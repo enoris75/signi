@@ -41,6 +41,11 @@ export function predicateText(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   // The demoted agent of a passive clause, rendered as the "por" phrase (see ResolvedPhrase.agent).
   agent?: ResolvedNounElement,
+  // Whether the clause's own subject is a preverbal `no` phrase ("ningún gato"), which already negates
+  // the clause. The caller's, as in English and German (see `negationSources`): a subject relative is
+  // handed its head's forms for agreement, but a `no` head negates the MATRIX clause, not the relative
+  // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
+  subjectIsNegative = subjectForms['definiteness'] === 'no',
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correría")
@@ -158,7 +163,6 @@ export function predicateText(
   // The preverbal "no" is emitted only when the clause needs a preverbal negator AND none is already
   // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (the finite adverb,
   // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
-  const subjectIsNegative = subjectForms['definiteness'] === 'no';
   const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after

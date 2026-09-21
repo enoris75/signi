@@ -154,9 +154,9 @@ describe('known bugs: German pronominal possessor on a complement', () => {
     expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
       .toBe('der Kater kommt aus meinem Haus.');
     expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
-      .toBe('der Kater weint wegen meinem Hund.');
+      .toBe('der Kater weint wegen meines Hundes.');
     expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'de'))
-      .toBe('das Buch von meinem Hund brennt.');
+      .toBe('das Buch meines Hundes brennt.'); // the genitive possessor (B09)
   });
 });
 
@@ -251,7 +251,7 @@ describe('pronominal possessor on a complement: every language', () => {
 
   test('a plural genitive possessor keeps its own possessive', () => {
     expect(sayAll(clause(np('BOOK', { possessor: np('DOG', { possessor: pron('1', 'plural'), number: 'plural' }) }), 'BURN'))).toMatchObject({
-      de: 'das Buch von unseren Hunden brennt.',
+      de: 'das Buch unserer Hunde brennt.',
       it: 'il libro dei nostri cani brucia.',
       fr: 'le livre de nos chiens brûle.',
       es: 'el libro de nuestros perros arde.',

@@ -175,7 +175,7 @@ describe('aspect × negation', () => {
       fr: "le chat n'a pas mangé.", // pas sits between auxiliary and participle
       es: 'el gato no ha comido.',
       de: 'der Kater hat nicht gefressen.',
-      ja: '猫は食べてしまいません。',
+      ja: '猫は食べていません。', // まだ食べていません: the negative perfect is the resultant state (B05)
     });
   });
 
@@ -185,7 +185,7 @@ describe('aspect × negation', () => {
       it: 'il gatto non aveva mangiato.',
       fr: "le chat n'avait pas mangé.",
       de: 'der Kater hatte nicht gefressen.',
-      ja: '猫は食べてしまいませんでした。',
+      ja: '猫は食べていませんでした。',
     });
 
     expect(catEats({ aspect: 'progressive', tense: 'future', negative: true })).toMatchObject({
@@ -308,7 +308,7 @@ describe('known bugs: aspect', () => {
 
   // Japanese DROPS the negation on the prospective: 食べるところです comes out for both polarities,
   // so "the cat is NOT about to eat" renders as "the cat IS about to eat" — the meaning inverts.
-  // The other two aspects negate correctly (食べていません, 食べてしまいません), which is what makes
+  // The other two aspects negate correctly (食べていません, and the perfect's 食べていません), which is what makes
   // this an oversight rather than a gap in the suffix inventory.
   test('Japanese must not drop the negation on the prospective aspect', () => {
     expect(catEats({ aspect: 'prospective', negative: true }).ja)
@@ -326,7 +326,7 @@ describe('known bugs: aspect', () => {
     expect(catEats({ aspect: 'prospective', tense: 'past' }).ja).toBe('猫は食べるところでした。');
     // Regression: the neighbouring aspects, which already negated correctly, are unchanged.
     expect(catEats({ aspect: 'progressive', negative: true }).ja).toBe('猫は食べていません。');
-    expect(catEats({ aspect: 'resultative', negative: true }).ja).toBe('猫は食べてしまいません。');
+    expect(catEats({ aspect: 'resultative', negative: true }).ja).toBe('猫は食べていません。');
   });
 
   // German used to negate INSIDE the prospective periphrasis rather than outside it:
@@ -424,12 +424,68 @@ describe('known bugs: adverb placement', () => {
   });
 });
 
-// Deliberate: the Japanese engine maps resultative onto ～てしまう, the completive aspect. It is a defensible
-// reading of "resultative", but note it renders NON-PAST ("will end up eating") where the other
-// six render a present perfect ("has eaten") — so the same plan means different things.
-describe('documented simplifications: aspect', () => {
-  test.fails('Japanese resultative renders non-past 〜てしまいます, not a perfect', () => {
+// B05 (fixed). The Japanese engine used to map the resultative onto the completive 〜てしまう, which
+// renders NON-PAST ("will end up eating") where the other six render a present perfect ("has eaten").
+// It is now a perfect. Japanese has none of its own: the affirmative present is the past (もう食べました),
+// and every other cell is the resultant state 〜ている: 食べていません "has not eaten", 食べていました
+// "had eaten", 食べています "will have eaten", 食べていたら "if it had eaten".
+describe('Japanese resultative: a perfect', () => {
+  const ja = (verbPhrase: Partial<VerbPhrase>, verb = 'EAT', extra: Omit<Partial<PhrasePlan>, 'subject' | 'verbPhrase'> = {}) =>
+    say(clause(np('CAT'), verb, { verbPhrase, ...extra }), 'ja');
+  const ifThen = (ifVp: Partial<VerbPhrase>, mainVp: Partial<VerbPhrase> = {}) =>
+    say({ ...clause(np('DOG'), 'RUN', { verbPhrase: mainVp }), condition: clause(np('CAT'), 'EAT', { verbPhrase: ifVp }) }, 'ja');
+
+  test('Japanese renders the resultative as a perfect, not the non-past 〜てしまいます', () => {
     expect(catEats({ aspect: 'resultative' })).toMatchObject({ ja: '猫は食べました。' });
+  });
+
+  test('the negative, the past and the future perfect are the resultant state 〜ている', () => {
+    expect(ja({ aspect: 'resultative', negative: true })).toBe('猫は食べていません。');
+    expect(ja({ aspect: 'resultative', tense: 'past' })).toBe('猫は食べていました。');
+    expect(ja({ aspect: 'resultative', tense: 'past', negative: true })).toBe('猫は食べていませんでした。');
+    expect(ja({ aspect: 'resultative', tense: 'future' })).toBe('猫は食べています。');
+    expect(ja({ aspect: 'resultative', tense: 'future', negative: true })).toBe('猫は食べていません。');
+    expect(ja({ aspect: 'resultative' }, 'EAT', { directObject: np('MOUSE') })).toBe('猫はネズミを食べました。');
+    expect(ja({ aspect: 'resultative', modifier: 'NEVER' })).toBe('猫は決して食べていません。');
+  });
+
+  test('a state verb\'s perfect is its state, and an event negative stays the event\'s', () => {
+    expect(ja({ aspect: 'resultative' }, 'HAVE', { directObject: np('BOOK') })).toBe('猫は本を持っていました。');
+    expect(ja({ aspect: 'resultative', negative: true }, 'HAVE', { directObject: np('BOOK') })).toBe('猫は本を持っていません。');
+    // 知る negates as the event, never 知っていません (A132).
+    expect(ja({ aspect: 'resultative', negative: true }, 'KNOW', { directObject: np('DOG') })).toBe('猫は犬を知りません。');
+    expect(ja({ aspect: 'resultative', negative: true, tense: 'past' }, 'KNOW', { directObject: np('DOG') })).toBe('猫は犬を知りませんでした。');
+  });
+
+  test('the passive, the copula and the existential take the past as well', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'resultative', voice: 'passive' }, directObject: np('FOOD') }), 'ja'))
+      .toBe('食べ物は猫に食べられました。');
+    expect(ja({ aspect: 'resultative' }, 'BE', { complements: { predicative: { phrase: np('HAPPY') } } })).toBe('猫は幸せでした。');
+    expect(ja({ aspect: 'resultative' }, 'BE', { complements: { locative: { phrase: np('HOUSE') } } })).toBe('猫は家にいました。');
+  });
+
+  test('a counterfactual: the protasis is 〜ていたら, the apodosis 〜ていました', () => {
+    expect(ifThen({ aspect: 'resultative' })).toBe('もし猫が食べていたら、犬は走ります。');
+    expect(ifThen({ aspect: 'resultative', negative: true })).toBe('もし猫が食べていなかったら、犬は走ります。');
+    expect(ifThen({}, { aspect: 'resultative' })).toBe('もし猫が食べたら、犬は走っていました。');
+    expect(ifThen({ aspect: 'resultative' }, { aspect: 'resultative', negative: true })).toBe('もし猫が食べていたら、犬は走っていませんでした。');
+  });
+
+  test('a relative clause takes the plain perfect', () => {
+    const who = (verbPhrase: Partial<VerbPhrase>, verb = 'EAT', directObject?: NounPhrase) =>
+      say(clause(np('CAT', { relative: { verbPhrase: { verb, ...verbPhrase }, ...(directObject ? { directObject } : {}) } }), 'RUN'), 'ja');
+    expect(who({ aspect: 'resultative' })).toBe('食べた猫は走ります。');
+    expect(who({ aspect: 'resultative', negative: true })).toBe('食べていない猫は走ります。');
+    expect(who({ aspect: 'resultative', tense: 'past' })).toBe('食べていた猫は走ります。');
+    expect(who({ aspect: 'resultative', tense: 'past', negative: true })).toBe('食べていなかった猫は走ります。');
+    expect(who({ aspect: 'resultative' }, 'HAVE', np('BOOK'))).toBe('本を持っていた猫は走ります。');
+    expect(who({ aspect: 'resultative', negative: true }, 'KNOW', np('DOG'))).toBe('犬を知らない猫は走ります。');
+  });
+
+  // The translator normalises a command and a citation to the neutral aspect, in every language.
+  test('regression: a command and a citation carry no aspect', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }), imperative: true }, 'ja')).toBe('食べてください。');
+    expect(say({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }), infinitive: true }, 'ja')).toBe('食べる。');
   });
 });
 
@@ -579,13 +635,13 @@ describe('causative / inchoative: START and BEGIN', () => {
       it: "l'azione sta iniziando.",
       ja: '動作は始まっています。',
     });
-    // ja maps resultative onto the completive 〜てしまう (B05), so it reads non-past here.
+    // ja renders the present perfect as the past, as Portuguese does (B05).
     expect(begins({ aspect: 'resultative' })).toMatchObject({
       en: 'the action has begun.',
       it: "l'azione è iniziata.", // essere + agreement, where START takes avere
       fr: "l'action a commencé.",
       de: 'die Handlung hat begonnen.',
-      ja: '動作は始まってしまいます。',
+      ja: '動作は始まりました。',
     });
   });
 
@@ -679,7 +735,7 @@ describe('workspace verbs: REMOVE and DELETE', () => {
       fr: 'le chat a retiré le bâton.',
       de: 'der Kater hat den Stock entfernt.',
       es: 'el gato ha quitado el palo.',
-      ja: '猫は棒を取り除いてしまいます。',
+      ja: '猫は棒を取り除きました。',
       pt: 'o gato removeu o pau.', // pt present resultative is the pretérito (documented)
     });
     expect(removes(np('CAT'), { aspect: 'progressive' })).toEqual({
@@ -763,7 +819,7 @@ describe('workspace verbs: REMOVE and DELETE', () => {
       fr: 'le chat a supprimé la phrase.',
       de: 'der Kater hat die Phrase gelöscht.',
       es: 'el gato ha eliminado la frase.',
-      ja: '猫はフレーズを削除してしまいます。',
+      ja: '猫はフレーズを削除しました。',
       pt: 'o gato excluiu a frase.', // pt present resultative is the pretérito (documented)
     });
     expect(deletes(np('CAT'), { aspect: 'progressive' })).toEqual({
@@ -1149,10 +1205,10 @@ describe('known bugs: German prospective word order', () => {
       phrase: np('WORD', { definiteness: 'indefinite' }), specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE' },
     };
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, complements: { instrumental } })).de)
-      .toBe('der Kater ist im Begriff zu fressen, indem man ein Wort wählt.');
+      .toBe('der Kater ist im Begriff zu fressen, indem er ein Wort wählt.');
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective' }, directObject: np('MOUSE'), complements: { instrumental } },
-    }), 'RUN')).de).toBe('der Hund, der im Begriff ist, die Maus zu fressen, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der im Begriff ist, die Maus zu fressen, indem er ein Wort wählt, läuft.');
     expect(sayAll({
       ...clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
       coordination: { conjunction: 'and', clause: clause(np('DOG'), 'RUN') },
@@ -1706,7 +1762,7 @@ describe('known bugs: KNOW with a noun object', () => {
     });
     // A complement is no object: KNOW with only a cause keeps the fact verb.
     expect(sayAll(clause(np('CAT'), 'KNOW', { complements: { cause: { phrase: np('DOG') } } }))).toMatchObject({
-      it: 'il gatto sa a causa del cane.', fr: 'le chat sait à cause du chien.', de: 'der Kater weiß wegen dem Hund.',
+      it: 'il gatto sa a causa del cane.', fr: 'le chat sait à cause du chien.', de: 'der Kater weiß wegen des Hundes.',
     });
   });
 });
@@ -1754,15 +1810,16 @@ describe('known bugs: Japanese state verb in the main clause', () => {
     expect(say(clause(np('CAT'), 'KNOW', { verbPhrase: { tense: 'past', negative: true } }), 'ja')).toBe('猫は知りませんでした。');
   });
 
-  // A relative clause and a command keep the plain form, the resultative stays B05's 〜てしまう, 思える is a
-  // Japanese state verb that needs no 〜ている, and KNOW's instruction label is its stem.
+  // A relative clause and a command keep the plain form, the perfect of a state is its state's past
+  // (持っていました "has had", B05), 思える is a Japanese state verb that needs no 〜ている, and KNOW's
+  // instruction label is its stem.
   test('regression: the relative, the command, the resultative, SEEM and the instruction label keep their forms', () => {
     const relative = (tense: 'present' | 'past') =>
       say(clause(np('CAT', { relative: { verbPhrase: { verb: 'HAVE', tense }, directObject: np('BOOK') } }), 'RUN'), 'ja');
     expect(relative('present')).toBe('本を持つ猫は走ります。');
     expect(relative('past')).toBe('本を持った猫は走ります。');
     expect(say({ ...clause(np('SECOND_PERSON'), 'HAVE', { directObject: np('BOOK') }), imperative: true }, 'ja')).toBe('本を持ってください。');
-    expect(ja('HAVE', { aspect: 'resultative' })).toBe('猫は本を持ってしまいます。');
+    expect(ja('HAVE', { aspect: 'resultative' })).toBe('猫は本を持っていました。');
     expect(say(clause(np('CAT'), 'SEEM', { verbPhrase: { tense: 'past', negative: true }, complements: { predicative: { phrase: np('HAPPY') } } }), 'ja'))
       .toBe('猫は幸せに思えませんでした。');
     expect(say({ ...clause(np('SECOND_PERSON'), 'KNOW', { directObject: np('BOOK') }), imperative: true, imperativeRegister: 'instruction' }, 'ja'))
@@ -1832,7 +1889,7 @@ describe('known bugs: German ADD is the arithmetic verb', () => {
     expect(de({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'ADD', { directObject: aMouse }) }))
       .toBe('wenn der Kater eine Maus hinzufügen würde, würde der Hund laufen.');
     expect(de(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: aMouse, specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'ADD' } } } })))
-      .toBe('der Kater beginnt, indem man eine Maus hinzufügt.');
+      .toBe('der Kater beginnt, indem er eine Maus hinzufügt.');
   });
 
   test('every command puts the particle last', () => {

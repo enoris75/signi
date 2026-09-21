@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (15 of
-them, as of this writing — 9 in Part B and 6 in Part A).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (2 of
+them, as of this writing — both in Part A; Part B has no `test.fails` left).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -61,29 +61,15 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Area |
 |---|---|---|
-| A165 | [A165-possessive-on-a-place-name.md](A-must-fix/A165-possessive-on-a-place-name.md) | French, Italian, Spanish, German |
-| A166 | [A166-relative-own-negative-subject-not-collapsed.md](A-must-fix/A166-relative-own-negative-subject-not-collapsed.md) | English, German |
-| A167 | [A167-negative-head-erases-relative-polarity.md](A-must-fix/A167-negative-head-erases-relative-polarity.md) | Italian, French, Spanish, Portuguese |
-| A168 | [A168-german-continent-goal-nach.md](A-must-fix/A168-german-continent-goal-nach.md) | German |
-| A169 | [A169-adjective-on-a-place-name.md](A-must-fix/A169-adjective-on-a-place-name.md) | German, Italian, French |
-| A170 | [A170-subjunctive-under-a-negative-head.md](A-must-fix/A170-subjunctive-under-a-negative-head.md) | Spanish, Portuguese |
+| A171 | [A171-negative-controller-negates-its-infinitive.md](A-must-fix/A171-negative-controller-negates-its-infinitive.md) | English, German, Italian, French, Japanese |
 
 Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
-| # | File |
-|---|---|
-| B5 | [B05-japanese-resultative-completive.md](B-can-fix/B05-japanese-resultative-completive.md) |
-| B6 | [B06-german-means-clause-impersonal-man.md](B-can-fix/B06-german-means-clause-impersonal-man.md) |
-| B7 | [B07-japanese-aspect-under-modal.md](B-can-fix/B07-japanese-aspect-under-modal.md) |
-| B9 | [B09-german-genitive-vs-colloquial-dative.md](B-can-fix/B09-german-genitive-vs-colloquial-dative.md) (not pinned by a test) |
-| B10 | [B10-german-compound-linking-element.md](B-can-fix/B10-german-compound-linking-element.md) |
-| B11 | [B11-spanish-portuguese-subjunctive-1pl-accent.md](B-can-fix/B11-spanish-portuguese-subjunctive-1pl-accent.md) |
-| B12 | [B12-japanese-copula-coordinated-adjective.md](B-can-fix/B12-japanese-copula-coordinated-adjective.md) |
-| B13 | [B13-japanese-plain-negative.md](B-can-fix/B13-japanese-plain-negative.md) |
-| B14 | [B14-japanese-relative-aspect-polite.md](B-can-fix/B14-japanese-relative-aspect-polite.md) |
+None open. Every documented simplification recorded so far was fixed after a product decision and
+is listed under **Fixed** below.
 
 ### Part C — Looks wrong, is right (`C-do-not-fix/`)
 
@@ -268,9 +254,24 @@ filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.
 | A162 | [A162-spanish-portuguese-juntos-agreement.md](fixed/A162-spanish-portuguese-juntos-agreement.md) | Spanish, Portuguese (corpus + engine) | 2026-09-20 |
 | A163 | [A163-alarm-cry-determiner.md](fixed/A163-alarm-cry-determiner.md) | English, Italian, French (corpus + translator + engine) | 2026-09-21 |
 | A164 | [A164-alarm-cry-determiner-satellite.md](fixed/A164-alarm-cry-determiner-satellite.md) | frontend (satellite controls) + shared `Concept` | 2026-09-21 |
+| A165 | [A165-possessive-on-a-place-name.md](fixed/A165-possessive-on-a-place-name.md) | French, Italian, Spanish, German | 2026-09-21 |
+| A169 | [A169-adjective-on-a-place-name.md](fixed/A169-adjective-on-a-place-name.md) | German, Italian, French | 2026-09-21 |
+| A168 | [A168-german-continent-goal-nach.md](fixed/A168-german-continent-goal-nach.md) | German | 2026-09-21 |
+| A166 | [A166-relative-own-negative-subject-not-collapsed.md](fixed/A166-relative-own-negative-subject-not-collapsed.md) | English, German | 2026-09-21 |
+| A167 | [A167-negative-head-erases-relative-polarity.md](fixed/A167-negative-head-erases-relative-polarity.md) | Italian, French, Spanish, Portuguese | 2026-09-21 |
+| A170 | [A170-subjunctive-under-a-negative-head.md](fixed/A170-subjunctive-under-a-negative-head.md) | Spanish, Portuguese | 2026-09-21 |
+| B5 | [B05-japanese-resultative-completive.md](fixed/B05-japanese-resultative-completive.md) | Japanese | 2026-09-21 |
+| B6 | [B06-german-means-clause-impersonal-man.md](fixed/B06-german-means-clause-impersonal-man.md) | German | 2026-09-21 |
+| B7 | [B07-japanese-aspect-under-modal.md](fixed/B07-japanese-aspect-under-modal.md) | Japanese | 2026-09-21 |
+| B9 | [B09-german-genitive-vs-colloquial-dative.md](fixed/B09-german-genitive-vs-colloquial-dative.md) | German (corpus + engine) | 2026-09-21 |
+| B10 | [B10-german-compound-linking-element.md](fixed/B10-german-compound-linking-element.md) | German (corpus + engine) | 2026-09-21 |
+| B11 | [B11-spanish-portuguese-subjunctive-1pl-accent.md](fixed/B11-spanish-portuguese-subjunctive-1pl-accent.md) | Spanish, Portuguese | 2026-09-21 |
+| B12 | [B12-japanese-copula-coordinated-adjective.md](fixed/B12-japanese-copula-coordinated-adjective.md) | Japanese | 2026-09-21 |
+| B13 | [B13-japanese-plain-negative.md](fixed/B13-japanese-plain-negative.md) | Japanese | 2026-09-21 |
+| B14 | [B14-japanese-relative-aspect-polite.md](fixed/B14-japanese-relative-aspect-polite.md) | Japanese | 2026-09-21 |
 
-_B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
-rather than as outright bugs._
+_B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
+product decision rather than as outright bugs._
 
 ---
 

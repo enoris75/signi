@@ -108,4 +108,17 @@ describe('relativeText', () => {
     expect(relativeText(np(MAISON, { number: 'plural' }, { relative: { ...clicked, verbPhrase: vp(CLIQUER, { aspect: 'resultative' }) } })))
       .toBe('sur lesquelles le chat a cliqué');
   });
+
+  // A167: an "aucun" head negates the matrix clause, not the relative, so it is no self-negating
+  // subject of the relative: a positive relative stays positive and a negative one takes "ne … pas".
+  // The relative's OWN "aucun" subject does negate it, with "ne" alone.
+  test('an aucun head leaves the relative its own polarity', () => {
+    const onNoCat = (verbPhrase: ReturnType<typeof vp>) =>
+      relativeText(np(CHAT, { definiteness: 'no' }, { relative: { headRole: 'subject', verbPhrase } }));
+    expect(onNoCat(vp(MANGER))).toBe('qui mange');
+    expect(onNoCat(vp(MANGER, { negative: true }))).toBe('qui ne mange pas');
+    expect(relativeText(np(SOURIS, {}, {
+      relative: { headRole: 'directObject', subject: el(np(CHAT, { definiteness: 'no' })), verbPhrase: vp(MANGER, { negative: true }) },
+    }))).toBe("qu'aucun chat ne mange");
+  });
 });

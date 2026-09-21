@@ -6,6 +6,7 @@ import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
@@ -42,7 +43,7 @@ export function relativeText(np: ResolvedNounPhrase): string {
     const noun = subjectText(possessed);
     return joinWords([
       defArticle(pf, isPlural(pf), noun), 'cui', noun,
-      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements),
+      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements, undefined, relativeSubjectIsNegative(rel)),
     ]);
   }
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
@@ -60,7 +61,10 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
   // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
-  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent);
+  // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
+  // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
+  // keeps its "non" ("nessun gatto che non mangia corre", A167).
+  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
   const gap = relativeGapComplement(np, QUALE);
   const agentGap = relativeAgentGap(np, QUALE);
   const relativizer = agentGap ? agentPhrase(agentGap)

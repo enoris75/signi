@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
-import { adj, CHAIRO, complement, DENSETSU, el, type Forms, INU, NEKO, np, OMOSHIROI, OOKII, SHIAWASE, SHINCHOU, TSUKARETA } from './ja.fixtures.js';
+import { adj, CHAIRO, complement, DENSETSU, el, type Forms, group, INU, NEKO, np, OMOSHIROI, OOKII, SHIAWASE, SHINCHOU, TSUKARETA } from './ja.fixtures.js';
 import { copulaSegs } from './copulaSegs.js';
 
 const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
@@ -132,7 +132,45 @@ describe('copulaSegs', () => {
 
     test('renders as a full noun phrase, every conjunct included', () => {
       expect(text(copulaSegs(complement(np(DENSETSU, {}, { adjectives: [adj(OMOSHIROI)] })), 'present', false))).toBe('面白い伝説です');
-      expect(text(copulaSegs(complement(el(np(NEKO), np(INU))), 'present', false))).toBe('猫と犬です');
+      // B12: predicates are chained with the copula's te-form で, not joined with と like things.
+      expect(text(copulaSegs(complement(el(np(NEKO), np(INU))), 'present', false))).toBe('猫で犬です');
+    });
+  });
+
+  // B12: every conjunct of a coordinated predicate is kept, each in its connective form, and the copula
+  // inflects on the last.
+  describe('a coordinated predicate', () => {
+    test('"and" chains the te-form of each class: くて, で, ていて', () => {
+      expect(copulaSegs(complement(el(np(OOKII), np(SHIAWASE))), 'present', false))
+        .toEqual([{ t: '大き', r: 'おおき' }, { t: 'くて' }, { t: '幸せ', r: 'しあわせ' }, { t: 'です' }]);
+      expect(text(copulaSegs(complement(el(np(SHIAWASE), np(OOKII))), 'past', false))).toBe('幸せで大きかったです');
+      expect(text(copulaSegs(complement(el(np(TSUKARETA), np(CHAIRO), np(DENSETSU))), 'present', false))).toBe('疲れていて茶色で伝説です');
+      expect(text(copulaSegs(complement(el(np(OOKII, { degree: 'more' }), np(SHIAWASE))), 'present', false))).toBe('もっと大きくて幸せです');
+    });
+
+    test('"or" joins whole predicates with か, each in the clause\'s tense', () => {
+      expect(text(copulaSegs(complement(group('or', np(OOKII), np(SHIAWASE))), 'present', false))).toBe('大きいか幸せです');
+      expect(text(copulaSegs(complement(group('or', np(OOKII), np(SHIAWASE))), 'past', false))).toBe('大きかったか幸せでした');
+      expect(text(copulaSegs(complement(group('or', np(DENSETSU), np(TSUKARETA))), 'past', false))).toBe('伝説だったか疲れていました');
+      expect(text(copulaSegs(complement(group('or', np(TSUKARETA), np(DENSETSU))), 'present', false))).toBe('疲れているか伝説です');
+    });
+
+    test('a negation reads "neither … nor": も on every conjunct, the negative after the last', () => {
+      expect(text(copulaSegs(complement(el(np(OOKII), np(SHIAWASE))), 'present', true))).toBe('大きくも幸せでもありません');
+      expect(text(copulaSegs(complement(group('or', np(OOKII), np(DENSETSU))), 'past', true))).toBe('大きくも伝説でもありませんでした');
+      expect(text(copulaSegs(complement(el(np(OOKII), np(TSUKARETA))), 'present', true))).toBe('大きくも疲れてもいません');
+    });
+
+    test('each form closes on the last conjunct', () => {
+      const bigHappy = complement(el(np(OOKII), np(SHIAWASE)));
+      expect(text(copulaSegs(bigHappy, 'present', false, 'prenominal'))).toBe('大きくて幸せな');
+      expect(text(copulaSegs(bigHappy, 'past', true, 'prenominal'))).toBe('大きくも幸せでもなかった');
+      expect(text(copulaSegs(bigHappy, 'present', false, 'tara'))).toBe('大きくて幸せだったら');
+      expect(text(copulaSegs(bigHappy, 'present', true, 'tara'))).toBe('大きくも幸せでもなかったら');
+      expect(text(copulaSegs(bigHappy, 'present', false, 'citation'))).toBe('大きくて幸せである');
+      expect(text(copulaSegs(bigHappy, 'present', false, 'dict'))).toBe('大きくて幸せである');
+      expect(text(copulaSegs(bigHappy, 'present', false, 'stem'))).toBe('大きくて幸せであり');
+      expect(text(copulaSegs(complement(group('or', np(OOKII), np(SHIAWASE))), 'past', false, 'tara'))).toBe('大きいか幸せだったら');
     });
   });
 

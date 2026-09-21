@@ -38,7 +38,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va de la maison au marché à cause du chien.',
       es: 'el gato va de la casa al mercado a causa del perro.',
       pt: 'o gato vai da casa ao mercado por causa do cão.',
-      de: 'der Kater geht aus dem Haus zum Markt wegen dem Hund.',
+      de: 'der Kater geht aus dem Haus zum Markt wegen des Hundes.',
       ja: '猫は家から市場へ犬のために行きます。',
     });
   });
@@ -52,7 +52,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va au marché dans la maison à cause du chien.',
       es: 'el gato va al mercado en la casa a causa del perro.',
       pt: 'o gato vai ao mercado na casa por causa do cão.',
-      de: 'der Kater geht zum Markt im Haus wegen dem Hund.',
+      de: 'der Kater geht zum Markt im Haus wegen des Hundes.',
       ja: '猫は市場へ家で犬のために行きます。',
     });
   });
@@ -66,7 +66,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va au marché à travers la maison à cause du chien.',
       es: 'el gato va al mercado por la casa a causa del perro.',
       pt: 'o gato vai ao mercado pela casa por causa do cão.',
-      de: 'der Kater geht zum Markt durch das Haus wegen dem Hund.',
+      de: 'der Kater geht zum Markt durch das Haus wegen des Hundes.',
       ja: '猫は市場へ家を犬のために行きます。',
     });
   });
@@ -80,7 +80,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va de la maison à travers le marché à cause du chien.',
       es: 'el gato va de la casa por el mercado a causa del perro.',
       pt: 'o gato vai da casa pelo mercado por causa do cão.',
-      de: 'der Kater geht aus dem Haus durch den Markt wegen dem Hund.',
+      de: 'der Kater geht aus dem Haus durch den Markt wegen des Hundes.',
       ja: '猫は家から市場を犬のために行きます。',
     });
   });
@@ -94,7 +94,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va de la maison dans le marché à cause du chien.',
       es: 'el gato va de la casa en el mercado a causa del perro.',
       pt: 'o gato vai da casa no mercado por causa do cão.',
-      de: 'der Kater geht aus dem Haus im Markt wegen dem Hund.',
+      de: 'der Kater geht aus dem Haus im Markt wegen des Hundes.',
       ja: '猫は家から市場で犬のために行きます。',
     });
   });
@@ -108,7 +108,7 @@ describe('three complements: the motion frame (GO)', () => {
       fr: 'le chat va à travers le marché dans la maison à cause du chien.',
       es: 'el gato va por el mercado en la casa a causa del perro.',
       pt: 'o gato vai pelo mercado na casa por causa do cão.',
-      de: 'der Kater geht durch den Markt im Haus wegen dem Hund.',
+      de: 'der Kater geht durch den Markt im Haus wegen des Hundes.',
       ja: '猫は市場を家で犬のために行きます。',
     });
   });
@@ -131,7 +131,7 @@ describe('three complements: the transitive frame', () => {
       fr: 'le chat coupe avec le bâton dans la maison à cause du chien.',
       es: 'el gato corta con el palo en la casa a causa del perro.',
       pt: 'o gato corta com o pau na casa por causa do cão.',
-      de: 'der Kater schneidet mit dem Stock im Haus wegen dem Hund.',
+      de: 'der Kater schneidet mit dem Stock im Haus wegen des Hundes.',
       ja: '猫は棒で家で犬のために切ります。',
     });
   });
@@ -146,7 +146,7 @@ describe('three complements: the transitive frame', () => {
       fr: 'le chat achète le livre avec le bâton de la maison à cause du chien.',
       es: 'el gato compra el libro con el palo de la casa a causa del perro.',
       pt: 'o gato compra o livro com o pau da casa por causa do cão.',
-      de: 'der Kater kauft das Buch mit dem Stock aus dem Haus wegen dem Hund.',
+      de: 'der Kater kauft das Buch mit dem Stock aus dem Haus wegen des Hundes.',
       ja: '猫は棒で家から犬のために本を買います。',
     });
   });
@@ -256,7 +256,7 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       fr: 'le chat est une légende dans la maison à cause du chien.',
       es: 'el gato es una leyenda en la casa a causa del perro.',
       pt: 'o gato é uma lenda na casa por causa do cão.',
-      de: 'der Kater ist eine Legende im Haus wegen dem Hund.',
+      de: 'der Kater ist eine Legende im Haus wegen des Hundes.',
       // Both adjuncts — the place AND the cause — are preposed ahead of the predicate noun (A42).
       ja: '猫は家で犬のために伝説です。',
     });

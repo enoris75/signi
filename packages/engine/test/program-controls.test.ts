@@ -77,14 +77,14 @@ describe('program verbs: the aspects', () => {
       fr: 'le chat a fermé le livre.',
       de: 'der Kater hat das Buch geschlossen.',
       es: 'el gato ha cerrado el libro.',
-      ja: '猫は本を閉じてしまいます。',
+      ja: '猫は本を閉じました。',
       pt: 'o gato fechou o livro.', // pt present resultative is the pretérito (documented)
     });
     expect(acts(np('CAT'), 'MOVE', 'BOOK', { aspect: 'resultative' })).toMatchObject({
       it: 'il gatto ha spostato il libro.', de: 'der Kater hat das Buch verschoben.', es: 'el gato ha movido el libro.',
     });
     expect(acts(np('CAT'), 'CANCEL', 'PHRASE', { aspect: 'resultative' })).toMatchObject({
-      en: 'the cat has canceled the phrase.', de: 'der Kater hat die Phrase annulliert.', ja: '猫はフレーズをキャンセルしてしまいます。',
+      en: 'the cat has canceled the phrase.', de: 'der Kater hat die Phrase annulliert.', ja: '猫はフレーズをキャンセルしました。',
     });
   });
 

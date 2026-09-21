@@ -20,8 +20,10 @@ import type { ConceptForms, Mood } from './types.js';
  *    it the infinitive stem (`base` minus -re, with a few overrides); fr the "nous" present
  *    stem (`1pl_present` minus -ons, être overridden).
  *
- * Known minor gaps (documented, consistent with existing engine gaps): the es/pt 1st-plural
- * forms omit the stem accent (comieramos, not comiéramos), and French -ger/-cer verbs keep an
+ * The es/pt 1st plural is stressed on the stem's last vowel, which the spelling marks (B11): Spanish
+ * always with the acute (comiéramos, fuéramos), Portuguese by that vowel (see `ptStemAccent`).
+ *
+ * Known minor gap (documented, consistent with existing engine gaps): French -ger/-cer verbs keep an
  * extra e at 1pl/2pl (mangeions). Third-person singular — the common conditional subject — is
  * exact across the board.
  */
@@ -65,6 +67,33 @@ function conditionalForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
   return endings ? stem + endings[pn] : undefined;
 }
 
+// A preterite stem ends on a vowel (comie-, fue-, tuvie-; come-, tive-, fo-, parti-), and the 1st
+// plural stresses it. A vowel already written with an accent (pt possuí-) is left as it is.
+const STEM_FINAL_VOWEL = /([aeiou])([^aeiouáéíóúâêô]*)$/;
+
+/** The stem with its last vowel written `accented`, unless that vowel already carries a mark. */
+function stressStem(stem: string, accented: (vowel: string) => string): string {
+  if (/[áéíóúâêô][^aeiouáéíóúâêô]*$/.test(stem)) return stem;
+  return stem.replace(STEM_FINAL_VOWEL, (_, vowel: string, tail: string) => accented(vowel) + tail);
+}
+
+const ACUTE: Record<string, string> = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
+
+/**
+ * The accent Portuguese writes on the stressed stem vowel of the 1st-plural imperfect subjunctive
+ * (B11): á for -ar (falássemos), í for -ir (partíssemos), ô for ser / ir (fôssemos). An e is open, é,
+ * in a strong preterite (tivéssemos, fizéssemos, déssemos, viéssemos) and closed, ê, in a regular -er
+ * verb (comêssemos, lêssemos). The spelling cannot tell those two apart ("comeram", "tiveram"), so the
+ * rule reads the preterite: a regular -er verb's 3sg past ends in -eu (comeu, leu), and a strong
+ * one's does not (teve, fez, veio). The -er infinitive is asked for too, because "dar" is the one
+ * strong preterite whose 3sg does end in -eu (deu). The aspect auxiliaries carry neither form and
+ * are strong (estivéssemos, tivéssemos), which is what the fallback gives them.
+ */
+function ptStemAccent(forms: Record<string, string>): (vowel: string) => string {
+  const regularEr = /er(?:-se)?$/.test(forms['base'] ?? '') && /eu$/.test(forms['3sg_past'] ?? '');
+  return (vowel) => (vowel === 'o' ? 'ô' : vowel === 'e' && regularEr ? 'ê' : ACUTE[vowel]);
+}
+
 function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string | undefined {
   const forms = verb.forms;
   switch (lang) {
@@ -74,11 +103,15 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
     }
     case 'es': {
       const p = forms['3pl_past'];
-      return p ? p.replace(/ron$/, '') + ES_SUBJ[pn] : undefined;
+      if (!p) return undefined;
+      const stem = p.replace(/ron$/, '');
+      return (pn === '1pl' ? stressStem(stem, (v) => ACUTE[v]) : stem) + ES_SUBJ[pn];
     }
     case 'pt': {
       const p = forms['3pl_past'];
-      return p ? p.replace(/ram$/, '') + PT_SUBJ[pn] : undefined;
+      if (!p) return undefined;
+      const stem = p.replace(/ram$/, '');
+      return (pn === '1pl' ? stressStem(stem, ptStemAccent(forms)) : stem) + PT_SUBJ[pn];
     }
     case 'fr': {
       const stem = FR_IMPARF_STEM[verb.conceptId] ?? forms['1pl_present']?.replace(/ons$/, '');
@@ -89,13 +122,15 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
 }
 
 /**
- * The finite conditional (apodosis) or imperfect-subjunctive (protasis) surface for a Romance
- * verb, or undefined when there is no mood to apply or the source stem is missing (the caller
- * then falls back to its ordinary conjugation). `pn` is the "1sg".."3pl" person-number key.
+ * The finite conditional (apodosis), imperfect-subjunctive (protasis) or present-subjunctive surface
+ * for a Romance verb, or undefined when there is no mood to apply or the source stem is missing (the
+ * caller then falls back to its ordinary conjugation). `pn` is the "1sg".."3pl" person-number key.
+ * The present subjunctive is Spanish and Portuguese only (see `presentSubjunctiveForm`).
  */
 export function moodForm(lang: LanguageCode, verb: ConceptForms, pn: PN, mood: Mood | undefined): string | undefined {
   if (mood === 'conditional') return conditionalForm(lang, verb, pn);
   if (mood === 'subjunctive') return subjunctiveForm(lang, verb, pn);
+  if (mood === 'presentSubjunctive') return presentSubjunctiveForm(lang, verb, pn);
   return undefined;
 }
 
@@ -217,39 +252,48 @@ function toIPN(pn: PN): IPN {
   return pn === '1pl' || pn === '2pl' ? pn : '2sg';
 }
 
-// Present-subjunctive endings by verb class, per language (only the imperative persons).
-const ES_SUBJ_PRES_END = {
-  ar: { '2sg': 'es', '1pl': 'emos', '2pl': 'éis' },
-  er: { '2sg': 'as', '1pl': 'amos', '2pl': 'áis' },
-} as const;
+// Present-subjunctive endings by verb class, per language. The imperative reads its three persons
+// (2sg / 1pl / 2pl); a relative under a negated antecedent reads any of the six (A170).
+const ES_SUBJ_PRES_END: Record<'ar' | 'er', Record<PN, string>> = {
+  ar: { '1sg': 'e', '2sg': 'es', '3sg': 'e', '1pl': 'emos', '2pl': 'éis', '3pl': 'en' },
+  er: { '1sg': 'a', '2sg': 'as', '3sg': 'a', '1pl': 'amos', '2pl': 'áis', '3pl': 'an' },
+};
 // Portuguese here is modelled on você/vocês (the seed stores 2sg = 3sg and 2pl = 3pl morphology),
 // so its whole imperative — affirmative and negative alike — is the present subjunctive with
 // 3rd-person agreement: você "coma" / nós "comamos" / vocês "comam".
-const PT_SUBJ_PRES_END = {
-  ar: { '2sg': 'e', '1pl': 'emos', '2pl': 'em' },
-  er: { '2sg': 'a', '1pl': 'amos', '2pl': 'am' },
-} as const;
+const PT_SUBJ_PRES_END: Record<'ar' | 'er', Record<PN, string>> = {
+  ar: { '1sg': 'e', '2sg': 'e', '3sg': 'e', '1pl': 'emos', '2pl': 'em', '3pl': 'em' },
+  er: { '1sg': 'a', '2sg': 'a', '3sg': 'a', '1pl': 'amos', '2pl': 'am', '3pl': 'am' },
+};
 
 // Irregular present-subjunctive stems the "1sg-present minus -o" rule can't reach (es/pt only —
 // Italian never routes through the subjunctive here; its negatives reuse the affirmative form or
-// the infinitive).
-const ES_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
-  BE:   { '2sg': 'seas', '1pl': 'seamos', '2pl': 'seáis' },   // ser → sea…
-  ESTAR: { '2sg': 'estés', '1pl': 'estemos', '2pl': 'estéis' }, // estar → esté… (1sg "estoy" breaks the -o rule)
-  KNOW: { '2sg': 'sepas', '1pl': 'sepamos', '2pl': 'sepáis' }, // saber → sepa…
-  GO:   { '2sg': 'vayas', '1pl': 'vayamos', '2pl': 'vayáis' }, // ir → vaya… (1sg "voy" breaks the -o rule)
-  GIVE: { '2sg': 'des', '1pl': 'demos', '2pl': 'deis' },       // dar → dé… (1sg "doy" breaks the -o rule)
+// the infinitive). The aspect auxiliaries are here too, since they carry no stored present of their
+// own: HABER ("que haya comido") and Portuguese TER ("que tenha comido").
+const ES_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
+  BE:   { '1sg': 'sea', '2sg': 'seas', '3sg': 'sea', '1pl': 'seamos', '2pl': 'seáis', '3pl': 'sean' },         // ser
+  ESTAR: { '1sg': 'esté', '2sg': 'estés', '3sg': 'esté', '1pl': 'estemos', '2pl': 'estéis', '3pl': 'estén' }, // estar (1sg "estoy" breaks the -o rule)
+  KNOW: { '1sg': 'sepa', '2sg': 'sepas', '3sg': 'sepa', '1pl': 'sepamos', '2pl': 'sepáis', '3pl': 'sepan' },  // saber
+  GO:   { '1sg': 'vaya', '2sg': 'vayas', '3sg': 'vaya', '1pl': 'vayamos', '2pl': 'vayáis', '3pl': 'vayan' },  // ir (1sg "voy" breaks the -o rule)
+  GIVE: { '1sg': 'dé', '2sg': 'des', '3sg': 'dé', '1pl': 'demos', '2pl': 'deis', '3pl': 'den' },              // dar (1sg "doy" breaks the -o rule)
+  HABER: { '1sg': 'haya', '2sg': 'hayas', '3sg': 'haya', '1pl': 'hayamos', '2pl': 'hayáis', '3pl': 'hayan' }, // the resultative's haber
   // -ir verbs whose stressed e→ie diphthong turns to i in the unstressed 1pl/2pl (sienta / sintamos).
-  FEEL: { '2sg': 'sientas', '1pl': 'sintamos', '2pl': 'sintáis' },                 // sentir
-  TRANSFER: { '2sg': 'transfieras', '1pl': 'transfiramos', '2pl': 'transfiráis' }, // transferir
-  ACQUIRE: { '2sg': 'adquieras', '1pl': 'adquiramos', '2pl': 'adquiráis' },       // adquirir (i→ie, back to i)
+  FEEL: { '1sg': 'sienta', '2sg': 'sientas', '3sg': 'sienta', '1pl': 'sintamos', '2pl': 'sintáis', '3pl': 'sientan' }, // sentir
+  TRANSFER: {
+    '1sg': 'transfiera', '2sg': 'transfieras', '3sg': 'transfiera', '1pl': 'transfiramos', '2pl': 'transfiráis', '3pl': 'transfieran',
+  }, // transferir
+  ACQUIRE: {
+    '1sg': 'adquiera', '2sg': 'adquieras', '3sg': 'adquiera', '1pl': 'adquiramos', '2pl': 'adquiráis', '3pl': 'adquieran',
+  }, // adquirir (i→ie, back to i)
 };
-const PT_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
-  BE:   { '2sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam' },   // ser → seja… (você/vocês)
-  ESTAR: { '2sg': 'esteja', '1pl': 'estejamos', '2pl': 'estejam' }, // estar → esteja… (1sg "estou" breaks the -o rule)
-  KNOW: { '2sg': 'saiba', '1pl': 'saibamos', '2pl': 'saibam' }, // saber → saiba…
-  GIVE: { '2sg': 'dê', '1pl': 'demos', '2pl': 'deem' },         // dar → dê… (1sg "dou" breaks the -o rule)
-  GO:   { '2sg': 'vá', '1pl': 'vamos', '2pl': 'vão' },          // ir → vá… (1sg "vou" breaks the -o rule)
+const PT_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
+  BE:   { '1sg': 'seja', '2sg': 'seja', '3sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam', '3pl': 'sejam' },               // ser (você/vocês)
+  ESTAR: { '1sg': 'esteja', '2sg': 'esteja', '3sg': 'esteja', '1pl': 'estejamos', '2pl': 'estejam', '3pl': 'estejam' }, // estar (1sg "estou" breaks the -o rule)
+  KNOW: { '1sg': 'saiba', '2sg': 'saiba', '3sg': 'saiba', '1pl': 'saibamos', '2pl': 'saibam', '3pl': 'saibam' },         // saber
+  GIVE: { '1sg': 'dê', '2sg': 'dê', '3sg': 'dê', '1pl': 'demos', '2pl': 'deem', '3pl': 'deem' },                         // dar (1sg "dou" breaks the -o rule)
+  GO:   { '1sg': 'vá', '2sg': 'vá', '3sg': 'vá', '1pl': 'vamos', '2pl': 'vão', '3pl': 'vão' },                           // ir (1sg "vou" breaks the -o rule)
+  TER:  { '1sg': 'tenha', '2sg': 'tenha', '3sg': 'tenha', '1pl': 'tenhamos', '2pl': 'tenham', '3pl': 'tenham' },         // the resultative's ter
+  WILL: { '1sg': 'queira', '2sg': 'queira', '3sg': 'queira', '1pl': 'queiramos', '2pl': 'queiram', '3pl': 'queiram' },   // querer (1sg "quero" hides the i)
 };
 
 // Irregular *affirmative familiar* imperative forms (indicative-based paradigm) by concept.
@@ -306,18 +350,34 @@ function unstressedStem(raw: string, forms: Record<string, string>): string {
 function subjPresent(
   lang: 'es' | 'pt',
   verb: ConceptForms,
-  pn: IPN,
+  pn: PN,
 ): string {
   const override = (lang === 'es' ? ES_SUBJ_OVERRIDE : PT_SUBJ_OVERRIDE)[verb.conceptId];
   if (override) return override[pn];
   const raw = (verb.forms['1sg_present'] ?? '').replace(/o$/, '');
   const base = verb.forms['base'] ?? '';
   const cls = base.endsWith('ar') ? 'ar' : 'er';
-  const unstressed = lang === 'es' && pn !== '2sg' && !base.endsWith('ir') ? unstressedStem(raw, verb.forms) : raw;
+  // Only the 1st and 2nd plural are stressed on the ending; the other four keep the stressed stem.
+  const endingStressed = pn === '1pl' || pn === '2pl';
+  const unstressed = lang === 'es' && endingStressed && !base.endsWith('ir') ? unstressedStem(raw, verb.forms) : raw;
   // A Portuguese -ear verb inserts its i only under stress, so the 1st plural drops it: nomeie, nomeemos.
   const unstressedPt = lang === 'pt' && pn === '1pl' && base.endsWith('ear') ? unstressed.replace(/ei$/, 'e') : unstressed;
   const stem = cls === 'ar' ? arSubjStem(unstressedPt, lang) : unstressedPt;
   return stem + (lang === 'es' ? ES_SUBJ_PRES_END : PT_SUBJ_PRES_END)[cls][pn];
+}
+
+/**
+ * The present subjunctive in any person, for the relative clause under a negated antecedent (A170):
+ * "ningún gato que coma", "nenhum gato que coma", "ningún gato que esté cansado". Spanish and
+ * Portuguese only. Italian and French keep the indicative there (see A170's decisions), and the other
+ * three never call this. Undefined when the verb has neither an override nor a stored 1sg present to
+ * derive it from, so the caller conjugates instead.
+ */
+function presentSubjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string | undefined {
+  if (lang !== 'es' && lang !== 'pt') return undefined;
+  const override = (lang === 'es' ? ES_SUBJ_OVERRIDE : PT_SUBJ_OVERRIDE)[verb.conceptId];
+  if (!override && !verb.forms['1sg_present']) return undefined;
+  return subjPresent(lang, verb, pn);
 }
 
 /**

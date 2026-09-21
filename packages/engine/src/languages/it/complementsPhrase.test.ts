@@ -173,6 +173,13 @@ describe('complementsPhrase', () => {
       expect(one('direction', complement(np(EUROPA)))).toBe('in Europa');
       expect(one('direction', complement(np(AMERICA_DEL_NORD)))).toBe('in America del Nord');
     });
+
+    // A165: a possessive rides on the article, which "in" then fuses with, in the goal and the place.
+    test('a possessed continent takes the article-fused in', () => {
+      const yours = { possessor: { kind: 'pronominal', person: '2', number: 'singular' } } as const;
+      expect(one('direction', complement(np(EUROPA, {}, yours)))).toBe('nella tua Europa');
+      expect(one('locative', complement(np(EUROPA, {}, yours)))).toBe('nella tua Europa');
+    });
   });
 
   describe('route', () => {
@@ -209,6 +216,13 @@ describe('complementsPhrase', () => {
     test('a proper noun takes a bare in, but keeps its article under a relation', () => {
       expect(one('locative', complement(np(EUROPA)))).toBe('in Europa');
       expect(one('locative', complement(np(EUROPA), [path('under')]))).toBe("sotto l'Europa");
+    });
+
+    // A169: the bare "in" fits the bare name alone; a prenominal adjective brings back the article.
+    test('a proper noun behind a prenominal adjective takes the article-fused in', () => {
+      const bigEurope = np(EUROPA, {}, { adjectives: [concept(GRANDE, 'BIG')] });
+      expect(one('locative', complement(bigEurope))).toBe('nella grande Europa');
+      expect(one('direction', complement(bigEurope))).toBe('nella grande Europa');
     });
 
     // Fixed A41: HOME in plain containment is the fixed idiom "a casa", with no article to fuse.

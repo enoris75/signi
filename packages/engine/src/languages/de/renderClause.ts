@@ -14,6 +14,8 @@ import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
+import { meansClause } from './meansClause.js';
+import { meansDoer } from './meansDoer.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
@@ -83,11 +85,12 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       verbPhrase, directObject, complements: phrase.complements,
     }, leadsComplements);
     // The dative recipient leads the accusative object; the other complements trail it, and a
-    // subordinate means clause trails even the verb (see `splitMeansClause`).
+    // subordinate means clause trails even the verb (see `splitMeansClause`). Its subject is the
+    // pronoun of whoever does this clause's act, "man" when that is no one (B06, see `meansDoer`).
     const { dative, rest: undative } = splitDative(negComplements);
     const { means, rest } = splitMeansClause(undative);
     const dativeText = complementsPhrase(dative);
-    const meansText = complementsPhrase(means);
+    const meansText = meansClause(means, meansDoer(phrase, zu));
     // A reflexive verb ("sich bewegen") builds its verb forms as the plain verb, and its pronoun,
     // agreeing with the subject, leads the Mittelfeld's pronoun slot: "bewegt sich nicht", "beweg
     // dich", "sich schnell bewegen". An instruction and the citation are infinitives, so "sich".

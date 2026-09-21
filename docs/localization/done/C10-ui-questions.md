@@ -90,7 +90,7 @@ es/pt predicate it with *estar*).
   (*est en train de fonctionner*) or de (*läuft … gerade*), and the neutral aspect asks the habitual in
   English ("does the server run?"). The state adjective reads naturally in all seven.
 - **Not "the translation server".** German compounds an attributive noun with no linking element
-  ([B10](../../bugs/B-can-fix/B10-german-compound-linking-element.md), a documented simplification that
+  ([B10](../../bugs/fixed/B10-german-compound-linking-element.md), a documented simplification that
   is not to be fixed without a product decision), so TRANSLATION + SERVER renders *Übersetzungserver*,
   missing its Fugen-s. The modifier was dropped rather than shipped misspelled; the app has one server,
   so nothing is lost but the word. Restoring it is one line once B10 is decided.

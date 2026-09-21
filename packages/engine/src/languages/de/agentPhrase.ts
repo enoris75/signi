@@ -3,6 +3,7 @@ import type { ResolvedNounElement } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { possessiveDe } from '../../possessive.js';
 import { adjPhrase } from './adjPhrase.js';
+import { articledNameForms } from './articledNameForms.js';
 import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
 import { germanCompound } from './germanCompound.js';
@@ -35,7 +36,7 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
     // A possessive is an ein-word in place of the article, so the head is the preposition alone and
     // the adjectives decline mixed ("von meinem kleinen Kater").
     const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
-    const f = possessedHeadForms(np, 'bare');
+    const f = articledNameForms(np, possessedHeadForms(np, 'bare'));
     const plural = (f['number'] ?? f['count']) === 'plural';
     const definiteness = poss ? 'indefinite' : (f['definiteness'] ?? 'definite');
     const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));

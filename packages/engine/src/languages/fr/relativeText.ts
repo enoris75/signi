@@ -5,6 +5,7 @@ import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
@@ -38,10 +39,13 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const possessed = relativePossessed(rel, 'definite');
   if (possessed) {
     return `dont ${joinSubject(subjectText(possessed),
-      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements))}`.trim();
+      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements, undefined, undefined, relativeSubjectIsNegative(rel)))}`.trim();
   }
+  // A subject relative agrees with its head, but a `no` head negates the MATRIX clause and is no
+  // "aucun" of this one: the relative keeps its own polarity, "aucun chat qui mange ne court", "aucun
+  // chat qui ne mange pas ne court" (A167, see `relativeSubjectIsNegative`).
   if (rel.headRole === 'subject' || !rel.subject) {
-    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements, undefined, rel.agent)}`.trim();
+    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements, undefined, rel.agent, relativeSubjectIsNegative(rel))}`.trim();
   }
   const subjText = subjectText(rel.subject);
   const fem = np.head.forms['gender'] === 'fem';
@@ -56,7 +60,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement, and
   // nor does an alarm, which is the cry's à-complement ("le loup auquel le garçon a crié").
   const precedingObject = rel.headRole === 'directObject' && !alarmHead && !prepHead ? np.head.forms : undefined;
-  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject, rel.agent);
+  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject, rel.agent,
+    relativeSubjectIsNegative(rel));
   // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
   const clause = joinSubject(subjText, pred);
   // The generic "on" after "où" takes the euphonic l' of the written language: "un lieu où l'on vit".

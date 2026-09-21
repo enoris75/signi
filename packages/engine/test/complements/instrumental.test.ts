@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import type { AbstractionLevel } from '@signi/shared';
-import { clause, np, sayAll } from '../harness.js';
+import type { AbstractionLevel, NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
+import { clause, np, say, sayAll } from '../harness.js';
 
 // What the action was done with. The instrumental is the one complement with an abstraction
 // gradient: the same instrument can be presented as a thing, as an action, or as an action
@@ -48,9 +48,9 @@ describe('instrumental', () => {
       es: 'el gato corta eligiendo el palo.',
       pt: 'o gato corta escolhendo o pau.',
       // German has no gerund, so it parts ways completely: a subordinate means clause, verb-final,
-      // in the Nachfeld — and its noun is a plain direct object, hence ACCUSATIVE ("den Stock"),
-      // not the dative that "mit" would have given it.
-      de: 'der Kater schneidet, indem man den Stock wählt.',
+      // in the Nachfeld, with an overt subject — the cat, as "er" (B06) — and its noun is a plain
+      // direct object, hence ACCUSATIVE ("den Stock"), not the dative that "mit" would have given it.
+      de: 'der Kater schneidet, indem er den Stock wählt.',
       ja: '猫は棒を選んで切ります。', // te-form
     });
   });
@@ -95,7 +95,7 @@ describe('instrumental: every licensing verb', () => {
     expect(said.fr).toMatch(/ en choisissant le bâton\.$/);
     expect(said.es).toMatch(/ eligiendo el palo\.$/);
     // The means clause is clause-final in German, after the verb material.
-    expect(said.de).toMatch(/^der Kater \S+, indem man den Stock wählt\.$/);
+    expect(said.de).toMatch(/^der Kater \S+, indem er den Stock wählt\.$/);
     // The te-form links the instrument's verb to the main one.
     expect(said.ja).toMatch(/^猫は棒を選んで.+ます。$/);
   });
@@ -159,7 +159,7 @@ describe('instrumental: the newly-licensing verbs', () => {
     expect(withStick('DESCRIBE', 'process')).toMatchObject({
       en: 'the cat describes by choosing the stick.',
       it: 'il gatto descrive scegliendo il bastone.',
-      de: 'der Kater beschreibt, indem man den Stock wählt.',
+      de: 'der Kater beschreibt, indem er den Stock wählt.',
       ja: '猫は棒を選んで描写します。',
     });
     expect(withStick('MODIFY', 'object')).toMatchObject({
@@ -192,7 +192,7 @@ describe('instrumental: an adverb on the action', () => {
       es: 'el gato corta eligiendo el palo bien.',
       pt: 'o gato corta escolhendo o pau bem.',
       // German drops it into the indem-clause, preverbally (the clause is verb-final): "gut wählt".
-      de: 'der Kater schneidet, indem man den Stock gut wählt.',
+      de: 'der Kater schneidet, indem er den Stock gut wählt.',
       ja: '猫は棒をよく選んで切ります。', // よく attaches to the te-form action
     });
   });
@@ -201,7 +201,7 @@ describe('instrumental: an adverb on the action', () => {
     expect(cutChoosing('process', 'FAST')).toMatchObject({
       en: 'the cat cuts by choosing the stick fast.',
       it: 'il gatto taglia scegliendo il bastone velocemente.',
-      de: 'der Kater schneidet, indem man den Stock schnell wählt.',
+      de: 'der Kater schneidet, indem er den Stock schnell wählt.',
       ja: '猫は棒を速く選んで切ります。',
     });
   });
@@ -232,15 +232,103 @@ describe('instrumental: an adverb on the action', () => {
   });
 });
 
-// DELIBERATE — do not "fix" without a product decision.
-describe('documented simplifications: instrumental', () => {
-  // German's means clause needs an overt subject (it cannot drop one the way a gerund does), and
-  // de/complementsPhrase/instrumentActionPhrase.ts fills it with the impersonal "man" — "indem MAN den Stock wählt", i.e. "by ONE choosing
-  // the stick". But the instrument is wielded by the clause's own subject, so the agreeing form
-  // is "indem ER den Stock wählt". As it stands the German quietly generalises an action the
-  // other six attribute to the cat.
-  test.fails('German should agree the means clause with the subject, not use impersonal "man"', () => {
+// B06, fixed. German's means clause needs an overt subject (it cannot drop one the way a gerund
+// does), and it names whoever wields the instrument: the clause's own subject, as the personal
+// pronoun agreeing with it in person, number and gender, the verb agreeing in turn ("indem ER den
+// Stock wählt", "indem ICH den Stock wähle"). It used to be the impersonal "man" throughout — "by ONE
+// choosing the stick" — which quietly generalised an action the other six attribute to the cat.
+// "man" is kept where the act is nobody's in particular (see de/meansDoer.ts).
+describe('German means clause subject', () => {
+  test('German should agree the means clause with the subject, not use impersonal "man"', () => {
     expect(withStick('CUT', 'process'))
       .toMatchObject({ de: 'der Kater schneidet, indem er den Stock wählt.' });
+  });
+
+  const instrumental = {
+    phrase: np('STICK'),
+    specifiers: [{ kind: 'abstraction' as const, value: 'process' as const }],
+    action: { verb: 'CHOOSE' },
+  };
+  const cut = (subject: NounElement, extra: Partial<PhrasePlan> = {}) =>
+    say({ ...clause(subject, 'CUT', { complements: { instrumental } }), ...extra }, 'de');
+
+  test('the pronoun agrees with the subject in person, number and gender, and its verb with it', () => {
+    expect({
+      i: cut(np('FIRST_PERSON')),
+      we: cut(np('FIRST_PERSON', { number: 'plural' })),
+      you: cut(np('SECOND_PERSON')),
+      youAll: cut(np('SECOND_PERSON', { number: 'plural' })),
+      she: cut(np('THIRD_PERSON', { gender: 'fem' })),
+      they: cut(np('THIRD_PERSON', { number: 'plural' })),
+      // A noun is referred back to by its grammatical gender.
+      femCat: cut(np('CAT', { gender: 'fem' })),
+      child: cut(np('CHILD')),
+      cats: cut(np('CAT', { number: 'plural' })),
+      // A coordinated subject agrees as its group does: "sie" for 3rd plural, "wir" with an "ich" in it.
+      catAndDog: cut({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'and' }),
+      meAndDog: cut({ conjuncts: [np('FIRST_PERSON'), np('DOG')], conjunction: 'and' }),
+    }).toEqual({
+      i: 'ich schneide, indem ich den Stock wähle.',
+      we: 'wir schneiden, indem wir den Stock wählen.',
+      you: 'du schneidest, indem du den Stock wählst.',
+      youAll: 'ihr schneidet, indem ihr den Stock wählt.',
+      she: 'sie schneidet, indem sie den Stock wählt.',
+      they: 'sie schneiden, indem sie den Stock wählen.',
+      femCat: 'die Katze schneidet, indem sie den Stock wählt.',
+      child: 'das Kind schneidet, indem es den Stock wählt.',
+      cats: 'die Kater schneiden, indem sie den Stock wählen.',
+      catAndDog: 'der Kater und der Hund schneiden, indem sie den Stock wählen.',
+      meAndDog: 'ich und der Hund schneiden, indem wir den Stock wählen.',
+    });
+  });
+
+  test('a generic subject keeps "man", which is right there', () => {
+    expect(cut(np('GENERIC_PERSON'))).toBe('man schneidet, indem man den Stock wählt.');
+  });
+
+  // A command's means clause is its addressee's act; an instruction and a citation are addressed to
+  // no one, and German says "man" there as it does on any button ("Beginnen, indem man …").
+  test('a command takes its addressee; an instruction and a citation infinitive take "man"', () => {
+    const command = (subject: NounElement, extra: Partial<PhrasePlan> = {}) => cut(subject, { imperative: true, ...extra });
+    expect(command(np('SECOND_PERSON'))).toBe('schneide, indem du den Stock wählst.');
+    expect(command(np('SECOND_PERSON', { number: 'plural' }))).toBe('schneidet, indem ihr den Stock wählt.');
+    expect(command(np('FIRST_PERSON', { number: 'plural' }))).toBe('schneiden wir, indem wir den Stock wählen.');
+    expect(command(np('SECOND_PERSON'), { verbPhrase: { verb: 'CUT', negative: true } }))
+      .toBe('schneide nicht, indem du den Stock wählst.');
+    // A coordinated command is addressed to the same person.
+    expect(command(np('SECOND_PERSON'), { coordination: { conjunction: 'and', clause: clause(np('CAT'), 'RUN', { complements: { instrumental } }) } }))
+      .toBe('schneide, indem du den Stock wählst, und lauf, indem du den Stock wählst.');
+    expect(command(np('SECOND_PERSON'), { imperativeRegister: 'instruction' })).toBe('schneiden, indem man den Stock wählt.');
+    expect(cut(np('CAT'), { infinitive: true })).toBe('schneiden, indem man den Stock wählt.');
+  });
+
+  test('a zu-infinitive and a clause of purpose take their controller', () => {
+    expect(say(clause(np('DOG'), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'CUT' }, complements: { instrumental } } }), 'de'))
+      .toBe('der Hund wünscht, zu schneiden, indem er den Stock wählt.');
+    expect(say(clause(np('CAT', { gender: 'fem' }), 'RUN', { purpose: { verbPhrase: { verb: 'CUT' }, complements: { instrumental } } }), 'de'))
+      .toBe('die Katze läuft, um zu schneiden, indem sie den Stock wählt.');
+  });
+
+  // The passive's subject is the patient; the one who wields the instrument is still the agent.
+  test('under the passive the agent wields it, and an agentless passive says "man"', () => {
+    const cutBy = (agent: string) =>
+      say(clause(np(agent), 'CUT', { directObject: np('FOOD'), verbPhrase: { voice: 'passive' }, complements: { instrumental } }), 'de');
+    expect(cutBy('CAT')).toBe('das Essen wird vom Kater geschnitten, indem er den Stock wählt.');
+    expect(cutBy('GENERIC_PERSON')).toBe('das Essen wird geschnitten, indem man den Stock wählt.');
+  });
+
+  test("a relative clause's means clause is its own subject's, the head's in a subject relative", () => {
+    const runs = (head: NounPhrase) => say(clause(head, 'RUN'), 'de');
+    expect(runs(np('CAT', { gender: 'fem', relative: { verbPhrase: { verb: 'EAT' }, complements: { instrumental } } })))
+      .toBe('die Katze, die frisst, indem sie den Stock wählt, läuft.');
+    expect(runs(np('MOUSE', { relative: { headRole: 'directObject', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT' }, complements: { instrumental } } })))
+      .toBe('die Maus, die ich esse, indem ich den Stock wähle, läuft.');
+    // Passive relatives: the agent again, the head itself when the relative is gapped on it.
+    expect(runs(np('FOOD', { relative: { headRole: 'directObject', subject: np('CAT', { gender: 'fem' }), verbPhrase: { verb: 'EAT', voice: 'passive' }, complements: { instrumental } } })))
+      .toBe('das Essen, das von der Katze gefressen wird, indem sie den Stock wählt, läuft.');
+    expect(runs(np('CHILD', { relative: { headRole: 'subject', directObject: np('BOOK'), verbPhrase: { verb: 'WRITE', voice: 'passive' }, complements: { instrumental } } })))
+      .toBe('das Kind, von dem das Buch geschrieben wird, indem es den Stock wählt, läuft.');
+    expect(runs(np('FOOD', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT', voice: 'passive' }, complements: { instrumental } } })))
+      .toBe('das Essen, das gegessen wird, indem man den Stock wählt, läuft.');
   });
 });

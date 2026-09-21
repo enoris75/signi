@@ -32,7 +32,7 @@ describe('manner adverbial (complemento di modo)', () => {
       fr: 'le chat court à la vitesse de la lumière.',
       es: 'el gato corre a la velocidad de la luz.',
       pt: 'o gato corre à velocidade da luz.',
-      de: 'der Kater läuft mit der Geschwindigkeit vom Licht.', // von-dative possessive
+      de: 'der Kater läuft mit der Geschwindigkeit des Lichtes.', // the genitive possessor (B09)
       ja: '猫は光の速さで走ります。',
     });
   });
@@ -89,7 +89,7 @@ describe('manner adverbial (complemento di modo)', () => {
       fr: 'le chat court à la vitesse de la lumière.',
       es: 'el gato corre a la velocidad de la luz.',
       pt: 'o gato corre à velocidade da luz.',
-      de: 'der Kater läuft mit der Geschwindigkeit vom Licht.',
+      de: 'der Kater läuft mit der Geschwindigkeit des Lichtes.',
       ja: '猫は光の速さで走ります。',
     });
   });

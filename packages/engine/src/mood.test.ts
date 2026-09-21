@@ -118,6 +118,91 @@ describe('moodForm', () => {
   });
 });
 
+// A170: the relative under a negated antecedent reads the present subjunctive in any person, not
+// only the imperative's three. The 3rd persons keep the stressed stem; only 1pl / 2pl take the
+// unstressed one.
+describe('moodForm: the present subjunctive (es, pt)', () => {
+  const persons = ['1sg', '2sg', '3sg', '1pl', '2pl', '3pl'] as const;
+  const paradigm = (lang: 'es' | 'pt', v: ReturnType<typeof verb>) => persons.map((pn) => moodForm(lang, v, pn, 'presentSubjunctive'));
+
+  test('Spanish derives all six persons off the 1sg stem, the plural 1st and 2nd unstressed', () => {
+    const COMER = verb('EAT', { base: 'comer', '1sg_present': 'como', '1pl_present': 'comemos' });
+    const CANTAR = verb('SING', { base: 'cantar', '1sg_present': 'canto', '1pl_present': 'cantamos' });
+    expect(paradigm('es', COMER)).toEqual(['coma', 'comas', 'coma', 'comamos', 'comáis', 'coman']);
+    expect(paradigm('es', CANTAR)).toEqual(['cante', 'cantes', 'cante', 'cantemos', 'cantéis', 'canten']);
+    expect(paradigm('es', MORDER)).toEqual(['muerda', 'muerdas', 'muerda', 'mordamos', 'mordáis', 'muerdan']);
+    expect(paradigm('es', EMPEZAR)).toEqual(['empiece', 'empieces', 'empiece', 'empecemos', 'empecéis', 'empiecen']);
+    expect(paradigm('es', ENVIAR)).toEqual(['envíe', 'envíes', 'envíe', 'enviemos', 'enviéis', 'envíen']);
+    expect(paradigm('es', VENIR)).toEqual(['venga', 'vengas', 'venga', 'vengamos', 'vengáis', 'vengan']);
+  });
+
+  test('Portuguese agrees vocês as the 3rd plural, and keeps the -ear i only under stress', () => {
+    const COMER = verb('EAT', { base: 'comer', '1sg_present': 'como' });
+    const NOMEAR = verb('NAME', { base: 'nomear', '1sg_present': 'nomeio' });
+    expect(paradigm('pt', COMER)).toEqual(['coma', 'coma', 'coma', 'comamos', 'comam', 'comam']);
+    expect(paradigm('pt', NOMEAR)).toEqual(['nomeie', 'nomeie', 'nomeie', 'nomeemos', 'nomeiem', 'nomeiem']);
+  });
+
+  test('the irregular verbs and the aspect auxiliaries take their own stem in the 3rd persons too', () => {
+    const third = (lang: 'es' | 'pt', conceptId: string) =>
+      [moodForm(lang, verb(conceptId, {}), '3sg', 'presentSubjunctive'), moodForm(lang, verb(conceptId, {}), '3pl', 'presentSubjunctive')];
+    expect(['BE', 'ESTAR', 'GIVE', 'GO', 'KNOW', 'HABER'].map((id) => third('es', id))).toEqual([
+      ['sea', 'sean'], ['esté', 'estén'], ['dé', 'den'], ['vaya', 'vayan'], ['sepa', 'sepan'], ['haya', 'hayan'],
+    ]);
+    expect(['BE', 'ESTAR', 'GIVE', 'GO', 'KNOW', 'TER', 'WILL'].map((id) => third('pt', id))).toEqual([
+      ['seja', 'sejam'], ['esteja', 'estejam'], ['dê', 'deem'], ['vá', 'vão'], ['saiba', 'saibam'], ['tenha', 'tenham'], ['queira', 'queiram'],
+    ]);
+  });
+
+  test('is undefined with no stem to derive from, and in the languages that keep the indicative', () => {
+    expect(moodForm('es', verb('EAT', { base: 'comer' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    const MANGIARE = verb('EAT', { base: 'mangiare', '1sg_present': 'mangio' });
+    expect(moodForm('it', MANGIARE, '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('fr', verb('EAT', { base: 'manger', '1sg_present': 'mange' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('en', verb('EAT', { base: 'eat', '1sg_present': 'eat' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+  });
+});
+
+// B11: the 1st-plural imperfect subjunctive is stressed on the stem's last vowel, and the spelling
+// marks it. Only that person: the others are stressed on the ending's first syllable.
+describe('moodForm: the 1st-plural imperfect subjunctive accent (es, pt)', () => {
+  test('Spanish writes the acute on the stem\'s last vowel, irregular preterites included', () => {
+    const COMER = verb('EAT', { base: 'comer', '3pl_past': 'comieron' });
+    expect(moodForm('es', COMER, '1pl', 'subjunctive')).toBe('comiéramos');
+    expect(moodForm('es', COMER, '2pl', 'subjunctive')).toBe('comierais');
+    expect(moodForm('es', COMER, '3pl', 'subjunctive')).toBe('comieran');
+    expect(moodForm('es', verb('SING', { base: 'cantar', '3pl_past': 'cantaron' }), '1pl', 'subjunctive')).toBe('cantáramos');
+    expect(moodForm('es', verb('BE', { base: 'ser', '3pl_past': 'fueron' }), '1pl', 'subjunctive')).toBe('fuéramos');
+    expect(moodForm('es', verb('HABER', { '3pl_past': 'hubieron' }), '1pl', 'subjunctive')).toBe('hubiéramos');
+    expect(moodForm('es', verb('READ', { base: 'leer', '3pl_past': 'leyeron' }), '1pl', 'subjunctive')).toBe('leyéramos');
+  });
+
+  test('Portuguese writes á, í and ô by the stem vowel', () => {
+    expect(moodForm('pt', verb('SPEAK', { base: 'falar', '3sg_past': 'falou', '3pl_past': 'falaram' }), '1pl', 'subjunctive')).toBe('falássemos');
+    expect(moodForm('pt', verb('LEAVE', { base: 'partir', '3sg_past': 'partiu', '3pl_past': 'partiram' }), '1pl', 'subjunctive')).toBe('partíssemos');
+    expect(moodForm('pt', verb('BE', { base: 'ser', '3sg_past': 'foi', '3pl_past': 'foram' }), '1pl', 'subjunctive')).toBe('fôssemos');
+    // A stem vowel already written with its accent keeps it.
+    expect(moodForm('pt', verb('OWN', { base: 'possuir', '3sg_past': 'possuiu', '3pl_past': 'possuíram' }), '1pl', 'subjunctive')).toBe('possuíssemos');
+  });
+
+  // The spelling cannot choose: "comeram" and "tiveram" look alike. The 3sg preterite can: -eu for a
+  // regular -er verb, anything else for a strong one. "dar" is strong though its 3sg is "deu".
+  test('Portuguese writes ê for a regular -er preterite and é for a strong one', () => {
+    const COMER = verb('EAT', { base: 'comer', '3sg_past': 'comeu', '3pl_past': 'comeram' });
+    expect(moodForm('pt', COMER, '1pl', 'subjunctive')).toBe('comêssemos');
+    expect(moodForm('pt', COMER, '3pl', 'subjunctive')).toBe('comessem');
+    expect(moodForm('pt', verb('HAVE', { base: 'ter', '3sg_past': 'teve', '3pl_past': 'tiveram' }), '1pl', 'subjunctive')).toBe('tivéssemos');
+    expect(moodForm('pt', verb('GIVE', { base: 'dar', '3sg_past': 'deu', '3pl_past': 'deram' }), '1pl', 'subjunctive')).toBe('déssemos');
+    expect(moodForm('pt', verb('COME', { base: 'vir', '3sg_past': 'veio', '3pl_past': 'vieram' }), '1pl', 'subjunctive')).toBe('viéssemos');
+    // A reflexive verb's stored forms keep their "-se" and clitic; the rule sees through them.
+    expect(moodForm('pt', verb('MOVE_ONESELF', { base: 'mover-se', '3sg_past': 'se moveu', '3pl_past': 'se moveram' }), '1pl', 'subjunctive'))
+      .toBe('se movêssemos');
+    // The aspect auxiliaries carry only their preterite stem, and are strong.
+    expect(moodForm('pt', verb('ESTAR', { '3pl_past': 'estiveram' }), '1pl', 'subjunctive')).toBe('estivéssemos');
+    expect(moodForm('pt', verb('TER', { '3pl_past': 'tiveram' }), '1pl', 'subjunctive')).toBe('tivéssemos');
+  });
+});
+
 describe('moodPN', () => {
   test('reads the person and number off the subject, defaulting to the 3rd singular', () => {
     expect(moodPN({ person: '1', number: 'plural' })).toBe('1pl');

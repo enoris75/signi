@@ -37,6 +37,22 @@ describe('relativeText', () => {
     expect(readBy(el(np(DOG), np(CAT)))).toBe('that the dog and the cat read');
   });
 
+  // A166: a non-subject relative's own `no` subject is this clause's negator, as in the main clause,
+  // so the verb's "not" goes and a second `no` phrase falls to "any". A `no` HEAD negates the matrix
+  // clause instead, and a genitive relative's possessed phrase has lost its determiner to "whose".
+  test('the clause\'s own `no` subject takes the "not" and a `no` phrase with it; a `no` head does not', () => {
+    const noCat = el(np(CAT, { definiteness: 'no' }));
+    expect(relativeText(np(MOUSE, {}, { relative: { headRole: 'directObject', subject: noCat, verbPhrase: vp(EAT, { negative: true }) } })))
+      .toBe('that no cat eats');
+    expect(relativeText(np(HOUSE, {}, {
+      relative: { headRole: 'locative', subject: noCat, verbPhrase: vp(EAT), directObject: el(np(MOUSE, { definiteness: 'no' })) },
+    }))).toBe('where no cat eats any mouse');
+    expect(relativeText(np(CAT, { definiteness: 'no' }, { relative: subjectRelative(vp(EAT, { negative: true })) })))
+      .toBe('that does not eat');
+    expect(relativeText(np(BOY, {}, { relative: { headRole: 'possessor', subject: noCat, verbPhrase: vp(EAT, { negative: true }) } })))
+      .toBe('whose cat does not eat');
+  });
+
   test('a person head keeps who in an object relative', () => {
     expect(relativeText(np(BOY, {}, { relative: { headRole: 'directObject', subject: el(np(MAN)), verbPhrase: vp(SEE) } })))
       .toBe('who the man sees');

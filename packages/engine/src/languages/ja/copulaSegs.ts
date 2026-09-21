@@ -8,6 +8,7 @@ import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
 /**
@@ -45,6 +46,21 @@ const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   stem: ['い', 'い', 'い', 'い'],
 };
 
+// The negative a "neither … nor" closes on, after the last conjunct's も, as [present, past]: the
+// existential ない (大きくも幸せでもない), or いない after a state's 〜ても (疲れてもいない).
+const NEITHER: Record<'polite' | 'prenominal' | 'tara' | 'citation', [string, string]> = {
+  polite: ['ありません', 'ありませんでした'],
+  prenominal: ['ない', 'なかった'],
+  tara: ['なかったら', 'なかったら'],
+  citation: ['ない', 'なかった'],
+};
+const STATE_NEITHER: Record<'polite' | 'prenominal' | 'tara' | 'citation', [string, string]> = {
+  polite: ['いません', 'いませんでした'],
+  prenominal: ['いない', 'いなかった'],
+  tara: ['いなかったら', 'いなかったら'],
+  citation: ['いない', 'いなかった'],
+};
+
 /**
  * The copula (BE) predicate: the predicate adjective or noun with its copula — the plain "is careful"
  * (慎重です) that the になる-based predicative can't express. Future reuses the present. By the
@@ -64,8 +80,28 @@ const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
  * (`stem`: 大きくあり / 幸せであり / 疲れてい / 伝説であり).
  */
 export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean, form: CopulaForm = 'polite'): RubySegment[] {
-  // The inflected copula agrees with one head; a coordinated copular predicate takes the first
-  // conjunct's form (a documented approximation — the UI's copula predicate is a single phrase).
+  const { conjuncts, conjunction, ...group } = pred.phrase;
+  // A coordinated predicate (B12) strings its conjuncts with their connective forms (see
+  // `predicateLinkSegs`) and leaves the copula to the last one, which inflects as a predicate standing
+  // alone: 大きくて幸せです, 伝説で犬です, 大きいか幸せです, 大きくて幸せな猫. A negation reads "neither … nor",
+  // 〜も on every conjunct and the negative existential after the last: 大きくも幸せでもありませんでした,
+  // 大きくも疲れてもいない猫. A governed form never carries the negation, which stays on the modal.
+  if (conjuncts.length > 1) {
+    const last = conjuncts[conjuncts.length - 1];
+    const governed = form === 'dict' || form === 'stem';
+    if (negative && !governed) {
+      const lastForms = jaComparisonAdj(last.head);
+      const state = last.head.forms['role'] === 'adjective' && jaAdjClass(lastForms.base, lastForms.reading).kind === 'ta';
+      const tail = (state ? STATE_NEITHER : NEITHER)[form][tense === 'past' ? 1 : 0];
+      return [...conjuncts.flatMap((np) => predicateLinkSegs(np, 'mo')), { t: tail }];
+    }
+    const link = conjunction === 'or' ? 'ka' : 'te';
+    // An "or" is between whole predicates, so each disjunct carries the clause's past (大きかったか幸せでした);
+    // a たら and a governed form carry no tense.
+    const past = link === 'ka' && tense === 'past' && !governed && form !== 'tara';
+    const lastAlone: ResolvedComplement = { ...pred, phrase: { ...group, conjuncts: [last] } };
+    return [...conjuncts.slice(0, -1).flatMap((np) => predicateLinkSegs(np, link, past)), ...copulaSegs(lastAlone, tense, negative, form)];
+  }
   const head = firstConjunct(pred.phrase);
   const f = head.head.forms;
   const cell = (negative ? 2 : 0) + (tense === 'past' ? 1 : 0);

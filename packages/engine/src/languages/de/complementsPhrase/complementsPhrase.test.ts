@@ -157,6 +157,21 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ direction: complement(np(HAUS, { definiteness: 'indefinite' })) }))).toBe('zu einem Haus');
       expect(complementsPhrase(complements({ direction: complement(np(HAUS, { number: 'plural' })) }))).toBe('zu den Häusern');
     });
+
+    // A168: a continent named without an article takes "nach"; an articled one keeps "zur", and a
+    // possessive or an adjective, which give the name its article, keep "zu".
+    test('a bare-name continent takes "nach", with no article', () => {
+      const continent = { isA: 'CONTINENT' };
+      const ANTARKTIS: Forms = { base: 'Antarktis', gender: 'fem', count: 'singular', proper: '1', takes_article: '1', isA: 'CONTINENT' };
+      expect(complementsPhrase(complements({ direction: complement(np(EUROPA, continent)) }))).toBe('nach Europa');
+      expect(complementsPhrase(complements({ direction: complement(np(ANTARKTIS)) }))).toBe('zur Antarktis');
+      expect(complementsPhrase(complements({
+        direction: complement(np(EUROPA, continent, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })),
+      }))).toBe('zu meinem Europa');
+      expect(complementsPhrase(complements({ direction: complement(np(EUROPA, continent, { adjectives: [adj(GROSS)] })) })))
+        .toBe('zum großen Europa');
+      expect(complementsPhrase(complements({ source: complement(np(EUROPA, continent)) }))).toBe('aus Europa');
+    });
   });
 
   describe('route', () => {
@@ -179,6 +194,13 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(HAUS, { definiteness: 'indefinite' })) }))).toBe('in einem Haus');
       expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural' })) }))).toBe('in den Häusern');
       expect(complementsPhrase(complements({ locative: complement(np(EUROPA)) }))).toBe('in Europa');
+    });
+
+    // A169: the article an adjective brings back to a bare-name place fuses like any other.
+    test('a bare-name place with an adjective takes the fused article', () => {
+      const bigEurope = np(EUROPA, {}, { adjectives: [adj(GROSS)] });
+      expect(complementsPhrase(complements({ locative: complement(bigEurope) }))).toBe('im großen Europa');
+      expect(complementsPhrase(complements({ source: complement(bigEurope) }))).toBe('aus dem großen Europa');
     });
 
     test('a path specifier picks the preposition and its case', () => {
@@ -206,16 +228,16 @@ describe('complementsPhrase', () => {
   });
 
   describe('cause', () => {
-    // "wegen" formally governs the genitive; the colloquial dative is a documented simplification (B09).
-    test('neutral is "wegen" and positive "dank", both with the dative', () => {
-      expect(complementsPhrase(complements({ cause: complement(np(MANN)) }))).toBe('wegen dem Mann');
+    // "wegen" governs the genitive (B09); "dank" keeps the dative, standard beside its genitive.
+    test('neutral is "wegen" with the genitive, and positive "dank" with the dative', () => {
+      expect(complementsPhrase(complements({ cause: complement(np(MANN)) }))).toBe('wegen des Mannes');
       expect(complementsPhrase(complements({ cause: complement(np(MANN), [sentiment('positive')]) }))).toBe('dank dem Mann');
     });
 
     // A pronoun or negative cause is `causePhrase`'s; this only checks the complement routes there.
     test('a pronoun or negative cause takes its own shape', () => {
-      expect(complementsPhrase(complements({ cause: complement(np(ER)) }))).toBe('wegen ihm');
-      expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(DU))) }))).toBe('wegen dem Mann und dir');
+      expect(complementsPhrase(complements({ cause: complement(np(ER)) }))).toBe('seinetwegen');
+      expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(DU))) }))).toBe('wegen des Mannes und deinetwegen');
       expect(complementsPhrase(complements({ cause: complement(np(MANN), [sentiment('negative')]) }))).toBe('durch die Schuld des Mannes');
     });
   });
@@ -252,7 +274,7 @@ describe('complementsPhrase', () => {
         direction: complement(np(MARKT)),
         source: complement(np(HAUS)),
         manner: complement(np(GESCHWINDIGKEIT, { definiteness: 'bare' }, { adjectives: [adj(HOCH)] })),
-      }))).toBe('mit hoher Geschwindigkeit aus dem Haus zum Markt wegen dem Wind');
+      }))).toBe('mit hoher Geschwindigkeit aus dem Haus zum Markt wegen des Windes');
       expect(complementsPhrase(complements({
         locative: complement(np(HAUS)),
         instrumental: complement(np(MESSER)),

@@ -62,7 +62,7 @@ test.describe('verb', () => {
       ja: '猫はネズミを食べるところです。',
     });
 
-    // Japanese is left out: its resultative is a documented completive simplification (B05).
+    // Japanese says the present perfect with the past, as Portuguese does (B05).
     await app.cycle('verbAspect');
     await app.expectSentences({
       en: 'the cat has eaten the mouse.',
@@ -71,6 +71,7 @@ test.describe('verb', () => {
       de: 'der Kater hat die Maus gefressen.',
       es: 'el gato ha comido el ratón.',
       pt: 'o gato comeu o rato.',
+      ja: '猫はネズミを食べました。',
     });
   });
 

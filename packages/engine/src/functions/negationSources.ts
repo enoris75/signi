@@ -26,9 +26,11 @@ export interface NegationSources {
 }
 
 /**
- * `subjectIsNegative` is the caller's, not read off the clause: in a RELATIVE clause the head noun
+ * `subjectIsNegative` is the caller's, not read off the clause: in a SUBJECT relative the head noun
  * stands in for the subject, but its `kein`/`no` negates the **matrix** clause, not the relative one
- * ("no cat that does not eat runs" keeps both negators), so those call sites leave it unset.
+ * ("no cat that does not eat runs" keeps both negators), so those call sites leave it unset. A
+ * relative on any other slot carries its own subject, whose `no` is the relative clause's own, and
+ * passes it as the main clause does ("the mouse that no cat eats", A166).
  */
 export function negationSources(clause: {
   subjectIsNegative?: boolean;

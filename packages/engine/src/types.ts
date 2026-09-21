@@ -80,6 +80,11 @@ export interface ResolvedNounElement {
  * "don't run!"), the subject is dropped from the surface, and the subject's person/number
  * selects the imperative form (2sg default, 1pl "let's…", 2pl). Absent ⇒ plain `'indicative'`.
  *
+ * `'presentSubjunctive'` is engine-internal: no plan asks for it. The Spanish and Portuguese engines
+ * set it on a relative clause whose antecedent is negated ("ningún gato que coma", A170), where the
+ * clause asserts nothing about a real referent. A past relative there takes `'subjunctive'`, the
+ * imperfect subjunctive the protasis already uses ("que comiera").
+ *
  * `'infinitive'` is the subject-less, tenseless citation form a verb definition is phrased as
  * ("to consume food"; see PhrasePlan.infinitive). Like the imperative it occupies the finite/mood
  * slot — the subject is dropped and there is no tense/aspect/modal — but it is not a speech act,
@@ -87,7 +92,7 @@ export interface ResolvedNounElement {
  *
  * Each engine maps this onto its own conditional / subjunctive / imperative / infinitive forms.
  */
-export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'imperative' | 'infinitive';
+export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'presentSubjunctive' | 'imperative' | 'infinitive';
 
 /** A resolved verb phrase: the verb, negation flag, tense, aspect, voice, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {

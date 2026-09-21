@@ -56,14 +56,14 @@ export const germanEngine: LanguageEngine = {
   // The preposition alone. German marks its spatial relations with case rather than with different
   // words, and the case shows on the *article*, so a bare noun leaves exactly the preposition —
   // "unter", "über", "durch" — and the accusative/dative split (a route through vs a place in) has
-  // nothing to show. The cause takes "wegen", credits with "dank", and blames with the fixed
-  // "durch die Schuld" + genitive.
+  // nothing to show. The cause takes "wegen" (+ genitive), credits with "dank" (+ dative), and blames
+  // with the fixed "durch die Schuld" + genitive.
   renderSpecifier(noun: ConceptForms, specifier: Specifier): string {
     const f = { ...noun.forms, definiteness: 'bare' };
     if (specifier.kind === 'sentiment') {
       return specifier.value === 'positive' ? prepDet('dank', f, 'dat', false)
         : specifier.value === 'negative' ? 'durch die Schuld'
-        : prepDet('wegen', f, 'dat', false);
+        : prepDet('wegen', f, 'gen', false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, 'locative') : '';
   },

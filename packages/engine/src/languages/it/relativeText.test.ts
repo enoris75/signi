@@ -88,4 +88,16 @@ describe('relativeText', () => {
     // The head is no object, so an impersonal si stays impersonal rather than agreeing with it.
     expect(relativeText(np(LIBRO, { number: 'plural' }, { relative: clicked(el(np(SI))) }))).toBe('sui quali si clicca');
   });
+
+  // A167: a nessun head negates the matrix clause, not the relative, so the relative keeps its own
+  // "non", and a postverbal nessun inside it still demands one. The relative's OWN nessun subject does
+  // negate it, as a main clause's does.
+  test('a nessun head leaves the relative its own polarity', () => {
+    const onNoCat = (relative: ResolvedRelativeClause) => relativeText(np(GATTO, { definiteness: 'no' }, { relative }));
+    expect(onNoCat(subjectRelative({ verbPhrase: vp(MANGIARE, { negative: true }) }))).toBe('che non mangia');
+    expect(onNoCat(subjectRelative({ directObject: el(np(TOPO, { definiteness: 'no' })) }))).toBe('che non mangia nessun topo');
+    expect(onNoCat(subjectRelative())).toBe('che mangia');
+    expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(GATTO, { definiteness: 'no' })), { verbPhrase: vp(MANGIARE, { negative: true }) }) })))
+      .toBe('che nessun gatto mangia');
+  });
 });

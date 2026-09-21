@@ -127,6 +127,15 @@ describe('predicateText', () => {
       expect(predicateText(noCat, vp(COMER), noMouse)).toBe('come nenhum rato');
     });
 
+    // A167: whether the subject negates is the caller's. A relative on a `no` head agrees with it, but
+    // the head negates the matrix clause, so the relative clause says `false` and keeps its "não".
+    test('a caller that says the subject does not negate keeps "não", whatever the forms say', () => {
+      const noCat = { ...GATO, definiteness: 'no' };
+      expect(predicateText(noCat, vp(COMER, { negative: true }), undefined, undefined, false, undefined, false)).toBe('não come');
+      expect(predicateText(noCat, vp(COMER), noMouse, undefined, false, undefined, false)).toBe('não come nenhum rato');
+      expect(predicateText(GATO, vp(COMER, { negative: true }), undefined, undefined, false, undefined, true)).toBe('come');
+    });
+
     test('a negative adverb is fronted in place of "não"', () => {
       expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA) }))).toBe('nunca come');
       expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA) }), noMouse)).toBe('nunca come nenhum rato');

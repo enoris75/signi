@@ -48,9 +48,15 @@ describe('complementSegs', () => {
         .toEqual([{ t: 'それほど' }, { t: '幸せではなく', r: 'しあわせではなく' }]);
     });
 
-    test('a coordination is strung with と or か and takes に once', () => {
-      expect(text(complementSegs(complements({ predicative: complement(el(np(DENSETSU), np(NEKO))) })))).toBe('伝説と猫に');
+    // B12: "and" chains the te-form (it used to string と, which joins things, not predicates).
+    test('a coordination is chained with the te-form or strung with か, and takes に once', () => {
+      expect(text(complementSegs(complements({ predicative: complement(el(np(DENSETSU), np(NEKO))) })))).toBe('伝説で猫に');
       expect(text(complementSegs(complements({ predicative: complement(group('or', np(DENSETSU), np(NEKO))) })))).toBe('伝説か猫に');
+      expect(complementSegs(complements({ predicative: complement(el(np(OOKII), np(SHIAWASE))) })))
+        .toEqual([{ t: '大き', r: 'おおき' }, { t: 'くて' }, { t: '幸せ', r: 'しあわせ' }, { t: 'に' }]);
+      // The last conjunct decides the に: an i-adjective's く-form takes none.
+      expect(text(complementSegs(complements({ predicative: complement(el(np(SHIAWASE), np(OOKII))) })))).toBe('幸せで大きく');
+      expect(text(complementSegs(complements({ predicative: complement(group('or', np(OOKII), np(SHIAWASE))) })))).toBe('大きくか幸せに');
     });
 
     // A115: a の-adjective takes its bare stem + に, a た-adjective the state as a ように clause.

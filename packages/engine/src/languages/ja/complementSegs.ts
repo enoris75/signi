@@ -14,6 +14,7 @@ import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
+import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
 /**
@@ -41,16 +42,21 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     // The furigana reading tracks the same trailing-mora substitution. A predicate adjective
     // takes its degree adverb before it, as an attributive one does (もっと楽しくなる).
     if (type === 'predicative' || factitive) {
-      // Coordinated conjuncts are strung with と / か, and the に — like every other particle in
-      // Japanese — attaches once, to the group: 「幸せか疲れに見える」, never 「幸せにか疲れに」.
-      // An i-adjective takes no に at all (it is already adverbial in the く-form), so the
-      // particle is decided by the *last* conjunct, the one the predicate actually follows.
-      // (Japanese would more idiomatically chain predicate adjectives with the て-form —
-      // 楽しくて疲れて — so a coordinated *adjective* predicate here is an approximation.)
-      const conj = c.phrase.conjunction === 'or' ? 'か' : 'と';
+      // Coordinated conjuncts: "and" chains every conjunct but the last in its te-form (B12), as the
+      // copula does (大きくて幸せになる, 伝説で犬に思える, 疲れていて幸せに思える; see `predicateLinkSegs`);
+      // "or" strings them with か. Either way the に — like every other particle in Japanese —
+      // attaches once, after the last conjunct: 「幸せか伝説に見える」, never 「幸せにか伝説に」. An
+      // i-adjective takes no に at all (it is already adverbial in the く-form), so the particle is
+      // decided by the *last* conjunct, the one the predicate actually follows.
+      const { conjuncts } = c.phrase;
+      const or = c.phrase.conjunction === 'or';
       let takesNi = false;
-      c.phrase.conjuncts.forEach((np, i) => {
-        if (i > 0) segs.push({ t: conj });
+      conjuncts.forEach((np, i) => {
+        if (!or && i < conjuncts.length - 1) {
+          segs.push(...predicateLinkSegs(np, 'te'));
+          return;
+        }
+        if (i > 0 && or) segs.push({ t: 'か' });
         const f = np.head.forms;
         const isAdj = f['role'] === 'adjective';
         // The lowered degrees negate the adjective (幸せな → 幸せではない, itself an い-adjective).

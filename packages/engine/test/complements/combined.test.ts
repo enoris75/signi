@@ -74,7 +74,7 @@ describe('complement pairs: predicative + …', () => {
       fr: 'le chat devient une légende à cause du chien.',
       es: 'el gato se vuelve una leyenda a causa del perro.',
       pt: 'o gato se torna uma lenda por causa do cão.',
-      de: 'der Kater wird eine Legende wegen dem Hund.',
+      de: 'der Kater wird eine Legende wegen des Hundes.',
       ja: '猫は伝説に犬のためになります。',
     });
   });
@@ -179,7 +179,7 @@ describe('complement pairs: instrumental + …', () => {
       fr: 'le chat coupe avec le bâton à cause du chien.',
       es: 'el gato corta con el palo a causa del perro.',
       pt: 'o gato corta com o pau por causa do cão.',
-      de: 'der Kater schneidet mit dem Stock wegen dem Hund.',
+      de: 'der Kater schneidet mit dem Stock wegen des Hundes.',
       ja: '猫は棒で犬のために切ります。',
     });
   });
@@ -201,7 +201,7 @@ describe('complement pairs: cause + a directional', () => {
       fr: 'le chat pleure dans la maison à cause du chien.',
       es: 'el gato llora en la casa a causa del perro.',
       pt: 'o gato chora na casa por causa do cão.',
-      de: 'der Kater weint im Haus wegen dem Hund.',
+      de: 'der Kater weint im Haus wegen des Hundes.',
       ja: '猫は家で犬のために泣きます。',
     });
   });
@@ -213,7 +213,7 @@ describe('complement pairs: cause + a directional', () => {
       fr: 'le chat va au marché à cause du chien.',
       es: 'el gato va al mercado a causa del perro.',
       pt: 'o gato vai ao mercado por causa do cão.',
-      de: 'der Kater geht zum Markt wegen dem Hund.',
+      de: 'der Kater geht zum Markt wegen des Hundes.',
       ja: '猫は市場へ犬のために行きます。',
     });
   });
@@ -225,7 +225,7 @@ describe('complement pairs: cause + a directional', () => {
       fr: 'le chat va de la maison à cause du chien.',
       es: 'el gato va de la casa a causa del perro.',
       pt: 'o gato vai da casa por causa do cão.',
-      de: 'der Kater geht aus dem Haus wegen dem Hund.',
+      de: 'der Kater geht aus dem Haus wegen des Hundes.',
       ja: '猫は家から犬のために行きます。',
     });
   });
@@ -240,7 +240,7 @@ describe('complement pairs: cause + a directional', () => {
       fr: 'le chat va à travers le marché à cause du chien.',
       es: 'el gato va por el mercado a causa del perro.',
       pt: 'o gato vai pelo mercado por causa do cão.',
-      de: 'der Kater geht durch den Markt wegen dem Hund.',
+      de: 'der Kater geht durch den Markt wegen des Hundes.',
       ja: '猫は市場を犬のために行きます。',
     });
   });
@@ -311,7 +311,7 @@ describe('known bugs: combined complements', () => {
       fr: 'le chat est une légende à cause du chien.',
       es: 'el gato es una leyenda a causa del perro.',
       pt: 'o gato é uma lenda por causa do cão.',
-      de: 'der Kater ist eine Legende wegen dem Hund.',
+      de: 'der Kater ist eine Legende wegen des Hundes.',
       ja: '猫は犬のために伝説です。',
     });
   });

@@ -117,6 +117,7 @@ describe('modals: aspect', () => {
       es: 'el gato debe haber comido.',
       pt: 'o gato deve ter comido.',
       de: 'der Kater muss gefressen haben.',
+      ja: '猫は食べている必要があります。', // "needs to have eaten": the resultant state (B07)
     });
   });
 
@@ -126,6 +127,7 @@ describe('modals: aspect', () => {
       it: 'il gatto deve stare mangiando.',
       es: 'el gato debe estar comiendo.',
       de: 'der Kater muss gerade fressen.',
+      ja: '猫は食べている必要があります。',
     });
   });
 });
@@ -409,14 +411,68 @@ describe('modals: with an adverb', () => {
   });
 });
 
-// DELIBERATE — do not "fix" without a product decision.
-describe('documented simplifications: modals', () => {
-  // ja/modalSegs.ts: "Known gap: `aspect` is dropped under a modal. Stacking ～ています inside 〜必要がある
-  // is [not built]." So a Japanese modal renders identically whatever the aspect, while the other
-  // six compose the two ("must have eaten").
-  test.fails('Japanese should not drop the aspect under a modal', () => {
+// B07 (fixed). Japanese used to drop the aspect under a modal (猫は食べる必要があります whatever the
+// aspect), while the other six compose the two ("must have eaten"). The aspect now stands under the
+// modal in the form the modal governs: the dictionary form for 〜必要がある / 〜ことができる, the stem
+// for 〜たい. The progressive and the resultative are both the resultant state 〜ている ("needs to be
+// eating / to have eaten"), and the prospective is 〜ようとしている, as in a relative clause (B14).
+describe('Japanese aspect under a modal', () => {
+  const ja = (verbPhrase: Partial<VerbPhrase>) => catModal(verbPhrase).ja;
+
+  test('Japanese should not drop the aspect under a modal', () => {
     expect(catModal({ modals: ['MUST'], aspect: 'resultative' }).ja)
       .not.toBe('猫は食べる必要があります。');
+  });
+
+  test('each modal governs the aspect in its own form', () => {
+    expect(ja({ modals: ['MUST'], aspect: 'progressive' })).toBe('猫は食べている必要があります。');
+    expect(ja({ modals: ['MUST'], aspect: 'resultative' })).toBe('猫は食べている必要があります。');
+    expect(ja({ modals: ['MUST'], aspect: 'prospective' })).toBe('猫は食べようとしている必要があります。');
+    expect(ja({ modals: ['CAN'], aspect: 'progressive' })).toBe('猫は食べていることができます。');
+    expect(ja({ modals: ['CAN'], aspect: 'resultative' })).toBe('猫は食べていることができます。');
+    expect(ja({ modals: ['CAN'], aspect: 'prospective' })).toBe('猫は食べようとしていることができます。');
+    // 〜たい governs the stem: いる's is い.
+    expect(ja({ modals: ['WILL'], aspect: 'progressive' })).toBe('猫は食べていたいです。');
+    expect(ja({ modals: ['WILL'], aspect: 'resultative' })).toBe('猫は食べていたいです。');
+    expect(ja({ modals: ['WILL'], aspect: 'prospective' })).toBe('猫は食べようとしていたいです。');
+  });
+
+  test('the modal keeps the tense and the polarity', () => {
+    expect(ja({ modals: ['MUST'], aspect: 'resultative', negative: true, tense: 'past' })).toBe('猫は食べている必要がありませんでした。');
+    expect(ja({ modals: ['CAN'], aspect: 'prospective', negative: true, tense: 'past' })).toBe('猫は食べようとしていることができませんでした。');
+    expect(ja({ modals: ['WILL'], aspect: 'progressive', negative: true, tense: 'past' })).toBe('猫は食べていたくなかったです。');
+  });
+
+  test('a bridged chain, an object, an adverb, a passive and a state verb all compose', () => {
+    expect(ja({ modals: ['WILL', 'CAN'], aspect: 'progressive' })).toBe('猫は食べていることができるようになりたいです。');
+    expect(ja({ modals: ['CAN', 'WILL'], aspect: 'progressive' })).toBe('猫は食べていたいと思うことができます。');
+    expect(ja({ modals: ['MUST', 'CAN'], aspect: 'resultative' })).toBe('猫は食べていることができる必要があります。');
+    expect(ja({ modals: ['MUST'], aspect: 'progressive', modifier: 'ALWAYS' })).toBe('猫はいつも食べている必要があります。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['MUST'], aspect: 'resultative' }, directObject: np('MOUSE') })).ja)
+      .toBe('猫はネズミを食べている必要があります。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['MUST'], aspect: 'resultative', voice: 'passive' }, directObject: np('FOOD') })).ja)
+      .toBe('食べ物は猫に食べられている必要があります。');
+    expect(sayAll(clause(np('CAT'), 'HAVE', { verbPhrase: { modals: ['MUST'], aspect: 'progressive' }, directObject: np('BOOK') })).ja)
+      .toBe('猫は本を持っている必要があります。');
+    expect(sayAll(clause(np('CAT'), 'COME', { verbPhrase: { modals: ['WILL'], aspect: 'prospective' } })).ja).toBe('猫は来ようとしていたいです。');
+  });
+
+  test('in a relative clause and an "if" clause, the modal takes the plain and たら endings', () => {
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', modals: ['MUST'], aspect: 'progressive' } } }), 'RUN')).ja)
+      .toBe('食べている必要がある猫は走ります。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', modals: ['WILL'], aspect: 'prospective' } } }), 'RUN')).ja)
+      .toBe('食べようとしていたい猫は走ります。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['CAN'], aspect: 'progressive' } }) }).ja)
+      .toBe('もし猫が食べていることができたら、犬は走ります。');
+  });
+
+  // Aspect on a copula is marginal, and the existential is a state that takes none.
+  test('regression: the copula and the existential keep their aspect-less form under a modal', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: ['MUST'], aspect: 'progressive' }, complements: { predicative: { phrase: np('HAPPY') } } })).ja)
+      .toBe('猫は幸せである必要があります。');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: ['MUST'], aspect: 'progressive' }, complements: { locative: { phrase: np('HOUSE') } } })).ja)
+      .toBe('猫は家にいる必要があります。');
+    expect(ja({ modals: ['MUST'] })).toBe('猫は食べる必要があります。');
   });
 });
 

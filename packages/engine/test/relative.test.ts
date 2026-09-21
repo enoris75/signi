@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Complement, ComplementType, NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, furigana, np, sayAll } from './harness.js';
 
 // A restrictive relative clause. The head noun fills one slot of the clause — its subject by
 // default, or any slot named by `headRole` — and clauses nest, since the clause's own objects
@@ -436,7 +436,7 @@ describe('relative clauses: polarity and modals of their own', () => {
       en: 'the cat that does not eat sees the mouse.',
       fr: 'le chat qui ne mange pas voit la souris.',
       de: 'der Kater, der nicht frisst, sieht die Maus.', // negation survives into the clause
-      ja: '食べません猫はネズミを見ます。', // documented gap, pinned as-is: B13
+      ja: '食べない猫はネズミを見ます。', // the plain negative before the head noun (B13)
     });
   });
 
@@ -619,13 +619,14 @@ describe('nested relative clauses: three tenses AND three aspects', () => {
   });
 
   test('Japanese composes tense and aspect at every depth', () => {
-    // The politeness is wrong at every level (B14), but the tense and
-    // aspect themselves compose correctly right down the nest — worth separating the two.
+    // Each relative clause closes on the plain form of its aspect (B14): the prospective 〜ようとしている
+    // and the progressive 〜ている, where only the matrix clause is polite. The matrix past perfect "had
+    // seen" is the past resultant state 見ていました (B05).
     expect(nested(
       { tense: 'past', aspect: 'resultative' },
       { aspect: 'progressive' },
       { tense: 'future', aspect: 'prospective' },
-    ).ja).toBe('走るところですネズミを食べています猫は犬を見てしまいました。');
+    ).ja).toBe('走ろうとしているネズミを食べている猫は犬を見ていました。');
   });
 });
 
@@ -702,7 +703,7 @@ describe('known bugs: German negation inside a relative clause', () => {
 
 // A51. A `process` instrumental is a subordinate "indem" clause, which the main clause moves to the
 // Nachfeld (`splitMeansClause`). The relative clause never splits it out, so it lands mid-clause,
-// before the relative's own verb. ("man" is the B06 simplification, kept here.)
+// before the relative's own verb. Its subject is the relative clause's own, as a pronoun (B06).
 describe('known bugs: German means clause inside a relative clause', () => {
   const dogWho = (relative: RelativeClause) => sayAll(clause(np('DOG', { relative }), 'RUN')).de;
   const byChoosing = (value: 'process' | 'concept'): Complement => ({
@@ -723,26 +724,26 @@ describe('known bugs: German means clause inside a relative clause', () => {
           },
         },
       },
-    }), 'RUN')).de).toBe('der Hund, der frisst, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der frisst, indem er ein Wort wählt, läuft.');
   });
 
   test('German keeps the "indem" clause last with an object, a tense, a negation or an object relative', () => {
     const instrumental = byChoosing('process');
     expect(dogWho({ verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE'), complements: { instrumental } }))
-      .toBe('der Hund, der die Maus frisst, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der die Maus frisst, indem er ein Wort wählt, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', aspect: 'resultative' }, complements: { instrumental } }))
-      .toBe('der Hund, der gefressen hat, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der gefressen hat, indem er ein Wort wählt, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, complements: { instrumental } }))
-      .toBe('der Hund, der nicht frisst, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der nicht frisst, indem er ein Wort wählt, läuft.');
     expect(sayAll(clause(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, complements: { instrumental } },
-    }), 'RUN')).de).toBe('die Maus, die der Kater frisst, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('die Maus, die der Kater frisst, indem er ein Wort wählt, läuft.');
   });
 
   test('German closes a sentence-final relative on the "indem" clause', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', {
       directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, complements: { instrumental: byChoosing('process') } } }),
-    })).de).toBe('der Hund sieht den Kater, der frisst, indem man ein Wort wählt.');
+    })).de).toBe('der Hund sieht den Kater, der frisst, indem er ein Wort wählt.');
   });
 
   test('regression: a concept-level instrument is a phrase and stays before the verb', () => {
@@ -985,11 +986,11 @@ describe('locative relative clause: the place where', () => {
   });
 });
 
-// B13. DELIBERATE — do not "fix" without a product decision. The lexicon stores no nai-form, so a
-// negated relative clause or citation falls back to the polite verbSeg (食べません猫, 食べません。), a
-// gap `predicateSegs` and `plainVerbSeg` document. Japanese wants the plain negative: 食べない猫.
-describe('documented simplifications: Japanese plain negative', () => {
-  test.fails('Japanese uses the plain negative in a relative clause and a citation', () => {
+// B13 (fixed). A negated relative clause or citation used to fall back to the polite verbSeg
+// (食べません猫, 食べません。). A prenominal clause and a citation both take the plain form, so the
+// negative is the plain one, built on the seeded nai-form: 食べない猫, 食べなかった猫, 食べない。
+describe('Japanese plain negative', () => {
+  test('Japanese uses the plain negative in a relative clause and a citation', () => {
     const eatsWho = (verbPhrase: object) =>
       sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
     expect(eatsWho({ negative: true })).toBe('食べない猫は走ります。');
@@ -998,17 +999,98 @@ describe('documented simplifications: Japanese plain negative', () => {
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { negative: true } }), infinitive: true }).ja)
       .toBe('食べない。');
   });
+
+  test('a negative-concord argument and an object gap take the plain negative too', () => {
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE', { definiteness: 'no' }) } }), 'RUN')).ja)
+      .toBe('どのネズミも食べない猫は走ります。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE') } }), 'RUN')).ja)
+      .toBe('ネズミを食べない猫は走ります。');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', negative: true, tense: 'past' } },
+    }), 'RUN')).ja).toBe('猫が食べなかったネズミは走ります。');
+  });
+
+  test('every verb class reads its own seeded nai-form', () => {
+    const who = (verb: string, verbPhrase: object = {}, extra: object = {}) =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb, negative: true, ...verbPhrase }, ...extra } }), 'RUN')).ja;
+    expect(who('RUN')).toBe('走らない猫は走ります。'); // a godan -る verb, not *走るない
+    expect(who('COME')).toBe('来ない猫は走ります。');
+    expect(who('COME', { tense: 'past' })).toBe('来なかった猫は走ります。');
+    expect(who('CONSUME', { tense: 'past' })).toBe('摂取しなかった猫は走ります。');
+    // The state verbs keep the plain form a relative takes, not the 〜ている of a main clause.
+    expect(who('HAVE', {}, { directObject: np('BOOK') })).toBe('本を持たない猫は走ります。');
+    expect(who('KNOW', {}, { directObject: np('BOOK') })).toBe('本を知らない猫は走ります。');
+    // The existential and the passive are verbs of their own, with their own nai-forms.
+    expect(who('BE', {}, { complements: { locative: { phrase: np('HOUSE') } } })).toBe('家にいない猫は走ります。');
+    expect(sayAll(clause(np('FOOD', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive', negative: true } },
+    }), 'RUN')).ja).toBe('猫に食べられない食べ物は走ります。');
+  });
+
+  test('the furigana follows the nai-form, not the dictionary form', () => {
+    // 来る reads く, but 来ない reads こ.
+    expect(furigana(clause(np('CAT', { relative: { verbPhrase: { verb: 'COME', negative: true, tense: 'past' } } }), 'RUN')))
+      .toEqual(['こなかった', 'ねこ', 'はしります']);
+  });
+
+  test('regression: the main clause keeps its polite negative', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true } })).ja).toBe('猫は食べません。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true } } }), 'RUN', { verbPhrase: { negative: true } })).ja)
+      .toBe('食べない猫は走りません。');
+  });
 });
 
-// B14. DELIBERATE — do not "fix" without a product decision. `aspectVerbSegs` builds only the
-// polite forms and never sees the relative clause's `plain` flag, a gap `plainVerbSeg` documents.
-// So an aspectual relative clause keeps 〜ています / 〜てしまいます before its head noun (食べています猫).
-describe('documented simplifications: Japanese aspect in a relative clause', () => {
-  test.fails('Japanese puts an aspectual relative clause in the plain form', () => {
+// B14 (fixed). `aspectVerbSegs` used to build only the polite forms, so an aspectual relative clause
+// kept 〜ています / 〜てしまいます before its head noun (食べています猫). It now takes the relative clause's
+// plain ending: the fixed auxiliary goes plain (食べている猫, 食べていない猫), and the prospective, whose
+// ところです has no prenominal form, is 〜ようとしている, "is about to" (食べようとしている猫).
+describe('Japanese aspect in a relative clause', () => {
+  const who = (verbPhrase: Partial<VerbPhrase>, extra: Partial<RelativeClause> = {}) =>
+    sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase }, ...extra } }), 'RUN')).ja;
+
+  test('Japanese puts an aspectual relative clause in the plain form', () => {
     const eatsWho = (aspect: 'progressive' | 'resultative') =>
       sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', aspect } } }), 'RUN')).ja;
     expect(eatsWho('progressive')).toBe('食べている猫は走ります。');
-    expect(eatsWho('resultative')).toBe('食べてしまう猫は走ります。');
+    expect(eatsWho('resultative')).toBe('食べた猫は走ります。');
+  });
+
+  test('the progressive takes the plain いる in every tense and polarity', () => {
+    expect(who({ aspect: 'progressive', tense: 'past' })).toBe('食べていた猫は走ります。');
+    expect(who({ aspect: 'progressive', tense: 'future' })).toBe('食べている猫は走ります。');
+    // The negative is the fixed いない, so it needs no nai-form of the verb's own.
+    expect(who({ aspect: 'progressive', negative: true })).toBe('食べていない猫は走ります。');
+    expect(who({ aspect: 'progressive', negative: true, tense: 'past' })).toBe('食べていなかった猫は走ります。');
+    expect(who({ aspect: 'progressive', modifier: 'NEVER' })).toBe('決して食べていない猫は走ります。');
+  });
+
+  test('the prospective is 〜ようとしている on the volitional', () => {
+    expect(who({ aspect: 'prospective' })).toBe('食べようとしている猫は走ります。');
+    expect(who({ aspect: 'prospective', tense: 'past' })).toBe('食べようとしていた猫は走ります。');
+    expect(who({ aspect: 'prospective', negative: true })).toBe('食べようとしていない猫は走ります。');
+    expect(who({ aspect: 'prospective', negative: true, tense: 'past' })).toBe('食べようとしていなかった猫は走ります。');
+    // A godan verb moves to the お row (走ろう), する and 来る take よう (摂取しよう, 来よう).
+    expect(who({ verb: 'RUN', aspect: 'prospective' })).toBe('走ろうとしている猫は走ります。');
+    expect(who({ verb: 'CONSUME', aspect: 'prospective' })).toBe('摂取しようとしている猫は走ります。');
+    expect(who({ verb: 'COME', aspect: 'prospective' })).toBe('来ようとしている猫は走ります。');
+    expect(furigana(clause(np('CAT', { relative: { verbPhrase: { verb: 'COME', aspect: 'prospective' } } }), 'RUN')))
+      .toEqual(['こよう', 'ねこ', 'はしります']);
+  });
+
+  test('an object, an object gap, a passive and a state verb all close on the plain aspect', () => {
+    expect(who({ aspect: 'progressive' }, { directObject: np('MOUSE') })).toBe('ネズミを食べている猫は走ります。');
+    expect(who({ verb: 'HAVE', aspect: 'progressive' }, { directObject: np('BOOK') })).toBe('本を持っている猫は走ります。');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', aspect: 'progressive' } },
+    }), 'RUN')).ja).toBe('猫が食べているネズミは走ります。');
+    expect(sayAll(clause(np('FOOD', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive', aspect: 'progressive' } },
+    }), 'RUN')).ja).toBe('猫に食べられている食べ物は走ります。');
+  });
+
+  test('regression: the main clause keeps its polite aspect', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'progressive' } })).ja).toBe('猫は食べています。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' } })).ja).toBe('猫は食べるところです。');
   });
 });
 

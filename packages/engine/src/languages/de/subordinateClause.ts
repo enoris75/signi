@@ -3,11 +3,13 @@ import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
+import { meansClause } from './meansClause.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
@@ -91,7 +93,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const { mid } = complex;
 
   // The dative recipient leads the accusative object, and a subordinate means clause trails the
-  // finite verb, as in the main clause (see `splitMeansClause`): "der isst, indem man ein Wort wählt".
+  // finite verb, as in the main clause (see `splitMeansClause`): "der isst, indem er ein Wort wählt".
   // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
   // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
   // An object a preposition leads stands where a predicate complement does, after "nicht" (A139),
@@ -100,15 +102,25 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const objectPrep = objectPreposition(verb);
   const leadsComplements = !!rel.complements?.['predicative'] || hasPrepositionalComplement(rel.complements)
     || (!!objectPrep && !!rel.directObject);
-  // The head noun stands in for the subject here, but a `kein` head negates the MATRIX clause, not
-  // this one ("kein Kater, der nicht frisst, läuft"), so no `subjectIsNegative` is passed.
+  // In a SUBJECT relative the head noun stands in for the subject, but a `kein` head negates the
+  // MATRIX clause, not this one ("kein Kater, der nicht frisst, läuft"), so it never counts. Any other
+  // relative renders its own subject, and that subject's `kein` is this clause's negator, as in the
+  // main clause (A160, A166): "die Maus, die kein Kater frisst", "in dem kein Kater läuft". A genitive
+  // relative's subject is the possessed phrase inside the pronoun, article-less, so it never counts
+  // (see `relativeSubjectIsNegative`).
   const { nicht, directObject, complements: negComplements } = finiteNegation({
+    subjectIsNegative: relativeSubjectIsNegative(rel),
     verbPhrase: rel.verbPhrase, directObject: rel.directObject, complements: rel.complements,
   }, leadsComplements);
   const { dative, rest: undative } = splitDative(negComplements);
   const { means, rest } = splitMeansClause(undative);
   const dativeText = complementsPhrase(dative);
-  const meansText = complementsPhrase(means);
+  // The means clause's subject is the pronoun of whoever does the act (B06, see `meansDoer`): the
+  // clause's agreeing subject, which is the head itself in a subject relative ("der Hund, der
+  // frisst, indem er ein Wort wählt"), or under the passive its agent, which a relative gapped on
+  // the agent has in the head; an agentless passive names no one ("…, indem man …").
+  const doer = passive ? (rel.headRole === 'agent' ? f : rel.agent?.agreement) : agreeForms;
+  const meansText = meansClause(means, doer);
   // A passive has no accusative object left, so its by-phrase takes the noun object's slot, as in the
   // main clause: "das vom Kind im Haus geschrieben wird".
   const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(directObject, '', objectPrep);

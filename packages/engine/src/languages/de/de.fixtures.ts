@@ -81,7 +81,11 @@ export const GEBEN: Forms = {
   '2sg_imperative': 'gib',
 };
 export const SCHNEIDEN: Forms = { base: 'schneiden', participle: 'geschnitten', '3sg_present': 'schneidet' };
-export const WAEHLEN: Forms = { base: 'wählen', participle: 'gewählt', '3sg_present': 'wählt' };
+export const WAEHLEN: Forms = {
+  base: 'wählen', participle: 'gewählt',
+  '1sg_present': 'wähle', '2sg_present': 'wählst', '3sg_present': 'wählt',
+  '1pl_present': 'wählen', '2pl_present': 'wählt', '3pl_present': 'wählen',
+};
 /** A separable verb: the stem verb's finite forms, its `particle` placed by the clause (A138). */
 export const HINZUFUEGEN: Forms = {
   base: 'hinzufügen', particle: 'hinzu', participle: 'hinzugefügt',

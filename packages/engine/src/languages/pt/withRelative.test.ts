@@ -81,4 +81,30 @@ describe('withRelative', () => {
     expect(withRelative('o livro', np(LIVRO, {}, { relative: clicked }))).toBe('o livro no qual o gato clica');
     expect(withRelative('as casas', np(CASA, { number: 'plural' }, { relative: clicked }))).toBe('as casas nas quais o gato clica');
   });
+
+  // A167: a nenhum head negates the matrix clause, not the relative, so the relative keeps its own
+  // "não", and a postverbal nenhum inside it still demands one. The relative's OWN nenhum subject does
+  // negate it, as a main clause's does. (The nenhum head also puts the relative in the subjunctive, A170.)
+  test('a nenhum head leaves the relative its own polarity', () => {
+    expect(withRelative('nenhum gato', np(GATO, { definiteness: 'no' }, { relative: subjectRelative(vp(COMER, { negative: true })) })))
+      .toBe('nenhum gato que não coma');
+    expect(withRelative('o rato', np(RATO, {}, {
+      relative: { headRole: 'directObject', subject: el(np(GATO, { definiteness: 'no' })), verbPhrase: vp(COMER, { negative: true }) },
+    }))).toBe('o rato que nenhum gato come');
+  });
+
+  // A170: under a nenhum head the relative asserts nothing about a real referent, so its verb is in
+  // the subjunctive: the present for a present or future relative, the imperfect for a past one.
+  test('a nenhum head puts the relative in the subjunctive, and any other head keeps the indicative', () => {
+    const eats = (verbPhrase: ReturnType<typeof vp>, extra: Record<string, string> = { definiteness: 'no' }) =>
+      withRelative('o gato', np(GATO, extra, { relative: subjectRelative(verbPhrase) }));
+    expect(eats(vp(COMER))).toBe('o gato que coma');
+    expect(eats(vp(COMER, { tense: 'past' }))).toBe('o gato que comesse');
+    expect(eats(vp(COMER), { number: 'plural', definiteness: 'no' })).toBe('o gato que comam');
+    expect(eats(vp(COMER, { aspect: 'resultative' }))).toBe('o gato que tenha comido');
+    expect(eats(vp(COMER), {})).toBe('o gato que come');
+    expect(withRelative('o rato', np(RATO, { definiteness: 'no' }, {
+      relative: { headRole: 'directObject', subject: el(np(GATO)), verbPhrase: vp(COMER) },
+    }))).toBe('o rato que o gato coma');
+  });
 });

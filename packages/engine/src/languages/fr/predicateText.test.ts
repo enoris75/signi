@@ -104,6 +104,16 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(COURIR), undefined, complements({ locative: complement(np(MAISON, { definiteness: 'no' })) })))
         .toBe('ne court dans aucune maison');
     });
+
+    // A167: whether the subject is the self-negating "aucun" is the caller's. A relative on a `no` head
+    // agrees with it, but the head negates the matrix clause, so the relative clause says `false`: a
+    // positive relative stays positive and a negative one takes "ne … pas".
+    test('a caller that says the subject does not negate gets its own polarity back', () => {
+      const noCat = { ...CHAT, definiteness: 'no' };
+      expect(predicateText(noCat, vp(MANGER), undefined, undefined, undefined, undefined, false)).toBe('mange');
+      expect(predicateText(noCat, vp(MANGER, { negative: true }), undefined, undefined, undefined, undefined, false)).toBe('ne mange pas');
+      expect(predicateText(CHAT, vp(MANGER), undefined, undefined, undefined, undefined, true)).toBe('ne mange');
+    });
   });
 
   describe('aspect', () => {

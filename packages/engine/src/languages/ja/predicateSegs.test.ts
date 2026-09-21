@@ -166,7 +166,8 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, true, false, true))).toBe('持った');
       expect(text(predicateSegs(vp(MOTSU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined, undefined, false, false, true))).toBe('持つ必要があります');
       expect(text(predicateSegs(vp(MOTSU, { mood: 'imperative' }), undefined, undefined, '2sg', false, false, true))).toBe('持ってください');
-      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), undefined, undefined, undefined, false, false, true))).toBe('持ってしまいます');
+      // The perfect of a state is its state's past, "has had" (B05).
+      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), undefined, undefined, undefined, false, false, true))).toBe('持っていました');
     });
   });
 
@@ -177,10 +178,20 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(TABERU, { aspect: 'progressive', negative: true }), undefined, undefined))).toBe('食べていません');
     });
 
-    // The resultative is mapped onto the completive ～てしまう (B05).
-    test('the resultative is the completive ～てしまいます', () => {
-      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative' }), undefined, undefined))).toBe('食べてしまいます');
-      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative', tense: 'past' }), undefined, undefined))).toBe('食べてしまいました');
+    // B05: the resultative is a perfect — the past "has eaten", else the resultant state 〜ている.
+    test('the resultative is a perfect', () => {
+      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative' }), undefined, undefined))).toBe('食べました');
+      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative', tense: 'past' }), undefined, undefined))).toBe('食べていました');
+      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative', negative: true }), undefined, undefined))).toBe('食べていません');
+      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative' }), undefined, undefined, undefined, true))).toBe('食べた');
+      expect(text(predicateSegs(vp(TABERU, { aspect: 'resultative', mood: 'subjunctive' }), undefined, undefined))).toBe('食べていたら');
+    });
+
+    // A counterfactual main clause's "would have run" is the past resultant state, whatever its tense.
+    test('the resultative of a conditional main clause is the past 〜ていました', () => {
+      expect(text(predicateSegs(vp(IKU, { aspect: 'resultative', mood: 'conditional' }), undefined, undefined))).toBe('行っていました');
+      expect(text(predicateSegs(vp(IKU, { aspect: 'resultative', mood: 'conditional', negative: true, tense: 'future' }), undefined, undefined)))
+        .toBe('行っていませんでした');
     });
 
     test('the prospective is the dictionary form + ところ + the copula', () => {
@@ -223,10 +234,16 @@ describe('predicateSegs', () => {
         .toBe('いつも速く慎重である必要があります');
     });
 
-    // Aspect has no periphrasis to compose with under a modal (B07).
-    test('aspect is dropped under a modal', () => {
+    // B07: an aspect stands under a modal in the form the modal governs (it used to be dropped).
+    test('an aspect composes under a modal', () => {
       expect(text(predicateSegs(vp(TABERU, { modals: [modal(HITSUYOU_GA_ARU)], aspect: 'progressive' }), undefined, undefined)))
-        .toBe('食べる必要があります');
+        .toBe('食べている必要があります');
+      expect(text(predicateSegs(vp(TABERU, { modals: [modal(TAI)], aspect: 'resultative', negative: true }), undefined, undefined)))
+        .toBe('食べていたくないです');
+      expect(text(predicateSegs(vp(TABERU, { modals: [modal(KOTO_GA_DEKIRU)], aspect: 'progressive', mood: 'subjunctive' }), undefined, undefined)))
+        .toBe('食べていることができたら');
+      expect(text(predicateSegs(vp(TABERU, { modals: [modal(HITSUYOU_GA_ARU)], aspect: 'progressive', tense: 'past' }), undefined, undefined, undefined, true)))
+        .toBe('食べている必要があった');
     });
   });
 
@@ -249,6 +266,18 @@ describe('predicateSegs', () => {
       expect(predicateSegs(vp(TABERU, { tense: 'past' }), undefined, undefined, undefined, true)).toEqual([{ t: '食べた', r: 'たべた' }]);
       expect(text(predicateSegs(vp(NOMU, { tense: 'past' }), undefined, undefined, undefined, true))).toBe('飲んだ');
       expect(text(predicateSegs(vp(TABERU, { tense: 'future' }), el(np(NEZUMI)), undefined, undefined, true))).toBe('ネズミを食べる');
+    });
+
+    // B13: the negative is the plain nai-form too, whatever negates the clause.
+    test('a negated relative predicate takes the plain negative', () => {
+      const tabenai = { ...TABERU, nai: '食べない', nai_reading: 'たべない' };
+      expect(predicateSegs(vp(tabenai, { negative: true }), undefined, undefined, undefined, true)).toEqual([{ t: '食べない', r: 'たべない' }]);
+      expect(text(predicateSegs(vp(tabenai, { negative: true, tense: 'past' }), undefined, undefined, undefined, true))).toBe('食べなかった');
+      expect(text(predicateSegs(vp(tabenai, { modifier: concept(KESSHITE) }), undefined, undefined, undefined, true))).toBe('決して食べない');
+      expect(text(predicateSegs(vp(tabenai), undefined, undefined, undefined, true, true))).toBe('食べない');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true }), el(np(HON)), undefined, undefined, true, false, true))).toBe('本を持たない');
+      // An inanimate owner's existential ある has the suppletive negative ない.
+      expect(text(predicateSegs(vp(MOTSU, { negative: true }), el(np(HON)), undefined, undefined, true))).toBe('本がない');
     });
   });
 
@@ -289,6 +318,13 @@ describe('predicateSegs', () => {
       expect(predicateSegs(vp(TABERU, { mood: 'infinitive' }), undefined, undefined)).toEqual([{ t: '食べる', r: 'たべる' }]);
       const phrase = vp(TABERU, { mood: 'infinitive', modifier: concept(HAYAKU) });
       expect(text(predicateSegs(phrase, el(np(NEZUMI)), complements({ locative: complement(np(IE)) })))).toBe('家でネズミを速く食べる');
+    });
+
+    // B13: a negative citation is the plain negative, not the polite 食べません.
+    test('a negative citation is the plain nai-form', () => {
+      const tabenai = { ...TABERU, nai: '食べない', nai_reading: 'たべない' };
+      expect(predicateSegs(vp(tabenai, { mood: 'infinitive', negative: true }), undefined, undefined)).toEqual([{ t: '食べない', r: 'たべない' }]);
+      expect(text(predicateSegs(vp(tabenai, { mood: 'infinitive', modifier: concept(KESSHITE) }), el(np(NEZUMI)), undefined))).toBe('ネズミを決して食べない');
     });
   });
 

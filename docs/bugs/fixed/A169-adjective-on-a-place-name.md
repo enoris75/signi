@@ -73,3 +73,43 @@ engine suite green.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: an adjective on a place name* (2 `test.fails`, plus a regression test for the positions and languages already right) |
+
+## Resolved
+
+Fixed on 2026-09-21.
+
+- **German.** A new [`articledNameForms`](../../../packages/engine/src/languages/de/articledNameForms.ts)
+  marks a bare-name `proper` head that carries an adjective, and no pronominal possessive, as
+  inherently articled (`takes_article: '1'`). [`nounPhrase.ts`](../../../packages/engine/src/languages/de/nounPhrase.ts)
+  (subject, object, the cause's noun phrase), [`possessorText.ts`](../../../packages/engine/src/languages/de/possessorText.ts),
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  (after `possessedHeadForms`) and the passive's [`agentPhrase.ts`](../../../packages/engine/src/languages/de/agentPhrase.ts)
+  read their determiner off it, so `determiner` gives the article and `prepDet` fuses it as for `die
+  Antarktis` (`im`, `zum`, `vom`, `ins`). The weak adjective ending was already right for it.
+- **Italian and French.** In [`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts)
+  and [`fr/complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts)
+  a `bareName(nf, lead)` test gates the bare locative and goal `in` / `en` and French's bare
+  continent source `de`: the name must still be `proper` (A165) and must lead its phrase (`lead ===
+  base`). Otherwise the locative and goal go through `spatialHead('in', …)` and the source through
+  `deDet`.
+
+**Decisions.** The postnominal adjective (`in Asia lontana`, `en Asie lointaine`) and Spanish (`en Asia
+grande`) are left as they are and unpinned, as the file proposed. The German goal keeps `zum großen
+Asien`: [A168](A168-german-continent-goal-nach.md) gives `nach` only to a bare name, and this one is
+articled.
+
+Guarded by `adjectives.test.ts` → *known bugs: an adjective on a place name*: both former
+`test.fails` now pass, plus two new tests. One covers the German comitative, terminus (`ins große
+Asien`) and passive agent (`vom großen Asien gesehen`), two adjectives (`das große ferne Europa`,
+`im großen fernen Europa`, `nella grande Europa lontana`, `dans la grande Europe lointaine`) and the
+source in three languages. The other covers a possessive with an adjective (`in deinem großen Asien`,
+`nella tua grande Asia`, `dans ta grande Asie`). The existing regression test is kept. Colocated
+cases: the new `articledNameForms.test.ts`, `de/nounPhrase.test.ts`, `de/possessorText.test.ts`,
+`de/complementsPhrase.test.ts`, and the French and Italian `complementsPhrase.test.ts`.
+
+No passing test changed its expectation.
+
+**Later the same day,** [B09](B09-german-genitive-vs-colloquial-dative.md) made the German possessor a
+genitive. The possessor pin in `adjectives.test.ts` changed from `das Buch vom großen Asien brennt.`
+to `das Buch des großen Asiens brennt.`, and the colocated `possessorText.test.ts` case from ` vom
+großen Europa` to ` des großen Europas`. The passive agent keeps `vom großen Asien`.

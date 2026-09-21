@@ -141,7 +141,8 @@ export const TENSES: Tense[] = ['present', 'past', 'future'];
  *                  (has seen, ha visto, a vu, hat gesehen) for everything else. The seed marks
  *                  the BE-selecting verbs per language with a form `aux: "be"`. Only a BE
  *                  participle agrees with the subject, and only in it/fr ("è andata"). ja
- *                  renders the aspect as ～てしまう and needs no auxiliary.
+ *                  has no perfect: it says "has eaten" with the past (食べました) and every
+ *                  other cell with the resultant state ～ている (食べていません, 食べていました).
  * The non-finite forms (gerund, past participle, ja te-form) are lexical data per verb.
  */
 export type Aspect = 'neutral' | 'progressive' | 'prospective' | 'resultative';

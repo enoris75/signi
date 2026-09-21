@@ -3,6 +3,7 @@ import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateParts } from './predicateParts.js';
@@ -45,7 +46,12 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   const subjText = subjectRelative ? '' : subjectText(rel.subject!);
-  return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, false, rel.agent)]
+  // A `no` head negates the MATRIX clause, so a subject relative's head never disarms the relative's
+  // own negation ("no cat that does not eat"). Any other relative carries its own subject, and that
+  // subject's `no` is this clause's negator, as in the main clause (A160, A166): "the mouse that no
+  // cat eats", "the mouse that no cat eats in any house". See `relativeSubjectIsNegative`.
+  return [pronoun, subjText,
+    ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, relativeSubjectIsNegative(rel), rel.agent)]
     .filter(Boolean)
     .join(' ');
 }

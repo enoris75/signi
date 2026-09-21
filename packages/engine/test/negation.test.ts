@@ -480,7 +480,7 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
   test('"nicht" leads every complement that carries a preposition', () => {
     const the = (concept: string) => np(concept, { definiteness: 'definite' as const });
     expect(notWith('EAT', { instrumental: { phrase: the('WORD') } })).toBe('der Kater frisst nicht mit dem Wort.');
-    expect(notWith('CRY', { cause: { phrase: the('DOG') } })).toBe('der Kater weint nicht wegen dem Hund.');
+    expect(notWith('CRY', { cause: { phrase: the('DOG') } })).toBe('der Kater weint nicht wegen des Hundes.');
     expect(notWith('RUN', { manner: { phrase: the('SPEED') } })).toBe('der Kater läuft nicht mit der Geschwindigkeit.');
     expect(notWith('GO', { route: { phrase: the('MARKET') } })).toBe('der Kater geht nicht durch den Markt.');
     expect(say(clause(np('MAN'), 'GIVE', {
@@ -515,7 +515,7 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
         phrase: np('WORD', { definiteness: 'indefinite' }),
         specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE' },
       } },
-    }), 'de')).toBe('der Kater frisst nicht, indem man ein Wort wählt.');
+    }), 'de')).toBe('der Kater frisst nicht, indem er ein Wort wählt.');
     expect(say(clause(np('CAT'), 'GO', {
       verbPhrase: { negative: true, modifier: 'FAST' }, complements: theMarket,
     }), 'de')).toBe('der Kater geht nicht schnell zum Markt.');
@@ -637,7 +637,7 @@ describe('known bugs: a relative clause\'s own negative subject is not collapsed
   const houseWhereNoCat = (verbPhrase: Partial<VerbPhrase> & { verb: string }) =>
     sayAll(clause(np('DOG'), 'SEE', { directObject: np('HOUSE', { relative: { headRole: 'locative', subject: noNP('CAT'), verbPhrase } }) }));
 
-  test.fails('English and German drop the relative verb\'s "not" under its own `no` subject', () => {
+  test('English and German drop the relative verb\'s "not" under its own `no` subject', () => {
     expect(mouseThatNoCat({ verbPhrase: { verb: 'EAT', negative: true } })).toMatchObject({
       en: 'the mouse that no cat eats runs.', // now: "that no cat does not eat"
       de: 'die Maus, die kein Kater frisst, läuft.', // now: "kein Kater nicht frisst"
@@ -648,10 +648,53 @@ describe('known bugs: a relative clause\'s own negative subject is not collapsed
     });
   });
 
-  test.fails('…and switch a second `no` phrase to "any" / the plain indefinite', () => {
+  test('…and switch a second `no` phrase to "any" / the plain indefinite', () => {
     expect(mouseThatNoCat({ verbPhrase: { verb: 'EAT' }, complements: { locative: { phrase: noNP('HOUSE') } } })).toMatchObject({
       en: 'the mouse that no cat eats in any house runs.', // now: "in no house"
       de: 'die Maus, die kein Kater in einem Haus frisst, läuft.', // now: "in keinem Haus"
+    });
+  });
+
+  // Suppressing the relative's finite "not" is the same branch per verb shape as in the main clause,
+  // and a plural `no` subject counts as much as a singular one.
+  test('every finite shape in the relative drops its "not", and a plural `no` subject counts', () => {
+    const notEat = (verbPhrase: Partial<VerbPhrase>) =>
+      mouseThatNoCat({ verbPhrase: { verb: 'EAT', negative: true, ...verbPhrase } });
+    expect(notEat({ tense: 'past' })).toMatchObject({
+      en: 'the mouse that no cat ate runs.', de: 'die Maus, die kein Kater fraß, läuft.',
+    });
+    expect(notEat({ modals: ['CAN'] })).toMatchObject({
+      en: 'the mouse that no cat can eat runs.', de: 'die Maus, die kein Kater fressen kann, läuft.',
+    });
+    expect(notEat({ aspect: 'progressive' })).toMatchObject({
+      en: 'the mouse that no cat is eating runs.', de: 'die Maus, die kein Kater gerade frisst, läuft.',
+    });
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: noNP('CAT', { number: 'plural' }), verbPhrase: { verb: 'EAT', negative: true } },
+    }), 'RUN'))).toMatchObject({
+      en: 'the mouse that no cats eat runs.', de: 'die Maus, die keine Kater fressen, läuft.',
+    });
+  });
+
+  // A relative on a complement keeps its own direct object, which falls to "any" / the plain indefinite
+  // under the relative's `no` subject, as in the main clause.
+  test('a locative relative\'s own `no` subject takes a `no` object with it', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('HOUSE', { relative: {
+      headRole: 'locative', subject: noNP('CAT'), verbPhrase: { verb: 'EAT' }, directObject: noNP('MOUSE'),
+    } }) }))).toMatchObject({
+      en: 'the dog sees the house where no cat eats any mouse.',
+      de: 'der Hund sieht das Haus, in dem kein Kater eine Maus frisst.',
+    });
+  });
+
+  // A genitive relative's possessed phrase gives its determiner up to "whose" / "dessen", so its `no`
+  // never reaches the surface and cannot stand in for the relative's own negation.
+  test('a genitive relative keeps its "not": the possessed phrase\'s `no` is gone', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('BOY', { relative: {
+      headRole: 'possessor', subject: noNP('CAT'), verbPhrase: { verb: 'EAT', negative: true },
+    } }) }))).toMatchObject({
+      en: 'the dog sees the boy whose cat does not eat.',
+      de: 'der Hund sieht den Jungen, dessen Kater nicht frisst.',
     });
   });
 
@@ -679,44 +722,124 @@ describe('known bugs: a relative clause\'s own negative subject is not collapsed
 // and German above. The Romance engines read "does the subject already negate?" off the forms they
 // are handed, and a subject relative is handed the head's, `no` included. Italian, Spanish and
 // Portuguese so drop the relative's own "non" / "no" / "não" (a negated relative reads as a positive
-// one); French takes the head's "aucun" as self-negating and prints a lone "ne" either way.
+// one); French takes the head's "aucun" as self-negating and prints a lone "ne" either way. With A170
+// in too, the Spanish and Portuguese relatives here are in the subjunctive: "ningún gato que no coma".
 describe('known bugs: a negative head erases its relative clause\'s polarity', () => {
   const noCatThat = (verbPhrase: Partial<VerbPhrase>, extra: { directObject?: NounPhrase } = {}) =>
     sayAll(clause(noNP('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase }, ...extra } }), 'RUN'));
   const dogSeesNoCatThat = (verbPhrase: Partial<VerbPhrase>) =>
     sayAll(clause(np('DOG'), 'SEE', { directObject: noNP('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }) }));
 
-  test.fails('the relative clause keeps its own negator (it, es, pt)', () => {
+  test('the relative clause keeps its own negator (it, es, pt)', () => {
     expect(noCatThat({ negative: true })).toMatchObject({
       it: 'nessun gatto che non mangia corre.', // now: "che mangia" — the positive
-      es: 'ningún gato que no come corre.',
-      pt: 'nenhum gato que não come corre.',
+      es: 'ningún gato que no coma corre.',
+      pt: 'nenhum gato que não coma corre.',
     });
     // A postverbal n-word or "mai" inside the relative needs the preverbal negator the concord obliges.
     expect(noCatThat({}, { directObject: noNP('MOUSE') })).toMatchObject({
       it: 'nessun gatto che non mangia nessun topo corre.',
-      es: 'ningún gato que no come ningún ratón corre.',
-      pt: 'nenhum gato que não come nenhum rato corre.',
+      es: 'ningún gato que no coma ningún ratón corre.',
+      pt: 'nenhum gato que não coma nenhum rato corre.',
     });
     expect(noCatThat({ modifier: 'NEVER' }).it).toBe('nessun gatto che non mangia mai corre.');
     // The head's position does not matter; its `no` does.
     expect(dogSeesNoCatThat({ negative: true })).toMatchObject({
       it: 'il cane non vede nessun gatto che non mangia.',
-      es: 'el perro no ve ningún gato que no come.',
-      pt: 'o cão não vê nenhum gato que não come.',
+      es: 'el perro no ve ningún gato que no coma.',
+      pt: 'o cão não vê nenhum gato que não coma.',
     });
   });
 
-  test.fails('French keeps a positive relative positive and a negative one "ne … pas"', () => {
+  test('French keeps a positive relative positive and a negative one "ne … pas"', () => {
     expect(noCatThat({}).fr).toBe('aucun chat qui mange ne court.'); // now: "qui ne mange"
     expect(noCatThat({ negative: true }).fr).toBe('aucun chat qui ne mange pas ne court.'); // now: "qui ne mange"
     expect(dogSeesNoCatThat({ negative: true }).fr).toBe('le chien ne voit aucun chat qui ne mange pas.');
+    expect(dogSeesNoCatThat({}).fr).toBe('le chien ne voit aucun chat qui mange.');
+  });
+
+  // Keeping the negator is one flag per clause, not per verb shape, but each shape builds its finite
+  // group apart: the past, a modal, the progressive's auxiliary and the copula. Spanish and Portuguese
+  // put each in the subjunctive under the `no` head (A170): the imperfect in the past, else the present.
+  test('every finite shape in the relative keeps its negator under a `no` head', () => {
+    expect(noCatThat({ negative: true, tense: 'past' })).toMatchObject({
+      it: 'nessun gatto che non mangiò corre.', fr: 'aucun chat qui ne mangea pas ne court.',
+      es: 'ningún gato que no comiera corre.', pt: 'nenhum gato que não comesse corre.',
+    });
+    expect(noCatThat({ negative: true, modals: ['CAN'] })).toMatchObject({
+      it: 'nessun gatto che non può mangiare corre.', fr: 'aucun chat qui ne peut pas manger ne court.',
+      es: 'ningún gato que no pueda comer corre.', pt: 'nenhum gato que não possa comer corre.',
+    });
+    expect(noCatThat({ negative: true, aspect: 'progressive' })).toMatchObject({
+      it: 'nessun gatto che non sta mangiando corre.', fr: "aucun chat qui n'est pas en train de manger ne court.",
+      es: 'ningún gato que no esté comiendo corre.', pt: 'nenhum gato que não esteja comendo corre.',
+    });
+    expect(sayAll(clause(noNP('CAT', {
+      relative: { verbPhrase: { verb: 'BE', negative: true }, complements: { predicative: { phrase: np('TIRED') } } },
+    }), 'RUN'))).toMatchObject({
+      it: 'nessun gatto che non è stanco corre.', fr: "aucun chat qui n'est pas fatigué ne court.",
+      es: 'ningún gato que no esté cansado corre.', pt: 'nenhum gato que não esteja cansado corre.',
+    });
+  });
+
+  // A postverbal `no` complement inside the relative obliges the preverbal negator, as a `no` object does.
+  test('a `no` complement inside the relative takes the negator the concord obliges', () => {
+    expect(sayAll(clause(noNP('CAT', {
+      relative: { verbPhrase: { verb: 'RUN' }, complements: { locative: { phrase: noNP('HOUSE') } } },
+    }), 'EAT'))).toMatchObject({
+      it: 'nessun gatto che non corre in nessuna casa mangia.',
+      fr: 'aucun chat qui ne court dans aucune maison ne mange.',
+      es: 'ningún gato que no corra en ninguna casa come.',
+      pt: 'nenhum gato que não corra em nenhuma casa come.',
+    });
+  });
+
+  // Only the relative's OWN subject decides. Under a `no` head, a definite subject leaves the relative
+  // its "non" / "ne … pas", and a `no` one carries the negation itself.
+  test('under a `no` head, the relative\'s own subject still decides', () => {
+    const noMouseThat = (subject: NounPhrase) => sayAll(clause(noNP('MOUSE', {
+      relative: { headRole: 'directObject', subject, verbPhrase: { verb: 'EAT', negative: true } },
+    }), 'RUN'));
+    expect(noMouseThat(np('CAT'))).toMatchObject({
+      it: 'nessun topo che il gatto non mangia corre.',
+      fr: 'aucune souris que le chat ne mange pas ne court.',
+      es: 'ningún ratón que el gato no coma corre.',
+      pt: 'nenhum rato que o gato não coma corre.',
+    });
+    expect(noMouseThat(noNP('CAT'))).toMatchObject({
+      it: 'nessun topo che nessun gatto mangia corre.',
+      fr: "aucune souris qu'aucun chat ne mange ne court.",
+      es: 'ningún ratón que ningún gato coma corre.',
+      pt: 'nenhum rato que nenhum gato coma corre.',
+    });
+  });
+
+  // A genitive relative's possessed phrase gives its determiner up to "il cui" / "dont le" / "cuyo" /
+  // "cujo", so its `no` never reaches the surface and cannot stand in for the relative's polarity. This
+  // was the same defect on the genitive branch: "il cui gatto mangia" for a negated relative, and a
+  // French positive relative read "dont le chat ne mange".
+  test('a genitive relative keeps its polarity: the possessed phrase\'s `no` is gone', () => {
+    const boyWhoseNoCat = (verbPhrase: Partial<VerbPhrase>) => sayAll(clause(np('DOG'), 'SEE', {
+      directObject: np('BOY', { relative: { headRole: 'possessor', subject: noNP('CAT'), verbPhrase: { verb: 'EAT', ...verbPhrase } } }),
+    }));
+    expect(boyWhoseNoCat({ negative: true })).toMatchObject({
+      it: 'il cane vede il ragazzo il cui gatto non mangia.',
+      fr: 'le chien voit le garçon dont le chat ne mange pas.',
+      es: 'el perro ve al niño cuyo gato no come.',
+      pt: 'o cão vê o menino cujo gato não come.',
+    });
+    expect(boyWhoseNoCat({})).toMatchObject({
+      it: 'il cane vede il ragazzo il cui gatto mangia.',
+      fr: 'le chien voit le garçon dont le chat mange.',
+      es: 'el perro ve al niño cuyo gato come.',
+      pt: 'o cão vê o menino cujo gato come.',
+    });
   });
 
   // Regression: a positive relative in the three that only drop, the preverbal "nunca" and French
   // "jamais" / "aucun" that carry the relative's negation themselves, and a head that is not `no`.
-  // (Spanish and Portuguese are left out of the `no`-head lines: their relative there wants the
-  // subjunctive, A170, which pins them.)
+  // (Spanish and Portuguese are left out of the `no`-head lines: their relative there takes the
+  // subjunctive, A170, which pins it.)
   test('a positive relative, a self-negating word inside it, and a definite head are unchanged', () => {
     expect(noCatThat({}).it).toBe('nessun gatto che mangia corre.');
     expect(noCatThat({ modifier: 'NEVER' }).fr).toBe('aucun chat qui ne mange jamais ne court.');
@@ -736,7 +859,7 @@ describe('known bugs: a relative under a negative head keeps the indicative', ()
   const noCatThat = (verbPhrase: Partial<VerbPhrase>) =>
     sayAll(clause(noNP('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN'));
 
-  test.fails('Spanish and Portuguese take the subjunctive in a relative on a `no` head', () => {
+  test('Spanish and Portuguese take the subjunctive in a relative on a `no` head', () => {
     expect(noCatThat({})).toMatchObject({
       es: 'ningún gato que coma corre.', // now: "que come"
       pt: 'nenhum gato que coma corre.',
@@ -757,7 +880,7 @@ describe('known bugs: a relative under a negative head keeps the indicative', ()
     });
   });
 
-  test.fails('…whether the gap is the relative\'s object and whether the head is the matrix object', () => {
+  test('…whether the gap is the relative\'s object and whether the head is the matrix object', () => {
     expect(sayAll(clause(noNP('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
     }), 'RUN'))).toMatchObject({
@@ -772,6 +895,65 @@ describe('known bugs: a relative under a negative head keeps the indicative', ()
     });
   });
 
+  // Every finite shape takes the mood: the future as the present subjunctive (Spanish; Portuguese
+  // renders the same, though some registers use its future subjunctive "que comer"), and the aspect
+  // auxiliaries and a modal as the finite verb, present or imperfect by the relative's tense.
+  test('the future, the aspect auxiliaries and a modal take the subjunctive too', () => {
+    expect(noCatThat({ tense: 'future' }).es).toBe('ningún gato que coma corre.');
+    expect(noCatThat({ aspect: 'progressive' })).toMatchObject({
+      es: 'ningún gato que esté comiendo corre.', pt: 'nenhum gato que esteja comendo corre.',
+    });
+    expect(noCatThat({ aspect: 'resultative' })).toMatchObject({
+      es: 'ningún gato que haya comido corre.', pt: 'nenhum gato que tenha comido corre.',
+    });
+    expect(noCatThat({ aspect: 'progressive', tense: 'past' })).toMatchObject({
+      es: 'ningún gato que estuviera comiendo corre.', pt: 'nenhum gato que estivesse comendo corre.',
+    });
+    expect(noCatThat({ aspect: 'resultative', tense: 'past' })).toMatchObject({
+      es: 'ningún gato que hubiera comido corre.', pt: 'nenhum gato que tivesse comido corre.',
+    });
+    expect(noCatThat({ modals: ['CAN'] })).toMatchObject({
+      es: 'ningún gato que pueda comer corre.', pt: 'nenhum gato que possa comer corre.',
+    });
+    expect(noCatThat({ modals: ['WILL'] })).toMatchObject({
+      es: 'ningún gato que quiera comer corre.', pt: 'nenhum gato que queira comer corre.',
+    });
+  });
+
+  // The present subjunctive's own irregular stems, which the 1sg present cannot give: ser, estar, ir,
+  // dar. A reflexive verb takes its clitic ahead of the plain verb's form.
+  test('the irregular and reflexive verbs take their own subjunctive', () => {
+    const noCatThatVerb = (verb: string, extra: Record<string, unknown> = {}) =>
+      sayAll(clause(noNP('CAT', { relative: { verbPhrase: { verb }, ...extra } }), 'RUN'));
+    expect(noCatThatVerb('BE', { complements: { predicative: { phrase: np('STRONG') } } })).toMatchObject({
+      es: 'ningún gato que sea fuerte corre.', pt: 'nenhum gato que seja forte corre.',
+    });
+    expect(noCatThatVerb('BE', { complements: { locative: { phrase: np('HOUSE') } } })).toMatchObject({
+      es: 'ningún gato que esté en la casa corre.', pt: 'nenhum gato que esteja na casa corre.',
+    });
+    expect(noCatThatVerb('GO')).toMatchObject({ es: 'ningún gato que vaya corre.', pt: 'nenhum gato que vá corre.' });
+    expect(noCatThatVerb('GIVE', { directObject: np('BOOK') })).toMatchObject({
+      es: 'ningún gato que dé el libro corre.', pt: 'nenhum gato que dê o livro corre.',
+    });
+    expect(noCatThatVerb('MOVE_ONESELF')).toMatchObject({
+      es: 'ningún gato que se mueva corre.', pt: 'nenhum gato que se mova corre.',
+    });
+  });
+
+  // The genitive relative and the plain locative gap hang off the head too, and take the same mood.
+  test('a genitive relative and a locative gap on a `no` head take it too', () => {
+    expect(sayAll(clause(noNP('BOY', {
+      relative: { headRole: 'possessor', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    }), 'RUN'))).toMatchObject({
+      es: 'ningún niño cuyo gato coma corre.', pt: 'nenhum menino cujo gato coma corre.',
+    });
+    expect(sayAll(clause(np('DOG'), 'SEE', {
+      directObject: noNP('HOUSE', { relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } } }),
+    }))).toMatchObject({
+      es: 'el perro no ve ninguna casa donde el gato coma.', pt: 'o cão não vê nenhuma casa onde o gato coma.',
+    });
+  });
+
   // Regression: a head that is not `no` keeps the indicative, and so does the main clause.
   test('a definite or quantified head and the main clause keep the indicative', () => {
     expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN'))).toMatchObject({
@@ -781,5 +963,72 @@ describe('known bugs: a relative under a negative head keeps the indicative', ()
       number: 'plural', definiteness: 'few', relative: { verbPhrase: { verb: 'EAT' } },
     }), 'RUN'))).toMatchObject({ es: 'pocos gatos que comen corren.', pt: 'poucos gatos que comem correm.' });
     expect(sayAll(clause(noNP('CAT'), 'EAT'))).toMatchObject({ es: 'ningún gato come.', pt: 'nenhum gato come.' });
+    // Italian and French are out of scope: the indicative is widely accepted there (see A170).
+    expect(sayAll(clause(noNP('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN'))).toMatchObject({
+      it: 'nessun gatto che mangia corre.', fr: 'aucun chat qui mange ne court.',
+    });
+  });
+});
+
+// A171. An infinitive complement or a clause of purpose is resolved with its controller as its
+// subject, `no` included, and five engines read that `no` as the embedded clause's own negative
+// subject. But a `no` controller negates the MATRIX clause only: "no cat desires not to eat" has two
+// negations. English, German and Italian drop the infinitive's own "not", French prints a lone "ne"
+// whatever the infinitive's polarity, and Japanese negates a positive infinitive.
+describe('known bugs: a negative controller negates its infinitive', () => {
+  const noCat = () => noNP('CAT');
+  const desires = (negative: boolean, extra: object = {}) =>
+    sayAll(clause(noCat(), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'EAT', negative }, ...extra } }));
+  const runs = (negative: boolean) =>
+    sayAll(clause(noCat(), 'RUN', { purpose: { verbPhrase: { verb: 'EAT', negative } } }));
+
+  test.fails('a negated infinitive complement under a `no` subject keeps its own negation', () => {
+    expect(desires(true)).toMatchObject({
+      en: 'no cat desires not to eat.', // now: "no cat desires to eat."
+      it: 'nessun gatto desidera non mangiare.', // now: "desidera mangiare"
+      fr: 'aucun chat ne désire ne pas manger.', // now: "ne désire ne manger"
+      de: 'kein Kater wünscht, nicht zu fressen.', // now: "wünscht, zu fressen"
+    });
+    expect(runs(true)).toMatchObject({
+      en: 'no cat runs not to eat.',
+      it: 'nessun gatto corre per non mangiare.',
+      fr: 'aucun chat ne court pour ne pas manger.',
+      de: 'kein Kater läuft, um nicht zu fressen.',
+    });
+  });
+
+  test.fails('a positive infinitive under a `no` subject stays positive (fr, ja)', () => {
+    expect(desires(false)).toMatchObject({
+      fr: 'aucun chat ne désire manger.', // now: "ne désire ne manger"
+      ja: 'どの猫も食べることを望んでいません。', // now: 食べないこと
+    });
+    expect(runs(false)).toMatchObject({
+      fr: 'aucun chat ne court pour manger.',
+      ja: 'どの猫も食べるために走りません。',
+    });
+    expect(desires(false, { directObject: np('MOUSE') })).toMatchObject({
+      fr: 'aucun chat ne désire manger la souris.',
+      ja: 'どの猫もネズミを食べることを望んでいません。',
+    });
+  });
+
+  // Regression: what is already right. Spanish and Portuguese keep the infinitive's own polarity;
+  // under a definite controller every language does; and the matrix clause keeps its `no`.
+  test('Spanish and Portuguese, and every definite controller, are already right', () => {
+    expect(desires(true)).toMatchObject({ es: 'ningún gato desea no comer.', pt: 'nenhum gato deseja não comer.' });
+    expect(desires(false)).toMatchObject({
+      en: 'no cat desires to eat.', it: 'nessun gatto desidera mangiare.', de: 'kein Kater wünscht, zu fressen.',
+      es: 'ningún gato desea comer.', pt: 'nenhum gato deseja comer.',
+    });
+    expect(runs(true)).toMatchObject({ es: 'ningún gato corre para no comer.', pt: 'nenhum gato corre para não comer.' });
+    expect(desires(true).ja).toBe('どの猫も食べないことを望んでいません。');
+    expect(sayAll(clause(np('CAT'), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'EAT', negative: true } } })))
+      .toMatchObject({
+        en: 'the cat desires not to eat.', it: 'il gatto desidera non mangiare.',
+        fr: 'le chat désire ne pas manger.', de: 'der Kater wünscht, nicht zu fressen.',
+        ja: '猫は食べないことを望んでいます。',
+      });
+    expect(sayAll(clause(np('CAT'), 'RUN', { purpose: { verbPhrase: { verb: 'EAT' } } })))
+      .toMatchObject({ fr: 'le chat court pour manger.', ja: '猫は食べるために走ります。' });
   });
 });

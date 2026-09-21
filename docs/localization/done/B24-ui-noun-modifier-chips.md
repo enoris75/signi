@@ -81,8 +81,9 @@ Changes against the plan:
 - `MODIFIER_RELATION_LABELS` is deleted from `@signi/shared`. The "— click to change" tail stays English
   ([C12](C12-ui-purpose-and-object-complements.md)), and so do the degree values
   ([C13](../done/C13-ui-grammatical-function-words.md)).
-- German says `Adjektiv vom Modifikator`, the colloquial *von* + dative the engine uses for a possessor
-  ([B9](../../bugs/B-can-fix/B09-german-genitive-vs-colloquial-dative.md)).
+- German says `Adjektiv des Modifikators`, the genitive the engine gives a possessor. It said `Adjektiv
+  vom Modifikator`, the colloquial *von* + dative, until
+  [B9](../../bugs/fixed/B09-german-genitive-vs-colloquial-dative.md) was fixed.
 
 Pinned by [nounPhrase.test.ts](../../../packages/engine/test/nounPhrase.test.ts) (*grammar nouns: …*),
 [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the chips of a noun used as a

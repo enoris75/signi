@@ -64,7 +64,7 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   // the tail the governor's lexeme names (`infinitive_link`, ことを by default): 行動することが可能です,
   // 食べ物を食べることを望みます, and ように for the causative below. The clause is itself a citation, in
   // the dictionary form, and may govern one in turn (行動することが可能であることを望む). Negated, it
-  // inherits the citation's polite negative (B13).
+  // takes the citation's plain negative (行動しないことが可能である, B13).
   // Under object control the controller is the one that acts, so Japanese speaks it *inside* the
   // clause with が (人が物体を見るようにする) instead of leaving it in the matrix object slot.
   const causee = phrase.infinitiveComplement?.control === 'object' ? phrase.directObject : undefined;

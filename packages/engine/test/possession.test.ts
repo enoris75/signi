@@ -92,7 +92,7 @@ describe('possessor as a full SVO phrase', () => {
       fr: 'le livre du chat qui donne la pièce au chien brûle.',
       // German, whose relative clause is verb-final, orders dative before accusative inside it,
       // and brackets the whole clause in commas.
-      de: 'das Buch vom Kater, der dem Hund die Münze gibt, brennt.',
+      de: 'das Buch des Katers, der dem Hund die Münze gibt, brennt.',
     });
   });
 
@@ -127,7 +127,7 @@ describe('possessor as a full SVO phrase', () => {
     }))).toMatchObject({
       it: 'il cane vede il libro del gatto che mangia il topo.',
       fr: 'le chien voit le livre du chat qui mange la souris.',
-      de: 'der Hund sieht das Buch vom Kater, der die Maus frisst.',
+      de: 'der Hund sieht das Buch des Katers, der die Maus frisst.',
     });
   });
 });
@@ -198,31 +198,32 @@ describe('known bugs: possessor', () => {
   });
 });
 
-// A58. The German von-possessor always takes the definite article (`defArticle`), whatever
-// determiner the possessor carries. So an indefinite or quantified possessor turns definite, and a
-// proper name gets an article it never takes. (The von + dative itself is the B09 simplification.)
+// A58. The German possessor always took the definite article (`defArticle`), whatever determiner
+// the possessor carried. So an indefinite or quantified possessor turned definite, and a proper name
+// got an article it never takes. Since B09 the possessor is a genitive, so these now pin the
+// possessor's own determiner in the genitive, where they once pinned it after "von" + the dative.
 describe('known bugs: German possessor determiner', () => {
-  test('German keeps the possessor\'s own determiner after "von"', () => {
-    expect(bookOf(np('CAT', { definiteness: 'indefinite' })).de).toBe('das Buch von einem Kater brennt.');
-    expect(bookOf(np('CAT', { definiteness: 'some', number: 'plural' })).de).toBe('das Buch von einigen Katern brennt.');
-    expect(bookOf(np('EUROPE')).de).toBe('das Buch von Europa brennt.');
+  test('German keeps the possessor\'s own determiner', () => {
+    expect(bookOf(np('CAT', { definiteness: 'indefinite' })).de).toBe('das Buch eines Katers brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'some', number: 'plural' })).de).toBe('das Buch einiger Kater brennt.');
+    expect(bookOf(np('EUROPE')).de).toBe('das Buch Europas brennt.');
   });
 
-  test('German declines the possessor\'s determiner and adjectives for the dative after "von"', () => {
-    expect(bookOf(np('CAT', { definiteness: 'no' })).de).toBe('das Buch von keinem Kater brennt.');
-    expect(bookOf(np('CAT', { definiteness: 'that' })).de).toBe('das Buch von jenem Kater brennt.');
-    expect(bookOf(np('WOMAN', { definiteness: 'this' })).de).toBe('das Buch von dieser Frau brennt.');
-    expect(bookOf(np('CAT', { definiteness: 'all', number: 'plural' })).de).toBe('das Buch von allen Katern brennt.');
-    expect(bookOf(np('CAT', { definiteness: 'indefinite', adjectives: ['SMALL'] })).de).toBe('das Buch von einem kleinen Kater brennt.');
-    expect(bookOf(np('CAT', { definiteness: 'bare', number: 'plural', adjectives: ['SMALL'] })).de).toBe('das Buch von kleinen Katern brennt.');
-    expect(bookOf(np('BOY', { definiteness: 'indefinite' })).de).toBe('das Buch von einem Jungen brennt.');
+  test('German declines the possessor\'s determiner and adjectives for the genitive', () => {
+    expect(bookOf(np('CAT', { definiteness: 'no' })).de).toBe('das Buch keines Katers brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'that' })).de).toBe('das Buch jenes Katers brennt.');
+    expect(bookOf(np('WOMAN', { definiteness: 'this' })).de).toBe('das Buch dieser Frau brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'all', number: 'plural' })).de).toBe('das Buch aller Kater brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'indefinite', adjectives: ['SMALL'] })).de).toBe('das Buch eines kleinen Katers brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'bare', number: 'plural', adjectives: ['SMALL'] })).de).toBe('das Buch kleiner Kater brennt.');
+    expect(bookOf(np('BOY', { definiteness: 'indefinite' })).de).toBe('das Buch eines Jungen brennt.');
     expect(bookOf(np('CAT', { definiteness: 'indefinite', possessor: np('MAN', { definiteness: 'this' }) })).de)
-      .toBe('das Buch von einem Kater von diesem Mann brennt.');
+      .toBe('das Buch eines Katers dieses Mannes brennt.');
   });
 
-  test('regression: only the definite article fuses to "vom", and an articled name keeps its article', () => {
-    expect(bookOf(np('CAT')).de).toBe('das Buch vom Kater brennt.');
-    expect(bookOf(np('ANTARCTICA')).de).toBe('das Buch von der Antarktis brennt.');
+  test('regression: the definite article declines, and an articled name keeps its article', () => {
+    expect(bookOf(np('CAT')).de).toBe('das Buch des Katers brennt.');
+    expect(bookOf(np('ANTARCTICA')).de).toBe('das Buch der Antarktis brennt.');
   });
 });
 
@@ -341,6 +342,8 @@ describe('known bugs: Portuguese possessor determiner', () => {
 // only its default determiner. The proper-noun branches run before the possessive is consulted, so
 // the two stack (French "la ton Asie", Spanish "la mi Antártida", German "in der meiner Antarktis"),
 // and Italian/French keep a bare continent's article-less "in" / "en" in front of it ("in tua Asia").
+// Fixed: `possessedHeadForms` drops `proper` from a possessed head, and the bare continent
+// prepositions fire only for a name that is still `proper`.
 describe('known bugs: a possessive on a place name', () => {
   const your = { kind: 'pronominal', person: '2', number: 'singular', gender: 'masc' } as const;
   const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
@@ -351,7 +354,7 @@ describe('known bugs: a possessive on a place name', () => {
   const goesTo = (place: NounPhrase) => sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: place } } }));
   const comesFrom = (place: NounPhrase) => sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: place } } }));
 
-  test.fails('French drops the name\'s article for the possessive, in every position', () => {
+  test('French drops the name\'s article for the possessive, in every position', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: yourAsia })).fr).toBe('le chat voit ton Asie.'); // now: "la ton Asie"
     expect(sayAll(clause(np('EUROPE', { possessor: our }), 'BURN')).fr).toBe('notre Europe brûle.');
     expect(sayAll(clause(np('CAT'), 'GIVE', {
@@ -365,7 +368,7 @@ describe('known bugs: a possessive on a place name', () => {
 
   // The goal keeps the continent's own "in" / "en", with the article the possessive now needs. The
   // common-place goal ("alla tua Asia", "à ton Asie") is the alternative — a decision for the fixer.
-  test.fails('Italian and French take the article-bearing "in" once a possessive leads a continent', () => {
+  test('Italian and French take the article-bearing "in" once a possessive leads a continent', () => {
     expect(runsIn(yourAsia)).toMatchObject({
       it: 'il gatto corre nella tua Asia.', // now: "in tua Asia"
       fr: 'le chat court dans ton Asie.', // now: "en ton Asie"
@@ -376,7 +379,7 @@ describe('known bugs: a possessive on a place name', () => {
     });
   });
 
-  test.fails('Spanish and German drop an articled name\'s article for the possessive', () => {
+  test('Spanish and German drop an articled name\'s article for the possessive', () => {
     expect(runsIn(myAntarctica)).toMatchObject({
       es: 'el gato corre en mi Antártida.', // now: "en la mi Antártida"
       de: 'der Kater läuft in meiner Antarktis.', // now: "in der meiner Antarktis"
@@ -384,6 +387,32 @@ describe('known bugs: a possessive on a place name', () => {
     expect(comesFrom(myAntarctica)).toMatchObject({
       es: 'el gato viene de mi Antártida.',
       de: 'der Kater kommt aus meiner Antarktis.',
+    });
+  });
+
+  // The articled name in the positions around the pinned ones, a masculine continent's goal and
+  // source, a plural possessor, and a possessed name as a possessor itself.
+  test('the possessive displaces the name\'s article in the subject, object, goal and possessor', () => {
+    expect(sayAll(clause(np('ANTARCTICA', { possessor: my }), 'BURN'))).toMatchObject({
+      fr: 'mon Antarctique brûle.', es: 'mi Antártida arde.', de: 'meine Antarktis brennt.',
+      it: 'la mia Antartide brucia.', pt: 'a minha Antártida arde.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: myAntarctica }))).toMatchObject({
+      fr: 'le chat voit mon Antarctique.', es: 'el gato ve mi Antártida.',
+    });
+    expect(goesTo(myAntarctica)).toMatchObject({
+      it: 'il gatto va nella mia Antartide.', fr: 'le chat va dans mon Antarctique.',
+      es: 'el gato va a mi Antártida.', pt: 'o gato vai à minha Antártida.', de: 'der Kater geht zu meiner Antarktis.',
+    });
+    expect(comesFrom(np('EUROPE', { possessor: your }))).toMatchObject({
+      it: 'il gatto viene dalla tua Europa.', fr: 'le chat vient de ton Europe.', es: 'el gato viene de tu Europa.',
+    });
+    expect(runsIn(np('ASIA', { possessor: { kind: 'pronominal', person: '3', number: 'plural', gender: 'masc' } }))).toMatchObject({
+      it: 'il gatto corre nella loro Asia.', fr: 'le chat court dans leur Asie.', es: 'el gato corre en su Asia.',
+    });
+    expect(bookOf(myAntarctica)).toMatchObject({
+      it: 'il libro della mia Antartide brucia.', fr: 'le livre de mon Antarctique brûle.',
+      es: 'el libro de mi Antártida arde.', pt: 'o livro da minha Antártida arde.',
     });
   });
 
@@ -403,5 +432,63 @@ describe('known bugs: a possessive on a place name', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('ASIA') })).fr).toBe("le chat voit l'Asie.");
     expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: your }) } } })))
       .toMatchObject({ it: 'il gatto mangia nella tua casa.', fr: 'le chat mange dans ta maison.' });
+  });
+});
+
+// B09. Standard written German postposes a noun possessor in the genitive: its own determiner and
+// adjectives declined for the genitive, a strong masculine/neuter noun with -(e)s, a weak one with
+// -(e)n, a feminine or a plural with no ending. It falls back on "von" + the dative only where the
+// genitive would not show: a determinerless plural or mass noun, or a name whose genitive is unmarked.
+// The engine used to write the colloquial "von" + dative everywhere ("das Buch vom Kater").
+describe('documented simplifications fixed: German genitive', () => {
+  const de = (possessor: NounPhrase) => bookOf(possessor).de;
+
+  test('a noun possessor is a postnominal genitive, in every gender and number', () => {
+    expect(de(np('CAT'))).toBe('das Buch des Katers brennt.');
+    expect(de(np('CAT', { gender: 'fem' }))).toBe('das Buch der Katze brennt.');
+    expect(de(np('BOY'))).toBe('das Buch des Jungen brennt.'); // a weak noun: -n, not -s
+    expect(de(np('DOG', { definiteness: 'indefinite' }))).toBe('das Buch eines Hundes brennt.');
+    expect(de(np('CAT', { definiteness: 'no' }))).toBe('das Buch keines Katers brennt.');
+    expect(de(np('DOG', { adjectives: ['BIG'] }))).toBe('das Buch des großen Hundes brennt.');
+    expect(say(clause(np('BOOK', { number: 'plural', possessor: np('CAT', { gender: 'fem', number: 'plural' }) }), 'BURN'), 'de'))
+      .toBe('die Bücher der Katzen brennen.');
+  });
+
+  test('the noun takes -es after a sibilant and on a monosyllable, -s on a longer word, or a recorded form', () => {
+    expect(de(np('HOUSE'))).toBe('das Buch des Hauses brennt.');
+    expect(de(np('SOUND'))).toBe('das Buch des Geräusches brennt.');
+    expect(de(np('RESULT'))).toBe('das Buch des Ergebnisses brennt.'); // -nis doubles its s
+    expect(de(np('ANGEL'))).toBe('das Buch des Engels brennt.');
+    expect(de(np('FIRE'))).toBe('das Buch des Feuers brennt.');
+    expect(de(np('NAME_NOUN'))).toBe('das Buch des Namens brennt.'); // weak, but -ns: seeded
+    expect(de(np('SLOT_MACHINE'))).toBe('das Buch des Spielautomaten brennt.'); // weak: seeded
+  });
+
+  test('a name takes its -s bare, or the article it has; a nested possessor and a clause follow it', () => {
+    expect(de(np('ASIA'))).toBe('das Buch Asiens brennt.');
+    expect(de(np('ASIA', { adjectives: ['BIG'] }))).toBe('das Buch des großen Asiens brennt.');
+    expect(de(np('ANTARCTICA'))).toBe('das Buch der Antarktis brennt.');
+    expect(de(np('FATHER', { possessor: np('CAT') }))).toBe('das Buch des Vaters des Katers brennt.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { possessor: np('BOY', { adjectives: ['SMALL'] }) }) })).de)
+      .toBe('der Kater sieht das Buch des kleinen Jungen.');
+  });
+
+  test('"von" + the dative where the genitive would not show', () => {
+    expect(de(np('CAT', { gender: 'fem', definiteness: 'bare', number: 'plural' }))).toBe('das Buch von Katzen brennt.');
+    expect(de(np('MAN', { definiteness: 'bare', number: 'plural' }))).toBe('das Buch von Männern brennt.');
+    expect(de(np('WATER', { definiteness: 'some' }))).toBe('das Buch von etwas Wasser brennt.');
+    expect(de(np('ENGLISH'))).toBe('das Buch von Englisch brennt.'); // a language's genitive is unmarked
+    // An adjective shows it again, strong.
+    expect(de(np('CAT', { gender: 'fem', definiteness: 'bare', number: 'plural', adjectives: ['SMALL'] })))
+      .toBe('das Buch kleiner Katzen brennt.');
+  });
+
+  // Regression: the German dative "von" that is no possessor, and the other languages, are unchanged.
+  test('the passive agent and a living source keep "von" + the dative', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase: { voice: 'passive' } })).de)
+      .toBe('das Essen wird vom Kater gefressen.');
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('BOY') } } })).de)
+      .toBe('der Kater kommt vom Jungen.');
+    expect(bookOf(np('CAT'))).toMatchObject({ it: 'il libro del gatto brucia.', fr: 'le livre du chat brûle.' });
   });
 });

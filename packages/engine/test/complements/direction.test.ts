@@ -354,7 +354,7 @@ describe('COME to a continent — the article-dropping goal', () => {
       en: 'the cat comes from Africa to Europe.',
       it: "il gatto viene dall'Africa in Europa.", // dall' (source, kept) … in (goal, dropped)
       fr: "le chat vient d'Afrique en Europe.", // d' (source) … en (goal), both bare
-      de: 'der Kater kommt aus Afrika zu Europa.',
+      de: 'der Kater kommt aus Afrika nach Europa.', // nach: a bare-name place (A168)
       ja: '猫はアフリカからヨーロッパへ来ます。',
     });
   });
@@ -374,7 +374,7 @@ describe('known bugs: direction', () => {
 
   // The weak-noun class generalises. It is a lexical property of the noun (forms.weak), so it
   // fires for every weak masculine, not just Junge, and in every oblique case — the accusative
-  // direct object and the "von"-dative possessor as much as the dative goal — while leaving the
+  // direct object and the genitive possessor as much as the dative goal — while leaving the
   // nominative singular and the (already -n) plural alone.
   test('German declines the other weak masculines too (Ochse, Bursche)', () => {
     expect(goTo(np('OX')).de).toBe('der Kater geht zum Ochsen.');
@@ -385,9 +385,9 @@ describe('known bugs: direction', () => {
     // Accusative direct object: "den Jungen", not "den Junge".
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY') })).de)
       .toBe('der Kater sieht den Jungen.');
-    // Possessor via the colloquial "von" + dative: "vom Jungen".
+    // Possessor in the genitive, which a weak noun marks with the same -n: "des Jungen" (B09).
     expect(sayAll(clause(np('BOOK', { possessor: np('BOY') }), 'BURN')).de)
-      .toBe('das Buch vom Jungen brennt.');
+      .toBe('das Buch des Jungen brennt.');
   });
 
   test('German leaves the nominative singular and the plural of a weak noun alone', () => {
@@ -513,12 +513,12 @@ describe('known bugs: German fusion on an articled proper name', () => {
     expect(goesTo('no')).toBe('der Kater geht zur Antarktis.');
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('ANTARCTICA', { definiteness: 'indefinite' }) } } })).de)
       .toBe('der Kater kommt aus der Antarktis.');
-    expect(sayAll(clause(np('BOOK', { possessor: np('ANTARCTICA', { definiteness: 'indefinite' }) }), 'BURN')).de).toBe('das Buch von der Antarktis brennt.');
+    expect(sayAll(clause(np('BOOK', { possessor: np('ANTARCTICA', { definiteness: 'indefinite' }) }), 'BURN')).de).toBe('das Buch der Antarktis brennt.'); // the genitive possessor (B09)
   });
 
   test('regression: a bare-name continent keeps no article', () => {
     expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } })).de)
-      .toBe('der Kater geht zu Europa.');
+      .toBe('der Kater geht nach Europa.'); // nach, not zu (A168)
   });
 });
 
@@ -548,13 +548,14 @@ describe('known bugs: Italian fusion on an articled proper name', () => {
 
 // A168. German marks motion to a place named without an article with "nach" ("nach Europa"); "zu" is
 // the goal preposition of common nouns and people ("zum Markt"). The German direction always takes
-// "zu", so a bare-name continent reads "geht zu Europa". Two older passing tests in this file pin that
-// "zu" (the COME test above, and the A63 regression) and change with the fix — see the bug file.
+// "zu", so a bare-name continent reads "geht zu Europa". Two older passing tests in this file pinned
+// that "zu" (the COME test above, and the A63 regression) and changed with the fix — see the bug file.
+// Fixed: the German direction takes a bare "nach" for a continent that is still a bare name.
 describe('known bugs: German continent goal "nach"', () => {
   const goes = (goal: NounPhrase) => say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: goal } } }), 'de');
 
-  test.fails('a bare-name continent goal takes "nach", in a clause, a command and a relative clause', () => {
-    expect(goes(np('EUROPE'))).toBe('der Kater geht nach Europa.'); // now: "zu Europa"
+  test('a bare-name continent goal takes "nach", in a clause, a command and a relative clause', () => {
+    expect(goes(np('EUROPE'))).toBe('der Kater geht nach Europa.'); // was: "zu Europa"
     expect(goes(np('ASIA'))).toBe('der Kater geht nach Asien.');
     expect(goes(np('NORTH_AMERICA'))).toBe('der Kater geht nach Nordamerika.');
     expect(say(clause(np('CAT'), 'COME', {
@@ -567,6 +568,22 @@ describe('known bugs: German continent goal "nach"', () => {
     expect(say(clause(np('CAT', {
       relative: { verbPhrase: { verb: 'GO' }, complements: { direction: { phrase: np('EUROPE') } } },
     }), 'RUN'), 'de')).toBe('der Kater, der nach Europa geht, läuft.');
+  });
+
+  // "nach" is chosen per conjunct, beside a common noun's "zum", and on any motion verb. A possessive
+  // or an adjective gives the name its article back (A165, A169), and with it the "zu".
+  test('"nach" per conjunct and per verb; a possessed or modified continent takes "zu" and its article', () => {
+    expect(say(clause(np('CAT'), 'GO', {
+      complements: { direction: { phrase: { conjuncts: [np('EUROPE'), np('ASIA')], conjunction: 'and' } } },
+    }), 'de')).toBe('der Kater geht nach Europa und nach Asien.');
+    expect(say(clause(np('CAT'), 'GO', {
+      complements: { direction: { phrase: { conjuncts: [np('EUROPE'), place()], conjunction: 'and' } } },
+    }), 'de')).toBe('der Kater geht nach Europa und zum Markt.');
+    expect(say(clause(np('CAT'), 'JUMP', { complements: { direction: { phrase: np('AFRICA') } } }), 'de'))
+      .toBe('der Kater springt nach Afrika.');
+    expect(goes(np('ASIA', { possessor: { kind: 'pronominal', person: '2', number: 'singular', gender: 'masc' } })))
+      .toBe('der Kater geht zu deinem Asien.');
+    expect(goes(np('ASIA', { adjectives: ['BIG'] }))).toBe('der Kater geht zum großen Asien.');
   });
 
   // Regression: a common-noun goal, the articled continent, the source, and ADD's own "zu" (a

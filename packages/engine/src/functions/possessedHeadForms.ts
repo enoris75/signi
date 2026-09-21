@@ -8,7 +8,15 @@ import type { ResolvedNounPhrase } from '../types.js';
  * (Italian "nella mia casa", Portuguese "na minha casa"), and "bare" where the possessive replaces
  * the article and the preposition stands alone (French "dans ma maison", Spanish "en mi casa", German
  * "in meinem Haus"). Any other noun phrase's forms are returned as they are.
+ *
+ * A proper name gives way too. The article a name takes as a name ("l'Asie", "la Antártida", "die
+ * Antarktis") is only its default determiner, and every builder hands it out on `proper` before it
+ * reads `definiteness`. So the possessed forms drop `proper`, and the name then takes the possessive's
+ * determiner like any common noun: "ton Asie", "mi Antártida", "in meiner Antarktis", "nella tua
+ * Asia" (A165). The name's other forms, `takes_article` and `isA` among them, stay.
  */
 export function possessedHeadForms(np: ResolvedNounPhrase, definiteness: 'definite' | 'bare'): Record<string, string> {
-  return np.possessor && isPronominalPossessor(np.possessor) ? { ...np.head.forms, definiteness } : np.head.forms;
+  if (!np.possessor || !isPronominalPossessor(np.possessor)) return np.head.forms;
+  const { proper: _name, ...forms } = np.head.forms;
+  return { ...forms, definiteness };
 }

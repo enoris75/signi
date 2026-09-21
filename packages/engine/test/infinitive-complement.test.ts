@@ -140,7 +140,7 @@ describe('infinitive complement', () => {
     });
   });
 
-  // Japanese is left out: a negated こと clause takes the citation's polite negative, 行動しません (B13).
+  // Japanese negates the こと clause with the citation's plain negative, 行動しない (B13).
   test('the infinitive negates on its own, inside the link', () => {
     expect(sayAll({
       ...clause(np('GENERIC_PERSON'), 'BE', { complements: predicate('ABLE'), infinitiveComplement: acts('ACT', { verbPhrase: { verb: 'ACT', negative: true } }) }),
@@ -151,6 +151,7 @@ describe('infinitive complement', () => {
       fr: 'être capable de ne pas agir.', // "de" keeps its e before "ne"
       de: 'fähig sein, nicht zu handeln.',
       es: 'ser capaz de no actuar.',
+      ja: '行動しないことが可能である。',
       pt: 'ser capaz de não agir.',
     });
   });

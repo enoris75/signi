@@ -12,6 +12,14 @@ export const OBJECT_PREDICATIVE_CASE: Record<string, 'nom' | 'acc' | 'dat'> = { 
 // The umlauted counterpart of each comparison-relevant stem vowel (see `deUmlaut`).
 export const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
 
+// The endings after which a noun takes the linking -s- as the first element of a compound (see
+// `compoundStem`): the feminine derivational suffixes ("Übersetzungsserver", "Geschwindigkeitswort",
+// "Qualitätskontrolle", "Optionsmenü"), which only ever build feminines, so a masculine that merely
+// ends the same way is left alone ("Sprungbrett"); and -ling / -tum, whatever the gender
+// ("Frühlingsanfang", "Wachstumsrate").
+export const FUGEN_S_FEMININE: readonly string[] = ['ung', 'heit', 'keit', 'schaft', 'ion', 'tät'];
+export const FUGEN_S_ANY: readonly string[] = ['ling', 'tum'];
+
 // Weak adjective declension (after a definite article: der/die/das). The genitive row is also
 // the *mixed* genitive: after any determiner at all, a genitive adjective is invariably -en
 // ("des großen Wortes", "eines großen Wortes").
@@ -88,6 +96,12 @@ export const HABEN: Record<'present' | 'past', Record<string, string>> = {
   present: { '1sg': 'habe', '2sg': 'hast', '3sg': 'hat', '1pl': 'haben', '2pl': 'habt', '3pl': 'haben' },
   past:    { '1sg': 'hatte', '2sg': 'hattest', '3sg': 'hatte', '1pl': 'hatten', '2pl': 'hattet', '3pl': 'hatten' },
 };
+
+// The nominative personal pronouns a clause refers back to its own subject with (see
+// `personalPronoun`). The third singular goes by the grammatical gender of what it stands for —
+// "der Kater" → "er", "die Katze" → "sie", "das Kind" → "es" — so it is keyed by gender instead.
+export const DE_PERSONAL: Record<string, string> = { '1sg': 'ich', '2sg': 'du', '1pl': 'wir', '2pl': 'ihr', '3pl': 'sie' };
+export const DE_THIRD_SINGULAR: Record<string, string> = { masc: 'er', fem: 'sie', neut: 'es' };
 
 // The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
 // "von" (**von** großer Größe, **von** hoher Qualität), measure "bei". Each governs the dative, so

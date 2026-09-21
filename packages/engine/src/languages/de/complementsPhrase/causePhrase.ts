@@ -1,7 +1,8 @@
-import type { ConceptForms, ResolvedComplement } from '../../../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedNounPhrase } from '../../../types.js';
 import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { possessiveDe, pronounPossessor } from '../../../possessive.js';
 import { coordinate } from '../coordinate.js';
+import { genitiveShows } from '../genitiveShows.js';
 import { nounPhrase } from '../nounPhrase.js';
 import { relativePronoun } from '../relativePronoun.js';
 
@@ -11,19 +12,34 @@ function schuldPossessive(forms: ConceptForms['forms']): string {
   return possessiveDe(pronounPossessor(forms), 'acc', { gender: 'fem', number: 'singular' });
 }
 
+// A personal pronoun's "wegen": the genitive of a personal pronoun is not said after it, so standard
+// German fuses the possessive stem with "-etwegen" — "meinetwegen", "deinetwegen", "seinetwegen",
+// "ihretwegen", "unseretwegen", "euretwegen".
+function pronounWegen(forms: ConceptForms['forms']): string {
+  const stem = possessiveDe(pronounPossessor(forms), 'nom', { gender: 'masc', number: 'singular' });
+  return `${stem === 'euer' ? 'eur' : stem}etwegen`;
+}
+
+// A noun cause after "wegen": the genitive, or the dative where the genitive would not show ("wegen
+// Männern", see `genitiveShows`).
+function nounWegen(np: ResolvedNounPhrase): string {
+  return `wegen ${nounPhrase(np, genitiveShows(np) ? 'gen' : 'dat')}`;
+}
+
 // The cause shapes of their own: a group holding a pronoun, and the negative "Schuld" periphrasis.
-// A neutral or positive noun cause gives undefined — it is "wegen" / "dank" + the dative, spelled on
-// each conjunct's article by the prepositional path in `complementsPhrase`.
+// A neutral or positive noun cause gives undefined — it is "wegen" + the genitive or "dank" + the
+// dative, spelled on each conjunct's article by the prepositional path in `complementsPhrase`.
 export function causePhrase(c: ResolvedComplement): string | undefined {
   const sentiment = causeSentiment(c);
-  // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
-  // colloquial dative that "wegen" already takes. Positive credits with "dank" ("dank
-  // dir"); negative lays blame with the possessive periphrasis "durch <possessive> Schuld"
-  // ("durch meine/deine/seine Schuld"), the possessive agreeing with feminine "Schuld".
+  // A neutral pronoun cause is one word, "meinetwegen" (see `pronounWegen`). Positive credits with
+  // "dank" + the pronoun's dative ("dank dir"); negative lays blame with the possessive periphrasis
+  // "durch <possessive> Schuld" ("durch meine/deine/seine Schuld"), the possessive agreeing with
+  // feminine "Schuld".
   //
-  // A group holding a pronoun renders every conjunct in its own form, never the first one's:
-  // the preposition once, then a pronoun's dative or a noun's dative phrase ("wegen dem Mann und
-  // dir"). In the negative a group of pronouns shares one "Schuld" ("durch meine und deine
+  // A group holding a pronoun renders every conjunct in its own form, never the first one's. "dank"
+  // is said once, before a pronoun's dative or a noun's dative phrase ("dank dem Mann und dir"). A
+  // pronoun's "wegen" is inside its one word, so every conjunct brings its own ("wegen des Mannes und
+  // deinetwegen"). In the negative a group of pronouns shares one "Schuld" ("durch meine und deine
   // Schuld"); a group mixing in a noun gives each conjunct its own periphrasis.
   const pronounCause = c.phrase.conjuncts.some((np) => np.head.forms['person']);
   if (pronounCause) {
@@ -35,11 +51,12 @@ export function causePhrase(c: ResolvedComplement): string | undefined {
         ? `durch ${schuldPossessive(np.head.forms)} Schuld`
         : `durch die Schuld ${nounPhrase(np, 'gen')}`);
     }
-    const prep = sentiment === 'positive' ? 'dank' : 'wegen';
-    const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person']
-      ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '')
-      : nounPhrase(np, 'dat'));
-    return `${prep} ${conjuncts}`;
+    if (sentiment === 'positive') {
+      return `dank ${coordinate(c.phrase, (np) => np.head.forms['person']
+        ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '')
+        : nounPhrase(np, 'dat'))}`;
+    }
+    return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronounWegen(np.head.forms) : nounWegen(np));
   }
   // A negative noun cause takes the genitive periphrasis "durch die Schuld" (through the
   // fault) + the cause in the genitive: "durch die Schuld des Hundes". "durch" governs the

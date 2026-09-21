@@ -204,7 +204,7 @@ the bare *glisser* rather than *faire glisser*, which a lexeme cannot conjugate.
   model has, and a period whose noun is the instrumental is verbless by construction.
 - **The mood toggles' locked tooltip names the two relations, not "the link".** LINK is not seeded,
   and the control cannot know which of the two holds the period, so it names both under "or".
-- **Japanese's negative purpose inherits [B13](../../bugs/B-can-fix/B13-japanese-plain-negative.md).**
+- **Japanese's negative purpose inherits [B13](../../bugs/fixed/B13-japanese-plain-negative.md).**
   「食べませんために」 — the citation's negative is the polite form, which ために then attaches to. The
   purpose clause is that documented gap's third call site, not a new one, so the negative ja purpose
   is left unpinned.

@@ -572,13 +572,13 @@ describe('known bugs: the adjective inside a German multiword noun', () => {
   });
 
   // The dative plural -n goes on the head, not on the fixed genitive ("der Richtung", "der Art und Weise").
-  test('declines in the dative plural and after a possessor\'s von', () => {
+  test('declines in the dative plural and as a genitive possessor', () => {
     expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('DIRECTION', { number: 'plural' }) } } }), 'de'))
       .toBe('der Kater beginnt mit den adverbialen Bestimmungen der Richtung.');
     expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('ADVERBIAL_OF_MANNER', { number: 'plural' }) } } }), 'de'))
       .toBe('der Kater beginnt mit den adverbialen Bestimmungen der Art und Weise.');
     expect(say({ subject: np('BOOK', { possessor: np('SOURCE', { number: 'plural' }) }) }, 'de'))
-      .toBe('das Buch von den adverbialen Bestimmungen der Herkunft.');
+      .toBe('das Buch der adverbialen Bestimmungen der Herkunft.');
   });
 
   test('declines in the accusative plural, after its own adjective', () => {

@@ -88,3 +88,33 @@ article the name does not take alone (German `große Asien brennt`, Italian `in 
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: a possessive on a place name* (3 `test.fails`, plus a regression test for the positions and languages already right) |
+
+## Resolved
+
+Fixed on 2026-09-21.
+
+- [`possessedHeadForms`](../../../packages/engine/src/functions/possessedHeadForms.ts) drops
+  `proper` from a head whose determiner slot a pronominal possessive fills. Every builder that hands a
+  name its own article reads `proper` before `definiteness` (French and Spanish `artFor`, French
+  `deDet`, German `determiner` / `prepDet`, Italian `prepDet`), so the name now takes the possessive's
+  `bare` / `definite` like a common noun. The French and Italian locatives' bare `en` / `in` stop
+  firing for the same reason. The name keeps its other forms (`takes_article`, `isA`). Of the two
+  shapes the file offered, this is the one kept: every reader of `proper` on these paths asks "does
+  the name supply the determiner?", and a possessed name does not, so the flag is dropped where that
+  becomes true rather than shadowed by a second flag every reader would have to consult.
+- The continent goal in [`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts)
+  and [`fr/complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts),
+  and the French feminine continent source, fire only for a name still `proper`. A possessed
+  continent goal goes through `spatialHead('in', …)`.
+
+**Goal preposition:** kept as pinned, the continent's own `in` with the article the possessive needs
+(`va nella tua Asia`, `va dans ton Asie`).
+
+Guarded by `possession.test.ts` → *known bugs: a possessive on a place name*: the three former
+`test.fails` now pass, plus a new test for the subject, object, goal (masculine `Antarctique`,
+`Antartide`), source, a plural possessor (`nella loro Asia`, `dans leur Asie`) and a possessed name as
+a possessor, beside the existing regression test. Colocated cases in `possessedHeadForms.test.ts`
+(the name drops `proper`, keeps `isA` / `takes_article`) and in the French and Italian
+`complementsPhrase.test.ts` (possessed continent goal, locative, source, terminus).
+
+No passing test changed its expectation.

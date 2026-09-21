@@ -158,6 +158,15 @@ describe('predicateText', () => {
       expect(predicateText(noCat, vp(COMER, { negative: true }))).toBe('come');
       expect(predicateText(noCat, vp(VER), el(np(RATON, { definiteness: 'no' })))).toBe('ve ningún ratón');
     });
+
+    // A167: whether the subject negates is the caller's. A relative on a `no` head agrees with it, but
+    // the head negates the matrix clause, so the relative clause says `false` and keeps its "no".
+    test('a caller that says the subject does not negate keeps no, whatever the forms say', () => {
+      const noCat = { ...GATO, definiteness: 'no' };
+      expect(predicateText(noCat, vp(COMER, { negative: true }), undefined, undefined, undefined, false)).toBe('no come');
+      expect(predicateText(noCat, vp(VER), el(np(RATON, { definiteness: 'no' })), undefined, undefined, false)).toBe('no ve ningún ratón');
+      expect(predicateText(GATO, vp(COMER, { negative: true }), undefined, undefined, undefined, true)).toBe('come');
+    });
   });
 
   describe('objects', () => {

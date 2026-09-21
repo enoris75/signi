@@ -36,8 +36,8 @@ describe('the quick brown fox of the boy who cried the wolf', () => {
   test('jumped over the lazy dog, as a locative', () => {
     expect(sayAll(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'locative'))).toMatchObject({
       en: 'the quick brown fox of the boy who cried wolf jumped over the lazy dog.',
-      // A place takes the dative after über. The possessor is "vom", not the genitive "des" (B09).
-      de: 'der schnelle braune Fuchs vom Jungen, der den Wolf rief, sprang über dem faulen Hund.',
+      // A place takes the dative after über. The possessor is the genitive "des Jungen" (B09).
+      de: 'der schnelle braune Fuchs des Jungen, der den Wolf rief, sprang über dem faulen Hund.',
       es: 'el zorro rápido y marrón del niño que gritó el lobo saltó por encima del perro perezoso.',
       pt: 'a raposa rápida e castanha do menino que gritou o lobo pulou por cima do cão preguiçoso.',
       // で marks the place where the jumping happens.
@@ -160,7 +160,7 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
 describe('known bugs: a route over crosses the dog, in the whole sentence', () => {
   test('German "über den faulen Hund", French "par-dessus le chien paresseux"', () => {
     expect(sayAll(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'route'))).toMatchObject({
-      de: 'der schnelle braune Fuchs vom Jungen, der den Wolf rief, sprang über den faulen Hund.',
+      de: 'der schnelle braune Fuchs des Jungen, der den Wolf rief, sprang über den faulen Hund.',
       fr: expect.stringMatching(/ sauta par-dessus le chien paresseux\.$/),
     });
   });

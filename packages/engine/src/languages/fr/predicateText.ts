@@ -43,6 +43,11 @@ export function predicateText(
   precedingObjectForms?: Record<string, string>,
   // The demoted agent of a passive clause, rendered as the "par" phrase (see ResolvedPhrase.agent).
   agent?: ResolvedNounElement,
+  // Whether the clause's own subject is a preverbal `no` phrase ("aucun chat"), which already negates
+  // the clause. The caller's, as in English and German (see `negationSources`): a subject relative is
+  // handed its head's forms for agreement, but a `no` head negates the MATRIX clause, not the relative
+  // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
+  subjectIsNegative = subjectForms['definiteness'] === 'no',
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
@@ -90,7 +95,7 @@ export function predicateText(
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
   // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne".
   const aucun =
-    subjectForms['definiteness'] === 'no' ||
+    subjectIsNegative ||
     (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false) ||
     hasNegativeComplement(complements);
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"

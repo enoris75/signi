@@ -2,8 +2,9 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
-import type { JaIPN } from './ja.types.js';
+import type { JaForm, JaIPN } from './ja.types.js';
 import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
+import { aspectFormSegs } from './aspectFormSegs.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
@@ -26,7 +27,8 @@ import { wordSeg } from './wordSeg.js';
  * relative clauses.
  * `imperativePN` is set only for a top-level command (relative clauses are never imperative).
  * `plain` is set only for a subordinate (prenominal relative) predicate: its finite verb takes
- * the plain form instead of the polite ます (see plainVerbSeg).
+ * the plain form instead of the polite ます (see plainVerbSeg), and so does its aspect (see
+ * aspectVerbSegs).
  */
 export function predicateSegs(
   givenVerbPhrase: ResolvedVerbPhrase,
@@ -113,8 +115,8 @@ export function predicateSegs(
   // Infinitive / citation phrase: the plain dictionary form (SOV, subject-less) — 「食物を消費する」.
   // This is the true citation, distinct from the imperative `instruction` register above, which
   // Japanese renders as the verbal noun (消費). A copula predicate falls through to the です block,
-  // which closes a citation in the plain written style (可能である). The plain negative needs a nai-form
-  // the lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
+  // which closes a citation in the plain written style (可能である). A negative citation takes the plain
+  // negative (食べない。, 食べないために, 行動しないことを; B13).
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
     segs.push(...complementSegs(adjunctComplements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
@@ -123,7 +125,7 @@ export function predicateSegs(
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
     }
-    segs.push(negated ? verbSeg(verb, true, 'present') : plainVerbSeg(verb, 'present'));
+    segs.push(plainVerbSeg(verb, 'present', negated));
     return segs;
   }
   if (verb.forms['copula'] === '1' && predicative) {
@@ -182,17 +184,25 @@ export function predicateSegs(
   // A relative clause and the dictionary form a modal governs keep the plain verb (本を持つ猫).
   const heldState = aspect === 'neutral' && !plain && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
     && !(negated && verb.forms['event_negative'] === '1');
-  // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
-  // periphrasis to compose with here, so it is dropped (see the Modality note on `modalSegs`).
-  if (modals.length > 0) segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite'));
-  else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara));
-  else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));
-  // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫).
-  // Negation still routes through the polite verbSeg — the plain negative (ない/なかった) needs a
-  // nai-form the lexicon doesn't store — a documented remaining gap.
-  else if (aspect === 'neutral') {
-    segs.push(plain && !negated ? plainVerbSeg(verb, tense) : verbSeg(verb, negated, tense));
+  // A modal suffixes the verb and takes the tense/polarity itself. An aspect stands under it in the form
+  // the modal governs (B07): 食べている必要があります, 食べていたいです, 食べようとしている必要があります.
+  if (modals.length > 0) {
+    const governed = aspect === 'neutral' ? undefined : (form: JaForm) => aspectFormSegs(verb, aspect, form);
+    segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed));
   }
-  else segs.push(...aspectVerbSegs(verbPhrase, negated, tara));
+  else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara ? 'tara' : 'polite'));
+  else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));
+  // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫), in the
+  // negative too (食べない猫 / 食べなかった猫, 決して食べない猫; B13).
+  else if (aspect === 'neutral') {
+    segs.push(plain ? plainVerbSeg(verb, tense, negated) : verbSeg(verb, negated, tense));
+  }
+  // An aspect takes the same three endings (B14): 食べています, 食べていたら, and before a head noun 食べている猫.
+  // The perfect of a counterfactual main clause, "would have run", is the past resultant state 走っていました
+  // (もし猫が食べていたら、犬は走っていました), whatever its tense (B05).
+  else {
+    const aspectPhrase = mood === 'conditional' && aspect === 'resultative' ? { ...verbPhrase, tense: 'past' as const } : verbPhrase;
+    segs.push(...aspectVerbSegs(aspectPhrase, negated, tara ? 'tara' : plain ? 'plain' : 'polite'));
+  }
   return segs;
 }

@@ -10,11 +10,15 @@ import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { possessiveDe } from '../../../possessive.js';
 import { adjPhrase } from '../adjPhrase.js';
+import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
 import { LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import type { Case } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
+import { genitiveS } from '../genitiveS.js';
+import { genitiveShows } from '../genitiveShows.js';
 import { germanCompound } from '../germanCompound.js';
 import { modifierGenitives } from '../modifierGenitives.js';
 import { nounPhrase } from '../nounPhrase.js';
@@ -27,6 +31,13 @@ import { subordinateClause } from '../subordinateClause.js';
 import { weakN } from '../weakN.js';
 import { causePhrase } from './causePhrase.js';
 import { instrumentActionPhrase } from './instrumentActionPhrase.js';
+
+// A continent named without an article ("Europa", "Asien"), the goal German marks with "nach". Keyed
+// off the hypernym, as the Italian and French continent goals are: a country or city seeded later
+// would want a place flag on the concept instead.
+function isBareNamePlace(f: Record<string, string>): boolean {
+  return f['isA'] === 'CONTINENT' && f['proper'] === '1' && f['takes_article'] !== '1';
+}
 
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
 // complements with the infinitival copula ("scheint eine Legende zu sein").
@@ -74,17 +85,19 @@ export function complementsPhrase(
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
-      // the adjectives decline mixed ("in meinem kleinen Haus", "deinem Hund").
+      // the adjectives decline mixed ("in meinem kleinen Haus", "deinem Hund"). A bare-name place
+      // modified by an adjective takes the article instead, and fuses ("im großen Asien").
       const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
-      const f = possessedHeadForms(np, 'bare');
+      const f = articledNameForms(np, possessedHeadForms(np, 'bare'));
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = poss ? 'indefinite' : (f['definiteness'] ?? 'definite');
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route/locative → spatial preposition (+ its case); direction/source → two-way preps +
-      // dative. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire only for a definite
-      // article; any other determiner (einem, keiner, vielen, bare) stays uncontracted.
+      // dative; the cause "wegen" → genitive. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire
+      // only for a definite article; any other determiner (einem, keiner, vielen, bare) stays
+      // uncontracted.
       let head: string;
-      let _case: 'nom' | 'acc' | 'dat';
+      let _case: Case;
       if (type === 'route' || type === 'locative') {
         // Both read their relation off the same specifier set; only the default differs, and the
         // case falls out of the preposition ("im Markt", "unter dem Markt", "um den Markt").
@@ -93,14 +106,15 @@ export function complementsPhrase(
         head = spatialHead(spec, f, plural, type);
       } else {
         _case = 'dat';
-        // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
-        // standard in speech and reuses the dative determiners; positive credits with "dank". The
-        // negative sentiment and a pronoun never reach here — they took `causePhrase` above.
         // A direction naming a relation is motion into it, which German marks with the accusative
-        // ("in die Luft"); a bare direction is the plain goal "zu" + dative ("zum Haus").
+        // ("in die Luft"); a bare direction is the plain goal "zu" + dative ("zum Haus"). A place
+        // named without an article takes "nach" instead, and no article: "nach Europa" (A168). A
+        // possessive or an adjective gives the name its article back, and it takes "zu" again ("zu
+        // deinem Asien", "zum großen Asien"), as the articled "zur Antarktis" does.
         if (type === 'direction') {
           const goal = directionSpecifier(c);
           if (goal) { _case = spatialCase(goal, 'direction'); head = spatialHead(goal, f, plural, 'direction'); }
+          else if (isBareNamePlace(f)) head = 'nach';
           else head = prepDet('zu', f, 'dat', plural);
         }
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
@@ -125,7 +139,17 @@ export function complementsPhrase(
           _case = mannerCase;
           head = prepDet(prep, f, mannerCase, plural);
         }
-        else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
+        // Cause: "wegen" governs the genitive ("wegen des Hundes", "wegen eines Hundes", "wegen
+        // meines Hundes"), and falls back on the dative only where the genitive would not show
+        // ("wegen Männern", see `genitiveShows`). A relativizer takes its genitive too: "der Hund,
+        // wegen dessen …". The positive "dank" credits with the dative, which is standard beside its
+        // genitive ("dank dem Hund"). The negative sentiment and a pronoun never reach here — they
+        // took `causePhrase` above.
+        else if (type === 'cause') {
+          const positive = causeSentiment(c) === 'positive';
+          _case = positive || !genitiveShows(np, f) ? 'dat' : 'gen';
+          head = prepDet(positive ? 'dank' : 'wegen', f, _case, plural);
+        }
         // Terminus. An animate recipient is a bare dative — no preposition, just the dative
         // determiner ("der Katze"), the same case German gives the plain indirect object. An
         // inanimate goal is a destination, not a recipient, so it takes a directional preposition:
@@ -146,8 +170,11 @@ export function complementsPhrase(
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
       if (definiteness === 'relative') return head;
       // A weak masculine goal/place declines to -(e)n in the oblique ("zum/im/aus dem Jungen");
-      // every other noun takes the regular dative-plural -n.
-      const word = f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
+      // every other noun takes the regular dative-plural -n, and a genitive its -(e)s ("wegen des
+      // Hundes").
+      const word = _case === 'gen'
+        ? genitiveS(compound, _case, f, plural)
+        : f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
       const possessive = poss

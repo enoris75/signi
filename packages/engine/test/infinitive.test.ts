@@ -133,10 +133,12 @@ describe('infinitive negation', () => {
     });
   });
 
-  // Japanese has no stored plain nai-form, so a negative citation falls back to the polite
-  // negative 食べません — the same documented lexicon gap the relative-clause path lives with (B13).
-  test('Japanese falls back to the polite negative (documented nai-form gap)', () => {
-    expect(sayAll(infinitive({}, { negative: true })).ja).toBe('食べません。');
+  // A citation is plain, so its negative is the plain nai-form, as a relative clause's is (B13). It
+  // used to fall back to the polite 食べません, the wrong register for a citation.
+  test('Japanese cites the plain negative', () => {
+    expect(sayAll(infinitive({}, { negative: true })).ja).toBe('食べない。');
+    expect(sayAll(infinitive({}, { verb: 'COME', negative: true })).ja).toBe('来ない。');
+    expect(sayAll(infinitive({ directObject: np('MOUSE') }, { modifier: 'NEVER' })).ja).toBe('ネズミを決して食べない。');
   });
 });
 

@@ -151,7 +151,7 @@ describe('CREATE (genus of MAKE / SET_ON_FIRE)', () => {
         fr: 'le chat a créé le feu.',
         de: 'der Kater hat das Feuer erschaffen.',
         es: 'el gato ha creado el fuego.',
-        ja: '猫は火を生み出してしまいます。',
+        ja: '猫は火を生み出しました。',
         pt: 'o gato criou o fogo.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -234,7 +234,7 @@ describe('DESTROY (genus of KILL / EXTINGUISH / CLEAR)', () => {
         fr: 'le chat a détruit la maison.',
         de: 'der Kater hat das Haus zerstört.',
         es: 'el gato ha destruido la casa.',
-        ja: '猫は家を破壊してしまいます。',
+        ja: '猫は家を破壊しました。',
         pt: 'o gato destruiu a casa.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -364,7 +364,7 @@ describe('PERCEIVE (genus of SEE)', () => {
         fr: 'le chat a perçu la lumière.',
         de: 'der Kater hat das Licht empfunden.',
         es: 'el gato ha percibido la luz.',
-        ja: '猫は光を知覚してしまいます。',
+        ja: '猫は光を知覚しました。',
         pt: 'o gato percebeu a luz.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -447,7 +447,7 @@ describe('UNDERSTAND (genus of KNOW / READ)', () => {
         fr: 'le chat a compris le mot.',
         de: 'der Kater hat das Wort verstanden.',
         es: 'el gato ha comprendido la palabra.',
-        ja: '猫は単語を理解してしまいます。',
+        ja: '猫は単語を理解しました。',
         pt: 'o gato compreendeu a palavra.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -552,7 +552,7 @@ describe('HAVE (genus of OWN / HOLD)', () => {
         fr: "le chat a eu l'argent.",
         de: 'der Kater hat das Geld gehabt.',
         es: 'el gato ha tenido el dinero.',
-        ja: '猫はお金を持ってしまいます。',
+        ja: '猫はお金を持っていました。',
         pt: 'o gato teve o dinheiro.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -689,7 +689,7 @@ describe('ACQUIRE (genus of BUY)', () => {
         fr: 'le chat a acquis le livre.',
         de: 'der Kater hat das Buch erworben.',
         es: 'el gato ha adquirido el libro.',
-        ja: '猫は本を取得してしまいます。',
+        ja: '猫は本を取得しました。',
         pt: 'o gato adquiriu o livro.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -800,7 +800,7 @@ describe('DIVIDE (genus of CUT)', () => {
         fr: 'le chat a divisé la nourriture.',
         de: 'der Kater hat das Essen geteilt.',
         es: 'el gato ha dividido la comida.',
-        ja: '猫は食べ物を分けてしまいます。',
+        ja: '猫は食べ物を分けました。',
         pt: 'o gato dividiu a comida.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -870,7 +870,7 @@ describe('STRIKE (genus of BEAT)', () => {
         fr: 'le chat a frappé le bâton.',
         de: 'der Kater hat den Stock geschlagen.',
         es: 'el gato ha golpeado el palo.',
-        ja: '猫は棒を打ってしまいます。',
+        ja: '猫は棒を打ちました。',
         pt: 'o gato golpeou o pau.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -942,7 +942,7 @@ describe('TRANSFER (genus of GIVE / SEND / EXPORT / IMPORT)', () => {
         fr: "le chat a transféré l'argent.",
         de: 'der Kater hat das Geld übertragen.',
         es: 'el gato ha transferido el dinero.',
-        ja: '猫はお金を移してしまいます。',
+        ja: '猫はお金を移しました。',
         pt: 'o gato transferiu o dinheiro.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1070,7 +1070,7 @@ describe('INDICATE (genus of NAME / DESCRIBE / EXPRESS / CHOOSE)', () => {
         fr: 'le chat a indiqué la maison.',
         de: 'der Kater hat das Haus bezeichnet.',
         es: 'el gato ha indicado la casa.',
-        ja: '猫は家を示してしまいます。',
+        ja: '猫は家を示しました。',
         pt: 'o gato indicou a casa.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1151,7 +1151,7 @@ describe('CHANGE (genus of MODIFY)', () => {
         fr: 'le chat a changé le mot.',
         de: 'der Kater hat das Wort geändert.',
         es: 'el gato ha cambiado la palabra.',
-        ja: '猫は単語を変えてしまいます。',
+        ja: '猫は単語を変えました。',
         pt: 'o gato mudou a palavra.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1209,7 +1209,7 @@ describe('FEEL (genus of LOVE)', () => {
         fr: 'le chat a éprouvé la température.',
         de: 'der Kater hat die Temperatur gefühlt.',
         es: 'el gato ha sentido la temperatura.',
-        ja: '猫は温度を感じてしまいます。',
+        ja: '猫は温度を感じました。',
         pt: 'o gato sentiu a temperatura.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1299,7 +1299,7 @@ describe('SHED (genus of CRY)', () => {
         fr: "le chat a versé l'eau.",
         de: 'der Kater hat das Wasser vergossen.',
         es: 'el gato ha derramado el agua.',
-        ja: '猫は水を流してしまいます。',
+        ja: '猫は水を流しました。',
         pt: 'o gato derramou a água.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1381,7 +1381,7 @@ describe('PRODUCE (genus of CRY_OUT)', () => {
         fr: 'le chat a produit la nourriture.',
         de: 'der Kater hat das Essen erzeugt.',
         es: 'el gato ha producido la comida.',
-        ja: '猫は食べ物を出してしまいます。',
+        ja: '猫は食べ物を出しました。',
         pt: 'o gato produziu a comida.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1455,7 +1455,7 @@ describe('PRESS (genus of CLICK)', () => {
         fr: 'le chat a pressé le livre.',
         de: 'der Kater hat das Buch gedrückt.',
         es: 'el gato ha pulsado el libro.',
-        ja: '猫は本を押してしまいます。',
+        ja: '猫は本を押しました。',
         pt: 'o gato pressionou o livro.', // pt present resultative is the pretérito (documented)
       });
   });
@@ -1512,7 +1512,7 @@ describe('WRITE (genus of TYPE)', () => {
         fr: 'le chat a écrit le mot.',
         de: 'der Kater hat das Wort geschrieben.',
         es: 'el gato ha escrito la palabra.',
-        ja: '猫は単語を書いてしまいます。',
+        ja: '猫は単語を書きました。',
         pt: 'o gato escreveu a palavra.', // pt present resultative is the pretérito (documented)
       });
   });

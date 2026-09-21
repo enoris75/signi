@@ -238,13 +238,14 @@ describe('BE without a subject complement: a coordination with a subordinate cla
 });
 
 // A120, in the linked clauses. A bare BE renders です in a protasis, a main clause, a relative and a
-// coordinated clause alike. The relatives here are affirmative: a negated relative's plain form is B13.
+// coordinated clause alike, the relative in its plain form, negative included (いない犬, B13).
 describe('known bugs: Japanese BE with no complement, in linked clauses', () => {
   test('Japanese renders the bare BE of a linked clause as the existential いる / ある', () => {
     expect(say(ifThen(be('CAT', { negative: true }), clause(np('DOG'), 'RUN')), 'ja')).toBe('もし猫がいなかったら、犬は走ります。');
     expect(say(ifThen(clause(np('CAT'), 'EAT'), be('DOG')), 'ja')).toBe('もし猫が食べたら、犬はいます。');
     expect(say(ifThen(be('CAT', { negative: true }), be('DOG', {}, 'LEGEND')), 'ja')).toBe('もし猫がいなかったら、犬は伝説です。');
     expect(say(clause(np('DOG', that({ verb: 'BE', tense: 'past' })), 'RUN'), 'ja')).toBe('いた犬は走ります。');
+    expect(say(clause(np('DOG', that({ verb: 'BE', negative: true })), 'RUN'), 'ja')).toBe('いない犬は走ります。');
     // The join between the coordinated clauses is A122.
     expect(say(but(clause(np('CAT', that({ verb: 'BE' })), 'RUN'), clause(np('DOG'), 'JUMP')), 'ja')).toMatch(/^いる猫は走ります/);
     expect(say(but(clause(np('CAT'), 'RUN'), clause(np('DOG', that({ verb: 'BE' })), 'JUMP')), 'ja')).toMatch(/いる犬は跳びます。$/);

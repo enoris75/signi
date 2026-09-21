@@ -51,7 +51,7 @@ citation, whose throwaway GENERIC_PERSON subject is a pronoun: the glosses of FE
 (財産を持つ) and HOLD (物体を持つ) are unchanged.
 
 **Not covered:** a negated relative clause reads 壁がありません場所. That is the plain-negative gap every
-Japanese verb has ([B13](../B-can-fix/B13-japanese-plain-negative.md)), even though `JA_ARU` stores
+Japanese verb has ([B13](B13-japanese-plain-negative.md)), even though `JA_ARU` stores
 its ない.
 
 - **Tests:**

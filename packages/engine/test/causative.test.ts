@@ -213,8 +213,7 @@ describe('object control', () => {
     });
   });
 
-  // Japanese is left out: a negated こと clause takes the citation's polite negative, 行動しません (B13).
-  // A negated *copula* is not affected, which is why HIDE's definition renders in all seven.
+  // Japanese negates the caused clause with the citation's plain negative, 行動しない (B13).
   test('the caused clause negates on its own', () => {
     expect(sayAll(cause(np('PERSON', { definiteness: 'indefinite' }), { verbPhrase: { verb: 'ACT', negative: true } }))).toMatchObject({
       en: 'to cause a person not to act.',
@@ -222,6 +221,7 @@ describe('object control', () => {
       fr: 'induire une personne à ne pas agir.',
       de: 'eine Person veranlassen, nicht zu handeln.',
       es: 'inducir a una persona a no actuar.',
+      ja: '人が行動しないようにする。',
       pt: 'induzir uma pessoa a não agir.',
     });
   });

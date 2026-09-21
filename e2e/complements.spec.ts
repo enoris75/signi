@@ -119,12 +119,13 @@ test.describe('complements', () => {
     await app.revealAndPick('cause', 'DOG');
     await app.expectSentences({ en: 'the cat runs because of the dog.' });
 
-    // German is left out: it emits the colloquial dative after dank/wegen (B09).
+    // German "dank" takes the dative, standard beside its genitive; "wegen" takes the genitive (B09).
     await page.getByRole('button', { name: 'Positive — thanks to' }).click();
     await app.expectSentences({
       en: 'the cat runs thanks to the dog.',
       it: 'il gatto corre grazie al cane.',
       fr: 'le chat court grâce au chien.',
+      de: 'der Kater läuft dank dem Hund.',
       es: 'el gato corre gracias al perro.',
       pt: 'o gato corre graças ao cão.',
       ja: '猫は犬のおかげで走ります。',

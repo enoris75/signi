@@ -19,7 +19,7 @@ export function prepDet(prep: string, forms: Record<string, string>, _case: Case
     if (prep === 'in' && det === 'das') return 'ins';
     if (prep === 'zu' && det === 'dem') return 'zum';
     if (prep === 'zu' && det === 'der') return 'zur';
-    // A living source takes "von", which fuses the same way (A154), as `possessorText` has it.
+    // A living source takes "von", which fuses the same way (A154), as the passive agent's does.
     if (prep === 'von' && det === 'dem') return 'vom';
   }
   if (!prep) return det;

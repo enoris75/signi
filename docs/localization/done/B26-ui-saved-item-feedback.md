@@ -76,7 +76,7 @@ Changes against the plan:
   verb for an adverb to modify. The labels say "No saved phrases".
 - **The invalid file is "not valid", not "not a valid phrase file".** The predicate noun reads *nicht eine
   gültige Phrasedatei* in German, where *keine* belongs and the compound wants its *-n-*
-  ([B10](../../bugs/B-can-fix/B10-german-compound-linking-element.md)), and Italian puts the adjective before
+  ([B10](../../bugs/fixed/B10-german-compound-linking-element.md)), and Italian puts the adjective before
   the modifier (*un file valido di frase*). The predicate adjective reads right in all seven, and the toast
   already says the import is what failed.
 - **The import toast** is `toast.importFailed — toast.invalidFile` when the file is refused, and

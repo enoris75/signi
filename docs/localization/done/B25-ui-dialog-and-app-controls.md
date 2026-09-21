@@ -93,7 +93,7 @@ Changes against the plan:
   to *abbrechen*.
 - **German INTERFACE is the loanword *Interface*.** *Oberfläche* and *Schnittstelle* compound with a
   linking *-n-* (*Oberflächensprache*), which `germanCompound` does not add
-  ([B10](../../bugs/B-can-fix/B10-german-compound-linking-element.md)).
+  ([B10](../../bugs/fixed/B10-german-compound-linking-element.md)).
 - **"no matches" is "no results"**, RESULT plural under `no`. The two engine defects the task warned about
   are fixed, not filed: the translator now puts a Romance `no` phrase in the singular for French too (A34
   had fixed Italian, Spanish and Portuguese; French hid behind the invariable *souris*), and a verbless

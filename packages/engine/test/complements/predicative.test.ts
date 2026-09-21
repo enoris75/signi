@@ -585,15 +585,84 @@ describe('known bugs: Italian agreement with the impersonal si', () => {
   });
 });
 
-// B12. DELIBERATE — do not "fix" without a product decision. `copulaSegs` inflects です against
-// `firstConjunct` only ("a documented approximation"). A coordinated adjective predicate therefore
-// loses every conjunct after the first: "the cat is big and happy" → 猫は大きいです. Japanese chains
-// them with the te-form: 猫は大きくて幸せです.
-describe('documented simplifications: Japanese coordinated copula predicate', () => {
-  test.fails('Japanese keeps every conjunct of a coordinated adjective predicate', () => {
+// B12 (fixed). `copulaSegs` used to inflect です against `firstConjunct` only, so a coordinated
+// adjective predicate lost every conjunct after the first: "the cat is big and happy" → 猫は大きいです.
+// Japanese chains predicates with the te-form and leaves the copula to the last conjunct (大きくて幸せです,
+// 伝説で犬です). "Or" joins whole predicates with か (大きいか幸せです), and a negation reads "neither …
+// nor", も on every conjunct (大きくも幸せでもありません). The same te-form replaces the と that joined
+// predicates under なる / 思える (大きくて幸せに思えます).
+describe('Japanese coordinated copula predicate', () => {
+  const both = (conjunction: 'and' | 'or', ...conjuncts: NounPhrase[]) => ({ phrase: { conjuncts, conjunction } });
+  const catIs = (predicative: ReturnType<typeof both>, verbPhrase: object = {}, verb = 'BE') =>
+    sayAll(clause(np('CAT'), verb, { verbPhrase, complements: { predicative } })).ja;
+  const catWhoIs = (predicative: ReturnType<typeof both>, verbPhrase: object = {}) =>
+    sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', ...verbPhrase }, complements: { predicative } } }), 'RUN')).ja;
+
+  test('Japanese keeps every conjunct of a coordinated adjective predicate', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       complements: { predicative: { phrase: { conjuncts: [np('BIG'), np('HAPPY')], conjunction: 'and' } } },
     })).ja).toBe('猫は大きくて幸せです。');
+  });
+
+  test('"and" chains each class in its te-form, the copula on the last', () => {
+    expect(catIs(both('and', np('BIG'), np('LEGEND')))).toBe('猫は大きくて伝説です。');
+    expect(catIs(both('and', np('HAPPY'), np('BIG')))).toBe('猫は幸せで大きいです。');
+    expect(catIs(both('and', np('BROWN'), np('BIG')))).toBe('猫は茶色で大きいです。');
+    expect(catIs(both('and', np('TIRED'), np('HAPPY')))).toBe('猫は疲れていて幸せです。');
+    expect(catIs(both('and', np('HAPPY'), np('TIRED')))).toBe('猫は幸せで疲れています。');
+    expect(catIs(both('and', np('LEGEND'), np('DOG', { definiteness: 'indefinite' })))).toBe('猫は伝説で犬です。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY'), np('LEGEND')))).toBe('猫は大きくて幸せで伝説です。');
+    expect(catIs(both('and', np('BIG', { headDegree: 'more' }), np('HAPPY')))).toBe('猫はもっと大きくて幸せです。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), { tense: 'past' })).toBe('猫は大きくて幸せでした。');
+  });
+
+  test('a negation reads "neither … nor", in the present and the past', () => {
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), { negative: true })).toBe('猫は大きくも幸せでもありません。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), { negative: true, tense: 'past' })).toBe('猫は大きくも幸せでもありませんでした。');
+    expect(catIs(both('or', np('BIG'), np('HAPPY')), { negative: true })).toBe('猫は大きくも幸せでもありません。');
+    expect(catIs(both('and', np('HAPPY'), np('TIRED')), { negative: true })).toBe('猫は幸せでも疲れてもいません。');
+  });
+
+  test('"or" joins whole predicates with か', () => {
+    expect(catIs(both('or', np('BIG'), np('HAPPY')))).toBe('猫は大きいか幸せです。');
+    expect(catIs(both('or', np('HAPPY'), np('BIG')))).toBe('猫は幸せか大きいです。');
+    expect(catIs(both('or', np('BIG'), np('HAPPY')), { tense: 'past' })).toBe('猫は大きかったか幸せでした。');
+    expect(catIs(both('or', np('LEGEND'), np('DOG', { definiteness: 'indefinite' })))).toBe('猫は伝説か犬です。');
+    expect(catIs(both('or', np('TIRED'), np('HAPPY')), { tense: 'past' })).toBe('猫は疲れていたか幸せでした。');
+  });
+
+  test('a relative clause, an "if" clause, a citation, a modal and a command close on the last conjunct', () => {
+    expect(catWhoIs(both('and', np('BIG'), np('HAPPY')))).toBe('大きくて幸せな猫は走ります。');
+    expect(catWhoIs(both('and', np('BIG'), np('HAPPY')), { tense: 'past' })).toBe('大きくて幸せだった猫は走ります。');
+    expect(catWhoIs(both('and', np('BIG'), np('HAPPY')), { negative: true })).toBe('大きくも幸せでもない猫は走ります。');
+    expect(catWhoIs(both('and', np('BIG'), np('TIRED')), { negative: true })).toBe('大きくも疲れてもいない猫は走ります。');
+    expect(catWhoIs(both('and', np('BIG'), np('LEGEND')))).toBe('大きくて伝説である猫は走ります。');
+    expect(catWhoIs(both('or', np('BIG'), np('HAPPY')))).toBe('大きいか幸せな猫は走ります。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE', { complements: { predicative: both('and', np('BIG'), np('HAPPY')) } }) }).ja)
+      .toBe('もし猫が大きくて幸せだったら、犬は走ります。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: both('and', np('BIG'), np('HAPPY')) } }) }).ja)
+      .toBe('もし猫が大きくも幸せでもなかったら、犬は走ります。');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BE', { complements: { predicative: both('and', np('BIG'), np('HAPPY')) } }), infinitive: true }).ja)
+      .toBe('大きくて幸せである。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), { modals: ['MUST'] })).toBe('猫は大きくて幸せである必要があります。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), { modals: ['WILL'] })).toBe('猫は大きくて幸せでありたいです。');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: { predicative: both('and', np('BIG'), np('HAPPY')) } }), imperative: true }).ja)
+      .toBe('大きくて幸せになってください。');
+  });
+
+  test('under なる and 思える the te-form replaces the と that joined things', () => {
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), {}, 'SEEM')).toBe('猫は大きくて幸せに思えます。');
+    expect(catIs(both('and', np('HAPPY'), np('TIRED')), {}, 'SEEM')).toBe('猫は幸せで疲れているように思えます。');
+    expect(catIs(both('and', np('LEGEND'), np('DOG', { definiteness: 'indefinite' })), {}, 'SEEM')).toBe('猫は伝説で犬に思えます。');
+    expect(catIs(both('and', np('BIG'), np('HAPPY')), {}, 'BECOME')).toBe('猫は大きくて幸せになります。');
+    expect(catIs(both('and', np('HAPPY'), np('BIG')), {}, 'BECOME')).toBe('猫は幸せで大きくなります。');
+    // "Or" keeps its か, the に once after the last conjunct.
+    expect(catIs(both('or', np('LEGEND'), np('DOG', { definiteness: 'indefinite' })), {}, 'SEEM')).toBe('猫は伝説か犬に思えます。');
+  });
+
+  test('regression: a single predicate is unchanged', () => {
+    expect(catIs(both('and', np('BIG')))).toBe('猫は大きいです。');
+    expect(catIs(both('and', np('HAPPY')), { negative: true, tense: 'past' })).toBe('猫は幸せではありませんでした。');
   });
 });
 

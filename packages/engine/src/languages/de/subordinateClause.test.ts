@@ -174,6 +174,21 @@ describe('subordinateClause', () => {
         .toBe(', der keine Maus essen wird,');
     });
 
+    // A166: a relative that is not a subject relative renders its own subject, and that subject's
+    // "kein" is this clause's negator, as in the main clause. A "kein" HEAD negates the matrix clause,
+    // and a genitive relative's possessed phrase has lost its article, so neither counts.
+    test('the clause\'s own kein subject takes the "nicht" and a kein phrase with it', () => {
+      const noCat = el(np(KATER, { definiteness: 'no' }));
+      expect(relativeOn(MAUS, { headRole: 'directObject', subject: noCat, verbPhrase: vp(ESSEN, { negative: true }) }))
+        .toBe(', die kein Kater isst,');
+      expect(relativeOn(HAUS, { headRole: 'locative', subject: noCat, verbPhrase: vp(ESSEN), directObject: el(np(MAUS, { definiteness: 'no' })) }))
+        .toBe(', in dem kein Kater eine Maus isst,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true }) }, { definiteness: 'no' }))
+        .toBe(', der nicht isst,');
+      expect(relativeOn(JUNGE, { headRole: 'possessor', subject: noCat, verbPhrase: vp(ESSEN, { negative: true }) }))
+        .toBe(', dessen Kater nicht isst,');
+    });
+
     test('"nicht" leads an adverb, whoever it belongs to', () => {
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, modifier: concept(IMMER) }) })).toBe(', der nicht immer isst,');
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, modifier: concept(IMMER) }), directObject: el(np(BUCH)) }))
@@ -198,6 +213,7 @@ describe('subordinateClause', () => {
   });
 
   // A51: a process-level instrument is a subordinate "indem" clause, split out as in the main clause.
+  // B06: its subject is the relative clause's own, as a pronoun — the head's in a subject relative.
   describe('means clause', () => {
     const byChoosingAWord = {
       instrumental: complement(np(WORT, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
@@ -205,16 +221,25 @@ describe('subordinateClause', () => {
 
     test('the "indem" clause trails the finite verb', () => {
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), complements: byChoosingAWord }))
-        .toBe(', der isst , indem man ein Wort wählt,');
+        .toBe(', der isst , indem er ein Wort wählt,');
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, aspect: 'resultative' }), directObject: el(np(BUCH)), complements: byChoosingAWord }))
-        .toBe(', der das Buch nicht gelesen hat , indem man ein Wort wählt,');
+        .toBe(', der das Buch nicht gelesen hat , indem er ein Wort wählt,');
       expect(relativeOn(BUCH, { headRole: 'directObject', subject: el(np(ICH)), verbPhrase: vp(LESEN), complements: byChoosingAWord }))
-        .toBe(', das ich lese , indem man ein Wort wählt,');
+        .toBe(', das ich lese , indem ich ein Wort wähle,');
+    });
+
+    test('its pronoun agrees with whoever does the act: the head, the subject, or the passive agent', () => {
+      expect(relativeOn(KATZE, { headRole: 'subject', verbPhrase: vp(ESSEN), complements: byChoosingAWord }))
+        .toBe(', die isst , indem sie ein Wort wählt,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), complements: byChoosingAWord }, { number: 'plural' }))
+        .toBe(', die essen , indem sie ein Wort wählen,');
+      expect(relativeOn(BUCH, { headRole: 'directObject', subject: el(np(MAN)), verbPhrase: vp(LESEN), complements: byChoosingAWord }))
+        .toBe(', das man liest , indem man ein Wort wählt,');
     });
 
     test('…and a prospective’s extraposed zu-infinitive group', () => {
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'prospective' }), directObject: el(np(BUCH)), complements: byChoosingAWord }))
-        .toBe(', der im Begriff ist , das Buch zu lesen , indem man ein Wort wählt,');
+        .toBe(', der im Begriff ist , das Buch zu lesen , indem er ein Wort wählt,');
     });
 
     test('a concept-level instrument is a phrase, not a clause, and stays in the Mittelfeld', () => {
@@ -257,7 +282,7 @@ describe('subordinateClause', () => {
     // The cause's own shapes come from `causePhrase`; the clause only places them.
     test('a cause trails the direct object, ahead of the verb', () => {
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), directObject: el(np(MAUS)), complements: { cause: complement(np(ICH)) } }))
-        .toBe(', der die Maus wegen mir isst,');
+        .toBe(', der die Maus meinetwegen isst,');
       expect(relativeOn(KATER, {
         headRole: 'subject', verbPhrase: vp(ESSEN, { aspect: 'resultative' }), directObject: el(np(MAUS)),
         complements: { cause: complement(np(MANN), [sentiment('negative')]) },
@@ -274,7 +299,7 @@ describe('subordinateClause', () => {
           terminus: complement(np(MANN)),
           instrumental: complement(np(WORT, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
         },
-      })).toBe(', der dem Mann das Buch gibt , indem man ein Wort wählt,');
+      })).toBe(', der dem Mann das Buch gibt , indem er ein Wort wählt,');
     });
 
     test('a relative clause nests inside another', () => {
@@ -315,11 +340,11 @@ describe('subordinateClause', () => {
       expect(relativeOn(HAUS, { headRole: 'direction', subject: el(np(KATER)), verbPhrase: vp(GEHEN) })).toBe(', zu dem der Kater geht,');
     });
 
-    test('a cause takes "wegen" or "dank" with the dative pronoun, and blames through the genitive', () => {
+    test('a cause takes "wegen" with the genitive pronoun or "dank" with the dative, and blames through the genitive', () => {
       const cause = (forms: Forms, value: CauseSentiment, extra: Forms = {}) =>
         relativeOn(forms, { headRole: 'cause', subject: el(np(KATER)), verbPhrase: vp(ESSEN), headSpecifiers: [sentiment(value)] }, extra);
-      expect(cause(MANN, 'neutral')).toBe(', wegen dem der Kater isst,');
-      expect(cause(KATZE, 'neutral')).toBe(', wegen der der Kater isst,');
+      expect(cause(MANN, 'neutral')).toBe(', wegen dessen der Kater isst,');
+      expect(cause(KATZE, 'neutral')).toBe(', wegen deren der Kater isst,');
       expect(cause(MANN, 'positive', { number: 'plural' })).toBe(', dank denen der Kater isst,');
       expect(cause(MANN, 'negative')).toBe(', durch dessen Schuld der Kater isst,');
       expect(cause(MANN, 'negative', { number: 'plural' })).toBe(', durch deren Schuld der Kater isst,');

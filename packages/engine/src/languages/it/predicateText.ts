@@ -39,6 +39,11 @@ export function predicateText(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   // The demoted agent of a passive clause, rendered as the "da" phrase (see ResolvedPhrase.agent).
   agent?: ResolvedNounElement,
+  // Whether the clause's own subject is a preverbal `no` phrase ("nessun gatto"), which already negates
+  // the clause. The caller's, as in English and German (see `negationSources`): a subject relative is
+  // handed its head's forms for agreement, but a `no` head negates the MATRIX clause, not the relative
+  // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
+  subjectIsNegative = subjectForms['definiteness'] === 'no',
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
@@ -111,7 +116,6 @@ export function predicateText(
   // "a nessun mercato") — obliges the preverbal "non", the same concord as a negative object. But a
   // preverbal negative SUBJECT ("nessun gatto") already negates the clause and carries it, so the
   // "non" is suppressed then: "nessun gatto mangia nessun topo", not "… non mangia …".
-  const subjectIsNegative = subjectForms['definiteness'] === 'no';
   const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)) && !subjectIsNegative ? 'non' : '';
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic

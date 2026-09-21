@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, GROSS, HAUS, JUNGE, KATER, KATZE, KLEIN, np, nounModifier, SEGEL, vp, WORT } from './de.fixtures.js';
+import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, EUROPA, GROSS, HAUS, JUNGE, KATER, KATZE, KLEIN, np, nounModifier, SEGEL, vp, WORT } from './de.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 
 describe('nounPhrase', () => {
@@ -8,6 +8,14 @@ describe('nounPhrase', () => {
     expect(nounPhrase(phrase, 'nom')).toBe('der kleine Kater');
     expect(nounPhrase(phrase, 'acc')).toBe('den kleinen Kater');
     expect(nounPhrase(phrase, 'dat')).toBe('dem kleinen Kater');
+  });
+
+  // A169: a bare-name place takes the article once an adjective modifies it.
+  test('a bare-name place takes the article with an adjective, and stays bare without one', () => {
+    const bigEurope = np(EUROPA, {}, { adjectives: [adj(GROSS)] });
+    expect(nounPhrase(bigEurope, 'nom')).toBe('das große Europa');
+    expect(nounPhrase(bigEurope, 'dat')).toBe('dem großen Europa');
+    expect(nounPhrase(np(EUROPA), 'nom')).toBe('Europa');
   });
 
   test('an indefinite phrase takes ein- and the mixed adjective ending', () => {
@@ -54,8 +62,10 @@ describe('nounPhrase', () => {
     expect(nounPhrase(phrase, 'acc')).toBe('meinen kleinen Kater');
   });
 
-  test('a noun possessor trails as von + dative', () => {
-    expect(nounPhrase(np(BUCH, {}, { possessor: np(JUNGE) }), 'nom')).toBe('das Buch vom Jungen');
+  // B09: a noun possessor trails in the genitive, whatever the head's own case.
+  test('a noun possessor trails in the genitive', () => {
+    expect(nounPhrase(np(BUCH, {}, { possessor: np(JUNGE) }), 'nom')).toBe('das Buch des Jungen');
+    expect(nounPhrase(np(BUCH, {}, { possessor: np(KATER) }), 'dat')).toBe('dem Buch des Katers');
   });
 
   test('a relative clause trails the noun, bracketed by commas', () => {

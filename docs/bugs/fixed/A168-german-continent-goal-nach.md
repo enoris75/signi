@@ -63,3 +63,40 @@ leaves the directional specifiers (`in`, `onto`, …), the terminus and the sour
 | | |
 |---|---|
 | **Test** | `complements/direction.test.ts` → *known bugs: German continent goal "nach"* (1 `test.fails`, plus a regression test for the goals already right) |
+
+## Resolved
+
+Fixed on 2026-09-21 in
+[`de/complementsPhrase/complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts):
+the bare `direction` branch takes `nach` with no article when `isBareNamePlace(f)`, which holds for
+a continent (`isA === 'CONTINENT'`) that is still a `proper` name with no inherent article
+(`takes_article !== '1'`). The directional specifiers, the terminus (ADD's own `zu`) and the source
+are untouched.
+
+**Decisions.**
+
+- **The articled continent** keeps `zur Antarktis`, as pinned. German's goal rule for an articled
+  region (`in die Antarktis`) is left as a separate call.
+- **A modified continent.** A possessive (A165 drops the name's `proper`) or an adjective (A169 marks
+  it `takes_article`) gives the name its article back, and the goal then keeps `zu`: `zu deinem
+  Asien`, `zum großen Asien`. Both fall out of the same test, so nothing extra keys them.
+- **Keying.** The hypernym, as in the Italian and French continent goals. A country or city seeded
+  later wants a place flag on the concept instead; the helper's comment says so.
+- A relative clause whose gap is the goal still reads `Europa, zu dem der Kater geht`: the
+  relativizer stand-in keeps none of the name's forms, so it is not a bare name. The idiomatic
+  relative for a place name is `wohin`, which is a separate change. Not pinned.
+
+Guarded by `complements/direction.test.ts` → *known bugs: German continent goal "nach"*: the former
+`test.fails` now passes, plus a new test for a coordinated goal (`nach Europa und nach Asien`, `nach
+Europa und zum Markt`), another motion verb (`springt nach Afrika`), and the possessed and modified
+continents (`zu deinem Asien`, `zum großen Asien`). The existing regression test is kept. A colocated
+case in `de/complementsPhrase/complementsPhrase.test.ts` covers `nach Europa`, `zur Antarktis`, `zu
+meinem Europa`, `zum großen Europa` and the unchanged `aus Europa`.
+
+**Passing tests whose expectation changed**, both named by this file:
+
+- `complements/direction.test.ts`, *COME to a continent*, "from one continent to another": `'der
+  Kater kommt aus Afrika zu Europa.'` → `'der Kater kommt aus Afrika nach Europa.'`.
+- `complements/direction.test.ts`, *known bugs: German fusion on an articled proper name*, "regression:
+  a bare-name continent keeps no article": `'der Kater geht zu Europa.'` → `'der Kater geht nach
+  Europa.'`. Its point, that no article appears, still holds.

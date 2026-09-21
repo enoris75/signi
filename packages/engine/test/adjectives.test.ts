@@ -146,7 +146,7 @@ describe('nouns as adjectives', () => {
     })).toMatchObject({
       en: 'the word phrase map burns.',
       it: 'la mappa a parola di frase brucia.', // "a parola" + "di frase"
-      de: 'die Wortphrasekarte brennt.',
+      de: 'die Wortphrasenkarte brennt.', // the feminine -e takes its linking -n- (B10)
       ja: '単語のフレーズの地図は燃えます。',
     });
   });
@@ -1392,18 +1392,82 @@ describe('known bugs: German superlative after -isch', () => {
   });
 });
 
-// B10. DELIBERATE — do not "fix" without a product decision. A German compound joins its parts
-// with no linking element (Fugenelement), a simplification `germanCompound` says so in its comment.
-// Many compounds need one: -n- after a feminine -e ("Phrasenschöpfer") or a weak noun
-// ("Jungenbuch"), -s- after -keit/-heit/-ung/-tät ("Geschwindigkeitswort").
-describe('documented simplifications: German compounds', () => {
+// B10, fixed. A German compound joins its parts with the linking element (Fugenelement) its first
+// element takes: -n- after a feminine -e ("Phrasenschöpfer") or a weak noun ("Jungenbuch"), -s-
+// after -keit/-heit/-ung/-tät/-ion/-schaft ("Geschwindigkeitswort"), and a seeded `compound` stem
+// where the choice is lexical ("Hundebuch", "Kinderbuch", "Sprachtaste"). See de/compoundStem.ts.
+describe('German compound linking elements', () => {
   const compound = (head: string, modifier: string) =>
     sayAll(clause(np(head, { nounModifiers: [{ concept: modifier, relation: 'feature' }] }), 'BURN')).de;
 
-  test.fails('German compounds take their linking element', () => {
+  test('German compounds take their linking element', () => {
     expect(compound('CREATOR', 'PHRASE')).toBe('der Phrasenschöpfer brennt.');
     expect(compound('BOOK', 'BOY')).toBe('das Jungenbuch brennt.');
     expect(compound('WORD', 'SPEED')).toBe('das Geschwindigkeitswort brennt.');
+  });
+
+  // The suffix rule: every feminine suffix that takes the -s-, including the C10 string's "the
+  // translation server", which had to drop its modifier rather than ship *Übersetzungserver.
+  test('-s- after the feminine suffixes -ung, -keit, -tät and -ion', () => {
+    expect(compound('SERVER', 'TRANSLATION')).toBe('der Übersetzungsserver brennt.');
+    expect(compound('WORD', 'CONDITION')).toBe('das Bedingungswort brennt.');
+    expect(compound('BOOK', 'QUALITY')).toBe('das Qualitätsbuch brennt.');
+    expect(compound('BOOK', 'POLARITY')).toBe('das Polaritätsbuch brennt.');
+    expect(compound('BUTTON', 'OPTION')).toBe('die Optionstaste brennt.');
+  });
+
+  test('-n- after a feminine -e and after a weak masculine', () => {
+    expect(compound('BOOK', 'BUTTON')).toBe('das Tastenbuch brennt.');
+    expect(compound('BOOK', 'SIZE')).toBe('das Größenbuch brennt.');
+    expect(compound('BOOK', 'OX')).toBe('das Ochsenbuch brennt.');
+    expect(compound('BOOK', 'YOUNG_MAN')).toBe('das Burschenbuch brennt.');
+  });
+
+  // Where the rule would be wrong the lexicon seeds the stem: an -e- or -s- the rule has no reason
+  // for, a plural, a feminine that drops its -e or keeps it bare, a weak noun that takes -ns-.
+  test('a seeded compound stem wins over the rule', () => {
+    expect(compound('BOOK', 'DOG')).toBe('das Hundebuch brennt.');
+    expect(compound('BOOK', 'LIFE')).toBe('das Lebensbuch brennt.');
+    expect(compound('BOOK', 'CHILD')).toBe('das Kinderbuch brennt.');
+    expect(compound('BUTTON', 'LANGUAGE')).toBe('die Sprachtaste brennt.');
+    expect(compound('BUTTON', 'CLIPBOARD')).toBe('die Zwischenablagetaste brennt.');
+    expect(compound('BUTTON', 'NAME_NOUN')).toBe('die Namenstaste brennt.');
+    expect(compound('ICON', 'LOADING')).toBe('das Ladesymbol brennt.');
+  });
+
+  test('a modifier that takes no linking element is joined bare, as before', () => {
+    expect(compound('CREATOR', 'WORD')).toBe('der Wortschöpfer brennt.');
+    expect(compound('BOOK', 'HOUSE')).toBe('das Hausbuch brennt.');
+  });
+
+  test('each of several modifiers takes its own linking element', () => {
+    const stacked = (head: string, ...modifiers: string[]) =>
+      sayAll(clause(np(head, { nounModifiers: modifiers.map((concept) => ({ concept, relation: 'feature' as const })) }), 'BURN')).de;
+    expect(stacked('BUTTON', 'LANGUAGE', 'OPTION')).toBe('die Sprachoptionstaste brennt.');
+    expect(stacked('MAP', 'TRANSLATION', 'WORD')).toBe('die Übersetzungswortkarte brennt.');
+  });
+
+  // The linking element belongs to the modifier; the head still declines as itself.
+  test('the head keeps its own case and number', () => {
+    const creator = (extra: Partial<NounPhrase> = {}) =>
+      np('CREATOR', { nounModifiers: [{ concept: 'PHRASE', relation: 'feature' }], ...extra });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: creator() })).de).toBe('der Kater sieht den Phrasenschöpfer.');
+    expect(sayAll(clause(creator({ number: 'plural' }), 'BURN')).de).toBe('die Phrasenschöpfer brennen.');
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('SERVER', { nounModifiers: [{ concept: 'TRANSLATION', relation: 'feature' }] }) } },
+    })).de).toBe('der Kater läuft im Übersetzungsserver.');
+  });
+
+  test('the other languages are untouched', () => {
+    expect(sayAll(clause(np('CREATOR', { nounModifiers: [{ concept: 'PHRASE', relation: 'feature' }] }), 'BURN'))).toEqual({
+      en: 'the phrase creator burns.',
+      it: 'il creatore a frase brucia.',
+      fr: 'le créateur à phrase brûle.',
+      es: 'el creador de frase arde.',
+      pt: 'o criador a frase arde.',
+      de: 'der Phrasenschöpfer brennt.',
+      ja: 'フレーズの創造者は燃えます。',
+    });
   });
 });
 
@@ -1812,12 +1876,15 @@ describe('the grammar adjectives agree with the noun they name', () => {
 // große Asien", not "große Asien" (no article, and a weak ending with nothing to be weak after). The
 // bare continent prepositions of Italian and French ("in Asia", "en Asie") likewise fit the bare
 // name only; a prenominal adjective needs the article-bearing one ("nella grande Asia").
+// Fixed: German `articledNameForms` marks such a name articled for its determiner, and the Italian
+// and French bare prepositions fire only while the name leads its phrase. A postnominal adjective
+// ("in Asia lontana") and Spanish ("en Asia grande") are left as they are, unpinned.
 describe('known bugs: an adjective on a place name', () => {
   const bigAsia = np('ASIA', { adjectives: ['BIG'] });
   const withPlace = (type: 'locative' | 'direction' | 'source', verb: string) =>
     sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: bigAsia } } }));
 
-  test.fails('German gives the modified name its article, in every position', () => {
+  test('German gives the modified name its article, in every position', () => {
     expect(sayAll(clause(bigAsia, 'BURN')).de).toBe('das große Asien brennt.'); // now: "große Asien"
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: bigAsia })).de).toBe('der Kater sieht das große Asien.');
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('ASIA', { adjectives: ['FAR'] }) })).de)
@@ -1825,10 +1892,10 @@ describe('known bugs: an adjective on a place name', () => {
     expect(withPlace('locative', 'RUN').de).toBe('der Kater läuft im großen Asien.'); // now: "in großen Asien"
     expect(withPlace('direction', 'GO').de).toBe('der Kater geht zum großen Asien.');
     expect(withPlace('source', 'COME').de).toBe('der Kater kommt aus dem großen Asien.');
-    expect(sayAll(clause(np('BOOK', { possessor: bigAsia }), 'BURN')).de).toBe('das Buch vom großen Asien brennt.');
+    expect(sayAll(clause(np('BOOK', { possessor: bigAsia }), 'BURN')).de).toBe('das Buch des großen Asiens brennt.'); // genitive since B09
   });
 
-  test.fails('Italian and French take the article-bearing preposition before a prenominal adjective', () => {
+  test('Italian and French take the article-bearing preposition before a prenominal adjective', () => {
     expect(withPlace('locative', 'RUN')).toMatchObject({
       it: 'il gatto corre nella grande Asia.', // now: "in grande Asia"
       fr: 'le chat court dans la grande Asie.', // now: "en grande Asie"
@@ -1838,6 +1905,42 @@ describe('known bugs: an adjective on a place name', () => {
       fr: 'le chat va dans la grande Asie.',
     });
     expect(withPlace('source', 'COME').fr).toBe('le chat vient de la grande Asie.'); // now: "de grande Asie"
+  });
+
+  // The other German prepositions fuse with the article the adjective brings back, and so does the
+  // passive's "von"; a second adjective, a relation and the Italian/French source behave the same.
+  test('the article comes back after every preposition, and after a relation', () => {
+    const withBig = (type: 'comitative' | 'cause', phrase = bigAsia) =>
+      sayAll(clause(np('CAT'), 'RUN', { complements: { [type]: { phrase } } }));
+    expect(withBig('comitative')).toMatchObject({ de: 'der Kater läuft mit dem großen Asien.', it: 'il gatto corre con la grande Asia.' });
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: bigAsia } } })).de)
+      .toBe('der Kater gibt das Buch ins große Asien.');
+    expect(sayAll(clause(bigAsia, 'SEE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).de)
+      .toBe('das Buch wird vom großen Asien gesehen.');
+    const bigFarEurope = np('EUROPE', { adjectives: ['BIG', 'FAR'] });
+    expect(sayAll(clause(bigFarEurope, 'BURN')).de).toBe('das große ferne Europa brennt.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: bigFarEurope } } }))).toMatchObject({
+      de: 'der Kater läuft im großen fernen Europa.',
+      it: 'il gatto corre nella grande Europa lontana.',
+      fr: 'le chat court dans la grande Europe lointaine.',
+    });
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('EUROPE', { adjectives: ['SMALL'] }) } } })))
+      .toMatchObject({ de: 'der Kater kommt aus dem kleinen Europa.', it: 'il gatto viene dalla piccola Europa.', fr: 'le chat vient de la petite Europe.' });
+  });
+
+  // A possessive, not the article, fills the slot of a possessed name, whatever adjective it has
+  // (A165): German "deinem großen Asien", Italian and French with the article-bearing "in".
+  test('a possessive and an adjective together take the possessive, not the article', () => {
+    const yourBigAsia = np('ASIA', { adjectives: ['BIG'], possessor: { kind: 'pronominal', person: '2', number: 'singular', gender: 'masc' } });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: yourBigAsia } } }))).toMatchObject({
+      de: 'der Kater läuft in deinem großen Asien.',
+      it: 'il gatto corre nella tua grande Asia.',
+      fr: 'le chat court dans ta grande Asie.',
+    });
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: yourBigAsia } } }))).toMatchObject({
+      it: 'il gatto va nella tua grande Asia.',
+      fr: 'le chat va dans ta grande Asie.',
+    });
   });
 
   // Regression: the positions and languages already right, an articled name, and the bare name.

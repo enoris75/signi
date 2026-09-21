@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { ASPECTS, TENSES, type Aspect, type LanguageCode, type Tense } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
+import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
+import { concepts } from '../../backend/src/concepts/index.js';
+import { moodForm } from '../src/mood.js';
 
 // Hypothetical (counterfactual) conditionals, swept combinatorially over tense and aspect.
 //
@@ -205,11 +208,11 @@ describe('known bugs: aspect drops the conditional mood', () => {
 });
 
 // B11. `mood.ts` derives the imperfect subjunctive from the 3pl preterite stem plus -ra endings.
-// Its header lists the 1st plural's missing stem accent as a known gap: "the es/pt 1st-plural
-// forms omit the stem accent (comieramos, not comiéramos)". The accent is required, so this is
-// the correct target.
+// The 1st plural is stressed on the stem's last vowel, the third syllable from the end, so Spanish
+// writes the accent there: comiéramos, hubiéramos, fuéramos. Its header listed the missing accent as
+// a known gap until the user asked for it (fixed 2026-09-21).
 describe('documented simplifications: Spanish 1st-plural imperfect subjunctive', () => {
-  test.fails('Spanish writes the stem accent on the 1st-plural imperfect subjunctive', () => {
+  test('Spanish writes the stem accent on the 1st-plural imperfect subjunctive', () => {
     const ifWe = (aspect: 'neutral' | 'progressive' | 'resultative') => sayAll({
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { aspect } }),
@@ -218,23 +221,118 @@ describe('documented simplifications: Spanish 1st-plural imperfect subjunctive',
     expect(ifWe('resultative')).toBe('si hubiéramos comido, el perro correría.');
     expect(ifWe('progressive')).toBe('si estuviéramos comiendo, el perro correría.');
   });
+
+  // The irregular preterite stems carry through, a modal and a reflexive verb take the accent on
+  // their finite form, and only the 1st plural is marked: "comierais" is stressed on its stem already.
+  test('irregular stems, a modal, a reflexive and the negation take it too; the 2nd plural does not', () => {
+    const ifWe = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+      sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), verb, extra) }).es;
+    expect(ifWe('BE', { complements: { predicative: { phrase: np('STRONG') } } })).toBe('si fuéramos fuertes, el perro correría.');
+    expect(ifWe('GO', { complements: { direction: { phrase: np('HOUSE') } } })).toBe('si fuéramos a la casa, el perro correría.');
+    expect(ifWe('HAVE', { directObject: np('BOOK') })).toBe('si tuviéramos el libro, el perro correría.');
+    expect(ifWe('GIVE', { directObject: np('BOOK') })).toBe('si diéramos el libro, el perro correría.');
+    expect(ifWe('READ', { directObject: np('BOOK') })).toBe('si leyéramos el libro, el perro correría.');
+    expect(ifWe('EAT', { verbPhrase: { modals: ['CAN'] } })).toBe('si pudiéramos comer, el perro correría.');
+    expect(ifWe('MOVE_ONESELF')).toBe('si nos moviéramos, el perro correría.');
+    // The 1st-plural row A101 left unpinned for want of this accent.
+    expect(ifWe('BECOME', { complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } } }))
+      .toBe('si nos volviéramos una leyenda, el perro correría.');
+    expect(ifWe('EAT', { verbPhrase: { negative: true } })).toBe('si no comiéramos, el perro correría.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT') }).es)
+      .toBe('si comierais, el perro correría.');
+  });
+
+  // Every seeded Spanish verb: the 1st plural is the 3pl preterite stem with an acute on its last
+  // vowel, the one written accent in the word. Spanish has no choice of accent to make, so the
+  // sweep checks that no stem escapes the rule (a consonant-final or pre-accented one would).
+  test('every seeded verb writes exactly one acute, on the stem vowel before -ramos', () => {
+    const verbs = seededVerbs('es');
+    expect(verbs.length).toBeGreaterThan(90);
+    const wrong = verbs.flatMap(({ id, forms }) => {
+      const form = moodForm('es', { conceptId: id, forms: plainForms(forms) }, '1pl', 'subjunctive') ?? '';
+      const stem = plainForms(forms)['3pl_past']!.replace(/ron$/, '');
+      const ok = /^[^áéíóú]*[áé]ramos$/.test(form) && unaccent(form) === `${stem}ramos`;
+      return ok ? [] : [`${id}: ${form}`];
+    });
+    expect(wrong).toEqual([]);
+  });
 });
 
 // B11. `mood.ts` builds the Portuguese imperfect subjunctive as the 3pl preterite stem + the
-// endings, and its header lists "the es/pt 1st-plural forms omit the stem accent" as a known gap.
-// The 1st plural stresses the syllable before -ssemos, which Portuguese always writes with an
-// accent: comêssemos, estivéssemos, tivéssemos, fôssemos.
+// endings. The 1st plural stresses the syllable before -ssemos, which Portuguese always writes with an
+// accent: comêssemos, estivéssemos, tivéssemos, fôssemos. The spelling cannot tell ê from é (comeram,
+// tiveram), so the engine reads the 3sg preterite (see `ptStemAccent`). Fixed 2026-09-21.
 describe('documented simplifications: Portuguese 1st-plural imperfect subjunctive', () => {
   const ifWe = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
     sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), verb, extra) }).pt;
 
-  test.fails('Portuguese accents the 1st-plural imperfect subjunctive', () => {
+  test('Portuguese accents the 1st-plural imperfect subjunctive', () => {
     expect(ifWe('EAT')).toBe('se comêssemos, o cão correria.');
     expect(ifWe('BE', { complements: { predicative: { phrase: np('STRONG') } } })).toBe('se fôssemos fortes, o cão correria.');
     expect(ifWe('BE', { complements: { locative: { phrase: np('HOUSE') } } })).toBe('se estivéssemos na casa, o cão correria.');
     expect(ifWe('EAT', { verbPhrase: { aspect: 'resultative' } })).toBe('se tivéssemos comido, o cão correria.');
   });
+
+  // ê for a regular -er verb, é for a strong preterite (dar among them, though its 3sg is "deu"),
+  // í for ver's i-stem, and a modal, a reflexive and the negation alike. The vocês form is unmarked.
+  test('ê or é by the preterite, í and ô by the stem, whatever else the clause carries', () => {
+    expect(ifWe('RUN')).toBe('se corrêssemos, o cão correria.');
+    expect(ifWe('READ', { directObject: np('BOOK') })).toBe('se lêssemos o livro, o cão correria.');
+    expect(ifWe('HAVE', { directObject: np('BOOK') })).toBe('se tivéssemos o livro, o cão correria.');
+    expect(ifWe('MAKE', { directObject: np('BOOK') })).toBe('se fizéssemos o livro, o cão correria.');
+    expect(ifWe('GIVE', { directObject: np('BOOK') })).toBe('se déssemos o livro, o cão correria.');
+    expect(ifWe('SEE', { directObject: np('CAT') })).toBe('se víssemos o gato, o cão correria.');
+    expect(ifWe('GO', { complements: { direction: { phrase: np('HOUSE') } } })).toBe('se fôssemos à casa, o cão correria.');
+    expect(ifWe('EAT', { verbPhrase: { modals: ['CAN'] } })).toBe('se pudéssemos comer, o cão correria.');
+    expect(ifWe('MOVE_ONESELF')).toBe('se nos movêssemos, o cão correria.');
+    // The 1st-plural accent A137 left to this bug.
+    expect(ifWe('BECOME', { complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } } }))
+      .toBe('se nos tornássemos uma lenda, o cão correria.');
+    expect(ifWe('EAT', { verbPhrase: { negative: true } })).toBe('se não comêssemos, o cão correria.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT') }).pt)
+      .toBe('se comessem, o cão correria.');
+  });
+
+  // Every seeded Portuguese verb, checked against an expectation built apart from the engine's rule
+  // (which reads the 3sg preterite): the infinitive's class picks the accent, á for -ar, ê for -er and
+  // í for -ir, except for the irregular preterites, written out by hand here.
+  test('every seeded verb takes the accent its class or its irregular preterite asks for', () => {
+    const IRREGULAR: Record<string, string> = {
+      BE: 'fôssemos', GO: 'fôssemos', GIVE: 'déssemos', SEE: 'víssemos', COME: 'viéssemos',
+      HAVE: 'tivéssemos', HOLD: 'contivéssemos', MAKE: 'fizéssemos', KNOW: 'soubéssemos', CAN: 'pudéssemos', WILL: 'quiséssemos',
+    };
+    const CLASS_ACCENT: Record<string, string> = { ar: 'á', er: 'ê', ir: 'í' };
+    const verbs = seededVerbs('pt');
+    expect(verbs.length).toBeGreaterThan(90);
+    const wrong = verbs.flatMap(({ id, forms }) => {
+      const plain = plainForms(forms);
+      const form = moodForm('pt', { conceptId: id, forms: plain }, '1pl', 'subjunctive');
+      const stem = plain['3pl_past']!.replace(/ram$/, '');
+      const accent = CLASS_ACCENT[plain['base']!.slice(-2)];
+      const expected = IRREGULAR[id] ?? `${unaccent(stem).slice(0, -1)}${accent}ssemos`;
+      return form === expected ? [] : [`${id}: ${form} (want ${expected})`];
+    });
+    expect(wrong).toEqual([]);
+  });
 });
+
+/** Every seeded verb with an entry in `lang`, with its stored forms. */
+function seededVerbs(lang: LanguageCode): { id: string; forms: Record<string, string> }[] {
+  return concepts.filter((c) => c.role === 'verb').flatMap((c) => {
+    const entry = lookupLexicalEntry(c.id, lang);
+    return entry ? [{ id: c.id, forms: entry.forms }] : [];
+  });
+}
+
+/** A reflexive verb's forms as the engines derive them, clitic and "-se" off (see nonReflexiveVerb). */
+function plainForms(forms: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(forms).map(([key, value]) =>
+    [key, key === 'base' ? value.replace(/-?se$/, '') : value.replace(/^(?:me|te|se|nos|os|vos) /, '')]));
+}
+
+function unaccent(word: string): string {
+  return word.normalize('NFD').replace(/[\u0300-\u0302]/g, '').normalize('NFC');
+}
 
 // A101. `moodForm` builds the conditional on the stored `1sg_future` and the imperfect subjunctive on
 // the stored `3pl_past`. For a reflexive verb those forms carry a clitic ("me volveré", "se
@@ -314,7 +412,7 @@ describe('known bugs: Japanese たら protasis', () => {
     expect(ifCat({ modals: ['CAN'] })).toBe('もし猫が食べることができたら、犬は走ります。');
     expect(ifCat({ modals: ['WILL'] })).toBe('もし猫が食べたかったら、犬は走ります。');
     expect(ifCat({ aspect: 'progressive' })).toBe('もし猫が食べていたら、犬は走ります。');
-    expect(ifCat({ aspect: 'resultative' })).toBe('もし猫が食べてしまったら、犬は走ります。');
+    expect(ifCat({ aspect: 'resultative' })).toBe('もし猫が食べていたら、犬は走ります。'); // "if it had eaten" (B05)
   });
 
   test('Japanese builds the たら clause on MUST, the negated modals and aspects, a no object and irregular verbs', () => {
@@ -331,9 +429,10 @@ describe('known bugs: Japanese たら protasis', () => {
     expect(ifCat({ negative: true }, { complements: { locative: { phrase: np('HOUSE') } } }, 'BE')).toBe('もし猫が家にいなかったら、犬は走ります。');
   });
 
-  test('regression: the apodosis keeps its polite negation, and a negated relative clause keeps B13\'s polite form', () => {
+  test('regression: the apodosis keeps its polite negation, and a negated relative clause takes the plain one', () => {
     expect(sayAll({ ...clause(np('DOG'), 'RUN', { verbPhrase: { negative: true } }), condition: clause(np('CAT'), 'EAT') }).ja)
       .toBe('もし猫が食べたら、犬は走りません。');
-    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true } } }), 'RUN')).ja).toBe('食べません猫は走ります。');
+    // The relative clause reads the same nai-form the protasis does (B13).
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true } } }), 'RUN')).ja).toBe('食べない猫は走ります。');
   });
 });

@@ -50,9 +50,12 @@ describe('a clause of purpose', () => {
       de: 'der Kater läuft, um nicht zu fressen.',
       es: 'el gato corre para no comer.',
       pt: 'o gato corre para não comer.',
-      // ja is left out: the citation's negative is the polite 食べません (docs/bugs B13), which
-      // ために then attaches to. The purpose clause is that gap's third call site, not a new one.
+      // The citation's plain negative, which ために attaches to (B13; it read 食べませんために).
+      ja: '猫は食べないために走ります。',
     });
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      purpose: { verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD') },
+    })).ja).toBe('猫は食べ物を食べないために走ります。');
   });
 
   test('a UI label is a command with a purpose — the shape every "click to …" takes', () => {

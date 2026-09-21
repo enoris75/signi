@@ -97,7 +97,7 @@ each engine's surface. e2e: the modal tooltip in `definition-tooltip.spec.ts`. T
 and `@signi/shared` dists must be rebuilt for the backend to serve the new definitions.
 
 Known gap: a **negated** Japanese こと clause inherits the citation's polite negative
-(行動しませんこと) — that is [B13](../../bugs/B-can-fix/B13-japanese-plain-negative.md), not this
+(行動しませんこと) — that is [B13](../../bugs/fixed/B13-japanese-plain-negative.md), not this
 construct, and no definition uses it. The builder has no UI for an infinitive complement; it is a
 plan-level construct the seed uses. The **inchoative** ("to begin to be —") and **causative** glosses
 [C08](C08-copular-and-genus-verbs.md) waits on now have the nesting half of what

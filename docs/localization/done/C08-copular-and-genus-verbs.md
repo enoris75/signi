@@ -165,7 +165,7 @@ negation", the negation riding the caused clause rather than the causing.
   2026-09-20**, as the first of its two shapes: the lexeme carries the agreeing adjective and the
   two engines resolve it against the clause's subject — here the object-controlled causee. The
   table above shows the corrected *juntas*.
-- **The Japanese negated-こと gap ([B13](../../bugs/B-can-fix/B13-japanese-plain-negative.md)) is
+- **The Japanese negated-こと gap ([B13](../../bugs/fixed/B13-japanese-plain-negative.md)) is
   still there** and still avoided: "to cause a person **not to act**" renders 行動しません inside the
   clause. HIDE is unaffected because its negation falls on a *copula*, which has its own plain
   negative (可視ではない).

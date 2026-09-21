@@ -67,7 +67,7 @@ of the phrases it is grammatically eligible for is half-seeded, so it was not se
 
 The message says what did not happen instead — **the phrase could not be translated** — and the
 call site follows it with `status.isServerActive`, which is the question about the server and
-already says it without the compound German cannot form ([B10](../../bugs/B-can-fix/B10-german-compound-linking-element.md)).
+already says it without the compound German cannot form ([B10](../../bugs/fixed/B10-german-compound-linking-element.md)).
 That is the shape `WordMap.tsx` already used for the same failure. The diagnosis is not lost; it
 has moved out of the sentence, which is what C14 concluded about runtime values and what this
 file's own last paragraph says about the instrumental hint.

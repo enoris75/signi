@@ -7,7 +7,8 @@ const sentiment = (value: CauseSentiment): Specifier => ({ kind: 'sentiment', va
 const negative = [sentiment('negative')];
 
 describe('causePhrase', () => {
-  // "wegen" / "dank" + the dative, spelled on the article, is the shared prepositional path's.
+  // "wegen" + the genitive and "dank" + the dative, spelled on the article, are the shared
+  // prepositional path's.
   test('leaves a neutral or positive noun cause to the prepositional path', () => {
     expect(causePhrase(complement(np(MANN)))).toBeUndefined();
     expect(causePhrase(complement(np(MANN), [sentiment('positive')]))).toBeUndefined();
@@ -27,8 +28,9 @@ describe('causePhrase', () => {
     expect(causePhrase(complement(np(MANN, { definiteness: 'relative', number: 'plural' }), negative))).toBe('durch deren Schuld');
   });
 
-  test('a pronoun cause takes its dative form with no article', () => {
-    expect(causePhrase(complement(np(ER)))).toBe('wegen ihm');
+  // B09: "wegen" fuses with a pronoun's possessive stem into one word; "dank" takes its dative.
+  test('a pronoun cause is one "-etwegen" word, or "dank" + its dative form', () => {
+    expect(causePhrase(complement(np(ER)))).toBe('seinetwegen');
     expect(causePhrase(complement(np(DU), [sentiment('positive')]))).toBe('dank dir');
     expect(causePhrase(complement(np(ICH, { number: 'plural', disjunctive: 'uns' }), [sentiment('positive')]))).toBe('dank uns');
   });
@@ -46,13 +48,16 @@ describe('causePhrase', () => {
     expect(blame(ER, { number: 'plural' })).toBe('durch ihre Schuld');
   });
 
+  // Under "dank" a pronoun is its stored dative; "-etwegen" needs only its person, number and gender.
   test('a pronoun with no stored dative falls back to its base form, and with neither drops out of its group', () => {
-    expect(causePhrase(complement(np({ base: 'es', person: '3' })))).toBe('wegen es');
-    expect(causePhrase(complement(el(np(MANN), np({ person: '3' }))))).toBe('wegen dem Mann');
+    const positive = [sentiment('positive')];
+    expect(causePhrase(complement(np({ base: 'es', person: '3' }), positive))).toBe('dank es');
+    expect(causePhrase(complement(el(np(MANN), np({ person: '3' })), positive))).toBe('dank dem Mann');
+    expect(causePhrase(complement(np({ base: 'es', person: '3' })))).toBe('seinetwegen');
   });
 
   test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
-    expect(causePhrase(complement(el(np(MANN), np(DU))))).toBe('wegen dem Mann und dir');
+    expect(causePhrase(complement(el(np(MANN), np(DU))))).toBe('wegen des Mannes und deinetwegen');
     expect(causePhrase(complement(el(np(DU), np(KATZE)), [sentiment('positive')]))).toBe('dank dir und der Katze');
     expect(causePhrase(complement(el(np(ICH), np(DU)), negative))).toBe('durch meine und deine Schuld');
     expect(causePhrase(complement(el(np(MANN), np(ER, { gender: 'fem' })), negative)))

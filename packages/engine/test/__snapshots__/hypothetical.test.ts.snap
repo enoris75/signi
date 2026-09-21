@@ -7,7 +7,7 @@ exports[`hypothetical: anchored cells > a fully-loaded conditional: motion goal,
   "es": "si el animal debiera estar yendo a la Antártida, el ángel estaría a punto de beber el agua.",
   "fr": "si l'animal devait être en train d'aller en Antarctique, l'ange serait sur le point de boire l'eau.",
   "it": "se l'animale dovesse stare andando in Antartide, l'angelo starebbe per bere l'acqua.",
-  "ja": "もし動物が南極大陸へ行く必要があったら、天使は水を飲むところです。",
+  "ja": "もし動物が南極大陸へ行っている必要があったら、天使は水を飲むところです。",
   "pt": "se o animal devesse estar indo à Antártida, o anjo estaria prestes a beber a água.",
 }
 `;
@@ -19,7 +19,7 @@ exports[`hypothetical: anchored cells > prospective present main, with a future 
   "es": "si el gato debiera estar comiendo, el perro estaría a punto de correr.",
   "fr": "si le chat devait être en train de manger, le chien serait sur le point de courir.",
   "it": "se il gatto dovesse stare mangiando, il cane starebbe per correre.",
-  "ja": "もし猫が食べる必要があったら、犬は走るところです。",
+  "ja": "もし猫が食べている必要があったら、犬は走るところです。",
   "pt": "se o gato devesse estar comendo, o cão estaria prestes a correr.",
 }
 `;
@@ -59,7 +59,7 @@ exports[`main: future · neutral > over every tense × aspect of the if clause 1
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "past · neutral": {
@@ -95,7 +95,7 @@ exports[`main: future · neutral > over every tense × aspect of the if clause 1
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "present · neutral": {
@@ -131,7 +131,7 @@ exports[`main: future · neutral > over every tense × aspect of the if clause 1
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
 }
@@ -172,7 +172,7 @@ exports[`main: future · progressive > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "past · neutral": {
@@ -208,7 +208,7 @@ exports[`main: future · progressive > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "present · neutral": {
@@ -244,7 +244,7 @@ exports[`main: future · progressive > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
 }
@@ -285,7 +285,7 @@ exports[`main: future · prospective > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "past · neutral": {
@@ -321,7 +321,7 @@ exports[`main: future · prospective > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "present · neutral": {
@@ -357,7 +357,7 @@ exports[`main: future · prospective > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
 }
@@ -371,7 +371,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "future · progressive": {
@@ -380,7 +380,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "future · prospective": {
@@ -389,7 +389,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "future · resultative": {
@@ -398,7 +398,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "past · neutral": {
@@ -407,7 +407,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "past · progressive": {
@@ -416,7 +416,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "past · prospective": {
@@ -425,7 +425,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "past · resultative": {
@@ -434,7 +434,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "present · neutral": {
@@ -443,7 +443,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "present · progressive": {
@@ -452,7 +452,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "present · prospective": {
@@ -461,7 +461,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "present · resultative": {
@@ -470,7 +470,7 @@ exports[`main: future · resultative > over every tense × aspect of the if clau
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
 }
@@ -511,7 +511,7 @@ exports[`main: past · neutral > over every tense × aspect of the if clause 1`]
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走りました。",
+    "ja": "もし猫が食べていたら、犬は走りました。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "past · neutral": {
@@ -547,7 +547,7 @@ exports[`main: past · neutral > over every tense × aspect of the if clause 1`]
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走りました。",
+    "ja": "もし猫が食べていたら、犬は走りました。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "present · neutral": {
@@ -583,7 +583,7 @@ exports[`main: past · neutral > over every tense × aspect of the if clause 1`]
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走りました。",
+    "ja": "もし猫が食べていたら、犬は走りました。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
 }
@@ -624,7 +624,7 @@ exports[`main: past · progressive > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っていました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "past · neutral": {
@@ -660,7 +660,7 @@ exports[`main: past · progressive > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っていました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "present · neutral": {
@@ -696,7 +696,7 @@ exports[`main: past · progressive > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っていました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
 }
@@ -737,7 +737,7 @@ exports[`main: past · prospective > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところでした。",
+    "ja": "もし猫が食べていたら、犬は走るところでした。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "past · neutral": {
@@ -773,7 +773,7 @@ exports[`main: past · prospective > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところでした。",
+    "ja": "もし猫が食べていたら、犬は走るところでした。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "present · neutral": {
@@ -809,7 +809,7 @@ exports[`main: past · prospective > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところでした。",
+    "ja": "もし猫が食べていたら、犬は走るところでした。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
 }
@@ -823,7 +823,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "future · progressive": {
@@ -832,7 +832,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "future · prospective": {
@@ -841,7 +841,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "future · resultative": {
@@ -850,7 +850,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "past · neutral": {
@@ -859,7 +859,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "past · progressive": {
@@ -868,7 +868,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "past · prospective": {
@@ -877,7 +877,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "past · resultative": {
@@ -886,7 +886,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "present · neutral": {
@@ -895,7 +895,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "present · progressive": {
@@ -904,7 +904,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "present · prospective": {
@@ -913,7 +913,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "present · resultative": {
@@ -922,7 +922,7 @@ exports[`main: past · resultative > over every tense × aspect of the if clause
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいました。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
 }
@@ -963,7 +963,7 @@ exports[`main: present · neutral > over every tense × aspect of the if clause 
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "past · neutral": {
@@ -999,7 +999,7 @@ exports[`main: present · neutral > over every tense × aspect of the if clause 
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
   "present · neutral": {
@@ -1035,7 +1035,7 @@ exports[`main: present · neutral > over every tense × aspect of the if clause 
     "es": "si el gato hubiera comido, el perro correría.",
     "fr": "si le chat avait mangé, le chien courrait.",
     "it": "se il gatto avesse mangiato, il cane correrebbe.",
-    "ja": "もし猫が食べてしまったら、犬は走ります。",
+    "ja": "もし猫が食べていたら、犬は走ります。",
     "pt": "se o gato tivesse comido, o cão correria.",
   },
 }
@@ -1076,7 +1076,7 @@ exports[`main: present · progressive > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "past · neutral": {
@@ -1112,7 +1112,7 @@ exports[`main: present · progressive > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
   "present · neutral": {
@@ -1148,7 +1148,7 @@ exports[`main: present · progressive > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría corriendo.",
     "fr": "si le chat avait mangé, le chien serait en train de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe correndo.",
-    "ja": "もし猫が食べてしまったら、犬は走っています。",
+    "ja": "もし猫が食べていたら、犬は走っています。",
     "pt": "se o gato tivesse comido, o cão estaria correndo.",
   },
 }
@@ -1189,7 +1189,7 @@ exports[`main: present · prospective > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "past · neutral": {
@@ -1225,7 +1225,7 @@ exports[`main: present · prospective > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
   "present · neutral": {
@@ -1261,7 +1261,7 @@ exports[`main: present · prospective > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro estaría a punto de correr.",
     "fr": "si le chat avait mangé, le chien serait sur le point de courir.",
     "it": "se il gatto avesse mangiato, il cane starebbe per correre.",
-    "ja": "もし猫が食べてしまったら、犬は走るところです。",
+    "ja": "もし猫が食べていたら、犬は走るところです。",
     "pt": "se o gato tivesse comido, o cão estaria prestes a correr.",
   },
 }
@@ -1275,7 +1275,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "future · progressive": {
@@ -1284,7 +1284,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "future · prospective": {
@@ -1293,7 +1293,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "future · resultative": {
@@ -1302,7 +1302,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "past · neutral": {
@@ -1311,7 +1311,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "past · progressive": {
@@ -1320,7 +1320,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "past · prospective": {
@@ -1329,7 +1329,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "past · resultative": {
@@ -1338,7 +1338,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
   "present · neutral": {
@@ -1347,7 +1347,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato comiera, el perro habría corrido.",
     "fr": "si le chat mangeait, le chien aurait couru.",
     "it": "se il gatto mangiasse, il cane avrebbe corso.",
-    "ja": "もし猫が食べたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べたら、犬は走っていました。",
     "pt": "se o gato comesse, o cão teria corrido.",
   },
   "present · progressive": {
@@ -1356,7 +1356,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera comiendo, el perro habría corrido.",
     "fr": "si le chat était en train de manger, le chien aurait couru.",
     "it": "se il gatto stesse mangiando, il cane avrebbe corso.",
-    "ja": "もし猫が食べていたら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato estivesse comendo, o cão teria corrido.",
   },
   "present · prospective": {
@@ -1365,7 +1365,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato estuviera a punto de comer, el perro habría corrido.",
     "fr": "si le chat était sur le point de manger, le chien aurait couru.",
     "it": "se il gatto stesse per mangiare, il cane avrebbe corso.",
-    "ja": "もし猫が食べるところだったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べるところだったら、犬は走っていました。",
     "pt": "se o gato estivesse prestes a comer, o cão teria corrido.",
   },
   "present · resultative": {
@@ -1374,7 +1374,7 @@ exports[`main: present · resultative > over every tense × aspect of the if cla
     "es": "si el gato hubiera comido, el perro habría corrido.",
     "fr": "si le chat avait mangé, le chien aurait couru.",
     "it": "se il gatto avesse mangiato, il cane avrebbe corso.",
-    "ja": "もし猫が食べてしまったら、犬は走ってしまいます。",
+    "ja": "もし猫が食べていたら、犬は走っていました。",
     "pt": "se o gato tivesse comido, o cão teria corrido.",
   },
 }

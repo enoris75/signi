@@ -33,4 +33,39 @@ describe('plainVerbSeg', () => {
     expect(plainVerbSeg(concept(AGERU), 'present')).toEqual({ t: 'あげる' });
     expect(plainVerbSeg(concept(AGERU), 'past')).toEqual({ t: 'あげた' });
   });
+
+  // B13: the plain negative is the seeded nai-form; its past turns the final い into かった.
+  describe('negative', () => {
+    const TABENAI = concept({ ...TABERU, nai: '食べない', nai_reading: 'たべない' });
+    const KONAI = concept({ ...KURU, nai: '来ない', nai_reading: 'こない' });
+
+    test('non-past is the nai-form, future included', () => {
+      expect(plainVerbSeg(TABENAI, 'present', true)).toEqual({ t: '食べない', r: 'たべない' });
+      expect(plainVerbSeg(TABENAI, 'future', true)).toEqual({ t: '食べない', r: 'たべない' });
+    });
+
+    test('the past turns its い into かった', () => {
+      expect(plainVerbSeg(TABENAI, 'past', true)).toEqual({ t: '食べなかった', r: 'たべなかった' });
+      expect(plainVerbSeg(concept(SHIRU), 'past', true)).toEqual({ t: '知らなかった', r: 'しらなかった' });
+    });
+
+    test('the reading follows the nai-form: 来ない reads こ', () => {
+      expect(plainVerbSeg(KONAI, 'present', true)).toEqual({ t: '来ない', r: 'こない' });
+      expect(plainVerbSeg(KONAI, 'past', true)).toEqual({ t: '来なかった', r: 'こなかった' });
+    });
+
+    test('a kana nai-form takes no ruby', () => {
+      expect(plainVerbSeg(concept({ ...AGERU, nai: 'あげない' }), 'past', true)).toEqual({ t: 'あげなかった' });
+    });
+
+    test('with no nai-form stored it falls back to the polite negative', () => {
+      expect(plainVerbSeg(concept(TABERU), 'present', true)).toEqual({ t: '食べません', r: 'たべません' });
+      expect(plainVerbSeg(concept(TABERU), 'past', true)).toEqual({ t: '食べませんでした', r: 'たべませんでした' });
+    });
+
+    test('regression: the affirmative ignores the nai-form', () => {
+      expect(plainVerbSeg(TABENAI, 'present', false)).toEqual({ t: '食べる', r: 'たべる' });
+      expect(plainVerbSeg(TABENAI, 'past')).toEqual({ t: '食べた', r: 'たべた' });
+    });
+  });
 });

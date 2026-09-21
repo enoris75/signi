@@ -216,6 +216,16 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ direction: complement(np(EUROPE)) }))).toBe('en Europe');
       expect(complementsPhrase(complements({ direction: complement(np(ANTARCTIQUE)) }))).toBe('en Antarctique');
     });
+
+    // A165: a possessive leading the continent takes the article-bearing "dans" in both the goal and
+    // the place, and the plain "de" of its source; the name's article gives way to it.
+    test('a possessed continent takes dans, and the possessive\'s de', () => {
+      const yours = { possessor: { kind: 'pronominal', person: '2', number: 'singular' } } as const;
+      expect(complementsPhrase(complements({ direction: complement(np(ASIE, {}, yours)) }))).toBe('dans ton Asie');
+      expect(complementsPhrase(complements({ locative: complement(np(EUROPE, {}, yours)) }))).toBe('dans ton Europe');
+      expect(complementsPhrase(complements({ source: complement(np(ANTARCTIQUE, {}, yours)) }), {}, 'COME')).toBe('de ton Antarctique');
+      expect(complementsPhrase(complements({ terminus: complement(np(ASIE, {}, yours)) }))).toBe('à ton Asie');
+    });
   });
 
   describe('route', () => {
@@ -242,6 +252,14 @@ describe('complementsPhrase', () => {
     test('a continent in plain containment is a bare en', () => {
       expect(complementsPhrase(complements({ locative: complement(np(EUROPE)) }))).toBe('en Europe');
       expect(complementsPhrase(complements({ locative: complement(np(AFRIQUE), [path('in')]) }))).toBe('en Afrique');
+    });
+
+    // A169: "en" fits the bare name alone; a prenominal adjective brings back the article and "dans".
+    test('a continent behind a prenominal adjective takes dans and its article', () => {
+      const bigEurope = np(EUROPE, {}, { adjectives: [concept(GRAND, 'BIG')] });
+      expect(complementsPhrase(complements({ locative: complement(bigEurope) }))).toBe('dans la grande Europe');
+      expect(complementsPhrase(complements({ direction: complement(bigEurope) }))).toBe('dans la grande Europe');
+      expect(complementsPhrase(complements({ source: complement(bigEurope) }), {}, 'COME')).toBe('de la grande Europe');
     });
 
     test('a spatial relation picks its preposition, keeping a continent’s article', () => {

@@ -18,8 +18,8 @@ const tired = complements({ predicative: complement(np(MUEDE)) });
 const LEGENDE: Forms = { base: 'Legende', plural: 'Legenden', gender: 'fem', count: 'singular' };
 const aLegend = complements({ predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })) });
 const toTheBoy = complements({ terminus: complement(np(JUNGE)) });
-// "indem man ein Messer wählt" — a process-level instrument. The subject is "man" throughout, so
-// the means clause's impersonal "man" (B06) is also the right German here.
+// "indem man ein Messer wählt" — a process-level instrument. The subject is "man" throughout, and
+// the means clause's subject is the clause's own (B06), so it is "man" here too.
 const byChoosingAKnife = complements({
   instrumental: complement(np(MESSER, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
 });
@@ -198,7 +198,7 @@ describe('renderClause', () => {
     test('a cause trails the object like any other complement', () => {
       const eatsTheMouse = (cause: ReturnType<typeof complement>, extra: Parameters<typeof vp>[1] = {}) =>
         renderClause(clause(np(KATER), vp(ESSEN, extra), { directObject: mouse, complements: complements({ cause }) }));
-      expect(eatsTheMouse(complement(np(ICH)))).toBe('der Kater isst die Maus wegen mir');
+      expect(eatsTheMouse(complement(np(ICH)))).toBe('der Kater isst die Maus meinetwegen');
       expect(eatsTheMouse(complement(el(np(MANN), np(DU)), [sentiment('positive')]))).toBe('der Kater isst die Maus dank dem Mann und dir');
       expect(eatsTheMouse(complement(np(MANN), [sentiment('negative')]), { aspect: 'resultative' }))
         .toBe('der Kater hat die Maus durch die Schuld des Mannes gegessen');

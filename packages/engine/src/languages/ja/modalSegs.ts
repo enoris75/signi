@@ -13,8 +13,9 @@ import { wordSeg } from './wordSeg.js';
 // (its own dictionary and polite-stem shapes, so an outer modal can attach to it in turn),
 // and `kind` — 〜たい is an i-adjective and inflects like one, the others are verbs.
 //
-// Known gap: `aspect` is dropped under a modal. Stacking ～ています inside 〜必要がある is
-// not something the language does periphrastically, so there is nothing to compose.
+// An aspect composes under a modal as the innermost element, in the form the modal governs (B07; see
+// `aspectFormSegs`): 食べている必要があります "needs to be eating / to have eaten", 食べていることができます,
+// 食べていたいです, 食べようとしている必要があります. The caller passes it as `governedSegs`.
 /**
  * The modal chain, built inside-out. `modals[0]` is the outermost and is the only one
  * inflected; each modal governs the form named by its `governs` key, so the main verb
@@ -33,8 +34,9 @@ export function modalSegs(
   form?: JaForm,
   // The outermost modal's ending: polite, plain (a prenominal relative clause) or たら (an "if" clause).
   ending: JaEnding = 'polite',
-  // The innermost element in the form a modal governs: the verb by default, or the copula's predicate,
-  // which has no verb of its own (幸せである必要がある, 伝説でありたい; see `copulaSegs`).
+  // The innermost element in the form a modal governs: the verb by default, the verb in its aspect
+  // (食べている必要がある; see `aspectFormSegs`), or the copula's predicate, which has no verb of its own
+  // (幸せである必要がある, 伝説でありたい; see `copulaSegs`).
   governedSegs: (form: JaForm) => RubySegment[] = (f) => [verbFormSeg(verb, f)],
 ): RubySegment[] {
   if (index === modals.length) return governedSegs(form ?? 'dict');

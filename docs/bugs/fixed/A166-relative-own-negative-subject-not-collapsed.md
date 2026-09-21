@@ -60,3 +60,43 @@ narrowing to *subject* relatives.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: a relative clause's own negative subject is not collapsed* (2 `test.fails`, plus a regression test for the languages and shapes already right) |
+
+## Resolved
+
+2026-09-21. The two relative call sites now pass the relative clause's own subject negativity,
+only when the relative has its own subject. They pass it exactly as the main clause does, so the
+relative collapses its negatives the way A160's main clause does.
+
+- **English**: [`en/relativeText.ts`](../../../packages/engine/src/languages/en/relativeText.ts)
+  passes `!subjectRelative && rel.subject!.agreement['definiteness'] === 'no'` to `predicateParts`.
+  The genitive-relative branch keeps `false`: `relativePossessed` hands the possessed phrase back
+  article-less, since `whose` takes its determiner's place, so its `no` never reaches the surface and
+  cannot stand in for the relative's negation (`the boy whose cat does not eat`).
+- **German**: [`de/subordinateClause.ts`](../../../packages/engine/src/languages/de/subordinateClause.ts)
+  passes the same expression as `subjectIsNegative` to `finiteNegation`, excluding the genitive
+  relative (`possessed`), whose subject sits inside the pronoun.
+- [A167](A167-negative-head-erases-relative-polarity.md), fixed right after, moved both expressions
+  into the shared [`relativeSubjectIsNegative`](../../../packages/engine/src/functions/relativeSubjectIsNegative.ts),
+  which all six engines' relative call sites now ask.
+- The comments on [`negationSources`](../../../packages/engine/src/functions/negationSources.ts),
+  above the German call site, and above the English main clause's call in
+  [`en/renderClause.ts`](../../../packages/engine/src/languages/en/renderClause.ts) are narrowed to
+  **subject** relatives. A `no` head still never counts, so A160's guard (`no cat that does not eat
+  runs.`, `kein Kater, der nicht frisst, läuft.`) is unchanged.
+
+`no` subject + `NEVER` is still doubled inside a relative (`the mouse that no cat never eats`), as it
+is in the main clause. A160's note records that as open, waiting on a seeded NPI adverb (`ever`,
+`je`). Nothing is pinned for it here.
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: a relative clause's own negative subject is not collapsed*. Both pinning
+  `test.fails` are now passing `test`s, with their assertions unchanged. New cases:
+  - every finite shape in the relative dropping its "not"/"nicht": past, a modal, the progressive,
+    and a plural `no` subject;
+  - a locative relative's own `no` subject taking a `no` direct object with it (`the house where no
+    cat eats any mouse`, `das Haus, in dem kein Kater eine Maus frisst`);
+  - a genitive relative keeping its "not" (`the boy whose cat does not eat`, `den Jungen, dessen
+    Kater nicht frisst`).
+- **Unit tests:** [`en/relativeText.test.ts`](../../../packages/engine/src/languages/en/relativeText.test.ts)
+  and [`de/subordinateClause.test.ts`](../../../packages/engine/src/languages/de/subordinateClause.test.ts)
+  cover the object and locative relatives, the `no` head, and the genitive relative.

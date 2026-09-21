@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, Specifier } from '@signi/shared';
-import { BUCH, complement, concept, el, HINZUFUEGEN, MESSER, np, SCHNELL, vp, WAEHLEN, WORT } from '../de.fixtures.js';
+import { BUCH, complement, concept, DU, el, HINZUFUEGEN, ICH, KATER, KATZE, MAN, MESSER, np, SCHNELL, vp, WAEHLEN, WORT } from '../de.fixtures.js';
 import { instrumentActionPhrase } from './instrumentActionPhrase.js';
 
 const abstraction = (value: AbstractionLevel): Specifier => ({ kind: 'abstraction', value });
@@ -13,8 +13,8 @@ describe('instrumentActionPhrase', () => {
     expect(instrumentActionPhrase(complement(np(WORT), [abstraction('process')]))).toBeUndefined();
   });
 
-  // The impersonal "man" is a documented simplification (B06). The leading comma is pulled back
-  // onto the previous word when the sentence is joined.
+  // With no doer the act is nobody's in particular, and German says "man". The leading comma is
+  // pulled back onto the previous word when the sentence is joined.
   test('a process instrument is a comma-led "indem man" clause with an accusative object', () => {
     const word = np(WORT, { definiteness: 'indefinite' });
     expect(instrumentActionPhrase(complement(word, [abstraction('process')], vp(WAEHLEN)))).toBe(', indem man ein Wort wählt');
@@ -24,7 +24,22 @@ describe('instrumentActionPhrase', () => {
       .toBe(', indem man ein Wort und ein Buch wählt');
   });
 
-  test('a process verb with no stored 3sg present falls back to its infinitive, then to nothing', () => {
+  // B06: the clause names whoever wields the instrument, and its verb agrees with that pronoun.
+  test("a doer's personal pronoun is the subject, and the verb agrees with it", () => {
+    const aWord = complement(np(WORT, { definiteness: 'indefinite' }), [abstraction('process')], vp(WAEHLEN));
+    expect(instrumentActionPhrase(aWord, KATER)).toBe(', indem er ein Wort wählt');
+    expect(instrumentActionPhrase(aWord, KATZE)).toBe(', indem sie ein Wort wählt');
+    expect(instrumentActionPhrase(aWord, ICH)).toBe(', indem ich ein Wort wähle');
+    expect(instrumentActionPhrase(aWord, { ...ICH, number: 'plural' })).toBe(', indem wir ein Wort wählen');
+    expect(instrumentActionPhrase(aWord, DU)).toBe(', indem du ein Wort wählst');
+    expect(instrumentActionPhrase(aWord, MAN)).toBe(', indem man ein Wort wählt');
+    expect(instrumentActionPhrase(complement(np(WORT, { definiteness: 'indefinite' }), [abstraction('process')], vp(HINZUFUEGEN)), { ...KATER, number: 'plural' }))
+      .toBe(', indem sie ein Wort hinzufügen');
+    // The concept level has no subject to agree.
+    expect(instrumentActionPhrase(complement(np(WORT), [abstraction('concept')], vp(WAEHLEN)), ICH)).toBe('mit dem Wählen des Wortes');
+  });
+
+  test('a process verb with no stored present for its person falls back to its infinitive, then to nothing', () => {
     const word = np(WORT, { definiteness: 'indefinite' });
     expect(instrumentActionPhrase(complement(word, [abstraction('process')], vp({ base: 'wählen' })))).toBe(', indem man ein Wort wählen');
     expect(instrumentActionPhrase(complement(word, [abstraction('process')], vp({})))).toBe(', indem man ein Wort');

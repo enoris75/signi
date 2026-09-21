@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, BOOT, GROSS, HAUS, np, nounModifier, SEGEL } from './de.fixtures.js';
+import { adj, BOOT, GESCHWINDIGKEIT, GROSS, HAUS, JUNGE, np, nounModifier, SEGEL, WORT } from './de.fixtures.js';
 import { germanCompound } from './germanCompound.js';
 
 const TUER = { base: 'Tür', plural: 'Türen', gender: 'fem', count: 'singular' };
@@ -19,6 +19,17 @@ describe('germanCompound', () => {
   test('chains several modifiers in order into one word', () => {
     const phrase = np(SCHLUESSEL, {}, { nounModifiers: [nounModifier(HAUS), nounModifier(TUER)] });
     expect(germanCompound(phrase, 'Schlüssel')).toBe('Haustürschlüssel');
+  });
+
+  // B10: each modifier enters in its compound stem, linking element included (see `compoundStem`).
+  test('joins each modifier by its linking element', () => {
+    const PHRASE = { base: 'Phrase', plural: 'Phrasen', gender: 'fem', count: 'singular' };
+    const HUND = { base: 'Hund', plural: 'Hunde', gender: 'masc', count: 'singular', compound: 'Hunde' };
+    expect(germanCompound(np(WORT, {}, { nounModifiers: [nounModifier(GESCHWINDIGKEIT)] }), 'Wort')).toBe('Geschwindigkeitswort');
+    expect(germanCompound(np(BOOT, {}, { nounModifiers: [nounModifier(JUNGE)] }), 'Boot')).toBe('Jungenboot');
+    expect(germanCompound(np(HAUS, {}, { nounModifiers: [nounModifier(HUND)] }), 'Haus')).toBe('Hundehaus');
+    expect(germanCompound(np(SCHLUESSEL, {}, { nounModifiers: [nounModifier(PHRASE), nounModifier(GESCHWINDIGKEIT)] }), 'Schlüssel'))
+      .toBe('Phrasengeschwindigkeitsschlüssel');
   });
 
   test('leaves out a modifier that carries its own adjective', () => {

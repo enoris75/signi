@@ -4,10 +4,10 @@
  * loop merges the per-language entry into that verb's forms before persisting them.
  *   • gerund     — present participle / gerundio / gerúndio (en/it/es/pt progressive).
  *   • participle — past participle (all Romance + de/en resultative; fr also for resultative).
- *   • te / te_reading — Japanese te-form, the base for ～ている / ～てしまう.
+ *   • te / te_reading — Japanese te-form, the base for the progressive and the perfect's ～ている.
  *   • nai / nai_reading — Japanese plain negative (食べない), the base for the negative たら
- *     (食べなかったら). Only the "if" clause reads it; a negated relative clause or citation keeps the
- *     polite negative (B13).
+ *     (食べなかったら) and for every plain negative predicate: a negated relative clause (食べない猫,
+ *     食べなかった猫), citation (食べない。) and purpose clause (食べないために) (B13).
  *   • passive / passive_reading — Japanese passive (食べられる), on the **transitive** verbs, the
  *     only ones a passive plan can reach (A01). Where the six European languages build their
  *     passive from an auxiliary plus the `participle` already here, Japanese has morphology:

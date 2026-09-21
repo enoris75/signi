@@ -147,8 +147,13 @@ export function complementsPhrase(
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
       const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
+      // The bare continent "in" fits the bare name alone: one still `proper`, which a possessive takes
+      // away (A165), and leading its phrase, which a prenominal adjective does not let it do (A169).
+      // Otherwise the name has its article back, and "in" fuses with it: "nella tua Asia", "nella
+      // grande Asia".
+      const bareName = (nf: Record<string, string>, lead: string): boolean => nf['proper'] === '1' && lead === nf['base'];
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
+        type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         // The comitative companion takes the same "con" as the instrument — Italian does not
         // separate the two either ("coordina con il periodo").
@@ -160,7 +165,9 @@ export function complementsPhrase(
           dirSpec ? spatialHead(dirSpec, nf, plural, lead) :
           // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with
           // the proper noun's article ("all'Antartide"); an animate goal takes "da", a place "a".
-          nf['isA'] === 'CONTINENT' ? 'in' :
+          // A continent that is no longer a bare name takes the "in" that fuses with its article: "va
+          // nella tua Asia", "va nella grande Asia".
+          nf['isA'] === 'CONTINENT' ? (bareName(nf, lead) ? 'in' : spatialHead('in', nf, plural, lead)) :
           prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
         ) :
         type === 'source'    ? `${sourceAdverb || (nf['animate'] === '1' ? 'via ' : '')}${prepDet('da', nf, plural, lead)}` :

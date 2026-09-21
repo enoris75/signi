@@ -1,10 +1,12 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
+import { negatedAntecedentVerbPhrase } from '../../functions/negatedAntecedentVerbPhrase.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -32,6 +34,9 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
   const rel = np.relative;
   if (!rel) return withPoss;
+  // Under a `no` head the relative asserts nothing about a real referent, so its verb takes the
+  // subjunctive, on every branch below: "nenhum gato que coma" (A170).
+  const verbPhrase = negatedAntecedentVerbPhrase(np, rel.verbPhrase);
   // Genitive relative: "cujo" replaces the possessed phrase's article and agrees with it, not
   // with the head — "um período cujo substantivo é uma palavra", and so does the clause's verb.
   const possessed = relativePossessed(rel);
@@ -39,7 +44,7 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
     const pf = firstConjunct(possessed).head.forms;
     const whose = `cuj${pf['gender'] === 'fem' ? 'a' : 'o'}${isPlural(pf) ? 's' : ''}`;
     const owned = [whose, subjectText(possessed),
-      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements)];
+      predicateText(possessed.agreement, verbPhrase, rel.directObject, rel.complements, false, undefined, relativeSubjectIsNegative(rel))];
     return `${withPoss} ${owned.filter(Boolean).join(' ')}`.trimEnd();
   }
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
@@ -47,7 +52,10 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
   // on agreeForms), not as a subject word — "uma coisa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
-  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, false, rel.agent);
+  // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
+  // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
+  // keeps its "não" ("nenhum gato que não coma corre", A167).
+  const clause = predicateText(agreeForms, verbPhrase, rel.directObject, rel.complements, false, rel.agent, relativeSubjectIsNegative(rel));
   const QUAL = { base: 'qual', plural: 'quais', definiteness: 'definite' };
   // The object of a verb that takes it with a preposition relativises on that preposition, as a
   // complement does: "o botão no qual o gato clica" (A139).

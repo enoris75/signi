@@ -1,6 +1,6 @@
 # A-must-fix — confirmed bugs
 
-Six open as of 2026-09-21 (A165–A170); everything else catalogued in this class has been fixed and
+One open as of 2026-09-21 (A171); everything else catalogued in this class has been fixed and
 moved to [`../fixed/`](../fixed/).
 
 A file belongs here when the engine's output is **wrong** — not a simplification it makes on purpose

@@ -384,7 +384,7 @@ describe('known bugs: a negative complement is not collapsed', () => {
       en: 'the cat does not eat with any word.', de: 'der Kater frisst mit keinem Wort.',
     });
     expect(notWith('CRY', { cause: no('DOG') })).toMatchObject({
-      en: 'the cat does not cry because of any dog.', de: 'der Kater weint wegen keinem Hund.',
+      en: 'the cat does not cry because of any dog.', de: 'der Kater weint wegen keines Hundes.',
     });
   });
 

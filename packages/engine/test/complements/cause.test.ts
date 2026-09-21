@@ -54,7 +54,7 @@ describe('cause: the copular verbs', () => {
       en: 'the cat becomes because of the dog.',
       it: 'il gatto diventa a causa del cane.',
       fr: 'le chat devient à cause du chien.',
-      de: 'der Kater wird wegen dem Hund.',
+      de: 'der Kater wird wegen des Hundes.',
       ja: '猫は犬のためになります。',
     });
   });
@@ -66,7 +66,7 @@ describe('cause: the copular verbs', () => {
     });
     expect(because('APPEAR')).toMatchObject({
       en: 'the cat appears because of the dog.',
-      de: 'der Kater erscheint wegen dem Hund.',
+      de: 'der Kater erscheint wegen des Hundes.',
     });
     expect(because('BE')).toMatchObject({
       en: 'the cat is because of the dog.',
@@ -133,7 +133,58 @@ describe('cause: the negative sentiment in English and German', () => {
   test('neutral and positive connectors are unchanged', () => {
     expect(criesBecauseOf('positive')).toMatchObject({ en: 'the cat cries thanks to the dog.', de: 'der Kater weint dank dem Hund.' });
     expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG') } } })))
-      .toMatchObject({ en: 'the cat cries because of the dog.', de: 'der Kater weint wegen dem Hund.' });
+      .toMatchObject({ en: 'the cat cries because of the dog.', de: 'der Kater weint wegen des Hundes.' });
+  });
+});
+
+// B09. "wegen" governs the genitive in standard written German: "wegen des Hundes", with the
+// determiner, a possessive and the adjectives declined for it. A personal pronoun's genitive is not
+// said after it; standard German fuses the possessive stem with "-etwegen" instead ("meinetwegen").
+// Only where the genitive would not show, a determinerless plural, does it take the dative ("wegen
+// Männern"). "dank" keeps the dative, which is standard beside its genitive. The engine used to write
+// the colloquial dative after "wegen" ("wegen dem Hund", "wegen mir").
+describe('documented simplifications fixed: German "wegen" takes the genitive', () => {
+  const runsBecauseOf = (phrase: NounElement, value: CauseSentiment = 'neutral') =>
+    say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value }] } } }), 'de');
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+
+  test('a noun cause is in the genitive', () => {
+    expect(runsBecauseOf(np('DOG'))).toBe('der Kater läuft wegen des Hundes.');
+    expect(runsBecauseOf(np('CAT', { gender: 'fem' }))).toBe('der Kater läuft wegen der Katze.');
+    expect(runsBecauseOf(np('BOY'))).toBe('der Kater läuft wegen des Jungen.');
+    expect(runsBecauseOf(np('DOG', { definiteness: 'indefinite', adjectives: ['BIG'] }))).toBe('der Kater läuft wegen eines großen Hundes.');
+    expect(runsBecauseOf(np('DOG', { possessor: mine }))).toBe('der Kater läuft wegen meines Hundes.');
+    expect(runsBecauseOf(np('DOG', { number: 'plural' }))).toBe('der Kater läuft wegen der Hunde.');
+    expect(runsBecauseOf(np('EUROPE'))).toBe('der Kater läuft wegen Europas.');
+    expect(runsBecauseOf(np('CAT', { gender: 'fem', definiteness: 'bare', number: 'plural', adjectives: ['SMALL'] })))
+      .toBe('der Kater läuft wegen kleiner Katzen.');
+  });
+
+  test('a determinerless plural, whose genitive would not show, takes the dative', () => {
+    expect(runsBecauseOf(np('MAN', { definiteness: 'bare', number: 'plural' }))).toBe('der Kater läuft wegen Männern.');
+  });
+
+  test('a personal pronoun is one "-etwegen" word, in every person', () => {
+    const pronoun = (concept: string, extra: Partial<NounPhrase> = {}) => runsBecauseOf(np(concept, extra));
+    expect(pronoun('FIRST_PERSON')).toBe('der Kater läuft meinetwegen.');
+    expect(pronoun('SECOND_PERSON')).toBe('der Kater läuft deinetwegen.');
+    expect(pronoun('THIRD_PERSON', { gender: 'masc' })).toBe('der Kater läuft seinetwegen.');
+    expect(pronoun('THIRD_PERSON', { gender: 'fem' })).toBe('der Kater läuft ihretwegen.');
+    expect(pronoun('THIRD_PERSON', { gender: 'neut' })).toBe('der Kater läuft seinetwegen.');
+    expect(pronoun('FIRST_PERSON', { number: 'plural' })).toBe('der Kater läuft unseretwegen.');
+    expect(pronoun('SECOND_PERSON', { number: 'plural' })).toBe('der Kater läuft euretwegen.');
+    expect(pronoun('THIRD_PERSON', { number: 'plural' })).toBe('der Kater läuft ihretwegen.');
+  });
+
+  test('a relative clause on the cause takes the genitive relative pronoun', () => {
+    expect(say(clause(np('DOG', { relative: { headRole: 'cause', subject: np('CAT'), verbPhrase: { verb: 'RUN' } } }), 'BURN'), 'de'))
+      .toBe('der Hund, wegen dessen der Kater läuft, brennt.');
+  });
+
+  test('regression: "dank" keeps the dative, and the negative "Schuld" its genitive', () => {
+    expect(runsBecauseOf(np('DOG'), 'positive')).toBe('der Kater läuft dank dem Hund.');
+    expect(runsBecauseOf(np('SECOND_PERSON'), 'positive')).toBe('der Kater läuft dank dir.');
+    expect(runsBecauseOf(np('DOG'), 'negative')).toBe('der Kater läuft durch die Schuld des Hundes.');
   });
 });
 
@@ -147,15 +198,17 @@ describe('known bugs: German cause with coordinated pronouns', () => {
     })).de;
 
   test('German renders each cause conjunct in its own form', () => {
-    expect(runsBecauseOf('neutral', np('MAN'), np('SECOND_PERSON'))).toBe('der Kater läuft wegen dem Mann und dir.');
-    expect(runsBecauseOf('neutral', np('SECOND_PERSON'), np('MAN'))).toBe('der Kater läuft wegen dir und dem Mann.');
+    expect(runsBecauseOf('neutral', np('MAN'), np('SECOND_PERSON'))).toBe('der Kater läuft wegen des Mannes und deinetwegen.');
+    expect(runsBecauseOf('neutral', np('SECOND_PERSON'), np('MAN'))).toBe('der Kater läuft deinetwegen und wegen des Mannes.');
     expect(runsBecauseOf('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('der Kater läuft durch meine und deine Schuld.');
   });
 
-  test('German shares "wegen" / "dank" across a group holding a pronoun, in any order', () => {
+  // "dank" is said once for the group; a pronoun's "wegen" is inside its one word ("meinetwegen", B09),
+  // so under "wegen" every conjunct brings its own.
+  test('German shares "dank" across a group holding a pronoun, in any order, and repeats "wegen"', () => {
     expect(runsBecauseOf('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('der Kater läuft dank dem Mann und ihnen.');
     expect(runsBecauseOf('positive', np('THIRD_PERSON', { gender: 'fem' }), np('HOUSE'))).toBe('der Kater läuft dank ihr und dem Haus.');
-    expect(runsBecauseOf('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('der Kater läuft wegen dem Hund, mir und der Maus.');
+    expect(runsBecauseOf('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('der Kater läuft wegen des Hundes, meinetwegen und wegen der Maus.');
   });
 
   test('German gives each conjunct its own "Schuld" in a negative group mixing a noun and a pronoun', () => {
@@ -164,9 +217,9 @@ describe('known bugs: German cause with coordinated pronouns', () => {
   });
 
   test('regression: a lone pronoun and a group of nouns are unchanged', () => {
-    expect(runsBecauseOf('neutral', np('FIRST_PERSON'))).toBe('der Kater läuft wegen mir.');
+    expect(runsBecauseOf('neutral', np('FIRST_PERSON'))).toBe('der Kater läuft meinetwegen.');
     expect(runsBecauseOf('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('der Kater läuft durch ihre Schuld.');
-    expect(runsBecauseOf('neutral', np('DOG'), np('MOUSE'))).toBe('der Kater läuft wegen dem Hund und wegen der Maus.');
+    expect(runsBecauseOf('neutral', np('DOG'), np('MOUSE'))).toBe('der Kater läuft wegen des Hundes und wegen der Maus.');
     expect(runsBecauseOf('negative', np('DOG'), np('MOUSE'))).toBe('der Kater läuft durch die Schuld des Hundes und der Maus.');
   });
 });
