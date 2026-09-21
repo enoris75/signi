@@ -227,8 +227,12 @@ const commandOf = (concept: string): PhrasePlan =>
 
 // The named parts of the canvas a control can act on, each with the grammar noun its box is titled
 // by (`slot.*`, `category.adjective`, `satellite.determiner`) and that noun's English for the fallback.
+// The agent is the subject's box and ring in a passive, titled `slot.agent` for the role they play
+// there (de "das Agens löschen", ja 動作主を消去); the voice is the satellite that puts the clause in
+// the passive, whose box is shown and hidden like the tense's (it "nascondi la diatesi", ja 態を隠し).
 const CANVAS_PARTS = {
   subject: { concept: 'SUBJECT_GRAMMAR', en: 'subject' },
+  agent: { concept: 'AGENT_GRAMMAR', en: 'agent' },
   verb: { concept: 'VERB', en: 'verb' },
   object: { concept: 'OBJECT_GRAMMAR', en: 'object' },
   adverb: { concept: 'ADVERB', en: 'adverb' },
@@ -241,6 +245,7 @@ const CANVAS_PARTS = {
   modal: { concept: 'MODAL', en: 'modal' },
   tense: { concept: 'TENSE', en: 'tense' },
   aspect: { concept: 'ASPECT', en: 'aspect' },
+  voice: { concept: 'VOICE', en: 'voice' },
   verbPhrase: { concept: 'VERB_PHRASE', en: 'verb phrase' },
   terminus: { concept: 'TERMINUS', en: 'terminus' },
   locative: { concept: 'LOCATIVE', en: 'locative' },
@@ -264,15 +269,15 @@ const BOXED_COMPLEMENT_PARTS = [
 // has a clear button; the parts behind a reveal control can be shown and hidden; the constituents
 // drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
-  'subject', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
+  'subject', 'agent', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
   ...BOXED_COMPLEMENT_PARTS, 'possessor',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
-  'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'instrumental',
+  'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'voice', 'instrumental',
   ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor',
 ] as const satisfies readonly CanvasPart[];
 export const COLLAPSIBLE_PARTS = [
-  'subject', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
+  'subject', 'agent', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
 ] as const satisfies readonly CanvasPart[];
 // The rings a remove control drops from the clause: the boxed complements. The subject and the object
 // stay (clearing their word empties them), and the instrumental has no ring of its own to remove.
@@ -365,7 +370,9 @@ export const UI_STRINGS = defineUiStrings({
       },
     } as PhrasePlan,
     format: { stripPeriod: true },
-    fallback: 'Semantic phrase builder',
+    // What the engine renders in English, so the header and the tab title read the same before the
+    // bundle lands as after (index.html carries it too, capitalized, until the app boots).
+    fallback: 'semantic phrase creator',
   },
 
   // The heading of the translations area: the TRANSLATION noun in the plural, bare — the
@@ -388,6 +395,17 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Copy the translation',
+  },
+  // The same act as the help sheet names the key for it, which works on whichever row of the panel the
+  // cursor is on: COPY on an indefinite LANGUAGE, one of the seven the user has yet to choose ("copia
+  // una lingua", es "copiar un idioma", ja 言語をコピー).
+  'action.copyLanguage': {
+    plan: {
+      ...commandOf('COPY'),
+      directObject: { concept: 'LANGUAGE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Copy a language',
   },
   // What the same control says once it has copied: the COPIED participle, agreeing with the TRANSLATION
   // it copied (it "copiata", fr "copiée"). Japanese strips the attributive の (コピー済み).
@@ -776,6 +794,20 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'choose',
   },
+  // The period by its name, for a heading or a label: the help sheet's section, and the console's
+  // header, which keeps the number outside the phrase (C14). PERIOD_SENTENCE bare, de "Satzgefüge", ja 文.
+  'period.name': {
+    plan: nameOf('PERIOD_SENTENCE'),
+    format: NAME_FORMAT,
+    fallback: 'Period',
+  },
+  // The bare MOVE command, lower-case like `slot.choose`: a key hint says what the arrows do ("move",
+  // it "sposta", ja 移動), and the help sheet capitalizes it with CSS (the A12 precedent).
+  'action.move': {
+    plan: commandOf('MOVE'),
+    format: { stripPeriod: true },
+    fallback: 'move',
+  },
   // The same box while it is not the active one: the EMPTY adjective, agreeing with the slot it describes
   // (SLOT_COMPUTING, the box's own noun). Lower-case, like `slot.choose`.
   'slot.empty': { word: 'EMPTY', agreesWith: 'SLOT_COMPUTING', fallback: 'empty' },
@@ -876,6 +908,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('COORDINATION'),
     format: NAME_FORMAT,
     fallback: 'Coordination',
+  },
+  // What ⇧C cycles once a noun has a conjunct: the conjunction joining the two, by the bare grammar noun
+  // like the satellite beside it ("congiunzione", de "Konjunktion", ja 接続詞).
+  'satellite.conjunction': {
+    plan: nameOf('CONJUNCTION'),
+    format: NAME_FORMAT,
+    fallback: 'Conjunction',
   },
 
   // The values of the tense satellite, keyed `tense.value.<Tense>` so a call site can write
@@ -1379,6 +1418,28 @@ export const UI_STRINGS = defineUiStrings({
   // The chip under a noun modifier's own adjective that removes it: the bare CLEAR command,
   // lower-case like the chips beside it ("clear", it "cancella", de "löschen").
   'action.clear': { plan: commandOf('CLEAR'), format: { stripPeriod: true }, fallback: 'clear' },
+
+  // The two keys on a box's word, as the hint line and the help sheet name them: each a command on the
+  // definite WORD, the one already in the box. ↵ puts another word in its place, so REPLACE ("sostituisci
+  // la parola", de "das Wort ersetzen"), not CHANGE, whose German *ändern* alters the word itself. ⌫ is
+  // CLEAR, naming what it clears where the bare `action.clear` would read oddly among named parts
+  // ("cancella la parola", ja 単語を消去).
+  'action.replaceWord': {
+    plan: {
+      ...commandOf('REPLACE'),
+      directObject: { concept: 'WORD', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Replace the word',
+  },
+  'action.clearWord': {
+    plan: {
+      ...commandOf('CLEAR'),
+      directObject: { concept: 'WORD', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Clear the word',
+  },
 
   // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
   'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
@@ -2222,6 +2283,128 @@ export const UI_STRINGS = defineUiStrings({
   'degree.value.least': { degree: 'least', fallback: 'least' },
   'degree.value.equally': { degree: 'equally', fallback: 'equally' },
 
+  // ── The phrase console ──────────────────────────────────────────────────────
+  // The console's frame, its key hints, its list titles and its help pages, where their words are
+  // seeded. Command names, values and the syntax stay English in every language (P02's decision 3).
+  // Lower-case unless noted: they are hints and captions, and the list's titles and topics are
+  // uppercased by the CSS.
+
+  // What the key beside the console's title does: the bare HIDE command, lower-case like `slot.choose`
+  // beside its keycap ("hide", it "nascondi", ja 隠し).
+  'action.hide': {
+    plan: commandOf('HIDE'),
+    format: { stripPeriod: true },
+    fallback: 'hide',
+  },
+  // A period with no words yet, as the source strip writes its line: PERIOD_SENTENCE under EMPTY,
+  // "empty period", it "periodo vuoto", de "leeres Satzgefüge", ja 空の文.
+  'period.empty': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['EMPTY'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'empty period',
+  },
+  // The prompt's placeholder: TYPE on a word or a command, the `slot.nounOrPronoun.placeholder` shape
+  // ("type a word or a command", it "digita una parola o un comando", ja 単語か命令を入力). The key that
+  // starts a command is a value, not a word, so the call site writes it after the phrase: "(/)".
+  'console.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'WORD', definiteness: 'indefinite' },
+          { concept: 'COMMAND', definiteness: 'indefinite' },
+        ],
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a word or a command',
+  },
+  // What ↵ does while a period is being edited: REPLACE on the period, definite because it is the one
+  // loaded into the prompt ("replace the period", de "das Satzgefüge ersetzen", ja 文を置き換え).
+  'action.replacePeriod': {
+    plan: {
+      ...commandOf('REPLACE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'replace the period',
+  },
+  // What `/del` does, in the list and on its help page: the bare REMOVE command. What it removes is
+  // the help page's usage line, which spells its arguments out (it "Rimuovi", de "Entfernen").
+  'action.remove': { plan: commandOf('REMOVE'), format: NAME_FORMAT, fallback: 'Remove' },
+
+  // The completion list's titles: what the list holds, a plural bare noun, like the words panel's
+  // headings (`palette.*`). The word a list is about, where there is one, follows the title outside
+  // the phrase (the C14 rule): "commands · cat".
+  'console.list.commands': {
+    plan: { subject: { concept: 'COMMAND', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'commands',
+  },
+  // `/load`'s names: the stored phrases, PHRASE under SAVED, as the load dialog calls them.
+  'console.list.savedPhrases': {
+    plan: {
+      subject: { concept: 'PHRASE', number: 'plural', definiteness: 'bare', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'saved phrases',
+  },
+  'console.list.conjunctions': {
+    plan: { subject: { concept: 'CONJUNCTION', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'conjunctions',
+  },
+  // A reference's periods (de "Satzgefüge", the plural is the singular; ja 文).
+  'console.list.periods': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'periods',
+  },
+  // `/modal`'s words: MODAL, which the traditions name by mood (it "verbi modali", de "Modalverben").
+  'console.list.modals': {
+    plan: { subject: { concept: 'MODAL', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'modals',
+  },
+
+  // The topics the commands are listed under, where no control's name already says it. The role
+  // commands fill the period's own words, WORD plural with the period as its possessor ("the period's
+  // words", it "le parole del periodo", de "die Wörter des Satzgefüges", ja 文の単語); it is also the
+  // help page's part for them. The links between periods are the linked periods themselves, PERIOD
+  // under LINKED ("linked periods", ja リンク済みの文); and `/new`, `/del` and `/edit` act on the period.
+  'console.topic.words': {
+    plan: {
+      subject: {
+        concept: 'WORD',
+        number: 'plural',
+        definiteness: 'definite',
+        possessor: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: "the period's words",
+  },
+  'console.topic.links': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', number: 'plural', definiteness: 'bare', adjectives: ['LINKED'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'linked periods',
+  },
+  'console.topic.period': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'the period',
+  },
+
+  // The placeholders of a help page's usage line, where a command's argument goes: `/subj ( word … )`,
+  // `/save name`, `/help [command]`. Bare nouns (it "parola", "nome", "comando"; de "Wort", "Name",
+  // "Befehl"); the brackets, `#n.noun` and the value lists around them stay as written.
+  'console.usage.word': { plan: nameOf('WORD'), format: { stripPeriod: true }, fallback: 'word' },
+  'console.usage.name': { plan: nameOf('NAME_NOUN'), format: { stripPeriod: true }, fallback: 'name' },
+  'console.usage.command': { plan: nameOf('COMMAND'), format: { stripPeriod: true }, fallback: 'command' },
+
   // The controls that act on one named part of the canvas — a word's clear button, a satellite's
   // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the
   // part's own grammar noun, the one its box is titled with. That noun has to sit *inside* the plan,
@@ -2239,6 +2422,26 @@ export const UI_STRINGS = defineUiStrings({
   ...commandOnEach('action.compact', 'COMPACT', 'Compact', COLLAPSIBLE_PARTS),
   // A complement ring's remove button, which drops the complement from the clause.
   ...commandOnEach('action.remove', 'REMOVE', 'Remove', REMOVABLE_PARTS),
+  // The same remove on whichever complement the cursor is in (⇧⌫), and the verb's + menu that adds one,
+  // named by the grammar noun rather than by one complement: the key works on all of them. Definite for
+  // the complement already there ("rimuovi il complemento", de "die Ergänzung entfernen"), indefinite
+  // for the one the menu has yet to pick ("aggiungi un complemento", ja 補語を追加).
+  'action.removeComplement': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'COMPLEMENT_GRAMMAR', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the complement',
+  },
+  'action.addComplement': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'COMPLEMENT_GRAMMAR', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a complement',
+  },
 
   // The two icon controls in the words sidebar's header, which have no label of their own — the
   // tooltip (and the aria-label it doubles as) is the whole affordance. Both are commands.
@@ -2272,6 +2475,9 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Close the word map',
   },
+  // The bare CLOSE command, lower-case like `action.move`: what esc does to an open picker or menu, in
+  // the picker's key strip ("chiudi", fr "fermer", ja 閉じる). The help sheet capitalizes it with CSS.
+  'action.close': { plan: commandOf('CLOSE'), format: { stripPeriod: true }, fallback: 'close' },
   // The button that fetches the words again after the map failed to load them: the bare RETRY command
   // ("Riprova", "Réessayer", ja 再試行).
   'action.retry': { plan: commandOf('RETRY'), format: NAME_FORMAT, fallback: 'Retry' },
@@ -2654,6 +2860,50 @@ export const UI_STRINGS = defineUiStrings({
     word: ['SECOND', 'PLURAL'],
     agreesWith: 'PERSON_GRAMMAR',
     fallback: 'second plural',
+  },
+
+  // The help sheet's own headings and rows, where no control already names the thing. Each names a
+  // part of the canvas by what it belongs to, the `modifier.adjective` shape: the head bare, as a
+  // heading drops its article (it "Soggetto del comando", de "Subjekt des Befehls"), and the owner
+  // definite, the one there is (en "The command's subject", ja 命令の主語). The command's subject is the
+  // box a command puts in place of the subject; the pronoun's person is what the chooser's 1–4 pick.
+  'help.commandSubject': {
+    plan: {
+      subject: {
+        concept: 'SUBJECT_GRAMMAR',
+        definiteness: 'bare',
+        possessor: { concept: 'COMMAND', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "The command's subject",
+  },
+  'help.pronounPerson': {
+    plan: {
+      subject: {
+        concept: 'PERSON_GRAMMAR',
+        definiteness: 'bare',
+        possessor: { concept: 'PRONOUN', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "The pronoun's person",
+  },
+  // The section for the two panels beside the canvas: their headings' nouns, TRANSLATION and WORD, both
+  // plural and bare as the headings have them, coordinated by `and` ("Traduzioni e parole", de
+  // "Übersetzungen und Wörter", ja 翻訳と単語).
+  'help.translationsAndWords': {
+    plan: {
+      subject: {
+        conjunction: 'and',
+        conjuncts: [
+          { concept: 'TRANSLATION', number: 'plural', definiteness: 'bare' },
+          { concept: 'WORD', number: 'plural', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Translations and words',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

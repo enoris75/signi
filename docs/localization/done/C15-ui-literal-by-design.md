@@ -13,7 +13,7 @@ C: the right outcome is no catalog entry.
 | `1sg` / `3pl` codes | [CorefPickContext.tsx:98-104](../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L98-L104) | language-neutral grammatical notation, the same choice the imperative person buttons make (`imperative.personShort.*` names them in words for the tooltip). They are map *keys*, never shown |
 | Windows &amp; Linux · Mac | [HelpOverlay.tsx:179-184](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L179-L184) | platform names, on the help sheet's switch that redraws the keycaps (added 2026-09-21) |
 | esc · Space · Ctrl, and the ⌘ ⇧ ↵ ⇥ ⌫ ← ↑ → ↓ glyphs | [matchKey.ts:118-139](../../../packages/frontend/src/keyboard/matchKey.ts#L118-L139) | the name printed on the key, in P01's Ctrl-first notation. **Recorded, not decided:** German keyboards print *Strg* for Ctrl and leave the space bar unlabelled (*Leertaste*), so a German user meets English on two caps. Revisit if a keycap ever takes the interface language (added 2026-09-21) |
-| console command names, aliases and value names (`/subj`, `/past`, `lets`, `process`); the syntax (`( ) [ ] { }`, `#2.obj`, `subj\|obj`) | [commands.ts](../../../packages/frontend/src/console/language/commands.ts), [help.ts:11-35](../../../packages/frontend/src/console/language/help.ts#L11-L35) | P02's decision 3: a line reads the same in every interface language. The interface-language aliases find a command, and the descriptions beside it are localized ([A21](../A-ready/A21-ui-console-seeded-words.md)). The usage line's `word` / `name` / `command` placeholders are *not* syntax and are localized there (added 2026-09-21) |
+| console command names, aliases and value names (`/subj`, `/past`, `lets`, `process`); the syntax (`( ) [ ] { }`, `#2.obj`, `subj\|obj`) | [commands.ts](../../../packages/frontend/src/console/language/commands.ts), [help.ts:11-35](../../../packages/frontend/src/console/language/help.ts#L11-L35) | P02's decision 3: a line reads the same in every interface language. The interface-language aliases find a command, and the descriptions beside it are localized ([A21](A21-ui-console-seeded-words.md)). The usage line's `word` / `name` / `command` placeholders are *not* syntax and are localized there (added 2026-09-21) |
 | the console's pronoun names: `1st` `2nd` `3rd` `one`, and the English pronouns it also accepts (`she`, `they`) | [resolve.ts:66-104](../../../packages/frontend/src/console/language/resolve.ts#L66-L104) | part of the console's notation (decision 3). A pronoun is written by its person, like the `1sg` keys above (added 2026-09-21) |
 
 ## Never reaches the user
@@ -45,11 +45,11 @@ read by the reducers and by `visibleSlots` / `nextActiveSlot`.
 This section used to record the **phrase console** (P02) as outstanding rather than decided. The
 sweep of 2026-09-21 catalogued it, together with the keyboard help overlay (P01) and a few strings
 the 2026-09-13 sweep missed on the canvas. The phrase console is now covered by
-[A21](../A-ready/A21-ui-console-seeded-words.md),
+[A21](A21-ui-console-seeded-words.md),
 [B42](../B-needs-seed/B42-ui-console-name.md), [B45](../B-needs-seed/B45-ui-console-lines-history-pins.md)–[B47](../B-needs-seed/B47-ui-console-command-purposes.md)
 and [C21](../C-needs-engine/C21-ui-console-diagnostics.md). The keyboard labels and help overlay are
-[A20](../A-ready/A20-ui-keyboard-labels-on-seeded-words.md), [B41](../B-needs-seed/B41-ui-help-overlay.md),
+[A20](A20-ui-keyboard-labels-on-seeded-words.md), [B41](../B-needs-seed/B41-ui-help-overlay.md),
 [B44](../B-needs-seed/B44-ui-keyboard-movement-labels.md) and [C22](../C-needs-engine/C22-ui-help-prose.md).
-The canvas is [A19](../A-ready/A19-ui-leaks-past-the-catalogue.md), [B40](../B-needs-seed/B40-ui-undo-redo.md)
+The canvas is [A19](A19-ui-leaks-past-the-catalogue.md), [B40](../B-needs-seed/B40-ui-undo-redo.md)
 and [B43](../B-needs-seed/B43-ui-canvas-preview-edit.md). The rows above marked *added 2026-09-21*
 are what that sweep found to be deliberate.

@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useId } from "react";
+import type { UiStringKey } from "@signi/shared";
 import { useUiString } from "../i18n/useUiString.ts";
 import { COMMANDS, TOPICS, shortcutOf, topicOf, type CommandDef, type CommandGroup } from "./language/commands.ts";
 import { MONO, tokenColor } from "./tokens.tsx";
@@ -11,14 +12,17 @@ import { MONO, tokenColor } from "./tokens.tsx";
  * orders them: a setting's shortcuts under the command that names it, each with what it is short for.
  */
 
-// English literals, for /localize.
-const GROUPS: { group: CommandGroup; title: string; note?: string }[] = [
-  { group: "role", title: "The period’s words", note: "take a word; alone they move the context" },
-  { group: "noun", title: "On a noun" },
-  { group: "verb", title: "On a verb" },
-  { group: "adjective", title: "On an adjective" },
-  { group: "period", title: "On a period" },
-  { group: "workspace", title: "On the workspace" },
+// Each part headed by what its commands act on, the bare noun, as the keyboard sheet heads its
+// sections; the CSS uppercases it. `title` is the English, the fallback for `titleKey`. The workspace
+// and the note are English literals, for /localize: WORKSPACE is not seeded (B46), and the note is
+// prose (C22).
+const GROUPS: { group: CommandGroup; title: string; titleKey?: UiStringKey; note?: string }[] = [
+  { group: "role", title: "The period's words", titleKey: "console.topic.words", note: "take a word; alone they move the context" },
+  { group: "noun", title: "Noun", titleKey: "category.noun" },
+  { group: "verb", title: "Verb", titleKey: "slot.verb" },
+  { group: "adjective", title: "Adjective", titleKey: "category.adjective" },
+  { group: "period", title: "Period", titleKey: "period.name" },
+  { group: "workspace", title: "Workspace" },
 ];
 
 export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void }) {
@@ -94,9 +98,10 @@ export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void 
         Choose a command for its page, with an example.
       </Typography>
       <Box sx={{ columnCount: { xs: 1, md: 2, lg: 3 }, columnGap: 4, "& > *": { breakInside: "avoid" } }}>
-        {GROUPS.map(({ group, title, note }) => (
+        {GROUPS.map(({ group, title, titleKey, note }) => (
           <Box key={group} sx={{ mb: 3 }} data-testid={`console-help-${group}`}>
             <Typography
+              data-testid="console-help-part"
               sx={{
                 fontFamily: '"Inter", sans-serif',
                 fontSize: "0.62rem",
@@ -106,7 +111,7 @@ export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void 
                 color: "primary.main",
               }}
             >
-              {title}
+              {titleKey ? t(titleKey) : title}
             </Typography>
             {note && (
               <Typography sx={{ fontStyle: "italic", fontSize: "0.72rem", color: "text.secondary", mb: 0.5 }}>

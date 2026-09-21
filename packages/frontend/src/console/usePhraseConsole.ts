@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type SetStateAction } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { LanguageCode, PhrasePlan } from "@signi/shared";
+import type { LanguageCode, PhrasePlan, UiStringKey } from "@signi/shared";
 import { fetchSavedPhrase, listSavedPhrases, savePhrase } from "../api.ts";
 import { conceptsQuery } from "../hooks/useConcepts.ts";
 import type { WorkspaceHistory } from "../hooks/useWorkspaceHistory.ts";
@@ -45,8 +45,10 @@ const NARROW = 600;
 export type TranscriptEntry =
   | { id: number; kind: "typed"; text: string; containerId: string; plan?: Partial<PhrasePlan> }
   | { id: number; kind: "echo"; parts: EchoPart[]; containerId: string; plan?: Partial<PhrasePlan> }
-  | { id: number; kind: "error"; text: string; message: string }
-  | { id: number; kind: "info"; text: string; detail?: string }
+  /** A mistake. `message` is English, the fallback for `messageKey`, which the transcript draws as shown. */
+  | { id: number; kind: "error"; text: string; message: string; messageKey?: UiStringKey }
+  /** A line that did something besides the phrase. `detail` is English, the fallback for `detailKey`. */
+  | { id: number; kind: "info"; text: string; detail?: string; detailKey?: UiStringKey }
   /**
    * A command's help page (`/help rel`): drawn from the catalogue when shown, so it follows the
    * interface language; `plan` is its example's sentence, and `here` what the command would do at
@@ -116,6 +118,7 @@ const unreadable = (state: WorkspaceState, text: string, context: ConsoleContext
   created: [],
   touched: [],
   filled: [],
+  resolved: [],
 });
 
 const uid = () =>
@@ -620,9 +623,16 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
           try {
             await savePhrase({ name: arg, kind: "phrase", workspace: serializeWorkspace(state.containers, state.links) });
             queryClient.invalidateQueries({ queryKey: ["savedPhrases"] });
-            add({ kind: "info", text: `/save ${arg}`, detail: "Saved." });
+            // What the toolbar's save says, and its failure: the transcript draws them in the
+            // interface language, as it draws a help page.
+            add({ kind: "info", text: `/save ${arg}`, detail: "Saved phrase", detailKey: "toast.phraseSaved" });
           } catch {
-            add({ kind: "error", text: `/save ${arg}`, message: "Could not save the phrase." });
+            add({
+              kind: "error",
+              text: `/save ${arg}`,
+              message: "The phrase could not be saved.",
+              messageKey: "failure.phraseNotSaved",
+            });
           }
           break;
         case "load": {
@@ -642,9 +652,14 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             const { containers, links } = hydrateWorkspace(record.workspace, catalog);
             writing.current = true;
             history.replace({ containers, links });
-            add({ kind: "info", text: `/load ${arg}`, detail: "Loaded." });
+            add({ kind: "info", text: `/load ${arg}`, detail: "Loaded phrase", detailKey: "toast.phraseLoaded" });
           } catch {
-            add({ kind: "error", text: `/load ${arg}`, message: "Could not load the phrase." });
+            add({
+              kind: "error",
+              text: `/load ${arg}`,
+              message: "That phrase could not be loaded.",
+              messageKey: "failure.phraseNotLoaded",
+            });
           }
           break;
         }

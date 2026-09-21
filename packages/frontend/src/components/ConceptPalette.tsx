@@ -9,6 +9,7 @@ import {
 import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
 import { ConceptWord } from '../i18n/ConceptWord.tsx';
+import { useConceptDefinition } from '../i18n/useConceptLabel.ts';
 import { useUiString } from '../i18n/useUiString.ts';
 import { focusRing } from '../keyboard/focusRing.ts';
 
@@ -30,6 +31,9 @@ interface Props {
 export default function ConceptPalette({ role, onSelect, selectedId, disabledIds = [] }: Props) {
   const { data: concepts, isLoading } = useConcepts(role);
   const t = useUiString();
+  // The word's definition in the UI language, as every other word list shows it on hover — not the
+  // seed's English `description`, which the hook falls back to only when no definition was rendered.
+  const definition = useConceptDefinition();
   const config = ROLE_CONFIG[role];
 
   return (
@@ -56,7 +60,7 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
           : concepts?.map((concept) => (
               <Tooltip
                 key={concept.id}
-                title={concept.description}
+                title={definition(concept)}
                 placement="right"
                 arrow
                 enterDelay={400}

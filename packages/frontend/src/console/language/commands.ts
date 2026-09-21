@@ -417,7 +417,8 @@ export const COMMANDS: readonly CommandDef[] = [
       "noun",
       { id: "specifier", value },
       value.replace(/_/g, " "),
-      undefined,
+      // The adposition the relation is spoken with, as the canvas's toolbar names it (C13).
+      `specifier.value.${value}`,
       "sets the relation of a place or a route",
       /^(locative|route)$/,
       ["setSpecifier"],
@@ -436,7 +437,8 @@ export const COMMANDS: readonly CommandDef[] = [
       "noun",
       { id: "sentiment", value },
       description,
-      undefined,
+      // The connector the stance picks, as the cause's toolbar shows it (C13): "thanks to", "per colpa di".
+      `sentiment.connector.${value}`,
       "sets how a cause is felt",
       /^cause$/,
       ["setSentiment"],
@@ -531,7 +533,9 @@ export const COMMANDS: readonly CommandDef[] = [
       "adjective",
       { id: "degree", value },
       value === "positive" ? "plain degree" : `${value} (degree)`,
-      undefined,
+      // What the degree does to an adjective, as the degree chip says it (C13): cited on BIG, so en
+      // "bigger", de "größer". The plain degree adds nothing to say, and waits on its own name (B46).
+      value === "positive" ? undefined : `degree.value.${value}`,
       "sets an adjective’s degree",
       /Adjective\d?$|^predicative$/,
       ["setDegree"],
@@ -631,7 +635,9 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: ["delete", "remove"],
     group: "period",
     description: "remove what the context names",
-    descriptionKey: "action.clear",
+    // REMOVE, as the canvas's remove controls say it: /del takes a word, a link or the period away,
+    // where CLEAR only empties a box. What it removes is its usage line's to say.
+    descriptionKey: "action.remove",
     color: "setting",
     arg: { kind: "text" },
     action: { kind: "del" },
@@ -815,7 +821,7 @@ export interface Topic {
 
 /** Every topic, in the order the list and the reference give them. */
 export const TOPICS: readonly Topic[] = [
-  { id: "words", label: "the period’s words", part: "role" },
+  { id: "words", label: "the period's words", labelKey: "console.topic.words", part: "role" },
   { id: "adjective", label: "adjective", labelKey: "category.adjective", part: "noun" },
   { id: "number", label: "number", labelKey: "satellite.number", part: "noun" },
   { id: "gender", label: "gender", labelKey: "satellite.gender", part: "noun" },
@@ -834,8 +840,8 @@ export const TOPICS: readonly Topic[] = [
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
   { id: "mood", label: "mood", part: "period" },
-  { id: "links", label: "links between periods", part: "period" },
-  { id: "period", label: "the period", part: "period" },
+  { id: "links", label: "linked periods", labelKey: "console.topic.links", part: "period" },
+  { id: "period", label: "the period", labelKey: "console.topic.period", part: "period" },
   { id: "workspace", label: "workspace", part: "workspace" },
 ];
 

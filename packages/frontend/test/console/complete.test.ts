@@ -39,13 +39,14 @@ describe('commands', () => {
   it('opens after / with the commands the box under the cursor takes, and their current values', () => {
     const c = at('/', onCat());
     expect(c.auto).toBe(true);
-    expect(c.title).toBe('commands for');
-    expect(c.about).toBe('cat');
+    // "commands · cat": the list's title from the catalogue, the word it is about after it.
+    expect(c).toMatchObject({ title: 'commands', titleKey: 'console.list.commands', about: 'cat' });
     // Topic by topic, in the order of the noun's own controls, each topic headed.
     expect(c.topics).toBe(true);
     expect(labels(c).slice(0, 5)).toEqual(['/adj', '/sg', '/pl', '/masc', '/fem']);
     const topics = [...new Set(c.candidates.map((x) => x.topic))];
-    expect(topics.slice(0, 8)).toEqual(['adjective', 'number', 'gender', 'determiner', 'possessor', 'relative clause', 'coordination', 'the period’s words']);
+    expect(topics.slice(0, 8)).toEqual(['adjective', 'number', 'gender', 'determiner', 'possessor', 'relative clause', 'coordination', "the period's words"]);
+    expect(c.candidates.find((x) => x.insert === '/subj')!.topicKey).toBe('console.topic.words');
     expect(c.candidates.find((x) => x.label === '/pl')!.current).toEqual({ value: 'singular', key: 'number.value.singular' });
     // Roles, period and workspace commands follow the noun's own.
     expect(labels(c)).toContain('/verb');
@@ -101,6 +102,57 @@ describe('commands', () => {
     expect(at('/verb ( eat /pa').candidates[0]).toMatchObject({ insert: '/past', shortcut: '/tense past' });
     // A setting with no command of its own is short for nothing.
     expect(at('/', onCat()).candidates.find((x) => x.insert === '/pl')!.shortcut).toBeUndefined();
+  });
+
+  it('says what each command does with the words the canvas uses for it', () => {
+    const detail = (text: string, insert: string, opts: Parameters<typeof at>[1] = {}) =>
+      at(text, opts).candidates.find((x) => x.insert === insert)!.detailKey;
+    const place = periods({ subject: byId('CAT'), verb: byId('EAT'), locative: byId('HOUSE') });
+    const onHouse = { state: place, context: { containerId: 'p1', word: { containerId: 'p1', slot: 'locative' as const } } };
+    // The spatial relation by its adposition, the cause's stance by its connector, the degree by what
+    // it does to an adjective — the tooltips of the toolbars and the chip that set them (C13).
+    expect(detail('/', '/under', onHouse)).toBe('specifier.value.under');
+    expect(detail('/', '/front', onHouse)).toBe('specifier.value.in_front_of');
+    expect(detail('/subj ( dog ) /verb ( run ) /cause ( cat ', '/thanks')).toBe('sentiment.connector.positive');
+    expect(detail('/subj ( cat /adj ( big ', '/more')).toBe('degree.value.more');
+    // The plain degree has no word yet (B46).
+    expect(detail('/subj ( cat /adj ( big ', '/plain')).toBeUndefined();
+    expect(detail('/', '/del')).toBe('action.remove');
+  });
+});
+
+describe('titles', () => {
+  const title = (c: Completion) => [c.title, c.titleKey, c.about];
+
+  it('heads a role’s words with the role, as its box is titled', () => {
+    expect(title(at('/subj ( '))).toEqual(['subject', 'slot.subject', undefined]);
+    expect(title(at('/subj ( cat ) /verb ( '))).toEqual(['verb', 'slot.verb', undefined]);
+  });
+
+  it('heads other words with their category, and the modals with their own name', () => {
+    expect(title(at('/subj ( cat /adj '))).toEqual(['adjectives', 'palette.adjective', undefined]);
+    expect(title(at('/subj ( dog ) /verb ( run /adv '))).toEqual(['adverbs', 'palette.adverb', undefined]);
+    expect(title(at('/subj ( cat ) /verb ( eat /modal '))).toEqual(['modals', 'console.list.modals', undefined]);
+  });
+
+  it('heads a link’s targets with the part they will play, then the noun it hangs off', () => {
+    const state = periods({ subject: byId('CHILD'), verb: byId('READ') }, { subject: byId('DOG'), verb: byId('RUN') });
+    const onChild = { state, context: { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' as const } } };
+    expect(title(at('/rel ', onChild))).toEqual(['relative clause', 'satellite.relative', 'child']);
+    expect(title(at('/poss ', onChild))).toEqual(['possessor', 'slot.possessor', 'child']);
+    expect(title(at('/and ', onChild))).toEqual(['coordination', 'satellite.coordination', 'child']);
+    expect(title(at('/if ', { state }))).toEqual(['if-condition', 'clause.conditional', undefined]);
+    expect(title(at('/join and ', { state }))).toEqual(['coordinated clause', 'clause.coordinated', undefined]);
+    expect(title(at('/subj ( child ) /verb ( eat ) /inst ', { state }))).toEqual(['instrument', 'slot.instrumental', undefined]);
+    expect(title(at('#', { state }))).toEqual(['periods', 'console.list.periods', undefined]);
+  });
+
+  it('heads the conjunctions and the saved phrases, and names an empty period as the box is named', () => {
+    expect(title(at('/join '))).toEqual(['conjunctions', 'console.list.conjunctions', undefined]);
+    expect(title(at('/load '))).toEqual(['saved phrases', 'console.list.savedPhrases', undefined]);
+    const state = periods({ subject: byId('CAT') }, {});
+    expect(at('#', { state }).candidates.find((x) => x.insert === '#2')).toMatchObject({ detail: 'empty', detailKey: 'slot.empty' });
+    expect(at('#', { state }).candidates.find((x) => x.insert === '#1')).toMatchObject({ detail: 'cat', detailKey: undefined });
   });
 });
 

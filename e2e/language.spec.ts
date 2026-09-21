@@ -332,6 +332,23 @@ test.describe('interface language', () => {
     ).toBeAttached();
   });
 
+  // A19. The tab's title is the header's — the brand and the tagline, capitalized as a title is — and
+  // the page's `lang` is the interface language, so a screen reader voices it and the browser picks
+  // its glyphs by it. index.html's English is only what shows before the app boots.
+  test('titles the page, and says what language it is in, in the UI language', async ({ app, page }) => {
+    const html = page.locator('html');
+    await expect(page).toHaveTitle('Signi — Semantic phrase creator');
+    await expect(html).toHaveAttribute('lang', 'en');
+
+    await app.setUiLanguage('ja');
+    await expect(page).toHaveTitle('Signi — 意味的なフレーズの創造者');
+    await expect(html).toHaveAttribute('lang', 'ja');
+
+    await app.setUiLanguage('fr');
+    await expect(page).toHaveTitle('Signi — Créateur de phrases sémantiques');
+    await expect(html).toHaveAttribute('lang', 'fr');
+  });
+
   test('leaves the translations themselves alone — every language is always shown', async ({
     app,
   }) => {

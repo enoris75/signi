@@ -17,8 +17,12 @@ import type { UiStringLookup } from "../../i18n/conceptWord.ts";
 // and satellite labels already name each part by its grammar noun, so that key doubles as the part's
 // identity. Its English `label` stays what it was — the fallback, and for a ring the key its collapse
 // state, layout rank and controls are stored under, which must not change with the UI language.
+//
+// A key missing here is a control that speaks English in every language, so every key a control
+// can carry is checked against it (canvasCommands.test.ts).
 const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.subject": "subject",
+  "slot.agent": "agent",
   "slot.verb": "verb",
   "slot.directObject": "object",
   "slot.adverb": "adverb",
@@ -31,6 +35,7 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.modal": "modal",
   "satellite.tense": "tense",
   "satellite.aspect": "aspect",
+  "satellite.voice": "voice",
   "slot.verbPhrase": "verbPhrase",
   "slot.terminus": "terminus",
   "slot.locative": "locative",
@@ -72,7 +77,8 @@ export function collapseTitle(
   labelKey?: UiStringKey,
 ): string {
   const part = partIn(COLLAPSIBLE_PARTS, labelKey);
-  if (!part) return `${collapsed ? "Expand" : "Collapse"} ${label}`;
+  // "Compact", as the catalog says it (COMPACT, not the seeded COLLAPSE, which is "fall down").
+  if (!part) return `${collapsed ? "Expand" : "Compact"} ${label}`;
   return collapsed ? t(`action.expand.${part}`) : t(`action.compact.${part}`);
 }
 

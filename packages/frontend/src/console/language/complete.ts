@@ -96,9 +96,10 @@ export interface Completion {
   candidates: Candidate[];
   /** The rest of the best candidate, drawn after the caret; ⇥ or → takes it. */
   ghost?: string;
-  /** The list's heading, English — with the word it is about, where there is one. */
+  /** The list's heading: what it holds, in English, the fallback for `titleKey`. */
   title: string;
-  /** The word the heading names: "commands for *cat*". */
+  titleKey?: UiStringKey;
+  /** The word the list is about, which the heading shows after it: "commands · *cat*". */
   about?: string;
   /** Whether the list opens by itself here, rather than on ⇥. */
   auto: boolean;
@@ -478,7 +479,8 @@ function commandCompletion(
     to,
     candidates,
     ghost: between ? undefined : ghostFor(`/${query}`, candidates[0]),
-    title: about ? "commands for" : "commands",
+    title: "commands",
+    titleKey: "console.list.commands",
     about,
     auto: !between,
     topics: !query,
@@ -592,10 +594,18 @@ function wordSpecForCommand(def: CommandDef, frame: Frame, words: WordInfo[]): W
   }
 }
 
-function titleForSpec(spec: WordSpec, def: CommandDef): string {
-  if (spec.modal) return "modals";
-  if (def.action.kind === "role") return `${def.description}`;
-  return `${spec.roles[0]}s`;
+/** A list's heading: its English, and the catalogue's key for it where there is one. */
+type Title = Pick<Completion, "title" | "titleKey">;
+
+/**
+ * What a list of words is headed: a role's words by the role, as its box is titled; the modals by
+ * their own name; any other words by their category, as the words panel heads its sections.
+ */
+function titleForSpec(spec: WordSpec, def: CommandDef): Title {
+  if (spec.modal) return { title: "modals", titleKey: "console.list.modals" };
+  if (def.action.kind === "role") return { title: def.description, titleKey: def.descriptionKey };
+  const role = spec.roles[0]!;
+  return { title: `${role}s`, titleKey: `palette.${role}` };
 }
 
 function wordCompletion(
@@ -604,7 +614,7 @@ function wordCompletion(
   query: string,
   spec: WordSpec,
   opts: CompleteOptions,
-  title: string,
+  title: Title,
   color: TokenColor,
   prefix = "",
 ): Completion {
@@ -651,7 +661,7 @@ function wordCompletion(
     to,
     candidates,
     ghost: ghostFor(`${prefix}${query}`, candidates[0]),
-    title,
+    ...title,
     auto: true,
   };
 }
@@ -687,7 +697,12 @@ function valueCompletion(
     to,
     candidates,
     ghost: ghostFor(query, candidates[0]),
-    title: free ? "saved phrases" : def.action.kind === "join" ? "conjunctions" : `values for /${def.name}`,
+    // English literal "values for /…", for /localize: VALUE is not seeded (B46).
+    ...(free
+      ? { title: "saved phrases", titleKey: "console.list.savedPhrases" as const }
+      : def.action.kind === "join"
+        ? { title: "conjunctions", titleKey: "console.list.conjunctions" as const }
+        : { title: `values for /${def.name}` }),
     auto: true,
   };
 }
@@ -730,13 +745,13 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
         return;
       }
       case "condition":
-        if (canBeCondition(state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        if (canBeCondition(state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
         return;
       case "join":
-        if (canBeCoordinate(state.containers, state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        if (canBeCoordinate(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
         return;
       case "instrument":
-        if (canBeInstrument(state.containers, state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        if (canBeInstrument(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
         return;
       case "possessor": {
         // A possessor that refers to another noun of its own period.
@@ -755,13 +770,14 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
   return out.map((c, i) => (i < 9 ? { ...c, number: i + 1 } : c));
 }
 
-function refCandidate(ref: string, concept: Concept | undefined, detail: string): Candidate {
-  return { kind: "ref", insert: ref, label: ref, detail, concept, color: "ref" };
+function refCandidate(ref: string, concept: Concept | undefined, detail: string, detailKey?: UiStringKey): Candidate {
+  return { kind: "ref", insert: ref, label: ref, detail, detailKey, concept, color: "ref" };
 }
 
-/** A period in a few words, for a reference row: its subject and verb. */
-function periodSummary(sel: WorkspaceState["containers"][number]["selection"]): string {
-  return [sel.subject?.label, sel.verb?.label].filter(Boolean).join(" ") || "empty";
+/** A reference row to a period, which it sums up in a few words: its subject and verb, or that it is empty. */
+function periodCandidate(n: number, sel: WorkspaceState["containers"][number]["selection"]): Candidate {
+  const summary = [sel.subject?.label, sel.verb?.label].filter(Boolean).join(" ");
+  return summary ? refCandidate(printRef(n), undefined, summary) : refCandidate(printRef(n), undefined, "empty", "slot.empty");
 }
 
 function linkCompletion(
@@ -806,7 +822,7 @@ function linkCompletion(
   // A possessor or a conjunct may also be named by its word.
   if ((action.kind === "possessor" || action.kind === "conjunct") && q) {
     const spec = wordSpecFor("subject", action.kind === "possessor" ? "possessor" : "conjunct");
-    rows.push(...wordCompletion(from, to, query, spec, opts, "", "primary").candidates);
+    rows.push(...wordCompletion(from, to, query, spec, opts, { title: "" }, "primary").candidates);
   }
   const candidates = rows.filter((r) => !q || r.kind === "word" || r.insert.toLowerCase().startsWith(q) || r.label.toLowerCase().includes(q));
   return {
@@ -814,26 +830,31 @@ function linkCompletion(
     to,
     candidates: candidates.slice(0, MAX_ROWS),
     ghost: ghostFor(query, candidates[0]),
-    title: linkTitle(def),
+    ...linkTitle(def),
     about: headName,
     auto: true,
   };
 }
 
-function linkTitle(def: CommandDef): string {
+/**
+ * What a link's list is headed: the part the target will play, named as the canvas's control for that
+ * link names it — the noun's relative clause, the period's if-condition, the coordinated clause, the
+ * instrument, the noun's possessor, a coordination. The noun it hangs off follows as `about`.
+ */
+function linkTitle(def: CommandDef): Title {
   switch (def.action.kind) {
     case "relative":
-      return "relative clause on";
+      return { title: "relative clause", titleKey: "satellite.relative" };
     case "condition":
-      return "if-condition";
+      return { title: "if-condition", titleKey: "clause.conditional" };
     case "join":
-      return "period to join";
+      return { title: "coordinated clause", titleKey: "clause.coordinated" };
     case "instrument":
-      return "instrument";
+      return { title: "instrument", titleKey: "slot.instrumental" };
     case "possessor":
-      return "possessor of";
+      return { title: "possessor", titleKey: "slot.possessor" };
     default:
-      return "coordinate with";
+      return { title: "coordination", titleKey: "satellite.coordination" };
   }
 }
 
@@ -855,7 +876,7 @@ function refCompletion(
     rows = state.containers.flatMap((c, i) => {
       const n = i + 1;
       return [
-        refCandidate(printRef(n), undefined, periodSummary(c.selection)),
+        periodCandidate(n, c.selection),
         ...(["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[])
           .filter((key) => c.selection[key as SlotKey])
           .map((key) => refCandidate(printRef(n, key), c.selection[key as SlotKey], `period ${n}`)),
@@ -870,7 +891,7 @@ function refCompletion(
     to,
     candidates: candidates.slice(0, MAX_ROWS),
     ghost: ghostFor(typed, candidates[0]),
-    title: owner ? linkTitle(owner) : "periods",
+    ...(owner ? linkTitle(owner) : { title: "periods", titleKey: "console.list.periods" as const }),
     about: (() => {
       const concept = owner ? words.find((w) => takes(owner.action, w))?.concept : undefined;
       return concept ? opts.vocab.label(concept) : undefined;
@@ -898,7 +919,8 @@ function didYouMean(
   const role = COMMANDS.find((c) => c.action.kind === "role" && c.action.slot === slot);
   const def = role ?? COMMANDS.find((c) => c.name === "subj")!;
   const spec = wordSpecFor(def.action.kind === "role" ? def.action.slot : "subject", nounFrame(frame));
-  const c = wordCompletion(from, to, query, spec, opts, "did you mean", def.color, `/${def.name} ( `);
+  // English literal, for /localize: a question, which no seeded words say yet.
+  const c = wordCompletion(from, to, query, spec, opts, { title: "did you mean" }, def.color, `/${def.name} ( `);
   // A bare word never stays: the list says what it would become — the word in its role's bracket.
   c.candidates = c.candidates.map((x) => ({ ...x, close: ")", label: `${x.insert} )` }));
   c.ghost = undefined;

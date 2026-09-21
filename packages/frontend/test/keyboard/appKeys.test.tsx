@@ -67,10 +67,55 @@ describe('the keys that work anywhere', () => {
     expect(within(keys).getByText('Period')).toBeInTheDocument();
     expect(within(keys).getByText('Noun')).toBeInTheDocument();
     expect(within(keys).getByText('Tense')).toBeInTheDocument();
-    expect(within(keys).getByText('If-condition')).toBeInTheDocument();
+    expect(within(keys).getByText('Conditional clause')).toBeInTheDocument();
     // Listed whether or not there is anything to take back: the sheet says what the keys are.
     expect(within(keys).getByText('Undo')).toBeInTheDocument();
     expect(within(keys).getByText('Redo')).toBeInTheDocument();
+  });
+
+  // The sheet's headings and rows are the catalogue's where the words are seeded: the levels by the
+  // nouns the canvas names them with, the keymap's commands by their `labelKey`, and the picker's
+  // rows by the words its own key strip shows.
+  it('lists the keys in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'de');
+    renderWithProviders(<App />, {
+      concepts: CONCEPTS,
+      strings: {
+        'period.name': { de: 'Satzgefüge' },
+        'help.commandSubject': { de: 'Subjekt des Befehls' },
+        'help.translationsAndWords': { de: 'Übersetzungen und Wörter' },
+        'action.movePeriodUp': { de: 'Dieses Satzgefüge nach oben verschieben' },
+        'clause.conditional': { de: 'Konditionaler Satz' },
+        'action.replaceWord': { de: 'Das Wort ersetzen' },
+        'action.move': { de: 'verschieben' },
+        'action.close': { de: 'schließen' },
+        'words.heading': { de: 'Wörter' },
+        'wordMap.heading': { de: 'Wortkarte' },
+        'satellite.relative': { de: 'Relativsatz' },
+        'clause.coordinated': { de: 'Beigeordneter Satz' },
+      },
+    });
+
+    press('?');
+
+    const keys = within(screen.getByRole('dialog')).getByRole('region', {
+      name: 'Keyboard navigation',
+    });
+    expect(within(keys).getByText('Satzgefüge')).toBeInTheDocument();
+    expect(within(keys).getByText('Subjekt des Befehls')).toBeInTheDocument();
+    expect(within(keys).getByText('Übersetzungen und Wörter')).toBeInTheDocument();
+    expect(within(keys).getByText('Dieses Satzgefüge nach oben verschieben')).toBeInTheDocument();
+    expect(within(keys).getByText('Konditionaler Satz')).toBeInTheDocument();
+    expect(within(keys).getByText('Das Wort ersetzen')).toBeInTheDocument();
+    // The picker's bare commands, which the sheet capitalizes with CSS rather than in the text.
+    expect(within(keys).getAllByText('verschieben').length).toBeGreaterThan(0);
+    expect(within(keys).getByText('schließen')).toBeInTheDocument();
+    // A panel's row says which panel before its colon.
+    expect(within(keys).getByText('Wörter: Wortkarte')).toBeInTheDocument();
+    // The link controls a pick serves, each by its own name.
+    expect(within(keys).getByText(/^Relativsatz, .*, Beigeordneter Satz, /)).toBeInTheDocument();
+    expect(within(keys).queryByText('If-condition')).not.toBeInTheDocument();
+    expect(within(keys).queryByText('Move')).not.toBeInTheDocument();
   });
 
   // The key is for whoever knows it; the icon is for whoever does not.

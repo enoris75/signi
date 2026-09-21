@@ -2,7 +2,7 @@ import { Box, IconButton, Tooltip } from "@mui/material";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import TouchAppOutlinedIcon from "@mui/icons-material/TouchAppOutlined";
 import type { PhrasePlan } from "@signi/shared";
 import { nounConjuncts } from "@signi/shared";
@@ -10,7 +10,8 @@ import { fetchTranslation } from "../api.ts";
 import { useUiLanguage } from "../i18n/LanguageContext.tsx";
 import { styleTokens } from "./language/parse.ts";
 import { ECHO_PARTS } from "./language/diff.ts";
-import { helpPage } from "./language/help.ts";
+import { exampleIn, helpPage } from "./language/help.ts";
+import type { Vocabulary } from "./language/types.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import { MONO, Token, tokenColor } from "./tokens.tsx";
 import type { TranscriptEntry } from "./usePhraseConsole.ts";
@@ -25,12 +26,16 @@ export function Transcript({
   entries,
   pins,
   onPin,
+  vocab,
 }: {
   entries: TranscriptEntry[];
   /** The lines pinned; a typed line wears a pin to pin or unpin itself. */
   pins: readonly string[];
   onPin: (line: string, pinned: boolean) => void;
+  /** The interface language's words, which a help page writes its example in. */
+  vocab: Vocabulary;
 }) {
+  const t = useUiString();
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
@@ -70,7 +75,7 @@ export function Transcript({
           </Box>
           <Box sx={{ fontFamily: MONO, fontSize: "0.88rem", overflowWrap: "anywhere" }}>
             {entry.kind === "help" ? (
-              <HelpPage name={entry.name} here={entry.here} />
+              <HelpPage name={entry.name} here={entry.here} vocab={vocab} />
             ) : entry.kind === "echo" ? (
               <Echo entry={entry} />
             ) : (
@@ -80,10 +85,14 @@ export function Transcript({
               <PinToggle pinned={pins.includes(entry.text)} onPin={(pinned) => onPin(entry.text, pinned)} />
             )}
             {entry.kind === "error" && (
-              <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "error.main" }}>{entry.message}</Box>
+              <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "error.main" }}>
+                {entry.messageKey ? t(entry.messageKey) : entry.message}
+              </Box>
             )}
-            {entry.kind === "info" && entry.detail && (
-              <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "text.secondary" }}>{entry.detail}</Box>
+            {entry.kind === "info" && (entry.detail || entry.detailKey) && (
+              <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "text.secondary" }}>
+                {entry.detailKey ? t(entry.detailKey) : entry.detail}
+              </Box>
             )}
           </Box>
           <Box>
@@ -129,13 +138,20 @@ function PinToggle({ pinned, onPin }: { pinned: boolean; onPin: (pinned: boolean
  * A command's help page: how it is written, what it does and what it acts on, its other names, the
  * values it takes, its example (whose sentence sits in the right-hand column), and what it would act
  * on where the page was asked from. Read from the catalogue as it is drawn, so it follows the
- * interface language.
+ * interface language — the usage line's placeholders, and the example's words, which are printed as
+ * the source strip prints them.
  */
-function HelpPage({ name, here }: { name: string; here?: string }) {
+function HelpPage({ name, here, vocab }: { name: string; here?: string; vocab: Vocabulary }) {
   const t = useUiString();
-  const page = helpPage(name);
-  if (!page) return null;
-  const { def, usage, example } = page;
+  const page = helpPage(name, {
+    word: t("console.usage.word"),
+    name: t("console.usage.name"),
+    command: t("console.usage.command"),
+  });
+  const written = page?.example;
+  const example = useMemo(() => (written === undefined ? undefined : exampleIn(written, vocab)), [written, vocab]);
+  if (!page || example === undefined) return null;
+  const { def, usage } = page;
   const prose = { fontFamily: '"Inter", sans-serif', fontSize: "0.8rem", color: "text.secondary", lineHeight: 1.6 };
   return (
     <Box data-testid="help-page" sx={{ py: 0.5 }}>
@@ -150,7 +166,10 @@ function HelpPage({ name, here }: { name: string; here?: string }) {
       </Box>
       {/* English literals, for /localize. */}
       <Box sx={prose}>
-        Written <Box component="span" sx={{ fontFamily: MONO, color: "text.primary" }}>{usage}</Box>
+        Written{" "}
+        <Box component="span" data-testid="help-usage" sx={{ fontFamily: MONO, color: "text.primary" }}>
+          {usage}
+        </Box>
         {def.aliases.length > 0 && <> · also {def.aliases.map((a) => `/${a}`).join(" ")}</>}
       </Box>
       {def.arg.kind === "values" && (
@@ -168,7 +187,7 @@ function HelpPage({ name, here }: { name: string; here?: string }) {
       )}
       <Box sx={{ ...prose, mt: 0.25 }}>
         For example{" "}
-        <Box component="span" sx={{ fontFamily: MONO, fontSize: "0.85rem" }}>
+        <Box component="span" data-testid="help-example" sx={{ fontFamily: MONO, fontSize: "0.85rem" }}>
           <Line text={example} />
         </Box>
       </Box>

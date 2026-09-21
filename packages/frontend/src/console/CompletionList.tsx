@@ -28,8 +28,9 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
 
   if (!completion) return null;
   const numbered = completion.candidates.some((c) => c.number);
-  // English literals, for /localize.
-  const title = completion.about ? `${completion.title} ${completion.about}` : completion.title;
+  // What the list holds, then the word it is about, outside the phrase (the C14 rule): "commands · cat".
+  const heading = completion.titleKey ? t(completion.titleKey) : completion.title;
+  const title = completion.about ? `${heading} · ${completion.about}` : heading;
 
   const row = (c: Candidate, i: number) => {
     const selected = i === highlight;
@@ -188,6 +189,7 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
       }}
     >
       <Box
+        data-testid="console-list-title"
         sx={{
           px: 2,
           pt: 1,
@@ -248,25 +250,26 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
           color: "text.secondary",
         }}
       >
-        {/* English literals, for /localize. */}
         <Box component="span" sx={{ display: "inline-flex", gap: 0.5, alignItems: "center" }}>
           <Keycap spec="ArrowUp" />
           <Keycap spec="ArrowDown" />
-          move
+          {t("action.move")}
         </Box>
+        {/* English literal, for /localize: COMPLETE is not seeded (B45). */}
         <Box component="span" sx={{ display: "inline-flex", gap: 0.5, alignItems: "center" }}>
           <Keycap spec="Tab" />
           complete
         </Box>
+        {/* A digit picks a row as ↵ does: the same act, CHOOSE (the A12 ruling). */}
         {numbered ? (
           <Box component="span" sx={{ display: "inline-flex", gap: 0.5, alignItems: "center" }}>
             <Keycap spec="1" />–<Keycap spec="9" />
-            pick
+            {t("slot.choose")}
           </Box>
         ) : (
           <Box component="span" sx={{ display: "inline-flex", gap: 0.5, alignItems: "center" }}>
             <Keycap spec="Enter" />
-            choose
+            {t("slot.choose")}
           </Box>
         )}
       </Box>

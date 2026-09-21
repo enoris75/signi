@@ -220,4 +220,41 @@ test.describe('the phrase console', () => {
       'the child who loves the cat runs.',
     );
   });
+
+  // A21: the console's own words follow the interface language — its header, the list's title, the
+  // key hints, a help page's usage line, and its example, written in the words of the sentence
+  // beside it as the source strip would write them.
+  test('speaks the interface language: its frame, its lists and its help pages', async ({ app, page }) => {
+    await expect(page.getByTestId('console-period')).toHaveText('Period 1');
+    await app.setUiLanguage('it');
+    await expect(page.getByTestId('console-period')).toHaveText('Periodo 1');
+    await expect(page.getByTestId('source-strip')).toContainText('periodo vuoto');
+    await expect(prompt(page)).toHaveAttribute('placeholder', 'digita una parola o un comando (/)');
+
+    await prompt(page).click();
+    await page.keyboard.type('/');
+    await expect(page.getByTestId('console-list-title')).toHaveText('comandi');
+    await expect(page.getByTestId('console-list')).toContainText('sposta');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+
+    await page.keyboard.type('/help rel');
+    await run(page);
+    const help = page.getByTestId('help-page');
+    await expect(help.first().getByTestId('help-example')).toHaveText(
+      '/subj ( bambino /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )',
+    );
+    await expect(page.getByTestId('transcript-help').getByTestId('transcript-sentence')).toHaveText(
+      'il bambino che ama il gatto corre.',
+    );
+    await page.keyboard.type('/help subj');
+    await run(page);
+    await expect(page.getByTestId('help-page').last().getByTestId('help-usage')).toHaveText('/subj ( parola … )');
+
+    // German keeps its noun capitalized: the header shows the name as the engine renders it.
+    await app.setUiLanguage('de');
+    await expect(page.getByTestId('console-period')).toHaveText('Satzgefüge 1');
+    await expect(help.first().getByTestId('help-example')).toContainText('/subj ( Kind');
+  });
 });

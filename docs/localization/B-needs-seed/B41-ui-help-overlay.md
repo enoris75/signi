@@ -7,7 +7,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 [HelpButton.tsx:16](../../../packages/frontend/src/keyboard/HelpButton.tsx#L16) and
 [HelpOverlay.tsx:144](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L144). The overlay's
 section headings need a few nouns besides. The rows whose words are seeded are in
-[A20](../A-ready/A20-ui-keyboard-labels-on-seeded-words.md), and its paragraphs and notes are in
+[A20](../done/A20-ui-keyboard-labels-on-seeded-words.md), and its paragraphs and notes are in
 [C22](../C-needs-engine/C22-ui-help-prose.md).
 
 ## Seed first

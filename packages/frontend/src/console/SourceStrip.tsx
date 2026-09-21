@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useRef } from "react";
+import { useUiString } from "../i18n/useUiString.ts";
 import { printPeriod, type PrintedPeriod } from "./language/print.ts";
 import { wordMark } from "./ConsoleMarks.tsx";
 import { MONO, Token } from "./tokens.tsx";
@@ -74,6 +75,7 @@ function SourceLine({
   focused: boolean;
   onEdit: () => void;
 }) {
+  const t = useUiString();
   const { context, hoveredBox } = model;
   const cursorMark = context.word ? wordMark(context.word) : undefined;
   const hoveredMark = hoveredBox ? wordMark(hoveredBox) : undefined;
@@ -100,9 +102,8 @@ function SourceLine({
         sx={{ flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
       >
         {printed.tokens.length === 0 ? (
-          // English literal, for /localize.
           <Box component="span" sx={{ color: "text.disabled" }}>
-            empty period
+            {t("period.empty")}
           </Box>
         ) : (
           printed.tokens.map((tok, i) => {

@@ -57,6 +57,18 @@ describe('LanguageProvider', () => {
     expect(screen.getByRole('button', { name: 'panel' })).toHaveTextContent('it');
   });
 
+  // A19: the page's own `lang`, which index.html sets to English before the app boots.
+  it('tells the page which language it is in, and follows a change', () => {
+    document.documentElement.lang = 'en';
+    localStorage.setItem(STORAGE_KEY, 'ja');
+    renderReaders();
+
+    expect(document.documentElement.lang).toBe('ja');
+
+    fireEvent.click(screen.getByRole('button', { name: 'header' }));
+    expect(document.documentElement.lang).toBe('it');
+  });
+
   it('keeps the same setter across a language change, so effects can depend on it', () => {
     const { result } = renderHook(() => useUiLanguage(), { wrapper: LanguageProvider });
     const { setUiLanguage } = result.current;

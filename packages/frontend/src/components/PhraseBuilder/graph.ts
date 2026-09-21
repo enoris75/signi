@@ -99,10 +99,14 @@ export function roleGroups({
   // say so with the words inside them: the object's box becomes the Subject and the subject's the
   // Agent (see `passiveCaptions`, which names the word boxes the same way). Every other group keeps
   // the name it is declared with — a hosted ring's own dressing is the ring's, not the group's.
+  //
+  // Only the `labelKey` changes. The English `label` is the ring's identity — its collapse state,
+  // layout rank and controls are stored under it — so it stays the one the ring is declared with:
+  // renamed, the agent's ring folded nothing and the patient's folded the agent's (A19).
   const named = <K extends UiStringKey>(key: string, label: string, labelKey: K) => {
     if (!passive) return { label, labelKey };
     const slot = passiveCaptions({ key, label, labelKey } as SlotConfig);
-    return { label: slot.label, labelKey: (slot.labelKey ?? labelKey) as K };
+    return { label, labelKey: (slot.labelKey ?? labelKey) as K };
   };
   return [
     ...(showSubject

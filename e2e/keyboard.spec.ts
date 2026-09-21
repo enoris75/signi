@@ -262,7 +262,8 @@ test.describe('the canvas by keyboard', () => {
     await toPeriod(page);
     // The hint line now says what the keys do *here*, a level up from the boxes.
     await expect(page.getByTestId('hint-line')).toContainText('Command');
-    await expect(page.getByTestId('hint-line')).toContainText('If-condition');
+    // I is named by the badge the period wears once it is a condition (`clause.conditional`).
+    await expect(page.getByTestId('hint-line')).toContainText('Conditional clause');
 
     // N is one more period, and ↵ goes into it at its subject.
     await page.keyboard.press('n');
@@ -498,8 +499,10 @@ test.describe('the help overlay', () => {
     await expect(overlay.getByRole('heading', { name: 'Keyboard navigation' })).toBeVisible();
     // Read off the keymaps: the levels, and the caps of a binding at each.
     await expect(overlay.getByText('Anywhere')).toBeVisible();
-    await expect(overlay.getByText('Period', { exact: true })).toBeVisible();
-    await expect(overlay.getByText('Move the period up')).toBeVisible();
+    // The keyboard section's, first: the console's reference below heads a part "Period" too (A21).
+    await expect(overlay.getByText('Period', { exact: true }).first()).toBeVisible();
+    // ⇧↑ is named as the header button it presses is.
+    await expect(overlay.getByText('Move this period up')).toBeVisible();
 
     await overlay.getByRole('button', { name: 'Cancel' }).click();
     await expect(overlay).toBeHidden();
@@ -507,5 +510,40 @@ test.describe('the help overlay', () => {
     // And the key opens the same overlay, from wherever the cursor is.
     await page.keyboard.press('?');
     await expect(page.getByTestId('help-overlay')).toBeVisible();
+  });
+
+  // The keys' names are the catalogue's wherever the words are seeded, so they follow the interface
+  // language: the picker's strip, the hint line, and the sheet's headings and rows.
+  test('names the keys in the interface language', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+
+    // A key typed in the picker makes the page a keyboard user's, and the strip under the list
+    // says what its keys do.
+    await app.subjectInput.focus();
+    await page.keyboard.type('gat');
+    const footer = page.getByTestId('picker-footer-list');
+    await expect(footer).toContainText('sposta');
+    await expect(footer).toContainText('scegli');
+    await expect(footer).toContainText('chiudi');
+
+    await page.getByTestId('help-button').click();
+    // The keyboard section, not the console's reference below it, which names /if the same way.
+    // Its own name is still English (B41).
+    const keys = page
+      .getByTestId('help-overlay')
+      .getByRole('region', { name: 'Keyboard navigation' });
+    await expect(keys.getByText('Periodo', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Soggetto del comando', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Traduzioni e parole', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Sposta questo periodo su', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Proposizione condizionale', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Sostituisci la parola', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Parole: Mappa di parole', { exact: true })).toBeVisible();
+    // The strip's bare command, which the sheet starts on a capital with CSS rather than in the text.
+    const move = keys.getByText('sposta', { exact: true }).first();
+    await expect(move).toBeVisible();
+    expect(
+      await move.evaluate((el) => getComputedStyle(el, '::first-letter').textTransform),
+    ).toBe('uppercase');
   });
 });

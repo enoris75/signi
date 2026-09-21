@@ -1,6 +1,7 @@
 import {
   canCoordinateImperative,
   type AbstractionLevel,
+  type Concept,
   type CoordConjunction,
   type ImperativeRegister,
 } from "@signi/shared";
@@ -11,6 +12,7 @@ import {
   isInstrumentalLink,
   isRelativeLink,
   possessorAddress,
+  type ConceptSelectOpts,
   type ImperativePerson,
   type NounAddress,
   type NounKey,
@@ -145,6 +147,17 @@ export interface Effect {
   span: Span;
 }
 
+/**
+ * A word of the line and the concept it named, among the words `spec` took there — what lets the
+ * line be written again in another language's words (see `printWords`). `opts` is what the word said
+ * beyond its concept: a pronoun's form gives its number and gender ("she").
+ */
+export interface ResolvedWord extends Span {
+  concept: Concept;
+  spec: WordSpec;
+  opts?: ConceptSelectOpts;
+}
+
 export interface ApplyResult {
   state: WorkspaceState;
   /** The first thing wrong, if any: everything before it was applied. */
@@ -167,6 +180,8 @@ export interface ApplyResult {
   touched: WordRef[];
   /** The period words the line's role commands filled, in order — where auto-advance starts from. */
   filled: WordRef[];
+  /** Every word the line named, in the order it was read. */
+  resolved: ResolvedWord[];
 }
 
 export interface ApplyOptions {
@@ -292,6 +307,7 @@ class Run {
   readonly created: string[] = [];
   readonly touched: WordRef[] = [];
   readonly filled: WordRef[] = [];
+  readonly resolved: ResolvedWord[] = [];
 
   constructor(
     state: WorkspaceState,
@@ -326,6 +342,7 @@ class Run {
       created: this.created,
       touched: this.touched,
       filled: this.filled,
+      resolved: this.resolved,
     };
   }
 
@@ -475,7 +492,10 @@ class Run {
   /** The concept a word argument names, or a diagnostic saying why it names none. */
   word(arg: { text: string } & Span, spec: WordSpec, command: string) {
     const res = resolveWord(arg.text, spec, this.vocab);
-    if (res.ok) return res;
+    if (res.ok) {
+      this.resolved.push({ from: arg.from, to: arg.to, concept: res.concept, spec, opts: res.opts });
+      return res;
+    }
     if (res.reason === "ambiguous")
       fail(arg, `“${arg.text}” names ${res.candidates.length} words — choose one: ${res.candidates.map((c) => c.id).join(", ")}.`);
     return fail(arg, `${command} has no word “${arg.text}” — the list shows the ones it takes.`);

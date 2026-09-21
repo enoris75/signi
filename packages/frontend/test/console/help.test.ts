@@ -27,6 +27,21 @@ describe('the help pages', () => {
     expect(usage('level')).toBe('/level process|concept|object');
     expect(usage('rel')).toBe('/rel #n.noun · /rel subj { … } · /rel obj { … }');
     expect(usage('poss')).toBe('/poss word · /poss [ word … ] · /poss #n.noun');
+    expect(usage('save')).toBe('/save name');
+    expect(usage('help')).toBe('/help [command]');
+  });
+
+  it('puts the interface language’s words where the argument goes, and nothing else', () => {
+    const it_ = { word: 'parola', name: 'nome', command: 'comando' };
+    const usage = (name: string) => usageOf(COMMANDS.find((c) => c.name === name)!, it_);
+    expect(usage('subj')).toBe('/subj ( parola … )');
+    expect(usage('poss')).toBe('/poss parola · /poss [ parola … ] · /poss #n.noun');
+    expect(usage('save')).toBe('/save nome');
+    expect(usage('help')).toBe('/help [comando]');
+    // The values, the references and the brackets are the console's own, in every language.
+    expect(usage('level')).toBe('/level process|concept|object');
+    expect(usage('del')).toBe('/del [subj|obj|adj n|adv|modal n|poss|and n|rel|if|join|inst|period]');
+    expect(helpPage('adj', it_)?.usage).toBe('/adj parola · /adj ( parola … )');
   });
 
   it('finds a page by name, alias or slash', () => {

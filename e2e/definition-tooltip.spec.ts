@@ -335,6 +335,23 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un piccolo mammifero');
   });
 
+  // A19. The words panel titled its words with the seed's English description ("domestic feline
+  // animal"), so none of the definitions above reached it, in any language.
+  test('the words panel defines its words as the pickers do, in the UI language', async ({ app, page }) => {
+    const panel = page.locator('[data-kb-region="words"]');
+    const cat = panel.locator('[data-kb-word="CAT"]').first();
+
+    await page.getByRole('button', { name: 'Words', exact: true }).click();
+    await expect(panel).not.toHaveAttribute('inert', '');
+    await cat.hover();
+    await expect(page.locator(tooltip)).toHaveText('a small mammal');
+
+    await app.setUiLanguage('it');
+    await page.mouse.move(0, 0);
+    await cat.hover();
+    await expect(page.locator(tooltip)).toHaveText('un piccolo mammifero');
+  });
+
   test('a genus+differentia noun definition renders (localize-seed A01: BOY)', async ({
     app,
     page,
@@ -1264,5 +1281,80 @@ test.describe('word definition tooltip', () => {
     await expect(addFr).toBeVisible();
     await addFr.hover();
     await expect(page.locator(tooltip)).toHaveText("induire un objet à être avec d'autres objets");
+  });
+
+  test('a passive with an essive complement glosses SEEM (localization A16)', async ({ app, page }) => {
+    // The passive of PERCEIVE drops its promoted subject in the citation, and the essive takes the
+    // object *as* something without making it one. German says the essive with "als", bare.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('seem');
+    const seemEn = page.locator('[data-testid="typeahead-option"][data-concept="SEEM"]');
+    await expect(seemEn).toBeVisible();
+    await seemEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to be perceived as an object');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('seem');
+    const seemDe = page.locator('[data-testid="typeahead-option"][data-concept="SEEM"]');
+    await expect(seemDe).toBeVisible();
+    await seemDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('als Gegenstand empfunden werden');
+  });
+
+  test('a superlative tells one continent from the others (localization A17: ASIA)', async ({
+    app,
+    page,
+  }) => {
+    // A definite CONTINENT under BIG at degree `most`. German says the superlative in one inflected
+    // word, umlaut included.
+    await app.subjectInput.fill('asia');
+    const asiaEn = page.locator('[data-testid="typeahead-option"][data-concept="ASIA"]');
+    await expect(asiaEn).toBeVisible();
+    await asiaEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('the biggest continent');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('asia');
+    const asiaDe = page.locator('[data-testid="typeahead-option"][data-concept="ASIA"]');
+    await expect(asiaDe).toBeVisible();
+    await asiaDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('der größte Kontinent');
+  });
+
+  test('a clause is a phrase that has a subject (localization A18: CLAUSE)', async ({ app, page }) => {
+    // The one grammar noun whose object is indefinite and singular. Japanese says the inanimate
+    // HAVE with ある, not 持つ.
+    await app.subjectInput.fill('clause');
+    const clauseEn = page.locator('[data-testid="typeahead-option"][data-concept="CLAUSE"]');
+    await expect(clauseEn).toBeVisible();
+    await clauseEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a phrase that has a subject');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('clause');
+    const clauseJa = page.locator('[data-testid="typeahead-option"][data-concept="CLAUSE"]');
+    await expect(clauseJa).toBeVisible();
+    await clauseJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('主語があるフレーズ');
+  });
+
+  test('a place complement is glossed on its genus (localization A18: LOCATIVE)', async ({
+    app,
+    page,
+  }) => {
+    // As INSTRUMENTAL: composed on COMPLEMENT_GRAMMAR, with INDICATE, which German says as
+    // "bezeichnet".
+    await app.subjectInput.fill('locative');
+    const locativeEn = page.locator('[data-testid="typeahead-option"][data-concept="LOCATIVE"]');
+    await expect(locativeEn).toBeVisible();
+    await locativeEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a complement that indicates places');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('locative');
+    const locativeDe = page.locator('[data-testid="typeahead-option"][data-concept="LOCATIVE"]');
+    await expect(locativeDe).toBeVisible();
+    await locativeDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Ergänzung, die Orte bezeichnet');
   });
 });

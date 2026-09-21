@@ -6,7 +6,7 @@ and reviewing its output for linguistic correctness. Each one is already pinned 
 A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
-`packages/frontend/test/`.
+`packages/frontend/test/`, and so is A179.
 
 The individual defects now live one-per-file under the three subdirectories:
 
@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (none,
-as of this writing — neither Part A nor Part B has a `test.fails` left).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (4 of
+them, as of this writing, pinning two bugs in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,7 +59,12 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+| # | File | Area |
+|---|---|---|
+| A178 | [A178-portuguese-suppletive-superlative-position.md](A-must-fix/A178-portuguese-suppletive-superlative-position.md) | Portuguese |
+| A179 | [A179-passive-infinitive-hidden-and-unprinted.md](A-must-fix/A179-passive-infinitive-hidden-and-unprinted.md) | Frontend |
+
+Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)

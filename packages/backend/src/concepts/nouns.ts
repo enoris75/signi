@@ -1359,6 +1359,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ASIA',
     role: 'noun',
     description: 'the largest continent, east of Europe',
+    // A superlative is what tells one continent from the others, where "a continent" did not
+    // (localization A17): de "der größte Kontinent", ja 最も大きい大陸. Portuguese renders the
+    // suppletive after the noun, "o continente maior", where "o maior continente" is usual (A178).
+    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['BIG'], adjectiveDegrees: ['most'] } },
     emoji: '🌏',
     proper: true,
     countable: false,
@@ -1377,6 +1381,8 @@ export const nouns: ConceptSeed[] = [
     id: 'OCEANIA',
     role: 'noun',
     description: 'the continent of Australia and the Pacific islands',
+    // Australia's continent, the smallest: "the smallest continent" (localization A17, as ASIA).
+    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['SMALL'], adjectiveDegrees: ['most'] } },
     emoji: '🏝️',
     proper: true,
     countable: false,
@@ -1834,6 +1840,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LOCATIVE',
     role: 'noun',
     description: 'the complement naming the place where something happens (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PLACE'),
     emoji: '📍',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -1904,6 +1911,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CAUSE_COMPLEMENT',
     role: 'noun',
     description: 'the complement naming the reason something happens (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'CAUSE'),
     emoji: '❔',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -2051,6 +2059,9 @@ export const nouns: ConceptSeed[] = [
     id: 'VERB_PHRASE',
     role: 'noun',
     description: 'a verb together with its objects and modifiers (grammar)',
+    // "a phrase that indicates actions" (localization A18). INDICATE, the grammatical verb in de
+    // (bezeichnet) and ja (示す), as B31 found; VERB's own gloss takes EXPRESS (de vermittelt).
+    definition: whoGloss('PHRASE', 'INDICATE', 'ACTION'),
     emoji: '🧬',
     isA: 'PHRASE',
     forms: {
@@ -2074,6 +2085,19 @@ export const nouns: ConceptSeed[] = [
     id: 'CLAUSE',
     role: 'noun',
     description: 'a unit of grammar with a verb of its own (grammar)',
+    // "a phrase that has a subject" (localization A18) — what a VERB_PHRASE does not. The object is
+    // one subject, indefinite and singular, which whoGloss's bare plural cannot give. Japanese says
+    // the inanimate HAVE with ある: 主語があるフレーズ (A150).
+    definition: {
+      subject: {
+        concept: 'PHRASE',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'HAVE' },
+          directObject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'indefinite' },
+        },
+      },
+    },
     emoji: '🧱',
     isA: 'PHRASE',
     forms: {
@@ -2092,6 +2116,7 @@ export const nouns: ConceptSeed[] = [
     id: 'RELATIVE_CLAUSE',
     role: 'noun',
     description: 'a clause that describes a noun (grammar)',
+    definition: whoGloss('CLAUSE', 'DESCRIBE', 'NOUN'),
     emoji: '🪝',
     isA: 'CLAUSE',
     forms: {
@@ -2176,6 +2201,18 @@ export const nouns: ConceptSeed[] = [
     id: 'MODIFIER',
     role: 'noun',
     description: 'a word that qualifies another word (grammar)',
+    // "a word that modifies other words" (localization A18). OTHER keeps it from reading as though a
+    // word could modify itself, which "a word that modifies words" does.
+    definition: {
+      subject: {
+        concept: 'WORD',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'MODIFY' },
+          directObject: { concept: 'WORD', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] },
+        },
+      },
+    },
     emoji: '🪄',
     isA: 'WORD',
     forms: {
@@ -2278,6 +2315,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PERIOD_SENTENCE',
     role: 'noun',
     description: 'a complete sentence built of one or more clauses (grammar)',
+    definition: whoGloss('PHRASE', 'HAVE', 'CLAUSE'),
     emoji: '📝',
     synonym: 'sentence',
     forms: {
@@ -2638,6 +2676,9 @@ export const nouns: ConceptSeed[] = [
     id: 'MODAL',
     role: 'noun',
     description: 'a verb that expresses necessity, ability or will (grammar)',
+    // "a verb that modifies verbs" (localization A18): what a modal does to the main verb, as a
+    // grammar says it. The genus keeps it apart from ADVERB, "a word that modifies verbs".
+    definition: whoGloss('VERB', 'MODIFY', 'VERB'),
     emoji: '🎚️',
     isA: 'VERB',
     forms: {

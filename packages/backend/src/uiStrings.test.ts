@@ -409,6 +409,34 @@ describe('buildUiStrings', () => {
     });
   });
 
+  // A19 — the passive's agent box and ring, and the voice satellite's box, which A01 added outside
+  // the families. AGENT_GRAMMAR is neuter in German (das Agens); VOICE is feminine in the Romance
+  // languages and German, and Japanese takes the shipped 見せ / 隠し stems (A126).
+  test('names the passive’s agent and the voice box in the controls that act on them', () => {
+    const strings = buildUiStrings();
+    expect(strings['action.clear.agent']).toEqual({
+      en: 'Clear the agent',
+      it: "Cancella l'agente",
+      fr: "Effacer l'agent",
+      de: 'Das Agens löschen',
+      es: 'Borrar el agente',
+      ja: '動作主を消去',
+      pt: 'Limpar o agente',
+    });
+    expect(strings['action.compact.agent']).toMatchObject({ it: "Compatta l'agente", de: 'Das Agens verdichten' });
+    expect(strings['action.expand.agent']).toMatchObject({ fr: "Étendre l'agent", ja: '動作主を展開' });
+    expect(strings['action.hide.voice']).toEqual({
+      en: 'Hide the voice',
+      it: 'Nascondi la diatesi',
+      fr: 'Cacher la voix',
+      de: 'Die Diathese verstecken',
+      es: 'Esconder la voz',
+      ja: '態を隠し',
+      pt: 'Esconder a voz',
+    });
+    expect(strings['action.show.voice']).toMatchObject({ it: 'Mostra la diatesi', ja: '態を見せ' });
+  });
+
   // C12 — the four constructs the catalog gained: a clause of purpose, the two readings of the
   // object complement, the comitative, and the genitive relative.
   test('says what a click is for, in the final clause each language writes', () => {
@@ -594,6 +622,53 @@ describe('buildUiStrings', () => {
     expect(strings['language.selector']).toMatchObject({ en: 'Interface language', fr: "Langue d'interface" });
   });
 
+  // The phrase console's own strings whose words are seeded (A21).
+  test('names the console’s frame, its lists, its topics and its usage words', () => {
+    const strings = buildUiStrings();
+    // The header keeps the number outside the phrase; German capitalizes the noun, so no CSS lowers it.
+    expect(strings['period.name']).toEqual({
+      en: 'Period', it: 'Periodo', fr: 'Période', de: 'Satzgefüge', es: 'Período', ja: '文', pt: 'Período',
+    });
+    expect(strings['period.empty']).toEqual({
+      en: 'empty period', it: 'periodo vuoto', fr: 'période vide', de: 'leeres Satzgefüge', es: 'período vacío', ja: '空の文', pt: 'período vazio',
+    });
+    // Each conjunct keeps its own article, as the pickers' placeholder does.
+    expect(strings['console.placeholder']).toEqual({
+      en: 'type a word or a command',
+      it: 'digita una parola o un comando',
+      fr: 'taper un mot ou une commande',
+      de: 'ein Wort oder einen Befehl tippen',
+      es: 'teclear una palabra o un comando',
+      ja: '単語か命令を入力',
+      pt: 'digitar uma palavra ou um comando',
+    });
+    expect(strings['action.hide']).toMatchObject({ en: 'hide', it: 'nascondi', ja: '隠し' });
+    expect(strings['action.move']).toMatchObject({ en: 'move', it: 'sposta', de: 'verschieben', ja: '移動' });
+    expect(strings['action.replacePeriod']).toMatchObject({ en: 'replace the period', de: 'das Satzgefüge ersetzen', ja: '文を置き換え' });
+    expect(strings['action.remove']).toMatchObject({ en: 'Remove', it: 'Rimuovi', fr: 'Retirer', ja: '取り除き' });
+    expect(strings['console.list.commands']).toMatchObject({ en: 'commands', de: 'Befehle', ja: '命令' });
+    expect(strings['console.list.savedPhrases']).toMatchObject({ en: 'saved phrases', it: 'frasi salvate', ja: '保存済みのフレーズ' });
+    expect(strings['console.list.conjunctions']).toMatchObject({ en: 'conjunctions', fr: 'conjonctions' });
+    // German's plural of Satzgefüge is the singular.
+    expect(strings['console.list.periods']).toMatchObject({ en: 'periods', it: 'periodi', de: 'Satzgefüge' });
+    expect(strings['console.list.modals']).toMatchObject({ en: 'modals', it: 'verbi modali', de: 'Modalverben' });
+    // The period as the words' possessor: the genitive each language writes.
+    expect(strings['console.topic.words']).toEqual({
+      en: "the period's words",
+      it: 'le parole del periodo',
+      fr: 'les mots de la période',
+      de: 'die Wörter des Satzgefüges',
+      es: 'las palabras del período',
+      ja: '文の単語',
+      pt: 'as palavras do período',
+    });
+    expect(strings['console.topic.links']).toMatchObject({ en: 'linked periods', fr: 'périodes liées', de: 'verknüpfte Satzgefüge' });
+    expect(strings['console.topic.period']).toMatchObject({ en: 'the period', it: 'il periodo', ja: '文' });
+    expect(strings['console.usage.word']).toMatchObject({ en: 'word', de: 'Wort', ja: '単語' });
+    expect(strings['console.usage.name']).toMatchObject({ en: 'name', es: 'nombre', ja: '名前' });
+    expect(strings['console.usage.command']).toMatchObject({ en: 'command', fr: 'commande', ja: '命令' });
+  });
+
   // The copy, reorder, resize and mood controls (B27, B28).
   test('names the copy, reorder, resize and mood controls', () => {
     const strings = buildUiStrings();
@@ -624,6 +699,50 @@ describe('buildUiStrings', () => {
     // The pronoun object attaches the way each language attaches it.
     expect(strings['action.turnOff']).toEqual({
       en: 'turn it off', it: 'disattivalo', fr: 'le désactiver', de: 'es deaktivieren', es: 'desactivarlo', ja: 'それをオフに', pt: 'desativá-lo',
+    });
+  });
+
+  // The keymap's commands and the help sheet's headings and rows (A20). A key on a box names what it
+  // acts on; the picker's bare commands are lower-case, as its key strip reads them.
+  test('names the keys, and the help sheet that lists them', () => {
+    const strings = buildUiStrings();
+    // REPLACE, not CHANGE: German "ändern" would alter the word rather than put another in its place.
+    expect(strings['action.replaceWord']).toEqual({
+      en: 'Replace the word', it: 'Sostituisci la parola', fr: 'Remplacer le mot', de: 'Das Wort ersetzen',
+      es: 'Reemplazar la palabra', ja: '単語を置き換え', pt: 'Substituir a palavra',
+    });
+    expect(strings['action.clearWord']).toMatchObject({ en: 'Clear the word', it: 'Cancella la parola', ja: '単語を消去' });
+    // Definite for the complement the cursor is in, indefinite for the one the menu has yet to add.
+    expect(strings['action.removeComplement']).toMatchObject({
+      en: 'Remove the complement', de: 'Die Ergänzung entfernen', ja: '補語を取り除き',
+    });
+    expect(strings['action.addComplement']).toEqual({
+      en: 'Add a complement', it: 'Aggiungi un complemento', fr: 'Ajouter un complément', de: 'Eine Ergänzung hinzufügen',
+      es: 'Añadir un complemento', ja: '補語を追加', pt: 'Adicionar um complemento',
+    });
+    expect(strings['satellite.conjunction']).toMatchObject({ en: 'Conjunction', de: 'Konjunktion', ja: '接続詞' });
+    expect(strings['period.name']).toEqual({
+      en: 'Period', it: 'Periodo', fr: 'Période', de: 'Satzgefüge', es: 'Período', ja: '文', pt: 'Período',
+    });
+    // A heading drops the article the head would take in a sentence; the owner keeps its own.
+    expect(strings['help.commandSubject']).toEqual({
+      en: "The command's subject", it: 'Soggetto del comando', fr: 'Sujet de la commande', de: 'Subjekt des Befehls',
+      es: 'Sujeto del comando', ja: '命令の主語', pt: 'Sujeito do comando',
+    });
+    expect(strings['help.pronounPerson']).toMatchObject({
+      en: "The pronoun's person", it: 'Persona del pronome', de: 'Person des Pronomens', ja: '代名詞の人称',
+    });
+    expect(strings['help.translationsAndWords']).toMatchObject({
+      en: 'Translations and words', it: 'Traduzioni e parole', de: 'Übersetzungen und Wörter', ja: '翻訳と単語',
+    });
+    expect(strings['action.move']).toEqual({
+      en: 'move', it: 'sposta', fr: 'déplacer', de: 'verschieben', es: 'mover', ja: '移動', pt: 'mover',
+    });
+    expect(strings['action.close']).toEqual({
+      en: 'close', it: 'chiudi', fr: 'fermer', de: 'schließen', es: 'cerrar', ja: '閉じる', pt: 'fechar',
+    });
+    expect(strings['action.copyLanguage']).toMatchObject({
+      en: 'Copy a language', it: 'Copia una lingua', es: 'Copiar un idioma', ja: '言語をコピー',
     });
   });
 });

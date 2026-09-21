@@ -62,5 +62,5 @@ Once it exists:
   Probed: "to indicate an object to use", 使うために物体を示す, but "per usare", "pour utiliser",
   "um zu verwenden", "para usar": without the clitic, the object is no longer the thing being used.
 - **The essive** ("to indicate an object as the one to use") wants a noun for "the one to act on"
-  that is not seeded, and the probe of SEEM ([A16](../A-ready/A16-seem.md)) found the essive works
+  that is not seeded, and the probe of SEEM ([A16](../done/A16-seem.md)) found the essive works
   for nouns only.

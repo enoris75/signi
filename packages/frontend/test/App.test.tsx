@@ -84,7 +84,22 @@ describe('App', () => {
       renderApp();
 
       expect(screen.getByText('Signi')).toBeInTheDocument();
-      expect(screen.getByText('Semantic phrase builder')).toBeInTheDocument();
+      expect(screen.getByText('semantic phrase creator')).toBeInTheDocument();
+    });
+
+    // A19: the tab reads what the header does, the tagline capitalized as a title is.
+    it('titles the page with the brand and the tagline, in the UI language', () => {
+      renderApp({ 'app.payoff': { it: 'creatore di frasi semantiche', ja: '意味的なフレーズの創造者' } });
+      expect(document.title).toBe('Signi — Semantic phrase creator');
+
+      const selector = screen.getByTestId('language-selector');
+      fireEvent.mouseDown(selector);
+      fireEvent.click(screen.getByRole('option', { name: /Italian/ }));
+      expect(document.title).toBe('Signi — Creatore di frasi semantiche');
+
+      fireEvent.mouseDown(selector);
+      fireEvent.click(screen.getByRole('option', { name: /Japanese/ }));
+      expect(document.title).toBe('Signi — 意味的なフレーズの創造者');
     });
 
     it('carries the language selector and the saved-phrase toolbar', () => {

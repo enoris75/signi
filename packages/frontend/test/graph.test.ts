@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { linkEdge } from '../src/components/PhraseBuilder/graph.ts';
+import { linkEdge, roleGroups } from '../src/components/PhraseBuilder/graph.ts';
+import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
 
 describe('linkEdge', () => {
   it('draws a straight line between a link’s ends', () => {
@@ -23,5 +24,26 @@ describe('linkEdge', () => {
       color: 'green',
       dashed: true,
     });
+  });
+});
+
+describe('roleGroups', () => {
+  const rings = (passive: boolean) =>
+    roleGroups({ drawCanvas: true, showSubject: true, visibleSlots: ALL_SLOTS, shownMap: { directObject: true }, passive })
+      .map((g) => [g.label, g.labelKey, g.mainKey]);
+
+  // A19. The label is what a ring's collapse state is stored under: renamed "Agent", the agent's ring
+  // folded nothing, and the patient's, renamed "Subject", folded the agent's satellites.
+  it('captions a passive’s rings by the roles they play, under the names they are stored by', () => {
+    expect(rings(false)).toEqual([
+      ['Subject', 'slot.subject', 'subject'],
+      ['Verb Phrase', 'slot.verbPhrase', 'verb'],
+      ['Direct Object', 'slot.directObject', 'directObject'],
+    ]);
+    expect(rings(true)).toEqual([
+      ['Subject', 'slot.agent', 'subject'],
+      ['Verb Phrase', 'slot.verbPhrase', 'verb'],
+      ['Direct Object', 'slot.subject', 'directObject'],
+    ]);
   });
 });

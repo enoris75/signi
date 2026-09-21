@@ -5,7 +5,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 
 **Blocked on:** the keymap (P01) names its keys with words the corpus doesn't hold. These are *next*
 and *previous*, *left* and *right*, a region, leaving, going backwards, a row and a value.
-[A20](../A-ready/A20-ui-keyboard-labels-on-seeded-words.md) takes the labels whose words are seeded. It
+[A20](../done/A20-ui-keyboard-labels-on-seeded-words.md) takes the labels whose words are seeded. It
 also includes the keyboard caption P01 left as a `/seed` + `/localize` task
 ([P01 README, *What phase 1 left*](../../features/Z-Done/P01-keyboard-first-ux/README.md)), which no
 localization task had picked up.

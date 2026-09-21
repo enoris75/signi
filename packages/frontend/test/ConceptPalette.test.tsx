@@ -9,10 +9,13 @@ import { renderWithProviders, type Seed } from './render.tsx';
 // The word lists are seeded into the query cache; only the loading and failure cases fetch.
 vi.mock('../src/api.ts');
 
+// Each word carries the seed's English `description` and the definitions the engine rendered, which
+// are what a tooltip shows: the two differ, so a test can tell which one it got.
 const noun = (id: string, en: string, it: string): Concept => ({
   id,
   role: 'noun',
   description: `the ${en}, as a noun`,
+  definitions: { en: `a kind of ${en}`, it: `un tipo di ${it}` },
   label: en,
   labels: { en, it },
 });
@@ -127,15 +130,18 @@ describe('ConceptPalette', () => {
 
   // MUI shares a module-level "a tooltip was just open" flag across every Tooltip, which drops
   // the enter delay for the next one; keep this the only test that opens a tooltip.
-  it('describes a word in a tooltip after hovering it a moment', () => {
+  // The definition, not the seed's English description, and in the UI language, as every other
+  // word list shows it (A19).
+  it('defines a word in the UI language, in a tooltip, after hovering it a moment', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    localStorage.setItem('signi:uiLanguage', 'it');
     renderPalette();
 
-    fireEvent.mouseOver(row('cat'));
+    fireEvent.mouseOver(row('gatto'));
     act(() => vi.advanceTimersByTime(399));
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(1));
-    expect(screen.getByRole('tooltip')).toHaveTextContent('the cat, as a noun');
+    expect(screen.getByRole('tooltip')).toHaveTextContent(/^un tipo di gatto$/);
   });
 });

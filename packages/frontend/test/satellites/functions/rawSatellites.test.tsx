@@ -7,6 +7,7 @@ import {
   type UiStringKey,
 } from '@signi/shared';
 import { rawSatellites } from '../../../src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx';
+import { setImperative, setInfinitive, setVoice } from '../../../src/components/PhraseBuilder/phraseReducers.ts';
 import type { RawSatellite } from '../../../src/components/PhraseBuilder/satellites/satellites.types.tsx';
 import type { PhraseSelection } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import {
@@ -796,5 +797,24 @@ describe('known bugs: the determiner an alarm cry cannot take', () => {
     expect(satellite({ verb: CRY_OUT, directObject: WORD }, 'directObjectDefiniteness').available).toBe(true);
     // A danger with no verb yet is no cry: the determiner is there until CRY_OUT is picked.
     expect(satellite({ directObject: WOLF }, 'directObjectDefiniteness').available).toBe(true);
+  });
+});
+
+// A179. Making a period an infinitive keeps a passive it already had (`setInfinitive` resets the tense,
+// the aspect and the modals, not the voice), and the translation says it: "to be seen". But the voice
+// control is withdrawn whenever the finite slot is taken, for the infinitive as for the command, so
+// nothing on the canvas shows the passive or takes it back. Either fix passes: the control stays for
+// the infinitive, or the infinitive takes the voice back to active, as the command does.
+describe('known bugs: A179 a passive infinitive', () => {
+  it.fails('leaves a way to take back the passive the translation still says', () => {
+    const sel = setInfinitive(setVoice({ verb: SEE, directObject: CAT }, 'passive'), true);
+    expect(sel.verbVoice !== 'passive' || satellite(sel, 'verbVoice').available).toBe(true);
+  });
+
+  // Regression: a command is always active, so its voice control stays withdrawn.
+  it('withdraws the voice from a command', () => {
+    const sel = setImperative(setVoice({ verb: SEE, directObject: CAT }, 'passive'), true);
+    expect(sel.verbVoice).toBe('active');
+    expect(satellite(sel, 'verbVoice').available).toBe(false);
   });
 });

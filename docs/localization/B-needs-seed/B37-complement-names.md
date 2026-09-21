@@ -4,7 +4,7 @@ _(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. C0
 "the nine complement names left" once COMPLEMENT_GRAMMAR became their genus.
 [B31](../done/B31-complement-genus.md) glossed the genus and three of the nine. The other six, which
 B23 seeded, got no gloss and no ticket, and neither did COMITATIVE, which C12 seeded. CAUSE_COMPLEMENT and LOCATIVE compose from seeded words and went to
-[A18](../A-ready/A18-grammar-nouns.md). These five each need a noun.)_
+[A18](../done/A18-grammar-nouns.md). These five each need a noun.)_
 
 All five use B31's shape, `whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', <noun>)`: "a complement that
 indicates means". It is the same shape INSTRUMENTAL and ADVERBIAL_OF_MANNER ship with, so the
@@ -42,7 +42,7 @@ Forms are suggestions for the seed author. COMPANION and RECIPIENT are `animate`
 | COMITATIVE | a complement that indicates companions | un complemento che indica compagni | un complément qui indique des compagnons | eine Ergänzung, die Begleiter bezeichnet | un complemento que indica compañeros | 同伴者を示す補語 | um complemento que indica companheiros |
 | TERMINUS | a complement that indicates recipients | un complemento che indica destinatari | un complément qui indique des destinataires | eine Ergänzung, die Empfänger bezeichnet | un complemento que indica destinatarios | 受け手を示す補語 | um complemento que indica destinatários |
 
-**Why not PLACE for the three motion names:** LOCATIVE takes "places" ([A18](../A-ready/A18-grammar-nouns.md)).
+**Why not PLACE for the three motion names:** LOCATIVE takes "places" ([A18](../done/A18-grammar-nouns.md)).
 DIRECTION, SOURCE and ROUTE also name places, but a place *reached*, *left* and *crossed*. A
 relative clause could say that ("the place where one goes"), but a relative clause inside the
 complement's own relative clause is past what these glosses need. The three nouns say it in a word.

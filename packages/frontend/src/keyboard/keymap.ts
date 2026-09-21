@@ -251,7 +251,11 @@ const goTo = (ctx: BoxKeyContext, slot: SlotKey) => ctx.revealSlot(slot, slot);
 /** The complements whose ring carries a relation toolbar, which S points the next key at. */
 const TOOLBAR_SLOTS: SlotKey[] = ["route", "locative", "cause"];
 
-/** The command box's three addressees, counted the way its rows are stacked. */
+/**
+ * The command box's three addressees, counted the way its rows are stacked. Each key is named by
+ * its person, as the person toggle's own tooltip names it (`imperative.person.*`), so the key and
+ * the button say the same.
+ */
 const IMPERATIVE_PERSONS: [ImperativePerson, string, string][] = [
   ["2sg", "1", "You"],
   ["1pl", "2", "Let’s"],
@@ -308,7 +312,9 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     id: "box.word",
     scope: "box",
     keys: ["Enter", "Space"],
-    label: "Change the word",
+    // REPLACE, not CHANGE: ↵ puts another word in the box's place, where German "ändern" alters it.
+    label: "Replace the word",
+    labelKey: "action.replaceWord",
     hint: true,
     run: (ctx) => {
       // A filled box opens its picker over the word; an empty one already has the picker on the
@@ -322,8 +328,9 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box",
     keys: ["Backspace"],
     // The catalogue's `action.clear` is the bare verb ("clear"), which reads oddly in a line of
-    // named parts; this names the part, and is ready for /localize like the other new labels.
+    // named parts; this names the part.
     label: "Clear the word",
+    labelKey: "action.clearWord",
     hint: true,
     when: filled,
     run: (ctx) => ctx.clearSlot(ctx.slot),
@@ -444,6 +451,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:noun",
     keys: ["Shift+C"],
     label: "Conjunction",
+    labelKey: "satellite.conjunction",
     when: (ctx) => Boolean(ctx.satellite(`${ctx.nounKey}Conjunct`)?.hasValue),
     run: (ctx) => ctx.cycleConjunction(ctx.nounKey!),
   },
@@ -465,6 +473,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:noun",
     keys: ["S"],
     label: "Relation",
+    // The word the adjective's R already reads, so one relation is called one thing.
+    labelKey: "modifier.relation",
     hint: true,
     // The spatial complements carry a relation ("under the bed"), the cause an affective stance
     // ("thanks to" / "because of" / "the fault of"). Both are toolbars already on the ring, so S
@@ -477,6 +487,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:noun",
     keys: ["Shift+Backspace"],
     label: "Remove the complement",
+    labelKey: "action.removeComplement",
     when: (ctx) => isComplementSlot(ctx.slot),
     run: (ctx) => ctx.removeComplement(ctx.slot as BoxComplementType),
   },
@@ -628,6 +639,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:verb",
     keys: ["+", "="],
     label: "Add a complement",
+    labelKey: "action.addComplement",
     hint: true,
     when: (ctx) => ctx.slot === "verb",
     run: (ctx) => ctx.openComplementMenu(),
@@ -650,6 +662,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:mood",
     keys: [key],
     label,
+    labelKey: `imperative.person.${person}`,
     // An instruction is addressed to nobody, so there is no person to choose (see
     // ImperativeSubjectSelector, which drops the row for the same reason).
     when: (ctx) => ctx.selection.imperative === true && ctx.imperative.register !== "instruction",
@@ -810,14 +823,16 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     label: "Next period",
     run: (ctx) => ctx.nav.move("down"),
   },
+  // Named by the header buttons' tooltips, so the key and the button say the same.
   ...([
-    ["up", "Shift+ArrowUp", -1],
-    ["down", "Shift+ArrowDown", 1],
-  ] as const).map(([dir, key, delta]): Command<PeriodKeyContext> => ({
+    ["up", "Shift+ArrowUp", -1, "action.movePeriodUp"],
+    ["down", "Shift+ArrowDown", 1, "action.movePeriodDown"],
+  ] as const).map(([dir, key, delta, labelKey]): Command<PeriodKeyContext> => ({
     id: `period.move.${dir}`,
     scope: "period",
     keys: [key],
     label: `Move the period ${dir}`,
+    labelKey,
     when: (ctx) => ctx.canMove(delta),
     run: (ctx) => ctx.move(delta),
   })),
@@ -881,6 +896,8 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     scope: "period",
     keys: ["I"],
     label: "If-condition",
+    // What the console's /if reads, and the badge the period wears once it is one.
+    labelKey: "clause.conditional",
     hint: true,
     // One key for both halves of the same idea: start the pick, or drop the condition there is.
     when: (ctx) => Boolean(ctx.condition?.canStart || ctx.condition?.hasLink),

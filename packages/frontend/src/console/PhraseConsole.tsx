@@ -3,6 +3,7 @@ import TerminalIcon from "@mui/icons-material/Terminal";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { useWindowDrag } from "../hooks/useWindowDrag.ts";
+import { useUiString } from "../i18n/useUiString.ts";
 import { Keycap } from "../keyboard/Keycap.tsx";
 import { ConsolePrompt } from "./ConsolePrompt.tsx";
 import { SourceStrip } from "./SourceStrip.tsx";
@@ -15,6 +16,7 @@ import type { PhraseConsoleModel } from "./usePhraseConsole.ts";
  * stops at the words panel while that is open. The grip resizes it; ` shows and hides it.
  */
 export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleModel; wordsPanelOpen: boolean }) {
+  const t = useUiString();
   const startDrag = useWindowDrag();
   const right = useWordsPanelWidth(wordsPanelOpen);
   if (!model.open) return null;
@@ -91,18 +93,24 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
         }}
       >
         <TerminalIcon sx={{ fontSize: 17 }} />
-        {/* English literals, for /localize. */}
+        {/* English literal, for /localize. */}
         <Box component="span" sx={{ fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "text.primary" }}>
           Console
         </Box>
-        <Box component="span" sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "0.85rem" }}>
-          period {number}
+        {/* The period by its name, as rendered: German capitalizes it (Satzgefüge 1), so no CSS lowers it. */}
+        <Box
+          component="span"
+          data-testid="console-period"
+          sx={{ fontFamily: '"Lora", Georgia, serif', fontStyle: "italic", fontSize: "0.85rem" }}
+        >
+          {t("period.name")} {number}
         </Box>
         <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
             <Keycap spec="Code:Backquote" />
-            hide
+            {t("action.hide")}
           </Box>
+          {/* English literals, for /localize. */}
           <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
             <Keycap spec="Escape" />
             back to the canvas
@@ -114,7 +122,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
           </Tooltip>
         </Box>
       </Box>
-      <Transcript entries={model.transcript} pins={model.pins} onPin={model.pin} />
+      <Transcript entries={model.transcript} pins={model.pins} onPin={model.pin} vocab={model.vocab} />
       <SourceStrip model={model} />
       <ConsolePrompt model={model} />
     </Box>

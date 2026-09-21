@@ -1,4 +1,7 @@
+import { applyScript } from "./apply.ts";
 import { COMMANDS, commandNamed, type CommandDef } from "./commands.ts";
+import { printWords } from "./print.ts";
+import type { Vocabulary } from "./types.ts";
 
 /**
  * The console's help pages (`/help rel`): for every command, how it is written, and an example that
@@ -7,26 +10,43 @@ import { COMMANDS, commandNamed, type CommandDef } from "./commands.ts";
  * the vocabulary, so none can go stale.
  */
 
-/** How a command is written: its argument, spelled out, in the brackets it takes. */
-export function usageOf(def: CommandDef): string {
+/**
+ * The words a usage line puts where an argument goes — `/subj ( word … )`, `/save name`,
+ * `/help [command]` — which the help page takes from the catalogue in the interface language
+ * (`console.usage.*`). English by default.
+ */
+export interface UsageWords {
+  word: string;
+  name: string;
+  command: string;
+}
+
+export const USAGE_WORDS: UsageWords = { word: "word", name: "name", command: "command" };
+
+/**
+ * How a command is written: its argument, spelled out, in the brackets it takes. Only the placeholders
+ * are words; the brackets, `#n.noun` and the values stay as the console reads them.
+ */
+export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): string {
   const name = `/${def.name}`;
   const action = def.action;
+  const { word } = words;
   switch (def.arg.kind) {
     case "none":
       return name;
     case "word":
       // A word of the period always in its bracket; a word inside one bare, or bracketed with what describes it.
-      return action.kind === "role" ? `${name} ( word … )` : `${name} word · ${name} ( word … )`;
+      return action.kind === "role" ? `${name} ( ${word} … )` : `${name} ${word} · ${name} ( ${word} … )`;
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
       if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|and n|rel|if|join|inst|period]`;
-      if (action.kind === "app" && action.app === "help") return `${name} [command]`;
-      return `${name} name`;
+      if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
+      return `${name} ${words.name}`;
     case "phrase":
       return action.kind === "possessor"
-        ? `${name} word · ${name} [ word … ] · ${name} #n.noun`
-        : `${name} word · ${name} [ word … ]`;
+        ? `${name} ${word} · ${name} [ ${word} … ] · ${name} #n.noun`
+        : `${name} ${word} · ${name} [ ${word} … ]`;
     case "link":
       if (action.kind === "relative") return `${name} #n.noun · ${name} subj { … } · ${name} obj { … }`;
       if (action.kind === "join") return `${name} and|or|but|thatis|therefore|then #n · { … }`;
@@ -142,10 +162,34 @@ export interface HelpPage {
 }
 
 /** The page for a command named by its name or an alias, with or without the slash. */
-export function helpPage(name: string): HelpPage | undefined {
+export function helpPage(name: string, words: UsageWords = USAGE_WORDS): HelpPage | undefined {
   const def = commandNamed(name.trim().replace(/^[/・／]/, ""));
   if (!def) return undefined;
-  return { def, usage: usageOf(def), example: EXAMPLES[def.name] ?? `/${def.name}` };
+  return { def, usage: usageOf(def, words), example: EXAMPLES[def.name] ?? `/${def.name}` };
+}
+
+/**
+ * A command's example as the page shows it: in the words of the interface language, as the source
+ * strip and every other printed line write them, so `/subj ( gatto )` sits beside *il gatto*. The
+ * examples are written once, in English, which every interface language also reads (see
+ * `resolveWord`). Applied from an empty period, they say which concept each word names, and
+ * `printWords` writes those words again in `vocab`'s language, keeping the example's own commands
+ * and brackets. Applied again, the printed line builds the same phrase; the tests hold every example
+ * to that. Where the line does not read — the words have not loaded — the English stands; it is drawn
+ * during render, where a throw would take the page down, so it stands then too.
+ */
+export function exampleIn(example: string, vocab: Vocabulary): string {
+  let n = 0;
+  try {
+    const applied = applyScript({ containers: [{ id: "help", selection: {} }], links: [] }, example, {
+      context: { containerId: "help" },
+      vocab,
+      newId: () => `help-${++n}`,
+    });
+    return applied.diagnostic ? example : printWords(example, applied.resolved, vocab);
+  } catch {
+    return example;
+  }
 }
 
 /** Every command, for the tests that hold each to a page. */

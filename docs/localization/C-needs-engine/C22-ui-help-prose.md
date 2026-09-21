@@ -15,7 +15,7 @@ of three to eight sentences. Inside them are constructs no plan holds:
 - **fragments that are not a period at all:** "Close · again restores the word", "Up from the first
   row: the category tabs".
 
-The overlay's name, headings and rows are in [A20](../A-ready/A20-ui-keyboard-labels-on-seeded-words.md)
+The overlay's name, headings and rows are in [A20](../done/A20-ui-keyboard-labels-on-seeded-words.md)
 and [B41](../B-needs-seed/B41-ui-help-overlay.md).
 
 ## Strings
@@ -32,7 +32,7 @@ and [B41](../B-needs-seed/B41-ui-help-overlay.md).
 | the box a command puts in place of the subject | [HelpOverlay.tsx:41](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L41) | a relative clause (exists) around "in place of" (does not) |
 | Up from the first row: the category tabs | [HelpOverlay.tsx:57](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L57) | a fragment |
 | Switch vocabulary, in the tabs | [HelpOverlay.tsx:58](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L58) | SWITCH and VOCABULARY are unseeded, and the "in the tabs" afterthought is a fragment |
-| Close · again restores the word | [HelpOverlay.tsx:60](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L60) | two statements in one row. `action.close` ([A20](../A-ready/A20-ui-keyboard-labels-on-seeded-words.md)) covers the first, and the second needs RESTORE and AGAIN |
+| Close · again restores the word | [HelpOverlay.tsx:60](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L60) | two statements in one row. `action.close` ([A20](../done/A20-ui-keyboard-labels-on-seeded-words.md)) covers the first, and the second needs RESTORE and AGAIN |
 
 ## To unblock
 

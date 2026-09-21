@@ -30,6 +30,7 @@ import {
   type Setting,
   type TokenColor,
 } from "./commands.ts";
+import type { ResolvedWord } from "./apply.ts";
 import { CLOSER, type Shape } from "./lex.ts";
 import { bracketColor } from "./parse.ts";
 import { printRef, printWord, wordSpecFor } from "./resolve.ts";
@@ -472,6 +473,27 @@ export function printPeriod(state: WorkspaceState, containerId: string, vocab: V
   const printer = new Printer(state, containerId, vocab);
   if (root) printer.period(root);
   return printer.done();
+}
+
+/**
+ * A line with its words written as the printer writes them in `vocab`'s language, and everything
+ * else — commands, values, brackets, references, a name — as it stands: what `resolved` (applying the
+ * line) found each word to name, put back as `printWord` spells that concept. A word that said more
+ * than its concept (a pronoun's form, "she") is kept, since its person alone would lose the rest.
+ *
+ * It is the printer for a line that must keep its own shape, which `printPeriod` would not: a help
+ * page's example shows the command it is about even where that sets the default (`/sg`), and types a
+ * clause in its braces rather than as a reference. Applied again, the line gives the same workspace.
+ */
+export function printWords(text: string, resolved: readonly ResolvedWord[], vocab: Vocabulary): string {
+  let out = "";
+  let at = 0;
+  for (const w of [...resolved].sort((a, b) => a.from - b.from)) {
+    if (w.from < at) continue;
+    out += text.slice(at, w.from) + (w.opts ? text.slice(w.from, w.to) : printWord(w.concept, w.spec, vocab));
+    at = w.to;
+  }
+  return out + text.slice(at);
 }
 
 /**

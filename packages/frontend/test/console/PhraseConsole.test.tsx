@@ -5,7 +5,8 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import type { ComponentProps } from 'react';
 import App from '../../src/App.tsx';
 import type { PhraseWorkspace } from '../../src/components/PhraseBuilder/PhraseWorkspace.tsx';
-import { renderWithProviders } from '../render.tsx';
+import { savePhrase } from '../../src/api.ts';
+import { renderWithProviders, type SeededStrings } from '../render.tsx';
 import { ADJECTIVES, ADVERBS, NOUNS, PRONOUNS, VERBS } from './vocab.ts';
 
 vi.mock('../../src/api.ts');
@@ -27,8 +28,9 @@ globalThis.ResizeObserver = class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-function renderApp() {
+function renderApp(strings: SeededStrings = {}) {
   renderWithProviders(<App />, {
+    strings,
     concepts: { noun: NOUNS, pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS },
   });
   return screen.getByTestId('console-prompt') as HTMLInputElement;
@@ -509,5 +511,93 @@ describe('the console', () => {
       expect(prompt.value).toBe('');
     });
   });
-});
 
+  // A21: the console's frame, key hints, list titles, help pages and /save results come from the
+  // catalogue, so they follow the interface language; before the bundle arrives, each reads its
+  // English fallback.
+  describe('in the interface language', () => {
+    // A slice of the catalogue as the backend renders it in Italian (probed 2026-09-21).
+    const IT_STRINGS: SeededStrings = {
+      'period.name': { it: 'Periodo' },
+      'action.hide': { it: 'nascondi' },
+      'period.empty': { it: 'periodo vuoto' },
+      'console.placeholder': { it: 'digita una parola o un comando' },
+      'console.list.commands': { it: 'comandi' },
+      'console.topic.words': { it: 'le parole del periodo' },
+      'console.usage.word': { it: 'parola' },
+      'category.noun': { it: 'Sostantivo' },
+      'toast.phraseSaved': { it: 'Frase salvata' },
+      'failure.phraseNotSaved': { it: 'La frase non poteva essere salvata.' },
+      'action.move': { it: 'sposta' },
+      'slot.choose': { it: 'scegli' },
+    };
+    const italian = () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      return renderApp(IT_STRINGS);
+    };
+    /** Run a line to its commit: close the list if it is up, then ↵. */
+    async function run(prompt: HTMLInputElement, line: string) {
+      type(prompt, line);
+      if (screen.queryByTestId('console-list')) key(prompt, 'Escape');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+    }
+
+    it('reads its English fallbacks before the bundle arrives', async () => {
+      const prompt = renderApp();
+      expect(screen.getByTestId('console-period')).toHaveTextContent('Period 1');
+      expect(screen.getByTestId('phrase-console')).toHaveTextContent('hide');
+      expect(screen.getByTestId('source-strip')).toHaveTextContent('empty period');
+      expect(prompt).toHaveAttribute('placeholder', 'type a word or a command (/)');
+      type(prompt, '/');
+      expect(await screen.findByTestId('console-list-title')).toHaveTextContent(/^commands$/);
+    });
+
+    it('frames the console in Italian: the period, the empty period, the hint and the list', async () => {
+      const prompt = italian();
+      // The period by its name as rendered, not lower-cased: German capitalizes it.
+      expect(screen.getByTestId('console-period')).toHaveTextContent('Periodo 1');
+      expect(screen.getByTestId('phrase-console')).toHaveTextContent('nascondi');
+      expect(screen.getByTestId('source-strip')).toHaveTextContent('periodo vuoto');
+      expect(prompt).toHaveAttribute('placeholder', 'digita una parola o un comando (/)');
+      type(prompt, '/subj cat /');
+      const list = await screen.findByTestId('console-list');
+      // The title from the catalogue, the word it is about after it, in the interface language too.
+      expect(within(list).getByTestId('console-list-title')).toHaveTextContent('comandi · gatto');
+      expect(list).toHaveTextContent('sposta');
+      expect(list).toHaveTextContent('scegli');
+    });
+
+    it('writes a help page’s usage and example in Italian, the example as the source strip would', async () => {
+      const prompt = italian();
+      await run(prompt, '/help pl');
+      const page = await screen.findByTestId('help-page');
+      expect(within(page).getByTestId('help-example')).toHaveTextContent('/subj ( gatto /pl )');
+      await run(prompt, '/help subj');
+      await waitFor(() => expect(screen.getAllByTestId('help-page')).toHaveLength(2));
+      const subj = screen.getAllByTestId('help-page')[1]!;
+      expect(within(subj).getByTestId('help-usage')).toHaveTextContent('/subj ( parola … )');
+      expect(within(subj).getByTestId('help-example')).toHaveTextContent('/subj ( gatto )');
+    });
+
+    it('heads the help overlay’s parts with the catalogue’s nouns', async () => {
+      italian();
+      fireEvent.click(screen.getByRole('button', { name: /help/i }));
+      const noun = await screen.findByTestId('console-help-noun');
+      expect(within(noun).getByTestId('console-help-part')).toHaveTextContent('Sostantivo');
+      expect(within(screen.getByTestId('console-help-role')).getByTestId('console-help-part')).toHaveTextContent(
+        'le parole del periodo',
+      );
+    });
+
+    it('says what /save did as the toolbar says it', async () => {
+      vi.mocked(savePhrase).mockResolvedValueOnce(undefined as never);
+      const prompt = italian();
+      await run(prompt, '/save gatti');
+      await waitFor(() => expect(screen.getByTestId('transcript-info')).toHaveTextContent('Frase salvata'));
+      vi.mocked(savePhrase).mockRejectedValueOnce(new Error('offline'));
+      await run(prompt, '/save gatti');
+      await waitFor(() => expect(screen.getByTestId('transcript-error')).toHaveTextContent('La frase non poteva essere salvata.'));
+    });
+  });
+});

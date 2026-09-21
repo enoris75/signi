@@ -231,6 +231,25 @@ export const motionVerbs: ConceptSeed[] = [
     // infinitival copula ("seems to be a legend", "scheint eine Legende zu sein"); it/fr/es/pt/ja do.
     complements: ['predicative', 'locative', 'cause', 'terminus'],
     description: 'to look like; to give the impression of being similar to',
+    // "to be perceived as an object" (localization A16): the PASSIVE of the genus PERCEIVE with
+    // the ESSIVE object complement — the thing is taken as X without becoming X, which is the
+    // impression SEEM gives. The passive promotes the patient to subject, and the citation drops
+    // it along with the agent GENERIC_PERSON, so neither determiner shows. Only English keeps the
+    // complement's article ("as an object"); the essive drops it elsewhere ("come oggetto", de
+    // "als Gegenstand empfunden werden", ja 物体として知覚される). Inline, because GlossParts has no
+    // `voice`. PERCEIVE, not SEE: SEE is "to perceive light", and seeming is not only sight.
+    definition: {
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'PERCEIVE', voice: 'passive' },
+      directObject: { concept: 'OBJECT_THING' },
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+      infinitive: true,
+    },
     synonym: 'look like',
     emoji: '🤔',
     forms: {

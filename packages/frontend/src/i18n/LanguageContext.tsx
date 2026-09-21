@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LanguageCode } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
@@ -27,6 +27,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, next);
     setLanguage(next);
   }, []);
+
+  // The page says which language it is in, so a screen reader reads it with that language's voice, and
+  // the browser picks that language's glyph forms where no font names them (else a Japanese kanji can
+  // come out in its Chinese form). index.html's `en` is only the default until this first runs.
+  useEffect(() => {
+    document.documentElement.lang = uiLanguage;
+  }, [uiLanguage]);
 
   const value = useMemo(() => ({ uiLanguage, setUiLanguage }), [uiLanguage, setUiLanguage]);
 

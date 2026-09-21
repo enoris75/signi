@@ -24,6 +24,7 @@ const LINE = 28;
 const MAX_ROWS = 8;
 
 export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
+  const t = useUiString();
   const { text, ghost, listShown, completion, diagnostic, caret } = model;
   const styled = useMemo(() => styleTokens(text), [text]);
   const listId = "console-completions";
@@ -171,8 +172,8 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
               aria-activedescendant={active}
               aria-multiline
               role="combobox"
-              // English literal, for /localize.
-              placeholder="type a word, or / for a command"
+              // The key that starts a command is a value, not a word: it follows the phrase.
+              placeholder={`${t("console.placeholder")} (/)`}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 model.onChange(
                   e.target.value,
@@ -351,6 +352,7 @@ function ContextChip({ model }: { model: PhraseConsoleModel }) {
 
 /** The keys that apply now, at the right of the prompt line. */
 function PromptKeys({ model }: { model: PhraseConsoleModel }) {
+  const t = useUiString();
   const keysSx = {
     display: "flex",
     alignItems: "center",
@@ -362,13 +364,14 @@ function PromptKeys({ model }: { model: PhraseConsoleModel }) {
   } as const;
   // Away from the prompt the line is the hint line: the keys of the box under the canvas cursor.
   if (!model.focused) return <HintKeys />;
-  const key = (spec: string, label: string) => (
+  const key = (spec: string, label: React.ReactNode) => (
     <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
       <Keycap spec={spec} />
       {label}
     </Box>
   );
-  // English literals, for /localize.
+  // The English literals wait on B43 and B45: "next word", "complete", "apply", "close the list",
+  // "back to the canvas", and the history tag.
   return (
     <Box sx={keysSx}>
       {model.walk && (
@@ -383,20 +386,21 @@ function PromptKeys({ model }: { model: PhraseConsoleModel }) {
       {model.editing !== undefined ? (
         <>
           {key("Tab", "next word")}
-          {key("Enter", "replace the period")}
-          {key("Escape", "cancel")}
+          {key("Enter", t("action.replacePeriod"))}
+          {/* The dialogs' Cancel, lower-case among the hints: a command, so no language minds. */}
+          {key("Escape", <Box component="span" sx={{ textTransform: "lowercase" }}>{t("action.cancel")}</Box>)}
         </>
       ) : model.listShown ? (
         <>
           {key("Tab", "complete")}
-          {key("Enter", "choose")}
+          {key("Enter", t("slot.choose"))}
           {key("Escape", "close the list")}
         </>
       ) : model.text ? (
         <>
           {key("Tab", model.ghost ? "complete" : "next word")}
           {key("Enter", "apply")}
-          {key("Escape", "clear")}
+          {key("Escape", t("action.clear"))}
         </>
       ) : (
         <>

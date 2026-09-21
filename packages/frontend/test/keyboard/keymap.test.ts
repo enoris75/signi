@@ -3,6 +3,7 @@ import { UI_STRINGS, type Concept } from '@signi/shared';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { Satellite } from '../../src/components/PhraseBuilder/satellites/index.ts';
 import {
+  APP_KEYMAP,
   hintsFor,
   KEYMAP,
   PERIOD_KEYMAP,
@@ -103,10 +104,55 @@ describe('the keymap', () => {
   });
 
   it('names every action, and names it from the catalogue wherever the word is seeded', () => {
-    for (const command of ALL_COMMANDS) {
+    for (const command of [...ALL_COMMANDS, ...APP_KEYMAP]) {
       expect(command.label, command.id).not.toBe('');
       if (command.labelKey) expect(UI_STRINGS[command.labelKey], command.id).toBeDefined();
     }
+  });
+
+  // A label without a key shows its English in every language, so only the commands whose words
+  // the corpus does not hold yet may go without one — each listed with the task that seeds them.
+  // A new command must name itself from the catalogue, and a task that seeds a word takes its
+  // commands off this list.
+  it('names from the catalogue every command but those still waiting on a word', () => {
+    const waiting: Record<string, string> = {
+      ...Object.fromEntries(
+        ['left', 'up', 'right', 'down'].flatMap((dir) => [
+          [`box.move.${dir}`, 'B44'],
+          [`box.nudge.${dir}`, 'B44'],
+        ]),
+      ),
+      'box.next': 'B44',
+      'box.previous': 'B44',
+      'box.fold': 'B44',
+      'box.out': 'B44',
+      'noun.gender.back': 'B44',
+      'object.voice.back': 'B44',
+      'adjective.degree.back': 'B44',
+      'adjective.relation.back': 'B44',
+      'verb.tense.back': 'B44',
+      'verb.aspect.back': 'B44',
+      'mood.register': 'B44',
+      'app.region.next': 'B44',
+      'app.region.previous': 'B44',
+      'period.previous': 'B44',
+      'period.next': 'B44',
+      'period.level': 'B44',
+      'period.out': 'B44',
+      'app.help': 'B41',
+      'app.console': 'B42',
+      'app.console.command': 'B42',
+      'app.undo': 'B40',
+      'app.redo': 'B40',
+      'period.enter': 'B43',
+      'period.taller': 'B43',
+      'period.taller.alt': 'B43',
+      'period.shorter': 'B43',
+    };
+    const commands = [...ALL_COMMANDS, ...APP_KEYMAP];
+    const unnamed = commands.filter((c) => !c.labelKey).map((c) => c.id);
+
+    expect(unnamed.sort()).toEqual(Object.keys(waiting).sort());
   });
 });
 

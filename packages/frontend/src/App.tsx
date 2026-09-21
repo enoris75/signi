@@ -105,6 +105,12 @@ export default function App() {
   // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
   const t = useUiString();
   const payoff = t('app.payoff');
+  // The tab's title is the header's: the brand, which stays literal (C15), and the tagline, set as a
+  // title is, with a capital (the header's CSS uppercases it instead). Keyed on the tagline, not the
+  // language, so it also catches the bundle arriving after a stored language was restored.
+  useEffect(() => {
+    document.title = `Signi — ${payoff.charAt(0).toUpperCase()}${payoff.slice(1)}`;
+  }, [payoff]);
 
   // One plan per root container (a container no link targets); linked containers fold in
   // as relative clauses. Every root is translated and shown in period order.

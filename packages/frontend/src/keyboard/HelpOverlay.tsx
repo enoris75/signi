@@ -27,17 +27,49 @@ import type { Scope } from "./scope.ts";
  * can read the Windows column and a Windows user the Mac one.
  */
 
+/**
+ * A heading or a row, named the way a keymap command is: `title` / `label` is the English, and the
+ * catalogue key beside it is what the sheet shows, wherever the words are seeded. The literals left
+ * without a key wait on vocabulary (B41, B43, B44) or are prose (C22).
+ */
+interface SheetSection {
+  title: string;
+  titleKey?: UiStringKey;
+  note?: string;
+  /** A list of names, the note spelled as the controls themselves are named, joined with commas. */
+  noteKeys?: UiStringKey[];
+}
+
+interface SheetRow {
+  keys: string[];
+  label: string;
+  labelKey?: UiStringKey;
+  /** The panel a row's key works in, written before its label with a colon ("Words: the word map"). */
+  whereKey?: UiStringKey;
+}
+
 /** The order the sheet reads in, and what each section is called. */
-const SECTIONS: { scope: Scope; title: string; note?: string }[] = [
+const SECTIONS: (SheetSection & { scope: Scope })[] = [
   { scope: "app", title: "Anywhere", note: "Ctrl is ⌘ on a Mac" },
-  { scope: "period", title: "Period", note: "with the cursor on the period (esc from a box)" },
+  {
+    scope: "period",
+    title: "Period",
+    titleKey: "period.name",
+    note: "with the cursor on the period (esc from a box)",
+  },
   { scope: "box", title: "Moving around", note: "inside a period" },
-  { scope: "box:noun", title: "Noun", note: "subject, object, complement, possessor, conjunct" },
-  { scope: "box:adjective", title: "Adjective" },
-  { scope: "box:verb", title: "Verb" },
+  {
+    scope: "box:noun",
+    title: "Noun",
+    titleKey: "category.noun",
+    note: "subject, object, complement, possessor, conjunct",
+  },
+  { scope: "box:adjective", title: "Adjective", titleKey: "category.adjective" },
+  { scope: "box:verb", title: "Verb", titleKey: "slot.verb" },
   {
     scope: "box:mood",
     title: "Command subject",
+    titleKey: "help.commandSubject",
     note: "the box a command puts in place of the subject",
   },
 ];
@@ -47,16 +79,16 @@ const SECTIONS: { scope: Scope; title: string; note?: string }[] = [
  * a pick in flight. Each is one table, read here and by the strip that teaches it on screen, so
  * the sheet and the page cannot disagree.
  */
-const HOOK_SECTIONS: { title: string; note?: string; rows: { keys: string[]; label: string }[] }[] = [
+const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
   {
     title: "Word picker",
     rows: [
-      { keys: ["ArrowUp", "ArrowDown"], label: "Move" },
-      { keys: ["Enter"], label: "Choose" },
+      { keys: ["ArrowUp", "ArrowDown"], label: "Move", labelKey: "action.move" },
+      { keys: ["Enter"], label: "Choose", labelKey: "slot.choose" },
       { keys: ["Tab"], label: "Choose and go to the next box" },
       { keys: ["ArrowUp"], label: "Up from the first row: the category tabs" },
       { keys: ["ArrowLeft", "ArrowRight"], label: "Switch vocabulary, in the tabs" },
-      { keys: ["1", "4"], label: "Pronoun person" },
+      { keys: ["1", "4"], label: "Pronoun person", labelKey: "help.pronounPerson" },
       { keys: ["Escape"], label: "Close · again restores the word" },
     ],
   },
@@ -64,28 +96,50 @@ const HOOK_SECTIONS: { title: string; note?: string; rows: { keys: string[]; lab
     title: "Menus",
     rows: [
       { keys: ["1", "9"], label: "The row's own key picks it" },
-      { keys: ["ArrowUp", "ArrowDown"], label: "Move" },
-      { keys: ["Enter"], label: "Pick" },
-      { keys: ["Escape"], label: "Close" },
+      { keys: ["ArrowUp", "ArrowDown"], label: "Move", labelKey: "action.move" },
+      // "Pick" and "Choose" are the same act, so the sheet calls both what the picker's ↵ is called.
+      { keys: ["Enter"], label: "Pick", labelKey: "slot.choose" },
+      { keys: ["Escape"], label: "Close", labelKey: "action.close" },
     ],
   },
   {
     title: "Picking a link",
+    // The five link controls a pick serves, by their own names.
     note: "relative clause, if, join, instrument, possessor",
+    noteKeys: [
+      "satellite.relative",
+      "clause.conditional",
+      "clause.coordinated",
+      "slot.instrumental",
+      "slot.possessor",
+    ],
     rows: [
       { keys: ["1", "9"], label: "Pick a numbered target" },
       { keys: ["Tab"], label: "Next target" },
-      { keys: ["Enter"], label: "Pick" },
-      { keys: ["Escape"], label: "Cancel" },
+      { keys: ["Enter"], label: "Pick", labelKey: "slot.choose" },
+      { keys: ["Escape"], label: "Cancel", labelKey: "action.cancel" },
     ],
   },
   {
     title: "Translations & words",
+    titleKey: "help.translationsAndWords",
     rows: [
-      { keys: ["ArrowUp", "ArrowDown"], label: "Move between rows" },
-      { keys: ["Enter", "C"], label: "Copy a language" },
-      { keys: ["Enter"], label: "Words: put it in the box" },
-      { keys: ["M"], label: "Words: the word map" },
+      // The ↑ ↓ caps beside it say where.
+      { keys: ["ArrowUp", "ArrowDown"], label: "Move between rows", labelKey: "action.move" },
+      { keys: ["Enter", "C"], label: "Copy a language", labelKey: "action.copyLanguage" },
+      // ↵ on a word chooses it for the box, which is what the picker's ↵ is called.
+      {
+        keys: ["Enter"],
+        label: "Words: put it in the box",
+        labelKey: "slot.choose",
+        whereKey: "words.heading",
+      },
+      {
+        keys: ["M"],
+        label: "Words: the word map",
+        labelKey: "wordMap.heading",
+        whereKey: "words.heading",
+      },
       { keys: ["Escape"], label: "Words: back to the canvas" },
     ],
   },
@@ -128,6 +182,14 @@ export function HelpOverlay({
       keys: c.keys,
       label: c.labelKey ? t(c.labelKey) : c.label,
     }));
+  const titleOf = (section: SheetSection) =>
+    section.titleKey ? t(section.titleKey) : section.title;
+  const noteOf = (section: SheetSection) =>
+    section.noteKeys ? section.noteKeys.map((key) => t(key)).join(", ") : section.note;
+  const rowOf = ({ keys, label, labelKey, whereKey }: SheetRow) => ({
+    keys,
+    label: !labelKey ? label : whereKey ? `${t(whereKey)}: ${t(labelKey)}` : t(labelKey),
+  });
 
   return (
     <Dialog
@@ -192,17 +254,23 @@ export function HelpOverlay({
               "& > *": { breakInside: "avoid" },
             }}
           >
-            {SECTIONS.map(({ scope, title, note }) => (
+            {SECTIONS.map((section) => (
               <Section
-                key={scope}
-                title={title}
-                note={note}
-                rows={byScope(scope)}
+                key={section.scope}
+                title={titleOf(section)}
+                note={noteOf(section)}
+                rows={byScope(section.scope)}
                 platform={platform}
               />
             ))}
             {HOOK_SECTIONS.map((section) => (
-              <Section key={section.title} {...section} platform={platform} />
+              <Section
+                key={section.title}
+                title={titleOf(section)}
+                note={noteOf(section)}
+                rows={section.rows.map(rowOf)}
+                platform={platform}
+              />
             ))}
           </Box>
         </Box>
@@ -256,7 +324,12 @@ function Section({
             fontSize: "0.82rem",
           }}
         >
-          <Box sx={{ flex: 1 }}>{row.label}</Box>
+          {/* A row reads as a sentence, so it starts on a capital — which the bare commands the
+              picker's strip shares ("move", "choose") are catalogued without. Only ever raised,
+              never lowered: a German noun keeps its capital wherever it stands. */}
+          <Box sx={{ flex: 1, "&::first-letter": { textTransform: "uppercase" } }}>
+            {row.label}
+          </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
             {row.keys.map((spec, k) => (
               <Box key={spec} sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>

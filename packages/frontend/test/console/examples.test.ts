@@ -1,8 +1,10 @@
 // The phrase language as the plan writes it: every example in P02 §1 and §3, run through
-// parse → apply, and printed back.
+// parse → apply, and printed back — and every help page's example, printed in another language.
 import { describe, expect, it } from 'vitest';
+import { EXAMPLES, exampleIn } from '../../src/console/language/help.ts';
+import { lex } from '../../src/console/language/lex.ts';
 import { ids_, ok, periods, print, run, script, sel } from './helpers.ts';
-import { byId } from './vocab.ts';
+import { ALL, EN, IT, byId } from './vocab.ts';
 
 describe('the examples of the plan', () => {
   it('builds a noun phrase and a clause from one line, settings following the word they change', () => {
@@ -163,5 +165,51 @@ describe('lines that once broke the console', () => {
     const state = ok('/subj dog /verb run /if ( /subj cat /verb eat )');
     const dangling = { ...state, containers: state.containers.slice(0, 1) };
     expect(print(dangling)).toBe('/subj ( dog ) /verb ( run )');
+  });
+});
+
+// The help pages' examples (help.ts) are written once, in English, and shown in the interface
+// language (A21): each word as the printer writes it there, the commands and brackets as written.
+// What the page shows must be a line the console reads back into the phrase the example makes.
+describe('the help pages’ examples, in another interface language', () => {
+  it.each(Object.keys(EXAMPLES).map((name) => [name]))('prints the example for /%s in Italian, and reads it back', (name) => {
+    const english = EXAMPLES[name]!;
+    const shown = exampleIn(english, IT);
+    const back = run(shown, { vocab: IT });
+    expect(back.diagnostic).toBeUndefined();
+    expect(back.state).toEqual(run(english).state);
+    expect(back.effects.map((e) => [e.app, e.arg])).toEqual(run(english).effects.map((e) => [e.app, e.arg]));
+    // The example still shows the command it is the example of, where printing the phrase would not.
+    expect(shown).toMatch(new RegExp(`/${name}(\\s|$)`));
+    // No English word is left that has an Italian one.
+    const englishOnly = ALL.filter((c) => c.role !== 'pronoun' && c.labels!.it !== c.label).map((c) => c.label!);
+    expect(lex(shown).filter((t) => t.kind === 'word' && englishOnly.includes(t.text))).toEqual([]);
+  });
+
+  it('writes the words in Italian, and keeps the rest as written', () => {
+    expect(exampleIn(EXAMPLES.sg!, IT)).toBe('/subj ( gatto /sg )');
+    expect(exampleIn(EXAMPLES.rel!, IT)).toBe('/subj ( bambino /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )');
+    expect(exampleIn(EXAMPLES.poss!, IT)).toBe('/subj ( libro /poss [ bambino /adj vecchio ] )');
+    expect(exampleIn(EXAMPLES.level!, IT)).toBe(
+      '/subj ( bambino ) /verb ( iniziare ) /inst { /verb ( scegliere ) /obj ( parola ) } /level process',
+    );
+    // A pronoun is its person in every language; a name, a language and a command are not words.
+    expect(exampleIn(EXAMPLES.neut!, IT)).toBe('/subj ( 3rd /neut ) /verb ( correre )');
+    expect(exampleIn(EXAMPLES.save!, IT)).toBe('/save my cats');
+    expect(exampleIn(EXAMPLES.lang!, IT)).toBe('/lang it');
+    expect(exampleIn(EXAMPLES.help!, IT)).toBe('/help rel');
+    expect(exampleIn(EXAMPLES.pin!, IT)).toBe('/subj ( gatto ) /verb ( mangiare ) /pin');
+  });
+
+  it('shows each example as written in English', () => {
+    for (const example of Object.values(EXAMPLES)) expect(exampleIn(example, EN)).toBe(example);
+  });
+
+  it('keeps a pronoun given by its form, whose person alone would lose its gender', () => {
+    expect(exampleIn('/subj ( she ) /verb ( run )', IT)).toBe('/subj ( she ) /verb ( correre )');
+  });
+
+  it('keeps the English where the line does not read', () => {
+    expect(exampleIn('/subj ( frobnicate )', IT)).toBe('/subj ( frobnicate )');
   });
 });

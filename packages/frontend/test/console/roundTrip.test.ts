@@ -31,7 +31,7 @@ import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
 import { printWorkspace } from '../../src/console/language/print.ts';
 import type { Vocabulary, WorkspaceState } from '../../src/console/language/types.ts';
-import { ADJECTIVES, ADVERBS, EN, IT, NOUNS, PRONOUNS, VERBS } from './vocab.ts';
+import { ADJECTIVES, ADVERBS, EN, IT, NOUNS, PRONOUNS, VERBS, byId } from './vocab.ts';
 import { empty, ids } from './helpers.ts';
 
 // ── A seeded random walk ─────────────────────────────────────────────────────
@@ -359,5 +359,41 @@ describe('the round trip', () => {
       const { text, back } = roundTrip(state, EN);
       expect(printWorkspace(back.state, EN)).toBe(text);
     }
+  });
+});
+
+// A179. A passive set on a finite period stays when the period is made an infinitive, and the
+// translation says it ("to be loved"). But the printer gates the voice as it gates the tense and the
+// aspect, on the finite slot being free, so the line it writes has no `/passive` and applies back to
+// an active. The random walk reaches this only past 400 seeds (764, 1659 and 2022 of 5,000).
+describe('known bugs: A179 a passive infinitive', () => {
+  // The canvas's own reducers, in the order a user takes them: a transitive verb and its object, the
+  // passive, then the infinitive.
+  const passiveInfinitive = (): WorkspaceState => {
+    let sel: PhraseSelection = {};
+    sel = R.applyConceptSelect(sel, 'verb', byId('LOVE'));
+    sel = R.applyConceptSelect(sel, 'directObject', byId('DOG'));
+    sel = R.setVoice(sel, 'passive');
+    sel = R.setInfinitive(sel, true);
+    return { containers: [{ id: 'p1', selection: sel }], links: [] };
+  };
+
+  it.fails.each([
+    ['English', EN],
+    ['Italian', IT],
+  ])('gives the passive back (%s words)', (_name, vocab) => {
+    const state = passiveInfinitive();
+    const { back } = roundTrip(state, vocab);
+    expect(back.diagnostic).toBeUndefined();
+    expect(normalizeWorkspace(back.state)).toEqual(normalizeWorkspace(state));
+  });
+
+  // Regression: the same period without the infinitive prints its passive and comes back whole.
+  it('gives back the finite passive', () => {
+    const state = passiveInfinitive();
+    state.containers[0]!.selection = R.setInfinitive(state.containers[0]!.selection, false);
+    const { text, back } = roundTrip(state, EN);
+    expect(text).toContain('/passive');
+    expect(normalizeWorkspace(back.state)).toEqual(normalizeWorkspace(state));
   });
 });

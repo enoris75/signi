@@ -2179,3 +2179,51 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
     });
   });
 });
+
+// A178. Portuguese says a suppletive superlative before the noun: "o maior continente", "o melhor
+// gato". A6 made maior / melhor / menor / pior the raised degrees of grande / bom / pequeno / mau and
+// kept every compared adjective after the noun, which is right for the comparative ("o gato maior",
+// the bigger cat) and for a periphrastic superlative ("o gato mais belo"). At `most` the suppletive
+// after the noun reads as the comparative, and the superlative loses the one place Portuguese marks
+// it. Found by the ASIA and OCEANIA definitions (localization A17): "o continente maior".
+describe('known bugs: Portuguese suppletive superlative before the noun', () => {
+  const most = (concept: string, adjective: string, extra: Partial<NounPhrase> = {}) =>
+    np(concept, { adjectives: [adjective], adjectiveDegrees: ['most'], ...extra });
+
+  test.fails('a suppletive superlative precedes the noun', () => {
+    expect(sayAll(clause(most('CAT', 'BIG'), 'EAT')).pt).toBe('o maior gato come.'); // now: "o gato maior"
+    expect(sayAll(clause(most('CAT', 'GOOD'), 'EAT')).pt).toBe('o melhor gato come.');
+    expect(sayAll(clause(most('CAT', 'BAD'), 'EAT')).pt).toBe('o pior gato come.');
+    expect(sayAll(clause(most('HOUSE', 'SMALL'), 'BURN')).pt).toBe('a menor casa arde.');
+    expect(sayAll(clause(most('CAT', 'GREAT'), 'EAT')).pt).toBe('o maior gato come.');
+    expect(sayAll(clause(most('DOG', 'BIG', { number: 'plural' }), 'RUN')).pt).toBe('os maiores cães correm.');
+    expect(sayAll(clause(most('CAT', 'BIG', { gender: 'fem', number: 'plural' }), 'EAT')).pt).toBe('as maiores gatas comem.');
+    // Under a preposition, a possessive, and beside a plain adjective, which keeps its own place.
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('HOUSE', 'BIG') } } })).pt)
+      .toBe('o gato vem da maior casa.');
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: most('DOG', 'BIG', { possessor: { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } }),
+    })).pt).toBe('o gato vê o meu maior cão.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['BIG', 'BROWN'], adjectiveDegrees: ['most', 'positive'] }), 'EAT')).pt)
+      .toBe('o maior gato castanho come.'); // now: "o gato maior e castanho"
+    // The definitions that found it (ASIA, OCEANIA).
+    expect(sayAll({ subject: most('CONTINENT', 'BIG', { definiteness: 'definite' }) }).pt).toBe('o maior continente.');
+    expect(sayAll({ subject: most('CONTINENT', 'SMALL', { definiteness: 'definite' }) }).pt).toBe('o menor continente.');
+  });
+
+  // Regression: the comparative, the lowered degree, a periphrastic superlative and the predicative
+  // superlative keep their places, and the other Romance languages are untouched.
+  test('the comparative, a periphrastic superlative and the predicate stay where they are', () => {
+    const withDegree = (adjective: string, degree: Degree) =>
+      sayAll(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: [degree] }), 'EAT'));
+    expect(withDegree('BIG', 'more').pt).toBe('o gato maior come.');
+    expect(withDegree('GOOD', 'more').pt).toBe('o gato melhor come.');
+    expect(withDegree('BIG', 'least').pt).toBe('o gato menos grande come.');
+    expect(withDegree('BEAUTIFUL', 'most').pt).toBe('o gato mais belo come.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: 'most' }) } } })).pt)
+      .toBe('o gato é o maior.');
+    expect(withDegree('BIG', 'most')).toMatchObject({
+      it: 'il gatto più grande mangia.', es: 'el gato más grande come.', fr: 'le chat le plus grand mange.',
+    });
+  });
+});

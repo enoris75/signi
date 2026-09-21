@@ -371,15 +371,21 @@ export function PhraseWorkspace({
             <Box
               sx={{ display: "flex", alignItems: "center", gap: 0.75, fontSize: "0.72rem" }}
             >
+              {/* Past nine there is a key per act, each followed by what it does, as the picker's
+                  strip writes them: ⇥ moves along the targets and ↵ chooses one. */}
               {count <= 9 ? (
-                <Keycap spec="1" />
+                <>
+                  <Keycap spec="1" />
+                  {`1–${count}`}
+                </>
               ) : (
                 <>
                   <Keycap spec="Tab" />
+                  {t("action.move")}
                   <Keycap spec="Enter" />
+                  {t("slot.choose")}
                 </>
               )}
-              {count <= 9 ? `1–${count}` : "move, pick"}
             </Box>
           )}
           <Button

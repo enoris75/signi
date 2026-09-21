@@ -78,10 +78,14 @@ test.describe('verb', () => {
   // A01. The voice satellite is there only on a transitive verb that has an object to promote, so
   // this is also the check that the gate lets it through; the canvas then has to agree with the
   // translations about which box is the subject.
-  test('voice cycles active → passive, and the boxes change their names with it', async ({ app }) => {
+  test('voice cycles active → passive, and the boxes change their names with it', async ({ app, page }) => {
     await app.buildClause('CAT', 'EAT');
     await app.setDirectObject('MOUSE');
-    await expect(app.groupBox('Subject')).toBeVisible();
+    // A box's text starts with its caption, then its word.
+    const subjectBox = page.getByTestId('box-subject');
+    const objectBox = page.getByTestId('box-directObject');
+    await expect(subjectBox).toHaveText(/^Subject/);
+    await expect(objectBox).toHaveText(/^Object/);
 
     await app.cycle('verbVoice');
     await app.expectSentences({
@@ -94,14 +98,63 @@ test.describe('verb', () => {
       ja: 'ネズミは猫に食べられます。',
     });
     // The patient is the subject now, and the box still holding the agent says so.
-    await expect(app.groupBox('Agent')).toBeVisible();
-    await expect(app.groupBox('Direct Object')).toHaveCount(0);
+    await expect(subjectBox).toHaveText(/^Agent/);
+    await expect(objectBox).toHaveText(/^Subject/);
+    // Only the captions change: each ring is still stored under the name it had, which is what its
+    // collapse state and its place in a tidied row are keyed by (A19).
+    await expect(app.groupBox('Subject')).toBeVisible();
+    await expect(app.groupBox('Direct Object')).toBeVisible();
 
     // Cycling back restores the active clause and the names it had.
     await app.cycle('verbVoice');
     await app.expectSentences({ en: 'the cat eats the mouse.' });
-    await expect(app.groupBox('Subject')).toBeVisible();
-    await expect(app.groupBox('Agent')).toHaveCount(0);
+    await expect(subjectBox).toHaveText(/^Subject/);
+    await expect(objectBox).toHaveText(/^Object/);
+  });
+
+  // A19. The passive's agent and the voice box came after the catalog's control families, so their
+  // controls said "Clear Agent" and "Hide Diatesi" whatever the interface language. Each is named
+  // here in Italian, and each still does what it says.
+  test('names the passive’s agent and the voice box in the interface language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('MOUSE');
+    await app.cycle('verbVoice');
+    await app.expectSentences({ en: 'the mouse is eaten by the cat.' });
+    await app.setUiLanguage('it');
+
+    // Cycling opened the voice box, so its control offers to hide it; hidden, it names the value.
+    const voiceBox = page.getByTestId('box-verbVoice');
+    await expect(app.satellite('verbVoice')).toHaveAttribute('aria-label', 'Nascondi la diatesi');
+    await app.satellite('verbVoice').click();
+    await expect(voiceBox).toHaveCount(0);
+    await expect(app.satellite('verbVoice')).toHaveAttribute('aria-label', 'Diatesi: Passiva');
+    await app.satellite('verbVoice').click();
+    await expect(voiceBox).toBeVisible();
+    await expect(app.satellite('verbVoice')).toHaveAttribute('aria-label', 'Nascondi la diatesi');
+
+    // The agent's ring folds its own satellites away, and the patient's ring — the subject now —
+    // folds its own, not the agent's.
+    const agentDeterminer = page.getByTestId('box-subjectDefiniteness');
+    const patientDeterminer = page.getByTestId('box-directObjectDefiniteness');
+    await app.satellite('subjectDefiniteness').click();
+    await app.satellite('directObjectDefiniteness').click();
+    await expect(agentDeterminer).toBeVisible();
+    await expect(patientDeterminer).toBeVisible();
+    await page.getByRole('button', { name: "Compatta l'agente", exact: true }).click();
+    await expect(agentDeterminer).toHaveCount(0);
+    await expect(patientDeterminer).toBeVisible();
+    await page.getByRole('button', { name: "Espandi l'agente", exact: true }).click();
+    await expect(agentDeterminer).toBeVisible();
+    await page.getByRole('button', { name: 'Compatta il soggetto', exact: true }).click();
+    await expect(patientDeterminer).toHaveCount(0);
+    await expect(agentDeterminer).toBeVisible();
+    await page.getByRole('button', { name: 'Espandi il soggetto', exact: true }).click();
+    await expect(patientDeterminer).toBeVisible();
+
+    // Clearing the agent empties its box, which keeps its caption.
+    await page.getByRole('button', { name: "Cancella l'agente", exact: true }).click();
+    await expect(page.getByTestId('box-subject')).toHaveText(/^Agente \*.*vuoto$/);
+    await expect(page.getByRole('button', { name: "Cancella l'agente", exact: true })).toHaveCount(0);
   });
 
   test('the polarity toggle negates the clause', async ({ app }) => {

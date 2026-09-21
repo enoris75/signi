@@ -6,7 +6,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 **Blocked on:** the words that organize the console's reference. The topics that group the commands
 (mood, workspace, the spatial relation), the short annotations on a completion row ("now", "also"),
 and the help page's labels (usage, example) each need a noun or an adverb the corpus lacks.
-[A21](../A-ready/A21-ui-console-seeded-words.md) takes the topics and titles whose words are seeded.
+[A21](../done/A21-ui-console-seeded-words.md) takes the topics and titles whose words are seeded.
 
 ## Seed first
 

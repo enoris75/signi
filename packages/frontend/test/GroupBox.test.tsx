@@ -147,7 +147,7 @@ describe('GroupBox', () => {
   describe('collapse toggle', () => {
     it('offers to collapse an expanded group, where the ring layout seated it', () => {
       const { ctx } = renderGroup(SUBJECT_GROUP);
-      const toggle = screen.getByRole('button', { name: 'Collapse Subject' });
+      const toggle = screen.getByRole('button', { name: 'Compact Subject' });
 
       expect(within(toggle).getByTestId('UnfoldLessIcon')).toBeInTheDocument();
       expect(position(toggle)).toEqual({ left: '136px', top: '36px' });
@@ -196,13 +196,13 @@ describe('GroupBox', () => {
     it('reads only its own group’s collapse state', () => {
       renderGroup(SUBJECT_GROUP, { collapsedGroups: { Direction: true, Subject: false } });
 
-      expect(screen.getByRole('button', { name: 'Collapse Subject' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Compact Subject' })).toBeInTheDocument();
     });
 
     it('is left off until the ring layout has seated it', () => {
       renderGroup(SUBJECT_GROUP, { controlPos: {} });
 
-      expect(screen.queryByRole('button', { name: 'Collapse Subject' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Compact Subject' })).not.toBeInTheDocument();
     });
   });
 
