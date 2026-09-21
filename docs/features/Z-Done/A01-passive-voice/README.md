@@ -135,8 +135,12 @@ stating the transitive-only constraint, that the agent survives as a by-phrase, 
     `ResolvedPhrase.agent?: ResolvedNounElement` (keeps `COMPLEMENT_RENDER_ORDER` and the slot
     machinery untouched). **Drop the agent entirely when its forms carry `generic: '1'`** —
     that is the agentless passive, and no language says *by one*. Passive with no directObject
-    falls back to active. Relative-clause verbs stay active in this cut (documented gap;
-    recursion at `resolveRelativeClause.ts`).
+    falls back to active. Relative-clause verbs stayed active in this cut; the follow-up
+    re-maps them in `resolveRelativeClause.ts` and moves the gap with the head — an object gap
+    becomes the subject ("the book that is written by the child"), a subject gap becomes the
+    new `'agent'` gap ("the child by whom the book is written"), a complement gap stays put. A
+    genitive relative stays active (its head owns the agent), and so does a Japanese subject
+    gap (`RELATIVIZES_AGENT`: Japanese relativises no agent).
 
 ## 3. Per-engine morphology
 
@@ -231,5 +235,6 @@ Follow the `verbAspect` satellite wiring exactly:
   covers an affectedness reading that applies to *intransitives* and has no active counterpart.
   The transitive-only gate correctly excludes it — the `ja` column here implements a narrower
   construction than the morphology's name suggests.
-- Passive inside relative clauses; de perfect-passive *worden*; agent as an *action*
-  ("by being…"); the get-passive. Each is a documented gap, not a blocker.
+- Passive inside a genitive relative ("by whose cat…"); agent as an *action* ("by being…");
+  the get-passive. Each is a documented gap, not a blocker. (Passive inside the other relatives,
+  and de perfect-passive *worden*, have since landed.)

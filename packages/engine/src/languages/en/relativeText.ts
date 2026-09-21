@@ -1,7 +1,9 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
+import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateParts } from './predicateParts.js';
 import { subjectText } from './subjectText.js';
@@ -17,7 +19,9 @@ import { subjectText } from './subjectText.js';
  * "which" otherwise ("the house under which the cat eats", "the boy to whom the man gives the book").
  * A plain locative gap is the relative adverb "where" instead ("a place where one lives", C07).
  * A possessor gap is the genitive relative "whose", which takes the place of the possessed
- * phrase's determiner ("a period whose noun is a word").
+ * phrase's determiner ("a period whose noun is a word"). A passive's agent gap takes the by-phrase's
+ * "by" ("the child by whom the book is written"), and a passive's other gaps carry their agent after
+ * the participle ("the book that is written by the child").
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -33,12 +37,15 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // English relativises on PERSONHOOD, not animacy: "who" for a person, "that" for anything else
   // (an animal is animate but still takes "that"/"which").
   const human = np.head.forms['human'] === '1';
-  const gap = relativeGapComplement(np, { base: human ? 'whom' : 'which', definiteness: 'bare' });
-  const pronoun = isPlainLocativeGap(rel) ? 'where' : gap ? complementsPhrase(gap) : human ? 'who' : 'that';
+  const WHOM = { base: human ? 'whom' : 'which', definiteness: 'bare' };
+  const gap = relativeGapComplement(np, WHOM);
+  const agentGap = relativeAgentGap(np, WHOM);
+  const pronoun = agentGap ? agentPhrase(agentGap)
+    : isPlainLocativeGap(rel) ? 'where' : gap ? complementsPhrase(gap) : human ? 'who' : 'that';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   const subjText = subjectRelative ? '' : subjectText(rel.subject!);
-  return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements)]
+  return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, false, rel.agent)]
     .filter(Boolean)
     .join(' ');
 }

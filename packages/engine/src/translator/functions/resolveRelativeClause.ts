@@ -1,5 +1,6 @@
 import type { RelativeClause } from '@signi/shared';
-import type { ResolvedRelativeClause } from '../../types.js';
+import type { ResolvedNounElement, ResolvedRelativeClause } from '../../types.js';
+import { RELATIVIZES_AGENT } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -17,6 +18,10 @@ import { resolveVerbPhrase } from './resolveVerbPhrase.js';
  * `headForms` are the head noun's, passed down from `resolveNounPhrase`. They stand in for the
  * clause's subject where the gap IS the subject, which is what a `subject_sense` reads ("der Kater,
  * der die Maus frisst", A157).
+ *
+ * A **passive** relative is re-mapped here, as `resolvePhrase` re-maps a main clause (A01): the patient
+ * is promoted to subject and the agent demoted to the by-phrase — and the gap moves with whichever of
+ * the two the head is (see `passiveRemap`).
  */
 export function resolveRelativeClause(
   clause: RelativeClause,
@@ -26,24 +31,51 @@ export function resolveRelativeClause(
 ): ResolvedRelativeClause {
   const headRole = clause.headRole ?? 'subject';
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
-  // A relative clause stays **active** whatever voice its plan names (A01, documented gap). The
-  // passive re-maps a clause's subject and object, and here one of those slots is the gap the head
-  // noun fills: promoting the patient over it would have to move the gap too, which is a second
-  // feature and not this one. Dropping the flag renders the plain active clause, which is at least
-  // a true sentence, rather than an auxiliary with nothing promoted into place.
-  const { voice: _voice, ...verbPhrasePlan } = clause.verbPhrase;
+  const directObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
+  // Two gaps keep the relative **active** whatever voice its plan names, since the passive would demote
+  // the head (or what it owns) to a by-phrase no relativizer here can say: a genitive relative's head
+  // owns the agent ("*the girl by whose cat the food is eaten"), and Japanese relativises no agent at
+  // all (see RELATIVIZES_AGENT). The plain active clause is still a true sentence.
+  const keepsActive = headRole === 'possessor' || (headRole === 'subject' && !RELATIVIZES_AGENT.has(language));
+  const { voice: _voice, ...activePlan } = clause.verbPhrase;
   // The head gapped as the direct object is the verb's object too ("il ragazzo che il gatto conosce").
+  // The sense is the agent's under either voice, so it reads the plan's own subject (see resolveVerbPhrase).
   const verbPhrase = resolveVerbPhrase(
-    verbPhrasePlan, language, lookup, undefined, undefined,
+    keepsActive ? activePlan : clause.verbPhrase, language, lookup, undefined, undefined,
     !!clause.directObject || headRole === 'directObject',
     headRole === 'subject' ? headForms : subject?.agreement,
   );
+  const slots = verbPhrase.voice === 'passive'
+    ? passiveRemap(headRole, subject, directObject)
+    : { headRole, subject, directObject };
   return {
-    headRole,
+    ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
-    subject,
     verbPhrase,
-    directObject: clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined,
     complements: resolveComplements(clause.complements, language, lookup, verbPhrase.verb.forms),
   };
+}
+
+/**
+ * The core slots of a passive relative. `resolveVerbPhrase` has already checked there is a patient to
+ * promote — the plan's object, or the head gapped as it — so the three gaps a passive can have are:
+ *
+ *  - the head is the **patient** (gapped as the object): it is the clause's subject now, and the
+ *    agent follows as the by-phrase — "the book that is written by the child";
+ *  - the head is the **agent** (gapped as the subject): the object is promoted to the clause's own
+ *    subject, and the head is the by-phrase's gap — "the child by whom the book is written";
+ *  - the head fills a **complement**, which the voice leaves where it was: "the house in which the book
+ *    is written by the child".
+ *
+ * A generic agent is demoted to nothing, as in a main clause: "the book that is written".
+ */
+function passiveRemap(
+  headRole: ResolvedRelativeClause['headRole'],
+  subject: ResolvedNounElement | undefined,
+  directObject: ResolvedNounElement | undefined,
+): Pick<ResolvedRelativeClause, 'headRole' | 'subject' | 'directObject' | 'agent'> {
+  if (headRole === 'subject') return { headRole: 'agent', subject: directObject };
+  const agent = subject && subject.agreement['generic'] !== '1' ? { agent: subject } : {};
+  if (headRole === 'directObject') return { headRole: 'subject', ...agent };
+  return { headRole, subject: directObject, ...agent };
 }

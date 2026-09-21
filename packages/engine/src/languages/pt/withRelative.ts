@@ -2,9 +2,11 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
@@ -22,7 +24,9 @@ import { subjectText } from './subjectText.js';
  * homem dá o livro"). A plain locative gap is the relative adverb "onde" instead ("um lugar onde se
  * vive", C07). A possessor gap is the genitive relative
  * "cujo", which agrees with the possessed noun and takes the place of its article
- * ("um período cujo substantivo é uma palavra").
+ * ("um período cujo substantivo é uma palavra"). A passive's agent gap is "pelo qual" ("a criança pela
+ * qual o livro é escrito"); its other gaps carry the agent after the participle ("o livro que é escrito
+ * pela criança").
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
@@ -43,13 +47,15 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
   // on agreeForms), not as a subject word — "uma coisa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
-  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
+  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, false, rel.agent);
   const QUAL = { base: 'qual', plural: 'quais', definiteness: 'definite' };
   // The object of a verb that takes it with a preposition relativises on that preposition, as a
   // complement does: "o botão no qual o gato clica" (A139).
   const prepHead = relativePrepositionalHead(np, QUAL);
   const gap = relativeGapComplement(np, QUAL);
-  const relativizer = prepHead ? prepObjectText(prepHead.head, prepHead.prep)
+  const agentGap = relativeAgentGap(np, QUAL);
+  const relativizer = agentGap ? agentPhrase(agentGap)
+    : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'onde' : gap ? complementsPhrase(gap, {}, '') : 'que';
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

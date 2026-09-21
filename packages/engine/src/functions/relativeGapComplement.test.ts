@@ -19,7 +19,7 @@ describe('relativeGapComplement', () => {
     expect(relativeGapComplement(np(HOUSE), WHICH)).toBeUndefined();
   });
 
-  test.each(['subject', 'directObject', 'predicative'] as const)('a %s gap takes no preposition, so it is no complement', (headRole) => {
+  test.each(['subject', 'directObject', 'predicative', 'agent'] as const)('a %s gap is no complement', (headRole) => {
     expect(relativeGapComplement(np(HOUSE, {}, { relative: clause({ headRole }) }), WHICH)).toBeUndefined();
   });
 

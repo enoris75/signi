@@ -170,14 +170,22 @@ export interface ResolvedModal {
  * `'possessor'` is the genitive relative (see RelativeClause): no slot is gapped at all — the head
  * owns the clause's `subject`, which is present and drives agreement, and each engine writes the
  * possessive relativizer together with it ("whose noun", "il cui nome", "dont le nom").
+ *
+ * A **passive** relative arrives re-mapped, as a passive main clause does (see ResolvedPhrase.agent):
+ * the patient is the subject and the agent the by-phrase, and the gap has moved with them. A head
+ * gapped as the object is the subject now ("the book that is written by the child"); a head gapped as
+ * the subject is the demoted agent, the one gap only a passive has (`'agent'`: "the child by whom the
+ * book is written"), and the patient is the clause's own subject.
  */
 export interface ResolvedRelativeClause {
-  headRole: 'subject' | 'directObject' | 'possessor' | ComplementType;
+  headRole: 'subject' | 'directObject' | 'possessor' | 'agent' | ComplementType;
   /** The gap complement's specifiers (see RelativeClause.headSpecifiers); plain data. */
   headSpecifiers?: Specifier[];
   subject?: ResolvedNounElement;
   verbPhrase: ResolvedVerbPhrase;
   directObject?: ResolvedNounElement;
+  /** The demoted agent of a passive relative, when it is not the gap (see ResolvedPhrase.agent). */
+  agent?: ResolvedNounElement;
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
 }
 

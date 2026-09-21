@@ -1,7 +1,6 @@
 import type { ResolvedPhrase, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
-import { objectPredication } from '../../functions/objectPredication.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
@@ -11,19 +10,11 @@ import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { isPotentialPassive } from './isPotentialPassive.js';
+import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
-
-/** The particle a passive's agent takes: に, or によって where a complement already holds the に. */
-function jaAgentParticle(phrase: ResolvedPhrase): string {
-  const complements = phrase.complements;
-  const factitive = complements?.['objectPredicative'];
-  const niIsTaken = !!complements?.['terminus']
-    || (!!factitive && objectPredication(factitive) !== 'essive');
-  return niIsTaken ? 'によって' : 'に';
-}
 
 /**
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
@@ -64,7 +55,7 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   // ditransitive, or the factitive object complement — the agent takes the compound によって
   // instead, because two に in one clause cannot be told apart: 本は猫によって子供にあげられます, never
   // 「猫に子供に」.
-  if (phrase.agent) segs.push(...elSegs(phrase.agent), ...jaParticleSegs(phrase.agent, jaAgentParticle(phrase)));
+  if (phrase.agent) segs.push(...elSegs(phrase.agent), ...jaParticleSegs(phrase.agent, jaAgentParticle(phrase.complements)));
   // A clause of purpose precedes what it is done for, closed by ために on the dictionary form:
   // 「変更するためにクリック」, 「翻訳を見るために主語を選択」. It is a citation clause, so it speaks no
   // subject of its own — the one it shares with this clause is already the topic above.

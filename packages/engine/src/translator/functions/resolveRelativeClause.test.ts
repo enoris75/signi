@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { lexicon, LOOKUP } from '../translator.fixtures.js';
+import { CANE, CASA, ESSERE, GATTO, lexicon, LOOKUP } from '../translator.fixtures.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
 
 describe('resolveRelativeClause', () => {
@@ -43,5 +43,68 @@ describe('resolveRelativeClause', () => {
     expect(verbOf({ headRole: 'directObject', subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } })).toBe('KNOW_ACQUAINTED');
     expect(verbOf({ verbPhrase: { verb: 'KNOW' } })).toBe('KNOW');
     expect(verbOf({ headRole: 'cause', subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } })).toBe('KNOW');
+  });
+
+  // A01: a passive relative is re-mapped as a passive main clause is, and the gap moves with the head.
+  describe('in the passive', () => {
+    const PASSIVE = lexicon({
+      CAT: GATTO, DOG: CANE, HOUSE: CASA, BE: ESSERE, GENERIC_PERSON: { base: 'si', generic: '1' },
+      EAT: { base: 'mangiare', transitivity: 'transitive' }, RUN: { base: 'correre', transitivity: 'intransitive' },
+    });
+    const eaten = { verb: 'EAT', voice: 'passive' } as const;
+    const base = (el?: { conjuncts: { head: { forms: Record<string, string> } }[] }) => el?.conjuncts[0]?.head.forms['base'];
+
+    test('a head gapped as the object is the patient, so it is the subject, and the agent the by-phrase', () => {
+      const clause = resolveRelativeClause({ headRole: 'directObject', subject: { concept: 'CAT' }, verbPhrase: eaten }, 'it', PASSIVE);
+      expect(clause).toMatchObject({ headRole: 'subject', verbPhrase: { voice: 'passive' } });
+      expect([clause.subject, clause.directObject]).toEqual([undefined, undefined]);
+      expect(base(clause.agent)).toBe('gatto');
+    });
+
+    test('a head gapped as the subject is the agent, and the object is promoted to the clause’s subject', () => {
+      const clause = resolveRelativeClause({ verbPhrase: eaten, directObject: { concept: 'DOG' } }, 'it', PASSIVE);
+      expect(clause.headRole).toBe('agent');
+      expect([clause.directObject, clause.agent]).toEqual([undefined, undefined]);
+      expect(base(clause.subject)).toBe('cane');
+    });
+
+    test('a head filling a complement stays there while the patient and the agent swap around it', () => {
+      const clause = resolveRelativeClause({ headRole: 'locative', subject: { concept: 'CAT' }, verbPhrase: eaten, directObject: { concept: 'DOG' } }, 'it', PASSIVE);
+      expect(clause.headRole).toBe('locative');
+      expect(clause.directObject).toBeUndefined();
+      expect(base(clause.subject)).toBe('cane');
+      expect(base(clause.agent)).toBe('gatto');
+    });
+
+    test('a generic agent is demoted to nothing', () => {
+      const clause = resolveRelativeClause({ headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: eaten }, 'it', PASSIVE);
+      expect(clause.headRole).toBe('subject');
+      expect(clause).not.toHaveProperty('agent');
+    });
+
+    test('a genitive relative stays active, since its head owns the agent', () => {
+      const clause = resolveRelativeClause({ headRole: 'possessor', subject: { concept: 'CAT' }, verbPhrase: eaten, directObject: { concept: 'DOG' } }, 'it', PASSIVE);
+      expect(clause.verbPhrase.voice).toBeUndefined();
+      expect(clause.headRole).toBe('possessor');
+      expect(base(clause.subject)).toBe('gatto');
+      expect(base(clause.directObject)).toBe('cane');
+    });
+
+    test('a language that relativises no agent keeps a subject gap active, and still passivizes an object gap', () => {
+      const agentGap = resolveRelativeClause({ verbPhrase: eaten, directObject: { concept: 'DOG' } }, 'ja', PASSIVE);
+      expect(agentGap.headRole).toBe('subject');
+      expect(agentGap.verbPhrase.voice).toBeUndefined();
+      expect(base(agentGap.directObject)).toBe('cane');
+      const objectGap = resolveRelativeClause({ headRole: 'directObject', subject: { concept: 'CAT' }, verbPhrase: eaten }, 'ja', PASSIVE);
+      expect(objectGap).toMatchObject({ headRole: 'subject', verbPhrase: { voice: 'passive' } });
+    });
+
+    test('a passive that cannot be one leaves every slot where the plan put it', () => {
+      const clause = resolveRelativeClause({ headRole: 'locative', subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN', voice: 'passive' } }, 'it', PASSIVE);
+      expect(clause.headRole).toBe('locative');
+      expect(clause.verbPhrase.voice).toBeUndefined();
+      expect(base(clause.subject)).toBe('gatto');
+      expect(clause).not.toHaveProperty('agent');
+    });
   });
 });

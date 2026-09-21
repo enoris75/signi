@@ -2,9 +2,11 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
@@ -21,7 +23,9 @@ import { subjectText } from './subjectText.js';
  * article and "que", agreeing with the head ("la casa debajo de la que el gato come", "el niño al que el hombre da el libro").
  * A plain locative gap is the relative adverb "donde" instead ("un lugar donde se vive", C07). A possessor gap is the genitive relative
  * "cuyo", which agrees with the possessed noun and takes the place of its article
- * ("un período cuyo sustantivo es una palabra").
+ * ("un período cuyo sustantivo es una palabra"). A passive's agent gap is "por el que" ("el niño por el
+ * que el libro es escrito"); its other gaps carry the agent after the participle ("el libro que es
+ * escrito por el niño").
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
@@ -51,9 +55,11 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
   // on agreeForms), not as a subject word — "una cosa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
-  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
+  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent);
   const gap = relativeGapComplement(np, QUE);
-  const relativizer = prepHead ? prepObjectText(prepHead.head, prepHead.prep)
+  const agentGap = relativeAgentGap(np, QUE);
+  const relativizer = agentGap ? agentPhrase(agentGap)
+    : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'donde' : gap ? complementsPhrase(gap, {}, '') : 'que';
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

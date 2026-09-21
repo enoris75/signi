@@ -3,9 +3,11 @@ import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { defArticle } from './defArticle.js';
@@ -24,7 +26,9 @@ import { subjectText } from './subjectText.js';
  * libro"). So does the alarm a cry raises, which the cry takes as its a-complement: "il lupo al quale il
  * ragazzo gridò" (A129). A plain locative gap is the relative adverb "dove" instead ("un luogo dove si
  * vive", C07). A possessor gap is the genitive relative "il cui", whose article agrees with the
- * possessed noun ("un periodo il cui nome è una parola").
+ * possessed noun ("un periodo il cui nome è una parola"). A passive's agent gap fuses "da" with "il
+ * quale" ("il bambino dal quale il libro è scritto"); its other gaps carry the agent after the
+ * participle ("il libro che è scritto dal bambino").
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -56,9 +60,11 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
   // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
-  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
+  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent);
   const gap = relativeGapComplement(np, QUALE);
-  const relativizer = alarmHead ? alarmCryText(alarmHead)
+  const agentGap = relativeAgentGap(np, QUALE);
+  const relativizer = agentGap ? agentPhrase(agentGap)
+    : alarmHead ? alarmCryText(alarmHead)
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'dove'
       : gap ? complementsPhrase(gap, {}, '') : 'che';

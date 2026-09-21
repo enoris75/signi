@@ -1,10 +1,12 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
+import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { VOWEL_START } from './fr.consts.js';
@@ -23,7 +25,9 @@ import { subjectText } from './subjectText.js';
  * laquelle le chat mange", "le garçon auquel l'homme donne le livre", "à cause duquel"). So does the alarm a
  * cry raises, which the cry takes as its à-complement: "le loup auquel le garçon cria" (A129). A plain
  * locative gap is the relative adverb "où" instead ("la maison où le chat mange", C07). A possessor gap is "dont",
- * which keeps the possessed phrase's own article ("une période dont le nom est un mot").
+ * which keeps the possessed phrase's own article ("une période dont le nom est un mot"). A passive's agent
+ * gap is "par lequel" ("l'enfant par lequel le livre est écrit"); its other gaps carry the agent after
+ * the participle ("le livre qui est écrit par l'enfant").
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -37,7 +41,7 @@ export function relativeText(np: ResolvedNounPhrase): string {
       predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements))}`.trim();
   }
   if (rel.headRole === 'subject' || !rel.subject) {
-    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements)}`.trim();
+    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements, undefined, rel.agent)}`.trim();
   }
   const subjText = subjectText(rel.subject);
   const fem = np.head.forms['gender'] === 'fem';
@@ -46,17 +50,19 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // So is the object of a verb that takes it with a preposition: "le bouton sur lequel le chat clique" (A139).
   const prepHead = relativePrepositionalHead(np, QUEL);
   const gap = relativeGapComplement(np, QUEL);
+  const agentGap = relativeAgentGap(np, QUEL);
   // "lequel" is written as one word with its article, contracted or not: lequel, laquelle, duquel, auxquels.
   // When the head is the clause's DIRECT OBJECT, it is a preceding object and an avoir participle
   // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement, and
   // nor does an alarm, which is the cry's à-complement ("le loup auquel le garçon a crié").
   const precedingObject = rel.headRole === 'directObject' && !alarmHead && !prepHead ? np.head.forms : undefined;
-  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject);
+  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject, rel.agent);
   // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
   const clause = joinSubject(subjText, pred);
   // The generic "on" after "où" takes the euphonic l' of the written language: "un lieu où l'on vit".
   if (isPlainLocativeGap(rel)) return `où ${isGenericSubject(rel.subject) ? `l'${clause}` : clause}`.trim();
-  const lequel = alarmHead ? alarmCryText(alarmHead)
+  const lequel = agentGap ? agentPhrase(agentGap)
+    : alarmHead ? alarmCryText(alarmHead)
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : gap ? complementsPhrase(gap, {}, '') : '';
   return (lequel

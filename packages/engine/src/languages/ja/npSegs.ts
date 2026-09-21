@@ -9,6 +9,7 @@ import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
+import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { predicateSegs } from './predicateSegs.js';
@@ -86,6 +87,11 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
       ? [...elSegs(rel.subject), ...jaParticleSegs(rel.subject, clauseSubjectParticle)] : [];
+  // A passive relative's agent follows its subject, as in a main clause, and the clause precedes the
+  // head all the same: アフリカに読まれる本 "the book that is read by Africa". (Japanese relativises no
+  // agent, so the head is never the one gapped here — see RELATIVIZES_AGENT.)
+  const agentSegs: RubySegment[] = rel.agent
+    ? [...elSegs(rel.agent), ...jaParticleSegs(rel.agent, jaAgentParticle(rel.complements))] : [];
   const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // A head that fills the copula's subject complement leaves a gap Japanese cannot leave empty: the
   // pro-form そう takes its place, with the plain copula a relative takes (犬がそうではない伝説, 犬がそう
@@ -93,5 +99,5 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const complements = rel.headRole === 'predicative' && rel.verbPhrase.verb.forms['copula'] === '1'
     ? { ...rel.complements, predicative: JA_SOU }
     : rel.complements;
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate), ...core];
+  return [...clauseSubjectSegs, ...agentSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate), ...core];
 }

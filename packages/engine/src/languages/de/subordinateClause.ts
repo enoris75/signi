@@ -4,12 +4,14 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { adverbSlots } from './adverbSlots.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { reflexivePronoun } from './reflexivePronoun.js';
 import { relativePronoun } from './relativePronoun.js';
@@ -29,8 +31,9 @@ import { verbGroup } from './verbGroup.js';
  * A head filling a complement takes that complement's preposition and case ("das Haus, in dem der
  * Kater isst", "der Junge, dem der Mann das Buch gibt"), see `relativePronoun`. A possessor gap is
  * the genitive "dessen"/"deren", agreeing with the head, followed by the phrase it owns without an
- * article of its own ("ein Satzgefüge, dessen Nomen ein Wort ist"). Returns "" if `np`
- * has no relative. The clause is bracketed by commas at both ends; a closing comma that lands
+ * article of its own ("ein Satzgefüge, dessen Nomen ein Wort ist"). A passive builds its verb complex
+ * on "werden", as the main clause does, and its agent gap is "von" + the dative pronoun ("das Kind, von
+ * dem das Buch geschrieben wird"). Returns "" if `np` has no relative. The clause is bracketed by commas at both ends; a closing comma that lands
  * against the sentence-final stop (or another comma) is tidied up in `punctuate`.
  */
 export function subordinateClause(np: ResolvedNounPhrase): string {
@@ -54,6 +57,8 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // — so the clause's verb forms reach the stand-in too, not only the rendered complements below.
   const pronoun = possessed
     ? [relativePronoun(f, 'gen', plural), subjectText(possessed)].filter(Boolean).join(' ')
+    : rel.headRole === 'agent'
+      ? `von ${relativePronoun(f, 'dat', plural)}`
     : gap
       ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
       : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
@@ -75,10 +80,14 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // clause, whose finite verb leads from the V2 slot instead.
   // A reflexive verb builds its forms as the plain verb, its pronoun leading the Mittelfeld's pronoun
   // slot: "der sich bewegt", "die sich bewegt haben" (see `reflexivePronoun`).
-  const plain = nonReflexiveVerb(verb).forms;
-  const complex = modals.length > 0
+  // A passive conjugates "werden" with the lexical verb's Partizip II at the head of the clause-final
+  // material, and is never reflexive (see `renderClause`): "das gegessen wird", "das gegessen worden ist".
+  const passive = rel.verbPhrase.voice === 'passive' && !!rel.verbPhrase.passiveAux;
+  const plain = passive ? rel.verbPhrase.passiveAux!.forms : nonReflexiveVerb(verb).forms;
+  const built = modals.length > 0
     ? modalVerbGroup(modals, plain, pn, tense, aspect, mood)
     : verbGroup(plain, pn, tense, aspect, mood);
+  const complex = passive ? passiveComplex(built, verb.forms['participle'] ?? verb.forms['base'] ?? '') : built;
   const { mid } = complex;
 
   // The dative recipient leads the accusative object, and a subordinate means clause trails the
@@ -100,8 +109,11 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const { means, rest } = splitMeansClause(undative);
   const dativeText = complementsPhrase(dative);
   const meansText = complementsPhrase(means);
-  const { pronoun: objectPronoun, noun: directObjectText, prepositional } = splitObject(directObject, '', objectPrep);
-  const objectPronounText = [reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
+  // A passive has no accusative object left, so its by-phrase takes the noun object's slot, as in the
+  // main clause: "das vom Kind im Haus geschrieben wird".
+  const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(directObject, '', objectPrep);
+  const directObjectText = passive ? agentPhrase(rel.agent) : objectNoun;
+  const objectPronounText = [passive ? '' : reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
   // The adverbs already follow the objects here, so a direction adverb only has to leave the

@@ -347,14 +347,131 @@ describe('a passive that cannot be one', () => {
       });
   });
 
-  test('a relative clause stays active, whatever its plan says (documented gap)', () => {
+  test('a genitive relative stays active, since its head owns the agent the passive would demote', () => {
+    expect(sayAll(clause(
+      np('CHILD', { relative: { headRole: 'possessor', subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive' }, directObject: np('FOOD') } }),
+      'RUN',
+    ))).toMatchObject({
+      en: 'the child whose cat eats the food runs.',
+      it: 'il bambino il cui gatto mangia il cibo corre.',
+      de: 'das Kind, dessen Kater das Essen frisst, läuft.',
+    });
+  });
+});
+
+// ── The passive in a relative clause ─────────────────────────────────────────
+// A relative is re-mapped as a main clause is, and the gap moves with the head: a head gapped as the
+// object is the patient, so it is the subject now; a head gapped as the subject is the agent, the one
+// gap only a passive has; a head in a complement stays where it was (see resolveRelativeClause).
+describe('a passive relative clause', () => {
+  test('a head gapped as the object is the promoted patient, and the agent follows as the by-phrase', () => {
+    // As built on the canvas: the book that Antarctica writes, turned passive, is read by Africa.
+    expect(sayAll(clause(np('AFRICA'), 'READ', {
+      directObject: np('BOOK', { relative: { headRole: 'directObject', subject: np('ANTARCTICA'), verbPhrase: { verb: 'WRITE', voice: 'passive' } } }),
+      verbPhrase: { voice: 'passive' },
+    }))).toEqual({
+      en: 'the book that is written by Antarctica is read by Africa.',
+      it: "il libro che è scritto dall'Antartide è letto dall'Africa.",
+      fr: "le livre qui est écrit par l'Antarctique est lu par l'Afrique.",
+      de: 'das Buch, das von der Antarktis geschrieben wird, wird von Afrika gelesen.',
+      es: 'el libro que es escrito por la Antártida es leído por África.',
+      ja: '南極大陸に書かれる本はアフリカに読まれます。',
+      pt: 'o livro que é escrito pela Antártida é lido pela África.',
+    });
+  });
+
+  test('the participle agrees with the head it promotes', () => {
+    expect(sayAll(clause(
+      np('HOUSE', { number: 'plural', relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'SEE', voice: 'passive' } } }),
+      'RUN',
+    ))).toEqual({
+      en: 'the houses that are seen by the cat run.',
+      it: 'le case che sono viste dal gatto corrono.',
+      fr: 'les maisons qui sont vues par le chat courent.',
+      de: 'die Häuser, die vom Kater gesehen werden, laufen.',
+      es: 'las casas que son vistas por el gato corren.',
+      ja: '猫に見られる家は走ります。',
+      pt: 'as casas que são vistas pelo gato correm.',
+    });
+  });
+
+  test('the auxiliary carries the tense and the aspect, as in a main clause', () => {
+    const food = (verbPhrase: Partial<VerbPhrase>) => clause(
+      np('FOOD', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive', ...verbPhrase } } }),
+      'RUN',
+    );
+    expect(sayAll(food({ tense: 'past' }))).toMatchObject({
+      en: 'the food that was eaten by the cat runs.',
+      it: 'il cibo che fu mangiato dal gatto corre.',
+      de: 'das Essen, das vom Kater gefressen wurde, läuft.',
+      ja: '猫に食べられた食べ物は走ります。',
+    });
+    expect(sayAll(food({ aspect: 'resultative' }))).toMatchObject({
+      en: 'the food that has been eaten by the cat runs.',
+      it: 'il cibo che è stato mangiato dal gatto corre.',
+      fr: 'la nourriture qui a été mangée par le chat court.',
+      de: 'das Essen, das vom Kater gefressen worden ist, läuft.', // the Ersatzform "worden"
+    });
+    expect(sayAll(food({ modals: ['MUST'] }))).toMatchObject({
+      en: 'the food that must be eaten by the cat runs.',
+      pt: 'a comida que deve ser comida pelo gato corre.',
+      ja: '猫に食べられる必要がある食べ物は走ります。',
+    });
+  });
+
+  test('a generic agent is demoted to nothing: the agentless passive', () => {
+    expect(sayAll(clause(
+      np('FOOD', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT', voice: 'passive' } } }),
+      'RUN',
+    ))).toEqual({
+      en: 'the food that is eaten runs.',
+      it: 'il cibo che è mangiato corre.',
+      fr: 'la nourriture qui est mangée court.',
+      de: 'das Essen, das gegessen wird, läuft.',
+      es: 'la comida que es comida corre.',
+      ja: '食べられる食べ物は走ります。',
+      pt: 'a comida que é comida corre.',
+    });
+  });
+
+  test('a head gapped as the subject is the agent, and its relativizer takes the by-phrase’s adposition', () => {
+    // Japanese relativises no agent: its gapped clause would lose the one who acts, so it stays active.
     expect(sayAll(clause(
       np('CHILD', { relative: { verbPhrase: { verb: 'EAT', voice: 'passive' }, directObject: np('FOOD') } }),
       'RUN',
+    ))).toEqual({
+      en: 'the child by whom the food is eaten runs.',
+      it: 'il bambino dal quale il cibo è mangiato corre.',
+      fr: "l'enfant par lequel la nourriture est mangée court.",
+      de: 'das Kind, von dem das Essen gegessen wird, läuft.', // a child eats: "essen", not "fressen"
+      es: 'el niño por el que la comida es comida corre.',
+      ja: '食べ物を食べる子供は走ります。',
+      pt: 'a criança pela qual a comida é comida corre.',
+    });
+    expect(sayAll(clause(
+      np('HOUSE', { number: 'plural', relative: { verbPhrase: { verb: 'SEE', voice: 'passive' }, directObject: np('CAT') } }),
+      'RUN',
     ))).toMatchObject({
-      en: 'the child who eats the food runs.',
-      it: 'il bambino che mangia il cibo corre.',
-      de: 'das Kind, das das Essen isst, läuft.',
+      en: 'the houses by which the cat is seen run.',
+      it: 'le case dalle quali il gatto è visto corrono.',
+      fr: 'les maisons par lesquelles le chat est vu courent.',
+      de: 'die Häuser, von denen der Kater gesehen wird, laufen.', // the dative plural "denen"
+      pt: 'as casas pelas quais o gato é visto correm.',
+    });
+  });
+
+  test('a head in a complement stays there while the patient and the agent swap around it', () => {
+    expect(sayAll(clause(
+      np('HOUSE', { relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive' }, directObject: np('FOOD') } }),
+      'RUN',
+    ))).toEqual({
+      en: 'the house where the food is eaten by the cat runs.',
+      it: 'la casa dove il cibo è mangiato dal gatto corre.',
+      fr: 'la maison où la nourriture est mangée par le chat court.',
+      de: 'das Haus, in dem das Essen vom Kater gefressen wird, läuft.',
+      es: 'la casa donde la comida es comida por el gato corre.',
+      ja: '食べ物が猫に食べられる家は走ります。',
+      pt: 'a casa onde a comida é comida pelo gato corre.',
     });
   });
 });

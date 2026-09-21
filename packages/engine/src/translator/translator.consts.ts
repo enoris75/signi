@@ -58,5 +58,16 @@ export const PASSIVE_AUXILIARY: Record<string, string> = {
   en: 'BE', it: 'BE', fr: 'BE', es: 'BE', pt: 'BE', de: 'BECOME',
 };
 
+/**
+ * Languages that can relativise the **agent** of a passive — the gap a relative clause gapped on its
+ * subject moves to when it turns passive: "the child by whom the book is written", "il bambino dal
+ * quale il libro è scritto", "das Kind, von dem das Buch geschrieben wird".
+ *
+ * Japanese is absent: its prenominal relative has no relativizer to carry the に, and a passive clause
+ * with its に-agent simply missing (本が書かれる子供) no longer says that the head is the one who acts —
+ * it reads as a child a book is written *about* or *for*. There the relative stays active.
+ */
+export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'de', 'es', 'pt']);
+
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
