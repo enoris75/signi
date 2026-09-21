@@ -744,3 +744,58 @@ describe('known bugs: Japanese clause coordination', () => {
     });
   });
 });
+
+// A192. "Das heißt" before a whole clause is set off by a comma on both sides ("…, das heißt, wir
+// müssen ein Taxi nehmen"), as English "that is", Spanish "es decir" and Portuguese "isto é" already
+// are (A69). German joins it with only the comma before. Ruled a defect over the pins in "explicative
+// — that is" and germanEngine.test.ts on 2026-09-21. Found by the random phrase "…, that is, few cats'
+// walls come because of all big deaths." (seed 502396).
+describe('known bugs: German "das heißt" without a comma after it', () => {
+  const join = (conjunction: CoordConjunction, first: PhrasePlan = clause(np('CAT'), 'RUN'), second: PhrasePlan = clause(np('DOG'), 'JUMP')) =>
+    sayAll({ ...first, coordination: { conjunction, clause: second } });
+
+  test.fails('a comma follows "das heißt"', () => {
+    expect(join('that_is').de).toBe('der Kater läuft, das heißt, der Hund springt.'); // now: "das heißt der Hund"
+    expect(join('that_is', clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }), clause(np('DOG'), 'SEE', { directObject: np('BOOK') })).de)
+      .toBe('der Kater frisst die Maus, das heißt, der Hund sieht das Buch.');
+    expect(join('that_is', { ...clause(np('CAT'), 'RUN'), interrogative: true }).de).toBe('läuft der Kater, das heißt, springt der Hund?');
+    expect(join('that_is', { ...clause(np('CAT'), 'RUN'), condition: clause(np('MAN'), 'GO') }).de)
+      .toBe('wenn der Mann gehen würde, würde der Kater laufen, das heißt, der Hund springt.');
+    expect(say({
+      subject: np('DEATH', { definiteness: 'no', adjectives: ['CAREFUL', 'MISSING'] }),
+      verbPhrase: { verb: 'DRINK', tense: 'past', aspect: 'progressive', modifier: 'UP' },
+      directObject: np('PRISON', {
+        adjectives: ['COLD'], adjectiveDegrees: ['least'],
+        possessor: { kind: 'pronominal', person: '3', number: 'plural', gender: 'fem' },
+        relative: { verbPhrase: { verb: 'FEEL' }, directObject: np('ASIA', { adjectives: ['MISSING'] }) },
+      }),
+      complements: { cause: { phrase: np('FOOD', { definiteness: 'all' }) } },
+      coordination: {
+        conjunction: 'that_is',
+        clause: {
+          subject: np('WALL', { number: 'plural', definiteness: 'some', possessor: np('CAT', { definiteness: 'few' }) }),
+          verbPhrase: { verb: 'COME' },
+          complements: { cause: { phrase: np('DEATH', { number: 'plural', definiteness: 'all', adjectives: ['BIG'] }) } },
+        },
+      },
+    }, 'de')).toBe('kein vorsichtiger fehlender Tod trank gerade ihr am wenigsten kaltes Gefängnis, das das fehlende Asien fühlt, '
+      + 'nach oben wegen all des Essens, das heißt, einige Wände weniger Kater kommen wegen aller großen Tode.');
+  });
+
+  // Regression: the true coordinators take no comma after them, "also" and "und dann" invert instead,
+  // and English, Spanish and Portuguese already set their connector off on both sides.
+  test('regression: the coordinators, the inverting adverbs, English, Spanish and Portuguese are right', () => {
+    expect((['and', 'or', 'but', 'therefore', 'then'] as const).map((c) => join(c).de)).toEqual([
+      'der Kater läuft, und der Hund springt.',
+      'der Kater läuft, oder der Hund springt.',
+      'der Kater läuft, aber der Hund springt.',
+      'der Kater läuft, also springt der Hund.',
+      'der Kater läuft, und dann springt der Hund.',
+    ]);
+    expect(join('that_is')).toMatchObject({
+      en: 'the cat runs, that is, the dog jumps.',
+      es: 'el gato corre, es decir, el perro salta.',
+      pt: 'o gato corre, isto é, o cão pula.',
+    });
+  });
+});

@@ -1187,3 +1187,60 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
     expect(say(clause(np('CAT'), 'EAT', { directObject: mouse({ definiteness: 'indefinite' }) }), 'de')).toBe('der Kater frisst eine Maus.');
   });
 });
+
+// A191. A definite object stands ahead of the negation in the German middle field ("frisst die Maus
+// nicht"), and the engine keeps it there when the verb has no adverb. With an adverb, "nicht" and the
+// adverb take the slot ahead of every object, so the definite object falls behind them and reads as
+// the focus of a contrast: "frisst nicht schnell die Maus" where German says "frisst die Maus nicht
+// schnell". The relative clause already puts its adverbs after the objects. Ruled a defect over A49's
+// pins on 2026-09-21. Found by the random phrase "whole hot wolves could not replace the empty files
+// suddenly, …" (seed 502397): "konnten nicht plötzlich die leeren Dateien ersetzen".
+describe('known bugs: German "nicht" and an adverb in front of a definite object', () => {
+  const eatNot = (verbPhrase: Partial<VerbPhrase> = {}, object: NounPhrase = np('MOUSE')) =>
+    clause(np('CAT'), 'EAT', { directObject: object, verbPhrase: { negative: true, modifier: 'FAST', ...verbPhrase } });
+  const command = (verbPhrase: Partial<VerbPhrase> = {}, register?: 'instruction') =>
+    ({ ...eatNot(verbPhrase), subject: np('SECOND_PERSON'), imperative: true, ...(register ? { imperativeRegister: register } : {}) });
+
+  test.fails('the definite object leads "nicht" and the adverb', () => {
+    expect(say(eatNot(), 'de')).toBe('der Kater frisst die Maus nicht schnell.'); // now: "frisst nicht schnell die Maus"
+    expect(say(eatNot({ modifier: 'ALWAYS' }), 'de')).toBe('der Kater frisst die Maus nicht immer.');
+    expect(say(eatNot({ modifier: 'SUDDENLY', tense: 'past', modals: ['CAN'] }), 'de')).toBe('der Kater konnte die Maus nicht plötzlich fressen.');
+    expect(say(eatNot({ aspect: 'resultative' }), 'de')).toBe('der Kater hat die Maus nicht schnell gefressen.');
+    expect(say(eatNot({ tense: 'future' }), 'de')).toBe('der Kater wird die Maus nicht schnell fressen.');
+    expect(say(eatNot({ aspect: 'progressive' }), 'de')).toBe('der Kater frisst gerade die Maus nicht schnell.');
+    expect(say(eatNot({}, np('MOUSE', { definiteness: 'this' })), 'de')).toBe('der Kater frisst diese Maus nicht schnell.');
+    expect(say(eatNot({}, np('MOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })), 'de'))
+      .toBe('der Kater frisst meine Maus nicht schnell.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('EUROPE'), verbPhrase: { negative: true, modifier: 'FAST' } }), 'de'))
+      .toBe('der Kater sieht Europa nicht schnell.');
+    expect(say(clause(np('CAT'), 'GIVE', {
+      directObject: np('BOOK'), verbPhrase: { negative: true, modifier: 'FAST' }, complements: { terminus: { phrase: np('DOG') } },
+    }), 'de')).toBe('der Kater gibt dem Hund das Buch nicht schnell.');
+    expect(say({ ...eatNot(), interrogative: true }, 'de')).toBe('frisst der Kater die Maus nicht schnell?');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: eatNot() }, 'de'))
+      .toBe('wenn der Kater die Maus nicht schnell fressen würde, würde der Hund laufen.');
+    expect(say(command(), 'de')).toBe('iss die Maus nicht schnell.');
+    expect(say(command({ modifier: 'ALWAYS' }), 'de')).toBe('iss die Maus nicht immer.');
+    expect(say(command({}, 'instruction'), 'de')).toBe('die Maus nicht schnell essen.');
+    expect(say({
+      ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('FOOD'), verbPhrase: { negative: true, modifier: 'ALWAYS' } }), infinitive: true,
+    }, 'de')).toBe('das Essen nicht immer essen.');
+    expect(say({
+      subject: np('WOLF', { number: 'plural', definiteness: 'indefinite', adjectives: ['WHOLE', 'HOT'], adjectiveDegrees: ['positive', 'positive'] }),
+      verbPhrase: { verb: 'REPLACE', tense: 'past', negative: true, modifier: 'SUDDENLY', modals: ['CAN'] },
+      directObject: np('FILE', { number: 'plural', adjectives: ['EMPTY'] }),
+    }, 'de')).toBe('ganze heiße Wölfe konnten die leeren Dateien nicht plötzlich ersetzen.');
+  });
+
+  // Regression: with no adverb the object already leads "nicht", a pronoun leads the middle field, the
+  // relative clause puts its adverbs after the objects, and a direction adverb follows the object (A142).
+  test('regression: no adverb, a pronoun, the relative clause and a direction adverb are right', () => {
+    expect(say(eatNot({ modifier: undefined }), 'de')).toBe('der Kater frisst die Maus nicht.');
+    expect(say(eatNot({}, np('THIRD_PERSON', { gender: 'fem' })), 'de')).toBe('der Kater frisst sie nicht schnell.');
+    expect(say(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', negative: true, modifier: 'FAST' }, directObject: np('MOUSE') },
+    }), 'RUN'), 'de')).toBe('der Hund, der die Maus nicht schnell frisst, läuft.');
+    expect(say(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { negative: true, modifier: 'UP' } }), 'de'))
+      .toBe('der Kater verschiebt das Buch nicht nach oben.');
+  });
+});

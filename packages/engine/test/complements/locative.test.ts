@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PATH_SPECIFIERS, type NounPhrase, type PathSpecifier } from '@signi/shared';
+import { PATH_SPECIFIERS, type NounPhrase, type PathSpecifier, type VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // Where the action happens — a static place, with no motion implied. Most verbs that denote a
@@ -788,5 +788,59 @@ describe('known bugs: a superlative on a place name after a bare preposition', (
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('EUROPE', 'BIG') } } })).it)
       .toBe("il gatto viene dall'Europa più grande.");
     expect(runsIn(most('EUROPE', 'BIG'))).toMatchObject({ es: 'el gato corre en la Europa más grande.', de: 'der Kater läuft im größten Europa.' });
+  });
+});
+
+// A190. A Japanese locative takes で, the place where something happens. 住む ("live, reside") and
+// 閉じ込める ("shut in") take に, the place where something is or ends up: 東京に住む, 犬を家に閉じ込める.
+// complementSegs gives に only to the existential いる / ある (A109), so LIVE and CONFINE read "家で住みます",
+// "家で犬を閉じ込めます". Found by the random phrase "she had lived in some buttons." (seed 502398).
+describe('known bugs: Japanese 住む and 閉じ込める mark their place with に', () => {
+  const lives = (verbPhrase: Partial<VerbPhrase> = {}, place: NounPhrase = np('HOUSE')) =>
+    sayAll(clause(np('CAT'), 'LIVE', { verbPhrase, complements: { locative: { phrase: place } } })).ja;
+  const confines = (verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'CONFINE', { directObject: np('DOG'), verbPhrase, complements: { locative: { phrase: np('HOUSE') } } })).ja;
+
+  test.fails('LIVE and CONFINE take に for their place', () => {
+    expect(lives()).toBe('猫は家に住みます。'); // now: "家で住みます"
+    expect(lives({ tense: 'past' })).toBe('猫は家に住みました。');
+    expect(lives({ aspect: 'progressive' })).toBe('猫は家に住んでいます。');
+    expect(lives({ negative: true })).toBe('猫は家に住みません。');
+    expect(lives({ modals: ['MUST'] })).toBe('猫は家に住む必要があります。');
+    expect(atPlace('under', 'LIVE').ja).toBe('猫は家の下に住みます。');
+    expect(atPlace('behind', 'LIVE').ja).toBe('猫は家の後ろに住みます。');
+    expect(lives({}, np('HOUSE', { definiteness: 'no' }))).toBe('猫はどの家にも住みません。');
+    expect(sayAll(clause(np('SECOND_PERSON'), 'LIVE', { imperative: true, complements: { locative: { phrase: np('HOUSE') } } })).ja)
+      .toBe('家に住んでください。');
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'LIVE' }, complements: { locative: { phrase: np('HOUSE') } } },
+    }), 'RUN')).ja).toBe('家に住む犬は走ります。');
+    expect(confines()).toBe('猫は家に犬を閉じ込めます。'); // now: "家で犬を閉じ込めます"
+    expect(confines({ tense: 'past' })).toBe('猫は家に犬を閉じ込めました。');
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'fem' }), 'LIVE', {
+      verbPhrase: { tense: 'past', aspect: 'resultative' },
+      complements: { locative: { phrase: np('BUTTON', { number: 'plural', definiteness: 'some' }) } },
+    })).ja).toBe('彼女はいくつかのボタンに住んでいました。');
+  });
+
+  // Regression: the other six languages are right, the verbs of action keep で, BE keeps A109's に,
+  // and the HOUSE gloss gaps the locative, so it has no particle to change.
+  test('regression: the other six languages, the verbs of action, BE and the gloss are right', () => {
+    expect(inPlace('LIVE')).toMatchObject({
+      en: 'the cat lives in the house.',
+      it: 'il gatto abita nella casa.',
+      fr: 'le chat habite dans la maison.',
+      de: 'der Kater wohnt im Haus.',
+      es: 'el gato vive en la casa.',
+      pt: 'o gato mora na casa.',
+    });
+    expect(inPlace('RUN').ja).toBe('猫は家で走ります。');
+    expect(inPlace('EAT').ja).toBe('猫は家で食べます。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: { locative: { phrase: np('HOUSE') } } })).ja)
+      .toBe('猫は家でネズミを食べます。');
+    expect(inPlace('BE').ja).toBe('猫は家にいます。');
+    expect(sayAll({
+      subject: { concept: 'BUILDING', definiteness: 'indefinite', relative: { headRole: 'locative', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'LIVE' } } },
+    }).ja).toBe('住む建物。');
   });
 });

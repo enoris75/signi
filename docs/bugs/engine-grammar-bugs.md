@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (18 of
-them, as of this writing, pinning eleven bugs in Part A; Part B has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (23 of
+them, as of this writing, pinning sixteen bugs in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -72,6 +72,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A186 | [A186-predicate-not-next-to-its-verb.md](A-must-fix/A186-predicate-not-next-to-its-verb.md) | German, Japanese |
 | A187 | [A187-pronominal-possessor-drops-the-head-determiner.md](A-must-fix/A187-pronominal-possessor-drops-the-head-determiner.md) | English, Italian, French, German, Spanish, Portuguese |
 | A188 | [A188-superlative-place-name-bare-preposition.md](A-must-fix/A188-superlative-place-name-bare-preposition.md) | Italian, French |
+| A189 | [A189-place-adverb-before-the-complements.md](A-must-fix/A189-place-adverb-before-the-complements.md) | English, Italian, French, Spanish, Portuguese |
+| A190 | [A190-japanese-ni-locative-of-live-and-confine.md](A-must-fix/A190-japanese-ni-locative-of-live-and-confine.md) | Japanese |
+| A191 | [A191-german-nicht-and-adverb-before-a-definite-object.md](A-must-fix/A191-german-nicht-and-adverb-before-a-definite-object.md) | German |
+| A192 | [A192-german-das-heisst-without-a-comma.md](A-must-fix/A192-german-das-heisst-without-a-comma.md) | German |
+| A193 | [A193-english-particle-after-a-relative-clause.md](A-must-fix/A193-english-particle-after-a-relative-clause.md) | English |
 
 Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
