@@ -35,7 +35,7 @@ today (`nf['isA'] === 'CONTINENT'`), and it reads a direct parent only, so no re
 
 | concept | gloss (en) | status |
 |---|---|---|
-| BUILDING | a place that has walls | ✗ **rejected on the probe** — see below. Stays on the English literal ([C05](../C-needs-engine/C05-non-distinguishing-genera.md)) |
+| BUILDING | a place that has walls | ✗ **rejected on the probe** — see below. Stays on the English literal ([C05](C05-non-distinguishing-genera.md)) |
 | HOUSE | a building where one lives | ✗ still [B32](B32-place-glosses.md): LIVE is not seeded (the engine side, C07, is done) |
 | PRISON | a building where people are confined | ✗ still [B32](B32-place-glosses.md): CONFINE is not seeded, and the passive is unsupported |
 
@@ -67,7 +67,7 @@ gloss. The hierarchy change was worth doing without it, and is what shipped.
 [A149](../../bugs/fixed/A149-french-object-zero-article.md) and the Japanese ある in
 [A150](../../bugs/fixed/A150-japanese-inanimate-owner-aru.md). WALL is seeded, and BUILDING's gloss ships
 as probed above, now reading *un lieu qui a des murs* and 壁がある場所. See
-[C05](../C-needs-engine/C05-non-distinguishing-genera.md#unblocked-building-2026-09-19).
+[C05](C05-non-distinguishing-genera.md#unblocked-building-2026-09-19).
 
 ## What shipped (2026-09-16)
 

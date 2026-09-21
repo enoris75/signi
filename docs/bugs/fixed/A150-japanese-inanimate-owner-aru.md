@@ -19,7 +19,7 @@ With 持つ, "the house has walls" reads as "the house is holding walls".
 The engine already chose between いる and ある on the subject's animacy, for BE with a place
 ([A109](A109-japanese-be-locative-existential.md)). The possession verb did not.
 
-Found while unblocking BUILDING for [C05](../../localization/C-needs-engine/C05-non-distinguishing-genera.md),
+Found while unblocking BUILDING for [C05](../../localization/done/C05-non-distinguishing-genera.md),
 whose gloss "a place that has walls" [B29](../../localization/done/B29-building-genus.md) had rejected
 for 壁を持つ場所.
 

@@ -1,6 +1,6 @@
 # A18. Grammar nouns composable today — CLAUSE, RELATIVE_CLAUSE, PERIOD_SENTENCE, VERB_PHRASE, MODIFIER, MODAL, CAUSE_COMPLEMENT, LOCATIVE
 
-_(split out of [C05](../C-needs-engine/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had the
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had the
 grammar meta-nouns as "GENDER, NUMBER_GRAMMAR, … etc." and no list. These eight compose from seeded
 words on shapes that already ship. The rest are sorted in C05 and in
 [B37](../B-needs-seed/B37-complement-names.md), [B38](../B-needs-seed/B38-link.md) and

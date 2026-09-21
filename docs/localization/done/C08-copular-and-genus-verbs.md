@@ -11,7 +11,7 @@ Three distinct reasons, none of them vocabulary:
 the copula — nothing sits above it. CONSUME is itself the genus that
 [B08's done half](B08-verb-definitions.md) used to define EAT and DRINK; glossing it against
 EAT/DRINK would be circular. These are the verb equivalent of
-[C05](../C-needs-engine/C05-non-distinguishing-genera.md)'s non-distinguishing genera: **deliberately left on the
+[C05](C05-non-distinguishing-genera.md)'s non-distinguishing genera: **deliberately left on the
 English literal.**
 
 **2. A construct the engine cannot render (BECOME, SEEM, APPEAR, BURN).**
@@ -118,7 +118,7 @@ updated; their output is unchanged.
   what HIDE denies.
 - **BEGIN** gained its `infinitive_link` (it *a*, fr *à*, es/pt *a*, ja ことが), which is all the
   **inchoative** ever needed: the nesting was C09's. "il gatto inizia **a** essere visibile",
-  「可視であることが始まる」. No definition uses it — see BECOME in [C05](../C-needs-engine/C05-non-distinguishing-genera.md) — but the construct this file
+  「可視であることが始まる」. No definition uses it — see BECOME in [C05](C05-non-distinguishing-genera.md) — but the construct this file
   asked for is there and pinned.
 
 ### (c) The glosses

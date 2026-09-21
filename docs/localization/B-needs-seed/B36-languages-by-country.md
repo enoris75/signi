@@ -1,6 +1,6 @@
 # B36. The seven languages — seed their countries: the language of Italy
 
-_(split out of [C05](../C-needs-engine/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had the
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had the
 seven languages on the literal because "a language" is the same for all of them. A **genitive**
 tells them apart: the language *of Italy*. The genitive ships as `NounElement.possessor`, but there
 is no country to put in it.)_

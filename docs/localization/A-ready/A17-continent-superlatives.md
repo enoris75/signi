@@ -1,6 +1,6 @@
 # A17. ASIA and OCEANIA — the biggest / the smallest continent
 
-_(split out of [C05](../C-needs-engine/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had
 every continent on the literal because "a continent" is the same for all of them. A
 **superlative** is not: only one continent is the biggest.)_
 

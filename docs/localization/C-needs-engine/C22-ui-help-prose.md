@@ -11,7 +11,7 @@ of three to eight sentences. Inside them are constructs no plan holds:
 - **a temporal clause:** "once you step out with esc";
 - **keys and syntax mid-sentence:** the [C14](../done/C14-ui-runtime-values.md) rule places a value
   after a phrase, not inside it;
-- **"in place of":** the idiom [C05](C05-non-distinguishing-genera.md) leaves REPLACE's gloss on;
+- **"in place of":** the idiom [C05](../done/C05-non-distinguishing-genera.md) leaves REPLACE's gloss on;
 - **fragments that are not a period at all:** "Close · again restores the word", "Up from the first
   row: the category tabs".
 

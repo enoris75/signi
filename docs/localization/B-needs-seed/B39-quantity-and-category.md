@@ -1,6 +1,6 @@
 # B39. NUMBER_GRAMMAR and QUANTIFIER — seed QUANTITY and CATEGORY
 
-_(split out of [C05](../C-needs-engine/C05-non-distinguishing-genera.md) on 2026-09-21. Most of the
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. Most of the
 grammatical categories have no single-noun differentia, and they stay in C05 with a reason each.
 These two have one, "quantities", and share it.)_
 

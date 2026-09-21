@@ -57,7 +57,7 @@ Resolving the two duplicate-gloss cautions:
   nouns use ("a word that modifies verbs"), and it pairs with DESCRIBE's "to indicate qualities".
 - **REPLACE stays literal.** Its sense ("to take the place of") is neither CHANGE nor INDICATE, and
   every composable shape duplicated a sibling. It is listed in
-  [C05](../C-needs-engine/C05-non-distinguishing-genera.md).
+  [C05](C05-non-distinguishing-genera.md).
 
 Word choices:
 - German INDICATE is the inseparable *bezeichnen*. *anzeigen* and *hinweisen* are separable.

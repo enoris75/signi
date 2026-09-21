@@ -1,7 +1,7 @@
 # C15. UI strings — left literal by design, or never shown
 
 **Kind:** hardcoded strings that are **not** localization work. Catalogued so a later sweep doesn't
-re-flag them. Like [C05](../C-needs-engine/C05-non-distinguishing-genera.md), this is a deliberate
+re-flag them. Like [C05](C05-non-distinguishing-genera.md), this is a deliberate
 C: the right outcome is no catalog entry.
 
 ## Stays literal

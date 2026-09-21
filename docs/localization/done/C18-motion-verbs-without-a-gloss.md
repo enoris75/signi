@@ -23,7 +23,7 @@ What changed from this file's own verdicts:
    place, *the ground*. That leaves the one `modifier` for SUDDENLY. This file had ruled the
    direction out because "there is no noun for COLLAPSE to end up in relation to". There is one; it
    was just not seeded.
-2. **COME's deixis is a noun.** This file put COME with the [C05](../C-needs-engine/C05-non-distinguishing-genera.md)
+2. **COME's deixis is a noun.** This file put COME with the [C05](C05-non-distinguishing-genera.md)
    literals for want of a "composable deixis". "The speaker" as the goal of the same `direction`
    complement is that deixis, and it renders in all seven. The pronoun route, "to move to me", is
    not open: the motion complements are noun-only by design.

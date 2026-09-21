@@ -50,7 +50,7 @@ from [B16](B16-word-verbs.md). Three of the four verbs are authored.
 - **CHOOSE** takes an indefinite object, "to indicate **an** option", using the new `definiteness`
   part: a choice picks one.
 - **SELECT stays literal.** Every composable shape duplicated CHOOSE's gloss. It is listed in
-  [C05](../C-needs-engine/C05-non-distinguishing-genera.md).
+  [C05](C05-non-distinguishing-genera.md).
 - **TYPE's instrument** needed B12's builder change, not B14's.
 - BUTTON and KEYBOARD have no ja `reading`. A katakana word with a reading gets its hiragana printed
   over it ([furigana.test.ts](../../../packages/engine/test/furigana.test.ts)).

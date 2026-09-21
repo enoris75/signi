@@ -1,6 +1,6 @@
 # B38. CONJUNCTION and CONJUNCT — seed LINK: a word that links clauses
 
-_(split out of [C05](../C-needs-engine/C05-non-distinguishing-genera.md) on 2026-09-21. The seeded
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. The seeded
 verb nearest to "join" is COORDINATE, and it is the wrong word: C08 seeded it as "to cause people to
 act together", and its Japanese, 調整する, is to adjust.)_
 

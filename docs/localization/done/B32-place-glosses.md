@@ -106,4 +106,4 @@ pessoas") where it and es agree ("si rinchiudono", "se encierran").
   resultative table — and all four tooltips in
   [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts). HOUSE was that spec's
   example of a concept with **no** plan, in two tests; both now use BUILDING, which
-  [C05](../C-needs-engine/C05-non-distinguishing-genera.md) leaves on its literal deliberately.
+  [C05](C05-non-distinguishing-genera.md) leaves on its literal deliberately.

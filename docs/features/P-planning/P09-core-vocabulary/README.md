@@ -128,7 +128,7 @@ already treats *may* and *might* as true auxiliaries
 | 158 | problem | `PROBLEM` | |
 | 161 | hand | `HAND` | |
 | 165 | part | `PART` | |
-| 171 | case | `CASE_INSTANCE` | The suffix keeps `CASE` free for grammatical case, which [C05](../../../localization/C-needs-engine/C05-non-distinguishing-genera.md) already names. |
+| 171 | case | `CASE_INSTANCE` | The suffix keeps `CASE` free for grammatical case, which [C05](../../../localization/done/C05-non-distinguishing-genera.md) already names. |
 | 172 | week | `WEEK` | |
 | 173 | company | `COMPANY_BUSINESS` | *azienda, entreprise, Firma, empresa, 会社*. Companionship (*compagnia*) can come later. |
 | 174 | system | `SYSTEM` | |

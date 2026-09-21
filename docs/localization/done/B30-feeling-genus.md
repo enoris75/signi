@@ -40,7 +40,7 @@ than held") is the wrong parent for it.
 |---|---|---|---|
 | AFFECTION | `glossOf('FEELING', 'WARM')` | a warm feeling | ✓ once seeded. The shape probed clean with CONCEPT and HOT standing in (it "un concetto caldo", de "ein heißer Begriff") |
 | FEEL | `infinitiveGloss('HAVE', 'FEELING', 'plural')` | to have feelings | ⚠ probe. The shape renders (de "Begriffe haben" with CONCEPT standing in), but check that "to have feelings" isn't read as the idiom |
-| FEELING | — | — | ✗ no composable differentia. `patientGloss('CONCEPT', 'FEEL')` gives "a concept that one feels" (de "ein Begriff, den man fühlt"). Leave it on the literal ([C05](../C-needs-engine/C05-non-distinguishing-genera.md)) |
+| FEELING | — | — | ✗ no composable differentia. `patientGloss('CONCEPT', 'FEEL')` gives "a concept that one feels" (de "ein Begriff, den man fühlt"). Leave it on the literal ([C05](C05-non-distinguishing-genera.md)) |
 
 This does **not** unblock HAPPY, SAD, TIRED or HUNGRY. B07 still needs their emotion nouns (JOY,
 SORROW, …) and a construct for "feeling joy"; FEELING only gives those nouns a parent.
@@ -49,7 +49,7 @@ SORROW, …) and a construct for "feeling joy"; FEELING only gives those nouns a
 
 - **FEELING** seeded in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts) as a root, with
   no `definition` — its only composable differentia is its own genus, so it stays on the English
-  literal ([C05](../C-needs-engine/C05-non-distinguishing-genera.md)). A count noun with a plural in
+  literal ([C05](C05-non-distinguishing-genera.md)). A count noun with a plural in
   every language; German *Gefühl* is neuter.
 - **WARM** seeded in [adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts), the
   figurative sense only, with `synonym: 'kindly'` so the picker says which sense it is. It is

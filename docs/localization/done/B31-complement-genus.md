@@ -4,7 +4,7 @@ _(from the isA audit, 2026-09-14: all three are described as "the complement …
 noun is seeded.)_
 
 The three seeded complement names have no `isA` and no `definition`: their genus is not a concept, and
-[C05](../C-needs-engine/C05-non-distinguishing-genera.md) parks the grammar meta-nouns that lack a
+[C05](C05-non-distinguishing-genera.md) parks the grammar meta-nouns that lack a
 differentia. This task seeds the genus and moves the three under it.
 [B23](B23-ui-complement-and-group-names.md) seeded the same noun, `COMPLEMENT_GRAMMAR`, for the
 word map's "complements" filter, with the forms below, and the six new complement names under it.

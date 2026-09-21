@@ -1,6 +1,6 @@
 # C20. A pronoun that agrees with what it stands for — SELECT, and SAVE's German
 
-_(split out of [C05](C05-non-distinguishing-genera.md) on 2026-09-21. C05 had SELECT on the literal
+_(split out of [C05](../done/C05-non-distinguishing-genera.md) on 2026-09-21. C05 had SELECT on the literal
 because its gloss would read the same as CHOOSE's. A gloss that does not has since become
 composable. It is blocked on something else.)_
 

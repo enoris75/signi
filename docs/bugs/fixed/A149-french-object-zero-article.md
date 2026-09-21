@@ -30,7 +30,7 @@ object bare, so 41 French tooltips were missing their article: *une personne qui
 mot qui nomme objets*, *consommer nourriture*, *éprouver affection*. [B09](../../localization/done/B09-create-verbs.md),
 [B31](../../localization/done/B31-complement-genus.md) and [B32](../../localization/done/B32-place-glosses.md)
 shipped with it as a known simplification. BUILDING's gloss could not ship at all, since *un lieu qui
-a murs* was one of its two blockers ([C05](../../localization/C-needs-engine/C05-non-distinguishing-genera.md)).
+a murs* was one of its two blockers ([C05](../../localization/done/C05-non-distinguishing-genera.md)).
 
 Found while unblocking BUILDING for C05.
 
