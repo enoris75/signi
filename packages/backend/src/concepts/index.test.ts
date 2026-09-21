@@ -41,7 +41,7 @@ describe('the concept corpus', () => {
 
   test('keeps verb-only fields on verbs', () => {
     const bad = concepts
-      .filter((c) => c.role !== 'verb' && (c.transitivity || c.modal || c.complements || c.stative || c.senseOf))
+      .filter((c) => c.role !== 'verb' && (c.transitivity || c.modal || c.complements || c.stative || c.senseOf || c.alarmCry))
       .map((c) => c.id);
     expect(bad).toEqual([]);
   });

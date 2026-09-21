@@ -27,6 +27,17 @@ describe('resolvePhrase', () => {
     expect(resolvePhrase(knows, 'it', KNOWING).verbPhrase?.verb.conceptId).toBe('KNOW');
   });
 
+  // A163: the alarm a cry raises has no determiner slot, so the plan's is dropped for the definite.
+  test("drops the determiner of the alarm the verb cries, and of no other object", () => {
+    const CRYING = lexicon({ CRY_OUT: { base: 'gridare', alarm_cry: '1' }, SEE: { base: 'vedere' }, BOY: { base: 'ragazzo' }, WOLF: { base: 'lupo', alarm: '1' }, WORD: { base: 'parola' } });
+    const objectOf = (verb: string, concept: string) => resolvePhrase(
+      { subject: { concept: 'BOY' }, verbPhrase: { verb }, directObject: { concept, definiteness: 'indefinite' } }, 'it', CRYING,
+    ).directObject?.conjuncts[0].head.forms['definiteness'];
+    expect(objectOf('CRY_OUT', 'WOLF')).toBe('definite');
+    expect(objectOf('CRY_OUT', 'WORD')).toBe('indefinite');
+    expect(objectOf('SEE', 'WOLF')).toBe('indefinite');
+  });
+
   test('a verbless period resolves just its subject', () => {
     const resolved = resolvePhrase({ subject: { concept: 'CAT' } }, 'it', LOOKUP);
     expect(resolved).toMatchObject({ verbPhrase: undefined, directObject: undefined, complements: undefined });

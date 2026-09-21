@@ -376,7 +376,13 @@ export function rawSatellites(
       label: t("satellite.determiner"),
       labelKey: "satellite.determiner",
       icon: <ArticleOutlinedIcon sx={iconSx} />,
-      available: directObjectRole === "noun",
+      // The alarm a cry raises (CRY_OUT + WOLF) is the shout itself, "Wolf!", with no determiner in any
+      // language, so the engine drops the one the plan carries (see the translator's withAlarmCry) — it
+      // is not user-changeable there, so it is withdrawn. It takes both words: a wolf seen, or a word
+      // cried, takes its determiner as usual.
+      available:
+        directObjectRole === "noun" &&
+        !(selection.verb?.alarmCry && selection.directObject?.alarm),
       hasValue: Boolean(
         selection.directObjectDefiniteness &&
           selection.directObjectDefiniteness !== "definite",

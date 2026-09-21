@@ -45,6 +45,16 @@ describe('resolveRelativeClause', () => {
     expect(verbOf({ headRole: 'cause', subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } })).toBe('KNOW');
   });
 
+  // A163: "the boy who cried wolf" — the alarm in a relative clause has no determiner slot either.
+  test('drops the determiner of the alarm its verb cries, and of no other object', () => {
+    const CRYING = lexicon({ CRY_OUT: { base: 'gridare', alarm_cry: '1' }, WOLF: { base: 'lupo', alarm: '1' }, WORD: { base: 'parola' } });
+    const objectOf = (concept: string) => resolveRelativeClause(
+      { verbPhrase: { verb: 'CRY_OUT', tense: 'past' }, directObject: { concept, definiteness: 'indefinite' } }, 'it', CRYING,
+    ).directObject?.conjuncts[0].head.forms['definiteness'];
+    expect(objectOf('WOLF')).toBe('definite');
+    expect(objectOf('WORD')).toBe('indefinite');
+  });
+
   // A01: a passive relative is re-mapped as a passive main clause is, and the gap moves with the head.
   describe('in the passive', () => {
     const PASSIVE = lexicon({

@@ -35,7 +35,7 @@ const cried = (wolf: Partial<NounPhrase> = {}): PhrasePlan =>
 describe('the quick brown fox of the boy who cried the wolf', () => {
   test('jumped over the lazy dog, as a locative', () => {
     expect(sayAll(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'locative'))).toMatchObject({
-      en: 'the quick brown fox of the boy who cried the wolf jumped over the lazy dog.',
+      en: 'the quick brown fox of the boy who cried wolf jumped over the lazy dog.',
       // A place takes the dative after über. The possessor is "vom", not the genitive "des" (B09).
       de: 'der schnelle braune Fuchs vom Jungen, der den Wolf rief, sprang über dem faulen Hund.',
       es: 'el zorro rápido y marrón del niño que gritó el lobo saltó por encima del perro perezoso.',
@@ -47,7 +47,7 @@ describe('the quick brown fox of the boy who cried the wolf', () => {
 
   test('jumped over the lazy dog, as a route', () => {
     expect(sayAll(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'route'))).toMatchObject({
-      en: 'the quick brown fox of the boy who cried the wolf jumped over the lazy dog.',
+      en: 'the quick brown fox of the boy who cried wolf jumped over the lazy dog.',
       es: 'el zorro rápido y marrón del niño que gritó el lobo saltó por encima del perro perezoso.',
       pt: 'a raposa rápida e castanha do menino que gritou o lobo pulou por cima do cão preguiçoso.',
       // を marks the path the jump crosses.
@@ -63,7 +63,7 @@ describe('the quick brown fox of the boy who cried the wolf', () => {
       relative: { verbPhrase: { verb: 'CRY_OUT', tense: 'past' }, directObject: np('WOLF') },
     });
     expect(say(jumpedOver(onTheFox, 'locative'), 'en'))
-      .toBe("the boy's quick brown fox that cried the wolf jumped over the lazy dog.");
+      .toBe("the boy's quick brown fox that cried wolf jumped over the lazy dog.");
   });
 
   // What CRY_OUT's object renders as on its own, and what a fix for A124 must leave alone: English
@@ -121,7 +121,8 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
   });
 
   // Each conjunct takes its own fused head. A possessive keeps its own article rules, and an adjective
-  // its place after the noun.
+  // its place after the noun. The frame's article is the only one: an indefinite alarm collapses into
+  // it (A163).
   test('the alarm phrase around the noun', () => {
     expect(cry({ conjunction: 'and', conjuncts: [np('WOLF'), np('FIRE')] }))
       .toEqual({ it: 'il ragazzo gridò al lupo e al fuoco.', fr: 'le garçon cria au loup et au feu.' });
@@ -130,7 +131,7 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
     expect(cry(np('WOLF', { adjectives: ['LAZY'] })))
       .toEqual({ it: 'il ragazzo gridò al lupo pigro.', fr: 'le garçon cria au loup paresseux.' });
     expect(cry(np('WOLF', { definiteness: 'indefinite' })))
-      .toEqual({ it: 'il ragazzo gridò a un lupo.', fr: 'le garçon cria à un loup.' });
+      .toEqual({ it: 'il ragazzo gridò al lupo.', fr: 'le garçon cria au loup.' });
   });
 
   // The cry is no direct object, so the Italian impersonal si does not agree with a plural one.
@@ -139,14 +140,14 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
   });
 
   // Regression: the frame is CRY_OUT's, and only for a danger. A wolf seen is a plain object, a recipient
-  // keeps its own a / à after the cry, and the other languages keep the literal object.
+  // keeps its own a / à after the cry, and German keeps the literal object. English cries it bare (A163).
   test('regression: another verb, a recipient, and the other languages are unchanged', () => {
     expect(itFr(clause(np('BOY'), 'SEE', { verbPhrase: { tense: 'past' }, directObject: np('WOLF') })))
       .toEqual({ it: 'il ragazzo vide il lupo.', fr: 'le garçon vit le loup.' });
     expect(itFr(clause(np('BOY'), 'CRY_OUT', { verbPhrase: { tense: 'past' }, directObject: np('WOLF'), complements: { terminus: { phrase: np('DOG') } } })))
       .toEqual({ it: 'il ragazzo gridò al lupo al cane.', fr: 'le garçon cria au loup au chien.' });
     expect(sayAll(cried())).toMatchObject({
-      en: 'the boy cried the wolf.',
+      en: 'the boy cried wolf.',
       de: 'der Junge rief den Wolf.',
     });
   });
@@ -229,7 +230,7 @@ describe('known bugs: a relative on the alarm a cry raises', () => {
 // inside the frame, which reads as the terminus ("shouted at a wolf"), and Italian's bare "a lupi" is
 // ungrammatical outright.
 describe('known bugs: an alarm cry has no determiner', () => {
-  test.fails('English cries the bare alarm whatever determiner the object carries', () => {
+  test('English cries the bare alarm whatever determiner the object carries', () => {
     expect(say(cried(), 'en')).toBe('the boy cried wolf.');
     expect(say(cried({ definiteness: 'indefinite' }), 'en')).toBe('the boy cried wolf.');
     expect(say(cried({ number: 'plural' }), 'en')).toBe('the boy cried wolves.');
@@ -240,7 +241,7 @@ describe('known bugs: an alarm cry has no determiner', () => {
       .toBe('the quick brown fox of the boy who cried wolf jumped over the lazy dog.');
   });
 
-  test.fails('Italian and French collapse an indefinite alarm into the frame', () => {
+  test('Italian and French collapse an indefinite alarm into the frame', () => {
     expect(sayAll(cried({ definiteness: 'indefinite' }))).toMatchObject({
       it: 'il ragazzo gridò al lupo.',
       fr: 'le garçon cria au loup.',
@@ -249,6 +250,65 @@ describe('known bugs: an alarm cry has no determiner', () => {
       it: 'il ragazzo gridò ai lupi.',
       fr: 'le garçon cria aux loups.',
     });
+  });
+
+  const enItFr = (plan: PhrasePlan) => {
+    const { en, it, fr } = sayAll(plan);
+    return { en, it, fr };
+  };
+  const cry = (object: NounElement, verbPhrase: Partial<VerbPhrase> = { tense: 'past' }, rest: Partial<PhrasePlan> = {}) =>
+    enItFr(clause(np('BOY'), 'CRY_OUT', { verbPhrase, directObject: object, ...rest }));
+
+  // Every determiner, not just the indefinite: a quantifier, a demonstrative, the negative.
+  test('every determiner collapses into the one the frame spells', () => {
+    expect(cry(np('FIRE', { definiteness: 'this' })))
+      .toEqual({ en: 'the boy cried fire.', it: 'il ragazzo gridò al fuoco.', fr: 'le garçon cria au feu.' });
+    expect(cry(np('WOLF', { definiteness: 'all', number: 'plural' })))
+      .toEqual({ en: 'the boy cried wolves.', it: 'il ragazzo gridò ai lupi.', fr: 'le garçon cria aux loups.' });
+    expect(cry(np('WOLF', { definiteness: 'no' })))
+      .toEqual({ en: 'the boy cried wolf.', it: 'il ragazzo gridò al lupo.', fr: 'le garçon cria au loup.' });
+  });
+
+  // A `no` alarm drops its negation with its determiner, so the clause is negated by its verb or not at
+  // all: never French's "ne" left without its "aucun", nor English's "any" standing in for it.
+  test('a negative alarm leaves no negation behind', () => {
+    expect(cry(np('WOLF', { definiteness: 'no' }), { tense: 'past', negative: true }))
+      .toEqual({ en: 'the boy did not cry wolf.', it: 'il ragazzo non gridò al lupo.', fr: 'le garçon ne cria pas au loup.' });
+  });
+
+  // The relative clause the pangram carries, and the other verb groups the alarm follows.
+  test('in a relative clause, a question and the future', () => {
+    const theBoyWhoCried = (wolf: Partial<NounPhrase>) =>
+      enItFr(clause(np('BOY', { relative: { verbPhrase: { verb: 'CRY_OUT', tense: 'past' }, directObject: np('WOLF', wolf) } }), 'RUN'));
+    expect(theBoyWhoCried({ definiteness: 'indefinite' }))
+      .toEqual({ en: 'the boy who cried wolf runs.', it: 'il ragazzo che gridò al lupo corre.', fr: 'le garçon qui cria au loup court.' });
+    expect(theBoyWhoCried({ definiteness: 'indefinite', number: 'plural' }))
+      .toEqual({ en: 'the boy who cried wolves runs.', it: 'il ragazzo che gridò ai lupi corre.', fr: 'le garçon qui cria aux loups court.' });
+    expect(cry(np('WOLF', { definiteness: 'indefinite' }), { tense: 'past' }, { interrogative: true }))
+      .toEqual({ en: 'did the boy cry wolf?', it: 'il ragazzo gridò al lupo?', fr: 'est-ce que le garçon cria au loup\u00a0?' });
+    expect(cry(np('WOLF', { definiteness: 'indefinite' }), { tense: 'future' }))
+      .toEqual({ en: 'the boy will cry wolf.', it: 'il ragazzo griderà al lupo.', fr: 'le garçon criera au loup.' });
+  });
+
+  // Each alarm in a coordinated object, and only the alarms: a shouted word keeps its own determiner.
+  test('each alarm of a group, and no other conjunct', () => {
+    expect(cry({ conjunction: 'and', conjuncts: [np('WOLF', { definiteness: 'no' }), np('FIRE', { definiteness: 'indefinite' })] }))
+      .toEqual({ en: 'the boy cried wolf and fire.', it: 'il ragazzo gridò al lupo e al fuoco.', fr: 'le garçon cria au loup et au feu.' });
+    expect(cry({ conjunction: 'and', conjuncts: [np('WOLF', { definiteness: 'indefinite' }), np('WORD', { definiteness: 'indefinite' })] }))
+      .toEqual({ en: 'the boy cried wolf and a word.', it: 'il ragazzo gridò al lupo e una parola.', fr: 'le garçon cria au loup et un mot.' });
+  });
+
+  // The languages with no alarm frame keep the literal object (A124 left them out), but the determiner
+  // is gone for them too: the canvas offers none (A164), so a saved plan renders as a new one would.
+  test('the languages with no frame keep the literal object, definite whatever the plan says', () => {
+    for (const definiteness of ['indefinite', 'no'] as const) {
+      expect(sayAll(cried({ definiteness }))).toMatchObject({
+        de: 'der Junge rief den Wolf.',
+        es: 'el niño gritó el lobo.',
+        pt: 'o menino gritou o lobo.',
+        ja: '男の子は狼を叫びました。',
+      });
+    }
   });
 
   // Regression: the determiner is only ignored on an alarm. An ordinary cry keeps the one it was

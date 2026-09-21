@@ -75,3 +75,30 @@ this file pins only the direct object.
 | | |
 |---|---|
 | **Test** | `packages/frontend/test/satellites/functions/rawSatellites.test.tsx` → *known bugs: the determiner an alarm cry cannot take* (1 `it.fails`, plus a regression guard for another verb and another object) |
+
+## Resolved
+
+Fixed 2026-09-21, after [A163](A163-alarm-cry-determiner.md) and in the same change. The ordering
+concern above is gone: the translator drops the stored determiner in all seven languages, so a saved
+plan with an indefinite alarm renders `the boy cried wolf` / `rief den Wolf` like a new one.
+
+- **Corpus.** Both flags reach `Concept`
+  ([`shared/src/index.ts`](../../../packages/shared/src/index.ts)): `alarm?: boolean` and
+  `alarmCry?: boolean`. `/api/concepts` carries them
+  ([`backend/src/index.ts`](../../../packages/backend/src/index.ts)). `alarm_cry` became a concept
+  column, not a lexeme form, as A163 records.
+- **Frontend.** [`rawSatellites.tsx`](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx)
+  gates the direct object's determiner with
+  `directObjectRole === "noun" && !(selection.verb?.alarmCry && selection.directObject?.alarm)`,
+  withdrawn rather than disabled, as proposed.
+
+**Tests.** The `it.fails` in `rawSatellites.test.tsx` → *known bugs: the determiner an alarm cry cannot
+take* is a plain passing test now. Its fixtures are typed against `Concept` with no cast, so a
+misspelt flag fails typecheck. Also added: the withdrawal reads the flags, not the ids (FIRE); the
+alarm's number, adjective and possessor stay offered; and a danger with no verb yet keeps its
+determiner. `backend/src/index.test.ts` pins both flags on the API, and their absence elsewhere.
+
+Not covered, as the file said: the coordinated object's conjunct rings. The console has the same gap:
+[`console/language/words.ts`](../../../packages/frontend/src/console/language/words.ts)'s
+`hasDeterminer` gives every direct object a determiner setting, so `determiner` on an alarm is still
+accepted there. It is harmless now that the engine ignores the value, but it no longer does anything.

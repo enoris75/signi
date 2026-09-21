@@ -132,9 +132,12 @@ describe('GET /api/concepts', () => {
     expect(await find('MUST')).toMatchObject({ modal: true, synonym: 'have to' });
     expect(await find('SPEED')).toMatchObject({ mannerRelation: 'measure' });
     expect(await find('SIZE')).toMatchObject({ dimensionRelation: 'extent' });
+    // A164: the canvas withdraws the determiner of the alarm a cry raises, and it reads both words.
+    expect(await find('WOLF')).toMatchObject({ alarm: true });
+    expect(await find('CRY_OUT')).toMatchObject({ alarmCry: true });
 
     const divide = await find('DIVIDE');
-    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'person', 'number', 'gendered', 'isA']) {
+    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA']) {
       expect(divide).not.toHaveProperty(key);
     }
   });

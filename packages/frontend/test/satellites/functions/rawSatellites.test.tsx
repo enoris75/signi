@@ -769,15 +769,24 @@ describe('rawSatellites', () => {
 // and spells no determiner in any language (A163). The canvas offers one anyway: the direct object's
 // determiner is gated on its head alone (`directObjectRole === 'noun'`), so the control sits on the
 // ring claiming a slot the grammar does not license, exactly as a measure manner adverbial's did
-// before it was withdrawn. Both flags reach `Concept` with the fix; the fixtures assert the shape it
-// introduces.
-const CRY_OUT = { ...concept('CRY_OUT', 'verb', { transitivity: 'transitive' }), alarmCry: true } as Concept;
-const WOLF = { ...concept('WOLF', 'noun'), alarm: true } as Concept;
+// before it was withdrawn. Both flags are on `Concept`, which the fixtures are typed against.
+const CRY_OUT: Concept = { ...concept('CRY_OUT', 'verb', { transitivity: 'transitive' }), alarmCry: true };
+const WOLF: Concept = { ...concept('WOLF', 'noun'), alarm: true };
 const WORD = concept('WORD', 'noun');
 
 describe('known bugs: the determiner an alarm cry cannot take', () => {
-  it.fails('withdraws the determiner from the alarm a cry raises', () => {
+  it('withdraws the determiner from the alarm a cry raises', () => {
     expect(satellite({ verb: CRY_OUT, directObject: WOLF }, 'directObjectDefiniteness').available).toBe(false);
+  });
+
+  // It reads the flags, not the ids: any danger cried is an alarm. And the determiner is all that goes —
+  // the alarm still takes a number ("cried wolves"), an adjective and a possessor, which the engine spells.
+  it('withdraws it from every alarm, and withdraws nothing else from the object', () => {
+    const FIRE: Concept = { ...concept('FIRE', 'noun'), alarm: true };
+    expect(satellite({ verb: CRY_OUT, directObject: FIRE }, 'directObjectDefiniteness').available).toBe(false);
+    for (const key of ['directObjectNumber', 'directObjectAdjective', 'directObjectPossessor']) {
+      expect(satellite({ verb: CRY_OUT, directObject: WOLF }, key).available).toBe(true);
+    }
   });
 
   // Regression: it is the pairing that licenses nothing, not either word on its own. The same danger
@@ -785,5 +794,7 @@ describe('known bugs: the determiner an alarm cry cannot take', () => {
   it('leaves every other cry, and every other object, alone', () => {
     expect(satellite({ verb: SEE, directObject: WOLF }, 'directObjectDefiniteness').available).toBe(true);
     expect(satellite({ verb: CRY_OUT, directObject: WORD }, 'directObjectDefiniteness').available).toBe(true);
+    // A danger with no verb yet is no cry: the determiner is there until CRY_OUT is picked.
+    expect(satellite({ directObject: WOLF }, 'directObjectDefiniteness').available).toBe(true);
   });
 });

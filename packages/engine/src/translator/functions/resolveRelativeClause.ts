@@ -5,6 +5,7 @@ import type { LexiconLookup } from '../translator.types.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
+import { withAlarmCry } from './withAlarmCry.js';
 
 /**
  * Resolve a relative clause: its verb phrase, optional objects, and complements. The
@@ -31,7 +32,7 @@ export function resolveRelativeClause(
 ): ResolvedRelativeClause {
   const headRole = clause.headRole ?? 'subject';
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
-  const directObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
+  const resolvedObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
   // Two gaps keep the relative **active** whatever voice its plan names, since the passive would demote
   // the head (or what it owns) to a by-phrase no relativizer here can say: a genitive relative's head
   // owns the agent ("*the girl by whose cat the food is eaten"), and Japanese relativises no agent at
@@ -45,6 +46,8 @@ export function resolveRelativeClause(
     !!clause.directObject || headRole === 'directObject',
     headRole === 'subject' ? headForms : subject?.agreement,
   );
+  // The alarm a cry raises has no determiner slot, as in a main clause: "the boy who cried wolf" (A163).
+  const directObject = resolvedObject && withAlarmCry(resolvedObject, verbPhrase.verb, language);
   const slots = verbPhrase.voice === 'passive'
     ? passiveRemap(headRole, subject, directObject)
     : { headRole, subject, directObject };

@@ -13,6 +13,8 @@ describe('alarmCryText', () => {
     expect(alarmCryText(np(ANGELO))).toBe("all'angelo");
   });
 
+  // No clause hands it one since A163 (the translator drops the alarm's determiner, see withAlarmCry),
+  // but the renderer still spells what it is given.
   test('any other determiner follows a plain "a"', () => {
     expect(alarmCryText(np(LUPO, { definiteness: 'indefinite' }))).toBe('a un lupo');
     expect(alarmCryText(np(LUPO, { definiteness: 'no' }))).toBe('a nessun lupo');

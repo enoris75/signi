@@ -867,6 +867,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('PRODUCE', 'SOUND', 'plural', ['LOUD']),
     emoji: '📢',
     synonym: 'shout',
+    // The cry of a danger (an `alarm` noun) is the shout itself, "Wolf!", with no determiner of its
+    // own: English "cried wolf", Italian and French a / à + the article, "gridò al lupo", "cria au
+    // loup". Any other cry stays a plain object, "cried the word", "gridò la parola" (A124, A163).
+    alarmCry: true,
     forms: {
       en: {
         base: 'cry',
@@ -874,10 +878,8 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'cry', '2pl_present': 'cry', '3pl_present': 'cry',
         past: 'cried',
       },
-      // `alarm_cry: '1'`: the cry of a danger (an `alarm` noun) is a / à + the article, "gridò al
-      // lupo", "cria au loup"; any other cry stays a plain object, "gridò la parola" (A124).
       it: {
-        base: 'gridare', alarm_cry: '1',
+        base: 'gridare',
         '1sg_present': 'grido', '2sg_present': 'gridi', '3sg_present': 'grida',
         '1pl_present': 'gridiamo', '2pl_present': 'gridate', '3pl_present': 'gridano',
         '1sg_past': 'gridai', '2sg_past': 'gridasti', '3sg_past': 'gridò',
@@ -886,7 +888,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'grideremo', '2pl_future': 'griderete', '3pl_future': 'grideranno',
       },
       fr: {
-        base: 'crier', alarm_cry: '1',
+        base: 'crier',
         '1sg_present': 'crie', '2sg_present': 'cries', '3sg_present': 'crie',
         '1pl_present': 'crions', '2pl_present': 'criez', '3pl_present': 'crient',
         '1sg_past': 'criai', '2sg_past': 'crias', '3sg_past': 'cria',

@@ -77,3 +77,58 @@ Update the expected strings; do not weaken the assertions.
 | | |
 |---|---|
 | **Test** | `pangram.test.ts` → *known bugs: an alarm cry has no determiner* (2 `test.fails`, English and Italian/French, plus a regression guard) |
+
+## Resolved
+
+Fixed 2026-09-21. Every row renders as wanted, and so does every row under "Already right".
+
+**The determiner is dropped in the translator, not in `alarmCry`.** The shape above would have
+normalised it where each engine renders the alarm, and the indefinite rows would have come out right.
+The `no` determiner would not have, because it is a negation as well as a determiner: the negative
+concord reads it off the resolved object (`negationSources`, French `predicateText`, the group
+agreement) before any engine renders the phrase. Dropped at render time, it left French
+`le garçon ne cria au loup` (a `ne` with no `aucun` to pair with) and English `the boy cried wolf`
+under a clause that still counted itself negated. So the new
+[`withAlarmCry`](../../../packages/engine/src/translator/functions/withAlarmCry.ts) drops it once, right
+after resolution, the way the measure manner adverbial's article is fixed bare
+([`resolveComplements`](../../../packages/engine/src/translator/functions/resolveComplements.ts)). It
+runs in [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) and
+[`resolveRelativeClause`](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts),
+and it resolves a coordinated object's agreement again, since a `no` conjunct marks the whole group
+negative. [`alarmCry`](../../../packages/engine/src/functions/alarmCry.ts) now turns every determiner
+into the definite, not just `bare`, and `withAlarmCry` applies it to each conjunct.
+
+Every engine sees one definiteness, whatever the plan says:
+
+- **English** spells it bare: one arm in
+  [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts),
+  `alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))`, as proposed.
+- **Italian and French** fuse it into the frame, unchanged: `al lupo`, `aux loups`.
+- **German, Spanish, Portuguese, Japanese** keep the literal object, as before, but now always the
+  definite one: `rief den Wolf` for an indefinite or a `no` plan too. This file left their frame out of
+  scope, and it still is. What changed is only that no determiner reaches them either, so a plan saved
+  before [A164](A164-alarm-cry-determiner-satellite.md) withdrew the control renders as a new one would.
+
+**Corpus.** `alarm_cry` is no longer a form on CRY_OUT's `it` and `fr` lexemes. It is the concept's
+`alarmCry` ([`concepts/verbs/transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)):
+a `semantic_concepts.alarm_cry` column with a migration
+([`db.ts`](../../../packages/backend/src/db.ts)), seeded by [`seed.ts`](../../../packages/backend/src/seed.ts)
+and put back into every language's verb forms by [`lexicon.ts`](../../../packages/backend/src/lexicon.ts),
+the same path `stative` takes. A164 needed it on `Concept` anyway. The dev database needs
+`npm run seed`, and the backend a rebuild of `@signi/shared` and `@signi/engine`.
+
+**Tests.** Both `test.fails` in `pangram.test.ts` → *known bugs: an alarm cry has no determiner* are
+plain tests now, with their assertions unchanged. The block gained five more: every other determiner
+(a demonstrative, a quantifier, `no`); a `no` alarm under a negated verb; the relative clause, a
+question and the future; each alarm of a coordinated object, next to a word that keeps its own; and the
+four languages with no frame. The English pins on lines 38, 50 and 66 and A124's "other languages"
+guard are re-pinned to `cried wolf`, and A124's indefinite row to `al lupo` / `au loup`. New or extended
+unit tests:
+[`withAlarmCry`](../../../packages/engine/src/translator/functions/withAlarmCry.test.ts),
+[`alarmCry`](../../../packages/engine/src/functions/alarmCry.test.ts),
+[`en/predicateParts`](../../../packages/engine/src/languages/en/predicateParts.test.ts), the two
+resolvers, and the backend's db / seed / lexicon / concepts tests.
+
+Not covered: the passive. An alarm promoted to subject is a literal, definite subject in every
+language (`the wolf was cried by the boy`, `il lupo fu gridato dal ragazzo`). A124 gave it no frame
+either.

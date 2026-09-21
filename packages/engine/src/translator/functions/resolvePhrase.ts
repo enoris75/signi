@@ -6,6 +6,7 @@ import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
+import { withAlarmCry } from './withAlarmCry.js';
 
 /** Whether `plan`'s infinitive complement is controlled by its direct object (see InfinitiveControl). */
 function objectControlled(plan: PhrasePlan): boolean {
@@ -72,7 +73,10 @@ export function resolvePhrase(
         ...(question ? { interrogative: true } : {}),
       }
     : undefined;
-  const directObject = plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined;
+  // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
+  const directObject = plan.directObject
+    ? withAlarmCry(resolveNounElement(plan.directObject, language, lookup), verbPhrase?.verb, language)
+    : undefined;
   // A passive re-maps the clause's core arguments (A01). The patient becomes the grammatical
   // subject — it drives the verb's agreement, and a Romance participle agrees with it — the object
   // slot is emptied, and the agent is demoted to the by-phrase. `resolveVerbPhrase` has already

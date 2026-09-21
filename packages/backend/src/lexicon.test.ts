@@ -73,6 +73,15 @@ describe('lookupLexicalEntry', () => {
     expect(lookupLexicalEntry('EAT', 'it')!.forms).not.toHaveProperty('stative');
   });
 
+  // A163: the cry of an alarm is the shout itself in every language, so the flag is the concept's and
+  // reaches every lexeme of it, not just the Italian and French ones that fuse an article into it.
+  test('marks a verb that cries an alarm in every language, and no other verb', () => {
+    for (const language of ['en', 'it', 'fr', 'de', 'es', 'pt', 'ja']) {
+      expect(lookupLexicalEntry('CRY_OUT', language)!.forms).toMatchObject({ alarm_cry: '1' });
+    }
+    expect(lookupLexicalEntry('SEE', 'it')!.forms).not.toHaveProperty('alarm_cry');
+  });
+
   test('reads a lexical sense like any verb, and the verb that names it as its object sense', () => {
     expect(lookupLexicalEntry('KNOW', 'de')!.forms).toMatchObject({ base: 'wissen', object_sense: 'KNOW_ACQUAINTED' });
     expect(lookupLexicalEntry('KNOW_ACQUAINTED', 'de')!.forms).toMatchObject({ base: 'kennen', participle: 'gekannt', stative: '1', role: 'verb' });

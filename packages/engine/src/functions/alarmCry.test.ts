@@ -8,12 +8,24 @@ const LUPO = { base: 'lupo', gender: 'masc', alarm: '1' };
 const PAROLA = { base: 'parola', gender: 'fem' };
 
 describe('alarmCry', () => {
-  // A124: a cry raises an alarm only when the verb cries one and the noun names a danger.
-  test('a danger shouted by a crying verb is the alarm, its determiner kept', () => {
+  // A124: a cry raises an alarm only when the verb cries one and the noun names a danger. A163: the
+  // alarm has no determiner slot, so a definite one comes back as it is.
+  test('a danger shouted by a crying verb is the alarm, the definite one as it is', () => {
     const wolf = np(LUPO, { definiteness: 'definite' });
     expect(alarmCry(GRIDARE, wolf)).toBe(wolf);
-    const aWolf = np(LUPO, { definiteness: 'indefinite' });
-    expect(alarmCry(GRIDARE, aWolf)).toBe(aWolf);
+  });
+
+  // A163: whatever determiner the plan gave it collapses into the definite, which the alarm frame fuses
+  // ("gridò al lupo", never "*a un lupo"). The number and the possessor are not determiners, and stay.
+  test('any other determiner comes back definite, the rest of the phrase kept', () => {
+    for (const definiteness of ['indefinite', 'no', 'some', 'many', 'few', 'all', 'this', 'that']) {
+      expect(alarmCry(GRIDARE, np(LUPO, { definiteness }))?.head.forms['definiteness']).toBe('definite');
+    }
+    const theirWolves = np(LUPO, { definiteness: 'indefinite', number: 'plural' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural' } });
+    expect(alarmCry(GRIDARE, theirWolves)).toMatchObject({
+      head: { forms: { number: 'plural', definiteness: 'definite' } },
+      possessor: { kind: 'pronominal', person: '3', number: 'plural' },
+    });
   });
 
   test('any other object of the crying verb stays plain', () => {

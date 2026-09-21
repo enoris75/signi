@@ -1,5 +1,6 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import { alarmCry } from '../../functions/alarmCry.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
@@ -100,7 +101,9 @@ function predicateWords(
   const anyObject = neg.object && negatedAhead;
   const anyComplement = neg.complement && (negatedAhead || neg.object);
   // The choice is per conjunct, so a group mixes the two ("sees the dog and me"). Only a conjunct
-  // that is itself `no` switches to "any": "does not eat the mouse or any food".
+  // that is itself `no` switches to "any": "does not eat the mouse or any food". The alarm a cry
+  // raises is the shout itself, and English shouts it bare whatever determiner it carries: "cried
+  // wolf", never "*cried the wolf" (A163). Italian and French fuse the article of the same frame.
   // A passive has no direct object left — the patient is the subject now — so the slot right after
   // the verb group carries the participle and the by-phrase instead. Every branch below puts this
   // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
@@ -110,6 +113,7 @@ function predicateWords(
     : !directObject ? ''
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounForm(np.head.forms)
+      : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
   const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';

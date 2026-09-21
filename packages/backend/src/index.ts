@@ -48,10 +48,12 @@ interface ConceptRow {
   modal: number;
   manner_relation: string | null;
   dimension_relation: string | null;
+  alarm: number;
+  alarm_cry: number;
 }
 
 const CONCEPT_COLS =
-  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, manner_relation, dimension_relation';
+  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, manner_relation, dimension_relation, alarm, alarm_cry';
 
 const PRONOUN_META_SQL = `
   SELECT cpl.concept_id, pl.person, pl.number
@@ -211,6 +213,8 @@ app.get('/api/concepts', (req, res) => {
       modal: r.modal === 1 || undefined,
       mannerRelation: (r.manner_relation as import('@signi/shared').MannerRelation) ?? undefined,
       dimensionRelation: (r.dimension_relation as import('@signi/shared').DimensionRelation) ?? undefined,
+      alarm: r.alarm === 1 || undefined,
+      alarmCry: r.alarm_cry === 1 || undefined,
       transitivity: (r.transitivity as import('@signi/shared').Transitivity) ?? undefined,
       complements: r.complements
         ? (r.complements.split(',') as import('@signi/shared').ComplementType[])

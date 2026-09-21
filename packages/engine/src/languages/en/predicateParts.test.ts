@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
 import {
-  ALWAYS, BE, BECOME, BOOK, CAN, CAT, complement, complements, concept, DOG, EAT, el, FAST, type Forms, GIVE, GO, HE, HOUSE, I,
-  IT, LEGEND, modal, MOUSE, MUST, NEVER, np, SEE, SEEM, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, YOU,
+  ALWAYS, BE, BECOME, BOOK, BOY, CAN, CAT, complement, complements, concept, CRY, DOG, EAT, el, FAST, FIRE, type Forms, GIVE, GO, HE,
+  HOUSE, I, IT, LEGEND, modal, MOUSE, MUST, NEVER, np, SEE, SEEM, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, WOLF, WORD, YOU,
 } from './en.fixtures.js';
 import { predicateParts } from './predicateParts.js';
 
@@ -391,6 +391,33 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(EAT, { interrogative: true, aspect: 'progressive' }))).toBe('is eating');
       expect(said(CAT, vp(EAT, { interrogative: true, negative: true }))).toBe('does not eat');
       expect(said(CAT, vp(EAT, { interrogative: true, modals: [modal(WILL)] }))).toBe('does want to eat');
+    });
+  });
+
+  // A163: the alarm a cry raises is the shout itself, and English shouts it bare whatever determiner it
+  // carries. The translator has already made it definite (see withAlarmCry); English drops that too.
+  describe('an alarm cry', () => {
+    const CRY_ALARM: Forms = { ...CRY, alarm_cry: '1' };
+    const ALARM_WOLF: Forms = { ...WOLF, alarm: '1' };
+    const ALARM_FIRE: Forms = { ...FIRE, alarm: '1' };
+
+    test('spells the alarm bare, in every number and verb group', () => {
+      expect(said(BOY, vp(CRY_ALARM, { tense: 'past' }), el(np(ALARM_WOLF)))).toBe('cried wolf');
+      expect(said(BOY, vp(CRY_ALARM, { tense: 'past' }), el(np(ALARM_WOLF, { number: 'plural' })))).toBe('cried wolves');
+      expect(said(BOY, vp(CRY_ALARM, { tense: 'past', negative: true }), el(np(ALARM_WOLF)))).toBe('did not cry wolf');
+      expect(said(BOY, vp(CRY_ALARM, { modals: [modal(MUST)] }), el(np(ALARM_WOLF)))).toBe('must cry wolf');
+      expect(said(BOY, vp(CRY_ALARM, { aspect: 'resultative' }), el(np(ALARM_FIRE)))).toBe('has cried fire');
+    });
+
+    test('each alarm conjunct is bare, and any other object of the cry keeps its determiner', () => {
+      expect(said(BOY, vp(CRY_ALARM, { tense: 'past' }), el(np(ALARM_WOLF), np(ALARM_FIRE)))).toBe('cried wolf and fire');
+      expect(said(BOY, vp(CRY_ALARM, { tense: 'past' }), el(np(ALARM_WOLF), np(WORD, { definiteness: 'indefinite' }))))
+        .toBe('cried wolf and a word');
+    });
+
+    test('a danger under another verb, or a cry that raises no alarm, is a plain object', () => {
+      expect(said(BOY, vp(SEE, { tense: 'past' }), el(np(ALARM_WOLF)))).toBe('saw the wolf');
+      expect(said(BOY, vp(CRY, { tense: 'past' }), el(np(ALARM_WOLF)))).toBe('cried the wolf');
     });
   });
 });

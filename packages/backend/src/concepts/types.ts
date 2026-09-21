@@ -22,6 +22,7 @@ export interface ConceptSeed {
   stative?: boolean; // verb naming a state that holds (have, want, be), not an event — the Romance past is its imperfect ("voleva", A130), Japanese says it with 〜ている ("持っています", A132)
   senseOf?: string; // a lexical sense the engine selects in place of the concept named here (KNOW_ACQUAINTED of KNOW, A131); left out of /api/concepts, so no picker offers it
   alarm?: boolean; // noun naming a danger one cries out a warning of (wolf, fire) — it/fr cry it with a / à: "gridare al lupo", "crier au feu" (A124)
+  alarmCry?: boolean; // verb whose object, when an `alarm` noun, is the shout itself ("cry wolf"): no determiner, and a / à + the article in it/fr (A124, A163)
   transient?: boolean; // adjective ascribing a transient state (tired, saved), not an inherent property (big) — es/pt predicate it with `estar`, not `ser` (A47); default inherent
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative
   dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent

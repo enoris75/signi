@@ -30,8 +30,8 @@ function formsFromRows(rows: FormRow[]): Record<string, string> {
 
 function lookupVerb(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; stative: number; transitivity: string | null }>(`
-    SELECT vl.id, sc.stative, sc.transitivity FROM concept_verb_links cvl
+  const lexeme = db.prepare<[string, string], { id: number; stative: number; transitivity: string | null; alarm_cry: number }>(`
+    SELECT vl.id, sc.stative, sc.transitivity, sc.alarm_cry FROM concept_verb_links cvl
     JOIN verb_lexemes vl ON vl.id = cvl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cvl.concept_id
     WHERE cvl.concept_id = ? AND vl.language = ? AND cvl.is_primary = 1
@@ -50,6 +50,10 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
   // reason `role` and `animate` are: only a verb with a patient can be put in the passive, and the
   // translator has to decide that with nothing but the resolved forms in hand (A01).
   if (lexeme.transitivity) forms['transitivity'] = lexeme.transitivity;
+  // A verb that cries an alarm (cry out): its object, when an `alarm` noun, is the shout itself and
+  // takes no determiner (A124, A163). Concept-level, since the object is the shout in every language;
+  // the engines that give it a frame of their own read it (English, Italian, French).
+  if (lexeme.alarm_cry) forms['alarm_cry'] = '1';
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }
@@ -83,8 +87,8 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   // How this dimension noun enters an adjective-definition gloss (extent / quality / measure); the
   // engine maps it to the adposition ("of great size" vs "at a high temperature"). Concept-level.
   if (lexeme.dimension_relation) forms['dimensionRelation'] = lexeme.dimension_relation;
-  // A danger one cries out a warning of (wolf, fire): a verb that raises an alarm (`alarm_cry` on its
-  // lexeme) takes it as the cry's topic, "gridare al lupo", not as a plain object (A124). Concept-level.
+  // A danger one cries out a warning of (wolf, fire): a verb that raises an alarm (`alarm_cry`, above)
+  // takes it as the cry's topic, "gridare al lupo", not as a plain object (A124). Concept-level.
   if (lexeme.alarm) forms['alarm'] = '1';
 
   // The concept's hypernym (its direct is-a). A continent goal keys its Romance adposition off

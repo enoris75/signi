@@ -57,6 +57,10 @@ function initSchema(db: Database.Database): void {
       -- shout such a cry with a / à and the article ("gridare al lupo", "crier au feu"), where any
       -- other cry is a plain object (A124); default 0. Ignored for non-nouns.
       alarm        INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1)),
+      -- 1 for a verb that cries an alarm (cry out): its object, when an alarm noun, is the shout
+      -- itself, "Wolf!", with no determiner of its own — English "cried wolf", Italian and French a / à
+      -- and the article, "gridò al lupo", "cria au loup" (A124, A163); default 0. Ignored for non-verbs.
+      alarm_cry    INTEGER NOT NULL DEFAULT 0 CHECK (alarm_cry IN (0,1)),
       -- 1 for a verb naming a state that holds (want, can, be, have, own, love, seem, hold, know)
       -- rather than an event. The Romance past of a state is the imperfect ("voleva", not the
       -- perfective "volle", A130), and Japanese says it holds with 〜ている ("持っています", A132);
@@ -349,6 +353,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('alarm')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN alarm INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1))');
+  }
+  if (!conceptCols.includes('alarm_cry')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN alarm_cry INTEGER NOT NULL DEFAULT 0 CHECK (alarm_cry IN (0,1))');
   }
   if (!conceptCols.includes('stative')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN stative INTEGER NOT NULL DEFAULT 0 CHECK (stative IN (0,1))');

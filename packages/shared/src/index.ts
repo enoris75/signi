@@ -450,6 +450,8 @@ export interface Concept {
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   mannerRelation?: MannerRelation; // how this noun enters a manner adverbial (SPEED→measure, CARE→means); default means
   dimensionRelation?: DimensionRelation; // how this noun enters an adjective-definition gloss (SIZE→extent "in"); default extent
+  alarm?: boolean;              // noun naming a danger one cries out a warning of (WOLF, FIRE) — see `alarmCry`
+  alarmCry?: boolean;           // verb whose `alarm` object is the shout itself ("cry wolf"): it takes no determiner (A163)
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
   /**
    * The concept's hypernym — the id of the concept it *is a* kind of (CARAVEL → SAILING_SHIP).
