@@ -41,15 +41,21 @@ function isBareNamePlace(f: Record<string, string>): boolean {
   return isNamedLand(f) && f['proper'] === '1' && f['takes_article'] !== '1';
 }
 
+// German closes the Mittelfeld with the predicate, against the verb cluster ("wird wegen des Hundes
+// eine Legende", "ist wegen des Hundes müde geworden"), where the shared `COMPLEMENT_RENDER_ORDER`
+// — English and Romance order — leads with it. So the two predicate slots are rendered apart from
+// the adjuncts, and last (A186).
+const DE_PREDICATE_TYPES: ComplementType[] = ['objectPredicative', 'predicative'];
+const DE_ADJUNCT_ORDER = COMPLEMENT_RENDER_ORDER.filter((type) => !DE_PREDICATE_TYPES.includes(type));
+
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
-// complements with the infinitival copula ("scheint eine Legende zu sein").
-export function complementsPhrase(
+// complements with the infinitival copula ("scheint im Markt eine Legende zu sein").
+export function complementsParts(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   verb: ConceptForms['forms'] = {},
-): string {
-  if (!complements) return '';
-  const text = COMPLEMENT_RENDER_ORDER
-    .map((type) => {
+): { adjuncts: string; predicate: string } {
+  if (!complements) return { adjuncts: '', predicate: '' };
+  const render = (type: ComplementType): string => {
       const c = complements[type];
       if (!c) return '';
       // A pronoun or negative cause and an instrument presented as an action take shapes of their own;
@@ -186,14 +192,24 @@ export function complementsPhrase(
       const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       });
-    })
-    .filter(Boolean)
-    .join(' ');
+  };
+  const adjuncts = DE_ADJUNCT_ORDER.map(render).filter(Boolean).join(' ');
+  const text = DE_PREDICATE_TYPES.map(render).filter(Boolean).join(' ');
   // "scheinen" takes no predicate nominative at all — "*scheint eine Legende" — only the infinitive
   // "zu sein" (a predicate adjective alone stays bare: "scheint müde"). The infinitive is
   // non-finite, so it closes the complements and sits against the verb cluster, whatever the clause
-  // order: "scheint eine Legende im Markt zu sein", "eine Legende zu sein scheinen wird", ", die eine
+  // order: "scheint im Markt eine Legende zu sein", "eine Legende zu sein scheinen wird", ", die eine
   // Legende zu sein scheint,".
   const predicative = complements['predicative'];
-  return predicative && isSeemingPredicateNoun(predicative, verb) ? `${text} zu sein` : text;
+  const predicate = text && predicative && isSeemingPredicateNoun(predicative, verb) ? `${text} zu sein` : text;
+  return { adjuncts, predicate };
+}
+
+/** The complements as one phrase, the adjuncts first and the predicate closing them. */
+export function complementsPhrase(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  verb: ConceptForms['forms'] = {},
+): string {
+  const { adjuncts, predicate } = complementsParts(complements, verb);
+  return [adjuncts, predicate].filter(Boolean).join(' ');
 }

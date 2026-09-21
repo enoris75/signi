@@ -75,6 +75,25 @@ describe('nounPhrase', () => {
     expect(nounPhrase(phrase, 'gen')).toBe('meiner großen Kater');
   });
 
+  // A187: a head that carries a determiner of its own keeps it, and the possessor moves into a
+  // postnominal "von" + dative phrase; the adjectives then decline after that determiner.
+  test('a head with its own determiner keeps it and the possessor goes into a "von" phrase', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(nounPhrase(np(KATER, { definiteness: 'this' }, { possessor: her }), 'nom')).toBe('dieser Kater von ihr');
+    expect(nounPhrase(np(KATER, { definiteness: 'no' }, { possessor: her }), 'acc')).toBe('keinen Kater von ihr');
+    expect(nounPhrase(np(KATER, { number: 'plural', definiteness: 'some' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), 'nom'))
+      .toBe('einige Kater von mir');
+    const big = np(KATER, { definiteness: 'this' }, { adjectives: [adj(GROSS)], possessor: her });
+    expect(nounPhrase(big, 'nom')).toBe('dieser große Kater von ihr'); // weak, after "dieser"
+  });
+
+  test('after "alle" the possessive stays in front of the noun', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(nounPhrase(np(KATER, { number: 'plural', definiteness: 'all' }, { possessor: my }), 'nom')).toBe('alle meine Kater');
+    expect(nounPhrase(np(KATER, { number: 'plural', definiteness: 'all' }, { adjectives: [adj(GROSS)], possessor: my }), 'dat'))
+      .toBe('allen meinen großen Katern');
+  });
+
   // B09: a noun possessor trails in the genitive, whatever the head's own case.
   test('a noun possessor trails in the genitive', () => {
     expect(nounPhrase(np(BUCH, {}, { possessor: np(JUNGE) }), 'nom')).toBe('das Buch des Jungen');

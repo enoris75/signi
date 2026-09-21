@@ -463,12 +463,12 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
       directObject: np('BOOK', { definiteness: 'definite' }),
       complements: { terminus: { phrase: np('DOG', { definiteness: 'definite' }) } },
     }), 'de')).toBe('der Mann gibt dem Hund das Buch nicht.');
-    // What is pinned here is the POSITION — "nicht" leads the predicative, as it already did.
-    // Whether the predicative should read "keine Legende" rather than "nicht eine Legende" is a
-    // separate question (German prefers "kein" for an indefinite predicate noun); this asserts
-    // today's string so the slot change is visible, and takes no position on that.
+    // What is pinned here is the POSITION — "nicht" leads the predicative, as it already did. An
+    // INDEFINITE predicate nominal now spells that "nicht" into "kein" instead of standing behind it
+    // (A182, ruled 2026-09-21), so the leading slot itself shows on a predicate adjective.
     expect(notWith('BE', { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } }))
-      .toBe('der Kater ist nicht eine Legende.');
+      .toBe('der Kater ist keine Legende.');
+    expect(notWith('BE', { predicative: { phrase: np('TIRED') } })).toBe('der Kater ist nicht müde.');
     // English is unaffected by the German slot.
     expect(say(clause(np('CAT'), 'GO', { verbPhrase: { negative: true }, complements: theMarket }), 'en'))
       .toBe('the cat does not go to the market.');
@@ -1136,7 +1136,7 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
   const notEat = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) =>
     say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, ...verbPhrase }, directObject: object }), 'de');
 
-  test.fails('German negates an indefinite, bare plural or mass object with "kein"', () => {
+  test('German negates an indefinite, bare plural or mass object with "kein"', () => {
     expect(notEat(mouse({ definiteness: 'indefinite' }))).toBe('der Kater frisst keine Maus.'); // now: "frisst eine Maus nicht"
     expect(notEat(mouse({ definiteness: 'indefinite', adjectives: ['BIG'] }))).toBe('der Kater frisst keine große Maus.');
     expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }))).toBe('der Kater frisst keine Mäuse.'); // now: "frisst Mäuse nicht"
@@ -1161,7 +1161,7 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
     }, 'de')).toBe('die am wenigsten junge erwachsene Frau wird keine Phrasen, die gerade das weniger hohe Wasser nicht essen, mit den runderen Gefühlen konsumieren müssen.');
   });
 
-  test.fails('…in a relative clause, a "wenn" clause, a command, an instruction and the infinitive', () => {
+  test('…in a relative clause, a "wenn" clause, a command, an instruction and the infinitive', () => {
     const aMouse = mouse({ definiteness: 'indefinite' });
     expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: aMouse } }), 'RUN'), 'de'))
       .toBe('der Hund, der keine Maus frisst, läuft.');
@@ -1186,6 +1186,64 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
       .toBe('der Kater frisst nie eine Maus.');
     expect(say(clause(np('CAT'), 'EAT', { directObject: mouse({ definiteness: 'indefinite' }) }), 'de')).toBe('der Kater frisst eine Maus.');
   });
+
+  // The rule is about an indefinite NOMINAL, not about the object slot, so a predicate noun takes
+  // "kein" on the same terms — under BE, BECOME and SEEM alike, across tense, a modal and the
+  // infinitive (ruled on 2026-09-21, over the A159 regression that asserted "ist nicht eine
+  // Legende"). A predicate ADJECTIVE is nothing "kein" can determine, so it keeps its "nicht".
+  const isNot = (verb: string, phrase: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('CAT'), verb, { verbPhrase: { negative: true, ...verbPhrase }, complements: { predicative: { phrase } } }), 'de');
+  const aLegend = np('LEGEND', { definiteness: 'indefinite' });
+
+  test('an indefinite predicate nominal takes "kein" as well', () => {
+    expect(isNot('BE', aLegend)).toBe('der Kater ist keine Legende.');
+    expect(isNot('BE', np('LEGEND', { definiteness: 'indefinite', adjectives: ['BIG'] }))).toBe('der Kater ist keine große Legende.');
+    expect(isNot('BE', np('LEGEND', { definiteness: 'bare', number: 'plural' }))).toBe('der Kater ist keine Legenden.');
+    expect(isNot('BECOME', aLegend)).toBe('der Kater wird keine Legende.');
+    expect(isNot('SEEM', aLegend)).toBe('der Kater scheint keine Legende zu sein.');
+    expect(isNot('BE', aLegend, { tense: 'future' })).toBe('der Kater wird keine Legende sein.');
+    expect(isNot('BE', aLegend, { modals: ['CAN'] })).toBe('der Kater kann keine Legende sein.');
+    expect(say({
+      ...clause(np('GENERIC_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: aLegend } } }),
+      infinitive: true,
+    }, 'de')).toBe('keine Legende sein.');
+  });
+
+  // Regression on the predicative side: an adjective and a definite noun keep the "nicht" that leads
+  // them (A159's slot), and "nie" still negates on its own, leaving the plain indefinite (A35).
+  test('a predicate adjective, a definite predicate noun and "nie" are unchanged', () => {
+    expect(isNot('BE', np('TIRED'))).toBe('der Kater ist nicht müde.');
+    expect(isNot('BECOME', np('TIRED'))).toBe('der Kater wird nicht müde.');
+    expect(isNot('BE', np('LEGEND', { definiteness: 'definite' }))).toBe('der Kater ist nicht die Legende.');
+    expect(say(clause(np('CAT'), 'BE', {
+      verbPhrase: { modifier: 'NEVER' }, complements: { predicative: { phrase: aLegend } },
+    }), 'de')).toBe('der Kater ist nie eine Legende.');
+  });
+
+  // What no single "kein" can cover, and what it is not reached for: a coordination mixing an
+  // indefinite and a definite conjunct, a prepositional complement (whose "nicht" is A159's slot),
+  // and a proper name, which is no more indefinite than a definite article is.
+  test('a coordinated object, a prepositional complement and a proper name keep "nicht"', () => {
+    expect(say(clause(np('CAT'), 'EAT', {
+      verbPhrase: { negative: true },
+      directObject: { conjuncts: [mouse({ definiteness: 'indefinite' }), np('FOOD')], conjunction: 'and' },
+    }), 'de')).toBe('der Kater frisst eine Maus und das Essen nicht.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      verbPhrase: { negative: true }, complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite' }) } },
+    }), 'de')).toBe('der Kater läuft nicht in einem Haus.');
+    expect(say(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: np('EUROPE', { definiteness: 'bare' }) }), 'de'))
+      .toBe('der Kater sieht Europa nicht.');
+  });
+
+  // The question shares the declarative's gate; with an adverb the "kein" object keeps the slot
+  // behind it, exactly where a `no` object already stands (A119's "schnell keine Maus essen").
+  test('the question takes "kein" too, and an adverb keeps its slot in front of it', () => {
+    expect(say({
+      ...clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: mouse({ definiteness: 'indefinite' }) }),
+      interrogative: true,
+    }, 'de')).toBe('frisst der Kater keine Maus?');
+    expect(notEat(mouse({ definiteness: 'indefinite' }), { modifier: 'FAST' })).toBe('der Kater frisst schnell keine Maus.');
+  });
 });
 
 // A191. A definite object stands ahead of the negation in the German middle field ("frisst die Maus
@@ -1201,7 +1259,7 @@ describe('known bugs: German "nicht" and an adverb in front of a definite object
   const command = (verbPhrase: Partial<VerbPhrase> = {}, register?: 'instruction') =>
     ({ ...eatNot(verbPhrase), subject: np('SECOND_PERSON'), imperative: true, ...(register ? { imperativeRegister: register } : {}) });
 
-  test.fails('the definite object leads "nicht" and the adverb', () => {
+  test('the definite object leads "nicht" and the adverb', () => {
     expect(say(eatNot(), 'de')).toBe('der Kater frisst die Maus nicht schnell.'); // now: "frisst nicht schnell die Maus"
     expect(say(eatNot({ modifier: 'ALWAYS' }), 'de')).toBe('der Kater frisst die Maus nicht immer.');
     expect(say(eatNot({ modifier: 'SUDDENLY', tense: 'past', modals: ['CAN'] }), 'de')).toBe('der Kater konnte die Maus nicht plötzlich fressen.');
@@ -1242,5 +1300,45 @@ describe('known bugs: German "nicht" and an adverb in front of a definite object
     }), 'RUN'), 'de')).toBe('der Hund, der die Maus nicht schnell frisst, läuft.');
     expect(say(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { negative: true, modifier: 'UP' } }), 'de'))
       .toBe('der Kater verschiebt das Buch nicht nach oben.');
+  });
+
+  // Which determiners move: a quantifier stays behind "nicht", because carrying it across the
+  // negation would change its scope, and a coordination mixing a known and a quantified conjunct
+  // stays whole behind it. The positive clause keeps the adverb ahead of the object either way.
+  test('a quantified object, a mixed coordination and the positive clause stay as they are', () => {
+    expect(say(eatNot({}, np('MOUSE', { number: 'plural', definiteness: 'all' })), 'de')).toBe('der Kater frisst nicht schnell alle Mäuse.');
+    expect(say(eatNot({}, np('MOUSE', { number: 'plural', definiteness: 'some' })), 'de')).toBe('der Kater frisst nicht schnell einige Mäuse.');
+    expect(say(eatNot({}, np('MOUSE', { number: 'plural', definiteness: 'many' })), 'de')).toBe('der Kater frisst nicht schnell viele Mäuse.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'some' })], conjunction: 'and' },
+      verbPhrase: { negative: true, modifier: 'FAST' },
+    }), 'de')).toBe('der Kater frisst nicht schnell die Maus und etwas Essen.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'FAST', modals: ['CAN'] } }), 'de'))
+      .toBe('der Kater kann schnell die Maus fressen.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'FAST' } }), imperative: true }, 'de'))
+      .toBe('iss schnell die Maus.');
+  });
+
+  // What travels with the object and what does not: a coordination of known conjuncts moves whole,
+  // "that" is as known as "this", and the complements stay behind "nicht" where A159 put them. A
+  // passive's by-phrase borrows the object's slot but is no object, so it keeps its place; the
+  // prospective's "nicht" scopes over "im Begriff" rather than the adverb slot, so nothing moves
+  // there either (A146).
+  test('a known coordination moves whole; the complements, the passive and the prospective do not', () => {
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: { conjuncts: [np('MOUSE'), np('FOOD')], conjunction: 'and' }, verbPhrase: { negative: true, modifier: 'FAST' },
+    }), 'de')).toBe('der Kater frisst die Maus und das Essen nicht schnell.');
+    expect(say(eatNot({}, np('MOUSE', { definiteness: 'that' })), 'de')).toBe('der Kater frisst jene Maus nicht schnell.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: np('MOUSE'), verbPhrase: { negative: true, modifier: 'FAST' }, complements: { locative: { phrase: np('HOUSE') } },
+    }), 'de')).toBe('der Kater frisst die Maus nicht schnell im Haus.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: np('FOOD'), verbPhrase: { voice: 'passive', negative: true, modifier: 'FAST' },
+    }), 'de')).toBe('das Essen wird nicht schnell vom Kater gefressen.');
+    expect(say(eatNot({ aspect: 'prospective' }), 'de')).toBe('der Kater ist nicht im Begriff, schnell die Maus zu fressen.');
+    // The command's direction adverb (A142) keeps the object ahead of it, as it already did.
+    expect(say({
+      ...clause(np('SECOND_PERSON'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { negative: true, modifier: 'UP' } }), imperative: true,
+    }, 'de')).toBe('verschieb das Buch nicht nach oben.');
   });
 });

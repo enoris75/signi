@@ -614,7 +614,7 @@ describe('known bugs: a determiner on a proper name', () => {
     np(concept, { definiteness, ...extra });
   const big = (concept: string, definiteness: Definiteness) => name(concept, definiteness, { adjectives: ['BIG'] });
 
-  test.fails('German declines the adjective after the article the name takes', () => {
+  test('German declines the adjective after the article the name takes', () => {
     expect(say(clause(big('ASIA', 'many'), 'BURN'), 'de')).toBe('das große Asien brennt.'); // now: "das großes Asien"
     expect(say(clause(np('CAT'), 'SEE', { directObject: big('EUROPE', 'indefinite') }), 'de')).toBe('der Kater sieht das große Europa.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: big('EUROPE', 'bare') }), 'de')).toBe('der Kater sieht das große Europa.');
@@ -632,7 +632,7 @@ describe('known bugs: a determiner on a proper name', () => {
     }), 'RUN'), 'de')).toBe('die Frau, die das weniger schöne Asien nicht lädt, läuft.');
   });
 
-  test.fails('Spanish contracts the article of an articled name whatever determiner was picked', () => {
+  test('Spanish contracts the article of an articled name whatever determiner was picked', () => {
     expect(say(clause(np('CAT'), 'SEND', { directObject: np('BOOK'), complements: { terminus: { phrase: big('ASIA', 'many') } } }), 'es'))
       .toBe('el gato envía el libro al Asia grande.'); // now: "a el Asia grande"
     expect(say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: big('ASIA', 'indefinite') } } }), 'es'))
@@ -641,7 +641,7 @@ describe('known bugs: a determiner on a proper name', () => {
       .toBe('el gato viene del África grande.'); // now: "de el África grande"
   });
 
-  test.fails('Japanese leaves the quantifier off a proper name', () => {
+  test('Japanese leaves the quantifier off a proper name', () => {
     for (const d of ['many', 'few', 'some', 'all'] as const) {
       expect(say(clause(np('CAT'), 'SEE', { directObject: name('EUROPE', d) }), 'ja')).toBe('猫はヨーロッパを見ます。'); // now: 多くの / 少しの / いくつかの / すべての
     }
@@ -650,7 +650,7 @@ describe('known bugs: a determiner on a proper name', () => {
       .toBe('猫は大きいアフリカから来ます。');
   });
 
-  test.fails('a `no` on a proper name does not negate the clause', () => {
+  test('a `no` on a proper name does not negate the clause', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: name('EUROPE', 'no') }))).toMatchObject({
       it: "il gatto vede l'Europa.", // now: "il gatto non vede l'Europa."
       fr: "le chat voit l'Europe.", // now: "le chat ne voit l'Europe."
@@ -690,6 +690,38 @@ describe('known bugs: a determiner on a proper name', () => {
       it: 'il gatto non vede nessun topo.', fr: 'le chat ne voit aucune souris.', ja: '猫はどのネズミも見ません。',
     });
   });
+
+  // Japanese drops この / その on a name too, as the other six languages already drop "this": the
+  // translator resolves every determiner on a `proper` head, with no per-language exception. A common
+  // noun keeps its demonstrative.
+  test('Japanese leaves a demonstrative off a proper name and keeps it on a common noun', () => {
+    for (const d of ['this', 'that'] as const) {
+      expect(say(clause(np('CAT'), 'SEE', { directObject: name('EUROPE', d) }), 'ja')).toBe('猫はヨーロッパを見ます。');
+    }
+    expect(say(clause(np('CAT'), 'SEE', { directObject: name('MOUSE', 'this') }), 'ja')).toBe('猫はこのネズミを見ます。');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: name('MOUSE', 'that') }), 'ja')).toBe('猫はそのネズミを見ます。');
+  });
+
+  // Whatever determiner is picked, all seven languages render the name exactly as its default does:
+  // the article the language fixes, and nothing else.
+  test('every determiner on a name renders as the default does, in all seven languages', () => {
+    const plain = sayAll(clause(np('CAT'), 'SEE', { directObject: np('EUROPE') }));
+    for (const d of ['indefinite', 'bare', 'many', 'few', 'some', 'all', 'this', 'that', 'no'] as const) {
+      expect(sayAll(clause(np('CAT'), 'SEE', { directObject: name('EUROPE', d) }))).toEqual(plain);
+    }
+    expect(plain).toMatchObject({
+      en: 'the cat sees Europe.', de: 'der Kater sieht Europa.', it: "il gatto vede l'Europa.",
+      fr: "le chat voit l'Europe.", es: 'el gato ve Europa.', pt: 'o gato vê a Europa.', ja: '猫はヨーロッパを見ます。',
+    });
+    expect(sayAll(clause(big('ASIA', 'many'), 'BURN'))).toMatchObject({
+      en: 'big Asia burns.', de: 'das große Asien brennt.', it: 'la grande Asia brucia.',
+      fr: 'la grande Asie brûle.', es: 'el Asia grande arde.', pt: 'a Ásia grande arde.', ja: '大きいアジアは燃えます。',
+    });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: big('EUROPE', 'all') }), 'de')).toBe('der Kater sieht das große Europa.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: name('AFRICA', 'some') } } }), 'pt'))
+      .toBe('o gato vem da África.');
+    expect(say(clause(np('BOOK', { possessor: name('AFRICA', 'many') }), 'BURN'), 'es')).toBe('el libro de África arde.');
+  });
 });
 
 // A183. An English superlative is definite: "the biggest dog", never "biggest dog" (A25, A175). On a
@@ -702,7 +734,7 @@ describe('known bugs: an English superlative on a proper name', () => {
   const most = (concept: string, adjective = 'BIG', extra: Partial<NounPhrase> = {}) =>
     np(concept, { adjectives: [adjective], adjectiveDegrees: ['most'], ...extra });
 
-  test.fails('English gives a superlative on a name its "the"', () => {
+  test('English gives a superlative on a name its "the"', () => {
     expect(say(clause(most('EUROPE'), 'BURN'), 'en')).toBe('the biggest Europe burns.'); // now: "biggest Europe burns."
     expect(say(clause(np('CAT'), 'SEE', { directObject: most('EUROPE') }), 'en')).toBe('the cat sees the biggest Europe.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('ASIA', { adjectives: ['BEAUTIFUL'], adjectiveDegrees: ['least'] }) }), 'en'))
@@ -732,5 +764,32 @@ describe('known bugs: an English superlative on a proper name', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: most('EUROPE') }))).toMatchObject({
       de: 'der Kater sieht das größte Europa.', it: "il gatto vede l'Europa più grande.",
     });
+  });
+
+  // Whatever determiner the plan picked, the superlative name reads the same: the name drops it
+  // (A180) and the superlative puts "the" back.
+  test('every determiner picked on a superlative name gives the same "the"', () => {
+    for (const definiteness of ['definite', 'indefinite', 'bare', 'this', 'that', 'no', 'some', 'many', 'few', 'all'] as const) {
+      expect(say(clause(np('CAT'), 'SEE', { directObject: most('EUROPE', 'BIG', { definiteness }) }), 'en'))
+        .toBe('the cat sees the biggest Europe.');
+    }
+  });
+
+  // The remaining places a name can stand, and the two degrees that are not superlatives.
+  test('the article reaches a name inside a complement, a relative clause and a possessor chain', () => {
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('AFRICA') } } }), 'en'))
+      .toBe('the cat comes from the biggest Africa.');
+    expect(say(clause(np('WOMAN', {
+      relative: { verbPhrase: { verb: 'SEE' }, directObject: most('ASIA', 'BEAUTIFUL') },
+    }), 'RUN'), 'en')).toBe('the woman who sees the most beautiful Asia runs.');
+    expect(say(clause(np('BOOK', { possessor: np('CAT', { possessor: most('EUROPE') }) }), 'BURN'), 'en'))
+      .toBe("the biggest Europe's cat's book burns.");
+    expect(say(clause(most('EUROPE'), 'SEE', { directObject: most('ASIA', 'SHARP') }), 'en'))
+      .toBe('the biggest Europe sees the sharpest Asia.');
+    // `equally` and `less` are not superlatives, so the name stays bare.
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('EUROPE', { adjectives: ['BIG'], adjectiveDegrees: ['equally'] }) }), 'en'))
+      .toBe('the cat sees equally big Europe.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('EUROPE', { adjectives: ['BIG'], adjectiveDegrees: ['less'] }) }), 'en'))
+      .toBe('the cat sees less big Europe.');
   });
 });

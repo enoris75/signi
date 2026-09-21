@@ -9,16 +9,17 @@ import type { NichtSlots } from './de.types.js';
  * - before the prospective's "im Begriff", which it scopes over as a whole ("ist nicht im Begriff zu
  *   essen", never "im Begriff nicht zu essen");
  * - before a Mittelfeld adverb, whoever it belongs to ("isst nicht immer", "iss nicht schnell",
- *   "nicht immer essen");
+ *   "nicht immer essen") — a slot the clause builder splices *behind* a known object, which keeps
+ *   the place it holds without the adverb ("isst die Maus nicht immer", A191);
  * - before the complements, which belong to the predicate and so stand behind "nicht": a predicate
  *   complement ("ist nicht müde", "nicht müde sein") and a prepositional one alike ("geht nicht
  *   zum Markt", "ist nicht im Haus" — A159);
  * - otherwise after the objects ("isst die Maus nicht", "die Maus nicht essen"), which is where a
  *   bare-dative recipient stays too ("gibt dem Hund das Buch nicht").
  *
- * `negate` is the caller's decision that "nicht" is needed at all (a negative adverb or a "kein"
- * already negates); `complements` is its decision that there is such a constituent to lead (see
- * `hasPrepositionalComplement`). This only places it.
+ * `negate` is the caller's decision that "nicht" is needed at all (a negative adverb already negates,
+ * and an indefinite nominal absorbs it as "kein" — A182); `complements` is its decision that there is
+ * such a constituent to lead (see `hasPrepositionalComplement`). This only places it.
  */
 export function nichtSlots(
   negate: boolean,

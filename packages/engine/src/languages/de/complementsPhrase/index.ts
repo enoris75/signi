@@ -1,1 +1,1 @@
-export { complementsPhrase } from './complementsPhrase.js';
+export { complementsParts, complementsPhrase } from './complementsPhrase.js';

@@ -3,7 +3,7 @@
 _(split out of [C05](C05-non-distinguishing-genera.md) on 2026-09-21. C05 had
 every continent on the literal because "a continent" is the same for all of them. A
 **superlative** is not: only one continent is the biggest. **Done 2026-09-21**, both as planned; the
-Portuguese word order is filed as bug [A178](../../bugs/A-must-fix/A178-portuguese-suppletive-superlative-position.md).
+Portuguese word order is filed as bug [A178](../../bugs/fixed/A178-portuguese-suppletive-superlative-position.md).
 See [Done](#done-2026-09-21).)_
 
 ## Plan
@@ -37,7 +37,7 @@ SMALL.
 superlatives *maior* and *menor* normally stand before the noun: *o maior continente*. After it,
 *o continente maior* leans toward the comparative ("the bigger continent"). The defect is not in
 this plan. Every suppletive superlative does it, in any sentence: *o gato melhor*, *a casa menor*,
-*o gato vê o cão maior*. It is [A178](../../bugs/A-must-fix/A178-portuguese-suppletive-superlative-position.md),
+*o gato vê o cão maior*. It is [A178](../../bugs/fixed/A178-portuguese-suppletive-superlative-position.md),
 pinned in `adjectives.test.ts`, and a trial fix renders *o maior continente* / *o menor
 continente*. The definitions pick that up with no change here.
 
@@ -75,8 +75,10 @@ on their seed blocks in [nouns.ts](../../../packages/backend/src/concepts/nouns.
 
 What landed differently from the plan:
 
-1. **Portuguese ships in the marked order**, *o continente maior* / *menor*, and the order is filed
-   as [A178](../../bugs/A-must-fix/A178-portuguese-suppletive-superlative-position.md). Checked
+1. **Portuguese shipped in the marked order**, *o continente maior* / *menor*, and the order was filed
+   as [A178](../../bugs/fixed/A178-portuguese-suppletive-superlative-position.md), **fixed on
+   2026-09-21**: these two now render *o maior continente* / *o menor continente*, with no seed edit,
+   exactly as this note predicted. Checked
    first: it is not specific to definitions (*the best cat* → *o gato melhor*), and no bug about it
    existed. A6 had chosen the postnominal place for every compared adjective, which is right for
    the comparative only. A178's `test.fails` includes the two continent plans, so fixing it moves

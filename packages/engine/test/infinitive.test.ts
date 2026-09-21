@@ -196,13 +196,15 @@ describe('known bugs: German "nicht" in the infinitive', () => {
     sayAll({ ...clause(np('GENERIC_PERSON'), verb, { verbPhrase, complements: { predicative: { phrase } } }), infinitive: true }).de;
 
   // A manner adverb takes the same slot as a frequency one; an adverb leads a predicate complement
-  // too ("nicht immer müde sein"); BECOME and SEEM's predicate take the "nicht" of BE's.
+  // too ("nicht immer müde sein"); BECOME and SEEM's predicate take the "nicht" of BE's. A definite
+  // object stands ahead of the whole group (A191, ruled over A49 on 2026-09-21).
   test('German puts "nicht" before every adverb and every predicate complement', () => {
     expect(sayAll(infinitive({}, { negative: true, modifier: 'FAST' })).de).toBe('nicht schnell essen.');
-    expect(sayAll(infinitive({ directObject: np('FOOD') }, { negative: true, modifier: 'ALWAYS' })).de).toBe('nicht immer das Essen essen.');
+    expect(sayAll(infinitive({ directObject: np('FOOD') }, { negative: true, modifier: 'ALWAYS' })).de).toBe('das Essen nicht immer essen.');
     expect(predicate('BE', np('TIRED'), { negative: true, modifier: 'ALWAYS' })).toBe('nicht immer müde sein.');
     expect(predicate('BECOME', np('TIRED'), { negative: true })).toBe('nicht müde werden.');
-    expect(predicate('SEEM', np('LEGEND', { definiteness: 'indefinite' }), { negative: true })).toBe('nicht eine Legende zu sein scheinen.');
+    // An indefinite predicate nominal spells the "nicht" into "kein" instead of taking it in front (A182).
+    expect(predicate('SEEM', np('LEGEND', { definiteness: 'indefinite' }), { negative: true })).toBe('keine Legende zu sein scheinen.');
   });
 
   // Regression guards: "nicht" still trails the objects with no adverb or predicate, and "nie" still

@@ -372,8 +372,9 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
   });
 
   // An adverb and a predicate complement together: "nicht" leads the adverb, as in "ist nicht immer müde".
+  // A definite object stands ahead of that group rather than behind it (A191, ruled over A49 on 2026-09-21).
   test('German puts "nicht" before an adverb that precedes the object or the predicate complement', () => {
-    expect(eatNot('ALWAYS', { directObject: np('MOUSE') })).toBe('iss nicht immer die Maus.');
+    expect(eatNot('ALWAYS', { directObject: np('MOUSE') })).toBe('iss die Maus nicht immer.');
     expect(beNot(np('SECOND_PERSON'), 'ALWAYS')).toBe('sei nicht immer müde.');
     expect(beNot(np('SECOND_PERSON'), 'ALWAYS', { imperativeRegister: 'instruction' })).toBe('nicht immer müde sein.');
     expect(eatNot('FAST', { imperativeRegister: 'instruction' })).toBe('nicht schnell essen.');

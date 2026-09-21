@@ -35,7 +35,8 @@ describe('germanEngine', () => {
     expect(joined('and')).toBe('der Kater isst, und der Mann geht');
     expect(joined('or')).toBe('der Kater isst, oder der Mann geht');
     expect(joined('but')).toBe('der Kater isst, aber der Mann geht');
-    expect(joined('that_is')).toBe('der Kater isst, das heißt der Mann geht');
+    // A192: parenthetical, so it takes a comma after it too — and still leaves the clause in V2.
+    expect(joined('that_is')).toBe('der Kater isst, das heißt, der Mann geht');
   });
 
   test('also and und dann claim the front field and invert the second clause', () => {

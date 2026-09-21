@@ -60,4 +60,19 @@ describe('nounPhrase', () => {
     expect(nounPhrase({ ...CAO, definiteness: 'indefinite' }, undefined, 'o seu')).toBe('o seu cão');
     expect(nounPhrase({ ...CASA, number: 'plural' }, { pre: '', post: 'velhas' }, 'as minhas')).toBe('as minhas casas velhas');
   });
+
+  // A187: a determiner of the head's own keeps its slot, article and all, and the possessive goes
+  // behind the noun without the article it arrived with.
+  test('a demonstrative or a quantifier keeps its slot and the possessive follows the noun', () => {
+    expect(nounPhrase({ ...CAO, definiteness: 'this' }, undefined, 'o seu')).toBe('este cão seu');
+    expect(nounPhrase({ ...CASA, definiteness: 'that' }, undefined, 'a minha')).toBe('essa casa minha');
+    expect(nounPhrase({ ...CAO, number: 'plural', definiteness: 'some' }, undefined, 'os seus')).toBe('alguns cães seus');
+    expect(nounPhrase({ ...CASA, definiteness: 'no' }, undefined, 'a nossa')).toBe('nenhuma casa nossa');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'many' }, { pre: '', post: 'velhas' }, 'as minhas')).toBe('muitas casas velhas minhas');
+  });
+
+  test('after "todos" the possessive keeps its article in front of the noun', () => {
+    expect(nounPhrase({ ...CAO, number: 'plural', definiteness: 'all' }, undefined, 'os seus')).toBe('todos os seus cães');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'all' }, undefined, 'as minhas')).toBe('todas as minhas casas');
+  });
 });

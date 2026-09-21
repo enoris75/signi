@@ -79,7 +79,7 @@ German `das weniger schönes Asien`, Japanese `多くのそれほど美しくな
 Verified by applying it to a throwaway copy of HEAD. It renders every **Want** above and leaves the
 engine suite green.
 
-Resolve the determiner once, in the translator, the way [A175](../fixed/A175-superlative-under-an-indefinite-determiner.md)
+Resolve the determiner once, in the translator, the way [A175](A175-superlative-under-an-indefinite-determiner.md)
 resolves a superlative's. In
 [`resolveNounPhrase`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts), a
 `proper` head gets `definite` whatever the plan picked, before `definiteness` is written to its
@@ -108,3 +108,42 @@ engine file changes, and no passing test moves.
 | | |
 |---|---|
 | **Test** | `nounPhrase.test.ts` → *known bugs: a determiner on a proper name* (4 `test.fails`, plus a regression test for the determiners, possessive, languages and common nouns already right) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+- **The translator.** [`resolveNounPhrase`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts)
+  resolves a `proper` head's determiner to `definite` before `definiteness` is written to its forms,
+  ahead of the superlative rule ([A175](A175-superlative-under-an-indefinite-determiner.md)) and the
+  `OTHER` rule. One rule for all seven languages: the name now carries only what its own article
+  builder already assumed, so German declines weak after the article (`das große Asien`), Spanish
+  contracts (`al Asia grande`, `del África grande`), Japanese has no quantifier to spell, and no `no`
+  reaches a concord check. No per-language file changed.
+- **The Japanese demonstrative.** The rule drops `この` / `その` on a name too, as the other six
+  languages already drop `this`. A common noun keeps its demonstrative (`このネズミ`).
+
+**Tests guarding it.** `packages/engine/test/nounPhrase.test.ts` → *known bugs: a determiner on a
+proper name*:
+
+- the four former `test.fails`, now plain passing tests, with their assertions unchanged: German's
+  adjective declension in seven positions plus the random phrase's relative clause; Spanish's `a` /
+  `de` + `el` contraction; Japanese's quantifier; and a `no` that no longer negates the clause in
+  Italian, French, Spanish, Portuguese and Japanese;
+- the existing regression test (the default determiner, a possessive on the name, English and German
+  under a `no`, and a common noun keeping its quantifier and concord);
+- added: Japanese drops a demonstrative on a name and keeps it on a common noun;
+- added: every determiner on a name renders exactly as the default does, in all seven languages, with
+  the quantified name spelled out across the seven, German `all`, Portuguese under a preposition and
+  a Spanish genitive possessor.
+
+`packages/engine/src/translator/functions/resolveNounPhrase.test.ts` checks the rule directly: a
+`proper` head resolves to `definite` under each of the nine other determiners in every language, a
+quantifier no longer forces its plural surface, and a common noun keeps the determiner it was given.
+
+The determiners, possessive and languages already right did not move, and no passing test changed
+its expectation.
+
+**Out of scope.** The frontend still offers the determiner control on a name, because `/api/concepts`
+does not carry `proper`. That is a separate UI question; the engine now ignores a determiner that
+arrives, which is what this fix does.

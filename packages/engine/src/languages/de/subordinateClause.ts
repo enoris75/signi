@@ -7,6 +7,7 @@ import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNega
 import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
+import { complementsWithNicht } from './complementsWithNicht.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { meansClause } from './meansClause.js';
@@ -131,7 +132,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // The adverbs already follow the objects here, so a direction adverb only has to leave the
   // prospective group's pre-object slot (see `adverbSlots`).
   const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
-  const complementsText = [prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
+  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements);
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads
@@ -147,7 +148,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
       directionAdverb: adverb.afterObject, complements: complementsText,
     }, true)
-    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforeComplements, complementsText, nicht.after, ...verbFinalCluster(complex)];
+    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');

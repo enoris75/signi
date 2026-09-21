@@ -4,7 +4,7 @@
 
 A Japanese locative takes `で`, the place where something happens (`家で走ります`, `家でネズミを食べます`).
 A few verbs take `に` instead, because the place is where something is or ends up, not where an act
-goes on. The existential いる / ある is one ([A109](../fixed/A109-japanese-be-locative-existential.md)).
+goes on. The existential いる / ある is one ([A109](A109-japanese-be-locative-existential.md)).
 住む, "live, reside", is the textbook other one: `東京に住む`, never `東京で住む`. 閉じ込める, "shut in",
 names where the confined thing ends up: `犬を家に閉じ込める`. With `で` it says where the act of
 shutting in took place, and leaves out what it was shut in.
@@ -60,7 +60,7 @@ BE.
 - **The flag's name and reach.** `existential` also means "the verb is いる / ある" in the comment on
   `complementSegs`. Rename the parameter to what it now decides (the locative's particle), or pass the
   particle itself.
-- **`through`.** The trial's `に` wins over [A176](../fixed/A176-japanese-locative-through.md)'s
+- **`through`.** The trial's `に` wins over [A176](A176-japanese-locative-through.md)'s
   `家を通って`, as BE's existential already does: "lives through the house" renders `猫は家に住みます。`.
   Not pinned.
 - **HIDE.** 隠す puts the hidden thing somewhere, and `家に本を隠す` is the usual phrasing. But `家で本を
@@ -70,3 +70,41 @@ BE.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: Japanese 住む and 閉じ込める mark their place with に* (1 `test.fails`, plus a regression test for the other six languages, the verbs of action and BE) |
+
+## Resolved
+
+2026-09-21. Took the shape above. The ja lexemes of LIVE
+([`intransitive.ts`](../../../packages/backend/src/concepts/verbs/intransitive.ts)) and CONFINE
+([`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)) now seed
+`locative_particle: 'に'`, the way `seeming` and `state_verb` sit on a lexeme.
+
+**The flag's name.** `complementSegs` takes the particle itself in place of the old `existential`
+boolean: `locativeParticle?: string`, "the particle this clause's place takes, で unless the caller
+says otherwise". `predicateSegs` computes it once —
+`existential ? 'に' : verbPhrase.verb.forms['locative_particle']` — off the verb actually rendered, so
+the existential's に (A109) and a lexeme's arrive by the same door and a passive carries the flag
+with it. The three `complementSegs(adjunctComplements, …)` calls pass it; the object complement and
+the copula's preposed adjuncts pass nothing, as before. The relational nouns (`家の下に`), the `no`
+circumfix (`どの家にも`), a coordinated place (`家か市場に`) and the relative clause all compose on it
+unchanged, because only the particle at the end of the phrase differs.
+
+**`through`.** The lexeme's に wins over [A176](A176-japanese-locative-through.md)'s `家を通って`, as
+BE's existential already did: "lives through the house" renders `猫は家に住みます。`. Pinned.
+
+**HIDE.** Left with で, as the bug file decided: `家で本を隠す` ("hides the book while at home") is also
+Japanese, and `locative.test.ts` pins で for HIDE in *takes its locative the same way*. A regression
+case in the A190 block now says so beside the two verbs that changed.
+
+- **Tests:** [`packages/engine/test/complements/locative.test.ts`](../../../packages/engine/test/complements/locative.test.ts)
+  → *known bugs: Japanese 住む and 閉じ込める mark their place with に*. The pinning `test.fails` is now a
+  passing `test`, with its assertions unchanged (LIVE in five forms, two relational places, a `no`
+  place, a command, a relative clause, CONFINE present and past, and the random phrase). New cases:
+  - the particle marks the place alone — a coordinated place takes it once, a cause keeps its
+    `のために`, a relational place takes it after `の下`;
+  - it wins over A176's `を通って`, for LIVE and for CONFINE;
+  - CONFINE through the rest of the clause's forms: a `no` place, a modal, a command, a relative
+    clause on the object, and a `たら` protasis;
+  - regression: CONFINE in the other six languages, and HIDE keeping its `で`.
+- **Unit test:** [`ja/complementSegs.test.ts`](../../../packages/engine/src/languages/ja/complementSegs.test.ts)
+  now gives the particle by name: a plain place, a relational one, a `no` group, a coordinated group,
+  a cause beside it and a route, which keeps its own を.

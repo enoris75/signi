@@ -615,7 +615,7 @@ describe('known bugs: English drops the possessed head\'s determiner', () => {
   const bookOf = (definiteness: NounPhrase['definiteness'], extra: Partial<NounPhrase> = {}) =>
     say(clause(np('BOOK', { definiteness, possessor: np('CAT'), ...extra }), 'BURN'), 'en');
 
-  test.fails('English keeps a demonstrative, a quantifier or `no` on the possessed head', () => {
+  test('English keeps a demonstrative, a quantifier or `no` on the possessed head', () => {
     expect(bookOf('this')).toBe('this book of the cat burns.'); // now: "the cat's book burns."
     expect(bookOf('that')).toBe('that book of the cat burns.');
     expect(bookOf('some')).toBe('some books of the cat burn.'); // now: "the cat's books burn."
@@ -654,6 +654,34 @@ describe('known bugs: English drops the possessed head\'s determiner', () => {
       it: 'nessun libro del gatto brucia.', de: 'kein Buch des Katers brennt.',
     });
   });
+
+  // The fix generalises: the NPI `any` a negated clause switches a `no` object to, the mass
+  // quantifiers, a plural head's demonstrative, and `all` stacking over a whole possessor chain.
+  test('the NPI, the mass quantifiers, a plural head and `all` over a chain', () => {
+    expect(say(clause(np('DOG', { definiteness: 'no' }), 'SEE', { directObject: np('BOOK', { definiteness: 'no', possessor: np('CAT') }) }), 'en'))
+      .toBe('no dog sees any book of the cat.');
+    expect(say(clause(np('WATER', { definiteness: 'many', possessor: np('CAT') }), 'BURN'), 'en')).toBe('much water of the cat burns.');
+    expect(say(clause(np('WATER', { definiteness: 'few', possessor: np('CAT') }), 'BURN'), 'en')).toBe('little water of the cat burns.');
+    expect(bookOf('this', { number: 'plural' })).toBe('these books of the cat burn.');
+    expect(bookOf('all', { adjectives: ['OLD'] })).toBe("all the cat's old books burn.");
+    expect(say(clause(np('BOOK', { definiteness: 'all', possessor: np('FATHER', { possessor: np('CAT') }) }), 'BURN'), 'en'))
+      .toBe("all the cat's father's books burn.");
+    // `all` still goes to the of-genitive when the possessor cannot take the clitic at all.
+    expect(say(clause(np('BOOK', {
+      definiteness: 'all', possessor: np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE') } }),
+    }), 'BURN'), 'en')).toBe('all books of the cat that eats the mouse burn.');
+    // A possessor that kept its own determiner now ends in an of-phrase, so it loses the clitic too.
+    expect(say(clause(np('BOOK', { possessor: np('FATHER', { definiteness: 'some', possessor: np('CAT') }) }), 'BURN'), 'en'))
+      .toBe('the book of some fathers of the cat burns.');
+  });
+
+  // The heads the Saxon genitive keeps: `indefinite` and `bare`, a decision taken with
+  // `en/nounPhrase.test.ts`'s "her big book", and a proper name, which has no article to lose.
+  test('an indefinite, bare or proper head stays on the Saxon genitive', () => {
+    expect(bookOf('indefinite')).toBe("the cat's book burns.");
+    expect(bookOf('bare')).toBe("the cat's book burns.");
+    expect(say(clause(np('EUROPE', { definiteness: 'this', possessor: np('CAT') }), 'BURN'), 'en')).toBe("the cat's Europe burns.");
+  });
 });
 
 // A185. Japanese puts the possessed head's determiner in front of its possessor: "この猫の本" for
@@ -668,7 +696,7 @@ describe('known bugs: Japanese puts the head\'s determiner before its possessor'
     say(clause(np('BOOK', { definiteness, possessor }), 'BURN'), 'ja');
   const hers = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
 
-  test.fails('Japanese puts the head\'s determiner after the possessor', () => {
+  test('Japanese puts the head\'s determiner after the possessor', () => {
     expect(bookOf('this')).toBe('猫のこの本は燃えます。'); // now: この猫の本は燃えます。
     expect(bookOf('that')).toBe('猫のその本は燃えます。');
     expect(bookOf('some')).toBe('猫のいくつかの本は燃えます。');
@@ -694,5 +722,21 @@ describe('known bugs: Japanese puts the head\'s determiner before its possessor'
     expect(say(clause(np('BOOK', { possessor: np('CAT', { definiteness: 'this' }) }), 'BURN'), 'ja')).toBe('この猫の本は燃えます。');
     expect(say(clause(np('BOOK', { definiteness: 'this' }), 'BURN'), 'ja')).toBe('この本は燃えます。');
     expect(say(clause(np('BOOK', { definiteness: 'no' }), 'BURN'), 'ja')).toBe('どの本も燃えません。');
+  });
+
+  // The fix generalises: every determiner lands behind the possessor's の, in front of the
+  // adjectives, at every depth of a possessor chain and in the object position too. `few` keeps its
+  // 少しの — the quantifier-and-counter choice is a separate matter, not this defect.
+  test('the determiner sits between the possessor and the adjectives, at every depth', () => {
+    expect(bookOf('few')).toBe('猫の少しの本は燃えます。');
+    expect(bookOf('indefinite')).toBe('猫の本は燃えます。'); // no prenominal word to place
+    expect(say(clause(np('BOOK', { definiteness: 'this', possessor: np('CAT'), adjectives: ['OLD', 'BIG'] }), 'BURN'), 'ja'))
+      .toBe('猫のこの古い大きい本は燃えます。');
+    // A possessor with a determiner of its own keeps it in front of *its* head, not of the phrase.
+    expect(say(clause(np('BOOK', { definiteness: 'this', possessor: np('FATHER', { definiteness: 'many', possessor: np('CAT') }) }), 'BURN'), 'ja'))
+      .toBe('猫の多くの父のこの本は燃えます。');
+    expect(bookOf('no', hers)).toBe('彼女のどの本も燃えません。');
+    expect(say(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { definiteness: 'all', possessor: np('CAT') }) }), 'ja'))
+      .toBe('犬は猫のすべての本を見ます。');
   });
 });

@@ -126,3 +126,58 @@ each language place the possessive:
 | | |
 |---|---|
 | **Test** | `possessivePronoun.test.ts` → *known bugs: a pronominal possessor drops the head's determiner* (1 `test.fails`, plus a regression test for the definite head, a kinship noun and a complement) |
+
+## Resolved
+
+**2026-09-21.** Every language keeps the head's determiner beside the possessive.
+
+[`possessive.ts`](../../../packages/engine/src/possessive.ts) names the shared rule,
+`KEPT_BESIDE_POSSESSIVE` — `this`, `that`, `some`, `many`, `few` and `no`, the determiners a
+possessive stands *beside* rather than replaces — and gains the words the new surfaces need:
+`possessiveEnIndependent` (mine/yours/his/hers/its/ours/theirs), `disjunctiveFr`
+(moi/toi/lui/elle/nous/vous/eux/elles), `dativePronounDe` (mir/dir/ihm/ihr/uns/euch/ihnen) and
+`possessiveEsStressed` (mío/tuyo/suyo…, keyed by the prenominal form `es/nounPhrase` is handed).
+`all` is deliberately outside the set: it prefixes the possessive rather than standing in for it, so
+each noun phrase adds the quantifier itself.
+
+- [`en/nounPhrase`](../../../packages/engine/src/languages/en/nounPhrase.ts) sends such a head down
+  the of-genitive A184 built, with the independent possessive: `this book of hers`, `no book of
+  hers`; `all her books` stacks. [`en/isPostModified`](../../../packages/engine/src/languages/en/isPostModified.ts)
+  counts the result as post-modified, so nothing puts `'s` after it.
+- [`it/itPossessedHeadForms`](../../../packages/engine/src/languages/it/itPossessedHeadForms.ts)
+  keeps those determiners — `all` included, since Italian stacks the quantifier *and* its article
+  with the possessive. `artFor`/`prepDet` then give `questo` / `alcuni` / `nessun` / `tutti i` and
+  `renderNP` puts the possessive after it, unchanged.
+- [`fr/renderNP`](../../../packages/engine/src/languages/fr/renderNP.ts) spells the head's own
+  determiner itself (the caller's head was built bare for the possessive) and trails `à` + the
+  disjunctive pronoun: `ce livre à elle`, `aucun livre à elle`, and `tous ses livres` after `all`.
+- [`de/nounPhrase`](../../../packages/engine/src/languages/de/nounPhrase.ts) keeps the determiner
+  and trails `von` + the dative pronoun (`dieses Buch von ihr`), with `alle ihre Bücher` after
+  `all`; [`de/possessedDeclension`](../../../packages/engine/src/languages/de/possessedDeclension.ts)
+  then declines the adjectives after that determiner rather than after the ein-word.
+- [`es/nounPhrase`](../../../packages/engine/src/languages/es/nounPhrase.ts) and
+  [`pt/nounPhrase`](../../../packages/engine/src/languages/pt/nounPhrase.ts) put the determiner back
+  in front and the possessive behind the noun — Spanish in its stressed form, Portuguese without the
+  article it arrived with: `este libro suyo`, `este livro seu`, `todos sus libros`,
+  `todos os seus livros`.
+
+The **Decisions for the fixer** were ruled on before the fix: the one-shape `à elle` / `von ihr` /
+`of hers` surface, not the partitive, and an `indefinite` head left on the plain possessive.
+
+**Not done — the other positions.** The subject, the direct object and a genitive possessor now
+carry the determiner in every language, and so does a complement in English, French, Italian and
+Japanese. A German, Spanish or Portuguese *complement* still drops it (`in meinem Haus` for "in this
+house of mine"): those builders read
+[`possessedHeadForms`](../../../packages/engine/src/functions/possessedHeadForms.ts) and place the
+possessive prenominally themselves, so keeping the determiner there stacked the two into
+`en esta mi casa` / `in keinem meinem Haus`. The shared function was therefore left as it was, and
+the three complement builders are untouched — worth a follow-up bug of its own.
+
+**Tests guarding it:** `packages/engine/test/possessivePronoun.test.ts` → *known bugs: a pronominal
+possessor drops the head's determiner* — the former `test.fails` is now a plain test, beside its
+regression test and three new ones: `that` / `many` / `few` and a 3rd-plural antecedent, the
+adjectives around each new shape (with and without `all`), and the complement and possessor
+positions in the languages that now carry it. Unit level: `possessive.test.ts` (the shared set and
+all four new tables), `en/nounPhrase.test.ts`, `en/isPostModified.test.ts`,
+`it/itPossessedHeadForms.test.ts`, `fr/renderNP.test.ts`, `de/nounPhrase.test.ts`,
+`de/possessedDeclension.test.ts`, `es/nounPhrase.test.ts` and `pt/nounPhrase.test.ts`.

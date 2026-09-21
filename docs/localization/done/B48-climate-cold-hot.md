@@ -107,7 +107,7 @@ What landed differently from the plan:
 1. **Nothing in the plans.** Both words took the proposed forms and flags, and both definitions
    rendered exactly as the ticket's wrapper probe had them.
 2. **Checked, and not A178.** ASIA and OCEANIA ship in the marked Portuguese order
-   ([A178](../../bugs/A-must-fix/A178-portuguese-suppletive-superlative-position.md): *o continente
+   ([A178](../../bugs/fixed/A178-portuguese-suppletive-superlative-position.md): *o continente
    maior*), because their superlatives are suppletive. *Mais frio* and *mais quente* are the regular
    superlative, which Portuguese puts after the noun, so these two read right as they are.
 

@@ -49,8 +49,12 @@ describe('buildSatellites', () => {
       directObject: CAT,
     };
 
+    // The voice is not in the finite slot: only a command forces the active, so an infinitive over a
+    // patient still offers the control (A179).
     it('withdraws tense, aspect and every modal', () => {
-      expect(offered(selection, 'verb')).toEqual(['verbNegative']);
+      expect(offered(selection, 'verb')).toEqual(
+        mood === 'infinitive' ? ['verbNegative', 'verbVoice'] : ['verbNegative'],
+      );
       expect(satellite(selection, 'verbTense').shown).toBe(false);
     });
 

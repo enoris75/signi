@@ -9,7 +9,7 @@ French repeats the article after the noun (`l'Europe la plus grande`), and that 
 only possible after a first one.
 
 A place name goes to the bare continent or land preposition (`in Europa`, `en Europe`, French source
-`d'Europe`) as long as it leads its phrase. [A169](../fixed/A169-adjective-on-a-place-name.md) brought
+`d'Europe`) as long as it leads its phrase. [A169](A169-adjective-on-a-place-name.md) brought
 the article back for a prenominal adjective. It left a postnominal one bare on purpose, as in region
 names (`in Asia lontana`, `en Asie centrale`). That rule also catches the superlative, which in these
 two languages always follows the noun:
@@ -65,3 +65,37 @@ pinned.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: a superlative on a place name after a bare preposition* (1 `test.fails`, plus a regression test for A169's cases, the Italian source, Spanish and German) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+[`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts) and
+[`fr/complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts) each gained
+a local `headForms(np)`, which wraps `itPossessedHeadForms(np)` / `possessedHeadForms(np, 'bare')` and
+adds `relativeSuperlative: '1'` when any of the phrase's adjectives is at `most` or `least`
+(`isRelativeSuperlative`, the same test the predicative superlative uses). `bareName` refuses a marked
+name, so the name takes its article back and `spatialHead` / `deDet` fuse the preposition with it, as
+they already did for a prenominal adjective. Every `renderNP` call that feeds `headFor` goes through
+`headForms` — one in Italian, three in French (the last, and the two on the pronoun-cause path).
+
+The mark is read by `bareName` alone, so nothing else moves: a relational locative was never bare
+(`sotto l'Europa più grande`), a common noun never was (`nella casa più grande`), and the name as a
+subject or a direct object never went through `complementsPhrase` at all.
+
+**The comparative** keeps [A169](A169-adjective-on-a-place-name.md)'s postnominal rule: `in Europa più
+grande` and `en Europe plus grande` stay bare, which is what "in a bigger Europe" wants.
+
+- **Tests:** [`packages/engine/test/complements/locative.test.ts`](../../../packages/engine/test/complements/locative.test.ts)
+  → *known bugs: a superlative on a place name after a bare preposition*. The pinning `test.fails` is
+  now a passing `test`, with its assertions unchanged (EUROPE in the locative and the direction, ASIA
+  at `least`, AFRICA, ITALY, and the French source). New cases:
+  - a country goes the same way — JAPAN in the locative and the direction, FRANCE, ANTARCTICA — and so
+    do the French source of a masculine land (`du Japon le plus grand`) and the `least` degree;
+  - regression: a relational place, a common noun, and the name as subject and as direct object.
+
+  The regression test for A169's positive and comparative, the Italian source, Spanish and German is
+  unchanged.
+- **Unit tests:** [`it/complementsPhrase.test.ts`](../../../packages/engine/src/languages/it/complementsPhrase.test.ts)
+  and [`fr/complementsPhrase.test.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.test.ts)
+  each check a name carrying `most` and `least` in the locative, the direction and (French) the source,
+  beside the comparative that stays bare.

@@ -1,7 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
-import { COORD_INVERTS, COORD_WORDS } from './de.consts.js';
+import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS } from './de.consts.js';
 import { deComparative } from './deComparative.js';
 import { deStem } from './deStem.js';
 import { deSuperlativeSuffix } from './deSuperlativeSuffix.js';
@@ -27,11 +27,14 @@ export const germanEngine: LanguageEngine = {
       ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${main}`
       : main;
     // Coordination: "<first clause>, <conjunction> <second clause>" — with the second clause
-    // inverted when the conjunction is an adverb that claims the front field.
+    // inverted when the conjunction is an adverb that claims the front field. A parenthetical
+    // connector takes a comma after it as well as before, since a whole clause follows it
+    // ("…, das heißt, der Hund springt"; A192).
     if (!phrase.coordination) return punctuate(sentence);
     const { conjunction, clause } = phrase.coordination;
+    const connector = `${COORD_WORDS[conjunction]}${PARENTHETICAL_CONNECTORS.has(conjunction) ? ',' : ''}`;
     return punctuate(
-      `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause, question || COORD_INVERTS[conjunction])}`,
+      `${sentence}, ${connector} ${renderClause(clause, question || COORD_INVERTS[conjunction])}`,
     );
   },
   // The determiner alone, for the menu that picks one. A German determiner is declined for case;

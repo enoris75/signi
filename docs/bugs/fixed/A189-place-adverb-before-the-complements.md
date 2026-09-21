@@ -8,7 +8,7 @@ adjunct. That is the slot [B41](../../localization/done/B41-ui-help-overlay.md) 
 ("after the object, where a locative complement stands"), and the one
 [`isDirectionAdverb`](../../../packages/engine/src/functions/isDirectionAdverb.ts) describes.
 
-It gets the direction adverb's slot instead. [A156](../fixed/A156-english-direction-adverb-after-complements.md)
+It gets the direction adverb's slot instead. [A156](./A156-english-direction-adverb-after-complements.md)
 put UP and DOWN, which are particles of the verb, at the head of the complements, and
 `isDirectionAdverb` answers for both subtypes. So a place adverb comes ahead of every complement,
 not just ahead of the cause. With a transitive verb and no complement it looks right (`eats the mouse
@@ -104,3 +104,37 @@ German is right as it stands.
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: an adverb of place before the complements* (1 `test.fails`, plus a regression test for an object and a cause, German and Japanese) |
+
+## Resolved
+
+Fixed 2026-09-21, as the shape above describes: the two subtypes no longer share a slot, and the
+place adverb takes the locative's.
+
+- **The split.** [`isDirectionAdverb`](../../../packages/engine/src/functions/isDirectionAdverb.ts)
+  now answers for `direction` alone, and the new
+  [`isPlaceAdverb`](../../../packages/engine/src/functions/isPlaceAdverb.ts) beside it answers for
+  `place`. German's [`adverbSlots`](../../../packages/engine/src/languages/de/adverbSlots.ts) reads
+  both, so its middle field is unchanged.
+- **The slot.** One shared helper,
+  [`complementsAroundAdverb`](../../../packages/engine/src/functions/complementsAroundAdverb.ts),
+  wraps each engine's own `complementsPhrase`: a direction adverb still leads the whole slot (A156),
+  a place adverb splits the complements at `locative` in `COMPLEMENT_RENDER_ORDER` and stands in the
+  gap, and any other adverb leaves the complements alone. `COMPLEMENT_RENDER_ORDER` itself does not
+  move — English and Romance want the predicate first.
+- **The five engines.** [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts),
+  [`it`](../../../packages/engine/src/languages/it/predicateText.ts),
+  [`fr`](../../../packages/engine/src/languages/fr/predicateText.ts),
+  [`es`](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) each call the
+  helper instead of prefixing the adverb, and keep the place adverb out of the trailing manner slot.
+  Spanish and Portuguese pass their agreed adverb surface, so the helper takes the text as an
+  argument.
+
+- **Tests:**
+  - New unit tests: `isPlaceAdverb.test.ts` and `complementsAroundAdverb.test.ts`;
+    `isDirectionAdverb.test.ts` now pins that a place adverb is *not* one.
+  - [`adverb.test.ts`](../../../packages/engine/test/adverb.test.ts) → *known bugs: an adverb of
+    place before the complements*: the pinning test is a plain `test` now, with a new case for the
+    locative and the motion path (`the cat runs from the house everywhere in the market.`), a
+    question, a command and a relative clause, in all five languages. The regression test gained the
+    German and Japanese locative (`der Kater läuft überall im Haus.`).

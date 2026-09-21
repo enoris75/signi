@@ -9,7 +9,7 @@ comparison, where Romance uses it the same way without touching the verb: `canta
 `chante comme personne`, `canta como nadie`, `canta como ninguém`. English and German already render
 it so (`the cat runs like no dog.`, `der Kater läuft wie kein Hund.`).
 
-[A33](../fixed/A33-romance-complement-negative-concord.md) made every `no` complement a postverbal
+[A33](A33-romance-complement-negative-concord.md) made every `no` complement a postverbal
 negative word that needs the preverbal negator.
 [`hasNegativeComplement`](../../../packages/engine/src/functions/hasNegativeComplement.ts) does not
 tell a comparison from the other complements, so the four Romance engines negate the verb. `il gatto
@@ -91,3 +91,41 @@ reads it too, and so does Japanese's `predicateSegs`, which is why the decisions
 | | |
 |---|---|
 | **Test** | `complements/manner.test.ts` → *known bugs: a `no` in a similative manner phrase* (1 `test.fails`, plus a regression test for English, German and the three other relations) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+[`hasNegativeComplement`](../../../packages/engine/src/functions/hasNegativeComplement.ts) now skips a
+`manner` conjunct whose head's `mannerRelation` is `similative` — or missing, which means the same —
+so a comparison's `no` is no longer one of the clause's negations. The four Romance `predicateText`s
+lose their negator with it (`il gatto corre come nessun cane`), and French, which used to stop at a
+bare `ne`, gets its `pas` back under a genuinely negated verb (`ne court pas comme aucun chien`). The
+measure, means and mode relations are untouched (`non corre a nessuna velocità`).
+
+**Japanese** keeps exactly what it rendered before: `predicateSegs` asks for the comparisons back
+through the new `countComparisons` option, because the `どの…も` circumfix a `no` argument renders with
+needs the clause-final `ない` to close. `猫はどの犬のようにも走ります。` would say "runs like every dog", so
+the trial's flip was no improvement. Japanese has no circumfix for "like no X" — a phrasing such as
+`どの犬とも違うように` ("unlike any dog") is still to be ruled on, and this bug does not settle it.
+
+**A second negation in English and German — both are kept,** on the user's ruling of 2026-09-21. A
+similative `no` is no longer a clause negation, so it no longer takes part in
+[A158](A158-negative-complement-not-collapsed.md)'s collapse: `the cat does not run like no dog.`,
+`der Kater läuft nicht wie kein Hund.`, `the cat never runs like no dog.`, `der Kater läuft nie wie
+kein Hund.`, `the cat eats no mouse like no dog.`, `der Kater frisst keine Maus wie kein Hund.` That
+is what the plan asks for; the old collapse read "like any dog" instead.
+
+- **Tests:** [`packages/engine/test/complements/manner.test.ts`](../../../packages/engine/test/complements/manner.test.ts)
+  → *known bugs: a `no` in a similative manner phrase*. The pinning `test.fails` is now a passing
+  `test`, with its assertions unchanged (the present, the past, a transitive clause, a relative
+  clause, and the random phrase). New cases:
+  - the ruling above: a clause that negates for its own reasons — the verb's `not`, a `NEVER`, a `no`
+    object — keeps both negations, in English, German and the four Romance languages;
+  - Japanese keeps its `どの…も` circumfix and its negated predicate, in the present, the past and with
+    a direct object.
+
+  The regression test for English, German and the measure, means and mode relations is unchanged.
+- **Unit test:** [`functions/hasNegativeComplement.test.ts`](../../../packages/engine/src/functions/hasNegativeComplement.test.ts)
+  checks a similative `no` (declared and defaulted), the three relations that still negate, a
+  comparison beside a negative locative, a coordinated manner group judged conjunct by conjunct, and
+  the `countComparisons` option Japanese passes.

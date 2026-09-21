@@ -57,6 +57,16 @@ describe('determiner', () => {
     expect(determiner({ ...AFRICA, definiteness: 'this' }, 'Africa')).toBe('');
   });
 
+  // A183: a superlative is definite in English, on a name as on a common noun.
+  test('a proper noun under a superlative gets its "the"', () => {
+    expect(determiner({ ...AFRICA, definiteness: 'definite' }, 'biggest', true)).toBe('the ');
+    expect(determiner({ ...AFRICA, definiteness: 'indefinite' }, 'biggest', true)).toBe('the ');
+    expect(determiner({ ...AFRICA, definiteness: 'bare' }, 'least', true)).toBe('the ');
+    // Without one it stays bare, so the positive and the comparative are untouched.
+    expect(determiner({ ...AFRICA, definiteness: 'definite' }, 'bigger', false)).toBe('');
+    expect(determiner(AFRICA, 'Africa')).toBe('');
+  });
+
   describe('with a superlative', () => {
     test('an indefinite or bare determiner is forced to the', () => {
       expect(determiner({ ...CAT, definiteness: 'indefinite' }, 'biggest', true)).toBe('the ');

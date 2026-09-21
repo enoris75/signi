@@ -150,6 +150,32 @@ describe('renderClause', () => {
         .toBe('der Kater isst nie eine Maus');
     });
 
+    // A182: an indefinite nominal absorbs the "nicht" as "kein", in the object slot and in the
+    // predicate one alike; the adverb keeps its own slot in front of it.
+    test('an indefinite object or predicate nominal takes the nicht as kein', () => {
+      const aMouse = el(np(MAUS, { definiteness: 'indefinite' }));
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true }), { directObject: aMouse }))).toBe('der Kater isst keine Maus');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(SCHNELL) }), { directObject: aMouse })))
+        .toBe('der Kater isst schnell keine Maus');
+      expect(renderClause(clause(np(KATER), vp(WERDEN_VERB, { negative: true }), { complements: aLegend }))).toBe('der Kater wird keine Legende');
+    });
+
+    // A191: a known object keeps the place it holds without the adverb — ahead of the whole "nicht"
+    // + adverb group — and takes the dative recipient with it. A quantified object stays behind
+    // them, where its scope is unchanged, and a pronoun leads from the pronoun slot as it always did.
+    test('a known object leads nicht and the adverb; a quantified one and a pronoun do not move', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(SCHNELL) }), { directObject: mouse })))
+        .toBe('der Kater isst die Maus nicht schnell');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(IMMER), aspect: 'resultative' }), { directObject: mouse })))
+        .toBe('der Kater hat die Maus nicht immer gegessen');
+      expect(renderClause(clause(np(MANN), vp(GEBEN, { negative: true, modifier: concept(IMMER) }), { directObject: el(np(BUCH)), complements: toTheBoy })))
+        .toBe('der Mann gibt dem Jungen das Buch nicht immer');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(SCHNELL) }), { directObject: el(np(MAUS, { definiteness: 'some', number: 'plural' })) })))
+        .toBe('der Kater isst nicht schnell einige Mäuse');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(SCHNELL) }), { directObject: el(np(ER)) })))
+        .toBe('der Kater isst ihn nicht schnell');
+    });
+
     test('nicht scopes over the whole prospective, ahead of im Begriff', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective' })))).toBe('der Kater ist nicht im Begriff zu essen');
       // A frequency adverb scopes over the prospective too, so it follows the "nicht" and both stand
@@ -171,7 +197,7 @@ describe('renderClause', () => {
     test('a predicate noun under the seeming verb takes "zu sein" before the verb cluster', () => {
       expect(renderClause(clause(np(KATER), vp(SCHEINEN), { complements: aLegend }))).toBe('der Kater scheint eine Legende zu sein');
       expect(renderClause(clause(np(KATER), vp(SCHEINEN, { negative: true }), { complements: aLegend })))
-        .toBe('der Kater scheint nicht eine Legende zu sein');
+        .toBe('der Kater scheint keine Legende zu sein'); // A182: the negation is spelled into the nominal
       expect(renderClause(clause(np(KATER), vp(SCHEINEN, { tense: 'future' }), { complements: aLegend })))
         .toBe('der Kater wird eine Legende zu sein scheinen');
       expect(renderClause(clause(np(KATER), vp(SCHEINEN, { modals: [modal(KOENNEN)] }), { complements: aLegend })))
@@ -303,11 +329,12 @@ describe('renderClause', () => {
         .toBe('seid nicht müde');
     });
 
-    // A49: the command takes the declarative's slots, so "nicht" leads the adverb as well.
-    test('nicht leads an adverb, ahead of the object and a predicate complement', () => {
+    // A49: the command takes the declarative's slots, so "nicht" leads the adverb as well — behind a
+    // definite object, which keeps the place it has without the adverb (A191).
+    test('nicht leads an adverb, behind the object and ahead of a predicate complement', () => {
       expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(SCHNELL) })))).toBe('iss nicht schnell');
       expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(IMMER) }), { directObject: mouse })))
-        .toBe('iss nicht immer die Maus');
+        .toBe('iss die Maus nicht immer');
       expect(renderClause(clause(np(DU), command(SEIN, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
         .toBe('sei nicht immer müde');
     });
@@ -355,7 +382,7 @@ describe('renderClause', () => {
     // A49: the infinitive takes the declarative's slots.
     test('nicht leads an adverb and a predicate complement', () => {
       expect(renderClause(clause(np(KATER), infinitive(ESSEN, { negative: true, modifier: concept(IMMER) }), { directObject: mouse })))
-        .toBe('nicht immer die Maus essen');
+        .toBe('die Maus nicht immer essen'); // A191: the definite object leads the group
       expect(renderClause(clause(np(KATER), infinitive(SEIN, { negative: true }), { complements: tired }))).toBe('nicht müde sein');
       expect(renderClause(clause(np(KATER), infinitive(WERDEN_VERB, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
         .toBe('nicht immer müde werden');

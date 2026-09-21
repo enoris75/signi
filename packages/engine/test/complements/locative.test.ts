@@ -747,20 +747,21 @@ describe('known bugs: Japanese locative "through"', () => {
 // A188. A superlative after a place name needs the name's article: the article is what makes "più
 // grande" the superlative and not the comparative (C01), and French cannot have "la plus grande"
 // after a bare "en". A169 gave a prenominal adjective the article back and left a postnominal one
-// bare ("in Asia lontana", as in "in Africa settentrionale"). That fits a region name, but it also
-// catches the superlative, which in Italian and French always follows the noun: "in Europa più
-// grande" reads "in a bigger Europe", and "en Europe la plus grande" is not French. Found while
-// reviewing the random phrase "… behind sharpest Europe." (seed 530537, A183).
+// bare ("in Asia lontana", as in "in Africa settentrionale"). That fitted a region name, but it also
+// caught the superlative, which in Italian and French always follows the noun: "in Europa più
+// grande" read "in a bigger Europe", and "en Europe la plus grande" is not French. `complementsPhrase`
+// now marks a phrase whose adjective is at `most` or `least`, and `bareName` refuses a marked name.
+// Found while reviewing the random phrase "… behind sharpest Europe." (seed 530537, A183).
 describe('known bugs: a superlative on a place name after a bare preposition', () => {
   const most = (concept: string, adjective: string, degree: 'most' | 'least' = 'most'): NounPhrase =>
     np(concept, { adjectives: [adjective], adjectiveDegrees: [degree] });
   const runsIn = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase } } }));
   const goesTo = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase } } }));
 
-  test.fails('Italian and French article a place name that carries a superlative', () => {
+  test('Italian and French article a place name that carries a superlative', () => {
     expect(runsIn(most('EUROPE', 'BIG'))).toMatchObject({
-      it: "il gatto corre nell'Europa più grande.", // now: "in Europa più grande"
-      fr: "le chat court dans l'Europe la plus grande.", // now: "en Europe la plus grande"
+      it: "il gatto corre nell'Europa più grande.", // was: "in Europa più grande"
+      fr: "le chat court dans l'Europe la plus grande.", // was: "en Europe la plus grande"
     });
     expect(goesTo(most('EUROPE', 'BIG'))).toMatchObject({
       it: "il gatto va nell'Europa più grande.", fr: "le chat va dans l'Europe la plus grande.",
@@ -775,7 +776,32 @@ describe('known bugs: a superlative on a place name after a bare preposition', (
       it: "il gatto va nell'Italia più grande.", fr: "le chat va dans l'Italie la plus grande.",
     });
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('EUROPE', 'BIG') } } })).fr)
-      .toBe("le chat vient de l'Europe la plus grande."); // now: "d'Europe la plus grande"
+      .toBe("le chat vient de l'Europe la plus grande."); // was: "d'Europe la plus grande"
+  });
+
+  // A country behaves as a continent does: the article comes back, and with it the "dans" a name
+  // that is no longer bare takes (A169), in place of the bare "in"/"en"/"au" of `landIn`. French's
+  // source contracts it ("du Japon le plus grand"), and the `least` degree goes the same way.
+  test('a country takes the same article, and the source and `least` follow', () => {
+    expect(runsIn(most('JAPAN', 'BIG'))).toMatchObject({
+      it: 'il gatto corre nel Giappone più grande.', fr: 'le chat court dans le Japon le plus grand.',
+    });
+    expect(goesTo(most('JAPAN', 'BIG'))).toMatchObject({
+      it: 'il gatto va nel Giappone più grande.', fr: 'le chat va dans le Japon le plus grand.',
+    });
+    expect(runsIn(most('FRANCE', 'BIG'))).toMatchObject({
+      it: 'il gatto corre nella Francia più grande.', fr: 'le chat court dans la France la plus grande.',
+    });
+    expect(goesTo(most('ANTARCTICA', 'BEAUTIFUL'))).toMatchObject({
+      it: "il gatto va nell'Antartide più bella.", fr: "le chat va dans l'Antarctique le plus beau.",
+    });
+    const comesFrom = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase } } }));
+    expect(comesFrom(most('JAPAN', 'BIG'))).toMatchObject({
+      it: 'il gatto viene dal Giappone più grande.', fr: 'le chat vient du Japon le plus grand.',
+    });
+    expect(comesFrom(most('EUROPE', 'BIG', 'least'))).toMatchObject({
+      it: "il gatto viene dall'Europa meno grande.", fr: "le chat vient de l'Europe la moins grande.",
+    });
   });
 
   // Regression: the plain and comparative postnominal adjectives keep A169's bare preposition, a
@@ -789,20 +815,42 @@ describe('known bugs: a superlative on a place name after a bare preposition', (
       .toBe("il gatto viene dall'Europa più grande.");
     expect(runsIn(most('EUROPE', 'BIG'))).toMatchObject({ es: 'el gato corre en la Europa más grande.', de: 'der Kater läuft im größten Europa.' });
   });
+
+  // The mark is read by `bareName` alone, so nothing else moves: a relational locative was never
+  // bare ("sotto l'Europa"), a common noun never was either, and the name outside a complement —
+  // subject or direct object — takes the article it always took.
+  test('regression: a relational place, a common noun, and the name as subject or object', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: most('EUROPE', 'BIG'), specifiers: [{ kind: 'path', value: 'under' }] } },
+    }))).toMatchObject({
+      it: "il gatto corre sotto l'Europa più grande.", fr: "le chat court sous l'Europe la plus grande.",
+    });
+    expect(runsIn(most('HOUSE', 'BIG'))).toMatchObject({
+      it: 'il gatto corre nella casa più grande.', fr: 'le chat court dans la maison la plus grande.',
+    });
+    expect(sayAll(clause(most('EUROPE', 'BIG'), 'RUN'))).toMatchObject({
+      it: "l'Europa più grande corre.", fr: "l'Europe la plus grande court.",
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: most('EUROPE', 'BIG') }))).toMatchObject({
+      it: "il gatto vede l'Europa più grande.", fr: "le chat voit l'Europe la plus grande.",
+    });
+  });
 });
 
 // A190. A Japanese locative takes で, the place where something happens. 住む ("live, reside") and
 // 閉じ込める ("shut in") take に, the place where something is or ends up: 東京に住む, 犬を家に閉じ込める.
-// complementSegs gives に only to the existential いる / ある (A109), so LIVE and CONFINE read "家で住みます",
-// "家で犬を閉じ込めます". Found by the random phrase "she had lived in some buttons." (seed 502398).
+// complementSegs used to give に only to the existential いる / ある (A109), so LIVE and CONFINE read
+// "家で住みます", "家で犬を閉じ込めます". Their ja lexemes now seed `locative_particle: 'に'`, which
+// `predicateSegs` hands to `complementSegs` where the existential hands its own.
+// Found by the random phrase "she had lived in some buttons." (seed 502398).
 describe('known bugs: Japanese 住む and 閉じ込める mark their place with に', () => {
   const lives = (verbPhrase: Partial<VerbPhrase> = {}, place: NounPhrase = np('HOUSE')) =>
     sayAll(clause(np('CAT'), 'LIVE', { verbPhrase, complements: { locative: { phrase: place } } })).ja;
   const confines = (verbPhrase: Partial<VerbPhrase> = {}) =>
     sayAll(clause(np('CAT'), 'CONFINE', { directObject: np('DOG'), verbPhrase, complements: { locative: { phrase: np('HOUSE') } } })).ja;
 
-  test.fails('LIVE and CONFINE take に for their place', () => {
-    expect(lives()).toBe('猫は家に住みます。'); // now: "家で住みます"
+  test('LIVE and CONFINE take に for their place', () => {
+    expect(lives()).toBe('猫は家に住みます。'); // was: "家で住みます"
     expect(lives({ tense: 'past' })).toBe('猫は家に住みました。');
     expect(lives({ aspect: 'progressive' })).toBe('猫は家に住んでいます。');
     expect(lives({ negative: true })).toBe('猫は家に住みません。');
@@ -815,7 +863,7 @@ describe('known bugs: Japanese 住む and 閉じ込める mark their place with 
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'LIVE' }, complements: { locative: { phrase: np('HOUSE') } } },
     }), 'RUN')).ja).toBe('家に住む犬は走ります。');
-    expect(confines()).toBe('猫は家に犬を閉じ込めます。'); // now: "家で犬を閉じ込めます"
+    expect(confines()).toBe('猫は家に犬を閉じ込めます。'); // was: "家で犬を閉じ込めます"
     expect(confines({ tense: 'past' })).toBe('猫は家に犬を閉じ込めました。');
     expect(sayAll(clause(np('THIRD_PERSON', { gender: 'fem' }), 'LIVE', {
       verbPhrase: { tense: 'past', aspect: 'resultative' },
@@ -842,6 +890,62 @@ describe('known bugs: Japanese 住む and 閉じ込める mark their place with 
     expect(sayAll({
       subject: { concept: 'BUILDING', definiteness: 'indefinite', relative: { headRole: 'locative', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'LIVE' } } },
     }).ja).toBe('住む建物。');
+  });
+
+  // The particle reaches the locative and nothing else: a coordinated place takes it once, after the
+  // group, and a cause keeps its own のために. A relational place puts it after the relational noun.
+  test('the に marks the place alone, once, behind the relational noun', () => {
+    expect(sayAll(clause(np('CAT'), 'LIVE', {
+      complements: { locative: { phrase: { conjuncts: [np('HOUSE'), np('MARKET')], conjunction: 'or' } } },
+    })).ja).toBe('猫は家か市場に住みます。');
+    expect(sayAll(clause(np('CAT'), 'LIVE', {
+      complements: { locative: { phrase: np('HOUSE') }, cause: { phrase: np('DOG') } },
+    })).ja).toBe('猫は家に犬のために住みます。');
+    expect(atPlace('in', 'LIVE').ja).toBe('猫は家に住みます。');
+  });
+
+  // A verb that puts something *at* the place wins over A176's traversal tail, as BE's existential
+  // already did: "lives through the house" is 家に住みます, not 家を通って住みます.
+  test('the に wins over A176\'s を通って', () => {
+    expect(atPlace('through', 'LIVE').ja).toBe('猫は家に住みます。');
+    expect(sayAll(clause(np('CAT'), 'CONFINE', {
+      directObject: np('DOG'),
+      complements: { locative: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'through' }] } },
+    })).ja).toBe('猫は家に犬を閉じ込めます。');
+  });
+
+  // CONFINE in the rest of the clause's forms, as LIVE is pinned above: a `no` place, a modal, a
+  // command, a relative clause on the object, and a hypothetical protasis.
+  test('CONFINE keeps its に through the negative, a modal, a command and a relative clause', () => {
+    expect(sayAll(clause(np('CAT'), 'CONFINE', {
+      directObject: np('DOG'), complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } },
+    })).ja).toBe('猫はどの家にも犬を閉じ込めません。');
+    expect(confines({ modals: ['MUST'] })).toBe('猫は家に犬を閉じ込める必要があります。');
+    expect(sayAll(clause(np('SECOND_PERSON'), 'CONFINE', {
+      imperative: true, directObject: np('DOG'), complements: { locative: { phrase: np('HOUSE') } },
+    })).ja).toBe('家に犬を閉じ込めてください。');
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'CONFINE' }, headRole: 'directObject', subject: np('CAT'), complements: { locative: { phrase: np('HOUSE') } } },
+    }), 'RUN')).ja).toBe('猫が家に閉じ込める犬は走ります。');
+    expect(sayAll({
+      ...clause(np('CAT'), 'RUN'),
+      condition: clause(np('CAT'), 'LIVE', { complements: { locative: { phrase: np('HOUSE') } } }),
+    }).ja).toBe('もし猫が家に住んだら、猫は走ります。');
+  });
+
+  // The other six languages say CONFINE's place exactly as they say any other verb's.
+  test('regression: CONFINE outside Japanese, and HIDE, which keeps で', () => {
+    expect(sayAll(clause(np('CAT'), 'CONFINE', { directObject: np('DOG'), complements: { locative: { phrase: np('HOUSE') } } }))).toMatchObject({
+      en: 'the cat confines the dog in the house.',
+      it: 'il gatto rinchiude il cane nella casa.',
+      fr: 'le chat enferme le chien dans la maison.',
+      de: 'der Kater inhaftiert den Hund im Haus.',
+      es: 'el gato encierra el perro en la casa.',
+      pt: 'o gato encarcera o cão na casa.',
+    });
+    // 隠す puts the hidden thing somewhere too, but "家で本を隠す" ("hides the book while at home") is
+    // also Japanese, so it is left with で and seeds no `locative_particle`.
+    expect(inPlace('HIDE').ja).toBe('猫は家で本を隠します。');
   });
 });
 

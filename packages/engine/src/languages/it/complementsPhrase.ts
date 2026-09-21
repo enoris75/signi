@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import type { ResolvedComplement } from '../../types.js';
+import type { ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
@@ -155,7 +155,17 @@ export function complementsPhrase(
       // away (A165), and leading its phrase, which a prenominal adjective does not let it do (A169).
       // Otherwise the name has its article back, and "in" fuses with it: "nella tua Asia", "nella
       // grande Asia".
-      const bareName = (nf: Record<string, string>, lead: string): boolean => nf['proper'] === '1' && lead === nf['base'];
+      // A *superlative* takes it back too (A188). Italian puts the degree after the noun, and the
+      // definite article is the only thing telling the superlative from the comparative (C01): bare
+      // "in Europa più grande" reads "in a bigger Europe", so the name is articled and "in" fuses
+      // with it ("nell'Europa più grande"). `headForms` marks the phrase for `bareName`, because
+      // `headFor` sees the forms and not the phrase. A169's positive and comparative stay bare.
+      const bareName = (nf: Record<string, string>, lead: string): boolean =>
+        nf['proper'] === '1' && lead === nf['base'] && nf['relativeSuperlative'] !== '1';
+      const headForms = (np: ResolvedNounPhrase): Record<string, string> => {
+        const nf = itPossessedHeadForms(np);
+        return np.adjectives.some(isRelativeSuperlative) ? { ...nf, relativeSuperlative: '1' } : nf;
+      };
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
         type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
@@ -189,7 +199,7 @@ export function complementsPhrase(
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(itPossessedHeadForms(np))));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
     })
     .filter(Boolean)
     .join(' ');

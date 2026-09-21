@@ -1545,10 +1545,13 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'encerraremos', '2pl_future': 'encerraréis', '3pl_future': 'encerrarán',
       },
       ja: {
+        // 閉じ込める names where the confined thing ends up, not where the shutting in happened, so
+        // its place takes に: 犬を家に閉じ込める (`locative_particle`, A190).
         base: '閉じ込める',
         reading: 'とじこめる',
         masu_present: '閉じ込めます',
         masu_present_reading: 'とじこめます',
+        locative_particle: 'に',
       },
       pt: {
         base: 'encarcerar',

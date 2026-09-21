@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, isPronominalPossessor, type ComplementType } from '@signi/shared';
-import type { ResolvedComplement } from '../../types.js';
+import type { ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
@@ -136,7 +136,18 @@ export function complementsPhrase(
       // `proper`, which a possessive takes away (A165), and leading its phrase, which a prenominal
       // adjective does not let it do (A169). Otherwise the name has its article back: "dans ton Asie",
       // "dans la grande Asie", "de la grande Asie".
-      const bareName = (nf: Record<string, string>, lead: string): boolean => nf['proper'] === '1' && lead === nf['base'];
+      // A *superlative* takes it back too (A188). French puts the degree after the noun and repeats
+      // the article in front of it ("l'Europe la plus grande"), and that second article is only
+      // possible after a first one: "en Europe la plus grande" is not French. So the name is articled
+      // and the preposition goes to "dans" / "de" + article ("dans l'Europe la plus grande", "de
+      // l'Europe la plus grande"). `headForms` marks the phrase for `bareName`, because `headFor` sees
+      // the forms and not the phrase. A169's positive and comparative stay bare.
+      const bareName = (nf: Record<string, string>, lead: string): boolean =>
+        nf['proper'] === '1' && lead === nf['base'] && nf['relativeSuperlative'] !== '1';
+      const headForms = (np: ResolvedNounPhrase): Record<string, string> => {
+        const nf = possessedHeadForms(np, 'bare');
+        return np.adjectives.some(isRelativeSuperlative) ? { ...nf, relativeSuperlative: '1' } : nf;
+      };
       // A bare land name is "in" and goes "to" with "en" when it is feminine or opens on a vowel ("en
       // Italie", "en Antarctique"), and with "au" when it is a masculine opening on a consonant ("au
       // Japon", "au Portugal"). All the continents take "en"; the countries split (localization B36).
@@ -212,16 +223,16 @@ export function complementsPhrase(
           return `${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
         };
         if (causeSent === 'negative') {
-          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(possessedHeadForms(np, 'bare'))));
+          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(headForms(np))));
         }
         const tail = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
           causeSent === 'positive' ? aDet(nf, plural, lead) : deDet(nf, plural, lead);
-        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(possessedHeadForms(np, 'bare'))));
+        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(headForms(np))));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
       return coordinate(c.phrase, (np) =>
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
-        || renderNP(np, headFor(possessedHeadForms(np, 'bare'), isPronominalPossessor(np.possessor))));
+        || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))));
     })
     .filter(Boolean)
     .join(' ');

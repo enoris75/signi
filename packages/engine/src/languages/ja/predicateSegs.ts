@@ -73,6 +73,12 @@ export function predicateSegs(
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).
   const { objectPredicative, rest: adjunctComplements } = splitObjectPredicative(complements);
+  // The particle this verb's place takes (see `complementSegs`). The existential states where the
+  // subject is, に (家にいます); so do the lexemes that seed `locative_particle` — 住む names where one
+  // lives and 閉じ込める where the confined thing ends up, neither of them a place an act merely goes
+  // on in (家に住みます, 犬を家に閉じ込めます; A190). Everything else keeps the default で, so it passes
+  // nothing. Read off `verbPhrase.verb`, the verb actually rendered, so a passive carries it too.
+  const locativeParticle = existential ? 'に' : verbPhrase.verb.forms['locative_particle'];
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -81,10 +87,13 @@ export function predicateSegs(
   // the negated predicate (決して…ない). A `no`-determiner argument (subject, object, or complement)
   // is likewise a negative-concord trigger: its も needs the clause-final ない to complete the
   // circumfix (どの時間も食べない), mirroring how Italian's `non` fires off hasNegativeComplement.
+  // A similative comparison is the one place the two part company: Romance leaves the clause
+  // positive under "like no dog" (A181), where Japanese writes the same circumfix as everywhere else
+  // (どの犬のようにも) and so still needs its ない — hence `countComparisons`.
   const negated = negative === true || groupHasNegativeAdverb(verbPhrase)
     || subjectNegative
     || (directObject !== undefined && isNegativeGroup(directObject))
-    || hasNegativeComplement(complements);
+    || hasNegativeComplement(complements, { countComparisons: true });
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.
@@ -102,7 +111,7 @@ export function predicateSegs(
       segs.push(...(predicative === JA_SOU ? [{ t: 'そう' }] : complementSegs({ predicative })), { t: naru });
       return segs;
     }
-    segs.push(...complementSegs(adjunctComplements, existential));
+    segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
     if (modifier) {
@@ -118,7 +127,7 @@ export function predicateSegs(
   // which closes a citation in the plain written style (可能である). A negative citation takes the plain
   // negative (食べない。, 食べないために, 行動しないことを; B13).
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
-    segs.push(...complementSegs(adjunctComplements, existential));
+    segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
     if (modifier) {
@@ -158,7 +167,7 @@ export function predicateSegs(
     segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }
-  segs.push(...complementSegs(adjunctComplements, existential));
+  segs.push(...complementSegs(adjunctComplements, locativeParticle));
   if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
   segs.push(...complementSegs(objectPredicative));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost

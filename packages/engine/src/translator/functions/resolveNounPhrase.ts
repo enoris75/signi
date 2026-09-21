@@ -73,10 +73,19 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // grande", "der größte Hund". Resolved here, once for every language (A175): Italian, Spanish and
     // Portuguese tell the superlative from the comparative by that article alone ("un cane più
     // grande" is "a bigger dog"), and German and French would decline or article it wrong.
+    // A proper name ("Europe", "Asia") takes the article its own language fixes, not the one the plan
+    // picked: every article builder already ignores `definiteness` for a `proper` head. Resolve that
+    // here too, once for every language (A180), so the other readers of `definiteness` agree with the
+    // article that is actually rendered — German's adjective declension ("das große Asien", not "das
+    // großes Asien"), Spanish's a/de + el contraction ("al Asia grande"), Japanese's quantifier (no
+    // "多くのヨーロッパ", and no この/その either, as the other six languages already drop "this"), and the
+    // negative concord a `no` would otherwise trigger with no negator to license it ("l'Asie ne brûle.").
     const superlative = (np.adjectives ?? []).some((_, i) => SUPERLATIVE_DEGREES.has(np.adjectiveDegrees?.[i] ?? 'positive'));
-    const picked = superlative && SUPERLATIVE_MAKES_DEFINITE.has(np.definiteness ?? 'definite')
+    const picked = head.forms['proper'] === '1'
       ? 'definite'
-      : np.definiteness ?? 'definite';
+      : superlative && SUPERLATIVE_MAKES_DEFINITE.has(np.definiteness ?? 'definite')
+        ? 'definite'
+        : np.definiteness ?? 'definite';
     const definiteness =
       picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && np.adjectives?.includes('OTHER')
         ? 'bare'

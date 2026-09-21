@@ -105,3 +105,46 @@ at the end of German `complementsPhrase` ("scheint eine Legende im Markt zu sein
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: the predicate is not next to its verb* (2 `test.fails`, plus a regression test for a lone predicate, the Japanese copula and object predicate, and English and Italian) |
+
+## Resolved
+
+Fixed on 2026-09-21.
+
+**German.** [`complementsPhrase`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+now renders the adjuncts and the predicate apart, as `complementsParts`: `DE_ADJUNCT_ORDER` is the
+shared `COMPLEMENT_RENDER_ORDER` without the two predicate slots, and `objectPredicative` +
+`predicative` close the Mittelfeld against the verb cluster. `complementsPhrase` itself is the two
+joined, so the callers that want the whole phrase (`dativeText`, a gapped relative) are unchanged.
+SEEM's `zu sein` is appended to the predicate part, so it still closes the complements
+(`scheint im Markt eine Legende zu sein`).
+
+**The `nicht` decision, ruled by the user on 2026-09-21:** with the predicate last, A159's slot at the
+head of the complements would read as a constituent negation of the adjunct — `ist nicht wegen des
+Hundes müde` says the dog is not the reason. Sentence negation stands right before the predicate
+instead. New
+[`complementsWithNicht`](../../../packages/engine/src/languages/de/complementsWithNicht.ts) places it,
+and the four Mittelfeld builders call it: the declarative (shared by the question and the `wenn`
+protasis), the command/instruction and the infinitive in
+[`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts), and
+[`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts). With no
+predicate to close on, `nicht` keeps A159's slot (`ist nicht im Haus`). A predicate *nominal* takes
+`kein` and no `nicht` at all ([A182](A182-german-nicht-with-an-indefinite-object.md), fixed in the
+same run): `wird wegen des Hundes keine Legende`.
+
+The user also asked, in the same ruling, for the other half of that distinction — a negation that
+belongs to the complement rather than to the verb, so that `nicht` can sit *before* the complement on
+purpose (`der Kater ist nicht wegen des Hundes nicht müde`). The plan model had no such thing; it was
+added afterwards as the cause complement's own negation.
+
+**Japanese.** [`complementSegs`](../../../packages/engine/src/languages/ja/complementSegs.ts) walks
+`JA_COMPLEMENT_ORDER`, the shared order with `predicative` alone moved to the end, straight before
+なる / 思える. The object predicate keeps its place beside its own object (家を刑務所に変える).
+
+**Tests.** `complements/predicative.test.ts` → *known bugs: the predicate is not next to its verb*
+(both pins now passing, assertions unchanged), plus *"nicht" stands right before the predicate, not
+before the adjuncts*, which pins the ruling across BE / BECOME / SEEM, the resultative, a modal, the
+relative clause, the command, the infinitive, an object predicative, the `kein` nominal, the two
+no-predicate cases that keep A159's slot, and the Japanese negation. The eleven passing assertions
+this overruled were rewritten as the table above says, in `complements/combined.test.ts`,
+`complements/combined-triples.test.ts`, `complements/predicative.test.ts`, `coordination.test.ts` and
+`de/complementsPhrase/complementsPhrase.test.ts`.

@@ -3,7 +3,9 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNou
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
+import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
+import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
@@ -124,9 +126,11 @@ export function predicateText(
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
-  // book"). Leading the complements slot puts it there in every branch below (A142).
+  // book"). Leading the complements slot puts it there in every branch below (A142). An adverb of
+  // place (EN TODAS PARTES) leaves the manner slot too, but stands among the complements where a
+  // locative does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection ? '' : adverbText;
+  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // Spanish fronts one negative frequency adverb ("nunca") preverbally without "no", whichever verb
   // it modifies. Scan the group outermost-first (each modal, then the main verb); the first negative
@@ -200,8 +204,8 @@ export function predicateText(
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : '';
   const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement)]
-    .filter(Boolean).join(' ');
+  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
   // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here. An object pronoun

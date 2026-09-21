@@ -61,3 +61,42 @@ keeps its voice withdrawn and active.
 
 Both pins fail on their assertions, not on an error: the round trip returns no `verbVoice`, and the
 control's `available` is false.
+
+## Resolved
+
+Fixed 2026-09-21, as the **recommended** shape: the voice is kept for the infinitive, gated on the
+command alone. Tense, aspect and the modals stay in the finite slot; the voice was never in it — only
+`setImperative` forces the active, and it already resets `verbVoice` itself.
+
+- **Canvas:** [`../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx`](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx).
+  The `verbVoice` control's `available` reads `!selection.imperative` instead of `!finiteSlotTaken`
+  (the comment now says why the voice parts company with the tense and the aspect). `finiteSlotTaken`
+  is unchanged and still gates the tense, the aspect and both modals with their adverbs.
+- **Console:** [`../../../packages/frontend/src/console/language/words.ts`](../../../packages/frontend/src/console/language/words.ts),
+  `settingTakes` case `"voice"`: `!w.root.imperative` for `!finiteSlotTaken(w.root)`. That one gate
+  serves both directions — [`print.ts`](../../../packages/frontend/src/console/language/print.ts) now
+  writes `/passive` for an infinitive period (`/inf /verb ( love /passive ) /obj ( dog )`), and
+  `/passive` is accepted under `/inf`. The `tense` / `aspect` cases still read `finiteSlotTaken`.
+- **Keymap:** no change. `object.voice` and `object.voice.back` in
+  [`keymap.ts`](../../../packages/frontend/src/keyboard/keymap.ts) gate on `has(ctx, "verbVoice")`,
+  i.e. the satellite's own `available`, so the keys came back with the control.
+- **Not taken:** `setInfinitive` resetting the voice. A passive infinitive is a citation form the
+  engine renders and the seeded definitions use, and resetting it would silently turn "to be loved"
+  into "to love".
+
+**Tests now guarding it**
+
+- [`../../../packages/frontend/test/satellites/functions/rawSatellites.test.tsx`](../../../packages/frontend/test/satellites/functions/rawSatellites.test.tsx),
+  *known bugs: A179 a passive infinitive*: the pinning `it.fails` is a plain passing test, plus the
+  control's set value and the way back to active, and a guard that the infinitive still withdraws the
+  tense, the aspect and the modals and that the voice still waits for a transitive verb with an
+  object. The command's withdrawn, forced-active voice is unchanged.
+- [`../../../packages/frontend/test/console/roundTrip.test.ts`](../../../packages/frontend/test/console/roundTrip.test.ts),
+  same block: both pinning `it.fails` rows are plain passing tests, plus the exact printed line in
+  English and Italian words, a hand-written `/passive` under `/inf` applying to a passive infinitive,
+  and a guard that a command still prints no `/passive`. The walk's voice op now gates on
+  `!sel.imperative`, so the random walk reaches the state inside the suite's 400 seeds (it fails on
+  seeds 3, 115 and 146 with the fix reverted). `SEEDS=5000` is green, including 764, 1659 and 2022.
+- [`../../../packages/frontend/test/satellites/functions/buildSatellites.test.tsx`](../../../packages/frontend/test/satellites/functions/buildSatellites.test.tsx)
+  had locked the old output (the infinitive offering only `verbNegative` on the verb family); it now
+  expects `verbVoice` alongside it for the infinitive, and only `verbNegative` for the command.

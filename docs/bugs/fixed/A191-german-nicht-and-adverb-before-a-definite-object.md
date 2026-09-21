@@ -63,7 +63,7 @@ The trial did this in the three places that assemble a middle field: the declara
 question and the `wenn` clause share), the command and instruction, and the infinitive. A possessive
 and a proper name resolve to `definite`, so they come along. A passive's by-phrase stays where it is.
 
-**It changes four passing assertions,** all added with [A49](../fixed/A49-german-nicht-in-commands-and-infinitives.md)'s
+**It changes four passing assertions,** all added with [A49](A49-german-nicht-in-commands-and-infinitives.md)'s
 fix, which was about "nicht" before the adverb and pinned the object's position along with it:
 
 | Test | Now asserted | Becomes |
@@ -89,3 +89,44 @@ Rewrite the comments that give the old order with them, including `adverbSlots`'
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German "nicht" and an adverb in front of a definite object* (1 `test.fails`, plus a regression test for no adverb, a pronoun, the relative clause and a direction adverb) |
+
+## Resolved
+
+**2026-09-21.** Fixed as the **Shape of the fix** describes, in
+[`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts). A new `objectLeadsNicht`
+predicate answers, once for the clause, whether the direct object stands ahead of the "nicht" + adverb
+group: "nicht" must hold the adverb slot (`adverbSlots(…).nichtBeforeObject`), the object must render
+in the Mittelfeld's noun slot, and every conjunct must be a noun with a `definite`, `this` or `that`
+determiner — a possessive and a proper name resolve to `definite` and come along. The three middle
+fields splice on that one answer: the declarative (shared by the question and the `wenn` protasis),
+the command/instruction and the infinitive. The dative recipient travels with the object, so
+`gibt dem Hund das Buch nicht schnell`. The relative clause needed nothing — `subordinateClause`
+already puts its adverbs after the objects.
+
+What does not move: a passive's by-phrase, which borrows the object slot but is no object; a
+prepositional object (A139), which stands with the complements; a pronoun, which already leads from
+the pronoun slot; the prospective, whose "nicht" scopes over "im Begriff" rather than the adverb slot
+(A146); a direction adverb, which follows the object already (A142); and — as the bug file's trial
+left them — the quantified object (`nicht schnell alle Mäuse`) and the positive clause
+(`kann schnell die Maus fressen`).
+
+- **Engine changed:** [`renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts).
+  [`adverbSlots.ts`](../../../packages/engine/src/languages/de/adverbSlots.ts) and
+  [`nichtSlots.ts`](../../../packages/engine/src/languages/de/nichtSlots.ts) took doc-comment changes
+  only, including `adverbSlots`'s own `verschiebt nicht schnell das Buch` example.
+- **Tests:** [`negation.test.ts`](../../../packages/engine/test/negation.test.ts) → *known bugs:
+  German "nicht" and an adverb in front of a definite object*. The pinning `test.fails` is now a
+  passing `test` with its assertions unchanged. New cases in the same block:
+  - the quantified objects (`alle`, `einige`, `viele`), a coordination mixing a known and a quantified
+    conjunct, and the positive declarative and command — all unmoved;
+  - a coordination of known conjuncts, which moves whole; `that` as well as `this`; the complements,
+    which stay behind "nicht"; the passive by-phrase; the prospective; and the command's direction
+    adverb.
+
+  Colocated: new declarative cases in
+  [`renderClause.test.ts`](../../../packages/engine/src/languages/de/renderClause.test.ts) (the known
+  object, the resultative, the dative recipient, the quantified object and the pronoun).
+- **The four passing assertions this overruled** were rewritten exactly as the table above says, in
+  [`imperative.test.ts`](../../../packages/engine/test/imperative.test.ts),
+  [`infinitive.test.ts`](../../../packages/engine/test/infinitive.test.ts) and twice in the colocated
+  `renderClause.test.ts`; their comments now name A191 over A49.

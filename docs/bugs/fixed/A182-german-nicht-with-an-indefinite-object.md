@@ -10,9 +10,9 @@ mice against something else.
 
 The engine knows `kein = nicht + ein`, but only uses it in one direction. When a `no` object meets a
 second negation, [`finiteNegation`](../../../packages/engine/src/languages/de/finiteNegation.ts)
-turns it into a plain indefinite ([A35](../fixed/A35-stacked-negation-not-collapsed.md),
-[A158](../fixed/A158-negative-complement-not-collapsed.md),
-[A160](../fixed/A160-negative-subject-not-collapsed.md)). But a negated verb with an indefinite
+turns it into a plain indefinite ([A35](A35-stacked-negation-not-collapsed.md),
+[A158](A158-negative-complement-not-collapsed.md),
+[A160](A160-negative-subject-not-collapsed.md)). But a negated verb with an indefinite
 object keeps its `nicht`, and the object keeps its `ein` or no article. The same gate serves the
 declarative, the relative clause, the `wenn` clause, the command, the instruction and the
 infinitive, so all of them do it.
@@ -83,3 +83,44 @@ object does today.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German "nicht" with an indefinite object* (2 `test.fails`, plus a regression test for the objects that keep `nicht` and the `kein` / `nie` cases already right) |
+
+## Resolved
+
+**2026-09-21.** Fixed as the **Shape of the fix** describes, in
+[`finiteNegation`](../../../packages/engine/src/languages/de/finiteNegation.ts) alone: a new
+`takesKein` predicate decides whether a noun slot can absorb the verb's own "nicht" as "kein" — one
+conjunct, `indefinite` or `bare`, no `person` (a pronoun), no `proper` name, and not a predicate
+adjective — and the slot is re-determined `no` while `nichtSlots` is told not to place a "nicht".
+Because the declarative, the relative clause, the `wenn` protasis, the question, the command, the
+instruction and the infinitive all share this one decision, every **Want** row above follows from it.
+
+**The predicate noun: extended, on the user's ruling of 2026-09-21.** `der Kater ist keine Legende.`
+and `scheint keine Legende zu sein`, on the same terms as the object; the object is the leftmost, so
+where both could take it the object carries the negation. A predicate **adjective** is untouched
+(`ist nicht müde`), and so is the prepositional complement (`läuft nicht in einem Haus`, A159's slot)
+and the coordinated object (`frisst eine Maus und das Essen nicht`), both as the bug file's trial left
+them.
+
+- **Engine changed:** [`finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts).
+  [`nichtSlots.ts`](../../../packages/engine/src/languages/de/nichtSlots.ts) took a doc-comment change
+  only — its `negate` argument now also means "no nominal absorbed it".
+- **Tests:** [`negation.test.ts`](../../../packages/engine/test/negation.test.ts) → *known bugs:
+  German "nicht" with an indefinite object*. Both pinning `test.fails` are now passing `test`s with
+  their assertions unchanged. New cases in the same block:
+  - the predicate nominal under BE, BECOME and SEEM, with an adjective, in the plural, across tense,
+    a modal and the infinitive;
+  - the predicate adjective, the definite predicate noun and `nie`, which keep "nicht";
+  - the coordinated object, the indefinite prepositional complement and the proper name;
+  - the question, and the adverb that keeps its slot in front of a "kein" object.
+
+  Colocated: new cases in
+  [`finiteNegation.test.ts`](../../../packages/engine/src/languages/de/finiteNegation.test.ts) (the
+  object, the mass noun, the predicate nominal against the predicate adjective, the coordination and
+  the proper name) and in
+  [`renderClause.test.ts`](../../../packages/engine/src/languages/de/renderClause.test.ts) (de).
+- **Assertions rewritten with the ruling:** the A159 regression in `negation.test.ts` (its comment
+  called the question open and now records the answer), the SEEM row in
+  [`complements/predicative.test.ts`](../../../packages/engine/test/complements/predicative.test.ts),
+  the SEEM row in [`infinitive.test.ts`](../../../packages/engine/test/infinitive.test.ts), and the
+  colocated `renderClause.test.ts` row — all four asserted `nicht eine Legende` and now assert
+  `keine Legende`.

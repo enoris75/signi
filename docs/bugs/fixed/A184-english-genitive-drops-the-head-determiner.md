@@ -10,7 +10,7 @@ negation: "no book of the cat burns" comes out as `the cat's book burns.`
 
 The other six languages keep the head's determiner, because their genitive follows the head
 (`nessun libro del gatto`, `kein Buch des Katers`, `ce livre du chat`). English keeps it too in one
-case. When [A21](../fixed/A21-english-group-genitive.md) moves a post-modified possessor to the
+case. When [A21](A21-english-group-genitive.md) moves a post-modified possessor to the
 of-genitive, the head keeps its article: `this book of the cat that eats the mouse`. English uses
 that same of-genitive, or the Saxon genitive after `all`, when the head has a determiner of its own.
 
@@ -78,3 +78,31 @@ engine suite green.
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: English drops the possessed head's determiner* (1 `test.fails`, plus a regression test for the definite head, the possessor's own determiner, a post-modified possessor and the other languages) |
+
+## Resolved
+
+**2026-09-21.** English keeps the possessed head's determiner.
+
+- [`en/isPostModified.ts`](../../../packages/engine/src/languages/en/isPostModified.ts) gains
+  `keepsHeadDeterminer(forms)`: true for every determiner the Saxon clitic would swallow — anything
+  but `definite`, `indefinite`, `bare` and `all` — and false for a proper name, which has no English
+  article to lose. `isPostModified` now counts such a phrase as post-modified, because it is
+  rendered with a trailing of-phrase and so cannot take `'s` either.
+- [`en/nounPhrase.ts`](../../../packages/engine/src/languages/en/nounPhrase.ts) sends a head that
+  `keepsHeadDeterminer` down the same of-genitive branch A21 built for a post-modified possessor
+  (`this book of the cat`, `no book of the cat`), and stacks `all` in front of the Saxon prefix
+  (`all the cat's books`).
+
+The **Decisions for the fixer** were ruled on before the fix: the plain of-genitive is the surface
+(not the double genitive, not the partitive), and an `indefinite` or `bare` head stays on the Saxon
+genitive. The pronominal possessor is [A187](A187-pronominal-possessor-drops-the-head-determiner.md).
+
+**Tests guarding it:** `packages/engine/test/possession.test.ts` → *known bugs: English drops the
+possessed head's determiner* — the former `test.fails` is now a plain test, beside its regression
+test and two new ones: the NPI `any` a negated clause switches to, the mass quantifiers
+(`much water of the cat`), a plural head (`these books of the cat`), `all` over a possessor chain
+and over a post-modified possessor, an of-genitive head used as a possessor, and the
+`indefinite` / `bare` / proper heads that keep the clitic. Unit level:
+`packages/engine/src/languages/en/isPostModified.test.ts` (a `keepsHeadDeterminer` block and the new
+post-modification source) and `packages/engine/src/languages/en/nounPhrase.test.ts` (the of-genitive
+head, `all`, and the proper/indefinite heads).

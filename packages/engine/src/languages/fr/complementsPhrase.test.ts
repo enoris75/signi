@@ -262,6 +262,18 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ source: complement(bigEurope) }), {}, 'COME')).toBe('de la grande Europe');
     });
 
+    // A188: the superlative repeats the article after the noun ("l'Europe la plus grande"), which is
+    // only possible after a first article — so it brings one back, as a prenominal adjective does.
+    // The comparative keeps A169's bare "en".
+    test('a continent carrying a superlative takes dans and its article; the comparative stays bare', () => {
+      const degree = (d: string) => np(EUROPE, {}, { adjectives: [concept({ ...GRAND, degree: d }, 'BIG')] });
+      expect(complementsPhrase(complements({ locative: complement(degree('most')) }))).toBe("dans l'Europe la plus grande");
+      expect(complementsPhrase(complements({ direction: complement(degree('most')) }))).toBe("dans l'Europe la plus grande");
+      expect(complementsPhrase(complements({ source: complement(degree('most')) }), {}, 'COME')).toBe("de l'Europe la plus grande");
+      expect(complementsPhrase(complements({ locative: complement(degree('least')) }))).toBe("dans l'Europe la moins grande");
+      expect(complementsPhrase(complements({ locative: complement(degree('more')) }))).toBe('en Europe plus grande');
+    });
+
     test('a spatial relation picks its preposition, keeping a continent’s article', () => {
       expect(complementsPhrase(complements({ locative: complement(np(MAISON), [path('behind')]) }))).toBe('derrière la maison');
       expect(complementsPhrase(complements({ locative: complement(np(MAISON), [path('in_front_of')]) }))).toBe('devant la maison');

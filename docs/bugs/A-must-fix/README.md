@@ -1,7 +1,8 @@
 # A-must-fix — confirmed bugs
 
-Twenty-four open as of 2026-09-21 (A178–A201); everything else catalogued in this class has been fixed
-and moved to [`../fixed/`](../fixed/). A194–A201 were found while localizing B48–B51 and C20–C22 —
+Nine open as of 2026-09-21 (A194–A202); everything else catalogued in this class has been fixed
+and moved to [`../fixed/`](../fixed/). A178–A193 were fixed in one run on 2026-09-21, and A202 is the
+half of A187 that run deliberately left. A194–A201 were found while localizing B48–B51 and C20–C22 —
 probing a gloss or a UI string in seven languages is its own defect hunt. Seven of those eight were
 reworded around rather than shipped; **A201 is wrong on screen today**, in the coreference chip's
 `pronoun.possessive.3sg.neut` (ja それの for その).

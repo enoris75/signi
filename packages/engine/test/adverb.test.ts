@@ -257,7 +257,7 @@ describe('known bugs: an adverb of place before the complements', () => {
   const tired = { complements: { predicative: { phrase: np('TIRED') } } };
   const aLegend = { complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } } };
 
-  test.fails('EVERYWHERE follows the predicate, the recipient and the object complement', () => {
+  test('EVERYWHERE follows the predicate, the recipient and the object complement', () => {
     expect(everywhere('SEEM', tired)).toMatchObject({
       en: 'the cat seems tired everywhere.', // now: "seems everywhere tired"
       it: 'il gatto sembra stanco ovunque.',
@@ -306,6 +306,46 @@ describe('known bugs: an adverb of place before the complements', () => {
     });
   });
 
+  // The generalisation: the slot is the locative's own, so it holds wherever a locative stands —
+  // behind the motion path, just ahead of a locative — and in every branch that renders the
+  // complements: a question, a command, a relative clause.
+  test('…just ahead of a locative, behind the path, and in the other branches', () => {
+    expect(everywhere('RUN', { complements: { locative: { phrase: np('HOUSE') } } })).toMatchObject({
+      en: 'the cat runs everywhere in the house.',
+      it: 'il gatto corre ovunque nella casa.',
+      fr: 'le chat court partout dans la maison.',
+      es: 'el gato corre en todas partes en la casa.',
+      pt: 'o gato corre em toda parte na casa.',
+    });
+    expect(everywhere('RUN', { complements: { source: { phrase: np('HOUSE') }, locative: { phrase: np('MARKET') } } })).toMatchObject({
+      en: 'the cat runs from the house everywhere in the market.',
+      it: 'il gatto corre via dalla casa ovunque nel mercato.',
+      fr: 'le chat court loin de la maison partout dans le marché.',
+      es: 'el gato corre lejos de la casa en todas partes en el mercado.',
+      pt: 'o gato corre longe da casa em toda parte no mercado.',
+    });
+    expect(everywhere('SEEM', { complements: { predicative: { phrase: np('TIRED') }, locative: { phrase: np('HOUSE') } } })).toMatchObject({
+      en: 'the cat seems tired everywhere in the house.',
+      fr: 'le chat semble fatigué partout dans la maison.',
+      pt: 'o gato parece cansado em toda parte na casa.',
+    });
+    expect(everywhere('EAT', { directObject: np('MOUSE'), interrogative: true })).toMatchObject({
+      en: 'does the cat eat the mouse everywhere?',
+      fr: 'est-ce que le chat mange la souris partout ?',
+      it: 'il gatto mangia il topo ovunque?',
+    });
+    expect(sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'EAT', modifier: 'EVERYWHERE' }, directObject: np('MOUSE'), imperative: true,
+    })).toMatchObject({ en: 'eat the mouse everywhere.', es: 'come el ratón en todas partes.' });
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'SEEM', modifier: 'EVERYWHERE' }, complements: { predicative: { phrase: np('TIRED') } } },
+    }), 'RUN'))).toMatchObject({
+      en: 'the dog that seems tired everywhere runs.',
+      it: 'il cane che sembra stanco ovunque corre.',
+      es: 'el perro que parece cansado en todas partes corre.',
+    });
+  });
+
   // Regression: after an object and ahead of a cause it is already where a locative stands, German's
   // middle field rightly puts it before the predicate, and Japanese is right.
   test('regression: an object and a cause, German and Japanese are right', () => {
@@ -322,6 +362,8 @@ describe('known bugs: an adverb of place before the complements', () => {
     expect(everywhere('SEEM', tired).de).toBe('der Kater scheint überall müde.');
     expect(everywhere('BE', aLegend)).toMatchObject({ de: 'der Kater ist überall eine Legende.', ja: '猫はどこでも伝説です。' });
     expect(everywhere('BE', tired).ja).toBe('猫はどこでも疲れています。');
+    expect(everywhere('RUN', { complements: { locative: { phrase: np('HOUSE') } } }))
+      .toMatchObject({ de: 'der Kater läuft überall im Haus.', ja: '猫は家でどこでも走ります。' });
   });
 });
 
@@ -338,7 +380,7 @@ describe('known bugs: an English particle after an object with a relative clause
   const command = (register?: 'instruction') =>
     ({ ...moves(), subject: np('SECOND_PERSON'), imperative: true, ...(register ? { imperativeRegister: register } : {}) });
 
-  test.fails('UP and DOWN come before an object with a relative clause', () => {
+  test('UP and DOWN come before an object with a relative clause', () => {
     expect(sayAll(moves()).en).toBe('the cat moves up the book that sees the dog.'); // now: "… sees the dog up"
     expect(sayAll(moves({ modifier: 'DOWN' })).en).toBe('the cat moves down the book that sees the dog.');
     expect(sayAll(moves({ tense: 'past' })).en).toBe('the cat moved up the book that sees the dog.');
@@ -361,6 +403,24 @@ describe('known bugs: an English particle after an object with a relative clause
       }),
       complements: { cause: { phrase: np('FOOD', { definiteness: 'all' }) } },
     }).en).toBe('no careful missing death was drinking up their least cold prison that feels missing Asia because of all food.');
+  });
+
+  // The generalisation: the hoist is on the object slot, so it reaches a relative clause's own
+  // predicate and the future's verb group, and a coordinated object takes it as soon as one conjunct
+  // carries a relative clause. A place adverb is no particle — it stands where a locative does
+  // (A189) — so it stays behind the object whatever the object holds.
+  test('…inside a relative clause, in the future, and across a coordinated object', () => {
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'MOVE', modifier: 'UP' }, directObject: bookThat() },
+    }), 'RUN')).en).toBe('the cat that moves up the book that sees the dog runs.');
+    expect(sayAll(moves({ tense: 'future' })).en).toBe('the cat will move up the book that sees the dog.');
+    expect(sayAll(clause(np('CAT'), 'MOVE', {
+      directObject: { conjuncts: [bookThat(), np('FOOD')], conjunction: 'and' }, verbPhrase: { modifier: 'UP' },
+    })).en).toBe('the cat moves up the book that sees the dog and the food.');
+    expect(sayAll(clause(np('CAT'), 'MOVE', {
+      directObject: { conjuncts: [np('BOOK'), np('FOOD')], conjunction: 'and' }, verbPhrase: { modifier: 'UP' },
+    })).en).toBe('the cat moves the book and the food up.');
+    expect(sayAll(moves({ modifier: 'EVERYWHERE' })).en).toBe('the cat moves the book that sees the dog everywhere.');
   });
 
   // Regression: a short object and a pronoun keep A156's order, and German and Japanese are right.

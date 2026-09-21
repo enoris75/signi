@@ -70,6 +70,20 @@ describe('nounPhrase', () => {
       expect(nounPhrase({ ...BOOK, number: 'plural' }, undefined, undefined, { kind: 'pronominal', person: '1', number: 'plural' })).toBe('our books');
     });
 
+    // A187: a head with a determiner of its own keeps it, and the possessor takes the of-genitive
+    // with the *independent* possessive; "all" stacks in front of the dependent one.
+    test('a pronominal possessor detaches into "of mine/hers" when the head keeps its determiner', () => {
+      const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+      expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, her)).toBe('this book of hers');
+      expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'some' }, undefined, undefined, her)).toBe('some books of hers');
+      expect(nounPhrase({ ...BOOK, definiteness: 'no' }, 'big', undefined, her)).toBe('no big book of hers');
+      expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, { kind: 'pronominal', person: '1', number: 'singular' }))
+        .toBe('this book of mine');
+      expect(nounPhrase({ ...BOOK, definiteness: 'that' }, undefined, undefined, { kind: 'pronominal', person: '3', number: 'plural' }))
+        .toBe('that book of theirs');
+      expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'all' }, 'big', undefined, her)).toBe('all her big books');
+    });
+
     test('a noun possessor is a Saxon genitive that replaces the article', () => {
       expect(nounPhrase(BOOK, undefined, undefined, np(CAT))).toBe("the cat's book");
       expect(nounPhrase(BOOK, 'old', undefined, np(CAT, { definiteness: 'indefinite' }))).toBe("a cat's old book");
@@ -91,6 +105,23 @@ describe('nounPhrase', () => {
       const catThatEats = np(CAT, {}, { relative: eatsTheMouse });
       expect(nounPhrase(BOOK, undefined, undefined, catThatEats)).toBe('the book of the cat that eats the mouse');
       expect(nounPhrase({ ...BOOK, definiteness: 'indefinite' }, undefined, undefined, catThatEats)).toBe('a book of the cat that eats the mouse');
+    });
+
+    // A184: the clitic fills the determiner slot, so a head with a determiner of its own takes the
+    // of-genitive instead — except "all", which stacks in front of the clitic.
+    test('a head that keeps its own determiner takes the of-genitive', () => {
+      expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, np(CAT))).toBe('this book of the cat');
+      expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'some' }, undefined, undefined, np(CAT))).toBe('some books of the cat');
+      expect(nounPhrase({ ...BOOK, definiteness: 'no' }, 'old', undefined, np(CAT))).toBe('no old book of the cat');
+      expect(nounPhrase({ ...WATER, definiteness: 'many' }, undefined, undefined, np(CAT))).toBe('much water of the cat');
+    });
+
+    test('`all` stacks in front of the Saxon genitive, and a proper head keeps it', () => {
+      expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'all' }, undefined, undefined, np(CAT))).toBe("all the cat's books");
+      expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'all' }, 'old', undefined, np(CAT))).toBe("all the cat's old books");
+      expect(nounPhrase({ ...EUROPE, definiteness: 'this' }, undefined, undefined, np(CAT))).toBe("the cat's Europe");
+      // An indefinite or bare head stays on the clitic too (the decision `her big book` pins).
+      expect(nounPhrase({ ...BOOK, definiteness: 'indefinite' }, undefined, undefined, np(CAT))).toBe("the cat's book");
     });
 
     test('post-modification propagates up the possessor chain', () => {

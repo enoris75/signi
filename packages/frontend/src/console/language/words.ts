@@ -188,14 +188,15 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
     case "aspect":
       return w.kind === "verb" && !finiteSlotTaken(w.root);
     // Only a verb with a patient has a passive to be in (see `VerbPhrase.voice`), and a command is
-    // always active. The *canvas* satellite also waits for the object to be there, since a control
+    // always active — an infinitive citation is not, so it keeps its voice and prints it ("to be
+    // loved"). The *canvas* satellite also waits for the object to be there, since a control
     // that can do nothing is worth hiding; the console asks only about the verb, because a line
     // names its object after its verb ("/verb ( eat /passive ) /obj ( food )") and a setting that
     // could not be written until the object existed could not be printed back either.
     case "voice":
       return (
         w.kind === "verb" &&
-        !finiteSlotTaken(w.root) &&
+        !w.root.imperative &&
         (w.slice.verb?.transitivity === "transitive" || w.slice.verb?.transitivity === "ditransitive")
       );
     case "polarity":

@@ -185,8 +185,13 @@ const OPS: Op[] = [
     const finite = !(sel.imperative || sel.infinitive);
     if (r < 0.3 && finite) return R.cycleTense(sel);
     if (r < 0.5 && finite) return R.cycleAspect(sel);
-    // The voice, which only a verb with a patient has (the satellite is gated on it too).
-    if (r < 0.6 && finite && (sel.verb?.transitivity === 'transitive' || sel.verb?.transitivity === 'ditransitive')) {
+    // The voice, which only a verb with a patient has (the satellite is gated on it too). It does
+    // not sit in the finite slot — an infinitive keeps its passive — so only a command rules it out.
+    if (
+      r < 0.6 &&
+      !sel.imperative &&
+      (sel.verb?.transitivity === 'transitive' || sel.verb?.transitivity === 'ditransitive')
+    ) {
       return R.cycleVoice(sel);
     }
     if (r < 0.75) return R.toggleNegative(sel);
@@ -378,13 +383,46 @@ describe('known bugs: A179 a passive infinitive', () => {
     return { containers: [{ id: 'p1', selection: sel }], links: [] };
   };
 
-  it.fails.each([
+  it.each([
     ['English', EN],
     ['Italian', IT],
   ])('gives the passive back (%s words)', (_name, vocab) => {
     const state = passiveInfinitive();
     const { back } = roundTrip(state, vocab);
     expect(back.diagnostic).toBeUndefined();
+    expect(normalizeWorkspace(back.state)).toEqual(normalizeWorkspace(state));
+  });
+
+  it.each([
+    ['English', EN, '/inf /verb ( love /passive ) /obj ( dog )'],
+    ['Italian', IT, '/inf /verb ( amare /passive ) /obj ( cane )'],
+  ])('writes the passive next to the infinitive (%s words)', (_name, vocab, line) => {
+    expect(printWorkspace(passiveInfinitive(), vocab)).toBe(line);
+  });
+
+  // The other direction, without the printer: a hand-written `/passive` under `/inf` is accepted.
+  it('takes a passive written under the infinitive', () => {
+    const back = applyScript(empty(), '/inf /verb ( love /passive ) /obj ( dog )', {
+      context: { containerId: 'p1' },
+      vocab: EN,
+      newId: ids(),
+    });
+    expect(back.diagnostic).toBeUndefined();
+    const sel = back.state.containers[0]!.selection;
+    expect(sel.infinitive).toBe(true);
+    expect(sel.verbVoice).toBe('passive');
+  });
+
+  // Regression: a command is always active, so nothing writes or takes a `/passive` for it.
+  it('writes no passive for a command', () => {
+    let sel: PhraseSelection = {};
+    sel = R.applyConceptSelect(sel, 'verb', byId('LOVE'));
+    sel = R.applyConceptSelect(sel, 'directObject', byId('DOG'));
+    sel = R.setVoice(sel, 'passive');
+    sel = R.setImperative(sel, true);
+    const state: WorkspaceState = { containers: [{ id: 'p1', selection: sel }], links: [] };
+    const { text, back } = roundTrip(state, EN);
+    expect(text).toBe('/command /verb ( love ) /obj ( dog )');
     expect(normalizeWorkspace(back.state)).toEqual(normalizeWorkspace(state));
   });
 

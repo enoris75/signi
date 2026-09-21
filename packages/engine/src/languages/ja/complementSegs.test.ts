@@ -160,11 +160,17 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ locative: complement(np(IE), [path('in')]) })))).toBe('家で');
     });
 
-    // A109: the existential いる / ある marks where the subject is with に.
-    test('an existential clause marks its locative with に, and only the locative', () => {
-      expect(text(complementSegs(complements({ locative: complement(np(IE)) }), true))).toBe('家に');
-      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('under')]) }), true))).toBe('家の下に');
-      expect(text(complementSegs(complements({ locative: complement(np(IE)), cause: complement(np(NEKO)) }), true))).toBe('家に猫のために');
+    // A109: the existential いる / ある marks where the subject is with に. A190: so do 住む and
+    // 閉じ込める, whose lexemes seed `locative_particle` — the caller passes the particle either way,
+    // and it reaches the locative alone.
+    test('a caller-given locative particle replaces で, and only on the locative', () => {
+      expect(text(complementSegs(complements({ locative: complement(np(IE)) }), 'に'))).toBe('家に');
+      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('under')]) }), 'に'))).toBe('家の下に');
+      expect(text(complementSegs(complements({ locative: complement(np(IE)), cause: complement(np(NEKO)) }), 'に'))).toBe('家に猫のために');
+      expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' })) }), 'に'))).toBe('どの家にも');
+      expect(text(complementSegs(complements({ locative: complement(group('or', np(IE), np(ICHIBA))) }), 'に'))).toBe('家か市場に');
+      // The route is a different complement and keeps its own を.
+      expect(text(complementSegs(complements({ route: complement(np(IE)) }), 'に'))).toBe('家を');
     });
 
     // A114: a no group closes its circumfix after the particle and the relational noun.
@@ -185,13 +191,13 @@ describe('complementSegs', () => {
     });
 
     // A176: a place passed through takes the traversal tail を通って, not the で of a plain place. A
-    // route keeps its bare を (above), and the existential keeps its に.
+    // route keeps its bare を (above), and a caller-given particle wins over it (A190).
     test('a through locative takes を通って, once for a group, with も after it for a no group', () => {
       expect(complementSegs(complements({ locative: complement(np(IE), [path('through')]) })))
         .toEqual([{ t: '家', r: 'いえ' }, { t: 'を通って' }]);
       expect(text(complementSegs(complements({ locative: complement(el(np(IE), np(ICHIBA)), [path('through')]) })))).toBe('家と市場を通って');
       expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' }), [path('through')]) })))).toBe('どの家を通っても');
-      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('through')]) }), true))).toBe('家に');
+      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('through')]) }), 'に'))).toBe('家に');
     });
   });
 

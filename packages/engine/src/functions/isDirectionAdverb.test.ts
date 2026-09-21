@@ -8,9 +8,10 @@ describe('isDirectionAdverb', () => {
     expect(isDirectionAdverb(concept({ base: 'nach unten', subtype: 'direction' }))).toBe(true);
   });
 
-  // A place adverb stands where a locative complement does, which is the direction adverb's slot.
-  test('an adverb of the place subtype', () => {
-    expect(isDirectionAdverb(concept({ base: 'partout', subtype: 'place' }))).toBe(true);
+  // A189: a place adverb stands where a locative complement does, not where the verb's particle does.
+  test('an adverb of the place subtype is not one', () => {
+    expect(isDirectionAdverb(concept({ base: 'partout', subtype: 'place' }))).toBe(false);
+    expect(isDirectionAdverb(concept({ base: 'everywhere', subtype: 'place' }))).toBe(false);
   });
 
   test('a manner or frequency adverb, or no adverb at all', () => {

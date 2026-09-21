@@ -17,15 +17,33 @@ import { npSegs } from './npSegs.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
+// The Japanese render order: the shared one with the subject complement moved to the end, against
+// the verb it predicates (A186).
+const JA_COMPLEMENT_ORDER: ComplementType[] = [
+  ...COMPLEMENT_RENDER_ORDER.filter((type) => type !== 'predicative'),
+  'predicative',
+];
+
 /**
- * The complements in Japanese order, each with its particle. `existential` marks a clause whose verb
- * is いる / ある: its locative states where the subject is, with に (家にいます), not the で of a place
- * where something happens (家で食べます).
+ * The complements in Japanese order, each with its particle. `locativeParticle` overrides the one a
+ * `locative` takes: the default で is the place where something happens (家で食べます), and a verb whose
+ * place is where something *is* or *ends up* asks for に instead — the existential いる / ある
+ * (家にいます, A109), and the lexemes seeding `locative_particle`, 住む and 閉じ込める (家に住みます, A190).
+ * The caller decides which; see `predicateSegs`.
+ *
+ * The subject complement comes last, straight before なる / 思える, where the shared
+ * `COMPLEMENT_RENDER_ORDER` — English and Romance order — leads with it. Anything between the two
+ * attaches to the verb instead: 「伝説に犬のためになります」 also reads "became beneficial to the dog"
+ * (犬のためになる), and 「伝説に犬となりました」 "became a dog" (犬となる) — A186. The object
+ * predicate keeps its place, which is already beside its own object (家を刑務所に変える).
  */
-export function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>, existential = false): RubySegment[] {
+export function complementSegs(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  locativeParticle?: string,
+): RubySegment[] {
   if (!complements) return [];
   const segs: RubySegment[] = [];
-  for (const type of COMPLEMENT_RENDER_ORDER) {
+  for (const type of JA_COMPLEMENT_ORDER) {
     const c = complements[type];
     if (!c) continue;
     // The factitive object complement takes the same shapes as the subject complement, and for the
@@ -125,9 +143,11 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     // Manner: a similative head takes 〜のように ("風のように" = like the wind), not the で the
     // means/measure/mode relations share; every other complement uses its fixed particle.
     const particle =
-      type === 'locative' && existential ? 'に'
+      type === 'locative' && locativeParticle !== undefined ? locativeParticle
       // A place the action passes through (A176): a locative's で says only where, so `through` takes
       // the traversal tail 家を通って. A route keeps its bare を, which already marks the path (家を走ります).
+      // A verb that puts something *at* the place wins over it: its に above says the same thing
+      // better ("lives through the house" is 家に住みます), as the existential already did.
       : type === 'locative' && spec === 'through' ? PATH_CITATION.through
       : type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'

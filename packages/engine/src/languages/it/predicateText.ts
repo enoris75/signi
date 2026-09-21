@@ -3,7 +3,9 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNou
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
+import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
@@ -149,11 +151,13 @@ export function predicateText(
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
-  // book"). Leading the complements slot puts it there in every branch below (A142).
+  // book"). Leading the complements slot puts it there in every branch below (A142). An adverb of
+  // place (EVERYWHERE) leaves the manner slot too, but stands among the complements where a locative
+  // does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection ? '' : adverbText;
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement, verb.forms)]
-    .filter(Boolean).join(' ');
+  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
+  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
   // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.

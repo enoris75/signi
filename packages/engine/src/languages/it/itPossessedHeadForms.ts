@@ -1,6 +1,7 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 import { isPlural } from './isPlural.js';
 
 /**
@@ -8,9 +9,22 @@ import { isPlural } from './isPlural.js';
  * "nella mia casa"), except before a singular, unmodified kinship noun, where it stands alone:
  * "mio padre", "a tuo padre". The article comes back with "loro" ("il loro padre"), in the plural
  * ("i miei padri") and with an adjective or a noun modifier ("il mio vecchio padre").
+ *
+ * A determiner of the head's own keeps its slot, because Italian simply stacks the two: "questo suo
+ * libro", "alcuni suoi libri", "nessun suo libro" and — the article included — "tutti i suoi libri"
+ * (A187). `renderNP` puts the possessive straight after whatever `artFor` or `prepDet` makes of
+ * these forms, so `all` belongs in the list here even though the other languages prefix a bare
+ * quantifier instead ("tous ses livres", "alle ihre Bücher") and let the possessive have the slot.
+ * As with a possessed name, `proper` is dropped so the determiner is the one the user picked.
  */
+const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all']);
+
 export function itPossessedHeadForms(np: ResolvedNounPhrase): Record<string, string> {
   const poss = np.possessor;
+  if (poss && isPronominalPossessor(poss) && IT_KEPT_BESIDE_POSSESSIVE.has(np.head.forms['definiteness'] ?? 'definite')) {
+    const { proper: _name, ...forms } = np.head.forms;
+    return forms;
+  }
   const bare = !!poss && isPronominalPossessor(poss)
     && np.head.forms['kinship'] === '1'
     && !isPlural(np.head.forms)

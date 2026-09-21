@@ -1537,8 +1537,8 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the largest continent, east of Europe',
     // A superlative is what tells one continent from the others, where "a continent" did not
-    // (localization A17): de "der größte Kontinent", ja 最も大きい大陸. Portuguese renders the
-    // suppletive after the noun, "o continente maior", where "o maior continente" is usual (A178).
+    // (localization A17): de "der größte Kontinent", ja 最も大きい大陸, pt "o maior continente"
+    // — prenominal since A178 was fixed, where it shipped as "o continente maior".
     definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['BIG'], adjectiveDegrees: ['most'] } },
     emoji: '🌏',
     proper: true,

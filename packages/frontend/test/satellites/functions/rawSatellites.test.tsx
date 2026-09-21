@@ -806,9 +806,33 @@ describe('known bugs: the determiner an alarm cry cannot take', () => {
 // nothing on the canvas shows the passive or takes it back. Either fix passes: the control stays for
 // the infinitive, or the infinitive takes the voice back to active, as the command does.
 describe('known bugs: A179 a passive infinitive', () => {
-  it.fails('leaves a way to take back the passive the translation still says', () => {
+  it('leaves a way to take back the passive the translation still says', () => {
     const sel = setInfinitive(setVoice({ verb: SEE, directObject: CAT }, 'passive'), true);
     expect(sel.verbVoice !== 'passive' || satellite(sel, 'verbVoice').available).toBe(true);
+  });
+
+  it('shows the infinitive’s passive as a set value, and takes it back to active', () => {
+    const sel = setInfinitive(setVoice({ verb: SEE, directObject: CAT }, 'passive'), true);
+    expect(satellite(sel, 'verbVoice')).toMatchObject({
+      available: true,
+      hasValue: true,
+      valueLabel: 't(voice.value.passive)',
+    });
+    const active = setVoice(sel, 'active');
+    expect(active.infinitive).toBe(true);
+    expect(active.verbVoice).toBe('active');
+    expect(satellite(active, 'verbVoice')).toMatchObject({ available: true, hasValue: false });
+  });
+
+  // Only the voice left the finite slot: the infinitive still withdraws the tense, the aspect and
+  // the modals, and the voice still waits for a patient to promote.
+  it('leaves the rest of the finite slot withdrawn under the infinitive', () => {
+    expect(offered({ infinitive: true, verb: SEE, directObject: CAT, verbModal: WANT, verbModal2: CAN }, 'verb')).toEqual([
+      'verbNegative',
+      'verbVoice',
+    ]);
+    expect(satellite({ infinitive: true, verb: SEE }, 'verbVoice').available).toBe(false);
+    expect(satellite({ infinitive: true, verb: SLEEP, directObject: CAT }, 'verbVoice').available).toBe(false);
   });
 
   // Regression: a command is always active, so its voice control stays withdrawn.

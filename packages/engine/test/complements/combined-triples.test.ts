@@ -224,8 +224,8 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       fr: 'le chat semble heureux au chien à cause de la souris.',
       es: 'el gato parece feliz al perro a causa del ratón.',
       pt: 'o gato parece feliz ao cão por causa do rato.',
-      de: 'der Kater scheint dem Hund glücklich wegen der Maus.',
-      ja: '猫は幸せに犬にネズミのために思えます。',
+      de: 'der Kater scheint dem Hund wegen der Maus glücklich.',
+      ja: '猫は犬にネズミのために幸せに思えます。',
     });
   });
 
@@ -238,8 +238,8 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       fr: 'le chat semble heureux au chien dans la maison.',
       es: 'el gato parece feliz al perro en la casa.',
       pt: 'o gato parece feliz ao cão na casa.',
-      de: 'der Kater scheint dem Hund glücklich im Haus.',
-      ja: '猫は幸せに犬に家で思えます。', // SEEM (思えます) is verb-like; BE below preposes its adjuncts before です
+      de: 'der Kater scheint dem Hund im Haus glücklich.',
+      ja: '猫は犬に家で幸せに思えます。', // SEEM (思えます) is verb-like; BE below preposes its adjuncts before です
     });
   });
 
@@ -256,7 +256,7 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       fr: 'le chat est une légende dans la maison à cause du chien.',
       es: 'el gato es una leyenda en la casa a causa del perro.',
       pt: 'o gato é uma lenda na casa por causa do cão.',
-      de: 'der Kater ist eine Legende im Haus wegen des Hundes.',
+      de: 'der Kater ist im Haus wegen des Hundes eine Legende.',
       // Both adjuncts — the place AND the cause — are preposed ahead of the predicate noun (A42).
       ja: '猫は家で犬のために伝説です。',
     });

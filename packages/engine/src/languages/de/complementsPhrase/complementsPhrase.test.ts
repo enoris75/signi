@@ -50,7 +50,7 @@ describe('complementsPhrase', () => {
     test('the infinitival copula closes the complements, against the verb cluster', () => {
       expect(complementsPhrase(complements({
         predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })), locative: complement(np(MARKT)),
-      }), SCHEINEN)).toBe('eine Legende im Markt zu sein');
+      }), SCHEINEN)).toBe('im Markt eine Legende zu sein');
     });
   });
 

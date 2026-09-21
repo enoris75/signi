@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import type { PronominalPossessor } from './types.js';
 import {
-  possessiveDe, possessiveEn, possessiveEs, possessiveFr, possessiveIt, possessiveJa, possessivePt, pronounPossessor,
+  dativePronounDe, disjunctiveFr, KEPT_BESIDE_POSSESSIVE, possessiveDe, possessiveEn, possessiveEnIndependent,
+  possessiveEs, possessiveEsStressed, possessiveFr, possessiveIt, possessiveJa, possessivePt, pronounPossessor,
 } from './possessive.js';
 
 const possessor = (person: '1' | '2' | '3', number: 'singular' | 'plural' = 'singular', gender?: 'masc' | 'fem' | 'neut'): PronominalPossessor =>
@@ -40,6 +41,68 @@ describe('possessiveEn', () => {
     expect(possessiveEn(possessor('1', 'plural'))).toBe('our');
     expect(possessiveEn(possessor('2', 'plural'))).toBe('your');
     expect(possessiveEn(possessor('3', 'plural', 'fem'))).toBe('their');
+  });
+});
+
+// A187: the forms each language needs once the head keeps a determiner of its own.
+describe('the determiners a possessive stands beside', () => {
+  test('are the demonstratives and the quantifiers, but not all/definite/indefinite/bare', () => {
+    for (const d of ['this', 'that', 'some', 'many', 'few', 'no']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(true);
+    for (const d of ['definite', 'indefinite', 'bare', 'all']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(false);
+  });
+});
+
+describe('possessiveEnIndependent', () => {
+  test('is the standalone form, the 3rd singular splitting on the antecedent\'s gender', () => {
+    expect(possessiveEnIndependent(possessor('3', 'singular', 'fem'))).toBe('hers');
+    expect(possessiveEnIndependent(possessor('3', 'singular', 'masc'))).toBe('his');
+    expect(possessiveEnIndependent(possessor('3', 'singular', 'neut'))).toBe('its');
+    expect(possessiveEnIndependent(possessor('1'))).toBe('mine');
+    expect(possessiveEnIndependent(possessor('2'))).toBe('yours');
+    expect(possessiveEnIndependent(possessor('1', 'plural'))).toBe('ours');
+    expect(possessiveEnIndependent(possessor('2', 'plural'))).toBe('yours');
+    expect(possessiveEnIndependent(possessor('3', 'plural'))).toBe('theirs');
+  });
+});
+
+describe('disjunctiveFr', () => {
+  test('carries the antecedent\'s features, the 3rd person gendering in both numbers', () => {
+    expect(disjunctiveFr(possessor('1'))).toBe('moi');
+    expect(disjunctiveFr(possessor('2'))).toBe('toi');
+    expect(disjunctiveFr(possessor('3', 'singular', 'fem'))).toBe('elle');
+    expect(disjunctiveFr(possessor('3', 'singular', 'masc'))).toBe('lui');
+    expect(disjunctiveFr(possessor('3'))).toBe('lui');
+    expect(disjunctiveFr(possessor('1', 'plural'))).toBe('nous');
+    expect(disjunctiveFr(possessor('2', 'plural'))).toBe('vous');
+    expect(disjunctiveFr(possessor('3', 'plural', 'fem'))).toBe('elles');
+    expect(disjunctiveFr(possessor('3', 'plural'))).toBe('eux');
+  });
+});
+
+describe('dativePronounDe', () => {
+  test('is the dative personal pronoun, the 3rd singular splitting on gender', () => {
+    expect(dativePronounDe(possessor('1'))).toBe('mir');
+    expect(dativePronounDe(possessor('2'))).toBe('dir');
+    expect(dativePronounDe(possessor('3', 'singular', 'fem'))).toBe('ihr');
+    expect(dativePronounDe(possessor('3', 'singular', 'masc'))).toBe('ihm');
+    expect(dativePronounDe(possessor('3', 'singular', 'neut'))).toBe('ihm');
+    expect(dativePronounDe(possessor('1', 'plural'))).toBe('uns');
+    expect(dativePronounDe(possessor('2', 'plural'))).toBe('euch');
+    expect(dativePronounDe(possessor('3', 'plural'))).toBe('ihnen');
+  });
+});
+
+describe('possessiveEsStressed', () => {
+  test('maps a prenominal possessive to its stressed paradigm, agreeing in gender and number', () => {
+    expect([MASC_SG, FEM_SG, MASC_PL, FEM_PL].map((a) => possessiveEsStressed('mi', a))).toEqual(['mío', 'mía', 'míos', 'mías']);
+    expect(possessiveEsStressed('mis', FEM_SG)).toBe('mía'); // the plural prenominal, the same paradigm
+    expect(possessiveEsStressed('tu', MASC_PL)).toBe('tuyos');
+    expect(possessiveEsStressed('sus', FEM_SG)).toBe('suya');
+  });
+
+  test('nuestro and vuestro are already stressed, and agree as they did', () => {
+    expect(possessiveEsStressed('nuestra', MASC_PL)).toBe('nuestros');
+    expect(possessiveEsStressed('vuestros', FEM_SG)).toBe('vuestra');
   });
 });
 

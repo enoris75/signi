@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { CoordConjunction, NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
-import { clause, np, say, sayAll } from './harness.js';
+import { clause, conjunctionAll, np, say, sayAll } from './harness.js';
 
 // Coordinated nouns. Where the comma falls and whether the conjunction repeats is a fact about
 // each language, so the engines do the joining; each conjunct keeps its own determiner, which
@@ -142,8 +142,9 @@ describe('coordinated clauses', () => {
       fr: "le chat court, c'est-à-dire le chien saute.",
       es: 'el gato corre, es decir, el perro salta.',
       pt: 'o gato corre, isto é, o cão pula.',
-      // "das heißt" is parenthetical, so — unlike "also" / "dann" — it does NOT invert.
-      de: 'der Kater läuft, das heißt der Hund springt.',
+      // "das heißt" is parenthetical, so it takes a comma on both sides too (A192) and — unlike
+      // "also" / "dann" — it does NOT invert.
+      de: 'der Kater läuft, das heißt, der Hund springt.',
       ja: '猫は走ります。つまり、犬は跳びます。',
     });
   });
@@ -545,7 +546,7 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
       fr: "l'Afrique est un continent en Asie, mais l'Antarctique ne le sera pas.",
       es: 'África es un continente en Asia, pero la Antártida no lo será.',
       pt: 'a África é um continente na Ásia, mas a Antártida não será.',
-      de: 'Afrika ist ein Kontinent in Asien, aber die Antarktis wird es nicht sein.',
+      de: 'Afrika ist in Asien ein Kontinent, aber die Antarktis wird es nicht sein.',
       ja: expect.stringMatching(/南極大陸はそうではありません。$/),
     });
     expect(but(catIs('LEGEND'), { negative: true })).toMatchObject({
@@ -747,15 +748,16 @@ describe('known bugs: Japanese clause coordination', () => {
 
 // A192. "Das heißt" before a whole clause is set off by a comma on both sides ("…, das heißt, wir
 // müssen ein Taxi nehmen"), as English "that is", Spanish "es decir" and Portuguese "isto é" already
-// are (A69). German joins it with only the comma before. Ruled a defect over the pins in "explicative
-// — that is" and germanEngine.test.ts on 2026-09-21. Found by the random phrase "…, that is, few cats'
-// walls come because of all big deaths." (seed 502396).
+// are (A69). German used to join it with only the comma before; `de.consts.ts` now names it in
+// `PARENTHETICAL_CONNECTORS`, as English does. Ruled a defect over the pins in "explicative — that
+// is" and germanEngine.test.ts on 2026-09-21, which moved with it. Found by the random phrase "…,
+// that is, few cats' walls come because of all big deaths." (seed 502396).
 describe('known bugs: German "das heißt" without a comma after it', () => {
   const join = (conjunction: CoordConjunction, first: PhrasePlan = clause(np('CAT'), 'RUN'), second: PhrasePlan = clause(np('DOG'), 'JUMP')) =>
     sayAll({ ...first, coordination: { conjunction, clause: second } });
 
-  test.fails('a comma follows "das heißt"', () => {
-    expect(join('that_is').de).toBe('der Kater läuft, das heißt, der Hund springt.'); // now: "das heißt der Hund"
+  test('a comma follows "das heißt"', () => {
+    expect(join('that_is').de).toBe('der Kater läuft, das heißt, der Hund springt.'); // was: "das heißt der Hund"
     expect(join('that_is', clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }), clause(np('DOG'), 'SEE', { directObject: np('BOOK') })).de)
       .toBe('der Kater frisst die Maus, das heißt, der Hund sieht das Buch.');
     expect(join('that_is', { ...clause(np('CAT'), 'RUN'), interrogative: true }).de).toBe('läuft der Kater, das heißt, springt der Hund?');
@@ -796,6 +798,33 @@ describe('known bugs: German "das heißt" without a comma after it', () => {
       en: 'the cat runs, that is, the dog jumps.',
       es: 'el gato corre, es decir, el perro salta.',
       pt: 'o gato corre, isto é, o cão pula.',
+    });
+  });
+
+  // The comma belongs to the sentence, not to the word: `renderConjunction`, which names the
+  // connector for the picker, still gives the bare "das heißt", as English gives the bare "that is".
+  test('the picker label is the bare connector, with no comma', () => {
+    expect(conjunctionAll('that_is')).toMatchObject({ de: 'das heißt', en: 'that is' });
+  });
+
+  // The comma sits between the connector and whatever the second clause opens with, so the clause's
+  // own tense, negation and modals change nothing about it.
+  test('the comma stands whatever the two clauses are', () => {
+    expect(join('that_is', clause(np('CAT'), 'RUN'), clause(np('DOG'), 'JUMP', { verbPhrase: { negative: true } })).de)
+      .toBe('der Kater läuft, das heißt, der Hund springt nicht.');
+    expect(join('that_is', clause(np('CAT'), 'RUN'), clause(np('DOG'), 'JUMP', { verbPhrase: { modals: ['MUST'] } })).de)
+      .toBe('der Kater läuft, das heißt, der Hund muss springen.');
+    expect(join('that_is', clause(np('CAT'), 'RUN', { verbPhrase: { tense: 'past' } })).de)
+      .toBe('der Kater lief, das heißt, der Hund springt.');
+  });
+
+  // Italian "cioè" and French "c'est-à-dire" join a clause with no comma after them. Italian
+  // commonly writes it that way and French usually says "c'est-à-dire que" before a clause —
+  // neither is part of this bug, and neither moved.
+  test('Italian and French keep their connector bare', () => {
+    expect(join('that_is')).toMatchObject({
+      it: 'il gatto corre, cioè il cane salta.',
+      fr: "le chat court, c'est-à-dire le chien saute.",
     });
   });
 });

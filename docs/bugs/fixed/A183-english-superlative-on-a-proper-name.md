@@ -3,8 +3,8 @@
 **Languages:** English
 
 An English superlative is definite: `the biggest dog`, never `biggest dog`
-([A25](../fixed/A25-english-superlative-indefinite-article.md),
-[A175](../fixed/A175-superlative-under-an-indefinite-determiner.md)). A proper name takes no article in
+([A25](A25-english-superlative-indefinite-article.md),
+[A175](A175-superlative-under-an-indefinite-determiner.md)). A proper name takes no article in
 English, and that holds for the positive and the comparative (`big Europe`, `bigger Europe`). A
 superlative brings the article back: `the biggest Europe`, `the least beautiful Asia`.
 
@@ -54,3 +54,30 @@ Update the comment on the proper-name line with it.
 | | |
 |---|---|
 | **Test** | `nounPhrase.test.ts` → *known bugs: an English superlative on a proper name* (1 `test.fails`, plus a regression test for the positive, the comparative, a possessive and a common noun) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+- **English.** [`determiner`](../../../packages/engine/src/languages/en/determiner.ts) lets a
+  superlative through the proper-name line: `if (forms['proper'] === '1') return superlative ? 'the ' : '';`.
+  Every caller already passes `superlative`, the Saxon possessor included, so the article reaches a
+  name in every position without another change. The comment on that line says so.
+
+**Tests guarding it.** `packages/engine/test/nounPhrase.test.ts` → *known bugs: an English superlative
+on a proper name*:
+
+- the former `test.fails`, now a plain passing test, with its assertions unchanged: the subject,
+  object, `least`, a second adjective, the `behind` locative, the direction, the possessor, the
+  predicate noun, an articled name, a language name;
+- the existing regression test (the positive, the comparative, a possessive keeping the slot, a
+  superlative on a common noun, and the other languages);
+- added: every determiner the plan can pick on a superlative name gives the same `the biggest Europe`
+  (the name drops the determiner, A180, and the superlative puts the article back);
+- added: the article reaches a name inside a source complement, a relative clause, a possessor chain
+  and both slots of one clause, while `equally` and `less` leave it bare.
+
+`packages/engine/src/languages/en/determiner.test.ts` checks the line directly: a `proper` head with
+a superlative returns `the ` under a definite, indefinite or bare determiner, and `''` without one.
+
+No passing test changed its expectation.

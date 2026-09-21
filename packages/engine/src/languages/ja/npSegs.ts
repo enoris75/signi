@@ -23,15 +23,22 @@ import { wordSeg } from './wordSeg.js';
  */
 export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const core: RubySegment[] = [];
-  // The determiner leads the phrase. Japanese spells no article, but the demonstratives and
-  // quantifiers are real prenominal words (この / すべての …) that render in a sentence; their の is
-  // part of the value, so they need no extra particle. The `no` quantifier is a circumfix — its
-  // prenominal どの leads here, its も closes the group with its case particle (see `jaParticleSegs`),
-  // and its clause-final ない is the predicate's job (see predicateSegs / mannerGlossSegs).
+  // Japanese spells no article, but the demonstratives and quantifiers are real prenominal words
+  // (この / すべての …) that render in a sentence; their の is part of the value, so they need no
+  // extra particle. The `no` quantifier is a circumfix — its prenominal どの is this segment, its も
+  // closes the group with its case particle (see `jaParticleSegs`), and its clause-final ない is the
+  // predicate's job (see predicateSegs / mannerGlossSegs).
+  //
+  // The determiner goes *after* the possessor, not at the head of the phrase (A185). A prenominal
+  // determiner modifies the nearest noun after it, so この猫の本 is "this cat's book" and 多くの猫の本
+  // is "many cats' books"; the head's own determiner belongs behind the possessor's の — 猫のこの本,
+  // 猫の多くの本, 猫のどの本も.
   const definiteness = (np.head.forms['definiteness'] ?? 'definite') as Definiteness;
   const prenominalDet = JA_PRENOMINAL_DET[definiteness];
-  if (prenominalDet) core.push({ t: prenominalDet });
-  else if (definiteness === 'no') core.push({ t: JA_NEGATIVE_DETERMINER.pre });
+  const detSegs: RubySegment[] =
+    prenominalDet ? [{ t: prenominalDet }]
+    : definiteness === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.pre }]
+    : [];
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
   // adjectives / nested possessor / relative clause ("子供の猫の本"). A pronominal possessor
   // ("彼の犬") is the antecedent pronoun + の, invariant of the possessed head.
@@ -43,6 +50,7 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
         : [...npSegs(np.possessor), ...(np.possessor.head.forms['definiteness'] === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.post }] : []), { t: 'の' }]),
     );
   }
+  core.push(...detSegs);
   // Attributive nouns ("sail boat") are also の-linked in Japanese (ガラスのコップ); the
   // relation is neutralised, so every relation renders the same の. The modifier's own
   // adjectives are bare (Japanese adjectives don't agree) and precede it (意味的なフレーズ

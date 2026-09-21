@@ -227,9 +227,11 @@ export function rawSatellites(
       icon: <SwapHorizIcon sx={iconSx} />,
       // Only a transitive verb with a direct object has a patient to promote into the subject
       // slot, so the control is there only when there is a passive to be had — the same condition
-      // the translator checks before it re-maps anything (see `resolveVoice`). A command is always
-      // active, so the finite slot being taken withdraws it as it does the tense and the aspect.
-      available: !finiteSlotTaken && passivizable && Boolean(selection.directObject),
+      // the translator checks before it re-maps anything (see `resolveVoice`). Unlike the tense and
+      // the aspect, the voice does not sit in the finite slot: an infinitive citation keeps it, and
+      // the engine says the passive one ("to be loved"). Only a command forces the active, so only
+      // the command withdraws the control (`setImperative` resets the voice to match).
+      available: !selection.imperative && passivizable && Boolean(selection.directObject),
       // Non-default (solid) once the voice is anything but the implicit active.
       hasValue: selection.verbVoice === "passive",
       alwaysSet: true,

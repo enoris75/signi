@@ -98,4 +98,19 @@ describe('nounPhrase', () => {
     expect(nounPhrase(GATO, undefined, 'mi')).toBe('mi gato');
     expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'indefinite' }, { pre: '', post: 'grandes' }, 'sus')).toBe('sus casas grandes');
   });
+
+  // A187: a determiner of the head's own keeps its slot and the possessive goes behind the noun in
+  // its stressed form, agreeing in gender as well as number.
+  test('a demonstrative or a quantifier keeps its slot and the possessive is stressed and postnominal', () => {
+    expect(nounPhrase({ ...GATO, definiteness: 'this' }, undefined, 'su')).toBe('este gato suyo');
+    expect(nounPhrase({ ...CASA, definiteness: 'that' }, undefined, 'mi')).toBe('esa casa mía');
+    expect(nounPhrase({ ...GATO, number: 'plural', definiteness: 'some' }, undefined, 'tus')).toBe('algunos gatos tuyos');
+    expect(nounPhrase({ ...CASA, definiteness: 'no' }, undefined, 'nuestra')).toBe('ninguna casa nuestra');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'many' }, { pre: '', post: 'grandes' }, 'sus')).toBe('muchas casas grandes suyas');
+  });
+
+  test('after "todos" the unstressed possessive keeps the article\'s place', () => {
+    expect(nounPhrase({ ...GATO, number: 'plural', definiteness: 'all' }, undefined, 'sus')).toBe('todos sus gatos');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'all' }, undefined, 'mis')).toBe('todas mis casas');
+  });
 });

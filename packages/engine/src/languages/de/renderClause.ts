@@ -1,4 +1,4 @@
-import type { ResolvedPhrase } from '../../types.js';
+import type { ResolvedNounElement, ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
@@ -6,6 +6,7 @@ import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
+import { complementsWithNicht } from './complementsWithNicht.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { dimensionGloss } from './dimensionGloss.js';
@@ -29,6 +30,35 @@ import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
 import { zuInfinitive } from './zuInfinitive.js';
+
+/**
+ * The determiners that make an object *known* — the ones that let it stand ahead of the negation
+ * (A191). A quantifier ("alle", "einige", "viele") is left behind "nicht", because moving it across
+ * the negation would change its scope, and an indefinite one is A182's "kein".
+ */
+const KNOWN_OBJECT_DETERMINERS = new Set(['definite', 'this', 'that']);
+
+/**
+ * Whether the direct object stands **ahead** of the "nicht"+adverb group in the Mittelfeld (A191).
+ * German leaves a known object where it stands without the adverb and lets "nicht" lead the adverb
+ * behind it: "frisst die Maus nicht schnell", not "frisst nicht schnell die Maus", which reads as a
+ * contrast ("not the mouse, but …").
+ *
+ * It applies only when "nicht" actually holds the adverb slot (`nichtBeforeObject`), and only to a
+ * noun object that renders in the Mittelfeld's noun slot — a pronoun already leads from the pronoun
+ * slot, a prepositional object (A139) stands with the complements, and a passive's by-phrase, which
+ * borrows the noun slot, is not an object and stays where it is. Every conjunct must be known: a
+ * group mixing a definite and a quantified conjunct keeps the whole object behind "nicht".
+ *
+ * Kept as one predicate because the three middle fields below — the declarative (shared by the
+ * question and the "wenn" protasis), the command/instruction and the infinitive — each splice their
+ * own slot list and must agree on the answer.
+ */
+function objectLeadsNicht(nichtBeforeObject: string, objectNoun: string, directObject?: ResolvedNounElement): boolean {
+  if (!nichtBeforeObject || !objectNoun || !directObject) return false;
+  return directObject.conjuncts.every((np) =>
+    !np.head.forms['person'] && KNOWN_OBJECT_DETERMINERS.has(np.head.forms['definiteness'] ?? 'definite'));
+}
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 // `inverted` renders the clause with the finite verb ahead of the subject, for when something
@@ -118,13 +148,18 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
       // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
       const impAdverb = adverbSlots(modifier, neg, '');
-      const impComplements = [proPlace, impDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
+      const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
       const impPronoun = withReflexive(register === 'instruction' ? '3sg' : ipn, impDirect.pronoun);
-      const mittelfeld = [impPronoun, impAdverb.nichtBeforeObject, impAdverb.beforeObject, dativeText, impDirect.noun,
-        impAdverb.nichtAfterObject, impAdverb.afterObject, neg.beforeComplements, impComplements, neg.after];
+      // A known object leads the "nicht"+adverb group instead of trailing it: "iss die Maus nicht
+      // schnell", not "iss nicht schnell die Maus" (A191, see `objectLeadsNicht`).
+      const impObjects = [dativeText, impDirect.noun];
+      const impLeads = objectLeadsNicht(impAdverb.nichtBeforeObject, impDirect.noun, objectToRender);
+      const mittelfeld = [impPronoun, ...(impLeads ? impObjects : []),
+        impAdverb.nichtBeforeObject, impAdverb.beforeObject, ...(impLeads ? [] : impObjects),
+        impAdverb.nichtAfterObject, impAdverb.afterObject, impComplements, neg.after];
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
@@ -142,14 +177,19 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       const infDirect = splitObject(objectToRender, proObject, objectPrep);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
-      const infComplements = [proPlace, infDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
+      const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements);
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
       // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
       // finite clause puts it too: "gegessen werden", "gegessen zu werden".
       const infVerb = [passiveParticipleText, zu ? zuInfinitive(plain) : (plain['base'] ?? '')]
         .filter(Boolean).join(' ');
-      return [withReflexive('3sg', infDirect.pronoun), infAdverb.nichtBeforeObject, infAdverb.beforeObject, dativeText, infObject,
-        infAdverb.nichtAfterObject, infAdverb.afterObject, neg.beforeComplements, infComplements, neg.after, infVerb, meansText]
+      // As in the command: a known object leads the "nicht"+adverb group ("das Essen nicht immer
+      // essen", A191). A passive's by-phrase borrows the object slot and is not one, so it stays.
+      const infObjects = [dativeText, infObject];
+      const infLeads = !passive && objectLeadsNicht(infAdverb.nichtBeforeObject, infDirect.noun, objectToRender);
+      return [withReflexive('3sg', infDirect.pronoun), ...(infLeads ? infObjects : []),
+        infAdverb.nichtBeforeObject, infAdverb.beforeObject, ...(infLeads ? [] : infObjects),
+        infAdverb.nichtAfterObject, infAdverb.afterObject, infComplements, neg.after, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -187,7 +227,12 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // The main verb's own adverb splits on its kind: a direction adverb follows the objects, every
     // other one leads them, and the "nicht" that marks the adverb slot goes where the adverb went.
     const adverb = adverbSlots(modifier, neg, modalAdverbsText);
-    const complementsText = [proPlace, prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
+    // A known object leads the whole "nicht" + adverbs group rather than trailing it — "frisst die
+    // Maus nicht schnell", "gibt dem Hund das Buch nicht schnell" (A191). The dative recipient keeps
+    // its place in front of the accusative object and travels with it.
+    const objects = [dativeText, directObjectText];
+    const objectLeads = !passive && objectLeadsNicht(adverb.nichtBeforeObject, objectNoun, objectToRender);
+    const complementsText = complementsWithNicht([proPlace, prepositional], rest, verb.forms, neg.beforeComplements);
     // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
     // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
     // non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. It is used for the
@@ -205,8 +250,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
         adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
         directionAdverb: adverb.afterObject, complements: complementsText,
       }, verbFinal)
-      : [objectPronounText, aspectMid, adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, dativeText, directObjectText,
-        adverb.nichtAfterObject, adverb.afterObject, neg.beforeComplements, complementsText, neg.after,
+      : [objectPronounText, aspectMid, ...(objectLeads ? objects : []),
+        adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, ...(objectLeads ? [] : objects),
+        adverb.nichtAfterObject, adverb.afterObject, complementsText, neg.after,
         ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail, complex.particle ?? ''])];
     return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

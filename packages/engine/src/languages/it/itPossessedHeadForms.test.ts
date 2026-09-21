@@ -23,6 +23,19 @@ describe('itPossessedHeadForms', () => {
     expect(itPossessedHeadForms(np(PADRE, {}, { possessor: pronominal('1'), nounModifiers: [nounModifier(VELA)] }))['definiteness']).toBe('definite');
   });
 
+  // A187: Italian stacks a demonstrative or a quantifier with the possessive ("questo suo libro",
+  // "tutti i suoi libri"), so those determiners keep their slot — `all` included, unlike the shared
+  // `possessedHeadForms`.
+  test('a demonstrative, a quantifier, `no` and `all` keep their slot', () => {
+    for (const definiteness of ['this', 'that', 'some', 'many', 'few', 'no', 'all']) {
+      expect(itPossessedHeadForms(np(CANE, { definiteness }, { possessor: pronominal('3') }))['definiteness']).toBe(definiteness);
+    }
+    // A possessed name drops `proper`, so it takes the determiner rather than the name's article.
+    expect(itPossessedHeadForms(np(CANE, { definiteness: 'this', proper: '1' }, { possessor: pronominal('3') }))['proper']).toBeUndefined();
+    // A kinship noun is no exception: "questo mio padre", not the bare "mio padre".
+    expect(itPossessedHeadForms(np(PADRE, { definiteness: 'this' }, { possessor: pronominal('1') }))['definiteness']).toBe('this');
+  });
+
   test('a phrase with no pronominal possessor keeps its own forms', () => {
     expect(itPossessedHeadForms(np(PADRE, { definiteness: 'indefinite' }))['definiteness']).toBe('indefinite');
     expect(itPossessedHeadForms(np(PADRE, {}, { possessor: np(CANE) }))['definiteness']).toBeUndefined();

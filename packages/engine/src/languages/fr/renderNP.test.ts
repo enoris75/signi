@@ -79,6 +79,31 @@ describe('renderNP', () => {
     expect(withArticle(np(LIVRE, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }))).toBe('leurs livres');
   });
 
+  // A187: the caller's head was built from a phrase `possessedHeadForms` left bare for the
+  // possessive, so a determiner of the head's own is spelled here — behind the preposition the head
+  // still carries — and the possessor trails as "à" + its disjunctive pronoun.
+  test('a head with its own determiner keeps it and the possessor trails as à + a disjunctive pronoun', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(withArticle(np(LIVRE, { definiteness: 'this' }, { possessor: her }))).toBe('ce livre à elle');
+    expect(withArticle(np(MAISON, { definiteness: 'no' }, { possessor: her }))).toBe('aucune maison à elle');
+    expect(withArticle(np(LIVRE, { number: 'plural', definiteness: 'some' }, { possessor: her }))).toBe('quelques livres à elle');
+    expect(withArticle(np(LIVRE, { definiteness: 'this' }, { possessor: her, adjectives: [concept(GRAND, 'BIG')] })))
+      .toBe('ce grand livre à elle');
+    // The complement's preposition stays in front of the determiner.
+    expect(renderNP(np(MAISON, { definiteness: 'this' }, { possessor: her }), () => 'dans')).toBe('dans cette maison à elle');
+    // The disjunctive pronoun carries the antecedent's own features, unlike the possessive.
+    expect(withArticle(np(LIVRE, { definiteness: 'this' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))
+      .toBe('ce livre à moi');
+    expect(withArticle(np(LIVRE, { definiteness: 'this' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural', gender: 'fem' } })))
+      .toBe('ce livre à elles');
+  });
+
+  test('after tous/toutes the possessive keeps the definite article\'s place', () => {
+    const his = { kind: 'pronominal', person: '3', number: 'singular' } as const;
+    expect(withArticle(np(LIVRE, { number: 'plural', definiteness: 'all' }, { possessor: his }))).toBe('tous ses livres');
+    expect(withArticle(np(MAISON, { number: 'plural', definiteness: 'all' }, { possessor: his }))).toBe('toutes ses maisons');
+  });
+
   test('a noun possessor trails as de + its own determiner, contracted only with the definite article', () => {
     expect(withArticle(np(LIVRE, {}, { possessor: np(CHAT) }))).toBe('le livre du chat');
     expect(withArticle(np(LIVRE, {}, { possessor: np(HOMME, { definiteness: 'indefinite' }) }))).toBe("le livre d'un homme");

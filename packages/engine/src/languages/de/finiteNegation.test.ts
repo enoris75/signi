@@ -1,10 +1,15 @@
 import { describe, expect, test } from 'vitest';
-import { concept, el, ESSEN, IMMER, KATZE, MAUS, modal, MUESSEN, NIE, np, vp, WERDEN_VERB } from './de.fixtures.js';
+import {
+  complement, complements, concept, el, ESSEN, EUROPA, IMMER, KATZE, MAUS, modal, MUEDE, MUESSEN, NIE, np, vp, WASSER, WERDEN_VERB,
+} from './de.fixtures.js';
 import { finiteNegation } from './finiteNegation.js';
 
 const empty = { beforeAspect: '', beforeAdverb: '', beforeComplements: '', after: '' };
 const mouse = el(np(MAUS));
 const noMouse = el(np(MAUS, { definiteness: 'no' }));
+const aMouse = el(np(MAUS, { definiteness: 'indefinite' }));
+const determiners = (el?: { conjuncts: { head: { forms: Record<string, string> } }[] }) =>
+  el?.conjuncts.map((c) => c.head.forms['definiteness']);
 
 describe('finiteNegation', () => {
   test('an affirmative clause places no nicht and keeps its object', () => {
@@ -41,6 +46,45 @@ describe('finiteNegation', () => {
   test('a kein object is the negator and stays kein: "isst keine Maus"', () => {
     expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: noMouse }, false)).toEqual({ nicht: empty, directObject: noMouse, complements: undefined });
     expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, modifier: concept(IMMER) }), directObject: noMouse }, false).nicht).toEqual(empty);
+  });
+
+  // A182, the other direction: the verb's own "nicht" is spelled into an indefinite object as
+  // "kein", so the slot stays empty and the object comes back `no`.
+  test('an indefinite or bare object takes the nicht as kein: "isst keine Maus", "isst kein Wasser"', () => {
+    const negated = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: aMouse }, false);
+    expect(negated.nicht).toEqual(empty);
+    expect(determiners(negated.directObject)).toEqual(['no']);
+    const water = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: el(np(WASSER, { definiteness: 'bare' })) }, false);
+    expect(water.nicht).toEqual(empty);
+    expect(determiners(water.directObject)).toEqual(['no']);
+    // The adverb keeps its own slot; only "nicht" goes ("isst schnell keine Maus").
+    expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, modifier: concept(IMMER) }), directObject: aMouse }, false).nicht)
+      .toEqual(empty);
+  });
+
+  // The predicate nominal takes it on the same terms (ruled 2026-09-21); a predicate ADJECTIVE is
+  // not a nominal "kein" can determine, so it keeps the "nicht" that leads it.
+  test('an indefinite predicate nominal takes it too, an adjective does not: "wird keine Katze", "wird nicht müde"', () => {
+    const aCat = complements({ predicative: complement(np(KATZE, { definiteness: 'indefinite' })) });
+    const nominal = finiteNegation({ verbPhrase: vp(WERDEN_VERB, { negative: true }), complements: aCat }, true);
+    expect(nominal.nicht).toEqual(empty);
+    expect(determiners(nominal.complements?.['predicative']?.phrase)).toEqual(['no']);
+    const tired = complements({ predicative: complement(np(MUEDE)) });
+    expect(finiteNegation({ verbPhrase: vp(WERDEN_VERB, { negative: true }), complements: tired }, true).nicht)
+      .toEqual({ ...empty, beforeComplements: 'nicht' });
+  });
+
+  // What "kein" cannot cover keeps "nicht": more than one conjunct and a proper name (the definite
+  // object is above). A negative adverb still negates on its own, leaving the plain indefinite.
+  test('a coordination and a proper name keep the nicht', () => {
+    const mixed = el(np(MAUS, { definiteness: 'indefinite' }), np(KATZE));
+    expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: mixed }, false).nicht)
+      .toEqual({ ...empty, after: 'nicht' });
+    expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: el(np(EUROPA, { definiteness: 'bare' })) }, false).nicht)
+      .toEqual({ ...empty, after: 'nicht' });
+    const never = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, modifier: concept(NIE) }), directObject: aMouse }, false);
+    expect(never.nicht).toEqual(empty);
+    expect(determiners(never.directObject)).toEqual(['indefinite']);
   });
 
   test('under a negative adverb every kein conjunct drops to the indefinite: "isst nie eine Maus"', () => {

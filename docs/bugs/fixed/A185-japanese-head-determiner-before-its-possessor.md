@@ -55,3 +55,25 @@ noun (`わずかな`, `少数の`), but that is the Japanese quantifier and coun
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: Japanese puts the head's determiner before its possessor* (1 `test.fails`, plus a regression test for the possessor's own determiner and a head with no possessor) |
+
+## Resolved
+
+**2026-09-21.** The determiner moved behind the possessor.
+
+- [`ja/npSegs.ts`](../../../packages/engine/src/languages/ja/npSegs.ts) still builds the determiner
+  segment from `JA_PRENOMINAL_DET[definiteness]` (or `JA_NEGATIVE_DETERMINER.pre` for `no`) where it
+  did, but holds it in `detSegs` and pushes it *after* the possessor block, in front of the noun
+  modifiers and adjectives: `猫のこの本`, `猫の多くの大きい本`, `猫のどの本も`. The closing も of the
+  どの…も circumfix is placed by the particle owner, so it was unaffected.
+
+Per the **Decision for the fixer**, `few` keeps `少しの` (`猫の少しの本`): the quantifier-and-counter
+choice is a separate matter from where the determiner sits.
+
+**Tests guarding it:** `packages/engine/test/possession.test.ts` → *known bugs: Japanese puts the
+head's determiner before its possessor* — the former `test.fails` is now a plain test, beside its
+regression test and a new one covering `few`, an `indefinite` head (no prenominal word to place),
+two stacked adjectives, a possessor that carries its own determiner at the next depth down
+(`猫の多くの父のこの本`), a pronominal possessor under `no` (`彼女のどの本も`) and the object position
+(`犬は猫のすべての本を見ます。`). Unit level:
+`packages/engine/src/languages/ja/npSegs.test.ts` → *a possessed head keeps its determiner after the
+possessor, before the adjectives*.

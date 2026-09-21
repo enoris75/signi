@@ -429,7 +429,7 @@ describe('French relative superlative doubles the article', () => {
     }), 'EAT'))).toMatchObject({
       it: 'il gatto più grande mangia.',
       es: 'el gato más grande come.',
-      pt: 'o gato maior come.',
+      pt: 'o maior gato come.',
     });
   });
 });
@@ -2063,7 +2063,7 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
       fr: 'le chat voit le chien le plus grand.', // now: "un chien le plus grand"
       de: 'der Kater sieht den größten Hund.', // now: "einen größten Hund"
       es: 'el gato ve el perro más grande.',
-      pt: 'o gato vê o cão maior.',
+      pt: 'o gato vê o maior cão.',
     });
     expect(sees(dog('indefinite', 'least'))).toMatchObject({
       it: 'il gatto vede il cane meno grande.', de: 'der Kater sieht den am wenigsten großen Hund.', fr: 'le chat voit le chien le moins grand.',
@@ -2072,7 +2072,7 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
       fr: 'le chat voit les chiens les plus grands.', de: 'der Kater sieht die größten Hunde.', es: 'el gato ve los perros más grandes.',
     });
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['most'] }) } } })))
-      .toMatchObject({ it: 'il gatto corre nella casa più grande.', de: 'der Kater läuft im größten Haus.', pt: 'o gato corre na casa maior.' });
+      .toMatchObject({ it: 'il gatto corre nella casa più grande.', de: 'der Kater läuft im größten Haus.', pt: 'o gato corre na maior casa.' });
     // A predicate noun defaults to the indefinite.
     expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('DOG', { adjectives: ['BIG'], adjectiveDegrees: ['most'] }) } } })))
       .toMatchObject({ it: 'il gatto è il cane più grande.', de: 'der Kater ist der größte Hund.', fr: 'le chat est le chien le plus grand.' });
@@ -2080,7 +2080,7 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
 
   test('a bare superlative takes the definite article', () => {
     expect(sayAll(clause(dog('bare'), 'RUN'))).toMatchObject({
-      it: 'il cane più grande corre.', fr: 'le chien le plus grand court.', de: 'der größte Hund läuft.', es: 'el perro más grande corre.', pt: 'o cão maior corre.',
+      it: 'il cane più grande corre.', fr: 'le chien le plus grand court.', de: 'der größte Hund läuft.', es: 'el perro más grande corre.', pt: 'o maior cão corre.',
     });
     expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'bare', adjectives: ['COLD'], adjectiveDegrees: ['most'] }) })))
       .toMatchObject({ fr: "le chat boit l'eau la plus froide.", de: 'der Kater trinkt das kälteste Wasser.', pt: 'o gato bebe a água mais fria.' });
@@ -2117,38 +2117,38 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
       ja: '猫は最も大きくない犬を見ます。',
     });
     expect(sees(dog('indefinite', 'most', { number: 'plural' }))).toMatchObject({
-      it: 'il gatto vede i cani più grandi.', pt: 'o gato vê os cães maiores.',
+      it: 'il gatto vede i cani più grandi.', pt: 'o gato vê os maiores cães.',
     });
     expect(sees(dog('bare', 'most', { number: 'plural' }))).toMatchObject({
       en: 'the cat sees the biggest dogs.', it: 'il gatto vede i cani più grandi.', fr: 'le chat voit les chiens les plus grands.',
-      de: 'der Kater sieht die größten Hunde.', es: 'el gato ve los perros más grandes.', pt: 'o gato vê os cães maiores.',
+      de: 'der Kater sieht die größten Hunde.', es: 'el gato ve los perros más grandes.', pt: 'o gato vê os maiores cães.',
     });
     expect(sees(np('CAT', { gender: 'fem', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['most'] }))).toMatchObject({
       it: 'il gatto vede la gatta più grande.', fr: 'le chat voit la chatte la plus grande.', de: 'der Kater sieht die größte Katze.',
-      es: 'el gato ve la gata más grande.', pt: 'o gato vê a gata maior.',
+      es: 'el gato ve la gata más grande.', pt: 'o gato vê a maior gata.',
     });
     const biggestHouse = np('HOUSE', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['most'] });
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: biggestHouse } } }))).toMatchObject({
       it: 'il gatto viene dalla casa più grande.', fr: 'le chat vient de la maison la plus grande.', de: 'der Kater kommt aus dem größten Haus.',
-      es: 'el gato viene de la casa más grande.', pt: 'o gato vem da casa maior.',
+      es: 'el gato viene de la casa más grande.', pt: 'o gato vem da maior casa.',
     });
     expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: biggestHouse } } }))).toMatchObject({
       it: 'il gatto va alla casa più grande.', fr: 'le chat va à la maison la plus grande.', de: 'der Kater geht zum größten Haus.',
-      es: 'el gato va a la casa más grande.', pt: 'o gato vai à casa maior.',
+      es: 'el gato va a la casa más grande.', pt: 'o gato vai à maior casa.',
     });
     expect(sayAll(clause(np('BOOK', { possessor: dog('indefinite') }), 'BURN'))).toMatchObject({
       it: 'il libro del cane più grande brucia.', fr: 'le livre du chien le plus grand brûle.', de: 'das Buch des größten Hundes brennt.',
-      es: 'el libro del perro más grande arde.', pt: 'o livro do cão maior arde.',
+      es: 'el libro del perro más grande arde.', pt: 'o livro do maior cão arde.',
     });
     expect(sayAll(clause(dog('indefinite'), 'SEE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } }))).toMatchObject({
       it: 'il libro è visto dal cane più grande.', fr: 'le livre est vu par le chien le plus grand.', de: 'das Buch wird vom größten Hund gesehen.',
-      es: 'el libro es visto por el perro más grande.', pt: 'o livro é visto pelo cão maior.',
+      es: 'el libro es visto por el perro más grande.', pt: 'o livro é visto pelo maior cão.',
     });
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjunction: 'and', conjuncts: [np('CAT', { definiteness: 'indefinite' }), dog('indefinite')] } })))
       .toMatchObject({
         en: 'the cat sees a cat and the biggest dog.', it: 'il gatto vede un gatto e il cane più grande.',
         fr: 'le chat voit un chat et le chien le plus grand.', de: 'der Kater sieht einen Kater und den größten Hund.',
-        es: 'el gato ve un gato y el perro más grande.', pt: 'o gato vê um gato e o cão maior.',
+        es: 'el gato ve un gato y el perro más grande.', pt: 'o gato vê um gato e o maior cão.',
       });
   });
 
@@ -2191,7 +2191,7 @@ describe('known bugs: Portuguese suppletive superlative before the noun', () => 
   const most = (concept: string, adjective: string, extra: Partial<NounPhrase> = {}) =>
     np(concept, { adjectives: [adjective], adjectiveDegrees: ['most'], ...extra });
 
-  test.fails('a suppletive superlative precedes the noun', () => {
+  test('a suppletive superlative precedes the noun', () => {
     expect(sayAll(clause(most('CAT', 'BIG'), 'EAT')).pt).toBe('o maior gato come.'); // now: "o gato maior"
     expect(sayAll(clause(most('CAT', 'GOOD'), 'EAT')).pt).toBe('o melhor gato come.');
     expect(sayAll(clause(most('CAT', 'BAD'), 'EAT')).pt).toBe('o pior gato come.');
@@ -2226,5 +2226,20 @@ describe('known bugs: Portuguese suppletive superlative before the noun', () => 
     expect(withDegree('BIG', 'most')).toMatchObject({
       it: 'il gatto più grande mangia.', es: 'el gato más grande come.', fr: 'le chat le plus grand mange.',
     });
+  });
+
+  // The suppletive agrees in number before the noun exactly as it did after it (it is invariant in
+  // gender and pluralises in -es), and it keeps its place under a determiner other than the definite
+  // and beside an ordinal, which already precedes the noun.
+  test('the prenominal suppletive agrees, and sits after an ordinal', () => {
+    expect(sayAll(clause(most('CAT', 'GOOD', { number: 'plural' }), 'EAT')).pt).toBe('os melhores gatos comem.');
+    expect(sayAll(clause(most('CAT', 'SMALL', { gender: 'fem', number: 'plural' }), 'EAT')).pt).toBe('as menores gatas comem.');
+    expect(sayAll(clause(most('CAT', 'BAD', { gender: 'fem' }), 'EAT')).pt).toBe('a pior gata come.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: most('DOG', 'GOOD', { definiteness: 'indefinite' }) })).pt)
+      .toBe('o gato vê o melhor cão.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['FIRST', 'BIG'], adjectiveDegrees: ['positive', 'most'] }), 'EAT')).pt)
+      .toBe('o primeiro maior gato come.');
+    // A periphrastic superlative still follows the noun in the plural too.
+    expect(sayAll(clause(most('CAT', 'BEAUTIFUL', { number: 'plural' }), 'EAT')).pt).toBe('os gatos mais belos comem.');
   });
 });

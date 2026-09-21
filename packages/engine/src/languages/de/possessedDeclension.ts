@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 
 /**
  * The determiner a German noun phrase's adjectives decline after, the companion of the forms
@@ -10,10 +11,16 @@ import type { ResolvedNounPhrase } from '../../types.js';
  * Not as `indefinite`, whose plural has no article and takes the strong endings (the "meine große
  * Kater" of A174).
  *
+ * A head that keeps a determiner of its own is the exception (A187): the possessive has moved to a
+ * postnominal "von" phrase ("dieses große Buch von ihr"), so the adjectives decline after that
+ * determiner like any other phrase's. "alle ihre großen Bücher" is not one of those — the possessive
+ * is still the ein-word the adjectives follow — so `all` keeps declining as `no`.
+ *
  * Any other phrase declines after the determiner its `forms` carry, `definite` when they carry none.
  * `forms` are the head forms the determiner builder reads, and default to the phrase's own.
  */
 export function possessedDeclension(np: ResolvedNounPhrase, forms: Record<string, string> = np.head.forms): string {
-  if (np.possessor && isPronominalPossessor(np.possessor)) return 'no';
-  return forms['definiteness'] ?? 'definite';
+  const definiteness = forms['definiteness'] ?? 'definite';
+  if (np.possessor && isPronominalPossessor(np.possessor) && !KEPT_BESIDE_POSSESSIVE.has(definiteness)) return 'no';
+  return definiteness;
 }

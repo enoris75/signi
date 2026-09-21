@@ -40,7 +40,7 @@ describe('complement pairs: predicative + …', () => {
       es: 'el gato parece feliz al perro.',
       pt: 'o gato parece feliz ao cão.',
       de: 'der Kater scheint dem Hund glücklich.', // dative experiencer leads, predicate adj trails
-      ja: '猫は幸せに犬に思えます。',
+      ja: '猫は犬に幸せに思えます。',
     });
   });
 
@@ -56,7 +56,7 @@ describe('complement pairs: predicative + …', () => {
       fr: 'le chat est une légende dans la maison.',
       es: 'el gato es una leyenda en la casa.',
       pt: 'o gato é uma lenda na casa.',
-      de: 'der Kater ist eine Legende im Haus.',
+      de: 'der Kater ist im Haus eine Legende.',
       // The locative is preposed ahead of the predicate noun, which closes on です (A42).
       ja: '猫は家で伝説です。',
     });
@@ -74,8 +74,8 @@ describe('complement pairs: predicative + …', () => {
       fr: 'le chat devient une légende à cause du chien.',
       es: 'el gato se vuelve una leyenda a causa del perro.',
       pt: 'o gato se torna uma lenda por causa do cão.',
-      de: 'der Kater wird eine Legende wegen des Hundes.',
-      ja: '猫は伝説に犬のためになります。',
+      de: 'der Kater wird wegen des Hundes eine Legende.',
+      ja: '猫は犬のために伝説になります。',
     });
   });
 });
@@ -311,7 +311,7 @@ describe('known bugs: combined complements', () => {
       fr: 'le chat est une légende à cause du chien.',
       es: 'el gato es una leyenda a causa del perro.',
       pt: 'o gato é uma lenda por causa do cão.',
-      de: 'der Kater ist eine Legende wegen des Hundes.',
+      de: 'der Kater ist wegen des Hundes eine Legende.',
       ja: '猫は犬のために伝説です。',
     });
   });
@@ -347,6 +347,6 @@ describe('known bugs: combined complements', () => {
     })).ja).toBe('猫は伝説です。');
     expect(sayAll(clause(np('CAT'), 'SEEM', {
       complements: { predicative: { phrase: np('HAPPY') }, locative: { phrase: np('HOUSE') } },
-    })).ja).toBe('猫は幸せに家で思えます。');
+    })).ja).toBe('猫は家で幸せに思えます。');
   });
 });

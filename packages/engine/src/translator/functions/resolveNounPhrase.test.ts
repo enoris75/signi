@@ -104,6 +104,24 @@ describe('resolveNounPhrase', () => {
       expect(resolveNounPhrase(otherBiggest, 'pt', lookup).head.forms['definiteness']).toBe('definite');
     });
 
+    // A180: a proper name takes the article its language fixes, never the one the plan picked, so the
+    // determiner is resolved to `definite` here — the article builders already assumed it, and every
+    // other reader of `definiteness` (declension, contraction, the quantifier, negative concord) now
+    // agrees with them.
+    test('a proper name is definite whatever determiner the plan picked, in every language', () => {
+      const europa = only('EUROPE', { base: 'Europa', plural: 'Europe', gender: 'fem', proper: '1' });
+      const name = (definiteness: NounPhrase['definiteness']): NounPhrase => ({ concept: 'EUROPE', definiteness });
+      for (const definiteness of ['indefinite', 'bare', 'this', 'that', 'no', 'some', 'many', 'few', 'all'] as const) {
+        for (const language of ['en', 'it', 'fr', 'de', 'es', 'pt', 'ja']) {
+          expect(resolveNounPhrase(name(definiteness), language, europa).head.forms['definiteness']).toBe('definite');
+        }
+      }
+      // So a quantifier no longer forces the plural surface on it either.
+      expect(headForms(name('many'), europa)).toMatchObject({ base: 'Europa', number: 'singular' });
+      // A common noun still keeps the determiner it was given.
+      expect(headForms({ concept: 'CAT', definiteness: 'many' })['definiteness']).toBe('many');
+    });
+
     test('a feminine referent takes the feminine forms', () => {
       expect(headForms({ concept: 'CAT', number: 'plural', gender: 'fem' })).toMatchObject({ base: 'gatte', gender: 'fem' });
     });

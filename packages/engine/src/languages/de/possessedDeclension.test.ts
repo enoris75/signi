@@ -24,6 +24,18 @@ describe('possessedDeclension', () => {
     expect(adjPhrase(singular, 'nom', possessedDeclension(singular))).toBe('großer');
   });
 
+  // A187: a head that kept its own determiner sends the possessive to a postnominal "von" phrase,
+  // so the adjectives decline after that determiner. "alle ihre großen Bücher" is not one of those
+  // — the possessive is still the ein-word in front of them — so `all` still declines as `no`.
+  test('a head that kept its determiner declines after it, `all` still after the possessive', () => {
+    expect(possessedDeclension(np(KATER, { definiteness: 'this' }, { possessor: my }))).toBe('this');
+    expect(possessedDeclension(np(KATER, { definiteness: 'no' }, { possessor: my }))).toBe('no');
+    expect(possessedDeclension(np(KATER, { number: 'plural', definiteness: 'some' }, { possessor: my }))).toBe('some');
+    expect(possessedDeclension(np(KATER, { number: 'plural', definiteness: 'all' }, { possessor: my }))).toBe('no');
+    const demonstrative = np(KATER, { definiteness: 'this' }, { possessor: my, adjectives: [adj(GROSS)] });
+    expect(adjPhrase(demonstrative, 'nom', possessedDeclension(demonstrative))).toBe('große'); // weak, after "dieser"
+  });
+
   test('any other phrase declines after its own determiner, definite by default', () => {
     expect(possessedDeclension(np(KATER, { definiteness: 'indefinite' }))).toBe('indefinite');
     expect(possessedDeclension(np(KATER))).toBe('definite');

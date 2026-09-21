@@ -319,9 +319,9 @@ describe('known bugs: Italian possessive before a kinship noun', () => {
 describe('known bugs: a pronominal possessor drops the head\'s determiner', () => {
   const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
   const mine: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
-  const bookOfHers = (definiteness: 'this' | 'some' | 'no' | 'all') => sayAll(clause(np('BOOK', { definiteness, possessor: her }), 'BURN'));
+  const bookOfHers = (definiteness: 'this' | 'that' | 'some' | 'many' | 'few' | 'no' | 'all') => sayAll(clause(np('BOOK', { definiteness, possessor: her }), 'BURN'));
 
-  test.fails('every language keeps a demonstrative, a quantifier, `no` and `all` beside the possessive', () => {
+  test('every language keeps a demonstrative, a quantifier, `no` and `all` beside the possessive', () => {
     expect(bookOfHers('this')).toMatchObject({
       en: 'this book of hers burns.', // now: "her book burns."
       it: 'questo suo libro brucia.', fr: 'ce livre à elle brûle.', de: 'dieses Buch von ihr brennt.',
@@ -362,6 +362,98 @@ describe('known bugs: a pronominal possessor drops the head\'s determiner', () =
     expect(say(clause(np('FATHER', { possessor: mine }), 'RUN'), 'it')).toBe('mio padre corre.');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: mine }) } } }))).toMatchObject({
       it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.', de: 'der Kater läuft in meinem Haus.',
+    });
+  });
+
+  // The fix generalises to the rest of the determiners and to the other persons: `that`, `many` and
+  // `few` take the same shape as `this` and `some`, and the possessive keeps agreeing with the
+  // possessed head while the detached pronoun keeps the antecedent's features ("à eux", "von ihnen").
+  test('that, many, few and a 3rd-plural antecedent take the same shapes', () => {
+    expect(bookOfHers('that')).toMatchObject({
+      en: 'that book of hers burns.', it: 'quel suo libro brucia.', fr: 'ce livre à elle brûle.',
+      de: 'jenes Buch von ihr brennt.', es: 'ese libro suyo arde.', pt: 'esse livro seu arde.',
+    });
+    expect(bookOfHers('many')).toMatchObject({
+      en: 'many books of hers burn.', it: 'molti suoi libri bruciano.', fr: 'beaucoup de livres à elle brûlent.',
+      de: 'viele Bücher von ihr brennen.', es: 'muchos libros suyos arden.', pt: 'muitos livros seus ardem.',
+    });
+    expect(bookOfHers('few')).toMatchObject({
+      en: 'few books of hers burn.', it: 'pochi suoi libri bruciano.', fr: 'peu de livres à elle brûlent.',
+      de: 'wenige Bücher von ihr brennen.', es: 'pocos libros suyos arden.', pt: 'poucos livros seus ardem.',
+    });
+    expect(sayAll(clause(np('HOUSE', { definiteness: 'this', possessor: { kind: 'pronominal', person: '3', number: 'plural' } }), 'BURN'))).toMatchObject({
+      en: 'this house of theirs burns.', it: 'questa loro casa brucia.', fr: 'cette maison à eux brûle.',
+      de: 'dieses Haus von ihnen brennt.', es: 'esta casa suya arde.', pt: 'esta casa sua arde.',
+    });
+  });
+
+  // The adjectives keep their places around the new shapes: prenominal in English/German/French,
+  // between the Italian possessive and its noun, postnominal in Spanish/Portuguese before the
+  // stressed possessive. German declines them after the determiner it kept, not after the ein-word.
+  test('the adjectives sit where each language puts them', () => {
+    expect(sayAll(clause(np('BOOK', { definiteness: 'this', adjectives: ['BIG'], possessor: her }), 'BURN'))).toMatchObject({
+      en: 'this big book of hers burns.', it: 'questo suo grande libro brucia.', fr: 'ce grand livre à elle brûle.',
+      de: 'dieses große Buch von ihr brennt.', es: 'este libro grande suyo arde.', pt: 'este livro grande seu arde.',
+    });
+    expect(sayAll(clause(np('BOOK', { definiteness: 'all', adjectives: ['BIG'], possessor: her }), 'BURN'))).toMatchObject({
+      en: 'all her big books burn.', it: 'tutti i suoi grandi libri bruciano.', fr: 'tous ses grands livres brûlent.',
+      de: 'alle ihre großen Bücher brennen.', es: 'todos sus libros grandes arden.', pt: 'todos os seus livros grandes ardem.',
+    });
+  });
+
+  // English, French and Italian carry the new shape into a complement as well; German, Spanish and
+  // Portuguese complements build their possessive prenominally from `possessedHeadForms` and still
+  // drop the determiner there ("in meinem Haus"), which is A202's.
+  test('a complement keeps the determiner in English, French and Italian', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'this', possessor: mine }) } } }))).toMatchObject({
+      en: 'the cat runs in this house of mine.',
+      fr: 'le chat court dans cette maison à moi.',
+      it: 'il gatto corre in questa mia casa.',
+      ja: '猫は私のこの家で走ります。',
+    });
+    expect(sayAll(clause(np('BOOK', { possessor: np('FATHER', { definiteness: 'this', possessor: her }) }), 'BURN'))).toMatchObject({
+      en: 'the book of this father of hers burns.',
+      fr: 'le livre de ce père à elle brûle.',
+      it: 'il libro di questo suo padre brucia.',
+      de: 'das Buch dieses Vaters von ihr brennt.',
+    });
+  });
+});
+
+// A202. A187 gave the head's determiner back beside a pronominal possessive, but only where the
+// language's own noun-phrase builder renders the head. German, Spanish and Portuguese complements
+// decline the head themselves and place the possessive prenominally, reading the `possessedHeadForms`
+// that still overwrites `definiteness` — so in a complement, and only in those three, the determiner
+// is dropped as it was before. Under a `no` the concord checks still fire, so Spanish and Portuguese
+// negate the verb with no negative word left to answer to.
+describe('known bugs: a possessive in a German, Spanish or Portuguese complement', () => {
+  const mine: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+  const inHouse = (definiteness: 'this' | 'no') =>
+    sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness, possessor: mine }) } } }));
+
+  test.fails('a complement keeps the determiner in German, Spanish and Portuguese too', () => {
+    expect(inHouse('this')).toMatchObject({
+      de: 'der Kater läuft in diesem Haus von mir.', // now: "in meinem Haus"
+      es: 'el gato corre en esta casa mía.',
+      pt: 'o gato corre nesta casa minha.',
+    });
+    expect(inHouse('no')).toMatchObject({
+      de: 'der Kater läuft in keinem Haus von mir.',
+      es: 'el gato no corre en ninguna casa mía.', // now: "no corre en mi casa", negated with nothing to negate
+      pt: 'o gato não corre em nenhuma casa minha.',
+    });
+  });
+
+  // Regression: the four languages whose complements already carry the determiner, and the plain
+  // possessive, which is what all seven give for a definite, indefinite or bare head.
+  test('the other four languages and a plain possessive are right', () => {
+    expect(inHouse('this')).toMatchObject({
+      en: 'the cat runs in this house of mine.', fr: 'le chat court dans cette maison à moi.',
+      it: 'il gatto corre in questa mia casa.', ja: '猫は私のこの家で走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: mine }) } } }))).toMatchObject({
+      de: 'der Kater läuft in meinem Haus.', es: 'el gato corre en mi casa.', pt: 'o gato corre na minha casa.',
+      en: 'the cat runs in my house.', it: 'il gatto corre nella mia casa.',
     });
   });
 });

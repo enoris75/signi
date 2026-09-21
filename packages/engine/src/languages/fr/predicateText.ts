@@ -3,7 +3,9 @@ import type { ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, Resol
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
+import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
@@ -75,9 +77,11 @@ export function predicateText(
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
-  // book"). Leading the complements slot puts it there in every branch below (A142).
+  // book"). Leading the complements slot puts it there in every branch below (A142). An adverb of
+  // place (PARTOUT) leaves the manner slot too, but stands among the complements where a locative
+  // does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection ? '' : adverbText;
+  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
   // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.
   const groupNegative = groupHasNegativeAdverb(verbPhrase);
@@ -196,8 +200,8 @@ export function predicateText(
     effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticipleText].filter(Boolean).join(' ');
     if (isFrequency) effectiveMod = '';
   }
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement, verb.forms)]
-    .filter(Boolean).join(' ');
+  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
   // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"
   // takes "ne" alone ("ne manger aucune souris"), as `negateFinite` has it; "ne" elides against the

@@ -7,7 +7,7 @@ Taxi benutzen`. With only a phrase after it, there is no comma after it (`am Mon
 Feiertag`). The engine's `that_is` always joins two clauses, so German always needs the second comma.
 English, Spanish and Portuguese already mark their connector as parenthetical and get it (`the cat
 runs, that is, the dog jumps.`, `es decir,`, `isto é,`).
-[A69](../fixed/A69-english-spanish-connector-comma.md) gave them that comma and left German `das
+[A69](A69-english-spanish-connector-comma.md) gave them that comma and left German `das
 heißt` as it was.
 
 [`germanEngine`](../../../packages/engine/src/languages/de/germanEngine.ts) joins every coordination as
@@ -62,3 +62,36 @@ Neither is part of this bug. Not pinned.
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: German "das heißt" without a comma after it* (1 `test.fails`, plus a regression test for the coordinators, the inverting adverbs and English, Spanish and Portuguese) |
+
+## Resolved
+
+2026-09-21. Took the shape above. German now has the English shape:
+[`de.consts.ts`](../../../packages/engine/src/languages/de/de.consts.ts) exports
+`PARENTHETICAL_CONNECTORS = new Set(['that_is'])`, and
+[`germanEngine`](../../../packages/engine/src/languages/de/germanEngine.ts)'s coordination join adds a
+comma after a connector the set names, exactly as
+[`englishEngine`](../../../packages/engine/src/languages/en/englishEngine.ts) does. The engine's
+`that_is` always joins two clauses, which is the case German style wants the comma in; a phrase-only
+"d. h." has no plan to arise from. `renderConjunction`, which names the connector alone for the
+picker, is untouched, so the menu still reads "das heißt".
+
+**Two passing assertions moved with it,** as the bug file said they would:
+
+| Test | Was | Is |
+|---|---|---|
+| `coordination.test.ts` → *coordinated clauses › explicative — "that is"* | `der Kater läuft, das heißt der Hund springt.` | `der Kater läuft, das heißt, der Hund springt.` |
+| `de/germanEngine.test.ts` → *und, oder, aber and das heißt leave the second clause in V2 order* | `der Kater isst, das heißt der Mann geht` | `der Kater isst, das heißt, der Mann geht` |
+
+**Italian and French** keep their bare connector (`cioè`, `c'est-à-dire`), as the bug file decided,
+and a regression case in the A192 block now says so.
+
+- **Tests:** [`packages/engine/test/coordination.test.ts`](../../../packages/engine/test/coordination.test.ts)
+  → *known bugs: German "das heißt" without a comma after it*. The pinning `test.fails` is now a
+  passing `test`, with its assertions unchanged (the plain join, two clauses with objects, a question,
+  a `wenn` clause, and the random phrase). New cases:
+  - the picker label is the bare connector, German and English;
+  - the comma stands whatever the clauses are — a negated second clause, a modal, a past first clause;
+  - Italian and French keep their connector bare.
+
+  The regression test for the true coordinators, the inverting adverbs, English, Spanish and
+  Portuguese is unchanged.

@@ -2,7 +2,7 @@
 
 **Language:** English
 
-UP and DOWN are particles of the verb. [A156](../fixed/A156-english-direction-adverb-after-complements.md)
+UP and DOWN are particles of the verb. [A156](./A156-english-direction-adverb-after-complements.md)
 put them right after the object (`moves the book up`), which is right for a short object. An object
 that carries a relative clause ends in that clause's verb. A particle after it attaches to the nearest
 verb, so `the cat moves the book that sees the dog up` reads as "the book that sees the dog up". English
@@ -58,7 +58,7 @@ places the object right after the verb, so the one change reaches them all.
   particle has a place to move to. Not pinned.
 - **Other heavy objects.** The trial moves the particle only for a relative clause. A long coordinated
   object is also better with the particle first, but nothing attaches to it wrongly. Not pinned.
-- **Romance.** A direction adverb after the object ([A142](../fixed/A142-direction-adverb-before-object.md))
+- **Romance.** A direction adverb after the object ([A142](./A142-direction-adverb-before-object.md))
   has the same attachment after a relative clause: `il gatto sposta il libro che vede il cane su.`,
   `el gato mueve el libro que ve el perro arriba.` A142 chose the post-object slot because the
   pre-object one reads as another sentence in Italian (`sposta su il libro`, "moves onto the book").
@@ -67,3 +67,24 @@ places the object right after the verb, so the one change reaches them all.
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: an English particle after an object with a relative clause* (1 `test.fails`, plus a regression test for a short object, a pronoun, A156's complement, German and Japanese) |
+
+## Resolved
+
+Fixed 2026-09-21, as the shape above describes, in English only.
+
+- **The hoist.** [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts)
+  computes `particleFirst`: a direction adverb, an active clause, and any conjunct of the direct
+  object carrying a `relative`. The object slot then opens on the adverb, and the complements slot is
+  built with an empty adverb text, so the particle is spelled exactly once. Every branch —
+  declarative, negative, question, command, instruction, the modals and the aspects — already puts
+  the object right after the verb group, so the one hoist reaches them all.
+- **What did not move.** A short object and a pronoun keep A156's split order, a passive has no
+  object left to carry a relative clause, and a place adverb is no particle, so it stays where a
+  locative stands (A189). Romance is out of scope, as the decision above has it.
+
+- **Tests:**
+  - [`adverb.test.ts`](../../../packages/engine/test/adverb.test.ts) → *known bugs: an English
+    particle after an object with a relative clause*: the pinning test is a plain `test` now, with a
+    new case for the hoist inside a relative clause's own predicate, in the future, across a
+    coordinated object where one conjunct carries the relative clause (and a plain coordination that
+    keeps A156's order), and for EVERYWHERE staying behind the same object.

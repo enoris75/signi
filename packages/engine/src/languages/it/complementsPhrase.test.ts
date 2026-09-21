@@ -225,6 +225,17 @@ describe('complementsPhrase', () => {
       expect(one('direction', complement(bigEurope))).toBe('nella grande Europa');
     });
 
+    // A188: a superlative follows the noun, and the article is what makes it one and not a
+    // comparative (C01) — so it brings the article back as a prenominal adjective does. The
+    // comparative keeps A169's bare "in": "in Europa più grande" is "in a bigger Europe".
+    test('a proper noun carrying a superlative takes the article-fused in; the comparative stays bare', () => {
+      const degree = (d: string) => np(EUROPA, {}, { adjectives: [concept({ ...GRANDE, degree: d }, 'BIG')] });
+      expect(one('locative', complement(degree('most')))).toBe("nell'Europa più grande");
+      expect(one('direction', complement(degree('most')))).toBe("nell'Europa più grande");
+      expect(one('locative', complement(degree('least')))).toBe("nell'Europa meno grande");
+      expect(one('locative', complement(degree('more')))).toBe('in Europa più grande');
+    });
+
     // Fixed A41: HOME in plain containment is the fixed idiom "a casa", with no article to fuse.
     // HOUSE shares the word "casa" but not the idiom — the override keys off the concept.
     test('HOME takes the "a casa" idiom; a marked determiner, plural or relation keeps the place', () => {

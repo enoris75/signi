@@ -20,6 +20,19 @@ import type { PronominalPossessor, RubySegment } from './types.js';
 /** person + number, the key most possessive paradigms are indexed by. */
 type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';
 
+/**
+ * The determiners a possessive stands *beside* rather than replaces (A187). A possessive fills the
+ * determiner slot of a definite, indefinite or bare head ("her book", "il suo libro"), but a
+ * demonstrative or a quantifier keeps its slot and pushes the possessive somewhere else — behind
+ * the noun in French, German, English, Spanish and Portuguese ("ce livre à elle", "dieses Buch von
+ * ihr", "this book of hers", "este libro suyo", "este livro seu"), stacked after it in Italian
+ * ("questo suo libro"). `all` is not one of them: it prefixes the possessive rather than standing in
+ * for it ("all her books", "tous ses livres", "alle ihre Bücher"), and each noun phrase adds it
+ * itself — except Italian, which does stack the two ("tutti i suoi libri").
+ */
+export const KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> =
+  new Set(['this', 'that', 'some', 'many', 'few', 'no']);
+
 /** Grammatical gender/number of the possessed head — the Romance/German agreement target. */
 export interface PossessedAgreement {
   gender: 'masc' | 'fem' | 'neut';
@@ -55,6 +68,22 @@ export function possessiveEn(feats: PronominalPossessor): string {
   const table: Record<PN, string> = {
     '1sg': 'my', '2sg': 'your', '3sg': 'his',
     '1pl': 'our', '2pl': 'your', '3pl': 'their',
+  };
+  return table[pn(feats)];
+}
+
+/**
+ * The *independent* English possessive ("this book of **hers**"). The dependent my/her/their fills
+ * the determiner slot, so a head that keeps a determiner of its own needs this form instead, in the
+ * of-genitive A184 built for a genitive possessor (A187).
+ */
+export function possessiveEnIndependent(feats: PronominalPossessor): string {
+  if (pn(feats) === '3sg') {
+    return feats.gender === 'fem' ? 'hers' : feats.gender === 'neut' ? 'its' : 'his';
+  }
+  const table: Record<PN, string> = {
+    '1sg': 'mine', '2sg': 'yours', '3sg': 'his',
+    '1pl': 'ours', '2pl': 'yours', '3pl': 'theirs',
   };
   return table[pn(feats)];
 }
@@ -106,6 +135,20 @@ export function possessiveFr(
   return f.masc;
 }
 
+/**
+ * The disjunctive pronoun French puts after "à" when the possessive cannot have the determiner
+ * slot: "ce livre **à elle**", "cette maison **à moi**" (A187).
+ */
+export function disjunctiveFr(feats: PronominalPossessor): string {
+  if (pn(feats) === '3sg') return feats.gender === 'fem' ? 'elle' : 'lui';
+  if (pn(feats) === '3pl') return feats.gender === 'fem' ? 'elles' : 'eux';
+  const table: Record<PN, string> = {
+    '1sg': 'moi', '2sg': 'toi', '3sg': 'lui',
+    '1pl': 'nous', '2pl': 'vous', '3pl': 'eux',
+  };
+  return table[pn(feats)];
+}
+
 // ── Spanish ─────────────────────────────────────────────────────────────────
 // mi/tu/su agree only in number (mi/mis); nuestro/vuestro also in gender.
 const ES: Record<PN, [string, string, string, string] | { sg: string; pl: string }> = {
@@ -121,6 +164,29 @@ export function possessiveEs(feats: PronominalPossessor, agree: PossessedAgreeme
   const forms = ES[pn(feats)];
   if (Array.isArray(forms)) return forms[romanceIndex(agree)];
   return agree.number === 'plural' ? forms.pl : forms.sg;
+}
+
+/**
+ * The *stressed* Spanish possessive, the postnominal counterpart of the prenominal mi/tu/su:
+ * "este libro **suyo**", "esta casa **mía**" (A187). It agrees with the possessed head in gender as
+ * well as number, which the unstressed singular forms do not, so it is keyed by the prenominal
+ * surface the noun phrase was handed — `es/nounPhrase` receives the possessive as a word, not as the
+ * possessor's features. nuestro/vuestro are already stressed and map to themselves.
+ */
+const ES_STRESSED: Record<string, [string, string, string, string]> = {
+  mi: ['mío', 'mía', 'míos', 'mías'],
+  tu: ['tuyo', 'tuya', 'tuyos', 'tuyas'],
+  su: ['suyo', 'suya', 'suyos', 'suyas'],
+  nuestro: ['nuestro', 'nuestra', 'nuestros', 'nuestras'],
+  vuestro: ['vuestro', 'vuestra', 'vuestros', 'vuestras'],
+};
+
+const ES_STRESSED_DEFAULT: [string, string, string, string] = ['suyo', 'suya', 'suyos', 'suyas'];
+
+export function possessiveEsStressed(unstressed: string, agree: PossessedAgreement): string {
+  // mis/tus/sus and nuestra/nuestros/… all reduce to their paradigm's key.
+  const key = unstressed.replace(/s$/, '').replace(/[ao]$/, 'o');
+  return (ES_STRESSED[key] ?? ES_STRESSED_DEFAULT)[romanceIndex(agree)];
 }
 
 // ── Portuguese ───────────────────────────────────────────────────────────────
@@ -172,6 +238,19 @@ export function possessiveDe(
   // euer → eur- before an ending; unser keeps its stem.
   const base = stem === 'euer' ? 'eur' : stem;
   return `${base}${ending}`;
+}
+
+/**
+ * The dative personal pronoun German puts after "von" when the possessive cannot have the
+ * determiner slot: "dieses Buch **von ihr**", "einige Bücher **von mir**" (A187).
+ */
+export function dativePronounDe(feats: PronominalPossessor): string {
+  if (pn(feats) === '3sg') return feats.gender === 'fem' ? 'ihr' : 'ihm';
+  const table: Record<PN, string> = {
+    '1sg': 'mir', '2sg': 'dir', '3sg': 'ihm',
+    '1pl': 'uns', '2pl': 'euch', '3pl': 'ihnen',
+  };
+  return table[pn(feats)];
 }
 
 // ── Japanese ─────────────────────────────────────────────────────────────────

@@ -497,10 +497,13 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'viviremos', '2pl_future': 'viviréis', '3pl_future': 'vivirán',
       },
       ja: {
+        // 住む names where one *is*, not where an act goes on, so its place takes に and never the
+        // で of an ordinary locative: 東京に住む, 猫は家に住みます (`locative_particle`, A190).
         base: '住む',
         reading: 'すむ',
         masu_present: '住みます',
         masu_present_reading: 'すみます',
+        locative_particle: 'に',
       },
       pt: {
         base: 'morar',

@@ -1,8 +1,9 @@
 import { isPronominalPossessor } from '@signi/shared';
-import type { ResolvedNounPhrase } from '../../types.js';
+import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { possessiveFr } from '../../possessive.js';
+import { disjunctiveFr, KEPT_BESIDE_POSSESSIVE, possessiveFr } from '../../possessive.js';
+import { artFor } from './artFor.js';
 import { deDet } from './deDet.js';
 import { elidesBefore } from './elidesBefore.js';
 import { frMods } from './frMods.js';
@@ -30,15 +31,32 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // agreeing with *this* possessed head; mon/ton/son stand in before a vowel-initial feminine. The
   // caller builds the head from `possessedHeadForms(np, 'bare')`, so what is left of it is a
   // complement's preposition alone ("à ton chien", "dans ma maison", "de mon chien").
+  //
+  // A head that carries a determiner of its own keeps it, and the possessor moves into a
+  // postnominal "à" phrase instead: "ce livre à elle", "aucun livre à elle" (A187). `headFor` was
+  // built from a head `possessedHeadForms` left bare for the possessive, so the determiner is spelled
+  // here, in front of the noun and behind whatever preposition the head still carries ("dans cette
+  // maison à moi"). After "all" the possessive stays where it is and the quantifier leads, taking
+  // the definite article's place: "tous ses livres".
   const poss = np.possessor;
-  const possWord = poss && isPronominalPossessor(poss)
+  const pronominal = !!poss && isPronominalPossessor(poss);
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const detached = pronominal && KEPT_BESIDE_POSSESSIVE.has(definiteness);
+  const possWord = poss && isPronominalPossessor(poss) && !detached
     ? possessiveFr(
         poss,
         { gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
         elidesBefore(forms, lead),
       )
     : '';
-  const words = [possWord, ...pre, noun].filter(Boolean);
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  // A possessed name takes the determiner the user picked, `proper` dropped as `possessedHeadForms`
+  // drops it.
+  const { proper: _name, ...ownForms } = forms;
+  const detWord = detached ? artFor(ownForms, plural, lead)
+    : pronominal && definiteness === 'all' ? (fem ? 'toutes' : 'tous')
+    : '';
+  const words = [detWord, possWord, ...pre, noun].filter(Boolean);
   const core = joinArt(headFor(plural, words[0] ?? noun), words.join(' '));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
@@ -55,6 +73,8 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // was already rendered prenominally above.)
   const base = poss && !isPronominalPossessor(poss)
     ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead))}`
+    // The detached possessor takes the genitive's own postnominal slot: "ce livre à elle".
+    : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`
     : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;

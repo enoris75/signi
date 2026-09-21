@@ -30,6 +30,20 @@ describe('ptAdj', () => {
     expect(ptAdj(phrase)).toEqual({ pre: '', post: 'maior e menos velha' });
   });
 
+  // A178: at `most` a suppletive stands before the noun ("o maior gato"), where after it it would
+  // read as the comparative. A periphrastic superlative keeps its postnominal place.
+  test('a suppletive superlative precedes the noun, a periphrastic one follows it', () => {
+    expect(ptAdj(np(GATO, {}, { adjectives: [concept({ ...GRANDE, degree: 'most' }, 'BIG')] })))
+      .toEqual({ pre: 'maior', post: '' });
+    expect(ptAdj(np(GATO, { number: 'plural' }, { adjectives: [concept({ ...BOM, degree: 'most' }, 'GOOD')] })))
+      .toEqual({ pre: 'melhores', post: '' });
+    expect(ptAdj(np(CASA, {}, { adjectives: [adj(BELO, { degree: 'most' })] })))
+      .toEqual({ pre: '', post: 'mais bela' });
+    // It leads the prenominal list's other members out of the postnominal one, which keeps its own.
+    expect(ptAdj(np(GATO, {}, { adjectives: [concept({ ...GRANDE, degree: 'most' }, 'BIG'), adj(VELHO)] })))
+      .toEqual({ pre: 'maior', post: 'velho' });
+  });
+
   test('a no-determined phrase agrees its adjectives in the singular', () => {
     const phrase = np(RATO, { number: 'plural', definiteness: 'no' }, { adjectives: [adj(VELHO)] });
     expect(ptAdj(phrase).post).toBe('velho');

@@ -275,7 +275,7 @@ What landed differently from the plan:
    "did you mean" ([complete.ts:923](../../../packages/frontend/src/console/language/complete.ts#L923))
    and the echo icon's "from the canvas" (B43 has that one, shipped 2026-09-21 as `console.fromCanvas`). "period {n}" could take `period.name` and
    the number, as the header does, once a candidate can carry a value after its `detailKey`.
-7. **Found by the round-trip stress run, and filed as [A179](../../bugs/A-must-fix/A179-passive-infinitive-hidden-and-unprinted.md):**
+7. **Found by the round-trip stress run, and filed as [A179](../../bugs/fixed/A179-passive-infinitive-hidden-and-unprinted.md):**
    at `SEEDS=5000`, seeds 764, 1659 and 2022 fail the same way before and after this task. A passive
    set before `/inf` stays in the translation, but the canvas hides its control and the printer
    drops `/passive`.

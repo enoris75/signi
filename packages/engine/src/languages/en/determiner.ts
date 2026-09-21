@@ -9,8 +9,10 @@ import { indefiniteArticle } from './indefiniteArticle.js';
  * trailing space, or "" for bare.
  */
 export function determiner(forms: Record<string, string>, lead: string, superlative = false): string {
-  // A proper noun ("Africa") takes no article in English, whatever determiner was picked.
-  if (forms['proper'] === '1') return '';
+  // A proper noun ("Africa") takes no article in English, whatever determiner was picked — except
+  // under a superlative, which brings the article back ("the biggest Europe", A183). The positive and
+  // the comparative stay bare ("big Europe", "bigger Europe").
+  if (forms['proper'] === '1') return superlative ? 'the ' : '';
   const definiteness = forms['definiteness'] ?? 'definite';
   // English superlatives are inherently definite ("THE biggest cat"), so an indefinite or bare
   // determiner is ungrammatical with one ("a biggest cat", "biggest cats"). Force "the". The

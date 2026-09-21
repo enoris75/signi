@@ -2,7 +2,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import type { PtAdjectives } from './pt.types.js';
-import { PRENOMINAL } from './pt.consts.js';
+import { PRENOMINAL, PT_SUPPLETIVE } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { isPlural } from './isPlural.js';
 import { ptComparison } from './ptComparison.js';
@@ -14,10 +14,16 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const pre: string[] = [];
   const post: string[] = [];
   for (const a of np.adjectives) {
-    // A comparative/superlative follows the noun even when its plain form precedes it: its
-    // degree marking (periphrastic "mais …" or a suppletive like "maior") belongs with the
-    // phrase, not between the article and the noun.
-    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
+    // A compared adjective follows the noun even when its plain form precedes it: its degree
+    // marking belongs with the phrase, not between the article and the noun — "o gato maior" (the
+    // bigger cat), "o gato mais belo" (the most beautiful cat).
+    // One exception: a suppletive at `most` stands before the noun, "o maior gato", "o melhor gato"
+    // (A178). After the noun it reads as the comparative, and the superlative loses the one place
+    // Portuguese marks it, since the definite article is on the comparative too (C01).
+    if (PT_SUPPLETIVE[a.forms['base'] ?? ''] && adjDegree(a) === 'most') {
+      const surface = ptComparison(a, gender, plural);
+      if (surface) pre.push(surface);
+    } else if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
       const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
       if (surface) pre.push(surface);
     } else {

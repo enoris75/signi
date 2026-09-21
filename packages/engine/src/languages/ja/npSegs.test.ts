@@ -68,6 +68,23 @@ describe('npSegs', () => {
     expect(text(npSegs(np(HON, {}, { possessor: np(NEKO, {}, { possessor: np(KODOMO) }) })))).toBe('子供の猫の本');
   });
 
+  // A185: a prenominal determiner modifies the nearest noun after it, so この猫の本 would read "this
+  // cat's book". The head's own determiner belongs behind the possessor's の.
+  test('a possessed head keeps its determiner after the possessor, before the adjectives', () => {
+    expect(npSegs(np(HON, { definiteness: 'this' }, { possessor: np(NEKO) }))).toEqual([
+      { t: '猫', r: 'ねこ' },
+      { t: 'の' },
+      { t: 'この' },
+      { t: '本', r: 'ほん' },
+    ]);
+    expect(text(npSegs(np(HON, { definiteness: 'many', number: 'plural' }, { possessor: np(NEKO), adjectives: [adj(OOKII)] }))))
+      .toBe('猫の多くの大きい本');
+    expect(text(npSegs(np(HON, { definiteness: 'no' }, { possessor: np(NEKO) })))).toBe('猫のどの本');
+    // The possessor's own determiner still leads the possessor, at every depth.
+    expect(text(npSegs(np(HON, { definiteness: 'this' }, { possessor: np(NEKO, { definiteness: 'many', number: 'plural' }) }))))
+      .toBe('多くの猫のこの本');
+  });
+
   test('a pronominal possessor is the pronoun + の, before the adjectives', () => {
     const hers = np(INU, {}, { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } });
     expect(npSegs(hers)).toEqual([{ t: '彼女', r: 'かのじょ' }, { t: 'の' }, { t: '犬', r: 'いぬ' }]);

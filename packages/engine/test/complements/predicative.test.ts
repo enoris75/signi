@@ -329,7 +329,7 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
     });
     expect(seemsIn({ negative: true })).toMatchObject({
       en: 'the cat does not seem to be a legend.',
-      de: 'der Kater scheint nicht eine Legende zu sein.',
+      de: 'der Kater scheint keine Legende zu sein.', // A182: an indefinite predicate nominal takes "kein"
       fr: 'le chat ne semble pas une légende.',
     });
     expect(seemsIn({ tense: 'future' })).toMatchObject({
@@ -382,7 +382,7 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
     expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend() }, locative: { phrase: np('MARKET') } } })))
       .toMatchObject({
         en: 'the cat seems to be a legend in the market.',
-        de: 'der Kater scheint eine Legende im Markt zu sein.',
+        de: 'der Kater scheint im Markt eine Legende zu sein.',
       });
     expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend() }, terminus: { phrase: np('DOG') } } })))
       .toMatchObject({
@@ -717,7 +717,7 @@ describe('known bugs: the predicate is not next to its verb', () => {
     sayAll(clause(np('CAT'), 'BECOME', { verbPhrase, complements }));
   const becauseOfDog = { cause: { phrase: np('DOG') } };
 
-  test.fails('German closes the Mittelfeld with the predicate', () => {
+  test('German closes the Mittelfeld with the predicate', () => {
     expect(becomes({}, { predicative: { phrase: legend }, ...becauseOfDog }).de).toBe('der Kater wird wegen des Hundes eine Legende.');
     expect(becomes({ aspect: 'resultative' }, { predicative: { phrase: legend }, ...becauseOfDog }).de)
       .toBe('der Kater ist wegen des Hundes eine Legende geworden.'); // now: "ist eine Legende wegen des Hundes geworden"
@@ -753,7 +753,7 @@ describe('known bugs: the predicate is not next to its verb', () => {
     }, 'de')).toBe('sind diese Stöcke wegen der fehlenden Kuh keine Person geworden?');
   });
 
-  test.fails('Japanese puts the predicate straight before なる and 思える', () => {
+  test('Japanese puts the predicate straight before なる and 思える', () => {
     expect(becomes({}, { predicative: { phrase: legend }, ...becauseOfDog }).ja).toBe('猫は犬のために伝説になります。'); // now: 伝説に犬のためになります
     expect(becomes({ modals: ['MUST'] }, { predicative: { phrase: legend }, ...becauseOfDog }).ja).toBe('猫は犬のために伝説になる必要があります。');
     expect(becomes({ tense: 'past' }, { predicative: { phrase: legend }, locative: { phrase: np('HOUSE') } }).ja).toBe('猫は家で伝説になりました。');
@@ -776,6 +776,45 @@ describe('known bugs: the predicate is not next to its verb', () => {
       },
       interrogative: true,
     }, 'ja')).toBe('この棒は見つからない牛のためにどの人にもなっていませんか？');
+  });
+
+  // The negation follows the predicate to the end of the Mittelfeld. "nicht" leads the complements
+  // (A159), but with the predicate last that would read as a constituent negation of the adjunct —
+  // "ist nicht wegen des Hundes müde" says the dog is not the reason. Sentence negation stands right
+  // before the predicate instead. A predicate *nominal* takes "kein" and no "nicht" at all (A182).
+  test('"nicht" stands right before the predicate, not before the adjuncts', () => {
+    const not = (verb: string, verbPhrase: Partial<VerbPhrase> = {}) =>
+      say(clause(np('CAT'), verb, { verbPhrase: { negative: true, ...verbPhrase }, complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } }), 'de');
+    expect(not('BE')).toBe('der Kater ist wegen des Hundes nicht müde.');
+    expect(not('BECOME')).toBe('der Kater wird wegen des Hundes nicht müde.');
+    expect(not('SEEM')).toBe('der Kater scheint wegen des Hundes nicht müde.');
+    expect(not('BE', { aspect: 'resultative' })).toBe('der Kater ist wegen des Hundes nicht müde gewesen.');
+    expect(not('BECOME', { modals: ['MUST'] })).toBe('der Kater muss wegen des Hundes nicht müde werden.');
+    // The relative clause, the command and the infinitive share the rule.
+    expect(say(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'BECOME', negative: true }, complements: { predicative: { phrase: np('TIRED') }, cause: { phrase: np('MOUSE') } } },
+    }), 'RUN'), 'de')).toBe('der Hund, der wegen der Maus nicht müde wird, läuft.');
+    const bare = { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } };
+    expect(say({ ...clause(np('SECOND_PERSON'), 'BE', bare), imperative: true }, 'de')).toBe('sei wegen des Hundes nicht müde.');
+    expect(say({ ...clause(np('CAT'), 'BE', bare), infinitive: true }, 'de')).toBe('wegen des Hundes nicht müde sein.');
+    // An object predicative closes the Mittelfeld the same way, and takes the "nicht" with it.
+    expect(say(clause(np('CAT'), 'TRANSFORM', {
+      verbPhrase: { negative: true }, directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'indefinite' }) }, ...becauseOfDog },
+    }), 'de')).toBe('der Kater verwandelt das Haus wegen des Hundes nicht in ein Gefängnis.');
+    // A predicate nominal is "kein" (A182), so no "nicht" is placed at all.
+    expect(becomes({ negative: true }, { predicative: { phrase: legend }, ...becauseOfDog }).de)
+      .toBe('der Kater wird wegen des Hundes keine Legende.');
+    expect(say(clause(np('CAT'), 'SEEM', { verbPhrase: { negative: true }, complements: { predicative: { phrase: legend }, locative: { phrase: np('MARKET') } } }), 'de'))
+      .toBe('der Kater scheint im Markt keine Legende zu sein.');
+    // With no predicate to close on, "nicht" keeps A159's slot at the head of the complements.
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { negative: true }, complements: { locative: { phrase: np('HOUSE') } } }), 'de'))
+      .toBe('der Kater ist nicht im Haus.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }), 'de'))
+      .toBe('der Kater ist nicht müde.');
+    // Japanese negates on the verb, which the predicate now stands against.
+    expect(say(clause(np('CAT'), 'SEEM', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } }), 'ja'))
+      .toBe('猫は犬のために疲れているように思えません。');
   });
 
   // Regression: a predicate alone, the Japanese copula (whose locative A42 already preposes) and

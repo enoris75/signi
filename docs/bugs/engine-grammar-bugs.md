@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (37 of
-them, as of this writing, pinning twenty-four bugs in Part A; Part B has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (15 of
+them, as of this writing, pinning nine bugs in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -61,22 +61,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Area |
 |---|---|---|
-| A178 | [A178-portuguese-suppletive-superlative-position.md](A-must-fix/A178-portuguese-suppletive-superlative-position.md) | Portuguese |
-| A179 | [A179-passive-infinitive-hidden-and-unprinted.md](A-must-fix/A179-passive-infinitive-hidden-and-unprinted.md) | Frontend |
-| A180 | [A180-determiner-on-a-proper-name.md](A-must-fix/A180-determiner-on-a-proper-name.md) | German, Spanish, Japanese, Italian, French, Portuguese (translator) |
-| A181 | [A181-negative-similative-manner-negates-the-clause.md](A-must-fix/A181-negative-similative-manner-negates-the-clause.md) | Italian, French, Spanish, Portuguese |
-| A182 | [A182-german-nicht-with-an-indefinite-object.md](A-must-fix/A182-german-nicht-with-an-indefinite-object.md) | German |
-| A183 | [A183-english-superlative-on-a-proper-name.md](A-must-fix/A183-english-superlative-on-a-proper-name.md) | English |
-| A184 | [A184-english-genitive-drops-the-head-determiner.md](A-must-fix/A184-english-genitive-drops-the-head-determiner.md) | English |
-| A185 | [A185-japanese-head-determiner-before-its-possessor.md](A-must-fix/A185-japanese-head-determiner-before-its-possessor.md) | Japanese |
-| A186 | [A186-predicate-not-next-to-its-verb.md](A-must-fix/A186-predicate-not-next-to-its-verb.md) | German, Japanese |
-| A187 | [A187-pronominal-possessor-drops-the-head-determiner.md](A-must-fix/A187-pronominal-possessor-drops-the-head-determiner.md) | English, Italian, French, German, Spanish, Portuguese |
-| A188 | [A188-superlative-place-name-bare-preposition.md](A-must-fix/A188-superlative-place-name-bare-preposition.md) | Italian, French |
-| A189 | [A189-place-adverb-before-the-complements.md](A-must-fix/A189-place-adverb-before-the-complements.md) | English, Italian, French, Spanish, Portuguese |
-| A190 | [A190-japanese-ni-locative-of-live-and-confine.md](A-must-fix/A190-japanese-ni-locative-of-live-and-confine.md) | Japanese |
-| A191 | [A191-german-nicht-and-adverb-before-a-definite-object.md](A-must-fix/A191-german-nicht-and-adverb-before-a-definite-object.md) | German |
-| A192 | [A192-german-das-heisst-without-a-comma.md](A-must-fix/A192-german-das-heisst-without-a-comma.md) | German |
-| A193 | [A193-english-particle-after-a-relative-clause.md](A-must-fix/A193-english-particle-after-a-relative-clause.md) | English |
 | A194 | [A194-french-participle-in-s-doubles-it.md](A-must-fix/A194-french-participle-in-s-doubles-it.md) | French |
 | A195 | [A195-french-tu-imperative-of-ouvrir.md](A-must-fix/A195-french-tu-imperative-of-ouvrir.md) | French |
 | A196 | [A196-french-bare-plural-after-a-preposition.md](A-must-fix/A196-french-bare-plural-after-a-preposition.md) | French |
@@ -85,6 +69,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A199 | [A199-spanish-portuguese-ser-in-a-place-relative.md](A-must-fix/A199-spanish-portuguese-ser-in-a-place-relative.md) | Spanish, Portuguese |
 | A200 | [A200-japanese-plural-neuter-pronoun.md](A-must-fix/A200-japanese-plural-neuter-pronoun.md) | Japanese (corpus + translator) |
 | A201 | [A201-japanese-neuter-pronominal-possessor.md](A-must-fix/A201-japanese-neuter-pronominal-possessor.md) | Japanese |
+| A202 | [A202-possessive-complement-drops-the-determiner.md](A-must-fix/A202-possessive-complement-drops-the-determiner.md) | German, Spanish, Portuguese |
 
 Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
@@ -299,6 +284,22 @@ is listed under **Fixed** below.
 | B12 | [B12-japanese-copula-coordinated-adjective.md](fixed/B12-japanese-copula-coordinated-adjective.md) | Japanese | 2026-09-21 |
 | B13 | [B13-japanese-plain-negative.md](fixed/B13-japanese-plain-negative.md) | Japanese | 2026-09-21 |
 | B14 | [B14-japanese-relative-aspect-polite.md](fixed/B14-japanese-relative-aspect-polite.md) | Japanese | 2026-09-21 |
+| A178 | [A178-portuguese-suppletive-superlative-position.md](fixed/A178-portuguese-suppletive-superlative-position.md) | Portuguese | 2026-09-21 |
+| A179 | [A179-passive-infinitive-hidden-and-unprinted.md](fixed/A179-passive-infinitive-hidden-and-unprinted.md) | Frontend | 2026-09-21 |
+| A180 | [A180-determiner-on-a-proper-name.md](fixed/A180-determiner-on-a-proper-name.md) | German, Spanish, Japanese, Italian, French, Portuguese | 2026-09-21 |
+| A181 | [A181-negative-similative-manner-negates-the-clause.md](fixed/A181-negative-similative-manner-negates-the-clause.md) | Italian, French, Spanish, Portuguese | 2026-09-21 |
+| A182 | [A182-german-nicht-with-an-indefinite-object.md](fixed/A182-german-nicht-with-an-indefinite-object.md) | German | 2026-09-21 |
+| A183 | [A183-english-superlative-on-a-proper-name.md](fixed/A183-english-superlative-on-a-proper-name.md) | English | 2026-09-21 |
+| A184 | [A184-english-genitive-drops-the-head-determiner.md](fixed/A184-english-genitive-drops-the-head-determiner.md) | English | 2026-09-21 |
+| A185 | [A185-japanese-head-determiner-before-its-possessor.md](fixed/A185-japanese-head-determiner-before-its-possessor.md) | Japanese | 2026-09-21 |
+| A186 | [A186-predicate-not-next-to-its-verb.md](fixed/A186-predicate-not-next-to-its-verb.md) | German, Japanese | 2026-09-21 |
+| A187 | [A187-pronominal-possessor-drops-the-head-determiner.md](fixed/A187-pronominal-possessor-drops-the-head-determiner.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-21 |
+| A188 | [A188-superlative-place-name-bare-preposition.md](fixed/A188-superlative-place-name-bare-preposition.md) | Italian, French | 2026-09-21 |
+| A189 | [A189-place-adverb-before-the-complements.md](fixed/A189-place-adverb-before-the-complements.md) | English, Italian, French, Spanish, Portuguese | 2026-09-21 |
+| A190 | [A190-japanese-ni-locative-of-live-and-confine.md](fixed/A190-japanese-ni-locative-of-live-and-confine.md) | Japanese | 2026-09-21 |
+| A191 | [A191-german-nicht-and-adverb-before-a-definite-object.md](fixed/A191-german-nicht-and-adverb-before-a-definite-object.md) | German | 2026-09-21 |
+| A192 | [A192-german-das-heisst-without-a-comma.md](fixed/A192-german-das-heisst-without-a-comma.md) | German | 2026-09-21 |
+| A193 | [A193-english-particle-after-a-relative-clause.md](fixed/A193-english-particle-after-a-relative-clause.md) | English | 2026-09-21 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

@@ -1,8 +1,10 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
 import { alarmCry } from '../../functions/alarmCry.js';
+import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
+import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negationSources } from '../../functions/negationSources.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
@@ -115,7 +117,7 @@ function predicateWords(
   // the verb group carries the participle and the by-phrase instead. Every branch below puts this
   // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
   // the house"), so the passive needs no branch of its own.
-  const directObjectText = passive
+  const objectText = passive
     ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
     : !directObject ? ''
     : coordinate(directObject, (np) =>
@@ -128,13 +130,26 @@ function predicateWords(
   // the verb or its object directly and leads the complements, because a complement after it joins
   // itself to the object instead ("*moves the book in the house up"). Taking the head of the
   // complements slot puts it there in every branch below, and leaves the trailing slot — where a
-  // manner adverb goes — empty (A156).
+  // manner adverb goes — empty (A156). An adverb of place (EVERYWHERE) leaves that trailing slot
+  // too, but stands among the complements where a locative does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection ? '' : adverbText;
-  const complementsText = [
-    isDirection ? adverbText : '',
-    complementsPhrase(anyComplement ? withComplementDefiniteness(complements, 'any') : complements, lexical.forms),
-  ].filter(Boolean).join(' ');
+  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
+  // An object that carries a relative clause ends in that clause's verb, and a particle standing
+  // after it attaches to that verb instead: "*moves the book that sees the dog up". English puts the
+  // particle in front of such an object — "moves up the book that sees the dog" — and every branch
+  // below places the object right after the verb group, so the one hoist reaches them all. A156's
+  // split order stays for a short object, and it is the only order for a pronoun, which never
+  // carries a relative clause. A passive has no object left to carry one (A193).
+  const particleFirst = isDirection && !passive && !!directObject?.conjuncts.some((np) => np.relative);
+  const directObjectText = particleFirst ? [adverbText, objectText].filter(Boolean).join(' ') : objectText;
+  // The particle is spelled once: where it has moved in front of the object, it leaves the slot it
+  // would otherwise lead.
+  const complementsText = complementsAroundAdverb(
+    modifier,
+    particleFirst ? '' : adverbText,
+    anyComplement ? withComplementDefiniteness(complements, 'any') : complements,
+    (c) => complementsPhrase(c, lexical.forms),
+  );
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
   // clause with the main verb's: "can eat the mouse fast".
   const modalManner = modals.filter((m) => m.modifier && !isFrequencyAdverb(m.modifier)).map((m) => m.modifier!.forms['base'] ?? '');

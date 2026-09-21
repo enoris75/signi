@@ -121,6 +121,15 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   then: 'und dann',
 };
 
+/**
+ * The clause connectors that are parenthetical rather than conjunctions, set off by a comma after
+ * them as well as before: "der Kater läuft, das heißt, der Hund springt". German style has the comma
+ * when a clause follows "das heißt" and none when only a phrase does ("am Montag, d. h. am
+ * Feiertag") — the engine's `that_is` always joins two clauses, so it always takes it (A192). Clause
+ * joins only; a noun group never takes one.
+ */
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);
+
 // "also" and "dann" are conjunctional *adverbs*, not coordinators: they occupy the clause's
 // front field, which pushes the finite verb into second position ahead of the subject —
 // "…, also läuft der Hund", "…, und dann läuft der Hund". The true coordinators (und, oder,
