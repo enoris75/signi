@@ -78,8 +78,15 @@ Concept definitions:
 
 #### UI strings
 
-_None outstanding._ A11–A15 are done (see the Done section). A08–A10 are retired ids: they became
-[C06](done/C06-pronoun-definitions.md), which is done.
+From the sweep of 2026-09-21. It covered the keyboard help overlay (P01) and the phrase console
+(P02), which shipped after the 2026-09-13 sweep, and the canvas again. A11–A15 are done (see the Done
+section). A08–A10 are retired ids: they became [C06](done/C06-pronoun-definitions.md), which is done.
+
+| # | File | Strings |
+|---|---|---|
+| A19 | [A19-ui-leaks-past-the-catalogue.md](A-ready/A19-ui-leaks-past-the-catalogue.md) | English that leaks into a translated UI without being a literal: "Clear Agent" / "Expand Agent" on a passive's agent and "Hide Diatesi" on the voice box (`slot.agent` and `satellite.voice` missing from `PART_BY_LABEL_KEY`); the words panel's tooltips, which show the English seed `description` instead of `useConceptDefinition()`; the page's `<title>` and `<html lang>`, fixed in English |
+| A20 | [A20-ui-keyboard-labels-on-seeded-words.md](A-ready/A20-ui-keyboard-labels-on-seeded-words.md) | keymap labels, help-sheet headings and rows, and the picker footer that need no new word: `action.replaceWord/clearWord/removeComplement/addComplement/move/close/copyLanguage`, `satellite.conjunction`, `help.commandSubject`, … plus reuse of `action.movePeriodUp`, `clause.conditional`, `imperative.person.*`. **Judge** the German of the reused `imperative.person.*` |
+| A21 | [A21-ui-console-seeded-words.md](A-ready/A21-ui-console-seeded-words.md) | the console's frame, key hints, list titles, topics, `/save` and `/load` results, and the command descriptions C13's entries already cover (`specifier.value.*`, `sentiment.connector.*`, `degree.value.*`, where en reads "bigger", so **judge** it). The help page's examples should be printed in the interface language, and its usage placeholders localized |
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
@@ -114,7 +121,18 @@ findings, if any, would be filed here.
 
 #### UI strings
 
-_None outstanding._ B20–B28 are done (see the Done section).
+From the sweep of 2026-09-21. B20–B28 are done (see the Done section).
+
+| # | File | Seed first → unlocks |
+|---|---|---|
+| B40 | [B40-ui-undo-redo.md](B-needs-seed/B40-ui-undo-redo.md) | **UNDO, REDO, REMOVED** → the toasts' Undo button, the undo and redo keys and console commands, "Period removed" (the `toast.periodAdded` shape). it and fr UNDO collide with CANCEL |
+| B41 | [B41-ui-help-overlay.md](B-needs-seed/B41-ui-help-overlay.md) | **HELP, NAVIGATION, EVERYWHERE, MENU, TARGET, NUMBERED** → the help button and overlay title, "Keyboard navigation", the section headings, "Pick a numbered target" |
+| B42 | [B42-ui-console-name.md](B-needs-seed/B42-ui-console-name.md) | **CONSOLE** → the header button, the console's title and accessible names, "Hide / Resize the console", the `/` key, "Show in the console: /x" |
+| B43 | [B43-ui-canvas-preview-edit.md](B-needs-seed/B43-ui-canvas-preview-edit.md) | **CANVAS, PREVIEW, EDIT, RETURN, TOOLBAR** → "Preview" (×2), "back to the canvas" (×3), "Canvas taller / shorter", "Edit", "click to edit", and a name for the header toolbar, which has none |
+| B44 | [B44-ui-keyboard-movement-labels.md](B-needs-seed/B44-ui-keyboard-movement-labels.md) | **NEXT, PREVIOUS, LEFT, RIGHT, REGION, LEAVE, GROUP, BACKWARDS, ROW, VALUE, REGISTER, LEVEL, ARROW** → the keymap's movement labels, "Step out", "…, backwards" (×6), the picker footer, and the keyboard caption P01 left as a `/seed` + `/localize` task |
+| B45 | [B45-ui-console-lines-history-pins.md](B-needs-seed/B45-ui-console-lines-history-pins.md) | **LINE, LIST, HISTORY, PIN, UNPIN, PINNED, UNPINNED, RECENT, COMPLETE, APPLY** → pinning, the history tag, "recent lines", the prompt's key hints, "The console could not read this line." (C11's passive) |
+| B46 | [B46-ui-console-topics-and-labels.md](B-needs-seed/B46-ui-console-topics-and-labels.md) | **MOOD, STATEMENT, WORKSPACE, SPATIAL, POSITIVE_DEGREE, USAGE, EXAMPLE, NOW, ALSO** → the console's remaining topics, `/statement`, `/plain`, "values for", the "now" and "also" annotations, the help page's labels. The seeded POSITIVE renders ja 肯定 (the polarity sense) |
+| B47 | [B47-ui-console-command-purposes.md](B-needs-seed/B47-ui-console-command-purposes.md) | **SET, GOVERN, NEGATE, SENTIMENT** (+ [B38](B-needs-seed/B38-link.md)'s LINK) → the 22 command purposes ("sets a noun's number"), as infinitive glosses: "to set a noun's number". GIVE was probed and ruled out (de "es gibt … in ein Substantiv") |
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
@@ -125,10 +143,14 @@ _None outstanding._ B20–B28 are done (see the Done section).
 
 #### UI strings
 
-_None outstanding._ C11, C13, C15 and C16 are done (see the Done section). The one UI surface still
-wholly in English is the **phrase console**'s own messages, which no task has reached — recorded at
-the foot of [C15](done/C15-ui-literal-by-design.md) so the next sweep knows it is outstanding
-rather than decided.
+C11, C13, C15 and C16 are done (see the Done section). The phrase console, which C15 recorded as
+outstanding, was catalogued on 2026-09-21. Its diagnostics are here, and the rest is in A21 and
+B42–B47.
+
+| # | File | Blocked on |
+|---|---|---|
+| C21 | [C21-ui-console-diagnostics.md](C-needs-engine/C21-ui-console-diagnostics.md) | about 100 console diagnostics, grouped by what each family needs. First, **message codes** (a refactor: the tests assert the English, including golden.test.ts's 34 `says`). Then an **existential clause** ("There is no period 3", or reword around it C14's way), and **on-request rendering** for sentences about the user's words (C16's route). The instruction and possession families are easy once codes exist |
+| C22 | [C22-ui-help-prose.md](C-needs-engine/C22-ui-help-prose.md) | the help overlay's paragraphs and notes: multi-sentence prose with free relatives, a temporal clause, keys inside sentences, "in place of". An editorial rewrite into short statements comes before any engine work. The noun-kind note collides in es (*complemento* ×2) |
 
 ### Done
 
@@ -193,7 +215,7 @@ rather than decided.
 | C10 | [done/C10-ui-questions.md](done/C10-ui-questions.md) | `status.isServerActive` ("Is the server active?", de "Ist der Server aktiv?", ja サーバーは稼働中ですか？): built **`PhrasePlan.interrogative`**, a yes/no question in all 7 engines — en subject–auxiliary inversion with do-support, de V1, fr "est-ce que", es "¿…?", ja か — plus per-language question marks and `capitalize` past an opening mark (seeded SERVER, ACTIVE). The two confirmations it was filed for had already gone: P01 replaced them with undo. Not a `Mood` value (that would have changed the verb forms), and "the translation server" lost its modifier to [B10](../bugs/fixed/B10-german-compound-linking-element.md) |
 | C11 | [done/C11-ui-failure-messages-passive.md](done/C11-ui-failure-messages-passive.md) | `failure.phraseNotSaved/phraseNotLoaded/savedPhrasesNotLoaded/periodNotSaved/periodNotLoaded/savedPeriodsNotLoaded/phraseNotTranslated/wordsNotLoaded` — nine "Could not …" messages as **agentless passives** under a negated past CAN, the agent GENERIC_PERSON the translator drops. **REACH was not seeded**: its Japanese (到達する) takes に and cannot carry a direct object, so the server message says what failed instead ("the phrase could not be translated") and keeps `status.isServerActive` after it. Seeded **TRANSLATE** in its place, with a gloss. Two engine fixes fell out: Japanese says an agentless passive under the potential on the *active* verb (保存することができません, not 保存されることができません — `isPotentialPassive`), and Portuguese builds a passive on the **short** participle of an abundant pair (`participle_passive`: *foi salva*, not *salvada*) |
 | C13 | [done/C13-ui-grammatical-function-words.md](done/C13-ui-grammatical-function-words.md) | `conjunction.value.*`, `specifier.value.*`, `sentiment.value/connector.*`, `degree.value.*` — **three new entry kinds** beside `determiner`, each with its own citation function: a conjunction cited between two clauses (agreeing with nothing), a specifier cited on a **bare** noun so only the adposition is left, and a degree cited on an **adjective**, because whether a degree is a word at all depends on which adjective. Deleted `DEGREE_LABELS`, `PATH_SPECIFIER_LABELS`, `CAUSE_SENTIMENT_LABELS` and `COORD_CONJUNCTION_LABEL`. The English menu changed with them: "So" and "And then", which is what English writes between two clauses and always rendered |
-| C15 | [done/C15-ui-literal-by-design.md](done/C15-ui-literal-by-design.md) | nothing localized, which was the point: the brand, the file extension, the `1sg`/`3pl` map keys and the never-shown throws were re-checked and stand (line numbers corrected). **`WordPalettePanel` deleted** — unmounted dead code, with its test. Records the **phrase console**'s English as outstanding rather than decided |
+| C15 | [done/C15-ui-literal-by-design.md](done/C15-ui-literal-by-design.md) | nothing localized, which was the point: the brand, the file extension, the `1sg`/`3pl` map keys and the never-shown throws were re-checked and stand (line numbers corrected). **`WordPalettePanel` deleted** — unmounted dead code, with its test. Records the **phrase console**'s English as outstanding rather than decided. **Re-checked 2026-09-21** by the second sweep, which added the platform names, the keycap names (de *Strg* recorded, not decided), the console's notation and the saved-file parse errors, and replaced the console note with pointers to A19–A21, B40–B47, C21 and C22 |
 | C16 | [done/C16-ui-possessive-pronoun-chip.md](done/C16-ui-possessive-pronoun-chip.md) | the coreference chip and the possessor tooltip show the **possessed noun phrase** the link will render ("his horse", it "il suo cane", but "**la sua** casa" for a feminine noun) instead of the bare possessive, which no boot-time entry could agree. Built C14's option 1 where it was needed: `usePossessivePhrases` renders each (noun, antecedent) pair through the translate route, cached. `pronoun.possessive.*` stays as the in-flight fallback |
 | C12 | [done/C12-ui-purpose-and-object-complements.md](done/C12-ui-purpose-and-object-complements.md) | `hint.clickToChange/clickToRemove/dragToResize/clickSlotToFilter/selectToTranslate/aNoun`, `status.linked`, `action.makeCommand/makeInfinitive/unlinkForCommand/unlinkForInfinitive/useAsCondition/useAsCoordinated`, `pick.coordinated/instrumental`, `wordMap.noRelationships/showRelationships`, `slot.objectPredicative/comitative`: built **four constructs** — `PhrasePlan.purpose` (a clause of purpose: en the bare infinitive, it/fr/es/pt per/pour/para, de "um … zu", ja 〜ために), the **`objectPredicative`** complement in two readings (factitive, linked by a word the verb's lexeme names — "transform it **into** a command" — and essive, one word per language that drops the article outside English — "come condizione", "als Bedingung"), the **`comitative`** (と in Japanese, "with" everywhere else), and the genitive relative **`headRole: 'possessor'`** (whose / il cui / dont / dessen / cuyo / cujo). Seeded OBJECT_COMPLEMENT, COMITATIVE, LINKED, TRANSFORM, DRAG, FILTER. The two new complements are plan-only — no builder box. "Make this period a command" became "Transform …" (MAKE licenses no object complement in the other six), and the instrumental pick hint left [C11](done/C11-ui-failure-messages-passive.md): the genitive relative says it without a passive |
 | B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stayed on the English literal (C05) and WALL was not seeded. Both gaps were fixed on 2026-09-19 (A149, A150), and BUILDING's gloss shipped under C05 |
