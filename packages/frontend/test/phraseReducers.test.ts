@@ -166,6 +166,7 @@ describe('applyClear', () => {
     ['route', { routeSpecifier: 'under' }],
     ['locative', { locativeSpecifier: 'behind' }],
     ['cause', { causeSentiment: 'negative' }],
+    ['cause', { causeNegative: true }],
   ])('drops the %s’s relation along with it', (which, relation) => {
     expect(applyClear(merge({ verb: GO }, fullNoun(which), relation), which)).toEqual({ verb: GO });
   });
@@ -265,6 +266,22 @@ describe('updateNounAt', () => {
   });
 });
 
+// The cause's own polarity: it denies the reason, not the clause, so the verb is untouched.
+describe('toggleCauseNegative', () => {
+  it('denies the cause and takes it back, leaving the clause positive', () => {
+    const s: PhraseSelection = { subject: CAT, verb: CRY, cause: DOG };
+    const denied = R.toggleCauseNegative(s);
+    expect(denied).toMatchObject({ causeNegative: true });
+    expect(denied.verbNegative).toBeUndefined();
+    expect(R.toggleCauseNegative(denied).causeNegative).toBe(false);
+  });
+
+  it('is independent of the stance beside it', () => {
+    const credited = R.setSentiment({ verb: CRY, cause: DOG }, 'positive');
+    expect(R.toggleCauseNegative(credited)).toMatchObject({ causeSentiment: 'positive', causeNegative: true });
+  });
+});
+
 describe('the set-value reducers', () => {
   it('set a value outright, whatever was there', () => {
     const s: PhraseSelection = { subject: CAT, verb: SEE };
@@ -272,6 +289,7 @@ describe('the set-value reducers', () => {
     expect(R.setTense(s, 'future').verbTense).toBe('future');
     expect(R.setAspect(s, 'resultative').verbAspect).toBe('resultative');
     expect(R.setNegative(R.setNegative(s, true), true).verbNegative).toBe(true);
+    expect(R.setCauseNegative(R.setCauseNegative(s, true), true).causeNegative).toBe(true);
     expect(R.setDegree(s, 'subjectAdjective', 'most').adjectiveDegrees).toEqual({ subjectAdjective: 'most' });
     expect(R.setModifierRelation(s, 'subjectAdjective', 'material').modifierRelations).toEqual({ subjectAdjective: 'material' });
     expect(R.setModifierNumber(s, 'subjectAdjective', 'plural').modifierNumbers).toEqual({ subjectAdjective: 'plural' });

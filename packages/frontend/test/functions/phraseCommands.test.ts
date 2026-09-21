@@ -30,6 +30,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleToggleNumber', (c) => c.handleToggleNumber('directObject'), (p) => reducers.toggleNumber(p, 'directObject')],
   ['handleToggleGender', (c) => c.handleToggleGender('subject'), (p) => reducers.toggleGender(p, 'subject')],
   ['handleToggleNegative', (c) => c.handleToggleNegative(), reducers.toggleNegative],
+  ['handleToggleCauseNegative', (c) => c.handleToggleCauseNegative(), reducers.toggleCauseNegative],
   ['handleSetDefiniteness', (c) => c.handleSetDefiniteness('subject', 'indefinite'), (p) => reducers.setDefiniteness(p, 'subject', 'indefinite')],
   ['handleCycleModifierRelation', (c) => c.handleCycleModifierRelation('modifier'), (p) => reducers.cycleModifierRelation(p, 'modifier')],
   ['handleCycleModifierNumber', (c) => c.handleCycleModifierNumber('modifier'), (p) => reducers.cycleModifierNumber(p, 'modifier')],

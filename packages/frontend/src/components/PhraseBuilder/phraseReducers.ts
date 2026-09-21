@@ -114,7 +114,10 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   delete sel[CONJUNCTION_KEY(which)];
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
-  if (which === "cause") delete sel.causeSentiment;
+  if (which === "cause") {
+    delete sel.causeSentiment;
+    delete sel.causeNegative;
+  }
 }
 
 // Drop the modals chained *after* `slot` — same reasoning as the adjectives: the control
@@ -544,6 +547,19 @@ export function setSpecifier(
   return which === "locative"
     ? { ...prev, locativeSpecifier: spec }
     : { ...prev, routeSpecifier: spec };
+}
+
+// Deny the cause rather than name it: "not because of the dog". It is the complement's own
+// negation, a separate axis from both the sentiment and the clause's `verbNegative`.
+export function setCauseNegative(
+  prev: PhraseSelection,
+  value: boolean,
+): PhraseSelection {
+  return { ...prev, causeNegative: value };
+}
+
+export function toggleCauseNegative(prev: PhraseSelection): PhraseSelection {
+  return setCauseNegative(prev, !prev.causeNegative);
 }
 
 // Set the cause complement's affective sentiment (neutral / negative / positive).

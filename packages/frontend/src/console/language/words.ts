@@ -24,6 +24,7 @@ import {
   setModifierRelation,
   setNegative,
   setNumber,
+  setCauseNegative,
   setSentiment,
   setSpecifier,
   setTense,
@@ -183,6 +184,9 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
     case "specifier":
       return w.kind === "noun" && !w.ref.slice && (w.which === "route" || w.which === "locative") && Boolean(c);
     case "sentiment":
+    // The cause's own polarity is offered wherever its stance is: on the cause box, once it holds
+    // a word. It is not the verb's "polarity" — that one negates the clause.
+    case "causePolarity":
       return w.kind === "noun" && !w.ref.slice && w.which === "cause" && Boolean(c);
     case "tense":
     case "aspect":
@@ -225,6 +229,8 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
       return setSpecifier(slice, s.value, which as "route" | "locative");
     case "sentiment":
       return setSentiment(slice, s.value);
+    case "causePolarity":
+      return setCauseNegative(slice, s.value === "negative");
     case "tense":
       return setTense(slice, s.value);
     case "aspect":
@@ -260,6 +266,8 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
       return which === "route" ? sel.routeSpecifier ?? "through" : sel.locativeSpecifier ?? "in";
     case "sentiment":
       return sel.causeSentiment ?? "neutral";
+    case "causePolarity":
+      return sel.causeNegative ? "negative" : "positive";
     case "tense":
       return sel.verbTense ?? "present";
     case "aspect":
@@ -288,6 +296,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
       return w.which === "route" ? "through" : "in";
     case "sentiment":
       return "neutral";
+    case "causePolarity":
+      return "positive";
     case "tense":
       return "present";
     case "aspect":

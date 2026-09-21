@@ -43,6 +43,7 @@ export type Setting =
   | { id: "aspect"; value: Aspect }
   | { id: "voice"; value: Voice }
   | { id: "polarity"; value: "positive" | "negative" }
+  | { id: "causePolarity"; value: "positive" | "negative" }
   | { id: "degree"; value: Degree }
   | { id: "relation"; value: ModifierRelation };
 
@@ -183,6 +184,10 @@ const setting = (
 function settingPurpose(s: Setting): UiStringKey {
   if (s.id === "gender" && s.value === "neut") return "purpose.pronounGender";
   if (s.id === "polarity" && s.value === "negative") return "purpose.negate";
+  // The cause's polarity denies the reason rather than the clause, but what it does is still
+  // negate, and its affirmative is still a polarity — so it borrows the verb's two purposes
+  // rather than asking the catalogue for a pair that would say the same words.
+  if (s.id === "causePolarity") return s.value === "negative" ? "purpose.negate" : "purpose.polarity";
   return `purpose.${s.id}`;
 }
 
@@ -453,6 +458,14 @@ export const COMMANDS: readonly CommandDef[] = [
       ["setSentiment"],
     ),
   ),
+
+  // The cause's own polarity, a second axis beside the stance: "/notcause" denies the reason
+  // ("not because of the dog", "non a causa del cane") without negating the clause, which is
+  // what "/not" on the verb does. Either stance can be denied — "not thanks to the dog".
+  setting("notcause", ["notbecause", "deny"], "noun", { id: "causePolarity", value: "negative" },
+    "not because of", "polarity.value.negative", /^causeNegative$/, ["setCauseNegative"]),
+  setting("poscause", ["posbecause"], "noun", { id: "causePolarity", value: "positive" },
+    "because of, not denied", "polarity.value.positive", /^causeNegative$/, ["setCauseNegative"]),
 
   // ── Verb ──────────────────────────────────────────────────────────────────
   // A setting named, its value the argument: the family whole in one command, for whoever thinks
@@ -874,6 +887,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   aspect: "aspect",
   voice: "voice",
   polarity: "polarity",
+  causePolarity: "cause",
   degree: "degree",
   relation: "relation",
 };

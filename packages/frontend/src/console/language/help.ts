@@ -102,6 +102,8 @@ export const EXAMPLES: Record<string, string> = {
   because: "/subj ( dog ) /verb ( run ) /cause ( cat /because )",
   fault: "/subj ( dog ) /verb ( run ) /cause ( cat /fault )",
   thanks: "/subj ( dog ) /verb ( run ) /cause ( cat /thanks )",
+  notcause: "/subj ( dog ) /verb ( run ) /cause ( cat /notcause )",
+  poscause: "/subj ( dog ) /verb ( run ) /cause ( cat /poscause )",
   // Verb
   tense: "/subj ( cat ) /verb ( eat /tense past )",
   aspect: "/subj ( cat ) /verb ( eat /aspect progressive )",

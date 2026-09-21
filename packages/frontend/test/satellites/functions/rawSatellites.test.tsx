@@ -302,6 +302,8 @@ describe('rawSatellites', () => {
       ]);
     });
 
+    // Every cause also carries its own polarity — the one complement that can be denied rather
+    // than named ("not because of the dog"), whatever kind of word heads it.
     it.each<[string, Concept, string[]]>([
       // "a causa di lei": a 3rd-person pronoun cause can render feminine.
       ['a third-person pronoun its number and gender', SHE, ['causeNumber', 'causeGender']],
@@ -312,7 +314,16 @@ describe('rawSatellites', () => {
         ['causeAdjective', 'causeNumber', 'causeGender', 'causeRelative', 'causePossessor'],
       ],
     ])('gives a cause that is %s', (_, cause, controls) => {
-      expect(offered({ verb: GO, cause }, 'cause')).toEqual(['cause', ...controls]);
+      expect(offered({ verb: GO, cause }, 'cause')).toEqual(['cause', ...controls, 'causeNegative']);
+    });
+
+    it('offers the polarity only on the cause, and only once it holds a word', () => {
+      expect(offered({ verb: GO }, 'cause')).not.toContain('causeNegative');
+      expect(offered({ verb: GO, locative: HOUSE }, 'locative')).not.toContain('locativeNegative');
+      const sat = satellite({ verb: GO, cause: FRIEND }, 'causeNegative');
+      expect(sat.parent).toBe('cause');
+      expect(sat.hasValue).toBe(false);
+      expect(satellite({ verb: GO, cause: FRIEND, causeNegative: true }, 'causeNegative').hasValue).toBe(true);
     });
 
     it.each<[ComplementType, boolean]>([

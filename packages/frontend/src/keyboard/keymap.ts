@@ -97,6 +97,7 @@ export interface BoxContext {
   toggleNumber: (which: NounKey) => void;
   toggleGender: (which: NounKey, step: 1 | -1) => void;
   toggleNegative: () => void;
+  toggleCauseNegative: () => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
   cycleVoice: (step: 1 | -1) => void;
@@ -498,6 +499,20 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     // points the next key at one rather than opening anything.
     when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && Boolean(ctx.selection[ctx.slot]),
     run: (ctx) => ctx.armToolbar(ctx.slot),
+  },
+  {
+    // The cause alone can be denied rather than named ("not because of the dog"). "N" is the noun's
+    // number on this box, so its polarity takes the shifted key; the verb's own "N" is unrelated —
+    // that one negates the clause.
+    id: "cause.negate",
+    scope: "box:noun",
+    keys: ["Shift+N"],
+    label: "Polarity",
+    labelKey: "satellite.polarity",
+    hint: true,
+    satellite: /^causeNegative$/,
+    when: (ctx) => ctx.slot === "cause" && has(ctx, "causeNegative"),
+    run: (ctx) => ctx.toggleCauseNegative(),
   },
   {
     id: "noun.removeComplement",

@@ -68,4 +68,20 @@ describe('buildComplements', () => {
   it('ignores a specifier whose complement is empty', () => {
     expect(buildComplements({ routeSpecifier: 'over', causeSentiment: 'negative' })).toBeUndefined();
   });
+
+  it('denies the cause when its polarity is negative', () => {
+    expect(buildComplements({ cause: DOG, causeNegative: true })?.cause?.negative).toBe(true);
+  });
+
+  it('leaves the cause plain when it is not denied, and never marks another complement', () => {
+    expect(buildComplements({ cause: DOG })?.cause).not.toHaveProperty('negative');
+    expect(buildComplements({ cause: DOG, causeNegative: false })?.cause).not.toHaveProperty('negative');
+    expect(buildComplements({ cause: DOG, locative: HOUSE, causeNegative: true })?.locative)
+      .not.toHaveProperty('negative');
+  });
+
+  it('carries the stance and the denial together — a credit can be denied', () => {
+    expect(buildComplements({ cause: DOG, causeSentiment: 'positive', causeNegative: true })?.cause)
+      .toMatchObject({ negative: true, specifiers: [{ kind: 'sentiment', value: 'positive' }] });
+  });
 });

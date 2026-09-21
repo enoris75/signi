@@ -44,6 +44,7 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     toggleNumber: () => {},
     toggleGender: () => {},
     toggleNegative: () => {},
+    toggleCauseNegative: () => {},
     cycleTense: () => {},
     cycleAspect: () => {},
     cycleVoice: () => {},

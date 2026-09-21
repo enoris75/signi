@@ -584,6 +584,23 @@ export function rawSatellites(
           hasValue: conjunctCount(type) > 0,
           valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
         },
+        // The cause alone can be denied rather than named — "not because of the dog", the act
+        // happened and this was not the reason. A toggle, like the verb's own polarity, and
+        // independent of the sentiment beside it: a credit can be denied too.
+        ...(type === "cause"
+          ? [{
+            key: "causeNegative" as const,
+            parent: "cause" as const,
+            label: t("satellite.polarity"),
+            labelKey: "satellite.polarity" as const,
+            icon: <RemoveCircleOutlineIcon sx={iconSx} />,
+            available: Boolean(concept),
+            hasValue: Boolean(selection.causeNegative),
+            alwaysSet: true,
+            directToggle: true,
+            valueLabel: t(`polarity.value.${selection.causeNegative ? "negative" : "positive"}`),
+          }]
+          : []),
       ];
     }),
   ];

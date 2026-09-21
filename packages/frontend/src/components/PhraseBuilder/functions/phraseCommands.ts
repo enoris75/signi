@@ -29,6 +29,7 @@ import {
   setSentiment,
   setSpecifier,
   toggleGender,
+  toggleCauseNegative,
   toggleNegative,
   toggleNumber,
   type CycleStep,
@@ -51,6 +52,7 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleToggleGender: (which: GenderSlot, step: CycleStep = 1) =>
       onPhraseUpdate((prev) => toggleGender(prev, which, step)),
     handleToggleNegative: () => onPhraseUpdate(toggleNegative),
+    handleToggleCauseNegative: () => onPhraseUpdate(toggleCauseNegative),
     handleSetDefiniteness: (which: NounKey, value: Definiteness) =>
       onPhraseUpdate((prev) => setDefiniteness(prev, which, value)),
     handleCycleModifierRelation: (slotKey: SlotKey, step: CycleStep = 1) =>

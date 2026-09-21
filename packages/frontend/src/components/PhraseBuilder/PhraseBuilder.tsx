@@ -876,6 +876,7 @@ export function PhraseBuilder({
       toggleNumber: commands.handleToggleNumber,
       toggleGender: commands.handleToggleGender,
       toggleNegative: commands.handleToggleNegative,
+      toggleCauseNegative: commands.handleToggleCauseNegative,
       cycleTense: commands.handleCycleTense,
       cycleAspect: commands.handleCycleAspect,
       cycleVoice: commands.handleCycleVoice,

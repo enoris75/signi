@@ -14,6 +14,9 @@ export function buildComplements(
     if (!phrase) continue;
     out[type] = {
       phrase,
+      // The cause may be denied rather than named ("not because of the dog"). Omitted unless set,
+      // so a plain cause is the plan it always was.
+      ...(type === "cause" && sel.causeNegative ? { negative: true } : {}),
       // Route and locative both carry a path specifier — the same relation set, read from their
       // own key because their defaults differ (through vs in). Cause carries a sentiment
       // specifier (omit the default 'neutral' — the engine assumes it when absent).

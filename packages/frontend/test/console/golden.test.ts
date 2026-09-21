@@ -98,6 +98,8 @@ const GOLDEN: Record<string, Golden> = {
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
   thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },
+  notcause: { line: '/verb run /cause dog /notcause', prints: '/verb ( run ) /cause ( dog /notcause )', holds: { causeNegative: true }, misuse: { line: '/subj cat /notcause', says: { code: 'noTarget', args: { command: 'notcause' } } } },
+  poscause: { line: '/verb run /cause dog /notcause /poscause', prints: '/verb ( run ) /cause ( dog )', holds: { causeNegative: false } },
   tense: {
     line: '/verb eat /tense past',
     holds: { verbTense: 'past' },

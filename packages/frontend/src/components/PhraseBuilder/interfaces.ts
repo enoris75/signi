@@ -240,6 +240,11 @@ export interface PhraseSelection {
     causeAdjective2?: Concept;
     causeAdjective3?: Concept;
     causeSentiment?: CauseSentiment;
+    // Whether the cause is *denied* rather than named — "not because of the dog", which says the
+    // act happened and this was not the reason. A second axis, independent of the sentiment: a
+    // credit can be denied too ("not thanks to the dog"). It is the complement's own negation and
+    // not the clause's, so it does not touch `verbNegative` (see `Complement.negative`).
+    causeNegative?: boolean;
     // The instrumental complement has no fields here: its noun phrase lives in a period
     // container of its own, linked from the verb-phrase dotted ring (see BoxComplementType and
     // the 'instrumental' PhraseLink), and is folded into the plan by workspacePlan.

@@ -161,7 +161,7 @@ const OPS: Op[] = [
       return R.setModifierAdjective(slice, slot, pick(rng, ADJECTIVES)!);
     });
   }),
-  // Number, gender, determiner, specifier, sentiment, predicate degree on a noun head.
+  // Number, gender, determiner, specifier, sentiment, cause polarity, predicate degree on a noun head.
   onPeriod((sel, rng) => {
     const head = pick(rng, nounHeads(sel));
     if (!head) return undefined;
@@ -174,7 +174,9 @@ const OPS: Op[] = [
         return R.setDefiniteness(slice, which, pick(rng, DEFINITENESS)!);
       if (r < 0.75 && (which === 'route' || which === 'locative') && head.frame === 'period')
         return R.setSpecifier(slice, pick(rng, PATH_SPECIFIERS)!, which);
-      if (r < 0.85 && which === 'cause' && head.frame === 'period') return R.setSentiment(slice, pick(rng, CAUSE_SENTIMENTS)!);
+      if (r < 0.80 && which === 'cause' && head.frame === 'period') return R.setSentiment(slice, pick(rng, CAUSE_SENTIMENTS)!);
+      // The cause's own polarity, a second axis beside its stance ("not thanks to the dog").
+      if (r < 0.85 && which === 'cause' && head.frame === 'period') return R.toggleCauseNegative(slice);
       if (which === 'predicative' && c.role === 'adjective') return R.setDegree(slice, 'predicative', pick(rng, DEGREES)!);
       return slice;
     });
@@ -337,7 +339,7 @@ function roundTrip(state: WorkspaceState, vocab: Vocabulary) {
 }
 
 describe('the round trip', () => {
-  const SEEDS = 400;
+  const SEEDS = Number(process.env.SEEDS ?? 400);
 
   it.each([
     ['English', EN],
