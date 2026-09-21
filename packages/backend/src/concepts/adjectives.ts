@@ -303,7 +303,9 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'NEW',
     role: 'adjective',
-    description: 'recently made or introduced',
+    // Both senses, because Spanish and Portuguese spell them apart by position and the engine puts
+    // this one before the noun — "one more" — everywhere it composes (A204).
+    description: 'recently made or introduced, or one more of the same kind',
     emoji: '🆕',
     forms: {
       en: { base: 'new' },

@@ -9,12 +9,25 @@ export const ES_DEGREE: Record<Degree, string> = {
 };
 
 /**
- * Concept IDs of the adjectives that precede their noun in Spanish. Only the ordinals and OTHER
- * do: "el primer día", "la segunda vez", "el otro gato". Every qualifying adjective (grande,
- * feliz, rojo …) follows the noun, which is why Spanish needs no "BAGS" set the way French and
- * Italian do.
+ * Concept IDs of the adjectives that precede their noun in Spanish. The ordinals and OTHER are
+ * here because that is simply where they go: "el primer día", "la segunda vez", "el otro gato".
+ * NEW is here for a different reason — its position decides its sense. After the noun "nuevo" is
+ * *recently made* ("una casa nueva" is a newly built house); before it, *another, one more* ("una
+ * nueva casa" is a second house, however old). Every NEW the app composes means the second one,
+ * so NEW precedes (A204). Every other qualifying adjective (grande, feliz, rojo …) follows the
+ * noun, which is why Spanish needs no "BAGS" set the way French and Italian do.
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW']);
+
+/**
+ * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
+ * "como" is an abbreviated comparison — "corre como yo" stands for "como yo corro" — so the pronoun
+ * is the subject of the clause it shortens, not the object of a preposition: "como mí" is not
+ * Spanish. German's "wie" is the same word and takes the nominative for the same reason (A203).
+ * Spanish has a wider class of these — "según", "entre", "excepto", "salvo", "menos" — but "como"
+ * is the only one a complement head emits.
+ */
+export const NOMINATIVE_PREP: ReadonlySet<string> = new Set(['como']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerundio / "a punto de"
 // + infinitivo. Past uses the imperfect ("estaba"), the aspectually-imperfective past.

@@ -1,13 +1,11 @@
 # A-must-fix — confirmed bugs
 
-Three open as of 2026-09-22 (A203–A205); everything else catalogued in this class has been fixed
-and moved to [`../fixed/`](../fixed/). A194–A202 were fixed in one run on 2026-09-21–22, which is
-where two of these three come from: **A203** is the half of A197 that run deliberately left — the
-five adposition-bearing complements whose pronoun still renders as a noun, each needing its own
-adposition and, in German, its own case — and **A205** is the feminine plural tonic pronoun the same
-run turned up (`avec eux` for `avec elles`), which had been standing in the causal adjunct all along.
-**A204** was filed separately while localizing. Nothing in the three is wrong on screen today: A203
-and A205's slots are plan-only or take no plural pronoun in any shipped string.
+None open as of 2026-09-22: everything catalogued in this class has been fixed and moved to
+[`../fixed/`](../fixed/). The last three went together — **A203**, the half of A197 that run
+deliberately left (the five adposition-bearing complements whose pronoun rendered as a noun, each
+needing its own adposition and, in German, its own case), **A205**, the feminine plural tonic
+pronoun the same run turned up (`avec eux` for `avec elles`), and **A204**, filed separately while
+localizing.
 
 A file belongs here when the engine's output is **wrong** — not a simplification it makes on purpose
 (that is [`../B-can-fix/`](../B-can-fix/)) and not something that only looks wrong

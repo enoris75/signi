@@ -15,7 +15,9 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
-import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
+import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
+import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
+import { tonicPhrase } from './tonicPhrase.js';
 import { possessiveFr, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { coordinate } from './coordinate.js';
@@ -164,15 +166,26 @@ export function complementsPhrase(
       // `artFor` already does for the indefinite.
       // Not the possessor: `possessedHeadForms` sets a possessed head to `bare` so the possessive can
       // take the article's place, and that bare is no zero article ("dans nos maisons"). Not a proper
-      // name either, whose bare is the continent preposition's ("en Europe"). The bare *singular* is
-      // left as it is ("dans parenthèse"): the partitive would reach the manner of means, whose bare
-      // singular is an idiom French wants ("avec soin", never "avec du soin").
+      // name either, whose bare is the continent preposition's ("en Europe"). Not a pronoun, whose
+      // bare is the absence of an article altogether — "sous elles", never "sous des elles" (A203).
+      // The bare *singular* is left as it is ("dans parenthèse"): the partitive would reach the
+      // manner of means, whose bare singular is an idiom French wants ("avec soin", never "avec du
+      // soin").
       const headFor = (nf0: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string => {
         const nf = !possessive && plural && (nf0['definiteness'] ?? 'definite') === 'bare'
-          && nf0['uncountable'] !== '1' && nf0['proper'] !== '1'
+          && nf0['uncountable'] !== '1' && nf0['proper'] !== '1' && !nf0['person']
           ? { ...nf0, definiteness: 'indefinite' } : nf0;
         return (
-          type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')) :
+          // A pronoun's plain containment is "en", not the "dans" a noun takes: French does not say
+          // "dans lui" of a person, and "en lui" is the form it has — the same bare "en" the bare
+          // continent takes on the line below, and for the same reason, that neither wants an
+          // article between the preposition and the word (A203). Every other relation keeps its own
+          // adposition, which is idiomatic before a pronoun as it stands: "sous lui", "derrière
+          // elle", "au-dessus d'eux".
+          type === 'locative'  ? (
+            nf['person'] && locSpec === 'in' ? 'en' :
+            bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')
+          ) :
           type === 'terminus'  ? aDet(nf, plural, lead) :
           // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
           // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
@@ -250,15 +263,25 @@ export function complementsPhrase(
         const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(headForms(np))));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
-      // A companion or an instrument that is a pronoun is "avec" + the tonic form, with no article
-      // and no elision ("avec lui", never "avec l'il" — A197), as the neutral cause above already
-      // spells it after "de". Per conjunct, and each conjunct repeats the preposition as a noun's
-      // contracted head does: "avec le chien et avec lui". The other adposition-bearing complements
-      // still render a pronoun as a noun phrase ("dans le lui") — A203.
-      const tonicWith = (np: ResolvedNounPhrase): string =>
-        (type === 'instrumental' || type === 'comitative') && tonicPronoun(np) ? `avec ${tonicPronoun(np)}` : '';
+      // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
+      // ("avec lui", "vers elle", never "avec l'il" — A197 for the comitative and the instrumental,
+      // A203 for the other five), as the neutral cause above already spells it after "de". Per
+      // conjunct, and each conjunct repeats the preposition as a noun's contracted head does: "avec
+      // le chien et avec lui". Which preposition each slot takes is not decided here: `headFor`
+      // chooses it as it always does, from a forms bag that carries no determiner for it to
+      // contract with (`tonicHeadForms`), and the tonic form follows it in place of the noun — as
+      // its own `lead`, so the elision is judged on the word that actually follows ("d'eux").
+      const tonicText = (np: ResolvedNounPhrase): string => {
+        const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+        if (!tonic) return '';
+        // The instrument's "avec" carries a partitive for a noun ("avec de l'argent", A149), and a
+        // pronoun is no quantity: it takes the plain preposition, which is the comitative's too.
+        if (type === 'instrumental' || type === 'comitative') return `avec ${tonic}`;
+        const nf = tonicHeadForms(np);
+        return tonicPhrase(headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic), tonic);
+      };
       return coordinate(c.phrase, (np) =>
-        tonicWith(np)
+        tonicText(np)
         || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
         || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))));
     })

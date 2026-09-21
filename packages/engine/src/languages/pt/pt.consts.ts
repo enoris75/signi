@@ -42,12 +42,25 @@ export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
 };
 
 /**
- * Concept IDs of the adjectives that precede their noun in Portuguese. Only the ordinals and
- * OTHER do: "o primeiro dia", "a segunda vez", "o outro gato". Every qualifying adjective follows
- * the noun (and unlike
- * Spanish, no ordinal apocopates — "o primeiro dia", never "*o primer dia").
+ * Concept IDs of the adjectives that precede their noun in Portuguese. The ordinals and OTHER are
+ * here because that is simply where they go: "o primeiro dia", "a segunda vez", "o outro gato".
+ * NEW is here for a different reason — its position decides its sense. After the noun "novo" is
+ * *recently made* ("uma casa nova" is a newly built house); before it, *another, one more* ("uma
+ * nova casa" is a second house, however old). Every NEW the app composes means the second one, so
+ * NEW precedes (A204). Every other qualifying adjective follows the noun (and unlike Spanish, no
+ * ordinal apocopates — "o primeiro dia", never "*o primer dia").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW']);
+
+/**
+ * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
+ * "como" is an abbreviated comparison — "corre como eu" stands for "como eu corro" — so the pronoun
+ * is the subject of the clause it shortens, not the object of a preposition: "como mim" is not
+ * Portuguese. German's "wie" is the same word and takes the nominative for the same reason (A203).
+ * The tonic "mim"/"ti" belongs after a true preposition ("por mim", "debaixo de ti"), which is
+ * where the rest of the complements put it.
+ */
+export const NOMINATIVE_PREP: ReadonlySet<string> = new Set(['como']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerúndio / "prestes a" +
 // infinitivo. Past uses the imperfect ("estava"). The gerund progressive is the Brazilian norm

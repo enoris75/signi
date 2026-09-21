@@ -76,3 +76,29 @@ four are paradigm pins that happen to use NEW as their stand-in adjective:
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: Spanish and Portuguese NEW before the noun* (1 `test.fails`, plus a regression test for OTHER and the ordinals, the qualifying adjectives that stay postnominal, and the four languages already right) |
+
+## Resolved
+
+**2026-09-22.** `NEW` joins `PRENOMINAL` in
+[es.consts.ts](../../../packages/engine/src/languages/es/es.consts.ts) and
+[pt.consts.ts](../../../packages/engine/src/languages/pt/pt.consts.ts), and nothing else moved —
+the trial the file describes was the fix. Each set's doc comment now says *why* NEW is there, which
+is not the ordinals' reason: the position decides the sense, and every NEW the app composes means
+"one more".
+
+**The decision was taken as the file recommends.** NEW moves, and the postnominal "recently made"
+sense becomes unsayable in these two languages, in exchange for the sense every caller means. No
+second concept was seeded. NEW's `description` in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts) now opens both senses —
+*"recently made or introduced, or one more of the same kind"* — since the picker's gloss would
+otherwise name the one the engine no longer spells there.
+
+Seven expectations moved with it, all es/pt, one more than the file counted: the seventh is
+[uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts)'s `help.console.newPeriod`
+("Período nuevo" → "Nuevo período"), the help row the file's table lists beside `console.new.period`
+but did not trace to its test. A stale quotation of the old rendering in a
+[uiStrings.ts](../../../packages/shared/src/uiStrings.ts) comment was corrected with it.
+
+| | |
+|---|---|
+| **Tests** | `adjectives.test.ts` → *known bugs: Spanish and Portuguese NEW before the noun*, the `test.fails` now passing, plus two added cases: the prenominal NEW's agreement and ordering (masculine plural, after an ordinal and after OTHER, before a qualifying adjective, in front of a genitive possessor), and the two slots with no position to take — a predicative NEW and a graded one, which keep the postnominal reading the corpus gloss opens with |

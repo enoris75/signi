@@ -2251,7 +2251,7 @@ describe('known bugs: Portuguese suppletive superlative before the noun', () => 
 // rows; `diagnostic.openClause`) reads as the other sense. Italian and French merge the two senses
 // in the prenominal slot already, and en/de/ja have no contrast to get wrong.
 describe('known bugs: Spanish and Portuguese NEW before the noun', () => {
-  test.fails('NEW precedes the noun in Spanish and Portuguese, as it does in Italian and French', () => {
+  test('NEW precedes the noun in Spanish and Portuguese, as it does in Italian and French', () => {
     expect(cat({ adjectives: ['NEW'] })).toMatchObject({
       es: 'el nuevo gato come.', // now: el gato nuevo come.
       pt: 'o novo gato come.', // now: o gato novo come.
@@ -2271,6 +2271,37 @@ describe('known bugs: Spanish and Portuguese NEW before the noun', () => {
       .toMatchObject({ es: 'nueva oración.', pt: 'nova oração.' });
     expect(sayAll({ subject: np('PERIOD_SENTENCE', { definiteness: 'bare', adjectives: ['NEW'] }) }))
       .toMatchObject({ es: 'nuevo período.', pt: 'novo período.' });
+  });
+
+  // NEW joins the prenominal set, so it takes that set's ordering and agreement: it follows an
+  // ordinal and OTHER (which are determiner-like and come first), precedes a qualifying adjective,
+  // agrees in the masculine plural as in the feminine, and keeps its slot in front of the noun when
+  // a genitive possessor follows it.
+  test('the prenominal NEW agrees and orders like the rest of the set', () => {
+    expect(cat({ number: 'plural', adjectives: ['NEW'] }))
+      .toMatchObject({ es: 'los nuevos gatos comen.', pt: 'os novos gatos comem.' });
+    expect(cat({ adjectives: ['FIRST', 'NEW'] }))
+      .toMatchObject({ es: 'el primer nuevo gato come.', pt: 'o primeiro novo gato come.' });
+    expect(cat({ adjectives: ['OTHER', 'NEW'] }))
+      .toMatchObject({ es: 'el otro nuevo gato come.', pt: 'o outro novo gato come.' });
+    expect(cat({ adjectives: ['NEW', 'BIG'] }))
+      .toMatchObject({ es: 'el nuevo gato grande come.', pt: 'o novo gato grande come.' });
+    expect(cat({ possessor: { concept: 'MAN' }, adjectives: ['NEW'] }))
+      .toMatchObject({ es: 'el nuevo gato del hombre come.', pt: 'o novo gato do homem come.' });
+  });
+
+  // The position contrast is the *attributive* one, so the two places a Spanish or Portuguese
+  // adjective has no position to take are untouched — and both keep the "recently made" reading the
+  // corpus gloss opens with. A predicate NEW follows the copula like any other adjective, and a
+  // graded one stays behind the noun with its periphrastic degree word ("el gato más nuevo" is the
+  // most recently made one, which is what a comparison of newness means).
+  test('a predicative and a graded NEW are unmoved', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('NEW') } } })))
+      .toMatchObject({ es: 'el gato es nuevo.', pt: 'o gato é novo.' });
+    expect(cat({ adjectives: ['NEW'], adjectiveDegrees: ['more'] }))
+      .toMatchObject({ es: 'el gato más nuevo come.', pt: 'o gato mais novo come.' });
+    expect(cat({ adjectives: ['NEW'], adjectiveDegrees: ['most'] }))
+      .toMatchObject({ es: 'el gato más nuevo come.', pt: 'o gato mais novo come.' });
   });
 
   // Regression: the four languages that are already right, the rest of the prenominal set, and the

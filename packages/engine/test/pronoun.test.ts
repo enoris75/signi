@@ -482,7 +482,7 @@ describe('known bugs: the feminine plural tonic pronoun', () => {
   const femPl = { number: 'plural', gender: 'fem' } as const;
   const her = (concept = 'THIRD_PERSON') => np(concept, femPl);
 
-  test.fails('the feminine plural is feminine after an adposition too', () => {
+  test('the feminine plural is feminine after an adposition too', () => {
     expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: her() } } }))).toMatchObject({
       fr: "le chat pleure à cause d'elles.", // now: "à cause d'eux"
       es: 'el gato llora a causa de ellas.', // now: "de ellos"
@@ -502,6 +502,40 @@ describe('known bugs: the feminine plural tonic pronoun', () => {
       .toBe('el gato coordina con nosotras.');
     expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her('SECOND_PERSON') } } })).es)
       .toBe('el gato coordina con vosotras.');
+  });
+
+  // The key is read off the gender in hand, so the genders that have no feminine form to select keep
+  // the one they had: a NEUTER plural is ellos / eles / eux in all three (neither Iberian language
+  // spells a neuter group apart from a masculine one, and French has no neuter plural at all), and
+  // that is the surface an antecedent naming things resolves to as well.
+  test('the masculine and neuter plurals keep the masculine tonic form', () => {
+    const withGender = (gender: 'masc' | 'neut') =>
+      sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('THIRD_PERSON', { number: 'plural', gender }) } } }));
+    expect(withGender('masc')).toMatchObject({
+      fr: "le chat pleure à cause d'eux.", es: 'el gato llora a causa de ellos.', pt: 'o gato chora por causa deles.',
+    });
+    expect(withGender('neut')).toMatchObject({
+      fr: "le chat pleure à cause d'eux.", es: 'el gato llora a causa de ellos.', pt: 'o gato chora por causa deles.',
+    });
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', {
+      complements: { comitative: { phrase: np('THIRD_PERSON', { number: 'plural', antecedent: 'GATE' }) } },
+    }))).toMatchObject({
+      fr: 'le chat coordonne avec eux.', es: 'el gato coordina con ellos.', pt: 'o gato coordena com eles.',
+    });
+  });
+
+  // The instrumental is the other slot A197 gave the tonic form, and it reads the same key. The
+  // French and Portuguese 1st and 2nd plurals are the counterpart of the Spanish pair above: they
+  // are invariable, so no `disjunctive_plural_fem` is seeded and each falls through to the form it
+  // already had — including the Portuguese "com" + "nós" fusion.
+  test('the instrumental follows, and the invariable 1st and 2nd plurals are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { instrumental: { phrase: her() } } }))).toMatchObject({
+      fr: 'le chat coordonne avec elles.', es: 'el gato coordina con ellas.', pt: 'o gato coordena com elas.',
+    });
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her('FIRST_PERSON') } } })))
+      .toMatchObject({ fr: 'le chat coordonne avec nous.', pt: 'o gato coordena conosco.' });
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her('SECOND_PERSON') } } })))
+      .toMatchObject({ fr: 'le chat coordonne avec vous.', pt: 'o gato coordena com vocês.' });
   });
 
   // Regression: the subject surface, which A36 and A161 settled, and the three languages with no

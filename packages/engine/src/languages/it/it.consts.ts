@@ -127,10 +127,12 @@ export const HARD_ICO_ADJ: ReadonlySet<string> = new Set(['antico', 'carico']);
 export const IT_SHORT_IMPERATIVE: ReadonlySet<string> = new Set(['GIVE', 'MAKE', 'GO']);
 
 /**
- * The prepositions a personal pronoun follows through "di": "su di me", "sotto di lui", "senza di te"
- * (A139). The others take the tonic pronoun directly ("a me", "con lui").
+ * The prepositions a personal pronoun follows through "di": "su di me", "sotto di lui", "senza di
+ * te", "attraverso di lui" (A139, and A203 for the complements' spatial locutions). The others take
+ * the tonic pronoun directly ("a me", "con lui", "in lui", "da lui", "come lui"), and so do the
+ * locutions that already govern a "di" or an "a" of their own ("intorno a lui", "davanti a lui").
  */
-export const IT_DI_BEFORE_PRONOUN: ReadonlySet<string> = new Set(['su', 'sopra', 'sotto', 'dietro', 'dentro', 'verso', 'contro', 'senza']);
+export const IT_DI_BEFORE_PRONOUN: ReadonlySet<string> = new Set(['su', 'sopra', 'sotto', 'dietro', 'dentro', 'verso', 'contro', 'senza', 'attraverso']);
 
 // A pronominal verb's clitic, agreeing with the subject (mi/ti/si/ci/vi/si). Pronominality is lexical:
 // the infinitive ends in the enclitic -rsi ("muoversi"), and each stored finite form carries the clitic

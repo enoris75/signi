@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (4 of
-them, as of this writing, pinning three bugs in Part A; Part B has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (none,
+as of this writing — Part A and Part B are both empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,14 +59,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Area |
-|---|---|---|
-| A203 | [A203-pronoun-in-the-other-complements.md](A-must-fix/A203-pronoun-in-the-other-complements.md) | English, Italian, French, German, Spanish, Portuguese |
-| A204 | [A204-spanish-portuguese-new-after-the-noun.md](A-must-fix/A204-spanish-portuguese-new-after-the-noun.md) | Spanish, Portuguese |
-| A205 | [A205-feminine-plural-tonic-pronoun.md](A-must-fix/A205-feminine-plural-tonic-pronoun.md) | French, Spanish, Portuguese |
-
-Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
-filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
+_None open._ Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones
+are filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -303,6 +297,9 @@ is listed under **Fixed** below.
 | A200 | [A200-japanese-plural-neuter-pronoun.md](fixed/A200-japanese-plural-neuter-pronoun.md) | Japanese (corpus + translator) | 2026-09-21 |
 | A201 | [A201-japanese-neuter-pronominal-possessor.md](fixed/A201-japanese-neuter-pronominal-possessor.md) | Japanese | 2026-09-21 |
 | A202 | [A202-possessive-complement-drops-the-determiner.md](fixed/A202-possessive-complement-drops-the-determiner.md) | German, Spanish, Portuguese | 2026-09-22 |
+| A203 | [A203-pronoun-in-the-other-complements.md](fixed/A203-pronoun-in-the-other-complements.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-22 |
+| A204 | [A204-spanish-portuguese-new-after-the-noun.md](fixed/A204-spanish-portuguese-new-after-the-noun.md) | Spanish, Portuguese (corpus + engine) | 2026-09-22 |
+| A205 | [A205-feminine-plural-tonic-pronoun.md](fixed/A205-feminine-plural-tonic-pronoun.md) | French, Spanish, Portuguese (corpus + translator) | 2026-09-22 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

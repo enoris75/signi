@@ -21,7 +21,7 @@ describe('the workspace nouns', () => {
     });
     expect(verbless(np('CONSOLE', { number: 'plural', definiteness: 'indefinite', adjectives: ['NEW'] }))).toEqual({
       en: 'new consoles.', it: 'nuove console.', fr: 'de nouvelles consoles.', de: 'neue Konsolen.',
-      es: 'unas consolas nuevas.', ja: '新しいコンソール。', pt: 'uns consoles novos.',
+      es: 'unas nuevas consolas.', ja: '新しいコンソール。', pt: 'uns novos consoles.',
     });
     expect(sayAll(clause(THE('CAT'), 'RUN', { complements: { locative: { phrase: THE('CONSOLE') } } }))).toEqual({
       en: 'the cat runs in the console.', it: 'il gatto corre nella console.', fr: 'le chat court dans la console.',
@@ -38,7 +38,7 @@ describe('the workspace nouns', () => {
     });
     expect(verbless(np('CANVAS', { number: 'plural', definiteness: 'indefinite', adjectives: ['NEW'] }))).toEqual({
       en: 'new canvases.', it: 'nuove tele.', fr: 'de nouveaux canevas.', de: 'neue Arbeitsflächen.',
-      es: 'unos lienzos nuevos.', ja: '新しいキャンバス。', pt: 'umas telas novas.',
+      es: 'unos nuevos lienzos.', ja: '新しいキャンバス。', pt: 'umas novas telas.',
     });
   });
 
@@ -50,7 +50,7 @@ describe('the workspace nouns', () => {
     });
     expect(verbless(np('PREVIEW', { number: 'plural', definiteness: 'indefinite', adjectives: ['NEW'] }))).toEqual({
       en: 'new previews.', it: 'nuove anteprime.', fr: 'de nouveaux aperçus.', de: 'neue Vorschauen.',
-      es: 'unas vistas previas nuevas.', ja: '新しいプレビュー。', pt: 'umas pré-visualizações novas.',
+      es: 'unas nuevas vistas previas.', ja: '新しいプレビュー。', pt: 'umas novas pré-visualizações.',
     });
   });
 
@@ -61,7 +61,7 @@ describe('the workspace nouns', () => {
     });
     expect(verbless(np('TOOLBAR', { number: 'plural', definiteness: 'indefinite', adjectives: ['NEW'] }))).toEqual({
       en: 'new toolbars.', it: 'nuove barre degli strumenti.', fr: "de nouvelles barres d'outils.", de: 'neue Symbolleisten.',
-      es: 'unas barras de herramientas nuevas.', ja: '新しいツールバー。', pt: 'umas barras de ferramentas novas.',
+      es: 'unas nuevas barras de herramientas.', ja: '新しいツールバー。', pt: 'umas novas barras de ferramentas.',
     });
   });
 });

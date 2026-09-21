@@ -2,7 +2,7 @@
 
 **Languages:** English, Italian, French, German, Spanish, Portuguese
 
-[A197](../fixed/A197-pronoun-in-the-comitative.md) gave the comitative and the instrumental the
+[A197](A197-pronoun-in-the-comitative.md) gave the comitative and the instrumental the
 pronoun branch the causal adjunct always had: a pronoun after an adposition takes its tonic
 (disjunctive) form and no article — *with him*, *con lui*, *avec lui*, *mit ihm*, *con él*, *com
 ele*. The other five adposition-bearing complements were left where they were. A locative, terminus,
@@ -77,3 +77,67 @@ with a determiner fused into it — and, in German, the **case that preposition 
 | | |
 |---|---|
 | **Test** | `complements/comitative.test.ts` → *known bugs: a pronoun in the other adposition-bearing complements* (2 `test.fails` — the locative, source, route, manner and terminus in English, Spanish and Portuguese, and German's three cases — plus a regression test for the comitative, the instrumental and Japanese) |
+
+## Resolved
+
+**2026-09-22.** The five remaining complements take the branch A197 gave the comitative and the
+instrumental, in all six languages. The shape the file calls for — the **bare adposition** each slot
+already computes, and in German the **case it governs** — came out of the head builders unchanged,
+by handing them a forms bag that carries no determiner for them to fuse with:
+
+- [`tonicHeadForms`](../../../packages/engine/src/functions/tonicHeadForms.ts) — the pronoun's forms
+  with `definiteness: 'bare'`, so every `prepDet` / `aDet` / `deDet` / `spatialHead` / `contractDet`
+  yields its preposition alone, and no slot's choice of preposition is written twice.
+- [`TONIC_COMPLEMENTS`](../../../packages/engine/src/functions/functions.consts.ts) — the eight
+  adposition-bearing complements, shared by the six engines; English needed nothing else, its
+  preposition already standing whole in front of the group.
+- [`headPreposition`](../../../packages/engine/src/functions/headPreposition.ts) — the last word of
+  a head, which is what actually governs the pronoun where the head is a locution ("debaixo **de**",
+  "intorno **a**").
+- Per language: [`tonicPronounDe`](../../../packages/engine/src/languages/de/tonicPronounDe.ts)
+  (the dative `disjunctive`, the accusative `object`, the nominative `base`),
+  [`pt/tonicPhrase`](../../../packages/engine/src/languages/pt/tonicPhrase.ts) (em + ele → *nele*,
+  de + elas → *delas*, on whichever preposition ends the head),
+  [`fr/tonicPhrase`](../../../packages/engine/src/languages/fr/tonicPhrase.ts) (the elided *d'* takes
+  no space), and `IT_DI_BEFORE_PRONOUN`, which gained *attraverso*.
+
+### The decisions the file left open
+
+- **German's cases** were taken from the preposition, as the file asks: `_case` is already computed
+  beside the head, so *in ihm* / *durch ihn* / *wie er* fall out of it with no case table of their own.
+- **The French locative** is **"en"** for plain containment — *en lui*, the bare preposition a bare
+  continent takes ("en Europe") and for the same reason, since French does not say *dans lui* of a
+  person. Every other French relation keeps its own adposition, which is idiomatic before a pronoun
+  as it stands: *sous lui*, *derrière elle*, *au-dessus d'eux*, *vers lui*, *comme elle*.
+- **Italian's "di"** is the list `prepObjectText` already consults (A139), read off the last word of
+  the head: *sotto di lui*, *attraverso di lui*, but *in lui*, *da lui*, and *intorno a lui* for the
+  locutions governing an "a" of their own. *attraverso* was added to the list, as this file names it.
+- **The animate branches** were answered yes, in one place: `tonicHeadForms` marks a pronoun animate
+  unless it is neuter, which is how Japanese's `isAnimate` has always read a `person`. So a personal
+  pronoun takes *hacia él*, *para ele*, *va da lui*, German's *von ihm* and its bare-dative recipient
+  (*gibt das Buch ihm*); a neuter one stands for a thing and keeps the inanimate branch (*a ello*,
+  *aus ihm*, *in es*).
+- **GENERIC_PERSON** kept A197's ruling: no tonic form is seeded, so the five new slots spell it
+  exactly as the comitative already does — the bare subject form after the preposition ("en se",
+  "comme on", "wie man"), which is no worse than the article it used to get ("en el se") and no
+  better than what A197 shipped. Idiomatic Romance would restructure the clause rather than put an
+  impersonal clitic there; seeding one is a corpus question, not this fix's.
+
+### Found while fixing it
+
+- **The Iberian similative governs the nominative.** "como" abbreviates a comparison — *corre como
+  yo* stands for *como yo corro* — so Spanish and Portuguese put the subject pronoun there, as
+  German's *wie* does. Without this the manner slot would have read *como mí* / *como mim*.
+  `NOMINATIVE_PREP` in each language's consts; only the 1st and 2nd singular spell the two apart.
+- **French promoted a bare plural to "des"** (A196's rule, which makes a bare plural indefinite
+  after a preposition). A pronoun's bare is the absence of an article, not a zero one, so it is
+  excluded: *sous elles*, never *sous des elles*.
+- **The French instrument keeps its plain "avec"**: a noun takes the partitive there (*avec de
+  l'argent*, A149) and a pronoun is no quantity.
+
+Everything the file lists as already right stayed right: Japanese, the comitative and the
+instrumental, the causal adjunct, the passive agent, `prepObjectText`, and a noun in any of these.
+
+| | |
+|---|---|
+| **Tests** | `complements/comitative.test.ts` → *known bugs: a pronoun in the other adposition-bearing complements*, both `test.fails` now passing, plus five added cases: the French and Italian usage rulings above; every spatial relation keeping its own adposition (including German's dative/accusative split at "um"); the animate branch against the neuter one; the similative's nominative; and a group mixing a noun and a pronoun under one relation, with the feminine plural of A205 carried into the new slots |

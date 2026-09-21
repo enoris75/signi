@@ -34,9 +34,10 @@ export const pronouns: ConceptSeed[] = [
       it: { base: 'io',       person: '1', number: 'singular', plural: 'noi', disjunctive: 'me',   disjunctive_plural: 'noi', object: 'mi', object_plural: 'ci' },
       fr: { base: 'je',       person: '1', number: 'singular', plural: 'nous', disjunctive: 'moi', disjunctive_plural: 'nous', object: 'me', object_plural: 'nous' },
       de: { base: 'ich',      person: '1', number: 'singular', plural: 'wir', disjunctive: 'mir',  disjunctive_plural: 'uns', object: 'mich', object_plural: 'uns' },
-      // Spanish carries the feminine through the plural paradigm (nosotras / vosotras / ellas);
-      // plural_fem is the feminine-plural subject surface. French/Portuguese "nous"/"nós" have none.
-      es: { base: 'yo',       person: '1', number: 'singular', plural: 'nosotros', plural_fem: 'nosotras', disjunctive: 'mí', disjunctive_plural: 'nosotros', object: 'me', object_plural: 'nos' },
+      // Spanish carries the feminine through the plural paradigm (nosotras / vosotras / ellas):
+      // plural_fem is the feminine-plural subject surface and disjunctive_plural_fem the tonic one,
+      // which are the same word here (A205). French/Portuguese "nous"/"nós" have neither.
+      es: { base: 'yo',       person: '1', number: 'singular', plural: 'nosotros', plural_fem: 'nosotras', disjunctive: 'mí', disjunctive_plural: 'nosotros', disjunctive_plural_fem: 'nosotras', object: 'me', object_plural: 'nos' },
       ja: { base: '私',       person: '1', number: 'singular', plural: '私たち', reading: 'わたし', plural_reading: 'わたしたち' },
       pt: { base: 'eu',       person: '1', number: 'singular', plural: 'nós', disjunctive: 'mim',  disjunctive_plural: 'nós', object: 'me', object_plural: 'nos' },
     },
@@ -52,7 +53,7 @@ export const pronouns: ConceptSeed[] = [
       it: { base: 'tu',       person: '2', number: 'singular', plural: 'voi',  disjunctive: 'te',  disjunctive_plural: 'voi', object: 'ti', object_plural: 'vi' },
       fr: { base: 'tu',       person: '2', number: 'singular', plural: 'vous', disjunctive: 'toi', disjunctive_plural: 'vous', object: 'te', object_plural: 'vous' },
       de: { base: 'du',       person: '2', number: 'singular', plural: 'ihr',  disjunctive: 'dir', disjunctive_plural: 'euch', object: 'dich', object_plural: 'euch' },
-      es: { base: 'tú',       person: '2', number: 'singular', plural: 'vosotros', plural_fem: 'vosotras', disjunctive: 'ti', disjunctive_plural: 'vosotros', object: 'te', object_plural: 'os' },
+      es: { base: 'tú',       person: '2', number: 'singular', plural: 'vosotros', plural_fem: 'vosotras', disjunctive: 'ti', disjunctive_plural: 'vosotros', disjunctive_plural_fem: 'vosotras', object: 'te', object_plural: 'os' },
       ja: { base: 'あなた',   person: '2', number: 'singular', plural: 'あなたたち' },
       pt: { base: 'você',     person: '2', number: 'singular', plural: 'vocês', disjunctive: 'você', disjunctive_plural: 'vocês', object: 'te', object_plural: 'vos' },
     },
@@ -67,13 +68,13 @@ export const pronouns: ConceptSeed[] = [
       // base = default masc singular; singular_fem/singular_neut and plural stored as extra forms
       en: { base: 'he',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'she',    singular_neut: 'it',   plural: 'they',  disjunctive: 'him', disjunctive_fem: 'her',  disjunctive_neut: 'it',   disjunctive_plural: 'them', object: 'him', object_fem: 'her', object_neut: 'it', object_plural: 'them' },
       it: { base: 'lui',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei',    singular_neut: 'esso', plural: 'loro',  disjunctive: 'lui', disjunctive_fem: 'lei',  disjunctive_neut: 'esso', disjunctive_plural: 'loro', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'li', object_plural_fem: 'le' },
-      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   singular_neut: 'cela', plural: 'ils',   plural_fem: 'elles', disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_neut: 'cela', disjunctive_plural: 'eux', object: 'le', object_fem: 'la', object_neut: 'le', object_plural: 'les' },
+      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   singular_neut: 'cela', plural: 'ils',   plural_fem: 'elles', disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_neut: 'cela', disjunctive_plural: 'eux', disjunctive_plural_fem: 'elles', object: 'le', object_fem: 'la', object_neut: 'le', object_plural: 'les' },
       de: { base: 'er',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'sie',    singular_neut: 'es',   plural: 'sie',   disjunctive: 'ihm', disjunctive_fem: 'ihr',  disjunctive_neut: 'ihm',  disjunctive_plural: 'ihnen', object: 'ihn', object_fem: 'sie', object_neut: 'es', object_plural: 'sie' },
-      es: { base: 'él',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella',   singular_neut: 'ello', plural: 'ellos', plural_fem: 'ellas', disjunctive: 'él',  disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'los', object_plural_fem: 'las' },
+      es: { base: 'él',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella',   singular_neut: 'ello', plural: 'ellos', plural_fem: 'ellas', disjunctive: 'él',  disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos', disjunctive_plural_fem: 'ellas', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'los', object_plural_fem: 'las' },
       // 彼ら and 彼女ら are people; それら is the plural of それ and is what a group of THINGS is called
       // (A200). Both neuter rows are kana, so their readings equal their text and no furigana is drawn.
       ja: { base: '彼',   person: '3', number: 'singular', gender: 'masc', singular_fem: '彼女',   singular_neut: 'それ', plural: '彼ら', plural_fem: '彼女ら', plural_neut: 'それら', reading: 'かれ', singular_fem_reading: 'かのじょ', singular_neut_reading: 'それ', plural_reading: 'かれら', plural_fem_reading: 'かのじょら', plural_neut_reading: 'それら' },
-      pt: { base: 'ele',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela',    singular_neut: 'isso', plural: 'eles',  plural_fem: 'elas', disjunctive: 'ele', disjunctive_fem: 'ela',  disjunctive_neut: 'isso', disjunctive_plural: 'eles', object: 'o', object_fem: 'a', object_neut: 'o', object_plural: 'os', object_plural_fem: 'as' },
+      pt: { base: 'ele',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela',    singular_neut: 'isso', plural: 'eles',  plural_fem: 'elas', disjunctive: 'ele', disjunctive_fem: 'ela',  disjunctive_neut: 'isso', disjunctive_plural: 'eles', disjunctive_plural_fem: 'elas', object: 'o', object_fem: 'a', object_neut: 'o', object_plural: 'os', object_plural_fem: 'as' },
     },
   },
   {
