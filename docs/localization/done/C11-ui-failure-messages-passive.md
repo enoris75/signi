@@ -114,7 +114,7 @@ all of them — so they say "the saved phrases".
 "Could not put it back." is the *undo* of a delete failing, and it reuses `failure.phraseNotSaved`:
 putting a deleted phrase back **is** saving it again, which is what the code does and what the
 comment there already said. A distinct "it could not be put back" would want the prior state that
-[C19](../C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md) catalogues for TIDY_UP —
+[C19](C19-verbs-needing-voice-purpose-or-comitative.md) catalogued for TIDY_UP —
 nothing in the plan model says "back".
 
 ## Tests that select on these literals

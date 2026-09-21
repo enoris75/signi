@@ -68,8 +68,11 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ### Part A — Ready (`A-ready/`)
 
-Concept definitions: _none outstanding — every catalogued definition A-task is done (see the Done
-section)._
+Concept definitions:
+
+| # | File | Concept → gloss |
+|---|---|---|
+| A16 | [A16-seem.md](A-ready/A16-seem.md) | SEEM → to be perceived as an object: the **passive** of PERCEIVE with the **essive** object complement, ja 物体として知覚される (split from C19; no new construct) |
 
 #### UI strings
 
@@ -78,8 +81,11 @@ _None outstanding._ A11–A15 are done (see the Done section). A08–A10 are ret
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-Concept definitions: _none outstanding — `B-needs-seed/` is empty, as `A-ready/` is. Every task that
-was waiting on a word has its word._
+Concept definitions:
+
+| # | File | Seed first → unlocks |
+|---|---|---|
+| B33 | [B33-burn-flame.md](B-needs-seed/B33-burn-flame.md) | **FLAME** → BURN: to produce flames, ja 炎を出す (split from C19). Replaces "to be consumed by fire", which CONSUME's *ingest* sense got wrong in fr, de and ja |
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
@@ -91,7 +97,7 @@ landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
 [C09](done/C09-modal-verbs.md) added two more parts: a `predicate` adjective for the copular genus
-BE, and the `infinitive` a gloss governs — "to be able **to act**". [C19](C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md)
+BE, and the `infinitive` a gloss governs — "to be able **to act**". [C19](done/C19-verbs-needing-voice-purpose-or-comitative.md)
 added a `purpose` clause ("to write content **to load it**") and the `gender` a pronoun object reads.
 
 Genus nouns (B29–B32) came from the isA audit of 2026-09-14 — each named children whose description
@@ -106,9 +112,8 @@ _None outstanding._ B20–B28 are done (see the Done section).
 
 | # | File | Blocked on |
 |---|---|---|
-| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns, FEELING; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's). BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
+| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns, FEELING; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's); BECOME, the copula plus an aspect (from C19). BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
 | C18 | [C18-motion-verbs-without-a-gloss.md](C-needs-engine/C18-motion-verbs-without-a-gloss.md) | a differentia MOVE_ONESELF cannot carry: two adverbs on one verb and SUDDENLY (COLLAPSE), deixis (COME) (split from C17). **JUMP shipped 2026-09-21** — seeded AIR and gave the `direction` complement a relation of its own, the *into* path |
-| C19 | [C19-verbs-needing-voice-purpose-or-comitative.md](C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md) | a Japanese consumption sense that is not itself burning (BURN — the passive shipped and the gloss renders in the other six), a similative complement of the copula (SEEM), a gloss worth the seed (BECOME) (split from C08). **SAVE, ADD, LOAD and TIDY_UP shipped 2026-09-21** |
 
 #### UI strings
 
@@ -153,7 +158,7 @@ rather than decided.
 | C09 | [done/C09-modal-verbs.md](done/C09-modal-verbs.md) | MUST → to be obliged to act; CAN → to be able to act; WILL → to desire to act (built the **infinitive complement**, `PhrasePlan.infinitiveComplement`: a subject-controlled clause in the citation mood, its linking word lexical on the governor — *capace **di*** / *obbligato **a*** / de extraposed *zu* / ja a こと clause before the predicate; seeded **ACT**, **DESIRE**, **ABLE**, **OBLIGED**; fixed the Italian citation's *si* agreement, "essere attento", and the Japanese copula citation, 慎重である) |
 | C17 | [done/C17-motion-verbs-reflexive-genus.md](done/C17-motion-verbs-reflexive-genus.md) | RUN → to move fast; GO → to move from a place to another place (built the **Italian pronominal verb**, *si è mosso* / *muoviti* / *ci si muove*, and the **German reflexive verb**, *bewegt sich* / *der sich bewegt* / *sich schnell bewegen*; seeded **MOVE_ONESELF** and the inchoative **CHANGE_ONESELF**, de *sich ändern*, ja 変わる; found bugs A151, A152). JUMP, COLLAPSE, COME → C18 |
 | C08 | [done/C08-copular-and-genus-verbs.md](done/C08-copular-and-genus-verbs.md) | SHOW → to cause a person to see objects; HIDE → to cause an object not to be visible; COORDINATE → to cause people to act together; START → to cause an action to begin; COMPACT / EXPAND → to cause an object to become smaller / bigger; APPEAR → to become visible (built **object control**, `InfinitiveComplement.control`: the causative is C09's nesting with the *object* as controller, which decides Romance agreement and, in Japanese, the ようにする construction with the causee inside the clause; seeded **CAUSE_VERB** — the induce family in Romance, so it also works with a plain object — and **VISIBLE**, and gave BEGIN the link the **inchoative** needed). BE, CONSUME and CAUSE_VERB stay on the literal by design; BURN, SEEM, BECOME and the four remaining workspace verbs → C19 |
-| C19 | [C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md](C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md#done-the-four-workspace-verbs-2026-09-21) | SAVE → to write content to load it; LOAD → to read written content; ADD → to cause an object to be with other objects; TIDY_UP → to cause objects to be tidy (seeded **TIDY**; `GlossParts` gained `purpose` and a pronoun object's `gender`). LOAD needed no prior state — WRITTEN already says the content was put there before — and TIDY_UP was blocked on a word, not a construct: the seeded ORDER is the *command* sense (de "Befehl", ja 命令). BURN, SEEM and BECOME stay |
+| C19 | [done/C19-verbs-needing-voice-purpose-or-comitative.md](done/C19-verbs-needing-voice-purpose-or-comitative.md#done-the-four-workspace-verbs-2026-09-21) | SAVE → to write content to load it; LOAD → to read written content; ADD → to cause an object to be with other objects; TIDY_UP → to cause objects to be tidy (seeded **TIDY**; `GlossParts` gained `purpose` and a pronoun object's `gender`). LOAD needed no prior state — WRITTEN already says the content was put there before — and TIDY_UP was blocked on a word, not a construct: the seeded ORDER is the *command* sense (de "Befehl", ja 命令). **Retired by splitting**: none of the other three was an engine gap. SEEM → A16, BURN → B33, BECOME → C05 |
 | C18 | [C-needs-engine/C18-motion-verbs-without-a-gloss.md](C-needs-engine/C18-motion-verbs-without-a-gloss.md#done-jump-2026-09-21) | JUMP → to move into the air (seeded **AIR**; gave the `direction` complement a `path` specifier — the *into* [B27](done/B27-ui-clipboard-move-resize.md) also wanted: en "into" vs "to", de the accusative of motion, ja の中へ). COLLAPSE still wants two adverbs on one verb, COME a composable deixis |
 | C06 | [done/C06-pronoun-definitions.md](done/C06-pronoun-definitions.md) | FIRST_PERSON → the first person; SECOND_PERSON → the second person; THIRD_PERSON → the third person (was A08–A10). **Nothing seeded and no engine change** — the block was a missing frontend surface: a pronoun is described rather than searched for, so it never reached `ConceptOption` and had nowhere to show a definition. The chooser's person row became that surface (`PersonToggle`: `data-concept` + a `describeChild` `useConceptDefinition` tooltip), and the three glosses were then plain seed data. GENERIC_PERSON has the surface but keeps its literal |
 | B32 | [done/B32-place-glosses.md](done/B32-place-glosses.md) | HOME → a place where one lives; HOUSE → a building where one lives; MARKET → a place where one trades; PRISON → a building where one confines people (seeded **LIVE**, **TRADE**, **CONFINE**; added the `whereGloss` helper). MARKET took TRADE objectless — de *handeln* / fr *commercer* take no object; PRISON shipped after all, the active with a generic subject standing in for the blocked passive |

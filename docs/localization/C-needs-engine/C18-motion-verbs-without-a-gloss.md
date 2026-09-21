@@ -15,7 +15,7 @@ GO and now JUMP are glossed on it. These two need something MOVE_ONESELF cannot 
 
 ## COLLAPSE: what "two adverbs" costs
 
-Not a corner of a gloss — a feature, the way the passive was for [C19](C19-verbs-needing-voice-purpose-or-comitative.md).
+Not a corner of a gloss — a feature, the way the passive was for [C19](../done/C19-verbs-needing-voice-purpose-or-comitative.md).
 `VerbPhrase.modifier` is one adverb, and **37 sites across 21 files** read it: the seven engines'
 adverb placement, the builder's adverb slot and its satellite, the console's `/adv`, the
 serialization format, the relative-clause and modal paths. Each language would also need an

@@ -27,6 +27,27 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
     ([B18](../done/B18-selection-verbs.md)).
   - **REPLACE** ("to take the place of") fits neither CHANGE nor INDICATE, and every shape tried read
     like MODIFY or NAME ([B16](../done/B16-word-verbs.md)).
+- **BECOME** ("to come to be; to change into a different state"), 2026-09-21, split out of
+  [C19](../done/C19-verbs-needing-voice-purpose-or-comitative.md). It is the copula plus an aspect,
+  not a genus with a differentia, so it sits with BE, which
+  [C08](../done/C08-copular-and-genus-verbs.md#still-on-the-english-literal-by-design) leaves on the
+  literal. The one composable shape is the **inchoative**, BEGIN + BE + an adjective, and it
+  renders, but it does not earn a gloss:
+
+  | plan | en | it | fr | de | es | ja | pt |
+  |---|---|---|---|---|---|---|---|
+  | BEGIN + BE + VISIBLE (seeded; probed 2026-09-21) | to begin to be visible | iniziare a essere visibile | commencer à être visible | beginnen, sichtbar zu sein | empezar a estar visible | 可視であることが始まる | começar a estar visível |
+  | BEGIN + BE + DIFFERENT (DIFFERENT unseeded; probed 2026-09-20) | to begin to be different | iniziare a essere diverso | commencer à être différent | beginnen, verschieden zu sein | empezar a ser diferente | 別であることが始まる | começar a ser diferente |
+
+  - **Japanese** says the *nominalized event* of being X, beginning (〜であることが始まる). What
+    Japanese says here is 〜になる, which is BECOME's own word, so the gloss either reads as a
+    translation exercise or defines the verb with itself.
+  - **The adjective.** A state-neutral gloss wants DIFFERENT, and DIFFERENT's Japanese would be 別の,
+    which is already OTHER's ([B21](../done/B21-ui-clause-and-coordination-vocabulary.md)). 異なる and
+    違う are verbs, not adjectives, so the seed would double a word to say a different thing.
+
+  BECOME is the genus of APPEAR, COMPACT and EXPAND (C08), and it works there. It just cannot be
+  defined itself. Revisit only if a gloss turns up that is worth a seed.
 
 This file is the record that the omission is **intentional**, not an oversight.
 

@@ -65,7 +65,7 @@ subject, which is the part still missing. The passive infinitive (BURN) is untou
 pieces that turned out not to need it: APPEAR's gloss, which the seeded BECOME could already carry,
 and the inchoative, which wanted a link in the seed and no engine change at all. Seven of the sixteen
 verbs are localized; two stay on the English literal by design, as this file said they would; the
-other seven moved to [C19](../C-needs-engine/C19-verbs-needing-voice-purpose-or-comitative.md), each
+other seven moved to [C19](C19-verbs-needing-voice-purpose-or-comitative.md), each
 behind a named construct.
 
 ### (a) Engine — object control
@@ -118,7 +118,7 @@ updated; their output is unchanged.
   what HIDE denies.
 - **BEGIN** gained its `infinitive_link` (it *a*, fr *à*, es/pt *a*, ja ことが), which is all the
   **inchoative** ever needed: the nesting was C09's. "il gatto inizia **a** essere visibile",
-  「可視であることが始まる」. No definition uses it — see BECOME in C19 — but the construct this file
+  「可視であることが始まる」. No definition uses it — see BECOME in [C05](../C-needs-engine/C05-non-distinguishing-genera.md) — but the construct this file
   asked for is there and pinned.
 
 ### (c) The glosses
