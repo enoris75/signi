@@ -1468,7 +1468,7 @@ export const UI_STRINGS = defineUiStrings({
   // *builds*, so it is cited on the grammar noun NOUN the way the determiner values are (see
   // UiStringPossessiveDef). Keyed `pronoun.possessive.<person><number>`, with the third singular
   // split by the antecedent's natural gender — the only cell any of the seven spells differently
-  // for it (en his/her/its, de sein/ihr, ja 彼の/彼女の/それの) — so a call site can write
+  // for it (en his/her/its, de sein/ihr, ja 彼の/彼女の/その — the last suppletive, A201) — so a call site can write
   // t(`pronoun.possessive.${key}`) for the features it resolved.
   //
   // Lower-case and unformatted: a word shown as a word, like the `determiner.value.*` hints. The
@@ -4231,8 +4231,9 @@ export const UI_STRINGS = defineUiStrings({
   // key or a machine (ACT is a person's, de "handeln"), with the box as its `locative` and the cursor
   // in a relative clause on HAVE — it "Un tasto funziona nello slot che ha il cursore", de "Eine Taste
   // funktioniert im Slot, der den Cursor hat", ja キーはカーソルがあるスロットで動作します. HAVE, not BE
-  // in a place relative ("the slot where the cursor is"): Spanish and Portuguese render that one with
-  // ser, "donde el cursor es". Then what esc does from a box, RETURN to the period (it "Torna al
+  // in a place relative ("the slot where the cursor is"): Spanish and Portuguese rendered that one
+  // with ser, "donde el cursor es". That was A199, fixed on 2026-09-21 — the engine now says "donde
+  // el cursor está", so BE is open again if this string is ever reconsidered. Then what esc does from a box, RETURN to the period (it "Torna al
   // periodo", ja 文へ戻る), the keys that work EVERYWHERE, as the section they head is called (it "Tasti
   // che funzionano ovunque", ja どこでも動作するキー), and what ⇧ does to a key that cycles a value
   // ("Choose the previous value", de "Den vorherigen Wert wählen", ja 前の値を選び).
@@ -4372,9 +4373,10 @@ export const UI_STRINGS = defineUiStrings({
   },
   // The console's paragraph, one statement to a line, each example after a colon. What a bracket
   // holds: HOLD on a word and bare plural commands (it "Una parentesi contiene una parola e comandi", fr
-  // "…un mot et des commandes", ja 括弧は単語と命令を保持しています). Not "its commands": Japanese spells
-  // that possessive それの, where it would say その, and a pronoun's gender would have to follow WORD's
-  // in each language. That the console writes the brackets (WRITE, it "La console scrive le
+  // "…un mot et des commandes", ja 括弧は単語と命令を保持しています). Not "its commands", which was written
+  // around because Japanese spelled that possessive それの where it says その (A201, fixed on
+  // 2026-09-21) and because a pronoun's gender would have to follow WORD's in each language. The
+  // second reason stands on its own, so the string is unchanged. That the console writes the brackets (WRITE, it "La console scrive le
   // parentesi"), and that the list inside one shows the word's commands (SHOW, whose Japanese says it
   // with 見せる as the word map's sentence does).
   'help.console.bracket': {

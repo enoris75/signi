@@ -93,7 +93,7 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
 // Romance languages, and never blank — which is exactly what a fallback is for.
 //
 // Third singular is the only cell any of the seven languages splits on the antecedent's *natural*
-// gender (en his/her/its, de sein/ihr, ja 彼の/彼女の/それの); an antecedent with none reads as
+// gender (en his/her/its, de sein/ihr, ja 彼の/彼女の/その — それ's adnominal is suppletive, A201); an antecedent with none reads as
 // masculine, the unmarked one — the same fallback `possessiveEn` makes in the engine.
 const POSSESSIVE_KEY = {
   "1sg": "pronoun.possessive.1sg",

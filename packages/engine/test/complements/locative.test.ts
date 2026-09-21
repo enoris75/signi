@@ -965,7 +965,7 @@ describe('known bugs: a French bare plural after a preposition', () => {
     },
   })).fr;
 
-  test.fails('the locative takes "des", under every spatial relation it spells with a preposition', () => {
+  test('the locative takes "des", under every spatial relation it spells with a preposition', () => {
     expect(inBrackets()).toBe('le chat est dans des parenthèses.');       // now: "dans parenthèses"
     expect(inBrackets('under')).toBe('le chat est sous des parenthèses.');
     expect(inBrackets('behind')).toBe('le chat est derrière des parenthèses.');
@@ -982,7 +982,7 @@ describe('known bugs: a French bare plural after a preposition', () => {
     })).fr).toBe('le chat est dans de grands mots.');
   });
 
-  test.fails('…and so do the route, terminus, direction, comitative and manner', () => {
+  test('…and so do the route, terminus, direction, comitative and manner', () => {
     const with_ = (type: 'route' | 'terminus' | 'direction' | 'comitative' | 'manner', verb = 'BE') =>
       sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: np('BRACKET', BARE_PLURAL) } } })).fr;
     expect(with_('route')).toBe('le chat est à travers des parenthèses.');
@@ -994,6 +994,25 @@ describe('known bugs: a French bare plural after a preposition', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       complements: { route: { phrase: np('BRACKET', BARE_PLURAL), specifiers: [{ kind: 'path', value: 'over' }] } },
     })).fr).toBe('le chat est par-dessus des parenthèses.');
+  });
+
+  // The rewrite is per conjunct and per complement, so a coordinated group takes "des" on each
+  // head, and the "de"-governed cause is left alone by the same rule that leaves the source alone.
+  // A prenominal adjective turns "des" into "de" wherever the head is built.
+  test('a coordinated group, the de-governed cause and a prenominal adjective on a sister', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: {
+        locative: {
+          phrase: { conjuncts: [np('BRACKET', BARE_PLURAL), np('WORD', BARE_PLURAL)], conjunction: 'and' },
+        },
+      },
+    })).fr).toBe('le chat est dans des parenthèses et dans des mots.');
+    expect(sayAll(clause(np('CAT'), 'CRY', {
+      complements: { cause: { phrase: np('BRACKET', BARE_PLURAL) } },
+    })).fr).toBe('le chat pleure à cause de parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { terminus: { phrase: np('WORD', { ...BARE_PLURAL, adjectives: ['BIG'] }) } },
+    })).fr).toBe('le chat est à de grands mots.');
   });
 
   // Regression: the instrumental already has its article (A149); every relation that governs "de"

@@ -112,3 +112,48 @@ this omission, and it is unchanged by the fix.
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: Spanish and Portuguese drop a pronominal possessor on a predicative* (2 `test.fails` — the subject complement and the object complement — plus a regression test for the other five languages, the same phrase as a direct object, a genitive possessor and the predicative's own determiner rules) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+Both predicate branches now ask their `nounPhrase` for the possessive the subject and the object
+have always had:
+
+- **Spanish** ([complementsPhrase](../../../packages/engine/src/languages/es/complementsPhrase.ts)) —
+  `nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np))` at both call sites,
+  the `predicative` noun branch and the `objectPredicative` noun branch. `esPossessiveWord` returns
+  `''` for a genitive or absent possessor, so nothing else moves.
+- **Portuguese** ([complementsPhrase](../../../packages/engine/src/languages/pt/complementsPhrase.ts)) —
+  the same with `ptPossessiveWord(np)` on the `predicative` branch.
+
+**The decision for the fixer — the Portuguese object complement.** Taken as the file proposed, with
+one piece the trial's `ptPossessiveWord(np, false)` alone did not supply: the marker has to be given
+a *definite* head to contract with, or the factitive link keeps the indefinite the predicative
+defaults to and renders `em uma sua prisão`. A possessed head therefore takes `definiteness:
+'definite'` for the marker (`em` + `a` → **na**), and the possessive comes without its own article —
+`na sua prisão`. The essive `como` contracts with nothing and drops the article from both, so it
+keeps the forms as they are: `como sua prisão`. Spanish needs neither: `en su prisión`, `como su
+prisión`.
+
+**What the fix generalises to.** Routing the predicate nominal through the language's own
+`nounPhrase` gives this slot everything that builder knows, which the probe confirmed: A187's
+determiner kept beside the possessive in its stressed, postnominal shape (`este libro suyo`, `este
+livro seu`), `todos sus libros` / `todos os seus livros` with the possessive still in front, the
+negative concord a `no` head drives (`el perro no es ningún libro suyo`), and an adjective in its
+place (`su libro grande`).
+
+**Not pinned**, and unchanged: Italian's essive article before a possessive (`usa la casa come la
+sua prigione`), which is that engine's essive rule and not this omission.
+
+**Tests guarding it.** `packages/engine/test/complements/predicative.test.ts` → *known bugs: Spanish
+and Portuguese drop a pronominal possessor on a predicative*: both former `test.fails` are now plain
+passing tests, with their assertions unchanged — the subject complement across the persons, genders,
+numbers, the other predicative verbs and a relative clause, and the object complement under both
+markers — beside the regression test for the other five languages, the same phrase as a direct
+object, a genitive possessor and the predicative's own determiner rules.
+
+Added there: a demonstrative, `all` and `no` beside the possessive, an adjective, and a coordinated
+predicate spelling each conjunct's own possessor.
+
+No passing test changed its expectation.

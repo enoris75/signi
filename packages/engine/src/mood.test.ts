@@ -102,6 +102,36 @@ describe('imperativeForm (pt)', () => {
   });
 });
 
+// A195: the French tu imperative drops the -s of the 2sg present, but only where that form ends
+// in -es — the -er paradigm plus the ouvrir class, which takes -er endings on an -ir infinitive.
+// Reading the drop off the infinitive gave ouvrir the -s back ("ouvres le livre").
+describe('imperativeForm (fr)', () => {
+  const OUVRIR = verb('OPEN', { base: 'ouvrir', '2sg_present': 'ouvres', '1pl_present': 'ouvrons', '2pl_present': 'ouvrez' });
+  const MANGER = verb('EAT', { base: 'manger', '2sg_present': 'manges', '1pl_present': 'mangeons', '2pl_present': 'mangez' });
+  const CHOISIR = verb('CHOOSE', { base: 'choisir', '2sg_present': 'choisis', '1pl_present': 'choisissons', '2pl_present': 'choisissez' });
+  const COURIR = verb('RUN', { base: 'courir', '2sg_present': 'cours', '1pl_present': 'courons', '2pl_present': 'courez' });
+
+  test('the tu form drops its -s off the form, not off the infinitive', () => {
+    expect(imperativeForm('fr', OUVRIR, '2sg', false)).toBe('ouvre');
+    expect(imperativeForm('fr', MANGER, '2sg', false)).toBe('mange');
+    expect(imperativeForm('fr', CHOISIR, '2sg', false)).toBe('choisis');
+    expect(imperativeForm('fr', COURIR, '2sg', false)).toBe('cours');
+  });
+
+  test('the negative takes the same form, and the other persons come straight from the present', () => {
+    expect(imperativeForm('fr', OUVRIR, '2sg', true)).toBe('ouvre');
+    expect(imperativeForm('fr', OUVRIR, '1pl', false)).toBe('ouvrons');
+    expect(imperativeForm('fr', OUVRIR, '2pl', false)).toBe('ouvrez');
+  });
+
+  test('FR_IMP_OVERRIDE wins, so être and aller never reach the rule', () => {
+    const ETRE = verb('BE', { base: 'être', '2sg_present': 'es', '1pl_present': 'sommes', '2pl_present': 'êtes' });
+    const ALLER = verb('GO', { base: 'aller', '2sg_present': 'vas', '1pl_present': 'allons', '2pl_present': 'allez' });
+    expect(imperativeForm('fr', ETRE, '2sg', false)).toBe('sois');
+    expect(imperativeForm('fr', ALLER, '2sg', false)).toBe('va');
+  });
+});
+
 describe('imperativeForm and moodForm: the languages that build them in-engine', () => {
   test('English, German and Japanese get no synthetic form', () => {
     for (const lang of ['en', 'de', 'ja'] as const) {

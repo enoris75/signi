@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import type { ConceptForms, ResolvedComplement } from '../../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
@@ -12,10 +12,17 @@ import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
+import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
+
+// The complements whose pronoun is spelled as a pronoun today: the comitative and the instrumental,
+// which share "with" (A197), beside the causal adjunct, which has its own branch below. The other
+// adposition-bearing complements still send a pronoun through the noun-phrase renderer ("in the he")
+// — A203.
+const TONIC_COMPLEMENTS = new Set<ComplementType>(['comitative', 'instrumental']);
 
 // `verb` is the governing verb's forms: the predicative reads it to repair a predicate noun under a
 // seeming verb ("seems to be a legend").
@@ -34,8 +41,7 @@ export function complementsPhrase(
       // "because of" ("thanks to her", "through the fault of them", "because of him"). The choice is
       // per conjunct, so a group mixes the two under the one connector ("because of the dog and him").
       if (type === 'cause') {
-        const conjuncts = coordinate(c.phrase, (np) =>
-          np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np));
+        const conjuncts = coordinate(c.phrase, (np) => tonicPronoun(np) ?? npText(np));
         return `${CAUSE_PREP[causeSentiment(c)]} ${conjuncts}`;
       }
       // An instrument presented as an action rather than a thing: "by choosing a word"
@@ -101,7 +107,12 @@ export function complementsPhrase(
       if (type === 'locative' && c.phrase.conjuncts.some((np) => locativeIdiom(c, np, LOCATIVE_IDIOMS))) {
         return coordinate(c.phrase, (np) => locativeIdiom(c, np, LOCATIVE_IDIOMS) ?? `${prep} ${npText(np)}`);
       }
-      return `${prep} ${coordinate(c.phrase, npText)}`;
+      // A pronoun behind the preposition takes its oblique form and no article — "with him", never
+      // "with the he" (A197) — the same shape the causal adjunct above has always had. Per conjunct,
+      // so a group mixes the two under the one preposition ("with the dog and him").
+      const conjunctText = (np: ResolvedNounPhrase): string =>
+        (TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined) ?? npText(np);
+      return `${prep} ${coordinate(c.phrase, conjunctText)}`;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever
     // shape the sentiment gave it (see `withCauseNegator`).

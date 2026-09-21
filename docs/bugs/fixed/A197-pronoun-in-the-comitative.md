@@ -125,3 +125,74 @@ so a group mixes a noun and a pronoun (*avec le chien et avec lui*).
 | | |
 |---|---|
 | **Test** | `complements/comitative.test.ts` → *known bugs: a pronoun in the comitative renders as a noun* (3 `test.fails` — the third person in all six languages across gender and number and in a coordinated group, the first and second persons with the Spanish/Portuguese fusions, and the instrumental — plus a regression test for Japanese, a noun companion, the causal pronoun, the passive agent and the prepositional object) |
+
+## Resolved
+
+2026-09-21. Took the shape above, for the **comitative and the instrumental** — the two slots the
+pinned cases cover, which share one adposition in all six languages. The other five sisters are
+**not** fixed here and are filed as [A203](../A-must-fix/A203-pronoun-in-the-other-complements.md);
+see the ruling below.
+
+A shared helper, [`tonicPronoun`](../../../packages/engine/src/functions/tonicPronoun.ts), answers
+the one question every engine was asking inline: the disjunctive surface for a pronoun, `undefined`
+for a noun. `resolveNounPhrase` has already selected it for the person, number and gender in hand.
+Each engine then spells its own adposition around it, per conjunct:
+
+- **en** ([complementsPhrase](../../../packages/engine/src/languages/en/complementsPhrase.ts)) — the
+  shared `${prep} ${coordinate(…)}` tail takes a conjunct callback that prefers the tonic form for
+  the two `TONIC_COMPLEMENTS`. The `cause` branch above it, which had the same expression inline,
+  now calls the helper too.
+- **it** / **fr** — a `con` / `avec` clause in the final `coordinate`, beside the existing pronoun
+  cause. Each conjunct repeats the preposition, as a fused head does: *con il cane e con lui*, *avec
+  le chien et avec lui*.
+- **de** ([complementsPhrase](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts))
+  — an early return beside the hearth idiom, before the case and declension machinery. *mit* governs
+  the dative and the German `disjunctive` **is** the dative, so `mit ${tonic}` is the whole phrase.
+- **es** / **pt** — a branch in `conjunctText`, with the fusions in each language's consts
+  (`COMITATIVE_FUSION`): *conmigo*, *contigo*, *consigo*; *comigo*, *contigo*, *conosco*, *consigo*.
+
+**Decisions for the fixer**, as ruled:
+
+- **The sisters were not done at the same time.** Each needs its own adposition and, in German, its
+  own case, and — unlike the comitative and the instrumental — *none of their wants was ever
+  rendered*: the bug file says in as many words that they "would have to be written by hand". They
+  are not one branch repeated but seven questions of usage (French *dans lui* or *en lui*, Italian
+  *sotto di lui*, German's accusative *durch ihn* against the dative the `disjunctive` already is),
+  and answering them blind is how a catalogue of verified defects stops being one. A203 files them
+  with those questions written down, exactly as A187 left A202 behind. What this fix does leave them
+  is the helper and the shape: each is a two-line branch once its adposition is ruled.
+- **GENERIC_PERSON.** Left as it is, and not seeded. The six now render *with one*, *con si*, *avec
+  on*, *mit man*, *con se*, *com se* — no better than the *con il si* of before, and no worse. A
+  comitative "one" is not a phrase these languages have, nothing in either UI builds one, and
+  inventing tonic forms (*soi*, *uno*, *einem*) for it would be seeding vocabulary no reader asked
+  for. Not pinned.
+- **Portuguese 1pl.** Fused: `com` + `nós` → **conosco**, the Brazilian spelling the rest of the
+  corpus uses (*está abrindo*, *em uma prisão*). *com nós* is not Portuguese, and no pinned case
+  asserted it — the 1pl row of the second test names en/it/fr/de/es only. The fusion sits in
+  `pt.consts.ts` beside the 1sg and 2sg ones rather than in the lexeme; moving all four into the
+  lexeme is a corpus question, not this defect's.
+- **Reflexive coreference.** Out of scope, as the file says. `consigo` is in both fusion tables for
+  completeness, and nothing reaches it.
+
+**Found while fixing this, and filed rather than fixed:** a *feminine plural* pronoun has no tonic
+form of its own in any language. `resolveNounPhrase` reads `disjunctive_plural` alone, so a feminine
+group is masculine behind every adposition — `à cause d'eux`, `a causa de ellos`, `por causa deles`,
+and now `avec elles` → *avec eux* in the comitative. It predates this fix (the causal adjunct shows
+it at HEAD) and is the `disjunctive` counterpart of A36 and A161. Filed as
+[A205](../A-must-fix/A205-feminine-plural-tonic-pronoun.md).
+
+**Tests guarding it.** `packages/engine/test/complements/comitative.test.ts` → *known bugs: a
+pronoun in the comitative renders as a noun*: all three former `test.fails` are now plain passing
+tests, with their assertions unchanged — the third person across gender and number and in a
+coordinated group, the first and second persons with the Spanish and Portuguese fusions, and the
+instrumental — beside the regression test for Japanese, a noun companion, the causal pronoun, the
+passive agent and the prepositional object.
+
+Added there: both slots in one clause, in all seven languages (`with him with me`, `猫は彼と私で調整します。`),
+the Portuguese 1pl fusion, the Spanish 2pl and the Portuguese neuter. Unit level:
+[`tonicPronoun.test.ts`](../../../packages/engine/src/functions/tonicPronoun.test.ts) (a pronoun, a
+pronoun with no tonic form, a noun) and the German
+[`complementsPhrase.test.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.test.ts),
+where the early return has to come before the case machinery.
+
+No passing test changed its expectation.

@@ -182,12 +182,18 @@ describe('possessiveJa', () => {
     expect(possessiveJa(possessor('1'))).toEqual([{ t: '私', r: 'わたし' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'singular', 'masc'))).toEqual([{ t: '彼', r: 'かれ' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'singular', 'fem'))).toEqual([{ t: '彼女', r: 'かのじょ' }, { t: 'の' }]);
-    expect(possessiveJa(possessor('3', 'singular', 'neut'))).toEqual([{ t: 'それ' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'plural'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
     // A161. The feminine plural has its own surface and reading, like the feminine singular; the
-    // masculine and neuter plural keep 彼ら.
+    // masculine and mixed plural keep 彼ら.
     expect(possessiveJa(possessor('3', 'plural', 'fem'))).toEqual([{ t: '彼女ら', r: 'かのじょら' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'plural', 'masc'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
-    expect(possessiveJa(possessor('3', 'plural', 'neut'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
+  });
+
+  // A201. それ is the one pronoun of the ten whose adnominal is suppletive: この / その / あの is the
+  // whole of that series, and それの is not the possessive determiner. The plural それら is regular
+  // again, so it takes the shared の. Both are kana and carry no reading.
+  test('the neuter singular is the suppletive その, and the neuter plural それらの', () => {
+    expect(possessiveJa(possessor('3', 'singular', 'neut'))).toEqual([{ t: 'その' }]);
+    expect(possessiveJa(possessor('3', 'plural', 'neut'))).toEqual([{ t: 'それら' }, { t: 'の' }]);
   });
 });

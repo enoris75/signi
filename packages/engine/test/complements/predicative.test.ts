@@ -850,7 +850,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
   const his = owner('3', 'singular', 'masc');
   const dogIs = (phrase: NounPhrase) => sayAll(clause(np('DOG'), 'BE', { complements: { predicative: { phrase } } }));
 
-  test.fails('a predicate nominal keeps its possessive in Spanish and Portuguese', () => {
+  test('a predicate nominal keeps its possessive in Spanish and Portuguese', () => {
     expect(dogIs(np('POSSESSOR', { definiteness: 'definite', possessor: his }))).toMatchObject({
       es: 'el perro es su poseedor.', // now: "el perro es el poseedor."
       pt: 'o cão é o seu possuidor.', // now: "o cão é o possuidor."
@@ -884,7 +884,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
   // The OBJECT complement is the same omission a few lines down in the same function, under both of
   // its markers. Portuguese has to fuse the factitive link with the possessive's own article
   // ("em" + "a" → "na sua prisão"); the essive "como" contracts with nothing and drops it.
-  test.fails('an object complement keeps its possessive in Spanish and Portuguese', () => {
+  test('an object complement keeps its possessive in Spanish and Portuguese', () => {
     expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
       directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('PRISON', { possessor: his }) } },
     }))).toMatchObject({
@@ -897,6 +897,39 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
     }))).toMatchObject({
       es: 'el gato usa la casa como su prisión.', // now: "… como prisión."
       pt: 'o gato usa a casa como sua prisão.', // now: "… como prisão."
+    });
+  });
+
+  // The fix routes the predicate nominal through the same `nounPhrase` the subject and the object
+  // take, so everything that builder knows about a possessive now reaches this slot too: A187's
+  // kept determiner in its stressed/postnominal shape, the "todos" that keeps the possessive in
+  // front, and the negative concord a `no` head drives. A coordinated predicate spells each
+  // conjunct's own possessor.
+  test('a determiner beside the possessive, "all", "no" and a coordinated predicate', () => {
+    expect(dogIs(np('BOOK', { definiteness: 'this', possessor: owner('3', 'singular', 'fem') }))).toMatchObject({
+      es: 'el perro es este libro suyo.', pt: 'o cão é este livro seu.',
+      en: 'the dog is this book of hers.', it: 'il cane è questo suo libro.',
+    });
+    expect(dogIs(np('BOOK', { definiteness: 'all', number: 'plural', possessor: owner('3', 'singular', 'fem') }))).toMatchObject({
+      es: 'el perro es todos sus libros.', pt: 'o cão é todos os seus livros.',
+    });
+    expect(dogIs(np('BOOK', { definiteness: 'no', possessor: owner('3', 'singular', 'fem') }))).toMatchObject({
+      es: 'el perro no es ningún libro suyo.', pt: 'o cão não é nenhum livro seu.',
+    });
+    expect(dogIs(np('BOOK', { possessor: owner('3', 'singular', 'fem'), adjectives: ['BIG'] }))).toMatchObject({
+      es: 'el perro es su libro grande.', pt: 'o cão é o seu livro grande.',
+    });
+    expect(sayAll(clause(np('DOG'), 'BE', {
+      complements: {
+        predicative: {
+          phrase: {
+            conjuncts: [np('POSSESSOR', { possessor: his }), np('BOOK', { possessor: owner('3', 'singular', 'fem') })],
+            conjunction: 'and',
+          },
+        },
+      },
+    }))).toMatchObject({
+      es: 'el perro es su poseedor y su libro.', pt: 'o cão é o seu possuidor e o seu livro.',
     });
   });
 

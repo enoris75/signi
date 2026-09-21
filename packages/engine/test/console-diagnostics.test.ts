@@ -120,11 +120,9 @@ describe('OPEN: to make something no longer closed', () => {
   });
 
   test('a command, and an instruction in the dictionary form', () => {
-    // French is left out of the command: its engine takes the tu imperative of an -ir verb from the
-    // present unchanged ("ouvres"), where ouvrir drops the -s as the -er verbs do ("ouvre").
-    expect(command('OPEN', BOOK)).toMatchObject({
-      en: 'open the book.', it: 'apri il libro.', de: 'öffne das Buch.', es: 'abre el libro.', ja: '本を開いてください。',
-      pt: 'abra o livro.',
+    expect(command('OPEN', BOOK)).toEqual({
+      en: 'open the book.', it: 'apri il libro.', fr: 'ouvre le livre.', de: 'öffne das Buch.',
+      es: 'abre el libro.', ja: '本を開いてください。', pt: 'abra o livro.',
     });
     expect(command('OPEN', BOOK, INSTRUCTION)).toEqual({
       en: 'open the book.', it: 'apri il libro.', fr: 'ouvrir le livre.', de: 'das Buch öffnen.', es: 'abrir el libro.',

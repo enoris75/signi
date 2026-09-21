@@ -81,3 +81,41 @@ return plural && !/[sxz]$/.test(stem) ? `${stem}s` : stem;
 | | |
 |---|---|
 | **Test** | `voice.test.ts` → *known bugs: a French participle in -s doubles it in the masculine plural* (2 `test.fails` — the passive of the three verbs across the tenses, aspects, negation, a modal and a relative clause; and the *avoir* participle agreeing with a preceding clitic object — plus a regression test for the feminine, the singular, the other participles and the other six languages) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+[`agreeParticipleFr`](../../../packages/engine/src/languages/fr/agreeParticipleFr.ts) builds the
+feminine stem first and adds the plural *-s* only where the stem does not already end in a sibilant:
+
+```ts
+const stem = `${base}${fem ? 'e' : ''}`;
+return plural && !/[sxz]$/.test(stem) ? `${stem}s` : stem;
+```
+
+All three callers — the passive `predicateText`, the *être* compound past (`aspectVerbFr`,
+`verbGroupInfinitiveFr`) and the *avoir* participle agreeing with a preceding clitic object — go
+through that one function, so the fix reaches every one of them.
+
+The two **Decisions for the fixer** were ruled as follows:
+
+- **`-x` and `-z`:** kept. The invariability is one rule for every French sibilant, and the regex
+  costs nothing. No seeded participle ends in either, so it is pinned only at unit level.
+- **Where the rule belongs:** left in `agreeParticipleFr`. The bug file expected `agreeAdjFr` to
+  have the same defect waiting, but it already guards it (`if (f.endsWith('s') || f.endsWith('x'))
+  return f;` — *mauvais*, *heureux*), so there is no second caller to share a helper with. The
+  participle now states the rule the same way the adjective does, and says so in its doc comment.
+
+**Tests guarding it.** `packages/engine/test/voice.test.ts` → *known bugs: a French participle in -s
+doubles it in the masculine plural*: both former `test.fails` are now plain passing tests, with
+their assertions unchanged — the passive of the three verbs across the tenses, aspects, negation, a
+modal and a relative clause, and the *avoir* participle after a preceding clitic object — beside the
+regression test for the feminine, the singular, the other participles and the other six languages.
+
+Added at unit level, in
+[`agreeParticipleFr.test.ts`](../../../packages/engine/src/languages/fr/agreeParticipleFr.test.ts):
+*compris* / *inclus* / *acquis* invariable in the masculine plural against the regular feminine
+(*comprise* / *comprises*), and the unobserved `-x` / `-z` guard.
+
+No passing test changed its expectation.

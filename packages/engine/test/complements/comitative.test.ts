@@ -64,7 +64,7 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
   const withPronoun = (concept: string, extra: Partial<NounPhrase> = {}) =>
     sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: np(concept, extra) } } }));
 
-  test.fails('the third person, in all six languages, by gender and number', () => {
+  test('the third person, in all six languages, by gender and number', () => {
     expect(withPronoun('THIRD_PERSON')).toEqual({
       en: 'the cat coordinates with him.',      // now: "with the he"
       it: 'il gatto coordina con lui.',         // now: "con il lui"
@@ -109,7 +109,7 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
     });
   });
 
-  test.fails('the first and second persons, where Spanish and Portuguese fuse the preposition', () => {
+  test('the first and second persons, where Spanish and Portuguese fuse the preposition', () => {
     expect(withPronoun('FIRST_PERSON')).toEqual({
       en: 'the cat coordinates with me.',
       it: 'il gatto coordina con me.',
@@ -150,7 +150,7 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
   // is the comitative's. The others are not pinned, because each needs its own adposition and, in
   // German, its own case — "durch" takes the accusative ("durch ihn"), not the dative the
   // `disjunctive` form already is. See the bug file.
-  test.fails('…and the instrumental, which shares the adposition, does the same', () => {
+  test('…and the instrumental, which shares the adposition, does the same', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', {
       directObject: np('DOG'), complements: { instrumental: { phrase: np('THIRD_PERSON') } },
     }))).toEqual({
@@ -162,6 +162,26 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
       ja: '猫は彼で犬を見ます。',                  // already right: the means takes で
       pt: 'o gato vê o cão com ele.',           // now: "com o ele"
     });
+  });
+
+  // The two slots are one branch, so a clause holding both spells both, and the Portuguese 1pl
+  // fuses like the 1sg ("com nós" is not Portuguese). Japanese keeps its own particles throughout.
+  test('both slots in one clause, and the rest of the persons', () => {
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', {
+      complements: { comitative: { phrase: np('THIRD_PERSON') }, instrumental: { phrase: np('FIRST_PERSON') } },
+    }))).toEqual({
+      en: 'the cat coordinates with him with me.',
+      it: 'il gatto coordina con lui con me.',
+      fr: 'le chat coordonne avec lui avec moi.',
+      de: 'der Kater koordiniert mit ihm mit mir.',
+      es: 'el gato coordina con él conmigo.',
+      ja: '猫は彼と私で調整します。',                // と for the companion, で for the means
+      pt: 'o gato coordena com ele comigo.',
+    });
+    expect(withPronoun('FIRST_PERSON', { number: 'plural' }).pt).toBe('o gato coordena conosco.');
+    expect(withPronoun('SECOND_PERSON', { number: 'plural' }).es).toBe('el gato coordina con vosotros.');
+    expect(withPronoun('THIRD_PERSON', { gender: 'neut' }).pt).toBe('o gato coordena com isso.');
+    expect(withPronoun('SECOND_PERSON').ja).toBe('猫はあなたと調整します。');
   });
 
   // Regression: Japanese is right, a noun companion is right, and every other place a pronoun
@@ -197,5 +217,57 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
       fr: 'le chat clique sur lui.',
       pt: 'o gato clica nele.',
     });
+  });
+});
+
+// A203. The comitative and the instrumental now spell a pronoun as a pronoun (A197), and the other
+// five adposition-bearing complements still do not: a locative, terminus, direction, source, route
+// or manner pronoun goes through the ordinary noun-phrase renderer, which hands it a determiner and
+// the citation form ("in the he", "nel lui", "im er"). It is the same missing branch, but each slot
+// needs its own adposition and, in German, its own case — the dative the `disjunctive` already is
+// for "in", the accusative for "durch", the nominative after "wie". French and Italian are left out
+// of the pins: whether a place is "dans lui" or "en lui", and which Italian prepositions insert
+// "di" ("sotto di lui"), are questions of usage this file records rather than answers.
+describe('known bugs: a pronoun in the other adposition-bearing complements', () => {
+  const HIM = np('THIRD_PERSON');
+  const around = (type: 'locative' | 'source' | 'route' | 'manner', verb: string) =>
+    sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: HIM } } }));
+
+  test.fails('English, Spanish and Portuguese take the tonic form after the plain adposition', () => {
+    expect(around('locative', 'BE')).toMatchObject({
+      en: 'the cat is in him.',       // now: "in the he"
+      es: 'el gato está en él.',      // now: "en el él"
+      pt: 'o gato está nele.',        // now: "no ele"; em + ele contracts
+    });
+    expect(around('source', 'COME')).toMatchObject({
+      en: 'the cat comes from him.', es: 'el gato viene de él.', pt: 'o gato vem dele.',
+    });
+    expect(around('route', 'RUN')).toMatchObject({
+      en: 'the cat runs through him.', es: 'el gato corre por él.', pt: 'o gato corre por ele.',
+    });
+    expect(around('manner', 'RUN')).toMatchObject({
+      en: 'the cat runs like him.', es: 'el gato corre como él.', pt: 'o gato corre como ele.',
+    });
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: HIM } } })))
+      .toMatchObject({
+        en: 'the man gives the book to him.', es: 'el hombre da el libro a él.', pt: 'o homem dá o livro a ele.',
+      });
+  });
+
+  test.fails('…and German, where each preposition governs its own case', () => {
+    expect(around('locative', 'BE').de).toBe('der Kater ist in ihm.');       // now: "im er"; in + dative
+    expect(around('route', 'RUN').de).toBe('der Kater läuft durch ihn.');    // now: "durch den er"; durch + accusative
+    expect(around('manner', 'RUN').de).toBe('der Kater läuft wie er.');      // now: "wie der er"; wie + nominative
+  });
+
+  // Regression: the two slots A197 did fix, and Japanese, which marks every one of these with a
+  // particle and needs no article in any of them.
+  test('the comitative, the instrumental and Japanese are right', () => {
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: HIM } } }))).toMatchObject({
+      en: 'the cat coordinates with him.', de: 'der Kater koordiniert mit ihm.', es: 'el gato coordina con él.',
+    });
+    expect(around('locative', 'BE').ja).toBe('猫は彼にいます。');
+    expect(around('source', 'COME').ja).toBe('猫は彼から来ます。');
+    expect(around('manner', 'RUN').ja).toBe('猫は彼のように走ります。');
   });
 });

@@ -75,3 +75,42 @@ return two.endsWith('es') ? two.replace(/s$/, '') : two; // an -es 2sg drops its
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: the French tu imperative of an -ir verb conjugated like an -er verb* (1 `test.fails` covering the request register, the negative, a feminine object and a clitic object — plus a regression test for the instruction register, the other persons, the declarative 2sg, the *-er* and *-is* verbs, the overrides and the other six languages) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+The `fr` branch of [`imperativeForm`](../../../packages/engine/src/mood.ts) reads the drop off the
+form the imperative is built from rather than off the infinitive:
+
+```ts
+const two = f['2sg_present'] ?? '';
+return two.endsWith('es') ? two.replace(/s$/, '') : two; // an -es 2sg drops its -s
+```
+
+The **Decisions for the fixer** were ruled as follows:
+
+- **Form, not class.** The form test is the rule as French states it and needs no list of verbs.
+  Confirmed against the corpus before the change: of the 117 seeded French verbs, exactly three
+  part company with their infinitive's class — *aller* (*vas*), *ouvrir* (*ouvres*) and *être*
+  (*es*) — and `FR_IMP_OVERRIDE` takes *aller* and *être* before the rule is reached, so the only
+  behaviour that moves is *ouvrir*'s.
+- **The *-s* before *y* and *en*:** nothing to do. Neither is in the model.
+
+The function's doc comment now states the rule as the form's, and names the *ouvrir / offrir /
+couvrir / souffrir / cueillir* class the fix will catch when those verbs are seeded.
+
+**Tests guarding it.** `packages/engine/test/imperative.test.ts` → *known bugs: the French tu
+imperative of an -ir verb conjugated like an -er verb*: the former `test.fails` is now a plain
+passing test, with its assertions unchanged (the request register, the negative, a feminine object
+and a clitic object), beside its regression test. Added there: the rule across the seeded
+paradigms — OPEN and CREATE drop the *-s*, SEE, READ, WRITE and BITE keep it, HAVE takes its
+override.
+
+`packages/engine/src/mood.test.ts` gains an *imperativeForm (fr)* block covering the same rule at
+unit level, the negative and the other two persons, and `FR_IMP_OVERRIDE` winning for *être* and
+*aller*.
+
+`packages/engine/test/console-diagnostics.test.ts` — the C21 command case that left French out with
+a comment naming this defect now asserts all seven languages with `toEqual`, French included
+(`ouvre le livre.`). No other passing test changed its expectation.

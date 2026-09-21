@@ -127,3 +127,53 @@ cells sharing one tail.
 | | |
 |---|---|
 | **Test** | `possessivePronoun.test.ts` → *known bugs: the Japanese neuter pronominal possessor* (1 `test.fails` covering the singular and the plural, plus a regression test tabling all eight cells that are already right and their furigana) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+Two branches in [`possessiveJa`](../../../packages/engine/src/possessive.ts):
+
+- **3rd singular neuter** returns the adnominal whole, as an early return before the shared tail —
+  which is exactly the `+ の` this cell must not take: `if (pn(feats) === '3sg' && feats.gender ===
+  'neut') return [{ t: 'その' }];`
+- **3rd plural neuter** joins the other gendered plural branch, `pronoun = { t: 'それら' }`, and the
+  regular tail gives それらの. Neither carries a reading: both are kana.
+
+The `JA` table's doc comment now says the rule holds for nine of the ten cells and names the tenth,
+and the function's own comment names それら beside 彼女ら.
+
+**The decision for the fixer — the shape of the branch.** The early return, as the trial had it: it
+is the smaller change and leaves the nine regular cells sharing one tail. Making the の conditional
+would suit a future あの, and can wait until there is one.
+
+**Both passing tests that pinned the wrong forms were corrected, not unmarked:**
+
+- [`possessive.test.ts`](../../../packages/engine/src/possessive.test.ts) → *possessiveJa*: the two
+  neuter assertions and the comment claiming "the masculine and neuter plural keep 彼ら" have moved
+  out of the regular-rule test into one of their own, which states the suppletion.
+- [`uiLabel.test.ts`](../../../packages/engine/test/uiLabel.test.ts) → *coreference chip*: `ja:
+  'それの'` is now `ja: 'その'`, with a line saying why. That assertion is the shipped string this
+  defect was wrong on — `pronoun.possessive.3sg.neut` is engine-built, so correcting the engine
+  corrects the chip.
+
+Two prose comments cited the old split and were corrected with it: the `UI_STRINGS` header for
+`pronoun.possessive.*` and
+[`CorefPickContext.tsx`](../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx),
+both of which read "ja 彼の/彼女の/それの". The comment above `help.console.bracket` now records that
+its first reason is gone and its second — a pronoun's gender would have to follow WORD's in each
+language — stands on its own, so that string is unchanged.
+
+**Tests guarding it.** `packages/engine/test/possessivePronoun.test.ts` → *known bugs: the Japanese
+neuter pronominal possessor*: the former `test.fails` is now a plain passing test, with its
+assertions unchanged — the subject, the object, a complement, the plural possessor and the plan that
+found it ("the word and its commands") — beside the regression test tabling all eight regular cells
+and their furigana.
+
+Added there: neither neuter cell draws furigana, and the possessive reaches a predicative
+(`犬はその所有者です。`) and a plural head (`それらの命令は燃えます。`). Unit level: the new
+*possessiveJa* case above.
+
+**Recorded, not changed.** "this command of its" renders `そのこの命令は燃えます。` — the possessive
+and the head's own determiner, two words of the same こ/そ/あ series side by side. Where that
+determiner goes is A185's, which fixed its placement; which word the possessive is, is this file's.

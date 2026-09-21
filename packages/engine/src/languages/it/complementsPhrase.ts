@@ -13,6 +13,7 @@ import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
+import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
 import { CONSTITUENT_NEGATOR, IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
@@ -196,10 +197,17 @@ export function complementsPhrase(
           `a causa ${prepDet('di', nf, plural, lead)}`
         ) :
         spatialHead(pathSpecifier(c), nf, plural, lead);
+      // A companion or an instrument that is a pronoun is "con" + the tonic form, with no article
+      // ("con lui", never "con il lui" — A197), as the positive cause above already spells it. Per
+      // conjunct, and each conjunct repeats the preposition as a noun's fused head does: "con il cane
+      // e con lui". The other adposition-bearing complements still render a pronoun as a noun phrase
+      // ("nel lui") — A203.
+      const tonicWith = (np: ResolvedNounPhrase): string =>
+        (type === 'instrumental' || type === 'comitative') && tonicPronoun(np) ? `con ${tonicPronoun(np)}` : '';
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
-        (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
+        (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicWith(np) ||
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever

@@ -398,8 +398,11 @@ function presentSubjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN):
  *        every negative form and nosotros use the present subjunctive ("no comas", "no comáis").
  *  - pt: affirmative tu = 3sg-present, nós = present-subjunctive, vós = 2pl-present minus -s;
  *        negatives use the present subjunctive ("não comas").
- *  - fr: tu = 2sg-present (minus -s for -er verbs), nous = 1pl-present, vous = 2pl-present; the
- *        same form serves the negative, which the engine wraps in "ne … pas".
+ *  - fr: tu = 2sg-present, minus its -s where the form ends in -es — that is the -er paradigm
+ *        (tu manges → mange) and with it the ouvrir/offrir/couvrir/souffrir/cueillir class, which
+ *        takes -er endings on an -ir infinitive (tu ouvres → ouvre). An -is or -s 2sg keeps it
+ *        (choisis, cours). nous = 1pl-present, vous = 2pl-present; the same form serves the
+ *        negative, which the engine wraps in "ne … pas".
  */
 export function imperativeForm(
   lang: LanguageCode,
@@ -437,7 +440,7 @@ export function imperativeForm(
       if (pn === '1pl') return f['1pl_present'] ?? '';
       if (pn === '2pl') return f['2pl_present'] ?? '';
       const two = f['2sg_present'] ?? '';
-      return base.endsWith('er') ? two.replace(/s$/, '') : two; // -er verbs drop final -s
+      return two.endsWith('es') ? two.replace(/s$/, '') : two; // an -es 2sg drops its -s
     }
     default:
       return undefined;

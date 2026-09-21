@@ -254,7 +254,9 @@ export function dativePronounDe(feats: PronominalPossessor): string {
 }
 
 // ── Japanese ─────────────────────────────────────────────────────────────────
-// The antecedent pronoun (with its furigana) + の. Invariant of the possessed.
+// The antecedent pronoun (with its furigana) + の, for the nine cells that have a regular genitive.
+// Invariant of the possessed. The tenth, the 3rd-singular neuter, is suppletive: それ's adnominal is
+// **その**, never それの, as この / その / あの are the whole of that series (A201).
 const JA: Record<PN, RubySegment> = {
   '1sg': { t: '私', r: 'わたし' },
   '2sg': { t: 'あなた' },
@@ -265,14 +267,17 @@ const JA: Record<PN, RubySegment> = {
 };
 
 export function possessiveJa(feats: PronominalPossessor): RubySegment[] {
+  // その is the adnominal whole: the shared tail below is exactly the の this cell must not take.
+  if (pn(feats) === '3sg' && feats.gender === 'neut') return [{ t: 'その' }];
   let pronoun = JA[pn(feats)];
-  // The 3rd person is the one that genders: 彼女 / それ in the singular, 彼女ら in the feminine
-  // plural (A161). The masculine and mixed plural keep 彼ら.
+  // The 3rd person is the one that genders: 彼女 in the singular, 彼女ら in the feminine plural
+  // (A161) and それら in the neuter plural, whose adnominal IS regular (それらの). The masculine and
+  // mixed plural keep 彼ら. それら and その are kana and carry no reading.
   if (pn(feats) === '3sg') {
     if (feats.gender === 'fem') pronoun = { t: '彼女', r: 'かのじょ' };
-    else if (feats.gender === 'neut') pronoun = { t: 'それ' };
-  } else if (pn(feats) === '3pl' && feats.gender === 'fem') {
-    pronoun = { t: '彼女ら', r: 'かのじょら' };
+  } else if (pn(feats) === '3pl') {
+    if (feats.gender === 'fem') pronoun = { t: '彼女ら', r: 'かのじょら' };
+    else if (feats.gender === 'neut') pronoun = { t: 'それら' };
   }
   return [pronoun, { t: 'の' }];
 }

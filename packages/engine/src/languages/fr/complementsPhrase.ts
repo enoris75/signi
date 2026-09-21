@@ -14,6 +14,7 @@ import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveFr, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
@@ -154,56 +155,74 @@ export function complementsPhrase(
       // Japon", "au Portugal"). All the continents take "en"; the countries split (localization B36).
       const landIn = (nf: Record<string, string>, plural: boolean, lead: string): string =>
         nf['gender'] === 'fem' || elidesBefore(nf, lead) ? 'en' : aDet(nf, plural, lead);
-      const headFor = (nf: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')) :
-        type === 'terminus'  ? aDet(nf, plural, lead) :
-        // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
-        // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
-        // the manner below.
-        type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
-        // The comitative companion takes the same "avec", with its ordinary article rather than the
-        // instrument's partitive: a companion is a definite party, not a quantity ("avec le chien").
-        type === 'comitative' ? prepDet('avec', nf, plural, lead) :
-        // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
-        // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
-        type === 'manner'    ? (
-          mannerRelation(nf) === 'means'   ? prepDet('avec', nf, plural, lead) :
-          mannerRelation(nf) === 'measure' ? aDet(nf, plural, lead) :
-          mannerRelation(nf) === 'mode'    ? deDet(nf, plural, lead) :
-          prepDet('comme', nf, plural, lead)
-        ) :
-        type === 'direction' ? (
-          // A direction naming a relation is that relation's goal, which French spells as it spells
-          // the place ("saute dans l'air"). `over` takes its locative reading, "au-dessus de": a
-          // goal above something is where the motion ends, not a crossing.
-          dirSpec ? spatialHead(dirSpec, nf, plural, lead, 'locative') :
-          // A verb can fix its goal's preposition in its lexeme. "Se déplacer" takes "vers" for every
-          // goal: after it, "au sol" and "en Europe" say where the moving happens ("les oiseaux se
-          // déplacent au sol"), not where it ends ("se déplace vers le sol"). Localization B34.
-          verbForms['direction_prep'] ? prepDet(verbForms['direction_prep'], nf, plural, lead) :
-          // A land goal, a continent or a country, takes bare "en" ("va en Antarctique", "va en
-          // Italie") or "au" ("va au Japon", see `landIn`), not the default place "à" with the proper
-          // noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à". A land that
-          // is no longer a bare name goes "dans" like the locative: "va dans ton Asie", "va dans la
-          // grande Asie".
-          isNamedLand(nf) ? (bareName(nf, lead) ? landIn(nf, plural, lead) : spatialHead('in', nf, plural, lead, 'locative')) :
-          nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
-        ) :
-        type === 'source'    ? (
-          // A land of origin takes a bare "de" when feminine ("vient d'Europe", "d'Amérique du Nord",
-          // "de France"), the counterpart of the goal's "en". A masculine one keeps its article, as
-          // usage has it ("de l'Antarctique", "du Japon"), and so does the "loin de" of a
-          // self-propelled verb. A land that is no longer a bare name takes "de" + its determiner
-          // ("de ton Asie", "de la grande Asie").
-          isNamedLand(nf) && bareName(nf, lead) && nf['gender'] === 'fem' && !sourceAdverb ? (elidesBefore(nf, lead) ? "d'" : 'de') :
-          `${sourceAdverb}${deDet(nf, plural, lead)}`
-        ) :
-        type === 'cause'     ? (
-          causeSent === 'positive' ? `grâce ${aDet(nf, plural, lead)}` :
-          causeSent === 'negative' ? `par la faute ${deDet(nf, plural, lead)}` :
-          `à cause ${deDet(nf, plural, lead)}`
-        ) :
-        spatialHead(pathSpecifier(c), nf, plural, lead, 'route');
+      // A196. French has no zero article on a plural noun phrase: where English writes a bare plural
+      // after a preposition ("in brackets"), French writes "des" ("dans des parenthèses"). A149 said
+      // the same of the object and the instrument; the other adposition-bearing complements were left
+      // behind. One rewrite of the head's determiner covers every branch below, and the relations that
+      // govern "de" need no case of their own — `deDet` drops an indefinite plural's article, so "de"
+      // + "des" stays "de". A prenominal adjective turns it into "de" ("dans de grands mots"), which
+      // `artFor` already does for the indefinite.
+      // Not the possessor: `possessedHeadForms` sets a possessed head to `bare` so the possessive can
+      // take the article's place, and that bare is no zero article ("dans nos maisons"). Not a proper
+      // name either, whose bare is the continent preposition's ("en Europe"). The bare *singular* is
+      // left as it is ("dans parenthèse"): the partitive would reach the manner of means, whose bare
+      // singular is an idiom French wants ("avec soin", never "avec du soin").
+      const headFor = (nf0: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string => {
+        const nf = !possessive && plural && (nf0['definiteness'] ?? 'definite') === 'bare'
+          && nf0['uncountable'] !== '1' && nf0['proper'] !== '1'
+          ? { ...nf0, definiteness: 'indefinite' } : nf0;
+        return (
+          type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')) :
+          type === 'terminus'  ? aDet(nf, plural, lead) :
+          // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
+          // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
+          // the manner below.
+          type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
+          // The comitative companion takes the same "avec", with its ordinary article rather than the
+          // instrument's partitive: a companion is a definite party, not a quantity ("avec le chien").
+          type === 'comitative' ? prepDet('avec', nf, plural, lead) :
+          // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
+          // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
+          type === 'manner'    ? (
+            mannerRelation(nf) === 'means'   ? prepDet('avec', nf, plural, lead) :
+            mannerRelation(nf) === 'measure' ? aDet(nf, plural, lead) :
+            mannerRelation(nf) === 'mode'    ? deDet(nf, plural, lead) :
+            prepDet('comme', nf, plural, lead)
+          ) :
+          type === 'direction' ? (
+            // A direction naming a relation is that relation's goal, which French spells as it spells
+            // the place ("saute dans l'air"). `over` takes its locative reading, "au-dessus de": a
+            // goal above something is where the motion ends, not a crossing.
+            dirSpec ? spatialHead(dirSpec, nf, plural, lead, 'locative') :
+            // A verb can fix its goal's preposition in its lexeme. "Se déplacer" takes "vers" for every
+            // goal: after it, "au sol" and "en Europe" say where the moving happens ("les oiseaux se
+            // déplacent au sol"), not where it ends ("se déplace vers le sol"). Localization B34.
+            verbForms['direction_prep'] ? prepDet(verbForms['direction_prep'], nf, plural, lead) :
+            // A land goal, a continent or a country, takes bare "en" ("va en Antarctique", "va en
+            // Italie") or "au" ("va au Japon", see `landIn`), not the default place "à" with the proper
+            // noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à". A land that
+            // is no longer a bare name goes "dans" like the locative: "va dans ton Asie", "va dans la
+            // grande Asie".
+            isNamedLand(nf) ? (bareName(nf, lead) ? landIn(nf, plural, lead) : spatialHead('in', nf, plural, lead, 'locative')) :
+            nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
+          ) :
+          type === 'source'    ? (
+            // A land of origin takes a bare "de" when feminine ("vient d'Europe", "d'Amérique du Nord",
+            // "de France"), the counterpart of the goal's "en". A masculine one keeps its article, as
+            // usage has it ("de l'Antarctique", "du Japon"), and so does the "loin de" of a
+            // self-propelled verb. A land that is no longer a bare name takes "de" + its determiner
+            // ("de ton Asie", "de la grande Asie").
+            isNamedLand(nf) && bareName(nf, lead) && nf['gender'] === 'fem' && !sourceAdverb ? (elidesBefore(nf, lead) ? "d'" : 'de') :
+            `${sourceAdverb}${deDet(nf, plural, lead)}`
+          ) :
+          type === 'cause'     ? (
+            causeSent === 'positive' ? `grâce ${aDet(nf, plural, lead)}` :
+            causeSent === 'negative' ? `par la faute ${deDet(nf, plural, lead)}` :
+            `à cause ${deDet(nf, plural, lead)}`
+          ) :
+          spatialHead(pathSpecifier(c), nf, plural, lead, 'route')
+        );
+      };
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "à la maison",
       // not "dans le foyer" — so it bypasses the article and contraction machinery entirely.
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
@@ -231,8 +250,16 @@ export function complementsPhrase(
         const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(headForms(np))));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
+      // A companion or an instrument that is a pronoun is "avec" + the tonic form, with no article
+      // and no elision ("avec lui", never "avec l'il" — A197), as the neutral cause above already
+      // spells it after "de". Per conjunct, and each conjunct repeats the preposition as a noun's
+      // contracted head does: "avec le chien et avec lui". The other adposition-bearing complements
+      // still render a pronoun as a noun phrase ("dans le lui") — A203.
+      const tonicWith = (np: ResolvedNounPhrase): string =>
+        (type === 'instrumental' || type === 'comitative') && tonicPronoun(np) ? `avec ${tonicPronoun(np)}` : '';
       return coordinate(c.phrase, (np) =>
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        tonicWith(np)
+        || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
         || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))));
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever

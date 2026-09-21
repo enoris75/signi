@@ -70,6 +70,25 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('in meinen Häusern');
     });
 
+    // A202: a head that carries a determiner of its own keeps it, and the possessive moves into a
+    // postnominal "von" + dative — as A187 gave the subject and the object. The adjectives then
+    // decline after that determiner and not after the ein-word. "alle" does not detach it.
+    test('a determiner of the head\'s own keeps its slot, and the possessive detaches to "von"', () => {
+      const my = (forms: Forms, definiteness: string, number = 'singular', extra: Record<string, unknown> = {}) =>
+        np(forms, { definiteness, number }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' }, ...extra });
+      expect(complementsPhrase(complements({ locative: complement(my(HAUS, 'this')) }))).toBe('in diesem Haus von mir');
+      expect(complementsPhrase(complements({ locative: complement(my(HAUS, 'no')) }))).toBe('in keinem Haus von mir');
+      expect(complementsPhrase(complements({ locative: complement(my(HAUS, 'this', 'singular', { adjectives: [adj(KLEIN)] })) })))
+        .toBe('in diesem kleinen Haus von mir');
+      expect(complementsPhrase(complements({ terminus: complement(my(KATZE, 'this')) }))).toBe('dieser Katze von mir');
+      expect(complementsPhrase(complements({ source: complement(my(HAUS, 'some', 'plural')) }))).toBe('aus einigen Häusern von mir');
+      // "alle" prefixes the possessive instead of detaching it, and the adjectives keep declining
+      // after that ein-word.
+      expect(complementsPhrase(complements({ locative: complement(my(HAUS, 'all', 'plural')) }))).toBe('in allen meinen Häusern');
+      expect(complementsPhrase(complements({ locative: complement(my(HAUS, 'all', 'plural', { adjectives: [adj(KLEIN)] })) })))
+        .toBe('in allen meinen kleinen Häusern');
+    });
+
     // A174: after a plural possessive the adjective takes the weak -en in the accusative and the
     // genitive too, not the strong ending of an article-less plural.
     test('an adjective after a plural possessive takes the weak -en', () => {
@@ -95,6 +114,18 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER)) }))).toBe('mit dem Messer');
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER, { definiteness: 'indefinite' })) }))).toBe('mit einem Messer');
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER, { number: 'plural' })) }))).toBe('mit den Messern');
+    });
+
+    // A197: a pronoun takes its tonic form after the preposition and no article at all — and the
+    // German tonic form is the dative "mit" already governs, so the two words are the whole phrase.
+    // The comitative takes the same "mit", and a group mixes the two.
+    test('a pronoun instrument or companion is "mit" + the tonic form alone', () => {
+      expect(complementsPhrase(complements({ instrumental: complement(np(ER)) }))).toBe('mit ihm');
+      expect(complementsPhrase(complements({ comitative: complement(np(ER)) }))).toBe('mit ihm');
+      expect(complementsPhrase(complements({ comitative: complement(np(ICH)) }))).toBe('mit mir');
+      // The resolver picks the number's tonic form before the engine sees it (`disjunctive_plural`).
+      expect(complementsPhrase(complements({ comitative: complement(np({ ...DU, number: 'plural', disjunctive: 'euch' })) }))).toBe('mit euch');
+      expect(complementsPhrase(complements({ comitative: complement(group('and', np(KATER), np(ER))) }))).toBe('mit dem Kater und mit ihm');
     });
 
     // A140: a multiword name declines its adjective for the dative; the genitive after its head stays fixed.

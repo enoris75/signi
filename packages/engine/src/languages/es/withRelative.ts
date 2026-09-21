@@ -5,6 +5,7 @@ import { negatedAntecedentVerbPhrase } from '../../functions/negatedAntecedentVe
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativeGapType } from '../../functions/relativeGapType.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
@@ -64,7 +65,8 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
   // keeps its "no" ("ningún gato que no coma corre", A167).
   const predicateFor = (forms: Record<string, string>) =>
-    predicateText(forms, verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+    predicateText(forms, verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel),
+      relativeGapType(rel));
   const clause = predicateFor(agreeForms);
   const gap = relativeGapComplement(np, QUE);
   const agentGap = relativeAgentGap(np, QUE);

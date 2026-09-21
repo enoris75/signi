@@ -1,11 +1,13 @@
 # A-must-fix — confirmed bugs
 
-Nine open as of 2026-09-21 (A194–A202); everything else catalogued in this class has been fixed
-and moved to [`../fixed/`](../fixed/). A178–A193 were fixed in one run on 2026-09-21, and A202 is the
-half of A187 that run deliberately left. A194–A201 were found while localizing B48–B51 and C20–C22 —
-probing a gloss or a UI string in seven languages is its own defect hunt. Seven of those eight were
-reworded around rather than shipped; **A201 is wrong on screen today**, in the coreference chip's
-`pronoun.possessive.3sg.neut` (ja それの for その).
+Three open as of 2026-09-22 (A203–A205); everything else catalogued in this class has been fixed
+and moved to [`../fixed/`](../fixed/). A194–A202 were fixed in one run on 2026-09-21–22, which is
+where two of these three come from: **A203** is the half of A197 that run deliberately left — the
+five adposition-bearing complements whose pronoun still renders as a noun, each needing its own
+adposition and, in German, its own case — and **A205** is the feminine plural tonic pronoun the same
+run turned up (`avec eux` for `avec elles`), which had been standing in the causal adjunct all along.
+**A204** was filed separately while localizing. Nothing in the three is wrong on screen today: A203
+and A205's slots are plan-only or take no plural pronoun in any shipped string.
 
 A file belongs here when the engine's output is **wrong** — not a simplification it makes on purpose
 (that is [`../B-can-fix/`](../B-can-fix/)) and not something that only looks wrong

@@ -5,6 +5,7 @@ import { negatedAntecedentVerbPhrase } from '../../functions/negatedAntecedentVe
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativeGapType } from '../../functions/relativeGapType.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
@@ -57,7 +58,8 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // keeps its "não" ("nenhum gato que não coma corre", A167). The relativizer precedes the verb, so a
   // clitic stays in front of it even when the subject is dropped ("o gato ao qual o dou").
   const predicateFor = (forms: Record<string, string>) =>
-    predicateText(forms, verbPhrase, rel.directObject, rel.complements, false, rel.agent, relativeSubjectIsNegative(rel));
+    predicateText(forms, verbPhrase, rel.directObject, rel.complements, false, rel.agent, relativeSubjectIsNegative(rel),
+      relativeGapType(rel));
   const clause = predicateFor(agreeForms);
   const QUAL = { base: 'qual', plural: 'quais', definiteness: 'definite' };
   // The object of a verb that takes it with a preposition relativises on that preposition, as a

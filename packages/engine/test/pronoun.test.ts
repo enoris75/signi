@@ -54,15 +54,20 @@ describe('third-person pronoun by gender', () => {
     });
   });
 
-  // The plural has no neuter pronoun in any of the seven — a group of "it"s is "they" — so a neuter
-  // third plural is the genderless plural form, identical to the (masculine-default) plain plural.
-  test('neuter is a no-op in the plural — a neuter "they" is the plain "they"', () => {
+  // Six of the seven have no neuter pronoun in the plural — a group of "it"s is "they" — so a neuter
+  // third plural is the genderless plural form there, identical to the (masculine-default) plain
+  // plural. Japanese is the exception, and splits its plural as it splits its singular: 彼ら is a
+  // group of people, それら a group of things (A200).
+  test('neuter is a no-op in the plural in six of the seven, and それら in Japanese', () => {
     const neutPl = sayAll(clause(np('THIRD_PERSON', { gender: 'neut', number: 'plural' }), 'EAT'));
     expect(neutPl).toMatchObject({
       en: 'they eat.', it: 'mangiano.', fr: 'ils mangent.', es: 'comen.',
-      pt: 'comem.', de: 'sie essen.', ja: '彼らは食べます。',
+      pt: 'comem.', de: 'sie essen.', ja: 'それらは食べます。',
     });
-    expect(neutPl).toEqual(sayAll(clause(np('THIRD_PERSON', { number: 'plural' }), 'EAT')));
+    const plain = sayAll(clause(np('THIRD_PERSON', { number: 'plural' }), 'EAT'));
+    expect(plain.ja).toBe('彼らは食べます。');
+    const { ja: _ja, ...sixOfSeven } = plain;
+    expect(neutPl).toMatchObject(sixOfSeven);
   });
 });
 
@@ -419,7 +424,7 @@ describe('known bugs: Japanese feminine plural pronoun', () => {
 describe('known bugs: the Japanese plural neuter pronoun', () => {
   const neutPl = np('THIRD_PERSON', { gender: 'neut', number: 'plural' });
 
-  test.fails('a neuter plural third person reads それら in every slot', () => {
+  test('a neuter plural third person reads それら in every slot', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: neutPl })).ja).toBe('猫はそれらを見ます。'); // now: 猫は彼らを見ます。
     expect(sayAll(clause(neutPl, 'RUN')).ja).toBe('それらは走ります。'); // now: 彼らは走ります。
     expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: neutPl } } })).ja).toBe('猫はそれらのために泣きます。');
@@ -429,8 +434,23 @@ describe('known bugs: the Japanese plural neuter pronoun', () => {
   });
 
   // それら is kana, so it takes no furigana — unlike 彼ら, whose かれら the surface drags along today.
-  test.fails('それら carries no reading', () => {
+  test('それら carries no reading', () => {
     expect(furigana(clause(neutPl, 'RUN'))).toEqual(['はしります']); // now: ['かれら', 'はしります']
+  });
+
+  // The other way in is an `antecedent`: `antecedentAgreement` hands Japanese the natural gender, and
+  // a plural non-person resolves to neuter (C20's rule), so a group of things named by an antecedent
+  // reads それら without the plan saying `neut` at all. The resolver's read is generic, so no other
+  // lexeme moves: only the ja THIRD_PERSON row has a `plural_neut`.
+  test('an antecedent naming things reaches それら too, and the first and second persons do not', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('THIRD_PERSON', { number: 'plural', antecedent: 'BOOK' }),
+    })).ja).toBe('猫はそれらを見ます。');
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('THIRD_PERSON', { number: 'plural', antecedent: 'MAN' }),
+    })).ja).toBe('猫は彼らを見ます。');
+    expect(sayAll(clause(np('FIRST_PERSON', { gender: 'neut', number: 'plural' }), 'RUN')).ja).toBe('私たちは走ります。');
+    expect(sayAll(clause(np('SECOND_PERSON', { gender: 'neut', number: 'plural' }), 'RUN')).ja).toBe('あなたたちは走ります。');
   });
 
   // Regression: the masculine and mixed plural keep 彼ら and its reading, the feminine plural keeps
@@ -446,6 +466,53 @@ describe('known bugs: the Japanese plural neuter pronoun', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: neutPl }))).toMatchObject({
       en: 'the cat sees them.', it: 'il gatto li vede.', fr: 'le chat les voit.',
       de: 'der Kater sieht sie.', es: 'el gato los ve.', pt: 'o gato os vê.',
+    });
+  });
+});
+
+// A205. A pronoun behind an adposition takes its tonic (disjunctive) form, and `resolveNounPhrase`
+// reads that form off `disjunctive_plural` alone — there is no `disjunctive_plural_fem`, in the seed
+// or in the resolver. So a feminine group is masculine everywhere an adposition governs it, in the
+// three languages that have a feminine plural tonic form: French elles, Spanish ellas / nosotras /
+// vosotras, Portuguese elas. The subject surface is right (A36, A161 seeded `plural_fem` and the
+// resolver reads it), which is what localises this to the tonic form. English, German and Italian
+// have no gendered plural tonic (them / ihnen / loro) and are right as they stand; Japanese carries
+// its 彼女ら into every slot.
+describe('known bugs: the feminine plural tonic pronoun', () => {
+  const femPl = { number: 'plural', gender: 'fem' } as const;
+  const her = (concept = 'THIRD_PERSON') => np(concept, femPl);
+
+  test.fails('the feminine plural is feminine after an adposition too', () => {
+    expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: her() } } }))).toMatchObject({
+      fr: "le chat pleure à cause d'elles.", // now: "à cause d'eux"
+      es: 'el gato llora a causa de ellas.', // now: "de ellos"
+      pt: 'o gato chora por causa delas.',   // now: "deles"
+    });
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her() } } }))).toMatchObject({
+      fr: 'le chat coordonne avec elles.', es: 'el gato coordina con ellas.', pt: 'o gato coordena com elas.',
+    });
+    expect(sayAll(clause(her(), 'SEE', { directObject: np('DOG'), verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      fr: 'le chien est vu par elles.', es: 'el perro es visto por ellas.', pt: 'o cão é visto por elas.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: her() }))).toMatchObject({
+      fr: 'le chat clique sur elles.', es: 'el gato clica en ellas.', pt: 'o gato clica nelas.',
+    });
+    // Spanish is the one with a gendered 1st and 2nd plural as well.
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her('FIRST_PERSON') } } })).es)
+      .toBe('el gato coordina con nosotras.');
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her('SECOND_PERSON') } } })).es)
+      .toBe('el gato coordina con vosotras.');
+  });
+
+  // Regression: the subject surface, which A36 and A161 settled, and the three languages with no
+  // feminine plural tonic form to select.
+  test('the subject pronoun and the languages without one are right', () => {
+    expect(sayAll(clause(her(), 'RUN'))).toMatchObject({
+      fr: 'elles courent.', ja: '彼女らは走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: her() } } }))).toMatchObject({
+      en: 'the cat coordinates with them.', de: 'der Kater koordiniert mit ihnen.', it: 'il gatto coordina con loro.',
+      ja: '猫は彼女らと調整します。',
     });
   });
 });

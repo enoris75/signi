@@ -2,7 +2,7 @@
 
 **Languages:** German, Spanish, Portuguese
 
-[A187](../fixed/A187-pronominal-possessor-drops-the-head-determiner.md) gave every language back the
+[A187](A187-pronominal-possessor-drops-the-head-determiner.md) gave every language back the
 head's own determiner beside a pronominal possessive — `this book of hers`, `questo suo libro`, `ce
 livre à elle`, `dieses Buch von ihr`, `este libro suyo`, `este livro seu`. It did so in the subject,
 the direct object and the genitive possessor, by teaching each language's noun-phrase builder where
@@ -67,3 +67,56 @@ keep the determiner for everyone.
 | | |
 |---|---|
 | **Test** | `possessivePronoun.test.ts` → *known bugs: a possessive in a German, Spanish or Portuguese complement* (1 `test.fails`, plus a regression test for the four languages already right and for the plain possessive) |
+
+## Resolved
+
+2026-09-22. Took the first of the two shapes: each of the three complement builders now places the
+possessive the way its language's noun-phrase builder does, rather than delegating to that builder.
+`possessedHeadForms` is untouched, so the other four languages and the other positions are as they
+were.
+
+The three edits are the same two lines in each file. Where the head carries a determiner of its own
+(`KEPT_BESIDE_POSSESSIVE`), the forms the determiner builders read keep that determiner instead of
+the `bare` a prenominal possessive would fill, and the possessive moves behind the noun:
+
+- **German**
+  ([complementsPhrase](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts))
+  — `von` + `dativePronounDe` after the noun, in the same place `nounPhrase` puts it (after the
+  modifier genitives, before a genitive possessor and a relative clause). The adjectives decline
+  after the head's determiner because `possessedDeclension` reads those same forms: *in diesem
+  großen Haus von mir*.
+- **Spanish** ([complementsPhrase](../../../packages/engine/src/languages/es/complementsPhrase.ts))
+  — `possessiveEsStressed` after the noun, the preposition taking the head's own determiner as it
+  would any other: *en esta casa mía*, *en ninguna casa mía*.
+- **Portuguese** ([complementsPhrase](../../../packages/engine/src/languages/pt/complementsPhrase.ts))
+  — the possessive after the noun, article and all left to the determiner, which the preposition
+  contracts with: *nesta casa minha*, *em nenhuma casa minha*.
+
+**`all` came with it**, though the bug file's table does not name it. It is the other determiner
+A187 settled, and it does *not* detach — it stands in front of the possessive, which stays where it
+is. The same three builders were dropping it for the same reason (`el gato corre en mis casas` for
+"in all my houses"), while they spell it correctly with no possessor (`en todas las casas`) and the
+subject and object slots spell it correctly with one (`todas mis casas arden`). Now: **de** `in
+allen meinen Häusern`, **es** `en todas mis casas`, **pt** `em todas as minhas casas`. Spanish
+writes the quantifier in the builder rather than taking it from `artFor`, which would put the
+article back (*todas las mis casas*); Portuguese takes it from `artFor`, whose "todas as" is exactly
+the article its possessive rides on.
+
+The `no` concord needed nothing of its own: with the head's `definiteness` back in the forms the
+Spanish and Portuguese checks read, the negative word and the verb's negation answer to each other
+again — `el gato no corre en ninguna casa mía`.
+
+**Tests guarding it.** `packages/engine/test/possessivePronoun.test.ts` → *known bugs: a possessive
+in a German, Spanish or Portuguese complement*: the former `test.fails` is now a plain passing test,
+with its assertions unchanged (`this` and `no` in the three languages), beside the regression test
+for the four languages already right and for the plain possessive.
+
+Added there: `that`, `some`, `many` and `few` on a plural head; `all`, which prefixes rather than
+detaches, in all seven; an adjective declining after the kept determiner; and the sister
+complements, each with its own preposition and — in German — its own case (the source's `aus
+diesem Haus von mir`, the cause's genitive `wegen dieses Hundes von mir`, the terminus's bare dative
+`diesem Kater von ihr`). Unit level: the German
+[`complementsPhrase.test.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.test.ts)
+gains the same six shapes against the builder directly.
+
+No passing test changed its expectation.

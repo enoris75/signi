@@ -2,7 +2,7 @@
 
 **Languages:** Spanish, Portuguese
 
-[A47](../fixed/A47-spanish-portuguese-ser-vs-estar.md) settled the locative copula: a place is
+[A47](A47-spanish-portuguese-ser-vs-estar.md) settled the locative copula: a place is
 `estar`, unconditionally, whatever the spatial relation — `el gato **está** en la casa`, `o gato
 **está** na casa`. Relativise that place and both languages fall back to `ser`. *The slot where the
 cursor is* comes out `el slot donde el cursor **es**` / `o slot onde o cursor **é**`, which is the
@@ -118,3 +118,56 @@ Kater ist`) and Japanese has no order to choose.
 | | |
 |---|---|
 | **Test** | `relative.test.ts` → *known bugs: Spanish and Portuguese use ser in a place relative clause* (1 `test.fails`, plus a regression test for the main clause, a locative complement inside a relative clause, a predicate nominal, a lexical verb under the gap and the other five languages) |
+
+## Resolved
+
+2026-09-21. Took the shape above, with the narrowing the file asked for rather than the trial's cast.
+
+- A new shared helper,
+  [`relativeGapType`](../../../packages/engine/src/functions/relativeGapType.ts), narrows
+  `rel.headRole` to the `ComplementType` it may be, or `undefined` for the subject, the direct
+  object, a possessor or a passive's agent. It sits beside `relativeGapComplement`, which renders
+  that same gap as the relativizer, and says in its comment why an engine has to be told.
+- `predicateText` in [es](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [pt](../../../packages/engine/src/languages/pt/predicateText.ts) takes a trailing
+  `gapComplement?: ComplementType` and reads
+  `const locativeAlone = (!!locative || gapComplement === 'locative') && !predicative;`.
+- [es/withRelative](../../../packages/engine/src/languages/es/withRelative.ts) and
+  [pt/withRelative](../../../packages/engine/src/languages/pt/withRelative.ts) pass
+  `relativeGapType(rel)` from their `predicateFor` helper. The possessor branch above it calls
+  `predicateText` for a clause of its own and passes nothing, which is right: a `cuyo` clause's gap
+  is the possessed phrase, not a complement.
+
+Every branch of `predicateText` builds its verb group out of `copulaVerb`, so one line carries the
+choice into the non-finite forms, the negation and the mood — verified: `debe estar` / `deve estar`,
+`ha estado` / `esteve`, `estará`, and the present subjunctive a negated antecedent takes
+(`ninguna casa donde el gato **esté** arde`, A170).
+
+The **Decisions for the fixer** stand as written: the `predicative` gap's `estar` frame is not
+reachable from the builder and is not pinned, and A121's `elided` complement is read from
+`verbPhrase.elided` and is untouched.
+
+**The closing note's word order is unchanged and still open.** `donde el cursor está` strands the
+copula where the unmarked order inverts (`donde está el cursor`), in four languages and over any
+short predicate. It is a different defect on a different axis, as the note says, and this fix
+neither helps nor hinders it.
+
+**Tests guarding it.** `packages/engine/test/relative.test.ts` → *known bugs: Spanish and Portuguese
+use ser in a place relative clause*: the former `test.fails` is now a plain passing test, with its
+assertions unchanged — the present, the imperfect past, the negative, the marked relation's
+`debajo de la que` / `debaixo da qual`, the head in the object slot and the plan that found it —
+beside the regression test for the main clause, a locative complement inside a relative clause, a
+predicate nominal keeping *ser*, a lexical verb under the gap and the other five languages.
+
+Added there: the choice following into a modal, the resultative, the future and a negated
+antecedent's subjunctive. Unit level:
+[`relativeGapType.test.ts`](../../../packages/engine/src/functions/relativeGapType.test.ts) — each
+complement slot gives itself, the four non-complement roles give `undefined`.
+
+`help.keyWorks` in [`uiStrings.ts`](../../../packages/shared/src/uiStrings.ts), which C22 wrote
+around this defect ("a key works in the slot that **has** the cursor"), is left as it is: it reads
+well on its own merits, and rewording a shipped string is a localization decision, not this fix's.
+The comment above it now has a defect that no longer exists — worth a line when that string is next
+touched.
+
+No passing test changed its expectation.

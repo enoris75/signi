@@ -36,15 +36,16 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     head.forms['gender'] = gender;
     // Keep the furigana reading (if any) in step with whichever surface we select.
     if (number === 'plural') {
-      // French/Spanish/Portuguese/Japanese have a distinct feminine-plural pronoun (elles / ellas /
-      // elas / 彼女ら, and Spanish nosotras / vosotras); select it for a feminine referent, else the
-      // plain plural. Italian/German/English have no gendered plural and carry only `plural`.
-      const femininePlural = gender === 'fem' && !!head.forms['plural_fem'];
-      const pluralSurface = (femininePlural && head.forms['plural_fem']) || head.forms['plural'];
+      // A language may have a distinct plural pronoun for a gender: the feminine elles / ellas / elas
+      // / 彼女ら (and Spanish nosotras / vosotras), and the Japanese neuter それら, which is a group of
+      // THINGS where 彼ら is a group of people (A200). Read off the gender in hand, exactly as the
+      // singular is a few lines below; a language with no gendered plural carries only `plural`.
+      const genderedPlural = head.forms[`plural_${gender}`];
+      const pluralSurface = genderedPlural || head.forms['plural'];
       if (pluralSurface) { head.forms['base'] = pluralSurface; head.forms['plural'] = pluralSurface; }
       // The furigana reading follows whichever surface was selected, so a feminine plural reads
       // かのじょら and not the masculine かれら (A161) — as the singular already does below.
-      const pluralReading = (femininePlural && head.forms['plural_fem_reading']) || head.forms['plural_reading'];
+      const pluralReading = (genderedPlural && head.forms[`plural_${gender}_reading`]) || head.forms['plural_reading'];
       if (pluralReading) head.forms['reading'] = pluralReading;
     } else if (head.forms['person'] === '3') {
       const gf = head.forms[`singular_${gender}`];

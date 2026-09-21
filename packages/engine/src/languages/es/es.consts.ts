@@ -104,6 +104,14 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
  */
 export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['cero', 'sin título']);
 
+/**
+ * "con" fuses with the 1st and 2nd singular tonic pronouns, and with the reflexive: con + mí →
+ * conmigo, con + ti → contigo, con + sí → consigo. Every other person keeps the two words ("con él",
+ * "con nosotros"). The reflexive is listed for completeness; nothing builds a reflexive comitative
+ * today. Keyed by the tonic form, which is what the complement builder has in hand (A197).
+ */
+export const COMITATIVE_FUSION: Record<string, string> = { 'mí': 'conmigo', ti: 'contigo', 'sí': 'consigo' };
+
 // El negador de un solo constituyente, no de la oración: "corre **no** a causa del perro" — corre, y
 // el perro no es la razón (véase `Complement.negative`).
 export const CONSTITUENT_NEGATOR = 'no';

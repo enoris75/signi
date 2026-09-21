@@ -10,7 +10,8 @@ import { isNamedLand } from '../../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
-import { possessiveDe } from '../../../possessive.js';
+import { tonicPronoun } from '../../../functions/tonicPronoun.js';
+import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../../possessive.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
@@ -93,12 +94,35 @@ export function complementsParts(
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
+      // A companion or an instrument that is a pronoun is "mit" + the tonic form, with no article and
+      // no declension ("mit ihm", never "mit dem er" — A197), as the causal adjunct already spells it
+      // in `causePhrase`. "mit" governs the dative and the German `disjunctive` IS the dative (mir /
+      // dir / ihm / ihr / uns / euch / ihnen), so the two words are the whole phrase and the case and
+      // declension machinery below is not reached. The other adposition-bearing complements still
+      // decline a pronoun as a noun ("durch den er", and "durch" would want the accusative) — A203.
+      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
+      if (tonic) return `mit ${tonic}`;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
       // the adjectives decline as they do after "kein" ("in meinem kleinen Haus", "deinem Hund",
       // "durch meine großen Häuser", see `possessedDeclension`). A bare-name place modified by an
       // adjective takes the article instead, and fuses ("im großen Asien").
       const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
-      const f = articledNameForms(np, possessedHeadForms(np, 'bare'));
+      // A head that carries a determiner of its own keeps it, and the possessive moves into a
+      // postnominal "von" + dative phrase: "in diesem Haus von mir", "in keinem Haus von ihr"
+      // (A187, which fixed the subject and the object; A202, which brought the complement along).
+      // `possessedHeadForms` still answers `bare` — the determiner slot a prenominal possessive
+      // fills — so a detached one asks for the head's own determiner back, exactly as `nounPhrase`
+      // does. The adjectives then decline after that determiner rather than after the possessive
+      // (`possessedDeclension` reads the same forms).
+      // "alle" is the other one that survives, and it does not detach: it stands in FRONT of the
+      // possessive rather than in its place ("in allen meinen Häusern"), so the head keeps its own
+      // determiner there too while the possessive stays prenominal.
+      const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
+      const detached = !!poss && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
+      const possessedForms = possessedHeadForms(np, 'bare');
+      const f = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all')
+        ? { ...possessedForms, definiteness: ownDeterminer }
+        : possessedForms);
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = possessedDeclension(np, f);
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
@@ -187,10 +211,11 @@ export function complementsParts(
         : f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
-      const possessive = poss
+      const possessive = poss && !detached
         ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
-      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
+      const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
+      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       });
   };

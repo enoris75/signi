@@ -1351,7 +1351,7 @@ describe('known bugs: Spanish and Portuguese use ser in a place relative clause'
       },
     }), 'BURN'));
 
-  test.fails('a locative gap over BE takes estar, as the main clause does', () => {
+  test('a locative gap over BE takes estar, as the main clause does', () => {
     expect(houseWhereIs()).toMatchObject({
       es: 'la casa donde el gato está arde.', // now: "donde el gato es"
       pt: 'a casa onde o gato está arde.',    // now: "onde o gato é"
@@ -1378,6 +1378,27 @@ describe('known bugs: Spanish and Portuguese use ser in a place relative clause'
       relative: { headRole: 'locative', subject: np('CURSOR', { definiteness: 'definite' }), verbPhrase: { verb: 'BE' } },
     }), 'BURN'))).toMatchObject({
       es: 'el slot donde el cursor está arde.', pt: 'o slot onde o cursor está arde.',
+    });
+  });
+
+  // Every branch of `predicateText` builds its verb group out of the copula it chose, so the choice
+  // follows into the non-finite forms, the future and the present subjunctive a negated antecedent
+  // takes (A170) — the same forms the main clause gives.
+  test('the choice follows into a modal, the aspects, the future and a negated antecedent', () => {
+    expect(houseWhereIs({ modals: ['MUST'] })).toMatchObject({
+      es: 'la casa donde el gato debe estar arde.', pt: 'a casa onde o gato deve estar arde.',
+    });
+    expect(houseWhereIs({ aspect: 'resultative' })).toMatchObject({
+      es: 'la casa donde el gato ha estado arde.', pt: 'a casa onde o gato esteve arde.',
+    });
+    expect(houseWhereIs({ tense: 'future' })).toMatchObject({
+      es: 'la casa donde el gato estará arde.', pt: 'a casa onde o gato estará arde.',
+    });
+    expect(sayAll(clause(np('HOUSE', {
+      definiteness: 'no',
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'BE' } },
+    }), 'BURN'))).toMatchObject({
+      es: 'ninguna casa donde el gato esté arde.', pt: 'nenhuma casa onde o gato esteja arde.',
     });
   });
 

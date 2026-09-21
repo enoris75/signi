@@ -14,8 +14,9 @@ import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
-import { possessiveEs, pronounPossessor } from '../../possessive.js';
+import { KEPT_BESIDE_POSSESSIVE, possessiveEs, possessiveEsStressed, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -23,7 +24,7 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS } from './es.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { isPlural } from './isPlural.js';
@@ -62,7 +63,10 @@ export function complementsPhrase(
         const plural = subjectForms['number'] === 'plural';
         return coordinateElement(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') {
-            return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np);
+            // A predicate nominal owns things like any other noun phrase ("el perro es su
+            // poseedor"), so it asks `nounPhrase` for the possessive the subject and the object
+            // already get (A198). `esPossessiveWord` is empty for a genitive or absent possessor.
+            return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np)), np);
           }
           const surface = esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
@@ -87,7 +91,9 @@ export function complementsPhrase(
           const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
           const word = np.head.forms['role'] === 'adjective'
             ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))
-            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np);
+            // The object predicative owns things too: "en su prisión", "como su prisión" — neither
+            // marker contracts with a possessive in Spanish (A198).
+            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np)), np);
           return [marker, word].filter(Boolean).join(' ');
         });
       }
@@ -118,12 +124,39 @@ export function complementsPhrase(
       // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
+      // A companion or an instrument that is a pronoun is "con" + the tonic form, with no article
+      // ("con él", never "con el él" — A197), as the cause below already spells it after "a"/"de".
+      // The 1st and 2nd singular fuse with the preposition instead (conmigo, contigo). The other
+      // adposition-bearing complements still render a pronoun as a noun phrase ("en el él") — A203.
+      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
+      if (tonic) return COMITATIVE_FUSION[tonic] ?? `con ${tonic}`;
       // A possessive replaces the article, so the head is the preposition alone ("en mi casa", "a tu perro").
-      const f = possessedHeadForms(np, 'bare');
+      // Unless the head carries a determiner of its own: that keeps its slot, the preposition takes
+      // it as it would any other ("en esta casa", "en ninguna casa"), and the possessive follows the
+      // noun in its stressed form — "en esta casa mía", "en ninguna casa mía" (A187 in the noun
+      // phrase, A202 here). `possessedHeadForms` answers `bare` for the prenominal case alone, so a
+      // detached possessive asks for the head's own determiner back.
+      const possessive = esPossessiveWord(np);
+      const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
+      const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
+      const possessed = possessedHeadForms(np, 'bare');
+      const f = detached ? { ...possessed, definiteness: ownDeterminer } : possessed;
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const adj = esAdj(np);
-      const noun = [esPossessiveWord(np), withAdj(word, adj)].filter(Boolean).join(' ');
+      const fem = (f['gender'] ?? 'masc') === 'fem';
+      const stressed = detached
+        ? possessiveEsStressed(possessive, { gender: fem ? 'fem' : 'masc', number: plural ? 'plural' : 'singular' })
+        : '';
+      // "todos" is the other determiner that survives a possessive, and it does not detach: it
+      // stands in front of the unstressed one ("en todas mis casas"), which is why it is written
+      // here rather than taken from `artFor` — that one would put the article back ("todas las").
+      const every = possessive && ownDeterminer === 'all'
+        ? (plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo'))
+        : '';
+      const noun = detached
+        ? [withAdj(word, adj), stressed].filter(Boolean).join(' ')
+        : [every, possessive, withAdj(word, adj)].filter(Boolean).join(' ');
       // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
       // stressed-a nouns take ("en la primera agua").
       const af = artForms(f, adj);

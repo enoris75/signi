@@ -26,6 +26,15 @@ export const PT_SUPPLETIVE: Record<string, string> = {
  */
 export const PT_DE_FUSING_PRONOUN = /^(?:el[ae]s?|isso|isto|aquilo|aquel[ae]s?)$/i;
 
+/**
+ * "com" fuses with three of the tonic pronouns: com + mim → comigo, com + ti → contigo, com + nós →
+ * conosco (the Brazilian spelling; "connosco" is the European one). Every other person keeps the two
+ * words ("com ele", "com você", "com vocês"), and "com si" → consigo is listed for completeness,
+ * since nothing builds a reflexive comitative today. Keyed by the tonic form, which is what the
+ * complement builder has in hand (A197).
+ */
+export const COMITATIVE_FUSION: Record<string, string> = { mim: 'comigo', ti: 'contigo', 'nós': 'conosco', si: 'consigo' };
+
 /** Irregular Portuguese adjectives: base → [masc sg, fem sg, masc pl, fem pl]. */
 export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
   bom: ['bom', 'boa', 'bons', 'boas'],

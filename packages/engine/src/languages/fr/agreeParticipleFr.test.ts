@@ -22,4 +22,24 @@ describe('agreeParticipleFr', () => {
   test('an empty participle stays empty', () => {
     expect(agreeParticipleFr('', FEMME)).toBe('');
   });
+
+  // A194. A participle already ending in -s has no separate masculine plural, exactly as
+  // agreeAdjFr's mauvais/heureux do: compris, inclus, acquis stay put. The feminine is regular,
+  // because the -e comes between the two.
+  test('a participle in -s is invariable in the masculine plural', () => {
+    const masculinePlural = { ...CHAT, number: 'plural' };
+    expect(agreeParticipleFr('compris', masculinePlural)).toBe('compris');
+    expect(agreeParticipleFr('inclus', masculinePlural)).toBe('inclus');
+    expect(agreeParticipleFr('acquis', masculinePlural)).toBe('acquis');
+    expect(agreeParticipleFr('compris', CHAT)).toBe('compris');
+    expect(agreeParticipleFr('compris', FEMME)).toBe('comprise');
+    expect(agreeParticipleFr('compris', { ...FEMME, number: 'plural' })).toBe('comprises');
+  });
+
+  // No seeded participle ends in -x or -z, so this guard is unobserved in the corpus; it is here
+  // because the invariability is the same rule for every French sibilant (vieux, doux, nez).
+  test('so is one in -x or -z', () => {
+    expect(agreeParticipleFr('faux', { ...CHAT, number: 'plural' })).toBe('faux');
+    expect(agreeParticipleFr('assez', { ...CHAT, number: 'plural' })).toBe('assez');
+  });
 });

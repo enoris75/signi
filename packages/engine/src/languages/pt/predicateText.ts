@@ -49,6 +49,11 @@ export function predicateText(
   // handed its head's forms for agreement, but a `no` head negates the MATRIX clause, not the relative
   // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
   subjectIsNegative = subjectForms['definiteness'] === 'no',
+  // The complement slot a relative clause's head fills, for a clause that IS a relative (see
+  // `relativeGapType`). A gap is not in `complements` — the relativizer renders it — so the copula
+  // choice below would otherwise see a clause that predicates nothing: "o slot onde o cursor **é**"
+  // for "está" (A199).
+  gapComplement?: ComplementType,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
@@ -82,7 +87,9 @@ export function predicateText(
   const predicativeHead = predicative ? firstConjunct(predicative.phrase).head.forms : undefined;
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
-  const locativeAlone = !!locative && !predicative;
+  // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
+  // "a casa onde o gato está arde" (A199).
+  const locativeAlone = (!!locative || gapComplement === 'locative') && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "deve estar", "tinha
   // estado", "esteja", "estar na casa".
   // The passive conjugates "ser" where the active conjugates the lexical verb, and agrees that

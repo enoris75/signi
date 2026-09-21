@@ -431,7 +431,7 @@ describe('known bugs: a possessive in a German, Spanish or Portuguese complement
   const inHouse = (definiteness: 'this' | 'no') =>
     sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness, possessor: mine }) } } }));
 
-  test.fails('a complement keeps the determiner in German, Spanish and Portuguese too', () => {
+  test('a complement keeps the determiner in German, Spanish and Portuguese too', () => {
     expect(inHouse('this')).toMatchObject({
       de: 'der Kater läuft in diesem Haus von mir.', // now: "in meinem Haus"
       es: 'el gato corre en esta casa mía.',
@@ -441,6 +441,70 @@ describe('known bugs: a possessive in a German, Spanish or Portuguese complement
       de: 'der Kater läuft in keinem Haus von mir.',
       es: 'el gato no corre en ninguna casa mía.', // now: "no corre en mi casa", negated with nothing to negate
       pt: 'o gato não corre em nenhuma casa minha.',
+    });
+  });
+
+  // The rest of what A187 settled, now that the complement builders read the head's own determiner:
+  // every determiner that keeps its slot, on the sister complements as well as the locative, with
+  // the adjectives declining after that determiner and not after the possessive. "all" is the one
+  // that does NOT detach — it stands in front of the possessive, which stays where it is.
+  test('the other kept determiners, the sister complements, "all" and an adjective', () => {
+    const inHouses = (definiteness: 'that' | 'some' | 'many' | 'few') =>
+      sayAll(clause(np('CAT'), 'RUN', {
+        complements: { locative: { phrase: np('HOUSE', { definiteness, number: 'plural', possessor: mine }) } },
+      }));
+    expect(inHouses('that')).toMatchObject({
+      de: 'der Kater läuft in jenen Häusern von mir.', es: 'el gato corre en esas casas mías.',
+      pt: 'o gato corre nessas casas minhas.',
+    });
+    expect(inHouses('some')).toMatchObject({
+      de: 'der Kater läuft in einigen Häusern von mir.', es: 'el gato corre en algunas casas mías.',
+      pt: 'o gato corre em algumas casas minhas.',
+    });
+    expect(inHouses('many')).toMatchObject({
+      de: 'der Kater läuft in vielen Häusern von mir.', es: 'el gato corre en muchas casas mías.',
+      pt: 'o gato corre em muitas casas minhas.',
+    });
+    expect(inHouses('few')).toMatchObject({
+      de: 'der Kater läuft in wenigen Häusern von mir.', es: 'el gato corre en pocas casas mías.',
+      pt: 'o gato corre em poucas casas minhas.',
+    });
+    // "all" prefixes the possessive rather than detaching it, as it does in the subject and the
+    // object ("alle meine Häuser brennen"), and German declines the adjectives after the ein-word.
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'all', number: 'plural', possessor: mine }) } },
+    }))).toMatchObject({
+      de: 'der Kater läuft in allen meinen Häusern.', es: 'el gato corre en todas mis casas.',
+      pt: 'o gato corre em todas as minhas casas.',
+      en: 'the cat runs in all my houses.', it: 'il gatto corre in tutte le mie case.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'this', adjectives: ['BIG'], possessor: mine }) } },
+    }))).toMatchObject({
+      de: 'der Kater läuft in diesem großen Haus von mir.', es: 'el gato corre en esta casa grande mía.',
+      pt: 'o gato corre nesta casa grande minha.',
+    });
+    // The sister complements take the same head, each with its own preposition and — in German —
+    // its own case: the cause governs the genitive, the terminus a bare dative.
+    const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+    expect(sayAll(clause(np('CAT'), 'COME', {
+      complements: { source: { phrase: np('HOUSE', { definiteness: 'this', possessor: mine }) } },
+    }))).toMatchObject({
+      de: 'der Kater kommt aus diesem Haus von mir.', es: 'el gato viene de esta casa mía.',
+      pt: 'o gato vem desta casa minha.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CRY', {
+      complements: { cause: { phrase: np('DOG', { definiteness: 'this', possessor: mine }) } },
+    }))).toMatchObject({
+      de: 'der Kater weint wegen dieses Hundes von mir.', es: 'el gato llora a causa de este perro mío.',
+      pt: 'o gato chora por causa deste cão meu.',
+    });
+    expect(sayAll(clause(np('MAN'), 'GIVE', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: np('CAT', { definiteness: 'this', possessor: her }) } },
+    }))).toMatchObject({
+      de: 'der Mann gibt diesem Kater von ihr das Buch.', es: 'el hombre da el libro a este gato suyo.',
+      pt: 'o homem dá o livro a este gato seu.',
     });
   });
 
@@ -471,7 +535,7 @@ describe('known bugs: the Japanese neuter pronominal possessor', () => {
   const owns = (poss: PronominalPossessor, head = 'CAT') => sayAll(clause(np(head, { possessor: poss }), 'RUN')).ja;
   const its = pron('3', 'singular', 'neut');
 
-  test.fails('a neuter possessor reads その in the singular and それらの in the plural', () => {
+  test('a neuter possessor reads その in the singular and それらの in the plural', () => {
     expect(owns(its)).toBe('その猫は走ります。'); // now: それの猫は走ります。
     expect(owns(pron('3', 'plural', 'neut'))).toBe('それらの猫は走ります。'); // now: 彼らの猫は走ります。
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('COMMAND', { possessor: its }) })).ja).toBe('猫はその命令を見ます。');
@@ -481,6 +545,18 @@ describe('known bugs: the Japanese neuter pronominal possessor', () => {
     expect(sayAll(clause({
       conjuncts: [np('WORD'), np('COMMAND', { number: 'plural', possessor: its })], conjunction: 'and',
     }, 'BE')).ja).toBe('単語とその命令はあります。'); // now: 単語とそれの命令はあります。
+  });
+
+  // Both neuter cells are kana, so neither draws furigana — where 彼の and 彼女らの drag かれ and
+  // かのじょら along. The possessive is one word for the phrase, so it reaches every slot and every
+  // number of the head alike.
+  test('その and それらの carry no reading, and reach the other slots', () => {
+    expect(furigana(clause(np('CAT', { possessor: its }), 'RUN'))).toEqual(['ねこ', 'はしります']);
+    expect(furigana(clause(np('CAT', { possessor: pron('3', 'plural', 'neut') }), 'RUN'))).toEqual(['ねこ', 'はしります']);
+    expect(sayAll(clause(np('DOG'), 'BE', { complements: { predicative: { phrase: np('POSSESSOR', { possessor: its }) } } })).ja)
+      .toBe('犬はその所有者です。');
+    expect(sayAll(clause(np('COMMAND', { number: 'plural', possessor: pron('3', 'plural', 'neut') }), 'BURN')).ja)
+      .toBe('それらの命令は燃えます。');
   });
 
   // Regression: the eight regular cells, which spell the possessive by the ordinary "+ の" rule and

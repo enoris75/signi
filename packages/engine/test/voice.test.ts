@@ -488,7 +488,7 @@ describe('known bugs: a French participle in -s doubles it in the masculine plur
       verbPhrase: { voice: 'passive', ...verbPhrase },
     })).fr;
 
-  test.fails('the passive participle of the three verbs whose participle ends in -s', () => {
+  test('the passive participle of the three verbs whose participle ends in -s', () => {
     expect(understood()).toBe('les mots sont compris par le chat.'); // now: "compriss"
     expect(sayAll(clause(np('CAT'), 'INCLUDE', {
       directObject: np('MEANING', { number: 'plural' }), verbPhrase: { voice: 'passive' },
@@ -509,7 +509,7 @@ describe('known bugs: a French participle in -s doubles it in the masculine plur
     }), 'RUN')).fr).toBe('les mots qui sont compris par le chat courent.');
   });
 
-  test.fails('…and the avoir participle agreeing with a preceding clitic object', () => {
+  test('…and the avoir participle agreeing with a preceding clitic object', () => {
     expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
       directObject: np('THIRD_PERSON', { number: 'plural' }), verbPhrase: { aspect: 'resultative' },
     })).fr).toBe('le chat les a compris.'); // now: "le chat les a compriss."

@@ -7,7 +7,7 @@ preposition ("the cat is in brackets"), French writes *des*: *dans **des** paren
 writes nothing, so a `bare` plural in a spatial or comitative complement comes out as
 *dans parenthèses*, *à parenthèses*, *avec parenthèses*.
 
-This is the complement half of [A149](../fixed/A149-french-object-zero-article.md), which made a
+This is the complement half of [A149](A149-french-object-zero-article.md), which made a
 direct object, a prepositional object and the *instrumental* take the article French cannot leave
 out (*mange des souris*, *clique sur des boutons*, *avec des mots*) and listed what it did not
 cover: "a bare object after *à*. `aDet` still gives a lone *à*." The other adposition-bearing
@@ -111,3 +111,51 @@ keeps the bare continent prepositions (*en Europe*).
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: a French bare plural after a preposition* (2 `test.fails` — the locative across its spatial relations and with a real verb, and the sister complements: route, terminus, direction, comitative, manner — plus a regression test for the instrumental, the *de*-governed relations, the other determiners, the possessor, the proper name and the other six languages) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+The `headFor` builder every complement shares in
+[`complementsPhrase`](../../../packages/engine/src/languages/fr/complementsPhrase.ts) rewrites a
+plural `bare` head to `indefinite` before it reaches `prepDet` / `aDet` / `spatialHead` / `deDet`:
+
+```ts
+const nf = !possessive && plural && (nf0['definiteness'] ?? 'definite') === 'bare'
+  && nf0['uncountable'] !== '1' && nf0['proper'] !== '1'
+  ? { ...nf0, definiteness: 'indefinite' } : nf0;
+```
+
+One rewrite covers every branch, which is why the *de*-governed relations need no case of their
+own: `deDet` already drops an indefinite plural's article, so *de* + *des* stays *de* (`à cause de
+parenthèses`, `au-dessus de parenthèses`). The prenominal adjective falls out of `artFor`, which
+writes *de* for *des* before a preposed adjective as it already does for the indefinite (`dans de
+grands mots`, `à de grands mots`).
+
+The **Decisions for the fixer** were ruled as follows:
+
+- **The bare singular** is left as it is (`dans parenthèse`, `dans eau`). Making it partitive would
+  reach the manner of means, whose bare singular is an idiom French wants (*avec soin*), so it needs
+  a guard of its own; A149 took the same view. Not pinned.
+- **Where the rewrite goes:** the French `complementsPhrase`, because that is where `possessive` is
+  known. `prepDet` alone would not do — `aDet`, `deDet` and `spatialHead` all reach `artFor` by
+  other routes, and none of them knows about the possessor.
+- **Whether `bare` should mean this at all:** French spells an article here whatever the plan says,
+  exactly as it does for an object. A149 ruled that way, and this follows it.
+
+The two guards earn their place: `possessive` keeps the pronominal possessor's *bare* (which is the
+possessive taking the article's place — `dans nos maisons`, not *dans de nos maisons*), and `proper`
+keeps the bare continent prepositions (`en Europe`).
+
+**Tests guarding it.** `packages/engine/test/complements/locative.test.ts` → *known bugs: a French
+bare plural after a preposition*: both former `test.fails` are now plain passing tests, with their
+assertions unchanged — the locative across its spatial relations, with a real verb, a masculine noun
+and a preposed adjective, and the sister complements (route, terminus, direction, comitative,
+manner) — beside the regression test for the instrumental, the *de*-governed relations, the other
+determiners, the possessor, the proper name and the other six languages.
+
+Added there: a coordinated group takes *des* on each conjunct's own head (`dans des parenthèses et
+dans des mots`), the *de*-governed cause is untouched (`à cause de parenthèses`), and a prenominal
+adjective gives *de* on a sister complement (`à de grands mots`).
+
+No passing test changed its expectation.

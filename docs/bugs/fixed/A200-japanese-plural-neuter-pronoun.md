@@ -43,7 +43,7 @@ Every **Want** was rendered by a trial fix applied to HEAD in this worktree and 
 written by hand.
 
 **Already right.** The masculine and mixed plural, which keeps 彼ら (`彼らは走ります。`) with its
-`かれら` reading. The feminine plural [A161](../fixed/A161-japanese-feminine-plural-pronoun.md) added,
+`かれら` reading. The feminine plural [A161](A161-japanese-feminine-plural-pronoun.md) added,
 彼女ら / `かのじょら`. The neuter **singular**, それ, everywhere it goes (`それは走ります。`,
 `猫はそれを見ます。`). The other six languages, none of which has a person/thing split in the plural
 pronoun: `the cat sees them.`, `il gatto li vede.`, `le chat les voit.`, `der Kater sieht sie.`, `el
@@ -105,3 +105,49 @@ before それら was known to be wanted, and it reads as coverage.
 | | |
 |---|---|
 | **Test** | `pronoun.test.ts` → *known bugs: the Japanese plural neuter pronoun* (2 `test.fails` — the surface in five slots, and the furigana — plus a regression test for the masculine and feminine plurals, the neuter singular and the other six languages) |
+
+## Resolved
+
+2026-09-21. Took the shape above — the seed form and the engine read, both.
+
+- **The seed.** The `ja` row of THIRD_PERSON
+  ([pronouns.ts](../../../packages/backend/src/concepts/pronouns.ts)) grows `plural_neut: 'それら'`
+  and `plural_neut_reading: 'それら'`, beside `plural_fem: '彼女ら'`. The reading is seeded for
+  symmetry with the other rows and draws no furigana, since it equals its text — as the singular
+  `singular_neut_reading: 'それ'` already does. A comment on the row says which plural is people and
+  which is things.
+- **The engine.**
+  [`resolveNounPhrase`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts) reads
+  the gendered plural off the gender in hand, exactly as the singular branch a few lines below does:
+
+  ```ts
+  const genderedPlural = head.forms[`plural_${gender}`];
+  const pluralSurface = genderedPlural || head.forms['plural'];
+  const pluralReading = (genderedPlural && head.forms[`plural_${gender}_reading`]) || head.forms['plural_reading'];
+  ```
+
+  No other lexeme grows a form: `plural_masc` is seeded nowhere, and the feminine plurals keep
+  working off `plural_fem`.
+
+**The passing test that pinned the wrong form was corrected, not unmarked.**
+[`pronoun.test.ts`](../../../packages/engine/test/pronoun.test.ts) → *third-person pronoun by
+gender* → "neuter is a no-op in the plural" asserted `ja: '彼らは食べます。'` and then an exact
+`toEqual` against the genderless plural. Its premise was false for Japanese. It is now "neuter is a
+no-op in the plural in six of the seven, and それら in Japanese": the six are still checked against
+the genderless plural, Japanese is checked against both surfaces (それら for the neuter, 彼ら for the
+plain plural), and the comment says why.
+
+The **Decisions for the fixer** were ruled as written: the reading is seeded and pinned only as "no
+furigana over それら"; the animate boundary is C20's and inherited, so a group of animals of unknown
+sex is それら as the singular is それ; and A201 is a second surface, off `possessive.ts`, which this
+does not touch.
+
+**Tests guarding it.** `packages/engine/test/pronoun.test.ts` → *known bugs: the Japanese plural
+neuter pronoun*: both former `test.fails` are now plain passing tests, with their assertions
+unchanged — the surface in five slots (subject, object, cause, terminus, a coordinated group) and
+the furigana — beside the regression test for the masculine and feminine plurals, the neuter
+singular and the other six languages.
+
+Added there: the second way in, an `antecedent` naming things (`猫はそれらを見ます。` with no `neut`
+in the plan at all, against `猫は彼らを見ます。` for an antecedent naming people), and the 1st and 2nd
+plurals, which carry no gendered row and are unmoved.

@@ -13,8 +13,9 @@ import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
-import { possessivePt, pronounPossessor } from '../../possessive.js';
+import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
@@ -26,7 +27,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
@@ -65,7 +66,10 @@ export function complementsPhrase(
         const plural = subjectForms['number'] === 'plural';
         return coordinateElement(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') {
-            return withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np)), np);
+            // A predicate nominal owns things like any other noun phrase ("o cão é o seu
+            // possuidor"), so it asks `nounPhrase` for the possessive the subject and the object
+            // already get, article and all (A198). Empty for a genitive or absent possessor.
+            return withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np), ptPossessiveWord(np)), np);
           }
           const surface = ptComparison(np.head, gender, plural);
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
@@ -88,7 +92,14 @@ export function complementsPhrase(
           if (np.head.forms['role'] === 'adjective') {
             return [essive ? 'como' : '', ptComparison(np.head, gender, plural)].filter(Boolean).join(' ');
           }
-          const f = predicativeForms(np.head.forms);
+          // The object predicative owns things too (A198). A Portuguese possessive rides on the
+          // definite article, and the factitive link contracts with that article as it does with
+          // any other ("em" + "a" → "na sua prisão"), so a possessed head takes the definite
+          // determiner for the marker and hands the possessive over without its own article. The
+          // essive "como" contracts with nothing and drops the article from both ("como sua prisão").
+          const possessive = ptPossessiveWord(np, false);
+          const f0 = predicativeForms(np.head.forms);
+          const f = possessive && !essive ? { ...f0, definiteness: 'definite' } : f0;
           const pl = isPlural(f);
           const marker = essive ? prepDet('como', f, pl)
             : !link ? ''
@@ -96,7 +107,7 @@ export function complementsPhrase(
             : prepDet(link, f, pl);
           // The marker carries the determiner when there is one, so the phrase itself goes bare.
           const bare = marker ? { ...f, definiteness: 'bare' } : f;
-          return [marker, withRelative(nounPhrase(bare, ptAdj(np)), np)].filter(Boolean).join(' ');
+          return [marker, withRelative(nounPhrase(bare, ptAdj(np), possessive), np)].filter(Boolean).join(' ');
         });
       }
       // An instrument presented as an action: the bare gerúndio for the process level
@@ -126,11 +137,33 @@ export function complementsPhrase(
       // "em casa", not the contracted "no lar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
+      // A companion or an instrument that is a pronoun is "com" + the tonic form, with no article
+      // ("com ele", never "com o ele" — A197), as the cause below already spells it after "de"/"a".
+      // "com" does not contract with an article, but it does fuse with three of the pronouns —
+      // comigo, contigo, conosco — which is what COMITATIVE_FUSION holds. The other
+      // adposition-bearing complements still render a pronoun as a noun phrase ("no ele") — A203.
+      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
+      if (tonic) return COMITATIVE_FUSION[tonic] ?? `com ${tonic}`;
       // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
-      const f = possessedHeadForms(np, 'definite');
+      // Unless the head carries a determiner of its own: that keeps its slot and takes the fusion
+      // ("nesta casa", "em nenhuma casa"), and the possessive follows the noun, article and all left
+      // to the determiner — "nesta casa minha", "em nenhuma casa minha" (A187 in the noun phrase,
+      // A202 here).
+      // "todas" is the other determiner that survives a possessive, and it does not detach: it stands
+      // in front of it, with the article between the two ("em todas as minhas casas"), so the head
+      // keeps its own determiner there too — `artFor` spells "todas as" — while the possessive stays
+      // prenominal without an article of its own.
+      const possessive = ptPossessiveWord(np, false);
+      const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
+      const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
+      const f = !!possessive && (detached || ownDeterminer === 'all')
+        ? { ...possessedHeadForms(np, 'definite'), definiteness: ownDeterminer }
+        : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const noun = [ptPossessiveWord(np, false), withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
+      const noun = detached
+        ? [withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
+        : [possessive, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para

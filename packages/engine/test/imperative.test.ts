@@ -728,7 +728,7 @@ describe('known bugs: the French tu imperative of an -ir verb conjugated like an
     subject: np('SECOND_PERSON'), verbPhrase: { verb: 'OPEN', negative }, directObject, imperative: true,
   }).fr;
 
-  test.fails('ouvrir drops the -s of its 2sg present, as the -er verbs do', () => {
+  test('ouvrir drops the -s of its 2sg present, as the -er verbs do', () => {
     expect(opens()).toBe('ouvre le livre.');                        // now: "ouvres le livre."
     expect(opens(np('BOOK'), true)).toBe("n'ouvre pas le livre.");  // now: "n'ouvres pas"
     expect(opens(np('BRACKET'))).toBe('ouvre la parenthèse.');
@@ -778,5 +778,21 @@ describe('known bugs: the French tu imperative of an -ir verb conjugated like an
       ja: '本を開いてください。',
       pt: 'abra o livro.',
     });
+  });
+
+  // The rule is now read off the 2sg form rather than off the infinitive, so it holds for every
+  // French verb in the corpus: of the 117 seeded, only aller (vas), ouvrir (ouvres) and être (es)
+  // part company with their infinitive's class, and aller and être are FR_IMP_OVERRIDE's.
+  test('every seeded verb drops the -s exactly when its 2sg present ends in -es', () => {
+    const drops = (verb: string, directObject?: NounPhrase) => sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb }, ...(directObject && { directObject }), imperative: true,
+    }).fr;
+    expect(drops('OPEN', np('BOOK'))).toBe('ouvre le livre.');    // -ir, 2sg in -es: drops it
+    expect(drops('CREATE', np('WORD'))).toBe('crée le mot.');     // -er, 2sg in -es: drops it
+    expect(drops('SEE', np('BOOK'))).toBe('vois le livre.');      // -oir, 2sg in -s: keeps it
+    expect(drops('READ', np('BOOK'))).toBe('lis le livre.');      // -re, 2sg in -s: keeps it
+    expect(drops('WRITE', np('WORD'))).toBe('écris le mot.');     // -re, 2sg in -s: keeps it
+    expect(drops('BITE', np('BOOK'))).toBe('mords le livre.');    // -re, 2sg in -ds: keeps it
+    expect(drops('HAVE', np('BOOK'))).toBe('aie le livre.');      // FR_IMP_OVERRIDE
   });
 });

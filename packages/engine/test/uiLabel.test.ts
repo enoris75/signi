@@ -174,7 +174,8 @@ describe('coreference chip: the possessive the link spells', () => {
 
   test('only the languages that spell the antecedent’s gender split his from her', () => {
     expect(of({ gender: 'fem' })).toMatchObject({ en: 'her', de: 'ihr', ja: '彼女の' });
-    expect(of({ gender: 'neut' })).toMatchObject({ en: 'its', de: 'sein', ja: 'それの' });
+    // Japanese spells the neuter possessive with the suppletive adnominal その, not それの (A201).
+    expect(of({ gender: 'neut' })).toMatchObject({ en: 'its', de: 'sein', ja: 'その' });
     // The Romance possessive agrees with what is possessed, not with who possesses it: one word.
     expect(of({ gender: 'fem' })).toMatchObject({ it: 'suo', fr: 'son', es: 'su', pt: 'seu' });
     expect(of({ gender: 'masc' })).toMatchObject({ it: 'suo', fr: 'son', es: 'su', pt: 'seu' });
