@@ -58,7 +58,7 @@ languages rather than one with a variant switch:
 |---|---|---|---|
 | D1 | Which Romansh? | **Three, as peers:** Rumantsch Grischun, Sursilvan, Vallader. The other idioms (Sutsilvan, Surmiran, Puter) and the Jauer dialect stay out of scope. | RG is what the Confederation and the canton write official texts in, and the only variety with one complete modern dictionary and conjugator — but it is an administrative standard, not a spoken variety, and several Surselva and Engadine municipalities adopted it for schools and then reverted. Sursilvan is the largest idiom and the Rhenish pole; Vallader is the Engadine pole with its own literary tradition. The three span the real dialect continuum. Puter is close enough to Vallader (the two are often grouped as *rumantsch ladin*) that it adds little; Sutsilvan and Surmiran are small. **Treating them as peers, not as variants of RG, is the decision** — it costs three reviewers and three columns, and it avoids declaring one variety the "real" Romansh. |
 | D2 | Language codes | **BCP 47 variant subtags: `rm-rumgr`, `rm-sursilv`, `rm-vallader`.** | Verified against the IANA Language Subtag Registry: `rumgr` ("Rumantsch Grischun", *Supraregional Romansh written standard*), `sursilv` and `vallader` (each *"one of the five traditional written standards or 'idioms' of the Romansh language"*), all `Prefix: rm`, all added 2010-06-29. ISO 639 offers only `roh` for Romansh as a whole, so these subtags are the only standard way to name the three. Symmetric: no variety gets the bare `rm`. **These are the first non-two-letter codes in `LanguageCode`** — see §0.1. |
-| D3 | Flags | **Inline SVG regional emblems:** the arms of Graubünden for `rm-rumgr`, and Surselva / Lower Engadine emblems for the two idioms *(exact emblems to settle — see Risks)*. | All three are Swiss, so 🇨🇭 on three rows would be three identical icons and a useless scan target. This **requires P03 D3's widening** of `FLAG` from `Record<LanguageCode, string>` to a small `Flag` component ([`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.ts) is a plain string map today, and both callers render it as text). P04 and P03 share that work. |
+| D3 | Flags | **Inline SVG arms of the Three Leagues (*Trais Ligias*) — not 🇨🇭.** The full cantonal arms of Graubünden for `rm-rumgr`; the **Grey League** for `rm-sursilv`; the **League of God's House** for `rm-vallader`. | Not 🇨🇭, which would be three identical icons, and not invented emblems either: the leagues are a real heraldic set whose historic territories map onto the varieties. The **Grey League** (*Lia Grischa*, founded 1395, capital Ilanz, holding Disentis, Lugnez, Vals and Waltensburg) **is** the Surselva — an exact match for Sursilvan. The **League of God's House** (*Chadé*, 1367, capital Chur) holds both Engadines, so it covers Vallader — though more loosely, since it also holds Puter country, Italian-speaking Bergell and Chur itself. **Rumantsch Grischun takes the full cantonal arms**, which combine all three: the supraregional standard gets the supraregional emblem. The third league, the **Ten Jurisdictions** (Davos, Klosters, Prättigau), is the German-speaking one and carries no Romansh variety — which is why only two of the three ever appear alone. Blazons, from the cantonal arms fixed in 1932: Grey League *per pale sable and argent*; Ten Jurisdictions *quarterly azure and or, a cross counterchanged*; God's House *argent, an ibex rampant sable*. Still **requires P03 D3's widening** of `FLAG` from `Record<LanguageCode, string>` to a small `Flag` component ([`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.ts) is a plain string map today, and both callers render it as text). |
 | D4 | Engine layout | **Three independent folders**, each free to diverge: `languages/rm-rumgr/`, `languages/rm-sursilv/`, `languages/rm-vallader/`. No shared Romansh core. | Maximum independence: a Sursilvan fix can never regress Vallader, and each folder reads as its own language like the existing seven. The cost is explicit and permanent: **~180 source files, ~6,200 LOC and ~165 colocated test files** (§2), and every shared-grammar fix applied three times. Accepted deliberately. |
 | D5 | What fills `past` | The **compound past**: *haver/esser* + participle. | The simple past is extinct in speech and rare in writing in all three. Auxiliary choice is per verb: reuse the existing `aux: 'be'` key in [`concepts/verbs/nonfinite.ts`](../../../../packages/backend/src/concepts/verbs/nonfinite.ts) (it/de already select the BE auxiliary with it). The participle agrees with the subject after *esser*, like Italian `aspectVerb.ts`. Participle morphology differs per variety (RG *-à*, Sursilvan *-au*). |
 | D6 | Past vs resultative | Accept that **neutral past and resultative aspect render the same**. | No variety has a second construction to tell "he went" from "he is gone". Document as a known collision, not a bug. |
@@ -300,8 +300,8 @@ is shared with it/es/pt/fr.
 - **Typeahead:** check that accents (*è, à, ì, ò, ù, é*) don't defeat search; fold diacritics if they
   do. Shared with P03.
 - **Three near-identical rows.** The panel will show three rows whose text is often identical or nearly
-  so. The row label must carry the variety name clearly, and D3's emblems must be distinguishable at
-  icon size.
+  so. The row label must carry the variety name clearly, and D3's three league arms must be
+  distinguishable from each other at icon size — see Risks.
 - **Fonts:** Lora and Inter cover all three alphabets.
 
 ## 4. Testing and review
@@ -350,9 +350,12 @@ All three varieties move together through each phase, per the sequencing decisio
   applied three times, and every future `/seed` and `/localize` owes three Romansh columns. §0.7's
   skill change keeps that from blocking other work while the varieties are `preview`, but the cost
   returns at promotion.
-- **Emblem choice** (D3). Graubünden's arms for RG is defensible; picking an emblem for Surselva and
-  the Lower Engadine invents visual identity for varieties that do not really have one. Worth asking
-  the reviewers rather than choosing unilaterally.
+- **Emblem legibility at icon size** (D3). The heraldry is settled, but two of the three are hard to
+  draw small: the ibex of the League of God's House is an intricate charge, and the cantonal arms
+  packs all three leagues into one shield. The Grey League's *per pale sable and argent* is the only
+  one that survives at 16px unaided. Budget for simplified, purpose-drawn SVGs rather than traced
+  official arms, and check the three against each other — and against `de`'s 🇩🇪 and `it`'s 🇮🇹 — at
+  the panel's real icon size before committing.
 - **Data licensing** (D11). The *Pledari Grond* is the natural RG source; the idioms' dictionaries are
   separate works with separate terms. Each decides whether forms can be copied or only consulted.
 - **Word order** (D9). If a reviewer requires verb-second inversion, it touches clause assembly in
