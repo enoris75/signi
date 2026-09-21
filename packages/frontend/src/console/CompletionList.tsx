@@ -136,7 +136,11 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
         )}
         {(c.detail || c.detailKey) && (
           <Box component="span" sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.8rem", color: "text.secondary" }}>
-            {c.detailKey ? t(c.detailKey) : c.detail}
+            {/* A detail of two names carries a key each, joined as the title's are: "new clause · Subject".
+                What it is about stays outside the phrase (the C14 rule) — a period numbers its name as the
+                console's header does ("Period 2"), a word is cited after the role's ("Subject: cat"). */}
+            {c.detailKey ? [c.detailKey].flat().map((k) => t(k)).join(" · ") : c.detail}
+            {c.detailValue && ("period" in c.detailValue ? ` ${c.detailValue.period}` : `: ${c.detailValue.word}`)}
           </Box>
         )}
         {(c.current || c.alias || c.shortcut) && (

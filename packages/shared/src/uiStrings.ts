@@ -661,6 +661,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Possessor',
   },
 
+  // The other side of a coordination: one of the phrases it joins, which `/del and` removes. The
+  // bare grammar noun, like the satellite names beside it — es and pt have no word of the linguists'
+  // and say "the coordinated member" ("Miembro coordinado", ja 等位項).
+  'slot.conjunct': {
+    plan: nameOf('CONJUNCT'),
+    format: NAME_FORMAT,
+    fallback: 'Conjunct',
+  },
+
   // The adverb (modifier) box's title and sidebar heading — the bare grammar noun, like `slot.verb`.
   'slot.adverb': {
     plan: nameOf('ADVERB'),
@@ -2675,6 +2684,29 @@ export const UI_STRINGS = defineUiStrings({
     plan: { subject: { concept: 'VALUE', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
     format: { stripPeriod: true },
     fallback: 'values',
+  },
+
+  // The first rows a link command offers make a phrase rather than point at one, and each is named
+  // by what the bracket would open: a NEW period, phrase or clause, bare and lower-case as the list's
+  // own titles are. The help sheet's legend names the period's bracket the same way
+  // (`help.console.newPeriod`), capitalized. It "nuovo periodo", "nuova frase", "nuova proposizione";
+  // de "neues Satzgefüge", "neue Phrase", "neuer Satz"; ja 新しい文, 新しいフレーズ, 新しい節. A relative
+  // clause's two rows say which role the noun takes in it, the role's name after this one and the word
+  // outside the phrase (the C14 rule): "new clause · Subject: cat".
+  'console.new.period': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['NEW'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'new period',
+  },
+  'console.new.phrase': {
+    plan: { subject: { concept: 'PHRASE', definiteness: 'bare', adjectives: ['NEW'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'new phrase',
+  },
+  'console.new.clause': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['NEW'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'new clause',
   },
 
   // The topics the commands are listed under, where no control's name already says it. The role

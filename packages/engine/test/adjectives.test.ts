@@ -2243,3 +2243,47 @@ describe('known bugs: Portuguese suppletive superlative before the noun', () => 
     expect(sayAll(clause(most('CAT', 'BEAUTIFUL', { number: 'plural' }), 'EAT')).pt).toBe('os gatos mais belos comem.');
   });
 });
+
+// A204. Iberian Romance decides *nuevo* / *novo* by position: after the noun it is "recently made"
+// ("una casa nueva", a newly built house), before it "another, one more" ("una nueva casa", a second
+// one). The PRENOMINAL sets hold only the ordinals and OTHER, so NEW always follows — and every
+// phrase in the app that means "one more" (the console's `new clause`, `new phrase`, `new period`
+// rows; `diagnostic.openClause`) reads as the other sense. Italian and French merge the two senses
+// in the prenominal slot already, and en/de/ja have no contrast to get wrong.
+describe('known bugs: Spanish and Portuguese NEW before the noun', () => {
+  test.fails('NEW precedes the noun in Spanish and Portuguese, as it does in Italian and French', () => {
+    expect(cat({ adjectives: ['NEW'] })).toMatchObject({
+      es: 'el nuevo gato come.', // now: el gato nuevo come.
+      pt: 'o novo gato come.', // now: o gato novo come.
+    });
+    expect(cat({ definiteness: 'indefinite', adjectives: ['NEW'] }))
+      .toMatchObject({ es: 'un nuevo gato come.', pt: 'um novo gato come.' });
+    expect(cat({ gender: 'fem', number: 'plural', adjectives: ['NEW'] }))
+      .toMatchObject({ es: 'las nuevas gatas comen.', pt: 'as novas gatas comem.' });
+    // Beside a qualifying adjective, which keeps its own place after the noun rather than being
+    // coordinated with this one ("un ratón nuevo y grande" today).
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('MOUSE', { definiteness: 'indefinite', adjectives: ['NEW', 'BIG'] }) })))
+      .toMatchObject({ es: 'el gato ve un nuevo ratón grande.', pt: 'o gato vê um novo rato grande.' });
+    // Under a preposition, and bare — the shape the console's rows render in.
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', adjectives: ['NEW'] }) } } })))
+      .toMatchObject({ es: 'el gato come en una nueva casa.', pt: 'o gato come em uma nova casa.' });
+    expect(sayAll({ subject: np('CLAUSE', { definiteness: 'bare', adjectives: ['NEW'] }) }))
+      .toMatchObject({ es: 'nueva oración.', pt: 'nova oração.' });
+    expect(sayAll({ subject: np('PERIOD_SENTENCE', { definiteness: 'bare', adjectives: ['NEW'] }) }))
+      .toMatchObject({ es: 'nuevo período.', pt: 'novo período.' });
+  });
+
+  // Regression: the four languages that are already right, the rest of the prenominal set, and the
+  // qualifying adjectives that must stay after the noun — the sense contrast is NEW's alone.
+  test('the other four languages, OTHER, the ordinals and the qualifying adjectives are unchanged', () => {
+    expect(cat({ adjectives: ['NEW'] })).toMatchObject({
+      en: 'the new cat eats.', it: 'il nuovo gatto mangia.', fr: 'le nouveau chat mange.',
+      de: 'der neue Kater frisst.', ja: '新しい猫は食べます。',
+    });
+    expect(cat({ definiteness: 'indefinite', adjectives: ['OTHER'] })).toMatchObject({ es: 'otro gato come.', pt: 'outro gato come.' });
+    expect(cat({ adjectives: ['FIRST'] })).toMatchObject({ es: 'el primer gato come.', pt: 'o primeiro gato come.' });
+    expect(cat({ adjectives: ['BIG'] })).toMatchObject({ es: 'el gato grande come.', pt: 'o gato grande come.' });
+    expect(cat({ adjectives: ['OLD'] })).toMatchObject({ es: 'el gato viejo come.', pt: 'o gato velho come.' });
+    expect(cat({ adjectives: ['BIG', 'OLD'] })).toMatchObject({ es: 'el gato grande y viejo come.', pt: 'o gato grande e velho come.' });
+  });
+});

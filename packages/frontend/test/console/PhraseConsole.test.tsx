@@ -565,6 +565,9 @@ describe('the console', () => {
       'console.topic.workspace': { it: 'area di lavoro' },
       'console.topic.mood': { it: 'modo' },
       'console.topic.place': { it: 'relazione spaziale' },
+      // A22.
+      'console.new.clause': { it: 'nuova proposizione' },
+      'slot.subject': { it: 'Soggetto' },
     };
     const italian = () => {
       localStorage.setItem('signi:uiLanguage', 'it');
@@ -650,6 +653,24 @@ describe('the console', () => {
       expect(within(list).getAllByTestId('console-option-current')[0]).toHaveTextContent(/^ora /);
       fireEvent.change(prompt, { target: { value: '/command ', selectionStart: 9, selectionEnd: 9 } });
       await waitFor(() => expect(screen.getByTestId('console-list-title')).toHaveTextContent('valori · /command'));
+    });
+
+    // A22: a reference row says which period its noun is in; a link's first row says what its bracket
+    // would make and the role the noun would take in it, the word outside the phrase.
+    it('names the period a reference reaches and the clause a bracket opens, in Italian', async () => {
+      const prompt = italian();
+      await run(prompt, '/subj dog');
+      await run(prompt, '/new /subj cat');
+      const rows = async (line: string) => {
+        fireEvent.change(prompt, { target: { value: line, selectionStart: line.length, selectionEnd: line.length } });
+        const list = await screen.findByTestId('console-list');
+        return within(list).getAllByTestId('console-option');
+      };
+      const row = (list: HTMLElement[], insert: string) => list.find((r) => r.getAttribute('data-insert') === insert);
+      // The period by its name and the number after it, as the console's header writes it (C14).
+      expect(row(await rows('#'), '#2.subj')).toHaveTextContent('Periodo 2');
+      // The clause the bracket opens, then the role the noun takes in it, then the noun itself.
+      expect(row(await rows('/subj cat /rel '), 'subj {')).toHaveTextContent('nuova proposizione · Soggetto: gatto');
     });
 
     // B47: what a command is for follows the interface language too, one entry for every command

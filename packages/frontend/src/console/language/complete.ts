@@ -71,7 +71,14 @@ export interface Candidate {
   label: string;
   /** What it means, in English (the fallback for `detailKey`). */
   detail?: string;
-  detailKey?: UiStringKey;
+  /** Or, for a detail made of two names, one key each, shown in order: "new clause · Subject". */
+  detailKey?: UiStringKey | readonly UiStringKey[];
+  /**
+   * What follows the rendered `detailKey`, outside the phrase (the C14 rule): the period a reference
+   * reaches, numbering the name as the console's header does ("Period 2"), or the word the row is
+   * about, cited after the role it takes in it ("Subject: cat").
+   */
+  detailValue?: { period: number } | { word: string };
   /** A line from history that was pinned. */
   pinned?: boolean;
   /** For a setting: the value the word holds now, which the row shows as "now …". */
@@ -715,21 +722,34 @@ function valueCompletion(
   };
 }
 
+/**
+ * What `/del` removes, each argument named by the part of the canvas it is — the same name the box,
+ * the satellite or the list's title gives it, capitalized as the other values lists are ("Object",
+ * it "Complemento oggetto"). The English articles the literals carried ("an adjective", "the
+ * adverb") said which arguments take a number; the usage line spells that out.
+ */
 const DEL_VALUES: readonly ValueDef[] = [
-  { name: "adj", value: "adj", description: "an adjective" },
-  { name: "obj", value: "obj", description: "the direct object" },
-  { name: "adv", value: "adv", description: "the adverb" },
-  { name: "modal", value: "modal", description: "a modal" },
-  { name: "poss", value: "poss", description: "the possessor" },
-  { name: "and", value: "and", description: "a coordinated phrase" },
-  { name: "rel", value: "rel", description: "the relative clause" },
-  { name: "if", value: "if", description: "the if-condition" },
-  { name: "join", value: "join", description: "the coordination" },
-  { name: "inst", value: "inst", description: "the instrument" },
-  { name: "period", value: "period", description: "the whole period" },
-  { name: "subj", value: "subj", description: "the subject" },
-  { name: "verb", value: "verb", description: "the verb" },
-  ...BOX_COMPLEMENT_TYPES.map((t) => ({ name: NOUN_NAMES[t], value: NOUN_NAMES[t], description: t })),
+  { name: "adj", value: "adj", description: "an adjective", descriptionKey: "category.adjective" },
+  { name: "obj", value: "obj", description: "the direct object", descriptionKey: "slot.directObject" },
+  { name: "adv", value: "adv", description: "the adverb", descriptionKey: "slot.adverb" },
+  { name: "modal", value: "modal", description: "a modal", descriptionKey: "slot.modal" },
+  { name: "poss", value: "poss", description: "the possessor", descriptionKey: "slot.possessor" },
+  { name: "and", value: "and", description: "a coordinated phrase", descriptionKey: "slot.conjunct" },
+  { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
+  { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
+  { name: "join", value: "join", description: "the coordination", descriptionKey: "clause.coordinated" },
+  { name: "inst", value: "inst", description: "the instrument", descriptionKey: "slot.instrumental" },
+  { name: "period", value: "period", description: "the whole period", descriptionKey: "period.name" },
+  { name: "subj", value: "subj", description: "the subject", descriptionKey: "slot.subject" },
+  { name: "verb", value: "verb", description: "the verb", descriptionKey: "slot.verb" },
+  // The boxed complements, each by its own box's title rather than by the internal type name the
+  // literal showed ("terminus", "route"), which is not even the English UI's word for them.
+  ...BOX_COMPLEMENT_TYPES.map((t) => ({
+    name: NOUN_NAMES[t],
+    value: NOUN_NAMES[t],
+    description: t,
+    descriptionKey: `slot.${t}` as UiStringKey,
+  })),
 ];
 
 // ── Links, phrases and references ────────────────────────────────────────────
@@ -748,7 +768,7 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
           const concept = c.selection[key as SlotKey];
           if (!concept) continue;
           if (!canBeRelativeTarget(state.containers, state.links, source.ref.containerId, { containerId: c.id, nounKey: key })) continue;
-          out.push(refCandidate(printRef(n, key), concept, `period ${n}`));
+          out.push(refCandidate(printRef(n, key), concept, inPeriod(n)));
         }
         return;
       }
@@ -769,7 +789,7 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
         for (const key of ["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[]) {
           const concept = c.selection[key as SlotKey];
           if (!concept || key === possessed.address || key.startsWith(`${possessed.address}/`)) continue;
-          out.push(refCandidate(printRef(n, key), concept, `period ${n}`));
+          out.push(refCandidate(printRef(n, key), concept, inPeriod(n)));
         }
         return;
       }
@@ -778,14 +798,25 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
   return out.map((c, i) => (i < 9 ? { ...c, number: i + 1 } : c));
 }
 
-function refCandidate(ref: string, concept: Concept | undefined, detail: string, detailKey?: UiStringKey): Candidate {
-  return { kind: "ref", insert: ref, label: ref, detail, detailKey, concept, color: "ref" };
+function refCandidate(ref: string, concept: Concept | undefined, detail: Partial<Candidate>): Candidate {
+  return { kind: "ref", insert: ref, label: ref, concept, color: "ref", ...detail };
+}
+
+/**
+ * What a noun's reference row says after it: which period the noun is in, the period by its name and
+ * the number outside the phrase, as the console's header writes it (the C14 rule) — "Period 2",
+ * de "Satzgefüge 2".
+ */
+function inPeriod(n: number): Partial<Candidate> {
+  return { detail: `Period ${n}`, detailKey: "period.name", detailValue: { period: n } };
 }
 
 /** A reference row to a period, which it sums up in a few words: its subject and verb, or that it is empty. */
 function periodCandidate(n: number, sel: WorkspaceState["containers"][number]["selection"]): Candidate {
   const summary = [sel.subject?.label, sel.verb?.label].filter(Boolean).join(" ");
-  return summary ? refCandidate(printRef(n), undefined, summary) : refCandidate(printRef(n), undefined, "empty", "slot.empty");
+  return summary
+    ? refCandidate(printRef(n), undefined, { detail: summary })
+    : refCandidate(printRef(n), undefined, { detail: "empty", detailKey: "slot.empty" });
 }
 
 function linkCompletion(
@@ -816,14 +847,23 @@ function linkCompletion(
   // New phrases first: `subj {` and `obj {` for a relative clause, `{` for a period of the others'
   // own, `[` for a possessor's or a conjunct's phrase.
   if (action.kind === "relative" && between.length === 0) {
+    // Which role the noun takes in the clause is said by the role's name after the clause's, and the
+    // word after that, outside the phrase (the C14 rule): "new clause · Subject: cat". A sentence
+    // about the word ("cat is its subject") would need a period built on it, and an "its" agreeing
+    // with CLAUSE. With no word yet, the role alone.
+    const clause = (key: "slot.subject" | "slot.directObject", english: string): Partial<Candidate> => ({
+      detail: `new clause · ${english}${headName ? `: ${headName}` : ""}`,
+      detailKey: ["console.new.clause", key],
+      ...(headName ? { detailValue: { word: headName } } : {}),
+    });
     rows.push(
-      { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", detail: `new clause · ${headName ?? "the noun"} is its subject` },
-      { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", detail: `new clause · ${headName ?? "the noun"} is its object` },
+      { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", ...clause("slot.subject", "Subject") },
+      { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", ...clause("slot.directObject", "Object") },
     );
   } else if (action.kind === "possessor" || action.kind === "conjunct") {
-    rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase" });
+    rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase", detailKey: "console.new.phrase" });
   } else {
-    rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period" });
+    rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period", detailKey: "console.new.period" });
   }
   // Then what exists already: the periods and nouns the rules let it reach.
   if (action.kind !== "conjunct" && targetHere) rows.push(...linkTargets(def, frame, state, words));
@@ -887,7 +927,7 @@ function refCompletion(
         periodCandidate(n, c.selection),
         ...(["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[])
           .filter((key) => c.selection[key as SlotKey])
-          .map((key) => refCandidate(printRef(n, key), c.selection[key as SlotKey], `period ${n}`)),
+          .map((key) => refCandidate(printRef(n, key), c.selection[key as SlotKey], inPeriod(n))),
       ];
     });
     rows = rows.map((c, i) => (i < 9 ? { ...c, number: i + 1 } : c));
@@ -911,8 +951,9 @@ function refCompletion(
 // ── A word with no command ───────────────────────────────────────────────────
 
 /**
- * A word typed without a command is not part of the language, and is met by completion instead:
- * *did you mean* the role command for the box under the cursor, with the word — `ca` → `/subj cat`.
+ * A word typed without a command is not part of the language, and is met by completion instead: the
+ * role command for the box under the cursor, with the word — `ca` → `/subj ( cat )`. The rows are all
+ * that one role's, so the list is headed by the role, as the role's own word list is.
  */
 function didYouMean(
   from: number,
@@ -927,8 +968,7 @@ function didYouMean(
   const role = COMMANDS.find((c) => c.action.kind === "role" && c.action.slot === slot);
   const def = role ?? COMMANDS.find((c) => c.name === "subj")!;
   const spec = wordSpecFor(def.action.kind === "role" ? def.action.slot : "subject", nounFrame(frame));
-  // English literal, for /localize: a question, which no seeded words say yet.
-  const c = wordCompletion(from, to, query, spec, opts, { title: "did you mean" }, def.color, `/${def.name} ( `);
+  const c = wordCompletion(from, to, query, spec, opts, titleForSpec(spec, def), def.color, `/${def.name} ( `);
   // A bare word never stays: the list says what it would become — the word in its role's bracket.
   c.candidates = c.candidates.map((x) => ({ ...x, close: ")", label: `${x.insert} )` }));
   c.ghost = undefined;

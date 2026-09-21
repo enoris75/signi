@@ -162,7 +162,9 @@ describe('titles', () => {
     expect(title(at('/command '))).toEqual(['values', 'console.list.values', '/command']);
     const state = periods({ subject: byId('CAT') }, {});
     expect(at('#', { state }).candidates.find((x) => x.insert === '#2')).toMatchObject({ detail: 'empty', detailKey: 'slot.empty' });
-    expect(at('#', { state }).candidates.find((x) => x.insert === '#1')).toMatchObject({ detail: 'cat', detailKey: undefined });
+    // A period with words in it is summed up by the words themselves, which no entry can hold.
+    expect(at('#', { state }).candidates.find((x) => x.insert === '#1')!.detailKey).toBeUndefined();
+    expect(at('#', { state }).candidates.find((x) => x.insert === '#1')).toMatchObject({ detail: 'cat' });
   });
 });
 
@@ -213,6 +215,38 @@ describe('values', () => {
     expect(second.auto).toBe(false);
   });
 
+  it('names what /del removes as the canvas names it, the complements by their box (A22)', () => {
+    const c = at('/del ', { state: ok('/subj cat /verb eat') });
+    const key = (name: string) => c.candidates.find((x) => x.insert === name)!.detailKey;
+    // The parts the canvas titles, each by its own box, satellite or list — not by the English
+    // article the literal carried ("an adjective"), which the usage line says instead.
+    expect(key('adj')).toBe('category.adjective');
+    expect(key('obj')).toBe('slot.directObject');
+    expect(key('adv')).toBe('slot.adverb');
+    expect(key('modal')).toBe('slot.modal');
+    expect(key('poss')).toBe('slot.possessor');
+    expect(key('rel')).toBe('satellite.relative');
+    expect(key('if')).toBe('clause.conditional');
+    expect(key('join')).toBe('clause.coordinated');
+    expect(key('inst')).toBe('slot.instrumental');
+    expect(key('period')).toBe('period.name');
+    expect(key('subj')).toBe('slot.subject');
+    expect(key('verb')).toBe('slot.verb');
+    // The other side of a coordination, which had no name of its own before (es "Miembro coordenado").
+    expect(key('and')).toBe('slot.conjunct');
+    // The boxed complements, by their box's title rather than by the internal type name.
+    expect(key('term')).toBe('slot.terminus');
+    expect(key('loc')).toBe('slot.locative');
+    expect(key('dir')).toBe('slot.direction');
+    expect(key('src')).toBe('slot.source');
+    expect(key('route')).toBe('slot.route');
+    expect(key('cause')).toBe('slot.cause');
+    expect(key('pred')).toBe('slot.predicative');
+    expect(key('manner')).toBe('slot.manner');
+    // Every value carries one: none is left showing English.
+    expect(c.candidates.every((x) => x.detailKey)).toBe(true);
+  });
+
   it('is done with a one-value command once it has its value, so ↵ runs the line', () => {
     const c = at('/lang it ');
     expect(c.auto).toBe(false);
@@ -238,12 +272,38 @@ describe('links and references', () => {
       ['#2.obj', 2],
     ]);
     expect(c.about).toBe('child');
+    // What each row would make, in the catalogue's words: a new clause, then the role the noun takes
+    // in it, then the noun itself outside the phrase — "nuova proposizione · Soggetto: gatto" (A22).
+    expect(c.candidates.slice(0, 2).map((x) => [x.detailKey, x.detailValue])).toEqual([
+      [['console.new.clause', 'slot.subject'], { word: 'child' }],
+      [['console.new.clause', 'slot.directObject'], { word: 'child' }],
+    ]);
+    expect(c.candidates[0]!.detail).toBe('new clause · Subject: child');
+    // The nouns of another period say which period, the number outside the phrase: "Period 2".
+    expect(c.candidates[2]).toMatchObject({ detail: 'Period 2', detailKey: 'period.name', detailValue: { period: 2 } });
+  });
+
+  it('names a clause by its role alone while the noun it hangs off is still to be typed', () => {
+    const c = at('/rel ', { state: two() });
+    expect(c.candidates.slice(0, 2).map((x) => [x.detail, x.detailValue])).toEqual([
+      ['new clause · Subject', undefined],
+      ['new clause · Object', undefined],
+    ]);
   });
 
   it('offers the periods an if-condition may take', () => {
     const c = at('/if ', { state: two() });
     expect(labels(c)).toEqual(['{ … }', '#2']);
-    expect(c.candidates[0]).toMatchObject({ insert: '{', close: '}' });
+    expect(c.candidates[0]).toMatchObject({ insert: '{', close: '}', detailKey: 'console.new.period' });
+  });
+
+  it('names the bracket a link opens by what it would hold: a period, a phrase, a clause', () => {
+    const key = (text: string, opts: Parameters<typeof at>[1] = {}) => at(text, opts).candidates[0]!.detailKey;
+    expect(key('/join and ', { state: two() })).toBe('console.new.period');
+    expect(key('/inst ', { state: two() })).toBe('console.new.period');
+    // A possessor's and a conjunct's bracket holds a noun phrase, not a period of its own.
+    expect(key('/subj child /poss ')).toBe('console.new.phrase');
+    expect(key('/subj child /and ')).toBe('console.new.phrase');
   });
 
   it('completes a reference as it is typed', () => {
@@ -271,7 +331,9 @@ describe('links and references', () => {
 describe('the rest', () => {
   it('meets a word with no command with the command for the box under the cursor', () => {
     const c = at('ca', { state: periods({}), context: { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' } } });
-    expect(c.title).toBe('did you mean');
+    // Headed by the role its rows fill, as the role's own word list is headed (A22): a question
+    // would need an interrogative the corpus has no words for.
+    expect([c.title, c.titleKey]).toEqual(['subject', 'slot.subject']);
     expect(c.candidates[0]).toMatchObject({ insert: '/subj ( cat', close: ')', label: '/subj ( cat )' });
     expect({ from: c.from, to: c.to }).toEqual({ from: 0, to: 2 });
   });

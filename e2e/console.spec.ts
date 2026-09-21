@@ -342,6 +342,48 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('console-history-tag')).toHaveText('Verlauf · 1/3');
   });
 
+  // A22: the completion rows A21 left in English — what `/del` removes, what a bracket would make,
+  // and which period a reference reaches.
+  test('names what /del removes, what a bracket makes and which period a reference reaches', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+    await prompt(page).click();
+    await page.keyboard.type('/subj dog');
+    await run(page);
+    await page.keyboard.type('/new /subj cat');
+    await run(page);
+    const row = (insert: string) => page.locator(`[data-testid="console-option"][data-insert="${insert}"]`);
+
+    // `/del`'s arguments, each by the canvas's name for the part it removes — the adjective, the
+    // other side of a coordination, a complement by its box rather than by the internal type name.
+    await page.keyboard.type('/del ');
+    await expect(row('adj')).toContainText('Aggettivo');
+    await expect(row('and')).toContainText('Congiunto');
+    await expect(row('term')).toContainText('Complemento di termine');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+
+    // A link's first rows make a phrase rather than point at one, and say what: a new clause, the
+    // role the noun would take in it, and the noun, outside the phrase (the C14 rule).
+    await page.keyboard.type('/subj cat /rel ');
+    await expect(row('subj {')).toContainText('nuova proposizione · Soggetto: gatto');
+    await expect(row('obj {')).toContainText('nuova proposizione · Complemento oggetto: gatto');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+
+    // A reference to a noun says which period it is in, the number after the name as the header
+    // writes it; German capitalizes the noun, so it is not lower-cased.
+    await page.keyboard.type('#');
+    await expect(row('#2.subj')).toContainText('Periodo 2');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await app.setUiLanguage('de');
+    await prompt(page).click();
+    await page.keyboard.type('#');
+    await expect(row('#2.subj')).toContainText('Satzgefüge 2');
+  });
+
   // B42, B43: the console's name, the way back to the canvas, the preview tags, the source strip's
   // hint and the chip of a period being edited, in German — and the header row's name.
   test('names itself, the canvas and the period it edits in the interface language', async ({ app, page }) => {

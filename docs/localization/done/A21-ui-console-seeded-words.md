@@ -266,7 +266,8 @@ What landed differently from the plan:
    one makes, and still shows its command. The page computes the example as it draws, from the
    console's vocabulary, so it follows a change of language; should the line not read (the words not
    loaded yet) or applying throw, the English stands.
-6. **Not in this task, and catalogued afterwards as [A22](../A-ready/A22-ui-console-completion-rows.md):**
+6. **Not in this task, and catalogued afterwards as [A22](A22-ui-console-completion-rows.md)**, which
+   shipped the same day:
    the reference rows' "period {n}" detail
    ([complete.ts:743, 764, 882](../../../packages/frontend/src/console/language/complete.ts#L743)), the
    new-phrase rows ("new clause · … is its subject", "new phrase", "new period",
