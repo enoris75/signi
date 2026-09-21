@@ -73,6 +73,8 @@ Concept definitions:
 | # | File | Concept → gloss |
 |---|---|---|
 | A16 | [A16-seem.md](A-ready/A16-seem.md) | SEEM → to be perceived as an object: the **passive** of PERCEIVE with the **essive** object complement, ja 物体として知覚される (split from C19; no new construct) |
+| A17 | [A17-continent-superlatives.md](A-ready/A17-continent-superlatives.md) | ASIA → the biggest continent; OCEANIA → the smallest continent (split from C05: a superlative distinguishes where "a continent" did not). Judge pt *o continente maior* |
+| A18 | [A18-grammar-nouns.md](A-ready/A18-grammar-nouns.md) | CLAUSE → a phrase that has a subject; RELATIVE_CLAUSE → a clause that describes nouns; PERIOD_SENTENCE → a phrase that has clauses; VERB_PHRASE → a phrase that indicates actions; MODIFIER → a word that modifies other words; MODAL → a verb that modifies verbs; CAUSE_COMPLEMENT / LOCATIVE → a complement that indicates causes / places (split from C05, seeded words only) |
 
 #### UI strings
 
@@ -88,6 +90,10 @@ Concept definitions:
 | B33 | [B33-burn-flame.md](B-needs-seed/B33-burn-flame.md) | **FLAME** → BURN: to produce flames, ja 炎を出す (split from C19). Replaces "to be consumed by fire", which CONSUME's *ingest* sense got wrong in fr, de and ja |
 | B34 | [B34-collapse.md](B-needs-seed/B34-collapse.md) | **GROUND**, **SUDDENLY** → COLLAPSE: to move to the ground suddenly, ja 地面へ突然移動する (split from C18). "Down" as a `direction` place instead of an adverb, so it needs one adverb, not two. Judge fr *se déplacer … au sol* |
 | B35 | [B35-come.md](B-needs-seed/B35-come.md) | **SPEAKER** → COME: to move to the speaker, ja 話し手へ移動する (split from C18). The deixis is the goal of the `direction` complement. Judge it *muoversi dal parlante* |
+| B36 | [B36-languages-by-country.md](B-needs-seed/B36-languages-by-country.md) | **ENGLAND, ITALY, FRANCE, GERMANY, SPAIN, JAPAN, PORTUGAL** → the seven languages: the language of Italy, via the genitive (en "Italy's language", de "die Sprache Italiens") (split from C05). pt "de Portugal" needs an article-less proper noun the pt engine lacks |
+| B37 | [B37-complement-names.md](B-needs-seed/B37-complement-names.md) | **DESTINATION, ORIGIN, PATH, COMPANION, RECIPIENT** → DIRECTION, SOURCE, ROUTE, COMITATIVE, TERMINUS: a complement that indicates destinations, … (split from C05; B31 glossed only three of "the nine") |
+| B38 | [B38-link.md](B-needs-seed/B38-link.md) | **LINK** → CONJUNCTION: a word that links clauses; CONJUNCT: a phrase that a conjunction links (split from C05; COORDINATE's ja is 調整する, to adjust) |
+| B39 | [B39-quantity-and-category.md](B-needs-seed/B39-quantity-and-category.md) | **QUANTITY, CATEGORY** → NUMBER_GRAMMAR: a category that indicates quantities; QUANTIFIER: a determiner that indicates quantities (split from C05) |
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
@@ -114,7 +120,8 @@ _None outstanding._ B20–B28 are done (see the Done section).
 
 | # | File | Blocked on |
 |---|---|---|
-| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns, FEELING; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's); BECOME, the copula plus an aspect (from C19). BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
+| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia: AFRICA, EUROPE and the Americas (a compass relation), ANTARCTICA (ja COLD is 冷たい), FEELING, REPLACE ("instead of" is an idiom per language), BECOME (the copula plus an aspect), and 21 grammar meta-nouns, each with its reason. **Split 2026-09-21** into A17, A18, B36–B39 and C20. BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
+| C20 | [C20-pronoun-agreement.md](C-needs-engine/C20-pronoun-agreement.md) | a pronoun that takes its antecedent's grammatical gender (de *ihn* for *Gegenstand*) where English and Japanese want the natural one: SELECT → to indicate an object to use it (split from C05). Also fixes SAVE's shipped German, "um **es** zu laden" |
 
 #### UI strings
 
