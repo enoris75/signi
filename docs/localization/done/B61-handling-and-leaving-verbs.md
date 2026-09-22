@@ -29,6 +29,9 @@ Proposed forms, for the seed author to check — suggestions, not renders.
 | DIRECT_VERB | verb | differentia of LOOK_AT — new | direct | rivolgere | diriger | richten | dirigir | 向ける | dirigir |
 
 Ten P09 verbs, then six differentia: three from sibling tickets, three new, each used by one gloss.
+(On landing, the three from sibling tickets — HAND, POINT_NOUN and STILL — and TAKE itself were
+seeded ahead of all nine P09 tickets, in the shared base commit two of them stand on, so this ticket
+seeded nine verbs and the three new differentia.)
 What the seed author needs beyond the table:
 
 1. **GET** is `isA: 'ACQUIRE'` with ACQUIRE's complements and **no `direction`** — A228's fix keeps
@@ -79,7 +82,9 @@ What the seed author needs beyond the table:
     French needs `direction_prep: 'vers'` (without it, *à un objet* — see TURN_OBJECT's probe below);
     Italian *rivolgere* takes *a* on its own (*rivolgere gli occhi a*). A root, C28's class.
 14. With LEAVE_DEPART and LEAVE_BEHIND the English picker has **three "leave"**. The seeded LEAVE has
-    no `synonym`; *exit* would tell it from the other two.
+    no `synonym`; *exit* would tell it from the other two. **Shipped**: LEAVE is *(exit)*,
+    LEAVE_BEHIND *(leave behind)* and LEAVE_DEPART *(depart)*, and the two new ones carry a gloss
+    the third does not.
 
 ## Unlocks
 
@@ -151,13 +156,13 @@ Larousse's own for *partir*), but in English it defines *leave* with *leave*.
 All ten render in all seven. None renders the same as a shipped gloss in any language, and no two of
 the ten render alike. Readings to judge on authoring:
 
-1. **GET's Italian is A228**:
+1. **GET's Italian was A228**:
    *via da una persona*. ACQUIRE licenses a source and no direction, exactly the verb A228's fix
-   drops the "via" for; after it, *acquisire oggetti da una persona*. A228 says no shipped string
-   shows it yet, so author GET after A228, not before.
-2. **PUT's German is A218**: *in einem
-   Ort zu sein* for *an einem Ort*, the same fault as GO's and IMPORT's shipped German; A218's fix
-   corrects all three. PUT can ship before it.
+   drops the "via" for. **A228 is fixed** (2026-09-22, before this ticket was authored), and the
+   re-render is *acquisire oggetti da una persona* — shipped, and pinned by an e2e row.
+2. **PUT's German was A218**: *in einem
+   Ort zu sein* for *an einem Ort*, the same fault as GO's and IMPORT's shipped German. **A218 is
+   fixed**, and PUT shipped with *an einem Ort zu sein*.
 3. **KEEP is the weakest, and it waits on B67.** B67 seeds STILL as a P09 word (its own gloss waits
    on E3, which does not matter here). English writes a frequency adverb before the "to" by design
    ("always to eat", `predicateParts.ts`), hence *still to have*; Japanese まだ持つ puts a state verb
@@ -226,7 +231,9 @@ the ten render alike. Readings to judge on authoring:
    each is an unglossed root to verdict: STAY and DIRECT_VERB beside
    [C28](../done/C28-verb-roots-without-a-gloss.md)'s verb roots, and OUTSIDE beside UP and DOWN, which
    ship C25's complement gloss ("to a higher place"). Probe that shape for OUTSIDE before calling it
-   literal.
+   literal. **Done on authoring**: STAY and OUTSIDE were probed and both ship (see
+   [Done](#what-landed-differently-from-the-plan), 3 and 4); DIRECT_VERB is literal by design, C28's
+   class, with its leads probed.
 
 ## Coverage
 
@@ -241,4 +248,112 @@ authored:
   Japanese (物体が残るようにする): typing "leave" lists three concepts, and the two new tooltips must
   tell them apart; LEAVE_BEHIND joins the C08 causative rows.
 
-GET in English and Italian is worth a fifth row once A228 lands: it pins *da una persona*.
+GET in English and Italian is worth a fifth row once A228 lands: it pins *da una persona*. A228
+landed first, so the fifth row shipped with the other four.
+
+## Done
+
+Shipped 2026-09-22. **Twelve words seeded** — the nine P09 verbs GET, PUT, KEEP, BRING,
+LEAVE_BEHIND, TURN, LOOK_AT, LEAVE_DEPART and GO_OUT (TAKE, the tenth, was seeded in the shared base
+commit), and the three differentia STAY, OUTSIDE and DIRECT_VERB — and **twelve glosses** authored:
+the ticket's ten, plus STAY's and OUTSIDE's own, which this file left to the author. The verbs are in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts) (GET, PUT, KEEP, BRING,
+LEAVE_BEHIND, LOOK_AT, DIRECT_VERB, after TAKE),
+[intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts) (STAY, after
+LIVE_ALIVE), [motion.ts](../../../packages/backend/src/concepts/verbs/motion.ts) (TURN,
+LEAVE_DEPART, GO_OUT, after RETURN) and
+[nonfinite.ts](../../../packages/backend/src/concepts/verbs/nonfinite.ts) (all eleven paradigms);
+OUTSIDE is in [adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts), after DOWN. The seeded
+LEAVE gained `synonym: 'exit'`. **DIRECT_VERB stays on the literal**, a root LOOK_AT's gloss stands
+on, like [C28](../done/C28-verb-roots-without-a-gloss.md)'s LIVE_ALIVE and POUR.
+
+Rendered fresh from the shipped seed (engine source at HEAD, the corpus seeded in memory):
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| TAKE | to acquire objects with the hand | acquisire oggetti con la mano | acquérir des objets avec la main | Gegenstände mit der Hand erwerben | adquirir objetos con la mano | 手で物体を取得する | adquirir objetos com a mão |
+| GET | to acquire objects from a person | acquisire oggetti da una persona | acquérir des objets d'une personne | Gegenstände von einer Person erwerben | adquirir objetos de una persona | 人から物体を取得する | adquirir objetos de uma pessoa |
+| PUT | to cause an object to be in a place | indurre un oggetto a essere in un luogo | induire un objet à être dans un lieu | einen Gegenstand veranlassen, an einem Ort zu sein | inducir un objeto a estar en un lugar | 物体が場所にあるようにする | induzir um objeto a estar em um lugar |
+| KEEP | still to have objects | avere ancora oggetti | avoir encore des objets | noch Gegenstände haben | tener todavía objetos | 物体をまだ持つ | ter ainda objetos |
+| BRING | to cause an object to come | indurre un oggetto a venire | induire un objet à venir | einen Gegenstand veranlassen, zu kommen | inducir un objeto a venir | 物体が来るようにする | induzir um objeto a vir |
+| LEAVE_BEHIND | to cause an object to stay | indurre un oggetto a restare | induire un objet à rester | einen Gegenstand veranlassen, zu bleiben | inducir un objeto a quedarse | 物体が残るようにする | induzir um objeto a ficar |
+| TURN | to move around a point | muoversi intorno a un punto | se déplacer autour d'un point | sich um einen Punkt bewegen | moverse alrededor de un punto | 点の周りを移動する | mover-se ao redor de um ponto |
+| LOOK_AT | to direct the eyes to an object | rivolgere gli occhi a un oggetto | diriger les yeux vers un objet | die Augen zu einem Gegenstand richten | dirigir los ojos a un objeto | 物体へ目を向ける | dirigir os olhos a um objeto |
+| LEAVE_DEPART | to begin to go | iniziare ad andare | commencer à aller | beginnen, zu gehen | empezar a ir | 行くことが始まる | começar a ir |
+| GO_OUT | to go outside | andare fuori | aller dehors | nach draußen gehen | ir afuera | 外に行く | ir para fora |
+| STAY | still to be in a place | essere ancora in un luogo | être encore dans un lieu | noch an einem Ort sein | estar todavía en un lugar | 場所にまだいる | estar ainda em um lugar |
+| OUTSIDE | to a place that is not in a building | a un luogo che non è in un edificio | à un lieu qui n'est pas dans un bâtiment | zu einem Ort, der nicht in einem Gebäude ist | a un lugar que no está en un edificio | 建物にない場所へ | a um lugar que não está em um edifício |
+
+All twelve pass `sweep-definitions.test.ts`: no two definitions in the corpus render alike in any
+language.
+
+### What landed differently from the plan
+
+1. **A228 and A218 were fixed before authoring**, so readings 1 and 2 are settled rather than
+   pending: GET's Italian source is the plain *da una persona*, and PUT's German is *an einem Ort zu
+   sein*. Both are pinned, GET's in the e2e rows as well.
+2. **KEEP shipped** as proposed, "still to have objects". The continuative fallback ("to continue to
+   have") is still unavailable and still not ticketed — a construct only a fallback would use.
+3. **STAY was glossed, not left a root.** This file said its own tooltip was not probed and left it
+   to [C28](../done/C28-verb-roots-without-a-gloss.md)'s class. It takes KEEP's shape on BE —
+   "still to be in a place", the dictionary's "to continue to be in the same place" without the
+   continuative — and Japanese reads the animate existential, 場所にまだいる. Probed against
+   "not to leave the place" (*non uscire dal luogo*, *no salir del lugar*: it/es/pt say *not to go
+   out of*), "not to leave a place" (German negative concord: *keinen Ort verlassen*, French *ne pas
+   quitter de lieu* — the same fault C28 recorded for CONFINE), "not to leave" on LEAVE_DEPART
+   (Japanese 出発しない is *not to set off*), "not to go" and "not to move" (true of far more).
+4. **OUTSIDE was glossed too**, on C25's complement gloss as this file asked: the direction UP and
+   DOWN take, with a relative clause where they take a compared adjective — "to a place that is not
+   in a building", the dictionaries' *not inside a building*. The leads that lost: **the open air**
+   (`AIR` + OPEN) is Italian's idiom alone — *all'aria aperta*, but *à l'air ouvert*, *zur offenen
+   Luft*, *al aire abierto* and 開いた空気へ; **an open place** (*a un luogo aperto*, 開いた場所へ) is
+   a place one may enter, not the outdoors; **a place that does not have walls** (壁がない場所へ) is
+   true of a field and false of a courtyard; **a place that walls do not enclose** leaves a bare
+   plural subject Romance cannot say (*che muri non racchiudono*, *que murs n'entourent pas*); a
+   `source` complement gloss ("from a building", *aus einem Gebäude*) says *out of*, not *outside*,
+   and `NounPhrase.complementGloss` takes only `locative` and `direction` anyway.
+5. **DIRECT_VERB is literal by design**, C28's "a root a gloss stands on" class, with every lead
+   probed: "to change an object's direction" (*cambiare la direzione di un oggetto*, 物体の方向を変える)
+   is the **transitive TURN's** gloss, reserved in *Not solved* 2, and says turning rather than
+   aiming; "to cause an object to indicate a place" reads *bezeichnen* in German, designating;
+   "to move an object to a direction" gives *spostare un oggetto a una direzione* and German
+   *verschieben*, shifting; "to cause an object to turn to a place" gives *girare a un luogo* and
+   場所へ回る, going round.
+6. **TAKE ↔ HAND was accepted** (the ruling): TAKE is "to acquire objects with the hand" and
+   [B65](B65-everyday-nouns.md) glosses HAND back on TAKE, the pair BITE ↔ TOOTH and CUT ↔ BLADE
+   already are. **BRING ships beside [B60](B60-saying-and-thinking-verbs.md)'s CALL**, the causee
+   carrying the difference.
+7. **PUT licenses both goals.** The file's note 3 asked for `direction`; Japanese 置く wants the に of
+   a `locative` (家に本を置きます), and German *legen* the accusative of a `direction` with `in`
+   (*legt das Buch ins Haus*). The concept licenses both and the lexemes say which they prefer
+   (`locative_particle: 'に'`), so each language has a frame that is right; a bare `direction` reads
+   *puts the book to the house* and a `locative` gives German the dative *im Haus*. Both are pinned.
+8. **LEAVE_BEHIND's Japanese locative takes に too** (`locative_particle`): the place a thing is left
+   in is where it then is — 家に本を置いていきます, not the で of where the act happens.
+9. **The English participle of GET is the British *got*** ("the cat has got the book"), as the corpus
+   spells *labour* and *colour*; American *gotten* would be the other choice.
+10. **Portuguese PUT is *pôr* and BRING *trazer*, whose strong preterites the hypothetical-mood test
+    knew nothing of**: `hypothetical.test.ts`'s table of every seeded verb's 1st-plural imperfect
+    subjunctive gained `PUT: 'puséssemos'` and `BRING: 'trouxéssemos'` — the engine was right and the
+    class rule (ê for -er) was not.
+11. **One defect left, in the Spanish imperative**: the affirmative *tú* command is the 3sg present
+    unless `mood.ts`'s `ES_IMP_OVERRIDE` says otherwise, and that table is keyed by **concept id**.
+    LEAVE has *salir*'s "sal" there; GO_OUT, which is the same *salir*, and PUT's *poner* do not, so
+    they render *sale* and *pone el libro* for *sal* and *pon el libro*. Pinned as a `test.fails` in
+    [handling-verbs.test.ts](../../../packages/engine/test/handling-verbs.test.ts)
+    (`known bugs: … (PENDING-L3-1)`). No shipped gloss shows it: a gloss is an infinitive citation.
+12. **Noted, not fixed**: a French or Spanish animate goal after BRING is *vers l'enfant* / *hacia el
+    niño*, where the idiom is the dative *à l'enfant* / *al niño* — the engine's animate-goal rule,
+    which is right after a self-propelled verb and reads oddly after a caused motion. In no gloss.
+
+### Coverage shipped
+
+Five rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), appended
+after A31's: LOOK_AT in English and Japanese (the tooltip that tells the picker's two 見る apart),
+TURN in English and German (*sich um einen Punkt bewegen*), LEAVE_DEPART in English and Italian and
+LEAVE_BEHIND in English and Japanese (the two of the three "leave" that carry a gloss), and GET in
+English and Italian (*da una persona*, A228's fix).
+[handling-verbs.test.ts](../../../packages/engine/test/handling-verbs.test.ts) pins the twelve
+glosses, each verb's present, simple past, resultative, future and negation, the Italian compound
+past with a feminine subject (verb.test.ts's table, kept here to spare the six P09 lanes a
+collision), the frames each verb was seeded for, and the commands.
