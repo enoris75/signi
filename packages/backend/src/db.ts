@@ -49,6 +49,11 @@ function initSchema(db: Database.Database): void {
       -- 'quality' (of high quality), 'measure' (at a high temperature). The engine maps it to the
       -- adposition; a noun that declares none is treated as 'extent'. NULL for non-dimension nouns.
       dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL),
+      -- 1 for a noun naming a point in time, an occasion (TIME), not a rate (SPEED). Under an
+      -- adjective a measure manner adverbial names a generic rate and goes bare ("at high speed"),
+      -- but an occasion keeps its article ("at the other time", A235); German says one with "zu" +
+      -- dative ("zu allen Zeiten", A60). Default 0. Ignored for non-nouns.
+      temporal     INTEGER NOT NULL DEFAULT 0 CHECK (temporal IN (0,1)),
       -- 1 for an adjective that ascribes a TRANSIENT state (tired, hungry, saved) rather than an
       -- inherent property (big, canine). Spanish/Portuguese predicate a transient adjective with
       -- estar, an inherent one with ser (A47); default 0 (inherent). Ignored for non-adjectives.
@@ -347,6 +352,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('dimension_relation')) {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL)");
+  }
+  if (!conceptCols.includes('temporal')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN temporal INTEGER NOT NULL DEFAULT 0 CHECK (temporal IN (0,1))');
   }
   if (!conceptCols.includes('transient')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN transient INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1))');

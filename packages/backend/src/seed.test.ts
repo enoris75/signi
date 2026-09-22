@@ -50,7 +50,8 @@ describe('seeding the corpus', () => {
     expect(row('CAT')).toMatchObject({ countable: 1, animate: 1, human: 0, synonym: null });
     expect(row('PERSON')).toMatchObject({ animate: 1, human: 1 });
     expect(row('AFRICA')).toMatchObject({ proper: 1 });
-    expect(row('SPEED')).toMatchObject({ manner_relation: 'measure', dimension_relation: null });
+    expect(row('SPEED')).toMatchObject({ manner_relation: 'measure', dimension_relation: null, temporal: 0 });
+    expect(row('TIME')).toMatchObject({ manner_relation: 'measure', temporal: 1 });
     expect(row('SIZE')).toMatchObject({ manner_relation: null, dimension_relation: 'extent' });
     expect(row('TIRED')).toMatchObject({ transient: 1 });
     expect(row('WOLF')).toMatchObject({ alarm: 1, alarm_cry: 0 });

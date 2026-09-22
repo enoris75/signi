@@ -29,6 +29,8 @@ export const CASA: Forms = { base: 'casa', plural: 'case', gender: 'fem' };
 /** Uncountable: no plural surface. */
 export const ACQUA: Forms = { base: 'acqua', gender: 'fem', uncountable: '1' };
 export const VELOCITA: Forms = { base: 'velocità', gender: 'fem', mannerRelation: 'measure' };
+/** A measure that names a point in time, an occasion, not a rate (A235). */
+export const TEMPO: Forms = { base: 'tempo', plural: 'tempi', gender: 'masc', mannerRelation: 'measure', temporal: '1' };
 export const MODO: Forms = { base: 'modo', plural: 'modi', gender: 'masc', mannerRelation: 'mode' };
 
 // ── Pronouns ────────────────────────────────────────────────────────────────
@@ -54,7 +56,7 @@ export const VOLERE: Forms = { base: 'volere', '3sg_present': 'vuole', nonfinite
 
 /** The entries above under the concept ids a plan names them by. */
 export const LOOKUP = lexicon({
-  CAT: GATTO, DOG: CANE, HOUSE: CASA, WATER: ACQUA, SPEED: VELOCITA, WAY: MODO,
+  CAT: GATTO, DOG: CANE, HOUSE: CASA, WATER: ACQUA, SPEED: VELOCITA, TIME: TEMPO, WAY: MODO,
   I: IO, YOU: TU, HE: LUI,
   BIG: GRANDE, RED: ROSSO, HAPPY: FELICE, ALWAYS: SEMPRE,
   EAT: MANGIARE, RUN: CORRERE, CHOOSE: SCEGLIERE, BE: ESSERE, WANT: VOLERE,
