@@ -185,6 +185,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'chorando', participle: 'chorado' },
     ja: { te: '泣いて', te_reading: 'ないて', nai: '泣かない', nai_reading: 'なかない' },
   },
+  SUFFER: {
+    en: { gerund: 'suffering', participle: 'suffered' },
+    it: { gerund: 'soffrendo', participle: 'sofferto' },
+    fr: { participle: 'souffert' }, de: { participle: 'gelitten' },
+    es: { gerund: 'sufriendo', participle: 'sufrido' },
+    pt: { gerund: 'sofrendo', participle: 'sofrido' },
+    ja: { te: '苦しんで', te_reading: 'くるしんで', nai: '苦しまない', nai_reading: 'くるしまない' },
+  },
   CRY_OUT: {
     en: { gerund: 'crying', participle: 'cried' },
     it: { gerund: 'gridando', participle: 'gridato' },

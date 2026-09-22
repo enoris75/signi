@@ -1895,6 +1895,19 @@ describe('B17 verb definitions (FEEL / SHED / PRODUCE genera)', () => {
     });
   });
 
+  // LOVE's counterpart under the same genus, with a sorrow for the affection (localization A31).
+  test('SUFFER feels sorrow', () => {
+    expect(definitionAll('SUFFER')).toEqual({
+      en: 'to feel sorrow.',
+      it: 'provare tristezza.',
+      fr: 'éprouver de la tristesse.',
+      de: 'Trauer fühlen.',
+      es: 'sentir tristeza.',
+      ja: '悲しみを感じる。',
+      pt: 'sentir tristeza.',
+    });
+  });
+
   test('CRY sheds tears', () => {
     expect(definitionAll('CRY')).toEqual({
       en: 'to shed tears.',

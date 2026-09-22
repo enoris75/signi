@@ -588,7 +588,9 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['SPECIFY', 'la gatta ha specificato.'],
     ['SPEAK', 'la gatta ha parlato.'],
     ['START', 'la gatta ha iniziato.'],
-    ['STRIKE', 'la gatta ha colpito.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['STRIKE', 'la gatta ha colpito.'],
+    // soffrire's participle is the strong sofferto, under avere.
+    ['SUFFER', 'la gatta ha sofferto.'], ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TRANSFORM', 'la gatta ha trasformato.'],
     // -durre keeps its Latin stem in the participle: tradotto, not *tradutto.
@@ -2197,6 +2199,59 @@ describe('B32 verbs: LIVE, TRADE and CONFINE', () => {
       fr: 'le chat a enfermé la personne.',
       de: 'der Kater hat die Person inhaftiert.', // -ieren takes no ge-
       es: 'el gato ha encerrado a la persona.',
+    });
+  });
+});
+
+// SUFFER, seeded so a denied cause can be said of it ("I suffer, not because of you" — see
+// complements/cause.test.ts). Its paradigm is pinned here: the persons, the Italian and French -ire
+// verbs that take no -isc-/-iss- infix, and German leiden's strong past (litt, gelitten).
+describe('SUFFER', () => {
+  const suffers = (subject: NounElement, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(subject, 'SUFFER', { verbPhrase }));
+
+  test('the present, in every person', () => {
+    expect(suffers(np('FIRST_PERSON'))).toEqual({
+      en: 'I suffer.', it: 'soffro.', fr: 'je souffre.', de: 'ich leide.',
+      es: 'sufro.', ja: '私は苦しみます。', pt: 'sofro.',
+    });
+    expect(suffers(np('SECOND_PERSON'))).toMatchObject({
+      it: 'soffri.', fr: 'tu souffres.', de: 'du leidest.', es: 'sufres.', pt: 'sofre.',
+    });
+    expect(suffers(np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'soffriamo.', fr: 'nous souffrons.', de: 'wir leiden.', es: 'sufrimos.', pt: 'sofremos.',
+    });
+    expect(suffers(np('SECOND_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'soffrite.', fr: 'vous souffrez.', de: 'ihr leidet.', es: 'sufrís.', pt: 'sofrem.',
+    });
+    expect(suffers(np('CAT', { number: 'plural' }))).toMatchObject({
+      en: 'the cats suffer.', it: 'i gatti soffrono.', fr: 'les chats souffrent.',
+      de: 'die Kater leiden.', es: 'los gatos sufren.', pt: 'os gatos sofrem.',
+    });
+  });
+
+  test('the past, the future and the aspects', () => {
+    expect(suffers(np('SECOND_PERSON'), { tense: 'past' })).toMatchObject({
+      en: 'you suffered.', it: 'soffristi.', fr: 'tu souffris.', de: 'du littest.',
+      es: 'sufriste.', ja: 'あなたは苦しみました。', pt: 'sofreu.',
+    });
+    expect(suffers(np('CAT', { number: 'plural' }), { tense: 'past' })).toMatchObject({
+      it: 'i gatti soffrirono.', fr: 'les chats souffrirent.', de: 'die Kater litten.',
+      es: 'los gatos sufrieron.', pt: 'os gatos sofreram.',
+    });
+    expect(suffers(np('FIRST_PERSON', { number: 'plural' }), { tense: 'future' })).toMatchObject({
+      it: 'soffriremo.', fr: 'nous souffrirons.', de: 'wir werden leiden.', es: 'sufriremos.', pt: 'sofreremos.',
+    });
+    expect(suffers(np('CAT'), { aspect: 'progressive' })).toMatchObject({
+      en: 'the cat is suffering.', it: 'il gatto sta soffrendo.', es: 'el gato está sufriendo.',
+      ja: '猫は苦しんでいます。', pt: 'o gato está sofrendo.',
+    });
+    expect(suffers(np('CAT', { gender: 'fem' }), { aspect: 'resultative' })).toMatchObject({
+      en: 'the cat has suffered.', fr: 'la chatte a souffert.', de: 'die Katze hat gelitten.',
+      es: 'la gata ha sufrido.',
+    });
+    expect(suffers(np('CAT'), { negative: true })).toMatchObject({
+      fr: 'le chat ne souffre pas.', de: 'der Kater leidet nicht.', ja: '猫は苦しみません。',
     });
   });
 });

@@ -292,6 +292,78 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Suffering as a state one is in, with no object: "I suffer, not because of you" — what it is
+  // suffered from is the cause complement, as CRY's is. The transitive "suffer a loss" is not seeded.
+  {
+    id: 'SUFFER',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to feel pain or distress',
+    // LOVE's counterpart under the same genus: "to feel affection", "to feel sorrow". PAIN, the
+    // physical half of the description, is not seeded (localization A31).
+    definition: infinitiveGloss('FEEL', 'SORROW'),
+    emoji: '😣',
+    isA: 'FEEL',
+    forms: {
+      en: {
+        base: 'suffer',
+        '1sg_present': 'suffer', '2sg_present': 'suffer', '3sg_present': 'suffers',
+        '1pl_present': 'suffer', '2pl_present': 'suffer', '3pl_present': 'suffer',
+        past: 'suffered',
+      },
+      it: {
+        base: 'soffrire',
+        '1sg_present': 'soffro', '2sg_present': 'soffri', '3sg_present': 'soffre',
+        '1pl_present': 'soffriamo', '2pl_present': 'soffrite', '3pl_present': 'soffrono',
+        '1sg_past': 'soffrii', '2sg_past': 'soffristi', '3sg_past': 'soffrì',
+        '1pl_past': 'soffrimmo', '2pl_past': 'soffriste', '3pl_past': 'soffrirono',
+        '1sg_future': 'soffrirò', '2sg_future': 'soffrirai', '3sg_future': 'soffrirà',
+        '1pl_future': 'soffriremo', '2pl_future': 'soffrirete', '3pl_future': 'soffriranno',
+      },
+      fr: {
+        base: 'souffrir',
+        '1sg_present': 'souffre', '2sg_present': 'souffres', '3sg_present': 'souffre',
+        '1pl_present': 'souffrons', '2pl_present': 'souffrez', '3pl_present': 'souffrent',
+        '1sg_past': 'souffris', '2sg_past': 'souffris', '3sg_past': 'souffrit',
+        '1pl_past': 'souffrîmes', '2pl_past': 'souffrîtes', '3pl_past': 'souffrirent',
+        '1sg_future': 'souffrirai', '2sg_future': 'souffriras', '3sg_future': 'souffrira',
+        '1pl_future': 'souffrirons', '2pl_future': 'souffrirez', '3pl_future': 'souffriront',
+      },
+      de: {
+        base: 'leiden',
+        '1sg_present': 'leide', '2sg_present': 'leidest', '3sg_present': 'leidet',
+        '1pl_present': 'leiden', '2pl_present': 'leidet', '3pl_present': 'leiden',
+        '1sg_past': 'litt', '2sg_past': 'littest', '3sg_past': 'litt',
+        '1pl_past': 'litten', '2pl_past': 'littet', '3pl_past': 'litten',
+      },
+      es: {
+        base: 'sufrir',
+        '1sg_present': 'sufro', '2sg_present': 'sufres', '3sg_present': 'sufre',
+        '1pl_present': 'sufrimos', '2pl_present': 'sufrís', '3pl_present': 'sufren',
+        '1sg_past': 'sufrí', '2sg_past': 'sufriste', '3sg_past': 'sufrió',
+        '1pl_past': 'sufrimos', '2pl_past': 'sufristeis', '3pl_past': 'sufrieron',
+        '1sg_future': 'sufriré', '2sg_future': 'sufrirás', '3sg_future': 'sufrirá',
+        '1pl_future': 'sufriremos', '2pl_future': 'sufriréis', '3pl_future': 'sufrirán',
+      },
+      ja: {
+        base: '苦しむ',
+        reading: 'くるしむ',
+        masu_present: '苦しみます',
+        masu_present_reading: 'くるしみます',
+      },
+      pt: {
+        base: 'sofrer',
+        '1sg_present': 'sofro', '2sg_present': 'sofre', '3sg_present': 'sofre',
+        '1pl_present': 'sofremos', '2pl_present': 'sofrem', '3pl_present': 'sofrem',
+        '1sg_past': 'sofri', '2sg_past': 'sofreu', '3sg_past': 'sofreu',
+        '1pl_past': 'sofremos', '2pl_past': 'sofreram', '3pl_past': 'sofreram',
+        '1sg_future': 'sofrerei', '2sg_future': 'sofrerá', '3sg_future': 'sofrerá',
+        '1pl_future': 'sofreremos', '2pl_future': 'sofrerão', '3pl_future': 'sofrerão',
+      },
+    },
+  },
+
   {
     id: 'BURN',
     role: 'verb',
