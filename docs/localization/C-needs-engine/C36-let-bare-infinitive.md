@@ -14,7 +14,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-plann
 | concept | role | why it waits |
 |---|---|---|
 | LET | verb | cannot be seeded until it renders in en, de and ja (below). Proposed: let, lasciare, laisser, lassen, dejar, 〜させる (a suffix), deixar |
-| ALLOWED | adjective ([B63](../B-needs-seed/B63-modal-verbs-may-should-might.md)) | seeded for MAY's gloss; its own gloss is the state LET leaves, as SAVED is SAVE's: "that one has let" (`stateGloss`) |
+| ALLOWED | adjective ([B63](../done/B63-modal-verbs-may-should-might.md)) | **seeded 2026-09-22** for MAY's gloss; its own gloss is the state LET leaves, as SAVED is SAVE's: "that one has let" (`stateGloss`), so it waits here |
 
 ## Blocked on
 

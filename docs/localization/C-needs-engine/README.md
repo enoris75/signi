@@ -1,7 +1,11 @@
 # C-needs-engine — tasks blocked on a construct, or deferred
 
 **Twelve open: C29–C40**, filed with the P09 batch on 2026-09-22, one per construct — the core
-words the engine must learn before they can be seeded, and the B59–B67 glosses that wait on it:
+words the engine must learn before they can be seeded, and the B59–B67 glosses that wait on it.
+**B59–B67 were authored on 2026-09-22**, so the second half of each line below is seeded now: those
+concepts are in the corpus and composable, and show the English literal in the picker until their
+construct lands. The first half — ONE, TWO, THREE, SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET,
+OWN_ADJECTIVE, MR, EVEN — still cannot be seeded at all:
 
 - [C29](C29-temporal-complement.md) a temporal complement — TODAY, JUST, STILL
 - [C30](C30-content-clause-with-expletive-subject.md) a content clause as subject — SHOULD, MIGHT
@@ -16,7 +20,9 @@ words the engine must learn before they can be seeded, and the B59–B67 glosses
 - [C39](C39-focus-particle-on-a-noun-phrase.md) a focus particle on a noun phrase — EVEN
 - [C40](C40-french-distal-demonstrative.md) French *ce …-là* — THERE
 
-Most of their concepts do not exist yet.
+Twelve of their concepts do not exist yet; the eleven that wait only for a gloss (DAY, WEEK, YEAR,
+TODAY, JUST, STILL, SHOULD, MIGHT, ONLY, THERE, and the differentia ALLOWED) were seeded by
+B59–B67.
 
 C23–C28, the six the [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22)
 filed, were driven to a verdict the same day and are all in [`done/`](../done/): **123 concepts

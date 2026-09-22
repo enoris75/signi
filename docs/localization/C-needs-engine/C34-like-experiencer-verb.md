@@ -36,11 +36,11 @@ English, French and German are right. The others want:
 An **experiencer verb** frame: a lexeme flag saying the plan's subject is rendered as the dative
 experiencer and the plan's object as the grammatical subject, with agreement following the latter.
 Italian and Spanish need it; the plan stays "cat likes dog" so the builder does not change.
-Portuguese needs no construct: it reads `object_prep` already ([B60](../B-needs-seed/B60-saying-and-thinking-verbs.md)'s
+Portuguese needs no construct: it reads `object_prep` already ([B60](../done/B60-saying-and-thinking-verbs.md)'s
 BELIEVE renders *acredita na história* on `object_prep: 'em'`), so *gostar de* is a lexeme key.
 Japanese needs a verb concept rendered as a な-adjective predicate (犬が好きです), which the copular
 predicates already produce for adjectives.
 
 The frame would serve *piacere / gustar*'s siblings as they are seeded (*mancare / faltar*, "to
 miss"). LIKE's own gloss should be probed once it renders: "to find pleasant" needs a word the
-corpus lacks, and FEEL + JOY is PLAY_GAME's differentia in [B62](../B-needs-seed/B62-doing-working-playing.md).
+corpus lacks, and FEEL + JOY is PLAY_GAME's differentia in [B62](../done/B62-doing-working-playing.md).

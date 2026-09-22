@@ -3,7 +3,7 @@
 **Kind:** blocked on a construct. *Only*, *even* and *also* mostly focus a noun ("only the cat",
 "even the cat", "the cat too"), and Japanese says all three as particles on it (猫**だけ**,
 猫**さえ**, 猫**も**). The engine attaches them to the verb. For ONLY and ALSO a verb adverb exists
-in every language and [B67](../B-needs-seed/B67-place-and-focus-adverbs.md) seeds them that way; for
+in every language and [B67](../done/B67-place-and-focus-adverbs.md) seeds them that way; for
 EVEN, Japanese has none, so EVEN cannot be seeded at all.
 
 _(from the P09 core-vocabulary sweep of 2026-09-22. [P09](../../features/P-planning/P09-core-vocabulary/README.md)
@@ -15,7 +15,7 @@ that row.)_
 | concept | role | why it waits |
 |---|---|---|
 | EVEN | adverb / particle | cannot be seeded: Japanese さえ / すら / でも are particles on the noun, and the verb form is 走り**さえ**する. Proposed for the other six: even, perfino, même, sogar, incluso, até (all `frequency`, before the verb in English) |
-| ONLY, ALSO (noun scope) | — | their verb-adverb concepts ship in B67 (ONLY's gloss is [C32](C32-indefinite-pronouns.md)'s); the noun-scope use is not a concept of its own, but it is what this construct adds to them |
+| ONLY, ALSO (noun scope) | — | their verb-adverb concepts **were seeded on 2026-09-22** by B67, and ALSO is glossed there ("in the same way"); ONLY's gloss is [C32](C32-indefinite-pronouns.md)'s. The noun-scope use is not a concept of its own, but it is what this construct adds to them |
 
 ## Blocked on
 

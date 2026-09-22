@@ -377,3 +377,15 @@ Nothing, and that is the finding. The two verbs this file ended on were seeded a
 shipped. The rest are primitives, genera their children stand on, the geography that only a compass
 relation would place, and words whose only differentia is a neighbour's gloss. A language describes
 itself with something.
+
+## Three more roots, 2026-09-22
+
+The P09 batch ([B59–B67](../localization-tasks.md#part-b--needs-seeding-b-needs-seed)) seeded three
+nouns as differentia and left each on the literal, for the reasons this file gives its own roots:
+**MIND** ([B60](B60-saying-and-thinking-verbs.md)) — "a part with which one thinks" renders, and
+would define THINK, which is glossed "to use the mind", back in a two-word circle; "a part of a
+person" is also a hand. **ERROR** ([B66](B66-core-adjectives.md)) — "a failed action" means a
+failure, not a mistake, and "a part that is not right" would close a pair with RIGHT_CORRECT, which
+is glossed "that does not have errors". **REALITY** ([B67](B67-place-and-focus-adverbs.md)) — the
+head noun of REALLY's "in reality", as STRENGTH is STRONG's; it is a primitive of the same kind as
+TIME and PLACE above.

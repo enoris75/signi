@@ -5,8 +5,10 @@ an adjective in any of the seven languages, and the dictionary glosses of DAY, W
 counts.
 
 _(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
-§3, **E7**. DAY, WEEK and YEAR are seeded by [B59](../B-needs-seed/B59-time-words.md), which probes
-every number-free lead; this ticket owns their glosses once B59 is authored.)_
+§3, **E7**. DAY, WEEK and YEAR are seeded by [B59](../done/B59-time-words.md), which probes
+every number-free lead; this ticket owns their glosses. **All three were seeded on 2026-09-22** (DAY
+and WEEK ahead of B59, as words two tickets shared), and each shows the English literal in its
+tooltip until the numerals land.)_
 
 ## The concepts
 

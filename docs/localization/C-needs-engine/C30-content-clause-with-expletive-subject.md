@@ -6,8 +6,10 @@ desire to act", where the adjective is said of the actor; *right* and *possible*
 action, and no plan can make an action a subject.
 
 _(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
-§3, **E4** (content clauses). Both words are seeded by [B63](../B-needs-seed/B63-modal-verbs-may-should-might.md),
-which probes every lead; this ticket owns their glosses once B63 is authored.)_
+§3, **E4** (content clauses). Both words are seeded by [B63](../done/B63-modal-verbs-may-should-might.md),
+which probes every lead; this ticket owns their glosses. **Both were seeded on 2026-09-22**, when
+B63 was authored — with the English, German and Japanese modal work their paradigms needed — and
+each shows the English literal in its tooltip until this construct lands.)_
 
 ## The concepts
 

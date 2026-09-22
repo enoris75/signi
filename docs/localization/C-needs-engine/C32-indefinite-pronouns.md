@@ -4,8 +4,9 @@
 into *nothing* or *anything* under negation. ONLY's gloss needs the negative one.
 
 _(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
-§3, **E7**. ONLY is seeded by [B67](../B-needs-seed/B67-place-and-focus-adverbs.md), which probes
-every lead; this ticket owns its gloss once B67 is authored.)_
+§3, **E7**. ONLY is seeded by [B67](../done/B67-place-and-focus-adverbs.md), which probes
+every lead; this ticket owns its gloss. **ONLY was seeded on 2026-09-22**, when B67 was authored,
+and shows the English literal in its tooltip until the indefinite pronoun lands.)_
 
 ## The concepts
 

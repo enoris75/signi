@@ -4,8 +4,9 @@
 collides with HERE's "in this place" in French, where both are *dans ce lieu*.
 
 _(from the P09 core-vocabulary sweep of 2026-09-22. Not a P09 §3 row: THERE is seeded by
-[B67](../B-needs-seed/B67-place-and-focus-adverbs.md), which probes every lead, and this ticket owns
-its gloss once B67 is authored.)_
+[B67](../done/B67-place-and-focus-adverbs.md), which probes every lead, and this ticket owns
+its gloss. **THERE was seeded on 2026-09-22**, when B67 was authored, and shows the English literal
+in its tooltip until French can say *ce …-là*.)_
 
 ## The concept
 

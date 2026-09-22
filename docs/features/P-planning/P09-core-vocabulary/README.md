@@ -38,8 +38,29 @@ against the words the English engine writes itself
 | a seeded concept | 43 | be, have, go, can, could (past of CAN), make, know, up, time, see, come, want (WILL), other, way, first, new, use, man, give, well, people (plural of PERSON), good, woman, life, child, down, feel, never, become, high, old, great, big, seem, start, show, place, run, small, number, always, move, hold |
 | a form of the seeded I / you / he | 18 | I, me, we, us, my, our, you, your, he, him, his, she, her, it, its, they, them, their |
 | written by the engine | 33 | the, a (identifiability); this, that, these, those (deixis); some, all, no, many, few (quantity); more, most (degree); and, or, but, so, then (coordination); not (negation); if, would (hypothetical); will (future); who, which (relative clauses); of, in, to, with, at, from, by, through, over (complements) |
-| **left to seed** | **70** | §2 |
+| **left to seed** | ~~**70**~~ → **1** | §2 — **seeded on 2026-09-22**, see below |
 | **needs the engine first** | **36** | §3 |
+
+**§2 is done.** Twelve of its words had been seeded in passing by the localization sweeps (LIVE,
+LIVE_ALIVE, FIND, HEAR, HAPPEN, WORK, COUNTRY, PART, NEXT, NOW, AGAIN, GROUP), three needed no
+concept because a seeded one covers them (TALK → SPEAK, COME_BACK → RETURN, STATE_CONDITION →
+STATE), and the remaining **60 were seeded on 2026-09-22** by the localization tickets
+[B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), which
+this plan's *Follow-ups* had asked for. They seeded **73 words** in all — the 60, twelve differentia
+their tooltips needed (DARK, TELEPHONE, MIND, STAY, OUTSIDE, DIRECT_VERB, ALLOWED, LEARN, SELL,
+BROADCAST, ERROR, REALITY) and NEXT_COMING — and glossed 56 of them, so the words arrived with
+localized tooltips rather than an English literal. **EVEN is the one §2 word still unseeded**:
+Japanese has no verb adverb for it (さえ is a particle on the noun), so D4's "seed them as verb
+adverbs now" does not hold for it, and it waits on a focus particle
+([C39](../../../localization/C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)).
+
+The seeding also answered this plan's open questions: **NEED is one lexical concept**, not a modal
+(a modal NEED_TO's only gloss would be MUST's, character for character); **TRY is lexical too**, not
+`modal: true`, which costs French its *de* and stacks a bare German infinitive; **MAY is permission
+only**, its possibility sense merging with MIGHT; and the labour verb is WORK_LABOUR, since the
+seeded WORK is the machine sense. Eleven seeded words show the English literal in their tooltip
+until §3 lands: DAY, WEEK, YEAR (numerals), TODAY, JUST, STILL (a temporal complement), SHOULD,
+MIGHT (a content clause), ONLY (an indefinite pronoun), THERE (French *ce …-là*) and ALLOWED (LET).
 
 A few covered words are still listed below, because their most common use is missing:
 
@@ -207,12 +228,24 @@ backend runs the builds, not `src`.
 
 ## Follow-ups
 
+- **§2 is seeded, 2026-09-22.** B59–B67 were authored the same day they were filed: **73 words
+  seeded and 56 glossed**, taking the corpus from 538 concepts to 611 and from 374 composed
+  definitions to 430. Each ticket's `## Done` section carries its fresh seven-language render table
+  and what landed differently from its plan. The seeding needed engine work in five places, all of
+  it done there: German adjectives in *-el* (*dunkle*), `should` in English `MODAL_AUX` and a
+  conditional modal's perfect past (*should have run*, *hätte laufen sollen*), Japanese べき as a
+  copula-kind modal and かもしれない as a suffix that leaves polarity and tense on its verb, the French
+  negation of a multiword finite (*n'a pas besoin*), and the Romance position of SAME and LAST_FINAL
+  with the article a predicate SAME keeps.
+- **A builder control this seeding wants, and no C ticket owns**: the frontend never builds an
+  `infinitiveComplement`, so "needs to run" and "tries to run" render from a plan but cannot be
+  built. One control would serve DESIRE, NEED and TRY alike.
 - **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
   are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose
   **Seed first** tables are this plan's seeding with the forms checked, and §3's content words are
   [C29–C40](../../../localization/C-needs-engine/README.md), one per construct. 47 of the 61
-  ship a gloss. [The P09 sweep](../../../localization/localization-tasks.md#the-p09-sweep-of-2026-09-22)
+  shipped a gloss, as forecast, and nine more concepts did besides. [The P09 sweep](../../../localization/localization-tasks.md#the-p09-sweep-of-2026-09-22)
   lists what they change here: TALK, COME_BACK and STATE_CONDITION are already concepts (SPEAK,
   RETURN, STATE); the labour verb is WORK_LABOUR, since the seeded WORK is the machine sense; the help
   verb is HELP_VERB; TRY is a lexical verb, not `modal: true`; EVEN cannot be seeded as a verb adverb

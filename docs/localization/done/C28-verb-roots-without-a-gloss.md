@@ -44,8 +44,19 @@ container"), which LIQUID's does ("substance that one pours"). See
 | literal by design — the subject is the differentia | EAT_ANIMAL, WORK, ACT, BECOME, CHANGE_ONESELF, MOVE_ONESELF | 6 |
 | literal by design — the genus word proposed does not hold | DESIRE, KNOW_ACQUAINTED, PERCEIVE | 3 |
 | literal by design — its gloss is another concept's | SHRINK (COMPACT's) | 1 |
-| literal by design — a primitive, every shape probed | CREATE, CHANGE, PRODUCE, HAVE, INDICATE, DESTROY, DIVIDE, STRIKE, PRESS, SHED, WRITE, FILTER, LINK, CONNECT, CANCEL, LEAVE, PIN, APPLY, GOVERN, ACCEPT, BEGIN, TRANSFER, CONFINE, BREATHE, ENCLOSE, GOVERN_STATE, SPEAK, ANSWER, SEARCH, ARRANGE | 30 |
+| literal by design — a primitive, every shape probed | CREATE, CHANGE, PRODUCE, HAVE, INDICATE, DESTROY, DIVIDE, STRIKE, PRESS, SHED, WRITE, FILTER, LINK, CONNECT, CANCEL, LEAVE, PIN, APPLY, GOVERN, ACCEPT, BEGIN, TRANSFER, CONFINE, BREATHE, ENCLOSE, GOVERN_STATE, SPEAK, ~~ANSWER~~, SEARCH, ARRANGE | 29 |
 | literal by design — a root a noun's gloss stands on | LIVE_ALIVE (LIFE's), POUR (LIQUID's) | 2 |
+
+**Three verbs joined this file's classes on 2026-09-22**, when the P09 batch seeded them, and each
+is named here so that no unglossed verb is outside a ticket. **DIRECT_VERB**
+([B61](B61-handling-and-leaving-verbs.md)) is a root a verb's gloss stands on — LOOK_AT's, "to direct
+the eyes to an object" — and its own leads fail: "to change an object's direction" is the unseeded
+transitive TURN's reserved gloss and says turning, not aiming; "to cause an object to indicate a
+place" reads *bezeichnen*, designate. **TRY** ([B62](B62-doing-working-playing.md)) is the
+"genus word proposed does not hold" class beside DESIRE: its nearest lead, "to desire to act", is
+WILL's shipped gloss word for word, and *cercare di* / *chercher à* read "look for acting" in
+Japanese. **STAY** was seeded as a differentia and did **not** join them: B61 glossed it "still to be
+in a place". ANSWER, above, left the file the same day.
 
 Nothing is left blocked on a construct. Every table below is engine output, 2026-09-22, engine source
 and seed at HEAD, rendered in memory; a word marked *(not seeded)* was rendered through a lookup

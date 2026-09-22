@@ -117,23 +117,35 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**Nine open: B59–B67, the P09 core vocabulary**, filed on 2026-09-22 (see
-[the P09 sweep](#the-p09-sweep-of-2026-09-22)). They differ from every B before them in one way:
-the concepts they gloss **do not exist yet**. The first rows of each **Seed first** table are the
-[P09](../features/P-planning/P09-core-vocabulary/README.md) words themselves, then the differentia
-their glosses need, so authoring a ticket is P09's seeding and the tooltips in one pass.
+**None open.** B59–B67, the P09 core vocabulary, were filed on 2026-09-22 (see
+[the P09 sweep](#the-p09-sweep-of-2026-09-22)) and authored the same day; all nine are in
+[`done/`](done/). They differed from every B before them in one way: the concepts they gloss **did
+not exist**, so the first rows of each **Seed first** table were the
+[P09](../features/P-planning/P09-core-vocabulary/README.md) words themselves, and authoring a ticket
+was P09's seeding and the tooltips in one pass.
 
-| # | File | P09 words | Ship a gloss | Words to seed | Not solved |
-|---|---|---|---|---|---|
-| B59 | [B-needs-seed/B59-time-words.md](B-needs-seed/B59-time-words.md) | DAY, NIGHT, WEEK, YEAR, TODAY | NIGHT → the dark part of a day | 5 + DARK | DAY, WEEK, YEAR → C31 (numerals); TODAY → C29 (a temporal complement) |
-| B60 | [B-needs-seed/B60-saying-and-thinking-verbs.md](B-needs-seed/B60-saying-and-thinking-verbs.md) | SAY, TELL, ASK, QUESTION, CALL, CALL_PHONE, MEAN, THINK, BELIEVE | **all nine** — SAY → to express concepts with words, QUESTION → a phrase with which one asks | 9 + TELEPHONE, MIND | none; TALK is SPEAK. Also re-opens C28's ANSWER |
-| B61 | [B-needs-seed/B61-handling-and-leaving-verbs.md](B-needs-seed/B61-handling-and-leaving-verbs.md) | GET, TAKE, PUT, KEEP, BRING, LEAVE_BEHIND, TURN, LOOK_AT, LEAVE_DEPART, GO_OUT | **all ten** — PUT → to cause an object to be in a place, LEAVE_DEPART → to begin to go | 10 + STAY, OUTSIDE, DIRECT_VERB | none; COME_BACK is RETURN |
-| B62 | [B-needs-seed/B62-doing-working-playing.md](B-needs-seed/B62-doing-working-playing.md) | DO, WORK_LABOUR, WORK_NOUN, PLAY_GAME, PLAY_INSTRUMENT, TRY, NEED | six — DO → to cause an action to happen, PLAY_GAME → to act to feel joy | 7, no differentia | TRY, literal by design |
-| B63 | [B-needs-seed/B63-modal-verbs-may-should-might.md](B-needs-seed/B63-modal-verbs-may-should-might.md) | MAY, SHOULD, MIGHT | MAY → to be allowed to act | 3 + ALLOWED | SHOULD, MIGHT → C30 (a content clause) |
-| B64 | [B-needs-seed/B64-institutions-and-people.md](B-needs-seed/B64-institutions-and-people.md) | SCHOOL, STUDENT, COMPANY_BUSINESS, STATE_NATION, WORLD | **all five** — SCHOOL → a building where one learns | 5 + LEARN, SELL | none |
-| B65 | [B-needs-seed/B65-everyday-nouns.md](B-needs-seed/B65-everyday-nouns.md) | THING, PROBLEM, CASE_INSTANCE, POINT_NOUN, HAND, SYSTEM, PROGRAM_SOFTWARE, PROGRAM_SHOW | **all eight** — THING → an object or a concept, HAND → an organ with which one takes an object | 8 + BROADCAST | none; STATE_CONDITION is STATE |
-| B66 | [B-needs-seed/B66-core-adjectives.md](B-needs-seed/B66-core-adjectives.md) | LAST_FINAL, LAST_PREVIOUS, SAME, AMERICAN, RIGHT_CORRECT, RIGHT_SIDE | four — SAME → that is not another object, RIGHT_CORRECT → that does not have errors | 6 + ERROR (+ NEXT_COMING, optional) | AMERICAN, RIGHT_SIDE, literal by design |
-| B67 | [B-needs-seed/B67-place-and-focus-adverbs.md](B-needs-seed/B67-place-and-focus-adverbs.md) | HERE, THERE, JUST, ALSO, ONLY, EVEN, STILL, REALLY | three — HERE → in this place, ALSO → in the same way, REALLY → in reality | 7 (not EVEN) + REALITY | JUST, STILL → C29; ONLY → C32; THERE → C40; EVEN cannot be seeded yet → C39 |
+Between them they **seeded 73 words and authored 56 glosses**, taking the corpus from 538 concepts
+to 611 and from 374 composed definitions to 430. Six of the words — TAKE, HAND, POINT_NOUN, STILL,
+DAY and WEEK — were seeded first, on their own, because one ticket's gloss stood on another's word
+(HAND on TAKE, TAKE on HAND, TURN on POINT_NOUN, KEEP on STILL); they are pinned in
+[core-vocabulary-shared.test.ts](../../packages/engine/test/core-vocabulary-shared.test.ts).
+
+| # | File | Words seeded | Glosses | Not glossed |
+|---|---|---|---|---|
+| B59 | [done/B59-time-words.md](done/B59-time-words.md) | 4 (+ DAY, WEEK shared) | 2 — NIGHT → the dark part of a day; DARK → that does not have light | DAY, WEEK, YEAR → C31; TODAY → C29 |
+| B60 | [done/B60-saying-and-thinking-verbs.md](done/B60-saying-and-thinking-verbs.md) | 11 | **12** — all nine P09 rows, TELEPHONE's own, and **ANSWER's**, which re-opened a C28 verdict | MIND, literal by design |
+| B61 | [done/B61-handling-and-leaving-verbs.md](done/B61-handling-and-leaving-verbs.md) | 12 (+ TAKE shared) | **13** — all ten P09 rows, and STAY and OUTSIDE, which the ticket had left to the author | DIRECT_VERB, literal by design |
+| B62 | [done/B62-doing-working-playing.md](done/B62-doing-working-playing.md) | 7 | 6 — DO → to cause an action to happen; NEED → to be obliged to have objects | TRY, literal by design |
+| B63 | [done/B63-modal-verbs-may-should-might.md](done/B63-modal-verbs-may-should-might.md) | 4 | 1 — MAY → to be allowed to act | SHOULD, MIGHT → C30; ALLOWED → C36 |
+| B64 | [done/B64-institutions-and-people.md](done/B64-institutions-and-people.md) | 7 | 7 — all five P09 rows, and LEARN's and SELL's own | none |
+| B65 | [done/B65-everyday-nouns.md](done/B65-everyday-nouns.md) | 7 (+ HAND, POINT_NOUN shared) | 9 — all eight P09 rows, and BROADCAST's own | none |
+| B66 | [done/B66-core-adjectives.md](done/B66-core-adjectives.md) | 8 | 5 — four P09 rows, and **NEXT_COMING**, the optional pair the ticket proposed | AMERICAN, RIGHT_SIDE, literal by design; ERROR a root |
+| B67 | [done/B67-place-and-focus-adverbs.md](done/B67-place-and-focus-adverbs.md) | 7 (+ STILL shared) | 3 — HERE → in this place; ALSO → in the same way; REALLY → in reality | JUST, STILL → C29; ONLY → C32; THERE → C40; REALITY a root |
+
+**Two tickets shipped more than they promised.** B61 glossed STAY and OUTSIDE rather than filing them
+as roots — OUTSIDE on C25's complement gloss, and the first one with a relative clause inside it —
+and B60 glossed ANSWER, which [C28](done/C28-verb-roots-without-a-gloss.md) had ruled literal by
+design for want of a question noun; a relative on the recipient says it without one.
 
 B52–B58 were authored on 2026-09-22 and all seven are in [`done/`](done/): six the
 same day, and [B54](done/B54-sensation-and-quality-adjectives.md) a few hours later, when
@@ -191,10 +203,12 @@ the catalogue.
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
 **Twelve open: C29–C40**, filed with the P09 batch on 2026-09-22, one per construct. Each names the
-P09 words it blocks: some cannot be seeded at all until it lands, and the others are seeded by a B
-ticket whose gloss waits here.
+P09 words it blocks: some cannot be seeded at all until it lands, and the others **are seeded now**
+— B59–B67 landed them on 2026-09-22 — and only their gloss waits here. So the last column has
+changed in kind: those words are in the corpus, pickable and composable, showing the English literal
+in their tooltip until the construct arrives.
 
-| # | File | Blocked on | Cannot be seeded yet | Gloss waits (seeded by) |
+| # | File | Blocked on | Cannot be seeded yet | Gloss waits (seeded 2026-09-22 by) |
 |---|---|---|---|---|
 | C29 | [C-needs-engine/C29-temporal-complement.md](C-needs-engine/C29-temporal-complement.md) | a temporal complement (P09 E3) | — | TODAY (B59), JUST, STILL (B67) |
 | C30 | [C-needs-engine/C30-content-clause-with-expletive-subject.md](C-needs-engine/C30-content-clause-with-expletive-subject.md) | a content clause as subject, "it is right that…" (E4) | — | SHOULD, MIGHT (B63) |
@@ -384,6 +398,23 @@ DIRECT_VERB, ALLOWED, LEARN, SELL, BROADCAST, ERROR, REALITY; EVEN waits) and sh
 glosses plus 5 differentia glosses** (DARK, TELEPHONE, LEARN, SELL, BROADCAST). B60 also offers a
 gloss for C28's ANSWER.
 
+**And authored the same day**, by six lanes on one shared pre-seed. The forecast held to the word:
+all 60 P09 words were seeded and all 47 forecast glosses shipped. What it did not forecast is the
+overshoot — **73 words and 56 glosses**, taking the corpus from 538 concepts to 611 and from 374
+composed definitions to 430:
+
+| | forecast | shipped | the difference |
+|---|---|---|---|
+| words seeded | 60 P09 + 12 differentia | **73** | NEXT_COMING, which B66 proposed as optional: the seeded NEXT is the sequence sense, so without it no Romance language can say "next week" |
+| glosses | 47 P09 + 5 differentia + ANSWER | **56** | STAY and OUTSIDE, which B61 had left to the author and which both pass the C05 test; NEXT_COMING's own; and ANSWER's, which the forecast counted as an offer |
+| blocked on a construct | 11 | **11** | unchanged: DAY, WEEK, YEAR (C31), TODAY, JUST, STILL (C29), SHOULD, MIGHT (C30), ONLY (C32), THERE (C40), EVEN (C39, and still unseeded) |
+| literal by design | 3 | **3** | TRY, AMERICAN, RIGHT_SIDE, each with its leads probed against the final seed |
+
+The words that stayed unglossed and are not P09 rows are the differentia the batch bought: MIND,
+ERROR and REALITY are root nouns of [C26](done/C26-root-nouns-on-the-literal.md)'s kind, DIRECT_VERB
+a verb root of [C28](done/C28-verb-roots-without-a-gloss.md)'s, and ALLOWED the state LET leaves,
+which [C36](C-needs-engine/C36-let-bare-infinitive.md) records beside LET.
+
 **How it was run.** The concepts being glossed are not in the corpus, so each ticket seeded its
 words **in memory only** — the proposed forms pushed into the concept list before the harness's
 in-memory seed — and rendered its plans through the engine source at HEAD. Every render was checked
@@ -416,29 +447,51 @@ B60. Three seeds need an engine edit in the same change: SAME and LAST_FINAL in 
 of it/fr/es/pt (B66), German adjectives in *-el* (*dunkle*, not *dunkele*, B59), and `should` in
 English `MODAL_AUX` (B63).
 
-**Decisions left for authoring**, each argued in its ticket:
+**The decisions the tickets left for authoring, and how each was ruled** on 2026-09-22:
 
-- **TAKE ↔ HAND** ([B61](B-needs-seed/B61-handling-and-leaving-verbs.md),
-  [B65](B-needs-seed/B65-everyday-nouns.md)) define each other — the verb-and-instrument kind the
-  corpus accepted in BITE ↔ TOOTH and CUT ↔ BLADE. If refused, HAND moves to GRASP.
-- **CALL and BRING** ([B60](B-needs-seed/B60-saying-and-thinking-verbs.md), B61) are the one
-  causative of COME with a person and an object as causee. Author them together.
-- **THING or OBJECT_THING** (B65): once THING is OBJECT_THING's genus, only one of the two can be
-  glossed without the pair defining each other; B65 glosses THING. OBJECT_THING's `synonym: 'thing'`
-  has to change either way.
-- **ANSWER** (B60) re-opens a C28 literal-by-design verdict with "to say words to a person who asks".
-- **KEEP** (B61) is the weakest gloss, "still to have objects"; if refused, it stays on the literal, and B61 records why.
+- **TAKE ↔ HAND** ([B61](done/B61-handling-and-leaving-verbs.md),
+  [B65](done/B65-everyday-nouns.md)) — **accepted.** They define each other, the
+  verb-and-its-instrument kind the corpus already accepted in BITE ↔ TOOTH and CUT ↔ BLADE, so GRASP
+  was not seeded.
+- **CALL and BRING** ([B60](done/B60-saying-and-thinking-verbs.md), B61) — **both ship.** They are
+  one causative of COME told apart by the causee, a person against an object, and they were authored
+  together.
+- **THING or OBJECT_THING** (B65) — **THING is glossed**, "an object or a concept"; OBJECT_THING
+  hangs under it and keeps the literal, and its synonym is now *item*, since "object (thing)" beside
+  "thing" would have collided in the picker.
+- **ANSWER** (B60) — **ships**, "to say words to a person who asks", which reverses a
+  [C28](done/C28-verb-roots-without-a-gloss.md) literal-by-design verdict: a relative on the
+  recipient says *what was asked* without the question noun C28 said it needed.
+- **KEEP** (B61) — **ships**, "still to have objects", on B67's STILL.
+- **TRY** (B62) — **lexical, not `modal: true`**, as P09's follow-up asked, and literal by design:
+  its nearest lead, "to desire to act", is WILL's shipped gloss word for word.
+- **NEED** (B62) — **one concept**, answering P09's open question: a modal NEED_TO's only gloss
+  would be MUST's, character for character, and in Japanese the modal *is* MUST's suffix.
+- **NEXT_COMING** (B66) — **seeded**, though it is no P09 row, and glossed.
+- **STAY and OUTSIDE** (B61) — **glossed**, not filed as roots.
 
-**Engine defects the probes met, none filed.** Latent until their word is seeded: German *-el*
-adjectives (B59); French *n'a besoin pas de* for a negated NEED (B62); `should` missing from English
-`MODAL_AUX`, and Japanese かもしれない conjugated as かもしれます (B63); SAME as a predicate losing
-its article, "the cat is same" (B66); ASK with a person as recipient, en "asks the name **to** the
-man" and de *fragt dem Mann* (B60). Live at HEAD, but in no shipped gloss: a place adverb takes ja
-で where the locative takes に, and es/pt *ser* (*el gato es en todas partes*), both visible with
-EVERYWHERE (B67); the French verbless manner gloss drops *de* before a bare plural (*comme autres
-objets*, B67); a Japanese headless relative on a positive の-adjective drops its copula (固体の, B66).
-Already filed and met again: A218 (PUT,
-HERE), A219 (REALLY), A228 (GET).
+**The engine defects the probes had met, and what became of them.** Five were fixed by the lane that
+met them, because the word could not be seeded honestly without the fix: German *-el* adjectives
+(*dunkle*, not *dunkele*, B59); `should` missing from English `MODAL_AUX`, and Japanese
+かもしれない conjugated as かもしれます, whose negation read as the positive (B63); French
+*n'a besoin pas de* for a negated NEED (B62); SAME as a predicate losing its article, "the cat is
+same" (B66). Two that were live at HEAD and in no gloss were fixed as well, since seeding HERE made
+them everyday: a place adverb took ja で where the locative takes に, and es/pt *ser* (*el gato es
+aquí*) — both had been visible on EVERYWHERE since it was seeded (B67). Two more the lanes met and
+fixed on the way: the French modal chain negated a compound finite as *n'aurait dû pas courir*
+(B63), and the Romance imperfect subjunctive of a conditional modal was garbage (*devriait*, B63).
+
+Still live and now filed as bugs: ASK with a person as recipient, en "asks the name **to** the man"
+(B60 — the German half is C35's lexical case, already recorded there); the Italian *dire* and *fare*
+imperfect subjunctives and the Romance dative clitic of a prepositional object (B60, B62); the
+Spanish *tú* command of *poner* and *salir* under a new concept (B61); an Italian frequency adverb
+after a multiword finite (B62); STILL and ALSO scoping under a negation rather than over it (B67);
+AMERICAN as a Japanese predicate, 猫はアメリカです (B66). Still live and **not** filed: the French
+verbless manner gloss drops *de* before a bare plural (*comme autres objets*, B67), and a Japanese
+headless relative on a positive の-adjective drops its copula (固体の, B66) — neither is in a shipped
+gloss. Already filed and met again: A218 (PUT, HERE), A219 (REALLY), A228 (GET), A225 (the two
+LASTs) — all four were **fixed before the authoring**, and each ticket's Done section records the
+render that changed.
 
 ### Done
 
@@ -553,6 +606,15 @@ HERE), A219 (REALLY), A228 (GET).
 | B58 | [done/B58-tense-and-number-values.md](done/B58-tense-and-number-values.md) | five adjectives (**PRESENT**, **PAST**, **FUTURE**, **SOLE**, **MANIFOLD**) and five glosses, the only ticket that cleared its whole set: PAST_TENSE → a past tense (de *ein vergangenes Tempus*), PLURAL_GRAMMAR → a manifold category (ja 複数の範疇). SOLE and MANIFOLD rather than SINGULAR and PLURAL, so the number categories are not defined with themselves. English is the weakest of the seven here — *a past tense* is the English term — and the other six do define |
 | C05 | [done/C05-non-distinguishing-genera.md](done/C05-non-distinguishing-genera.md#done-2026-09-21) | BUILDING → a place that has walls, 2026-09-19 (seeded **WALL**; built the French object partitive and the negative *de*, [A149](../bugs/fixed/A149-french-object-zero-article.md), which restored the article in 41 shipped French glosses, and the Japanese ある of an inanimate owner, [A150](../bugs/fixed/A150-japanese-inanimate-owner-aru.md)). **Retired by splitting** on 2026-09-21, in two passes: A17, A18, B36–B39 and C20, then B48–B51 once every lead the file named but had not tried was probed (AFRICA moved with ANTARCTICA). The rest stays on the literal **by design**, each with a probe: EUROPE and the Americas, FEELING, REPLACE (moves with C22's "in place of"), BECOME, and 18 grammar meta-nouns. PERIOD_PUNCTUATION stays, though MARK renders: en *period* is also the sentence it ends |
 | B54 | [done/B54-sensation-and-quality-adjectives.md](done/B54-sensation-and-quality-adjectives.md) | the last nine, the relational ones, on C24's headless relative: WILD → that has not been tamed, DOMESTIC → that lives with people, MALE → that has testicles, FEMALE → that has ovaries, CASTRATED → from which the testicles have been removed, HUNGRY → that wants to eat, ROUND → whose shape is a circle (de *dessen Form ein Kreis ist*). BROWN (no exemplar the corpus has) and CANINE (a cycle through DOG and WOLF) are literal by design. Seeded **TESTICLE**, **SHAPE**, **CIRCLE** and **OVARY**; COLOUR, NATURE and SEX were not needed |
+| B59 | [done/B59-time-words.md](done/B59-time-words.md) | NIGHT → the dark part of a day (de *der dunkle Teil eines Tages*, ja 日の暗い部分) and DARK → that does not have light. Seeded **NIGHT**, **YEAR** (fr *année*, not *an*), **TODAY** and **DARK**, beside the shared DAY and WEEK. DARK is the corpus's first German adjective in *-el*, and the declension and the comparative had to learn to drop its e (*dunkle*, *dunkler*, but *am dunkelsten*). DAY, WEEK and YEAR wait on numerals (C31) and TODAY on a temporal complement (C29) |
+| B60 | [done/B60-saying-and-thinking-verbs.md](done/B60-saying-and-thinking-verbs.md) | eleven words and **twelve glosses**, every P09 row of the ticket: SAY → to express concepts with words, TELL → to say facts to a person, ASK → to say words to know the facts, QUESTION → a phrase with which one asks (the instrument gap, since the object gap says *asks for*), CALL → to cause a person to come, CALL_PHONE → to use a telephone to speak with a person, MEAN → to have as meaning, THINK → to use the mind, BELIEVE → to accept as fact. Seeded **TELEPHONE** and **MIND** as differentia; MIND stays on the literal, and TALK gets no concept (SPEAK covers it). **ANSWER re-opens a C28 verdict** and ships as "to say words to a person who asks" |
+| B61 | [done/B61-handling-and-leaving-verbs.md](done/B61-handling-and-leaving-verbs.md) | twelve words and **thirteen glosses**, all ten P09 rows: GET → to acquire objects from a person, TAKE → to acquire objects with the hand, PUT → to cause an object to be in a place, KEEP → still to have objects, BRING → to cause an object to come, LEAVE_BEHIND → to cause an object to stay, TURN → to move around a point, LOOK_AT → to direct the eyes to an object, LEAVE_DEPART → to begin to go, GO_OUT → to go outside. **STAY and OUTSIDE were glossed rather than filed as roots** — OUTSIDE on C25's complement gloss, the first with a relative clause inside it — and DIRECT_VERB stays on the literal. Three English "leave" now need their synonyms (*exit*, *depart*, *leave behind*) |
+| B62 | [done/B62-doing-working-playing.md](done/B62-doing-working-playing.md) | seven words and six glosses on no new differentia: DO → to cause an action to happen (whose gloss may not say *fare*), WORK_LABOUR → to act to acquire money, WORK_NOUN → an action with which one acquires money, PLAY_GAME → to act to feel joy, PLAY_INSTRUMENT → to produce sounds with an object, NEED → to be obliged to have objects. It answers P09's open question — **NEED is one lexical concept**, since a modal NEED_TO's only gloss would be MUST's — and **TRY is lexical too**, and literal by design. NEED's *avere bisogno* / *avoir besoin* are the first multiword lemmas, which the French negation and four derived forms had to learn |
+| B63 | [done/B63-modal-verbs-may-should-might.md](done/B63-modal-verbs-may-should-might.md) | MAY → to be allowed to act, on the new adjective **ALLOWED**, C09's shape beside MUST and CAN. **SHOULD and MIGHT are seeded but not glossed** — each judges the act, which needs a content clause (C30). The seed is where most of the work was: `should` joined English `MODAL_AUX`, a conditional modal's past became the perfect under it (*should have run*, *hätte laufen sollen*), Japanese べき became a copula-kind modal and かもしれない a suffix that leaves polarity and tense on the verb it follows (走らないかもしれません) |
+| B64 | [done/B64-institutions-and-people.md](done/B64-institutions-and-people.md) | five P09 nouns and the two verbs they stand on, seven glosses: SCHOOL → a building where one learns, STUDENT → a person who learns (not "who studies", which cannot also serve SCHOOL), COMPANY_BUSINESS → a group that sells, STATE_NATION → a system that governs a country (on B65's SYSTEM), WORLD → the place that includes all countries, LEARN → to begin to know, SELL → to give objects to acquire money. NATION is `human: true`, so it still cannot head a relative clause in a gloss |
+| B65 | [done/B65-everyday-nouns.md](done/B65-everyday-nouns.md) | eight P09 nouns and nine glosses: THING → an object or a concept (**the first definition whose whole phrase is a coordinated group**), PROBLEM → a state that one must change, CASE_INSTANCE → a thing that happens, POINT_NOUN → a place that does not have size, HAND → an organ with which one takes an object, SYSTEM → a group of parts that works, PROGRAM_SOFTWARE → a list of instructions, PROGRAM_SHOW → content that one broadcasts, and BROADCAST → to send content to many people. **OBJECT_THING hangs under THING** and keeps the literal, since the two would otherwise define each other; its synonym is now *item* |
+| B66 | [done/B66-core-adjectives.md](done/B66-core-adjectives.md) | four P09 adjectives and the optional fifth: LAST_FINAL → that follows all other objects (FIRST read the other way), LAST_PREVIOUS → that this period follows, **NEXT_COMING** → that follows this period (worth its concept: the seeded NEXT is the sequence sense, so no Romance language could say "next week"), SAME → that is not another object, RIGHT_CORRECT → that does not have errors. Seeded **ERROR**. AMERICAN and RIGHT_SIDE stay literal by design, as CANINE and the RIGHT adverb do. SAME and LAST_FINAL joined the it/fr/es/pt prenominal sets, and a predicate SAME keeps its article in five languages |
+| B67 | [done/B67-place-and-focus-adverbs.md](done/B67-place-and-focus-adverbs.md) | three of the eight: HERE → in this place, ALSO → in the same way, REALLY → in reality (on the new **REALITY**, countable, and the first gloss to show [A219](../bugs/fixed/A219-french-bare-singular-after-dans.md)'s fix, *en réalité*). Seeding the place adverbs fixed what EVERYWHERE had shown since it was seeded: es/pt now say *está aquí* and Japanese ここに with a verb that marks a place with に. THERE waits on the French distal demonstrative (C40), JUST and STILL on a temporal complement (C29), ONLY on *nothing* (C32), and EVEN cannot be seeded at all until a focus particle exists (C39) |
 | C23 | [done/C23-participial-state-adjectives.md](done/C23-participial-state-adjectives.md) | **built the headless relative clause**, `NounPhrase.relativeGloss`: an adjective said as the relative clause it is, its unspoken antecedent still driving agreement (de *den man gespeichert hat*, fr *qu'on a enregistrée* of a feminine one). Twenty-two state adjectives: SAVED → that one has saved, VISIBLE → that one can see, MISSING → that one cannot find, EMPTY → that does not have content, ACTIVE → that is working, KNOWN → that one knows. Seeded **EXPECT**, **FIND**, **TITLE**, **NUMBER_LABEL**. RECENT (a distance in time), CLOSED and OPEN_ADJECTIVE (OPEN and CLOSE are glossed through them) literal by design. Found and fixed the Italian passive *si* participle, [A213](../bugs/fixed/A213-italian-passive-si-compound-participle.md), and Portuguese [A206](../bugs/fixed/A206-portuguese-impersonal-se-plural-object.md) |
 | C24 | [done/C24-grammar-feature-adjectives.md](done/C24-grammar-feature-adjectives.md) | fifty-eight adjectives on C23's construct: the grammar features as what each does (PASSIVE → that uses the direct object as the subject, DEFINITE → that indicates a known object, COPULATIVE → that adds a phrase to another phrase), the relational ones as what they have or do (SWEET → that has sugar, SOLID → that does not flow, WARM → of great kindness), the order and time words (NEXT → that follows, SECOND → that follows the first object, PAST → that has happened), CONDITIONAL → on which another clause depends. The last five needed **prepositional objects** — Japanese `object_particle` (犬に続く), English `object_prep` pied-piped ("on which"), a German dative-only preposition, French *dont*, a Spanish `object_a` — and SHARP → that cuts well needed B13's CUT to lose its "sharp". Seventeen words seeded (DEPEND, FOLLOW, KINDNESS, SUGAR, …); ten literal by design |
 | C25 | [done/C25-place-and-direction-adverbs.md](done/C25-place-and-direction-adverbs.md) | **built the complement gloss**, `NounPhrase.complementGloss`: a place adverb rendered as the complement it stands for, by each engine's own complement renderer — EVERYWHERE → in all places, TOGETHER → in a group (ja グループで), UP → to a higher place (de *zu einem höheren Ort*), BACKWARDS → in the opposite direction; SUDDENLY → in an unexpected way. Not a `MannerRelation` after all: PLACE is a location for one adverb and a goal for another. Seeded **DIRECTION_SPACE**, **OPPOSITE**. LEFT and RIGHT literal by design |

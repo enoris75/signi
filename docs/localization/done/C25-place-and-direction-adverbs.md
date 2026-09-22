@@ -235,3 +235,15 @@ What landed differently from the plan:
    the construct takes the two spatial complements the ticket named.
 6. **LEFT and RIGHT are literal by design**, with the heart's side the only honest lead and the
    probes above showing why it does not render.
+
+## A seventh complement gloss, 2026-09-22
+
+[B61](B61-handling-and-leaving-verbs.md) seeded **OUTSIDE** as GO_OUT's differentia ("to go
+outside") and glossed it on this file's construct: "to a place that is not in a building", the
+`direction` complement with a **relative clause inside the complement-gloss phrase**, which none of
+the six above has. Its rejected leads are in B61: the open air is an Italian idiom alone, "a place
+without walls" and "a place that walls do not enclose" need a bare plural subject Romance cannot
+say, and a `source` complement would say *out of*, which `complementGloss` has no type for.
+[B67](B67-place-and-focus-adverbs.md) then seeded **HERE** ("in this place") on the same construct,
+and fixed what EVERYWHERE had shown since it shipped: a place adverb took Japanese で where the
+locative takes に, and es/pt said *ser* (*el gato es en todas partes*) where a place wants *estar*.
