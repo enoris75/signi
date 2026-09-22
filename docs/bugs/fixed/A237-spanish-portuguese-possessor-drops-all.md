@@ -45,3 +45,21 @@ possessive, as the complement path does. Spanish can likely take the object's bu
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A237)* (1 `test.fails`, plus a regression test for the object, a possessor with no possessive and the other five) |
+
+## Resolved
+
+2026-09-22. As the file guessed: `all` joins the determiners the possessor hands to the object's own
+builder. [`es/possessorText`](../../../packages/engine/src/languages/es/possessorText.ts) widens
+A234's branch to `ownDeterminer === 'all' || KEPT_BESIDE_POSSESSIVE.has(ownDeterminer)`, and
+[`pt/possessorText`](../../../packages/engine/src/languages/pt/possessorText.ts) takes an early
+`" de " + npText(poss)` for `all`, which keeps `contractDet` away from the article so "de" does not
+fuse across "todos". Both `nounPhrase`s already wrote the phrase itself.
+
+Renders the Want column: `el gato ve la casa de todos mis libros.`, `o gato vê a casa de todos os
+meus livros.`, and the same for a 3rd-person possessive and for the possessor of a subject.
+
+Guarded by *known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A237)* in
+[possession.test.ts](../../../packages/engine/test/possession.test.ts), now four tests: the three
+Want rows, the feminine, the 1st plural and a possessor carrying its own adjective or relative, a
+regression that a plain possessive still fuses and a detaching determiner still detaches, and the
+original regression row.

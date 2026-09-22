@@ -30,7 +30,7 @@ Six things landed differently from the plan below, each noted where it occurs:
   loaded from the database goes through the former only, so the version travels there from each
   load site.
 
-[A236](../../../bugs/A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md) was filed
+[A236](../../../bugs/fixed/A236-negative-adverb-under-a-modal-negates-the-modal.md) was filed
 while this was specified and is **not** fixed here: a negative adverb (NEVER) on the main verb still
 negates the modal. The inner negator this feature builds is what that fix will use.
 

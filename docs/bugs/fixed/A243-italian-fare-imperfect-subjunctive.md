@@ -23,3 +23,19 @@ Pinned by `known bugs: the Italian imperfect subjunctive of fare (A243)` in
 [doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts).
 
 Found seeding DO for [B62](../../localization/done/B62-doing-working-playing.md).
+
+## Resolved
+
+2026-09-22, by [A239](A239-italian-dire-imperfect-subjunctive.md)'s fix, which is what this file
+asked for: the row is keyed by the **lemma**. `IT_CONTRACTED_STEM` in
+[mood.ts](../../../packages/engine/src/mood.ts) is now read by both Italian imperfects, so *fare*
+reaches *face-* in the subjunctive as it already did in the indicative, and **both concepts on the
+verb** get it — MAKE and DO alike — without a row each. The next concept on a contracted infinitive
+meets it too.
+
+Renders the Want column: `se l'uomo facesse il lavoro, il gatto mangerebbe.`, for MAKE and for DO.
+
+Guarded by *known bugs: the Italian imperfect subjunctive of fare (A243)* in
+[doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts), now three tests: the Want
+row for both concepts, the plural and PRODUCE (whose concept row the fix removed as redundant), and
+a regression that the conditional and the other languages are unchanged.

@@ -1,23 +1,28 @@
 # A-must-fix — confirmed bugs
 
-**Eleven open, every one filed 2026-09-22.** **A236** was met while specifying
-[A03, modal polarity](../../features/Z-Done/A03-modal-polarity/README.md): a negative adverb on the
-main verb under a modal negates the modal, where the verb's own negation now stays with the verb.
-A03 has shipped the inner negator its fix needs. **A237** came from the lane that fixed A234: a
-Spanish or Portuguese possessor that drops "all" beside a possessive of its own (*de mis libros* for
-*de todos mis libros*).
-
-**The other nine, A238–A246**, were met by the six lanes that seeded P09's core vocabulary
+**None open.** The eleven filed on 2026-09-22 were fixed the same day and moved to
+[`../fixed/`](../fixed/). **A236** was met while specifying
+[A03, modal polarity](../../features/Z-Done/A03-modal-polarity/README.md) — a negative adverb on the
+main verb under a modal negated the modal — and its fix routed the adverb through the inner negator
+A03 had shipped. **A237** came from the lane that fixed A234: a Spanish or Portuguese possessor
+dropping "all" beside a possessive of its own. **A238–A246** were met by the six lanes that seeded
+P09's core vocabulary
 ([B59–B67](../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)), each a
-shape the corpus first reached when a word of its kind was seeded: **A238**, an English addressee
-that takes no "to" (ASK, ANSWER); **A239** and **A243**, *dire* and *fare* in the Italian imperfect
-subjunctive; **A240**, a Romance prepositional object writing the tonic pronoun where the dative
-clitic belongs; **A241**, the Spanish *tú* command keyed by concept, so GO_OUT misses *salir*'s row;
-**A242**, an Italian frequency adverb trailing the multiword finite *avere bisogno*; **A244** and
-**A245**, STILL and ALSO under a negation; and **A246**, a Japanese の-adjective dropping its の as a
-predicate, so AMERICAN says "the cat is America". No shipped gloss shows any of the nine, and
-between them the eleven files carry thirteen `test.fails` — A238 pins its two verbs apart, and A240
-its two languages.
+shape the corpus first reached when a word of its kind was seeded: an English addressee that takes
+no "to" (A238), *dire* and *fare* in the Italian imperfect subjunctive (A239, A243), a Romance
+prepositional object writing the tonic pronoun where the dative clitic belongs (A240), the Spanish
+*tú* command keyed by concept (A241), an Italian frequency adverb trailing the multiword finite
+*avere bisogno* (A242), STILL and ALSO under a negation (A244, A245), and a Japanese の-adjective
+dropping its の as a predicate (A246).
+
+**Four of the eleven needed the corpus**, which is this class's recurring shape: the engine has the
+rule, and the lexeme has to be able to ask for it. `terminus_bare` selects an English bare or double
+object recipient the way `object_prep` selects a prepositional direct object; `relational` marks the
+Japanese の that belongs to the predicate; `negative` and `negative_slot` say what an adverb becomes
+under a negation and where it goes; and the pronouns gained a `dative` form family for the Romance
+indirect-object clitics. Three of the other seven were fixed by re-keying a table **by lemma rather
+than by concept** (the Italian contracted infinitives, the Spanish short *tú* commands), which
+closed four more concepts' worth of the same defect than the files named.
 
 Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/).
 The last six, **A230**–**A235**, were filed and fixed on 2026-09-22, each met by the lane that fixed

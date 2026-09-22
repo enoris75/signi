@@ -57,3 +57,37 @@ instead of through the finite verb.
 | | |
 |---|---|
 | **Test** | `modals.test.ts` → *known bugs: a negative adverb on the main verb negates the modal (A236)* (1 `test.fails`, plus a regression test for English, for a NEVER on the modal itself, and for a modal-free clause) |
+
+## Resolved
+
+2026-09-22. [`groupHasNegativeAdverb`](../../../packages/engine/src/functions/groupHasNegativeAdverb.ts)
+kept its meaning — *any* negative adverb in the group — and split into two readings beside it:
+[`finiteHasNegativeAdverb`](../../../packages/engine/src/functions/finiteHasNegativeAdverb.ts), a
+modal's own adverb or the main verb's in a modal-free clause, and
+[`governedHasNegativeAdverb`](../../../packages/engine/src/functions/governedHasNegativeAdverb.ts),
+the main verb's under a modal. The five languages that write a preverbal negator read the split:
+[`it/predicateText`](../../../packages/engine/src/languages/it/predicateText.ts),
+[`es/predicateText`](../../../packages/engine/src/languages/es/predicateText.ts),
+[`pt/predicateText`](../../../packages/engine/src/languages/pt/predicateText.ts) and
+[`ja/predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts) feed the governed
+adverb into A03's inner negator (`governedNon` / `governedNo` / `governedNao` / `governedNeg`), and
+[`fr/predicateText`](../../../packages/engine/src/languages/fr/predicateText.ts) makes the adverb
+that group's negator *word*, in place of its "pas" — `governedNegator`. Spanish and Portuguese also
+stopped fronting a governed adverb preverbally. English and German read the unsplit predicate and
+are untouched.
+
+Renders the Want column exactly: `il gatto vuole non mangiare mai.`, `le chat veut ne jamais
+manger.`, `el gato quiere no comer nunca.`, `o gato quer não comer nunca.`,
+`猫は決して食べないでいたいです。`
+
+Guarded by *known bugs: a negative adverb on the main verb negates the modal (A236)* in
+[modals.test.ts](../../../packages/engine/test/modals.test.ts), now four tests: the two scopes apart,
+the governed one under an object, a past tense, a stacked modal and an adverb on the modal too, and
+German saying the same thing for both.
+
+**Six passing tests moved with the rule**, each of which had pinned the defect from another angle:
+the frequency-adverb row in `modals.test.ts` (`il gatto non deve mangiare mai` → `deve non mangiare
+mai`), the Japanese copula-modal line there (`幸せである必要がありません` → `幸せでない必要があります`),
+the French clitic row in `objectPronoun.test.ts` (`ne doit jamais me voir` → `doit ne jamais me
+voir`), and three colocated cases in `es/predicateText.test.ts` and `fr/predicateText.test.ts`, one
+of which was named *"jamais still negates the finite modal"* and marked out of scope for A03.

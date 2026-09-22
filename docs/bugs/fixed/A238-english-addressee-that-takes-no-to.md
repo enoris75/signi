@@ -28,3 +28,23 @@ Pinned by `known bugs: an English addressee that takes no "to" (A238)` in
 [saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts).
 
 Found seeding ASK and ANSWER for [B60](../../localization/done/B60-saying-and-thinking-verbs.md).
+
+## Resolved
+
+2026-09-22. The lexeme selects the shape, as `object_prep` does for a direct object: English ASK and
+ANSWER say **`terminus_bare`**, seeded in
+[ditransitive.ts](../../../packages/backend/src/concepts/verbs/ditransitive.ts) and
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts). A new shared helper,
+[`splitBareTerminus`](../../../packages/engine/src/functions/splitBareTerminus.ts) — the English
+counterpart of German's `splitDative` — lifts that complement out of the set, and
+[`en/predicateParts`](../../../packages/engine/src/languages/en/predicateParts.ts) writes it with no
+adposition in the slot right after the verb, ahead of the direct object. A pronoun addressee takes
+the object form the direct object's takes ("asks him the name"). The passive has promoted the thing
+asked, so the addressee is an ordinary complement again and keeps its "to", as the other six write it.
+
+Renders the Want column: `the woman asks the man the name.`, `the woman answers the man.`
+
+Guarded by *known bugs: an English addressee that takes no "to" (A238)* in
+[saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts), now six tests: the two
+Want rows, a pronoun addressee and each verb in the other's frame, the two objects under a tense, a
+modal, a negation and another complement, the passive, and the original regression row.

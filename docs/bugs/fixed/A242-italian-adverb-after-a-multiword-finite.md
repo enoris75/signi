@@ -25,3 +25,24 @@ Pinned by `known bugs: an Italian multiword finite (A242)` in
 [doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts).
 
 Found seeding NEED for [B62](../../localization/done/B62-doing-working-playing.md).
+
+## Resolved
+
+2026-09-22. [`it/predicateText`](../../../packages/engine/src/languages/it/predicateText.ts) calls
+[`lemmaTail`](../../../packages/engine/src/functions/lemmaTail.ts) and
+[`splitLemmaTail`](../../../packages/engine/src/functions/splitLemmaTail.ts) — the two helpers
+French already used — and writes a frequency adverb between the verb and its lemma's noun. The
+periphrastic branch above it already split at its own auxiliary (`ha mai avuto bisogno`), so the new
+branch handles what falls through it.
+
+Renders the Want column: `l'uomo non ha mai bisogno del cibo.`, `l'uomo ha sempre bisogno del cibo.`
+
+**The modal chain was left with the same defect** and is fixed with it: under a modal the lemma is
+non-finite, and the adverb was landing behind its noun there too (`deve avere bisogno sempre`). The
+split is applied to any group that is not a periphrasis, so that reads `deve avere sempre bisogno
+del cibo`.
+
+Guarded by *known bugs: an Italian multiword finite (A242)* in
+[doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts), now three tests: the two
+Want rows, the modal chain beside the compound tense, and a regression over no adverb, a plain
+negation and the six other languages.

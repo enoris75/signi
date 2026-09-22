@@ -49,7 +49,8 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing each open Part A file has its own, and Part B is empty).** If
+this writing there are none left — Part A and Part B are both empty, and the suite carries no
+expected failures).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,35 +60,15 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Eleven open**, every one filed on 2026-09-22 — the day the catalogue emptied and filled again.
-**A236** was filed while specifying [A03, modal polarity](../features/Z-Done/A03-modal-polarity/README.md);
-A03 has since shipped the inner negator its fix needs. **A237** was filed by the lane that fixed
-A234. **A238–A246** were met by the six lanes that seeded P09's core vocabulary
-([B59–B67](../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)), and each is a
-shape the corpus could not reach until a word of its kind existed: the first multiword finite
-(*avere bisogno*), the first verb sharing a Spanish irregular command with another concept, the
-first adverbs whose negation wants another word, the first adjective relating its subject to a
-country. **No shipped gloss shows any of the nine**, which is why each was pinned rather than fixed
-in the lane that found it — five others those lanes met *were* fixed there, because the word could
-not have been seeded honestly without the fix. The eleven files carry **thirteen** `test.fails`
-between them: A238 pins its two verbs apart, and A240 its two languages.
+**None open.** The eleven filed on 2026-09-22 — A236, A237 and the nine (A238–A246) that P09's
+core-vocabulary lanes met while seeding — were all fixed the same day and are listed under **Fixed**
+below. Four of them needed the corpus to carry something new, which is the pattern that keeps
+recurring in this class: a lexeme key for the shape the language wants (`terminus_bare` for an
+English addressee that takes no "to", `relational` for a Japanese の-adjective that keeps its の as a
+predicate, `negative` / `negative_slot` for an adverb that outscopes a negation) and a form family
+for a surface it had no slot for (the Romance `dative` clitics).
 
-| # | File | Language | Defect |
-|---|---|---|---|
-| A236 | [A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md](A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md) | Italian, French, Spanish, Portuguese, Japanese | a negative adverb (NEVER) on the main verb under a modal negates the **modal** (*il gatto non vuole mangiare mai* for *vuole non mangiare mai*), because `groupHasNegativeAdverb` hands every negative adverb in the group to the finite verb; its fix routes the adverb through the inner negator [A03](../features/Z-Done/A03-modal-polarity/README.md) shipped |
-| A237 | [A-must-fix/A237-spanish-portuguese-possessor-drops-all.md](A-must-fix/A237-spanish-portuguese-possessor-drops-all.md) | Spanish, Portuguese | a possessor that has a possessive of its own drops "all" (*de mis libros* for *de todos mis libros*), where the object keeps it; [A234](fixed/A234-spanish-portuguese-possessor-drops-its-determiner.md) gave back only the determiners that move the possessive behind the noun |
-| A238 | [A-must-fix/A238-english-addressee-that-takes-no-to.md](A-must-fix/A238-english-addressee-that-takes-no-to.md) | English | English writes every `terminus` with "to", so a verb whose addressee is a bare or double object says it with the preposition (*asks the name to the man* for *asks the man the name*, *answers to the man* for *answers the man*); no lexeme key selects the bare recipient, as `object_prep` selects one for a direct object |
-| A239 | [A-must-fix/A239-italian-dire-imperfect-subjunctive.md](A-must-fix/A239-italian-dire-imperfect-subjunctive.md) | Italian | *dire*'s imperfect subjunctive is derived from the infinitive minus -re (*dissimo* for *dicessimo*), because `IT_SUBJ_STEM` overrides the contracted infinitives by concept id and has PRODUCE but not SAY |
-| A240 | [A-must-fix/A240-romance-dative-clitic-of-a-prepositional-object.md](A-must-fix/A240-romance-dative-clitic-of-a-prepositional-object.md) | Italian, French | a prepositional object writes its pronoun as the tonic one (*telefona a lui*, *téléphone à lui*), right for the spatial *su*/*sur* of CLICK and wrong for a dative, where the clitic belongs (*gli telefona*, *lui téléphone*) |
-| A241 | [A-must-fix/A241-spanish-tu-command-keyed-by-concept.md](A-must-fix/A241-spanish-tu-command-keyed-by-concept.md) | Spanish | the irregular affirmative *tú* commands are keyed by concept id, so a new concept on a verb already in the table misses it (GO_OUT is *salir*: `sale` for `sal`), and *poner* has no row at all (`pone` for `pon`) |
-| A242 | [A-must-fix/A242-italian-adverb-after-a-multiword-finite.md](A-must-fix/A242-italian-adverb-after-a-multiword-finite.md) | Italian | a frequency adverb trails a multiword finite instead of splitting it (*ha bisogno sempre del cibo* for *ha sempre bisogno del cibo*), where French was taught the split with NEED and Italian itself splits a compound tense |
-| A243 | [A-must-fix/A243-italian-fare-imperfect-subjunctive.md](A-must-fix/A243-italian-fare-imperfect-subjunctive.md) | Italian | *fare*'s imperfect subjunctive is *fasse* for *facesse*, A239's table and its other contracted infinitive; MAKE's bug, live before the batch, which DO meets through the shared lemma |
-| A244 | [A-must-fix/A244-still-scopes-under-the-negation.md](A-must-fix/A244-still-scopes-under-the-negation.md) | English, French, German | a `frequency` adverb sits inside the negation, so STILL is denied rather than denying (*does not still eat* for *still does not eat*), and French *ne … pas encore* says "not yet", the opposite reading |
-| A245 | [A-must-fix/A245-also-has-no-negative-form.md](A-must-fix/A245-also-has-no-negative-form.md) | English, Italian, French, German, Spanish, Portuguese | six languages say *also* under a negation with another word (*either*, *neanche*, *non plus*, *auch nicht*, *tampoco*, *também não*) and the engine writes the positive one in the positive slot; the placement half is A244 |
-| A246 | [A-must-fix/A246-japanese-no-adjective-predicate-drops-its-no.md](A-must-fix/A246-japanese-no-adjective-predicate-drops-its-no.md) | Japanese | a の-adjective drops its の before the copula, right for a colour (猫は茶色です) and wrong for an adjective relating its subject to a proper noun: AMERICAN renders 猫はアメリカです, "the cat is America" |
-
-Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
-as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
+New ones are filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -355,6 +336,17 @@ is listed under **Fixed** below.
 | A233 | [A233-portuguese-negated-reflexive-infinitive.md](fixed/A233-portuguese-negated-reflexive-infinitive.md) | Portuguese | 2026-09-22 |
 | A234 | [A234-spanish-portuguese-possessor-drops-its-determiner.md](fixed/A234-spanish-portuguese-possessor-drops-its-determiner.md) | Spanish, Portuguese | 2026-09-22 |
 | A235 | [A235-time-under-an-adjective-goes-bare.md](fixed/A235-time-under-an-adjective-goes-bare.md) | English (corpus + translator) | 2026-09-22 |
+| A236 | [A236-negative-adverb-under-a-modal-negates-the-modal.md](fixed/A236-negative-adverb-under-a-modal-negates-the-modal.md) | Italian, French, Spanish, Portuguese, Japanese | 2026-09-22 |
+| A237 | [A237-spanish-portuguese-possessor-drops-all.md](fixed/A237-spanish-portuguese-possessor-drops-all.md) | Spanish, Portuguese | 2026-09-22 |
+| A238 | [A238-english-addressee-that-takes-no-to.md](fixed/A238-english-addressee-that-takes-no-to.md) | English (corpus + engine) | 2026-09-22 |
+| A239 | [A239-italian-dire-imperfect-subjunctive.md](fixed/A239-italian-dire-imperfect-subjunctive.md) | Italian | 2026-09-22 |
+| A240 | [A240-romance-dative-clitic-of-a-prepositional-object.md](fixed/A240-romance-dative-clitic-of-a-prepositional-object.md) | Italian, French (corpus + engine) | 2026-09-22 |
+| A241 | [A241-spanish-tu-command-keyed-by-concept.md](fixed/A241-spanish-tu-command-keyed-by-concept.md) | Spanish | 2026-09-22 |
+| A242 | [A242-italian-adverb-after-a-multiword-finite.md](fixed/A242-italian-adverb-after-a-multiword-finite.md) | Italian | 2026-09-22 |
+| A243 | [A243-italian-fare-imperfect-subjunctive.md](fixed/A243-italian-fare-imperfect-subjunctive.md) | Italian | 2026-09-22 |
+| A244 | [A244-still-scopes-under-the-negation.md](fixed/A244-still-scopes-under-the-negation.md) | English, French, German (corpus + engine) | 2026-09-22 |
+| A245 | [A245-also-has-no-negative-form.md](fixed/A245-also-has-no-negative-form.md) | English, Italian, French, German, Spanish, Portuguese (corpus + engine) | 2026-09-22 |
+| A246 | [A246-japanese-no-adjective-predicate-drops-its-no.md](fixed/A246-japanese-no-adjective-predicate-drops-its-no.md) | Japanese (corpus + engine) | 2026-09-22 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._
