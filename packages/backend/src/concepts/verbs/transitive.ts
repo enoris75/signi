@@ -4096,6 +4096,83 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // PROGRAM_SHOW's differentia (localization B65): "to send content to many people", beside SEND
+    // ("to transfer objects to a place") and EXPORT, which it does not restate. German is the
+    // separable ausstrahlen, like ADD's hinzufügen ("strahlt die Sendung aus", "die man ausstrahlt"),
+    // not senden, which is the root of Sendung itself. Japanese 放送する is a suru compound, and
+    // Italian trasmettere is mettere's compound (trasmise, trasmesso).
+    id: 'BROADCAST',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to send out a program on radio or television',
+    definition: infinitiveGloss('SEND', {
+      object: 'CONTENT',
+      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'many', number: 'plural' } } },
+    }),
+    emoji: '📡',
+    forms: {
+      en: {
+        base: 'broadcast',
+        '1sg_present': 'broadcast', '2sg_present': 'broadcast', '3sg_present': 'broadcasts',
+        '1pl_present': 'broadcast', '2pl_present': 'broadcast', '3pl_present': 'broadcast',
+        past: 'broadcast',
+      },
+      it: {
+        base: 'trasmettere',
+        '1sg_present': 'trasmetto', '2sg_present': 'trasmetti', '3sg_present': 'trasmette',
+        '1pl_present': 'trasmettiamo', '2pl_present': 'trasmettete', '3pl_present': 'trasmettono',
+        '1sg_past': 'trasmisi', '2sg_past': 'trasmettesti', '3sg_past': 'trasmise',
+        '1pl_past': 'trasmettemmo', '2pl_past': 'trasmetteste', '3pl_past': 'trasmisero',
+        '1sg_future': 'trasmetterò', '2sg_future': 'trasmetterai', '3sg_future': 'trasmetterà',
+        '1pl_future': 'trasmetteremo', '2pl_future': 'trasmetterete', '3pl_future': 'trasmetteranno',
+      },
+      fr: {
+        base: 'diffuser',
+        '1sg_present': 'diffuse', '2sg_present': 'diffuses', '3sg_present': 'diffuse',
+        '1pl_present': 'diffusons', '2pl_present': 'diffusez', '3pl_present': 'diffusent',
+        '1sg_past': 'diffusai', '2sg_past': 'diffusas', '3sg_past': 'diffusa',
+        '1pl_past': 'diffusâmes', '2pl_past': 'diffusâtes', '3pl_past': 'diffusèrent',
+        '1sg_future': 'diffuserai', '2sg_future': 'diffuseras', '3sg_future': 'diffusera',
+        '1pl_future': 'diffuserons', '2pl_future': 'diffuserez', '3pl_future': 'diffuseront',
+      },
+      de: {
+        // Separable: the finite forms are strahlen's, and the clause places the particle.
+        base: 'ausstrahlen', particle: 'aus',
+        '1sg_present': 'strahle', '2sg_present': 'strahlst', '3sg_present': 'strahlt',
+        '1pl_present': 'strahlen', '2pl_present': 'strahlt', '3pl_present': 'strahlen',
+        '1sg_past': 'strahlte', '2sg_past': 'strahltest', '3sg_past': 'strahlte',
+        '1pl_past': 'strahlten', '2pl_past': 'strahltet', '3pl_past': 'strahlten',
+        '2sg_imperative': 'strahle', // the optional du -e, kept
+      },
+      es: {
+        base: 'emitir',
+        '1sg_present': 'emito', '2sg_present': 'emites', '3sg_present': 'emite',
+        '1pl_present': 'emitimos', '2pl_present': 'emitís', '3pl_present': 'emiten',
+        '1sg_past': 'emití', '2sg_past': 'emitiste', '3sg_past': 'emitió',
+        '1pl_past': 'emitimos', '2pl_past': 'emitisteis', '3pl_past': 'emitieron',
+        '1sg_future': 'emitiré', '2sg_future': 'emitirás', '3sg_future': 'emitirá',
+        '1pl_future': 'emitiremos', '2pl_future': 'emitiréis', '3pl_future': 'emitirán',
+      },
+      ja: {
+        base: '放送する',
+        reading: 'ほうそうする',
+        masu_present: '放送します',
+        masu_present_reading: 'ほうそうします',
+      },
+      pt: {
+        base: 'transmitir',
+        '1sg_present': 'transmito', '2sg_present': 'transmite', '3sg_present': 'transmite',
+        '1pl_present': 'transmitimos', '2pl_present': 'transmitem', '3pl_present': 'transmitem',
+        '1sg_past': 'transmiti', '2sg_past': 'transmitiu', '3sg_past': 'transmitiu',
+        '1pl_past': 'transmitimos', '2pl_past': 'transmitiram', '3pl_past': 'transmitiram',
+        '1sg_future': 'transmitirei', '2sg_future': 'transmitirá', '3sg_future': 'transmitirá',
+        '1pl_future': 'transmitiremos', '2pl_future': 'transmitirão', '3pl_future': 'transmitirão',
+      },
+    },
+  },
+
+  {
     id: 'IMPORT',
     role: 'verb',
     transitivity: 'transitive',
