@@ -421,3 +421,23 @@ describe('known bugs: a measure manner adverbial loses the determiner it was giv
     });
   });
 });
+
+// A235. `resolveComplements` forces an adjective-modified, definite measure adverbial bare, because a
+// measure there names a rate ("at high speed", A226). Two nouns are measures, SPEED and TIME, and only
+// SPEED names a rate. TIME is a count noun and an occasion, so the rule strips the article English
+// needs: "the cat runs at other time". Found fixing A226.
+describe('known bugs: TIME under an adjective goes bare as if it named a rate (A235)', () => {
+  const runsAt = (phrase: NounPhrase, tense?: 'past') =>
+    sayAll(clause(np('CAT'), 'RUN', { verbPhrase: tense ? { tense } : {}, complements: { manner: { phrase } } }));
+
+  test.fails('TIME keeps the definite article a count noun needs', () => {
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'] })).en).toBe('the cat runs at the other time.');
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'] }), 'past').en).toBe('the cat ran at the other time.');
+  });
+
+  test('regression: SPEED goes bare, a plain TIME and an indefinite one keep their article', () => {
+    expect(runsAt(np('SPEED', { adjectives: ['HIGH'] })).en).toBe('the cat runs at high speed.');
+    expect(runsAt(np('TIME')).en).toBe('the cat runs at the time.');
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'], definiteness: 'indefinite' })).en).toBe('the cat runs at another time.');
+  });
+});

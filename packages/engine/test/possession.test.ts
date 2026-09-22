@@ -898,3 +898,49 @@ describe('known bugs: Japanese HAVE says an animate possession with ある', () 
     expect(say(clause(np('BOOK'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('本は家にあります。');
   });
 });
+
+// A234. A pronominal possessive takes the article's place, and Spanish and Portuguese keep a head's
+// own determiner beside it by moving the possessive behind the noun in its stressed form: "este libro
+// mío", "ningún libro suyo" (A187). A possessor does not. `possessorText` forces its determiner bare
+// before writing the prenominal possessive, so "of this book of mine" is "de mi libro", "of some
+// books of mine" "de mis libros", and "of no book of his" "de su libro" — which, since A216, also
+// negates the clause around it. Found fixing A216.
+describe('known bugs: a Spanish or Portuguese possessor drops its own determiner beside a possessive (A234)', () => {
+  const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
+  const his = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } as const;
+  const housesOf = (possessor: NounPhrase) => sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { possessor }) }));
+  const esPt = (said: Record<string, string>) => ({ es: said['es'], pt: said['pt'] });
+
+  test.fails('the possessor keeps its determiner, and the possessive follows the noun', () => {
+    expect(esPt(housesOf(np('BOOK', { definiteness: 'this', possessor: my })))).toEqual({
+      es: 'el gato ve la casa de este libro mío.', pt: 'o gato vê a casa deste livro meu.',
+    });
+    expect(esPt(housesOf(np('BOOK', { definiteness: 'some', number: 'plural', possessor: my })))).toEqual({
+      es: 'el gato ve la casa de algunos libros míos.', pt: 'o gato vê a casa de alguns livros meus.',
+    });
+    expect(esPt(housesOf(np('BOOK', { definiteness: 'no', possessor: his })))).toEqual({
+      es: 'el gato no ve la casa de ningún libro suyo.', pt: 'o gato não vê a casa de nenhum livro seu.',
+    });
+    expect(esPt(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { possessor: np('MAN', { definiteness: 'no', possessor: his }) }) } },
+    })))).toEqual({
+      es: 'el gato no corre en la casa de ningún hombre suyo.', pt: 'o gato não corre na casa de nenhum homem seu.',
+    });
+  });
+
+  test('regression: the object (A187), a definite possessor, and the other five', () => {
+    expect(esPt(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { definiteness: 'this', possessor: my }) })))).toEqual({
+      es: 'el gato ve este libro mío.', pt: 'o gato vê este livro meu.',
+    });
+    expect(esPt(housesOf(np('BOOK', { possessor: my })))).toEqual({
+      es: 'el gato ve la casa de mi libro.', pt: 'o gato vê a casa do meu livro.',
+    });
+    expect(housesOf(np('BOOK', { definiteness: 'this', possessor: my }))).toMatchObject({
+      en: 'the cat sees the house of this book of mine.',
+      it: 'il gatto vede la casa di questo mio libro.',
+      fr: 'le chat voit la maison de ce livre à moi.',
+      de: 'der Kater sieht das Haus dieses Buches von mir.',
+      ja: '猫は私のこの本の家を見ます。',
+    });
+  });
+});

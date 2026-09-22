@@ -1487,3 +1487,46 @@ describe('known bugs: German "nicht" and an adverb in front of a coordinated pro
       .toBe('der Hund, der ihn und die Maus nicht schnell frisst, läuft.');
   });
 });
+
+// A230. A negated prospective negates ahead of "im Begriff" (A19), and A209 kept an indefinite object
+// from absorbing that "nicht" as "kein". A `no` object still takes it: the verb's negation and the
+// object's collapse into the object's "kein" (A158), and in the prospective that "kein" stands inside
+// the zu-group. So "the cat is not about to eat any mouse" comes out as "ist im Begriff, keine Maus zu
+// fressen", the very sentence the positive "about to eat no mouse" renders, and the verb's negation is
+// gone. Found fixing A209.
+describe('known bugs: a `no` object keeps its "kein" inside a negated German prospective (A230)', () => {
+  const notAbout = (verb: string, extra: Parameters<typeof clause>[2] = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('CAT'), verb, { ...extra, verbPhrase: { aspect: 'prospective', negative: true, ...verbPhrase } }), 'de');
+  const noMouse = { directObject: np('MOUSE', { definiteness: 'no' }) };
+
+  test.fails('the verb\'s "nicht" carries ahead of "im Begriff", and the `no` phrase falls to the indefinite', () => {
+    expect(notAbout('EAT', noMouse)).toBe('der Kater ist nicht im Begriff, eine Maus zu fressen.');
+    expect(notAbout('EAT', { directObject: np('MOUSE', { definiteness: 'no', number: 'plural' }) }))
+      .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
+    expect(notAbout('EAT', noMouse, { tense: 'past' })).toBe('der Kater war nicht im Begriff, eine Maus zu fressen.');
+    expect(notAbout('EAT', noMouse, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('BECOME', { complements: { predicative: { phrase: np('DOG', { definiteness: 'no' }) } } }))
+      .toBe('der Kater ist nicht im Begriff, ein Hund zu werden.');
+    expect(notAbout('RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
+      .toBe('der Kater ist nicht im Begriff, in einem Haus zu laufen.');
+    expect(say(clause(np('DOG', {
+      relative: { headRole: 'subject', verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, ...noMouse },
+    }), 'RUN'), 'de')).toBe('der Hund, der nicht im Begriff ist, eine Maus zu fressen, läuft.');
+  });
+
+  test('regression: the positive prospective, NEVER, the other aspects and the other languages', () => {
+    // The plan's own "about to eat no mouse" keeps its "kein" in the group (A209).
+    expect(say(clause(np('CAT'), 'EAT', { ...noMouse, verbPhrase: { aspect: 'prospective' } }), 'de'))
+      .toBe('der Kater ist im Begriff, keine Maus zu fressen.');
+    // A negative adverb stands ahead of the group already, and takes the object's "kein" away (A158).
+    expect(notAbout('EAT', noMouse, { negative: false, modifier: 'NEVER' })).toBe('der Kater ist nie im Begriff, eine Maus zu fressen.');
+    expect(say(clause(np('CAT'), 'EAT', { ...noMouse, verbPhrase: { negative: true } }), 'de')).toBe('der Kater frisst keine Maus.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { ...noMouse, verbPhrase: { aspect: 'prospective', negative: true } }))).toMatchObject({
+      en: 'the cat is not about to eat any mouse.',
+      it: 'il gatto non sta per mangiare nessun topo.',
+      es: 'el gato no está a punto de comer ningún ratón.',
+      pt: 'o gato não está prestes a comer nenhum rato.',
+      ja: '猫はどのネズミも食べるところではありません。',
+    });
+  });
+});

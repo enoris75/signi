@@ -1,8 +1,15 @@
 # A-must-fix — confirmed bugs
 
-**None open.** Everything catalogued in this class has been fixed and moved to
-[`../fixed/`](../fixed/). The last twenty, all filed and fixed on 2026-09-22, went together:
-**A207**–**A212** and **A216**–**A229**, found by three rounds of random phrases (a negative word
+**Six open, all filed 2026-09-22** by the lanes that fixed A207–A229, each beside its own fix:
+**A230**, a `no` object keeping its "kein" inside a negated German prospective; **A231**, a German
+ordinal left bare as an essive object predicate; **A232**, the Japanese essive dropping an adjective's
+degree; **A233**, a negated Portuguese reflexive infinitive keeping "-se" after the verb; **A234**, a
+Spanish or Portuguese possessor losing its determiner beside a possessive; and **A235**, TIME forced
+bare under an adjective as if it named a rate.
+
+Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/).
+The last twenty, all filed and fixed on 2026-09-22, went together: **A207**–**A212** and
+**A216**–**A229**, found by three rounds of random phrases (a negative word
 the Romance negator did not see, an "or" group agreeing with the wrong conjunct, German "kein" and
 "nicht" in the wrong place) and by the C23–C28 localization sweep, whose authors met them outside
 their own lanes. Four of those were a preposition or a particle that belongs to a noun or a verb,
