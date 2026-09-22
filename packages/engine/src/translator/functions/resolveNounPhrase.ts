@@ -1,21 +1,44 @@
 import type { NounPhrase } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
+import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
+import { applyIntensifier } from './applyIntensifier.js';
 import { applyNounGender } from './applyNounGender.js';
+import { applyPossessorForm } from './applyPossessorForm.js';
+import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
 
+/** No adjective was fused into the head — the answer for every phrase but a Japanese kin term. */
+const EMPTY: ReadonlySet<number> = new Set();
+
 /**
- * Resolve a noun phrase for one language: resolve the head noun/pronoun and apply
- * number/gender (synthesising the pronoun surface form, or applying noun gender),
- * then resolve each adjective. This folds together what used to be four duplicated
+ * Resolve a noun phrase for one language: resolve the possessor, then the head noun/pronoun with its
+ * number/gender (synthesising the pronoun surface form, or applying noun gender) and the form its
+ * possessor selects, then each adjective. This folds together what used to be four duplicated
  * subject/object/complement blocks.
  */
 export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup): ResolvedNounPhrase {
   const head = resolve(np.concept, language, lookup);
+  // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical features —
+  // it needs no lexicon lookup, so it passes straight through for the engine to spell as a
+  // possessive pronoun. A genitive possessor is itself a noun phrase; recursing handles its own
+  // adjectives, number/gender, and any nested possessor ("the cat's owner's book").
+  //
+  // It is resolved **before** the head's own forms are settled, because in two of the seven the head's
+  // word depends on who owns it: 母 is my mother and お母さん is yours, "ma femme" but "une épouse"
+  // (P11 §2, `applyPossessorForm`). A possessor deep in a genitive chain therefore reaches the head
+  // that names it, one link at a time.
+  const possessor = np.possessor
+    ? (isPronominalPossessor(np.possessor)
+        ? np.possessor
+        : resolveNounPhrase(np.possessor, language, lookup))
+    : undefined;
+  // The adjectives the head fused into its own word, spent rather than said (see `fuseAdjectives`).
+  // Only a noun head fuses; a pronoun takes no attributive adjective to fuse.
+  let fused: ReadonlySet<number> = EMPTY;
   if (head.forms['person']) {
     // A 3rd-person pronoun that names the noun it stands for takes its gender from that noun, the
     // way this language reads it (C20): de *Inhalt* → "ihn", but en "it". Settled here, before the
@@ -86,22 +109,50 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // "多くのヨーロッパ", and no この/その either, as the other six languages already drop "this"), and the
     // negative concord a `no` would otherwise trigger with no negator to license it ("l'Asie ne brûle.").
     const superlative = (np.adjectives ?? []).some((_, i) => SUPERLATIVE_DEGREES.has(np.adjectiveDegrees?.[i] ?? 'positive'));
+    // A name the language leaves bare resolves **bare**, not definite (`takes_article: '0'`): a
+    // personal name takes no article in five of the seven, and the paths that fuse a preposition
+    // with an article read the determiner rather than the `proper` flag — "a Pietro", "de Pierre",
+    // never "al Pietro" (C38). A title overrides the key, so a titled name is articled again where
+    // the language articles a title.
     const picked = head.forms['proper'] === '1'
-      ? 'definite'
+      ? (head.forms['takes_article'] === '0' ? 'bare' : 'definite')
       : superlative && SUPERLATIVE_MAKES_DEFINITE.has(np.definiteness ?? 'definite')
         ? 'definite'
         : np.definiteness ?? 'definite';
+    // Spanish "otro gato" and Portuguese "outro gato" put OTHER where the indefinite article would
+    // stand — but only while OTHER actually stands there. A degree or an intensifier moves it behind
+    // the noun ("un gato más otro", "un gato muy otro"), and the article is then wanted again, so the
+    // test is the same one the two engines' prenominal branches make (C33).
+    const otherLeads = (np.adjectives ?? []).some((id, i) =>
+      id === 'OTHER' && (np.adjectiveDegrees?.[i] ?? 'positive') === 'positive' && !np.adjectiveIntensifiers?.[i]);
     const definiteness =
-      picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && np.adjectives?.includes('OTHER')
+      picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && otherLeads
         ? 'bare'
         : picked;
     // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
-    const forcesPlural = PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1';
+    // A cardinal above one counts, so it pluralises the head wherever the language has a plural —
+    // "two cats", "le due case" — which is the first thing the numeral does (C31). At one it leaves
+    // the number alone, and a mass noun is never counted.
+    const counted = (np.numeral ?? 0) > 1 && head.forms['uncountable'] !== '1';
+    const forcesPlural = counted || (PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1');
     const forcesSingular = definiteness === 'no' && NO_TAKES_SINGULAR.has(language);
     const num = forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);
-    head.forms['definiteness'] = definiteness;
+    // Then the head's *own* word, where an adjective is part of it (ja 兄弟 + ELDER → 兄, P11 D5) —
+    // before the possessor picks a form of that word, so 兄 can still become お兄さん. The gender step
+    // above is untouched by it: only Japanese seeds a `with_` column, and Japanese nouns have none.
+    fused = fuseAdjectives(head.forms, np.adjectives ?? []);
+    // …and last, the form the possessor selects: one's own 母 against someone else's お母さん, "ma
+    // femme" against "une épouse" (P11 D2/D3/D6). It also marks a kin head as one's own, which the
+    // phrase holding this one as its genitive possessor reads.
+    applyPossessorForm(head.forms, possessor);
+    // An indefinite article gives way to a numeral in every one of the seven — at one the numeral IS
+    // that article in five of them, and above one no language writes both — so the phrase resolves
+    // bare and each engine's article builder writes nothing without being told (C31). The value
+    // itself rides on the forms, as the determiner and the degree do.
+    head.forms['definiteness'] = np.numeral !== undefined && definiteness === 'indefinite' ? 'bare' : definiteness;
+    if (np.numeral !== undefined) head.forms['numeral'] = String(np.numeral);
   }
   // An adjective head is the predicate adjective of a subject complement ("seems happy") —
   // the one head that carries a comparative degree of its own. Thread it onto the head's
@@ -109,16 +160,57 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   if (head.forms['role'] === 'adjective' && np.headDegree && np.headDegree !== 'positive') {
     head.forms['degree'] = np.headDegree;
   }
+  // …and its intensifier, the same way ("is very big"; see `applyIntensifier`, C33).
+  if (head.forms['role'] === 'adjective') applyIntensifier(head, np.headIntensifier, language, lookup);
+  // A title stands with a personal name and nowhere else: `proper` says it is a name and `human`
+  // that it is a person's (C38). Its surface, its gender and the form Italian writes before a name
+  // ride on the head's forms too, where every engine's article builder can reach them — the article
+  // of a titled phrase agrees with the title, not with the name.
+  const title = np.title && head.forms['proper'] === '1' && head.forms['human'] === '1'
+    ? resolve(np.title, language, lookup)
+    : undefined;
+  if (title) {
+    // Title and name are one word from here on. That is not a shortcut: the two really are one noun
+    // phrase, and making them one surface is what puts the title in every slot a name can fill —
+    // subject, object, complement, possessor — without each of those asking whether there is one.
+    // Italian writes the short form before a name (`before_name`), and Japanese writes the title
+    // **after** it (`position: 'suffix'`), which is the only place the order differs.
+    const word = title.forms['before_name'] ?? title.forms['base'] ?? '';
+    const name = head.forms['base'] ?? '';
+    head.forms['base'] = title.forms['position'] === 'suffix' ? `${name}${word}` : `${word} ${name}`;
+    // The article agrees with the title, and is the one a **title** takes: Italian, Spanish and
+    // Portuguese write it ("il signor Pietro", "el señor Pedro"), English, French and German none.
+    // Each language says which on the title's own lexeme, overriding what the name says as a name.
+    if (title.forms['gender']) head.forms['gender'] = title.forms['gender'];
+    delete head.forms['takes_article'];
+    if (title.forms['takes_article']) head.forms['takes_article'] = title.forms['takes_article'];
+    // Furigana is drawn per word, so a fused surface has none: the name's reading would sit over
+    // both halves. The names are katakana, which needs none anyway.
+    delete head.forms['reading'];
+  }
+  // OWN is bound to the possessor, not listed among the adjectives (see NounPhrase.possessorOwn),
+  // but it agrees and declines exactly as an adjective does, so it is handed to the engines as one —
+  // at the head of the list, where every language puts it, and marked so Japanese can tell it from
+  // an ordinary adjective and drop the possessor it replaces. With no possessor there is nothing to
+  // bind it to and the flag is ignored (C37).
+  const own = np.possessorOwn && np.possessor ? resolve(POSSESSOR_OWN_ADJECTIVE, language, lookup) : undefined;
+  if (own) own.forms['possessor_bound'] = '1';
   return {
     head,
-    adjectives: (np.adjectives ?? []).map((id, i) => {
+    adjectives: (own ? [own] : []).concat((np.adjectives ?? []).flatMap((id, i) => {
+      // An adjective the head fused into its own word is already said (兄 IS "older brother"), so it
+      // is dropped here. The ones that stay keep their index, and with it their degree and intensifier.
+      if (fused.has(i)) return [];
       const cf = resolve(id, language, lookup);
       // Thread the per-adjective comparative degree onto its forms (like number/gender/
       // definiteness) so each engine reads it off `forms['degree']`. Omit the plain form.
       const deg = np.adjectiveDegrees?.[i];
       if (deg && deg !== 'positive') cf.forms['degree'] = deg;
-      return cf;
-    }),
+      // The intensifier is a word of its own, so it is resolved in this language and its surface,
+      // reading and position ride on the adjective beside the degree (C33).
+      applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup);
+      return [cf];
+    })),
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can
     // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise). Apply
     // the modifier's own number (so Romance engines can select its plural surface and
@@ -141,15 +233,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // The head's own forms reach the clause: they fill its subject slot where the gap is the
     // subject, which a `subject_sense` reads (A157).
     relative: np.relative ? resolveRelativeClause(np.relative, language, lookup, head.forms) : undefined,
-    // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical
-    // features — it needs no lexicon lookup, so it passes straight through for the engine to
-    // spell as a possessive pronoun. A genitive possessor is itself a noun phrase; recursing
-    // handles its own adjectives, number/gender, and any nested possessor ("the cat's owner's book").
-    possessor: np.possessor
-      ? (isPronominalPossessor(np.possessor)
-          ? np.possessor
-          : resolveNounPhrase(np.possessor, language, lookup))
-      : undefined,
+    // The possessor, resolved at the top of this function because the head's own word may depend on it.
+    possessor,
     // What that possessor is to the head: its owner (the default), the whole the head is a part of
     // ("a part of a keyboard"), or the parts the head is made up of ("a group of canvases", C26).
     // Only English renders them differently from the owner; the flag rides through.
@@ -170,5 +255,17 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // The flag rides through; the head resolves on the ordinary path above, because the clause
     // still agrees with it (its gender, number and personhood) as the antecedent.
     relativeGloss: np.relativeGloss,
+    // A contrastive demonstrative ("that place, not this one"): only French reads it, and only to
+    // write the deictic clitic the other six spell in the determiner itself. The flag rides through.
+    contrastive: np.contrastive,
+    // The cardinal counting the head ("two cats", 二匹の猫). Plain data: each engine spells its own
+    // word and places it, the number it forces having been settled above (C31).
+    numeral: np.numeral,
+    // The title standing with this name ("Mr Peter", ピーターさん) — already fused into the head's
+    // surface above; carried here so an engine can tell a titled name from a bare one (C38).
+    title,
+    // The focus particle singling this phrase out ("only the cat", 猫も). Plain data: each engine
+    // spells its own word and decides where it stands (C39).
+    focus: np.focus,
   };
 }

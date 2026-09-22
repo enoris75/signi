@@ -8,6 +8,7 @@ import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -42,6 +43,16 @@ const COPULA_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   dict: ['である', 'である', 'でない', 'でない'],
   stem: ['であり', 'であり', 'でないでい', 'でないでい'],
 };
+// An intensifier's 〜すぎる is an ichidan verb, so the predicate inflects as one, on the stem
+// jaAdjClass's `ru` class leaves (大きすぎ): 大きすぎます / 大きすぎました / 大きすぎません (C33).
+const RU_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
+  polite: ['ます', 'ました', 'ません', 'ませんでした'],
+  prenominal: ['る', 'た', 'ない', 'なかった'],
+  tara: ['たら', 'たら', 'なかったら', 'なかったら'],
+  citation: ['る', 'た', 'ない', 'なかった'],
+  dict: ['る', 'る', 'ない', 'ない'],
+  stem: ['', '', 'ないでい', 'ないでい'],
+};
 const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['います', 'いました', 'いません', 'いませんでした'],
   prenominal: ['いる', 'いた', 'いない', 'いなかった'],
@@ -69,6 +80,15 @@ const STATE_NEITHER: Record<CopulaForm, [string, string]> = {
   citation: ['いない', 'いなかった'],
   dict: ['いない', 'いない'],
   stem: ['いないでい', 'いないでい'],
+};
+// A verb closes the "neither … nor" on する, not on the existential ある: 大きすぎも小さすぎもしません.
+const RU_NEITHER: Record<CopulaForm, [string, string]> = {
+  polite: ['しません', 'しませんでした'],
+  prenominal: ['しない', 'しなかった'],
+  tara: ['しなかったら', 'しなかったら'],
+  citation: ['しない', 'しなかった'],
+  dict: ['しない', 'しない'],
+  stem: ['しないでい', 'しないでい'],
 };
 
 /**
@@ -103,8 +123,11 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
     const governed = form === 'dict' || form === 'stem';
     if (negative) {
       const lastForms = jaComparisonAdj(last.head);
-      const state = last.head.forms['role'] === 'adjective' && jaAdjClass(lastForms.base, lastForms.reading).kind === 'ta';
-      const tail = (state ? STATE_NEITHER : NEITHER)[form][tense === 'past' ? 1 : 0];
+      const lastKind = last.head.forms['role'] === 'adjective'
+        ? jaAdjClass(lastForms.base, lastForms.reading, false, lastForms.verbal).kind
+        : 'na';
+      const table = lastKind === 'ta' ? STATE_NEITHER : lastKind === 'ru' ? RU_NEITHER : NEITHER;
+      const tail = table[form][tense === 'past' ? 1 : 0];
       return [...conjuncts.flatMap((np) => predicateLinkSegs(np, 'mo')), { t: tail }];
     }
     const link = conjunction === 'or' ? 'ka' : 'te';
@@ -125,16 +148,19 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   }
   // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so it
   // inflects as one: 大きくないです).
-  const { base, reading } = jaComparisonAdj(head.head);
-  const { kind, stem, reading: stemReading, attributive, predicative } = jaAdjClass(base, reading, f['relational'] === '1');
-  // The predicate adjective's degree adverb leads, as it does attributively (もっと楽しいです).
+  const { base, reading, verbal } = jaComparisonAdj(head.head);
+  const { kind, stem, reading: stemReading, attributive, predicative } = jaAdjClass(base, reading, f['relational'] === '1', verbal);
+  // The predicate adjective's intensifier and degree adverb lead, as they do attributively
+  // (とても楽しいです, もっと楽しいです). A suffix intensifier is inside the stem instead (C33).
   const deg = JA_DEGREE[adjDegree(head.head)];
-  const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];
+  const intensifier = jaIntensifierSeg(head.head);
+  const degSegs: RubySegment[] = [...(intensifier ? [intensifier] : []), ...(deg ? [{ t: deg }] : [])];
   // A na- or の-adjective before its noun keeps its own attributive particle (幸せな猫, 茶色の猫).
   // A relational one keeps its の in front of the copula too, where dropping it would name the thing
   // the stem is rather than predicate of the subject (猫はアメリカのです, not 猫はアメリカです — A246).
   const ending = kind === 'i' ? I_ENDINGS[form][cell]
     : kind === 'ta' ? STATE_ENDINGS[form][cell]
+    : kind === 'ru' ? RU_ENDINGS[form][cell]
     : form === 'prenominal' && cell === 0 && attributive ? attributive
     : `${predicative}${COPULA_ENDINGS[form][cell]}`;
   return [...degSegs, wordSeg(stem, stemReading), { t: ending }];

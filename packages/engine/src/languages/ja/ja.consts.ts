@@ -1,5 +1,6 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../types.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -183,3 +184,15 @@ export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある',
  * as the copula gives way to ある / いる when it states that its subject exists. Kana, so no reading.
  */
 export const JA_SURU: ConceptForms = { conceptId: 'SURU', forms: { base: 'する', masu_present: 'します', te: 'して', nai: 'しない' } };
+
+/**
+ * The cardinals Japanese spells (see `numeralWord`, C31). They agree with nothing, and they never
+ * stand on their own: a counted noun phrase is numeral + the noun's own **counter** (二匹の猫,
+ * 二十四時間), which `jaCounted` builds.
+ */
+export const CARDINALS: CardinalTable = {
+  1: { word: '一' }, 2: { word: '二' }, 3: { word: '三' }, 4: { word: '四' },
+  5: { word: '五' }, 6: { word: '六' }, 7: { word: '七' }, 8: { word: '八' },
+  9: { word: '九' }, 10: { word: '十' }, 11: { word: '十一' }, 12: { word: '十二' },
+  24: { word: '二十四' },
+};

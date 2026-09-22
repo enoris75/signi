@@ -12,6 +12,12 @@ export * from '../resolved.fixtures.js';
 // ── Lexicon ─────────────────────────────────────────────────────────────────
 
 export const KATER: Forms = { base: 'Kater', plural: 'Kater', gender: 'masc', count: 'singular', animate: '1' };
+// An adjectival noun (P11 D8): the lexeme stores the bare stem, and the ending is the adjective one
+// its determiner and case select. The plural is the same stem, so the phrase can be pluralised at all.
+export const VERWANDT: Forms = {
+  base: 'Verwandt', plural: 'Verwandt', gender: 'masc', count: 'singular',
+  adjectival: '1', animate: '1', human: '1', fem: 'Verwandt',
+};
 export const KATZE: Forms = { base: 'Katze', plural: 'Katzen', gender: 'fem', count: 'singular', animate: '1' };
 export const MAUS: Forms = { base: 'Maus', plural: 'Mäuse', gender: 'fem', count: 'singular', animate: '1' };
 export const MANN: Forms = { base: 'Mann', plural: 'Männer', gender: 'masc', count: 'singular', animate: '1' };

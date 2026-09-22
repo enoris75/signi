@@ -226,29 +226,31 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-**Twelve open: C29–C40**, filed with the P09 batch on 2026-09-22, one per construct. Each names the
-P09 words it blocks: some cannot be seeded at all until it lands, and the others **are seeded now**
-— B59–B67 landed them on 2026-09-22 — and only their gloss waits here. So the last column has
-changed in kind: those words are in the corpus, pickable and composable, showing the English literal
-in their tooltip until the construct arrives.
+**One open: C29.** C30–C40 were filed with the P09 batch on 2026-09-22, one per construct, and
+**all eleven were built the same day** — see the Done table below and each file's own `## Done`. What
+is left here is C29's temporal complement, which still blocks TODAY, JUST and STILL.
 
-| # | File | Blocked on | Cannot be seeded yet | Gloss waits (seeded 2026-09-22 by) |
-|---|---|---|---|---|
-| C29 | [C-needs-engine/C29-temporal-complement.md](C-needs-engine/C29-temporal-complement.md) | a temporal complement (P09 E3) | — | TODAY (B59), JUST, STILL (B67) |
-| C30 | [C-needs-engine/C30-content-clause-with-expletive-subject.md](C-needs-engine/C30-content-clause-with-expletive-subject.md) | a content clause as subject, "it is right that…" (E4) | — | SHOULD, MIGHT (B63) |
-| C31 | [C-needs-engine/C31-numerals.md](C-needs-engine/C31-numerals.md) | numerals (E7) | ONE, TWO, THREE | DAY, WEEK, YEAR (B59) |
-| C32 | [C-needs-engine/C32-indefinite-pronouns.md](C-needs-engine/C32-indefinite-pronouns.md) | an indefinite pronoun, *something* / *nothing* (E7) | SOMETHING | ONLY (B67) |
-| C33 | [C-needs-engine/C33-degree-adverbs-on-adjectives.md](C-needs-engine/C33-degree-adverbs-on-adjectives.md) | an adverb on an adjective (E8) | VERY, TOO | — |
-| C34 | [C-needs-engine/C34-like-experiencer-verb.md](C-needs-engine/C34-like-experiencer-verb.md) | an experiencer verb, *al gatto piace* (E9) | LIKE | — |
-| C35 | [C-needs-engine/C35-lexical-object-case.md](C-needs-engine/C35-lexical-object-case.md) | a verb choosing its object's case, *hilft dem Hund* (E9) | HELP_VERB | — |
-| C36 | [C-needs-engine/C36-let-bare-infinitive.md](C-needs-engine/C36-let-bare-infinitive.md) | a bare infinitive and the ja causative (E9) | LET | ALLOWED (B63) |
-| C37 | [C-needs-engine/C37-own-intensifier.md](C-needs-engine/C37-own-intensifier.md) | an adjective bound to a possessor (E10) | OWN_ADJECTIVE | — |
-| C38 | [C-needs-engine/C38-title-before-a-name.md](C-needs-engine/C38-title-before-a-name.md) | personal names and a title before them (E11) | MR | — |
-| C39 | [C-needs-engine/C39-focus-particle-on-a-noun-phrase.md](C-needs-engine/C39-focus-particle-on-a-noun-phrase.md) | a focus particle on a noun phrase (not in P09 §3) | EVEN | — |
-| C40 | [C-needs-engine/C40-french-distal-demonstrative.md](C-needs-engine/C40-french-distal-demonstrative.md) | French *ce …-là* (a rule, not in P09 §3) | — | THERE (B67) |
+Each row names the P09 words its construct blocked: some could not be seeded at all until it landed,
+and the others **were already seeded** — B59–B67 landed them on 2026-09-22 — and only their gloss
+waited. A retired row says what the construct turned out to be.
+
+| # | File | Blocked on | Could not be seeded | Gloss waited (seeded 2026-09-22 by) | Shipped |
+|---|---|---|---|---|---|
+| C29 | [C-needs-engine/C29-temporal-complement.md](C-needs-engine/C29-temporal-complement.md) | a temporal complement (P09 E3) | — | TODAY (B59), JUST, STILL (B67) | **open** |
+| C30 | [done/C30-content-clause-with-expletive-subject.md](done/C30-content-clause-with-expletive-subject.md) | a content clause as subject, "it is right that…" (E4) | — | SHOULD, MIGHT (B63) | `PhrasePlan.contentSubject`; both glossed, POSSIBLE seeded, the present subjunctive extended to it/fr |
+| C31 | [done/C31-numerals.md](done/C31-numerals.md) | numerals (E7) | ONE, TWO, THREE | DAY, WEEK, YEAR (B59) | `NounPhrase.numeral`; all three glossed, HOUR and MONTH seeded; the three are **values**, not concepts |
+| C32 | [done/C32-indefinite-pronouns.md](done/C32-indefinite-pronouns.md) | an indefinite pronoun, *something* / *nothing* (E7) | SOMETHING | ONLY (B67) | a two-form pronoun; SOMETHING seeded and glossed, ONLY literal by design |
+| C33 | [done/C33-degree-adverbs-on-adjectives.md](done/C33-degree-adverbs-on-adjectives.md) | an adverb on an adjective (E8) | VERY, TOO | — | `adjectiveIntensifiers`; both seeded, VERY glossed, TOO literal by design |
+| C34 | [done/C34-like-experiencer-verb.md](done/C34-like-experiencer-verb.md) | an experiencer verb, *al gatto piace* (E9) | LIKE | — | the `experiencer` frame; LIKE seeded and glossed |
+| C35 | [done/C35-lexical-object-case.md](done/C35-lexical-object-case.md) | a verb choosing its object's case, *hilft dem Hund* (E9) | HELP_VERB | — | `object_case`; HELP_VERB seeded, literal by design; *fragen* fixed with `terminus_case` |
+| C36 | [done/C36-let-bare-infinitive.md](done/C36-let-bare-infinitive.md) | a bare infinitive and the ja causative (E9) | LET | ALLOWED (B63) | `infinitive_bare` + `causative_suffix`; LET seeded and glossed, ALLOWED literal by design |
+| C37 | [done/C37-own-intensifier.md](done/C37-own-intensifier.md) | an adjective bound to a possessor (E10) | OWN_ADJECTIVE | — | `possessorOwn`; OWN_ADJECTIVE seeded and glossed |
+| C38 | [done/C38-title-before-a-name.md](done/C38-title-before-a-name.md) | personal names and a title before them (E11) | MR | — | `NounPhrase.title`; PETER, MARY and MR seeded, all three literal by design |
+| C39 | [done/C39-focus-particle-on-a-noun-phrase.md](done/C39-focus-particle-on-a-noun-phrase.md) | a focus particle on a noun phrase (not in P09 §3) | EVEN | — | `NounPhrase.focus`; EVEN is a **value**, not a concept |
+| C40 | [done/C40-french-distal-demonstrative.md](done/C40-french-distal-demonstrative.md) | French *ce …-là* (a rule, not in P09 §3) | — | THERE (B67) | `NounPhrase.contrastive`; THERE glossed |
 
 They were filed as one ticket and split the same day at review: the twelve share nothing but P09,
-and each retires on its own construct.
+and each retires on its own construct. Eleven did, on 2026-09-22.
 
 **The P11 sweep of 2026-09-22 filed none.** Its 41 kin concepts
 ([B68–B74](#part-b--needs-seeding-b-needs-seed)) compose 37 glosses on the corpus as it stands, and
@@ -445,7 +447,24 @@ composed definitions to 430:
 The words that stayed unglossed and are not P09 rows are the differentia the batch bought: MIND,
 ERROR and REALITY are root nouns of [C26](done/C26-root-nouns-on-the-literal.md)'s kind, DIRECT_VERB
 a verb root of [C28](done/C28-verb-roots-without-a-gloss.md)'s, and ALLOWED the state LET leaves,
-which [C36](C-needs-engine/C36-let-bare-infinitive.md) records beside LET.
+which [C36](done/C36-let-bare-infinitive.md) records beside LET.
+
+#### And the eleven constructs, the same day
+
+C30–C40 were all built on 2026-09-22, which closes every §3 row but E3's temporal complement (C29).
+The corpus went from 611 concepts to **624** and from 430 composed definitions to **441**:
+
+| | before | after | the difference |
+|---|---|---|---|
+| P09 words blocked on a construct | 11 | **3** | TODAY, JUST and STILL, all C29's. DAY, WEEK, YEAR, SHOULD, MIGHT and THERE are glossed; ONLY is literal by design; **EVEN turned out not to be a concept at all** |
+| P09 words that could not be seeded | 12 | **0** | ONE, TWO, THREE and EVEN are *values*, not concepts; SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET, OWN_ADJECTIVE and MR are seeded |
+| words seeded | 73 | **+13** | SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET, OWN_ADJECTIVE, MR, and the eight differentia and names the glosses needed: POSSIBLE, HOUR, MONTH, PETER, MARY |
+| composed definitions | 430 | **441** | SHOULD, MIGHT, DAY, WEEK, YEAR, THERE, VERY, LIKE, LET, OWN_ADJECTIVE, SOMETHING |
+
+Seven of the new words are **literal by design**, each with its leads probed and recorded in its own
+file: HELP_VERB, TOO, ALLOWED, ONLY, MR, PETER and MARY (names are names), with HOUR and MONTH as
+units. That is the batch's second recurring verdict, beside the first — that a word a construct was
+filed for need not be a concept.
 
 **How it was run.** The concepts being glossed are not in the corpus, so each ticket seeded its
 words **in memory only** — the proposed forms pushed into the concept list before the harness's
@@ -711,6 +730,18 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
 | C26 | [done/C26-root-nouns-on-the-literal.md](done/C26-root-nouns-on-the-literal.md) | **built the part-whole possessor**, `NounPhrase.possessorRole` — wrong in English alone ("a keyboard's part" → "a part of a keyboard"; the other six already read a plain possessor as the whole) — and the instrument gap, `instrumentGloss`. Ten nouns: ORGAN → a part of a body, FLAME → the visible part of a fire, EYE → an organ with which one sees, MATERIAL → substance with which one makes an object, DEATH → the end of a life, LIFE → the state of a being that lives, LIQUID → substance that one pours, STICK, BLADE, SCREEN. Seeded **END**, **BODY**, **WOOD**, **LIVE_ALIVE**, **POUR**. The other 74 — the primitives, the genera, the geography — literal by design, the compass relation recorded and not built |
 | C27 | [done/C27-grammar-meta-nouns.md](done/C27-grammar-meta-nouns.md) | eleven nouns: the seven parts of a surface on C26's relation (KEY → a part of a keyboard, ROW → a part of a list, WORKSPACE → a group of canvases, ARROW → a key that moves the cursor, TAB, REGION, NAVIGATION) and four grammar nouns on headed relatives (STATEMENT → a clause that asserts facts, MOOD → a feature that indicates the speaker's purpose, PARTICIPANT_GRAMMAR, REGISTER → a formality level). Seeded **ASSERT**, **FACT**, **FORMALITY**. ARTICLE (identifiability alone is true of the demonstrative too), COMMAND, ORDER, INSTRUCTION and PERIOD_PUNCTUATION literal by design |
 | C28 | [done/C28-verb-roots-without-a-gloss.md](done/C28-verb-roots-without-a-gloss.md) | sixteen verb roots on shapes that already existed — FLY → to move through the air (MOVE_ONESELF already licensed a route), HEAR → to perceive sounds, INCLUDE → to have as part (the essive), EXCHANGE → to give an object to acquire another object (a purpose clause), OPEN / CLOSE as negated causatives, SPECIFY → to indicate exactly (freed from EXPRESS) — and forty-six literal by design, every lead probed: the subject constraint recorded and not built, the genus-verb leads for DESIRE, PERCEIVE and KNOW_ACQUAINTED probed with candidate words. Seeded **EXACTLY**, **CLOSED**, **OPEN_ADJECTIVE**. UNDERSTAND → to know the meaning and KNOW → to understand concepts now define each other, recorded |
+
+| C30 | [done/C30-content-clause-with-expletive-subject.md](done/C30-content-clause-with-expletive-subject.md) | **built the content clause as a subject**, `PhrasePlan.contentSubject` — the one shape C09 could not take, because *right* and *possible* are said of the **act** and not of the actor. Three answers, all of them the language's own: en/fr/de write an expletive (*it*, *il*, *es*) and extrapose under *that* / *que* / *dass*; it/es/pt write no subject and take the **present subjunctive**, which Italian and French had no forms for and now derive (it from the 1st singular, fr from the 3rd plural, with a short override list); ja nominalizes with こと and marks it が, where it really is the subject. SHOULD → it is right that one acts, MIGHT → it is possible that one acts. Seeded **POSSIBLE**, whose Japanese is 起こり得る and not ABLE's 可能 — the whole point of the ticket. E4's *object* clause ("say that…") is still open |
+| C31 | [done/C31-numerals.md](done/C31-numerals.md) | **built the cardinal**, `NounPhrase.numeral` — a value beside `definiteness`, not a concept, so ONE, TWO and THREE are not seeded. It pluralises the head from two up, precedes the noun in all seven, agrees only where the language agrees it (*un/una*, *ein/eine*, pt *dois/duas*), and the indefinite article gives way to it. Japanese takes the **counter** the noun chooses — 二匹の猫, 二軒の家 — from its animacy where the lexeme names none, and a time word is its own counter (二十四時間, 七日, 十二か月); no furigana is drawn over the compound, whose readings fuse irregularly. DAY → a period of twenty-four hours, WEEK → a period of seven days, YEAR → a period of twelve months, on C26's `parts` possessor. Seeded **HOUR** and **MONTH**, both literal by design. French's *deux ans* (`cardinal_form`) and the counted object's missing partitive shipped with it |
+| C32 | [done/C32-indefinite-pronouns.md](done/C32-indefinite-pronouns.md) | **built the indefinite pronoun**: SOMETHING, whose lexeme names a second surface for the negative and whose phrase is then marked `no` — the flag every engine already reads for concord, so *anything* / *niente* / *rien* / *nichts* / *nada* / 何も…ない each come out of machinery the `no` determiner built, with French's *pas* and German's *nicht* giving way. English needs a third form in the subject slot (*nothing eats*). It is a pronoun by its lexicon and a phrase by its syntax (`thing`): no Romance clitic, no pro-drop, no personal *a*. Glossed → an unknown thing. **ONLY is literal by design**: "and nothing more" wants a verbless "and" fragment, and a verbless period cannot be negated at all |
+| C33 | [done/C33-degree-adverbs-on-adjectives.md](done/C33-degree-adverbs-on-adjectives.md) | **built the intensifier**, `adjectiveIntensifiers` / `headIntensifier` — concepts rather than values, because the word is lexical in three ways. Seeded **VERY** and **TOO**, flagged `intensifier` so the adverb picker leaves them out as it leaves out a modal. pt *demais* follows its adjective; Japanese 〜すぎる is a **suffix** that turns the adjective into an ichidan verb, which cost `jaAdjClass` a new `ru` class and the copula tables a row (大きすぎます, 幸せすぎる, 疲れすぎます). An intensified adjective is postnominal in Romance, as a compared one is — which also fixed a latent defect in OTHER's article. VERY → to a high level; **TOO is literal by design**, the corpus having no *excessive* |
+| C34 | [done/C34-like-experiencer-verb.md](done/C34-like-experiencer-verb.md) | **built the experiencer frame**, `experiencer` on the Italian and Spanish lexemes: the thing liked becomes the grammatical subject (so the verb agrees with it) and the one who likes the bare dative, re-mapped in the translator beside the passive, which does the same thing. The relative clause re-maps too, its gap moving with it (*il gatto al quale il cane piace*, *il cane che piace al gatto*). Spanish's obligatory clitic agrees in person (*a mí me gusta*). Portuguese needed only `object_prep`, and Japanese no verb at all — `adjectival` makes 好き the predicate and its object takes が (猫は犬が好きです). Seeded **LIKE**, glossed → to feel joy because of an object |
+| C35 | [done/C35-lexical-object-case.md](done/C35-lexical-object-case.md) | **built the lexical object case**, `object_case` on the German lexeme, read wherever the object is declined — article, adjectives, *kein*, pronoun, dative plural -n, the relative pronoun, and the **impersonal passive**, where the patient keeps its case and *werden* is forced to the 3rd singular (*dem Hund wird geholfen*). The same key the other way round, `terminus_case`, fixed *fragen*, which had been saying "fragt dem Mann". Seeded **HELP_VERB**, **literal by design**: the corpus has no *easy* or *support*, and every construct-free lead defines *enable*, *cooperate* or *encourage* instead |
+| C36 | [done/C36-let-bare-infinitive.md](done/C36-let-bare-infinitive.md) | **built the bare infinitive and the Japanese causative**, two lexical flags on the governor. `infinitive_bare` drops en *to*, de *zu* and its comma, and puts the governed verb in German's own verb cluster, behind the finite verb in a V2 clause and in front of it in a verb-final one (*eine Person handeln lassen*). `causative_suffix` replaces the governing verb outright with the governed verb's 〜せる / させる form, **derived** from the `nai` and `passive` the lexeme already stores, the causee taking を or に by whether that verb has an object. Seeded **LET**, glossed → to cause a person to be allowed to act; **ALLOWED is literal by design** (*lassen* without an infinitive means *leave*). A relative clause carrying no infinitive complement is recorded as a defect of its own |
+| C37 | [done/C37-own-intensifier.md](done/C37-own-intensifier.md) | **built the possessor-bound modifier**, `NounPhrase.possessorOwn` — a flag on the plan, so the builder can offer it only beside a possessor, and an adjective to the engines, so agreement, German's declension and the Romance prenominal position come for free. Japanese is what the flag exists for: 自分の **replaces** a possessive pronoun (自分の猫, never 彼の自分の猫), and after a named owner it is 自身の (猫自身の本). Seeded **OWN_ADJECTIVE**, glossed on C23's headless relative → that no other person owns, which is what "my own" adds to "my" |
+| C38 | [done/C38-title-before-a-name.md](done/C38-title-before-a-name.md) | **built personal names and the title**, `NounPhrase.title`. Seeded **PETER** and **MARY** — the corpus's first people — and **MR**, flagged `title` so no noun picker offers it. Title and name fuse into one word in the translator, which is what puts the title in every slot a name can fill and makes the article agree with the **title** (*il signor Pietro*, *el señor Pedro*, and none in en/fr/de); Japanese writes it after the name. A personal name resolves **bare**, which it/fr had no way to say of a proper noun (*a Pietro*, not *al Pietro*). All three are literal by design. German's weak *Herrn* is the one thing named and not done |
+| C39 | [done/C39-focus-particle-on-a-noun-phrase.md](done/C39-focus-particle-on-a-noun-phrase.md) | **built the focus particle**, `NounPhrase.focus` — `only \| even \| also`, a value, so **EVEN is not a concept** and its gloss question dissolves with it. Six languages write a word beside the phrase (en *too* and fr *aussi* after it); Japanese writes a particle that replaces が / を / は and follows every other, which is the `no` circumfix's own rule and so one site: 猫だけ, 猫さえ, 猫も, 家にも. A coordination takes none. The six reach the subject and the direct object; a complement's focus, which belongs in front of the adposition, is what is left |
+| C40 | [done/C40-french-distal-demonstrative.md](done/C40-french-distal-demonstrative.md) | **built the contrastive demonstrative**, `NounPhrase.contrastive` — read by French alone, which neutralises this/that in *ce* and marks the distance with the postposed clitic (*ce lieu-là*, *ce chat-ci*). It closes the noun's own words, behind its adjectives and ahead of a modifier, possessor or relative. THERE → in that place, which without it was HERE's gloss character for character |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

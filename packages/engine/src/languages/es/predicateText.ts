@@ -18,12 +18,14 @@ import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { ESTAR_COPULA } from './es.consts.js';
+import { ESTAR_COPULA, FOCUS_WORDS } from './es.consts.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeAdj } from './agreeAdj.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
+import { slotFocus } from '../../functions/slotFocus.js';
+import { withFocus } from '../../functions/withFocus.js';
 import { coordinateElement } from './coordinateElement.js';
 import { esCliticize } from './esCliticize.js';
 import { esEnclitic } from './esEnclitic.js';
@@ -218,13 +220,30 @@ export function predicateText(
   // a group mixing in a noun, where the doubling is optional, is left undoubled.
   // An elided predicate leaves the invariable "lo" in the same slot ("el perro no lo es", "los perros
   // no lo están"); an elided place leaves nothing ("el perro no está") (A121).
-  const objectClitic = !directObject ? (verbPhrase.elided?.type === 'predicative' ? 'lo' : '')
+  // An experiencer verb doubles its dative with a clitic, which Spanish requires there: "al gato
+  // **le** gusta el perro", "a los gatos **les** gustan los perros", "a mí **me** gusta el perro"
+  // (localization C34). The experiencer arrives as the `terminus` complement — or, in a relative
+  // clause whose head is the one who likes, as the terminus **gap**, which the relativizer renders
+  // and `gapComplement` names ("el gato al que **le** gusta el perro").
+  const experiencerDative = verb.forms['experiencer'] === '1' ? complements?.['terminus'] : undefined;
+  const experiencerForms = experiencerDative?.phrase.conjuncts.length === 1
+    ? experiencerDative.phrase.conjuncts[0].head.forms : undefined;
+  const experiencerClitic =
+    experiencerForms?.['person'] && experiencerForms['person'] !== '3' ? objectPronounForm(experiencerForms)
+    : experiencerDative ? (experiencerDative.phrase.agreement['number'] === 'plural' ? 'les' : 'le')
+    : verb.forms['experiencer'] === '1' && gapComplement === 'terminus' ? 'le'
+    : '';
+  const objectClitic = experiencerClitic || (!directObject ? (verbPhrase.elided?.type === 'predicative' ? 'lo' : '')
     : objectPrep ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
-    : pronounGroup ? groupObjectClitic(directObject) : '';
+    : pronounGroup ? groupObjectClitic(directObject) : '');
   // A human noun takes the personal "a" too ("ve al niño"), see `objectNounText`.
+  // The personal "a" marks a person, so the indefinite pronoun that stands for a **thing** takes
+  // none: "come algo", never "*come a algo" (C32).
   const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
-    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np, verb.forms);
+    : np.head.forms['person']
+      ? `${np.head.forms['thing'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
+      : objectNounText(np, verb.forms);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
   // A reflexive verb already carries its own "se" in the form ("se mueve"), and the impersonal one
@@ -238,7 +257,9 @@ export function predicateText(
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("es comida por el gato en la casa").
   const directObjectText = passive ? agentPhrase(agent)
-    : directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun, true) : '';
+    // A focus particle singles the object out, from outside the phrase: "come solo la comida" (C39).
+    : directObject && (!objectClitic || pronounGroup)
+      ? withFocus(coordinateElement(directObject, tonicOrNoun, true), slotFocus(directObject), FOCUS_WORDS) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo ? modifierText : '';

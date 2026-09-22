@@ -63,6 +63,18 @@ describe('agreeAdjFr', () => {
     expect(agreeAdjFr('vieux', 'masc', true)).toBe('vieux');
     expect(agreeAdjFr('bas', 'fem', false)).toBe('basse');
     expect(agreeAdjFr('bas', 'masc', true)).toBe('bas');
+    // YOUNGER (P11): the rule's default would give "cadete" / "cadetes".
+    expect(agreeAdjFr('cadet', 'fem', false)).toBe('cadette');
+    expect(agreeAdjFr('cadet', 'fem', true)).toBe('cadettes');
+    expect(agreeAdjFr('cadet', 'masc', true)).toBe('cadets');
+  });
+
+  // ELDER (P11) needs no entry: -é takes the regular +e / +s, "mon frère aîné", "mes sœurs aînées".
+  test('an -é adjective agrees by the default rule', () => {
+    expect(agreeAdjFr('aîné', 'masc', false)).toBe('aîné');
+    expect(agreeAdjFr('aîné', 'fem', false)).toBe('aînée');
+    expect(agreeAdjFr('aîné', 'masc', true)).toBe('aînés');
+    expect(agreeAdjFr('aîné', 'fem', true)).toBe('aînées');
   });
 
   test('an empty base stays empty', () => {

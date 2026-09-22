@@ -209,6 +209,32 @@ export const VOICE_LABELS: Record<Voice, string> = { active: 'active', passive: 
  * `instrumental` is the means: both spell "with" in English, and no other language conflates them
  * beyond the Romance "con", which at least keeps the animate reading apart by context.
  */
+/**
+ * A **focus particle** on a noun phrase: what it singles out of the alternatives its context offers
+ * (localization C39). `only` excludes them ("only the cat eats"), `even` includes the least likely
+ * one ("even the cat eats"), `also` adds one to what has been said ("the cat too eats").
+ *
+ * It is a value rather than a concept, as the determiners are: no language has one word for it that
+ * a picker could offer, and Japanese has no word at all — its だけ / さえ / も are particles that
+ * replace the case particle after the phrase. The three values get `focus` entries in `UI_STRINGS`.
+ */
+export type FocusParticle = 'only' | 'even' | 'also';
+
+/**
+ * The slot a concept fills when it is not the one its role implies (see `Concept.slot`). Each value
+ * names a field of `NounPhrase` rather than a picker, because that is what the word is for; the
+ * picker that must **not** offer it follows from its role. The pattern is `Concept.modal`'s, which
+ * splits the verbs between the main-verb picker and the modal one — with one difference: these four
+ * have no picker of their own yet, so today the flag only keeps them out of the wrong one.
+ *
+ *  - `intensifier` — VERY, TOO: adverbs that modify an adjective (`adjectiveIntensifiers`, C33).
+ *  - `title` — MR: a noun that stands with a personal name (`title`, C38).
+ *  - `possessorOwn` — OWN_ADJECTIVE: an adjective bound to a possessor (`possessorOwn`, C37).
+ *  - `indefinite` — SOMETHING: a pronoun that stands for a thing rather than a person (C32), which
+ *    the pronoun chooser's person row has no place for.
+ */
+export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite';
+
 export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'comitative' | 'terminus' | 'predicative' | 'objectPredicative';
 
 /**
@@ -443,6 +469,14 @@ export interface Concept {
   emoji?: string;
   transitivity?: Transitivity; // only set for verbs
   modal?: boolean;             // verb that governs another verb rather than heading a clause
+  /**
+   * The slot this concept fills, where that is **not** the one its role implies (see `ConceptSlot`).
+   * A picker offering its role must filter it out: *very* is an adverb that never modifies a verb,
+   * *Mr* a noun that never fills a noun slot, *own* an adjective that exists only beside a possessor,
+   * *something* a pronoun that is not a person. Absent for every ordinary concept, which is what
+   * every existing picker wants.
+   */
+  slot?: ConceptSlot;
   person?: '1' | '2' | '3';   // only set for pronouns
   number?: 'singular' | 'plural'; // inherent grammatical number, only set for pronouns
   gendered?: boolean;           // noun has distinct masc/fem surface forms
@@ -522,6 +556,24 @@ export interface NounPhrase {
    */
   adjectiveDegrees?: Degree[];
   /**
+   * An **intensifier** per adjective, index-aligned with `adjectives`: the id of an adverb flagged
+   * `Concept.intensifier` (VERY, TOO), or nothing for the plain adjective. It says *how much*,
+   * where `adjectiveDegrees` says *more or less than what* — "a very big cat", "un chat très
+   * grand", "ein sehr großer Kater", とても大きい猫 — and the two compose ("molto più grande").
+   *
+   * Where it goes is the intensifier's own, not the adjective's: before it in six languages and
+   * for pt *muito*, but **after** it for pt *demais* (*grande demais*), and in Japanese TOO is not
+   * a word at all but the suffix 〜すぎる on the adjective's stem (大きすぎる), which inflects as a
+   * verb. Each lexeme names which (`position`: pre / post / suffix). Localization C33.
+   */
+  adjectiveIntensifiers?: (string | undefined)[];
+  /**
+   * The intensifier of the *head* itself, the counterpart of `headDegree`: only meaningful when the
+   * head is an adjective — the predicate adjective of a `predicative` subject complement ("is
+   * **very** big"). Ignored for a noun or pronoun head.
+   */
+  headIntensifier?: string;
+  /**
    * Comparative degree of the *head* itself. Only meaningful when the head is an adjective —
    * i.e. the predicate adjective of a `predicative` subject complement ("seems **happier**"),
    * the one place an adjective heads a noun phrase. Ignored for a noun or pronoun head.
@@ -569,6 +621,21 @@ export interface NounPhrase {
    * possessor, which stays the possessive pronoun ("its part").
    */
   possessorRole?: 'owner' | 'whole' | 'parts';
+  /**
+   * Bind OWN to the `possessor` — "my **own** cat", "il **proprio** gatto", "sein **eigener**
+   * Kater", 自分の猫 (localization C37). It is a flag here rather than an entry in `adjectives`
+   * because the word exists only beside a possessor: an "own cat" with nobody owning it is not a
+   * phrase in any of the seven, and the builder offers the control only once a possessor is set.
+   *
+   * The engines are given it as an adjective all the same (the translator puts OWN_ADJECTIVE at the
+   * head of the resolved adjectives, marked `possessor_bound`), so it agrees and declines with the
+   * head by the ordinary machinery and stands before the noun everywhere. Japanese is the exception
+   * the flag exists for: 自分の does not join the possessor, it **replaces** it — *his own cat* is
+   * 自分の猫, never 彼の自分の猫 — and a genitive possessor keeps its own word, 猫自身の本.
+   *
+   * Ignored with no possessor.
+   */
+  possessorOwn?: boolean;
   /**
    * Render this phrase as an **adjective-definition gloss**: a bare noun phrase of a *dimension
    * noun* carrying a *degree adjective* ("great size" / "grande dimensione"), realised as a
@@ -626,6 +693,61 @@ export interface NounPhrase {
    * or on a coordination.
    */
   relativeGloss?: boolean;
+  /**
+   * Mark a `this` / `that` determiner as **contrastive** — pointing at one of a set and away from
+   * the rest ("*that* place, not this one"), rather than merely pointing at something present. Six
+   * languages spell the contrast in the determiner itself and read this nowhere (en this/that, it
+   * questo/quel, de dieser/jener, es este/ese, pt este/esse, ja この/その); French does not — its
+   * single *ce* series covers both, and the distance is carried by the postposed deictic clitics
+   * *-ci* / *-là*, which are marked and only written where the contrast is meant ("ce lieu-**là**",
+   * "cette maison-**là**"; see `demArticle`).
+   *
+   * A definition is where the distance *is* the meaning, so THERE's gloss "in that place" sets it
+   * and French says *dans ce lieu-là* instead of HERE's *dans ce lieu* (localization C40). Ignored
+   * on any other determiner, and on a pronoun head.
+   */
+  contrastive?: boolean;
+  /**
+   * A **focus particle** on this phrase — "**only** the cat", "**even** the cat", "the cat **too**"
+   * (see `FocusParticle`, localization C39). It is the phrase that is singled out, not the act, which
+   * is what distinguishes it from the focus *adverbs* ONLY and ALSO, whose scope is the verb ("the
+   * cat only eats"). Six languages write a word before the phrase — and English writes "too" after
+   * it, French "aussi" after it — where Japanese writes a particle that **replaces** が / を / は
+   * (猫も, 食べ物さえ) and follows every other particle (家にも).
+   *
+   * Read on the subject and the direct object, and in Japanese wherever a case particle is written.
+   * Ignored on a conjunct of a coordination: the focus is of the whole slot, and no engine spells it
+   * once per conjunct.
+   */
+  focus?: FocusParticle;
+  /**
+   * A **cardinal numeral** counting the head — "**two** cats", "le **due** case", "**zwei** Häuser",
+   * 二匹の猫 (localization C31). It is a value beside `definiteness` rather than a concept, as the
+   * determiners are: no picker offers a word for it, and Japanese has no word at all without the
+   * **counter** its noun chooses (匹 for an animal, 軒 for a house, 時間 for an hour).
+   *
+   * From two up it makes the phrase plural wherever the language has a plural, and it stands before
+   * the noun in all seven. It agrees only where the language agrees it — *un/una*, *ein/eine*,
+   * *dois/duas* — and only at one; every language's higher cardinals are invariable. An indefinite
+   * article gives way to it, because in five of the seven the numeral *is* that article at one; a
+   * definite or demonstrative determiner keeps its place in front of it ("the two cats").
+   *
+   * The words are spelled for 1–12 and 24 — the numbers the calendar glosses count in — and any
+   * other value renders as its digits, which every one of the seven writes that way.
+   */
+  numeral?: number;
+  /**
+   * A **title** standing with a personal name — "**Mr** Peter", "il **signor** Pietro", ピーター**さん**
+   * (localization C38). The id of a concept flagged `title`; meaningful only on a head that is both
+   * `proper` and a person, because a title with no name to precede is not a phrase.
+   *
+   * The title and the name are one noun phrase, and the engines are given it as one word: the name
+   * keeps the role, and everything that agrees agrees with the **title**, which is what the article
+   * lands on ("**il** signor Pietro", where the bare name is "Pietro"). Whether a language articles a
+   * title at all is the title's own business, and so is where it stands: Japanese writes it after the
+   * name, and Italian drops its final -e before one (*signore* → *signor*).
+   */
+  title?: string;
 }
 
 /**
@@ -894,6 +1016,19 @@ export interface LexicalEntry {
  * aspect or modals of its own. It may be negated ("to be able not to act") and may itself govern one
  * ("to desire to be able to act").
  */
+/**
+ * A finite clause filling a slot a noun phrase would (see PhrasePlan.contentSubject). It is a whole
+ * clause of its own — its subject is spoken, and it carries its own object and complements — unlike
+ * an `InfinitiveComplement`, whose subject is the governing clause's and goes unsaid. Its mood is
+ * not its own: the language puts it in the indicative or the present subjunctive.
+ */
+export interface ContentClause {
+  subject: NounElement;
+  verbPhrase: VerbPhrase;
+  directObject?: NounElement;
+  complements?: Partial<Record<ComplementType, Complement>>;
+}
+
 export interface InfinitiveComplement {
   verbPhrase: VerbPhrase;
   directObject?: NounElement;
@@ -1038,6 +1173,25 @@ export interface PhrasePlan {
    * the infinitive ("consumare", not the 2sg "consuma" its imperative shows).
    */
   infinitive?: boolean;
+  /**
+   * A **content clause standing where the subject would** — "**that one acts** is right", which
+   * every one of the seven says the other way round: "it is right that one acts", "è giusto che si
+   * agisca", "es ist richtig, dass man handelt", 行動することが正しい (localization C30).
+   *
+   * It is what an evaluative predicate is said *of*. MUST, CAN and WILL are glossed "to be obliged /
+   * able / to desire to act", where the adjective is said of the one who acts; *right* and *possible*
+   * are said of the **act**, and no phrase can make an act a subject. This can.
+   *
+   * What each language does with it is its own: English, French and German write an **expletive** in
+   * the subject slot ("it", "il", "es") and extrapose the clause behind the predicate; Italian,
+   * Spanish and Portuguese write no expletive and put the clause in the present **subjunctive**
+   * ("che si agisca", "que se actúe", "que se aja"), which the mood machinery derives; and Japanese
+   * nominalizes it with こと and marks it が, where it really is the subject.
+   *
+   * The plan's own `subject` is not rendered when this is present — it is the throwaway a subjectless
+   * clause carries, as an infinitive citation's is.
+   */
+  contentSubject?: ContentClause;
   /**
    * An optional clause this clause's predicate governs in the infinitive — "the cat is able **to
    * eat**", "to desire **to act**" (see `InfinitiveComplement`). It follows the clause (German

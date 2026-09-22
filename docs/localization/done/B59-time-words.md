@@ -4,7 +4,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. The five time words of P09 �
 seeded early). All five seed today, and one of them glosses: NIGHT, on FLAME's part-whole shape
 with DAY as the whole and one new adjective, DARK. DAY, WEEK and YEAR are measured in numbers the
 engine does not have (E7), and TODAY is "on this day", a temporal complement (E3): DAY, WEEK and YEAR go to
-[C31](../C-needs-engine/C31-numerals.md), TODAY to [C29](../C-needs-engine/C29-temporal-complement.md). The words come from
+[C31](../done/C31-numerals.md), TODAY to [C29](../C-needs-engine/C29-temporal-complement.md). The words come from
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
@@ -78,7 +78,7 @@ No proposed render collides with a shipped gloss. Four readings to judge on auth
 
 ## Not solved by this seed
 
-1. **DAY is blocked on numbers — [C31](../C-needs-engine/C31-numerals.md),
+1. **DAY is blocked on numbers — [C31](../done/C31-numerals.md),
    E7.** Its gloss is "a period of twenty-four hours". That needs the cardinal, and HOUR, whose
    Japanese 時間 is TIME's own word; the counter 二十四時間 is E7's job. None of the number-free leads
    singles out a day:
@@ -209,7 +209,7 @@ What landed differently from the plan:
    teure*), which no seeded adjective has yet.
 2. **DAY and WEEK were seeded before this ticket ran**, with B66's *la settimana scorsa* in view;
    this ticket owns them from here. Their glosses are numbers' work either way, and go to
-   [C31](../C-needs-engine/C31-numerals.md) as planned — the number-free leads re-rendered
+   [C31](../done/C31-numerals.md) as planned — the number-free leads re-rendered
    unchanged against the final seed ("a part of a week", "a group of days", "a period of days").
 3. **YEAR is French *année* and German *das Jahr*, as the ruling and the table said**: *beaucoup
    d'années* and *cette année* render, where *an* would give *beaucoup d'ans*. Its Japanese 年 reads

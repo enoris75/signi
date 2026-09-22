@@ -274,6 +274,35 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'incluindo', participle: 'incluído' },
     ja: { te: '含んで', te_reading: 'ふくんで', nai: '含まない', nai_reading: 'ふくまない', passive: '含まれる', passive_reading: 'ふくまれる' },
   },
+  // lassen is strong (Partizip gelassen); English "let" is invariant. Japanese needs its te/nai
+  // forms for the plain and negative paths even though a clause renders the causative suffix.
+  LET: {
+    en: { gerund: 'letting', participle: 'let' },
+    it: { gerund: 'lasciando', participle: 'lasciato' },
+    fr: { participle: 'laissé' }, de: { participle: 'gelassen' },
+    es: { gerund: 'dejando', participle: 'dejado' },
+    pt: { gerund: 'deixando', participle: 'deixado' },
+    ja: { te: '許して', te_reading: 'ゆるして', nai: '許さない', nai_reading: 'ゆるさない', passive: '許される', passive_reading: 'ゆるされる' },
+  },
+  // piacere selects essere (è piaciuto). Japanese needs none: 好き is an adjective, and its forms
+  // come off the copula (localization C34).
+  LIKE: {
+    en: { gerund: 'liking', participle: 'liked' },
+    it: { gerund: 'piacendo', participle: 'piaciuto', aux: 'be' },
+    fr: { participle: 'aimé' }, de: { participle: 'gemocht' },
+    es: { gerund: 'gustando', participle: 'gustado' },
+    pt: { gerund: 'gostando', participle: 'gostado' },
+  },
+  // helfen is strong: Partizip II "geholfen". Japanese 手伝う is a godan う-verb (て-form 手伝って,
+  // negative 手伝わない, passive 手伝われる).
+  HELP_VERB: {
+    en: { gerund: 'helping', participle: 'helped' },
+    it: { gerund: 'aiutando', participle: 'aiutato' },
+    fr: { participle: 'aidé' }, de: { participle: 'geholfen' },
+    es: { gerund: 'ayudando', participle: 'ayudado' },
+    pt: { gerund: 'ajudando', participle: 'ajudado' },
+    ja: { te: '手伝って', te_reading: 'てつだって', nai: '手伝わない', nai_reading: 'てつだわない', passive: '手伝われる', passive_reading: 'てつだわれる' },
+  },
   CLICK: {
     en: { gerund: 'clicking', participle: 'clicked' },
     it: { gerund: 'cliccando', participle: 'cliccato' },

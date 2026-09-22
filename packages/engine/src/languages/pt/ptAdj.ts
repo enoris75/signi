@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import type { PtAdjectives } from './pt.types.js';
 import { PRENOMINAL, PT_SUPPLETIVE } from './pt.consts.js';
@@ -20,10 +21,11 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
     // One exception: a suppletive at `most` stands before the noun, "o maior gato", "o melhor gato"
     // (A178). After the noun it reads as the comparative, and the superlative loses the one place
     // Portuguese marks it, since the definite article is on the comparative too (C01).
-    if (PT_SUPPLETIVE[a.forms['base'] ?? ''] && adjDegree(a) === 'most') {
+    // An intensified adjective follows the noun in either case, as a compared one does (C33).
+    if (PT_SUPPLETIVE[a.forms['base'] ?? ''] && adjDegree(a) === 'most' && !hasIntensifier(a)) {
       const surface = ptComparison(a, gender, plural);
       if (surface) pre.push(surface);
-    } else if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
+    } else if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a)) {
       const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
       if (surface) pre.push(surface);
     } else {

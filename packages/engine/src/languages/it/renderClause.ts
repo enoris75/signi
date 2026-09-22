@@ -36,7 +36,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
     (phrase.verbPhrase.mood === 'imperative' ||
       phrase.verbPhrase.mood === 'infinitive' ||
       isPronounElement(subject));
-  const subj = dropSubject ? '' : subjectText(subject);
+  // A content clause standing where the subject would is extraposed behind the predicate, under
+  // "che" / "que" and in the present subjunctive; these languages write no expletive in the slot it
+  // left, because they write no subject pronoun at all (C30).
+  const contentSubject = phrase.contentSubject;
+  const subj = contentSubject || dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
   if (!phrase.verbPhrase) return subj.trim();
   // A citation's subject is nobody: the generic subject it carries only satisfies the plan, so its
@@ -56,7 +60,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // puts before the infinitive: "per cambiare", "per vedere le traduzioni". It is subject-controlled,
   // so it agrees with this clause's own subject, exactly as an infinitive complement does.
   const purpose = phrase.purpose ? infinitiveComplementText(phrase.purpose, agreement, 'per') : '';
-  return [subj, predicate, complement, purpose].filter(Boolean).join(' ').trim();
+  // The content clause closes the phrase, under "che" and in the present subjunctive the
+  // translator resolved it in (C30).
+  const content = contentSubject ? `che ${renderClause(contentSubject)}` : '';
+  return [subj, predicate, content, complement, purpose].filter(Boolean).join(' ').trim();
 }
 
 function withoutGeneric(forms: Record<string, string>): Record<string, string> {

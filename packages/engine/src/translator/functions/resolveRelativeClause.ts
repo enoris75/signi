@@ -48,15 +48,45 @@ export function resolveRelativeClause(
   );
   // The alarm a cry raises has no determiner slot, as in a main clause: "the boy who cried wolf" (A163).
   const directObject = resolvedObject && withAlarmCry(resolvedObject, verbPhrase.verb, language);
+  // An experiencer verb re-maps a relative clause as it re-maps a main one (see `resolvePhrase`,
+  // C34), and the gap moves with the slot the head fills.
+  const { experiencer, ...experiencerSlots } = verbPhrase.verb.forms['experiencer'] === '1'
+    ? experiencerRemap(headRole, subject, directObject)
+    : { experiencer: undefined, headRole, subject, directObject };
   const slots = verbPhrase.voice === 'passive'
     ? passiveRemap(headRole, subject, directObject)
-    : { headRole, subject, directObject };
+    : experiencerSlots;
+  const complements = resolveComplements(clause.complements, language, lookup, verbPhrase.verb.forms);
   return {
     ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     verbPhrase,
-    complements: resolveComplements(clause.complements, language, lookup, verbPhrase.verb.forms),
+    complements: experiencer ? { ...complements, terminus: { phrase: experiencer } } : complements,
   };
+}
+
+/**
+ * The core slots of an experiencer relative (see `resolvePhrase`): the thing liked is the clause's
+ * subject and the one who likes is its dative, so the gap moves with whichever of the two the head
+ * is.
+ *
+ *  - the head is the **experiencer** (gapped as the subject): the thing liked becomes the clause's
+ *    own subject and the gap becomes the dative — "il gatto **a cui** piace il cane";
+ *  - the head is the **thing liked** (gapped as the object): it is the clause's subject now, and the
+ *    experiencer follows as the dative — "il cane **che** piace al gatto";
+ *  - the head fills a **complement**, which the frame leaves where it was.
+ *
+ * A generic experiencer is dropped, as a generic agent is under the passive.
+ */
+function experiencerRemap(
+  headRole: ResolvedRelativeClause['headRole'],
+  subject: ResolvedNounElement | undefined,
+  directObject: ResolvedNounElement | undefined,
+): Pick<ResolvedRelativeClause, 'headRole' | 'subject' | 'directObject'> & { experiencer?: ResolvedNounElement } {
+  const dative = subject && subject.agreement['generic'] !== '1' ? subject : undefined;
+  if (headRole === 'subject') return { headRole: 'terminus', subject: directObject };
+  if (headRole === 'directObject') return { headRole: 'subject', experiencer: dative };
+  return { headRole, subject: directObject, experiencer: dative };
 }
 
 /**

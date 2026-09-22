@@ -17,12 +17,14 @@ import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { ESTAR_COPULA } from './pt.consts.js';
+import { ESTAR_COPULA, FOCUS_WORDS } from './pt.consts.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeAdj } from './agreeAdj.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
+import { slotFocus } from '../../functions/slotFocus.js';
+import { withFocus } from '../../functions/withFocus.js';
 import { coordinateElement } from './coordinateElement.js';
 import { isPlural } from './isPlural.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
@@ -210,8 +212,12 @@ export function predicateText(
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes the
   // normative tonic object, "a" + its tonic form ("vê a ele e a mim", "vê o cão e a você").
+  // The personal "a" marks a person, so the indefinite pronoun that stands for a **thing** takes
+  // none: "come algo", never "*come a algo" (C32).
   const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
-    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
+    : np.head.forms['person']
+      ? `${np.head.forms['thing'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
+      : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
   //
@@ -232,7 +238,9 @@ export function predicateText(
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("é comida pelo gato na casa").
   const directObjectText = passive ? agentPhrase(agent)
-    : directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
+    // A focus particle singles the object out, from outside the phrase: "come só a comida" (C39).
+    : directObject && !objectClitic
+      ? withFocus(coordinateElement(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   // A focus adverb that scopes over the negation stands in front of the "não" it outscopes:

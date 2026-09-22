@@ -453,8 +453,9 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // P09's ask in the inquire sense, not request. Japanese 尋ねる, since 聞く is HEAR's; Italian
     // chiedere, since domandare is QUESTION's domanda made a verb. German asks *for* the thing,
     // `object_prep` nach ("fragt nach dem Namen"). The person asked is where ASK is not a plain
-    // ditransitive: German fragen takes the person in the accusative (localization C35's lexical
-    // case), and the terminus renders "asks the name to the man" and "fragt dem Mann" today.
+    // ditransitive: German fragen takes the person in the **accusative**, which its lexeme names
+    // (`terminus_case`, the lexical case C35 built for helfen's dative object, the other way round):
+    // "fragt den Mann nach dem Namen", not "fragt dem Mann".
     id: 'ASK',
     role: 'verb',
     transitivity: 'ditransitive',
@@ -498,7 +499,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'demanderons', '2pl_future': 'demanderez', '3pl_future': 'demanderont',
       },
       de: {
-        base: 'fragen', object_prep: 'nach',
+        base: 'fragen', object_prep: 'nach', terminus_case: 'acc',
         '1sg_present': 'frage', '2sg_present': 'fragst', '3sg_present': 'fragt',
         '1pl_present': 'fragen', '2pl_present': 'fragt', '3pl_present': 'fragen',
         '1sg_past': 'fragte', '2sg_past': 'fragtest', '3sg_past': 'fragte',

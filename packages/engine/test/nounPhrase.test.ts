@@ -144,6 +144,48 @@ describe('determiners', () => {
       ja: '猫はネズミを食べます。',
     });
   });
+
+  // Localization C40: six languages spell the proximal/distal contrast in the determiner itself, so
+  // they read `contrastive` nowhere and render exactly as they do without it. French has one series
+  // — "ce" is both — and writes the distance in the postposed clitic, which is marked and appears
+  // only where the contrast is meant.
+  test('a contrastive demonstrative writes the French deictic clitic, and nothing elsewhere', () => {
+    expect(sayAll(clause(np('CAT', { definiteness: 'that', contrastive: true }), 'RUN'))).toEqual({
+      en: 'that cat runs.', it: 'quel gatto corre.', fr: 'ce chat-là court.', de: 'jener Kater läuft.',
+      es: 'ese gato corre.', ja: 'その猫は走ります。', pt: 'esse gato corre.',
+    });
+    expect(sayAll(clause(np('CAT', { definiteness: 'this', contrastive: true }), 'RUN'))).toEqual({
+      en: 'this cat runs.', it: 'questo gatto corre.', fr: 'ce chat-ci court.', de: 'dieser Kater läuft.',
+      es: 'este gato corre.', ja: 'この猫は走ります。', pt: 'este gato corre.',
+    });
+    // Every other language is bit-for-bit what it says without the flag.
+    for (const definiteness of ['this', 'that'] as const) {
+      const marked = sayAll(clause(np('CAT', { definiteness, contrastive: true }), 'RUN'));
+      const plain = sayAll(clause(np('CAT', { definiteness }), 'RUN'));
+      for (const lang of ['en', 'it', 'de', 'es', 'ja', 'pt'] as const) expect(marked[lang], lang).toBe(plain[lang]);
+      expect(plain.fr).toBe('ce chat court.');
+    }
+  });
+
+  test('the clitic closes the noun\'s own words — behind its adjectives, ahead of a possessor', () => {
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: np('HOUSE', { definiteness: 'that', contrastive: true, adjectives: ['BIG'] }),
+    }), 'fr')).toBe('le chat mange cette grande maison-là.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: np('HOUSE', { definiteness: 'that', contrastive: true, possessor: np('DOG') }),
+    }), 'fr')).toBe('le chat mange cette maison-là du chien.');
+    // A complement's preposition is outside it, and fuses with the article as it always does.
+    expect(say(clause(np('CAT'), 'LIVE', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'that', contrastive: true }) } },
+    }), 'fr')).toBe('le chat habite dans cette maison-là.');
+  });
+
+  test('the flag is ignored on every determiner but the two demonstratives', () => {
+    for (const definiteness of ['definite', 'indefinite', 'bare', 'some', 'many', 'few', 'all', 'no'] as const) {
+      expect(say(clause(np('CAT', { definiteness, contrastive: true }), 'RUN'), 'fr'), definiteness)
+        .toBe(say(clause(np('CAT', { definiteness }), 'RUN'), 'fr'));
+    }
+  });
 });
 
 describe('known bugs: determiners', () => {

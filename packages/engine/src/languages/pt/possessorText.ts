@@ -2,6 +2,8 @@ import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS } from './pt.consts.js';
 import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
 import { npText } from './npText.js';
@@ -37,7 +39,8 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const f = detached ? { ...possessed, definiteness: ownDeterminer } : possessed;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const head = withAdj(word, ptAdj(poss));
+  // A counted possessor keeps its cardinal: "um período de vinte e quatro horas" (C31).
+  const head = [numeralText(f, CARDINALS), withAdj(word, ptAdj(poss))].filter(Boolean).join(' ');
   const noun = (detached ? [head, possessive] : [possessive, head]).filter(Boolean).join(' ');
   return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${noun}`, poss)}`;
 }

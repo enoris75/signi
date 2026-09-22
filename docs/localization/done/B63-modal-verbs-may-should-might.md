@@ -4,7 +4,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. P09's three modals. **MAY sh
 allowed to act", on one new adjective, ALLOWED: the shape [C09](../done/C09-modal-verbs.md)
 gave MUST and CAN. **SHOULD and MIGHT do not.** Each judges the act (right, possible), and the
 adjective that says so takes the act as its subject ("it is possible that one acts"). That needs a
-content clause, so both go to [C30](../C-needs-engine/C30-content-clause-with-expletive-subject.md),
+content clause, so both go to [C30](../done/C30-content-clause-with-expletive-subject.md),
 E4. The ticket also sorts the modals' seeding into seed work and engine work. The words come from
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
 
@@ -105,7 +105,7 @@ MAY renders in all seven and collides with nothing shipped. Readings to judge on
 
 ## Not solved by this seed
 
-1. **SHOULD → [C30](../C-needs-engine/C30-content-clause-with-expletive-subject.md), E4.** SHOULD is
+1. **SHOULD → [C30](../done/C30-content-clause-with-expletive-subject.md), E4.** SHOULD is
    the right or advisable thing to do (Longman: "used to say what is the right or sensible thing to
    do"). It is not a weaker obligation the one who acts carries, which is why MUST's frame does not
    stretch to it. Every lead, probed:
@@ -153,7 +153,7 @@ MAY renders in all seven and collides with nothing shipped. Readings to judge on
    `subtype: 'frequency'`, `synonym: 'maybe'`.
 3. **ALLOWED's own gloss is not in this ticket.** It is the state LET leaves, as SAVED is SAVE's
    ([C23](../done/C23-participial-state-adjectives.md)'s `stateGloss`), and LET is
-   [C36](../C-needs-engine/C36-let-bare-infinitive.md) (E9), which records it beside LET.
+   [C36](../done/C36-let-bare-infinitive.md) (E9), which records it beside LET.
 
 ## Coverage
 
@@ -244,9 +244,9 @@ What landed differently from the plan:
    許可されている and the modal 許される, two lexemes that share the character 許 but neither the word
    nor the reading — the C09 rule is that no gloss repeats the word it defines, which this keeps.
 10. **SHOULD's and MIGHT's glosses still wait on
-    [C30](../C-needs-engine/C30-content-clause-with-expletive-subject.md)**, as **Not solved**
+    [C30](../done/C30-content-clause-with-expletive-subject.md)**, as **Not solved**
     argues; nothing in the seed changed that, and neither POSSIBLE nor PERHAPS was seeded. ALLOWED's
-    own gloss still waits on LET ([C36](../C-needs-engine/C36-let-bare-infinitive.md)).
+    own gloss still waits on LET ([C36](../done/C36-let-bare-infinitive.md)).
 11. **No frontend change was needed.** The modal picker is `Concept.modal`'s own list
     (`ModalTypeahead`), so the three appear in it as soon as they are seeded; the e2e row checks all
     three are there and reads MAY's tooltip against CAN's under the one Italian word *potere*.

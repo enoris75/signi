@@ -1,5 +1,7 @@
 import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
 // "plus"/"moins"; the superlative repeats the definite article to distinguish them ("un chat
@@ -28,6 +30,9 @@ export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string, s
   // -s adjectives double the s in the feminine ("bas → basse"); the rule in `agreeAdjFr` has no -s branch and
   // would give the wrong "base". Only "bas" (LOW) is seeded; masc plural stays "bas" (invariable).
   bas: ['bas', 'basse', 'bas', 'basses', 'bas'],
+  // -et doubles its t in the feminine ("cadet → cadette"); the rule would give "cadete" (P11 §3).
+  // YOUNGER is the one seeded -et adjective; its elder counterpart "aîné" needs no entry.
+  cadet: ['cadet', 'cadette', 'cadets', 'cadettes', 'cadet'],
 };
 
 // œ and æ are vowel letters too, and one seeded noun opens on one: œil, l'œil (localization B52).
@@ -47,7 +52,7 @@ export const VOWEL_START = /^[aeiouéèêëàâîïôùûüœæ]/i;
 // dernière") and follows the noun, as NEXT_COMING's "la semaine prochaine" does.
 export const PRENOMINAL = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL',
+  'FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE',
 ]);
 
 // The verbs whose present-participle stem the "nous" present rule misses (see `presentParticiple`).
@@ -116,3 +121,20 @@ export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro', 'sans titre
 // full "non pas" and not a bare "pas", which after a verb reads as the colloquial dropped-"ne"
 // negation of the verb itself (see `Complement.negative`).
 export const CONSTITUENT_NEGATOR = 'non pas';
+
+/**
+ * The focus particles (see NounPhrase.focus, C39). French leads with "seulement" and "même";
+ * "aussi" follows the phrase ("le chat aussi"). The discontinuous "ne … que", which brackets the
+ * verb rather than the phrase, is the other way to say `only` and is not what this writes.
+ */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'seulement' }, even: { word: 'même' }, also: { word: 'aussi', post: true },
+};
+
+/** The cardinals French spells (see `numeralWord`, C31); only "un" agrees. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'un', fem: 'une' }, 2: { word: 'deux' }, 3: { word: 'trois' }, 4: { word: 'quatre' },
+  5: { word: 'cinq' }, 6: { word: 'six' }, 7: { word: 'sept' }, 8: { word: 'huit' },
+  9: { word: 'neuf' }, 10: { word: 'dix' }, 11: { word: 'onze' }, 12: { word: 'douze' },
+  24: { word: 'vingt-quatre' },
+};

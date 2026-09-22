@@ -1,4 +1,6 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, MannerRelation, PathSpecifier } from '@signi/shared';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -126,3 +128,16 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
 // dog", which says the cat runs and the dog is not why (see `Complement.negative`). English sets
 // such a phrase off with nothing but the word itself.
 export const CONSTITUENT_NEGATOR = 'not';
+
+/** The focus particles (see NounPhrase.focus, C39). English writes "too" after the phrase. */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'only' }, even: { word: 'even' }, also: { word: 'too', post: true },
+};
+
+/** The cardinals English spells (see `numeralWord`, C31); it agrees none of them. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'one' }, 2: { word: 'two' }, 3: { word: 'three' }, 4: { word: 'four' },
+  5: { word: 'five' }, 6: { word: 'six' }, 7: { word: 'seven' }, 8: { word: 'eight' },
+  9: { word: 'nine' }, 10: { word: 'ten' }, 11: { word: 'eleven' }, 12: { word: 'twelve' },
+  24: { word: 'twenty-four' },
+};

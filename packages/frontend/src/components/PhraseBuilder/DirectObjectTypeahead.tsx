@@ -17,7 +17,12 @@ export function DirectObjectTypeahead({
   header?: ReactNode;
   tabs?: PickerTabs;
 }) {
-  const { data: nouns = [] } = useConcepts("noun");
+  const { data: allNouns = [] } = useConcepts("noun");
+  // A concept whose slot is not its role's is filtered out here: it reuses this role's lexicon and
+// arrives on the same fetch, but nothing it could fill is in this picker — the split
+// ModalTypeahead / VerbTypeahead make on `Concept.modal`, one level out (see `ConceptSlot`).
+// Here that is MR, which stands with a personal name: "eats the Mr" is not a sentence.
+  const nouns = allNouns.filter((n) => !n.slot);
   const t = useUiString();
   const picker = usePickerKeys({ items: nouns, onSelect, tabs });
 

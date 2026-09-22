@@ -55,6 +55,24 @@ export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
 export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);
 
 /**
+ * The mood a **content clause** stands in as the subject of an evaluative predicate (see
+ * PhrasePlan.contentSubject, C30). The four Romance languages put it in the present subjunctive —
+ * "che si agisca", "qu'on agisse", "que se actúe", "que se aja" — because what it names is judged
+ * rather than asserted. English, German and Japanese have no such mood and keep the indicative.
+ */
+export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
+  it: 'presentSubjunctive', fr: 'presentSubjunctive', es: 'presentSubjunctive', pt: 'presentSubjunctive',
+};
+
+/**
+ * The adjective a `possessorOwn` phrase writes beside its possessor — "my **own** cat" (see
+ * NounPhrase.possessorOwn, C37). It is a seeded concept like any other, so each language reads its
+ * own word out of the lexicon (proprio / propre / eigen / propio / 自分の / próprio); the id is fixed
+ * here because the plan names a flag, not a word.
+ */
+export const POSSESSOR_OWN_ADJECTIVE = 'OWN_ADJECTIVE';
+
+/**
  * The verb each language conjugates in place of the lexical one to build a **passive** — the
  * auxiliary the past participle hangs off of. Six of the seven take their copula, *be* / *essere* /
  * *être* / *ser* / *ser*; German takes *werden*, which is the BECOME concept, because *sein* +

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
-  adj, BASHO, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HITO_GENERIC, HON, IE, IMITEKI, INU, KABE, KODOMO,
-  MIZU, MOTSU, NARU, NEKO, NEZUMI, NOMU, np, nounModifier, OOKII, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
+  adj, BASHO, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HAHA, HITO_GENERIC, HON, IE, IMITEKI, INU, KABE, KODOMO,
+  MIZU, MOTSU, NARU, NEKO, NEZUMI, NOMU, np, nounModifier, OKAASAN, OOKII, OYA, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
 } from './ja.fixtures.js';
 import { npSegs } from './npSegs.js';
 
@@ -170,5 +170,55 @@ describe('npSegs', () => {
 
   test('regression: a real verb on the same gap keeps its own form', () => {
     expect(text(npSegs(np(DENSETSU, {}, { relative: { headRole: 'predicative', subject: el(np(INU)), verbPhrase: vp(NARU) } })))).toBe('犬がなる伝説');
+  });
+  // ── P11: whose relative it is ─────────────────────────────────────────────
+  // The word has already been chosen by `applyPossessorForm`; what is left here is the possessor it
+  // makes redundant (D4) and the plural that is another word (D7).
+
+  test('私の drops before one\'s own kin noun, which already says whose it is', () => {
+    const myMother = np(HAHA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } });
+    expect(npSegs(myMother)).toEqual([{ t: '母', r: 'はは' }]);
+  });
+
+  test('私たちの stays: it adds that the relative is shared', () => {
+    const ourMother = np(HAHA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'plural' } });
+    expect(text(npSegs(ourMother))).toBe('私たちの母');
+  });
+
+  test('every other possessor stays, in front of the word it chose', () => {
+    expect(text(npSegs(np(OKAASAN, {}, { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }))))
+      .toBe('あなたのお母さん');
+    expect(text(npSegs(np(OKAASAN, {}, { possessor: np(KODOMO) })))).toBe('子供のお母さん');
+    // A genitive possessor is said even where it is one's own: 私の兄の妻 is 兄の妻, not 妻.
+    expect(text(npSegs(np(HAHA, {}, { possessor: np(NEKO) })))).toBe('猫の母');
+  });
+
+  test('私の stays before a noun that is not one\'s own relative', () => {
+    const myBook = np(HON, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } });
+    expect(text(npSegs(myBook))).toBe('私の本');
+    // …and before a kin noun the possessor did not make one's own (someone else's mother).
+    expect(text(npSegs(np(OKAASAN, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))))
+      .toBe('私のお母さん');
+  });
+
+  test('a plural that is another word is written with its own reading', () => {
+    expect(npSegs(np(OYA, { number: 'plural' }))).toEqual([{ t: '両親', r: 'りょうしん' }]);
+    const myParents = np(OYA, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } });
+    expect(npSegs(myParents)).toEqual([{ t: '両親', r: 'りょうしん' }]);
+  });
+
+  test('a singular kin noun keeps its own word and reading', () => {
+    expect(npSegs(np(OYA))).toEqual([{ t: '親', r: 'おや' }]);
+  });
+
+  // Japanese nouns otherwise have no plural, so a plural head with no word of its own is unchanged.
+  test('a head with no plural surface writes its base', () => {
+    expect(text(npSegs(np(NEKO, { number: 'plural' })))).toBe('猫');
+  });
+
+  test('a plural pronoun keeps the surface the translator already chose for it', () => {
+    // 彼女ら is written into `base` with its own reading; `plural_reading` still holds かれら.
+    const they = { base: '彼女ら', reading: 'かのじょら', plural: '彼女ら', plural_reading: 'かれら', person: '3', number: 'plural' };
+    expect(npSegs(np(they))).toEqual([{ t: '彼女ら', r: 'かのじょら' }]);
   });
 });

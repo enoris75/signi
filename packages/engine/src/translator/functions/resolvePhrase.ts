@@ -1,9 +1,11 @@
 import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { CONTENT_CLAUSE_MOOD } from '../translator.consts.js';
 import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
+import { negativePolarity } from './negativePolarity.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
@@ -24,12 +26,20 @@ function resolveInfinitiveComplement(
   plan: PhrasePlan & { infinitiveComplement: InfinitiveComplement },
   language: string,
   lookup: LexiconLookup,
+  // The governing verb's forms, for the lexical keys the governed clause reads off it.
+  governor?: Record<string, string>,
 ): ResolvedPhrase {
   const { control: _control, ...clause } = plan.infinitiveComplement;
   const byObject = objectControlled(plan);
   const subject: NounElement = controlledSubject(byObject ? plan.directObject! : plan.subject);
+  const resolved = resolvePhrase({ ...clause, subject }, language, lookup, 'infinitive');
+  // A governor that takes the **bare** infinitive says so in its lexeme (`infinitive_bare`): English
+  // *let* and German *lassen* write no "to" / "zu" and no comma. The flag belongs to the governed
+  // clause, which is what renders it, so it is threaded onto that clause's verb phrase here (C36).
+  const bare = governor?.['infinitive_bare'] === '1' && resolved.verbPhrase;
   return {
-    ...resolvePhrase({ ...clause, subject }, language, lookup, 'infinitive'),
+    ...resolved,
+    ...(bare ? { verbPhrase: { ...resolved.verbPhrase!, bareInfinitive: true } } : {}),
     ...(byObject ? { control: 'object' as const } : {}),
   };
 }
@@ -60,7 +70,18 @@ export function resolvePhrase(
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is
   // indicative: a condition, a command or a citation keeps its own and drops the flag.
   const question = !!plan.interrogative && mood === undefined;
-  const subject = resolveNounElement(plan.subject, language, lookup);
+  // An indefinite pronoun takes its negative form under negation — *something* is *anything* /
+  // *niente* / 何も there (see `negativePolarity`, C32). The clause's polarity is this one: the
+  // finite element's, or, under a modal, the governed group's.
+  const clauseNegative = plan.verbPhrase?.negative === true
+    || plan.verbPhrase?.modals?.some((m) => typeof m !== 'string' && m.negative === true) === true;
+  const resolvedSubject = negativePolarity(resolveNounElement(plan.subject, language, lookup), clauseNegative, true)!;
+  // A **content clause** fills the subject slot, and what agrees with it agrees with a clause, not
+  // with the throwaway noun the plan carries there: 3rd singular, and masculine where the language
+  // genders a predicate adjective ("è giusto che si agisca", not "è giusta" — C30).
+  const subject = plan.contentSubject
+    ? { ...resolvedSubject, agreement: { person: '3', number: 'singular', gender: 'masc' } }
+    : resolvedSubject;
   // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
   // render just the subject when it is absent. Resolved before the rest, because a complement
   // reads the verb's lexeme for the word it links an object predicative with.
@@ -77,7 +98,10 @@ export function resolvePhrase(
     : undefined;
   // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
   const directObject = plan.directObject
-    ? withAlarmCry(resolveNounElement(plan.directObject, language, lookup), verbPhrase?.verb, language)
+    ? negativePolarity(
+        withAlarmCry(resolveNounElement(plan.directObject, language, lookup), verbPhrase?.verb, language),
+        clauseNegative,
+      )
     : undefined;
   // A passive re-maps the clause's core arguments (A01). The patient becomes the grammatical
   // subject — it drives the verb's agreement, and a Romance participle agrees with it — the object
@@ -89,12 +113,28 @@ export function resolvePhrase(
   // agentless passive ("the food is eaten", "das Futter wird gegessen").
   const passive = verbPhrase?.voice === 'passive' && !!directObject;
   const generic = subject.agreement['generic'] === '1';
+  // An **experiencer verb** re-maps the clause too, and in the same way a passive does — the
+  // difference is that the plan never asks for it: it is lexical. Italian *piacere* and Spanish
+  // *gustar* make the thing liked the grammatical **subject**, which the verb then agrees with ("al
+  // gatto piacciono i cani"), and put the one who likes in the **dative**, where every other
+  // language makes it the subject of a plain transitive verb ("the cat likes the dogs"). The plan
+  // stays "cat likes dog" everywhere, so the builder never changes; the lexeme says which languages
+  // turn it round (`experiencer`), and here is where they do — the experiencer becoming the
+  // `terminus` complement, the bare dative it already renders as (localization C34).
+  //
+  // A **generic** experiencer is dropped there rather than rendered, exactly as a generic agent is
+  // under the passive: no language says *piace a si*. What is left is the plain citation of the verb
+  // ("piacere", "gustar"), which cannot name the thing liked because that thing is its subject and a
+  // citation has none — a fact about Italian and Spanish, not a gap in the plan.
+  const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
   const resolved: ResolvedPhrase = {
-    subject: passive ? directObject : subject,
+    subject: passive || experiencer ? directObject : subject,
     verbPhrase,
-    directObject: passive ? undefined : directObject,
+    directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic ? { agent: subject } : {}),
-    complements: resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
+    complements: experiencer && !generic
+      ? { ...resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
+      : resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
     // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see
@@ -103,7 +143,13 @@ export function resolvePhrase(
     // the clause. Object control with no object to control it falls back to the subject, so the
     // clause always has one to resolve. It may govern one in turn.
     infinitiveComplement: plan.infinitiveComplement
-      ? resolveInfinitiveComplement({ ...plan, infinitiveComplement: plan.infinitiveComplement }, language, lookup)
+      ? resolveInfinitiveComplement(
+          { ...plan, infinitiveComplement: plan.infinitiveComplement }, language, lookup, verbPhrase?.verb.forms)
+      : undefined,
+    // A content clause standing where the subject would ("it is right that one acts", C30): a clause
+    // of its own, in the mood this language puts such a clause in.
+    contentSubject: plan.contentSubject
+      ? resolvePhrase(plan.contentSubject, language, lookup, CONTENT_CLAUSE_MOOD[language])
       : undefined,
     // A clause of purpose is a clause of its own in the citation mood, its unspoken subject always
     // this clause's own — the one who clicks is the one who changes — so it needs no control. It

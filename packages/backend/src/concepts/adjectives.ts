@@ -683,6 +683,28 @@ export const adjectives: ConceptSeed[] = [
   // capable de, capaz de; obbligato a, obligé de, obligado a. The Japanese entry is the whole tail
   // that closes the nominalized clause — both predicate of a こと clause marked with が:
   // 行動することが可能である ("acting is possible").
+  // What MIGHT's gloss is said of: the **act**, not the actor (localization C30). Japanese takes
+  // 起こりうる ("can come about") rather than ABLE's 可能な — the two are one word there, and a gloss
+  // that said 可能 would make MIGHT and CAN the same sentence, which is exactly what the ticket was
+  // filed to avoid. It is said of a clause, so it needs no infinitive_link: the content clause is
+  // its subject, not something it governs.
+  {
+    id: 'POSSIBLE',
+    role: 'adjective',
+    description: 'that may come about',
+    emoji: '🎲',
+    forms: {
+      en: { base: 'possible' },
+      it: { base: 'possibile' },
+      fr: { base: 'possible' },
+      de: { base: 'möglich' },
+      es: { base: 'posible' },
+      // 起こり得る is 得る, an ichidan verb, so the predicate inflects as a verb and not through the
+      // copula (`ja_verbal`): 行動することが起こり得ます, never "起こり得るです".
+      ja: { base: '起こり得る', reading: 'おこりえる', ja_verbal: '1' },
+      pt: { base: 'possível' },
+    },
+  },
   {
     id: 'ABLE',
     role: 'adjective',
@@ -722,8 +744,13 @@ export const adjectives: ConceptSeed[] = [
     // OBLIGED. It is said of the one allowed, not of the act: autorizzato, autorisé, berechtigt,
     // autorizado, where permesso, permis, erlaubt, permitido say "es ist erlaubt". Transient like
     // OBLIGED, so es/pt predicate it with estar ("estar autorizado a actuar", not the passive "ser
-    // autorizado"). Japanese 許可された is predicated as 許可されている, as 閉じた is. Its own gloss is
-    // the state LET leaves, which waits on LET (C36).
+    // autorizado"). Japanese 許可された is predicated as 許可されている, as 閉じた is.
+    //
+    // It stays on the English literal by design (C36): the state LET leaves is ambiguous in the two
+    // languages whose verb also means *leave* ("die man gelassen hat", "che si è lasciata"), and
+    // every other lead defines it by the word it was itself seeded for — "who may act" and MAY's
+    // "to be allowed to act" would define each other and nothing else. ABLE's and OBLIGED's shape
+    // ("of high ability") wants a scalar noun, and permission is not one.
     id: 'ALLOWED',
     role: 'adjective',
     transient: true,
@@ -2375,6 +2402,35 @@ export const adjectives: ConceptSeed[] = [
   {
     // SOLE and MANIFOLD say in ordinary words what SINGULAR and PLURAL say as grammar, so the
     // number categories can be glossed without defining a word with itself (localization B58).
+    // P09's *own* (localization C37) — the adjective of "my own cat", not the verb OWN ("to have as
+    // property"), whose id it yields to as OPEN_ADJECTIVE yields to OPEN. It exists only beside a
+    // possessor, so no phrase lists it among its adjectives: a `possessorOwn` flag on the noun
+    // phrase is what turns it on, and the translator hands it to the engines as the first adjective
+    // (see NounPhrase.possessorOwn). Prenominal in all six European languages — Italian keeping its
+    // article ("il proprio gatto") and German declining it ("sein eigener Kater") — and in Japanese
+    // a word that **replaces** the possessor: 自分の猫, never 彼の自分の猫. After a genitive possessor
+    // Japanese says 自身の instead (猫自身の本), which the lexeme carries as `after_possessor`.
+    id: 'OWN_ADJECTIVE',
+    role: 'adjective',
+    slot: 'possessorOwn',
+    description: 'belonging to the one named and to no other',
+    // What "my own" adds to "my": nobody else owns it. A headless relative on the owning verb with a
+    // negated agent (C23's shape), which is the only construct-free lead that does not define
+    // *owned* instead — "that a possessor owns" says the wrong word twice over.
+    definition: namedAgentGloss('OBJECT_THING', 'OWN', { concept: 'PERSON', definiteness: 'no', adjectives: ['OTHER'] }),
+    synonym: 'own',
+    emoji: '🫱',
+    forms: {
+      en: { base: 'own' },
+      it: { base: 'proprio' },
+      fr: { base: 'propre' },
+      de: { base: 'eigen' },
+      es: { base: 'propio' },
+      ja: { base: '自分の', reading: 'じぶんの', after_possessor: '自身の', after_possessor_reading: 'じしんの' },
+      pt: { base: 'próprio' },
+    },
+  },
+  {
     id: 'SOLE',
     role: 'adjective',
     description: 'being the only one',

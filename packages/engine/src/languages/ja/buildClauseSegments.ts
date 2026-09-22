@@ -14,6 +14,7 @@ import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { isPotentialPassive } from './isPotentialPassive.js';
+import { jaCausativeVerb } from './jaCausativeVerb.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
@@ -25,7 +26,7 @@ import { relativeClauseSegs } from './relativeClauseSegs.js';
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
-export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string): RubySegment[] {
+export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string, plain = false): RubySegment[] {
   // A modal governing an infinitive is the modal chain over it, suffixed to the verb: 行動したい, never
   // 行動することをたい (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);
@@ -60,7 +61,17 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // not が (もし家に壁があったら, A150). The topic は stays (家は壁があります).
   const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
-  if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+  // A content clause standing where the subject would really is the subject in Japanese: it is
+  // nominalized with こと and marked が, in the slot the noun phrase would have filled — 行動すること
+  // が正しい. No expletive, and no extraposition: the six European languages move the clause behind
+  // the predicate because they cannot leave it in front, and Japanese can (C30).
+  if (phrase.contentSubject) {
+    // Nominalized, so the clause inside it is plain (行動する, not 行動します) — and a generic subject
+    // is unsaid there, as it is in every citation: 行動することが正しい, not 人は行動することが正しい.
+    segs.push(...buildClauseSegments(phrase.contentSubject, 'が', true), { t: 'ことが' });
+  } else if (!dropsSubject && !(plain && phrase.subject.agreement['generic'] === '1')) {
+    segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+  }
   // The demoted agent of a passive takes に, right after the topic and before everything else the
   // predicate holds: 食べ物は猫に食べられます ("the food is eaten by the cat"). The agentless passive has
   // none — the translator drops a generic agent rather than passing it (see ResolvedPhrase.agent).
@@ -82,7 +93,16 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // Under object control the controller is the one that acts, so Japanese speaks it *inside* the
   // clause with が (人が物体を見るようにする) instead of leaving it in the matrix object slot.
   const causee = phrase.infinitiveComplement?.control === 'object' ? phrase.directObject : undefined;
-  if (phrase.infinitiveComplement) {
+  // A governor whose Japanese is the causative **suffix** (`causative_suffix`: LET, whose 〜させる is
+  // what Japanese says where the six European languages say a verb, C36) has no clause to nominalize
+  // and no verb of its own. The causee takes を when what it is made to do is intransitive and に
+  // when that verb has an object of its own — 犬を走らせる, 犬に食べ物を食べさせる — and what closes the
+  // clause is the governed verb in its causative form, built below.
+  const suffixCausative = !!causee && phrase.verbPhrase?.verb.forms['causative_suffix'] === '1'
+    && !!phrase.infinitiveComplement?.verbPhrase;
+  if (suffixCausative && causee) {
+    segs.push(...elSegs(causee), ...jaParticleSegs(causee, phrase.infinitiveComplement?.directObject ? 'に' : 'を'));
+  } else if (phrase.infinitiveComplement) {
     if (causee) segs.push(...elSegs(causee), ...jaParticleSegs(causee, 'が'));
     segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: infinitiveLink(phrase) || 'ことを' });
   }
@@ -98,14 +118,24 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   const voiced: ResolvedVerbPhrase = isPotentialPassive(phrase)
     ? { ...phrase.verbPhrase, voice: 'active' }
     : phrase.verbPhrase;
-  const verbPhrase = causee && voiced.verb.forms['causative'] === '1'
-    ? { ...voiced, verb: JA_SURU }
-    : voiced;
+  // The suffix causative replaces this clause's verb with the governed verb's causative form; the
+  // ようにする causative replaces it with する, which is what closes that construction.
+  const governed = phrase.infinitiveComplement?.verbPhrase;
+  const verbPhrase = suffixCausative && governed
+    ? { ...voiced, verb: jaCausativeVerb(governed.verb), aspect: 'neutral' as const }
+    : causee && voiced.verb.forms['causative'] === '1'
+      ? { ...voiced, verb: JA_SURU }
+      : voiced;
   // A `no` causee is still this clause's object, and negates this clause, not the one it is spoken in
   // (A171): 猫はどの犬も食べるようにしません, "the cat causes no dog to eat". The clause keeps its own polarity.
   const causeeNegative = !!causee && isNegativeGroup(causee);
   segs.push(...predicateSegs(
-    verbPhrase, causee ? undefined : phrase.directObject, phrase.complements, impPN, false,
+    // Under the suffix causative the governed verb's own object is this clause's, since the two
+    // clauses have collapsed into one: 犬に食べ物を食べさせます.
+    verbPhrase,
+    suffixCausative ? phrase.infinitiveComplement?.directObject : causee ? undefined : phrase.directObject,
+    // A nominalized clause is plain, as a prenominal one is (行動する, not 行動します).
+    phrase.complements, impPN, plain,
     subjectNegative || causeeNegative, animate,
   ));
   return segs;

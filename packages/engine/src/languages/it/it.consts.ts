@@ -1,5 +1,7 @@
 import type { CoordConjunction, Degree, DimensionRelation, MannerRelation, ModifierRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // The preposition each manner relation takes in Italian: similative "come" (fuses with nothing —
 // "come il vento"), means "con", measure "a" (→ alla velocità), mode "in" (→ in modo). prepDet
@@ -45,7 +47,7 @@ export const PRENOMINAL_QUALIFYING = new Set([
  * itself and "il giorno ultimo" is not said, where "la settimana scorsa" (LAST_PREVIOUS) and "la
  * settimana prossima" (NEXT_COMING) follow it as any adjective does (localization B66).
  */
-export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL']);
+export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
 
 /** Every adjective that can precede the noun, of either kind. */
 export const PRENOMINAL = new Set([...PRENOMINAL_DETERMINER, ...PRENOMINAL_QUALIFYING]);
@@ -146,3 +148,16 @@ export const IT_REFLEXIVE: Record<string, string> = { '1sg': 'mi', '2sg': 'ti', 
 // Il negatore di un singolo costituente, non della frase: "corre **non** a causa del cane" — corre,
 // e il cane non ne è la ragione (vedi `Complement.negative`).
 export const CONSTITUENT_NEGATOR = 'non';
+
+/** The focus particles (see NounPhrase.focus, C39). Italian writes all three before the phrase. */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'solo' }, even: { word: 'perfino' }, also: { word: 'anche' },
+};
+
+/** The cardinals Italian spells (see `numeralWord`, C31); only "uno" agrees. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'un', fem: 'una' }, 2: { word: 'due' }, 3: { word: 'tre' }, 4: { word: 'quattro' },
+  5: { word: 'cinque' }, 6: { word: 'sei' }, 7: { word: 'sette' }, 8: { word: 'otto' },
+  9: { word: 'nove' }, 10: { word: 'dieci' }, 11: { word: 'undici' }, 12: { word: 'dodici' },
+  24: { word: 'ventiquattro' },
+};

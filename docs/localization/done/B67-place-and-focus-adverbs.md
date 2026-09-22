@@ -5,9 +5,9 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. This ticket covers P09's eig
 REALLY needs one new noun plus the fix for
 [A219](../../bugs/fixed/A219-french-bare-singular-after-dans.md), **which landed on 2026-09-22**. THERE, JUST, STILL and ONLY wait on the engine:
 JUST and STILL on a temporal complement ([C29](../C-needs-engine/C29-temporal-complement.md)), ONLY on *nothing*
-([C32](../C-needs-engine/C32-indefinite-pronouns.md)), THERE on the French distal demonstrative
-([C40](../C-needs-engine/C40-french-distal-demonstrative.md)). EVEN's concept waits as well, because Japanese has no verb
-adverb for it ([C39](../C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)). The words come from
+([C32](../done/C32-indefinite-pronouns.md)), THERE on the French distal demonstrative
+([C40](../done/C40-french-distal-demonstrative.md)). EVEN's concept waits as well, because Japanese has no verb
+adverb for it ([C39](../done/C39-focus-particle-on-a-noun-phrase.md)). The words come from
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
@@ -39,7 +39,7 @@ and REALITY are the differentia for ALSO and REALLY:
 **Japanese.** Five of the eight have a Japanese adverb that reads right before the verb: まだ,
 本当に, たった今 (with a past verb), ここ and そこ (see note 1 below for their particle). For *also*,
 *only* and *even*, the idiom is
-a particle on the focused noun (猫**も**, 猫**だけ**, 猫**さえ**). That is [C39](../C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)'s focus particle, which
+a particle on the focused noun (猫**も**, 猫**だけ**, 猫**さえ**). That is [C39](../done/C39-focus-particle-on-a-noun-phrase.md)'s focus particle, which
 the engine lacks. The three cases differ:
 
 - For ALSO and ONLY, a real adverb exists and the choice fixes only the form.
@@ -201,7 +201,7 @@ Leads, probed (MOMENT\* is a candidate, seeded in memory only):
    - The definite ("in the place") loses the pointing in Japanese (場所で).
    - FAR says a distance, "far away" (*lontano*, 遠い), not deixis.
    - What would move it is an engine rule, not a §3 construct: French `that` would say its distance
-     where the contrast is the meaning (*dans ce lieu-là*). → [C40](../C-needs-engine/C40-french-distal-demonstrative.md).
+     where the contrast is the meaning (*dans ce lieu-là*). → [C40](../done/C40-french-distal-demonstrative.md).
    - The Spanish and Portuguese `that` is the *ese* / *esse* series, which pairs with *ahí* / *aí*
      as naturally as with the *allí* / *ali* proposed above.
 2. **JUST: blocked on E3 (a temporal complement).**
@@ -230,7 +230,7 @@ Leads, probed (MOMENT\* is a candidate, seeded in memory only):
 4. **ONLY: blocked on E7 (*nothing*).**
    - The gloss is "and nothing more" (*e nient'altro*, *et rien d'autre*, *und nichts anderes*, *y nada
      más*, 他には何もない, *e nada mais*). That needs the negative indefinite beside E7's *something*, in
-     a verbless "and" fragment. → [C32](../C-needs-engine/C32-indefinite-pronouns.md) (E7).
+     a verbless "and" fragment. → [C32](../done/C32-indefinite-pronouns.md) (E7).
    - SOLE says "unique" (*in un modo unico*).
    - The negated similative says "unlike anything", and in Japanese どの別の物体もない means "there is
      no other object".
@@ -270,7 +270,7 @@ REALLY ([adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts): HERE an
 EVERYWHERE, the four focus adverbs after NO_LONGER) and the differentia noun REALITY
 ([nouns.ts](../../../packages/backend/src/concepts/nouns.ts), after SORROW, countable) — and **three
 glosses** authored. STILL was seeded ahead of them with the words two tickets share, and its position
-is pinned there; EVEN is not seeded ([C39](../C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)).
+is pinned there; EVEN is not seeded ([C39](../done/C39-focus-particle-on-a-noun-phrase.md)).
 
 | concept | en | it | fr | de | es | ja | pt |
 |---|---|---|---|---|---|---|---|

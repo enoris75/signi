@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import type { EsAdjectives } from './es.types.js';
 import { PRENOMINAL } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -19,7 +20,8 @@ export function esAdj(np: ResolvedNounPhrase): EsAdjectives {
     if (!surface) continue;
     // A comparative/superlative follows the noun even when its plain form precedes it ("el
     // primer gato" but "el gato más primero"), as its degree adverb belongs with the phrase.
-    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
+    // An intensifier moves it the same way (C33).
+    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a)) {
       pre.push(apocopate(a.conceptId, surface, gender, plural));
     } else {
       post.push(esDeg(a, surface));

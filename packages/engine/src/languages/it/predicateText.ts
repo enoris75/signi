@@ -20,7 +20,7 @@ import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { splitLemmaTail } from '../../functions/splitLemmaTail.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
+import { FOCUS_WORDS, IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
@@ -28,6 +28,8 @@ import { alarmCryText } from './alarmCryText.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
+import { slotFocus } from '../../functions/slotFocus.js';
+import { withFocus } from '../../functions/withFocus.js';
 import { coordinate } from './coordinate.js';
 import { itEnclitic } from './itEnclitic.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
@@ -184,7 +186,8 @@ export function predicateText(
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("è mangiato dal gatto nella casa").
   const directObjectText = passive ? agentPhrase(agent)
-    : directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
+    // A focus particle singles the object out, from outside the phrase: "mangia solo il cibo" (C39).
+    : directObject && !objectClitic ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // A focus adverb under a negation takes its negative-polarity word in the same slot, where
   // Italian has one: "non mangia neanche il cibo", not "*non mangia anche il cibo" (A245).
   const negAdverb = negativeAdverb(modifier, verbNegative === true);

@@ -36,7 +36,10 @@ export function renderClause(given: ResolvedPhrase): string {
   // An infinitive citation ("to consume food") is likewise subject-less on the surface.
   const dropsSubject =
     phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive';
-  const subj = dropsSubject ? '' : subjectText(subject);
+  // A content clause standing where the subject would is extraposed behind the predicate, and the
+  // slot it left takes the expletive "it": "it is right that one acts" (C30).
+  const contentSubject = phrase.contentSubject;
+  const subj = contentSubject ? 'it' : dropsSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
   // A `no` subject is the clause's negator and takes the other negatives with it (A160). Only the
@@ -54,7 +57,8 @@ export function renderClause(given: ResolvedPhrase): string {
     .trim();
   // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
-  const governed = phrase.infinitiveComplement ? `${clause} ${renderClause(phrase.infinitiveComplement)}` : clause;
+  const withContent = contentSubject ? `${clause} that ${renderClause(contentSubject)}` : clause;
+  const governed = phrase.infinitiveComplement ? `${withContent} ${renderClause(phrase.infinitiveComplement)}` : withContent;
   // A clause of purpose closes the sentence, and English marks it with the bare infinitive the
   // citation mood already gives: "click to change", "select a subject to see the translations".
   return phrase.purpose ? `${governed} ${renderClause(phrase.purpose)}` : governed;

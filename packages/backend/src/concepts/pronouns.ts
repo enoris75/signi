@@ -110,4 +110,32 @@ export const pronouns: ConceptSeed[] = [
       pt: { base: 'se',  person: '3', number: 'singular', generic: '1', generic_reflexive: 'a gente' },
     },
   },
+  {
+    // P09's *something* (localization C32): a pronoun that stands for an unnamed **thing**, where the
+    // three persons and GENERIC_PERSON all stand for people. What makes it a pronoun of its own is
+    // that it has two forms, not one: under negation every language swaps the word outright —
+    // English to *anything* (beside "not"), and the other six to the negative pronoun that carries
+    // the negation with it (`negative`, see `negativePolarity`). Japanese writes 何 and lets the
+    // も…ない circumfix the `no` determiner already builds close it: 何も食べません.
+    //
+    // It is 3rd singular and never a person, so it agrees as "it" does and takes no reflexive.
+    id: 'SOMETHING',
+    role: 'pronoun',
+    slot: 'indefinite',
+    description: 'an unknown thing',
+    // A genus+differentia gloss on THING, the only shape a pronoun of this kind takes: "an unknown
+    // thing". The negative half of the word is not glossed separately — it is the same concept.
+    definition: { subject: { concept: 'THING', definiteness: 'indefinite', adjectives: ['UNKNOWN'] } },
+    synonym: 'something',
+    emoji: '❔',
+    forms: {
+      en: { base: 'something', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'something', disjunctive: 'something', negative: 'anything', negative_subject: 'nothing' },
+      it: { base: 'qualcosa', person: '3', number: 'singular', thing: '1', object: 'qualcosa', disjunctive: 'qualcosa', negative: 'niente' },
+      fr: { base: 'quelque chose', person: '3', number: 'singular', thing: '1', object: 'quelque chose', disjunctive: 'quelque chose', negative: 'rien' },
+      de: { base: 'etwas', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'etwas', disjunctive: 'etwas', negative: 'nichts' },
+      es: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada' },
+      ja: { base: '何か', person: '3', number: 'singular', thing: '1', reading: 'なにか', negative: '何', negative_reading: 'なに' },
+      pt: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada' },
+    },
+  },
 ];

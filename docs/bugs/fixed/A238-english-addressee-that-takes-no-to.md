@@ -19,7 +19,7 @@ key selects a bare or double-object recipient, the way `object_prep` selects one
 (`la donna chiede il nome all'uomo.`, `la mujer pregunta el nombre al hombre.`, 女は男に名前を尋ねます。),
 and a verb whose English addressee really does take "to" keeps it (`the woman says the word to the
 man.`). **German is a different bug**: *fragen* takes the person in the accusative, and it renders
-*fragt dem Mann*, which is [C35](../../localization/C-needs-engine/C35-lexical-object-case.md)'s
+*fragt dem Mann*, which is [C35](../../localization/done/C35-lexical-object-case.md)'s
 lexical object case — already recorded there, and not this file's.
 
 **Nothing shipped shows it.** ANSWER's own gloss is SAY with a terminus, which takes "to" correctly.

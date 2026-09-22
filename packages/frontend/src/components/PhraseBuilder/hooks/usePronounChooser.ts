@@ -42,13 +42,17 @@ export const pronounRows = (person: PronounPerson): readonly PronounRow[] =>
  * fourth person, and it shares person 3 with THIRD_PERSON, so it is matched by id and kept out of
  * the deictic lookup — which is why this is one place both the chooser and the commit read.
  */
+// The chooser's rows are the three grammatical persons and the generic "one". A pronoun whose slot
+// is not a person's has no row — SOMETHING is 3rd singular and would otherwise take the third
+// person's, being the first such concept by id — so `slot` is what keeps it out (see `ConceptSlot`,
+// localization C32). A row of its own is the builder work that pronoun is still waiting for.
 export const pronounFor = (
   pronouns: readonly Concept[],
   person: PronounPerson,
 ): Concept | undefined =>
   person === "generic"
     ? pronouns.find((p) => p.id === "GENERIC_PERSON")
-    : pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON");
+    : pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON" && !p.slot);
 
 export interface PronounChooser {
   choice: PronounChoice;

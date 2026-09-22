@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { PRENOMINAL } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
@@ -24,8 +25,8 @@ export function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: 
     }
     // A comparative/superlative adjective is postnominal in French ("le chat plus grand",
     // "le chat meilleur"), even when its plain form would precede the noun — this also avoids
-    // elision artefacts ("l'aussi grand chat").
-    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive';
+    // elision artefacts ("l'aussi grand chat"). An intensifier moves it the same way (C33).
+    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a);
     (prenominal ? pre : post).push(word);
   }
   return { pre, post };

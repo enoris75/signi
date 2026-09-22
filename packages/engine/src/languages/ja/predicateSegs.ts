@@ -50,7 +50,25 @@ export function predicateSegs(
 ): RubySegment[] {
   // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
   // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
-  const predicative = complements?.['predicative']
+  // A verb Japanese says as an **adjective** (localization C34): 好き is a な-adjective, not a verb,
+  // and the thing liked is what it is said of — 猫は犬が好きです. The lexeme flags itself `adjectival`
+  // and marks its object が (`object_particle`); everything else follows from the copula path below,
+  // so tense, negation, the たら form, a relative clause and a modal all compose on it exactly as
+  // they do on any predicate adjective (犬が好きな猫, 犬が好きではありませんでした).
+  const adjectival = givenVerbPhrase.verb.forms['adjectival'] === '1';
+  const predicative = (adjectival
+    ? {
+        phrase: {
+          conjuncts: [{
+            head: { ...givenVerbPhrase.verb, forms: { ...givenVerbPhrase.verb.forms, role: 'adjective' } },
+            adjectives: [],
+            nounModifiers: [],
+          }],
+          agreement: {},
+        },
+      } satisfies ResolvedComplement
+    : undefined)
+    ?? complements?.['predicative']
     ?? (givenVerbPhrase.elided?.type === 'predicative' ? JA_SOU : undefined);
   // BE with no predicative states that the subject exists, or where it is: Japanese uses the
   // existential verb, いる for an animate subject and ある for an inanimate one, and marks any place
@@ -89,6 +107,10 @@ export function predicateSegs(
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).
   const { objectPredicative, rest: adjunctComplements } = splitObjectPredicative(complements);
+  // Whether the predicate is the copula's — the real copula with a complement, or a verb that is an
+  // adjective in Japanese (see `adjectival` above). Both close the clause on です rather than on a
+  // conjugated verb.
+  const copulaPredicate = (verbPhrase.verb.forms['copula'] === '1' || adjectival) && !!predicative;
   // The particle this verb's place takes (see `complementSegs`). The existential states where the
   // subject is, に (家にいます); so do the lexemes that seed `locative_particle` — 住む names where one
   // lives and 閉じ込める where the confined thing ends up, neither of them a place an act merely goes
@@ -136,7 +158,7 @@ export function predicateSegs(
   // (伝説にならないでください) rather than the plain prohibitive ordinary verbs take.
   if (mood === 'imperative') {
     const pn = imperativePN ?? '2sg';
-    if (verb.forms['copula'] === '1' && predicative) {
+    if (copulaPredicate) {
       const naru = pn === '1pl'
         ? (negated ? 'なるのはやめましょう' : 'なりましょう')
         : (negated ? 'ならないでください' : 'なってください');
@@ -156,7 +178,7 @@ export function predicateSegs(
   // Japanese renders as the verbal noun (消費). A copula predicate falls through to the です block,
   // which closes a citation in the plain written style (可能である). A negative citation takes the plain
   // negative (食べない。, 食べないために, 行動しないことを; B13).
-  if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
+  if (mood === 'infinitive' && !copulaPredicate) {
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
@@ -173,11 +195,14 @@ export function predicateSegs(
       : [plainVerbSeg(verb, 'present', negated)]));
     return segs;
   }
-  if (verb.forms['copula'] === '1' && predicative) {
+  if (copulaPredicate) {
     // The predicate noun closes the clause, so every other complement is preposed ahead of it
     // (猫は家で犬のために伝説です) rather than lost behind です.
     const { predicative: _, ...adjuncts } = complements ?? {};
     segs.push(...complementSegs(adjuncts));
+    // An adjectival verb still has its object, which its particle marks — 猫は犬が好きです. The real
+    // copula is intransitive and never has one.
+    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     for (const m of modals) {
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));

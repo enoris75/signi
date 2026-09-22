@@ -41,7 +41,8 @@ Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
    - **noun** — `base`, `plural`, `gender` (`masc`/`fem`/`neut`, not in en/ja), `count`; `fem` +
      `fem_plural` when the noun has a feminine counterpart; `reading` (kana) for `ja`.
      Flags: `animate` (affects motion adpositions), `countable: false` for mass nouns,
-     `proper: true` for proper nouns.
+     `proper: true` for proper nouns. A handful of columns are **one language's own** and go on that
+     language's lexeme only (see *A noun's language-specific columns* below).
    - **verb** — `base` (infinitive) plus the finite paradigm: `1sg_present`…`3pl_present`, and the
      `_past` / `_future` persons each language inflects (en collapses to a single `past`).
      Set `transitivity`, and `complements` for the complement types the verb licenses; `modal: true`
@@ -77,6 +78,26 @@ Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
    - **Run them:** `npm run test:unit` from the repo root (or `npx vitest run <file>` for one file).
      Pin the *actual* rendered output — run first, read what the engine produces, assert that — never
      guess the foreign-language strings.
+
+## A noun's language-specific columns
+
+A few noun columns belong to **one language's lexeme**, not to the concept: the fact they record is a
+fact about that language's word. They are ordinary `forms` keys, so nothing but the engine that reads
+one has to know about it, and a lexeme without one is simply the regular case.
+
+| column | language | what it does |
+| --- | --- | --- |
+| `kinship: '1'` | it | Drops the article before a possessive on the singular: "**mio** padre", but "**il mio** cane", "**il loro** padre", "i miei fratelli", "il mio vecchio padre" (A85). Italian itself splits the meaning — "mia madre" but "**la mia** mamma" — so it is flagged word by word, not by concept. |
+| `weak: '1'` | de | An n-declension masculine: -(e)n in every case but the nominative singular ("der Junge", "den/dem/des Jungen"), and no genitive -(e)s. |
+| `adjectival: '1'` | de | An **adjectival noun**, which declines like an adjective: *der Verwandte*, *ein Verwandter*, *einem Verwandten*, bare plural *Verwandte* (P11 D8). Seed `base` as the bare **stem** (`Verwandt`), and seed `plural` — and `fem` for the feminine — as that same stem, since the ending is what carries the number and gender. The noun rules (genitive -(e)s, weak -(e)n, dative-plural -n) do not apply. |
+| `possessed`, `possessed_plural` | fr, de, ja | The word once the thing has an **owner**: "ma **femme**" but "une **épouse**", "meine **Frau**" but "eine **Ehefrau**", and Japanese 母 for one's own mother against 母親 for nobody's (P11 D2/D6). Applies under any possessor at all. |
+| `honorific`, `plural_honorific` | ja | The word for **someone else's** relative: お母さん, 奥さん, ご主人, ご両親 (P11 D2). It is chosen for a possessor who is a person outside the speaker's family; a missing column falls back to `possessed`, then to `base`. |
+| `kin: '1'` | ja | Marks the noun as a **relative**, which is what lets one's own family carry down a genitive chain (私の兄の妻 → 兄の妻) and what lets 私の drop in front of it (P11 D3/D4). Every Japanese kin noun carries it — including MOM's お母さん, which has no `possessed` or `honorific` of its own. |
+| `with_<ADJECTIVE>` | ja | The one word that says the noun **and** an adjective: 兄弟 with ELDER is 兄, with YOUNGER 弟 (P11 D5). The adjective is then not said again. Each takes `with_<ADJECTIVE>_reading` and, where someone else's has its own word, `with_<ADJECTIVE>_honorific` (+ `_reading`). A head with no column for the adjective renders it as itself (上の息子). |
+
+Each of the surface columns above takes a `_reading` of its own in Japanese (`possessed_reading`,
+`honorific_reading`, `plural_honorific_reading`): the furigana follows whichever word is selected, and
+a column with no reading leaves none behind — お母さん must not be read ははおや.
 
 ## Definition of done
 

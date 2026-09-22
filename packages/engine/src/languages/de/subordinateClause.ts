@@ -15,6 +15,7 @@ import { meansClause } from './meansClause.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { objectCase } from './objectCase.js';
 import { objectPrepCase } from './objectPrepCase.js';
 import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
@@ -66,7 +67,9 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       ? `von ${relativePronoun(f, 'dat', plural)}`
     : gap
       ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
-      : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : headPrep ? objectPrepCase(headPrep) : 'acc', plural)].filter(Boolean).join(' ');
+      // A bare object gap takes the case its verb governs — the accusative, or the dative after
+      // *helfen* and its like: "der Hund, **dem** man hilft" (`objectCase`, C35).
+      : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : headPrep ? objectPrepCase(headPrep) : objectCase(rel.verbPhrase.verb), plural)].filter(Boolean).join(' ');
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;
@@ -126,7 +129,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const meansText = meansClause(means, doer);
   // A passive has no accusative object left, so its by-phrase takes the noun object's slot, as in the
   // main clause: "das vom Kind im Haus geschrieben wird".
-  const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(directObject, '', objectPrep);
+  const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(directObject, '', objectPrep, objectCase(verb));
   const directObjectText = passive ? agentPhrase(rel.agent) : objectNoun;
   const objectPronounText = [passive ? '' : reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';

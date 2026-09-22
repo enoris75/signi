@@ -215,8 +215,13 @@ export function complementsParts(
         // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default. A verb whose
         // terminus is its dative object whatever it names says `terminus_dative`: GIVE gives a value
         // TO an option, "gibt der Option den Wert", not INTO it (A223).
+        // A verb that governs the person it reaches in the **accusative** says so (`terminus_case`,
+        // C35's lexical case the other way round): German *fragen* asks a person, "fragt den Mann
+        // nach dem Namen", where every other addressee verb says "dem Mann". It is bare, like the
+        // dative recipient, and keeps the recipient's place ahead of the object.
         else if (type === 'terminus') {
-          if (f['animate'] === '1' || verb['terminus_dative'] === '1') head = prepDet('', f, 'dat', plural);
+          if (verb['terminus_case'] === 'acc') { _case = 'acc'; head = prepDet('', f, 'acc', plural); }
+          else if (f['animate'] === '1' || verb['terminus_dative'] === '1') head = prepDet('', f, 'dat', plural);
           else if (verb['terminus_prep']) head = prepDet(verb['terminus_prep'], f, 'dat', plural);
           // A place one is at rather than inside is reached with its own preposition: "schickt das
           // Buch an einen Ort" (A218).

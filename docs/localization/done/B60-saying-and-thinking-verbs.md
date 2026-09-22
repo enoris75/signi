@@ -215,8 +215,8 @@ check), and the eleven are distinct from one another in all seven. Readings to j
    believe that …* (E4), *think / talk about* (E2), German *glauben* + a dative person (E9), and MEAN's
    "intend" sense (P09's row defers it). None has a gloss of its own to wait for, so no C ticket owns a
    concept from this one. The German cases are recorded in
-   [C35](../C-needs-engine/C35-lexical-object-case.md), and the *that* clause is the object half of
-   [C30](../C-needs-engine/C30-content-clause-with-expletive-subject.md)'s E4.
+   [C35](../done/C35-lexical-object-case.md), and the *that* clause is the object half of
+   [C30](../done/C30-content-clause-with-expletive-subject.md)'s E4.
 
 ## Coverage
 
@@ -272,7 +272,7 @@ What landed differently from the plan:
    man* where it wants the double object *asks the man the name* — a defect of English's own, pinned
    as **A238** with ANSWER's *the woman answers to the man* (want *answers the man*), which
    is the same rule. German's *fragt dem Mann nach dem Namen* wants the accusative *den Mann*, which
-   is [C35](../C-needs-engine/C35-lexical-object-case.md)'s lexical object case — C35 already records
+   is [C35](../done/C35-lexical-object-case.md)'s lexical object case — C35 already records
    *fragen* by name, so nothing new goes there. The other five are right.
 3. **CALL and BRING both ship** (the sweep's ruling): CALL is the causative of COME with a person as
    causee, [B61](B61-handling-and-leaving-verbs.md)'s BRING the same with an object, and the causee

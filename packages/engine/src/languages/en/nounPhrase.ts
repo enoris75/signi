@@ -1,6 +1,8 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { possessiveEn, possessiveEnIndependent } from '../../possessive.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS } from './en.consts.js';
 import { determiner } from './determiner.js';
 import { isPostModified, keepsHeadDeterminer } from './isPostModified.js';
 import { possessivePrefix } from './possessivePrefix.js';
@@ -9,11 +11,13 @@ import { possessorPhrase } from './possessorPhrase.js';
 export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false, partitive = false): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? `${adj} ` : '';
+  // A cardinal stands between the determiner and the adjectives: "the two big cats" (C31).
+  const numeral = numeralText(forms, CARDINALS);
+  const a = `${numeral ? `${numeral} ` : ''}${adj ? `${adj} ` : ''}`;
   // Noun-modifiers sit between the adjectives and the head: "the big sail boat".
   const m = mods ? `${mods} ` : '';
   // "a/an" agrees with the first word after the article (adjective, else modifier, else noun).
-  const lead = adj || mods || word;
+  const lead = numeral || adj || mods || word;
   // "all" is the one head determiner a possessor makes room for, by stacking in front of it: "all
   // the cat's books" / "all her books", not "all books of the cat" (A184, A187).
   const allHead = (forms['definiteness'] ?? 'definite') === 'all' && forms['proper'] !== '1';

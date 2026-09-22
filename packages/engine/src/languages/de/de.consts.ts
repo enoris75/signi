@@ -1,5 +1,7 @@
 import type { CoordConjunction, DimensionRelation } from '@signi/shared';
 import type { Case, Slot } from './de.types.js';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 /**
  * The case each marker of an object predicative governs. The factitive link is the verb's own word
@@ -160,3 +162,16 @@ export const DE_REFLEXIVE: Record<string, string> = { '1sg': 'mich', '2sg': 'dic
 // er ist müde, und der Hund ist nicht der Grund (siehe `Complement.negative`). Er steht direkt vor
 // dem Satzglied, wo die Satznegation vor dem Prädikat steht (A186).
 export const CONSTITUENT_NEGATOR = 'nicht';
+
+/** The focus particles (see NounPhrase.focus, C39). German writes all three before the phrase. */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'nur' }, even: { word: 'sogar' }, also: { word: 'auch' },
+};
+
+/** The cardinals German spells (see `numeralWord`, C31); only "ein" agrees. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'ein', fem: 'eine' }, 2: { word: 'zwei' }, 3: { word: 'drei' }, 4: { word: 'vier' },
+  5: { word: 'fünf' }, 6: { word: 'sechs' }, 7: { word: 'sieben' }, 8: { word: 'acht' },
+  9: { word: 'neun' }, 10: { word: 'zehn' }, 11: { word: 'elf' }, 12: { word: 'zwölf' },
+  24: { word: 'vierundzwanzig' },
+};

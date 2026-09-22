@@ -30,8 +30,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeText(firstConjunct(subject));
   // An imperative drops its subject (the person still drives the form — see predicateText); an
   // infinitive citation ("consommer la nourriture") is likewise subject-less on the surface.
-  const subj =
-    phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive'
+  // A content clause standing where the subject would is extraposed behind the predicate, under
+  // "que" and in the present subjunctive; the slot it left takes the expletive "il" (C30).
+  const contentSubject = phrase.contentSubject;
+  const subj = contentSubject ? 'il'
+    : phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive'
       ? ''
       : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
@@ -43,9 +46,13 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("être capable d'agir", "le chat désire manger") or, under a causative, its object
   // ("amener une maison à être cachée").
-  const governed = phrase.infinitiveComplement
-    ? `${clause} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`
+  // "que" elides before a vowel, as it does everywhere else: "qu'on agisse".
+  const withContent = contentSubject
+    ? `${clause} ${((text) => (/^[aeiouyâêîôûéèh]/i.test(text) ? `qu'${text}` : `que ${text}`))(renderClause(contentSubject))}`
     : clause;
+  const governed = phrase.infinitiveComplement
+    ? `${withContent} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`
+    : withContent;
   // A clause of purpose closes the sentence, under "pour" + the infinitive ("cliquer pour changer").
   // It is subject-controlled, so it agrees with this clause's own subject, as a complement does.
   return phrase.purpose

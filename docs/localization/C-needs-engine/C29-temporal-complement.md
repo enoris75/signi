@@ -61,7 +61,7 @@ and, for P09's function words, *after*, *before* and *during* as three more rela
 complement. As a **relative gap** (`headRole: 'temporal'`) it would also say "a period **in which**",
 where en/it/es/pt now write the place words *where / dove / donde / onde*: that is the route by which
 YEAR's astronomical gloss could ship ("a period in which the earth turns around the sun", probed in
-B59), though YEAR itself is owned by [C31](C31-numerals.md), whose calendar gloss is the direct one.
+B59), though YEAR itself is owned by [C31](../done/C31-numerals.md), whose calendar gloss is the direct one.
 
 Each gloss then renders through `complementGloss`, exactly as [C25](../done/C25-place-and-direction-adverbs.md)'s
 place adverbs do.

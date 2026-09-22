@@ -1,0 +1,141 @@
+import { describe, expect, test } from 'vitest';
+import type { LanguageCode } from '@signi/shared';
+import { clause, np, say, sayAll } from './harness.js';
+import { translate } from '../src/index.js';
+import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
+import { concepts } from '../../backend/src/concepts/index.js';
+
+// Localization C33: an intensifier on an adjective — VERY and TOO. It is an adverb concept of its
+// own, so it is looked up per language like any word; where it goes is its lexeme's business, and
+// three answers exist: before the adjective (six languages, and pt muito), after it (pt demais),
+// and as a suffix on its stem that turns the adjective into a verb (ja 〜すぎる).
+
+const seed = (id: string) => concepts.find((c) => c.id === id);
+
+/** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
+function definitionAll(id: string): Record<LanguageCode, string> {
+  const concept = seed(id);
+  if (!concept?.definition) throw new Error(`${id} has no definition plan`);
+  return Object.fromEntries(
+    translate(concept.definition, lookupLexicalEntry).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+describe('an intensifier inside the noun phrase', () => {
+  test('VERY leads the adjective in every language', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toEqual({
+      en: 'a very big cat runs.', it: 'un gatto molto grande corre.', fr: 'un chat très grand court.',
+      de: 'ein sehr großer Kater läuft.', es: 'un gato muy grande corre.', ja: 'とても大きい猫は走ります。',
+      pt: 'um gato muito grande corre.',
+    });
+  });
+
+  test('TOO follows it in Portuguese and is a suffix in Japanese', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['TOO'],
+    }), 'RUN'))).toEqual({
+      en: 'a too big cat runs.', it: 'un gatto troppo grande corre.', fr: 'un chat trop grand court.',
+      de: 'ein zu großer Kater läuft.', es: 'un gato demasiado grande corre.', ja: '大きすぎる猫は走ります。',
+      pt: 'um gato grande demais corre.',
+    });
+  });
+
+  test('the adjective still agrees, and the intensifier never does', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toMatchObject({
+      it: 'case molto grandi corrono.', fr: 'des maisons très grandes courent.',
+      es: 'unas casas muy grandes corren.', pt: 'umas casas muito grandes correm.',
+      de: 'sehr große Häuser laufen.',
+    });
+  });
+
+  test('it stacks outside a comparative degree', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toMatchObject({
+      it: 'un gatto molto più grande corre.', es: 'un gato muy más grande corre.',
+      en: 'a very bigger cat runs.',
+    });
+  });
+
+  // An intensified adjective follows the noun in Romance, as a compared one does — and OTHER then
+  // gives the indefinite article back, since it no longer stands where the article would.
+  test('an intensified prenominal adjective moves behind the noun', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['OTHER'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toMatchObject({
+      it: 'un gatto molto altro corre.', fr: 'un chat très autre court.',
+      es: 'un gato muy otro corre.', pt: 'um gato muito outro corre.',
+    });
+    // Without one, OTHER leads and Iberian Romance drops the article (the shape A-side already had).
+    expect(sayAll(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['OTHER'] }), 'RUN')))
+      .toMatchObject({ es: 'otro gato corre.', pt: 'outro gato corre.', it: 'un altro gatto corre.' });
+  });
+});
+
+describe('an intensifier on a predicate adjective', () => {
+  test('VERY and TOO under the copula', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headIntensifier: 'VERY' }) } },
+    }))).toEqual({
+      en: 'the cat is very big.', it: 'il gatto è molto grande.', fr: 'le chat est très grand.',
+      de: 'der Kater ist sehr groß.', es: 'el gato es muy grande.', ja: '猫はとても大きいです。',
+      pt: 'o gato é muito grande.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headIntensifier: 'TOO' }) } },
+    }))).toEqual({
+      en: 'the cat is too big.', it: 'il gatto è troppo grande.', fr: 'le chat est trop grand.',
+      de: 'der Kater ist zu groß.', es: 'el gato es demasiado grande.', ja: '猫は大きすぎます。',
+      pt: 'o gato é grande demais.',
+    });
+  });
+
+  // 〜すぎる is an ichidan verb, so the Japanese predicate inflects as one: tense and polarity come
+  // off the suffix, not off the adjective (大きすぎませんでした, never 大きすぎるくなかったです).
+  test('the Japanese suffix carries the tense and the negation', () => {
+    const past = (id: string) => say(clause(np('CAT'), 'BE', {
+      verbPhrase: { tense: 'past', negative: true },
+      complements: { predicative: { phrase: np('BIG', { headIntensifier: id }) } },
+    }), 'ja');
+    expect(past('VERY')).toBe('猫はとても大きくなかったです。');
+    expect(past('TOO')).toBe('猫は大きすぎませんでした。');
+  });
+
+  test('the suffix takes each adjective class by its own stem', () => {
+    // い-adjective 大きい → 大き, な-adjective 幸せな → 幸せ, た-adjective 疲れた → 疲れ.
+    const tooJa = (adjective: string) => say(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np(adjective, { headIntensifier: 'TOO' }) } },
+    }), 'ja');
+    expect(tooJa('BIG')).toBe('猫は大きすぎます。');
+    expect(tooJa('HAPPY')).toBe('猫は幸せすぎます。');
+    expect(tooJa('TIRED')).toBe('猫は疲れすぎます。');
+    // …and attributively it is the verb's prenominal form, which is the dictionary one.
+    expect(say(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['HAPPY'], adjectiveIntensifiers: ['TOO'],
+    }), 'RUN'), 'ja')).toBe('幸せすぎる猫は走ります。');
+  });
+});
+
+describe('the words themselves', () => {
+  // VERY is UP's direction complement on LEVEL instead of PLACE. TOO's "to an excessive level" has
+  // no word in the corpus, so it stays on the English literal (see the ticket's probe table).
+  test('VERY is glossed and TOO is not', () => {
+    expect(definitionAll('VERY')).toEqual({
+      en: 'to a high level.', it: 'a un livello alto.', fr: 'à un niveau haut.', de: 'zu einer hohen Ebene.',
+      es: 'a un nivel alto.', ja: '高い段階へ。', pt: 'a um nível alto.',
+    });
+    expect(seed('TOO')?.definition).toBeUndefined();
+  });
+
+  // They are adverb concepts, so they ride the `role=adverb` fetch; `slot` is what keeps them out
+  // of the verb's adverb picker, as `modal` keeps a modal out of the main-verb one.
+  test('both name the slot they fill instead of a verb\'s', () => {
+    expect(seed('VERY')?.slot).toBe('intensifier');
+    expect(seed('TOO')?.slot).toBe('intensifier');
+    expect(seed('REALLY')?.slot).toBeUndefined();
+  });
+});

@@ -43,7 +43,12 @@ export function SubjectTypeahead({
   const t = useUiString();
   const prompt = `${t(placeholderKey)}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
-  const { data: nouns = [] } = useConcepts("noun");
+  const { data: allNouns = [] } = useConcepts("noun");
+  // A concept whose slot is not its role's is filtered out here: it reuses this role's lexicon and
+// arrives on the same fetch, but nothing it could fill is in this picker — the split
+// ModalTypeahead / VerbTypeahead make on `Concept.modal`, one level out (see `ConceptSlot`).
+// Here that is MR, which stands with a personal name: "the Mr eats" is not a sentence.
+  const nouns = allNouns.filter((n) => !n.slot);
   // The category is controlled when the box supplies `onKindChange`; otherwise the popper
   // owns it locally so a bare <SubjectTypeahead/> still works.
   const [localTab, setLocalTab] = useState<string>(kind);

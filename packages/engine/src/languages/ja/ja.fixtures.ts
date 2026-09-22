@@ -23,6 +23,19 @@ export const FUREEZU: Forms = { base: 'フレーズ', count: 'singular', reading
 export const OTOKONOKO: Forms = { base: '男の子', count: 'singular', reading: 'おとこのこ', animate: '1', human: '1' };
 export const KODOMO: Forms = { base: '子供', count: 'singular', reading: 'こども', animate: '1', human: '1' };
 export const HITO: Forms = { base: '人', count: 'singular', reading: 'ひと', animate: '1', human: '1' };
+
+// Kin nouns, as `applyPossessorForm` leaves them — the word has already been chosen by then, and the
+// `own` mark says the relative is the speaker's (P11 D2/D3). Which word that was is the translator's
+// test; what npSegs reads off them is the possessor it may now drop, and the plural that is another word.
+/** One's own mother: 母 (as against 母親, nobody's, and お母さん, someone else's). */
+export const HAHA: Forms = { base: '母', count: 'singular', reading: 'はは', animate: '1', human: '1', kin: '1', own: '1' };
+/** Someone else's mother, which carries no `own` mark. */
+export const OKAASAN: Forms = { base: 'お母さん', count: 'singular', reading: 'おかあさん', animate: '1', human: '1', kin: '1' };
+/** A kin noun whose plural is another word: 親 → 両親 (P11 D7). */
+export const OYA: Forms = {
+  base: '親', plural: '両親', count: 'singular', reading: 'おや', plural_reading: 'りょうしん',
+  animate: '1', human: '1', kin: '1', own: '1',
+};
 export const HON: Forms = { base: '本', count: 'singular', reading: 'ほん' };
 export const IE: Forms = { base: '家', count: 'singular', reading: 'いえ' };
 export const KABE: Forms = { base: '壁', count: 'singular', reading: 'かべ' };

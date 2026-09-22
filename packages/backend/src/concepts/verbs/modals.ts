@@ -1,5 +1,22 @@
 import type { ConceptSeed } from '../types.js';
+import type { PhrasePlan } from '@signi/shared';
 import { infinitiveGloss } from './gloss.js';
+
+// An **evaluative** modal's gloss: what is judged is the act, not the one who acts, so the act is
+// the subject — a content clause, which localization C30 built. evaluativeGloss('RIGHT_CORRECT') →
+// en "it is right that one acts", it "è giusto che si agisca", fr "il est juste qu'on agisse", de
+// "es ist richtig, dass man handelt", es "es correcto que se actúe", ja 行動することが正しい, pt "é
+// certo que se aja".
+//
+// This is why SHOULD and MIGHT could not take C09's shape, which the other four modals do: "to be
+// obliged / able / allowed to act" says the adjective of the **actor**, and *right* and *possible*
+// are not said of anyone. The plan's own subject is the throwaway a clausal subject leaves behind.
+const evaluativeGloss = (adjective: string): PhrasePlan => ({
+  subject: { concept: 'THING' },
+  contentSubject: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'ACT' } },
+  verbPhrase: { verb: 'BE' },
+  complements: { predicative: { phrase: { concept: adjective } } },
+});
 
 // Each modal is defined by what it governs: an infinitive complement (PhrasePlan.infinitiveComplement)
 // under a word that says the modality in plain vocabulary — a duty (OBLIGED), a capacity (ABLE), a
@@ -331,6 +348,7 @@ export const modals: ConceptSeed[] = [
     role: 'verb',
     modal: true,
     description: 'ought to; what is right or advisable to do',
+    definition: evaluativeGloss('RIGHT_CORRECT'),
     synonym: 'ought to',
     emoji: '🫵',
     forms: {
@@ -389,6 +407,7 @@ export const modals: ConceptSeed[] = [
     role: 'verb',
     modal: true,
     description: 'possibly will; possibility',
+    definition: evaluativeGloss('POSSIBLE'),
     synonym: 'possibly',
     emoji: '🎲',
     forms: {

@@ -3,6 +3,8 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { articledNameForms } from './articledNameForms.js';
 import { datPluralN } from './datPluralN.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS } from './de.consts.js';
 import { determiner } from './determiner.js';
 import { genitiveShows } from './genitiveShows.js';
 import { germanCompound } from './germanCompound.js';
@@ -43,6 +45,8 @@ function vonDative(poss: ResolvedNounPhrase): string {
   const words = [
     'von',
     determiner(f, 'dat', plural),
+    // A counted possessor keeps its cardinal: "ein Zeitraum von vierundzwanzig Stunden" (C31).
+    numeralText(f, CARDINALS),
     adjPhrase(poss, 'dat', definiteness),
     `${word}${postnominal(f)}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`,
   ];

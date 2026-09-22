@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, EUROPA, GROSS, HAUS, JUNGE, KATER, KATZE, KLEIN, np, nounModifier, SEGEL, vp, WORT } from './de.fixtures.js';
+import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, EUROPA, GROSS, HAUS, JUNGE, KATER, KATZE, KLEIN, np, nounModifier, SEGEL, VERWANDT, vp, WORT } from './de.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 
 describe('nounPhrase', () => {
@@ -103,5 +103,65 @@ describe('nounPhrase', () => {
   test('a relative clause trails the noun, bracketed by commas', () => {
     const relative = { headRole: 'subject' as const, verbPhrase: vp(ESSEN) };
     expect(nounPhrase(np(KATER, {}, { relative }), 'nom')).toBe('der Kater, der isst,');
+  });
+  // ── P11 D8: the adjectival noun ───────────────────────────────────────────
+  // *der Verwandte*, *ein Verwandter*: the noun declines like an adjective, by the very table its
+  // own adjectives decline by, and takes none of the noun endings.
+
+  describe('an adjectival noun', () => {
+    test('takes the adjective ending its determiner and case select', () => {
+      expect(nounPhrase(np(VERWANDT), 'nom')).toBe('der Verwandte');
+      expect(nounPhrase(np(VERWANDT), 'acc')).toBe('den Verwandten');
+      expect(nounPhrase(np(VERWANDT), 'dat')).toBe('dem Verwandten');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }), 'nom')).toBe('ein Verwandter');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }), 'acc')).toBe('einen Verwandten');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }), 'dat')).toBe('einem Verwandten');
+    });
+
+    test('declines strong where no determiner carries the case', () => {
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'bare' }), 'nom')).toBe('Verwandter');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'bare' }), 'dat')).toBe('Verwandtem');
+      expect(nounPhrase(np(VERWANDT, { number: 'plural', definiteness: 'bare' }), 'nom')).toBe('Verwandte');
+    });
+
+    test('the plural takes the plural ending, and no dative-plural -n on top of it', () => {
+      expect(nounPhrase(np(VERWANDT, { number: 'plural' }), 'nom')).toBe('die Verwandten');
+      expect(nounPhrase(np(VERWANDT, { number: 'plural' }), 'dat')).toBe('den Verwandten');
+    });
+
+    test('the genitive is the adjective ending, not the noun -(e)s', () => {
+      expect(nounPhrase(np(VERWANDT), 'gen')).toBe('des Verwandten');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }), 'gen')).toBe('eines Verwandten');
+    });
+
+    test('the feminine declines as a feminine does', () => {
+      const she = { gender: 'fem', base: 'Verwandt' };
+      expect(nounPhrase(np(VERWANDT, she), 'nom')).toBe('die Verwandte');
+      expect(nounPhrase(np(VERWANDT, { ...she, definiteness: 'indefinite' }), 'nom')).toBe('eine Verwandte');
+      expect(nounPhrase(np(VERWANDT, { ...she, definiteness: 'indefinite' }), 'acc')).toBe('eine Verwandte');
+      expect(nounPhrase(np(VERWANDT, { ...she, definiteness: 'indefinite' }), 'dat')).toBe('einer Verwandten');
+    });
+
+    test('a possessive is an ein-word, and the noun follows it as it follows "kein"', () => {
+      const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+      expect(nounPhrase(np(VERWANDT, {}, { possessor: my }), 'nom')).toBe('mein Verwandter');
+      expect(nounPhrase(np(VERWANDT, {}, { possessor: my }), 'dat')).toBe('meinem Verwandten');
+      expect(nounPhrase(np(VERWANDT, { number: 'plural' }, { possessor: my }), 'nom')).toBe('meine Verwandten');
+    });
+
+    test('its own adjectives decline by the same table, agreeing all the way through', () => {
+      expect(nounPhrase(np(VERWANDT, {}, { adjectives: [adj(KLEIN)] }), 'nom')).toBe('der kleine Verwandte');
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }, { adjectives: [adj(KLEIN)] }), 'nom')).toBe('ein kleiner Verwandter');
+      expect(nounPhrase(np(VERWANDT, { number: 'plural', definiteness: 'bare' }, { adjectives: [adj(KLEIN)] }), 'dat')).toBe('kleinen Verwandten');
+    });
+
+    test('as a noun possessor it trails in the genitive, declined', () => {
+      expect(nounPhrase(np(BUCH, {}, { possessor: np(VERWANDT) }), 'nom')).toBe('das Buch des Verwandten');
+    });
+
+    test('a compound declines on its last element', () => {
+      expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }, { nounModifiers: [nounModifier(BUCH)] }), 'nom'))
+        .toBe('ein Buchverwandter');
+    });
   });
 });

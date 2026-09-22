@@ -1,4 +1,4 @@
-import type { PhrasePlan } from '@signi/shared';
+import type { ConceptSlot, PhrasePlan } from '@signi/shared';
 
 export interface ConceptSeed {
   id: string;
@@ -15,6 +15,7 @@ export interface ConceptSeed {
   emoji?: string;
   transitivity?: string; // only for verbs
   modal?: boolean; // verb that governs another verb's infinitive rather than heading a clause
+  slot?: ConceptSlot; // the slot this concept fills where that is not its role's — VERY/TOO, MR, OWN_ADJECTIVE, SOMETHING (see ConceptSlot; C32, C33, C37, C38)
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   human?: boolean; // referent is a person — English relativises "who" on this, not animacy

@@ -3,8 +3,11 @@ import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { disjunctiveFr, KEPT_BESIDE_POSSESSIVE, possessiveFr } from '../../possessive.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS } from './fr.consts.js';
 import { artFor } from './artFor.js';
 import { deDet } from './deDet.js';
+import { deicticClitic } from './deicticClitic.js';
 import { elidesBefore } from './elidesBefore.js';
 import { frMods } from './frMods.js';
 import { joinArt } from './joinArt.js';
@@ -56,12 +59,22 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const detWord = detached ? artFor(ownForms, plural, lead)
     : pronominal && definiteness === 'all' ? (fem ? 'toutes' : 'tous')
     : '';
-  const words = [detWord, possWord, ...pre, noun].filter(Boolean);
+  // A cardinal stands between the determiner and the prenominal adjectives: "les deux grandes
+  // maisons" (C31). A count noun whose cardinal form differs takes it here — "deux ans", where the
+  // bare noun is "année" (`cardinal_form`).
+  const numeral = numeralText(forms, CARDINALS);
+  const cardinalForm = plural ? forms['cardinal_form_plural'] : forms['cardinal_form'];
+  const counted = numeral && cardinalForm ? cardinalForm : noun;
+  const words = [detWord, possWord, ...(numeral ? [numeral] : []), ...pre, counted].filter(Boolean);
   const core = joinArt(headFor(plural, words[0] ?? noun), words.join(' '));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
   const postStr = joinConjuncts(post, ', ', () => ' et ');
-  const postAdj = postStr ? `${core} ${postStr}` : core;
+  // A contrastive demonstrative carries its distance in the postposed clitic, not in "ce", which
+  // says both (C40): "ce lieu-là", "cette robe bleue-là". It closes the noun's own material, so it
+  // stands behind the postnominal adjectives and ahead of a modifier, possessor or relative.
+  const deictic = deicticClitic(definiteness, np.contrastive === true);
+  const postAdj = `${postStr ? `${core} ${postStr}` : core}${deictic}`;
   // Attributive nouns are postnominal and bare, the relation choosing the preposition:
   // feature "à" (bateau à voile), purpose/material "de" (lunettes de soleil). Distinct
   // from the possessor's contracted "du/de la".

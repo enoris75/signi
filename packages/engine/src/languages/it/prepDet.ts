@@ -21,7 +21,9 @@ export function prepDet(prep: ItPreposition, forms: Record<string, string>, plur
   // "di dell'acqua".
   const definiteness = forms['definiteness'] ?? 'definite';
   const partitive = forms['uncountable'] === '1' && definiteness === 'some';
-  const definite = definiteness === 'definite' || forms['proper'] === '1' || partitive;
+  // A name the language leaves bare says so, and takes none here either (`takes_article: '0'`, C38).
+  const articledName = forms['proper'] === '1' && forms['takes_article'] !== '0';
+  const definite = definiteness === 'definite' || articledName || partitive;
   if (prep !== 'con' && prep !== 'come' && prep !== 'verso' && definite) return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;

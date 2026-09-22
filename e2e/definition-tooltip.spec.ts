@@ -2534,4 +2534,145 @@ test.describe('word definition tooltip', () => {
     await can.hover();
     await expect(page.locator(tooltip)).toHaveText('essere capace di agire');
   });
+
+  // The two modals B63 seeded and C30 glossed. Their meaning is a judgment about the **act**, so the
+  // act is the gloss's subject — a content clause, which each language places its own way: English
+  // and German extrapose it behind an expletive, Italian writes none and puts it in the present
+  // subjunctive, and Japanese nominalizes it with こと and marks it が.
+  test('an evaluative modal is glossed by a content clause (localization C30: SHOULD, MIGHT)', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.satellite('verbModal').click();
+    const modalInput = page.getByTestId('box-verbModal').locator('input');
+    const should = page.locator('[data-testid="typeahead-option"][data-concept="SHOULD"]');
+
+    await modalInput.fill('should');
+    await expect(should).toBeVisible();
+    await should.hover();
+    await expect(page.locator(tooltip)).toHaveText('it is right that one acts');
+
+    await app.setUiLanguage('de');
+    await modalInput.fill('sollen');
+    await expect(should).toBeVisible();
+    await should.hover();
+    await expect(page.locator(tooltip)).toHaveText('es ist richtig, dass man handelt');
+
+    // MIGHT is not CAN: Japanese says the act can come about (起こり得る), not that one is able to
+    // act (可能), which is what the ticket was filed to keep apart.
+    await app.setUiLanguage('ja');
+    const might = page.locator('[data-testid="typeahead-option"][data-concept="MIGHT"]');
+    await modalInput.fill('かもしれない');
+    await expect(might).toBeVisible();
+    await might.hover();
+    await expect(page.locator(tooltip)).toHaveText('行動することが起こり得ます');
+  });
+
+  // C31's cardinal, in the one place a tooltip shows it: the calendar words are counted in smaller
+  // ones, and Japanese writes the counter the noun chooses — 時間 is its own, so it is not said twice.
+  test('a period counted in smaller ones (localization C31: DAY, YEAR)', async ({ app, page }) => {
+    const day = page.locator('[data-testid="typeahead-option"][data-concept="DAY"]');
+
+    await app.subjectInput.fill('day');
+    await expect(day).toBeVisible();
+    await day.hover();
+    await expect(page.locator(tooltip)).toHaveText('a period of twenty-four hours');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('日');
+    await expect(day).toBeVisible();
+    await day.hover();
+    await expect(page.locator(tooltip)).toHaveText('二十四時間の期間');
+
+    await app.setUiLanguage('fr');
+    const year = page.locator('[data-testid="typeahead-option"][data-concept="YEAR"]');
+    await app.subjectInput.fill('année');
+    await expect(year).toBeVisible();
+    await year.hover();
+    await expect(page.locator(tooltip)).toHaveText('une période de douze mois');
+  });
+
+  // The three verbs C34–C36 seeded, which are the new words a picker can actually reach: the other
+  // eight name a slot no control offers yet (`Concept.slot`), so their glosses are pinned in the
+  // engine suite rather than here.
+  test('the verbs three constructs unlocked (localization C34, C35, C36)', async ({ app, page }) => {
+    await app.setSubject('CAT');
+    const like = page.locator('[data-testid="typeahead-option"][data-concept="LIKE"]');
+    const let_ = page.locator('[data-testid="typeahead-option"][data-concept="LET"]');
+    const help = page.locator('[data-testid="typeahead-option"][data-concept="HELP_VERB"]');
+
+    await app.verbInput.fill('like');
+    await expect(like).toBeVisible();
+    await like.hover();
+    await expect(page.locator(tooltip)).toHaveText('to feel joy because of an object');
+
+    await app.verbInput.fill('let');
+    await expect(let_).toBeVisible();
+    await let_.hover();
+    await expect(page.locator(tooltip)).toHaveText('to cause a person to be allowed to act');
+
+    // HELP_VERB is literal by design — no construct-free gloss tells helping from cooperating —
+    // so what it shows is its English literal, in every UI language.
+    await app.verbInput.fill('help');
+    await expect(help).toBeVisible();
+    await help.hover();
+    await expect(page.locator(tooltip)).toHaveText('to make what another does easier');
+
+    // And the German gloss of the one whose frame is German's own accusative object.
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('mögen');
+    await expect(like).toBeVisible();
+    await like.hover();
+    await expect(page.locator(tooltip)).toHaveText('Freude wegen eines Gegenstands fühlen');
+  });
+
+  // The eight words that name a slot of their own are not in any picker, by design: an intensifier
+  // is not a verb's adverb, a title is not a noun, OWN is not an ordinary adjective, and SOMETHING
+  // is not one of the chooser's four persons. Each control is the builder work its ticket leaves.
+  test('a concept whose slot is not its role\'s is offered by no picker (localization C32, C33, C37, C38)', async ({
+    app,
+    page,
+  }) => {
+    await app.setSubject('CAT');
+    await app.verbInput.fill('eat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="EAT"]').click();
+
+    // MR is a noun; the subject picker does not list it.
+    await app.subjectInput.fill('mr');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="MR"]')).toHaveCount(0);
+    // PETER, beside it, is an ordinary name and is listed.
+    await app.subjectInput.fill('peter');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="PETER"]')).toBeVisible();
+
+    // VERY and TOO are adverbs; the verb's adverb picker does not list them.
+    await app.openVerbAdverb('very');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="VERY"]')).toHaveCount(0);
+    await app.openVerbAdverb('fast');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="FAST"]')).toBeVisible();
+  });
+
+  // C40: French says "this" and "that" with one word, so THERE's gloss would have been HERE's. The
+  // contrastive demonstrative writes the clitic that tells them apart.
+  test('a contrastive demonstrative tells THERE from HERE (localization C40)', async ({
+    app,
+    page,
+  }) => {
+    await app.setUiLanguage('fr');
+    await app.buildClause('CAT', 'EAT');
+    const there = page.locator('[data-testid="typeahead-option"][data-concept="THERE"]');
+    const here = page.locator('[data-testid="typeahead-option"][data-concept="HERE"]');
+
+    await app.openVerbAdverb('là');
+    await expect(there).toBeVisible();
+    await there.hover();
+    await expect(page.locator(tooltip)).toHaveText('dans ce lieu-là');
+
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await app.openVerbAdverb('ici');
+    await expect(here).toBeVisible();
+    await here.hover();
+    await expect(page.locator(tooltip)).toHaveText('dans ce lieu');
+  });
 });

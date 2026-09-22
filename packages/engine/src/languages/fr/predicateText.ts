@@ -27,6 +27,9 @@ import { alarmCryText } from './alarmCryText.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
+import { slotFocus } from '../../functions/slotFocus.js';
+import { withFocus } from '../../functions/withFocus.js';
+import { FOCUS_WORDS } from './fr.consts.js';
 import { coordinate } from './coordinate.js';
 import { elidesBeforeVerb } from './elidesBeforeVerb.js';
 import { frCliticize } from './frCliticize.js';
@@ -208,7 +211,10 @@ export function predicateText(
     const cry = alarmCry(verb, np);
     return cry ? alarmCryText(cry) : objectNpText(np, negatedClause);
   };
-  const objectGroup = directObject && (!objectClitic || dislocated) ? coordinate(directObject, tonicOrNoun) : '';
+  // A focus particle singles the object out, from outside the phrase: "mange seulement la
+  // nourriture", "mange la nourriture aussi" (C39).
+  const objectGroup = directObject && (!objectClitic || dislocated)
+    ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("est mangée par le chat dans la maison").
   const directObjectText = passive ? agentPhrase(agent) : dislocated ? '' : objectGroup;

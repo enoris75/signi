@@ -14,6 +14,7 @@ import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
@@ -26,6 +27,7 @@ import { modalAdverbs } from './modalAdverbs.js';
 import { modalStack } from './modalStack.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { objectCase } from './objectCase.js';
 import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { reflexivePronoun } from './reflexivePronoun.js';
@@ -80,12 +82,29 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   // A modal governing an infinitive is the modal chain over it, in the verb cluster: "handeln wollen",
   // never "wollen, zu handeln" (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);
-  const clause = clauseText(phrase, inverted, verbFinal, zu);
+  // A governor that takes the **bare** infinitive keeps the governed verb in this clause's own verb
+  // cluster, with no "zu" and no comma to set it off (C36). Where the cluster stands is where German
+  // always puts it: behind the finite verb in a V2 clause ("der Kater lässt den Hund **laufen**") and
+  // in front of it in a verb-final one, which is the *Ersatzinfinitiv* order ("…, der den Hund
+  // **laufen lässt**", "eine Person **handeln lassen**"). So it is passed into the clause rather than
+  // appended to it. What is left of the governed clause is exactly that infinitive: its subject is
+  // the matrix object and is dropped.
+  const bare = phrase.infinitiveComplement?.verbPhrase?.bareInfinitive === true;
+  const bareGoverned = bare && phrase.infinitiveComplement
+    ? renderClause(phrase.infinitiveComplement, false, false, false)
+    : '';
+  const clause = clauseText(phrase, inverted, verbFinal, zu, bareGoverned);
   // An infinitive complement is extraposed behind the whole clause, verb-final tail included, after
-  // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen".
-  const governed = phrase.infinitiveComplement
-    ? `${clause}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+  // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen". A bare one was
+  // already spoken inside the clause above.
+  // A content clause is extraposed behind the whole clause, after a comma and under "dass", with
+  // its own finite verb closing it: "es ist richtig, dass man handelt" (C30).
+  const withContent = phrase.contentSubject
+    ? `${clause}, dass ${renderClause(phrase.contentSubject, false, true)}`
     : clause;
+  const governed = phrase.infinitiveComplement && !bare
+    ? `${withContent}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+    : withContent;
   // A clause of purpose is extraposed the same way, inside the "um … zu" frame German puts a final
   // clause in: "klicken, um zu ändern", "ein Subjekt selektieren, um die Übersetzungen zu sehen".
   return phrase.purpose
@@ -93,7 +112,7 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
     : governed;
 }
 
-function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean): string {
+function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean, bareGoverned = ''): string {
     const { subject, verbPhrase, directObject } = phrase;
     // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("von
     // großer Größe"), not a bare subject noun phrase — wrap the dimension NP (dative) in its adposition.
@@ -106,9 +125,10 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A relative-clause gloss ("den man gespeichert hat") is the head's relative alone, its pronoun
     // still taking the head's gender and number, with no comma to set it off from a head.
     if (!verbPhrase && isRelativeGloss(subject)) return relativeGloss(firstConjunct(subject));
-    const subj = subjectText(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
-    if (!verbPhrase) return subj.trim();
+    if (!verbPhrase) return subjectText(subject).trim();
+    // A content clause standing where the subject would takes the expletive "es" in the slot it
+    // left, and is extraposed behind the whole clause under "dass", verb-final (C30).
     const { verb, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
     // An elided subject complement leaves its pro-form (A121): "es" for a predicate, a pronoun in the
@@ -119,6 +139,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // An object a preposition leads ("auf die Taste", A139) stands where a predicate complement does, so
     // "nicht" leads it as well: "klickt nicht auf die Taste".
     const objectPrep = objectPreposition(verb);
+    // The case this verb declines a bare object in — the accusative, or the dative a lexeme names
+    // (*helfen*, *folgen*, *danken*; see `objectCase`, C35).
+    const objCase = objectCase(verb);
     // Everything "nicht" leads rather than follows: a predicate complement, the elided place's "da",
     // a prepositional object, and — A159 — any complement that renders as a prepositional phrase
     // ("geht nicht zum Markt", never "*geht zum Markt nicht"). A bare-dative recipient and a
@@ -168,7 +191,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // The command negates as the declarative does (the shared decision above): no "nicht" beside
       // "nie" or a "kein" object, and "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie
       // eine Maus").
-      const impDirect = splitObject(objectToRender, proObject, objectPrep);
+      const impDirect = splitObject(objectToRender, proObject, objectPrep, objCase);
       // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
       // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
       const impAdverb = adverbSlots(modifier, neg, '');
@@ -187,8 +210,8 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
-        ? [...mittelfeld, [passiveParticipleText, plain['base'] ?? word].filter(Boolean).join(' '), meansText]
-        : [word, ...mittelfeld, verb.forms['particle'] ?? '', meansText];
+        ? [...mittelfeld, bareGoverned, [passiveParticipleText, plain['base'] ?? word].filter(Boolean).join(' '), meansText]
+        : [word, ...mittelfeld, bareGoverned, verb.forms['particle'] ?? '', meansText];
       return parts.filter(Boolean).join(' ').trim();
     }
 
@@ -200,7 +223,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A folded modal chain's adverbs (A222) lead the main verb's, as in the finite clause.
       const infModalAdverbs = modalAdverbs(verbPhrase.modals);
       const infAdverb = adverbSlots(modifier, neg, infModalAdverbs);
-      const infDirect = splitObject(objectToRender, proObject, objectPrep);
+      const infDirect = splitObject(objectToRender, proObject, objectPrep, objCase);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
       const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement, objectHost);
@@ -222,7 +245,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       const infLeads = !passive && objectLeadsNicht(infAdverb.nichtBeforeObject, infDirect.noun, objectToRender);
       return [withReflexive('3sg', infDirect.pronoun), ...(infLeads ? infObjects : []),
         infAdverb.nichtBeforeObject, infModalAdverbs, infAdverb.beforeObject, ...(infLeads ? [] : infObjects),
-        infAdverb.nichtAfterObject, infAdverb.afterObject, infComplements, neg.after, infVerb, meansText]
+        infAdverb.nichtAfterObject, infAdverb.afterObject, infComplements, neg.after, bareGoverned, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -236,8 +259,16 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A verb ahead of its subject agrees with an "or" group's first conjunct, the one nearest it (A210):
     // "laufen die Kater oder der Hund?".
     const agreement = inverted && !verbFinal ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
-    const person = agreement['person'] ?? '3';
-    const number = agreement['number'] ?? 'singular';
+    // A dative verb passivizes **impersonally**: the patient is not promoted to the nominative, it
+    // keeps the case its verb governs, and "werden" has nothing to agree with, so it stands in the
+    // 3rd singular — "dem Hund wird geholfen", "ihm wird geholfen", never *"er wird geholfen" (C35).
+    // The translator has already moved the patient into the subject slot for every language, as a
+    // personal passive needs; German is the one that declines it, so it is the one that undoes it.
+    const impersonal = passive && objCase === 'dat';
+    const subj = phrase.contentSubject ? 'es'
+      : impersonal ? elementPhrase(subject, 'dat') : subjectText(subject);
+    const person = impersonal ? '3' : agreement['person'] ?? '3';
+    const number = impersonal ? 'singular' : agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
     const built = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, plain, pn, tense, aspect, mood)
@@ -253,7 +284,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A passive has no accusative object left — the patient is this clause's subject now — so the
     // Mittelfeld's noun-object slot carries the by-phrase instead, which is where German puts it:
     // "das Essen wird von der Katze im Haus gegessen".
-    const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(objectToRender, proObject, objectPrep);
+    const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(objectToRender, proObject, objectPrep, objCase);
     const directObjectText = passive ? agentPhrase(phrase.agent) : objectNoun;
     const objectPronounText = withReflexive(pn, objectPronoun);
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
@@ -288,7 +319,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       }, verbFinal)
       : [objectPronounText, aspectMid, ...(objectLeads ? objects : []),
         adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, ...(objectLeads ? [] : objects),
-        adverb.nichtAfterObject, adverb.afterObject, complementsText, neg.after,
+        adverb.nichtAfterObject, adverb.afterObject, complementsText, neg.after, bareGoverned,
         ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail, complex.particle ?? ''])];
     return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

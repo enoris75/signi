@@ -13,6 +13,7 @@ import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, PARTICLE, PATH_CITATION, REL_NOUN
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
+import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
@@ -97,18 +98,24 @@ export function complementSegs(
           takesNi = true;
           return;
         }
-        const { base, reading } = jaComparisonAdj(np.head);
+        const { base, reading, verbal } = jaComparisonAdj(np.head);
+        const intensifier = jaIntensifierSeg(np.head);
+        if (intensifier) segs.push(intensifier);
         const deg = JA_DEGREE[adjDegree(np.head)];
         if (deg) segs.push({ t: deg });
         // By class (see `jaAdjClass`): an i-adjective takes its く-form, a na- or の-adjective its bare
         // stem + に (幸せに, 茶色に), and a た-adjective the state 〜ている as a ように clause, which takes no
         // に either (疲れているように思える).
-        const { kind, stem, reading: stemReading } = jaAdjClass(base, reading);
+        const { kind, stem, reading: stemReading } = jaAdjClass(base, reading, false, verbal);
         if (kind === 'i') {
           segs.push(wordSeg(`${stem}く`, stemReading === undefined ? undefined : `${stemReading}く`));
           takesNi = false;
         } else if (kind === 'ta') {
           segs.push(wordSeg(stem, stemReading), { t: 'いるように' });
+          takesNi = false;
+        } else if (kind === 'ru') {
+          // A verb becomes a ように clause, as the た-adjective's state does: 大きすぎるようになる (C33).
+          segs.push(wordSeg(stem, stemReading), { t: 'るように' });
           takesNi = false;
         } else {
           segs.push(wordSeg(stem, stemReading));

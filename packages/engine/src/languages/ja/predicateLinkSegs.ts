@@ -4,14 +4,17 @@ import { JA_DEGREE } from './ja.consts.js';
 import type { PredicateLink } from './ja.types.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { npSegs } from './npSegs.js';
 import { wordSeg } from './wordSeg.js';
 
 // The connective each class of conjunct takes, as [non-past, past]. Only `ka` tells the tenses apart.
-const TAILS: Record<'i' | 'na' | 'ta', Record<PredicateLink, [present: string, past: string]>> = {
+const TAILS: Record<'i' | 'na' | 'ta' | 'ru', Record<PredicateLink, [present: string, past: string]>> = {
   i: { te: ['くて', 'くて'], mo: ['くも', 'くも'], ka: ['いか', 'かったか'] },
   na: { te: ['で', 'で'], mo: ['でも', 'でも'], ka: ['か', 'だったか'] },
   ta: { te: ['いて', 'いて'], mo: ['も', 'も'], ka: ['いるか', 'いたか'] },
+  // An intensifier's 〜すぎる is a verb, so it links as one: 大きすぎて, 大きすぎても, 大きすぎるか (C33).
+  ru: { te: ['て', 'て'], mo: ['ても', 'ても'], ka: ['るか', 'たか'] },
 };
 
 /**
@@ -29,10 +32,11 @@ const TAILS: Record<'i' | 'na' | 'ta', Record<PredicateLink, [present: string, p
 export function predicateLinkSegs(np: ResolvedNounPhrase, link: PredicateLink, past = false): RubySegment[] {
   const cell = past ? 1 : 0;
   if (np.head.forms['role'] !== 'adjective') return [...npSegs(np), { t: TAILS.na[link][cell] }];
-  const { base, reading } = jaComparisonAdj(np.head);
+  const { base, reading, verbal } = jaComparisonAdj(np.head);
   // A relational の-adjective keeps its の here too: this is the predicate position, one conjunct
   // earlier (アメリカので, アメリカのでも — A246).
-  const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, np.head.forms['relational'] === '1');
+  const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, np.head.forms['relational'] === '1', verbal);
   const deg = JA_DEGREE[adjDegree(np.head)];
-  return [...(deg ? [{ t: deg }] : []), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
+  const intensifier = jaIntensifierSeg(np.head);
+  return [...(intensifier ? [intensifier] : []), ...(deg ? [{ t: deg }] : []), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
 }

@@ -343,10 +343,12 @@ export const adverbs: ConceptSeed[] = [
   },
   // P09's here and there (localization B67), place adverbs like EVERYWHERE: after the object, where a
   // locative complement stands. HERE is glossed as EVERYWHERE is, with NOW's deixis: "in this place".
-  // THERE's "in that place" is HERE's in French, whose ce is both demonstratives (dans ce lieu), so it
-  // stays on the literal until French says the distance (C40). Spanish allí and Portuguese ali, the
-  // far series; ahí and aí pair with ese and esse. Japanese ここで and そこで are the place an act goes
-  // on in; being or living there is ここに, そこに (`locative_ni`, as EVERYWHERE's).
+  // THERE's "in that place" is the same gloss one demonstrative along, and marked `contrastive`,
+  // because the distance *is* the meaning here: without it French says "dans ce lieu" for both, its
+  // single ce series covering this and that, and THERE would be HERE (localization C40). Spanish allí
+  // and Portuguese ali, the far series; ahí and aí pair with ese and esse. Japanese ここで and そこで
+  // are the place an act goes on in; being or living there is ここに, そこに (`locative_ni`, as
+  // EVERYWHERE's).
   {
     id: 'HERE',
     role: 'adverb',
@@ -367,6 +369,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'THERE',
     role: 'adverb',
     description: 'in that place',
+    definition: complementGloss('locative', 'PLACE', 'that', { contrastive: true }),
     emoji: '👈',
     forms: {
       en: { base: 'there', subtype: 'place' },
@@ -608,6 +611,54 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'realmente', subtype: 'frequency' },
       ja: { base: '本当に', subtype: 'frequency', reading: 'ほんとうに' },
       pt: { base: 'realmente', subtype: 'frequency' },
+    },
+  },
+
+  // ── INTENSIFIERS ─────────────────────────────────────────────────────
+  // P09's *very* and *too* (localization C33): adverbs that modify an **adjective**, never a verb.
+  // "The cat runs very" is not a sentence in any of the seven, so they are flagged `intensifier` and
+  // the adverb picker leaves them out, exactly as the verb picker leaves out a `modal`; what they
+  // fill is a noun phrase's `adjectiveIntensifiers` / `headIntensifier`.
+  //
+  // Where the word goes is its own, not the adjective's, so each lexeme names it (`position`): six
+  // languages and pt *muito* lead the adjective, pt *demais* follows it (*grande demais*), and
+  // Japanese has no word for TOO at all — 〜すぎる is a suffix on the adjective's stem (大きすぎる),
+  // which then inflects as the ichidan verb it is (see `jaComparisonAdj`, `jaAdjClass`'s ru class).
+  {
+    id: 'VERY',
+    role: 'adverb',
+    slot: 'intensifier',
+    description: 'to a great degree',
+    // The direction complement UP is glossed with, on LEVEL rather than PLACE: "to a high level"
+    // (C25's `complementGloss`). TOO's "to an excessive level" has no word in the corpus and stays
+    // on the literal — see docs/localization/done/C33-degree-adverbs-on-adjectives.md.
+    definition: complementGloss('direction', 'LEVEL', 'indefinite', { adjectives: ['HIGH'] }),
+    emoji: '🔺',
+    forms: {
+      en: { base: 'very' },
+      it: { base: 'molto' },
+      fr: { base: 'très' },
+      de: { base: 'sehr' },
+      es: { base: 'muy' },
+      ja: { base: 'とても' },
+      pt: { base: 'muito' },
+    },
+  },
+  {
+    id: 'TOO',
+    role: 'adverb',
+    slot: 'intensifier',
+    description: 'to a degree that is more than is wanted',
+    emoji: '🔝',
+    forms: {
+      en: { base: 'too' },
+      it: { base: 'troppo' },
+      fr: { base: 'trop' },
+      de: { base: 'zu' },
+      es: { base: 'demasiado' },
+      // Not a word before the adjective: the ichidan suffix 〜すぎる on its stem.
+      ja: { base: 'すぎる', position: 'suffix' },
+      pt: { base: 'demais', position: 'post' },
     },
   },
 ];

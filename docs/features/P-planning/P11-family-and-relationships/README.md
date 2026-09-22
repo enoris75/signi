@@ -9,7 +9,11 @@ changes with whose relative it is: 母 is my mother, お母さん is yours.
 **Scope:** all 7 languages. Japanese needs the most work. German needs the adjectival noun, and French
 and German read the new `possessed` column. English, Italian, Spanish and Portuguese need only data,
 because Italian's article rule for kin nouns already exists ([A85](../../../bugs/fixed/A85-italian-kinship-possessive-article.md)).
-**Status:** planning. The decisions below are **proposed**, not yet confirmed; each carries a recommendation.
+**Status:** the **engine is built** (§1–§3, 2026-09-22): the decisions below are settled and the
+columns are read. What is left is the **corpus** (§4) and the sentence-level suite (§5), which are
+[B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)'s to seed —
+until they land, nothing in the corpus carries a `possessed`, `honorific`, `kin`, `with_<ADJECTIVE>` or
+`adjectival` column, so every rendering is exactly what it was. See *What landed* below for the files.
 The **localization tickets for these concepts' definitions are catalogued** as B68–B74 (2026-09-22, see
 *Localization tickets* below); they seed every word in §4 and correct some of D12's rows.
 
@@ -279,6 +283,26 @@ The Japanese adjectives end in の so that
 `hierarchy.test.ts` covers the RELATIVE subtree, and the boot check renders PARENT's new definition.
 
 **Frontend** — no change.
+
+## What landed (2026-09-22)
+
+§1–§3, with the colocated unit tests. No corpus, so no rendering changes yet: the columns are read
+where they exist and nothing seeds them.
+
+| file | what |
+| --- | --- |
+| [`fuseAdjectives.ts`](../../../../packages/engine/src/translator/functions/fuseAdjectives.ts) | D5. Swaps `with_<ADJECTIVE>` in as `base`, carries `with_<ADJECTIVE>_honorific` along, drops the unfused word's `possessed`, and returns the adjective indices it spent. |
+| [`applyPossessorForm.ts`](../../../../packages/engine/src/translator/functions/applyPossessorForm.ts) | D2, D3, D6, D7. Picks `honorific` / `possessed` / `base` (and `plural_honorific` / `possessed_plural`) off who the possessor is, keeps the reading in step, and sets `forms['own']` on a `kin` head whose possessor is one's own. |
+| [`resolveNounPhrase.ts`](../../../../packages/engine/src/translator/functions/resolveNounPhrase.ts) | Resolves the possessor **first**, then number → gender → fusion → possessor form, and drops a fused adjective from the resolved list while the rest keep their degrees and intensifiers. |
+| [`ja/npSegs.ts`](../../../../packages/engine/src/languages/ja/npSegs.ts) | D4 (私の drops before one's own kin noun, 1st-person **singular** only) and D7 (a plural head writes its `plural` and `plural_reading`; a pronoun keeps the surface the translator chose). |
+| [`de/adjectivalNoun.ts`](../../../../packages/engine/src/languages/de/adjectivalNoun.ts), [`de/nounPhrase.ts`](../../../../packages/engine/src/languages/de/nounPhrase.ts), [`de/agentPhrase.ts`](../../../../packages/engine/src/languages/de/agentPhrase.ts) | D8. `adjectival: '1'` declines through `declineAdj`/`endingsFor` and takes none of the noun rules — genitive, compound and agent phrase alike. |
+| [`fr/fr.consts.ts`](../../../../packages/engine/src/languages/fr/fr.consts.ts) | `cadet` in `FR_ADJ_IRREGULAR`. |
+| [seed skill](../../../../.claude/skills/seed/SKILL.md) | *A noun's language-specific columns* — the five new ones, next to `kinship` and `weak`. |
+
+Two things the seeding has to honour, found while building D8: a German `adjectival` lexeme seeds
+`plural` (and `fem`) as the **same bare stem**, because the ending carries the number and gender and
+the resolver drops to the singular for a noun with no plural surface at all; and the plural honorific
+column is `plural_honorific`, beside `possessed_plural`.
 
 ## Verification
 

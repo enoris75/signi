@@ -1,5 +1,6 @@
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { PRENOMINAL, PRENOMINAL_QUALIFYING } from './it.consts.js';
 
 /**
@@ -21,9 +22,9 @@ export function splitAdjectives(np: ResolvedNounPhrase): { pre: ConceptForms[]; 
   for (const a of np.adjectives) {
     // A comparative/superlative adjective is postnominal in Italian ("il gatto più grande"),
     // even when its plain form would precede the noun — this also avoids article-elision
-    // artefacts ("l'ugualmente grande gatto").
+    // artefacts ("l'ugualmente grande gatto"). An intensifier moves it the same way (C33).
     const qualifying = PRENOMINAL_QUALIFYING.has(a.conceptId);
-    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !(qualifying && qualified);
+    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a) && !(qualifying && qualified);
     if (prenominal && qualifying) qualified = true;
     (prenominal ? pre : post).push(a);
   }

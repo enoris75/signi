@@ -284,4 +284,80 @@ describe('resolveNounPhrase', () => {
       expect(resolved).toMatchObject({ relativeGloss: true, head: { forms: { base: 'gatto' } }, relative: { verbPhrase: { verb: { forms: { base: 'mangiare' } } } } });
     });
   });
+  // ── P11: kin terms, and whose family they are ─────────────────────────────
+  // The head's own word may depend on an adjective it fuses (D5) and on who owns it (D2, D3, D6), so
+  // the possessor resolves first and the head's forms are settled around it.
+
+  describe('a kin head', () => {
+    const KIN = lexicon({
+      // BROTHER: one word for a brother of unstated age, another for the older one, each honorific its own.
+      BROTHER: {
+        base: '兄弟', reading: 'きょうだい', kin: '1', human: '1', honorific: 'ご兄弟',
+        with_ELDER: '兄', with_ELDER_reading: 'あに', with_ELDER_honorific: 'お兄さん',
+      },
+      // SON fuses nothing: Japanese says 上の息子, the older son.
+      SON: { base: '息子', reading: 'むすこ', kin: '1', human: '1', honorific: '息子さん' },
+      WIFE: { base: '妻', reading: 'つま', kin: '1', human: '1', honorific: '奥さん', honorific_reading: 'おくさん' },
+      BOY: { base: '男の子', reading: 'おとこのこ', human: '1' },
+      CAT: { base: '猫', reading: 'ねこ', animate: '1' },
+      ELDER: { role: 'adjective', base: '上の' },
+      BIG: { role: 'adjective', base: '大きい' },
+    });
+    const ja = (phrase: NounPhrase) => resolveNounPhrase(phrase, 'ja', KIN);
+    const word = (phrase: NounPhrase) => ja(phrase).head.forms['base'];
+    const mine: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+    const yours: PronominalPossessor = { kind: 'pronominal', person: '2', number: 'singular' };
+
+    test('fuses the adjective it has a word for, and drops it from the adjectives', () => {
+      const resolved = ja({ concept: 'BROTHER', adjectives: ['ELDER'] });
+      expect(resolved.head.forms).toMatchObject({ base: '兄', reading: 'あに' });
+      expect(resolved.adjectives).toEqual([]);
+    });
+
+    test('keeps an adjective it has no word for', () => {
+      const resolved = ja({ concept: 'SON', adjectives: ['ELDER'] });
+      expect(resolved.head.forms['base']).toBe('息子');
+      expect(resolved.adjectives.map((a) => a.forms['base'])).toEqual(['上の']);
+    });
+
+    test('the adjectives that stay keep the degree their own index carries', () => {
+      const resolved = ja({ concept: 'BROTHER', adjectives: ['BIG', 'ELDER'], adjectiveDegrees: ['more', 'positive'] });
+      expect(resolved.adjectives.map((a) => [a.forms['base'], a.forms['degree']])).toEqual([['大きい', 'more']]);
+    });
+
+    test('the possessor then picks a form of the word the fusion left', () => {
+      expect(word({ concept: 'BROTHER', adjectives: ['ELDER'], possessor: yours })).toBe('お兄さん');
+      expect(word({ concept: 'BROTHER', adjectives: ['ELDER'], possessor: mine })).toBe('兄');
+      expect(word({ concept: 'BROTHER', possessor: yours })).toBe('ご兄弟');
+    });
+
+    // D3: 私の兄の妻 is 兄の妻, own all the way down; あなたのお兄さんの奥さん is someone else's, all the way down.
+    test('own and someone else\'s carry down a genitive chain', () => {
+      const brother = (possessor: PronominalPossessor) => ({ concept: 'BROTHER', adjectives: ['ELDER'], possessor });
+      expect(word({ concept: 'WIFE', possessor: brother(mine) })).toBe('妻');
+      expect(word({ concept: 'WIFE', possessor: brother(yours) })).toBe('奥さん');
+    });
+
+    test('a human possessor that is nobody\'s relative is still someone else\'s', () => {
+      expect(word({ concept: 'WIFE', possessor: { concept: 'BOY' } })).toBe('奥さん');
+    });
+
+    test('a possessor that is not a person takes no honorific', () => {
+      expect(word({ concept: 'WIFE', possessor: { concept: 'CAT' } })).toBe('妻');
+      expect(word({ concept: 'WIFE' })).toBe('妻');
+    });
+
+    test('the own mark rides on the head for the phrase above to read', () => {
+      expect(ja({ concept: 'WIFE', possessor: mine }).head.forms['own']).toBe('1');
+      expect(ja({ concept: 'WIFE', possessor: yours }).head.forms['own']).toBeUndefined();
+    });
+
+    // The other six seed none of these columns, so nothing above fires for them.
+    test('a language with no such column resolves as it always did', () => {
+      const resolved = resolveIt({ concept: 'CAT', adjectives: ['BIG'], possessor: mine });
+      expect(resolved.head.forms).toMatchObject({ base: 'gatto' });
+      expect(resolved.head.forms['own']).toBeUndefined();
+      expect(resolved.adjectives.map((a) => a.forms['base'])).toEqual(['grande']);
+    });
+  });
 });

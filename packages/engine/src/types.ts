@@ -1,4 +1,4 @@
-import type { Aspect, ComplementType, CoordConjunction, Degree, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
+import type { Aspect, ComplementType, CoordConjunction, Degree, FocusParticle, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -68,6 +68,31 @@ export interface ResolvedNounPhrase {
    * relative. Set on the verbless subject; ignored without a relative.
    */
   relativeGloss?: boolean;
+  /**
+   * Whether a `this` / `that` determiner is **contrastive** (see NounPhrase.contrastive): it points
+   * at one of a set and away from the rest, rather than merely pointing. Only French reads it — the
+   * other six spell the distance in the determiner already — and renders the postposed deictic
+   * clitic on the noun ("ce lieu-**là**").
+   */
+  contrastive?: boolean;
+  /**
+   * The focus particle singling this phrase out (see NounPhrase.focus): "only the cat", "even the
+   * cat", "the cat too", 猫も. Read on the subject and the direct object, and in Japanese wherever
+   * a case particle is written.
+   */
+  focus?: FocusParticle;
+  /**
+   * The cardinal numeral counting this head (see NounPhrase.numeral): "two cats", 二匹の猫. Plain
+   * data — each engine spells its own word, agrees it where its language does, and Japanese adds the
+   * counter its noun names.
+   */
+  numeral?: number;
+  /**
+   * The title standing with this name (see NounPhrase.title): "Mr Peter", "il signor Pietro",
+   * ピーターさん. Its surface is already part of the head's, and its gender and article are the
+   * head's too — this is here so an engine can tell a titled name from a bare one.
+   */
+  title?: ConceptForms;
 }
 
 /**
@@ -166,6 +191,14 @@ export interface ResolvedVerbPhrase {
    */
   passiveAux?: ConceptForms;
   mood?: Mood;
+  /**
+   * Set on a governed infinitive clause whose governor takes a **bare** infinitive — English *let*
+   * ("lets the dog **run**", not "to run") and German *lassen* ("lässt den Hund **laufen**", with no
+   * "zu" and no comma). It is lexical, named by the governor (`infinitive_bare`), and read only in
+   * the two languages that write a linking word at all: the Romance ones already say which word
+   * their governor takes, and "" is a bare infinitive there (see `infinitiveLink`). Localization C36.
+   */
+  bareInfinitive?: boolean;
   /**
    * The register of an imperative (see PhrasePlan.imperativeRegister). Absent ⇒ `'request'`,
    * a command spoken to someone. `'instruction'` is the impersonal directive a UI control or a
@@ -308,6 +341,15 @@ export interface ResolvedPhrase {
    * `infinitiveLink`).
    */
   infinitiveComplement?: ResolvedPhrase;
+  /**
+   * A resolved **content clause standing where the subject would** (see PhrasePlan.contentSubject):
+   * "it is right **that one acts**". It is a clause of its own, resolved in the mood this language
+   * puts such a clause in — the present subjunctive in the four Romance languages, the indicative in
+   * the other three. The phrase's own `subject` is not rendered where this is present: English,
+   * French and German write their expletive in that slot instead, Italian, Spanish and Portuguese
+   * nothing, and Japanese the clause itself, nominalized.
+   */
+  contentSubject?: ResolvedPhrase;
   /**
    * A resolved clause of purpose — what the act is done for ("click **to change**", see
    * PhrasePlan.purpose). Like an infinitive complement it is a clause of its own in the

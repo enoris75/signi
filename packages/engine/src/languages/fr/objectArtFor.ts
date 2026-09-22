@@ -11,8 +11,13 @@ import { partitiveArtFor } from './partitiveArtFor.js';
  *
  * The negative "de" is the direct object's alone: an instrument or a prepositional object keeps its
  * article under a negation ("ne clique pas sur des boutons").
+ *
+ * A **counted** object is the one that really has none: the cardinal stands where the article would,
+ * so there is no partitive and no negative "de" either — "mange deux souris", "ne mange pas deux
+ * souris" (C31).
  */
 export function objectArtFor(forms: Record<string, string>, plural: boolean, lead: string, negated: boolean): string {
+  if (forms['numeral'] !== undefined) return '';
   const picked = forms['definiteness'] ?? 'definite';
   const partitive = picked === 'bare' || picked === 'indefinite'
     || (picked === 'some' && forms['uncountable'] === '1');

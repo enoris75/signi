@@ -9228,4 +9228,235 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+
+  // P09's *let* — to allow someone to act (localization C36). It governs an object-controlled
+  // infinitive, the shape C08 built for CAUSE_VERB, and differs from it in two lexical ways: English
+  // and German take the **bare** infinitive ("lets the dog run", "lässt den Hund laufen" — no "to",
+  // no "zu", no comma), which `infinitive_bare` names, and Japanese has no governing verb at all —
+  // what it says is the causative form of the governed verb, 犬を走らせる, which `causative_suffix`
+  // asks for. The four Romance languages need nothing: their governor links its infinitive with
+  // nothing (`infinitive_link` left off), which is the bare infinitive there too.
+  {
+    id: 'LET',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to allow someone to act',
+    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' },
+      { verb: 'BE', predicate: 'ALLOWED', infinitive: 'ACT' }),
+    emoji: '🪟',
+    forms: {
+      en: {
+        base: 'let', infinitive_bare: '1',
+        '1sg_present': 'let', '2sg_present': 'let', '3sg_present': 'lets',
+        '1pl_present': 'let', '2pl_present': 'let', '3pl_present': 'let',
+        past: 'let',
+      },
+      it: {
+        base: 'lasciare',
+        '1sg_present': 'lascio', '2sg_present': 'lasci', '3sg_present': 'lascia',
+        '1pl_present': 'lasciamo', '2pl_present': 'lasciate', '3pl_present': 'lasciano',
+        '1sg_past': 'lasciai', '2sg_past': 'lasciasti', '3sg_past': 'lasciò',
+        '1pl_past': 'lasciammo', '2pl_past': 'lasciaste', '3pl_past': 'lasciarono',
+        '1sg_future': 'lascerò', '2sg_future': 'lascerai', '3sg_future': 'lascerà',
+        '1pl_future': 'lasceremo', '2pl_future': 'lascerete', '3pl_future': 'lasceranno',
+      },
+      fr: {
+        base: 'laisser',
+        '1sg_present': 'laisse', '2sg_present': 'laisses', '3sg_present': 'laisse',
+        '1pl_present': 'laissons', '2pl_present': 'laissez', '3pl_present': 'laissent',
+        '1sg_past': 'laissai', '2sg_past': 'laissas', '3sg_past': 'laissa',
+        '1pl_past': 'laissâmes', '2pl_past': 'laissâtes', '3pl_past': 'laissèrent',
+        '1sg_future': 'laisserai', '2sg_future': 'laisseras', '3sg_future': 'laissera',
+        '1pl_future': 'laisserons', '2pl_future': 'laisserez', '3pl_future': 'laisseront',
+      },
+      de: {
+        // Strong, with an a→ä present singular (lässt) and a strong preterite (ließ).
+        base: 'lassen', infinitive_bare: '1',
+        '1sg_present': 'lasse', '2sg_present': 'lässt', '3sg_present': 'lässt',
+        '1pl_present': 'lassen', '2pl_present': 'lasst', '3pl_present': 'lassen',
+        '1sg_past': 'ließ', '2sg_past': 'ließt', '3sg_past': 'ließ',
+        '1pl_past': 'ließen', '2pl_past': 'ließt', '3pl_past': 'ließen',
+      },
+      es: {
+        base: 'dejar',
+        '1sg_present': 'dejo', '2sg_present': 'dejas', '3sg_present': 'deja',
+        '1pl_present': 'dejamos', '2pl_present': 'dejáis', '3pl_present': 'dejan',
+        '1sg_past': 'dejé', '2sg_past': 'dejaste', '3sg_past': 'dejó',
+        '1pl_past': 'dejamos', '2pl_past': 'dejasteis', '3pl_past': 'dejaron',
+        '1sg_future': 'dejaré', '2sg_future': 'dejarás', '3sg_future': 'dejará',
+        '1pl_future': 'dejaremos', '2pl_future': 'dejaréis', '3pl_future': 'dejarán',
+      },
+      ja: {
+        // 許す is what the dictionary gives for "permit", and it is what a picker shows; in a clause
+        // the causative suffix stands in its place (see `causative_suffix`, `jaCausativeVerb`).
+        base: '許す',
+        reading: 'ゆるす',
+        masu_present: '許します',
+        masu_present_reading: 'ゆるします',
+        causative_suffix: '1',
+      },
+      pt: {
+        base: 'deixar',
+        '1sg_present': 'deixo', '2sg_present': 'deixa', '3sg_present': 'deixa',
+        '1pl_present': 'deixamos', '2pl_present': 'deixam', '3pl_present': 'deixam',
+        '1sg_past': 'deixei', '2sg_past': 'deixou', '3sg_past': 'deixou',
+        '1pl_past': 'deixamos', '2pl_past': 'deixaram', '3pl_past': 'deixaram',
+        '1sg_future': 'deixarei', '2sg_future': 'deixará', '3sg_future': 'deixará',
+        '1pl_future': 'deixaremos', '2pl_future': 'deixarão', '3pl_future': 'deixarão',
+      },
+    },
+  },
+
+  // P09's *like* (localization C34). The plan is always "the cat likes the dog"; four languages say
+  // it that way and three do not. Italian *piacere* and Spanish *gustar* make the thing liked the
+  // subject and the one who likes a dative ("al gatto piacciono i cani"), which their lexemes ask
+  // for with `experiencer`; Portuguese *gostar* takes a prepositional object (`object_prep: 'de'`,
+  // as CLICK's); and Japanese has no verb here at all — 好き is a な-adjective whose が-marked subject
+  // is the thing liked (猫は犬が好きです), which `adjectival` + `object_particle` say.
+  // Italian piacere is irregular (piaccio / piacciono, piacqui) and selects essere.
+  {
+    id: 'LIKE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to find pleasant',
+    // "To find pleasant" needs a word the corpus lacks, so the gloss says what liking is: the joy
+    // the thing causes. FEEL + JOY alone is PLAY_GAME's differentia (B62); the cause is what tells
+    // them apart.
+    definition: infinitiveGloss('FEEL', {
+      object: 'JOY',
+      complements: { cause: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
+    }),
+    stative: true,
+    emoji: '👍',
+    forms: {
+      en: {
+        base: 'like',
+        '1sg_present': 'like', '2sg_present': 'like', '3sg_present': 'likes',
+        '1pl_present': 'like', '2pl_present': 'like', '3pl_present': 'like',
+        past: 'liked',
+      },
+      it: {
+        base: 'piacere', experiencer: '1',
+        '1sg_present': 'piaccio', '2sg_present': 'piaci', '3sg_present': 'piace',
+        '1pl_present': 'piacciamo', '2pl_present': 'piacete', '3pl_present': 'piacciono',
+        '1sg_past': 'piacqui', '2sg_past': 'piacesti', '3sg_past': 'piacque',
+        '1pl_past': 'piacemmo', '2pl_past': 'piaceste', '3pl_past': 'piacquero',
+        '1sg_future': 'piacerò', '2sg_future': 'piacerai', '3sg_future': 'piacerà',
+        '1pl_future': 'piaceremo', '2pl_future': 'piacerete', '3pl_future': 'piaceranno',
+      },
+      fr: {
+        base: 'aimer',
+        '1sg_present': 'aime', '2sg_present': 'aimes', '3sg_present': 'aime',
+        '1pl_present': 'aimons', '2pl_present': 'aimez', '3pl_present': 'aiment',
+        '1sg_past': 'aimai', '2sg_past': 'aimas', '3sg_past': 'aima',
+        '1pl_past': 'aimâmes', '2pl_past': 'aimâtes', '3pl_past': 'aimèrent',
+        '1sg_future': 'aimerai', '2sg_future': 'aimeras', '3sg_future': 'aimera',
+        '1pl_future': 'aimerons', '2pl_future': 'aimerez', '3pl_future': 'aimeront',
+      },
+      de: {
+        base: 'mögen',
+        '1sg_present': 'mag', '2sg_present': 'magst', '3sg_present': 'mag',
+        '1pl_present': 'mögen', '2pl_present': 'mögt', '3pl_present': 'mögen',
+        '1sg_past': 'mochte', '2sg_past': 'mochtest', '3sg_past': 'mochte',
+        '1pl_past': 'mochten', '2pl_past': 'mochtet', '3pl_past': 'mochten',
+      },
+      es: {
+        base: 'gustar', experiencer: '1',
+        '1sg_present': 'gusto', '2sg_present': 'gustas', '3sg_present': 'gusta',
+        '1pl_present': 'gustamos', '2pl_present': 'gustáis', '3pl_present': 'gustan',
+        '1sg_past': 'gusté', '2sg_past': 'gustaste', '3sg_past': 'gustó',
+        '1pl_past': 'gustamos', '2pl_past': 'gustasteis', '3pl_past': 'gustaron',
+        '1sg_future': 'gustaré', '2sg_future': 'gustarás', '3sg_future': 'gustará',
+        '1pl_future': 'gustaremos', '2pl_future': 'gustaréis', '3pl_future': 'gustarán',
+      },
+      ja: {
+        base: '好きな', reading: 'すきな', adjectival: '1', object_particle: 'が',
+      },
+      pt: {
+        base: 'gostar', object_prep: 'de',
+        '1sg_present': 'gosto', '2sg_present': 'gosta', '3sg_present': 'gosta',
+        '1pl_present': 'gostamos', '2pl_present': 'gostam', '3pl_present': 'gostam',
+        '1sg_past': 'gostei', '2sg_past': 'gostou', '3sg_past': 'gostou',
+        '1pl_past': 'gostamos', '2pl_past': 'gostaram', '3pl_past': 'gostaram',
+        '1sg_future': 'gostarei', '2sg_future': 'gostará', '3sg_future': 'gostará',
+        '1pl_future': 'gostaremos', '2pl_future': 'gostarão', '3pl_future': 'gostarão',
+      },
+    },
+  },
+
+  // P09's *help* (localization C35). The id is HELP_VERB because HELP is taken, by the noun B41
+  // seeded for the help overlay. Six languages take an ordinary accusative object; German *helfen*
+  // governs the **dative**, which nothing in the meaning predicts — one helps a dog and sees a dog
+  // alike — so its lexeme names it (`object_case`, read by the German engine wherever the object is
+  // declined, and by its impersonal passive "ihm wird geholfen"). Strong e→i in the present
+  // singular (hilfst, hilft, and the du command hilf) and a strong preterite (half).
+  {
+    id: 'HELP_VERB',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to make what another does easier',
+    synonym: 'assist',
+    emoji: '🤝',
+    forms: {
+      en: {
+        base: 'help',
+        '1sg_present': 'help', '2sg_present': 'help', '3sg_present': 'helps',
+        '1pl_present': 'help', '2pl_present': 'help', '3pl_present': 'help',
+        past: 'helped',
+      },
+      it: {
+        base: 'aiutare',
+        '1sg_present': 'aiuto', '2sg_present': 'aiuti', '3sg_present': 'aiuta',
+        '1pl_present': 'aiutiamo', '2pl_present': 'aiutate', '3pl_present': 'aiutano',
+        '1sg_past': 'aiutai', '2sg_past': 'aiutasti', '3sg_past': 'aiutò',
+        '1pl_past': 'aiutammo', '2pl_past': 'aiutaste', '3pl_past': 'aiutarono',
+        '1sg_future': 'aiuterò', '2sg_future': 'aiuterai', '3sg_future': 'aiuterà',
+        '1pl_future': 'aiuteremo', '2pl_future': 'aiuterete', '3pl_future': 'aiuteranno',
+      },
+      fr: {
+        base: 'aider',
+        '1sg_present': 'aide', '2sg_present': 'aides', '3sg_present': 'aide',
+        '1pl_present': 'aidons', '2pl_present': 'aidez', '3pl_present': 'aident',
+        '1sg_past': 'aidai', '2sg_past': 'aidas', '3sg_past': 'aida',
+        '1pl_past': 'aidâmes', '2pl_past': 'aidâtes', '3pl_past': 'aidèrent',
+        '1sg_future': 'aiderai', '2sg_future': 'aideras', '3sg_future': 'aidera',
+        '1pl_future': 'aiderons', '2pl_future': 'aiderez', '3pl_future': 'aideront',
+      },
+      de: {
+        base: 'helfen', object_case: 'dat',
+        '1sg_present': 'helfe', '2sg_present': 'hilfst', '3sg_present': 'hilft',
+        '1pl_present': 'helfen', '2pl_present': 'helft', '3pl_present': 'helfen',
+        '1sg_past': 'half', '2sg_past': 'halfst', '3sg_past': 'half',
+        '1pl_past': 'halfen', '2pl_past': 'halft', '3pl_past': 'halfen',
+        '2sg_imperative': 'hilf', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'ayudar',
+        '1sg_present': 'ayudo', '2sg_present': 'ayudas', '3sg_present': 'ayuda',
+        '1pl_present': 'ayudamos', '2pl_present': 'ayudáis', '3pl_present': 'ayudan',
+        '1sg_past': 'ayudé', '2sg_past': 'ayudaste', '3sg_past': 'ayudó',
+        '1pl_past': 'ayudamos', '2pl_past': 'ayudasteis', '3pl_past': 'ayudaron',
+        '1sg_future': 'ayudaré', '2sg_future': 'ayudarás', '3sg_future': 'ayudará',
+        '1pl_future': 'ayudaremos', '2pl_future': 'ayudaréis', '3pl_future': 'ayudarán',
+      },
+      ja: {
+        base: '手伝う',
+        reading: 'てつだう',
+        masu_present: '手伝います',
+        masu_present_reading: 'てつだいます',
+      },
+      pt: {
+        base: 'ajudar',
+        '1sg_present': 'ajudo', '2sg_present': 'ajuda', '3sg_present': 'ajuda',
+        '1pl_present': 'ajudamos', '2pl_present': 'ajudam', '3pl_present': 'ajudam',
+        '1sg_past': 'ajudei', '2sg_past': 'ajudou', '3sg_past': 'ajudou',
+        '1pl_past': 'ajudamos', '2pl_past': 'ajudaram', '3pl_past': 'ajudaram',
+        '1sg_future': 'ajudarei', '2sg_future': 'ajudará', '3sg_future': 'ajudará',
+        '1pl_future': 'ajudaremos', '2pl_future': 'ajudarão', '3pl_future': 'ajudarão',
+      },
+    },
+  },
 ];

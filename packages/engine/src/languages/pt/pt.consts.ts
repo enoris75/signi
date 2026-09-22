@@ -1,5 +1,7 @@
 import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "mais"/"menos"; the noun phrase's definite article distinguishes them ("um gato mais
@@ -54,7 +56,7 @@ export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
  * dia", where "o dia mesmo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("a semana
  * passada", "a semana próxima").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
@@ -152,3 +154,16 @@ export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'sem título
 // O negador de um só constituinte, e não da oração: "corre **não** por causa do cão" — corre, e o
 // cão não é a razão (ver `Complement.negative`).
 export const CONSTITUENT_NEGATOR = 'não';
+
+/** The focus particles (see NounPhrase.focus, C39). Portuguese writes all three before the phrase. */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'só' }, even: { word: 'até' }, also: { word: 'também' },
+};
+
+/** The cardinals Portuguese spells (see `numeralWord`, C31); "um" and "dois" both agree. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'um', fem: 'uma' }, 2: { word: 'dois', fem: 'duas' }, 3: { word: 'três' }, 4: { word: 'quatro' },
+  5: { word: 'cinco' }, 6: { word: 'seis' }, 7: { word: 'sete' }, 8: { word: 'oito' },
+  9: { word: 'nove' }, 10: { word: 'dez' }, 11: { word: 'onze' }, 12: { word: 'doze' },
+  24: { word: 'vinte e quatro' },
+};

@@ -49,23 +49,31 @@ STATE), and the remaining **60 were seeded on 2026-09-22** by the localization t
 this plan's *Follow-ups* had asked for. They seeded **73 words** in all — the 60, twelve differentia
 their tooltips needed (DARK, TELEPHONE, MIND, STAY, OUTSIDE, DIRECT_VERB, ALLOWED, LEARN, SELL,
 BROADCAST, ERROR, REALITY) and NEXT_COMING — and glossed 56 of them, so the words arrived with
-localized tooltips rather than an English literal. **EVEN is the one §2 word still unseeded**:
+localized tooltips rather than an English literal. **EVEN turned out not to be a word at all**:
 Japanese has no verb adverb for it (さえ is a particle on the noun), so D4's "seed them as verb
-adverbs now" does not hold for it, and it waits on a focus particle
-([C39](../../../localization/C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)).
+adverbs now" did not hold for it — and when the focus particle was built
+([C39](../../../localization/done/C39-focus-particle-on-a-noun-phrase.md), 2026-09-22) *only*,
+*even* and *also* landed as a **value** on the noun phrase, the way the determiners are values. EVEN
+has no concept and will not get one.
 
 The seeding also answered this plan's open questions: **NEED is one lexical concept**, not a modal
 (a modal NEED_TO's only gloss would be MUST's, character for character); **TRY is lexical too**, not
 `modal: true`, which costs French its *de* and stacks a bare German infinitive; **MAY is permission
 only**, its possibility sense merging with MIGHT; and the labour verb is WORK_LABOUR, since the
-seeded WORK is the machine sense. Eleven seeded words show the English literal in their tooltip
-until §3 lands: DAY, WEEK, YEAR (numerals), TODAY, JUST, STILL (a temporal complement), SHOULD,
-MIGHT (a content clause), ONLY (an indefinite pronoun), THERE (French *ce …-là*) and ALLOWED (LET).
+seeded WORK is the machine sense. Eleven seeded words showed the English literal in their tooltip
+until §3 landed; **it landed the same day**, C30–C40 building eleven constructs between them, so
+eight of those are now glossed (DAY, WEEK, YEAR, SHOULD, MIGHT, THERE, and the newly seeded
+SOMETHING, VERY, LIKE, LET, OWN_ADJECTIVE). **Three still wait, all on C29's temporal complement**:
+TODAY, JUST and STILL. ONLY and ALLOWED were driven to a verdict instead and are literal by design.
 
-A few covered words are still listed below, because their most common use is missing:
+A few covered words were still listed below when this plan was written, because their most common
+use was missing. Both are now seeded, by [C31](../../../localization/done/C31-numerals.md) and
+[C34](../../../localization/done/C34-like-experiencer-verb.md):
 
-- **one** is seeded only as the impersonal pronoun (GENERIC_PERSON), not as the number.
-- **like** is written by the engine only as the manner preposition ("like the wind"). The verb is missing.
+- **one** was seeded only as the impersonal pronoun (GENERIC_PERSON), not as the number. The number
+  is a `numeral` **value** on the noun phrase, not a concept of its own.
+- **like** was written by the engine only as the manner preposition ("like the wind"). The verb is
+  seeded, with the experiencer frame Italian and Spanish need for it.
 - **own** is seeded only as the verb (OWN, "to have as property"). "My own" is missing.
 - **do** is written by the engine as the helper in "did not" and, since C10, in a question ("does the
   cat eat?"). The main verb is missing.
@@ -244,7 +252,8 @@ backend runs the builds, not `src`.
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
   are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose
   **Seed first** tables are this plan's seeding with the forms checked, and §3's content words are
-  [C29–C40](../../../localization/C-needs-engine/README.md), one per construct. 47 of the 61
+  [C29–C40](../../../localization/C-needs-engine/README.md), one per construct (C30–C40 built
+  2026-09-22; C29 open). 47 of the 61
   shipped a gloss, as forecast, and nine more concepts did besides. [The P09 sweep](../../../localization/localization-tasks.md#the-p09-sweep-of-2026-09-22)
   lists what they change here: TALK, COME_BACK and STATE_CONDITION are already concepts (SPEAK,
   RETURN, STATE); the labour verb is WORK_LABOUR, since the seeded WORK is the machine sense; the help

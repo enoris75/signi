@@ -1,5 +1,7 @@
 import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
+import type { FocusWords } from '../../functions/withFocus.js';
+import type { CardinalTable } from '../../functions/numeralWord.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "más"/"menos"; the noun phrase's definite article distinguishes them ("un gato más
@@ -21,7 +23,7 @@ export const ES_DEGREE: Record<Degree, string> = {
  * día", where "el día mismo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("la semana
  * pasada", "la semana próxima"). Neither apocopates: "el último día", never "*el últim día".
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
@@ -132,3 +134,16 @@ export const COMITATIVE_FUSION: Record<string, string> = { 'mí': 'conmigo', ti:
 // El negador de un solo constituyente, no de la oración: "corre **no** a causa del perro" — corre, y
 // el perro no es la razón (véase `Complement.negative`).
 export const CONSTITUENT_NEGATOR = 'no';
+
+/** The focus particles (see NounPhrase.focus, C39). Spanish writes all three before the phrase. */
+export const FOCUS_WORDS: FocusWords = {
+  only: { word: 'solo' }, even: { word: 'incluso' }, also: { word: 'también' },
+};
+
+/** The cardinals Spanish spells (see `numeralWord`, C31); only "uno" agrees. */
+export const CARDINALS: CardinalTable = {
+  1: { word: 'un', fem: 'una' }, 2: { word: 'dos' }, 3: { word: 'tres' }, 4: { word: 'cuatro' },
+  5: { word: 'cinco' }, 6: { word: 'seis' }, 7: { word: 'siete' }, 8: { word: 'ocho' },
+  9: { word: 'nueve' }, 10: { word: 'diez' }, 11: { word: 'once' }, 12: { word: 'doce' },
+  24: { word: 'veinticuatro' },
+};

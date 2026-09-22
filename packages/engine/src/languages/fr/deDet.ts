@@ -13,7 +13,9 @@ export function deDet(forms: Record<string, string>, plural: boolean, lead: stri
   const def = forms['definiteness'] ?? 'definite';
   // A proper noun takes the definite article whatever was picked (see `artFor`), so it contracts
   // like one: "à cause de l'Afrique", not the mass-noun drop "d'Afrique".
-  if (def === 'definite' || forms['proper'] === '1') return dePrep(forms, plural, lead);
+  // A name the language leaves bare says so, and takes none here either (`takes_article: '0'`, C38).
+  const articledName = forms['proper'] === '1' && forms['takes_article'] !== '0';
+  if (def === 'definite' || articledName) return dePrep(forms, plural, lead);
   const det = artFor(forms, plural, lead);
   const drops =
     (def === 'indefinite' && (plural || forms['uncountable'] === '1')) ||

@@ -163,7 +163,7 @@ describe('moodForm', () => {
 // A170: the relative under a negated antecedent reads the present subjunctive in any person, not
 // only the imperative's three. The 3rd persons keep the stressed stem; only 1pl / 2pl take the
 // unstressed one.
-describe('moodForm: the present subjunctive (es, pt)', () => {
+describe('moodForm: the present subjunctive (the four Romance languages)', () => {
   const persons = ['1sg', '2sg', '3sg', '1pl', '2pl', '3pl'] as const;
   const paradigm = (lang: 'es' | 'pt', v: ReturnType<typeof verb>) => persons.map((pn) => moodForm(lang, v, pn, 'presentSubjunctive'));
 
@@ -196,12 +196,26 @@ describe('moodForm: the present subjunctive (es, pt)', () => {
     ]);
   });
 
-  test('is undefined with no stem to derive from, and in the languages that keep the indicative', () => {
-    expect(moodForm('es', verb('EAT', { base: 'comer' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+  // Italian and French derive it too, for the content clause of an evaluative predicate (C30):
+  // Italian from the 1st singular, as es/pt do, and French from the 3rd plural — in each case the
+  // form that carries the irregular stem. An -iare verb writes one i, not two.
+  test('Italian derives it from the 1st singular, French from the 3rd plural', () => {
     const MANGIARE = verb('EAT', { base: 'mangiare', '1sg_present': 'mangio' });
-    expect(moodForm('it', MANGIARE, '3sg', 'presentSubjunctive')).toBeUndefined();
-    expect(moodForm('fr', verb('EAT', { base: 'manger', '1sg_present': 'mange' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('it', MANGIARE, '3sg', 'presentSubjunctive')).toBe('mangi');
+    expect(moodForm('it', verb('RUN', { base: 'correre', '1sg_present': 'corro' }), '3sg', 'presentSubjunctive')).toBe('corra');
+    expect(moodForm('it', verb('BE', { base: 'essere', '1sg_present': 'sono' }), '3sg', 'presentSubjunctive')).toBe('sia');
+    expect(moodForm('fr', verb('EAT', { base: 'manger', '3pl_present': 'mangent' }), '3sg', 'presentSubjunctive')).toBe('mange');
+    expect(moodForm('fr', verb('RUN', { base: 'courir', '3pl_present': 'courent' }), '3sg', 'presentSubjunctive')).toBe('coure');
+    expect(moodForm('fr', verb('BE', { base: 'être', '3pl_present': 'sont' }), '3sg', 'presentSubjunctive')).toBe('soit');
+  });
+
+  test('is undefined with no stem to derive from, and in the three languages that have no such mood', () => {
+    expect(moodForm('es', verb('EAT', { base: 'comer' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('it', verb('EAT', { base: 'mangiare' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('fr', verb('EAT', { base: 'manger' }), '3sg', 'presentSubjunctive')).toBeUndefined();
     expect(moodForm('en', verb('EAT', { base: 'eat', '1sg_present': 'eat' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('de', verb('EAT', { base: 'essen', '1sg_present': 'esse' }), '3sg', 'presentSubjunctive')).toBeUndefined();
+    expect(moodForm('ja', verb('EAT', { base: '食べる' }), '3sg', 'presentSubjunctive')).toBeUndefined();
   });
 });
 

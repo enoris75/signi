@@ -5,6 +5,10 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import { usePickerKeys, type PickerTabs } from "./hooks/usePickerKeys.ts";
 import { PickerList } from "./PickerList.tsx";
 
+// A concept whose slot is not its role's is filtered out here: it reuses this role's lexicon and
+// arrives on the same fetch, but nothing it could fill is in this picker — the split
+// ModalTypeahead / VerbTypeahead make on `Concept.modal`, one level out (see `ConceptSlot`).
+// Here that is OWN_ADJECTIVE, which exists only beside a possessor: "an own cat" is not a phrase.
 export function AdjectiveTypeahead({
   onSelect,
   // Optional sticky content pinned to the top of the dropdown — used to surface the
@@ -17,7 +21,8 @@ export function AdjectiveTypeahead({
   header?: ReactNode;
   tabs?: PickerTabs;
 }) {
-  const { data: adjectives = [] } = useConcepts("adjective");
+  const { data: allAdjectives = [] } = useConcepts("adjective");
+  const adjectives = allAdjectives.filter((a) => !a.slot);
   const t = useUiString();
   const picker = usePickerKeys({ items: adjectives, onSelect, tabs });
 

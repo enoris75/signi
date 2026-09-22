@@ -145,7 +145,7 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
  * The finite conditional (apodosis), imperfect-subjunctive (protasis) or present-subjunctive surface
  * for a Romance verb, or undefined when there is no mood to apply or the source stem is missing (the
  * caller then falls back to its ordinary conjugation). `pn` is the "1sg".."3pl" person-number key.
- * The present subjunctive is Spanish and Portuguese only (see `presentSubjunctiveForm`).
+ * The present subjunctive is Romance-wide (see `presentSubjunctiveForm`).
  */
 export function moodForm(lang: LanguageCode, verb: ConceptForms, pn: PN, mood: Mood | undefined): string | undefined {
   return onLemmaHead(verb, (v) => {
@@ -428,14 +428,66 @@ function subjPresent(
   return stem + (lang === 'es' ? ES_SUBJ_PRES_END : PT_SUBJ_PRES_END)[cls][pn];
 }
 
+// The Italian present subjunctive, from the 1st-singular present minus its -o: an -are verb takes
+// -i and every other -a, and an irregular 1sg carries its stem through (faccio → faccia, dico →
+// dica, posso → possa, vado → vada). The 1st and 2nd plural are the indicative's own forms. Only
+// the verbs whose 1sg does not give the stem are overridden.
+const IT_SUBJ_PRES_END: Record<'are' | 'other', Record<PN, string>> = {
+  are:   { '1sg': 'i', '2sg': 'i', '3sg': 'i', '1pl': 'iamo', '2pl': 'iate', '3pl': 'ino' },
+  other: { '1sg': 'a', '2sg': 'a', '3sg': 'a', '1pl': 'iamo', '2pl': 'iate', '3pl': 'ano' },
+};
+const IT_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
+  BE:   { '1sg': 'sia', '2sg': 'sia', '3sg': 'sia', '1pl': 'siamo', '2pl': 'siate', '3pl': 'siano' },        // essere
+  HAVE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' }, // avere (1sg "ho")
+  MUST: { '1sg': 'debba', '2sg': 'debba', '3sg': 'debba', '1pl': 'dobbiamo', '2pl': 'dobbiate', '3pl': 'debbano' }, // dovere
+};
+
+// The French present subjunctive, from the 3rd-plural present minus its -ent: ils agissent → agisse,
+// ils mangent → mange, ils courent → coure. The 1st and 2nd plural are the imperfect's forms
+// (mangions, mangiez). The verbs whose 3pl does not give the stem are overridden.
+const FR_SUBJ_PRES_END: Record<PN, string> = { '1sg': 'e', '2sg': 'es', '3sg': 'e', '1pl': 'ions', '2pl': 'iez', '3pl': 'ent' };
+const FR_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
+  BE:    { '1sg': 'sois', '2sg': 'sois', '3sg': 'soit', '1pl': 'soyons', '2pl': 'soyez', '3pl': 'soient' },   // être
+  HAVE:  { '1sg': 'aie', '2sg': 'aies', '3sg': 'ait', '1pl': 'ayons', '2pl': 'ayez', '3pl': 'aient' },        // avoir
+  GO:    { '1sg': 'aille', '2sg': 'ailles', '3sg': 'aille', '1pl': 'allions', '2pl': 'alliez', '3pl': 'aillent' }, // aller
+  CAN:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' }, // pouvoir
+  MAY:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' },
+  MAKE:  { '1sg': 'fasse', '2sg': 'fasses', '3sg': 'fasse', '1pl': 'fassions', '2pl': 'fassiez', '3pl': 'fassent' },  // faire
+  DO:    { '1sg': 'fasse', '2sg': 'fasses', '3sg': 'fasse', '1pl': 'fassions', '2pl': 'fassiez', '3pl': 'fassent' },
+  KNOW:  { '1sg': 'sache', '2sg': 'saches', '3sg': 'sache', '1pl': 'sachions', '2pl': 'sachiez', '3pl': 'sachent' },  // savoir
+  WILL:  { '1sg': 'veuille', '2sg': 'veuilles', '3sg': 'veuille', '1pl': 'voulions', '2pl': 'vouliez', '3pl': 'veuillent' }, // vouloir
+};
+
 /**
- * The present subjunctive in any person, for the relative clause under a negated antecedent (A170):
- * "ningún gato que coma", "nenhum gato que coma", "ningún gato que esté cansado". Spanish and
- * Portuguese only. Italian and French keep the indicative there (see A170's decisions), and the other
- * three never call this. Undefined when the verb has neither an override nor a stored 1sg present to
- * derive it from, so the caller conjugates instead.
+ * The present subjunctive in any person: the mood a **content clause** stands in as the subject of an
+ * evaluative predicate ("è giusto che si **agisca**", "il est juste qu'on **agisse**", "es correcto
+ * que se **actúe**", "é certo que se **aja**" — localization C30), and the one a relative clause
+ * takes under a negated antecedent in Spanish and Portuguese ("ningún gato que **coma**", A170).
+ * English, German and Japanese have no such mood and never call this.
+ *
+ * Each language derives it from a stored present it already has, so no paradigm is seeded: es/pt from
+ * the 1st singular, Italian from the 1st singular, French from the 3rd plural — in each case the form
+ * that carries the irregular stem. The verbs whose stored form does not carry it are overridden above.
+ * Undefined when the source form is missing, so the caller conjugates instead.
  */
 function presentSubjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string | undefined {
+  if (lang === 'it') {
+    const override = IT_SUBJ_PRES_OVERRIDE[verb.conceptId];
+    if (override) return override[pn];
+    const stem = (verb.forms['1sg_present'] ?? '').replace(/o$/, '');
+    if (!stem) return undefined;
+    const ending = IT_SUBJ_PRES_END[(verb.forms['base'] ?? '').endsWith('are') ? 'are' : 'other'][pn];
+    // An -iare verb writes one i, not two: mangiare → mangi, not "mangii" (the same spelling rule
+    // its 2nd-singular present already follows).
+    return stem.endsWith('i') && ending.startsWith('i') ? stem + ending.slice(1) : stem + ending;
+  }
+  if (lang === 'fr') {
+    const override = FR_SUBJ_PRES_OVERRIDE[verb.conceptId];
+    if (override) return override[pn];
+    const stem = (verb.forms['3pl_present'] ?? '').replace(/ent$/, '');
+    if (!stem) return undefined;
+    return stem + FR_SUBJ_PRES_END[pn];
+  }
   if (lang !== 'es' && lang !== 'pt') return undefined;
   const override = (lang === 'es' ? ES_SUBJ_OVERRIDE : PT_SUBJ_OVERRIDE)[verb.conceptId];
   if (!override && !verb.forms['1sg_present']) return undefined;

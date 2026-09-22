@@ -62,6 +62,12 @@ describe('the glosses, in every language', () => {
       en: 'in this place.', it: 'in questo luogo.', fr: 'dans ce lieu.', de: 'an diesem Ort.', es: 'en este lugar.', ja: 'この場所で。',
       pt: 'neste lugar.',
     }],
+    // HERE's gloss one demonstrative along, marked `contrastive` so French says the distance it
+    // neutralises in "ce": without the clitic THERE would be HERE there (localization C40).
+    ['THERE', {
+      en: 'in that place.', it: 'in quel luogo.', fr: 'dans ce lieu-là.', de: 'an jenem Ort.', es: 'en ese lugar.', ja: 'その場所で。',
+      pt: 'nesse lugar.',
+    }],
     // WELL's `mode` gloss on SAME, which stands before the noun in the Romance languages.
     ['ALSO', {
       en: 'in the same way.', it: 'nello stesso modo.', fr: 'de la même manière.', de: 'auf die gleiche Weise.', es: 'de la misma manera.',
@@ -76,10 +82,10 @@ describe('the glosses, in every language', () => {
   });
 
   // AMERICAN and RIGHT_SIDE are literal by design (every gloss says the word again, or is true of
-  // Canada, or of both sides); THERE waits on C40, JUST and STILL on C29, ONLY on C32. ERROR and
-  // REALITY are root nouns.
+  // Canada, or of both sides); JUST and STILL wait on C29, ONLY on C32. ERROR and REALITY are root
+  // nouns. THERE shipped with C40, and is glossed above.
   test('the words that stay on the literal', () => {
-    for (const id of ['AMERICAN', 'RIGHT_SIDE', 'THERE', 'JUST', 'STILL', 'ONLY', 'ERROR', 'REALITY']) {
+    for (const id of ['AMERICAN', 'RIGHT_SIDE', 'JUST', 'STILL', 'ONLY', 'ERROR', 'REALITY']) {
       expect(seed(id)?.definition, id).toBeUndefined();
     }
   });

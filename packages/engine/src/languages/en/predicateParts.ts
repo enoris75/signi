@@ -13,12 +13,14 @@ import { splitBareTerminus } from '../../functions/splitBareTerminus.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
-import { FINITE_BE, MODAL_AUX } from './en.consts.js';
+import { FINITE_BE, FOCUS_WORDS, MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { agentPhrase } from './agentPhrase.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
+import { slotFocus } from '../../functions/slotFocus.js';
+import { withFocus } from '../../functions/withFocus.js';
 import { coordinate } from './coordinate.js';
 import { doSupport } from './doSupport.js';
 import { modalAdverbEn } from './modalAdverbEn.js';
@@ -146,11 +148,14 @@ function predicateWords(
   // A verb that takes its object with a preposition names it in its lexeme (`object_prep`, A139), and
   // the object follows it, once for the whole group: "depends on the condition", "depends on me".
   const objectPrep = objectPreposition(lexical);
+  // A focus particle singles the object out, from outside everything the phrase writes: "eats only
+  // the food", "eats the food too" (see `withFocus`, C39).
   const objectWords = passive || !directObject ? ''
-    : coordinate(directObject, (np) =>
+    : withFocus(coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms)
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
-      : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
+      : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np)),
+      slotFocus(directObject), FOCUS_WORDS);
   const objectText = passive
     ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
     : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
@@ -252,6 +257,8 @@ function predicateWords(
   // base ("consume food") above — the "to" is what makes it a gloss rather than a directive. A
   // frequency adverb leads the "to", after any "not": "always to eat", "not always to eat".
   if (mood === 'infinitive') {
+    // A governor that takes the bare infinitive writes no "to" at all: "lets the dog run" (C36).
+    const to = verbPhrase.bareInfinitive ? '' : 'to ';
     // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
     // `foldModalGovernor`). The "to" leads each modal's `nonfinite` and `link`, down to the main
     // verb's group: "to be able to act", "to have to act", "not to want to have objects". The main
@@ -260,10 +267,10 @@ function predicateWords(
     if (modals.length > 0) {
       const chain = modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not');
       const group = [...chain, governedNot, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
-      return ['', negateVerb ? `not to ${group}` : `to ${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
+      return ['', negateVerb ? `not ${to}${group}` : `${to}${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
     }
     const group = verbGroupInfinitive(verb.forms, aspect);
-    const verbText = negateVerb ? `not to ${group}` : `to ${group}`;
+    const verbText = negateVerb ? `not ${to}${group}` : `${to}${group}`;
     if (isFrequency && modifierText && negateVerb) {
       return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
     }

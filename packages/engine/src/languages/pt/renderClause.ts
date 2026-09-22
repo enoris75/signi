@@ -39,7 +39,11 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
     (phrase.verbPhrase.mood === 'imperative' ||
       phrase.verbPhrase.mood === 'infinitive' ||
       isPronounElement(subject));
-  const subj = dropSubject ? '' : subjectText(subject);
+  // A content clause standing where the subject would is extraposed behind the predicate, under
+  // "che" / "que" and in the present subjunctive; these languages write no expletive in the slot it
+  // left, because they write no subject pronoun at all (C30).
+  const contentSubject = phrase.contentSubject;
+  const subj = contentSubject || dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("últimas notícias").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
@@ -55,5 +59,8 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
   // puts before the infinitive: "para cambiare", "para vedere le traduzioni". It is subject-controlled,
   // so it agrees with this clause's own subject, exactly as an infinitive complement does.
   const purpose = phrase.purpose ? infinitiveComplementText(phrase.purpose, subject.agreement, 'para') : '';
-  return [subj, predicate, complement, purpose].filter(Boolean).join(' ').trim();
+  // The content clause closes the phrase, under "que" and in the present subjunctive the
+  // translator resolved it in (C30).
+  const content = contentSubject ? `que ${renderClause(contentSubject)}` : '';
+  return [subj, predicate, content, complement, purpose].filter(Boolean).join(' ').trim();
 }

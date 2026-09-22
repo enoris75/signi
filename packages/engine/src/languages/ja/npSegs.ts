@@ -2,9 +2,12 @@ import type { Definiteness } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
 import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
+import { jaCounted } from './jaCounted.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -26,22 +29,39 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // determiner modifies the nearest noun after it, so この猫の本 is "this cat's book" and 多くの猫の本
   // is "many cats' books"; the head's own determiner belongs behind the possessor's の — 猫のこの本,
   // 猫の多くの本, 猫のどの本も.
+  // A **pronoun** head takes no prenominal determiner: この彼 is not Japanese, and neither is どの何 —
+  // the negative indefinite pronoun writes 何 and lets the circumfix's も close it (何も, C32).
+  const pronounHead = !!np.head.forms['person'];
   const definiteness = (np.head.forms['definiteness'] ?? 'definite') as Definiteness;
-  const prenominalDet = JA_PRENOMINAL_DET[definiteness];
+  const prenominalDet = pronounHead ? undefined : JA_PRENOMINAL_DET[definiteness];
   const detSegs: RubySegment[] =
     prenominalDet ? [{ t: prenominalDet }]
-    : definiteness === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.pre }]
+    : !pronounHead && definiteness === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.pre }]
     : [];
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
   // adjectives / nested possessor / relative clause ("子供の猫の本"). A pronominal possessor
   // ("彼の犬") is the antecedent pronoun + の, invariant of the possessed head.
-  if (np.possessor) {
+  //
+  // OWN is the one adjective that touches the possessor (C37). Japanese does not add 自分の to a
+  // possessive pronoun, it says it **in place of** one — 自分の猫, never 彼の自分の猫 — so a
+  // pronominal possessor is dropped here and the adjective below is the whole of it. A genitive
+  // possessor is still said, and OWN follows it as 自身の: 猫自身の本.
+  const own = possessorBound(np);
+  const ownReplacesPossessor = !!own && !!np.possessor && isPronominalPossessor(np.possessor);
+  // 母 already means "my mother" (see `applyPossessorForm`, P11 D4), so 私の in front of it says 私
+  // twice: 母は走ります, 私は妻を愛しています. The drop is for the 1st person **singular** only — 私たちの
+  // adds that the relative is shared — and only before one's own kin noun: 私の本 keeps its 私の.
+  const ownKin = np.head.forms['own'] === '1';
+  const redundantPossessive = ownKin && !!np.possessor && isPronominalPossessor(np.possessor)
+    && np.possessor.person === '1' && np.possessor.number === 'singular';
+  if (np.possessor && !ownReplacesPossessor && !redundantPossessive) {
     core.push(
       ...(isPronominalPossessor(np.possessor)
         ? possessiveJa(np.possessor)
         // A `no` possessor writes only its どの here: its も closes the whole phrase, where the phrase's
         // particle goes (どの猫の本も, see `isNegativeGroup` and `jaParticleSegs`; A216).
-        : [...npSegs(np.possessor), { t: 'の' }]),
+        // OWN's 自身の carries the の itself, so the possessor before it writes none (猫自身の本).
+        : [...npSegs(np.possessor), ...(own ? [] : [{ t: 'の' }])]),
     );
   }
   core.push(...detSegs);
@@ -60,17 +80,40 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   }
   const adjSegs: RubySegment[] = [];
   for (const a of np.adjectives) {
-    // The lowered degrees negate the adjective (大きい → 大きくない); every other keeps the base.
+    // OWN after a genitive possessor is 自身の, the word Japanese uses when the owner has been
+    // named ("猫自身の本"); standing for the possessor it is 自分の, which the base already is.
+    if (a === own && !ownReplacesPossessor && np.possessor) {
+      const after = a.forms['after_possessor'];
+      if (after) { adjSegs.push(wordSeg(after, a.forms['after_possessor_reading'])); continue; }
+    }
+    // The lowered degrees negate the adjective (大きい → 大きくない); an intensifier's 〜すぎる is
+    // already built into the base here (大きすぎる猫), and every other case keeps it.
     const { base, reading } = jaComparisonAdj(a);
     if (!base) continue;
-    // Prenominal degree adverb bound directly to its adjective (もっと大きい), no space.
+    // Prenominal intensifier and degree adverb, bound directly to the adjective (とてももっと大きい),
+    // no space. A suffix intensifier writes no word here — the base above carries it (C33).
+    const intensifier = jaIntensifierSeg(a);
+    if (intensifier) adjSegs.push(intensifier);
     const deg = JA_DEGREE[adjDegree(a)];
     if (deg) adjSegs.push({ t: deg });
     adjSegs.push(wordSeg(base, reading));
   }
-  core.push(...adjSegs);
   const head = np.head.forms;
-  core.push(wordSeg(head['base'] ?? '', head['reading']));
+  // A cardinal is written with the counter its noun chooses, ahead of the adjectives (二匹の大きい猫);
+  // a time word IS its counter and is not said again (二十四時間). See `jaCounted`, C31.
+  const counted = jaCounted(np);
+  if (counted) core.push(...counted.segs);
+  core.push(...adjSegs);
+  // Japanese nouns have no plural, so the head is its one word — except where the plural IS another
+  // word the lexeme stores: 親 → 両親, ご親御さん → ご両親 (P11 D7). The reading follows that surface,
+  // never the singular's. A pronoun is left alone: the translator has already written its plural into
+  // `base`, gender and all (彼女ら), and `plural_reading` still holds the masculine's.
+  const pluralHead = !pronounHead && (head['number'] ?? head['count']) === 'plural' && !!head['plural'];
+  if (!counted?.replacesHead) {
+    core.push(pluralHead
+      ? wordSeg(head['plural'] ?? '', head['plural_reading'])
+      : wordSeg(head['base'] ?? '', head['reading']));
+  }
   // A relative clause is prenominal: the whole clause precedes everything else (see relativeClauseSegs).
   return [...relativeClauseSegs(np), ...core];
 }

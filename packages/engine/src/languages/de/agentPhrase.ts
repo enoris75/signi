@@ -2,6 +2,7 @@ import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounElement } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { possessiveDe } from '../../possessive.js';
+import { adjectivalNoun } from './adjectivalNoun.js';
 import { adjPhrase } from './adjPhrase.js';
 import { articledNameForms } from './articledNameForms.js';
 import { coordinate } from './coordinate.js';
@@ -43,9 +44,12 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
     const definiteness = possessedDeclension(np, f);
     const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
     const head = prepDet('von', f, 'dat', plural);
-    // A weak masculine declines to -(e)n in the oblique ("von dem Jungen"); every other noun takes
+    // An adjectival noun takes the dative adjective ending instead ("von einem Verwandten", P11 D8);
+    // a weak masculine declines to -(e)n in the oblique ("von dem Jungen"); every other noun takes
     // the regular dative-plural -n.
-    const word = f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
+    const word = f['adjectival'] === '1'
+      ? adjectivalNoun(compound, f, 'dat', definiteness, plural)
+      : f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
     const declined = adjPhrase(np, 'dat', definiteness);
     const adj = declined ? `${declined} ` : '';
     const possessive = poss

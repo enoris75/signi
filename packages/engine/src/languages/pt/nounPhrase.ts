@@ -1,5 +1,7 @@
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 import type { PtAdjectives } from './pt.types.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS } from './pt.consts.js';
 import { artFor } from './artFor.js';
 import { isPlural } from './isPlural.js';
 import { withAdj } from './withAdj.js';
@@ -7,7 +9,10 @@ import { withAdj } from './withAdj.js';
 export function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives, possessive?: string): string {
   const plural = isPlural(forms);
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const noun = withAdj(word, adj);
+  // A cardinal stands between the determiner and the prenominal adjectives: "las dos casas
+  // grandes" (C31). It agrees only at one — and in Portuguese at two as well (dois / duas).
+  const numeral = numeralText(forms, CARDINALS);
+  const noun = `${numeral ? `${numeral} ` : ''}${withAdj(word, adj)}`;
   const definiteness = forms['definiteness'] ?? 'definite';
   // A pronominal possessive ("o seu cão") replaces the picked determiner with the definite
   // article + possessive — unless the head carries a determiner of its own. Portuguese keeps both

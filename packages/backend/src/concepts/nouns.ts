@@ -140,6 +140,19 @@ const partOfGloss = (whole: string): PhrasePlan => ({
   },
 });
 
+// A period of time counted in smaller ones: C26's `parts` possessor under C31's cardinal —
+// countedPeriod('HOUR', 24) → en "a period of twenty-four hours", it "un periodo di ventiquattro
+// ore", de "ein Zeitraum von vierundzwanzig Stunden", ja 二十四時間の期間. The cardinal pluralises the
+// unit and takes the Japanese counter the noun names (localization C31).
+const countedPeriod = (unit: string, count: number): PhrasePlan => ({
+  subject: {
+    concept: 'PERIOD_TIME',
+    definiteness: 'indefinite',
+    possessor: { concept: unit, definiteness: 'indefinite', numeral: count },
+    possessorRole: 'parts',
+  },
+});
+
 // A language's gloss: the definite LANGUAGE with its country as the genitive possessor —
 // languageOf('ITALY') → en "Italy's language", it "la lingua dell'Italia", de "die Sprache Italiens",
 // ja "イタリアの言語" (localization B36). Definite, because "a language of Italy" says one of several.
@@ -868,7 +881,7 @@ export const nouns: ConceptSeed[] = [
       fr: { base: 'maison', plural: 'maisons', gender: 'fem', count: 'singular' },
       de: { base: 'Haus', plural: 'Häuser', gender: 'neut', count: 'singular' },
       es: { base: 'casa', plural: 'casas', gender: 'fem', count: 'singular' },
-      ja: { base: '家', count: 'singular', reading: 'いえ' },
+      ja: { base: '家', count: 'singular', reading: 'いえ', counter: '軒' },
       pt: { base: 'casa', plural: 'casas', gender: 'fem', count: 'singular' },
     },
   },
@@ -1913,6 +1926,80 @@ export const nouns: ConceptSeed[] = [
   // The remaining continents, all shaped like AFRICA above: proper, uncountable, no plural,
   // feminine in the Romance languages and neuter in German. Japanese takes 北米 / 南米 for the
   // Americas rather than a transliteration — they are the ordinary words.
+  // ── PERSONAL NAMES ───────────────────────────────────────────────
+  // The corpus's proper nouns were all places and languages; a title has nothing to precede without
+  // a person's name, so C38 seeds two. They are `proper` and `human`, which is what tells them from
+  // a place: the languages that article a place name leave a person's bare ("Pietro", "Pierre",
+  // not "il Pietro"), which their forms say with `takes_article: '0'` — Portuguese is the one that
+  // keeps it ("o Pedro"), as Portuguese does. Each language spells the name its own way, the way it
+  // already spells Europe; Japanese writes it in katakana.
+  {
+    id: 'PETER',
+    role: 'noun',
+    description: 'a personal name (male)',
+    emoji: '🧔',
+    proper: true,
+    human: true,
+    animate: true,
+    countable: false,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'Peter',   count: 'singular' },
+      it: { base: 'Pietro',  gender: 'masc', count: 'singular', takes_article: '0' },
+      fr: { base: 'Pierre',  gender: 'masc', count: 'singular', takes_article: '0' },
+      de: { base: 'Peter',   gender: 'masc', count: 'singular' },
+      es: { base: 'Pedro',   gender: 'masc', count: 'singular' },
+      ja: { base: 'ピーター', count: 'singular' },
+      pt: { base: 'Pedro',   gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'MARY',
+    role: 'noun',
+    description: 'a personal name (female)',
+    emoji: '👩',
+    proper: true,
+    human: true,
+    animate: true,
+    countable: false,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'Mary',    count: 'singular' },
+      it: { base: 'Maria',   gender: 'fem', count: 'singular', takes_article: '0' },
+      fr: { base: 'Marie',   gender: 'fem', count: 'singular', takes_article: '0' },
+      de: { base: 'Maria',   gender: 'fem', count: 'singular' },
+      es: { base: 'María',   gender: 'fem', count: 'singular' },
+      ja: { base: 'メアリー', count: 'singular' },
+      pt: { base: 'Maria',   gender: 'fem', count: 'singular' },
+    },
+  },
+  // P09's *Mr* (localization C38). A title is a common noun that fuses with a name into one phrase,
+  // and four things about it are each language's own: Italian drops the final -e before a name
+  // (`before_name`, "il signor Pietro" beside "il signore"); Italian, Spanish and Portuguese write
+  // the article, which agrees with the title and not with the name; English, French and German write
+  // none; and Japanese writes it **after** the name, as a suffix, and says it of anyone, not only of
+  // men (`position: 'suffix'`). It is `title: true`, so no ordinary noun slot offers it.
+  {
+    id: 'MR',
+    role: 'noun',
+    slot: 'title',
+    description: 'a title used before a man\'s name',
+    emoji: '🎩',
+    human: true,
+    animate: true,
+    forms: {
+      // `takes_article` is whether the language writes an article before a title: Italian and Spanish
+      // do (and it overrides the bare article a personal name takes as a name), French does not, and
+      // German, English and Japanese have none to write. Portuguese articles a proper noun already.
+      en: { base: 'Mr',       plural: 'Messrs',   count: 'singular' },
+      it: { base: 'signore',  plural: 'signori',  gender: 'masc', count: 'singular', before_name: 'signor', takes_article: '1' },
+      fr: { base: 'monsieur', plural: 'messieurs', gender: 'masc', count: 'singular', takes_article: '0' },
+      de: { base: 'Herr',     plural: 'Herren',   gender: 'masc', count: 'singular' },
+      es: { base: 'señor',    plural: 'señores',  gender: 'masc', count: 'singular', takes_article: '1' },
+      ja: { base: 'さん',      count: 'singular',  position: 'suffix' },
+      pt: { base: 'senhor',   plural: 'senhores', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     id: 'EUROPE',
     role: 'noun',
@@ -2387,6 +2474,8 @@ export const nouns: ConceptSeed[] = [
     id: 'DAY',
     role: 'noun',
     description: 'the period of twenty-four hours from one midnight to the next',
+    // C26's part-whole possessor with C31's cardinal: what the period is made up of.
+    definition: countedPeriod('HOUR', 24),
     emoji: '📅',
     isA: 'PERIOD_TIME',
     forms: {
@@ -2395,14 +2484,50 @@ export const nouns: ConceptSeed[] = [
       fr: { base: 'jour', plural: 'jours', gender: 'masc', count: 'singular' },
       de: { base: 'Tag', plural: 'Tage', gender: 'masc', count: 'singular' },
       es: { base: 'día', plural: 'días', gender: 'masc', count: 'singular' },
-      ja: { base: '日', count: 'singular', reading: 'ひ' },
+      // Counted, 日 is its own counter and the noun is not said again: 七日 (C31).
+      ja: { base: '日', count: 'singular', reading: 'ひ', counter: '日', counter_is_head: '1' },
       pt: { base: 'dia', plural: 'dias', gender: 'masc', count: 'singular' },
+    },
+  },
+  // P09's hour and month (localization C31), the units DAY and YEAR are counted in. Both are their
+  // own counter in Japanese (二十四時間, 十二か月), like 日 and 年. 時間 is also TIME's word — Japanese
+  // does not tell the hour from time in general — so HOUR is left on its English literal rather than
+  // glossed into a phrase that would say TIME twice.
+  {
+    id: 'HOUR',
+    role: 'noun',
+    description: 'a period of sixty minutes',
+    emoji: '🕐',
+    forms: {
+      en: { base: 'hour', plural: 'hours', count: 'singular' },
+      it: { base: 'ora', plural: 'ore', gender: 'fem', count: 'singular' },
+      fr: { base: 'heure', plural: 'heures', gender: 'fem', count: 'singular' },
+      de: { base: 'Stunde', plural: 'Stunden', gender: 'fem', count: 'singular' },
+      es: { base: 'hora', plural: 'horas', gender: 'fem', count: 'singular' },
+      ja: { base: '時間', count: 'singular', reading: 'じかん', counter: '時間', counter_is_head: '1' },
+      pt: { base: 'hora', plural: 'horas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'MONTH',
+    role: 'noun',
+    description: 'a period of about thirty days',
+    emoji: '🗓️',
+    forms: {
+      en: { base: 'month', plural: 'months', count: 'singular' },
+      it: { base: 'mese', plural: 'mesi', gender: 'masc', count: 'singular' },
+      fr: { base: 'mois', plural: 'mois', gender: 'masc', count: 'singular' },
+      de: { base: 'Monat', plural: 'Monate', gender: 'masc', count: 'singular' },
+      es: { base: 'mes', plural: 'meses', gender: 'masc', count: 'singular' },
+      ja: { base: '月', count: 'singular', reading: 'つき', counter: 'か月', counter_is_head: '1' },
+      pt: { base: 'mês', plural: 'meses', gender: 'masc', count: 'singular' },
     },
   },
   {
     id: 'WEEK',
     role: 'noun',
     description: 'a period of seven days',
+    definition: countedPeriod('DAY', 7),
     emoji: '🗓️',
     isA: 'PERIOD_TIME',
     forms: {
@@ -2411,7 +2536,7 @@ export const nouns: ConceptSeed[] = [
       fr: { base: 'semaine', plural: 'semaines', gender: 'fem', count: 'singular' },
       de: { base: 'Woche', plural: 'Wochen', gender: 'fem', count: 'singular' },
       es: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
-      ja: { base: '週', count: 'singular', reading: 'しゅう' },
+      ja: { base: '週', count: 'singular', reading: 'しゅう', counter: '週間', counter_is_head: '1' },
       pt: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
     },
   },
@@ -2453,15 +2578,19 @@ export const nouns: ConceptSeed[] = [
     id: 'YEAR',
     role: 'noun',
     description: 'the period of about 365 days the earth takes to go around the sun',
+    // Twelve months rather than 365 days: a number the cardinal table spells, and the unit a year
+    // is actually divided into.
+    definition: countedPeriod('MONTH', 12),
     emoji: '📆',
     isA: 'PERIOD_TIME',
     forms: {
       en: { base: 'year', plural: 'years', count: 'singular' },
       it: { base: 'anno', plural: 'anni', gender: 'masc', count: 'singular' },
-      fr: { base: 'année', plural: 'années', gender: 'fem', count: 'singular' },
+      // After a cardinal French says "an", not "année" — "douze ans" (`cardinal_form`, C31).
+      fr: { base: 'année', plural: 'années', gender: 'fem', count: 'singular', cardinal_form: 'an', cardinal_form_plural: 'ans' },
       de: { base: 'Jahr', plural: 'Jahre', gender: 'neut', count: 'singular' },
       es: { base: 'año', plural: 'años', gender: 'masc', count: 'singular' },
-      ja: { base: '年', count: 'singular', reading: 'とし' },
+      ja: { base: '年', count: 'singular', reading: 'とし', counter: '年', counter_is_head: '1' },
       pt: { base: 'ano', plural: 'anos', gender: 'masc', count: 'singular' },
     },
   },
