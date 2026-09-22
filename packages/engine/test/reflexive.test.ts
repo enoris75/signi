@@ -475,7 +475,7 @@ describe('known bugs: a negated Portuguese reflexive infinitive keeps "-se" afte
   const instruction = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
     clause(np('SECOND_PERSON'), verb, { ...extra, imperative: true, imperativeRegister: 'instruction' });
 
-  test.fails('"não" draws the "se" ahead of the infinitive, as it draws an object pronoun', () => {
+  test('"não" draws the "se" ahead of the infinitive, as it draws an object pronoun', () => {
     expect(pt(citation('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toBe('não se mover.');
     expect(pt(instruction('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toBe('não se mover.');
     expect(pt(citation('MOVE_ONESELF', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } })))
@@ -484,11 +484,40 @@ describe('known bugs: a negated Portuguese reflexive infinitive keeps "-se" afte
       .toBe('não se tornar feliz.');
   });
 
+  test('the instruction takes every row the infinitive does', () => {
+    expect(pt(instruction('MOVE_ONESELF', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } })))
+      .toBe('não se mover em nenhuma casa.');
+    expect(pt(instruction('BECOME', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toBe('não se tornar feliz.');
+  });
+
+  // Every source of the "não" draws the "se" the same way: a negative adverb and a `no` possessor
+  // oblige it as a `no` complement does (A208, A216).
+  test('a negative adverb and a "nenhum" possessor draw the "se" too', () => {
+    expect(pt(citation('MOVE_ONESELF', { verbPhrase: { modifier: 'NEVER' } }))).toBe('não se mover nunca.');
+    expect(pt(instruction('MOVE_ONESELF', { verbPhrase: { modifier: 'NEVER' } }))).toBe('não se mover nunca.');
+    expect(pt(citation('MOVE_ONESELF', {
+      complements: { locative: { phrase: np('HOUSE', { possessor: np('MAN', { definiteness: 'no' }) }) } },
+    }))).toBe('não se mover na casa de nenhum homem.');
+  });
+
   test('regression: the affirmative, an object pronoun, the command, and Spanish and Italian', () => {
     expect(pt(citation('MOVE_ONESELF'))).toBe('mover-se.');
     expect(pt(instruction('MOVE_ONESELF'))).toBe('mover-se.');
     expect(pt(citation('EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }))).toBe('não o comer.');
     expect(pt(clause(np('SECOND_PERSON'), 'MOVE_ONESELF', { imperative: true, verbPhrase: { negative: true } }))).toBe('não se mova.');
     expect(sayAll(citation('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toMatchObject({ es: 'no moverse.', it: 'non muoversi.' });
+  });
+
+  test('regression: a plain verb, the affirmative BECOME, the other commands, and the other Romance BECOME', () => {
+    expect(pt(citation('EAT', { verbPhrase: { negative: true } }))).toBe('não comer.');
+    expect(pt(instruction('EAT', { verbPhrase: { negative: true } }))).toBe('não comer.');
+    expect(pt(instruction('BECOME', { complements: { predicative: { phrase: np('HAPPY') } } }))).toBe('tornar-se feliz.');
+    expect(pt(clause(np('SECOND_PERSON'), 'BECOME', {
+      imperative: true, verbPhrase: { negative: true }, complements: { predicative: { phrase: np('HAPPY') } },
+    }))).toBe('não se torne feliz.');
+    expect(pt(clause(WE, 'MOVE_ONESELF', { imperative: true, verbPhrase: { negative: true } }))).toBe('não nos movamos.');
+    expect(sayAll(citation('BECOME', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toMatchObject({ es: 'no volverse feliz.', it: 'non diventare felice.', fr: 'ne pas devenir heureux.' });
   });
 });
