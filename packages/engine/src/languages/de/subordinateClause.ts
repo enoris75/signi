@@ -133,7 +133,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // The adverbs already follow the objects here, so a direction adverb only has to leave the
   // prospective group's pre-object slot (see `adverbSlots`).
   const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
-  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements);
+  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements, agreeForms);
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads

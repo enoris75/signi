@@ -61,3 +61,30 @@ German too, with the strong ending. The definite article is the reading that hol
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: a German ordinal as a predicate is left bare (A225)* (1 `test.fails`, plus a regression test for an attributive ordinal, another predicate adjective and the other six) |
+
+## Resolved
+
+**2026-09-22.** The definite reading, as the trial had it:
+
+- The German lexemes of FIRST, SECOND and THIRD say `ordinal: '1'` in
+  [`adjectives.ts`](../../../packages/backend/src/concepts/adjectives.ts).
+- [`dePredOrdinal`](../../../packages/engine/src/languages/de/dePredOrdinal.ts) renders a predicate
+  ordinal as `defArticle(agreement, 'nom', plural)` + the capitalised base (+ *n* in the plural).
+  [`complementsParts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  takes the agreement of what the predicate is said of and hands it an ordinal head;
+  [`complementsWithNicht`](../../../packages/engine/src/languages/de/complementsWithNicht.ts) passes
+  it through, [`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) hands it
+  `subject.agreement` in its three branches (so the causative gets the causee's), and
+  [`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts) its
+  `agreeForms`.
+- **Found while fixing it: "scheinen".** The nominalised ordinal is a predicate noun as far as
+  "scheinen" goes, so `complementsParts` gives it the infinitival copula a noun takes (A46): *der
+  Kater scheint der Erste zu sein*, where the trial left *scheint der Erste* (and HEAD *scheint
+  erste*). A predicate adjective stays bare (*scheint müde*).
+
+No passing test moved. PIN's C28 gloss can now leave its literal; that is a localization task, not
+this fix's.
+
+| | |
+|---|---|
+| **Tests** | `complements/predicative.test.ts` → *known bugs: a German ordinal as a predicate is left bare (A225)*, the `test.fails` now passing, plus an added case: pronoun subjects (*ich bin der Erste*, *sie ist die Erste*, *wir sind die Ersten*), a coordinated subject, the command and the instruction, the future and the resultative, a relative's feminine and plural head, and "scheinen" with the ordinal and with an adjective. `languages/de/dePredOrdinal.test.ts`, and `complementsPhrase/complementsPhrase.test.ts` → `complementsParts` with an agreement and under "scheinen" |

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from '@signi/shared';
-import { complementsPhrase } from './complementsPhrase.js';
+import { complementsParts, complementsPhrase } from './complementsPhrase.js';
 import {
   adj, BEHAELTER, BESTIMMUNG_RICHTUNG, BOOT, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
   GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SEGEL, SORGFALT, vp, WAEHLEN,
@@ -51,6 +51,15 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({
         predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })), locative: complement(np(MARKT)),
       }), SCHEINEN)).toBe('im Markt eine Legende zu sein');
+    });
+
+    // A225: an ordinal has no undeclined form; it is nominalised in the agreement it is handed, and
+    // under "scheinen" takes the copula a predicate noun takes.
+    test('a predicate ordinal takes the article and the capital of what it is said of', () => {
+      const first = complements({ predicative: complement(np({ role: 'adjective', base: 'erste', ordinal: '1' })) });
+      expect(complementsParts(first, {}, KATZE).predicate).toBe('die Erste');
+      expect(complementsParts(first, {}, { ...KATER, number: 'plural' }).predicate).toBe('die Ersten');
+      expect(complementsParts(first, SCHEINEN, KATER).predicate).toBe('der Erste zu sein');
     });
   });
 
