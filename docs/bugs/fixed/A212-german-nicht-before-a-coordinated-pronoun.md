@@ -55,3 +55,29 @@ so every row follows.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German "nicht" and an adverb in front of a coordinated pronoun* (1 `test.fails`, plus a regression test for the lone pronoun, a group of nouns, a quantified conjunct, no adverb, the positive clause and the relative clause) |
+
+## Resolved
+
+**2026-09-22.** Fixed as the **Shape of the fix** describes, in
+[`objectLeadsNicht`](../../../packages/engine/src/languages/de/renderClause.ts) alone: a conjunct with
+a `person` now counts as known instead of disqualifying the group. A lone pronoun never reaches the
+check, because it renders in the pronoun slot and leaves the noun slot empty, so it leads from the
+pronoun slot as before. The doc comment now says so, and says why a coordination differs: it is
+never a clitic (A53), so a group holding a pronoun renders in the noun slot and leads as a group of
+nouns does. The one predicate serves the declarative, the question, the `wenn` clause, the command,
+the instruction and the infinitive, so every **Want** row follows. No passing test moved.
+
+- **Engine changed:** [`renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts)
+  (`objectLeadsNicht` and its doc comment only).
+- **Tests:** [`negation.test.ts`](../../../packages/engine/test/negation.test.ts) → *known bugs:
+  German "nicht" and an adverb in front of a coordinated pronoun*. The pinning `test.fails` is now a
+  passing `test` with its assertions unchanged. The block comment's sentences about
+  `objectLeadsNicht` are now in the past tense. New cases in the same block:
+  - the question, the `wenn` clause, the instruction, the infinitive, the resultative, the future,
+    an `or` group, two pronouns and a pronoun beside a `that` noun, all leading;
+  - a regression for a pronoun beside an indefinite conjunct (not known, so the group stays behind),
+    the passive and the prospective, none of which moves.
+
+  Colocated: a new case in
+  [`renderClause.test.ts`](../../../packages/engine/src/languages/de/renderClause.test.ts)
+  (*der Kater isst ihn und die Maus nicht schnell*).

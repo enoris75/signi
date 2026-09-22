@@ -1409,9 +1409,9 @@ describe('known bugs: German "kein" inside the prospective', () => {
 });
 
 // A212. A191's known object leads "nicht" and the adverb, and a coordination of known conjuncts moves
-// whole. A pronoun conjunct does not count as known: `objectLeadsNicht` leaves out every conjunct with
-// a person, because a lone pronoun already leads from the pronoun slot. A pronoun inside a group
-// renders in the noun slot (A53), so the whole group stays behind: "frisst nicht schnell ihn und den
+// whole. A pronoun conjunct did not count as known: `objectLeadsNicht` left out every conjunct with a
+// person, because a lone pronoun already leads from the pronoun slot. A pronoun inside a group
+// renders in the noun slot (A53), so the whole group stayed behind: "frisst nicht schnell ihn und den
 // Hund". Found by the random phrase "if the old light did not describe me or that big man with these
 // wild buildings well, …" (seed 583438): "wenn das alte Licht nicht gut mich oder jenen großen Mann …".
 describe('known bugs: German "nicht" and an adverb in front of a coordinated pronoun', () => {
@@ -1439,7 +1439,7 @@ describe('known bugs: German "nicht" and an adverb in front of a coordinated pro
     },
   };
 
-  test.fails('a group holding a pronoun leads "nicht" and the adverb, as a group of known nouns does', () => {
+  test('a group holding a pronoun leads "nicht" and the adverb, as a group of known nouns does', () => {
     expect(say(eatNot(and(him, np('DOG'))), 'de')).toBe('der Kater frisst ihn und den Hund nicht schnell.');
     expect(say(eatNot(and(np('DOG'), him)), 'de')).toBe('der Kater frisst den Hund und ihn nicht schnell.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: and(him, np('FIRST_PERSON')), verbPhrase: { negative: true, modifier: 'ALWAYS' } }), 'de'))
@@ -1450,6 +1450,30 @@ describe('known bugs: German "nicht" and an adverb in front of a coordinated pro
     // The random phrase's "wenn" clause.
     expect(say(phrase583438, 'de'))
       .toContain('wenn das alte Licht mich oder jenen großen Mann nicht gut mit diesen wilden Gebäuden beschreiben würde, ');
+  });
+
+  test('the question, the "wenn" clause, the instruction, the infinitive, other tenses, "or" and two pronouns lead too', () => {
+    expect(say({ ...eatNot(and(him, np('DOG'))), interrogative: true }, 'de')).toBe('frisst der Kater ihn und den Hund nicht schnell?');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: eatNot(and(him, np('DOG'))) }, 'de'))
+      .toBe('wenn der Kater ihn und den Hund nicht schnell fressen würde, würde der Hund laufen.');
+    expect(say({ ...eatNot(and(him, np('DOG'))), subject: np('SECOND_PERSON'), imperative: true, imperativeRegister: 'instruction' }, 'de'))
+      .toBe('ihn und den Hund nicht schnell essen.');
+    expect(say({
+      ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: and(him, np('FOOD')), verbPhrase: { negative: true, modifier: 'ALWAYS' } }), infinitive: true,
+    }, 'de')).toBe('ihn und das Essen nicht immer essen.');
+    expect(say(eatNot(and(him, np('DOG')), { aspect: 'resultative' }), 'de')).toBe('der Kater hat ihn und den Hund nicht schnell gefressen.');
+    expect(say(eatNot(and(him, np('DOG')), { tense: 'future' }), 'de')).toBe('der Kater wird ihn und den Hund nicht schnell fressen.');
+    expect(say(eatNot({ conjuncts: [him, np('DOG')], conjunction: 'or' }), 'de')).toBe('der Kater frisst ihn oder den Hund nicht schnell.');
+    expect(say(eatNot(and(him, np('THIRD_PERSON', { gender: 'fem' }))), 'de')).toBe('der Kater frisst ihn und sie nicht schnell.');
+    expect(say(eatNot(and(him, np('DOG', { definiteness: 'that' }))), 'de')).toBe('der Kater frisst ihn und jenen Hund nicht schnell.');
+  });
+
+  // An indefinite conjunct is not known either (A191), the passive's subject is no object, and the
+  // prospective's "nicht" scopes over "im Begriff" (A146): none of the three moves.
+  test('regression: an indefinite conjunct, the passive and the prospective keep their order', () => {
+    expect(say(eatNot(and(him, np('DOG', { definiteness: 'indefinite' }))), 'de')).toBe('der Kater frisst nicht schnell ihn und einen Hund.');
+    expect(say(eatNot(and(him, np('DOG')), { voice: 'passive' }), 'de')).toBe('er und der Hund werden nicht schnell vom Kater gefressen.');
+    expect(say(eatNot(and(him, np('DOG')), { aspect: 'prospective' }), 'de')).toBe('der Kater ist nicht im Begriff, schnell ihn und den Hund zu fressen.');
   });
 
   test('regression: a lone pronoun, a group of nouns, a quantified conjunct and the relative clause keep their order', () => {

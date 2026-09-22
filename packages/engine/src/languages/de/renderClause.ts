@@ -48,11 +48,13 @@ const KNOWN_OBJECT_DETERMINERS = new Set(['definite', 'this', 'that']);
  * behind it: "frisst die Maus nicht schnell", not "frisst nicht schnell die Maus", which reads as a
  * contrast ("not the mouse, but …").
  *
- * It applies only when "nicht" actually holds the adverb slot (`nichtBeforeObject`), and only to a
- * noun object that renders in the Mittelfeld's noun slot — a pronoun already leads from the pronoun
+ * It applies only when "nicht" actually holds the adverb slot (`nichtBeforeObject`), and only to an
+ * object that renders in the Mittelfeld's noun slot — a lone pronoun already leads from the pronoun
  * slot, a prepositional object (A139) stands with the complements, and a passive's by-phrase, which
  * borrows the noun slot, is not an object and stays where it is. Every conjunct must be known: a
- * group mixing a definite and a quantified conjunct keeps the whole object behind "nicht".
+ * group mixing a definite and a quantified conjunct keeps the whole object behind "nicht". A pronoun
+ * conjunct is known: a coordination is never a clitic (A53), so a group holding a pronoun renders in
+ * the noun slot and leads as a group of nouns does — "frisst ihn und den Hund nicht schnell" (A212).
  *
  * Kept as one predicate because the three middle fields below — the declarative (shared by the
  * question and the "wenn" protasis), the command/instruction and the infinitive — each splice their
@@ -61,7 +63,7 @@ const KNOWN_OBJECT_DETERMINERS = new Set(['definite', 'this', 'that']);
 function objectLeadsNicht(nichtBeforeObject: string, objectNoun: string, directObject?: ResolvedNounElement): boolean {
   if (!nichtBeforeObject || !objectNoun || !directObject) return false;
   return directObject.conjuncts.every((np) =>
-    !np.head.forms['person'] && KNOWN_OBJECT_DETERMINERS.has(np.head.forms['definiteness'] ?? 'definite'));
+    !!np.head.forms['person'] || KNOWN_OBJECT_DETERMINERS.has(np.head.forms['definiteness'] ?? 'definite'));
 }
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
