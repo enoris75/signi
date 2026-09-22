@@ -60,12 +60,23 @@ describe('lookupLexicalEntry', () => {
     ['PERSON', 'en', { human: '1', animate: '1' }],
     ['AFRICA', 'fr', { proper: '1', uncountable: '1', gender: 'fem', isA: 'CONTINENT' }],
     ['SPEED', 'en', { mannerRelation: 'measure' }],
+    ['TIME', 'it', { mannerRelation: 'measure', temporal: '1' }],
     ['SIZE', 'en', { dimensionRelation: 'extent' }],
     ['WOLF', 'it', { alarm: '1', animate: '1', animal: '1' }],
     // `animal` is walked up the whole chain, so the genus itself carries it and a person never does.
     ['ANIMAL', 'de', { animal: '1', animate: '1' }],
   ])('carries %s\'s concept-level noun flags in %s', (id, language, flags) => {
     expect(lookupLexicalEntry(id, language)!.forms).toMatchObject(flags);
+  });
+
+  // A235: a point in time is the concept's, not a German word's, so every lexeme of TIME carries it —
+  // the translator reads it in any language to keep the article of "at the other time" — and a rate
+  // like SPEED does not.
+  test('marks a noun naming a point in time temporal in every language, and no rate', () => {
+    for (const language of ['en', 'it', 'fr', 'de', 'es', 'pt', 'ja']) {
+      expect(lookupLexicalEntry('TIME', language)!.forms).toMatchObject({ mannerRelation: 'measure', temporal: '1' });
+    }
+    expect(lookupLexicalEntry('SPEED', 'en')!.forms).not.toHaveProperty('temporal');
   });
 
   // A130 / A132: a state verb carries its concept's flag; an event verb does not.
@@ -99,7 +110,7 @@ describe('lookupLexicalEntry', () => {
 
   test('keeps flags a noun does not have out of its forms', () => {
     const forms = lookupLexicalEntry('CAT', 'en')!.forms;
-    for (const key of ['gender', 'human', 'uncountable', 'proper', 'mannerRelation', 'dimensionRelation', 'alarm']) {
+    for (const key of ['gender', 'human', 'uncountable', 'proper', 'mannerRelation', 'dimensionRelation', 'temporal', 'alarm']) {
       expect(forms).not.toHaveProperty(key);
     }
     // A person is not an animal, however far up the chain: PERSON has no hypernym above it.

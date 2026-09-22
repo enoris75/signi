@@ -16,9 +16,10 @@ import { nichtSlots } from './nichtSlots.js';
  * `negationSources`) may surface and the rest give way. Which one carries:
  *
  * - a negator standing **ahead** of the postverbal phrases carries the clause — a `no` SUBJECT
- *   ("kein Kater"), or a negative adverb ("nie") in the Mittelfeld — and the phrases behind it fall
- *   to the plain indefinite: "kein Kater frisst eine Maus", "isst nie eine Maus", "läuft nie in
- *   einem Haus" (A160, A158);
+ *   ("kein Kater"), a negative adverb ("nie") in the Mittelfeld, or the prospective's "nicht" ahead
+ *   of "im Begriff" — and the phrases behind it fall to the plain indefinite: "kein Kater frisst eine
+ *   Maus", "isst nie eine Maus", "läuft nie in einem Haus" (A160, A158), "ist nicht im Begriff, eine
+ *   Maus zu fressen" (A230);
  * - failing that, a `kein` phrase carries it and the verb's own "nicht" goes, because "kein" is
  *   already "nicht + ein": "isst keine Maus", "läuft in keinem Haus", never "… keine Maus nicht";
  * - with both an object and a complement negative, the object is the leftmost and keeps its "kein",
@@ -54,13 +55,22 @@ export function finiteNegation(
   // deliberately the same sentence; only denying two words at once adds a word.
   const governedNicht = verbPhrase.modals.length > 0 && verbPhrase.governedNegative === true ? 1 : 0;
   const innerNicht = verbPhrase.modals.filter((m, i) => i > 0 && m.negative === true).length;
+  const denials = (neg.verb ? 1 : 0) + governedNicht + innerNicht;
+  const prospective = verbPhrase.aspect === 'prospective';
+  // A230: the prospective's "nicht" stands ahead of "im Begriff" (A19), and a `no` phrase stands
+  // inside the zu-group, where its "kein" would negate the infinitive alone ("ist im Begriff, keine
+  // Maus zu fressen", about to eat no mouse). So there the verb group's "nicht" carries the clause
+  // over a `no` object or complement, and the `no` phrase gives way as it does behind "nie". Any of
+  // the group's denials does it, wherever it sits: one "nicht" ahead of "im Begriff" reads under
+  // either scope, which is why A03 spells the governed one there too.
+  const prospectiveNicht = denials > 0 && !neg.adverb && !neg.subject && prospective;
   // German has no concord, so every one of them gives way where the finite one does: a "kein" or a
   // "nie" standing ahead carries the clause alone ("der Kater will kein Essen fressen").
-  const carries = !neg.adverb && !neg.subject && !neg.object && !neg.complement;
-  const count = carries ? (neg.verb ? 1 : 0) + governedNicht + innerNicht : 0;
+  const carries = !neg.adverb && !neg.subject && (prospectiveNicht || (!neg.object && !neg.complement));
+  const count = carries ? denials : 0;
   const negate = count === 1;
   // What already negates ahead of the postverbal phrases, and so takes their "kein" away.
-  const negatedAhead = neg.subject || neg.adverb;
+  const negatedAhead = neg.subject || neg.adverb || prospectiveNicht;
   const plainObject = neg.object && negatedAhead;
   const plainComplement = neg.complement && (negatedAhead || neg.object);
   // A182, the reverse of the downgrade above: the verb's own "nicht" is spelled into an indefinite
@@ -75,14 +85,14 @@ export function finiteNegation(
   // Only ever the clause's one negation: "kein" is "nicht + ein", so it can stand in for a single
   // "nicht" and never for two ("will kein Essen fressen" says one denial, whichever word carries it).
   // With two, the nominal keeps its determiner and both "nicht" stay in the Mittelfeld.
-  const absorbs = negate && verbPhrase.aspect !== 'prospective';
+  const absorbs = negate && !prospective;
   const keinObject = absorbs && takesKein(directObject);
   const keinPredicative = absorbs && !keinObject && takesKein(complements?.['predicative']?.phrase);
   // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
   const adverb = !!(modalAdverbs(verbPhrase.modals) || verbPhrase.modifier?.forms['base']);
   return {
     nicht: nichtSlots(keinObject || keinPredicative ? 0 : count,
-      { prospective: verbPhrase.aspect === 'prospective', adverb, complements: leadsComplements }),
+      { prospective, adverb, complements: leadsComplements }),
     // Per conjunct, as the complements are: a group mixing determiners keeps the ones that are not
     // negative ("die Maus und eine Katze"). A "kein" object is one conjunct by construction.
     directObject: directObject && (plainObject || keinObject)

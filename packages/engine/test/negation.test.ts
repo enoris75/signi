@@ -1501,7 +1501,7 @@ describe('known bugs: a `no` object keeps its "kein" inside a negated German pro
     say(clause(np('CAT'), verb, { ...extra, verbPhrase: { aspect: 'prospective', negative: true, ...verbPhrase } }), 'de');
   const noMouse = { directObject: np('MOUSE', { definiteness: 'no' }) };
 
-  test.fails('the verb\'s "nicht" carries ahead of "im Begriff", and the `no` phrase falls to the indefinite', () => {
+  test('the verb\'s "nicht" carries ahead of "im Begriff", and the `no` phrase falls to the indefinite', () => {
     expect(notAbout('EAT', noMouse)).toBe('der Kater ist nicht im Begriff, eine Maus zu fressen.');
     expect(notAbout('EAT', { directObject: np('MOUSE', { definiteness: 'no', number: 'plural' }) }))
       .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
@@ -1514,6 +1514,69 @@ describe('known bugs: a `no` object keeps its "kein" inside a negated German pro
     expect(say(clause(np('DOG', {
       relative: { headRole: 'subject', verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, ...noMouse },
     }), 'RUN'), 'de')).toBe('der Hund, der nicht im Begriff ist, eine Maus zu fressen, läuft.');
+  });
+
+  // A03 spells a modal clause's denial on the word it denies, so the governed verb's own flag reaches
+  // here too. The aspect periphrasis is part of the group that flag denies, not something inside it —
+  // English builds "must not be about to eat" the same way — so every denial of the group carries
+  // ahead of "im Begriff", and the `no` object falls to the indefinite whichever word holds it.
+  test('a denial anywhere in the verb group carries ahead of "im Begriff", not inside the zu-group', () => {
+    const about = (vp: Partial<VerbPhrase>, extra: Parameters<typeof clause>[2] = noMouse) =>
+      say(clause(np('CAT'), 'EAT', { ...extra, verbPhrase: { aspect: 'prospective', ...vp } }), 'de');
+    // The modal's own denial, and the governed verb's, place the same "nicht" in the same slot.
+    expect(about({ modals: [{ verb: 'MUST', negative: true }] }))
+      .toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(about({ negative: true, modals: ['MUST'] }))
+      .toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    // Which is what the definite object already renders, with no `no` to collapse: the `no` case
+    // now agrees with it instead of hiding the denial inside the zu-group.
+    expect(about({ modals: [{ verb: 'MUST', negative: true }] }, { directObject: np('MOUSE') }))
+      .toBe('der Kater muss nicht im Begriff sein, die Maus zu fressen.');
+    // Two denied words are two "nicht" (A03), both still ahead of "im Begriff": "kein" is
+    // "nicht + ein" and can stand in for one denial only, so the object stays the plain indefinite.
+    expect(about({ negative: true, modals: [{ verb: 'MUST', negative: true }] }))
+      .toBe('der Kater muss nicht nicht im Begriff sein, eine Maus zu fressen.');
+  });
+
+  test('the question, the "wenn" clause, the future, an adverb, a mass noun and a relative on another slot carry it too', () => {
+    expect(say({ ...clause(np('CAT'), 'EAT', { ...noMouse, verbPhrase: { aspect: 'prospective', negative: true } }), interrogative: true }, 'de'))
+      .toBe('ist der Kater nicht im Begriff, eine Maus zu fressen?');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { ...noMouse, verbPhrase: { aspect: 'prospective', negative: true } }) }, 'de'))
+      .toBe('wenn der Kater nicht im Begriff sein würde, eine Maus zu fressen, würde der Hund laufen.');
+    expect(notAbout('EAT', noMouse, { tense: 'future' })).toBe('der Kater wird nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', noMouse, { modifier: 'FAST' })).toBe('der Kater ist nicht im Begriff, schnell eine Maus zu fressen.');
+    expect(notAbout('DRINK', { directObject: np('WATER', { definiteness: 'no' }) })).toBe('der Kater ist nicht im Begriff, Wasser zu trinken.');
+    expect(notAbout('BECOME', { complements: { predicative: { phrase: np('DOG', { definiteness: 'no', number: 'plural' }) } } }))
+      .toBe('der Kater ist nicht im Begriff, Hunde zu werden.');
+    expect(say(clause(np('CAT'), 'SEE', {
+      directObject: np('HOUSE', { relative: { headRole: 'locative', subject: np('MOUSE'), verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, ...noMouse } }),
+    }), 'de')).toBe('der Kater sieht das Haus, in dem die Maus nicht im Begriff ist, eine Maus zu fressen.');
+    expect(say(clause(np('CAT'), 'SEE', {
+      directObject: np('DOG', { relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } } }),
+    }), 'de')).toBe('der Kater sieht den Hund, der nicht im Begriff ist, in einem Haus zu fressen.');
+  });
+
+  // Every `no` phrase falls, per conjunct, as it does behind "nie" (A158): the object and the
+  // complement together, and a coordination keeps the conjunct that is not negative.
+  test('a `no` object beside a `no` complement, and a coordination, fall per conjunct', () => {
+    expect(notAbout('EAT', { ...noMouse, complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
+      .toBe('der Kater ist nicht im Begriff, eine Maus in einem Haus zu fressen.');
+    const and = (...conjuncts: NounPhrase[]): NounElement => ({ conjuncts, conjunction: 'and' });
+    expect(notAbout('EAT', { directObject: and(np('MOUSE', { definiteness: 'no' }), np('DOG', { definiteness: 'no' })) }))
+      .toBe('der Kater ist nicht im Begriff, eine Maus und einen Hund zu fressen.');
+    expect(notAbout('EAT', { directObject: and(np('MOUSE', { definiteness: 'no' }), np('DOG')) }))
+      .toBe('der Kater ist nicht im Begriff, eine Maus und den Hund zu fressen.');
+  });
+
+  // A `no` subject and NEVER stand ahead of the verb's "nicht" and carry the clause themselves
+  // (A160, A158); the positive prospective has no "nicht", so its object carries (A209).
+  test('regression: a `no` subject, NEVER beside the verb\'s negation, and the positive prospective with a `no` complement', () => {
+    expect(say(clause(np('CAT', { definiteness: 'no' }), 'EAT', { ...noMouse, verbPhrase: { aspect: 'prospective', negative: true } }), 'de'))
+      .toBe('kein Kater ist im Begriff, eine Maus zu fressen.');
+    expect(notAbout('EAT', noMouse, { modifier: 'NEVER' })).toBe('der Kater ist nie im Begriff, eine Maus zu fressen.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      ...noMouse, complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } }, verbPhrase: { aspect: 'prospective' },
+    }), 'de')).toBe('der Kater ist im Begriff, keine Maus in einem Haus zu fressen.');
   });
 
   test('regression: the positive prospective, NEVER, the other aspects and the other languages', () => {

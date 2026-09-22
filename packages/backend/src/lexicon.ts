@@ -68,8 +68,8 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number; manner_relation: string | null; dimension_relation: string | null; alarm: number }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper, sc.manner_relation, sc.dimension_relation, sc.alarm FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number; manner_relation: string | null; dimension_relation: string | null; temporal: number; alarm: number }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper, sc.manner_relation, sc.dimension_relation, sc.temporal, sc.alarm FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
@@ -95,6 +95,9 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   // How this dimension noun enters an adjective-definition gloss (extent / quality / measure); the
   // engine maps it to the adposition ("of great size" vs "at a high temperature"). Concept-level.
   if (lexeme.dimension_relation) forms['dimensionRelation'] = lexeme.dimension_relation;
+  // A point in time, an occasion (TIME), not a rate: under an adjective a measure adverbial keeps its
+  // article, "at the other time" (A235), and German says it with "zu" (A60). Concept-level.
+  if (lexeme.temporal) forms['temporal'] = '1';
   // A danger one cries out a warning of (wolf, fire): a verb that raises an alarm (`alarm_cry`, above)
   // takes it as the cry's topic, "gridare al lupo", not as a plain object (A124). Concept-level.
   if (lexeme.alarm) forms['alarm'] = '1';

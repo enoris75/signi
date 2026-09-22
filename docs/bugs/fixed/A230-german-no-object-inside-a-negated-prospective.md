@@ -56,3 +56,34 @@ past, the modal and the relative clause all follow.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: a `no` object keeps its "kein" inside a negated German prospective (A230)* (1 `test.fails`, plus a regression test for the positive prospective, NEVER, the simple aspect and the other languages) |
+
+## Resolved
+
+**2026-09-22.** Fixed as the **Shape of the fix** describes, in
+[`finiteNegation`](../../../packages/engine/src/languages/de/finiteNegation.ts) alone. A negated
+prospective now carries the verb's "nicht" (`prospectiveNicht`) even beside a `no` object or
+complement, and that "nicht" counts among the negators standing ahead of the postverbal phrases
+(`negatedAhead`), so the `no` phrases fall to the plain indefinite per conjunct, as they do behind
+"nie" or a `no` subject. [`nichtSlots`](../../../packages/engine/src/languages/de/nichtSlots.ts)
+already places the prospective's "nicht" ahead of `im Begriff` (A19), so the declarative, the past,
+the modal, the question, the `wenn` clause and the relative clause all follow. A `no` subject and
+NEVER still outrank the verb, and the positive prospective keeps its own "kein" (A209). No passing
+test moved.
+
+- **Engine changed:** [`finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts)
+  (`prospectiveNicht` and its comment, `negate` and `negatedAhead` extended, the prospective test
+  hoisted into one `prospective` constant, and a line in the function's doc comment).
+- **Tests:** [`negation.test.ts`](../../../packages/engine/test/negation.test.ts) → *known bugs: a
+  `no` object keeps its "kein" inside a negated German prospective (A230)*. The pinning `test.fails`
+  is now a passing `test` with its assertions unchanged; it already covered every **Want** row. New
+  cases in the same block cover the question, the `wenn` clause, the future, an adverb inside the
+  zu-group, a `no` mass noun and a `no` plural predicate nominal, a relative clause on the locative
+  slot and a subject relative with a `no` complement, a `no` object beside a `no` complement, and
+  coordinations (all-`no` and mixed); a second regression case holds a `no` subject, NEVER beside the
+  verb's negation, and the positive prospective's `no` object beside a `no` complement.
+
+  Colocated: a new case in
+  [`finiteNegation.test.ts`](../../../packages/engine/src/languages/de/finiteNegation.test.ts) (under
+  a negated prospective a `no` object, a `no` locative and a `no` predicate nominal fall to the
+  indefinite and the "nicht" takes the `beforeAspect` slot; the positive prospective's `no` object is
+  untouched).

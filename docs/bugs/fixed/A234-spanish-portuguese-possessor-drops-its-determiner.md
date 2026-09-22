@@ -46,3 +46,39 @@ Portuguese "de" fused with the determiner (`contractDet`) + the noun + the stres
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: a Spanish or Portuguese possessor drops its own determiner beside a possessive (A234)* (1 `test.fails`, plus a regression test for the object, a definite possessor and the other five) |
+
+## Resolved
+
+**2026-09-22.** Took the trial's shape. In both `possessorText`s, a possessor whose own possessor is
+pronominal and whose determiner is one A187 keeps (`KEPT_BESIDE_POSSESSIVE`) is built as the object is:
+
+- **Spanish** ([`es/possessorText.ts`](../../../packages/engine/src/languages/es/possessorText.ts)) writes
+  "de" + the object's own builder, [`npText`](../../../packages/engine/src/languages/es/npText.ts)
+  (`nounPhrase(forms, esAdj(poss), esPossessiveWord(poss))` through `withRelative`), which already
+  writes the stressed possessive after the noun: *de este libro mío*, *de ningún libro suyo*. "de"
+  fuses with none of these determiners.
+- **Portuguese** ([`pt/possessorText.ts`](../../../packages/engine/src/languages/pt/possessorText.ts))
+  gives the possessor's forms their own determiner back, fuses "de" with it through `contractDet`, and
+  puts `ptPossessiveWord(poss, false)` after the noun: *deste livro meu*, *de nenhum livro seu*. That
+  is the shape `pt/complementsPhrase` gives a complement's detached possessive (A202).
+
+Any other determiner (definite, indefinite, bare) keeps the prenominal possessive as before (*de mi
+libro*, *do meu livro*). A216's negation needed nothing: `possessorIsNegative` already read the `no`,
+and the clause now says what it negates (*el gato no ve la casa de ningún libro suyo*).
+
+- **Tests:** [`packages/engine/test/possession.test.ts`](../../../packages/engine/test/possession.test.ts)
+  → *known bugs: a Spanish or Portuguese possessor drops its own determiner beside a possessive
+  (A234)*. The pinning `test.fails` is now a passing `test`, with its assertions unchanged, and the
+  regression test is unchanged. New cases cover `that`, `many` and `few`; feminine singular and plural
+  possessors; an adjective, a relative clause, a possessor's possessor, a direction complement and the
+  subject; the `no` possessor under a feminine head, a negated verb, NEVER, the command, the infinitive
+  and in the subject (A216); and a regression guard for an indefinite and a bare possessor and the
+  other five languages' "no book of his".
+- **Unit tests:** [`es/possessorText.test.ts`](../../../packages/engine/src/languages/es/possessorText.test.ts)
+  and [`pt/possessorText.test.ts`](../../../packages/engine/src/languages/pt/possessorText.test.ts)
+  each add a case for a demonstrative and a quantifier kept beside the possessive, and an indefinite
+  that still gives way to it.
+
+`all` is not in `KEPT_BESIDE_POSSESSIVE` (it stands ahead of the unstressed possessive rather than
+moving it behind the noun), and a possessor still drops it: *de mis libros* for *de todos mis
+libros*. Filed as [A237](../A-must-fix/A237-spanish-portuguese-possessor-drops-all.md).

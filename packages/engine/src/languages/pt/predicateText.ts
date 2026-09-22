@@ -28,6 +28,7 @@ import { npText } from './npText.js';
 import { prepObjectText } from './prepObjectText.js';
 import { ptCliticize } from './ptCliticize.js';
 import { ptEnclitic } from './ptEnclitic.js';
+import { ptNegateInfinitive } from './ptNegateInfinitive.js';
 import { reflexiveClitic } from './reflexiveClitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
@@ -242,7 +243,8 @@ export function predicateText(
     // infinitive in Portuguese ("Carregar um período", "Não correr"), not the imperative.
     // A pronominal command is derived from the plain verb and takes the addressee's reflexive — "se"
     // for você / vocês, "nos" for nós — after an affirmative command ("torne-se", "tornemo-nos", the
-    // -s dropping) and before a negative one ("não se torne"). The instruction keeps "tornar-se".
+    // -s dropping) and before a negative one ("não se torne"). The instruction keeps "tornar-se", and
+    // under "não" draws its "se" ahead as the infinitive below does: "não se tornar" (A233).
     const impPN = moodPN(subjectForms);
     const reflexive = register !== 'instruction' && (copulaVerb.forms['base'] ?? '').endsWith('-se')
       ? (impPN === '1pl' ? 'nos' : 'se') : '';
@@ -253,7 +255,7 @@ export function predicateText(
       ? (impNeg ? `não ${reflexive} ${impForm}` : `${reflexive === 'nos' ? impForm.replace(/s$/, '') : impForm}-${reflexive}`)
       : !impNeg && thirdPersonClitic
         ? ptEnclitic(impForm, thirdPersonClitic)
-        : ptCliticize(objectClitic, impNeg ? `não ${impForm}` : impForm);
+        : ptCliticize(objectClitic, impNeg ? ptNegateInfinitive(impForm) : impForm);
     return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -261,14 +263,14 @@ export function predicateText(
   // Infinitive / citation phrase: the bare infinitive ("consumir o alimento"), the same surface
   // Portuguese already gives the imperative `instruction` register above. Negation prefixes "não"
   // ("não consumir"); a 3rd-person object pronoun attaches after it ("consumi-lo"), and after "não"
-  // it leads ("não o consumir").
+  // it leads ("não o consumir"), as a reflexive verb's own "se" does ("não se mover", A233).
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the particípio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     const infVerb = !infNeg && thirdPersonClitic
       ? ptEnclitic(inf, thirdPersonClitic)
-      : ptCliticize(objectClitic, infNeg ? `não ${inf}` : inf);
+      : ptCliticize(objectClitic, infNeg ? ptNegateInfinitive(inf) : inf);
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

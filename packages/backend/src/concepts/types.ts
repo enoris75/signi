@@ -25,6 +25,7 @@ export interface ConceptSeed {
   alarmCry?: boolean; // verb whose object, when an `alarm` noun, is the shout itself ("cry wolf"): no determiner, and a / à + the article in it/fr (A124, A163)
   transient?: boolean; // adjective ascribing a transient state (tired, saved), not an inherent property (big) — es/pt predicate it with `estar`, not `ser` (A47); default inherent
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative
+  temporal?: boolean; // noun naming a point in time, an occasion (TIME), not a rate: a measure adverbial under an adjective keeps its article, "at the other time" not "at high speed" (A235); German says it with "zu", "zu allen Zeiten" (A60)
   dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)

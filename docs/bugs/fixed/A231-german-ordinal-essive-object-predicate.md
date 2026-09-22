@@ -42,3 +42,31 @@ and it is not pinned.
 | | |
 |---|---|
 | **Test** | `complements/objectPredicative.test.ts` → *known bugs: a German ordinal as an essive object predicate is left bare (A231)* (1 `test.fails`, plus a regression test for the subject predicate and the other six) |
+
+## Resolved
+
+**2026-09-22**, in the shape above, with A225's machinery generalised rather than copied.
+
+- [`dePredOrdinal`](../../../packages/engine/src/languages/de/dePredOrdinal.ts) takes a case
+  (default the nominative, so A225's subject predicate is unchanged) and declines the ordinal weak
+  after the definite article with `declineAdj`, which gives the masculine accusative its *-n* (*den
+  Ersten*) beside the plural's (*die Ersten*).
+- [`complementsParts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  takes what an object predicate is said of and its case (`ObjectPredicateHost` in
+  [`de.types.ts`](../../../packages/engine/src/languages/de/de.types.ts)), and renders an essive
+  ordinal head with `dePredOrdinal` in it; a plain adjective stays on `dePredAdj`.
+  [`complementsWithNicht`](../../../packages/engine/src/languages/de/complementsWithNicht.ts) passes it
+  through. [`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) hands it the
+  direct object's agreement in the accusative in its three branches, and
+  [`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts) the same, with
+  the head's own forms when the head is the gapped object.
+- **The passive.** The patient is the subject there, and "als" shares its nominative, so both
+  builders hand a passive clause's subject in the nominative: *der Hund wird vom Kater als der Erste
+  gesehen*, where the accusative object path alone would have fallen back on the neuter *das Erste*.
+
+The factitive with no link (*macht die Option erste*) is left as it was and not pinned, as ruled: it
+wants MAKE's "zu". No passing test moved.
+
+| | |
+|---|---|
+| **Tests** | `complements/objectPredicative.test.ts` → *known bugs: a German ordinal as an essive object predicate is left bare (A231)*, the `test.fails` now passing, plus two added cases: a masculine object (*sieht den Hund als den Ersten*), a plural of either gender, a coordinated object, a pronoun (*sieht ihn als den Ersten*), the past and the negative; and the command, a relative gapped on the object and one with its own object, and the passive in a clause and in a relative (*als der Erste gesehen*, *als die Erste gesehen*). The regression test adds a plain adjective after "als". Colocated: `de/dePredOrdinal.test.ts` (the accusative), `de/complementsPhrase/complementsPhrase.test.ts` → *objectPredicative* (the host's gender, number and case; a plain adjective; the factitive left as it was), `de/renderClause.test.ts` (the object, and a passive's subject), `de/subordinateClause.test.ts` (the gapped head, and the clause's own object) |

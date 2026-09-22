@@ -1,6 +1,7 @@
 import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import { complementsParts } from './complementsPhrase/index.js';
+import type { ObjectPredicateHost } from './de.types.js';
 
 /**
  * The Mittelfeld's complements with the clause's "nicht" in its place among them.
@@ -14,7 +15,8 @@ import { complementsParts } from './complementsPhrase/index.js';
  *
  * `lead` is whatever the clause puts before its complements in that slot (the elided place's "da", a
  * prepositional object); it goes with the adjuncts. `agreement` is what the predicate is said of,
- * whose gender and number a predicate ordinal takes (see `complementsParts`).
+ * whose gender and number a predicate ordinal takes, and `object` what an object predicate is said
+ * of, and its case (see `complementsParts`).
  */
 export function complementsWithNicht(
   lead: string[],
@@ -22,8 +24,9 @@ export function complementsWithNicht(
   verb: ConceptForms['forms'],
   nicht: string,
   agreement: Record<string, string> = {},
+  object?: ObjectPredicateHost,
 ): string {
-  const { adjuncts, predicate } = complementsParts(complements, verb, agreement);
+  const { adjuncts, predicate } = complementsParts(complements, verb, agreement, object);
   // German spells a clause's "nicht" and a denied cause's own in the same slot (see
   // `Complement.negative`). With a predicate they stay apart, one at each end of the adjuncts, and
   // the sentence says both: "ist nicht wegen des Hundes nicht müde". With no predicate to anchor the

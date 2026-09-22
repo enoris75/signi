@@ -103,8 +103,8 @@ describe('schema', () => {
   test('defaults a concept to countable and to every other flag off', () => {
     insertConcept('CAT');
     expect(
-      db.prepare('SELECT animate, human, countable, modal, proper, transient, alarm, alarm_cry FROM semantic_concepts').get(),
-    ).toEqual({ animate: 0, human: 0, countable: 1, modal: 0, proper: 0, transient: 0, alarm: 0, alarm_cry: 0 });
+      db.prepare('SELECT animate, human, countable, modal, proper, temporal, transient, alarm, alarm_cry FROM semantic_concepts').get(),
+    ).toEqual({ animate: 0, human: 0, countable: 1, modal: 0, proper: 0, temporal: 0, transient: 0, alarm: 0, alarm_cry: 0 });
   });
 
   test('rejects a role outside the five grammatical roles', () => {
@@ -222,12 +222,12 @@ describe('migrations', () => {
     expect(columns(db, 'semantic_concepts')).toEqual([
       'id', 'role', 'description', 'emoji', 'transitivity',
       'complements', 'animate', 'human', 'synonym', 'countable', 'modal', 'proper',
-      'manner_relation', 'dimension_relation', 'transient', 'alarm', 'alarm_cry', 'stative', 'sense_of',
+      'manner_relation', 'dimension_relation', 'temporal', 'transient', 'alarm', 'alarm_cry', 'stative', 'sense_of',
     ]);
     expect(db.prepare("SELECT * FROM semantic_concepts WHERE id = 'WATER'").get()).toEqual({
       id: 'WATER', role: 'noun', description: 'a clear liquid', emoji: null, transitivity: null,
       complements: null, animate: 0, human: 0, synonym: null, countable: 1, modal: 0, proper: 0,
-      manner_relation: null, dimension_relation: null, transient: 0, alarm: 0, alarm_cry: 0, stative: 0, sense_of: null,
+      manner_relation: null, dimension_relation: null, temporal: 0, transient: 0, alarm: 0, alarm_cry: 0, stative: 0, sense_of: null,
     });
   });
 
@@ -238,6 +238,7 @@ describe('migrations', () => {
     expect(() => db.prepare("UPDATE semantic_concepts SET manner_relation = 'speed'").run()).toThrow(
       /CHECK constraint failed/,
     );
+    expect(() => db.prepare('UPDATE semantic_concepts SET temporal = 2').run()).toThrow(/CHECK constraint failed/);
   });
 
   test('backfills an existing saved phrase as a whole-workspace phrase', async () => {

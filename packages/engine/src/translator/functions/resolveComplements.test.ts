@@ -74,6 +74,16 @@ describe('resolveComplements', () => {
       expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], possessor: { concept: 'CAT' } })).toEqual(['definite']);
     });
 
+    // A235: a temporal measure names an occasion, not a rate, and keeps the article like any count
+    // noun ("at the other time"); the determiners that already meant what they said still do.
+    test('a temporal measure noun names an occasion, and keeps its article', () => {
+      expect(determiners('manner', { concept: 'TIME', adjectives: ['BIG'] })).toEqual(['definite']);
+      expect(determiners('manner', { concept: 'TIME', adjectives: ['BIG'], definiteness: 'definite', number: 'plural' })).toEqual(['definite']);
+      expect(determiners('manner', { concept: 'TIME', adjectives: ['BIG'], definiteness: 'indefinite' })).toEqual(['indefinite']);
+      const phrase: NounElement = { conjuncts: [{ concept: 'SPEED', adjectives: ['BIG'] }, { concept: 'TIME', adjectives: ['BIG'] }], conjunction: 'or' };
+      expect(determiners('manner', phrase)).toEqual(['bare', 'definite']);
+    });
+
     test('a noun of any other manner relation keeps its article', () => {
       expect(determiners('manner', { concept: 'WAY', adjectives: ['BIG'] })).toEqual(['definite']);
     });

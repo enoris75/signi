@@ -10,6 +10,18 @@ describe('possessorText', () => {
     expect(bookOf(np(NINO, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe(' de mi niño');
   });
 
+  // A234: a demonstrative or a quantifier keeps its slot beside the possessive, which follows the noun
+  // stressed, as in the object (A187).
+  test('a possessor\'s own demonstrative or quantifier stays, and the stressed possessive follows the noun', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    const his = { kind: 'pronominal', person: '3', number: 'singular' } as const;
+    expect(bookOf(np(HOMBRE, { definiteness: 'this' }, { possessor: my }))).toBe(' de este hombre mío');
+    expect(bookOf(np(HOMBRE, { definiteness: 'no' }, { possessor: his }))).toBe(' de ningún hombre suyo');
+    expect(bookOf(np(MUJER, { definiteness: 'some', number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'plural' } })))
+      .toBe(' de algunas mujeres nuestras');
+    expect(bookOf(np(HOMBRE, { definiteness: 'indefinite' }, { possessor: my }))).toBe(' de mi hombre');
+  });
+
   test('is empty without a noun possessor', () => {
     expect(possessorText(np(LIBRO))).toBe('');
     expect(bookOf({ kind: 'pronominal', person: '3', number: 'singular' })).toBe('');

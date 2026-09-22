@@ -44,10 +44,15 @@ export function resolveComplements(
     // builder fixes this slot's determiner, but a gloss or the console can choose any, and every
     // other determiner means what it says: "at another time", "at all other times", "at no other
     // time" (A226).
+    //
+    // Only a rate goes bare. A `temporal` measure (TIME) names a point in time, an occasion, and
+    // one under an adjective is a count noun like any other, so it keeps the definite a rate
+    // drops: "at the other time", beside "at high speed" (A235).
     if (type === 'manner') {
       for (const conjunct of resolvedPhrase.conjuncts) {
         if (
           mannerRelation(conjunct.head.forms) === 'measure' &&
+          conjunct.head.forms['temporal'] !== '1' &&
           conjunct.adjectives.length > 0 &&
           !conjunct.possessor &&
           (conjunct.head.forms['definiteness'] ?? 'definite') === 'definite'

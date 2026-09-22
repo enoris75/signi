@@ -342,6 +342,8 @@ describe('predicateText', () => {
       expect(predicateText(NOS, become())).toBe('tornemo-nos');
       expect(predicateText({ ...VOCE, number: 'plural' }, become({ negative: true }))).toBe('não se tornem');
       expect(predicateText(VOCE, become({ register: 'instruction' }))).toBe('tornar-se');
+      // A233: "não" draws the instruction's "se" ahead of it, as it draws the command's.
+      expect(predicateText(VOCE, become({ register: 'instruction', negative: true }))).toBe('não se tornar');
     });
 
     test('the adverb trails the verb, then the object and complements', () => {
@@ -377,6 +379,14 @@ describe('predicateText', () => {
       expect(predicateText(GATO, citation({ negative: true }))).toBe('não comer');
       expect(predicateText(GATO, citation(), noMouse)).toBe('não comer nenhum rato');
       expect(predicateText(GATO, citation({ modifier: concept(NUNCA) }))).toBe('não comer nunca');
+    });
+
+    // A233: a reflexive infinitive's "-se" goes ahead of the verb after "não", as an object pronoun does.
+    test('"não" draws a reflexive infinitive\'s "se" ahead of it', () => {
+      const become = (extra: Parameters<typeof vp>[1] = {}) => vp(TORNAR_SE, { mood: 'infinitive', ...extra }, 'BECOME');
+      expect(predicateText(GATO, become())).toBe('tornar-se');
+      expect(predicateText(GATO, become({ negative: true }))).toBe('não se tornar');
+      expect(predicateText(GATO, become({ modifier: concept(NUNCA) }))).toBe('não se tornar nunca');
     });
   });
 
