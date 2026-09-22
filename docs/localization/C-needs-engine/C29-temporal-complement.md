@@ -21,7 +21,16 @@ each shows the English literal in its tooltip until this construct lands.)_
 ## Blocked on
 
 **A temporal complement.** `ComplementType` is `locative | direction | source | route | cause |
-instrumental | manner | comitative | terminus | predicative | objectPredicative`. A time adverb's
+instrumental | manner | comitative | terminus | predicative | objectPredicative`.
+
+**Where to start, added 2026-09-22.** A concept can now say it names a time:
+[`ConceptSeed.temporal`](../../../packages/backend/src/concepts/types.ts) ("a noun naming a point in
+time, an occasion, not a rate"), seeded on TIME and read by the measure rule
+[A235](../../bugs/fixed/A235-time-under-an-adjective-goes-bare.md) narrowed, and German already
+turns it into *zu* ("zu allen Zeiten", A60). That flag is the natural hook for this construct: the
+three words waiting here are DAY, TIME and MOMENT phrases, and what each gloss needs is the
+adposition its language puts before a time — en *on*, de *an*, ja に, fr *en ce jour* — which is a
+lexeme-level fact about the head noun, not a new relation on the verb. A time adverb's
 gloss borrows the nearest one, and each gets the adposition wrong somewhere. Probed 2026-09-22,
 engine source at HEAD, DAY and MOMENT seeded in memory:
 
