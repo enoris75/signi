@@ -1,10 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { concept, HITSUYOU_GA_ARU, IKU, KOTO_GA_DEKIRU, TABERU, TAI } from './ja.fixtures.js';
+import { BEKI, concept, HITSUYOU_GA_ARU, IKU, KAMOSHIRENAI, KOTO_GA_DEKIRU, MOTSU, TABERU, TAI } from './ja.fixtures.js';
 import { modalSegs } from './modalSegs.js';
 
 const MUST = concept(HITSUYOU_GA_ARU);
 const CAN = concept(KOTO_GA_DEKIRU);
 const WANT = concept(TAI);
+const SHOULD = concept(BEKI);
+const MIGHT = concept(KAMOSHIRENAI);
 
 const text = (segs: { t: string }[]) => segs.map((s) => s.t).join('');
 
@@ -34,6 +36,35 @@ describe('modalSegs', () => {
     ]);
     expect(text(modalSegs([WANT], concept(IKU), 'present', true))).toBe('行きたくないです');
     expect(text(modalSegs([WANT], concept(TABERU), 'past', false))).toBe('食べたかったです');
+  });
+
+  // B63: 〜べき takes the dictionary form and closes as a predicate noun does.
+  test('a copula-kind modal closes on the copula', () => {
+    expect(text(modalSegs([SHOULD], concept(TABERU), 'present', false))).toBe('食べるべきです');
+    expect(text(modalSegs([SHOULD], concept(TABERU), 'present', true))).toBe('食べるべきではありません');
+    expect(text(modalSegs([SHOULD], concept(TABERU), 'past', false))).toBe('食べるべきでした');
+  });
+
+  // B63: 〜かもしれない is the one modal whose governed element is FINITE — the tense and the polarity
+  // are said on it, and the suffix carries only the politeness.
+  describe('〜かもしれない governs the plain finite form', () => {
+    test('the verb before it carries the tense and the polarity', () => {
+      expect(text(modalSegs([MIGHT], concept(TABERU), 'present', false))).toBe('食べるかもしれません');
+      expect(text(modalSegs([MIGHT], concept(TABERU), 'past', false))).toBe('食べたかもしれません');
+      expect(text(modalSegs([MIGHT], concept(MOTSU), 'present', true))).toBe('持たないかもしれません');
+      expect(text(modalSegs([MIGHT], concept(MOTSU), 'past', true))).toBe('持たなかったかもしれません');
+    });
+
+    test('a relative clause keeps the plain suffix, an "if" clause takes なら', () => {
+      expect(text(modalSegs([MIGHT], concept(TABERU), 'past', false, 0, undefined, 'plain'))).toBe('食べたかもしれない');
+      expect(text(modalSegs([MIGHT], concept(TABERU), 'present', false, 0, undefined, 'tara'))).toBe('食べるかもしれないなら');
+    });
+
+    test('in a chain: the inner modal is the finite element, and governed it is the plain present', () => {
+      expect(text(modalSegs([MIGHT, CAN], concept(TABERU), 'present', true))).toBe('食べることができないかもしれません');
+      expect(text(modalSegs([MIGHT, SHOULD], concept(TABERU), 'present', false))).toBe('食べるべきであるかもしれません');
+      expect(text(modalSegs([MUST, MIGHT], concept(TABERU), 'present', false))).toBe('食べるかもしれない必要があります');
+    });
   });
 
   // A128: the copula's predicate stands in for the verb, in whichever form the innermost modal governs.

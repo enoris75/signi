@@ -20,6 +20,17 @@ describe('modalGroupFr', () => {
     expect(modalGroupFr([modal(POUVOIR)], MANGER, CHAT, 'present', 'neutral', 'subjunctive', '').finite).toBe('pouvait');
   });
 
+  // B63: SHOULD's past is the conditionnel passé, a compound form. Only its auxiliary is finite, so
+  // the caller's "ne … pas" and the modal's own adverb wrap "aurait" and the participle leads the
+  // tail — "n'aurait pas dû courir", "aurait toujours dû manger".
+  test('a compound finite is finite in its auxiliary alone', () => {
+    const DEVRAIT = { base: 'devoir', '3sg_present': 'devrait', '3sg_past': 'aurait dû' };
+    expect(modalGroupFr([modal(DEVRAIT)], MANGER, CHAT, 'past', 'neutral', undefined, ''))
+      .toEqual({ finite: 'aurait', finiteAdverb: '', tail: 'dû manger' });
+    expect(modalGroupFr([modal(DEVRAIT, TOUJOURS)], MANGER, CHAT, 'past', 'neutral', undefined, ''))
+      .toEqual({ finite: 'aurait', finiteAdverb: 'toujours', tail: 'dû manger' });
+  });
+
   test('inner modals trail as infinitives ahead of the main verb', () => {
     expect(modalGroupFr([modal(VOULOIR), modal(POUVOIR)], MANGER, CHAT, 'present', 'neutral', undefined, ''))
       .toEqual({ finite: 'veut', finiteAdverb: '', tail: 'pouvoir manger' });

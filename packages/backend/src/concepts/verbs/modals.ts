@@ -39,7 +39,7 @@ export const modals: ConceptSeed[] = [
     forms: {
       en: {
         // Defective: no infinitive, no past, no future — all suppleted by "have to".
-        base: 'must', nonfinite: 'have to',
+        base: 'must', nonfinite: 'have to', nonfinite_perfect: 'have had to',
         '1sg_present': 'must', '2sg_present': 'must', '3sg_present': 'must',
         '1pl_present': 'must', '2pl_present': 'must', '3pl_present': 'must',
         past: 'had to', future: 'will have to',
@@ -109,7 +109,7 @@ export const modals: ConceptSeed[] = [
     forms: {
       en: {
         // Defective: "can" has only a present and a past ("could"); everything else is "be able to".
-        base: 'can', nonfinite: 'be able to',
+        base: 'can', nonfinite: 'be able to', nonfinite_perfect: 'have been able to',
         '1sg_present': 'can', '2sg_present': 'can', '3sg_present': 'can',
         '1pl_present': 'can', '2pl_present': 'can', '3pl_present': 'can',
         past: 'could', future: 'will be able to',
@@ -183,7 +183,7 @@ export const modals: ConceptSeed[] = [
         // The volitional "will" is the lexical verb "want", which needs "to" before its
         // infinitive and negates with do-support ("does not want to go") — unlike the
         // defective must/can above. Its `link` is what supplies that "to".
-        base: 'want', nonfinite: 'want', link: 'to',
+        base: 'want', nonfinite: 'want', nonfinite_perfect: 'have wanted', link: 'to',
         '1sg_present': 'want', '2sg_present': 'want', '3sg_present': 'wants',
         '1pl_present': 'want', '2pl_present': 'want', '3pl_present': 'want',
         past: 'wanted', future: 'will want',
@@ -349,7 +349,7 @@ export const modals: ConceptSeed[] = [
         '1pl_past': 'avremmo dovuto', '2pl_past': 'avreste dovuto', '3pl_past': 'avrebbero dovuto',
       },
       fr: {
-        base: 'devoir',
+        base: 'devoir', subjunctive_stem: 'dev',
         '1sg_present': 'devrais', '2sg_present': 'devrais', '3sg_present': 'devrait',
         '1pl_present': 'devrions', '2pl_present': 'devriez', '3pl_present': 'devraient',
         '1sg_past': 'aurais dû', '2sg_past': 'aurais dû', '3sg_past': 'aurait dû',
@@ -362,7 +362,7 @@ export const modals: ConceptSeed[] = [
         '1pl_present': 'sollten', '2pl_present': 'solltet', '3pl_present': 'sollten',
       },
       es: {
-        base: 'deber',
+        base: 'deber', subjunctive_stem: 'debie',
         '1sg_present': 'debería', '2sg_present': 'deberías', '3sg_present': 'debería',
         '1pl_present': 'deberíamos', '2pl_present': 'deberíais', '3pl_present': 'deberían',
         '1sg_past': 'habría debido', '2sg_past': 'habrías debido', '3sg_past': 'habría debido',
@@ -376,7 +376,7 @@ export const modals: ConceptSeed[] = [
         suffix_dict: 'べきである', suffix_stem: 'べきであり',
       },
       pt: {
-        base: 'dever',
+        base: 'dever', subjunctive_stem: 'deve',
         '1sg_present': 'deveria', '2sg_present': 'deveria', '3sg_present': 'deveria',
         '1pl_present': 'deveríamos', '2pl_present': 'deveriam', '3pl_present': 'deveriam',
         '1sg_past': 'teria devido', '2sg_past': 'teria devido', '3sg_past': 'teria devido',
@@ -408,7 +408,7 @@ export const modals: ConceptSeed[] = [
         '1pl_past': 'avremmo potuto', '2pl_past': 'avreste potuto', '3pl_past': 'avrebbero potuto',
       },
       fr: {
-        base: 'pouvoir',
+        base: 'pouvoir', subjunctive_stem: 'pouv',
         '1sg_present': 'pourrais', '2sg_present': 'pourrais', '3sg_present': 'pourrait',
         '1pl_present': 'pourrions', '2pl_present': 'pourriez', '3pl_present': 'pourraient',
         '1sg_past': 'aurais pu', '2sg_past': 'aurais pu', '3sg_past': 'aurait pu',
@@ -421,7 +421,7 @@ export const modals: ConceptSeed[] = [
         '1pl_present': 'könnten', '2pl_present': 'könntet', '3pl_present': 'könnten',
       },
       es: {
-        base: 'poder',
+        base: 'poder', subjunctive_stem: 'pudie',
         '1sg_present': 'podría', '2sg_present': 'podrías', '3sg_present': 'podría',
         '1pl_present': 'podríamos', '2pl_present': 'podríais', '3pl_present': 'podrían',
         '1sg_past': 'habría podido', '2sg_past': 'habrías podido', '3sg_past': 'habría podido',
@@ -434,7 +434,7 @@ export const modals: ConceptSeed[] = [
         base: 'かもしれない', governs: 'plain', suffix_dict: 'かもしれない',
       },
       pt: {
-        base: 'poder',
+        base: 'poder', subjunctive_stem: 'pude',
         '1sg_present': 'poderia', '2sg_present': 'poderia', '3sg_present': 'poderia',
         '1pl_present': 'poderíamos', '2pl_present': 'poderiam', '3pl_present': 'poderiam',
         '1sg_past': 'teria podido', '2sg_past': 'teria podido', '3sg_past': 'teria podido',

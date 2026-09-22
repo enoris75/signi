@@ -189,3 +189,9 @@ export const KOTO_GA_DEKIRU: Forms = {
 };
 /** WANT (the WILL concept): 〜たい, an i-adjective on the polite stem. */
 export const TAI: Forms = { base: 'たい', kind: 'iadj', governs: 'stem', suffix_dict: 'たい', suffix_stem: 'たく' };
+/** SHOULD: 〜べき, a noun-like word the copula closes (べきです / べきではありません), on the dictionary form. */
+export const BEKI: Forms = {
+  base: 'べきである', kind: 'copula', governs: 'dict', suffix_dict: 'べきである', suffix_stem: 'べきであり',
+};
+/** MIGHT: 〜かもしれない, which governs the plain FINITE form — the verb before it carries tense and polarity. */
+export const KAMOSHIRENAI: Forms = { base: 'かもしれない', governs: 'plain', suffix_dict: 'かもしれない' };

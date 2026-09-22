@@ -153,3 +153,12 @@ export const BE: Forms = {
 export const MUST: Forms = { base: 'must', nonfinite: 'have to', ...present('must', 'must'), past: 'had to', future: 'will have to' };
 export const CAN: Forms = { base: 'can', nonfinite: 'be able to', ...present('can', 'can'), past: 'could', future: 'will be able to' };
 export const WILL: Forms = { base: 'want', nonfinite: 'want', link: 'to', ...present('want', 'wants'), past: 'wanted', future: 'will want' };
+// MAY's past and future are suppleted by "be allowed to", whose finite "be" is an auxiliary of its
+// own; SHOULD is a `conditional`, defective past the one form it has (B63).
+export const MAY: Forms = {
+  base: 'may', nonfinite: 'be allowed to', ...present('may', 'may'),
+  '1sg_past': 'was allowed to', '2sg_past': 'were allowed to', '3sg_past': 'was allowed to',
+  '1pl_past': 'were allowed to', '2pl_past': 'were allowed to', '3pl_past': 'were allowed to',
+  future: 'will be allowed to',
+};
+export const SHOULD: Forms = { base: 'should', nonfinite: 'be supposed to', conditional: '1', ...present('should', 'should') };
