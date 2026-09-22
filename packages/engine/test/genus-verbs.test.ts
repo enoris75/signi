@@ -1990,7 +1990,7 @@ describe('B19 verb definitions (TRANSFER genus)', () => {
       en: 'to transfer content from a place.',
       it: 'trasferire contenuto da un luogo.',
       fr: "transférer du contenu d'un lieu.",
-      de: 'Inhalt aus einem Ort übertragen.',
+      de: 'Inhalt von einem Ort übertragen.',
       es: 'transferir contenido de un lugar.',
       ja: '場所から内容を移す。',
       pt: 'transferir conteúdo de um lugar.',

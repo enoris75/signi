@@ -241,7 +241,7 @@ test.describe('word definition tooltip', () => {
     ['CLICK', 'click', 'to press a button', 'es', 'pulsar un botón'],
     ['TYPE', 'type', 'to write with a keyboard', 'ja', 'キーボードで書く'],
     ['EXPORT', 'export', 'to transfer content to a place', 'pt', 'transferir conteúdo a um lugar'],
-    ['IMPORT', 'import', 'to transfer content from a place', 'de', 'Inhalt aus einem Ort übertragen'],
+    ['IMPORT', 'import', 'to transfer content from a place', 'de', 'Inhalt von einem Ort übertragen'],
   ] as const) {
     test(`a verb definition renders (localize-seed B12–B19: ${id})`, async ({ app, page }) => {
       const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);

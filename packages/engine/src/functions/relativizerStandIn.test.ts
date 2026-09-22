@@ -12,6 +12,11 @@ describe('relativizerStandIn', () => {
     });
   });
 
+  // A218: a German place's own preposition picks the relative's, "ein Ort, an dem".
+  test('keeps the preposition a place names for itself', () => {
+    expect(relativizerStandIn(np({ base: 'Ort', gender: 'masc', place_prep: 'an' }), { definiteness: 'relative' }).agreement['place_prep']).toBe('an');
+  });
+
   test("the relativizer's forms win over the head's", () => {
     expect(relativizerStandIn(np({ base: 'house', number: 'singular' }), { base: 'que', number: 'plural' }).agreement['number']).toBe('plural');
   });

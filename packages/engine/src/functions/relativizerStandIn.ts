@@ -1,7 +1,10 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../types.js';
 
-/** The head forms a relativizer stand-in keeps: agreement, and what picks a complement's preposition. */
-const RELATIVIZER_KEPT_FORMS = ['gender', 'number', 'count', 'animate', 'human', 'mannerRelation', 'temporal'] as const;
+/**
+ * The head forms a relativizer stand-in keeps: agreement, and what picks a complement's preposition
+ * — among them a German place's own (`place_prep`), so "a place where" is "ein Ort, an dem" (A218).
+ */
+const RELATIVIZER_KEPT_FORMS = ['gender', 'number', 'count', 'animate', 'human', 'mannerRelation', 'temporal', 'place_prep'] as const;
 
 /**
  * A stand-in for the head of a relative clause whose gap takes an adposition: the relativizer word

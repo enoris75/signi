@@ -209,12 +209,16 @@ export function complementsParts(
         else if (type === 'terminus') {
           if (f['animate'] === '1' || verb['terminus_dative'] === '1') head = prepDet('', f, 'dat', plural);
           else if (verb['terminus_prep']) head = prepDet(verb['terminus_prep'], f, 'dat', plural);
-          else { _case = 'acc'; head = prepDet('in', f, 'acc', plural); }
+          // A place one is at rather than inside is reached with its own preposition: "schickt das
+          // Buch an einen Ort" (A218).
+          else { _case = 'acc'; head = prepDet(f['place_prep'] ?? 'in', f, 'acc', plural); }
         }
         // Source. "aus" is "out of" an enclosure, right for a house or a continent but not for a
         // person or an animal, which one is not inside: a living source takes "von", fused to "vom"
-        // before "dem" (A154). The relativizer stand-in comes through here too ("von dem").
-        else /* source */         head = prepDet(f['animate'] === '1' ? 'von' : 'aus', f, 'dat', plural);
+        // before "dem" (A154). So does a place one is at rather than inside, which names its own
+        // preposition (`place_prep`): "von einem Ort", "vom Ausgangspunkt" (A218). The relativizer
+        // stand-in comes through here too ("von dem").
+        else /* source */         head = prepDet(f['animate'] === '1' || f['place_prep'] ? 'von' : 'aus', f, 'dat', plural);
       }
       // The pronoun is the whole phrase after the head, declined for the case the head governs. The
       // bare-dative terminus leaves no head at all, and then the pronoun is the phrase ("gibt ihm").

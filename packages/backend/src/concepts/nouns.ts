@@ -87,7 +87,7 @@ const patientOfGloss = (genus: string, verb: string, agent: string, definiteness
 // A place gloss: a genus restricted by a *locative*-gap relative clause — the head is where the
 // action happens, not who does it or what it is done to, and the clause carries its own generic
 // subject. whereGloss('PLACE', 'EAT') → en "a place where one eats", it "un luogo dove si mangia",
-// fr "un lieu où l'on mange", de "ein Ort, in dem man isst", ja "食べる場所". The verb must license a
+// fr "un lieu où l'on mange", de "ein Ort, an dem man isst", ja "食べる場所". The verb must license a
 // `locative` complement. The optional object renders as a bare plural, as in whoGloss. Added for
 // B32; the engine side that renders the relative adverb is C07.
 const whereGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
@@ -698,7 +698,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'place', plural: 'places', count: 'singular' },
       it: { base: 'luogo', plural: 'luoghi', gender: 'masc', count: 'singular' },
       fr: { base: 'lieu', plural: 'lieux', gender: 'masc', count: 'singular' },
-      de: { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular', compound: 'Orts' },
+      de: { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular', compound: 'Orts', place_prep: 'an' },
       es: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
       ja: { base: '場所', count: 'singular', reading: 'ばしょ' },
       pt: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
@@ -719,7 +719,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'destination', plural: 'destinations', count: 'singular' },
       it: { base: 'destinazione', plural: 'destinazioni', gender: 'fem', count: 'singular' },
       fr: { base: 'destination', plural: 'destinations', gender: 'fem', count: 'singular' },
-      de: { base: 'Ziel', plural: 'Ziele', gender: 'neut', count: 'singular' },
+      de: { base: 'Ziel', plural: 'Ziele', gender: 'neut', count: 'singular', place_prep: 'an' },
       es: { base: 'destino', plural: 'destinos', gender: 'masc', count: 'singular' },
       ja: { base: '目的地', count: 'singular', reading: 'もくてきち' },
       pt: { base: 'destino', plural: 'destinos', gender: 'masc', count: 'singular' },
@@ -735,7 +735,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'origin', plural: 'origins', count: 'singular' },
       it: { base: 'origine', plural: 'origini', gender: 'fem', count: 'singular' },
       fr: { base: 'origine', plural: 'origines', gender: 'fem', count: 'singular' },
-      de: { base: 'Ausgangspunkt', plural: 'Ausgangspunkte', gender: 'masc', count: 'singular' },
+      de: { base: 'Ausgangspunkt', plural: 'Ausgangspunkte', gender: 'masc', count: 'singular', place_prep: 'an' },
       es: { base: 'origen', plural: 'orígenes', gender: 'masc', count: 'singular' },
       ja: { base: '起点', count: 'singular', reading: 'きてん' },
       pt: { base: 'origem', plural: 'origens', gender: 'fem', count: 'singular' },
@@ -1182,7 +1182,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'end', plural: 'ends', count: 'singular' },
       it: { base: 'fine', plural: 'fini', gender: 'fem', count: 'singular' },
       fr: { base: 'fin', plural: 'fins', gender: 'fem', count: 'singular' },
-      de: { base: 'Ende', plural: 'Enden', gender: 'neut', count: 'singular', compound: 'End' },
+      de: { base: 'Ende', plural: 'Enden', gender: 'neut', count: 'singular', compound: 'End', place_prep: 'an' },
       es: { base: 'fin', plural: 'fines', gender: 'masc', count: 'singular' },
       ja: { base: '終わり', count: 'singular', reading: 'おわり' },
       pt: { base: 'fim', plural: 'fins', gender: 'masc', count: 'singular' },

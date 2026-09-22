@@ -4,7 +4,8 @@ import { determiner } from './determiner.js';
 /**
  * A complement's preposition + case-declined determiner, honoring `definiteness`. Only a
  * *definite* article triggers the German preposition-article fusions (in+dem=im, in+das=ins,
- * zu+dem=zum, zu+der=zur, von+dem=vom); any other determiner (einem, keiner, vielen, bare) rides
+ * an+dem=am, an+das=ans, zu+dem=zum, zu+der=zur, von+dem=vom); any other determiner (einem, keiner,
+ * vielen, bare) rides
  * after the plain preposition. An empty `prep` is the bare-dative terminus — the determiner alone.
  */
 export function prepDet(prep: string, forms: Record<string, string>, _case: Case, plural: boolean): string {
@@ -17,6 +18,9 @@ export function prepDet(prep: string, forms: Record<string, string>, _case: Case
     // The accusative of motion into a neuter ("speichert das Buch ins Haus"); "in das" reads as
     // the emphatic "into *that* house".
     if (prep === 'in' && det === 'das') return 'ins';
+    // "an" fuses the same way, for a place one is at (A218): "am Ende", "ans Ziel".
+    if (prep === 'an' && det === 'dem') return 'am';
+    if (prep === 'an' && det === 'das') return 'ans';
     if (prep === 'zu' && det === 'dem') return 'zum';
     if (prep === 'zu' && det === 'der') return 'zur';
     // A living source takes "von", which fuses the same way (A154), as the passive agent's does.

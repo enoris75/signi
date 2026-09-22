@@ -9,6 +9,15 @@ describe('spatialHead', () => {
     expect(spatialHead('in', HAUS, true, 'locative')).toBe('in den');
   });
 
+  // A218: a place one is at names its own preposition, which the plain relation takes in its place.
+  test('the plain relation takes the noun\'s own place preposition', () => {
+    const ORT = { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular', place_prep: 'an' };
+    expect(spatialHead('in', ORT, false, 'locative')).toBe('am');
+    expect(spatialHead('in', { ...ORT, definiteness: 'indefinite' }, false, 'locative')).toBe('an einem');
+    expect(spatialHead('in', { ...ORT, definiteness: 'indefinite' }, false, 'direction')).toBe('an einen');
+    expect(spatialHead('under', ORT, false, 'locative')).toBe('unter dem');
+  });
+
   test('in does not fuse with any other determiner', () => {
     expect(spatialHead('in', { ...HAUS, definiteness: 'indefinite' }, false, 'locative')).toBe('in einem');
     expect(spatialHead('in', { ...HAUS, definiteness: 'this' }, false, 'locative')).toBe('in diesem');

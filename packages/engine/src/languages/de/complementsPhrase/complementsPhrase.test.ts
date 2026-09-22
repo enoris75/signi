@@ -196,6 +196,15 @@ describe('complementsPhrase', () => {
   });
 
   describe('source', () => {
+    // A218: a place one is at is left "von", as a living source is, and fuses to "vom".
+    test('a place that names its own preposition is left with "von"', () => {
+      const ORT: Forms = { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular', place_prep: 'an' };
+      expect(complementsPhrase(complements({ source: complement(np(ORT)) }))).toBe('vom Ort');
+      expect(complementsPhrase(complements({ source: complement(np(ORT, { definiteness: 'indefinite' })) }))).toBe('von einem Ort');
+      expect(complementsPhrase(complements({ locative: complement(np(ORT)) }))).toBe('am Ort');
+      expect(complementsPhrase(complements({ terminus: complement(np(ORT, { definiteness: 'indefinite' })) }))).toBe('an einen Ort');
+    });
+
     test('is "aus" + dative', () => {
       expect(complementsPhrase(complements({ source: complement(np(HAUS)) }))).toBe('aus dem Haus');
       expect(complementsPhrase(complements({ source: complement(np(HAUS, { number: 'plural' })) }))).toBe('aus den Häusern');

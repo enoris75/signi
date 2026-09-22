@@ -31,7 +31,7 @@ const bare = (text: string): string => text.replace(/[.。]$/, '');
 describe('the place and direction adverbs are glossed in every language', () => {
   test.each<[string, Record<LanguageCode, string>]>([
     // The place something happens in: a locative, with its default relation.
-    ['EVERYWHERE', { en: 'in all places.', it: 'in tutti i luoghi.', fr: 'dans tous les lieux.', de: 'in allen Orten.', es: 'en todos los lugares.', ja: 'すべての場所で。', pt: 'em todos os lugares.' }],
+    ['EVERYWHERE', { en: 'in all places.', it: 'in tutti i luoghi.', fr: 'dans tous les lieux.', de: 'an allen Orten.', es: 'en todos los lugares.', ja: 'すべての場所で。', pt: 'em todos os lugares.' }],
     ['TOGETHER', { en: 'in a group.', it: 'in un gruppo.', fr: 'dans un groupe.', de: 'in einer Gruppe.', es: 'en un grupo.', ja: 'グループで。', pt: 'em um grupo.' }],
     // The plain goal, compared: "a higher place" says upward, where "a high place" would be a
     // destination on a mountain.
