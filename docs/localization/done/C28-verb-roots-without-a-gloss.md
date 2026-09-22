@@ -322,6 +322,13 @@ Every one stays on the literal:
   "to cause a person to hear words" is equally true of ANSWER. SPEAKER stands on it.
 - **ANSWER** — its differentia is *back* and *what was asked*, which want a question noun or a reply
   relation; the one causative that renders is SPEAK's row. SERVER stands on it.
+  **Superseded 2026-09-22 by [B60](B60-saying-and-thinking-verbs.md)**, which seeded SAY and ASK:
+  *what was asked* is said by a **relative on the recipient**, with neither a question noun nor a
+  reply relation — "to say words to a person who asks", *dire parole a una persona che chiede*, de
+  *einer Person, die fragt, Wörter sagen* (the relative sits inside the clause, and is grammatical),
+  ja 尋ねる人に単語を言う. ANSWER is glossed and no longer literal by design; the verdict table above
+  counts it where it stood. QUESTION as its object is still not the way: *rispondere*, *répondre* and
+  *antworten* take a dative, and the object gap renders *una frase che si risponde*.
 - **SEARCH** — "to desire to acquire objects" is wanting, not looking; FIND and TRY are not seeded.
   RESULT stands on it.
 - **ARRANGE** — "to cause objects to be tidy" is TIDY_UP's gloss; "to put things in a sequence"

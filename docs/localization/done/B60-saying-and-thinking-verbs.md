@@ -38,7 +38,8 @@ glossed on it. What the sentence probes showed the seed author:
    where ASK is not a plain ditransitive: the terminus renders "the woman asks the name **to** the
    man" and *fragt **dem** Mann nach dem Namen* (*fragen* takes the person in the accusative), and no
    lexeme key moves either today. Pin ASK's test without a terminus in en and de, or with that
-   written down. Do not pin QUESTION as its object: every language says it with a light verb (*fare
+   written down. *(Landed: pinned without a terminus; the English half is the defect PENDING-L2-1, the
+   German half C35's accusative person. See [Done](#done).)* Do not pin QUESTION as its object: every language says it with a light verb (*fare
    una domanda, poser une question, eine Frage stellen, hacer una pregunta, 質問する, fazer uma
    pergunta*), and the render is *chiede la domanda*, *pregunta la pregunta*.
 3. **CALL's German *rufen* is CRY_OUT's German too.** The picker shows it twice; no gloss here uses
@@ -75,7 +76,7 @@ glossed on it. What the sentence probes showed the seed author:
 | concept | plan | gloss (en) |
 |---|---|---|
 | TELEPHONE (differentia, its own gloss) | `instrumentGloss('OBJECT_THING', 'SPEAK')` | an object with which one speaks |
-| ANSWER ([C28](../done/C28-verb-roots-without-a-gloss.md) root, literal by design) | `infinitiveGloss('SAY', { object: 'WORD', number: 'plural', complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'ASK' } } } } } })` | to say words to a person who asks |
+| ANSWER ([C28](../done/C28-verb-roots-without-a-gloss.md) root, literal by design until this ticket; shipped) | `infinitiveGloss('SAY', { object: 'WORD', number: 'plural', complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'ASK' } } } } } })` | to say words to a person who asks |
 
 **ASK and QUESTION: QUESTION is glossed on ASK, not the other way.** ASK on QUESTION needs the light
 verb every language idiomatizes differently (*fare / poser / stellen / hacer / 質問する / fazer*), and
@@ -127,7 +128,8 @@ check), and the eleven are distinct from one another in all seven. Readings to j
 5. **CALL does not say *by voice*.** "With words" attaches to the causer or to COME and breaks either
    way (below). What the gloss says is enough to tell CALL from NAME, the sense D1 split it from.
    **B61 probed BRING on the same frame** with an object causee ("to cause an object to come"): if
-   B61 ships that, the two differ only by the causee — decide them together.
+   B61 ships that, the two differ only by the causee — decide them together. *(Ruled for the P09
+   landing: both ship, and the causee is the difference.)*
 6. **CALL_PHONE's purpose clause keeps TELEPHONE out of the instrumental**, which after a verb of
    speaking reads as the one spoken with: *parlare con un telefono*, *hablar con un teléfono*, *mit
    einem Telefon sprechen* (below). TELEPHONE's word is the stem of CALL_PHONE's in four languages
@@ -151,7 +153,8 @@ check), and the eleven are distinct from one another in all seven. Readings to j
     it with neither; German puts the relative inside the clause (*einer Person, die fragt, Wörter
     sagen*), which is grammatical. QUESTION as ANSWER's object is not the way (below): *rispondere,
     répondre, antworten, responder* take a dative, and the object gap renders *una frase che si
-    risponde*, *eine Phrase, die man antwortet*.
+    risponde*, *eine Phrase, die man antwortet*. *(Ruled for the P09 landing: ANSWER ships this gloss,
+    and C28 now carries a dated note where it kept ANSWER literal.)*
 11. **TELEPHONE, "an object with which one speaks"**, is also a microphone; among OBJECT_THING's
     seeded kinds (BOOK, COIN, CONTAINER, KEYBOARD, SCREEN, BUTTON, FILE) it is distinct. Japanese
     話す物体 loses the role, as QUESTION's does.
@@ -222,3 +225,80 @@ authored: TELL in English and German (the ditransitive gloss, the animate dative
 the object — *einer Person Tatsachen sagen* — on a genus seeded in the same ticket), QUESTION in
 English and Spanish (the instrument gap, *con la que se pregunta*, and the direction QUESTION → ASK),
 and CALL_PHONE in English and Japanese (a comitative inside a purpose clause, 人と話すために電話を使う).
+
+## Done
+
+Shipped 2026-09-22. **Eleven words seeded** — the verbs SAY, CALL, CALL_PHONE, MEAN and BELIEVE in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts) (after EXPRESS), TELL and
+ASK in [ditransitive.ts](../../../packages/backend/src/concepts/verbs/ditransitive.ts) (after SEND),
+THINK in [intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts) (after
+SPEAK), their aspect forms in
+[nonfinite.ts](../../../packages/backend/src/concepts/verbs/nonfinite.ts), and the nouns QUESTION,
+TELEPHONE and MIND in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts) (after
+TRANSLATION) — and **eleven glosses**: the nine P09 rows, TELEPHONE's own, and ANSWER's, set on the
+ANSWER already seeded in transitive.ts. TALK got no concept (SPEAK covers it) and MIND no gloss.
+Every paradigm, every gloss and the three defects left are pinned in
+[saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| SAY | to express concepts with words | esprimere concetti con parole | exprimer des concepts avec des mots | Begriffe mit Wörtern vermitteln | expresar conceptos con palabras | 単語で概念を表す | exprimir conceitos com palavras |
+| TELL | to say facts to a person | dire fatti a una persona | dire des faits à une personne | einer Person Tatsachen sagen | decir hechos a una persona | 人に事実を言う | dizer fatos a uma pessoa |
+| ASK | to say words to know the facts | dire parole per conoscere i fatti | dire des mots pour connaître les faits | Wörter sagen, um die Tatsachen zu kennen | decir palabras para conocer los hechos | 事実を知るために単語を言う | dizer palavras para conhecer os fatos |
+| QUESTION | a phrase with which one asks | una frase con la quale si chiede | une phrase avec laquelle on demande | eine Phrase, mit der man fragt | una frase con la que se pregunta | 尋ねるフレーズ | uma frase com a qual se pergunta |
+| CALL | to cause a person to come | indurre una persona a venire | induire une personne à venir | eine Person veranlassen, zu kommen | inducir a una persona a venir | 人が来るようにする | induzir uma pessoa a vir |
+| CALL_PHONE | to use a telephone to speak with a person | usare un telefono per parlare con una persona | utiliser un téléphone pour parler avec une personne | ein Telefon verwenden, um mit einer Person zu sprechen | usar un teléfono para hablar con una persona | 人と話すために電話を使う | usar um telefone para falar com uma pessoa |
+| MEAN | to have as meaning | avere come significato | avoir comme sens | als Bedeutung haben | tener como significado | 意味として持つ | ter como significado |
+| THINK | to use the mind | usare la mente | utiliser l'esprit | den Verstand verwenden | usar la mente | 頭脳を使う | usar a mente |
+| BELIEVE | to accept as fact | accettare come fatto | accepter comme fait | als Tatsache akzeptieren | aceptar como hecho | 事実として受け付ける | aceitar como fato |
+| TELEPHONE | an object with which one speaks | un oggetto con il quale si parla | un objet avec lequel on parle | ein Gegenstand, mit dem man spricht | un objeto con el que se habla | 話す物体 | um objeto com o qual se fala |
+| ANSWER | to say words to a person who asks | dire parole a una persona che chiede | dire des mots à une personne qui demande | einer Person, die fragt, Wörter sagen | decir palabras a una persona que pregunta | 尋ねる人に単語を言う | dizer palavras a uma pessoa que pergunta |
+
+Rendered from the seed as it shipped, engine source at HEAD; all eleven are what the probe table
+above proposed, in every language. `sweep-definitions.test.ts` renders every definition in all seven
+and finds no two alike, so nothing here collides with a gloss already shipped.
+
+What landed differently from the plan:
+
+1. **Every proposed form shipped as proposed** — the eleven rows of **Seed first**, the two lexical
+   keys on ASK (German `object_prep: 'nach'`, *fragt nach dem Namen*), CALL_PHONE's four (it `a`, fr
+   `à`, pt `para`, ja `に`) and its German particle `an` (*ruft den Mann an*, *angerufen*). One
+   addition the table did not name: **German *Verstand* has no plural in use**, and MIND is a count
+   noun in the other six, so its German lexeme carries the regular *Verstände* (as *Zustand →
+   Zustände*) for a plural pick rather than leaving the key out — every countable noun in the corpus
+   has a plural in every language, and without one a plural MIND would read *die Verstand*.
+2. **ASK is pinned without a terminus**, as the ticket asked, and the person asked is two separate
+   things. English renders every `terminus` with *to*, so it says *the woman asks the name to the
+   man* where it wants the double object *asks the man the name* — a defect of English's own, pinned
+   as **PENDING-L2-1** with ANSWER's *the woman answers to the man* (want *answers the man*), which
+   is the same rule. German's *fragt dem Mann nach dem Namen* wants the accusative *den Mann*, which
+   is [C35](../C-needs-engine/C35-lexical-object-case.md)'s lexical object case — C35 already records
+   *fragen* by name, so nothing new goes there. The other five are right.
+3. **CALL and BRING both ship** (the sweep's ruling): CALL is the causative of COME with a person as
+   causee, [B61](B61-handling-and-leaving-verbs.md)'s BRING the same with an object, and the causee
+   is the whole difference. Recorded in both tickets.
+4. **ANSWER ships** (the sweep's ruling), re-opening the verdict
+   [C28](C28-verb-roots-without-a-gloss.md) recorded, which now carries a dated note at the entry
+   where it kept ANSWER literal. Only its `definition` was added: ANSWER keeps no `isA`, since the
+   sweep's brief scoped this lane to the gloss, and SAY as its hypernym is a separate call.
+5. **MIND stays literal by design** (*Not solved* 2), both leads re-probed against the shipped seed:
+   *a part with which one thinks* (*ein Teil, mit dem man denkt*, 考える部分) would define THINK back,
+   and *a part of a person* (*ein Teil einer Person*, 人の部分) is also a hand. **TALK** got no
+   concept (*Not solved* 1), and **SAY re-opened neither SPEAK nor ASSERT** (*Not solved* 3): *to say
+   words* (*dire parole*, 単語を言う) and *to say facts* (*dire fatti*, 事実を言う) render, and are
+   what that item said they were.
+6. **Two engine defects left, neither in any shipped gloss.** **PENDING-L2-2**: the Italian imperfect
+   subjunctive is the infinitive minus *-re* with the contracted infinitives overridden by concept id
+   (`IT_SUBJ_STEM` in [mood.ts](../../../packages/engine/src/mood.ts)), so SAY's *dire* gives *se
+   dissimo* where Italian says *se dicessimo* — the imperfect indicative already knows *dire*
+   (*diceva*). **PENDING-L2-3**: a verb whose object takes a preposition writes a pronoun object as
+   the tonic pronoun after it (*telefona a lui*, *téléphone à lui*), right for *su di lui* (A139) and
+   wrong for a dative *a* / *à*, which wants the clitic (*gli telefona*, *lui téléphone*); Spanish
+   and Portuguese are right. The same shape as the Romance recipient pronoun
+   [A229](../../bugs/fixed/A229-german-dative-pronoun-trails-the-object.md) left unfiled.
+7. **The Portuguese subjunctive class table learned *dizer***.
+   [hypothetical.test.ts](../../../packages/engine/test/hypothetical.test.ts) checks every seeded
+   verb's 1st-plural imperfect subjunctive against a rule built apart from the engine — the accent of
+   the infinitive's class, unless the verb is in its irregular-preterite list. The engine is right
+   (*disséssemos*, the open é of a strong preterite); the test's rule read *dizer* as a regular *-er*
+   verb and wanted *dissêssemos*, so SAY joins the list beside *fazer*'s compounds.
