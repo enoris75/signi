@@ -21,10 +21,18 @@ npm run phrases:random -- <count>            # or: npx tsx packages/engine/test/
 
 [The tool](../../packages/engine/test/tools/randomPhrase.ts) prints, per phrase, the **seed**, the
 **plan as JSON**, and the **seven renderings**. It randomises the subject (number, gender,
-determiner, adjectives and degrees, possessor, relative clause — or a pronoun), the verb (tense,
-aspect, negation, adverb, modal), the object, the complements that verb licenses, and now and then a
-clause-level mood (question, command, hypothetical, coordination). It stays inside what the builder
-UI can express, so anything wrong in its output is wrong in the app.
+determiner, adjectives and degrees, attributive nouns, possessor, relative clause — or a pronoun),
+the verb (tense, aspect, negation, adverb, modal, passive), the object, the complements that verb
+licenses, and now and then a clause-level mood (question, command, citation infinitive,
+hypothetical, coordination). Any noun slot but a possessor may be a coordinated group.
+
+Subordinate clauses nest two deep: a relative clause on any noun, with its own objects and
+complements and a gap in the subject, the object, a complement or the possessor ("whose"), whose
+nouns may carry one more; a governed infinitive (DESIRE, BEGIN, "able to", "obliged to", nested once)
+or the causative (CAUSE_VERB, object control); and a clause of purpose. It stays inside what the app
+can express, so anything wrong in its output is wrong in the app. The infinitive complement, the
+causative, the purpose clause and the "whose" relative are not on the builder canvas, but every
+concept definition and localized UI string is built on them, so a defect there shows in a tooltip.
 
 It reads the **engine from source** (no rebuild needed after an engine edit) but `@signi/shared` from
 `dist`. If a new shared constant seems missing, `npm run build --workspace=packages/shared`.
