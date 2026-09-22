@@ -58,3 +58,39 @@ all 751 concept definitions and UI strings, no other rendering changes in any la
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: Japanese HAVE says an animate possession with ある* (1 `test.fails`, plus a regression test for a thing possessed, an animate owner, BE and English) |
+
+## Resolved
+
+**2026-09-22.** Took the trial's shape. In
+[`predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts) the existential verb
+follows what exists. For a possessive existential that is the thing possessed: the new optional
+`animateObject`, or else `isAnimate` of the direct object. For BE it is still the subject
+(`animateSubject`). The "if" clause, the modal chain, the negative and the relative clause all
+compose on the chosen verb.
+
+The relative clause on the thing possessed has no object left, because the head fills that gap.
+[`relativeClauseSegs`](../../../packages/engine/src/languages/ja/relativeClauseSegs.ts) passes
+`isAnimate([np])` as `animateObject` when `rel.headRole === 'directObject'`. The trial describes this
+as [`npSegs`](../../../packages/engine/src/languages/ja/npSegs.ts) passing it. In this tree `npSegs`
+reaches the predicate only through `relativeClauseSegs`, which holds both the head and the call.
+
+**The UI string moves, as ruled.** `diagnostic.noNounHasPossessor` now renders
+`どの名詞も所有者がいません` (it was `どの名詞も所有者がありません`), because POSSESSOR is seeded
+`animate: true`. `console-diagnostics.test.ts` was updated. No hardcoded Japanese form of it exists in
+`packages/frontend/src`, `packages/shared/src` or `e2e/`: the shared entry's `fallback` is the
+English `No noun has a possessor`, and the frontend reaches it only through the key. The whole
+suite shows no other concept definition or UI string moving.
+
+- **Tests:** [`packages/engine/test/possession.test.ts`](../../../packages/engine/test/possession.test.ts)
+  → *known bugs: Japanese HAVE says an animate possession with ある*. The pinning `test.fails` is now a
+  passing `test`, with its assertions unchanged, and the regression test is unchanged. A new case
+  covers a pronoun (`家は私がいます`), a quantified plural, a `no` object (`家はどの猫もいません`), a
+  question, the resultative, a relative clause on the owner (`猫がいる家`, `壁がある家`), one on the
+  thing possessed, animate and not and negated (`家にある壁`, `家にいない人`), and BE with an
+  inanimate subject (`本は家にあります`).
+- **Unit tests:** `ja/predicateSegs.test.ts` covers an animate thing possessed in the polite, the
+  past negative and the たら forms, `animateObject` for a gapped object, and BE ignoring it.
+  `ja/relativeClauseSegs.test.ts` covers an animate head the owner has (`家にいる`) and a relative on
+  the owner (`猫がいる`).
+- **UI string:** [`packages/engine/test/console-diagnostics.test.ts`](../../../packages/engine/test/console-diagnostics.test.ts)
+  → `diagnostic.noNounHasPossessor`, ja `どの名詞も所有者がありません` → `どの名詞も所有者がいません`.

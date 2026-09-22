@@ -7,11 +7,13 @@ import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
+import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -121,13 +123,16 @@ export function predicateText(
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
   // A negative adverb (mai) anywhere in the group — main verb or any modal — forces "non".
   const modifierIsNegative = groupHasNegativeAdverb(verbPhrase);
-  // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza".
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
+  // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza" — and so
+  // does a "nessun" possessor: "non vede la casa di nessun uomo" (A216).
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
   // A postverbal negative word — a `no`-determined direct object OR complement ("in nessuna casa",
-  // "a nessun mercato") — obliges the preverbal "non", the same concord as a negative object. But a
-  // preverbal negative SUBJECT ("nessun gatto") already negates the clause and carries it, so the
-  // "non" is suppressed then: "nessun gatto mangia nessun topo", not "… non mangia …".
-  const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)) && !subjectIsNegative ? 'non' : '';
+  // "a nessun mercato"), or a `no` possessor in one ("nella casa di nessun uomo") — obliges the
+  // preverbal "non", the same concord as a negative object. But a preverbal negative SUBJECT
+  // ("nessun gatto") already negates the clause and carries it, so the "non" is suppressed then:
+  // "nessun gatto mangia nessun topo", not "… non mangia …".
+  const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)
+    || hasNegativePossessorComplement(complements)) && !subjectIsNegative ? 'non' : '';
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
   // on the imperative ("guardami"); a noun object keeps the post-verbal slot.

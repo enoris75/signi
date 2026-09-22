@@ -7,11 +7,13 @@ import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
+import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -165,12 +167,14 @@ export function predicateText(
     : conjugated, passiveParticipleText].filter(Boolean).join(' ');
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
-  // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
+  // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina" — and so does
+  // a "nenhum" possessor, in the object or in a complement: "não vê a casa de nenhum homem" (A216).
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
+  const complementIsNegative = hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
   // The preverbal "não" is emitted only when the clause needs a preverbal negator AND none is already
   // there. A preverbal negative subject ("nenhum gato …") or a preverbal "nunca" (the finite adverb)
   // already negates the clause, so "não" is dropped.
-  const needsNao = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
+  const needsNao = verbNegative || objectIsNegative || complementIsNegative || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
@@ -215,7 +219,9 @@ export function predicateText(
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")
   // prefixes "não". The adverb simply trails the verb here.
   if (mood === 'imperative') {
-    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    // A "nenhum" complement is post-verbal, and obliges the negator here as in the statement:
+    // "não corra em nenhuma casa" (A208).
+    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Portuguese ("Carregar um período", "Não correr"), not the imperative.
     // A pronominal command is derived from the plain verb and takes the addressee's reflexive — "se"
@@ -243,7 +249,7 @@ export function predicateText(
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the particípio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     const infVerb = !infNeg && thirdPersonClitic
       ? ptEnclitic(inf, thirdPersonClitic)
       : ptCliticize(objectClitic, infNeg ? `não ${inf}` : inf);

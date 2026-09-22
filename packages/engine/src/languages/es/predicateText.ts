@@ -8,11 +8,13 @@ import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
+import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -169,12 +171,14 @@ export function predicateText(
     : conjugated, passiveParticipleText].filter(Boolean).join(' ');
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
-  // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
+  // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña" — and so does a
+  // "ningún" possessor, in the object or in a complement: "no ve la casa de ningún hombre" (A216).
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
+  const complementIsNegative = hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
   // The preverbal "no" is emitted only when the clause needs a preverbal negator AND none is already
   // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (the finite adverb,
   // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
-  const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
+  const needsNo = verbNegative || objectIsNegative || complementIsNegative || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the
@@ -219,7 +223,9 @@ export function predicateText(
   // attaches after an affirmative command ("cómelo", "comedlo") and after an instruction, which is an
   // infinitive ("cargarlo", "no cargarlo"); only a negative command keeps it in front ("no lo comas").
   if (mood === 'imperative') {
-    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    // A "ningún" complement is post-verbal, and obliges the negator here as in the statement:
+    // "no corras en ninguna casa" (A208).
+    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Spanish ("Cargar un período", "No correr"), not the imperative.
     // A reflexive command is derived from the plain verb and takes the addressee's clitic, ahead of
@@ -243,7 +249,7 @@ export function predicateText(
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the participio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)

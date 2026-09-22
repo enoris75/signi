@@ -258,9 +258,9 @@ describe('known bugs: complement negative concord', () => {
 
 // A208. The concord above reaches the Spanish and Portuguese statement, but the command, the
 // instruction and the infinitive each build their own negation gate in `predicateText`, from the
-// verb, the object and the adverb — not the complements. So "corre en ninguna casa" stays an
-// affirmative command where Spanish wants "no corras en ninguna casa". Italian and French gate every
-// mood on the same term, and are right.
+// verb, the object and the adverb — not the complements. So "corre en ninguna casa" stayed an
+// affirmative command where Spanish wants "no corras en ninguna casa"; both gates now read the
+// complements too. Italian and French gate every mood on the same term, and were right.
 describe('known bugs: complement negative concord in a command or an infinitive', () => {
   const noHouse = { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } };
   const command = (verb: string, extra: Parameters<typeof clause>[2] = {}, addressee = np('SECOND_PERSON')) =>
@@ -270,7 +270,7 @@ describe('known bugs: complement negative concord in a command or an infinitive'
   const infinitive = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
     sayAll(clause(np('GENERIC_PERSON'), verb, { ...extra, infinitive: true }));
 
-  test.fails('Spanish and Portuguese negate a command, an instruction and an infinitive with a negative complement', () => {
+  test('Spanish and Portuguese negate a command, an instruction and an infinitive with a negative complement', () => {
     expect(command('RUN', { complements: noHouse })).toMatchObject({
       es: 'no corras en ninguna casa.', pt: 'não corra em nenhuma casa.',
     });
@@ -345,6 +345,42 @@ describe('known bugs: complement negative concord in a command or an infinitive'
     });
     expect(infinitive('RUN', { verbPhrase: { negative: true }, complements: { locative: { phrase: np('HOUSE') } } })).toMatchObject({
       es: 'no correr en la casa.', pt: 'não correr na casa.',
+    });
+  });
+
+  test('the gate reaches the clitics, the vosotros command, a terminus and NEVER beside the complement', () => {
+    // An object pronoun follows the instruction and the infinitive in Spanish, and leads after
+    // Portuguese "não".
+    const him = np('THIRD_PERSON', { gender: 'masc' });
+    expect(instruction('EAT', { directObject: him, complements: noHouse })).toMatchObject({
+      es: 'no comerlo en ninguna casa.', pt: 'não o comer em nenhuma casa.',
+    });
+    expect(infinitive('EAT', { directObject: him, complements: noHouse })).toMatchObject({
+      es: 'no comerlo en ninguna casa.', pt: 'não o comer em nenhuma casa.',
+    });
+    expect(infinitive('EAT', { directObject: np('MOUSE'), complements: noHouse })).toMatchObject({
+      es: 'no comer el ratón en ninguna casa.', pt: 'não comer o rato em nenhuma casa.',
+    });
+    expect(instruction('MOVE_ONESELF', { complements: noHouse })).toMatchObject({ es: 'no moverse en ninguna casa.' });
+    expect(command('RUN', { complements: noHouse }, np('SECOND_PERSON', { number: 'plural' }))).toMatchObject({
+      es: 'no corráis en ninguna casa.', pt: 'não corram em nenhuma casa.',
+    });
+    expect(command('GIVE', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { definiteness: 'no' }) } },
+    })).toMatchObject({
+      es: 'no des el libro a ningún perro.', pt: 'não dê o livro a nenhum cão.',
+    });
+    // NEVER and the complement together take one negator.
+    expect(command('RUN', { verbPhrase: { modifier: 'NEVER' }, complements: noHouse })).toMatchObject({
+      es: 'no corras nunca en ninguna casa.', pt: 'não corra nunca em nenhuma casa.',
+    });
+    // A comparison's `no` leaves the instruction and the infinitive positive too (A181).
+    const likeNoDog = { manner: { phrase: np('DOG', { definiteness: 'no' }) } };
+    expect(instruction('RUN', { complements: likeNoDog })).toMatchObject({
+      es: 'correr como ningún perro.', pt: 'correr como nenhum cão.',
+    });
+    expect(infinitive('RUN', { complements: likeNoDog })).toMatchObject({
+      es: 'correr como ningún perro.', pt: 'correr como nenhum cão.',
     });
   });
 });

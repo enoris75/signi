@@ -108,6 +108,15 @@ describe('predicateSegs', () => {
     test('a no-determined subject negates the verb', () => {
       expect(text(predicateSegs(vp(TABERU), undefined, undefined, undefined, false, true))).toBe('食べません');
     });
+
+    // A216: a `no` possessor closes the circumfix around its whole phrase, which negates the verb.
+    test('a no-determined possessor in the object or a complement negates the verb', () => {
+      const noDogs = (forms: typeof IE) => np(forms, {}, { possessor: np(INU, { definiteness: 'no' }) });
+      expect(text(predicateSegs(vp(TABERU), el(noDogs(HON)), undefined))).toBe('どの犬の本も食べません');
+      expect(text(predicateSegs(vp(TABERU), undefined, complements({ locative: complement(noDogs(IE)) })))).toBe('どの犬の家でも食べません');
+      // A comparison counts here too, as a `no` head's does (A181).
+      expect(text(predicateSegs(vp(TABERU), undefined, complements({ manner: complement(noDogs(IE)) })))).toBe('どの犬の家のようにも食べません');
+    });
   });
 
   // A150: HAVE with an inanimate owner is the existential ある, its object marked が, not 持つ + を.
@@ -137,6 +146,23 @@ describe('predicateSegs', () => {
 
     test('regression: an animate owner keeps 持つ and を', () => {
       expect(text(predicateSegs(vp(MOTSU), walls, undefined, undefined, false, false, true))).toBe('壁を持っています');
+    });
+
+    // A217: the existential verb follows what exists, which under HAVE is the thing possessed.
+    test('an animate thing possessed takes いる', () => {
+      expect(text(predicateSegs(vp(MOTSU), el(np(NEZUMI)), undefined))).toBe('ネズミがいます');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), el(np(NEZUMI)), undefined))).toBe('ネズミがいませんでした');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), el(np(NEZUMI)), undefined))).toBe('ネズミがいたら');
+    });
+
+    // A relative clause on the thing possessed has no object left: the head fills it, and says which.
+    test('animateObject names the thing possessed when the object slot is the gap', () => {
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true, false, false, true))).toBe('いる');
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true, false, false, false))).toBe('ある');
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true))).toBe('ある');
+      // BE reads its subject, whatever it is told about an object.
+      const inHouse = complements({ locative: complement(np(IE)) });
+      expect(text(predicateSegs(vp(DESU), undefined, inHouse, undefined, false, false, false, true))).toBe('家にあります');
     });
   });
 

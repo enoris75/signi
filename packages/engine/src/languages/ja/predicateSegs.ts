@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import type { JaForm, JaIPN } from './ja.types.js';
 import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
 import { aspectFormSegs } from './aspectFormSegs.js';
@@ -9,6 +10,7 @@ import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
 import { elSegs } from './elSegs.js';
+import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
@@ -39,6 +41,10 @@ export function predicateSegs(
   subjectNegative = false,
   // Whether the subject is animate (a person or an animal); picks いる over ある for a located subject.
   animateSubject = false,
+  // Whether the thing possessed is animate, for a possessive existential whose object is not in the
+  // clause: a relative clause on the thing possessed (家にいる猫), where the head fills the gap. Read
+  // off `directObject` when omitted.
+  animateObject?: boolean,
 ): RubySegment[] {
   // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
   // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
@@ -62,10 +68,15 @@ export function predicateSegs(
   // form standing where the active one stood (see `jaPassiveVerb`), which then conjugates for tense,
   // negation, aspect and the modal suffixes like any other ichidan verb. The existential substitution
   // above wins where both could apply — an existential clause has no agent to demote.
+  // The existential verb follows what exists: the subject under BE (猫は家にいます), the thing possessed
+  // under HAVE, whose owner is inanimate by definition (家は猫がいます, 家は壁があります; A217).
+  const animateExistent = possessive
+    ? animateObject ?? (directObject !== undefined && isAnimate(directObject.conjuncts))
+    : animateSubject;
   const verbPhrase: ResolvedVerbPhrase = existential
     ? {
         ...givenVerbPhrase,
-        verb: animateSubject ? JA_IRU : JA_ARU,
+        verb: animateExistent ? JA_IRU : JA_ARU,
         aspect: 'neutral',
         tense: givenVerbPhrase.aspect === 'resultative' ? 'past' : givenVerbPhrase.tense,
       }
@@ -96,7 +107,9 @@ export function predicateSegs(
   const negated = negative === true || groupHasNegativeAdverb(verbPhrase)
     || subjectNegative
     || (directObject !== undefined && isNegativeGroup(directObject))
-    || hasNegativeComplement(complements, { countComparisons: true });
+    || hasNegativeComplement(complements, { countComparisons: true })
+    // A `no` possessor in a complement closes the same circumfix around its phrase (どの男の家でも; A216).
+    || hasNegativePossessorComplement(complements, { countComparisons: true });
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.
