@@ -78,3 +78,7 @@ and the clause now says what it negates (*el gato no ve la casa de ningún libro
   and [`pt/possessorText.test.ts`](../../../packages/engine/src/languages/pt/possessorText.test.ts)
   each add a case for a demonstrative and a quantifier kept beside the possessive, and an indefinite
   that still gives way to it.
+
+`all` is not in `KEPT_BESIDE_POSSESSIVE` (it stands ahead of the unstressed possessive rather than
+moving it behind the noun), and a possessor still drops it: *de mis libros* for *de todos mis
+libros*. Filed as [A236](../A-must-fix/A236-spanish-portuguese-possessor-drops-all.md).

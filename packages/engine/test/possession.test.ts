@@ -1024,3 +1024,41 @@ describe('known bugs: a Spanish or Portuguese possessor drops its own determiner
     });
   });
 });
+
+// A236. A234 gave a Spanish or Portuguese possessor its own determiner back beside a possessive, for
+// the determiners A187 keeps. `all` is not one of them — the object writes it ahead of the possessive,
+// "todos mis libros", "todos os meus livros" — and the possessor still forces it away before writing
+// the prenominal possessive: "of all my books" is "de mis libros", "dos meus livros". Found fixing A234.
+describe('known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A236)', () => {
+  const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
+  const his = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } as const;
+  const housesOf = (possessor: NounPhrase) => sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { possessor }) }));
+  const esPt = (said: Record<string, string>) => ({ es: said['es'], pt: said['pt'] });
+
+  test.fails('the possessor keeps "all" ahead of the possessive, as the object does', () => {
+    expect(esPt(housesOf(np('BOOK', { definiteness: 'all', number: 'plural', possessor: my })))).toEqual({
+      es: 'el gato ve la casa de todos mis libros.', pt: 'o gato vê a casa de todos os meus livros.',
+    });
+    expect(esPt(housesOf(np('BOOK', { definiteness: 'all', number: 'plural', possessor: his })))).toEqual({
+      es: 'el gato ve la casa de todos sus libros.', pt: 'o gato vê a casa de todos os seus livros.',
+    });
+    expect(esPt(sayAll(clause(np('HOUSE', { possessor: np('BOOK', { definiteness: 'all', number: 'plural', possessor: my }) }), 'BURN')))).toEqual({
+      es: 'la casa de todos mis libros arde.', pt: 'a casa de todos os meus livros arde.',
+    });
+  });
+
+  test('regression: the object, a possessor without a possessive, and the other five', () => {
+    expect(esPt(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { definiteness: 'all', number: 'plural', possessor: my }) })))).toEqual({
+      es: 'el gato ve todos mis libros.', pt: 'o gato vê todos os meus livros.',
+    });
+    expect(esPt(bookOf(np('CAT', { definiteness: 'all', number: 'plural' })))).toEqual({
+      es: 'el libro de todos los gatos arde.', pt: 'o livro de todos os gatos arde.',
+    });
+    expect(housesOf(np('BOOK', { definiteness: 'all', number: 'plural', possessor: my }))).toMatchObject({
+      it: 'il gatto vede la casa di tutti i miei libri.',
+      fr: 'le chat voit la maison de tous mes livres.',
+      de: 'der Kater sieht das Haus aller meiner Bücher.',
+      ja: '猫は私のすべての本の家を見ます。',
+    });
+  });
+});
