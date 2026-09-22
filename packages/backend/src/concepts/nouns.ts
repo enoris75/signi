@@ -2411,6 +2411,56 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
     },
   },
+  // P09's night and year (localization B59). NIGHT is glossed on FLAME's part-whole shape, with DAY
+  // as the whole and DARK as the differentia: "the dark part of a day". A relative clause ("the part
+  // of a day that does not have light") would put Japanese's clause on the day, 光がない日の部分; the
+  // adjective sits between the whole and the head, 日の暗い部分, as 火の可視の部分 does. The head is
+  // definite as FLAME's is: a day has one dark part.
+  {
+    id: 'NIGHT',
+    role: 'noun',
+    description: 'the time from sunset to sunrise, when it is dark',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        adjectives: ['DARK'],
+        possessor: { concept: 'DAY', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
+    emoji: '🌙',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'night', plural: 'nights', count: 'singular' },
+      it: { base: 'notte', plural: 'notti', gender: 'fem', count: 'singular' },
+      fr: { base: 'nuit', plural: 'nuits', gender: 'fem', count: 'singular' },
+      de: { base: 'Nacht', plural: 'Nächte', gender: 'fem', count: 'singular' },
+      es: { base: 'noche', plural: 'noches', gender: 'fem', count: 'singular' },
+      ja: { base: '夜', count: 'singular', reading: 'よる' },
+      pt: { base: 'noite', plural: 'noites', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // French année, not an: "an" is the form after a cardinal ("deux ans"), which waits on numerals
+    // (C31); under the determiners the builder has, année gives "beaucoup d'années" and "cette année"
+    // where an would give "beaucoup d'ans" and "cet an". Japanese 年 reads とし on its own; "this year"
+    // is この年, where the language says the fused 今年.
+    id: 'YEAR',
+    role: 'noun',
+    description: 'the period of about 365 days the earth takes to go around the sun',
+    emoji: '📆',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'year', plural: 'years', count: 'singular' },
+      it: { base: 'anno', plural: 'anni', gender: 'masc', count: 'singular' },
+      fr: { base: 'année', plural: 'années', gender: 'fem', count: 'singular' },
+      de: { base: 'Jahr', plural: 'Jahre', gender: 'neut', count: 'singular' },
+      es: { base: 'año', plural: 'años', gender: 'masc', count: 'singular' },
+      ja: { base: '年', count: 'singular', reading: 'とし' },
+      pt: { base: 'ano', plural: 'anos', gender: 'masc', count: 'singular' },
+    },
+  },
 
   // ── Grammar terms ─────────────────────────────────────────────────
   // The metalinguistic vocabulary the builder itself is made of — the words for the parts of

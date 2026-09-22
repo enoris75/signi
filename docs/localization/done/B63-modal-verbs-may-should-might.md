@@ -28,7 +28,9 @@ persona autorizzata*, *eine berechtigte Person*, *la mujer está autorizada*, �
 
 ### Seed work and engine work
 
-The candidates above, rendered as modals over RUN (2026-09-22, engine source at HEAD, in memory):
+The candidates above, rendered as modals over RUN (2026-09-22, engine source at HEAD, in memory).
+**Every engine gap this section names was built with the seed — see **Done** for what each row reads
+now.**
 
 | plan | en | it | fr | de | es | ja | pt |
 |---|---|---|---|---|---|---|---|
@@ -160,3 +162,91 @@ in the modal picker C09's test opens:
 
 - **MAY in English and Italian.** The Italian list shows *potere* twice, MAY and CAN, told apart
   only by *essere autorizzato ad agire* against *essere capace di agire*.
+
+## Done
+
+Shipped 2026-09-22. **Four words seeded** — MAY, SHOULD and MIGHT in
+[verbs/modals.ts](../../../packages/backend/src/concepts/verbs/modals.ts) (after WILL) and ALLOWED in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts) (after OBLIGED) — **one gloss**
+authored, MAY's, and the engine work all three needed built with the seed, so none of them is half
+seeded. The three paradigms, the gloss and every engine fix are pinned in
+[modal-verbs-may-should-might.test.ts](../../../packages/engine/test/modal-verbs-may-should-might.test.ts),
+each engine function keeping its own case beside it.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| MAY | to be allowed to act | essere autorizzato ad agire | être autorisé à agir | berechtigt sein, zu handeln | estar autorizado a actuar | 行動することが許可されている | estar autorizado a agir |
+
+The three as modals over RUN, from the final seed (the table the ticket opened with, re-rendered):
+
+| plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| MAY | the man may run. | l'uomo può correre. | l'homme peut courir. | der Mann darf laufen. | el hombre puede correr. | 男は走ることが許されます。 | o homem pode correr. |
+| MAY, negated | the man may not run. | l'uomo non può correre. | l'homme ne peut pas courir. | der Mann darf nicht laufen. | el hombre no puede correr. | 男は走ることが許されません。 | o homem não pode correr. |
+| MAY, past | the man was allowed to run. | l'uomo poteva correre. | l'homme pouvait courir. | der Mann durfte laufen. | el hombre podía correr. | 男は走ることが許されました。 | o homem podia correr. |
+| MAY, past negated | the man was not allowed to run. | l'uomo non poteva correre. | l'homme ne pouvait pas courir. | der Mann durfte nicht laufen. | el hombre no podía correr. | 男は走ることが許されませんでした。 | o homem não podia correr. |
+| MAY, question | may the man run? | l'uomo può correre? | est-ce que l'homme peut courir ? | darf der Mann laufen? | ¿el hombre puede correr? | 男は走ることが許されますか？ | o homem pode correr? |
+| SHOULD | the man should run. | l'uomo dovrebbe correre. | l'homme devrait courir. | der Mann sollte laufen. | el hombre debería correr. | 男は走るべきです。 | o homem deveria correr. |
+| SHOULD, negated | the man should not run. | l'uomo non dovrebbe correre. | l'homme ne devrait pas courir. | der Mann sollte nicht laufen. | el hombre no debería correr. | 男は走るべきではありません。 | o homem não deveria correr. |
+| SHOULD, question | should the man run? | l'uomo dovrebbe correre? | est-ce que l'homme devrait courir ? | sollte der Mann laufen? | ¿el hombre debería correr? | 男は走るべきですか？ | o homem deveria correr? |
+| SHOULD, past | the man should have run. | l'uomo avrebbe dovuto correre. | l'homme aurait dû courir. | der Mann hätte laufen sollen. | el hombre habría debido correr. | 男は走るべきでした。 | o homem teria devido correr. |
+| SHOULD, past negated | the man should not have run. | l'uomo non avrebbe dovuto correre. | l'homme n'aurait pas dû courir. | der Mann hätte nicht laufen sollen. | el hombre no habría debido correr. | 男は走るべきではありませんでした。 | o homem não teria devido correr. |
+| MIGHT | the man might run. | l'uomo potrebbe correre. | l'homme pourrait courir. | der Mann könnte laufen. | el hombre podría correr. | 男は走るかもしれません。 | o homem poderia correr. |
+| MIGHT, negated | the man might not run. | l'uomo non potrebbe correre. | l'homme ne pourrait pas courir. | der Mann könnte nicht laufen. | el hombre no podría correr. | 男は走らないかもしれません。 | o homem não poderia correr. |
+| MIGHT, past | the man might have run. | l'uomo avrebbe potuto correre. | l'homme aurait pu courir. | der Mann hätte laufen können. | el hombre habría podido correr. | 男は走ったかもしれません。 | o homem teria podido correr. |
+| MIGHT, past negated | the man might not have run. | l'uomo non avrebbe potuto correre. | l'homme n'aurait pas pu courir. | der Mann hätte nicht laufen können. | el hombre no habría podido correr. | 男は走らなかったかもしれません。 | o homem não teria podido correr. |
+
+What landed differently from the plan:
+
+1. **`should` joined English `MODAL_AUX`**, as the ticket asked: "the man should not run.", "should
+   the man run?", where do-support over the suppletive *be supposed to* used to read "does not be
+   supposed to run".
+2. **The "be" of a suppletive periphrasis is an auxiliary too.** MAY's past is *was / were allowed
+   to*, and with only `MODAL_AUX` to go by it negated and questioned with do-support ("did not be
+   allowed to run"). A `FINITE_BE` set beside `MODAL_AUX` fixes it in
+   [`modalFinite`](../../../packages/engine/src/languages/en/modalFinite.ts): "was not allowed to
+   run", "was the man allowed to run?".
+3. **SHOULD and MIGHT are `conditional`, a lexeme flag the engine reads** (en and de). A conditional
+   modal has no future of its own — the future is its one form — and its past is the perfect under
+   it: English "should have run" / "might not have run" (the perfect lands on the first element that
+   can carry it: an inner modal's new `nonfinite_perfect`, "should have been able to run", else the
+   main verb's group), German the Konjunktiv II pluperfect with the double infinitive, *hätte laufen
+   sollen*, which a verb-final clause fronts correctly (*der Kater, der hätte fressen sollen*). The
+   Romance four need no flag: their conditional present and conditional perfect are seeded as the
+   ticket gives, and leaving `stative` off is what reads them.
+4. **Japanese SHOULD is a copula-kind modal**, the cheap option the ticket allowed: `kind: 'copula'`
+   inflects 〜べき as a predicate noun, 走るべきです / 走るべきではありません / 走るべきでした, where a
+   verb kind read 走るべきであります. Governed by another modal it is 〜べきである
+   (男は走るべきであるかもしれません).
+5. **Japanese MIGHT governs the plain FINITE form**, a third `governs` value: the verb before
+   〜かもしれない carries the polarity and the tense and the suffix only the politeness —
+   走らないかもしれません, 走ったかもしれません, 走ることができないかもしれません, and 走っていないかもしれません
+   for an aspect. The ticket's かもしれます and its positive-reading negation are gone. An "if" clause
+   takes なら (走るかもしれないなら), the tense having already gone to the verb.
+6. **The French modal chain negates a compound finite on its auxiliary.** SHOULD's past is
+   *aurait dû*, and "ne … pas" wrapped the whole of it (*n'aurait dû pas courir*);
+   [`modalGroupFr`](../../../packages/engine/src/languages/fr/modalGroupFr.ts) now splits it, so the
+   participle leads the tail: *n'aurait pas dû courir*, *aurait toujours dû courir*. (This is the
+   modal chain's own negation, not the lexical multiword finite B62's NEED meets.)
+7. **A conditional modal seeds the imperfect-subjunctive stem an "if" clause needs.** With the
+   conditional in the present slot, fr/es/pt derived the protasis from it (*si le chat devriait
+   manger*, *si el gato habrían debidora comer*): the seed now carries `subjunctive_stem` (fr *dev-*,
+   *pouv-*; es *debie-*, *pudie-*; pt *deve-*, *pude-*), which
+   [`mood.ts`](../../../packages/engine/src/mood.ts) prefers — *si le chat devait manger*, *si el
+   gato debiera comer*, *se o gato devesse comer*, and the 1st plural's accent with it
+   (*debiéramos*, *devêssemos*, *pudéssemos*). Italian needed none: its rule reads the infinitive
+   (*dovesse*).
+8. **MIGHT's English `nonfinite` is the adverb "possibly".** English has no paraphrase that keeps
+   the possibility under another modal, so a governed MIGHT is "wants to possibly run"; being no
+   verb, it passes a conditional past's perfect on to what follows ("should possibly have run"). Its
+   `synonym` is "possibly" for the same reason.
+9. **MAY keeps 〜ことが許される**, not the alternative 〜ことが認められる of reading 2: the gloss says
+   許可されている and the modal 許される, two lexemes that share the character 許 but neither the word
+   nor the reading — the C09 rule is that no gloss repeats the word it defines, which this keeps.
+10. **SHOULD's and MIGHT's glosses still wait on
+    [C30](../C-needs-engine/C30-content-clause-with-expletive-subject.md)**, as **Not solved**
+    argues; nothing in the seed changed that, and neither POSSIBLE nor PERHAPS was seeded. ALLOWED's
+    own gloss still waits on LET ([C36](../C-needs-engine/C36-let-bare-infinitive.md)).
+11. **No frontend change was needed.** The modal picker is `Concept.modal`'s own list
+    (`ModalTypeahead`), so the three appear in it as soon as they are seeded; the e2e row checks all
+    three are there and reads MAY's tooltip against CAN's under the one Italian word *potere*.

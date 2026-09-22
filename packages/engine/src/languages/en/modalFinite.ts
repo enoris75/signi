@@ -1,17 +1,18 @@
 import type { Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
-import { MODAL_AUX } from './en.consts.js';
+import { FINITE_BE, MODAL_AUX } from './en.consts.js';
 import { conjugate } from './conjugate.js';
 import { doSupport } from './doSupport.js';
 
 /**
  * The outermost modal's finite form, negated where asked. "not" follows a true modal
- * auxiliary — with the orthographic contraction "can not" → "cannot" — and everything else
- * (the suppletive "had to", the lexical "want") takes do-support over its bare form.
+ * auxiliary — with the orthographic contraction "can not" → "cannot" — and so does the "be"
+ * a periphrasis opens on ("was not allowed to"); everything else (the suppletive "had to", the
+ * lexical "want") takes do-support over its bare form.
  *
  * A `question` needs an auxiliary to put before its subject, and finds one the same way: a true modal
- * auxiliary is one ("can the cat go?"), anything else takes do-support ("does the cat want to go?",
- * "did the cat have to go?").
+ * auxiliary or a "be" is one ("can the cat go?", "was the cat allowed to go?"), anything else takes
+ * do-support ("does the cat want to go?", "did the cat have to go?").
  */
 export function modalFinite(
   m: ConceptForms,
@@ -22,8 +23,9 @@ export function modalFinite(
 ): string {
   const finite = conjugate(m.forms, subjectForms, tense);
   const [first, ...rest] = finite.split(' ');
+  const auxiliary = MODAL_AUX.has(first) || FINITE_BE.has(first);
   if (!negative) {
-    if (!question || MODAL_AUX.has(first)) return finite;
+    if (!question || auxiliary) return finite;
     return `${doSupport(subjectForms, tense)} ${m.forms['nonfinite'] ?? m.forms['base'] ?? ''}`;
   }
   // A true modal auxiliary takes "not" straight after it ("could not", "will not") — with the
@@ -31,7 +33,7 @@ export function modalFinite(
   // ¬obligation ("does not have to"), the reading its own past ("did not have to"), German and
   // Japanese all take — never the prohibitive "must not". So "must" negates periphrastically via
   // the "have to" do-support below (as its past/future already do), keeping one scope across tenses.
-  if (MODAL_AUX.has(first) && first !== 'must') {
+  if (auxiliary && first !== 'must') {
     if (first === 'can' && rest.length === 0) return 'cannot';
     return [first, 'not', ...rest].join(' ');
   }

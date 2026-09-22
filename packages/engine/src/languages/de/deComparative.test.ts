@@ -12,6 +12,11 @@ describe('deComparative', () => {
     expect(deComparative('leise')).toBe('leiser');
   });
 
+  test('drops the e of an unstressed -el', () => {
+    expect(deComparative('dunkel')).toBe('dunkler');
+    expect(deComparative('schnell')).toBe('schneller');
+  });
+
   test('does not umlaut the stem — that is the caller’s job', () => {
     expect(deComparative('alt')).toBe('alter');
   });

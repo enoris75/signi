@@ -570,6 +570,26 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The differentia of NIGHT's gloss, "the dark part of a day" (localization B59), glossed as
+    // UNTITLED and EMPTY are, HAVE negated over a bare object: "that does not have light". German
+    // dunkel is the corpus's first adjective in -el, which drops its e before an ending (der dunkle
+    // Teil, dunkler) and keeps it in the superlative (am dunkelsten): see the engine's `deSchwaStem`.
+    id: 'DARK',
+    role: 'adjective',
+    description: 'with little or no light',
+    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'LIGHT', negative: true }),
+    emoji: '🌑',
+    forms: {
+      en: { base: 'dark' },
+      it: { base: 'scuro' },
+      fr: { base: 'sombre' },
+      de: { base: 'dunkel' },
+      es: { base: 'oscuro' },
+      ja: { base: '暗い', reading: 'くらい' },
+      pt: { base: 'escuro' },
+    },
+  },
+  {
     id: 'WILD',
     role: 'adjective',
     description: 'living in nature, not tamed',
@@ -695,6 +715,28 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'obligado', infinitive_link: 'a' },
       ja: { base: '義務的な', reading: 'ぎむてきな', infinitive_link: 'ことが' },
       pt: { base: 'obrigado', infinitive_link: 'a' },
+    },
+  },
+  {
+    // The differentia of MAY's gloss, "to be allowed to act" (localization B63), beside ABLE and
+    // OBLIGED. It is said of the one allowed, not of the act: autorizzato, autorisé, berechtigt,
+    // autorizado, where permesso, permis, erlaubt, permitido say "es ist erlaubt". Transient like
+    // OBLIGED, so es/pt predicate it with estar ("estar autorizado a actuar", not the passive "ser
+    // autorizado"). Japanese 許可された is predicated as 許可されている, as 閉じた is. Its own gloss is
+    // the state LET leaves, which waits on LET (C36).
+    id: 'ALLOWED',
+    role: 'adjective',
+    transient: true,
+    description: 'having permission to do something',
+    emoji: '🆗',
+    forms: {
+      en: { base: 'allowed' },
+      it: { base: 'autorizzato', infinitive_link: 'a' },
+      fr: { base: 'autorisé', infinitive_link: 'à' },
+      de: { base: 'berechtigt' },
+      es: { base: 'autorizado', infinitive_link: 'a' },
+      ja: { base: '許可された', reading: 'きょかされた', infinitive_link: 'ことが' },
+      pt: { base: 'autorizado', infinitive_link: 'a' },
     },
   },
   {

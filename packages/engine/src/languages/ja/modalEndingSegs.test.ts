@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { concept, HITSUYOU_GA_ARU, KOTO_GA_DEKIRU, TAI } from './ja.fixtures.js';
+import { BEKI, concept, HITSUYOU_GA_ARU, KOTO_GA_DEKIRU, TAI } from './ja.fixtures.js';
 import { modalEndingSegs } from './modalEndingSegs.js';
 
 const text = (segs: { t: string }[]) => segs.map((s) => s.t).join('');
@@ -19,6 +19,18 @@ describe('modalEndingSegs', () => {
     expect(text(modalEndingSegs(can, 'past', true))).toBe('ことができませんでした');
     // Negated MUST is ¬obligation, "need not" (see A23).
     expect(text(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'present', true))).toBe('必要がありません');
+  });
+
+  // B63: 〜べき is a noun-like word, so it closes as a predicate noun does — べきです, never べきであります.
+  test('a copula-kind modal takes the copula a predicate noun takes', () => {
+    const should = concept(BEKI);
+    expect(modalEndingSegs(should, 'present', false)).toEqual([{ t: 'べき' }, { t: 'です' }]);
+    expect(text(modalEndingSegs(should, 'present', true))).toBe('べきではありません');
+    expect(text(modalEndingSegs(should, 'past', false))).toBe('べきでした');
+    expect(text(modalEndingSegs(should, 'past', true))).toBe('べきではありませんでした');
+    expect(text(modalEndingSegs(should, 'present', false, 'plain'))).toBe('べきである');
+    expect(text(modalEndingSegs(should, 'past', false, 'plain'))).toBe('べきだった');
+    expect(text(modalEndingSegs(should, 'present', true, 'tara'))).toBe('べきではなかったら');
   });
 
   test('〜たい inflects as an i-adjective, with polite です', () => {

@@ -20,7 +20,11 @@ import { lemmaTail } from './functions/lemmaTail.js';
  *  - Imperfect subjunctive (protasis) is built on: es/pt the stored 3rd-plural preterite stem
  *    (`3pl_past` minus -ron/-ram — irregular preterites carry through: es supieron→supiera);
  *    it the infinitive stem (`base` minus -re, with a few overrides); fr the "nous" present
- *    stem (`1pl_present` minus -ons, être overridden).
+ *    stem (`1pl_present` minus -ons, être overridden). A lexeme whose stored paradigm is not the
+ *    indicative one — a conditional modal, whose present is the conditional and whose past is the
+ *    conditional perfect (SHOULD "devrait" / "aurait dû") — seeds the stem itself as
+ *    `subjunctive_stem` (fr dev-, es debie-, pt deve-), so the protasis still reads "si le chat
+ *    devait manger", "si el gato debiera comer", "se o gato devesse comer".
  *
  * The es/pt 1st plural is stressed on the stem's last vowel, which the spelling marks (B11): Spanish
  * always with the acute (comiéramos, fuéramos), Portuguese by that vowel (see `ptStemAccent`).
@@ -91,8 +95,13 @@ const ACUTE: Record<string, string> = { a: 'á', e: 'é', i: 'í', o: 'ó', u: '
  * strong preterite whose 3sg does end in -eu (deu). The aspect auxiliaries carry neither form and
  * are strong (estivéssemos, tivéssemos), which is what the fallback gives them.
  */
-function ptStemAccent(forms: Record<string, string>): (vowel: string) => string {
-  const regularEr = /er(?:-se)?$/.test(forms['base'] ?? '') && /eu$/.test(forms['3sg_past'] ?? '');
+function ptStemAccent(forms: Record<string, string>, stem: string): (vowel: string) => string {
+  const base = forms['base'] ?? '';
+  // A regular -er verb's preterite stem is its infinitive minus the r (comer → comeram → come-), which
+  // a strong one's never is (ter → tiveram → tive-). That reading serves a lexeme whose `3sg_past` is
+  // no preterite at all: a conditional modal's is its conditional perfect (SHOULD's "teria devido"),
+  // and its stem is seeded as `subjunctive_stem` (deve-, so devêssemos).
+  const regularEr = /er(?:-se)?$/.test(base) && (/eu$/.test(forms['3sg_past'] ?? '') || stem === base.slice(0, -1));
   return (vowel) => (vowel === 'o' ? 'ô' : vowel === 'e' && regularEr ? 'ê' : ACUTE[vowel]);
 }
 
@@ -104,19 +113,17 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
       return stem === undefined ? undefined : stem + IT_SUBJ[pn];
     }
     case 'es': {
-      const p = forms['3pl_past'];
+      const p = forms['subjunctive_stem'] ?? forms['3pl_past']?.replace(/ron$/, '');
       if (!p) return undefined;
-      const stem = p.replace(/ron$/, '');
-      return (pn === '1pl' ? stressStem(stem, (v) => ACUTE[v]) : stem) + ES_SUBJ[pn];
+      return (pn === '1pl' ? stressStem(p, (v) => ACUTE[v]) : p) + ES_SUBJ[pn];
     }
     case 'pt': {
-      const p = forms['3pl_past'];
-      if (!p) return undefined;
-      const stem = p.replace(/ram$/, '');
-      return (pn === '1pl' ? stressStem(stem, ptStemAccent(forms)) : stem) + PT_SUBJ[pn];
+      const stem = forms['subjunctive_stem'] ?? forms['3pl_past']?.replace(/ram$/, '');
+      if (!stem) return undefined;
+      return (pn === '1pl' ? stressStem(stem, ptStemAccent(forms, stem)) : stem) + PT_SUBJ[pn];
     }
     case 'fr': {
-      const stem = FR_IMPARF_STEM[verb.conceptId] ?? forms['1pl_present']?.replace(/ons$/, '');
+      const stem = FR_IMPARF_STEM[verb.conceptId] ?? forms['subjunctive_stem'] ?? forms['1pl_present']?.replace(/ons$/, '');
       return stem === undefined ? undefined : stem + FR_IMPARF[pn];
     }
     default: return undefined;

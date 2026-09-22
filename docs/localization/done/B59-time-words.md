@@ -30,7 +30,7 @@ Five P09 words and one differentia word. Three things for the seed author:
   where Japanese says 今年, and *this week* この週 for 今週. Those deictic compounds are fused
   words, as 今日 is, and the engine cannot compose them.
 - **DARK needs a German engine fix before it is seeded:** *dunkel* is the first German adjective in
-  -el, and the engine does not drop its e. See reading 1.
+  -el, and the engine does not drop its e. See reading 1. (It shipped with the fix.)
 
 ## Unlocks
 
@@ -63,7 +63,7 @@ No proposed render collides with a shipped gloss. Four readings to judge on auth
    [`declineAdj`](../../../packages/engine/src/languages/de/declineAdj.ts) absorbs only a stem-final
    -e (*müde*), and the comparative has the same gap. No seeded German adjective ends in -el, so
    DARK is the first to show it. Fix it with the seed and pin it in DARK's unit test, or NIGHT's
-   tooltip ships *dunkele* in German.
+   tooltip ships *dunkele* in German. **(Fixed with the seed — see **Done**, item 1.)**
 2. **Why DARK and not a relative clause.** "The part of a day that does not have light" renders in
    six languages with seeded words only. Japanese is the exception: it puts the clause on the whole,
    光がない日の部分, "the part of a lightless day". That is the reason FLAME's seed comment gives
@@ -176,3 +176,57 @@ One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec
 authored: NIGHT in German and Japanese. German pins the -el declension DARK's seed has to fix
 (*der dunkle Teil eines Tages*), and Japanese pins the order that chose the adjective over the
 relative clause (日の暗い部分).
+
+## Done
+
+Shipped 2026-09-22. **Four words seeded** — NIGHT and YEAR in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts) (after WEEK), DARK in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts) (after BROWN) and TODAY in
+[adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts) (after NOW) — beside DAY and WEEK,
+which the shared P09 seed had already placed (`1bf45a5`, pinned in
+[core-vocabulary-shared.test.ts](../../../packages/engine/test/core-vocabulary-shared.test.ts)).
+**Two glosses** authored, NIGHT's and its differentia's, and one engine defect fixed. The five P09
+words' own paradigms and both glosses are pinned in
+[time-words.test.ts](../../../packages/engine/test/time-words.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| NIGHT | the dark part of a day | la parte scura di un giorno | la partie sombre d'un jour | der dunkle Teil eines Tages | la parte oscura de un día | 日の暗い部分 | a parte escura de um dia |
+| DARK | that does not have light | che non ha luce | qui n'a pas de lumière | der kein Licht hat | que no tiene luz | 光がない | que não tem luz |
+
+What landed differently from the plan:
+
+1. **The German -el defect of reading 1 is fixed, not worked around.** A new
+   [`deSyncopate`](../../../packages/engine/src/languages/de/deSyncopate.ts) drops the e of an
+   unstressed -el before an ending, and
+   [`declineAdj`](../../../packages/engine/src/languages/de/declineAdj.ts) and
+   [`deComparative`](../../../packages/engine/src/languages/de/deComparative.ts) call it: *der
+   dunkle Teil eines Tages*, *eine dunkle Nacht*, *die dunklen Nächte*, *wird dunkler*. The
+   superlative keeps its e, because its -st is a consonant (*am dunkelsten*, *die dunkelste Nacht*),
+   and so does the undeclined predicate (*ist dunkel*) — all five pinned, in the function's own unit
+   tests and in the sentence suite. A monosyllable in -ll (*hell*, *schnell*) and the stressed -lel
+   of *parallel* are excluded by rule; the same syncope takes -er after a diphthong (*teuer →
+   teure*), which no seeded adjective has yet.
+2. **DAY and WEEK were seeded before this ticket ran**, with B66's *la settimana scorsa* in view;
+   this ticket owns them from here. Their glosses are numbers' work either way, and go to
+   [C31](../C-needs-engine/C31-numerals.md) as planned — the number-free leads re-rendered
+   unchanged against the final seed ("a part of a week", "a group of days", "a period of days").
+3. **YEAR is French *année* and German *das Jahr*, as the ruling and the table said**: *beaucoup
+   d'années* and *cette année* render, where *an* would give *beaucoup d'ans*. Its Japanese 年 reads
+   とし on its own, and *this year* is この年 where the language says the fused 今年 — the same gap
+   WEEK's この週 shows. YEAR's own gloss stays with C31 (the calendar route) and
+   [C29](../C-needs-engine/C29-temporal-complement.md) (the astronomical one), untouched by the seed.
+4. **TODAY is seeded with no `subtype`**, so it stands where NOW stands — after the verb in English,
+   before the object in Romance and German, before the verb in Japanese (*the cat eats today*, *il
+   gatto mangia oggi il cibo*, 猫は食べ物を今日食べます). Japanese 今日 is the fused deictic word,
+   read きょう. Its gloss stays on C29: every lead of reading 4 was re-rendered against the final
+   seed and none moved — the locative is still right only in it/es/pt (*in this day*, *dans ce
+   jour*, *in diesem Tag*, この日で).
+5. **NIGHT's plan is the one proposed, written inline as FLAME's is.** Its rejected leads were
+   re-rendered too, and still read as reading 2 says: the relative clause puts Japanese's gap on the
+   day (光がない日の部分), and dropping the day loses what makes a dark period a night.
+6. **DARK's own gloss is UNTITLED's and EMPTY's shape** (`subjectGapGloss('OBJECT_THING', 'HAVE',
+   { object: 'LIGHT', negative: true })`), as proposed; it collides with nothing in
+   [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts).
+7. **Nothing from "Not solved" was seeded**: HOUR, MONTH, EARTH, SUN and SLEEP stay unseeded, with
+   their forms kept above for whoever takes them up.

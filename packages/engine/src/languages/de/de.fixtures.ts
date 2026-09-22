@@ -111,3 +111,8 @@ export const SCHEINEN: Forms = {
 export const MUESSEN: Forms = { base: 'müssen', '1sg_present': 'muss', '3sg_present': 'muss', '3pl_present': 'müssen', '3sg_past': 'musste' };
 export const KOENNEN: Forms = { base: 'können', '3sg_present': 'kann' };
 export const WOLLEN: Forms = { base: 'wollen', '3sg_present': 'will' };
+/** SHOULD: a `conditional` modal — its one form is a Konjunktiv II, and its past is "hätte … sollen". */
+export const SOLLEN: Forms = {
+  base: 'sollen', conditional: '1',
+  '1sg_present': 'sollte', '3sg_present': 'sollte', '3pl_present': 'sollten',
+};

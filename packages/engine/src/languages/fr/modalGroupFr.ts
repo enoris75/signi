@@ -31,10 +31,14 @@ export function modalGroupFr(
 ): { finite: string; finiteAdverb: string; tail: string } {
   const pn = moodPN(subjectForms);
   // A modal names a state, so its past is the imparfait ("voulait", "devait"), not the passé simple (A130).
-  const finite = moodForm('fr', modals[0].verb, pn, mood) ?? statePastForm('fr', modals[0].verb, pn, tense, mood)
+  const conjugated = moodForm('fr', modals[0].verb, pn, mood) ?? statePastForm('fr', modals[0].verb, pn, tense, mood)
     ?? conjugate(modals[0].verb.forms, subjectForms, tense);
+  // A compound form (SHOULD's past "aurait dû", the conditionnel passé) is finite in its auxiliary
+  // alone: "ne … pas" and the modal's own adverb go around "aurait", and the participle leads the
+  // tail — "n'aurait pas dû courir", "aurait toujours dû courir".
+  const [finite, ...participle] = conjugated.split(' ');
   const finiteAdverb = modals[0].modifier?.forms['base'] ?? '';
-  const inner: string[] = [];
+  const inner: string[] = [...participle];
   modals.slice(1).forEach((m) => {
     const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
     const adv = m.modifier?.forms['base'] ?? '';

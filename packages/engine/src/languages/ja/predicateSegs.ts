@@ -1,4 +1,4 @@
-import type { ComplementType } from '@signi/shared';
+import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
@@ -177,7 +177,10 @@ export function predicateSegs(
     // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
     if (modals.length > 0) {
       const ending = mood === 'subjunctive' ? 'tara' : plain || mood === 'infinitive' ? 'plain' : 'polite';
-      segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, ending, (form) => copulaSegs(predicative, 'present', false, form)));
+      // Under 〜かもしれない the predicate itself is finite, in the plain written style a citation takes
+      // (幸せではないかもしれません, 伝説であったかもしれません; see `modalSegs`).
+      segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, ending,
+        (form) => copulaSegs(predicative, 'present', false, form), (t, n) => copulaSegs(predicative, t, n, 'citation')));
       return segs;
     }
     // A copula has no verb to carry aspect; the only meaningful one is the resultative
@@ -217,7 +220,11 @@ export function predicateSegs(
   // the modal governs (B07): 食べている必要があります, 食べていたいです, 食べようとしている必要があります.
   if (modals.length > 0) {
     const governed = aspect === 'neutral' ? undefined : (form: JaForm) => aspectFormSegs(verb, aspect, form);
-    segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed));
+    // Under 〜かもしれない the aspect is finite, in its plain form: 食べているかもしれません, and the perfect
+    // 食べたかもしれません "might have eaten" (see `modalSegs`).
+    const finite = aspect === 'neutral' ? undefined
+      : (t: Tense, n: boolean) => aspectVerbSegs({ ...verbPhrase, tense: t }, n, 'plain');
+    segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed, finite));
   }
   else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara ? 'tara' : 'polite'));
   else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));

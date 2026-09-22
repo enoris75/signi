@@ -5,19 +5,35 @@ import { masuEnding } from './masuEnding.js';
 import { modalSuffixSeg } from './modalSuffixSeg.js';
 import { wordSeg } from './wordSeg.js';
 
+// A copula-kind modal's endings, by the ending the predicate closes on, as [affirmative present,
+// affirmative past, negative present, negative past]: the copula a predicate noun takes (see
+// `copulaSegs`), after the noun-like 〜べき.
+const COPULA_KIND_ENDINGS: Record<JaEnding, [string, string, string, string]> = {
+  polite: ['です', 'でした', 'ではありません', 'ではありませんでした'],
+  plain: ['である', 'だった', 'ではない', 'ではなかった'],
+  tara: ['だったら', 'だったら', 'ではなかったら', 'ではなかったら'],
+};
+
 /**
  * The outermost modal's inflected ending — it alone carries tense and polarity. A verb-kind
  * modal takes the ordinary ます paradigm on its stem (行く必要があります); 〜たい is an
- * i-adjective, so it inflects as one (行きたいです / 行きたくなかったです).
+ * i-adjective, so it inflects as one (行きたいです / 行きたくなかったです); and a copula-kind modal
+ * is a noun-like word the copula closes, as it closes a predicate noun (行くべきです /
+ * 行くべきではありませんでした), its `suffix_dict` being that word with the dictionary copula である.
  *
  * `ending` picks the paradigm (see `JaEnding`). The modals' endings are fixed, so no lexicon form is
  * needed: 〜ある goes ある / あった / ない / なかった, an ichidan できる drops its る for た / ない / なかった,
- * and たら is the plain past + ら (必要があったら, ことができなかったら, たかったら).
+ * and たら is the plain past + ら (必要があったら, ことができなかったら, たかったら, べきだったら).
  */
 export function modalEndingSegs(m: ConceptForms, tense: Tense, negative: boolean, ending: JaEnding = 'polite'): RubySegment[] {
   const past = tense === 'past';
   const dict = m.forms['suffix_dict'] ?? '';
   const dictReading = m.forms['suffix_dict_reading'];
+  if (m.forms['kind'] === 'copula') {
+    const cut = (s: string) => s.replace(/である$/, '');
+    const cell = (negative ? 2 : 0) + (past ? 1 : 0);
+    return [wordSeg(cut(dict), dictReading ? cut(dictReading) : undefined), { t: COPULA_KIND_ENDINGS[ending][cell] }];
+  }
   if (m.forms['kind'] !== 'iadj') {
     if (ending === 'polite') return [modalSuffixSeg(m, 'stem'), { t: masuEnding(tense, negative) }];
     // 〜ある is irregular (its negative is ない); any other verb-kind modal is ichidan (できる).

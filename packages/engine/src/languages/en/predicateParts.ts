@@ -11,7 +11,7 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
-import { MODAL_AUX } from './en.consts.js';
+import { FINITE_BE, MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { agentPhrase } from './agentPhrase.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -23,6 +23,7 @@ import { modalAdverbEn } from './modalAdverbEn.js';
 import { modalFinite } from './modalFinite.js';
 import { npText } from './npText.js';
 import { objectPronounText } from './objectPronounText.js';
+import { perfectInfinitive } from './perfectInfinitive.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -240,23 +241,36 @@ function predicateWords(
     // and the modals' alike. The main verb's own frequency adverb sits right before its group. A
     // question's finite always opens on an auxiliary, *do* where the modal is not one, so the adverb
     // follows it there too: "does the cat never want to go?".
+    //
+    // A `conditional` modal (should, might) has no past or future of its own. It stays in its one
+    // form, and its past is the perfect under it: "should have run", "might not have run", "should
+    // the cat have run?". The perfect lands on the first element that can carry it: an inner modal's
+    // `nonfinite_perfect` ("should have been able to run"), or else the main verb's group ("should
+    // possibly have run", MIGHT's governed "possibly" being no verb). An "if" clause's past is its
+    // mood, not a past, so it keeps the plain form: "if the cat should run".
+    const conditionalModal = modals[0].verb.forms['conditional'] === '1';
+    const finiteTense: Tense = conditionalModal ? 'present' : tense;
+    let perfect = conditionalModal && verbPhrase.tense === 'past';
     const words: string[] = [];
     modals.forEach((m, i) => {
       const adv = m.modifier?.forms['base'] ?? '';
       const freq = isFrequencyAdverb(m.modifier);
       if (i === 0) {
-        const finite = modalFinite(m.verb, subjectForms, tense, negateVerb, interrogative);
-        if (adv && freq && (negateVerb || interrogative || MODAL_AUX.has(finite.split(' ')[0]))) words.push(afterFirstAux(finite, adv));
+        const finite = modalFinite(m.verb, subjectForms, finiteTense, negateVerb, interrogative);
+        const [first] = finite.split(' ');
+        if (adv && freq && (negateVerb || interrogative || MODAL_AUX.has(first) || FINITE_BE.has(first))) words.push(afterFirstAux(finite, adv));
         else if (adv && freq) words.push(adv, finite);
         else words.push(finite);
       } else {
-        const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
+        const perfectWord = perfect ? m.verb.forms['nonfinite_perfect'] : undefined;
+        if (perfectWord) perfect = false;
+        const word = perfectWord ?? m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
         if (adv && freq) words.push(adv, word);
         else words.push(word);
       }
       if (m.verb.forms['link']) words.push(m.verb.forms['link']);
     });
-    const mainGroup = verbGroupInfinitive(verb.forms, aspect);
+    const mainGroup = perfect ? perfectInfinitive(verb.forms, aspect) : verbGroupInfinitive(verb.forms, aspect);
     if (modifierText && isFrequency) words.push(modifierText, mainGroup);
     else words.push(mainGroup);
     const trailingMod = trailing(modifierText && !isFrequency ? modifierText : '');

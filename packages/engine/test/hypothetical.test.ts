@@ -250,7 +250,10 @@ describe('documented simplifications: Spanish 1st-plural imperfect subjunctive',
     expect(verbs.length).toBeGreaterThan(90);
     const wrong = verbs.flatMap(({ id, forms }) => {
       const form = moodForm('es', { conceptId: id, forms: plainForms(forms) }, '1pl', 'subjunctive') ?? '';
-      const stem = plainForms(forms)['3pl_past']!.replace(/ron$/, '');
+      // A conditional modal's stored past is its conditional perfect ("habría debido"), so its stem is
+      // the seeded `subjunctive_stem` rather than a preterite (see `mood.ts`).
+      const plain = plainForms(forms);
+      const stem = plain['subjunctive_stem'] ?? plain['3pl_past']!.replace(/ron$/, '');
       const ok = /^[^áéíóú]*[áé]ramos$/.test(form) && unaccent(form) === `${stem}ramos`;
       return ok ? [] : [`${id}: ${form}`];
     });
@@ -302,6 +305,8 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
       HAVE: 'tivéssemos', HOLD: 'contivéssemos', MAKE: 'fizéssemos', KNOW: 'soubéssemos', CAN: 'pudéssemos', WILL: 'quiséssemos',
       // DO is fazer too, as MAKE is (B62).
       DO: 'fizéssemos',
+      // MAY and MIGHT are poder too (B63); SHOULD is the regular dever, and its stem falls out below.
+      MAY: 'pudéssemos', MIGHT: 'pudéssemos',
       // fazer's compounds keep its irregular preterite (B40), and pôr's do the same (B57: dispor).
       UNDO: 'desfizéssemos', REDO: 'refizéssemos', ARRANGE: 'dispuséssemos',
       // dizer's strong preterite (disse, not a regular -eu) takes the open é (B60).
@@ -315,7 +320,7 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
     const wrong = verbs.flatMap(({ id, forms }) => {
       const plain = plainForms(forms);
       const form = moodForm('pt', { conceptId: id, forms: plain }, '1pl', 'subjunctive');
-      const stem = plain['3pl_past']!.replace(/ram$/, '');
+      const stem = plain['subjunctive_stem'] ?? plain['3pl_past']!.replace(/ram$/, '');
       const accent = CLASS_ACCENT[plain['base']!.slice(-2)];
       const expected = IRREGULAR[id] ?? `${unaccent(stem).slice(0, -1)}${accent}ssemos`;
       return form === expected ? [] : [`${id}: ${form} (want ${expected})`];

@@ -397,6 +397,24 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // P09's today (localization B59). A time adverb, positioned as NOW is. Its gloss, "on this day",
+    // is a temporal complement no relation renders yet (en "on", de "an", ja に), so it waits on C29.
+    // Japanese 今日 is the fused deictic word, reading きょう.
+    id: 'TODAY',
+    role: 'adverb',
+    description: 'on this present day',
+    emoji: '🌅',
+    forms: {
+      en: { base: 'today' },
+      it: { base: 'oggi' },
+      fr: { base: "aujourd'hui" },
+      de: { base: 'heute' },
+      es: { base: 'hoy' },
+      ja: { base: '今日', reading: 'きょう' },
+      pt: { base: 'hoje' },
+    },
+  },
+  {
     // By this time, sooner than expected: "this command already has a value" (localization C21). It
     // sits where ALWAYS and NEVER sit — before the verb in English ("already has"), between the
     // auxiliary and the participle in a compound tense (it "ha già mangiato", fr "a déjà mangé", de

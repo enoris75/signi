@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { CAN, concept, HE, I, MUST, THEY, WE, WILL } from './en.fixtures.js';
+import { CAN, concept, HE, I, MAY, MUST, SHOULD, THEY, WE, WILL } from './en.fixtures.js';
 import { modalFinite } from './modalFinite.js';
 
 describe('modalFinite', () => {
@@ -58,6 +58,24 @@ describe('modalFinite', () => {
     test('a negative question is negated as a statement is', () => {
       expect(modalFinite(concept(CAN), HE, 'present', true, true)).toBe('cannot');
       expect(modalFinite(concept(WILL), HE, 'present', true, true)).toBe('does not want');
+    });
+  });
+
+  // B63: "should" is a modal auxiliary, and the "be" of a suppletive periphrasis behaves as one —
+  // never the do-support "does not be supposed to" / "did the cat be allowed to".
+  describe('should, and the "be" of a periphrasis', () => {
+    test('should takes "not" and leads a question itself', () => {
+      expect(modalFinite(concept(SHOULD), HE, 'present', false)).toBe('should');
+      expect(modalFinite(concept(SHOULD), HE, 'present', true)).toBe('should not');
+      expect(modalFinite(concept(SHOULD), THEY, 'present', false, true)).toBe('should');
+    });
+
+    test('a finite "be" negates and inverts on itself, agreeing with the subject', () => {
+      expect(modalFinite(concept(MAY), HE, 'past', false)).toBe('was allowed to');
+      expect(modalFinite(concept(MAY), THEY, 'past', false)).toBe('were allowed to');
+      expect(modalFinite(concept(MAY), HE, 'past', true)).toBe('was not allowed to');
+      expect(modalFinite(concept(MAY), HE, 'past', false, true)).toBe('was allowed to');
+      expect(modalFinite(concept(MAY), I, 'present', true)).toBe('may not');
     });
   });
 });

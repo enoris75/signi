@@ -1,8 +1,23 @@
 import { describe, expect, test } from 'vitest';
-import { ESSEN, GEHEN, HINZUFUEGEN, KOENNEN, modal, MUESSEN, WOLLEN } from './de.fixtures.js';
+import { ESSEN, GEHEN, HINZUFUEGEN, KOENNEN, modal, MUESSEN, SOLLEN, WOLLEN } from './de.fixtures.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 
 describe('modalVerbGroup', () => {
+  // A `conditional` modal (sollte, könnte) is a Konjunktiv II already: no würde, no future of its
+  // own, and a past that is the pluperfect subjunctive with the double infinitive (B63).
+  test('a conditional modal keeps its one form, and its past is "hätte … sollen"', () => {
+    expect(modalVerbGroup([modal(SOLLEN)], GEHEN, '3sg', 'present', 'neutral')).toEqual({ v2: 'sollte', mid: '', tail: 'gehen', zuInfinitive: '' });
+    expect(modalVerbGroup([modal(SOLLEN)], GEHEN, '3sg', 'future', 'neutral')).toEqual({ v2: 'sollte', mid: '', tail: 'gehen', zuInfinitive: '' });
+    expect(modalVerbGroup([modal(SOLLEN)], GEHEN, '3sg', 'present', 'neutral', 'conditional')).toEqual({ v2: 'sollte', mid: '', tail: 'gehen', zuInfinitive: '' });
+    expect(modalVerbGroup([modal(SOLLEN)], GEHEN, '3sg', 'past', 'neutral'))
+      .toEqual({ v2: 'hätte', mid: '', tail: 'gehen sollen', zuInfinitive: '', finiteLeadsTail: true });
+    expect(modalVerbGroup([modal(SOLLEN)], GEHEN, '3pl', 'past', 'neutral'))
+      .toEqual({ v2: 'hätten', mid: '', tail: 'gehen sollen', zuInfinitive: '', finiteLeadsTail: true });
+    // A chain stacks under hätte exactly as it stacks under werden: "hätte essen können sollen".
+    expect(modalVerbGroup([modal(SOLLEN), modal(KOENNEN)], ESSEN, '3sg', 'past', 'neutral'))
+      .toEqual({ v2: 'hätte', mid: '', tail: 'essen können sollen', zuInfinitive: '', finiteLeadsTail: true });
+  });
+
   test('neutral: the finite modal in V2, the main verb infinitive at the end', () => {
     expect(modalVerbGroup([modal(MUESSEN)], GEHEN, '3sg', 'present', 'neutral')).toEqual({ v2: 'muss', mid: '', tail: 'gehen', zuInfinitive: '' });
     expect(modalVerbGroup([modal(MUESSEN)], GEHEN, '3pl', 'present', 'neutral')).toEqual({ v2: 'müssen', mid: '', tail: 'gehen', zuInfinitive: '' });
