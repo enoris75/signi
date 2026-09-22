@@ -2112,4 +2112,22 @@ test.describe('word definition tooltip', () => {
     await conditionalDe.hover();
     await expect(page.locator(tooltip)).toHaveText('von dem ein anderer Satz abhängt');
   });
+
+  // SUFFER, seeded for a denied cause ("soffro non a causa tua"), glossed as LOVE's counterpart under
+  // the same genus.
+  test('a verb definition renders (localization A31: SUFFER)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="SUFFER"]');
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('suffer');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('to feel sorrow');
+
+    await app.setUiLanguage('it');
+    await app.verbInput.fill('suffer');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('provare tristezza');
+  });
 });

@@ -300,6 +300,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to feel pain or distress',
+    // LOVE's counterpart under the same genus: "to feel affection", "to feel sorrow". PAIN, the
+    // physical half of the description, is not seeded (localization A31).
+    definition: infinitiveGloss('FEEL', 'SORROW'),
     emoji: '😣',
     isA: 'FEEL',
     forms: {
