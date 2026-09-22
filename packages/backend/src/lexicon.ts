@@ -30,8 +30,8 @@ function formsFromRows(rows: FormRow[]): Record<string, string> {
 
 function lookupVerb(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; stative: number; transitivity: string | null; alarm_cry: number }>(`
-    SELECT vl.id, sc.stative, sc.transitivity, sc.alarm_cry FROM concept_verb_links cvl
+  const lexeme = db.prepare<[string, string], { id: number; stative: number; transitivity: string | null; alarm_cry: number; modal: number; complements: string | null }>(`
+    SELECT vl.id, sc.stative, sc.transitivity, sc.alarm_cry, sc.modal, sc.complements FROM concept_verb_links cvl
     JOIN verb_lexemes vl ON vl.id = cvl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cvl.concept_id
     WHERE cvl.concept_id = ? AND vl.language = ? AND cvl.is_primary = 1
@@ -54,6 +54,14 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
   // takes no determiner (A124, A163). Concept-level, since the object is the shout in every language;
   // the engines that give it a frame of their own read it (English, Italian, French).
   if (lexeme.alarm_cry) forms['alarm_cry'] = '1';
+  // A modal verb (must, can, will): it governs a verb group rather than heading one. A clause that
+  // still names one as its verb, governing an infinitive complement, is folded into the modal chain
+  // over that complement (A222). Concept-level.
+  if (lexeme.modal) forms['modal'] = '1';
+  // The complements the concept licenses, comma-separated as the column stores them. Italian reads
+  // `direction` here: an animate source takes "via" only under a verb whose goal could read "da"
+  // (A228). Concept-level.
+  if (lexeme.complements) forms['complements'] = lexeme.complements;
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }
