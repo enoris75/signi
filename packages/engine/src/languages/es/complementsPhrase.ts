@@ -13,6 +13,8 @@ import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -27,7 +29,7 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { isPlural } from './isPlural.js';
@@ -193,6 +195,18 @@ export function complementsPhrase(
           mannerRelation(af) === 'mode'    ? deDet(af, plural) :
           prepDet('como', af, plural)
         ) :
+        // A time. "después de" and "antes de" are locutions ending in "de", so the article fuses
+        // through it ("después del día", "antes de este día"); "hasta" and "durante" govern the
+        // phrase directly and fuse with nothing. The `at` relation takes the word the head noun
+        // names and falls back on the generic "en" ("en este día", "en este momento"), and "hace" is
+        // no preposition at all — an impersonal verb leading the phrase's own article ("hace un
+        // momento").
+        type === 'temporal'  ? (() => {
+          const relation = temporalRelation(c);
+          if (relation === 'at') return prepDet(temporalPreposition(c, 'en'), af, plural);
+          const { word, de } = ES_TEMPORAL[relation];
+          return de ? `${word} ${deDet(af, plural)}` : prepDet(word, af, plural);
+        })() :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal, spelled as the place is
           // ("salta en el aire"); with none it is the plain goal "a", or "hacia" towards a person.

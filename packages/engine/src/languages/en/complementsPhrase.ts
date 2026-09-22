@@ -11,11 +11,13 @@ import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
-import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
+import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
@@ -90,6 +92,18 @@ export function complementsPhrase(
           : isAdjectivePredicate(c) ? ''
           : (c.link ?? '');
         return [marker, predicate].filter(Boolean).join(' ');
+      }
+      // A time. Five of the six relations are ordinary prepositions and fall through to the shared
+      // path below; "ago" is not one — English postposes it, after the whole group ("a moment ago",
+      // "a day and a night ago"). The `at` relation takes the word the head noun names ("on this
+      // day", "in this week") and only falls back on the generic "at" (see `temporalPreposition`).
+      if (type === 'temporal') {
+        const relation = temporalRelation(c);
+        const word = relation === 'at' ? temporalPreposition(c, TEMPORAL_PREP.at) : TEMPORAL_PREP[relation];
+        // No tonic branch: a time is not a person, so `temporal` is absent from TONIC_COMPLEMENTS
+        // and a pronoun here takes the ordinary noun-phrase path, as it does in the other six.
+        const group = coordinate(c.phrase, npText);
+        return TEMPORAL_POSTPOSED.has(relation) ? `${group} ${word}` : `${word} ${group}`;
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       // A direction may name a relation of its own, and then it is that relation's goal form

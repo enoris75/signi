@@ -1,5 +1,5 @@
 import type { ConceptSeed } from './types.js';
-import type { Definiteness, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { Definiteness, NounPhrase, PhrasePlan, TemporalRelation } from '@signi/shared';
 
 // A manner-definition gloss the engine renders into every language: a *manner noun* phrase realised
 // as the bare prepositional adverbial that defines an adverb, the adposition chosen by the noun's
@@ -24,6 +24,26 @@ const complementGloss = (
   extra: Omit<NounPhrase, 'concept' | 'definiteness'> = {},
 ): PhrasePlan => ({
   subject: { concept: noun, definiteness, ...extra, complementGloss: { type } },
+});
+
+// A time gloss the engine renders into every language: a noun phrase realised as the `temporal`
+// complement, by the renderer a clause's complements take — temporalGloss('at', 'DAY', 'this') is
+// "on this day" / "in questo giorno" / "an diesem Tag" / この日に, exactly as "the cat eats on this
+// day" says it after the verb, and temporalGloss('ago', 'MOMENT', 'indefinite') is "a moment ago" /
+// "un momento fa" / "vor einem Augenblick" / "il y a un instant". The relation rides as the
+// complement's specifier, the way a place gloss carries a `path` one (C29, P09 §3 E3).
+const temporalGloss = (
+  relation: TemporalRelation,
+  noun: string,
+  definiteness: Definiteness,
+  extra: Omit<NounPhrase, 'concept' | 'definiteness'> = {},
+): PhrasePlan => ({
+  subject: {
+    concept: noun,
+    definiteness,
+    ...extra,
+    complementGloss: { type: 'temporal', specifiers: [{ kind: 'temporal', value: relation }] },
+  },
 });
 
 // The frequency adverbs gloss TIME (measure → "at") with a quantifier determiner and no adjective:
@@ -400,12 +420,14 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
-    // P09's today (localization B59). A time adverb, positioned as NOW is. Its gloss, "on this day",
-    // is a temporal complement no relation renders yet (en "on", de "an", ja に), so it waits on C29.
+    // P09's today (localization B59). A time adverb, positioned as NOW is. Its gloss is the temporal
+    // complement C29 built, at the `at` relation: "on this day", where the preposition is the day's
+    // own in English, German and French (en "on", de "an", fr "en") and the generic one elsewhere.
     // Japanese 今日 is the fused deictic word, reading きょう.
     id: 'TODAY',
     role: 'adverb',
     description: 'on this present day',
+    definition: temporalGloss('at', 'DAY', 'this'),
     emoji: '🌅',
     forms: {
       en: { base: 'today' },
@@ -446,6 +468,10 @@ export const adverbs: ConceptSeed[] = [
     id: 'STILL',
     role: 'adverb',
     description: 'up to now; as before',
+    // "up to this time" — C29's `until` relation on TIME. It is NOW's noun and determiner, and the
+    // "fino a" / "bis zu" / まで is the whole of what keeps the two glosses apart, which is exactly
+    // what B67 found missing: NOW is "a questo tempo", STILL "fino a questo tempo".
+    definition: temporalGloss('until', 'TIME', 'this'),
     emoji: '⏸️',
     // STILL scopes OVER a negation — "still does not" is what the plan means, not "does not still"
     // (A244). Three languages mark that scope in the surface: English puts the adverb ahead of the
@@ -537,20 +563,29 @@ export const adverbs: ConceptSeed[] = [
   // cat", 猫だけ) is a focus particle the engine lacks (C39), and so is EVEN, which Japanese has no
   // verb adverb for (さえ), so it is not seeded.
   {
-    // A moment ago, with a past or compound verb: in a simple present "just" is "merely". fr/es/pt
-    // have no adverb of recency and say it with their "ago" phrase, which keeps the default position
-    // after the verb. German soeben, since gerade is the engine's progressive (C05). Its gloss, "a
-    // moment ago", waits on a temporal complement (C29).
+    // A moment ago, with a past or compound verb: in a simple present "just" is "merely". fr/pt have
+    // no adverb of recency and say it with their "ago" phrase, which keeps the default position
+    // after the verb. German soeben, since gerade is the engine's progressive (C05).
+    //
+    // Spanish said it that way too — *hace un momento* — until C29 gave the concept its gloss, which
+    // is built from MOMENT and the `ago` relation and so renders *hace un momento* character for
+    // character: the tooltip would have repeated the word. B67 named *recién* as the fallback for
+    // exactly this, and it is a true adverb, so it takes the `frequency` position the other six
+    // have ("el gato recién corre") — which is where American Spanish puts it. Peninsular Spanish
+    // prefers the *acabar de* periphrasis, which the engine cannot build.
     id: 'JUST',
     role: 'adverb',
     description: 'a moment ago',
+    // C29's `ago` relation on MOMENT, seeded with it: a moment back from now, which is not
+    // ALREADY's "at a previous time" nor the previous moment (the one before another moment).
+    definition: temporalGloss('ago', 'MOMENT', 'indefinite'),
     emoji: '⏮️',
     forms: {
       en: { base: 'just', subtype: 'frequency' },
       it: { base: 'appena', subtype: 'frequency' },
       fr: { base: "à l'instant" },
       de: { base: 'soeben', subtype: 'frequency' },
-      es: { base: 'hace un momento' },
+      es: { base: 'recién', subtype: 'frequency' },
       ja: { base: 'たった今', subtype: 'frequency', reading: 'たったいま' },
       pt: { base: 'há pouco' },
     },

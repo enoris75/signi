@@ -1,4 +1,4 @@
-import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
+import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -146,4 +146,25 @@ export const CARDINALS: CardinalTable = {
   5: { word: 'cinco' }, 6: { word: 'seis' }, 7: { word: 'siete' }, 8: { word: 'ocho' },
   9: { word: 'nueve' }, 10: { word: 'diez' }, 11: { word: 'once' }, 12: { word: 'doce' },
   24: { word: 'veinticuatro' },
+};
+
+/**
+ * How each temporal relation is spelled in Spanish (C29). `de: true` marks the two locutions that
+ * end in "de" and so fuse with a masculine singular definite through it ("después del día"); the
+ * others govern the phrase directly. `at` is not here: it reads the head noun's own `temporal_prep`
+ * and falls back on "en", the word Spanish already puts before a day, a month and a moment. A lexeme
+ * that names one goes through the non-contracting `prepDet`, which is right for every word but "a"
+ * and "de" — the two Spanish fuses with "el". None names either today; one that needs to must route
+ * through `aDet` / `deDet` instead, or it will render "a el día".
+ *
+ * "hace" is an impersonal verb, not a preposition — "hace un momento" is literally "it makes a
+ * moment" — but it stands in exactly the place a preposition would and takes the phrase's own
+ * article, so it needs nothing special beyond its row.
+ */
+export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string; de?: boolean }> = {
+  ago: { word: 'hace' },
+  until: { word: 'hasta' },
+  after: { word: 'después', de: true },
+  before: { word: 'antes', de: true },
+  during: { word: 'durante' },
 };

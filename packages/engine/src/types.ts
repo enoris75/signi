@@ -49,11 +49,12 @@ export interface ResolvedNounPhrase {
   dimensionGloss?: boolean;
   /**
    * The complement this phrase **is**, when it is a complement-definition gloss (see
-   * NounPhrase.complementGloss): a place or direction noun phrase the engines render as that
+   * NounPhrase.complementGloss): a place, direction or time noun phrase the engines render as that
    * complement, with its specifiers, through the renderer a clause's complements take ("in all
-   * places", "to a higher place"). Set on the verbless subject; the phrase keeps its own determiner.
+   * places", "to a higher place", "on this day"). Set on the verbless subject; the phrase keeps its
+   * own determiner.
    */
-  complementGloss?: { type: 'locative' | 'direction'; specifiers?: Specifier[] };
+  complementGloss?: { type: 'locative' | 'direction' | 'temporal'; specifiers?: Specifier[] };
   /**
    * Whether this phrase is a **manner-definition gloss** (see NounPhrase.mannerGloss): a manner-noun
    * phrase the engines render as the bare prepositional adverbial defining an adverb ("at high

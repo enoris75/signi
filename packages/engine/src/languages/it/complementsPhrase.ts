@@ -13,13 +13,15 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
-import { CONSTITUENT_NEGATOR, IT_DI_BEFORE_PRONOUN, IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
+import { CONSTITUENT_NEGATOR, IT_DI_BEFORE_PRONOUN, IT_MANNER_PREP, IT_TEMPORAL, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
 import { artFor } from './artFor.js';
@@ -183,6 +185,17 @@ export function complementsPhrase(
         // separate the two either ("coordina con il periodo").
         type === 'instrumental' || type === 'comitative' ? prepDet('con', nf, plural, lead) :
         type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
+        // A time. "fino a" and "prima di" are locutions ending in a simple preposition, so the
+        // article fuses through it ("fino al giorno", "prima del giorno"); "dopo" and "durante" are
+        // single words that fuse with nothing ("dopo il giorno"). The `at` relation takes the word
+        // the head noun names — "in questo giorno" against the generic "a questo tempo" — and "fa"
+        // is no adposition at all, so it leaves the phrase bare and is postposed below.
+        type === 'temporal'  ? (() => {
+          const relation = temporalRelation(c);
+          const { word, prep } = IT_TEMPORAL[relation];
+          const p = relation === 'at' ? temporalPreposition<ItPreposition>(c, 'a') : prep;
+          return joinWords([word ?? '', p ? prepDet(p, nf, plural, lead) : artFor(nf, plural, lead)]);
+        })() :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal — Italian spells the two the same
           // ("salta nell'aria", "è nell'aria"), so the place map serves ("jumps into the air").
@@ -225,9 +238,13 @@ export function complementsPhrase(
       };
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
-      return coordinate(c.phrase, (np) =>
+      const phrase = coordinate(c.phrase, (np) =>
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicText(np) ||
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
+      // "fa" follows the whole group, as English's "ago" does: "un momento fa", "un giorno e una
+      // notte fa". Every other temporal relation is an adposition and was emitted by `headFor`.
+      const tail = type === 'temporal' ? IT_TEMPORAL[temporalRelation(c)].postposed : undefined;
+      return tail ? `${phrase} ${tail}` : phrase;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever
     // shape the sentiment gave it (see `withCauseNegator`).

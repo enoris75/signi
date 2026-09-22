@@ -1,4 +1,4 @@
-import type { CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, MannerRelation, PathSpecifier } from '@signi/shared';
+import type { CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, MannerRelation, PathSpecifier, TemporalRelation } from '@signi/shared';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
@@ -30,6 +30,7 @@ export const PREP: Record<ComplementType, string> = {
   manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
   comitative: 'with', // companion — "coordinates with the other period"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
+  temporal: 'at', // time — relation-driven, see TEMPORAL_PREP; 'at' is the generic `at` preposition
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
   // Object complement — the factitive link is the verb's ("transform it INTO a command"), the
   // essive's is ESSIVE below, so the type itself contributes none. See `complementsPhrase`.
@@ -64,6 +65,24 @@ export const CAUSE_PREP: Record<CauseSentiment, string> = {
   positive: 'thanks to',
   negative: 'through the fault of',
 };
+
+/**
+ * The temporal complement's relation, as an adposition. `at` is the generic one — the word a lexeme
+ * that names no `temporal_prep` of its own falls back on ("at this time"); a day says "on", a week
+ * "in". `ago` is not a preposition at all: English postposes it ("a moment **ago**"), which
+ * `TEMPORAL_POSTPOSED` marks and `complementsPhrase` renders after the noun phrase.
+ */
+export const TEMPORAL_PREP: Record<TemporalRelation, string> = {
+  at: 'at',
+  ago: 'ago',
+  until: 'until',
+  after: 'after',
+  before: 'before',
+  during: 'during',
+};
+
+/** The relations English writes after the noun phrase rather than before it. */
+export const TEMPORAL_POSTPOSED = new Set<TemporalRelation>(['ago']);
 
 // The spatial relations, shared by route and locative — English uses one preposition per relation
 // for both ("goes under the bed", "is under the bed"), so a single map serves the two complements.

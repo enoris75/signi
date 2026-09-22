@@ -8,8 +8,10 @@ import { firstConjunct } from '../../functions/firstConjunct.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
-import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
@@ -167,6 +169,13 @@ export function complementSegs(
       ? pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER)
       : undefined;
     if (spec && REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
+    // A time: the relational noun of its relation, before the particle. 「瞬間前に」 ("a moment ago")
+    // against 「この日の前に」 ("before this day") — the の is the whole difference, so each relation
+    // names its own noun (see JA_TEMPORAL).
+    if (type === 'temporal') {
+      const { noun, reading } = JA_TEMPORAL[temporalRelation(c)];
+      if (noun) segs.push(wordSeg(noun, reading));
+    }
     // A direction naming a relation takes the same relational noun before its へ — 空気の中へ ("into
     // the air"), 家の後ろへ ("to behind the house"). Containment is the one that needs it: a *place*
     // spells it with に alone (空気に), but a goal's へ says only "towards", so without 中 the phrase
@@ -191,6 +200,11 @@ export function complementSegs(
       : type === 'locative' && spec === 'in' && firstConjunct(c.phrase).head.forms['locative_particle']
         ? firstConjunct(c.phrase).head.forms['locative_particle']!
       : type === 'cause' ? jaCauseParticle(c)
+      // A time: the relation's particle, or — for `at` alone — the one the head noun names, as a
+      // place noun names its own `locative_particle`.
+      : type === 'temporal' ? (
+        temporalRelation(c) === 'at' ? temporalPreposition(c, JA_TEMPORAL.at.particle) : JA_TEMPORAL[temporalRelation(c)].particle
+      )
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       // The object complement: the factitive に ("この文を命令にする"), or として where the object is
       // only taken as the thing ("この文を条件として使う").

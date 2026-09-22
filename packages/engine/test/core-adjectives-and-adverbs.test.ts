@@ -77,15 +77,35 @@ describe('the glosses, in every language', () => {
     ['REALLY', {
       en: 'in reality.', it: 'in realtà.', fr: 'en réalité.', de: 'in Wirklichkeit.', es: 'en realidad.', ja: '現実で。', pt: 'em realidade.',
     }],
+    // C29's temporal complement, at its `at` relation: HERE's shape a day along. The preposition is
+    // the day's own where the language has one — en "on", de "an", fr "en" — and the generic time
+    // preposition elsewhere.
+    ['TODAY', {
+      en: 'on this day.', it: 'in questo giorno.', fr: 'en ce jour.', de: 'an diesem Tag.', es: 'en este día.', ja: 'この日に。',
+      pt: 'neste dia.',
+    }],
+    // The `ago` relation, measured back from now. Three languages postpose it ("ago", "fa", 前に)
+    // and three front an impersonal verb ("il y a", "hace", "há"); German alone spells it with an
+    // ordinary preposition, the "vor" it also uses for `before`.
+    ['JUST', {
+      en: 'a moment ago.', it: 'un momento fa.', fr: 'il y a un instant.', de: 'vor einem Augenblick.', es: 'hace un momento.',
+      ja: '瞬間前に。', pt: 'há um momento.',
+    }],
+    // The `until` relation on NOW's own noun and determiner: the "fino a" / "bis zu" / まで is the
+    // whole of what keeps STILL apart from NOW ("a questo tempo"), which is what B67 found missing.
+    ['STILL', {
+      en: 'until this time.', it: 'fino a questo tempo.', fr: "jusqu'à ce temps.", de: 'bis zu dieser Zeit.', es: 'hasta este tiempo.',
+      ja: 'この時間まで。', pt: 'até este tempo.',
+    }],
   ])('%s', (id, rendered) => {
     expect(definitionAll(id)).toEqual(rendered);
   });
 
   // AMERICAN and RIGHT_SIDE are literal by design (every gloss says the word again, or is true of
-  // Canada, or of both sides); JUST and STILL wait on C29, ONLY on C32. ERROR and REALITY are root
-  // nouns. THERE shipped with C40, and is glossed above.
+  // Canada, or of both sides); ONLY is, since C32. ERROR and REALITY are root nouns. THERE shipped
+  // with C40, and TODAY, JUST and STILL with C29 — all four are glossed above.
   test('the words that stay on the literal', () => {
-    for (const id of ['AMERICAN', 'RIGHT_SIDE', 'JUST', 'STILL', 'ONLY', 'ERROR', 'REALITY']) {
+    for (const id of ['AMERICAN', 'RIGHT_SIDE', 'ONLY', 'ERROR', 'REALITY']) {
       expect(seed(id)?.definition, id).toBeUndefined();
     }
   });
@@ -297,17 +317,19 @@ describe('the adverbs: where they stand', () => {
   });
 
   // JUST says "a moment ago" only with a past or compound verb ("just eats" is "merely eats"). The
-  // French, Spanish and Portuguese words are "ago" phrases with no subtype, so they keep a manner
-  // adverb's place after the verb.
+  // French and Portuguese words are "ago" phrases with no subtype, so they keep a manner adverb's
+  // place after the verb. Spanish said it that way too until C29 glossed the concept, which renders
+  // *hace un momento* itself; it now takes the adverb *recién*, which sits where every other Spanish
+  // frequency adverb sits — after the participle, beside "ya" and "siempre".
   test('JUST', () => {
     expect(sayAll(eats('JUST', { aspect: 'resultative' }, the('CAT', { gender: 'fem' })))).toEqual({
       en: 'the cat has just eaten the food.', it: 'la gatta ha appena mangiato il cibo.', fr: "la chatte a mangé à l'instant la nourriture.",
-      de: 'die Katze hat soeben das Essen gefressen.', es: 'la gata ha comido hace un momento la comida.', ja: '猫は食べ物をたった今食べました。',
+      de: 'die Katze hat soeben das Essen gefressen.', es: 'la gata ha comido recién la comida.', ja: '猫は食べ物をたった今食べました。',
       pt: 'a gata comeu há pouco a comida.',
     });
     expect(sayAll(eats('JUST', { tense: 'past' }))).toEqual({
       en: 'the cat just ate the food.', it: 'il gatto mangiò appena il cibo.', fr: "le chat mangea à l'instant la nourriture.",
-      de: 'der Kater fraß soeben das Essen.', es: 'el gato comió hace un momento la comida.', ja: '猫は食べ物をたった今食べました。',
+      de: 'der Kater fraß soeben das Essen.', es: 'el gato comió recién la comida.', ja: '猫は食べ物をたった今食べました。',
       pt: 'o gato comeu há pouco a comida.',
     });
   });

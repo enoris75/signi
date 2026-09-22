@@ -235,13 +235,14 @@ export type FocusParticle = 'only' | 'even' | 'also';
  */
 export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite';
 
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'comitative' | 'terminus' | 'predicative' | 'objectPredicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'comitative' | 'terminus' | 'temporal' | 'predicative' | 'objectPredicative';
 
 /**
  * The complements the **builder** offers, in the order it presents them. Not every complement type
- * is here: `objectPredicative` and `comitative` render from a plan (the UI strings of C12 are built
- * on them) but have no box on the canvas yet, so the frontend — which derives its slots, satellites
- * and selection fields from this list — does not know about them. Add one here to give it a box.
+ * is here: `objectPredicative`, `comitative` and `temporal` render from a plan (the UI strings of
+ * C12 are built on the first two, the time adverbs' glosses on the third) but have no box on the
+ * canvas yet, so the frontend — which derives its slots, satellites and selection fields from this
+ * list — does not know about them. Add one here to give it a box.
  * The engine's own order is `COMPLEMENT_RENDER_ORDER`, which holds all of them.
  */
 export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'cause'];
@@ -257,9 +258,12 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'i
  * means belongs with the act ("cuts the bread **with the knife** in the house"), before the
  * path and the place it happens in. The `objectPredicative` follows the object it predicates of,
  * so it leads the rest ("makes the period a command in the house"), and the `comitative` companion
- * sits with the dative recipient, ahead of the instrument ("goes with the dog to the market").
+ * sits with the dative recipient, ahead of the instrument ("goes with the dog to the market"). The
+ * `temporal` adjunct — the *when* — comes after the place, the order English and the Romance
+ * languages take ("runs in the house on this day"); German prefers the reverse and Japanese fronts
+ * a time before everything, but neither reorders here today, as neither does for the others.
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
@@ -272,6 +276,7 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   direction: 'Direction',
   source: 'Source',
   route: 'Route',
+  temporal: 'Temporal',
   cause: 'Cause',
 };
 
@@ -283,7 +288,7 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'temporal'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs
@@ -322,6 +327,48 @@ export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over
 /** The relation each specifier-bearing complement falls back on when none is chosen. */
 export const DEFAULT_ROUTE_SPECIFIER: PathSpecifier = 'through';
 export const DEFAULT_LOCATIVE_SPECIFIER: PathSpecifier = 'in';
+
+/**
+ * How a `temporal` complement places its act against the time its noun phrase names — the
+ * *when* of a clause, the one adjunct the engine had no complement for (localization C29, P09 §3
+ * E3). Like `PathSpecifier` it is a relation the speaker chooses, and each language renders it with
+ * its own adposition; unlike it, one member's adposition is the head noun's to pick (see `at`
+ * below) and another is not an adposition at all in three of the seven.
+ *
+ *   at     — the act happens *at* that time (the default): "runs **on this day**"
+ *            (it *in questo giorno*, fr *en ce jour*, de *an diesem Tag*, ja この日に)
+ *   ago    — measured back from now: "runs **a moment ago**" (*un momento fa*, *il y a un
+ *            instant*, *vor einem Augenblick*, *hace un momento*, 瞬間前に, *há um momento*)
+ *   until  — up to that time, not past it: "runs **until this time**" (*fino a*, *jusqu'à*,
+ *            *bis zu*, *hasta*, まで, *até*)
+ *   after  — later than it: "runs **after this day**" (*dopo*, *après*, *nach*, *después de*,
+ *            の後に, *depois de*)
+ *   before — earlier than it: "runs **before this day**" (*prima di*, *avant*, *vor*, *antes de*,
+ *            の前に, *antes de*)
+ *   during — throughout it: "runs **during this day**" (*durante*, *pendant*, *während*,
+ *            *durante*, の間に, *durante*)
+ *
+ * **`at` is the one whose word the head noun picks**, not the relation: English is *on* a day, *at*
+ * a time, *in* a week, and German *an* dem Tag, *zu* der Zeit, *in* der Woche. That is a fact about
+ * the noun's meaning, as `mannerRelation` and `place_prep` are, so each lexeme may name its own
+ * `temporal_prep` and the engines fall back on the language's generic one. The other five relations
+ * are the same word whatever the noun.
+ *
+ * Three languages say `ago` with no adposition at all: English and Italian postpose a word ("a
+ * moment **ago**", "un momento **fa**"), Japanese postposes 前に, and French, Spanish and Portuguese
+ * front an impersonal verb ("**il y a** un instant", "**hace** un momento", "**há** um momento").
+ * German alone treats it as an ordinary preposition, the *vor* + dative it also uses for `before`.
+ *
+ * Plan-only for now, like `objectPredicative` and `comitative`: the complement renders from a plan
+ * and glosses the time adverbs (TODAY, JUST, STILL), but the canvas draws no ring for it yet — it is
+ * absent from `COMPLEMENT_TYPES`, which is what gives a complement a box.
+ */
+export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during';
+
+export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during'];
+
+/** A temporal complement naming no relation simply places the act at that time. */
+export const DEFAULT_TEMPORAL_RELATION: TemporalRelation = 'at';
 
 /**
  * The affective stance a `cause` adjunct takes toward its reason — the difference
@@ -649,16 +696,17 @@ export interface NounPhrase {
   dimensionGloss?: boolean;
   /**
    * Render this phrase as a **complement-definition gloss**: the verbless fragment that defines a
-   * place or direction adverb, which is exactly the `type` complement a clause would carry after its
-   * verb — EVERYWHERE → locative "in all places" / "in tutti i luoghi" / すべての場所で, UP → direction
-   * "to a higher place" / "zu einem höheren Ort" / より高い場所へ. It is rendered by the same code
-   * that renders that complement in a clause, so the adposition, the case, the article fusion and
-   * any idiom are the complement's own, and `specifiers` are the complement's (a `path` relation:
-   * "under all places", "into a group"). The phrase keeps its own `definiteness`, as `mannerGloss`
-   * does. Localization C25. Only meaningful on the subject of a verbless period (see the engines'
-   * verbless branch); ignored when a verb phrase is present.
+   * place, direction or time adverb, which is exactly the `type` complement a clause would carry
+   * after its verb — EVERYWHERE → locative "in all places" / "in tutti i luoghi" / すべての場所で, UP →
+   * direction "to a higher place" / "zu einem höheren Ort" / より高い場所へ, TODAY → temporal "on this
+   * day" / "an diesem Tag" / この日に (C29). It is rendered by the same code that renders that
+   * complement in a clause, so the adposition, the case, the article fusion and any idiom are the
+   * complement's own, and `specifiers` are the complement's (a `path` relation: "under all places",
+   * "into a group"; a `temporal` one: "a moment ago", "until this time"). The phrase keeps its own
+   * `definiteness`, as `mannerGloss` does. Localization C25, C29. Only meaningful on the subject of
+   * a verbless period (see the engines' verbless branch); ignored when a verb phrase is present.
    */
-  complementGloss?: { type: 'locative' | 'direction'; specifiers?: Specifier[] };
+  complementGloss?: { type: 'locative' | 'direction' | 'temporal'; specifiers?: Specifier[] };
   /**
    * Render this phrase as a **manner-definition gloss**: a *manner noun* phrase realised as the
    * bare prepositional adverbial that defines an adverb — FAST → "at high speed", WELL → "in a good
@@ -950,11 +998,14 @@ export interface VerbPhrase {
 
 /**
  * A specifier attached to a complement. Discriminated by `kind`: `path` is the spatial relation
- * of a route or locative complement, `sentiment` is the cause complement's affective stance
- * (blame / credit / neutral). New specifier families can be added as further members.
+ * of a route or locative complement, `temporal` the temporal complement's relation to the time it
+ * names (at / ago / until / after / before / during), `sentiment` is the cause complement's
+ * affective stance (blame / credit / neutral). New specifier families can be added as further
+ * members.
  */
 export type Specifier =
   | { kind: 'path'; value: PathSpecifier }
+  | { kind: 'temporal'; value: TemporalRelation }
   | { kind: 'sentiment'; value: CauseSentiment }
   | { kind: 'abstraction'; value: AbstractionLevel }
   | { kind: 'predication'; value: ObjectPredication };

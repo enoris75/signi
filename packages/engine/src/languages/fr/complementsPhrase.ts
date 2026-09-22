@@ -13,6 +13,8 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -26,7 +28,7 @@ import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
 import { elidesBefore } from './elidesBefore.js';
-import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS } from './fr.consts.js';
+import { CONSTITUENT_NEGATOR, FR_TEMPORAL, LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { joinArt } from './joinArt.js';
 import { npText } from './npText.js';
@@ -212,6 +214,20 @@ export function complementsPhrase(
             mannerRelation(nf) === 'mode'    ? deDet(nf, plural, lead) :
             prepDet('comme', nf, plural, lead)
           ) :
+          // A time. "jusqu'à" fuses through its "à" ("jusqu'au jour", "jusqu'à ce jour"); "après",
+          // "avant" and "pendant" govern the phrase directly and fuse with nothing. The `at`
+          // relation takes the word the head noun names — "en ce jour" against the generic "à ce
+          // temps" — and "il y a" is no adposition at all: it is an impersonal verb, emitted whole
+          // in front of the phrase's own article ("il y a un instant").
+          type === 'temporal'  ? (() => {
+            const relation = temporalRelation(c);
+            if (relation === 'at') {
+              const prep = temporalPreposition(c, '');
+              return prep ? prepDet(prep, nf, plural, lead) : aDet(nf, plural, lead);
+            }
+            if (relation === 'until') return `jusqu'${aDet(nf, plural, lead)}`;
+            return prepDet(FR_TEMPORAL[relation], nf, plural, lead);
+          })() :
           type === 'direction' ? (
             // A direction naming a relation is that relation's goal, which French spells as it spells
             // the place ("saute dans l'air"). `over` takes its locative reading, "au-dessus de": a

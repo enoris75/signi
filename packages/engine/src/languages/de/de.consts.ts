@@ -1,4 +1,4 @@
-import type { CoordConjunction, DimensionRelation } from '@signi/shared';
+import type { CoordConjunction, DimensionRelation, TemporalRelation } from '@signi/shared';
 import type { Case, Slot } from './de.types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -174,4 +174,20 @@ export const CARDINALS: CardinalTable = {
   5: { word: 'fünf' }, 6: { word: 'sechs' }, 7: { word: 'sieben' }, 8: { word: 'acht' },
   9: { word: 'neun' }, 10: { word: 'zehn' }, 11: { word: 'elf' }, 12: { word: 'zwölf' },
   24: { word: 'vierundzwanzig' },
+};
+
+/**
+ * The dative preposition each temporal relation takes in German (C29). `at` is not here — it reads
+ * the head noun's own `temporal_prep` and falls back on "zu", the word a temporal noun already takes
+ * in a manner adverbial ("zu allen Zeiten", A60) — and neither is `until`, which reaches its time
+ * through that same "zu" ("bis zum Tag"), nor `during`, which governs the genitive.
+ *
+ * **"vor" spells both `ago` and `before`**, and that is the language, not a shortcut: "vor einem
+ * Augenblick" is a moment ago and "vor dem Tag" is before the day, one preposition for the two
+ * readings English splits into "ago" and "before" and Japanese into 前に and の前に.
+ */
+export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during'>, string> = {
+  ago: 'vor',
+  after: 'nach',
+  before: 'vor',
 };

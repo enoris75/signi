@@ -765,6 +765,15 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Cause',
   },
+  // The *when* of a clause (C29). Named with the same tradition words as its siblings — it
+  // "complemento di tempo", de "adverbiale Bestimmung der Zeit", pt "adjunto adverbial de tempo".
+  // The complement is plan-only, so nothing shows this title yet; it is here because the label map
+  // is exhaustive over ComplementType, and it is what the box would call itself.
+  'slot.temporal': {
+    plan: nameOf('TEMPORAL_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Temporal',
+  },
 
   // The verb's ring on the canvas: the verb with its modals, tense, aspect and adverb. The Romance
   // traditions call a phrase in this sense a "sintagma" / "syntagme" (it "sintagma verbale"), and

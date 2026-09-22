@@ -8,6 +8,8 @@ import { objectPredication } from '../../../functions/objectPredication.js';
 import { directionSpecifier } from '../../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../../functions/tonicPronoun.js';
@@ -19,7 +21,7 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { CONSTITUENT_NEGATOR, DE_TEMPORAL, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -205,6 +207,28 @@ export function complementsParts(
           const positive = causeSentiment(c) === 'positive';
           _case = positive || !genitiveShows(np, f) ? 'dat' : 'gen';
           head = prepDet(positive ? 'dank' : 'wegen', f, _case, plural);
+        }
+        // A time. "an" + dative for the `at` relation ("an diesem Tag"), where the word is the head
+        // noun's own — German is *an* dem Tag, *zu* der Zeit, *in* der Woche — and "zu" is the
+        // fallback a lexeme naming none takes, the same "zu" a temporal noun already takes in a
+        // manner adverbial ("zu allen Zeiten", A60). "bis" reaches its time through that "zu" as
+        // well ("bis zum Tag"), and "nach" and "vor" take the plain dative. "vor" spells both `ago`
+        // and `before` — German makes no difference between "vor einem Augenblick" and "vor dem
+        // Tag", where English has two words and Japanese marks the two apart with の.
+        //
+        // "während" is the exception: it governs the **genitive** ("während des Tages"), and falls
+        // back on the dative exactly where the cause's "wegen" does — a bare plural has no genitive
+        // to show ("während Tagen", see `genitiveShows`).
+        else if (type === 'temporal') {
+          const relation = temporalRelation(c);
+          if (relation === 'during') {
+            _case = genitiveShows(np, f) ? 'gen' : 'dat';
+            head = prepDet('während', f, _case, plural);
+          } else if (relation === 'until') {
+            head = `bis ${prepDet('zu', f, 'dat', plural)}`;
+          } else {
+            head = prepDet(relation === 'at' ? temporalPreposition(c, 'zu') : DE_TEMPORAL[relation], f, 'dat', plural);
+          }
         }
         // Terminus. An animate recipient is a bare dative — no preposition, just the dative
         // determiner ("der Katze"), the same case German gives the plain indirect object. An

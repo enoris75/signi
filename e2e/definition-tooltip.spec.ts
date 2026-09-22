@@ -2675,4 +2675,58 @@ test.describe('word definition tooltip', () => {
     await here.hover();
     await expect(page.locator(tooltip)).toHaveText('dans ce lieu');
   });
+
+  // C29: the temporal complement, the *when* of a clause, which glosses P09's last three time
+  // adverbs. Each of the three exercises a different part of it — the preposition a noun names for
+  // itself, the postposed / impersonal-verb "ago", and the "until" that keeps STILL apart from NOW.
+  test('a day names its own time preposition (localization C29: TODAY)', async ({
+    app,
+    page,
+  }) => {
+    // German is "an" a day where it is "zu" a time — the word is the day's, not the relation's, so
+    // the tooltip says "an diesem Tag" and not the generic "zu diesem Tag".
+    await app.setUiLanguage('de');
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('heute');
+    const today = page.locator('[data-testid="typeahead-option"][data-concept="TODAY"]');
+    await expect(today).toBeVisible();
+    await today.hover();
+    await expect(page.locator(tooltip)).toHaveText('an diesem Tag');
+  });
+
+  test('"ago" is an impersonal verb in French (localization C29: JUST)', async ({
+    app,
+    page,
+  }) => {
+    // French has no preposition for "ago": it fronts "il y a", which takes the phrase's own article
+    // after it. English and Italian postpose a word instead, and Japanese postposes 前に.
+    await app.setUiLanguage('fr');
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb("à l'instant");
+    const just = page.locator('[data-testid="typeahead-option"][data-concept="JUST"]');
+    await expect(just).toBeVisible();
+    await just.hover();
+    await expect(page.locator(tooltip)).toHaveText('il y a un instant');
+  });
+
+  test('"until" tells STILL from NOW (localization C29)', async ({ app, page }) => {
+    // Both gloss on TIME with the same "this": without a complement that says *until*, STILL's
+    // tooltip was NOW's, which is what B67 found and C29 fixed. The "fino a" is the whole difference.
+    await app.setUiLanguage('it');
+    await app.buildClause('CAT', 'EAT');
+    const still = page.locator('[data-testid="typeahead-option"][data-concept="STILL"]');
+    const now = page.locator('[data-testid="typeahead-option"][data-concept="NOW"]');
+
+    await app.openVerbAdverb('ancora');
+    await expect(still).toBeVisible();
+    await still.hover();
+    await expect(page.locator(tooltip)).toHaveText('fino a questo tempo');
+
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await app.openVerbAdverb('ora');
+    await expect(now).toBeVisible();
+    await now.hover();
+    await expect(page.locator(tooltip)).toHaveText('a questo tempo');
+  });
 });

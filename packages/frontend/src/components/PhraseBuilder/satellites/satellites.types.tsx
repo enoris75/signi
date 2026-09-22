@@ -10,6 +10,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import SpeedIcon from "@mui/icons-material/Speed";
 import TransformIcon from "@mui/icons-material/Transform";
 import GroupIcon from "@mui/icons-material/Group";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import type { ComplementType, UiStringKey } from "@signi/shared";
 import type {
   GenderSlot,
@@ -123,4 +124,6 @@ export const complementIcons: Record<ComplementType, ReactNode> = {
   // What the object is turned into, and who the act is carried out alongside.
   objectPredicative: <TransformIcon sx={iconSx} />,
   comitative: <GroupIcon sx={iconSx} />,
+  // When the act happens. Plan-only today, so nothing draws this icon yet (see BoxComplementType).
+  temporal: <ScheduleIcon sx={iconSx} />,
 };

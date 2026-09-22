@@ -12,6 +12,8 @@ import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { temporalRelation } from '../../functions/temporalRelation.js';
+import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -31,7 +33,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
@@ -200,6 +202,20 @@ export function complementsPhrase(
           mannerRelation(hf) === 'mode'    ? contractDet(dePrep, 'de', hf, plural) :
           prepDet('como', hf, plural)
         ) :
+        // A time. "depois de" and "antes de" are locutions ending in "de", so the article — and a
+        // demonstrative, which Portuguese contracts just as obligatorily — fuses through it ("depois
+        // deste dia"); "até" and "durante" govern the phrase directly. The `at` relation is the
+        // contracting "em" ("neste dia") unless the head noun names another word, and "há" is no
+        // preposition at all: an impersonal verb leading the phrase's own article ("há um momento").
+        type === 'temporal'  ? (() => {
+          const relation = temporalRelation(c);
+          if (relation === 'at') {
+            const named = temporalPreposition(c, '');
+            return named ? prepDet(named, hf, plural) : contractDet(emPrep, 'em', hf, plural);
+          }
+          const { word, de } = PT_TEMPORAL[relation];
+          return de ? `${word} ${contractDet(dePrep, 'de', hf, plural)}` : prepDet(word, hf, plural);
+        })() :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal, spelled as the place is ("salta
           // no ar"); with none it is the plain goal "a", or "para" towards a person.

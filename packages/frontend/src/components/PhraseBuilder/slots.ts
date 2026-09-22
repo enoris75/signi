@@ -157,6 +157,7 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
   source: "slot.source",
   route: "slot.route",
   cause: "slot.cause",
+  temporal: "slot.temporal",
 };
 
 /**
@@ -177,6 +178,10 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   source: "S",
   route: "R",
   cause: "C",
+  // The temporal answers to A, from the "at" it takes by default: its own initial is the
+  // terminus's, and the "when" that would name it is the comitative's W. Inert until the
+  // complement gets a box — a plan-only complement never reaches the menu (see BoxComplementType).
+  temporal: "A",
 };
 
 /**

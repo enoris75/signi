@@ -2467,6 +2467,27 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'período', plural: 'períodos', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // The shortest period the corpus names — JUST's gloss, "a moment ago" (C29). B67 named the seven
+    // forms; French and German take their own word for it (*instant*, *Augenblick*) where the other
+    // five say *moment*. Left on the English literal: "a small period" is what the corpus can
+    // compose, and small is not short — the differentia MOMENT wants (SHORT) is not seeded, and
+    // seeding it for one tooltip costs a seven-language paradigm no other gloss in this batch uses.
+    id: 'MOMENT',
+    role: 'noun',
+    description: 'a very short period of time',
+    emoji: '⏱️',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'moment', plural: 'moments', count: 'singular' },
+      it: { base: 'momento', plural: 'momenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'instant', plural: 'instants', gender: 'masc', count: 'singular' },
+      de: { base: 'Augenblick', plural: 'Augenblicke', gender: 'masc', count: 'singular' },
+      es: { base: 'momento', plural: 'momentos', gender: 'masc', count: 'singular' },
+      ja: { base: '瞬間', count: 'singular', reading: 'しゅんかん' },
+      pt: { base: 'momento', plural: 'momentos', gender: 'masc', count: 'singular' },
+    },
+  },
   // P09's day and week (localization B59), periods of time. Seeded ahead of B59's other time words
   // because B66's LAST_PREVIOUS and NEXT_COMING are said of them ("la settimana scorsa"). Japanese 日
   // reads ひ on its own; the deictic compounds (今日, 今週) are fused words the engine cannot compose.
@@ -2479,10 +2500,14 @@ export const nouns: ConceptSeed[] = [
     emoji: '📅',
     isA: 'PERIOD_TIME',
     forms: {
-      en: { base: 'day', plural: 'days', count: 'singular' },
-      it: { base: 'giorno', plural: 'giorni', gender: 'masc', count: 'singular' },
-      fr: { base: 'jour', plural: 'jours', gender: 'masc', count: 'singular' },
-      de: { base: 'Tag', plural: 'Tage', gender: 'masc', count: 'singular' },
+      // A day is the noun that most needs its own time preposition (C29): English is *on* a day
+      // where it is *at* a time, German *an* dem Tag where it is *zu* der Zeit, and French *en ce
+      // jour*. Italian, Spanish, Portuguese and Japanese take the generic one ("in questo giorno",
+      // "en este día", "neste dia", この日に), so they name none.
+      en: { base: 'day', plural: 'days', count: 'singular', temporal_prep: 'on' },
+      it: { base: 'giorno', plural: 'giorni', gender: 'masc', count: 'singular', temporal_prep: 'in' },
+      fr: { base: 'jour', plural: 'jours', gender: 'masc', count: 'singular', temporal_prep: 'en' },
+      de: { base: 'Tag', plural: 'Tage', gender: 'masc', count: 'singular', temporal_prep: 'an' },
       es: { base: 'día', plural: 'días', gender: 'masc', count: 'singular' },
       // Counted, 日 is its own counter and the noun is not said again: 七日 (C31).
       ja: { base: '日', count: 'singular', reading: 'ひ', counter: '日', counter_is_head: '1' },
@@ -2514,10 +2539,11 @@ export const nouns: ConceptSeed[] = [
     description: 'a period of about thirty days',
     emoji: '🗓️',
     forms: {
-      en: { base: 'month', plural: 'months', count: 'singular' },
-      it: { base: 'mese', plural: 'mesi', gender: 'masc', count: 'singular' },
-      fr: { base: 'mois', plural: 'mois', gender: 'masc', count: 'singular' },
-      de: { base: 'Monat', plural: 'Monate', gender: 'masc', count: 'singular' },
+      // Like a week, a stretch one is *in* (C29).
+      en: { base: 'month', plural: 'months', count: 'singular', temporal_prep: 'in' },
+      it: { base: 'mese', plural: 'mesi', gender: 'masc', count: 'singular', temporal_prep: 'in' },
+      fr: { base: 'mois', plural: 'mois', gender: 'masc', count: 'singular', temporal_prep: 'en' },
+      de: { base: 'Monat', plural: 'Monate', gender: 'masc', count: 'singular', temporal_prep: 'in' },
       es: { base: 'mes', plural: 'meses', gender: 'masc', count: 'singular' },
       ja: { base: '月', count: 'singular', reading: 'つき', counter: 'か月', counter_is_head: '1' },
       pt: { base: 'mês', plural: 'meses', gender: 'masc', count: 'singular' },
@@ -2531,10 +2557,12 @@ export const nouns: ConceptSeed[] = [
     emoji: '🗓️',
     isA: 'PERIOD_TIME',
     forms: {
-      en: { base: 'week', plural: 'weeks', count: 'singular' },
-      it: { base: 'settimana', plural: 'settimane', gender: 'fem', count: 'singular' },
-      fr: { base: 'semaine', plural: 'semaines', gender: 'fem', count: 'singular' },
-      de: { base: 'Woche', plural: 'Wochen', gender: 'fem', count: 'singular' },
+      // A stretch one is *in*, not *at*: "in this week", "in dieser Woche", "in questa settimana",
+      // "en cette semaine" (C29). Spanish, Portuguese and Japanese take the generic one.
+      en: { base: 'week', plural: 'weeks', count: 'singular', temporal_prep: 'in' },
+      it: { base: 'settimana', plural: 'settimane', gender: 'fem', count: 'singular', temporal_prep: 'in' },
+      fr: { base: 'semaine', plural: 'semaines', gender: 'fem', count: 'singular', temporal_prep: 'en' },
+      de: { base: 'Woche', plural: 'Wochen', gender: 'fem', count: 'singular', temporal_prep: 'in' },
       es: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
       ja: { base: '週', count: 'singular', reading: 'しゅう', counter: '週間', counter_is_head: '1' },
       pt: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
@@ -2584,11 +2612,12 @@ export const nouns: ConceptSeed[] = [
     emoji: '📆',
     isA: 'PERIOD_TIME',
     forms: {
-      en: { base: 'year', plural: 'years', count: 'singular' },
-      it: { base: 'anno', plural: 'anni', gender: 'masc', count: 'singular' },
+      // Like a week, a stretch one is *in* (C29).
+      en: { base: 'year', plural: 'years', count: 'singular', temporal_prep: 'in' },
+      it: { base: 'anno', plural: 'anni', gender: 'masc', count: 'singular', temporal_prep: 'in' },
       // After a cardinal French says "an", not "année" — "douze ans" (`cardinal_form`, C31).
-      fr: { base: 'année', plural: 'années', gender: 'fem', count: 'singular', cardinal_form: 'an', cardinal_form_plural: 'ans' },
-      de: { base: 'Jahr', plural: 'Jahre', gender: 'neut', count: 'singular' },
+      fr: { base: 'année', plural: 'années', gender: 'fem', count: 'singular', cardinal_form: 'an', cardinal_form_plural: 'ans', temporal_prep: 'en' },
+      de: { base: 'Jahr', plural: 'Jahre', gender: 'neut', count: 'singular', temporal_prep: 'in' },
       es: { base: 'año', plural: 'años', gender: 'masc', count: 'singular' },
       ja: { base: '年', count: 'singular', reading: 'とし', counter: '年', counter_is_head: '1' },
       pt: { base: 'ano', plural: 'anos', gender: 'masc', count: 'singular' },
@@ -2922,6 +2951,28 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'complemento circunstancial de causa', plural: 'complementos circunstanciales de causa', gender: 'masc', count: 'singular' },
       ja: { base: '原因の副詞語句', count: 'singular', reading: 'げんいんのふくしごく' },
       pt: { base: 'adjunto adverbial de causa', plural: 'adjuntos adverbiais de causa', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The *when* of a clause — the complement C29 built, which places an act at a time, a moment
+    // ago, until then, after / before / during it. Named with the same tradition words as its
+    // siblings: the Italian and Spanish "complemento di/de tempo/tiempo", the French circumstantial,
+    // the German adverbial determination, the Portuguese adjunct, the Japanese 副詞語句.
+    id: 'TEMPORAL_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming the time something happens (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'TIME'),
+    emoji: '⏳',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'temporal', plural: 'temporals', count: 'singular' },
+      it: { base: 'complemento di tempo', plural: 'complementi di tempo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de temps', plural: 'compléments circonstanciels de temps', gender: 'masc', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Zeit', citation: 'adverbiale Bestimmung der Zeit', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de tiempo', plural: 'complementos circunstanciales de tiempo', gender: 'masc', count: 'singular' },
+      ja: { base: '時間の副詞語句', count: 'singular', reading: 'じかんのふくしごく' },
+      pt: { base: 'adjunto adverbial de tempo', plural: 'adjuntos adverbiais de tempo', gender: 'masc', count: 'singular' },
     },
   },
   {

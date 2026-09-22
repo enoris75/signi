@@ -67,14 +67,16 @@ export function coordConjunctionOptions(
 /**
  * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
  * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
- * `objectPredicative` and the `comitative` have no builder slot at all: they are plan-only
- * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
- * strings built on them need and all they need. Giving either one a box means adding its
- * selection fields below, as every other complement has them.
+ * `objectPredicative`, the `comitative` and the `temporal` have no builder slot at all: they are
+ * plan-only complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what
+ * the UI strings built on the first two and the time adverbs' glosses built on the third need, and
+ * all they need. Giving one a box means adding its selection fields below, as every other
+ * complement has them — and, for the temporal, a toolbar for its relation (at / ago / until /
+ * after / before / during), the way the route and locative rings draw one for their path.
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "objectPredicative" | "comitative"
+    "instrumental" | "objectPredicative" | "comitative" | "temporal"
 >;
 
 export interface SlotConfig {

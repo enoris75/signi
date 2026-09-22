@@ -1,4 +1,4 @@
-import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
+import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -137,4 +137,22 @@ export const CARDINALS: CardinalTable = {
   5: { word: 'cinq' }, 6: { word: 'six' }, 7: { word: 'sept' }, 8: { word: 'huit' },
   9: { word: 'neuf' }, 10: { word: 'dix' }, 11: { word: 'onze' }, 12: { word: 'douze' },
   24: { word: 'vingt-quatre' },
+};
+
+/**
+ * The word each temporal relation puts in front of its noun phrase in French (C29). Only the three
+ * non-fusing prepositions are here: `at` reads the head noun's own `temporal_prep` and falls back on
+ * "à" (which fuses, through `aDet`), `until` is the elided "jusqu'" plus that same "à", and `ago` is
+ * "il y a" — an impersonal verb, not a preposition, which is why it takes no article of its own and
+ * simply leads the phrase ("il y a un instant").
+ *
+ * `at`'s noun-named preposition is one that does **not** fuse, "en ce jour" being the form French
+ * has; a day under a *definite* article would want "dans la journée" instead, which no plan builds
+ * today — the construct is plan-only and its glosses are all deictic.
+ */
+export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, string> = {
+  ago: 'il y a',
+  after: 'après',
+  before: 'avant',
+  during: 'pendant',
 };

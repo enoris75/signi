@@ -27,6 +27,8 @@ export const SOURCE_ABLATIVE_ADVERB_VERBS = new Set(['RUN', 'JUMP']);
  * `cause` is absent because it never reaches the shared path: its connector holds a possessive in
  * the negative sentiment ("por mi culpa", "par ma faute"), so every language answers it in a branch
  * of its own, above. `predicative` and `objectPredicative` carry no adposition to govern a pronoun.
+ * `temporal` is absent because a time is not a person: its adposition governs a noun phrase naming a
+ * day, a week or a moment, and no pronoun stands for one.
  */
 export const TONIC_COMPLEMENTS: ReadonlySet<ComplementType> = new Set<ComplementType>([
   'locative', 'terminus', 'direction', 'source', 'route', 'manner', 'comitative', 'instrumental',

@@ -1,4 +1,4 @@
-import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier } from '@signi/shared';
+import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier, TemporalRelation } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
@@ -28,6 +28,9 @@ export const PARTICLE: Record<ComplementType, string> = {
   // of light" is 光の速さで, "with care" 注意で. で serves every manner specifier; the possessor
   // (光の) renders through the shared noun-phrase path.
   manner: 'で',
+  // Time — に, the particle that places an act at a point in time (この日に), the same one the
+  // terminus takes. The other five relations swap it for their own; see JA_TEMPORAL.
+  temporal: 'に',
   // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
   terminus: 'に',
   // Comitative (companion) — と, the particle that joins one party to another ("犬と歩く"). It is
@@ -42,6 +45,32 @@ export const PARTICLE: Record<ComplementType, string> = {
   // takes its adverbial く-form with no particle (楽しくなる). Handled specially in
   // complementSegs — this に is the noun/na-adjective default.
   predicative: 'に',
+};
+
+/**
+ * The postposition each temporal relation takes (C29). Every one of the six is a postposition in
+ * Japanese, so they all go through the ordinary particle path — unlike English, Italian, French,
+ * Spanish and Portuguese, where "ago" is not an adposition at all.
+ *
+ * **前に and の前に are different words.** 「瞬間前に」 measures back from now ("a moment ago");
+ * 「この日の前に」 places the act earlier than a named time ("before this day"). Japanese tells the
+ * two apart by the の alone, which is why `ago` and `before` are separate rows here and why neither
+ * can borrow the other's particle.
+ *
+ * Split into a relational `noun` and a `particle`, the way REL_NOUN and PARTICLE split a place:
+ * the kanji part takes its furigana through `wordSeg`, and the plain kana particle is left for
+ * `jaParticleSegs`, which a focus particle or the negative circumfix's も replaces or follows.
+ *
+ * The `at` row's に is the fallback; a lexeme naming its own `temporal_prep` wins, as one naming
+ * `locative_particle` wins over the locative's で.
+ */
+export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: string; particle: string }> = {
+  at: { noun: '', particle: 'に' },
+  ago: { noun: '前', reading: 'まえ', particle: 'に' },
+  until: { noun: '', particle: 'まで' },
+  after: { noun: 'の後', reading: 'のあと', particle: 'に' },
+  before: { noun: 'の前', reading: 'のまえ', particle: 'に' },
+  during: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
 };
 
 /** The essive marker: the object *taken as* the complement rather than made into it. */

@@ -1,4 +1,4 @@
-import type { CoordConjunction, Degree, DimensionRelation, MannerRelation, ModifierRelation, Tense } from '@signi/shared';
+import type { CoordConjunction, Degree, DimensionRelation, MannerRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -7,6 +7,26 @@ import type { CardinalTable } from '../../functions/numeralWord.js';
 // "come il vento"), means "con", measure "a" (→ alla velocità), mode "in" (→ in modo). prepDet
 // handles the article fusion; "come" and "con" take the non-fusing path.
 export const IT_MANNER_PREP: Record<MannerRelation, 'come' | 'con' | 'a' | 'in'> = { similative: 'come', means: 'con', measure: 'a', mode: 'in' };
+
+/**
+ * How each temporal relation is spelled in Italian (C29). `prep` is a simple preposition, so the
+ * article fuses with it ("a questo tempo" → "al tempo"); `word` is an invariable word emitted in
+ * front of it, which is how the two locutions are built — "fino **a**", "prima **di**". "dopo" and
+ * "durante" govern the noun phrase directly and fuse with nothing, so they carry a `word` and no
+ * `prep`. "fa" is neither: Italian postposes it after the whole phrase ("un momento fa"), exactly as
+ * English postposes "ago", so it is a `postposed` and the phrase keeps its plain article.
+ *
+ * The `at` row's "a" is only the fallback — a lexeme naming its own `temporal_prep` wins ("in questo
+ * giorno"), the way `place_prep` and `mannerRelation` are the noun's to choose.
+ */
+export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' | 'di'; postposed?: string }> = {
+  at: { prep: 'a' },
+  ago: { postposed: 'fa' },
+  until: { word: 'fino', prep: 'a' },
+  after: { word: 'dopo' },
+  before: { word: 'prima', prep: 'di' },
+  during: { word: 'durante' },
+};
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes

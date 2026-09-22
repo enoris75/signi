@@ -1,4 +1,4 @@
-import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
+import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -166,4 +166,25 @@ export const CARDINALS: CardinalTable = {
   5: { word: 'cinco' }, 6: { word: 'seis' }, 7: { word: 'sete' }, 8: { word: 'oito' },
   9: { word: 'nove' }, 10: { word: 'dez' }, 11: { word: 'onze' }, 12: { word: 'doze' },
   24: { word: 'vinte e quatro' },
+};
+
+/**
+ * How each temporal relation is spelled in Portuguese (C29). `de: true` marks the two locutions that
+ * end in "de", so the article — and a demonstrative, which Portuguese contracts just as obligatorily
+ * — fuses through it ("depois do dia", "antes deste dia"); the others govern the phrase directly.
+ * `at` is not here: it is the contracting "em" ("neste dia") unless the head noun names its own
+ * `temporal_prep`, so it goes through `contractDet` rather than a plain word. A lexeme that names
+ * one takes the non-contracting `prepDet`, which is right for every word but "a", "de", "em" and
+ * "por" — the four Portuguese fuses with. None names one today; one that needs "a" or "de" must
+ * route through `contractDet` instead, or it will render "a o dia".
+ *
+ * "há" is an impersonal verb, not a preposition — "há um momento" is literally "it has a moment" —
+ * but it stands where a preposition would and takes the phrase's own article, so its row is enough.
+ */
+export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string; de?: boolean }> = {
+  ago: { word: 'há' },
+  until: { word: 'até' },
+  after: { word: 'depois', de: true },
+  before: { word: 'antes', de: true },
+  during: { word: 'durante' },
 };
