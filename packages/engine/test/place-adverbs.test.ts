@@ -38,7 +38,7 @@ describe('the place and direction adverbs are glossed in every language', () => 
     ['UP', { en: 'to a higher place.', it: 'a un luogo più alto.', fr: 'à un lieu plus haut.', de: 'zu einem höheren Ort.', es: 'a un lugar más alto.', ja: 'もっと高い場所へ。', pt: 'a um lugar mais alto.' }],
     ['DOWN', { en: 'to a lower place.', it: 'a un luogo più basso.', fr: 'à un lieu plus bas.', de: 'zu einem niedrigeren Ort.', es: 'a un lugar más bajo.', ja: 'もっと低い場所へ。', pt: 'a um lugar mais baixo.' }],
     // A direction, not a goal: the locative of the way a thing moves.
-    ['BACKWARDS', { en: 'in the opposite direction.', it: 'nella direzione opposta.', fr: 'dans la direction opposée.', de: 'in der entgegengesetzten Richtung.', es: 'en la dirección opuesta.', ja: '反対の方向で。', pt: 'na direção oposta.' }],
+    ['BACKWARDS', { en: 'in the opposite direction.', it: 'nella direzione opposta.', fr: 'dans la direction opposée.', de: 'in der entgegengesetzten Richtung.', es: 'en la dirección opuesta.', ja: '反対の方向に。', pt: 'na direção oposta.' }],
     // Not a place at all: the `mode` manner gloss WELL is glossed with.
     ['SUDDENLY', { en: 'in an unexpected way.', it: 'in un modo inatteso.', fr: "d'une manière inattendue.", de: 'auf eine unerwartete Weise.', es: 'de una manera inesperada.', ja: '予期しない方法で。', pt: 'de uma maneira inesperada.' }],
   ])('%s', (id, rendered) => {

@@ -4,7 +4,7 @@ import { complementsPhrase } from './complementsPhrase.js';
 import {
   AFRIQUE, ANGE, ANTARCTIQUE, ASIE, BATON, BON, CHAT, CHIEN, CHOISIR, complement, complements, concept, el, ENFANT, EUROPE,
   FATIGUE, FEMME, type Forms, FOYER, GRAND, group, HEUREUX, HOMME, IL, INTERESSANT, JE, LEGENDE, LENTEMENT, LUMIERE, MAISON,
-  MANGER, MANIERE, MARCHE, MOT, NOURRITURE, np, PETIT, PHRASE, RENARD, SAVOIR, SOIN, SOURIS, TRISTE, TU, VITESSE, vp,
+  MANGER, MANIERE, MARCHE, MOT, NOURRITURE, np, PETIT, PHRASE, PRISON, RENARD, SAVOIR, SOIN, SOURIS, TRISTE, TU, VITESSE, vp,
 } from './fr.fixtures.js';
 
 const BRULER: Forms = { base: 'brûler', '3sg_present': 'brûle' };
@@ -283,6 +283,17 @@ describe('complementsPhrase', () => {
 
     test('a negative determiner stays on the noun', () => {
       expect(complementsPhrase(complements({ locative: complement(np(MAISON, { definiteness: 'no' })) }))).toBe('dans aucune maison');
+    });
+
+    // A219: "dans" needs a determiner, so a bare singular count noun takes "en" ("en prison") and a
+    // bare mass noun "dans" + its partitive ("dans de la nourriture"). The bare plural keeps A196's
+    // "des".
+    test('a bare singular takes en, a bare mass noun dans + its partitive', () => {
+      const bare = { definiteness: 'bare' };
+      expect(complementsPhrase(complements({ locative: complement(np(PRISON, bare)) }))).toBe('en prison');
+      expect(complementsPhrase(complements({ locative: complement(np(PRISON, bare), [path('in')]) }))).toBe('en prison');
+      expect(complementsPhrase(complements({ locative: complement(np(NOURRITURE, bare)) }))).toBe('dans de la nourriture');
+      expect(complementsPhrase(complements({ locative: complement(np(PRISON, { ...bare, number: 'plural' })) }))).toBe('dans des prisons');
     });
 
     // Fixed A41: HOME in plain containment is the fixed "à la maison" — the hearth-word "foyer" gives

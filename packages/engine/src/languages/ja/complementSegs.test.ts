@@ -3,7 +3,7 @@ import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from 
 import type { RubySegment } from '../../types.js';
 import { complementSegs } from './complementSegs.js';
 import {
-  adj, complement, complements, concept, DENSETSU, el, ERABU, type Forms, group, HAYAKU, HAYASA, HIKARI, HOUHOU, ICHIBA, IE, INU,
+  adj, CHAIRO, complement, complements, concept, DENSETSU, el, ERABU, type Forms, group, HAYAKU, HAYASA, HIKARI, HOUHOU, ICHIBA, IE, INU,
   MIZU, NEKO, np, OOKII, SHIAWASE, TAKAI, YOI, vp,
 } from './ja.fixtures.js';
 
@@ -65,6 +65,19 @@ describe('complementSegs', () => {
         .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'に' }]);
       expect(complementSegs(complements({ predicative: complement(np({ role: 'adjective', base: '疲れた', reading: 'つかれた' })) })))
         .toEqual([{ t: '疲れて', r: 'つかれて' }, { t: 'いるように' }]);
+    });
+  });
+
+  describe('the essive object complement', () => {
+    const essive: Specifier[] = [{ kind: 'predication', value: 'essive' }];
+
+    // A224: として is no noun, so a na- or の-adjective takes it on its stem, its reading cut the same way.
+    test('a na- or の-adjective takes として on its stem; a noun takes it as it stands', () => {
+      expect(complementSegs(complements({ objectPredicative: complement(np(SHIAWASE), essive) })))
+        .toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'として' }]);
+      expect(complementSegs(complements({ objectPredicative: complement(np(CHAIRO), essive) })))
+        .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'として' }]);
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(DENSETSU), essive) })))).toBe('伝説として');
     });
   });
 
@@ -198,6 +211,20 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ locative: complement(el(np(IE), np(ICHIBA)), [path('through')]) })))).toBe('家と市場を通って');
       expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' }), [path('through')]) })))).toBe('どの家を通っても');
       expect(text(complementSegs(complements({ locative: complement(np(IE), [path('through')]) }), 'に'))).toBe('家に');
+    });
+
+    // A220: a noun can ask for に as a verb does — a direction is no place an act goes on in (反対の
+    // 方向に走ります). Plain containment only: a relation keeps its で, `through` its tail, and the
+    // verb's own particle still comes first.
+    test('a noun seeding locative_particle takes it in plain containment', () => {
+      const HOUKOU: Forms = { base: '方向', count: 'singular', reading: 'ほうこう', locative_particle: 'に' };
+      expect(complementSegs(complements({ locative: complement(np(HOUKOU)) })))
+        .toEqual([{ t: '方向', r: 'ほうこう' }, { t: 'に' }]);
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('in')]) })))).toBe('方向に');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU, { definiteness: 'no' })) })))).toBe('どの方向にも');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('under')]) })))).toBe('方向の下で');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('through')]) })))).toBe('方向を通って');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU)) }), 'に'))).toBe('方向に');
     });
   });
 

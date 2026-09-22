@@ -7,7 +7,8 @@ import { complementSegs } from './complementSegs.js';
  * the particle of the locative or direction complement it names, by the renderer a clause's
  * complements take — the place where something happens takes で, a goal へ, and a relation its
  * relational noun before the particle (グループの中へ). With no verb there is no existential or
- * `locative_particle` to ask for に, so a locative keeps its default で.
+ * verb's `locative_particle` to ask for に, so a locative keeps its default で — unless its noun asks
+ * for に itself, as a direction does (反対の方向に, A220).
  */
 export function complementGlossSegs(el: ResolvedNounElement): RubySegment[] {
   return complementSegs(glossComplement(el));

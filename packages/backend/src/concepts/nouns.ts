@@ -772,7 +772,9 @@ export const nouns: ConceptSeed[] = [
       fr: { base: 'direction', plural: 'directions', gender: 'fem', count: 'singular' },
       de: { base: 'Richtung', plural: 'Richtungen', gender: 'fem', count: 'singular' },
       es: { base: 'dirección', plural: 'direcciones', gender: 'fem', count: 'singular' },
-      ja: { base: '方向', count: 'singular', reading: 'ほうこう' },
+      // A direction is no place an act goes on in, so its locative takes に, not the で of an
+      // ordinary place: 反対の方向に走ります, "runs in the opposite direction" (A220).
+      ja: { base: '方向', count: 'singular', reading: 'ほうこう', locative_particle: 'に' },
       pt: { base: 'direção', plural: 'direções', gender: 'fem', count: 'singular' },
     },
   },

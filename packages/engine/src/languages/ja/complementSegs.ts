@@ -40,7 +40,8 @@ const JA_COMPLEMENT_ORDER: ComplementType[] = [
  * `locative` takes: the default で is the place where something happens (家で食べます), and a verb whose
  * place is where something *is* or *ends up* asks for に instead — the existential いる / ある
  * (家にいます, A109), and the lexemes seeding `locative_particle`, 住む and 閉じ込める (家に住みます, A190).
- * The caller decides which; see `predicateSegs`.
+ * The caller decides which; see `predicateSegs`. Failing that, a noun seeding `locative_particle` asks
+ * for に in plain containment — a direction, which is no place an act goes on in (方向に, A220).
  *
  * The subject complement comes last, straight before なる / 思える, where the shared
  * `COMPLEMENT_RENDER_ORDER` — English and Romance order — leads with it. Anything between the two
@@ -60,7 +61,8 @@ export function complementSegs(
     // The factitive object complement takes the same shapes as the subject complement, and for the
     // same reason: 「家を刑務所にする」 is 「家が刑務所になる」 under a causer, so an adjective head
     // takes its く-form (家を美しくする) and a noun head the に. Only the essive differs — として
-    // attaches to the word as it stands — so it falls through to the particle path below.
+    // attaches to the word as it stands, or to a na-adjective's stem (A224) — so it falls through to
+    // the particle path below.
     const factitive = type === 'objectPredicative' && objectPredication(c) !== 'essive';
     // Subject complement (of なる/見える etc.), by head type:
     //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
@@ -135,7 +137,14 @@ export function complementSegs(
       }
     }
     // The particle below attaches to the whole group, not to each conjunct: 「猫と犬に」.
-    segs.push(...elSegs(c.phrase));
+    // The essive's として is no noun, so a na-adjective (or a noun-adjective linked by の) takes it on
+    // its stem, not on the な / の that links it to a noun after it: 有効として, 茶色として (A224). A lone
+    // adjective only; an i- or た-adjective keeps its form as it stands.
+    const [lone] = c.phrase.conjuncts;
+    const essiveAdj = type === 'objectPredicative' && c.phrase.conjuncts.length === 1 && lone?.head.forms['role'] === 'adjective'
+      ? jaAdjClass(lone.head.forms['base'] ?? '', lone.head.forms['reading'])
+      : undefined;
+    segs.push(...(essiveAdj?.kind === 'na' ? [wordSeg(essiveAdj.stem, essiveAdj.reading)] : elSegs(c.phrase)));
     // The relational noun sits between the place and its particle, for a path and a place alike:
     // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
     const spec = type === 'route' || type === 'locative'
@@ -160,6 +169,11 @@ export function complementSegs(
       // A verb that puts something *at* the place wins over it: its に above says the same thing
       // better ("lives through the house" is 家に住みます), as the existential already did.
       : type === 'locative' && spec === 'through' ? PATH_CITATION.through
+      // A noun can ask for に as a verb does (A220): a direction is no place an act goes on in, so one
+      // runs 反対の方向に, never 反対の方向で ("running while standing in a direction"). Plain
+      // containment only — a relation keeps its relational noun and で (反対の方向の下で).
+      : type === 'locative' && spec === 'in' && firstConjunct(c.phrase).head.forms['locative_particle']
+        ? firstConjunct(c.phrase).head.forms['locative_particle']!
       : type === 'cause' ? jaCauseParticle(c)
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       // The object complement: the factitive に ("この文を命令にする"), or として where the object is

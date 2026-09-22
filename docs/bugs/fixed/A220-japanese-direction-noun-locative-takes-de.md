@@ -66,3 +66,25 @@ regression test above does not assert the German either.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: a Japanese direction noun as a locative takes で (A220)* (1 `test.fails`, plus a regression test for the existential, a relation, a place, a goal and the other languages) |
+
+## Resolved
+
+**2026-09-22**, with the trial above as written.
+
+- [`nouns.ts`](../../../packages/backend/src/concepts/nouns.ts) — DIRECTION_SPACE's ja forms seed
+  `locative_particle: 'に'`, the key 住む and 閉じ込める already use. **Needs a reseed** of `signi.db`.
+- [`ja/complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts) — one step in
+  the particle chain, after the verb's override and A176's `through`: a plain-containment locative
+  (`spec === 'in'`) whose first conjunct's head seeds `locative_particle` takes it. The verb's に still
+  wins, a relation keeps its relational noun and で, and the `no` circumfix closes after it
+  (どの方向にも). The complement gloss reaches it through
+  [`complementGlossSegs`](../../../packages/engine/src/languages/ja/complementGlossSegs.ts), whose
+  comment now says so.
+
+BACKWARDS's shipped definition moved from `反対の方向で。` to the **Want** `反対の方向に。`
+(`place-adverbs.test.ts` → *BACKWARDS*). No e2e spec pins it. German's `in der entgegengesetzten
+Richtung` was not touched and is not asserted, as ruled.
+
+| | |
+|---|---|
+| **Tests** | `complements/locative.test.ts` → *known bugs: a Japanese direction noun as a locative takes で (A220)*, the `test.fails` now passing, plus two added cases: the に across JUMP, COME, a plural subject's GO, an explicit `in`, the `all` determiner, a question and an "or" group of directions; and what keeps its own particle — 住む's に, `through`'s を通って, the route's を, and the glosses of a relation (の下で) and a goal (へ). Colocated: `ja/complementSegs.test.ts` → *a noun seeding locative_particle takes it in plain containment*. `place-adverbs.test.ts` → *BACKWARDS* now pins `反対の方向に。` |

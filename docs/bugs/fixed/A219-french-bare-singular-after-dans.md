@@ -74,3 +74,21 @@ continent preposition.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: a French bare singular after "dans" (A219)* (1 `test.fails`, plus a regression test for the other determiners, the possessive, the plural, a name, a pronoun, the idiom, the manner and the other six) |
+
+## Resolved
+
+**2026-09-22**, with the trial above as written.
+
+- [`fr/complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts) — in
+  the locative branch of `headFor`, after the tonic pronoun's and the bare name's "en", a head that is
+  bare, singular, not a proper name and not a possessor's takes "en" when it is countable and "dans"
+  + `partitiveArtFor` when it is `uncountable`. The comment above `headFor` that described the bare
+  singular as left alone now points at the new branch.
+
+The decisions stayed as ruled: the count nouns "en" does not suit (*en lieu*, *en maison*, *en sol*)
+were accepted and not pinned; the other relations (*sous groupe*) and the direction's `in` were not
+touched and not pinned. English and German were left as the file says.
+
+| | |
+|---|---|
+| **Tests** | `complements/locative.test.ts` → *known bugs: a French bare singular after "dans" (A219)*, the `test.fails` now passing, plus three added cases: the "en" through the past, the negative, a prenominal adjective and a plural subject; three more mass nouns' own partitive (*du sucre*, *de la nourriture*, *de l'air*) and the gloss of a bare WATER; a coordination whose conjuncts each take their own preposition (*en groupe et en prison*, *dans de l'eau et dans le groupe*). Colocated: `fr/complementsPhrase.test.ts` → *a bare singular takes en, a bare mass noun dans + its partitive* |
