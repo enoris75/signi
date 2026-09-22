@@ -1,5 +1,6 @@
 import type { ResolvedPhrase, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { complementGlossSegs } from './complementGlossSegs.js';
@@ -24,7 +25,10 @@ import { relativeClauseSegs } from './relativeClauseSegs.js';
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
-export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
+export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string): RubySegment[] {
+  // A modal governing an infinitive is the modal chain over it, suffixed to the verb: 行動したい, never
+  // 行動することをたい (A222, see `foldModalGovernor`).
+  const phrase = foldModalGovernor(given);
   // A verbless period marked as an adjective-definition gloss is a が-predicate ("大きさが大きい"),
   // not a bare noun-phrase title — render the dimension noun + が + its degree adjective.
   if (!phrase.verbPhrase && isDimensionGloss(phrase.subject)) return dimensionGlossSegs(firstConjunct(phrase.subject));

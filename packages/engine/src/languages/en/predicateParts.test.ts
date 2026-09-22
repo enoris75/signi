@@ -362,6 +362,17 @@ describe('predicateParts', () => {
       expect(said(CAT, citation({ aspect: 'progressive' }))).toBe('to be eating');
       expect(said(CAT, citation({ aspect: 'resultative' }))).toBe('to have eaten');
     });
+
+    // A222: a modal-headed citation folds into a modal chain, which cites each modal by its
+    // `nonfinite` and `link` — never "to can to eat".
+    test('a modal chain cites each modal by its non-finite form and link', () => {
+      expect(said(CAT, citation({ modals: [modal(CAN)] }), mouse)).toBe('to be able to eat the mouse');
+      expect(said(CAT, citation({ modals: [modal(MUST)] }))).toBe('to have to eat');
+      expect(said(CAT, citation({ modals: [modal(WILL), modal(CAN)] }))).toBe('to want to be able to eat');
+      expect(said(CAT, citation({ modals: [modal(WILL)], negative: true }))).toBe('not to want to eat');
+      expect(said(CAT, citation({ modals: [modal(CAN)], modifier: always }))).toBe('to be able to always eat');
+      expect(said(CAT, citation({ modals: [modal(CAN)], modifier: fast }))).toBe('to be able to eat fast');
+    });
   });
 
   describe('conditional', () => {

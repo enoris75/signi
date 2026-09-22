@@ -100,3 +100,63 @@ the trial folds it into one:
 | | |
 |---|---|
 | **Test** | `modals.test.ts` → *known bugs: a modal as the verb of a clause that governs an infinitive (A222)* (1 `test.fails`, plus a regression test for the Romance four, English WILL, a lexical governor and the modal chain) |
+
+## Resolved
+
+**2026-09-22.** Fixed as the **Shape of the fix** describes, with the fold in the three engines that
+need it: the Romance four and English WILL rendered the clause right and are not touched. A new shared
+[`foldModalGovernor`](../../../packages/engine/src/functions/foldModalGovernor.ts) turns a clause whose
+verb carries the lexicon's `modal` flag and governs a subject-controlled, un-negated infinitive into
+the complement's clause with the modal (and its own adverb) prepended to the complement's `modals`,
+after any modals the governing clause already had. The result keeps the governing clause's subject,
+tense, mood, register, negation, question, condition, coordination, purpose and control, and the
+complement's verb, voice, adverb, object, agent, complements and nested infinitive; the two clauses'
+complements merge. It applies itself to its result, so a modal governing a modal by complements is
+one chain: WILL governing CAN governing ACT is *to want to be able to act*, *handeln können wollen*,
+行動することができるようになりたい — what `modals: ['WILL', 'CAN']` gives.
+
+English [`renderClause`](../../../packages/engine/src/languages/en/renderClause.ts), German
+[`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) and Japanese
+[`buildClauseSegments`](../../../packages/engine/src/languages/ja/buildClauseSegments.ts) call it
+first, and their citations render the modal chain they never had to:
+
+- English [`predicateParts`](../../../packages/engine/src/languages/en/predicateParts.ts): `to` + each
+  modal's `nonfinite` and `link` + the main verb's group (*to be able to act*, *not to want to act*),
+  the main verb's frequency adverb with its own group and the modals' manner adverbs trailing, as in
+  the finite chain.
+- German: the main infinitive, then the modals innermost first, the last taking any "zu" (*handeln
+  wollen*, *handeln zu wollen*). The modals' adverbs lead the main verb's in the Mittelfeld, as in the
+  finite clause (*immer handeln wollen*).
+- Japanese [`predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts): the citation
+  closes with `modalSegs(…, 'plain')` in place of the plain verb (行動したい, 行動したくない), each modal's
+  adverb ahead of the main verb's; a copula predicate under the chain takes the plain ending too
+  (幸せでありたい, not 幸せでありたいです).
+
+Left as the trial left them: a negated complement is not folded (German `wollen, nicht zu handeln`,
+Japanese `行動しないことをたい`, English `to can not to act`), nor is an object-controlled complement or
+a modal with a direct object of its own. The folded clause takes the complement's aspect, which the
+citation mood makes neutral, so an aspect on the governing modal itself is not carried: the chain has
+no slot for the modal's own aspect (every engine puts a chain's aspect on its main verb).
+
+- **Engine changed:** [`foldModalGovernor.ts`](../../../packages/engine/src/functions/foldModalGovernor.ts)
+  (new), [`en/renderClause.ts`](../../../packages/engine/src/languages/en/renderClause.ts),
+  [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts),
+  [`de/renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts),
+  [`ja/buildClauseSegments.ts`](../../../packages/engine/src/languages/ja/buildClauseSegments.ts),
+  [`ja/predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts). The lexicon's
+  `modal` flag landed ahead of the fix, in [`lexicon.ts`](../../../packages/backend/src/lexicon.ts).
+- **Tests:** [`modals.test.ts`](../../../packages/engine/test/modals.test.ts) → *known bugs: a modal as
+  the verb of a clause that governs an infinitive (A222)*. The pinning `test.fails` is now a passing
+  `test` with its assertions unchanged. New cases in the same block:
+  - a modal governing a modal by complements (WILL CAN ACT, MUST CAN ACT), one chain in English, German
+    and Japanese, and the Romance complement unmoved;
+  - what the chain keeps: a negated citation, a negated, a questioned, a future and a conditional
+    finite clause, a governing clause's own modal (*the cat must want to act*), the modal's adverb, a
+    copula complement and a nested lexical infinitive (*to want to desire to act*).
+
+  Colocated: [`foldModalGovernor.test.ts`](../../../packages/engine/src/functions/foldModalGovernor.test.ts)
+  (new), and new cases in [`en/predicateParts.test.ts`](../../../packages/engine/src/languages/en/predicateParts.test.ts),
+  [`de/renderClause.test.ts`](../../../packages/engine/src/languages/de/renderClause.test.ts) and
+  [`ja/predicateSegs.test.ts`](../../../packages/engine/src/languages/ja/predicateSegs.test.ts).
+- **No passing test moved**, and no shipped definition takes a modal as its genus, so no e2e
+  expectation changed.
