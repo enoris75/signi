@@ -1355,7 +1355,7 @@ describe('known bugs: German "kein" inside the prospective', () => {
     say(clause(np('CAT'), verb, { ...extra, verbPhrase: { aspect: 'prospective', negative: true, ...verbPhrase } }), 'de');
   const aMouse = { directObject: np('MOUSE', { definiteness: 'indefinite' }) };
 
-  test.fails('the verb\'s "nicht" stays ahead of "im Begriff" beside an indefinite object or predicate noun', () => {
+  test('the verb\'s "nicht" stays ahead of "im Begriff" beside an indefinite object or predicate noun', () => {
     expect(notAbout('EAT', aMouse)).toBe('der Kater ist nicht im Begriff, eine Maus zu fressen.');
     expect(notAbout('EAT', { directObject: np('MOUSE', { number: 'plural', definiteness: 'bare' }) }))
       .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
@@ -1380,6 +1380,18 @@ describe('known bugs: German "kein" inside the prospective', () => {
         },
       },
     }, 'de')).toBe('alle Tränen und ich sind nicht im Begriff, wegen der näheren am wenigsten großen Klinge ein Tod zu werden.');
+  });
+
+  test('the "wenn" clause, the future, a modal past, an adverb and a complement keep "nicht" ahead of "im Begriff" too', () => {
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { aspect: 'prospective', negative: true } }) }, 'de'))
+      .toBe('wenn der Kater nicht im Begriff sein würde, eine Maus zu fressen, würde der Hund laufen.');
+    expect(notAbout('EAT', aMouse, { tense: 'future' })).toBe('der Kater wird nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', aMouse, { tense: 'past', modals: ['CAN'] })).toBe('der Kater konnte nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', aMouse, { modifier: 'FAST' })).toBe('der Kater ist nicht im Begriff, schnell eine Maus zu fressen.');
+    expect(notAbout('EAT', { ...aMouse, complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite' }) } } }))
+      .toBe('der Kater ist nicht im Begriff, eine Maus in einem Haus zu fressen.');
+    // A negative adverb negates on its own, as it did.
+    expect(notAbout('EAT', aMouse, { modifier: 'NEVER' })).toBe('der Kater ist nie im Begriff, eine Maus zu fressen.');
   });
 
   test('regression: a definite object, a `no` object and the other aspects keep what they render', () => {

@@ -24,7 +24,8 @@ import { nichtSlots } from './nichtSlots.js';
  * - with both an object and a complement negative, the object is the leftmost and keeps its "kein",
  *   so the complement falls: "frisst keine Maus in einem Haus";
  * - otherwise the verb's "nicht", which `nichtSlots` places — unless an indefinite nominal can
- *   absorb it as "kein" (see `takesKein`), which is the same identity read the other way (A182).
+ *   absorb it as "kein" (see `takesKein`), which is the same identity read the other way (A182),
+ *   and never in the prospective, whose nominal stands inside the zu-group (A209).
  *
  * `leadsComplements` is whether the clause carries a constituent "nicht" leads rather than follows —
  * a predicate complement or a prepositional one (A159).
@@ -51,8 +52,12 @@ export function finiteNegation(
   // predicate nominal ("ist keine Legende", "scheint keine Legende zu sein" — ruled 2026-09-21).
   // The object is the leftmost, so when both could take it the object carries the negation, exactly
   // as it does when both are `no` already.
-  const keinObject = negate && takesKein(directObject);
-  const keinPredicative = negate && !keinObject && takesKein(complements?.['predicative']?.phrase);
+  // Not in the prospective (A209): there the nominal stands inside the zu-group, so its "kein" would
+  // negate the infinitive ("ist im Begriff, keine Maus zu fressen", about to eat no mouse), where the
+  // verb's "nicht" negates the whole ahead of "im Begriff" (A19).
+  const absorbs = negate && verbPhrase.aspect !== 'prospective';
+  const keinObject = absorbs && takesKein(directObject);
+  const keinPredicative = absorbs && !keinObject && takesKein(complements?.['predicative']?.phrase);
   // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
   const adverb = !!(modalAdverbs(verbPhrase.modals) || verbPhrase.modifier?.forms['base']);
   return {

@@ -74,6 +74,17 @@ describe('finiteNegation', () => {
       .toEqual({ ...empty, beforeComplements: 'nicht' });
   });
 
+  // A209: the prospective's nominal stands inside the zu-group, where "kein" would negate the
+  // infinitive alone, so the "nicht" stays ahead of "im Begriff" and the nominal keeps its determiner.
+  test('the prospective keeps its nicht ahead of "im Begriff": "ist nicht im Begriff, eine Maus zu essen"', () => {
+    const object = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, aspect: 'prospective' }), directObject: aMouse }, false);
+    expect(object).toEqual({ nicht: { ...empty, beforeAspect: 'nicht' }, directObject: aMouse, complements: undefined });
+    const aCat = complements({ predicative: complement(np(KATZE, { definiteness: 'indefinite' })) });
+    const nominal = finiteNegation({ verbPhrase: vp(WERDEN_VERB, { negative: true, aspect: 'prospective' }), complements: aCat }, true);
+    expect(nominal.nicht).toEqual({ ...empty, beforeAspect: 'nicht' });
+    expect(determiners(nominal.complements?.['predicative']?.phrase)).toEqual(['indefinite']);
+  });
+
   // What "kein" cannot cover keeps "nicht": more than one conjunct and a proper name (the definite
   // object is above). A negative adverb still negates on its own, leaving the plain indefinite.
   test('a coordination and a proper name keep the nicht', () => {

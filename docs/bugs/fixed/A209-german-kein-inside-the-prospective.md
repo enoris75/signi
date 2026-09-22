@@ -61,3 +61,27 @@ declarative, the question, the relative clause and the `wenn` clause, so every r
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German "kein" inside the prospective* (1 `test.fails`, plus a regression test for the definite object, the `no` object, A182 in the other aspects and English) |
+
+## Resolved
+
+**2026-09-22.** Fixed as the **Shape of the fix** describes, in
+[`finiteNegation`](../../../packages/engine/src/languages/de/finiteNegation.ts) alone: A182's
+absorption is gated on `absorbs = negate && verbPhrase.aspect !== 'prospective'`, so in the
+prospective neither the object nor the predicate nominal takes the verb's "nicht" as "kein". The
+"nicht" reaches [`nichtSlots`](../../../packages/engine/src/languages/de/nichtSlots.ts), which
+already places it ahead of `im Begriff` (A19), and the nominal keeps its own determiner. The
+declarative, the question, the relative clause and the `wenn` clause share the decision, so every
+**Want** row follows. No passing test moved.
+
+- **Engine changed:** [`finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts)
+  (the gate, its comment, and a line in the function's doc comment).
+- **Tests:** [`negation.test.ts`](../../../packages/engine/test/negation.test.ts) → *known bugs:
+  German "kein" inside the prospective*. The pinning `test.fails` is now a passing `test` with its
+  assertions unchanged. A new case in the same block covers the `wenn` clause, the future, a modal
+  past, an adverb inside the zu-group, an indefinite locative complement, and `nie`, which still
+  negates on its own.
+
+  Colocated: a new case in
+  [`finiteNegation.test.ts`](../../../packages/engine/src/languages/de/finiteNegation.test.ts) (the
+  prospective's indefinite object and predicate nominal keep their determiner, and the "nicht" takes
+  the `beforeAspect` slot).
