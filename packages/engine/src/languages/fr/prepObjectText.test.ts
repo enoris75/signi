@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { HOMME, IL, JE, LIVRE, MAISON, np } from './fr.fixtures.js';
+import { EAU, HOMME, IL, JE, LIVRE, MAISON, np } from './fr.fixtures.js';
 import { prepObjectText } from './prepObjectText.js';
 
 describe('prepObjectText', () => {
@@ -25,7 +25,9 @@ describe('prepObjectText', () => {
 
   test('a bare object takes the indefinite or partitive article after the preposition (A149)', () => {
     expect(prepObjectText(np(MAISON, { definiteness: 'bare', number: 'plural' }), 'sur')).toBe('sur des maisons');
-    expect(prepObjectText(np(LIVRE, { definiteness: 'bare' }), 'sur')).toBe('sur du livre');
+    // A bare singular count noun takes the definite (A207), a mass one the partitive.
+    expect(prepObjectText(np(LIVRE, { definiteness: 'bare' }), 'sur')).toBe('sur le livre');
+    expect(prepObjectText(np(EAU, { definiteness: 'bare' }), 'sur')).toBe("sur de l'eau");
   });
 
   test('a possessive stands in for the article', () => {

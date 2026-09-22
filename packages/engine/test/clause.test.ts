@@ -362,7 +362,7 @@ describe('known bugs: the article on a language name', () => {
 
 // A207. French has no zero article on an object, so A149 gave a bare singular the partitive. That
 // is right for a mass noun ("consommer de la nourriture") and wrong for a count one, which French
-// articles with the definite: "changer la taille". `partitiveArtFor` does not look at countability,
+// articles with the definite: "changer la taille". `partitiveArtFor` did not look at countability,
 // which the corpus carries and the lexicon already hands the engine as `uncountable`. Filed while
 // authoring localization A24 (RESIZE, EDIT).
 describe('known bugs: the French article on a bare singular count object (A207)', () => {
@@ -374,8 +374,26 @@ describe('known bugs: the French article on a bare singular count object (A207)'
     infinitive: true,
   };
 
-  test.fails('French articles a bare singular count object with the definite', () => {
+  test('French articles a bare singular count object with the definite', () => {
     expect(sayAll(changeSize).fr).toBe('changer la taille.');
+  });
+
+  test('the definite elides, and reaches a finite clause and an instrument', () => {
+    const bareInfinitive = (verb: string, concept: string, negative = false): PhrasePlan => ({
+      subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb, negative },
+      directObject: { concept, definiteness: 'bare' }, infinitive: true,
+    });
+    expect(sayAll(bareInfinitive('CHANGE', 'TEXT')).fr).toBe('changer le texte.');
+    expect(sayAll(bareInfinitive('WRITE', 'WORD')).fr).toBe('écrire le mot.');
+    expect(sayAll(bareInfinitive('WRITE', 'OBJECT_THING')).fr).toBe("écrire l'objet.");
+    expect(say(clause(np('CAT'), 'EAT', { directObject: np('MOUSE', { definiteness: 'bare' }) }), 'fr'))
+      .toBe('le chat mange la souris.');
+    expect(say(clause(np('MAN'), 'WRITE', {
+      complements: { instrumental: { phrase: np('KEYBOARD', { definiteness: 'bare' }) } },
+    }), 'fr')).toBe("l'homme écrit avec le clavier.");
+    // A negation still turns the bare object into "de", count or mass.
+    expect(sayAll(bareInfinitive('WRITE', 'WORD', true)).fr).toBe('ne pas écrire de mot.');
+    expect(sayAll(bareInfinitive('CONSUME', 'FOOD', true)).fr).toBe('ne pas consommer de nourriture.');
   });
 
   // Already right, and what the fix must not disturb: a bare singular MASS object keeps the
@@ -389,6 +407,11 @@ describe('known bugs: the French article on a bare singular count object (A207)'
       subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'REMOVE' },
       directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' }, infinitive: true,
     }).fr).toBe('retirer des objets.');
+    expect(say(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'bare' }) }), 'fr'))
+      .toBe("le chat boit de l'eau.");
+    expect(say(clause(np('MAN'), 'BUY', {
+      complements: { instrumental: { phrase: np('MONEY', { definiteness: 'bare' }) } },
+    }), 'fr')).toBe("l'homme achète avec de l'argent.");
   });
 
   // The other six languages are right on the failing row, which is what localises the defect.

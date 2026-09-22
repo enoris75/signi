@@ -120,13 +120,13 @@ test.describe('word definition tooltip', () => {
     await extEn.hover();
     await expect(page.locator(tooltip)).toHaveText('to destroy fire');
 
-    // French: the same plan, the bare object taking the partitive (A149) — "détruire du feu".
+    // French: the same plan, the bare count object taking the generic definite (A207) — "détruire le feu".
     await app.setUiLanguage('fr');
     await app.verbInput.fill('extinguish');
     const extFr = page.locator('[data-testid="typeahead-option"][data-concept="EXTINGUISH"]');
     await expect(extFr).toBeVisible();
     await extFr.hover();
-    await expect(page.locator(tooltip)).toHaveText('détruire du feu');
+    await expect(page.locator(tooltip)).toHaveText('détruire le feu');
   });
 
   test('a genus+mass-noun verb definition renders (localize-seed B10: CLEAR)', async ({
