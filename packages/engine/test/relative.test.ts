@@ -669,7 +669,7 @@ describe('known bugs: German negation inside a relative clause', () => {
   test('German "nicht" leads any adverb, after an object and ahead of a predicate complement', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' }, directObject: np('MOUSE') }))
       .toBe('der Hund, der die Maus nicht immer frisst, läuft.');
-    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }))
+    expect(dogWho({ verbPhrase: { verb: 'EAT', modals: [{ verb: 'MUST', modifier: 'ALWAYS', negative: true }] } }))
       .toBe('der Hund, der nicht immer fressen muss, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true, modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }))
       .toBe('der Hund, der nicht immer müde wird, läuft.');
@@ -1118,9 +1118,9 @@ describe('known bugs: Japanese relative clause with a modal or a copula', () => 
       sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
     const isWho = (predicate: string, verbPhrase: object = {}) =>
       sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', ...verbPhrase }, complements: { predicative: { phrase: np(predicate) } } } }), 'RUN')).ja;
-    expect(eatsWho({ modals: ['CAN'], negative: true })).toBe('食べることができない猫は走ります。');
-    expect(eatsWho({ modals: ['WILL'], negative: true })).toBe('食べたくない猫は走ります。');
-    expect(eatsWho({ modals: ['MUST'], negative: true, tense: 'past' })).toBe('食べる必要がなかった猫は走ります。');
+    expect(eatsWho({ modals: [{ verb: 'CAN', negative: true }] })).toBe('食べることができない猫は走ります。');
+    expect(eatsWho({ modals: [{ verb: 'WILL', negative: true }] })).toBe('食べたくない猫は走ります。');
+    expect(eatsWho({ modals: [{ verb: 'MUST', negative: true }], tense: 'past' })).toBe('食べる必要がなかった猫は走ります。');
     expect(eatsWho({ modals: ['CAN', 'WILL'] })).toBe('食べたいと思うことができる猫は走ります。');
     expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', modals: ['CAN'] } } }), 'RUN')).ja)
       .toBe('猫が食べることができるネズミは走ります。');

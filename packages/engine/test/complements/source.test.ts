@@ -254,7 +254,7 @@ describe('known bugs: Italian animate source reads as a goal', () => {
     expect(fromChild('GO')).toBe('il cane va via dal bambino.');
     expect(fromChild('COME')).toBe('il cane viene via dal bambino.');
     expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
-      verbPhrase: { modals: ['CAN'], negative: true },
+      verbPhrase: { modals: [{ verb: 'CAN', negative: true }] },
       complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
     })).it).toBe("pochi buoni buoi non possono andare via da quell'angelo meno intero e freddo.");
   });
@@ -290,7 +290,7 @@ describe('known bugs: German animate source takes "aus"', () => {
     expect(from('COME', np('WOMAN')).de).toBe('der Kater kommt von der Frau.');
     expect(from('RUN', np('DOG', { number: 'plural' })).de).toBe('der Kater läuft von den Hunden.');
     expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
-      verbPhrase: { modals: ['CAN'], negative: true },
+      verbPhrase: { modals: [{ verb: 'CAN', negative: true }] },
       complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
     })).de).toBe('wenige gute Ochsen können nicht von jenem weniger ganzen kalten Engel gehen.');
   });

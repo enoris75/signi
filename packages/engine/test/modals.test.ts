@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { ModalRef, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A modal is an ordinary verb concept flagged `Concept.modal`; what marks it out is that it
@@ -162,7 +162,7 @@ describe('modals: chains', () => {
   });
 
   test('the outermost modal of a chain carries the tense and the negation', () => {
-    expect(catModal({ modals: ['MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }, 'CAN'], tense: 'past' })).toMatchObject({
       en: 'the cat did not have to be able to eat.',
       it: 'il gatto non doveva poter mangiare.',
       fr: 'le chat ne devait pas pouvoir manger.',
@@ -185,7 +185,7 @@ describe('modals: chains', () => {
   });
 
   test('a three-modal chain carries tense and negation on the outermost only', () => {
-    expect(catModal({ modals: ['WILL', 'MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
+    expect(catModal({ modals: [{ verb: 'WILL', negative: true }, 'MUST', 'CAN'], tense: 'past' })).toMatchObject({
       en: 'the cat did not want to have to be able to eat.', // do-support: WILL is the lexical "want"
       it: 'il gatto non voleva dover poter mangiare.',
       fr: 'le chat ne voulait pas devoir pouvoir manger.',
@@ -196,7 +196,7 @@ describe('modals: chains', () => {
 
 describe('modals: negation', () => {
   test('CAN — the negation is unambiguous', () => {
-    expect(catModal({ modals: ['CAN'], negative: true })).toEqual({
+    expect(catModal({ modals: [{ verb: 'CAN', negative: true }] })).toEqual({
       en: 'the cat cannot eat.',
       it: 'il gatto non può mangiare.',
       fr: 'le chat ne peut pas manger.',
@@ -268,7 +268,7 @@ describe('modals: every pair', () => {
 
 // The negation lands on the OUTERMOST modal, wherever the pair puts it.
 describe('modals: a pair with negation', () => {
-  const negPair = (a: string, b: string) => catModal({ modals: [a, b], negative: true });
+  const negPair = (a: string, b: string) => catModal({ modals: [{ verb: a, negative: true }, b] });
 
   test('MUST outermost', () => {
     expect(negPair('MUST', 'CAN')).toMatchObject({
@@ -318,7 +318,7 @@ describe('modals: a pair with negation', () => {
   });
 
   test('a negated pair in the past — the outermost takes tense AND negation', () => {
-    expect(catModal({ modals: ['MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }, 'CAN'], tense: 'past' })).toMatchObject({
       en: 'the cat did not have to be able to eat.',
       it: 'il gatto non doveva poter mangiare.',
       fr: 'le chat ne devait pas pouvoir manger.',
@@ -366,7 +366,7 @@ describe('modals: with an adverb', () => {
       de: 'der Kater muss schnell fressen können.',
     });
 
-    expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'FAST', negative: true }))
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }, 'CAN'], modifier: 'FAST' }))
       .toMatchObject({
         en: 'the cat does not have to be able to eat fast.', // ¬obligation scope (see below)
         it: 'il gatto non deve poter mangiare velocemente.',
@@ -374,7 +374,7 @@ describe('modals: with an adverb', () => {
         de: 'der Kater muss nicht schnell fressen können.',
       });
 
-    expect(catModal({ modals: ['CAN'], modifier: 'FAST', negative: true })).toMatchObject({
+    expect(catModal({ modals: [{ verb: 'CAN', negative: true }], modifier: 'FAST' })).toMatchObject({
       en: 'the cat cannot eat fast.',
       es: 'el gato no puede comer rápido.',
       de: 'der Kater kann nicht schnell fressen.',
@@ -438,9 +438,9 @@ describe('Japanese aspect under a modal', () => {
   });
 
   test('the modal keeps the tense and the polarity', () => {
-    expect(ja({ modals: ['MUST'], aspect: 'resultative', negative: true, tense: 'past' })).toBe('猫は食べている必要がありませんでした。');
-    expect(ja({ modals: ['CAN'], aspect: 'prospective', negative: true, tense: 'past' })).toBe('猫は食べようとしていることができませんでした。');
-    expect(ja({ modals: ['WILL'], aspect: 'progressive', negative: true, tense: 'past' })).toBe('猫は食べていたくなかったです。');
+    expect(ja({ modals: [{ verb: 'MUST', negative: true }], aspect: 'resultative', tense: 'past' })).toBe('猫は食べている必要がありませんでした。');
+    expect(ja({ modals: [{ verb: 'CAN', negative: true }], aspect: 'prospective', tense: 'past' })).toBe('猫は食べようとしていることができませんでした。');
+    expect(ja({ modals: [{ verb: 'WILL', negative: true }], aspect: 'progressive', tense: 'past' })).toBe('猫は食べていたくなかったです。');
   });
 
   test('a bridged chain, an object, an adverb, a passive and a state verb all compose', () => {
@@ -487,7 +487,7 @@ describe('known bugs: modals', () => {
   // reading (no obligation) that the past, German and Japanese already take, so the present now
   // reads "does not have to eat" — the "have to" periphrasis with do-support, like every tense.
   test('English MUST + negative does not flip scope between present and past', () => {
-    expect(catModal({ modals: ['MUST'], negative: true }))
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }] }))
       .toMatchObject({ en: 'the cat does not have to eat.' });
   });
 
@@ -495,7 +495,7 @@ describe('known bugs: modals', () => {
   // (absence of obligation); the prohibition would be "darf nicht essen". English now agrees with
   // German/Japanese on the ¬must reading, so the same plan no longer reads as opposites.
   test('MUST + negative means the same thing in every language', () => {
-    const said = catModal({ modals: ['MUST'], negative: true });
+    const said = catModal({ modals: [{ verb: 'MUST', negative: true }] });
     // English and German must not read as opposites.
     expect([said.en, said.de]).not.toEqual([
       'the cat must not eat.', // prohibition
@@ -506,15 +506,15 @@ describe('known bugs: modals', () => {
   // One ¬obligation scope in every tense: "does not / did not / will not have to eat" — no tense
   // is the odd one out any longer.
   test('English negates MUST periphrastically in every tense', () => {
-    expect(catModal({ modals: ['MUST'], negative: true }).en).toBe('the cat does not have to eat.');
-    expect(catModal({ modals: ['MUST'], tense: 'past', negative: true }).en).toBe('the cat did not have to eat.');
-    expect(catModal({ modals: ['MUST'], tense: 'future', negative: true }).en).toBe('the cat will not have to eat.');
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }] }).en).toBe('the cat does not have to eat.');
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }], tense: 'past' }).en).toBe('the cat did not have to eat.');
+    expect(catModal({ modals: [{ verb: 'MUST', negative: true }], tense: 'future' }).en).toBe('the cat will not have to eat.');
   });
 
   // The do-support agrees with the subject: "the cats do not have to eat".
   test('English MUST negation takes plural do-support', () => {
     expect(sayAll(clause(np('CAT', { number: 'plural' }), 'EAT', {
-      verbPhrase: { modals: ['MUST'], negative: true },
+      verbPhrase: { modals: [{ verb: 'MUST', negative: true }] },
     })).en).toBe('the cats do not have to eat.');
   });
 
@@ -522,8 +522,8 @@ describe('known bugs: modals', () => {
   // "cannot", and MUST as the INNER member of a chain keeps its "have to" citation ("cannot have
   // to eat"), since only the finite (outermost) form is chosen here.
   test('English still negates CAN as "cannot", and MUST-inner as "have to"', () => {
-    expect(catModal({ modals: ['CAN'], negative: true }).en).toBe('the cat cannot eat.');
-    expect(catModal({ modals: ['CAN', 'MUST'], negative: true }).en).toBe('the cat cannot have to eat.');
+    expect(catModal({ modals: [{ verb: 'CAN', negative: true }] }).en).toBe('the cat cannot eat.');
+    expect(catModal({ modals: [{ verb: 'CAN', negative: true }, 'MUST'] }).en).toBe('the cat cannot have to eat.');
   });
 
   // Japanese modality is suffixal, so a CHAIN has to nest suffixes — and the engine stacks them
@@ -554,7 +554,7 @@ describe('known bugs: modals', () => {
   test('the volitional bridge carries tense and polarity on the outer element', () => {
     // Negation and past land on the bridging なる (なりたくない) / と思う-modal, as they would on
     // any outermost modal.
-    expect(catModal({ modals: ['WILL', 'CAN'], negative: true }).ja)
+    expect(catModal({ modals: [{ verb: 'WILL', negative: true }, 'CAN'] }).ja)
       .toBe('猫は食べることができるようになりたくないです。');
     expect(catModal({ modals: ['CAN', 'WILL'], tense: 'past' }).ja)
       .toBe('猫は食べたいと思うことができました。');
@@ -696,7 +696,7 @@ describe('known bugs: German double infinitive in a verb-final clause', () => {
     expect(dogWho({ tense: 'future', modals: [{ verb: 'WILL' }, { verb: 'CAN' }] })).toBe('der Hund, der das Buch wird fressen können wollen, läuft.');
     expect(dogWho({ tense: 'future', aspect: 'resultative', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch wird gefressen haben müssen, läuft.');
     expect(dogWho({ tense: 'future', aspect: 'progressive', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der gerade das Buch wird fressen müssen, läuft.');
-    expect(dogWho({ tense: 'future', negative: true, modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch nicht wird fressen müssen, läuft.');
+    expect(dogWho({ tense: 'future', modals: [{ verb: 'MUST', negative: true }] })).toBe('der Hund, der das Buch nicht wird fressen müssen, läuft.');
     expect(sayAll(clause(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] } },
     }), 'RUN')).de).toBe('die Maus, die der Kater wird fressen müssen, läuft.');
@@ -733,7 +733,7 @@ describe('known bugs: English manner adverb on a modal', () => {
   test('English trails a modal\'s manner adverb in every row of the table', () => {
     const cat = (verbPhrase: Partial<VerbPhrase>, extra: object = {}) => say(clause(np('CAT'), 'EAT', { verbPhrase, ...extra }), 'en');
     expect(cat({ modals: [{ verb: 'WILL', modifier: 'FAST' }] })).toBe('the cat wants to eat fast.');
-    expect(cat({ negative: true, modals: [{ verb: 'CAN', modifier: 'FAST' }] })).toBe('the cat cannot eat fast.');
+    expect(cat({ modals: [{ verb: 'CAN', modifier: 'FAST', negative: true }] })).toBe('the cat cannot eat fast.');
     expect(cat({ modals: [{ verb: 'MUST' }, { verb: 'CAN', modifier: 'FAST' }] })).toBe('the cat must be able to eat fast.');
     expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en'))
       .toBe('if the cat ate, the dog would be able to run fast.');
@@ -754,8 +754,8 @@ describe('known bugs: Japanese 〜たい bridge inside a longer modal chain', ()
   });
 
   test('Japanese keeps 〜たい through tense and polarity and in a four-modal chain', () => {
-    const eats = (modals: string[], verbPhrase = {}) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals, ...verbPhrase } })).ja;
-    expect(eats(['MUST', 'WILL', 'CAN'], { negative: true, tense: 'past' })).toBe('猫は食べることができるようになりたいと思う必要がありませんでした。');
+    const eats = (modals: ModalRef[], verbPhrase = {}) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals, ...verbPhrase } })).ja;
+    expect(eats([{ verb: 'MUST', negative: true }, 'WILL', 'CAN'], { tense: 'past' })).toBe('猫は食べることができるようになりたいと思う必要がありませんでした。');
     expect(eats(['WILL', 'CAN', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思うことができるようになりたいです。');
   });
 
@@ -781,7 +781,7 @@ describe('known bugs: Japanese modal on the copula', () => {
     expect(ja('BIG', { modals: ['MUST'] })).toBe('猫は大きい必要があります。');
     expect(ja('TIRED', { modals: ['MUST'] })).toBe('猫は疲れている必要があります。');
     expect(ja('LEGEND', { modals: ['MUST'] })).toBe('猫は伝説である必要があります。');
-    expect(ja('HAPPY', { modals: ['MUST'], negative: true })).toBe('猫は幸せである必要がありません。');
+    expect(ja('HAPPY', { modals: [{ verb: 'MUST', negative: true }] })).toBe('猫は幸せである必要がありません。');
     expect(ja('LEGEND', { modals: ['MUST'], tense: 'past' })).toBe('猫は伝説である必要がありました。');
     expect(ja('LEGEND', { modals: ['CAN'] })).toBe('猫は伝説であることができます。');
     expect(ja('LEGEND', { modals: ['WILL'] })).toBe('猫は伝説でありたいです。');
@@ -790,7 +790,7 @@ describe('known bugs: Japanese modal on the copula', () => {
     // A121's elided predicate carries the modal too.
     expect(say({
       ...isA('HAPPY', {}),
-      coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modals: ['MUST'], negative: true } }) },
+      coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST', negative: true }] } }) },
     }, 'ja')).toMatch(/犬はそうである必要がありません。$/);
   });
 
@@ -799,14 +799,14 @@ describe('known bugs: Japanese modal on the copula', () => {
   test('Japanese composes the copula\'s modal in the protasis, a chain and every adjective class', () => {
     const ja = (plan: PhrasePlan) => say(plan, 'ja');
     expect(ja({ ...clause(np('DOG'), 'RUN'), condition: isA('LEGEND', { modals: ['CAN'] }) })).toBe('もし猫が伝説であることができたら、犬は走ります。');
-    expect(ja({ ...clause(np('DOG'), 'RUN'), condition: isA('HAPPY', { modals: ['MUST'], negative: true }) }))
+    expect(ja({ ...clause(np('DOG'), 'RUN'), condition: isA('HAPPY', { modals: [{ verb: 'MUST', negative: true }] }) }))
       .toBe('もし猫が幸せである必要がなかったら、犬は走ります。');
     expect(ja(isA('LEGEND', { modals: ['WILL', 'CAN'] }))).toBe('猫は伝説であることができるようになりたいです。');
     expect(ja(isA('HAPPY', { modals: ['MUST', 'CAN'] }))).toBe('猫は幸せであることができる必要があります。');
     expect(ja(isA('BIG', { modals: ['WILL'] }))).toBe('猫は大きくありたいです。');
     expect(ja(isA('TIRED', { modals: ['WILL'] }))).toBe('猫は疲れていたいです。');
-    expect(ja(isA('HAPPY', { modals: ['WILL'], negative: true }))).toBe('猫は幸せでありたくないです。');
-    expect(ja(isA('TIRED', { modals: ['CAN'], tense: 'past', negative: true }))).toBe('猫は疲れていることができませんでした。');
+    expect(ja(isA('HAPPY', { modals: [{ verb: 'WILL', negative: true }] }))).toBe('猫は幸せでありたくないです。');
+    expect(ja(isA('TIRED', { modals: [{ verb: 'CAN', negative: true }], tense: 'past' }))).toBe('猫は疲れていることができませんでした。');
     expect(ja(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', modals: ['CAN'], tense: 'past' }, complements: { predicative: { phrase: np('HAPPY') } } } }), 'RUN')))
       .toBe('幸せであることができた猫は走ります。');
     expect(ja(isA('HAPPY', { modals: [{ verb: 'MUST', modifier: 'ALWAYS' }], modifier: 'NEVER' }))).toBe('猫はいつも決して幸せである必要がありません。');
@@ -911,3 +911,190 @@ describe('known bugs: a modal as the verb of a clause that governs an infinitive
   });
 });
 
+
+// A03. Polarity is per word of the verb group: each modal carries its own `negative`, and
+// `VerbPhrase.negative` carries the main verb's. A chain can deny any of them, or several — "I do
+// not want to not go". The finite modal's negation is the clause's sentential one (unchanged, and
+// still what do-support / ne…pas / nicht-placement / concord read); every element below it takes
+// its language's non-finite negator in front of it.
+describe('modal polarity — each word of the group takes its own negation', () => {
+  const iGo = (verbPhrase: Partial<VerbPhrase>) => sayAll(clause(np('FIRST_PERSON'), 'GO', { verbPhrase }));
+
+  test('the modal is denied, the verb is denied, or both', () => {
+    // ¬want go — what a modal chain has always been able to say, now spelled on the modal itself.
+    expect(iGo({ modals: [{ verb: 'WILL', negative: true }] })).toEqual({
+      en: 'I do not want to go.',
+      it: 'non voglio andare.',
+      fr: 'je ne veux pas aller.',
+      es: 'no quiero ir.',
+      pt: 'não quero ir.',
+      de: 'ich will nicht gehen.',
+      ja: '私は行きたくないです。',
+    });
+    // want ¬go — the governed verb's own negation, which had no plan before A03.
+    expect(iGo({ modals: ['WILL'], negative: true })).toEqual({
+      en: 'I want to not go.',
+      it: 'voglio non andare.',
+      fr: 'je veux ne pas aller.',
+      es: 'quiero no ir.',
+      pt: 'quero não ir.',
+      de: 'ich will nicht gehen.', // one "nicht" in a cluster reads under either scope in German
+      ja: '私は行かないでいたいです。',
+    });
+    // Both at once, the sentence this feature was asked for.
+    expect(iGo({ modals: [{ verb: 'WILL', negative: true }], negative: true })).toEqual({
+      en: 'I do not want to not go.',
+      it: 'non voglio non andare.',
+      fr: 'je ne veux pas ne pas aller.',
+      es: 'no quiero no ir.',
+      pt: 'não quero não ir.',
+      de: 'ich will nicht nicht gehen.',
+      ja: '私は行かないでいたくないです。',
+    });
+  });
+
+  // The prohibition, which one flag could not express: a POSITIVE must over a negated verb. A
+  // negated MUST stays the ¬obligation reading every language already took.
+  test('MUST over a negated verb is the prohibition, and a negated MUST is still no obligation', () => {
+    expect(iGo({ modals: ['MUST'], negative: true })).toEqual({
+      en: 'I must not go.',
+      it: 'devo non andare.',
+      fr: 'je dois ne pas aller.',
+      es: 'debo no ir.',
+      pt: 'devo não ir.',
+      de: 'ich muss nicht gehen.',
+      ja: '私は行かない必要があります。',
+    });
+    expect(iGo({ modals: [{ verb: 'MUST', negative: true }] })).toMatchObject({
+      en: 'I do not have to go.',
+      it: 'non devo andare.',
+      ja: '私は行く必要がありません。',
+    });
+  });
+
+  test('CAN over a negated verb is the ability to refrain', () => {
+    expect(iGo({ modals: ['CAN'], negative: true })).toEqual({
+      en: 'I can not go.', // two words: "cannot" is the negated CAN
+      it: 'posso non andare.',
+      fr: 'je peux ne pas aller.',
+      es: 'puedo no ir.',
+      pt: 'posso não ir.',
+      de: 'ich kann nicht gehen.',
+      ja: '私は行かないことができます。',
+    });
+  });
+
+  // Every element of a chain is deniable, not just its ends.
+  test('an inner modal carries its own negation', () => {
+    expect(iGo({ modals: ['MUST', { verb: 'CAN', negative: true }] })).toMatchObject({
+      en: 'I must not be able to go.',
+      it: 'devo non poter andare.',
+      fr: 'je dois ne pas pouvoir aller.',
+      es: 'debo no poder ir.',
+      pt: 'devo não poder ir.',
+      ja: '私は行くことができない必要があります。',
+    });
+    expect(iGo({ modals: ['MUST', 'CAN'], negative: true })).toMatchObject({
+      en: 'I must be able to not go.',
+      it: 'devo poter non andare.',
+      fr: 'je dois pouvoir ne pas aller.',
+      es: 'debo poder no ir.',
+      pt: 'devo poder não ir.',
+    });
+  });
+
+  test('a governed negation composes with tense and aspect', () => {
+    expect(iGo({ modals: ['WILL'], negative: true, tense: 'past' })).toMatchObject({
+      en: 'I wanted to not go.',
+      it: 'volevo non andare.',
+      fr: 'je voulais ne pas aller.',
+    });
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['MUST'], negative: true, aspect: 'resultative' } })))
+      .toMatchObject({
+        en: 'I must not have eaten.',
+        it: 'devo non aver mangiato.',
+        fr: 'je dois ne pas avoir mangé.',
+      });
+  });
+
+  // A negator inside the governed group stands ahead of the object, so a `no` object concords with
+  // THAT one: the finite verb takes none, and English switches to its "any"-series as it does after
+  // any negator ahead of the object.
+  test('a `no` object concords with the governed negation, not the modal', () => {
+    const wantsNotToEat = sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modals: ['WILL'], negative: true },
+      directObject: np('FOOD', { definiteness: 'no' }),
+    }));
+    expect(wantsNotToEat).toMatchObject({
+      en: 'the cat wants to not eat any food.',
+      it: 'il gatto vuole non mangiare nessun cibo.',
+      es: 'el gato quiere no comer ninguna comida.',
+      pt: 'o gato quer não comer nenhuma comida.',
+      de: 'der Kater will kein Essen fressen.', // "kein" absorbs the nicht, as it does the finite one
+    });
+    // Unchanged where the governed verb is positive: the concord is the finite verb's.
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modals: ['WILL'] },
+      directObject: np('FOOD', { definiteness: 'no' }),
+    }))).toMatchObject({
+      it: 'il gatto non vuole mangiare nessun cibo.',
+      es: 'el gato no quiere comer ninguna comida.',
+    });
+  });
+
+  test('a governed negation survives a relative clause and a conditional', () => {
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'EAT', modals: ['WILL'], negative: true } },
+    }), 'RUN'))).toMatchObject({
+      en: 'the cat that wants to not eat runs.',
+      it: 'il gatto che vuole non mangiare corre.',
+    });
+    expect(sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['WILL'], negative: true } }),
+    })).toMatchObject({
+      en: 'if the cat wanted to not eat, the dog would run.',
+      it: 'se il gatto volesse non mangiare, il cane correrebbe.',
+    });
+  });
+
+  // A modal heading a clause folds into the chain (A222), and what denied it comes along: the
+  // clause's own negation stays the finite one, and a modal ITS modals deny becomes a denied link.
+  test('a folded modal governor keeps the negation that denied it', () => {
+    // A citation drops a clause's own modals, so the two scopes are only tellable apart in a
+    // finite clause, where MUST governs the WILL that governs the complement.
+    const wantToAct = { verbPhrase: { verb: 'ACT' } };
+    expect(sayAll({
+      subject: np('CAT'),
+      verbPhrase: { verb: 'WILL', modals: ['MUST'], negative: true },
+      infinitiveComplement: wantToAct,
+    })).toMatchObject({
+      en: 'the cat must not want to act.',
+      it: 'il gatto deve non volere agire.',
+      ja: '猫は行動したくないと思う必要があります。',
+    });
+    expect(sayAll({
+      subject: np('CAT'),
+      verbPhrase: { verb: 'WILL', modals: [{ verb: 'MUST', negative: true }] },
+      infinitiveComplement: wantToAct,
+    })).toMatchObject({
+      en: 'the cat does not have to want to act.',
+      it: 'il gatto non deve volere agire.',
+      ja: '猫は行動したいと思う必要がありません。',
+    });
+  });
+
+  // With no modal the main verb IS the finite one, so `negative` means exactly what it meant: this
+  // is the whole of the compatibility promise, and `negation.test.ts` holds the rest of it.
+  test('a modal-free clause is untouched', () => {
+    expect(iGo({ negative: true })).toEqual({
+      en: 'I do not go.',
+      it: 'non vado.',
+      fr: 'je ne vais pas.',
+      es: 'no voy.',
+      pt: 'não vou.',
+      de: 'ich gehe nicht.',
+      ja: '私は行きません。',
+    });
+  });
+});

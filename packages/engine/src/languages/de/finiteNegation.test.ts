@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
-  complement, complements, concept, el, ESSEN, EUROPA, IMMER, KATZE, MAUS, modal, MUEDE, MUESSEN, NIE, np, vp, WASSER, WERDEN_VERB,
+  complement, complements, concept, el, ESSEN, EUROPA, GEHEN, IMMER, KATZE, KOENNEN, MAUS, modal, MUEDE, MUESSEN, NIE, np, vp, WASSER,
+  WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
 import { finiteNegation } from './finiteNegation.js';
 
@@ -103,5 +104,67 @@ describe('finiteNegation', () => {
     const { nicht, directObject } = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, modals: [modal(MUESSEN, NIE)] }), directObject: noCats }, false);
     expect(nicht).toEqual(empty);
     expect(directObject?.conjuncts.map((np) => np.head.forms['definiteness'])).toEqual(['indefinite', 'indefinite']);
+  });
+
+  // A03: every denied word of the verb group spells its own "nicht" in the same slot.
+  describe('modal polarity', () => {
+    const cannot = { ...modal(KOENNEN), negative: true };
+
+    test('the main verb under a modal adds one: "will nicht gehen", "will nicht nicht gehen"', () => {
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { modals: [modal(WOLLEN)], governedNegative: true }) }, false).nicht)
+        .toEqual({ ...empty, after: 'nicht' });
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }) }, false).nicht)
+        .toEqual({ ...empty, after: 'nicht nicht' });
+    });
+
+    test('an inner modal adds one: "muss nicht gehen können", "muss nicht nicht gehen können"', () => {
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { modals: [modal(MUESSEN), cannot] }) }, false).nicht)
+        .toEqual({ ...empty, after: 'nicht' });
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { negative: true, modals: [modal(MUESSEN), cannot] }) }, false).nicht)
+        .toEqual({ ...empty, after: 'nicht nicht' });
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { modals: [modal(MUESSEN), cannot], governedNegative: true }) }, false).nicht)
+        .toEqual({ ...empty, after: 'nicht nicht' });
+    });
+
+    // The outermost modal is the finite element: the translator has already moved its flag to
+    // `negative`, so the one on `modals[0]` is not read twice, and `governedNegative` means nothing
+    // with no modal to govern (there the main verb IS the finite one).
+    test('the outermost modal and a modal-free governed flag count for nothing', () => {
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { modals: [{ ...modal(WOLLEN), negative: true }] }) }, false).nicht).toEqual(empty);
+      expect(finiteNegation({ verbPhrase: vp(GEHEN, { governedNegative: true }) }, false).nicht).toEqual(empty);
+    });
+
+    test('they take the slot the finite one takes: before an adverb, a complement, the prospective', () => {
+      const both = { negative: true, modals: [modal(WOLLEN)], governedNegative: true };
+      expect(finiteNegation({ verbPhrase: vp(ESSEN, { ...both, modifier: concept(IMMER) }) }, false).nicht)
+        .toEqual({ ...empty, beforeAdverb: 'nicht nicht' });
+      expect(finiteNegation({ verbPhrase: vp(WERDEN_VERB, both) }, true).nicht)
+        .toEqual({ ...empty, beforeComplements: 'nicht nicht' });
+      expect(finiteNegation({ verbPhrase: vp(ESSEN, { ...both, aspect: 'prospective' }) }, false).nicht)
+        .toEqual({ ...empty, beforeAspect: 'nicht nicht' });
+    });
+
+    // German has no concord, so a governed "nicht" gives way to a "kein" exactly as the finite one
+    // does — "der Kater will kein Essen fressen" — and a lone one still absorbs into an indefinite.
+    test('a kein object or a nie outranks a governed negation as it does the finite one', () => {
+      const governed = { modals: [modal(WOLLEN)], governedNegative: true };
+      expect(finiteNegation({ verbPhrase: vp(ESSEN, governed), directObject: noMouse }, false))
+        .toEqual({ nicht: empty, directObject: noMouse, complements: undefined });
+      expect(finiteNegation({ verbPhrase: vp(ESSEN, { ...governed, modifier: concept(NIE) }), directObject: mouse }, false).nicht)
+        .toEqual(empty);
+      const absorbed = finiteNegation({ verbPhrase: vp(ESSEN, governed), directObject: aMouse }, false);
+      expect(absorbed.nicht).toEqual(empty);
+      expect(determiners(absorbed.directObject)).toEqual(['no']);
+    });
+
+    // "kein" is "nicht + ein", so it can only ever stand in for ONE "nicht": two denials keep both
+    // words and leave the object's determiner alone ("will eine Maus nicht nicht essen").
+    test('two negations are not absorbed by an indefinite object', () => {
+      const twice = finiteNegation({
+        verbPhrase: vp(ESSEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }), directObject: aMouse,
+      }, false);
+      expect(twice.nicht).toEqual({ ...empty, after: 'nicht nicht' });
+      expect(determiners(twice.directObject)).toEqual(['indefinite']);
+    });
   });
 });

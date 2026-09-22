@@ -19,6 +19,14 @@ export interface NegationSources {
   adverb: boolean;
   /** The verb phrase's own `negative` — the "not" / "nicht" the clause would otherwise take. */
   verb: boolean;
+  /**
+   * A negation **inside** the verb group a modal governs — "wants to not eat", "vuole non
+   * mangiare". It is not the clause's own negator (the modal stands unnegated), but it is a
+   * negator standing ahead of the object and the complements, so a `no` among them concords with
+   * it: "vuole non mangiare nessun cibo" takes no second "non" on the finite verb, and English
+   * switches its object to the "any"-series ("wants to not eat any food") as it does after "not".
+   */
+  governed: boolean;
   /** A `no`-determined conjunct in the direct object. */
   object: boolean;
   /** A `no`-determined conjunct in any complement — the twin of `object` on the adjunct side. */
@@ -42,6 +50,8 @@ export function negationSources(clause: {
     subject: clause.subjectIsNegative === true,
     adverb: groupHasNegativeAdverb(clause.verbPhrase),
     verb: clause.verbPhrase.negative === true,
+    governed: clause.verbPhrase.governedNegative === true
+      || clause.verbPhrase.modals.some((m) => m.negative === true),
     object: clause.directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false,
     complement: hasNegativeComplement(clause.complements),
   };

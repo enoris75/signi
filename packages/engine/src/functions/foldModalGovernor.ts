@@ -13,7 +13,8 @@ import type { ResolvedModal, ResolvedPhrase } from '../types.js';
  *
  * Every other clause comes back as it is: a lexical verb, a complement its governor's object controls
  * (a causative), a modal with an object of its own, and a negated complement — "to want not to act"
- * cannot be one chain, whose negation is the finite modal's.
+ * cannot be one chain, since the complement's own negation is not the chain's finite one. A modal
+ * this clause's OWN modals deny ("to have to not want to act") does fold: that denial is the link's.
  *
  * Only the engines whose modal is not a verb taking an infinitive complement ask: Japanese suffixes
  * its modals (行動したい, not 行動することをたい), German stacks them in the verb cluster (handeln
@@ -26,7 +27,14 @@ export function foldModalGovernor(phrase: ResolvedPhrase): ResolvedPhrase {
   if (governor?.verb.forms['modal'] !== '1' || !inner?.verbPhrase || inner.control === 'object'
     || inner.verbPhrase.negative || phrase.directObject) return phrase;
   const { tense, mood, register, negative, interrogative } = governor;
-  const link: ResolvedModal = { verb: governor.verb, ...(governor.modifier ? { modifier: governor.modifier } : {}) };
+  // The governor becomes a link of the chain, and what denied it comes with it: a modal clause's
+  // own `governedNegative` denies its verb, which is this modal ("must not want to act"). Its
+  // `negative` is the finite element's and stays the clause's, above.
+  const link: ResolvedModal = {
+    verb: governor.verb,
+    ...(governor.modifier ? { modifier: governor.modifier } : {}),
+    ...(governor.governedNegative ? { negative: true } : {}),
+  };
   const complements = { ...phrase.complements, ...inner.complements };
   return foldModalGovernor({
     subject: phrase.subject,

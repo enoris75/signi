@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Complement, NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
+import type { Complement, ModalRef, NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
@@ -1215,7 +1215,7 @@ describe('known bugs: German prospective word order', () => {
     expect(catEatsMouse({ negative: true })).toBe('der Kater ist nicht im Begriff, die Maus zu fressen.');
     expect(catEatsMouse({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('der Kater muss immer im Begriff sein, die Maus zu fressen.');
     expect(catEatsMouse({ tense: 'future', modals: [{ verb: 'MUST' }] })).toBe('der Kater wird im Begriff sein müssen, die Maus zu fressen.');
-    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } })).de)
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modals: [{ verb: 'MUST', modifier: 'ALWAYS', negative: true }] } })).de)
       .toBe('der Kater muss nicht immer im Begriff sein zu fressen.');
   });
 
@@ -1475,7 +1475,7 @@ describe('known bugs: English frequency adverb before a mood auxiliary', () => {
     expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true, imperativeRegister: 'instruction' }, 'en')).toBe('do not always eat.');
     expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'NEVER' } }), imperative: true }, 'en')).toBe("let's never eat.");
     expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'ALWAYS', aspect: 'progressive' } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would always be running.');
-    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { negative: true, modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en'))
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'ALWAYS', negative: true }] } }), condition: clause(np('CAT'), 'EAT') }, 'en'))
       .toBe('if the cat ate, the dog would not always be able to run.');
   });
 
@@ -1535,7 +1535,7 @@ describe('known bugs: French reflexive infinitive', () => {
     expect(collapse('FIRST_PERSON', { modals: ['MUST'], aspect: 'resultative' }, { number: 'plural' })).toBe('nous devons nous être effondrés.');
     expect(collapse('CAT', { modals: ['MUST'], aspect: 'resultative' }, { gender: 'fem' })).toBe("la chatte doit s'être effondrée.");
     expect(collapse('FIRST_PERSON', { modals: ['WILL', 'CAN'] })).toBe("je veux pouvoir m'effondrer.");
-    expect(collapse('FIRST_PERSON', { modals: ['MUST'], negative: true })).toBe("je ne dois pas m'effondrer.");
+    expect(collapse('FIRST_PERSON', { modals: [{ verb: 'MUST', negative: true }] })).toBe("je ne dois pas m'effondrer.");
     expect(collapse('FIRST_PERSON', { modals: ['MUST'], aspect: 'progressive' })).toBe("je dois être en train de m'effondrer.");
   });
 
@@ -1573,7 +1573,7 @@ describe('known bugs: Spanish reflexive verb in a non-finite verb group', () => 
     expect(become(np('SECOND_PERSON', { number: 'plural' }), { modals: ['MUST'] })).toBe('debéis volveros una leyenda.');
     expect(become(np('FIRST_PERSON', { number: 'plural' }), { modals: ['MUST'], aspect: 'resultative' })).toBe('debemos habernos vuelto una leyenda.');
     expect(become(np('FIRST_PERSON'), { modals: ['MUST'], aspect: 'progressive' })).toBe('debo estar volviéndome una leyenda.');
-    expect(become(np('FIRST_PERSON'), { modals: ['MUST'], negative: true })).toBe('no debo volverme una leyenda.');
+    expect(become(np('FIRST_PERSON'), { modals: [{ verb: 'MUST', negative: true }] })).toBe('no debo volverme una leyenda.');
     expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'BECOME', modals: ['MUST'], aspect: 'resultative' }, complements: legend } }), 'RUN')).es)
       .toBe('el perro que debe haberse vuelto una leyenda corre.');
     expect(sayAll({ ...clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { modals: ['MUST'] }, complements: legend }), condition: clause(np('DOG'), 'EAT') }).es)
@@ -1600,7 +1600,7 @@ describe('known bugs: Romance past of a state verb', () => {
     const { it, fr, es, pt } = sayAll(plan);
     return { it, fr, es, pt };
   };
-  const catModalPast = (modal: string, extra: Partial<VerbPhrase> = {}, subject = np('CAT')) =>
+  const catModalPast = (modal: ModalRef, extra: Partial<VerbPhrase> = {}, subject = np('CAT')) =>
     romance(clause(subject, 'EAT', { verbPhrase: { tense: 'past', modals: [modal], ...extra } }));
   const catWasPast = (complements: Parameters<typeof clause>[2]) =>
     romance(clause(np('CAT'), 'BE', { verbPhrase: { tense: 'past' }, ...complements }));
@@ -1618,7 +1618,8 @@ describe('known bugs: Romance past of a state verb', () => {
     expect(catModalPast('WILL')).toEqual({
       it: 'il gatto voleva mangiare.', fr: 'le chat voulait manger.', es: 'el gato quería comer.', pt: 'o gato queria comer.',
     });
-    expect(catModalPast('WILL', { negative: true })).toEqual({
+    // The modal's own negation: it is the finite verb, and its imperfect is what this pins.
+    expect(catModalPast({ verb: 'WILL', negative: true })).toEqual({
       it: 'il gatto non voleva mangiare.', fr: 'le chat ne voulait pas manger.', es: 'el gato no quería comer.', pt: 'o gato não queria comer.',
     });
     expect(catModalPast('WILL', {}, np('CAT', { number: 'plural' }))).toEqual({

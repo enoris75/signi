@@ -33,6 +33,7 @@ import {
   toggleNegative,
   toggleNumber,
   type CycleStep,
+  type NegativeField,
 } from "../phraseReducers.ts";
 
 type PhraseUpdate = (updater: (prev: PhraseSelection) => PhraseSelection) => void;
@@ -51,7 +52,8 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     // The cycling controls take a direction: +1 for a click, −1 for the keyboard's ⇧ (see keymap).
     handleToggleGender: (which: GenderSlot, step: CycleStep = 1) =>
       onPhraseUpdate((prev) => toggleGender(prev, which, step)),
-    handleToggleNegative: () => onPhraseUpdate(toggleNegative),
+    handleToggleNegative: (field: NegativeField = "verbNegative") =>
+      onPhraseUpdate((sel) => toggleNegative(sel, field)),
     handleToggleCauseNegative: () => onPhraseUpdate(toggleCauseNegative),
     handleSetDefiniteness: (which: NounKey, value: Definiteness) =>
       onPhraseUpdate((prev) => setDefiniteness(prev, which, value)),

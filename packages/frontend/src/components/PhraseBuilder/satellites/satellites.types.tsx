@@ -19,6 +19,7 @@ import type {
   WorkspaceBinding,
 } from "../interfaces.ts";
 import type { SatelliteIcon } from "../Boxes.tsx";
+import type { NegativeField } from "../phraseReducers.ts";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 
 // Satellite elements (gender / number / polarity / adjective / adverb) are hidden
@@ -90,7 +91,7 @@ export interface BuildSatelliteIconsArgs {
   linkBinding: WorkspaceBinding | undefined;
   onToggleNumber: (which: NumberSlot) => void;
   onToggleGender: (which: GenderSlot) => void;
-  onToggleNegative: () => void;
+  onToggleNegative: (field: NegativeField) => void;
   onToggleReveal: (sat: Satellite) => void;
   // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
   // coordinate any number of phrases, so each click adds one more ring to the group.

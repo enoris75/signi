@@ -26,6 +26,8 @@ const SEE: Concept = { id: 'SEE', role: 'verb', description: 'SEE', label: 'see'
 const SLEEP: Concept = { id: 'SLEEP', role: 'verb', description: 'SLEEP', label: 'sleep', transitivity: 'intransitive' };
 const GO: Concept = { id: 'GO', role: 'verb', description: 'GO', label: 'go', complements: ['locative', 'cause'] };
 const CRY: Concept = { id: 'CRY', role: 'verb', description: 'CRY', label: 'cry', complements: ['cause'] };
+const WANT: Concept = { id: 'WANT', role: 'verb', description: 'WANT', label: 'want', modal: true };
+const NEVER: Concept = { id: 'NEVER', role: 'adverb', description: 'NEVER', label: 'never' };
 
 const SETTING_MAPS = ['adjectiveDegrees', 'modifierRelations', 'modifierNumbers', 'modifierAdjectives'] as const;
 
@@ -152,6 +154,17 @@ describe('applyConceptSelect', () => {
 });
 
 describe('applyClear', () => {
+  // A modal's polarity control rides the modal's box, so it cannot outlive the word it denied.
+  it('takes a modal’s own adverb and polarity with the modal', () => {
+    const prev: PhraseSelection = {
+      verb: SEE,
+      verbModal: WANT,
+      verbModalAdverb: NEVER,
+      verbModalNegative: true,
+    };
+    expect(applyClear(prev, 'verbModal')).toEqual({ verb: SEE });
+  });
+
   it.each<NounKey>(['subject', 'directObject', 'predicative', 'locative', 'cause'])(
     'leaves nothing of the %s’s block behind, and every other block’s settings in place',
     (which) => {
@@ -294,6 +307,21 @@ describe('the set-value reducers', () => {
     expect(R.setModifierRelation(s, 'subjectAdjective', 'material').modifierRelations).toEqual({ subjectAdjective: 'material' });
     expect(R.setModifierNumber(s, 'subjectAdjective', 'plural').modifierNumbers).toEqual({ subjectAdjective: 'plural' });
     expect(R.setNounConjunction(s, 'subject', 'or').subjectConjunction).toBe('or');
+  });
+
+  // Polarity is per word of the verb group (A03): the field names which word is denied, and the
+  // verb's own is the default the canvas and the console both leave unwritten.
+  it('deny one word of the verb group each, by field', () => {
+    const s: PhraseSelection = { verb: SEE, verbModal: WANT };
+    expect(R.setNegative(s, true)).toMatchObject({ verbNegative: true });
+    expect(R.setNegative(s, true, 'verbModalNegative')).toMatchObject({ verbModalNegative: true });
+    expect(R.setNegative(s, true, 'verbModalNegative').verbNegative).toBeUndefined();
+    expect(R.toggleNegative(R.setNegative(s, true, 'verbModalNegative'), 'verbModalNegative').verbModalNegative).toBe(false);
+    // Both at once is an ordinary phrase: "I do not want to not see".
+    expect(R.setNegative(R.setNegative(s, true), true, 'verbModalNegative')).toMatchObject({
+      verbNegative: true,
+      verbModalNegative: true,
+    });
   });
 
   it('change nothing when the mood asked for is the mood there is', () => {

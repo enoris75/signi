@@ -28,4 +28,15 @@ describe('aspectFormSegs', () => {
     expect(text(aspectFormSegs(concept(TABERU), 'prospective', 'dict'))).toBe('食べるところである');
     expect(text(aspectFormSegs(concept(TABERU), 'prospective', 'stem'))).toBe('食べるところであり');
   });
+
+  // A03: a modal can deny the group it governs, and the aspect's own auxiliary carries that ない —
+  // through the 〜ないでい bridge under a stem governor, as every other governed element does.
+  test('the aspect the modal denies takes the ない form on its auxiliary', () => {
+    expect(aspectFormSegs(concept(TABERU), 'progressive', 'dict', true)).toEqual([{ t: '食べて', r: 'たべて' }, { t: 'いない' }]);
+    expect(text(aspectFormSegs(concept(TABERU), 'progressive', 'stem', true))).toBe('食べていないでい');
+    expect(text(aspectFormSegs(concept(TABERU), 'resultative', 'dict', true))).toBe('食べていない');
+    expect(text(aspectFormSegs(TABENAI, 'prospective', 'dict', true))).toBe('食べようとしていない');
+    expect(text(aspectFormSegs(concept(TABERU), 'prospective', 'dict', true))).toBe('食べるところでない');
+    expect(text(aspectFormSegs(concept(TABERU), 'prospective', 'stem', true))).toBe('食べるところでないでい');
+  });
 });

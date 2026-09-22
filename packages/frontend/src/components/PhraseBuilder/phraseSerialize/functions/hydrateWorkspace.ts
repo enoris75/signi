@@ -1,5 +1,5 @@
 import type { Concept, SerializedWorkspace } from "@signi/shared";
-import { ABSTRACTION_LEVELS, COORD_CONJUNCTIONS } from "@signi/shared";
+import { ABSTRACTION_LEVELS, COORD_CONJUNCTIONS, SAVED_PHRASE_VERSION } from "@signi/shared";
 import type {
   AbstractionLevel,
   CoordConjunction,
@@ -13,14 +13,20 @@ import { hydrateSelection } from "./hydrateSelection.ts";
 import { isRecord } from "./isRecord.ts";
 import { isSavedLink } from "./isSavedLink.ts";
 import { migrateKey } from "./migrateKey.ts";
+import { migrateModalPolarity } from "./migrateModalPolarity.ts";
 
 // Restore a saved workspace against the catalog. Like each selection, the workspace around them
 // may have been damaged: a period with no id and a link without both endpoints are dropped, a
 // period with no selection loads empty, and a link's unreadable address, level or conjunction falls
 // back on its default.
+//
+// `version` is the schema the workspace was written at, which decides the value migrations a load
+// still owes it (see `migrateModalPolarity`). A workspace with no version of its own is one this
+// build just wrote, so it defaults to the current schema and is migrated no further.
 export function hydrateWorkspace(
   workspace: SerializedWorkspace,
   concepts: Concept[],
+  version: number = SAVED_PHRASE_VERSION,
 ): HydratedWorkspace {
   const byId = new Map(concepts.map((c) => [c.id, c]));
   const missing = new Set<string>();
@@ -30,7 +36,11 @@ export function hydrateWorkspace(
     .map(
       (c): PhraseContainer => ({
         id: c.id,
-        selection: hydrateSelection(isRecord(c.selection) ? c.selection : {}, byId, missing),
+        selection: hydrateSelection(
+          version < 8 ? migrateModalPolarity(isRecord(c.selection) ? c.selection : {}) : (isRecord(c.selection) ? c.selection : {}),
+          byId,
+          missing,
+        ),
       }),
     );
   const nounKey = (key: unknown): string => migrateKey(typeof key === "string" ? key : "subject");

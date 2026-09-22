@@ -1,6 +1,7 @@
 import type { GenderSlot, NounKey, NumberSlot, SlotKey } from "../../interfaces.ts";
 import type { SatelliteIcon } from "../../Boxes.tsx";
-import { COMPLEMENT_KEY_SET, REVEALABLE_SLOT_KEYS } from "../../slots.ts";
+import type { NegativeField } from "../../phraseReducers.ts";
+import { COMPLEMENT_KEY_SET, isModalNegativeField, REVEALABLE_SLOT_KEYS } from "../../slots.ts";
 import type {
   BuildSatelliteIconsArgs,
   PerimeterEntry,
@@ -122,6 +123,12 @@ export function buildSatelliteIcons({
       sat.directToggle && sat.key.endsWith("Gender")
         ? (sat.key.slice(0, -"Gender".length) as GenderSlot)
         : null;
+    // Polarity is per word of the verb group: the verb's own control and each modal's flip the
+    // field that denies the word the control is drawn on.
+    const negativeField: NegativeField | null =
+      sat.directToggle && (sat.key === "verbNegative" || isModalNegativeField(sat.key))
+        ? (sat.key as NegativeField)
+        : null;
     const iconEntry: SatelliteIcon = {
       key: sat.key,
       icon: sat.icon,
@@ -136,8 +143,8 @@ export function buildSatelliteIcons({
         ? () => onToggleNumber(numberSlot)
         : genderSlot
           ? () => onToggleGender(genderSlot)
-          : sat.key === "verbNegative"
-            ? onToggleNegative
+          : negativeField
+            ? () => onToggleNegative(negativeField)
             : () => onToggleReveal(sat),
     };
     if (sat.key === "directObject") {

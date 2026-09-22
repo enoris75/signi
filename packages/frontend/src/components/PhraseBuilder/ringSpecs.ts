@@ -20,6 +20,7 @@ import {
   MODAL_ADVERB_SLOTS,
   MODAL_SLOTS,
   NOUN_KEYS,
+  isModalNegativeField,
 } from "./slots.ts";
 import type { NounKey } from "./interfaces.ts";
 
@@ -119,7 +120,8 @@ function innerAim(key: string, chain: ReturnType<typeof chainFor>): RingAim {
   if (home !== undefined) return { disc: key, home };
   if (key.endsWith("Number")) return { clock: NUMBER_HOUR };
   if (key.endsWith("Gender")) return { clock: GENDER_HOUR };
-  if (key === "verbNegative") return { clock: POLARITY_HOUR };
+  // The verb's polarity and each modal's own take the same hour, each on its own box's ring.
+  if (key === "verbNegative" || isModalNegativeField(key)) return { clock: POLARITY_HOUR };
   return { clock: DIRECT_OBJECT_HOUR };
 }
 
@@ -189,13 +191,21 @@ export function buildRingSpecs({
       if (discs.length > 0) spec.chains.push({ home: chain.home, dir: chain.dir, discs });
       // The control for a chain member rides the gap where its disc sits (or would): right after
       // the last shown member before it in chain order.
-      const gaps = discs
-        .flatMap((parent) => (satelliteIconsByParent[parent] ?? []).map((icon) => icon.key))
+      const iconKeys = discs.flatMap((parent) => (satelliteIconsByParent[parent] ?? []).map((icon) => icon.key));
+      const gaps = iconKeys
         .filter((key) => chain.full.includes(key))
         .sort((a, b) => chain.full.indexOf(a) - chain.full.indexOf(b));
       for (const key of gaps) {
         const before = chain.full.slice(0, chain.full.indexOf(key)).filter((k) => shown.has(k));
         if (before.length > 0) spec.gaps.push({ key, after: before[before.length - 1] });
+      }
+      // A control of a chain member that is not itself a member — a modal's own polarity, which
+      // flips a value rather than revealing a disc — rides the gap right after the disc it belongs
+      // to, beside the controls that reveal what comes next.
+      for (const parent of discs) {
+        for (const icon of satelliteIconsByParent[parent] ?? []) {
+          if (!chain.full.includes(icon.key)) spec.gaps.push({ key: icon.key, after: parent });
+        }
       }
     }
 

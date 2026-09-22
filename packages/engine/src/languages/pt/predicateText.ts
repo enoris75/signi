@@ -57,7 +57,7 @@ export function predicateText(
   // for "está" (A199).
   gapComplement?: ComplementType,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
   // or imperfect-subjunctive (protasis, "comesse") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
@@ -114,8 +114,11 @@ export function predicateText(
   const passiveParticipleText = passive
     ? agreeAdj(passiveParticiple(verb), subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
     : '';
-  // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
-  // prepended below and lands in front of it, exactly as for a plain verb.
+  // A modal chain makes the outermost modal the finite verb ("quero poder ir"); the clause's own
+  // "não" is prepended below and lands in front of it, exactly as for a plain verb. Every element
+  // the chain governs is denied where it stands instead, by a bare preverbal "não" of its own:
+  // "devo não ir" is a positive DEVER over a negated IR (the prohibition), and "não devo ir" denies
+  // the obligation. An inner modal takes the same word ("devo não poder ir").
   // TOGETHER is an adverb in every language, but the Portuguese word for it is a predicative
   // adjective and agrees with the subject — "as gatas comem juntas", not the flat "*juntos" (A162).
   // Such a lexeme carries its agreeing stem beside the citation form; a true adverb has none and
@@ -144,13 +147,20 @@ export function predicateText(
   const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
   const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
   const preVerbNunca = frontIdx >= 0;
+  // The main verb's own negation, which only a modal can govern: "quero não ir". It leads the
+  // governed infinitive group — before the aspect auxiliary and its enclitic ("devo não ter
+  // comido", "quero não mover-me") — inside the chain, where the finite "não" never reaches. With
+  // no modal the main verb IS the finite one, and `verbNegative` already carries it.
+  const governedNao = governedNegative === true && modals.length > 0 ? 'não' : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
-        // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
-        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) })),
+        // negative adverb, which takes the preverbal slot instead (emitted as preVerb). An inner
+        // modal's own "não" leads it ("devo não poder ir").
+        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) }), 'não'),
+        governedNao,
         verbGroupInfinitive(copulaVerb.forms, agreeForms, aspect),
-      ].join(' ')
+      ].filter(Boolean).join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
       : aspectVerb(copulaVerb.forms, agreeForms, tense, aspect, mood);
@@ -171,10 +181,15 @@ export function predicateText(
   // a "nenhum" possessor, in the object or in a complement: "não vê a casa de nenhum homem" (A216).
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
   const complementIsNegative = hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
+  // A negator inside the governed group is preverbal for everything that follows it, so a "nenhum"
+  // object or complement concords with that one instead: "quer não comer nenhuma comida" takes no
+  // second "não" on the modal, which would deny the modal as well (see `negationSources.governed`).
+  const concordedInside = governedNao !== '' || modals.some((m) => m.negative);
   // The preverbal "não" is emitted only when the clause needs a preverbal negator AND none is already
   // there. A preverbal negative subject ("nenhum gato …") or a preverbal "nunca" (the finite adverb)
   // already negates the clause, so "não" is dropped.
-  const needsNao = verbNegative || objectIsNegative || complementIsNegative || groupHasNegativeAdverb(verbPhrase);
+  const needsNao = verbNegative || ((objectIsNegative || complementIsNegative) && !concordedInside)
+    || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun

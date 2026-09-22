@@ -40,8 +40,9 @@ export interface VerbComplex {
 
 /**
  * The Mittelfeld slots a negating "nicht" may take (see `nichtSlots`): before the prospective's "im
- * Begriff", before a Mittelfeld adverb, before the complements, or after the objects. Each holds
- * "nicht" or "", and at most one holds it.
+ * Begriff", before a Mittelfeld adverb, before the complements, or after the objects. Each holds the
+ * clause's negation or "", and at most one holds it. That negation is one "nicht" per denied word of
+ * the verb group, so a clause denying two of them fills its slot with "nicht nicht" (A03).
  */
 export interface NichtSlots {
   beforeAspect: string;

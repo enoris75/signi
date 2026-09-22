@@ -67,7 +67,11 @@ test.describe('the phrase console', () => {
     await expect(prompt(page)).toHaveValue('/modal can ');
     await run(page);
     await expect(page.getByTestId('box-verbModal')).toContainText('can');
-    await app.expectSentences({ en: 'the brown cats cannot eat the food.' });
+    // The polarity clicked above is *eat*'s own, and it stays the verb's under the modal: these
+    // cats are able to refrain (A03). The modal's own denial — "cannot eat" — is the control on
+    // *can*, written `/modal ( can /not )`.
+    await app.expectSentences({ en: 'the brown cats can not eat the food.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/verb ( eat /not /modal can )');
 
     // A relative clause in braces, which open by themselves: a second period, made already linked to cats.
     await page.keyboard.type('#1.subj /rel obj /subj dog /verb see');
@@ -76,13 +80,13 @@ test.describe('the phrase console', () => {
     await run(page);
     await expect(page.getByTestId('period-container')).toHaveCount(2);
     await app.expectSentences({
-      en: 'the brown cats that the dog sees cannot eat the food.',
-      it: 'i gatti marroni che il cane vede non possono mangiare il cibo.',
-      fr: 'les chats bruns que le chien voit ne peuvent pas manger la nourriture.',
+      en: 'the brown cats that the dog sees can not eat the food.',
+      it: 'i gatti marroni che il cane vede possono non mangiare il cibo.',
+      fr: 'les chats bruns que le chien voit peuvent ne pas manger la nourriture.',
       de: 'die braunen Kater, die der Hund sieht, können das Essen nicht fressen.',
-      es: 'los gatos marrones que el perro ve no pueden comer la comida.',
-      ja: '犬が見る茶色の猫は食べ物を食べることができません。',
-      pt: 'os gatos castanhos que o cão vê não podem comer a comida.',
+      es: 'los gatos marrones que el perro ve pueden no comer la comida.',
+      ja: '犬が見る茶色の猫は食べ物を食べないことができます。',
+      pt: 'os gatos castanhos que o cão vê podem não comer a comida.',
     });
 
     // ↑ brings the last line back.

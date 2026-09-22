@@ -32,6 +32,34 @@ describe('buildVerbPhrase', () => {
     ).toEqual([{ verb: 'WANT', modifier: 'NEVER' }, { verb: 'CAN' }]);
   });
 
+  // Polarity is per word of the verb group: the verb's own control denies the verb, and each
+  // modal's denies that modal — "I do not want to not go" is both of them set (A03).
+  it('gives each modal its own negation, and leaves the verb’s on the verb phrase', () => {
+    const vp = buildVerbPhrase({
+      verb: GO,
+      verbNegative: true,
+      verbModal: WANT,
+      verbModalNegative: true,
+      verbModal2: CAN,
+    });
+
+    expect(vp?.negative).toBe(true);
+    expect(vp?.modals).toEqual([{ verb: 'WANT', negative: true }, { verb: 'CAN' }]);
+  });
+
+  it('writes no negation for a modal left positive', () => {
+    const vp = buildVerbPhrase({ verb: GO, verbModal: WANT, verbModal2: CAN, verbModal2Negative: true });
+
+    expect(vp?.modals).toEqual([{ verb: 'WANT' }, { verb: 'CAN', negative: true }]);
+    expect(vp?.modals?.[0]).not.toHaveProperty('negative');
+  });
+
+  it('keeps a modal’s adverb and its negation together', () => {
+    expect(
+      buildVerbPhrase({ verb: GO, verbModal: WANT, verbModalAdverb: NEVER, verbModalNegative: true })?.modals,
+    ).toEqual([{ verb: 'WANT', modifier: 'NEVER', negative: true }]);
+  });
+
   it('keeps the second modal when the first is empty', () => {
     expect(buildVerbPhrase({ verb: GO, verbModal2: CAN, verbModal2Adverb: ALWAYS })?.modals).toEqual([
       { verb: 'CAN', modifier: 'ALWAYS' },

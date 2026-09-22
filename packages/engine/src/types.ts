@@ -122,10 +122,24 @@ export interface ResolvedNounElement {
  */
 export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'presentSubjunctive' | 'imperative' | 'infinitive';
 
-/** A resolved verb phrase: the verb, negation flag, tense, aspect, voice, mood, and resolved adverb. */
+/** A resolved verb phrase: the verb, negation flags, tense, aspect, voice, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {
   verb: ConceptForms;
+  /**
+   * The **finite** element's negation — the clause's sentential "not". With a modal chain that
+   * element is the outermost modal, and the translator has already put its flag here, so every
+   * engine negates the word it conjugates without looking at where the plan wrote the flag.
+   * Do-support, "ne … pas", German's "nicht" placement and negative concord all read this one.
+   */
   negative?: boolean;
+  /**
+   * The negation of the verb group a modal **governs** — "I want to **not** go", set only when
+   * there is a modal (with none, the main verb is the finite one and its flag is `negative`).
+   * Each engine renders it as its non-finite negator in front of the governed group: "non
+   * andare", "ne pas aller", "nicht gehen", ja's ない form. An inner modal's own negation rides
+   * `ResolvedModal.negative` the same way.
+   */
+  governedNegative?: boolean;
   tense?: Tense;
   aspect?: Aspect;
   /**
@@ -187,10 +201,16 @@ export interface ElidedComplement {
   complement: ResolvedComplement;
 }
 
-/** A resolved modal link: the modal verb's forms plus its own resolved adverb (if any). */
+/**
+ * A resolved modal link: the modal verb's forms plus its own resolved adverb and negation (if any).
+ *
+ * `negative` is set on **inner** links only. The outermost modal is the finite element, and its
+ * negation is the clause's, so the translator moves that flag to `ResolvedVerbPhrase.negative`.
+ */
 export interface ResolvedModal {
   verb: ConceptForms;
   modifier?: ConceptForms;
+  negative?: boolean;
 }
 
 /**

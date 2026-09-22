@@ -116,6 +116,69 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER)] }), el(np(EL)))).toBe('lo debe comer');
       expect(predicateText(GATO, vp(VER, { negative: true, modals: [modal(PODER)] }), el(np(ELLA)))).toBe('no la puede ver');
     });
+
+    // A03. A negation belongs to the word it sits on. `negative` is the finite element's — the
+    // clause's own "no", unchanged — and `governedNegative` is the main verb's, which only a modal
+    // can govern. The two scopes are different sentences and now spell differently: "no quiero ir"
+    // denies the wanting, "quiero no ir" the going. MUST is the prohibition either way round.
+    describe('polarity', () => {
+      test('the governed verb takes its own no, inside the chain', () => {
+        expect(predicateText(YO, vp(IR, { modals: [modal(QUERER)], governedNegative: true }))).toBe('quiero no ir');
+        expect(predicateText(YO, vp(IR, { negative: true, modals: [modal(QUERER)], governedNegative: true })))
+          .toBe('no quiero no ir');
+        expect(predicateText(YO, vp(IR, { modals: [modal(DEBER)], governedNegative: true }))).toBe('debo no ir');
+        expect(predicateText(YO, vp(IR, { modals: [modal(PODER)], governedNegative: true }))).toBe('puedo no ir');
+      });
+
+      test('an inner modal is denied where it stands, the main verb behind it', () => {
+        expect(predicateText(YO, vp(IR, { modals: [modal(DEBER), { ...modal(PODER), negative: true }] })))
+          .toBe('debo no poder ir');
+        expect(predicateText(YO, vp(IR, { modals: [modal(DEBER), modal(PODER)], governedNegative: true })))
+          .toBe('debo poder no ir');
+      });
+
+      // Without a modal the main verb IS the finite one, so a stray flag changes nothing: the
+      // clause's "no" is `negative`'s alone and every modal-free rendering is byte-identical.
+      test('the governed no needs a modal to govern it', () => {
+        expect(predicateText(YO, vp(IR, { governedNegative: true }))).toBe('voy');
+        expect(predicateText(YO, vp(IR, { negative: true, governedNegative: true }))).toBe('no voy');
+      });
+
+      test('it leads the aspect auxiliary and keeps the reflexive clitic on its own verb', () => {
+        expect(predicateText(YO, vp(COMER, { aspect: 'resultative', modals: [modal(DEBER)], governedNegative: true })))
+          .toBe('debo no haber comido');
+        expect(predicateText(YO, vp(COMER, { aspect: 'progressive', modals: [modal(DEBER)], governedNegative: true })))
+          .toBe('debo no estar comiendo');
+        expect(predicateText(YO, vp(VOLVERSE, { modals: [modal(QUERER)], governedNegative: true }), undefined, aLegend))
+          .toBe('quiero no volverme una leyenda');
+      });
+
+      test('the mood stays on the finite modal', () => {
+        expect(predicateText(YO, vp(IR, { mood: 'conditional', modals: [modal(DEBER)], governedNegative: true })))
+          .toBe('debería no ir');
+        expect(predicateText(YO, vp(IR, { mood: 'subjunctive', modals: [modal(PODER)], governedNegative: true })))
+          .toBe('pudiera no ir');
+      });
+
+      // The governed "no" is preverbal for everything behind it, so a "ningún" object or complement
+      // concords with that one. A second "no" on the modal would deny the modal as well.
+      test('a ningún object or complement concords with the negator inside the group', () => {
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER)], governedNegative: true }), el(np(COMIDA, { definiteness: 'no' }))))
+          .toBe('quiere no comer ninguna comida');
+        expect(predicateText(GATO, vp(CORRER, { modals: [modal(QUERER)], governedNegative: true }, 'RUN'), undefined,
+          complements({ direction: complement(np(CASA, { definiteness: 'no' })) })))
+          .toBe('quiere no correr a ninguna casa');
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER), { ...modal(PODER), negative: true }] }), el(np(COMIDA, { definiteness: 'no' }))))
+          .toBe('debe no poder comer ninguna comida');
+      });
+
+      // The finite reading is untouched: a positive governed group still puts the concord's "no"
+      // on the modal, where it has always been.
+      test('a positive governed group keeps the no on the finite modal', () => {
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER)] }), el(np(COMIDA, { definiteness: 'no' }))))
+          .toBe('no quiere comer ninguna comida');
+      });
+    });
   });
 
   describe('adverbs', () => {

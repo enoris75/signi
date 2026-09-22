@@ -53,7 +53,7 @@ export function predicateText(
   // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
   subjectIsNegative = subjectForms['definiteness'] === 'no',
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
   // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
   // A state verb's past is the imparfait ("avait", "était"), not the passé simple (A130).
@@ -101,18 +101,43 @@ export function predicateText(
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
   // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne" — and for an
   // "aucun" possessor in either of the last two ("ne voit la maison d'aucun homme", A216).
-  const aucun =
-    subjectIsNegative ||
+  // A postverbal "aucun" is told apart from a subject one below: only the postverbal kind can
+  // concord with a negator standing *inside* the group a modal governs.
+  const aucunPostverbal =
     (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false) ||
     hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
+  const aucun = subjectIsNegative || aucunPostverbal;
+  // The main verb's own negation, which only a modal can govern: "je veux ne pas aller". Without a
+  // modal the main verb IS the finite verb and `verbNegative` already carries it.
+  const governedNeg = governedNegative === true && modals.length > 0;
+  // An inner modal denying itself ("je dois ne pas pouvoir aller"); the outermost modal's own
+  // negation is the clause's, and lives in `verbNegative`.
+  const innerNeg = modals.some((m, i) => i > 0 && m.negative === true);
+  // A negator inside the governed group stands ahead of the object and the complements, so a
+  // postverbal "aucun" concords with THAT one and the finite verb takes none: "le chat veut ne
+  // manger aucune nourriture", not "… ne veut pas ne manger aucune nourriture", which would deny
+  // the modal as well. The deepest negator is the nearest one, so the main verb's outranks an
+  // inner modal's. A subject "aucun" is preverbal and keeps its "ne" on the finite verb either way
+  // ("aucun chat ne veut ne pas manger").
+  const concordedInside = governedNeg || innerNeg;
+  const finiteAucun = subjectIsNegative || (aucunPostverbal && !concordedInside);
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched.
   const negateFinite = (finite: string): string => {
-    if (!verbNegative && !aucun && !groupNegative) return finite;
+    if (!verbNegative && !finiteAucun && !groupNegative) return finite;
     const ne = elidesBeforeVerb(verb.forms, finite) ? "n'" : 'ne ';
-    const pas = verbNegative && !groupNegative && !aucun ? ' pas' : '';
+    const pas = verbNegative && !groupNegative && !finiteAucun ? ' pas' : '';
     return `${ne}${finite}${pas}`;
+  };
+  // A NON-FINITE element takes its whole negation in front of it — "ne pas" stays together before
+  // an infinitive, its auxiliary and its clitic ("ne pas avoir mangé", "ne pas me voir"), where a
+  // finite verb would split it. "ne" elides against whatever follows ("n'aimer aucun chat"), which
+  // is why the text is judged after the second word is chosen. Shared by the citation infinitive
+  // and by every element a modal governs.
+  const negateNonFinite = (negator: string, group: string): string => {
+    const tail = [negator, group].filter(Boolean).join(' ');
+    return `${elidesBeforeVerb(verb.forms, tail) ? "n'" : 'ne '}${tail}`;
   };
   // A pronoun direct object is a proclitic before the finite verb ("le chat me voit"), not a
   // post-verbal noun ("voit le je"). It sits inside any "ne … pas" bracket ("ne me voit pas") and
@@ -140,7 +165,9 @@ export function predicateText(
   // The alarm a cry raises takes "à" and the article ("cria au loup", A124).
   // A noun object has no zero article, and a negation turns its indefinite or partitive article into
   // "de" ("ne mange pas de souris", A149); an object taken with a preposition is no direct object.
-  const negatedClause = verbNegative === true || groupNegative || aucun;
+  // A negator governing the main verb stands ahead of its object too, so it turns an indefinite or
+  // partitive article into "de" as the finite one does: "doit ne pas manger de souris".
+  const negatedClause = verbNegative === true || groupNegative || aucun || governedNeg;
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
     if (objectPrep) return prepObjectText(np, objectPrep);
     if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
@@ -166,14 +193,26 @@ export function predicateText(
   let effectiveVerb: string;
   let effectiveMod: string;
   if (modals.length > 0) {
-    // The outermost modal is the finite verb — it takes the tense, the agreement, and the
+    // The outermost modal is the finite verb — it takes the tense, the agreement, and its own
     // negation — and governs the inner modals' infinitives down to the main verb group's
-    // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
+    // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat"). Each governed element denies
+    // itself with a "ne pas" of its own, in front of the group it denies: "je dois ne pas pouvoir
+    // ne pas aller". The one that a postverbal "aucun" concords with drops the "pas", exactly as
+    // the finite verb does ("le chat veut ne manger aucune nourriture").
+    const concordDrops = aucunPostverbal;
+    // A negative adverb is the FINITE verb's negator wherever in the group it was written (see
+    // `groupHasNegativeAdverb`), so it stays beside the verb it negates rather than falling inside
+    // the governed group's own "ne pas": "je ne dois jamais ne pas aller", never "… ne pas jamais
+    // aller", which would read as a third negator. Any other frequency adverb belongs to the main
+    // verb and goes under its negation ("je dois ne pas toujours aller").
+    const mainNegAdverb = governedNeg && isFrequency && isNegativeAdverb(modifier) ? modifierText : '';
     const { finite, finiteAdverb, tail } = modalGroupFr(
-      modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic,
+      modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency && !mainNegAdverb ? modifierText : '', infinitiveClitic,
       precedingObjectForms ?? cliticObjectForms, preInfinitive,
+      (word) => negateNonFinite(concordDrops && !governedNeg ? '' : 'pas', word),
+      governedNeg ? (group) => negateNonFinite(concordDrops ? '' : 'pas', group) : undefined,
     );
-    effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
+    effectiveVerb = [negateFinite(finite), finiteAdverb, mainNegAdverb, tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
   } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
@@ -219,9 +258,7 @@ export function predicateText(
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
     const group = [preInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
     if (!verbNegative && !aucun && !negativeAdverb) return group;
-    const negator = negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '';
-    const tail = [negator, group].filter(Boolean).join(' ');
-    return `${elidesBeforeVerb(verb.forms, tail) ? "n'" : 'ne '}${tail}`;
+    return negateNonFinite(negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '', group);
   };
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped

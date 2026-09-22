@@ -1111,7 +1111,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is in, not a quality it has → es/pt predicate with estar (A47)
     description: 'not present where it is expected',
-    definition: stateGloss('OBJECT_THING', 'FIND', { aspect: 'neutral', modals: ['CAN'], negative: true }),
+    definition: stateGloss('OBJECT_THING', 'FIND', { aspect: 'neutral', modals: [{ verb: 'CAN', negative: true }] }),
     emoji: '🕳️',
     forms: {
       en: { base: 'missing' },

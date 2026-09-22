@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { complement, complements, el, group, np, vp } from '../languages/resolved.fixtures.js';
+import { complement, complements, el, group, modal, np, vp } from '../languages/resolved.fixtures.js';
 import { negationSources } from './negationSources.js';
 
 const EAT = { base: 'eat' };
@@ -7,7 +7,9 @@ const MOUSE = { base: 'mouse' };
 const HOUSE = { base: 'house' };
 const NEVER = { base: 'never', subtype: 'frequency', polarity: 'negative' };
 const ALWAYS = { base: 'always', subtype: 'frequency' };
-const none = { subject: false, adverb: false, verb: false, object: false, complement: false };
+const MUST = { base: 'must' };
+const CAN = { base: 'can' };
+const none = { subject: false, adverb: false, verb: false, governed: false, object: false, complement: false };
 
 describe('negationSources', () => {
   test('an affirmative clause carries none of them', () => {
@@ -30,6 +32,17 @@ describe('negationSources', () => {
     })).toEqual({ ...none, complement: true });
   });
 
+  // A negation inside the group a modal governs is a source of its own: it is not the clause's
+  // negator, but it stands ahead of the object and the complements, so a `no` among them concords
+  // with it (A03).
+  test('a governed negation is counted, from the verb phrase or from an inner modal', () => {
+    expect(negationSources({ verbPhrase: vp(EAT, { governedNegative: true, modals: [modal(MUST)] }) }))
+      .toEqual({ ...none, governed: true });
+    expect(negationSources({ verbPhrase: vp(EAT, { modals: [modal(MUST), { ...modal(CAN), negative: true }] }) }))
+      .toEqual({ ...none, governed: true });
+    expect(negationSources({ verbPhrase: vp(EAT, { modals: [modal(MUST)] }) })).toEqual(none);
+  });
+
   test('one `no` conjunct is enough, on either the object or a complement', () => {
     const mixed = group('or', np(MOUSE), np(MOUSE, { definiteness: 'no' }));
     expect(negationSources({ verbPhrase: vp(EAT), directObject: mixed }).object).toBe(true);
@@ -46,7 +59,7 @@ describe('negationSources', () => {
       verbPhrase: vp(EAT, { negative: true, modifier: { conceptId: 'NEVER', forms: NEVER } }),
       directObject: el(np(MOUSE, { definiteness: 'no' })),
       complements: complements({ locative: complement(np(HOUSE, { definiteness: 'no' })) }),
-    })).toEqual({ subject: true, adverb: true, verb: true, object: true, complement: true });
+    })).toEqual({ subject: true, adverb: true, verb: true, governed: false, object: true, complement: true });
   });
 
   // `subjectIsNegative` is the caller's: a relative clause leaves it unset, because its head's

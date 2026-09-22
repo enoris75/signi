@@ -15,14 +15,19 @@ import { wordSeg } from './wordSeg.js';
  *                 the past a finite perfect takes (食べました) cannot stand under a modal
  *   prospective → 〜ようとしている on the volitional: 食べようとしている必要があります, 食べようとしていたいです;
  *                 with no nai-form to build the volitional on, ところ + である / であり
+ *
+ * `negative` denies the aspect itself, the group a modal governs rather than the modal (A03): the
+ * auxiliary takes the ない form (食べていない必要があります), with the 〜ないでい bridge under a stem
+ * governor (食べていないでいたいです) that `naiSegs` spells for every other governed element.
  */
-export function aspectFormSegs(verb: ConceptForms, aspect: Exclude<Aspect, 'neutral'>, form: JaForm): RubySegment[] {
+export function aspectFormSegs(verb: ConceptForms, aspect: Exclude<Aspect, 'neutral'>, form: JaForm, negative = false): RubySegment[] {
   const dictSeg = wordSeg(verb.forms['base'] ?? '', verb.forms['reading']);
-  const iru = form === 'dict' ? 'いる' : 'い';
+  const iru = form === 'dict' ? (negative ? 'いない' : 'いる') : (negative ? 'いないでい' : 'い');
   if (aspect === 'prospective') {
     const volitional = volitionalSeg(verb);
     if (volitional) return [volitional, { t: 'として' }, { t: iru }];
-    return [dictSeg, { t: 'ところ' }, { t: form === 'dict' ? 'である' : 'であり' }];
+    const aru = form === 'dict' ? (negative ? 'でない' : 'である') : (negative ? 'でないでい' : 'であり');
+    return [dictSeg, { t: 'ところ' }, { t: aru }];
   }
   const te = verb.forms['te'];
   return [te ? wordSeg(te, verb.forms['te_reading']) : dictSeg, { t: iru }];

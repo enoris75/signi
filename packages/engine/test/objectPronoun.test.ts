@@ -440,7 +440,7 @@ describe('known bugs: French object clitic in a periphrasis', () => {
     expect(sees({ aspect: 'prospective' })).toBe('le chat est sur le point de me voir.');
     expect(sees({ aspect: 'progressive' }, 'THIRD_PERSON', 'ADD')).toBe("le chat est en train de l'ajouter.");
     expect(sees({ modals: ['MUST'] })).toBe('le chat doit me voir.');
-    expect(sees({ modals: ['MUST'], negative: true })).toBe('le chat ne doit pas me voir.');
+    expect(sees({ modals: [{ verb: 'MUST', negative: true }] })).toBe('le chat ne doit pas me voir.');
     expect(sees({ modals: ['MUST'], aspect: 'resultative' }, 'THIRD_PERSON')).toBe("le chat doit l'avoir vu.");
   });
 

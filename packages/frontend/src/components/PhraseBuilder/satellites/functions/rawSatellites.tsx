@@ -283,6 +283,31 @@ export function rawSatellites(
       hasValue: Boolean(selection.verbModal2Adverb),
       valueLabel: label(selection.verbModal2Adverb),
     },
+    // Each modal's own polarity, on its own box — the same control the verb carries, denying the
+    // word it is drawn on: "I do not want to not go" is this control on WILL and the verb's own on
+    // GO. Revealed once its modal holds a word, and withdrawn with the modals under a command.
+    {
+      key: "verbModalNegative",
+      parent: "verbModal",
+      label: t("satellite.polarity"),
+      icon: <RemoveCircleOutlineIcon sx={iconSx} />,
+      available: !finiteSlotTaken && Boolean(selection.verbModal),
+      hasValue: Boolean(selection.verbModalNegative),
+      alwaysSet: true,
+      directToggle: true,
+      valueLabel: t(`polarity.value.${selection.verbModalNegative ? "negative" : "positive"}`),
+    },
+    {
+      key: "verbModal2Negative",
+      parent: "verbModal2",
+      label: t("satellite.polarity"),
+      icon: <RemoveCircleOutlineIcon sx={iconSx} />,
+      available: !finiteSlotTaken && Boolean(selection.verbModal2),
+      hasValue: Boolean(selection.verbModal2Negative),
+      alwaysSet: true,
+      directToggle: true,
+      valueLabel: t(`polarity.value.${selection.verbModal2Negative ? "negative" : "positive"}`),
+    },
     {
       key: "modifier",
       parent: "verb",
