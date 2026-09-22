@@ -1620,7 +1620,7 @@ describe('B09 verb definitions (CREATE genus)', () => {
     expect(definitionAll('SET_ON_FIRE')).toEqual({
       en: 'to create fire.',
       it: 'creare fuoco.',
-      fr: 'créer du feu.',
+      fr: 'créer le feu.',
       de: 'Feuer erschaffen.',
       es: 'crear fuego.',
       ja: '火を生み出す。',
@@ -1631,12 +1631,13 @@ describe('B09 verb definitions (CREATE genus)', () => {
 
 // The B10 destruction-verb definitions on the DESTROY genus. All three differentiae render
 // bare-singular: FIRE the way B09's SET_ON_FIRE does, and LIFE and CONTENT in their mass sense.
+// French, which has no zero article, gives the three corpus-count nouns the generic definite (A207).
 describe('B10 verb definitions (DESTROY genus)', () => {
   test('KILL → "to destroy life"', () => {
     expect(definitionAll('KILL')).toEqual({
       en: 'to destroy life.',
       it: 'distruggere vita.',
-      fr: 'détruire de la vie.',
+      fr: 'détruire la vie.',
       de: 'Leben zerstören.',
       es: 'destruir vida.',
       ja: '生命を破壊する。',
@@ -1648,7 +1649,7 @@ describe('B10 verb definitions (DESTROY genus)', () => {
     expect(definitionAll('EXTINGUISH')).toEqual({
       en: 'to destroy fire.',
       it: 'distruggere fuoco.',
-      fr: 'détruire du feu.',
+      fr: 'détruire le feu.',
       de: 'Feuer zerstören.',
       es: 'destruir fuego.',
       ja: '火を破壊する。',
@@ -1660,7 +1661,7 @@ describe('B10 verb definitions (DESTROY genus)', () => {
     expect(definitionAll('CLEAR')).toEqual({
       en: 'to destroy content.',
       it: 'distruggere contenuto.',
-      fr: 'détruire du contenu.',
+      fr: 'détruire le contenu.',
       de: 'Inhalt zerstören.',
       es: 'destruir contenido.',
       ja: '内容を破壊する。',
@@ -1679,7 +1680,7 @@ describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
     expect(definitionAll('SEE')).toEqual({
       en: 'to perceive light.',
       it: 'percepire luce.',
-      fr: 'percevoir de la lumière.',
+      fr: 'percevoir la lumière.',
       de: 'Licht empfinden.',
       es: 'percibir luz.',
       ja: '光を知覚する。',
@@ -1977,7 +1978,7 @@ describe('B19 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('EXPORT')).toEqual({
       en: 'to transfer content to a place.',
       it: 'trasferire contenuto a un luogo.',
-      fr: 'transférer du contenu à un lieu.',
+      fr: 'transférer le contenu à un lieu.',
       de: 'Inhalt zu einem Ort übertragen.',
       es: 'transferir contenido a un lugar.',
       ja: '場所へ内容を移す。',
@@ -1989,7 +1990,7 @@ describe('B19 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('IMPORT')).toEqual({
       en: 'to transfer content from a place.',
       it: 'trasferire contenuto da un luogo.',
-      fr: "transférer du contenu d'un lieu.",
+      fr: "transférer le contenu d'un lieu.",
       de: 'Inhalt aus einem Ort übertragen.',
       es: 'transferir contenido de un lugar.',
       ja: '場所から内容を移す。',
@@ -2053,7 +2054,7 @@ describe('C19: the verbs the purpose clause and a re-read literal unblocked', ()
     expect(definitionAll('SAVE')).toEqual({
       en: 'to write content to load it.',
       it: 'scrivere contenuto per caricarlo.', // the clitic attaches to the infinitive
-      fr: 'écrire du contenu pour le charger.',
+      fr: 'écrire le contenu pour le charger.',
       de: 'Inhalt schreiben, um ihn zu laden.',
       es: 'escribir contenido para cargarlo.',
       ja: 'それを読み込むために内容を書く。',
@@ -2084,7 +2085,7 @@ describe('C19: the verbs the purpose clause and a re-read literal unblocked', ()
     expect(definitionAll('LOAD')).toEqual({
       en: 'to read written content.',
       it: 'leggere contenuto scritto.',
-      fr: 'lire du contenu écrit.',
+      fr: 'lire le contenu écrit.',
       de: 'geschriebenen Inhalt lesen.',
       es: 'leer contenido escrito.',
       ja: '書かれた内容を読む。',

@@ -355,7 +355,7 @@ describe('known bugs: French continent source', () => {
 // A228. A153 gave an Italian animate source "via" on every verb, because an animate GOAL takes "da"
 // too (the andare-da construction) and "va dal bambino" reads "goes to the boy". A verb that takes no
 // goal has nothing for "da" to collide with. REMOVE licenses a source and no direction, so "via" only
-// doubles "rimuovere" ("rimuove il libro via dal cane"), and in a relative on the source it lands in
+// doubled "rimuovere" ("rimuove il libro via dal cane"), and in a relative on the source it landed in
 // front of the relative pronoun, where Italian cannot have it: "un animale via dal quale si sono
 // rimossi testicoli". Found authoring C24's relational adjectives.
 describe('known bugs: an Italian animate source takes "via" under a verb with no goal (A228)', () => {
@@ -364,13 +364,41 @@ describe('known bugs: an Italian animate source takes "via" under a verb with no
   const removedFrom = (head: NounPhrase, subject: NounPhrase, object: NounPhrase, aspect?: 'resultative') =>
     sayAll({ subject: { ...head, relative: { headRole: 'source', subject, verbPhrase: { verb: 'REMOVE', ...(aspect ? { aspect } : {}) }, directObject: object } } });
 
-  test.fails('REMOVE takes its animate source with a bare "da"', () => {
+  test('REMOVE takes its animate source with a bare "da"', () => {
     expect(removedFrom(np('ANIMAL', { definiteness: 'indefinite' }), G, TESTICLES, 'resultative').it)
       .toBe('un animale dal quale si sono rimossi testicoli.');
     expect(removedFrom(np('ANIMAL', { definiteness: 'indefinite' }), G, TESTICLES).it).toBe('un animale dal quale si rimuovono testicoli.');
     expect(removedFrom(np('DOG'), np('MAN'), np('BOOK')).it).toBe("il cane dal quale l'uomo rimuove il libro.");
     expect(sayAll(clause(np('MAN'), 'REMOVE', { directObject: np('BOOK'), complements: { source: { phrase: np('DOG') } } })).it)
       .toBe("l'uomo rimuove il libro dal cane.");
+  });
+
+  // Every verb that licenses a source and no direction: buying, acquiring, importing from someone.
+  test('the other goal-less verbs, a relative on one, a group and a pronoun take the bare "da"', () => {
+    const fromTheBoy = (verb: string) =>
+      sayAll(clause(np('MAN'), verb, { directObject: np('BOOK'), complements: { source: { phrase: np('BOY') } } })).it;
+    expect(fromTheBoy('BUY')).toBe("l'uomo compra il libro dal ragazzo.");
+    expect(fromTheBoy('ACQUIRE')).toBe("l'uomo acquisisce il libro dal ragazzo.");
+    expect(fromTheBoy('IMPORT')).toBe("l'uomo importa il libro dal ragazzo.");
+    expect(fromTheBoy('DELETE')).toBe("l'uomo elimina il libro dal ragazzo.");
+    expect(sayAll({ subject: np('BOY', { relative: { headRole: 'source', subject: np('MAN'), verbPhrase: { verb: 'BUY' }, directObject: np('BOOK') } }) }).it)
+      .toBe("il ragazzo dal quale l'uomo compra il libro.");
+    expect(sayAll(clause(np('MAN'), 'REMOVE', {
+      directObject: np('BOOK'), complements: { source: { phrase: { conjuncts: [np('DOG'), np('HOUSE')], conjunction: 'and' } } },
+    })).it).toBe("l'uomo rimuove il libro dal cane e dalla casa.");
+    expect(sayAll(clause(np('MAN'), 'REMOVE', { directObject: np('BOOK'), complements: { source: { phrase: np('THIRD_PERSON', { gender: 'fem' }) } } })).it)
+      .toBe("l'uomo rimuove il libro da lei.");
+  });
+
+  // As ruled: MOVE, COPY and TRANSFER take a direction, so "sposta il libro dal ragazzo" would be
+  // ambiguous, and they keep A153's "via"; so does an intransitive verb of motion.
+  test('a transitive verb with a goal keeps "via", and so does COME', () => {
+    const fromTheBoy = (verb: string) =>
+      sayAll(clause(np('MAN'), verb, { directObject: np('BOOK'), complements: { source: { phrase: np('BOY') } } })).it;
+    expect(fromTheBoy('MOVE')).toBe("l'uomo sposta il libro via dal ragazzo.");
+    expect(fromTheBoy('COPY')).toBe("l'uomo copia il libro via dal ragazzo.");
+    expect(fromTheBoy('TRANSFER')).toBe("l'uomo trasferisce il libro via dal ragazzo.");
+    expect(sayAll(clause(np('MAN'), 'COME', { complements: { source: { phrase: np('BOY') } } })).it).toBe("l'uomo viene via dal ragazzo.");
   });
 
   test('regression: a verb with a goal keeps "via", a place stays bare, and the other six', () => {

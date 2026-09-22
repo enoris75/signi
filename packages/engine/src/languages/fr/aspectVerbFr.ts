@@ -1,8 +1,9 @@
 import type { Aspect, Tense } from '@signi/shared';
 import type { Mood } from '../../types.js';
-import { AVOIR_AUX, AVOIR_FR, ETRE_AUX, ETRE_FR, VOWEL_START } from './fr.consts.js';
+import { AVOIR_AUX, AVOIR_FR, ETRE_AUX, ETRE_FR } from './fr.consts.js';
 import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { auxFiniteFr } from './auxFiniteFr.js';
+import { elidesBeforeVerb } from './elidesBeforeVerb.js';
 import { frCliticize } from './frCliticize.js';
 import { reflexiveFinite } from './reflexiveFinite.js';
 import { reflexiveInfinitive } from './reflexiveInfinitive.js';
@@ -10,10 +11,10 @@ import { reflexiveInfinitive } from './reflexiveInfinitive.js';
 /**
  * The verb group for a non-neutral aspect, split into the finite auxiliary (which negation
  * wraps) and the non-finite tail: progressive "en train de + inf", prospective "sur le
- * point de + inf" (both eliding "de" → "d'" before a vowel), resultative = the past
- * participle ("est allé", "a vu"). The resultative auxiliary is a lexical property of the
- * verb (the seed marks the être-selecting ones with forms.aux = "be"), and only an être
- * participle agrees with the subject — "elle est allée" but "elle a vu".
+ * point de + inf" (both eliding "de" → "d'" before a vowel or an h muet, A227),
+ * resultative = the past participle ("est allé", "a vu"). The resultative auxiliary is a
+ * lexical property of the verb (the seed marks the être-selecting ones with forms.aux =
+ * "be"), and only an être participle agrees with the subject — "elle est allée" but "elle a vu".
  */
 export function aspectVerbFr(
   verbForms: Record<string, string>,
@@ -37,7 +38,7 @@ export function aspectVerbFr(
   const pre = (rest: string) => [preInfinitive, rest].filter(Boolean).join(' ');
   // A reflexive infinitive agrees its clitic with the subject ("en train de m'effondrer").
   const group = pre(frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms)));
-  const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
+  const deInf = elidesBeforeVerb(verbForms, group) ? `d'${group}` : `de ${group}`;
   const etreFinite = auxFiniteFr(ETRE_AUX, ETRE_FR, subjectForms, tense, mood);
   if (aspect === 'progressive') return { finite: etreFinite, tail: `en train ${deInf}` };
   if (aspect === 'prospective') return { finite: etreFinite, tail: `sur le point ${deInf}` };

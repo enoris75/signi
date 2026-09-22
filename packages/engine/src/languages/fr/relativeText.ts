@@ -7,6 +7,7 @@ import { relativeGapComplement } from '../../functions/relativeGapComplement.js'
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { relativeInvertsCopula } from '../../functions/relativeInvertsCopula.js';
 import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -39,7 +40,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const possessed = relativePossessed(rel, 'definite');
   if (possessed) {
     return `dont ${joinSubject(subjectText(possessed),
-      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements, undefined, undefined, relativeSubjectIsNegative(rel)))}`.trim();
+      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements, undefined, undefined, relativeSubjectIsNegative(rel)),
+      rel.verbPhrase.verb.forms)}`.trim();
   }
   // A subject relative agrees with its head, but a `no` head negates the MATRIX clause and is no
   // "aucun" of this one: the relative keeps its own polarity, "aucun chat qui mange ne court", "aucun
@@ -62,8 +64,10 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const precedingObject = rel.headRole === 'directObject' && !alarmHead && !prepHead ? np.head.forms : undefined;
   const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject, rel.agent,
     relativeSubjectIsNegative(rel));
-  // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
-  const clause = joinSubject(subjText, pred);
+  // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime"). The bare copula
+  // goes before its noun subject: "où est le chat", "sous laquelle est le chat" (A221, see
+  // `relativeInvertsCopula`).
+  const clause = relativeInvertsCopula(rel) ? `${pred} ${subjText}` : joinSubject(subjText, pred, rel.verbPhrase.verb.forms);
   // The generic "on" after "où" takes the euphonic l' of the written language: "un lieu où l'on vit".
   if (isPlainLocativeGap(rel)) return `où ${isGenericSubject(rel.subject) ? `l'${clause}` : clause}`.trim();
   // An object the verb takes with "de" relativises as "dont", not "duquel": "la condition dont la

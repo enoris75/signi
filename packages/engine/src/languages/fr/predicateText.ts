@@ -16,7 +16,6 @@ import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { VOWEL_START } from './fr.consts.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { alarmCryText } from './alarmCryText.js';
@@ -24,6 +23,7 @@ import { aspectVerbFr } from './aspectVerbFr.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
+import { elidesBeforeVerb } from './elidesBeforeVerb.js';
 import { frCliticize } from './frCliticize.js';
 import { frEnclitic } from './frEnclitic.js';
 import { modalGroupFr } from './modalGroupFr.js';
@@ -110,7 +110,7 @@ export function predicateText(
   // which both negate their finite auxiliary and leave the non-finite tail untouched.
   const negateFinite = (finite: string): string => {
     if (!verbNegative && !aucun && !groupNegative) return finite;
-    const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';
+    const ne = elidesBeforeVerb(verb.forms, finite) ? "n'" : 'ne ';
     const pas = verbNegative && !groupNegative && !aucun ? ' pas' : '';
     return `${ne}${finite}${pas}`;
   };
@@ -221,7 +221,7 @@ export function predicateText(
     if (!verbNegative && !aucun && !negativeAdverb) return group;
     const negator = negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '';
     const tail = [negator, group].filter(Boolean).join(' ');
-    return `${VOWEL_START.test(tail) ? "n'" : 'ne '}${tail}`;
+    return `${elidesBeforeVerb(verb.forms, tail) ? "n'" : 'ne '}${tail}`;
   };
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped

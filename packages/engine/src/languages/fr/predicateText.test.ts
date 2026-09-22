@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  ALLER, CHAT, CHIEN, complement, complements, concept, DEVOIR, EFFONDRER, el, ETRE, FATIGUE, FEMME, FEU, type Forms, IL, JAMAIS, JE, LIVRE,
+  ALLER, CHAT, CHIEN, complement, complements, concept, DEVOIR, EFFONDRER, el, ETRE, FATIGUE, FEMME, FEU, type Forms, HABITER, IL, JAMAIS, JE, LIVRE,
   HEUREUX, MAISON, MANGER, modal, np, NOURRITURE, POUVOIR, SEMBLER, SOURIS, TOUJOURS, TU, VITE, VOIR, VOULOIR, vp,
 } from './fr.fixtures.js';
 import { predicateText } from './predicateText.js';
@@ -91,6 +91,13 @@ describe('predicateText', () => {
     test('jamais replaces pas, and negates even without the negative flag', () => {
       expect(predicateText(CHAT, vp(MANGER, { negative: true, modifier: concept(JAMAIS) }))).toBe('ne mange jamais');
       expect(predicateText(CHAT, vp(MANGER, { modifier: concept(JAMAIS) }))).toBe('ne mange jamais');
+    });
+
+    // A227: an h muet is a vowel sound, and the verb's lexeme says which h is one.
+    test('ne elides before a verb on an h muet, not before an h aspiré', () => {
+      expect(predicateText(CHAT, vp(HABITER, { negative: true }))).toBe("n'habite pas");
+      expect(predicateText(CHAT, vp(HABITER, { modifier: concept(JAMAIS) }))).toBe("n'habite jamais");
+      expect(predicateText(CHAT, vp({ base: 'hurler', '3sg_present': 'hurle' }, { negative: true }))).toBe('ne hurle pas');
     });
 
     test('any other frequency adverb follows pas', () => {
@@ -243,6 +250,8 @@ describe('predicateText', () => {
       expect(predicateText(TU, command(ETRE, { negative: true }, 'BE'), undefined, careful)).toBe('ne sois pas prudent');
       expect(predicateText(TU, command(MANGER, { negative: true, modifier: concept(JAMAIS) }))).toBe('ne mange jamais');
       expect(predicateText(TU, command(MANGER), el(np(SOURIS, { definiteness: 'no' })))).toBe('ne mange aucune souris');
+      // ne elides before a command on an h muet (A227).
+      expect(predicateText(TU, command(HABITER, { negative: true }))).toBe("n'habite pas");
     });
 
     test('a negative command keeps its object clitic inside the bracket', () => {
@@ -283,6 +292,8 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, infinitive(VOIR, { modifier: concept(JAMAIS), negative: true }), el(np(IL, { gender: 'fem' })))).toBe('ne jamais la voir');
       expect(predicateText(CHAT, infinitive(MANGER), el(np(SOURIS, { definiteness: 'no' })))).toBe('ne manger aucune souris');
       expect(predicateText(CHAT, infinitive(AIMER), el(np(CHAT, { definiteness: 'no' })))).toBe("n'aimer aucun chat");
+      expect(predicateText(CHAT, infinitive(HABITER), undefined, complements({ locative: complement(np(MAISON, { definiteness: 'no' })) })))
+        .toBe("n'habiter dans aucune maison");
     });
 
     test('an object pronoun is proclitic to the infinitive', () => {

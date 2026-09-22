@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AFRIQUE, ANGE, ARGENT, EAU, HOMME, MOT, NOURRITURE, SOURIS } from './fr.fixtures.js';
+import { AFRIQUE, ANGE, ARGENT, EAU, HOMME, MOT, NOURRITURE, PHRASE, SOURIS } from './fr.fixtures.js';
 import { partitiveArtFor } from './partitiveArtFor.js';
 
 describe('partitiveArtFor', () => {
@@ -13,12 +13,18 @@ describe('partitiveArtFor', () => {
     expect(partitiveArtFor({ ...MOT, definiteness: 'bare' }, true, 'autres')).toBe("d'");
   });
 
-  test('a bare singular takes the partitive, eliding before a vowel sound', () => {
+  test('a bare singular mass noun takes the partitive, eliding before a vowel sound', () => {
     expect(partitiveArtFor({ ...EAU, definiteness: 'bare' }, false, 'eau')).toBe("de l'");
     expect(partitiveArtFor({ ...NOURRITURE, definiteness: 'bare' }, false, 'nourriture')).toBe('de la');
     expect(partitiveArtFor({ ...ARGENT, definiteness: 'bare' }, false, 'argent')).toBe("de l'");
-    expect(partitiveArtFor({ ...MOT, definiteness: 'bare' }, false, 'mot')).toBe('du');
-    expect(partitiveArtFor({ ...HOMME, definiteness: 'bare' }, false, 'homme')).toBe("de l'");
+  });
+
+  // A207: a count noun has no partitive reading; its bare singular is the generic definite.
+  test('a bare singular count noun takes the definite, eliding as it does', () => {
+    expect(partitiveArtFor({ ...MOT, definiteness: 'bare' }, false, 'mot')).toBe('le');
+    expect(partitiveArtFor({ ...PHRASE, definiteness: 'bare' }, false, 'phrase')).toBe('la');
+    expect(partitiveArtFor({ ...HOMME, definiteness: 'bare' }, false, 'homme')).toBe("l'");
+    expect(partitiveArtFor({ ...ANGE, definiteness: 'bare' }, false, 'ange')).toBe("l'");
   });
 
   test('any other determiner is the article artFor gives', () => {

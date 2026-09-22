@@ -70,3 +70,30 @@ engine and backend suites green, and no passing test moves.
 | | |
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: French does not elide before a verb opening on an h muet (A227)* (1 `test.fails`, plus a regression test for an auxiliary or a modal, the citation, *est-ce que* and a verb on a consonant) |
+
+## Resolved
+
+**2026-09-22**, as the shape above has it, both decisions taken as ruled:
+
+- [`intransitive.ts`](../../../packages/backend/src/concepts/verbs/intransitive.ts) — *habiter*
+  carries `elides: '1'`, as an h-muet noun does. **A corpus change: reseed `signi.db`.**
+- [`fr/elidesBeforeVerb.ts`](../../../packages/engine/src/languages/fr/elidesBeforeVerb.ts) (new) —
+  whether a clitic elides before a text that opens on the verb: `VOWEL_START`, or an h on a verb
+  whose lexeme says `elides`. **The `/^h/` stand-in is kept**: every caller hands it a text that
+  opens on the verb's own form (the imperfect and the conditional are derived, not stored, so the
+  forms cannot list them) or on an auxiliary, a modal or a clitic, none of which opens on an h. The
+  helper's comment says so.
+- [`fr/joinSubject.ts`](../../../packages/engine/src/languages/fr/joinSubject.ts) takes the verb's
+  forms, which [`fr/renderClause.ts`](../../../packages/engine/src/languages/fr/renderClause.ts) and
+  both calls in [`fr/relativeText.ts`](../../../packages/engine/src/languages/fr/relativeText.ts)
+  pass (`verbPhrase.verb.forms`); `negateFinite` and `negateInfinitive` in
+  [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts) and the
+  periphrasis's *de* in [`fr/aspectVerbFr.ts`](../../../packages/engine/src/languages/fr/aspectVerbFr.ts)
+  ask the helper in place of `VOWEL_START`.
+
+**The object clitics were left alone, as ruled**: `frCliticize` still elides *me / te / le / la /
+se* by the first letter, which no seeded verb reaches.
+
+| | |
+|---|---|
+| **Tests** | `clause.test.ts` → *known bugs: French does not elide before a verb opening on an h muet (A227)*, the `test.fails` now passing, plus an added case (*tu n'habites pas*, *je n'habiterai jamais*, the progressive and its negative, *aucun homme n'habite*, *nous habitons*, a negative condition, a negative place relative, *est-ce que j'habite ?*, *ne jamais habiter*). Colocated: `fr/elidesBeforeVerb.test.ts` (new), `fr/joinSubject.test.ts`, `fr/predicateText.test.ts`, `fr/aspectVerbFr.test.ts`, with a `HABITER` fixture in `fr/fr.fixtures.ts` |

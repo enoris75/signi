@@ -9,6 +9,7 @@ import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { relativeDropsSubject } from '../../functions/relativeDropsSubject.js';
+import { relativeInvertsCopula } from '../../functions/relativeInvertsCopula.js';
 import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -84,5 +85,11 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // reading (A173).
   const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'che', predicateFor)
     ? '' : subjectText(rel.subject!);
+  // The bare copula goes before its noun subject, "dove" eliding before "è" and "era": "un luogo dov'è il
+  // gatto", "dove sono i gatti", "sotto la quale è il gatto" (A221, see `relativeInvertsCopula`).
+  if (relativeInvertsCopula(rel)) {
+    const lead = relativizer === 'dove' && /^(?:è|era)$/.test(pred) ? `dov'${pred}` : `${relativizer} ${pred}`;
+    return `${lead} ${subjText}`.trim();
+  }
   return `${relativizer} ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }

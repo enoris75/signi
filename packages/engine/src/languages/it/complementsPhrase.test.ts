@@ -153,6 +153,20 @@ describe('complementsPhrase', () => {
       expect(one('source', complement(np(CASA)), GATTO, 'JUMP')).toBe('via dalla casa');
       expect(one('source', complement(np(CASA)), GATTO, 'COME')).toBe('dalla casa');
     });
+
+    // A153: an animate goal takes "da" too, so an animate source takes "via" under a verb with a goal.
+    // A228: a verb that licenses no direction has no goal to collide with, and keeps the bare "da". A
+    // caller that names no verb (the complement gloss) keeps the adverb.
+    test('an animate source takes via only under a verb that takes a goal', () => {
+      const source = (verbForms?: Forms) =>
+        complementsPhrase(complements({ source: complement(np(RAGAZZO)) }), GATTO, 'TEST', {}, verbForms);
+      expect(source({ base: 'andare', complements: 'manner,locative,direction,source,route,cause' })).toBe('via dal ragazzo');
+      expect(source({ base: 'rimuovere', complements: 'manner,instrumental,source,cause,locative' })).toBe('dal ragazzo');
+      expect(source()).toBe('via dal ragazzo');
+      // A place stays bare either way.
+      expect(complementsPhrase(complements({ source: complement(np(CASA)) }), GATTO, 'TEST', {}, { base: 'andare', complements: 'direction,source' }))
+        .toBe('dalla casa');
+    });
   });
 
   describe('direction', () => {

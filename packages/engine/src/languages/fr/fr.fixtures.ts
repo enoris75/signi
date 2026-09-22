@@ -134,6 +134,12 @@ export const MANGER: Forms = {
   '1sg_future': 'mangerai', '2sg_future': 'mangeras', '3sg_future': 'mangera',
   '1pl_future': 'mangerons', '2pl_future': 'mangerez', '3pl_future': 'mangeront',
 };
+/** A verb on an h muet, which its lexeme marks `elides` as a noun's does ("j'habite", A227). */
+export const HABITER: Forms = {
+  base: 'habiter', participle: 'habité', elides: '1',
+  '1sg_present': 'habite', '2sg_present': 'habites', '3sg_present': 'habite',
+  '1pl_present': 'habitons', '2pl_present': 'habitez', '3pl_present': 'habitent',
+};
 /** An être-selecting verb ("est allé"). */
 export const ALLER: Forms = {
   base: 'aller', participle: 'allé', aux: 'be',
