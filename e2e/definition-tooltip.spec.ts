@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test';
 import { test, expect } from './fixtures';
 
 // Hovering a word in a picker dropdown surfaces the concept's definition in a tooltip.
@@ -2129,5 +2130,70 @@ test.describe('word definition tooltip', () => {
     await expect(option).toBeVisible();
     await option.hover();
     await expect(page.locator(tooltip)).toHaveText('provare tristezza');
+  });
+
+  // B62's two plays. German spielen and French jouer say both senses, so in those languages the
+  // picker shows one word twice and only the gloss tells the game from the music.
+  test('one verb, two senses, told apart by the gloss alone (localization B62: PLAY_GAME, PLAY_INSTRUMENT)', async ({
+    app,
+    page,
+  }) => {
+    const game = page.locator('[data-testid="typeahead-option"][data-concept="PLAY_GAME"]');
+    const instrument = page.locator('[data-testid="typeahead-option"][data-concept="PLAY_INSTRUMENT"]');
+    // Two rows, hovered one after the other: the first tooltip has to be let go of before the
+    // second is read, or the locator matches both.
+    const glossOf = async (option: Locator, gloss: string): Promise<void> => {
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(gloss);
+      await page.mouse.move(0, 0);
+      await expect(page.locator(tooltip)).toHaveCount(0);
+    };
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('play');
+    await glossOf(game, 'to act to feel joy');
+    await glossOf(instrument, 'to produce sounds with an object');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('spielen');
+    await glossOf(game, 'handeln, um Freude zu fühlen');
+    await glossOf(instrument, 'Geräusche mit einem Gegenstand erzeugen');
+  });
+
+  // DO shares MAKE's Romance verb, so its tooltip is the one place the picker can tell them apart —
+  // and it must not say fare / faire / hacer / fazer back at the reader (the B62 ruling).
+  test('a verb whose gloss may not repeat its own lemma (localization B62: DO)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="DO"]');
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('do');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('to cause an action to happen');
+
+    await app.setUiLanguage('it');
+    await app.verbInput.fill('fare');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText("indurre un'azione a succedere");
+  });
+
+  // NEED is the first multiword Romance lemma in the picker (avoir besoin), and its gloss is
+  // governed by an infinitive — MUST's own "to be obliged to" frame.
+  test('a multiword lemma and an infinitive-governed gloss (localization B62: NEED)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="NEED"]');
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('need');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('to be obliged to have objects');
+
+    await app.setUiLanguage('fr');
+    await app.verbInput.fill('avoir besoin');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText("être obligé d'avoir des objets");
   });
 });
