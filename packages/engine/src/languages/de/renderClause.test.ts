@@ -102,6 +102,29 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER), modals: [modal(WOLLEN, NIE)] }))))
         .toBe('der Kater will nie immer essen');
     });
+
+    // A222: a clause whose verb is a modal, governing an infinitive, is the modal chain over it — in
+    // the verb cluster, never a zu-clause after a comma ("wollen, die Maus zu essen").
+    test('a modal heading a clause folds into the chain over its infinitive complement', () => {
+      const MODAL_WOLLEN: Forms = { ...WOLLEN, modal: '1' };
+      const eatTheMouse = clause(np(KATER), vp(ESSEN, { mood: 'infinitive' }), { directObject: mouse });
+      const citeWollen = clause(np(MAN), vp(MODAL_WOLLEN, { mood: 'infinitive' }), { infinitiveComplement: eatTheMouse });
+      expect(renderClause(citeWollen)).toBe('die Maus essen wollen');
+      expect(renderClause(citeWollen, false, false, true)).toBe('die Maus essen zu wollen');
+      expect(renderClause(clause(np(KATER), vp(MODAL_WOLLEN), { infinitiveComplement: eatTheMouse })))
+        .toBe('der Kater will die Maus essen');
+      // Without the flag it is a lexical governor, and extraposes its complement.
+      expect(renderClause(clause(np(MAN), vp(WOLLEN, { mood: 'infinitive' }), { infinitiveComplement: eatTheMouse })))
+        .toBe('wollen, die Maus zu essen');
+    });
+
+    test('a citation stacks its modals behind the main verb, the last taking zu', () => {
+      const cite = (extra: Parameters<typeof vp>[1]) => clause(np(MAN), vp(ESSEN, { mood: 'infinitive', ...extra }));
+      expect(renderClause(cite({ modals: [modal(WOLLEN), modal(KOENNEN)] }))).toBe('essen können wollen');
+      expect(renderClause(cite({ modals: [modal(WOLLEN), modal(KOENNEN)] }), false, false, true)).toBe('essen können zu wollen');
+      expect(renderClause(cite({ modals: [modal(MUESSEN)], negative: true }))).toBe('nicht essen müssen');
+      expect(renderClause(cite({ modals: [modal(WOLLEN, NIE)], modifier: concept(IMMER) }))).toBe('nie immer essen wollen');
+    });
   });
 
   describe('negation', () => {

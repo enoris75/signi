@@ -830,8 +830,8 @@ describe('known bugs: Japanese modal on the copula', () => {
 // one, but a definition can still name one as its genus — "to want to have objects" is WILL governing
 // an infinitive complement, since the citation mood drops `modals`. The Romance four render that as the
 // complement it is ("volere avere oggetti"), and so does English WILL. The other modals are not verbs of
-// that kind: Japanese glues its infinitive to the modal with ことを (行動することをたい), German extraposes
-// it as a zu-clause after a comma (wollen, zu handeln), and English cites a defective CAN or MUST with
+// that kind: Japanese glued its infinitive to the modal with ことを (行動することをたい), German extraposed
+// it as a zu-clause after a comma (wollen, zu handeln), and English cited a defective CAN or MUST with
 // "to" (to can to act). Found authoring the C23-C28 sweep.
 describe('known bugs: a modal as the verb of a clause that governs an infinitive (A222)', () => {
   const G = np('GENERIC_PERSON');
@@ -841,7 +841,7 @@ describe('known bugs: a modal as the verb of a clause that governs an infinitive
   const citeModal = (modal: string, infinitive: NonNullable<PhrasePlan['infinitiveComplement']>, verbPhrase: Partial<VerbPhrase> = {}): PhrasePlan =>
     ({ subject: G, verbPhrase: { verb: modal, ...verbPhrase }, infinitiveComplement: infinitive, infinitive: true });
 
-  test.fails('the modal governs its verb as it does in a modal chain', () => {
+  test('the modal governs its verb as it does in a modal chain', () => {
     expect(sayAll(citeModal('WILL', ACT))).toMatchObject({ de: 'handeln wollen.', ja: '行動したい。' });
     expect(sayAll(citeModal('WILL', HAVE_OBJECTS))).toMatchObject({ de: 'Gegenstände haben wollen.', ja: '物体を持ちたい。' });
     expect(sayAll(citeModal('CAN', ACT))).toMatchObject({ en: 'to be able to act.', de: 'handeln können.', ja: '行動することができる。' });
@@ -870,6 +870,44 @@ describe('known bugs: a modal as the verb of a clause that governs an infinitive
     expect(sayAll(clause(np('CAT'), 'HAVE', { verbPhrase: { modals: ['WILL'], tense: 'past' }, directObject: OBJECTS }))).toMatchObject({
       en: 'the cat wanted to have objects.', de: 'der Kater wollte Gegenstände haben.', ja: '猫は物体を持ちたかったです。',
     });
+  });
+
+  // The fold applies to its own result, so a modal governing a modal is one chain, outermost first, as
+  // `modals: ['WILL', 'CAN']` gives it; the Romance four keep the complement they render.
+  test('a modal governing a modal by complements is one chain', () => {
+    expect(sayAll(citeModal('WILL', { verbPhrase: { verb: 'CAN' }, infinitiveComplement: ACT }))).toMatchObject({
+      en: 'to want to be able to act.', de: 'handeln können wollen.', ja: '行動することができるようになりたい。',
+      it: 'volere potere agire.', fr: 'vouloir pouvoir agir.',
+    });
+    expect(sayAll(citeModal('MUST', { verbPhrase: { verb: 'CAN' }, infinitiveComplement: ACT }))).toMatchObject({
+      en: 'to have to be able to act.', de: 'handeln können müssen.', ja: '行動することができる必要がある。',
+    });
+  });
+
+  // The chain keeps the governing clause's negation, tense, question, condition, own modals and
+  // adverb, and the complement's object, adverb, copula and the infinitive it governs in turn.
+  test('the chain keeps what the governing clause and its complement each carried', () => {
+    const catGoverns = (verbPhrase: VerbPhrase, infinitiveComplement: NonNullable<PhrasePlan['infinitiveComplement']>, rest: Partial<PhrasePlan> = {}): PhrasePlan =>
+      ({ subject: np('CAT'), verbPhrase, infinitiveComplement, ...rest });
+    expect(sayAll(citeModal('MUST', ACT, { negative: true }))).toMatchObject({ en: 'not to have to act.', de: 'nicht handeln müssen.', ja: '行動する必要がない。' });
+    expect(sayAll(catGoverns({ verb: 'CAN', negative: true }, ACT)))
+      .toMatchObject({ en: 'the cat cannot act.', de: 'der Kater kann nicht handeln.', ja: '猫は行動することができません。' });
+    expect(sayAll(catGoverns({ verb: 'MUST' }, ACT, { interrogative: true })))
+      .toMatchObject({ en: 'must the cat act?', de: 'muss der Kater handeln?', ja: '猫は行動する必要がありますか？' });
+    expect(sayAll(catGoverns({ verb: 'WILL', modals: ['MUST'] }, ACT)))
+      .toMatchObject({ en: 'the cat must want to act.', de: 'der Kater muss handeln wollen.', ja: '猫は行動したいと思う必要があります。' });
+    expect(sayAll(catGoverns({ verb: 'CAN', tense: 'future' }, { verbPhrase: { verb: 'EAT', modifier: 'FAST' }, directObject: np('MOUSE') }))).toMatchObject({
+      en: 'the cat will be able to eat the mouse fast.', de: 'der Kater wird schnell die Maus fressen können.', ja: '猫はネズミを速く食べることができます。',
+    });
+    expect(sayAll({ subject: np('DOG'), verbPhrase: { verb: 'RUN' }, condition: catGoverns({ verb: 'WILL' }, ACT) })).toMatchObject({
+      en: 'if the cat wanted to act, the dog would run.', de: 'wenn der Kater würde handeln wollen, würde der Hund laufen.',
+      ja: 'もし猫が行動したかったら、犬は走ります。',
+    });
+    expect(sayAll(citeModal('WILL', ACT, { modifier: 'ALWAYS' }))).toMatchObject({ en: 'to always want to act.', de: 'immer handeln wollen.', ja: 'いつも行動したい。' });
+    expect(sayAll(citeModal('WILL', { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toMatchObject({ en: 'to want to be happy.', de: 'glücklich sein wollen.', ja: '幸せでありたい。' });
+    expect(sayAll(citeModal('WILL', { verbPhrase: { verb: 'DESIRE' }, infinitiveComplement: ACT })))
+      .toMatchObject({ en: 'to want to desire to act.', de: 'wünschen wollen, zu handeln.', ja: '行動することを望みたい。' });
   });
 });
 

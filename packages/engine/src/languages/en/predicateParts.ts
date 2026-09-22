@@ -194,6 +194,16 @@ function predicateWords(
   // base ("consume food") above — the "to" is what makes it a gloss rather than a directive. A
   // frequency adverb leads the "to", after any "not": "always to eat", "not always to eat".
   if (mood === 'infinitive') {
+    // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
+    // `foldModalGovernor`). The "to" leads each modal's `nonfinite` and `link`, down to the main
+    // verb's group: "to be able to act", "to have to act", "not to want to have objects". The main
+    // verb's frequency adverb stays with its own group ("to want to always eat"), and the modals'
+    // manner adverbs trail the clause with its own, as in the finite chain.
+    if (modals.length > 0) {
+      const chain = modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn);
+      const group = [...chain, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
+      return ['', negateVerb ? `not to ${group}` : `to ${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
+    }
     const group = verbGroupInfinitive(verb.forms, aspect);
     const verbText = negateVerb ? `not to ${group}` : `to ${group}`;
     if (isFrequency && modifierText && negateVerb) {

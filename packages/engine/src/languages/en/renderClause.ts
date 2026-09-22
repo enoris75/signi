@@ -1,5 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
@@ -13,7 +14,10 @@ import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
-export function renderClause(phrase: ResolvedPhrase): string {
+export function renderClause(given: ResolvedPhrase): string {
+  // A modal governing an infinitive is the modal chain over it: "to be able to act", never "to can to
+  // act" (A222, see `foldModalGovernor`).
+  const phrase = foldModalGovernor(given);
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("of
   // great size"), not a bare subject noun phrase — wrap the dimension NP in its adposition.

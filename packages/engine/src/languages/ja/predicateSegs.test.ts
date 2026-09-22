@@ -332,6 +332,18 @@ describe('predicateSegs', () => {
       expect(predicateSegs(vp(tabenai, { mood: 'infinitive', negative: true }), undefined, undefined)).toEqual([{ t: '食べない', r: 'たべない' }]);
       expect(text(predicateSegs(vp(tabenai, { mood: 'infinitive', modifier: concept(KESSHITE) }), el(np(NEZUMI)), undefined))).toBe('ネズミを決して食べない');
     });
+
+    // A222: a modal-headed citation folds into a modal chain, which closes the citation in the plain
+    // form — never the modal written as a word after ことを (食べることをたい).
+    test('a modal chain closes the citation in the plain form', () => {
+      const cite = (extra: Parameters<typeof vp>[1]) => vp(TABERU, { mood: 'infinitive', ...extra });
+      expect(text(predicateSegs(cite({ modals: [modal(TAI)] }), undefined, undefined))).toBe('食べたい');
+      expect(text(predicateSegs(cite({ modals: [modal(KOTO_GA_DEKIRU)] }), el(np(NEZUMI)), undefined))).toBe('ネズミを食べることができる');
+      expect(text(predicateSegs(cite({ modals: [modal(HITSUYOU_GA_ARU)], negative: true }), undefined, undefined))).toBe('食べる必要がない');
+      expect(text(predicateSegs(cite({ modals: [modal(TAI)], negative: true }), undefined, undefined))).toBe('食べたくない');
+      expect(text(predicateSegs(cite({ modals: [modal(TAI, ITSUMO)], modifier: concept(HAYAKU) }), undefined, undefined))).toBe('いつも速く食べたい');
+      expect(text(predicateSegs(vp(DESU, { mood: 'infinitive', modals: [modal(TAI)] }), undefined, careful))).toBe('慎重でありたい');
+    });
   });
 
   describe('copula', () => {

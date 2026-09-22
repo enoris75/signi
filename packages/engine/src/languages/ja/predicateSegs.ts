@@ -133,11 +133,20 @@ export function predicateSegs(
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
+    // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
+    // `foldModalGovernor`), and the chain closes it in the plain form, each modal's adverb ahead of the
+    // main verb's: 行動したい, 物体を持つことができる, 行動したくない.
+    for (const m of modals) {
+      const b = m.modifier?.forms['base'] ?? '';
+      if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
+    }
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
     }
-    segs.push(plainVerbSeg(verb, 'present', negated));
+    segs.push(...(modals.length > 0
+      ? modalSegs(modals.map((m) => m.verb), verb, 'present', negated, 0, undefined, 'plain')
+      : [plainVerbSeg(verb, 'present', negated)]));
     return segs;
   }
   if (verb.forms['copula'] === '1' && predicative) {
@@ -156,7 +165,7 @@ export function predicateSegs(
     // A modal suffixes the predicate in the form it governs, and takes the tense, polarity and ending
     // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
     if (modals.length > 0) {
-      const ending = mood === 'subjunctive' ? 'tara' : plain ? 'plain' : 'polite';
+      const ending = mood === 'subjunctive' ? 'tara' : plain || mood === 'infinitive' ? 'plain' : 'polite';
       segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, ending, (form) => copulaSegs(predicative, 'present', false, form)));
       return segs;
     }

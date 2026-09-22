@@ -1,5 +1,6 @@
 import type { ResolvedNounElement, ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
@@ -21,6 +22,7 @@ import { mannerGloss } from './mannerGloss.js';
 import { meansClause } from './meansClause.js';
 import { meansDoer } from './meansDoer.js';
 import { modalAdverbs } from './modalAdverbs.js';
+import { modalStack } from './modalStack.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { passiveComplex } from './passiveComplex.js';
@@ -71,7 +73,10 @@ function objectLeadsNicht(nichtBeforeObject: string, objectNoun: string, directO
 // the same order the relative clause uses; it overrides `inverted`. A verbless or imperative
 // clause has no V2 slot to move, so both flags are inert there. `zu` renders an infinitive clause
 // as the zu-infinitive another clause governs ("zu handeln", "das Essen zu essen").
-export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false, zu = false): string {
+export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal = false, zu = false): string {
+  // A modal governing an infinitive is the modal chain over it, in the verb cluster: "handeln wollen",
+  // never "wollen, zu handeln" (A222, see `foldModalGovernor`).
+  const phrase = foldModalGovernor(given);
   const clause = clauseText(phrase, inverted, verbFinal, zu);
   // An infinitive complement is extraposed behind the whole clause, verb-final tail included, after
   // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen".
@@ -183,7 +188,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // German already gives the imperative `instruction` register above; the infinitive is `base`.
     if (mood === 'infinitive') {
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
-      const infAdverb = adverbSlots(modifier, neg, '');
+      // A folded modal chain's adverbs (A222) lead the main verb's, as in the finite clause.
+      const infModalAdverbs = modalAdverbs(verbPhrase.modals);
+      const infAdverb = adverbSlots(modifier, neg, infModalAdverbs);
       const infDirect = splitObject(objectToRender, proObject, objectPrep);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
@@ -191,14 +198,21 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
       // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
       // finite clause puts it too: "gegessen werden", "gegessen zu werden".
-      const infVerb = [passiveParticipleText, zu ? zuInfinitive(plain) : (plain['base'] ?? '')]
+      // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
+      // `foldModalGovernor`): they stack behind the main verb, innermost first, and the last of them
+      // takes the "zu" — "handeln wollen", "Gegenstände haben können", "handeln zu wollen".
+      const infModals = modalStack(verbPhrase.modals, true);
+      const infinitive = (forms: Record<string, string>) => (zu ? zuInfinitive(forms) : (forms['base'] ?? ''));
+      const infVerb = [passiveParticipleText, ...(infModals.length > 0
+        ? [plain['base'] ?? '', ...infModals.slice(0, -1), infinitive({ base: infModals[infModals.length - 1] })]
+        : [infinitive(plain)])]
         .filter(Boolean).join(' ');
       // As in the command: a known object leads the "nicht"+adverb group ("das Essen nicht immer
       // essen", A191). A passive's by-phrase borrows the object slot and is not one, so it stays.
       const infObjects = [dativeText, infObject];
       const infLeads = !passive && objectLeadsNicht(infAdverb.nichtBeforeObject, infDirect.noun, objectToRender);
       return [withReflexive('3sg', infDirect.pronoun), ...(infLeads ? infObjects : []),
-        infAdverb.nichtBeforeObject, infAdverb.beforeObject, ...(infLeads ? [] : infObjects),
+        infAdverb.nichtBeforeObject, infModalAdverbs, infAdverb.beforeObject, ...(infLeads ? [] : infObjects),
         infAdverb.nichtAfterObject, infAdverb.afterObject, infComplements, neg.after, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
