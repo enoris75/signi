@@ -69,3 +69,27 @@ so the trial keeps their "via" (A153 left them open: *sposta il libro dal bambin
 | | |
 |---|---|
 | **Test** | `complements/source.test.ts` → *known bugs: an Italian animate source takes "via" under a verb with no goal (A228)* (1 `test.fails`, plus a regression test for a verb with a goal, a place and the other six) |
+
+## Resolved
+
+**2026-09-22**, as the shape above has it:
+
+- [`lexicon.ts`](../../../packages/backend/src/lexicon.ts) hands a verb its concept's licensed
+  complements, `forms['complements']` — landed ahead of this fix in the shared base commit, with
+  CUT's row in `lexicon.test.ts`.
+- [`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts) — the
+  animate "via" in the source branch of `headFor` is gated on the verb's `complements` including
+  `direction`; a caller that passes no verb forms (the complement gloss) keeps it. The relative
+  already passes its verb's forms to the relativizer, so *dal quale* follows.
+
+Every verb that licenses a source and no direction now takes its animate source with a bare "da":
+REMOVE (*rimuove il libro dal cane*, *un animale dal quale si sono rimossi testicoli*), and BUY,
+ACQUIRE, IMPORT, LOAD, DELETE and SHED with it (*compra il libro dal ragazzo*). **MOVE, COPY and
+TRANSFER keep their "via"**, as ruled: they take a direction, and bare *sposta il libro dal
+ragazzo* would be ambiguous. So do the verbs of motion. **The relative of a verb with a goal**
+(*l'uomo via dal quale il cane va corre.*) is A153's recorded decision; it and its pin are
+untouched.
+
+| | |
+|---|---|
+| **Tests** | `complements/source.test.ts` → *known bugs: an Italian animate source takes "via" under a verb with no goal (A228)*, the `test.fails` now passing, plus two added cases: BUY, ACQUIRE, IMPORT and DELETE, a relative on BUY, a group and a pronoun source under REMOVE; and MOVE, COPY, TRANSFER and COME keeping "via". Colocated: `it/complementsPhrase.test.ts` (a verb with a goal, one without, and no verb) |

@@ -48,10 +48,14 @@ export function complementsPhrase(
   // The ablative adverb "via" disambiguates source from direction, but only self-propelled
   // motion verbs (RUN/JUMP) need it for every source — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and
   // the transitive LOAD/IMPORT keep bare "da" for a PLACE ("viene dalla casa", "carica il libro dal
-  // contenitore"); an animate source takes the adverb on any verb, because the animate *goal* takes
-  // "da" as well (the andare-da construction), so bare "va dal bambino" reads as "goes TO the boy"
-  // (A153). That part is decided per conjunct, in `headFor` below.
+  // contenitore"); an animate source takes the adverb under a verb that takes a goal, because the
+  // animate *goal* takes "da" as well (the andare-da construction), so bare "va dal bambino" reads as
+  // "goes TO the boy" (A153). That part is decided per conjunct, in `headFor` below. A verb that licenses
+  // no `direction` has no goal for "da" to collide with, so its animate source stays bare: "rimuove il
+  // libro dal cane", "il cane dal quale l'uomo rimuove il libro" (A228). A caller that names no verb
+  // (the complement gloss) keeps the adverb.
   const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'via ' : '';
+  const takesGoal = (verbForms['complements'] ?? 'direction').split(',').includes('direction');
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
@@ -192,7 +196,7 @@ export function complementsPhrase(
           isNamedLand(nf) ? (bareName(nf, lead) ? 'in' : spatialHead('in', nf, plural, lead)) :
           prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
         ) :
-        type === 'source'    ? `${sourceAdverb || (nf['animate'] === '1' ? 'via ' : '')}${prepDet('da', nf, plural, lead)}` :
+        type === 'source'    ? `${sourceAdverb || (nf['animate'] === '1' && takesGoal ? 'via ' : '')}${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grazie ${prepDet('a', nf, plural, lead)}` :
           causeSent === 'negative' ? `per colpa ${prepDet('di', nf, plural, lead)}` :
