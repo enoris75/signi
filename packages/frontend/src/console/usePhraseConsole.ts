@@ -650,7 +650,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             }
             const record = await fetchSavedPhrase(hit.id);
             const catalog = await queryClient.ensureQueryData(conceptsQuery());
-            const { containers, links } = hydrateWorkspace(record.workspace, catalog);
+            const { containers, links } = hydrateWorkspace(record.workspace, catalog, record.version);
             writing.current = true;
             history.replace({ containers, links });
             add({ kind: "info", text: `/load ${arg}`, detail: "Loaded phrase", detailKey: "toast.phraseLoaded" });

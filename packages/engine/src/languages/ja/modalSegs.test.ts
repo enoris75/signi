@@ -1,12 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import { BEKI, concept, HITSUYOU_GA_ARU, IKU, KAMOSHIRENAI, KOTO_GA_DEKIRU, MOTSU, TABERU, TAI } from './ja.fixtures.js';
+import type { ResolvedModal } from '../../types.js';
+import { BEKI, concept, HITSUYOU_GA_ARU, IKU, KAMOSHIRENAI, KOTO_GA_DEKIRU, modal, MOTSU, TABERU, TAI } from './ja.fixtures.js';
 import { modalSegs } from './modalSegs.js';
 
-const MUST = concept(HITSUYOU_GA_ARU);
-const CAN = concept(KOTO_GA_DEKIRU);
-const WANT = concept(TAI);
-const SHOULD = concept(BEKI);
-const MIGHT = concept(KAMOSHIRENAI);
+const MUST = modal(HITSUYOU_GA_ARU);
+const CAN = modal(KOTO_GA_DEKIRU);
+const WANT = modal(TAI);
+const SHOULD = modal(BEKI);
+const MIGHT = modal(KAMOSHIRENAI);
+/** An inner link denied on its own (A03): its negation rides its own suffix, not the finite ending. */
+const not = (m: ResolvedModal): ResolvedModal => ({ ...m, negative: true });
+/** 行く with its seeded nai-form, which a governed negation is built on (see plainVerbSeg). */
+const IKANAI = { ...IKU, nai: '行かない', nai_reading: 'いかない' };
 
 const text = (segs: { t: string }[]) => segs.map((s) => s.t).join('');
 
@@ -115,5 +120,71 @@ describe('modalSegs', () => {
 
   test('a bridged pair nests under a further modal', () => {
     expect(text(modalSegs([MUST, CAN, WANT], concept(TABERU), 'present', false))).toBe('食べたいと思うことができる必要があります');
+  });
+
+  // ── A03: polarity per word of the chain ───────────────────────────────────
+  // The finite `negative` denies the outermost link; `governedNegative` denies the group the
+  // innermost modal governs; an inner link denies its own suffix.
+  describe('modal polarity', () => {
+    const chain = (
+      modals: ResolvedModal[],
+      governedNegative: boolean,
+      negative = false,
+      ending: 'polite' | 'plain' | 'tara' = 'polite',
+    ) => text(modalSegs(modals, concept(IKANAI), 'present', negative, 0, undefined, ending, undefined, undefined, governedNegative));
+
+    test('a dict governor attaches straight to the ない form', () => {
+      expect(chain([MUST], true)).toBe('行かない必要があります');
+      expect(chain([CAN], true)).toBe('行かないことができます');
+    });
+
+    // 〜たい has no ない stem to sit on, so the negation goes through 〜ないでいる (see naiSegs).
+    test('a stem governor goes through the 〜ないでい bridge', () => {
+      expect(modalSegs([WANT], concept(IKANAI), 'present', false, 0, undefined, 'polite', undefined, undefined, true)).toEqual([
+        { t: '行かない', r: 'いかない' },
+        { t: 'でい' },
+        { t: 'た' },
+        { t: 'いです' },
+      ]);
+      expect(chain([WANT], true)).toBe('行かないでいたいです');
+    });
+
+    test('the two negations are independent', () => {
+      expect(chain([WANT], false, true)).toBe('行きたくないです');
+      expect(chain([WANT], true, true)).toBe('行かないでいたくないです');
+      expect(chain([MUST], false, true)).toBe('行く必要がありません');
+      expect(chain([MUST], true, true)).toBe('行かない必要がありません');
+    });
+
+    test('an inner link wears its own negation on its own suffix', () => {
+      expect(chain([MUST, not(CAN)], false)).toBe('行くことができない必要があります');
+      expect(chain([MUST, CAN], true)).toBe('行かないことができる必要があります');
+      expect(chain([MUST, not(CAN)], true)).toBe('行かないことができない必要があります');
+    });
+
+    // The ようになる and と思う bridges stay compositional under either negation — as marginal as the
+    // affirmative chains they are built on.
+    test('the bridged chains keep their bridge', () => {
+      expect(chain([WANT, not(CAN)], false)).toBe('行くことができないようになりたいです');
+      expect(chain([WANT, CAN], true)).toBe('行かないことができるようになりたいです');
+      expect(chain([CAN, not(WANT)], false)).toBe('行きたくないと思うことができます');
+      expect(chain([CAN, WANT], true)).toBe('行かないでいたいと思うことができます');
+    });
+
+    test('the plain and たら endings carry the same governed ない', () => {
+      expect(chain([MUST], true, false, 'plain')).toBe('行かない必要がある');
+      expect(chain([WANT], true, false, 'plain')).toBe('行かないでいたい');
+      expect(chain([MUST], true, false, 'tara')).toBe('行かない必要があったら');
+      expect(chain([WANT], true, false, 'tara')).toBe('行かないでいたかったら');
+    });
+
+    test('a governed element of its own is negated in the form the modal asks for', () => {
+      const governed = (form: 'dict' | 'stem', negative: boolean) =>
+        [{ t: '幸せ' }, { t: negative ? (form === 'dict' ? 'でない' : 'でないでい') : (form === 'dict' ? 'である' : 'であり') }];
+      expect(text(modalSegs([MUST], concept(IKANAI), 'present', false, 0, undefined, 'polite', governed, undefined, true)))
+        .toBe('幸せでない必要があります');
+      expect(text(modalSegs([WANT], concept(IKANAI), 'present', false, 0, undefined, 'polite', governed, undefined, true)))
+        .toBe('幸せでないでいたいです');
+    });
   });
 });

@@ -130,12 +130,15 @@ describe('rawSatellites', () => {
         'verbModal',
         'verbModal2',
         'verbModalAdverb',
+        'verbModalNegative',
       ]);
       expect(offered({ verb: GO, verbModal: WANT, verbModal2: CAN }, 'verbModal')).toEqual([
         'verbModal',
         'verbModal2',
         'verbModalAdverb',
         'verbModal2Adverb',
+        'verbModalNegative',
+        'verbModal2Negative',
       ]);
 
       const satellites = list({ verb: GO, verbModal: WANT, verbModal2: CAN });
@@ -143,6 +146,9 @@ describe('rawSatellites', () => {
       expect(parentOf('verbModal2')).toBe('verbModal');
       expect(parentOf('verbModalAdverb')).toBe('verbModal');
       expect(parentOf('verbModal2Adverb')).toBe('verbModal2');
+      // Each modal's polarity rides its own modal's box, as its adverb does.
+      expect(parentOf('verbModalNegative')).toBe('verbModal');
+      expect(parentOf('verbModal2Negative')).toBe('verbModal2');
     });
 
     it('names the verb’s controls by the catalog keys their tooltips and titles read', () => {

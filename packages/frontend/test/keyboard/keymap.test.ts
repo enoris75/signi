@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { UI_STRINGS, type Concept, type UiStringKey } from '@signi/shared';
-import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
+import type { PhraseSelection, SlotKey } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { Satellite } from '../../src/components/PhraseBuilder/satellites/index.ts';
 import {
   APP_KEYMAP,
@@ -166,6 +166,22 @@ describe('resolving a keystroke', () => {
         selection: { subjectAdjective: noun('SAIL') } as PhraseSelection,
       }),
     ).toBe('adjective.number');
+  });
+
+  // Polarity is per word of the verb group (A03), and the verb family shares one scope, so N
+  // denies whichever word the cursor is on — the verb, or the modal governing it.
+  it('denies the word N is pressed on, verb or modal', () => {
+    const withModal = { selection: { verb: verb('GO'), verbModal: verb('WANT') } as PhraseSelection };
+    expect(commandFor('n', { ...withModal, slot: 'verb', nounKey: null })).toBe('verb.negate');
+    expect(commandFor('n', { ...withModal, slot: 'verbModal', nounKey: null })).toBe('verb.negate');
+
+    const negate = KEYMAP.find((c) => c.id === 'verb.negate')!;
+    const toggled: string[] = [];
+    const press = (slot: SlotKey) =>
+      negate.run(ctx({ ...withModal, slot, nounKey: null, toggleNegative: (field) => toggled.push(field) }));
+    press('verb');
+    press('verbModal');
+    expect(toggled).toEqual(['verbNegative', 'verbModalNegative']);
   });
 
   it('prefers the box’s own grammar to the keys every box shares', () => {

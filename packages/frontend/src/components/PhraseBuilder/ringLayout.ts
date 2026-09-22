@@ -52,10 +52,18 @@ const DISC_CLEAR = 6;
 const ORBIT_FILL = 0.85;
 // Clear space between the solid ring's controls and the dotted ring's when nothing orbits between.
 const HALO = 6;
-// Two controls sharing a gap stack across the orbit, this far either side of it — which needs a
-// band at least this deep.
+// Controls sharing a gap stack across the orbit, LANE_SPACING apart and centred on it: a pair sits
+// LANE_OFFSET either side, a third takes the orbit itself. The band has to be deep enough to hold
+// the outermost lane and its button, which is what `laneBand` works out.
 const LANE_OFFSET = 11;
+const LANE_SPACING = 2 * LANE_OFFSET;
 const STACKED_BAND = 22;
+
+/** Where lane `i` of `n` sits, relative to the orbit: one lane rides it, the rest spread evenly. */
+const laneShift = (i: number, n: number) => (n === 1 ? 0 : (i - (n - 1) / 2) * LANE_SPACING);
+
+/** How deep a band a gap of `n` controls needs — the outermost lane, plus the room a pair keeps. */
+const laneBand = (n: number) => (n <= 1 ? 0 : ((n - 1) / 2) * LANE_SPACING + (STACKED_BAND - LANE_OFFSET));
 // The solid ring spreads its controls over at most this share of its circumference before it grows.
 const INNER_FILL = 0.8;
 // The dotted ring seats its controls in at most half its circumference before it grows.
@@ -260,8 +268,8 @@ export function layoutRing(
     if (!(g.after in radius)) continue;
     gapsAfter.set(g.after, [...(gapsAfter.get(g.after) ?? []), g.key]);
   }
-  const stacked = [...gapsAfter.values()].some((keys) => keys.length > 1);
-  const band = Math.max(0, ...discKeys.map((k) => radius[k]), stacked ? STACKED_BAND : 0);
+  const lanes = Math.max(1, ...[...gapsAfter.values()].map((keys) => keys.length));
+  const band = Math.max(0, ...discKeys.map((k) => radius[k]), laneBand(lanes));
 
   // Lay each chain out along its own arc: member i sits `offset[i]` from the first, in the chain's
   // direction; the gap after a disc is widened to seat the control it holds.
@@ -292,9 +300,8 @@ export function layoutRing(
           const mid = arc + chain.dir * (radius[k] + CHAIN_ROOM / 2);
           const a = mid / orbit;
           gap.forEach((key, lane) => {
-            // A lone control rides the orbit itself; a pair splits across it, the first inside.
-            const shift = gap.length === 1 ? 0 : lane === 0 ? -LANE_OFFSET : LANE_OFFSET;
-            out.controls[key] = onCircle(center, orbit + shift, a);
+            // A lone control rides the orbit itself; several spread across it, the first inside.
+            out.controls[key] = onCircle(center, orbit + laneShift(lane, gap.length), a);
           });
         });
       },

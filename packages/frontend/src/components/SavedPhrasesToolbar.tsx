@@ -82,11 +82,12 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
   // Rehydrate a serialized workspace against the catalog and hand it to the app. The catalog is
   // awaited, not read off a hook: a phrase loaded before it arrives would find none of its words.
-  async function applyWorkspace(workspace: SerializedWorkspace) {
+  async function applyWorkspace(workspace: SerializedWorkspace, version?: number) {
     const catalog = await queryClient.ensureQueryData(conceptsQuery());
     const { containers: hydrated, links: hydratedLinks, missing } = hydrateWorkspace(
       workspace,
       catalog,
+      version,
     );
     onLoad(hydrated, hydratedLinks);
     if (missing.length > 0) {
@@ -164,7 +165,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   async function handleLoad(id: string) {
     try {
       const record = await fetchSavedPhrase(id);
-      await applyWorkspace(record.workspace);
+      await applyWorkspace(record.workspace, record.version);
       setLoadOpen(false);
     } catch {
       setToast({ severity: "error", msg: t("failure.phraseNotLoaded") });
@@ -187,7 +188,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
       return;
     }
     try {
-      await applyWorkspace(doc.workspace);
+      await applyWorkspace(doc.workspace, doc.version);
     } catch {
       setToast({ severity: "error", msg: t("toast.importFailed") });
     }

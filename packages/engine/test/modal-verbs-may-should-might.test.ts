@@ -60,7 +60,7 @@ describe('MAY: permission, and the "be allowed to" its past and future supplete'
       en: 'the man may run.', it: "l'uomo può correre.", fr: "l'homme peut courir.", de: 'der Mann darf laufen.',
       es: 'el hombre puede correr.', ja: '男は走ることが許されます。', pt: 'o homem pode correr.',
     });
-    expect(runs({ modals: ['MAY'], negative: true })).toEqual({
+    expect(runs({ modals: [{ verb: 'MAY', negative: true }] })).toEqual({
       en: 'the man may not run.', it: "l'uomo non può correre.", fr: "l'homme ne peut pas courir.",
       de: 'der Mann darf nicht laufen.', es: 'el hombre no puede correr.', ja: '男は走ることが許されません。',
       pt: 'o homem não pode correr.',
@@ -80,7 +80,7 @@ describe('MAY: permission, and the "be allowed to" its past and future supplete'
       pt: 'o homem podia correr.',
     });
     // Never the do-support "did not be allowed to" / "did the man be allowed to".
-    expect(runs({ modals: ['MAY'], tense: 'past', negative: true })).toMatchObject({
+    expect(runs({ modals: [{ verb: 'MAY', negative: true }], tense: 'past' })).toMatchObject({
       en: 'the man was not allowed to run.', de: 'der Mann durfte nicht laufen.',
       ja: '男は走ることが許されませんでした。',
     });
@@ -110,7 +110,7 @@ describe('SHOULD: a conditional, and a copula-kind modal in Japanese', () => {
     });
     // Without "should" in MODAL_AUX English fell to do-support over the suppletive "be supposed to"
     // ("does not be supposed to run"); Japanese read 走るべきでありません as a verb-kind modal.
-    expect(runs({ modals: ['SHOULD'], negative: true })).toEqual({
+    expect(runs({ modals: [{ verb: 'SHOULD', negative: true }] })).toEqual({
       en: 'the man should not run.', it: "l'uomo non dovrebbe correre.", fr: "l'homme ne devrait pas courir.",
       de: 'der Mann sollte nicht laufen.', es: 'el hombre no debería correr.', ja: '男は走るべきではありません。',
       pt: 'o homem não deveria correr.',
@@ -129,7 +129,7 @@ describe('SHOULD: a conditional, and a copula-kind modal in Japanese', () => {
       pt: 'o homem teria devido correr.',
     });
     // French negates the compound finite on its auxiliary, not after the participle.
-    expect(runs({ modals: ['SHOULD'], tense: 'past', negative: true })).toEqual({
+    expect(runs({ modals: [{ verb: 'SHOULD', negative: true }], tense: 'past' })).toEqual({
       en: 'the man should not have run.', it: "l'uomo non avrebbe dovuto correre.", fr: "l'homme n'aurait pas dû courir.",
       de: 'der Mann hätte nicht laufen sollen.', es: 'el hombre no habría debido correr.',
       ja: '男は走るべきではありませんでした。', pt: 'o homem não teria devido correr.',
@@ -152,7 +152,7 @@ describe('SHOULD: a conditional, and a copula-kind modal in Japanese', () => {
       en: 'the man should always have run.', fr: "l'homme aurait toujours dû courir.",
       de: 'der Mann hätte immer laufen sollen.', ja: '男はいつも走るべきでした。',
     });
-    expect(runs({ modals: ['SHOULD'], modifier: 'FAST', tense: 'past', negative: true })).toMatchObject({
+    expect(runs({ modals: [{ verb: 'SHOULD', negative: true }], modifier: 'FAST', tense: 'past' })).toMatchObject({
       en: 'the man should not have run fast.', fr: "l'homme n'aurait pas dû courir vite.",
       de: 'der Mann hätte nicht schnell laufen sollen.', ja: '男は速く走るべきではありませんでした。',
     });
@@ -167,7 +167,7 @@ describe('MIGHT: a conditional, and 〜かもしれない on the plain finite ve
       pt: 'o homem poderia correr.',
     });
     // 走るかもしれません would read as the positive, and かもしれます conjugates a suffix that never does.
-    expect(runs({ modals: ['MIGHT'], negative: true })).toEqual({
+    expect(runs({ modals: [{ verb: 'MIGHT', negative: true }] })).toEqual({
       en: 'the man might not run.', it: "l'uomo non potrebbe correre.", fr: "l'homme ne pourrait pas courir.",
       de: 'der Mann könnte nicht laufen.', es: 'el hombre no podría correr.', ja: '男は走らないかもしれません。',
       pt: 'o homem não poderia correr.',
@@ -180,7 +180,7 @@ describe('MIGHT: a conditional, and 〜かもしれない on the plain finite ve
       de: 'der Mann hätte laufen können.', es: 'el hombre habría podido correr.', ja: '男は走ったかもしれません。',
       pt: 'o homem teria podido correr.',
     });
-    expect(runs({ modals: ['MIGHT'], tense: 'past', negative: true })).toEqual({
+    expect(runs({ modals: [{ verb: 'MIGHT', negative: true }], tense: 'past' })).toEqual({
       en: 'the man might not have run.', it: "l'uomo non avrebbe potuto correre.", fr: "l'homme n'aurait pas pu courir.",
       de: 'der Mann hätte nicht laufen können.', es: 'el hombre no habría podido correr.',
       ja: '男は走らなかったかもしれません。', pt: 'o homem não teria podido correr.',
@@ -214,7 +214,7 @@ describe('the three in a chain, an aspect, a passive and a relative clause', () 
   });
 
   test('Japanese chains: the inner element is finite under かもしれない, bridged under 〜たい', () => {
-    expect(runs({ modals: ['MIGHT', 'CAN'], negative: true })).toMatchObject({ ja: '男は走ることができないかもしれません。' });
+    expect(runs({ modals: ['MIGHT', { verb: 'CAN', negative: true }] })).toMatchObject({ ja: '男は走ることができないかもしれません。' });
     expect(runs({ modals: ['MIGHT', 'SHOULD'] })).toMatchObject({ ja: '男は走るべきであるかもしれません。' });
     expect(runs({ modals: ['WILL', 'SHOULD'] })).toMatchObject({ ja: '男は走るべきであるようになりたいです。' });
     expect(runs({ modals: ['MUST', 'MAY'] })).toMatchObject({ ja: '男は走ることが許される必要があります。' });
@@ -225,7 +225,7 @@ describe('the three in a chain, an aspect, a passive and a relative clause', () 
       en: 'the man might have run.', it: "l'uomo potrebbe aver corso.", de: 'der Mann könnte gelaufen sein.',
       ja: '男は走ったかもしれません。',
     });
-    expect(runs({ modals: ['MIGHT'], aspect: 'progressive', negative: true })).toMatchObject({
+    expect(runs({ modals: [{ verb: 'MIGHT', negative: true }], aspect: 'progressive' })).toMatchObject({
       en: 'the man might not be running.', ja: '男は走っていないかもしれません。',
     });
     expect(runs({ modals: ['SHOULD'], aspect: 'progressive', tense: 'past' })).toMatchObject({
@@ -239,10 +239,10 @@ describe('the three in a chain, an aspect, a passive and a relative clause', () 
     expect(isHappy({ modals: ['MIGHT'] })).toMatchObject({
       en: 'the cat might be happy.', de: 'der Kater könnte glücklich sein.', ja: '猫は幸せであるかもしれません。',
     });
-    expect(isHappy({ modals: ['MIGHT'], negative: true, tense: 'past' })).toMatchObject({
+    expect(isHappy({ modals: [{ verb: 'MIGHT', negative: true }], tense: 'past' })).toMatchObject({
       en: 'the cat might not have been happy.', ja: '猫は幸せではなかったかもしれません。',
     });
-    expect(isHappy({ modals: ['SHOULD'], negative: true })).toMatchObject({
+    expect(isHappy({ modals: [{ verb: 'SHOULD', negative: true }] })).toMatchObject({
       en: 'the cat should not be happy.', ja: '猫は幸せであるべきではありません。',
     });
   });
@@ -253,7 +253,7 @@ describe('the three in a chain, an aspect, a passive and a relative clause', () 
         en: 'the food should have been eaten by the cat.', it: 'il cibo avrebbe dovuto essere mangiato dal gatto.',
         de: 'das Essen hätte vom Kater gefressen werden sollen.', ja: '食べ物は猫に食べられるべきでした。',
       });
-    expect(sayAll(clause(the('CAT'), 'EAT', { directObject: the('MOUSE'), verbPhrase: { modals: ['SHOULD'], tense: 'past', negative: true } })))
+    expect(sayAll(clause(the('CAT'), 'EAT', { directObject: the('MOUSE'), verbPhrase: { modals: [{ verb: 'SHOULD', negative: true }], tense: 'past' } })))
       .toMatchObject({
         en: 'the cat should not have eaten the mouse.', fr: "le chat n'aurait pas dû manger la souris.",
         de: 'der Kater hätte die Maus nicht fressen sollen.', ja: '猫はネズミを食べるべきではありませんでした。',
@@ -269,10 +269,10 @@ describe('the three in a chain, an aspect, a passive and a relative clause', () 
       en: 'the cat that should have eaten runs.', de: 'der Kater, der hätte fressen sollen, läuft.',
       ja: '食べるべきだった猫は走ります。',
     });
-    expect(catThat({ modals: ['MIGHT'], negative: true })).toMatchObject({
+    expect(catThat({ modals: [{ verb: 'MIGHT', negative: true }] })).toMatchObject({
       en: 'the cat that might not eat runs.', ja: '食べないかもしれない猫は走ります。',
     });
-    expect(catThat({ modals: ['MAY'], tense: 'past', negative: true })).toMatchObject({
+    expect(catThat({ modals: [{ verb: 'MAY', negative: true }], tense: 'past' })).toMatchObject({
       en: 'the cat that was not allowed to eat runs.', ja: '食べることが許されなかった猫は走ります。',
     });
   });

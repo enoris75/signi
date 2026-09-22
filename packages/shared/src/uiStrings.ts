@@ -335,13 +335,14 @@ const exampleAt = (level: AbstractionLevel): PhrasePlan =>
 // it/fr/de ("non si è potuto…", "man konnte…") but not in English ("one could not save the phrase"),
 // which is why these waited for the voice rather than taking it.
 //
-// The modal is CAN throughout, past and negative: it is the ability that failed. It also keeps the
+// The modal is CAN throughout, past and negative — the negation is the modal's own, since it is the
+// ability that failed, not the saving that was not done (A03 made that difference sayable). It also keeps the
 // Romance past in its imperfect ("non poteva", "ne pouvait pas"), where a bare past would reach for
 // the literary perfective ("non fu salvata") that no error message should be written in.
 const couldNotBe = (verb: string, patient: NounPhrase): PhrasePlan =>
   ({
     subject: { concept: 'GENERIC_PERSON' },
-    verbPhrase: { verb, voice: 'passive', modals: ['CAN'], tense: 'past', negative: true },
+    verbPhrase: { verb, voice: 'passive', modals: [{ verb: 'CAN', negative: true }], tense: 'past' },
     directObject: patient,
   }) as PhrasePlan;
 

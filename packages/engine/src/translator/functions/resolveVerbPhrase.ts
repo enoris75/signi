@@ -42,9 +42,30 @@ export function resolveVerbPhrase(
     ?? (hasObject ? given.forms['object_sense'] : undefined);
   const verb = sense && lookup(sense, language) ? resolve(sense, language, lookup) : given;
   const voice = resolveVoice(vp, verb, language, imperative, hasObject);
+  // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
+  // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys; each may
+  // also carry its own adverb and its own negation, resolved alongside.
+  const modals = finiteSlotTaken
+    ? []
+    : (vp.modals ?? []).map((ref) => {
+        // A bare string is shorthand for a modal with no adverb and no negation of its own.
+        const m = typeof ref === 'string' ? { verb: ref } : ref;
+        return {
+          verb: resolve(m.verb, language, lookup),
+          modifier: m.modifier ? resolve(m.modifier, language, lookup) : undefined,
+          negative: m.negative,
+        };
+      });
+  // Negation is per word in the plan (each modal's own, plus the main verb's), and per *position*
+  // in the resolved shape every engine reads: `negative` is the finite element's, wherever it came
+  // from, so do-support, "ne … pas", German's "nicht" and negative concord go on reading one flag.
+  // What a modal governs is denied by `governedNegative` and by each inner modal's own `negative`.
+  const governed = modals.length > 0;
+  const finiteModal = modals[0];
   return {
     verb,
-    negative: vp.negative,
+    negative: governed ? finiteModal?.negative : vp.negative,
+    ...(governed && vp.negative ? { governedNegative: true } : {}),
     tense: finiteSlotTaken ? 'present' : vp.tense,
     aspect: finiteSlotTaken ? 'neutral' : vp.aspect,
     ...(voice === 'passive'
@@ -53,19 +74,8 @@ export function resolveVerbPhrase(
     mood,
     register: imperative ? (register ?? 'request') : undefined,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
-    // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
-    // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys; each may
-    // also carry its own adverb, resolved alongside.
-    modals: finiteSlotTaken
-      ? []
-      : (vp.modals ?? []).map((ref) => {
-          // A bare string is shorthand for a modal with no adverb of its own.
-          const m = typeof ref === 'string' ? { verb: ref } : ref;
-          return {
-            verb: resolve(m.verb, language, lookup),
-            modifier: m.modifier ? resolve(m.modifier, language, lookup) : undefined,
-          };
-        }),
+    // The outermost modal's negation has moved to `negative` above, so no engine reads it twice.
+    modals: modals.map((m, i) => (i === 0 ? { ...m, negative: undefined } : m)),
   };
 }
 

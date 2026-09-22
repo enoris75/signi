@@ -130,12 +130,15 @@ describe('buildSatelliteIcons', () => {
       expect(folded.satelliteIconsByParent['subjectAdjective']).toBeUndefined();
     });
 
-    it('seats the second modal and the first modal’s adverb on the first modal’s box', () => {
+    it('seats the second modal and the first modal’s adverb and polarity on the first modal’s box', () => {
       const selection = { verb: GO, verbModal: WANT };
 
+      // A modal wears everything that is its own: the modal it governs, its adverb and its
+      // polarity — the last one denying that modal, not the verb ("do not want to go").
       expect(keysOf(icons(selection).satelliteIconsByParent['verbModal'])).toEqual([
         'verbModal2',
         'verbModalAdverb',
+        'verbModalNegative',
       ]);
       const folded = icons(selection, { revealed: { verbModal: false } });
       expect(folded.satelliteIconsByParent['verbModal']).toBeUndefined();

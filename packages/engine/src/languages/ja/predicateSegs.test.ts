@@ -290,6 +290,86 @@ describe('predicateSegs', () => {
     });
   });
 
+  // ── A03: each word of the verb group takes its own negation ───────────────
+  // `negative` is still the finite element's — with a modal, the outermost one's. `governedNegative`
+  // denies the group the innermost modal governs, and Japanese spells it as that group's ない form.
+  describe('modal polarity', () => {
+    const TABENAI = { ...TABERU, nai: '食べない', nai_reading: 'たべない' };
+    const govNeg = (extra: Parameters<typeof vp>[1] = {}) => vp(TABENAI, { governedNegative: true, ...extra });
+
+    test('a dict governor takes the ない form, a stem governor the 〜ないでい bridge', () => {
+      expect(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined))
+        .toEqual([{ t: '食べない', r: 'たべない' }, { t: '必要があり', r: 'ひつようがあり' }, { t: 'ます' }]);
+      expect(text(predicateSegs(govNeg({ modals: [modal(KOTO_GA_DEKIRU)] }), undefined, undefined))).toBe('食べないことができます');
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)] }), undefined, undefined))).toBe('食べないでいたいです');
+    });
+
+    test('the finite negation and the governed one are independent', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)], negative: true }), undefined, undefined))).toBe('食べないでいたくないです');
+      expect(text(predicateSegs(vp(TABENAI, { modals: [modal(TAI)], negative: true }), undefined, undefined))).toBe('食べたくないです');
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)], negative: true }), undefined, undefined))).toBe('食べない必要がありません');
+    });
+
+    test('an inner modal denies its own suffix', () => {
+      expect(text(predicateSegs(vp(TABENAI, { modals: [modal(HITSUYOU_GA_ARU), { ...modal(KOTO_GA_DEKIRU), negative: true }] }), undefined, undefined)))
+        .toBe('食べることができない必要があります');
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU), modal(KOTO_GA_DEKIRU)] }), undefined, undefined)))
+        .toBe('食べないことができる必要があります');
+    });
+
+    test('the plain (relative) and たら endings carry the governed ない', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined, undefined, true))).toBe('食べない必要がある');
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)] }), undefined, undefined, undefined, true))).toBe('食べないでいたい');
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)], mood: 'subjunctive' }), undefined, undefined))).toBe('食べない必要があったら');
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)], mood: 'subjunctive' }), undefined, undefined))).toBe('食べないでいたかったら');
+    });
+
+    // The citation a modal-headed definition folds into (A222) closes the same way, plainly.
+    test('the infinitive citation carries the governed ない', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)], mood: 'infinitive' }), undefined, undefined))).toBe('食べない必要がある');
+    });
+
+    // A128 + A03: the copula's predicate is what the modal governs, so the ない goes on the predicate.
+    test('the copula under a modal is denied on its predicate', () => {
+      expect(text(predicateSegs(vp(DESU, { governedNegative: true, modals: [modal(HITSUYOU_GA_ARU)] }), undefined, careful)))
+        .toBe('慎重でない必要があります');
+      expect(text(predicateSegs(vp(DESU, { governedNegative: true, modals: [modal(TAI)] }), undefined, careful)))
+        .toBe('慎重でないでいたいです');
+      expect(text(predicateSegs(vp(DESU, { governedNegative: true, modals: [modal(HITSUYOU_GA_ARU)] }), undefined, careful, undefined, true)))
+        .toBe('慎重でない必要がある');
+    });
+
+    test('an aspect under a modal is denied on its auxiliary', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)], aspect: 'progressive' }), undefined, undefined)))
+        .toBe('食べていない必要があります');
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)], aspect: 'resultative' }), undefined, undefined)))
+        .toBe('食べていないでいたいです');
+    });
+
+    // The どの…も circumfix closes on the ない that is actually there: the governed one, leaving the
+    // modal positive. Denying the modal as well would say something else ("does not want to").
+    test('a no argument concords with the governed ない, not with the finite modal', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI)] }), el(np(NEZUMI, { definiteness: 'no' })), undefined)))
+        .toBe('どのネズミも食べないでいたいです');
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined, undefined, false, true)))
+        .toBe('食べない必要があります');
+      expect(text(predicateSegs(govNeg({ modals: [modal(HITSUYOU_GA_ARU)] }), undefined, complements({ route: complement(np(ICHIBA, { definiteness: 'no' })) }))))
+        .toBe('どの市場も食べない必要があります');
+      // An inner modal's own ない closes the circumfix just as well.
+      expect(text(predicateSegs(vp(TABENAI, { modals: [modal(HITSUYOU_GA_ARU), { ...modal(KOTO_GA_DEKIRU), negative: true }] }), el(np(NEZUMI, { definiteness: 'no' })), undefined)))
+        .toBe('どのネズミも食べることができない必要があります');
+      // With no negation inside the chain the concord still falls on the finite modal, as it always has.
+      expect(text(predicateSegs(vp(TABENAI, { modals: [modal(TAI)] }), el(np(NEZUMI, { definiteness: 'no' })), undefined)))
+        .toBe('どのネズミも食べたくないです');
+    });
+
+    // The adverb keeps going to the finite element by design (see groupHasNegativeAdverb).
+    test('a negative-polarity adverb still negates the finite modal', () => {
+      expect(text(predicateSegs(govNeg({ modals: [modal(TAI, KESSHITE)] }), undefined, undefined)))
+        .toBe('決して食べないでいたくないです');
+    });
+  });
+
   describe('conditional', () => {
     test('the subjunctive protasis takes the たら form', () => {
       expect(predicateSegs(vp(TABERU, { mood: 'subjunctive' }), el(np(NEZUMI)), undefined))

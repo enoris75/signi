@@ -37,6 +37,7 @@ import {
   isModalSlot,
   modalAdverbFor,
   MODAL_SLOTS,
+  negativeFieldOf,
   NOUN_KEYS,
 } from "../../components/PhraseBuilder/slots.ts";
 import type { Action, Setting } from "./commands.ts";
@@ -203,8 +204,9 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
         !w.root.imperative &&
         (w.slice.verb?.transitivity === "transitive" || w.slice.verb?.transitivity === "ditransitive")
       );
+    // Polarity is per word of the verb group: the verb's own, or a modal's ("/modal ( want /not )").
     case "polarity":
-      return w.kind === "verb";
+      return w.kind === "verb" || (w.kind === "modal" && Boolean(w.concept));
     case "degree":
       return (
         (w.kind === "adjective" && c?.role === "adjective") ||
@@ -238,7 +240,7 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
     case "voice":
       return setVoice(slice, s.value);
     case "polarity":
-      return setNegative(slice, s.value === "negative");
+      return setNegative(slice, s.value === "negative", negativeFieldOf(w.ref.slot) ?? "verbNegative");
     case "degree":
       return setDegree(slice, w.ref.slot, s.value);
     case "relation":
@@ -275,7 +277,7 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
     case "voice":
       return sel.verbVoice ?? "active";
     case "polarity":
-      return sel.verbNegative ? "negative" : "positive";
+      return sel[negativeFieldOf(w.ref.slot) ?? "verbNegative"] ? "negative" : "positive";
     case "degree":
       return sel.adjectiveDegrees?.[w.ref.slot] ?? "positive";
     case "relation":

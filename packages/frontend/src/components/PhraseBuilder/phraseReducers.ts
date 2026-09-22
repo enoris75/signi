@@ -31,15 +31,20 @@ import {
   POSSESSOR_REF_KEY,
   SlotKey,
 } from "./interfaces.ts";
+import type { ModalNegativeField } from "./slots.ts";
 import {
   adjectiveSlots,
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_KEY_SET,
   getActiveSlots,
   modalAdverbFor,
+  modalNegativeFor,
   MODAL_SLOTS,
   NOUN_KEYS,
 } from "./slots.ts";
+
+/** A polarity field of the verb group: the main verb's, or one of the modals' own. */
+export type NegativeField = "verbNegative" | ModalNegativeField;
 
 // The settings kept per slot in maps keyed by slot key, rather than as fields of their own:
 // an adjective's degree (or the predicate adjective's, under `predicative`) and a noun-modifier's
@@ -129,9 +134,12 @@ function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
   if (idx === -1 && slot !== "verb") return;
   for (const key of MODAL_SLOTS.slice(idx + 1)) {
     delete sel[key as keyof PhraseSelection];
-    // A cleared modal takes its own adverb with it — the adverb's control rides the modal's box.
+    // A cleared modal takes its own adverb and its own polarity with it — both controls ride the
+    // modal's box, so neither can be reached once that box is gone.
     const advKey = modalAdverbFor(key);
     if (advKey) delete sel[advKey as keyof PhraseSelection];
+    const negKey = modalNegativeFor(key);
+    if (negKey) delete sel[negKey as keyof PhraseSelection];
   }
 }
 
@@ -242,9 +250,12 @@ export function applyClear(
   delete next[slot];
   // A cleared word's own keyed settings go with it (an adjective's degree, a noun-modifier's relation).
   clearSlotSettings(next, [slot]);
-  // Clearing a modal clears its own adverb (its control lives on the modal's box).
+  // Clearing a modal clears its own adverb and its own polarity (both controls live on the
+  // modal's box, so neither survives it).
   const clearedModalAdverb = modalAdverbFor(slot);
   if (clearedModalAdverb) delete next[clearedModalAdverb as keyof PhraseSelection];
+  const clearedModalNegative = modalNegativeFor(slot);
+  if (clearedModalNegative) delete next[clearedModalNegative as keyof PhraseSelection];
   if (slot === "verb") {
     clearNoun(next, "directObject");
     clearAdjectives(next, "subject");
@@ -309,8 +320,15 @@ export function setGender(
   return { ...prev, [`${which}Gender`]: value };
 }
 
-export function setNegative(prev: PhraseSelection, value: boolean): PhraseSelection {
-  return { ...prev, verbNegative: value };
+// Set the polarity of one word of the verb group: the main verb's (`verbNegative`, the default)
+// or a modal's own (`verbModalNegative` / `verbModal2Negative`). Each denies the word its control
+// is drawn on — "I do not want to not go" is both of them set.
+export function setNegative(
+  prev: PhraseSelection,
+  value: boolean,
+  field: NegativeField = "verbNegative",
+): PhraseSelection {
+  return { ...prev, [field]: value };
 }
 
 export function setTense(prev: PhraseSelection, value: Tense): PhraseSelection {
@@ -374,8 +392,11 @@ export function toggleGender(
   return setGender(prev, which, cycled(gendersOf(prev, which), cur, step));
 }
 
-export function toggleNegative(prev: PhraseSelection): PhraseSelection {
-  return setNegative(prev, !prev.verbNegative);
+export function toggleNegative(
+  prev: PhraseSelection,
+  field: NegativeField = "verbNegative",
+): PhraseSelection {
+  return setNegative(prev, !prev[field], field);
 }
 
 // Set a noun's determiner to a value picked from the menu. Ten values across three semantic
@@ -464,6 +485,8 @@ export function setImperative(prev: PhraseSelection, value: boolean): PhraseSele
     verbModal2: undefined,
     verbModalAdverb: undefined,
     verbModal2Adverb: undefined,
+    verbModalNegative: undefined,
+    verbModal2Negative: undefined,
   };
 }
 
@@ -491,6 +514,8 @@ export function setInfinitive(prev: PhraseSelection, value: boolean): PhraseSele
     verbModal2: undefined,
     verbModalAdverb: undefined,
     verbModal2Adverb: undefined,
+    verbModalNegative: undefined,
+    verbModal2Negative: undefined,
   };
 }
 

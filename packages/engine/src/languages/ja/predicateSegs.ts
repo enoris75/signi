@@ -84,7 +84,7 @@ export function predicateSegs(
     : givenVerbPhrase.voice === 'passive'
       ? { ...givenVerbPhrase, verb: jaPassiveVerb(givenVerbPhrase.verb) }
       : givenVerbPhrase;
-  const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).
   const { objectPredicative, rest: adjunctComplements } = splitObjectPredicative(complements);
@@ -108,12 +108,22 @@ export function predicateSegs(
   // A similative comparison is the one place the two part company: Romance leaves the clause
   // positive under "like no dog" (A181), where Japanese writes the same circumfix as everywhere else
   // (どの犬のようにも) and so still needs its ない — hence `countComparisons`.
-  const negated = negative === true || groupHasNegativeAdverb(verbPhrase)
-    || subjectNegative
+  const concord = subjectNegative
     || (directObject !== undefined && isNegativeGroup(directObject))
     || hasNegativeComplement(complements, { countComparisons: true })
     // A `no` possessor in a complement closes the same circumfix around its phrase (どの男の家でも; A216).
     || hasNegativePossessorComplement(complements, { countComparisons: true });
+  // Where a modal denies the group it governs, that inner ない is the one a `no` argument concords
+  // with, and the finite modal takes none — 猫はどの食べ物も食べないでいたいです, not 食べないでいたくない
+  // です, which would deny the wanting too (A03). A negative adverb still goes to the finite element
+  // by design (see `groupHasNegativeAdverb`).
+  const governedNeg = governedNegative === true && modals.length > 0;
+  // Any ない the chain already stands inside the predicate closes the circumfix: the governed group's,
+  // or an inner modal's own (どの食べ物も食べることができない必要があります). The translator has moved the
+  // outermost modal's flag to `negative`, so `modals` only ever carries the inner ones' — the same
+  // reading `negationSources.governed` gives the languages that write a separate negator.
+  const innerNegation = governedNeg || modals.some((m) => m.negative === true);
+  const negated = negative === true || groupHasNegativeAdverb(verbPhrase) || (concord && !innerNegation);
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.
@@ -149,14 +159,14 @@ export function predicateSegs(
     segs.push(...complementSegs(objectPredicative));
     // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
     // `foldModalGovernor`), and the chain closes it in the plain form, each modal's adverb ahead of the
-    // main verb's: 行動したい, 物体を持つことができる, 行動したくない.
+    // main verb's: 行動したい, 物体を持つことができる, 行動したくない, 行動しない必要がある.
     for (const m of modals) {
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
     if (adverb) segs.push(adverb);
     segs.push(...(modals.length > 0
-      ? modalSegs(modals.map((m) => m.verb), verb, 'present', negated, 0, undefined, 'plain')
+      ? modalSegs(modals, verb, 'present', negated, 0, undefined, 'plain', undefined, undefined, governedNeg)
       : [plainVerbSeg(verb, 'present', negated)]));
     return segs;
   }
@@ -175,12 +185,15 @@ export function predicateSegs(
     }
     // A modal suffixes the predicate in the form it governs, and takes the tense, polarity and ending
     // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
+    // A polarity of the predicate's own goes on the predicate, in that same governed form (A03:
+    // 幸せでない必要があります).
     if (modals.length > 0) {
       const ending = mood === 'subjunctive' ? 'tara' : plain || mood === 'infinitive' ? 'plain' : 'polite';
       // Under 〜かもしれない the predicate itself is finite, in the plain written style a citation takes
       // (幸せではないかもしれません, 伝説であったかもしれません; see `modalSegs`).
-      segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, ending,
-        (form) => copulaSegs(predicative, 'present', false, form), (t, n) => copulaSegs(predicative, t, n, 'citation')));
+      segs.push(...modalSegs(modals, verb, tense, negated, 0, undefined, ending,
+        (form, neg) => copulaSegs(predicative, 'present', neg, form),
+        (t, n) => copulaSegs(predicative, t, n, 'citation'), governedNeg));
       return segs;
     }
     // A copula has no verb to carry aspect; the only meaningful one is the resultative
@@ -216,15 +229,17 @@ export function predicateSegs(
   // A relative clause and the dictionary form a modal governs keep the plain verb (本を持つ猫).
   const heldState = aspect === 'neutral' && !plain && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
     && !(negated && verb.forms['event_negative'] === '1');
-  // A modal suffixes the verb and takes the tense/polarity itself. An aspect stands under it in the form
-  // the modal governs (B07): 食べている必要があります, 食べていたいです, 食べようとしている必要があります.
+  // A modal suffixes the verb and takes the tense and the finite polarity itself; the polarity of what
+  // it governs goes on the governed group as its ない form (A03: 行かない必要があります, 行かないでい
+  // たいです). An aspect stands under it in the form the modal governs (B07): 食べている必要があります,
+  // 食べていたいです, 食べようとしている必要があります.
   if (modals.length > 0) {
-    const governed = aspect === 'neutral' ? undefined : (form: JaForm) => aspectFormSegs(verb, aspect, form);
+    const governed = aspect === 'neutral' ? undefined : (form: JaForm, neg: boolean) => aspectFormSegs(verb, aspect, form, neg);
     // Under 〜かもしれない the aspect is finite, in its plain form: 食べているかもしれません, and the perfect
     // 食べたかもしれません "might have eaten" (see `modalSegs`).
     const finite = aspect === 'neutral' ? undefined
       : (t: Tense, n: boolean) => aspectVerbSegs({ ...verbPhrase, tense: t }, n, 'plain');
-    segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed, finite));
+    segs.push(...modalSegs(modals, verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed, finite, governedNeg));
   }
   else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara ? 'tara' : 'polite'));
   else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));

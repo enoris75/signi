@@ -95,7 +95,7 @@ export function PeriodSaveLoad({
       // Awaited, not read off a hook: a period added before the catalog arrives would otherwise
       // find none of its words.
       const catalog = await queryClient.ensureQueryData(conceptsQuery());
-      const { containers, missing } = hydrateWorkspace(record.workspace, catalog);
+      const { containers, missing } = hydrateWorkspace(record.workspace, catalog, record.version);
       const selection = containers[0]?.selection;
       if (!selection) throw new Error("empty period");
       onAppendPeriod(selection);

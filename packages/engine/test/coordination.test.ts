@@ -604,7 +604,7 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
   // The pro-form rides the clitic placement of each language: before the finite verb, before the
   // infinitive under a French modal, ahead of "nicht" and the German non-finite tail.
   test('the pro-form under a modal, in the compound past and after a pronoun subject', () => {
-    expect(but(catIs('HAPPY'), { modals: ['MUST'], negative: true })).toMatchObject({
+    expect(but(catIs('HAPPY'), { modals: [{ verb: 'MUST', negative: true }] })).toMatchObject({
       it: 'il gatto è felice, ma il cane non lo deve essere.',
       fr: "le chat est heureux, mais le chien ne doit pas l'être.",
       es: 'el gato está feliz, pero el perro no lo debe estar.',

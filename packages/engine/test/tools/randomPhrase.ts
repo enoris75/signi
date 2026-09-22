@@ -258,7 +258,12 @@ function verbPhrase(r: Random, verb: ConceptSeed, weight = 1): VerbPhrase {
   if (r.chance(0.45 * weight)) vp.aspect = r.pick(MARKED_ASPECTS);
   if (r.chance(0.25)) vp.negative = true;
   if (r.chance(0.5 * weight)) vp.modifier = r.pick(adverbs);
-  if (r.chance(0.2 * weight)) vp.modals = [r.pick(MODALS)];
+  // A modal carries its own polarity, as it carries its own adverb: the generator denies the modal
+  // about as often as `negative` denies the verb it governs, so both scopes get hunted (A03).
+  if (r.chance(0.2 * weight)) {
+    const modal = r.pick(MODALS);
+    vp.modals = [r.chance(0.3) ? { verb: modal, negative: true } : modal];
+  }
   return vp;
 }
 

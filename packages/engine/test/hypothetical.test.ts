@@ -432,8 +432,8 @@ describe('known bugs: Japanese たら protasis', () => {
     const ifCat = (verbPhrase: object, extra: object = {}, verb = 'EAT') =>
       sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), verb, { verbPhrase, ...extra }) }).ja;
     expect(ifCat({ modals: ['MUST'] })).toBe('もし猫が食べる必要があったら、犬は走ります。');
-    expect(ifCat({ modals: ['CAN'], negative: true })).toBe('もし猫が食べることができなかったら、犬は走ります。');
-    expect(ifCat({ modals: ['WILL'], negative: true })).toBe('もし猫が食べたくなかったら、犬は走ります。');
+    expect(ifCat({ modals: [{ verb: 'CAN', negative: true }] })).toBe('もし猫が食べることができなかったら、犬は走ります。');
+    expect(ifCat({ modals: [{ verb: 'WILL', negative: true }] })).toBe('もし猫が食べたくなかったら、犬は走ります。');
     expect(ifCat({ aspect: 'progressive', negative: true })).toBe('もし猫が食べていなかったら、犬は走ります。');
     expect(ifCat({ aspect: 'prospective' })).toBe('もし猫が食べるところだったら、犬は走ります。');
     expect(ifCat({}, { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('もし猫がどのネズミも食べなかったら、犬は走ります。');

@@ -24,11 +24,14 @@ import type {
   SlotKey,
 } from "../components/PhraseBuilder/interfaces.ts";
 import type { Satellite } from "../components/PhraseBuilder/satellites/index.ts";
+import type { NegativeField } from "../components/PhraseBuilder/phraseReducers.ts";
 import {
   adjectiveSlots,
   MODAL_ADVERB_SLOTS,
+  MODAL_NEGATIVE_FIELDS,
   MODAL_SLOTS,
   modalAdverbFor,
+  negativeFieldOf,
 } from "../components/PhraseBuilder/slots.ts";
 import { isComplementSlot, nounBlockOf, type Scope } from "./scope.ts";
 import type { Direction } from "./spatialNav.ts";
@@ -96,7 +99,7 @@ export interface BoxContext {
   imperative: { person: ImperativePerson; register: ImperativeRegister };
   toggleNumber: (which: NounKey) => void;
   toggleGender: (which: NounKey, step: 1 | -1) => void;
-  toggleNegative: () => void;
+  toggleNegative: (field: NegativeField) => void;
   toggleCauseNegative: () => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
@@ -241,6 +244,11 @@ function nextModal(slot: SlotKey): SlotKey | undefined {
 /** The adverb a verb-family box's <kbd>V</kbd> reveals: the verb's own, or that modal's. */
 function adverbOf(slot: SlotKey): SlotKey | undefined {
   return slot === "verb" ? "modifier" : modalAdverbFor(slot);
+}
+
+/** The polarity a verb-family box's <kbd>N</kbd> flips: the verb's own, or that modal's. */
+function negativeOf(slot: SlotKey): NegativeField | undefined {
+  return negativeFieldOf(slot);
 }
 
 /** Whether the box holds an attributive noun ("sail boat") rather than a real adjective. */
@@ -594,15 +602,23 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
 
   // ── The verb, and the modals that govern it ────────────────────────────────────────────────
   {
+    // The verb family's boxes share this scope, so <kbd>N</kbd> denies whichever word it is
+    // pressed on: the verb ("to not go") or a modal ("do not want").
     id: "verb.negate",
     scope: "box:verb",
     keys: ["N"],
     label: "Polarity",
     labelKey: "satellite.polarity",
     hint: true,
-    satellite: /^verbNegative$/,
-    when: (ctx) => has(ctx, "verbNegative"),
-    run: (ctx) => ctx.toggleNegative(),
+    satellite: new RegExp(`^(verbNegative|${MODAL_NEGATIVE_FIELDS.join("|")})$`),
+    when: (ctx) => {
+      const field = negativeOf(ctx.slot);
+      return field !== undefined && has(ctx, field);
+    },
+    run: (ctx) => {
+      const field = negativeOf(ctx.slot);
+      if (field) ctx.toggleNegative(field);
+    },
   },
   {
     id: "verb.tense",

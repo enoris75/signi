@@ -59,19 +59,20 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Six open**, all filed on 2026-09-22 by the lanes that fixed A207–A229, each met beside its own
-fix: A230 beside A209, A231 beside A225, A232 beside A224, A233 beside A208, A234 beside A216 and
-A235 beside A226. Every one but A231 was given a trial fix on a throwaway copy, which wrote its
-**Want** column.
-
-**And nine more, A238–A246**, met the same day by the six lanes that seeded P09's core vocabulary
-([B59–B67](../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)). Each is a
-shape the corpus could not reach until a word of its kind existed: the first multiword finite
-(*avere bisogno*), the first verb sharing a Spanish irregular command with another concept, the
-first adverbs whose negation wants another word, the first adjective relating its subject to a
-country. **No shipped gloss shows any of the nine**, which is why each was pinned rather than fixed
-in the lane that found it — five others those lanes met *were* fixed there, because the word could
-not be seeded honestly without the fix.
+**Sixteen open**, every one filed on 2026-09-22 — the day the catalogue emptied and three sessions
+filled it again. Six came from the lanes that fixed A207–A229, each met beside its own fix: A230
+beside A209, A231 beside A225, A232 beside A224, A233 beside A208, A234 beside A216 and A235 beside
+A226. Every one but A231 was given a trial fix on a throwaway copy, which wrote its **Want** column.
+**A236** was filed while specifying [A03, modal polarity](../features/Z-Done/A03-modal-polarity/README.md),
+which has since shipped the inner negator its fix needs. **A238–A246** came from the six lanes that
+seeded P09's core vocabulary
+([B59–B67](../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)): each of those
+nine is a shape the corpus could not reach until a word of its kind existed — the first multiword
+finite (*avere bisogno*), the first verb sharing a Spanish irregular command with another concept,
+the first adverbs whose negation wants another word, the first adjective relating its subject to a
+country. No shipped gloss shows any of the nine, which is why each was pinned rather than fixed in
+the lane that found it; five others those lanes met *were* fixed there, because the word could not be
+seeded honestly without the fix.
 
 | # | File | Language | Defect |
 |---|---|---|---|
@@ -81,6 +82,7 @@ not be seeded honestly without the fix.
 | A233 | [A-must-fix/A233-portuguese-negated-reflexive-infinitive.md](A-must-fix/A233-portuguese-negated-reflexive-infinitive.md) | Portuguese | a negated reflexive infinitive or instruction keeps its "-se" after the verb (*não mover-se*), where "não" draws it ahead (*não se mover*) as it draws an object pronoun |
 | A234 | [A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md](A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md) | Spanish, Portuguese | a possessor that has a possessive of its own loses its determiner (*de mi libro* for *de este libro mío*, *de su libro* for *de ningún libro suyo*), where the object keeps both ([A187](fixed/A187-pronominal-possessor-drops-the-head-determiner.md)) |
 | A235 | [A-must-fix/A235-time-under-an-adjective-goes-bare.md](A-must-fix/A235-time-under-an-adjective-goes-bare.md) | English | TIME under an adjective is forced bare as if it named a rate (*runs at other time*), because the measure rule [A226](fixed/A226-measure-manner-loses-its-determiner.md) narrowed takes every measure noun |
+| A236 | [A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md](A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md) | Italian, French, Spanish, Portuguese, Japanese | a negative adverb (NEVER) on the main verb under a modal negates the **modal** (*il gatto non vuole mangiare mai* for *vuole non mangiare mai*), because `groupHasNegativeAdverb` hands every negative adverb in the group to the finite verb; its fix routes the adverb through the inner negator [A03](../features/Z-Done/A03-modal-polarity/README.md) shipped |
 | A238 | [A-must-fix/A238-english-addressee-that-takes-no-to.md](A-must-fix/A238-english-addressee-that-takes-no-to.md) | English | English writes every `terminus` with "to", so a verb whose addressee is a bare or double object says it with the preposition (*asks the name to the man* for *asks the man the name*, *answers to the man* for *answers the man*); no lexeme key selects the bare recipient, as `object_prep` selects one for a direct object |
 | A239 | [A-must-fix/A239-italian-dire-imperfect-subjunctive.md](A-must-fix/A239-italian-dire-imperfect-subjunctive.md) | Italian | *dire*'s imperfect subjunctive is derived from the infinitive minus -re (*dissimo* for *dicessimo*), because `IT_SUBJ_STEM` overrides the contracted infinitives by concept id and has PRODUCE but not SAY |
 | A240 | [A-must-fix/A240-romance-dative-clitic-of-a-prepositional-object.md](A-must-fix/A240-romance-dative-clitic-of-a-prepositional-object.md) | Italian, French | a prepositional object writes its pronoun as the tonic one (*telefona a lui*, *téléphone à lui*), right for the spatial *su*/*sur* of CLICK and wrong for a dative, where the clitic belongs (*gli telefona*, *lui téléphone*) |

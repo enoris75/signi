@@ -56,12 +56,15 @@ Settled on 2026-09-13:
 | <kbd>↵</kbd> | The boxes become real; the cursor moves to the Verb. | `› /subj cat /adj brown /pl` — *the brown cats.* |
 | `/verb eat /obj food` <kbd>↵</kbd> | Verb and object filled. | *the brown cats eat the food.* |
 | *(click the polarity control on eat)* | eat turns negative. | `⌖ /not · eat` — *the brown cats do not eat the food.* |
-| `/modal ca` <kbd>⇥</kbd> <kbd>↵</kbd> | A modal box *can*, previewed then committed. | *the brown cats cannot eat the food.* |
-| `/subj /rel obj ( /subj dog /verb see )` <kbd>↵</kbd> | A second period appears, already linked to *cats* as a relative clause. | *the brown cats that the dog sees cannot eat the food.* |
+| `/modal ca` <kbd>⇥</kbd> <kbd>↵</kbd> | A modal box *can*, previewed then committed. | *the brown cats can not eat the food.* |
+| `/subj /rel obj ( /subj dog /verb see )` <kbd>↵</kbd> | A second period appears, already linked to *cats* as a relative clause. | *the brown cats that the dog sees can not eat the food.* |
 | <kbd>↑</kbd> | — | The previous line comes back from history. |
 | <kbd>esc</kbd> <kbd>&#96;</kbd> | The page gets its full height back; the cursor is on the canvas again. | esc clears the line; &#96; hides the console. |
 
-(Sentences are sample renderings.)
+(Sentences are sample renderings. The last two read *can not eat* — able to refrain — because the
+polarity clicked above is *eat*'s own: since [A03](../A03-modal-polarity/README.md) each
+word of the verb group carries its own, and *cannot eat* is the control on *can*, written
+`/modal ( can /not )`.)
 
 ## 2. The console
 

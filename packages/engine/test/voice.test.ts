@@ -281,7 +281,7 @@ describe('a passive under the Japanese potential', () => {
     clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('FOOD'), verbPhrase });
 
   test('an agentless one is said on the active verb, not on 〜られる', () => {
-    expect(sayAll(generic({ voice: 'passive', modals: ['CAN'], tense: 'past', negative: true }))).toEqual({
+    expect(sayAll(generic({ voice: 'passive', modals: [{ verb: 'CAN', negative: true }], tense: 'past' }))).toEqual({
       en: 'the food could not be eaten.',
       it: 'il cibo non poteva essere mangiato.',
       fr: 'la nourriture ne pouvait pas être mangée.',

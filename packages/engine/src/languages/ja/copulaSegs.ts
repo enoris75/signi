@@ -21,44 +21,54 @@ export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | JaForm;
 // The endings by class and form, as [affirmative present, affirmative past, negative present, negative
 // past]. A たら form ignores tense, so it repeats its two cells; a governed form ignores both, so it
 // repeats one.
+//
+// A governed form carries a negation of its own once the modal denies what it governs (A03: 幸せで
+// ない必要があります). It is the plain ない form, and a `stem` governor reaches it through the same
+// 〜ないでい bridge `naiSegs` builds for a verb (幸せでないでいたいです) — marginal beside a verb's
+// 行かないでいたい, but compositional and the only shape that keeps the desire on the outside.
 const I_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['いです', 'かったです', 'くないです', 'くなかったです'],
   prenominal: ['い', 'かった', 'くない', 'くなかった'],
   tara: ['かったら', 'かったら', 'くなかったら', 'くなかったら'],
   citation: ['い', 'かった', 'くない', 'くなかった'],
-  dict: ['い', 'い', 'い', 'い'],
-  stem: ['くあり', 'くあり', 'くあり', 'くあり'],
+  dict: ['い', 'い', 'くない', 'くない'],
+  stem: ['くあり', 'くあり', 'くないでい', 'くないでい'],
 };
 const COPULA_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['です', 'でした', 'ではありません', 'ではありませんでした'],
   prenominal: ['である', 'だった', 'ではない', 'ではなかった'],
   tara: ['だったら', 'だったら', 'ではなかったら', 'ではなかったら'],
   citation: ['である', 'であった', 'ではない', 'ではなかった'],
-  dict: ['である', 'である', 'である', 'である'],
-  stem: ['であり', 'であり', 'であり', 'であり'],
+  dict: ['である', 'である', 'でない', 'でない'],
+  stem: ['であり', 'であり', 'でないでい', 'でないでい'],
 };
 const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['います', 'いました', 'いません', 'いませんでした'],
   prenominal: ['いる', 'いた', 'いない', 'いなかった'],
   tara: ['いたら', 'いたら', 'いなかったら', 'いなかったら'],
   citation: ['いる', 'いた', 'いない', 'いなかった'],
-  dict: ['いる', 'いる', 'いる', 'いる'],
-  stem: ['い', 'い', 'い', 'い'],
+  dict: ['いる', 'いる', 'いない', 'いない'],
+  stem: ['い', 'い', 'いないでい', 'いないでい'],
 };
 
 // The negative a "neither … nor" closes on, after the last conjunct's も, as [present, past]: the
-// existential ない (大きくも幸せでもない), or いない after a state's 〜ても (疲れてもいない).
-const NEITHER: Record<'polite' | 'prenominal' | 'tara' | 'citation', [string, string]> = {
+// existential ない (大きくも幸せでもない), or いない after a state's 〜ても (疲れてもいない). A governed
+// form takes the plain ない and its でい bridge, as the single-predicate endings above do.
+const NEITHER: Record<CopulaForm, [string, string]> = {
   polite: ['ありません', 'ありませんでした'],
   prenominal: ['ない', 'なかった'],
   tara: ['なかったら', 'なかったら'],
   citation: ['ない', 'なかった'],
+  dict: ['ない', 'ない'],
+  stem: ['ないでい', 'ないでい'],
 };
-const STATE_NEITHER: Record<'polite' | 'prenominal' | 'tara' | 'citation', [string, string]> = {
+const STATE_NEITHER: Record<CopulaForm, [string, string]> = {
   polite: ['いません', 'いませんでした'],
   prenominal: ['いない', 'いなかった'],
   tara: ['いなかったら', 'いなかったら'],
   citation: ['いない', 'いなかった'],
+  dict: ['いない', 'いない'],
+  stem: ['いないでい', 'いないでい'],
 };
 
 /**
@@ -77,7 +87,8 @@ const STATE_NEITHER: Record<'polite' | 'prenominal' | 'tara' | 'citation', [stri
  * infinitive citation (`citation`: 大きい / 幸せである / 疲れている / 幸せではない). Under a modal it
  * is the form the modal governs (A128): the dictionary form (`dict`: 大きい / 幸せである / 疲れている /
  * 伝説である, a na-adjective keeping である rather than its attributive な) or the stem 〜たい attaches to
- * (`stem`: 大きくあり / 幸せであり / 疲れてい / 伝説であり).
+ * (`stem`: 大きくあり / 幸せであり / 疲れてい / 伝説であり). A governed form is negative when the modal
+ * denies the predicate rather than itself (A03: 幸せでない必要があります, 幸せでないでいたいです).
  */
 export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean, form: CopulaForm = 'polite'): RubySegment[] {
   const { conjuncts, conjunction, ...group } = pred.phrase;
@@ -85,11 +96,12 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // `predicateLinkSegs`) and leaves the copula to the last one, which inflects as a predicate standing
   // alone: 大きくて幸せです, 伝説で犬です, 大きいか幸せです, 大きくて幸せな猫. A negation reads "neither … nor",
   // 〜も on every conjunct and the negative existential after the last: 大きくも幸せでもありませんでした,
-  // 大きくも疲れてもいない猫. A governed form never carries the negation, which stays on the modal.
+  // 大きくも疲れてもいない猫. A governed form spells the same circumfix under a modal that denies what it
+  // governs (A03: 大きくも幸せでもない必要があります).
   if (conjuncts.length > 1) {
     const last = conjuncts[conjuncts.length - 1];
     const governed = form === 'dict' || form === 'stem';
-    if (negative && !governed) {
+    if (negative) {
       const lastForms = jaComparisonAdj(last.head);
       const state = last.head.forms['role'] === 'adjective' && jaAdjClass(lastForms.base, lastForms.reading).kind === 'ta';
       const tail = (state ? STATE_NEITHER : NEITHER)[form][tense === 'past' ? 1 : 0];
@@ -106,10 +118,10 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const f = head.head.forms;
   const cell = (negative ? 2 : 0) + (tense === 'past' ? 1 : 0);
   // A `no` noun predicate closes its circumfix in the copula: でもありません, not ではありません, and under a
-  // modal でもある.
+  // modal でもある — or, where the modal denies it, でもない (A03).
   if (f['role'] !== 'adjective') {
     const ending = COPULA_ENDINGS[form][cell];
-    return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^では|^で(?=あ)/, 'でも') : ending }];
+    return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^では|^で(?=[あな])/, 'でも') : ending }];
   }
   // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so it
   // inflects as one: 大きくないです).

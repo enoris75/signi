@@ -746,25 +746,38 @@ export interface RelativeClause {
 }
 
 /**
- * One link in the modal chain: a modal verb concept plus, optionally, its *own* adverb. Every
- * verb in a group can carry its own adverb — the main verb via `VerbPhrase.modifier`, each modal
- * via this `modifier`. "I **never** wanted to **always** go" is WILL with `modifier: 'NEVER'`
- * governing GO with `VerbPhrase.modifier: 'ALWAYS'`.
+ * One link in the modal chain: a modal verb concept plus, optionally, its *own* adverb and its
+ * *own* negation. Every verb in a group carries both of its own — the main verb via
+ * `VerbPhrase.modifier` and `VerbPhrase.negative`, each modal via this `modifier` and `negative`.
+ * "I **never** wanted to **always** go" is WILL with `modifier: 'NEVER'` governing GO with
+ * `VerbPhrase.modifier: 'ALWAYS'`; "I **do not** want to **not** go" is WILL with
+ * `negative: true` governing GO with `VerbPhrase.negative: true`.
  */
 export interface ModalVerb {
   verb: string;                    // modal verb concept id (`Concept.modal`)
   modifier?: string;               // adverb id scoped to *this* modal, not the main verb
+  /**
+   * This modal's own negation, not the main verb's: "I do not want to go" is WILL with
+   * `negative`, where "I want to not go" is a plain WILL over a negated verb phrase. Each denies
+   * one word of the group, and a chain may deny several ("I do not want to not go").
+   */
+  negative?: boolean;
 }
 
 /**
- * A modal chain link. A bare string is shorthand for a modal with no adverb of its own
- * (`'MUST'` ≡ `{ verb: 'MUST' }`), so the common adverb-free chain stays terse.
+ * A modal chain link. A bare string is shorthand for a modal with no adverb and no negation of its
+ * own (`'MUST'` ≡ `{ verb: 'MUST' }`), so the common plain chain stays terse.
  */
 export type ModalRef = string | ModalVerb;
 
 /** The predicate head: a core verb, optional negation, and an optional adverb. */
 export interface VerbPhrase {
   verb: string;                    // core verb id
+  /**
+   * The **main verb's** negation — the word this verb phrase heads, not the group above it. With
+   * no modal that verb is the finite one, so this is the clause's "not". Under a modal it denies
+   * only the governed verb ("I want to **not** go"); the modal's own denial is `ModalVerb.negative`.
+   */
   negative?: boolean;
   modifier?: string;               // adverb id scoped to the main verb
   tense?: Tense;                   // defaults to 'present'
@@ -783,24 +796,32 @@ export interface VerbPhrase {
    * `Concept.modal`, so it conjugates out of the lexicon; what marks a modal out is that
    * it *governs* a non-finite verb group instead of heading one.
    *
-   * Only the outermost modal is finite: it carries the tense, the subject agreement, and
-   * the negation. Every inner modal takes its `nonfinite` form (Italian apocopates,
+   * Only the outermost modal is finite: it carries the tense and the subject agreement.
+   * Every inner modal takes its `nonfinite` form (Italian apocopates,
    * *potere* → *poter*; English is suppletive, *can* → *be able to*), and the innermost
    * element is the infinitive of the main verb's *whole* group — so a modal composes with
    * `aspect`: "must **have seen**", "deve **aver visto**". Two lexical form keys carry the
    * language-specific joinery: `nonfinite` (default: `base`) and `link`, a particle emitted
    * before the governed element (English "want **to** go"; empty elsewhere).
    *
+   * **Negation is per word.** Each link carries its own `negative`, and `VerbPhrase.negative`
+   * carries the main verb's, so every scope of a chain can be said: ¬want ("I do not want to go"),
+   * want ¬go ("I want to not go"), or both ("I do not want to not go"). The finite modal's
+   * negation is the clause's sentential one; a negated inner element takes its language's
+   * non-finite negator in front of it ("voglio **non** andare", "je veux **ne pas** aller",
+   * ja 行か**ない**でいたい).
+   *
    * Each link may also carry its own `modifier` (an adverb scoped to that modal). A negative
    * adverb (polarity `negative`, e.g. NEVER) anywhere in the group forces sentential negation
-   * onto the finite element regardless of which verb it modifies.
+   * onto the finite element regardless of which verb it modifies (A236: it belongs on the verb
+   * it modifies, as `negative` now does).
    *
    * Japanese has no modal verbs — modality is suffixal (〜必要がある / 〜ことができる /
    * 〜たい) — so its lexemes carry `governs` / `suffix_dict` / `suffix_stem` / `kind`
    * instead, and its engine drops `aspect` under a modal (a documented gap).
    *
    * The UI chains two today; the model is uncapped. A link may be a bare id string (shorthand
-   * for an adverb-free modal) or a `ModalVerb` object carrying its own `modifier`.
+   * for a plain modal) or a `ModalVerb` object carrying its own `modifier` and `negative`.
    */
   modals?: ModalRef[];
 }
@@ -1125,7 +1146,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 7;
+export const SAVED_PHRASE_VERSION = 8;
 
 /**
  * The grain of a saved workspace:

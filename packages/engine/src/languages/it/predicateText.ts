@@ -53,7 +53,7 @@ export function predicateText(
   // salvata", "i libri che si sono salvati"). See `relativeText`.
   gappedPatient?: Record<string, string>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
   // agree with, be a clitic or become the passive si's subject: "si clicca sui pulsanti", "clicca su di me".
   const objectPrep = objectPreposition(verb);
@@ -106,13 +106,18 @@ export function predicateText(
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
+  // The main verb's own negation, which only a modal can govern: "voglio non andare". It leads the
+  // governed infinitive, inside the chain, where the finite "non" of `negText` never reaches.
+  const governedNon = governedNegative === true && modals.length > 0 ? 'non' : '';
   const verbGroup = modals.length > 0
     ? [
         // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
         // voglio mai poter sempre andare"); the main verb's adverb is appended after the group.
-        ...modalChain(modals, finite, (m) => ({ post: m.modifier?.forms['base'] })),
+        // An inner modal's own "non" leads it ("devo non poter andare").
+        ...modalChain(modals, finite, (m) => ({ post: m.modifier?.forms['base'] }), 'non'),
+        governedNon,
         verbGroupInfinitive(plain.forms, subjectForms, aspect, agreeingObject, attachedReflexive),
-      ].join(' ')
+      ].filter(Boolean).join(' ')
     : aspect === 'neutral'
       ? finite(plain)
       : aspectVerb(plain.forms, agreeForms, tense, aspect, mood, agreeingObject, attachedReflexive);
@@ -131,8 +136,13 @@ export function predicateText(
   // preverbal "non", the same concord as a negative object. But a preverbal negative SUBJECT
   // ("nessun gatto") already negates the clause and carries it, so the "non" is suppressed then:
   // "nessun gatto mangia nessun topo", not "… non mangia …".
-  const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)
-    || hasNegativePossessorComplement(complements)) && !subjectIsNegative ? 'non' : '';
+  // A negator inside the governed group is preverbal for everything that follows it, so a "nessun"
+  // object or complement concords with that one: "vuole non mangiare nessun cibo" takes no second
+  // "non" on the modal, which would deny the modal instead of the verb.
+  const concordedInside = governedNon !== '' || modals.some((m) => m.negative);
+  const negText = (verbNegative || modifierIsNegative
+    || ((objectIsNegative || hasNegativeComplement(complements) || hasNegativePossessorComplement(complements))
+      && !concordedInside)) && !subjectIsNegative ? 'non' : '';
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
   // on the imperative ("guardami"); a noun object keeps the post-verbal slot.

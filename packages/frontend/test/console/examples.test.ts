@@ -109,12 +109,25 @@ describe('the examples of the plan', () => {
     expect(ids_(sel(after, 1))).toMatchObject({ subject: 'DOG', verb: 'SEE', directObject: 'CAT' });
   });
 
-  it('builds the brown cats that cannot eat the food, a line at a time', () => {
+  // The walkthrough's polarity click is on *eat*, so the phrase is "can not eat" — the verb's own
+  // negation under a modal (A03). A settings-before-modals print order is what keeps that meaning
+  // when the line is read back: after `/modal can`, a `/not` would be the modal's.
+  it('builds the brown cats that can not eat the food, a line at a time', () => {
     let state = ok('/subj cat /adj brown /pl');
     state = ok('/verb eat /obj food', { state });
     state = ok('/not', { state, word: { containerId: 'p1', slot: 'verb' } });
     state = ok('/modal can', { state, word: { containerId: 'p1', slot: 'verb' } });
-    expect(print(state)).toBe('/subj ( cat /adj brown /pl ) /verb ( eat /modal can /not ) /obj ( food )');
+    expect(print(state)).toBe('/subj ( cat /adj brown /pl ) /verb ( eat /not /modal can ) /obj ( food )');
+  });
+
+  // The other scope, "cannot eat": the negation is the modal's own, and it rides the modal's
+  // bracket exactly as a modal's adverb does.
+  it('builds the brown cats that cannot eat the food, negating the modal', () => {
+    let state = ok('/subj cat /adj brown /pl');
+    state = ok('/verb eat /obj food', { state });
+    state = ok('/modal can', { state, word: { containerId: 'p1', slot: 'verb' } });
+    state = ok('/not', { state, word: { containerId: 'p1', slot: 'verbModal' } });
+    expect(print(state)).toBe('/subj ( cat /adj brown /pl ) /verb ( eat /modal ( can /not ) ) /obj ( food )');
   });
 });
 

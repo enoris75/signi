@@ -180,6 +180,104 @@ describe('predicateText', () => {
     });
   });
 
+  // A03: each word of the verb group is denied on its own. `negative` stays the FINITE element's
+  // negation — the outermost modal's, which "ne … pas" brackets as before — while
+  // `governedNegative` is the main verb's own and `ResolvedModal.negative` an inner modal's. A
+  // non-finite element keeps "ne pas" together in front of the group it denies.
+  describe('modal polarity', () => {
+    test('the main verb’s own negation leads the governed infinitive', () => {
+      expect(predicateText(JE, vp(ALLER, { governedNegative: true, modals: [modal(VOULOIR)] }))).toBe('veux ne pas aller');
+      expect(predicateText(JE, vp(ALLER, { governedNegative: true, modals: [modal(DEVOIR)] }))).toBe('dois ne pas aller');
+      expect(predicateText(JE, vp(ALLER, { governedNegative: true, modals: [modal(POUVOIR)] }))).toBe('peux ne pas aller');
+    });
+
+    test('the finite modal keeps its own ne … pas, and both negations stand together', () => {
+      expect(predicateText(JE, vp(ALLER, { negative: true, modals: [modal(VOULOIR)] }))).toBe('ne veux pas aller');
+      expect(predicateText(JE, vp(ALLER, { negative: true, governedNegative: true, modals: [modal(VOULOIR)] })))
+        .toBe('ne veux pas ne pas aller');
+    });
+
+    test('an inner modal denies itself where it stands', () => {
+      expect(predicateText(JE, vp(ALLER, { modals: [modal(DEVOIR), { ...modal(POUVOIR), negative: true }] })))
+        .toBe('dois ne pas pouvoir aller');
+      expect(predicateText(JE, vp(ALLER, { governedNegative: true, modals: [modal(DEVOIR), modal(POUVOIR)] })))
+        .toBe('dois pouvoir ne pas aller');
+    });
+
+    // "ne pas" never splits around the infinitive the way the finite bracket does: it stands ahead
+    // of the auxiliary, of the clitic and of the group's own frequency adverb.
+    test('the governed negator leads the whole group — aspect, clitic and adverb', () => {
+      expect(predicateText(JE, vp(MANGER, { governedNegative: true, aspect: 'resultative', modals: [modal(DEVOIR)] })))
+        .toBe('dois ne pas avoir mangé');
+      expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, aspect: 'progressive', modals: [modal(DEVOIR)] })))
+        .toBe('doit ne pas être en train de manger');
+      expect(predicateText(CHAT, vp(VOIR, { governedNegative: true, modals: [modal(VOULOIR)] }), el(np(JE))))
+        .toBe('veut ne pas me voir');
+      expect(predicateText(CHAT, vp(EFFONDRER, { governedNegative: true, modals: [modal(DEVOIR)] }, 'COLLAPSE')))
+        .toBe("doit ne pas s'effondrer");
+      expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)], modifier: concept(TOUJOURS) })))
+        .toBe('doit ne pas toujours manger');
+    });
+
+    // The negator stands ahead of the object, so it takes "de" as the finite one does (A149).
+    test('a governed negation turns an indefinite object into de', () => {
+      expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)] }), el(np(SOURIS, { definiteness: 'indefinite' }))))
+        .toBe('doit ne pas manger de souris');
+    });
+
+    // A negative adverb is the finite verb's negator wherever it was written (`groupHasNegativeAdverb`,
+    // out of scope for A03), so it stays beside the modal rather than falling inside the "ne pas".
+    test('jamais still negates the finite modal, ahead of the governed negation', () => {
+      expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)], modifier: concept(JAMAIS) })))
+        .toBe('ne doit jamais ne pas manger');
+    });
+
+    test('governedNegative without a modal is ignored — the main verb is then the finite one', () => {
+      expect(predicateText(CHAT, vp(MANGER, { governedNegative: true }))).toBe('mange');
+      expect(predicateText(CHAT, vp(MANGER, { negative: true, governedNegative: true }))).toBe('ne mange pas');
+    });
+
+    // An "aucun" object or complement concords with the nearest negator ahead of it, which is now
+    // the governed one; the finite modal takes none, or the clause would deny the modal as well.
+    describe('negative concord', () => {
+      const noMouse = el(np(SOURIS, { definiteness: 'no' }));
+
+      test('a postverbal aucun concords with the governed negator, and drops its pas', () => {
+        expect(predicateText(CHAT, vp(MANGER, { modals: [modal(VOULOIR)] }), noMouse)).toBe('ne veut manger aucune souris');
+        expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(VOULOIR)] }), noMouse))
+          .toBe('veut ne manger aucune souris');
+        expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)] }), undefined,
+          complements({ locative: complement(np(MAISON, { definiteness: 'no' })) })))
+          .toBe('doit ne manger dans aucune maison');
+      });
+
+      test('the concorded ne elides against the word after it', () => {
+        expect(predicateText(CHAT, vp(AIMER, { governedNegative: true, modals: [modal(VOULOIR)] }), noMouse))
+          .toBe("veut n'aimer aucune souris");
+      });
+
+      test('an inner modal carries the concord when nothing deeper does', () => {
+        expect(predicateText(CHAT, vp(MANGER, { modals: [modal(DEVOIR), { ...modal(POUVOIR), negative: true }] }), noMouse))
+          .toBe('doit ne pouvoir manger aucune souris');
+        // The main verb's negator is the nearer one, so it takes the concord and the inner keeps "pas".
+        expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR), { ...modal(POUVOIR), negative: true }] }), noMouse))
+          .toBe('doit ne pas pouvoir ne manger aucune souris');
+      });
+
+      test('a negated finite modal keeps its own pas beside a concord inside', () => {
+        expect(predicateText(CHAT, vp(MANGER, { negative: true, governedNegative: true, modals: [modal(VOULOIR)] }), noMouse))
+          .toBe('ne veut pas ne manger aucune souris');
+      });
+
+      // A preverbal "aucun" subject is the clause's own negator and keeps its "ne" on the finite
+      // verb; the governed group still denies itself.
+      test('an aucun subject keeps the finite ne', () => {
+        expect(predicateText({ ...CHAT, definiteness: 'no' }, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)] })))
+          .toBe('ne doit ne pas manger');
+      });
+    });
+  });
+
   describe('object pronouns', () => {
     test('a pronoun object is a proclitic before the finite verb', () => {
       expect(predicateText(CHAT, vp(VOIR), el(np(JE)))).toBe('me voit');

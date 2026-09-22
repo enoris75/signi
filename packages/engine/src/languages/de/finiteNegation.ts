@@ -27,6 +27,12 @@ import { nichtSlots } from './nichtSlots.js';
  *   absorb it as "kein" (see `takesKein`), which is the same identity read the other way (A182),
  *   and never in the prospective, whose nominal stands inside the zu-group (A209).
  *
+ * The verb *group* can deny more than one of its words, though (A03): the finite element, the main
+ * verb a modal governs, and each inner modal each carry their own flag. German spells every one of
+ * them "nicht" in the one Mittelfeld slot, so the clause places a count rather than a flag — "ich
+ * will nicht nicht gehen". They are all the same clause's negation, so they give way together to a
+ * negator that outranks them, and a lone one still absorbs into "kein".
+ *
  * `leadsComplements` is whether the clause carries a constituent "nicht" leads rather than follows —
  * a predicate complement or a prepositional one (A159).
  */
@@ -41,7 +47,18 @@ export function finiteNegation(
 ): FiniteNegation {
   const { verbPhrase, directObject, complements } = clause;
   const neg = negationSources(clause);
-  const negate = neg.verb && !neg.adverb && !neg.subject && !neg.object && !neg.complement;
+  // One "nicht" per denied word of the verb group (A03), all in the slot the sentential one takes:
+  // the finite element's (`neg.verb`), the main verb's own under a modal (`governedNegative`), and
+  // each inner modal's — "ich will nicht nicht gehen", "ich muss nicht nicht gehen können". A single
+  // "nicht" in a modal cluster already reads under any scope in German, so ¬want and want ¬go are
+  // deliberately the same sentence; only denying two words at once adds a word.
+  const governedNicht = verbPhrase.modals.length > 0 && verbPhrase.governedNegative === true ? 1 : 0;
+  const innerNicht = verbPhrase.modals.filter((m, i) => i > 0 && m.negative === true).length;
+  // German has no concord, so every one of them gives way where the finite one does: a "kein" or a
+  // "nie" standing ahead carries the clause alone ("der Kater will kein Essen fressen").
+  const carries = !neg.adverb && !neg.subject && !neg.object && !neg.complement;
+  const count = carries ? (neg.verb ? 1 : 0) + governedNicht + innerNicht : 0;
+  const negate = count === 1;
   // What already negates ahead of the postverbal phrases, and so takes their "kein" away.
   const negatedAhead = neg.subject || neg.adverb;
   const plainObject = neg.object && negatedAhead;
@@ -55,13 +72,16 @@ export function finiteNegation(
   // Not in the prospective (A209): there the nominal stands inside the zu-group, so its "kein" would
   // negate the infinitive ("ist im Begriff, keine Maus zu fressen", about to eat no mouse), where the
   // verb's "nicht" negates the whole ahead of "im Begriff" (A19).
+  // Only ever the clause's one negation: "kein" is "nicht + ein", so it can stand in for a single
+  // "nicht" and never for two ("will kein Essen fressen" says one denial, whichever word carries it).
+  // With two, the nominal keeps its determiner and both "nicht" stay in the Mittelfeld.
   const absorbs = negate && verbPhrase.aspect !== 'prospective';
   const keinObject = absorbs && takesKein(directObject);
   const keinPredicative = absorbs && !keinObject && takesKein(complements?.['predicative']?.phrase);
   // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
   const adverb = !!(modalAdverbs(verbPhrase.modals) || verbPhrase.modifier?.forms['base']);
   return {
-    nicht: nichtSlots(negate && !keinObject && !keinPredicative,
+    nicht: nichtSlots(keinObject || keinPredicative ? 0 : count,
       { prospective: verbPhrase.aspect === 'prospective', adverb, complements: leadsComplements }),
     // Per conjunct, as the complements are: a group mixing determiners keeps the ones that are not
     // negative ("die Maus und eine Katze"). A "kein" object is one conjunct by construction.
