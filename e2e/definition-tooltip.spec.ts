@@ -2146,7 +2146,9 @@ test.describe('word definition tooltip', () => {
     const previousEn = page.locator('[data-testid="typeahead-option"][data-concept="LAST_PREVIOUS"]');
     await expect(previousEn).toBeVisible();
     await previousEn.hover();
-    await expect(page.locator(tooltip)).toHaveText('that this period follows');
+    // Both rows stand in the one list, with no new query between the hovers, so the first tooltip is
+    // still fading out: match the one that says the second definition.
+    await expect(page.locator(tooltip).filter({ hasText: 'that this period follows' })).toBeVisible();
 
     // Spanish FOLLOW takes a before its quantified object.
     await app.setUiLanguage('es');
