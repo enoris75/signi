@@ -7,7 +7,8 @@ senses turn into more concepts, plus 36 words that need an engine construct befo
 **Scope:** all 7 languages, like every seed. Only the checklist is English: the other six languages
 get the same concepts, not their own top 200.
 **Status:** planning. The decisions below are **proposed**, each with a recommendation. The
-localization tasks for the new concepts' definitions are **not catalogued yet** (see *Follow-ups*).
+localization tickets for the missing words are **catalogued** as B59–B67 and C29–C40 (2026-09-22, see
+*Follow-ups*); they supersede some rows below.
 
 ## Why
 
@@ -206,11 +207,17 @@ backend runs the builds, not `src`.
 
 ## Follow-ups
 
-- **Localization tasks: not created yet.** Every new concept needs a `definition` PhrasePlan
-  ("a period of seven days", "a person who studies"). Catalogue them in
-  [`docs/localization/`](../../../localization/localization-tasks.md), sorted into A / B / C by
-  feasibility, once the words in §2 are seeded and the definitions can be judged against the real
-  corpus.
+- **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
+  was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
+  are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose
+  **Seed first** tables are this plan's seeding with the forms checked, and §3's content words are
+  [C29–C40](../../../localization/C-needs-engine/README.md), one per construct. 47 of the 61
+  ship a gloss. [The P09 sweep](../../../localization/localization-tasks.md#the-p09-sweep-of-2026-09-22)
+  lists what they change here: TALK, COME_BACK and STATE_CONDITION are already concepts (SPEAK,
+  RETURN, STATE); the labour verb is WORK_LABOUR, since the seeded WORK is the machine sense; the help
+  verb is HELP_VERB; TRY is a lexical verb, not `modal: true`; EVEN cannot be seeded as a verb adverb
+  (Japanese); and §3 lacks three constructs (a focus particle on a noun phrase, the French distal
+  demonstrative, a continuative complement).
 - **Secondary lexemes.** The seeder always links a lexeme as primary
   ([`seed.ts:21`](../../../../packages/backend/src/seed.ts#L21)). Supporting non-primary links would
   let "begin" find START in the English picker without a duplicate concept.

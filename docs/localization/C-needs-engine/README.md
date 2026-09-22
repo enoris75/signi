@@ -1,6 +1,24 @@
 # C-needs-engine — tasks blocked on a construct, or deferred
 
-**None open.** C23–C28, the six the [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22)
+**Twelve open: C29–C40**, filed with the P09 batch on 2026-09-22, one per construct — the core
+words the engine must learn before they can be seeded, and the B59–B67 glosses that wait on it:
+
+- [C29](C29-temporal-complement.md) a temporal complement — TODAY, JUST, STILL
+- [C30](C30-content-clause-with-expletive-subject.md) a content clause as subject — SHOULD, MIGHT
+- [C31](C31-numerals.md) numerals — ONE, TWO, THREE; DAY, WEEK, YEAR
+- [C32](C32-indefinite-pronouns.md) an indefinite pronoun — SOMETHING; ONLY
+- [C33](C33-degree-adverbs-on-adjectives.md) an adverb on an adjective — VERY, TOO
+- [C34](C34-like-experiencer-verb.md) an experiencer verb — LIKE
+- [C35](C35-lexical-object-case.md) a verb choosing its object's case — HELP_VERB
+- [C36](C36-let-bare-infinitive.md) a bare infinitive and the ja causative — LET; ALLOWED
+- [C37](C37-own-intensifier.md) an adjective bound to a possessor — OWN_ADJECTIVE
+- [C38](C38-title-before-a-name.md) personal names and a title — MR
+- [C39](C39-focus-particle-on-a-noun-phrase.md) a focus particle on a noun phrase — EVEN
+- [C40](C40-french-distal-demonstrative.md) French *ce …-là* — THERE
+
+Most of their concepts do not exist yet.
+
+C23–C28, the six the [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22)
 filed, were driven to a verdict the same day and are all in [`done/`](../done/): **123 concepts
 shipped a gloss**, and the rest are literal by design, every lead probed. Four constructs were built
 for them — the headless relative clause ([C23](../done/C23-participial-state-adjectives.md)), the
