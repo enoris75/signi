@@ -1,6 +1,6 @@
 # A-must-fix — confirmed bugs
 
-**One open, filed 2026-09-22** by the lane that fixed A234: **A236**, a Spanish or Portuguese
+**One open, filed 2026-09-22** by the lane that fixed A234: **A237**, a Spanish or Portuguese
 possessor that drops "all" beside a possessive of its own (*de mis libros* for *de todos mis
 libros*).
 

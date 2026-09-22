@@ -1,4 +1,4 @@
-# A236. A Spanish or Portuguese possessor drops "all" beside a possessive
+# A237. A Spanish or Portuguese possessor drops "all" beside a possessive
 
 **Languages:** Spanish, Portuguese
 
@@ -44,4 +44,4 @@ possessive, as the complement path does. Spanish can likely take the object's bu
 
 | | |
 |---|---|
-| **Test** | `possession.test.ts` → *known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A236)* (1 `test.fails`, plus a regression test for the object, a possessor with no possessive and the other five) |
+| **Test** | `possession.test.ts` → *known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A237)* (1 `test.fails`, plus a regression test for the object, a possessor with no possessive and the other five) |

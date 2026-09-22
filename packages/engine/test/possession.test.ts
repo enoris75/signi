@@ -1025,11 +1025,11 @@ describe('known bugs: a Spanish or Portuguese possessor drops its own determiner
   });
 });
 
-// A236. A234 gave a Spanish or Portuguese possessor its own determiner back beside a possessive, for
+// A237. A234 gave a Spanish or Portuguese possessor its own determiner back beside a possessive, for
 // the determiners A187 keeps. `all` is not one of them — the object writes it ahead of the possessive,
 // "todos mis libros", "todos os meus livros" — and the possessor still forces it away before writing
 // the prenominal possessive: "of all my books" is "de mis libros", "dos meus livros". Found fixing A234.
-describe('known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A236)', () => {
+describe('known bugs: a Spanish or Portuguese possessor drops "all" beside a possessive (A237)', () => {
   const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
   const his = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } as const;
   const housesOf = (possessor: NounPhrase) => sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { possessor }) }));

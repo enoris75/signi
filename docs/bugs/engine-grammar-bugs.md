@@ -63,7 +63,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Defect |
 |---|---|---|---|
-| A236 | [A-must-fix/A236-spanish-portuguese-possessor-drops-all.md](A-must-fix/A236-spanish-portuguese-possessor-drops-all.md) | Spanish, Portuguese | a possessor that has a possessive of its own drops "all" (*de mis libros* for *de todos mis libros*), where the object keeps it; [A234](fixed/A234-spanish-portuguese-possessor-drops-its-determiner.md) gave back only the determiners that move the possessive behind the noun |
+| A237 | [A-must-fix/A237-spanish-portuguese-possessor-drops-all.md](A-must-fix/A237-spanish-portuguese-possessor-drops-all.md) | Spanish, Portuguese | a possessor that has a possessive of its own drops "all" (*de mis libros* for *de todos mis libros*), where the object keeps it; [A234](fixed/A234-spanish-portuguese-possessor-drops-its-determiner.md) gave back only the determiners that move the possessive behind the noun |
 
 Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
 as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
