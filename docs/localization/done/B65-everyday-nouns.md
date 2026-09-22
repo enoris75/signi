@@ -23,7 +23,7 @@ Proposed forms, for the seed author to check — suggestions, not renders.
 | PROGRAM_SOFTWARE | noun | **P09**, rank 177, D2: the software. `synonym: 'software'` | program | programma *m* | programme *m* | Programm *n* | programa *m* | プログラム | programa *m* |
 | PROGRAM_SHOW | noun | **P09**, rank 177, D2: the broadcast. `synonym: 'show'` | program | programma *m* | émission *f* | Sendung *f* | programa *m* | 番組 (ばんぐみ) | programa *m* |
 | BROADCAST | verb | differentia, **new**: PROGRAM_SHOW. Transitive | broadcast | trasmettere | diffuser | ausstrahlen | emitir | 放送する (ほうそうする) | transmitir |
-| TAKE | verb | differentia, **seeded by [B61](B61-handling-and-leaving-verbs.md)**: HAND. The lexemes and present tense are B61's candidates as of this probe (`isA: 'ACQUIRE'` there), and HAND renders the same on them | take | prendere | prendre | nehmen | tomar | 取る (とる) | pegar |
+| TAKE | verb | differentia, **seeded with POINT_NOUN and HAND in the shared P09 base**, since two tickets stand on it (`isA: 'ACQUIRE'`, its own gloss [B61](B61-handling-and-leaving-verbs.md)'s): HAND. Spanish *tomar*, Portuguese *pegar* | take | prendere | prendre | nehmen | tomar | 取る (とる) | pegar |
 
 Eight P09 nouns, one new verb, and B61's TAKE.
 
@@ -229,3 +229,65 @@ authored:
   clause (*Inhalt, den man ausstrahlt*, *contenu qu'on diffuse*).
 - **HAND** in German and Portuguese: the instrument gap with an object, on B61's verb (*ein Organ,
   mit dem man einen Gegenstand nimmt*, *um órgão com o qual se pega um objeto*).
+
+## Done
+
+Shipped 2026-09-22. **Seven words seeded** — the six nouns THING, PROBLEM, CASE_INSTANCE, SYSTEM,
+PROGRAM_SOFTWARE and PROGRAM_SHOW, and the verb BROADCAST — and **nine glosses** authored in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts) and
+[verbs/transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts): eight P09 nouns
+(POINT_NOUN and HAND were seeded in the shared P09 base, and this ticket gives them their
+definitions) plus BROADCAST's own. The paradigms and the glosses are pinned in
+[everyday-nouns.test.ts](../../../packages/engine/test/everyday-nouns.test.ts), which carries B64's
+words too; the three verbs' Italian compound past is pinned there rather than in `verb.test.ts`'s
+table, because six lanes seeded P09 the same day.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| THING | an object or a concept | un oggetto o un concetto | un objet ou un concept | ein Gegenstand oder ein Begriff | un objeto o un concepto | 物体か概念 | um objeto ou um conceito |
+| PROBLEM | a state that one must change | uno stato che si deve cambiare | un état qu'on doit changer | ein Zustand, den man ändern muss | un estado que se debe cambiar | 変える必要がある状態 | um estado que se deve mudar |
+| CASE_INSTANCE | a thing that happens | una cosa che succede | une chose qui arrive | ein Ding, das geschieht | una cosa que ocurre | 起こるもの | uma coisa que acontece |
+| POINT_NOUN | a place that does not have size | un luogo che non ha dimensione | un lieu qui n'a pas de taille | ein Ort, der keine Größe hat | un lugar que no tiene tamaño | 大きさがない場所 | um lugar que não tem tamanho |
+| HAND | an organ with which one takes an object | un organo con il quale si prende un oggetto | un organe avec lequel on prend un objet | ein Organ, mit dem man einen Gegenstand nimmt | un órgano con el que se toma un objeto | 物体を取る器官 | um órgão com o qual se pega um objeto |
+| SYSTEM | a group of parts that works | un gruppo di parti che funziona | un groupe de parties qui fonctionne | eine Gruppe von Teilen, die funktioniert | un grupo de partes que funciona | 動作する部分のグループ | um grupo de partes que funciona |
+| PROGRAM_SOFTWARE | a list of instructions | un elenco di istruzioni | une liste d'instructions | eine Liste von Anweisungen | una lista de instrucciones | 指示の一覧 | uma lista de instruções |
+| PROGRAM_SHOW | content that one broadcasts | contenuto che si trasmette | contenu qu'on diffuse | Inhalt, den man ausstrahlt | contenido que se emite | 放送する内容 | conteúdo que se transmite |
+| BROADCAST | to send content to many people | mandare contenuto a molte persone | envoyer le contenu à beaucoup de personnes | vielen Personen Inhalt schicken | enviar contenido a muchas personas | 多くの人に内容を送る | enviar conteúdo a muitas pessoas |
+
+What landed differently from the plan:
+
+1. **The TAKE ↔ HAND cycle is accepted**, as the sweep ruled: TAKE is glossed on HAND ("to acquire
+   objects with the hand", B61) and HAND on TAKE, the verb-and-its-instrument pair the corpus
+   already has in BITE ↔ TOOTH and CUT ↔ BLADE. GRASP, the fallback of reading 5, was not seeded.
+   TAKE itself was seeded ahead of both tickets, in the shared P09 base, with Portuguese *pegar*,
+   and HAND renders on it exactly as the probe said.
+2. **BROADCAST's French gloss writes the generic definite, not the partitive**: *envoyer **le**
+   contenu à beaucoup de personnes*, where the probe table said *du contenu*. That is what a French
+   verb citation does with a bare object throughout the corpus — EXPORT is *transférer le contenu à
+   un lieu*, pinned in `genus-verbs.test.ts` — so the gloss keeps the corpus's shape rather than
+   the probe's. Nothing else in either table moved.
+3. **OBJECT_THING is `isA: 'THING'` and its synonym is now `'item'`** (reading 1). Nothing in the
+   frontend, the console or the tests read the old `'thing'`: the two references this file keeps are
+   still right — the picker's haystack holds the synonym
+   ([useConceptLabel.ts](../../../packages/frontend/src/i18n/useConceptLabel.ts), line 60), and
+   `resolveWord` tries labels before synonyms
+   ([resolve.ts](../../../packages/frontend/src/console/language/resolve.ts), line 139), so "thing"
+   reads as THING. OBJECT_THING stays on the literal, as reading 1 argued; "a thing that one can
+   take" now renders in all seven (*ein Ding, das man nehmen kann*, 取ることができるもの) and is not
+   shipped.
+4. **THING's coordinated group boots.** The backend was started against a seeded database and read
+   back through `/api/concepts?role=noun`: THING's plan renders in all seven, and
+   `sweep-definitions.test.ts` finds no collision with any shipped gloss in any language.
+5. **CASE_INSTANCE keeps its two marked languages** (reading 3), unchanged by the landing: German
+   *ein Ding, das geschieht* and Japanese 起こるもの. The temporal reading 場合 actually has stays
+   with [C29](../C-needs-engine/C29-temporal-complement.md), whose gap still renders *a time
+   **where** a thing happens* (*un tempo dove*, *um tempo onde*).
+6. **`isA` was set only where this file asked for it**: HAND under ORGAN (the base's), OBJECT_THING
+   under THING. PROBLEM, CASE_INSTANCE, SYSTEM and the two programs are seeded as roots, as WALL and
+   SCREEN are — their genus is in the gloss, not in the hierarchy.
+7. **e2e**: the two rows landed as one test at the end of
+   [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), "an everyday noun, the
+   root and the organ (localization B65: THING, PROGRAM_SHOW, HAND)", covering THING in English and
+   Japanese, PROGRAM_SHOW in German and French, and HAND in Portuguese and German. Each search
+   follows a language switch: in German, "hand" also finds *Handlung* (ACTION), whose tooltip
+   lingers over the row the next option takes.
