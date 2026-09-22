@@ -603,6 +603,27 @@ describe('a denied cause', () => {
     });
   });
 
+  // The sentence the feature was asked for: it "soffro non per causa tua". The neutral connector is
+  // "a causa", and the blaming one is where "per" comes from ("per colpa tua").
+  test('"I suffer, not because of you"', () => {
+    const iSuffer = (value?: CauseSentiment) =>
+      sayAll(clause(np('FIRST_PERSON'), 'SUFFER', { complements: notBecauseOf(value, np('SECOND_PERSON')) }));
+    expect(iSuffer()).toEqual({
+      en: 'I suffer not because of you.',
+      it: 'soffro non a causa tua.',
+      fr: 'je souffre non pas à cause de toi.',
+      es: 'sufro no a causa de ti.',
+      pt: 'sofro não por causa de você.',
+      de: 'ich leide nicht deinetwegen.',
+      ja: '私はあなたのためではなく苦しみます。',
+    });
+    expect(iSuffer('negative')).toMatchObject({
+      it: 'soffro non per colpa tua.', fr: 'je souffre non pas par ta faute.',
+      es: 'sufro no por tu culpa.', pt: 'sofro não por sua culpa.',
+      de: 'ich leide nicht durch deine Schuld.', ja: '私はあなたのせいではなく苦しみます。',
+    });
+  });
+
   // The two negations are independent: the clause says the cat is NOT tired, and the cause says the
   // dog is not why. German tells them apart by position — the denied cause before the adjunct slot,
   // the clause's own before the predicate (A186).
