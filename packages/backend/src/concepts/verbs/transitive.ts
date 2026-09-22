@@ -2306,6 +2306,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
     description: 'to get hold of with the hand',
+    // "to acquire objects with the hand" (localization B61): BUY's shape, ACQUIRE with the instrument
+    // that tells it apart. HAND is glossed back on TAKE ("an organ with which one takes an object",
+    // B65), the verb-and-its-instrument pair BITE ↔ TOOTH and CUT ↔ BLADE already make.
+    definition: infinitiveGloss('ACQUIRE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'HAND', definiteness: 'definite' } } },
+    }),
     emoji: '✊',
     isA: 'ACQUIRE',
     forms: {
@@ -2364,6 +2372,539 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'pegamos', '2pl_past': 'pegaram', '3pl_past': 'pegaram',
         '1sg_future': 'pegarei', '2sg_future': 'pegará', '3sg_future': 'pegará',
         '1pl_future': 'pegaremos', '2pl_future': 'pegarão', '3pl_future': 'pegarão',
+      },
+    },
+  },
+
+  // ── Handling (localization B61) ───────────────────────────────────
+  // P09's get, put, keep, bring and leave (the leaving-behind sense), and look at, with DIRECT_VERB,
+  // the differentia LOOK_AT's gloss needs. Glossed on the shapes BUY, REMOVE and RESTORE ship:
+  // ACQUIRE plus one complement, or the causative of what the object comes to do.
+  {
+    // P09's get (D1): obtain, receive. ACQUIRE stays beside it for register, which no gloss says, so
+    // the source carries the difference: the receiving half, German bekommen. ACQUIRE's complements
+    // and no `direction`, so Italian's animate source is a plain "da" (A228). Japanese 手に入れる is
+    // obtaining; もらう is receiving from someone, the narrower half. The English participle is the
+    // British "got", as the corpus spells labour and colour.
+    id: 'GET',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
+    description: 'to come to have; to obtain or receive',
+    definition: infinitiveGloss('ACQUIRE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { source: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
+    emoji: '📥',
+    isA: 'ACQUIRE',
+    forms: {
+      en: {
+        base: 'get',
+        '1sg_present': 'get', '2sg_present': 'get', '3sg_present': 'gets',
+        '1pl_present': 'get', '2pl_present': 'get', '3pl_present': 'get',
+        past: 'got',
+      },
+      it: {
+        base: 'ottenere',
+        '1sg_present': 'ottengo', '2sg_present': 'ottieni', '3sg_present': 'ottiene',
+        '1pl_present': 'otteniamo', '2pl_present': 'ottenete', '3pl_present': 'ottengono',
+        '1sg_past': 'ottenni', '2sg_past': 'ottenesti', '3sg_past': 'ottenne',
+        '1pl_past': 'ottenemmo', '2pl_past': 'otteneste', '3pl_past': 'ottennero',
+        '1sg_future': 'otterrò', '2sg_future': 'otterrai', '3sg_future': 'otterrà',
+        '1pl_future': 'otterremo', '2pl_future': 'otterrete', '3pl_future': 'otterranno',
+      },
+      fr: {
+        base: 'obtenir',
+        '1sg_present': 'obtiens', '2sg_present': 'obtiens', '3sg_present': 'obtient',
+        '1pl_present': 'obtenons', '2pl_present': 'obtenez', '3pl_present': 'obtiennent',
+        '1sg_past': 'obtins', '2sg_past': 'obtins', '3sg_past': 'obtint',
+        '1pl_past': 'obtînmes', '2pl_past': 'obtîntes', '3pl_past': 'obtinrent',
+        '1sg_future': 'obtiendrai', '2sg_future': 'obtiendras', '3sg_future': 'obtiendra',
+        '1pl_future': 'obtiendrons', '2pl_future': 'obtiendrez', '3pl_future': 'obtiendront',
+      },
+      de: {
+        base: 'bekommen',
+        '1sg_present': 'bekomme', '2sg_present': 'bekommst', '3sg_present': 'bekommt',
+        '1pl_present': 'bekommen', '2pl_present': 'bekommt', '3pl_present': 'bekommen',
+        '1sg_past': 'bekam', '2sg_past': 'bekamst', '3sg_past': 'bekam',
+        '1pl_past': 'bekamen', '2pl_past': 'bekamt', '3pl_past': 'bekamen',
+      },
+      es: {
+        // conseguir: e → i under the stress, and the gu → g before a/o (consigo).
+        base: 'conseguir',
+        '1sg_present': 'consigo', '2sg_present': 'consigues', '3sg_present': 'consigue',
+        '1pl_present': 'conseguimos', '2pl_present': 'conseguís', '3pl_present': 'consiguen',
+        '1sg_past': 'conseguí', '2sg_past': 'conseguiste', '3sg_past': 'consiguió',
+        '1pl_past': 'conseguimos', '2pl_past': 'conseguisteis', '3pl_past': 'consiguieron',
+        '1sg_future': 'conseguiré', '2sg_future': 'conseguirás', '3sg_future': 'conseguirá',
+        '1pl_future': 'conseguiremos', '2pl_future': 'conseguiréis', '3pl_future': 'conseguirán',
+      },
+      ja: {
+        base: '手に入れる',
+        reading: 'てにいれる',
+        masu_present: '手に入れます',
+        masu_present_reading: 'てにいれます',
+      },
+      pt: {
+        base: 'conseguir',
+        '1sg_present': 'consigo', '2sg_present': 'consegue', '3sg_present': 'consegue',
+        '1pl_present': 'conseguimos', '2pl_present': 'conseguem', '3pl_present': 'conseguem',
+        '1sg_past': 'consegui', '2sg_past': 'conseguiu', '3sg_past': 'conseguiu',
+        '1pl_past': 'conseguimos', '2pl_past': 'conseguiram', '3pl_past': 'conseguiram',
+        '1sg_future': 'conseguirei', '2sg_future': 'conseguirá', '3sg_future': 'conseguirá',
+        '1pl_future': 'conseguiremos', '2pl_future': 'conseguirão', '3pl_future': 'conseguirão',
+      },
+    },
+  },
+  {
+    // P09's put: set a thing in a place. German legen, the orientation-free default (stellen is
+    // upright, setzen seated, stecken into, tun colloquial). The goal is licensed both ways, because
+    // two languages want opposite ones: German legen takes its goal in the accusative, the
+    // `direction` with `in` ("legt das Buch in das Haus"), where a `locative` says the dative of
+    // where the act happens; Japanese 置く takes the place with に (`locative_particle`, 家に本を置き
+    // ます), where a direction says へ. Spanish poner's tú command is the irregular "pon".
+    id: 'PUT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'direction', 'cause', 'locative'],
+    description: 'to move something to a place and leave it there',
+    // "to cause an object to be in a place": REMOVE's converse, the causative on BE where REMOVE's is
+    // on LEAVE. German "an einem Ort" is Ort's own preposition (A218).
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BE', complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } } },
+    ),
+    emoji: '📍',
+    forms: {
+      en: {
+        base: 'put',
+        '1sg_present': 'put', '2sg_present': 'put', '3sg_present': 'puts',
+        '1pl_present': 'put', '2pl_present': 'put', '3pl_present': 'put',
+        past: 'put',
+      },
+      it: {
+        base: 'mettere',
+        '1sg_present': 'metto', '2sg_present': 'metti', '3sg_present': 'mette',
+        '1pl_present': 'mettiamo', '2pl_present': 'mettete', '3pl_present': 'mettono',
+        '1sg_past': 'misi', '2sg_past': 'mettesti', '3sg_past': 'mise',
+        '1pl_past': 'mettemmo', '2pl_past': 'metteste', '3pl_past': 'misero',
+        '1sg_future': 'metterò', '2sg_future': 'metterai', '3sg_future': 'metterà',
+        '1pl_future': 'metteremo', '2pl_future': 'metterete', '3pl_future': 'metteranno',
+      },
+      fr: {
+        base: 'mettre',
+        '1sg_present': 'mets', '2sg_present': 'mets', '3sg_present': 'met',
+        '1pl_present': 'mettons', '2pl_present': 'mettez', '3pl_present': 'mettent',
+        '1sg_past': 'mis', '2sg_past': 'mis', '3sg_past': 'mit',
+        '1pl_past': 'mîmes', '2pl_past': 'mîtes', '3pl_past': 'mirent',
+        '1sg_future': 'mettrai', '2sg_future': 'mettras', '3sg_future': 'mettra',
+        '1pl_future': 'mettrons', '2pl_future': 'mettrez', '3pl_future': 'mettront',
+      },
+      de: {
+        base: 'legen',
+        '1sg_present': 'lege', '2sg_present': 'legst', '3sg_present': 'legt',
+        '1pl_present': 'legen', '2pl_present': 'legt', '3pl_present': 'legen',
+        '1sg_past': 'legte', '2sg_past': 'legtest', '3sg_past': 'legte',
+        '1pl_past': 'legten', '2pl_past': 'legtet', '3pl_past': 'legten',
+      },
+      es: {
+        base: 'poner',
+        '1sg_present': 'pongo', '2sg_present': 'pones', '3sg_present': 'pone',
+        '1pl_present': 'ponemos', '2pl_present': 'ponéis', '3pl_present': 'ponen',
+        '1sg_past': 'puse', '2sg_past': 'pusiste', '3sg_past': 'puso',
+        '1pl_past': 'pusimos', '2pl_past': 'pusisteis', '3pl_past': 'pusieron',
+        '1sg_future': 'pondré', '2sg_future': 'pondrás', '3sg_future': 'pondrá',
+        '1pl_future': 'pondremos', '2pl_future': 'pondréis', '3pl_future': 'pondrán',
+      },
+      ja: {
+        base: '置く',
+        reading: 'おく',
+        masu_present: '置きます',
+        masu_present_reading: 'おきます',
+        locative_particle: 'に',
+      },
+      pt: {
+        base: 'pôr',
+        '1sg_present': 'ponho', '2sg_present': 'põe', '3sg_present': 'põe',
+        '1pl_present': 'pomos', '2pl_present': 'põem', '3pl_present': 'põem',
+        '1sg_past': 'pus', '2sg_past': 'pôs', '3sg_past': 'pôs',
+        '1pl_past': 'pusemos', '2pl_past': 'puseram', '3pl_past': 'puseram',
+        '1sg_future': 'porei', '2sg_future': 'porá', '3sg_future': 'porá',
+        '1pl_future': 'poremos', '2pl_future': 'porão', '3pl_future': 'porão',
+      },
+    },
+  },
+  {
+    // P09's keep: go on having, not give up. Spanish conservar, not guardar, which is SAVE's Spanish;
+    // Portuguese guardar is free (SAVE is salvar there). Japanese 取っておく is keeping for later; 保つ
+    // is keeping a state. German behalten is strong (behält, behielt, behalten).
+    id: 'KEEP',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to continue to have; not to give up',
+    // "still to have objects" (localization B61): HAVE with STILL, English's frequency adverb before
+    // its "to" by design. Its natural gloss, "to continue to have", needs a continuative complement
+    // the engine lacks (Spanish continuar takes a gerund).
+    definition: infinitiveGloss('HAVE', { object: 'OBJECT_THING', number: 'plural', modifier: 'STILL' }),
+    emoji: '🫳',
+    isA: 'HAVE',
+    forms: {
+      en: {
+        base: 'keep',
+        '1sg_present': 'keep', '2sg_present': 'keep', '3sg_present': 'keeps',
+        '1pl_present': 'keep', '2pl_present': 'keep', '3pl_present': 'keep',
+        past: 'kept',
+      },
+      it: {
+        base: 'tenere',
+        '1sg_present': 'tengo', '2sg_present': 'tieni', '3sg_present': 'tiene',
+        '1pl_present': 'teniamo', '2pl_present': 'tenete', '3pl_present': 'tengono',
+        '1sg_past': 'tenni', '2sg_past': 'tenesti', '3sg_past': 'tenne',
+        '1pl_past': 'tenemmo', '2pl_past': 'teneste', '3pl_past': 'tennero',
+        '1sg_future': 'terrò', '2sg_future': 'terrai', '3sg_future': 'terrà',
+        '1pl_future': 'terremo', '2pl_future': 'terrete', '3pl_future': 'terranno',
+      },
+      fr: {
+        base: 'garder',
+        '1sg_present': 'garde', '2sg_present': 'gardes', '3sg_present': 'garde',
+        '1pl_present': 'gardons', '2pl_present': 'gardez', '3pl_present': 'gardent',
+        '1sg_past': 'gardai', '2sg_past': 'gardas', '3sg_past': 'garda',
+        '1pl_past': 'gardâmes', '2pl_past': 'gardâtes', '3pl_past': 'gardèrent',
+        '1sg_future': 'garderai', '2sg_future': 'garderas', '3sg_future': 'gardera',
+        '1pl_future': 'garderons', '2pl_future': 'garderez', '3pl_future': 'garderont',
+      },
+      de: {
+        base: 'behalten',
+        '1sg_present': 'behalte', '2sg_present': 'behältst', '3sg_present': 'behält',
+        '1pl_present': 'behalten', '2pl_present': 'behaltet', '3pl_present': 'behalten',
+        '1sg_past': 'behielt', '2sg_past': 'behieltst', '3sg_past': 'behielt',
+        '1pl_past': 'behielten', '2pl_past': 'behieltet', '3pl_past': 'behielten',
+      },
+      es: {
+        base: 'conservar',
+        '1sg_present': 'conservo', '2sg_present': 'conservas', '3sg_present': 'conserva',
+        '1pl_present': 'conservamos', '2pl_present': 'conserváis', '3pl_present': 'conservan',
+        '1sg_past': 'conservé', '2sg_past': 'conservaste', '3sg_past': 'conservó',
+        '1pl_past': 'conservamos', '2pl_past': 'conservasteis', '3pl_past': 'conservaron',
+        '1sg_future': 'conservaré', '2sg_future': 'conservarás', '3sg_future': 'conservará',
+        '1pl_future': 'conservaremos', '2pl_future': 'conservaréis', '3pl_future': 'conservarán',
+      },
+      ja: {
+        base: '取っておく',
+        reading: 'とっておく',
+        masu_present: '取っておきます',
+        masu_present_reading: 'とっておきます',
+      },
+      pt: {
+        base: 'guardar',
+        '1sg_present': 'guardo', '2sg_present': 'guarda', '3sg_present': 'guarda',
+        '1pl_present': 'guardamos', '2pl_present': 'guardam', '3pl_present': 'guardam',
+        '1sg_past': 'guardei', '2sg_past': 'guardou', '3sg_past': 'guardou',
+        '1pl_past': 'guardamos', '2pl_past': 'guardaram', '3pl_past': 'guardaram',
+        '1sg_future': 'guardarei', '2sg_future': 'guardará', '3sg_future': 'guardará',
+        '1pl_future': 'guardaremos', '2pl_future': 'guardarão', '3pl_future': 'guardarão',
+      },
+    },
+  },
+  {
+    // P09's bring: carry here. French apporter (a thing; amener is for a person). Japanese 持ってくる
+    // conjugates as 来る (持ってきます, 持ってこない). Transitive with a `direction`, as P09 says.
+    id: 'BRING',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'direction', 'source', 'cause', 'locative'],
+    description: 'to carry something to the speaker or a place',
+    // "to cause an object to come" (localization B61): the causative of COME, whose own gloss already
+    // names the speaker. B60's CALL is the same causative with a person as the causee, "to cause a
+    // person to come": the causee is the difference, and both ship.
+    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'COME' }),
+    emoji: '🎁',
+    forms: {
+      en: {
+        base: 'bring',
+        '1sg_present': 'bring', '2sg_present': 'bring', '3sg_present': 'brings',
+        '1pl_present': 'bring', '2pl_present': 'bring', '3pl_present': 'bring',
+        past: 'brought',
+      },
+      it: {
+        base: 'portare',
+        '1sg_present': 'porto', '2sg_present': 'porti', '3sg_present': 'porta',
+        '1pl_present': 'portiamo', '2pl_present': 'portate', '3pl_present': 'portano',
+        '1sg_past': 'portai', '2sg_past': 'portasti', '3sg_past': 'portò',
+        '1pl_past': 'portammo', '2pl_past': 'portaste', '3pl_past': 'portarono',
+        '1sg_future': 'porterò', '2sg_future': 'porterai', '3sg_future': 'porterà',
+        '1pl_future': 'porteremo', '2pl_future': 'porterete', '3pl_future': 'porteranno',
+      },
+      fr: {
+        base: 'apporter',
+        '1sg_present': 'apporte', '2sg_present': 'apportes', '3sg_present': 'apporte',
+        '1pl_present': 'apportons', '2pl_present': 'apportez', '3pl_present': 'apportent',
+        '1sg_past': 'apportai', '2sg_past': 'apportas', '3sg_past': 'apporta',
+        '1pl_past': 'apportâmes', '2pl_past': 'apportâtes', '3pl_past': 'apportèrent',
+        '1sg_future': 'apporterai', '2sg_future': 'apporteras', '3sg_future': 'apportera',
+        '1pl_future': 'apporterons', '2pl_future': 'apporterez', '3pl_future': 'apporteront',
+      },
+      de: {
+        base: 'bringen',
+        '1sg_present': 'bringe', '2sg_present': 'bringst', '3sg_present': 'bringt',
+        '1pl_present': 'bringen', '2pl_present': 'bringt', '3pl_present': 'bringen',
+        '1sg_past': 'brachte', '2sg_past': 'brachtest', '3sg_past': 'brachte',
+        '1pl_past': 'brachten', '2pl_past': 'brachtet', '3pl_past': 'brachten',
+      },
+      es: {
+        base: 'traer',
+        '1sg_present': 'traigo', '2sg_present': 'traes', '3sg_present': 'trae',
+        '1pl_present': 'traemos', '2pl_present': 'traéis', '3pl_present': 'traen',
+        '1sg_past': 'traje', '2sg_past': 'trajiste', '3sg_past': 'trajo',
+        '1pl_past': 'trajimos', '2pl_past': 'trajisteis', '3pl_past': 'trajeron',
+        '1sg_future': 'traeré', '2sg_future': 'traerás', '3sg_future': 'traerá',
+        '1pl_future': 'traeremos', '2pl_future': 'traeréis', '3pl_future': 'traerán',
+      },
+      ja: {
+        base: '持ってくる',
+        reading: 'もってくる',
+        masu_present: '持ってきます',
+        masu_present_reading: 'もってきます',
+      },
+      pt: {
+        base: 'trazer',
+        '1sg_present': 'trago', '2sg_present': 'traz', '3sg_present': 'traz',
+        '1pl_present': 'trazemos', '2pl_present': 'trazem', '3pl_present': 'trazem',
+        '1sg_past': 'trouxe', '2sg_past': 'trouxe', '3sg_past': 'trouxe',
+        '1pl_past': 'trouxemos', '2pl_past': 'trouxeram', '3pl_past': 'trouxeram',
+        '1sg_future': 'trarei', '2sg_future': 'trará', '3sg_future': 'trará',
+        '1pl_future': 'traremos', '2pl_future': 'trarão', '3pl_future': 'trarão',
+      },
+    },
+  },
+  {
+    // P09's leave in the letting-stay sense: to go without, leave behind. English has three "leave"
+    // concepts now (LEAVE, exit; LEAVE_DEPART, depart; this one), so the picker says which.
+    // German zurücklassen is separable (lässt … zurück, zurückgelassen).
+    id: 'LEAVE_BEHIND',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to go away without taking something; to let it stay',
+    // "to cause an object to stay" (localization B61): the dictionary's "to cause to remain", the
+    // causative of STAY. Japanese 物体が残るようにする is 残す said out.
+    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'STAY' }),
+    emoji: '🧳',
+    synonym: 'leave behind',
+    forms: {
+      en: {
+        base: 'leave',
+        '1sg_present': 'leave', '2sg_present': 'leave', '3sg_present': 'leaves',
+        '1pl_present': 'leave', '2pl_present': 'leave', '3pl_present': 'leave',
+        past: 'left',
+      },
+      it: {
+        base: 'lasciare',
+        '1sg_present': 'lascio', '2sg_present': 'lasci', '3sg_present': 'lascia',
+        '1pl_present': 'lasciamo', '2pl_present': 'lasciate', '3pl_present': 'lasciano',
+        '1sg_past': 'lasciai', '2sg_past': 'lasciasti', '3sg_past': 'lasciò',
+        '1pl_past': 'lasciammo', '2pl_past': 'lasciaste', '3pl_past': 'lasciarono',
+        '1sg_future': 'lascerò', '2sg_future': 'lascerai', '3sg_future': 'lascerà',
+        '1pl_future': 'lasceremo', '2pl_future': 'lascerete', '3pl_future': 'lasceranno',
+      },
+      fr: {
+        base: 'laisser',
+        '1sg_present': 'laisse', '2sg_present': 'laisses', '3sg_present': 'laisse',
+        '1pl_present': 'laissons', '2pl_present': 'laissez', '3pl_present': 'laissent',
+        '1sg_past': 'laissai', '2sg_past': 'laissas', '3sg_past': 'laissa',
+        '1pl_past': 'laissâmes', '2pl_past': 'laissâtes', '3pl_past': 'laissèrent',
+        '1sg_future': 'laisserai', '2sg_future': 'laisseras', '3sg_future': 'laissera',
+        '1pl_future': 'laisserons', '2pl_future': 'laisserez', '3pl_future': 'laisseront',
+      },
+      de: {
+        base: 'zurücklassen', particle: 'zurück',
+        '1sg_present': 'lasse', '2sg_present': 'lässt', '3sg_present': 'lässt',
+        '1pl_present': 'lassen', '2pl_present': 'lasst', '3pl_present': 'lassen',
+        '1sg_past': 'ließ', '2sg_past': 'ließest', '3sg_past': 'ließ',
+        '1pl_past': 'ließen', '2pl_past': 'ließt', '3pl_past': 'ließen',
+      },
+      es: {
+        base: 'dejar',
+        '1sg_present': 'dejo', '2sg_present': 'dejas', '3sg_present': 'deja',
+        '1pl_present': 'dejamos', '2pl_present': 'dejáis', '3pl_present': 'dejan',
+        '1sg_past': 'dejé', '2sg_past': 'dejaste', '3sg_past': 'dejó',
+        '1pl_past': 'dejamos', '2pl_past': 'dejasteis', '3pl_past': 'dejaron',
+        '1sg_future': 'dejaré', '2sg_future': 'dejarás', '3sg_future': 'dejará',
+        '1pl_future': 'dejaremos', '2pl_future': 'dejaréis', '3pl_future': 'dejarán',
+      },
+      ja: {
+        // The place a thing is left in is where it then is: に, not the で of where an act happens
+        // (家に本を置いていきます), as 置く takes it.
+        base: '置いていく',
+        reading: 'おいていく',
+        masu_present: '置いていきます',
+        masu_present_reading: 'おいていきます',
+        locative_particle: 'に',
+      },
+      pt: {
+        base: 'deixar',
+        '1sg_present': 'deixo', '2sg_present': 'deixa', '3sg_present': 'deixa',
+        '1pl_present': 'deixamos', '2pl_present': 'deixam', '3pl_present': 'deixam',
+        '1sg_past': 'deixei', '2sg_past': 'deixou', '3sg_past': 'deixou',
+        '1pl_past': 'deixamos', '2pl_past': 'deixaram', '3pl_past': 'deixaram',
+        '1sg_future': 'deixarei', '2sg_future': 'deixará', '3sg_future': 'deixará',
+        '1pl_future': 'deixaremos', '2pl_future': 'deixarão', '3pl_future': 'deixarão',
+      },
+    },
+  },
+  {
+    // P09's look (at): turn the eyes on. The looked-at thing is the object, with the preposition
+    // English and Portuguese fix (`object_prep`, as DEPEND's "on"): "looks at the book", "olha para o
+    // livro". German ansehen is separable and strong (sieht … an, sah … an, angesehen; du command
+    // sieh). Japanese 見る is SEE's word too: the picker shows two 見る, told apart by their tooltips
+    // (SEE's 光を知覚する, this one's 物体へ目を向ける); 眺める and 見つめる are narrower.
+    id: 'LOOK_AT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to turn one\'s eyes toward something',
+    // "to direct the eyes to an object" (localization B61), on DIRECT_VERB: every verb the corpus had
+    // for pointing the eyes failed somewhere (TURN_OBJECT's 目を回す is getting dizzy, MOVE's is
+    // shifting them, PERCEIVE's is SEE's meaning).
+    definition: infinitiveGloss('DIRECT_VERB', {
+      object: 'EYE',
+      definiteness: 'definite',
+      number: 'plural',
+      complements: { direction: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
+    }),
+    emoji: '👁️',
+    forms: {
+      en: {
+        base: 'look', object_prep: 'at',
+        '1sg_present': 'look', '2sg_present': 'look', '3sg_present': 'looks',
+        '1pl_present': 'look', '2pl_present': 'look', '3pl_present': 'look',
+        past: 'looked',
+      },
+      it: {
+        base: 'guardare',
+        '1sg_present': 'guardo', '2sg_present': 'guardi', '3sg_present': 'guarda',
+        '1pl_present': 'guardiamo', '2pl_present': 'guardate', '3pl_present': 'guardano',
+        '1sg_past': 'guardai', '2sg_past': 'guardasti', '3sg_past': 'guardò',
+        '1pl_past': 'guardammo', '2pl_past': 'guardaste', '3pl_past': 'guardarono',
+        '1sg_future': 'guarderò', '2sg_future': 'guarderai', '3sg_future': 'guarderà',
+        '1pl_future': 'guarderemo', '2pl_future': 'guarderete', '3pl_future': 'guarderanno',
+      },
+      fr: {
+        base: 'regarder',
+        '1sg_present': 'regarde', '2sg_present': 'regardes', '3sg_present': 'regarde',
+        '1pl_present': 'regardons', '2pl_present': 'regardez', '3pl_present': 'regardent',
+        '1sg_past': 'regardai', '2sg_past': 'regardas', '3sg_past': 'regarda',
+        '1pl_past': 'regardâmes', '2pl_past': 'regardâtes', '3pl_past': 'regardèrent',
+        '1sg_future': 'regarderai', '2sg_future': 'regarderas', '3sg_future': 'regardera',
+        '1pl_future': 'regarderons', '2pl_future': 'regarderez', '3pl_future': 'regarderont',
+      },
+      de: {
+        base: 'ansehen', particle: 'an',
+        '1sg_present': 'sehe', '2sg_present': 'siehst', '3sg_present': 'sieht',
+        '1pl_present': 'sehen', '2pl_present': 'seht', '3pl_present': 'sehen',
+        '1sg_past': 'sah', '2sg_past': 'sahst', '3sg_past': 'sah',
+        '1pl_past': 'sahen', '2pl_past': 'saht', '3pl_past': 'sahen',
+        '2sg_imperative': 'sieh', // strong e→ie: the du command keeps the vowel change
+      },
+      es: {
+        base: 'mirar',
+        '1sg_present': 'miro', '2sg_present': 'miras', '3sg_present': 'mira',
+        '1pl_present': 'miramos', '2pl_present': 'miráis', '3pl_present': 'miran',
+        '1sg_past': 'miré', '2sg_past': 'miraste', '3sg_past': 'miró',
+        '1pl_past': 'miramos', '2pl_past': 'mirasteis', '3pl_past': 'miraron',
+        '1sg_future': 'miraré', '2sg_future': 'mirarás', '3sg_future': 'mirará',
+        '1pl_future': 'miraremos', '2pl_future': 'miraréis', '3pl_future': 'mirarán',
+      },
+      ja: {
+        base: '見る',
+        reading: 'みる',
+        masu_present: '見ます',
+        masu_present_reading: 'みます',
+      },
+      pt: {
+        base: 'olhar', object_prep: 'para',
+        '1sg_present': 'olho', '2sg_present': 'olha', '3sg_present': 'olha',
+        '1pl_present': 'olhamos', '2pl_present': 'olham', '3pl_present': 'olham',
+        '1sg_past': 'olhei', '2sg_past': 'olhou', '3sg_past': 'olhou',
+        '1pl_past': 'olhamos', '2pl_past': 'olharam', '3pl_past': 'olharam',
+        '1sg_future': 'olharei', '2sg_future': 'olhará', '3sg_future': 'olhará',
+        '1pl_future': 'olharemos', '2pl_future': 'olharão', '3pl_future': 'olharão',
+      },
+    },
+  },
+  {
+    // To point a thing toward something: LOOK_AT's differentia, "to direct the eyes to an object".
+    // Suffixed because DIRECT is the grammar's adjective, as CAUSE_VERB is beside CAUSE. French
+    // diriger fixes its goal's preposition, "vers" (`direction_prep`, as MOVE_ONESELF's): without it
+    // the goal reads "à un objet". Italian rivolgere takes "a" on its own (rivolgere gli occhi a).
+    // Its own tooltip stays on the literal, a root LOOK_AT's gloss stands on (localization B61):
+    // "to change an object's direction" is the transitive TURN's, and INDICATE, MOVE and TURN each
+    // say another act (bezeichnen, verschieben, girare a un luogo).
+    id: 'DIRECT_VERB',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'direction', 'cause', 'locative'],
+    description: 'to point or turn something toward something',
+    emoji: '🎯',
+    forms: {
+      en: {
+        base: 'direct',
+        '1sg_present': 'direct', '2sg_present': 'direct', '3sg_present': 'directs',
+        '1pl_present': 'direct', '2pl_present': 'direct', '3pl_present': 'direct',
+        past: 'directed',
+      },
+      it: {
+        base: 'rivolgere',
+        '1sg_present': 'rivolgo', '2sg_present': 'rivolgi', '3sg_present': 'rivolge',
+        '1pl_present': 'rivolgiamo', '2pl_present': 'rivolgete', '3pl_present': 'rivolgono',
+        '1sg_past': 'rivolsi', '2sg_past': 'rivolgesti', '3sg_past': 'rivolse',
+        '1pl_past': 'rivolgemmo', '2pl_past': 'rivolgeste', '3pl_past': 'rivolsero',
+        '1sg_future': 'rivolgerò', '2sg_future': 'rivolgerai', '3sg_future': 'rivolgerà',
+        '1pl_future': 'rivolgeremo', '2pl_future': 'rivolgerete', '3pl_future': 'rivolgeranno',
+      },
+      fr: {
+        // -ger keeps its soft g with an e before a/o: nous dirigeons, il dirigea.
+        base: 'diriger', direction_prep: 'vers',
+        '1sg_present': 'dirige', '2sg_present': 'diriges', '3sg_present': 'dirige',
+        '1pl_present': 'dirigeons', '2pl_present': 'dirigez', '3pl_present': 'dirigent',
+        '1sg_past': 'dirigeai', '2sg_past': 'dirigeas', '3sg_past': 'dirigea',
+        '1pl_past': 'dirigeâmes', '2pl_past': 'dirigeâtes', '3pl_past': 'dirigèrent',
+        '1sg_future': 'dirigerai', '2sg_future': 'dirigeras', '3sg_future': 'dirigera',
+        '1pl_future': 'dirigerons', '2pl_future': 'dirigerez', '3pl_future': 'dirigeront',
+      },
+      de: {
+        base: 'richten',
+        '1sg_present': 'richte', '2sg_present': 'richtest', '3sg_present': 'richtet',
+        '1pl_present': 'richten', '2pl_present': 'richtet', '3pl_present': 'richten',
+        '1sg_past': 'richtete', '2sg_past': 'richtetest', '3sg_past': 'richtete',
+        '1pl_past': 'richteten', '2pl_past': 'richtetet', '3pl_past': 'richteten',
+      },
+      es: {
+        // dirigir respells g → j before a/o: dirijo.
+        base: 'dirigir',
+        '1sg_present': 'dirijo', '2sg_present': 'diriges', '3sg_present': 'dirige',
+        '1pl_present': 'dirigimos', '2pl_present': 'dirigís', '3pl_present': 'dirigen',
+        '1sg_past': 'dirigí', '2sg_past': 'dirigiste', '3sg_past': 'dirigió',
+        '1pl_past': 'dirigimos', '2pl_past': 'dirigisteis', '3pl_past': 'dirigieron',
+        '1sg_future': 'dirigiré', '2sg_future': 'dirigirás', '3sg_future': 'dirigirá',
+        '1pl_future': 'dirigiremos', '2pl_future': 'dirigiréis', '3pl_future': 'dirigirán',
+      },
+      ja: {
+        base: '向ける',
+        reading: 'むける',
+        masu_present: '向けます',
+        masu_present_reading: 'むけます',
+      },
+      pt: {
+        base: 'dirigir',
+        '1sg_present': 'dirijo', '2sg_present': 'dirige', '3sg_present': 'dirige',
+        '1pl_present': 'dirigimos', '2pl_present': 'dirigem', '3pl_present': 'dirigem',
+        '1sg_past': 'dirigi', '2sg_past': 'dirigiu', '3sg_past': 'dirigiu',
+        '1pl_past': 'dirigimos', '2pl_past': 'dirigiram', '3pl_past': 'dirigiram',
+        '1sg_future': 'dirigirei', '2sg_future': 'dirigirá', '3sg_future': 'dirigirá',
+        '1pl_future': 'dirigiremos', '2pl_future': 'dirigirão', '3pl_future': 'dirigirão',
       },
     },
   },
@@ -5674,11 +6215,15 @@ export const transitiveVerbs: ConceptSeed[] = [
     // passive is asked for, as CLICK does. Italian uscire takes essere; Spanish salir's tú command is
     // the irregular "sal" (mood.ts). Japanese instructions say 退出, the verbal noun a "leave" button
     // takes, since the stem of 出る is a bare 出.
+    //
+    // English has three "leave" concepts since B61 (this one, LEAVE_BEHIND and LEAVE_DEPART), so the
+    // picker says which: "exit", the going out of a place.
     id: 'LEAVE',
     role: 'verb',
     transitivity: 'transitive',
     complements: ['manner', 'direction', 'cause'],
     description: 'to go away from a place',
+    synonym: 'exit',
     emoji: '🚪',
     forms: {
       en: {

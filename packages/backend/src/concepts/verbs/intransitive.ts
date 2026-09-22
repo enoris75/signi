@@ -665,6 +665,84 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Remaining where one is: LEAVE_BEHIND's differentia, "to cause an object to stay" (localization
+  // B61). The place is a `locative`, which Japanese 残る takes with に (`locative_particle`, as 住む
+  // does: 家に残ります). Spanish quedarse is pronominal, as moverse is: the clitic rides inside each
+  // finite form.
+  {
+    id: 'STAY',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to remain in the same place',
+    // "still to be in a place" (localization B61): KEEP's shape on BE, the dictionary's "to continue
+    // to be in the same place" without the continuative the engine lacks. Japanese 場所にまだいる is
+    // the existential a person takes.
+    definition: infinitiveGloss('BE', {
+      modifier: 'STILL',
+      complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+    }),
+    emoji: '🧍',
+    forms: {
+      en: {
+        base: 'stay',
+        '1sg_present': 'stay', '2sg_present': 'stay', '3sg_present': 'stays',
+        '1pl_present': 'stay', '2pl_present': 'stay', '3pl_present': 'stay',
+        past: 'stayed',
+      },
+      it: {
+        base: 'restare',
+        '1sg_present': 'resto', '2sg_present': 'resti', '3sg_present': 'resta',
+        '1pl_present': 'restiamo', '2pl_present': 'restate', '3pl_present': 'restano',
+        '1sg_past': 'restai', '2sg_past': 'restasti', '3sg_past': 'restò',
+        '1pl_past': 'restammo', '2pl_past': 'restaste', '3pl_past': 'restarono',
+        '1sg_future': 'resterò', '2sg_future': 'resterai', '3sg_future': 'resterà',
+        '1pl_future': 'resteremo', '2pl_future': 'resterete', '3pl_future': 'resteranno',
+      },
+      fr: {
+        base: 'rester',
+        '1sg_present': 'reste', '2sg_present': 'restes', '3sg_present': 'reste',
+        '1pl_present': 'restons', '2pl_present': 'restez', '3pl_present': 'restent',
+        '1sg_past': 'restai', '2sg_past': 'restas', '3sg_past': 'resta',
+        '1pl_past': 'restâmes', '2pl_past': 'restâtes', '3pl_past': 'restèrent',
+        '1sg_future': 'resterai', '2sg_future': 'resteras', '3sg_future': 'restera',
+        '1pl_future': 'resterons', '2pl_future': 'resterez', '3pl_future': 'resteront',
+      },
+      de: {
+        base: 'bleiben',
+        '1sg_present': 'bleibe', '2sg_present': 'bleibst', '3sg_present': 'bleibt',
+        '1pl_present': 'bleiben', '2pl_present': 'bleibt', '3pl_present': 'bleiben',
+        '1sg_past': 'blieb', '2sg_past': 'bliebst', '3sg_past': 'blieb',
+        '1pl_past': 'blieben', '2pl_past': 'bliebt', '3pl_past': 'blieben',
+      },
+      es: {
+        base: 'quedarse',
+        '1sg_present': 'me quedo', '2sg_present': 'te quedas', '3sg_present': 'se queda',
+        '1pl_present': 'nos quedamos', '2pl_present': 'os quedáis', '3pl_present': 'se quedan',
+        '1sg_past': 'me quedé', '2sg_past': 'te quedaste', '3sg_past': 'se quedó',
+        '1pl_past': 'nos quedamos', '2pl_past': 'os quedasteis', '3pl_past': 'se quedaron',
+        '1sg_future': 'me quedaré', '2sg_future': 'te quedarás', '3sg_future': 'se quedará',
+        '1pl_future': 'nos quedaremos', '2pl_future': 'os quedaréis', '3pl_future': 'se quedarán',
+      },
+      ja: {
+        base: '残る',
+        reading: 'のこる',
+        masu_present: '残ります',
+        masu_present_reading: 'のこります',
+        locative_particle: 'に',
+      },
+      pt: {
+        base: 'ficar',
+        '1sg_present': 'fico', '2sg_present': 'fica', '3sg_present': 'fica',
+        '1pl_present': 'ficamos', '2pl_present': 'ficam', '3pl_present': 'ficam',
+        '1sg_past': 'fiquei', '2sg_past': 'ficou', '3sg_past': 'ficou',
+        '1pl_past': 'ficamos', '2pl_past': 'ficaram', '3pl_past': 'ficaram',
+        '1sg_future': 'ficarei', '2sg_future': 'ficará', '3sg_future': 'ficará',
+        '1pl_future': 'ficaremos', '2pl_future': 'ficarão', '3pl_future': 'ficarão',
+      },
+    },
+  },
+
   // Buying and selling in one verb — the differentia MARKET's gloss needs, since a relative clause
   // holds one verbPhrase and cannot coordinate "buys and sells" (B32). Intransitive on purpose:
   // German "handeln" and French "commercer" take no direct object (one handelt *mit* something),
