@@ -483,9 +483,9 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
     expect(notWith('CRY', { cause: { phrase: the('DOG') } })).toBe('der Kater weint nicht wegen des Hundes.');
     expect(notWith('RUN', { manner: { phrase: the('SPEED') } })).toBe('der Kater läuft nicht mit der Geschwindigkeit.');
     expect(notWith('GO', { route: { phrase: the('MARKET') } })).toBe('der Kater geht nicht durch den Markt.');
-    expect(say(clause(np('MAN'), 'GIVE', {
+    expect(say(clause(np('MAN'), 'SAVE', {
       verbPhrase: { negative: true }, directObject: the('BOOK'), complements: { terminus: { phrase: the('HOUSE') } },
-    }), 'de')).toBe('der Mann gibt das Buch nicht ins Haus.');
+    }), 'de')).toBe('der Mann speichert das Buch nicht ins Haus.');
   });
 
   // The slot is between the objects and the complements, so both sides keep their order around it:

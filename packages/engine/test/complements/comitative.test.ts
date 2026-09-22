@@ -328,8 +328,8 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
       es: 'el gato va a ello.', pt: 'o gato vai a isso.', it: 'il gatto va a esso.',
     });
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: IT_ } } })).de).toBe('der Kater kommt aus ihm.');
-    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: IT_ } } })).de)
-      .toBe('der Mann gibt das Buch in es.');
+    expect(sayAll(clause(np('MAN'), 'SAVE', { directObject: np('BOOK'), complements: { terminus: { phrase: IT_ } } })).de)
+      .toBe('der Mann speichert das Buch in es.');
   });
 
   // The similative is a shortened comparison — "corre como yo" stands for "como yo corro" — so the

@@ -268,10 +268,11 @@ describe('known bugs: German "ins" contraction', () => {
 
 // A223. A16 gave an inanimate German terminus "in" + the accusative, the goal of SAVE and EXPORT
 // ("speichert das Buch in den Behälter"), and A143 let a verb name another preposition
-// (`terminus_prep`). Two verbs are left on the default that is not theirs. GIVE's terminus is its
+// (`terminus_prep`). Two verbs were left on the default that is not theirs. GIVE's terminus is its
 // dative object whatever it names — one gives a value TO an option, "gibt der Option den Wert", not
 // INTO it. CONNECT is "verbinden", the verb LINK already joins WITH ("mit einem anderen Knoten"), but
-// its lexeme names no `terminus_prep`. Found authoring the C23-C28 sweep.
+// its lexeme named no `terminus_prep`. Found authoring the C23-C28 sweep. The fix gave CONNECT's
+// lexeme "mit", and GIVE's `terminus_dative`, which `splitDative` and the terminus branch read.
 describe('known bugs: a German inanimate terminus of GIVE and CONNECT takes "in" (A223)', () => {
   const G = np('PERSON');
   const give = (goal: Parameters<typeof clause>[0], extra: Parameters<typeof clause>[2] = {}) =>
@@ -280,7 +281,7 @@ describe('known bugs: a German inanimate terminus of GIVE and CONNECT takes "in"
     sayAll(clause(G, 'CONNECT', { directObject: np('NODE'), complements: { terminus: { phrase: goal } }, ...extra })).de;
   const ANOTHER_NODE = np('NODE', { definiteness: 'indefinite', adjectives: ['OTHER'] });
 
-  test.fails('GIVE takes the bare dative ahead of its object, and CONNECT takes "mit"', () => {
+  test('GIVE takes the bare dative ahead of its object, and CONNECT takes "mit"', () => {
     expect(give(np('OPTION'))).toBe('die Person gibt der Option den Wert.');
     expect(give(np('OPTION', { definiteness: 'indefinite' }))).toBe('die Person gibt einer Option den Wert.');
     expect(give(np('OPTION', { number: 'plural' }))).toBe('die Person gibt den Optionen den Wert.');
@@ -307,6 +308,40 @@ describe('known bugs: a German inanimate terminus of GIVE and CONNECT takes "in"
     expect(sayAll({
       subject: np('NODE', { relative: { headRole: 'terminus', subject: G, verbPhrase: { verb: 'CONNECT' }, directObject: np('NODE', { definiteness: 'indefinite' }) } }),
     }).de).toBe('der Knoten, mit dem die Person einen Knoten verbindet.');
+  });
+
+  // GIVE's inanimate dative takes a recipient's slot in every clause: ahead of the object and of the
+  // "nicht" (which spells a known indefinite object as "kein" and leads an adverb or a place behind
+  // it), in a subject relative, beside a passive's by-phrase, and for a group. The two rows that used
+  // GIVE for its "in" (an adjective on a place name, "nicht" before a PP) moved onto SAVE; these are
+  // what GIVE says now. CONNECT's "mit" is the verb's in every clause, and before a pronoun.
+  test("GIVE's dative stands where a recipient's does, and CONNECT's \"mit\" in every clause", () => {
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('ASIA', { adjectives: ['BIG'] }) } } })).de)
+      .toBe('der Kater gibt dem großen Asien das Buch.');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { verbPhrase: { negative: true }, directObject: np('BOOK'), complements: { terminus: { phrase: np('HOUSE') } } })).de)
+      .toBe('der Mann gibt dem Haus das Buch nicht.');
+    expect(give(np('OPTION'), { directObject: np('VALUE', { definiteness: 'indefinite' }), verbPhrase: { negative: true } }))
+      .toBe('die Person gibt der Option keinen Wert.');
+    expect(give(np('OPTION'), { verbPhrase: { negative: true, modifier: 'FAST' } })).toBe('die Person gibt der Option den Wert nicht schnell.');
+    expect(give(np('OPTION'), { complements: { terminus: { phrase: np('OPTION') }, locative: { phrase: np('HOUSE') } } }))
+      .toBe('die Person gibt der Option den Wert im Haus.');
+    expect(sayAll(clause(np('PERSON', {
+      relative: { verbPhrase: { verb: 'GIVE' }, directObject: np('VALUE'), complements: { terminus: { phrase: np('OPTION') } } },
+    }), 'RUN')).de).toBe('die Person, die der Option den Wert gibt, läuft.');
+    expect(give(np('OPTION'), { verbPhrase: { voice: 'passive' } })).toBe('der Wert wird der Option von der Person gegeben.');
+    expect(give({ conjunction: 'and', conjuncts: [np('OPTION'), np('HOUSE', { definiteness: 'indefinite' })] }))
+      .toBe('die Person gibt der Option und einem Haus den Wert.');
+    expect(connect(np('NODE', { number: 'plural' }), { verbPhrase: { negative: true } })).toBe('die Person verbindet den Knoten nicht mit den Knoten.');
+    expect(connect(np('THIRD_PERSON', { gender: 'neut' }))).toBe('die Person verbindet den Knoten mit ihm.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'CONNECT', { directObject: np('NODE'), complements: { terminus: { phrase: np('NODE', { number: 'plural' }) } } }), imperative: true }).de)
+      .toBe('verbinde den Knoten mit den Knoten.');
+    expect(sayAll({
+      ...clause(np('GENERIC_PERSON'), 'CONNECT', { directObject: np('NODE', { definiteness: 'indefinite' }), complements: { terminus: { phrase: ANOTHER_NODE } } }),
+      infinitive: true,
+    }).de).toBe('einen Knoten mit einem anderen Knoten verbinden.');
+    expect(sayAll(clause(np('PERSON', {
+      relative: { verbPhrase: { verb: 'CONNECT' }, directObject: np('NODE'), complements: { terminus: { phrase: ANOTHER_NODE } } },
+    }), 'RUN')).de).toBe('die Person, die den Knoten mit einem anderen Knoten verbindet, läuft.');
   });
 
   test('regression: a living recipient, LINK, the goals of SAVE and ADD, and the other six', () => {

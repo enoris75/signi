@@ -2,11 +2,11 @@
 
 **Language:** German
 
-[A16](../fixed/A16-german-inanimate-terminus-dative.md) split the German terminus on animacy. A person
+[A16](A16-german-inanimate-terminus-dative.md) split the German terminus on animacy. A person
 or an animal is a recipient, the bare dative ahead of the object (*gibt dem Hund das Buch*); a thing
 is a destination, "in" + the accusative behind it (*speichert das Buch in den Behälter*), because the
 bare dative would read as *giving* the book to the container. Which preposition a destination takes
-is the verb's: [A143](../fixed/A143-german-add-goal-takes-zu.md) let a verb's lexeme name it,
+is the verb's: [A143](A143-german-add-goal-takes-zu.md) let a verb's lexeme name it,
 `terminus_prep` (ADD's *zu*, LINK's *mit*).
 
 Two verbs are left on the default that is not theirs:
@@ -105,3 +105,44 @@ takes the **Want**:
 | | |
 |---|---|
 | **Test** | `complements/terminus.test.ts` → *known bugs: a German inanimate terminus of GIVE and CONNECT takes "in" (A223)* (1 `test.fails`, plus a regression test for a living recipient, LINK, the goals of SAVE and ADD, and the other six) |
+
+## Resolved
+
+**2026-09-22.** As the trial had it:
+
+- **CONNECT**, corpus only: `terminus_prep: 'mit'` on its de lexeme in
+  [`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts), as LINK has.
+- **GIVE**: `terminus_dative: '1'` on *geben* in
+  [`ditransitive.ts`](../../../packages/backend/src/concepts/verbs/ditransitive.ts), a flag beside
+  `terminus_prep` rather than a value of it.
+  [`splitDative`](../../../packages/engine/src/languages/de/splitDative.ts) takes the verb's forms
+  and hoists the terminus when it is animate **or** the verb says `terminus_dative`; the terminus
+  branch of
+  [`complementsParts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  writes the bare dative on the same test. Its two callers,
+  [`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) and
+  [`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts), pass the
+  verb's forms to it and on to the `complementsPhrase(dative, …)` that renders the slot. The relative
+  gapped on the terminus already handed its stand-in the verb's forms, so it takes the bare "der".
+
+The two decisions left open (SHOW and SEND to a thing, LINK and CONNECT to a person) stay as they
+were, unpinned: *zeigt den Wert in die Option*, *verbindet dem Mann den Knoten*.
+
+**Passing tests moved.** The two rows that were about the preposition moved off GIVE onto SAVE, which
+keeps an inanimate "in", and GIVE's new rendering of each went into the A223 block; the third keeps
+its purpose (the neuter pronoun's inanimate branch) on SAVE:
+
+- `adjectives.test.ts` → *known bugs: an adjective on a place name* → *the article comes back after
+  every preposition, and after a relation*: GIVE `der Kater gibt das Buch ins große Asien.` → SAVE
+  `der Kater speichert das Buch ins große Asien.`
+- `negation.test.ts` → *known bugs: German "nicht" and a prepositional complement* → *"nicht" leads
+  every complement that carries a preposition*: GIVE `der Mann gibt das Buch nicht ins Haus.` → SAVE
+  `der Mann speichert das Buch nicht ins Haus.`
+- `complements/comitative.test.ts` → *known bugs: a pronoun in the other adposition-bearing
+  complements* → *a personal pronoun takes the animate branch, and a neuter one does not*: GIVE `der
+  Mann gibt das Buch in es.` → SAVE `der Mann speichert das Buch in es.` (GIVE's `der Mann gibt ihm
+  das Buch.` is in the A223 pin itself.)
+
+| | |
+|---|---|
+| **Tests** | `complements/terminus.test.ts` → *known bugs: a German inanimate terminus of GIVE and CONNECT takes "in" (A223)*, the `test.fails` now passing, plus an added case: GIVE's dative ahead of the object with an adjective on a place name and ahead of "nicht" (the two rows moved off GIVE), a "kein" object, an adverb, a place, a subject relative, the passive and a group; CONNECT's "mit" negated, before a pronoun, in the command, the citation and a relative. `languages/de/splitDative.test.ts` and `complementsPhrase/complementsPhrase.test.ts` → the `terminus_dative` verb's inanimate goal hoisted and rendered as the bare dative |

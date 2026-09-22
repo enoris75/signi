@@ -46,7 +46,7 @@ clitic, not an order, and it is left as a lead.
 
 **Nothing shipped shows it.** No definition or UI string gives to a pronoun.
 
-Found reproducing [A223](../A-must-fix/A223-german-inanimate-terminus-of-give-and-connect.md).
+Found reproducing [A223](A223-german-inanimate-terminus-of-give-and-connect.md).
 
 ## Shape of the fix
 

@@ -195,9 +195,11 @@ export function complementsParts(
         // "in" + the accusative of motion-into ("speichert das Buch in den Behälter"), never the
         // bare dative that would read as *giving the book to the container*. Which preposition is
         // the verb's own: ADD adds a thing TO something, so it says `terminus_prep: 'zu'` and takes
-        // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default.
+        // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default. A verb whose
+        // terminus is its dative object whatever it names says `terminus_dative`: GIVE gives a value
+        // TO an option, "gibt der Option den Wert", not INTO it (A223).
         else if (type === 'terminus') {
-          if (f['animate'] === '1') head = prepDet('', f, 'dat', plural);
+          if (f['animate'] === '1' || verb['terminus_dative'] === '1') head = prepDet('', f, 'dat', plural);
           else if (verb['terminus_prep']) head = prepDet(verb['terminus_prep'], f, 'dat', plural);
           else { _case = 'acc'; head = prepDet('in', f, 'acc', plural); }
         }

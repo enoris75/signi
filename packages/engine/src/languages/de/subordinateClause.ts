@@ -114,9 +114,9 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
     subjectIsNegative: relativeSubjectIsNegative(rel),
     verbPhrase: rel.verbPhrase, directObject: rel.directObject, complements: rel.complements,
   }, leadsComplements);
-  const { dative, rest: undative } = splitDative(negComplements);
+  const { dative, rest: undative } = splitDative(negComplements, verb.forms);
   const { means, rest } = splitMeansClause(undative);
-  const dativeText = complementsPhrase(dative);
+  const dativeText = complementsPhrase(dative, verb.forms);
   // The means clause's subject is the pronoun of whoever does the act (B06, see `meansDoer`): the
   // clause's agreeing subject, which is the head itself in a subject relative ("der Hund, der
   // frisst, indem er ein Wort wählt"), or under the passive its agent, which a relative gapped on

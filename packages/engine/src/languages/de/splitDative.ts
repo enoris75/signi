@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import type { ResolvedComplement } from '../../types.js';
+import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -19,12 +19,17 @@ import { tonicPronoun } from '../../functions/tonicPronoun.js';
  * tonic pronoun's (`tonicHeadForms`), which count a personal pronoun as a person. So a dative pronoun
  * leads the object as a dative noun does — "gibt ihm das Buch", not "gibt das Buch ihm" (A229) — and a
  * neuter one keeps the inanimate branch.
+ *
+ * `verb` is the governing verb's forms. A verb whose terminus is its dative object whatever it names
+ * says `terminus_dative` (GIVE: one gives a value *to* an option, "gibt der Option den Wert", A223),
+ * and its terminus is hoisted whether it is animate or not.
  */
 export function splitDative(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  verb: ConceptForms['forms'] = {},
 ): { dative?: Partial<Record<ComplementType, ResolvedComplement>>; rest?: Partial<Record<ComplementType, ResolvedComplement>> } {
   const terminus = complements?.['terminus'];
-  if (!terminus || recipientForms(terminus)['animate'] !== '1') return { rest: complements };
+  if (!terminus || (recipientForms(terminus)['animate'] !== '1' && verb['terminus_dative'] !== '1')) return { rest: complements };
   const { terminus: _t, ...rest } = complements;
   return { dative: { terminus }, rest };
 }

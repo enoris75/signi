@@ -127,9 +127,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // The dative recipient leads the accusative object; the other complements trail it, and a
     // subordinate means clause trails even the verb (see `splitMeansClause`). Its subject is the
     // pronoun of whoever does this clause's act, "man" when that is no one (B06, see `meansDoer`).
-    const { dative, rest: undative } = splitDative(negComplements);
+    const { dative, rest: undative } = splitDative(negComplements, verb.forms);
     const { means, rest } = splitMeansClause(undative);
-    const dativeText = complementsPhrase(dative);
+    const dativeText = complementsPhrase(dative, verb.forms);
     const meansText = meansClause(means, meansDoer(phrase, zu));
     // A reflexive verb ("sich bewegen") builds its verb forms as the plain verb, and its pronoun,
     // agreeing with the subject, leads the Mittelfeld's pronoun slot: "bewegt sich nicht", "beweg

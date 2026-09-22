@@ -107,6 +107,14 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER)) }))).toBe('in den Behälter');
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER, { definiteness: 'indefinite' })) }))).toBe('in einen Behälter');
     });
+
+    // A223: a verb whose terminus is its dative object whatever it names ("gibt der Option den Wert").
+    test('an inanimate goal of a `terminus_dative` verb is the bare dative', () => {
+      const dative = { terminus_dative: '1' };
+      expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER)) }), dative)).toBe('dem Behälter');
+      expect(complementsPhrase(complements({ terminus: complement(np(HAUS, { definiteness: 'indefinite' })) }), dative)).toBe('einem Haus');
+      expect(complementsPhrase(complements({ terminus: complement(np(ER, { gender: 'neut' })) }), dative)).toBe('ihm');
+    });
   });
 
   describe('instrumental', () => {

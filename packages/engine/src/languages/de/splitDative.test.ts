@@ -33,4 +33,14 @@ describe('splitDative', () => {
     const map = complements({ terminus: complement(np(ER, { gender: 'neut' })) });
     expect(splitDative(map)).toEqual({ rest: map });
   });
+
+  test('splits out an inanimate goal of a `terminus_dative` verb', () => {
+    // "gibt der Option den Wert" (A223): GIVE's terminus is its dative object whatever it names.
+    const terminus = complement(np(HAUS));
+    const instrumental = complement(np(MESSER));
+    expect(splitDative(complements({ terminus, instrumental }), { terminus_dative: '1' })).toEqual({
+      dative: { terminus },
+      rest: { instrumental },
+    });
+  });
 });

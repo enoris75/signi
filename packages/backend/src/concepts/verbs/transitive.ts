@@ -7775,7 +7775,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'connecterons', '2pl_future': 'connecterez', '3pl_future': 'connecteront',
       },
       de: {
-        base: 'verbinden',
+        base: 'verbinden', terminus_prep: 'mit',
         '1sg_present': 'verbinde', '2sg_present': 'verbindest', '3sg_present': 'verbindet',
         '1pl_present': 'verbinden', '2pl_present': 'verbindet', '3pl_present': 'verbinden',
         '1sg_past': 'verband', '2sg_past': 'verbandest', '3sg_past': 'verband',
