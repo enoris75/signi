@@ -56,7 +56,7 @@ All thirteen render in all seven. Three readings were judged on authoring:
    partitive *du / de la*, which is right for a mass noun (*consommer de la nourriture*) and wrong
    for a count one — French wants *changer la taille*, *écrire le mot*. The corpus already carries
    the `countable` flag the rule needs. Filed as
-   [A207](../../bugs/A-must-fix/A207-french-bare-singular-count-object.md); the two plans are
+   [A207](../../bugs/fixed/A207-french-bare-singular-count-object.md); the two plans are
    unchanged.
 2. **Japanese *持つことが始まる* for ACQUIRE ships.** It reads "the having begins", an intransitive
    with the nominalised clause as its subject, where the other six read "to begin to have". It is
@@ -105,7 +105,7 @@ Shipped 2026-09-22. Thirteen `definition` plans, on their seed blocks under
 | LIVE | to be at home | essere a casa | être à la maison | zu Hause sein | estar en casa | 家にいる | estar em casa |
 | TRADE | to buy objects | comprare oggetti | acheter des objets | Gegenstände kaufen | comprar objetos | 物体を買う | comprar objetos |
 
-The two French rows carry [A207](../../bugs/A-must-fix/A207-french-bare-singular-count-object.md)
+The two French rows carry [A207](../../bugs/fixed/A207-french-bare-singular-count-object.md)
 and will read *changer la taille* / *changer le texte* when it is fixed.
 
 What landed differently from the plan:
