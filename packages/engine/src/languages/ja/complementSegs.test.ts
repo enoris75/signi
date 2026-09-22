@@ -199,6 +199,20 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' }), [path('through')]) })))).toBe('どの家を通っても');
       expect(text(complementSegs(complements({ locative: complement(np(IE), [path('through')]) }), 'に'))).toBe('家に');
     });
+
+    // A220: a noun can ask for に as a verb does — a direction is no place an act goes on in (反対の
+    // 方向に走ります). Plain containment only: a relation keeps its で, `through` its tail, and the
+    // verb's own particle still comes first.
+    test('a noun seeding locative_particle takes it in plain containment', () => {
+      const HOUKOU: Forms = { base: '方向', count: 'singular', reading: 'ほうこう', locative_particle: 'に' };
+      expect(complementSegs(complements({ locative: complement(np(HOUKOU)) })))
+        .toEqual([{ t: '方向', r: 'ほうこう' }, { t: 'に' }]);
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('in')]) })))).toBe('方向に');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU, { definiteness: 'no' })) })))).toBe('どの方向にも');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('under')]) })))).toBe('方向の下で');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU), [path('through')]) })))).toBe('方向を通って');
+      expect(text(complementSegs(complements({ locative: complement(np(HOUKOU)) }), 'に'))).toBe('方向に');
+    });
   });
 
   describe('cause', () => {

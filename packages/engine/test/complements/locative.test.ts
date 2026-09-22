@@ -1220,13 +1220,13 @@ describe('known bugs: a French bare singular after "dans" (A219)', () => {
 // に (A109's existential, A190's 住む). A direction is no such place: one runs 反対の方向に, "in the
 // opposite direction", and 反対の方向で reads as running while standing in a direction. That is the
 // noun's doing, not the verb's — every verb that moves takes it — so no per-verb `locative_particle`
-// can say it. BACKWARDS's C25 gloss ships 反対の方向で.
+// can say it. BACKWARDS's C25 gloss shipped 反対の方向で.
 describe('known bugs: a Japanese direction noun as a locative takes で (A220)', () => {
   const opposite = np('DIRECTION_SPACE', { adjectives: ['OPPOSITE'] });
   const along = (verb: string, place: NounPhrase, extra: Parameters<typeof clause>[2] = {}) =>
     say(clause(np('CAT'), verb, { ...extra, complements: { locative: { phrase: place } } }), 'ja');
 
-  test.fails('the direction takes に', () => {
+  test('the direction takes に', () => {
     expect(along('RUN', opposite)).toBe('猫は反対の方向に走ります。');
     expect(along('RUN', opposite, { verbPhrase: { tense: 'past' } })).toBe('猫は反対の方向に走りました。');
     expect(along('RUN', opposite, { verbPhrase: { negative: true } })).toBe('猫は反対の方向に走りません。');
@@ -1237,6 +1237,33 @@ describe('known bugs: a Japanese direction noun as a locative takes で (A220)',
     expect(say({ ...clause(np('GENERIC_PERSON'), 'RUN', { complements: { locative: { phrase: opposite } } }), infinitive: true }, 'ja'))
       .toBe('反対の方向に走る。');
     expect(say(concepts.find((c) => c.id === 'BACKWARDS')!.definition!, 'ja')).toBe('反対の方向に。');
+  });
+
+  test('every verb of motion, every determiner, a question and a group of directions take に', () => {
+    expect(along('JUMP', opposite)).toBe('猫は反対の方向に跳びます。');
+    expect(along('COME', opposite)).toBe('猫は反対の方向に来ます。');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'GO', { complements: { locative: { phrase: opposite } } }), 'ja'))
+      .toBe('猫は反対の方向に行きます。');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: opposite, specifiers: [{ kind: 'path', value: 'in' }] } },
+    }), 'ja')).toBe('猫は反対の方向に走ります。');
+    expect(along('RUN', np('DIRECTION_SPACE', { definiteness: 'all', number: 'plural' }))).toBe('猫はすべての方向に走ります。');
+    expect(say({ ...clause(np('CAT'), 'RUN', { complements: { locative: { phrase: opposite } } }), interrogative: true }, 'ja'))
+      .toBe('猫は反対の方向に走りますか？');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: { conjuncts: [np('DIRECTION_SPACE', { definiteness: 'this' }), opposite], conjunction: 'or' } } },
+    }), 'ja')).toBe('猫はこの方向か反対の方向に走ります。');
+  });
+
+  test('a verb that asks for に keeps it, and through, the route and the glosses of a relation and a goal keep theirs', () => {
+    expect(along('LIVE', opposite)).toBe('猫は反対の方向に住みます。');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: opposite, specifiers: [{ kind: 'path', value: 'through' }] } },
+    }), 'ja')).toBe('猫は反対の方向を通って走ります。');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { route: { phrase: opposite } } }), 'ja')).toBe('猫は反対の方向を走ります。');
+    expect(say({ subject: { ...opposite, complementGloss: { type: 'locative', specifiers: [{ kind: 'path', value: 'under' }] } } }, 'ja'))
+      .toBe('反対の方向の下で。');
+    expect(say({ subject: { ...opposite, complementGloss: { type: 'direction' } } }, 'ja')).toBe('反対の方向へ。');
   });
 
   test('regression: the existential, a relation, a place, a goal and the other languages', () => {

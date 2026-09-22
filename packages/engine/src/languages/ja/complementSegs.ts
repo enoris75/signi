@@ -40,7 +40,8 @@ const JA_COMPLEMENT_ORDER: ComplementType[] = [
  * `locative` takes: the default で is the place where something happens (家で食べます), and a verb whose
  * place is where something *is* or *ends up* asks for に instead — the existential いる / ある
  * (家にいます, A109), and the lexemes seeding `locative_particle`, 住む and 閉じ込める (家に住みます, A190).
- * The caller decides which; see `predicateSegs`.
+ * The caller decides which; see `predicateSegs`. Failing that, a noun seeding `locative_particle` asks
+ * for に in plain containment — a direction, which is no place an act goes on in (方向に, A220).
  *
  * The subject complement comes last, straight before なる / 思える, where the shared
  * `COMPLEMENT_RENDER_ORDER` — English and Romance order — leads with it. Anything between the two
@@ -160,6 +161,11 @@ export function complementSegs(
       // A verb that puts something *at* the place wins over it: its に above says the same thing
       // better ("lives through the house" is 家に住みます), as the existential already did.
       : type === 'locative' && spec === 'through' ? PATH_CITATION.through
+      // A noun can ask for に as a verb does (A220): a direction is no place an act goes on in, so one
+      // runs 反対の方向に, never 反対の方向で ("running while standing in a direction"). Plain
+      // containment only — a relation keeps its relational noun and で (反対の方向の下で).
+      : type === 'locative' && spec === 'in' && firstConjunct(c.phrase).head.forms['locative_particle']
+        ? firstConjunct(c.phrase).head.forms['locative_particle']!
       : type === 'cause' ? jaCauseParticle(c)
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       // The object complement: the factitive に ("この文を命令にする"), or として where the object is
