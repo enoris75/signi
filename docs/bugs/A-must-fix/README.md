@@ -1,10 +1,15 @@
 # A-must-fix — confirmed bugs
 
-**Two open, both filed 2026-09-22** while authoring the localization sweep (A23–A30, B52–B58):
-**A206**, the Portuguese impersonal *se* that does not agree with a plural object, and **A207**, the
-French mass partitive on a bare singular *count* object. Both were found the same way — a gloss
-renders a bare object under a generic subject in all seven languages at once, so a rule that is
-right for one noun class and wrong for another shows up side by side.
+**Seven open, all filed 2026-09-22.** Two came from authoring the localization sweep (A23–A30,
+B52–B58): **A206**, the Portuguese impersonal *se* that does not agree with a plural object, and
+**A207**, the French mass partitive on a bare singular *count* object. Both were found the same way
+— a gloss renders a bare object under a generic subject in all seven languages at once, so a rule
+that is right for one noun class and wrong for another shows up side by side. **A208** came from a
+random phrase: a negative complement does not negate a Spanish or Portuguese command, instruction or
+infinitive. **A209–A212** came from a second round once the generator coordinated noun groups: German
+"kein" inside the prospective, an "or" group agreeing with its last conjunct after the verb (English
+and German), a German group of animals eating with "essen", and a coordinated pronoun object kept
+behind "nicht".
 
 Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/). The
 last three went together — **A203**, the half of A197 that run deliberately left (the five

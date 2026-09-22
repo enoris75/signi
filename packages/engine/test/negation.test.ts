@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, VerbPhrase } from '@signi/shared';
+import type { NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A `no`-determined DIRECT OBJECT ("the cat eats no mouse"). Unlike the article determiners, the
@@ -1340,5 +1340,114 @@ describe('known bugs: German "nicht" and an adverb in front of a definite object
     expect(say({
       ...clause(np('SECOND_PERSON'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { negative: true, modifier: 'UP' } }), imperative: true,
     }, 'de')).toBe('verschieb das Buch nicht nach oben.');
+  });
+});
+
+// A209. A182's "kein" absorbs the verb's "nicht" into an indefinite object or predicate noun, and in
+// the prospective that nominal stands inside the zu-group: "ist im Begriff, keine Maus zu fressen"
+// says the cat is about to eat no mouse, where the plan says it is not about to eat one. A19 put
+// "nicht" ahead of "im Begriff" for exactly this scope, and a definite object still gets it ("ist
+// nicht im Begriff, die Maus zu fressen"). Found by the random phrase "all tears and I are not about
+// to become a death because of the nearer least big blade." (seed 583434): "sind im Begriff, … kein
+// Tod zu werden".
+describe('known bugs: German "kein" inside the prospective', () => {
+  const notAbout = (verb: string, extra: Parameters<typeof clause>[2] = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('CAT'), verb, { ...extra, verbPhrase: { aspect: 'prospective', negative: true, ...verbPhrase } }), 'de');
+  const aMouse = { directObject: np('MOUSE', { definiteness: 'indefinite' }) };
+
+  test.fails('the verb\'s "nicht" stays ahead of "im Begriff" beside an indefinite object or predicate noun', () => {
+    expect(notAbout('EAT', aMouse)).toBe('der Kater ist nicht im Begriff, eine Maus zu fressen.');
+    expect(notAbout('EAT', { directObject: np('MOUSE', { number: 'plural', definiteness: 'bare' }) }))
+      .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
+    expect(notAbout('DRINK', { directObject: np('WATER', { definiteness: 'bare' }) })).toBe('der Kater ist nicht im Begriff, Wasser zu trinken.');
+    expect(notAbout('EAT', aMouse, { tense: 'past' })).toBe('der Kater war nicht im Begriff, eine Maus zu fressen.');
+    expect(notAbout('EAT', aMouse, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('BECOME', { complements: { predicative: { phrase: np('DOG') } } })).toBe('der Kater ist nicht im Begriff, ein Hund zu werden.');
+    expect(notAbout('BE', { complements: { predicative: { phrase: np('LEGEND') } } })).toBe('der Kater ist nicht im Begriff, eine Legende zu sein.');
+    expect(say({ ...clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { aspect: 'prospective', negative: true } }), interrogative: true }, 'de'))
+      .toBe('ist der Kater nicht im Begriff, eine Maus zu fressen?');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, ...aMouse } }), 'RUN'), 'de'))
+      .toBe('der Hund, der nicht im Begriff ist, eine Maus zu fressen, läuft.');
+    // The random phrase that found it.
+    expect(say({
+      subject: { conjuncts: [np('TEAR', { number: 'plural', definiteness: 'all' }), np('FIRST_PERSON', { number: 'singular' })], conjunction: 'and' },
+      verbPhrase: { verb: 'BECOME', aspect: 'prospective', negative: true },
+      complements: {
+        predicative: { phrase: np('DEATH') },
+        cause: {
+          phrase: np('BLADE', { adjectives: ['NEAR', 'BIG'], adjectiveDegrees: ['more', 'least'] }),
+          specifiers: [{ kind: 'sentiment', value: 'neutral' }],
+        },
+      },
+    }, 'de')).toBe('alle Tränen und ich sind nicht im Begriff, wegen der näheren am wenigsten großen Klinge ein Tod zu werden.');
+  });
+
+  test('regression: a definite object, a `no` object and the other aspects keep what they render', () => {
+    expect(notAbout('EAT', { directObject: np('MOUSE') })).toBe('der Kater ist nicht im Begriff, die Maus zu fressen.');
+    expect(notAbout('EAT', { directObject: np('MOUSE') }, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, die Maus zu fressen.');
+    // A `no` object is the plan's own "about to eat no mouse", so its "kein" belongs in the group.
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE', { definiteness: 'no' }), verbPhrase: { aspect: 'prospective' } })))
+      .toMatchObject({ en: 'the cat is about to eat no mouse.', de: 'der Kater ist im Begriff, keine Maus zu fressen.' });
+    // A182 outside the prospective, and English on the defect's own plan.
+    expect(say(clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { negative: true } }), 'de')).toBe('der Kater frisst keine Maus.');
+    expect(say(clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { negative: true, aspect: 'progressive' } }), 'de')).toBe('der Kater frisst gerade keine Maus.');
+    expect(say(clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { negative: true, aspect: 'resultative' } }), 'de')).toBe('der Kater hat keine Maus gefressen.');
+    expect(say(clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { aspect: 'prospective', negative: true } }), 'en')).toBe('the cat is not about to eat a mouse.');
+  });
+});
+
+// A212. A191's known object leads "nicht" and the adverb, and a coordination of known conjuncts moves
+// whole. A pronoun conjunct does not count as known: `objectLeadsNicht` leaves out every conjunct with
+// a person, because a lone pronoun already leads from the pronoun slot. A pronoun inside a group
+// renders in the noun slot (A53), so the whole group stays behind: "frisst nicht schnell ihn und den
+// Hund". Found by the random phrase "if the old light did not describe me or that big man with these
+// wild buildings well, …" (seed 583438): "wenn das alte Licht nicht gut mich oder jenen großen Mann …".
+describe('known bugs: German "nicht" and an adverb in front of a coordinated pronoun', () => {
+  const him = np('THIRD_PERSON', { gender: 'masc' });
+  const and = (...conjuncts: NounPhrase[]): NounElement => ({ conjuncts, conjunction: 'and' });
+  const eatNot = (object: NounElement, verbPhrase: Partial<VerbPhrase> = {}) =>
+    clause(np('CAT'), 'EAT', { directObject: object, verbPhrase: { negative: true, modifier: 'FAST', ...verbPhrase } });
+  const phrase583438: PhrasePlan = {
+    subject: {
+      conjuncts: [
+        np('CHILD', { number: 'plural', definiteness: 'that' }),
+        np('FIRE', { number: 'plural', definiteness: 'definite', adjectives: ['BROWN', 'MISSING'], possessor: np('WING', { definiteness: 'all', adjectives: ['STRONG', 'OLD'] }) }),
+        np('HOUSE', { definiteness: 'no', adjectives: ['NEW', 'ADULT'], adjectiveDegrees: ['positive', 'equally'] }),
+      ],
+      conjunction: 'or',
+    },
+    verbPhrase: { verb: 'COMPACT', tense: 'present' },
+    directObject: np('FILE', { definiteness: 'definite', adjectives: ['SMALL'] }),
+    complements: { instrumental: { phrase: { conjuncts: [np('PERSON', { definiteness: 'few' }), np('WING', { definiteness: 'definite' })], conjunction: 'and' } } },
+    condition: {
+      subject: np('LIGHT', { adjectives: ['OLD'] }),
+      verbPhrase: { verb: 'DESCRIBE', tense: 'past', negative: true, modifier: 'WELL' },
+      directObject: { conjuncts: [np('FIRST_PERSON', { number: 'singular' }), np('MAN', { definiteness: 'that', adjectives: ['BIG'] })], conjunction: 'or' },
+      complements: { instrumental: { phrase: np('BUILDING', { number: 'plural', definiteness: 'this', adjectives: ['WILD'] }) } },
+    },
+  };
+
+  test.fails('a group holding a pronoun leads "nicht" and the adverb, as a group of known nouns does', () => {
+    expect(say(eatNot(and(him, np('DOG'))), 'de')).toBe('der Kater frisst ihn und den Hund nicht schnell.');
+    expect(say(eatNot(and(np('DOG'), him)), 'de')).toBe('der Kater frisst den Hund und ihn nicht schnell.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: and(him, np('FIRST_PERSON')), verbPhrase: { negative: true, modifier: 'ALWAYS' } }), 'de'))
+      .toBe('der Kater sieht ihn und mich nicht immer.');
+    expect(say(eatNot(and(np('SECOND_PERSON'), np('MOUSE')), { modifier: 'SUDDENLY', tense: 'past', modals: ['CAN'] }), 'de'))
+      .toBe('der Kater konnte dich und die Maus nicht plötzlich fressen.');
+    expect(say({ ...eatNot(and(him, np('DOG'))), subject: np('SECOND_PERSON'), imperative: true }, 'de')).toBe('iss ihn und den Hund nicht schnell.');
+    // The random phrase's "wenn" clause.
+    expect(say(phrase583438, 'de'))
+      .toContain('wenn das alte Licht mich oder jenen großen Mann nicht gut mit diesen wilden Gebäuden beschreiben würde, ');
+  });
+
+  test('regression: a lone pronoun, a group of nouns, a quantified conjunct and the relative clause keep their order', () => {
+    expect(say(eatNot(him), 'de')).toBe('der Kater frisst ihn nicht schnell.');
+    expect(say(eatNot(and(np('MOUSE'), np('DOG'))), 'de')).toBe('der Kater frisst die Maus und den Hund nicht schnell.');
+    // A quantified conjunct keeps the whole group behind "nicht", pronoun or not (A191).
+    expect(say(eatNot(and(him, np('DOG', { number: 'plural', definiteness: 'all' }))), 'de')).toBe('der Kater frisst nicht schnell ihn und alle Hunde.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: and(him, np('DOG')), verbPhrase: { negative: true } }), 'de')).toBe('der Kater frisst ihn und den Hund nicht.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: and(him, np('DOG')), verbPhrase: { modifier: 'FAST' } }), 'de')).toBe('der Kater frisst schnell ihn und den Hund.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', negative: true, modifier: 'FAST' }, directObject: and(him, np('MOUSE')) } }), 'RUN'), 'de'))
+      .toBe('der Hund, der ihn und die Maus nicht schnell frisst, läuft.');
   });
 });

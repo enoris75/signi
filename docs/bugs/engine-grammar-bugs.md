@@ -59,14 +59,21 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Two open**, both filed on 2026-09-22 while authoring the localization sweep, and both about the
-article or the agreement a *definition* renders — the surface that exercises bare objects and
-generic subjects harder than any clause a user builds.
+**Seven open**. A206 and A207 were filed on 2026-09-22 while authoring the localization sweep, and
+both are about the article or the agreement a *definition* renders — the surface that exercises
+bare objects and generic subjects harder than any clause a user builds. A208 was found the same day
+by rendering twenty random phrases, and A209–A212 by a second round of twenty once the generator
+coordinated noun groups — three of the four are about a group.
 
 | # | File | Language | Defect |
 |---|---|---|---|
 | A206 | [A-must-fix/A206-portuguese-impersonal-se-plural-object.md](A-must-fix/A206-portuguese-impersonal-se-plural-object.md) | Portuguese | the impersonal *se* stays singular before a plural object (*se faz frases*), where [A73](fixed/A73-impersonal-se-plural-object.md) agreed Italian and Spanish and left Portuguese out by name |
 | A207 | [A-must-fix/A207-french-bare-singular-count-object.md](A-must-fix/A207-french-bare-singular-count-object.md) | French | a bare singular **count** object takes the mass partitive (*changer de la taille*), where French wants the definite — [A149](fixed/A149-french-object-zero-article.md)'s rule does not look at countability |
+| A208 | [A-must-fix/A208-spanish-portuguese-command-drops-complement-concord.md](A-must-fix/A208-spanish-portuguese-command-drops-complement-concord.md) | Spanish, Portuguese | a negative complement does not negate a command, an instruction or an infinitive (*corre en ninguna casa* for *no corras en ninguna casa*): the three moods build their own gate without [A33](fixed/A33-romance-complement-negative-concord.md)'s complement term |
+| A209 | [A-must-fix/A209-german-kein-inside-the-prospective.md](A-must-fix/A209-german-kein-inside-the-prospective.md) | German | [A182](fixed/A182-german-nicht-with-an-indefinite-object.md)'s "kein" carries the prospective's negation into the zu-group (*ist im Begriff, keine Maus zu fressen* for *ist nicht im Begriff, eine Maus zu fressen*), undoing [A19](fixed/A19-german-prospective-aspect-negation.md) for an indefinite object or predicate noun |
+| A210 | [A-must-fix/A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md](A-must-fix/A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md) | English, German | an "or" group agrees with its last conjunct even when the verb comes first, in a question and German's inverted clauses (*does the cats or the dog run?*, *läuft die Kater oder der Hund?*) |
+| A211 | [A-must-fix/A211-german-animal-group-eats-with-essen.md](A-must-fix/A211-german-animal-group-eats-with-essen.md) | German | a coordinated subject of animals takes *essen* (*der Kater und der Hund essen*): the group agreement [A157](fixed/A157-german-animals-fressen.md)'s sense reads carries no `animal` |
+| A212 | [A-must-fix/A212-german-nicht-before-a-coordinated-pronoun.md](A-must-fix/A212-german-nicht-before-a-coordinated-pronoun.md) | German | a coordinated object holding a pronoun stays behind "nicht" and the adverb (*frisst nicht schnell ihn und den Hund*), where [A191](fixed/A191-german-nicht-and-adverb-before-a-definite-object.md) moves a group of known nouns ahead |
 
 Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
 as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).

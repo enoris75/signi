@@ -256,6 +256,99 @@ describe('known bugs: complement negative concord', () => {
   });
 });
 
+// A208. The concord above reaches the Spanish and Portuguese statement, but the command, the
+// instruction and the infinitive each build their own negation gate in `predicateText`, from the
+// verb, the object and the adverb — not the complements. So "corre en ninguna casa" stays an
+// affirmative command where Spanish wants "no corras en ninguna casa". Italian and French gate every
+// mood on the same term, and are right.
+describe('known bugs: complement negative concord in a command or an infinitive', () => {
+  const noHouse = { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } };
+  const command = (verb: string, extra: Parameters<typeof clause>[2] = {}, addressee = np('SECOND_PERSON')) =>
+    sayAll(clause(addressee, verb, { ...extra, imperative: true }));
+  const instruction = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    command(verb, { ...extra, imperativeRegister: 'instruction' });
+  const infinitive = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(np('GENERIC_PERSON'), verb, { ...extra, infinitive: true }));
+
+  test.fails('Spanish and Portuguese negate a command, an instruction and an infinitive with a negative complement', () => {
+    expect(command('RUN', { complements: noHouse })).toMatchObject({
+      es: 'no corras en ninguna casa.', pt: 'não corra em nenhuma casa.',
+    });
+    expect(command('GO', { complements: { direction: { phrase: np('MARKET', { definiteness: 'no' }) } } })).toMatchObject({
+      es: 'no vayas a ningún mercado.', pt: 'não vá a nenhum mercado.',
+    });
+    expect(command('EAT', {
+      directObject: np('MOUSE'), complements: { comitative: { phrase: np('DOG', { definiteness: 'no' }) } },
+    }, np('SECOND_PERSON', { number: 'plural' }))).toMatchObject({
+      es: 'no comáis el ratón con ningún perro.', pt: 'não comam o rato com nenhum cão.',
+    });
+    // The negative command's form and clitic order follow from the gate alone.
+    expect(command('EAT', { directObject: np('THIRD_PERSON', { gender: 'masc' }), complements: noHouse })).toMatchObject({
+      es: 'no lo comas en ninguna casa.', pt: 'não o coma em nenhuma casa.',
+    });
+    expect(command('MOVE_ONESELF', { complements: noHouse })).toMatchObject({
+      es: 'no te muevas en ninguna casa.', pt: 'não se mova em nenhuma casa.',
+    });
+    expect(command('EDIT', { directObject: np('PHRASE'), complements: noHouse }, np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({
+      es: 'no editemos la frase en ninguna casa.', pt: 'não editemos a frase em nenhuma casa.',
+    });
+    expect(instruction('RUN', { complements: noHouse })).toMatchObject({
+      es: 'no correr en ninguna casa.', pt: 'não correr em nenhuma casa.',
+    });
+    expect(instruction('EAT', { directObject: np('MOUSE'), complements: noHouse })).toMatchObject({
+      es: 'no comer el ratón en ninguna casa.', pt: 'não comer o rato em nenhuma casa.',
+    });
+    expect(infinitive('RUN', { complements: noHouse })).toMatchObject({
+      es: 'no correr en ninguna casa.', pt: 'não correr em nenhuma casa.',
+    });
+    // The random phrase that found it.
+    expect(command('EDIT', {
+      verbPhrase: { tense: 'future' },
+      directObject: np('PHRASE', { definiteness: 'all' }),
+      complements: {
+        locative: {
+          phrase: np('MONEY', { definiteness: 'no', adjectives: ['QUICK'], adjectiveDegrees: ['least'] }),
+          specifiers: [{ kind: 'path', value: 'through' }],
+        },
+      },
+    }, np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({
+      es: 'no editemos todas las frases por ningún dinero menos rápido.',
+      pt: 'não editemos todas as frases por nenhum dinheiro menos rápido.',
+    });
+  });
+
+  test('regression: Italian and French already negate them, and the neighbouring cases stay put', () => {
+    expect(command('RUN', { complements: noHouse })).toMatchObject({
+      en: 'run in no house.', it: 'non correre in nessuna casa.', fr: 'ne cours dans aucune maison.',
+      de: 'lauf in keinem Haus.', ja: 'どの家でも走るな。',
+    });
+    expect(instruction('RUN', { complements: noHouse })).toMatchObject({
+      it: 'non correre in nessuna casa.', fr: 'ne courir dans aucune maison.',
+    });
+    expect(infinitive('RUN', { complements: noHouse })).toMatchObject({
+      it: 'non correre in nessuna casa.', fr: 'ne courir dans aucune maison.',
+    });
+    // Spanish and Portuguese: a negated verb beside the complement, and a `no` object, already
+    // negate the command; a comparison's `no` does not negate it (A181); a positive complement adds
+    // nothing; and a negated infinitive already takes its negator.
+    expect(command('RUN', { verbPhrase: { negative: true }, complements: noHouse })).toMatchObject({
+      es: 'no corras en ninguna casa.', pt: 'não corra em nenhuma casa.',
+    });
+    expect(command('EDIT', { directObject: np('PHRASE', { definiteness: 'no' }) })).toMatchObject({
+      es: 'no edites ninguna frase.', pt: 'não edite nenhuma frase.',
+    });
+    expect(command('RUN', { complements: { manner: { phrase: np('DOG', { definiteness: 'no' }) } } })).toMatchObject({
+      es: 'corre como ningún perro.', pt: 'corra como nenhum cão.',
+    });
+    expect(command('RUN', { complements: { locative: { phrase: np('HOUSE') } } })).toMatchObject({
+      es: 'corre en la casa.', pt: 'corra na casa.',
+    });
+    expect(infinitive('RUN', { verbPhrase: { negative: true }, complements: { locative: { phrase: np('HOUSE') } } })).toMatchObject({
+      es: 'no correr en la casa.', pt: 'não correr na casa.',
+    });
+  });
+});
+
 // A114. `npSegs` puts the どの…も circumfix's も right after the head noun, and every caller then
 // drops its particle, as if も replaced any particle. It replaces only が/を/は; with で, に, から, へ
 // and のために Japanese keeps the particle and adds も (どの家でも, どの犬にも). A relational noun lands
