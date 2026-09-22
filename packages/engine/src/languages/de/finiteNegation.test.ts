@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  complement, complements, concept, el, ESSEN, EUROPA, IMMER, KATZE, MAUS, modal, MUEDE, MUESSEN, NIE, np, vp, WASSER, WERDEN_VERB,
+  complement, complements, concept, el, ESSEN, EUROPA, HAUS, IMMER, KATZE, MAUS, modal, MUEDE, MUESSEN, NIE, np, vp, WASSER, WERDEN_VERB,
 } from './de.fixtures.js';
 import { finiteNegation } from './finiteNegation.js';
 
@@ -83,6 +83,23 @@ describe('finiteNegation', () => {
     const nominal = finiteNegation({ verbPhrase: vp(WERDEN_VERB, { negative: true, aspect: 'prospective' }), complements: aCat }, true);
     expect(nominal.nicht).toEqual({ ...empty, beforeAspect: 'nicht' });
     expect(determiners(nominal.complements?.['predicative']?.phrase)).toEqual(['indefinite']);
+  });
+
+  // A230: a `no` phrase there would keep its "kein" inside the zu-group and swallow the verb's
+  // negation, so the "nicht" carries ahead of "im Begriff" and the `no` phrases fall to the indefinite.
+  test('the prospective\'s nicht takes a kein phrase\'s negation away: "ist nicht im Begriff, eine Maus in einem Haus zu essen"', () => {
+    const inNoHouse = complements({ locative: complement(np(HAUS, { definiteness: 'no' })) });
+    const negated = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, aspect: 'prospective' }), directObject: noMouse, complements: inNoHouse }, true);
+    expect(negated.nicht).toEqual({ ...empty, beforeAspect: 'nicht' });
+    expect(determiners(negated.directObject)).toEqual(['indefinite']);
+    expect(determiners(negated.complements?.['locative']?.phrase)).toEqual(['indefinite']);
+    const noCat = complements({ predicative: complement(np(KATZE, { definiteness: 'no' })) });
+    const nominal = finiteNegation({ verbPhrase: vp(WERDEN_VERB, { negative: true, aspect: 'prospective' }), complements: noCat }, true);
+    expect(nominal.nicht).toEqual({ ...empty, beforeAspect: 'nicht' });
+    expect(determiners(nominal.complements?.['predicative']?.phrase)).toEqual(['indefinite']);
+    // The positive prospective's `no` phrase is its own "about to eat no mouse", and keeps its "kein".
+    expect(finiteNegation({ verbPhrase: vp(ESSEN, { aspect: 'prospective' }), directObject: noMouse }, false))
+      .toEqual({ nicht: empty, directObject: noMouse, complements: undefined });
   });
 
   // What "kein" cannot cover keeps "nicht": more than one conjunct and a proper name (the definite
