@@ -1786,6 +1786,70 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'tradução', plural: 'traduções', gender: 'fem', count: 'singular' },
     },
   },
+  // ── P09's question, and the two words B60's verb glosses stand on (localization B60) ──
+  {
+    // "A phrase with which one asks": the instrument gap, since the object gap is German "eine
+    // Phrase, nach der man fragt", a phrase one asks *for*. Japanese drops the role (尋ねるフレーズ),
+    // as EYE's 見る器官 does. Under PHRASE rather than CLAUSE, whose words are the grammar's
+    // (proposizione, 節); STATEMENT is the grammar sibling. QUESTION is glossed on ASK, not ASK on
+    // QUESTION: every language asks one with a light verb of its own (fare una domanda, eine Frage
+    // stellen, 質問する).
+    id: 'QUESTION',
+    role: 'noun',
+    description: 'words said to learn something',
+    definition: instrumentGloss('PHRASE', 'ASK'),
+    emoji: '❔',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'question', plural: 'questions', count: 'singular' },
+      it: { base: 'domanda', plural: 'domande', gender: 'fem', count: 'singular' },
+      fr: { base: 'question', plural: 'questions', gender: 'fem', count: 'singular' },
+      de: { base: 'Frage', plural: 'Fragen', gender: 'fem', count: 'singular' },
+      es: { base: 'pregunta', plural: 'preguntas', gender: 'fem', count: 'singular' },
+      ja: { base: '質問', count: 'singular', reading: 'しつもん' },
+      pt: { base: 'pergunta', plural: 'perguntas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The differentia of CALL_PHONE's gloss, "to use a telephone to speak with a person". Its own
+    // gloss is "an object with which one speaks", true of a microphone too, but distinct among
+    // OBJECT_THING's seeded kinds. German Telefon is a loan and takes the short genitive (des Telefons).
+    id: 'TELEPHONE',
+    role: 'noun',
+    description: 'a device for speaking with someone far away',
+    definition: instrumentGloss('OBJECT_THING', 'SPEAK'),
+    emoji: '☎️',
+    isA: 'OBJECT_THING',
+    forms: {
+      en: { base: 'telephone', plural: 'telephones', count: 'singular' },
+      it: { base: 'telefono', plural: 'telefoni', gender: 'masc', count: 'singular' },
+      fr: { base: 'téléphone', plural: 'téléphones', gender: 'masc', count: 'singular' },
+      de: { base: 'Telefon', plural: 'Telefone', gender: 'neut', count: 'singular', genitive: 'Telefons' },
+      es: { base: 'teléfono', plural: 'teléfonos', gender: 'masc', count: 'singular' },
+      ja: { base: '電話', count: 'singular', reading: 'でんわ' },
+      pt: { base: 'telefone', plural: 'telefones', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The differentia of THINK's gloss, "to use the mind". Japanese 頭脳, since 心 is the heart (心を使う
+    // is "to be considerate") and 頭 the head; German Verstand, since Geist is the spirit. Verstand has
+    // no plural in use: Verstände is the regular one (Zustand, Zustände) a plural pick falls back on.
+    // Unglossed, a root of C26's kind: "a part with which one thinks" would define THINK back, and "a
+    // part of a person" is also a hand.
+    id: 'MIND',
+    role: 'noun',
+    description: 'the faculty of a person that thinks',
+    emoji: '🧠',
+    forms: {
+      en: { base: 'mind', plural: 'minds', count: 'singular' },
+      it: { base: 'mente', plural: 'menti', gender: 'fem', count: 'singular' },
+      fr: { base: 'esprit', plural: 'esprits', gender: 'masc', count: 'singular' },
+      de: { base: 'Verstand', plural: 'Verstände', gender: 'masc', count: 'singular' },
+      es: { base: 'mente', plural: 'mentes', gender: 'fem', count: 'singular' },
+      ja: { base: '頭脳', count: 'singular', reading: 'ずのう' },
+      pt: { base: 'mente', plural: 'mentes', gender: 'fem', count: 'singular' },
+    },
+  },
 
   {
     id: 'CONTINENT',

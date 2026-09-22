@@ -292,4 +292,164 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+
+  // ── The saying verbs with an addressee (localization B60) ──
+  {
+    // P09's tell, to relate something to someone: the verbs of relating, not SAY's dire / sagen /
+    // decir, which would render SAY in five languages. Japanese 伝える, not SPEAK's 話す nor the
+    // narrating 語る: "女は男に物語を伝えます".
+    id: 'TELL',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'cause'],
+    description: 'to relate something to someone',
+    // "to say facts to a person", GIVE's recipient frame on SAY. A lie or a joke is told too; "words"
+    // would read as merely addressing someone, and is the frame ANSWER takes.
+    definition: infinitiveGloss('SAY', {
+      object: 'FACT',
+      number: 'plural',
+      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
+    emoji: '🗣️',
+    isA: 'SAY',
+    forms: {
+      en: {
+        base: 'tell',
+        '1sg_present': 'tell', '2sg_present': 'tell', '3sg_present': 'tells',
+        '1pl_present': 'tell', '2pl_present': 'tell', '3pl_present': 'tell',
+        past: 'told',
+      },
+      it: {
+        base: 'raccontare',
+        '1sg_present': 'racconto', '2sg_present': 'racconti', '3sg_present': 'racconta',
+        '1pl_present': 'raccontiamo', '2pl_present': 'raccontate', '3pl_present': 'raccontano',
+        '1sg_past': 'raccontai', '2sg_past': 'raccontasti', '3sg_past': 'raccontò',
+        '1pl_past': 'raccontammo', '2pl_past': 'raccontaste', '3pl_past': 'raccontarono',
+        '1sg_future': 'racconterò', '2sg_future': 'racconterai', '3sg_future': 'racconterà',
+        '1pl_future': 'racconteremo', '2pl_future': 'racconterete', '3pl_future': 'racconteranno',
+      },
+      fr: {
+        base: 'raconter',
+        '1sg_present': 'raconte', '2sg_present': 'racontes', '3sg_present': 'raconte',
+        '1pl_present': 'racontons', '2pl_present': 'racontez', '3pl_present': 'racontent',
+        '1sg_past': 'racontai', '2sg_past': 'racontas', '3sg_past': 'raconta',
+        '1pl_past': 'racontâmes', '2pl_past': 'racontâtes', '3pl_past': 'racontèrent',
+        '1sg_future': 'raconterai', '2sg_future': 'raconteras', '3sg_future': 'racontera',
+        '1pl_future': 'raconterons', '2pl_future': 'raconterez', '3pl_future': 'raconteront',
+      },
+      de: {
+        // erzählen is inseparable: no ge- in the participle (erzählt).
+        base: 'erzählen',
+        '1sg_present': 'erzähle', '2sg_present': 'erzählst', '3sg_present': 'erzählt',
+        '1pl_present': 'erzählen', '2pl_present': 'erzählt', '3pl_present': 'erzählen',
+        '1sg_past': 'erzählte', '2sg_past': 'erzähltest', '3sg_past': 'erzählte',
+        '1pl_past': 'erzählten', '2pl_past': 'erzähltet', '3pl_past': 'erzählten',
+      },
+      es: {
+        // contar diphthongises o → ue under the stress: cuento, cuentan, but contamos.
+        base: 'contar',
+        '1sg_present': 'cuento', '2sg_present': 'cuentas', '3sg_present': 'cuenta',
+        '1pl_present': 'contamos', '2pl_present': 'contáis', '3pl_present': 'cuentan',
+        '1sg_past': 'conté', '2sg_past': 'contaste', '3sg_past': 'contó',
+        '1pl_past': 'contamos', '2pl_past': 'contasteis', '3pl_past': 'contaron',
+        '1sg_future': 'contaré', '2sg_future': 'contarás', '3sg_future': 'contará',
+        '1pl_future': 'contaremos', '2pl_future': 'contaréis', '3pl_future': 'contarán',
+      },
+      ja: {
+        base: '伝える',
+        reading: 'つたえる',
+        masu_present: '伝えます',
+        masu_present_reading: 'つたえます',
+      },
+      pt: {
+        base: 'contar',
+        '1sg_present': 'conto', '2sg_present': 'conta', '3sg_present': 'conta',
+        '1pl_present': 'contamos', '2pl_present': 'contam', '3pl_present': 'contam',
+        '1sg_past': 'contei', '2sg_past': 'contou', '3sg_past': 'contou',
+        '1pl_past': 'contamos', '2pl_past': 'contaram', '3pl_past': 'contaram',
+        '1sg_future': 'contarei', '2sg_future': 'contará', '3sg_future': 'contará',
+        '1pl_future': 'contaremos', '2pl_future': 'contarão', '3pl_future': 'contarão',
+      },
+    },
+  },
+
+  {
+    // P09's ask in the inquire sense, not request. Japanese 尋ねる, since 聞く is HEAR's; Italian
+    // chiedere, since domandare is QUESTION's domanda made a verb. German asks *for* the thing,
+    // `object_prep` nach ("fragt nach dem Namen"). The person asked is where ASK is not a plain
+    // ditransitive: German fragen takes the person in the accusative (localization C35's lexical
+    // case), and the terminus renders "asks the name to the man" and "fragt dem Mann" today.
+    id: 'ASK',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'cause'],
+    description: 'to put a question to someone',
+    // "to say words to know the facts": the purpose says what asking is for without a question noun.
+    // KNOW with a noun object takes KNOW_ACQUAINTED's verb (conoscere, kennen, A131), right with the
+    // definite; the purpose clause's unspoken subject is the asker.
+    definition: infinitiveGloss('SAY', {
+      object: 'WORD',
+      number: 'plural',
+      purpose: { verb: 'KNOW', object: 'FACT', number: 'plural', definiteness: 'definite' },
+    }),
+    emoji: '🙋',
+    isA: 'SAY',
+    forms: {
+      en: {
+        base: 'ask',
+        '1sg_present': 'ask', '2sg_present': 'ask', '3sg_present': 'asks',
+        '1pl_present': 'ask', '2pl_present': 'ask', '3pl_present': 'ask',
+        past: 'asked',
+      },
+      it: {
+        base: 'chiedere',
+        '1sg_present': 'chiedo', '2sg_present': 'chiedi', '3sg_present': 'chiede',
+        '1pl_present': 'chiediamo', '2pl_present': 'chiedete', '3pl_present': 'chiedono',
+        '1sg_past': 'chiesi', '2sg_past': 'chiedesti', '3sg_past': 'chiese',
+        '1pl_past': 'chiedemmo', '2pl_past': 'chiedeste', '3pl_past': 'chiesero',
+        '1sg_future': 'chiederò', '2sg_future': 'chiederai', '3sg_future': 'chiederà',
+        '1pl_future': 'chiederemo', '2pl_future': 'chiederete', '3pl_future': 'chiederanno',
+      },
+      fr: {
+        base: 'demander',
+        '1sg_present': 'demande', '2sg_present': 'demandes', '3sg_present': 'demande',
+        '1pl_present': 'demandons', '2pl_present': 'demandez', '3pl_present': 'demandent',
+        '1sg_past': 'demandai', '2sg_past': 'demandas', '3sg_past': 'demanda',
+        '1pl_past': 'demandâmes', '2pl_past': 'demandâtes', '3pl_past': 'demandèrent',
+        '1sg_future': 'demanderai', '2sg_future': 'demanderas', '3sg_future': 'demandera',
+        '1pl_future': 'demanderons', '2pl_future': 'demanderez', '3pl_future': 'demanderont',
+      },
+      de: {
+        base: 'fragen', object_prep: 'nach',
+        '1sg_present': 'frage', '2sg_present': 'fragst', '3sg_present': 'fragt',
+        '1pl_present': 'fragen', '2pl_present': 'fragt', '3pl_present': 'fragen',
+        '1sg_past': 'fragte', '2sg_past': 'fragtest', '3sg_past': 'fragte',
+        '1pl_past': 'fragten', '2pl_past': 'fragtet', '3pl_past': 'fragten',
+      },
+      es: {
+        base: 'preguntar',
+        '1sg_present': 'pregunto', '2sg_present': 'preguntas', '3sg_present': 'pregunta',
+        '1pl_present': 'preguntamos', '2pl_present': 'preguntáis', '3pl_present': 'preguntan',
+        '1sg_past': 'pregunté', '2sg_past': 'preguntaste', '3sg_past': 'preguntó',
+        '1pl_past': 'preguntamos', '2pl_past': 'preguntasteis', '3pl_past': 'preguntaron',
+        '1sg_future': 'preguntaré', '2sg_future': 'preguntarás', '3sg_future': 'preguntará',
+        '1pl_future': 'preguntaremos', '2pl_future': 'preguntaréis', '3pl_future': 'preguntarán',
+      },
+      ja: {
+        base: '尋ねる',
+        reading: 'たずねる',
+        masu_present: '尋ねます',
+        masu_present_reading: 'たずねます',
+      },
+      pt: {
+        base: 'perguntar',
+        '1sg_present': 'pergunto', '2sg_present': 'pergunta', '3sg_present': 'pergunta',
+        '1pl_present': 'perguntamos', '2pl_present': 'perguntam', '3pl_present': 'perguntam',
+        '1sg_past': 'perguntei', '2sg_past': 'perguntou', '3sg_past': 'perguntou',
+        '1pl_past': 'perguntamos', '2pl_past': 'perguntaram', '3pl_past': 'perguntaram',
+        '1sg_future': 'perguntarei', '2sg_future': 'perguntará', '3sg_future': 'perguntará',
+        '1pl_future': 'perguntaremos', '2pl_future': 'perguntarão', '3pl_future': 'perguntarão',
+      },
+    },
+  },
 ];

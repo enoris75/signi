@@ -1116,6 +1116,79 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // P09's think (localization B60), intransitive: its *that* clause (E4) and its *about* (E2) wait
+    // on constructs, and neither is a concept of its own.
+    id: 'THINK',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to form thoughts in the mind',
+    // "to use the mind", on the MIND seeded for it: 頭脳を使う is the idiom; the French and German
+    // (utiliser l'esprit, den Verstand verwenden) are understood rather than idiomatic. Without MIND
+    // every lead said something narrower: creating concepts is inventing, understanding them KNOW's.
+    definition: infinitiveGloss('USE', { object: 'MIND', definiteness: 'definite' }),
+    emoji: '🤔',
+    forms: {
+      en: {
+        base: 'think',
+        '1sg_present': 'think', '2sg_present': 'think', '3sg_present': 'thinks',
+        '1pl_present': 'think', '2pl_present': 'think', '3pl_present': 'think',
+        past: 'thought',
+      },
+      it: {
+        base: 'pensare',
+        '1sg_present': 'penso', '2sg_present': 'pensi', '3sg_present': 'pensa',
+        '1pl_present': 'pensiamo', '2pl_present': 'pensate', '3pl_present': 'pensano',
+        '1sg_past': 'pensai', '2sg_past': 'pensasti', '3sg_past': 'pensò',
+        '1pl_past': 'pensammo', '2pl_past': 'pensaste', '3pl_past': 'pensarono',
+        '1sg_future': 'penserò', '2sg_future': 'penserai', '3sg_future': 'penserà',
+        '1pl_future': 'penseremo', '2pl_future': 'penserete', '3pl_future': 'penseranno',
+      },
+      fr: {
+        base: 'penser',
+        '1sg_present': 'pense', '2sg_present': 'penses', '3sg_present': 'pense',
+        '1pl_present': 'pensons', '2pl_present': 'pensez', '3pl_present': 'pensent',
+        '1sg_past': 'pensai', '2sg_past': 'pensas', '3sg_past': 'pensa',
+        '1pl_past': 'pensâmes', '2pl_past': 'pensâtes', '3pl_past': 'pensèrent',
+        '1sg_future': 'penserai', '2sg_future': 'penseras', '3sg_future': 'pensera',
+        '1pl_future': 'penserons', '2pl_future': 'penserez', '3pl_future': 'penseront',
+      },
+      de: {
+        // denken is mixed: a weak ending on the strong stem, dachte and gedacht.
+        base: 'denken',
+        '1sg_present': 'denke', '2sg_present': 'denkst', '3sg_present': 'denkt',
+        '1pl_present': 'denken', '2pl_present': 'denkt', '3pl_present': 'denken',
+        '1sg_past': 'dachte', '2sg_past': 'dachtest', '3sg_past': 'dachte',
+        '1pl_past': 'dachten', '2pl_past': 'dachtet', '3pl_past': 'dachten',
+      },
+      es: {
+        // pensar diphthongises e → ie under the stress: pienso, piensan, but pensamos.
+        base: 'pensar',
+        '1sg_present': 'pienso', '2sg_present': 'piensas', '3sg_present': 'piensa',
+        '1pl_present': 'pensamos', '2pl_present': 'pensáis', '3pl_present': 'piensan',
+        '1sg_past': 'pensé', '2sg_past': 'pensaste', '3sg_past': 'pensó',
+        '1pl_past': 'pensamos', '2pl_past': 'pensasteis', '3pl_past': 'pensaron',
+        '1sg_future': 'pensaré', '2sg_future': 'pensarás', '3sg_future': 'pensará',
+        '1pl_future': 'pensaremos', '2pl_future': 'pensaréis', '3pl_future': 'pensarán',
+      },
+      ja: {
+        base: '考える',
+        reading: 'かんがえる',
+        masu_present: '考えます',
+        masu_present_reading: 'かんがえます',
+      },
+      pt: {
+        base: 'pensar',
+        '1sg_present': 'penso', '2sg_present': 'pensa', '3sg_present': 'pensa',
+        '1pl_present': 'pensamos', '2pl_present': 'pensam', '3pl_present': 'pensam',
+        '1sg_past': 'pensei', '2sg_past': 'pensou', '3sg_past': 'pensou',
+        '1pl_past': 'pensamos', '2pl_past': 'pensaram', '3pl_past': 'pensaram',
+        '1sg_future': 'pensarei', '2sg_future': 'pensará', '3sg_future': 'pensará',
+        '1pl_future': 'pensaremos', '2pl_future': 'pensarão', '3pl_future': 'pensarão',
+      },
+    },
+  },
   // PRECEDE and FOLLOW are what PREVIOUS and NEXT are glossed on, "that precedes" and "that follows"
   // (localization C24). Intransitive, as B55 proposed: German vorangehen governs a dative a direct
   // object cannot mark, and Japanese 続く and 先行する take their "what" with に, where the engine

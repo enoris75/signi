@@ -7050,6 +7050,412 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // ── The saying and thinking verbs (localization B60) ──
+  {
+    // P09's say: to utter words, spoken or written ("the letter says", "il cartello dice"), which is
+    // what tells it from SPEAK's aloud. TELL and ASK hang under it, and it under EXPRESS, beside
+    // TRANSLATE: the same frame with another instrument. The `terminus` is who it is said to ("dire
+    // parole a una persona"), which TELL's and ANSWER's glosses name.
+    id: 'SAY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'terminus', 'cause', 'locative'],
+    description: 'to utter words',
+    // "to express concepts with words": the instrument is the differentia, as TRANSLATE's other
+    // language is. It is true of writing too, which is right for SAY and was what kept SPEAK literal
+    // (localization C28).
+    definition: infinitiveGloss('EXPRESS', {
+      object: 'CONCEPT',
+      number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural' } } },
+    }),
+    emoji: '🗨️',
+    isA: 'EXPRESS',
+    forms: {
+      en: {
+        base: 'say',
+        '1sg_present': 'say', '2sg_present': 'say', '3sg_present': 'says',
+        '1pl_present': 'say', '2pl_present': 'say', '3pl_present': 'say',
+        past: 'said',
+      },
+      it: {
+        base: 'dire',
+        '1sg_present': 'dico', '2sg_present': 'dici', '3sg_present': 'dice',
+        '1pl_present': 'diciamo', '2pl_present': 'dite', '3pl_present': 'dicono',
+        '1sg_past': 'dissi', '2sg_past': 'dicesti', '3sg_past': 'disse',
+        '1pl_past': 'dicemmo', '2pl_past': 'diceste', '3pl_past': 'dissero',
+        '1sg_future': 'dirò', '2sg_future': 'dirai', '3sg_future': 'dirà',
+        '1pl_future': 'diremo', '2pl_future': 'direte', '3pl_future': 'diranno',
+      },
+      fr: {
+        base: 'dire',
+        '1sg_present': 'dis', '2sg_present': 'dis', '3sg_present': 'dit',
+        '1pl_present': 'disons', '2pl_present': 'dites', '3pl_present': 'disent',
+        '1sg_past': 'dis', '2sg_past': 'dis', '3sg_past': 'dit',
+        '1pl_past': 'dîmes', '2pl_past': 'dîtes', '3pl_past': 'dirent',
+        '1sg_future': 'dirai', '2sg_future': 'diras', '3sg_future': 'dira',
+        '1pl_future': 'dirons', '2pl_future': 'direz', '3pl_future': 'diront',
+      },
+      de: {
+        base: 'sagen',
+        '1sg_present': 'sage', '2sg_present': 'sagst', '3sg_present': 'sagt',
+        '1pl_present': 'sagen', '2pl_present': 'sagt', '3pl_present': 'sagen',
+        '1sg_past': 'sagte', '2sg_past': 'sagtest', '3sg_past': 'sagte',
+        '1pl_past': 'sagten', '2pl_past': 'sagtet', '3pl_past': 'sagten',
+      },
+      es: {
+        base: 'decir',
+        '1sg_present': 'digo', '2sg_present': 'dices', '3sg_present': 'dice',
+        '1pl_present': 'decimos', '2pl_present': 'decís', '3pl_present': 'dicen',
+        '1sg_past': 'dije', '2sg_past': 'dijiste', '3sg_past': 'dijo',
+        '1pl_past': 'dijimos', '2pl_past': 'dijisteis', '3pl_past': 'dijeron',
+        '1sg_future': 'diré', '2sg_future': 'dirás', '3sg_future': 'dirá',
+        '1pl_future': 'diremos', '2pl_future': 'diréis', '3pl_future': 'dirán',
+      },
+      ja: {
+        base: '言う',
+        reading: 'いう',
+        masu_present: '言います',
+        masu_present_reading: 'いいます',
+      },
+      pt: {
+        base: 'dizer',
+        '1sg_present': 'digo', '2sg_present': 'diz', '3sg_present': 'diz',
+        '1pl_present': 'dizemos', '2pl_present': 'dizem', '3pl_present': 'dizem',
+        '1sg_past': 'disse', '2sg_past': 'disse', '3sg_past': 'disse',
+        '1pl_past': 'dissemos', '2pl_past': 'disseram', '3pl_past': 'disseram',
+        '1sg_future': 'direi', '2sg_future': 'dirá', '3sg_future': 'dirá',
+        '1pl_future': 'diremos', '2pl_future': 'dirão', '3pl_future': 'dirão',
+      },
+    },
+  },
+
+  {
+    // P09's call in the sense D1 split from NAME: to summon, "call the man". CALL_PHONE is the other
+    // call. German rufen is CRY_OUT's German too, so the German picker shows it twice; Spanish llamar
+    // is CALL_PHONE's too, which is what Spanish says for both.
+    id: 'CALL',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to summon someone',
+    // "to cause a person to come": the causative of COME with a person as causee. BRING is the same
+    // causative with an object (localization B61), and the causee is the difference. "By voice" does
+    // not attach: "with words" on the causer or on COME breaks either way (B60).
+    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'COME' }),
+    emoji: '📣',
+    synonym: 'summon',
+    forms: {
+      en: {
+        base: 'call',
+        '1sg_present': 'call', '2sg_present': 'call', '3sg_present': 'calls',
+        '1pl_present': 'call', '2pl_present': 'call', '3pl_present': 'call',
+        past: 'called',
+      },
+      it: {
+        base: 'chiamare',
+        '1sg_present': 'chiamo', '2sg_present': 'chiami', '3sg_present': 'chiama',
+        '1pl_present': 'chiamiamo', '2pl_present': 'chiamate', '3pl_present': 'chiamano',
+        '1sg_past': 'chiamai', '2sg_past': 'chiamasti', '3sg_past': 'chiamò',
+        '1pl_past': 'chiamammo', '2pl_past': 'chiamaste', '3pl_past': 'chiamarono',
+        '1sg_future': 'chiamerò', '2sg_future': 'chiamerai', '3sg_future': 'chiamerà',
+        '1pl_future': 'chiameremo', '2pl_future': 'chiamerete', '3pl_future': 'chiameranno',
+      },
+      fr: {
+        // appeler doubles its l before a mute e: appelle, appellent, appellerai — not in appelons.
+        base: 'appeler',
+        '1sg_present': 'appelle', '2sg_present': 'appelles', '3sg_present': 'appelle',
+        '1pl_present': 'appelons', '2pl_present': 'appelez', '3pl_present': 'appellent',
+        '1sg_past': 'appelai', '2sg_past': 'appelas', '3sg_past': 'appela',
+        '1pl_past': 'appelâmes', '2pl_past': 'appelâtes', '3pl_past': 'appelèrent',
+        '1sg_future': 'appellerai', '2sg_future': 'appelleras', '3sg_future': 'appellera',
+        '1pl_future': 'appellerons', '2pl_future': 'appellerez', '3pl_future': 'appelleront',
+      },
+      de: {
+        base: 'rufen',
+        '1sg_present': 'rufe', '2sg_present': 'rufst', '3sg_present': 'ruft',
+        '1pl_present': 'rufen', '2pl_present': 'ruft', '3pl_present': 'rufen',
+        '1sg_past': 'rief', '2sg_past': 'riefst', '3sg_past': 'rief',
+        '1pl_past': 'riefen', '2pl_past': 'rieft', '3pl_past': 'riefen',
+      },
+      es: {
+        base: 'llamar',
+        '1sg_present': 'llamo', '2sg_present': 'llamas', '3sg_present': 'llama',
+        '1pl_present': 'llamamos', '2pl_present': 'llamáis', '3pl_present': 'llaman',
+        '1sg_past': 'llamé', '2sg_past': 'llamaste', '3sg_past': 'llamó',
+        '1pl_past': 'llamamos', '2pl_past': 'llamasteis', '3pl_past': 'llamaron',
+        '1sg_future': 'llamaré', '2sg_future': 'llamarás', '3sg_future': 'llamará',
+        '1pl_future': 'llamaremos', '2pl_future': 'llamaréis', '3pl_future': 'llamarán',
+      },
+      ja: {
+        base: '呼ぶ',
+        reading: 'よぶ',
+        masu_present: '呼びます',
+        masu_present_reading: 'よびます',
+      },
+      pt: {
+        base: 'chamar',
+        '1sg_present': 'chamo', '2sg_present': 'chama', '3sg_present': 'chama',
+        '1pl_present': 'chamamos', '2pl_present': 'chamam', '3pl_present': 'chamam',
+        '1sg_past': 'chamei', '2sg_past': 'chamou', '3sg_past': 'chamou',
+        '1pl_past': 'chamamos', '2pl_past': 'chamaram', '3pl_past': 'chamaram',
+        '1sg_future': 'chamarei', '2sg_future': 'chamará', '3sg_future': 'chamará',
+        '1pl_future': 'chamaremos', '2pl_future': 'chamarão', '3pl_future': 'chamarão',
+      },
+    },
+  },
+
+  {
+    // P09's call in the telephone sense (D1). The person called is a prepositional object in four
+    // languages, each on the key its engine reads: it "telefona all'uomo", fr "téléphone à l'homme",
+    // pt "telefona para o homem" (`object_prep`), ja 男に電話する (`object_particle`); German anrufen
+    // takes the accusative and is separable ("ruft den Mann an"). Spanish llamar is CALL's word too,
+    // which is what Spanish says; Portuguese telefonar, since ligar is LINK's.
+    id: 'CALL_PHONE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to telephone someone',
+    // "to use a telephone to speak with a person": a purpose clause keeps the telephone out of the
+    // instrumental, which after a verb of speaking reads as the one spoken with ("mit einem Telefon
+    // sprechen"). TELEPHONE is the stem of the verb in four languages: a cognate in the differentia,
+    // not the genus.
+    definition: infinitiveGloss('USE', {
+      object: 'TELEPHONE',
+      definiteness: 'indefinite',
+      purpose: {
+        verb: 'SPEAK',
+        complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+      },
+    }),
+    emoji: '📞',
+    synonym: 'phone',
+    forms: {
+      en: {
+        base: 'call',
+        '1sg_present': 'call', '2sg_present': 'call', '3sg_present': 'calls',
+        '1pl_present': 'call', '2pl_present': 'call', '3pl_present': 'call',
+        past: 'called',
+      },
+      it: {
+        base: 'telefonare', object_prep: 'a',
+        '1sg_present': 'telefono', '2sg_present': 'telefoni', '3sg_present': 'telefona',
+        '1pl_present': 'telefoniamo', '2pl_present': 'telefonate', '3pl_present': 'telefonano',
+        '1sg_past': 'telefonai', '2sg_past': 'telefonasti', '3sg_past': 'telefonò',
+        '1pl_past': 'telefonammo', '2pl_past': 'telefonaste', '3pl_past': 'telefonarono',
+        '1sg_future': 'telefonerò', '2sg_future': 'telefonerai', '3sg_future': 'telefonerà',
+        '1pl_future': 'telefoneremo', '2pl_future': 'telefonerete', '3pl_future': 'telefoneranno',
+      },
+      fr: {
+        base: 'téléphoner', object_prep: 'à',
+        '1sg_present': 'téléphone', '2sg_present': 'téléphones', '3sg_present': 'téléphone',
+        '1pl_present': 'téléphonons', '2pl_present': 'téléphonez', '3pl_present': 'téléphonent',
+        '1sg_past': 'téléphonai', '2sg_past': 'téléphonas', '3sg_past': 'téléphona',
+        '1pl_past': 'téléphonâmes', '2pl_past': 'téléphonâtes', '3pl_past': 'téléphonèrent',
+        '1sg_future': 'téléphonerai', '2sg_future': 'téléphoneras', '3sg_future': 'téléphonera',
+        '1pl_future': 'téléphonerons', '2pl_future': 'téléphonerez', '3pl_future': 'téléphoneront',
+      },
+      de: {
+        base: 'anrufen', particle: 'an',
+        '1sg_present': 'rufe', '2sg_present': 'rufst', '3sg_present': 'ruft',
+        '1pl_present': 'rufen', '2pl_present': 'ruft', '3pl_present': 'rufen',
+        '1sg_past': 'rief', '2sg_past': 'riefst', '3sg_past': 'rief',
+        '1pl_past': 'riefen', '2pl_past': 'rieft', '3pl_past': 'riefen',
+      },
+      es: {
+        base: 'llamar',
+        '1sg_present': 'llamo', '2sg_present': 'llamas', '3sg_present': 'llama',
+        '1pl_present': 'llamamos', '2pl_present': 'llamáis', '3pl_present': 'llaman',
+        '1sg_past': 'llamé', '2sg_past': 'llamaste', '3sg_past': 'llamó',
+        '1pl_past': 'llamamos', '2pl_past': 'llamasteis', '3pl_past': 'llamaron',
+        '1sg_future': 'llamaré', '2sg_future': 'llamarás', '3sg_future': 'llamará',
+        '1pl_future': 'llamaremos', '2pl_future': 'llamaréis', '3pl_future': 'llamarán',
+      },
+      ja: {
+        base: '電話する',
+        reading: 'でんわする',
+        masu_present: '電話します',
+        masu_present_reading: 'でんわします',
+        object_particle: 'に',
+      },
+      pt: {
+        base: 'telefonar', object_prep: 'para',
+        '1sg_present': 'telefono', '2sg_present': 'telefona', '3sg_present': 'telefona',
+        '1pl_present': 'telefonamos', '2pl_present': 'telefonam', '3pl_present': 'telefonam',
+        '1sg_past': 'telefonei', '2sg_past': 'telefonou', '3sg_past': 'telefonou',
+        '1pl_past': 'telefonamos', '2pl_past': 'telefonaram', '3pl_past': 'telefonaram',
+        '1sg_future': 'telefonarei', '2sg_future': 'telefonará', '3sg_future': 'telefonará',
+        '1pl_future': 'telefonaremos', '2pl_future': 'telefonarão', '3pl_future': 'telefonarão',
+      },
+    },
+  },
+
+  {
+    // P09's mean in the signify sense only ("the word means a concept"); the intend sense waits with
+    // P09's row. A state, as INCLUDE is: the Romance past is its imperfect (significava), Japanese
+    // says it with 〜ている (意味しています).
+    id: 'MEAN',
+    role: 'verb',
+    stative: true,
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to have as its meaning',
+    // "to have as meaning": INCLUDE's essive frame on MEANING, bare as PART is there. MEANING is
+    // cognate with MEAN in five languages (significato, Bedeutung, significado, 意味): the differentia
+    // again. MEANING, unglossed, cannot now be glossed on MEAN, a two-word circle.
+    definition: infinitiveGloss('HAVE', {
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'MEANING', definiteness: 'bare' },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    }),
+    emoji: '🔣',
+    synonym: 'signify',
+    forms: {
+      en: {
+        base: 'mean',
+        '1sg_present': 'mean', '2sg_present': 'mean', '3sg_present': 'means',
+        '1pl_present': 'mean', '2pl_present': 'mean', '3pl_present': 'mean',
+        past: 'meant',
+      },
+      it: {
+        base: 'significare',
+        '1sg_present': 'significo', '2sg_present': 'significhi', '3sg_present': 'significa',
+        '1pl_present': 'significhiamo', '2pl_present': 'significate', '3pl_present': 'significano',
+        '1sg_past': 'significai', '2sg_past': 'significasti', '3sg_past': 'significò',
+        '1pl_past': 'significammo', '2pl_past': 'significaste', '3pl_past': 'significarono',
+        '1sg_future': 'significherò', '2sg_future': 'significherai', '3sg_future': 'significherà',
+        '1pl_future': 'significheremo', '2pl_future': 'significherete', '3pl_future': 'significheranno',
+      },
+      fr: {
+        base: 'signifier',
+        '1sg_present': 'signifie', '2sg_present': 'signifies', '3sg_present': 'signifie',
+        '1pl_present': 'signifions', '2pl_present': 'signifiez', '3pl_present': 'signifient',
+        '1sg_past': 'signifiai', '2sg_past': 'signifias', '3sg_past': 'signifia',
+        '1pl_past': 'signifiâmes', '2pl_past': 'signifiâtes', '3pl_past': 'signifièrent',
+        '1sg_future': 'signifierai', '2sg_future': 'signifieras', '3sg_future': 'signifiera',
+        '1pl_future': 'signifierons', '2pl_future': 'signifierez', '3pl_future': 'signifieront',
+      },
+      de: {
+        // A -t stem takes an epenthetic -e- before the -st/-t endings: bedeutest, bedeutete.
+        base: 'bedeuten',
+        '1sg_present': 'bedeute', '2sg_present': 'bedeutest', '3sg_present': 'bedeutet',
+        '1pl_present': 'bedeuten', '2pl_present': 'bedeutet', '3pl_present': 'bedeuten',
+        '1sg_past': 'bedeutete', '2sg_past': 'bedeutetest', '3sg_past': 'bedeutete',
+        '1pl_past': 'bedeuteten', '2pl_past': 'bedeutetet', '3pl_past': 'bedeuteten',
+      },
+      es: {
+        base: 'significar',
+        '1sg_present': 'significo', '2sg_present': 'significas', '3sg_present': 'significa',
+        '1pl_present': 'significamos', '2pl_present': 'significáis', '3pl_present': 'significan',
+        '1sg_past': 'signifiqué', '2sg_past': 'significaste', '3sg_past': 'significó',
+        '1pl_past': 'significamos', '2pl_past': 'significasteis', '3pl_past': 'significaron',
+        '1sg_future': 'significaré', '2sg_future': 'significarás', '3sg_future': 'significará',
+        '1pl_future': 'significaremos', '2pl_future': 'significaréis', '3pl_future': 'significarán',
+      },
+      ja: {
+        base: '意味する',
+        reading: 'いみする',
+        masu_present: '意味します',
+        masu_present_reading: 'いみします',
+      },
+      pt: {
+        base: 'significar',
+        '1sg_present': 'significo', '2sg_present': 'significa', '3sg_present': 'significa',
+        '1pl_present': 'significamos', '2pl_present': 'significam', '3pl_present': 'significam',
+        '1sg_past': 'signifiquei', '2sg_past': 'significou', '3sg_past': 'significou',
+        '1pl_past': 'significamos', '2pl_past': 'significaram', '3pl_past': 'significaram',
+        '1sg_future': 'significarei', '2sg_future': 'significará', '3sg_future': 'significará',
+        '1pl_future': 'significaremos', '2pl_future': 'significarão', '3pl_future': 'significarão',
+      },
+    },
+  },
+
+  {
+    // P09's believe, with a thing as its object ("believes the story"); a person believed, German
+    // glauben + dative, is E9 and outside this seed (localization C35). Italian credere a and
+    // Portuguese acreditar em take the thing with a preposition (`object_prep`): "crede alla
+    // storia", "acredita na história". A state: credeva, 信じています.
+    id: 'BELIEVE',
+    role: 'verb',
+    stative: true,
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to take something as true',
+    // "to accept as fact": INCLUDE's essive frame on ACCEPT. Japanese 受け付ける is ACCEPT's interface
+    // word (an entry accepted), so 事実として受け付ける reads "to register as fact": the lexeme, not the
+    // plan, and VALID stands on it.
+    definition: infinitiveGloss('ACCEPT', {
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'FACT', definiteness: 'bare' },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    }),
+    emoji: '🙏',
+    forms: {
+      en: {
+        base: 'believe',
+        '1sg_present': 'believe', '2sg_present': 'believe', '3sg_present': 'believes',
+        '1pl_present': 'believe', '2pl_present': 'believe', '3pl_present': 'believe',
+        past: 'believed',
+      },
+      it: {
+        base: 'credere', object_prep: 'a',
+        '1sg_present': 'credo', '2sg_present': 'credi', '3sg_present': 'crede',
+        '1pl_present': 'crediamo', '2pl_present': 'credete', '3pl_present': 'credono',
+        '1sg_past': 'credetti', '2sg_past': 'credesti', '3sg_past': 'credette',
+        '1pl_past': 'credemmo', '2pl_past': 'credeste', '3pl_past': 'credettero',
+        '1sg_future': 'crederò', '2sg_future': 'crederai', '3sg_future': 'crederà',
+        '1pl_future': 'crederemo', '2pl_future': 'crederete', '3pl_future': 'crederanno',
+      },
+      fr: {
+        base: 'croire',
+        '1sg_present': 'crois', '2sg_present': 'crois', '3sg_present': 'croit',
+        '1pl_present': 'croyons', '2pl_present': 'croyez', '3pl_present': 'croient',
+        '1sg_past': 'crus', '2sg_past': 'crus', '3sg_past': 'crut',
+        '1pl_past': 'crûmes', '2pl_past': 'crûtes', '3pl_past': 'crurent',
+        '1sg_future': 'croirai', '2sg_future': 'croiras', '3sg_future': 'croira',
+        '1pl_future': 'croirons', '2pl_future': 'croirez', '3pl_future': 'croiront',
+      },
+      de: {
+        base: 'glauben',
+        '1sg_present': 'glaube', '2sg_present': 'glaubst', '3sg_present': 'glaubt',
+        '1pl_present': 'glauben', '2pl_present': 'glaubt', '3pl_present': 'glauben',
+        '1sg_past': 'glaubte', '2sg_past': 'glaubtest', '3sg_past': 'glaubte',
+        '1pl_past': 'glaubten', '2pl_past': 'glaubtet', '3pl_past': 'glaubten',
+      },
+      es: {
+        // creer writes the unstressed i between vowels as y: creyó, creyeron, creyendo.
+        base: 'creer',
+        '1sg_present': 'creo', '2sg_present': 'crees', '3sg_present': 'cree',
+        '1pl_present': 'creemos', '2pl_present': 'creéis', '3pl_present': 'creen',
+        '1sg_past': 'creí', '2sg_past': 'creíste', '3sg_past': 'creyó',
+        '1pl_past': 'creímos', '2pl_past': 'creísteis', '3pl_past': 'creyeron',
+        '1sg_future': 'creeré', '2sg_future': 'creerás', '3sg_future': 'creerá',
+        '1pl_future': 'creeremos', '2pl_future': 'creeréis', '3pl_future': 'creerán',
+      },
+      ja: {
+        base: '信じる',
+        reading: 'しんじる',
+        masu_present: '信じます',
+        masu_present_reading: 'しんじます',
+      },
+      pt: {
+        base: 'acreditar', object_prep: 'em',
+        '1sg_present': 'acredito', '2sg_present': 'acredita', '3sg_present': 'acredita',
+        '1pl_present': 'acreditamos', '2pl_present': 'acreditam', '3pl_present': 'acreditam',
+        '1sg_past': 'acreditei', '2sg_past': 'acreditou', '3sg_past': 'acreditou',
+        '1pl_past': 'acreditamos', '2pl_past': 'acreditaram', '3pl_past': 'acreditaram',
+        '1sg_future': 'acreditarei', '2sg_future': 'acreditará', '3sg_future': 'acreditará',
+        '1pl_future': 'acreditaremos', '2pl_future': 'acreditarão', '3pl_future': 'acreditarão',
+      },
+    },
+  },
+
   {
     id: 'REPLACE',
     role: 'verb',
@@ -7545,6 +7951,17 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to say back what was asked for',
+    // "to say words to a person who asks" (localization B60, re-opening C28's literal verdict): a
+    // relative on the recipient says the *what was asked* C28 wanted a question noun or a reply
+    // relation for. German puts the relative inside the clause, "einer Person, die fragt, Wörter
+    // sagen". QUESTION as the object would not do: rispondere, répondre and antworten take a dative.
+    definition: infinitiveGloss('SAY', {
+      object: 'WORD',
+      number: 'plural',
+      complements: {
+        terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'ASK' } } } },
+      },
+    }),
     emoji: '💬',
     forms: {
       en: {
