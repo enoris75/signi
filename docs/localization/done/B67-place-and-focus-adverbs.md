@@ -2,7 +2,8 @@
 
 _(from the P09 core-vocabulary sweep of 2026-09-22. This ticket covers P09's eight adverbs of place and focus (§2
 *Adverbs*, D4). Three ship on this seed. HERE needs no new differentia, ALSO waits on B66's SAME, and
-REALLY needs one new noun plus the fix for A219. THERE, JUST, STILL and ONLY wait on the engine:
+REALLY needs one new noun plus the fix for
+[A219](../../bugs/fixed/A219-french-bare-singular-after-dans.md), **which landed on 2026-09-22**. THERE, JUST, STILL and ONLY wait on the engine:
 JUST and STILL on a temporal complement ([C29](../C-needs-engine/C29-temporal-complement.md)), ONLY on *nothing*
 ([C32](../C-needs-engine/C32-indefinite-pronouns.md)), THERE on the French distal demonstrative
 ([C40](../C-needs-engine/C40-french-distal-demonstrative.md)). EVEN's concept waits as well, because Japanese has no verb
@@ -32,8 +33,8 @@ and REALITY are the differentia for ALSO and REALLY:
   reads the position from concept ids: add SAME to Italian `PRENOMINAL_DETERMINER` beside OTHER,
   and to the French, Spanish and Portuguese `PRENOMINAL` sets. Without that, ALSO's gloss reads
   *de la manière même*.
-- **REALITY must be countable.** A219's fix gives *en* to a bare count singular. A noun seeded with
-  `countable: false` gets *dans de la réalité* instead (rendered below).
+- **REALITY must be countable.** A219's fix, now at HEAD, gives *en* to a bare count singular. A noun
+  seeded with `countable: false` gets *dans de la réalité* instead (rendered below).
 
 **Japanese.** Five of the eight have a Japanese adverb that reads right before the verb: まだ,
 本当に, たった今 (with a past verb), ここ and そこ (see note 1 below for their particle). For *also*,
@@ -68,7 +69,9 @@ touches a gloss:
    - Spanish and Portuguese: BE with a place adverb takes *ser*. It should take *estar*, as it
      already does with the complement. EVERYWHERE shows this today as well (*el gato es en todas
      partes*).
-   - No bug file covers either.
+   - No bug file covers either. **Both were fixed with this seed** (see **Done** 2), so the clause
+     rows above now read *el gato está aquí*, *o gato está aqui*, 猫はここにいます and 猫はここに住みます,
+     and EVERYWHERE with them.
 2. **STILL and ALSO outscope the negation.** The correct forms are *still does not*, *noch nicht*,
    *does not … either*, *auch nicht*, *tampoco*, *neanche* and *non plus*. D4 asks for each
    language's position to be pinned, and the negative belongs in that pin.
@@ -89,7 +92,7 @@ touches a gloss:
 
 HERE uses the construct EVERYWHERE shipped on ([C25](../done/C25-place-and-direction-adverbs.md))
 with NOW's deictic determiner. ALSO uses WELL's `mode` shape with SAME, so it becomes an A when B66
-lands. REALLY becomes an A when REALITY is seeded and A219 is fixed.
+lands. REALLY becomes an A when REALITY is seeded; A219 is fixed.
 
 ## Probe renders (2026-09-22, engine source at HEAD, lexicon seeded in memory with the forms above)
 
@@ -99,8 +102,8 @@ lands. REALLY becomes an A when REALITY is seeded and A219 is fixed.
 | EVERYWHERE (shipped, for comparison) | in all places | in tutti i luoghi | dans tous les lieux | in allen Orten | en todos los lugares | すべての場所で | em todos os lugares |
 | ALSO, with SAME prenominal in it/fr/es/pt ¹ | in the same way | nello stesso modo | de la même manière | auf die gleiche Weise | de la misma manera | 同じ方法で | da mesma maneira |
 | ALSO, with SAME seeded without its position | in the same way | nel modo stesso | de la manière même | auf die gleiche Weise | de la manera misma | 同じ方法で | da maneira mesma |
-| REALLY (HEAD) | in reality | in realtà | dans réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
-| REALLY, with A219's fix ² | in reality | in realtà | en réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
+| REALLY (HEAD before A219 landed) | in reality | in realtà | dans réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
+| REALLY, with A219's fix ² — **what HEAD now renders** | in reality | in realtà | en réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
 | *rejected:* REALITY `countable: false`, with A219's fix ² | in reality | in realtà | dans de la réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
 | *rejected:* ALSO as TIME + SAME (`measure`) ¹ | at the same time | allo stesso tempo | au même temps | zu der gleichen Zeit | al mismo tiempo | 同じ時間で | ao mesmo tempo |
 | *rejected:* ALSO as ADDITION\* `bare`, `mode` | in addition | in aggiunta | d'ajout | auf Zusatz | de adición | 追加で | de adição |
@@ -113,16 +116,18 @@ lands. REALLY becomes an A when REALITY is seeded and A219 is fixed.
 \* A candidate probed in memory and not proposed. FACT is seeded, and it was probed under each
 relation through a copy of its forms.
 ¹ SAME was added to the four Romance position sets in memory, which is where B66's seed will put it.
-² A219's own *Shape of the fix* was applied to a scratch copy of the engine, never to the tree.
-Under it, EVERYWHERE, TOGETHER, BACKWARDS and HOME render byte-identically.
+² A219's own *Shape of the fix* was applied to a scratch copy of the engine, never to the tree. Under
+it, EVERYWHERE, TOGETHER, BACKWARDS and HOME render byte-identically. It landed in the tree on
+2026-09-22, so every "with A219's fix" row above is what HEAD renders now; A218 landed with it, so
+EVERYWHERE's German is *an allen Orten*, not *in allen Orten*.
 
 All three shipping glosses render in all seven languages, and none restates a shipped gloss. Four
 readings to judge on authoring:
 
 1. **HERE: German *in diesem Ort*.**
-   - A218 is the bug for it: its
+   - [A218](../../bugs/fixed/A218-german-ort-takes-an-and-von.md) was the bug for it: its
      **Want** row "… in this PLACE" is *an diesem Ort*, which is Duden's own definition of *hier*.
-   - The gloss ships as it is and gets better when A218 lands.
+   - **A218 landed on 2026-09-22**, so the gloss ships as *an diesem Ort* already.
    - French *ce* is also the distal demonstrative
      ([demArticle.ts](../../../packages/engine/src/languages/fr/demArticle.ts)). So *dans ce lieu*
      reads "in this place" only by default, which is why THERE cannot ship (**Not solved** 1).
@@ -257,3 +262,75 @@ authored, each through `openVerbAdverb`:
   depends on.
 - **REALLY in English and French (*en réalité*).** This pins A219's fix through the first gloss that
   shows it.
+
+## Done
+
+Shipped 2026-09-22. **Seven words seeded** — the six P09 adverbs HERE, THERE, JUST, ALSO, ONLY and
+REALLY ([adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts): HERE and THERE after
+EVERYWHERE, the four focus adverbs after NO_LONGER) and the differentia noun REALITY
+([nouns.ts](../../../packages/backend/src/concepts/nouns.ts), after SORROW, countable) — and **three
+glosses** authored. STILL was seeded ahead of them with the words two tickets share, and its position
+is pinned there; EVEN is not seeded ([C39](../C-needs-engine/C39-focus-particle-on-a-noun-phrase.md)).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| HERE | in this place | in questo luogo | dans ce lieu | an diesem Ort | en este lugar | この場所で | neste lugar |
+| ALSO | in the same way | nello stesso modo | de la même manière | auf die gleiche Weise | de la misma manera | 同じ方法で | da mesma maneira |
+| REALLY | in reality | in realtà | en réalité | in Wirklichkeit | en realidad | 現実で | em realidade |
+
+The adverbs in a clause, from the seed as it shipped:
+
+| clause | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| cat BE, HERE | the cat is here. | il gatto è qui. | le chat est ici. | der Kater ist hier. | el gato está aquí. | 猫はここにいます。 | o gato está aqui. |
+| cat LIVE, HERE | the cat lives here. | il gatto abita qui. | le chat habite ici. | der Kater wohnt hier. | el gato vive aquí. | 猫はここに住みます。 | o gato mora aqui. |
+| cat EAT food, HERE | the cat eats the food here. | il gatto mangia il cibo qui. | le chat mange la nourriture ici. | der Kater frisst das Essen hier. | el gato come la comida aquí. | 猫は食べ物をここで食べます。 | o gato come a comida aqui. |
+| cat BE, THERE | the cat is there. | il gatto è lì. | le chat est là. | der Kater ist dort. | el gato está allí. | 猫はそこにいます。 | o gato está ali. |
+| cat BE, EVERYWHERE (shipped) | the cat is everywhere. | il gatto è ovunque. | le chat est partout. | der Kater ist überall. | el gato está en todas partes. | 猫はどこにでもいます。 | o gato está em toda parte. |
+| cat EAT food, ALSO | the cat also eats the food. | il gatto mangia anche il cibo. | le chat mange aussi la nourriture. | der Kater frisst auch das Essen. | el gato come también la comida. | 猫は食べ物を同じく食べます。 | o gato come também a comida. |
+| cat EAT food, ONLY | the cat only eats the food. | il gatto mangia solo il cibo. | le chat mange seulement la nourriture. | der Kater frisst nur das Essen. | el gato come solo la comida. | 猫は食べ物をただ食べます。 | o gato come só a comida. |
+| cat EAT food, REALLY | the cat really eats the food. | il gatto mangia davvero il cibo. | le chat mange vraiment la nourriture. | der Kater frisst wirklich das Essen. | el gato come realmente la comida. | 猫は食べ物を本当に食べます。 | o gato come realmente a comida. |
+| cat EAT food, JUST, resultative | the cat has just eaten the food. | la gatta ha appena mangiato il cibo. | la chatte a mangé à l'instant la nourriture. | die Katze hat soeben das Essen gefressen. | la gata ha comido hace un momento la comida. | 猫は食べ物をたった今食べました。 | a gata comeu há pouco a comida. |
+
+What landed differently from the plan:
+
+1. **A219 and A218 landed before the seed did**, so two rows the ticket wrote as futures are the
+   present: REALLY's French is *en réalité* (the first shipped gloss that shows A219's fix, and the
+   e2e row below pins it), and HERE's German is *an diesem Ort*, which is Duden's own definition of
+   *hier*. Nothing else in the tables moved.
+2. **The two place-adverb defects of note 1 were fixed here rather than filed.** Being somewhere is a
+   locative whether a complement or an adverb says where, so
+   [es](../../../packages/engine/src/languages/es/predicateText.ts) and
+   [pt](../../../packages/engine/src/languages/pt/predicateText.ts) now select *estar* for a place
+   adverb as they already did for a locative (*el gato está aquí*, *o gato está aqui*), and Japanese
+   says the adverb with the particle its verb gives a place — a new `locative_ni` form (ここに, そこに,
+   どこにでも) read by
+   [jaModifierSeg](../../../packages/engine/src/languages/ja/jaModifierSeg.ts) under the existential
+   いる / ある and 住む (猫はここにいます, どこにでも住みます), where an ordinary verb keeps で
+   (ここで食べます). EVERYWHERE is fixed with them, and beside a predicate the adverb is an adjunct
+   again (*el gato es grande aquí*, 猫はここで大きいです).
+3. **STILL and ALSO under a negation are pinned, not fixed** (`PENDING-L6-1` in
+   [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts)),
+   as note 2 expected: the adverb sits in the frequency slot inside the negation, giving *the cat does
+   not still eat*, *der Kater frisst das Essen nicht noch*, *il gatto non mangia anche il cibo*, *ne
+   mange pas aussi*, *no come también*, *não come também*, where each language puts it outside or
+   swaps the word (*still does not*, *noch nicht*; *does not … either*, *auch nicht*, *neanche*, *non
+   plus*, *tampoco*, *também não*). It wants adverb scope, not a form: no gloss shows it, and the
+   Italian, Spanish and Portuguese STILL rows read acceptably as they stand (*non mangia ancora*).
+4. **JUST keeps the `frequency` subtype in en/it/de/ja and none in fr/es/pt**, as proposed. The three
+   "ago" phrases then take a manner adverb's place after the verb and before the object (*la chatte a
+   mangé à l'instant la nourriture*, *ha comido hace un momento la comida*), which reads but is not
+   where those languages would put the phrase. That is the position D4 asked to be pinned, and it is,
+   in the new test file; the gloss still waits on [C29](../C-needs-engine/C29-temporal-complement.md).
+5. **THERE, JUST, ONLY and STILL ship with no gloss**, and their leads were re-probed at HEAD. Two
+   rows changed, neither verdict: A218 gives THERE's leads *an jenem Ort*, *am Ort* and *an einem
+   fernen Ort* (French still collides with HERE's *dans ce lieu*, which is what blocks it), and SAME's
+   new position gives STILL's "at this same time" as *a questo stesso tempo*, *à ce même temps*, *a
+   este mismo tiempo*, *a este mesmo tempo* — still a moment rather than a stretch.
+6. **ALSO's gloss stands on B66's prenominal SAME**, which landed with this batch: *nello stesso
+   modo*, *de la même manière*, *de la misma manera*, *da mesma maneira*. The rejected leads are
+   unchanged, the French verbless similative still drops *de* before a bare plural (*comme autres
+   objets*), and that defect is still unfiled.
+7. **REALITY ships countable and unglossed**, a root noun of [C26](../done/C26-root-nouns-on-the-literal.md)'s
+   kind, as **No mutual definitions** asked: REALLY's gloss says its own noun, as STRONG's says
+   strength.
