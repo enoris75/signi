@@ -20,7 +20,7 @@ import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
 import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
-import type { Case } from '../de.types.js';
+import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
 import { dePredOrdinal } from '../dePredOrdinal.js';
@@ -57,11 +57,14 @@ const DE_ADJUNCT_ORDER = COMPLEMENT_RENDER_ORDER.filter((type) => !DE_PREDICATE_
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
 // complements with the infinitival copula ("scheint im Markt eine Legende zu sein"). `agreement` is
 // what the predicate is said of — the clause's subject, a causative's causee, a relative's head — whose
-// gender and number a predicate ordinal takes ("die Katze ist die Erste", A225).
+// gender and number a predicate ordinal takes ("die Katze ist die Erste", A225). `object` is what an
+// object predicate is said of, and its case: the direct object in the accusative, or a passive's
+// subject in the nominative, whose gender and number an essive ordinal takes (A231).
 export function complementsParts(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   verb: ConceptForms['forms'] = {},
   agreement: Record<string, string> = {},
+  object: ObjectPredicateHost = { agreement: {}, case: 'acc' },
 ): { adjuncts: string; predicate: string } {
   if (!complements) return { adjuncts: '', predicate: '' };
   const render = (type: ComplementType): string => {
@@ -97,9 +100,15 @@ export function complementsParts(
       const essive = type === 'objectPredicative' && objectPredication(c) === 'essive';
       const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
       // A German object predicative adjective is uninflected, as the subject one is ("streicht
-      // die Wand rot", "betrachtet die Wand als rot").
+      // die Wand rot", "betrachtet die Wand als rot"). An ordinal after "als" is nominalised
+      // instead, as a subject one is (A225), in the gender and number of the object and in the case
+      // "als" shares with it: "sieht das Haus als das Erste", "den Hund als den Ersten" (A231). The
+      // factitive with no link ("macht die Option erste") wants MAKE's "zu", not a new form here.
       if (type === 'objectPredicative' && np.head.forms['role'] === 'adjective') {
-        return [essive ? 'als' : '', dePredAdj(np.head)].filter(Boolean).join(' ');
+        const word = essive && np.head.forms['ordinal'] === '1'
+          ? dePredOrdinal(np.head, object.agreement, object.case)
+          : dePredAdj(np.head);
+        return [essive ? 'als' : '', word].filter(Boolean).join(' ');
       }
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "zu Hause",
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.

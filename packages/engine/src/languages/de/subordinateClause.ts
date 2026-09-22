@@ -8,6 +8,7 @@ import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { complementsWithNicht } from './complementsWithNicht.js';
+import type { ObjectPredicateHost } from './de.types.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { meansClause } from './meansClause.js';
@@ -133,7 +134,13 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // The adverbs already follow the objects here, so a direction adverb only has to leave the
   // prospective group's pre-object slot (see `adverbSlots`).
   const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
-  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements, agreeForms);
+  // What an object predicate is said of (A231): the direct object in the accusative, which is the
+  // head itself when the head is the gapped object ("der Hund, den der Kater als den Ersten sieht");
+  // under the passive the patient is the clause's subject, in the nominative (see `renderClause`).
+  const objectHost: ObjectPredicateHost = passive
+    ? { agreement: agreeForms, case: 'nom' }
+    : { agreement: rel.headRole === 'directObject' ? f : rel.directObject?.agreement ?? {}, case: 'acc' };
+  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements, agreeForms, objectHost);
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, Specifier } from '@signi/shared';
+import type { NounElement, NounPhrase, Specifier, VerbPhrase } from '@signi/shared';
 import { clause, furigana, np, say, sayAll } from '../harness.js';
 
 // The OBJECT complement (localization C12) — the subject complement's counterpart on the direct
@@ -153,18 +153,54 @@ describe('known bugs: a Japanese na-adjective keeps its な before として (A2
 // the gender of what it is said of ("das Haus ist das Erste"). The essive object predicate is the
 // same predication, said of the object, and still takes the undeclined adjective path: "sieht das
 // Haus als erste", where German wants "als das Erste". Found fixing A225.
+// The fix renders an essive ordinal with A225's `dePredOrdinal`, in the agreement and the case of
+// what the object predicate is said of, which the clause builders now hand the complements too.
 describe('known bugs: a German ordinal as an essive object predicate is left bare (A231)', () => {
   const seesAs = (subject: string, object: string, ordinal: string) =>
     sayAll(clause(np(subject), 'SEE', { directObject: np(object), complements: { objectPredicative: { phrase: np(ordinal), specifiers: ESSIVE } } }));
+  const asFirst = { objectPredicative: { phrase: np('FIRST'), specifiers: ESSIVE } };
 
-  test.fails('the ordinal takes the article and the capital, in the object\'s gender', () => {
+  test('the ordinal takes the article and the capital, in the object\'s gender', () => {
     expect(seesAs('CAT', 'HOUSE', 'FIRST').de).toBe('der Kater sieht das Haus als das Erste.');
     expect(seesAs('PERSON', 'OPTION', 'SECOND').de).toBe('die Person sieht die Option als die Zweite.');
+  });
+
+  // "als" shares the object's accusative, so a masculine takes "den" and the weak -n; a plural or a
+  // group is plural whatever its genders.
+  test('a masculine object takes the accusative article and the weak -n, a plural one the plural', () => {
+    expect(seesAs('CAT', 'DOG', 'FIRST').de).toBe('der Kater sieht den Hund als den Ersten.');
+    const sees = (object: NounElement, verbPhrase: Partial<VerbPhrase> = {}) =>
+      say(clause(np('CAT'), 'SEE', { verbPhrase, directObject: object, complements: asFirst }), 'de');
+    expect(sees(np('HOUSE', { number: 'plural' }))).toBe('der Kater sieht die Häuser als die Ersten.');
+    expect(sees(np('DOG', { number: 'plural' }))).toBe('der Kater sieht die Hunde als die Ersten.');
+    expect(sees({ conjuncts: [np('DOG'), np('HOUSE')], conjunction: 'and' })).toBe('der Kater sieht den Hund und das Haus als die Ersten.');
+    expect(sees(np('THIRD_PERSON', { gender: 'masc' }))).toBe('der Kater sieht ihn als den Ersten.');
+    expect(sees(np('DOG'), { tense: 'past' })).toBe('der Kater sah den Hund als den Ersten.');
+    expect(sees(np('DOG'), { negative: true })).toBe('der Kater sieht den Hund nicht als den Ersten.');
+  });
+
+  // A command and a relative take the same accusative; a relative gapped on the object says it of
+  // its own head. Under the passive the patient is the subject, and "als" shares its nominative.
+  test('a command, a relative, and the passive, where it is said of the subject', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('DOG'), complements: asFirst }), imperative: true }, 'de'))
+      .toBe('sieh den Hund als den Ersten.');
+    expect(say(clause(np('DOG', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'SEE' }, complements: asFirst } }), 'RUN'), 'de'))
+      .toBe('der Hund, den der Kater als den Ersten sieht, läuft.');
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('DOG'), complements: asFirst } }), 'RUN'), 'de'))
+      .toBe('der Kater, der den Hund als den Ersten sieht, läuft.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG'), verbPhrase: { voice: 'passive' }, complements: asFirst }), 'de'))
+      .toBe('der Hund wird vom Kater als der Erste gesehen.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('OPTION'), verbPhrase: { voice: 'passive' }, complements: asFirst }), 'de'))
+      .toBe('die Option wird vom Kater als die Erste gesehen.');
+    expect(say(clause(np('DOG', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'SEE', voice: 'passive' }, complements: asFirst } }), 'RUN'), 'de'))
+      .toBe('der Hund, der vom Kater als der Erste gesehen wird, läuft.');
   });
 
   test('regression: the subject predicate (A225) and the other six', () => {
     expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('FIRST') } } })).de).toBe('das Haus ist das Erste.');
     expect(sayAll(clause(np('OPTION'), 'BE', { complements: { predicative: { phrase: np('SECOND') } } })).de).toBe('die Option ist die Zweite.');
+    // A plain adjective stays undeclined after "als".
+    expect(seesAs('CAT', 'DOG', 'HAPPY').de).toBe('der Kater sieht den Hund als glücklich.');
     expect(seesAs('CAT', 'HOUSE', 'FIRST')).toMatchObject({
       en: 'the cat sees the house as first.',
       it: 'il gatto vede la casa come prima.',

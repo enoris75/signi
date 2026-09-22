@@ -239,6 +239,16 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(SCHEINEN), { complements: tired }))).toBe('der Kater scheint müde');
     });
 
+    // A231: an essive ordinal is said of the object, in the accusative "als" shares with it; under
+    // the passive the patient is the subject, and it is the nominative.
+    test('an essive ordinal agrees with the object, or with a passive\'s subject', () => {
+      const asFirst = complements({ objectPredicative: complement(np({ role: 'adjective', base: 'erste', ordinal: '1' }), [{ kind: 'predication', value: 'essive' }]) });
+      expect(renderClause(clause(np(MANN), vp(ZEIGEN), { directObject: el(np(KATER)), complements: asFirst }))).toBe('der Mann zeigt den Kater als den Ersten');
+      expect(renderClause(clause(np(MANN), vp(ZEIGEN), { directObject: el(np(KATZE)), complements: asFirst }))).toBe('der Mann zeigt die Katze als die Erste');
+      expect(renderClause(clause(np(KATER), vp(ZEIGEN, { voice: 'passive', passiveAux: concept(WERDEN_VERB) }), { complements: asFirst })))
+        .toBe('der Kater wird als der Erste gezeigt');
+    });
+
     test('the other complements trail the object, ahead of the non-finite tail', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN), { directObject: mouse, complements: inTheHouse }))).toBe('der Kater isst die Maus im Haus');
       expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'resultative' }), { directObject: mouse, complements: inTheHouse })))

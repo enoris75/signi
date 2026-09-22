@@ -9,6 +9,7 @@ import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { complementsWithNicht } from './complementsWithNicht.js';
+import type { ObjectPredicateHost } from './de.types.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { complementGloss } from './complementGloss.js';
@@ -148,6 +149,12 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // never reflexive, whatever the lexical verb is.
     const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
     const plain = passive ? verbPhrase.passiveAux!.forms : nonReflexiveVerb(verb).forms;
+    // What an object predicate is said of (A231): the direct object, in the accusative ("sieht den
+    // Hund als den Ersten"). Under the passive the patient is the subject, and "als" shares its
+    // nominative ("der Hund wird als der Erste gesehen").
+    const objectHost: ObjectPredicateHost = passive
+      ? { agreement: subject.agreement, case: 'nom' }
+      : { agreement: directObject?.agreement ?? {}, case: 'acc' };
     const passiveParticipleText = passive ? passiveParticiple(verb) : '';
     const withReflexive = (pn: string, pronoun: string) =>
       [passive ? '' : reflexivePronoun(verb.forms, pn), pronoun].filter(Boolean).join(' ');
@@ -165,7 +172,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
       // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
       const impAdverb = adverbSlots(modifier, neg, '');
-      const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
+      const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement, objectHost);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
@@ -196,7 +203,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       const infDirect = splitObject(objectToRender, proObject, objectPrep);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
-      const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
+      const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement, objectHost);
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
       // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
       // finite clause puts it too: "gegessen werden", "gegessen zu werden".
@@ -261,7 +268,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // its place in front of the accusative object and travels with it.
     const objects = [dativeText, directObjectText];
     const objectLeads = !passive && objectLeadsNicht(adverb.nichtBeforeObject, objectNoun, objectToRender);
-    const complementsText = complementsWithNicht([proPlace, prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
+    const complementsText = complementsWithNicht([proPlace, prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement, objectHost);
     // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
     // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
     // non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. It is used for the

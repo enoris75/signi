@@ -63,6 +63,28 @@ describe('complementsPhrase', () => {
     });
   });
 
+  describe('objectPredicative', () => {
+    const ERSTE: Forms = { role: 'adjective', base: 'erste', ordinal: '1' };
+    const essive: Specifier = { kind: 'predication', value: 'essive' };
+
+    // A231: an essive ordinal is nominalised in the agreement and the case of what it is said of —
+    // the object, in the accusative, or a passive's subject, in the nominative — not the subject's.
+    test('an essive ordinal takes the article and the capital of the object, in its case', () => {
+      const asFirst = complements({ objectPredicative: complement(np(ERSTE), [essive]) });
+      expect(complementsParts(asFirst, {}, KATZE, { agreement: KATER, case: 'acc' }).predicate).toBe('als den Ersten');
+      expect(complementsParts(asFirst, {}, KATER, { agreement: HAUS, case: 'acc' }).predicate).toBe('als das Erste');
+      expect(complementsParts(asFirst, {}, KATER, { agreement: { ...HAUS, number: 'plural' }, case: 'acc' }).predicate).toBe('als die Ersten');
+      expect(complementsParts(asFirst, {}, {}, { agreement: KATER, case: 'nom' }).predicate).toBe('als der Erste');
+    });
+
+    test('a plain adjective stays undeclined, and a factitive ordinal is left as it was', () => {
+      expect(complementsParts(complements({ objectPredicative: complement(np(MUEDE), [essive]) }), {}, {}, { agreement: KATER, case: 'acc' }).predicate)
+        .toBe('als müde');
+      expect(complementsParts(complements({ objectPredicative: complement(np(ERSTE)) }), {}, {}, { agreement: KATER, case: 'acc' }).predicate)
+        .toBe('erste');
+    });
+  });
+
   describe('terminus', () => {
     test('an animate recipient is a bare dative', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(KATZE)) }))).toBe('der Katze');
