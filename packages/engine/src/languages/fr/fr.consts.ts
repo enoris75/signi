@@ -30,7 +30,8 @@ export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string, s
   bas: ['bas', 'basse', 'bas', 'basses', 'bas'],
 };
 
-export const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
+// œ and æ are vowel letters too, and one seeded noun opens on one: œil, l'œil (localization B52).
+export const VOWEL_START = /^[aeiouéèêëàâîïôùûüœæ]/i;
 
 /**
  * Concept IDs of the "BAGS" adjectives (beauty, age, goodness, size) that precede the

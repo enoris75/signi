@@ -9,6 +9,10 @@ describe('elidesBefore', () => {
     expect(elidesBefore(AFRIQUE, 'Afrique')).toBe(true);
   });
 
+  test('elides before the œ ligature, which one seeded noun opens on', () => {
+    expect(elidesBefore(CHAT, 'œil')).toBe(true);
+  });
+
   test('does not elide before a consonant', () => {
     expect(elidesBefore(CHAT, 'chat')).toBe(false);
   });

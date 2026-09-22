@@ -1427,3 +1427,39 @@ describe('known bugs: Spanish and Portuguese use ser in a place relative clause'
     });
   });
 });
+
+// A206. The impersonal "se" is the passive "se" before a plural object, and the verb agrees with it.
+// A73 fixed Italian and Spanish and left Portuguese out by name, because its main-clause target
+// ("comem-se os ratos") also moves the clitic. In a relative clause Portuguese is proclitic anyway,
+// so only the agreement is missing — and every whereGloss/whoGloss definition with a plural object
+// goes through this path. Filed while authoring localization A23 (CANVAS).
+describe('known bugs: the Portuguese impersonal se and a plural object (A206)', () => {
+  // CANVAS's own definition plan: a locative-gap relative with a generic subject and a bare plural
+  // object. Italian and Spanish agree the verb; Portuguese leaves it singular.
+  const canvas = {
+    subject: {
+      concept: 'PLACE',
+      definiteness: 'indefinite' as const,
+      relative: {
+        headRole: 'locative' as const,
+        subject: { concept: 'GENERIC_PERSON' },
+        verbPhrase: { verb: 'MAKE' },
+        directObject: { concept: 'PHRASE', definiteness: 'bare' as const, number: 'plural' as const },
+      },
+    },
+  };
+
+  test.fails('Portuguese agrees the impersonal verb with its plural object', () => {
+    expect(sayAll(canvas).pt).toBe('um lugar onde se fazem frases.');
+  });
+
+  // Already right, and what the fix must not disturb: A73's two languages, and a singular object.
+  test('Italian and Spanish already agree, and a singular object stays singular', () => {
+    expect(sayAll(canvas)).toMatchObject({
+      it: 'un luogo dove si fanno frasi.',
+      es: 'un lugar donde se hacen frases.',
+    });
+    expect(sayAll({ ...canvas, subject: { ...canvas.subject, relative: { ...canvas.subject.relative, directObject: { concept: 'PHRASE', definiteness: 'bare' as const } } } }).pt)
+      .toBe('um lugar onde se faz frase.');
+  });
+});

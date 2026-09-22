@@ -503,12 +503,15 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
   const IT: [id: string, it: string][] = [
     ['ACCEPT', 'la gatta ha accettato.'],
     ['ACQUIRE', 'la gatta ha acquisito.'], ['ACT', 'la gatta ha agito.'],
+    ['ACCOMPANY', 'la gatta ha accompagnato.'], ['ANSWER', 'la gatta ha risposto.'],
+    ['ARRANGE', 'la gatta ha disposto.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['APPLY', 'la gatta ha applicato.'],
     ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
     ['BECOME', 'la gatta è diventata.'],
     // The inchoative BEGIN selects essere and agrees; the causative START keeps avere.
     ['BEGIN', 'la gatta è iniziata.'], ['BITE', 'la gatta ha morso.'],
+    ['BREATHE', 'la gatta ha respirato.'],
     ['BURN', 'la gatta ha bruciato.'], ['BUY', 'la gatta ha comprato.'],
     ['CANCEL', 'la gatta ha annullato.'],
     // The causative CAUSE_VERB: indurre contracts to the participle indotto, under avere.
@@ -521,6 +524,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['COME', 'la gatta è venuta.'], ['COMPACT', 'la gatta ha compattato.'],
     ['COMPLETE', 'la gatta ha completato.'],
     ['CONFINE', 'la gatta ha rinchiuso.'],
+    ['CONNECT', 'la gatta ha connesso.'],
     ['COORDINATE', 'la gatta ha coordinato.'], ['COPY', 'la gatta ha copiato.'],
     ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
@@ -531,15 +535,22 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],
     // EDIT shares MODIFY's verb (B43).
     ['EDIT', 'la gatta ha modificato.'],
+    // umschließen is inseparable, so the German participle has no ge-; Italian racchiudere is strong.
+    ['ENCLOSE', 'la gatta ha racchiuso.'], ['EXCHANGE', 'la gatta ha scambiato.'],
     ['EXPAND', 'la gatta ha espanso.'], ['EXPORT', 'la gatta ha esportato.'],
     ['EXPRESS', 'la gatta ha espresso.'],
     ['EXTINGUISH', 'la gatta ha spento.'], ['FEEL', 'la gatta ha provato.'],
     ['FILTER', 'la gatta ha filtrato.'],
+    // volare takes avere for the activity, where German fliegen selects sein ("ist geflogen").
+    ['FLY', 'la gatta ha volato.'],
     ['GIVE', 'la gatta ha dato.'],
     ['GO', 'la gatta è andata.'],
     // reggere's participle is the strong retto.
-    ['GOVERN', 'la gatta ha retto.'], ['HAVE', 'la gatta ha avuto.'],
-    ['HIDE', 'la gatta ha nascosto.'], ['HOLD', 'la gatta ha contenuto.'],
+    ['GOVERN', 'la gatta ha retto.'],
+    // GOVERN is the grammatical sense (reggere); GOVERN_STATE is the political one (governare).
+    ['GOVERN_STATE', 'la gatta ha governato.'], ['HAVE', 'la gatta ha avuto.'],
+    ['HIDE', 'la gatta ha nascosto.'],
+    ['HEAR', 'la gatta ha sentito.'], ['HOLD', 'la gatta ha contenuto.'],
     ['IMPORT', 'la gatta ha importato.'], ['INCLUDE', 'la gatta ha incluso.'],
     ['INDICATE', 'la gatta ha indicato.'],
     ['JUMP', 'la gatta ha saltato.'],
@@ -566,12 +577,14 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // Going back takes essere, as GO does, and agrees (B43).
     ['RETURN', 'la gatta è tornata.'],
     ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
-    ['SEE', 'la gatta ha visto.'], ['SEEM', 'la gatta è sembrata.'],
+    ['SEE', 'la gatta ha visto.'],
+    ['SEARCH', 'la gatta ha cercato.'], ['SEEM', 'la gatta è sembrata.'],
     ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
     ['SET', 'la gatta ha impostato.'],
     ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHED', 'la gatta ha versato.'],
     ['SHOW', 'la gatta ha mostrato.'], ['SHRINK', 'la gatta ha rimpicciolito.'],
     ['SPECIFY', 'la gatta ha specificato.'],
+    ['SPEAK', 'la gatta ha parlato.'],
     ['START', 'la gatta ha iniziato.'],
     ['STRIKE', 'la gatta ha colpito.'], ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],

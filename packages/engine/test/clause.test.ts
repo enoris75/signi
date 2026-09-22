@@ -359,3 +359,43 @@ describe('known bugs: the article on a language name', () => {
     });
   });
 });
+
+// A207. French has no zero article on an object, so A149 gave a bare singular the partitive. That
+// is right for a mass noun ("consommer de la nourriture") and wrong for a count one, which French
+// articles with the definite: "changer la taille". `partitiveArtFor` does not look at countability,
+// which the corpus carries and the lexicon already hands the engine as `uncountable`. Filed while
+// authoring localization A24 (RESIZE, EDIT).
+describe('known bugs: the French article on a bare singular count object (A207)', () => {
+  // RESIZE's own definition plan. SIZE is a count noun; TEXT and WORD behave the same way.
+  const changeSize: PhrasePlan = {
+    subject: { concept: 'GENERIC_PERSON' },
+    verbPhrase: { verb: 'CHANGE' },
+    directObject: { concept: 'SIZE', definiteness: 'bare' },
+    infinitive: true,
+  };
+
+  test.fails('French articles a bare singular count object with the definite', () => {
+    expect(sayAll(changeSize).fr).toBe('changer la taille.');
+  });
+
+  // Already right, and what the fix must not disturb: a bare singular MASS object keeps the
+  // partitive, and a bare plural count object keeps "des".
+  test('a mass object keeps the partitive and a plural count object keeps des', () => {
+    expect(sayAll({
+      subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'CONSUME' },
+      directObject: { concept: 'FOOD', definiteness: 'bare' }, infinitive: true,
+    }).fr).toBe('consommer de la nourriture.');
+    expect(sayAll({
+      subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'REMOVE' },
+      directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' }, infinitive: true,
+    }).fr).toBe('retirer des objets.');
+  });
+
+  // The other six languages are right on the failing row, which is what localises the defect.
+  test('the other six write no article there', () => {
+    expect(sayAll(changeSize)).toMatchObject({
+      en: 'to change size.', it: 'cambiare dimensione.', de: 'Größe ändern.',
+      es: 'cambiar tamaño.', ja: '大きさを変える。', pt: 'mudar tamanho.',
+    });
+  });
+});

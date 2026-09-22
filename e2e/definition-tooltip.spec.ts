@@ -12,18 +12,19 @@ test.describe('word definition tooltip', () => {
   const tooltip = '.MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
-    // FEELING carries only a stored English literal: nothing composable distinguishes it from its
-    // siblings, so C05 leaves it on the literal deliberately.
-    await app.subjectInput.fill('feeling');
+    // PERSON carries only a stored English literal: it is one of the primitives the definition
+    // language is built out of, so C26 leaves it on the literal by design. (FEELING was this
+    // test's example until B53 gave it a plan on STATE.)
+    await app.subjectInput.fill('person');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="FEELING"]',
+      '[data-testid="typeahead-option"][data-concept="PERSON"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
     await expect(page.locator(tooltip)).toBeVisible();
-    await expect(page.locator(tooltip)).toHaveText('an emotion or sensation one feels');
+    await expect(page.locator(tooltip)).toHaveText('a human being');
   });
 
   test('shows the definition on hover in the verb picker', async ({ app, page }) => {
@@ -1166,18 +1167,18 @@ test.describe('word definition tooltip', () => {
     app,
     page,
   }) => {
-    // FEELING has no definition plan and only an English literal, so an Italian UI reverts to it.
-    // The search still finds it by its English label, which is why "feeling" works under it.
+    // PERSON has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // The search still finds it by its English label, which is why "person" works under it.
     await app.setUiLanguage('it');
-    await app.subjectInput.fill('feeling');
+    await app.subjectInput.fill('person');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="FEELING"]',
+      '[data-testid="typeahead-option"][data-concept="PERSON"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
-    await expect(page.locator(tooltip)).toHaveText('an emotion or sensation one feels');
+    await expect(page.locator(tooltip)).toHaveText('a human being');
   });
 
   test('a modal definition governs an infinitive (localization C09: CAN, WILL)', async ({
@@ -1559,5 +1560,359 @@ test.describe('word definition tooltip', () => {
     await expect(locativeDe).toBeVisible();
     await locativeDe.hover();
     await expect(page.locator(tooltip)).toHaveText('eine Ergänzung, die Orte bezeichnet');
+  });
+  // ── The sweep of 2026-09-22 (A23–A30, B52–B58) ──────────────────────
+  // One row per ticket, each in English and in the language whose grammar the ticket turns on.
+
+  test('a UI noun is what one presses, or where one works (localization A23: BUTTON, CANVAS)', async ({
+    app,
+    page,
+  }) => {
+    // The object gap, whose German relative pronoun is accusative — "den man drückt".
+    await app.subjectInput.fill('button');
+    const buttonEn = page.locator('[data-testid="typeahead-option"][data-concept="BUTTON"]');
+    await expect(buttonEn).toBeVisible();
+    await buttonEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an object that one presses');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('button');
+    const buttonDe = page.locator('[data-testid="typeahead-option"][data-concept="BUTTON"]');
+    await expect(buttonDe).toBeVisible();
+    await buttonDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Gegenstand, den man drückt');
+
+    // The locative gap C07 built, whose French relative adverb takes the euphonic "l'on".
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('canvas');
+    const canvasFr = page.locator('[data-testid="typeahead-option"][data-concept="CANVAS"]');
+    await expect(canvasFr).toBeVisible();
+    await canvasFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("un lieu où l'on fait des phrases");
+  });
+
+  test('a UI verb is its genus plus its object (localization A24: DELETE, ACQUIRE)', async ({
+    app,
+    page,
+  }) => {
+    // The bare-plural object precedes the clause-final German infinitive.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('delete');
+    const deleteEn = page.locator('[data-testid="typeahead-option"][data-concept="DELETE"]');
+    await expect(deleteEn).toBeVisible();
+    await deleteEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to remove objects');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('delete');
+    const deleteDe = page.locator('[data-testid="typeahead-option"][data-concept="DELETE"]');
+    await expect(deleteDe).toBeVisible();
+    await deleteDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Gegenstände entfernen');
+
+    // The governed infinitive, which Italian links with "ad" before a vowel.
+    await app.setUiLanguage('it');
+    await app.verbInput.fill('acquire');
+    const acquireIt = page.locator('[data-testid="typeahead-option"][data-concept="ACQUIRE"]');
+    await expect(acquireIt).toBeVisible();
+    await acquireIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('iniziare ad avere');
+  });
+
+  test('a negated causative puts the nicht inside its infinitive (localization A25: TURN_OFF)', async ({
+    app,
+    page,
+  }) => {
+    await app.setSubject('CAT');
+    await app.verbInput.fill('turn off');
+    const turnOffEn = page.locator('[data-testid="typeahead-option"][data-concept="TURN_OFF"]');
+    await expect(turnOffEn).toBeVisible();
+    await turnOffEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to cause an object not to be active');
+
+    // The negation sits in the governed clause, not on the causative verb.
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('turn off');
+    const turnOffDe = page.locator('[data-testid="typeahead-option"][data-concept="TURN_OFF"]');
+    await expect(turnOffDe).toBeVisible();
+    await turnOffDe.hover();
+    await expect(page.locator(tooltip)).toHaveText(
+      'einen Gegenstand veranlassen, nicht aktiv zu sein',
+    );
+  });
+
+  test('a mass head takes the bare determiner (localization A26: WATER)', async ({ app, page }) => {
+    // "liquid", not "a liquid": indefinite would count what cannot be counted.
+    await app.subjectInput.fill('water');
+    const waterEn = page.locator('[data-testid="typeahead-option"][data-concept="WATER"]');
+    await expect(waterEn).toBeVisible();
+    await waterEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('liquid that one drinks');
+
+    // French writes no partitive on a relativised mass head either — "liquide qu'on boit".
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('water');
+    const waterFr = page.locator('[data-testid="typeahead-option"][data-concept="WATER"]');
+    await expect(waterFr).toBeVisible();
+    await waterFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("liquide qu'on boit");
+  });
+
+  test('a subject governs its verb, an object is governed (localization A27: SUBJECT_GRAMMAR)', async ({
+    app,
+    page,
+  }) => {
+    await app.subjectInput.fill('subject');
+    const subjectEn = page.locator('[data-testid="typeahead-option"][data-concept="SUBJECT_GRAMMAR"]');
+    await expect(subjectEn).toBeVisible();
+    await subjectEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a participant that governs verbs');
+
+    // German shows the difference from OBJECT_GRAMMAR on the relative pronoun: der, not den.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('subject');
+    const subjectDe = page.locator('[data-testid="typeahead-option"][data-concept="SUBJECT_GRAMMAR"]');
+    await expect(subjectDe).toBeVisible();
+    await subjectDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Partizipant, der Verben regiert');
+  });
+
+  test('a scalar adjective takes the low pole of its scale (localization A28: SMALL)', async ({
+    app,
+    page,
+  }) => {
+    // BIG ships "of great size"; SMALL is the same dimension at LOW. Glossing it with SMALL itself
+    // would be circular in all seven, not only in English.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('small');
+    const smallEn = page.locator('[data-testid="typeahead-option"][data-concept="SMALL"]');
+    await expect(smallEn).toBeVisible();
+    await smallEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('of low size');
+
+    await app.setUiLanguage('fr');
+    await app.openSubjectAdjective('small');
+    const smallFr = page.locator('[data-testid="typeahead-option"][data-concept="SMALL"]');
+    await expect(smallFr).toBeVisible();
+    await smallFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('de taille basse');
+  });
+
+  test('a time adverb names its own time deictically (localization A29: NOW)', async ({
+    app,
+    page,
+  }) => {
+    // The first deixis in a definition: "at this time", not "at the time".
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('now');
+    const nowEn = page.locator('[data-testid="typeahead-option"][data-concept="NOW"]');
+    await expect(nowEn).toBeVisible();
+    await nowEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('at this time');
+
+    // The German demonstrative inflects for the dative the `measure` relation governs.
+    await app.setUiLanguage('de');
+    await app.openVerbAdverb('now');
+    const nowDe = page.locator('[data-testid="typeahead-option"][data-concept="NOW"]');
+    await expect(nowDe).toBeVisible();
+    await nowDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('zu dieser Zeit');
+  });
+
+  test('a grammar feature is what it indicates (localization A30: TENSE, GENDER)', async ({
+    app,
+    page,
+  }) => {
+    await app.subjectInput.fill('tense');
+    const tenseEn = page.locator('[data-testid="typeahead-option"][data-concept="TENSE"]');
+    await expect(tenseEn).toBeVisible();
+    await tenseEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a feature that indicates times');
+
+    // The bare-plural object sits before the clause-final verb.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('tense');
+    const tenseDe = page.locator('[data-testid="typeahead-option"][data-concept="TENSE"]');
+    await expect(tenseDe).toBeVisible();
+    await tenseDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Merkmal, das Zeiten bezeichnet');
+
+    // Japanese puts the whole clause in front of the head.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('gender');
+    const genderJa = page.locator('[data-testid="typeahead-option"][data-concept="GENDER"]');
+    await expect(genderJa).toBeVisible();
+    await genderJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('単語を支配する範疇');
+  });
+
+  test('a natural kind hangs under its seeded genus (localization B52: MAMMAL, ICE_CREAM)', async ({
+    app,
+    page,
+  }) => {
+    // A mass object stays singular under the bare determiner: milk, not "milks".
+    await app.subjectInput.fill('mammal');
+    const mammalEn = page.locator('[data-testid="typeahead-option"][data-concept="MAMMAL"]');
+    await expect(mammalEn).toBeVisible();
+    await mammalEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an animal that produces milk');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('mammal');
+    const mammalDe = page.locator('[data-testid="typeahead-option"][data-concept="MAMMAL"]');
+    await expect(mammalDe).toBeVisible();
+    await mammalDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Tier, das Milch erzeugt');
+
+    // Two stacked adjectives, which Spanish coordinates with "y".
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('ice cream');
+    const iceCreamEs = page.locator('[data-testid="typeahead-option"][data-concept="ICE_CREAM"]');
+    await expect(iceCreamEs).toBeVisible();
+    await iceCreamEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('comida fría y dulce');
+  });
+
+  test('a feeling is a state, and a wall encloses (localization B53: FEELING, WALL)', async ({
+    app,
+    page,
+  }) => {
+    // STATE is the parent C05 was missing: a feeling is a state one feels, not a concept.
+    await app.subjectInput.fill('feeling');
+    const feelingEn = page.locator('[data-testid="typeahead-option"][data-concept="FEELING"]');
+    await expect(feelingEn).toBeVisible();
+    await feelingEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a state that one feels');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('feeling');
+    const feelingDe = page.locator('[data-testid="typeahead-option"][data-concept="FEELING"]');
+    await expect(feelingDe).toBeVisible();
+    await feelingDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Zustand, den man fühlt');
+
+    // ENCLOSE, not CONFINE: a wall that jails its places is what the seeded verb would have said.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('wall');
+    const wallFr = page.locator('[data-testid="typeahead-option"][data-concept="WALL"]');
+    await expect(wallFr).toBeVisible();
+    await wallFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un objet qui entoure des lieux');
+  });
+
+  test('a quality adjective scales on its own dimension (localization B54: HAPPY, TIRED)', async ({
+    app,
+    page,
+  }) => {
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('happy');
+    const happyEn = page.locator('[data-testid="typeahead-option"][data-concept="HAPPY"]');
+    await expect(happyEn).toBeVisible();
+    await happyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('of high joy');
+
+    // The dative the German "von" relation governs.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('happy');
+    const happyDe = page.locator('[data-testid="typeahead-option"][data-concept="HAPPY"]');
+    await expect(happyDe).toBeVisible();
+    await happyDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von hoher Freude');
+
+    // Japanese makes the dimension the topic.
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('tired');
+    const tiredJa = page.locator('[data-testid="typeahead-option"][data-concept="TIRED"]');
+    await expect(tiredJa).toBeVisible();
+    await tiredJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('休息が低い');
+  });
+
+  test('the adverb A29 could not ship (localization B55: ALREADY)', async ({ app, page }) => {
+    // AGAIN's shape with PREVIOUS in place of OTHER, and no new word for it.
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('already');
+    const alreadyEn = page.locator('[data-testid="typeahead-option"][data-concept="ALREADY"]');
+    await expect(alreadyEn).toBeVisible();
+    await alreadyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('at a previous time');
+
+    await app.setUiLanguage('de');
+    await app.openVerbAdverb('already');
+    const alreadyDe = page.locator('[data-testid="typeahead-option"][data-concept="ALREADY"]');
+    await expect(alreadyDe).toBeVisible();
+    await alreadyDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('zu einer vorherigen Zeit');
+  });
+
+  test('a country is land a nation governs (localization B56: COUNTRY)', async ({ app, page }) => {
+    // An object gap whose agent is named rather than generic, on a mass head.
+    await app.subjectInput.fill('country');
+    const countryEn = page.locator('[data-testid="typeahead-option"][data-concept="COUNTRY"]');
+    await expect(countryEn).toBeVisible();
+    await countryEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('land that a nation governs');
+
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('country');
+    const countryIt = page.locator('[data-testid="typeahead-option"][data-concept="COUNTRY"]');
+    await expect(countryIt).toBeVisible();
+    await countryIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('terra che una nazione governa');
+  });
+
+  test('an interface noun stands on its new verb (localization B57: SPEAKER, TOOLBAR, MAP)', async ({
+    app,
+    page,
+  }) => {
+    // The plainest whoGloss, on SPEAK.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('speaker');
+    const speakerIt = page.locator('[data-testid="typeahead-option"][data-concept="SPEAKER"]');
+    await expect(speakerIt).toBeVisible();
+    await speakerIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona che parla');
+
+    // A head this ticket glosses itself — ROW is on the literal, but its word is what TOOLBAR needs.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('toolbar');
+    const toolbarDe = page.locator('[data-testid="typeahead-option"][data-concept="TOOLBAR"]');
+    await expect(toolbarDe).toBeVisible();
+    await toolbarDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Zeile, die Tasten hat');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('map');
+    const mapJa = page.locator('[data-testid="typeahead-option"][data-concept="MAP"]');
+    await expect(mapJa).toBeVisible();
+    await mapJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('場所を見せる画像');
+  });
+
+  test('a tense and a number value take an ordinary adjective (localization B58)', async ({
+    app,
+    page,
+  }) => {
+    // The strong adjective ending after the German indefinite article.
+    await app.subjectInput.fill('past');
+    const pastEn = page.locator('[data-testid="typeahead-option"][data-concept="PAST_TENSE"]');
+    await expect(pastEn).toBeVisible();
+    await pastEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a past tense');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('past');
+    const pastDe = page.locator('[data-testid="typeahead-option"][data-concept="PAST_TENSE"]');
+    await expect(pastDe).toBeVisible();
+    await pastDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein vergangenes Tempus');
+
+    // MANIFOLD, not PLURAL: "a plural category" would define the word with itself.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('plural');
+    const pluralJa = page.locator('[data-testid="typeahead-option"][data-concept="PLURAL_GRAMMAR"]');
+    await expect(pluralJa).toBeVisible();
+    await pluralJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('複数の範疇');
   });
 });

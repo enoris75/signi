@@ -1,5 +1,5 @@
 import type { ConceptSeed } from './types.js';
-import type { PhrasePlan } from '@signi/shared';
+import type { Definiteness, PhrasePlan } from '@signi/shared';
 
 // A genus-differentia gloss the engine renders into every language: an indefinite noun phrase
 // whose head is the genus (usually the concept's own hypernym) carrying differentia adjectives —
@@ -10,17 +10,35 @@ const glossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
   subject: { concept: genus, definiteness: 'indefinite', adjectives },
 });
 
+// A genus-differentia gloss on a **mass** genus: the same shape glossOf builds, with the bare
+// determiner a mass noun takes instead of the indefinite that counts it — massGlossOf('SUBSTANCE',
+// 'SOLID') → en "solid substance", de "fester Stoff", fr "substance solide", ja "固体の物質", where
+// glossOf would say *a solid substance*. Localization A23 (TEXT), B53 (GROUND), B56 (CONTINENT).
+const massGlossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
+  subject: { concept: genus, definiteness: 'bare', adjectives },
+});
+
 // A genus + subject-gap relative-clause gloss: an indefinite head noun restricted by a relative
 // clause whose subject the head fills — whoGloss('PERSON', 'MAKE', 'OBJECT_THING') → en "a person
 // who makes objects", it "una persona che fa oggetti", de "eine Person, die Gegenstände macht", ja
 // "物体を作る人". The optional object renders as a bare plural ("objects", not "the objects").
-const whoGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
+const whoGloss = (
+  genus: string,
+  verb: string,
+  object?: string,
+  // A **mass** object reads bare in the singular, not the plural: LOADING is a process that loads
+  // content, not *contents* (localization B57). CONTENT is a count noun elsewhere in the corpus
+  // (B10 pins "die Inhalte"), so the number is the gloss's choice, not the lexeme's.
+  objectNumber: 'singular' | 'plural' = 'plural',
+): PhrasePlan => ({
   subject: {
     concept: genus,
     definiteness: 'indefinite',
     relative: {
       verbPhrase: { verb },
-      ...(object ? { directObject: { concept: object, definiteness: 'bare', number: 'plural' } } : {}),
+      ...(object
+        ? { directObject: { concept: object, definiteness: 'bare', ...(objectNumber === 'plural' ? { number: 'plural' as const } : {}) } }
+        : {}),
     },
   },
 });
@@ -31,13 +49,36 @@ const whoGloss = (genus: string, verb: string, object?: string): PhrasePlan => (
 // mangia", fr "un objet qu'on mange", de "ein Gegenstand, den man isst", ja "食べる物体". The
 // GENERIC_PERSON subject renders as a placed word (en/de/fr) or an impersonal clitic (it/es/pt),
 // and drops in Japanese — see its seed and isGenericSubject in the engine.
-const patientGloss = (genus: string, verb: string): PhrasePlan => ({
+//
+// A **mass** genus takes `bare` instead: *a content* counts what cannot be counted, so HELP is
+// patientGloss('CONTENT', 'SHOW', 'bare') → en "content that one shows", de "Inhalt, den man
+// zeigt", while French still writes the partitive its grammar requires (*du contenu qu'on
+// montre*). Localization A23.
+const patientGloss = (genus: string, verb: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
   subject: {
     concept: genus,
-    definiteness: 'indefinite',
+    definiteness,
     relative: {
       headRole: 'directObject',
       subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb },
+    },
+  },
+});
+
+// A patient gloss whose agent is **named** rather than generic: the same object-gap relative clause
+// patientGloss builds, with an indefinite noun in the subject where "one" would stand —
+// patientOfGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB') → en "a participant that a verb governs",
+// de "ein Partizipant, den ein Verb regiert", ja "動詞が支配する参与者". It is what says a
+// grammatical object (the verb governs its case) beside a subject, which whoGloss says the other way
+// round — "a participant that governs verbs". Localization A27; B56 glosses COUNTRY with it.
+const patientOfGloss = (genus: string, verb: string, agent: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
+  subject: {
+    concept: genus,
+    definiteness,
+    relative: {
+      headRole: 'directObject',
+      subject: { concept: agent, definiteness: 'indefinite' },
       verbPhrase: { verb },
     },
   },
@@ -80,6 +121,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ANIMAL',
     role: 'noun',
     description: 'a living creature other than a person',
+    definition: whoGloss('BEING', 'MOVE_ONESELF'),
     emoji: '🐾',
     animate: true,
     forms: {
@@ -97,6 +139,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MAMMAL',
     role: 'noun',
     description: 'a warm-blooded animal that suckles its young',
+    definition: whoGloss('ANIMAL', 'PRODUCE', 'MILK'),
     emoji: '🐘',
     animate: true,
     isA: 'ANIMAL',
@@ -167,6 +210,7 @@ export const nouns: ConceptSeed[] = [
     id: 'AIR',
     role: 'noun',
     description: 'the gas that surrounds the earth',
+    definition: patientGloss('GAS', 'BREATHE', 'bare'),
     emoji: '💨',
     countable: false,
     forms: {
@@ -186,6 +230,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GROUND',
     role: 'noun',
     description: 'the solid surface of the earth',
+    definition: massGlossOf('SUBSTANCE', 'SOLID'),
     emoji: '🟫',
     forms: {
       en: { base: 'ground', plural: 'grounds', count: 'singular' },
@@ -202,6 +247,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WATER',
     role: 'noun',
     description: 'the liquid H₂O',
+    definition: patientGloss('LIQUID', 'DRINK', 'bare'),
     emoji: '💧',
     countable: false,
     isA: 'LIQUID',
@@ -242,6 +288,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LIGHT',
     role: 'noun',
     description: 'the natural agent that makes things visible',
+    definition: patientGloss('CONCEPT', 'SEE'),
     emoji: '💡',
     forms: {
       en: { base: 'light', plural: 'lights', count: 'singular' },
@@ -259,6 +306,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SOUND',
     role: 'noun',
     description: 'something that can be heard',
+    definition: patientGloss('CONCEPT', 'HEAR'),
     emoji: '🔊',
     forms: {
       en: { base: 'sound', plural: 'sounds', count: 'singular' },
@@ -441,6 +489,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MONEY',
     role: 'noun',
     description: 'a medium of exchange',
+    definition: patientGloss('OBJECT_THING', 'EXCHANGE'),
     emoji: '💰',
     countable: false,
     forms: {
@@ -477,6 +526,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ICE_CREAM',
     role: 'noun',
     description: 'a sweet frozen dessert made from milk or cream',
+    definition: glossOf('FOOD', 'COLD', 'SWEET'),
     emoji: '🍨',
     isA: 'FOOD',
     forms: {
@@ -514,6 +564,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTENT',
     role: 'noun',
     description: 'what something holds or contains',
+    definition: patientGloss('OBJECT_THING', 'INCLUDE'),
     emoji: '🗃️',
     forms: {
       en: { base: 'content', plural: 'contents', count: 'singular' },
@@ -627,6 +678,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WALL',
     role: 'noun',
     description: 'an upright structure that encloses or divides a space',
+    definition: whoGloss('OBJECT_THING', 'ENCLOSE', 'PLACE'),
     emoji: '🧱',
     forms: {
       en: { base: 'wall', plural: 'walls', count: 'singular' },
@@ -715,6 +767,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SPEAKER',
     role: 'noun',
     description: 'the person who is speaking',
+    definition: whoGloss('PERSON', 'SPEAK'),
     emoji: '🗣️',
     animate: true,
     human: true,
@@ -735,6 +788,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COMPANION',
     role: 'noun',
     description: 'one who does something together with another',
+    definition: whoGloss('PERSON', 'ACCOMPANY', 'PERSON'),
     emoji: '👯',
     animate: true,
     human: true,
@@ -753,6 +807,7 @@ export const nouns: ConceptSeed[] = [
     id: 'RECIPIENT',
     role: 'noun',
     description: 'one who receives something',
+    definition: whoGloss('PERSON', 'ACQUIRE', 'OBJECT_THING'),
     emoji: '📬',
     animate: true,
     human: true,
@@ -867,6 +922,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOVINE',
     role: 'noun',
     description: 'a large ruminant mammal of the cattle kind',
+    definition: whoGloss('MAMMAL', 'EAT_ANIMAL', 'GRASS'),
     emoji: '🐄',
     animate: true,
     isA: 'MAMMAL',
@@ -994,6 +1050,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FEELING',
     role: 'noun',
     description: 'an emotion or sensation one feels',
+    definition: patientGloss('STATE', 'FEEL'),
     emoji: '💗',
     forms: {
       en: { base: 'feeling', plural: 'feelings', count: 'singular' },
@@ -1081,6 +1138,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FIRE',
     role: 'noun',
     description: 'the phenomenon of combustion; flame',
+    definition: whoGloss('PROCESS', 'PRODUCE', 'HEAT'),
     emoji: '🔥',
     alarm: true, // "cry fire": gridare al fuoco, crier au feu
     forms: {
@@ -1118,6 +1176,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PARENT',
     role: 'noun',
     description: 'one who has a child',
+    definition: whoGloss('PERSON', 'HAVE', 'CHILD'),
     emoji: '🧑‍🍼',
     animate: true,
     human: true,
@@ -1193,6 +1252,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LEGEND',
     role: 'noun',
     description: 'a traditional story or a famous person',
+    definition: glossOf('STORY', 'OLD'),
     emoji: '📜',
     forms: {
       en: { base: 'legend', plural: 'legends', count: 'singular' },
@@ -1209,6 +1269,7 @@ export const nouns: ConceptSeed[] = [
     id: 'WING',
     role: 'noun',
     description: 'a limb or organ used for flight',
+    definition: whoGloss('ORGAN', 'FLY'),
     emoji: '🪽',
     forms: {
       en: { base: 'wing', plural: 'wings', count: 'singular' },
@@ -1226,6 +1287,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TOOTH',
     role: 'noun',
     description: 'a hard structure in the mouth used for biting',
+    definition: whoGloss('ORGAN', 'BITE'),
     emoji: '🦷',
     forms: {
       en: { base: 'tooth', plural: 'teeth', count: 'singular' },
@@ -1242,6 +1304,18 @@ export const nouns: ConceptSeed[] = [
     id: 'TEAR',
     role: 'noun',
     description: 'a drop of liquid from the eye',
+    definition: {
+      subject: {
+        concept: 'LIQUID',
+        definiteness: 'bare',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'SHED' },
+          complements: { source: { phrase: { concept: 'EYE', definiteness: 'definite' } } },
+        },
+      },
+    },
     emoji: '🥲',
     synonym: 'teardrop',
     forms: {
@@ -1470,6 +1544,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTINENT',
     role: 'noun',
     description: 'one of the earth’s great landmasses',
+    definition: massGlossOf('LAND', 'GREAT'),
     emoji: '🗺️',
     // The hypernym of AFRICA. An ordinary common noun — countable, and it takes articles the
     // normal way ("a continent", "the continents"), where its proper-noun child does not. That
@@ -1653,6 +1728,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COUNTRY',
     role: 'noun',
     description: 'a nation with its own territory and government',
+    definition: patientOfGloss('LAND', 'GOVERN_STATE', 'NATION', 'bare'),
     emoji: '🏳️',
     isA: 'PLACE',
     forms: {
@@ -2037,6 +2113,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SUBJECT_GRAMMAR',
     role: 'noun',
     description: 'the noun phrase a clause predicates something of (grammar)',
+    definition: whoGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB'),
     emoji: '🎯',
     synonym: 'grammar',
     forms: {
@@ -2056,6 +2133,7 @@ export const nouns: ConceptSeed[] = [
     id: 'OBJECT_GRAMMAR',
     role: 'noun',
     description: 'the noun phrase a verb\'s action falls on (grammar)',
+    definition: patientOfGloss('PARTICIPANT_GRAMMAR', 'GOVERN', 'VERB'),
     emoji: '🥅',
     synonym: 'grammar',
     forms: {
@@ -2463,6 +2541,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NOUN_PHRASE',
     role: 'noun',
     description: 'a noun together with its determiner and modifiers (grammar)',
+    definition: whoGloss('PHRASE', 'HAVE', 'NOUN'),
     emoji: '🧩',
     isA: 'PHRASE',
     forms: {
@@ -2554,6 +2633,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONDITION',
     role: 'noun',
     description: 'what must be true for something else to happen',
+    definition: glossOf('CLAUSE', 'CONDITIONAL'),
     emoji: '🔀',
     forms: {
       en: { base: 'condition', plural: 'conditions', count: 'singular' },
@@ -2571,6 +2651,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COORDINATION',
     role: 'noun',
     description: 'the joining of clauses or phrases of equal rank (grammar)',
+    definition: whoGloss('RELATIONSHIP', 'LINK', 'CLAUSE'),
     emoji: '🔗',
     forms: {
       en: { base: 'coordination', plural: 'coordinations', count: 'singular' },
@@ -2745,6 +2826,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DEMONSTRATIVE',
     role: 'noun',
     description: 'the determiner that points — this, that (grammar)',
+    definition: whoGloss('DETERMINER', 'INDICATE'),
     emoji: '👆',
     isA: 'DETERMINER',
     forms: {
@@ -2818,6 +2900,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BRACKET',
     role: 'noun',
     description: 'one of a pair of marks that enclose a group of words',
+    definition: whoGloss('WORD', 'ENCLOSE', 'PHRASE'),
     emoji: '🔣',
     forms: {
       en: { base: 'bracket', plural: 'brackets', count: 'singular' },
@@ -2854,6 +2937,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MAP',
     role: 'noun',
     description: 'a diagram showing how things are arranged or connected',
+    definition: whoGloss('PICTURE', 'SHOW', 'PLACE'),
     emoji: '🗺️',
     forms: {
       en: { base: 'map', plural: 'maps', count: 'singular' },
@@ -2872,6 +2956,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NODE',
     role: 'noun',
     description: 'a point where the lines of a network meet',
+    definition: patientGloss('PART', 'CONNECT'),
     emoji: '⚫',
     forms: {
       en: { base: 'node', plural: 'nodes', count: 'singular' },
@@ -2908,6 +2993,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PERSON_GRAMMAR',
     role: 'noun',
     description: 'the speaker, the addressee or the one spoken about (grammar)',
+    definition: whoGloss('CATEGORY', 'INDICATE', 'SPEAKER'),
     emoji: '🗣️',
     synonym: 'grammar',
     forms: {
@@ -3004,6 +3090,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SINGULAR_GRAMMAR',
     role: 'noun',
     description: 'the form of a word referring to one (grammar)',
+    definition: glossOf('CATEGORY', 'SOLE'),
     emoji: '1️⃣',
     synonym: 'grammar',
     forms: {
@@ -3020,6 +3107,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PLURAL_GRAMMAR',
     role: 'noun',
     description: 'the form of a word referring to more than one (grammar)',
+    definition: glossOf('CATEGORY', 'MANIFOLD'),
     emoji: '🔟',
     synonym: 'grammar',
     forms: {
@@ -3036,6 +3124,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GENDER',
     role: 'noun',
     description: 'the class a noun belongs to — masculine, feminine, neuter (grammar)',
+    definition: whoGloss('CATEGORY', 'GOVERN', 'WORD'),
     emoji: '🚻',
     forms: {
       en: { base: 'gender', plural: 'genders', count: 'singular' },
@@ -3058,6 +3147,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TENSE',
     role: 'noun',
     description: 'the form of a verb that places an event in time (grammar)',
+    definition: whoGloss('FEATURE', 'INDICATE', 'TIME'),
     emoji: '⏳',
     forms: {
       en: { base: 'tense', plural: 'tenses', count: 'singular' },
@@ -3073,6 +3163,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PRESENT_TENSE',
     role: 'noun',
     description: 'the tense of what is happening now (grammar)',
+    definition: glossOf('TENSE', 'PRESENT'),
     emoji: '⏺️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -3091,6 +3182,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PAST_TENSE',
     role: 'noun',
     description: 'the tense of what has already happened (grammar)',
+    definition: glossOf('TENSE', 'PAST'),
     emoji: '⏮️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -3108,6 +3200,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FUTURE_TENSE',
     role: 'noun',
     description: 'the tense of what is yet to happen (grammar)',
+    definition: glossOf('TENSE', 'FUTURE'),
     emoji: '⏭️',
     synonym: 'grammar',
     isA: 'TENSE',
@@ -3127,6 +3220,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ASPECT',
     role: 'noun',
     description: 'how a verb presents an event unfolding in time (grammar)',
+    definition: whoGloss('FEATURE', 'INDICATE', 'PERIOD_TIME'),
     emoji: '🎞️',
     synonym: 'grammar',
     forms: {
@@ -3148,6 +3242,7 @@ export const nouns: ConceptSeed[] = [
     id: 'VOICE',
     role: 'noun',
     description: 'which participant of an event a clause makes its subject (grammar)',
+    definition: whoGloss('FEATURE', 'INDICATE', 'PARTICIPANT_GRAMMAR'),
     emoji: '🔄',
     synonym: 'grammar',
     forms: {
@@ -3166,6 +3261,7 @@ export const nouns: ConceptSeed[] = [
     id: 'POLARITY',
     role: 'noun',
     description: 'whether a clause is affirmed or negated (grammar)',
+    definition: whoGloss('FEATURE', 'NEGATE', 'CLAUSE'),
     emoji: '☯️',
     forms: {
       en: { base: 'polarity', plural: 'polarities', count: 'singular' },
@@ -3187,6 +3283,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SENTIMENT',
     role: 'noun',
     description: 'the positive, negative or neutral stance taken toward something',
+    definition: whoGloss('FEATURE', 'INDICATE', 'FEELING'),
     emoji: '🙂',
     forms: {
       en: { base: 'sentiment', plural: 'sentiments', count: 'singular' },
@@ -3223,6 +3320,7 @@ export const nouns: ConceptSeed[] = [
     id: 'DEGREE_GRAMMAR',
     role: 'noun',
     description: 'the level of comparison an adjective expresses (grammar)',
+    definition: whoGloss('FEATURE', 'INDICATE', 'LEVEL'),
     emoji: '📶',
     synonym: 'grammar',
     forms: {
@@ -3242,6 +3340,7 @@ export const nouns: ConceptSeed[] = [
     id: 'POSITIVE_DEGREE',
     role: 'noun',
     description: 'the plain form of an adjective, not compared (grammar)',
+    definition: glossOf('DEGREE_GRAMMAR', 'POSITIVE'),
     emoji: '▫️',
     synonym: 'grammar',
     isA: 'DEGREE_GRAMMAR',
@@ -3349,6 +3448,7 @@ export const nouns: ConceptSeed[] = [
     id: 'OPTION',
     role: 'noun',
     description: 'one of several possibilities to choose from',
+    definition: patientGloss('CONCEPT', 'CHOOSE'),
     emoji: '☑️',
     forms: {
       en: { base: 'option', plural: 'options', count: 'singular' },
@@ -3367,6 +3467,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BUTTON',
     role: 'noun',
     description: 'a control that is pressed to operate something',
+    definition: patientGloss('OBJECT_THING', 'PRESS'),
     emoji: '🔘',
     forms: {
       en: { base: 'button', plural: 'buttons', count: 'singular' },
@@ -3383,6 +3484,7 @@ export const nouns: ConceptSeed[] = [
     id: 'KEYBOARD',
     role: 'noun',
     description: 'a set of keys for typing',
+    definition: whoGloss('OBJECT_THING', 'HAVE', 'KEY'),
     emoji: '⌨️',
     forms: {
       en: { base: 'keyboard', plural: 'keyboards', count: 'singular' },
@@ -3459,6 +3561,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GROUP',
     role: 'noun',
     description: 'a set of things that belong together',
+    definition: patientGloss('CONCEPT', 'CONNECT'),
     emoji: '🫂',
     forms: {
       en: { base: 'group', plural: 'groups', count: 'singular' },
@@ -3492,6 +3595,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MENU',
     role: 'noun',
     description: 'a list of commands to choose from',
+    definition: patientGloss('LIST', 'CHOOSE'),
     emoji: '🍔',
     forms: {
       en: { base: 'menu', plural: 'menus', count: 'singular' },
@@ -3529,6 +3633,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TARGET',
     role: 'noun',
     description: 'the thing a link points to',
+    definition: patientGloss('OBJECT_THING', 'INDICATE'),
     emoji: '🎯',
     forms: {
       en: { base: 'target', plural: 'targets', count: 'singular' },
@@ -3545,6 +3650,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HELP',
     role: 'noun',
     description: 'information that shows how to use something',
+    definition: patientGloss('CONTENT', 'SHOW', 'bare'),
     emoji: '🛟',
     countable: false,
     forms: {
@@ -3603,6 +3709,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ALIAS',
     role: 'noun',
     description: 'another name a thing is also called by',
+    definition: glossOf('NAME_NOUN', 'OTHER'),
     emoji: '🪪',
     isA: 'NAME_NOUN',
     forms: {
@@ -3621,6 +3728,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LOADING',
     role: 'noun',
     description: 'the process of bringing data into a program',
+    definition: whoGloss('PROCESS', 'LOAD', 'CONTENT', 'singular'),
     emoji: '⏳',
     countable: false,
     isA: 'PROCESS',
@@ -3642,6 +3750,7 @@ export const nouns: ConceptSeed[] = [
     id: 'INTERFACE',
     role: 'noun',
     description: 'the part of a program a person sees and uses',
+    definition: patientGloss('SCREEN', 'SEE'),
     emoji: '🖥️',
     forms: {
       en: { base: 'interface', plural: 'interfaces', count: 'singular' },
@@ -3660,6 +3769,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SERVER',
     role: 'noun',
     description: 'a program that answers the requests of other programs',
+    definition: whoGloss('PROCESS', 'ANSWER'),
     emoji: '🗄️',
     forms: {
       en: { base: 'server', plural: 'servers', count: 'singular' },
@@ -3676,6 +3786,7 @@ export const nouns: ConceptSeed[] = [
     id: 'RESULT',
     role: 'noun',
     description: 'something found by a search',
+    definition: patientGloss('CONCEPT', 'SEARCH'),
     emoji: '🔎',
     forms: {
       en: { base: 'result', plural: 'results', count: 'singular' },
@@ -3692,6 +3803,7 @@ export const nouns: ConceptSeed[] = [
     id: 'IMPORT_NOUN',
     role: 'noun',
     description: 'the act of bringing data in from a file',
+    definition: whoGloss('ACTION', 'IMPORT', 'FILE'),
     emoji: '📥',
     isA: 'ACTION',
     forms: {
@@ -3709,6 +3821,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ICON',
     role: 'noun',
     description: 'a small picture on a control that shows what it does',
+    definition: glossOf('PICTURE', 'SMALL'),
     emoji: '🖼️',
     forms: {
       en: { base: 'icon', plural: 'icons', count: 'singular' },
@@ -3725,6 +3838,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FILE',
     role: 'noun',
     description: 'a document stored on a computer',
+    definition: patientGloss('OBJECT_THING', 'SAVE'),
     emoji: '📄',
     forms: {
       en: { base: 'file', plural: 'files', count: 'singular' },
@@ -3742,6 +3856,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CLIPBOARD',
     role: 'noun',
     description: 'the temporary store for content that has been copied',
+    definition: whereGloss('PLACE', 'COPY'),
     emoji: '📋',
     forms: {
       en: { base: 'clipboard', plural: 'clipboards', count: 'singular' },
@@ -3761,6 +3876,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LINE',
     role: 'noun',
     description: 'a row of text typed as one command',
+    definition: patientGloss('TEXT', 'TYPE', 'bare'),
     emoji: '⌨️',
     forms: {
       en: { base: 'line', plural: 'lines', count: 'singular' },
@@ -3779,6 +3895,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HISTORY',
     role: 'noun',
     description: 'the lines typed before, in order',
+    definition: patientGloss('LIST', 'WRITE'),
     emoji: '🕘',
     countable: false,
     forms: {
@@ -3814,6 +3931,7 @@ export const nouns: ConceptSeed[] = [
     id: 'USAGE',
     role: 'noun',
     description: 'how a thing is written or used',
+    definition: patientGloss('WAY', 'USE'),
     emoji: '📖',
     countable: false,
     forms: {
@@ -3830,6 +3948,7 @@ export const nouns: ConceptSeed[] = [
     id: 'EXAMPLE',
     role: 'noun',
     description: 'a case that shows how something is used',
+    definition: patientGloss('PHRASE', 'SHOW'),
     emoji: '💡',
     forms: {
       en: { base: 'example', plural: 'examples', count: 'singular' },
@@ -3848,6 +3967,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONSOLE',
     role: 'noun',
     description: 'a text field where a user types commands',
+    definition: whereGloss('PLACE', 'TYPE'),
     emoji: '💻',
     forms: {
       en: { base: 'console', plural: 'consoles', count: 'singular' },
@@ -3866,6 +3986,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CANVAS',
     role: 'noun',
     description: 'the surface a phrase is built on',
+    definition: whereGloss('PLACE', 'MAKE', 'PHRASE'),
     emoji: '🎨',
     forms: {
       en: { base: 'canvas', plural: 'canvases', count: 'singular' },
@@ -3883,6 +4004,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PREVIEW',
     role: 'noun',
     description: 'a view of a result before it is made',
+    definition: patientGloss('CONTENT', 'SEE', 'bare'),
     emoji: '👀',
     forms: {
       en: { base: 'preview', plural: 'previews', count: 'singular' },
@@ -3899,6 +4021,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TOOLBAR',
     role: 'noun',
     description: 'a row of controls',
+    definition: whoGloss('ROW', 'HAVE', 'BUTTON'),
     emoji: '🧰',
     forms: {
       en: { base: 'toolbar', plural: 'toolbars', count: 'singular' },
@@ -3917,6 +4040,7 @@ export const nouns: ConceptSeed[] = [
     id: 'LIST',
     role: 'noun',
     description: 'items written one after another',
+    definition: patientGloss('GROUP', 'ARRANGE'),
     emoji: '📃',
     forms: {
       en: { base: 'list', plural: 'lists', count: 'singular' },
@@ -3934,6 +4058,7 @@ export const nouns: ConceptSeed[] = [
     id: 'VALUE',
     role: 'noun',
     description: 'one of the settings a control can have',
+    definition: patientGloss('CONCEPT', 'SET'),
     emoji: '🎛️',
     forms: {
       en: { base: 'value', plural: 'values', count: 'singular' },
@@ -3951,6 +4076,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CURSOR',
     role: 'noun',
     description: 'the mark on a screen that shows where the next key acts',
+    definition: whoGloss('PICTURE', 'INDICATE', 'PLACE'),
     emoji: '🖱️',
     forms: {
       en: { base: 'cursor', plural: 'cursors', count: 'singular' },
@@ -3968,6 +4094,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TEXT',
     role: 'noun',
     description: 'written words',
+    definition: massGlossOf('CONTENT', 'WRITTEN'),
     emoji: '📝',
     forms: {
       en: { base: 'text', plural: 'texts', count: 'singular' },
@@ -3986,6 +4113,7 @@ export const nouns: ConceptSeed[] = [
     id: 'REFERENCE',
     role: 'noun',
     description: 'something that points to something else',
+    definition: whoGloss('WORD', 'INDICATE', 'CONCEPT'),
     emoji: '🔗',
     forms: {
       en: { base: 'reference', plural: 'references', count: 'singular' },
@@ -4218,6 +4346,356 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
       ja: { base: '物体', count: 'singular', reading: 'ぶったい' },
       pt: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── The natural kinds' genera (localization B52) ───────────────────
+  {
+    id: 'BEING',
+    role: 'noun',
+    description: 'a thing that exists, living or not',
+    emoji: '✨',
+    forms: {
+      en: { base: 'being', plural: 'beings', count: 'singular' },
+      it: { base: 'essere', plural: 'esseri', gender: 'masc', count: 'singular' },
+      fr: { base: 'être', plural: 'êtres', gender: 'masc', count: 'singular' },
+      de: { base: 'Wesen', plural: 'Wesen', gender: 'neut', count: 'singular' },
+      es: { base: 'ser', plural: 'seres', gender: 'masc', count: 'singular' },
+      ja: { base: '存在', count: 'singular', reading: 'そんざい' },
+      pt: { base: 'ser', plural: 'seres', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'ORGAN',
+    role: 'noun',
+    description: 'a part of a living body',
+    emoji: '🫀',
+    forms: {
+      en: { base: 'organ', plural: 'organs', count: 'singular' },
+      it: { base: 'organo', plural: 'organi', gender: 'masc', count: 'singular' },
+      fr: { base: 'organe', plural: 'organes', gender: 'masc', count: 'singular' },
+      de: { base: 'Organ', plural: 'Organe', gender: 'neut', count: 'singular' },
+      es: { base: 'órgano', plural: 'órganos', gender: 'masc', count: 'singular' },
+      ja: { base: '器官', count: 'singular', reading: 'きかん' },
+      pt: { base: 'órgão', plural: 'órgãos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'MILK',
+    role: 'noun',
+    description: 'the white liquid a mammal feeds its young with',
+    emoji: '🥛',
+    countable: false,
+    forms: {
+      en: { base: 'milk', count: 'singular' },
+      it: { base: 'latte', gender: 'masc', count: 'singular' },
+      fr: { base: 'lait', gender: 'masc', count: 'singular' },
+      de: { base: 'Milch', gender: 'fem', count: 'singular' },
+      es: { base: 'leche', gender: 'fem', count: 'singular' },
+      ja: { base: '乳', count: 'singular', reading: 'ちち' },
+      pt: { base: 'leite', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'GRASS',
+    role: 'noun',
+    description: 'the low green plant that covers ground',
+    emoji: '🌿',
+    countable: false,
+    forms: {
+      en: { base: 'grass', count: 'singular' },
+      it: { base: 'erba', gender: 'fem', count: 'singular' },
+      // herbe opens on an h muet: l'herbe, de l'herbe.
+      fr: { base: 'herbe', gender: 'fem', count: 'singular', elides: '1' },
+      de: { base: 'Gras', gender: 'neut', count: 'singular' },
+      es: { base: 'hierba', gender: 'fem', count: 'singular' },
+      ja: { base: '草', count: 'singular', reading: 'くさ' },
+      pt: { base: 'grama', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'HEAT',
+    role: 'noun',
+    description: 'the energy a hot thing gives off',
+    emoji: '🔥',
+    countable: false,
+    forms: {
+      en: { base: 'heat', count: 'singular' },
+      it: { base: 'calore', gender: 'masc', count: 'singular' },
+      fr: { base: 'chaleur', gender: 'fem', count: 'singular' },
+      // Hitze- is the compound stem, not the *Hitzen- the feminine -e rule would give.
+      de: { base: 'Hitze', gender: 'fem', count: 'singular', compound: 'Hitze' },
+      es: { base: 'calor', gender: 'masc', count: 'singular' },
+      ja: { base: '熱', count: 'singular', reading: 'ねつ' },
+      pt: { base: 'calor', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'EYE',
+    role: 'noun',
+    description: 'the organ one sees with',
+    emoji: '👁️',
+    forms: {
+      en: { base: 'eye', plural: 'eyes', count: 'singular' },
+      it: { base: 'occhio', plural: 'occhi', gender: 'masc', count: 'singular' },
+      // œil is one of the few French nouns with a wholly irregular plural.
+      fr: { base: 'œil', plural: 'yeux', gender: 'masc', count: 'singular' },
+      de: { base: 'Auge', plural: 'Augen', gender: 'neut', count: 'singular', compound: 'Augen' },
+      es: { base: 'ojo', plural: 'ojos', gender: 'masc', count: 'singular' },
+      ja: { base: '目', count: 'singular', reading: 'め' },
+      pt: { base: 'olho', plural: 'olhos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'STORY',
+    role: 'noun',
+    description: 'a telling of events, true or not',
+    emoji: '📖',
+    forms: {
+      en: { base: 'story', plural: 'stories', count: 'singular' },
+      it: { base: 'storia', plural: 'storie', gender: 'fem', count: 'singular' },
+      // histoire opens on an h muet: l'histoire.
+      fr: { base: 'histoire', plural: 'histoires', gender: 'fem', count: 'singular', elides: '1' },
+      de: { base: 'Geschichte', plural: 'Geschichten', gender: 'fem', count: 'singular' },
+      es: { base: 'historia', plural: 'historias', gender: 'fem', count: 'singular' },
+      ja: { base: '物語', count: 'singular', reading: 'ものがたり' },
+      pt: { base: 'história', plural: 'histórias', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── Substances and states (localization B53) ───────────────────────
+  {
+    id: 'SUBSTANCE',
+    role: 'noun',
+    description: 'what things are made of; matter',
+    emoji: '🧪',
+    countable: false,
+    synonym: 'matter',
+    forms: {
+      en: { base: 'substance', count: 'singular' },
+      it: { base: 'sostanza', gender: 'fem', count: 'singular' },
+      fr: { base: 'substance', gender: 'fem', count: 'singular' },
+      de: { base: 'Stoff', gender: 'masc', count: 'singular' },
+      es: { base: 'sustancia', gender: 'fem', count: 'singular' },
+      ja: { base: '物質', count: 'singular', reading: 'ぶっしつ' },
+      pt: { base: 'substância', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'STATE',
+    role: 'noun',
+    description: 'the way a thing is at a time',
+    emoji: '🔆',
+    synonym: 'condition',
+    forms: {
+      en: { base: 'state', plural: 'states', count: 'singular' },
+      it: { base: 'stato', plural: 'stati', gender: 'masc', count: 'singular' },
+      fr: { base: 'état', plural: 'états', gender: 'masc', count: 'singular' },
+      de: { base: 'Zustand', plural: 'Zustände', gender: 'masc', count: 'singular', compound: 'Zustands' },
+      es: { base: 'estado', plural: 'estados', gender: 'masc', count: 'singular' },
+      ja: { base: '状態', count: 'singular', reading: 'じょうたい' },
+      pt: { base: 'estado', plural: 'estados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'GAS',
+    role: 'noun',
+    description: 'a substance that is neither solid nor liquid',
+    emoji: '💨',
+    countable: false,
+    forms: {
+      en: { base: 'gas', count: 'singular' },
+      // Italian gas and French gaz are invariable.
+      it: { base: 'gas', gender: 'masc', count: 'singular' },
+      fr: { base: 'gaz', gender: 'masc', count: 'singular' },
+      de: { base: 'Gas', gender: 'neut', count: 'singular' },
+      es: { base: 'gas', gender: 'masc', count: 'singular' },
+      ja: { base: '気体', count: 'singular', reading: 'きたい' },
+      pt: { base: 'gás', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── The dimensions a quality adjective scales on (localization B54) ─
+  {
+    id: 'JOY',
+    role: 'noun',
+    description: 'the feeling of being glad',
+    emoji: '😀',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'joy', count: 'singular' },
+      it: { base: 'gioia', gender: 'fem', count: 'singular' },
+      fr: { base: 'joie', gender: 'fem', count: 'singular' },
+      de: { base: 'Freude', gender: 'fem', count: 'singular' },
+      es: { base: 'alegría', gender: 'fem', count: 'singular' },
+      ja: { base: '喜び', count: 'singular', reading: 'よろこび' },
+      pt: { base: 'alegria', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'SORROW',
+    role: 'noun',
+    description: 'the feeling of being sad',
+    emoji: '😢',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'sorrow', count: 'singular' },
+      it: { base: 'tristezza', gender: 'fem', count: 'singular' },
+      fr: { base: 'tristesse', gender: 'fem', count: 'singular' },
+      de: { base: 'Trauer', gender: 'fem', count: 'singular' },
+      es: { base: 'tristeza', gender: 'fem', count: 'singular' },
+      ja: { base: '悲しみ', count: 'singular', reading: 'かなしみ' },
+      pt: { base: 'tristeza', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'REST',
+    role: 'noun',
+    description: 'the being still, to recover strength',
+    emoji: '😴',
+    countable: false,
+    synonym: 'repose',
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'rest', count: 'singular' },
+      it: { base: 'riposo', gender: 'masc', count: 'singular' },
+      fr: { base: 'repos', gender: 'masc', count: 'singular' },
+      // Ruhe- is the compound stem, not the *Ruhen- the feminine -e rule would give.
+      de: { base: 'Ruhe', gender: 'fem', count: 'singular', compound: 'Ruhe' },
+      es: { base: 'descanso', gender: 'masc', count: 'singular' },
+      ja: { base: '休息', count: 'singular', reading: 'きゅうそく' },
+      pt: { base: 'descanso', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'ATTENTION',
+    role: 'noun',
+    description: 'the turning of the mind toward something',
+    emoji: '🧐',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'attention', count: 'singular' },
+      it: { base: 'attenzione', gender: 'fem', count: 'singular' },
+      fr: { base: 'attention', gender: 'fem', count: 'singular' },
+      de: { base: 'Aufmerksamkeit', gender: 'fem', count: 'singular' },
+      es: { base: 'atención', gender: 'fem', count: 'singular' },
+      // 注目, not 注意: CARE is already 注意, and INTERESTING and CAREFUL would gloss alike in
+      // Japanese alone — the COLD/冷たい case B48 met.
+      ja: { base: '注目', count: 'singular', reading: 'ちゅうもく' },
+      pt: { base: 'atenção', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'ABILITY',
+    role: 'noun',
+    description: 'the power to do something',
+    emoji: '💪',
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'ability', plural: 'abilities', count: 'singular' },
+      // Italian capacità is invariable, as every -tà noun is.
+      it: { base: 'capacità', plural: 'capacità', gender: 'fem', count: 'singular' },
+      fr: { base: 'capacité', plural: 'capacités', gender: 'fem', count: 'singular' },
+      de: { base: 'Fähigkeit', plural: 'Fähigkeiten', gender: 'fem', count: 'singular' },
+      es: { base: 'capacidad', plural: 'capacidades', gender: 'fem', count: 'singular' },
+      ja: { base: '能力', count: 'singular', reading: 'のうりょく' },
+      pt: { base: 'capacidade', plural: 'capacidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'DUTY',
+    role: 'noun',
+    description: 'what one is bound to do',
+    emoji: '📋',
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'duty', plural: 'duties', count: 'singular' },
+      it: { base: 'dovere', plural: 'doveri', gender: 'masc', count: 'singular' },
+      fr: { base: 'devoir', plural: 'devoirs', gender: 'masc', count: 'singular' },
+      de: { base: 'Pflicht', plural: 'Pflichten', gender: 'fem', count: 'singular' },
+      es: { base: 'deber', plural: 'deberes', gender: 'masc', count: 'singular' },
+      ja: { base: '義務', count: 'singular', reading: 'ぎむ' },
+      pt: { base: 'dever', plural: 'deveres', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── The geography genera (localization B56) ────────────────────────
+  {
+    id: 'LAND',
+    role: 'noun',
+    description: "ground taken as a stretch of the earth's surface",
+    emoji: '🏞️',
+    countable: false,
+    synonym: 'territory',
+    forms: {
+      en: { base: 'land', count: 'singular' },
+      it: { base: 'terra', gender: 'fem', count: 'singular' },
+      fr: { base: 'terre', gender: 'fem', count: 'singular' },
+      de: { base: 'Land', gender: 'neut', count: 'singular' },
+      es: { base: 'tierra', gender: 'fem', count: 'singular' },
+      ja: { base: '陸地', count: 'singular', reading: 'りくち' },
+      pt: { base: 'terra', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'NATION',
+    role: 'noun',
+    description: 'a people with a government of its own',
+    emoji: '🚩',
+    human: true,
+    forms: {
+      en: { base: 'nation', plural: 'nations', count: 'singular' },
+      it: { base: 'nazione', plural: 'nazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'nation', plural: 'nations', gender: 'fem', count: 'singular' },
+      de: { base: 'Nation', plural: 'Nationen', gender: 'fem', count: 'singular' },
+      es: { base: 'nación', plural: 'naciones', gender: 'fem', count: 'singular' },
+      ja: { base: '国民', count: 'singular', reading: 'こくみん' },
+      pt: { base: 'nação', plural: 'nações', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── The interface nouns' own words (localization B57) ──────────────
+  {
+    id: 'PICTURE',
+    role: 'noun',
+    description: 'a likeness of a thing, drawn or shown',
+    emoji: '🖼️',
+    forms: {
+      en: { base: 'picture', plural: 'pictures', count: 'singular' },
+      it: { base: 'immagine', plural: 'immagini', gender: 'fem', count: 'singular' },
+      fr: { base: 'image', plural: 'images', gender: 'fem', count: 'singular' },
+      de: { base: 'Bild', plural: 'Bilder', gender: 'neut', count: 'singular' },
+      es: { base: 'imagen', plural: 'imágenes', gender: 'fem', count: 'singular' },
+      ja: { base: '画像', count: 'singular', reading: 'がぞう' },
+      pt: { base: 'imagem', plural: 'imagens', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'SCREEN',
+    role: 'noun',
+    description: 'the lit surface a program shows itself on',
+    emoji: '🖥️',
+    forms: {
+      en: { base: 'screen', plural: 'screens', count: 'singular' },
+      it: { base: 'schermo', plural: 'schermi', gender: 'masc', count: 'singular' },
+      fr: { base: 'écran', plural: 'écrans', gender: 'masc', count: 'singular' },
+      de: { base: 'Bildschirm', plural: 'Bildschirme', gender: 'masc', count: 'singular' },
+      es: { base: 'pantalla', plural: 'pantallas', gender: 'fem', count: 'singular' },
+      ja: { base: '画面', count: 'singular', reading: 'がめん' },
+      pt: { base: 'tela', plural: 'telas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'PART',
+    role: 'noun',
+    description: 'one of the pieces a whole is made of',
+    emoji: '🧩',
+    forms: {
+      en: { base: 'part', plural: 'parts', count: 'singular' },
+      it: { base: 'parte', plural: 'parti', gender: 'fem', count: 'singular' },
+      fr: { base: 'partie', plural: 'parties', gender: 'fem', count: 'singular' },
+      de: { base: 'Teil', plural: 'Teile', gender: 'masc', count: 'singular' },
+      es: { base: 'parte', plural: 'partes', gender: 'fem', count: 'singular' },
+      ja: { base: '部分', count: 'singular', reading: 'ぶぶん' },
+      pt: { base: 'parte', plural: 'partes', gender: 'fem', count: 'singular' },
     },
   },
 ];

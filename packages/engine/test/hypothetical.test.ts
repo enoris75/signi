@@ -300,8 +300,8 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
     const IRREGULAR: Record<string, string> = {
       BE: 'fôssemos', GO: 'fôssemos', GIVE: 'déssemos', SEE: 'víssemos', COME: 'viéssemos',
       HAVE: 'tivéssemos', HOLD: 'contivéssemos', MAKE: 'fizéssemos', KNOW: 'soubéssemos', CAN: 'pudéssemos', WILL: 'quiséssemos',
-      // fazer's compounds keep its irregular preterite (B40).
-      UNDO: 'desfizéssemos', REDO: 'refizéssemos',
+      // fazer's compounds keep its irregular preterite (B40), and pôr's do the same (B57: dispor).
+      UNDO: 'desfizéssemos', REDO: 'refizéssemos', ARRANGE: 'dispuséssemos',
     };
     const CLASS_ACCENT: Record<string, string> = { ar: 'á', er: 'ê', ir: 'í' };
     const verbs = seededVerbs('pt');

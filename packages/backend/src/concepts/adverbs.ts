@@ -98,6 +98,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'REPEATEDLY',
     role: 'adverb',
     description: 'many times over',
+    definition: { subject: { concept: 'TIME', definiteness: 'many', number: 'plural', mannerGloss: true } },
     emoji: '🔁',
     forms: {
       en: { base: 'repeatedly' },
@@ -117,6 +118,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'AGAIN',
     role: 'adverb',
     description: 'one more time',
+    definition: { subject: { concept: 'TIME', definiteness: 'indefinite', adjectives: ['OTHER'], mannerGloss: true } },
     emoji: '🔂',
     forms: {
       en: { base: 'again' },
@@ -259,6 +261,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'NOW',
     role: 'adverb',
     description: 'at the present time',
+    definition: { subject: { concept: 'TIME', definiteness: 'this', mannerGloss: true } },
     emoji: '⏱️',
     forms: {
       en: { base: 'now' },
@@ -279,6 +282,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALREADY',
     role: 'adverb',
     description: 'by this time; before now',
+    definition: mannerGloss('TIME', 'indefinite', 'PREVIOUS'),
     emoji: '✔️',
     forms: {
       en: { base: 'already', subtype: 'frequency' },

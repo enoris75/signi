@@ -453,6 +453,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to have one\'s home in a place',
+    definition: infinitiveGloss('BE', {
+      complements: { locative: { phrase: { concept: 'HOME', definiteness: 'definite' } } },
+    }),
     emoji: '🏘️',
     synonym: 'dwell',
     forms: {
@@ -528,6 +531,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to buy and sell goods',
+    definition: infinitiveGloss('BUY', 'OBJECT_THING', 'plural'),
     emoji: '🤝',
     forms: {
       en: {
@@ -897,6 +901,73 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'mudamos', '2pl_past': 'mudaram', '3pl_past': 'mudaram',
         '1sg_future': 'mudarei', '2sg_future': 'mudará', '3sg_future': 'mudará',
         '1pl_future': 'mudaremos', '2pl_future': 'mudarão', '3pl_future': 'mudarão',
+      },
+    },
+  },
+  // ── Speaking, and the two verbs that order a sequence (localization B55, B57) ──
+  {
+    id: 'SPEAK',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'instrumental', 'locative', 'cause'],
+    description: 'to say words aloud',
+    emoji: '🗣️',
+    forms: {
+      en: {
+        base: 'speak',
+        '1sg_present': 'speak', '2sg_present': 'speak', '3sg_present': 'speaks',
+        '1pl_present': 'speak', '2pl_present': 'speak', '3pl_present': 'speak',
+        past: 'spoke',
+      },
+      it: {
+        base: 'parlare',
+        '1sg_present': 'parlo', '2sg_present': 'parli', '3sg_present': 'parla',
+        '1pl_present': 'parliamo', '2pl_present': 'parlate', '3pl_present': 'parlano',
+        '1sg_past': 'parlai', '2sg_past': 'parlasti', '3sg_past': 'parlò',
+        '1pl_past': 'parlammo', '2pl_past': 'parlaste', '3pl_past': 'parlarono',
+        '1sg_future': 'parlerò', '2sg_future': 'parlerai', '3sg_future': 'parlerà',
+        '1pl_future': 'parleremo', '2pl_future': 'parlerete', '3pl_future': 'parleranno',
+      },
+      fr: {
+        base: 'parler',
+        '1sg_present': 'parle', '2sg_present': 'parles', '3sg_present': 'parle',
+        '1pl_present': 'parlons', '2pl_present': 'parlez', '3pl_present': 'parlent',
+        '1sg_past': 'parlai', '2sg_past': 'parlas', '3sg_past': 'parla',
+        '1pl_past': 'parlâmes', '2pl_past': 'parlâtes', '3pl_past': 'parlèrent',
+        '1sg_future': 'parlerai', '2sg_future': 'parleras', '3sg_future': 'parlera',
+        '1pl_future': 'parlerons', '2pl_future': 'parlerez', '3pl_future': 'parleront',
+      },
+      de: {
+        // sprechen is a strong e → i verb in the 2/3 singular: du sprichst, er spricht.
+        base: 'sprechen',
+        '1sg_present': 'spreche', '2sg_present': 'sprichst', '3sg_present': 'spricht',
+        '1pl_present': 'sprechen', '2pl_present': 'sprecht', '3pl_present': 'sprechen',
+        '1sg_past': 'sprach', '2sg_past': 'sprachst', '3sg_past': 'sprach',
+        '1pl_past': 'sprachen', '2pl_past': 'spracht', '3pl_past': 'sprachen',
+      },
+      es: {
+        base: 'hablar',
+        '1sg_present': 'hablo', '2sg_present': 'hablas', '3sg_present': 'habla',
+        '1pl_present': 'hablamos', '2pl_present': 'habláis', '3pl_present': 'hablan',
+        '1sg_past': 'hablé', '2sg_past': 'hablaste', '3sg_past': 'habló',
+        '1pl_past': 'hablamos', '2pl_past': 'hablasteis', '3pl_past': 'hablaron',
+        '1sg_future': 'hablaré', '2sg_future': 'hablarás', '3sg_future': 'hablará',
+        '1pl_future': 'hablaremos', '2pl_future': 'hablaréis', '3pl_future': 'hablarán',
+      },
+      ja: {
+        base: '話す',
+        reading: 'はなす',
+        masu_present: '話します',
+        masu_present_reading: 'はなします',
+      },
+      pt: {
+        base: 'falar',
+        '1sg_present': 'falo', '2sg_present': 'fala', '3sg_present': 'fala',
+        '1pl_present': 'falamos', '2pl_present': 'falam', '3pl_present': 'falam',
+        '1sg_past': 'falei', '2sg_past': 'falou', '3sg_past': 'falou',
+        '1pl_past': 'falamos', '2pl_past': 'falaram', '3pl_past': 'falaram',
+        '1sg_future': 'falarei', '2sg_future': 'falará', '3sg_future': 'falará',
+        '1pl_future': 'falaremos', '2pl_future': 'falarão', '3pl_future': 'falarão',
       },
     },
   },

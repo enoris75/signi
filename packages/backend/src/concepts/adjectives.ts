@@ -34,6 +34,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'SMALL',
     role: 'adjective',
     description: 'little in size',
+    definition: dimGloss('SIZE', 'LOW'),
     emoji: '🔬',
     forms: {
       en: { base: 'small' },
@@ -177,6 +178,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing joy',
+    definition: dimGloss('JOY', 'HIGH'),
     emoji: '😊',
     forms: {
       en: { base: 'happy' },
@@ -193,6 +195,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing sorrow',
+    definition: dimGloss('SORROW', 'HIGH'),
     emoji: '😢',
     forms: {
       en: { base: 'sad' },
@@ -303,7 +306,9 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'NEW',
     role: 'adjective',
-    description: 'recently made or introduced',
+    // Both senses, because Spanish and Portuguese spell them apart by position and the engine puts
+    // this one before the noun — "one more" — everywhere it composes (A204).
+    description: 'recently made or introduced, or one more of the same kind',
     emoji: '🆕',
     forms: {
       en: { base: 'new' },
@@ -367,6 +372,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to rest or sleep',
+    definition: dimGloss('REST', 'LOW'),
     emoji: '😴',
     forms: {
       en: { base: 'tired' },
@@ -496,6 +502,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'INTERESTING',
     role: 'adjective',
     description: 'arousing curiosity or attention',
+    definition: dimGloss('ATTENTION', 'HIGH'),
     emoji: '🤔',
     forms: {
       en: { base: 'interesting' },
@@ -591,6 +598,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LAZY',
     role: 'adjective',
     description: 'unwilling to work or use energy',
+    definition: dimGloss('CARE', 'LOW'),
     emoji: '🦥',
     forms: {
       en: { base: 'lazy' },
@@ -606,6 +614,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'CAREFUL',
     role: 'adjective',
     description: 'taking care to avoid harm or mistakes',
+    definition: dimGloss('CARE', 'HIGH'),
     emoji: '⚠️',
     forms: {
       en: { base: 'careful' },
@@ -627,6 +636,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'ABLE',
     role: 'adjective',
     description: 'having the power or the skill to do something',
+    definition: dimGloss('ABILITY', 'HIGH'),
     emoji: '🦾',
     forms: {
       en: { base: 'able' },
@@ -644,6 +654,7 @@ export const adjectives: ConceptSeed[] = [
     // Bound by a duty that holds for now, not a trait: es/pt say it with estar ("estar obligado a").
     transient: true,
     description: 'bound to do something by a duty or a rule',
+    definition: dimGloss('DUTY', 'HIGH'),
     emoji: '📜',
     forms: {
       en: { base: 'obliged' },
@@ -710,6 +721,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'LOUD',
     role: 'adjective',
     description: 'producing much sound',
+    definition: dimGloss('SOUND', 'GREAT'),
     emoji: '📣',
     forms: {
       en: { base: 'loud' },
@@ -1795,6 +1807,119 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'visible' },
       ja: { base: '可視の', reading: 'かしの' },
       pt: { base: 'visível' },
+    },
+  },
+  // ── The definition adjectives of localization B52, B53 and B58 ─────
+  {
+    id: 'SWEET',
+    role: 'adjective',
+    description: 'tasting of sugar',
+    emoji: '🍬',
+    forms: {
+      en: { base: 'sweet' },
+      it: { base: 'dolce' },
+      fr: { base: 'sucré' },
+      de: { base: 'süß' },
+      es: { base: 'dulce' },
+      ja: { base: '甘い', reading: 'あまい' },
+      pt: { base: 'doce' },
+    },
+  },
+  {
+    id: 'SOLID',
+    role: 'adjective',
+    description: 'keeping its shape, neither liquid nor gas',
+    emoji: '🧱',
+    forms: {
+      en: { base: 'solid' },
+      it: { base: 'solido' },
+      fr: { base: 'solide' },
+      de: { base: 'fest' },
+      es: { base: 'sólido' },
+      ja: { base: '固体の', reading: 'こたいの' },
+      pt: { base: 'sólido' },
+    },
+  },
+  {
+    // PRESENT, PAST and FUTURE are the ordinary time words, kept apart from the grammatical
+    // tense nouns they gloss (PRESENT_TENSE and the rest, localization B58).
+    id: 'PRESENT',
+    role: 'adjective',
+    description: 'happening now',
+    emoji: '⌚',
+    synonym: 'current',
+    forms: {
+      en: { base: 'present' },
+      it: { base: 'presente' },
+      fr: { base: 'présent' },
+      de: { base: 'gegenwärtig' },
+      es: { base: 'presente' },
+      ja: { base: '現在の', reading: 'げんざいの' },
+      pt: { base: 'presente' },
+    },
+  },
+  {
+    id: 'PAST',
+    role: 'adjective',
+    description: 'already happened',
+    emoji: '📜',
+    forms: {
+      en: { base: 'past' },
+      it: { base: 'passato' },
+      fr: { base: 'passé' },
+      de: { base: 'vergangen' },
+      es: { base: 'pasado' },
+      ja: { base: '過去の', reading: 'かこの' },
+      pt: { base: 'passado' },
+    },
+  },
+  {
+    id: 'FUTURE',
+    role: 'adjective',
+    description: 'yet to happen',
+    emoji: '🔮',
+    forms: {
+      en: { base: 'future' },
+      it: { base: 'futuro' },
+      fr: { base: 'futur' },
+      de: { base: 'zukünftig' },
+      es: { base: 'futuro' },
+      ja: { base: '未来の', reading: 'みらいの' },
+      pt: { base: 'futuro' },
+    },
+  },
+  {
+    // SOLE and MANIFOLD say in ordinary words what SINGULAR and PLURAL say as grammar, so the
+    // number categories can be glossed without defining a word with itself (localization B58).
+    id: 'SOLE',
+    role: 'adjective',
+    description: 'being the only one',
+    emoji: '☝️',
+    synonym: 'only',
+    forms: {
+      en: { base: 'sole' },
+      it: { base: 'unico' },
+      fr: { base: 'unique' },
+      de: { base: 'einzig' },
+      es: { base: 'único' },
+      ja: { base: '単一の', reading: 'たんいつの' },
+      pt: { base: 'único' },
+    },
+  },
+  {
+    id: 'MANIFOLD',
+    role: 'adjective',
+    description: 'being more than one',
+    emoji: '🖐️',
+    synonym: 'multiple',
+    forms: {
+      en: { base: 'manifold' },
+      it: { base: 'molteplice' },
+      fr: { base: 'multiple' },
+      de: { base: 'mehrfach' },
+      es: { base: 'múltiple' },
+      ja: { base: '複数の', reading: 'ふくすうの' },
+      pt: { base: 'múltiplo' },
     },
   },
 ];
