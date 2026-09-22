@@ -215,7 +215,9 @@ export function predicateText(
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")
   // prefixes "não". The adverb simply trails the verb here.
   if (mood === 'imperative') {
-    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    // A "nenhum" complement is post-verbal, and obliges the negator here as in the statement:
+    // "não corra em nenhuma casa" (A208).
+    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative || hasNegativeComplement(complements);
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Portuguese ("Carregar um período", "Não correr"), not the imperative.
     // A pronominal command is derived from the plain verb and takes the addressee's reflexive — "se"
@@ -243,7 +245,7 @@ export function predicateText(
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the particípio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || hasNegativeComplement(complements);
     const infVerb = !infNeg && thirdPersonClitic
       ? ptEnclitic(inf, thirdPersonClitic)
       : ptCliticize(objectClitic, infNeg ? `não ${inf}` : inf);

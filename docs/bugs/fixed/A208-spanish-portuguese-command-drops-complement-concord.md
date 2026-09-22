@@ -82,3 +82,28 @@ and an infinitive discard.
 | | |
 |---|---|
 | **Test** | `complements/determiner.test.ts` → *known bugs: complement negative concord in a command or an infinitive* (1 `test.fails`, plus a regression test for Italian, French, English, German, Japanese and the Spanish and Portuguese cases already right) |
+
+## Resolved
+
+**2026-09-22.** Took the minimal shape above. In
+[`es/predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts) and
+[`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) the imperative
+branch's `impNeg` and the infinitive branch's `infNeg` also read
+[`hasNegativeComplement(complements)`](../../../packages/engine/src/functions/hasNegativeComplement.ts).
+The negative imperative form, the proclitic order and the leading negator all follow from the gate.
+Because the helper already skips a similative manner phrase, a comparison's `no` still leaves the
+command, the instruction and the infinitive positive (A181).
+
+**The gates were not unified**, by ruling. `needsNo` / `needsNao` also reads
+`groupHasNegativeAdverb` for the modals' adverbs, which a command and an infinitive discard, so the
+three gates stay separate and the two moods only gain the complement term.
+
+- **Tests:** [`packages/engine/test/complements/determiner.test.ts`](../../../packages/engine/test/complements/determiner.test.ts)
+  → *known bugs: complement negative concord in a command or an infinitive*. The pinning
+  `test.fails` is now a passing `test`, with its assertions unchanged, and the regression test is
+  unchanged. A new case covers the siblings: an object clitic under the instruction and the
+  infinitive (`no comerlo`, `não o comer`), a noun object under the infinitive, the Spanish reflexive
+  instruction (`no moverse`), the vosotros / vocês command (`no corráis`, `não corram`), a negative
+  terminus (`no des el libro a ningún perro`), NEVER beside the complement taking one negator (`no
+  corras nunca en ninguna casa`), and a comparison's `no` leaving the instruction and the infinitive
+  positive.

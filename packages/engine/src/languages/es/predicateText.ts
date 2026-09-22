@@ -219,7 +219,9 @@ export function predicateText(
   // attaches after an affirmative command ("cómelo", "comedlo") and after an instruction, which is an
   // infinitive ("cargarlo", "no cargarlo"); only a negative command keeps it in front ("no lo comas").
   if (mood === 'imperative') {
-    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    // A "ningún" complement is post-verbal, and obliges the negator here as in the statement:
+    // "no corras en ninguna casa" (A208).
+    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative || hasNegativeComplement(complements);
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Spanish ("Cargar un período", "No correr"), not the imperative.
     // A reflexive command is derived from the plain verb and takes the addressee's clitic, ahead of
@@ -243,7 +245,7 @@ export function predicateText(
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the participio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || hasNegativeComplement(complements);
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
