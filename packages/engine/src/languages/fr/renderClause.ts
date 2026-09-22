@@ -39,7 +39,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const predicate = predicateText(
     subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, undefined, phrase.agent,
   );
-  const clause = joinSubject(subj, predicate).trim();
+  const clause = joinSubject(subj, predicate, phrase.verbPhrase.verb.forms).trim();
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("être capable d'agir", "le chat désire manger") or, under a causative, its object
   // ("amener une maison à être cachée").

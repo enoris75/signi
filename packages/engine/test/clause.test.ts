@@ -425,8 +425,8 @@ describe('known bugs: the French article on a bare singular count object (A207)'
 
 // A227. French elides "je", "ne" and "de" before a vowel sound, and an h muet is one: "j'habite",
 // "n'habite", "d'habiter". A noun says so in its lexeme (`elides`, which `elidesBefore` reads: "l'homme",
-// "l'histoire"), but the verb side tests the first letter only (`VOWEL_START` in `joinSubject`,
-// `predicateText` and `aspectVerbFr`), and no verb lexeme carries the flag. LIVE is "habiter", the one
+// "l'histoire"), but the verb side tested the first letter only (`VOWEL_START` in `joinSubject`,
+// `predicateText` and `aspectVerbFr`), and no verb lexeme carried the flag. LIVE is "habiter", the one
 // such verb seeded. Found authoring C24 ("qui ne habite pas avec des personnes").
 describe('known bugs: French does not elide before a verb opening on an h muet (A227)', () => {
   const I = np('FIRST_PERSON');
@@ -434,7 +434,7 @@ describe('known bugs: French does not elide before a verb opening on an h muet (
     say(clause(subject, 'LIVE', { ...extra, verbPhrase }), 'fr');
   const G = np('GENERIC_PERSON');
 
-  test.fails('je, ne and de elide before habiter', () => {
+  test('je, ne and de elide before habiter', () => {
     expect(lives(I)).toBe("j'habite.");
     expect(lives(I, { tense: 'past' })).toBe("j'habitai.");
     expect(lives(I, { tense: 'future' })).toBe("j'habiterai.");
@@ -455,6 +455,21 @@ describe('known bugs: French does not elide before a verb opening on an h muet (
       ...clause(G, 'BE', { complements: { predicative: { phrase: np('ABLE') } } }),
       infinitiveComplement: { verbPhrase: { verb: 'LIVE' } }, infinitive: true,
     }, 'fr')).toBe("être capable d'habiter.");
+  });
+
+  test('the other persons, tenses and aspects, a relative, est-ce que and aucun', () => {
+    expect(lives(np('SECOND_PERSON'), { negative: true })).toBe("tu n'habites pas.");
+    expect(lives(I, { tense: 'future', modifier: 'NEVER' })).toBe("je n'habiterai jamais.");
+    expect(lives(I, { aspect: 'progressive' })).toBe("je suis en train d'habiter.");
+    expect(lives(I, { aspect: 'progressive', negative: true })).toBe("je ne suis pas en train d'habiter.");
+    expect(lives(np('MAN', { definiteness: 'no' }))).toBe("aucun homme n'habite.");
+    expect(lives(np('FIRST_PERSON', { number: 'plural' }))).toBe('nous habitons.');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(I, 'LIVE', { verbPhrase: { negative: true } }) }, 'fr'))
+      .toBe("si je n'habitais pas, le chien courrait.");
+    expect(say({ subject: np('HOUSE', { relative: { headRole: 'locative', subject: I, verbPhrase: { verb: 'LIVE', negative: true } } }) }, 'fr'))
+      .toBe("la maison où je n'habite pas.");
+    expect(say({ ...clause(I, 'LIVE'), interrogative: true }, 'fr')).toBe("est-ce que j'habite ?");
+    expect(say({ ...clause(G, 'LIVE', { verbPhrase: { modifier: 'NEVER' } }), infinitive: true }, 'fr')).toBe('ne jamais habiter.');
   });
 
   test('regression: an auxiliary or a modal leads, the citation, "est-ce que", and a verb on a consonant', () => {

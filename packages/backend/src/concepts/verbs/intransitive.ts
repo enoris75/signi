@@ -476,6 +476,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       fr: {
         base: 'habiter',
+        // An h muet, as a noun's `elides` says: "j'habite", "n'habite pas", "d'habiter" (A227).
+        elides: '1',
         '1sg_present': 'habite', '2sg_present': 'habites', '3sg_present': 'habite',
         '1pl_present': 'habitons', '2pl_present': 'habitez', '3pl_present': 'habitent',
         '1sg_past': 'habitai', '2sg_past': 'habitas', '3sg_past': 'habita',

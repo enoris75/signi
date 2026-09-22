@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, CHAT, EFFONDRER, FEMME, JE, LIVRE, MANGER, SOURIS, TU } from './fr.fixtures.js';
+import { ALLER, CHAT, EFFONDRER, FEMME, HABITER, JE, LIVRE, MANGER, SOURIS, TU } from './fr.fixtures.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
 
 describe('aspectVerbFr', () => {
@@ -11,6 +11,13 @@ describe('aspectVerbFr', () => {
   test('the prospective is être + sur le point de + the infinitive', () => {
     expect(aspectVerbFr(MANGER, JE, 'future', 'prospective')).toEqual({ finite: 'serai', tail: 'sur le point de manger' });
     expect(aspectVerbFr(ALLER, TU, 'present', 'prospective')).toEqual({ finite: 'es', tail: "sur le point d'aller" });
+  });
+
+  // A227: an h muet is a vowel sound, and the verb's lexeme says which h is one.
+  test('de elides before a verb on an h muet, not before an h aspiré', () => {
+    expect(aspectVerbFr(HABITER, JE, 'present', 'prospective')).toEqual({ finite: 'suis', tail: "sur le point d'habiter" });
+    expect(aspectVerbFr(HABITER, CHAT, 'present', 'progressive')).toEqual({ finite: 'est', tail: "en train d'habiter" });
+    expect(aspectVerbFr({ base: 'hurler' }, CHAT, 'present', 'progressive')).toEqual({ finite: 'est', tail: 'en train de hurler' });
   });
 
   test('the resultative takes avoir by default, its participle not agreeing with the subject', () => {
