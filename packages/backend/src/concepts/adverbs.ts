@@ -232,6 +232,35 @@ export const adverbs: ConceptSeed[] = [
       pt: { base: 'para baixo', subtype: 'direction' },
     },
   },
+  {
+    // Out of a building, into the open: GO_OUT's differentia, "to go outside" (localization B61). A
+    // direction like UP and DOWN, and a phrase in German and Portuguese ("nach draußen", "para
+    // fora"). Spanish afuera is American usage, as the corpus's pt is Brazilian; Spain says fuera.
+    //
+    // Glossed as UP and DOWN are, the goal the motion reaches — "to a place that is not in a
+    // building", the dictionaries' "not inside a building" as the place a relative clause says. It
+    // names what none of UP, DOWN and EVERYWHERE does; the open air (all'aria aperta) reads in Italian
+    // alone.
+    id: 'OUTSIDE',
+    role: 'adverb',
+    description: 'out of a building or an enclosed place',
+    definition: complementGloss('direction', 'PLACE', 'indefinite', {
+      relative: {
+        verbPhrase: { verb: 'BE', negative: true },
+        complements: { locative: { phrase: { concept: 'BUILDING', definiteness: 'indefinite' } } },
+      },
+    }),
+    emoji: '🌳',
+    forms: {
+      en: { base: 'outside', subtype: 'direction' },
+      it: { base: 'fuori', subtype: 'direction' },
+      fr: { base: 'dehors', subtype: 'direction' },
+      de: { base: 'nach draußen', subtype: 'direction' },
+      es: { base: 'afuera', subtype: 'direction' },
+      ja: { base: '外に', subtype: 'direction', reading: 'そとに' },
+      pt: { base: 'para fora', subtype: 'direction' },
+    },
+  },
   // The other two ways a key moves the cursor, or a box (localization B44): "go left", "move the slot
   // right". Directions like UP and DOWN, and a phrase in every language but English.
   //

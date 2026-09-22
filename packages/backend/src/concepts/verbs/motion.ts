@@ -156,6 +156,239 @@ export const motionVerbs: ConceptSeed[] = [
       },
     },
   },
+  // ── Turning and leaving (localization B61) ────────────────────────
+  {
+    // P09's turn, the intransitive "rotate": the subject turns, as B59's "the earth turns around the
+    // sun" needs. German says it with the reflexive sich drehen, seeded like MOVE_ONESELF's sich
+    // bewegen: the plain forms, the clause placing the pronoun ("dreht sich", "hat sich gedreht").
+    // The Romance verbs are the plain girare, tourner, girar, which also serve the transitive sense
+    // (not seeded: drehen, 回す), and take HAVE in it/fr ("ha girato", "a tourné"). The `route` is
+    // what it turns around ("turns around the house").
+    id: 'TURN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'direction', 'route', 'cause'],
+    description: 'to move around a centre or an axis',
+    // "to move around a point" (localization B61): MOVE_ONESELF with the `around` route, the first in
+    // a verb gloss.
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      complements: {
+        route: {
+          phrase: { concept: 'POINT_NOUN', definiteness: 'indefinite' },
+          specifiers: [{ kind: 'path', value: 'around' }],
+        },
+      },
+    }),
+    emoji: '🔄',
+    isA: 'MOVE_ONESELF',
+    synonym: 'rotate',
+    forms: {
+      en: {
+        base: 'turn',
+        '1sg_present': 'turn', '2sg_present': 'turn', '3sg_present': 'turns',
+        '1pl_present': 'turn', '2pl_present': 'turn', '3pl_present': 'turn',
+        past: 'turned',
+      },
+      it: {
+        base: 'girare',
+        '1sg_present': 'giro', '2sg_present': 'giri', '3sg_present': 'gira',
+        '1pl_present': 'giriamo', '2pl_present': 'girate', '3pl_present': 'girano',
+        '1sg_past': 'girai', '2sg_past': 'girasti', '3sg_past': 'girò',
+        '1pl_past': 'girammo', '2pl_past': 'giraste', '3pl_past': 'girarono',
+        '1sg_future': 'girerò', '2sg_future': 'girerai', '3sg_future': 'girerà',
+        '1pl_future': 'gireremo', '2pl_future': 'girerete', '3pl_future': 'gireranno',
+      },
+      fr: {
+        base: 'tourner',
+        '1sg_present': 'tourne', '2sg_present': 'tournes', '3sg_present': 'tourne',
+        '1pl_present': 'tournons', '2pl_present': 'tournez', '3pl_present': 'tournent',
+        '1sg_past': 'tournai', '2sg_past': 'tournas', '3sg_past': 'tourna',
+        '1pl_past': 'tournâmes', '2pl_past': 'tournâtes', '3pl_past': 'tournèrent',
+        '1sg_future': 'tournerai', '2sg_future': 'tourneras', '3sg_future': 'tournera',
+        '1pl_future': 'tournerons', '2pl_future': 'tournerez', '3pl_future': 'tourneront',
+      },
+      de: {
+        base: 'sich drehen',
+        '1sg_present': 'drehe', '2sg_present': 'drehst', '3sg_present': 'dreht',
+        '1pl_present': 'drehen', '2pl_present': 'dreht', '3pl_present': 'drehen',
+        '1sg_past': 'drehte', '2sg_past': 'drehtest', '3sg_past': 'drehte',
+        '1pl_past': 'drehten', '2pl_past': 'drehtet', '3pl_past': 'drehten',
+      },
+      es: {
+        base: 'girar',
+        '1sg_present': 'giro', '2sg_present': 'giras', '3sg_present': 'gira',
+        '1pl_present': 'giramos', '2pl_present': 'giráis', '3pl_present': 'giran',
+        '1sg_past': 'giré', '2sg_past': 'giraste', '3sg_past': 'giró',
+        '1pl_past': 'giramos', '2pl_past': 'girasteis', '3pl_past': 'giraron',
+        '1sg_future': 'giraré', '2sg_future': 'girarás', '3sg_future': 'girará',
+        '1pl_future': 'giraremos', '2pl_future': 'giraréis', '3pl_future': 'girarán',
+      },
+      ja: {
+        base: '回る',
+        reading: 'まわる',
+        masu_present: '回ります',
+        masu_present_reading: 'まわります',
+      },
+      pt: {
+        base: 'girar',
+        '1sg_present': 'giro', '2sg_present': 'gira', '3sg_present': 'gira',
+        '1pl_present': 'giramos', '2pl_present': 'giram', '3pl_present': 'giram',
+        '1sg_past': 'girei', '2sg_past': 'girou', '3sg_past': 'girou',
+        '1pl_past': 'giramos', '2pl_past': 'giraram', '3pl_past': 'giraram',
+        '1sg_future': 'girarei', '2sg_future': 'girará', '3sg_future': 'girará',
+        '1pl_future': 'giraremos', '2pl_future': 'girarão', '3pl_future': 'girarão',
+      },
+    },
+  },
+  {
+    // P09's leave in the setting-off sense: to depart. The place left is a `source` ("leaves from the
+    // house"), where the seeded LEAVE takes it as its object. BE in it/fr/de (è partito, est parti,
+    // ist weggegangen). German weggehen is the generic for a person (abfahren is by vehicle) and
+    // separable (geht … weg). Spanish partir, not irse, which the gloss's "ir" would define by its own
+    // stem; Japanese 出発する, since 出る is LEAVE's and GO_OUT's.
+    id: 'LEAVE_DEPART',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'source', 'cause'],
+    description: 'to go away; to set off',
+    // "to begin to go" (localization B61): ACQUIRE's inchoative ("to begin to have") on GO.
+    definition: infinitiveGloss('BEGIN', { infinitive: 'GO' }),
+    emoji: '🛫',
+    isA: 'GO',
+    synonym: 'depart',
+    forms: {
+      en: {
+        base: 'leave',
+        '1sg_present': 'leave', '2sg_present': 'leave', '3sg_present': 'leaves',
+        '1pl_present': 'leave', '2pl_present': 'leave', '3pl_present': 'leave',
+        past: 'left',
+      },
+      it: {
+        base: 'partire',
+        '1sg_present': 'parto', '2sg_present': 'parti', '3sg_present': 'parte',
+        '1pl_present': 'partiamo', '2pl_present': 'partite', '3pl_present': 'partono',
+        '1sg_past': 'partii', '2sg_past': 'partisti', '3sg_past': 'partì',
+        '1pl_past': 'partimmo', '2pl_past': 'partiste', '3pl_past': 'partirono',
+        '1sg_future': 'partirò', '2sg_future': 'partirai', '3sg_future': 'partirà',
+        '1pl_future': 'partiremo', '2pl_future': 'partirete', '3pl_future': 'partiranno',
+      },
+      fr: {
+        base: 'partir',
+        '1sg_present': 'pars', '2sg_present': 'pars', '3sg_present': 'part',
+        '1pl_present': 'partons', '2pl_present': 'partez', '3pl_present': 'partent',
+        '1sg_past': 'partis', '2sg_past': 'partis', '3sg_past': 'partit',
+        '1pl_past': 'partîmes', '2pl_past': 'partîtes', '3pl_past': 'partirent',
+        '1sg_future': 'partirai', '2sg_future': 'partiras', '3sg_future': 'partira',
+        '1pl_future': 'partirons', '2pl_future': 'partirez', '3pl_future': 'partiront',
+      },
+      de: {
+        base: 'weggehen', particle: 'weg',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+        '1sg_past': 'ging', '2sg_past': 'gingst', '3sg_past': 'ging',
+        '1pl_past': 'gingen', '2pl_past': 'gingt', '3pl_past': 'gingen',
+      },
+      es: {
+        base: 'partir',
+        '1sg_present': 'parto', '2sg_present': 'partes', '3sg_present': 'parte',
+        '1pl_present': 'partimos', '2pl_present': 'partís', '3pl_present': 'parten',
+        '1sg_past': 'partí', '2sg_past': 'partiste', '3sg_past': 'partió',
+        '1pl_past': 'partimos', '2pl_past': 'partisteis', '3pl_past': 'partieron',
+        '1sg_future': 'partiré', '2sg_future': 'partirás', '3sg_future': 'partirá',
+        '1pl_future': 'partiremos', '2pl_future': 'partiréis', '3pl_future': 'partirán',
+      },
+      ja: {
+        base: '出発する',
+        reading: 'しゅっぱつする',
+        masu_present: '出発します',
+        masu_present_reading: 'しゅっぱつします',
+      },
+      pt: {
+        base: 'partir',
+        '1sg_present': 'parto', '2sg_present': 'parte', '3sg_present': 'parte',
+        '1pl_present': 'partimos', '2pl_present': 'partem', '3pl_present': 'partem',
+        '1sg_past': 'parti', '2sg_past': 'partiu', '3sg_past': 'partiu',
+        '1pl_past': 'partimos', '2pl_past': 'partiram', '3pl_past': 'partiram',
+        '1sg_future': 'partirei', '2sg_future': 'partirá', '3sg_future': 'partirá',
+        '1pl_future': 'partiremos', '2pl_future': 'partirão', '3pl_future': 'partirão',
+      },
+    },
+  },
+  {
+    // P09's go out (D3): to go outside. English phrasal, German separable hinausgehen; BE in it/fr/de
+    // (è uscito, est sorti, ist hinausgegangen). No `source`: "goes out of the house" is the seeded
+    // LEAVE's frame, which it/es/ja/pt already say with this verb (esce dalla casa, 家を出る), and
+    // en/fr/de split. Spanish salir's tú command is the irregular "sal", as LEAVE's is.
+    id: 'GO_OUT',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'direction', 'route', 'cause'],
+    description: 'to go outside',
+    // "to go outside" (localization B61): GO with the direction adverb its particle says, as Duden
+    // glosses hinausgehen "nach draußen gehen".
+    definition: infinitiveGloss('GO', { modifier: 'OUTSIDE' }),
+    emoji: '🚶‍➡️',
+    isA: 'GO',
+    forms: {
+      en: {
+        // phrasal, like TIDY_UP: the particle stays with the verb.
+        base: 'go out',
+        '1sg_present': 'go out', '2sg_present': 'go out', '3sg_present': 'goes out',
+        '1pl_present': 'go out', '2pl_present': 'go out', '3pl_present': 'go out',
+        past: 'went out',
+        particle: 'out',
+      },
+      it: {
+        base: 'uscire',
+        '1sg_present': 'esco', '2sg_present': 'esci', '3sg_present': 'esce',
+        '1pl_present': 'usciamo', '2pl_present': 'uscite', '3pl_present': 'escono',
+        '1sg_past': 'uscii', '2sg_past': 'uscisti', '3sg_past': 'uscì',
+        '1pl_past': 'uscimmo', '2pl_past': 'usciste', '3pl_past': 'uscirono',
+        '1sg_future': 'uscirò', '2sg_future': 'uscirai', '3sg_future': 'uscirà',
+        '1pl_future': 'usciremo', '2pl_future': 'uscirete', '3pl_future': 'usciranno',
+      },
+      fr: {
+        base: 'sortir',
+        '1sg_present': 'sors', '2sg_present': 'sors', '3sg_present': 'sort',
+        '1pl_present': 'sortons', '2pl_present': 'sortez', '3pl_present': 'sortent',
+        '1sg_past': 'sortis', '2sg_past': 'sortis', '3sg_past': 'sortit',
+        '1pl_past': 'sortîmes', '2pl_past': 'sortîtes', '3pl_past': 'sortirent',
+        '1sg_future': 'sortirai', '2sg_future': 'sortiras', '3sg_future': 'sortira',
+        '1pl_future': 'sortirons', '2pl_future': 'sortirez', '3pl_future': 'sortiront',
+      },
+      de: {
+        base: 'hinausgehen', particle: 'hinaus',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+        '1sg_past': 'ging', '2sg_past': 'gingst', '3sg_past': 'ging',
+        '1pl_past': 'gingen', '2pl_past': 'gingt', '3pl_past': 'gingen',
+      },
+      es: {
+        base: 'salir',
+        '1sg_present': 'salgo', '2sg_present': 'sales', '3sg_present': 'sale',
+        '1pl_present': 'salimos', '2pl_present': 'salís', '3pl_present': 'salen',
+        '1sg_past': 'salí', '2sg_past': 'saliste', '3sg_past': 'salió',
+        '1pl_past': 'salimos', '2pl_past': 'salisteis', '3pl_past': 'salieron',
+        '1sg_future': 'saldré', '2sg_future': 'saldrás', '3sg_future': 'saldrá',
+        '1pl_future': 'saldremos', '2pl_future': 'saldréis', '3pl_future': 'saldrán',
+      },
+      ja: {
+        base: '出る',
+        reading: 'でる',
+        masu_present: '出ます',
+        masu_present_reading: 'でます',
+      },
+      pt: {
+        base: 'sair',
+        '1sg_present': 'saio', '2sg_present': 'sai', '3sg_present': 'sai',
+        '1pl_present': 'saímos', '2pl_present': 'saem', '3pl_present': 'saem',
+        '1sg_past': 'saí', '2sg_past': 'saiu', '3sg_past': 'saiu',
+        '1pl_past': 'saímos', '2pl_past': 'saíram', '3pl_past': 'saíram',
+        '1sg_future': 'sairei', '2sg_future': 'sairá', '3sg_future': 'sairá',
+        '1pl_future': 'sairemos', '2pl_future': 'sairão', '3pl_future': 'sairão',
+      },
+    },
+  },
 
   {
     // The intransitive "move", the genus GO and RUN are kinds of: the subject changes position. MOVE is

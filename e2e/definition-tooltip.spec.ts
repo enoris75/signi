@@ -2282,4 +2282,31 @@ test.describe('word definition tooltip', () => {
     await stateJa.hover();
     await expect(page.locator(tooltip)).toHaveText('国を統治するシステム');
   });
+
+  // B61: P09's handling and leaving verbs. The tooltip is what tells apart the words a picker shows
+  // twice — the Japanese 見る of SEE and LOOK_AT, and the three English "leave" — and GET's Italian
+  // source is the plain "da" A228's fix left it with.
+  for (const [id, query, en, language, other] of [
+    ['LOOK_AT', 'look', 'to direct the eyes to an object', 'ja', '物体へ目を向ける'],
+    ['TURN', 'turn', 'to move around a point', 'de', 'sich um einen Punkt bewegen'],
+    ['LEAVE_DEPART', 'leave', 'to begin to go', 'it', 'iniziare ad andare'],
+    ['LEAVE_BEHIND', 'leave', 'to cause an object to stay', 'ja', '物体が残るようにする'],
+    ['GET', 'get', 'to acquire objects from a person', 'it', 'acquisire oggetti da una persona'],
+  ] as const) {
+    test(`a verb definition renders (localization B61: ${id})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
 });
