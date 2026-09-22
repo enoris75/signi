@@ -1,6 +1,14 @@
 # B-needs-seed — tasks waiting on words
 
-**None open.** B52–B58, the seven the
+**Nine open: [B59](B59-time-words.md)–[B67](B67-place-and-focus-adverbs.md)**, the
+[P09](../../features/P-planning/P09-core-vocabulary/README.md) core vocabulary, filed on 2026-09-22.
+Each seeds P09 words that do not exist yet and glosses them: the first rows of its **Seed first** are
+the P09 words themselves, then the differentia. 47 of their 61 words ship a gloss on the ticket's own
+seed; the rest wait on a construct in [C29–C40](../C-needs-engine/README.md), or are literal by
+design. See [the P09 sweep](../localization-tasks.md#the-p09-sweep-of-2026-09-22) for the order to
+author them in and the decisions each leaves open.
+
+B52–B58, the seven the
 [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22) filed, were authored the
 same day and are all in [`done/`](../done/): six in the morning, and
 [B54](../done/B54-sensation-and-quality-adjectives.md) once
