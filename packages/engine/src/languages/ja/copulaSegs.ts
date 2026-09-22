@@ -126,14 +126,16 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so it
   // inflects as one: 大きくないです).
   const { base, reading } = jaComparisonAdj(head.head);
-  const { kind, stem, reading: stemReading, attributive } = jaAdjClass(base, reading);
+  const { kind, stem, reading: stemReading, attributive, predicative } = jaAdjClass(base, reading, f['relational'] === '1');
   // The predicate adjective's degree adverb leads, as it does attributively (もっと楽しいです).
   const deg = JA_DEGREE[adjDegree(head.head)];
   const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];
   // A na- or の-adjective before its noun keeps its own attributive particle (幸せな猫, 茶色の猫).
+  // A relational one keeps its の in front of the copula too, where dropping it would name the thing
+  // the stem is rather than predicate of the subject (猫はアメリカのです, not 猫はアメリカです — A246).
   const ending = kind === 'i' ? I_ENDINGS[form][cell]
     : kind === 'ta' ? STATE_ENDINGS[form][cell]
     : form === 'prenominal' && cell === 0 && attributive ? attributive
-    : COPULA_ENDINGS[form][cell];
+    : `${predicative}${COPULA_ENDINGS[form][cell]}`;
   return [...degSegs, wordSeg(stem, stemReading), { t: ending }];
 }

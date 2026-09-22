@@ -444,11 +444,16 @@ export const adverbs: ConceptSeed[] = [
     role: 'adverb',
     description: 'up to now; as before',
     emoji: '⏸️',
+    // STILL scopes OVER a negation — "still does not" is what the plan means, not "does not still"
+    // (A244). Three languages mark that scope in the surface: English puts the adverb ahead of the
+    // whole negated group, German ahead of "nicht", and French both ahead of "pas" and on a second
+    // lexeme (*ne … pas encore* is "not yet", the wrong reading). Italian, Spanish, Portuguese and
+    // Japanese read right where the adverb already stands, and name neither key.
     forms: {
-      en: { base: 'still', subtype: 'frequency' },
+      en: { base: 'still', subtype: 'frequency', negative_slot: 'pre-negation' },
       it: { base: 'ancora', subtype: 'frequency' },
-      fr: { base: 'encore', subtype: 'frequency' },
-      de: { base: 'noch', subtype: 'frequency' },
+      fr: { base: 'encore', subtype: 'frequency', negative: 'toujours', negative_slot: 'pre-negator' },
+      de: { base: 'noch', subtype: 'frequency', negative_slot: 'pre-negator' },
       es: { base: 'todavía', subtype: 'frequency' },
       ja: { base: 'まだ', subtype: 'frequency' },
       pt: { base: 'ainda', subtype: 'frequency' },
@@ -556,14 +561,18 @@ export const adverbs: ConceptSeed[] = [
     description: 'likewise; in addition',
     definition: mannerGloss('WAY', 'definite', 'SAME'),
     emoji: '➕',
+    // The additive scopes over a negation too, and six languages have a separate word for it there:
+    // postposed "either", *neanche*, *non plus*, *tampoco*, and the fixed orders "auch nicht" and
+    // "também não" (A245). Spanish's is preverbal and carries the negation itself, so the clause's
+    // own "no" gives way to it, as it does to *nunca*. Japanese 同じく reads right as it stands.
     forms: {
-      en: { base: 'also', subtype: 'frequency' },
-      it: { base: 'anche', subtype: 'frequency' },
-      fr: { base: 'aussi', subtype: 'frequency' },
-      de: { base: 'auch', subtype: 'frequency' },
-      es: { base: 'también', subtype: 'frequency' },
+      en: { base: 'also', subtype: 'frequency', negative: 'either', negative_slot: 'final' },
+      it: { base: 'anche', subtype: 'frequency', negative: 'neanche' },
+      fr: { base: 'aussi', subtype: 'frequency', negative: 'non plus' },
+      de: { base: 'auch', subtype: 'frequency', negative_slot: 'pre-negator' },
+      es: { base: 'también', subtype: 'frequency', negative: 'tampoco', negative_slot: 'pre-negation' },
       ja: { base: '同じく', subtype: 'frequency', reading: 'おなじく' },
-      pt: { base: 'também', subtype: 'frequency' },
+      pt: { base: 'também', subtype: 'frequency', negative_slot: 'pre-negator' },
     },
   },
   {

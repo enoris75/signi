@@ -2,16 +2,19 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
+import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
+import { dativePronounForm } from '../../functions/dativePronounForm.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { lemmaTail } from '../../functions/lemmaTail.js';
+import { negativeAdverb as negativeAdverbForm } from '../../functions/negativeAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -77,7 +80,12 @@ export function predicateText(
   const moodFinite = moodForm('fr', plain, moodPN(subjectForms), mood) ?? statePastForm('fr', plain, moodPN(subjectForms), tense, mood);
   const conjugated = moodFinite !== undefined ? reflexiveFinite(finiteVerb.forms, subjectForms, moodFinite)
     : conjugate(finiteVerb.forms, subjectForms, tense);
-  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A focus adverb that scopes over the negation. French changes both the word and the place: the
+  // additive is *non plus* behind "pas", where *aussi* is ungrammatical, and STILL is *toujours* in
+  // front of it — *ne … pas encore* is "not yet", the reading the plan does not mean (A244, A245).
+  const negAdverb = negativeAdverbForm(modifier, verbNegative === true);
+  const preNegator = negAdverb?.slot === 'pre-negator' ? negAdverb.text : '';
+  const adverbText = preNegator ? '' : (negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : ''));
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -86,9 +94,10 @@ export function predicateText(
   // does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
-  // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
-  // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.
-  const groupNegative = groupHasNegativeAdverb(verbPhrase);
+  // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on a MODAL, or
+  // on the main verb of a modal-free clause, provides the FINITE verb's negation, so "pas" is
+  // suppressed there. One on the main verb under a modal denies the governed group instead (A236).
+  const groupNegative = finiteHasNegativeAdverb(verbPhrase);
   // A frequency adverb (jamais, toujours, souvent) sits right after the finite verb — which
   // in a compound tense means between the auxiliary and the participle ("n'a jamais été",
   // "doit toujours aller"), not trailing the whole group. Manner adverbs still trail.
@@ -110,8 +119,12 @@ export function predicateText(
     hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
   const aucun = subjectIsNegative || aucunPostverbal;
   // The main verb's own negation, which only a modal can govern: "je veux ne pas aller". Without a
-  // modal the main verb IS the finite verb and `verbNegative` already carries it.
-  const governedNeg = governedNegative === true && modals.length > 0;
+  // modal the main verb IS the finite verb and `verbNegative` already carries it. Its negative
+  // adverb is a negation of the same group, and is its own negator word: "le chat veut ne jamais
+  // manger", where "jamais" replaces the "pas" exactly as it does on a finite verb (A236).
+  const governedAdverb = governedHasNegativeAdverb(verbPhrase);
+  const governedNeg = (governedNegative === true || governedAdverb) && modals.length > 0;
+  const governedNegator = governedAdverb ? modifierText : 'pas';
   // An inner modal denying itself ("je dois ne pas pouvoir aller"); the outermost modal's own
   // negation is the clause's, and lives in `verbNegative`.
   const innerNeg = modals.some((m, i) => i > 0 && m.negative === true);
@@ -144,7 +157,7 @@ export function predicateText(
     if (!verbNegative && !finiteAucun && !groupNegative) return join(head);
     const ne = elidesBeforeVerb(verb.forms, head) ? "n'" : 'ne ';
     const pas = verbNegative && !groupNegative && !finiteAucun ? ' pas' : '';
-    return join(`${ne}${head}${pas}`);
+    return join(`${ne}${head}${preNegator ? ` ${preNegator}` : ''}${pas}`);
   };
   // A NON-FINITE element takes its whole negation in front of it — "ne pas" stays together before
   // an infinitive, its auxiliary and its clitic ("ne pas avoir mangé", "ne pas me voir"), where a
@@ -167,16 +180,21 @@ export function predicateText(
   // "aucun" conjunct, which no clitic can resume.
   // A verb that takes its object with a preposition ("clique sur le bouton", A139) has no direct object
   // for a clitic to stand in for: its pronoun takes the tonic form after the preposition ("clique sur
-  // moi"), and no participle agrees with it.
+  // moi"), and no participle agrees with it. The dative "à" is the exception (téléphoner à): its
+  // pronoun object is the indirect-object clitic, "lui téléphone", where "téléphone à lui" is
+  // ungrammatical (A240). No participle agrees with that one either.
   const objectPrep = objectPreposition(verb);
+  const datClitic = objectPrep === 'à';
   const dislocated = !!directObject && !objectPrep && directObject.conjuncts.length > 1 && !aucun
     && directObject.conjuncts.some((np) => np.head.forms['person']);
   // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "le" for
   // a predicate ("le chien ne l'est pas", "les chiens le sont"), "y" for a place ("il n'y est pas").
   const elided = verbPhrase.elided;
   const objectClitic = !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
+    : objectPrep && !datClitic ? ''
+    : isPronounElement(directObject)
+      ? (datClitic ? dativePronounForm(firstConjunct(directObject).head.forms) : objectPronounForm(firstConjunct(directObject).head.forms))
     : objectPrep ? ''
-    : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : dislocated ? groupObjectClitic(directObject) : '';
   // The alarm a cry raises takes "à" and the article ("cria au loup", A124).
   // A noun object has no zero article, and a negation turns its indefinite or partitive article into
@@ -199,7 +217,7 @@ export function predicateText(
   // object ("le chat l'a vue", "les a vus"); a resumed group agrees as the group ("nous a vus, lui
   // et moi"). An object relative passes its antecedent instead (`precedingObjectForms`).
   // A pro-form is no object, and the participle does not agree with it ("l'a été").
-  const cliticObjectForms = !objectClitic || !directObject ? undefined
+  const cliticObjectForms = !objectClitic || !directObject || datClitic ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
   // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit
@@ -216,20 +234,18 @@ export function predicateText(
     // ne pas aller". The one that a postverbal "aucun" concords with drops the "pas", exactly as
     // the finite verb does ("le chat veut ne manger aucune nourriture").
     const concordDrops = aucunPostverbal;
-    // A negative adverb is the FINITE verb's negator wherever in the group it was written (see
-    // `groupHasNegativeAdverb`), so it stays beside the verb it negates rather than falling inside
-    // the governed group's own "ne pas": "je ne dois jamais ne pas aller", never "… ne pas jamais
-    // aller", which would read as a third negator. Any other frequency adverb belongs to the main
-    // verb and goes under its negation ("je dois ne pas toujours aller").
-    const mainNegAdverb = governedNeg && isFrequency && isNegativeAdverb(modifier) ? modifierText : '';
+    // The main verb's negative adverb is that verb's negator, written inside the group the modal
+    // governs ("le chat veut ne jamais manger"); it is `governedNegator` above, so it takes no slot
+    // of its own here. Any other frequency adverb belongs to the main verb and goes under its
+    // negation ("je dois ne pas toujours aller").
     const { finite, finiteAdverb, tail } = modalGroupFr(
-      modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency && !mainNegAdverb ? modifierText : '', infinitiveClitic,
+      modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency && !governedAdverb ? modifierText : '', infinitiveClitic,
       precedingObjectForms ?? cliticObjectForms, preInfinitive,
-      (word) => negateNonFinite(concordDrops && !governedNeg ? '' : 'pas', word),
-      governedNeg ? (group) => negateNonFinite(concordDrops ? '' : 'pas', group) : undefined,
+      (word) => negateNonFinite(concordDrops && !governedNeg ? '' : governedNegator, word),
+      governedNeg ? (group) => negateNonFinite(concordDrops ? '' : governedNegator, group) : undefined,
     );
-    effectiveVerb = [negateFinite(finite), finiteAdverb, mainNegAdverb, tail].filter(Boolean).join(' ');
-    effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
+    effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
+    effectiveMod = isFrequency || preInfinitive || governedAdverb ? '' : modifierText;
   } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a

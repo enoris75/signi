@@ -4,6 +4,7 @@ import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
+import { npText } from './npText.js';
 import { ptAdj } from './ptAdj.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
@@ -26,6 +27,11 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A234 here).
   const possessive = ptPossessiveWord(poss, false);
   const ownDeterminer = poss.head.forms['definiteness'] ?? 'definite';
+  // "todos" keeps its slot too, and is the one determiner that does not detach the possessive: it
+  // stands in front of it, article and all ("de todos os meus livros", A237). "de" fuses with the
+  // article of an ordinary possessor ("dos meus livros") but not across "todos", so the phrase is
+  // the one the object builds, behind a plain "de".
+  if (possessive && ownDeterminer === 'all') return ` de ${npText(poss)}`;
   const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
   const possessed = possessedHeadForms(poss, 'definite');
   const f = detached ? { ...possessed, definiteness: ownDeterminer } : possessed;

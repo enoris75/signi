@@ -1665,7 +1665,9 @@ export const adjectives: ConceptSeed[] = [
       fr: { base: 'américain' },
       de: { base: 'amerikanisch' },
       es: { base: 'estadounidense' },
-      ja: { base: 'アメリカの' },
+      // `relational`: the の links the subject to a country, not to a property of it, so the
+      // predicate keeps it (猫はアメリカのです). Dropped, it would say the cat IS America (A246).
+      ja: { base: 'アメリカの', relational: '1' },
       pt: { base: 'americano' },
     },
   },

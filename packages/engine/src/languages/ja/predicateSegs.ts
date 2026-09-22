@@ -1,6 +1,7 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
+import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import type { JaForm, JaIPN } from './ja.types.js';
@@ -117,13 +118,15 @@ export function predicateSegs(
   // with, and the finite modal takes none — 猫はどの食べ物も食べないでいたいです, not 食べないでいたくない
   // です, which would deny the wanting too (A03). A negative adverb still goes to the finite element
   // by design (see `groupHasNegativeAdverb`).
-  const governedNeg = governedNegative === true && modals.length > 0;
+  // A negative adverb on the main verb negates the governed verb, not the modal: 決して食べないでい
+  // たいです — the cat wants to never eat — where the finite reading is 決して食べたくないです (A236).
+  const governedNeg = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0;
   // Any ない the chain already stands inside the predicate closes the circumfix: the governed group's,
   // or an inner modal's own (どの食べ物も食べることができない必要があります). The translator has moved the
   // outermost modal's flag to `negative`, so `modals` only ever carries the inner ones' — the same
   // reading `negationSources.governed` gives the languages that write a separate negator.
   const innerNegation = governedNeg || modals.some((m) => m.negative === true);
-  const negated = negative === true || groupHasNegativeAdverb(verbPhrase) || (concord && !innerNegation);
+  const negated = negative === true || finiteHasNegativeAdverb(verbPhrase) || (concord && !innerNegation);
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.

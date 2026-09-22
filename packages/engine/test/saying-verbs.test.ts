@@ -271,15 +271,57 @@ describe('the B60 glosses, in every language', () => {
 // all'uomo, 男に名前を尋ねます) except German, whose fragen takes the person in the accusative, "fragt
 // den Mann" where it renders "fragt dem Mann": that is C35's lexical object case, not this bug. No
 // shipped gloss shows it: ANSWER's own gloss is SAY with a terminus, which takes "to".
+// Fixed: the lexeme selects the shape, as `object_prep` does for a direct object — English ASK and
+// ANSWER say `terminus_bare`, and the addressee is written with no adposition, ahead of the thing.
 describe('known bugs: an English addressee that takes no "to" (A238)', () => {
-  test.fails('ASK puts the person asked before the thing, with no "to"', () => {
+  const asks = (extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: { terminus: { phrase: the('MAN') } }, ...extra })).en;
+
+  test('ASK puts the person asked before the thing, with no "to"', () => {
     expect(sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: { terminus: { phrase: the('MAN') } } })).en)
       .toBe('the woman asks the man the name.');
   });
 
-  test.fails('ANSWER takes the person answered as a bare object', () => {
+  test('ANSWER takes the person answered as a bare object', () => {
     expect(sayAll(clause(the('WOMAN'), 'ANSWER', { complements: { terminus: { phrase: the('MAN') } } })).en)
       .toBe('the woman answers the man.');
+  });
+
+  test('a pronoun addressee takes the object form, and ASK without a thing asked is the plain object', () => {
+    expect(sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: { terminus: { phrase: np('THIRD_PERSON', { gender: 'masc' }) } } })).en)
+      .toBe('the woman asks him the name.');
+    expect(sayAll(clause(the('WOMAN'), 'ANSWER', { complements: { terminus: { phrase: np('THIRD_PERSON', { gender: 'fem' }) } } })).en)
+      .toBe('the woman answers her.');
+    expect(sayAll(clause(the('WOMAN'), 'ASK', { complements: { terminus: { phrase: the('MAN') } } })).en)
+      .toBe('the woman asks the man.');
+    expect(sayAll(clause(the('WOMAN'), 'ANSWER', { directObject: the('WORD'), complements: { terminus: { phrase: the('MAN') } } })).en)
+      .toBe('the woman answers the man the word.');
+  });
+
+  test('the two objects hold together under a tense, a modal, a negation and another complement', () => {
+    expect(asks({ verbPhrase: { tense: 'past' } })).toBe('the woman asked the man the name.');
+    expect(asks({ verbPhrase: { modals: ['MUST'] } })).toBe('the woman must ask the man the name.');
+    expect(asks({ verbPhrase: { negative: true } })).toBe('the woman does not ask the man the name.');
+    expect(sayAll(clause(the('WOMAN'), 'ASK', {
+      directObject: the('NAME_NOUN'),
+      complements: { terminus: { phrase: the('MAN') }, cause: { phrase: the('STORY') } },
+    })).en).toBe('the woman asks the man the name because of the story.');
+  });
+
+  // The passive has promoted the thing asked, so the addressee is an ordinary complement again and
+  // takes the preposition, as the other six write it ("al hombre", "all'uomo").
+  test('the passive keeps the addressee among the complements', () => {
+    expect(asks({ verbPhrase: { voice: 'passive' } })).toBe('the name is asked by the woman to the man.');
+  });
+
+  // It is still a complement for the "any"-series: English has no negative concord, so a `no`
+  // addressee gives way to the "not" ahead of it (A158/A160), rather than doubling the negation.
+  test('a `no` addressee gives way to the clause\'s negator', () => {
+    const noMan = { terminus: { phrase: np('MAN', { definiteness: 'no' }) } };
+    expect(sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: noMan })).en)
+      .toBe('the woman asks no man the name.');
+    expect(sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: noMan, verbPhrase: { negative: true } })).en)
+      .toBe('the woman does not ask any man the name.');
   });
 
   test('regression: the rest keep their terminus, and the other languages theirs', () => {
@@ -294,15 +336,32 @@ describe('known bugs: an English addressee that takes no "to" (A238)', () => {
 // contracted infinitives overridden by concept id (IT_SUBJ_STEM in mood.ts: PRODUCE's produce-). SAY's
 // dire is contracted too, and gives *dissimo* where Italian says dicessimo; the imperfect indicative
 // already knows dire (IT_IMPERF_CONTRACTED: diceva). No shipped gloss shows it.
+// Fixed: both imperfects now read one lemma-keyed list of contracted infinitives
+// (IT_CONTRACTED_STEM), so dire reaches dice- in the subjunctive as it already did in the indicative.
 describe('known bugs: Italian dire in the imperfect subjunctive (A239)', () => {
-  test.fails('se dicessimo, not se dissimo', () => {
-    expect(sayAll({ ...clause(the('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), 'SAY', OBJECT['SAY']) }).it)
-      .toBe('se dicessimo la parola, il cane correrebbe.');
+  const protasis = (subject: NounPhrase) =>
+    sayAll({ ...clause(the('DOG'), 'RUN'), condition: clause(subject, 'SAY', OBJECT['SAY']) }).it;
+
+  test('se dicessimo, not se dissimo', () => {
+    expect(protasis(np('FIRST_PERSON', { number: 'plural' }))).toBe('se dicessimo la parola, il cane correrebbe.');
+  });
+
+  test('the whole paradigm is built on dice-', () => {
+    expect(protasis(np('FIRST_PERSON'))).toBe('se dicessi la parola, il cane correrebbe.');
+    expect(protasis(the('WOMAN'))).toBe('se la donna dicesse la parola, il cane correrebbe.');
+    expect(protasis(the('WOMAN', { number: 'plural' }))).toBe('se le donne dicessero la parola, il cane correrebbe.');
   });
 
   test('regression: the conditional is built on the future stem, and is right', () => {
     expect(sayAll({ ...clause(the('WOMAN'), 'SAY', OBJECT['SAY']), condition: clause(the('DOG'), 'RUN') }).it)
       .toBe('se il cane corresse, la donna direbbe la parola.');
+  });
+
+  test('regression: an uncontracted infinitive keeps the plain rule, and the six others are untouched', () => {
+    expect(sayAll({ ...clause(the('DOG'), 'RUN'), condition: clause(the('WOMAN'), 'ASK', OBJECT['ASK']) }).it)
+      .toBe('se la donna chiedesse il nome, il cane correrebbe.');
+    expect(sayAll({ ...clause(the('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), 'SAY', OBJECT['SAY']) }))
+      .toMatchObject({ es: 'si dijéramos la palabra, el perro correría.', fr: 'si nous disions le mot, le chien courrait.' });
   });
 });
 
@@ -312,15 +371,56 @@ describe('known bugs: Italian dire in the imperfect subjunctive (A239)', () => {
 // ungrammatical; the unmarked sentence has the dative clitic, "gli telefona", "lui téléphone". Spanish
 // and Portuguese are right (lo llama, telefona para ele). The recipient pronoun of GIVE has the same
 // shape (A229's unfiled Romance lead). No shipped gloss shows it.
+// Fixed: a pronoun object of the dative preposition cliticizes, as the indirect-object clitic the
+// pronouns now seed (`dative`, 3rd person only — the 1st and 2nd reuse their accusative).
 describe('known bugs: the dative clitic of a prepositional object (A240)', () => {
-  const callsHim = () => sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: np('THIRD_PERSON', { gender: 'masc' }) }));
+  const calls = (obj: Partial<NounPhrase>, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: np('THIRD_PERSON', obj), ...extra }));
+  const callsHim = () => calls({ gender: 'masc' });
 
-  test.fails('Italian: gli telefona', () => {
+  test('Italian: gli telefona', () => {
     expect(callsHim().it).toBe('la donna gli telefona.');
   });
 
-  test.fails('French: lui téléphone', () => {
+  test('French: lui téléphone', () => {
     expect(callsHim().fr).toBe('la femme lui téléphone.');
+  });
+
+  test('the rest of the paradigm: the feminine and the plural, and the two persons that reuse their accusative', () => {
+    expect(calls({ gender: 'fem' })).toMatchObject({ it: 'la donna le telefona.', fr: 'la femme lui téléphone.' });
+    expect(calls({ number: 'plural' })).toMatchObject({ it: 'la donna gli telefona.', fr: 'la femme leur téléphone.' });
+    expect(sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: np('FIRST_PERSON') })))
+      .toMatchObject({ it: 'la donna mi telefona.', fr: 'la femme me téléphone.' });
+    expect(sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: np('FIRST_PERSON', { number: 'plural' }) })))
+      .toMatchObject({ it: 'la donna ci telefona.', fr: 'la femme nous téléphone.' });
+  });
+
+  test('it climbs, encliticizes and takes the negation like any other object clitic', () => {
+    expect(calls({ gender: 'masc' }, { verbPhrase: { negative: true } }))
+      .toMatchObject({ it: 'la donna non gli telefona.', fr: 'la femme ne lui téléphone pas.' });
+    expect(calls({ gender: 'masc' }, { verbPhrase: { modals: ['MUST'] } }))
+      .toMatchObject({ it: 'la donna gli deve telefonare.', fr: 'la femme doit lui téléphoner.' });
+    const command = (extra: Parameters<typeof clause>[2] = {}) => sayAll({
+      ...clause(np('SECOND_PERSON'), 'CALL_PHONE', { directObject: np('THIRD_PERSON', { gender: 'masc' }), ...extra }),
+      imperative: true,
+    });
+    expect(command()).toMatchObject({ it: 'telefonagli.', fr: 'téléphone-lui.' });
+    expect(command({ verbPhrase: { negative: true } })).toMatchObject({ it: 'non telefonargli.', fr: 'ne lui téléphone pas.' });
+  });
+
+  // Italian "credere a" takes the same clitic; no participle agrees with a dative one.
+  test('the other dative verb, and no participle agreement', () => {
+    expect(sayAll(clause(the('WOMAN'), 'BELIEVE', { directObject: np('THIRD_PERSON', { gender: 'fem' }) })).it)
+      .toBe('la donna le crede.');
+    expect(calls({ gender: 'fem' }, { verbPhrase: { tense: 'past', aspect: 'resultative' } }))
+      .toMatchObject({ it: 'la donna le aveva telefonato.', fr: 'la femme lui avait téléphoné.' });
+  });
+
+  test('regression: a noun object keeps the preposition, and a spatial one keeps the tonic pronoun', () => {
+    expect(sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: the('MAN') })))
+      .toMatchObject({ it: "la donna telefona all'uomo.", fr: "la femme téléphone à l'homme." });
+    expect(sayAll(clause(the('WOMAN'), 'CLICK', { directObject: np('THIRD_PERSON', { gender: 'masc' }) })))
+      .toMatchObject({ it: 'la donna clicca su di lui.', fr: 'la femme clique sur lui.' });
   });
 
   test('regression: the other five', () => {

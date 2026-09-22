@@ -17,7 +17,7 @@ export function jaComparisonAdj(concept: ConceptForms): { base: string; reading?
   if (concept.forms['role'] !== 'adjective' || !isLoweredDegree(concept)) return { base, reading };
   // The negative ending by class (see `jaAdjClass`): くない, ではない (幸せな and 茶色の alike), or the
   // negative state ていない (疲れた → 疲れていない).
-  const { kind, stem, reading: stemReading } = jaAdjClass(base, reading);
-  const ending = kind === 'i' ? 'くない' : kind === 'ta' ? 'いない' : 'ではない';
+  const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, concept.forms['relational'] === '1');
+  const ending = kind === 'i' ? 'くない' : kind === 'ta' ? 'いない' : `${predicative}ではない`;
   return { base: `${stem}${ending}`, reading: stemReading === undefined ? undefined : `${stemReading}${ending}` };
 }

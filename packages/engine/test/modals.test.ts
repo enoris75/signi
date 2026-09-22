@@ -402,11 +402,14 @@ describe('modals: with an adverb', () => {
       ja: '猫はいつも食べる必要があります。',
     });
 
+    // A NEVER on the MAIN verb denies the verb it modifies, not the modal: the Romance negator
+    // stands inside the group the modal governs (A236). "il gatto non deve mangiare mai" is the
+    // other plan — the adverb written on the modal — which the A236 block pins beside this one.
     expect(catModal({ modals: ['MUST'], modifier: 'NEVER' })).toMatchObject({
-      it: 'il gatto non deve mangiare mai.', // non … mai brackets the verb
-      fr: 'le chat ne doit jamais manger.',
-      es: 'el gato nunca debe comer.',
-      de: 'der Kater muss nie fressen.',
+      it: 'il gatto deve non mangiare mai.', // non … mai brackets the governed verb
+      fr: 'le chat doit ne jamais manger.',
+      es: 'el gato debe no comer nunca.',
+      de: 'der Kater muss nie fressen.', // one "nie" in a cluster takes either scope
     });
   });
 });
@@ -809,7 +812,9 @@ describe('known bugs: Japanese modal on the copula', () => {
     expect(ja(isA('TIRED', { modals: [{ verb: 'CAN', negative: true }], tense: 'past' }))).toBe('猫は疲れていることができませんでした。');
     expect(ja(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', modals: ['CAN'], tense: 'past' }, complements: { predicative: { phrase: np('HAPPY') } } } }), 'RUN')))
       .toBe('幸せであることができた猫は走ります。');
-    expect(ja(isA('HAPPY', { modals: [{ verb: 'MUST', modifier: 'ALWAYS' }], modifier: 'NEVER' }))).toBe('猫はいつも決して幸せである必要がありません。');
+    // The 決して is the copula's own, so it denies the copula, not the modal (A236): 幸せでない必要が
+    // あります, "must be not happy", where 幸せである必要がありません would deny the obligation.
+    expect(ja(isA('HAPPY', { modals: [{ verb: 'MUST', modifier: 'ALWAYS' }], modifier: 'NEVER' }))).toBe('猫はいつも決して幸せでない必要があります。');
     expect(ja(clause(np('CAT'), 'BE', { verbPhrase: { modals: ['MUST'] }, complements: { predicative: { phrase: np('HAPPY') }, locative: { phrase: np('HOUSE') } } })))
       .toBe('猫は家で幸せである必要があります。');
   });
@@ -1106,10 +1111,14 @@ describe('modal polarity — each word of the group takes its own negation', () 
 // modal; French, Spanish, Portuguese and Japanese render the two plans identically. English alone
 // keeps the scope, and German "nie" reads under either. Deliberate while a governed verb had no
 // negation of its own — A03's inner negator gives it one, which is where this adverb belongs.
+// Fixed: `groupHasNegativeAdverb` splits in two — `finiteHasNegativeAdverb`, what a preverbal
+// negator reads, and `governedHasNegativeAdverb`, the main verb's under a modal, which the four
+// Romance engines and Japanese route through A03's inner negator. English and German still read the
+// unsplit predicate, and are unchanged.
 describe('known bugs: a negative adverb on the main verb negates the modal (A236)', () => {
   const neverEats = (verbPhrase: Partial<VerbPhrase>) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase }));
 
-  test.fails('a negative adverb on the main verb negates the verb it modifies, not the modal', () => {
+  test('a negative adverb on the main verb negates the verb it modifies, not the modal', () => {
     expect(neverEats({ modals: ['WILL'], modifier: 'NEVER' })).toMatchObject({
       it: 'il gatto vuole non mangiare mai.',
       fr: 'le chat veut ne jamais manger.',
@@ -1138,5 +1147,33 @@ describe('known bugs: a negative adverb on the main verb negates the modal (A236
       pt: 'o gato nunca come.',
       ja: '猫は決して食べません。',
     });
+  });
+
+  test('the governed scope survives an object, a past tense, a stacked modal and an adverb on the modal too', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { definiteness: 'definite' }), verbPhrase: { modals: ['WILL'], modifier: 'NEVER' } })))
+      .toMatchObject({
+        it: 'il gatto vuole non mangiare mai il cibo.', fr: 'le chat veut ne jamais manger la nourriture.',
+        es: 'el gato quiere no comer nunca la comida.', pt: 'o gato quer não comer nunca a comida.',
+        ja: '猫は食べ物を決して食べないでいたいです。', en: 'the cat wants to never eat the food.',
+      });
+    expect(neverEats({ modals: ['WILL'], modifier: 'NEVER', tense: 'past' })).toMatchObject({
+      it: 'il gatto voleva non mangiare mai.', fr: 'le chat voulait ne jamais manger.',
+      es: 'el gato quería no comer nunca.', ja: '猫は決して食べないでいたかったです。',
+    });
+    expect(neverEats({ modals: ['WILL', 'CAN'], modifier: 'NEVER' })).toMatchObject({
+      it: 'il gatto vuole poter non mangiare mai.', fr: 'le chat veut pouvoir ne jamais manger.',
+      es: 'el gato quiere poder no comer nunca.', pt: 'o gato quer poder não comer nunca.',
+    });
+    // Each adverb denies — or times — the verb it was written on: "always wants to never eat".
+    expect(neverEats({ modals: [{ verb: 'WILL', modifier: 'ALWAYS' }], modifier: 'NEVER' })).toMatchObject({
+      en: 'the cat always wants to never eat.', it: 'il gatto vuole sempre non mangiare mai.',
+      fr: 'le chat veut toujours ne jamais manger.', ja: '猫はいつも決して食べないでいたいです。',
+    });
+  });
+
+  // German was never pinned: one "nie" in a modal cluster takes either scope, like "nicht".
+  test('regression: German says the same thing for both scopes', () => {
+    expect(neverEats({ modals: ['WILL'], modifier: 'NEVER' }).de).toBe('der Kater will nie fressen.');
+    expect(neverEats({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] }).de).toBe('der Kater will nie fressen.');
   });
 });

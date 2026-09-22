@@ -174,8 +174,12 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(MANGER, { modals: [modal(POUVOIR)], modifier: concept(VITE) }), mouse)).toBe('peut manger vite la souris');
     });
 
-    test('jamais on the main verb or on a modal negates the finite modal', () => {
-      expect(predicateText(CHAT, vp(MANGER, { modals: [modal(DEVOIR)], modifier: concept(JAMAIS) }))).toBe('ne doit jamais manger');
+    // A jamais on a MODAL negates that modal, the finite one; one on the main verb negates the
+    // group the modal governs, and is that group's own negator word — "doit ne jamais manger", the
+    // cat must never eat, where "ne doit jamais manger" is the other plan (A236).
+    test('jamais negates the verb it modifies: the finite modal, or the group it governs', () => {
+      expect(predicateText(CHAT, vp(MANGER, { modals: [modal(DEVOIR)], modifier: concept(JAMAIS) }))).toBe('doit ne jamais manger');
+      expect(predicateText(CHAT, vp(MANGER, { modals: [modal(DEVOIR, JAMAIS)] }))).toBe('ne doit jamais manger');
       expect(predicateText(CHAT, vp(MANGER, { negative: true, modals: [modal(VOULOIR, JAMAIS)] }))).toBe('ne veut jamais manger');
     });
   });
@@ -225,11 +229,12 @@ describe('predicateText', () => {
         .toBe('doit ne pas manger de souris');
     });
 
-    // A negative adverb is the finite verb's negator wherever it was written (`groupHasNegativeAdverb`,
-    // out of scope for A03), so it stays beside the modal rather than falling inside the "ne pas".
-    test('jamais still negates the finite modal, ahead of the governed negation', () => {
+    // The main verb's negative adverb is a negation of the group the modal governs, and French
+    // writes one negator per group: "jamais" takes the place of that group's "pas", exactly as it
+    // takes the place of a finite verb's (A236).
+    test('jamais is the governed group\'s own negator, in place of its pas', () => {
       expect(predicateText(CHAT, vp(MANGER, { governedNegative: true, modals: [modal(DEVOIR)], modifier: concept(JAMAIS) })))
-        .toBe('ne doit jamais ne pas manger');
+        .toBe('doit ne jamais manger');
     });
 
     test('governedNegative without a modal is ignored — the main verb is then the finite one', () => {

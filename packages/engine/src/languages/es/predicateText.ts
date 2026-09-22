@@ -1,7 +1,8 @@
 import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
+import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
@@ -11,6 +12,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -135,7 +137,11 @@ export function predicateText(
       ? agreeAdj(stem, subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
       : (a.forms['base'] ?? '');
   };
-  const adverbText = adverbSurface(modifier);
+  // A focus adverb that scopes over the negation takes its negative-polarity word, and Spanish puts
+  // that word preverbally, where it carries the negation itself and the clause's "no" gives way to
+  // it — the concord *nunca* already has: "el gato tampoco come la comida" (A245).
+  const negAdverb = negativeAdverb(modifier, verbPhrase.negative === true);
+  const adverbText = negAdverb?.text ?? adverbSurface(modifier);
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -145,18 +151,24 @@ export function predicateText(
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  const outscopesNo = negAdverb?.slot === 'pre-negation';
   // Spanish fronts one negative frequency adverb ("nunca") preverbally without "no", whichever verb
   // it modifies. Scan the group outermost-first (each modal, then the main verb); the first negative
   // adverb takes that slot and is suppressed from its in-group position. `frontIdx` indexes this
   // array: 0…n-1 are the modals, n is the main verb.
   const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
-  const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
+  // The main verb's own adverb is not among the candidates when a modal governs it: it denies
+  // that governed group, and fronting it would put the "nunca" on the modal instead (A236).
+  const frontable = modals.length > 0 ? groupAdverbs.slice(0, -1) : groupAdverbs;
+  const frontIdx = verbNegative ? -1 : frontable.findIndex((a) => a?.forms['polarity'] === 'negative');
   const preVerbNunca = frontIdx >= 0;
   // The main verb's own negation, which only a modal can govern: "quiero no ir". It leads the
   // governed infinitive group — before the aspect auxiliary and its enclitic ("debo no haber
   // comido", "quiero no moverme") — inside the chain, where the finite "no" never reaches. With no
   // modal the main verb IS the finite one, and `verbNegative` already carries it.
-  const governedNo = governedNegative === true && modals.length > 0 ? 'no' : '';
+  // A negative adverb on the main verb denies the group the modal governs, not the modal: "quiere
+  // no comer nunca" — the cat wants to never eat — not "nunca quiere comer" (A236).
+  const governedNo = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0 ? 'no' : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
@@ -194,8 +206,8 @@ export function predicateText(
   // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (the finite adverb,
   // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
   const needsNo = verbNegative || ((objectIsNegative || complementIsNegative) && !concordedInside)
-    || groupHasNegativeAdverb(verbPhrase);
-  const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${grouped}` : grouped;
+    || finiteHasNegativeAdverb(verbPhrase);
+  const verbText = needsNo && !subjectIsNegative && !preVerbNunca && !outscopesNo ? `no ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the
   // post-verbal slot.
@@ -229,8 +241,8 @@ export function predicateText(
     : directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun, true) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
-  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : '';
-  const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo ? modifierText : '';
+  const postVerb = mainIsFronted || splitFrequency || outscopesNo ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /

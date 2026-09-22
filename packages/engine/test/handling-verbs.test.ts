@@ -323,8 +323,36 @@ describe('the commands', () => {
 // poner ("pon") do not.
 describe('known bugs: the Spanish tú command of poner and salir under a new concept (A241)', () => {
   // Now: "pone el libro.", "sale." — Want: "pon el libro.", "sal."
-  test.fails('PUT and GO_OUT take the short tú command', () => {
+  // Fixed: the table is keyed by the lemma, and the five families that take a prefixed compound
+  // (hacer, poner, salir, tener, venir) match by ending, so a new concept on one of them reaches it.
+  test('PUT and GO_OUT take the short tú command', () => {
     expect(sayAll(command('PUT', { directObject: the('BOOK') })).es).toBe('pon el libro.');
     expect(sayAll(command('GO_OUT')).es).toBe('sal.');
+  });
+
+  // Three more concepts were losing the same row, on three other lemmas: decir, venir and tener's
+  // compound contener, whose short command carries the acute (contén, not *conten).
+  test('the rest of the short commands, and a compound', () => {
+    expect(sayAll(command('SAY', { directObject: the('WORD') })).es).toBe('di la palabra.');
+    expect(sayAll(command('COME')).es).toBe('ven.');
+    expect(sayAll(command('HOLD', { directObject: the('BOOK') })).es).toBe('contén el libro.');
+  });
+
+  test('regression: the concepts that already had their row keep it, and a regular verb is untouched', () => {
+    expect(sayAll(command('LEAVE')).es).toBe('sal.');
+    expect(sayAll(command('MAKE', { directObject: the('WORK_NOUN') })).es).toBe('haz el trabajo.');
+    expect(sayAll(command('UNDO')).es).toBe('deshaz.');
+    expect(sayAll(command('REDO')).es).toBe('rehaz.');
+    expect(sayAll(command('HAVE', { directObject: the('BOOK') })).es).toBe('ten el libro.');
+    expect(sayAll(command('BE')).es).toBe('sé.');
+    expect(sayAll(command('GO')).es).toBe('ve.');
+    expect(sayAll(command('TELL', { directObject: the('STORY') })).es).toBe('cuenta la historia.');
+  });
+
+  test('regression: the negative command still reads the subjunctive stem, and the other six are unchanged', () => {
+    expect(sayAll(command('PUT', { directObject: the('BOOK'), verbPhrase: { negative: true } })).es).toBe('no pongas el libro.');
+    expect(sayAll(command('GO_OUT', { verbPhrase: { negative: true } })).es).toBe('no salgas.');
+    expect(sayAll(command('PUT', { directObject: the('BOOK') })))
+      .toMatchObject({ it: 'metti il libro.', fr: 'mets le livre.', de: 'leg das Buch.', pt: 'ponha o livro.' });
   });
 });

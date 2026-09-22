@@ -472,7 +472,9 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     isA: 'SAY',
     forms: {
       en: {
-        base: 'ask',
+        // English asks the person, not *to* the person: the addressee is a bare object, and with a
+        // thing asked it is the first of two ("asks the man the name", A238).
+        base: 'ask', terminus_bare: '1',
         '1sg_present': 'ask', '2sg_present': 'ask', '3sg_present': 'asks',
         '1pl_present': 'ask', '2pl_present': 'ask', '3pl_present': 'ask',
         past: 'asked',

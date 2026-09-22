@@ -7,7 +7,9 @@ import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negationSources } from '../../functions/negationSources.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
+import { splitBareTerminus } from '../../functions/splitBareTerminus.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -27,6 +29,20 @@ import { perfectInfinitive } from './perfectInfinitive.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
+ * The adverb that leads a negated predicate, ahead of the auxiliary carrying the "not" — "the cat
+ * **still** does not eat the food" (A244) — or '' where the clause takes none.
+ *
+ * A question is left out: subject–auxiliary inversion fronts the first part of the predicate, so a
+ * leading adverb would be taken for the auxiliary ("*still the cat does not eat?"). The interrogative
+ * keeps the adverb in its ordinary frequency slot, as it did before the scope rule existed.
+ */
+function preNegationAdverb(verbPhrase: ResolvedVerbPhrase): string {
+  if (verbPhrase.interrogative) return '';
+  const negAdverb = negativeAdverb(verbPhrase.modifier, verbPhrase.negative === true);
+  return negAdverb?.slot === 'pre-negation' ? negAdverb.text : '';
+}
+
+/**
  * The predicate half of a phrase — everything after the subject — as ordered parts.
  * Shared by the top-level sentence and by relative clauses, which pass the head noun's
  * forms as `subjectForms` so the verb agrees with the head.
@@ -41,7 +57,12 @@ export function predicateParts(
   agent?: ResolvedNounElement,
 ): string[] {
   const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative, agent);
-  return particleAfterPronoun(parts, subjectForms, verbPhrase, directObject);
+  const ordered = particleAfterPronoun(parts, subjectForms, verbPhrase, directObject);
+  // An adverb that outscopes the negation stands in front of the whole negated group, ahead of the
+  // auxiliary that carries the "not": "the cat still does not eat the food" (A244). The parts are
+  // joined in order, so leading them puts it there whichever branch built the verb group.
+  const lead = preNegationAdverb(verbPhrase);
+  return lead ? [lead, ...ordered] : ordered;
 }
 
 /**
@@ -133,8 +154,17 @@ function predicateWords(
   const objectText = passive
     ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
     : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
-  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
-  const isFrequency = modifier?.forms['subtype'] === 'frequency';
+  // A focus adverb that scopes over the negation leaves the frequency slot between the auxiliary
+  // and the verb, which reads as the negation scoping over IT. STILL steps ahead of the whole
+  // negated group ("still does not eat"), and the additive takes its postposed NPI at the end of
+  // the clause ("does not eat the food either") — A244, A245. Both leave `isFrequency` behind: the
+  // first is spliced in front of the parts, the second trails where a manner adverb does.
+  const negAdverb = negativeAdverb(modifier, verbPhrase.negative === true);
+  // A question cannot take the pre-negation adverb (see `preNegationAdverb`), so it keeps the
+  // frequency slot and the ordinary word there: "does the cat not still eat the food?".
+  const keepsSlot = negAdverb?.slot === undefined || (verbPhrase.interrogative === true && negAdverb.slot === 'pre-negation');
+  const adverbText = (keepsSlot ? undefined : negAdverb?.text) ?? (modifier ? (modifier.forms['base'] ?? '') : '');
+  const isFrequency = modifier?.forms['subtype'] === 'frequency' && keepsSlot;
   // A direction adverb (UP, DOWN) is a particle of the verb, not a comment on the action: it follows
   // the verb or its object directly and leads the complements, because a complement after it joins
   // itself to the object instead ("*moves the book in the house up"). Taking the head of the
@@ -142,7 +172,9 @@ function predicateWords(
   // manner adverb goes — empty (A156). An adverb of place (EVERYWHERE) leaves that trailing slot
   // too, but stands among the complements where a locative does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
+  // The pre-negation adverb is spliced in front of the whole predicate by `predicateParts`, so it
+  // leaves every in-clause slot empty here.
+  const modifierText = isDirection || isPlaceAdverb(modifier) || preNegationAdverb(verbPhrase) ? '' : adverbText;
   // An object that carries a relative clause ends in that clause's verb, and a particle standing
   // after it attaches to that verb instead: "*moves the book that sees the dog up". English puts the
   // particle in front of such an object — "moves up the book that sees the dog" — and every branch
@@ -150,13 +182,31 @@ function predicateWords(
   // split order stays for a short object, and it is the only order for a pronoun, which never
   // carries a relative clause. A passive has no object left to carry one (A193).
   const particleFirst = isDirection && !passive && !!directObject?.conjuncts.some((np) => np.relative);
-  const directObjectText = particleFirst ? [adverbText, objectText].filter(Boolean).join(' ') : objectText;
+  // A verb whose addressee is a bare object (`terminus_bare`, A238) writes the person with no "to",
+  // ahead of the thing: "asks the man the name", "answers the man". A pronoun addressee takes the
+  // object form the direct object's does ("asks him the name"). A passive has promoted the patient,
+  // so the recipient trails the by-phrase as an ordinary complement there instead.
+  // It is split off the complements the clause has already settled the "any"-series on, so a `no`
+  // addressee gives way to it like any other complement ("does not ask any man the name").
+  const settledComplements = anyComplement ? withComplementDefiniteness(complements, 'any') : complements;
+  const { bare: bareTerminus, rest: trailingComplements } = passive
+    ? { bare: undefined, rest: settledComplements }
+    : splitBareTerminus(settledComplements, lexical.forms);
+  const bareTerminusText = bareTerminus
+    ? coordinate(bareTerminus.phrase, (np) =>
+      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms) : npText(np))
+    : '';
+  const directObjectText = [
+    particleFirst ? adverbText : '',
+    bareTerminusText,
+    objectText,
+  ].filter(Boolean).join(' ');
   // The particle is spelled once: where it has moved in front of the object, it leaves the slot it
   // would otherwise lead.
   const complementsText = complementsAroundAdverb(
     modifier,
     particleFirst ? '' : adverbText,
-    anyComplement ? withComplementDefiniteness(complements, 'any') : complements,
+    trailingComplements,
     (c) => complementsPhrase(c, lexical.forms),
   );
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the

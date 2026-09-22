@@ -369,21 +369,60 @@ describe('an adverb of place with BE and LIVE', () => {
 // negation, where each language's scope puts them outside it or swaps the word: "still does not",
 // "noch nicht", "ne … toujours pas"; "does not … either", "auch nicht", "neanche", "ne … pas non
 // plus", "tampoco", "também não". The engine has no adverb scope to say it with (P09 D4).
+//
+// Fixed: the lexeme names what changes under a negation — `negative` the word, `negative_slot` the
+// position (`negativeAdverb`) — and each engine reads it. The two ids share the one mechanism: A244
+// needed the placement, A245 the negative-polarity word, and German needed the placement for both.
 describe('known bugs: STILL under a negation (A244)', () => {
   // Now: en "the cat does not still eat the food.", fr "le chat ne mange pas encore la nourriture."
   // ("not yet"), de "der Kater frisst das Essen nicht noch."
   // Want: en "the cat still does not eat the food.", fr "le chat ne mange toujours pas la nourriture.",
   // de "der Kater frisst das Essen noch nicht." (it "non mangia ancora", es "no come todavía", pt "não
   // come ainda" and ja まだ食べません read right.)
-  test.fails('STILL outscopes the negation', () => {
+  test('STILL outscopes the negation', () => {
     expect(sayAll(eats('STILL', { negative: true }))).toMatchObject({
       en: 'the cat still does not eat the food.', fr: 'le chat ne mange toujours pas la nourriture.', de: 'der Kater frisst das Essen noch nicht.',
     });
   });
 
-  test('what it renders now', () => {
+  test('the four that already read right are unmoved, and the affirmative is untouched everywhere', () => {
     expect(sayAll(eats('STILL', { negative: true }))).toMatchObject({
-      en: 'the cat does not still eat the food.', fr: 'le chat ne mange pas encore la nourriture.', de: 'der Kater frisst das Essen nicht noch.',
+      it: 'il gatto non mangia ancora il cibo.', es: 'el gato no come todavía la comida.',
+      pt: 'o gato não come ainda a comida.', ja: '猫は食べ物をまだ食べません。',
+    });
+    expect(sayAll(eats('STILL'))).toEqual({
+      en: 'the cat still eats the food.', it: 'il gatto mangia ancora il cibo.', fr: 'le chat mange encore la nourriture.',
+      de: 'der Kater frisst noch das Essen.', es: 'el gato come todavía la comida.', ja: '猫は食べ物をまだ食べます。',
+      pt: 'o gato come ainda a comida.',
+    });
+  });
+
+  test('the scope holds in the past, the future, the perfect and on the copula', () => {
+    expect(sayAll(eats('STILL', { negative: true, tense: 'past' }))).toMatchObject({
+      en: 'the cat still did not eat the food.', fr: 'le chat ne mangea toujours pas la nourriture.', de: 'der Kater fraß das Essen noch nicht.',
+    });
+    expect(sayAll(eats('STILL', { negative: true, tense: 'future' }))).toMatchObject({
+      en: 'the cat still will not eat the food.', fr: 'le chat ne mangera toujours pas la nourriture.', de: 'der Kater wird das Essen noch nicht fressen.',
+    });
+    expect(sayAll(eats('STILL', { negative: true, tense: 'past', aspect: 'resultative' }))).toMatchObject({
+      en: 'the cat still had not eaten the food.', fr: "le chat n'avait toujours pas mangé la nourriture.",
+      de: 'der Kater hatte das Essen noch nicht gefressen.',
+    });
+    expect(sayAll(clause(the('CAT'), 'BE', { verbPhrase: { modifier: 'STILL', negative: true }, complements: { predicative: { phrase: np('TIRED') } } })))
+      .toMatchObject({ en: 'the cat still is not tired.', fr: "le chat n'est toujours pas fatigué.", de: 'der Kater ist noch nicht müde.' });
+  });
+
+  // A question fronts the first word of the predicate, so the adverb cannot lead it there; English
+  // keeps its ordinary frequency slot in that one frame.
+  test('a question keeps the adverb inside the inverted group', () => {
+    expect(sayAll({ ...eats('STILL', { negative: true }), interrogative: true }).en)
+      .toBe('does the cat not still eat the food?');
+  });
+
+  test('regression: an ordinary frequency adverb still sits inside the negation', () => {
+    expect(sayAll(eats('ALWAYS', { negative: true }))).toMatchObject({
+      en: 'the cat does not always eat the food.', fr: 'le chat ne mange pas toujours la nourriture.',
+      de: 'der Kater frisst das Essen nicht immer.', es: 'el gato no come siempre la comida.',
     });
   });
 });
@@ -393,31 +432,64 @@ describe('known bugs: ALSO under a negation (A245)', () => {
   // chat ne mange pas aussi la nourriture.", de "der Kater frisst das Essen nicht auch.", es "el gato
   // no come también la comida.", pt "o gato não come também a comida."
   // Want: the negative forms below (ja 同じく食べません reads right).
-  test.fails('ALSO takes its negative form', () => {
+  test('ALSO takes its negative form', () => {
     expect(sayAll(eats('ALSO', { negative: true }))).toMatchObject({
       en: 'the cat does not eat the food either.', it: 'il gatto non mangia neanche il cibo.', fr: 'le chat ne mange pas non plus la nourriture.',
       de: 'der Kater frisst das Essen auch nicht.', es: 'el gato tampoco come la comida.', pt: 'o gato também não come a comida.',
     });
   });
 
-  test('what it renders now', () => {
-    expect(sayAll(eats('ALSO', { negative: true }))).toMatchObject({
-      en: 'the cat does not also eat the food.', it: 'il gatto non mangia anche il cibo.', fr: 'le chat ne mange pas aussi la nourriture.',
-      de: 'der Kater frisst das Essen nicht auch.', es: 'el gato no come también la comida.', pt: 'o gato não come também a comida.',
+  test('Japanese is unmoved, and the affirmative keeps the positive word in all seven', () => {
+    expect(sayAll(eats('ALSO', { negative: true })).ja).toBe('猫は食べ物を同じく食べません。');
+    expect(sayAll(eats('ALSO'))).toEqual({
+      en: 'the cat also eats the food.', it: 'il gatto mangia anche il cibo.', fr: 'le chat mange aussi la nourriture.',
+      de: 'der Kater frisst auch das Essen.', es: 'el gato come también la comida.', ja: '猫は食べ物を同じく食べます。',
+      pt: 'o gato come também a comida.',
+    });
+  });
+
+  test('the negative form holds in the past, on the copula and with no object to hold the slot', () => {
+    expect(sayAll(eats('ALSO', { negative: true, tense: 'past' }))).toMatchObject({
+      en: 'the cat did not eat the food either.', it: 'il gatto non mangiò neanche il cibo.',
+      es: 'el gato tampoco comió la comida.', pt: 'o gato também não comeu a comida.',
+    });
+    expect(sayAll(clause(the('CAT'), 'BE', { verbPhrase: { modifier: 'ALSO', negative: true }, complements: { predicative: { phrase: np('TIRED') } } })))
+      .toMatchObject({
+        en: 'the cat is not tired either.', it: 'il gatto non è neanche stanco.', fr: "le chat n'est pas non plus fatigué.",
+        de: 'der Kater ist auch nicht müde.', es: 'el gato tampoco está cansado.', pt: 'o gato também não está cansado.',
+      });
+    expect(sayAll(clause(the('CAT'), 'RUN', { verbPhrase: { modifier: 'ALSO', negative: true } }))).toMatchObject({
+      en: 'the cat does not run either.', it: 'il gatto non corre neanche.', fr: 'le chat ne court pas non plus.',
+      de: 'der Kater läuft auch nicht.', es: 'el gato tampoco corre.', pt: 'o gato também não corre.',
     });
   });
 });
 
-// Known bug: a Japanese predicate の-adjective drops its の and takes the copula (jaAdjClass), which is
-// right for 茶色の (猫は茶色です) and wrong for one relating the subject to a proper noun: 猫はアメリカ
-// です reads "the cat is America". Attributively it is right (アメリカの猫).
 describe('known bugs: AMERICAN as a Japanese predicate (A246)', () => {
   // Now: 猫はアメリカです。 Want: 猫はアメリカのです。
-  test.fails('keeps its の', () => {
+  test('keeps its の', () => {
     expect(sayAll(is(the('CAT'), 'AMERICAN')).ja).toBe('猫はアメリカのです。');
   });
 
-  test('what it renders now', () => {
-    expect(sayAll(is(the('CAT'), 'AMERICAN')).ja).toBe('猫はアメリカです。');
+  test('and keeps it through the negative, the past and a modal', () => {
+    expect(sayAll(is(the('CAT'), 'AMERICAN', { verbPhrase: { negative: true } })).ja).toBe('猫はアメリカのではありません。');
+    expect(sayAll(is(the('CAT'), 'AMERICAN', { verbPhrase: { tense: 'past' } })).ja).toBe('猫はアメリカのでした。');
+    expect(sayAll(is(the('CAT'), 'AMERICAN', { verbPhrase: { tense: 'past', negative: true } })).ja).toBe('猫はアメリカのではありませんでした。');
+    expect(sayAll(is(the('CAT'), 'AMERICAN', { verbPhrase: { modals: ['MUST'] } })).ja).toBe('猫はアメリカのである必要があります。');
+  });
+
+  test('regression: the attributive is untouched, and an unmarked の-adjective still drops its particle', () => {
+    expect(sayAll(clause(the('CAT', { adjectives: ['AMERICAN'] }), 'RUN')).ja).toBe('アメリカの猫は走ります。');
+    expect(sayAll(is(the('CAT'), 'BROWN')).ja).toBe('猫は茶色です。');
+    expect(sayAll(is(the('CAT'), 'BROWN', { verbPhrase: { negative: true } })).ja).toBe('猫は茶色ではありません。');
+    expect(sayAll(is(the('CAT'), 'FEMALE')).ja).toBe('猫は女性です。');
+    expect(sayAll(is(the('CAT'), 'HAPPY')).ja).toBe('猫は幸せです。');
+  });
+
+  test('regression: the other six predicate the adjective as they did', () => {
+    expect(sayAll(is(the('CAT'), 'AMERICAN'))).toMatchObject({
+      en: 'the cat is American.', it: 'il gatto è americano.', de: 'der Kater ist amerikanisch.',
+      es: 'el gato es estadounidense.', fr: 'le chat est américain.', pt: 'o gato é americano.',
+    });
   });
 });

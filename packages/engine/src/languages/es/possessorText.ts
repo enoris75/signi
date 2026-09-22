@@ -25,7 +25,12 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // Unless the possessor carries a determiner of its own. That keeps its slot and the possessive
   // follows the noun in its stressed form, as it does in the object, which builds it: "de este libro
   // mío", "de ningún libro suyo" (A187 in the noun phrase, A234 here). "de" fuses with none of them.
-  if (possessive && KEPT_BESIDE_POSSESSIVE.has(poss.head.forms['definiteness'] ?? 'definite')) {
+  //
+  // "todos" keeps its slot too, and is the one determiner that does *not* detach the possessive: it
+  // stands in front of the unstressed one, "de todos mis libros" (A237). The object builds that
+  // phrase as well, so both go through `npText`.
+  const ownDeterminer = poss.head.forms['definiteness'] ?? 'definite';
+  if (possessive && (ownDeterminer === 'all' || KEPT_BESIDE_POSSESSIVE.has(ownDeterminer))) {
     return ` de ${npText(poss)}`;
   }
   const f = possessedHeadForms(poss, 'bare');

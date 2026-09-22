@@ -2,18 +2,23 @@ import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
+import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
+import { dativePronounForm } from '../../functions/dativePronounForm.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
+import { lemmaTail } from '../../functions/lemmaTail.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
+import { splitLemmaTail } from '../../functions/splitLemmaTail.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -74,8 +79,14 @@ export function predicateText(
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
   // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
   // and left out.
-  const cliticObject = directObject && !objectPrep && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
-  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject
+  // A verb whose object takes the dative "a" (telefonare a, credere a) still cliticizes a pronoun
+  // one, as the indirect-object clitic: "gli telefona", not the contrastive tonic "telefona a lui"
+  // (A240). Any other preposition is spatial and keeps the tonic form after it ("clicca su di lui").
+  const datClitic = objectPrep === 'a';
+  const cliticObject = directObject && (!objectPrep || datClitic) && isPronounElement(directObject)
+    ? firstConjunct(directObject).head.forms : undefined;
+  // A dative clitic is no direct object, so no participle agrees with it ("gli ha telefonato").
+  const agreeingObject = cliticObject?.['person'] === '3' && !datClitic ? cliticObject
     : siPatient ? directObject!.agreement
     : subjectForms['generic'] === '1' ? gappedPatient : undefined;
   // A state verb's past is the imperfect ("voleva", "aveva", "era"), not the perfective (A130).
@@ -108,7 +119,10 @@ export function predicateText(
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
   // The main verb's own negation, which only a modal can govern: "voglio non andare". It leads the
   // governed infinitive, inside the chain, where the finite "non" of `negText` never reaches.
-  const governedNon = governedNegative === true && modals.length > 0 ? 'non' : '';
+  // A negative adverb on the main verb is the governed group's own negator too: "vuole non mangiare
+  // mai" — the cat wants to never eat — where sending it to the finite verb would say it never
+  // wants to eat (A236).
+  const governedNon = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0 ? 'non' : '';
   const verbGroup = modals.length > 0
     ? [
         // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
@@ -127,7 +141,7 @@ export function predicateText(
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
   // A negative adverb (mai) anywhere in the group — main verb or any modal — forces "non".
-  const modifierIsNegative = groupHasNegativeAdverb(verbPhrase);
+  const modifierIsNegative = finiteHasNegativeAdverb(verbPhrase);
   // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza" — and so
   // does a "nessun" possessor: "non vede la casa di nessun uomo" (A216).
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
@@ -150,7 +164,7 @@ export function predicateText(
   // a predicate ("il cane non lo è", "i cani lo sono"), "ci" for a place ("il cane non c'è").
   const elided = verbPhrase.elided;
   const objectClitic = cliticObject
-    ? objectPronounForm(cliticObject)
+    ? (datClitic ? dativePronounForm(cliticObject) : objectPronounForm(cliticObject))
     : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
   const elideCi = (text: string): string => (elided?.type === 'locative' ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'") : text);
@@ -171,7 +185,10 @@ export function predicateText(
   // after the verb carries the by-phrase instead ("è mangiato dal gatto nella casa").
   const directObjectText = passive ? agentPhrase(agent)
     : directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
-  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A focus adverb under a negation takes its negative-polarity word in the same slot, where
+  // Italian has one: "non mangia neanche il cibo", not "*non mangia anche il cibo" (A245).
+  const negAdverb = negativeAdverb(modifier, verbNegative === true);
+  const adverbText = negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : '');
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -233,6 +250,18 @@ export function predicateText(
     const [finite, ...rest] = verbText.split(' ');
     const withAdverb = [finite, modifierText, ...rest].join(' ');
     return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
+  }
+  // A multiword lemma's noun, "bisogno" in avere bisogno (NEED, B62), sits where a participle does:
+  // the frequency adverb splits the lemma instead of trailing the whole thing ("non ha MAI bisogno
+  // del cibo", "ha SEMPRE bisogno"), exactly as the compound tense above splits "ha MAI avuto
+  // bisogno" and as French writes "n'a jamais besoin" (A242). A modal chain splits it too, since
+  // the adverb would otherwise land behind the noun there as well ("deve avere SEMPRE bisogno");
+  // a periphrasis took the branch above, which splits it at its own auxiliary.
+  const lemmaNoun = periphrastic ? '' : lemmaTail(plain);
+  const [finiteHead, lemmaEnd] = splitLemmaTail(verbText, lemmaNoun);
+  if (isFrequency && modifierText && lemmaEnd) {
+    return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, directObjectText, complementsText]
+      .filter(Boolean).join(' '));
   }
   return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)

@@ -449,7 +449,9 @@ describe('known bugs: French object clitic in a periphrasis', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).fr)
       .toBe("le chat doit l'avoir vue.");
     expect(sees({ modals: ['MUST'], modifier: 'ALWAYS' })).toBe('le chat doit toujours me voir.');
-    expect(sees({ modals: ['MUST'], modifier: 'NEVER' })).toBe('le chat ne doit jamais me voir.');
+    // The NEVER is the main verb's, so it denies the governed group and the clitic stays with the
+    // infinitive it belongs to, behind that group's own "ne" (A236).
+    expect(sees({ modals: ['MUST'], modifier: 'NEVER' })).toBe('le chat doit ne jamais me voir.');
     expect(sees({ modals: ['WILL', 'CAN'] })).toBe('le chat veut pouvoir me voir.');
     expect(sees({ modals: ['MUST'], aspect: 'progressive' })).toBe('le chat doit être en train de me voir.');
     expect(sees({ aspect: 'progressive', negative: true })).toBe("le chat n'est pas en train de me voir.");

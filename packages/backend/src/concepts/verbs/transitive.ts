@@ -8895,7 +8895,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     emoji: '💬',
     forms: {
       en: {
-        base: 'answer',
+        // One answers the person, and "answers to the man" reads *is accountable to*: the addressee
+        // is a bare object here too (A238).
+        base: 'answer', terminus_bare: '1',
         '1sg_present': 'answer', '2sg_present': 'answer', '3sg_present': 'answers',
         '1pl_present': 'answer', '2pl_present': 'answer', '3pl_present': 'answer',
         past: 'answered',

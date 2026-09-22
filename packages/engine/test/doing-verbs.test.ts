@@ -456,11 +456,33 @@ describe('known bugs: an Italian multiword finite (A242)', () => {
   // "ha sempre bisogno del cibo", the way French now does it (fr/predicateText.ts) and the way
   // Italian itself does it in a compound tense ("non ha mai avuto bisogno"). The Italian predicate is
   // no lane's engine area in this batch, so it is left pinned rather than fixed.
-  test.fails('an Italian frequency adverb sits between the verb and its noun', () => {
-    const needs = (modifier: string) =>
-      sayAll(clause(np('MAN', { definiteness: 'definite' }), 'NEED', { directObject: np('FOOD', { definiteness: 'definite' }), verbPhrase: { modifier } })).it;
-    expect(needs('NEVER')).toBe("l'uomo non ha mai bisogno del cibo.");
-    expect(needs('ALWAYS')).toBe("l'uomo ha sempre bisogno del cibo.");
+  // Fixed: it/predicateText splits the lemma with splitLemmaTail, the helper French already called.
+  const needs = (extra: Parameters<typeof clause>[2]) =>
+    sayAll(clause(np('MAN', { definiteness: 'definite' }), 'NEED', { directObject: np('FOOD', { definiteness: 'definite' }), ...extra }));
+
+  test('an Italian frequency adverb sits between the verb and its noun', () => {
+    expect(needs({ verbPhrase: { modifier: 'NEVER' } }).it).toBe("l'uomo non ha mai bisogno del cibo.");
+    expect(needs({ verbPhrase: { modifier: 'ALWAYS' } }).it).toBe("l'uomo ha sempre bisogno del cibo.");
+  });
+
+  // Under a modal the lemma is non-finite, and the adverb was landing behind its noun there too
+  // ("deve avere bisogno sempre"). The same split serves it; the compound tense splits at its own
+  // auxiliary, which it already did.
+  test('a modal chain splits the lemma, and the compound tense still splits at the auxiliary', () => {
+    expect(needs({ verbPhrase: { modifier: 'ALWAYS', modals: ['MUST'] } }).it)
+      .toBe("l'uomo deve avere sempre bisogno del cibo.");
+    expect(needs({ verbPhrase: { modifier: 'NEVER', tense: 'past', aspect: 'resultative' } }).it)
+      .toBe("l'uomo non aveva mai avuto bisogno del cibo.");
+  });
+
+  test('regression: no adverb, a plain negation, and the six other languages', () => {
+    expect(needs({}).it).toBe("l'uomo ha bisogno del cibo.");
+    expect(needs({ verbPhrase: { negative: true } }).it).toBe("l'uomo non ha bisogno del cibo.");
+    expect(needs({ verbPhrase: { modifier: 'NEVER' } })).toMatchObject({
+      en: 'the man never needs the food.', fr: "l'homme n'a jamais besoin de la nourriture.",
+      de: 'der Mann braucht nie das Essen.', es: 'el hombre nunca necesita la comida.',
+      pt: 'o homem nunca precisa da comida.', ja: '男は食べ物を決して必要としていません。',
+    });
   });
 });
 
@@ -469,12 +491,29 @@ describe('known bugs: the Italian imperfect subjunctive of fare (A243)', () => {
   // -re, and fare hides its Latin stem (IT_SUBJ_STEM has PRODUCE for the same reason, produrre →
   // produce). Want: "facesse". It is MAKE's bug, live before B62; DO meets it because it shares
   // fare. The fix is one row in IT_SUBJ_STEM, in no lane's area this batch.
-  test.fails('fare\'s protasis is facesse', () => {
+  // Fixed: the row is keyed by the lemma, not the concept — IT_CONTRACTED_STEM, the list the
+  // imperfect indicative already read — so both concepts on fare reach it, and so does the next one.
+  const protasis = (verb: string, subject = np('MAN', { definiteness: 'definite' })) => sayAll({
+    ...clause(np('CAT', { definiteness: 'definite' }), 'EAT'),
+    condition: clause(subject, verb, { directObject: np('WORK_NOUN', { definiteness: 'definite' }) }),
+  }).it;
+
+  test('fare\'s protasis is facesse', () => {
     for (const verb of ['MAKE', 'DO']) {
-      expect(sayAll({
-        ...clause(np('CAT', { definiteness: 'definite' }), 'EAT'),
-        condition: clause(np('MAN', { definiteness: 'definite' }), verb, { directObject: np('WORK_NOUN', { definiteness: 'definite' }) }),
-      }).it).toBe("se l'uomo facesse il lavoro, il gatto mangerebbe.");
+      expect(protasis(verb)).toBe("se l'uomo facesse il lavoro, il gatto mangerebbe.");
     }
+  });
+
+  test('the plural too, and PRODUCE keeps the stem its concept row used to carry', () => {
+    expect(protasis('DO', np('MAN', { definiteness: 'definite', number: 'plural' })))
+      .toBe('se gli uomini facessero il lavoro, il gatto mangerebbe.');
+    expect(protasis('PRODUCE')).toBe("se l'uomo producesse il lavoro, il gatto mangerebbe.");
+  });
+
+  test('regression: the conditional and the six other languages are unchanged', () => {
+    expect(sayAll({
+      ...clause(np('CAT', { definiteness: 'definite' }), 'EAT'),
+      condition: clause(np('MAN', { definiteness: 'definite' }), 'MAKE', { directObject: np('WORK_NOUN', { definiteness: 'definite' }) }),
+    })).toMatchObject({ en: 'if the man made the work, the cat would eat.', es: 'si el hombre hiciera el trabajo, el gato comería.' });
   });
 });

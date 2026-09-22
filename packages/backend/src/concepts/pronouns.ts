@@ -30,6 +30,9 @@ export const pronouns: ConceptSeed[] = [
       // dative disjunctive ("mich" vs "mir").
       // reflexive = English's object when it is the subject itself ("I see myself", A177). The
       // other languages need none: their object form doubles as the reflexive ("mi vedo").
+      // dative = the Romance indirect-object clitic, where it differs from the accusative one: only
+      // the 3rd person does (it gli/le, fr lui/leur), so only that concept carries the keys and the
+      // 1st and 2nd fall back to `object` ("mi telefona", "me téléphone" — A240).
       en: { base: 'I',        person: '1', number: 'singular', plural: 'we',  disjunctive: 'me',   disjunctive_plural: 'us', object: 'me', object_plural: 'us', reflexive: 'myself', reflexive_plural: 'ourselves' },
       it: { base: 'io',       person: '1', number: 'singular', plural: 'noi', disjunctive: 'me',   disjunctive_plural: 'noi', object: 'mi', object_plural: 'ci' },
       fr: { base: 'je',       person: '1', number: 'singular', plural: 'nous', disjunctive: 'moi', disjunctive_plural: 'nous', object: 'me', object_plural: 'nous' },
@@ -67,8 +70,8 @@ export const pronouns: ConceptSeed[] = [
     forms: {
       // base = default masc singular; singular_fem/singular_neut and plural stored as extra forms
       en: { base: 'he',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'she',    singular_neut: 'it',   plural: 'they',  disjunctive: 'him', disjunctive_fem: 'her',  disjunctive_neut: 'it',   disjunctive_plural: 'them', object: 'him', object_fem: 'her', object_neut: 'it', object_plural: 'them' },
-      it: { base: 'lui',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei',    singular_neut: 'esso', plural: 'loro',  disjunctive: 'lui', disjunctive_fem: 'lei',  disjunctive_neut: 'esso', disjunctive_plural: 'loro', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'li', object_plural_fem: 'le' },
-      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   singular_neut: 'cela', plural: 'ils',   plural_fem: 'elles', disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_neut: 'cela', disjunctive_plural: 'eux', disjunctive_plural_fem: 'elles', object: 'le', object_fem: 'la', object_neut: 'le', object_plural: 'les' },
+      it: { base: 'lui',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei',    singular_neut: 'esso', plural: 'loro',  disjunctive: 'lui', disjunctive_fem: 'lei',  disjunctive_neut: 'esso', disjunctive_plural: 'loro', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'li', object_plural_fem: 'le', dative: 'gli', dative_fem: 'le', dative_neut: 'gli', dative_plural: 'gli' },
+      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   singular_neut: 'cela', plural: 'ils',   plural_fem: 'elles', disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_neut: 'cela', disjunctive_plural: 'eux', disjunctive_plural_fem: 'elles', object: 'le', object_fem: 'la', object_neut: 'le', object_plural: 'les', dative: 'lui', dative_fem: 'lui', dative_neut: 'lui', dative_plural: 'leur' },
       de: { base: 'er',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'sie',    singular_neut: 'es',   plural: 'sie',   disjunctive: 'ihm', disjunctive_fem: 'ihr',  disjunctive_neut: 'ihm',  disjunctive_plural: 'ihnen', object: 'ihn', object_fem: 'sie', object_neut: 'es', object_plural: 'sie' },
       es: { base: 'él',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella',   singular_neut: 'ello', plural: 'ellos', plural_fem: 'ellas', disjunctive: 'él',  disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos', disjunctive_plural_fem: 'ellas', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'los', object_plural_fem: 'las' },
       // 彼ら and 彼女ら are people; それら is the plural of それ and is what a group of THINGS is called

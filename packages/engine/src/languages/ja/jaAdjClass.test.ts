@@ -3,21 +3,36 @@ import { jaAdjClass } from './jaAdjClass.js';
 
 describe('jaAdjClass', () => {
   test('an i-adjective drops its い', () => {
-    expect(jaAdjClass('大きい', 'おおきい')).toEqual({ kind: 'i', stem: '大き', reading: 'おおき', attributive: '' });
+    expect(jaAdjClass('大きい', 'おおきい')).toEqual({ kind: 'i', stem: '大き', reading: 'おおき', attributive: '', predicative: '' });
   });
 
   test('a na-adjective and a の-adjective drop their particle and inflect through the copula', () => {
-    expect(jaAdjClass('幸せな', 'しあわせな')).toEqual({ kind: 'na', stem: '幸せ', reading: 'しあわせ', attributive: 'な' });
-    expect(jaAdjClass('茶色の', 'ちゃいろの')).toEqual({ kind: 'na', stem: '茶色', reading: 'ちゃいろ', attributive: 'の' });
+    expect(jaAdjClass('幸せな', 'しあわせな')).toEqual({ kind: 'na', stem: '幸せ', reading: 'しあわせ', attributive: 'な', predicative: '' });
+    expect(jaAdjClass('茶色の', 'ちゃいろの')).toEqual({ kind: 'na', stem: '茶色', reading: 'ちゃいろ', attributive: 'の', predicative: '' });
   });
 
   test('a た-adjective builds on its te-form', () => {
-    expect(jaAdjClass('疲れた', 'つかれた')).toEqual({ kind: 'ta', stem: '疲れて', reading: 'つかれて', attributive: '' });
-    expect(jaAdjClass('孤立した')).toEqual({ kind: 'ta', stem: '孤立して', reading: undefined, attributive: '' });
-    expect(jaAdjClass('死んだ')).toEqual({ kind: 'ta', stem: '死んで', reading: undefined, attributive: '' });
+    expect(jaAdjClass('疲れた', 'つかれた')).toEqual({ kind: 'ta', stem: '疲れて', reading: 'つかれて', attributive: '', predicative: '' });
+    expect(jaAdjClass('孤立した')).toEqual({ kind: 'ta', stem: '孤立して', reading: undefined, attributive: '', predicative: '' });
+    expect(jaAdjClass('死んだ')).toEqual({ kind: 'ta', stem: '死んで', reading: undefined, attributive: '', predicative: '' });
   });
 
   test('any other base is a na-adjective with nothing to drop', () => {
-    expect(jaAdjClass('ゼロ')).toEqual({ kind: 'na', stem: 'ゼロ', reading: undefined, attributive: '' });
+    expect(jaAdjClass('ゼロ')).toEqual({ kind: 'na', stem: 'ゼロ', reading: undefined, attributive: '', predicative: '' });
+  });
+
+  // A246. A relational の-adjective keeps its の in front of the copula, where dropping it would
+  // predicate the thing the stem names (猫はアメリカです, "the cat is America").
+  test('a relational の-adjective hands back the の the predicate keeps', () => {
+    expect(jaAdjClass('アメリカの', undefined, true))
+      .toEqual({ kind: 'na', stem: 'アメリカ', reading: undefined, attributive: 'の', predicative: 'の' });
+  });
+
+  test('the flag reaches only a の-adjective: a な one and the other classes keep nothing', () => {
+    expect(jaAdjClass('幸せな', 'しあわせな', true))
+      .toEqual({ kind: 'na', stem: '幸せ', reading: 'しあわせ', attributive: 'な', predicative: '' });
+    expect(jaAdjClass('大きい', 'おおきい', true)).toMatchObject({ kind: 'i', predicative: '' });
+    expect(jaAdjClass('疲れた', 'つかれた', true)).toMatchObject({ kind: 'ta', predicative: '' });
+    expect(jaAdjClass('ゼロ', undefined, true)).toMatchObject({ kind: 'na', stem: 'ゼロ', predicative: '' });
   });
 });

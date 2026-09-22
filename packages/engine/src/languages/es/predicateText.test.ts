@@ -196,11 +196,14 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(VOLVERSE, { negative: true }, 'BECOME'), undefined, aLegend)).toBe('no se vuelve una leyenda');
     });
 
-    test('nunca fronts and replaces no, whichever verb it modifies', () => {
+    // It fronts for the verb it modifies: the main verb of a modal-free clause, or a modal. The main
+    // verb's own nunca under a modal denies the group that modal governs instead, and the governed
+    // "no" stands there in its place — "quiere no comer nunca", the cat wants to never eat (A236).
+    test('nunca fronts and replaces no for the verb it modifies', () => {
       expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA) }))).toBe('nunca come');
       expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), aspect: 'resultative' }))).toBe('nunca ha comido');
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER, NUNCA)] }))).toBe('nunca debe comer');
-      expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), modals: [modal(QUERER)] }))).toBe('nunca quiere comer');
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), modals: [modal(QUERER)] }))).toBe('quiere no comer nunca');
       expect(predicateText(GATO, vp(COMER, { tense: 'past', modifier: concept(SIEMPRE), modals: [modal(QUERER, NUNCA)] })))
         .toBe('nunca quería comer siempre');
     });

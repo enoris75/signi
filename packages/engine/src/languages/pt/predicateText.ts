@@ -1,7 +1,8 @@
 import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
+import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
@@ -10,6 +11,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -147,13 +149,18 @@ export function predicateText(
   // verb it modifies. Scan the group outermost-first (each modal, then the main verb); the first
   // negative adverb takes that slot. `frontIdx` indexes this array: 0…n-1 modals, n = main verb.
   const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
-  const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
+  // The main verb's own adverb is not among the candidates when a modal governs it: it denies
+  // that governed group, and fronting it would put the "nunca" on the modal instead (A236).
+  const frontable = modals.length > 0 ? groupAdverbs.slice(0, -1) : groupAdverbs;
+  const frontIdx = verbNegative ? -1 : frontable.findIndex((a) => a?.forms['polarity'] === 'negative');
   const preVerbNunca = frontIdx >= 0;
   // The main verb's own negation, which only a modal can govern: "quero não ir". It leads the
   // governed infinitive group — before the aspect auxiliary and its enclitic ("devo não ter
   // comido", "quero não mover-me") — inside the chain, where the finite "não" never reaches. With
   // no modal the main verb IS the finite one, and `verbNegative` already carries it.
-  const governedNao = governedNegative === true && modals.length > 0 ? 'não' : '';
+  // A negative adverb on the main verb denies the group the modal governs, not the modal: "quer não
+  // comer nunca" — the cat wants to never eat — not "nunca quer comer" (A236).
+  const governedNao = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0 ? 'não' : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
@@ -191,7 +198,7 @@ export function predicateText(
   // there. A preverbal negative subject ("nenhum gato …") or a preverbal "nunca" (the finite adverb)
   // already negates the clause, so "não" is dropped.
   const needsNao = verbNegative || ((objectIsNegative || complementIsNegative) && !concordedInside)
-    || groupHasNegativeAdverb(verbPhrase);
+    || finiteHasNegativeAdverb(verbPhrase);
   const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
@@ -228,8 +235,11 @@ export function predicateText(
     : directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
-  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : '';
-  const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
+  // A focus adverb that scopes over the negation stands in front of the "não" it outscopes:
+  // "também não come a comida", not "não come também a comida" (A245).
+  const outscopesNao = negativeAdverb(modifier, verbText.startsWith('não '))?.slot === 'pre-negator';
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? modifierText : '';
+  const postVerb = mainIsFronted || splitFrequency || outscopesNao ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every

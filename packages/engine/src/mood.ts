@@ -47,10 +47,20 @@ const ES_SUBJ: Record<PN, string> = { '1sg': 'ra', '2sg': 'ras', '3sg': 'ra', '1
 const PT_SUBJ: Record<PN, string> = { '1sg': 'sse', '2sg': 'sse', '3sg': 'sse', '1pl': 'ssemos', '2pl': 'ssem', '3pl': 'ssem' };
 const FR_IMPARF: Record<PN, string> = { '1sg': 'ais', '2sg': 'ais', '3sg': 'ait', '1pl': 'ions', '2pl': 'iez', '3pl': 'aient' };
 
-// Italian imperfect-subjunctive stems that the "infinitive minus -re" rule gets wrong.
+// Contracted infinitives, by ending, and the Latin stem they hide (produrre → produce-, dire →
+// dice-). The imperfect subjunctive and the imperfect indicative are built on the same one, so both
+// read this list. Keyed by the lemma, not by the concept: a second concept on a contracted verb
+// reaches it too (DO on MAKE's fare — A243).
+const IT_CONTRACTED_STEM: [RegExp, string][] = [[/urre$/, 'uce'], [/orre$/, 'one'], [/arre$/, 'ae'], [/dire$/, 'dice'], [/fare$/, 'face'], [/bere$/, 'beve']];
+
+function itContractedStem(base: string): string {
+  const contracted = IT_CONTRACTED_STEM.find(([ending]) => ending.test(base));
+  return contracted ? base.replace(contracted[0], contracted[1]) : base.replace(/re$/, '');
+}
+
+// Italian imperfect-subjunctive stems that neither rule above gets right.
 // STARE is the aspect auxiliary (progressive/prospective) — irregular: stessi/stesse, not *stassi.
-// PRODUCE's contracted infinitive (produrre) hides its Latin stem: producesse, not *prodursse.
-const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', DRINK: 'beve', STARE: 'ste', PRODUCE: 'produce' };
+const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', STARE: 'ste' };
 // French imparfait stems the "nous-present minus -ons" rule gets wrong (être → ét-).
 const FR_IMPARF_STEM: Record<string, string> = { BE: 'ét' };
 
@@ -109,7 +119,8 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
   const forms = verb.forms;
   switch (lang) {
     case 'it': {
-      const stem = IT_SUBJ_STEM[verb.conceptId] ?? forms['base']?.replace(/re$/, '');
+      const base = forms['base'];
+      const stem = IT_SUBJ_STEM[verb.conceptId] ?? (base === undefined ? undefined : itContractedStem(base));
       return stem === undefined ? undefined : stem + IT_SUBJ[pn];
     }
     case 'es': {
@@ -179,8 +190,6 @@ function onLemmaHead(verb: ConceptForms, derive: (verb: ConceptForms) => string 
 
 const IT_IMPERF: Record<PN, string> = { '1sg': 'vo', '2sg': 'vi', '3sg': 'va', '1pl': 'vamo', '2pl': 'vate', '3pl': 'vano' };
 const IT_ESSERE_IMPERF: Record<PN, string> = { '1sg': 'ero', '2sg': 'eri', '3sg': 'era', '1pl': 'eravamo', '2pl': 'eravate', '3pl': 'erano' };
-// Contracted infinitives, by ending, and the stem their imperfect keeps.
-const IT_IMPERF_CONTRACTED: [RegExp, string][] = [[/urre$/, 'uce'], [/orre$/, 'one'], [/arre$/, 'ae'], [/dire$/, 'dice'], [/fare$/, 'face'], [/bere$/, 'beve']];
 const ES_IMPERF_AR: Record<PN, string> = { '1sg': 'aba', '2sg': 'abas', '3sg': 'aba', '1pl': 'ábamos', '2pl': 'abais', '3pl': 'aban' };
 const ES_IMPERF_ER: Record<PN, string> = { '1sg': 'ía', '2sg': 'ías', '3sg': 'ía', '1pl': 'íamos', '2pl': 'íais', '3pl': 'ían' };
 const ES_IMPERF_IRREGULAR: Record<string, Record<PN, string>> = {
@@ -201,9 +210,7 @@ function imperfectForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string |
   switch (lang) {
     case 'it': {
       if (base === 'essere') return IT_ESSERE_IMPERF[pn];
-      const contracted = IT_IMPERF_CONTRACTED.find(([ending]) => ending.test(base));
-      const stem = contracted ? base.replace(contracted[0], contracted[1]) : base.replace(/re$/, '');
-      return stem + IT_IMPERF[pn];
+      return itContractedStem(base) + IT_IMPERF[pn];
     }
     case 'fr':
       return subjunctiveForm('fr', verb, pn);
@@ -321,18 +328,37 @@ const PT_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
   WILL: { '1sg': 'queira', '2sg': 'queira', '3sg': 'queira', '1pl': 'queiramos', '2pl': 'queiram', '3pl': 'queiram' },   // querer (1sg "quero" hides the i)
 };
 
-// Irregular *affirmative familiar* imperative forms (indicative-based paradigm) by concept.
+// Irregular imperative forms outside the tú command, which only ser and ir have (seamos / sed,
+// vamos). Keyed by **lemma**, like the tú commands below and for the same reason (A241).
 const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
-  BE: { '2sg': 'sé', '1pl': 'seamos', '2pl': 'sed' },          // ser: sé / seamos / sed
-  GO: { '2sg': 've', '1pl': 'vamos' },                         // ir: ve / vamos (vosotros "id" is regular)
-  HAVE: { '2sg': 'ten' },                                      // tener: ten (tengamos / tened are regular)
-  LEAVE: { '2sg': 'sal' },                                     // salir: sal (salgamos / salid are regular)
-  // hacer and its compounds take the short tú command, not the 3sg "hace" (B40): haz, deshaz, rehaz.
-  MAKE: { '2sg': 'haz' },                                      // hacer
-  DO: { '2sg': 'haz' },                                        // hacer, DO's verb too (B62)
-  UNDO: { '2sg': 'deshaz' },                                   // deshacer
-  REDO: { '2sg': 'rehaz' },                                    // rehacer
+  ser: { '2sg': 'sé', '1pl': 'seamos', '2pl': 'sed' },         // sé / seamos / sed
+  ir: { '2sg': 've', '1pl': 'vamos' },                         // ve / vamos (vosotros "id" is regular)
 };
+// The eight short *affirmative familiar* tú commands, which are not the 3sg present (di, haz, ve,
+// pon, sal, sé, ten, ven) — ve and sé in the table above, the other six here. Keyed by the **lemma**,
+// not by the concept: a second concept on a verb already listed reaches the same row (GO_OUT on
+// LEAVE's salir, DO on MAKE's hacer — A241), where a concept-keyed table left it the regular 3sg.
+// Five are verb *families* whose prefixed compounds command the same way: deshacer → deshaz,
+// contener → contén, componer → compón, sobresalir → sobresal, prevenir → prevén. decir does not
+// carry its own: bendecir and predecir take the regular "bendice".
+const ES_IMP_SHORT: [RegExp, string][] = [
+  [/^decir$/, 'di'], [/hacer$/, 'haz'], [/poner$/, 'pon'], [/salir$/, 'sal'], [/tener$/, 'ten'], [/venir$/, 'ven'],
+];
+
+/**
+ * The short tú command of a verb in one of those families, or undefined. A prefixed compound whose
+ * short form ends in -n takes the acute the default stress rule would otherwise pull off the last
+ * syllable (contén, compón, prevén); one ending in -z or -l is already stressed there (deshaz,
+ * sobresal). The bare verbs keep their unaccented monosyllable (pon, ten, ven).
+ */
+function esShortCommand(base: string): string | undefined {
+  const family = ES_IMP_SHORT.find(([lemma]) => lemma.test(base));
+  if (!family) return undefined;
+  const short = base.replace(family[0], family[1]);
+  const prefixed = short !== family[1];
+  return prefixed ? short.replace(/([aeiou])n$/, (_, v: string) => `${ACUTE[v]}n`) : short;
+}
+
 const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE:   { '2sg': 'sii', '1pl': 'siamo', '2pl': 'siate' },      // essere: sii / siamo / siate
   KNOW: { '2sg': 'sappi', '1pl': 'sappiamo', '2pl': 'sappiate' }, // sapere: sappi / sappiamo / sappiate
@@ -457,8 +483,8 @@ export function imperativeForm(
     }
     case 'es': {
       if (negative) return `${subjPresent('es', verb, pn)}`;
-      return ES_IMP_OVERRIDE[verb.conceptId]?.[pn]
-        ?? (pn === '2sg' ? (f['3sg_present'] ?? '')
+      return ES_IMP_OVERRIDE[base]?.[pn]
+        ?? (pn === '2sg' ? (esShortCommand(base) ?? f['3sg_present'] ?? '')
           : pn === '1pl' ? subjPresent('es', verb, pn)
           : base.replace(/r$/, 'd'));            // vosotros: infinitive − r + d
     }
