@@ -509,6 +509,58 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'fazendo', participle: 'feito' },
     ja: { te: '作って', te_reading: 'つくって', nai: '作らない', nai_reading: 'つくらない', passive: '作られる', passive_reading: 'つくられる' },
   },
+  // The B62 verbs. DO repeats MAKE's Romance participles; tun's is getan, する's te-form して.
+  DO: {
+    en: { gerund: 'doing', participle: 'done' },
+    it: { gerund: 'facendo', participle: 'fatto' },
+    fr: { participle: 'fait' }, de: { participle: 'getan' },
+    es: { gerund: 'haciendo', participle: 'hecho' },
+    pt: { gerund: 'fazendo', participle: 'feito' },
+    ja: { te: 'して', te_reading: 'して', nai: 'しない', nai_reading: 'しない', passive: 'される', passive_reading: 'される' },
+  },
+  PLAY_INSTRUMENT: {
+    en: { gerund: 'playing', participle: 'played' },
+    it: { gerund: 'suonando', participle: 'suonato' },
+    fr: { participle: 'joué' }, de: { participle: 'gespielt' },
+    es: { gerund: 'tocando', participle: 'tocado' },
+    pt: { gerund: 'tocando', participle: 'tocado' },
+    ja: { te: '演奏して', te_reading: 'えんそうして', nai: '演奏しない', nai_reading: 'えんそうしない', passive: '演奏される', passive_reading: 'えんそうされる' },
+  },
+  // avere bisogno and avoir besoin keep their noun in the non-finite forms too: avuto bisogno, eu besoin.
+  NEED: {
+    en: { gerund: 'needing', participle: 'needed' },
+    it: { gerund: 'avendo bisogno', participle: 'avuto bisogno' },
+    fr: { participle: 'eu besoin' }, de: { participle: 'gebraucht' },
+    es: { gerund: 'necesitando', participle: 'necesitado' },
+    pt: { gerund: 'precisando', participle: 'precisado' },
+    ja: { te: '必要として', te_reading: 'ひつようとして', nai: '必要としない', nai_reading: 'ひつようとしない', passive: '必要とされる', passive_reading: 'ひつようとされる' },
+  },
+  // versuchen is inseparable, so its participle has no ge-.
+  TRY: {
+    en: { gerund: 'trying', participle: 'tried' },
+    it: { gerund: 'provando', participle: 'provato' },
+    fr: { participle: 'essayé' }, de: { participle: 'versucht' },
+    es: { gerund: 'intentando', participle: 'intentado' },
+    pt: { gerund: 'tentando', participle: 'tentado' },
+    ja: { te: '試みて', te_reading: 'こころみて', nai: '試みない', nai_reading: 'こころみない', passive: '試みられる', passive_reading: 'こころみられる' },
+  },
+  // The two intransitives take avere in Italian, haben in German.
+  WORK_LABOUR: {
+    en: { gerund: 'working', participle: 'worked' },
+    it: { gerund: 'lavorando', participle: 'lavorato' },
+    fr: { participle: 'travaillé' }, de: { participle: 'gearbeitet' },
+    es: { gerund: 'trabajando', participle: 'trabajado' },
+    pt: { gerund: 'trabalhando', participle: 'trabalhado' },
+    ja: { te: '働いて', te_reading: 'はたらいて', nai: '働かない', nai_reading: 'はたらかない' },
+  },
+  PLAY_GAME: {
+    en: { gerund: 'playing', participle: 'played' },
+    it: { gerund: 'giocando', participle: 'giocato' },
+    fr: { participle: 'joué' }, de: { participle: 'gespielt' },
+    es: { gerund: 'jugando', participle: 'jugado' },
+    pt: { gerund: 'jogando', participle: 'jogado' },
+    ja: { te: '遊んで', te_reading: 'あそんで', nai: '遊ばない', nai_reading: 'あそばない' },
+  },
   CREATE: {
     en: { gerund: 'creating', participle: 'created' },
     it: { gerund: 'creando', participle: 'creato' },

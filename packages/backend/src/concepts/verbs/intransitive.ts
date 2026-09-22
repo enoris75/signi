@@ -888,6 +888,150 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  {
+    // P09's work (localization B62): a person's labour, "the man works". WORK above is the machine
+    // sense ("the key works", funzionare). Glossed by what it is for, "to act to acquire money", as
+    // WORK_NOUN is "an action with which one acquires money": the two share ACQUIRE + MONEY, one from
+    // the verb's end and one from the noun's, and neither names the other.
+    id: 'WORK_LABOUR',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    description: 'to do a job; to labour',
+    definition: infinitiveGloss('ACT', { purpose: { verb: 'ACQUIRE', object: 'MONEY' } }),
+    synonym: 'labour',
+    emoji: '⚒️',
+    forms: {
+      en: {
+        base: 'work',
+        '1sg_present': 'work', '2sg_present': 'work', '3sg_present': 'works',
+        '1pl_present': 'work', '2pl_present': 'work', '3pl_present': 'work',
+        past: 'worked',
+      },
+      it: {
+        base: 'lavorare',
+        '1sg_present': 'lavoro', '2sg_present': 'lavori', '3sg_present': 'lavora',
+        '1pl_present': 'lavoriamo', '2pl_present': 'lavorate', '3pl_present': 'lavorano',
+        '1sg_past': 'lavorai', '2sg_past': 'lavorasti', '3sg_past': 'lavorò',
+        '1pl_past': 'lavorammo', '2pl_past': 'lavoraste', '3pl_past': 'lavorarono',
+        '1sg_future': 'lavorerò', '2sg_future': 'lavorerai', '3sg_future': 'lavorerà',
+        '1pl_future': 'lavoreremo', '2pl_future': 'lavorerete', '3pl_future': 'lavoreranno',
+      },
+      fr: {
+        base: 'travailler',
+        '1sg_present': 'travaille', '2sg_present': 'travailles', '3sg_present': 'travaille',
+        '1pl_present': 'travaillons', '2pl_present': 'travaillez', '3pl_present': 'travaillent',
+        '1sg_past': 'travaillai', '2sg_past': 'travaillas', '3sg_past': 'travailla',
+        '1pl_past': 'travaillâmes', '2pl_past': 'travaillâtes', '3pl_past': 'travaillèrent',
+        '1sg_future': 'travaillerai', '2sg_future': 'travailleras', '3sg_future': 'travaillera',
+        '1pl_future': 'travaillerons', '2pl_future': 'travaillerez', '3pl_future': 'travailleront',
+      },
+      de: {
+        base: 'arbeiten',
+        '1sg_present': 'arbeite', '2sg_present': 'arbeitest', '3sg_present': 'arbeitet',
+        '1pl_present': 'arbeiten', '2pl_present': 'arbeitet', '3pl_present': 'arbeiten',
+        '1sg_past': 'arbeitete', '2sg_past': 'arbeitetest', '3sg_past': 'arbeitete',
+        '1pl_past': 'arbeiteten', '2pl_past': 'arbeitetet', '3pl_past': 'arbeiteten',
+        '2sg_imperative': 'arbeite', // a stem in -t keeps the du -e
+      },
+      es: {
+        base: 'trabajar',
+        '1sg_present': 'trabajo', '2sg_present': 'trabajas', '3sg_present': 'trabaja',
+        '1pl_present': 'trabajamos', '2pl_present': 'trabajáis', '3pl_present': 'trabajan',
+        '1sg_past': 'trabajé', '2sg_past': 'trabajaste', '3sg_past': 'trabajó',
+        '1pl_past': 'trabajamos', '2pl_past': 'trabajasteis', '3pl_past': 'trabajaron',
+        '1sg_future': 'trabajaré', '2sg_future': 'trabajarás', '3sg_future': 'trabajará',
+        '1pl_future': 'trabajaremos', '2pl_future': 'trabajaréis', '3pl_future': 'trabajarán',
+      },
+      ja: {
+        base: '働く',
+        reading: 'はたらく',
+        masu_present: '働きます',
+        masu_present_reading: 'はたらきます',
+      },
+      pt: {
+        base: 'trabalhar',
+        '1sg_present': 'trabalho', '2sg_present': 'trabalha', '3sg_present': 'trabalha',
+        '1pl_present': 'trabalhamos', '2pl_present': 'trabalham', '3pl_present': 'trabalham',
+        '1sg_past': 'trabalhei', '2sg_past': 'trabalhou', '3sg_past': 'trabalhou',
+        '1pl_past': 'trabalhamos', '2pl_past': 'trabalharam', '3pl_past': 'trabalharam',
+        '1sg_future': 'trabalharei', '2sg_future': 'trabalhará', '3sg_future': 'trabalhará',
+        '1pl_future': 'trabalharemos', '2pl_future': 'trabalharão', '3pl_future': 'trabalharão',
+      },
+    },
+  },
+
+  {
+    // P09's play, of games (localization B62); PLAY_INSTRUMENT is music. German spielen and French
+    // jouer say both, so there the two tooltips differ by the gloss alone: joy against sounds.
+    // Portuguese jogar (games and sport) over brincar (a child's play); the gloss fits both.
+    id: 'PLAY_GAME',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    description: 'to take part in a game for enjoyment',
+    definition: infinitiveGloss('ACT', { purpose: { verb: 'FEEL', object: 'JOY' } }),
+    synonym: 'play a game',
+    emoji: '🎲',
+    forms: {
+      en: {
+        base: 'play',
+        '1sg_present': 'play', '2sg_present': 'play', '3sg_present': 'plays',
+        '1pl_present': 'play', '2pl_present': 'play', '3pl_present': 'play',
+        past: 'played',
+      },
+      it: {
+        base: 'giocare',
+        '1sg_present': 'gioco', '2sg_present': 'giochi', '3sg_present': 'gioca',
+        '1pl_present': 'giochiamo', '2pl_present': 'giocate', '3pl_present': 'giocano',
+        '1sg_past': 'giocai', '2sg_past': 'giocasti', '3sg_past': 'giocò',
+        '1pl_past': 'giocammo', '2pl_past': 'giocaste', '3pl_past': 'giocarono',
+        '1sg_future': 'giocherò', '2sg_future': 'giocherai', '3sg_future': 'giocherà',
+        '1pl_future': 'giocheremo', '2pl_future': 'giocherete', '3pl_future': 'giocheranno',
+      },
+      fr: {
+        base: 'jouer',
+        '1sg_present': 'joue', '2sg_present': 'joues', '3sg_present': 'joue',
+        '1pl_present': 'jouons', '2pl_present': 'jouez', '3pl_present': 'jouent',
+        '1sg_past': 'jouai', '2sg_past': 'jouas', '3sg_past': 'joua',
+        '1pl_past': 'jouâmes', '2pl_past': 'jouâtes', '3pl_past': 'jouèrent',
+        '1sg_future': 'jouerai', '2sg_future': 'joueras', '3sg_future': 'jouera',
+        '1pl_future': 'jouerons', '2pl_future': 'jouerez', '3pl_future': 'joueront',
+      },
+      de: {
+        base: 'spielen',
+        '1sg_present': 'spiele', '2sg_present': 'spielst', '3sg_present': 'spielt',
+        '1pl_present': 'spielen', '2pl_present': 'spielt', '3pl_present': 'spielen',
+        '1sg_past': 'spielte', '2sg_past': 'spieltest', '3sg_past': 'spielte',
+        '1pl_past': 'spielten', '2pl_past': 'spieltet', '3pl_past': 'spielten',
+      },
+      es: {
+        base: 'jugar',
+        '1sg_present': 'juego', '2sg_present': 'juegas', '3sg_present': 'juega',
+        '1pl_present': 'jugamos', '2pl_present': 'jugáis', '3pl_present': 'juegan',
+        '1sg_past': 'jugué', '2sg_past': 'jugaste', '3sg_past': 'jugó',
+        '1pl_past': 'jugamos', '2pl_past': 'jugasteis', '3pl_past': 'jugaron',
+        '1sg_future': 'jugaré', '2sg_future': 'jugarás', '3sg_future': 'jugará',
+        '1pl_future': 'jugaremos', '2pl_future': 'jugaréis', '3pl_future': 'jugarán',
+      },
+      ja: {
+        base: '遊ぶ',
+        reading: 'あそぶ',
+        masu_present: '遊びます',
+        masu_present_reading: 'あそびます',
+      },
+      pt: {
+        base: 'jogar',
+        '1sg_present': 'jogo', '2sg_present': 'joga', '3sg_present': 'joga',
+        '1pl_present': 'jogamos', '2pl_present': 'jogam', '3pl_present': 'jogam',
+        '1sg_past': 'joguei', '2sg_past': 'jogou', '3sg_past': 'jogou',
+        '1pl_past': 'jogamos', '2pl_past': 'jogaram', '3pl_past': 'jogaram',
+        '1sg_future': 'jogarei', '2sg_future': 'jogará', '3sg_future': 'jogará',
+        '1pl_future': 'jogaremos', '2pl_future': 'jogarão', '3pl_future': 'jogarão',
+      },
+    },
+  },
+
   // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
   // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
   // action" / "the action starts"), so six of the seven paradigms below repeat START's. Japanese

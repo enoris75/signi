@@ -11,10 +11,12 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
+import { lemmaTail } from '../../functions/lemmaTail.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
+import { splitLemmaTail } from '../../functions/splitLemmaTail.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeParticipleFr } from './agreeParticipleFr.js';
@@ -105,14 +107,25 @@ export function predicateText(
     subjectIsNegative ||
     (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false) ||
     hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
+  // A multiword lemma's noun, "besoin" in avoir besoin (NEED, B62). Every finite form carries it ("a
+  // besoin"), and what goes between a finite verb and a non-finite one goes between the verb and its
+  // noun: the "pas" of the negation, and a frequency or short adverb ("n'a jamais eu", "a bien
+  // mangé") — "n'a pas besoin", "n'a jamais besoin", "a toujours besoin", not "n'a besoin pas".
+  // Empty for any other verb. `innerAdverb` is the adverb a finite takes inside: none unless it ends
+  // in the noun, so an auxiliary or a modal in front of the lemma ("a eu besoin", "doit") is untouched.
+  const lemmaNoun = lemmaTail(verb);
+  const innerAdverb = (finite: string): string =>
+    splitLemmaTail(finite, lemmaNoun)[1] && (isFrequency || preInfinitive) ? modifierText : '';
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
-  // which both negate their finite auxiliary and leave the non-finite tail untouched.
+  // which both negate their finite auxiliary and leave the non-finite tail untouched. A
+  // multiword finite is wrapped on its verb, then its inner adverb, then its noun; an affirmative
+  // one comes back with its inner adverb in place ("a toujours besoin"), any other as it is.
   const negateFinite = (finite: string): string => {
-    if (!verbNegative && !aucun && !groupNegative) return finite;
-    const ne = elidesBeforeVerb(verb.forms, finite) ? "n'" : 'ne ';
-    const pas = verbNegative && !groupNegative && !aucun ? ' pas' : '';
-    return `${ne}${finite}${pas}`;
+    const [head, noun] = splitLemmaTail(finite, lemmaNoun);
+    const negated = !verbNegative && !aucun && !groupNegative ? head
+      : `${elidesBeforeVerb(verb.forms, head) ? "n'" : 'ne '}${head}${verbNegative && !groupNegative && !aucun ? ' pas' : ''}`;
+    return [negated, innerAdverb(finite), noun].filter(Boolean).join(' ');
   };
   // A pronoun direct object is a proclitic before the finite verb ("le chat me voit"), not a
   // post-verbal noun ("voit le je"). It sits inside any "ne … pas" bracket ("ne me voit pas") and
@@ -185,14 +198,12 @@ export function predicateText(
     );
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
-  } else if (verbNegative || aucun || groupNegative) {
-    // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
-    // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais).
-    effectiveVerb = negateFinite(conjugated);
-    effectiveMod = modifierText;
   } else {
-    effectiveVerb = conjugated;
-    effectiveMod = modifierText;
+    // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
+    // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais). An
+    // affirmative verb comes back as it is, but for a multiword one's inner adverb ("a toujours besoin").
+    effectiveVerb = negateFinite(conjugated);
+    effectiveMod = innerAdverb(conjugated) ? '' : modifierText;
   }
   // The participe closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   // A frequency adverb belongs between the finite verb and the participe ("n'est jamais mangée"),
@@ -240,10 +251,11 @@ export function predicateText(
     // negative one keeps them in front, inside "ne … pas" ("ne me vois pas", "ne t'effondre pas").
     const affirmative = !verbNegative && !aucun && !groupNegative;
     const reflexive = /^(?:s'|se )/.test(verb.forms['base'] ?? '');
+    // A multiword command keeps its noun after the negation and the inner adverb: "n'aie pas besoin".
     const impVerb = affirmative
-      ? frEnclitic(impForm, objectClitic, reflexive, pn)
+      ? frEnclitic(negateFinite(impForm), objectClitic, reflexive, pn)
       : frCliticize(objectClitic, negateFinite(impForm));
-    return withDislocated([impVerb, modifierText, directObjectText, complementsText]
+    return withDislocated([impVerb, innerAdverb(impForm) ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
   }

@@ -1858,6 +1858,311 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // P09's do (localization B62), the main verb: "the man does the work". The helper of "does not"
+    // and "does …?" stays in the English engine. English, German and Japanese split it from MAKE (tun
+    // against machen, する against 作る); Italian, French, Spanish and Portuguese have one verb for
+    // both, so their paradigms repeat MAKE's (fare, faire, hacer, fazer). Its gloss is START's
+    // causative shape with HAPPEN, so no Romance tooltip says fare / faire / hacer / fazer.
+    id: 'DO',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to perform an action',
+    definition: causativeGloss({ object: 'ACTION', definiteness: 'indefinite' }, { verb: 'HAPPEN' }),
+    synonym: 'perform',
+    emoji: '✅',
+    forms: {
+      en: {
+        base: 'do',
+        '1sg_present': 'do', '2sg_present': 'do', '3sg_present': 'does',
+        '1pl_present': 'do', '2pl_present': 'do', '3pl_present': 'do',
+        past: 'did',
+      },
+      it: {
+        base: 'fare',
+        '1sg_present': 'faccio', '2sg_present': 'fai', '3sg_present': 'fa',
+        '1pl_present': 'facciamo', '2pl_present': 'fate', '3pl_present': 'fanno',
+        '1sg_past': 'feci', '2sg_past': 'facesti', '3sg_past': 'fece',
+        '1pl_past': 'facemmo', '2pl_past': 'faceste', '3pl_past': 'fecero',
+        '1sg_future': 'farò', '2sg_future': 'farai', '3sg_future': 'farà',
+        '1pl_future': 'faremo', '2pl_future': 'farete', '3pl_future': 'faranno',
+      },
+      fr: {
+        base: 'faire',
+        '1sg_present': 'fais', '2sg_present': 'fais', '3sg_present': 'fait',
+        '1pl_present': 'faisons', '2pl_present': 'faites', '3pl_present': 'font',
+        '1sg_past': 'fis', '2sg_past': 'fis', '3sg_past': 'fit',
+        '1pl_past': 'fîmes', '2pl_past': 'fîtes', '3pl_past': 'firent',
+        '1sg_future': 'ferai', '2sg_future': 'feras', '3sg_future': 'fera',
+        '1pl_future': 'ferons', '2pl_future': 'ferez', '3pl_future': 'feront',
+      },
+      de: {
+        base: 'tun',
+        '1sg_present': 'tue', '2sg_present': 'tust', '3sg_present': 'tut',
+        '1pl_present': 'tun', '2pl_present': 'tut', '3pl_present': 'tun',
+        '1sg_past': 'tat', '2sg_past': 'tatest', '3sg_past': 'tat',
+        '1pl_past': 'taten', '2pl_past': 'tatet', '3pl_past': 'taten',
+        '2sg_imperative': 'tu',
+      },
+      es: {
+        base: 'hacer',
+        '1sg_present': 'hago', '2sg_present': 'haces', '3sg_present': 'hace',
+        '1pl_present': 'hacemos', '2pl_present': 'hacéis', '3pl_present': 'hacen',
+        '1sg_past': 'hice', '2sg_past': 'hiciste', '3sg_past': 'hizo',
+        '1pl_past': 'hicimos', '2pl_past': 'hicisteis', '3pl_past': 'hicieron',
+        '1sg_future': 'haré', '2sg_future': 'harás', '3sg_future': 'hará',
+        '1pl_future': 'haremos', '2pl_future': 'haréis', '3pl_future': 'harán',
+      },
+      ja: {
+        base: 'する',
+        reading: 'する',
+        masu_present: 'します',
+        masu_present_reading: 'します',
+      },
+      pt: {
+        base: 'fazer',
+        '1sg_present': 'faço', '2sg_present': 'faz', '3sg_present': 'faz',
+        '1pl_present': 'fazemos', '2pl_present': 'fazem', '3pl_present': 'fazem',
+        '1sg_past': 'fiz', '2sg_past': 'fez', '3sg_past': 'fez',
+        '1pl_past': 'fizemos', '2pl_past': 'fizeram', '3pl_past': 'fizeram',
+        '1sg_future': 'farei', '2sg_future': 'fará', '3sg_future': 'fará',
+        '1pl_future': 'faremos', '2pl_future': 'farão', '3pl_future': 'farão',
+      },
+    },
+  },
+
+  {
+    // P09's play, of music (localization B62); PLAY_GAME is the game. Japanese 演奏する plays any
+    // instrument, where 弾く is strings and keys only (a flute is 吹く). French plays "de" an
+    // instrument ("joue du piano"), the preposition its lexeme names (`object_prep`, as CLICK's).
+    id: 'PLAY_INSTRUMENT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to make music on an instrument',
+    definition: infinitiveGloss('PRODUCE', {
+      object: 'SOUND', number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite' } } },
+    }),
+    synonym: 'play music',
+    emoji: '🎻',
+    forms: {
+      en: {
+        base: 'play',
+        '1sg_present': 'play', '2sg_present': 'play', '3sg_present': 'plays',
+        '1pl_present': 'play', '2pl_present': 'play', '3pl_present': 'play',
+        past: 'played',
+      },
+      it: {
+        base: 'suonare',
+        '1sg_present': 'suono', '2sg_present': 'suoni', '3sg_present': 'suona',
+        '1pl_present': 'suoniamo', '2pl_present': 'suonate', '3pl_present': 'suonano',
+        '1sg_past': 'suonai', '2sg_past': 'suonasti', '3sg_past': 'suonò',
+        '1pl_past': 'suonammo', '2pl_past': 'suonaste', '3pl_past': 'suonarono',
+        '1sg_future': 'suonerò', '2sg_future': 'suonerai', '3sg_future': 'suonerà',
+        '1pl_future': 'suoneremo', '2pl_future': 'suonerete', '3pl_future': 'suoneranno',
+      },
+      fr: {
+        base: 'jouer', object_prep: 'de',
+        '1sg_present': 'joue', '2sg_present': 'joues', '3sg_present': 'joue',
+        '1pl_present': 'jouons', '2pl_present': 'jouez', '3pl_present': 'jouent',
+        '1sg_past': 'jouai', '2sg_past': 'jouas', '3sg_past': 'joua',
+        '1pl_past': 'jouâmes', '2pl_past': 'jouâtes', '3pl_past': 'jouèrent',
+        '1sg_future': 'jouerai', '2sg_future': 'joueras', '3sg_future': 'jouera',
+        '1pl_future': 'jouerons', '2pl_future': 'jouerez', '3pl_future': 'joueront',
+      },
+      de: {
+        base: 'spielen',
+        '1sg_present': 'spiele', '2sg_present': 'spielst', '3sg_present': 'spielt',
+        '1pl_present': 'spielen', '2pl_present': 'spielt', '3pl_present': 'spielen',
+        '1sg_past': 'spielte', '2sg_past': 'spieltest', '3sg_past': 'spielte',
+        '1pl_past': 'spielten', '2pl_past': 'spieltet', '3pl_past': 'spielten',
+      },
+      es: {
+        base: 'tocar',
+        '1sg_present': 'toco', '2sg_present': 'tocas', '3sg_present': 'toca',
+        '1pl_present': 'tocamos', '2pl_present': 'tocáis', '3pl_present': 'tocan',
+        '1sg_past': 'toqué', '2sg_past': 'tocaste', '3sg_past': 'tocó',
+        '1pl_past': 'tocamos', '2pl_past': 'tocasteis', '3pl_past': 'tocaron',
+        '1sg_future': 'tocaré', '2sg_future': 'tocarás', '3sg_future': 'tocará',
+        '1pl_future': 'tocaremos', '2pl_future': 'tocaréis', '3pl_future': 'tocarán',
+      },
+      ja: {
+        base: '演奏する',
+        reading: 'えんそうする',
+        masu_present: '演奏します',
+        masu_present_reading: 'えんそうします',
+      },
+      pt: {
+        base: 'tocar',
+        '1sg_present': 'toco', '2sg_present': 'toca', '3sg_present': 'toca',
+        '1pl_present': 'tocamos', '2pl_present': 'tocam', '3pl_present': 'tocam',
+        '1sg_past': 'toquei', '2sg_past': 'tocou', '3sg_past': 'tocou',
+        '1pl_past': 'tocamos', '2pl_past': 'tocaram', '3pl_past': 'tocaram',
+        '1sg_future': 'tocarei', '2sg_future': 'tocará', '3sg_future': 'tocará',
+        '1pl_future': 'tocaremos', '2pl_future': 'tocarão', '3pl_future': 'tocarão',
+      },
+    },
+  },
+
+  {
+    // P09's need (localization B62): "needs water", and — with an infinitive complement, the way
+    // DESIRE takes one — "needs to run". One lexical concept, not a modal. Italian and French say it
+    // with a light verb and a noun, avere bisogno / avoir besoin: the base carries both words and so
+    // does every finite form (ha bisogno, a besoin), and the participle (avuto bisogno, eu besoin). The
+    // object and the infinitive both take di / de (`object_prep`, `infinitive_link`), as Portuguese
+    // precisar takes its object with de. A state, like DESIRE: the Romance past is its imperfect, and
+    // Japanese says it with 〜ている (必要としています). Glossed on MUST's own frame, "to be obliged
+    // to have objects" (Longman: "to have to have something").
+    id: 'NEED',
+    role: 'verb',
+    stative: true,
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to require something one does not have',
+    definition: infinitiveGloss('BE', {
+      predicate: 'OBLIGED',
+      infinitive: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' } },
+    }),
+    synonym: 'require',
+    emoji: '❗',
+    forms: {
+      en: {
+        base: 'need',
+        '1sg_present': 'need', '2sg_present': 'need', '3sg_present': 'needs',
+        '1pl_present': 'need', '2pl_present': 'need', '3pl_present': 'need',
+        past: 'needed',
+      },
+      it: {
+        base: 'avere bisogno', object_prep: 'di', infinitive_link: 'di',
+        '1sg_present': 'ho bisogno', '2sg_present': 'hai bisogno', '3sg_present': 'ha bisogno',
+        '1pl_present': 'abbiamo bisogno', '2pl_present': 'avete bisogno', '3pl_present': 'hanno bisogno',
+        '1sg_past': 'ebbi bisogno', '2sg_past': 'avesti bisogno', '3sg_past': 'ebbe bisogno',
+        '1pl_past': 'avemmo bisogno', '2pl_past': 'aveste bisogno', '3pl_past': 'ebbero bisogno',
+        '1sg_future': 'avrò bisogno', '2sg_future': 'avrai bisogno', '3sg_future': 'avrà bisogno',
+        '1pl_future': 'avremo bisogno', '2pl_future': 'avrete bisogno', '3pl_future': 'avranno bisogno',
+      },
+      fr: {
+        base: 'avoir besoin', object_prep: 'de', infinitive_link: 'de',
+        '1sg_present': 'ai besoin', '2sg_present': 'as besoin', '3sg_present': 'a besoin',
+        '1pl_present': 'avons besoin', '2pl_present': 'avez besoin', '3pl_present': 'ont besoin',
+        '1sg_past': 'eus besoin', '2sg_past': 'eus besoin', '3sg_past': 'eut besoin',
+        '1pl_past': 'eûmes besoin', '2pl_past': 'eûtes besoin', '3pl_past': 'eurent besoin',
+        '1sg_future': 'aurai besoin', '2sg_future': 'auras besoin', '3sg_future': 'aura besoin',
+        '1pl_future': 'aurons besoin', '2pl_future': 'aurez besoin', '3pl_future': 'auront besoin',
+      },
+      de: {
+        base: 'brauchen',
+        '1sg_present': 'brauche', '2sg_present': 'brauchst', '3sg_present': 'braucht',
+        '1pl_present': 'brauchen', '2pl_present': 'braucht', '3pl_present': 'brauchen',
+        '1sg_past': 'brauchte', '2sg_past': 'brauchtest', '3sg_past': 'brauchte',
+        '1pl_past': 'brauchten', '2pl_past': 'brauchtet', '3pl_past': 'brauchten',
+      },
+      es: {
+        base: 'necesitar',
+        '1sg_present': 'necesito', '2sg_present': 'necesitas', '3sg_present': 'necesita',
+        '1pl_present': 'necesitamos', '2pl_present': 'necesitáis', '3pl_present': 'necesitan',
+        '1sg_past': 'necesité', '2sg_past': 'necesitaste', '3sg_past': 'necesitó',
+        '1pl_past': 'necesitamos', '2pl_past': 'necesitasteis', '3pl_past': 'necesitaron',
+        '1sg_future': 'necesitaré', '2sg_future': 'necesitarás', '3sg_future': 'necesitará',
+        '1pl_future': 'necesitaremos', '2pl_future': 'necesitaréis', '3pl_future': 'necesitarán',
+      },
+      ja: {
+        base: '必要とする',
+        reading: 'ひつようとする',
+        masu_present: '必要とします',
+        masu_present_reading: 'ひつようとします',
+        // The こと clause it governs is its object, as DESIRE's: 走ることを必要とする.
+        infinitive_link: 'ことを',
+      },
+      pt: {
+        base: 'precisar', object_prep: 'de',
+        '1sg_present': 'preciso', '2sg_present': 'precisa', '3sg_present': 'precisa',
+        '1pl_present': 'precisamos', '2pl_present': 'precisam', '3pl_present': 'precisam',
+        '1sg_past': 'precisei', '2sg_past': 'precisou', '3sg_past': 'precisou',
+        '1pl_past': 'precisamos', '2pl_past': 'precisaram', '3pl_past': 'precisaram',
+        '1sg_future': 'precisarei', '2sg_future': 'precisará', '3sg_future': 'precisará',
+        '1pl_future': 'precisaremos', '2pl_future': 'precisarão', '3pl_future': 'precisarão',
+      },
+    },
+  },
+
+  {
+    // P09's try (localization B62): "tries to run". A lexical verb that takes an infinitive complement
+    // the way DESIRE does, not `modal: true` as P09 proposed: a modal's link is lost on the outermost
+    // French modal ("essaie courir") and German stacks a bare infinitive ("versucht laufen"), where the
+    // lexical verb says "essaie de courir" and "versucht, zu laufen". The link is the lexeme's own:
+    // provare a, essayer de, 試みる with its こと clause as object. RETRY sits under it. Literal by
+    // design, beside DESIRE: no genus renders "attempt" in all seven (see the B62 task).
+    id: 'TRY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to make an attempt',
+    synonym: 'attempt',
+    emoji: '🎯',
+    forms: {
+      en: {
+        base: 'try',
+        '1sg_present': 'try', '2sg_present': 'try', '3sg_present': 'tries',
+        '1pl_present': 'try', '2pl_present': 'try', '3pl_present': 'try',
+        past: 'tried',
+      },
+      it: {
+        base: 'provare', infinitive_link: 'a',
+        '1sg_present': 'provo', '2sg_present': 'provi', '3sg_present': 'prova',
+        '1pl_present': 'proviamo', '2pl_present': 'provate', '3pl_present': 'provano',
+        '1sg_past': 'provai', '2sg_past': 'provasti', '3sg_past': 'provò',
+        '1pl_past': 'provammo', '2pl_past': 'provaste', '3pl_past': 'provarono',
+        '1sg_future': 'proverò', '2sg_future': 'proverai', '3sg_future': 'proverà',
+        '1pl_future': 'proveremo', '2pl_future': 'proverete', '3pl_future': 'proveranno',
+      },
+      fr: {
+        base: 'essayer', infinitive_link: 'de',
+        '1sg_present': 'essaie', '2sg_present': 'essaies', '3sg_present': 'essaie',
+        '1pl_present': 'essayons', '2pl_present': 'essayez', '3pl_present': 'essaient',
+        '1sg_past': 'essayai', '2sg_past': 'essayas', '3sg_past': 'essaya',
+        '1pl_past': 'essayâmes', '2pl_past': 'essayâtes', '3pl_past': 'essayèrent',
+        '1sg_future': 'essaierai', '2sg_future': 'essaieras', '3sg_future': 'essaiera',
+        '1pl_future': 'essaierons', '2pl_future': 'essaierez', '3pl_future': 'essaieront',
+      },
+      de: {
+        base: 'versuchen',
+        '1sg_present': 'versuche', '2sg_present': 'versuchst', '3sg_present': 'versucht',
+        '1pl_present': 'versuchen', '2pl_present': 'versucht', '3pl_present': 'versuchen',
+        '1sg_past': 'versuchte', '2sg_past': 'versuchtest', '3sg_past': 'versuchte',
+        '1pl_past': 'versuchten', '2pl_past': 'versuchtet', '3pl_past': 'versuchten',
+      },
+      es: {
+        base: 'intentar',
+        '1sg_present': 'intento', '2sg_present': 'intentas', '3sg_present': 'intenta',
+        '1pl_present': 'intentamos', '2pl_present': 'intentáis', '3pl_present': 'intentan',
+        '1sg_past': 'intenté', '2sg_past': 'intentaste', '3sg_past': 'intentó',
+        '1pl_past': 'intentamos', '2pl_past': 'intentasteis', '3pl_past': 'intentaron',
+        '1sg_future': 'intentaré', '2sg_future': 'intentarás', '3sg_future': 'intentará',
+        '1pl_future': 'intentaremos', '2pl_future': 'intentaréis', '3pl_future': 'intentarán',
+      },
+      ja: {
+        base: '試みる',
+        reading: 'こころみる',
+        masu_present: '試みます',
+        masu_present_reading: 'こころみます',
+        // The こと clause it governs is its object: 走ることを試みる.
+        infinitive_link: 'ことを',
+      },
+      pt: {
+        base: 'tentar',
+        '1sg_present': 'tento', '2sg_present': 'tenta', '3sg_present': 'tenta',
+        '1pl_present': 'tentamos', '2pl_present': 'tentam', '3pl_present': 'tentam',
+        '1sg_past': 'tentei', '2sg_past': 'tentou', '3sg_past': 'tentou',
+        '1pl_past': 'tentamos', '2pl_past': 'tentaram', '3pl_past': 'tentaram',
+        '1sg_future': 'tentarei', '2sg_future': 'tentará', '3sg_future': 'tentará',
+        '1pl_future': 'tentaremos', '2pl_future': 'tentarão', '3pl_future': 'tentarão',
+      },
+    },
+  },
+
+  {
     // The genus of MAKE ("to create objects") and SET_ON_FIRE ("to create fire") — the creation verb
     // their dictionary definitions cite as their genus (see the B09 verb-definition task). Its own
     // tooltip stays on the literal: glossing CREATE through MAKE would read as circular. German
@@ -5378,6 +5683,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to try something again after it failed',
     definition: infinitiveGloss('START', { modifier: 'AGAIN' }),
     emoji: '🔄',
+    // P09's /attach RETRY under TRY (localization B62). Its gloss stays "to start again": TRY is
+    // literal by design, so there is no genus gloss to build it on.
+    isA: 'TRY',
     forms: {
       en: {
         base: 'retry',
