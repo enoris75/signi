@@ -1,3 +1,5 @@
+import type { ComplementType } from '@signi/shared';
+
 /**
  * Verb concept ids whose Romance `source` keeps its disambiguating ablative adverb
  * ("via da" / "loin de" / "lejos de" / "longe de") whatever the source is. These are the
@@ -14,3 +16,18 @@
  * only licensed on these six verbs (see the intransitive corpus).
  */
 export const SOURCE_ABLATIVE_ADVERB_VERBS = new Set(['RUN', 'JUMP']);
+
+/**
+ * The complements that spell a pronoun as a pronoun: every one that carries an adposition. A
+ * pronoun behind one takes its tonic (disjunctive) form, no article and no declension of its own —
+ * "in him", "durch ihn", "en él", "dele", "sotto di lui", "en elle" — where the ordinary
+ * noun-phrase renderer would hand it a determiner and the citation form ("in the he", "durch den
+ * er"). A197 gave the comitative and the instrumental this branch; A203 gave it to the other five.
+ *
+ * `cause` is absent because it never reaches the shared path: its connector holds a possessive in
+ * the negative sentiment ("por mi culpa", "par ma faute"), so every language answers it in a branch
+ * of its own, above. `predicative` and `objectPredicative` carry no adposition to govern a pronoun.
+ */
+export const TONIC_COMPLEMENTS: ReadonlySet<ComplementType> = new Set<ComplementType>([
+  'locative', 'terminus', 'direction', 'source', 'route', 'manner', 'comitative', 'instrumental',
+]);

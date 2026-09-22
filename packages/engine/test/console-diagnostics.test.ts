@@ -177,8 +177,8 @@ describe('TEXT and REFERENCE', () => {
       en: 'the texts.', it: 'i testi.', fr: 'les textes.', de: 'die Texte.', es: 'los textos.', pt: 'os textos.',
     });
     expect(sayAll({ subject: np('TEXT', { definiteness: 'indefinite', adjectives: ['NEW'] }) })).toEqual({
-      en: 'a new text.', it: 'un nuovo testo.', fr: 'un nouveau texte.', de: 'ein neuer Text.', es: 'un texto nuevo.',
-      ja: '新しいテキスト。', pt: 'um texto novo.',
+      en: 'a new text.', it: 'un nuovo testo.', fr: 'un nouveau texte.', de: 'ein neuer Text.', es: 'un nuevo texto.',
+      ja: '新しいテキスト。', pt: 'um novo texto.',
     });
     expect(sayAll({ subject: np('REFERENCE', { number: 'plural' }) })).toEqual({
       en: 'the references.', it: 'i riferimenti.', fr: 'les références.', de: 'die Verweise.', es: 'las referencias.',
@@ -186,7 +186,7 @@ describe('TEXT and REFERENCE', () => {
     });
     expect(sayAll({ subject: np('REFERENCE', { definiteness: 'indefinite', adjectives: ['NEW'] }) })).toEqual({
       en: 'a new reference.', it: 'un nuovo riferimento.', fr: 'une nouvelle référence.', de: 'ein neuer Verweis.',
-      es: 'una referencia nueva.', ja: '新しい参照。', pt: 'uma referência nova.',
+      es: 'una nueva referencia.', ja: '新しい参照。', pt: 'uma nova referência.',
     });
   });
 });
@@ -439,7 +439,7 @@ describe('the diagnostics, as the catalogue plans them', () => {
     },
     'diagnostic.openClause': {
       en: 'Open a new clause', it: 'Apri una nuova proposizione', fr: 'Ouvrir une nouvelle proposition', de: 'Einen neuen Satz öffnen',
-      es: 'Abrir una oración nueva', pt: 'Abrir uma oração nova', ja: '新しい節を開く',
+      es: 'Abrir una nueva oración', pt: 'Abrir uma nova oração', ja: '新しい節を開く',
     },
     'diagnostic.openBracketWithCommand': {
       en: 'Open a bracket with a command', it: 'Apri una parentesi con un comando', fr: 'Ouvrir une parenthèse avec une commande', de: 'Eine Klammer mit einem Befehl öffnen',

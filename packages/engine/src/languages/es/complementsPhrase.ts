@@ -15,7 +15,9 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
-import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
+import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
+import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
+import { headPreposition } from '../../functions/headPreposition.js';
 import { KEPT_BESIDE_POSSESSIVE, possessiveEs, possessiveEsStressed, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -24,7 +26,7 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS } from './es.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { isPlural } from './isPlural.js';
@@ -124,12 +126,15 @@ export function complementsPhrase(
       // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      // A companion or an instrument that is a pronoun is "con" + the tonic form, with no article
-      // ("con él", never "con el él" — A197), as the cause below already spells it after "a"/"de".
-      // The 1st and 2nd singular fuse with the preposition instead (conmigo, contigo). The other
-      // adposition-bearing complements still render a pronoun as a noun phrase ("en el él") — A203.
-      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
-      if (tonic) return COMITATIVE_FUSION[tonic] ?? `con ${tonic}`;
+      // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
+      // ("en él", never "en el él" — A197 for the comitative and the instrumental, A203 for the
+      // other five), as the cause below already spells it after "a"/"de". The 1st and 2nd singular
+      // fuse with the comitative preposition instead (conmigo, contigo). Which preposition each
+      // slot takes is not decided here: the head below is built as it always is, from a forms bag
+      // that carries no determiner for it to fuse with (`tonicHeadForms`), and the tonic form
+      // follows it in place of the noun.
+      const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+      if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `con ${tonic}`;
       // A possessive replaces the article, so the head is the preposition alone ("en mi casa", "a tu perro").
       // Unless the head carries a determiner of its own: that keeps its slot, the preposition takes
       // it as it would any other ("en esta casa", "en ninguna casa"), and the possessive follows the
@@ -159,7 +164,7 @@ export function complementsPhrase(
         : [every, possessive, withAdj(word, adj)].filter(Boolean).join(' ');
       // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
       // stressed-a nouns take ("en la primera agua").
-      const af = artForms(f, adj);
+      const af = tonic ? tonicHeadForms(np) : artForms(f, adj);
       // locative→en, direction→a (al/a la), source→"lejos de" (lejos del/de la),
       // route→path preposition. A direction toward an *animate* goal takes "hacia"
       // (toward) — bare "a" + person doesn't read as a motion destination ("corro hacia
@@ -190,7 +195,7 @@ export function complementsPhrase(
           // A direction naming a relation is that relation's goal, spelled as the place is
           // ("salta en el aire"); with none it is the plain goal "a", or "hacia" towards a person.
           dirSpec ? spatialHead(dirSpec, plural, af) :
-          f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)
+          af['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)
         ) :
         type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
@@ -199,6 +204,10 @@ export function complementsPhrase(
           `${connectorShared ? '' : 'a causa '}${deDet(af, plural)}`
         ) :
         spatialHead(pathSpecifier(c), plural, af);
+      // The pronoun is the whole phrase after the head: no article, no adjective, no relative. It is
+      // the tonic form, unless the head is one of the adpositions that govern the nominative
+      // instead ("corre como yo", never "como mí"), which only the 1st and 2nd singular spell apart.
+      if (tonic) return `${head} ${NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic}`;
       return withRelative(`${head} ${noun}`, np);
       };
       // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic

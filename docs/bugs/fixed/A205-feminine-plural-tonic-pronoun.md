@@ -46,14 +46,14 @@ pronoun vocabulary, and its gender is a toggle. The other slots above are plan-o
 
 **Nothing shipped shows it.** No concept `definition` and no `UI_STRINGS` entry uses a plural
 pronoun, which is what C20 recorded when it checked the same question for
-[A200](../fixed/A200-japanese-plural-neuter-pronoun.md).
+[A200](A200-japanese-plural-neuter-pronoun.md).
 
-Found while fixing [A197](../fixed/A197-pronoun-in-the-comitative.md), which gave the comitative a
+Found while fixing [A197](A197-pronoun-in-the-comitative.md), which gave the comitative a
 tonic pronoun and so a fourth place for this to show.
 
 ## Shape of the fix
 
-The same two halves [A200](../fixed/A200-japanese-plural-neuter-pronoun.md) took — a seed form and a
+The same two halves [A200](A200-japanese-plural-neuter-pronoun.md) took — a seed form and a
 generic read — and the second half is the line right below the one A200 generalised:
 
 - **The seed.** `disjunctive_plural_fem` on the `fr`, `es` and `pt` rows of THIRD_PERSON (*elles*,
@@ -72,3 +72,25 @@ is its base form (A200's それら), which needs no `disjunctive` row at all.
 | | |
 |---|---|
 | **Test** | `pronoun.test.ts` → *known bugs: the feminine plural tonic pronoun* (1 `test.fails` covering the cause, the comitative, the passive agent, a prepositional object and the Spanish 1st and 2nd plurals, plus a regression test for the subject surface and the languages with no feminine plural tonic) |
+
+## Resolved
+
+**2026-09-22.** The two halves the file sets out, and no more:
+
+- **The seed.** `disjunctive_plural_fem` on the `fr`, `es` and `pt` THIRD_PERSON rows (*elles*,
+  *ellas*, *elas*) and on the Spanish FIRST_PERSON and SECOND_PERSON rows (*nosotras*, *vosotras*),
+  in [pronouns.ts](../../../packages/backend/src/concepts/pronouns.ts). French *nous* / *vous* and
+  Portuguese *nós* / *vocês* are invariable and got none, so they fall through to the form they had.
+- **The engine.** [`resolveNounPhrase`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts)
+  reads the plural tonic off the gender in hand, one line below the one A200 generalised:
+  `disjunctive_plural_${gender}` first, then the two keys it read before. English, German, Italian
+  and Japanese spell no such key and are untouched.
+
+**The neuter plural was ruled as the file rules it.** Only the feminine key is seeded, so a neuter
+group keeps *ellos* / *eles* / *eux* — neither Iberian language spells a neuter group apart from a
+masculine one, and French has no neuter plural at all. That is also what an antecedent naming things
+resolves to.
+
+| | |
+|---|---|
+| **Tests** | `pronoun.test.ts` → *known bugs: the feminine plural tonic pronoun*, the `test.fails` now passing, plus two added cases: the masculine and neuter plurals keeping the masculine tonic form (including through an antecedent), and the instrumental — the other slot A197 gave the tonic form — beside the invariable French and Portuguese 1st and 2nd plurals |

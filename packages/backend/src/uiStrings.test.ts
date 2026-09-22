@@ -1089,8 +1089,8 @@ describe('buildUiStrings', () => {
     });
     // NEW leads its noun in Italian and French, follows it in Spanish and Portuguese.
     expect(strings['help.console.newPeriod']).toEqual({
-      en: 'New period', it: 'Nuovo periodo', fr: 'Nouvelle période', de: 'Neues Satzgefüge', es: 'Período nuevo',
-      ja: '新しい文', pt: 'Período novo',
+      en: 'New period', it: 'Nuovo periodo', fr: 'Nouvelle période', de: 'Neues Satzgefüge', es: 'Nuevo período',
+      ja: '新しい文', pt: 'Novo período',
     });
     expect(strings['help.console.otherNoun']).toEqual({
       en: "Another period's noun", it: 'Sostantivo di un altro periodo', fr: "Nom d'une autre période",

@@ -13,16 +13,11 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
-
-// The complements whose pronoun is spelled as a pronoun today: the comitative and the instrumental,
-// which share "with" (A197), beside the causal adjunct, which has its own branch below. The other
-// adposition-bearing complements still send a pronoun through the noun-phrase renderer ("in the he")
-// — A203.
-const TONIC_COMPLEMENTS = new Set<ComplementType>(['comitative', 'instrumental']);
 
 // `verb` is the governing verb's forms: the predicative reads it to repair a predicate noun under a
 // seeming verb ("seems to be a legend").
@@ -107,9 +102,12 @@ export function complementsPhrase(
       if (type === 'locative' && c.phrase.conjuncts.some((np) => locativeIdiom(c, np, LOCATIVE_IDIOMS))) {
         return coordinate(c.phrase, (np) => locativeIdiom(c, np, LOCATIVE_IDIOMS) ?? `${prep} ${npText(np)}`);
       }
-      // A pronoun behind the preposition takes its oblique form and no article — "with him", never
-      // "with the he" (A197) — the same shape the causal adjunct above has always had. Per conjunct,
-      // so a group mixes the two under the one preposition ("with the dog and him").
+      // A pronoun behind the preposition takes its oblique form and no article — "with him", "in
+      // him", "like him", never "with the he" (A197 for the comitative and the instrumental, A203
+      // for the rest) — the same shape the causal adjunct above has always had. English needs no
+      // more than the set: the preposition is already emitted whole, in front of the group, and
+      // fuses with no article. Per conjunct, so a group mixes the two under the one preposition
+      // ("with the dog and him").
       const conjunctText = (np: ResolvedNounPhrase): string =>
         (TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined) ?? npText(np);
       return `${prep} ${coordinate(c.phrase, conjunctText)}`;

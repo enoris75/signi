@@ -14,7 +14,10 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
-import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
+import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
+import { headPreposition } from '../../functions/headPreposition.js';
+import { tonicPhrase } from './tonicPhrase.js';
+import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { coordinateElement } from './coordinateElement.js';
@@ -27,7 +30,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
@@ -137,13 +140,16 @@ export function complementsPhrase(
       // "em casa", not the contracted "no lar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      // A companion or an instrument that is a pronoun is "com" + the tonic form, with no article
-      // ("com ele", never "com o ele" — A197), as the cause below already spells it after "de"/"a".
-      // "com" does not contract with an article, but it does fuse with three of the pronouns —
-      // comigo, contigo, conosco — which is what COMITATIVE_FUSION holds. The other
-      // adposition-bearing complements still render a pronoun as a noun phrase ("no ele") — A203.
-      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
-      if (tonic) return COMITATIVE_FUSION[tonic] ?? `com ${tonic}`;
+      // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
+      // ("em ele" → "nele", never "no ele" — A197 for the comitative and the instrumental, A203 for
+      // the other five), as the cause below already spells it after "de"/"a". "com" does not
+      // contract with an article, but it does fuse with three of the pronouns — comigo, contigo,
+      // conosco — which is what COMITATIVE_FUSION holds; "em" and "de" fuse with the 3rd-person
+      // forms, which `tonicPhrase` writes. Which preposition each slot takes is not decided here:
+      // the head below is built as it always is, from a forms bag that carries no determiner for it
+      // to contract with (`tonicHeadForms`), and the tonic form follows it in place of the noun.
+      const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+      if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `com ${tonic}`;
       // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
       // Unless the head carries a determiner of its own: that keeps its slot and takes the fusion
       // ("nesta casa", "em nenhuma casa"), and the possessive follows the noun, article and all left
@@ -176,34 +182,39 @@ export function complementsPhrase(
       // connector — negative "por culpa do cão", positive "graças ao cão".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
+      const hf = tonic ? tonicHeadForms(np) : f;
       const head =
-        type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), f, plural) :
-        type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
+        type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), hf, plural) :
+        type === 'terminus'  ? contractDet(datPrep, 'a', hf, plural) :
         // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
         // The comitative companion takes the same "com": Portuguese does not separate the two either.
-        type === 'instrumental' || type === 'comitative' ? prepDet('com', f, plural) :
+        type === 'instrumental' || type === 'comitative' ? prepDet('com', hf, plural) :
         // Manner: similative "como" (como o vento — the default), means "com" (com cuidado),
         // measure "a" (à velocidade da luz), mode "de" (de maneira…). Read off the head noun.
         type === 'manner'    ? (
-          mannerRelation(f) === 'means'   ? prepDet('com', f, plural) :
-          mannerRelation(f) === 'measure' ? contractDet(datPrep, 'a', f, plural) :
-          mannerRelation(f) === 'mode'    ? contractDet(dePrep, 'de', f, plural) :
-          prepDet('como', f, plural)
+          mannerRelation(hf) === 'means'   ? prepDet('com', hf, plural) :
+          mannerRelation(hf) === 'measure' ? contractDet(datPrep, 'a', hf, plural) :
+          mannerRelation(hf) === 'mode'    ? contractDet(dePrep, 'de', hf, plural) :
+          prepDet('como', hf, plural)
         ) :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal, spelled as the place is ("salta
           // no ar"); with none it is the plain goal "a", or "para" towards a person.
-          dirSpec ? spatialHead(dirSpec, f, plural) :
-          f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)
+          dirSpec ? spatialHead(dirSpec, hf, plural) :
+          hf['animate'] === '1' ? prepDet('para', hf, plural) : contractDet(datPrep, 'a', hf, plural)
         ) :
-        type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', f, plural)}` :
+        type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', hf, plural)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `${connectorShared ? '' : 'graças '}${contractDet(datPrep, 'a', f, plural)}` :
-          causeSent === 'negative' ? `por culpa ${contractDet(dePrep, 'de', f, plural)}` :
-          `${connectorShared ? '' : 'por causa '}${contractDet(dePrep, 'de', f, plural)}`
+          causeSent === 'positive' ? `${connectorShared ? '' : 'graças '}${contractDet(datPrep, 'a', hf, plural)}` :
+          causeSent === 'negative' ? `por culpa ${contractDet(dePrep, 'de', hf, plural)}` :
+          `${connectorShared ? '' : 'por causa '}${contractDet(dePrep, 'de', hf, plural)}`
         ) :
-        spatialHead(pathSpecifier(c), f, plural);
+        spatialHead(pathSpecifier(c), hf, plural);
+      // The pronoun is the whole phrase after the head: no article, no adjective, no relative. It is
+      // the tonic form, unless the head is one of the adpositions that govern the nominative
+      // instead ("corre como eu", never "como mim"), which only the 1st and 2nd singular spell apart.
+      if (tonic) return tonicPhrase(head, NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic);
       return withRelative(`${head} ${noun}`, np);
       };
       // A pronoun cause: neutral "por causa de mim / dele" takes the tonic form after "de"

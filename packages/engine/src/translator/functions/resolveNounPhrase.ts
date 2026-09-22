@@ -57,9 +57,13 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // Disjunctive (tonic/oblique) surface for prepositional use ("because of me/her/them"),
     // synthesised for the same number/gender as `base`. Engines that place a pronoun after
     // a preposition read forms['disjunctive'] (falling back to base when absent, e.g. ja).
+    // The plural reads off the gender in hand exactly as the surface above does: French elles,
+    // Spanish ellas / nosotras / vosotras, Portuguese elas are the feminine of the tonic form as
+    // well as of the subject one (A205). A row with no `disjunctive_plural_<gender>` — English,
+    // German, Italian, whose plural tonic is invariant — falls through to the ungendered key.
     const disj =
       number === 'plural'
-        ? head.forms['disjunctive_plural'] ?? head.forms['disjunctive']
+        ? head.forms[`disjunctive_plural_${gender}`] ?? head.forms['disjunctive_plural'] ?? head.forms['disjunctive']
         : head.forms['person'] === '3'
           ? head.forms[`disjunctive_${gender}`] ?? head.forms['disjunctive']
           : head.forms['disjunctive'];

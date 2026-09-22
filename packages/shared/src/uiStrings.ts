@@ -4419,7 +4419,7 @@ export const UI_STRINGS = defineUiStrings({
   },
   // The other two brackets, each named by what it holds, head bare as a legend's is, the example after
   // the colon: a noun's NOUN_PHRASE (it "Sintagma nominale di un sostantivo", de "Nominalphrase eines
-  // Substantivs", ja 名詞の名詞句) and a NEW period (it "Nuovo periodo", es "Período nuevo", ja 新しい文).
+  // Substantivs", ja 名詞の名詞句) and a NEW period (it "Nuovo periodo", es "Nuevo período", ja 新しい文).
   // A reference to a noun elsewhere is another period's noun (OTHER: it "Sostantivo di un altro
   // periodo", ja 別の文の名詞).
   'help.console.nounPhrase': {

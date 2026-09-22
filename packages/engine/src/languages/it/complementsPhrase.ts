@@ -14,9 +14,11 @@ import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
-import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
+import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
+import { headPreposition } from '../../functions/headPreposition.js';
+import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
-import { CONSTITUENT_NEGATOR, IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
+import { CONSTITUENT_NEGATOR, IT_DI_BEFORE_PRONOUN, IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
 import { artFor } from './artFor.js';
@@ -197,17 +199,28 @@ export function complementsPhrase(
           `a causa ${prepDet('di', nf, plural, lead)}`
         ) :
         spatialHead(pathSpecifier(c), nf, plural, lead);
-      // A companion or an instrument that is a pronoun is "con" + the tonic form, with no article
-      // ("con lui", never "con il lui" — A197), as the positive cause above already spells it. Per
-      // conjunct, and each conjunct repeats the preposition as a noun's fused head does: "con il cane
-      // e con lui". The other adposition-bearing complements still render a pronoun as a noun phrase
-      // ("nel lui") — A203.
-      const tonicWith = (np: ResolvedNounPhrase): string =>
-        (type === 'instrumental' || type === 'comitative') && tonicPronoun(np) ? `con ${tonicPronoun(np)}` : '';
+      // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
+      // ("con lui", "in lui", never "con il lui" — A197 for the comitative and the instrumental,
+      // A203 for the other five), as the positive cause above already spells it. Per conjunct, and
+      // each conjunct repeats the preposition as a noun's fused head does: "con il cane e con lui".
+      // Which preposition each slot takes is not decided here: `headFor` chooses it as it always
+      // does, from a forms bag that carries no determiner for it to fuse with (`tonicHeadForms`).
+      // A class of them then reaches the pronoun through "di" — "sotto di lui", "attraverso di lui"
+      // — which `IT_DI_BEFORE_PRONOUN` lists and `prepObjectText` already consults for a verb's
+      // prepositional object; the locutions that govern their own "a" are not among them ("intorno
+      // a lui"), so the last word of the head is what decides.
+      const tonicText = (np: ResolvedNounPhrase): string => {
+        const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+        if (!tonic) return '';
+        const nf = tonicHeadForms(np);
+        const head = headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic);
+        const di = IT_DI_BEFORE_PRONOUN.has(headPreposition(head)) ? 'di ' : '';
+        return `${head} ${di}${tonic}`;
+      };
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
-        (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicWith(np) ||
+        (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicText(np) ||
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever

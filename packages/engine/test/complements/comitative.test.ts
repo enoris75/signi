@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import type { NounPhrase, PathSpecifier } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // The COMITATIVE (localization C12) — the companion an act is carried out *together with*, as
@@ -225,15 +225,19 @@ describe('known bugs: a pronoun in the comitative renders as a noun', () => {
 // or manner pronoun goes through the ordinary noun-phrase renderer, which hands it a determiner and
 // the citation form ("in the he", "nel lui", "im er"). It is the same missing branch, but each slot
 // needs its own adposition and, in German, its own case — the dative the `disjunctive` already is
-// for "in", the accusative for "durch", the nominative after "wie". French and Italian are left out
-// of the pins: whether a place is "dans lui" or "en lui", and which Italian prepositions insert
-// "di" ("sotto di lui"), are questions of usage this file records rather than answers.
+// for "in", the accusative for "durch", the nominative after "wie". French and Italian were left
+// out of the two pins below: whether a place is "dans lui" or "en lui", and which Italian
+// prepositions insert "di" ("sotto di lui"), were questions of usage the file recorded rather than
+// answered. The fix ruled both, and the third test pins the rulings.
 describe('known bugs: a pronoun in the other adposition-bearing complements', () => {
   const HIM = np('THIRD_PERSON');
-  const around = (type: 'locative' | 'source' | 'route' | 'manner', verb: string) =>
-    sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: HIM } } }));
+  const pl = np('THIRD_PERSON', { number: 'plural', gender: 'fem' });
+  const around = (type: 'locative' | 'source' | 'route' | 'manner' | 'direction', verb: string, phrase = HIM) =>
+    sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase } } }));
+  const place = (value: PathSpecifier, phrase = HIM) =>
+    sayAll(clause(np('CAT'), 'BE', { complements: { locative: { phrase, specifiers: [{ kind: 'path', value }] } } }));
 
-  test.fails('English, Spanish and Portuguese take the tonic form after the plain adposition', () => {
+  test('English, Spanish and Portuguese take the tonic form after the plain adposition', () => {
     expect(around('locative', 'BE')).toMatchObject({
       en: 'the cat is in him.',       // now: "in the he"
       es: 'el gato está en él.',      // now: "en el él"
@@ -254,10 +258,116 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
       });
   });
 
-  test.fails('…and German, where each preposition governs its own case', () => {
+  test('…and German, where each preposition governs its own case', () => {
     expect(around('locative', 'BE').de).toBe('der Kater ist in ihm.');       // now: "im er"; in + dative
     expect(around('route', 'RUN').de).toBe('der Kater läuft durch ihn.');    // now: "durch den er"; durch + accusative
     expect(around('manner', 'RUN').de).toBe('der Kater läuft wie er.');      // now: "wie der er"; wie + nominative
+  });
+
+  // The two the pins above leave to this one, because each turned on a point of usage rather than on
+  // the missing branch. FRENCH does not say "dans lui" of a person: plain containment is "en lui",
+  // the bare preposition a bare continent takes ("en Europe") and for the same reason. Every other
+  // French relation keeps its own adposition, which is idiomatic before a pronoun as it stands.
+  // ITALIAN reaches a pronoun through "di" after a class of prepositions and not after the rest —
+  // "sotto di lui" but "in lui" — which is the list `prepObjectText` already consults for a verb's
+  // prepositional object ("clicca su di lui", A139), read off the last word of the head so the
+  // locutions governing their own "a" stay out of it ("intorno a lui", "davanti a lui").
+  test('French puts a place in "en", and Italian reaches the pronoun through "di"', () => {
+    expect(around('locative', 'BE')).toMatchObject({ fr: 'le chat est en lui.', it: 'il gatto è in lui.' });
+    expect(around('route', 'RUN')).toMatchObject({
+      fr: 'le chat court à travers lui.', it: 'il gatto corre attraverso di lui.',
+    });
+    expect(around('manner', 'RUN')).toMatchObject({ fr: 'le chat court comme lui.', it: 'il gatto corre come lui.' });
+    expect(around('source', 'COME')).toMatchObject({ fr: 'le chat vient de lui.', it: 'il gatto viene via da lui.' });
+    expect(place('under')).toMatchObject({ fr: 'le chat est sous lui.', it: 'il gatto è sotto di lui.' });
+    expect(place('around')).toMatchObject({ fr: 'le chat est autour de lui.', it: 'il gatto è intorno a lui.' });
+    expect(place('in_front_of')).toMatchObject({ fr: 'le chat est devant lui.', it: 'il gatto è davanti a lui.' });
+    // The elided "de" carries its apostrophe rather than a space, as the causal adjunct's does.
+    expect(place('around', pl).fr).toBe("le chat est autour d'elles.");
+  });
+
+  // Each relation keeps the adposition the slot already chose for a noun; only the determiner it
+  // fused in is gone. The "de"-locutions the Iberian languages build them from take the pronoun as
+  // they take a noun — Portuguese fusing its "de" with the 3rd person, as "em" fuses in the plain
+  // locative ("nele") — and German's case falls out of the preposition, the dative for the static
+  // two-way relations and the accusative for "um".
+  test('every spatial relation keeps its own adposition', () => {
+    expect(place('under')).toMatchObject({
+      en: 'the cat is under him.', de: 'der Kater ist unter ihm.',
+      es: 'el gato está debajo de él.', pt: 'o gato está debaixo dele.',
+    });
+    expect(place('over')).toMatchObject({
+      en: 'the cat is over him.', de: 'der Kater ist über ihm.',
+      es: 'el gato está por encima de él.', pt: 'o gato está por cima dele.',
+    });
+    expect(place('behind')).toMatchObject({
+      en: 'the cat is behind him.', de: 'der Kater ist hinter ihm.',
+      es: 'el gato está detrás de él.', pt: 'o gato está atrás dele.',
+    });
+    // "um" governs the accusative, where the static relations above take the dative.
+    expect(place('around')).toMatchObject({
+      en: 'the cat is around him.', de: 'der Kater ist um ihn.',
+      es: 'el gato está alrededor de él.', pt: 'o gato está ao redor dele.',
+    });
+  });
+
+  // A pronoun standing for a person IS a person, so it takes the branch an animate noun takes:
+  // Spanish "hacia" and Portuguese "para" for a goal, Italian's andare-da, German's "von" for a
+  // living source and its bare dative for a recipient. The NEUTER pronoun stands for a thing and
+  // keeps the inanimate branch — the plain goal "a", German's "aus" and its accusative "in".
+  test('a personal pronoun takes the animate branch, and a neuter one does not', () => {
+    expect(around('direction', 'GO')).toMatchObject({
+      en: 'the cat goes to him.', de: 'der Kater geht zu ihm.', it: 'il gatto va da lui.',
+      es: 'el gato va hacia él.', pt: 'o gato vai para ele.', fr: 'le chat va vers lui.',
+    });
+    expect(around('source', 'COME').de).toBe('der Kater kommt von ihm.');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: HIM } } })).de)
+      .toBe('der Mann gibt das Buch ihm.');
+    const IT_ = np('THIRD_PERSON', { gender: 'neut' });
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: IT_ } } }))).toMatchObject({
+      es: 'el gato va a ello.', pt: 'o gato vai a isso.', it: 'il gatto va a esso.',
+    });
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: IT_ } } })).de).toBe('der Kater kommt aus ihm.');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: IT_ } } })).de)
+      .toBe('der Mann gibt das Buch in es.');
+  });
+
+  // The similative is a shortened comparison — "corre como yo" stands for "como yo corro" — so the
+  // Iberian languages put the SUBJECT pronoun there, as German's "wie" already does. Only the 1st
+  // and 2nd singular spell the two apart; every other person and language is unaffected, and the
+  // tonic form stays where a true preposition governs it ("por mí", "debaixo de ti").
+  test('the similative takes the nominative in Spanish, Portuguese and German', () => {
+    const like = (concept: string) => sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: np(concept) } } }));
+    expect(like('FIRST_PERSON')).toMatchObject({
+      es: 'el gato corre como yo.', pt: 'o gato corre como eu.', de: 'der Kater läuft wie ich.',
+      fr: 'le chat court comme moi.', it: 'il gatto corre come me.', en: 'the cat runs like me.',
+    });
+    expect(like('SECOND_PERSON')).toMatchObject({
+      es: 'el gato corre como tú.', pt: 'o gato corre como você.', de: 'der Kater läuft wie du.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('FIRST_PERSON') } } }))).toMatchObject({
+      es: 'el gato corre por mí.', pt: 'o gato corre por mim.', de: 'der Kater läuft durch mich.',
+    });
+  });
+
+  // The choice is per conjunct, as it is in the comitative: a group mixes a noun and a pronoun under
+  // the one relation, each conjunct bringing the head English says once in front of the whole group
+  // and the others repeat. A feminine plural takes the feminine tonic form here too (A205).
+  test('a group mixes a noun and a pronoun, and the feminine plural carries', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: { conjuncts: [np('HOUSE'), HIM], conjunction: 'and' } } },
+    }))).toMatchObject({
+      en: 'the cat is in the house and him.', de: 'der Kater ist im Haus und in ihm.',
+      es: 'el gato está en la casa y en él.', pt: 'o gato está na casa e nele.',
+      fr: 'le chat est dans la maison et en lui.', it: 'il gatto è nella casa e in lui.',
+    });
+    expect(around('locative', 'BE', pl)).toMatchObject({
+      es: 'el gato está en ellas.', pt: 'o gato está nelas.', fr: 'le chat est en elles.',
+      de: 'der Kater ist in ihnen.', it: 'il gatto è in loro.',
+    });
+    expect(around('route', 'RUN', pl)).toMatchObject({
+      es: 'el gato corre por ellas.', pt: 'o gato corre por elas.', de: 'der Kater läuft durch sie.',
+    });
   });
 
   // Regression: the two slots A197 did fix, and Japanese, which marks every one of these with a

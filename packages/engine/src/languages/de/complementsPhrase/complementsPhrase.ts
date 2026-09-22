@@ -11,6 +11,9 @@ import { pathSpecifier } from '../../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../../functions/tonicPronoun.js';
+import { tonicHeadForms } from '../../../functions/tonicHeadForms.js';
+import { TONIC_COMPLEMENTS } from '../../../functions/functions.consts.js';
+import { tonicPronounDe } from '../tonicPronounDe.js';
 import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../../possessive.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
@@ -94,14 +97,15 @@ export function complementsParts(
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      // A companion or an instrument that is a pronoun is "mit" + the tonic form, with no article and
-      // no declension ("mit ihm", never "mit dem er" — A197), as the causal adjunct already spells it
-      // in `causePhrase`. "mit" governs the dative and the German `disjunctive` IS the dative (mir /
-      // dir / ihm / ihr / uns / euch / ihnen), so the two words are the whole phrase and the case and
-      // declension machinery below is not reached. The other adposition-bearing complements still
-      // decline a pronoun as a noun ("durch den er", and "durch" would want the accusative) — A203.
-      const tonic = type === 'instrumental' || type === 'comitative' ? tonicPronoun(np) : undefined;
-      if (tonic) return `mit ${tonic}`;
+      // A pronoun behind an adposition is the bare preposition + the pronoun, with no article and no
+      // declension of its own ("mit ihm", never "mit dem er" — A197 for the comitative and the
+      // instrumental, A203 for the other five), as the causal adjunct already spells it in
+      // `causePhrase`. German is the language where that is not one form: the preposition rules the
+      // case, so the head below is chosen exactly as it always is — from a forms bag with no
+      // determiner to fuse with (`tonicHeadForms`) — and `_case` falls out of it alongside, which is
+      // what picks the pronoun ("in ihm" dative, "durch ihn" accusative, "wie er" nominative).
+      const pronoun = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+      if (pronoun && (type === 'instrumental' || type === 'comitative')) return `mit ${pronoun}`;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
       // the adjectives decline as they do after "kein" ("in meinem kleinen Haus", "deinem Hund",
       // "durch meine großen Häuser", see `possessedDeclension`). A bare-name place modified by an
@@ -120,9 +124,10 @@ export function complementsParts(
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
       const detached = !!poss && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
       const possessedForms = possessedHeadForms(np, 'bare');
-      const f = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all')
+      const nounForms = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all')
         ? { ...possessedForms, definiteness: ownDeterminer }
         : possessedForms);
+      const f = pronoun ? tonicHeadForms(np) : nounForms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = possessedDeclension(np, f);
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
@@ -200,6 +205,12 @@ export function complementsParts(
         // person or an animal, which one is not inside: a living source takes "von", fused to "vom"
         // before "dem" (A154). The relativizer stand-in comes through here too ("von dem").
         else /* source */         head = prepDet(f['animate'] === '1' ? 'von' : 'aus', f, 'dat', plural);
+      }
+      // The pronoun is the whole phrase after the head, declined for the case the head governs. The
+      // bare-dative terminus leaves no head at all, and then the pronoun is the phrase ("gibt ihm").
+      if (pronoun) {
+        const word = tonicPronounDe(np.head.forms, _case);
+        return head ? `${head} ${word}` : word;
       }
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
       if (definiteness === 'relative') return head;
