@@ -215,22 +215,42 @@ describe('known bugs: a German ordinal as an essive object predicate is left bar
 // A232. The Japanese essive として takes a na-adjective's stem (A224), and drops the degree the
 // adjective was given: "as happier" is 幸せとして, the positive. The factitive branch writes the
 // degree word ahead of the adjective (もっと幸せに), and the other six languages compare it. Found
-// fixing A224.
+// fixing A224. The fix writes the degree word ahead of the stem in the essive too, but for the
+// lowered degrees, which want a negated adjective.
 describe('known bugs: the Japanese essive drops an adjective head\'s degree (A232)', () => {
   const seesAs = (adjective: NounPhrase) =>
     sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective, specifiers: ESSIVE } } }));
   const makes = (adjective: NounPhrase) =>
     say(clause(np('CAT'), 'MAKE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective } } }), 'ja');
 
-  test.fails('the degree word stands before the stem, as it does in the factitive', () => {
+  test('the degree word stands before the stem, as it does in the factitive', () => {
     expect(seesAs(np('HAPPY', { headDegree: 'more' })).ja).toBe('猫は家をもっと幸せとして見ます。');
     expect(seesAs(np('BROWN', { headDegree: 'most' })).ja).toBe('猫は家を最も茶色として見ます。');
+  });
+
+  // The equal degree, more na- and の-adjectives, another verb, the past and the negative. The
+  // lowered degrees are left out: それほど and 最も want a negated adjective, which として has no form
+  // for (see `complementSegs`).
+  test('the equal degree, more adjectives, another verb, the past and the negative', () => {
+    expect(seesAs(np('HAPPY', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい幸せとして見ます。');
+    expect(seesAs(np('VALID', { headDegree: 'more' })).ja).toBe('猫は家をもっと有効として見ます。');
+    expect(say(clause(np('CAT'), 'SEE', {
+      verbPhrase: { tense: 'past' }, directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('LAZY', { headDegree: 'most' }), specifiers: ESSIVE } },
+    }), 'ja')).toBe('猫は家を最も怠惰として見ました。');
+    expect(say(clause(np('CAT'), 'SEE', {
+      verbPhrase: { negative: true }, directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('HAPPY', { headDegree: 'more' }), specifiers: ESSIVE } },
+    }), 'ja')).toBe('猫は家をもっと幸せとして見ません。');
+    expect(uses(np('HAPPY', { headDegree: 'more' })).ja).toBe('猫は家をもっと幸せとして使います。');
   });
 
   test('regression: the factitive, the positive essive and the other six', () => {
     expect(makes(np('HAPPY', { headDegree: 'more' }))).toBe('猫は家をもっと幸せに作ります。');
     expect(makes(np('HAPPY', { headDegree: 'most' }))).toBe('猫は家を最も幸せに作ります。');
+    expect(makes(np('HAPPY', { headDegree: 'equally' }))).toBe('猫は家を同じくらい幸せに作ります。');
     expect(seesAs(np('HAPPY')).ja).toBe('猫は家を幸せとして見ます。');
+    expect(uses(np('PRISON')).ja).toBe('猫は家を刑務所として使います。');
     expect(seesAs(np('HAPPY', { headDegree: 'more' }))).toMatchObject({
       en: 'the cat sees the house as happier.',
       de: 'der Kater sieht das Haus als glücklicher.',
