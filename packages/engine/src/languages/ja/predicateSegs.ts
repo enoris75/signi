@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import type { JaForm, JaIPN } from './ja.types.js';
 import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
 import { aspectFormSegs } from './aspectFormSegs.js';
@@ -96,7 +97,9 @@ export function predicateSegs(
   const negated = negative === true || groupHasNegativeAdverb(verbPhrase)
     || subjectNegative
     || (directObject !== undefined && isNegativeGroup(directObject))
-    || hasNegativeComplement(complements, { countComparisons: true });
+    || hasNegativeComplement(complements, { countComparisons: true })
+    // A `no` possessor in a complement closes the same circumfix around its phrase (どの男の家でも; A216).
+    || hasNegativePossessorComplement(complements, { countComparisons: true });
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.

@@ -39,8 +39,9 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     core.push(
       ...(isPronominalPossessor(np.possessor)
         ? possessiveJa(np.possessor)
-        // A `no` possessor keeps its も before the の (a separate, unhandled case: どの猫もの本).
-        : [...npSegs(np.possessor), ...(np.possessor.head.forms['definiteness'] === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.post }] : []), { t: 'の' }]),
+        // A `no` possessor writes only its どの here: its も closes the whole phrase, where the phrase's
+        // particle goes (どの猫の本も, see `isNegativeGroup` and `jaParticleSegs`; A216).
+        : [...npSegs(np.possessor), { t: 'の' }]),
     );
   }
   core.push(...detSegs);

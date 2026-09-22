@@ -68,6 +68,13 @@ describe('npSegs', () => {
     expect(text(npSegs(np(HON, {}, { possessor: np(NEKO, {}, { possessor: np(KODOMO) }) })))).toBe('子供の猫の本');
   });
 
+  // A216: a `no` possessor writes its どの and leaves its も to the whole phrase's particle (どの猫の本も),
+  // not before its own の (どの猫もの本).
+  test('a no-determined possessor leads with どの; its も is left to the phrase', () => {
+    expect(text(npSegs(np(HON, {}, { possessor: np(NEKO, { definiteness: 'no' }) })))).toBe('どの猫の本');
+    expect(text(npSegs(np(HON, {}, { possessor: np(IE, {}, { possessor: np(NEKO, { definiteness: 'no' }) }) })))).toBe('どの猫の家の本');
+  });
+
   // A185: a prenominal determiner modifies the nearest noun after it, so この猫の本 would read "this
   // cat's book". The head's own determiner belongs behind the possessor's の.
   test('a possessed head keeps its determiner after the possessor, before the adjectives', () => {

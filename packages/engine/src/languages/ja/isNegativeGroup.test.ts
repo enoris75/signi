@@ -19,4 +19,12 @@ describe('isNegativeGroup', () => {
     expect(isNegativeGroup(group('or', np(NEKO, { definiteness: 'no' }), np(NEZUMI)))).toBe(true);
     expect(isNegativeGroup(el(np(NEKO), np(INU), np(NEZUMI)))).toBe(false);
   });
+
+  // A216: どの犬の猫も — the possessor's どの opens the circumfix, and the whole phrase closes it.
+  test('is true when a conjunct\'s possessor chain is no-determined', () => {
+    expect(isNegativeGroup(el(np(NEKO, {}, { possessor: np(INU, { definiteness: 'no' }) })))).toBe(true);
+    expect(isNegativeGroup(el(np(NEKO, {}, { possessor: np(INU, {}, { possessor: np(NEZUMI, { definiteness: 'no' }) }) })))).toBe(true);
+    expect(isNegativeGroup(el(np(NEKO), np(NEZUMI, {}, { possessor: np(INU, { definiteness: 'no' }) })))).toBe(true);
+    expect(isNegativeGroup(el(np(NEKO, {}, { possessor: np(INU, { definiteness: 'all' }) })))).toBe(false);
+  });
 });

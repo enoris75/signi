@@ -743,9 +743,10 @@ describe('known bugs: Japanese puts the head\'s determiner before its possessor'
 
 // A216. A `no` possessor is a negative word like any other: "la casa di nessun uomo" after the verb
 // obliges the Romance preverbal negator, as "nessuna casa" does ("il gatto non vede la casa di nessun
-// uomo"). Every negation check reads a noun phrase's own determiner and never its possessor's, so the
-// clause stays positive; and Japanese closes the どの…も circumfix on the possessor itself, before its
-// の, over a positive verb (猫はどの男もの家を見ます — the unhandled case npSegs names). Found by the
+// uomo"). Every negation check read a noun phrase's own determiner and never its possessor's, so the
+// clause stayed positive; and Japanese closed the どの…も circumfix on the possessor itself, before its
+// の, over a positive verb (猫はどの男もの家を見ます — the unhandled case npSegs named). The checks now
+// walk the possessor chain too (`possessorIsNegative`). Found by the
 // random phrase "does the hidden hot cow confine little big money through the fault of all no
 // water's parents repeatedly?" (seed 942836): "rinchiude … per colpa di tutti i genitori di
 // nessun'acqua?".
@@ -753,7 +754,7 @@ describe('known bugs: a `no` possessor does not negate its clause', () => {
   const noMansHouse = np('HOUSE', { possessor: np('MAN', { definiteness: 'no' }) });
   const sees = (object: NounPhrase, extra: Parameters<typeof clause>[2] = {}) => sayAll(clause(np('CAT'), 'SEE', { directObject: object, ...extra }));
 
-  test.fails('the Romance negator and the Japanese circumfix take in a `no` possessor', () => {
+  test('the Romance negator and the Japanese circumfix take in a `no` possessor', () => {
     expect(sees(noMansHouse)).toMatchObject({
       it: 'il gatto non vede la casa di nessun uomo.', fr: "le chat ne voit la maison d'aucun homme.",
       es: 'el gato no ve la casa de ningún hombre.', pt: 'o gato não vê a casa de nenhum homem.', ja: '猫はどの男の家も見ません。',
@@ -806,6 +807,45 @@ describe('known bugs: a `no` possessor does not negate its clause', () => {
     });
     // The possessor preverbal, in the subject, needs no negator (A58's own row).
     expect(say(clause(noMansHouse, 'BURN'), 'it')).toBe('la casa di nessun uomo brucia.');
+  });
+
+  test('the other tenses, moods and complements, and a clause already negated, take one negator', () => {
+    expect(sees(noMansHouse, { verbPhrase: { verb: 'SEE', tense: 'past' } })).toMatchObject({
+      it: 'il gatto non vide la casa di nessun uomo.', fr: "le chat ne vit la maison d'aucun homme.",
+      es: 'el gato no vio la casa de ningún hombre.', pt: 'o gato não viu a casa de nenhum homem.', ja: '猫はどの男の家も見ませんでした。',
+    });
+    // A negated verb or NEVER already negates the clause: one negator, and Spanish and Portuguese keep
+    // the preverbal "nunca" alone.
+    expect(sees(noMansHouse, { verbPhrase: { verb: 'SEE', negative: true } })).toMatchObject({
+      it: 'il gatto non vede la casa di nessun uomo.', es: 'el gato no ve la casa de ningún hombre.', pt: 'o gato não vê a casa de nenhum homem.',
+    });
+    expect(sees(noMansHouse, { verbPhrase: { verb: 'SEE', modifier: 'NEVER' } })).toMatchObject({
+      it: 'il gatto non vede mai la casa di nessun uomo.', fr: "le chat ne voit jamais la maison d'aucun homme.",
+      es: 'el gato nunca ve la casa de ningún hombre.', pt: 'o gato nunca vê a casa de nenhum homem.', ja: '猫はどの男の家も決して見ません。',
+    });
+    // Another complement: the も follows the particle in Japanese (どの男の市場へも).
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('MARKET', { possessor: np('MAN', { definiteness: 'no' }) }) } } }))).toMatchObject({
+      it: 'il gatto non va al mercato di nessun uomo.', fr: "le chat ne va au marché d'aucun homme.",
+      es: 'el gato no va al mercado de ningún hombre.', pt: 'o gato não vai ao mercado de nenhum homem.', ja: '猫はどの男の市場へも行きません。',
+    });
+    // The plural command, the instruction and the infinitive read the same gates (A208).
+    expect(sayAll(clause(np('SECOND_PERSON', { number: 'plural' }), 'SEE', { directObject: noMansHouse, imperative: true }))).toMatchObject({
+      it: 'non vedete la casa di nessun uomo.', fr: "ne voyez la maison d'aucun homme.",
+      es: 'no veáis la casa de ningún hombre.', pt: 'não vejam a casa de nenhum homem.',
+    });
+    expect(sayAll(clause(np('SECOND_PERSON'), 'SEE', { directObject: noMansHouse, imperative: true, imperativeRegister: 'instruction' }))).toMatchObject({
+      es: 'no ver la casa de ningún hombre.', pt: 'não ver a casa de nenhum homem.',
+    });
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: noMansHouse, infinitive: true }))).toMatchObject({
+      it: 'non vedere la casa di nessun uomo.', fr: "ne voir la maison d'aucun homme.",
+      es: 'no ver la casa de ningún hombre.', pt: 'não ver a casa de nenhum homem.', ja: 'どの男の家も見ない。',
+    });
+    // A `no` head and a `no` possessor together: one circumfix each opens, one closes.
+    expect(sees(np('HOUSE', { definiteness: 'no', possessor: np('MAN', { definiteness: 'no' }) }))).toMatchObject({
+      it: 'il gatto non vede nessuna casa di nessun uomo.', es: 'el gato no ve ninguna casa de ningún hombre.', ja: '猫はどの男のどの家も見ません。',
+    });
+    // Japanese keeps counting a comparison, as it does for a `no` head (A181).
+    expect(say(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: noMansHouse } } }), 'ja')).toBe('猫はどの男の家のようにも走りません。');
   });
 });
 

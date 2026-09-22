@@ -105,3 +105,56 @@ it reaches English and German, which is the first decision below.
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: a `no` possessor does not negate its clause* (1 `test.fails`, plus a regression test for English, German, a comparison, a `no` head and the Romance subject) |
+
+## Resolved
+
+**2026-09-22.** Took the trial's shape. Two new helpers:
+
+- [`possessorIsNegative(np)`](../../../packages/engine/src/functions/possessorIsNegative.ts) walks a
+  noun phrase's possessor chain for a `no`. It does not read the phrase's own determiner, and a
+  pronominal possessor ends the chain.
+- [`hasNegativePossessorComplement(complements)`](../../../packages/engine/src/functions/hasNegativePossessorComplement.ts)
+  is its complement version. Like `hasNegativeComplement`, it skips a similative `manner` conjunct,
+  and `countComparisons` puts that conjunct back.
+
+They are read beside the existing checks:
+
+- **Romance.** `objectIsNegative` in
+  [`it`](../../../packages/engine/src/languages/it/predicateText.ts),
+  [`es`](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [`pt`](../../../packages/engine/src/languages/pt/predicateText.ts) `predicateText`, and the direct-object
+  term of French's `aucun` gate in [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts),
+  also count a conjunct whose possessor is negative. Each `hasNegativeComplement(complements)` term also
+  reads the complement version. In Spanish and Portuguese that is one local `complementIsNegative`,
+  which the statement's `needsNo` / `needsNao` and A208's `impNeg` / `infNeg` share. The command,
+  the instruction, the infinitive and the relative clause follow because they read the same gates.
+- **Japanese.** [`isNegativeGroup`](../../../packages/engine/src/languages/ja/isNegativeGroup.ts) counts
+  a negative possessor, so `jaParticleSegs` closes the も at the phrase's own particle and the
+  predicate negates. [`npSegs`](../../../packages/engine/src/languages/ja/npSegs.ts) no longer writes
+  the possessor's own も before its の, and [`predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+  adds the complement version, counting comparisons as it does for a `no` head.
+
+**The decisions, as ruled.**
+
+- **English and German were not moved.**
+  [`hasNegativeComplement`](../../../packages/engine/src/functions/hasNegativeComplement.ts) and
+  [`negationSources`](../../../packages/engine/src/functions/negationSources.ts) are unchanged. Their
+  doubled negation beside a negated verb (`the cat does not see no man's house.`) is left as it is,
+  and not pinned.
+- **French with the possessor in the subject** is left as it is (`la maison d'aucun homme brûle.`).
+  The subject's `subjectIsNegative` still reads the head alone. Not pinned.
+- **A mixed-polarity group** negates the clause, as the trial does and as a `no` conjunct already
+  does. Not pinned.
+
+- **Tests:** [`packages/engine/test/possession.test.ts`](../../../packages/engine/test/possession.test.ts)
+  → *known bugs: a `no` possessor does not negate its clause*. The pinning `test.fails` is now a
+  passing `test`, with its assertions unchanged. The regression test is unchanged. A new case covers
+  the past tense; a negated verb and NEVER taking one negator (Spanish and Portuguese keep the
+  preverbal `nunca` alone); a direction complement (`どの男の市場へも行きません`); the plural command, the
+  instruction and the infinitive; a `no` head beside a `no` possessor (`どの男のどの家も`); and the
+  Japanese comparison, which still negates (`どの男の家のようにも走りません`).
+- **Unit tests:** [`possessorIsNegative.test.ts`](../../../packages/engine/src/functions/possessorIsNegative.test.ts)
+  and [`hasNegativePossessorComplement.test.ts`](../../../packages/engine/src/functions/hasNegativePossessorComplement.test.ts)
+  are new. Cases were added to `ja/isNegativeGroup.test.ts` (a negative possessor chain), to
+  `ja/npSegs.test.ts` (the possessor writes only its どの) and to `ja/predicateSegs.test.ts` (a
+  possessor in the object, in a locative and in a comparison negates the verb).

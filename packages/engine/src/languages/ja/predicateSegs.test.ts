@@ -108,6 +108,15 @@ describe('predicateSegs', () => {
     test('a no-determined subject negates the verb', () => {
       expect(text(predicateSegs(vp(TABERU), undefined, undefined, undefined, false, true))).toBe('食べません');
     });
+
+    // A216: a `no` possessor closes the circumfix around its whole phrase, which negates the verb.
+    test('a no-determined possessor in the object or a complement negates the verb', () => {
+      const noDogs = (forms: typeof IE) => np(forms, {}, { possessor: np(INU, { definiteness: 'no' }) });
+      expect(text(predicateSegs(vp(TABERU), el(noDogs(HON)), undefined))).toBe('どの犬の本も食べません');
+      expect(text(predicateSegs(vp(TABERU), undefined, complements({ locative: complement(noDogs(IE)) })))).toBe('どの犬の家でも食べません');
+      // A comparison counts here too, as a `no` head's does (A181).
+      expect(text(predicateSegs(vp(TABERU), undefined, complements({ manner: complement(noDogs(IE)) })))).toBe('どの犬の家のようにも食べません');
+    });
   });
 
   // A150: HAVE with an inanimate owner is the existential ある, its object marked が, not 持つ + を.

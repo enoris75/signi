@@ -8,11 +8,13 @@ import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
+import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -97,11 +99,12 @@ export function predicateText(
   const preInfinitive = modifier?.forms['pre_nonfinite'] === '1' ? modifierText : '';
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
-  // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne".
+  // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne" — and for an
+  // "aucun" possessor in either of the last two ("ne voit la maison d'aucun homme", A216).
   const aucun =
     subjectIsNegative ||
-    (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false) ||
-    hasNegativeComplement(complements);
+    (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false) ||
+    hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched.
