@@ -148,3 +148,58 @@ describe('known bugs: a Japanese na-adjective keeps its な before として (A2
     });
   });
 });
+
+// A231. A225 gave a German predicate ordinal the article and the capital of a nominalised rank, in
+// the gender of what it is said of ("das Haus ist das Erste"). The essive object predicate is the
+// same predication, said of the object, and still takes the undeclined adjective path: "sieht das
+// Haus als erste", where German wants "als das Erste". Found fixing A225.
+describe('known bugs: a German ordinal as an essive object predicate is left bare (A231)', () => {
+  const seesAs = (subject: string, object: string, ordinal: string) =>
+    sayAll(clause(np(subject), 'SEE', { directObject: np(object), complements: { objectPredicative: { phrase: np(ordinal), specifiers: ESSIVE } } }));
+
+  test.fails('the ordinal takes the article and the capital, in the object\'s gender', () => {
+    expect(seesAs('CAT', 'HOUSE', 'FIRST').de).toBe('der Kater sieht das Haus als das Erste.');
+    expect(seesAs('PERSON', 'OPTION', 'SECOND').de).toBe('die Person sieht die Option als die Zweite.');
+  });
+
+  test('regression: the subject predicate (A225) and the other six', () => {
+    expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('FIRST') } } })).de).toBe('das Haus ist das Erste.');
+    expect(sayAll(clause(np('OPTION'), 'BE', { complements: { predicative: { phrase: np('SECOND') } } })).de).toBe('die Option ist die Zweite.');
+    expect(seesAs('CAT', 'HOUSE', 'FIRST')).toMatchObject({
+      en: 'the cat sees the house as first.',
+      it: 'il gatto vede la casa come prima.',
+      fr: 'le chat voit la maison comme première.',
+      es: 'el gato ve la casa como primera.',
+      pt: 'o gato vê a casa como primeira.',
+      ja: '猫は家を第一として見ます。',
+    });
+  });
+});
+
+// A232. The Japanese essive として takes a na-adjective's stem (A224), and drops the degree the
+// adjective was given: "as happier" is 幸せとして, the positive. The factitive branch writes the
+// degree word ahead of the adjective (もっと幸せに), and the other six languages compare it. Found
+// fixing A224.
+describe('known bugs: the Japanese essive drops an adjective head\'s degree (A232)', () => {
+  const seesAs = (adjective: NounPhrase) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective, specifiers: ESSIVE } } }));
+  const makes = (adjective: NounPhrase) =>
+    say(clause(np('CAT'), 'MAKE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective } } }), 'ja');
+
+  test.fails('the degree word stands before the stem, as it does in the factitive', () => {
+    expect(seesAs(np('HAPPY', { headDegree: 'more' })).ja).toBe('猫は家をもっと幸せとして見ます。');
+    expect(seesAs(np('BROWN', { headDegree: 'most' })).ja).toBe('猫は家を最も茶色として見ます。');
+  });
+
+  test('regression: the factitive, the positive essive and the other six', () => {
+    expect(makes(np('HAPPY', { headDegree: 'more' }))).toBe('猫は家をもっと幸せに作ります。');
+    expect(makes(np('HAPPY', { headDegree: 'most' }))).toBe('猫は家を最も幸せに作ります。');
+    expect(seesAs(np('HAPPY')).ja).toBe('猫は家を幸せとして見ます。');
+    expect(seesAs(np('HAPPY', { headDegree: 'more' }))).toMatchObject({
+      en: 'the cat sees the house as happier.',
+      de: 'der Kater sieht das Haus als glücklicher.',
+      it: 'il gatto vede la casa come più felice.',
+      es: 'el gato ve la casa como más feliz.',
+    });
+  });
+});

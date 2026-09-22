@@ -49,7 +49,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing there are none: Parts A and B are both empty).** If
+this writing each open Part A file has its own, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,10 +59,22 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. The last twenty were fixed together on 2026-09-22: A207–A212 and A216–A229, found
-that day by three rounds of random phrases and by the C23–C28 localization sweep. Every defect
-confirmed so far is fixed and listed under **Fixed** below. New ones are filed here as they are
-found — see [`A-must-fix/README.md`](A-must-fix/README.md).
+**Six open**, all filed on 2026-09-22 by the lanes that fixed A207–A229, each met beside its own
+fix: A230 beside A209, A231 beside A225, A232 beside A224, A233 beside A208, A234 beside A216 and
+A235 beside A226. Every one but A231 was given a trial fix on a throwaway copy, which wrote its
+**Want** column.
+
+| # | File | Language | Defect |
+|---|---|---|---|
+| A230 | [A-must-fix/A230-german-no-object-inside-a-negated-prospective.md](A-must-fix/A230-german-no-object-inside-a-negated-prospective.md) | German | a `no` object keeps its "kein" inside a negated prospective (*ist im Begriff, keine Maus zu fressen* for *ist nicht im Begriff, eine Maus zu fressen*): the verb's negation collapses into the object inside the zu-group, which [A209](fixed/A209-german-kein-inside-the-prospective.md) closed for an indefinite object only |
+| A231 | [A-must-fix/A231-german-ordinal-essive-object-predicate.md](A-must-fix/A231-german-ordinal-essive-object-predicate.md) | German | an ordinal as an essive object predicate takes the undeclined adjective path (*sieht das Haus als erste*), where [A225](fixed/A225-german-ordinal-predicate-left-bare.md) gave the subject predicate the article and the capital (*als das Erste*) |
+| A232 | [A-must-fix/A232-japanese-essive-drops-the-degree.md](A-must-fix/A232-japanese-essive-drops-the-degree.md) | Japanese | the essive として drops an adjective head's degree (*幸せとして* for *もっと幸せとして*), which the factitive branch writes |
+| A233 | [A-must-fix/A233-portuguese-negated-reflexive-infinitive.md](A-must-fix/A233-portuguese-negated-reflexive-infinitive.md) | Portuguese | a negated reflexive infinitive or instruction keeps its "-se" after the verb (*não mover-se*), where "não" draws it ahead (*não se mover*) as it draws an object pronoun |
+| A234 | [A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md](A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md) | Spanish, Portuguese | a possessor that has a possessive of its own loses its determiner (*de mi libro* for *de este libro mío*, *de su libro* for *de ningún libro suyo*), where the object keeps both ([A187](fixed/A187-pronominal-possessor-drops-the-head-determiner.md)) |
+| A235 | [A-must-fix/A235-time-under-an-adjective-goes-bare.md](A-must-fix/A235-time-under-an-adjective-goes-bare.md) | English | TIME under an adjective is forced bare as if it named a rate (*runs at other time*), because the measure rule [A226](fixed/A226-measure-manner-loses-its-determiner.md) narrowed takes every measure noun |
+
+Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
+as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

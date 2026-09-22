@@ -464,3 +464,31 @@ describe('known bugs: Spanish and Portuguese impersonal subject of a reflexive v
     }))).toMatchObject({ es: 'el gato ve la casa que se ve.', pt: 'o gato vê a casa que se vê.' });
   });
 });
+
+// A233. Portuguese draws a clitic ahead of a verb that "não" precedes: "não o comer", "não se mova".
+// A reflexive verb's infinitive carries its "-se" in the lexeme's base ("mover-se"), and the negated
+// infinitive and instruction prefix "não" to that base whole, so the clitic stays behind the verb:
+// "não mover-se". Found fixing A208.
+describe('known bugs: a negated Portuguese reflexive infinitive keeps "-se" after the verb (A233)', () => {
+  const pt = (plan: PhrasePlan) => sayAll(plan).pt;
+  const citation = (verb: string, extra: Parameters<typeof clause>[2] = {}) => clause(np('GENERIC_PERSON'), verb, { ...extra, infinitive: true });
+  const instruction = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    clause(np('SECOND_PERSON'), verb, { ...extra, imperative: true, imperativeRegister: 'instruction' });
+
+  test.fails('"não" draws the "se" ahead of the infinitive, as it draws an object pronoun', () => {
+    expect(pt(citation('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toBe('não se mover.');
+    expect(pt(instruction('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toBe('não se mover.');
+    expect(pt(citation('MOVE_ONESELF', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } })))
+      .toBe('não se mover em nenhuma casa.');
+    expect(pt(citation('BECOME', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toBe('não se tornar feliz.');
+  });
+
+  test('regression: the affirmative, an object pronoun, the command, and Spanish and Italian', () => {
+    expect(pt(citation('MOVE_ONESELF'))).toBe('mover-se.');
+    expect(pt(instruction('MOVE_ONESELF'))).toBe('mover-se.');
+    expect(pt(citation('EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }))).toBe('não o comer.');
+    expect(pt(clause(np('SECOND_PERSON'), 'MOVE_ONESELF', { imperative: true, verbPhrase: { negative: true } }))).toBe('não se mova.');
+    expect(sayAll(citation('MOVE_ONESELF', { verbPhrase: { negative: true } }))).toMatchObject({ es: 'no moverse.', it: 'non muoversi.' });
+  });
+});
