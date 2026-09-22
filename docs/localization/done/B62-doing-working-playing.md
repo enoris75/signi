@@ -33,11 +33,15 @@ What the sentence probes showed the seed author:
    n'a besoin pas de la nourriture* — the negator wraps the whole two-word finite instead of its
    first word (*n'a pas besoin*). Italian is unaffected (*non ha bisogno del cibo*). Engine; no bug
    file covers it. Japanese takes 〜ている as a state (男は水を必要としています).
+   **On authoring: "Italian is unaffected" held only for the negation.** The past, the conditional,
+   the imperfect subjunctive and the imperative broke in *both* languages, because each is derived
+   from a stored form by rule and the rule reached the noun (*avere bisognova*, *hai bisogno* as a
+   command). All of it is fixed; see **Done**, 1.
 2. **PLAY_INSTRUMENT is 演奏する, not P09's 弾く**, which is only for strings and keys (a flute is
    吹く); 演奏する plays any instrument (男は楽器を演奏します). French *jouer* takes *de* (*l'homme
    joue de l'instrument*).
 3. **PLAY_GAME's pt *jogar*** (P09) is games and sport; children's play is *brincar*. The gloss
-   below fits both — the seed author picks.
+   below fits both — the seed author picks. Landed on *jogar*, per the P09 ruling.
 4. **DO** reuses MAKE's paradigms in it/fr/es/pt; ja する renders as a plain verb (男は動作をします).
 5. **WORK_NOUN** is a mass noun in English ("work", but "a job") and counts in the others (*un
    lavoro*, *des travaux*); the gloss below does not turn on it.
@@ -189,3 +193,84 @@ authored:
   un'azione a succedere*).
 - **NEED in English and French**: the first multiword Romance lemma in the picker (*avoir besoin*),
   with an infinitive-governed gloss (*être obligé d'avoir des objets*).
+
+## Done
+
+Shipped 2026-09-22. **Seven words seeded** — DO, PLAY_INSTRUMENT, NEED and TRY in
+[verbs/transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts) after MAKE,
+WORK_LABOUR and PLAY_GAME in
+[verbs/intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts) after WORK,
+WORK_NOUN in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts) after USE_NOUN, all six
+verbs in [verbs/nonfinite.ts](../../../packages/backend/src/concepts/verbs/nonfinite.ts) after MAKE
+— **six glosses** authored on them, `isA: 'TRY'` set on RETRY, and the engine taught to keep a
+multiword Romance lemma's noun apart from the verb it is negated and derived on. The paradigms, the
+glosses and the engine change are pinned in
+[packages/engine/test/doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| DO | to cause an action to happen | indurre un'azione a succedere | induire une action à arriver | eine Handlung veranlassen, zu geschehen | inducir una acción a ocurrir | 動作が起こるようにする | induzir uma ação a acontecer |
+| WORK_LABOUR | to act to acquire money | agire per acquisire denaro | agir pour acquérir de l'argent | handeln, um Geld zu erwerben | actuar para adquirir dinero | お金を取得するために行動する | agir para adquirir dinheiro |
+| WORK_NOUN | an action with which one acquires money | un'azione con la quale si acquisisce denaro | une action avec laquelle on acquiert de l'argent | eine Handlung, mit der man Geld erwirbt | una acción con la que se adquiere dinero | お金を取得する動作 | uma ação com a qual se adquire dinheiro |
+| PLAY_GAME | to act to feel joy | agire per provare gioia | agir pour éprouver de la joie | handeln, um Freude zu fühlen | actuar para sentir alegría | 喜びを感じるために行動する | agir para sentir alegria |
+| PLAY_INSTRUMENT | to produce sounds with an object | produrre suoni con un oggetto | produire des sons avec un objet | Geräusche mit einem Gegenstand erzeugen | producir sonidos con un objeto | 物体で音を出す | produzir sons com um objeto |
+| NEED | to be obliged to have objects | essere obbligato ad avere oggetti | être obligé d'avoir des objets | verpflichtet sein, Gegenstände zu haben | estar obligado a tener objetos | 物体を持つことが義務的である | estar obrigado a ter objetos |
+| RETRY (unchanged by the attach) | to start again | iniziare di nuovo | commencer de nouveau | erneut beginnen | empezar de nuevo | もう一度始める | começar de novo |
+
+Every render above is this seed's, re-rendered after the words landed; the **Probe renders** table
+above was the in-memory probe and agrees with it character for character.
+
+What landed differently from the plan:
+
+1. **The French negation is fixed, and Italian was not "unaffected".** The probe saw only the
+   negation, which [fr/predicateText.ts](../../../packages/engine/src/languages/fr/predicateText.ts)
+   now wraps on the verb of a multiword finite — *l'homme **n'a pas besoin** de la nourriture*,
+   where it said *n'a besoin pas*. Three more broke in **both** languages, and are fixed in
+   [mood.ts](../../../packages/engine/src/mood.ts):
+   - the **state's past** (A130's imperfect) was derived on the whole lemma, inflecting the noun:
+     *l'uomo **avere bisognova** del cibo*, *l'homme **avons besoinait***. It is derived on the verb
+     and given its noun back now: *aveva bisogno*, *avait besoin*.
+   - the **conditional** and the **imperfect subjunctive** the same way (*avrò bisognoebbe*,
+     *aurai besoinait*) → *avrebbe bisogno* / *aurait besoin*, *avesse bisogno* / *avait besoin*.
+   - the **imperative** took the indicative (*hai bisogno del cibo*, *as besoin de la nourriture*):
+     *avere* and *avoir* have their own (*abbi*, *aie*), so NEED takes a row in the two override
+     tables — *abbi bisogno*, *aie besoin*, negated *non avere bisogno* and *n'aie pas besoin*.
+   The split itself is three shared helpers beside the engine's other per-verb readings:
+   [lemmaTail.ts](../../../packages/engine/src/functions/lemmaTail.ts) (the noun a lemma carries
+   after its verb, "" for a one-word or pronominal one),
+   [splitLemmaTail.ts](../../../packages/engine/src/functions/splitLemmaTail.ts) and
+   [lemmaHead.ts](../../../packages/engine/src/functions/lemmaHead.ts).
+2. **A French frequency adverb moved inside the lemma too**, since it is the same slot the negation
+   uses: *n'a **jamais** besoin*, *a **toujours** besoin*, *a **bien** besoin* — as French already
+   put it between an auxiliary and its participle (*n'a jamais eu besoin*). **Italian still trails
+   it**: *l'uomo non ha bisogno **mai** del cibo*, want *non ha **mai** bisogno del cibo*. The
+   Italian predicate was no lane's engine area in this batch, so it is pinned as a failing test in
+   `doing-verbs.test.ts` ("known bugs: an Italian multiword finite") for the orchestrator to file.
+3. **DO needed its own imperative rows.** It shares MAKE's *fare* and *hacer*, and their commands
+   are irregular (*fa'*, *haz*) in tables keyed by concept, so DO came out as *fa il lavoro* /
+   *hace el trabajo*. Two rows in `mood.ts`, beside MAKE's, UNDO's and REDO's.
+4. **fare's Italian protasis is wrong, and DO meets it**: *se l'uomo **fasse** il lavoro*, want
+   *facesse* — the Latin stem the "infinitive minus -re" rule hides, which `IT_SUBJ_STEM` already
+   carries for *produrre*. **MAKE's bug, live before this seed**; pinned as a failing test in
+   `doing-verbs.test.ts` ("known bugs: the Italian imperfect subjunctive of fare").
+5. **WORK_NOUN is seeded as a mass noun** (`countable: false`): "work" is English's mass sense (a
+   counted one is "a job"), and the labour sense is mass in the others too (*du travail*, *viel
+   Arbeit*). `countable` is concept-level, so the plural the proposal listed (*travaux*, *lavori*)
+   cannot be seeded beside it; French renders the indefinite as its partitive, *du travail*. The
+   gloss does not turn on it, as the ticket said.
+6. **No `isA` on the six new verbs and WORK_NOUN.** This ticket named none, and the hierarchy earns
+   a level only where a rule needs it. The one attach it does name is P09's: RETRY under TRY, whose
+   own gloss is unchanged by it (the table above).
+7. **TRY ships `synonym: 'attempt'`**, which the proposal did not list: "try" is the attempt here,
+   not the tasting *provare* / *probar* also has. It ships **no gloss**: literal by design, beside
+   DESIRE. One of the five leads is worse than weak — "to desire to act" is WILL's shipped gloss
+   character for character, so `sweep-definitions.test.ts` would reject it as a collision.
+8. **"Needs to run" and "tries to run" still cannot be built.** The engine renders both from a plan
+   (pinned in `doing-verbs.test.ts`), but the builder has no control for an `infinitiveComplement`
+   on a lexical verb: the picker offers an object, an adverb and the complements, and the infinitive
+   is not among them. One control would serve DESIRE, NEED and TRY alike. Not built here — it is a
+   frontend change, and this lane is a seed.
+9. **Coverage landed as three rows** in
+   [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), at the end of the
+   file's `test.describe`. The two-play row lets go of the first tooltip before reading the second,
+   or the `.MuiTooltip-tooltip` locator matches both.

@@ -300,6 +300,8 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
     const IRREGULAR: Record<string, string> = {
       BE: 'fôssemos', GO: 'fôssemos', GIVE: 'déssemos', SEE: 'víssemos', COME: 'viéssemos',
       HAVE: 'tivéssemos', HOLD: 'contivéssemos', MAKE: 'fizéssemos', KNOW: 'soubéssemos', CAN: 'pudéssemos', WILL: 'quiséssemos',
+      // DO is fazer too, as MAKE is (B62).
+      DO: 'fizéssemos',
       // fazer's compounds keep its irregular preterite (B40), and pôr's do the same (B57: dispor).
       UNDO: 'desfizéssemos', REDO: 'refizéssemos', ARRANGE: 'dispuséssemos',
       // dizer's strong preterite (disse, not a regular -eu) takes the open é (B60).

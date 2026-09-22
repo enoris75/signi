@@ -1,5 +1,7 @@
 import type { LanguageCode, Tense } from '@signi/shared';
 import type { ConceptForms, Mood } from './types.js';
+import { lemmaHead } from './functions/lemmaHead.js';
+import { lemmaTail } from './functions/lemmaTail.js';
 
 /**
  * Conditional / imperfect-subjunctive verb forms for the hypothetical conditional, derived
@@ -128,10 +130,26 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
  * The present subjunctive is Spanish and Portuguese only (see `presentSubjunctiveForm`).
  */
 export function moodForm(lang: LanguageCode, verb: ConceptForms, pn: PN, mood: Mood | undefined): string | undefined {
-  if (mood === 'conditional') return conditionalForm(lang, verb, pn);
-  if (mood === 'subjunctive') return subjunctiveForm(lang, verb, pn);
-  if (mood === 'presentSubjunctive') return presentSubjunctiveForm(lang, verb, pn);
-  return undefined;
+  return onLemmaHead(verb, (v) => {
+    if (mood === 'conditional') return conditionalForm(lang, v, pn);
+    if (mood === 'subjunctive') return subjunctiveForm(lang, v, pn);
+    if (mood === 'presentSubjunctive') return presentSubjunctiveForm(lang, v, pn);
+    return undefined;
+  });
+}
+
+/**
+ * A form derived from a stored stem, derived on the verb of a multiword lemma alone and given its
+ * noun back after: avere bisogno → "aveva bisogno", "avrebbe bisogno", "avesse bisogno"; avoir besoin →
+ * "avait besoin", "aurait besoin" (NEED, localization B62). Derived on the whole lemma, the rules
+ * above would inflect the noun ("avere bisognova", "avons besoinait"). A one-word lemma is derived as
+ * it always was.
+ */
+function onLemmaHead(verb: ConceptForms, derive: (verb: ConceptForms) => string | undefined): string | undefined {
+  const tail = lemmaTail(verb);
+  if (!tail) return derive(verb);
+  const form = derive(lemmaHead(verb));
+  return form === undefined ? undefined : `${form} ${tail}`;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -216,7 +234,7 @@ function imperfectForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string |
  */
 export function statePastForm(lang: LanguageCode, verb: ConceptForms, pn: PN, tense: Tense | undefined, mood: Mood | undefined): string | undefined {
   if (verb.forms['stative'] !== '1' || tense !== 'past' || (mood !== undefined && mood !== 'indicative')) return undefined;
-  return imperfectForm(lang, verb, pn);
+  return onLemmaHead(verb, (v) => imperfectForm(lang, v, pn));
 }
 
 /** Person-number key ("1sg".."3pl") from a resolved subject/head's forms. */
@@ -304,6 +322,7 @@ const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   LEAVE: { '2sg': 'sal' },                                     // salir: sal (salgamos / salid are regular)
   // hacer and its compounds take the short tú command, not the 3sg "hace" (B40): haz, deshaz, rehaz.
   MAKE: { '2sg': 'haz' },                                      // hacer
+  DO: { '2sg': 'haz' },                                        // hacer, DO's verb too (B62)
   UNDO: { '2sg': 'deshaz' },                                   // deshacer
   REDO: { '2sg': 'rehaz' },                                    // rehacer
 };
@@ -314,6 +333,9 @@ const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   // The tu command of the short -are verbs is not their 3sg indicative (dà / fa / va).
   GIVE: { '2sg': "da'" },                                        // dare: da'
   MAKE: { '2sg': "fa'" },                                        // fare: fa'
+  DO: { '2sg': "fa'" },                                          // fare, DO's verb too (B62)
+  // A multiword lemma commands with its verb's imperative, and keeps its noun (B62).
+  NEED: { '2sg': 'abbi bisogno', '1pl': 'abbiamo bisogno', '2pl': 'abbiate bisogno' }, // avere bisogno
   GO:   { '2sg': "va'" },                                        // andare: va'
 };
 // French imperative is a single paradigm (negation only wraps it), so one override table.
@@ -322,6 +344,8 @@ const FR_IMP_OVERRIDE: Record<string, Record<IPN, string>> = {
   KNOW: { '2sg': 'sache', '1pl': 'sachons', '2pl': 'sachez' }, // savoir
   HAVE: { '2sg': 'aie', '1pl': 'ayons', '2pl': 'ayez' },       // avoir
   GO:   { '2sg': 'va', '1pl': 'allons', '2pl': 'allez' },      // aller
+  // A multiword lemma commands with its verb's imperative, and keeps its noun (B62).
+  NEED: { '2sg': 'aie besoin', '1pl': 'ayons besoin', '2pl': 'ayez besoin' }, // avoir besoin
 };
 
 /**

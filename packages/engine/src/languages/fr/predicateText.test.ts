@@ -355,4 +355,49 @@ describe('predicateText', () => {
       expect(predicateText(TU, vp(CLIQUER, { mood: 'imperative' }), el(np(JE)))).toBe('clique sur moi');
     });
   });
+
+  // NEED's lemma is avoir besoin (B62): every finite form carries the noun, and the negation and a
+  // frequency or short adverb go between the verb and the noun, as between an auxiliary and its
+  // participle.
+  describe('a multiword lemma: avoir besoin (B62)', () => {
+    const AVOIR_BESOIN: Forms = {
+      base: 'avoir besoin', object_prep: 'de', stative: '1', participle: 'eu besoin',
+      '1sg_present': 'ai besoin', '2sg_present': 'as besoin', '3sg_present': 'a besoin', '1pl_present': 'avons besoin',
+      '3sg_past': 'eut besoin', '1sg_future': 'aurai besoin', '3sg_future': 'aura besoin',
+    };
+    const food = el(np(NOURRITURE));
+    const need = (extra: Parameters<typeof vp>[1] = {}) => vp(AVOIR_BESOIN, extra, 'NEED');
+
+    test('the negation wraps the verb, not the verb and its noun', () => {
+      expect(predicateText(CHAT, need(), food)).toBe('a besoin de la nourriture');
+      expect(predicateText(CHAT, need({ negative: true }), food)).toBe("n'a pas besoin de la nourriture");
+      expect(predicateText(JE, need({ negative: true }), food)).toBe("n'ai pas besoin de la nourriture");
+      expect(predicateText(CHAT, need({ tense: 'future', negative: true }), food)).toBe("n'aura pas besoin de la nourriture");
+    });
+
+    test('a frequency adverb and "bien" go between the verb and its noun', () => {
+      expect(predicateText(CHAT, need({ modifier: concept(TOUJOURS) }), food)).toBe('a toujours besoin de la nourriture');
+      expect(predicateText(CHAT, need({ modifier: concept(JAMAIS) }), food)).toBe("n'a jamais besoin de la nourriture");
+      expect(predicateText(CHAT, need({ modifier: concept(TOUJOURS), negative: true }), food)).toBe("n'a pas toujours besoin de la nourriture");
+      expect(predicateText(CHAT, need({ modifier: concept({ base: 'bien', pre_nonfinite: '1' }) }), food)).toBe('a bien besoin de la nourriture');
+    });
+
+    test('a compound tense and a modal negate their own finite, as for any verb', () => {
+      expect(predicateText(CHAT, need({ aspect: 'resultative', negative: true }), food)).toBe("n'a pas eu besoin de la nourriture");
+      expect(predicateText(CHAT, need({ aspect: 'resultative', modifier: concept(JAMAIS) }), food)).toBe("n'a jamais eu besoin de la nourriture");
+      expect(predicateText(CHAT, need({ modals: [modal(DEVOIR)], negative: true }), food)).toBe('ne doit pas avoir besoin de la nourriture');
+    });
+
+    // The state's imparfait and the conditional are derived on "avoir" and keep the noun (mood.ts).
+    test('the derived moods keep the noun after the verb', () => {
+      expect(predicateText(CHAT, need({ tense: 'past', negative: true }), food)).toBe("n'avait pas besoin de la nourriture");
+      expect(predicateText(CHAT, need({ mood: 'conditional' }), food)).toBe('aurait besoin de la nourriture');
+    });
+
+    test('a command takes avoir\'s imperative, inside ne … pas', () => {
+      expect(predicateText(TU, need({ mood: 'imperative' }), food)).toBe('aie besoin de la nourriture');
+      expect(predicateText(TU, need({ mood: 'imperative', negative: true }), food)).toBe("n'aie pas besoin de la nourriture");
+      expect(predicateText(TU, need({ mood: 'imperative', modifier: concept(JAMAIS) }), food)).toBe("n'aie jamais besoin de la nourriture");
+    });
+  });
 });

@@ -4724,6 +4724,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09's work, the noun (localization B62): labour, the noun of WORK_LABOUR — "the man does the
+    // work". A mass noun, as English "work" is (a counted one is "a job"), and as the others say it
+    // in this sense: il lavoro, du travail, Arbeit, trabajo, 仕事, trabalho. Glossed from the noun's
+    // end of WORK_LABOUR's ACQUIRE + MONEY, on the instrument gap EYE stands on, so neither names the
+    // other.
+    id: 'WORK_NOUN',
+    role: 'noun',
+    description: 'labour; what one does for a living',
+    definition: instrumentGloss('ACTION', 'ACQUIRE', 'MONEY'),
+    emoji: '💼',
+    countable: false,
+    forms: {
+      en: { base: 'work', count: 'singular' },
+      it: { base: 'lavoro', gender: 'masc', count: 'singular' },
+      fr: { base: 'travail', gender: 'masc', count: 'singular' },
+      de: { base: 'Arbeit', gender: 'fem', count: 'singular' },
+      es: { base: 'trabajo', gender: 'masc', count: 'singular' },
+      ja: { base: '仕事', count: 'singular', reading: 'しごと' },
+      pt: { base: 'trabalho', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // What a thing is made of. French "matériau" (a material to build with), not "matériel" (equipment).
     // Glossed "substance with which one makes an object" (localization C26): SUBSTANCE is matter,
     // and a material is the substance a thing is made *with* — the instrument gap, bare because
