@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (none,
-as of this writing — Part A and Part B are both empty).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
+this writing each open Part A file has its own, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,21 +59,42 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Seven open**. A206 and A207 were filed on 2026-09-22 while authoring the localization sweep, and
+**Twenty open**. A206 and A207 were filed on 2026-09-22 while authoring the localization sweep, and
 both are about the article or the agreement a *definition* renders — the surface that exercises
-bare objects and generic subjects harder than any clause a user builds. A208 was found the same day
-by rendering twenty random phrases, and A209–A212 by a second round of twenty once the generator
-coordinated noun groups — three of the four are about a group.
+bare objects and generic subjects harder than any clause a user builds; A206 was fixed the same day,
+with [A213](fixed/A213-italian-passive-si-compound-participle.md) beside it, when C23's headless
+relative gloss put a feminine and a plural antecedent under the impersonal *si* / *se*. A208 was
+found the same day by rendering twenty random phrases, A209–A212 by a second round of twenty once the
+generator coordinated noun groups — three of the four are about a group — and A216 and A217 by a
+third, once it reached the subordinate clauses. A218–A229 were filed the same day from the C23–C28
+sweep, defects its authors met outside their own lanes, each reproduced and given a trial fix. Four
+are a preposition or a particle that belongs to a noun or a verb and that no lexeme can name yet
+(A218, A220, A223, A228); the rest are the preposition before a bare noun (A219), a word order
+(A221, A229), a modal governing an infinitive (A222), an adjective's form (A224, A225), a lost
+determiner (A226) and an elision (A227).
 
 | # | File | Language | Defect |
 |---|---|---|---|
-| A206 | [A-must-fix/A206-portuguese-impersonal-se-plural-object.md](A-must-fix/A206-portuguese-impersonal-se-plural-object.md) | Portuguese | the impersonal *se* stays singular before a plural object (*se faz frases*), where [A73](fixed/A73-impersonal-se-plural-object.md) agreed Italian and Spanish and left Portuguese out by name |
 | A207 | [A-must-fix/A207-french-bare-singular-count-object.md](A-must-fix/A207-french-bare-singular-count-object.md) | French | a bare singular **count** object takes the mass partitive (*changer de la taille*), where French wants the definite — [A149](fixed/A149-french-object-zero-article.md)'s rule does not look at countability |
 | A208 | [A-must-fix/A208-spanish-portuguese-command-drops-complement-concord.md](A-must-fix/A208-spanish-portuguese-command-drops-complement-concord.md) | Spanish, Portuguese | a negative complement does not negate a command, an instruction or an infinitive (*corre en ninguna casa* for *no corras en ninguna casa*): the three moods build their own gate without [A33](fixed/A33-romance-complement-negative-concord.md)'s complement term |
 | A209 | [A-must-fix/A209-german-kein-inside-the-prospective.md](A-must-fix/A209-german-kein-inside-the-prospective.md) | German | [A182](fixed/A182-german-nicht-with-an-indefinite-object.md)'s "kein" carries the prospective's negation into the zu-group (*ist im Begriff, keine Maus zu fressen* for *ist nicht im Begriff, eine Maus zu fressen*), undoing [A19](fixed/A19-german-prospective-aspect-negation.md) for an indefinite object or predicate noun |
 | A210 | [A-must-fix/A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md](A-must-fix/A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md) | English, German | an "or" group agrees with its last conjunct even when the verb comes first, in a question and German's inverted clauses (*does the cats or the dog run?*, *läuft die Kater oder der Hund?*) |
 | A211 | [A-must-fix/A211-german-animal-group-eats-with-essen.md](A-must-fix/A211-german-animal-group-eats-with-essen.md) | German | a coordinated subject of animals takes *essen* (*der Kater und der Hund essen*): the group agreement [A157](fixed/A157-german-animals-fressen.md)'s sense reads carries no `animal` |
 | A212 | [A-must-fix/A212-german-nicht-before-a-coordinated-pronoun.md](A-must-fix/A212-german-nicht-before-a-coordinated-pronoun.md) | German | a coordinated object holding a pronoun stays behind "nicht" and the adverb (*frisst nicht schnell ihn und den Hund*), where [A191](fixed/A191-german-nicht-and-adverb-before-a-definite-object.md) moves a group of known nouns ahead |
+| A216 | [A-must-fix/A216-no-possessor-does-not-negate-its-clause.md](A-must-fix/A216-no-possessor-does-not-negate-its-clause.md) | Italian, French, Spanish, Portuguese, Japanese | a `no` possessor is not read as a negation: Romance leaves the clause positive (*il gatto vede la casa di nessun uomo*), and Japanese closes どの…も on the possessor over a positive verb (*どの男もの家を見ます*) |
+| A217 | [A-must-fix/A217-japanese-have-an-animate-possession-with-aru.md](A-must-fix/A217-japanese-have-an-animate-possession-with-aru.md) | Japanese | HAVE with an inanimate owner says an animate possession with ある (*家は猫があります*): [A150](fixed/A150-japanese-inanimate-owner-aru.md)'s existential takes its verb from the owner's animacy, not the possessed's |
+| A218 | [A-must-fix/A218-german-ort-takes-an-and-von.md](A-must-fix/A218-german-ort-takes-an-and-von.md) | German | *Ort*, *Ende*, *Ziel* and *Ausgangspunkt* take the "in"/"aus" of a place one is inside (*in allen Orten*, *aus einem Ort*, *ein Ort, in dem man wohnt*) where they want "an"/"von"; eight shipped definitions say it |
+| A219 | [A-must-fix/A219-french-bare-singular-after-dans.md](A-must-fix/A219-french-bare-singular-after-dans.md) | French | a bare singular locative follows "dans" with no article (*dans groupe*), where French writes *en groupe*, and a mass noun *dans de l'eau*; [A196](fixed/A196-french-bare-plural-after-a-preposition.md) left the singular behind |
+| A220 | [A-must-fix/A220-japanese-direction-noun-locative-takes-de.md](A-must-fix/A220-japanese-direction-noun-locative-takes-de.md) | Japanese | a direction noun as a locative takes the place's で (*反対の方向で走ります*, BACKWARDS's gloss) where it wants に; the particle is the noun's, and only a verb can name one today |
+| A221 | [A-must-fix/A221-italian-french-place-relative-ends-on-a-bare-copula.md](A-must-fix/A221-italian-french-place-relative-ends-on-a-bare-copula.md) | Italian, French | a place relative whose predicate is the bare copula keeps SV and ends on it (*un luogo dove il gatto è*, *la maison où le chat est brûle*), where both invert (*dov'è il gatto*, *où est le chat*) |
+| A222 | [A-must-fix/A222-modal-as-the-verb-that-governs-an-infinitive.md](A-must-fix/A222-modal-as-the-verb-that-governs-an-infinitive.md) | Japanese, German, English | a modal heading a clause that governs an infinitive is rendered as a lexical governor (*行動することをたい*, *wollen, zu handeln*, *to can to act*) rather than as the modal chain it is (*行動したい*, *handeln wollen*, *to be able to act*) |
+| A223 | [A-must-fix/A223-german-inanimate-terminus-of-give-and-connect.md](A-must-fix/A223-german-inanimate-terminus-of-give-and-connect.md) | German | GIVE and CONNECT take [A16](fixed/A16-german-inanimate-terminus-dative.md)'s "in" + accusative for a thing (*gibt den Wert in die Option*, *verbindet den Knoten in einen anderen Knoten*), where GIVE's terminus is a dative whatever it is and CONNECT, like LINK, joins *mit* |
+| A224 | [A-must-fix/A224-japanese-na-adjective-before-toshite.md](A-must-fix/A224-japanese-na-adjective-before-toshite.md) | Japanese | a na- or の-adjective keeps its link before the essive として (*有効なとして*, *茶色のとして*), where the stem takes it (*有効として*) as the factitive branch already cuts it |
+| A225 | [A-must-fix/A225-german-ordinal-predicate-left-bare.md](A-must-fix/A225-german-ordinal-predicate-left-bare.md) | German | an ordinal as a predicate takes a predicate adjective's bare form (*der Kater ist erste*), where German says the rank with the article and a capital in the subject's gender (*der Erste*, *die Erste*, *die Ersten*) |
+| A226 | [A-must-fix/A226-measure-manner-loses-its-determiner.md](A-must-fix/A226-measure-manner-loses-its-determiner.md) | English, Italian, French, German, Spanish, Portuguese, Japanese | an adjective-modified measure adverbial is forced bare whatever its determiner, not only under the definite the rule is for: *at other time* for *at another time*, and "no" goes with its negation (*runs at other time* for *runs at no other time*) |
+| A227 | [A-must-fix/A227-french-no-elision-before-an-h-muet-verb.md](A-must-fix/A227-french-no-elision-before-an-h-muet-verb.md) | French | *je*, *ne* and *de* do not elide before *habiter* (*je habite*, *ne habite pas*, *capable de habiter*): the verb side tests the first letter, and no verb lexeme can say `elides` as a noun's does |
+| A228 | [A-must-fix/A228-italian-via-under-a-verb-with-no-goal.md](A-must-fix/A228-italian-via-under-a-verb-with-no-goal.md) | Italian | [A153](fixed/A153-italian-animate-source-reads-as-goal.md)'s "via" on an animate source reaches a verb that takes no goal, REMOVE, and lands before the relative pronoun (*un animale via dal quale si sono rimossi testicoli*) |
+| A229 | [A-must-fix/A229-german-dative-pronoun-trails-the-object.md](A-must-fix/A229-german-dative-pronoun-trails-the-object.md) | German | a dative pronoun trails a noun object (*gibt das Buch ihm*, *zeigt das Buch mir*), because `splitDative` reads the pronoun's raw forms and not [A203](fixed/A203-pronoun-in-the-other-complements.md)'s animate `tonicHeadForms` |
 
 Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
 as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
@@ -316,6 +337,8 @@ is listed under **Fixed** below.
 | A203 | [A203-pronoun-in-the-other-complements.md](fixed/A203-pronoun-in-the-other-complements.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-22 |
 | A204 | [A204-spanish-portuguese-new-after-the-noun.md](fixed/A204-spanish-portuguese-new-after-the-noun.md) | Spanish, Portuguese (corpus + engine) | 2026-09-22 |
 | A205 | [A205-feminine-plural-tonic-pronoun.md](fixed/A205-feminine-plural-tonic-pronoun.md) | French, Spanish, Portuguese (corpus + translator) | 2026-09-22 |
+| A206 | [A206-portuguese-impersonal-se-plural-object.md](fixed/A206-portuguese-impersonal-se-plural-object.md) | Portuguese | 2026-09-22 |
+| A213 | [A213-italian-passive-si-compound-participle.md](fixed/A213-italian-passive-si-compound-participle.md) | Italian | 2026-09-22 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

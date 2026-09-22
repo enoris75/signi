@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A possessor is a full noun phrase in the genitive, and recursive. It is the one noun slot that
@@ -738,5 +738,105 @@ describe('known bugs: Japanese puts the head\'s determiner before its possessor'
     expect(bookOf('no', hers)).toBe('彼女のどの本も燃えません。');
     expect(say(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { definiteness: 'all', possessor: np('CAT') }) }), 'ja'))
       .toBe('犬は猫のすべての本を見ます。');
+  });
+});
+
+// A216. A `no` possessor is a negative word like any other: "la casa di nessun uomo" after the verb
+// obliges the Romance preverbal negator, as "nessuna casa" does ("il gatto non vede la casa di nessun
+// uomo"). Every negation check reads a noun phrase's own determiner and never its possessor's, so the
+// clause stays positive; and Japanese closes the どの…も circumfix on the possessor itself, before its
+// の, over a positive verb (猫はどの男もの家を見ます — the unhandled case npSegs names). Found by the
+// random phrase "does the hidden hot cow confine little big money through the fault of all no
+// water's parents repeatedly?" (seed 942836): "rinchiude … per colpa di tutti i genitori di
+// nessun'acqua?".
+describe('known bugs: a `no` possessor does not negate its clause', () => {
+  const noMansHouse = np('HOUSE', { possessor: np('MAN', { definiteness: 'no' }) });
+  const sees = (object: NounPhrase, extra: Parameters<typeof clause>[2] = {}) => sayAll(clause(np('CAT'), 'SEE', { directObject: object, ...extra }));
+
+  test.fails('the Romance negator and the Japanese circumfix take in a `no` possessor', () => {
+    expect(sees(noMansHouse)).toMatchObject({
+      it: 'il gatto non vede la casa di nessun uomo.', fr: "le chat ne voit la maison d'aucun homme.",
+      es: 'el gato no ve la casa de ningún hombre.', pt: 'o gato não vê a casa de nenhum homem.', ja: '猫はどの男の家も見ません。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: noMansHouse } } }))).toMatchObject({
+      it: 'il gatto non corre nella casa di nessun uomo.', fr: "le chat ne court dans la maison d'aucun homme.",
+      es: 'el gato no corre en la casa de ningún hombre.', pt: 'o gato não corre na casa de nenhum homem.', ja: '猫はどの男の家でも走りません。',
+    });
+    // A possessor's possessor, a command and a relative clause.
+    expect(sees(np('BOOK', { possessor: np('HOUSE', { possessor: np('MAN', { definiteness: 'no' }) }) }))).toMatchObject({
+      it: 'il gatto non vede il libro della casa di nessun uomo.', es: 'el gato no ve el libro de la casa de ningún hombre.', ja: '猫はどの男の家の本も見ません。',
+    });
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: noMansHouse }), imperative: true })).toMatchObject({
+      it: 'non vedere la casa di nessun uomo.', fr: "ne vois la maison d'aucun homme.",
+      es: 'no veas la casa de ningún hombre.', pt: 'não veja a casa de nenhum homem.', ja: 'どの男の家も見るな。',
+    });
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: noMansHouse } }), 'RUN'))).toMatchObject({
+      it: 'il cane che non vede la casa di nessun uomo corre.', fr: "le chien qui ne voit la maison d'aucun homme court.",
+      es: 'el perro que no ve la casa de ningún hombre corre.', pt: 'o cão que não vê a casa de nenhum homem corre.', ja: 'どの男の家も見ない犬は走ります。',
+    });
+    // Japanese on the subject, and French beside a negated verb, which "aucun" leaves without "pas".
+    expect(say(clause(noMansHouse, 'BURN'), 'ja')).toBe('どの男の家も燃えません。');
+    expect(sees(noMansHouse, { verbPhrase: { verb: 'SEE', negative: true } })).toMatchObject({
+      fr: "le chat ne voit la maison d'aucun homme.", ja: '猫はどの男の家も見ません。',
+    });
+    // The random phrase that found it.
+    expect(sayAll({
+      subject: np('COW', { adjectives: ['HIDDEN', 'HOT'] }),
+      verbPhrase: { verb: 'CONFINE', modifier: 'REPEATEDLY' },
+      directObject: np('MONEY', { definiteness: 'few', adjectives: ['BIG'] }),
+      complements: {
+        cause: { phrase: np('PARENT', { definiteness: 'all', possessor: np('WATER', { definiteness: 'no' }) }), specifiers: [{ kind: 'sentiment', value: 'negative' }] },
+      },
+      interrogative: true,
+    })).toMatchObject({
+      it: "la mucca nascosta e calda non rinchiude ripetutamente poco grande denaro per colpa di tutti i genitori di nessun'acqua?",
+      es: '¿la vaca oculta y caliente no encierra repetidamente poco dinero grande por culpa de todos los progenitores de ninguna agua?',
+      pt: 'a vaca oculta e quente não encarcera repetidamente pouco dinheiro grande por culpa de todos os progenitores de nenhuma água?',
+    });
+  });
+
+  test('regression: English and German need no concord, a comparison stays positive, and a `no` head already negates', () => {
+    expect(sees(noMansHouse)).toMatchObject({ en: "the cat sees no man's house.", de: 'der Kater sieht das Haus keines Mannes.' });
+    // A comparison licenses its own negative word (A181).
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: noMansHouse } } }))).toMatchObject({
+      it: 'il gatto corre come la casa di nessun uomo.', es: 'el gato corre como la casa de ningún hombre.',
+    });
+    expect(sees(np('HOUSE', { definiteness: 'no' }))).toMatchObject({
+      it: 'il gatto non vede nessuna casa.', es: 'el gato no ve ninguna casa.', ja: '猫はどの家も見ません。',
+    });
+    // The possessor preverbal, in the subject, needs no negator (A58's own row).
+    expect(say(clause(noMansHouse, 'BURN'), 'it')).toBe('la casa di nessun uomo brucia.');
+  });
+});
+
+// A217. HAVE with an inanimate owner is the existential (A150): 家は壁があります, the thing possessed
+// marked が. The existential verb follows what exists, which under HAVE is the thing possessed:
+// ある for a thing, いる for a person or an animal (家には猫がいます). The engine keeps ある whatever the
+// possessed noun is, because the choice reads the subject's animacy, and a possessive existential's
+// owner is inanimate by definition. Found by the random phrase "the hot phrase has the cats again."
+// (seed 942845): 熱いフレーズは猫がもう一度あります。
+describe('known bugs: Japanese HAVE says an animate possession with ある', () => {
+  const houseHas = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('HOUSE'), 'HAVE', { directObject: object, verbPhrase }), 'ja');
+
+  test.fails('a person or an animal is had with いる', () => {
+    expect(houseHas(np('CAT'))).toBe('家は猫がいます。');
+    expect(houseHas(np('CAT', { number: 'plural', definiteness: 'bare' }), { tense: 'past', negative: true })).toBe('家は猫がいませんでした。');
+    expect(houseHas(np('PERSON', { definiteness: 'indefinite' }), { modals: ['MUST'] })).toBe('家は人がいる必要があります。');
+    expect(say(clause(np('DOG'), 'RUN', { condition: clause(np('HOUSE'), 'HAVE', { directObject: np('CAT') }) }), 'ja'))
+      .toBe('もし家に猫がいたら、犬は走ります。');
+    expect(say(clause(np('CAT', { relative: { headRole: 'directObject', subject: np('HOUSE'), verbPhrase: { verb: 'HAVE' } } }), 'RUN'), 'ja'))
+      .toBe('家にいる猫は走ります。');
+    // The random phrase that found it.
+    expect(say(clause(np('PHRASE', { adjectives: ['HOT'], adjectiveDegrees: ['positive'] }), 'HAVE', {
+      directObject: np('CAT', { number: 'plural', definiteness: 'definite' }), verbPhrase: { modifier: 'AGAIN' },
+    }), 'ja')).toBe('熱いフレーズは猫がもう一度います。');
+  });
+
+  test('regression: a thing is had with ある, an animate owner keeps 持つ, and BE already chooses', () => {
+    expect(houseHas(np('WALL'))).toBe('家は壁があります。');
+    expect(say(clause(np('CAT'), 'HAVE', { directObject: np('BOOK') }), 'ja')).toBe('猫は本を持っています。');
+    expect(say(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('猫は家にいます。');
+    expect(say(clause(np('HOUSE'), 'HAVE', { directObject: np('CAT') }), 'en')).toBe('the house has the cat.');
   });
 });
