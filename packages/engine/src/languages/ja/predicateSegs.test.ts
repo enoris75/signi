@@ -44,6 +44,17 @@ describe('predicateSegs', () => {
       const elided = { type: 'locative' as const, complement: complement(np(IE)) };
       expect(text(predicateSegs(vp(DESU, { negative: true, elided }), undefined, undefined, undefined, false, false, true))).toBe('いません');
     });
+
+    // Localization B67: an adverb of place is where the subject is, so it takes the existential's に
+    // too; any other verb keeps the adverb's own で.
+    test('an adverb of place takes its に form', () => {
+      const here = concept({ base: 'ここで', subtype: 'place', locative_ni: 'ここに' });
+      expect(text(predicateSegs(vp(DESU, { modifier: here }), undefined, undefined, undefined, false, false, true))).toBe('ここにいます');
+      expect(text(predicateSegs(vp(DESU, { modifier: here }), undefined, undefined))).toBe('ここにあります');
+      expect(text(predicateSegs(vp(DESU, { modifier: here }), undefined, undefined, undefined, true, false, true))).toBe('ここにいる');
+      expect(text(predicateSegs(vp(TABERU, { modifier: here }), undefined, undefined))).toBe('ここで食べます');
+      expect(text(predicateSegs(vp(DESU, { modifier: here }), undefined, careful))).toBe('ここで慎重です');
+    });
   });
 
   describe('tense and polarity', () => {

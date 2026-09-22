@@ -42,9 +42,12 @@ export const VOWEL_START = /^[aeiouéèêëàâîïôùûüœæ]/i;
 // taille"). HIGH ("haut") stays after the noun: it is not a BAGS adjective ("une tour haute").
 // The ordinals join them: an ordinal precedes its noun in French ("le premier père", "la
 // deuxième fois"), whatever its "BAGS" membership. So does OTHER ("un autre chat").
+// SAME and the final LAST precede for their sense (localization B66): after the noun, "le jour même"
+// is the day itself and "le jour dernier" the previous one, which is LAST_PREVIOUS ("la semaine
+// dernière") and follows the noun, as NEXT_COMING's "la semaine prochaine" does.
 export const PRENOMINAL = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD', 'OTHER',
+  'FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL',
 ]);
 
 // The verbs whose present-participle stem the "nous" present rule misses (see `presentParticiple`).

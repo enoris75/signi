@@ -6,6 +6,7 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isSeemingPredicateNoun } from '../../functions/isSeemingPredicateNoun.js';
+import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
@@ -63,10 +64,13 @@ export function complementsPhrase(
       // or tired" and "becomes a legend and an icon" both fall out of the same map).
       // A seeming verb takes a predicate noun only through the infinitival copula — "seems to be a
       // legend", not the archaic "seems a legend" — which then carries the whole group ("seems to be
-      // tired and a legend"). BECOME and BE keep the bare noun; an adjective alone stays bare.
+      // tired and a legend"). BECOME and BE keep the bare noun; an adjective alone stays bare,
+      // unless it keeps its article as a predicate: "is the same" (see `takesPredicateArticle`).
       if (type === 'predicative') {
         const predicate = coordinate(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),
+          np.head.forms['role'] !== 'adjective' ? npText(np)
+            : takesPredicateArticle(np.head) ? `the ${enAdj(np.head)}`
+            : enAdj(np.head),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }

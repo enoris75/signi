@@ -37,11 +37,15 @@ export const PRENOMINAL_QUALIFYING = new Set([
 
 /**
  * The determiner-like adjectives that precede the noun: an ordinal ("il primo padre", "la seconda
- * volta") and OTHER ("un altro gatto"). They do not qualify the noun, so they do not compete for
- * the one qualifying slot above and stand in front of it — "un altro grande topo", "il primo
- * grande gatto".
+ * volta"), OTHER ("un altro gatto"), SAME ("lo stesso giorno") and the final LAST ("l'ultimo
+ * giorno"). They do not qualify the noun, so they do not compete for the one qualifying slot above
+ * and stand in front of it — "un altro grande topo", "il primo grande gatto".
+ *
+ * Their position is their sense for the last two: after the noun, "il giorno stesso" is the day
+ * itself and "il giorno ultimo" is not said, where "la settimana scorsa" (LAST_PREVIOUS) and "la
+ * settimana prossima" (NEXT_COMING) follow it as any adjective does (localization B66).
  */
-export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
+export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL']);
 
 /** Every adjective that can precede the noun, of either kind. */
 export const PRENOMINAL = new Set([...PRENOMINAL_DETERMINER, ...PRENOMINAL_QUALIFYING]);

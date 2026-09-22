@@ -293,6 +293,10 @@ export const adverbs: ConceptSeed[] = [
     // adverb of place, which follows the object as a locative complement does ("mange la souris
     // partout", "come el ratón en todas partes"), where a manner adverb would lead it. Glossed as
     // exactly that locative, "in all places" (localization C25).
+    //
+    // Being somewhere is a locative too, so BE takes estar with it ("está en todas partes"), and
+    // Japanese says the place with the に its verb gives a place where it gives one: `locative_ni`,
+    // どこにでもいます, どこにでも住みます, beside どこでも食べます (localization B67).
     id: 'EVERYWHERE',
     role: 'adverb',
     description: 'in every place',
@@ -304,8 +308,45 @@ export const adverbs: ConceptSeed[] = [
       fr: { base: 'partout', subtype: 'place' },
       de: { base: 'überall', subtype: 'place' },
       es: { base: 'en todas partes', subtype: 'place' },
-      ja: { base: 'どこでも', subtype: 'place' },
+      ja: { base: 'どこでも', subtype: 'place', locative_ni: 'どこにでも' },
       pt: { base: 'em toda parte', subtype: 'place' },
+    },
+  },
+  // P09's here and there (localization B67), place adverbs like EVERYWHERE: after the object, where a
+  // locative complement stands. HERE is glossed as EVERYWHERE is, with NOW's deixis: "in this place".
+  // THERE's "in that place" is HERE's in French, whose ce is both demonstratives (dans ce lieu), so it
+  // stays on the literal until French says the distance (C40). Spanish allí and Portuguese ali, the
+  // far series; ahí and aí pair with ese and esse. Japanese ここで and そこで are the place an act goes
+  // on in; being or living there is ここに, そこに (`locative_ni`, as EVERYWHERE's).
+  {
+    id: 'HERE',
+    role: 'adverb',
+    description: 'in this place',
+    definition: complementGloss('locative', 'PLACE', 'this'),
+    emoji: '📍',
+    forms: {
+      en: { base: 'here', subtype: 'place' },
+      it: { base: 'qui', subtype: 'place' },
+      fr: { base: 'ici', subtype: 'place' },
+      de: { base: 'hier', subtype: 'place' },
+      es: { base: 'aquí', subtype: 'place' },
+      ja: { base: 'ここで', subtype: 'place', locative_ni: 'ここに' },
+      pt: { base: 'aqui', subtype: 'place' },
+    },
+  },
+  {
+    id: 'THERE',
+    role: 'adverb',
+    description: 'in that place',
+    emoji: '👈',
+    forms: {
+      en: { base: 'there', subtype: 'place' },
+      it: { base: 'lì', subtype: 'place' },
+      fr: { base: 'là', subtype: 'place' },
+      de: { base: 'dort', subtype: 'place' },
+      es: { base: 'allí', subtype: 'place' },
+      ja: { base: 'そこで', subtype: 'place', locative_ni: 'そこに' },
+      pt: { base: 'ali', subtype: 'place' },
     },
   },
   {
@@ -433,6 +474,84 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'ya no', subtype: 'frequency', polarity: 'negative' },
       ja: { base: 'もう', subtype: 'frequency', polarity: 'negative' },
       pt: { base: 'já não', subtype: 'frequency', polarity: 'negative' },
+    },
+  },
+  // ── P09's focus adverbs (localization B67) ───────────────────────
+  // Seeded as verb adverbs (P09 D4) in ALREADY's `frequency` position: before the verb in English,
+  // between the auxiliary and the participle in a compound tense. Their scope over a noun ("only the
+  // cat", 猫だけ) is a focus particle the engine lacks (C39), and so is EVEN, which Japanese has no
+  // verb adverb for (さえ), so it is not seeded.
+  {
+    // A moment ago, with a past or compound verb: in a simple present "just" is "merely". fr/es/pt
+    // have no adverb of recency and say it with their "ago" phrase, which keeps the default position
+    // after the verb. German soeben, since gerade is the engine's progressive (C05). Its gloss, "a
+    // moment ago", waits on a temporal complement (C29).
+    id: 'JUST',
+    role: 'adverb',
+    description: 'a moment ago',
+    emoji: '⏮️',
+    forms: {
+      en: { base: 'just', subtype: 'frequency' },
+      it: { base: 'appena', subtype: 'frequency' },
+      fr: { base: "à l'instant" },
+      de: { base: 'soeben', subtype: 'frequency' },
+      es: { base: 'hace un momento' },
+      ja: { base: 'たった今', subtype: 'frequency', reading: 'たったいま' },
+      pt: { base: 'há pouco' },
+    },
+  },
+  {
+    // Likewise, in addition. "In the same way" is its first dictionary sense (Merriam-Webster's
+    // "likewise", Duden's "in gleicher Weise"), WELL's `mode` gloss on SAME. Japanese 同じく, not また,
+    // which reads "again" (B46).
+    id: 'ALSO',
+    role: 'adverb',
+    description: 'likewise; in addition',
+    definition: mannerGloss('WAY', 'definite', 'SAME'),
+    emoji: '➕',
+    forms: {
+      en: { base: 'also', subtype: 'frequency' },
+      it: { base: 'anche', subtype: 'frequency' },
+      fr: { base: 'aussi', subtype: 'frequency' },
+      de: { base: 'auch', subtype: 'frequency' },
+      es: { base: 'también', subtype: 'frequency' },
+      ja: { base: '同じく', subtype: 'frequency', reading: 'おなじく' },
+      pt: { base: 'também', subtype: 'frequency' },
+    },
+  },
+  {
+    // And nothing more. Its gloss needs "nothing" (C32). Japanese ただ, the adverb; the particle だけ
+    // on a noun is C39's.
+    id: 'ONLY',
+    role: 'adverb',
+    description: 'and nothing more',
+    emoji: '☝️',
+    forms: {
+      en: { base: 'only', subtype: 'frequency' },
+      it: { base: 'solo', subtype: 'frequency' },
+      fr: { base: 'seulement', subtype: 'frequency' },
+      de: { base: 'nur', subtype: 'frequency' },
+      es: { base: 'solo', subtype: 'frequency' },
+      ja: { base: 'ただ', subtype: 'frequency' },
+      pt: { base: 'só', subtype: 'frequency' },
+    },
+  },
+  {
+    // In fact, truly: glossed "in reality", the locative of its own noun, as STRONG is "of great
+    // strength". The intensifier ("really big") is VERY's construct (E8), not this concept.
+    id: 'REALLY',
+    role: 'adverb',
+    description: 'in fact; truly',
+    definition: complementGloss('locative', 'REALITY', 'bare'),
+    emoji: '💯',
+    forms: {
+      en: { base: 'really', subtype: 'frequency' },
+      it: { base: 'davvero', subtype: 'frequency' },
+      fr: { base: 'vraiment', subtype: 'frequency' },
+      de: { base: 'wirklich', subtype: 'frequency' },
+      es: { base: 'realmente', subtype: 'frequency' },
+      ja: { base: '本当に', subtype: 'frequency', reading: 'ほんとうに' },
+      pt: { base: 'realmente', subtype: 'frequency' },
     },
   },
 ];

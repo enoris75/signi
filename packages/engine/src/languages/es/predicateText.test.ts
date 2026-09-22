@@ -268,6 +268,15 @@ describe('predicateText', () => {
       expect(predicateText(GATO, be(), undefined, { ...aLegend, ...inTheHouse })).toBe('es una leyenda en la casa');
     });
 
+    // Localization B67: an adverb of place says where, as a locative does.
+    test('an adverb of place alone selects estar too, and is an adjunct beside a predicate', () => {
+      const here = concept({ base: 'aquí', subtype: 'place' });
+      expect(predicateText(GATO, be({ modifier: here }))).toBe('está aquí');
+      expect(predicateText(GATOS, be({ modifier: here, tense: 'past' }))).toBe('estaban aquí');
+      expect(predicateText(GATO, be({ modifier: here }), undefined, aLegend)).toBe('es una leyenda aquí');
+      expect(predicateText(GATO, be({ modifier: concept(SIEMPRE) }), undefined, aLegend)).toBe('es siempre una leyenda');
+    });
+
     test('only the copula is swapped', () => {
       expect(predicateText(GATO, vp(COMER, {}, 'EAT'), undefined, inTheHouse)).toBe('come en la casa');
       expect(predicateText(MUJER, vp(PARECER, {}, 'SEEM'), undefined, tired)).toBe('parece cansada');

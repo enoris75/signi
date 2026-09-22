@@ -14,6 +14,7 @@ import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
+import { jaModifierSeg } from './jaModifierSeg.js';
 import { jaPassiveVerb } from './jaPassiveVerb.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
@@ -93,6 +94,9 @@ export function predicateSegs(
   // on in (家に住みます, 犬を家に閉じ込めます; A190). Everything else keeps the default で, so it passes
   // nothing. Read off `verbPhrase.verb`, the verb actually rendered, so a passive carries it too.
   const locativeParticle = existential ? 'に' : verbPhrase.verb.forms['locative_particle'];
+  // The verb's adverb, which an adverb of place says with the same particle (ここにいます, ここで食べます;
+  // see `jaModifierSeg`).
+  const adverb = jaModifierSeg(modifier, locativeParticle);
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -130,10 +134,7 @@ export function predicateSegs(
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
-    if (modifier) {
-      const b = modifier.forms['base'] ?? '';
-      if (b) segs.push(wordSeg(b, modifier.forms['reading']));
-    }
+    if (adverb) segs.push(adverb);
     segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
     return segs;
   }
@@ -153,10 +154,7 @@ export function predicateSegs(
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
-    if (modifier) {
-      const b = modifier.forms['base'] ?? '';
-      if (b) segs.push(wordSeg(b, modifier.forms['reading']));
-    }
+    if (adverb) segs.push(adverb);
     segs.push(...(modals.length > 0
       ? modalSegs(modals.map((m) => m.verb), verb, 'present', negated, 0, undefined, 'plain')
       : [plainVerbSeg(verb, 'present', negated)]));
@@ -201,10 +199,7 @@ export function predicateSegs(
     const b = m.modifier?.forms['base'] ?? '';
     if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
   }
-  if (modifier) {
-    const base = modifier.forms['base'] ?? '';
-    if (base) segs.push(wordSeg(base, modifier.forms['reading']));
-  }
+  if (adverb) segs.push(adverb);
   // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form on whatever closes
   // its verb group — the verb (食べたら, 食べなかったら), the outermost modal (食べることができたら) or the
   // aspect (食べていたら). The main clause (conditional) falls through to the ordinary polite

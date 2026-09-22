@@ -6,6 +6,7 @@ import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
+import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
@@ -73,7 +74,8 @@ export function complementsPhrase(
           const surface = esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
-          return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+          // SAME keeps its article the same way: "es el mismo" (see `takesPredicateArticle`).
+          return isRelativeSuperlative(np.head) || takesPredicateArticle(np.head) ?`${defArticle({ gender }, plural)} ${surface}` : surface;
         });
       }
       // Object complement: what the object is *made into* ("convertir el período en un comando")

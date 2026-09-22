@@ -233,6 +233,15 @@ describe('predicateText', () => {
       expect(predicateText(GATO, be(), undefined, legendInTheHouse)).toBe('é uma lenda na casa');
     });
 
+    // Localization B67: an adverb of place says where, as a locative does.
+    test('an adverb of place alone takes estar too, and is an adjunct beside a predicate', () => {
+      const here = concept({ base: 'aqui', subtype: 'place' });
+      expect(predicateText(GATO, be({ modifier: here }))).toBe('está aqui');
+      expect(predicateText(GATO, be({ modifier: here, tense: 'past' }))).toBe('estava aqui');
+      expect(predicateText(GATO, be({ modifier: here }), undefined, complements({ predicative: complement(np(LENDA, { definiteness: 'indefinite' })) })))
+        .toBe('é uma lenda aqui');
+    });
+
     test('only BE splits: another verb keeps its own form', () => {
       expect(predicateText(GATO, vp(PARECER, {}, 'SEEM'), undefined, complements({ predicative: complement(np(CANSADO)) }))).toBe('parece cansado');
     });
