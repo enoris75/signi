@@ -37,16 +37,20 @@ export function resolveComplements(
     const resolvedPhrase = resolveNounElement(phrase, language, lookup);
     // An *adjective-modified* measure manner adverbial names a generic rate ("at high speed"),
     // not an identifiable one, so a definite article reads oddly ("at *the* high speed"). Force
-    // it bare. Two cases keep their article, as they are genuinely specific: a bare measure noun
-    // is anaphoric ("at *the* speed" — a known speed), and a possessor makes it specific ("at
-    // *the* speed of light"). Applied after resolution because the manner relation and adjectives
-    // are only known once the head is looked up; the determiner is fixed for this slot in the UI.
+    // the definite — chosen, or the slot's default — bare. Two cases keep their article, as they
+    // are genuinely specific: a bare measure noun is anaphoric ("at *the* speed" — a known speed),
+    // and a possessor makes it specific ("at *the* speed of light"). Applied after resolution
+    // because the manner relation and adjectives are only known once the head is looked up. The
+    // builder fixes this slot's determiner, but a gloss or the console can choose any, and every
+    // other determiner means what it says: "at another time", "at all other times", "at no other
+    // time" (A226).
     if (type === 'manner') {
       for (const conjunct of resolvedPhrase.conjuncts) {
         if (
           mannerRelation(conjunct.head.forms) === 'measure' &&
           conjunct.adjectives.length > 0 &&
-          !conjunct.possessor
+          !conjunct.possessor &&
+          (conjunct.head.forms['definiteness'] ?? 'definite') === 'definite'
         ) {
           conjunct.head.forms['definiteness'] = 'bare';
         }
