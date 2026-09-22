@@ -38,7 +38,7 @@ glossed on it. What the sentence probes showed the seed author:
    where ASK is not a plain ditransitive: the terminus renders "the woman asks the name **to** the
    man" and *fragt **dem** Mann nach dem Namen* (*fragen* takes the person in the accusative), and no
    lexeme key moves either today. Pin ASK's test without a terminus in en and de, or with that
-   written down. *(Landed: pinned without a terminus; the English half is the defect A237, the
+   written down. *(Landed: pinned without a terminus; the English half is the defect A238, the
    German half C35's accusative person. See [Done](#done).)* Do not pin QUESTION as its object: every language says it with a light verb (*fare
    una domanda, poser une question, eine Frage stellen, hacer una pregunta, 質問する, fazer uma
    pergunta*), and the render is *chiede la domanda*, *pregunta la pregunta*.
@@ -270,7 +270,7 @@ What landed differently from the plan:
 2. **ASK is pinned without a terminus**, as the ticket asked, and the person asked is two separate
    things. English renders every `terminus` with *to*, so it says *the woman asks the name to the
    man* where it wants the double object *asks the man the name* — a defect of English's own, pinned
-   as **A237** with ANSWER's *the woman answers to the man* (want *answers the man*), which
+   as **A238** with ANSWER's *the woman answers to the man* (want *answers the man*), which
    is the same rule. German's *fragt dem Mann nach dem Namen* wants the accusative *den Mann*, which
    is [C35](../C-needs-engine/C35-lexical-object-case.md)'s lexical object case — C35 already records
    *fragen* by name, so nothing new goes there. The other five are right.
@@ -287,11 +287,11 @@ What landed differently from the plan:
    concept (*Not solved* 1), and **SAY re-opened neither SPEAK nor ASSERT** (*Not solved* 3): *to say
    words* (*dire parole*, 単語を言う) and *to say facts* (*dire fatti*, 事実を言う) render, and are
    what that item said they were.
-6. **Two engine defects left, neither in any shipped gloss.** **A238**: the Italian imperfect
+6. **Two engine defects left, neither in any shipped gloss.** **A239**: the Italian imperfect
    subjunctive is the infinitive minus *-re* with the contracted infinitives overridden by concept id
    (`IT_SUBJ_STEM` in [mood.ts](../../../packages/engine/src/mood.ts)), so SAY's *dire* gives *se
    dissimo* where Italian says *se dicessimo* — the imperfect indicative already knows *dire*
-   (*diceva*). **A239**: a verb whose object takes a preposition writes a pronoun object as
+   (*diceva*). **A240**: a verb whose object takes a preposition writes a pronoun object as
    the tonic pronoun after it (*telefona a lui*, *téléphone à lui*), right for *su di lui* (A139) and
    wrong for a dative *a* / *à*, which wants the clitic (*gli telefona*, *lui téléphone*); Spanish
    and Portuguese are right. The same shape as the Romance recipient pronoun

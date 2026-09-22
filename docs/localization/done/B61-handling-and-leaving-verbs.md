@@ -341,7 +341,7 @@ language.
     LEAVE has *salir*'s "sal" there; GO_OUT, which is the same *salir*, and PUT's *poner* do not, so
     they render *sale* and *pone el libro* for *sal* and *pon el libro*. Pinned as a `test.fails` in
     [handling-verbs.test.ts](../../../packages/engine/test/handling-verbs.test.ts)
-    (`known bugs: … (A240)`). No shipped gloss shows it: a gloss is an infinitive citation.
+    (`known bugs: … (A241)`). No shipped gloss shows it: a gloss is an infinitive citation.
 12. **Noted, not fixed**: a French or Spanish animate goal after BRING is *vers l'enfant* / *hacia el
     niño*, where the idiom is the dative *à l'enfant* / *al niño* — the engine's animate-goal rule,
     which is right after a self-propelled verb and reads oddly after a caused motion. In no gloss.

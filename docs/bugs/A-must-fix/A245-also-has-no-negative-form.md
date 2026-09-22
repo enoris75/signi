@@ -1,4 +1,4 @@
-# A244. ALSO under a negation keeps its positive word
+# A245. ALSO under a negation keeps its positive word
 
 **Languages:** English, Italian, French, German, Spanish, Portuguese
 
@@ -18,13 +18,13 @@ ungrammatical or reads as a contrast in each.
 
 The **Want** column is written by hand. German alone needs no new word, only the other order; the
 other five need a negative-polarity lexeme on the adverb, which no seed field carries today.
-[A243](A243-still-scopes-under-the-negation.md) is the placement half of the same gap.
+[A244](A244-still-scopes-under-the-negation.md) is the placement half of the same gap.
 
 **Already right.** Japanese (同じく食べません) and every affirmative clause.
 
 **Nothing shipped shows it**: ALSO's gloss ("in the same way") is a verbless phrase.
 
-Pinned by `known bugs: ALSO under a negation (A244)` in
+Pinned by `known bugs: ALSO under a negation (A245)` in
 [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts),
 which also pins what it renders today.
 

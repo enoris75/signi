@@ -1,4 +1,4 @@
-# A238. Italian *dire* in the imperfect subjunctive is *dissimo*, not *dicessimo*
+# A239. Italian *dire* in the imperfect subjunctive is *dissimo*, not *dicessimo*
 
 **Language:** Italian
 
@@ -19,7 +19,7 @@ la donna direbbe la parola.`), and the six other languages are unaffected.
 
 **Nothing shipped shows it**: a gloss is an infinitive citation, which never inflects for mood.
 
-Pinned by `known bugs: Italian dire in the imperfect subjunctive (A238)` in
+Pinned by `known bugs: Italian dire in the imperfect subjunctive (A239)` in
 [saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts).
 
 Found seeding SAY for [B60](../../localization/done/B60-saying-and-thinking-verbs.md).

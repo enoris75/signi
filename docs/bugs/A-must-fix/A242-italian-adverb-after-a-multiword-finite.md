@@ -1,4 +1,4 @@
-# A241. An Italian frequency adverb trails a multiword finite instead of splitting it
+# A242. An Italian frequency adverb trails a multiword finite instead of splitting it
 
 **Language:** Italian
 
@@ -21,7 +21,7 @@ rather than fixed.
 
 **Nothing shipped shows it**: no gloss carries a frequency adverb on NEED.
 
-Pinned by `known bugs: an Italian multiword finite (A241)` in
+Pinned by `known bugs: an Italian multiword finite (A242)` in
 [doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts).
 
 Found seeding NEED for [B62](../../localization/done/B62-doing-working-playing.md).

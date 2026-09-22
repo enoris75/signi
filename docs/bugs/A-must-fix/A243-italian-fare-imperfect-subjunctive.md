@@ -1,8 +1,8 @@
-# A242. Italian *fare* in the imperfect subjunctive is *fasse*, not *facesse*
+# A243. Italian *fare* in the imperfect subjunctive is *fasse*, not *facesse*
 
 **Language:** Italian
 
-The same table as [A238](A238-italian-dire-imperfect-subjunctive.md), the other contracted
+The same table as [A239](A239-italian-dire-imperfect-subjunctive.md), the other contracted
 infinitive: [`IT_SUBJ_STEM` in mood.ts](../../../packages/engine/src/mood.ts) derives the imperfect
 subjunctive from the infinitive minus *-re*, and *fare* hides its Latin stem *face-*.
 
@@ -19,7 +19,7 @@ verb, and the other six languages are unaffected.
 
 **Nothing shipped shows it**: a gloss is an infinitive citation.
 
-Pinned by `known bugs: the Italian imperfect subjunctive of fare (A242)` in
+Pinned by `known bugs: the Italian imperfect subjunctive of fare (A243)` in
 [doing-verbs.test.ts](../../../packages/engine/test/doing-verbs.test.ts).
 
 Found seeding DO for [B62](../../localization/done/B62-doing-working-playing.md).

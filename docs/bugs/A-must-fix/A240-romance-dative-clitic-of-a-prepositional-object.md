@@ -1,4 +1,4 @@
-# A239. A Romance prepositional object writes a tonic pronoun where the dative clitic belongs
+# A240. A Romance prepositional object writes a tonic pronoun where the dative clitic belongs
 
 **Languages:** Italian, French
 
@@ -24,7 +24,7 @@ unfiled for Romance.
 
 **Nothing shipped shows it**: no gloss takes a pronoun object.
 
-Pinned by `known bugs: the dative clitic of a prepositional object (A239)` in
+Pinned by `known bugs: the dative clitic of a prepositional object (A240)` in
 [saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts).
 
 Found seeding CALL_PHONE for [B60](../../localization/done/B60-saying-and-thinking-verbs.md).

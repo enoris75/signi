@@ -1,4 +1,4 @@
-# A245. A Japanese の-adjective drops its の as a predicate, and says the noun instead
+# A246. A Japanese の-adjective drops its の as a predicate, and says the noun instead
 
 **Language:** Japanese
 
@@ -21,7 +21,7 @@ adjective properly (`the cat is American.`, `il gatto è americano.`, `der Kater
 **Nothing shipped shows it**: AMERICAN is literal by design
 ([B66](../../localization/done/B66-core-adjectives.md)), so it heads no gloss.
 
-Pinned by `known bugs: AMERICAN as a Japanese predicate (A245)` in
+Pinned by `known bugs: AMERICAN as a Japanese predicate (A246)` in
 [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts),
 which also pins what it renders today.
 

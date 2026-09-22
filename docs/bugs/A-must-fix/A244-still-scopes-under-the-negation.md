@@ -1,4 +1,4 @@
-# A243. STILL scopes under the negation instead of over it
+# A244. STILL scopes under the negation instead of over it
 
 **Languages:** English, French, German
 
@@ -23,7 +23,7 @@ seven.
 **Nothing shipped shows it**: STILL's only use in a gloss is KEEP's "still to have objects", which is
 affirmative.
 
-Pinned by `known bugs: STILL under a negation (A243)` in
+Pinned by `known bugs: STILL under a negation (A244)` in
 [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts),
 which also pins what it renders today.
 

@@ -309,7 +309,7 @@ What landed differently from the plan:
    いる / ある and 住む (猫はここにいます, どこにでも住みます), where an ordinary verb keeps で
    (ここで食べます). EVERYWHERE is fixed with them, and beside a predicate the adverb is an adjunct
    again (*el gato es grande aquí*, 猫はここで大きいです).
-3. **STILL and ALSO under a negation are pinned, not fixed** (`A243` and `A244` in
+3. **STILL and ALSO under a negation are pinned, not fixed** (`A244` and `A245` in
    [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts)),
    as note 2 expected: the adverb sits in the frequency slot inside the negation, giving *the cat does
    not still eat*, *der Kater frisst das Essen nicht noch*, *il gatto non mangia anche il cibo*, *ne

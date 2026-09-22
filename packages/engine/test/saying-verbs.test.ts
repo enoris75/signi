@@ -77,7 +77,7 @@ describe('the nouns: a singular and a plural in every language', () => {
 });
 
 // Each verb with the object it takes: TELL with its addressee, ASK without one (the person asked is
-// A237 below, and German's accusative person is C35's), THINK with none.
+// A238 below, and German's accusative person is C35's), THINK with none.
 const OBJECT: Record<string, Partial<PhrasePlan>> = {
   SAY: { directObject: the('WORD') },
   TELL: { directObject: the('STORY'), complements: { terminus: { phrase: the('MAN') } } },
@@ -264,14 +264,14 @@ describe('the B60 glosses, in every language', () => {
 
 // ── Known bugs ────────────────────────────────────────────────────────
 
-// A237. English renders every `terminus` with "to", so a verb whose addressee is a bare object
+// A238. English renders every `terminus` with "to", so a verb whose addressee is a bare object
 // says it with the preposition: ASK's person asked ("asks the name to the man") and ANSWER's person
 // answered ("answers to the man", which reads "is accountable to"). Want the double object, "asks the
 // man the name", and the bare object, "answers the man"; the other six are right (chiede il nome
 // all'uomo, 男に名前を尋ねます) except German, whose fragen takes the person in the accusative, "fragt
 // den Mann" where it renders "fragt dem Mann": that is C35's lexical object case, not this bug. No
 // shipped gloss shows it: ANSWER's own gloss is SAY with a terminus, which takes "to".
-describe('known bugs: an English addressee that takes no "to" (A237)', () => {
+describe('known bugs: an English addressee that takes no "to" (A238)', () => {
   test.fails('ASK puts the person asked before the thing, with no "to"', () => {
     expect(sayAll(clause(the('WOMAN'), 'ASK', { directObject: the('NAME_NOUN'), complements: { terminus: { phrase: the('MAN') } } })).en)
       .toBe('the woman asks the man the name.');
@@ -290,11 +290,11 @@ describe('known bugs: an English addressee that takes no "to" (A237)', () => {
   });
 });
 
-// A238. The Italian imperfect subjunctive is built on the infinitive minus -re, with the
+// A239. The Italian imperfect subjunctive is built on the infinitive minus -re, with the
 // contracted infinitives overridden by concept id (IT_SUBJ_STEM in mood.ts: PRODUCE's produce-). SAY's
 // dire is contracted too, and gives *dissimo* where Italian says dicessimo; the imperfect indicative
 // already knows dire (IT_IMPERF_CONTRACTED: diceva). No shipped gloss shows it.
-describe('known bugs: Italian dire in the imperfect subjunctive (A238)', () => {
+describe('known bugs: Italian dire in the imperfect subjunctive (A239)', () => {
   test.fails('se dicessimo, not se dissimo', () => {
     expect(sayAll({ ...clause(the('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), 'SAY', OBJECT['SAY']) }).it)
       .toBe('se dicessimo la parola, il cane correrebbe.');
@@ -306,13 +306,13 @@ describe('known bugs: Italian dire in the imperfect subjunctive (A238)', () => {
   });
 });
 
-// A239. A verb whose object takes a preposition (`object_prep`, A139) writes a pronoun object
+// A240. A verb whose object takes a preposition (`object_prep`, A139) writes a pronoun object
 // as the tonic pronoun after it, which is right for su / sur ("clicca su di lui") and wrong for the
 // dative a / à of CALL_PHONE: Italian "telefona a lui" is contrastive only, French "téléphone à lui"
 // ungrammatical; the unmarked sentence has the dative clitic, "gli telefona", "lui téléphone". Spanish
 // and Portuguese are right (lo llama, telefona para ele). The recipient pronoun of GIVE has the same
 // shape (A229's unfiled Romance lead). No shipped gloss shows it.
-describe('known bugs: the dative clitic of a prepositional object (A239)', () => {
+describe('known bugs: the dative clitic of a prepositional object (A240)', () => {
   const callsHim = () => sayAll(clause(the('WOMAN'), 'CALL_PHONE', { directObject: np('THIRD_PERSON', { gender: 'masc' }) }));
 
   test.fails('Italian: gli telefona', () => {

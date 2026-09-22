@@ -1,4 +1,4 @@
-# A237. An English addressee that takes no "to" gets one anyway
+# A238. An English addressee that takes no "to" gets one anyway
 
 **Language:** English
 
@@ -24,7 +24,7 @@ lexical object case — already recorded there, and not this file's.
 
 **Nothing shipped shows it.** ANSWER's own gloss is SAY with a terminus, which takes "to" correctly.
 
-Pinned by `known bugs: an English addressee that takes no "to" (A237)` in
+Pinned by `known bugs: an English addressee that takes no "to" (A238)` in
 [saying-verbs.test.ts](../../../packages/engine/test/saying-verbs.test.ts).
 
 Found seeding ASK and ANSWER for [B60](../../localization/done/B60-saying-and-thinking-verbs.md).

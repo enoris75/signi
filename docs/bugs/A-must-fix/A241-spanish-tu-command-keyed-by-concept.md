@@ -1,4 +1,4 @@
-# A240. The Spanish *tú* command is keyed by concept, so a new concept on the same verb loses it
+# A241. The Spanish *tú* command is keyed by concept, so a new concept on the same verb loses it
 
 **Language:** Spanish
 
@@ -19,7 +19,7 @@ shared verb from meeting it.
 
 **Nothing shipped shows it**: a gloss is an infinitive citation, never an imperative.
 
-Pinned by `known bugs: the Spanish tú command of poner and salir under a new concept (A240)` in
+Pinned by `known bugs: the Spanish tú command of poner and salir under a new concept (A241)` in
 [handling-verbs.test.ts](../../../packages/engine/test/handling-verbs.test.ts).
 
 Found seeding PUT and GO_OUT for [B61](../../localization/done/B61-handling-and-leaving-verbs.md).

@@ -294,7 +294,7 @@ What landed differently from the plan:
    `ordinal` gives *der Kater ist der Letzte*, *die Katze ist die Letzte*, *die Kater sind die
    Letzten*. LAST_PREVIOUS and NEXT_COMING carry the same mark, for the same reason: *letzte* and
    *nächste* are -e citations with no undeclined predicative form.
-4. **AMERICAN's Japanese predicate is pinned as a known bug** (`A245` in
+4. **AMERICAN's Japanese predicate is pinned as a known bug** (`A246` in
    [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts)):
    猫はアメリカです, "the cat is America". The rule that drops の and takes the copula
    ([jaAdjClass.ts](../../../packages/engine/src/languages/ja/jaAdjClass.ts)) is right for 茶色の
