@@ -2130,4 +2130,65 @@ test.describe('word definition tooltip', () => {
     await option.hover();
     await expect(page.locator(tooltip)).toHaveText('provare tristezza');
   });
+
+  // NIGHT is FLAME's part-whole shape over a new adjective, DARK (localization B59). German pins the
+  // -el declension DARK's seed had to build — "der dunkle Teil", not *der dunkele — and Japanese the
+  // order that chose an adjective over a relative clause: 日の暗い部分, the dark part OF A DAY, where a
+  // clause would have gone on the day (光がない日の部分).
+  test('a part-whole definition with a new adjective (localization B59: NIGHT)', async ({
+    app,
+    page,
+  }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="NIGHT"]');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('nacht');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('der dunkle Teil eines Tages');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('夜');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('日の暗い部分');
+  });
+
+  // MAY is C09's modal shape on a third adjective, ALLOWED (localization B63). In Italian it is CAN's
+  // own verb: the modal picker lists "potere" twice, and only the tooltip tells the two apart.
+  test('a permission modal shares its Romance lemma with CAN (localization B63: MAY)', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.satellite('verbModal').click();
+    const modalInput = page.getByTestId('box-verbModal').locator('input');
+    const may = page.locator('[data-testid="typeahead-option"][data-concept="MAY"]');
+
+    await modalInput.fill('may');
+    await expect(may).toBeVisible();
+    await may.hover();
+    await expect(page.locator(tooltip)).toHaveText('to be allowed to act');
+
+    // The picker is the `modal` flag's own list, so B63's other two are in it as well; their glosses
+    // wait on a content clause (C30), so the tooltip is the English literal until then.
+    await modalInput.fill('should');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="SHOULD"]')).toBeVisible();
+    await modalInput.fill('might');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="MIGHT"]')).toBeVisible();
+
+    await app.setUiLanguage('it');
+    await modalInput.fill('potere');
+    await expect(may).toBeVisible();
+    // CAN is in the same list under the same word, told apart by its own gloss.
+    const can = page.locator('[data-testid="typeahead-option"][data-concept="CAN"]');
+    await expect(can).toBeVisible();
+    await may.hover();
+    await expect(page.locator(tooltip)).toHaveText('essere autorizzato ad agire');
+    // Let the first tooltip go before reading the second, so only one is on the page.
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await can.hover();
+    await expect(page.locator(tooltip)).toHaveText('essere capace di agire');
+  });
 });
