@@ -1098,3 +1098,45 @@ describe('modal polarity — each word of the group takes its own negation', () 
     });
   });
 });
+
+// A236. A negative-polarity adverb (NEVER) is sent to the FINITE verb whatever it modifies
+// (`groupHasNegativeAdverb`), so a NEVER on the main verb under a modal denies the modal instead:
+// "il gatto non vuole mangiare mai" says the cat never wants to eat, where the plan says it wants
+// to never eat. Italian moves the adverb (mangiare mai / mai mangiare) but keeps the negator on the
+// modal; French, Spanish, Portuguese and Japanese render the two plans identically. English alone
+// keeps the scope, and German "nie" reads under either. Deliberate while a governed verb had no
+// negation of its own — A03's inner negator gives it one, which is where this adverb belongs.
+describe('known bugs: a negative adverb on the main verb negates the modal (A236)', () => {
+  const neverEats = (verbPhrase: Partial<VerbPhrase>) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase }));
+
+  test.fails('a negative adverb on the main verb negates the verb it modifies, not the modal', () => {
+    expect(neverEats({ modals: ['WILL'], modifier: 'NEVER' })).toMatchObject({
+      it: 'il gatto vuole non mangiare mai.',
+      fr: 'le chat veut ne jamais manger.',
+      es: 'el gato quiere no comer nunca.',
+      pt: 'o gato quer não comer nunca.',
+      ja: '猫は決して食べないでいたいです。',
+    });
+  });
+
+  // Already right: English keeps the two scopes apart, the adverb on the MODAL is the modal's own
+  // negation in every language, and a modal-free clause never reached the defect.
+  test('English keeps the scope, and a NEVER on the modal itself is right everywhere', () => {
+    expect(neverEats({ modals: ['WILL'], modifier: 'NEVER' }).en).toBe('the cat wants to never eat.');
+    expect(neverEats({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] }).en).toBe('the cat never wants to eat.');
+    expect(neverEats({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] })).toMatchObject({
+      it: 'il gatto non vuole mai mangiare.',
+      fr: 'le chat ne veut jamais manger.',
+      es: 'el gato nunca quiere comer.',
+      pt: 'o gato nunca quer comer.',
+      ja: '猫は決して食べたくないです。',
+    });
+    expect(neverEats({ modifier: 'NEVER' })).toMatchObject({
+      it: 'il gatto non mangia mai.',
+      fr: 'le chat ne mange jamais.',
+      es: 'el gato nunca come.',
+      pt: 'o gato nunca come.',
+      ja: '猫は決して食べません。',
+    });
+  });
+});
