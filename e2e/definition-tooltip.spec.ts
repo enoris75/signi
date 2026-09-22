@@ -2130,4 +2130,56 @@ test.describe('word definition tooltip', () => {
     await option.hover();
     await expect(page.locator(tooltip)).toHaveText('provare tristezza');
   });
+
+  // B60's saying verbs. TELL is SAY, seeded in the same ticket, with an addressee: German hoists the
+  // animate dative ahead of the object.
+  test('a ditransitive gloss on a genus seeded beside it (localization B60: TELL)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="TELL"]');
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('tell');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('to say facts to a person');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('tell');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('einer Person Tatsachen sagen');
+  });
+
+  // QUESTION is glossed on ASK, not ASK on QUESTION: the instrument gap, Spanish "con la que".
+  test('a noun glossed on the instrument gap of its verb (localization B60: QUESTION)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="QUESTION"]');
+
+    await app.subjectInput.fill('question');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('a phrase with which one asks');
+
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('question');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('una frase con la que se pregunta');
+  });
+
+  // CALL_PHONE, found by its synonym: a comitative inside a purpose clause, which keeps the telephone
+  // out of the instrumental. Japanese puts the purpose first.
+  test('a comitative inside a purpose clause (localization B60: CALL_PHONE)', async ({ app, page }) => {
+    const option = page.locator('[data-testid="typeahead-option"][data-concept="CALL_PHONE"]');
+    await app.setSubject('CAT');
+
+    await app.verbInput.fill('phone');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('to use a telephone to speak with a person');
+
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('phone');
+    await expect(option).toBeVisible();
+    await option.hover();
+    await expect(page.locator(tooltip)).toHaveText('人と話すために電話を使う');
+  });
 });
