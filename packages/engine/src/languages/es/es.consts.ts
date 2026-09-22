@@ -16,8 +16,12 @@ export const ES_DEGREE: Record<Degree, string> = {
  * nueva casa" is a second house, however old). Every NEW the app composes means the second one,
  * so NEW precedes (A204). Every other qualifying adjective (grande, feliz, rojo …) follows the
  * noun, which is why Spanish needs no "BAGS" set the way French and Italian do.
+ *
+ * SAME and the final LAST precede for the same reason (localization B66): "el mismo día", "el último
+ * día", where "el día mismo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("la semana
+ * pasada", "la semana próxima"). Neither apocopates: "el último día", never "*el últim día".
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative

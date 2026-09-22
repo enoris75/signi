@@ -5311,6 +5311,41 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'tristeza', gender: 'fem', count: 'singular' },
     },
   },
+  // Two root nouns P09's words are glossed on (localization B66, B67), each on the literal, as C26's
+  // roots are. ERROR is RIGHT_CORRECT's differentia ("that does not have errors"), and must never be
+  // glossed back through it ("a part that is not right"); "a failed action" says a failure, not a
+  // mistake. REALITY is REALLY's ("in reality"): countable, so the French locative of a bare singular
+  // is "en réalité" (A219), where a mass noun would take "dans de la réalité".
+  {
+    id: 'ERROR',
+    role: 'noun',
+    description: 'something done or said that is not correct',
+    emoji: '❌',
+    forms: {
+      en: { base: 'error', plural: 'errors', count: 'singular' },
+      it: { base: 'errore', plural: 'errori', gender: 'masc', count: 'singular' },
+      fr: { base: 'erreur', plural: 'erreurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Fehler', plural: 'Fehler', gender: 'masc', count: 'singular' },
+      es: { base: 'error', plural: 'errores', gender: 'masc', count: 'singular' },
+      ja: { base: '誤り', count: 'singular', reading: 'あやまり' },
+      pt: { base: 'erro', plural: 'erros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'REALITY',
+    role: 'noun',
+    description: 'the way things actually are',
+    emoji: '🌐',
+    forms: {
+      en: { base: 'reality', plural: 'realities', count: 'singular' },
+      it: { base: 'realtà', plural: 'realtà', gender: 'fem', count: 'singular' },
+      fr: { base: 'réalité', plural: 'réalités', gender: 'fem', count: 'singular' },
+      de: { base: 'Wirklichkeit', plural: 'Wirklichkeiten', gender: 'fem', count: 'singular' },
+      es: { base: 'realidad', plural: 'realidades', gender: 'fem', count: 'singular' },
+      ja: { base: '現実', count: 'singular', reading: 'げんじつ' },
+      pt: { base: 'realidade', plural: 'realidades', gender: 'fem', count: 'singular' },
+    },
+  },
   {
     id: 'REST',
     role: 'noun',

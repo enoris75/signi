@@ -37,8 +37,9 @@ Six P09 words, one differentia word, and one optional pair. What the seed author
   the noun in Romance, but only LAST_FINAL does.
 - **Predicates.** SAME wants its article in five languages: the probe gives *the cat is same*, *è
   stesso*, *est même*, *es mismo*, *é mesmo*. LAST_FINAL's German *ist letzte* is
-  A225's case (*der Letzte*),
-  which that bug files for ordinals only. AMERICAN's Japanese predicate drops の, so 猫はアメリカです
+  [A225](../../bugs/fixed/A225-german-ordinal-predicate-left-bare.md)'s case (*der Letzte*), which
+  that bug files for ordinals only — **it landed on 2026-09-22**, so the seed reaches it by marking
+  the German form `ordinal`. AMERICAN's Japanese predicate drops の, so 猫はアメリカです
   reads "the cat is America". None of this touches a gloss. It is what the seed's unit tests will
   pin.
 - **The Japanese deictic words are fused compounds**: 先週, 去年, 昨夜 ("last week / year / night")
@@ -239,3 +240,84 @@ authored:
   *dieser* (*auf den dieser Zeitraum folgt*).
 - **RIGHT_CORRECT in English and Japanese.** It shares *right* with RIGHT_SIDE, which stays literal,
   and Japanese has the plain negative of HAVE (誤りがない).
+
+## Done
+
+Shipped 2026-09-22. **Eight words seeded** — the six P09 adjectives LAST_FINAL, LAST_PREVIOUS, SAME,
+AMERICAN, RIGHT_CORRECT and RIGHT_SIDE, the optional NEXT_COMING (all in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts), after PREVIOUS) and the
+differentia noun ERROR ([nouns.ts](../../../packages/backend/src/concepts/nouns.ts), after SORROW) —
+and **five glosses** authored, the four the ticket proposed plus NEXT_COMING's.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| LAST_FINAL | that follows all other objects | che segue tutti gli altri oggetti | qui suit tous les autres objets | der auf alle anderen Gegenstände folgt | que sigue a todos los otros objetos | すべての別の物体に続く | que segue todos os outros objetos |
+| LAST_PREVIOUS | that this period follows | che questo periodo segue | que cette période suit | auf den dieser Zeitraum folgt | que este período sigue | この期間が続く | que este período segue |
+| NEXT_COMING | that follows this period | che segue questo periodo | qui suit cette période | der auf diesen Zeitraum folgt | que sigue a este período | この期間に続く | que segue este período |
+| SAME | that is not another object | che non è un altro oggetto | qui n'est pas un autre objet | der kein anderer Gegenstand ist | que no es otro objeto | 別の物体ではない | que não é outro objeto |
+| RIGHT_CORRECT | that does not have errors | che non ha errori | qui n'a pas d'erreurs | der keine Fehler hat | que no tiene errores | 誤りがない | que não tem erros |
+
+The words in a phrase, from the seed as it shipped (the rows the ticket's probe table had wrong
+before the prenominal sets learned SAME and LAST_FINAL):
+
+| phrase | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| the DAY + LAST_FINAL | the last day | l'ultimo giorno | le dernier jour | der letzte Tag | el último día | 最後の日 | o último dia |
+| the WEEK + LAST_PREVIOUS | the last week | la settimana scorsa | la semaine dernière | die letzte Woche | la semana pasada | この前の週 | a semana passada |
+| the WEEK + NEXT_COMING | the next week | la settimana prossima | la semaine prochaine | die nächste Woche | la semana próxima | 今度の週 | a semana próxima |
+| the DAY + SAME | the same day | lo stesso giorno | le même jour | der gleiche Tag | el mismo día | 同じ日 | o mesmo dia |
+| the CAT + SAME + BIG | the same big cat | lo stesso grande gatto | le même grand chat | der gleiche große Kater | el mismo gato grande | 同じ大きい猫 | o mesmo gato grande |
+| the BOOK + AMERICAN | the American book | il libro americano | le livre américain | das amerikanische Buch | el libro estadounidense | アメリカの本 | o livro americano |
+| the WORD + RIGHT_CORRECT | the right word | la parola giusta | le mot juste | das richtige Wort | la palabra correcta | 正しい単語 | a palavra certa |
+| the HAND + RIGHT_SIDE | the right hand | la mano destra | la main droite | die rechte Hand | la mano derecha | 右の手 | a mão direita |
+| the CAT IS SAME | the cat is the same | il gatto è lo stesso | le chat est le même | der Kater ist gleich | el gato es el mismo | 猫は同じです | o gato é o mesmo |
+| the CAT IS LAST_FINAL | the cat is last | il gatto è ultimo | le chat est dernier | der Kater ist der Letzte | el gato es último | 猫は最後です | o gato é último |
+| the CAT IS AMERICAN | the cat is American | il gatto è americano | le chat est américain | der Kater ist amerikanisch | el gato es estadounidense | 猫はアメリカです | o gato é americano |
+
+What landed differently from the plan:
+
+1. **The four Romance prenominal sets learned SAME and LAST_FINAL**, the engine edit the ticket
+   asked for: Italian `PRENOMINAL_DETERMINER` (beside FIRST, SECOND, THIRD and OTHER) and the
+   French, Spanish and Portuguese `PRENOMINAL`. Neither word apocopates in Spanish — `apocopate.ts`
+   names FIRST and THIRD only, so "el último día" and "el mismo día" come out whole. A
+   determiner-like prenominal does not take Italian's one qualifying slot (A145), so "lo stesso
+   grande gatto" keeps both.
+2. **A predicate SAME's article was fixed, not pinned.** The seed marks the five languages that keep
+   it with a new `predicate_article` form; the engine's shared
+   [`takesPredicateArticle`](../../../packages/engine/src/functions/takesPredicateArticle.ts) reads
+   it, and each of en/it/fr/es/pt supplies the article in its `complementsPhrase` predicative branch,
+   where a relative superlative already supplied one — "the cat is the same", *è lo stesso*, *est le
+   même*, *es el mismo*, *é o mesmo*, agreeing with the subject (*la stessa*, *les mêmes*, *las
+   mismas*), and under SEEM, BECOME, a negation and a relative clause alike. German *gleich* and
+   Japanese 同じです were already right and carry no mark.
+3. **LAST_FINAL's German predicate is right, because A225 landed.** Marking the German form
+   `ordinal` gives *der Kater ist der Letzte*, *die Katze ist die Letzte*, *die Kater sind die
+   Letzten*. LAST_PREVIOUS and NEXT_COMING carry the same mark, for the same reason: *letzte* and
+   *nächste* are -e citations with no undeclined predicative form.
+4. **AMERICAN's Japanese predicate is pinned as a known bug** (`PENDING-L6-3` in
+   [core-adjectives-and-adverbs.test.ts](../../../packages/engine/test/core-adjectives-and-adverbs.test.ts)):
+   猫はアメリカです, "the cat is America". The rule that drops の and takes the copula
+   ([jaAdjClass.ts](../../../packages/engine/src/languages/ja/jaAdjClass.ts)) is right for 茶色の
+   (猫は茶色です) and wrong for an adjective relating its subject to a proper noun; the seeded FEMALE
+   shows the same (猫は女性です). Attributively AMERICAN is right (アメリカの猫), and no shipped gloss
+   uses the shape.
+5. **NEXT_COMING shipped.** Without it no Romance language can say "next week": the seeded NEXT is
+   the sequence sense. Its gloss mirrors LAST_PREVIOUS's and collides with nothing.
+6. **Five synonyms, not four.** The two LASTs, the two RIGHTs *and* NEXT_COMING share an English word
+   with a seeded concept, so the picker gets `final`, `most recent`, `coming`, `correct` and
+   `right-hand`.
+7. **ERROR ships with no gloss and no `isA`**, a root noun of [C26](../done/C26-root-nouns-on-the-literal.md)'s
+   kind, as this ticket's **Not solved** 6 asked. Re-probed at HEAD, "a failed action" still says a
+   failure, not a mistake (*un'azione fallita*, *eine fehlgeschlagene Handlung*, 失敗した動作, and now
+   a Portuguese *uma ação malsucedida*).
+8. **AMERICAN and RIGHT_SIDE stay literal by design**, and their leads were re-probed at HEAD. One
+   row changed: with [A218](../../bugs/fixed/A218-german-ort-takes-an-and-von.md) landed, RIGHT_SIDE's
+   "in the next place" is German *der am nächsten Ort ist*, not *im nächsten Ort* — the objection
+   that remains is the one that decides it, that "the next place" is right of a place only along a
+   line written left to right ([C25](../done/C25-place-and-direction-adverbs.md)). The leads through
+   words probed in memory (UNITED_STATES, SIDE, HEART, TRUE, DIFFERENT) are untouched by A218 and
+   A219, which reach a `place_prep` noun and a French bare count singular, neither of which those
+   rows hold.
+9. **The Japanese の-adjective copula drop that this ticket's **Not solved** 4 noted** (本当の for "that
+   is true") is unchanged at HEAD and still in no shipped gloss; item 4 above is the same rule met as
+   a predicate.

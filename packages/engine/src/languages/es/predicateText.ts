@@ -101,8 +101,9 @@ export function predicateText(
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
   // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
-  // "la casa donde el gato está arde" (A199).
-  const locativeAlone = (!!locative || gapComplement === 'locative') && !predicative;
+  // "la casa donde el gato está arde" (A199). So does an adverb of place, which says where as a
+  // locative does: "el gato está aquí", "está en todas partes", never "*es aquí" (localization B67).
+  const locativeAlone = (!!locative || gapComplement === 'locative' || isPlaceAdverb(modifier)) && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "debe estar", "ha
   // estado", "no estés", "estar en la casa".
   // The passive conjugates "ser" where the active conjugates the lexical verb, and agrees that

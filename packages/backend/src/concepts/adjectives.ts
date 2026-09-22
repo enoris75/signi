@@ -1517,6 +1517,154 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'anterior' },
     },
   },
+  // ── P09's core adjectives (localization B66) ─────────────────────
+  // English last is two words elsewhere: the one after all others (ultimo, 最後の) and the period
+  // before this one (scorso, この前の). LAST_FINAL precedes its noun in the Romance languages, as the
+  // ordinals do ("l'ultimo giorno", "le dernier jour", "el último día"); LAST_PREVIOUS and NEXT_COMING
+  // follow it ("la settimana scorsa", "la semaine dernière / prochaine", "la semana pasada"), which is
+  // how French tells its two derniers apart. German letzte and nächste are -e citations, like erste,
+  // and a predicate one is nominalised with the article, as an ordinal is ("ist der Letzte", A225).
+  //
+  // LAST_FINAL is FIRST read the other way, the subject gap where FIRST is the object gap: what
+  // follows all other objects. LAST_PREVIOUS is the period this one follows, and NEXT_COMING the one
+  // that follows it: "this" is NOW's deixis.
+  {
+    id: 'LAST_FINAL',
+    role: 'adjective',
+    description: 'coming after all others in a sequence',
+    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'all', number: 'plural', adjectives: ['OTHER'] }),
+    emoji: '🏁',
+    synonym: 'final',
+    forms: {
+      en: { base: 'last' },
+      it: { base: 'ultimo' },
+      fr: { base: 'dernier' },
+      de: { base: 'letzte', ordinal: '1' },
+      es: { base: 'último' },
+      ja: { base: '最後の', reading: 'さいごの' },
+      pt: { base: 'último' },
+    },
+  },
+  {
+    id: 'LAST_PREVIOUS',
+    role: 'adjective',
+    description: 'the one before this one, of a period of time',
+    definition: namedAgentGloss('PERIOD_TIME', 'FOLLOW', { concept: 'PERIOD_TIME', definiteness: 'this' }),
+    emoji: '⏪',
+    synonym: 'most recent',
+    forms: {
+      en: { base: 'last' },
+      it: { base: 'scorso' },
+      fr: { base: 'dernier' },
+      de: { base: 'letzte', ordinal: '1' },
+      es: { base: 'pasado' },
+      ja: { base: 'この前の', reading: 'このまえの' },
+      pt: { base: 'passado' },
+    },
+  },
+  {
+    // "Next week": the seeded NEXT is the sequence sense (successivo, suivant, siguiente, seguinte,
+    // "the following"), so the Romance languages need this word to say the coming period. English
+    // next and German nächste render as NEXT's do, the way the two LASTs share last and letzte.
+    id: 'NEXT_COMING',
+    role: 'adjective',
+    description: 'the one after this one, of a period of time',
+    definition: subjectGapGloss('PERIOD_TIME', 'FOLLOW', { object: 'PERIOD_TIME', definiteness: 'this' }),
+    emoji: '🔜',
+    synonym: 'coming',
+    forms: {
+      en: { base: 'next' },
+      it: { base: 'prossimo' },
+      fr: { base: 'prochain' },
+      de: { base: 'nächste', ordinal: '1' },
+      es: { base: 'próximo' },
+      ja: { base: '今度の', reading: 'こんどの' },
+      pt: { base: 'próximo' },
+    },
+  },
+  {
+    // Not another: OTHER negated, one way only (OTHER is a literal primitive, so no pair defines only
+    // each other). Before the noun in the Romance languages ("lo stesso giorno", "le même jour", "el
+    // mismo día"), where after it, it means "itself" ("il giorno stesso", "le jour même"). German
+    // gleich, since derselbe fuses with the article; Japanese 同じ joins its noun with no particle.
+    // A predicate one keeps its article in five languages, which `predicate_article` marks: "the cat
+    // is the same", "è lo stesso", "est le même", "es el mismo", "é o mesmo" (gleich and 同じです as
+    // they stand).
+    id: 'SAME',
+    role: 'adjective',
+    description: 'not different; the one already named',
+    definition: subjectGapGloss('OBJECT_THING', 'BE', {
+      complements: { predicative: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
+      negative: true,
+    }),
+    emoji: '🟰',
+    forms: {
+      en: { base: 'same', predicate_article: '1' },
+      it: { base: 'stesso', predicate_article: '1' },
+      fr: { base: 'même', predicate_article: '1' },
+      de: { base: 'gleich' },
+      es: { base: 'mismo', predicate_article: '1' },
+      ja: { base: '同じ', reading: 'おなじ' },
+      pt: { base: 'mesmo', predicate_article: '1' },
+    },
+  },
+  {
+    // Of the United States. Literal by design: every gloss says the country's own name again
+    // (Japanese アメリカ, Spanish estadounidense), or is true of Canada and Mexico too (North America);
+    // CANINE is the precedent (localization B66, C24). Spanish estadounidense, the academies' form for
+    // the United States. Japanese アメリカの, the の-adjective of FEMALE's 女性の.
+    id: 'AMERICAN',
+    role: 'adjective',
+    description: 'of or from the United States of America',
+    emoji: '🗽',
+    forms: {
+      en: { base: 'American' },
+      it: { base: 'americano' },
+      fr: { base: 'américain' },
+      de: { base: 'amerikanisch' },
+      es: { base: 'estadounidense' },
+      ja: { base: 'アメリカの' },
+      pt: { base: 'americano' },
+    },
+  },
+  // English right is two words elsewhere too: correct (giusto, richtig, 正しい) and of the right-hand
+  // side (destro, recht, 右の). RIGHT_CORRECT is what has no errors — UNTITLED's and EMPTY's shape, HAVE
+  // negated with a bare plural object. RIGHT_SIDE is literal by design, the verdict the RIGHT adverb
+  // has (localization C25): whatever tells the two sides apart says "right" again.
+  {
+    id: 'RIGHT_CORRECT',
+    role: 'adjective',
+    description: 'correct; without error',
+    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'ERROR', number: 'plural', negative: true }),
+    emoji: '🎯',
+    synonym: 'correct',
+    forms: {
+      en: { base: 'right' },
+      it: { base: 'giusto' },
+      // Juste, not bon: "la bonne réponse" is the idiom, but bon is GOOD's word.
+      fr: { base: 'juste' },
+      de: { base: 'richtig' },
+      es: { base: 'correcto' },
+      ja: { base: '正しい', reading: 'ただしい' },
+      pt: { base: 'certo' },
+    },
+  },
+  {
+    id: 'RIGHT_SIDE',
+    role: 'adjective',
+    description: 'on the side of the body opposite the heart',
+    emoji: '🫱',
+    synonym: 'right-hand',
+    forms: {
+      en: { base: 'right' },
+      it: { base: 'destro' },
+      fr: { base: 'droit' },
+      de: { base: 'recht' },
+      es: { base: 'derecho' },
+      ja: { base: '右の', reading: 'みぎの' },
+      pt: { base: 'direito' },
+    },
+  },
   // Not standing for any particular person — the grammatical category of the generic subject
   // ("one eats"), GENERIC_PERSON. Offered in the pronoun chooser's person row alongside the three
   // ordinals, and naming the concept in the picker/chip, so it is seeded like them: an adjective

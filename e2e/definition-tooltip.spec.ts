@@ -2375,4 +2375,101 @@ test.describe('word definition tooltip', () => {
     await option.hover();
     await expect(page.locator(tooltip)).toHaveText("être obligé d'avoir des objets");
   });
+
+  test('the two LASTs are FOLLOW read two ways (localization B66: LAST_FINAL, LAST_PREVIOUS)', async ({
+    app,
+    page,
+  }) => {
+    // Both are "last" in English, side by side in the picker, and their tooltips tell them apart:
+    // what follows all the others, and the period this one follows.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('last');
+    const finalEn = page.locator('[data-testid="typeahead-option"][data-concept="LAST_FINAL"]');
+    await expect(finalEn).toBeVisible();
+    await finalEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that follows all other objects');
+    const previousEn = page.locator('[data-testid="typeahead-option"][data-concept="LAST_PREVIOUS"]');
+    await expect(previousEn).toBeVisible();
+    await previousEn.hover();
+    // Both rows stand in the one list, with no new query between the hovers, so the first tooltip is
+    // still fading out: match the one that says the second definition.
+    await expect(page.locator(tooltip).filter({ hasText: 'that this period follows' })).toBeVisible();
+
+    // Spanish FOLLOW takes a before its quantified object.
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('last');
+    const finalEs = page.locator('[data-testid="typeahead-option"][data-concept="LAST_FINAL"]');
+    await expect(finalEs).toBeVisible();
+    await finalEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que sigue a todos los otros objetos');
+
+    // German relativises on FOLLOW's auf, under the deictic dieser.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('last');
+    const previousDe = page.locator('[data-testid="typeahead-option"][data-concept="LAST_PREVIOUS"]');
+    await expect(previousDe).toBeVisible();
+    await previousDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('auf den dieser Zeitraum folgt');
+  });
+
+  test('the correct RIGHT has no errors (localization B66: RIGHT_CORRECT)', async ({ app, page }) => {
+    // It shares "right" with RIGHT_SIDE, which stays on the literal.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('right');
+    const correctEn = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_CORRECT"]');
+    await expect(correctEn).toBeVisible();
+    await correctEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that does not have errors');
+
+    // The plain negative of HAVE, with the existential ない.
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('right');
+    const correctJa = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_CORRECT"]');
+    await expect(correctJa).toBeVisible();
+    await correctJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('誤りがない');
+  });
+
+  test('a place, a manner and a fact adverb (localization B67: HERE, ALSO, REALLY)', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('here');
+    const hereEn = page.locator('[data-testid="typeahead-option"][data-concept="HERE"]');
+    await expect(hereEn).toBeVisible();
+    await hereEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('in this place');
+    await app.openVerbAdverb('also');
+    const alsoEn = page.locator('[data-testid="typeahead-option"][data-concept="ALSO"]');
+    await expect(alsoEn).toBeVisible();
+    await alsoEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('in the same way');
+    await app.openVerbAdverb('really');
+    const reallyEn = page.locator('[data-testid="typeahead-option"][data-concept="REALLY"]');
+    await expect(reallyEn).toBeVisible();
+    await reallyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('in reality');
+
+    // Japanese says the deictic determiner as a word, where its articles say nothing.
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('here');
+    const hereJa = page.locator('[data-testid="typeahead-option"][data-concept="HERE"]');
+    await expect(hereJa).toBeVisible();
+    await hereJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('この場所で');
+
+    // SAME stands before the noun in French, and a countable bare singular after dans is en (A219).
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('also');
+    const alsoFr = page.locator('[data-testid="typeahead-option"][data-concept="ALSO"]');
+    await expect(alsoFr).toBeVisible();
+    await alsoFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('de la même manière');
+    await app.openVerbAdverb('really');
+    const reallyFr = page.locator('[data-testid="typeahead-option"][data-concept="REALLY"]');
+    await expect(reallyFr).toBeVisible();
+    await reallyFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('en réalité');
+  });
 });

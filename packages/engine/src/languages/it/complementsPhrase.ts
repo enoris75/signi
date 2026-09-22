@@ -6,6 +6,7 @@ import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
+import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
@@ -75,8 +76,9 @@ export function complementsPhrase(
           const surface = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
           // A predicative superlative has no noun's article to borrow (unlike "il gatto più
           // grande"), so it supplies its own, agreeing with the subject: "sembra IL più felice",
-          // distinguishing it from the comparative "sembra più felice".
-          return isRelativeSuperlative(np.head)
+          // distinguishing it from the comparative "sembra più felice". SAME keeps its article the
+          // same way: "è lo stesso" (see `takesPredicateArticle`).
+          return isRelativeSuperlative(np.head) || takesPredicateArticle(np.head)
             ? joinArt(defArticle({ gender }, plural, surface), surface)
             : surface;
         });

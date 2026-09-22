@@ -49,8 +49,12 @@ export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
  * nova casa" is a second house, however old). Every NEW the app composes means the second one, so
  * NEW precedes (A204). Every other qualifying adjective follows the noun (and unlike Spanish, no
  * ordinal apocopates — "o primeiro dia", never "*o primer dia").
+ *
+ * SAME and the final LAST precede for the same reason (localization B66): "o mesmo dia", "o último
+ * dia", where "o dia mesmo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("a semana
+ * passada", "a semana próxima").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative

@@ -52,6 +52,16 @@ describe('complementsPhrase', () => {
       expect(one('predicative', complement(np(STANCO, { degree: 'least' })), { ...GATTA, number: 'plural' })).toBe('le meno stanche');
     });
 
+    // Localization B66: SAME keeps its article as a predicate, "è lo stesso", in the form the
+    // adjective's own onset picks (lo before s + consonant).
+    test('a predicate that keeps its article takes it the same way', () => {
+      const STESSO: Forms = { role: 'adjective', base: 'stesso', predicate_article: '1' };
+      expect(one('predicative', complement(np(STESSO)), GATTO)).toBe('lo stesso');
+      expect(one('predicative', complement(np(STESSO)), GATTA)).toBe('la stessa');
+      expect(one('predicative', complement(np(STESSO)), { ...GATTO, number: 'plural' })).toBe('gli stessi');
+      expect(one('predicative', complement(np(STESSO)), { ...GATTA, number: 'plural' })).toBe('le stesse');
+    });
+
     test('a predicate noun keeps its own determiner and no preposition', () => {
       expect(one('predicative', complement(np(LEGGENDA, { definiteness: 'indefinite' })), GATTO)).toBe('una leggenda');
       expect(one('predicative', complement(np(ANGELO, { definiteness: 'indefinite' })), GATTA)).toBe('un angelo');
