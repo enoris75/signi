@@ -322,6 +322,34 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'dando', participle: 'dado' },
     ja: { te: 'あげて', te_reading: 'あげて', nai: 'あげない', passive: 'あげられる' },
   },
+  // P09's three new verbs (localization B64, B65). All take HAVE: imparare, vendere and trasmettere
+  // select avere. The irregular participles are en sold and broadcast, it trasmesso, fr appris;
+  // German verkaufen takes no ge- after its unstressed ver-, and ausstrahlen puts it after the
+  // particle (ausgestrahlt).
+  SELL: {
+    en: { gerund: 'selling', participle: 'sold' },
+    it: { gerund: 'vendendo', participle: 'venduto' },
+    fr: { participle: 'vendu' }, de: { participle: 'verkauft' },
+    es: { gerund: 'vendiendo', participle: 'vendido' },
+    pt: { gerund: 'vendendo', participle: 'vendido' },
+    ja: { te: '売って', te_reading: 'うって', nai: '売らない', nai_reading: 'うらない', passive: '売られる', passive_reading: 'うられる' },
+  },
+  LEARN: {
+    en: { gerund: 'learning', participle: 'learned' },
+    it: { gerund: 'imparando', participle: 'imparato' },
+    fr: { participle: 'appris' }, de: { participle: 'gelernt' },
+    es: { gerund: 'aprendiendo', participle: 'aprendido' },
+    pt: { gerund: 'aprendendo', participle: 'aprendido' },
+    ja: { te: '学んで', te_reading: 'まなんで', nai: '学ばない', nai_reading: 'まなばない' },
+  },
+  BROADCAST: {
+    en: { gerund: 'broadcasting', participle: 'broadcast' },
+    it: { gerund: 'trasmettendo', participle: 'trasmesso' },
+    fr: { participle: 'diffusé' }, de: { participle: 'ausgestrahlt' },
+    es: { gerund: 'emitiendo', participle: 'emitido' },
+    pt: { gerund: 'transmitindo', participle: 'transmitido' },
+    ja: { te: '放送して', te_reading: 'ほうそうして', nai: '放送しない', nai_reading: 'ほうそうしない', passive: '放送される', passive_reading: 'ほうそうされる' },
+  },
   SHOW: {
     en: { gerund: 'showing', participle: 'shown' },
     it: { gerund: 'mostrando', participle: 'mostrato' },

@@ -121,9 +121,10 @@ Readings to judge on authoring:
    would be the political word, but SYSTEM's lexeme belongs to B65.
 5. **WORLD is the place that includes all countries.** It is true of the world and of nothing
    smaller, because a continent includes only some. "The place where all people live" also renders
-   in all seven, but it is HOME's gloss ("a place where one lives") said of everyone, and its German
-   *der Ort, in dem …* is A218 (*Ort*
-   wants *an dem*). "All places" and "all land" are headless fragments. "All land" leaves out the
+   in all seven, but it is HOME's gloss ("a place where one lives") said of everyone. Its German was
+   *der Ort, in dem …* when this was written, which was A218; A218 is fixed, and the lead now renders
+   *der Ort, an dem alle Personen wohnen*. It is still HOME's gloss said of everyone, so the verdict
+   stands on its own. "All places" and "all land" are headless fragments. "All land" leaves out the
    seas, and its German is *all das Land*.
 6. **The two verbs' glosses.** LEARN, "to begin to know", has ACQUIRE's shipped shape ("to begin to
    have"), including its Japanese *…ことが始まる*, which
@@ -156,3 +157,57 @@ authored:
   (*il luogo che include tutti i paesi*).
 - **STATE_NATION** in French and Japanese: its head is glossed in B65, so one row pins both tickets
   (*un système qui gouverne un pays*, 国を統治するシステム).
+
+## Done
+
+Shipped 2026-09-22. **Seven words seeded** — the five nouns SCHOOL, STUDENT, COMPANY_BUSINESS,
+STATE_NATION and WORLD, and the verbs LEARN and SELL — and **seven glosses** authored in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts),
+[verbs/intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts) and
+[verbs/ditransitive.ts](../../../packages/backend/src/concepts/verbs/ditransitive.ts): five of five,
+plus the two verbs' own. B65 was authored first, in the same pass, so STATE_NATION stands on a
+SYSTEM that is seeded and glossed. The paradigms and the glosses are pinned in
+[everyday-nouns.test.ts](../../../packages/engine/test/everyday-nouns.test.ts), which carries B65's
+words too.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| SCHOOL | a building where one learns | un edificio dove si impara | un bâtiment où l'on apprend | ein Gebäude, in dem man lernt | un edificio donde se aprende | 学ぶ建物 | um edifício onde se aprende |
+| STUDENT | a person who learns | una persona che impara | une personne qui apprend | eine Person, die lernt | una persona que aprende | 学ぶ人 | uma pessoa que aprende |
+| COMPANY_BUSINESS | a group that sells | un gruppo che vende | un groupe qui vend | eine Gruppe, die verkauft | un grupo que vende | 売るグループ | um grupo que vende |
+| STATE_NATION | a system that governs a country | un sistema che governa un paese | un système qui gouverne un pays | ein System, das ein Land regiert | un sistema que gobierna un país | 国を統治するシステム | um sistema que governa um país |
+| WORLD | the place that includes all countries | il luogo che include tutti i paesi | le lieu qui inclut tous les pays | der Ort, der alle Länder umfasst | el lugar que incluye todos los países | すべての国を含む場所 | o lugar que inclui todos os países |
+| LEARN | to begin to know | iniziare a sapere | commencer à savoir | beginnen, zu wissen | empezar a saber | 知ることが始まる | começar a saber |
+| SELL | to give objects to acquire money | dare oggetti per acquisire denaro | donner des objets pour acquérir de l'argent | Gegenstände geben, um Geld zu erwerben | dar objetos para adquirir dinero | お金を取得するために物体をあげる | dar objetos para adquirir dinheiro |
+
+Every render is the seed's own, and none differs from the probe table. What landed differently from
+the plan:
+
+1. **A218 is fixed, so reading 5's rejected lead no longer shows it**: "the place where all people
+   live" is now *der Ort, **an dem** alle Personen wohnen*. The lead is still rejected, for the
+   reason that was never the bug's — it is HOME's gloss said of everyone.
+2. **STUDENT's German weak declension is pinned, not just seeded**: `weak: '1'` gives *den
+   Studenten*, *dem Studenten* and *des Studenten* (the genitive the ticket probed), with the
+   feminine in all five languages that write one (*una studentessa, une étudiante, eine Studentin,
+   una estudiante, uma estudante*), Spanish and Portuguese carrying it on the article alone.
+3. **SCHOOL's German compound stem is seeded as *Schul***. The engine's rule for a feminine in *-e*
+   would give *Schulen-*, which is not the stem of *Schulbuch*; nothing in the shipped glosses uses
+   it, but the lexeme would be wrong the first time a compound did.
+4. **LEARN is intransitive, as this file proposed**, so a learner cannot yet take what he learns as
+   an object ("learns a language"). Both glosses that use it are subject- and locative-gap
+   relatives, which need no object, and the corpus has the same shape in WORK and SPEAK. Whoever
+   wants the object should re-seed it as transitive rather than add a second verb.
+5. **SELL is ditransitive, and its buyer is a German dative**: *die Firma verkauft **dem Mann** das
+   Programm*. Its gloss takes EXCHANGE's purpose clause rather than a terminus, so the gloss itself
+   names no buyer: "to give objects to acquire money".
+6. **NATION's `human: true` is unchanged** (reading 4): "a nation **who** governs a country" still
+   renders, so NATION still cannot head a relative clause in a gloss. STATE_NATION does not use it.
+7. **`isA` was set as this file asked**: SCHOOL under BUILDING (so *a building where one learns*
+   sets it apart from HOUSE and PRISON, its siblings), STUDENT under PERSON, WORLD under PLACE.
+   COMPANY_BUSINESS and STATE_NATION are seeded as roots — their genus is in the gloss. LEARN and
+   SELL take none, as ACQUIRE and EXCHANGE, the verbs whose shape they borrow, take none.
+8. **e2e**: the three rows landed as one test at the end of
+   [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), "an institution stands on
+   a verb it seeded, or on B65's SYSTEM (localization B64: SCHOOL, WORLD, STATE_NATION)", covering
+   SCHOOL in English and German, WORLD in Italian and English, and STATE_NATION in French and
+   Japanese.

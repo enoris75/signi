@@ -76,6 +76,82 @@ export const ditransitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // COMPANY_BUSINESS's differentia (localization B64): "to give objects to acquire money", BUY's
+    // counterpart ("to acquire objects with money") and a narrowing of EXCHANGE. Ditransitive like
+    // GIVE, the buyer its `terminus` (German dative: "dem Mann verkaufen"). Italian vendere keeps the
+    // -etti past (vendette), French vendre is an -re verb (vend, vendit, vendu), Japanese 売る godan.
+    id: 'SELL',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'cause', 'locative'],
+    description: 'to give something to someone in exchange for money',
+    definition: infinitiveGloss('GIVE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      purpose: { verb: 'ACQUIRE', object: 'MONEY' },
+    }),
+    emoji: '🏷️',
+    forms: {
+      en: {
+        base: 'sell',
+        '1sg_present': 'sell', '2sg_present': 'sell', '3sg_present': 'sells',
+        '1pl_present': 'sell', '2pl_present': 'sell', '3pl_present': 'sell',
+        past: 'sold',
+      },
+      it: {
+        base: 'vendere',
+        '1sg_present': 'vendo', '2sg_present': 'vendi', '3sg_present': 'vende',
+        '1pl_present': 'vendiamo', '2pl_present': 'vendete', '3pl_present': 'vendono',
+        '1sg_past': 'vendetti', '2sg_past': 'vendesti', '3sg_past': 'vendette',
+        '1pl_past': 'vendemmo', '2pl_past': 'vendeste', '3pl_past': 'vendettero',
+        '1sg_future': 'venderò', '2sg_future': 'venderai', '3sg_future': 'venderà',
+        '1pl_future': 'venderemo', '2pl_future': 'venderete', '3pl_future': 'venderanno',
+      },
+      fr: {
+        base: 'vendre',
+        '1sg_present': 'vends', '2sg_present': 'vends', '3sg_present': 'vend',
+        '1pl_present': 'vendons', '2pl_present': 'vendez', '3pl_present': 'vendent',
+        '1sg_past': 'vendis', '2sg_past': 'vendis', '3sg_past': 'vendit',
+        '1pl_past': 'vendîmes', '2pl_past': 'vendîtes', '3pl_past': 'vendirent',
+        '1sg_future': 'vendrai', '2sg_future': 'vendras', '3sg_future': 'vendra',
+        '1pl_future': 'vendrons', '2pl_future': 'vendrez', '3pl_future': 'vendront',
+      },
+      de: {
+        base: 'verkaufen', terminus_dative: '1',
+        '1sg_present': 'verkaufe', '2sg_present': 'verkaufst', '3sg_present': 'verkauft',
+        '1pl_present': 'verkaufen', '2pl_present': 'verkauft', '3pl_present': 'verkaufen',
+        '1sg_past': 'verkaufte', '2sg_past': 'verkauftest', '3sg_past': 'verkaufte',
+        '1pl_past': 'verkauften', '2pl_past': 'verkauftet', '3pl_past': 'verkauften',
+        '2sg_imperative': 'verkaufe', // the optional du -e, kept
+      },
+      es: {
+        base: 'vender',
+        '1sg_present': 'vendo', '2sg_present': 'vendes', '3sg_present': 'vende',
+        '1pl_present': 'vendemos', '2pl_present': 'vendéis', '3pl_present': 'venden',
+        '1sg_past': 'vendí', '2sg_past': 'vendiste', '3sg_past': 'vendió',
+        '1pl_past': 'vendimos', '2pl_past': 'vendisteis', '3pl_past': 'vendieron',
+        '1sg_future': 'venderé', '2sg_future': 'venderás', '3sg_future': 'venderá',
+        '1pl_future': 'venderemos', '2pl_future': 'venderéis', '3pl_future': 'venderán',
+      },
+      ja: {
+        base: '売る',
+        reading: 'うる',
+        masu_present: '売ります',
+        masu_present_reading: 'うります',
+      },
+      pt: {
+        base: 'vender',
+        '1sg_present': 'vendo', '2sg_present': 'vende', '3sg_present': 'vende',
+        '1pl_present': 'vendemos', '2pl_present': 'vendem', '3pl_present': 'vendem',
+        '1sg_past': 'vendi', '2sg_past': 'vendeu', '3sg_past': 'vendeu',
+        '1pl_past': 'vendemos', '2pl_past': 'venderam', '3pl_past': 'venderam',
+        '1sg_future': 'venderei', '2sg_future': 'venderá', '3sg_future': 'venderá',
+        '1pl_future': 'venderemos', '2pl_future': 'venderão', '3pl_future': 'venderão',
+      },
+    },
+  },
+
+  {
     // The genus of GIVE and SEND (B15) and of EXPORT and IMPORT (B19) — the verb of moving something
     // from one holder or place to another that their dictionary definitions cite as their genus. Besides GIVE's recipient (`terminus`) it licenses the place it moves from and to
     // (`source` / `direction`). English doubles its r (transferred / transferring), Italian

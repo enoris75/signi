@@ -710,9 +710,18 @@ export const nouns: ConceptSeed[] = [
     // (punta, Spitze) are other words, so other concepts. Suffixed as D2 asks: the verb POINT stays
     // unseeded (C12). German takes "an", like Ort and Ausgangspunkt (A218): an diesem Punkt. Seeded
     // ahead of B65's other nouns because B61's TURN is glossed on it ("to move around a point").
+    // "A place that does not have size": the `no` determiner would say "no size", but renders it
+    // nessuna dimensione, aucune taille, どの大きさもない ("no size of any kind").
     id: 'POINT_NOUN',
     role: 'noun',
     description: 'a position with no size',
+    definition: {
+      subject: {
+        concept: 'PLACE',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'HAVE', negative: true }, directObject: { concept: 'SIZE', definiteness: 'bare' } },
+      },
+    },
     emoji: '🔸',
     isA: 'PLACE',
     forms: {
@@ -4793,6 +4802,81 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'processo', plural: 'processos', gender: 'masc', count: 'singular' },
     },
   },
+  // ── P09's system and the two programs (localization B65) ─────────────
+  {
+    // "A group of parts that works": WORK is the machine sense (funzionare, funktionieren), and the
+    // relative agrees with GROUP, so the whole works. STATE_NATION (B64) is glossed on it.
+    id: 'SYSTEM',
+    role: 'noun',
+    description: 'a set of parts that work together as a whole',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'PART', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+        relative: { verbPhrase: { verb: 'WORK' } },
+      },
+    },
+    emoji: '⚙️',
+    forms: {
+      en: { base: 'system', plural: 'systems', count: 'singular' },
+      it: { base: 'sistema', plural: 'sistemi', gender: 'masc', count: 'singular' },
+      fr: { base: 'système', plural: 'systèmes', gender: 'masc', count: 'singular' },
+      de: { base: 'System', plural: 'Systeme', gender: 'neut', count: 'singular' },
+      es: { base: 'sistema', plural: 'sistemas', gender: 'masc', count: 'singular' },
+      ja: { base: 'システム', count: 'singular' },
+      pt: { base: 'sistema', plural: 'sistemas', gender: 'masc', count: 'singular' },
+    },
+  },
+  // P09 D2's split of "program": the two render alike in en, it, es and pt and apart in fr, de and ja
+  // (programme / émission, Programm / Sendung, プログラム / 番組), like DO and MAKE. The glosses and the
+  // synonyms tell them apart.
+  {
+    // "A list of instructions": INSTRUCTION is a step telling what to do, addressed to nobody.
+    id: 'PROGRAM_SOFTWARE',
+    role: 'noun',
+    description: 'a set of instructions a computer runs',
+    definition: {
+      subject: {
+        concept: 'LIST',
+        definiteness: 'indefinite',
+        possessor: { concept: 'INSTRUCTION', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+      },
+    },
+    emoji: '💾',
+    synonym: 'software',
+    forms: {
+      en: { base: 'program', plural: 'programs', count: 'singular' },
+      it: { base: 'programma', plural: 'programmi', gender: 'masc', count: 'singular' },
+      fr: { base: 'programme', plural: 'programmes', gender: 'masc', count: 'singular' },
+      de: { base: 'Programm', plural: 'Programme', gender: 'neut', count: 'singular' },
+      es: { base: 'programa', plural: 'programas', gender: 'masc', count: 'singular' },
+      ja: { base: 'プログラム', count: 'singular' },
+      pt: { base: 'programa', plural: 'programas', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "Content that one broadcasts", on BROADCAST, the one word it pays for: HELP is the content one
+    // shows, PREVIEW the content one sees. German Sendung is senden's noun, but SEND's German is
+    // schicken, so the two do not meet.
+    id: 'PROGRAM_SHOW',
+    role: 'noun',
+    description: 'a show broadcast on radio or television',
+    definition: patientGloss('CONTENT', 'BROADCAST', 'bare'),
+    emoji: '📺',
+    synonym: 'show',
+    forms: {
+      en: { base: 'program', plural: 'programs', count: 'singular' },
+      it: { base: 'programma', plural: 'programmi', gender: 'masc', count: 'singular' },
+      fr: { base: 'émission', plural: 'émissions', gender: 'fem', count: 'singular' },
+      de: { base: 'Sendung', plural: 'Sendungen', gender: 'fem', count: 'singular' },
+      es: { base: 'programa', plural: 'programas', gender: 'masc', count: 'singular' },
+      ja: { base: '番組', count: 'singular', reading: 'ばんぐみ' },
+      pt: { base: 'programa', plural: 'programas', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     // The abstract notion, not a draft or a plan — de Begriff (the philosophical sense), not
     // Konzept, which is the sketch one writes before doing the thing.
@@ -4828,11 +4912,16 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The material half of THING (P09 D1, localization B65), which is its genus and whose gloss is
+    // "an object or a concept": so this one stays on the literal, or the two would define only each
+    // other (C26's BODY/ORGAN rule). Its synonym tells it from OBJECT_GRAMMAR, and is "item", not
+    // "thing": THING's own label is "thing", and the picker's haystack includes the synonym.
     id: 'OBJECT_THING',
     role: 'noun',
     description: 'a material thing one can hold or use',
     emoji: '📦',
-    synonym: 'thing',
+    synonym: 'item',
+    isA: 'THING',
     forms: {
       en: { base: 'object', plural: 'objects', count: 'singular' },
       it: { base: 'oggetto', plural: 'oggetti', gender: 'masc', count: 'singular' },
@@ -4841,6 +4930,80 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
       ja: { base: '物体', count: 'singular', reading: 'ぶったい' },
       pt: { base: 'objeto', plural: 'objetos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── P09's everyday nouns (localization B65) ──────────────────────────
+  {
+    // Anything, material or not (P09 D1): the root above OBJECT_THING. Its two halves are both
+    // seeded, so the root has a gloss where C26's roots have none: an object is the material half, a
+    // concept the other. The words are the plain "thing" of each language (cosa, Ding, もの), not
+    // OBJECT_THING's oggetto, Gegenstand, 物体. German Ding and Japanese もの lean concrete, which
+    // CASE_INSTANCE's gloss shows ("ein Ding, das geschieht").
+    id: 'THING',
+    role: 'noun',
+    description: 'anything, material or not',
+    definition: {
+      subject: {
+        conjuncts: [
+          { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+          { concept: 'CONCEPT', definiteness: 'indefinite' },
+        ],
+        conjunction: 'or',
+      },
+    },
+    emoji: '🔣',
+    forms: {
+      en: { base: 'thing', plural: 'things', count: 'singular' },
+      it: { base: 'cosa', plural: 'cose', gender: 'fem', count: 'singular' },
+      fr: { base: 'chose', plural: 'choses', gender: 'fem', count: 'singular' },
+      de: { base: 'Ding', plural: 'Dinge', gender: 'neut', count: 'singular' },
+      es: { base: 'cosa', plural: 'cosas', gender: 'fem', count: 'singular' },
+      ja: { base: 'もの', count: 'singular' },
+      pt: { base: 'coisa', plural: 'coisas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // "A state that one must change": the dictionary's "a matter to be solved" would cost SOLVE for
+    // one tooltip. STATE shares its word with STATE_NATION in it/fr/es/pt; cambiare settles which.
+    id: 'PROBLEM',
+    role: 'noun',
+    description: 'a matter that needs to be dealt with and solved',
+    definition: {
+      subject: {
+        concept: 'STATE',
+        definiteness: 'indefinite',
+        relative: { headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'CHANGE', modals: ['MUST'] } },
+      },
+    },
+    emoji: '⚠️',
+    forms: {
+      en: { base: 'problem', plural: 'problems', count: 'singular' },
+      // problema is masculine despite the -a, as in Spanish and Portuguese: il problema, i problemi.
+      it: { base: 'problema', plural: 'problemi', gender: 'masc', count: 'singular' },
+      fr: { base: 'problème', plural: 'problèmes', gender: 'masc', count: 'singular' },
+      de: { base: 'Problem', plural: 'Probleme', gender: 'neut', count: 'singular' },
+      es: { base: 'problema', plural: 'problemas', gender: 'masc', count: 'singular' },
+      ja: { base: '問題', count: 'singular', reading: 'もんだい' },
+      pt: { base: 'problema', plural: 'problemas', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The instance, as in "in this case" — not a container or a court case. French cas is the same
+    // word in the plural; German Fall umlauts (Fälle).
+    id: 'CASE_INSTANCE',
+    role: 'noun',
+    description: 'an instance of something happening, as in "in this case"',
+    definition: whoGloss('THING', 'HAPPEN'),
+    emoji: '🗂️',
+    synonym: 'instance',
+    forms: {
+      en: { base: 'case', plural: 'cases', count: 'singular' },
+      it: { base: 'caso', plural: 'casi', gender: 'masc', count: 'singular' },
+      fr: { base: 'cas', plural: 'cas', gender: 'masc', count: 'singular' },
+      de: { base: 'Fall', plural: 'Fälle', gender: 'masc', count: 'singular' },
+      es: { base: 'caso', plural: 'casos', gender: 'masc', count: 'singular' },
+      ja: { base: '場合', count: 'singular', reading: 'ばあい' },
+      pt: { base: 'caso', plural: 'casos', gender: 'masc', count: 'singular' },
     },
   },
   // ── The natural kinds' genera (localization B52) ───────────────────
@@ -5004,9 +5167,14 @@ export const nouns: ConceptSeed[] = [
   // nouns because B61's TAKE is glossed on it ("to acquire objects with the hand"). Italian and
   // Spanish mano are feminine despite the -o, and Italian's plural is mani.
   {
+    // "An organ with which one takes an object": EYE's instrument gap, with an object, since German
+    // nehmen wants one. TAKE is glossed on HAND in turn, the verb-and-its-instrument pair the corpus
+    // accepts in BITE and TOOTH, CUT and BLADE. HOLD's lexemes are the contain sense (contenere,
+    // enthalten), so it could not serve.
     id: 'HAND',
     role: 'noun',
     description: 'the part at the end of the arm one holds things with',
+    definition: instrumentGloss('ORGAN', 'TAKE', 'OBJECT_THING'),
     emoji: '✋',
     isA: 'ORGAN',
     forms: {
@@ -5243,6 +5411,121 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'nación', plural: 'naciones', gender: 'fem', count: 'singular' },
       ja: { base: '国民', count: 'singular', reading: 'こくみん' },
       pt: { base: 'nação', plural: 'nações', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── P09's institutions and people (localization B64) ─────────────────
+  {
+    // The institution, not P08's CLASS_SCHOOL or a school of fish: a building like HOUSE ("where one
+    // lives") and PRISON, set apart from them by LEARN, which STUDENT takes too. German Schul- is the
+    // compound stem (Schulbuch), not the *Schulen- the feminine -e rule would give.
+    id: 'SCHOOL',
+    role: 'noun',
+    description: 'a place where children and young people are taught',
+    definition: whereGloss('BUILDING', 'LEARN'),
+    emoji: '🏫',
+    isA: 'BUILDING',
+    forms: {
+      en: { base: 'school', plural: 'schools', count: 'singular' },
+      it: { base: 'scuola', plural: 'scuole', gender: 'fem', count: 'singular' },
+      fr: { base: 'école', plural: 'écoles', gender: 'fem', count: 'singular' },
+      de: { base: 'Schule', plural: 'Schulen', gender: 'fem', count: 'singular', compound: 'Schul' },
+      es: { base: 'escuela', plural: 'escuelas', gender: 'fem', count: 'singular' },
+      ja: { base: '学校', count: 'singular', reading: 'がっこう' },
+      pt: { base: 'escola', plural: 'escolas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // "A person who learns", a learner at its widest: STUDY would be closer to étudiant and Student,
+    // but German studieren is a university's verb and cannot also serve SCHOOL. German Student is a
+    // weak masculine (des Studenten); Spanish and Portuguese write the feminine as the masculine, and
+    // the article carries it (una estudiante).
+    id: 'STUDENT',
+    role: 'noun',
+    description: 'a person who is studying at a school or university',
+    definition: whoGloss('PERSON', 'LEARN'),
+    emoji: '🧑‍🎓',
+    animate: true,
+    human: true,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'student', plural: 'students', count: 'singular' },
+      it: { base: 'studente', plural: 'studenti', gender: 'masc', count: 'singular', fem: 'studentessa', fem_plural: 'studentesse' },
+      fr: { base: 'étudiant', plural: 'étudiants', gender: 'masc', count: 'singular', fem: 'étudiante', fem_plural: 'étudiantes' },
+      de: { base: 'Student', plural: 'Studenten', gender: 'masc', count: 'singular', weak: '1', fem: 'Studentin', fem_plural: 'Studentinnen' },
+      es: { base: 'estudiante', plural: 'estudiantes', gender: 'masc', count: 'singular', fem: 'estudiante', fem_plural: 'estudiantes' },
+      ja: { base: '学生', count: 'singular', reading: 'がくせい' },
+      pt: { base: 'estudante', plural: 'estudantes', gender: 'masc', count: 'singular', fem: 'estudante', fem_plural: 'estudantes' },
+    },
+  },
+  {
+    // The business, not companionship (compagnia, compagnie). "A group that sells": TRADE's German
+    // handeln is also ACT's, so "eine Gruppe, die handelt" would read "a group that takes action".
+    id: 'COMPANY_BUSINESS',
+    role: 'noun',
+    description: 'a business that makes or sells goods or services',
+    definition: whoGloss('GROUP', 'SELL'),
+    emoji: '🏢',
+    synonym: 'business',
+    forms: {
+      en: { base: 'company', plural: 'companies', count: 'singular' },
+      it: { base: 'azienda', plural: 'aziende', gender: 'fem', count: 'singular' },
+      fr: { base: 'entreprise', plural: 'entreprises', gender: 'fem', count: 'singular' },
+      de: { base: 'Firma', plural: 'Firmen', gender: 'fem', count: 'singular', compound: 'Firmen' },
+      es: { base: 'empresa', plural: 'empresas', gender: 'fem', count: 'singular' },
+      ja: { base: '会社', count: 'singular', reading: 'かいしゃ' },
+      pt: { base: 'empresa', plural: 'empresas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The polity half of P09's "state"; the condition is STATE. Italian, French, Spanish and
+    // Portuguese say both with one word and write the polity with a capital (Stato, État, Estado),
+    // which is what tells the two apart in writing. Not its people (NATION), its land (COUNTRY) or
+    // its government: "a system that governs a country", on B65's SYSTEM.
+    id: 'STATE_NATION',
+    role: 'noun',
+    description: 'a country considered as a political body with its own government',
+    definition: {
+      subject: {
+        concept: 'SYSTEM',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'GOVERN_STATE' }, directObject: { concept: 'COUNTRY', definiteness: 'indefinite' } },
+      },
+    },
+    emoji: '🏛️',
+    synonym: 'polity',
+    forms: {
+      en: { base: 'state', plural: 'states', count: 'singular' },
+      it: { base: 'Stato', plural: 'Stati', gender: 'masc', count: 'singular' },
+      fr: { base: 'État', plural: 'États', gender: 'masc', count: 'singular' },
+      de: { base: 'Staat', plural: 'Staaten', gender: 'masc', count: 'singular', compound: 'Staats' },
+      es: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
+      ja: { base: '国家', count: 'singular', reading: 'こっか' },
+      pt: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "The place that includes all countries": definite, since there is one, and true of nothing
+    // smaller — a continent includes only some. A PLACE, as COUNTRY and CONTINENT are.
+    id: 'WORLD',
+    role: 'noun',
+    description: 'the earth, with all its countries and peoples',
+    definition: {
+      subject: {
+        concept: 'PLACE',
+        definiteness: 'definite',
+        relative: { verbPhrase: { verb: 'INCLUDE' }, directObject: { concept: 'COUNTRY', definiteness: 'all', number: 'plural' } },
+      },
+    },
+    emoji: '🌍',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'world', plural: 'worlds', count: 'singular' },
+      it: { base: 'mondo', plural: 'mondi', gender: 'masc', count: 'singular' },
+      fr: { base: 'monde', plural: 'mondes', gender: 'masc', count: 'singular' },
+      de: { base: 'Welt', plural: 'Welten', gender: 'fem', count: 'singular' },
+      es: { base: 'mundo', plural: 'mundos', gender: 'masc', count: 'singular' },
+      ja: { base: '世界', count: 'singular', reading: 'せかい' },
+      pt: { base: 'mundo', plural: 'mundos', gender: 'masc', count: 'singular' },
     },
   },
   // ── The interface nouns' own words (localization B57) ──────────────

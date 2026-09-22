@@ -1049,6 +1049,77 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  // SCHOOL's and STUDENT's differentia (localization B64): "to begin to know", ACQUIRE's shape ("to
+  // begin to have"), Japanese ことが始まる included. Intransitive, with the place one learns in.
+  // French apprendre is prendre's compound (apprends, apprit, appris); Japanese 学ぶ is godan
+  // (学んで, 学ばない). Italian imparare takes avere.
+  {
+    id: 'LEARN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to come to know or be able to do something',
+    definition: infinitiveGloss('BEGIN', { infinitive: 'KNOW' }),
+    emoji: '📚',
+    forms: {
+      en: {
+        base: 'learn',
+        '1sg_present': 'learn', '2sg_present': 'learn', '3sg_present': 'learns',
+        '1pl_present': 'learn', '2pl_present': 'learn', '3pl_present': 'learn',
+        past: 'learned',
+      },
+      it: {
+        base: 'imparare',
+        '1sg_present': 'imparo', '2sg_present': 'impari', '3sg_present': 'impara',
+        '1pl_present': 'impariamo', '2pl_present': 'imparate', '3pl_present': 'imparano',
+        '1sg_past': 'imparai', '2sg_past': 'imparasti', '3sg_past': 'imparò',
+        '1pl_past': 'imparammo', '2pl_past': 'imparaste', '3pl_past': 'impararono',
+        '1sg_future': 'imparerò', '2sg_future': 'imparerai', '3sg_future': 'imparerà',
+        '1pl_future': 'impareremo', '2pl_future': 'imparerete', '3pl_future': 'impareranno',
+      },
+      fr: {
+        base: 'apprendre',
+        '1sg_present': 'apprends', '2sg_present': 'apprends', '3sg_present': 'apprend',
+        '1pl_present': 'apprenons', '2pl_present': 'apprenez', '3pl_present': 'apprennent',
+        '1sg_past': 'appris', '2sg_past': 'appris', '3sg_past': 'apprit',
+        '1pl_past': 'apprîmes', '2pl_past': 'apprîtes', '3pl_past': 'apprirent',
+        '1sg_future': 'apprendrai', '2sg_future': 'apprendras', '3sg_future': 'apprendra',
+        '1pl_future': 'apprendrons', '2pl_future': 'apprendrez', '3pl_future': 'apprendront',
+      },
+      de: {
+        base: 'lernen',
+        '1sg_present': 'lerne', '2sg_present': 'lernst', '3sg_present': 'lernt',
+        '1pl_present': 'lernen', '2pl_present': 'lernt', '3pl_present': 'lernen',
+        '1sg_past': 'lernte', '2sg_past': 'lerntest', '3sg_past': 'lernte',
+        '1pl_past': 'lernten', '2pl_past': 'lerntet', '3pl_past': 'lernten',
+        '2sg_imperative': 'lerne', // the optional du -e, kept
+      },
+      es: {
+        base: 'aprender',
+        '1sg_present': 'aprendo', '2sg_present': 'aprendes', '3sg_present': 'aprende',
+        '1pl_present': 'aprendemos', '2pl_present': 'aprendéis', '3pl_present': 'aprenden',
+        '1sg_past': 'aprendí', '2sg_past': 'aprendiste', '3sg_past': 'aprendió',
+        '1pl_past': 'aprendimos', '2pl_past': 'aprendisteis', '3pl_past': 'aprendieron',
+        '1sg_future': 'aprenderé', '2sg_future': 'aprenderás', '3sg_future': 'aprenderá',
+        '1pl_future': 'aprenderemos', '2pl_future': 'aprenderéis', '3pl_future': 'aprenderán',
+      },
+      ja: {
+        base: '学ぶ',
+        reading: 'まなぶ',
+        masu_present: '学びます',
+        masu_present_reading: 'まなびます',
+      },
+      pt: {
+        base: 'aprender',
+        '1sg_present': 'aprendo', '2sg_present': 'aprende', '3sg_present': 'aprende',
+        '1pl_present': 'aprendemos', '2pl_present': 'aprendem', '3pl_present': 'aprendem',
+        '1sg_past': 'aprendi', '2sg_past': 'aprendeu', '3sg_past': 'aprendeu',
+        '1pl_past': 'aprendemos', '2pl_past': 'aprenderam', '3pl_past': 'aprenderam',
+        '1sg_future': 'aprenderei', '2sg_future': 'aprenderá', '3sg_future': 'aprenderá',
+        '1pl_future': 'aprenderemos', '2pl_future': 'aprenderão', '3pl_future': 'aprenderão',
+      },
+    },
+  },
   // ── Speaking, and the two verbs that order a sequence (localization B55, B57) ──
   {
     id: 'SPEAK',

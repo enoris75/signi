@@ -2182,4 +2182,104 @@ test.describe('word definition tooltip', () => {
     await option.hover();
     await expect(page.locator(tooltip)).toHaveText('人と話すために電話を使う');
   });
+
+  test('an everyday noun, the root and the organ (localization B65: THING, PROGRAM_SHOW, HAND)', async ({
+    app,
+    page,
+  }) => {
+    // The first noun definition whose whole phrase is a coordinated group; Japanese says "or" with か.
+    await app.subjectInput.fill('thing');
+    const thingEn = page.locator('[data-testid="typeahead-option"][data-concept="THING"]');
+    await expect(thingEn).toBeVisible();
+    await thingEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an object or a concept');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('thing');
+    const thingJa = page.locator('[data-testid="typeahead-option"][data-concept="THING"]');
+    await expect(thingJa).toBeVisible();
+    await thingJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('物体か概念');
+
+    // The program German and French have a word of their own for, on the separable ausstrahlen,
+    // whole again in the relative clause.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('program');
+    const showDe = page.locator('[data-testid="typeahead-option"][data-concept="PROGRAM_SHOW"]');
+    await expect(showDe).toBeVisible();
+    await showDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Inhalt, den man ausstrahlt');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('program');
+    const showFr = page.locator('[data-testid="typeahead-option"][data-concept="PROGRAM_SHOW"]');
+    await expect(showFr).toBeVisible();
+    await showFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("contenu qu'on diffuse");
+
+    // The instrument gap with an object, on TAKE. Each search follows a language switch, which
+    // closes the last tooltip: German "hand" also finds Handlung, whose tooltip would linger.
+    await app.setUiLanguage('pt');
+    await app.subjectInput.fill('hand');
+    const handPt = page.locator('[data-testid="typeahead-option"][data-concept="HAND"]');
+    await expect(handPt).toBeVisible();
+    await handPt.hover();
+    await expect(page.locator(tooltip)).toHaveText('um órgão com o qual se pega um objeto');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('hand');
+    const handDe = page.locator('[data-testid="typeahead-option"][data-concept="HAND"]');
+    await expect(handDe).toBeVisible();
+    await handDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Organ, mit dem man einen Gegenstand nimmt');
+  });
+
+  test('an institution stands on a verb it seeded, or on B65\'s SYSTEM (localization B64: SCHOOL, WORLD, STATE_NATION)', async ({
+    app,
+    page,
+  }) => {
+    // A locative-gap relative on LEARN: German's relativizer is in dem.
+    await app.subjectInput.fill('school');
+    const schoolEn = page.locator('[data-testid="typeahead-option"][data-concept="SCHOOL"]');
+    await expect(schoolEn).toBeVisible();
+    await schoolEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a building where one learns');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('school');
+    const schoolDe = page.locator('[data-testid="typeahead-option"][data-concept="SCHOOL"]');
+    await expect(schoolDe).toBeVisible();
+    await schoolDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Gebäude, in dem man lernt');
+
+    // A definite head and an object under `all`.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('world');
+    const worldIt = page.locator('[data-testid="typeahead-option"][data-concept="WORLD"]');
+    await expect(worldIt).toBeVisible();
+    await worldIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('il luogo che include tutti i paesi');
+
+    await app.setUiLanguage('en');
+    await app.subjectInput.fill('world');
+    const worldEn = page.locator('[data-testid="typeahead-option"][data-concept="WORLD"]');
+    await expect(worldEn).toBeVisible();
+    await worldEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('the place that includes all countries');
+
+    // The polity, glossed on SYSTEM, whose own gloss is B65's: one row pins both tickets.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('state');
+    const stateFr = page.locator('[data-testid="typeahead-option"][data-concept="STATE_NATION"]');
+    await expect(stateFr).toBeVisible();
+    await stateFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un système qui gouverne un pays');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('state');
+    const stateJa = page.locator('[data-testid="typeahead-option"][data-concept="STATE_NATION"]');
+    await expect(stateJa).toBeVisible();
+    await stateJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('国を統治するシステム');
+  });
 });
