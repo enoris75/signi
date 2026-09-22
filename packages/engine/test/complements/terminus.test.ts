@@ -334,16 +334,17 @@ describe('known bugs: a German inanimate terminus of GIVE and CONNECT takes "in"
 });
 
 // A229. A German dative pronoun leads a noun object: "gibt ihm das Buch", as a dative noun does ("gibt
-// dem Hund das Buch"). `splitDative` hoists the recipient into that slot only when its head's forms
-// say `animate`, and a pronoun's forms carry no such key — A203 made `tonicHeadForms` count a
-// personal pronoun as animate, which is why it takes the bare dative at all, but `splitDative` reads
-// the raw forms. So the pronoun trails the object, "gibt das Buch ihm", which reads as contrastive
-// ("gives the book to HIM"), and after "nicht" as "not to him". Found reproducing A223.
+// dem Hund das Buch"). `splitDative` hoisted the recipient into that slot only when its head's forms
+// said `animate`, and a pronoun's forms carry no such key — A203 made `tonicHeadForms` count a
+// personal pronoun as animate, which is why it takes the bare dative at all, but `splitDative` read
+// the raw forms. So the pronoun trailed the object, "gibt das Buch ihm", which reads as contrastive
+// ("gives the book to HIM"), and after "nicht" as "not to him". Found reproducing A223. The fix
+// reads the recipient's animacy off `tonicHeadForms` when the recipient is a pronoun.
 describe('known bugs: a German dative pronoun trails the object (A229)', () => {
   const to = (verb: string, recipient: Parameters<typeof np>[0], extra: Parameters<typeof clause>[2] = {}, recipientExtra = {}) =>
     sayAll(clause(np('CAT'), verb, { directObject: np('BOOK'), complements: { terminus: { phrase: np(recipient, recipientExtra) } }, ...extra })).de;
 
-  test.fails('the pronoun leads the noun object, in every ditransitive and every clause', () => {
+  test('the pronoun leads the noun object, in every ditransitive and every clause', () => {
     expect(to('GIVE', 'THIRD_PERSON')).toBe('der Kater gibt ihm das Buch.');
     expect(to('GIVE', 'THIRD_PERSON', {}, { gender: 'fem' })).toBe('der Kater gibt ihr das Buch.');
     expect(to('GIVE', 'FIRST_PERSON')).toBe('der Kater gibt mir das Buch.');
@@ -366,6 +367,24 @@ describe('known bugs: a German dative pronoun trails the object (A229)', () => {
       ...clause(np('GENERIC_PERSON'), 'GIVE', { directObject: np('BOOK', { definiteness: 'indefinite' }), complements: { terminus: { phrase: np('THIRD_PERSON') } } }),
       infinitive: true,
     }).de).toBe('ihm ein Buch geben.');
+  });
+
+  // The pronoun takes the noun recipient's slot wherever that slot is: in front of the object in the
+  // verb-final tail, the prospective's zu-group and a negated relative, and ahead of the "nicht" that
+  // leads a place, exactly where "dem Hund" stands.
+  test('the pronoun stands where a noun recipient stands, in every tense and clause', () => {
+    expect(to('SEND', 'THIRD_PERSON', { verbPhrase: { tense: 'future' } }, { number: 'plural' })).toBe('der Kater wird ihnen das Buch schicken.');
+    expect(to('SHOW', 'SECOND_PERSON', { verbPhrase: { tense: 'past' } })).toBe('der Kater zeigte dir das Buch.');
+    expect(to('GIVE', 'THIRD_PERSON', { verbPhrase: { aspect: 'prospective' } })).toBe('der Kater ist im Begriff, ihm das Buch zu geben.');
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'GIVE', negative: true }, directObject: np('BOOK'), complements: { terminus: { phrase: np('THIRD_PERSON', { gender: 'fem' }) } } },
+    }), 'RUN')).de).toBe('der Kater, der ihr das Buch nicht gibt, läuft.');
+    const withPlace = (recipient: string) => sayAll(clause(np('CAT'), 'GIVE', {
+      directObject: np('BOOK'), verbPhrase: { negative: true },
+      complements: { terminus: { phrase: np(recipient) }, locative: { phrase: np('HOUSE') } },
+    })).de;
+    expect(withPlace('THIRD_PERSON')).toBe('der Kater gibt ihm das Buch nicht im Haus.');
+    expect(withPlace('DOG')).toBe('der Kater gibt dem Hund das Buch nicht im Haus.');
   });
 
   test('regression: two pronouns, a noun recipient, the experiencer, and English and Japanese', () => {

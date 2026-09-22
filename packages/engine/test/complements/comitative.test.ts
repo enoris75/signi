@@ -322,7 +322,7 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
     });
     expect(around('source', 'COME').de).toBe('der Kater kommt von ihm.');
     expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: HIM } } })).de)
-      .toBe('der Mann gibt das Buch ihm.');
+      .toBe('der Mann gibt ihm das Buch.');
     const IT_ = np('THIRD_PERSON', { gender: 'neut' });
     expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: IT_ } } }))).toMatchObject({
       es: 'el gato va a ello.', pt: 'o gato vai a isso.', it: 'il gatto va a esso.',

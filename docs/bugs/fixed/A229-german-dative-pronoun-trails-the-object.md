@@ -9,7 +9,7 @@ him": *gibt das Buch nicht ihm*.
 
 [`splitDative`](../../../packages/engine/src/languages/de/splitDative.ts) moves the terminus into the
 slot ahead of the object only when its head's forms say `animate`, and a pronoun's forms carry no such
-key. [A203](../fixed/A203-pronoun-in-the-other-complements.md) made
+key. [A203](A203-pronoun-in-the-other-complements.md) made
 [`tonicHeadForms`](../../../packages/engine/src/functions/tonicHeadForms.ts) count a personal pronoun as
 animate, which is why the pronoun takes the bare dative at all (*ihm*, not *in ihn*), but
 `splitDative` reads the raw forms. So the pronoun keeps the trailing slot of an inanimate goal.
@@ -46,7 +46,7 @@ clitic, not an order, and it is left as a lead.
 
 **Nothing shipped shows it.** No definition or UI string gives to a pronoun.
 
-Found reproducing [A223](A223-german-inanimate-terminus-of-give-and-connect.md).
+Found reproducing [A223](../A-must-fix/A223-german-inanimate-terminus-of-give-and-connect.md).
 
 ## Shape of the fix
 
@@ -70,3 +70,20 @@ pins are independent.
 | | |
 |---|---|
 | **Test** | `complements/terminus.test.ts` → *known bugs: a German dative pronoun trails the object (A229)* (1 `test.fails`, plus a regression test for two pronouns, a noun recipient, the experiencer, and English and Japanese) |
+
+## Resolved
+
+**2026-09-22.** [`splitDative`](../../../packages/engine/src/languages/de/splitDative.ts) reads the
+recipient's animacy off the forms the terminus branch of `complementsPhrase` chooses its adposition
+from: [`tonicHeadForms`](../../../packages/engine/src/functions/tonicHeadForms.ts) when
+`tonicPronoun` gives the recipient a tonic form, the noun's own forms otherwise. A personal pronoun
+is hoisted into the dative slot ahead of the object, in the main clause, the relative, the command
+and the citation alike; a neuter one keeps A203's inanimate branch. Every **Want** above renders.
+
+**Passing test moved.** `complements/comitative.test.ts` → *known bugs: a pronoun in the other
+adposition-bearing complements* → *a personal pronoun takes the animate branch, and a neuter one does
+not*: `der Mann gibt das Buch ihm.` → `der Mann gibt ihm das Buch.`
+
+| | |
+|---|---|
+| **Tests** | `complements/terminus.test.ts` → *known bugs: a German dative pronoun trails the object (A229)*, the `test.fails` now passing, plus an added case putting the pronoun where a noun recipient stands (the future, the past of SHOW, the prospective's zu-group, a negated relative, and ahead of the "nicht" that leads a place); `languages/de/splitDative.test.ts` → a personal pronoun split out, a neuter one left among the rest |
