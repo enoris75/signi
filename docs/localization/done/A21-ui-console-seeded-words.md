@@ -7,7 +7,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 against the plan.
 
 **Why it was ready:** the phrase console (P02) left "every new caption, title and message" as an English
-literal for `/localize` ([P02 README, *Left open*](../../features/P-planning/P02-phrase-console/README.md)),
+literal for `/localize` ([P02 README, *Left open*](../../features/Z-Done/P02-phrase-console/README.md)),
 and [C15](C15-ui-literal-by-design.md) recorded the whole surface as outstanding. This file took the part
 that needed no new word. The console's own vocabulary is in [B42](B42-ui-console-name.md),
 [B45](B45-ui-console-lines-history-pins.md), [B46](B46-ui-console-topics-and-labels.md)

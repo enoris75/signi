@@ -7,12 +7,13 @@ previews on the canvas, and every canvas action is written back to the console a
 equals.
 **Shape:** a pure text ⇄ selection layer (parse, complete, apply, print) over the existing reducers,
 and one console component. No change to the engine, the API or the saved-phrase format.
-**Relation to [P01](../../Z-Done/P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
+**Relation to [P01](../P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
 the keyboard (cursor, focus ring, key tips, box letters). The console is the fast path, and it
 replaces P01's command palette and hint bar.
-**Status:** phases 1–6 shipped — the console builds, previews and edits every
-part of a phrase the canvas can, and writes every canvas change back as the command it equals. See
-[Phases](#6-phases) for what each covered, and the notes under the table for what the plan left open.
+**Status:** done, 2026-09-22 — phases 1–6 shipped, and the console builds, previews and edits
+every part of a phrase the canvas can, and writes every canvas change back as the command it equals.
+See [Phases](#6-phases) for what each covered, and the notes under the table for what the plan left
+open.
 **Drawings:** [`artwork/`](artwork/) — six images exported from page *Phrase console (P02)* of
 the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded in
 the sections they illustrate. They show the flat lines of phases 1–5; the bracketed lines of phase 6
@@ -352,7 +353,7 @@ matches. "Code" is the existing function each one reaches.
 | `/undo` · `/redo` | history (P01 phase 5) |
 | `/words` · `/help [command]` | words panel · help |
 
-New grammar features add a command in the same change — e.g. [A01 passive voice](../../Z-Done/A01-passive-voice/README.md) would add `/passive` · `/active`.
+New grammar features add a command in the same change — e.g. [A01 passive voice](../A01-passive-voice/README.md) would add `/passive` · `/active`.
 
 ### Subordinate phrases — *artboard "Subordinate phrases"*
 
@@ -630,10 +631,21 @@ in a flat line it was hard to tell which word a setting belonged to.
 - **The chip** reads the end of the selection. While editing, it names the word the caret is on:
   `EDITING PERIOD 1 › VERB love ›`.
 
-**Left open.** Every new caption, title and message is an English literal marked for `/localize`
-(command descriptions already come from the catalogue where the words are seeded). The IME slashes
-(`・`, `／`) and the ISO backtick are in, and still to be tried on real input methods and keyboards.
-The transcript lives for the session.
+**Left open.** The console's English was cleared after phase 6 by the localization catalogue, not
+here: [A21](../../../localization/done/A21-ui-console-seeded-words.md) and
+[A22](../../../localization/done/A22-ui-console-completion-rows.md) took the frame, the lists and the
+completion rows, [B42–B47](../../../localization/localization-tasks.md) the names and the command
+purposes, [C21](../../../localization/done/C21-ui-console-diagnostics.md) the 85 diagnostics and
+[C22](../../../localization/done/C22-ui-help-prose.md) the help prose, so every caption, title and
+message now reads from `UI_STRINGS` with its English only as the fallback. Two things stand:
+
+- The IME slashes (`・`, `／`) and the ISO backtick are in — [`lex.ts`](../../../../packages/frontend/src/console/language/lex.ts)
+  opens a command on either slash, and `Code:Backquote` matches `IntlBackslash` too on a Mac — but
+  only synthetic events exercise them. They want a real Japanese input method and a real ISO
+  keyboard, which no test here can give them.
+- The transcript lives for the session. History and pins are kept per browser
+  (`signi:consoleHistory`, `signi:consolePins`); the scrollback is not, and whether it should be was
+  never decided.
 
 ## 7. Testing
 

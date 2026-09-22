@@ -290,7 +290,7 @@ word holds now is the catalogue's own name for it, as the completion row's "now 
 
 ## Avoidable: the console could do it instead of saying it
 
-Recorded, not built. [P02](../../features/P-planning/P02-phrase-console/README.md)'s structured lines
+Recorded, not built. [P02](../../features/Z-Done/P02-phrase-console/README.md)'s structured lines
 (decision 7) say that when the console knows the one next step, it takes it rather than saying it. Each of
 these knows exactly what the line should be:
 

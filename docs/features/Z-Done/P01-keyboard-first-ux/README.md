@@ -5,7 +5,7 @@ boxes and periods, every grammatical control, clause relations, panels, save/loa
 **Shape:** one cursor, and keys that act on whatever the cursor is on — a box, or the period once
 you step out. <kbd>Ctrl</kbd> keys act on the app. There is no Alt/⌥ layer. One keymap registry drives the
 handlers, key tips, tooltips and the shortcuts sheet.
-**Relation to [P02](../../P-planning/P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
+**Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
 **Status:** all five phases shipped — every control on the page is reachable without a mouse, and
