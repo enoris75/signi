@@ -61,7 +61,8 @@ export function complementSegs(
     // The factitive object complement takes the same shapes as the subject complement, and for the
     // same reason: 「家を刑務所にする」 is 「家が刑務所になる」 under a causer, so an adjective head
     // takes its く-form (家を美しくする) and a noun head the に. Only the essive differs — として
-    // attaches to the word as it stands — so it falls through to the particle path below.
+    // attaches to the word as it stands, or to a na-adjective's stem (A224) — so it falls through to
+    // the particle path below.
     const factitive = type === 'objectPredicative' && objectPredication(c) !== 'essive';
     // Subject complement (of なる/見える etc.), by head type:
     //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
@@ -136,7 +137,14 @@ export function complementSegs(
       }
     }
     // The particle below attaches to the whole group, not to each conjunct: 「猫と犬に」.
-    segs.push(...elSegs(c.phrase));
+    // The essive's として is no noun, so a na-adjective (or a noun-adjective linked by の) takes it on
+    // its stem, not on the な / の that links it to a noun after it: 有効として, 茶色として (A224). A lone
+    // adjective only; an i- or た-adjective keeps its form as it stands.
+    const [lone] = c.phrase.conjuncts;
+    const essiveAdj = type === 'objectPredicative' && c.phrase.conjuncts.length === 1 && lone?.head.forms['role'] === 'adjective'
+      ? jaAdjClass(lone.head.forms['base'] ?? '', lone.head.forms['reading'])
+      : undefined;
+    segs.push(...(essiveAdj?.kind === 'na' ? [wordSeg(essiveAdj.stem, essiveAdj.reading)] : elSegs(c.phrase)));
     // The relational noun sits between the place and its particle, for a path and a place alike:
     // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
     const spec = type === 'route' || type === 'locative'

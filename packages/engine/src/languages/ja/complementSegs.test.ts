@@ -3,7 +3,7 @@ import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from 
 import type { RubySegment } from '../../types.js';
 import { complementSegs } from './complementSegs.js';
 import {
-  adj, complement, complements, concept, DENSETSU, el, ERABU, type Forms, group, HAYAKU, HAYASA, HIKARI, HOUHOU, ICHIBA, IE, INU,
+  adj, CHAIRO, complement, complements, concept, DENSETSU, el, ERABU, type Forms, group, HAYAKU, HAYASA, HIKARI, HOUHOU, ICHIBA, IE, INU,
   MIZU, NEKO, np, OOKII, SHIAWASE, TAKAI, YOI, vp,
 } from './ja.fixtures.js';
 
@@ -65,6 +65,19 @@ describe('complementSegs', () => {
         .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'に' }]);
       expect(complementSegs(complements({ predicative: complement(np({ role: 'adjective', base: '疲れた', reading: 'つかれた' })) })))
         .toEqual([{ t: '疲れて', r: 'つかれて' }, { t: 'いるように' }]);
+    });
+  });
+
+  describe('the essive object complement', () => {
+    const essive: Specifier[] = [{ kind: 'predication', value: 'essive' }];
+
+    // A224: として is no noun, so a na- or の-adjective takes it on its stem, its reading cut the same way.
+    test('a na- or の-adjective takes として on its stem; a noun takes it as it stands', () => {
+      expect(complementSegs(complements({ objectPredicative: complement(np(SHIAWASE), essive) })))
+        .toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'として' }]);
+      expect(complementSegs(complements({ objectPredicative: complement(np(CHAIRO), essive) })))
+        .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'として' }]);
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(DENSETSU), essive) })))).toBe('伝説として');
     });
   });
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase, Specifier } from '@signi/shared';
-import { clause, np, sayAll } from '../harness.js';
+import { clause, furigana, np, say, sayAll } from '../harness.js';
 
 // The OBJECT complement (localization C12) — the subject complement's counterpart on the direct
 // object. It says what the object is made into ("transform the house into a prison") or what it is
@@ -97,7 +97,7 @@ describe('objectPredicative', () => {
   });
 });
 
-// A224. The Japanese essive として follows a noun as it stands (刑務所として). An adjective head is
+// A224. The Japanese essive として follows a noun as it stands (刑務所として). An adjective head was
 // rendered as it stands too, which for a na-adjective is its attributive form: 有効なとして, 幸せなとして.
 // The な (and the の of a noun-adjective, 茶色の) links a word to a noun after it, and として is no
 // noun: the stem takes it, 有効として. The factitive branch above it already cuts the stem, by
@@ -109,12 +109,28 @@ describe('known bugs: a Japanese na-adjective keeps its な before として (A2
   const seesAs = (adjective: string, verbPhrase = {}) =>
     sayAll(clause(np('CAT'), 'SEE', { verbPhrase, directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np(adjective), specifiers: ESSIVE } } })).ja;
 
-  test.fails('the stem takes として', () => {
+  test('the stem takes として', () => {
     expect(acquireAs('VALID').ja).toBe('物体を有効として取得する。');
     expect(acquireAs('VALID', np('OBJECT_THING', { definiteness: 'indefinite' })).ja).toBe('物体を有効として取得する。');
     expect(seesAs('HAPPY')).toBe('猫は家を幸せとして見ます。');
     expect(seesAs('VALID', { tense: 'past' })).toBe('猫は家を有効として見ました。');
     expect(seesAs('BROWN')).toBe('猫は家を茶色として見ます。');
+  });
+
+  test('more na- and の-adjectives, another verb, the negative and the imperative, and the stem’s own furigana', () => {
+    expect(seesAs('LAZY')).toBe('猫は家を怠惰として見ます。');
+    expect(seesAs('CAREFUL')).toBe('猫は家を慎重として見ます。');
+    expect(seesAs('WILD')).toBe('猫は家を野生として見ます。');
+    expect(seesAs('SAVED')).toBe('猫は家を保存済みとして見ます。');
+    expect(seesAs('HAPPY', { negative: true })).toBe('猫は家を幸せとして見ません。');
+    expect(uses(np('HAPPY')).ja).toBe('猫は家を幸せとして使います。');
+    expect(say({
+      ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('VALID'), specifiers: ESSIVE } } }),
+      imperative: true,
+    }, 'ja')).toBe('家を有効として見てください。');
+    expect(furigana(clause(np('CAT'), 'SEE', {
+      directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('BROWN'), specifiers: ESSIVE } },
+    }))).toEqual(['ねこ', 'いえ', 'ちゃいろ', 'みます']);
   });
 
   test('regression: a noun, the factitive and the other six', () => {

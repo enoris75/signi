@@ -53,3 +53,20 @@ adjective of `jaAdjClass` kind `na` pushes its stem (`wordSeg(stem, reading)`) i
 | | |
 |---|---|
 | **Test** | `complements/objectPredicative.test.ts` → *known bugs: a Japanese na-adjective keeps its な before として (A224)* (1 `test.fails`, plus a regression test for a noun, the factitive and the other six) |
+
+## Resolved
+
+**2026-09-22**, with the trial above as written.
+
+- [`ja/complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts) — on the
+  particle path, an essive object complement whose one conjunct is an adjective of `jaAdjClass` kind
+  `na` (a na-adjective, or a noun-adjective linked by の) pushes its stem, with its reading cut the
+  same way, in place of `elSegs(c.phrase)`; として follows as before. Everything else keeps `elSegs`.
+
+The decisions stayed as ruled: a coordination (`幸せなか茶色のとして`) and the i- and た-adjectives
+(`大きいとして`, `疲れたとして`) are left as they were and not pinned. ACCEPT stays on its literal; nothing
+shipped moved.
+
+| | |
+|---|---|
+| **Tests** | `complements/objectPredicative.test.ts` → *known bugs: a Japanese na-adjective keeps its な before として (A224)*, the `test.fails` now passing, plus one added case: four more na- and の-adjectives (怠惰, 慎重, 野生, 保存済み), USE, the negative and the imperative, and the stem's furigana (ちゃいろ). Colocated: `ja/complementSegs.test.ts` → *the essive object complement* (the stem and its reading for a na- and a の-adjective; a noun as it stands) |
