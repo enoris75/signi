@@ -199,6 +199,13 @@ describe('renderClause', () => {
         .toBe('der Kater isst ihn nicht schnell');
     });
 
+    // A212: a coordination holding a pronoun renders in the noun slot (A53), and leads as a group of
+    // known nouns does.
+    test('a coordinated pronoun leads nicht and the adverb with its group', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modifier: concept(SCHNELL) }), { directObject: el(np(ER), np(MAUS)) })))
+        .toBe('der Kater isst ihn und die Maus nicht schnell');
+    });
+
     test('nicht scopes over the whole prospective, ahead of im Begriff', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective' })))).toBe('der Kater ist nicht im Begriff zu essen');
       // A frequency adverb scopes over the prospective too, so it follows the "nicht" and both stand

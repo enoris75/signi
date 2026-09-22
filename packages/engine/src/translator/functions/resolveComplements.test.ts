@@ -58,6 +58,17 @@ describe('resolveComplements', () => {
       expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'] })).toEqual(['bare']);
     });
 
+    // A226: the rule is for the definite, chosen or defaulted; any other determiner was asked for
+    // and keeps its meaning ("at another time", "at no other time").
+    test('only the definite goes bare; any other determiner stays', () => {
+      expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], definiteness: 'definite' })).toEqual(['bare']);
+      expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], definiteness: 'bare' })).toEqual(['bare']);
+      for (const definiteness of ['indefinite', 'this', 'that', 'no'] as const) {
+        expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], definiteness })).toEqual([definiteness]);
+      }
+      expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], definiteness: 'all', number: 'plural' })).toEqual(['all']);
+    });
+
     test('a bare measure noun, or a possessed one, keeps its article', () => {
       expect(determiners('manner', { concept: 'SPEED' })).toEqual(['definite']);
       expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'], possessor: { concept: 'CAT' } })).toEqual(['definite']);

@@ -76,3 +76,32 @@ preposition, not the article, and it is not pinned.
 | | |
 |---|---|
 | **Test** | `complements/manner.test.ts` → *known bugs: a measure manner adverbial loses the determiner it was given (A226)* (1 `test.fails`, plus a regression test for the definite and the bare, a plain measure noun, the gloss, and Spanish, Portuguese and Japanese) |
+
+## Resolved
+
+**2026-09-22.** Fixed as the **Shape of the fix** describes, in the `manner` loop of
+[`resolveComplements`](../../../packages/engine/src/translator/functions/resolveComplements.ts): the
+condition now also requires the conjunct's determiner to be the definite, chosen or the slot's
+default (`(definiteness ?? 'definite') === 'definite'`), so only the definite is forced bare. Every
+other determiner keeps its article and its meaning, and "no" keeps its negation and the Romance
+negator. The loop's comment now says the rule is for the definite, and that "the determiner is fixed
+for this slot" is true of the builder only, not of a gloss or the console. No passing test moved.
+
+**TIME in Italian and French: left as it is.** *a un altro tempo* and *à un autre temps* are what
+the gloss says too. The idiom (*un'altra volta*, *une autre fois*) is a matter of TIME's word and
+the measure preposition, not the article, and nothing pins it.
+
+- **Engine changed:** [`resolveComplements.ts`](../../../packages/engine/src/translator/functions/resolveComplements.ts)
+  (the `manner` condition and its comment).
+- **Tests:** [`complements/manner.test.ts`](../../../packages/engine/test/complements/manner.test.ts)
+  → *known bugs: a measure manner adverbial loses the determiner it was given (A226)*. The pinning
+  `test.fails` is now a passing `test` with its assertions unchanged. The block comment's sentence
+  about the rule is now in the past tense. A new case in the same block covers `that`, `some`,
+  `many`, a `no` measure in the past in all seven languages, and a coordination whose definite
+  conjunct goes bare while its indefinite one keeps its article.
+
+  Colocated: a new case in
+  [`resolveComplements.test.ts`](../../../packages/engine/src/translator/functions/resolveComplements.test.ts)
+  (a chosen definite and a bare go bare; indefinite, `this`, `that`, `no` and `all` stay).
+- **e2e:** unchanged. `manner.spec.ts` builds the default definite, which still goes bare (*at high
+  speed*), and FAST's definition is a verbless gloss that never reaches `resolveComplements`.

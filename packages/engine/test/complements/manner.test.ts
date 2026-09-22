@@ -346,7 +346,7 @@ describe('known bugs: a `no` in a similative manner phrase', () => {
 
 // A226. `resolveComplements` forces an adjective-modified measure adverbial bare, because a rate is
 // not an identifiable thing and "at the high speed" reads oddly — the tests above pin that for the
-// definite. The rule does not look at which determiner it overrides, so it takes every one: the
+// definite. The rule did not look at which determiner it overrode, so it took every one: the
 // indefinite ("at other time", "zu anderer Zeit"), a quantifier ("at other times" for "at all other
 // times") and "no", whose negation goes with it ("runs at other time" for "runs at no other time").
 // AGAIN's verbless gloss on the same noun keeps its article ("at another time"), which is what
@@ -355,7 +355,7 @@ describe('known bugs: a measure manner adverbial loses the determiner it was giv
   const OTHER_TIME = (extra: Partial<NounPhrase>) => np('TIME', { adjectives: ['OTHER'], ...extra });
   const four = (said: Record<string, string>) => ({ en: said['en'], it: said['it'], fr: said['fr'], de: said['de'] });
 
-  test.fails('only the definite gives way to bare; every other determiner stays', () => {
+  test('only the definite gives way to bare; every other determiner stays', () => {
     expect(four(runManner(OTHER_TIME({ definiteness: 'indefinite' })))).toEqual({
       en: 'the cat runs at another time.', it: 'il gatto corre a un altro tempo.',
       fr: 'le chat court à un autre temps.', de: 'der Kater läuft zu einer anderen Zeit.',
@@ -378,6 +378,34 @@ describe('known bugs: a measure manner adverbial loses the determiner it was giv
       en: 'the cat runs at no other time.', it: 'il gatto non corre a nessun altro tempo.',
       fr: 'le chat ne court à aucun autre temps.', de: 'der Kater läuft zu keiner anderen Zeit.',
       es: 'el gato no corre a ningún otro tiempo.', ja: '猫はどの別の時間でも走りません。', pt: 'o gato não corre a nenhum outro tempo.',
+    });
+  });
+
+  test('the other demonstrative and quantifiers stay, "no" negates in the past, and each conjunct decides for itself', () => {
+    expect(four(runManner(OTHER_TIME({ definiteness: 'that' })))).toEqual({
+      en: 'the cat runs at that other time.', it: "il gatto corre a quell'altro tempo.",
+      fr: 'le chat court à cet autre temps.', de: 'der Kater läuft zu jener anderen Zeit.',
+    });
+    expect(four(runManner(OTHER_TIME({ definiteness: 'some', number: 'plural' })))).toEqual({
+      en: 'the cat runs at some other times.', it: 'il gatto corre a alcuni altri tempi.',
+      fr: 'le chat court à quelques autres temps.', de: 'der Kater läuft zu einigen anderen Zeiten.',
+    });
+    expect(runManner(np('SPEED', { adjectives: ['HIGH'], definiteness: 'many', number: 'plural' })))
+      .toMatchObject({ en: 'the cat runs at many high speeds.', de: 'der Kater läuft mit vielen hohen Geschwindigkeiten.' });
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      verbPhrase: { tense: 'past' }, complements: { manner: { phrase: np('SPEED', { adjectives: ['HIGH'], definiteness: 'no' }) } },
+    }))).toEqual({
+      en: 'the cat ran at no high speed.', it: 'il gatto non corse a nessuna velocità alta.',
+      fr: 'le chat ne courut à aucune vitesse haute.', de: 'der Kater lief mit keiner hohen Geschwindigkeit.',
+      es: 'el gato no corrió a ninguna velocidad alta.', ja: '猫はどの高い速さでも走りませんでした。', pt: 'o gato não correu a nenhuma velocidade alta.',
+    });
+    // A group: the definite conjunct goes bare, the indefinite one keeps its article.
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: {
+      conjuncts: [np('SPEED', { adjectives: ['HIGH'] }), np('SPEED', { adjectives: ['LOW'], definiteness: 'indefinite' })], conjunction: 'or',
+    } } } }))).toMatchObject({
+      en: 'the cat runs at high speed or a low speed.',
+      de: 'der Kater läuft mit hoher Geschwindigkeit oder mit einer niedrigen Geschwindigkeit.',
+      it: 'il gatto corre a velocità alta o a una velocità bassa.',
     });
   });
 
