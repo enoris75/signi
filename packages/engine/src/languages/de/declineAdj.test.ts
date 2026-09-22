@@ -25,4 +25,13 @@ describe('declineAdj', () => {
     expect(declineAdj('müde', 'acc', 'masc', false, 'definite')).toBe('müden');
     expect(declineAdj('müde', 'nom', 'masc', false, 'indefinite')).toBe('müder');
   });
+
+  test('a stem in unstressed -el loses its own e instead', () => {
+    expect(declineAdj('dunkel', 'nom', 'masc', false, 'definite')).toBe('dunkle');
+    expect(declineAdj('dunkel', 'nom', 'fem', false, 'indefinite')).toBe('dunkle');
+    expect(declineAdj('dunkel', 'dat', 'neut', false, 'bare')).toBe('dunklem');
+    // A comparative or superlative stem is past the -el: dunklere, dunkelste.
+    expect(declineAdj('dunkler', 'nom', 'masc', false, 'definite')).toBe('dunklere');
+    expect(declineAdj('dunkelst', 'nom', 'masc', false, 'definite')).toBe('dunkelste');
+  });
 });

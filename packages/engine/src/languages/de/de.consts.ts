@@ -83,6 +83,14 @@ export const WUERDE: Record<string, string> = {
   '1pl': 'würden', '2pl': 'würdet', '3pl': 'würden',
 };
 
+// Konjunktiv II of "haben", the finite verb of a conditional modal's past: the pluperfect subjunctive
+// with the modal's infinitive standing in for its participle ("er hätte laufen sollen", "er hätte
+// laufen können"). It holds V2 as werden and würde do, over the whole infinitive stack.
+export const HAETTE: Record<string, string> = {
+  '1sg': 'hätte', '2sg': 'hättest', '3sg': 'hätte',
+  '1pl': 'hätten', '2pl': 'hättet', '3pl': 'hätten',
+};
+
 // "sein", the copula of the prospective ("ist im Begriff zu gehen") and the resultative
 // auxiliary of the verbs that select it ("ist gegangen"). Only present and past are synthetic;
 // the future is periphrastic on "werden" (see `verbGroup`), so no future column is needed.

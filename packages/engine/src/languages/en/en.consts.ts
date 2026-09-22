@@ -96,7 +96,14 @@ export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'at home' };
  * which are ordinary verbs and therefore negate with do-support ("did not have to go"). A
  * finite modal form is one or the other depending on its *first* word, which this decides.
  */
-export const MODAL_AUX = new Set(['must', 'can', 'could', 'will', 'would', 'shall', 'may', 'might']);
+export const MODAL_AUX = new Set(['must', 'can', 'could', 'will', 'would', 'shall', 'should', 'may', 'might']);
+
+/**
+ * The finite forms of "be", which open a suppletive modal periphrasis that is no ordinary verb: MAY's
+ * past "was allowed to" negates and inverts on its "be" as a modal auxiliary does ("was not allowed
+ * to go", "was the cat allowed to go?"), never with do-support.
+ */
+export const FINITE_BE = new Set(['am', 'is', 'are', 'was', 'were']);
 
 // The coordinating conjunctions, as English surface words.
 export const COORD_WORDS: Record<CoordConjunction, string> = {
