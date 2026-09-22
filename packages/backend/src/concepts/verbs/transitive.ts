@@ -2297,6 +2297,78 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // P09's take (localization B61): take hold of, obtain — the sense each language has one plain
+    // verb for. The carry-away sense (portare via, emporter, mitnehmen, llevar) is not this concept.
+    // Portuguese pegar is Brazilian, as the corpus's pt is; tomar elsewhere. Seeded ahead of B61's
+    // other verbs because B65's HAND is glossed on it.
+    id: 'TAKE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
+    description: 'to get hold of with the hand',
+    emoji: '✊',
+    isA: 'ACQUIRE',
+    forms: {
+      en: {
+        base: 'take',
+        '1sg_present': 'take', '2sg_present': 'take', '3sg_present': 'takes',
+        '1pl_present': 'take', '2pl_present': 'take', '3pl_present': 'take',
+        past: 'took',
+      },
+      it: {
+        base: 'prendere',
+        '1sg_present': 'prendo', '2sg_present': 'prendi', '3sg_present': 'prende',
+        '1pl_present': 'prendiamo', '2pl_present': 'prendete', '3pl_present': 'prendono',
+        '1sg_past': 'presi', '2sg_past': 'prendesti', '3sg_past': 'prese',
+        '1pl_past': 'prendemmo', '2pl_past': 'prendeste', '3pl_past': 'presero',
+        '1sg_future': 'prenderò', '2sg_future': 'prenderai', '3sg_future': 'prenderà',
+        '1pl_future': 'prenderemo', '2pl_future': 'prenderete', '3pl_future': 'prenderanno',
+      },
+      fr: {
+        base: 'prendre',
+        '1sg_present': 'prends', '2sg_present': 'prends', '3sg_present': 'prend',
+        '1pl_present': 'prenons', '2pl_present': 'prenez', '3pl_present': 'prennent',
+        '1sg_past': 'pris', '2sg_past': 'pris', '3sg_past': 'prit',
+        '1pl_past': 'prîmes', '2pl_past': 'prîtes', '3pl_past': 'prirent',
+        '1sg_future': 'prendrai', '2sg_future': 'prendras', '3sg_future': 'prendra',
+        '1pl_future': 'prendrons', '2pl_future': 'prendrez', '3pl_future': 'prendront',
+      },
+      de: {
+        base: 'nehmen',
+        '1sg_present': 'nehme', '2sg_present': 'nimmst', '3sg_present': 'nimmt',
+        '1pl_present': 'nehmen', '2pl_present': 'nehmt', '3pl_present': 'nehmen',
+        '1sg_past': 'nahm', '2sg_past': 'nahmst', '3sg_past': 'nahm',
+        '1pl_past': 'nahmen', '2pl_past': 'nahmt', '3pl_past': 'nahmen',
+        '2sg_imperative': 'nimm', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'tomar',
+        '1sg_present': 'tomo', '2sg_present': 'tomas', '3sg_present': 'toma',
+        '1pl_present': 'tomamos', '2pl_present': 'tomáis', '3pl_present': 'toman',
+        '1sg_past': 'tomé', '2sg_past': 'tomaste', '3sg_past': 'tomó',
+        '1pl_past': 'tomamos', '2pl_past': 'tomasteis', '3pl_past': 'tomaron',
+        '1sg_future': 'tomaré', '2sg_future': 'tomarás', '3sg_future': 'tomará',
+        '1pl_future': 'tomaremos', '2pl_future': 'tomaréis', '3pl_future': 'tomarán',
+      },
+      ja: {
+        base: '取る',
+        reading: 'とる',
+        masu_present: '取ります',
+        masu_present_reading: 'とります',
+      },
+      pt: {
+        base: 'pegar',
+        '1sg_present': 'pego', '2sg_present': 'pega', '3sg_present': 'pega',
+        '1pl_present': 'pegamos', '2pl_present': 'pegam', '3pl_present': 'pegam',
+        '1sg_past': 'peguei', '2sg_past': 'pegou', '3sg_past': 'pegou',
+        '1pl_past': 'pegamos', '2pl_past': 'pegaram', '3pl_past': 'pegaram',
+        '1sg_future': 'pegarei', '2sg_future': 'pegará', '3sg_future': 'pegará',
+        '1pl_future': 'pegaremos', '2pl_future': 'pegarão', '3pl_future': 'pegarão',
+      },
+    },
+  },
+
+  {
     // The genus of CUT ("to divide with a sharp blade") — the separation verb its dictionary
     // definition cites as its genus (see the B13 verb-definition task). Italian dividere has a
     // strong remote past (divise) and participle (diviso); German takes the plain teilen, not the

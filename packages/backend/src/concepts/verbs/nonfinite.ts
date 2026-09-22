@@ -558,6 +558,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'adquirindo', participle: 'adquirido' },
     ja: { te: '取得して', te_reading: 'しゅとくして', nai: '取得しない', nai_reading: 'しゅとくしない', passive: '取得される', passive_reading: 'しゅとくされる' },
   },
+  TAKE: {
+    en: { gerund: 'taking', participle: 'taken' },
+    it: { gerund: 'prendendo', participle: 'preso' },
+    fr: { participle: 'pris' }, de: { participle: 'genommen' },
+    es: { gerund: 'tomando', participle: 'tomado' },
+    pt: { gerund: 'pegando', participle: 'pegado' },
+    ja: { te: '取って', te_reading: 'とって', nai: '取らない', nai_reading: 'とらない', passive: '取られる', passive_reading: 'とられる' },
+  },
   DIVIDE: {
     en: { gerund: 'dividing', participle: 'divided' },
     it: { gerund: 'dividendo', participle: 'diviso' },

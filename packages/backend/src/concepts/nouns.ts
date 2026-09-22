@@ -704,6 +704,27 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // P09's point (localization B65), the position: the one sense all seven say with one word. A
+    // score, an item and an aspect grow out of it; the purpose (senso, Sinn, 意味) and the sharp end
+    // (punta, Spitze) are other words, so other concepts. Suffixed as D2 asks: the verb POINT stays
+    // unseeded (C12). German takes "an", like Ort and Ausgangspunkt (A218): an diesem Punkt. Seeded
+    // ahead of B65's other nouns because B61's TURN is glossed on it ("to move around a point").
+    id: 'POINT_NOUN',
+    role: 'noun',
+    description: 'a position with no size',
+    emoji: '🔸',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'point', plural: 'points', count: 'singular' },
+      it: { base: 'punto', plural: 'punti', gender: 'masc', count: 'singular' },
+      fr: { base: 'point', plural: 'points', gender: 'masc', count: 'singular' },
+      de: { base: 'Punkt', plural: 'Punkte', gender: 'masc', count: 'singular', place_prep: 'an' },
+      es: { base: 'punto', plural: 'puntos', gender: 'masc', count: 'singular' },
+      ja: { base: '点', count: 'singular', reading: 'てん' },
+      pt: { base: 'ponto', plural: 'pontos', gender: 'masc', count: 'singular' },
+    },
+  },
   // ── The places of a motion ────────────────────────────────────────
   // Where a motion ends, starts and passes: what the direction, source and route complements indicate
   // (localization B37, "a complement that indicates destinations"). Each is a place, but one reached,
@@ -2280,6 +2301,41 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'período', plural: 'períodos', gender: 'masc', count: 'singular' },
       ja: { base: '期間', count: 'singular', reading: 'きかん' },
       pt: { base: 'período', plural: 'períodos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // P09's day and week (localization B59), periods of time. Seeded ahead of B59's other time words
+  // because B66's LAST_PREVIOUS and NEXT_COMING are said of them ("la settimana scorsa"). Japanese 日
+  // reads ひ on its own; the deictic compounds (今日, 今週) are fused words the engine cannot compose.
+  {
+    id: 'DAY',
+    role: 'noun',
+    description: 'the period of twenty-four hours from one midnight to the next',
+    emoji: '📅',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'day', plural: 'days', count: 'singular' },
+      it: { base: 'giorno', plural: 'giorni', gender: 'masc', count: 'singular' },
+      fr: { base: 'jour', plural: 'jours', gender: 'masc', count: 'singular' },
+      de: { base: 'Tag', plural: 'Tage', gender: 'masc', count: 'singular' },
+      es: { base: 'día', plural: 'días', gender: 'masc', count: 'singular' },
+      ja: { base: '日', count: 'singular', reading: 'ひ' },
+      pt: { base: 'dia', plural: 'dias', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'WEEK',
+    role: 'noun',
+    description: 'a period of seven days',
+    emoji: '🗓️',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'week', plural: 'weeks', count: 'singular' },
+      it: { base: 'settimana', plural: 'settimane', gender: 'fem', count: 'singular' },
+      fr: { base: 'semaine', plural: 'semaines', gender: 'fem', count: 'singular' },
+      de: { base: 'Woche', plural: 'Wochen', gender: 'fem', count: 'singular' },
+      es: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
+      ja: { base: '週', count: 'singular', reading: 'しゅう' },
+      pt: { base: 'semana', plural: 'semanas', gender: 'fem', count: 'singular' },
     },
   },
 
@@ -4878,6 +4934,25 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'ojo', plural: 'ojos', gender: 'masc', count: 'singular' },
       ja: { base: '目', count: 'singular', reading: 'め' },
       pt: { base: 'olho', plural: 'olhos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // P09's hand (localization B65), an organ like TESTICLE and OVARY. Seeded ahead of B65's other
+  // nouns because B61's TAKE is glossed on it ("to acquire objects with the hand"). Italian and
+  // Spanish mano are feminine despite the -o, and Italian's plural is mani.
+  {
+    id: 'HAND',
+    role: 'noun',
+    description: 'the part at the end of the arm one holds things with',
+    emoji: '✋',
+    isA: 'ORGAN',
+    forms: {
+      en: { base: 'hand', plural: 'hands', count: 'singular' },
+      it: { base: 'mano', plural: 'mani', gender: 'fem', count: 'singular' },
+      fr: { base: 'main', plural: 'mains', gender: 'fem', count: 'singular' },
+      de: { base: 'Hand', plural: 'Hände', gender: 'fem', count: 'singular' },
+      es: { base: 'mano', plural: 'manos', gender: 'fem', count: 'singular' },
+      ja: { base: '手', count: 'singular', reading: 'て' },
+      pt: { base: 'mão', plural: 'mãos', gender: 'fem', count: 'singular' },
     },
   },
   {

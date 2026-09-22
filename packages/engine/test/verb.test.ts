@@ -590,7 +590,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['START', 'la gatta ha iniziato.'],
     ['STRIKE', 'la gatta ha colpito.'],
     // soffrire's participle is the strong sofferto, under avere.
-    ['SUFFER', 'la gatta ha sofferto.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['SUFFER', 'la gatta ha sofferto.'], ['TAKE', 'la gatta ha preso.'], ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TRANSFORM', 'la gatta ha trasformato.'],
     // -durre keeps its Latin stem in the participle: tradotto, not *tradutto.

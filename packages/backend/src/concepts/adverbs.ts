@@ -348,6 +348,25 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // P09's still (localization B67), a focus adverb seeded as a verb adverb (P09 D4): up to now,
+    // as before. ALREADY's `frequency` position — before the verb in English, between the auxiliary
+    // and the participle in a compound tense. Its own gloss ("up to now") waits on a temporal
+    // complement (C29). Seeded ahead of B67's other adverbs because B61's KEEP is glossed on it.
+    id: 'STILL',
+    role: 'adverb',
+    description: 'up to now; as before',
+    emoji: '⏸️',
+    forms: {
+      en: { base: 'still', subtype: 'frequency' },
+      it: { base: 'ancora', subtype: 'frequency' },
+      fr: { base: 'encore', subtype: 'frequency' },
+      de: { base: 'noch', subtype: 'frequency' },
+      es: { base: 'todavía', subtype: 'frequency' },
+      ja: { base: 'まだ', subtype: 'frequency' },
+      pt: { base: 'ainda', subtype: 'frequency' },
+    },
+  },
+  {
     // A short time ago: NEW is "that has been made recently" (localization C24). No subtype — it
     // follows the verb and its object, and a compound tense keeps it after the participle ("has been
     // made recently", "è stato fatto di recente"). Italian di recente, the everyday form.
