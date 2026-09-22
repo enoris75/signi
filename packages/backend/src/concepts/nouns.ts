@@ -377,17 +377,21 @@ export const nouns: ConceptSeed[] = [
     // The temporal head of the frequency adverbials ALWAYS / NEVER — "at all times" / "at no
     // time". A measure, like SPEED, so it enters a manner/frequency adverbial under "at" (it/es/pt
     // "a", fr "à"). Countable: "at no time" is singular, "at all times" plural.
+    //
+    // Temporal: it names a point in time, an occasion, not a rate as SPEED does. So under an
+    // adjective it keeps the article a rate drops, "at the other time" beside "at high speed"
+    // (A235), and German says it with "zu" + dative, "zu allen Zeiten", not measure's "mit" (A60).
     id: 'TIME',
     role: 'noun',
     description: 'the indefinite continued progress of existence; an occasion',
     emoji: '⏰',
     mannerRelation: 'measure',
+    temporal: true,
     forms: {
       en: { base: 'time', plural: 'times', count: 'singular' },
       it: { base: 'tempo', plural: 'tempi', gender: 'masc', count: 'singular' },
       fr: { base: 'temps', plural: 'temps', gender: 'masc', count: 'singular' },
-      // A point in time takes "zu" in a German manner adverbial ("zu allen Zeiten"), not measure's "mit".
-      de: { base: 'Zeit', plural: 'Zeiten', gender: 'fem', count: 'singular', temporal: '1' },
+      de: { base: 'Zeit', plural: 'Zeiten', gender: 'fem', count: 'singular' },
       es: { base: 'tiempo', plural: 'tiempos', gender: 'masc', count: 'singular' },
       ja: { base: '時間', count: 'singular', reading: 'じかん' },
       pt: { base: 'tempo', plural: 'tempos', gender: 'masc', count: 'singular' },

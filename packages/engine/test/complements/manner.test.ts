@@ -430,14 +430,30 @@ describe('known bugs: TIME under an adjective goes bare as if it named a rate (A
   const runsAt = (phrase: NounPhrase, tense?: 'past') =>
     sayAll(clause(np('CAT'), 'RUN', { verbPhrase: tense ? { tense } : {}, complements: { manner: { phrase } } }));
 
-  test.fails('TIME keeps the definite article a count noun needs', () => {
+  test('TIME keeps the definite article a count noun needs', () => {
     expect(runsAt(np('TIME', { adjectives: ['OTHER'] })).en).toBe('the cat runs at the other time.');
     expect(runsAt(np('TIME', { adjectives: ['OTHER'] }), 'past').en).toBe('the cat ran at the other time.');
+  });
+
+  test('the plural keeps it too, and German fuses it into "zu" as for a plain TIME', () => {
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'], number: 'plural' }))).toMatchObject({
+      en: 'the cat runs at the other times.', de: 'der Kater läuft zu den anderen Zeiten.',
+    });
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'] })).de).toBe('der Kater läuft zur anderen Zeit.');
+    expect(runsAt(np('TIME', { adjectives: ['OTHER'] }), 'past').de).toBe('der Kater lief zur anderen Zeit.');
+    expect(runsAt(np('TIME')).de).toBe('der Kater läuft zur Zeit.');
   });
 
   test('regression: SPEED goes bare, a plain TIME and an indefinite one keep their article', () => {
     expect(runsAt(np('SPEED', { adjectives: ['HIGH'] })).en).toBe('the cat runs at high speed.');
     expect(runsAt(np('TIME')).en).toBe('the cat runs at the time.');
     expect(runsAt(np('TIME', { adjectives: ['OTHER'], definiteness: 'indefinite' })).en).toBe('the cat runs at another time.');
+  });
+
+  test('regression: SPEED under an adjective is still a rate, bare in the past and in German too', () => {
+    expect(runsAt(np('SPEED', { adjectives: ['HIGH'] }), 'past')).toMatchObject({
+      en: 'the cat ran at high speed.', de: 'der Kater lief mit hoher Geschwindigkeit.', it: 'il gatto corse a velocità alta.',
+    });
+    expect(runsAt(np('SPEED', { adjectives: ['HIGH'] })).de).toBe('der Kater läuft mit hoher Geschwindigkeit.');
   });
 });
