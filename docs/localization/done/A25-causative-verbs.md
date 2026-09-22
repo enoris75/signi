@@ -18,8 +18,8 @@ Inline on each seed block under [concepts/verbs/](../../../packages/backend/src/
 
 All seeded: CAUSE_VERB (the causative's own verb), BECOME, BE, OBJECT_THING, CLAUSE, and the
 adjectives SMALL, ACTIVE and NEGATIVE. The three adjectives are themselves still on the literal —
-ACTIVE and NEGATIVE are [C23](../C-needs-engine/C23-participial-state-adjectives.md) and
-[C24](../C-needs-engine/C24-grammar-feature-adjectives.md), SMALL is [A28](A28-scalar-adjectives.md).
+ACTIVE and NEGATIVE are [C23](../done/C23-participial-state-adjectives.md) and
+[C24](../done/C24-grammar-feature-adjectives.md), SMALL is [A28](A28-scalar-adjectives.md).
 None of that blocks this ticket.
 
 ## Probe renders (2026-09-22, engine source at HEAD, lexicon seeded in memory)
@@ -39,12 +39,12 @@ state a thing is in, *ser negativa* for what a clause is. One reading was judged
   would have rendered one string in all seven, including the もっと the reading worried about.
   Dropping the degree to tell them apart ("become small" against "become smaller") is a distinction
   a reader cannot use, and the two words name the same operation in this corpus anyway. SHRINK is
-  [C28](../C-needs-engine/C28-verb-roots-without-a-gloss.md)'s with that reason.
+  [C28](../done/C28-verb-roots-without-a-gloss.md)'s with that reason.
 
 ## Not in this ticket
 
 The rest of the sweep's verbs are [A24](A24-ui-verbs-genus-and-object.md) (genus + object) and
-[C28](../C-needs-engine/C28-verb-roots-without-a-gloss.md) (the roots, which have no genus above
+[C28](../done/C28-verb-roots-without-a-gloss.md) (the roots, which have no genus above
 them). HIDE already has a gloss and is not in the sweep; it is the precedent the negative causative
 was built for.
 

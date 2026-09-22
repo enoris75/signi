@@ -72,6 +72,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'bebendo', participle: 'bebido' },
     ja: { te: '飲んで', te_reading: 'のんで', nai: '飲まない', nai_reading: 'のまない', passive: '飲まれる', passive_reading: 'のまれる' },
   },
+  POUR: {
+    en: { gerund: 'pouring', participle: 'poured' },
+    it: { gerund: 'versando', participle: 'versato' },
+    fr: { participle: 'versé' }, de: { participle: 'gegossen' },
+    es: { gerund: 'vertiendo', participle: 'vertido' },
+    pt: { gerund: 'vertendo', participle: 'vertido' },
+    ja: { te: '注いで', te_reading: 'そそいで', nai: '注がない', nai_reading: 'そそがない', passive: '注がれる', passive_reading: 'そそがれる' },
+  },
   CONSUME: {
     en: { gerund: 'consuming', participle: 'consumed' },
     it: { gerund: 'consumando', participle: 'consumato' },
@@ -135,6 +143,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'conociendo', participle: 'conocido' },
     pt: { gerund: 'conhecendo', participle: 'conhecido' },
     ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない', passive: '知られる', passive_reading: 'しられる' },
+  },
+  // prevedere's participle is vedere's strong visto, prefixed: previsto.
+  EXPECT: {
+    en: { gerund: 'expecting', participle: 'expected' },
+    it: { gerund: 'prevedendo', participle: 'previsto' },
+    fr: { participle: 'attendu' }, de: { participle: 'erwartet' },
+    es: { gerund: 'esperando', participle: 'esperado' },
+    pt: { gerund: 'esperando', participle: 'esperado' },
+    ja: { te: '予想して', te_reading: 'よそうして', nai: '予想しない', nai_reading: 'よそうしない', passive: '予想される', passive_reading: 'よそうされる' },
   },
   READ: {
     en: { gerund: 'reading', participle: 'read' },
@@ -911,6 +928,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'negando', participle: 'negado' },
     ja: { te: '否定して', te_reading: 'ひていして', nai: '否定しない', nai_reading: 'ひていしない', passive: '否定される', passive_reading: 'ひていされる' },
   },
+  ASSERT: {
+    en: { gerund: 'asserting', participle: 'asserted' },
+    it: { gerund: 'affermando', participle: 'affermato' },
+    fr: { participle: 'affirmé' }, de: { participle: 'festgestellt' },
+    es: { gerund: 'afirmando', participle: 'afirmado' },
+    pt: { gerund: 'afirmando', participle: 'afirmado' },
+    ja: { te: '述べて', te_reading: 'のべて', nai: '述べない', nai_reading: 'のべない', passive: '述べられる', passive_reading: 'のべられる' },
+  },
   EDIT: {
     en: { gerund: 'editing', participle: 'edited' },
     it: { gerund: 'modificando', participle: 'modificato' },
@@ -946,6 +971,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'morando', participle: 'morado' },
     ja: { te: '住んで', te_reading: 'すんで', nai: '住まない', nai_reading: 'すまない' },
   },
+  LIVE_ALIVE: {
+    en: { gerund: 'living', participle: 'lived' },
+    it: { gerund: 'vivendo', participle: 'vissuto' },
+    fr: { participle: 'vécu' }, de: { participle: 'gelebt' },
+    es: { gerund: 'viviendo', participle: 'vivido' },
+    pt: { gerund: 'vivendo', participle: 'vivido' },
+    ja: { te: '生きて', te_reading: 'いきて', nai: '生きない', nai_reading: 'いきない' },
+  },
   TRADE: {
     en: { gerund: 'trading', participle: 'traded' },
     it: { gerund: 'commerciando', participle: 'commerciato' },
@@ -978,6 +1011,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'encerrando', participle: 'encerrado' },
     pt: { gerund: 'encarcerando', participle: 'encarcerado' },
     ja: { te: '閉じ込めて', te_reading: 'とじこめて', nai: '閉じ込めない', nai_reading: 'とじこめない', passive: '閉じ込められる', passive_reading: 'とじこめられる' },
+  },
+  TAME: {
+    en: { gerund: 'taming', participle: 'tamed' },
+    it: { gerund: 'domando', participle: 'domato' },
+    fr: { participle: 'apprivoisé' }, de: { participle: 'gezähmt' },
+    es: { gerund: 'domando', participle: 'domado' },
+    pt: { gerund: 'domando', participle: 'domado' },
+    ja: { te: '飼い慣らして', te_reading: 'かいならして', nai: '飼い慣らさない', nai_reading: 'かいならさない', passive: '飼い慣らされる', passive_reading: 'かいならされる' },
   },
   // ── The definition words of localization B52–B57 ───────────────────
   // fliegen is a motion verb, so its German resultative selects sein ("ist geflogen"); Italian
@@ -1040,6 +1081,57 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'falando', participle: 'falado' },
     ja: { te: '話して', te_reading: 'はなして', nai: '話さない', nai_reading: 'はなさない' },
   },
+  // The order, time, growth and substance verbs of localization C24. Italian precedere and seguire
+  // take avere; succedere, crescere and scorrere take essere, as vorangehen, folgen, geschehen,
+  // wachsen and fließen take sein.
+  PRECEDE: {
+    en: { gerund: 'preceding', participle: 'preceded' },
+    it: { gerund: 'precedendo', participle: 'preceduto' },
+    fr: { participle: 'précédé' }, de: { participle: 'vorangegangen', aux: 'be' },
+    es: { gerund: 'precediendo', participle: 'precedido' },
+    pt: { gerund: 'precedendo', participle: 'precedido' },
+    ja: { te: '先行して', te_reading: 'せんこうして', nai: '先行しない', nai_reading: 'せんこうしない' },
+  },
+  DEPEND: {
+    en: { gerund: 'depending', participle: 'depended' },
+    it: { gerund: 'dipendendo', participle: 'dipeso', aux: 'be' },
+    fr: { participle: 'dépendu' }, de: { participle: 'abgehangen' },
+    es: { gerund: 'dependiendo', participle: 'dependido' },
+    pt: { gerund: 'dependendo', participle: 'dependido' },
+    ja: { te: '依存して', te_reading: 'いぞんして', nai: '依存しない', nai_reading: 'いぞんしない' },
+  },
+  FOLLOW: {
+    en: { gerund: 'following', participle: 'followed' },
+    it: { gerund: 'seguendo', participle: 'seguito' },
+    fr: { participle: 'suivi' }, de: { participle: 'gefolgt', aux: 'be' },
+    es: { gerund: 'siguiendo', participle: 'seguido' },
+    pt: { gerund: 'seguindo', participle: 'seguido' },
+    ja: { te: '続いて', te_reading: 'つづいて', nai: '続かない', nai_reading: 'つづかない' },
+  },
+  HAPPEN: {
+    en: { gerund: 'happening', participle: 'happened' },
+    it: { gerund: 'succedendo', participle: 'successo', aux: 'be' },
+    fr: { participle: 'arrivé', aux: 'be' }, de: { participle: 'geschehen', aux: 'be' },
+    es: { gerund: 'ocurriendo', participle: 'ocurrido' },
+    pt: { gerund: 'acontecendo', participle: 'acontecido' },
+    ja: { te: '起こって', te_reading: 'おこって', nai: '起こらない', nai_reading: 'おこらない' },
+  },
+  GROW: {
+    en: { gerund: 'growing', participle: 'grown' },
+    it: { gerund: 'crescendo', participle: 'cresciuto', aux: 'be' },
+    fr: { participle: 'grandi' }, de: { participle: 'gewachsen', aux: 'be' },
+    es: { gerund: 'creciendo', participle: 'crecido' },
+    pt: { gerund: 'crescendo', participle: 'crescido' },
+    ja: { te: '成長して', te_reading: 'せいちょうして', nai: '成長しない', nai_reading: 'せいちょうしない' },
+  },
+  FLOW: {
+    en: { gerund: 'flowing', participle: 'flowed' },
+    it: { gerund: 'scorrendo', participle: 'scorso', aux: 'be' },
+    fr: { participle: 'coulé' }, de: { participle: 'geflossen', aux: 'be' },
+    es: { gerund: 'fluyendo', participle: 'fluido' },
+    pt: { gerund: 'fluindo', participle: 'fluído' },
+    ja: { te: '流れて', te_reading: 'ながれて', nai: '流れない', nai_reading: 'ながれない' },
+  },
   ACCOMPANY: {
     en: { gerund: 'accompanying', participle: 'accompanied' },
     it: { gerund: 'accompagnando', participle: 'accompagnato' },
@@ -1063,6 +1155,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'buscando', participle: 'buscado' },
     pt: { gerund: 'procurando', participle: 'procurado' },
     ja: { te: '探して', te_reading: 'さがして', nai: '探さない', nai_reading: 'さがさない', passive: '探される', passive_reading: 'さがされる' },
+  },
+  FIND: {
+    en: { gerund: 'finding', participle: 'found' },
+    it: { gerund: 'trovando', participle: 'trovato' },
+    fr: { participle: 'trouvé' }, de: { participle: 'gefunden' },
+    es: { gerund: 'encontrando', participle: 'encontrado' },
+    pt: { gerund: 'encontrando', participle: 'encontrado' },
+    ja: { te: '見つけて', te_reading: 'みつけて', nai: '見つけない', nai_reading: 'みつけない', passive: '見つけられる', passive_reading: 'みつけられる' },
   },
   // anordnen is separable: the ge- goes between the particle and the stem, angeordnet.
   ARRANGE: {

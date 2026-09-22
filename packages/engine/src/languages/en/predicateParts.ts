@@ -7,6 +7,7 @@ import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negationSources } from '../../functions/negationSources.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -117,13 +118,18 @@ function predicateWords(
   // the verb group carries the participle and the by-phrase instead. Every branch below puts this
   // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
   // the house"), so the passive needs no branch of its own.
-  const objectText = passive
-    ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
-    : !directObject ? ''
+  //
+  // A verb that takes its object with a preposition names it in its lexeme (`object_prep`, A139), and
+  // the object follows it, once for the whole group: "depends on the condition", "depends on me".
+  const objectPrep = objectPreposition(lexical);
+  const objectWords = passive || !directObject ? ''
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms)
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
+  const objectText = passive
+    ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
+    : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
   const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   // A direction adverb (UP, DOWN) is a particle of the verb, not a comment on the action: it follows

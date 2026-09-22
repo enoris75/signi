@@ -38,7 +38,7 @@ All four render in all seven, and the bare-plural object comes out right in each
 - **RECIPIENT ships.** Its gloss is wider than the word — a recipient receives in a given event,
   where the relative clause reads as a habit — but it is distinguishing, no other seeded concept
   glosses this way, and the narrower reading needs the event-position construct
-  [C27](../C-needs-engine/C27-grammar-meta-nouns.md) is for. Moving it there would have traded a
+  [C27](../done/C27-grammar-meta-nouns.md) is for. Moving it there would have traded a
   wide gloss for none.
 
 ## Not in this ticket

@@ -4,6 +4,7 @@ import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
+import { infinitiveGloss } from '../../backend/src/concepts/verbs/gloss.js';
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
 function definitionAll(id: string): Record<LanguageCode, string> {
@@ -1750,8 +1751,25 @@ describe('B12 verb definitions (HAVE / ACQUIRE genera)', () => {
 });
 
 describe('B13 verb definitions (DIVIDE / CUT / STRIKE genera)', () => {
-  test('CUT divides with a sharp blade: an instrumental carrying its own adjective', () => {
+  // CUT shipped as "to divide with a sharp blade" and lost the adjective when SHARP was glossed as
+  // "that cuts well" (localization C24); the instrument carrying an adjective of its own is still a
+  // shape a verb gloss takes, pinned on the plan CUT had.
+  test('CUT divides with a blade', () => {
     expect(definitionAll('CUT')).toEqual({
+      en: 'to divide with a blade.',
+      it: 'dividere con una lama.',
+      fr: 'diviser avec une lame.',
+      de: 'mit einer Klinge teilen.',
+      es: 'dividir con una cuchilla.',
+      ja: '刃で分ける。',
+      pt: 'dividir com uma lâmina.',
+    });
+  });
+
+  test('an instrumental carrying its own adjective', () => {
+    expect(sayAll(infinitiveGloss('DIVIDE', {
+      complements: { instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite', adjectives: ['SHARP'] } } },
+    }))).toEqual({
       en: 'to divide with a sharp blade.',
       it: 'dividere con una lama affilata.',
       fr: 'diviser avec une lame tranchante.',

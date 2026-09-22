@@ -110,6 +110,13 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(SEE), el(np(WE)))).toBe('sees us');
     });
 
+    // DEPEND takes its object with "on", its lexeme's `object_prep` (A139, localization C24).
+    test('a verb that names its object preposition leads the object with it', () => {
+      const DEPEND: Forms = { base: 'depend', object_prep: 'on', '3sg_present': 'depends' };
+      expect(said(CAT, vp(DEPEND), el(np(DOG)))).toBe('depends on the dog');
+      expect(said(CAT, vp(DEPEND), el(np(HE)))).toBe('depends on him');
+    });
+
     test('a coordinated noun object renders as a group', () => {
       expect(said(CAT, vp(SEE), el(np(MOUSE), np(DOG)))).toBe('sees the mouse and the dog');
     });

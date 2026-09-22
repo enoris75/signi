@@ -12,4 +12,10 @@ describe('takesPersonalA', () => {
     expect(takesPersonalA(np(HOMBRE, { definiteness: 'bare' }))).toBe(false);
     expect(takesPersonalA(np(PERRO))).toBe(false);
   });
+
+  // FOLLOW's seguir marks every determined object so (`object_a`), a bare one still not.
+  test('a verb that marks every object takes it for a non-human too', () => {
+    expect(takesPersonalA(np(PERRO), { object_a: '1' })).toBe(true);
+    expect(takesPersonalA(np(PERRO, { definiteness: 'bare' }), { object_a: '1' })).toBe(false);
+  });
 });

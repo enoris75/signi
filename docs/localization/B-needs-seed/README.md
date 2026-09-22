@@ -1,14 +1,14 @@
 # B-needs-seed — tasks waiting on words
 
-**One open, 9 concepts — [B54](B54-sensation-and-quality-adjectives.md).** B52–B58, the seven the
+**None open.** B52–B58, the seven the
 [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22) filed, were authored the
-same day: six retired to [`done/`](../done/), and B54 stays here with the part of it a seed alone
-cannot clear — nine relational adjectives (*of* a class, *in* a place, *without* a part) whose six
-words wait on [C24](../C-needs-engine/C24-grammar-feature-adjectives.md), because the shape C24
-builds will decide what those words have to be.
+same day and are all in [`done/`](../done/): six in the morning, and
+[B54](../done/B54-sensation-and-quality-adjectives.md) once
+[C24](../done/C24-grammar-feature-adjectives.md) built the relational gloss its last nine relational
+adjectives waited on — seven of them shipped on it, on three of its six proposed words.
 
-Between them the six that retired **seeded 40 words and authored 54 glosses**. B57 was the best
-ratio, as filed — twenty concepts for ten words.
+Between them the seven **seeded 44 words and authored 61 glosses**. B57 was the best ratio, as
+filed — twenty concepts for ten words.
 
 A file belongs here when the plan shape works but a concept it references is not seeded yet. Its
 **Seed first** section lists the missing words with proposed forms in all seven languages —
@@ -27,5 +27,5 @@ each of the seventeen is named in its file with the proposed forms kept for whoe
 [B55](../done/B55-sequence-and-position.md) is the extreme case: it proposed three words, needed
 none of them, and shipped the one concept that mattered on vocabulary already in the corpus.
 
-B01–B53 and B55–B58 are in [`done/`](../done/). See
+B01–B58 are in [`done/`](../done/). See
 [the index](../localization-tasks.md#part-b--needs-seeding-b-needs-seed) for the encoding.

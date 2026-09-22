@@ -18,6 +18,12 @@ describe('elementPhrase', () => {
     expect(elementPhrase(group('or', np(KATER), np(KATZE)), 'acc')).toBe('den Kater oder die Katze');
   });
 
+  // The object of a dative-only preposition ("hängt von ihr ab", localization C24).
+  test('a pronoun in the dative takes its dative form, no article', () => {
+    expect(elementPhrase(el(np(ER)), 'dat')).toBe('ihm');
+    expect(elementPhrase(el(np(ICH)), 'dat')).toBe('mir');
+  });
+
   test('a pronoun object takes its accusative form, no article', () => {
     expect(elementPhrase(el(np(ER)), 'acc')).toBe('ihn');
     expect(elementPhrase(el(np(ER, { gender: 'fem' })), 'acc')).toBe('sie');

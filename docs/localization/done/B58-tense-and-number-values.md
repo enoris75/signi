@@ -51,7 +51,7 @@ feature that indicates times" above "a present tense".
 ## Not solved by this seed
 
 Nothing in this ticket. Two neighbours stay where they are: the adjectives SINGULAR and PLURAL
-themselves are [C24](../C-needs-engine/C24-grammar-feature-adjectives.md) — seeding SOLE and
+themselves are [C24](../done/C24-grammar-feature-adjectives.md) — seeding SOLE and
 MANIFOLD gives them a gloss the day C24's construct exists (`glossOf`-style *of a sole number*),
 but not before, because an adjective cannot be glossed by a noun phrase.
 

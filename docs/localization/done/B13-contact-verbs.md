@@ -61,3 +61,14 @@ Pinned by [genus-verbs.test.ts](../../../packages/engine/test/genus-verbs.test.t
 [subject.test.ts](../../../packages/engine/test/subject.test.ts) (BLADE, TOOTH),
 [infinitive.test.ts](../../../packages/engine/test/infinitive.test.ts) (REPEATEDLY's placement) and
 [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) (CUT en+es, BITE en+ja, BEAT en+pt).
+
+## Re-authored: CUT (2026-09-22)
+
+CUT's gloss lost its adjective in [C24](C24-grammar-feature-adjectives.md)'s integration pass. It
+shipped here as "to divide with a sharp blade", and SHARP — unglossed then — is now glossed as what
+it does, "that cuts well", which would have defined each of the two by the other. CUT is now **"to
+divide with a blade"** (it *dividere con una lama*, fr *diviser avec une lame*, de *mit einer Klinge
+teilen*, es *dividir con una cuchilla*, ja 刃で分ける, pt *dividir com uma lâmina*); the blade is
+what cuts ([C26](C26-root-nouns-on-the-literal.md)'s BLADE, "the part of an object that cuts"),
+so the gloss still says the edge. The instrumental-with-an-adjective shape it was the example of is
+still pinned in `genus-verbs.test.ts`, on the plan CUT had.

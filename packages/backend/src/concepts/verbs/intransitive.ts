@@ -520,6 +520,77 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // The other sense of English "live" (and of Spanish "vivir"): to be alive, not to dwell. LIVE is the
+  // dwelling one, which four languages say with their own verb (abitare, habiter, wohnen, 住む, morar),
+  // so the two are split as COLD and COLD_CLIMATE are. Seeded for LIFE's gloss, "the state of a being
+  // that lives" (localization C26).
+  {
+    id: 'LIVE_ALIVE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to be alive',
+    emoji: '💓',
+    synonym: 'be alive',
+    forms: {
+      en: {
+        base: 'live',
+        '1sg_present': 'live', '2sg_present': 'live', '3sg_present': 'lives',
+        '1pl_present': 'live', '2pl_present': 'live', '3pl_present': 'live',
+        past: 'lived',
+      },
+      it: {
+        base: 'vivere',
+        '1sg_present': 'vivo', '2sg_present': 'vivi', '3sg_present': 'vive',
+        '1pl_present': 'viviamo', '2pl_present': 'vivete', '3pl_present': 'vivono',
+        '1sg_past': 'vissi', '2sg_past': 'vivesti', '3sg_past': 'visse',
+        '1pl_past': 'vivemmo', '2pl_past': 'viveste', '3pl_past': 'vissero',
+        '1sg_future': 'vivrò', '2sg_future': 'vivrai', '3sg_future': 'vivrà',
+        '1pl_future': 'vivremo', '2pl_future': 'vivrete', '3pl_future': 'vivranno',
+      },
+      fr: {
+        base: 'vivre',
+        '1sg_present': 'vis', '2sg_present': 'vis', '3sg_present': 'vit',
+        '1pl_present': 'vivons', '2pl_present': 'vivez', '3pl_present': 'vivent',
+        '1sg_past': 'vécus', '2sg_past': 'vécus', '3sg_past': 'vécut',
+        '1pl_past': 'vécûmes', '2pl_past': 'vécûtes', '3pl_past': 'vécurent',
+        '1sg_future': 'vivrai', '2sg_future': 'vivras', '3sg_future': 'vivra',
+        '1pl_future': 'vivrons', '2pl_future': 'vivrez', '3pl_future': 'vivront',
+      },
+      de: {
+        base: 'leben',
+        '1sg_present': 'lebe', '2sg_present': 'lebst', '3sg_present': 'lebt',
+        '1pl_present': 'leben', '2pl_present': 'lebt', '3pl_present': 'leben',
+        '1sg_past': 'lebte', '2sg_past': 'lebtest', '3sg_past': 'lebte',
+        '1pl_past': 'lebten', '2pl_past': 'lebtet', '3pl_past': 'lebten',
+      },
+      es: {
+        base: 'vivir',
+        '1sg_present': 'vivo', '2sg_present': 'vives', '3sg_present': 'vive',
+        '1pl_present': 'vivimos', '2pl_present': 'vivís', '3pl_present': 'viven',
+        '1sg_past': 'viví', '2sg_past': 'viviste', '3sg_past': 'vivió',
+        '1pl_past': 'vivimos', '2pl_past': 'vivisteis', '3pl_past': 'vivieron',
+        '1sg_future': 'viviré', '2sg_future': 'vivirás', '3sg_future': 'vivirá',
+        '1pl_future': 'viviremos', '2pl_future': 'viviréis', '3pl_future': 'vivirán',
+      },
+      ja: {
+        base: '生きる',
+        reading: 'いきる',
+        masu_present: '生きます',
+        masu_present_reading: 'いきます',
+      },
+      pt: {
+        base: 'viver',
+        '1sg_present': 'vivo', '2sg_present': 'vive', '3sg_present': 'vive',
+        '1pl_present': 'vivemos', '2pl_present': 'vivem', '3pl_present': 'vivem',
+        '1sg_past': 'vivi', '2sg_past': 'viveu', '3sg_past': 'viveu',
+        '1pl_past': 'vivemos', '2pl_past': 'viveram', '3pl_past': 'viveram',
+        '1sg_future': 'viverei', '2sg_future': 'viverá', '3sg_future': 'viverá',
+        '1pl_future': 'viveremos', '2pl_future': 'viverão', '3pl_future': 'viverão',
+      },
+    },
+  },
+
   // Buying and selling in one verb — the differentia MARKET's gloss needs, since a relative clause
   // holds one verbPhrase and cannot coordinate "buys and sells" (B32). Intransitive on purpose:
   // German "handeln" and French "commercer" take no direct object (one handelt *mit* something),
@@ -968,6 +1039,361 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'falamos', '2pl_past': 'falaram', '3pl_past': 'falaram',
         '1sg_future': 'falarei', '2sg_future': 'falará', '3sg_future': 'falará',
         '1pl_future': 'falaremos', '2pl_future': 'falarão', '3pl_future': 'falarão',
+      },
+    },
+  },
+  // PRECEDE and FOLLOW are what PREVIOUS and NEXT are glossed on, "that precedes" and "that follows"
+  // (localization C24). Intransitive, as B55 proposed: German vorangehen governs a dative a direct
+  // object cannot mark, and Japanese 続く and 先行する take their "what" with に, where the engine
+  // writes を for every object — so an object would be wrong in two languages.
+  {
+    id: 'PRECEDE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to come before in an order',
+    emoji: '⏪',
+    forms: {
+      en: {
+        base: 'precede',
+        '1sg_present': 'precede', '2sg_present': 'precede', '3sg_present': 'precedes',
+        '1pl_present': 'precede', '2pl_present': 'precede', '3pl_present': 'precede',
+        past: 'preceded',
+      },
+      it: {
+        base: 'precedere',
+        '1sg_present': 'precedo', '2sg_present': 'precedi', '3sg_present': 'precede',
+        '1pl_present': 'precediamo', '2pl_present': 'precedete', '3pl_present': 'precedono',
+        '1sg_past': 'precedetti', '2sg_past': 'precedesti', '3sg_past': 'precedette',
+        '1pl_past': 'precedemmo', '2pl_past': 'precedeste', '3pl_past': 'precedettero',
+        '1sg_future': 'precederò', '2sg_future': 'precederai', '3sg_future': 'precederà',
+        '1pl_future': 'precederemo', '2pl_future': 'precederete', '3pl_future': 'precederanno',
+      },
+      fr: {
+        base: 'précéder',
+        '1sg_present': 'précède', '2sg_present': 'précèdes', '3sg_present': 'précède',
+        '1pl_present': 'précédons', '2pl_present': 'précédez', '3pl_present': 'précèdent',
+        '1sg_past': 'précédai', '2sg_past': 'précédas', '3sg_past': 'précéda',
+        '1pl_past': 'précédâmes', '2pl_past': 'précédâtes', '3pl_past': 'précédèrent',
+        '1sg_future': 'précéderai', '2sg_future': 'précéderas', '3sg_future': 'précédera',
+        '1pl_future': 'précéderons', '2pl_future': 'précéderez', '3pl_future': 'précéderont',
+      },
+      de: {
+        // vorangehen is separable and strong (ging voran, vorangegangen) and selects sein.
+        base: 'vorangehen', particle: 'voran',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+        '1sg_past': 'ging', '2sg_past': 'gingst', '3sg_past': 'ging',
+        '1pl_past': 'gingen', '2pl_past': 'gingt', '3pl_past': 'gingen',
+      },
+      es: {
+        base: 'preceder',
+        '1sg_present': 'precedo', '2sg_present': 'precedes', '3sg_present': 'precede',
+        '1pl_present': 'precedemos', '2pl_present': 'precedéis', '3pl_present': 'preceden',
+        '1sg_past': 'precedí', '2sg_past': 'precediste', '3sg_past': 'precedió',
+        '1pl_past': 'precedimos', '2pl_past': 'precedisteis', '3pl_past': 'precedieron',
+        '1sg_future': 'precederé', '2sg_future': 'precederás', '3sg_future': 'precederá',
+        '1pl_future': 'precederemos', '2pl_future': 'precederéis', '3pl_future': 'precederán',
+      },
+      ja: {
+        base: '先行する',
+        reading: 'せんこうする',
+        masu_present: '先行します',
+        masu_present_reading: 'せんこうします',
+      },
+      pt: {
+        base: 'preceder',
+        '1sg_present': 'precedo', '2sg_present': 'precede', '3sg_present': 'precede',
+        '1pl_present': 'precedemos', '2pl_present': 'precedem', '3pl_present': 'precedem',
+        '1sg_past': 'precedi', '2sg_past': 'precedeu', '3sg_past': 'precedeu',
+        '1pl_past': 'precedemos', '2pl_past': 'precederam', '3pl_past': 'precederam',
+        '1sg_future': 'precederei', '2sg_future': 'precederá', '3sg_future': 'precederá',
+        '1pl_future': 'precederemos', '2pl_future': 'precederão', '3pl_future': 'precederão',
+      },
+    },
+  },
+  {
+    // Transitive since localization C24: the ordinals are what follows which ("that follows the first
+    // object"). German takes the object with auf (+ accusative, "folgt auf den Hund", its lexeme's
+    // `object_prep`, A139), Spanish marks it with the personal a whatever it is (`object_a`, "sigue al
+    // primer objeto", and still "lo sigue"), and Japanese takes it with に (`object_particle`, 犬に続く).
+    // NEXT is still the bare "that follows".
+    id: 'FOLLOW',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to come after in an order',
+    emoji: '⏩',
+    synonym: 'come after',
+    forms: {
+      en: {
+        base: 'follow',
+        '1sg_present': 'follow', '2sg_present': 'follow', '3sg_present': 'follows',
+        '1pl_present': 'follow', '2pl_present': 'follow', '3pl_present': 'follow',
+        past: 'followed',
+      },
+      it: {
+        base: 'seguire',
+        '1sg_present': 'seguo', '2sg_present': 'segui', '3sg_present': 'segue',
+        '1pl_present': 'seguiamo', '2pl_present': 'seguite', '3pl_present': 'seguono',
+        '1sg_past': 'seguii', '2sg_past': 'seguisti', '3sg_past': 'seguì',
+        '1pl_past': 'seguimmo', '2pl_past': 'seguiste', '3pl_past': 'seguirono',
+        '1sg_future': 'seguirò', '2sg_future': 'seguirai', '3sg_future': 'seguirà',
+        '1pl_future': 'seguiremo', '2pl_future': 'seguirete', '3pl_future': 'seguiranno',
+      },
+      fr: {
+        base: 'suivre',
+        '1sg_present': 'suis', '2sg_present': 'suis', '3sg_present': 'suit',
+        '1pl_present': 'suivons', '2pl_present': 'suivez', '3pl_present': 'suivent',
+        '1sg_past': 'suivis', '2sg_past': 'suivis', '3sg_past': 'suivit',
+        '1pl_past': 'suivîmes', '2pl_past': 'suivîtes', '3pl_past': 'suivirent',
+        '1sg_future': 'suivrai', '2sg_future': 'suivras', '3sg_future': 'suivra',
+        '1pl_future': 'suivrons', '2pl_future': 'suivrez', '3pl_future': 'suivront',
+      },
+      de: {
+        // folgen selects sein: "ist gefolgt".
+        base: 'folgen', object_prep: 'auf',
+        '1sg_present': 'folge', '2sg_present': 'folgst', '3sg_present': 'folgt',
+        '1pl_present': 'folgen', '2pl_present': 'folgt', '3pl_present': 'folgen',
+        '1sg_past': 'folgte', '2sg_past': 'folgtest', '3sg_past': 'folgte',
+        '1pl_past': 'folgten', '2pl_past': 'folgtet', '3pl_past': 'folgten',
+      },
+      es: {
+        // seguir stem-changes e → i under the stress, and takes the -g- of sigo.
+        base: 'seguir', object_a: '1',
+        '1sg_present': 'sigo', '2sg_present': 'sigues', '3sg_present': 'sigue',
+        '1pl_present': 'seguimos', '2pl_present': 'seguís', '3pl_present': 'siguen',
+        '1sg_past': 'seguí', '2sg_past': 'seguiste', '3sg_past': 'siguió',
+        '1pl_past': 'seguimos', '2pl_past': 'seguisteis', '3pl_past': 'siguieron',
+        '1sg_future': 'seguiré', '2sg_future': 'seguirás', '3sg_future': 'seguirá',
+        '1pl_future': 'seguiremos', '2pl_future': 'seguiréis', '3pl_future': 'seguirán',
+      },
+      ja: {
+        base: '続く',
+        reading: 'つづく',
+        masu_present: '続きます',
+        masu_present_reading: 'つづきます',
+        object_particle: 'に',
+      },
+      pt: {
+        base: 'seguir',
+        '1sg_present': 'sigo', '2sg_present': 'segue', '3sg_present': 'segue',
+        '1pl_present': 'seguimos', '2pl_present': 'seguem', '3pl_present': 'seguem',
+        '1sg_past': 'segui', '2sg_past': 'seguiu', '3sg_past': 'seguiu',
+        '1pl_past': 'seguimos', '2pl_past': 'seguiram', '3pl_past': 'seguiram',
+        '1sg_future': 'seguirei', '2sg_future': 'seguirá', '3sg_future': 'seguirá',
+        '1pl_future': 'seguiremos', '2pl_future': 'seguirão', '3pl_future': 'seguirão',
+      },
+    },
+  },
+  // ── The verbs the time, growth and substance adjectives stand on (localization C24) ──
+  // HAPPEN carries PRESENT, PAST and FUTURE by its tense and aspect alone: "that happens now", "that
+  // has happened", "that will happen". Spanish ocurrir, not pasar, which is PAST's own pasado; French
+  // arriver, the everyday one (se produire would need the pronominal verb French does not build).
+  {
+    id: 'HAPPEN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to take place',
+    emoji: '💥',
+    forms: {
+      en: {
+        base: 'happen',
+        '1sg_present': 'happen', '2sg_present': 'happen', '3sg_present': 'happens',
+        '1pl_present': 'happen', '2pl_present': 'happen', '3pl_present': 'happen',
+        past: 'happened',
+      },
+      it: {
+        // succedere takes essere, and its past and participle are the strong successe, successo.
+        base: 'succedere',
+        '1sg_present': 'succedo', '2sg_present': 'succedi', '3sg_present': 'succede',
+        '1pl_present': 'succediamo', '2pl_present': 'succedete', '3pl_present': 'succedono',
+        '1sg_past': 'successi', '2sg_past': 'succedesti', '3sg_past': 'successe',
+        '1pl_past': 'succedemmo', '2pl_past': 'succedeste', '3pl_past': 'successero',
+        '1sg_future': 'succederò', '2sg_future': 'succederai', '3sg_future': 'succederà',
+        '1pl_future': 'succederemo', '2pl_future': 'succederete', '3pl_future': 'succederanno',
+      },
+      fr: {
+        base: 'arriver',
+        '1sg_present': 'arrive', '2sg_present': 'arrives', '3sg_present': 'arrive',
+        '1pl_present': 'arrivons', '2pl_present': 'arrivez', '3pl_present': 'arrivent',
+        '1sg_past': 'arrivai', '2sg_past': 'arrivas', '3sg_past': 'arriva',
+        '1pl_past': 'arrivâmes', '2pl_past': 'arrivâtes', '3pl_past': 'arrivèrent',
+        '1sg_future': 'arriverai', '2sg_future': 'arriveras', '3sg_future': 'arrivera',
+        '1pl_future': 'arriverons', '2pl_future': 'arriverez', '3pl_future': 'arriveront',
+      },
+      de: {
+        // geschehen is strong (geschieht, geschah, geschehen) and selects sein.
+        base: 'geschehen',
+        '1sg_present': 'geschehe', '2sg_present': 'geschiehst', '3sg_present': 'geschieht',
+        '1pl_present': 'geschehen', '2pl_present': 'gescheht', '3pl_present': 'geschehen',
+        '1sg_past': 'geschah', '2sg_past': 'geschahst', '3sg_past': 'geschah',
+        '1pl_past': 'geschahen', '2pl_past': 'geschaht', '3pl_past': 'geschahen',
+      },
+      es: {
+        base: 'ocurrir',
+        '1sg_present': 'ocurro', '2sg_present': 'ocurres', '3sg_present': 'ocurre',
+        '1pl_present': 'ocurrimos', '2pl_present': 'ocurrís', '3pl_present': 'ocurren',
+        '1sg_past': 'ocurrí', '2sg_past': 'ocurriste', '3sg_past': 'ocurrió',
+        '1pl_past': 'ocurrimos', '2pl_past': 'ocurristeis', '3pl_past': 'ocurrieron',
+        '1sg_future': 'ocurriré', '2sg_future': 'ocurrirás', '3sg_future': 'ocurrirá',
+        '1pl_future': 'ocurriremos', '2pl_future': 'ocurriréis', '3pl_future': 'ocurrirán',
+      },
+      ja: {
+        base: '起こる',
+        reading: 'おこる',
+        masu_present: '起こります',
+        masu_present_reading: 'おこります',
+      },
+      pt: {
+        base: 'acontecer',
+        '1sg_present': 'aconteço', '2sg_present': 'acontece', '3sg_present': 'acontece',
+        '1pl_present': 'acontecemos', '2pl_present': 'acontecem', '3pl_present': 'acontecem',
+        '1sg_past': 'aconteci', '2sg_past': 'aconteceu', '3sg_past': 'aconteceu',
+        '1pl_past': 'acontecemos', '2pl_past': 'aconteceram', '3pl_past': 'aconteceram',
+        '1sg_future': 'acontecerei', '2sg_future': 'acontecerá', '3sg_future': 'acontecerá',
+        '1pl_future': 'aconteceremos', '2pl_future': 'acontecerão', '3pl_future': 'acontecerão',
+      },
+    },
+  },
+  // ADULT is "that no longer grows". The growing of living things, not of a quantity: French
+  // grandir (croître is formal), Japanese 成長する; it/de/es/pt crescere/wachsen/crecer/crescer
+  // cover both.
+  {
+    id: 'GROW',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to become bigger over time, as a living thing does',
+    emoji: '🌱',
+    forms: {
+      en: {
+        base: 'grow',
+        '1sg_present': 'grow', '2sg_present': 'grow', '3sg_present': 'grows',
+        '1pl_present': 'grow', '2pl_present': 'grow', '3pl_present': 'grow',
+        past: 'grew',
+      },
+      it: {
+        // crescere takes essere; its past is the strong crebbe.
+        base: 'crescere',
+        '1sg_present': 'cresco', '2sg_present': 'cresci', '3sg_present': 'cresce',
+        '1pl_present': 'cresciamo', '2pl_present': 'crescete', '3pl_present': 'crescono',
+        '1sg_past': 'crebbi', '2sg_past': 'crescesti', '3sg_past': 'crebbe',
+        '1pl_past': 'crescemmo', '2pl_past': 'cresceste', '3pl_past': 'crebbero',
+        '1sg_future': 'crescerò', '2sg_future': 'crescerai', '3sg_future': 'crescerà',
+        '1pl_future': 'cresceremo', '2pl_future': 'crescerete', '3pl_future': 'cresceranno',
+      },
+      fr: {
+        base: 'grandir',
+        '1sg_present': 'grandis', '2sg_present': 'grandis', '3sg_present': 'grandit',
+        '1pl_present': 'grandissons', '2pl_present': 'grandissez', '3pl_present': 'grandissent',
+        '1sg_past': 'grandis', '2sg_past': 'grandis', '3sg_past': 'grandit',
+        '1pl_past': 'grandîmes', '2pl_past': 'grandîtes', '3pl_past': 'grandirent',
+        '1sg_future': 'grandirai', '2sg_future': 'grandiras', '3sg_future': 'grandira',
+        '1pl_future': 'grandirons', '2pl_future': 'grandirez', '3pl_future': 'grandiront',
+      },
+      de: {
+        // wachsen is strong (wächst, wuchs, gewachsen) and selects sein.
+        base: 'wachsen',
+        '1sg_present': 'wachse', '2sg_present': 'wächst', '3sg_present': 'wächst',
+        '1pl_present': 'wachsen', '2pl_present': 'wachst', '3pl_present': 'wachsen',
+        '1sg_past': 'wuchs', '2sg_past': 'wuchsest', '3sg_past': 'wuchs',
+        '1pl_past': 'wuchsen', '2pl_past': 'wuchst', '3pl_past': 'wuchsen',
+      },
+      es: {
+        base: 'crecer',
+        '1sg_present': 'crezco', '2sg_present': 'creces', '3sg_present': 'crece',
+        '1pl_present': 'crecemos', '2pl_present': 'crecéis', '3pl_present': 'crecen',
+        '1sg_past': 'crecí', '2sg_past': 'creciste', '3sg_past': 'creció',
+        '1pl_past': 'crecimos', '2pl_past': 'crecisteis', '3pl_past': 'crecieron',
+        '1sg_future': 'creceré', '2sg_future': 'crecerás', '3sg_future': 'crecerá',
+        '1pl_future': 'creceremos', '2pl_future': 'creceréis', '3pl_future': 'crecerán',
+      },
+      ja: {
+        base: '成長する',
+        reading: 'せいちょうする',
+        masu_present: '成長します',
+        masu_present_reading: 'せいちょうします',
+      },
+      pt: {
+        base: 'crescer',
+        '1sg_present': 'cresço', '2sg_present': 'cresce', '3sg_present': 'cresce',
+        '1pl_present': 'crescemos', '2pl_present': 'crescem', '3pl_present': 'crescem',
+        '1sg_past': 'cresci', '2sg_past': 'cresceu', '3sg_past': 'cresceu',
+        '1pl_past': 'crescemos', '2pl_past': 'cresceram', '3pl_past': 'cresceram',
+        '1sg_future': 'crescerei', '2sg_future': 'crescerá', '3sg_future': 'crescerá',
+        '1pl_future': 'cresceremos', '2pl_future': 'crescerão', '3pl_future': 'crescerão',
+      },
+    },
+  },
+  // SOLID is "that does not flow": what neither a liquid nor a gas can say. Italian scorrere and
+  // French couler, the words for a liquid moving; es/pt fluir, de fließen, ja 流れる.
+  {
+    id: 'FLOW',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to move along steadily, as a liquid does',
+    emoji: '🌊',
+    forms: {
+      en: {
+        base: 'flow',
+        '1sg_present': 'flow', '2sg_present': 'flow', '3sg_present': 'flows',
+        '1pl_present': 'flow', '2pl_present': 'flow', '3pl_present': 'flow',
+        past: 'flowed',
+      },
+      it: {
+        // scorrere takes essere, and its past and participle are the strong scorse, scorso.
+        base: 'scorrere',
+        '1sg_present': 'scorro', '2sg_present': 'scorri', '3sg_present': 'scorre',
+        '1pl_present': 'scorriamo', '2pl_present': 'scorrete', '3pl_present': 'scorrono',
+        '1sg_past': 'scorsi', '2sg_past': 'scorresti', '3sg_past': 'scorse',
+        '1pl_past': 'scorremmo', '2pl_past': 'scorreste', '3pl_past': 'scorsero',
+        '1sg_future': 'scorrerò', '2sg_future': 'scorrerai', '3sg_future': 'scorrerà',
+        '1pl_future': 'scorreremo', '2pl_future': 'scorrerete', '3pl_future': 'scorreranno',
+      },
+      fr: {
+        base: 'couler',
+        '1sg_present': 'coule', '2sg_present': 'coules', '3sg_present': 'coule',
+        '1pl_present': 'coulons', '2pl_present': 'coulez', '3pl_present': 'coulent',
+        '1sg_past': 'coulai', '2sg_past': 'coulas', '3sg_past': 'coula',
+        '1pl_past': 'coulâmes', '2pl_past': 'coulâtes', '3pl_past': 'coulèrent',
+        '1sg_future': 'coulerai', '2sg_future': 'couleras', '3sg_future': 'coulera',
+        '1pl_future': 'coulerons', '2pl_future': 'coulerez', '3pl_future': 'couleront',
+      },
+      de: {
+        // fließen is strong (fließt, floss, geflossen) and selects sein.
+        base: 'fließen',
+        '1sg_present': 'fließe', '2sg_present': 'fließt', '3sg_present': 'fließt',
+        '1pl_present': 'fließen', '2pl_present': 'fließt', '3pl_present': 'fließen',
+        '1sg_past': 'floss', '2sg_past': 'flossest', '3sg_past': 'floss',
+        '1pl_past': 'flossen', '2pl_past': 'flosst', '3pl_past': 'flossen',
+      },
+      es: {
+        // fluir inserts -y- before a vowel ending, as every -uir verb does.
+        base: 'fluir',
+        '1sg_present': 'fluyo', '2sg_present': 'fluyes', '3sg_present': 'fluye',
+        '1pl_present': 'fluimos', '2pl_present': 'fluís', '3pl_present': 'fluyen',
+        '1sg_past': 'fluí', '2sg_past': 'fluiste', '3sg_past': 'fluyó',
+        '1pl_past': 'fluimos', '2pl_past': 'fluisteis', '3pl_past': 'fluyeron',
+        '1sg_future': 'fluiré', '2sg_future': 'fluirás', '3sg_future': 'fluirá',
+        '1pl_future': 'fluiremos', '2pl_future': 'fluiréis', '3pl_future': 'fluirán',
+      },
+      ja: {
+        base: '流れる',
+        reading: 'ながれる',
+        masu_present: '流れます',
+        masu_present_reading: 'ながれます',
+      },
+      pt: {
+        base: 'fluir',
+        '1sg_present': 'fluo', '2sg_present': 'flui', '3sg_present': 'flui',
+        '1pl_present': 'fluímos', '2pl_present': 'fluem', '3pl_present': 'fluem',
+        '1sg_past': 'fluí', '2sg_past': 'fluiu', '3sg_past': 'fluiu',
+        '1pl_past': 'fluímos', '2pl_past': 'fluíram', '3pl_past': 'fluíram',
+        '1sg_future': 'fluirei', '2sg_future': 'fluirá', '3sg_future': 'fluirá',
+        '1pl_future': 'fluiremos', '2pl_future': 'fluirão', '3pl_future': 'fluirão',
       },
     },
   },

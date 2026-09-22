@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { hasPartitivePossessor } from './hasPartitivePossessor.js';
 
 /**
  * The determiners the Saxon genitive can carry for the head it possesses. "the cat's book" is
@@ -36,5 +37,9 @@ export function isPostModified(np: ResolvedNounPhrase): boolean {
   // propagates nothing — unless the head kept its own determiner and sent it to the of-genitive
   // too ("this book of hers", A187).
   if (isPronominalPossessor(np.possessor)) return keepsHeadDeterminer(np.head.forms);
+  // A whole, or the parts a head is made up of, is always an of-phrase after the head ("a part of a
+  // keyboard", "a group of canvases", C26), so the phrase trails one whatever its determiner: "the
+  // name of a part of a keyboard", never "a part of a keyboard's name".
+  if (hasPartitivePossessor(np)) return true;
   return keepsHeadDeterminer(np.head.forms) || isPostModified(np.possessor);
 }

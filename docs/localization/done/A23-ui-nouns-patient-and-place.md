@@ -64,7 +64,7 @@ All twelve render in all seven. Two readings were judged on authoring:
    stays singular before a plural object where Italian and Spanish agree it (*si fanno*, *se
    hacen*). [A73](../../bugs/fixed/A73-impersonal-se-plural-object.md) fixed those two and left
    Portuguese out by name, so no open ticket held it; it is now
-   [A206](../../bugs/A-must-fix/A206-portuguese-impersonal-se-plural-object.md). The plan is
+   [A206](../../bugs/fixed/A206-portuguese-impersonal-se-plural-object.md). The plan is
    unchanged, as the reading said it should be.
 
 ## Not in this ticket

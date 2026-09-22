@@ -963,3 +963,49 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
     }))).toMatchObject({ es: 'el gato usa la casa como condición.', pt: 'o gato usa a casa como condição.' });
   });
 });
+
+// A225. A German predicate adjective is undeclined ("der Kater ist müde"), and `dePredAdj` gives an
+// ordinal the same bare form: "der Kater ist erste". An ordinal has no such predicative form. German
+// says the rank with the definite article and the nominalised ordinal, which takes the subject's
+// gender and number: "der Kater ist der Erste", "die Katze ist die Erste", "die Kater sind die Ersten".
+// PIN's C28 gloss stayed on the literal for it ("einen Gegenstand veranlassen, immer erste zu sein").
+describe('known bugs: a German ordinal as a predicate is left bare (A225)', () => {
+  const is = (subject: NounPhrase, ordinal: string, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(subject, 'BE', { verbPhrase, complements: { predicative: { phrase: np(ordinal) } } }), 'de');
+  const causeToBe = (causee: NounPhrase, ordinal: string, verbPhrase: Partial<VerbPhrase> = {}): PhrasePlan => ({
+    subject: np('GENERIC_PERSON'),
+    verbPhrase: { verb: 'CAUSE_VERB' },
+    directObject: causee,
+    infinitiveComplement: { verbPhrase: { verb: 'BE', ...verbPhrase }, complements: { predicative: { phrase: np(ordinal) } }, control: 'object' },
+    infinitive: true,
+  });
+
+  test.fails('the ordinal takes the article and the capital, in the subject\'s gender and number', () => {
+    expect(is(np('CAT'), 'FIRST')).toBe('der Kater ist der Erste.');
+    expect(is(np('CAT', { gender: 'fem' }), 'FIRST')).toBe('die Katze ist die Erste.');
+    expect(is(np('CHILD'), 'FIRST')).toBe('das Kind ist das Erste.');
+    expect(is(np('CAT', { number: 'plural' }), 'FIRST')).toBe('die Kater sind die Ersten.');
+    expect(is(np('CAT'), 'SECOND', { tense: 'past' })).toBe('der Kater war der Zweite.');
+    expect(is(np('CAT'), 'THIRD', { negative: true })).toBe('der Kater ist nicht der Dritte.');
+    expect(say(clause(np('CAT'), 'BECOME', { complements: { predicative: { phrase: np('FIRST') } } }), 'de')).toBe('der Kater wird der Erste.');
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('FIRST') } } } }), 'RUN'), 'de'))
+      .toBe('der Kater, der der Erste ist, läuft.');
+    expect(say(causeToBe(np('OBJECT_THING', { definiteness: 'indefinite' }), 'FIRST'), 'de')).toBe('einen Gegenstand veranlassen, der Erste zu sein.');
+    expect(say(causeToBe(np('OBJECT_THING', { definiteness: 'indefinite' }), 'FIRST', { modifier: 'ALWAYS' }), 'de'))
+      .toBe('einen Gegenstand veranlassen, immer der Erste zu sein.');
+    expect(say(causeToBe(np('OPTION', { definiteness: 'indefinite' }), 'SECOND'), 'de')).toBe('eine Option veranlassen, die Zweite zu sein.');
+  });
+
+  test('regression: an attributive ordinal, another predicate adjective and the other six', () => {
+    expect(say(clause(np('CAT', { adjectives: ['FIRST'] }), 'RUN'), 'de')).toBe('der erste Kater läuft.');
+    expect(is(np('CAT'), 'TIRED')).toBe('der Kater ist müde.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('FIRST') } } }))).toMatchObject({
+      en: 'the cat is first.', it: 'il gatto è primo.', fr: 'le chat est premier.',
+      es: 'el gato es primero.', ja: '猫は第一です。', pt: 'o gato é primeiro.',
+    });
+    expect(sayAll(causeToBe(np('OBJECT_THING', { definiteness: 'indefinite' }), 'FIRST'))).toMatchObject({
+      en: 'to cause an object to be first.', it: 'indurre un oggetto a essere primo.', fr: 'induire un objet à être premier.',
+      es: 'inducir un objeto a ser primero.', ja: '物体が第一であるようにする。', pt: 'induzir um objeto a ser primeiro.',
+    });
+  });
+});

@@ -46,7 +46,7 @@ adjective. [B54](B54-sensation-and-quality-adjectives.md)'s own **Not solved** s
 rule in plain words — *an adjective cannot be glossed by a noun phrase* — and `dimGloss` ("of
 <degree> <dimension>") is the only adjective shape the engine has. Order is not a scale, so
 `dimGloss` does not reach it either. All three go to
-[C24](../C-needs-engine/C24-grammar-feature-adjectives.md), which is the ticket for an adjective
+[C24](../done/C24-grammar-feature-adjectives.md), which is the ticket for an adjective
 gloss that is not a scale.
 
 **SECOND and THIRD are ordinals, and an ordinal is a number, not a phrase.** "The second" is

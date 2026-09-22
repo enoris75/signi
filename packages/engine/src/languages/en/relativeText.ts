@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { relativePossessed } from '../../functions/relativePossessed.js';
@@ -41,8 +42,14 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const WHOM = { base: human ? 'whom' : 'which', definiteness: 'bare' };
   const gap = relativeGapComplement(np, WHOM);
   const agentGap = relativeAgentGap(np, WHOM);
+  // The object of a verb that takes it with a preposition relativises on that preposition, as a
+  // complement does — "a clause on which another clause depends" — where the others pied-pipe it
+  // too (it "dalla quale", de "von dem"). Formal English, and never a stranded preposition that a
+  // following complement would read as its own.
+  const objectPrep = rel.headRole === 'directObject' ? objectPreposition(rel.verbPhrase.verb) : '';
   const pronoun = agentGap ? agentPhrase(agentGap)
-    : isPlainLocativeGap(rel) ? 'where' : gap ? complementsPhrase(gap) : human ? 'who' : 'that';
+    : isPlainLocativeGap(rel) ? 'where' : gap ? complementsPhrase(gap)
+    : objectPrep ? `${objectPrep} ${WHOM.base}` : human ? 'who' : 'that';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   const subjText = subjectRelative ? '' : subjectText(rel.subject!);

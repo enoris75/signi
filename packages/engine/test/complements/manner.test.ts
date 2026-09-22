@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // The adverbial of manner (complemento di modo) — how an action is carried out. Its preposition
@@ -340,5 +341,55 @@ describe('known bugs: a `no` in a similative manner phrase', () => {
       .toBe('猫はどの犬のようにも走りませんでした。');
     expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: likeNo('DOG') })).ja)
       .toBe('猫はどの犬のようにもネズミを食べません。');
+  });
+});
+
+// A226. `resolveComplements` forces an adjective-modified measure adverbial bare, because a rate is
+// not an identifiable thing and "at the high speed" reads oddly — the tests above pin that for the
+// definite. The rule does not look at which determiner it overrides, so it takes every one: the
+// indefinite ("at other time", "zu anderer Zeit"), a quantifier ("at other times" for "at all other
+// times") and "no", whose negation goes with it ("runs at other time" for "runs at no other time").
+// AGAIN's verbless gloss on the same noun keeps its article ("at another time"), which is what
+// isolates the defect to the clause. Found authoring the C23-C28 sweep.
+describe('known bugs: a measure manner adverbial loses the determiner it was given (A226)', () => {
+  const OTHER_TIME = (extra: Partial<NounPhrase>) => np('TIME', { adjectives: ['OTHER'], ...extra });
+  const four = (said: Record<string, string>) => ({ en: said['en'], it: said['it'], fr: said['fr'], de: said['de'] });
+
+  test.fails('only the definite gives way to bare; every other determiner stays', () => {
+    expect(four(runManner(OTHER_TIME({ definiteness: 'indefinite' })))).toEqual({
+      en: 'the cat runs at another time.', it: 'il gatto corre a un altro tempo.',
+      fr: 'le chat court à un autre temps.', de: 'der Kater läuft zu einer anderen Zeit.',
+    });
+    expect(four(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { tense: 'past' }, complements: { manner: { phrase: OTHER_TIME({ definiteness: 'indefinite' }) } } })))).toEqual({
+      en: 'the cat ran at another time.', it: 'il gatto corse a un altro tempo.',
+      fr: 'le chat courut à un autre temps.', de: 'der Kater lief zu einer anderen Zeit.',
+    });
+    expect(four(runManner(np('SPEED', { adjectives: ['HIGH'], definiteness: 'indefinite' })))).toEqual({
+      en: 'the cat runs at a high speed.', it: 'il gatto corre a una velocità alta.',
+      fr: 'le chat court à une vitesse haute.', de: 'der Kater läuft mit einer hohen Geschwindigkeit.',
+    });
+    expect(runManner(OTHER_TIME({ definiteness: 'all', number: 'plural' }))).toMatchObject({
+      en: 'the cat runs at all other times.', de: 'der Kater läuft zu allen anderen Zeiten.', es: 'el gato corre a todos los otros tiempos.',
+    });
+    expect(runManner(OTHER_TIME({ definiteness: 'this' }))).toMatchObject({
+      en: 'the cat runs at this other time.', de: 'der Kater läuft zu dieser anderen Zeit.', es: 'el gato corre a este otro tiempo.',
+    });
+    expect(runManner(OTHER_TIME({ definiteness: 'no' }))).toEqual({
+      en: 'the cat runs at no other time.', it: 'il gatto non corre a nessun altro tempo.',
+      fr: 'le chat ne court à aucun autre temps.', de: 'der Kater läuft zu keiner anderen Zeit.',
+      es: 'el gato no corre a ningún otro tiempo.', ja: '猫はどの別の時間でも走りません。', pt: 'o gato não corre a nenhum outro tempo.',
+    });
+  });
+
+  test('regression: the definite and the bare, a plain measure noun, the gloss, and Spanish, Portuguese and Japanese', () => {
+    expect(runManner(np('SPEED', { adjectives: ['HIGH'] })).en).toBe('the cat runs at high speed.');
+    expect(runManner(np('SPEED', { adjectives: ['HIGH'], definiteness: 'bare' })).en).toBe('the cat runs at high speed.');
+    expect(runManner(np('TIME', { definiteness: 'indefinite' })).en).toBe('the cat runs at a time.');
+    expect(sayAll({ subject: OTHER_TIME({ definiteness: 'indefinite', mannerGloss: true }) })).toMatchObject({
+      en: 'at another time.', it: 'a un altro tempo.', fr: 'à un autre temps.', de: 'zu einer anderen Zeit.',
+    });
+    expect(runManner(OTHER_TIME({ definiteness: 'indefinite' }))).toMatchObject({
+      es: 'el gato corre a otro tiempo.', ja: '猫は別の時間で走ります。', pt: 'o gato corre a outro tempo.',
+    });
   });
 });

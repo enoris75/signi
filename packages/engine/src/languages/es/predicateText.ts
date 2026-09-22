@@ -66,7 +66,7 @@ export function predicateText(
   const objectPrep = objectPreposition(verb);
   const passiveSe = subjectForms['generic'] === '1' && !!directObject && !objectPrep && !isPronounElement(directObject)
     && directObject.agreement['number'] === 'plural'
-    && !directObject.conjuncts.some((np) => np.head.forms['person'] || takesPersonalA(np));
+    && !directObject.conjuncts.some((np) => np.head.forms['person'] || takesPersonalA(np, verb.forms));
   const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   // A reflexive verb's stored forms carry a fixed clitic ("me volveré", "se volvieron"), so its mood
@@ -192,7 +192,7 @@ export function predicateText(
     : pronounGroup ? groupObjectClitic(directObject) : '';
   // A human noun takes the personal "a" too ("ve al niño"), see `objectNounText`.
   const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
-    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np);
+    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np, verb.forms);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
   // A reflexive verb already carries its own "se" in the form ("se mueve"), and the impersonal one

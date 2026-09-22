@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  AFRICA, BOOK, CAT, CHILD, CREATOR, EAT, el, EUROPE, type Forms, MOUSE, np, OBJECT, vp, WATER,
+  AFRICA, BOOK, CAT, CHILD, CREATOR, EAT, el, EUROPE, type Forms, MOUSE, np, OBJECT, STICK, vp, WATER,
 } from './en.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 
@@ -127,6 +127,19 @@ describe('nounPhrase', () => {
     test('post-modification propagates up the possessor chain', () => {
       const fatherOfCatThatEats = np(FATHER, {}, { possessor: np(CAT, {}, { relative: eatsTheMouse }) });
       expect(nounPhrase(BOOK, undefined, undefined, fatherOfCatThatEats)).toBe('the book of the father of the cat that eats the mouse');
+    });
+
+    // C26: a whole (or the parts a head is made of) is never the clitic, which would make it the
+    // owner. The head keeps whatever determiner it has, "all" included.
+    test('a partitive possessor takes the of-phrase and the head keeps its determiner', () => {
+      const partitive = (forms: Forms, adj?: string) => nounPhrase(forms, adj, undefined, np(CAT, { definiteness: 'indefinite' }), false, true);
+      expect(partitive({ ...STICK, definiteness: 'indefinite' })).toBe('a stick of a cat');
+      expect(partitive(STICK, 'old')).toBe('the old stick of a cat');
+      expect(partitive({ ...STICK, definiteness: 'this' })).toBe('this stick of a cat');
+      expect(partitive({ ...STICK, number: 'plural', definiteness: 'all' })).toBe('all sticks of a cat');
+      expect(partitive({ ...OBJECT, definiteness: 'indefinite' })).toBe('an object of a cat');
+      // The same possessor as an owner, for contrast.
+      expect(nounPhrase({ ...STICK, definiteness: 'indefinite' }, undefined, undefined, np(CAT, { definiteness: 'indefinite' }))).toBe("a cat's stick");
     });
   });
 });

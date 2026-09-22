@@ -109,6 +109,13 @@ describe('relativeText', () => {
       .toBe('sur lesquelles le chat a cliqué');
   });
 
+  // DEPEND's dépendre takes its object with "de", which relativises as "dont", not "duquel".
+  test('a head that is the de-object of a prepositional verb takes dont', () => {
+    const DEPENDRE: Forms = { base: 'dépendre', object_prep: 'de', participle: 'dépendu', '3sg_present': 'dépend' };
+    const depends = { headRole: 'directObject' as const, subject: el(np(CHAT)), verbPhrase: vp(DEPENDRE) };
+    expect(relativeText(np(MAISON, {}, { relative: depends }))).toBe('dont le chat dépend');
+  });
+
   // A167: an "aucun" head negates the matrix clause, not the relative, so it is no self-negating
   // subject of the relative: a positive relative stays positive and a negative one takes "ne … pas".
   // The relative's OWN "aucun" subject does negate it, with "ne" alone.

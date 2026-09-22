@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { PATH_SPECIFIERS, type NounPhrase, type PathSpecifier, type VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from '../harness.js';
+import { clause, np, say, sayAll } from '../harness.js';
+import { concepts } from '../../../backend/src/concepts/index.js';
 
 // Where the action happens — a static place, with no motion implied. Most verbs that denote a
 // concrete act license it: something happens, and it happens *somewhere*. The list mirrors the
@@ -1059,6 +1060,169 @@ describe('known bugs: a French bare plural after a preposition', () => {
       es: 'el gato está en paréntesis.',
       ja: '猫は括弧にいます。',
       pt: 'o gato está em parênteses.',
+    });
+  });
+});
+
+// A218. German says where a thing is with "in" and where it comes from with "aus" for a place one is
+// inside — "im Haus", "aus dem Haus" — and the engine gives every inanimate place that pair. *Ort* is
+// not one of them: a place is where one is AT, "an einem Ort", and what one comes FROM, "von einem
+// Ort". So are *Ende*, *Ziel* and *Ausgangspunkt* ("am Ende", "am Ziel"). The five place glosses,
+// EVERYWHERE, GO and IMPORT ship the "in"/"aus" pair. Found authoring C25 (EVERYWHERE's gloss).
+describe('known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)', () => {
+  const at = (place: NounPhrase, verb = 'EAT') =>
+    say(clause(np('CAT'), verb, { complements: { locative: { phrase: place } } }), 'de');
+  const from = (place: NounPhrase) =>
+    say(clause(np('MAN'), 'GO', { complements: { source: { phrase: place } } }), 'de');
+  const definition = (id: string) => say(concepts.find((c) => c.id === id)!.definition!, 'de');
+
+  test.fails('the place takes "an" + dative, its relative "an dem", its source "von" and its goal "an"', () => {
+    expect(at(np('PLACE', { definiteness: 'all', number: 'plural' }))).toBe('der Kater frisst an allen Orten.');
+    expect(at(np('PLACE', { definiteness: 'indefinite' }))).toBe('der Kater frisst an einem Ort.');
+    expect(at(np('PLACE'))).toBe('der Kater frisst am Ort.');
+    expect(at(np('PLACE', { definiteness: 'this' }))).toBe('der Kater frisst an diesem Ort.');
+    expect(at(np('PLACE', { definiteness: 'no' }))).toBe('der Kater frisst an keinem Ort.');
+    expect(at(np('PLACE', { adjectives: ['OTHER'] }), 'BE')).toBe('der Kater ist am anderen Ort.');
+    expect(at(np('END'))).toBe('der Kater frisst am Ende.');
+    expect(at(np('DESTINATION'), 'BE')).toBe('der Kater ist am Ziel.');
+    expect(at(np('ORIGIN'), 'BE')).toBe('der Kater ist am Ausgangspunkt.');
+    expect(say({
+      subject: np('PLACE', {
+        definiteness: 'indefinite',
+        relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+      }),
+    }, 'de')).toBe('ein Ort, an dem der Kater frisst.');
+    expect(from(np('PLACE', { definiteness: 'indefinite' }))).toBe('der Mann geht von einem Ort.');
+    expect(from(np('PLACE'))).toBe('der Mann geht vom Ort.');
+    expect(from(np('ORIGIN'))).toBe('der Mann geht vom Ausgangspunkt.');
+    expect(say(clause(np('CAT'), 'SEND', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: np('PLACE', { definiteness: 'indefinite' }) } },
+    }), 'de')).toBe('der Kater schickt das Buch an einen Ort.');
+    // The shipped definitions.
+    expect(definition('EVERYWHERE')).toBe('an allen Orten.');
+    expect(definition('GO')).toBe('sich von einem Ort zu einem anderen Ort bewegen.');
+    expect(definition('IMPORT')).toBe('Inhalt von einem Ort übertragen.');
+    expect(definition('HOME')).toBe('ein Ort, an dem man wohnt.');
+    expect(definition('MARKET')).toBe('ein Ort, an dem man handelt.');
+    expect(definition('CLIPBOARD')).toBe('ein Ort, an dem man kopiert.');
+    expect(definition('CONSOLE')).toBe('ein Ort, an dem man tippt.');
+    expect(definition('CANVAS')).toBe('ein Ort, an dem man Phrasen macht.');
+  });
+
+  test('regression: a place one is inside, another relation, a goal, a living source, the other six', () => {
+    expect(at(np('HOUSE'))).toBe('der Kater frisst im Haus.');
+    expect(from(np('HOUSE'))).toBe('der Mann geht aus dem Haus.');
+    expect(from(np('DOG'))).toBe('der Mann geht vom Hund.');
+    expect(definition('HOUSE')).toBe('ein Gebäude, in dem man wohnt.');
+    expect(say(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('PLACE'), specifiers: [{ kind: 'path', value: 'under' }] } },
+    }), 'de')).toBe('der Kater ist unter dem Ort.');
+    expect(say(clause(np('MAN'), 'GO', {
+      complements: { direction: { phrase: np('PLACE', { definiteness: 'indefinite' }) } },
+    }), 'de')).toBe('der Mann geht zu einem Ort.');
+    expect(say(clause(np('CAT'), 'SAVE', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: np('CONTAINER') } },
+    }), 'de')).toBe('der Kater speichert das Buch in den Behälter.');
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('PLACE', { definiteness: 'indefinite' }) } },
+    }))).toMatchObject({
+      en: 'the cat eats in a place.',
+      it: 'il gatto mangia in un luogo.',
+      fr: 'le chat mange dans un lieu.',
+      es: 'el gato come en un lugar.',
+      ja: '猫は場所で食べます。',
+      pt: 'o gato come em um lugar.',
+    });
+  });
+});
+
+// A219. French "dans" needs a determiner after it: "dans le groupe", "dans un groupe", never "dans
+// groupe". The preposition French puts before a bare noun is "en" — "en groupe", "en prison", "en
+// parenthèse" — the same "en" the bare continent and the tonic pronoun already take ("en Europe",
+// "en lui"). A196 gave the bare plural its "des" and left the bare singular as "dans parenthèse". A
+// mass noun has no "en" reading ("en eau" is not "in water"), and takes its partitive after "dans"
+// instead, as an object does (A149): "dans de l'eau". Found authoring the C23-C28 sweep.
+describe('known bugs: a French bare singular after "dans" (A219)', () => {
+  const inBare = (concept: string, verb = 'BE', extra: Partial<NounPhrase> = {}) => say(clause(np('CAT'), verb, {
+    complements: { locative: { phrase: np(concept, { definiteness: 'bare', ...extra }) } },
+  }), 'fr');
+
+  test.fails('a count noun takes "en", a mass noun "dans" + its partitive', () => {
+    expect(inBare('GROUP', 'EAT')).toBe('le chat mange en groupe.');
+    expect(inBare('GROUP', 'EAT', { adjectives: ['SMALL'] })).toBe('le chat mange en petit groupe.');
+    expect(inBare('PRISON')).toBe('le chat est en prison.');
+    expect(inBare('BRACKET')).toBe('le chat est en parenthèse.');
+    expect(inBare('WATER')).toBe("le chat est dans de l'eau.");
+    expect(say({ subject: np('GROUP', { definiteness: 'bare', complementGloss: { type: 'locative' } }) }, 'fr')).toBe('en groupe.');
+  });
+
+  test('regression: the other determiners, the possessive, the plural, a name, a pronoun and the other six', () => {
+    const inGroup = (extra: Partial<NounPhrase>) => say(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('GROUP', extra) } },
+    }), 'fr');
+    expect(inGroup({})).toBe('le chat mange dans le groupe.');
+    expect(inGroup({ definiteness: 'indefinite' })).toBe('le chat mange dans un groupe.');
+    expect(inGroup({ possessor: { kind: 'pronominal', person: '1', number: 'singular' } })).toBe('le chat mange dans mon groupe.');
+    expect(inBare('GROUP', 'BE', { number: 'plural' })).toBe('le chat est dans des groupes.');
+    expect(inBare('EUROPE', 'EAT')).toBe('le chat mange en Europe.');
+    expect(inBare('JAPAN', 'EAT')).toBe('le chat mange au Japon.');
+    expect(inBare('HOME', 'EAT')).toBe('le chat mange à la maison.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('THIRD_PERSON', { gender: 'masc' }) } },
+    }), 'fr')).toBe('le chat mange en lui.');
+    expect(say(clause(np('CAT'), 'EAT', {
+      complements: { manner: { phrase: np('CARE', { definiteness: 'bare' }) } },
+    }), 'fr')).toBe('le chat mange avec soin.');
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('GROUP', { definiteness: 'bare' }) } },
+    }))).toMatchObject({
+      it: 'il gatto mangia in gruppo.',
+      es: 'el gato come en grupo.',
+      ja: '猫はグループで食べます。',
+      pt: 'o gato come em grupo.',
+    });
+  });
+});
+
+// A220. A Japanese locative takes で, the place an act goes on in (家で走ります), unless the verb asks for
+// に (A109's existential, A190's 住む). A direction is no such place: one runs 反対の方向に, "in the
+// opposite direction", and 反対の方向で reads as running while standing in a direction. That is the
+// noun's doing, not the verb's — every verb that moves takes it — so no per-verb `locative_particle`
+// can say it. BACKWARDS's C25 gloss ships 反対の方向で.
+describe('known bugs: a Japanese direction noun as a locative takes で (A220)', () => {
+  const opposite = np('DIRECTION_SPACE', { adjectives: ['OPPOSITE'] });
+  const along = (verb: string, place: NounPhrase, extra: Parameters<typeof clause>[2] = {}) =>
+    say(clause(np('CAT'), verb, { ...extra, complements: { locative: { phrase: place } } }), 'ja');
+
+  test.fails('the direction takes に', () => {
+    expect(along('RUN', opposite)).toBe('猫は反対の方向に走ります。');
+    expect(along('RUN', opposite, { verbPhrase: { tense: 'past' } })).toBe('猫は反対の方向に走りました。');
+    expect(along('RUN', opposite, { verbPhrase: { negative: true } })).toBe('猫は反対の方向に走りません。');
+    expect(along('GO', np('DIRECTION_SPACE', { definiteness: 'this' }))).toBe('猫はこの方向に行きます。');
+    expect(along('GO', np('DIRECTION_SPACE', { definiteness: 'no' }))).toBe('猫はどの方向にも行きません。');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'RUN', { complements: { locative: { phrase: opposite } } }), imperative: true }, 'ja'))
+      .toBe('反対の方向に走ってください。');
+    expect(say({ ...clause(np('GENERIC_PERSON'), 'RUN', { complements: { locative: { phrase: opposite } } }), infinitive: true }, 'ja'))
+      .toBe('反対の方向に走る。');
+    expect(say(concepts.find((c) => c.id === 'BACKWARDS')!.definition!, 'ja')).toBe('反対の方向に。');
+  });
+
+  test('regression: the existential, a relation, a place, a goal and the other languages', () => {
+    expect(along('BE', opposite)).toBe('猫は反対の方向にいます。');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: opposite, specifiers: [{ kind: 'path', value: 'under' }] } },
+    }), 'ja')).toBe('猫は反対の方向の下で走ります。');
+    expect(along('RUN', np('HOUSE'))).toBe('猫は家で走ります。');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { direction: { phrase: opposite } } }), 'ja'))
+      .toBe('猫は反対の方向へ走ります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: opposite } } }))).toMatchObject({
+      en: 'the cat runs in the opposite direction.',
+      it: 'il gatto corre nella direzione opposta.',
+      fr: 'le chat court dans la direction opposée.',
+      es: 'el gato corre en la dirección opuesta.',
+      pt: 'o gato corre na direção oposta.',
     });
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MANGIARE, MONETA, NOI, np, SI, TOPO, TU, vp,
+  CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MANGIARE, MONETA, NOI, np, SI, TOPO, TU, VOLPE, vp,
 } from './it.fixtures.js';
 import { relativeText } from './relativeText.js';
 
@@ -66,6 +66,14 @@ describe('relativeText', () => {
     expect(relativeText(np(TOPO, { number: 'plural' }, { relative: objectRelative(el(np(SI))) }))).toBe('che si mangiano');
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(SI)), { verbPhrase: vp(MANGIARE, { negative: true }) }) })))
       .toBe('che non si mangia');
+  });
+
+  // A213: in the compound tense the gapped head is the participle's patient, in either number.
+  test('the passive si agrees its compound participle with the gapped head', () => {
+    const eaten = objectRelative(el(np(SI)), { verbPhrase: vp(MANGIARE, { aspect: 'resultative' }) });
+    expect(relativeText(np(VOLPE, {}, { relative: eaten }))).toBe('che si è mangiata');
+    expect(relativeText(np(TOPO, { number: 'plural' }, { relative: eaten }))).toBe('che si sono mangiati');
+    expect(relativeText(np(TOPO, {}, { relative: eaten }))).toBe('che si è mangiato');
   });
 
   test('a head filling a complement takes its preposition fused with an agreeing il quale', () => {

@@ -59,7 +59,7 @@ Romance stacks postnominally (*comida fría dulce*) and may want a conjunction.
    FLAME is *the visible part of a fire* (part-whole); STICK is *an object of wood* and BLADE *a
    sharp object of metal* (material). `ComplementType` has neither, and PART is now seeded (by
    [B57](B57-ui-nouns-needing-a-word.md)) without helping: the blocker is the relation, not the
-   word. All three go to [C26](../C-needs-engine/C26-root-nouns-on-the-literal.md), where
+   word. All three go to [C26](../done/C26-root-nouns-on-the-literal.md), where
    [B57](B57-ui-nouns-needing-a-word.md)'s KEY, ROW, REGION and TAB wait on the same part-whole
    relation. **That is now one ticket's worth of work with seven concepts behind it**, and it is
    the largest single thing the sweep leaves undone.

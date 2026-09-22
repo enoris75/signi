@@ -14,6 +14,7 @@ import { meansClause } from './meansClause.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { objectPrepCase } from './objectPrepCase.js';
 import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { reflexivePronoun } from './reflexivePronoun.js';
@@ -64,7 +65,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       ? `von ${relativePronoun(f, 'dat', plural)}`
     : gap
       ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
-      : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
+      : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : headPrep ? objectPrepCase(headPrep) : 'acc', plural)].filter(Boolean).join(' ');
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;

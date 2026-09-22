@@ -76,6 +76,12 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(TABERU), group('or', np(NEZUMI), np(HON)), undefined))).toBe('ネズミか本を食べます');
     });
 
+    // FOLLOW's 続く takes its object with に, as its lexeme's `object_particle` says (localization C24).
+    test('a verb that names its object particle takes it in place of を', () => {
+      const TSUZUKU = { base: '続く', reading: 'つづく', masu_present: '続きます', masu_present_reading: 'つづきます', object_particle: 'に' };
+      expect(text(predicateSegs(vp(TSUZUKU), el(np(INU)), undefined))).toBe('犬に続きます');
+    });
+
     test('a modal’s adverb precedes the main verb’s', () => {
       const phrase = vp(TABERU, { modifier: concept(HAYAKU), modals: [modal(KOTO_GA_DEKIRU, ITSUMO)] });
       expect(text(predicateSegs(phrase, undefined, undefined))).toBe('いつも速く食べることができます');

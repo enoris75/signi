@@ -3,7 +3,7 @@
 _(from the unsorted sweep of 2026-09-22. Three of the twelve undefined adverbs gloss today, on the
 `frequencyGloss` shape ALWAYS and NEVER already ship — TIME under a determiner, with the `measure`
 relation writing "at". The other nine need a construct the engine does not have and are
-[C25](../C-needs-engine/C25-place-and-direction-adverbs.md) and
+[C25](../done/C25-place-and-direction-adverbs.md) and
 [B55](B55-sequence-and-position.md).)_
 
 ## Plan
@@ -52,7 +52,7 @@ judged on authoring:
 ALREADY is the fourth time adverb and needs a word: "by this time" is a terminus, not a measure, and
 PREVIOUS has no gloss. It is [B55](B55-sequence-and-position.md). SUDDENLY renders
 "in a quick way" on the seeded QUICK, which is not what sudden means, and is in
-[C25](../C-needs-engine/C25-place-and-direction-adverbs.md) with the place adverbs.
+[C25](../done/C25-place-and-direction-adverbs.md) with the place adverbs.
 
 ## Coverage
 

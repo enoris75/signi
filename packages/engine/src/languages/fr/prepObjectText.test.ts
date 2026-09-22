@@ -3,6 +3,14 @@ import { HOMME, IL, JE, LIVRE, MAISON, np } from './fr.fixtures.js';
 import { prepObjectText } from './prepObjectText.js';
 
 describe('prepObjectText', () => {
+  // A pronoun takes its tonic form, and "de" elides before a vowel.
+  test('a pronoun is the tonic form, de elided before a vowel', () => {
+    expect(prepObjectText(np(IL), 'sur')).toBe('sur lui');
+    // The resolved feminine tonic, as the translator hands it over.
+    expect(prepObjectText(np({ base: 'elle', person: '3', number: 'singular', gender: 'fem', disjunctive: 'elle' }), 'de')).toBe("d'elle");
+    expect(prepObjectText(np(IL), 'de')).toBe('de lui');
+  });
+
   test('the preposition leads the noun phrase with its own determiner', () => {
     expect(prepObjectText(np(LIVRE), 'sur')).toBe('sur le livre');
     expect(prepObjectText(np(HOMME), 'sur')).toBe("sur l'homme");

@@ -351,3 +351,38 @@ describe('known bugs: French continent source', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: np('EUROPE') } } })).fr).toBe("le chat court à cause de l'Europe.");
   });
 });
+
+// A228. A153 gave an Italian animate source "via" on every verb, because an animate GOAL takes "da"
+// too (the andare-da construction) and "va dal bambino" reads "goes to the boy". A verb that takes no
+// goal has nothing for "da" to collide with. REMOVE licenses a source and no direction, so "via" only
+// doubles "rimuovere" ("rimuove il libro via dal cane"), and in a relative on the source it lands in
+// front of the relative pronoun, where Italian cannot have it: "un animale via dal quale si sono
+// rimossi testicoli". Found authoring C24's relational adjectives.
+describe('known bugs: an Italian animate source takes "via" under a verb with no goal (A228)', () => {
+  const G = np('GENERIC_PERSON');
+  const TESTICLES = np('TESTICLE', { definiteness: 'bare', number: 'plural' });
+  const removedFrom = (head: NounPhrase, subject: NounPhrase, object: NounPhrase, aspect?: 'resultative') =>
+    sayAll({ subject: { ...head, relative: { headRole: 'source', subject, verbPhrase: { verb: 'REMOVE', ...(aspect ? { aspect } : {}) }, directObject: object } } });
+
+  test.fails('REMOVE takes its animate source with a bare "da"', () => {
+    expect(removedFrom(np('ANIMAL', { definiteness: 'indefinite' }), G, TESTICLES, 'resultative').it)
+      .toBe('un animale dal quale si sono rimossi testicoli.');
+    expect(removedFrom(np('ANIMAL', { definiteness: 'indefinite' }), G, TESTICLES).it).toBe('un animale dal quale si rimuovono testicoli.');
+    expect(removedFrom(np('DOG'), np('MAN'), np('BOOK')).it).toBe("il cane dal quale l'uomo rimuove il libro.");
+    expect(sayAll(clause(np('MAN'), 'REMOVE', { directObject: np('BOOK'), complements: { source: { phrase: np('DOG') } } })).it)
+      .toBe("l'uomo rimuove il libro dal cane.");
+  });
+
+  test('regression: a verb with a goal keeps "via", a place stays bare, and the other six', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('DOG') } } })).it).toBe('il gatto corre via dal cane.');
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { source: { phrase: np('DOG') } } })).it).toBe('il gatto va via dal cane.');
+    expect(removedFrom(np('HOUSE'), np('MAN'), np('BOOK')).it).toBe("la casa dalla quale l'uomo rimuove il libro.");
+    expect(removedFrom(np('ANIMAL', { definiteness: 'indefinite' }), G, TESTICLES, 'resultative')).toMatchObject({
+      en: 'an animal from which one has removed testicles.',
+      de: 'ein Tier, von dem man Hoden entfernt hat.',
+      es: 'un animal del que se han quitado testículos.',
+      ja: '精巣を取り除いた動物。',
+      pt: 'um animal do qual se removeram testículos.',
+    });
+  });
+});

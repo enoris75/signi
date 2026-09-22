@@ -265,3 +265,119 @@ describe('known bugs: German "ins" contraction', () => {
     expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
   });
 });
+
+// A223. A16 gave an inanimate German terminus "in" + the accusative, the goal of SAVE and EXPORT
+// ("speichert das Buch in den Behälter"), and A143 let a verb name another preposition
+// (`terminus_prep`). Two verbs are left on the default that is not theirs. GIVE's terminus is its
+// dative object whatever it names — one gives a value TO an option, "gibt der Option den Wert", not
+// INTO it. CONNECT is "verbinden", the verb LINK already joins WITH ("mit einem anderen Knoten"), but
+// its lexeme names no `terminus_prep`. Found authoring the C23-C28 sweep.
+describe('known bugs: a German inanimate terminus of GIVE and CONNECT takes "in" (A223)', () => {
+  const G = np('PERSON');
+  const give = (goal: Parameters<typeof clause>[0], extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(G, 'GIVE', { directObject: np('VALUE'), complements: { terminus: { phrase: goal } }, ...extra })).de;
+  const connect = (goal: Parameters<typeof clause>[0], extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(G, 'CONNECT', { directObject: np('NODE'), complements: { terminus: { phrase: goal } }, ...extra })).de;
+  const ANOTHER_NODE = np('NODE', { definiteness: 'indefinite', adjectives: ['OTHER'] });
+
+  test.fails('GIVE takes the bare dative ahead of its object, and CONNECT takes "mit"', () => {
+    expect(give(np('OPTION'))).toBe('die Person gibt der Option den Wert.');
+    expect(give(np('OPTION', { definiteness: 'indefinite' }))).toBe('die Person gibt einer Option den Wert.');
+    expect(give(np('OPTION', { number: 'plural' }))).toBe('die Person gibt den Optionen den Wert.');
+    expect(give(np('OPTION'), { verbPhrase: { tense: 'past' } })).toBe('die Person gab der Option den Wert.');
+    expect(give(np('OPTION'), { verbPhrase: { aspect: 'resultative' } })).toBe('die Person hat der Option den Wert gegeben.');
+    expect(give(np('OPTION'), { verbPhrase: { negative: true } })).toBe('die Person gibt der Option den Wert nicht.');
+    expect(sayAll({
+      subject: np('OPTION', { relative: { headRole: 'terminus', subject: G, verbPhrase: { verb: 'GIVE' }, directObject: np('VALUE') } }),
+    }).de).toBe('die Option, der die Person den Wert gibt.');
+    expect(sayAll({
+      ...clause(np('GENERIC_PERSON'), 'GIVE', {
+        directObject: np('VALUE', { definiteness: 'indefinite' }),
+        complements: { terminus: { phrase: np('OPTION', { definiteness: 'indefinite' }) } },
+      }),
+      infinitive: true,
+    }).de).toBe('einer Option einen Wert geben.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('VALUE'), complements: { terminus: { phrase: np('OPTION') } } }), imperative: true }).de)
+      .toBe('gib der Option den Wert.');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('THIRD_PERSON', { gender: 'neut' }) } } })).de)
+      .toBe('der Mann gibt ihm das Buch.');
+    expect(connect(ANOTHER_NODE)).toBe('die Person verbindet den Knoten mit einem anderen Knoten.');
+    expect(connect(np('NODE', { number: 'plural' }))).toBe('die Person verbindet den Knoten mit den Knoten.');
+    expect(connect(ANOTHER_NODE, { verbPhrase: { tense: 'past' } })).toBe('die Person verband den Knoten mit einem anderen Knoten.');
+    expect(sayAll({
+      subject: np('NODE', { relative: { headRole: 'terminus', subject: G, verbPhrase: { verb: 'CONNECT' }, directObject: np('NODE', { definiteness: 'indefinite' }) } }),
+    }).de).toBe('der Knoten, mit dem die Person einen Knoten verbindet.');
+  });
+
+  test('regression: a living recipient, LINK, the goals of SAVE and ADD, and the other six', () => {
+    expect(give(np('DOG'))).toBe('die Person gibt dem Hund den Wert.');
+    expect(sayAll(clause(G, 'LINK', { directObject: np('NODE'), complements: { terminus: { phrase: ANOTHER_NODE } } })).de)
+      .toBe('die Person verbindet den Knoten mit einem anderen Knoten.');
+    expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
+    expect(sendTo('ADD', 'CONTAINER').de).toBe('der Kater fügt das Buch zum Behälter hinzu.');
+    expect(sayAll(clause(G, 'GIVE', { directObject: np('VALUE'), complements: { terminus: { phrase: np('OPTION') } } }))).toMatchObject({
+      en: 'the person gives the value to the option.',
+      it: "la persona dà il valore all'opzione.",
+      fr: "la personne donne la valeur à l'option.",
+      es: 'la persona da el valor a la opción.',
+      ja: '人は選択肢に値をあげます。',
+      pt: 'a pessoa dá o valor à opção.',
+    });
+    expect(sayAll(clause(G, 'CONNECT', { directObject: np('NODE'), complements: { terminus: { phrase: ANOTHER_NODE } } }))).toMatchObject({
+      en: 'the person connects the node to another node.',
+      it: 'la persona connette il nodo a un altro nodo.',
+      fr: 'la personne connecte le nœud à un autre nœud.',
+      ja: '人は別のノードにノードを接続します。',
+      pt: 'a pessoa conecta o nó a outro nó.',
+    });
+  });
+});
+
+// A229. A German dative pronoun leads a noun object: "gibt ihm das Buch", as a dative noun does ("gibt
+// dem Hund das Buch"). `splitDative` hoists the recipient into that slot only when its head's forms
+// say `animate`, and a pronoun's forms carry no such key — A203 made `tonicHeadForms` count a
+// personal pronoun as animate, which is why it takes the bare dative at all, but `splitDative` reads
+// the raw forms. So the pronoun trails the object, "gibt das Buch ihm", which reads as contrastive
+// ("gives the book to HIM"), and after "nicht" as "not to him". Found reproducing A223.
+describe('known bugs: a German dative pronoun trails the object (A229)', () => {
+  const to = (verb: string, recipient: Parameters<typeof np>[0], extra: Parameters<typeof clause>[2] = {}, recipientExtra = {}) =>
+    sayAll(clause(np('CAT'), verb, { directObject: np('BOOK'), complements: { terminus: { phrase: np(recipient, recipientExtra) } }, ...extra })).de;
+
+  test.fails('the pronoun leads the noun object, in every ditransitive and every clause', () => {
+    expect(to('GIVE', 'THIRD_PERSON')).toBe('der Kater gibt ihm das Buch.');
+    expect(to('GIVE', 'THIRD_PERSON', {}, { gender: 'fem' })).toBe('der Kater gibt ihr das Buch.');
+    expect(to('GIVE', 'FIRST_PERSON')).toBe('der Kater gibt mir das Buch.');
+    expect(to('GIVE', 'FIRST_PERSON', {}, { number: 'plural' })).toBe('der Kater gibt uns das Buch.');
+    expect(to('GIVE', 'THIRD_PERSON', {}, { number: 'plural' })).toBe('der Kater gibt ihnen das Buch.');
+    expect(to('SHOW', 'THIRD_PERSON')).toBe('der Kater zeigt ihm das Buch.');
+    expect(to('SEND', 'FIRST_PERSON')).toBe('der Kater schickt mir das Buch.');
+    expect(to('READ', 'THIRD_PERSON')).toBe('der Kater liest ihm das Buch.');
+    expect(to('GIVE', 'THIRD_PERSON', { verbPhrase: { tense: 'past' } })).toBe('der Kater gab ihm das Buch.');
+    expect(to('GIVE', 'THIRD_PERSON', { verbPhrase: { aspect: 'resultative' } })).toBe('der Kater hat ihm das Buch gegeben.');
+    expect(to('GIVE', 'THIRD_PERSON', { verbPhrase: { negative: true } })).toBe('der Kater gibt ihm das Buch nicht.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK', { definiteness: 'indefinite' }), complements: { terminus: { phrase: np('THIRD_PERSON') } } })).de)
+      .toBe('der Kater gibt ihm ein Buch.');
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK'), complements: { terminus: { phrase: np('THIRD_PERSON') } } },
+    }), 'RUN')).de).toBe('der Kater, der ihm das Buch gibt, läuft.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('THIRD_PERSON') } } }), imperative: true }).de)
+      .toBe('gib ihm das Buch.');
+    expect(sayAll({
+      ...clause(np('GENERIC_PERSON'), 'GIVE', { directObject: np('BOOK', { definiteness: 'indefinite' }), complements: { terminus: { phrase: np('THIRD_PERSON') } } }),
+      infinitive: true,
+    }).de).toBe('ihm ein Buch geben.');
+  });
+
+  test('regression: two pronouns, a noun recipient, the experiencer, and English and Japanese', () => {
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('THIRD_PERSON', { gender: 'neut' }), complements: { terminus: { phrase: np('THIRD_PERSON') } } })).de)
+      .toBe('der Kater gibt es ihm.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('THIRD_PERSON'), complements: { terminus: { phrase: np('FIRST_PERSON') } } })).de)
+      .toBe('der Kater gibt ihn mir.');
+    expect(to('GIVE', 'DOG')).toBe('der Kater gibt dem Hund das Buch.');
+    expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { terminus: { phrase: np('THIRD_PERSON') } } })).de).toBe('der Kater scheint ihm.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('THIRD_PERSON') } } }))).toMatchObject({
+      en: 'the cat gives the book to him.',
+      ja: '猫は彼に本をあげます。',
+    });
+  });
+});

@@ -103,6 +103,43 @@ const whereGloss = (genus: string, verb: string, object?: string): PhrasePlan =>
   },
 });
 
+// An instrument gloss: a genus restricted by an *instrumental*-gap relative clause — the head is
+// what the action is done **with**, not who does it or what it is done to, and the clause carries
+// the generic subject patientGloss and whereGloss use. instrumentGloss('ORGAN', 'SEE') → en "an
+// organ with which one sees", it "un organo con il quale si vede", fr "un organe avec lequel on
+// voit", de "ein Organ, mit dem man sieht", ja "見る器官". The optional object is an indefinite
+// singular, "makes **an** object": a bare plural (whereGloss's) would meet the Portuguese impersonal
+// *se*, which does not yet agree with a plural object (A206 — "se faz objetos"). A mass genus takes
+// `bare`, as in patientGloss. Localization C26 (EYE, MATERIAL).
+const instrumentGloss = (genus: string, verb: string, object?: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
+  subject: {
+    concept: genus,
+    definiteness,
+    relative: {
+      headRole: 'instrumental',
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb },
+      ...(object ? { directObject: { concept: object, definiteness: 'indefinite' } } : {}),
+    },
+  },
+});
+
+// A part-whole gloss: PART with the **whole** it is a part of as its genitive — partOfGloss('KEYBOARD')
+// → en "a part of a keyboard", it "una parte di una tastiera", fr "une partie d'un clavier", de "ein
+// Teil einer Tastatur", ja "キーボードの部分". The whole is a `possessor` flagged `possessorRole:
+// 'whole'`, which the six other languages render as the genitive they already had and English
+// turns from the Saxon "a keyboard's part" (a part the keyboard owns) into an of-phrase.
+// Localization C26 (KEY, ROW, REGION, ORGAN); FLAME, DEATH and BLADE write the same relation out,
+// on a definite head.
+const partOfGloss = (whole: string): PhrasePlan => ({
+  subject: {
+    concept: 'PART',
+    definiteness: 'indefinite',
+    possessor: { concept: whole, definiteness: 'indefinite' },
+    possessorRole: 'whole',
+  },
+});
+
 // A language's gloss: the definite LANGUAGE with its country as the genitive possessor —
 // languageOf('ITALY') → en "Italy's language", it "la lingua dell'Italia", de "die Sprache Italiens",
 // ja "イタリアの言語" (localization B36). Definite, because "a language of Italy" says one of several.
@@ -486,6 +523,58 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The scale NEAR and FAR sit on (localization C24): "at small distance" / "at great distance", a
+    // point on the scale like TEMPERATURE's, so `measure`. German Entfernung, the everyday word
+    // ("in großer Entfernung"); Abstand is the gap between two things.
+    id: 'DISTANCE',
+    role: 'noun',
+    description: 'how far apart two things are',
+    emoji: '📐',
+    dimensionRelation: 'measure',
+    forms: {
+      en: { base: 'distance', plural: 'distances', count: 'singular' },
+      it: { base: 'distanza', plural: 'distanze', gender: 'fem', count: 'singular' },
+      fr: { base: 'distance', plural: 'distances', gender: 'fem', count: 'singular' },
+      de: { base: 'Entfernung', plural: 'Entfernungen', gender: 'fem', count: 'singular' },
+      es: { base: 'distancia', plural: 'distancias', gender: 'fem', count: 'singular' },
+      ja: { base: '距離', count: 'singular', reading: 'きょり' },
+      pt: { base: 'distância', plural: 'distâncias', gender: 'fem', count: 'singular' },
+    },
+  },
+  // What ROUND is glossed on (localization C24): "whose shape is a circle", the genitive relative
+  // HYPERNYM uses. Neither is a scale, so neither takes a `dimensionRelation`. A circle is a shape.
+  {
+    id: 'SHAPE',
+    role: 'noun',
+    description: "the form a thing's outline takes",
+    emoji: '🔷',
+    forms: {
+      en: { base: 'shape', plural: 'shapes', count: 'singular' },
+      it: { base: 'forma', plural: 'forme', gender: 'fem', count: 'singular' },
+      fr: { base: 'forme', plural: 'formes', gender: 'fem', count: 'singular' },
+      de: { base: 'Form', plural: 'Formen', gender: 'fem', count: 'singular' },
+      es: { base: 'forma', plural: 'formas', gender: 'fem', count: 'singular' },
+      ja: { base: '形', count: 'singular', reading: 'かたち' },
+      pt: { base: 'forma', plural: 'formas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'CIRCLE',
+    role: 'noun',
+    description: 'a round figure, every point of it equally far from its middle',
+    emoji: '⚪',
+    isA: 'SHAPE',
+    forms: {
+      en: { base: 'circle', plural: 'circles', count: 'singular' },
+      it: { base: 'cerchio', plural: 'cerchi', gender: 'masc', count: 'singular' },
+      fr: { base: 'cercle', plural: 'cercles', gender: 'masc', count: 'singular' },
+      de: { base: 'Kreis', plural: 'Kreise', gender: 'masc', count: 'singular' },
+      es: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
+      ja: { base: '円', count: 'singular', reading: 'えん' },
+      pt: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'MONEY',
     role: 'noun',
     description: 'a medium of exchange',
@@ -540,11 +629,33 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What SWEET is glossed on: "that has sugar" (localization C24). A mass noun, as FOOD is; Spanish
+    // azúcar is masculine in the everyday usage (el azúcar).
+    id: 'SUGAR',
+    role: 'noun',
+    description: 'a sweet substance made from plants and eaten in food',
+    emoji: '🍯',
+    countable: false,
+    isA: 'FOOD',
+    forms: {
+      en: { base: 'sugar', count: 'singular' },
+      it: { base: 'zucchero', gender: 'masc', count: 'singular' },
+      fr: { base: 'sucre', gender: 'masc', count: 'singular' },
+      de: { base: 'Zucker', gender: 'masc', count: 'singular' },
+      es: { base: 'azúcar', gender: 'masc', count: 'singular' },
+      ja: { base: '砂糖', count: 'singular', reading: 'さとう' },
+      pt: { base: 'açúcar', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The differentia object of DRINK's dictionary definition ("to consume liquid"). A mass noun,
-    // modelled on FOOD — uncountable, no plural, and rendered bare in the gloss.
+    // modelled on FOOD — uncountable, no plural, and rendered bare in the gloss. Glossed by what one
+    // does to a liquid and not to a gas: "substance that one pours" (localization C26). "Not solid" is
+    // true of a gas too, and "that one drinks" is WATER's differentia.
     id: 'LIQUID',
     role: 'noun',
     description: 'a fluid substance, something to drink',
+    definition: patientGloss('SUBSTANCE', 'POUR', 'bare'),
     emoji: '💧',
     countable: false,
     forms: {
@@ -645,6 +756,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'recorrido', plural: 'recorridos', gender: 'masc', count: 'singular' },
       ja: { base: '経路', count: 'singular', reading: 'けいろ' },
       pt: { base: 'percurso', plural: 'percursos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The way a thing moves or faces, not a place it goes to: what BACKWARDS is glossed by, "in the
+    // opposite direction" (localization C25). DIRECTION is the grammar's complement, so this one takes
+    // the suffix. German Richtung links a compound with -s- by the -ung rule (Richtungswechsel).
+    id: 'DIRECTION_SPACE',
+    role: 'noun',
+    description: 'the way something moves or faces',
+    emoji: '🧭',
+    forms: {
+      en: { base: 'direction', plural: 'directions', count: 'singular' },
+      it: { base: 'direzione', plural: 'direzioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'direction', plural: 'directions', gender: 'fem', count: 'singular' },
+      de: { base: 'Richtung', plural: 'Richtungen', gender: 'fem', count: 'singular' },
+      es: { base: 'dirección', plural: 'direcciones', gender: 'fem', count: 'singular' },
+      ja: { base: '方向', count: 'singular', reading: 'ほうこう' },
+      pt: { base: 'direção', plural: 'direções', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -1012,9 +1141,22 @@ export const nouns: ConceptSeed[] = [
     // The differentia object of KILL's dictionary definition ("to destroy life"), and DEATH's
     // antonym. Countable like DEATH ("lives"), but rendered bare-singular in the gloss the way FIRE
     // is. Japanese takes 生命 (life as a phenomenon) over 命 (one's own life).
+    //
+    // Glossed "the state of a being that lives", on LIVE_ALIVE — the seeded LIVE is the dwelling one,
+    // which four languages say with abitare / habiter / wohnen / 住む (localization C26). The being is
+    // the `whole` of its state, so English writes it as an of-phrase rather than a Saxon genitive that
+    // would have to hang the relative clause before "'s".
     id: 'LIFE',
     role: 'noun',
     description: 'the condition of being alive',
+    definition: {
+      subject: {
+        concept: 'STATE',
+        definiteness: 'definite',
+        possessor: { concept: 'BEING', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'LIVE_ALIVE' } } },
+        possessorRole: 'whole',
+      },
+    },
     emoji: '🌱',
     forms: {
       en: { base: 'life', plural: 'lives', count: 'singular' },
@@ -1027,9 +1169,41 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The last part of a thing, the word DEATH's gloss turns on: "the end of a life" (localization
+    // C26). A part-whole primitive like PART, so it has no gloss of its own. Feminine in Italian and
+    // French (la fine, la fin), masculine in Spanish and Portuguese (el fin, o fim), where the
+    // feminine la final / a final is a match's last round; German das Ende, whose compound stem
+    // drops the -e (Endpunkt).
+    id: 'END',
+    role: 'noun',
+    description: 'the last part of something',
+    emoji: '🔚',
+    forms: {
+      en: { base: 'end', plural: 'ends', count: 'singular' },
+      it: { base: 'fine', plural: 'fini', gender: 'fem', count: 'singular' },
+      fr: { base: 'fin', plural: 'fins', gender: 'fem', count: 'singular' },
+      de: { base: 'Ende', plural: 'Enden', gender: 'neut', count: 'singular', compound: 'End' },
+      es: { base: 'fin', plural: 'fines', gender: 'masc', count: 'singular' },
+      ja: { base: '終わり', count: 'singular', reading: 'おわり' },
+      pt: { base: 'fim', plural: 'fins', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "The end of a life": END with LIFE as the whole it is the end of (localization C26). The life
+    // is indefinite, which every language reads as any one life — English has no generic article for
+    // it ("the end of life" is bare, and bare LIFE is "das Ende von Leben" in German), and the
+    // definite would be "the end of the life".
     id: 'DEATH',
     role: 'noun',
     description: 'the end of life; the state of being dead',
+    definition: {
+      subject: {
+        concept: 'END',
+        definiteness: 'definite',
+        possessor: { concept: 'LIFE', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
     emoji: '💀',
     forms: {
       en: { base: 'death', plural: 'deaths', count: 'singular' },
@@ -1102,9 +1276,19 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // "A wood object": WOOD as a `material` noun modifier (localization C26), which Romance links
+    // with the material's preposition (it "un oggetto di legno", es "un objeto de madera") and
+    // German compounds (ein Holzgegenstand).
     id: 'STICK',
     role: 'noun',
     description: 'a thin elongated piece of wood',
+    definition: {
+      subject: {
+        concept: 'OBJECT_THING',
+        definiteness: 'indefinite',
+        nounModifiers: [{ concept: 'WOOD', relation: 'material' }],
+      },
+    },
     emoji: '🥢',
     synonym: 'rod',
     forms: {
@@ -1119,10 +1303,22 @@ export const nouns: ConceptSeed[] = [
   },
   {
     // The cutting part of a knife or tool, not the whole implement. Feminine across the gendered
-    // languages (lama / lame / Klinge / cuchilla / lâmina).
+    // languages (lama / lame / Klinge / cuchilla / lâmina). Glossed "the part of an object that
+    // cuts" (localization C26): the relative clause is the part's, and English and Romance leave it
+    // after the whole, where it reads as true either way — the part cuts, and so does the object.
+    // German's "der" is Teil's and Gegenstand's alike.
     id: 'BLADE',
     role: 'noun',
     description: 'the flat cutting part of a knife or tool',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        relative: { verbPhrase: { verb: 'CUT' } },
+        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
     emoji: '🗡️',
     forms: {
       en: { base: 'blade', plural: 'blades', count: 'singular' },
@@ -1154,10 +1350,21 @@ export const nouns: ConceptSeed[] = [
   {
     // The visible part of a fire, which a burning thing gives off: BURN is "to produce flames"
     // (localization B33). A count noun, where FIRE is the phenomenon. Japanese 炎 is the flame
-    // itself and does not contain 燃, so BURN's gloss does not define 燃える with itself.
+    // itself and does not contain 燃, so BURN's gloss does not define 燃える with itself. Glossed as
+    // what its description says, "the visible part of a fire" (localization C26), with FIRE as the
+    // whole — "the part of a fire that one sees" would put Japanese's gapped clause on the fire.
     id: 'FLAME',
     role: 'noun',
     description: 'the visible, glowing part of a fire',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        adjectives: ['VISIBLE'],
+        possessor: { concept: 'FIRE', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
     emoji: '🕯️',
     forms: {
       en: { base: 'flame', plural: 'flames', count: 'singular' },
@@ -1522,6 +1729,23 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'significado', plural: 'significados', gender: 'masc', count: 'singular' },
       ja: { base: '意味', count: 'singular', reading: 'いみ' },
       pt: { base: 'significado', plural: 'significados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // What a statement asserts: STATEMENT is "a clause that asserts facts" (localization C27), as the
+    // school grammars define the declarative sentence. German Tatsache, not Fakt, the loan.
+    id: 'FACT',
+    role: 'noun',
+    description: 'something that is so',
+    emoji: '📌',
+    forms: {
+      en: { base: 'fact', plural: 'facts', count: 'singular' },
+      it: { base: 'fatto', plural: 'fatti', gender: 'masc', count: 'singular' },
+      fr: { base: 'fait', plural: 'faits', gender: 'masc', count: 'singular' },
+      de: { base: 'Tatsache', plural: 'Tatsachen', gender: 'fem', count: 'singular' },
+      es: { base: 'hecho', plural: 'hechos', gender: 'masc', count: 'singular' },
+      ja: { base: '事実', count: 'singular', reading: 'じじつ' },
+      pt: { base: 'fato', plural: 'fatos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -2066,11 +2290,14 @@ export const nouns: ConceptSeed[] = [
     // One of the entities an event involves: the genus of the agent (localization B49). The grammar
     // sense only, suffixed and glossed like AGENT_GRAMMAR, because the everyday word is another in
     // two languages: German Teilnehmer and Japanese 参加者 are attendees, where Partizipant and 参与者
-    // are what grammars say. Partizipant is a weak masculine: den / dem / des Partizipanten. No gloss
-    // of its own: a genus with nothing above it, as FEELING is.
+    // are what grammars say. Partizipant is a weak masculine: den / dem / des Partizipanten. Glossed
+    // on CONCEPT, the corpus's genus for a thing thought rather than held, with the action as the
+    // named agent: German *Begriff* is masculine, so "den eine Handlung umfasst" cannot be misread as
+    // the concept including the action, as neuter *Wesen* ("das eine Handlung umfasst") could.
     id: 'PARTICIPANT_GRAMMAR',
     role: 'noun',
     description: 'one of the entities an event involves (grammar)',
+    definition: patientOfGloss('CONCEPT', 'INCLUDE', 'ACTION'),
     emoji: '👥',
     synonym: 'grammar',
     forms: {
@@ -2617,6 +2844,7 @@ export const nouns: ConceptSeed[] = [
     id: 'STATEMENT',
     role: 'noun',
     description: 'a clause that asserts something (grammar)',
+    definition: whoGloss('CLAUSE', 'ASSERT', 'FACT'),
     emoji: '💬',
     isA: 'CLAUSE',
     forms: {
@@ -3022,6 +3250,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // A number that marks one item among others, as a row's or a page's is — not NUMBER's value, which
+    // counts or measures. Three languages have a word for each: fr numéro / nombre, de Nummer / Zahl,
+    // ja 番号 / 数. What NUMBERED things have (localization C23).
+    id: 'NUMBER_LABEL',
+    role: 'noun',
+    description: 'a number that marks one item among others',
+    emoji: '#️⃣',
+    forms: {
+      en: { base: 'number', plural: 'numbers', count: 'singular' },
+      it: { base: 'numero', plural: 'numeri', gender: 'masc', count: 'singular' },
+      fr: { base: 'numéro', plural: 'numéros', gender: 'masc', count: 'singular' },
+      de: { base: 'Nummer', plural: 'Nummern', gender: 'fem', count: 'singular' },
+      es: { base: 'número', plural: 'números', gender: 'masc', count: 'singular' },
+      ja: { base: '番号', count: 'singular', reading: 'ばんごう' },
+      pt: { base: 'número', plural: 'números', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // How much or how many: what grammatical number and a quantifier indicate (localization B39).
     // Italian "quantità" is invariable. Japanese 数量 covers both amount and count.
     id: 'QUANTITY',
@@ -3302,6 +3548,18 @@ export const nouns: ConceptSeed[] = [
     id: 'MOOD',
     role: 'noun',
     description: 'the form of a verb that shows how a clause is meant (grammar)',
+    // How a clause is meant is what the speaker says it for — asserting, commanding, citing — not a
+    // condition, which is CONDITION's own gloss one row away (localization C27).
+    definition: {
+      subject: {
+        concept: 'FEATURE',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'INDICATE' },
+          directObject: { concept: 'PURPOSE', definiteness: 'definite', possessor: { concept: 'SPEAKER', definiteness: 'definite' } },
+        },
+      },
+    },
     emoji: '🎭',
     synonym: 'grammar',
     forms: {
@@ -3431,6 +3689,10 @@ export const nouns: ConceptSeed[] = [
     id: 'REGISTER',
     role: 'noun',
     description: 'the level of formality of a way of speaking',
+    // A dimension named with no degree: FORMALITY as a noun modifier on LEVEL, "a formality level"
+    // (it "un livello di formalità", de "eine Förmlichkeitsebene"). dimGloss says a degree, and glosses
+    // adjectives (localization C27).
+    definition: { subject: { concept: 'LEVEL', definiteness: 'indefinite', nounModifiers: [{ concept: 'FORMALITY', relation: 'material' }] } },
     emoji: '🎩',
     synonym: 'linguistics',
     forms: {
@@ -3441,6 +3703,27 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'registro', plural: 'registros', gender: 'masc', count: 'singular' },
       ja: { base: '言語使用域', count: 'singular', reading: 'げんごしよういき' },
       pt: { base: 'registro', plural: 'registros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // How formal a way of speaking is: the dimension REGISTER is a level on (localization C27, as
+    // B57 proposed). A mass noun and a quality dimension, like ATTENTION, so a later FORMAL could be
+    // dimGloss('FORMALITY', 'HIGH'). German Förmlichkeit, the native word (Formalität is also "a
+    // formality", the paperwork); Japanese 丁寧さ, the politeness a Japanese register is graded by.
+    id: 'FORMALITY',
+    role: 'noun',
+    description: 'how formal a way of speaking is',
+    emoji: '👔',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'formality', count: 'singular' },
+      it: { base: 'formalità', gender: 'fem', count: 'singular' },
+      fr: { base: 'formalité', gender: 'fem', count: 'singular' },
+      de: { base: 'Förmlichkeit', gender: 'fem', count: 'singular' },
+      es: { base: 'formalidad', gender: 'fem', count: 'singular' },
+      ja: { base: '丁寧さ', count: 'singular', reading: 'ていねいさ' },
+      pt: { base: 'formalidade', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -3500,10 +3783,13 @@ export const nouns: ConceptSeed[] = [
     // One of the keys of a KEYBOARD, which the help overlay says the keys of the app work in
     // (localization C22). German Taste is BUTTON's word too, a homograph as ORDER and COMMAND share
     // Befehl: a German key and a German button are both pressed. Katakana キー, with no separate
-    // reading (see BUTTON).
+    // reading (see BUTTON). Glossed "a part of a keyboard" (localization C26), not "a button of a
+    // keyboard", which in German would define Taste with itself; KEYBOARD is "an object that has
+    // keys", so the two define each other and neither itself.
     id: 'KEY',
     role: 'noun',
     description: 'one of the buttons of a keyboard',
+    definition: partOfGloss('KEYBOARD'),
     emoji: '🔑',
     synonym: 'keyboard',
     forms: {
@@ -3523,10 +3809,19 @@ export const nouns: ConceptSeed[] = [
   {
     // The key, not the projectile or the drawn sign: "use the arrows" is what the Romance UIs say
     // of the keys (it "usa le frecce", fr "les flèches"), where English, German and Japanese name
-    // the key (Pfeiltaste, 矢印キー). Katakana キー, so the reading is the kanji's with it.
+    // the key (Pfeiltaste, 矢印キー). Katakana キー, so the reading is the kanji's with it. Glossed
+    // "a key that moves the cursor" (localization C26): the cursor is definite, the one the page
+    // has, where whoGloss's bare plural would say "moves cursors".
     id: 'ARROW',
     role: 'noun',
     description: 'a key marked with an arrow, that moves the cursor',
+    definition: {
+      subject: {
+        concept: 'KEY',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'MOVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
+      },
+    },
     emoji: '⬅️',
     synonym: 'key',
     forms: {
@@ -3542,9 +3837,11 @@ export const nouns: ConceptSeed[] = [
   {
     // A part of a page the keyboard walks between (F6): the canvas, the translations, the header.
     // The UI's word in each language — it "area" (not "regione", the land), fr "zone", de "Bereich".
+    // Glossed "a part of a screen" (localization C26).
     id: 'REGION',
     role: 'noun',
     description: 'a part of a page or a screen',
+    definition: partOfGloss('SCREEN'),
     emoji: '🗺️',
     forms: {
       en: { base: 'region', plural: 'regions', count: 'singular' },
@@ -3576,9 +3873,12 @@ export const nouns: ConceptSeed[] = [
   {
     // A line of items across a list or a grid: a menu's entries, the pronoun grid's persons. The
     // same words a line of text takes in it, fr, de, pt and ja; Spanish says "fila" of a table's row.
+    // Glossed "a part of a list" (localization C26) — not "a line of a list", since LINE is riga,
+    // ligne, Zeile, linha and 行 too, and would define ROW with itself in five languages.
     id: 'ROW',
     role: 'noun',
     description: 'a line of items across a list or a grid',
+    definition: partOfGloss('LIST'),
     emoji: '🟰',
     forms: {
       en: { base: 'row', plural: 'rows', count: 'singular' },
@@ -3611,10 +3911,18 @@ export const nouns: ConceptSeed[] = [
     // One of the labels along the top of a panel that each show a page of it: the word picker's
     // Noun | Pronoun switch (localization C22). Each UI's word — it "scheda", fr "onglet", es
     // "pestaña", pt "aba"; German keeps the loanword, der Tab, which its UIs write beside
-    // Registerkarte.
+    // Registerkarte. Glossed "a button that shows a region" (localization C26): what a tab shows is
+    // a part of the screen, which REGION's own gloss says, and it is shown by pressing the tab.
     id: 'TAB',
     role: 'noun',
     description: 'a label at the top of a panel that shows one of its pages',
+    definition: {
+      subject: {
+        concept: 'BUTTON',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'SHOW' }, directObject: { concept: 'REGION', definiteness: 'indefinite' } },
+      },
+    },
     emoji: '🗂️',
     forms: {
       en: { base: 'tab', plural: 'tabs', count: 'singular' },
@@ -3665,9 +3973,19 @@ export const nouns: ConceptSeed[] = [
   },
   {
     // Moving from place to place in an interface: "keyboard navigation", the help's first section.
+    // Glossed "an action that moves the cursor" (localization C26), the genus IMPORT_NOUN takes: it
+    // needs no noun made from a verb, since what moves from place to place is the cursor, "a picture
+    // that indicates places". ARROW says the same of the key that does it.
     id: 'NAVIGATION',
     role: 'noun',
     description: 'moving from place to place in an interface',
+    definition: {
+      subject: {
+        concept: 'ACTION',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'MOVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
+      },
+    },
     emoji: '🧭',
     countable: false,
     forms: {
@@ -3720,6 +4038,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'alias', plural: 'alias', gender: 'masc', count: 'singular' },
       ja: { base: '別名', count: 'singular', reading: 'べつめい' },
       pt: { base: 'alias', plural: 'aliases', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The name a work or a document goes by: what UNTITLED has none of (localization C23). Japanese
+    // タイトル, the word an interface says ("タイトルなし"); 題名 is a book's or a film's.
+    id: 'TITLE',
+    role: 'noun',
+    description: 'the name a work or a document is known by',
+    emoji: '📰',
+    isA: 'NAME_NOUN',
+    forms: {
+      en: { base: 'title', plural: 'titles', count: 'singular' },
+      it: { base: 'titolo', plural: 'titoli', gender: 'masc', count: 'singular' },
+      fr: { base: 'titre', plural: 'titres', gender: 'masc', count: 'singular' },
+      de: { base: 'Titel', plural: 'Titel', gender: 'masc', count: 'singular' },
+      es: { base: 'título', plural: 'títulos', gender: 'masc', count: 'singular' },
+      ja: { base: 'タイトル', count: 'singular' },
+      pt: { base: 'título', plural: 'títulos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -3911,9 +4247,20 @@ export const nouns: ConceptSeed[] = [
   {
     // All the periods being built at once, which the console saves, exports and imports as one. The
     // canvas (CANVAS) is the surface one period is drawn on; this is everything on it together.
+    // Glossed "a group of canvases" (localization C26): the part-whole relation read from the whole,
+    // the canvases as the `parts` the group is made up of. CANVAS, "a place where one makes phrases",
+    // was the gloss this one would otherwise have restated.
     id: 'WORKSPACE',
     role: 'noun',
     description: 'all the periods being built at once',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'CANVAS', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+      },
+    },
     emoji: '🗂️',
     forms: {
       en: { base: 'workspace', plural: 'workspaces', count: 'singular' },
@@ -4247,9 +4594,13 @@ export const nouns: ConceptSeed[] = [
   },
   {
     // What a thing is made of. French "matériau" (a material to build with), not "matériel" (equipment).
+    // Glossed "substance with which one makes an object" (localization C26): SUBSTANCE is matter,
+    // and a material is the substance a thing is made *with* — the instrument gap, bare because
+    // SUBSTANCE is a mass noun.
     id: 'MATERIAL',
     role: 'noun',
     description: 'what something is made of',
+    definition: instrumentGloss('SUBSTANCE', 'MAKE', 'OBJECT_THING', 'bare'),
     emoji: '🧶',
     forms: {
       en: { base: 'material', plural: 'materials', count: 'singular' },
@@ -4259,6 +4610,28 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'material', plural: 'materiales', gender: 'masc', count: 'singular' },
       ja: { base: '材料', count: 'singular', reading: 'ざいりょう' },
       pt: { base: 'material', plural: 'materiais', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The material STICK is made of, as a `material` noun modifier: "a wood object", it "un oggetto
+    // di legno", de "ein Holzgegenstand" (localization C26). A mass noun, like SUBSTANCE, so it
+    // carries no plural (en "woods" is a forest). Japanese 木, which is also the tree, over the
+    // lumber-yard 木材. Unglossed: "solid substance" is GROUND's gloss, and what tells wood from any
+    // other material is the tree it comes from, which is not seeded.
+    id: 'WOOD',
+    role: 'noun',
+    description: 'the hard material trees are made of',
+    emoji: '🪵',
+    countable: false,
+    isA: 'MATERIAL',
+    forms: {
+      en: { base: 'wood', count: 'singular' },
+      it: { base: 'legno', gender: 'masc', count: 'singular' },
+      fr: { base: 'bois', gender: 'masc', count: 'singular' },
+      de: { base: 'Holz', gender: 'neut', count: 'singular' },
+      es: { base: 'madera', gender: 'fem', count: 'singular' },
+      ja: { base: '木', count: 'singular', reading: 'き' },
+      pt: { base: 'madeira', gender: 'fem', count: 'singular' },
     },
   },
 
@@ -4365,9 +4738,30 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The whole ORGAN is a part of (localization C26), and the root of it: nothing seeded is above
+    // it but OBJECT_THING and BEING, and "an object that has organs" would define it and ORGAN by
+    // each other. Japanese 体, the everyday word, over the formal 身体.
+    id: 'BODY',
+    role: 'noun',
+    description: 'the physical whole of a person or an animal',
+    emoji: '🧍',
+    forms: {
+      en: { base: 'body', plural: 'bodies', count: 'singular' },
+      it: { base: 'corpo', plural: 'corpi', gender: 'masc', count: 'singular' },
+      fr: { base: 'corps', plural: 'corps', gender: 'masc', count: 'singular' },
+      de: { base: 'Körper', plural: 'Körper', gender: 'masc', count: 'singular' },
+      es: { base: 'cuerpo', plural: 'cuerpos', gender: 'masc', count: 'singular' },
+      ja: { base: '体', count: 'singular', reading: 'からだ' },
+      pt: { base: 'corpo', plural: 'corpos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "A part of a body" (localization C26). The description's "living" has no word to say it with
+    // — LIVE is the dwelling sense — and a body is a living thing's anyway.
     id: 'ORGAN',
     role: 'noun',
     description: 'a part of a living body',
+    definition: partOfGloss('BODY'),
     emoji: '🫀',
     forms: {
       en: { base: 'organ', plural: 'organs', count: 'singular' },
@@ -4377,6 +4771,42 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'órgano', plural: 'órganos', gender: 'masc', count: 'singular' },
       ja: { base: '器官', count: 'singular', reading: 'きかん' },
       pt: { base: 'órgão', plural: 'órgãos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // The two organs the sexes are glossed on (localization C24): MALE is "that has testicles", FEMALE
+  // "that has ovaries", CASTRATED "from which the testicles have been removed". German Hoden is the
+  // same word in the plural; Japanese takes the anatomical 精巣 and 卵巣, one pair of one register.
+  {
+    id: 'TESTICLE',
+    role: 'noun',
+    description: 'the male organ that produces sperm',
+    emoji: '🫘',
+    isA: 'ORGAN',
+    forms: {
+      en: { base: 'testicle', plural: 'testicles', count: 'singular' },
+      it: { base: 'testicolo', plural: 'testicoli', gender: 'masc', count: 'singular' },
+      fr: { base: 'testicule', plural: 'testicules', gender: 'masc', count: 'singular' },
+      de: { base: 'Hoden', plural: 'Hoden', gender: 'masc', count: 'singular' },
+      es: { base: 'testículo', plural: 'testículos', gender: 'masc', count: 'singular' },
+      ja: { base: '精巣', count: 'singular', reading: 'せいそう' },
+      pt: { base: 'testículo', plural: 'testículos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'OVARY',
+    role: 'noun',
+    description: 'the female organ that produces egg cells',
+    emoji: '🥚',
+    isA: 'ORGAN',
+    forms: {
+      en: { base: 'ovary', plural: 'ovaries', count: 'singular' },
+      // ovaia is feminine in Italian, and its plural is ovaie.
+      it: { base: 'ovaia', plural: 'ovaie', gender: 'fem', count: 'singular' },
+      fr: { base: 'ovaire', plural: 'ovaires', gender: 'masc', count: 'singular' },
+      de: { base: 'Eierstock', plural: 'Eierstöcke', gender: 'masc', count: 'singular' },
+      es: { base: 'ovario', plural: 'ovarios', gender: 'masc', count: 'singular' },
+      ja: { base: '卵巣', count: 'singular', reading: 'らんそう' },
+      pt: { base: 'ovário', plural: 'ovários', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -4430,9 +4860,12 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // "An organ with which one sees" — its description, said with the instrument gap (localization
+    // C26). WING and TOOTH, the other organs, are what flies and what bites.
     id: 'EYE',
     role: 'noun',
     description: 'the organ one sees with',
+    definition: instrumentGloss('ORGAN', 'SEE'),
     emoji: '👁️',
     forms: {
       en: { base: 'eye', plural: 'eyes', count: 'singular' },
@@ -4618,6 +5051,25 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'dever', plural: 'deveres', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // The scale the figurative WARM sits on, "of great kindness" (localization C24): AFFECTION is
+    // "a warm feeling", so WARM cannot be glossed on it. Japanese 優しさ, not 親切, which is a kind act.
+    id: 'KINDNESS',
+    role: 'noun',
+    description: 'the quality of being kind to others',
+    emoji: '🤝',
+    countable: false,
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'kindness', count: 'singular' },
+      it: { base: 'gentilezza', gender: 'fem', count: 'singular' },
+      fr: { base: 'gentillesse', gender: 'fem', count: 'singular' },
+      de: { base: 'Freundlichkeit', gender: 'fem', count: 'singular' },
+      es: { base: 'amabilidad', gender: 'fem', count: 'singular' },
+      ja: { base: '優しさ', count: 'singular', reading: 'やさしさ' },
+      pt: { base: 'gentileza', gender: 'fem', count: 'singular' },
+    },
+  },
   // ── The geography genera (localization B56) ────────────────────────
   {
     id: 'LAND',
@@ -4669,9 +5121,12 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // "An object that shows pictures" (localization C26). INTERFACE, the screen one sees, took SEE,
+    // the differentia a screen would first reach for; SHOW is no child's.
     id: 'SCREEN',
     role: 'noun',
     description: 'the lit surface a program shows itself on',
+    definition: whoGloss('OBJECT_THING', 'SHOW', 'PICTURE'),
     emoji: '🖥️',
     forms: {
       en: { base: 'screen', plural: 'screens', count: 'singular' },

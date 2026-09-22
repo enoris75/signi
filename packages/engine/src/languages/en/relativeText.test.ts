@@ -9,6 +9,15 @@ const subjectRelative = (verbPhrase: ResolvedRelativeClause['verbPhrase'], rest:
   ({ headRole: 'subject', verbPhrase, ...rest });
 
 describe('relativeText', () => {
+  // DEPEND takes its object with "on", so an object gap relativises on it, pied-piped (localization C24).
+  test('the object of a prepositional verb relativises on its preposition', () => {
+    const DEPEND = { base: 'depend', object_prep: 'on', '3sg_present': 'depends' };
+    expect(relativeText(np(HOUSE, {}, { relative: { headRole: 'directObject', subject: el(np(CAT)), verbPhrase: vp(DEPEND) } })))
+      .toBe('on which the cat depends');
+    expect(relativeText(np(MAN, {}, { relative: { headRole: 'directObject', subject: el(np(CAT)), verbPhrase: vp(DEPEND) } })))
+      .toBe('on whom the cat depends');
+  });
+
   test('is empty without a relative clause', () => {
     expect(relativeText(np(CAT))).toBe('');
   });

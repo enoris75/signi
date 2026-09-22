@@ -54,11 +54,11 @@ it distinguishes JAPAN from the other six seeded countries and from nothing else
 [C05](../done/C05-non-distinguishing-genera.md) test, and it fails it the way "a continent" failed
 it for all seven continents.
 
-**So the seven countries move to [C26](../C-needs-engine/C26-root-nouns-on-the-literal.md)** as
+**So the seven countries move to [C26](../done/C26-root-nouns-on-the-literal.md)** as
 literal by design, with the compass relation named as what would move them — and EUROPE,
 NORTH_AMERICA and SOUTH_AMERICA, which C05 already holds for the same reason, finally have the
 ticket C05 said they lacked. Seeding LAND and NATION is still worth doing on its own: COUNTRY and
-CONTINENT are two of the roots [C26](../C-needs-engine/C26-root-nouns-on-the-literal.md) would
+CONTINENT are two of the roots [C26](../done/C26-root-nouns-on-the-literal.md) would
 otherwise hold forever, and CONTINENT is the head of the superlative glosses
 [A17](../done/A17-continent-superlatives.md) and [B48](../done/B48-climate-cold-hot.md) ship.
 
@@ -84,7 +84,7 @@ What landed differently from the plan:
    the coverage note disagreed with each other; the coverage note was right.
 2. **SEA and ISLAND were not seeded.** They buy JAPAN alone, which this file already rules out.
 3. **The seven countries and JAPAN move to
-   [C26](../C-needs-engine/C26-root-nouns-on-the-literal.md)** as literal by design, with the
+   [C26](../done/C26-root-nouns-on-the-literal.md)** as literal by design, with the
    compass relation named as what would move them — which is the ticket
    [C05](../done/C05-non-distinguishing-genera.md) said EUROPE, NORTH_AMERICA and SOUTH_AMERICA
    lacked. They have it now.

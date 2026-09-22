@@ -3,7 +3,7 @@
 **Language:** Portuguese
 
 With a plural noun object, the impersonal *se* is the passive *se*, and the verb agrees with that
-noun. [A73](../fixed/A73-impersonal-se-plural-object.md) fixed exactly this for Italian and Spanish
+noun. [A73](A73-impersonal-se-plural-object.md) fixed exactly this for Italian and Spanish
 (*si mangiano i topi*, *se comen los ratones*) and left Portuguese out by name, because its standard
 target for a main clause — *comem-se os ratos* — also moves the clitic to the enclitic position,
 which was a second change. In a **subordinate** clause Portuguese is proclitic anyway, so the clitic
@@ -47,3 +47,23 @@ The CANVAS row above is pinned in
 [`e2e/definition-tooltip.spec.ts`](../../../e2e/definition-tooltip.spec.ts) in English and French
 only, so no test asserts the wrong Portuguese. A fix wants the clause rows in
 `packages/engine/test/relative.test.ts` beside A73's Italian and Spanish ones.
+
+## Resolved
+
+**2026-09-22**, found again while building the headless relative gloss (localization C23), whose
+plural antecedent read *que se salvou*. The Italian and Spanish shape, in the Portuguese engine, and
+no more:
+
+- [`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) — a generic
+  subject with a plural noun object (not a clitic, not the object of a verb that takes it with a
+  preposition) conjugates every finite element against a 3pl agreement: the plain verb, a mood form,
+  the compound tense's auxiliary and a modal chain.
+- [`pt/withRelative.ts`](../../../packages/engine/src/languages/pt/withRelative.ts) — an object
+  relative whose plural head is gapped as that patient agrees the same way.
+
+**The clitic position was left alone, as the file rules.** A main clause still reads *se comem os
+ratos*, the agreement right and the proclitic where it was; *comem-se* is a separate question.
+
+| | |
+|---|---|
+| **Tests** | `relative.test.ts` → *known bugs: the Portuguese impersonal se and a plural object (A206)*, the `test.fails` now passing, plus three added cases: a main clause in the present, past and under a modal; an object relative in the simple and the compound tense; a clitic and a singular object staying impersonal. Colocated: `pt/predicateText.test.ts`, `pt/withRelative.test.ts`. CANVAS's row in `sweep-definitions.test.ts` now reads *um lugar onde se fazem frases* |

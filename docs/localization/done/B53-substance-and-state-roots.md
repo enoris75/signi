@@ -69,7 +69,7 @@ literal now use PERSON, which C26 keeps there by design.
 1. **LIQUID and DEATH need a negation on an adjective or a noun in a fragment.** A liquid is a
    substance that is *not* solid; death is the *end* of life. `GlossParts.negative` negates a
    clause, and these are verbless fragments, so there is nothing to negate. Both go to
-   [C26](../C-needs-engine/C26-root-nouns-on-the-literal.md) unless the authoring probe finds a
+   [C26](../done/C26-root-nouns-on-the-literal.md) unless the authoring probe finds a
    copular shape that takes the negative.
 2. **LIFE is the state of LIVE**, which needs a state noun derived from a verb — "the state of one
    who lives" — a genitive on a relative clause head. C26 names the construct.

@@ -554,6 +554,22 @@ export interface NounPhrase {
    */
   possessor?: Possessor;
   /**
+   * What the genitive `possessor` is to this head. `'owner'` (the default) is possession, the
+   * Saxon genitive where English can take it: "the cat's book", "Italy's language". The other two
+   * are the part-whole relation, read from either end (localization C26):
+   *  - `'whole'`: the possessor is the **whole this head is a part of** — "a part **of a
+   *    keyboard**", "the visible part **of a fire**", "the end **of a life**".
+   *  - `'parts'`: the possessor is **what this head is made up of** — "a group **of canvases**".
+   *
+   * Only English tells them from the owner on the surface: neither is ever the clitic, so the head
+   * keeps its own determiner and the possessor follows it as an of-phrase, where "a keyboard's
+   * part" would read as a part the keyboard owns and "canvases' group" as a group they own. The
+   * other six already say all three with one genitive (it "una parte di una tastiera", de "ein
+   * Teil einer Tastatur", ja "キーボードの部分"), and read the flag nowhere. Ignored on a pronominal
+   * possessor, which stays the possessive pronoun ("its part").
+   */
+  possessorRole?: 'owner' | 'whole' | 'parts';
+  /**
    * Render this phrase as an **adjective-definition gloss**: a bare noun phrase of a *dimension
    * noun* carrying a *degree adjective* ("great size" / "grande dimensione"), realised as a
    * prepositional fragment whose adposition the head noun's `dimensionRelation` selects — BIG →
@@ -564,6 +580,18 @@ export interface NounPhrase {
    * added. Ignored when a verb phrase is present or the head is not a noun.
    */
   dimensionGloss?: boolean;
+  /**
+   * Render this phrase as a **complement-definition gloss**: the verbless fragment that defines a
+   * place or direction adverb, which is exactly the `type` complement a clause would carry after its
+   * verb — EVERYWHERE → locative "in all places" / "in tutti i luoghi" / すべての場所で, UP → direction
+   * "to a higher place" / "zu einem höheren Ort" / より高い場所へ. It is rendered by the same code
+   * that renders that complement in a clause, so the adposition, the case, the article fusion and
+   * any idiom are the complement's own, and `specifiers` are the complement's (a `path` relation:
+   * "under all places", "into a group"). The phrase keeps its own `definiteness`, as `mannerGloss`
+   * does. Localization C25. Only meaningful on the subject of a verbless period (see the engines'
+   * verbless branch); ignored when a verb phrase is present.
+   */
+  complementGloss?: { type: 'locative' | 'direction'; specifiers?: Specifier[] };
   /**
    * Render this phrase as a **manner-definition gloss**: a *manner noun* phrase realised as the
    * bare prepositional adverbial that defines an adverb — FAST → "at high speed", WELL → "in a good
@@ -576,6 +604,28 @@ export interface NounPhrase {
    * is present or the head is not a noun.
    */
   mannerGloss?: boolean;
+  /**
+   * Render this phrase as a **headless relative-clause gloss**: its `relative` alone, as the
+   * language says it after a head, with the head and everything that belongs to it left unsaid —
+   * no determiner, adjectives, noun modifiers or possessor, and no German comma. It defines an
+   * adjective by the clause it is: SAVED → en "that one has saved", it "che si è salvato", fr
+   * "qu'on a enregistré", de "den man gespeichert hat", es "que se ha guardado", ja 保存した, pt "que
+   * se salvou"; WILD → "that lives in nature". A noun-phrase gloss ("an object that one has saved")
+   * would define a *saved thing*, not *saved* (localization C23).
+   *
+   * The head is the clause's **antecedent**: unspoken, but what the clause is about, so everything
+   * that agrees with it in a headed relative agrees with it here, unchanged — the same principle as
+   * a pronoun's `antecedent`. German's relative pronoun takes its gender and the gap's case
+   * (*Gegenstand* → "den man gespeichert hat", *Wesen* → "das man sehen kann"); English says "who"
+   * for a person and "that" otherwise; the Romance participles and predicate adjectives agree with
+   * it (fr "qu'on a enregistrée" of a feminine one), and its number reaches the verb where the
+   * headed relative's does. The gloss author picks it: the class of thing the adjective is said of.
+   *
+   * Only meaningful on the lone subject of a verbless period (see the engines' verbless branch) that
+   * carries a `relative`; ignored — the phrase renders as before — without one, under a verb phrase,
+   * or on a coordination.
+   */
+  relativeGloss?: boolean;
 }
 
 /**

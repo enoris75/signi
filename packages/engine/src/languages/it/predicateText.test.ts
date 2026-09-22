@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   ANDARE, BENE, CANE, CASA, CIBO, complement, complements, concept, CORRERE, DARE, DONNA, DOVERE, el, ESSERE, type Forms, GATTA,
   FUOCO, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMBRARE, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
-  FELICE, MUOVERSI, VELOCEMENTE, VOLERE, vp,
+  FELICE, MUOVERSI, VELOCEMENTE, VOLERE, VOLPE, vp,
 } from './it.fixtures.js';
 import { predicateText } from './predicateText.js';
 
@@ -175,6 +175,17 @@ describe('predicateText', () => {
       expect(predicateText(SI, vp(MANGIARE), el(np(TOPO, { number: 'plural' })))).toBe('si mangiano i topi');
       expect(predicateText(SI, vp(MANGIARE, { modals: [modal(DOVERE)] }), el(np(TOPO, { number: 'plural' })))).toBe('si devono mangiare i topi');
       expect(predicateText(SI, vp(MANGIARE), mouse)).toBe('si mangia il topo');
+    });
+
+    // A213: the compound tense agrees its participle with the patient in either number — a spoken one,
+    // or an object relative's gapped head, which the caller passes.
+    test('a compound participle agrees with the passive si\'s patient', () => {
+      const perfect = vp(MANGIARE, { aspect: 'resultative' });
+      expect(predicateText(SI, perfect, el(np(VOLPE)))).toBe('si è mangiata la volpe');
+      expect(predicateText(SI, perfect, el(np(TOPO, { number: 'plural' })))).toBe('si sono mangiati i topi');
+      expect(predicateText(SI, perfect, undefined, undefined, undefined, undefined, { gender: 'fem', number: 'singular' }))
+        .toBe('si è mangiata');
+      expect(predicateText(SI, perfect, el(np(LUI)))).toBe('lo si è mangiato');
     });
   });
 

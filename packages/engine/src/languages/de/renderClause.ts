@@ -1,5 +1,6 @@
 import type { ResolvedNounElement, ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -9,11 +10,13 @@ import { complementsPhrase } from './complementsPhrase/index.js';
 import { complementsWithNicht } from './complementsWithNicht.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
+import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { finiteNegation } from './finiteNegation.js';
 import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
+import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { meansClause } from './meansClause.js';
 import { meansDoer } from './meansDoer.js';
@@ -23,6 +26,7 @@ import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { reflexivePronoun } from './reflexivePronoun.js';
+import { relativeGloss } from './relativeGloss.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { splitObject } from './splitObject.js';
@@ -86,8 +90,14 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("von
     // großer Größe"), not a bare subject noun phrase — wrap the dimension NP (dative) in its adposition.
     if (!verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+    // A complement-definition gloss ("in allen Orten", "zu einem höheren Ort") is the place or direction complement
+    // that defines an adverb, as a clause renders it.
+    if (!verbPhrase && isComplementGloss(subject)) return complementGloss(subject);
     // A manner-definition gloss ("mit hoher Geschwindigkeit") is the adverbial fragment defining an adverb.
     if (!verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
+    // A relative-clause gloss ("den man gespeichert hat") is the head's relative alone, its pronoun
+    // still taking the head's gender and number, with no comma to set it off from a head.
+    if (!verbPhrase && isRelativeGloss(subject)) return relativeGloss(firstConjunct(subject));
     const subj = subjectText(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subj.trim();

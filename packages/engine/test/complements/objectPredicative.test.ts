@@ -96,3 +96,39 @@ describe('objectPredicative', () => {
     }))).toMatchObject({ en: 'the cat makes the house a prison.' });
   });
 });
+
+// A224. The Japanese essive として follows a noun as it stands (刑務所として). An adjective head is
+// rendered as it stands too, which for a na-adjective is its attributive form: 有効なとして, 幸せなとして.
+// The な (and the の of a noun-adjective, 茶色の) links a word to a noun after it, and として is no
+// noun: the stem takes it, 有効として. The factitive branch above it already cuts the stem, by
+// `jaAdjClass` (幸せにする). ACCEPT's C28 gloss stayed on the literal for it.
+describe('known bugs: a Japanese na-adjective keeps its な before として (A224)', () => {
+  const G = np('GENERIC_PERSON');
+  const acquireAs = (adjective: string, object: NounPhrase = np('OBJECT_THING', { definiteness: 'bare', number: 'plural' })) =>
+    sayAll({ ...clause(G, 'ACQUIRE', { directObject: object, complements: { objectPredicative: { phrase: np(adjective), specifiers: ESSIVE } } }), infinitive: true });
+  const seesAs = (adjective: string, verbPhrase = {}) =>
+    sayAll(clause(np('CAT'), 'SEE', { verbPhrase, directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np(adjective), specifiers: ESSIVE } } })).ja;
+
+  test.fails('the stem takes として', () => {
+    expect(acquireAs('VALID').ja).toBe('物体を有効として取得する。');
+    expect(acquireAs('VALID', np('OBJECT_THING', { definiteness: 'indefinite' })).ja).toBe('物体を有効として取得する。');
+    expect(seesAs('HAPPY')).toBe('猫は家を幸せとして見ます。');
+    expect(seesAs('VALID', { tense: 'past' })).toBe('猫は家を有効として見ました。');
+    expect(seesAs('BROWN')).toBe('猫は家を茶色として見ます。');
+  });
+
+  test('regression: a noun, the factitive and the other six', () => {
+    expect(uses(np('PRISON')).ja).toBe('猫は家を刑務所として使います。');
+    expect(sayAll(clause(np('CAT'), 'MAKE', {
+      directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('HAPPY') } },
+    })).ja).toBe('猫は家を幸せに作ります。');
+    expect(acquireAs('VALID')).toMatchObject({
+      en: 'to acquire objects as valid.',
+      it: 'acquisire oggetti come validi.',
+      fr: 'acquérir des objets comme valides.',
+      de: 'Gegenstände als gültig erwerben.',
+      es: 'adquirir objetos como válidos.',
+      pt: 'adquirir objetos como válidos.',
+    });
+  });
+});

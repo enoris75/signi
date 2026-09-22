@@ -1,5 +1,6 @@
 import type { ConceptSeed } from './types.js';
 import type { PhrasePlan } from '@signi/shared';
+import { namedAgentGloss, relativeGloss, stateGloss, subjectGapGloss } from './relativeGloss.js';
 
 // An adjective-definition gloss: a dimension noun carrying a degree adjective, rendered verblessly as
 // a prepositional fragment whose adposition the noun's `dimensionRelation` selects — dimGloss('SIZE',
@@ -109,6 +110,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
     description: 'a short distance away',
+    // The distance scale's two poles, as TEMPERATURE's are COLD and HOT: "at small distance" /
+    // "at great distance". SMALL, not LOW, is the low pole here — "at low distance", it "a distanza
+    // bassa" say a height — and it is not circular, as it was for SMALL's own gloss (A28).
+    definition: dimGloss('DISTANCE', 'SMALL'),
     emoji: '📍',
     forms: {
       en: { base: 'near' },
@@ -129,6 +134,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
     description: 'a long distance away',
+    definition: dimGloss('DISTANCE', 'GREAT'),
     emoji: '🛰️',
     forms: {
       en: { base: 'far' },
@@ -245,6 +251,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'ADULT',
     role: 'adjective',
     description: 'fully grown',
+    // What OLD's "of great age" is not: a being that has finished growing, however long ago.
+    definition: subjectGapGloss('BEING', 'GROW', { modifier: 'NO_LONGER' }),
     emoji: '🧑',
     forms: {
       en: { base: 'adult' },
@@ -260,6 +268,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'MALE',
     role: 'adjective',
     description: 'of the sex that produces sperm; masculine',
+    // The creature adjectives say what they say of a BEING, a creature of either kind: de "das …".
+    definition: subjectGapGloss('BEING', 'HAVE', { object: 'TESTICLE', number: 'plural' }),
     emoji: '♂️',
     forms: {
       en: { base: 'male' },
@@ -275,6 +285,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'FEMALE',
     role: 'adjective',
     description: 'of the sex that bears offspring; feminine',
+    definition: subjectGapGloss('BEING', 'HAVE', { object: 'OVARY', number: 'plural' }),
     emoji: '♀️',
     forms: {
       en: { base: 'female' },
@@ -292,6 +303,14 @@ export const adjectives: ConceptSeed[] = [
     id: 'CASTRATED',
     role: 'adjective',
     description: 'having the testicles removed',
+    // A source gap, in the passive: "from which the testicles have been removed". "That has no
+    // testicles" would be FEMALE's too.
+    definition: relativeGloss('BEING', {
+      headRole: 'source',
+      subject: { concept: 'GENERIC_PERSON' },
+      directObject: { concept: 'TESTICLE', definiteness: 'definite', number: 'plural' },
+      verbPhrase: { verb: 'REMOVE', aspect: 'resultative', voice: 'passive' },
+    }),
     emoji: '✂️',
     forms: {
       en: { base: 'castrated' },
@@ -309,6 +328,8 @@ export const adjectives: ConceptSeed[] = [
     // Both senses, because Spanish and Portuguese spell them apart by position and the engine puts
     // this one before the noun — "one more" — everywhere it composes (A204).
     description: 'recently made or introduced, or one more of the same kind',
+    // What YOUNG's "of low age" cannot say of a thing: when it was made.
+    definition: stateGloss('OBJECT_THING', 'MAKE', { voice: 'passive', modifier: 'RECENTLY' }),
     emoji: '🆕',
     forms: {
       en: { base: 'new' },
@@ -389,6 +410,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to eat',
+    definition: subjectGapGloss('BEING', 'EAT', { modals: ['WILL'], aspect: 'neutral' }),
     emoji: '🤤',
     forms: {
       en: { base: 'hungry' },
@@ -449,6 +471,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'WARM',
     role: 'adjective',
     description: 'kindly and affectionate in feeling',
+    // Not on AFFECTION, which is "a warm feeling": the two would define each other.
+    definition: dimGloss('KINDNESS', 'GREAT'),
     emoji: '🤗',
     synonym: 'kindly',
     forms: {
@@ -549,6 +573,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'WILD',
     role: 'adjective',
     description: 'living in nature, not tamed',
+    // "That lives in nature" would say "in the nature" in English, and "that does not live with
+    // people" hits French's unelided "ne habite"; the description's own "not tamed" renders in all
+    // seven.
+    definition: stateGloss('BEING', 'TAME', { voice: 'passive', negative: true }),
     emoji: '🌿',
     forms: {
       en: { base: 'wild' },
@@ -567,6 +595,9 @@ export const adjectives: ConceptSeed[] = [
     id: 'DOMESTIC',
     role: 'adjective',
     description: 'kept by or living with people',
+    definition: subjectGapGloss('BEING', 'LIVE', {
+      complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'bare', number: 'plural' } } },
+    }),
     emoji: '🏠',
     forms: {
       en: { base: 'domestic' },
@@ -670,6 +701,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'WHOLE',
     role: 'adjective',
     description: 'complete, with no part missing',
+    definition: stateGloss('OBJECT_THING', 'DIVIDE', { voice: 'passive', negative: true }),
     emoji: '⭕',
     forms: {
       en: { base: 'whole' },
@@ -685,6 +717,13 @@ export const adjectives: ConceptSeed[] = [
     id: 'ROUND',
     role: 'adjective',
     description: 'shaped like a circle or ball',
+    // The genitive relative HYPERNYM uses: "whose shape is a circle", de "dessen Form ein Kreis ist".
+    definition: relativeGloss('OBJECT_THING', {
+      headRole: 'possessor',
+      subject: { concept: 'SHAPE', definiteness: 'definite' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'CIRCLE', definiteness: 'indefinite' } } },
+    }),
     emoji: '⭕',
     forms: {
       en: { base: 'round' },
@@ -700,10 +739,13 @@ export const adjectives: ConceptSeed[] = [
     // Sharp of an edge — it "affilato", fr "tranchant", not the pointed or the figurative senses.
     // Postnominal in Romance like ROUND; German umlauts it like stark. es "afilado" / pt "afiado" are
     // sharpened-state participles, which predicate with estar ("la cuchilla está afilada").
+    // Glossed as what it does, "that cuts well" (localization C24), once CUT stopped being "to divide
+    // with a sharp blade".
     id: 'SHARP',
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'having an edge that cuts easily',
+    definition: subjectGapGloss('OBJECT_THING', 'CUT', { modifier: 'WELL' }),
     emoji: '🔪',
     forms: {
       en: { base: 'sharp' },
@@ -740,6 +782,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'set down in words',
+    definition: stateGloss('OBJECT_THING', 'WRITE'),
     emoji: '✍️',
     forms: {
       en: { base: 'written' },
@@ -756,6 +799,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'brought in from storage and ready to use',
+    definition: stateGloss('OBJECT_THING', 'LOAD'),
     emoji: '📂',
     forms: {
       en: { base: 'loaded' },
@@ -772,6 +816,8 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is put into, not a property it has → es/pt estar (A47)
     description: 'arranged in order',
+    // ARRANGE, "to put things in an order", and not TIDY_UP: its gloss is "to cause objects to be tidy".
+    definition: stateGloss('OBJECT_THING', 'ARRANGE'),
     synonym: 'in order',
     emoji: '🧹',
     forms: {
@@ -790,6 +836,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'stored so it can be retrieved later',
+    definition: stateGloss('OBJECT_THING', 'SAVE'),
     emoji: '💾',
     forms: {
       en: { base: 'saved' },
@@ -808,6 +855,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'put in with the others',
+    definition: stateGloss('OBJECT_THING', 'ADD'),
     emoji: '➕',
     forms: {
       en: { base: 'added' },
@@ -829,6 +877,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'taken away from the others',
+    definition: stateGloss('OBJECT_THING', 'REMOVE'),
     emoji: '➖',
     forms: {
       en: { base: 'removed' },
@@ -846,6 +895,9 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'that did not succeed',
+    // The resultative, not the past: Italian and French would say the simple past, "che non
+    // funzionò", "qui ne fonctionna pas", which a status line never does.
+    definition: subjectGapGloss('OBJECT_THING', 'WORK', { aspect: 'resultative', negative: true }),
     emoji: '❌',
     forms: {
       en: { base: 'failed' },
@@ -863,6 +915,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'duplicated, as to the clipboard',
+    definition: stateGloss('OBJECT_THING', 'COPY'),
     emoji: '✅',
     forms: {
       en: { base: 'copied' },
@@ -881,6 +934,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is put into and taken out of, like COPIED (A47)
     description: 'joined to another by a link',
+    definition: stateGloss('OBJECT_THING', 'LINK'),
     emoji: '🔗',
     forms: {
       en: { base: 'linked' },
@@ -900,6 +954,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'kept at the top of a list',
+    definition: stateGloss('OBJECT_THING', 'PIN'),
     emoji: '📌',
     forms: {
       en: { base: 'pinned' },
@@ -918,6 +973,9 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'no longer kept at the top of a list',
+    // The state UNPIN leaves, so it says UNPIN's own verbs: it "che si è sbloccato", de "den man
+    // gelöst hat" — the ones the comment above keeps out of the adjective.
+    definition: stateGloss('OBJECT_THING', 'UNPIN'),
     emoji: '📍',
     forms: {
       en: { base: 'unpinned' },
@@ -956,6 +1014,8 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'marked with a number',
+    // NUMBER_LABEL, not NUMBER: fr "un nombre", de "eine Zahl", ja 数 are a count, not a row's number.
+    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'NUMBER_LABEL', definiteness: 'indefinite' }),
     emoji: '🔢',
     forms: {
       en: { base: 'numbered' },
@@ -976,6 +1036,7 @@ export const adjectives: ConceptSeed[] = [
     transient: true,
     synonym: 'running',
     description: 'in operation, as a running program or machine',
+    definition: subjectGapGloss('OBJECT_THING', 'WORK', { aspect: 'progressive' }),
     emoji: '🟢',
     forms: {
       en: { base: 'active' },
@@ -995,6 +1056,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'having no name or title',
+    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'TITLE', definiteness: 'indefinite', negative: true }),
     emoji: '🏷️',
     forms: {
       en: { base: 'untitled' },
@@ -1011,6 +1073,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true,
     description: 'containing nothing',
+    definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'CONTENT', negative: true }),
     emoji: '🫙',
     forms: {
       en: { base: 'empty' },
@@ -1027,6 +1090,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'VALID',
     role: 'adjective',
     description: 'correctly formed and accepted',
+    definition: stateGloss('OBJECT_THING', 'ACCEPT', { aspect: 'neutral' }),
     emoji: '✔️',
     forms: {
       en: { base: 'valid' },
@@ -1047,6 +1111,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing is in, not a quality it has → es/pt predicate with estar (A47)
     description: 'not present where it is expected',
+    definition: stateGloss('OBJECT_THING', 'FIND', { aspect: 'neutral', modals: ['CAN'], negative: true }),
     emoji: '🕳️',
     forms: {
       en: { base: 'missing' },
@@ -1065,6 +1130,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNKNOWN',
     role: 'adjective',
     description: 'not known',
+    definition: stateGloss('OBJECT_THING', 'KNOW', { aspect: 'neutral', negative: true }),
     emoji: '❓',
     forms: {
       en: { base: 'unknown' },
@@ -1077,12 +1143,34 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // UNKNOWN's antonym, seeded for DEFINITE's gloss: the definite determiner points at a known
+    // object, the indefinite at an unknown one (localization C24). Japanese 既知の, the written word
+    // for "already known" that pairs with 不明な; postnominal in the Romance languages ("un oggetto
+    // noto"). Glossed as UNKNOWN is, without the negation: "that one knows" (Japanese 知る, the written
+    // attributive of 誰もが知る).
+    id: 'KNOWN',
+    role: 'adjective',
+    description: 'already known to whoever hears or reads it',
+    definition: stateGloss('OBJECT_THING', 'KNOW', { aspect: 'neutral' }),
+    emoji: '💡',
+    forms: {
+      en: { base: 'known' },
+      it: { base: 'noto' },
+      fr: { base: 'connu' },
+      de: { base: 'bekannt' },
+      es: { base: 'conocido' },
+      ja: { base: '既知の', reading: 'きちの' },
+      pt: { base: 'conhecido' },
+    },
+  },
+  {
     // Not expected where it comes: a token the console's parser meets where nothing of its kind can
     // stand — "unexpected bracket", it "parentesi inattesa", de "unerwartete Klammer" (localization
     // C21). Japanese says it with the negative of 予期する, which inflects as an i-adjective: 予期しない.
     id: 'UNEXPECTED',
     role: 'adjective',
     description: 'not expected',
+    definition: stateGloss('OBJECT_THING', 'EXPECT', { aspect: 'neutral', negative: true }),
     emoji: '⁉️',
     forms: {
       en: { base: 'unexpected' },
@@ -1098,6 +1186,9 @@ export const adjectives: ConceptSeed[] = [
     id: 'SINGULAR',
     role: 'adjective',
     description: 'referring to one (grammar)',
+    // The number values are said of a WORD. SOLE, not SINGULAR: "a singular object" would say the
+    // word with itself (B58).
+    definition: subjectGapGloss('WORD', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['SOLE'] }),
     emoji: '1️⃣',
     forms: {
       en: { base: 'singular' },
@@ -1113,6 +1204,17 @@ export const adjectives: ConceptSeed[] = [
     id: 'PLURAL',
     role: 'adjective',
     description: 'referring to more than one (grammar)',
+    // "One and others", not MANIFOLD: Japanese spells MANIFOLD 複数の, PLURAL's own word.
+    definition: relativeGloss('WORD', {
+      verbPhrase: { verb: 'INDICATE' },
+      directObject: {
+        conjuncts: [
+          { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+          { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] },
+        ],
+        conjunction: 'and',
+      },
+    }),
     emoji: '🔢',
     forms: {
       en: { base: 'plural' },
@@ -1128,6 +1230,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEUTER',
     role: 'adjective',
     description: 'of the gender that is neither masculine nor feminine (grammar)',
+    definition: relativeGloss('WORD', {
+      verbPhrase: { verb: 'BE', negative: true },
+      complements: { predicative: { phrase: { conjuncts: [{ concept: 'MALE' }, { concept: 'FEMALE' }], conjunction: 'or' } } },
+    }),
     emoji: '⚪',
     forms: {
       en: { base: 'neuter' },
@@ -1154,6 +1260,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'DEFINITE',
     role: 'adjective',
     description: 'pointing at a referent the hearer can already identify (grammar)',
+    // The determiner values are said of a DETERMINER. Identifiability is whether the object is known.
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['KNOWN'] }),
     emoji: '🎯',
     forms: {
       en: { base: 'definite' },
@@ -1169,6 +1277,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'INDEFINITE',
     role: 'adjective',
     description: 'pointing at a referent the hearer cannot yet identify (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['UNKNOWN'] }),
     emoji: '❓',
     forms: {
       en: { base: 'indefinite' },
@@ -1186,6 +1295,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'ZERO',
     role: 'adjective',
     description: 'spelled with no article at all, meaningfully (grammar)',
+    definition: stateGloss('DETERMINER', 'WRITE', { aspect: 'neutral', negative: true }),
     emoji: '⃠',
     forms: {
       en: { base: 'zero' },
@@ -1201,6 +1311,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROXIMAL',
     role: 'adjective',
     description: 'pointing at what is near the speaker (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['NEAR'] }),
     emoji: '👉',
     forms: {
       en: { base: 'proximal' },
@@ -1216,6 +1327,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'DISTAL',
     role: 'adjective',
     description: 'pointing at what is far from the speaker (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['FAR'] }),
     emoji: '🔭',
     forms: {
       en: { base: 'distal' },
@@ -1231,6 +1343,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PARTITIVE',
     role: 'adjective',
     description: 'naming a part of a whole, an unspecified some of it (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'PART', definiteness: 'indefinite' }),
     emoji: '🍰',
     forms: {
       en: { base: 'partitive' },
@@ -1242,6 +1355,8 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'partitivo' },
     },
   },
+  // No gloss, by design (localization C24): "that negates" is circular through NEGATE ("to cause a
+  // clause to be negative"), and "that indicates no object" reads as indicating nothing.
   {
     id: 'NEGATIVE',
     role: 'adjective',
@@ -1264,6 +1379,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'MULTAL',
     role: 'adjective',
     description: 'naming a large quantity, without claiming most (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'indefinite', adjectives: ['GREAT'] }),
     emoji: '🔺',
     forms: {
       en: { base: 'multal' },
@@ -1279,6 +1395,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PAUCAL',
     role: 'adjective',
     description: 'naming a small quantity, without claiming a minority (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'indefinite', adjectives: ['SMALL'] }),
     emoji: '🔻',
     forms: {
       en: { base: 'paucal' },
@@ -1294,6 +1411,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNIVERSAL',
     role: 'adjective',
     description: 'taking in every one of them, with no exception (grammar)',
+    definition: subjectGapGloss('DETERMINER', 'INDICATE', { object: 'QUANTITY', definiteness: 'definite', adjectives: ['WHOLE'] }),
     emoji: '🌐',
     forms: {
       en: { base: 'universal' },
@@ -1310,10 +1428,15 @@ export const adjectives: ConceptSeed[] = [
   // persons in the UI language. German declines from an uninflected stem, but its endings
   // absorb a leading -e after a stem in -e (the "müde" rule), so the -e citation form
   // ("erste") both declines correctly and reads as a word on its own.
+  //
+  // The ordinals are what follows which, on FOLLOW with an object (localization C24): FIRST is what
+  // every other object follows, SECOND what follows the first, THIRD what follows the second — German
+  // "folgt auf", Spanish's a ("sigue al primer objeto"), Japanese's に (第一の物体に続く).
   {
     id: 'FIRST',
     role: 'adjective',
     description: 'coming before all others in a sequence',
+    definition: namedAgentGloss('OBJECT_THING', 'FOLLOW', { concept: 'OBJECT_THING', definiteness: 'all', number: 'plural', adjectives: ['OTHER'] }),
     emoji: '🥇',
     forms: {
       en: { base: 'first' },
@@ -1329,6 +1452,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'SECOND',
     role: 'adjective',
     description: 'coming after the first in a sequence',
+    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'definite', adjectives: ['FIRST'] }),
     emoji: '🥈',
     forms: {
       en: { base: 'second' },
@@ -1344,6 +1468,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'THIRD',
     role: 'adjective',
     description: 'coming after the second in a sequence',
+    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW', { object: 'OBJECT_THING', definiteness: 'definite', adjectives: ['SECOND'] }),
     emoji: '🥉',
     forms: {
       en: { base: 'third' },
@@ -1364,6 +1489,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEXT',
     role: 'adjective',
     description: 'coming straight after in a sequence',
+    definition: subjectGapGloss('OBJECT_THING', 'FOLLOW'),
     emoji: '⏭️',
     forms: {
       en: { base: 'next' },
@@ -1379,6 +1505,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PREVIOUS',
     role: 'adjective',
     description: 'coming straight before in a sequence',
+    definition: subjectGapGloss('OBJECT_THING', 'PRECEDE'),
     emoji: '⏮️',
     forms: {
       en: { base: 'previous' },
@@ -1398,6 +1525,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'IMPERSONAL',
     role: 'adjective',
     description: 'not standing for any particular person (grammar)',
+    // The generic "one" stands for no one person, which is to say for anyone: people at large.
+    definition: subjectGapGloss('PRONOUN', 'INDICATE', { object: 'PERSON', definiteness: 'all', number: 'plural' }),
     emoji: '🫥',
     forms: {
       en: { base: 'impersonal' },
@@ -1427,6 +1556,24 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'outro' },
     },
   },
+  {
+    // Facing the other way, or as far from it as can be: BACKWARDS is "in the opposite direction"
+    // (localization C25). Postnominal in the Romance languages ("la direzione opposta"). Japanese
+    // 反対の, not 逆の: BACKWARDS is 逆方向に, and its gloss would say its own word.
+    id: 'OPPOSITE',
+    role: 'adjective',
+    description: 'facing the other way; as different as can be',
+    emoji: '🔃',
+    forms: {
+      en: { base: 'opposite' },
+      it: { base: 'opposto' },
+      fr: { base: 'opposé' },
+      de: { base: 'entgegengesetzt' },
+      es: { base: 'opuesto' },
+      ja: { base: '反対の', reading: 'はんたいの' },
+      pt: { base: 'oposto' },
+    },
+  },
   // ── Kinds of clause ──────────────────────────────────────────────
   // What a clause is to the period it sits in, said of CLAUSE: the main one the others depend on,
   // the conditional one, and one coordinated with another. The Romance traditions name the clauses
@@ -1438,6 +1585,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'MAIN',
     role: 'adjective',
     description: 'not depending on any other clause (grammar)',
+    // Italian "reggere" is the grammar's verb for it: the main clause is the "proposizione reggente".
+    definition: subjectGapGloss('CLAUSE', 'GOVERN', { object: 'CLAUSE', number: 'plural', adjectives: ['OTHER'] }),
     emoji: '👑',
     forms: {
       en: { base: 'main' },
@@ -1449,10 +1598,14 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'principal' },
     },
   },
+  // CONDITION is "a conditional clause", so the gloss is its description instead: the clause another
+  // one depends on, on DEPEND, whose object takes its own preposition in six languages and に in
+  // Japanese — en "on which", it "dalla quale", fr "dont", de "von dem" (localization C24).
   {
     id: 'CONDITIONAL',
     role: 'adjective',
     description: 'setting the condition another clause depends on (grammar)',
+    definition: namedAgentGloss('CLAUSE', 'DEPEND', { concept: 'CLAUSE', adjectives: ['OTHER'] }),
     emoji: '🔀',
     forms: {
       en: { base: 'conditional' },
@@ -1468,6 +1621,9 @@ export const adjectives: ConceptSeed[] = [
     id: 'COORDINATED',
     role: 'adjective',
     description: 'joined to another clause or phrase of equal rank (grammar)',
+    definition: namedAgentGloss('CLAUSE', 'LINK', 'CONJUNCTION', {
+      complements: { terminus: { phrase: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
+    }),
     emoji: '🔗',
     forms: {
       en: { base: 'coordinated' },
@@ -1489,6 +1645,12 @@ export const adjectives: ConceptSeed[] = [
     id: 'COPULATIVE',
     role: 'adjective',
     description: 'adding one thing to another, like "and" (grammar)',
+    // The kinds of conjunction are said of a CONJUNCTION, feminine in German ("die").
+    definition: subjectGapGloss('CONJUNCTION', 'ADD', {
+      object: 'PHRASE',
+      definiteness: 'indefinite',
+      complements: { terminus: { phrase: { concept: 'PHRASE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
+    }),
     emoji: '➕',
     forms: {
       en: { base: 'copulative' },
@@ -1504,6 +1666,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'DISJUNCTIVE',
     role: 'adjective',
     description: 'offering a choice between things, like "or" (grammar)',
+    definition: subjectGapGloss('CONJUNCTION', 'LINK', { object: 'OPTION', number: 'plural' }),
     emoji: '🔀',
     forms: {
       en: { base: 'disjunctive' },
@@ -1519,6 +1682,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'ADVERSATIVE',
     role: 'adjective',
     description: 'setting one thing against another, like "but" (grammar)',
+    definition: subjectGapGloss('CONJUNCTION', 'LINK', { object: 'CLAUSE', number: 'plural', adjectives: ['OPPOSITE'] }),
     emoji: '↔️',
     forms: {
       en: { base: 'adversative' },
@@ -1534,6 +1698,12 @@ export const adjectives: ConceptSeed[] = [
     id: 'EXPLICATIVE',
     role: 'adjective',
     description: 'explaining what came before, like "that is" (grammar)',
+    definition: subjectGapGloss('CONJUNCTION', 'EXPRESS', {
+      object: 'CLAUSE',
+      definiteness: 'definite',
+      adjectives: ['PREVIOUS'],
+      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] } } },
+    }),
     emoji: '💬',
     forms: {
       en: { base: 'explicative' },
@@ -1549,6 +1719,14 @@ export const adjectives: ConceptSeed[] = [
     id: 'CONCLUSIVE',
     role: 'adjective',
     description: 'drawing a conclusion from what came before, like "therefore" (grammar)',
+    definition: subjectGapGloss('CONJUNCTION', 'USE', {
+      object: 'CLAUSE',
+      definiteness: 'definite',
+      adjectives: ['PREVIOUS'],
+      complements: {
+        objectPredicative: { phrase: { concept: 'CAUSE', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
+      },
+    }),
     emoji: '🏁',
     forms: {
       en: { base: 'conclusive' },
@@ -1564,6 +1742,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'TEMPORAL',
     role: 'adjective',
     description: 'relating things by their order in time, like "then"',
+    definition: subjectGapGloss('CONJUNCTION', 'INDICATE', { object: 'ACTION', definiteness: 'definite', adjectives: ['NEXT'] }),
     emoji: '🕰️',
     forms: {
       en: { base: 'temporal' },
@@ -1581,6 +1760,11 @@ export const adjectives: ConceptSeed[] = [
     id: 'SPATIAL',
     role: 'adjective',
     description: 'having to do with place',
+    // What the /in … /front relations set: how a place stands to the object it is the place of.
+    definition: relativeGloss('RELATIONSHIP', {
+      verbPhrase: { verb: 'INDICATE' },
+      directObject: { concept: 'PLACE', definiteness: 'definite', possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' } },
+    }),
     emoji: '📐',
     forms: {
       en: { base: 'spatial' },
@@ -1600,6 +1784,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'NEUTRAL',
     role: 'adjective',
     description: 'taking neither one side nor the other',
+    definition: relativeGloss('WORD', {
+      verbPhrase: { verb: 'BE', negative: true },
+      complements: { predicative: { phrase: { conjuncts: [{ concept: 'POSITIVE' }, { concept: 'NEGATIVE' }], conjunction: 'or' } } },
+    }),
     emoji: '⚖️',
     forms: {
       en: { base: 'neutral' },
@@ -1620,6 +1808,14 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     synonym: 'grammar',
     description: 'presenting the agent of an event as the subject (grammar)',
+    // The voices are said of a CLAUSE (VOICE: which participant a clause makes its subject).
+    definition: subjectGapGloss('CLAUSE', 'USE', {
+      object: 'AGENT_GRAMMAR',
+      definiteness: 'definite',
+      complements: {
+        objectPredicative: { phrase: { concept: 'SUBJECT_GRAMMAR', definiteness: 'definite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
+      },
+    }),
     emoji: '➡️',
     forms: {
       en: { base: 'active' },
@@ -1637,6 +1833,15 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     synonym: 'grammar',
     description: 'presenting the patient of an event as the subject (grammar)',
+    // The *direct* object: Spanish OBJECT_GRAMMAR alone is "complemento", which reads as any complement.
+    definition: subjectGapGloss('CLAUSE', 'USE', {
+      object: 'OBJECT_GRAMMAR',
+      definiteness: 'definite',
+      adjectives: ['DIRECT'],
+      complements: {
+        objectPredicative: { phrase: { concept: 'SUBJECT_GRAMMAR', definiteness: 'definite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
+      },
+    }),
     emoji: '⬅️',
     forms: {
       en: { base: 'passive' },
@@ -1652,6 +1857,14 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROGRESSIVE',
     role: 'adjective',
     description: 'presenting an event as in progress (grammar)',
+    // The aspects are said of a VERB, and each is how it shows its action.
+    definition: subjectGapGloss('VERB', 'SHOW', {
+      object: 'ACTION',
+      definiteness: 'indefinite',
+      complements: {
+        objectPredicative: { phrase: { concept: 'PROCESS', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
+      },
+    }),
     emoji: '▶️',
     forms: {
       en: { base: 'progressive' },
@@ -1667,6 +1880,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PROSPECTIVE',
     role: 'adjective',
     description: 'presenting an event as about to happen (grammar)',
+    definition: relativeGloss('VERB', {
+      verbPhrase: { verb: 'SHOW' },
+      directObject: { concept: 'ACTION', definiteness: 'indefinite', relative: { verbPhrase: { verb: 'BEGIN', aspect: 'prospective' } } },
+    }),
     emoji: '⏩',
     forms: {
       en: { base: 'prospective' },
@@ -1682,6 +1899,13 @@ export const adjectives: ConceptSeed[] = [
     id: 'RESULTATIVE',
     role: 'adjective',
     description: 'presenting the state an event has left behind (grammar)',
+    definition: subjectGapGloss('VERB', 'SHOW', {
+      object: 'ACTION',
+      definiteness: 'indefinite',
+      complements: {
+        objectPredicative: { phrase: { concept: 'STATE', definiteness: 'indefinite' }, specifiers: [{ kind: 'predication', value: 'essive' }] },
+      },
+    }),
     emoji: '✅',
     forms: {
       en: { base: 'resultative' },
@@ -1697,6 +1921,9 @@ export const adjectives: ConceptSeed[] = [
     id: 'POSITIVE',
     role: 'adjective',
     description: 'affirming, not negating (grammar)',
+    // Not the reverse: NEGATE is glossed "to cause a clause to be negative", so NEGATIVE cannot be
+    // "that negates".
+    definition: subjectGapGloss('WORD', 'NEGATE', { negative: true }),
     emoji: '👍',
     forms: {
       en: { base: 'positive' },
@@ -1712,6 +1939,11 @@ export const adjectives: ConceptSeed[] = [
     id: 'SEMANTIC',
     role: 'adjective',
     description: 'relating to meaning in language',
+    // As the app's "semantic phrase creator" means it: phrases built out of meanings, not out of words.
+    definition: stateGloss('PHRASE', 'MAKE', {
+      aspect: 'neutral',
+      complements: { instrumental: { phrase: { concept: 'MEANING', definiteness: 'bare', number: 'plural' } } },
+    }),
     emoji: '🔤',
     forms: {
       en: { base: 'semantic' },
@@ -1727,6 +1959,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'DIRECT',
     role: 'adjective',
     description: 'reaching its end with nothing in between',
+    definition: subjectGapGloss('PATH', 'GO', {
+      negative: true,
+      complements: { route: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
+    }),
     emoji: '➡️',
     forms: {
       en: { base: 'direct' },
@@ -1742,6 +1978,9 @@ export const adjectives: ConceptSeed[] = [
     id: 'INDIRECT',
     role: 'adjective',
     description: 'reaching its end through something in between',
+    definition: subjectGapGloss('PATH', 'GO', {
+      complements: { route: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } } },
+    }),
     emoji: '↪️',
     forms: {
       en: { base: 'indirect' },
@@ -1760,6 +1999,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'UNCONNECTED',
     role: 'adjective',
     description: 'joined to nothing else',
+    // The word map's edges are RELATIONSHIPs: an unconnected word is one no edge reaches.
+    definition: subjectGapGloss('WORD', 'HAVE', { object: 'RELATIONSHIP', definiteness: 'no', number: 'plural' }),
     emoji: '⚪',
     forms: {
       en: { base: 'unconnected' },
@@ -1779,6 +2020,7 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'kept out of sight',
+    definition: stateGloss('OBJECT_THING', 'HIDE'),
     emoji: '🙈',
     forms: {
       en: { base: 'hidden' },
@@ -1791,6 +2033,45 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The two states OPEN and CLOSE leave behind, each seeded for the other verb's gloss: OPEN is "to
+    // cause an object not to be closed" and CLOSE "to cause an object not to be open" (localization
+    // C28), HIDE's negated shape, because each verb asserting its own state would cite its own
+    // participle. Transient, like HIDDEN: es/pt predicate them with estar ("está cerrada"). Japanese
+    // takes the た-form of the verbs the corpus seeds, 閉じた and 開いた (ひらいた, as OPEN reads
+    // 開く), which the engine turns into 閉じている / 閉じていない as a predicate. The open one's id is
+    // suffixed because the verb holds the plain one, as CAUSE_VERB's is beside the noun CAUSE.
+    id: 'CLOSED',
+    role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
+    description: 'not open; shut',
+    emoji: '🔒',
+    forms: {
+      en: { base: 'closed' },
+      it: { base: 'chiuso' },
+      fr: { base: 'fermé' },
+      de: { base: 'geschlossen' },
+      es: { base: 'cerrado' },
+      ja: { base: '閉じた', reading: 'とじた' },
+      pt: { base: 'fechado' },
+    },
+  },
+  {
+    id: 'OPEN_ADJECTIVE',
+    role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
+    description: 'not closed; allowing access',
+    emoji: '🔓',
+    forms: {
+      en: { base: 'open' },
+      it: { base: 'aperto' },
+      fr: { base: 'ouvert' },
+      de: { base: 'offen' },
+      es: { base: 'abierto' },
+      ja: { base: '開いた', reading: 'ひらいた' },
+      pt: { base: 'aberto' },
+    },
+  },
+  {
     // HIDDEN's opposite, and what APPEAR comes to be ("to become visible", localization C08).
     // Japanese takes 可視の, the word of 可視光 "visible light": 見える is a verb, and the UI's 表示の
     // ("displayed") says a screen shows it rather than that an eye can see it.
@@ -1798,6 +2079,8 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state a thing comes into, like HIDDEN → es/pt predicate with estar (A47)
     description: 'able to be seen',
+    // SEE, not APPEAR or HIDE: their glosses are "to become visible" and "to cause an object not to be visible".
+    definition: stateGloss('OBJECT_THING', 'SEE', { aspect: 'neutral', modals: ['CAN'] }),
     emoji: '👓',
     forms: {
       en: { base: 'visible' },
@@ -1814,6 +2097,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'SWEET',
     role: 'adjective',
     description: 'tasting of sugar',
+    definition: subjectGapGloss('FOOD', 'HAVE', { object: 'SUGAR' }),
     emoji: '🍬',
     forms: {
       en: { base: 'sweet' },
@@ -1829,6 +2113,8 @@ export const adjectives: ConceptSeed[] = [
     id: 'SOLID',
     role: 'adjective',
     description: 'keeping its shape, neither liquid nor gas',
+    // What neither a liquid nor a gas can say. Not on GROUND, whose gloss is "solid substance".
+    definition: subjectGapGloss('SUBSTANCE', 'FLOW', { negative: true }),
     emoji: '🧱',
     forms: {
       en: { base: 'solid' },
@@ -1846,6 +2132,10 @@ export const adjectives: ConceptSeed[] = [
     id: 'PRESENT',
     role: 'adjective',
     description: 'happening now',
+    // The three time words differ by HAPPEN's tense and aspect alone, said of a PROCESS (masculine in
+    // the five that agree, so it "è successo", fr "est arrivé" read as "what has happened"). None
+    // routes back through the tense nouns (PRESENT_TENSE, …) whose glosses stand on them.
+    definition: subjectGapGloss('PROCESS', 'HAPPEN', { modifier: 'NOW' }),
     emoji: '⌚',
     synonym: 'current',
     forms: {
@@ -1862,6 +2152,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'PAST',
     role: 'adjective',
     description: 'already happened',
+    definition: subjectGapGloss('PROCESS', 'HAPPEN', { aspect: 'resultative' }),
     emoji: '📜',
     forms: {
       en: { base: 'past' },
@@ -1877,6 +2168,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'FUTURE',
     role: 'adjective',
     description: 'yet to happen',
+    definition: subjectGapGloss('PROCESS', 'HAPPEN', { tense: 'future' }),
     emoji: '🔮',
     forms: {
       en: { base: 'future' },

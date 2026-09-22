@@ -62,7 +62,7 @@ All thirteen render in all seven. Three readings were judged on authoring:
    with the nominalised clause as its subject, where the other six read "to begin to have". It is
    grammatical, it is what Japanese does with an inchoative, and no shape the engine has says it
    more directly.
-3. **EAT_ANIMAL moved to [C28](../C-needs-engine/C28-verb-roots-without-a-gloss.md)**, which is what
+3. **EAT_ANIMAL moved to [C28](../done/C28-verb-roots-without-a-gloss.md)**, which is what
    the reading said would happen if EAT were not glossed differently. EAT's shipped plan *is*
    `infinitiveGloss('CONSUME', 'FOOD')` — the same plan, character for character — so the two would
    have rendered one string in all seven.
@@ -75,7 +75,7 @@ All thirteen render in all seven. Three readings were judged on authoring:
 TRANSFORM and DRAG were in this group and were moved out: `infinitiveGloss('CHANGE', …)` renders
 TRANSFORM as "to change objects" and `infinitiveGloss('MOVE', …)` renders DRAG as "to move
 objects", each indistinguishable from its own genus, which has no gloss to be distinguished from.
-Both are [C28](../C-needs-engine/C28-verb-roots-without-a-gloss.md). The causative verbs are
+Both are [C28](../done/C28-verb-roots-without-a-gloss.md). The causative verbs are
 [A25](A25-causative-verbs.md).
 
 ## Coverage

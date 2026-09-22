@@ -1,14 +1,18 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
+import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
+import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
+import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
@@ -17,8 +21,13 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("di
   // grande dimensione"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A complement-definition gloss ("in tutti i luoghi", "a un luogo più alto") is the place or direction complement
+  // that defines an adverb, as a clause renders it.
+  if (!phrase.verbPhrase && isComplementGloss(subject)) return complementGloss(subject);
   // A manner-definition gloss ("in un modo buono") is the adverbial fragment defining an adverb.
   if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
+  // A relative-clause gloss ("che si è salvato") is the head's relative alone, still agreeing with it.
+  if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeText(firstConjunct(subject));
   // Italian is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("mangio", not "io mangio"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun

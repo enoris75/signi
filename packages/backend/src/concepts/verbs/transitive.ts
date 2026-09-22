@@ -9,9 +9,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to divide or wound with a sharp edge',
+    // "To divide with a blade" — B13 shipped it as "with a sharp blade", and SHARP is now glossed as
+    // what cuts well, so the adjective went: the two would have defined each other (localization C24).
     definition: infinitiveGloss('DIVIDE', {
       complements: {
-        instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite', adjectives: ['SHARP'] } },
+        instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite' } },
       },
     }),
     emoji: '✂️',
@@ -286,6 +288,75 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'bebemos', '2pl_past': 'beberam', '3pl_past': 'beberam',
         '1sg_future': 'beberei', '2sg_future': 'beberá', '3sg_future': 'beberá',
         '1pl_future': 'beberemos', '2pl_future': 'beberão', '3pl_future': 'beberão',
+      },
+    },
+  },
+
+  // To make a liquid run out of a vessel: what one does to a liquid and not to a gas, which is why it
+  // is LIQUID's differentia, "substance that one pours" (localization C26). German gießen is strong
+  // (goss, gegossen); Spanish verter stem-changes e → ie under the stress.
+  {
+    id: 'POUR',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to make a liquid flow out of a container',
+    emoji: '🫗',
+    forms: {
+      en: {
+        base: 'pour',
+        '1sg_present': 'pour', '2sg_present': 'pour', '3sg_present': 'pours',
+        '1pl_present': 'pour', '2pl_present': 'pour', '3pl_present': 'pour',
+        past: 'poured',
+      },
+      it: {
+        base: 'versare',
+        '1sg_present': 'verso', '2sg_present': 'versi', '3sg_present': 'versa',
+        '1pl_present': 'versiamo', '2pl_present': 'versate', '3pl_present': 'versano',
+        '1sg_past': 'versai', '2sg_past': 'versasti', '3sg_past': 'versò',
+        '1pl_past': 'versammo', '2pl_past': 'versaste', '3pl_past': 'versarono',
+        '1sg_future': 'verserò', '2sg_future': 'verserai', '3sg_future': 'verserà',
+        '1pl_future': 'verseremo', '2pl_future': 'verserete', '3pl_future': 'verseranno',
+      },
+      fr: {
+        base: 'verser',
+        '1sg_present': 'verse', '2sg_present': 'verses', '3sg_present': 'verse',
+        '1pl_present': 'versons', '2pl_present': 'versez', '3pl_present': 'versent',
+        '1sg_past': 'versai', '2sg_past': 'versas', '3sg_past': 'versa',
+        '1pl_past': 'versâmes', '2pl_past': 'versâtes', '3pl_past': 'versèrent',
+        '1sg_future': 'verserai', '2sg_future': 'verseras', '3sg_future': 'versera',
+        '1pl_future': 'verserons', '2pl_future': 'verserez', '3pl_future': 'verseront',
+      },
+      de: {
+        base: 'gießen',
+        '1sg_present': 'gieße', '2sg_present': 'gießt', '3sg_present': 'gießt',
+        '1pl_present': 'gießen', '2pl_present': 'gießt', '3pl_present': 'gießen',
+        '1sg_past': 'goss', '2sg_past': 'gossest', '3sg_past': 'goss',
+        '1pl_past': 'gossen', '2pl_past': 'gosst', '3pl_past': 'gossen',
+      },
+      es: {
+        base: 'verter',
+        '1sg_present': 'vierto', '2sg_present': 'viertes', '3sg_present': 'vierte',
+        '1pl_present': 'vertemos', '2pl_present': 'vertéis', '3pl_present': 'vierten',
+        '1sg_past': 'vertí', '2sg_past': 'vertiste', '3sg_past': 'vertió',
+        '1pl_past': 'vertimos', '2pl_past': 'vertisteis', '3pl_past': 'vertieron',
+        '1sg_future': 'verteré', '2sg_future': 'verterás', '3sg_future': 'verterá',
+        '1pl_future': 'verteremos', '2pl_future': 'verteréis', '3pl_future': 'verterán',
+      },
+      ja: {
+        base: '注ぐ',
+        reading: 'そそぐ',
+        masu_present: '注ぎます',
+        masu_present_reading: 'そそぎます',
+      },
+      pt: {
+        base: 'verter',
+        '1sg_present': 'verto', '2sg_present': 'verte', '3sg_present': 'verte',
+        '1pl_present': 'vertemos', '2pl_present': 'vertem', '3pl_present': 'vertem',
+        '1sg_past': 'verti', '2sg_past': 'verteu', '3sg_past': 'verteu',
+        '1pl_past': 'vertemos', '2pl_past': 'verteram', '3pl_past': 'verteram',
+        '1sg_future': 'verterei', '2sg_future': 'verterá', '3sg_future': 'verterá',
+        '1pl_future': 'verteremos', '2pl_future': 'verterão', '3pl_future': 'verterão',
       },
     },
   },
@@ -785,6 +856,78 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'conhecemos', '2pl_past': 'conheceram', '3pl_past': 'conheceram',
         '1sg_future': 'conhecerei', '2sg_future': 'conhecerá', '3sg_future': 'conhecerá',
         '1pl_future': 'conheceremos', '2pl_future': 'conhecerão', '3pl_future': 'conhecerão',
+      },
+    },
+  },
+
+  {
+    // UNEXPECTED is what one does not expect (localization C23). Italian takes prevedere, "foresee":
+    // aspettarsi, the everyday verb, is pronominal and transitive, a shape no Italian verb has yet.
+    // French attendre, the verb of "inattendu" (qu'on n'attendait pas). Japanese 予想する, not 予期する:
+    // 予期しない is UNEXPECTED's own Japanese, so its gloss would have been the word itself.
+    id: 'EXPECT',
+    role: 'verb',
+    stative: true, // a state of mind: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
+    transitivity: 'transitive',
+    complements: ['cause'],
+    description: 'to regard something as likely to happen or arrive',
+    emoji: '🔮',
+    forms: {
+      en: {
+        base: 'expect',
+        '1sg_present': 'expect', '2sg_present': 'expect', '3sg_present': 'expects',
+        '1pl_present': 'expect', '2pl_present': 'expect', '3pl_present': 'expect',
+        past: 'expected',
+      },
+      it: {
+        base: 'prevedere',
+        '1sg_present': 'prevedo', '2sg_present': 'prevedi', '3sg_present': 'prevede',
+        '1pl_present': 'prevediamo', '2pl_present': 'prevedete', '3pl_present': 'prevedono',
+        '1sg_past': 'previdi', '2sg_past': 'prevedesti', '3sg_past': 'previde',
+        '1pl_past': 'prevedemmo', '2pl_past': 'prevedeste', '3pl_past': 'previdero',
+        '1sg_future': 'prevederò', '2sg_future': 'prevederai', '3sg_future': 'prevederà',
+        '1pl_future': 'prevederemo', '2pl_future': 'prevederete', '3pl_future': 'prevederanno',
+      },
+      fr: {
+        base: 'attendre',
+        '1sg_present': 'attends', '2sg_present': 'attends', '3sg_present': 'attend',
+        '1pl_present': 'attendons', '2pl_present': 'attendez', '3pl_present': 'attendent',
+        '1sg_past': 'attendis', '2sg_past': 'attendis', '3sg_past': 'attendit',
+        '1pl_past': 'attendîmes', '2pl_past': 'attendîtes', '3pl_past': 'attendirent',
+        '1sg_future': 'attendrai', '2sg_future': 'attendras', '3sg_future': 'attendra',
+        '1pl_future': 'attendrons', '2pl_future': 'attendrez', '3pl_future': 'attendront',
+      },
+      de: {
+        base: 'erwarten',
+        '1sg_present': 'erwarte', '2sg_present': 'erwartest', '3sg_present': 'erwartet',
+        '1pl_present': 'erwarten', '2pl_present': 'erwartet', '3pl_present': 'erwarten',
+        '1sg_past': 'erwartete', '2sg_past': 'erwartetest', '3sg_past': 'erwartete',
+        '1pl_past': 'erwarteten', '2pl_past': 'erwartetet', '3pl_past': 'erwarteten',
+        '2sg_imperative': 'erwarte',
+      },
+      es: {
+        base: 'esperar',
+        '1sg_present': 'espero', '2sg_present': 'esperas', '3sg_present': 'espera',
+        '1pl_present': 'esperamos', '2pl_present': 'esperáis', '3pl_present': 'esperan',
+        '1sg_past': 'esperé', '2sg_past': 'esperaste', '3sg_past': 'esperó',
+        '1pl_past': 'esperamos', '2pl_past': 'esperasteis', '3pl_past': 'esperaron',
+        '1sg_future': 'esperaré', '2sg_future': 'esperarás', '3sg_future': 'esperará',
+        '1pl_future': 'esperaremos', '2pl_future': 'esperaréis', '3pl_future': 'esperarán',
+      },
+      ja: {
+        base: '予想する',
+        reading: 'よそうする',
+        masu_present: '予想します',
+        masu_present_reading: 'よそうします',
+      },
+      pt: {
+        base: 'esperar',
+        '1sg_present': 'espero', '2sg_present': 'espera', '3sg_present': 'espera',
+        '1pl_present': 'esperamos', '2pl_present': 'esperam', '3pl_present': 'esperam',
+        '1sg_past': 'esperei', '2sg_past': 'esperou', '3sg_past': 'esperou',
+        '1pl_past': 'esperamos', '2pl_past': 'esperaram', '3pl_past': 'esperaram',
+        '1sg_future': 'esperarei', '2sg_future': 'esperará', '3sg_future': 'esperará',
+        '1pl_future': 'esperaremos', '2pl_future': 'esperarão', '3pl_future': 'esperarão',
       },
     },
   },
@@ -1432,6 +1575,18 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to have as a part',
+    // "to have as part": the essive object complement (C12) says what the thing had is had *as* —
+    // it "avere come parte", de "als Teil haben", ja 部分として持つ (localization C28). HAVE licenses
+    // no objectPredicative box on the canvas, but a plan renders it regardless. Bare singular, the
+    // idiom in all seven: "as a part" would be *come una parte* in Italian.
+    definition: infinitiveGloss('HAVE', {
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'PART', definiteness: 'bare' },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    }),
     emoji: '🧺',
     forms: {
       en: {
@@ -1561,6 +1716,74 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'encarceramos', '2pl_past': 'encarceraram', '3pl_past': 'encarceraram',
         '1sg_future': 'encarcerarei', '2sg_future': 'encarcerará', '3sg_future': 'encarcerará',
         '1pl_future': 'encarceraremos', '2pl_future': 'encarcerarão', '3pl_future': 'encarcerarão',
+      },
+    },
+  },
+  {
+    // WILD is "that has not been tamed" (localization C24). Italian, Spanish and Portuguese domare /
+    // domar, not addomesticare / domesticar, which would gloss WILD on its sibling DOMESTIC's own
+    // root (domestico, doméstico); French apprivoiser, Japanese 飼い慣らす.
+    id: 'TAME',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'locative', 'cause'],
+    description: 'to make an animal used to people and no longer wild',
+    emoji: '🦮',
+    forms: {
+      en: {
+        base: 'tame',
+        '1sg_present': 'tame', '2sg_present': 'tame', '3sg_present': 'tames',
+        '1pl_present': 'tame', '2pl_present': 'tame', '3pl_present': 'tame',
+        past: 'tamed',
+      },
+      it: {
+        base: 'domare',
+        '1sg_present': 'domo', '2sg_present': 'domi', '3sg_present': 'doma',
+        '1pl_present': 'domiamo', '2pl_present': 'domate', '3pl_present': 'domano',
+        '1sg_past': 'domai', '2sg_past': 'domasti', '3sg_past': 'domò',
+        '1pl_past': 'domammo', '2pl_past': 'domaste', '3pl_past': 'domarono',
+        '1sg_future': 'domerò', '2sg_future': 'domerai', '3sg_future': 'domerà',
+        '1pl_future': 'domeremo', '2pl_future': 'domerete', '3pl_future': 'domeranno',
+      },
+      fr: {
+        base: 'apprivoiser',
+        '1sg_present': 'apprivoise', '2sg_present': 'apprivoises', '3sg_present': 'apprivoise',
+        '1pl_present': 'apprivoisons', '2pl_present': 'apprivoisez', '3pl_present': 'apprivoisent',
+        '1sg_past': 'apprivoisai', '2sg_past': 'apprivoisas', '3sg_past': 'apprivoisa',
+        '1pl_past': 'apprivoisâmes', '2pl_past': 'apprivoisâtes', '3pl_past': 'apprivoisèrent',
+        '1sg_future': 'apprivoiserai', '2sg_future': 'apprivoiseras', '3sg_future': 'apprivoisera',
+        '1pl_future': 'apprivoiserons', '2pl_future': 'apprivoiserez', '3pl_future': 'apprivoiseront',
+      },
+      de: {
+        base: 'zähmen',
+        '1sg_present': 'zähme', '2sg_present': 'zähmst', '3sg_present': 'zähmt',
+        '1pl_present': 'zähmen', '2pl_present': 'zähmt', '3pl_present': 'zähmen',
+        '1sg_past': 'zähmte', '2sg_past': 'zähmtest', '3sg_past': 'zähmte',
+        '1pl_past': 'zähmten', '2pl_past': 'zähmtet', '3pl_past': 'zähmten',
+      },
+      es: {
+        base: 'domar',
+        '1sg_present': 'domo', '2sg_present': 'domas', '3sg_present': 'doma',
+        '1pl_present': 'domamos', '2pl_present': 'domáis', '3pl_present': 'doman',
+        '1sg_past': 'domé', '2sg_past': 'domaste', '3sg_past': 'domó',
+        '1pl_past': 'domamos', '2pl_past': 'domasteis', '3pl_past': 'domaron',
+        '1sg_future': 'domaré', '2sg_future': 'domarás', '3sg_future': 'domará',
+        '1pl_future': 'domaremos', '2pl_future': 'domaréis', '3pl_future': 'domarán',
+      },
+      ja: {
+        base: '飼い慣らす',
+        reading: 'かいならす',
+        masu_present: '飼い慣らします',
+        masu_present_reading: 'かいならします',
+      },
+      pt: {
+        base: 'domar',
+        '1sg_present': 'domo', '2sg_present': 'doma', '3sg_present': 'doma',
+        '1pl_present': 'domamos', '2pl_present': 'domam', '3pl_present': 'domam',
+        '1sg_past': 'domei', '2sg_past': 'domou', '3sg_past': 'domou',
+        '1pl_past': 'domamos', '2pl_past': 'domaram', '3pl_past': 'domaram',
+        '1sg_future': 'domarei', '2sg_future': 'domará', '3sg_future': 'domará',
+        '1pl_future': 'domaremos', '2pl_future': 'domarão', '3pl_future': 'domarão',
       },
     },
   },
@@ -1850,7 +2073,10 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     // The genus of KNOW ("to understand concepts") and READ ("to understand written words") — the
     // cognition verb their dictionary definitions cite as their genus (see the B11 verb-definition
-    // task). Its own tooltip stays on the literal. The Romance languages take the comprendere family
+    // task). Its own tooltip is "to know the meaning" (localization C28): KNOW with a noun object
+    // swaps to KNOW_ACQUAINTED's word (A131), so it reads conoscere / connaître / kennen / conocer /
+    // conhecer, the verb those languages know a meaning with; the definite article keeps French off
+    // the partitive *du sens*. The Romance languages take the comprendere family
     // (not capire / entender), the register a dictionary gloss is written in; Portuguese in
     // particular avoids perceber, which is PERCEIVE here. Japanese takes 理解する, echoing neither
     // 知る nor 読む.
@@ -1859,6 +2085,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to grasp the meaning of',
+    definition: infinitiveGloss('KNOW', { object: 'MEANING', definiteness: 'definite' }),
     emoji: '🧩',
     forms: {
       en: {
@@ -2367,6 +2594,19 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['objectPredicative', 'manner', 'instrumental', 'cause', 'locative'],
     description: 'to change a thing into another thing',
+    // "to cause an object to become another object" (localization C28). Its genus CHANGE has no
+    // gloss to be told apart from, and "to change objects" would be CHANGE's own meaning; the
+    // causative says what sets it apart, the other thing it ends up as. Japanese 物体が別の物体になる
+    // ようにする keeps clear of 変える, which is this verb's word there as well as CHANGE's.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      {
+        verb: 'BECOME',
+        complements: {
+          predicative: { phrase: { concept: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] } },
+        },
+      },
+    ),
     emoji: '🦋',
     isA: 'CHANGE',
     forms: {
@@ -2948,6 +3188,80 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'clicamos', '2pl_past': 'clicaram', '3pl_past': 'clicaram',
         '1sg_future': 'clicarei', '2sg_future': 'clicará', '3sg_future': 'clicará',
         '1pl_future': 'clicaremos', '2pl_future': 'clicarão', '3pl_future': 'clicarão',
+      },
+    },
+  },
+
+  // To be decided by another thing: CONDITIONAL's differentia, "on which another clause depends"
+  // (localization C24). Like CLICK, every language but Japanese takes the object with a preposition
+  // its lexeme names (`object_prep`, A139) — English "on", it "da", fr/es/pt "de", de "von" — and
+  // Japanese with に (`object_particle`). German abhängen is separable and strong (hing ab,
+  // abgehangen); Italian dipendere selects essere (è dipeso).
+  {
+    id: 'DEPEND',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to be decided or conditioned by something',
+    emoji: '🔗',
+    stative: true,
+    forms: {
+      en: {
+        base: 'depend', object_prep: 'on',
+        '1sg_present': 'depend', '2sg_present': 'depend', '3sg_present': 'depends',
+        '1pl_present': 'depend', '2pl_present': 'depend', '3pl_present': 'depend',
+        past: 'depended',
+      },
+      it: {
+        base: 'dipendere', object_prep: 'da',
+        '1sg_present': 'dipendo', '2sg_present': 'dipendi', '3sg_present': 'dipende',
+        '1pl_present': 'dipendiamo', '2pl_present': 'dipendete', '3pl_present': 'dipendono',
+        '1sg_past': 'dipesi', '2sg_past': 'dipendesti', '3sg_past': 'dipese',
+        '1pl_past': 'dipendemmo', '2pl_past': 'dipendeste', '3pl_past': 'dipesero',
+        '1sg_future': 'dipenderò', '2sg_future': 'dipenderai', '3sg_future': 'dipenderà',
+        '1pl_future': 'dipenderemo', '2pl_future': 'dipenderete', '3pl_future': 'dipenderanno',
+      },
+      fr: {
+        base: 'dépendre', object_prep: 'de',
+        '1sg_present': 'dépends', '2sg_present': 'dépends', '3sg_present': 'dépend',
+        '1pl_present': 'dépendons', '2pl_present': 'dépendez', '3pl_present': 'dépendent',
+        '1sg_past': 'dépendis', '2sg_past': 'dépendis', '3sg_past': 'dépendit',
+        '1pl_past': 'dépendîmes', '2pl_past': 'dépendîtes', '3pl_past': 'dépendirent',
+        '1sg_future': 'dépendrai', '2sg_future': 'dépendras', '3sg_future': 'dépendra',
+        '1pl_future': 'dépendrons', '2pl_future': 'dépendrez', '3pl_future': 'dépendront',
+      },
+      de: {
+        base: 'abhängen', particle: 'ab', object_prep: 'von',
+        '1sg_present': 'hänge', '2sg_present': 'hängst', '3sg_present': 'hängt',
+        '1pl_present': 'hängen', '2pl_present': 'hängt', '3pl_present': 'hängen',
+        '1sg_past': 'hing', '2sg_past': 'hingst', '3sg_past': 'hing',
+        '1pl_past': 'hingen', '2pl_past': 'hingt', '3pl_past': 'hingen',
+        '2sg_imperative': 'hänge',
+      },
+      es: {
+        base: 'depender', object_prep: 'de',
+        '1sg_present': 'dependo', '2sg_present': 'dependes', '3sg_present': 'depende',
+        '1pl_present': 'dependemos', '2pl_present': 'dependéis', '3pl_present': 'dependen',
+        '1sg_past': 'dependí', '2sg_past': 'dependiste', '3sg_past': 'dependió',
+        '1pl_past': 'dependimos', '2pl_past': 'dependisteis', '3pl_past': 'dependieron',
+        '1sg_future': 'dependeré', '2sg_future': 'dependerás', '3sg_future': 'dependerá',
+        '1pl_future': 'dependeremos', '2pl_future': 'dependeréis', '3pl_future': 'dependerán',
+      },
+      ja: {
+        base: '依存する',
+        reading: 'いぞんする',
+        masu_present: '依存します',
+        masu_present_reading: 'いぞんします',
+        object_particle: 'に',
+      },
+      pt: {
+        base: 'depender', object_prep: 'de',
+        '1sg_present': 'dependo', '2sg_present': 'depende', '3sg_present': 'depende',
+        '1pl_present': 'dependemos', '2pl_present': 'dependem', '3pl_present': 'dependem',
+        '1sg_past': 'dependi', '2sg_past': 'dependeu', '3sg_past': 'dependeu',
+        '1pl_past': 'dependemos', '2pl_past': 'dependeram', '3pl_past': 'dependeram',
+        '1sg_future': 'dependerei', '2sg_future': 'dependerá', '3sg_future': 'dependerá',
+        '1pl_future': 'dependeremos', '2pl_future': 'dependerão', '3pl_future': 'dependerão',
       },
     },
   },
@@ -3865,6 +4179,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
     description: 'to take something away from where it is',
+    // "to cause an object to leave a place" (localization C28): the causative of LEAVE, whose
+    // Italian, Spanish and Portuguese words (uscire, salir, sair) are going *out of*, which is what
+    // taking a thing away is. DELETE's "to remove objects" stands on it.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'LEAVE', object: 'PLACE', definiteness: 'indefinite' },
+    ),
     emoji: '➖',
     forms: {
       en: {
@@ -4752,6 +5073,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to put something back as it was before',
+    // "to cause an object to return" (localization C28) — the word the esc gives back comes back.
+    // German zurückkehren beside the lexeme's zurückholen, ja 戻る beside 復元する: related, not the
+    // same verb, so the gloss does not cite the word it defines.
+    definition: causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'RETURN' }),
     emoji: '♻️',
     forms: {
       en: {
@@ -4828,6 +5153,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to make something no longer closed',
+    // "to cause an object not to be closed" (localization C28), HIDE's shape on CLOSED. Denying the
+    // opposite state rather than asserting OPEN_ADJECTIVE's, which is this verb's own word or
+    // participle in six languages (open, aperto, ouvert, abierto, aberto, 開いた) — the reason HIDE
+    // denies VISIBLE.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BE', predicate: 'CLOSED', negative: true },
+    ),
     emoji: '📂',
     forms: {
       en: {
@@ -4897,6 +5230,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to shut something that was open',
+    // "to cause an object not to be open" (localization C28), OPEN's gloss the other way round, and
+    // for the same reason: CLOSED is this verb's participle in all seven.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BE', predicate: 'OPEN_ADJECTIVE', negative: true },
+    ),
     emoji: '❎',
     forms: {
       en: {
@@ -5182,6 +5521,16 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'direction', 'source', 'cause', 'locative'],
     description: 'to change the position of something',
+    // "to change an object's place" (localization C28), RESIZE's genus on PLACE, with the object whose
+    // place it is as the genitive: it "cambiare il luogo di un oggetto", ja 物体の場所を変える.
+    definition: {
+      ...infinitiveGloss('CHANGE'),
+      directObject: {
+        concept: 'PLACE',
+        definiteness: 'definite',
+        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+      },
+    },
     emoji: '↕️',
     forms: {
       en: {
@@ -5404,6 +5753,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'direction', 'cause'],
     description: 'to move a thing by holding it and pulling',
+    // "to move objects with the cursor" (localization C28): the gesture's instrument is what tells
+    // it from its genus MOVE, which "to move objects" alone would restate. Definite, the one cursor
+    // a screen has.
+    definition: infinitiveGloss('MOVE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'CURSOR', definiteness: 'definite' } } },
+    }),
     emoji: '🫳',
     isA: 'MOVE',
     forms: {
@@ -5550,6 +5907,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to give a setting a value',
+    // "to choose a value" (localization C28). "To give a value to an option" says it more fully and
+    // renders wrong twice: German puts the recipient in the accusative ("einen Wert in eine Option
+    // geben") and Japanese GIVE is あげる, which beside 値を reads as raising it.
+    definition: infinitiveGloss('CHOOSE', { object: 'VALUE', definiteness: 'indefinite' }),
     emoji: '⚙️',
     forms: {
       en: {
@@ -5691,6 +6052,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to stop keeping an item at the top of a list',
+    // "to cause an object not to be pinned" (localization C28), HIDE's shape on PIN's participle —
+    // PIN's word, not this one's, so the gloss is no circle: fissato beside sbloccare, fijado beside
+    // desfijar, ピン留め済み beside ピン留め解除する.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BE', predicate: 'PINNED', negative: true },
+    ),
     emoji: '📍',
     forms: {
       en: {
@@ -6113,6 +6481,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'instrumental'],
     description: 'to identify exactly',
+    // "to indicate exactly" (localization C28). Without the adverb it was EXPRESS's "to indicate
+    // concepts", character for character; EXACTLY was seeded for it. French exactement, not
+    // précisément, which would echo this verb's own préciser.
+    definition: infinitiveGloss('INDICATE', { modifier: 'EXACTLY' }),
     emoji: '🔍',
     forms: {
       en: {
@@ -6468,6 +6840,78 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // Saying that something is so: what a statement does and a command does not (localization C27,
+    // STATEMENT "a clause that asserts facts"). The school grammars' own verb for the declarative
+    // sentence — it "afferma un fatto", es "afirma un hecho", ja 事実を述べる — except English
+    // "state" and German "aussagen", which would gloss *statement* and *Aussagesatz* with themselves:
+    // "assert", and German feststellen, separable ("stellt … fest", "feststellt").
+    id: 'ASSERT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to say that something is so',
+    emoji: '☝️',
+    forms: {
+      en: {
+        base: 'assert',
+        '1sg_present': 'assert', '2sg_present': 'assert', '3sg_present': 'asserts',
+        '1pl_present': 'assert', '2pl_present': 'assert', '3pl_present': 'assert',
+        past: 'asserted',
+      },
+      it: {
+        base: 'affermare',
+        '1sg_present': 'affermo', '2sg_present': 'affermi', '3sg_present': 'afferma',
+        '1pl_present': 'affermiamo', '2pl_present': 'affermate', '3pl_present': 'affermano',
+        '1sg_past': 'affermai', '2sg_past': 'affermasti', '3sg_past': 'affermò',
+        '1pl_past': 'affermammo', '2pl_past': 'affermaste', '3pl_past': 'affermarono',
+        '1sg_future': 'affermerò', '2sg_future': 'affermerai', '3sg_future': 'affermerà',
+        '1pl_future': 'affermeremo', '2pl_future': 'affermerete', '3pl_future': 'affermeranno',
+      },
+      fr: {
+        base: 'affirmer',
+        '1sg_present': 'affirme', '2sg_present': 'affirmes', '3sg_present': 'affirme',
+        '1pl_present': 'affirmons', '2pl_present': 'affirmez', '3pl_present': 'affirment',
+        '1sg_past': 'affirmai', '2sg_past': 'affirmas', '3sg_past': 'affirma',
+        '1pl_past': 'affirmâmes', '2pl_past': 'affirmâtes', '3pl_past': 'affirmèrent',
+        '1sg_future': 'affirmerai', '2sg_future': 'affirmeras', '3sg_future': 'affirmera',
+        '1pl_future': 'affirmerons', '2pl_future': 'affirmerez', '3pl_future': 'affirmeront',
+      },
+      de: {
+        base: 'feststellen', particle: 'fest',
+        '1sg_present': 'stelle', '2sg_present': 'stellst', '3sg_present': 'stellt',
+        '1pl_present': 'stellen', '2pl_present': 'stellt', '3pl_present': 'stellen',
+        '1sg_past': 'stellte', '2sg_past': 'stelltest', '3sg_past': 'stellte',
+        '1pl_past': 'stellten', '2pl_past': 'stelltet', '3pl_past': 'stellten',
+        '2sg_imperative': 'stelle',
+      },
+      es: {
+        base: 'afirmar',
+        '1sg_present': 'afirmo', '2sg_present': 'afirmas', '3sg_present': 'afirma',
+        '1pl_present': 'afirmamos', '2pl_present': 'afirmáis', '3pl_present': 'afirman',
+        '1sg_past': 'afirmé', '2sg_past': 'afirmaste', '3sg_past': 'afirmó',
+        '1pl_past': 'afirmamos', '2pl_past': 'afirmasteis', '3pl_past': 'afirmaron',
+        '1sg_future': 'afirmaré', '2sg_future': 'afirmarás', '3sg_future': 'afirmará',
+        '1pl_future': 'afirmaremos', '2pl_future': 'afirmaréis', '3pl_future': 'afirmarán',
+      },
+      ja: {
+        base: '述べる',
+        reading: 'のべる',
+        masu_present: '述べます',
+        masu_present_reading: 'のべます',
+      },
+      pt: {
+        base: 'afirmar',
+        '1sg_present': 'afirmo', '2sg_present': 'afirma', '3sg_present': 'afirma',
+        '1pl_present': 'afirmamos', '2pl_present': 'afirmam', '3pl_present': 'afirmam',
+        '1sg_past': 'afirmei', '2sg_past': 'afirmou', '3sg_past': 'afirmou',
+        '1pl_past': 'afirmamos', '2pl_past': 'afirmaram', '3pl_past': 'afirmaram',
+        '1sg_future': 'afirmarei', '2sg_future': 'afirmará', '3sg_future': 'afirmará',
+        '1pl_future': 'afirmaremos', '2pl_future': 'afirmarão', '3pl_future': 'afirmarão',
+      },
+    },
+  },
+
+  {
     id: 'EXPRESS',
     role: 'verb',
     transitivity: 'transitive',
@@ -6673,6 +7117,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'instrumental', 'cause', 'locative'],
     description: 'to give one thing and take another for it',
+    // "to give an object to acquire another object" (localization C28): the purpose clause (C19)
+    // carries the half the description calls taking. Singular, one thing for another.
+    definition: infinitiveGloss('GIVE', {
+      object: 'OBJECT_THING',
+      definiteness: 'indefinite',
+      purpose: { verb: 'ACQUIRE', object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] },
+    }),
     emoji: '🔄',
     forms: {
       en: {
@@ -6810,6 +7261,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to take in through the ears',
+    // "to perceive sounds" (localization C28), SEE's "to perceive light" on the other sense. Plural:
+    // sounds are counted where light is not.
+    definition: infinitiveGloss('PERCEIVE', 'SOUND', 'plural'),
     emoji: '👂',
     forms: {
       en: {
@@ -6948,6 +7402,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to go along with another',
+    // "to go with a person" (localization C28): GO with the comitative companion (C12), the "with"
+    // that says together rather than by means of. GO licenses no comitative box on the canvas; the
+    // plan renders it regardless, as ADD's does on BE.
+    definition: infinitiveGloss('GO', {
+      complements: { comitative: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
     emoji: '🧑‍🤝‍🧑',
     forms: {
       en: {
@@ -7140,6 +7600,74 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'procuramos', '2pl_past': 'procuraram', '3pl_past': 'procuraram',
         '1sg_future': 'procurarei', '2sg_future': 'procurará', '3sg_future': 'procurará',
         '1pl_future': 'procuraremos', '2pl_future': 'procurarão', '3pl_future': 'procurarão',
+      },
+    },
+  },
+  {
+    // What seeking ends in, and what MISSING is not: "that one cannot find" (localization C23).
+    // Spanish and Portuguese encontrar; Spanish diphthongises the stressed stem, encuentro.
+    id: 'FIND',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'locative', 'cause'],
+    description: 'to come upon something, by seeking or by chance',
+    emoji: '🔦',
+    forms: {
+      en: {
+        base: 'find',
+        '1sg_present': 'find', '2sg_present': 'find', '3sg_present': 'finds',
+        '1pl_present': 'find', '2pl_present': 'find', '3pl_present': 'find',
+        past: 'found',
+      },
+      it: {
+        base: 'trovare',
+        '1sg_present': 'trovo', '2sg_present': 'trovi', '3sg_present': 'trova',
+        '1pl_present': 'troviamo', '2pl_present': 'trovate', '3pl_present': 'trovano',
+        '1sg_past': 'trovai', '2sg_past': 'trovasti', '3sg_past': 'trovò',
+        '1pl_past': 'trovammo', '2pl_past': 'trovaste', '3pl_past': 'trovarono',
+        '1sg_future': 'troverò', '2sg_future': 'troverai', '3sg_future': 'troverà',
+        '1pl_future': 'troveremo', '2pl_future': 'troverete', '3pl_future': 'troveranno',
+      },
+      fr: {
+        base: 'trouver',
+        '1sg_present': 'trouve', '2sg_present': 'trouves', '3sg_present': 'trouve',
+        '1pl_present': 'trouvons', '2pl_present': 'trouvez', '3pl_present': 'trouvent',
+        '1sg_past': 'trouvai', '2sg_past': 'trouvas', '3sg_past': 'trouva',
+        '1pl_past': 'trouvâmes', '2pl_past': 'trouvâtes', '3pl_past': 'trouvèrent',
+        '1sg_future': 'trouverai', '2sg_future': 'trouveras', '3sg_future': 'trouvera',
+        '1pl_future': 'trouverons', '2pl_future': 'trouverez', '3pl_future': 'trouveront',
+      },
+      de: {
+        base: 'finden',
+        '1sg_present': 'finde', '2sg_present': 'findest', '3sg_present': 'findet',
+        '1pl_present': 'finden', '2pl_present': 'findet', '3pl_present': 'finden',
+        '1sg_past': 'fand', '2sg_past': 'fandest', '3sg_past': 'fand',
+        '1pl_past': 'fanden', '2pl_past': 'fandet', '3pl_past': 'fanden',
+        '2sg_imperative': 'finde',
+      },
+      es: {
+        base: 'encontrar',
+        '1sg_present': 'encuentro', '2sg_present': 'encuentras', '3sg_present': 'encuentra',
+        '1pl_present': 'encontramos', '2pl_present': 'encontráis', '3pl_present': 'encuentran',
+        '1sg_past': 'encontré', '2sg_past': 'encontraste', '3sg_past': 'encontró',
+        '1pl_past': 'encontramos', '2pl_past': 'encontrasteis', '3pl_past': 'encontraron',
+        '1sg_future': 'encontraré', '2sg_future': 'encontrarás', '3sg_future': 'encontrará',
+        '1pl_future': 'encontraremos', '2pl_future': 'encontraréis', '3pl_future': 'encontrarán',
+      },
+      ja: {
+        base: '見つける',
+        reading: 'みつける',
+        masu_present: '見つけます',
+        masu_present_reading: 'みつけます',
+      },
+      pt: {
+        base: 'encontrar',
+        '1sg_present': 'encontro', '2sg_present': 'encontra', '3sg_present': 'encontra',
+        '1pl_present': 'encontramos', '2pl_present': 'encontram', '3pl_present': 'encontram',
+        '1sg_past': 'encontrei', '2sg_past': 'encontrou', '3sg_past': 'encontrou',
+        '1pl_past': 'encontramos', '2pl_past': 'encontraram', '3pl_past': 'encontraram',
+        '1sg_future': 'encontrarei', '2sg_future': 'encontrará', '3sg_future': 'encontrará',
+        '1pl_future': 'encontraremos', '2pl_future': 'encontrarão', '3pl_future': 'encontrarão',
       },
     },
   },

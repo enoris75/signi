@@ -504,7 +504,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['ACCEPT', 'la gatta ha accettato.'],
     ['ACQUIRE', 'la gatta ha acquisito.'], ['ACT', 'la gatta ha agito.'],
     ['ACCOMPANY', 'la gatta ha accompagnato.'], ['ANSWER', 'la gatta ha risposto.'],
-    ['ARRANGE', 'la gatta ha disposto.'],
+    ['ARRANGE', 'la gatta ha disposto.'], ['ASSERT', 'la gatta ha affermato.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['APPLY', 'la gatta ha applicato.'],
     ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
@@ -537,10 +537,12 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['EDIT', 'la gatta ha modificato.'],
     // umschließen is inseparable, so the German participle has no ge-; Italian racchiudere is strong.
     ['ENCLOSE', 'la gatta ha racchiuso.'], ['EXCHANGE', 'la gatta ha scambiato.'],
-    ['EXPAND', 'la gatta ha espanso.'], ['EXPORT', 'la gatta ha esportato.'],
+    ['EXPAND', 'la gatta ha espanso.'],
+    // prevedere is vedere prefixed, and keeps its strong participle: previsto.
+    ['EXPECT', 'la gatta ha previsto.'], ['EXPORT', 'la gatta ha esportato.'],
     ['EXPRESS', 'la gatta ha espresso.'],
     ['EXTINGUISH', 'la gatta ha spento.'], ['FEEL', 'la gatta ha provato.'],
-    ['FILTER', 'la gatta ha filtrato.'],
+    ['FILTER', 'la gatta ha filtrato.'], ['FIND', 'la gatta ha trovato.'],
     // volare takes avere for the activity, where German fliegen selects sein ("ist geflogen").
     ['FLY', 'la gatta ha volato.'],
     ['GIVE', 'la gatta ha dato.'],

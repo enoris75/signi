@@ -46,6 +46,10 @@ export function predicateText(
   // handed its head's forms for agreement, but a `no` head negates the MATRIX clause, not the relative
   // one (A167). It defaults to the forms' own `no`, which is right wherever they are the subject's.
   subjectIsNegative = subjectForms['definiteness'] === 'no',
+  // The passive si's patient when it is not spoken here: an object relative's gapped head, which the
+  // participle of the compound tense agrees with as it agrees with a spoken one ("l'opzione che si è
+  // salvata", "i libri che si sono salvati"). See `relativeText`.
+  gappedPatient?: Record<string, string>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
@@ -58,15 +62,20 @@ export function predicateText(
   // patient: "si mangiano i topi", "si devono mangiare i topi", and in the compound tense the participle
   // too ("si sono mangiati i topi"). A clitic object keeps si impersonal ("li si mangia"), and so does
   // an alarm cry, which is not a direct object ("si grida ai lupi").
-  const passiveSi = subjectForms['generic'] === '1' && !!directObject && !objectPrep && !isPronounElement(directObject)
-    && directObject.agreement['number'] === 'plural' && !directObject.conjuncts.every((np) => alarmCry(verb, np));
+  // The patient is the passive si's in either number, and a compound tense agrees its participle with
+  // it — "si è salvata l'opzione" as "si sono salvate le opzioni"; only the plural moves the finite verb.
+  const siPatient = subjectForms['generic'] === '1' && !!directObject && !objectPrep && !isPronounElement(directObject)
+    && !directObject.conjuncts.every((np) => alarmCry(verb, np));
+  const passiveSi = siPatient && directObject!.agreement['number'] === 'plural';
   const agreeForms = passiveSi ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
   // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
   // and left out.
   const cliticObject = directObject && !objectPrep && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
-  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : passiveSi ? directObject!.agreement : undefined;
+  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject
+    : siPatient ? directObject!.agreement
+    : subjectForms['generic'] === '1' ? gappedPatient : undefined;
   // A state verb's past is the imperfect ("voleva", "aveva", "era"), not the perfective (A130).
   const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? statePastForm('it', m, pn, tense, mood) ?? conjugate(m.forms, agreeForms, tense);
   // A pronominal verb ("muoversi") is conjugated as its plain verb, and its clitic, agreeing with the

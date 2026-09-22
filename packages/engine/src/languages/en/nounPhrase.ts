@@ -6,7 +6,7 @@ import { isPostModified, keepsHeadDeterminer } from './isPostModified.js';
 import { possessivePrefix } from './possessivePrefix.js';
 import { possessorPhrase } from './possessorPhrase.js';
 
-export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false): string {
+export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false, partitive = false): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? `${adj} ` : '';
@@ -27,6 +27,14 @@ export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: s
       return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${possessiveEnIndependent(possessor)}`;
     }
     return `${possessiveEn(possessor)} ${a}${m}${word}`;
+  }
+  // A possessor in the part-whole relation (`partitive`, NounPhrase.possessorRole) — the whole the
+  // head is a part of, or the parts it is made up of — is never the Saxon clitic, which would make
+  // it the owner: "a keyboard's part" is a part the keyboard owns. The head keeps its own
+  // determiner and the possessor follows it: "a part of a keyboard", "the visible part of a fire",
+  // "all parts of the list" (not "all the list's parts"), "a group of canvases" (C26).
+  if (possessor && partitive) {
+    return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${possessorPhrase(possessor)}`;
   }
   if (possessor && !isPostModified(possessor) && allHead) {
     return `all ${possessivePrefix(possessor)}${a}${m}${word}`;

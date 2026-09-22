@@ -1,7 +1,7 @@
 import type { ResolvedNounElement } from '../../types.js';
-import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { coordinate } from './coordinate.js';
 import { nounPhrase } from './nounPhrase.js';
+import { tonicPronounDe } from './tonicPronounDe.js';
 
 /**
  * A whole noun slot in one case. Every conjunct declines for that case *individually* — German
@@ -11,7 +11,8 @@ import { nounPhrase } from './nounPhrase.js';
 export function elementPhrase(el: ResolvedNounElement, _case: 'nom' | 'acc' | 'dat'): string {
   // A pronoun direct object takes its accusative form with no article ("sieht ihn"), not the noun
   // path that would give "den ich". The choice is per conjunct, so a group mixes the two ("den Hund
-  // und dich"). Only the accusative object reaches a pronoun here.
+  // und dich"). The object of a dative-only preposition reaches a pronoun here too, in its dative
+  // ("hängt von ihr ab", see `objectPrepCase`).
   return coordinate(el, (np) =>
-    _case === 'acc' && np.head.forms['person'] ? objectPronounForm(np.head.forms) : nounPhrase(np, _case));
+    _case !== 'nom' && np.head.forms['person'] ? tonicPronounDe(np.head.forms, _case) : nounPhrase(np, _case));
 }

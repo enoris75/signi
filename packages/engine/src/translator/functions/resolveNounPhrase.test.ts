@@ -267,8 +267,21 @@ describe('resolveNounPhrase', () => {
       });
     });
 
+    // C26: what the possessor is to the head — only English reads it, so it rides through as given.
+    test("the possessor's role rides through", () => {
+      expect(resolveIt({ concept: 'HOUSE', possessor: { concept: 'CAT' }, possessorRole: 'whole' }).possessorRole).toBe('whole');
+      expect(resolveIt({ concept: 'HOUSE', possessor: { concept: 'CAT' } }).possessorRole).toBeUndefined();
+    });
+
     test('the gloss flags ride through', () => {
       expect(resolveIt({ concept: 'SPEED', dimensionGloss: true, mannerGloss: true })).toMatchObject({ dimensionGloss: true, mannerGloss: true });
+    });
+
+    // The head of a relative-clause gloss is never spoken, but it resolves in full: the clause agrees
+    // with its forms, as a headed relative's does.
+    test('the relative-gloss flag rides through beside a resolved head and relative', () => {
+      const resolved = resolveIt({ concept: 'CAT', relativeGloss: true, relative: { verbPhrase: { verb: 'EAT' } } });
+      expect(resolved).toMatchObject({ relativeGloss: true, head: { forms: { base: 'gatto' } }, relative: { verbPhrase: { verb: { forms: { base: 'mangiare' } } } } });
     });
   });
 });

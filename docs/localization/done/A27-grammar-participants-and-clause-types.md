@@ -1,7 +1,7 @@
 # A27. Grammar meta-nouns that a seeded verb already tells apart
 
 _(from the unsorted sweep of 2026-09-22. Five of the corpus's grammar nouns whose differentia is a
-seeded verb or adjective. The other twenty-one are [C27](../C-needs-engine/C27-grammar-meta-nouns.md):
+seeded verb or adjective. The other twenty-one are [C27](../done/C27-grammar-meta-nouns.md):
 they name a position in a system rather than a property, and no phrase composes that.)_
 
 ## Plan
@@ -52,7 +52,7 @@ All five render in all seven. Two readings were judged on authoring:
 2. **DEMONSTRATIVE and ARTICLE would collide**, which is why ARTICLE is not here. Both are
    determiners, and the only thing that separates them — identifiability versus pointing — is what
    DEFINITE and PROXIMAL mean, and both are adjectives with no gloss of their own
-   ([C24](../C-needs-engine/C24-grammar-feature-adjectives.md)). ARTICLE is in C27 with that reason.
+   ([C24](../done/C24-grammar-feature-adjectives.md)). ARTICLE is in C27 with that reason.
 
 ## Coverage
 

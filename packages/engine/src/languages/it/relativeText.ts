@@ -54,18 +54,21 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const alarmHead = relativeAlarmHead(np, QUALE);
   // So is the object of a verb that takes it with a preposition: "il pulsante sul quale si clicca" (A139).
   const prepHead = relativePrepositionalHead(np, QUALE);
-  // A plural head gapped as the object of the impersonal si is the passive si's patient, and the verb
-  // agrees with it: "i topi che si mangiano" (the compound tense aside, as in `predicateText`). An alarm is
-  // no object, so si stays impersonal: "i lupi ai quali si grida".
-  const passiveSi = !subjectRelative && rel.headRole === 'directObject' && !alarmHead && !prepHead && isGenericSubject(rel.subject!)
-    && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural' && rel.verbPhrase.aspect !== 'resultative';
+  // A head gapped as the object of the impersonal si is the passive si's patient: a plural one moves the
+  // verb ("i topi che si mangiano", "i libri che si sono salvati"), and in a compound tense the participle
+  // agrees with it in either number ("l'opzione che si è salvata"), as with a spoken patient in
+  // `predicateText`. An alarm is no object, so si stays impersonal: "i lupi ai quali si grida".
+  const siPatient = !subjectRelative && rel.headRole === 'directObject' && !alarmHead && !prepHead && isGenericSubject(rel.subject!);
+  const headNumber = np.head.forms['number'] ?? np.head.forms['count'] ?? 'singular';
+  const passiveSi = siPatient && headNumber === 'plural';
   const agreeForms = subjectRelative ? np.head.forms
     : passiveSi ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
+  const gappedPatient = siPatient ? { gender: np.head.forms['gender'] ?? 'masc', number: headNumber } : undefined;
   // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
   // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
   // keeps its "non" ("nessun gatto che non mangia corre", A167).
   const predicateFor = (forms: Record<string, string>) =>
-    predicateText(forms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+    predicateText(forms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel), gappedPatient);
   const pred = predicateFor(agreeForms);
   const gap = relativeGapComplement(np, QUALE);
   const agentGap = relativeAgentGap(np, QUALE);

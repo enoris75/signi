@@ -54,7 +54,10 @@ export function predicateSegs(
   // "a place that has walls", 家は窓があります (A150). ある is a state verb, so it takes no 〜ている either.
   const possessive = !copulaExistential && isPossessiveExistential(givenVerbPhrase.verb, animateSubject);
   const existential = copulaExistential || possessive;
-  const objectParticle = possessive ? 'が' : 'を';
+  // Every other object takes を, unless its verb governs it with another particle, which its lexeme
+  // names as `object_particle`: 続く takes its object with に, as one follows *after* a thing (猫は犬に
+  // 続きます). Read off the verb as given, like `locative_particle` below.
+  const objectParticle = possessive ? 'が' : (givenVerbPhrase.verb.forms['object_particle'] ?? 'を');
   // A passive is not a branch of the predicate but a different verb in the same slot: the 〜れる/られる
   // form standing where the active one stood (see `jaPassiveVerb`), which then conjugates for tense,
   // negation, aspect and the modal suffixes like any other ichidan verb. The existential substitution

@@ -1435,7 +1435,7 @@ describe('known bugs: Spanish and Portuguese use ser in a place relative clause'
 // goes through this path. Filed while authoring localization A23 (CANVAS).
 describe('known bugs: the Portuguese impersonal se and a plural object (A206)', () => {
   // CANVAS's own definition plan: a locative-gap relative with a generic subject and a bare plural
-  // object. Italian and Spanish agree the verb; Portuguese leaves it singular.
+  // object. Italian and Spanish agree the verb, and so, since the fix, does Portuguese.
   const canvas = {
     subject: {
       concept: 'PLACE',
@@ -1449,7 +1449,7 @@ describe('known bugs: the Portuguese impersonal se and a plural object (A206)', 
     },
   };
 
-  test.fails('Portuguese agrees the impersonal verb with its plural object', () => {
+  test('Portuguese agrees the impersonal verb with its plural object', () => {
     expect(sayAll(canvas).pt).toBe('um lugar onde se fazem frases.');
   });
 
@@ -1461,5 +1461,103 @@ describe('known bugs: the Portuguese impersonal se and a plural object (A206)', 
     });
     expect(sayAll({ ...canvas, subject: { ...canvas.subject, relative: { ...canvas.subject.relative, directObject: { concept: 'PHRASE', definiteness: 'bare' as const } } } }).pt)
       .toBe('um lugar onde se faz frase.');
+  });
+
+  // The fix is the agreement alone: a main clause keeps the proclitic it had (the standard writes
+  // "comem-se os ratos", a separate question), and the object relative — the head gapped as the passive
+  // se's patient — agrees with its plural head, in the simple and the compound tense alike.
+  const GENERIC = np('GENERIC_PERSON');
+  const MICE = np('MOUSE', { number: 'plural' });
+  test('a main clause agrees with its plural object, and keeps its proclitic', () => {
+    expect(sayAll(clause(GENERIC, 'EAT', { directObject: MICE })).pt).toBe('se comem os ratos.');
+    expect(sayAll(clause(GENERIC, 'EAT', { directObject: MICE, verbPhrase: { tense: 'past' } })).pt).toBe('se comeram os ratos.');
+    expect(sayAll(clause(GENERIC, 'EAT', { directObject: MICE, verbPhrase: { modals: ['MUST'] } })).pt).toBe('se devem comer os ratos.');
+  });
+  test('an object relative agrees with its plural head', () => {
+    const eaten = (verbPhrase: VerbPhrase) =>
+      np('MOUSE', { number: 'plural', relative: { headRole: 'directObject', subject: GENERIC, verbPhrase } });
+    expect(sayAll(clause(eaten({ verb: 'EAT' }), 'RUN')).pt).toBe('os ratos que se comem correm.');
+    expect(sayAll({ subject: eaten({ verb: 'EAT', aspect: 'resultative' }) }).pt).toBe('os ratos que se comeram.');
+  });
+  test('a clitic or a singular object keeps se impersonal and singular', () => {
+    expect(sayAll(clause(GENERIC, 'EAT', { directObject: np('THIRD_PERSON', { number: 'plural' }) })).pt).toBe('se os come.');
+    expect(sayAll(clause(GENERIC, 'EAT', { directObject: np('MOUSE') })).pt).toBe('se come o rato.');
+  });
+});
+
+// A213. With the impersonal si, a compound tense is the passive si's, and its participle agrees with the
+// patient — "si è salvata l'opzione", "le opzioni che si sono salvate". The main clause did this for a
+// plural object only, and an object relative not at all: its gapped head is the patient, but nothing
+// handed it to the participle, and the plural head's agreement was switched off in the compound tense.
+// Found while building the headless relative gloss (localization C23), whose Italian read "che si è
+// salvato" under a feminine antecedent.
+describe('known bugs: the Italian passive si and its compound participle (A213)', () => {
+  const GENERIC = np('GENERIC_PERSON');
+  const SAVED = { verb: 'SAVE', aspect: 'resultative' as const };
+  const saved = (head: string, number?: 'plural', verbPhrase: VerbPhrase = SAVED) =>
+    np(head, { ...(number ? { number } : {}), relative: { headRole: 'directObject', subject: GENERIC, verbPhrase } });
+
+  test('a main clause agrees the participle with a singular patient too', () => {
+    expect(sayAll(clause(GENERIC, 'SAVE', { directObject: np('OPTION'), verbPhrase: SAVED })).it).toBe("si è salvata l'opzione.");
+    expect(sayAll(clause(GENERIC, 'SAVE', { directObject: np('OPTION', { number: 'plural' }), verbPhrase: SAVED })).it).toBe('si sono salvate le opzioni.');
+    expect(sayAll(clause(GENERIC, 'SAVE', { directObject: np('BOOK'), verbPhrase: SAVED })).it).toBe('si è salvato il libro.');
+  });
+
+  test('an object relative agrees the auxiliary and the participle with its head', () => {
+    expect(sayAll({ subject: saved('OPTION') }).it).toBe("l'opzione che si è salvata.");
+    expect(sayAll({ subject: saved('OPTION', 'plural') }).it).toBe('le opzioni che si sono salvate.');
+    expect(sayAll({ subject: saved('BOOK', 'plural') }).it).toBe('i libri che si sono salvati.');
+    expect(sayAll({ subject: saved('BOOK') }).it).toBe('il libro che si è salvato.');
+  });
+
+  // The modal's compound infinitive takes the same agreement the main clause already gave it
+  // ("si devono aver salvate le opzioni"), and the simple tenses are untouched.
+  test('the modal and the simple tenses read as the main clause does', () => {
+    expect(sayAll({ subject: saved('OPTION', 'plural', { ...SAVED, modals: ['MUST'] }) }).it).toBe('le opzioni che si devono aver salvate.');
+    expect(sayAll({ subject: saved('OPTION', 'plural', { verb: 'SAVE' }) }).it).toBe('le opzioni che si salvano.');
+    expect(sayAll({ subject: saved('OPTION', undefined, { verb: 'SAVE', tense: 'past' }) }).it).toBe("l'opzione che si salvò.");
+  });
+});
+
+// A221. A place relative whose predicate is the bare copula leaves "è" / "est" alone at the end of the
+// clause, after its noun subject: "un luogo dove il gatto è", "un lieu où le chat est". Italian and
+// French put the verb first there — "dov'è il gatto", "où est le chat" — and in the subject slot the
+// SV order runs the two verbs together: "la casa dove il gatto è brucia". A predicate, another verb, a
+// pronoun or the generic subject keeps SV. Found authoring the C23-C28 sweep.
+describe('known bugs: an Italian or French place relative ends on a bare copula (A221)', () => {
+  const where = (subject: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<RelativeClause> = {}): RelativeClause =>
+    ({ headRole: 'locative', subject, verbPhrase: { verb: 'BE', ...verbPhrase }, ...extra });
+  const place = (relative: RelativeClause) => sayAll({ subject: np('PLACE', { definiteness: 'indefinite', relative }) });
+  const itFr = (said: Record<string, string>) => ({ it: said['it'], fr: said['fr'] });
+
+  test.fails('the copula comes before its noun subject', () => {
+    expect(itFr(place(where(np('CAT'))))).toEqual({ it: "un luogo dov'è il gatto.", fr: 'un lieu où est le chat.' });
+    expect(itFr(place(where(np('CAT', { number: 'plural' }))))).toEqual({ it: 'un luogo dove sono i gatti.', fr: 'un lieu où sont les chats.' });
+    expect(itFr(place(where(np('CAT'), { tense: 'past' })))).toEqual({ it: "un luogo dov'era il gatto.", fr: 'un lieu où était le chat.' });
+    expect(itFr(place(where(np('CAT'), { tense: 'future' })))).toEqual({ it: 'un luogo dove sarà il gatto.', fr: 'un lieu où sera le chat.' });
+    expect(itFr(sayAll(clause(np('HOUSE', { relative: where(np('CAT')) }), 'BURN'))))
+      .toEqual({ it: "la casa dov'è il gatto brucia.", fr: 'la maison où est le chat brûle.' });
+    expect(itFr(sayAll(clause(np('DOG'), 'SEE', { directObject: np('HOUSE', { relative: where(np('CAT')) }) }))))
+      .toEqual({ it: "il cane vede la casa dov'è il gatto.", fr: 'le chien voit la maison où est le chat.' });
+    expect(itFr(sayAll({ subject: np('SLOT', { relative: where(np('CURSOR')) }) })))
+      .toEqual({ it: "la fessura dov'è il cursore.", fr: 'la fente où est le curseur.' });
+    expect(itFr(sayAll({
+      subject: np('HOUSE', { definiteness: 'indefinite', relative: where(np('CAT'), {}, { headSpecifiers: [{ kind: 'path', value: 'under' }] }) }),
+    }))).toEqual({ it: 'una casa sotto la quale è il gatto.', fr: 'une maison sous laquelle est le chat.' });
+  });
+
+  test('regression: a pronoun, the generic subject, a predicate, another verb and the other languages', () => {
+    expect(itFr(place(where(np('FIRST_PERSON'))))).toEqual({ it: 'un luogo dove sono.', fr: 'un lieu où je suis.' });
+    expect(place(where(np('THIRD_PERSON', { gender: 'masc' }))).fr).toBe('un lieu où il est.');
+    expect(itFr(place(where(np('GENERIC_PERSON'))))).toEqual({ it: 'un luogo dove si è.', fr: "un lieu où l'on est." });
+    expect(itFr(place(where(np('CAT'), {}, { complements: { predicative: { phrase: np('HAPPY') } } }))))
+      .toEqual({ it: 'un luogo dove il gatto è felice.', fr: 'un lieu où le chat est heureux.' });
+    expect(itFr(place({ headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } })))
+      .toEqual({ it: 'un luogo dove il gatto mangia.', fr: 'un lieu où le chat mange.' });
+    expect(place(where(np('CAT')))).toMatchObject({
+      en: 'a place where the cat is.',
+      es: 'un lugar donde el gato está.',
+      pt: 'um lugar onde o gato está.',
+    });
   });
 });

@@ -66,8 +66,11 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const clause = joinSubject(subjText, pred);
   // The generic "on" after "où" takes the euphonic l' of the written language: "un lieu où l'on vit".
   if (isPlainLocativeGap(rel)) return `où ${isGenericSubject(rel.subject) ? `l'${clause}` : clause}`.trim();
+  // An object the verb takes with "de" relativises as "dont", not "duquel": "la condition dont la
+  // proposition dépend", as French writes every de-complement of a verb.
   const lequel = agentGap ? agentPhrase(agentGap)
     : alarmHead ? alarmCryText(alarmHead)
+    : prepHead?.prep === 'de' ? 'dont'
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     // The verb's forms, for a goal preposition its lexeme fixes: "la maison vers laquelle le chat se déplace".
     : gap ? complementsPhrase(gap, {}, '', {}, rel.verbPhrase.verb.forms) : '';

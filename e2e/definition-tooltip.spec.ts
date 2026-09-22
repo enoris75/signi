@@ -225,7 +225,7 @@ test.describe('word definition tooltip', () => {
     ['OWN', 'own', 'to have property', 'it', 'avere proprietà'],
     ['HOLD', 'hold', 'to have objects', 'fr', 'avoir des objets'],
     ['BUY', 'buy', 'to acquire objects with money', 'de', 'Gegenstände mit Geld erwerben'],
-    ['CUT', 'cut', 'to divide with a sharp blade', 'es', 'dividir con una cuchilla afilada'],
+    ['CUT', 'cut', 'to divide with a blade', 'es', 'dividir con una cuchilla'],
     ['BITE', 'bite', 'to cut with the teeth', 'ja', '歯で切る'],
     ['BEAT', 'beat', 'to strike repeatedly', 'pt', 'golpear repetidamente'],
     ['GIVE', 'give', 'to transfer objects to a person', 'de', 'einer Person Gegenstände übertragen'],
@@ -1873,7 +1873,7 @@ test.describe('word definition tooltip', () => {
     await speakerIt.hover();
     await expect(page.locator(tooltip)).toHaveText('una persona che parla');
 
-    // A head this ticket glosses itself — ROW is on the literal, but its word is what TOOLBAR needs.
+    // A head this ticket needed only the word of — ROW's own gloss came later (C26).
     await app.setUiLanguage('de');
     await app.subjectInput.fill('toolbar');
     const toolbarDe = page.locator('[data-testid="typeahead-option"][data-concept="TOOLBAR"]');
@@ -1914,5 +1914,202 @@ test.describe('word definition tooltip', () => {
     await expect(pluralJa).toBeVisible();
     await pluralJa.hover();
     await expect(page.locator(tooltip)).toHaveText('複数の範疇');
+  });
+
+  test('a place adverb is the complement it stands for (localization C25: EVERYWHERE, UP)', async ({
+    app,
+    page,
+  }) => {
+    // The verbless fragment is rendered as a locative complement, exactly as "eats in all places".
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('everywhere');
+    const everywhereEn = page.locator('[data-testid="typeahead-option"][data-concept="EVERYWHERE"]');
+    await expect(everywhereEn).toBeVisible();
+    await everywhereEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('in all places');
+
+    // A direction is the plain goal, and German's "zu" governs the dative of the compared adjective.
+    await app.setUiLanguage('de');
+    await app.openVerbAdverb('up');
+    const upDe = page.locator('[data-testid="typeahead-option"][data-concept="UP"]');
+    await expect(upDe).toBeVisible();
+    await upDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('zu einem höheren Ort');
+  });
+
+  test('a part names its whole, and an organ what one sees with (localization C26)', async ({
+    app,
+    page,
+  }) => {
+    // The part-whole possessor: English writes the whole as an of-phrase, not "a keyboard's part".
+    await app.subjectInput.fill('key');
+    const keyEn = page.locator('[data-testid="typeahead-option"][data-concept="KEY"]');
+    await expect(keyEn).toBeVisible();
+    await keyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a part of a keyboard');
+
+    // The same relation read from the whole: the canvases are what the group is made of.
+    await app.subjectInput.fill('workspace');
+    const workspaceEn = page.locator('[data-testid="typeahead-option"][data-concept="WORKSPACE"]');
+    await expect(workspaceEn).toBeVisible();
+    await workspaceEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a group of canvases');
+
+    // The instrument gap: German's relativizer is the instrumental preposition's, mit dem.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('eye');
+    const eyeDe = page.locator('[data-testid="typeahead-option"][data-concept="EYE"]');
+    await expect(eyeDe).toBeVisible();
+    await eyeDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Organ, mit dem man sieht');
+  });
+
+  test('a verb root takes a gloss on a shape that shipped after it (localization C28: FLY, OPEN)', async ({
+    app,
+    page,
+  }) => {
+    // FLY on the route complement its genus always licensed: "through the air".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('fly');
+    const flyEn = page.locator('[data-testid="typeahead-option"][data-concept="FLY"]');
+    await expect(flyEn).toBeVisible();
+    await flyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to move through the air');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('fly');
+    const flyDe = page.locator('[data-testid="typeahead-option"][data-concept="FLY"]');
+    await expect(flyDe).toBeVisible();
+    await flyDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('sich durch die Luft bewegen');
+
+    // OPEN denies the state CLOSE leaves, the adjective seeded for it; Japanese turns 閉じた into
+    // 閉じていない inside the causative's ように clause.
+    await app.setUiLanguage('en');
+    await app.verbInput.fill('open');
+    const openEn = page.locator('[data-testid="typeahead-option"][data-concept="OPEN"]');
+    await expect(openEn).toBeVisible();
+    await openEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to cause an object not to be closed');
+
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('open');
+    const openJa = page.locator('[data-testid="typeahead-option"][data-concept="OPEN"]');
+    await expect(openJa).toBeVisible();
+    await openJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('物体が閉じていないようにする');
+  });
+
+  test('a state adjective is the relative clause it stands for (localization C23: SAVED, EMPTY)', async ({
+    app,
+    page,
+  }) => {
+    // The headless relative: the state saving leaves, the object gap's generic "one".
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('saved');
+    const savedEn = page.locator('[data-testid="typeahead-option"][data-concept="SAVED"]');
+    await expect(savedEn).toBeVisible();
+    await savedEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that one has saved');
+
+    // The unspoken antecedent, Gegenstand, still gives the relative pronoun its gender and case.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('saved');
+    const savedDe = page.locator('[data-testid="typeahead-option"][data-concept="SAVED"]');
+    await expect(savedDe).toBeVisible();
+    await savedDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('den man gespeichert hat');
+
+    // A subject gap: what the thing does not have. Japanese says the relative before its absent head.
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('empty');
+    const emptyJa = page.locator('[data-testid="typeahead-option"][data-concept="EMPTY"]');
+    await expect(emptyJa).toBeVisible();
+    await emptyJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('内容がない');
+  });
+
+  test('a relational adjective is the clause it stands for (localization C24: WILD, ROUND)', async ({
+    app,
+    page,
+  }) => {
+    // The headless relative: the antecedent is unspoken, the passive state is the gloss.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('wild');
+    const wildEn = page.locator('[data-testid="typeahead-option"][data-concept="WILD"]');
+    await expect(wildEn).toBeVisible();
+    await wildEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that has not been tamed');
+
+    // German's relative pronoun takes the unspoken antecedent's gender: BEING's Wesen is neuter.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('wild');
+    const wildDe = page.locator('[data-testid="typeahead-option"][data-concept="WILD"]');
+    await expect(wildDe).toBeVisible();
+    await wildDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('das nicht gezähmt worden ist');
+
+    // The genitive relative, on OBJECT_THING's masculine Gegenstand.
+    await app.openSubjectAdjective('round');
+    const roundDe = page.locator('[data-testid="typeahead-option"][data-concept="ROUND"]');
+    await expect(roundDe).toBeVisible();
+    await roundDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('dessen Form ein Kreis ist');
+  });
+
+  test('a grammar feature is what it does, said as its clause alone (localization C24, C27: MOOD, PASSIVE)', async ({
+    app,
+    page,
+  }) => {
+    // C27's MOOD, a noun, keeps its head: the speaker's purpose, a genitive inside the relative.
+    await app.subjectInput.fill('mood');
+    const moodEn = page.locator('[data-testid="typeahead-option"][data-concept="MOOD"]');
+    await expect(moodEn).toBeVisible();
+    await moodEn.hover();
+    await expect(page.locator(tooltip)).toHaveText("a feature that indicates the speaker's purpose");
+
+    // An adjective is glossed as its relative clause alone, on an unspoken CLAUSE — not "a clause
+    // that…" — and the essive object complement says what the passive promotes.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('passive');
+    const passiveEn = page.locator('[data-testid="typeahead-option"][data-concept="PASSIVE"]');
+    await expect(passiveEn).toBeVisible();
+    await passiveEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that uses the direct object as the subject');
+
+    // German's relative pronoun takes the gender of the antecedent no one sees: Satz, masculine.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('passive');
+    const passiveDe = page.locator('[data-testid="typeahead-option"][data-concept="PASSIVE"]');
+    await expect(passiveDe).toBeVisible();
+    await passiveDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('der das direkte Objekt als Subjekt verwendet');
+  });
+
+  test('an ordinal is what it follows, a condition what another clause depends on (localization C24: SECOND, CONDITIONAL)', async ({
+    app,
+    page,
+  }) => {
+    // FOLLOW takes an object now: SECOND is what follows the first.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('second');
+    const secondEn = page.locator('[data-testid="typeahead-option"][data-concept="SECOND"]');
+    await expect(secondEn).toBeVisible();
+    await secondEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that follows the first object');
+
+    // English pied-pipes DEPEND's preposition, where German relativises on its dative.
+    await app.openSubjectAdjective('conditional');
+    const conditionalEn = page.locator('[data-testid="typeahead-option"][data-concept="CONDITIONAL"]');
+    await expect(conditionalEn).toBeVisible();
+    await conditionalEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('on which another clause depends');
+
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('konditional');
+    const conditionalDe = page.locator('[data-testid="typeahead-option"][data-concept="CONDITIONAL"]');
+    await expect(conditionalDe).toBeVisible();
+    await conditionalDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von dem ein anderer Satz abhängt');
   });
 });

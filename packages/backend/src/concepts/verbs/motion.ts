@@ -555,6 +555,13 @@ export const motionVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move through the air',
+    // Its own description, on the route complement MOVE_ONESELF already licenses (localization C28):
+    // "sich durch die Luft bewegen", es "moverse por el aire", ja 空気を移動する — the を of the space
+    // moved through, as 大辞林 glosses 飛ぶ (空中を移動する). Definite, the one air there is; JUMP's
+    // "to move into the air" is the same noun as a direction, so the two stay apart in all seven.
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      complements: { route: { phrase: { concept: 'AIR', definiteness: 'definite' } } },
+    }),
     emoji: '🕊️',
     isA: 'MOVE_ONESELF',
     forms: {

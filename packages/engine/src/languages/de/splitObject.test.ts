@@ -24,6 +24,13 @@ describe('splitObject', () => {
     expect(splitObject(el(np(KATER), np(ICH)), '', 'auf')).toEqual({ pronoun: '', noun: '', prepositional: 'auf den Kater und mich' });
   });
 
+  // DEPEND's abhängen takes "von", which governs the dative whatever the verb.
+  test('a dative-only preposition keeps its dative, a pronoun included', () => {
+    expect(splitObject(el(np(MAUS)), '', 'von')).toEqual({ pronoun: '', noun: '', prepositional: 'von der Maus' });
+    expect(splitObject(el(np(ER)), '', 'von')).toEqual({ pronoun: '', noun: '', prepositional: 'von ihm' });
+    expect(splitObject(el(np(ER, { gender: 'neut' })), '', 'von').prepositional).toBe('davon');
+  });
+
   test('a neuter pronoun a preposition leads is the da-compound', () => {
     expect(splitObject(el(np(ER, { gender: 'neut' })), '', 'auf')).toEqual({ pronoun: '', noun: '', prepositional: 'darauf' });
     expect(splitObject(el(np(ER, { gender: 'neut' })), '', 'mit').prepositional).toBe('damit');

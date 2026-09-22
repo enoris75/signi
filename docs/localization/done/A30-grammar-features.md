@@ -34,7 +34,7 @@ DETERMINER's "a word that specifies nouns" ([B51](../done/B51-specify.md)) or th
 All seeded: the genera FEATURE, CATEGORY, PHRASE, RELATIONSHIP; the verbs INDICATE, NEGATE, GOVERN,
 HAVE, LINK; the objects TIME, PERIOD_TIME, PARTICIPANT_GRAMMAR, LEVEL, FEELING, CONDITION, CLAUSE,
 WORD, SPEAKER, NOUN. Several are themselves on the literal — FEATURE, CATEGORY, LEVEL and TIME are
-[C26](../C-needs-engine/C26-root-nouns-on-the-literal.md), SPEAKER is
+[C26](../done/C26-root-nouns-on-the-literal.md), SPEAKER is
 [B57](B57-ui-nouns-needing-a-word.md) — and none of that blocks this ticket.
 
 ## Probe renders (2026-09-22, engine source at HEAD, lexicon seeded in memory)
@@ -55,7 +55,7 @@ WORD, SPEAKER, NOUN. Several are themselves on the literal — FEATURE, CATEGORY
 All ten render in all seven, and the German bare-plural object sits before its clause-final verb
 in each (*das Zeiten bezeichnet*). Three readings were judged on authoring:
 
-1. **MOOD went to [C27](../C-needs-engine/C27-grammar-meta-nouns.md)**, as the reading said it
+1. **MOOD went to [C27](../done/C27-grammar-meta-nouns.md)**, as the reading said it
    should. The two tickets were authored together, so the collision was plain on the page:
    [A27](A27-grammar-participants-and-clause-types.md) ships CONDITION as "a conditional
    clause", and MOOD would have sat above it saying it indicates conditions — which names its
@@ -75,7 +75,7 @@ PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE, SINGULAR_GRAMMAR and PLURAL_GRAMMAR all
 this ticket glosses and each needs one adjective that is not seeded; they are
 [B58](B58-tense-and-number-values.md). STATEMENT, ARTICLE and
 PARTICIPANT_GRAMMAR were probed with the rest and did not survive: each rendered a gloss true of its
-siblings too. They are [C27](../C-needs-engine/C27-grammar-meta-nouns.md).
+siblings too. They are [C27](../done/C27-grammar-meta-nouns.md).
 
 ## Coverage
 

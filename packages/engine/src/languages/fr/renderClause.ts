@@ -1,14 +1,18 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
+import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
+import { isRelativeGloss } from './isRelativeGloss.js';
 import { joinSubject } from './joinSubject.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
+import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
@@ -17,8 +21,13 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande taille"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A complement-definition gloss ("dans tous les lieux", "à un lieu plus haut") is the place or direction complement
+  // that defines an adverb, as a clause renders it.
+  if (!phrase.verbPhrase && isComplementGloss(subject)) return complementGloss(subject);
   // A manner-definition gloss ("à vitesse haute") is the adverbial fragment defining an adverb.
   if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
+  // A relative-clause gloss ("qu'on a enregistré") is the head's relative alone, still agreeing with it.
+  if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeText(firstConjunct(subject));
   // An imperative drops its subject (the person still drives the form — see predicateText); an
   // infinitive citation ("consommer la nourriture") is likewise subject-less on the surface.
   const subj =

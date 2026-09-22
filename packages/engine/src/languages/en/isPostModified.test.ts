@@ -49,6 +49,14 @@ describe('isPostModified', () => {
     // "all" stacks in front of the clitic instead, so it leaves nothing trailing.
     expect(isPostModified(np(BOY, { definiteness: 'all' }, { possessor: np(CAT) }))).toBe(false);
   });
+
+  // C26: a whole or the parts always follow the head as an of-phrase, so "'s" cannot follow them —
+  // "the name of a part of a keyboard", never "a part of a keyboard's name".
+  test('a partitive possessor is post-modified, whatever the determiner', () => {
+    expect(isPostModified(np(BOOK, {}, { possessor: np(CAT), possessorRole: 'whole' }))).toBe(true);
+    expect(isPostModified(np(BOOK, { definiteness: 'all' }, { possessor: np(CAT), possessorRole: 'parts' }))).toBe(true);
+    expect(isPostModified(np(BOOK, {}, { possessor: np(CAT), possessorRole: 'owner' }))).toBe(false);
+  });
 });
 
 describe('keepsHeadDeterminer', () => {

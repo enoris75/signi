@@ -2,6 +2,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { negatedAntecedentVerbPhrase } from '../../functions/negatedAntecedentVerbPhrase.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeAgentGap } from '../../functions/relativeAgentGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
@@ -52,7 +53,13 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
     return `${withPoss} ${owned.filter(Boolean).join(' ')}`.trimEnd();
   }
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  // A plural head gapped as the object of the impersonal se is the passive se's patient, and the verb
+  // agrees with it: "os ratos que se comem" (A206). A verb that takes its object with a preposition
+  // relativises on it instead, and se stays impersonal: "os botões nos quais se clica".
+  const passiveSe = !subjectRelative && rel.headRole === 'directObject' && isGenericSubject(rel.subject!)
+    && !objectPreposition(verbPhrase.verb) && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
+  const agreeForms = subjectRelative ? np.head.forms
+    : passiveSe ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
   // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
   // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
   // keeps its "não" ("nenhum gato que não coma corre", A167). The relativizer precedes the verb, so a

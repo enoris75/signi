@@ -150,13 +150,25 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
           ? np.possessor
           : resolveNounPhrase(np.possessor, language, lookup))
       : undefined,
+    // What that possessor is to the head: its owner (the default), the whole the head is a part of
+    // ("a part of a keyboard"), or the parts the head is made up of ("a group of canvases", C26).
+    // Only English renders them differently from the owner; the flag rides through.
+    possessorRole: np.possessorRole,
     // An adjective-definition gloss ("of great size"): a bare dimension-noun + degree-adjective
     // phrase the engines wrap in the preposition its head noun's `dimensionRelation` selects. The
     // flag rides through; the head noun and its adjective resolve on the ordinary path above.
     dimensionGloss: np.dimensionGloss,
+    // A complement-definition gloss ("in all places", "to a higher place"): a place noun phrase the
+    // engines render as the complement it names. The complement type and its specifiers ride
+    // through; the phrase itself resolves on the ordinary path above.
+    complementGloss: np.complementGloss,
     // A manner-definition gloss ("at high speed", "in a good way"): a manner-noun phrase the engines
     // wrap in the adposition its head noun's `mannerRelation` selects, keeping its own determiner.
     // The flag rides through; the head noun and its adjective resolve on the ordinary path above.
     mannerGloss: np.mannerGloss,
+    // A headless relative-clause gloss ("that one has saved"): the engines say the relative alone.
+    // The flag rides through; the head resolves on the ordinary path above, because the clause
+    // still agrees with it (its gender, number and personhood) as the antecedent.
+    relativeGloss: np.relativeGloss,
   };
 }

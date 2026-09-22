@@ -1,6 +1,8 @@
 import type { ResolvedPhrase, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
+import { complementGlossSegs } from './complementGlossSegs.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
@@ -8,6 +10,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
+import { isRelativeGloss } from './isRelativeGloss.js';
 import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { isPotentialPassive } from './isPotentialPassive.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
@@ -15,6 +18,7 @@ import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
+import { relativeClauseSegs } from './relativeClauseSegs.js';
 
 /**
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
@@ -24,8 +28,14 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   // A verbless period marked as an adjective-definition gloss is a が-predicate ("大きさが大きい"),
   // not a bare noun-phrase title — render the dimension noun + が + its degree adjective.
   if (!phrase.verbPhrase && isDimensionGloss(phrase.subject)) return dimensionGlossSegs(firstConjunct(phrase.subject));
+  // A complement-definition gloss (すべての場所で, より高い場所へ) is the place or direction complement
+  // that defines an adverb, as a clause renders it.
+  if (!phrase.verbPhrase && isComplementGloss(phrase.subject)) return complementGlossSegs(phrase.subject);
   // A manner-definition gloss ("高い速さで") is the adverbial fragment defining an adverb.
   if (!phrase.verbPhrase && isMannerGloss(phrase.subject)) return mannerGlossSegs(phrase.subject);
+  // A relative-clause gloss (保存した) is the head's prenominal clause alone, in the plain form it
+  // takes before a head.
+  if (!phrase.verbPhrase && isRelativeGloss(phrase.subject)) return relativeClauseSegs(firstConjunct(phrase.subject));
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate. A
   // `no` group still closes its どの … も circumfix on ない, which no predicate is there to supply
   // ("どの保存済みのフレーズもない", "no saved phrases"), as the manner gloss does.

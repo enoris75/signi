@@ -34,6 +34,13 @@ export interface ResolvedNounPhrase {
    */
   possessor?: ResolvedNounPhrase | PronominalPossessor;
   /**
+   * What the genitive possessor is to this head (see NounPhrase.possessorRole): `'whole'` is the
+   * whole the head is a part of ("a part of a keyboard"), `'parts'` what the head is made up of ("a
+   * group of canvases"). English renders both as an of-phrase after a head that keeps its own
+   * determiner. Absent means the owner.
+   */
+  possessorRole?: 'owner' | 'whole' | 'parts';
+  /**
    * Whether this phrase is an **adjective-definition gloss** (see NounPhrase.dimensionGloss): a bare
    * dimension-noun + degree-adjective phrase the engines render as a prepositional fragment ("of
    * great size"), the adposition chosen by the head noun's `dimensionRelation`. Set on the verbless
@@ -41,12 +48,26 @@ export interface ResolvedNounPhrase {
    */
   dimensionGloss?: boolean;
   /**
+   * The complement this phrase **is**, when it is a complement-definition gloss (see
+   * NounPhrase.complementGloss): a place or direction noun phrase the engines render as that
+   * complement, with its specifiers, through the renderer a clause's complements take ("in all
+   * places", "to a higher place"). Set on the verbless subject; the phrase keeps its own determiner.
+   */
+  complementGloss?: { type: 'locative' | 'direction'; specifiers?: Specifier[] };
+  /**
    * Whether this phrase is a **manner-definition gloss** (see NounPhrase.mannerGloss): a manner-noun
    * phrase the engines render as the bare prepositional adverbial defining an adverb ("at high
    * speed", "in a good way"), the adposition chosen by the head noun's `mannerRelation`. Set on the
    * verbless subject; unlike `dimensionGloss` the phrase keeps its own determiner.
    */
   mannerGloss?: boolean;
+  /**
+   * Whether this phrase is a **headless relative-clause gloss** (see NounPhrase.relativeGloss): the
+   * engines render its `relative` alone ("that one has saved", "den man gespeichert hat", 保存した),
+   * with the head unsaid but still the clause's antecedent, so agreement reads it as in a headed
+   * relative. Set on the verbless subject; ignored without a relative.
+   */
+  relativeGloss?: boolean;
 }
 
 /**

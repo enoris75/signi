@@ -1,5 +1,5 @@
 import type { ConceptSeed } from './types.js';
-import type { Definiteness, PhrasePlan } from '@signi/shared';
+import type { Definiteness, NounPhrase, PhrasePlan } from '@signi/shared';
 
 // A manner-definition gloss the engine renders into every language: a *manner noun* phrase realised
 // as the bare prepositional adverbial that defines an adverb, the adposition chosen by the noun's
@@ -9,6 +9,21 @@ import type { Definiteness, PhrasePlan } from '@signi/shared';
 // mannerGloss render + Concept.mannerRelation).
 const mannerGloss = (noun: string, definiteness: Definiteness, ...adjectives: string[]): PhrasePlan => ({
   subject: { concept: noun, definiteness, adjectives, mannerGloss: true },
+});
+
+// A place or direction gloss the engine renders into every language: a noun phrase realised as the
+// locative or direction complement it names, by the same renderer a clause's complements take — so
+// complementGloss('locative', 'PLACE', 'all', { number: 'plural' }) is "in all places" / "in tutti i
+// luoghi" / すべての場所で exactly as "the cat eats in all places" says it after the verb, and a
+// direction is the plain goal, "to a higher place" / "zu einem höheren Ort" / もっと高い場所へ. Set as
+// an adverb's `definition` to localize its picker tooltip (see NounPhrase.complementGloss, C25).
+const complementGloss = (
+  type: 'locative' | 'direction',
+  noun: string,
+  definiteness: Definiteness,
+  extra: Omit<NounPhrase, 'concept' | 'definiteness'> = {},
+): PhrasePlan => ({
+  subject: { concept: noun, definiteness, ...extra, complementGloss: { type } },
 });
 
 // The frequency adverbs gloss TIME (measure → "at") with a quantifier determiner and no adjective:
@@ -77,9 +92,13 @@ export const adverbs: ConceptSeed[] = [
     // Five languages have a true adverb here. The Spanish and Portuguese word is a predicative
     // adjective agreeing with the subject ("las gatas comen juntas"), so both carry the agreeing
     // masculine singular in `predicative` alongside the plural the picker cites (A162).
+    //
+    // Glossed as the place it happens in, "in a group" — Japanese グループで is how 一緒に is said
+    // (localization C25).
     id: 'TOGETHER',
     role: 'adverb',
     description: 'with each other, in company',
+    definition: complementGloss('locative', 'GROUP', 'indefinite'),
     emoji: '🤝',
     forms: {
       en: { base: 'together' },
@@ -133,10 +152,12 @@ export const adverbs: ConceptSeed[] = [
   {
     // A manner adverb like REPEATEDLY, without a subtype: it follows the verb, and it is COLLAPSE's
     // differentia beside the ground it ends at, "to move to the ground suddenly" (localization B34).
-    // Spanish and Portuguese say it with the fixed phrase "de repente".
+    // Spanish and Portuguese say it with the fixed phrase "de repente". Glossed as WELL is, a `mode`
+    // manner gloss: "in an unexpected way" — what is sudden is unexpected, not fast (localization C25).
     id: 'SUDDENLY',
     role: 'adverb',
     description: 'quickly and without warning',
+    definition: mannerGloss('WAY', 'indefinite', 'UNEXPECTED'),
     emoji: '⚡',
     forms: {
       en: { base: 'suddenly' },
@@ -148,6 +169,25 @@ export const adverbs: ConceptSeed[] = [
       pt: { base: 'de repente' },
     },
   },
+  {
+    // Without error or approximation: SPECIFY's differentia, "to indicate exactly", the adverb that
+    // tells it from EXPRESS's "to indicate concepts" (localization C28). A manner adverb like
+    // SUDDENLY. French exactement, not précisément, which would echo SPECIFY's own préciser; German
+    // genau, the word "genau bestimmen" is said with; Japanese 正確に, the adverbial of 正確.
+    id: 'EXACTLY',
+    role: 'adverb',
+    description: 'without error or approximation',
+    emoji: '🎯',
+    forms: {
+      en: { base: 'exactly' },
+      it: { base: 'esattamente' },
+      fr: { base: 'exactement' },
+      de: { base: 'genau' },
+      es: { base: 'exactamente' },
+      ja: { base: '正確に', reading: 'せいかくに' },
+      pt: { base: 'exatamente' },
+    },
+  },
   // Which way a thing goes (B27: "move this period up"). A phrase in French, German and Portuguese,
   // which have no one-word adverb of direction: "vers le haut", "nach oben", "para cima".
   //
@@ -156,10 +196,15 @@ export const adverbs: ConceptSeed[] = [
   // right after the object and before the complements — "moves the book up in the house", "sposta il
   // libro su" — where a manner adverb trails the whole clause in English and leads the object in
   // Romance (A142, A156).
+  //
+  // UP and DOWN are glossed as the goal their motion reaches, compared: "to a higher place", where "a
+  // high place" would name a destination rather than a way (localization C25). French shares haut / bas
+  // with its own "vers le haut", the cognate-dimension case STRONG's "of great strength" set.
   {
     id: 'UP',
     role: 'adverb',
     description: 'towards a higher position',
+    definition: complementGloss('direction', 'PLACE', 'indefinite', { adjectives: ['HIGH'], adjectiveDegrees: ['more'] }),
     emoji: '⬆️',
     forms: {
       en: { base: 'up', subtype: 'direction' },
@@ -175,6 +220,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'DOWN',
     role: 'adverb',
     description: 'towards a lower position',
+    definition: complementGloss('direction', 'PLACE', 'indefinite', { adjectives: ['LOW'], adjectiveDegrees: ['more'] }),
     emoji: '⬇️',
     forms: {
       en: { base: 'down', subtype: 'direction' },
@@ -188,6 +234,9 @@ export const adverbs: ConceptSeed[] = [
   },
   // The other two ways a key moves the cursor, or a box (localization B44): "go left", "move the slot
   // right". Directions like UP and DOWN, and a phrase in every language but English.
+  //
+  // Both stay on the literal by design: every gloss the corpus can compose either says "left" and
+  // "right" again or is true of both alike ("to a side") (localization C25).
   {
     id: 'LEFT',
     role: 'adverb',
@@ -222,10 +271,12 @@ export const adverbs: ConceptSeed[] = [
     // The reverse way: what ⇧ does to a key that cycles a value ("Tense, backwards"), and the way one
     // walks backwards. A direction, so it follows the object as UP and DOWN do ("sposta il libro
     // all'indietro"). Japanese 逆方向に, "in the reverse direction", which says both; 逆順に would
-    // only say the order.
+    // only say the order. Glossed "in the opposite direction", the locative of the way a thing moves
+    // — not "to the back", which says "back" in English and "arrière" in French (localization C25).
     id: 'BACKWARDS',
     role: 'adverb',
     description: 'in the reverse direction or order',
+    definition: complementGloss('locative', 'DIRECTION_SPACE', 'definite', { adjectives: ['OPPOSITE'] }),
     emoji: '↩️',
     forms: {
       en: { base: 'backwards', subtype: 'direction' },
@@ -240,10 +291,12 @@ export const adverbs: ConceptSeed[] = [
   {
     // In every place: the keys that work wherever the cursor is, the help's first section (B41). An
     // adverb of place, which follows the object as a locative complement does ("mange la souris
-    // partout", "come el ratón en todas partes"), where a manner adverb would lead it.
+    // partout", "come el ratón en todas partes"), where a manner adverb would lead it. Glossed as
+    // exactly that locative, "in all places" (localization C25).
     id: 'EVERYWHERE',
     role: 'adverb',
     description: 'in every place',
+    definition: complementGloss('locative', 'PLACE', 'all', { number: 'plural' }),
     emoji: '🌍',
     forms: {
       en: { base: 'everywhere', subtype: 'place' },
@@ -295,6 +348,24 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // A short time ago: NEW is "that has been made recently" (localization C24). No subtype — it
+    // follows the verb and its object, and a compound tense keeps it after the participle ("has been
+    // made recently", "è stato fatto di recente"). Italian di recente, the everyday form.
+    id: 'RECENTLY',
+    role: 'adverb',
+    description: 'a short time ago',
+    emoji: '🕐',
+    forms: {
+      en: { base: 'recently' },
+      it: { base: 'di recente' },
+      fr: { base: 'récemment' },
+      de: { base: 'kürzlich' },
+      es: { base: 'recientemente' },
+      ja: { base: '最近', reading: 'さいきん' },
+      pt: { base: 'recentemente' },
+    },
+  },
+  {
     id: 'ALWAYS',
     role: 'adverb',
     description: 'at all times, on every occasion',
@@ -324,6 +395,25 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
       ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして' },
       pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
+    },
+  },
+  {
+    // Not any more: ADULT is "that no longer grows" (localization C24). A negative-polarity
+    // frequency adverb, as NEVER is, so each language builds its own negation around it: it
+    // "non … più", fr "ne … plus", ja もう〜ない, and es "ya no" / pt "já não" before the verb, where
+    // NEVER's nunca stands, with no second "no".
+    id: 'NO_LONGER',
+    role: 'adverb',
+    description: 'not any more; not now, as it was before',
+    emoji: '🔚',
+    forms: {
+      en: { base: 'no longer', subtype: 'frequency', polarity: 'negative' },
+      it: { base: 'più', subtype: 'frequency', polarity: 'negative' },
+      fr: { base: 'plus', subtype: 'frequency', polarity: 'negative' },
+      de: { base: 'nicht mehr', subtype: 'frequency', polarity: 'negative' },
+      es: { base: 'ya no', subtype: 'frequency', polarity: 'negative' },
+      ja: { base: 'もう', subtype: 'frequency', polarity: 'negative' },
+      pt: { base: 'já não', subtype: 'frequency', polarity: 'negative' },
     },
   },
 ];

@@ -82,7 +82,7 @@ count held: NAME_NOUN fell out on authoring and ICON, moved here from A23, took 
 3. **COMMAND, ORDER and INSTRUCTION are one problem, not three.** They differ by *who is addressed*
    — an order tells a person, an instruction tells nobody, a command tells a program — and the
    addressee of an imperative is not a phrase a definition can carry. They belong with
-   [C27](../C-needs-engine/C27-grammar-meta-nouns.md), whose concepts are all positions in a system.
+   [C27](../done/C27-grammar-meta-nouns.md), whose concepts are all positions in a system.
 4. **REGISTER wants `dimGloss` on FORMALITY**, but `dimGloss` glosses an *adjective* and REGISTER is
    a noun — the shape is right and the category is wrong. C27.
 5. **NAVIGATION is an action noun derived from a verb**, the same shape LIFE needs in

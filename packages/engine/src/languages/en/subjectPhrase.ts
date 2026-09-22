@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { hasPartitivePossessor } from './hasPartitivePossessor.js';
 import { nounMods } from './nounMods.js';
 import { nounPhrase } from './nounPhrase.js';
 import { npAdj } from './npAdj.js';
@@ -10,5 +11,5 @@ export function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np)); // noun — determiner from forms
+  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np), hasPartitivePossessor(np)); // noun — determiner from forms
 }

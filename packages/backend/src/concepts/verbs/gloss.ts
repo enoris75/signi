@@ -1,4 +1,6 @@
-import type { Complement, ComplementType, Definiteness, Degree, InfinitiveComplement, PhrasePlan } from '@signi/shared';
+import type {
+  Aspect, Complement, ComplementType, Definiteness, Degree, InfinitiveComplement, ModalRef, PhrasePlan, Tense, Voice,
+} from '@signi/shared';
 
 /**
  * The parts of a verb's gloss past its genus, for the glosses a bare object cannot carry alone: an
@@ -30,6 +32,17 @@ export interface GlossParts {
   modifier?: string;
   /** Negates the clause: HIDE is causing an object **not** to be visible. */
   negative?: boolean;
+  /**
+   * The verb's tense, aspect and voice, and the modals governing it (see VerbPhrase), each left to
+   * the engine's default when unset. A verb's citation has none of them to say, so the verb glosses
+   * leave them off; a clause said *of* something — the relative of a headless relative gloss (see
+   * `relativeGloss.ts`) — takes them: SAVED is the state saving leaves, "that one **has** saved"
+   * (resultative), and VISIBLE is "that one **can** see".
+   */
+  tense?: Tense;
+  aspect?: Aspect;
+  voice?: Voice;
+  modals?: ModalRef[];
   /** A predicate adjective for a copular genus: BE + ABLE, "to be able". Shorthand for `complements.predicative`. */
   predicate?: string;
   /** The predicate adjective's degree: BECOME + SMALL at `more`, "to become smaller". */
@@ -62,14 +75,24 @@ const CAUSATIVE_VERB = 'CAUSE_VERB';
 
 // The clause a gloss renders: its verb (with any adverb), its object under the determiner the gloss
 // asks for, its complements — a predicate adjective among them — and any infinitive it governs.
-// Shared by the citation `infinitiveGloss` builds and by the clause a causative gloss puts under it,
-// which are the same clause in two positions.
-function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
+// Shared by the citation `infinitiveGloss` builds, by the clause a causative gloss puts under it,
+// which are the same clause in two positions, and by the relative a headless relative gloss says
+// (see `relativeGloss.ts`), which is the third. Only that one has a tense, aspect, voice or modal to
+// give the verb; the others leave them off, and the verb phrase is what it always was.
+export function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
   const predicative: Partial<Record<ComplementType, Complement>> = p.predicate
     ? { predicative: { phrase: { concept: p.predicate, ...(p.predicateDegree ? { headDegree: p.predicateDegree } : {}) } } }
     : {};
   return {
-    verbPhrase: { verb, ...(p.modifier ? { modifier: p.modifier } : {}), ...(p.negative ? { negative: true } : {}) },
+    verbPhrase: {
+      verb,
+      ...(p.modifier ? { modifier: p.modifier } : {}),
+      ...(p.negative ? { negative: true } : {}),
+      ...(p.tense ? { tense: p.tense } : {}),
+      ...(p.aspect ? { aspect: p.aspect } : {}),
+      ...(p.voice ? { voice: p.voice } : {}),
+      ...(p.modals?.length ? { modals: p.modals } : {}),
+    },
     ...(p.object
       ? {
           directObject: {

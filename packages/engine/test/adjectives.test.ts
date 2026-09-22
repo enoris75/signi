@@ -751,7 +751,7 @@ describe('known bugs: degree (extended)', () => {
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['ABLE', 'able'], ['ACTIVE', 'active'], ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
-  ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
+  ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'], ['CLOSED', 'closed'],
   ['COLD', 'cold'], ['COLD_CLIMATE', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
   ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
@@ -759,10 +759,11 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['FIRST', 'first'], ['FUTURE', 'future'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HOT_CLIMATE', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
+  ['KNOWN', 'known'],
   ['LAZY', 'lazy'], ['LINKED', 'linked'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MANIFOLD', 'manifold'], ['MISSING', 'missing'], ['MULTAL', 'multal'],
   ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['NEXT', 'next'],
   ['NUMBERED', 'numbered'],
-  ['OBLIGED', 'obliged'], ['OLD', 'old'],
+  ['OBLIGED', 'obliged'], ['OLD', 'old'], ['OPEN_ADJECTIVE', 'open'],
   ['OTHER', 'other'], ['PARTITIVE', 'partitive'], ['PAST', 'past'], ['PAUCAL', 'paucal'], ['PRESENT', 'present'], ['PINNED', 'pinned'], ['PLURAL', 'plural'],
   ['POSITIVE', 'positive'], ['PREVIOUS', 'previous'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],
   ['QUICK', 'quick'], ['RECENT', 'recent'], ['REMOVED', 'removed'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],

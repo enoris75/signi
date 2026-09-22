@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { causativeGloss, infinitiveGloss } from './gloss.js';
+import { causativeGloss, glossClause, infinitiveGloss } from './gloss.js';
 
 describe('infinitiveGloss', () => {
   test('a bare genus verb is a subject-less infinitive with no object', () => {
@@ -138,5 +138,17 @@ describe('causativeGloss', () => {
       infinitiveComplement: { verbPhrase: { verb: 'ACT', modifier: 'TOGETHER' }, control: 'object' },
       infinitive: true,
     });
+  });
+});
+
+describe('glossClause', () => {
+  // A relative gloss's clause is said of something, so it has a tense, an aspect, a voice and modals
+  // to give its verb; a verb's citation has none, and its verb phrase stays exactly what it was.
+  test('tense, aspect, voice and modals reach the verb phrase when given, and only then', () => {
+    expect(glossClause('SEE', { tense: 'past', aspect: 'resultative', voice: 'passive', modals: ['CAN'] }).verbPhrase).toEqual({
+      verb: 'SEE', tense: 'past', aspect: 'resultative', voice: 'passive', modals: ['CAN'],
+    });
+    expect(glossClause('SEE', { modals: [] }).verbPhrase).toEqual({ verb: 'SEE' });
+    expect(glossClause('SEE', { object: 'OBJECT_THING', negative: true }).verbPhrase).toEqual({ verb: 'SEE', negative: true });
   });
 });

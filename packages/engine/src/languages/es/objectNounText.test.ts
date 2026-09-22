@@ -15,6 +15,12 @@ describe('objectNounText', () => {
     expect(objectNounText(np(NINO, {}, { possessor: his }))).toBe('a su niño');
   });
 
+  // FOLLOW's seguir marks every determined object with a (`object_a`, localization C24).
+  test('a verb that marks every object gives a non-human the a too', () => {
+    expect(objectNounText(np(PERRO), { object_a: '1' })).toBe('al perro');
+    expect(objectNounText(np(CASA, { definiteness: 'indefinite' }), { object_a: '1' })).toBe('a una casa');
+  });
+
   test('a bare human and a non-human keep the plain noun phrase', () => {
     expect(objectNounText(np(NINO, { number: 'plural', definiteness: 'bare' }))).toBe('niños');
     expect(objectNounText(np(PERRO))).toBe('el perro');

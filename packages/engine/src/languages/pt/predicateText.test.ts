@@ -185,6 +185,13 @@ describe('predicateText', () => {
       expect(predicateText(SE, vp(COMER), mouse)).toBe('se come o rato');
       expect(predicateText(SE, vp(COMER, { negative: true }))).toBe('não se come');
     });
+
+    // A206: before a plural noun object the impersonal se is the passive se, and the verb agrees with
+    // its patient; a clitic object keeps it impersonal.
+    test('the passive "se" agrees with a plural noun object', () => {
+      expect(predicateText(SE, vp(COMER), el(np(RATO, { number: 'plural' })))).toBe('se comem os ratos');
+      expect(predicateText(SE, vp(COMER, { tense: 'past' }), el(np(RATO, { number: 'plural' })))).toBe('se comeram os ratos');
+    });
   });
 
   describe('ser and estar', () => {

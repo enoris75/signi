@@ -59,17 +59,25 @@ export function predicateText(
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
   // or imperfect-subjunctive (protasis, "comesse") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
-  const pn = moodPN(subjectForms);
+  // With a plural noun object the impersonal se is the passive se, and the finite verb agrees with its
+  // patient, as Italian's si and Spanish's se do (A73): "um lugar onde se fazem frases", "os ratos que
+  // se comem" (A206). A clitic object keeps se impersonal, and so does the object of a verb that takes
+  // it with a preposition ("se clica nos botões", A139). Only the agreement: the main clause keeps the
+  // proclitic it already had ("se comem os ratos"), where the standard writes *comem-se*.
+  const passiveSe = subjectForms['generic'] === '1' && !!directObject && !objectPreposition(verb)
+    && !isPronounElement(directObject) && directObject.agreement['number'] === 'plural';
+  const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
+  const pn = moodPN(agreeForms);
   // A state verb's past is the imperfect ("queria", "tinha", "estava"), not the perfective (A130).
   // A pronominal verb's stored forms carry a fixed clitic ("me tornarei", "se tornaram"), so both are
   // derived from the plain verb and take the subject's clitic in front: "se tornaria", "me tornasse" (A137).
   const moodFinite = (m: ConceptForms): string | undefined => {
     const plain = nonReflexiveVerb(m);
     const form = moodForm('pt', plain, pn, mood) ?? statePastForm('pt', plain, pn, tense, mood);
-    const clitic = reflexiveClitic(m.forms, subjectForms);
+    const clitic = reflexiveClitic(m.forms, agreeForms);
     return form && clitic ? `${clitic} ${form}` : form;
   };
-  const finite = (m: ConceptForms) => moodFinite(m) ?? conjugate(m.forms, subjectForms, tense);
+  const finite = (m: ConceptForms) => moodFinite(m) ?? conjugate(m.forms, agreeForms, tense);
   // A47: Portuguese splits the copula. `estar` covers two BE frames; `ser` everything else.
   //  · Location — "o gato está na casa", never "*é na casa". A place is `estar` unconditionally,
   //    whatever the spatial relation, so a locative alone selects it; the past inherits the choice
@@ -139,11 +147,11 @@ export function predicateText(
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
         ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) })),
-        verbGroupInfinitive(copulaVerb.forms, subjectForms, aspect),
+        verbGroupInfinitive(copulaVerb.forms, agreeForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
-      : aspectVerb(copulaVerb.forms, subjectForms, tense, aspect, mood);
+      : aspectVerb(copulaVerb.forms, agreeForms, tense, aspect, mood);
   // A frequency adverb on the prospective belongs right after the finite "estar", not after the whole
   // periphrasis, where it would scope over the infinitive alone — "está prestes a comer SEMPRE" reads as
   // *is about to always eat* (A147). A fronted "nunca" is already preverbal, and a manner adverb does

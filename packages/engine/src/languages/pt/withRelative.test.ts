@@ -66,6 +66,8 @@ describe('withRelative', () => {
     expect(withRelative('um objeto', np(OBJETO, { definiteness: 'indefinite' }, { relative: oneEats }))).toBe('um objeto que se come');
     const oneDoesNotEat = { ...oneEats, verbPhrase: vp(COMER, { negative: true }) };
     expect(withRelative('um objeto', np(OBJETO, { definiteness: 'indefinite' }, { relative: oneDoesNotEat }))).toBe('um objeto que não se come');
+    // A206: a plural head is the passive se's patient, and the verb agrees with it.
+    expect(withRelative('os ratos', np(RATO, { number: 'plural' }, { relative: oneEats }))).toBe('os ratos que se comem');
   });
 
   test('the relative follows the possessor', () => {

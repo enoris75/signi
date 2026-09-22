@@ -105,7 +105,7 @@ every cell below matched.
 **The reading judged: Spanish and Portuguese NEW.** They put it after the noun (*oración nueva*,
 *frase nova*), which reads as "brand-new". "One more", which is what the row means, is the prenominal
 *nueva oración* / *nova oração*. It reads wrong, so it is filed as an engine bug —
-**[A204](../../bugs/A-must-fix/A204-spanish-portuguese-new-after-the-noun.md)** — and this plan is
+**[A204](../../bugs/fixed/A204-spanish-portuguese-new-after-the-noun.md)** — and this plan is
 unchanged, as the task said. See Done, 3.
 
 The reused entries, as they render today:
@@ -173,7 +173,7 @@ What landed differently from the plan, and what it found:
    uniform (`slot.${t}`), so both came with the other six; `slot.predicative` and `slot.manner` were
    already in the catalogue.
 3. **The es/pt reading was judged wrong and filed as
-   [A204](../../bugs/A-must-fix/A204-spanish-portuguese-new-after-the-noun.md).** *oración nueva* /
+   [A204](../../bugs/fixed/A204-spanish-portuguese-new-after-the-noun.md).** *oración nueva* /
    *frase nova* is "newly made"; the row means "one more", which Spanish and Portuguese write
    prenominally. Adding `NEW` to the two `PRENOMINAL` sets was trialled and produces the wanted
    output everywhere probed (under an article, in the plural, under a preposition, beside a
