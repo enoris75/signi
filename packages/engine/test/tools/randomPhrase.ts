@@ -11,7 +11,8 @@
  * degrees, a possessor, a relative clause — or a pronoun), the verb (tense, aspect, negation, an
  * adverb, a modal), the direct object where the verb's transitivity licenses one, one or two of the
  * complements that verb declares, and now and then a clause-level mood (a question, a command, a
- * hypothetical, a coordination).
+ * hypothetical, a coordination). Any noun slot but a possessor may hold a group of two or three
+ * coordinated noun phrases instead of one ("the cat and a dog", "in the house or the market").
  *
  * What it does NOT do: make sense. A random plan is semantic nonsense as often as not ("few legends
  * bit many books in few butchers"), which is fine — the grammar of a nonsense sentence is still
@@ -33,6 +34,7 @@ import type {
   CoordConjunction,
   Definiteness,
   Degree,
+  NounElement,
   NounPhrase,
   PathSpecifier,
   PhrasePlan,
@@ -65,6 +67,8 @@ const TENSES: Tense[] = ['present', 'past', 'future'];
 const MARKED_ASPECTS: Aspect[] = ['progressive', 'prospective', 'resultative'];
 const PATHS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of'];
 const CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then'];
+// Only these two join noun phrases (NOUN_COORD_CONJUNCTIONS); the others relate clauses.
+const NOUN_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
 const MODALS = ['MUST', 'CAN', 'WILL'];
 
 const byId = new Map(concepts.map((c) => [c.id, c]));
@@ -128,6 +132,17 @@ function nounPhrase(r: Random, depth: number, opts: { pronoun?: boolean; relativ
   return np;
 }
 
+// What fills a noun slot: one phrase, or now and then a group of two or three joined by "and" or
+// "or", as every noun block on the canvas can be coordinated. Each conjunct is built on its own, so
+// they differ in determiner, adjectives, possessor and relative clause, as the builder lets them. A
+// possessor is never a group (see `NounElement`), so it keeps calling `nounPhrase`.
+function nounElement(r: Random, depth: number, opts: { pronoun?: boolean; relative?: boolean } = {}): NounElement {
+  const head = nounPhrase(r, depth, opts);
+  if (!r.chance(0.2)) return head;
+  const others = Array.from({ length: r.chance(0.25) ? 2 : 1 }, () => nounPhrase(r, depth, opts));
+  return { conjuncts: [head, ...others], conjunction: r.pick(NOUN_CONJUNCTIONS) };
+}
+
 function relativeClause(r: Random, depth: number): RelativeClause {
   // A copular verb needs a subject complement and a ditransitive a recipient; keep the embedded
   // clause to the verbs that read without one.
@@ -137,9 +152,9 @@ function relativeClause(r: Random, depth: number): RelativeClause {
     if (r.chance(0.4)) {
       // An object-relative: the head fills the object slot, so the clause carries its own subject.
       rc.headRole = 'directObject';
-      rc.subject = nounPhrase(r, depth + 1, { pronoun: true });
+      rc.subject = nounElement(r, depth + 1, { pronoun: true });
     } else {
-      rc.directObject = nounPhrase(r, depth + 1);
+      rc.directObject = nounElement(r, depth + 1);
     }
   }
   return rc;
@@ -163,10 +178,10 @@ function complement(r: Random, type: ComplementType): Complement {
       if (r.chance(0.3)) head.headDegree = r.pick(MARKED_DEGREES);
       return { phrase: head };
     }
-    return { phrase: nounPhrase(r, 1) };
+    return { phrase: nounElement(r, 1) };
   }
   // Only the cause complement accepts a pronoun ("because of him").
-  const c: Complement = { phrase: nounPhrase(r, 1, { pronoun: type === 'cause' }) };
+  const c: Complement = { phrase: nounElement(r, 1, { pronoun: type === 'cause' }) };
   if ((type === 'route' || type === 'locative') && r.chance(0.6)) c.specifiers = [{ kind: 'path', value: r.pick(PATHS) }];
   if (type === 'cause' && r.chance(0.6)) c.specifiers = [{ kind: 'sentiment', value: r.pick(['neutral', 'negative', 'positive'] as const) }];
   return c;
@@ -176,10 +191,10 @@ function plan(r: Random, extras = true): PhrasePlan {
   const verb = r.pick(verbs);
   const licensed = (verb.complements ?? []) as ComplementType[];
   const p: PhrasePlan = {
-    subject: nounPhrase(r, 0, { pronoun: true, relative: true }),
+    subject: nounElement(r, 0, { pronoun: true, relative: true }),
     verbPhrase: verbPhrase(r, verb),
   };
-  if (verb.transitivity !== 'intransitive') p.directObject = nounPhrase(r, 0, { pronoun: r.chance(0.3), relative: true });
+  if (verb.transitivity !== 'intransitive') p.directObject = nounElement(r, 0, { pronoun: r.chance(0.3), relative: true });
   // A ditransitive needs its recipient, and a copular verb needs the complement it exists for.
   const required: ComplementType[] = verb.transitivity === 'ditransitive' ? ['terminus']
     : licensed.includes('predicative') && (verb.id !== 'BE' || r.chance(0.7)) ? ['predicative']
