@@ -829,10 +829,10 @@ describe('known bugs: German "das heißt" without a comma after it', () => {
   });
 });
 
-// A210. An "or" group agrees with the conjunct nearest the verb, which `groupAgreement` takes to be
+// A210. An "or" group agrees with the conjunct nearest the verb, which `groupAgreement` took to be
 // the last. That holds while the subject comes first. English inverts in a question, German in a
 // question, in the main clause after a "wenn" clause and after "also" or "dann"; there the verb stands
-// next to the FIRST conjunct, and agreeing with the last gives "does the cats or the dog run?",
+// next to the FIRST conjunct, and agreeing with the last gave "does the cats or the dog run?",
 // "läuft die Kater oder der Hund?", "does I or the cat run?". Found by the random phrase "if the old
 // light did not describe me or that big man …, those children, … or no new equally adult house would
 // compact the small file …" (seed 583438): "würde jene Kinder, …".
@@ -861,7 +861,7 @@ describe('known bugs: an "or" group after its verb agrees with the last conjunct
     },
   };
 
-  test.fails('the verb agrees with the first conjunct when it comes first', () => {
+  test('the verb agrees with the first conjunct when it comes first', () => {
     expect(ask(catsOrDog)).toMatchObject({ en: 'do the cats or the dog run?', de: 'laufen die Kater oder der Hund?' });
     expect(ask(or(np('DOG'), np('CAT', { number: 'plural' })))).toMatchObject({ en: 'does the dog or the cats run?', de: 'läuft der Hund oder die Kater?' });
     expect(ask(catsOrDog, 'BE', { complements: { predicative: { phrase: np('TIRED') } } }))
@@ -903,6 +903,38 @@ describe('known bugs: an "or" group after its verb agrees with the last conjunct
       .toMatchObject({ en: 'do the cats and the dog run?', de: 'laufen die Kater und der Hund?' });
     expect(say(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: catsOrDog, verbPhrase: { verb: 'SEE' } } }), 'RUN'), 'de'))
       .toBe('die Maus, die die Kater oder der Hund sieht, läuft.');
+  });
+
+  test('three conjuncts, the past, the future, a modal, the passive and a coordinated question follow', () => {
+    expect(ask(or(np('CAT', { number: 'plural' }), np('DOG'), np('MOUSE'))))
+      .toMatchObject({ en: 'do the cats, the dog or the mouse run?', de: 'laufen die Kater, der Hund oder die Maus?' });
+    expect(ask(or(np('DOG'), np('MOUSE'), np('CAT', { number: 'plural' }))))
+      .toMatchObject({ en: 'does the dog, the mouse or the cats run?', de: 'läuft der Hund, die Maus oder die Kater?' });
+    const tiredYesterday = { verbPhrase: { tense: 'past' as const }, complements: { predicative: { phrase: np('TIRED') } } };
+    expect(ask(catsOrDog, 'BE', tiredYesterday)).toMatchObject({ en: 'were the cats or the dog tired?', de: 'waren die Kater oder der Hund müde?' });
+    expect(ask(or(np('DOG'), np('CAT', { number: 'plural' })), 'BE', tiredYesterday))
+      .toMatchObject({ en: 'was the dog or the cats tired?', de: 'war der Hund oder die Kater müde?' });
+    expect(ask(catsOrDog, 'RUN', { verbPhrase: { tense: 'future' } }))
+      .toMatchObject({ en: 'will the cats or the dog run?', de: 'werden die Kater oder der Hund laufen?' });
+    expect(ask(catsOrDog, 'RUN', { verbPhrase: { modals: ['MUST'] } }))
+      .toMatchObject({ en: 'must the cats or the dog run?', de: 'müssen die Kater oder der Hund laufen?' });
+    expect(ask(or(np('SECOND_PERSON'), np('CAT')))).toMatchObject({ en: 'do you or the cat run?', de: 'läufst du oder der Kater?' });
+    // A passive promotes the "or" group to the subject, and the question agrees with its first conjunct.
+    expect(sayAll({ ...clause(np('MAN'), 'SEE', { directObject: catsOrDog, verbPhrase: { voice: 'passive' } }), interrogative: true }))
+      .toMatchObject({ en: 'are the cats or the dog seen by the man?', de: 'werden die Kater oder der Hund vom Mann gesehen?' });
+    // A clause coordinated with a question is a question too.
+    expect(sayAll({ ...clause(np('MAN'), 'JUMP'), interrogative: true, coordination: { conjunction: 'and', clause: clause(catsOrDog, 'RUN') } }))
+      .toMatchObject({ en: 'does the man jump, and do the cats or the dog run?', de: 'springt der Mann, und laufen die Kater oder der Hund?' });
+  });
+
+  // A211's animal flag is a fact about the whole group, not about its nearest conjunct, so it
+  // survives the inverted agreement.
+  test('an inverted "or" group of animals still eats with "fressen", and one with a person with "essen"', () => {
+    expect(ask(catsOrDog, 'EAT').de).toBe('fressen die Kater oder der Hund?');
+    expect(ask(or(np('CAT'), np('DOG', { number: 'plural' })), 'EAT').de).toBe('frisst der Kater oder die Hunde?');
+    expect(say({ ...clause(catsOrDog, 'EAT'), condition: clause(np('MAN'), 'JUMP') }, 'de'))
+      .toBe('wenn der Mann springen würde, würden die Kater oder der Hund fressen.');
+    expect(ask(or(np('MAN', { number: 'plural' }), np('DOG')), 'EAT').de).toBe('essen die Männer oder der Hund?');
   });
 });
 

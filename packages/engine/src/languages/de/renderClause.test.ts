@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import {
-  adj, BEWEGEN, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS, HINZUFUEGEN,
+  adj, BEWEGEN, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, group, GROESSE, GROSS, HINZUFUEGEN,
   ER, GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
   SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
@@ -294,6 +294,15 @@ describe('renderClause', () => {
     test('verb-final overrides inverted', () => {
       const phrase = clause(np(KATER), vp(ESSEN, { modals: [modal(KOENNEN)] }));
       expect(renderClause(phrase, true, true)).toBe('der Kater essen kann');
+    });
+
+    // A210: a verb ahead of its subject agrees with an "or" group's first conjunct — the element's
+    // `invertedAgreement` — while V2 and verb-final order keep the group's own agreement.
+    test('inverted order reads the inverted agreement', () => {
+      const katerOrKatze = { ...group('or', np(KATER, { number: 'plural' }), np(KATZE)), invertedAgreement: { number: 'plural', gender: 'masc' } };
+      expect(renderClause(clause(katerOrKatze, vp(ESSEN)), true)).toBe('essen die Kater oder die Katze');
+      expect(renderClause(clause(katerOrKatze, vp(ESSEN)))).toBe('die Kater oder die Katze isst');
+      expect(renderClause(clause(katerOrKatze, vp(ESSEN, { mood: 'subjunctive' })), true, true)).toBe('die Kater oder die Katze essen würde');
     });
 
     test('both flags are inert on verbless and imperative clauses', () => {

@@ -28,7 +28,7 @@ Every **Want** was rendered by a trial fix applied to a throwaway copy of HEAD, 
 non-animal in it keeps *essen*, in either order (`der Mann und der Hund essen.`, `der Hund und der
 Mann essen.`, `der Kater und der Engel essen.`). The other six languages have one verb for both.
 
-Found while probing the random phrase of [A210](../A-must-fix/A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md)
+Found while probing the random phrase of [A210](A210-or-group-after-its-verb-agrees-with-the-last-conjunct.md)
 (seed 583438) for its inverted `or`: `wenn der Mann …, würde die Kater oder der Hund essen`.
 
 ## Shape of the fix

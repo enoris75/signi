@@ -87,3 +87,36 @@ Either way, `groupAgreement`'s comment ("nearest the verb, i.e. the last") needs
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: an "or" group after its verb agrees with the last conjunct* (1 `test.fails`, plus a regression test for the subject-first clauses, `und`, the verb-final clauses, an `and` group and the Romance questions) |
+
+## Resolved
+
+**2026-09-22.** As a second agreement field, computed beside `agreement`, rather than a helper the
+engines call, so the one function that knows the rules still applies all of them:
+
+- [`groupAgreement`](../../../packages/engine/src/translator/functions/groupAgreement.ts) takes a
+  `verbFirst` flag that makes the conjunct nearest the verb the first instead of the last. Everything
+  else it decides is a fact about the whole group and does not move: `and` resolves as before,
+  French's mixed persons resolve as under `and`, a negative conjunct marks the group's
+  `definiteness`, and [A211](A211-german-animal-group-eats-with-essen.md)'s `animal` needs every
+  conjunct. Its comment no longer says "nearest the verb, i.e. the last".
+- [`resolveNounElement`](../../../packages/engine/src/translator/functions/resolveNounElement.ts)
+  resolves a group's `invertedAgreement` with it, beside `agreement`; a single phrase has none. The
+  field is declared on `ResolvedNounElement` in [`types.ts`](../../../packages/engine/src/types.ts).
+- English reads it in a question
+  ([`en/renderClause.ts`](../../../packages/engine/src/languages/en/renderClause.ts)), German for
+  its verb group's person and number when `inverted && !verbFinal`
+  ([`de/renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts)). Either
+  falls back to `agreement` when the element has none. `germanEngine` already sets `inverted` for
+  the question, the clause after a condition and the clause after an inverting coordinator, so
+  nothing changed there.
+
+The verb's sense is still chosen from `agreement`, so an inverted `or` group of animals eats with
+*fressen* (`frisst der Kater oder die Hunde?`) and one with a person with *essen*.
+
+**The decisions were left where the file leaves them.** The German reflexive follows the verb's
+person, as in the trial: `bewegst du oder der Kater dich?`, `bewegt der Kater oder du sich?`. Not
+pinned. French keeps the subject first and is unchanged. No passing test moved.
+
+| | |
+|---|---|
+| **Tests** | `coordination.test.ts` → *known bugs: an "or" group after its verb agrees with the last conjunct*, the `test.fails` now passing, plus two added cases: three conjuncts in either order, the past copula, the future, a modal, the 2nd person, the passive and a clause coordinated with a question; and an inverted `or` group of animals eating with *fressen* (in a question and after a `wenn` clause) beside one with a person eating with *essen*. `groupAgreement.test.ts` → the two *with the verb ahead of the group* cases; `resolveNounElement.test.ts` → *a group also resolves the agreement a verb ahead of it reads*; `en/renderClause.test.ts` → *a question reads the inverted agreement*; `de/renderClause.test.ts` → *inverted order reads the inverted agreement* |

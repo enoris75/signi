@@ -10,9 +10,11 @@ import { AGREEMENT_KEYS, OR_RESOLVES_MIXED_PERSONS } from '../translator.consts.
  *    the lowest person of them (1 ≺ 2 ≺ 3: "you and I **are**" is 1st plural), and, in the
  *    languages that resolve gender, is feminine only if *every* conjunct is — one masculine
  *    conjunct masculinises the whole ("il gatto e la volpe sono stanch**i**").
- *  · **or** — the group agrees with the conjunct *nearest* the verb, i.e. the last ("Peter or the
- *    boys **speak**", "o Pietro o i ragazzi parl**ano**"): the disjunction asserts one of them,
- *    not both, so there is no group to resolve. French is the exception when the conjuncts differ
+ *  · **or** — the group agrees with the conjunct *nearest* the verb ("Peter or the boys
+ *    **speak**", "o Pietro o i ragazzi parl**ano**"): the disjunction asserts one of them, not
+ *    both, so there is no group to resolve. That is the last conjunct while the subject comes
+ *    first, and the first once the verb leads it (`verbFirst`, A210): "**do** the cats or the dog
+ *    run?", "**laufen** die Kater oder der Hund?". French is the exception when the conjuncts differ
  *    in person (`OR_RESOLVES_MIXED_PERSONS`): the group resolves as under **and**.
  *
  * A single conjunct resolves to its own head's forms untouched, which is exactly what the engines
@@ -22,15 +24,16 @@ export function groupAgreement(
   conjuncts: ResolvedNounPhrase[],
   conjunction: CoordConjunction,
   language: string,
+  verbFirst = false,
 ): Record<string, string> {
-  const last = conjuncts[conjuncts.length - 1].head.forms;
+  const nearest = conjuncts[verbFirst ? 0 : conjuncts.length - 1].head.forms;
   const persons = conjuncts.map((c) => c.head.forms['person'] ?? '3');
   const resolves = conjunction === 'and'
     || (conjunction === 'or' && OR_RESOLVES_MIXED_PERSONS.has(language) && new Set(persons).size > 1);
   const features: Record<string, string> =
     // Disjunction: the nearest conjunct is the one the verb agrees with — take its features whole.
     !resolves
-      ? Object.fromEntries(AGREEMENT_KEYS.filter((k) => last[k] !== undefined).map((k) => [k, last[k]]))
+      ? Object.fromEntries(AGREEMENT_KEYS.filter((k) => nearest[k] !== undefined).map((k) => [k, nearest[k]]))
       : (() => {
           const person = ['1', '2', '3'].find((p) => persons.includes(p)) ?? '3';
           const feminine = conjuncts.every((c) => c.head.forms['gender'] === 'fem');

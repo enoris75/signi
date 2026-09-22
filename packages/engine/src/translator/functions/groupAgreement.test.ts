@@ -39,6 +39,19 @@ describe('groupAgreement', () => {
     test('in French, a group of one person keeps the nearest conjunct', () => {
       expect(groupAgreement([np(PIETRO), np(VOLPE)], 'or', 'fr')).toEqual({ number: 'singular', gender: 'fem' });
     });
+
+    test('with the verb ahead of the group, the nearest conjunct is the first', () => {
+      expect(groupAgreement([np(IO), np(RAGAZZI)], 'or', 'de', true)).toEqual({ person: '1', number: 'singular', gender: 'masc' });
+      expect(groupAgreement([np(RAGAZZI), np(TU)], 'or', 'de', true)).toEqual({ number: 'plural', gender: 'masc' });
+      // The group's own facts stay the group's: a negative conjunct anywhere, an animal only if every one is.
+      expect(groupAgreement([np(RAGAZZI), np(VOLPE, { definiteness: 'no' })], 'or', 'de', true)).toEqual({ number: 'plural', gender: 'masc', definiteness: 'no' });
+      expect(groupAgreement([np(RAGAZZI, { animal: '1' }), np(VOLPE, { animal: '1' })], 'or', 'de', true)).toMatchObject({ animal: '1' });
+    });
+
+    test('with the verb ahead of the group, "and" and the French mixed persons resolve as before', () => {
+      expect(groupAgreement([np(PIETRO), np(TU)], 'and', 'en', true)).toEqual({ person: '2', number: 'plural', gender: 'masc' });
+      expect(groupAgreement([np(TU), np(IO)], 'or', 'fr', true)).toEqual({ person: '1', number: 'plural', gender: 'masc' });
+    });
   });
 
   test('any no-determined conjunct marks the whole group negative, under either conjunction', () => {

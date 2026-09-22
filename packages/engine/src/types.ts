@@ -92,6 +92,13 @@ export interface ResolvedNounElement {
    * that conjunct's own head forms, so the two coincide and nothing changes.
    */
   agreement: Record<string, string>;
+  /**
+   * The agreement a verb standing *ahead* of the group reads — an English question, a German
+   * inverted clause — where the conjunct nearest the verb is the first: "**do** the cats or the dog
+   * run?" (A210, see `groupAgreement`). It differs from `agreement` only for an "or" group, and is
+   * absent for a single conjunct, where an engine reads `agreement`.
+   */
+  invertedAgreement?: Record<string, string>;
 }
 
 /**

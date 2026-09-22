@@ -38,7 +38,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // A `no` subject is the clause's negator and takes the other negatives with it (A160). Only the
   // matrix clause's own subject counts: `relativeText` passes a subject relative the head noun's
   // forms for agreement, but a `no` head negates THIS clause, not the relative one.
-  const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+  // A question puts the verb ahead of the subject, so an "or" group agrees with its first conjunct,
+  // the one nearest the verb (A210): "do the cats or the dog run?".
+  const agreement = phrase.verbPhrase.interrogative ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
+  const parts = predicateParts(agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
     subject.agreement['definiteness'] === 'no', phrase.agent);
   // A question puts the finite auxiliary before the subject: "is the server active?".
   const clause = (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])

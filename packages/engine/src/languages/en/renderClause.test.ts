@@ -44,6 +44,14 @@ describe('renderClause', () => {
       expect(renderClause(clause(group('or', np(DOG, { number: 'plural' }), np(CAT)), vp(RUN)))).toBe('the dogs or the cat runs');
     });
 
+    // A210: a question puts the verb ahead of the subject, where an "or" group agrees with its first
+    // conjunct — the element's `invertedAgreement`, which the translator resolves beside `agreement`.
+    test('a question reads the inverted agreement, a statement the group agreement', () => {
+      const dogsOrCat = { ...group('or', np(DOG, { number: 'plural' }), np(CAT)), invertedAgreement: { number: 'plural' } };
+      expect(renderClause(clause(dogsOrCat, vp(RUN, { interrogative: true })))).toBe('do the dogs or the cat run');
+      expect(renderClause(clause(dogsOrCat, vp(RUN)))).toBe('the dogs or the cat runs');
+    });
+
     test('tense, aspect, negation and modals follow the subject', () => {
       expect(renderClause(clause(np(CAT), vp(EAT, { tense: 'past', negative: true }), { directObject: mouse }))).toBe('the cat did not eat the mouse');
       expect(renderClause(clause(np(CAT), vp(EAT, { aspect: 'resultative' })))).toBe('the cat has eaten');

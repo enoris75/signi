@@ -210,8 +210,11 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // follows it, and the non-finite tail (infinitive / Partizip / the modal stack) closes the
     // clause. Aspect is rendered by verbGroup/modalVerbGroup, which a relative clause reaches
     // through the same helpers (see subordinateClause).
-    const person = subject.agreement['person'] ?? '3';
-    const number = subject.agreement['number'] ?? 'singular';
+    // A verb ahead of its subject agrees with an "or" group's first conjunct, the one nearest it (A210):
+    // "laufen die Kater oder der Hund?".
+    const agreement = inverted && !verbFinal ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
+    const person = agreement['person'] ?? '3';
+    const number = agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
     const built = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, plain, pn, tense, aspect, mood)

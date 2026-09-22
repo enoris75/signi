@@ -34,4 +34,12 @@ describe('resolveNounElement', () => {
     expect(resolveNounElement(youOrMe, 'fr', LOOKUP).agreement['number']).toBe('plural');
     expect(resolveNounElement(youOrMe, 'it', LOOKUP).agreement['number']).toBe('singular');
   });
+
+  test('a group also resolves the agreement a verb ahead of it reads; a single phrase has none', () => {
+    const catsOrDog: NounElement = { conjuncts: [{ concept: 'CAT', number: 'plural' }, { concept: 'DOG' }], conjunction: 'or' };
+    const element = resolveNounElement(catsOrDog, 'it', LOOKUP);
+    expect(element.agreement['number']).toBe('singular');
+    expect(element.invertedAgreement?.['number']).toBe('plural');
+    expect(resolveNounElement({ concept: 'CAT' }, 'it', LOOKUP)).not.toHaveProperty('invertedAgreement');
+  });
 });

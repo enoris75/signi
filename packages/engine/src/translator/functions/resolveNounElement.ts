@@ -7,8 +7,10 @@ import { resolveNounPhrase } from './resolveNounPhrase.js';
 
 /**
  * Resolve a noun slot: each conjunct as a full noun phrase, plus the agreement they resolve to
- * together. A slot holding a single phrase yields a one-conjunct element with that phrase's own
- * head forms as its agreement — no coordination, no behaviour change.
+ * together — once for a verb after the group, once for a verb ahead of it, which an "or" group
+ * agrees with through its first conjunct instead of its last (A210). A slot holding a single phrase
+ * yields a one-conjunct element with that phrase's own head forms as its agreement — no
+ * coordination, no behaviour change.
  *
  * The group's plural number is a fact about the *group*, not about its members, so it is not
  * pushed back down into the conjuncts: "Peter and the boys" keeps a singular Peter.
@@ -22,5 +24,6 @@ export function resolveNounElement(el: NounElement, language: string, lookup: Le
     conjuncts,
     conjunction: el.conjunction,
     agreement: groupAgreement(conjuncts, el.conjunction, language),
+    invertedAgreement: groupAgreement(conjuncts, el.conjunction, language, /*verbFirst*/ true),
   };
 }
