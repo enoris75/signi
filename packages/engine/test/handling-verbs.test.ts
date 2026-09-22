@@ -321,7 +321,7 @@ describe('the commands', () => {
 // The Spanish affirmative tú command is the 3sg present unless mood.ts's ES_IMP_OVERRIDE, keyed by
 // concept id, says otherwise. LEAVE has salir's "sal" there; GO_OUT, the same salir, and PUT's
 // poner ("pon") do not.
-describe('known bugs: the Spanish tú command of poner and salir under a new concept (PENDING-L3-1)', () => {
+describe('known bugs: the Spanish tú command of poner and salir under a new concept (A240)', () => {
   // Now: "pone el libro.", "sale." — Want: "pon el libro.", "sal."
   test.fails('PUT and GO_OUT take the short tú command', () => {
     expect(sayAll(command('PUT', { directObject: the('BOOK') })).es).toBe('pon el libro.');

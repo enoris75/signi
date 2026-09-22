@@ -64,6 +64,15 @@ fix: A230 beside A209, A231 beside A225, A232 beside A224, A233 beside A208, A23
 A235 beside A226. Every one but A231 was given a trial fix on a throwaway copy, which wrote its
 **Want** column.
 
+**And nine more, A237–A245**, met the same day by the six lanes that seeded P09's core vocabulary
+([B59–B67](../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)). Each is a
+shape the corpus could not reach until a word of its kind existed: the first multiword finite
+(*avere bisogno*), the first verb sharing a Spanish irregular command with another concept, the
+first adverbs whose negation wants another word, the first adjective relating its subject to a
+country. **No shipped gloss shows any of the nine**, which is why each was pinned rather than fixed
+in the lane that found it — five others those lanes met *were* fixed there, because the word could
+not be seeded honestly without the fix.
+
 | # | File | Language | Defect |
 |---|---|---|---|
 | A230 | [A-must-fix/A230-german-no-object-inside-a-negated-prospective.md](A-must-fix/A230-german-no-object-inside-a-negated-prospective.md) | German | a `no` object keeps its "kein" inside a negated prospective (*ist im Begriff, keine Maus zu fressen* for *ist nicht im Begriff, eine Maus zu fressen*): the verb's negation collapses into the object inside the zu-group, which [A209](fixed/A209-german-kein-inside-the-prospective.md) closed for an indefinite object only |
@@ -72,6 +81,15 @@ A235 beside A226. Every one but A231 was given a trial fix on a throwaway copy, 
 | A233 | [A-must-fix/A233-portuguese-negated-reflexive-infinitive.md](A-must-fix/A233-portuguese-negated-reflexive-infinitive.md) | Portuguese | a negated reflexive infinitive or instruction keeps its "-se" after the verb (*não mover-se*), where "não" draws it ahead (*não se mover*) as it draws an object pronoun |
 | A234 | [A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md](A-must-fix/A234-spanish-portuguese-possessor-drops-its-determiner.md) | Spanish, Portuguese | a possessor that has a possessive of its own loses its determiner (*de mi libro* for *de este libro mío*, *de su libro* for *de ningún libro suyo*), where the object keeps both ([A187](fixed/A187-pronominal-possessor-drops-the-head-determiner.md)) |
 | A235 | [A-must-fix/A235-time-under-an-adjective-goes-bare.md](A-must-fix/A235-time-under-an-adjective-goes-bare.md) | English | TIME under an adjective is forced bare as if it named a rate (*runs at other time*), because the measure rule [A226](fixed/A226-measure-manner-loses-its-determiner.md) narrowed takes every measure noun |
+| A237 | [A-must-fix/A237-english-addressee-that-takes-no-to.md](A-must-fix/A237-english-addressee-that-takes-no-to.md) | English | English writes every `terminus` with "to", so a verb whose addressee is a bare or double object says it with the preposition (*asks the name to the man* for *asks the man the name*, *answers to the man* for *answers the man*); no lexeme key selects the bare recipient, as `object_prep` selects one for a direct object |
+| A238 | [A-must-fix/A238-italian-dire-imperfect-subjunctive.md](A-must-fix/A238-italian-dire-imperfect-subjunctive.md) | Italian | *dire*'s imperfect subjunctive is derived from the infinitive minus -re (*dissimo* for *dicessimo*), because `IT_SUBJ_STEM` overrides the contracted infinitives by concept id and has PRODUCE but not SAY |
+| A239 | [A-must-fix/A239-romance-dative-clitic-of-a-prepositional-object.md](A-must-fix/A239-romance-dative-clitic-of-a-prepositional-object.md) | Italian, French | a prepositional object writes its pronoun as the tonic one (*telefona a lui*, *téléphone à lui*), right for the spatial *su*/*sur* of CLICK and wrong for a dative, where the clitic belongs (*gli telefona*, *lui téléphone*) |
+| A240 | [A-must-fix/A240-spanish-tu-command-keyed-by-concept.md](A-must-fix/A240-spanish-tu-command-keyed-by-concept.md) | Spanish | the irregular affirmative *tú* commands are keyed by concept id, so a new concept on a verb already in the table misses it (GO_OUT is *salir*: `sale` for `sal`), and *poner* has no row at all (`pone` for `pon`) |
+| A241 | [A-must-fix/A241-italian-adverb-after-a-multiword-finite.md](A-must-fix/A241-italian-adverb-after-a-multiword-finite.md) | Italian | a frequency adverb trails a multiword finite instead of splitting it (*ha bisogno sempre del cibo* for *ha sempre bisogno del cibo*), where French was taught the split with NEED and Italian itself splits a compound tense |
+| A242 | [A-must-fix/A242-italian-fare-imperfect-subjunctive.md](A-must-fix/A242-italian-fare-imperfect-subjunctive.md) | Italian | *fare*'s imperfect subjunctive is *fasse* for *facesse*, A238's table and its other contracted infinitive; MAKE's bug, live before the batch, which DO meets through the shared lemma |
+| A243 | [A-must-fix/A243-still-scopes-under-the-negation.md](A-must-fix/A243-still-scopes-under-the-negation.md) | English, French, German | a `frequency` adverb sits inside the negation, so STILL is denied rather than denying (*does not still eat* for *still does not eat*), and French *ne … pas encore* says "not yet", the opposite reading |
+| A244 | [A-must-fix/A244-also-has-no-negative-form.md](A-must-fix/A244-also-has-no-negative-form.md) | English, Italian, French, German, Spanish, Portuguese | six languages say *also* under a negation with another word (*either*, *neanche*, *non plus*, *auch nicht*, *tampoco*, *também não*) and the engine writes the positive one in the positive slot; the placement half is A243 |
+| A245 | [A-must-fix/A245-japanese-no-adjective-predicate-drops-its-no.md](A-must-fix/A245-japanese-no-adjective-predicate-drops-its-no.md) | Japanese | a の-adjective drops its の before the copula, right for a colour (猫は茶色です) and wrong for an adjective relating its subject to a proper noun: AMERICAN renders 猫はアメリカです, "the cat is America" |
 
 Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here
 as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).

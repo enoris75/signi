@@ -7,6 +7,16 @@ degree; **A233**, a negated Portuguese reflexive infinitive keeping "-se" after 
 Spanish or Portuguese possessor losing its determiner beside a possessive; and **A235**, TIME forced
 bare under an adjective as if it named a rate.
 
+**And nine more, A237–A245**, filed the same day by the six lanes that seeded P09's core vocabulary
+([B59–B67](../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)), each a
+shape the corpus first reached when a word of its kind was seeded: **A237**, an English addressee
+that takes no "to" (ASK, ANSWER); **A238** and **A242**, *dire* and *fare* in the Italian imperfect
+subjunctive; **A239**, a Romance prepositional object writing the tonic pronoun where the dative
+clitic belongs; **A240**, the Spanish *tú* command keyed by concept, so GO_OUT misses *salir*'s row;
+**A241**, an Italian frequency adverb trailing the multiword finite *avere bisogno*; **A243** and
+**A244**, STILL and ALSO under a negation; and **A245**, a Japanese の-adjective dropping its の as a
+predicate, so AMERICAN says "the cat is America". No shipped gloss shows any of the nine.
+
 Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/).
 The last twenty, all filed and fixed on 2026-09-22, went together: **A207**–**A212** and
 **A216**–**A229**, found by three rounds of random phrases (a negative word

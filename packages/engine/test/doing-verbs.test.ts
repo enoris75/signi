@@ -450,7 +450,7 @@ describe('TRY: a lexical verb that takes an infinitive, not a modal', () => {
 // adverb and the complements, and the infinitive is not among them. One control would serve DESIRE,
 // NEED and TRY alike; B62 records it, and this suite is where the plans are exercised meanwhile.
 
-describe('known bugs: an Italian multiword finite (PENDING-L4-1)', () => {
+describe('known bugs: an Italian multiword finite (A241)', () => {
   // Now: the frequency adverb trails the whole finite, "non ha bisogno mai del cibo" / "ha bisogno
   // sempre del cibo". Want: it sits between the verb and its noun, "non ha mai bisogno del cibo" /
   // "ha sempre bisogno del cibo", the way French now does it (fr/predicateText.ts) and the way
@@ -464,7 +464,7 @@ describe('known bugs: an Italian multiword finite (PENDING-L4-1)', () => {
   });
 });
 
-describe('known bugs: the Italian imperfect subjunctive of fare (PENDING-L4-2)', () => {
+describe('known bugs: the Italian imperfect subjunctive of fare (A242)', () => {
   // Now: "se l'uomo fasse il lavoro" — mood.ts derives the Italian protasis from the infinitive minus
   // -re, and fare hides its Latin stem (IT_SUBJ_STEM has PRODUCE for the same reason, produrre →
   // produce). Want: "facesse". It is MAKE's bug, live before B62; DO meets it because it shares
