@@ -1149,13 +1149,43 @@ describe('known bugs: a French bare singular after "dans" (A219)', () => {
     complements: { locative: { phrase: np(concept, { definiteness: 'bare', ...extra }) } },
   }), 'fr');
 
-  test.fails('a count noun takes "en", a mass noun "dans" + its partitive', () => {
+  test('a count noun takes "en", a mass noun "dans" + its partitive', () => {
     expect(inBare('GROUP', 'EAT')).toBe('le chat mange en groupe.');
     expect(inBare('GROUP', 'EAT', { adjectives: ['SMALL'] })).toBe('le chat mange en petit groupe.');
     expect(inBare('PRISON')).toBe('le chat est en prison.');
     expect(inBare('BRACKET')).toBe('le chat est en parenthèse.');
     expect(inBare('WATER')).toBe("le chat est dans de l'eau.");
     expect(say({ subject: np('GROUP', { definiteness: 'bare', complementGloss: { type: 'locative' } }) }, 'fr')).toBe('en groupe.');
+  });
+
+  test('the "en" holds through tense, negation, an adjective and a plural subject', () => {
+    const eatIn = (verbPhrase: Partial<VerbPhrase>) => say(clause(np('CAT'), 'EAT', {
+      verbPhrase,
+      complements: { locative: { phrase: np('GROUP', { definiteness: 'bare' }) } },
+    }), 'fr');
+    expect(eatIn({ tense: 'past' })).toBe('le chat mangea en groupe.');
+    expect(eatIn({ negative: true })).toBe('le chat ne mange pas en groupe.');
+    expect(inBare('GROUP', 'EAT', { adjectives: ['BIG'] })).toBe('le chat mange en grand groupe.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'BE', {
+      complements: { locative: { phrase: np('PRISON', { definiteness: 'bare' }) } },
+    }), 'fr')).toBe('les chats sont en prison.');
+  });
+
+  test('every mass noun takes its own partitive after "dans", in a clause and in the gloss', () => {
+    expect(inBare('SUGAR')).toBe('le chat est dans du sucre.');
+    expect(inBare('FOOD')).toBe('le chat est dans de la nourriture.');
+    expect(inBare('AIR', 'RUN')).toBe("le chat court dans de l'air.");
+    expect(say({ subject: np('WATER', { definiteness: 'bare', complementGloss: { type: 'locative' } }) }, 'fr')).toBe("dans de l'eau.");
+  });
+
+  test('each conjunct of a coordination takes its own preposition', () => {
+    const inBoth = (conjuncts: NounPhrase[]) => say(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: { conjuncts, conjunction: 'and' } } },
+    }), 'fr');
+    expect(inBoth([np('GROUP', { definiteness: 'bare' }), np('PRISON', { definiteness: 'bare' })]))
+      .toBe('le chat est en groupe et en prison.');
+    expect(inBoth([np('WATER', { definiteness: 'bare' }), np('GROUP')]))
+      .toBe("le chat est dans de l'eau et dans le groupe.");
   });
 
   test('regression: the other determiners, the possessive, the plural, a name, a pronoun and the other six', () => {

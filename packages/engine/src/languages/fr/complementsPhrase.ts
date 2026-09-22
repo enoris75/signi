@@ -168,9 +168,9 @@ export function complementsPhrase(
       // take the article's place, and that bare is no zero article ("dans nos maisons"). Not a proper
       // name either, whose bare is the continent preposition's ("en Europe"). Not a pronoun, whose
       // bare is the absence of an article altogether — "sous elles", never "sous des elles" (A203).
-      // The bare *singular* is left as it is ("dans parenthèse"): the partitive would reach the
-      // manner of means, whose bare singular is an idiom French wants ("avec soin", never "avec du
-      // soin").
+      // The bare *singular* is not rewritten here: the partitive would reach the manner of means,
+      // whose bare singular is an idiom French wants ("avec soin", never "avec du soin"). The plain
+      // locative gives it "en" instead, in its own branch below (A219).
       const headFor = (nf0: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string => {
         const nf = !possessive && plural && (nf0['definiteness'] ?? 'definite') === 'bare'
           && nf0['uncountable'] !== '1' && nf0['proper'] !== '1' && !nf0['person']
@@ -184,7 +184,15 @@ export function complementsPhrase(
           // elle", "au-dessus d'eux".
           type === 'locative'  ? (
             nf['person'] && locSpec === 'in' ? 'en' :
-            bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')
+            bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') :
+            // A219. "Dans" needs a determiner after it, never "dans groupe": the preposition French
+            // puts before a bare singular is "en" ("en groupe", "en prison", "en parenthèse"). A mass
+            // noun has no such "en" ("en eau" is not "in water") and takes its partitive after "dans"
+            // instead, as a bare mass object does (A149): "dans de l'eau". A196's guards: the
+            // possessor's bare is no zero article, and a bare name keeps its continent preposition.
+            !possessive && !plural && locSpec === 'in' && (nf['definiteness'] ?? 'definite') === 'bare' && nf['proper'] !== '1'
+              ? (nf['uncountable'] === '1' ? `dans ${partitiveArtFor(nf, plural, lead)}` : 'en') :
+            spatialHead(locSpec, nf, plural, lead, 'locative')
           ) :
           type === 'terminus'  ? aDet(nf, plural, lead) :
           // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
