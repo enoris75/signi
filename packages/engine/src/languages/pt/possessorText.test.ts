@@ -10,6 +10,16 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: his }) }))).toBe(' do seu cão');
   });
 
+  // A234: a demonstrative or a quantifier keeps its slot, fused with "de", and the possessive follows the
+  // noun without its article, as in the object (A187).
+  test('a possessor\'s own demonstrative or quantifier stays, and the possessive follows the noun', () => {
+    const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+    expect(possessorText(np(LIVRO, {}, { possessor: np(RAPOSA, { definiteness: 'this' }, { possessor: my }) }))).toBe(' desta raposa minha');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'no' }, { possessor: his }) }))).toBe(' de nenhum gato seu');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'some', number: 'plural' }, { possessor: his }) }))).toBe(' de alguns gatos seus');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'indefinite' }, { possessor: his }) }))).toBe(' do seu gato');
+  });
+
   test('is empty without a possessor', () => {
     expect(possessorText(np(LIVRO))).toBe('');
   });
