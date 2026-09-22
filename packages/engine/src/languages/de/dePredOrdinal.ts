@@ -1,4 +1,6 @@
 import type { ConceptForms } from '../../types.js';
+import type { Case } from './de.types.js';
+import { declineAdj } from './declineAdj.js';
 import { defArticle } from './defArticle.js';
 
 /**
@@ -8,13 +10,16 @@ import { defArticle } from './defArticle.js';
  * article — "der Kater ist der Erste", "die Katze ist die Erste", "die Kater sind die Ersten".
  *
  * `agreement` is what the predicate is said of: the clause's subject, a causative's causee, a
- * relative's head. The article-less "wurde Erster" (placed first in a race) is German too; the
- * definite reading is the one that holds without a race.
+ * relative's head — or, for an essive object predicate, the direct object (A231). `_case` is that
+ * one's case, which "als" shares with it: the nominative of a subject predicate, the accusative of
+ * an object one, where a masculine takes the weak -n too ("sieht den Hund als den Ersten"). The
+ * article-less "wurde Erster" (placed first in a race) is German too; the definite reading is the
+ * one that holds without a race.
  */
-export function dePredOrdinal(a: ConceptForms, agreement: Record<string, string>): string {
+export function dePredOrdinal(a: ConceptForms, agreement: Record<string, string>, _case: Case = 'nom'): string {
   const base = a.forms['base'] ?? '';
   if (!base) return '';
   const plural = (agreement['number'] ?? agreement['count']) === 'plural';
-  const noun = `${base.charAt(0).toUpperCase()}${base.slice(1)}${plural ? 'n' : ''}`;
-  return `${defArticle(agreement, 'nom', plural)} ${noun}`;
+  const word = declineAdj(base, _case, agreement['gender'] ?? 'neut', plural, 'definite');
+  return `${defArticle(agreement, _case, plural)} ${word.charAt(0).toUpperCase()}${word.slice(1)}`;
 }

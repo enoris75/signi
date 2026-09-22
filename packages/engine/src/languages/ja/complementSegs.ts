@@ -11,6 +11,7 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
+import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
@@ -144,7 +145,15 @@ export function complementSegs(
     const essiveAdj = type === 'objectPredicative' && c.phrase.conjuncts.length === 1 && lone?.head.forms['role'] === 'adjective'
       ? jaAdjClass(lone.head.forms['base'] ?? '', lone.head.forms['reading'])
       : undefined;
-    segs.push(...(essiveAdj?.kind === 'na' ? [wordSeg(essiveAdj.stem, essiveAdj.reading)] : elSegs(c.phrase)));
+    if (essiveAdj?.kind === 'na' && lone) {
+      // The stem takes its degree adverb ahead of it, as the factitive's does (もっと幸せとして,
+      // 最も茶色として, 同じくらい幸せとして — A232). Not the lowered two: それほど and 最も are
+      // negative-polarity there (see `JA_DEGREE`) and want a negated adjective, which the factitive
+      // spells ではなく and として has no counterpart for, so "less" and "least" still drop the degree.
+      const degree = isLoweredDegree(lone.head) ? '' : JA_DEGREE[adjDegree(lone.head)];
+      if (degree) segs.push({ t: degree });
+      segs.push(wordSeg(essiveAdj.stem, essiveAdj.reading));
+    } else segs.push(...elSegs(c.phrase));
     // The relational noun sits between the place and its particle, for a path and a place alike:
     // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
     const spec = type === 'route' || type === 'locative'

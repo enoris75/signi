@@ -41,3 +41,21 @@ stem when there is one, as the factitive branch does.
 | | |
 |---|---|
 | **Test** | `complements/objectPredicative.test.ts` → *known bugs: the Japanese essive drops an adjective head's degree (A232)* (1 `test.fails`, plus a regression test for the factitive, the positive essive and the other six) |
+
+## Resolved
+
+**2026-09-22**, with the trial above.
+
+- [`ja/complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts) — in the
+  essive branch, a na-adjective (or a noun-adjective linked by の) pushes `JA_DEGREE[adjDegree(head)]`
+  ahead of its stem, as the factitive branch does: `猫は家をもっと幸せとして見ます。`,
+  `猫は家を最も茶色として見ます。`, `猫は家を同じくらい幸せとして見ます。`.
+
+The decisions stayed as ruled. The lowered degrees (`isLoweredDegree`: "less", "least") still drop
+the degree, with a comment saying why: それほど and 最も want a negated adjective there, which the
+factitive spells ではなく and として has no counterpart for. They are not pinned. The i-adjective
+(`大きいとして`) is left as it was and not pinned. No passing test moved.
+
+| | |
+|---|---|
+| **Tests** | `complements/objectPredicative.test.ts` → *known bugs: the Japanese essive drops an adjective head's degree (A232)*, the `test.fails` now passing, plus an added case: the equal degree (同じくらい幸せとして), another na-adjective (もっと有効として), a na-adjective in the past (最も怠惰として見ました), the negative, and USE. The regression test adds the factitive's equal degree and a noun. Colocated: `ja/complementSegs.test.ts` → *the essive object complement* (the degree word ahead of the stem for "more", "most" and "equally") |

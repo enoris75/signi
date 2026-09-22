@@ -79,6 +79,14 @@ describe('complementSegs', () => {
         .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'として' }]);
       expect(text(complementSegs(complements({ objectPredicative: complement(np(DENSETSU), essive) })))).toBe('伝説として');
     });
+
+    // A232: the degree adverb leads the stem, as it leads the factitive's.
+    test('a raised or equal degree leads the stem', () => {
+      expect(complementSegs(complements({ objectPredicative: complement(np(SHIAWASE, { degree: 'more' }), essive) })))
+        .toEqual([{ t: 'もっと' }, { t: '幸せ', r: 'しあわせ' }, { t: 'として' }]);
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(CHAIRO, { degree: 'most' }), essive) })))).toBe('最も茶色として');
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(SHIAWASE, { degree: 'equally' }), essive) })))).toBe('同じくらい幸せとして');
+    });
   });
 
   describe('terminus', () => {

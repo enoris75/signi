@@ -279,6 +279,16 @@ describe('subordinateClause', () => {
       })).toBe(', der müde scheint,');
     });
 
+    // A231: an essive ordinal is said of the object, which is the head itself when the head is the
+    // gapped object, in the accusative "als" shares with it.
+    test('an essive ordinal agrees with the object, whether the head or the clause\'s own', () => {
+      const asFirst = { objectPredicative: complement(np({ role: 'adjective', base: 'erste', ordinal: '1' }), [{ kind: 'predication', value: 'essive' }]) };
+      expect(relativeOn(BRIEF, { headRole: 'directObject', subject: el(np(MANN)), verbPhrase: vp(LESEN), complements: asFirst }))
+        .toBe(', den der Mann als den Ersten liest,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN), directObject: el(np(BUCH)), complements: asFirst }))
+        .toBe(', der das Buch als das Erste liest,');
+    });
+
     // The cause's own shapes come from `causePhrase`; the clause only places them.
     test('a cause trails the direct object, ahead of the verb', () => {
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), directObject: el(np(MAUS)), complements: { cause: complement(np(ICH)) } }))

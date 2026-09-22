@@ -16,4 +16,14 @@ describe('dePredOrdinal', () => {
   test('the plural takes the weak -n after "die"', () => {
     expect(dePredOrdinal(adj(ERSTE), { ...KATER, number: 'plural' })).toBe('die Ersten');
   });
+
+  // A231: an essive object predicate shares the object's accusative, where only the masculine
+  // singular differs from the nominative, in its article and its weak -n.
+  test('in the accusative a masculine takes "den" and the weak -n, the others as in the nominative', () => {
+    expect(dePredOrdinal(adj(ERSTE), KATER, 'acc')).toBe('den Ersten');
+    expect(dePredOrdinal(adj(ERSTE), KATZE, 'acc')).toBe('die Erste');
+    expect(dePredOrdinal(adj(ZWEITE), { gender: 'neut' }, 'acc')).toBe('das Zweite');
+    expect(dePredOrdinal(adj(ERSTE), { ...KATZE, number: 'plural' }, 'acc')).toBe('die Ersten');
+    expect(dePredOrdinal(adj(ERSTE), KATER, 'nom')).toBe('der Erste');
+  });
 });

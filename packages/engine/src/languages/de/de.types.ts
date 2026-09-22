@@ -4,6 +4,17 @@ import type { ResolvedComplement, ResolvedNounElement } from '../../types.js';
 /** A German grammatical case. */
 export type Case = 'nom' | 'acc' | 'dat' | 'gen';
 
+/**
+ * What an object predicate is said of (see `complementsParts`), whose gender and number an essive
+ * ordinal takes, and the case "als" shares with it (A231): the direct object, in the accusative
+ * ("sieht den Hund als den Ersten"), or under the passive, where the patient is the subject, that
+ * subject, in the nominative ("der Hund wird als der Erste gesehen").
+ */
+export interface ObjectPredicateHost {
+  agreement: Record<string, string>;
+  case: Case;
+}
+
 /** A declension-table column: the singular genders, plus the plural (which neutralises gender). */
 export type Slot = 'masc' | 'fem' | 'neut' | 'plural';
 
