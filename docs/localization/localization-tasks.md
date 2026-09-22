@@ -35,15 +35,29 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 - A concept's definition is a `PhrasePlan` set as its `definition` in the seed. Two shapes exist:
   - **genus + differentia** — `glossOf(genus, ...adjectives)` → "a small mammal".
   - **genus + relative clause** — `whoGloss(genus, verb, objectConcept?)` → "a person who makes
-    objects" (the head fills the clause's subject gap; the object renders bare-plural). The head can
-    fill another gap instead: `patientGloss` the object ("an object that one eats"), and a
-    `headRole: 'locative'` clause the place ("a place where one eats", see
-    [B32](done/B32-place-glosses.md)).
+    objects" (the head fills the clause's subject gap; the object renders bare-plural, or singular
+    for a mass reading — "a process that loads content"). The head can fill another gap instead:
+    `patientGloss` the object ("an object that one eats"), and a `headRole: 'locative'` clause the
+    place ("a place where one eats", see [B32](done/B32-place-glosses.md)).
+  - **a mass head takes `bare`, not `indefinite`** — *a content* counts what cannot be counted.
+    `patientGloss` takes the determiner as its third argument, and `massGlossOf(genus, ...adjectives)`
+    is `glossOf` with the same bare head ("solid substance", "great land"). Both are from
+    [A23](done/A23-ui-nouns-patient-and-place.md).
+  - **an object gap with a named agent** — `patientOfGloss(genus, verb, agent)` is `patientGloss`
+    with an indefinite noun where the generic "one" would stand: "a participant that **a verb**
+    governs", "land that **a nation** governs"
+    ([A27](done/A27-grammar-participants-and-clause-types.md)).
 - The renderer [`buildConceptDefinitions()`](../../packages/backend/src/definitions.ts) renders every
   plan into all 7 languages **at backend startup and throws if any language is missing** — so a task
   is "done" only when it boots clean. That boot check is the catalogue's pinning test.
 - Classification follows feasibility, not the concept's role: an A references only seeded concepts; a
   B names unseeded words; a C names a missing construct.
+- **A plan that renders is not yet a gloss.** It must also say something the concept's siblings do
+  not — the [C05](done/C05-non-distinguishing-genera.md) test — and it must not render the *same
+  string* as a gloss already shipped, which a per-plan probe cannot see.
+  [`sweep-definitions.test.ts`](../../packages/engine/test/sweep-definitions.test.ts) renders every
+  definition in all seven languages and fails on any two alike, with an allow-list of the pairs the
+  corpus shares by design. It is the guard a probe table cannot be.
 
 ### UI-string tasks
 
@@ -68,26 +82,17 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ### Part A — Ready (`A-ready/`)
 
-**Eight open, 60 concepts**, all filed by the sweep of 2026-09-22 (see
-[The sweep](#the-sweep-of-2026-09-22)). Every one is composable today: no new word, no new construct.
-Each carries a seven-language probe table taken from the engine source at HEAD on the day it was
-filed; re-verify on authoring.
+**None open.** A23–A30, the eight the sweep of 2026-09-22 filed, were all authored on 2026-09-22 and
+are in [`done/`](done/) — **51 of their 60 concepts** shipped a gloss. The nine that did not are
+each in a C ticket with the reason, and three of the nine went there for a reason the sweep's probe
+could not see: **a plan that renders correctly can still restate a gloss another concept already
+ships**. EAT_ANIMAL restated EAT, SHRINK restated COMPACT, SPECIFY restated EXPRESS, NEW restated
+YOUNG and BEAUTIFUL restated GOOD — each character for character, in all seven languages. The guard
+that now catches it is `packages/engine/test/sweep-definitions.test.ts`, which renders every
+definition in every language and fails on any two alike.
 
-| # | File | Concepts | Shape |
-|---|---|---|---|
-| A23 | [A-ready/A23-ui-nouns-patient-and-place.md](A-ready/A23-ui-nouns-patient-and-place.md) | 13 — BUTTON, FILE, CLIPBOARD, CONSOLE, CANVAS, TEXT, HELP, PREVIEW, OPTION, TARGET, EXAMPLE, ICON, VALUE | `patientGloss` / `whereGloss` — the thing one presses, the place where one types |
-| A24 | [A-ready/A24-ui-verbs-genus-and-object.md](A-ready/A24-ui-verbs-genus-and-object.md) | 15 — DELETE, UNDO, REDO, RETRY, COPY, USE, SPECIFY, COMPLETE, RESIZE, EDIT, ACQUIRE, RETURN, LIVE, EAT_ANIMAL, TRADE | `infinitiveGloss` — genus + object |
-| A25 | [A-ready/A25-causative-verbs.md](A-ready/A25-causative-verbs.md) | 3 — SHRINK, TURN_OFF, NEGATE | `causativeGloss`, two of them negated |
-| A26 | [A-ready/A26-kin-roles-and-kinds.md](A-ready/A26-kin-roles-and-kinds.md) | 4 — PARENT, RECIPIENT, ALIAS, WATER | four one-off glosses their genus already carries |
-| A27 | [A-ready/A27-grammar-participants-and-clause-types.md](A-ready/A27-grammar-participants-and-clause-types.md) | 5 — SUBJECT_GRAMMAR, OBJECT_GRAMMAR, DEMONSTRATIVE, POSITIVE_DEGREE, CONDITION | grammar nouns a seeded verb tells apart |
-| A28 | [A-ready/A28-scalar-adjectives.md](A-ready/A28-scalar-adjectives.md) | 6 — SMALL, NEW, BEAUTIFUL, INTERESTING, ABLE, LOUD | `dimGloss` on a seeded dimension |
-| A29 | [A-ready/A29-time-adverbs.md](A-ready/A29-time-adverbs.md) | 3 — NOW, AGAIN, REPEATEDLY | `mannerGloss` on TIME, ALWAYS's shape |
-| A30 | [A-ready/A30-grammar-features.md](A-ready/A30-grammar-features.md) | 11 — TENSE, ASPECT, VOICE, POLARITY, DEGREE_GRAMMAR, SENTIMENT, MOOD, GENDER, PERSON_GRAMMAR, NOUN_PHRASE, COORDINATION | `whoGloss` — what a feature indicates |
-
-A16–A18, the concept definitions split from C05 and C19, and A19–A21, the UI strings from the sweep
-of 2026-09-21 (the keyboard help overlay of P01, the phrase console of P02, and the canvas again), were
-all done on 2026-09-21 (see the Done section, with A01–A07 and A11–A15). A08–A10 are retired ids: they
-became [C06](done/C06-pronoun-definitions.md), which is done.
+A01–A07 and A11–A30 are all in [`done/`](done/). A08–A10 are retired ids: they became
+[C06](done/C06-pronoun-definitions.md), which is done.
 
 #### UI strings
 
@@ -96,28 +101,38 @@ became [C06](done/C06-pronoun-definitions.md), which is done.
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**Seven open, 59 concepts**, all filed by the sweep of 2026-09-22. Each file's **Seed first** table
-proposes the missing words in all seven languages — suggestions for the seed author, not renders —
-and its **Unlocks** table gives the plan each word turns on. Seed the words and the file becomes an
-A.
+**One open, 9 concepts.** B52–B58 were authored on 2026-09-22: six of the seven retired to
+[`done/`](done/) and [B54](B-needs-seed/B54-sensation-and-quality-adjectives.md) stays here with the
+part of it that a seed alone cannot clear.
 
 | # | File | Seeds | Unlocks |
 |---|---|---|---|
-| B52 | [B-needs-seed/B52-natural-kind-genera.md](B-needs-seed/B52-natural-kind-genera.md) | 12 — BEING, ORGAN, MILK, GRASS, WOOD, METAL, HEAT, EYE, STORY, MESSAGE, SWEET, FLY | 11 — ANIMAL, MAMMAL, BOVINE, WING, TOOTH, TEAR, STICK, BLADE, FIRE, LEGEND, ICE_CREAM |
-| B53 | [B-needs-seed/B53-substance-and-state-roots.md](B-needs-seed/B53-substance-and-state-roots.md) | 8 — SUBSTANCE, STATE, GAS, SOLID, BREATHE, EXCHANGE, ENCLOSE, HEAR | 9 — AIR, GROUND, SOUND, LIGHT, MONEY, WALL, FEELING, CONTENT, BRACKET |
-| B54 | [B-needs-seed/B54-sensation-and-quality-adjectives.md](B-needs-seed/B54-sensation-and-quality-adjectives.md) | 12 — JOY, SORROW, REST, ATTENTION, ABILITY, DUTY, COLOUR, SHAPE, CIRCLE, NATURE, SEX, TESTICLE | 8 — HAPPY, SAD, TIRED, WARM, LAZY, CAREFUL, OBLIGED, ADULT |
-| B55 | [B-needs-seed/B55-sequence-and-position.md](B-needs-seed/B55-sequence-and-position.md) | 3 — SEQUENCE, PRECEDE, FOLLOW | 4 — FIRST, NEXT, PREVIOUS, ALREADY |
-| B56 | [B-needs-seed/B56-countries-and-continents.md](B-needs-seed/B56-countries-and-continents.md) | 5 — LAND, NATION, SEA, ISLAND, GOVERN_STATE | 2 — COUNTRY, CONTINENT |
-| B57 | [B-needs-seed/B57-ui-nouns-needing-a-word.md](B-needs-seed/B57-ui-nouns-needing-a-word.md) | 12 — SPEAK, ACCOMPANY, ANSWER, SEARCH, ARRANGE, CONNECT, PICTURE, LETTER, SCREEN, PART, ORDER_SEQUENCE, FORMALITY | 20 — SPEAKER, COMPANION, SERVER, RESULT, INTERFACE, KEYBOARD, LINE, TOOLBAR, LIST, GROUP, MENU, CURSOR, HISTORY, USAGE, MAP, NODE, REFERENCE, NAME_NOUN, LOADING, IMPORT_NOUN |
-| B58 | [B-needs-seed/B58-tense-and-number-values.md](B-needs-seed/B58-tense-and-number-values.md) | 5 — PRESENT, PAST, FUTURE, SOLE, MANIFOLD | 5 — PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE, SINGULAR_GRAMMAR, PLURAL_GRAMMAR |
+| B54 | [B-needs-seed/B54-sensation-and-quality-adjectives.md](B-needs-seed/B54-sensation-and-quality-adjectives.md) | 6 — COLOUR, SHAPE, CIRCLE, NATURE, SEX, TESTICLE | 9 — BROWN, ROUND, WILD, DOMESTIC, MALE, FEMALE, CASTRATED, CANINE, HUNGRY, **once [C24](C-needs-engine/C24-grammar-feature-adjectives.md) exists** |
 
-B57 is the best ratio in the sweep — 20 concepts for 12 words — and B58 the only one that clears its
-whole set. **Author [A30](A-ready/A30-grammar-features.md) before B58**: its five glosses stand on
-TENSE and CATEGORY having glosses of their own.
+B54's other eight shipped (the scalar adjectives, on six dimension nouns seeded the same day); what
+is left is relational — *of* a class, *in* a place, *without* a part — and the six words wait with
+it, because the shape C24 builds will decide what they have to be. Seeding them first would put six
+seven-language paradigms in the corpus against a construct that does not exist.
 
-Everything filed before the sweep is done. B33–B39 and B48–B51 were all done on 2026-09-21 (see the Done
-section). B48–B51 were C05's second pass, and seeding their six words glossed the five concepts they
-named.
+**What the six retired tickets delivered**, on 2026-09-22: **40 words seeded** and **54 glosses**
+authored on them.
+
+| # | File | Words seeded | Glosses |
+|---|---|---|---|
+| B52 | [done/B52-natural-kind-genera.md](done/B52-natural-kind-genera.md) | 9 of 12 | 9 of 13 |
+| B53 | [done/B53-substance-and-state-roots.md](done/B53-substance-and-state-roots.md) | 8 of 8 | 9 of 13 |
+| B55 | [done/B55-sequence-and-position.md](done/B55-sequence-and-position.md) | 0 of 3 | 1 of 6 |
+| B56 | [done/B56-countries-and-continents.md](done/B56-countries-and-continents.md) | 3 of 5 | 2 of 3 |
+| B57 | [done/B57-ui-nouns-needing-a-word.md](done/B57-ui-nouns-needing-a-word.md) | 10 of 12 | 20 of 32 |
+| B58 | [done/B58-tense-and-number-values.md](done/B58-tense-and-number-values.md) | 5 of 5 | 5 of 5 |
+
+**Seventeen of the 57 proposed words were not seeded**, and the rule the authoring pass applied is
+worth recording: *seed a word when a gloss in the batch uses it*. WOOD, METAL, MESSAGE, SEA, ISLAND,
+LETTER, ORDER_SEQUENCE, FORMALITY, SEQUENCE, PRECEDE, FOLLOW and B54's six each buy only a concept
+the same ticket puts in **Not solved**; seeding one adds a seven-language paradigm and a test to the
+corpus for a tooltip that cannot be written. Every one is named in its file, with the proposed forms
+kept for whoever unblocks it. **B55 is the extreme case**: it proposed three words, needed none of
+them, and shipped ALREADY — the one concept that mattered — on vocabulary that was already there.
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
@@ -146,28 +161,38 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-**Six open, 199 concepts**, all filed by the sweep of 2026-09-22 — and 199 is not a backlog so much
-as a description of the corpus: 76 of them are the roots the whole definition language is built out
-of, and the right outcome for those is no plan.
+**Six open, 244 concepts**, and 244 is not a backlog so much as a description of the corpus: 90 of
+them are the roots the whole definition language is built out of, and the right outcome for those is
+no plan. The counts grew rather than shrank on 2026-09-22, which is what authoring a sweep does:
+the A and B tickets sent 40 concepts here that their probes had placed elsewhere, and the 40 words
+they seeded are themselves unglossed roots.
 
 | # | File | Concepts | Blocked on |
 |---|---|---|---|
 | C23 | [C-needs-engine/C23-participial-state-adjectives.md](C-needs-engine/C23-participial-state-adjectives.md) | 22 — SAVED, LOADED, PINNED, HIDDEN, … | **a headless relative clause** — an adjective the engine can only say as a noun |
-| C24 | [C-needs-engine/C24-grammar-feature-adjectives.md](C-needs-engine/C24-grammar-feature-adjectives.md) | 53 — DEFINITE, PASSIVE, MALE, WILD, OTHER, … | an adjective gloss that is **not a scale**; 49 of them on C23's clause |
+| C24 | [C-needs-engine/C24-grammar-feature-adjectives.md](C-needs-engine/C24-grammar-feature-adjectives.md) | 67 — DEFINITE, PASSIVE, MALE, WILD, NEW, FIRST, … | an adjective gloss that is **not a scale**; 49 of them on C23's clause |
 | C25 | [C-needs-engine/C25-place-and-direction-adverbs.md](C-needs-engine/C25-place-and-direction-adverbs.md) | 8 — UP, DOWN, LEFT, RIGHT, BACKWARDS, EVERYWHERE, TOGETHER, SUDDENLY | a **locative `MannerRelation`**; the smallest engine change any open C names |
-| C26 | [C-needs-engine/C26-root-nouns-on-the-literal.md](C-needs-engine/C26-root-nouns-on-the-literal.md) | 56 — TIME, PLACE, PERSON, CONCEPT, the seven countries, … | 39 are primitives (**literal by design**); 17 on a **part-whole** or compass relation |
-| C27 | [C-needs-engine/C27-grammar-meta-nouns.md](C-needs-engine/C27-grammar-meta-nouns.md) | 15 — ARTICLE, STATEMENT, COMMAND, KEY, ROW, TAB, … | differentia is a **position, not a property**; 11 move on other tickets' constructs |
-| C28 | [C-needs-engine/C28-verb-roots-without-a-gloss.md](C-needs-engine/C28-verb-roots-without-a-gloss.md) | 45 — CREATE, CHANGE, HAVE, BE, … | 37 are primitives (**literal by design**); 4 are B work awaiting a vocabulary proposal |
+| C26 | [C-needs-engine/C26-root-nouns-on-the-literal.md](C-needs-engine/C26-root-nouns-on-the-literal.md) | 71 — TIME, PLACE, PERSON, BEING, SUBSTANCE, the seven countries, … | 51 are primitives or genera (**literal by design**); the rest on a **part-whole**, material or compass relation |
+| C27 | [C-needs-engine/C27-grammar-meta-nouns.md](C-needs-engine/C27-grammar-meta-nouns.md) | 16 — ARTICLE, STATEMENT, COMMAND, KEY, ROW, TAB, MOOD | differentia is a **position, not a property**; 11 move on other tickets' constructs |
+| C28 | [C-needs-engine/C28-verb-roots-without-a-gloss.md](C-needs-engine/C28-verb-roots-without-a-gloss.md) | 60 — CREATE, CHANGE, HAVE, BE, ENCLOSE, SPEAK, … | 49 are primitives (**literal by design**); 3 restate a gloss already shipped |
+
+**Every unglossed concept in the corpus is owned by exactly one open ticket** — 253 of them across
+these six and B54, checked against the seed rather than asserted.
 
 **One construct dominates.** A *headless relative clause* — the object-gap clause `patientGloss`
-already builds, rendered without a head — unblocks C23's 22, most of C24's 53 and two of C27's, plus
-the ten [B54](B-needs-seed/B54-sensation-and-quality-adjectives.md) defers: **about eighty
-concepts**, a quarter of everything still on the literal, and more than any other single piece of
-engine work the catalogue has named. A *part-whole complement* is second, taking C27's five surface
-parts, C26's FLAME and LIQUID and B57's deferrals.
+already builds, rendered without a head — unblocks C23's 22, most of C24's 67 and two of C27's, plus
+the nine [B54](B-needs-seed/B54-sensation-and-quality-adjectives.md) defers: **about ninety
+concepts**, and more than any other single piece of engine work the catalogue has named.
+
+**The part-whole relation is second, and it is now one ticket's worth of work.** Authoring B52, B53
+and B57 together showed that what they each called "a part-whole relation" is one relation with two
+faces — *part of* (FLAME, KEY, ROW, REGION, TAB, ORGAN) and *made of* (STICK, BLADE) — with a
+neighbouring instrument gap behind it (MATERIAL, NAME_NOUN: what one makes *with*, what one names
+*with*). Nine concepts, all recorded in
+[C26](C-needs-engine/C26-root-nouns-on-the-literal.md#the-part-whole-and-material-relation-2026-09-22).
 
 C05's three continents finally have a ticket: they are in C26 with the seven countries, which
-[B56](B-needs-seed/B56-countries-and-continents.md) found fail the same test.
+[B56](done/B56-countries-and-continents.md) found fail the same test.
 
 Everything filed before the sweep is done. C20, C21 and C22, the last three, shipped on 2026-09-21 (see the
 Done section). C20 built the construct it named — a pronoun that genders itself off the noun it stands
@@ -193,6 +218,18 @@ classified, and each is now owned by exactly one open ticket. Nothing is unaccou
 | **B** — waiting on a word | B52–B58 (7) | **59** | 57 words proposed in all seven languages |
 | **C** — blocked or by design | C23–C28 (6) | **199** | 76 are primitives that should stay on the literal |
 
+**And authored the same day.** All fifteen A and B tickets were driven to a verdict on 2026-09-22:
+
+| | filed | shipped a gloss | moved to a C ticket | still open |
+|---|---|---|---|---|
+| **A23–A30** | 60 | **51** | 9 | none — all eight retired |
+| **B52–B58** | 59 | **54**, on 40 words seeded | 14 | B54, with 9 concepts and 6 words |
+
+**105 concepts gained a localized definition**, taking the corpus from 145 composed definitions to
+250. Two engine defects were filed ([A206](../bugs/A-must-fix/A206-portuguese-impersonal-se-plural-object.md),
+[A207](../bugs/A-must-fix/A207-french-bare-singular-count-object.md)) and one engine gap fixed in
+passing (French did not elide before the œ ligature, so *l'œil* read *le œil*).
+
 **How it was run.** Every concept's genus, role and description was read off the seed, candidate
 plans were composed from the shapes the engine has — `glossOf`, `whoGloss`, `patientGloss`,
 `whereGloss`, `dimGloss`, `mannerGloss`, `infinitiveGloss`, `causativeGloss` — and each was rendered
@@ -202,24 +239,38 @@ restated a sibling or a genus made it a C, per the [C05](done/C05-non-distinguis
 decision; one that needed a word made it a B.
 
 **What the sweep changed its mind about.** The eleven grammar features of
-[A30](A-ready/A30-grammar-features.md) were drafted as a C — a feature names a position in a system,
+[A30](done/A30-grammar-features.md) were drafted as a C — a feature names a position in a system,
 which sounded like the C05 case — and the probe found that *what a feature indicates* is exactly
 what tells one from another. That is 11 of the 60 A concepts, and it is why the A tickets carry
 their probe output rather than a prediction.
 
+**What the probe could not see, and the authoring pass could.** A probe renders one plan at a time,
+so it shows that a plan renders — not that its output is *already some other concept's*. Five of the
+nine A concepts that did not ship failed exactly there: EAT_ANIMAL's plan was EAT's, SHRINK's was
+COMPACT's, SPECIFY's was EXPRESS's, NEW's was YOUNG's and BEAUTIFUL's was GOOD's, each character for
+character. Two more failed in one language only: INTERESTING and CAREFUL would both have read
+注意が高い, because CARE and the newly seeded ATTENTION shared 注意 — the COLD/冷たい case
+[B48](done/B48-climate-cold-hot.md) met. Both kinds are now guarded by
+`packages/engine/test/sweep-definitions.test.ts`, which renders every definition in all seven
+languages and fails on any two alike, with an allow-list of the five pairs the corpus shares by
+design.
+
 **What to build first, if anything is built.** One construct dominates: a **headless relative
 clause**, the object-gap clause `patientGloss` already builds rendered without a head. It unblocks
 [C23](C-needs-engine/C23-participial-state-adjectives.md)'s 22, most of
-[C24](C-needs-engine/C24-grammar-feature-adjectives.md)'s 53, two of
-[C27](C-needs-engine/C27-grammar-meta-nouns.md)'s and ten of
-[B54](B-needs-seed/B54-sensation-and-quality-adjectives.md)'s deferrals — about **eighty concepts**,
-a quarter of everything still on the literal. A **part-whole complement** is second. A **locative
-`MannerRelation`** ([C25](C-needs-engine/C25-place-and-direction-adverbs.md)) is the cheapest.
+[C24](C-needs-engine/C24-grammar-feature-adjectives.md)'s 67, two of
+[C27](C-needs-engine/C27-grammar-meta-nouns.md)'s and the nine
+[B54](B-needs-seed/B54-sensation-and-quality-adjectives.md) still defers — about **ninety
+concepts**. A **part-whole and material complement** is second, and authoring the B tickets
+consolidated it into one nine-concept piece of work. A **locative `MannerRelation`**
+([C25](C-needs-engine/C25-place-and-direction-adverbs.md)) is still the cheapest.
 
 **What was resolved rather than filed.** [C05](done/C05-non-distinguishing-genera.md)'s three
 continents — EUROPE, NORTH_AMERICA, SOUTH_AMERICA — had no ticket and now do:
 [C26](C-needs-engine/C26-root-nouns-on-the-literal.md), together with the seven countries, which
-[B56](B-needs-seed/B56-countries-and-continents.md) probed and found fail the same test. The
+[B56](done/B56-countries-and-continents.md) probed and found fail the same test. C05's **FEELING**
+entry is retired outright: [B53](done/B53-substance-and-state-roots.md) seeded STATE, the parent
+C05 was missing, and *a state that one feels* is what a feeling is. The
 27-concept "literal by design" figure the old section quoted is superseded: the sweep puts it at
 **76**, all of them roots, all of them named in C26 and C28.
 
@@ -323,6 +374,20 @@ exhaustive.
 | C21 | [done/C21-ui-console-diagnostics.md](done/C21-ui-console-diagnostics.md) | the phrase console's **85 diagnostics**, in the interface language. First the codes, as a pure refactor: each diagnostic is a `code` and its typed `args` ([diagnostics.ts](../../packages/frontend/src/console/language/diagnostics.ts)), every assertion moved off the English, which a table test still pins as each entry's fallback. Then **74 `diagnostic.*` entries**, said as one or two periods with the value after a colon — "Unknown command: /frob", it "Comando sconosciuto: /frob", ja 「不明な命令: /frob」 — joined by the language's own full stop (seeded **UNKNOWN**, **UNEXPECTED**, **ALREADY**, **TEXT**, **REFERENCE**, **OPEN**, **ACCEPT**). **Neither construct the file waited on was needed:** no existential (MISSING / UNKNOWN on a bare noun, C14's rule) and no on-request rendering (once the user's word follows the colon nothing has to agree with it; probed, and a pronoun as subject is dropped in it/es/pt). Licensing is ACCEPT with *this* command or verb as subject ("This command accepts no word: /pl"; TAKE reads as grabbing in five languages); the misuse message leads with B47's citation ("/more — to set an adjective's degree. This word is a noun: cat"), so `CommandDef.purpose`, the last English the console held, is gone. The explanations were reworded, none left literal; a `#2.obj` leak that printed the internal key is now "Missing noun: #2.obj"; the help page says "Cursor: cat · now Singular" |
 | C22 | [done/C22-ui-help-prose.md](done/C22-ui-help-prose.md) | the help overlay's paragraphs and notes and the console help page's prose: **rewritten first**, as short statements in shapes that exist — one period each, a relative clause in place of a free one, keys and syntax after a colon — then **30 `help.*` / `help.console.*` entries** ("A key works in the slot that has the cursor.", de "Eine Taste funktioniert im Slot, der den Cursor hat."; "Return to the period: esc"; "A bracket holds a word and commands: /subj ( cat /adj brown /pl )"). Seeded **KEY**, **TAB**, **NOUN_PHRASE**, **WORK**, **RESTORE** (de *zurückholen*, since *wiederherstellen* cannot be said as a separable verb), **AGAIN**. "Ctrl is ⌘ on a Mac" dropped: the sheet's platform switch already redraws every cap, and `keycapLabels` now draws a modifier named alone. The noun note names the **direct** object, or es says *complemento* twice; "in place of" is said with REPLACE, so C05's REPLACE entry does not move. The console's examples now write their words in the interface language (`exampleIn`). Nothing left literal: *only*, "the right one" and "whatever the period held" were each probed and said another way |
 | B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stayed on the English literal (C05) and WALL was not seeded. Both gaps were fixed on 2026-09-19 (A149, A150), and BUILDING's gloss shipped under C05 |
+| A23 | [done/A23-ui-nouns-patient-and-place.md](done/A23-ui-nouns-patient-and-place.md) | the twelve UI nouns that are what an action is done *to* or *where*: BUTTON → an object that one presses, CANVAS → a place where one makes phrases (fr *un lieu où l'on fait des phrases*), TEXT → written content. `patientGloss` took the head's determiner, so a mass head reads "content that one shows"; `massGlossOf` is `glossOf` with the same bare determiner. The French partitive the ticket predicted on a relativised mass head is **not** written, and both tables are corrected to the engine. ICON went to B57 and shipped there as "a small picture"; the Portuguese *se faz frases* was filed as **[A206](../bugs/A-must-fix/A206-portuguese-impersonal-se-plural-object.md)** |
+| A24 | [done/A24-ui-verbs-genus-and-object.md](done/A24-ui-verbs-genus-and-object.md) | thirteen verbs as genus + object: DELETE → to remove objects (de *Gegenstände entfernen*), ACQUIRE → to begin to have (it *iniziare ad avere*), LIVE → to be at home. **Two were duplicates of glosses already shipped** — EAT_ANIMAL's plan is EAT's and SPECIFY's is EXPRESS's, character for character — and both went to C28; the test that now catches that is `sweep-definitions.test.ts`. The French *changer de la taille* was filed as **[A207](../bugs/A-must-fix/A207-french-bare-singular-count-object.md)**: A149's partitive is right for a mass noun and wrong for a count one |
+| A25 | [done/A25-causative-verbs.md](done/A25-causative-verbs.md) | TURN_OFF → to cause an object not to be active, de *einen Gegenstand veranlassen, nicht aktiv zu sein* (the negation inside the governed clause), and NEGATE → to cause a clause to be negative. SHRINK did not ship: its plan is COMPACT's, character for character, and telling them apart by a comparative degree is not a distinction a reader can use. C28 |
+| A26 | [done/A26-kin-roles-and-kinds.md](done/A26-kin-roles-and-kinds.md) | PARENT → a person who has children, RECIPIENT → a person who acquires objects, ALIAS → another name, WATER → liquid that one drinks. RECIPIENT ships wide (the clause reads as a habit) rather than not at all; the narrow reading needs C27's event-position construct. ALIAS needs NAME_NOUN's form only, which is why it is unaffected by NAME_NOUN failing in B57 |
+| A27 | [done/A27-grammar-participants-and-clause-types.md](done/A27-grammar-participants-and-clause-types.md) | SUBJECT_GRAMMAR → a participant that governs verbs and OBJECT_GRAMMAR → a participant that **a verb** governs, the pair read from both ends of one relation, which German shows on the relative pronoun (*der* / *den*). **Reshaped rather than moved to C27**: the new helper `patientOfGloss(genus, verb, agent)` is `patientGloss` with a named agent where "one" would stand, and B56's COUNTRY is its second caller. Also DEMONSTRATIVE, POSITIVE_DEGREE and CONDITION — whose gloss is what dropped A30's MOOD |
+| A28 | [done/A28-scalar-adjectives.md](done/A28-scalar-adjectives.md) | SMALL → of low size and LOUD → of great sound. Two of six: `dimGloss('SIZE', 'SMALL')` was probed and is circular in **all seven**, not in English alone; INTERESTING and ABLE moved to B54 and shipped there on ATTENTION and ABILITY; **NEW and BEAUTIFUL restate YOUNG's and GOOD's shipped glosses** and are C24's, the first on animacy, the second on a scale that would be cognate with its own word in every language |
+| A29 | [done/A29-time-adverbs.md](done/A29-time-adverbs.md) | NOW → at this time (the first deixis in a definition, de *zu dieser Zeit*), AGAIN → at another time, REPEATEDLY → at many times, which ships with the marked English rather than nothing. The French *à beaucoup de temps* is **not** a bug: the same determiner on OBJECT_THING gives *beaucoup d'objets*, and *temps* is invariable in the plural. ALREADY, the fourth, shipped in B55 and needed no seed |
+| A30 | [done/A30-grammar-features.md](done/A30-grammar-features.md) | ten grammar features as what each indicates: TENSE → a feature that indicates times (de *ein Merkmal, das Zeiten bezeichnet*), GENDER → a category that governs words (ja 単語を支配する範疇), plus ASPECT, VOICE, DEGREE_GRAMMAR, SENTIMENT, POLARITY, PERSON_GRAMMAR, NOUN_PHRASE, COORDINATION. MOOD went to C27: authored beside A27's CONDITION ("a conditional clause"), its gloss named its neighbour |
+| B52 | [done/B52-natural-kind-genera.md](done/B52-natural-kind-genera.md) | nine words (**BEING**, **ORGAN**, **MILK**, **GRASS**, **HEAT**, **EYE**, **STORY**, **SWEET**, **FLY**) and nine glosses: ANIMAL → a being that moves, MAMMAL → an animal that produces milk, WING → an organ that flies, TEAR → liquid that one sheds from the eye, ICE_CREAM → cold sweet food, whose two adjectives the Romance languages coordinate on their own (*cibo freddo e dolce*). Two French elisions were missing — *herbe* is an h muet (`elides`) and *œil* opens on a ligature `VOWEL_START` did not list, the one engine change. WOOD, METAL and MESSAGE were not seeded: they buy only STICK, BLADE and ANGEL, all deferred |
+| B53 | [done/B53-substance-and-state-roots.md](done/B53-substance-and-state-roots.md) | eight words (**SUBSTANCE**, **STATE**, **GAS**, **SOLID**, **BREATHE**, **EXCHANGE**, **ENCLOSE**, **HEAR**) and nine glosses: FEELING → a state that one feels, which **retires C05's FEELING entry** — STATE was the parent C05 was missing; WALL → an object that encloses places and BRACKET → a word that encloses phrases, ENCLOSE paying for itself twice. Its French and Portuguese are *entourer* and *cercar*, not the proposed *enclore* (no passé simple) and *encerrar* (to end). Only the mass heads take `bare` |
+| B55 | [done/B55-sequence-and-position.md](done/B55-sequence-and-position.md) | ALREADY → at a previous time, **and nothing seeded**: SEQUENCE appears in no plan, and PRECEDE and FOLLOW appear only in plans that cannot ship. FIRST, NEXT and PREVIOUS join SECOND and THIRD in C24 on one reason — an adjective cannot be glossed by a noun phrase, and order is not a scale. One of six, and it is the one that closed A29's adverb set |
+| B56 | [done/B56-countries-and-continents.md](done/B56-countries-and-continents.md) | three words (**LAND**, **NATION**, **GOVERN_STATE**, the political sense split from the grammatical GOVERN) and two glosses: COUNTRY → land that a nation governs (it *terra che una nazione governa*) on A27's `patientOfGloss`, since the file's own plan table said `whoGloss` and would have rendered the relation backwards; CONTINENT → great land. SEA and ISLAND were not seeded. **The seven countries and JAPAN move to C26** as literal by design, which gives C05's three continents the ticket it said they lacked |
+| B57 | [done/B57-ui-nouns-needing-a-word.md](done/B57-ui-nouns-needing-a-word.md) | ten words (**SPEAK**, **ACCOMPANY**, **ANSWER**, **SEARCH**, **ARRANGE**, **CONNECT**, **PICTURE**, **SCREEN**, **PART**) and **twenty glosses** — the sweep's best ratio, as filed: SPEAKER → a person who speaks, MAP → a picture that shows places, TOOLBAR → a row that has buttons, LOADING → a process that loads content. **KEYBOARD has keys rather than typing letters** (a person types), which is why LETTER was not seeded; SEARCH's English lemma is *seek*, since English *search* takes the place searched; `whoGloss` learned an object number for LOADING's mass CONTENT. NAME_NOUN failed on the instrument gap and is C26's with MATERIAL |
+| B58 | [done/B58-tense-and-number-values.md](done/B58-tense-and-number-values.md) | five adjectives (**PRESENT**, **PAST**, **FUTURE**, **SOLE**, **MANIFOLD**) and five glosses, the only ticket that cleared its whole set: PAST_TENSE → a past tense (de *ein vergangenes Tempus*), PLURAL_GRAMMAR → a manifold category (ja 複数の範疇). SOLE and MANIFOLD rather than SINGULAR and PLURAL, so the number categories are not defined with themselves. English is the weakest of the seven here — *a past tense* is the English term — and the other six do define |
 | C05 | [done/C05-non-distinguishing-genera.md](done/C05-non-distinguishing-genera.md#done-2026-09-21) | BUILDING → a place that has walls, 2026-09-19 (seeded **WALL**; built the French object partitive and the negative *de*, [A149](../bugs/fixed/A149-french-object-zero-article.md), which restored the article in 41 shipped French glosses, and the Japanese ある of an inanimate owner, [A150](../bugs/fixed/A150-japanese-inanimate-owner-aru.md)). **Retired by splitting** on 2026-09-21, in two passes: A17, A18, B36–B39 and C20, then B48–B51 once every lead the file named but had not tried was probed (AFRICA moved with ANTARCTICA). The rest stays on the literal **by design**, each with a probe: EUROPE and the Americas, FEELING, REPLACE (moves with C22's "in place of"), BECOME, and 18 grammar meta-nouns. PERIOD_PUNCTUATION stays, though MARK renders: en *period* is also the sentence it ends |
 
 Shipped before this catalogue existed (the genus+differentia precedent):

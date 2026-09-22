@@ -6,8 +6,8 @@ is "in" or "to" a place, so every one of these eight falls through to `similativ
 "like a place".
 
 _(from the unsorted sweep of 2026-09-22. Three of the twelve undefined adverbs ship as
-[A29](../A-ready/A29-time-adverbs.md) — they are the ones about time, which `measure` already
-covers — and ALREADY is [B55](../B-needs-seed/B55-sequence-and-position.md). These eight are the
+[A29](../done/A29-time-adverbs.md) — they are the ones about time, which `measure` already
+covers — and ALREADY is [B55](../done/B55-sequence-and-position.md). These eight are the
 rest.)_
 
 ## The concepts
@@ -43,8 +43,10 @@ places*, it is *in all places*.
    [B07](../done/B07-scalar-adjective-definitions.md) built.
 
 Both are values in an existing enum plus a branch per engine, which is the smallest engine change
-any open C names. BACKWARDS needs (2) plus an ORDER_SEQUENCE noun and is really a
-[B55](../B-needs-seed/B55-sequence-and-position.md) once the relation exists.
+any open C names. BACKWARDS needs (2) plus an ORDER_SEQUENCE noun, which
+[B55](../done/B55-sequence-and-position.md) proposed and did **not** seed — it bought nothing that
+ticket could author — so BACKWARDS waits here for both, and its word is this ticket's to propose
+when the relation exists.
 
 ## SUDDENLY is a different problem
 

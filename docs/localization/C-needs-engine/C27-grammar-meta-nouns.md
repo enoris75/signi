@@ -3,16 +3,16 @@
 **Kind:** blocked on a construct, or non-distinguishing. Fifteen nouns that are told apart by
 *where they sit in a system* — which participant a clause makes its subject, who an imperative
 addresses, which part of a screen a region is — and a genus-differentia gloss describes what a thing
-*is like*, not where it stands.
+*is like*, not where it stands. **MOOD joined them on 2026-09-22**, making sixteen.
 
-_(from the unsorted sweep of 2026-09-22. [A30](../A-ready/A30-grammar-features.md) took eleven
+_(from the unsorted sweep of 2026-09-22. [A30](../done/A30-grammar-features.md) took eleven
 grammar nouns that did turn out to have a property — what a feature indicates — and
-[A27](../A-ready/A27-grammar-participants-and-clause-types.md) five more. These fifteen are what was
-left after both.)_
+[A27](../done/A27-grammar-participants-and-clause-types.md) five more. These fifteen are what was
+left after both, and MOOD came back from A30 on authoring.)_
 
 ## The concepts
 
-**Grammar (4).** PARTICIPANT_GRAMMAR, STATEMENT, ARTICLE, PERIOD_PUNCTUATION.
+**Grammar (5).** PARTICIPANT_GRAMMAR, STATEMENT, ARTICLE, PERIOD_PUNCTUATION, MOOD.
 
 **The imperative's addressee (4).** COMMAND, ORDER, INSTRUCTION, REGISTER.
 
@@ -51,7 +51,7 @@ addressee at all.
 
 **REGISTER is the same family from the other end**: it is *how formal* a way of speaking is, which
 is a scale — and `dimGloss`, the shape that says a scale, glosses **adjectives**, not nouns. The
-plan is right and the category is wrong. [B57](../B-needs-seed/B57-ui-nouns-needing-a-word.md)
+plan is right and the category is wrong. [B57](../done/B57-ui-nouns-needing-a-word.md)
 proposes seeding FORMALITY, which would be the dimension; what is missing is a *noun* gloss that
 names a dimension without a degree, which is shape 1 of
 [C24](C24-grammar-feature-adjectives.md).
@@ -66,7 +66,7 @@ work. `possessor` renders the genitive backwards ("Italy's language",
 and no complement carries it. ARROW waits on KEY.
 
 **WORKSPACE is the relation from the other end** — all the canvases at once, a plural-of — and
-collides with CANVAS meanwhile, which [A23](../A-ready/A23-ui-nouns-patient-and-place.md) ships as
+collides with CANVAS meanwhile, which [A23](../done/A23-ui-nouns-patient-and-place.md) ships as
 "a place where one makes phrases".
 
 **NAVIGATION is an action noun derived from a verb**, the same shape LIFE needs in C26 and the same
@@ -76,7 +76,7 @@ genitive-on-a-clause-head.
 
 | construct | takes | shared with |
 |---|---|---|
-| part-whole complement | KEY, ARROW, ROW, REGION, TAB, WORKSPACE | [C26](C26-root-nouns-on-the-literal.md) (FLAME), [B57](../B-needs-seed/B57-ui-nouns-needing-a-word.md) |
+| part-whole complement | KEY, ARROW, ROW, REGION, TAB, WORKSPACE | [C26](C26-root-nouns-on-the-literal.md) (FLAME), [B57](../done/B57-ui-nouns-needing-a-word.md) |
 | a noun gloss naming a dimension with no degree | REGISTER | [C24](C24-grammar-feature-adjectives.md) shape 1 |
 | a headless relative clause | STATEMENT, PARTICIPANT_GRAMMAR | [C23](C23-participial-state-adjectives.md), C24 |
 | C24 shipping DEFINITE and PROXIMAL | ARTICLE | C24 |
@@ -85,3 +85,14 @@ genitive-on-a-clause-head.
 
 **Eleven of the fifteen move on constructs three other tickets already want.** None of them needs
 anything built for this ticket alone.
+
+## MOOD (arrived 2026-09-22, from A30)
+
+[A30](../done/A30-grammar-features.md) drafted MOOD as `whoGloss('FEATURE', 'INDICATE',
+'CONDITION')` — "a feature that indicates conditions", de *ein Merkmal, das Bedingungen bezeichnet*
+— and flagged it as the weak one of its eleven. Authoring the two tickets together settled it:
+[A27](../done/A27-grammar-participants-and-clause-types.md) ships CONDITION as "a conditional
+clause" on the same page of the picker, so MOOD's gloss would have named its neighbour. Mood is how
+a clause is *meant* — asserted, ordered, wished, supposed — and only the last of those is a
+condition. Saying that needs the same thing the four imperative nouns below need: a way to name the
+stance a clause is uttered with, which is a position in a system and not a property of the clause.

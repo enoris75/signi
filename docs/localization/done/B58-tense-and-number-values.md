@@ -1,7 +1,7 @@
 # B58. The tense and number values — seed PRESENT, PAST, FUTURE and the two number adjectives
 
 _(from the unsorted sweep of 2026-09-22. Five grammar nouns that hang under heads
-[A30](../A-ready/A30-grammar-features.md) glosses, each waiting on one adjective. The shape is
+[A30](A30-grammar-features.md) glosses, each waiting on one adjective. The shape is
 `glossOf(genus, adjective)` — the plainest one the engine has — so this is a pure vocabulary
 ticket.)_
 
@@ -40,11 +40,13 @@ tells them from their grammatical twins, the way
 
 Five for five — the only ticket in the sweep that clears its whole set. The three tense glosses read
 as they should in each language (de *ein gegenwärtiges Tempus*, ja 現在の時制), and TENSE itself is
-glossed by [A30](../A-ready/A30-grammar-features.md), so the picker shows "a feature that indicates
+glossed by [A30](A30-grammar-features.md), so the picker shows "a feature that indicates
 times" above "a present tense".
 
 **Author A30 first.** These five stand on TENSE and CATEGORY having glosses of their own; nothing
-breaks if they do not, but the tooltip reads oddly when the genus is still English.
+breaks if they do not, but the tooltip reads oddly when the genus is still English. That advice was
+followed: [A30](A30-grammar-features.md) shipped in the same pass, so the picker reads "a
+feature that indicates times" above "a present tense".
 
 ## Not solved by this seed
 
@@ -58,3 +60,23 @@ but not before, because an adjective cannot be glossed by a noun phrase.
 Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once
 authored: PAST_TENSE in English and German (*ein vergangenes Tempus*, the strong adjective ending
 after the indefinite article) and PLURAL_GRAMMAR in English and Japanese (複数の範疇).
+
+## Done
+
+Shipped 2026-09-22. **Five adjectives seeded** (PRESENT, PAST, FUTURE, SOLE, MANIFOLD) and **five
+glosses** authored on them in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts). Five for
+five: the only ticket in the sweep that cleared its whole set, exactly as filed.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| PRESENT_TENSE | a present tense | un tempo presente | un temps présent | ein gegenwärtiges Tempus | un tiempo presente | 現在の時制 | um tempo presente |
+| PAST_TENSE | a past tense | un tempo passato | un temps passé | ein vergangenes Tempus | un tiempo pasado | 過去の時制 | um tempo passado |
+| FUTURE_TENSE | a future tense | un tempo futuro | un temps futur | ein zukünftiges Tempus | un tiempo futuro | 未来の時制 | um tempo futuro |
+| SINGULAR_GRAMMAR | a sole category | una categoria unica | une catégorie unique | eine einzige Kategorie | una categoría única | 単一の範疇 | uma categoria única |
+| PLURAL_GRAMMAR | a manifold category | una categoria molteplice | une catégorie multiple | eine mehrfache Kategorie | una categoría múltiple | uma categoria múltipla |
+
+Nothing landed differently. The one reading worth recording is that **English is the weakest of the
+seven on the three tense rows**: *a present tense* is the English grammatical term itself, so the
+tooltip teaches an English reader nothing. The other six do define — German says *ein gegenwärtiges
+Tempus* where its own term is *Präsens*, and Japanese 現在の時制 where the term is 現在形 — which is
+the argument the ticket made for the three ordinary time words, and it holds.

@@ -30,7 +30,7 @@ HEAD, with the head dropped to `bare` to get as close as the engine allows:
 | SAVED as `patientGloss('OBJECT_THING', 'SAVE')` at `bare` | object that one saves | oggetto che si salva | objet qu'on enregistre | Gegenstand, den man speichert | objeto que se guarda | 保存する物体 | objeto que se salva |
 
 That renders in all seven and is still wrong: it defines *a saved thing*, not *saved*. Put in the
-picker beside FILE, which [A23](../A-ready/A23-ui-nouns-patient-and-place.md) ships as "an object
+picker beside FILE, which [A23](../done/A23-ui-nouns-patient-and-place.md) ships as "an object
 that one saves", the two would read as the same word.
 
 ## What would move it
@@ -59,9 +59,11 @@ worth a B ticket of its own while the construct is missing; whoever builds the c
 seed the two words in the same change.
 
 RECENT is the one concept here that is **not** participial — "used a short time ago" is a measure on
-TIME, not a state left by a verb — and it may turn out to be a
-[B55](../B-needs-seed/B55-sequence-and-position.md) once that ticket's SEQUENCE lands. Re-probe it
-there before building anything for it here.
+TIME, not a state left by a verb. [B55](../done/B55-sequence-and-position.md) did not seed SEQUENCE,
+which bought nothing it could author, and its own five order words went to
+[C24](C24-grammar-feature-adjectives.md) on the reason RECENT shares: an adjective cannot be glossed
+by a noun phrase, and position in time is not a scale `dimGloss` reaches. Re-probe RECENT with them,
+not here.
 
 ## Why this is worth building
 

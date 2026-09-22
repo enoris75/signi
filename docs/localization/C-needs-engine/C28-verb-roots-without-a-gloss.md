@@ -1,22 +1,35 @@
 # C28. The verb roots — the genera every other verb gloss stands on
 
 **Kind:** mostly **deliberately left on the English literal**, like
-[C05](../done/C05-non-distinguishing-genera.md); a few blocked on a named construct. Forty-five
+[C05](../done/C05-non-distinguishing-genera.md); a few blocked on a named construct. Sixty
 verbs, and they are to the verb lexicon what [C26](C26-root-nouns-on-the-literal.md)'s roots are to
 the nouns: CREATE, CHANGE, HAVE, INDICATE, TRANSFER, MOVE_ONESELF, BE. Almost every verb gloss
 [B09](../done/B09-create-verbs.md)–[B19](../done/B19-data-verbs.md) shipped is built out of one of
 them.
 
 _(from the unsorted sweep of 2026-09-22. Fifteen verbs went to
-[A24](../A-ready/A24-ui-verbs-genus-and-object.md) and three to
-[A25](../A-ready/A25-causative-verbs.md). These forty-five are the rest of the 63 undefined verbs.)_
+[A24](../done/A24-ui-verbs-genus-and-object.md) and three to
+[A25](../done/A25-causative-verbs.md). These forty-five were the rest of the 63 undefined verbs —
+and **three of the eighteen came back on 2026-09-22**, for a reason this file did not have a name
+for. See [Three that came back](#three-that-came-back-2026-09-22).)_
 
 ## The concepts
 
 CONSUME, DESIRE, KNOW_ACQUAINTED, INCLUDE, CONFINE, CREATE, DESTROY, PERCEIVE, UNDERSTAND, HAVE,
 DIVIDE, STRIKE, INDICATE, CHANGE, TRANSFORM, SHED, PRODUCE, CAUSE_VERB, PRESS, WRITE, FILTER, LINK,
 REMOVE, CANCEL, RESTORE, OPEN, CLOSE, MOVE, LEAVE, DRAG, SET, PIN, UNPIN, APPLY, GOVERN, ACCEPT,
-REPLACE, ACT, WORK, BEGIN, CHANGE_ONESELF, TRANSFER, MOVE_ONESELF, BECOME, BE.
+REPLACE, ACT, WORK, BEGIN, CHANGE_ONESELF, TRANSFER, MOVE_ONESELF, BECOME, BE — and EAT_ANIMAL,
+SHRINK and SPECIFY, which A24 and A25 sent back.
+
+**Twelve more were seeded on 2026-09-22** and are roots in the same sense: BREATHE, EXCHANGE,
+ENCLOSE, HEAR, GOVERN_STATE, ACCOMPANY, ANSWER, SEARCH, ARRANGE, CONNECT, SPEAK, FLY. Each was
+seeded by [B52](../done/B52-natural-kind-genera.md), [B53](../done/B53-substance-and-state-roots.md),
+[B56](../done/B56-countries-and-continents.md) or [B57](../done/B57-ui-nouns-needing-a-word.md) to
+be the *differentia* of a noun — a wall is what encloses, a speaker is one who speaks — and reaching
+for a genus above them lands on ACT or MOVE_ONESELF, which is this file's whole subject. FLY is the
+one with a real genus (MOVE_ONESELF, by `isA`), and "to move" is MOVE_ONESELF's own meaning: what
+distinguishes flying is *through the air*, a route complement on a noun AIR that
+[B53](../done/B53-substance-and-state-roots.md) glossed but no verb gloss can reach.
 
 ## Why a verb root gets no gloss
 
@@ -30,7 +43,7 @@ HEAD:
 | CHANGE as `infinitiveGloss('MAKE', { object: 'OBJECT_THING', adjectives: ['OTHER'] })` | to make another object | fare un altro oggetto | faire un autre objet | einen anderen Gegenstand machen | hacer otro objeto | 別の物体を作る | fazer outro objeto |
 
 Both render in all seven, and the second is already COPY's plan in
-[A24](../A-ready/A24-ui-verbs-genus-and-object.md). MAKE is the only verb above CREATE and CHANGE,
+[A24](../done/A24-ui-verbs-genus-and-object.md). MAKE is the only verb above CREATE and CHANGE,
 and it is glossed itself — so a gloss here either restates MAKE or steals a sibling's.
 
 **TRANSFORM and DRAG were drafted into A24 and moved here for exactly this reason**:
@@ -86,3 +99,20 @@ Nothing worth building. Thirty-eight of the forty-five are primitives of the ver
 were decided by C08, one by C05, and the remaining four are a B ticket waiting on a vocabulary
 proposal. The honest summary is the same as [C26](C26-root-nouns-on-the-literal.md)'s: **a language
 describes itself with something**, and this is most of what Signi describes itself with.
+
+## Three that came back (2026-09-22)
+
+A root gets no gloss because it has no genus above it. These three have one, and still get none, for
+the neighbouring reason: **the gloss their genus gives is a gloss another concept already ships.**
+
+| concept | drafted as | the concept that already ships it |
+|---|---|---|
+| EAT_ANIMAL | `infinitiveGloss('CONSUME', 'FOOD')` | EAT, character for character |
+| SHRINK | `causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' }, { verb: 'BECOME', predicate: 'SMALL', predicateDegree: 'more' })` | COMPACT, character for character |
+| SPECIFY | `infinitiveGloss('INDICATE', 'CONCEPT', 'plural')` | EXPRESS, character for character |
+
+Each has a differentia the corpus cannot say: EAT_ANIMAL's is its *subject* ("of an animal"),
+SHRINK's is nothing at all beside COMPACT, and SPECIFY's is exactness. A probe table cannot show
+this — it renders one plan at a time — so the guard is a test instead:
+`packages/engine/test/sweep-definitions.test.ts` renders every definition in all seven languages and
+fails on any two alike, with an allow-list of the five pairs the corpus shares by design.

@@ -2,13 +2,14 @@
 
 **Kind:** mostly **deliberately left on the English literal**, like
 [C05](../done/C05-non-distinguishing-genera.md) and [C15](../done/C15-ui-literal-by-design.md), plus
-a handful blocked on one named relation. Fifty-six nouns, and they are the bottom of the corpus:
+a handful blocked on one named relation. Seventy-one nouns, and they are the bottom of the corpus:
 TIME, PLACE, PERSON, CONCEPT, ACTION, OBJECT_THING, WORD, WAY. Almost every gloss the catalogue has
 ever shipped stands on one of them.
 
 _(from the unsorted sweep of 2026-09-22, and the ticket that absorbed C05's three continents at
-last — [B56](../B-needs-seed/B56-countries-and-continents.md) found the seven countries fail the
-same test, so all ten geography concepts are recorded here together.)_
+last — [B56](../done/B56-countries-and-continents.md) found the seven countries fail the same test,
+so all ten geography concepts are recorded here together. **Five more arrived on 2026-09-22**, from
+B52, B53 and B57: see [The part-whole and material relation](#the-part-whole-and-material-relation-2026-09-22).)_
 
 ## Why a root gets no gloss
 
@@ -48,11 +49,11 @@ neither child inherits cleanly. Left with the rest.
 LIQUID, MATERIAL, LIFE, DEATH, FLAME.
 
 Each needs a relation no complement carries, and
-[B53](../B-needs-seed/B53-substance-and-state-roots.md) and
-[B52](../B-needs-seed/B52-natural-kind-genera.md) each hit one of them from their own side:
+[B53](../done/B53-substance-and-state-roots.md) and
+[B52](../done/B52-natural-kind-genera.md) each hit one of them from their own side:
 
 - **FLAME** is *the visible part of a fire* — a part-whole genitive, the same one
-  [B57](../B-needs-seed/B57-ui-nouns-needing-a-word.md) needs for KEY, ROW, REGION and TAB.
+  [B57](../done/B57-ui-nouns-needing-a-word.md) needs for KEY, ROW, REGION and TAB.
   `possessor` renders the genitive the other way round ("Italy's language",
   [B36](../done/B36-languages-by-country.md)); a head that *is* the part needs the whole as a
   complement, and there is none.
@@ -66,6 +67,18 @@ Each needs a relation no complement carries, and
 **A part-whole complement is the single relation that would move four of these five**, and it is
 also what B57's four UI nouns and B52's FLAME wait on. It is the second-most-valuable piece of
 engine work the sweep found, after [C23](C23-participial-state-adjectives.md)'s headless clause.
+
+### The genera the sweep's B tickets seeded (12)
+
+BEING, ORGAN, MILK, GRASS, HEAT, EYE, STORY, SUBSTANCE, STATE, GAS, PICTURE, SCREEN.
+
+Seeded on 2026-09-22 by [B52](../done/B52-natural-kind-genera.md),
+[B53](../done/B53-substance-and-state-roots.md) and
+[B57](../done/B57-ui-nouns-needing-a-word.md) so the concepts *under* them could be glossed, and
+unglossed themselves for the reason the primitives above are: they are the floor their children
+stand on. BEING and SUBSTANCE have nothing over them at all; ORGAN is *a part of a living body*, so
+it wants the part-whole relation below; STATE, GAS, PICTURE and SCREEN each want a differentia their
+own children took (a gas is *what one breathes*, which is AIR).
 
 ### The geography — blocked on a compass relation (12)
 
@@ -81,9 +94,9 @@ from the six other seeded countries and from nothing else in the world.
 
 **This ticket is where C05's three now live**, so the geography is in one place for the first time.
 COUNTRY and CONTINENT, their two genera, are *not* here: they gloss the day
-[B56](../B-needs-seed/B56-countries-and-continents.md) seeds LAND and NATION.
+[B56](../done/B56-countries-and-continents.md) seeds LAND and NATION.
 
-**ANGEL** is the twelfth: [B52](../B-needs-seed/B52-natural-kind-genera.md) probed it as "a being
+**ANGEL** is the twelfth: [B52](../done/B52-natural-kind-genera.md) probed it as "a being
 that transfers messages", which is also a courier, and its seed says *a messenger of God* — a word
 this corpus should not grow for one tooltip.
 
@@ -93,3 +106,39 @@ Nothing, and that is the finding. Thirty-nine of the fifty-six are primitives, a
 describes itself with something. The other seventeen turn on two relations — **part-whole** and
 **compass** — of which only part-whole is worth building, because it has customers in three other
 tickets and compass has customers only here.
+
+## The part-whole and material relation (2026-09-22)
+
+Three of the sweep's B tickets each deferred a handful of concepts to "a part-whole relation", and
+authoring them together showed it is **one relation with two faces and seven concepts behind it** —
+the largest single thing the sweep leaves undone.
+
+| concept | from | wants to say |
+|---|---|---|
+| FLAME | [B52](../done/B52-natural-kind-genera.md) | the visible **part of** a fire |
+| KEY | [B57](../done/B57-ui-nouns-needing-a-word.md) | a **part of** a keyboard |
+| ROW | B57 | a **part of** a list |
+| REGION | B57 | a **part of** a screen |
+| TAB | B57 | a **part of** a panel, the one shown |
+| STICK | B52 | an object **of** wood |
+| BLADE | B52 | a sharp object **of** metal |
+| ORGAN | B52 | a **part of** a living body |
+
+`possessor` renders the genitive the other way round ("Italy's language",
+[B36](../done/B36-languages-by-country.md)): a head that is the *part* needs the whole as a
+complement, not as its possessor, and `ComplementType` has no member for either the part-whole or
+the material relation. PART is seeded (B57) and WOOD and METAL are not, on purpose — the blocker is
+the relation, and the shape it takes will decide what the material words have to be.
+
+Two more arrived on the neighbouring **instrument** gap, where a helper gaps only the direct object:
+
+| concept | from | wants to say |
+|---|---|---|
+| MATERIAL | [B53](../done/B53-substance-and-state-roots.md) | substance one makes **with** |
+| NAME_NOUN | [B57](../done/B57-ui-nouns-needing-a-word.md) | a word one names **with** |
+
+And the rest on reasons of their own: **ANGEL** (B52 — "a being that transfers messages" is a
+courier, and its real differentia needs a word this corpus should not grow), **LIQUID** and
+**DEATH** (B53 — a negated verbless fragment, which `GlossParts.negative` cannot reach), and
+**LIFE** (B53 — a state noun derived from a verb; [C27](C27-grammar-meta-nouns.md)'s NAVIGATION is
+the action-noun half of the same gap).
