@@ -1,6 +1,17 @@
 # B-needs-seed — tasks waiting on words
 
-**None open.** [B59](../done/B59-time-words.md)–[B67](../done/B67-place-and-focus-adverbs.md), the
+**Seven open: [B68](B68-the-family.md)–[B74](B74-partners-and-friends.md)**, the
+[P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, filed on
+2026-09-22: one ticket per branch of the family, **41 concepts** to seed and **37 glosses** to
+author, plus a re-point of PARENT's — 38 definitions in all. Read them in order — B68 seeds
+CHILD_OFFSPRING, MOTHER and PARENT's new plurals, which the other six stand on — and note one engine defect B69's seed has to
+fix: Spanish puts the personal *a* after *tener*. Four of the 41 stay on the English literal by
+design (SON and DAUGHTER, which would close a circle with CHILD_OFFSPRING; MOM and DAD, which differ
+from MOTHER and FATHER only in register), each named in its file with every lead probed. **None of
+the seven waits on P11's own engine work**: a definition has no possessor, so no tooltip reads the
+`possessed`, `honorific`, `kin` or `with_<ADJECTIVE>` columns that feature adds.
+
+[B59](../done/B59-time-words.md)–[B67](../done/B67-place-and-focus-adverbs.md), the
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) core vocabulary, were filed on
 2026-09-22 and authored the same day; all nine are in [`done/`](../done/), and so is every B ticket
 before them. B01–B58 retired earlier.

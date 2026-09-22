@@ -117,7 +117,31 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**None open.** B59–B67, the P09 core vocabulary, were filed on 2026-09-22 (see
+**Seven open: B68–B74**, the [P11](../features/P-planning/P11-family-and-relationships/README.md)
+kin terms, filed on 2026-09-22 (see [the P11 sweep](#the-p11-sweep-of-2026-09-22)). They seed **41
+concepts** — about forty relatives and partners, the two adjectives ELDER and YOUNGER, and the verb
+MARRY — of which **37 ship a gloss**; with PARENT's re-point that is 38 definitions authored.
+Like B59–B67 the concepts do not exist yet, so each **Seed first** table is P11 §4's own row set
+with the forms checked; unlike them, the feature they come from has engine work of its own (P11
+§2–§3), and **none of these
+tooltips waits on it**: a definition has no possessor, so it never reads the `possessed`,
+`honorific`, `kin` or `with_<ADJECTIVE>` columns that feature adds.
+
+| # | File | Words seeded | Glosses | Not glossed |
+|---|---|---|---|---|
+| B68 | [B-needs-seed/B68-the-family.md](B-needs-seed/B68-the-family.md) | 8 | 4 + PARENT's re-point to CHILD_OFFSPRING (P11 D11) and its three D7 plurals | SON, DAUGHTER (a circle), MOM, DAD (register), all literal by design |
+| B69 | [B-needs-seed/B69-brothers-and-sisters.md](B-needs-seed/B69-brothers-and-sisters.md) | 5 | **5** — SIBLING, BROTHER and SISTER on one shape, which overturns P11 D12; ELDER and YOUNGER | none |
+| B70 | [B-needs-seed/B70-spouses-and-marriage.md](B-needs-seed/B70-spouses-and-marriage.md) | 4 | 4 | none |
+| B71 | [B-needs-seed/B71-grandparents-and-grandchildren.md](B-needs-seed/B71-grandparents-and-grandchildren.md) | 6 | 6 | none |
+| B72 | [B-needs-seed/B72-the-extended-family.md](B-needs-seed/B72-the-extended-family.md) | 5 | 5 | none |
+| B73 | [B-needs-seed/B73-in-laws-and-step-parents.md](B-needs-seed/B73-in-laws-and-step-parents.md) | 8 | 8 | none |
+| B74 | [B-needs-seed/B74-partners-and-friends.md](B-needs-seed/B74-partners-and-friends.md) | 5 | 5 | none |
+
+**Authoring order:** B68 first (every other ticket stands on CHILD_OFFSPRING, MOTHER or PARENT's
+plurals), then B69 and B70, then B71–B74. One engine defect must be fixed with B69's seed: Spanish
+puts the personal *a* after *tener*.
+
+B59–B67, the P09 core vocabulary, were filed on 2026-09-22 (see
 [the P09 sweep](#the-p09-sweep-of-2026-09-22)) and authored the same day; all nine are in
 [`done/`](done/). They differed from every B before them in one way: the concepts they gloss **did
 not exist**, so the first rows of each **Seed first** table were the
@@ -225,6 +249,14 @@ in their tooltip until the construct arrives.
 
 They were filed as one ticket and split the same day at review: the twelve share nothing but P09,
 and each retires on its own construct.
+
+**The P11 sweep of 2026-09-22 filed none.** Its 41 kin concepts
+([B68–B74](#part-b--needs-seeding-b-needs-seed)) compose 37 glosses on the corpus as it stands, and
+the four that stay on the literal — SON, DAUGHTER, MOM and DAD — are literal by design, not blocked:
+no construct would move them. The engine work that feature needs (the Japanese `possessed` and
+`honorific` columns, German's adjectival noun, the sibling fusion) belongs to
+[P11](../features/P-planning/P11-family-and-relationships/README.md) itself, and no definition reads
+any of it.
 
 C23–C28, the six the sweep of 2026-09-22 filed, were driven to a verdict the same day
 and all six are in [`done/`](done/) — **123 of their concepts shipped a gloss**, four constructs were
@@ -492,6 +524,64 @@ headless relative on a positive の-adjective drops its copula (固体の, B66) 
 gloss. Already filed and met again: A218 (PUT, HERE), A219 (REALLY), A228 (GET), A225 (the two
 LASTs) — all four were **fixed before the authoring**, and each ticket's Done section records the
 render that changed.
+
+### The P11 sweep of 2026-09-22
+
+[P11](../features/P-planning/P11-family-and-relationships/README.md) plans the kin terms — about
+forty relatives and partners, two adjectives and MARRY — and its **D12** asks for localization
+tickets for the pairs it could not see a definition for. This sweep files the whole seed, as
+[B68–B74](#part-b--needs-seeding-b-needs-seed), one ticket per branch of the family, and files **no
+C ticket**: every gloss composes on the corpus as it stands, and the engine work P11 needs (§2–§3)
+is the feature's own — a definition has no possessor, so none of it reaches a tooltip.
+
+| | P11 concepts | what it means |
+|---|---|---|
+| **ship a gloss** on the ticket's own seed | **37** | 10 on the corpus as it stands, 27 on another P11 word of the same ticket or a sibling |
+| **literal by design** | **4** | SON, DAUGHTER (glossing them would close a circle with CHILD_OFFSPRING), MOM, DAD (register is not a differentia — P11 D13) |
+| **blocked on a construct** | **0** | — |
+| **already seeded, and re-pointed** | 1 | PARENT: its definition moves from CHILD to CHILD_OFFSPRING (D11), and three plurals become the words speakers use (D7) |
+
+**How it was run.** The concepts are not in the corpus, so the words were seeded **in memory only** —
+the proposed forms pushed onto the concept list before the harness's in-memory seed — and every plan
+rendered through the engine **source at HEAD in a detached worktree**, because other sessions had
+uncommitted engine edits in the tree at the time. Each render was checked against every shipped
+definition in all seven languages and against the batch's other 37: **no collision anywhere**. A
+graph walk over every definition, the batch included, adds exactly two mutual pairs, both of the
+kinds the corpus already accepts: FAMILY ↔ RELATIVE (a group and its member, as KEY ↔ KEYBOARD) and
+SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
+
+**What P11 did not know, and the tickets correct:**
+
+1. **BROTHER and SISTER can be glossed.** D12 files them as undefinable because the sex adjective on
+   their genus gives *un fratello maschile* ("a male brother") — true, and probed. The way around it
+   is not the genus but the **relative clause**: a *person* who has the same parents, where the head
+   is neutral in all seven languages. SIBLING, BROTHER and SISTER all ship on that one shape
+   ([B69](B-needs-seed/B69-brothers-and-sisters.md)), and so do GRANDSON and GRANDDAUGHTER on a
+   different route — the grandchild word is neutral everywhere (it *nipote*, ja 孫), so the sex
+   adjective works there.
+2. **SON and DAUGHTER are the two that stay on the literal, and not for D12's reason.** Their
+   working gloss ("a parent's male child") renders in all seven; what refuses it is that
+   CHILD_OFFSPRING is glossed "a son or a daughter", and a genus and its species cannot define each
+   other. [B68](B-needs-seed/B68-the-family.md) spends the definition on CHILD_OFFSPRING, where the
+   Italian, Spanish and Portuguese word is genuinely ambiguous (*figlio* is both the son and the
+   offspring), and records the swap for whoever prefers it the other way round.
+3. **FAMILY is not seeded.** D10 marks it ✓ ("FAMILY under GROUP ✓"), and the corpus has no such
+   concept — it is listed in [P08](../features/P-planning/P08-collective-nouns/README.md) as well,
+   and B68 seeds it.
+4. **Re-pointing PARENT changes three languages, not seven.** English, French, German and Japanese
+   have one word for a child of either sense, so only Italian, Spanish and Portuguese move (*figli*,
+   *hijos*, *filhos*, against today's *bambini*, *niños*, *crianças*).
+5. **One shape is new and one defect is live.** CHILD_OFFSPRING's gloss is the corpus's first
+   **coordination in subject position** ("a son or a daughter", ja 息子か娘) — the corpus coordinates
+   inside a gloss already, in PLURAL's object and NEUTER's predicative. And Spanish puts the personal
+   *a* after *tener* ("una persona que tiene **a** los mismos padres"), which
+   [`takesPersonalA.ts:12`](../../packages/engine/src/languages/es/takesPersonalA.ts#L12) marks on
+   every determined human object; *tener* is the verb that takes none. **No bug file covers it**, and
+   B69's three glosses need it fixed with their seed — the [B59](done/B59-time-words.md) precedent
+   (German *dunkele*). Two more defects were met on rejected leads and are recorded, not ticketed:
+   the superlative's unfused article (it *di l'età più grande*, pt *de a maior idade*) and the
+   Japanese comitative gap, which goes unmarked in a relative clause and which
+   [B74](B-needs-seed/B74-partners-and-friends.md) works around with an adverb (一緒に住む人).
 
 ### Done
 

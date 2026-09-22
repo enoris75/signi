@@ -24,6 +24,13 @@ Twelve of their concepts do not exist yet; the eleven that wait only for a gloss
 TODAY, JUST, STILL, SHOULD, MIGHT, ONLY, THERE, and the differentia ALLOWED) were seeded by
 B59–B67.
 
+**The P11 kin sweep of 2026-09-22 added none.** Its 41 concepts
+([B68](../B-needs-seed/B68-the-family.md)–[B74](../B-needs-seed/B74-partners-and-friends.md))
+compose 37 glosses on the corpus as it stands, plus a re-point of PARENT's; the four left on the literal — SON, DAUGHTER, MOM and
+DAD — are literal by design, and the engine work
+[P11](../../features/P-planning/P11-family-and-relationships/README.md) needs is the feature's own,
+which no definition reads.
+
 C23–C28, the six the [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22)
 filed, were driven to a verdict the same day and are all in [`done/`](../done/): **123 concepts
 shipped a gloss**, and the rest are literal by design, every lead probed. Four constructs were built

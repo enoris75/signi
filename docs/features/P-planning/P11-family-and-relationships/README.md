@@ -10,6 +10,8 @@ changes with whose relative it is: 母 is my mother, お母さん is yours.
 and German read the new `possessed` column. English, Italian, Spanish and Portuguese need only data,
 because Italian's article rule for kin nouns already exists ([A85](../../../bugs/fixed/A85-italian-kinship-possessive-article.md)).
 **Status:** planning. The decisions below are **proposed**, not yet confirmed; each carries a recommendation.
+The **localization tickets for these concepts' definitions are catalogued** as B68–B74 (2026-09-22, see
+*Localization tickets* below); they seed every word in §4 and correct some of D12's rows.
 
 | lang | my mother runs | your mother runs | a mother runs | my older brother runs | my son marries your daughter |
 |---|---|---|---|---|---|
@@ -286,6 +288,37 @@ The Japanese adjectives end in の so that
 3. API: `POST /api/translate` with the plans behind both tables at the top; compare all 7 languages.
 4. In the browser (5173): give MOTHER a 1st-person possessor and check ja 母. Switch it to 2nd person
    (お母さん), then remove it (母親). Add ELDER to BROTHER and check 兄, *fratello maggiore*, *frère aîné*.
+
+## Localization tickets
+
+Catalogued on 2026-09-22, **before** the seeding rather than after: each word was seeded in memory
+and its definition rendered through the engine source at HEAD, the way
+[P09](../P09-core-vocabulary/README.md) was. The 41 concepts of §4 are
+[B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), one
+ticket per branch of the family, and their **Seed first** tables are this plan's §4 with the forms
+checked, so authoring one is the seeding and the tooltips in a single pass. **37 of the 41 concepts
+ship a gloss**, PARENT's is re-pointed (D11), and **no C ticket was needed**: every definition
+composes on the corpus as it stands, and none of them reads the columns §2 and §3 add, because a
+definition has no possessor. The tickets can therefore be authored before, during or after the
+engine work here.
+
+What [the P11 sweep](../../../localization/localization-tasks.md#the-p11-sweep-of-2026-09-22)
+changes in this plan:
+
+- **D12 is too pessimistic.** BROTHER and SISTER *can* be defined — not by the sex adjective on
+  their genus (*un fratello maschile*, as D12 says) but by a relative clause on PERSON, which is
+  neutral in all seven: "a male person who has the same parents"
+  ([B69](../../../localization/B-needs-seed/B69-brothers-and-sisters.md)). GRANDSON and
+  GRANDDAUGHTER ship on the adjective after all, because *nipote*, *petit-enfant*, *Enkelkind* and
+  孫 are neutral ([B71](../../../localization/B-needs-seed/B71-grandparents-and-grandchildren.md)).
+- **SON and DAUGHTER are the two that stay on the literal**, and for a different reason than D12
+  gives: their working gloss ("a parent's male child") would define CHILD_OFFSPRING's species by the
+  genus its own gloss names ("a son or a daughter"), a circle
+  ([B68](../../../localization/B-needs-seed/B68-the-family.md)). MOM and DAD stay literal because
+  register is not a differentia, which is D13 read from the definitions' side.
+- **D10's ✓ on FAMILY is wrong** — the corpus has no FAMILY concept; B68 seeds it.
+- **One engine defect blocks three tooltips**: Spanish puts the personal *a* after *tener* ("tiene
+  **a** los mismos padres"), and B69's seed has to fix it. No bug file covers it.
 
 ## Later languages
 
