@@ -226,9 +226,11 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-**One open: C29.** C30–C40 were filed with the P09 batch on 2026-09-22, one per construct, and
-**all eleven were built the same day** — see the Done table below and each file's own `## Done`. What
-is left here is C29's temporal complement, which still blocks TODAY, JUST and STILL.
+**None open.** C29–C40 were filed with the P09 batch on 2026-09-22, one per construct, and **all
+twelve were built the same day** — see the Done table below and each file's own `## Done`. C29, the
+temporal complement, was the last of them, and with it every P09 word that a construct blocked is
+glossed. Five of P09's §3 rows are still unbuilt (E1, E2, E4, E5 and E6's wh-question), but no
+catalogued string or gloss waits on them, which is why none is a C ticket.
 
 Each row names the P09 words its construct blocked: some could not be seeded at all until it landed,
 and the others **were already seeded** — B59–B67 landed them on 2026-09-22 — and only their gloss
@@ -236,7 +238,7 @@ waited. A retired row says what the construct turned out to be.
 
 | # | File | Blocked on | Could not be seeded | Gloss waited (seeded 2026-09-22 by) | Shipped |
 |---|---|---|---|---|---|
-| C29 | [C-needs-engine/C29-temporal-complement.md](C-needs-engine/C29-temporal-complement.md) | a temporal complement (P09 E3) | — | TODAY (B59), JUST, STILL (B67) | **open** |
+| C29 | [done/C29-temporal-complement.md](done/C29-temporal-complement.md) | a temporal complement (P09 E3) | — | TODAY (B59), JUST, STILL (B67) | `ComplementType.temporal` + `TemporalRelation`; all three glossed, MOMENT and TEMPORAL_COMPLEMENT seeded, MOMENT literal by design |
 | C30 | [done/C30-content-clause-with-expletive-subject.md](done/C30-content-clause-with-expletive-subject.md) | a content clause as subject, "it is right that…" (E4) | — | SHOULD, MIGHT (B63) | `PhrasePlan.contentSubject`; both glossed, POSSIBLE seeded, the present subjunctive extended to it/fr |
 | C31 | [done/C31-numerals.md](done/C31-numerals.md) | numerals (E7) | ONE, TWO, THREE | DAY, WEEK, YEAR (B59) | `NounPhrase.numeral`; all three glossed, HOUR and MONTH seeded; the three are **values**, not concepts |
 | C32 | [done/C32-indefinite-pronouns.md](done/C32-indefinite-pronouns.md) | an indefinite pronoun, *something* / *nothing* (E7) | SOMETHING | ONLY (B67) | a two-form pronoun; SOMETHING seeded and glossed, ONLY literal by design |
@@ -441,7 +443,7 @@ composed definitions to 430:
 |---|---|---|---|
 | words seeded | 60 P09 + 12 differentia | **73** | NEXT_COMING, which B66 proposed as optional: the seeded NEXT is the sequence sense, so without it no Romance language can say "next week" |
 | glosses | 47 P09 + 5 differentia + ANSWER | **56** | STAY and OUTSIDE, which B61 had left to the author and which both pass the C05 test; NEXT_COMING's own; and ANSWER's, which the forecast counted as an offer |
-| blocked on a construct | 11 | **11** | unchanged: DAY, WEEK, YEAR (C31), TODAY, JUST, STILL (C29), SHOULD, MIGHT (C30), ONLY (C32), THERE (C40), EVEN (C39, and still unseeded) |
+| blocked on a construct | 11 | **11** | unchanged: DAY, WEEK, YEAR (C31), TODAY, JUST, STILL (C29), SHOULD, MIGHT (C30), ONLY (C32), THERE (C40), EVEN (C39, and still unseeded). All eleven were unblocked the same day — see below |
 | literal by design | 3 | **3** | TRY, AMERICAN, RIGHT_SIDE, each with its leads probed against the final seed |
 
 The words that stayed unglossed and are not P09 rows are the differentia the batch bought: MIND,
@@ -449,21 +451,25 @@ ERROR and REALITY are root nouns of [C26](done/C26-root-nouns-on-the-literal.md)
 a verb root of [C28](done/C28-verb-roots-without-a-gloss.md)'s, and ALLOWED the state LET leaves,
 which [C36](done/C36-let-bare-infinitive.md) records beside LET.
 
-#### And the eleven constructs, the same day
+#### And the twelve constructs, the same day
 
-C30–C40 were all built on 2026-09-22, which closes every §3 row but E3's temporal complement (C29).
-The corpus went from 611 concepts to **624** and from 430 composed definitions to **441**:
+C29–C40 were all built on 2026-09-22, which closes six of P09's eleven §3 rows — E3, E7, E8, E9, E10
+and E11 — and every P09 word that was blocked on one. Five rows stay open and no ticket owns them:
+E1's spatial relations, E2's complement types, E4's clauses (including the clause readings of
+*after* / *before* / *during*, which are E4's and not E3's), E5's standard of comparison, and E6's
+wh-question. The corpus went from 611 concepts to
+**626** and from 430 composed definitions to **445**:
 
 | | before | after | the difference |
 |---|---|---|---|
-| P09 words blocked on a construct | 11 | **3** | TODAY, JUST and STILL, all C29's. DAY, WEEK, YEAR, SHOULD, MIGHT and THERE are glossed; ONLY is literal by design; **EVEN turned out not to be a concept at all** |
+| P09 words blocked on a construct | 11 | **0** | DAY, WEEK, YEAR, SHOULD, MIGHT, THERE and — with C29 last — TODAY, JUST and STILL are glossed; ONLY is literal by design; **EVEN turned out not to be a concept at all** |
 | P09 words that could not be seeded | 12 | **0** | ONE, TWO, THREE and EVEN are *values*, not concepts; SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET, OWN_ADJECTIVE and MR are seeded |
-| words seeded | 73 | **+13** | SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET, OWN_ADJECTIVE, MR, and the eight differentia and names the glosses needed: POSSIBLE, HOUR, MONTH, PETER, MARY |
-| composed definitions | 430 | **441** | SHOULD, MIGHT, DAY, WEEK, YEAR, THERE, VERY, LIKE, LET, OWN_ADJECTIVE, SOMETHING |
+| words seeded | 73 | **+15** | SOMETHING, VERY, TOO, LIKE, HELP_VERB, LET, OWN_ADJECTIVE, MR, and the differentia, names and grammar terms the glosses needed: POSSIBLE, HOUR, MONTH, PETER, MARY, and C29's MOMENT and TEMPORAL_COMPLEMENT |
+| composed definitions | 430 | **445** | SHOULD, MIGHT, DAY, WEEK, YEAR, THERE, VERY, LIKE, LET, OWN_ADJECTIVE, SOMETHING, and C29's TODAY, JUST, STILL and TEMPORAL_COMPLEMENT |
 
-Seven of the new words are **literal by design**, each with its leads probed and recorded in its own
-file: HELP_VERB, TOO, ALLOWED, ONLY, MR, PETER and MARY (names are names), with HOUR and MONTH as
-units. That is the batch's second recurring verdict, beside the first — that a word a construct was
+Eight of the new words are **literal by design**, each with its leads probed and recorded in its own
+file: HELP_VERB, TOO, ALLOWED, ONLY, MR, PETER and MARY (names are names), and C29's MOMENT — whose
+differentia would be SHORT, which the corpus does not have — with HOUR and MONTH as units. That is the batch's second recurring verdict, beside the first — that a word a construct was
 filed for need not be a concept.
 
 **How it was run.** The concepts being glossed are not in the corpus, so each ticket seeded its
@@ -742,6 +748,7 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
 | C38 | [done/C38-title-before-a-name.md](done/C38-title-before-a-name.md) | **built personal names and the title**, `NounPhrase.title`. Seeded **PETER** and **MARY** — the corpus's first people — and **MR**, flagged `title` so no noun picker offers it. Title and name fuse into one word in the translator, which is what puts the title in every slot a name can fill and makes the article agree with the **title** (*il signor Pietro*, *el señor Pedro*, and none in en/fr/de); Japanese writes it after the name. A personal name resolves **bare**, which it/fr had no way to say of a proper noun (*a Pietro*, not *al Pietro*). All three are literal by design. German's weak *Herrn* is the one thing named and not done |
 | C39 | [done/C39-focus-particle-on-a-noun-phrase.md](done/C39-focus-particle-on-a-noun-phrase.md) | **built the focus particle**, `NounPhrase.focus` — `only \| even \| also`, a value, so **EVEN is not a concept** and its gloss question dissolves with it. Six languages write a word beside the phrase (en *too* and fr *aussi* after it); Japanese writes a particle that replaces が / を / は and follows every other, which is the `no` circumfix's own rule and so one site: 猫だけ, 猫さえ, 猫も, 家にも. A coordination takes none. The six reach the subject and the direct object; a complement's focus, which belongs in front of the adposition, is what is left |
 | C40 | [done/C40-french-distal-demonstrative.md](done/C40-french-distal-demonstrative.md) | **built the contrastive demonstrative**, `NounPhrase.contrastive` — read by French alone, which neutralises this/that in *ce* and marks the distance with the postposed clitic (*ce lieu-là*, *ce chat-ci*). It closes the noun's own words, behind its adjectives and ahead of a modifier, possessor or relative. THERE → in that place, which without it was HERE's gloss character for character |
+| C29 | [done/C29-temporal-complement.md](done/C29-temporal-complement.md) | **built the temporal complement**, the *when* a clause had no slot for — `ComplementType.temporal` carrying a `TemporalRelation` specifier: `at \| ago \| until \| after \| before \| during`, all six of the ticket's list. `at` is the one whose word the **noun** picks (`temporal_prep`: en *on* a day but *at* a time and *in* a week, de *an* / *zu* / *in*), each language keeping a generic fallback; the other five are the relation's own. Three languages have no preposition for *ago* at all — en / it postpose a word, ja postposes 前に, and fr / es / pt front an impersonal verb (*il y a*, *hace*, *há*) — while German spells it with the *vor* it also spells *before* with, and *während* is the one that governs the genitive. TODAY → on this day; JUST → a moment ago; STILL → until this time, which the *until* finally tells from NOW's "at this time". Seeded **MOMENT** (literal by design: "short" is not in the corpus) and **TEMPORAL_COMPLEMENT**; **Spanish JUST changed lexeme to *recién***, because its gloss rendered its old word back. Plan-only, like the object predicative and the comitative |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

@@ -21,7 +21,7 @@ Six are SVO (en, it, fr, de, es, pt) and one is SOV (ja, with は/を particles 
 - **Grammatical aspect** — neutral, progressive, prospective, resultative
 - **Mood** — indicative, conditional (second conditional "if… would…"), imperative (commands)
 - **Modal verbs** — obligation (must), ability (can), volition (will), chainable
-- **Complements** — predicative (copular), terminus (dative recipient), and the motion family (locative, direction, source, route)
+- **Complements** — predicative (copular), terminus (dative recipient), the motion family (locative, direction, source, route), and temporal (when)
 - **Determiners** — definite / indefinite / bare, plus quantifiers (some, no, many, few, all)
 - **Noun modifiers** — attributive nouns with their own number and agreeing adjectives
 - **Proper nouns**, animacy-driven adpositions, and more
@@ -64,6 +64,7 @@ Per-verb-licensed arguments beyond the direct/indirect object:
 - **Predicative** — the copular complement of *become / seem / appear / be*, describing the subject with no adposition; head may be a predicate noun ("becomes a legend") or a predicate adjective agreeing with the subject ("seems happy").
 - **Terminus** — the dative recipient/goal ("read the book **to the child**"), rendered with each language's dative marking.
 - **Motion family** — **locative** (in/at a place), **direction** (toward a goal), **source** (away from), and **route** (via/through). Romance engines prefix an ablative adverb on source and use animacy-sensitive adpositions for direction.
+- **Temporal** — *when*, with a relation: at / ago / until / after / before / during ("runs **on this day**", *an diesem Tag*, この日に). `at` is the one relation whose adposition the head **noun** picks — English is *on* a day but *at* a time and *in* a week — and three languages have no preposition for *ago* at all, postposing a word (en *ago*, it *fa*, ja 前に) or fronting an impersonal verb (*il y a*, *hace*, *há*).
 
 ### Determiners and quantifiers
 

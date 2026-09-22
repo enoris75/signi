@@ -6,9 +6,12 @@ as the checklist.
 senses turn into more concepts, plus 36 words that need an engine construct before they can be used.
 **Scope:** all 7 languages, like every seed. Only the checklist is English: the other six languages
 get the same concepts, not their own top 200.
-**Status:** planning. The decisions below are **proposed**, each with a recommendation. The
-localization tickets for the missing words are **catalogued** as B59–B67 and C29–C40 (2026-09-22, see
-*Follow-ups*); they supersede some rows below.
+**Status:** **§2 done, §3 half done**, both on 2026-09-22, by the localization tickets B59–B67 and
+C29–C40 (see *Follow-ups*), which supersede some rows below. Every word of §2 is seeded and every
+one of them is glossed or literal by design; six of §3's eleven constructs are built, and five are
+open (E1, E2, E4, E5 and E6's wh-question), owned by no ticket. The decisions below were
+**proposed**, each with a recommendation; every one is now resolved, and where the seeding
+overturned it the row says so.
 
 ## Why
 
@@ -39,7 +42,7 @@ against the words the English engine writes itself
 | a form of the seeded I / you / he | 18 | I, me, we, us, my, our, you, your, he, him, his, she, her, it, its, they, them, their |
 | written by the engine | 33 | the, a (identifiability); this, that, these, those (deixis); some, all, no, many, few (quantity); more, most (degree); and, or, but, so, then (coordination); not (negation); if, would (hypothetical); will (future); who, which (relative clauses); of, in, to, with, at, from, by, through, over (complements) |
 | **left to seed** | ~~**70**~~ → **1** | §2 — **seeded on 2026-09-22**, see below |
-| **needs the engine first** | **36** | §3 |
+| **needs the engine first** | ~~**36**~~ → **18** | §3 — six of the eleven constructs **built on 2026-09-22**; E1, E2, E4, E5 and E6's wh-question are open |
 
 **§2 is done.** Twelve of its words had been seeded in passing by the localization sweeps (LIVE,
 LIVE_ALIVE, FIND, HEAR, HAPPEN, WORK, COUNTRY, PART, NEXT, NOW, AGAIN, GROUP), three needed no
@@ -61,10 +64,12 @@ The seeding also answered this plan's open questions: **NEED is one lexical conc
 `modal: true`, which costs French its *de* and stacks a bare German infinitive; **MAY is permission
 only**, its possibility sense merging with MIGHT; and the labour verb is WORK_LABOUR, since the
 seeded WORK is the machine sense. Eleven seeded words showed the English literal in their tooltip
-until §3 landed; **it landed the same day**, C30–C40 building eleven constructs between them, so
-eight of those are now glossed (DAY, WEEK, YEAR, SHOULD, MIGHT, THERE, and the newly seeded
-SOMETHING, VERY, LIKE, LET, OWN_ADJECTIVE). **Three still wait, all on C29's temporal complement**:
-TODAY, JUST and STILL. ONLY and ALLOWED were driven to a verdict instead and are literal by design.
+until §3 landed; **it landed the same day**, C29–C40 building twelve constructs between them, so
+**all eleven are now glossed** — DAY, WEEK, YEAR, SHOULD, MIGHT, THERE, the newly seeded SOMETHING,
+VERY, LIKE, LET, OWN_ADJECTIVE, and, on
+[C29](../../../localization/done/C29-temporal-complement.md)'s temporal complement, the last three:
+TODAY ("on this day"), JUST ("a moment ago") and STILL ("until this time"). ONLY and ALLOWED were
+driven to a verdict instead and are literal by design.
 
 A few covered words were still listed below when this plan was written, because their most common
 use was missing. Both are now seeded, by [C31](../../../localization/done/C31-numerals.md) and
@@ -202,16 +207,32 @@ already treats *may* and *might* as true auxiliaries
 | 101 | back | `COME_BACK` | D3. |
 | 186 | off | — | D3. TURN_OFF covers the common case. "Take off" and "get off" can come later. |
 
-## 3. Needs the engine first (36)
+## 3. Needs the engine first (11 constructs → 5 open)
 
-Each group is a construct the engine doesn't have yet. Each is its own feature task, to be split off
-when it is scheduled.
+Each group was a construct the engine didn't have. **Six of the eleven were built on 2026-09-22** by
+the twelve C tickets this plan's *Follow-ups* filed: **E3** as
+[C29](../../../localization/done/C29-temporal-complement.md) (the last of them), **E7** as
+[C31](../../../localization/done/C31-numerals.md) and
+[C32](../../../localization/done/C32-indefinite-pronouns.md), **E8** as
+[C33](../../../localization/done/C33-degree-adverbs-on-adjectives.md), **E9** as
+[C34](../../../localization/done/C34-like-experiencer-verb.md),
+[C35](../../../localization/done/C35-lexical-object-case.md) and
+[C36](../../../localization/done/C36-let-bare-infinitive.md), **E10** as
+[C37](../../../localization/done/C37-own-intensifier.md) and **E11** as
+[C38](../../../localization/done/C38-title-before-a-name.md). Only E3 is annotated in the table
+below; what each of the others shipped is in its own ticket and in
+[the Part C index](../../../localization/localization-tasks.md#part-c--needs-engine--deferred-c-needs-engine),
+which is the record.
+
+**Five are open**, and each is still its own feature task, to be split off when it is scheduled:
+**E1** (`on` is still not a `PathSpecifier`), **E2** (`ComplementType` still has no purpose, topic,
+role or privative), **E4**, **E5**, and the wh-question half of **E6**.
 
 | # | construct | words | notes |
 |---|---|---|---|
 | E1 | Spatial relations | on, into, between, against | `on` is one more [`PathSpecifier`](../../../../packages/shared/src/index.ts#L237) value, built exactly like [A02](../../A-ready/A02-locative-near-far/README.md) (*su, sur, auf, en/sobre, em/sobre, の上に*). `into` is `direction` plus the `in` relation, with de *in* + accusative. `between` needs two landmarks. |
 | E2 | New complement types | for, about, as, without | Purpose / beneficiary (*per, pour, für, para*), topic (*di, sur, über, sobre*), role (*come, comme, als, como*), and the negative of `instrumental` (*senza, sans, ohne, sin*). [`ComplementType`](../../../../packages/shared/src/index.ts#L183) has none of these. |
-| E3 | Time | after, before, during | No temporal complement exists yet. The same words also introduce clauses (E4). |
+| ~~E3~~ | ~~Time~~ — **built 2026-09-22** | after, before, during | **Done** ([C29](../../../localization/done/C29-temporal-complement.md)): `ComplementType.temporal`, carrying a `TemporalRelation` — `at \| ago \| until \| after \| before \| during`. The three words are relations on a noun phrase ("after this day", *nach diesem Tag*, この日の後に), and the complement also gave TODAY, JUST and STILL the glosses they waited for. `at` turned out to be the one relation whose adposition the **head noun** picks, not the relation (en *on* a day but *at* a time). The same words as **clause** introducers are still E4's. |
 | E4 | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
 | E5 | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
 | E6 | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
@@ -248,12 +269,19 @@ backend runs the builds, not `src`.
 - **A builder control this seeding wants, and no C ticket owns**: the frontend never builds an
   `infinitiveComplement`, so "needs to run" and "tries to run" render from a plan but cannot be
   built. One control would serve DESIRE, NEED and TRY alike.
+- **A second one, from §3: the temporal complement has no ring.**
+  [C29](../../../localization/done/C29-temporal-complement.md) built it plan-only, the way the object
+  predicative and the comitative are — it glosses TODAY, JUST and STILL, and a plan can say *when*,
+  but the canvas cannot. Giving it a box means its selection fields *and* a toolbar for the relation
+  (at / ago / until / after / before / during), the way the route and locative rings draw one for
+  their path. It would be the first complement box added since the canvas was laid out, so where it
+  sits is a layout question as much as a control one.
 - **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
   are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose
   **Seed first** tables are this plan's seeding with the forms checked, and §3's content words are
-  [C29–C40](../../../localization/C-needs-engine/README.md), one per construct (C30–C40 built
-  2026-09-22; C29 open). 47 of the 61
+  [C29–C40](../../../localization/C-needs-engine/README.md), one per construct (**all twelve built
+  2026-09-22**, C29 last). 47 of the 61
   shipped a gloss, as forecast, and nine more concepts did besides. [The P09 sweep](../../../localization/localization-tasks.md#the-p09-sweep-of-2026-09-22)
   lists what they change here: TALK, COME_BACK and STATE_CONDITION are already concepts (SPEAK,
   RETURN, STATE); the labour verb is WORK_LABOUR, since the seeded WORK is the machine sense; the help

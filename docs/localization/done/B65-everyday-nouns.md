@@ -144,7 +144,7 @@ Readings to judge on authoring:
    concept will want too, so whoever seeds EVENT must give it another gloss. What Japanese 場合
    actually means is "a time when a thing happens", and that needs a temporal relative. On TIME,
    the locative gap renders *where*: "a time where", *un tempo dove*, *un tiempo donde*, *um tempo
-   onde*. That is E3's time gap ([C29](../C-needs-engine/C29-temporal-complement.md)), so it
+   onde*. That is E3's time gap ([C29](C29-temporal-complement.md)), so it
    is recorded here, not blocked on. "A fact that happens" and "an action that happens" are wrong:
    a fact is so, and an action is done. EXAMPLE's shipped "a phrase that one shows" is not
    restated.
@@ -280,7 +280,7 @@ What landed differently from the plan:
    `sweep-definitions.test.ts` finds no collision with any shipped gloss in any language.
 5. **CASE_INSTANCE keeps its two marked languages** (reading 3), unchanged by the landing: German
    *ein Ding, das geschieht* and Japanese 起こるもの. The temporal reading 場合 actually has stays
-   with [C29](../C-needs-engine/C29-temporal-complement.md), whose gap still renders *a time
+   with [C29](C29-temporal-complement.md), whose gap still renders *a time
    **where** a thing happens* (*un tempo dove*, *um tempo onde*).
 6. **`isA` was set only where this file asked for it**: HAND under ORGAN (the base's), OBJECT_THING
    under THING. PROBLEM, CASE_INSTANCE, SYSTEM and the two programs are seeded as roots, as WALL and

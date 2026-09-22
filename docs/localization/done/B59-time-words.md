@@ -4,7 +4,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. The five time words of P09 �
 seeded early). All five seed today, and one of them glosses: NIGHT, on FLAME's part-whole shape
 with DAY as the whole and one new adjective, DARK. DAY, WEEK and YEAR are measured in numbers the
 engine does not have (E7), and TODAY is "on this day", a temporal complement (E3): DAY, WEEK and YEAR go to
-[C31](../done/C31-numerals.md), TODAY to [C29](../C-needs-engine/C29-temporal-complement.md). The words come from
+[C31](../done/C31-numerals.md), TODAY to [C29](C29-temporal-complement.md). The words come from
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
@@ -120,9 +120,9 @@ No proposed render collides with a shipped gloss. Four readings to judge on auth
    **time gap**: `RelativeClause.headRole` takes a `ComplementType`, and none of them is temporal, so
    the relative waits on E3's temporal complement. It would also seed EARTH and SUN for one tooltip
    and borrow TURN from B61. C31 owns YEAR for the calendar route, and
-   [C29](../C-needs-engine/C29-temporal-complement.md) records the time gap as the other.
+   [C29](C29-temporal-complement.md) records the time gap as the other.
 
-4. **TODAY is blocked on a temporal complement — [C29](../C-needs-engine/C29-temporal-complement.md), E3.** Its gloss is "on this day" (de *an
+4. **TODAY is blocked on a temporal complement — [C29](C29-temporal-complement.md), E3.** Its gloss is "on this day" (de *an
    diesem Tag*, ja この日に). A time adverb is a temporal locative, and every relation the engine has
    gets the adposition wrong in at least three languages:
 
@@ -215,7 +215,7 @@ What landed differently from the plan:
    d'années* and *cette année* render, where *an* would give *beaucoup d'ans*. Its Japanese 年 reads
    とし on its own, and *this year* is この年 where the language says the fused 今年 — the same gap
    WEEK's この週 shows. YEAR's own gloss stays with C31 (the calendar route) and
-   [C29](../C-needs-engine/C29-temporal-complement.md) (the astronomical one), untouched by the seed.
+   [C29](C29-temporal-complement.md) (the astronomical one), untouched by the seed.
 4. **TODAY is seeded with no `subtype`**, so it stands where NOW stands — after the verb in English,
    before the object in Romance and German, before the verb in Japanese (*the cat eats today*, *il
    gatto mangia oggi il cibo*, 猫は食べ物を今日食べます). Japanese 今日 is the fused deictic word,

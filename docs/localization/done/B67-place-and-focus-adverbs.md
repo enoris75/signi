@@ -4,7 +4,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. This ticket covers P09's eig
 *Adverbs*, D4). Three ship on this seed. HERE needs no new differentia, ALSO waits on B66's SAME, and
 REALLY needs one new noun plus the fix for
 [A219](../../bugs/fixed/A219-french-bare-singular-after-dans.md), **which landed on 2026-09-22**. THERE, JUST, STILL and ONLY wait on the engine:
-JUST and STILL on a temporal complement ([C29](../C-needs-engine/C29-temporal-complement.md)), ONLY on *nothing*
+JUST and STILL on a temporal complement ([C29](C29-temporal-complement.md)), ONLY on *nothing*
 ([C32](../done/C32-indefinite-pronouns.md)), THERE on the French distal demonstrative
 ([C40](../done/C40-french-distal-demonstrative.md)). EVEN's concept waits as well, because Japanese has no verb
 adverb for it ([C39](../done/C39-focus-particle-on-a-noun-phrase.md)). The words come from
@@ -206,7 +206,7 @@ Leads, probed (MOMENT\* is a candidate, seeded in memory only):
      as naturally as with the *allí* / *ali* proposed above.
 2. **JUST: blocked on E3 (a temporal complement).**
    - The gloss is "a moment ago", and *ago* measures back from now: *poco fa*, *il y a un instant*,
-     *vor einem Augenblick*, *hace un momento*, さっき, *há pouco*. → [C29](../C-needs-engine/C29-temporal-complement.md) (E3).
+     *vor einem Augenblick*, *hace un momento*, さっき, *há pouco*. → [C29](C29-temporal-complement.md) (E3).
    - Every construct-free lead fails:
      - ALREADY's "at a previous time" collides in all seven.
      - The previous moment is the one before another moment, not before now.
@@ -321,7 +321,7 @@ What landed differently from the plan:
    "ago" phrases then take a manner adverb's place after the verb and before the object (*la chatte a
    mangé à l'instant la nourriture*, *ha comido hace un momento la comida*), which reads but is not
    where those languages would put the phrase. That is the position D4 asked to be pinned, and it is,
-   in the new test file; the gloss still waits on [C29](../C-needs-engine/C29-temporal-complement.md).
+   in the new test file; the gloss still waits on [C29](C29-temporal-complement.md).
 5. **THERE, JUST, ONLY and STILL ship with no gloss**, and their leads were re-probed at HEAD. Two
    rows changed, neither verdict: A218 gives THERE's leads *an jenem Ort*, *am Ort* and *an einem
    fernen Ort* (French still collides with HERE's *dans ce lieu*, which is what blocks it), and SAME's
