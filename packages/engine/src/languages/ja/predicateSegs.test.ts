@@ -147,6 +147,23 @@ describe('predicateSegs', () => {
     test('regression: an animate owner keeps 持つ and を', () => {
       expect(text(predicateSegs(vp(MOTSU), walls, undefined, undefined, false, false, true))).toBe('壁を持っています');
     });
+
+    // A217: the existential verb follows what exists, which under HAVE is the thing possessed.
+    test('an animate thing possessed takes いる', () => {
+      expect(text(predicateSegs(vp(MOTSU), el(np(NEZUMI)), undefined))).toBe('ネズミがいます');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), el(np(NEZUMI)), undefined))).toBe('ネズミがいませんでした');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), el(np(NEZUMI)), undefined))).toBe('ネズミがいたら');
+    });
+
+    // A relative clause on the thing possessed has no object left: the head fills it, and says which.
+    test('animateObject names the thing possessed when the object slot is the gap', () => {
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true, false, false, true))).toBe('いる');
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true, false, false, false))).toBe('ある');
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true))).toBe('ある');
+      // BE reads its subject, whatever it is told about an object.
+      const inHouse = complements({ locative: complement(np(IE)) });
+      expect(text(predicateSegs(vp(DESU), undefined, inHouse, undefined, false, false, false, true))).toBe('家にあります');
+    });
   });
 
   // A132: a state verb says the state holds with 〜ている; its plain 〜ます names the change of state.

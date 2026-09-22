@@ -34,6 +34,15 @@ describe('relativeClauseSegs', () => {
     expect(text(relativeClauseSegs(np(KABE, {}, { relative: theHouseHas })))).toBe('家にある');
   });
 
+  // A217: the head fills the object's gap, so it is what exists, and picks いる or ある.
+  test('an animate head the owner has takes いる', () => {
+    const theHouseHas = { headRole: 'directObject' as const, subject: el(np(IE)), verbPhrase: vp(MOTSU) };
+    expect(text(relativeClauseSegs(np(NEKO, {}, { relative: theHouseHas })))).toBe('家にいる');
+    // A relative on the owner keeps the object in the clause, and reads it there.
+    const hasACat = { headRole: 'subject' as const, verbPhrase: vp(MOTSU), directObject: el(np(NEKO)) };
+    expect(text(relativeClauseSegs(np(IE, {}, { relative: hasACat })))).toBe('猫がいる');
+  });
+
   // A123: a head filling the copula's subject complement leaves a gap filled with そう.
   test('a gap on the copula\'s subject complement is filled with そう', () => {
     const theDogIs = { headRole: 'predicative' as const, subject: el(np(INU)), verbPhrase: vp(DESU, { negative: true }) };

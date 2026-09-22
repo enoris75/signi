@@ -851,15 +851,15 @@ describe('known bugs: a `no` possessor does not negate its clause', () => {
 
 // A217. HAVE with an inanimate owner is the existential (A150): 家は壁があります, the thing possessed
 // marked が. The existential verb follows what exists, which under HAVE is the thing possessed:
-// ある for a thing, いる for a person or an animal (家には猫がいます). The engine keeps ある whatever the
-// possessed noun is, because the choice reads the subject's animacy, and a possessive existential's
-// owner is inanimate by definition. Found by the random phrase "the hot phrase has the cats again."
-// (seed 942845): 熱いフレーズは猫がもう一度あります。
+// ある for a thing, いる for a person or an animal (家には猫がいます). The engine kept ある whatever the
+// possessed noun was, because the choice read the subject's animacy, and a possessive existential's
+// owner is inanimate by definition; it now reads the object's. Found by the random phrase "the hot
+// phrase has the cats again." (seed 942845): 熱いフレーズは猫がもう一度あります。
 describe('known bugs: Japanese HAVE says an animate possession with ある', () => {
   const houseHas = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) =>
     say(clause(np('HOUSE'), 'HAVE', { directObject: object, verbPhrase }), 'ja');
 
-  test.fails('a person or an animal is had with いる', () => {
+  test('a person or an animal is had with いる', () => {
     expect(houseHas(np('CAT'))).toBe('家は猫がいます。');
     expect(houseHas(np('CAT', { number: 'plural', definiteness: 'bare' }), { tense: 'past', negative: true })).toBe('家は猫がいませんでした。');
     expect(houseHas(np('PERSON', { definiteness: 'indefinite' }), { modals: ['MUST'] })).toBe('家は人がいる必要があります。');
@@ -878,5 +878,23 @@ describe('known bugs: Japanese HAVE says an animate possession with ある', () 
     expect(say(clause(np('CAT'), 'HAVE', { directObject: np('BOOK') }), 'ja')).toBe('猫は本を持っています。');
     expect(say(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('猫は家にいます。');
     expect(say(clause(np('HOUSE'), 'HAVE', { directObject: np('CAT') }), 'en')).toBe('the house has the cat.');
+  });
+
+  test('the thing possessed picks the verb wherever it stands, and BE still reads its subject', () => {
+    // A pronoun, a quantified plural, a `no` object, a question and the resultative.
+    expect(houseHas(np('FIRST_PERSON'))).toBe('家は私がいます。');
+    expect(houseHas(np('PERSON', { number: 'plural', definiteness: 'many' }))).toBe('家は多くの人がいます。');
+    expect(houseHas(np('CAT', { definiteness: 'no' }))).toBe('家はどの猫もいません。');
+    expect(say({ ...clause(np('HOUSE'), 'HAVE', { directObject: np('DOG') }), interrogative: true }, 'ja')).toBe('家は犬がいますか？');
+    expect(houseHas(np('CAT'), { aspect: 'resultative' })).toBe('家は猫がいました。');
+    // A relative clause on the owner keeps its object in the clause; one on the thing possessed reads
+    // the head, animate or not.
+    expect(say(clause(np('HOUSE', { relative: { verbPhrase: { verb: 'HAVE' }, directObject: np('CAT') } }), 'BURN'), 'ja')).toBe('猫がいる家は燃えます。');
+    expect(say(clause(np('HOUSE', { relative: { verbPhrase: { verb: 'HAVE' }, directObject: np('WALL') } }), 'BURN'), 'ja')).toBe('壁がある家は燃えます。');
+    expect(say(clause(np('WALL', { relative: { headRole: 'directObject', subject: np('HOUSE'), verbPhrase: { verb: 'HAVE' } } }), 'BURN'), 'ja')).toBe('家にある壁は燃えます。');
+    expect(say(clause(np('PERSON', { relative: { headRole: 'directObject', subject: np('HOUSE'), verbPhrase: { verb: 'HAVE', negative: true } } }), 'RUN'), 'ja'))
+      .toBe('家にいない人は走ります。');
+    // BE: an inanimate subject keeps ある.
+    expect(say(clause(np('BOOK'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('本は家にあります。');
   });
 });

@@ -343,7 +343,7 @@ describe('the diagnostics, as the catalogue plans them', () => {
     },
     'diagnostic.noNounHasPossessor': {
       en: 'No noun has a possessor', it: 'Nessun sostantivo ha un possessore', fr: "Aucun nom n'a de possesseur", de: 'Kein Substantiv hat einen Besitzer',
-      es: 'Ningún sustantivo tiene un poseedor', pt: 'Nenhum substantivo tem um possuidor', ja: 'どの名詞も所有者がありません',
+      es: 'Ningún sustantivo tiene un poseedor', pt: 'Nenhum substantivo tem um possuidor', ja: 'どの名詞も所有者がいません',
     },
     'diagnostic.noNounHasRelative': {
       en: 'No noun has a relative clause', it: 'Nessun sostantivo ha una proposizione relativa', fr: "Aucun nom n'a de proposition relative", de: 'Kein Substantiv hat einen Relativsatz',

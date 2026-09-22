@@ -44,5 +44,8 @@ export function relativeClauseSegs(np: ResolvedNounPhrase): RubySegment[] {
   const complements = rel.headRole === 'predicative' && rel.verbPhrase.verb.forms['copula'] === '1'
     ? { ...rel.complements, predicative: JA_SOU }
     : rel.complements;
-  return [...clauseSubjectSegs, ...agentSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate)];
+  // A head that fills the object slot is the thing possessed of an existential possession, and picks
+  // its verb: 家にいる猫, 家にある壁 (A217).
+  const animateObject = rel.headRole === 'directObject' ? isAnimate([np]) : undefined;
+  return [...clauseSubjectSegs, ...agentSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate, animateObject)];
 }
