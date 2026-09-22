@@ -369,7 +369,7 @@ describe('an adverb of place with BE and LIVE', () => {
 // negation, where each language's scope puts them outside it or swaps the word: "still does not",
 // "noch nicht", "ne … toujours pas"; "does not … either", "auch nicht", "neanche", "ne … pas non
 // plus", "tampoco", "também não". The engine has no adverb scope to say it with (P09 D4).
-describe('known bugs: a focus adverb under a negation (PENDING-L6-1)', () => {
+describe('known bugs: STILL under a negation (PENDING-L6-1)', () => {
   // Now: en "the cat does not still eat the food.", fr "le chat ne mange pas encore la nourriture."
   // ("not yet"), de "der Kater frisst das Essen nicht noch."
   // Want: en "the cat still does not eat the food.", fr "le chat ne mange toujours pas la nourriture.",
@@ -381,6 +381,14 @@ describe('known bugs: a focus adverb under a negation (PENDING-L6-1)', () => {
     });
   });
 
+  test('what it renders now', () => {
+    expect(sayAll(eats('STILL', { negative: true }))).toMatchObject({
+      en: 'the cat does not still eat the food.', fr: 'le chat ne mange pas encore la nourriture.', de: 'der Kater frisst das Essen nicht noch.',
+    });
+  });
+});
+
+describe('known bugs: ALSO under a negation (PENDING-L6-2)', () => {
   // Now: en "the cat does not also eat the food.", it "il gatto non mangia anche il cibo.", fr "le
   // chat ne mange pas aussi la nourriture.", de "der Kater frisst das Essen nicht auch.", es "el gato
   // no come también la comida.", pt "o gato não come também a comida."
@@ -392,10 +400,7 @@ describe('known bugs: a focus adverb under a negation (PENDING-L6-1)', () => {
     });
   });
 
-  test('what they render now', () => {
-    expect(sayAll(eats('STILL', { negative: true }))).toMatchObject({
-      en: 'the cat does not still eat the food.', fr: 'le chat ne mange pas encore la nourriture.', de: 'der Kater frisst das Essen nicht noch.',
-    });
+  test('what it renders now', () => {
     expect(sayAll(eats('ALSO', { negative: true }))).toMatchObject({
       en: 'the cat does not also eat the food.', it: 'il gatto non mangia anche il cibo.', fr: 'le chat ne mange pas aussi la nourriture.',
       de: 'der Kater frisst das Essen nicht auch.', es: 'el gato no come también la comida.', pt: 'o gato não come também a comida.',
@@ -406,7 +411,7 @@ describe('known bugs: a focus adverb under a negation (PENDING-L6-1)', () => {
 // Known bug: a Japanese predicate の-adjective drops its の and takes the copula (jaAdjClass), which is
 // right for 茶色の (猫は茶色です) and wrong for one relating the subject to a proper noun: 猫はアメリカ
 // です reads "the cat is America". Attributively it is right (アメリカの猫).
-describe('known bugs: AMERICAN as a Japanese predicate (PENDING-L6-2)', () => {
+describe('known bugs: AMERICAN as a Japanese predicate (PENDING-L6-3)', () => {
   // Now: 猫はアメリカです。 Want: 猫はアメリカのです。
   test.fails('keeps its の', () => {
     expect(sayAll(is(the('CAT'), 'AMERICAN')).ja).toBe('猫はアメリカのです。');
