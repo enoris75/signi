@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MANGIARE, MONETA, NOI, np, SI, TOPO, TU, VOLPE, vp,
+  CANE, CASA, complement, complements, DARE, DONNA, el, ESSERE, type Forms, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MANGIARE, MONETA, NOI, np, SI, TOPO, TU, VOLPE, vp,
 } from './it.fixtures.js';
 import { relativeText } from './relativeText.js';
 
@@ -94,6 +94,19 @@ describe('relativeText', () => {
     expect(eatenIn({ subject: el(np(SI)) }, { number: 'plural' })).toBe('dove si mangia');
     expect(eatenIn({ subject: el(np(SI)), verbPhrase: vp(MANGIARE, { negative: true }) })).toBe('dove non si mangia');
     expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'under' }] })).toBe('sotto la quale il gatto mangia');
+  });
+
+  // A221: the bare copula goes before its noun subject, "dove" eliding before "è" and "era" only.
+  test('a bare copula after a complement relativizer precedes its noun subject', () => {
+    const isIn = (rest: Partial<ResolvedRelativeClause> = {}, subject = np(GATTO)) =>
+      relativeText(np(CASA, {}, { relative: { headRole: 'locative', subject: el(subject), verbPhrase: vp(ESSERE, {}, 'BE'), ...rest } }));
+    expect(isIn()).toBe("dov'è il gatto");
+    expect(isIn({}, np(GATTO, { number: 'plural' }))).toBe('dove sono i gatti');
+    expect(isIn({ verbPhrase: vp(ESSERE, { tense: 'future' }, 'BE') })).toBe('dove sarà il gatto');
+    expect(isIn({ headSpecifiers: [{ kind: 'path', value: 'under' }] })).toBe('sotto la quale è il gatto');
+    // The negative keeps SV, and so does a dropped pronoun.
+    expect(isIn({ verbPhrase: vp(ESSERE, { negative: true }, 'BE') })).toBe('dove il gatto non è');
+    expect(isIn({}, np(LUI))).toBe('dove è');
   });
 
   // A129: the alarm a cry raises is the cry's a-complement, so its relative takes "al quale", not "che".

@@ -1341,7 +1341,7 @@ describe('known bugs: a pronoun subject in a relative clause', () => {
 // the cursor is" reads "el slot donde el cursor ES" / "o slot onde o cursor É" — the copula of
 // identity. The same relative clause with the locative as a complement rather than the gap is
 // already right ("el gato que está en la casa corre"). The stranded Romance copula ("dove il
-// cursore è", "où le curseur est") is a separate concern; see the bug file's closing note.
+// cursore è", "où le curseur est") was a separate concern, A221.
 describe('known bugs: Spanish and Portuguese use ser in a place relative clause', () => {
   const houseWhereIs = (verbPhrase: Partial<VerbPhrase> = {}, headSpecifiers?: RelativeClause['headSpecifiers']) =>
     sayAll(clause(np('HOUSE', {
@@ -1423,7 +1423,7 @@ describe('known bugs: Spanish and Portuguese use ser in a place relative clause'
     }), 'BURN'))).toMatchObject({ es: 'la casa donde el gato come arde.', pt: 'a casa onde o gato come arde.' });
     expect(houseWhereIs()).toMatchObject({
       en: 'the house where the cat is burns.', de: 'das Haus, in dem der Kater ist, brennt.',
-      it: 'la casa dove il gatto è brucia.', fr: 'la maison où le chat est brûle.', ja: '猫がいる家は燃えます。',
+      it: "la casa dov'è il gatto brucia.", fr: 'la maison où est le chat brûle.', ja: '猫がいる家は燃えます。',
     });
   });
 });
@@ -1519,18 +1519,18 @@ describe('known bugs: the Italian passive si and its compound participle (A213)'
   });
 });
 
-// A221. A place relative whose predicate is the bare copula leaves "è" / "est" alone at the end of the
+// A221. A place relative whose predicate is the bare copula left "è" / "est" alone at the end of the
 // clause, after its noun subject: "un luogo dove il gatto è", "un lieu où le chat est". Italian and
 // French put the verb first there — "dov'è il gatto", "où est le chat" — and in the subject slot the
 // SV order runs the two verbs together: "la casa dove il gatto è brucia". A predicate, another verb, a
 // pronoun or the generic subject keeps SV. Found authoring the C23-C28 sweep.
 describe('known bugs: an Italian or French place relative ends on a bare copula (A221)', () => {
-  const where = (subject: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<RelativeClause> = {}): RelativeClause =>
+  const where = (subject: NonNullable<RelativeClause['subject']>, verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<RelativeClause> = {}): RelativeClause =>
     ({ headRole: 'locative', subject, verbPhrase: { verb: 'BE', ...verbPhrase }, ...extra });
   const place = (relative: RelativeClause) => sayAll({ subject: np('PLACE', { definiteness: 'indefinite', relative }) });
   const itFr = (said: Record<string, string>) => ({ it: said['it'], fr: said['fr'] });
 
-  test.fails('the copula comes before its noun subject', () => {
+  test('the copula comes before its noun subject', () => {
     expect(itFr(place(where(np('CAT'))))).toEqual({ it: "un luogo dov'è il gatto.", fr: 'un lieu où est le chat.' });
     expect(itFr(place(where(np('CAT', { number: 'plural' }))))).toEqual({ it: 'un luogo dove sono i gatti.', fr: 'un lieu où sont les chats.' });
     expect(itFr(place(where(np('CAT'), { tense: 'past' })))).toEqual({ it: "un luogo dov'era il gatto.", fr: 'un lieu où était le chat.' });
@@ -1544,6 +1544,33 @@ describe('known bugs: an Italian or French place relative ends on a bare copula 
     expect(itFr(sayAll({
       subject: np('HOUSE', { definiteness: 'indefinite', relative: where(np('CAT'), {}, { headSpecifiers: [{ kind: 'path', value: 'under' }] }) }),
     }))).toEqual({ it: 'una casa sotto la quale è il gatto.', fr: 'une maison sous laquelle est le chat.' });
+  });
+
+  test('a plural past, a group, an elided article and a marked relation in the past', () => {
+    expect(itFr(place(where(np('CAT', { number: 'plural' }), { tense: 'past' }))))
+      .toEqual({ it: 'un luogo dove erano i gatti.', fr: 'un lieu où étaient les chats.' });
+    expect(itFr(place(where({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'and' }))))
+      .toEqual({ it: 'un luogo dove sono il gatto e il cane.', fr: 'un lieu où sont le chat et le chien.' });
+    expect(itFr(sayAll({ subject: np('HOUSE', { relative: where(np('MAN')) }) })))
+      .toEqual({ it: "la casa dov'è l'uomo.", fr: "la maison où est l'homme." });
+    expect(itFr(sayAll({
+      subject: np('HOUSE', { definiteness: 'indefinite', relative: where(np('CAT'), { tense: 'past' }, { headSpecifiers: [{ kind: 'path', value: 'under' }] }) }),
+    }))).toEqual({ it: 'una casa sotto la quale era il gatto.', fr: 'une maison sous laquelle était le chat.' });
+  });
+
+  // As ruled: only the affirmative, simple, modal-free bare copula inverts. The negative keeps SV in
+  // both languages, and so do a compound tense, a modal, an adverb and a `no` subject.
+  test('the negative, the compound tenses, a modal, an adverb and a no subject keep SV', () => {
+    expect(itFr(place(where(np('CAT'), { negative: true })))).toEqual({ it: 'un luogo dove il gatto non è.', fr: "un lieu où le chat n'est pas." });
+    expect(itFr(place(where(np('CAT'), { modifier: 'NEVER' })))).toEqual({ it: 'un luogo dove il gatto non è mai.', fr: "un lieu où le chat n'est jamais." });
+    expect(itFr(place(where(np('CAT', { definiteness: 'no' }))))).toEqual({ it: 'un luogo dove nessun gatto è.', fr: "un lieu où aucun chat n'est." });
+    expect(itFr(place(where(np('CAT'), { aspect: 'resultative' })))).toEqual({ it: 'un luogo dove il gatto è stato.', fr: 'un lieu où le chat a été.' });
+    expect(itFr(place(where(np('CAT'), { modals: ['MUST'] })))).toEqual({ it: 'un luogo dove il gatto deve essere.', fr: 'un lieu où le chat doit être.' });
+    expect(itFr(place(where(np('CAT'), { modifier: 'ALWAYS' })))).toEqual({ it: 'un luogo dove il gatto è sempre.', fr: 'un lieu où le chat est toujours.' });
+    // A dropped pronoun keeps the unelided "dove è", and a group with a pronoun is resumed by it.
+    expect(place(where(np('THIRD_PERSON', { gender: 'masc' }))).it).toBe('un luogo dove è.');
+    expect(itFr(place(where({ conjuncts: [np('CAT'), np('FIRST_PERSON')], conjunction: 'and' }))))
+      .toEqual({ it: 'un luogo dove il gatto e io siamo.', fr: 'un lieu où le chat et moi, nous sommes.' });
   });
 
   test('regression: a pronoun, the generic subject, a predicate, another verb and the other languages', () => {

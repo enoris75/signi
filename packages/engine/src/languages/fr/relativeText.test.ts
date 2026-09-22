@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, FEU, type Forms, GARCON, IL, JE, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
+import { ALLER, ANGE, CHAT, CHIEN, el, ETRE, FEMME, FEU, type Forms, GARCON, IL, JE, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
 import { relativeText } from './relativeText.js';
 
 const CRIER: Forms = { base: 'crier', alarm_cry: '1', participle: 'crié', '3sg_present': 'crie', '3sg_past': 'cria' };
@@ -75,6 +75,19 @@ describe('relativeText', () => {
     expect(eatenIn()).toBe('où le chat mange');
     expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'in' }] })).toBe('où le chat mange');
     expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'behind' }] })).toBe('derrière laquelle le chat mange');
+  });
+
+  // A221: the bare copula goes before its noun subject, after où and after lequel.
+  test('a bare copula after où or lequel precedes its noun subject', () => {
+    const isIn = (rest: Record<string, unknown> = {}, subject = np(CHAT)) =>
+      relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(subject), verbPhrase: vp(ETRE, {}, 'BE'), ...rest } }));
+    expect(isIn()).toBe('où est le chat');
+    expect(isIn({}, np(CHAT, { number: 'plural' }))).toBe('où sont les chats');
+    expect(isIn({ headSpecifiers: [{ kind: 'path', value: 'behind' }] })).toBe('derrière laquelle est le chat');
+    // The negative keeps SV, and so do a clitic subject and the generic on.
+    expect(isIn({ verbPhrase: vp(ETRE, { negative: true }, 'BE') })).toBe("où le chat n'est pas");
+    expect(isIn({}, np(JE))).toBe('où je suis');
+    expect(isIn({}, np(ON))).toBe("où l'on est");
   });
 
   test('the generic on after où takes the euphonic l\'', () => {

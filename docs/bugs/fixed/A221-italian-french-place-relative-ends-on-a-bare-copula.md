@@ -87,3 +87,34 @@ put the predicate before it:
 | | |
 |---|---|
 | **Test** | `relative.test.ts` → *known bugs: an Italian or French place relative ends on a bare copula (A221)* (1 `test.fails`, plus a regression test for a pronoun, the generic subject, a predicate, another verb and the other languages) |
+
+## Resolved
+
+**2026-09-22.** The trial's shape, narrowed by the rulings on its open decisions:
+
+- [`functions/relativeInvertsCopula.ts`](../../../packages/engine/src/functions/relativeInvertsCopula.ts)
+  (new) — whether a relative gapped on a complement (a place, or a marked relation's "lequel" / "il
+  quale") is the **bare copula** after a **noun** subject: BE with no object, no complement, no
+  pro-form and no adverb, **affirmative, in a simple tense and under no modal** (the past and the
+  future included). A pronoun, a group holding one, the generic subject, a `no` subject and a gap
+  that is no complement's (subject, object, predicative, possessor, agent) all answer no.
+- [`it/relativeText.ts`](../../../packages/engine/src/languages/it/relativeText.ts) — relativizer +
+  predicate + subject, "dove" eliding before *è* and *era* only: *dov'è il gatto*, *dov'era il
+  gatto*, *dove sono i gatti*, *dove sarà il gatto*, *sotto la quale è il gatto*.
+- [`fr/relativeText.ts`](../../../packages/engine/src/languages/fr/relativeText.ts) — predicate +
+  subject after "où" and after "lequel": *où est le chat*, *sous laquelle est le chat*.
+
+**The decisions, as ruled.** The **negative keeps SV** in both languages (*où le chat n'est pas*,
+*dove il gatto non è*), and so do *jamais* / *mai* and a `no` subject. The **resultative keeps SV**
+(*où le chat a été*, *dove il gatto è stato*), as do the other marked aspects and a modal. Italian
+**elides** *dove* before *è* and *era*, and not before *sono*, *erano* or *sarà*. A **dropped
+pronoun** is untouched: *un luogo dove è.* One narrowing beyond the rulings: an adverb makes the
+copula no longer bare, so *dove il gatto è sempre* keeps SV.
+
+**One passing test moved**, as the file foresaw: A199's regression in `relative.test.ts` (*the main
+clause, a locative complement, a predicate nominal and the other five are right*) now reads *la casa
+dov'è il gatto brucia.* and *la maison où est le chat brûle.*
+
+| | |
+|---|---|
+| **Tests** | `relative.test.ts` → *known bugs: an Italian or French place relative ends on a bare copula (A221)*, the `test.fails` now passing, plus two added cases: the plural past, a group subject, an elided article (*dov'è l'uomo*, *où est l'homme*) and a marked relation in the past; and the negative, *jamais*, a `no` subject, the resultative, a modal, an adverb, a dropped pronoun and a group with a pronoun, all keeping SV. Colocated: `functions/relativeInvertsCopula.test.ts` (new), `it/relativeText.test.ts`, `fr/relativeText.test.ts` |
