@@ -210,6 +210,22 @@ describe('subordinateClause', () => {
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, aspect: 'prospective' }), directObject: el(np(BUCH)) }))
         .toBe(', der nicht im Begriff ist , das Buch zu lesen,');
     });
+
+    // A03: a denied word of the verb group spells its own "nicht" here too, through the shared
+    // `finiteNegation` — the verb-final clause keeps them in the Mittelfeld, ahead of the cluster.
+    test('each denied word of the verb group adds a "nicht", ahead of the verb-final cluster', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(GEHEN, { modals: [modal(WOLLEN)], governedNegative: true }) }))
+        .toBe(', der nicht gehen will,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(GEHEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }) }))
+        .toBe(', der nicht nicht gehen will,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(GEHEN, { negative: true, modals: [modal(MUESSEN), { ...modal(KOENNEN), negative: true }] }) }))
+        .toBe(', der nicht nicht gehen können muss,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }), directObject: el(np(BUCH)) }))
+        .toBe(', der das Buch nicht nicht lesen will,');
+      // A "kein" object outranks them all, as it outranks the finite "nicht" (A50).
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { modals: [modal(WOLLEN)], governedNegative: true }), directObject: el(np(MAUS, { definiteness: 'no' })) }))
+        .toBe(', der keine Maus essen will,');
+    });
   });
 
   // A51: a process-level instrument is a subordinate "indem" clause, split out as in the main clause.

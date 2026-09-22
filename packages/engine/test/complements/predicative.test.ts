@@ -789,7 +789,7 @@ describe('known bugs: the predicate is not next to its verb', () => {
     expect(not('BECOME')).toBe('der Kater wird wegen des Hundes nicht müde.');
     expect(not('SEEM')).toBe('der Kater scheint wegen des Hundes nicht müde.');
     expect(not('BE', { aspect: 'resultative' })).toBe('der Kater ist wegen des Hundes nicht müde gewesen.');
-    expect(not('BECOME', { modals: ['MUST'] })).toBe('der Kater muss wegen des Hundes nicht müde werden.');
+    expect(not('BECOME', { negative: false, modals: [{ verb: 'MUST', negative: true }] })).toBe('der Kater muss wegen des Hundes nicht müde werden.');
     // The relative clause, the command and the infinitive share the rule.
     expect(say(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'BECOME', negative: true }, complements: { predicative: { phrase: np('TIRED') }, cause: { phrase: np('MOUSE') } } },

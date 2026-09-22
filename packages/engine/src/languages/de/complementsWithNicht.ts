@@ -32,8 +32,10 @@ export function complementsWithNicht(
   // the sentence says both: "ist nicht wegen des Hundes nicht müde". With no predicate to anchor the
   // clause's, the two land side by side — "läuft nicht nicht wegen des Hundes", which is not German.
   // One "nicht" carries both readings there; telling them apart would need the "sondern" clause the
-  // plan has no room for.
-  const clauseNicht = !predicate && nicht && adjuncts.startsWith(`${nicht} `) ? '' : nicht;
+  // plan has no room for. A clause denying two words of its verb group (A03) hands over two "nicht":
+  // one of them merges with the adjunct's as a single one does, and the other still stands.
+  const clauseNicht = !predicate && nicht && adjuncts.startsWith('nicht ')
+    ? nicht.replace(/^nicht ?/, '') : nicht;
   const parts = predicate ? [...lead, adjuncts, nicht, predicate] : [clauseNicht, ...lead, adjuncts];
   return parts.filter(Boolean).join(' ');
 }

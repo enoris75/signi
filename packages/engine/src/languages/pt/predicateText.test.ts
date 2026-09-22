@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { predicateText } from './predicateText.js';
 import {
   BOM, CANSADO, CAO, CASA, COMER, complement, complements, concept, CRIANCA, DAR, DEVER, el, ELA, ELE, ELES, EU, FELIZ,
-  type Forms, GATA, GATO, GRANDE, LENDA, LIVRO, MENINO, modal, NOS, np, NUNCA, PODER, QUERER, RAPIDAMENTE, RAPOSA,
+  type Forms, GATA, GATO, GRANDE, IR, LENDA, LIVRO, MENINO, modal, NOS, np, NUNCA, PODER, QUERER, RAPIDAMENTE, RAPOSA,
   RATO, SE, SEMPRE, SER, TORNAR_SE, VER, VOCE, vp,
 } from './pt.fixtures.js';
 
@@ -102,6 +102,69 @@ describe('predicateText', () => {
     test('a modal’s adverb trails the modal, the main verb’s the whole group', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEVER, SEMPRE)] }))).toBe('deve sempre comer');
       expect(predicateText(GATO, vp(COMER, { modifier: concept(RAPIDAMENTE), modals: [modal(PODER)] }))).toBe('pode comer rapidamente');
+    });
+
+    // A03. A negation belongs to the word it sits on. `negative` is the finite element's — the
+    // clause's own "não", unchanged — and `governedNegative` is the main verb's, which only a modal
+    // can govern. The two scopes are different sentences and now spell differently: "não quero ir"
+    // denies the wanting, "quero não ir" the going. DEVER is the prohibition either way round.
+    describe('polarity', () => {
+      test('the governed verb takes its own não, inside the chain', () => {
+        expect(predicateText(EU, vp(IR, { modals: [modal(QUERER)], governedNegative: true }))).toBe('quero não ir');
+        expect(predicateText(EU, vp(IR, { negative: true, modals: [modal(QUERER)], governedNegative: true })))
+          .toBe('não quero não ir');
+        expect(predicateText(EU, vp(IR, { modals: [modal(DEVER)], governedNegative: true }))).toBe('devo não ir');
+        expect(predicateText(EU, vp(IR, { modals: [modal(PODER)], governedNegative: true }))).toBe('posso não ir');
+      });
+
+      test('an inner modal is denied where it stands, the main verb behind it', () => {
+        expect(predicateText(EU, vp(IR, { modals: [modal(DEVER), { ...modal(PODER), negative: true }] })))
+          .toBe('devo não poder ir');
+        expect(predicateText(EU, vp(IR, { modals: [modal(DEVER), modal(PODER)], governedNegative: true })))
+          .toBe('devo poder não ir');
+      });
+
+      // Without a modal the main verb IS the finite one, so a stray flag changes nothing: the
+      // clause's "não" is `negative`'s alone and every modal-free rendering is byte-identical.
+      test('the governed não needs a modal to govern it', () => {
+        expect(predicateText(EU, vp(IR, { governedNegative: true }))).toBe('vou');
+        expect(predicateText(EU, vp(IR, { negative: true, governedNegative: true }))).toBe('não vou');
+      });
+
+      test('it leads the aspect auxiliary and keeps the clitic on its own verb', () => {
+        expect(predicateText(EU, vp(COMER, { aspect: 'resultative', modals: [modal(DEVER)], governedNegative: true })))
+          .toBe('devo não ter comido');
+        expect(predicateText(EU, vp(COMER, { aspect: 'progressive', modals: [modal(DEVER)], governedNegative: true })))
+          .toBe('devo não estar comendo');
+        expect(predicateText(EU, vp(TORNAR_SE, { modals: [modal(QUERER)], governedNegative: true }, 'BECOME'), undefined,
+          complements({ predicative: complement(np(LENDA, { definiteness: 'indefinite' })) })))
+          .toBe('quero não tornar-me uma lenda');
+      });
+
+      test('the mood stays on the finite modal', () => {
+        expect(predicateText(EU, vp(IR, { mood: 'conditional', modals: [modal(DEVER)], governedNegative: true })))
+          .toBe('deveria não ir');
+        expect(predicateText(EU, vp(IR, { mood: 'subjunctive', modals: [modal(PODER)], governedNegative: true })))
+          .toBe('pudesse não ir');
+      });
+
+      // The governed "não" is preverbal for everything behind it, so a "nenhum" object or
+      // complement concords with that one. A second "não" on the modal would deny the modal as well.
+      test('a nenhum object or complement concords with the negator inside the group', () => {
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER)], governedNegative: true }), noMouse))
+          .toBe('quer não comer nenhum rato');
+        expect(predicateText(GATO, vp(CORRER, { modals: [modal(QUERER)], governedNegative: true }, 'RUN'), undefined,
+          complements({ locative: complement(np(CASA, { definiteness: 'no' })) })))
+          .toBe('quer não correr em nenhuma casa');
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(DEVER), { ...modal(PODER), negative: true }] }), noMouse))
+          .toBe('deve não poder comer nenhum rato');
+      });
+
+      // The finite reading is untouched: a positive governed group still puts the concord's "não"
+      // on the modal, where it has always been.
+      test('a positive governed group keeps the não on the finite modal', () => {
+        expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER)] }), noMouse)).toBe('não quer comer nenhum rato');
+      });
     });
   });
 

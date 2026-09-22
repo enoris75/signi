@@ -70,7 +70,8 @@ describe('copulaSegs', () => {
     });
   });
 
-  // A128: under a modal the copula takes the form the modal governs, with no tense or polarity of its own.
+  // A128: under a modal the copula takes the form the modal governs, with no tense of its own. A03:
+  // its polarity is its own again — the negation a modal puts on what it governs, not on itself.
   describe('governed forms', () => {
     test('the dictionary form: a na-adjective keeps である, an i-adjective and a state their own', () => {
       expect(copulaSegs(pred(SHIAWASE), 'present', false, 'dict')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'である' }]);
@@ -87,14 +88,34 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'stem'))).toBe('伝説であり');
     });
 
-    test('ignore tense and polarity, which the modal carries', () => {
-      expect(text(copulaSegs(pred(DENSETSU), 'past', true, 'dict'))).toBe('伝説である');
-      expect(text(copulaSegs(pred(OOKII), 'past', true, 'stem'))).toBe('大きくあり');
+    test('ignore tense, which the modal carries', () => {
+      expect(text(copulaSegs(pred(DENSETSU), 'past', false, 'dict'))).toBe('伝説である');
+      expect(text(copulaSegs(pred(OOKII), 'past', false, 'stem'))).toBe('大きくあり');
+    });
+
+    // A03: 幸せでない必要があります — the modal denies the predicate rather than itself.
+    test('the negated dictionary form is the plain ない one', () => {
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'dict'))).toBe('幸せでない');
+      expect(text(copulaSegs(pred(OOKII), 'past', true, 'dict'))).toBe('大きくない');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', true, 'dict'))).toBe('疲れていない');
+      expect(text(copulaSegs(pred(CHAIRO), 'present', true, 'dict'))).toBe('茶色でない');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'dict'))).toBe('伝説でない');
+    });
+
+    // 〜たい cannot sit on ない, so the negated stem goes through the same 〜ないでい bridge a verb
+    // takes (幸せでないでいたいです; see naiSegs).
+    test('the negated stem goes through 〜ないでい', () => {
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'stem'))).toBe('幸せでないでい');
+      expect(text(copulaSegs(pred(OOKII), 'past', true, 'stem'))).toBe('大きくないでい');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', true, 'stem'))).toBe('疲れていないでい');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'stem'))).toBe('伝説でないでい');
     });
 
     test('keep the degree adverb and a no predicate\'s でも', () => {
       expect(text(copulaSegs(pred(OOKII, { degree: 'more' }), 'present', false, 'dict'))).toBe('もっと大きい');
       expect(text(copulaSegs(complement(np(DENSETSU, { definiteness: 'no' })), 'present', false, 'dict'))).toBe('どの伝説でもある');
+      // Denied, the same circumfix closes on the governed ない: どの伝説でもない必要があります.
+      expect(text(copulaSegs(complement(np(DENSETSU, { definiteness: 'no' })), 'present', true, 'dict'))).toBe('どの伝説でもない');
     });
   });
 
@@ -170,6 +191,9 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(bigHappy, 'present', false, 'citation'))).toBe('大きくて幸せである');
       expect(text(copulaSegs(bigHappy, 'present', false, 'dict'))).toBe('大きくて幸せである');
       expect(text(copulaSegs(bigHappy, 'present', false, 'stem'))).toBe('大きくて幸せであり');
+      // A03: denied by the modal that governs it, a governed pair closes on the same "neither … nor".
+      expect(text(copulaSegs(bigHappy, 'present', true, 'dict'))).toBe('大きくも幸せでもない');
+      expect(text(copulaSegs(bigHappy, 'present', true, 'stem'))).toBe('大きくも幸せでもないでい');
       expect(text(copulaSegs(complement(group('or', np(OOKII), np(SHIAWASE))), 'past', false, 'tara'))).toBe('大きいか幸せだったら');
     });
   });

@@ -213,6 +213,57 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective', modifier: concept(IMMER) }), { directObject: mouse })))
         .toBe('der Kater ist nicht immer im Begriff , die Maus zu essen');
     });
+
+    // A03: every word of the verb group carries its own polarity, and German spells each denied one
+    // "nicht" in the slot the sentential one takes — the finite element's first, then the inner
+    // ones. A single "nicht" in a modal cluster already reads under any scope, so ¬want and want ¬go
+    // are deliberately the same sentence; only denying two words at once adds a word.
+    describe('modal polarity', () => {
+      const cannot = { ...modal(KOENNEN), negative: true };
+
+      test('the finite modal and the verb it governs both read as one nicht', () => {
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { negative: true, modals: [modal(WOLLEN)] })))).toBe('der Kater will nicht gehen');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { modals: [modal(WOLLEN)], governedNegative: true })))).toBe('der Kater will nicht gehen');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }))))
+          .toBe('der Kater will nicht nicht gehen');
+      });
+
+      test('an inner modal carries its own, ahead of the infinitive cluster', () => {
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { modals: [modal(MUESSEN)], governedNegative: true })))).toBe('der Kater muss nicht gehen');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { modals: [modal(MUESSEN), cannot] })))).toBe('der Kater muss nicht gehen können');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { modals: [modal(MUESSEN), modal(KOENNEN)], governedNegative: true }))))
+          .toBe('der Kater muss nicht gehen können');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { negative: true, modals: [modal(MUESSEN), cannot] }))))
+          .toBe('der Kater muss nicht nicht gehen können');
+      });
+
+      test('the nicht keep the places one takes: after a known object, before an adverb, in the tail orders', () => {
+        expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }), { directObject: mouse })))
+          .toBe('der Kater will die Maus nicht nicht essen');
+        expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true, modifier: concept(SCHNELL) }))))
+          .toBe('der Kater will nicht nicht schnell essen');
+        // The future stacks every modal under "werden", and the verb-final protasis closes on the
+        // finite verb: the "nicht" stay in the Mittelfeld, ahead of the whole cluster.
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { negative: true, tense: 'future', modals: [modal(WOLLEN)], governedNegative: true }))))
+          .toBe('der Kater wird nicht nicht gehen wollen');
+        expect(renderClause(clause(np(KATER), vp(GEHEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true })), false, true))
+          .toBe('der Kater nicht nicht gehen will');
+      });
+
+      // German has no concord: a "kein" outranks the clause's "nicht" whichever word it denies, and
+      // absorbs a lone one out of the Mittelfeld exactly as it absorbs the finite one (A182).
+      test('a kein object outranks a governed nicht as it does the finite one', () => {
+        const noMouse = el(np(MAUS, { definiteness: 'no' }));
+        const aMouse = el(np(MAUS, { definiteness: 'indefinite' }));
+        expect(renderClause(clause(np(KATER), vp(ESSEN, { modals: [modal(WOLLEN)], governedNegative: true }), { directObject: noMouse })))
+          .toBe('der Kater will keine Maus essen');
+        expect(renderClause(clause(np(KATER), vp(ESSEN, { modals: [modal(WOLLEN)], governedNegative: true }), { directObject: aMouse })))
+          .toBe('der Kater will keine Maus essen');
+        // Two denials are two words, and "kein" can stand in for only one, so the object is left alone.
+        expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, modals: [modal(WOLLEN)], governedNegative: true }), { directObject: aMouse })))
+          .toBe('der Kater will eine Maus nicht nicht essen');
+      });
+    });
   });
 
   describe('complement order', () => {

@@ -98,6 +98,29 @@ const MODAL_ADVERB_SLOT_SET = new Set<SlotKey>(MODAL_ADVERB_SLOTS);
 export const isModalAdverbSlot = (key: string): boolean =>
   MODAL_ADVERB_SLOT_SET.has(key as SlotKey);
 
+// Each modal may carry its own negation — the selection field paired to MODAL_SLOTS by index, so
+// `verbModalNegative` denies `verbModal` and `verbModal2Negative` denies `verbModal2`. They mirror
+// the main verb's `verbNegative`, and each is revealed from a control on its modal's box. Unlike
+// the adverbs these hold a boolean, not a word, so they are selection fields and not slots.
+export const MODAL_NEGATIVE_FIELDS = ["verbModalNegative", "verbModal2Negative"] as const;
+
+export type ModalNegativeField = (typeof MODAL_NEGATIVE_FIELDS)[number];
+
+const MODAL_NEGATIVE_FIELD_SET: Set<string> = new Set(MODAL_NEGATIVE_FIELDS);
+
+export const isModalNegativeField = (key: string): boolean => MODAL_NEGATIVE_FIELD_SET.has(key);
+
+/** The negation field of a modal slot — `verbModal` → `verbModalNegative`. */
+export function modalNegativeFor(key: string): ModalNegativeField | undefined {
+  const idx = MODAL_SLOTS.indexOf(key as SlotKey);
+  return idx === -1 ? undefined : MODAL_NEGATIVE_FIELDS[idx];
+}
+
+/** The negation field a verb-family box toggles: the verb's own, or that modal's. */
+export function negativeFieldOf(key: string): "verbNegative" | ModalNegativeField | undefined {
+  return key === "verb" ? "verbNegative" : modalNegativeFor(key);
+}
+
 /** The adverb slot for a modal slot (by index), or undefined for a non-modal key. */
 export const modalAdverbFor = (key: string): SlotKey | undefined => {
   const idx = MODAL_SLOTS.indexOf(key as SlotKey);

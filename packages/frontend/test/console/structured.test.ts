@@ -61,7 +61,21 @@ describe('what a bracket keeps its own', () => {
   it('keeps a modal’s adverb its own, and the tense the verb’s', () => {
     const s = sel(ok('/verb ( eat /modal ( can /adv never ) /past )'));
     expect(ids_(s)).toMatchObject({ verb: 'EAT', verbModal: 'CAN', verbTense: 'past' });
-    expect(print(ok('/verb ( eat /modal ( can /adv never ) /past )'))).toBe('/verb ( eat /modal ( can /adv never ) /past )');
+    // The verb's own settings are printed before the modals: after one, a `/not` would be the
+    // modal's, so the canonical line writes the verb's where only the verb can own them.
+    expect(print(ok('/verb ( eat /modal ( can /adv never ) /past )'))).toBe('/verb ( eat /past /modal ( can /adv never ) )');
+  });
+
+  // Polarity is per word of the verb group (A03): inside the modal's bracket it denies the modal,
+  // and beside the verb it denies the verb. Each prints back where it was written.
+  it('keeps a modal’s polarity its own, and the verb’s the verb’s', () => {
+    const both = sel(ok('/verb ( eat /not /modal ( can /not ) )'));
+    expect(both).toMatchObject({ verbNegative: true, verbModalNegative: true });
+    expect(print(ok('/verb ( eat /not /modal ( can /not ) )'))).toBe('/verb ( eat /not /modal ( can /not ) )');
+    const modalOnly = sel(ok('/verb ( eat /modal can /not )'));
+    expect(modalOnly).toMatchObject({ verbModalNegative: true });
+    expect(modalOnly.verbNegative).toBeFalsy();
+    expect(print(ok('/verb ( eat /modal can /not )'))).toBe('/verb ( eat /modal ( can /not ) )');
   });
 
   it('keeps an adjective’s degree in its bracket, and says where a stray one goes', () => {

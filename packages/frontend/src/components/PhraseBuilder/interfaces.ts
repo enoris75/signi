@@ -166,6 +166,13 @@ export interface PhraseSelection {
     // with `modifier` = ALWAYS. Each is revealed once its modal holds a word.
     verbModalAdverb?: Concept;
     verbModal2Adverb?: Concept;
+    // Each modal may also carry its own negation, exactly as the main verb carries `verbNegative`
+    // — "I do not want to not go" is `verbModal` = WILL with `verbModalNegative` over the verb GO
+    // with `verbNegative`. Each denies one word of the group, and each is revealed once its modal
+    // holds a word. `verbNegative` is the MAIN VERB's: under a modal it says "to not go", and the
+    // modal's own "do not want" is here (see `ModalVerb.negative`).
+    verbModalNegative?: boolean;
+    verbModal2Negative?: boolean;
     directObject?: Concept;
     modifier?: Concept;
     // Each noun block chains up to three adjectives; each one is revealed from a control

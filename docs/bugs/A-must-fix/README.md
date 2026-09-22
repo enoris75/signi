@@ -1,8 +1,11 @@
 # A-must-fix — confirmed bugs
 
-**One open, filed 2026-09-22** by the lane that fixed A234: **A237**, a Spanish or Portuguese
-possessor that drops "all" beside a possessive of its own (*de mis libros* for *de todos mis
-libros*).
+**Two open, both filed 2026-09-22.** **A236** was met while specifying
+[A03, modal polarity](../../features/Z-Done/A03-modal-polarity/README.md): a negative adverb on the
+main verb under a modal negates the modal, where the verb's own negation now stays with the verb.
+A03 has shipped the inner negator its fix needs. **A237** came from the lane that fixed A234: a
+Spanish or Portuguese possessor that drops "all" beside a possessive of its own (*de mis libros* for
+*de todos mis libros*).
 
 Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/).
 The last six, **A230**–**A235**, were filed and fixed on 2026-09-22, each met by the lane that fixed

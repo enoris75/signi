@@ -59,10 +59,13 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**One open**, filed on 2026-09-22 by the lane that fixed A234.
+**Two open**, both filed on 2026-09-22. A236 was filed while specifying
+[A03, modal polarity](../features/Z-Done/A03-modal-polarity/README.md); A03 has since shipped the
+inner negator its fix needs. A237 was filed by the lane that fixed A234.
 
 | # | File | Language | Defect |
 |---|---|---|---|
+| A236 | [A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md](A-must-fix/A236-negative-adverb-under-a-modal-negates-the-modal.md) | Italian, French, Spanish, Portuguese, Japanese | a negative adverb (NEVER) on the main verb under a modal negates the **modal** (*il gatto non vuole mangiare mai* for *vuole non mangiare mai*), because `groupHasNegativeAdverb` hands every negative adverb in the group to the finite verb; its fix routes the adverb through the inner negator [A03](../features/Z-Done/A03-modal-polarity/README.md) shipped |
 | A237 | [A-must-fix/A237-spanish-portuguese-possessor-drops-all.md](A-must-fix/A237-spanish-portuguese-possessor-drops-all.md) | Spanish, Portuguese | a possessor that has a possessive of its own drops "all" (*de mis libros* for *de todos mis libros*), where the object keeps it; [A234](fixed/A234-spanish-portuguese-possessor-drops-its-determiner.md) gave back only the determiners that move the possessive behind the noun |
 
 Everything else confirmed so far is fixed and listed under **Fixed** below. New ones are filed here

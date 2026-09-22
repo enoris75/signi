@@ -56,7 +56,7 @@ export function predicateText(
   // **es**" for "está" (A199).
   gapComplement?: ComplementType,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correría")
   // or imperfect-subjunctive (protasis, "comiera") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
@@ -117,8 +117,11 @@ export function predicateText(
   const passiveParticipleText = passive
     ? agreeAdj(passiveParticiple(verb), subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
     : '';
-  // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
-  // prepended below and lands in front of it, exactly as for a plain verb.
+  // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); the clause's own
+  // "no" is prepended below and lands in front of it, exactly as for a plain verb. Every element
+  // the chain governs is denied where it stands instead, by a bare preverbal "no" of its own:
+  // "debo no ir" is a positive DEBER over a negated IR (the prohibition), and "no debo ir" denies
+  // the obligation. An inner modal takes the same word ("debo no poder ir").
   // TOGETHER is an adverb in every language, but the Spanish word for it is a predicative
   // adjective and agrees with the subject — "las gatas comen juntas", not the flat "*juntos" (A162).
   // Such a lexeme carries its agreeing stem beside the citation form; a true adverb has none and
@@ -148,13 +151,20 @@ export function predicateText(
   const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
   const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
   const preVerbNunca = frontIdx >= 0;
+  // The main verb's own negation, which only a modal can govern: "quiero no ir". It leads the
+  // governed infinitive group — before the aspect auxiliary and its enclitic ("debo no haber
+  // comido", "quiero no moverme") — inside the chain, where the finite "no" never reaches. With no
+  // modal the main verb IS the finite one, and `verbNegative` already carries it.
+  const governedNo = governedNegative === true && modals.length > 0 ? 'no' : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
-        // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
-        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) })),
+        // negative adverb, which takes the preverbal slot instead (emitted as preVerb). An inner
+        // modal's own "no" leads it ("debo no poder ir").
+        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) }), 'no'),
+        governedNo,
         verbGroupInfinitive(copulaVerb.forms, agreeForms, aspect),
-      ].join(' ')
+      ].filter(Boolean).join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
       : aspectVerb(copulaVerb.forms, agreeForms, tense, aspect, mood);
@@ -175,10 +185,15 @@ export function predicateText(
   // "ningún" possessor, in the object or in a complement: "no ve la casa de ningún hombre" (A216).
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
   const complementIsNegative = hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
+  // A negator inside the governed group is preverbal for everything that follows it, so a "ningún"
+  // object or complement concords with that one instead: "quiere no comer ninguna comida" takes no
+  // second "no" on the modal, which would deny the modal as well (see `negationSources.governed`).
+  const concordedInside = governedNo !== '' || modals.some((m) => m.negative);
   // The preverbal "no" is emitted only when the clause needs a preverbal negator AND none is already
   // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (the finite adverb,
   // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
-  const needsNo = verbNegative || objectIsNegative || complementIsNegative || groupHasNegativeAdverb(verbPhrase);
+  const needsNo = verbNegative || ((objectIsNegative || complementIsNegative) && !concordedInside)
+    || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the

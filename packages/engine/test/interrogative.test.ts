@@ -93,7 +93,7 @@ describe('interrogative', () => {
       ja: '猫は走ることができますか？',
     });
     // "cannot" is one word for two, and only the "can" moves.
-    expect(sayAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { modals: ['CAN'], negative: true } }))).en)
+    expect(sayAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', negative: true }] } }))).en)
       .toBe('can the cat not run?');
     expect(sayAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { modals: ['WILL'] } })))).toMatchObject({
       en: 'does the cat want to run?',

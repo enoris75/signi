@@ -14,6 +14,7 @@ import {
 } from "@signi/shared";
 import type { ImperativePerson, SlotConfig, SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
+import { MODAL_NEGATIVE_FIELDS } from "../../components/PhraseBuilder/slots.ts";
 
 /**
  * The console's commands, declared once.
@@ -177,6 +178,9 @@ const setting = (
   satellites,
   reducers,
 });
+
+// The polarity controls a `/not` or `/pos` may land on: the verb's own and each modal's.
+const POLARITY_SATELLITES = new RegExp(`^(verbNegative|${MODAL_NEGATIVE_FIELDS.join("|")})$`);
 
 // A setting command's purpose in the catalogue: its setting's, except where the command does
 // something narrower — /neut sets a pronoun's gender, and /not negates the verb rather than naming a
@@ -534,8 +538,10 @@ export const COMMANDS: readonly CommandDef[] = [
   ...(["active", "passive"] as const).map((value) =>
     setting(value, [], "verb", { id: "voice", value }, value, `voice.value.${value}` as UiStringKey, /^verbVoice$/, ["setVoice"]),
   ),
-  setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", /^verbNegative$/, ["setNegative"]),
-  setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", /^verbNegative$/, ["setNegative"]),
+  // Polarity is per word of the verb group, so these reach the verb's own control and each modal's
+  // ("/verb ( go /not /modal ( want /not ) )"), exactly as /adv reaches the verb's adverb or a modal's.
+  setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", POLARITY_SATELLITES, ["setNegative"]),
+  setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", POLARITY_SATELLITES, ["setNegative"]),
 
   // ── Adjective ─────────────────────────────────────────────────────────────
   ...(

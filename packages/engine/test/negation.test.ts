@@ -280,10 +280,10 @@ describe('known bugs: English frequency adverb inside a negated auxiliary', () =
   test('English puts ALWAYS after the auxiliary\'s "not"', () => {
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'resultative' } }), 'en')).toBe('the cat has not always eaten.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'progressive' } }), 'en')).toBe('the cat is not always eating.');
-    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat cannot always eat.');
-    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, tense: 'past', modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat could not always eat.');
-    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always have to eat.');
-    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'WILL', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always want to eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'ALWAYS', negative: true }] } }), 'en')).toBe('the cat cannot always eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'past', modals: [{ verb: 'CAN', modifier: 'ALWAYS', negative: true }] } }), 'en')).toBe('the cat could not always eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST', modifier: 'ALWAYS', negative: true }] } }), 'en')).toBe('the cat does not always have to eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'WILL', modifier: 'ALWAYS', negative: true }] } }), 'en')).toBe('the cat does not always want to eat.');
   });
 
   test('English puts the adverb after "not" in every negated group of the table', () => {
@@ -292,9 +292,9 @@ describe('known bugs: English frequency adverb inside a negated auxiliary', () =
     expect(cat({ modifier: 'ALWAYS', negative: true, aspect: 'resultative', tense: 'future' })).toBe('the cat will not always have eaten.');
     expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', modifier: 'ALWAYS', negative: true, aspect: 'resultative' } } }), 'RUN'), 'en'))
       .toBe('the dog that has not always eaten runs.');
-    expect(cat({ negative: true, tense: 'future', modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] })).toBe('the cat will not always be able to eat.');
-    expect(cat({ negative: true, tense: 'past', modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('the cat did not always have to eat.');
-    expect(cat({ negative: true, modals: [{ verb: 'WILL', modifier: 'ALWAYS' }] })).toBe('the cat does not always want to eat.');
+    expect(cat({ tense: 'future', modals: [{ verb: 'CAN', modifier: 'ALWAYS', negative: true }] })).toBe('the cat will not always be able to eat.');
+    expect(cat({ tense: 'past', modals: [{ verb: 'MUST', modifier: 'ALWAYS', negative: true }] })).toBe('the cat did not always have to eat.');
+    expect(cat({ modals: [{ verb: 'WILL', modifier: 'ALWAYS', negative: true }] })).toBe('the cat does not always want to eat.');
   });
 
   test('regression: the affirmative groups keep their slots', () => {
@@ -302,7 +302,7 @@ describe('known bugs: English frequency adverb inside a negated auxiliary', () =
     expect(cat({ modifier: 'ALWAYS', aspect: 'resultative' })).toBe('the cat has always eaten.');
     expect(cat({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('the cat must always eat.');
     expect(cat({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] })).toBe('the cat never wants to eat.');
-    expect(cat({ negative: true, modifier: 'ALWAYS', modals: [{ verb: 'CAN' }] })).toBe('the cat cannot always eat.');
+    expect(cat({ modifier: 'ALWAYS', modals: [{ verb: 'CAN', negative: true }] })).toBe('the cat cannot always eat.');
   });
 });
 
@@ -385,7 +385,7 @@ describe('A149: the French object has no zero article, and a negation makes it d
   });
 
   test('wherever the negation sits in the verb group', () => {
-    expect(eats(bareMice, { negative: true, modals: ['MUST'] }).fr).toBe('le chat ne doit pas manger de souris.');
+    expect(eats(bareMice, { modals: [{ verb: 'MUST', negative: true }] }).fr).toBe('le chat ne doit pas manger de souris.');
     expect(eats(bareMice, { negative: true, aspect: 'resultative' }).fr).toBe("le chat n'a pas mangé de souris.");
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: bareMice, verbPhrase: { negative: true } }), infinitive: true }).fr)
       .toBe('ne pas manger de souris.');
@@ -444,7 +444,7 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
       imperative: true, complements: theMarket,
     }, 'de')).toBe('geh nicht zum Markt.'); // now: "geh zum Markt nicht."
     expect(say(clause(np('CAT'), 'GO', {
-      verbPhrase: { negative: true, modals: ['CAN'] }, complements: theMarket,
+      verbPhrase: { modals: [{ verb: 'CAN', negative: true }] }, complements: theMarket,
     }), 'de')).toBe('der Kater kann nicht zum Markt gehen.');
     // The relative clause computes the slot inline in `subordinateClause.ts` — a separate site.
     expect(say(clause(np('CAT', {
@@ -602,7 +602,9 @@ describe('known bugs: a negative subject is not collapsed', () => {
     expect(notRun({ tense: 'past' })).toMatchObject({ en: 'no cat ran.', de: 'kein Kater lief.' });
     expect(notRun({ tense: 'future' })).toMatchObject({ en: 'no cat will run.', de: 'kein Kater wird laufen.' });
     expect(notRun({ aspect: 'progressive' })).toMatchObject({ en: 'no cat is running.', de: 'kein Kater läuft gerade.' });
-    expect(notRun({ modals: ['CAN'] })).toMatchObject({ en: 'no cat can run.', de: 'kein Kater kann laufen.' });
+    // The modal is the finite verb of a chain, so its own negation is the one the subject drops.
+    expect(sayAll(clause(noCat, 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', negative: true }] } })))
+      .toMatchObject({ en: 'no cat can run.', de: 'kein Kater kann laufen.' });
     expect(sayAll(clause(noCat, 'BE', {
       verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } },
     }))).toMatchObject({ en: 'no cat is tired.', de: 'kein Kater ist müde.' });
@@ -663,7 +665,7 @@ describe('known bugs: a relative clause\'s own negative subject is not collapsed
     expect(notEat({ tense: 'past' })).toMatchObject({
       en: 'the mouse that no cat ate runs.', de: 'die Maus, die kein Kater fraß, läuft.',
     });
-    expect(notEat({ modals: ['CAN'] })).toMatchObject({
+    expect(mouseThatNoCat({ verbPhrase: { verb: 'EAT', modals: [{ verb: 'CAN', negative: true }] } })).toMatchObject({
       en: 'the mouse that no cat can eat runs.', de: 'die Maus, die kein Kater fressen kann, läuft.',
     });
     expect(notEat({ aspect: 'progressive' })).toMatchObject({
@@ -766,7 +768,7 @@ describe('known bugs: a negative head erases its relative clause\'s polarity', (
       it: 'nessun gatto che non mangiò corre.', fr: 'aucun chat qui ne mangea pas ne court.',
       es: 'ningún gato que no comiera corre.', pt: 'nenhum gato que não comesse corre.',
     });
-    expect(noCatThat({ negative: true, modals: ['CAN'] })).toMatchObject({
+    expect(noCatThat({ modals: [{ verb: 'CAN', negative: true }] })).toMatchObject({
       it: 'nessun gatto che non può mangiare corre.', fr: 'aucun chat qui ne peut pas manger ne court.',
       es: 'ningún gato que no pueda comer corre.', pt: 'nenhum gato que não possa comer corre.',
     });
@@ -1142,7 +1144,7 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
     expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }))).toBe('der Kater frisst keine Mäuse.'); // now: "frisst Mäuse nicht"
     expect(notEat(mouse({ definiteness: 'indefinite', number: 'plural' }))).toBe('der Kater frisst keine Mäuse.');
     expect(notEat(np('WATER', { definiteness: 'bare' }))).toBe('der Kater frisst kein Wasser.');
-    expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }), { tense: 'future', modals: ['MUST'] }))
+    expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }), { negative: false, tense: 'future', modals: [{ verb: 'MUST', negative: true }] }))
       .toBe('der Kater wird keine Mäuse fressen müssen.');
     expect(notEat(mouse({ definiteness: 'bare', number: 'plural', relative: { verbPhrase: { verb: 'RUN' } } })))
       .toBe('der Kater frisst keine Mäuse, die laufen.'); // now: "frisst Mäuse, die laufen, nicht"
@@ -1152,7 +1154,7 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
     // The random phrase.
     expect(say({
       subject: np('WOMAN', { gender: 'fem', definiteness: 'definite', adjectives: ['YOUNG', 'ADULT'], adjectiveDegrees: ['least', 'positive'] }),
-      verbPhrase: { verb: 'CONSUME', tense: 'future', negative: true, modals: ['MUST'] },
+      verbPhrase: { verb: 'CONSUME', tense: 'future', modals: [{ verb: 'MUST', negative: true }] },
       directObject: np('PHRASE', {
         number: 'plural', definiteness: 'bare',
         relative: { verbPhrase: { verb: 'EAT', aspect: 'progressive', negative: true }, directObject: np('WATER', { adjectives: ['HIGH'], adjectiveDegrees: ['less'] }) },
@@ -1202,7 +1204,7 @@ describe('known bugs: German "nicht" with an indefinite object', () => {
     expect(isNot('BECOME', aLegend)).toBe('der Kater wird keine Legende.');
     expect(isNot('SEEM', aLegend)).toBe('der Kater scheint keine Legende zu sein.');
     expect(isNot('BE', aLegend, { tense: 'future' })).toBe('der Kater wird keine Legende sein.');
-    expect(isNot('BE', aLegend, { modals: ['CAN'] })).toBe('der Kater kann keine Legende sein.');
+    expect(isNot('BE', aLegend, { negative: false, modals: [{ verb: 'CAN', negative: true }] })).toBe('der Kater kann keine Legende sein.');
     expect(say({
       ...clause(np('GENERIC_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: aLegend } } }),
       infinitive: true,
@@ -1262,7 +1264,7 @@ describe('known bugs: German "nicht" and an adverb in front of a definite object
   test('the definite object leads "nicht" and the adverb', () => {
     expect(say(eatNot(), 'de')).toBe('der Kater frisst die Maus nicht schnell.'); // now: "frisst nicht schnell die Maus"
     expect(say(eatNot({ modifier: 'ALWAYS' }), 'de')).toBe('der Kater frisst die Maus nicht immer.');
-    expect(say(eatNot({ modifier: 'SUDDENLY', tense: 'past', modals: ['CAN'] }), 'de')).toBe('der Kater konnte die Maus nicht plötzlich fressen.');
+    expect(say(eatNot({ negative: false, modifier: 'SUDDENLY', tense: 'past', modals: [{ verb: 'CAN', negative: true }] }), 'de')).toBe('der Kater konnte die Maus nicht plötzlich fressen.');
     expect(say(eatNot({ aspect: 'resultative' }), 'de')).toBe('der Kater hat die Maus nicht schnell gefressen.');
     expect(say(eatNot({ tense: 'future' }), 'de')).toBe('der Kater wird die Maus nicht schnell fressen.');
     expect(say(eatNot({ aspect: 'progressive' }), 'de')).toBe('der Kater frisst gerade die Maus nicht schnell.');
@@ -1285,7 +1287,7 @@ describe('known bugs: German "nicht" and an adverb in front of a definite object
     }, 'de')).toBe('das Essen nicht immer essen.');
     expect(say({
       subject: np('WOLF', { number: 'plural', definiteness: 'indefinite', adjectives: ['WHOLE', 'HOT'], adjectiveDegrees: ['positive', 'positive'] }),
-      verbPhrase: { verb: 'REPLACE', tense: 'past', negative: true, modifier: 'SUDDENLY', modals: ['CAN'] },
+      verbPhrase: { verb: 'REPLACE', tense: 'past', modifier: 'SUDDENLY', modals: [{ verb: 'CAN', negative: true }] },
       directObject: np('FILE', { number: 'plural', adjectives: ['EMPTY'] }),
     }, 'de')).toBe('ganze heiße Wölfe konnten die leeren Dateien nicht plötzlich ersetzen.');
   });
@@ -1361,7 +1363,7 @@ describe('known bugs: German "kein" inside the prospective', () => {
       .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
     expect(notAbout('DRINK', { directObject: np('WATER', { definiteness: 'bare' }) })).toBe('der Kater ist nicht im Begriff, Wasser zu trinken.');
     expect(notAbout('EAT', aMouse, { tense: 'past' })).toBe('der Kater war nicht im Begriff, eine Maus zu fressen.');
-    expect(notAbout('EAT', aMouse, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', aMouse, { negative: false, modals: [{ verb: 'MUST', negative: true }] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
     expect(notAbout('BECOME', { complements: { predicative: { phrase: np('DOG') } } })).toBe('der Kater ist nicht im Begriff, ein Hund zu werden.');
     expect(notAbout('BE', { complements: { predicative: { phrase: np('LEGEND') } } })).toBe('der Kater ist nicht im Begriff, eine Legende zu sein.');
     expect(say({ ...clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { aspect: 'prospective', negative: true } }), interrogative: true }, 'de'))
@@ -1386,7 +1388,7 @@ describe('known bugs: German "kein" inside the prospective', () => {
     expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { ...aMouse, verbPhrase: { aspect: 'prospective', negative: true } }) }, 'de'))
       .toBe('wenn der Kater nicht im Begriff sein würde, eine Maus zu fressen, würde der Hund laufen.');
     expect(notAbout('EAT', aMouse, { tense: 'future' })).toBe('der Kater wird nicht im Begriff sein, eine Maus zu fressen.');
-    expect(notAbout('EAT', aMouse, { tense: 'past', modals: ['CAN'] })).toBe('der Kater konnte nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', aMouse, { negative: false, tense: 'past', modals: [{ verb: 'CAN', negative: true }] })).toBe('der Kater konnte nicht im Begriff sein, eine Maus zu fressen.');
     expect(notAbout('EAT', aMouse, { modifier: 'FAST' })).toBe('der Kater ist nicht im Begriff, schnell eine Maus zu fressen.');
     expect(notAbout('EAT', { ...aMouse, complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite' }) } } }))
       .toBe('der Kater ist nicht im Begriff, eine Maus in einem Haus zu fressen.');
@@ -1396,7 +1398,7 @@ describe('known bugs: German "kein" inside the prospective', () => {
 
   test('regression: a definite object, a `no` object and the other aspects keep what they render', () => {
     expect(notAbout('EAT', { directObject: np('MOUSE') })).toBe('der Kater ist nicht im Begriff, die Maus zu fressen.');
-    expect(notAbout('EAT', { directObject: np('MOUSE') }, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, die Maus zu fressen.');
+    expect(notAbout('EAT', { directObject: np('MOUSE') }, { negative: false, modals: [{ verb: 'MUST', negative: true }] })).toBe('der Kater muss nicht im Begriff sein, die Maus zu fressen.');
     // A `no` object is the plan's own "about to eat no mouse", so its "kein" belongs in the group.
     expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE', { definiteness: 'no' }), verbPhrase: { aspect: 'prospective' } })))
       .toMatchObject({ en: 'the cat is about to eat no mouse.', de: 'der Kater ist im Begriff, keine Maus zu fressen.' });
@@ -1444,7 +1446,7 @@ describe('known bugs: German "nicht" and an adverb in front of a coordinated pro
     expect(say(eatNot(and(np('DOG'), him)), 'de')).toBe('der Kater frisst den Hund und ihn nicht schnell.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: and(him, np('FIRST_PERSON')), verbPhrase: { negative: true, modifier: 'ALWAYS' } }), 'de'))
       .toBe('der Kater sieht ihn und mich nicht immer.');
-    expect(say(eatNot(and(np('SECOND_PERSON'), np('MOUSE')), { modifier: 'SUDDENLY', tense: 'past', modals: ['CAN'] }), 'de'))
+    expect(say(eatNot(and(np('SECOND_PERSON'), np('MOUSE')), { negative: false, modifier: 'SUDDENLY', tense: 'past', modals: [{ verb: 'CAN', negative: true }] }), 'de'))
       .toBe('der Kater konnte dich und die Maus nicht plötzlich fressen.');
     expect(say({ ...eatNot(and(him, np('DOG'))), subject: np('SECOND_PERSON'), imperative: true }, 'de')).toBe('iss ihn und den Hund nicht schnell.');
     // The random phrase's "wenn" clause.
@@ -1504,7 +1506,7 @@ describe('known bugs: a `no` object keeps its "kein" inside a negated German pro
     expect(notAbout('EAT', { directObject: np('MOUSE', { definiteness: 'no', number: 'plural' }) }))
       .toBe('der Kater ist nicht im Begriff, Mäuse zu fressen.');
     expect(notAbout('EAT', noMouse, { tense: 'past' })).toBe('der Kater war nicht im Begriff, eine Maus zu fressen.');
-    expect(notAbout('EAT', noMouse, { modals: ['MUST'] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(notAbout('EAT', noMouse, { negative: false, modals: [{ verb: 'MUST', negative: true }] })).toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
     expect(notAbout('BECOME', { complements: { predicative: { phrase: np('DOG', { definiteness: 'no' }) } } }))
       .toBe('der Kater ist nicht im Begriff, ein Hund zu werden.');
     expect(notAbout('RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
@@ -1512,6 +1514,28 @@ describe('known bugs: a `no` object keeps its "kein" inside a negated German pro
     expect(say(clause(np('DOG', {
       relative: { headRole: 'subject', verbPhrase: { verb: 'EAT', aspect: 'prospective', negative: true }, ...noMouse },
     }), 'RUN'), 'de')).toBe('der Hund, der nicht im Begriff ist, eine Maus zu fressen, läuft.');
+  });
+
+  // A03 spells a modal clause's denial on the word it denies, so the governed verb's own flag reaches
+  // here too. The aspect periphrasis is part of the group that flag denies, not something inside it —
+  // English builds "must not be about to eat" the same way — so every denial of the group carries
+  // ahead of "im Begriff", and the `no` object falls to the indefinite whichever word holds it.
+  test('a denial anywhere in the verb group carries ahead of "im Begriff", not inside the zu-group', () => {
+    const about = (vp: Partial<VerbPhrase>, extra: Parameters<typeof clause>[2] = noMouse) =>
+      say(clause(np('CAT'), 'EAT', { ...extra, verbPhrase: { aspect: 'prospective', ...vp } }), 'de');
+    // The modal's own denial, and the governed verb's, place the same "nicht" in the same slot.
+    expect(about({ modals: [{ verb: 'MUST', negative: true }] }))
+      .toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    expect(about({ negative: true, modals: ['MUST'] }))
+      .toBe('der Kater muss nicht im Begriff sein, eine Maus zu fressen.');
+    // Which is what the definite object already renders, with no `no` to collapse: the `no` case
+    // now agrees with it instead of hiding the denial inside the zu-group.
+    expect(about({ modals: [{ verb: 'MUST', negative: true }] }, { directObject: np('MOUSE') }))
+      .toBe('der Kater muss nicht im Begriff sein, die Maus zu fressen.');
+    // Two denied words are two "nicht" (A03), both still ahead of "im Begriff": "kein" is
+    // "nicht + ein" and can stand in for one denial only, so the object stays the plain indefinite.
+    expect(about({ negative: true, modals: [{ verb: 'MUST', negative: true }] }))
+      .toBe('der Kater muss nicht nicht im Begriff sein, eine Maus zu fressen.');
   });
 
   test('the question, the "wenn" clause, the future, an adverb, a mass noun and a relative on another slot carry it too', () => {

@@ -77,7 +77,7 @@ function predicateWords(
   subjectIsNegative = false,
   agent?: ResolvedNounElement,
 ): string[] {
-  const { negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
+  const { negative: verbNegative, governedNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
   // The passive conjugates "be" where the active conjugates the lexical verb, and hangs that verb's
   // past participle off it: "is eaten", "was eaten", "will be eaten", and — because every branch
   // below sees the auxiliary and not the verb — "is being eaten", "has been eaten", "must be
@@ -103,7 +103,9 @@ function predicateWords(
   // anywhere in the group, or the finite verb's own "not". Between the two postverbal phrases the
   // object is leftmost and keeps its "no", so the complement is the one that gives way.
   const neg = negationSources({ subjectIsNegative, verbPhrase, directObject, complements });
-  const negatedAhead = neg.subject || neg.adverb || neg.verb;
+  // A "not" inside the governed group stands ahead of the postverbal phrases too, so it takes them
+  // the same way the finite verb's does: "wants to not eat any food".
+  const negatedAhead = neg.subject || neg.adverb || neg.verb || neg.governed;
   // "does not eat any mouse", "never eats any mouse", "no cat eats any mouse" — but a LONE `no`
   // object keeps "no" ("eats no mouse"). A158/A160 widened this from the object to the subject that
   // precedes it and the complements that follow it: "does not run in any house", "no cat runs in
@@ -161,6 +163,11 @@ function predicateWords(
   const modalManner = modals.filter((m) => m.modifier && !isFrequencyAdverb(m.modifier)).map((m) => m.modifier!.forms['base'] ?? '');
   const trailing = (mainManner: string) => [...modalManner, mainManner].filter(Boolean).join(' ');
 
+  // The main verb's own "not", which only a modal can govern ("wants to not go"). With no modal
+  // the main verb IS the finite one and `negative` carries it, so this stays empty there. It leads
+  // the group's frequency adverb, closest to the word it denies: "wants to not always go".
+  const governedNot = governedNegative === true && modals.length > 0 ? 'not' : '';
+
   // A negative subject is itself the clause's negator, so the finite verb takes no "not" —
   // "no cat runs", never "no cat does not run" — exactly as a NEVER adverb already did (A160).
   const negateVerb = verbNegative === true && !neg.adverb && !neg.subject;
@@ -200,8 +207,8 @@ function predicateWords(
     // verb's frequency adverb stays with its own group ("to want to always eat"), and the modals'
     // manner adverbs trail the clause with its own, as in the finite chain.
     if (modals.length > 0) {
-      const chain = modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn);
-      const group = [...chain, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
+      const chain = modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not');
+      const group = [...chain, governedNot, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
       return ['', negateVerb ? `not to ${group}` : `to ${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
     }
     const group = verbGroupInfinitive(verb.forms, aspect);
@@ -219,7 +226,7 @@ function predicateWords(
   // so it takes "not" directly and carries no tense/agreement itself.
   if (mood === 'conditional') {
     const groups = modals.length > 0
-      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn), verbGroupInfinitive(verb.forms, aspect)]
+      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not'), governedNot, verbGroupInfinitive(verb.forms, aspect)].filter(Boolean)
       : [verbGroupInfinitive(verb.forms, aspect)];
     const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
     // A frequency adverb follows "would" and its "not": "would always run", "would not always run".
@@ -229,9 +236,11 @@ function predicateWords(
     return ['', verbText, directObjectText, complementsText, trailing(modifierText)];
   }
 
-  // A modal chain makes the outermost modal the finite verb — it takes the tense, the
-  // agreement, and the negation — and every other element non-finite, down to the main
-  // verb's whole group in the infinitive ("must not have seen the cat").
+  // A modal chain makes the outermost modal the finite verb — it takes the tense, the agreement
+  // and the clause's own negation — and every other element non-finite, down to the main verb's
+  // whole group in the infinitive ("must have seen the cat"). Every element below the finite one
+  // is denied by a plain "not" in front of it: "must not go" is a positive MUST over a negated GO
+  // (the prohibition), where a negated MUST is "does not have to go" (see `modalFinite`).
   if (modals.length > 0) {
     // Each verb in the group can carry its own adverb. A frequency adverb precedes the verb it
     // modifies ("never wanted", "to always go"), except on a true modal *auxiliary* finite or a
@@ -250,13 +259,16 @@ function predicateWords(
         else if (adv && freq) words.push(adv, finite);
         else words.push(finite);
       } else {
+        // An inner modal's own "not" leads it and its adverb: "must not always be able to go".
         const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
+        if (m.negative) words.push('not');
         if (adv && freq) words.push(adv, word);
         else words.push(word);
       }
       if (m.verb.forms['link']) words.push(m.verb.forms['link']);
     });
     const mainGroup = verbGroupInfinitive(verb.forms, aspect);
+    if (governedNot) words.push(governedNot);
     if (modifierText && isFrequency) words.push(modifierText, mainGroup);
     else words.push(mainGroup);
     const trailingMod = trailing(modifierText && !isFrequency ? modifierText : '');

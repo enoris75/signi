@@ -34,6 +34,42 @@ describe('hydrateWorkspace', () => {
     });
   });
 
+  // Schema v8 (A03) made polarity per word of the verb group. Before it, one `verbNegative` denied
+  // the whole group and the engines put that "not" on the finite element — the modal, where there
+  // was one. So an older file's flag moves onto its modal, and it goes on saying what it said.
+  describe('the v8 polarity migration', () => {
+    const loaded = (selection: Record<string, unknown>, version?: number) =>
+      hydrateWorkspace(
+        damaged({ containers: [{ id: 'a', selection }], links: [] }),
+        CATALOG,
+        version,
+      ).containers[0]?.selection;
+
+    it('moves a v7 file’s verb negation onto the modal it denied', () => {
+      expect(loaded({ verb: 'EAT', verbModal: 'WANT', verbNegative: true }, 7)).toMatchObject({
+        verbModalNegative: true,
+      });
+      expect(loaded({ verb: 'EAT', verbModal: 'WANT', verbNegative: true }, 7)).not.toHaveProperty('verbNegative');
+    });
+
+    it('leaves a v7 file with no modal alone — its verb was the finite one already', () => {
+      expect(loaded({ verb: 'EAT', verbNegative: true }, 7)).toMatchObject({ verbNegative: true });
+    });
+
+    it('leaves a v8 file alone: its verb negation is the verb’s own', () => {
+      expect(loaded({ verb: 'EAT', verbModal: 'WANT', verbNegative: true }, 8)).toMatchObject({
+        verbNegative: true,
+      });
+      expect(loaded({ verb: 'EAT', verbModal: 'WANT', verbNegative: true }, 8)).not.toHaveProperty('verbModalNegative');
+    });
+
+    it('migrates nothing when no version is given: that workspace is this build’s own', () => {
+      expect(loaded({ verb: 'EAT', verbModal: 'WANT', verbNegative: true })).toMatchObject({
+        verbNegative: true,
+      });
+    });
+  });
+
   it('reports each concept missing from the catalog once, across every period', () => {
     const { missing } = hydrateWorkspace(
       {

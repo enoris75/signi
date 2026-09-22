@@ -255,22 +255,26 @@ class Printer {
     this.emit("/verb", "command", "secondary", { word: verbRef });
     this.emit("(", "open", "secondary", { word: verbRef, element: true });
     if (root.verb) this.emit(this.word(root.verb, "verb"), "word", "secondary", { word: verbRef, italic: true });
-    // The verb's own adverb before any modal: after one, `/adv` would be the modal's.
+    // The verb's own adverb and its own settings before any modal: after one, `/adv` and `/not`
+    // would be the modal's (both attach to the closest verb or modal).
     if (root.modifier) this.wordStatement({ containerId: id, slot: "modifier" }, "/adv", "info", root.modifier, verbRef);
+    for (const s of settings) this.setting({ id: s, value: currentSetting(s, w) } as Setting, w);
     for (const key of MODAL_SLOTS) {
       const modal = root[key];
       if (!modal) continue;
       const ref: WordRef = { containerId: id, slot: key };
       const adverbKey = modalAdverbFor(key)!;
       const adverb = root[adverbKey];
-      // A modal with an adverb of its own wears a bracket, which keeps the adverb its.
-      const own = this.wordStatement(ref, "/modal", "secondary", modal, verbRef, Boolean(adverb));
-      if (adverb) {
-        this.wordStatement({ containerId: id, slot: adverbKey }, "/adv", "info", adverb, ref);
-        this.emit(")", "close", "secondary", { word: ref, element: true, statement: own });
-      }
+      const modalWord = this.info(ref)!;
+      // A modal's own polarity is printed inside its bracket, where `/not` denies the modal and
+      // not the verb. Its affirmative is the default and stays unwritten.
+      const negated = this.holds(modalWord, "polarity");
+      // A modal with an adverb or a polarity of its own wears a bracket, which keeps both its.
+      const own = this.wordStatement(ref, "/modal", "secondary", modal, verbRef, Boolean(adverb) || negated);
+      if (adverb) this.wordStatement({ containerId: id, slot: adverbKey }, "/adv", "info", adverb, ref);
+      if (negated) this.setting({ id: "polarity", value: currentSetting("polarity", modalWord) } as Setting, modalWord);
+      if (adverb || negated) this.emit(")", "close", "secondary", { word: ref, element: true, statement: own });
     }
-    for (const s of settings) this.setting({ id: s, value: currentSetting(s, w) } as Setting, w);
     this.emit(")", "close", "secondary", { word: verbRef, element: true, statement });
   }
 
