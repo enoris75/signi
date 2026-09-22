@@ -964,11 +964,13 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
   });
 });
 
-// A225. A German predicate adjective is undeclined ("der Kater ist müde"), and `dePredAdj` gives an
+// A225. A German predicate adjective is undeclined ("der Kater ist müde"), and `dePredAdj` gave an
 // ordinal the same bare form: "der Kater ist erste". An ordinal has no such predicative form. German
 // says the rank with the definite article and the nominalised ordinal, which takes the subject's
 // gender and number: "der Kater ist der Erste", "die Katze ist die Erste", "die Kater sind die Ersten".
 // PIN's C28 gloss stayed on the literal for it ("einen Gegenstand veranlassen, immer erste zu sein").
+// The fix marks the German ordinals `ordinal` and renders one as a predicate with `dePredOrdinal`, in
+// the agreement of what it is said of, which every clause builder now hands the complements.
 describe('known bugs: a German ordinal as a predicate is left bare (A225)', () => {
   const is = (subject: NounPhrase, ordinal: string, verbPhrase: Partial<VerbPhrase> = {}) =>
     say(clause(subject, 'BE', { verbPhrase, complements: { predicative: { phrase: np(ordinal) } } }), 'de');
@@ -980,7 +982,7 @@ describe('known bugs: a German ordinal as a predicate is left bare (A225)', () =
     infinitive: true,
   });
 
-  test.fails('the ordinal takes the article and the capital, in the subject\'s gender and number', () => {
+  test('the ordinal takes the article and the capital, in the subject\'s gender and number', () => {
     expect(is(np('CAT'), 'FIRST')).toBe('der Kater ist der Erste.');
     expect(is(np('CAT', { gender: 'fem' }), 'FIRST')).toBe('die Katze ist die Erste.');
     expect(is(np('CHILD'), 'FIRST')).toBe('das Kind ist das Erste.');
@@ -994,6 +996,32 @@ describe('known bugs: a German ordinal as a predicate is left bare (A225)', () =
     expect(say(causeToBe(np('OBJECT_THING', { definiteness: 'indefinite' }), 'FIRST', { modifier: 'ALWAYS' }), 'de'))
       .toBe('einen Gegenstand veranlassen, immer der Erste zu sein.');
     expect(say(causeToBe(np('OPTION', { definiteness: 'indefinite' }), 'SECOND'), 'de')).toBe('eine Option veranlassen, die Zweite zu sein.');
+  });
+
+  // Whoever the predicate is said of: a pronoun (whose person takes the masculine unless it says
+  // otherwise), a group, the addressee of a command and an instruction, a relative's head in any
+  // gender and number. "scheinen" takes the nominalised ordinal as it takes a predicate noun, with
+  // "zu sein" ("scheint eine Legende zu sein"), where a predicate adjective stays bare.
+  test('the ordinal agrees with every subject, and takes "zu sein" under "scheinen"', () => {
+    expect(is(np('FIRST_PERSON'), 'FIRST')).toBe('ich bin der Erste.');
+    expect(is(np('THIRD_PERSON', { gender: 'fem' }), 'FIRST')).toBe('sie ist die Erste.');
+    expect(is(np('FIRST_PERSON', { number: 'plural' }), 'FIRST')).toBe('wir sind die Ersten.');
+    expect(say(clause({ conjunction: 'and', conjuncts: [np('CAT'), np('CAT', { gender: 'fem' })] }, 'BE', {
+      complements: { predicative: { phrase: np('FIRST') } },
+    }), 'de')).toBe('der Kater und die Katze sind die Ersten.');
+    const addressed = { ...clause(np('SECOND_PERSON'), 'BE', { complements: { predicative: { phrase: np('FIRST') } } }), imperative: true };
+    expect(say(addressed, 'de')).toBe('sei der Erste.');
+    expect(say({ ...addressed, imperativeRegister: 'instruction' }, 'de')).toBe('der Erste sein.');
+    expect(is(np('OPTION'), 'FIRST', { tense: 'future' })).toBe('die Option wird die Erste sein.');
+    expect(say(clause(np('CAT'), 'BECOME', { verbPhrase: { aspect: 'resultative' }, complements: { predicative: { phrase: np('FIRST') } } }), 'de'))
+      .toBe('der Kater ist der Erste geworden.');
+    expect(say(clause(np('OPTION', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('SECOND') } } } }), 'RUN'), 'de'))
+      .toBe('die Option, die die Zweite ist, läuft.');
+    expect(say(clause(np('OPTION', { number: 'plural', relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('THIRD') } } } }), 'RUN'), 'de'))
+      .toBe('die Optionen, die die Dritten sind, laufen.');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('FIRST') } } }), 'de')).toBe('der Kater scheint der Erste zu sein.');
+    expect(say(clause(np('OPTION'), 'SEEM', { complements: { predicative: { phrase: np('FIRST') } } }), 'de')).toBe('die Option scheint die Erste zu sein.');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('TIRED') } } }), 'de')).toBe('der Kater scheint müde.');
   });
 
   test('regression: an attributive ordinal, another predicate adjective and the other six', () => {

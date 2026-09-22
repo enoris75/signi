@@ -23,6 +23,7 @@ import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '.
 import type { Case } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
+import { dePredOrdinal } from '../dePredOrdinal.js';
 import { genitiveS } from '../genitiveS.js';
 import { genitiveShows } from '../genitiveShows.js';
 import { germanCompound } from '../germanCompound.js';
@@ -54,10 +55,13 @@ const DE_PREDICATE_TYPES: ComplementType[] = ['objectPredicative', 'predicative'
 const DE_ADJUNCT_ORDER = COMPLEMENT_RENDER_ORDER.filter((type) => !DE_PREDICATE_TYPES.includes(type));
 
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
-// complements with the infinitival copula ("scheint im Markt eine Legende zu sein").
+// complements with the infinitival copula ("scheint im Markt eine Legende zu sein"). `agreement` is
+// what the predicate is said of — the clause's subject, a causative's causee, a relative's head — whose
+// gender and number a predicate ordinal takes ("die Katze ist die Erste", A225).
 export function complementsParts(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   verb: ConceptForms['forms'] = {},
+  agreement: Record<string, string> = {},
 ): { adjuncts: string; predicate: string } {
   if (!complements) return { adjuncts: '', predicate: '' };
   const render = (type: ComplementType): string => {
@@ -75,9 +79,13 @@ export function complementsParts(
       // use ("wird eine Legende").
       // Coordinated conjuncts render one by one, so a group may mix the two ("wird müde und
       // eine Legende" is odd, but "scheint müde oder groß" falls out of the same map).
+      // An ordinal has no undeclined form, and takes the article and the capital instead, in the
+      // gender and number of what it is said of: "ist der Erste" (A225, see `dePredOrdinal`).
       if (type === 'predicative') {
         return coordinate(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective' ? dePredAdj(np.head) : nounPhrase(np, 'nom'),
+          np.head.forms['role'] !== 'adjective' ? nounPhrase(np, 'nom')
+            : np.head.forms['ordinal'] === '1' ? dePredOrdinal(np.head, agreement)
+            : dePredAdj(np.head),
         );
       }
       // The preposition governs a case, and the case is spelled on each conjunct's own article
@@ -195,16 +203,22 @@ export function complementsParts(
         // "in" + the accusative of motion-into ("speichert das Buch in den Behälter"), never the
         // bare dative that would read as *giving the book to the container*. Which preposition is
         // the verb's own: ADD adds a thing TO something, so it says `terminus_prep: 'zu'` and takes
-        // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default.
+        // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default. A verb whose
+        // terminus is its dative object whatever it names says `terminus_dative`: GIVE gives a value
+        // TO an option, "gibt der Option den Wert", not INTO it (A223).
         else if (type === 'terminus') {
-          if (f['animate'] === '1') head = prepDet('', f, 'dat', plural);
+          if (f['animate'] === '1' || verb['terminus_dative'] === '1') head = prepDet('', f, 'dat', plural);
           else if (verb['terminus_prep']) head = prepDet(verb['terminus_prep'], f, 'dat', plural);
-          else { _case = 'acc'; head = prepDet('in', f, 'acc', plural); }
+          // A place one is at rather than inside is reached with its own preposition: "schickt das
+          // Buch an einen Ort" (A218).
+          else { _case = 'acc'; head = prepDet(f['place_prep'] ?? 'in', f, 'acc', plural); }
         }
         // Source. "aus" is "out of" an enclosure, right for a house or a continent but not for a
         // person or an animal, which one is not inside: a living source takes "von", fused to "vom"
-        // before "dem" (A154). The relativizer stand-in comes through here too ("von dem").
-        else /* source */         head = prepDet(f['animate'] === '1' ? 'von' : 'aus', f, 'dat', plural);
+        // before "dem" (A154). So does a place one is at rather than inside, which names its own
+        // preposition (`place_prep`): "von einem Ort", "vom Ausgangspunkt" (A218). The relativizer
+        // stand-in comes through here too ("von dem").
+        else /* source */         head = prepDet(f['animate'] === '1' || f['place_prep'] ? 'von' : 'aus', f, 'dat', plural);
       }
       // The pronoun is the whole phrase after the head, declined for the case the head governs. The
       // bare-dative terminus leaves no head at all, and then the pronoun is the phrase ("gibt ihm").
@@ -240,9 +254,12 @@ export function complementsParts(
   // "zu sein" (a predicate adjective alone stays bare: "scheint müde"). The infinitive is
   // non-finite, so it closes the complements and sits against the verb cluster, whatever the clause
   // order: "scheint im Markt eine Legende zu sein", "eine Legende zu sein scheinen wird", ", die eine
-  // Legende zu sein scheint,".
+  // Legende zu sein scheint,". A predicate ordinal is a nominalised one in German, "der Erste", so it
+  // takes the copula as a noun does: "scheint der Erste zu sein" (A225).
   const predicative = complements['predicative'];
-  const predicate = text && predicative && isSeemingPredicateNoun(predicative, verb) ? `${text} zu sein` : text;
+  const nominal = !!predicative && (isSeemingPredicateNoun(predicative, verb)
+    || (verb['seeming'] === '1' && predicative.phrase.conjuncts.some((np) => np.head.forms['ordinal'] === '1')));
+  const predicate = text && nominal ? `${text} zu sein` : text;
   return { adjuncts, predicate };
 }
 

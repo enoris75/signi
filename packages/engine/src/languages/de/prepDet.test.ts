@@ -16,6 +16,16 @@ describe('prepDet', () => {
     expect(prepDet('zu', { ...SCHWEIZ, definiteness: 'indefinite' }, 'dat', false)).toBe('zur');
   });
 
+  // A218: the "an" of a place one is at fuses as "in" does ("am Ende", "ans Ziel"); "an der" does not.
+  test('a definite article fuses with an, in the dative and the accusative', () => {
+    expect(prepDet('an', HAUS, 'dat', false)).toBe('am');
+    expect(prepDet('an', KATER, 'dat', false)).toBe('am');
+    expect(prepDet('an', HAUS, 'acc', false)).toBe('ans');
+    expect(prepDet('an', KATER, 'acc', false)).toBe('an den');
+    expect(prepDet('an', KATZE, 'dat', false)).toBe('an der');
+    expect(prepDet('an', { ...HAUS, definiteness: 'indefinite' }, 'dat', false)).toBe('an einem');
+  });
+
   test('any other preposition-article pair stays apart', () => {
     expect(prepDet('in', KATZE, 'dat', false)).toBe('in der');
     expect(prepDet('zu', HAUS, 'dat', true)).toBe('zu den');

@@ -261,7 +261,7 @@ describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
       en: 'to move from a place to another place.',
       it: 'muoversi da un luogo verso un altro luogo.',
       fr: "se déplacer d'un lieu vers un autre lieu.",
-      de: 'sich aus einem Ort zu einem anderen Ort bewegen.',
+      de: 'sich von einem Ort zu einem anderen Ort bewegen.',
       es: 'moverse de un lugar a otro lugar.',
       ja: '場所から別の場所へ移動する。',
       pt: 'mover-se de um lugar a outro lugar.',

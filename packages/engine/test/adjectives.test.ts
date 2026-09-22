@@ -1915,8 +1915,8 @@ describe('known bugs: an adjective on a place name', () => {
     const withBig = (type: 'comitative' | 'cause', phrase = bigAsia) =>
       sayAll(clause(np('CAT'), 'RUN', { complements: { [type]: { phrase } } }));
     expect(withBig('comitative')).toMatchObject({ de: 'der Kater läuft mit dem großen Asien.', it: 'il gatto corre con la grande Asia.' });
-    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: bigAsia } } })).de)
-      .toBe('der Kater gibt das Buch ins große Asien.');
+    expect(sayAll(clause(np('CAT'), 'SAVE', { directObject: np('BOOK'), complements: { terminus: { phrase: bigAsia } } })).de)
+      .toBe('der Kater speichert das Buch ins große Asien.');
     expect(sayAll(clause(bigAsia, 'SEE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).de)
       .toBe('das Buch wird vom großen Asien gesehen.');
     const bigFarEurope = np('EUROPE', { adjectives: ['BIG', 'FAR'] });

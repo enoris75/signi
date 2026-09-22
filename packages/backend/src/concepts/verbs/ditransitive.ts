@@ -43,7 +43,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'donnerons', '2pl_future': 'donnerez', '3pl_future': 'donneront',
       },
       de: {
-        base: 'geben',
+        base: 'geben', terminus_dative: '1',
         '1sg_present': 'gebe', '2sg_present': 'gibst', '3sg_present': 'gibt',
         '1pl_present': 'geben', '2pl_present': 'gebt', '3pl_present': 'geben',
         '1sg_past': 'gab', '2sg_past': 'gabst', '3sg_past': 'gab',

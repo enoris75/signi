@@ -105,3 +105,44 @@ above:
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)* (1 `test.fails`, plus a regression test for a place one is inside, a relation, a goal, a living source and the other six) |
+
+## Resolved
+
+**2026-09-22.** As the trial had it: the key is `place_prep`, value `'an'`, on the de forms of PLACE,
+END, DESTINATION and ORIGIN only in [`nouns.ts`](../../../packages/backend/src/concepts/nouns.ts). No
+"auf" noun was seeded (MARKET stays *im Markt*). It is read in:
+
+- [`spatialHead`](../../../packages/engine/src/languages/de/spatialHead.ts), `case 'in'` — the
+  locative, a route and a direction in the plain relation;
+- [`prepDet`](../../../packages/engine/src/languages/de/prepDet.ts) — *an + dem* → *am*, *an + das*
+  → *ans*;
+- the source branch of
+  [`complementsParts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  ("von" when the head is animate or names a `place_prep`) and its inanimate terminus default
+  (`f['place_prep'] ?? 'in'`, behind A223's `terminus_dative` and a verb's own `terminus_prep`, which
+  still win: *gibt dem Ziel das Buch*, *fügt das Buch zum Ort hinzu*);
+- [`relativizerStandIn`](../../../packages/engine/src/functions/relativizerStandIn.ts), which keeps
+  `place_prep` among its kept forms (*ein Ort, an dem*).
+
+The direction "into a place" falls out as *geht an einen Ort*, *geht ans Ziel*; not pinned.
+
+**Passing tests moved** (German rows only, each to the **Want**):
+
+- `genus-verbs.test.ts` → *IMPORT transfers content from a place …*: `Inhalt aus einem Ort
+  übertragen.` → `Inhalt von einem Ort übertragen.`
+- `place-adverbs.test.ts` → *EVERYWHERE*: `in allen Orten.` → `an allen Orten.`
+- `reflexive.test.ts` → *GO → to move from a place to another place*: `sich aus einem Ort zu einem
+  anderen Ort bewegen.` → `sich von einem Ort zu einem anderen Ort bewegen.`
+- `relative.test.ts` → *a place where one does something, in every language* (`ein Ort, in dem man
+  isst.` → `ein Ort, an dem man isst.`) and *the clause keeps its own object, negation and tense*
+  (`… in dem man Gegenstände kauft.`, `… in dem man nicht isst.`, `… in dem man aß.` → `an dem`)
+- `sweep-definitions.test.ts` → *CANVAS*: `ein Ort, in dem man Phrasen macht.` → `ein Ort, an dem man
+  Phrasen macht.`
+
+**Shipped strings.** The eight in the table above now render the **Want**; `e2e/definition-tooltip.spec.ts`
+pins IMPORT's German, now `Inhalt von einem Ort übertragen`. HOUSE's `ein Gebäude, in dem man wohnt`
+is unchanged.
+
+| | |
+|---|---|
+| **Tests** | `complements/locative.test.ts` → *known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)*, the `test.fails` now passing, plus an added case: the plural, a possessive and "nicht", a relative on END and one gapped on the source, "vom Ende" and "von den Orten", SEND's "ans Ziel", and ADD's and GIVE's own terminus winning over the noun's. Unit tests: `prepDet.test.ts` (the *am*/*ans* fusions), `spatialHead.test.ts`, `complementsPhrase.test.ts` (source, locative, terminus) and `relativizerStandIn.test.ts` |

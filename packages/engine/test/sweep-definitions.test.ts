@@ -138,7 +138,7 @@ describe('the glosses the sweep shipped', () => {
   test.each<[string, Record<LanguageCode, string>]>([
     // A23. The object gap ("that one presses") and the locative one ("where one makes phrases").
     ['BUTTON', { en: 'an object that one presses.', it: 'un oggetto che si preme.', fr: "un objet qu'on presse.", de: 'ein Gegenstand, den man drückt.', es: 'un objeto que se pulsa.', ja: '押す物体。', pt: 'um objeto que se pressiona.' }],
-    ['CANVAS', { en: 'a place where one makes phrases.', it: 'un luogo dove si fanno frasi.', fr: "un lieu où l'on fait des phrases.", de: 'ein Ort, in dem man Phrasen macht.', es: 'un lugar donde se hacen frases.', ja: 'フレーズを作る場所。', pt: 'um lugar onde se fazem frases.' }],
+    ['CANVAS', { en: 'a place where one makes phrases.', it: 'un luogo dove si fanno frasi.', fr: "un lieu où l'on fait des phrases.", de: 'ein Ort, an dem man Phrasen macht.', es: 'un lugar donde se hacen frases.', ja: 'フレーズを作る場所。', pt: 'um lugar onde se fazem frases.' }],
     // A24. The infinitive closes the German clause; the governed one takes Italian's "ad".
     ['DELETE', { en: 'to remove objects.', it: 'rimuovere oggetti.', fr: 'retirer des objets.', de: 'Gegenstände entfernen.', es: 'quitar objetos.', ja: '物体を取り除く。', pt: 'remover objetos.' }],
     ['ACQUIRE', { en: 'to begin to have.', it: 'iniziare ad avere.', fr: 'commencer à avoir.', de: 'beginnen, zu haben.', es: 'empezar a tener.', ja: '持つことが始まる。', pt: 'começar a ter.' }],

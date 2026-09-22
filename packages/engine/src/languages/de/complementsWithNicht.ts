@@ -13,15 +13,17 @@ import { complementsParts } from './complementsPhrase/index.js';
  * negation of the adjunct, "not *because of the dog*", which is a different sentence.
  *
  * `lead` is whatever the clause puts before its complements in that slot (the elided place's "da", a
- * prepositional object); it goes with the adjuncts.
+ * prepositional object); it goes with the adjuncts. `agreement` is what the predicate is said of,
+ * whose gender and number a predicate ordinal takes (see `complementsParts`).
  */
 export function complementsWithNicht(
   lead: string[],
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   verb: ConceptForms['forms'],
   nicht: string,
+  agreement: Record<string, string> = {},
 ): string {
-  const { adjuncts, predicate } = complementsParts(complements, verb);
+  const { adjuncts, predicate } = complementsParts(complements, verb, agreement);
   // German spells a clause's "nicht" and a denied cause's own in the same slot (see
   // `Complement.negative`). With a predicate they stay apart, one at each end of the adjuncts, and
   // the sentence says both: "ist nicht wegen des Hundes nicht müde". With no predicate to anchor the

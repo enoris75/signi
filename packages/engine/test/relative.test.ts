@@ -914,7 +914,7 @@ describe('locative relative clause: the place where', () => {
       en: 'a place where one eats.',
       it: 'un luogo dove si mangia.',
       fr: "un lieu où l'on mange.",
-      de: 'ein Ort, in dem man isst.',
+      de: 'ein Ort, an dem man isst.',
       es: 'un lugar donde se come.',
       ja: '食べる場所。',
       pt: 'um lugar onde se come.',
@@ -926,7 +926,7 @@ describe('locative relative clause: the place where', () => {
       en: 'a place where one buys objects.',
       it: 'un luogo dove si comprano oggetti.',
       fr: "un lieu où l'on achète des objets.", // the object's partitive (A149)
-      de: 'ein Ort, in dem man Gegenstände kauft.',
+      de: 'ein Ort, an dem man Gegenstände kauft.',
       es: 'un lugar donde se compran objetos.',
       ja: '物体を買う場所。',
     });
@@ -934,14 +934,14 @@ describe('locative relative clause: the place where', () => {
       en: 'a place where one does not eat.',
       it: 'un luogo dove non si mangia.',
       fr: "un lieu où l'on ne mange pas.",
-      de: 'ein Ort, in dem man nicht isst.',
+      de: 'ein Ort, an dem man nicht isst.',
       es: 'un lugar donde no se come.',
       pt: 'um lugar onde não se come.',
     });
     expect(sayAll(placeWhere('EAT', { verbPhrase: { verb: 'EAT', tense: 'past' } }))).toMatchObject({
       en: 'a place where one ate.',
       fr: "un lieu où l'on mangea.",
-      de: 'ein Ort, in dem man aß.',
+      de: 'ein Ort, an dem man aß.',
     });
   });
 

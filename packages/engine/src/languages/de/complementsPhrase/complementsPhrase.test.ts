@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from '@signi/shared';
-import { complementsPhrase } from './complementsPhrase.js';
+import { complementsParts, complementsPhrase } from './complementsPhrase.js';
 import {
   adj, BEHAELTER, BESTIMMUNG_RICHTUNG, BOOT, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
   GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SEGEL, SORGFALT, vp, WAEHLEN,
@@ -51,6 +51,15 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({
         predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })), locative: complement(np(MARKT)),
       }), SCHEINEN)).toBe('im Markt eine Legende zu sein');
+    });
+
+    // A225: an ordinal has no undeclined form; it is nominalised in the agreement it is handed, and
+    // under "scheinen" takes the copula a predicate noun takes.
+    test('a predicate ordinal takes the article and the capital of what it is said of', () => {
+      const first = complements({ predicative: complement(np({ role: 'adjective', base: 'erste', ordinal: '1' })) });
+      expect(complementsParts(first, {}, KATZE).predicate).toBe('die Erste');
+      expect(complementsParts(first, {}, { ...KATER, number: 'plural' }).predicate).toBe('die Ersten');
+      expect(complementsParts(first, SCHEINEN, KATER).predicate).toBe('der Erste zu sein');
     });
   });
 
@@ -106,6 +115,14 @@ describe('complementsPhrase', () => {
     test('an inanimate goal takes "in" + the accusative', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER)) }))).toBe('in den Behälter');
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER, { definiteness: 'indefinite' })) }))).toBe('in einen Behälter');
+    });
+
+    // A223: a verb whose terminus is its dative object whatever it names ("gibt der Option den Wert").
+    test('an inanimate goal of a `terminus_dative` verb is the bare dative', () => {
+      const dative = { terminus_dative: '1' };
+      expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER)) }), dative)).toBe('dem Behälter');
+      expect(complementsPhrase(complements({ terminus: complement(np(HAUS, { definiteness: 'indefinite' })) }), dative)).toBe('einem Haus');
+      expect(complementsPhrase(complements({ terminus: complement(np(ER, { gender: 'neut' })) }), dative)).toBe('ihm');
     });
   });
 
@@ -179,6 +196,15 @@ describe('complementsPhrase', () => {
   });
 
   describe('source', () => {
+    // A218: a place one is at is left "von", as a living source is, and fuses to "vom".
+    test('a place that names its own preposition is left with "von"', () => {
+      const ORT: Forms = { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular', place_prep: 'an' };
+      expect(complementsPhrase(complements({ source: complement(np(ORT)) }))).toBe('vom Ort');
+      expect(complementsPhrase(complements({ source: complement(np(ORT, { definiteness: 'indefinite' })) }))).toBe('von einem Ort');
+      expect(complementsPhrase(complements({ locative: complement(np(ORT)) }))).toBe('am Ort');
+      expect(complementsPhrase(complements({ terminus: complement(np(ORT, { definiteness: 'indefinite' })) }))).toBe('an einen Ort');
+    });
+
     test('is "aus" + dative', () => {
       expect(complementsPhrase(complements({ source: complement(np(HAUS)) }))).toBe('aus dem Haus');
       expect(complementsPhrase(complements({ source: complement(np(HAUS, { number: 'plural' })) }))).toBe('aus den Häusern');

@@ -114,9 +114,9 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
     subjectIsNegative: relativeSubjectIsNegative(rel),
     verbPhrase: rel.verbPhrase, directObject: rel.directObject, complements: rel.complements,
   }, leadsComplements);
-  const { dative, rest: undative } = splitDative(negComplements);
+  const { dative, rest: undative } = splitDative(negComplements, verb.forms);
   const { means, rest } = splitMeansClause(undative);
-  const dativeText = complementsPhrase(dative);
+  const dativeText = complementsPhrase(dative, verb.forms);
   // The means clause's subject is the pronoun of whoever does the act (B06, see `meansDoer`): the
   // clause's agreeing subject, which is the head itself in a subject relative ("der Hund, der
   // frisst, indem er ein Wort wählt"), or under the passive its agent, which a relative gapped on
@@ -133,7 +133,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // The adverbs already follow the objects here, so a direction adverb only has to leave the
   // prospective group's pre-object slot (see `adverbSlots`).
   const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
-  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements);
+  const complementsText = complementsWithNicht([prepositional], rest, verb.forms, nicht.beforeComplements, agreeForms);
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads

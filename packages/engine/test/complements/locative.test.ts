@@ -1065,10 +1065,11 @@ describe('known bugs: a French bare plural after a preposition', () => {
 });
 
 // A218. German says where a thing is with "in" and where it comes from with "aus" for a place one is
-// inside — "im Haus", "aus dem Haus" — and the engine gives every inanimate place that pair. *Ort* is
+// inside — "im Haus", "aus dem Haus" — and the engine gave every inanimate place that pair. *Ort* is
 // not one of them: a place is where one is AT, "an einem Ort", and what one comes FROM, "von einem
 // Ort". So are *Ende*, *Ziel* and *Ausgangspunkt* ("am Ende", "am Ziel"). The five place glosses,
-// EVERYWHERE, GO and IMPORT ship the "in"/"aus" pair. Found authoring C25 (EVERYWHERE's gloss).
+// EVERYWHERE, GO and IMPORT shipped the "in"/"aus" pair. Found authoring C25 (EVERYWHERE's gloss).
+// The fix lets the noun's German lexeme name its preposition, `place_prep: 'an'`.
 describe('known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)', () => {
   const at = (place: NounPhrase, verb = 'EAT') =>
     say(clause(np('CAT'), verb, { complements: { locative: { phrase: place } } }), 'de');
@@ -1076,7 +1077,7 @@ describe('known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)
     say(clause(np('MAN'), 'GO', { complements: { source: { phrase: place } } }), 'de');
   const definition = (id: string) => say(concepts.find((c) => c.id === id)!.definition!, 'de');
 
-  test.fails('the place takes "an" + dative, its relative "an dem", its source "von" and its goal "an"', () => {
+  test('the place takes "an" + dative, its relative "an dem", its source "von" and its goal "an"', () => {
     expect(at(np('PLACE', { definiteness: 'all', number: 'plural' }))).toBe('der Kater frisst an allen Orten.');
     expect(at(np('PLACE', { definiteness: 'indefinite' }))).toBe('der Kater frisst an einem Ort.');
     expect(at(np('PLACE'))).toBe('der Kater frisst am Ort.');
@@ -1108,6 +1109,29 @@ describe('known bugs: German Ort takes "an" and "von", not "in" and "aus" (A218)
     expect(definition('CLIPBOARD')).toBe('ein Ort, an dem man kopiert.');
     expect(definition('CONSOLE')).toBe('ein Ort, an dem man tippt.');
     expect(definition('CANVAS')).toBe('ein Ort, an dem man Phrasen macht.');
+  });
+
+  // The noun's "an" in every number and determiner, under "nicht", in a relative on any of the four
+  // nouns and gapped on the source; the "an" + "das" fusion "ans" for a neuter goal; and a verb's own
+  // preposition (ADD's "zu") or dative (GIVE's) still wins over the noun's.
+  test('"an" and "von" in every number, determiner and clause; the verb\'s own terminus still wins', () => {
+    expect(at(np('PLACE', { number: 'plural' }))).toBe('der Kater frisst an den Orten.');
+    expect(at(np('END', { number: 'plural' }))).toBe('der Kater frisst an den Enden.');
+    expect(at(np('PLACE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe('der Kater frisst an meinem Ort.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, complements: { locative: { phrase: np('PLACE') } } }), 'de'))
+      .toBe('der Kater frisst nicht am Ort.');
+    expect(say({ subject: np('END', { relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } } }) }, 'de'))
+      .toBe('das Ende, an dem der Kater frisst.');
+    expect(say({
+      subject: np('PLACE', { definiteness: 'indefinite', relative: { headRole: 'source', subject: np('MAN'), verbPhrase: { verb: 'GO' } } }),
+    }, 'de')).toBe('ein Ort, von dem der Mann geht.');
+    expect(from(np('END'))).toBe('der Mann geht vom Ende.');
+    expect(from(np('PLACE', { number: 'plural' }))).toBe('der Mann geht von den Orten.');
+    const sendTo = (verb: string, goal: string) =>
+      say(clause(np('CAT'), verb, { directObject: np('BOOK'), complements: { terminus: { phrase: np(goal) } } }), 'de');
+    expect(sendTo('SEND', 'DESTINATION')).toBe('der Kater schickt das Buch ans Ziel.');
+    expect(sendTo('ADD', 'PLACE')).toBe('der Kater fügt das Buch zum Ort hinzu.');
+    expect(sendTo('GIVE', 'DESTINATION')).toBe('der Kater gibt dem Ziel das Buch.');
   });
 
   test('regression: a place one is inside, another relation, a goal, a living source, the other six', () => {

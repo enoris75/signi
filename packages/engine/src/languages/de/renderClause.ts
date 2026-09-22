@@ -134,9 +134,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // The dative recipient leads the accusative object; the other complements trail it, and a
     // subordinate means clause trails even the verb (see `splitMeansClause`). Its subject is the
     // pronoun of whoever does this clause's act, "man" when that is no one (B06, see `meansDoer`).
-    const { dative, rest: undative } = splitDative(negComplements);
+    const { dative, rest: undative } = splitDative(negComplements, verb.forms);
     const { means, rest } = splitMeansClause(undative);
-    const dativeText = complementsPhrase(dative);
+    const dativeText = complementsPhrase(dative, verb.forms);
     const meansText = meansClause(means, meansDoer(phrase, zu));
     // A reflexive verb ("sich bewegen") builds its verb forms as the plain verb, and its pronoun,
     // agreeing with the subject, leads the Mittelfeld's pronoun slot: "bewegt sich nicht", "beweg
@@ -165,7 +165,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
       // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
       const impAdverb = adverbSlots(modifier, neg, '');
-      const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements);
+      const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
@@ -196,7 +196,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       const infDirect = splitObject(objectToRender, proObject, objectPrep);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
-      const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements);
+      const infComplements = complementsWithNicht([proPlace, infDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
       // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
       // finite clause puts it too: "gegessen werden", "gegessen zu werden".
@@ -261,7 +261,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // its place in front of the accusative object and travels with it.
     const objects = [dativeText, directObjectText];
     const objectLeads = !passive && objectLeadsNicht(adverb.nichtBeforeObject, objectNoun, objectToRender);
-    const complementsText = complementsWithNicht([proPlace, prepositional], rest, verb.forms, neg.beforeComplements);
+    const complementsText = complementsWithNicht([proPlace, prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement);
     // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
     // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
     // non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. It is used for the
