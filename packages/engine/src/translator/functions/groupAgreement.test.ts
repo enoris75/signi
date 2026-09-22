@@ -46,4 +46,12 @@ describe('groupAgreement', () => {
     expect(groupAgreement([np(PIETRO, { definiteness: 'no' }), np(VOLPE)], 'or', 'fr')).toMatchObject({ definiteness: 'no' });
     expect(groupAgreement([np(PIETRO), np(VOLPE)], 'and', 'fr')).not.toHaveProperty('definiteness');
   });
+
+  test('the group is an animal only when every conjunct is, under either conjunction', () => {
+    const GATTO = { base: 'gatto', number: 'singular', gender: 'masc', animal: '1' };
+    expect(groupAgreement([np(GATTO), np(VOLPE, { animal: '1' })], 'and', 'de')).toMatchObject({ animal: '1' });
+    expect(groupAgreement([np(GATTO), np(VOLPE, { animal: '1' })], 'or', 'de')).toMatchObject({ animal: '1' });
+    expect(groupAgreement([np(GATTO), np(PIETRO)], 'and', 'de')).not.toHaveProperty('animal');
+    expect(groupAgreement([np(PIETRO), np(GATTO)], 'or', 'de')).not.toHaveProperty('animal');
+  });
 });

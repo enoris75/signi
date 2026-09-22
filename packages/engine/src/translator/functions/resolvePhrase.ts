@@ -67,7 +67,7 @@ export function resolvePhrase(
   const verbPhrase = plan.verbPhrase
     ? {
         // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
-        // coordination is read off its first conjunct, as agreement is.
+        // coordination is read off its group agreement, an animal only when every conjunct is one.
         ...resolveVerbPhrase(
           plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject,
           citation ? undefined : subject.agreement,

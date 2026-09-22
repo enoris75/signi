@@ -40,5 +40,8 @@ export function groupAgreement(
   // engines read off the subject: French negates on "aucun" alone ("aucun garçon ne pleure"), so
   // a group with any negative conjunct still triggers the concord.
   if (conjuncts.some((c) => c.head.forms['definiteness'] === 'no')) features['definiteness'] = 'no';
+  // So is being an animal, which German EAT reads to pick "fressen" over "essen" (`subject_sense`):
+  // only a group whose *every* conjunct is one, since "fressen" said of a person is an insult.
+  if (conjuncts.every((c) => c.head.forms['animal'] === '1')) features['animal'] = '1';
   return features;
 }

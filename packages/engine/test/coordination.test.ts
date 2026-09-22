@@ -908,14 +908,14 @@ describe('known bugs: an "or" group after its verb agrees with the last conjunct
 
 // A211. German EAT is "fressen" of an animal (A157): the translator resolves the verb's
 // `subject_sense` when the subject's forms say `animal`. A coordinated subject's forms are its group
-// agreement, which carries person, number and gender only, so a group of animals is never an animal
-// and eats as people do: "der Kater und der Hund essen". Found while probing the random phrase above
+// agreement, which carried person, number and gender only, so a group of animals was never an animal
+// and ate as people do: "der Kater und der Hund essen". Found while probing the random phrase above
 // (seed 583438) for its inverted "or": "würde die Kater oder der Hund essen".
 describe('known bugs: a German group of animals eats with "essen"', () => {
   const and = (...conjuncts: NounPhrase[]): NounElement => ({ conjuncts, conjunction: 'and' });
   const eat = (subject: NounElement, extra: Parameters<typeof clause>[2] = {}) => say(clause(subject, 'EAT', extra), 'de');
 
-  test.fails('a group whose every conjunct is an animal takes "fressen"', () => {
+  test('a group whose every conjunct is an animal takes "fressen"', () => {
     expect(eat(and(np('CAT'), np('DOG')))).toBe('der Kater und der Hund fressen.');
     expect(eat({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'or' })).toBe('der Kater oder der Hund frisst.');
     expect(eat(and(np('CAT'), np('DOG'), np('COW', { number: 'plural' })))).toBe('der Kater, der Hund und die Kühe fressen.');
@@ -935,5 +935,22 @@ describe('known bugs: a German group of animals eats with "essen"', () => {
       en: 'the cat and the dog eat.', it: 'il gatto e il cane mangiano.', fr: 'le chat et le chien mangent.',
       es: 'el gato y el perro comen.', ja: '猫と犬は食べます。', pt: 'o gato e o cão comem.',
     });
+  });
+
+  test('the future, a modal, the progressive, a question and a negative group follow', () => {
+    const catAndDog = and(np('CAT'), np('DOG'));
+    expect(eat(catAndDog, { verbPhrase: { tense: 'future' } })).toBe('der Kater und der Hund werden fressen.');
+    expect(eat(catAndDog, { verbPhrase: { modals: ['MUST'] } })).toBe('der Kater und der Hund müssen fressen.');
+    expect(eat(catAndDog, { verbPhrase: { aspect: 'progressive' } })).toBe('der Kater und der Hund fressen gerade.');
+    expect(say({ ...clause(catAndDog, 'EAT'), interrogative: true }, 'de')).toBe('fressen der Kater und der Hund?');
+    expect(eat(and(np('CAT', { definiteness: 'no' }), np('DOG', { definiteness: 'no' })))).toBe('kein Kater und kein Hund fressen.');
+  });
+
+  // Every conjunct, not the nearest: an "or" group with a person in it keeps "essen" in either order,
+  // and a pronoun, which carries no animacy of its own, keeps it too.
+  test('an "or" group with a person, and a group with a pronoun, keep "essen"', () => {
+    expect(eat({ conjuncts: [np('MAN'), np('DOG')], conjunction: 'or' })).toBe('der Mann oder der Hund isst.');
+    expect(eat({ conjuncts: [np('DOG'), np('MAN')], conjunction: 'or' })).toBe('der Hund oder der Mann isst.');
+    expect(eat(and(np('DOG'), np('FIRST_PERSON')))).toBe('der Hund und ich essen.');
   });
 });
