@@ -278,6 +278,7 @@ describe('rawSatellites', () => {
         'locativeDefiniteness',
         'locativeRelative',
         'locativePossessor',
+        'locativeConjunct',
       ]);
     });
 
@@ -302,8 +303,8 @@ describe('rawSatellites', () => {
       ]);
     });
 
-    // Every cause also carries its own polarity — the one complement that can be denied rather
-    // than named ("not because of the dog"), whatever kind of word heads it.
+    // Every cause also coordinates, and carries its own polarity — the one complement that can be
+    // denied rather than named ("not because of the dog"), whatever kind of word heads it.
     it.each<[string, Concept, string[]]>([
       // "a causa di lei": a 3rd-person pronoun cause can render feminine.
       ['a third-person pronoun its number and gender', SHE, ['causeNumber', 'causeGender']],
@@ -314,7 +315,12 @@ describe('rawSatellites', () => {
         ['causeAdjective', 'causeNumber', 'causeGender', 'causeRelative', 'causePossessor'],
       ],
     ])('gives a cause that is %s', (_, cause, controls) => {
-      expect(offered({ verb: GO, cause }, 'cause')).toEqual(['cause', ...controls, 'causeNegative']);
+      expect(offered({ verb: GO, cause }, 'cause')).toEqual([
+        'cause',
+        ...controls,
+        'causeConjunct',
+        'causeNegative',
+      ]);
     });
 
     it('offers the polarity only on the cause, and only once it holds a word', () => {
@@ -346,10 +352,14 @@ describe('rawSatellites', () => {
       expect(satellite({ verb: GO, manner: CARE }, 'mannerDefiniteness').available).toBe(true);
     });
 
-    it('coordinates only the predicative among the complements, once it has a head', () => {
+    // The prepositional complements coordinate too: each engine decides per conjunct whether its
+    // adposition repeats ("in the house and the market", "nella casa e nel mercato").
+    it('coordinates every complement, once it has a head', () => {
       expect(satellite({ verb: GO, predicative: CAT }, 'predicativeConjunct').available).toBe(true);
+      expect(satellite({ verb: GO, locative: CAT }, 'locativeConjunct').available).toBe(true);
+      expect(satellite({ verb: GO, cause: CAT }, 'causeConjunct').available).toBe(true);
       expect(satellite({ verb: GO }, 'predicativeConjunct').available).toBe(false);
-      expect(satellite({ verb: GO, locative: CAT }, 'locativeConjunct').available).toBe(false);
+      expect(satellite({ verb: GO }, 'locativeConjunct').available).toBe(false);
     });
   });
 

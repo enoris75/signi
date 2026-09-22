@@ -40,6 +40,28 @@ describe('buildComplements', () => {
     });
   });
 
+  // Every boxed complement coordinates, the prepositional ones included (see
+  // COORDINABLE_NOUN_KEYS) — the engines repeat each language's adposition per conjunct.
+  it('builds every boxed complement as a group once it has conjuncts', () => {
+    const boxed = COMPLEMENT_TYPES.filter((type) => type !== 'instrumental');
+    const sel = Object.fromEntries(
+      boxed.flatMap((type) => [
+        [type, CAT],
+        [`${type}Conjuncts`, [{ subject: DOG }]],
+        [`${type}Conjunction`, 'or'],
+      ]),
+    ) as PhraseSelection;
+
+    const complements = buildComplements(sel)!;
+
+    for (const type of boxed) {
+      expect(complements[type]?.phrase).toMatchObject({
+        conjuncts: [{ concept: 'CAT' }, { concept: 'DOG' }],
+        conjunction: 'or',
+      });
+    }
+  });
+
   it('gives the route and the locative each their own path specifier', () => {
     const sel: PhraseSelection = { route: HOUSE, routeSpecifier: 'over', locative: BED, locativeSpecifier: 'under' };
 

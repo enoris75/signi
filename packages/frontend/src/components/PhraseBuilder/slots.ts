@@ -39,19 +39,23 @@ export const NOUN_KEYS: NounKey[] = [
 ];
 
 /**
- * The noun blocks that can be *coordinated* ("Peter and Paul could speak aramaic or latin").
- * The three adposition-free slots: subject, direct object, and the predicative subject
- * complement.
+ * The noun blocks that can be *coordinated* ("Peter and Paul could speak aramaic or latin") —
+ * every noun block on the canvas.
  *
- * The other complements are left out on purpose, not for lack of a data model — `NounGroup` sits
- * in every noun slot. Coordinating a complement forces a question they alone raise: does the
- * preposition repeat across the conjuncts? Each language answers differently (Italian's fused
- * "nella casa e nel bosco" must repeat it; English's "with the cat and the dog" must not), and
- * a `direction` group could even need two different prepositions at once ("corro dal bambino e
- * alla casa"). The engines already implement each language's answer, so opening these up is a
- * UI change — but it deserves its own look, not a silent ride-along.
+ * The prepositional complements were held back at first, not for lack of a data model — `NounGroup`
+ * sits in every noun slot — but because coordinating one raises a question the adposition-free
+ * slots never do: does the preposition repeat across the conjuncts? Each language answers
+ * differently, and the engines answer it *per conjunct*, which is what made opening these up a UI
+ * change alone. Italian repeats its fused article where English drops the preposition ("nella casa
+ * e nel mercato" / "in the house and the market"); a `direction` group takes two different
+ * prepositions at once when its goals differ in animacy ("corre dal bambino e alla casa"); and an
+ * English locative idiom survives on the one conjunct that licenses it ("at home and in the
+ * market").
+ *
+ * The instrumental is absent because it is not a box on this canvas (see LINKED_COMPLEMENT_TYPES),
+ * not because it cannot coordinate.
  */
-export const COORDINABLE_NOUN_KEYS: NounKey[] = ["subject", "directObject", "predicative"];
+export const COORDINABLE_NOUN_KEYS: NounKey[] = [...NOUN_KEYS];
 
 // Every noun block chains up to three adjectives. They are revealed one at a time —
 // the noun box carries the control for the first, and each adjective box carries the

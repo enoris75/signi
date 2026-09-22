@@ -577,9 +577,9 @@ export function rawSatellites(
           parent: type,
           label: t("satellite.coordination"),
           icon: <CallSplitIcon sx={iconSx} />,
-          // Only the adposition-free complement coordinates today — the predicative subject
-          // complement ("seems happy or tired", "becomes a legend and an icon"). See
-          // COORDINABLE_NOUN_KEYS for why the prepositional ones are held back.
+          // Every complement with a box coordinates — the adposition-free predicative ("becomes a
+          // legend and an icon") and the prepositional ones alike ("in the house and the market").
+          // The engines repeat each language's adposition per conjunct; see COORDINABLE_NOUN_KEYS.
           available: COORDINABLE_NOUN_KEYS.includes(type) && Boolean(concept),
           hasValue: conjunctCount(type) > 0,
           valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),

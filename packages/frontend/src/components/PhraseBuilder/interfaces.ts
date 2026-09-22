@@ -298,17 +298,30 @@ export interface PhraseSelection {
     // relative clause) from the same recursive builder, and conjuncts may differ freely ("Peter
     // and the old dog"). The block's own fields are the *first* conjunct; these are the rest.
     //
-    // Only the three adposition-free noun slots coordinate today (see COORDINABLE_NOUN_KEYS):
-    // the prepositional complements raise a question these don't — whether the preposition
-    // repeats across the conjuncts — that each language answers differently.
+    // Every noun block coordinates (see COORDINABLE_NOUN_KEYS), the prepositional complements
+    // included: each language's engine decides per conjunct whether its adposition repeats.
     subjectConjuncts?: PhraseSelection[];
     directObjectConjuncts?: PhraseSelection[];
     predicativeConjuncts?: PhraseSelection[];
+    locativeConjuncts?: PhraseSelection[];
+    directionConjuncts?: PhraseSelection[];
+    sourceConjuncts?: PhraseSelection[];
+    routeConjuncts?: PhraseSelection[];
+    causeConjuncts?: PhraseSelection[];
+    terminusConjuncts?: PhraseSelection[];
+    mannerConjuncts?: PhraseSelection[];
     // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
     // noun phrases — see NOUN_COORD_CONJUNCTIONS.
     subjectConjunction?: CoordConjunction;
     directObjectConjunction?: CoordConjunction;
     predicativeConjunction?: CoordConjunction;
+    locativeConjunction?: CoordConjunction;
+    directionConjunction?: CoordConjunction;
+    sourceConjunction?: CoordConjunction;
+    routeConjunction?: CoordConjunction;
+    causeConjunction?: CoordConjunction;
+    terminusConjunction?: CoordConjunction;
+    mannerConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;

@@ -75,6 +75,28 @@ test.describe('complements', () => {
     });
   });
 
+  // A prepositional complement coordinates like the subject does. The goal is the hard case: its
+  // conjuncts differ in animacy, so Italian needs a different preposition for each ("dal bambino
+  // e alla casa"), while English shares its one ("to the child and the house").
+  test('a direction coordinates, each goal taking its own preposition', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.revealAndPick('direction', 'CHILD');
+
+    await app.satellite('directionConjunct').click();
+    await page.getByTestId('typeahead-subject').last().fill('house');
+    await page.locator('[data-testid="typeahead-option"][data-concept="HOUSE"]').click();
+
+    await app.expectSentences({
+      en: 'the cat runs to the child and the house.',
+      it: 'il gatto corre dal bambino e alla casa.',
+      fr: "le chat court vers l'enfant et à la maison.",
+      de: 'der Kater läuft zum Kind und zum Haus.',
+      es: 'el gato corre hacia el niño y a la casa.',
+      pt: 'o gato corre para a criança e à casa.',
+      ja: '猫は子供と家へ走ります。',
+    });
+  });
+
   test('the route takes its relation from the specifier toolbar', async ({ app, page }) => {
     await app.buildClause('CAT', 'RUN');
     await app.revealAndPick('route', 'HOUSE');
