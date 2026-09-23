@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { agentPhrase } from './agentPhrase.js';
+import { questionStandIn } from '../../functions/questionGapComplement.js';
 import { CAT, el, HE, I, np, WE, YOU } from './en.fixtures.js';
 
 describe('agentPhrase', () => {
@@ -25,5 +26,11 @@ describe('agentPhrase', () => {
     expect(agentPhrase(el(np(WE)), WE)).toBe('by ourselves');
     expect(agentPhrase(el(np(YOU)), YOU)).toBe('by yourself');
     expect(agentPhrase(el(np(I), np(CAT)), I)).toBe('by myself and the cat');
+  });
+});
+
+describe('agentPhrase: the agent asked about (P09-E16)', () => {
+  test('the wordless question stand-in strands its by', () => {
+    expect(agentPhrase(questionStandIn({ role: 'agent', animate: true }, { base: '' }))).toBe('by');
   });
 });

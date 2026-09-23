@@ -13,6 +13,7 @@ import { existentialPlan } from './existentialPlan.js';
 import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
+import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
 import { withQuestionPossessor } from './withQuestionPossessor.js';
 import { resolveComplements } from './resolveComplements.js';
@@ -139,8 +140,9 @@ export function resolvePhrase(
         ...resolveVerbPhrase(
           plan.verbPhrase, language, lookup, mood, impRegister,
           // A direct-object question gaps the object the verb still takes, as a relative does ("what
-          // does the cat eat?"); a passive has none left to ask about, and stays active without one.
-          !!plan.directObject || (gap?.role === 'directObject' && plan.verbPhrase.voice !== 'passive'),
+          // does the cat eat?") — and under the passive that gapped object is the patient to promote
+          // ("what is eaten by the cat?", P09-E16).
+          !!plan.directObject || gap?.role === 'directObject',
           citation ? undefined : subject.agreement,
         ),
         ...(question ? { interrogative: true } : {}),
@@ -161,7 +163,24 @@ export function resolvePhrase(
   // A **generic** agent is demoted to nothing at all: no language says *by one* / *da si* / *von
   // man*, and a plan whose agent is the generic person is exactly the one that wants the plain
   // agentless passive ("the food is eaten", "das Futter wird gegessen").
-  const passive = verbPhrase?.voice === 'passive' && !!directObject;
+  //
+  // A **passive wh-question** (P09-E16) moves its gap with the slots (`passiveGap`): a patient gapped
+  // as the object is the subject now, the wordless third-singular stand-in a subject question has
+  // ("what **is** eaten", never "are", whatever the answer), and an agent gapped as the subject is the
+  // by-phrase's gap, so there is no agent to speak. A plan asking a passive the verb cannot take — an
+  // intransitive, or an object the language takes with a preposition — is refused rather than asked
+  // in the active, where its gap would name the other slot.
+  if (gap && plan.verbPhrase?.voice === 'passive' && verbPhrase?.voice !== 'passive') {
+    throw new Error(`a passive wh-question needs a verb that takes the passive in ${language} (P09-E16)`);
+  }
+  const passive = verbPhrase?.voice === 'passive' && (!!directObject || gap?.role === 'directObject');
+  if (passive && gap?.role === 'possessor' && gap.possessed === 'subject') {
+    throw new Error('a possessor question inside a passive\'s agent is not built (P09-E16)');
+  }
+  const asked = gap && passive
+    ? gap.role === 'possessor' ? { ...gap, possessed: 'subject' as const } : { ...gap, role: passiveGap(gap.role) }
+    : gap;
+  const patient = passive ? directObject ?? questionSubject(gap!) : undefined;
   const generic = subject.agreement['generic'] === '1';
   // An **experiencer verb** re-maps the clause too, and in the same way a passive does — the
   // difference is that the plan never asks for it: it is lexical. Italian *piacere* and Spanish
@@ -178,12 +197,12 @@ export function resolvePhrase(
   // citation has none — a fact about Italian and Spanish, not a gap in the plan.
   const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
   const resolved: ResolvedPhrase = {
-    subject: passive || experiencer ? directObject : subject,
+    subject: passive ? patient! : experiencer ? directObject! : subject,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
     verbPhrase: clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject),
     directObject: passive || experiencer ? undefined : directObject,
-    ...(passive && !generic ? { agent: subject } : {}),
-    ...(gap ? { question: gap } : {}),
+    ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
+    ...(asked ? { question: asked } : {}),
     complements: experiencer && !generic
       ? { ...resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
       : resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),

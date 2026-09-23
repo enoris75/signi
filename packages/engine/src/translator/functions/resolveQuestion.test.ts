@@ -69,4 +69,10 @@ describe('resolveQuestion', () => {
     expect(ask({ subject: { conjuncts: [{ concept: 'CAT' }, { concept: 'DOG' }], conjunction: 'and' } })).toThrow(/coordination.*P09-E14/);
     expect(ask({ questionPossessed: 'locative' as never })).toThrow(/subject or the direct object.*P09-E14/);
   });
+
+  test('a passive plan names the active slots; resolvePhrase moves the gap (P09-E16)', () => {
+    const passive = { verb: 'EAT', voice: 'passive' } as const;
+    expect(resolveQuestion(plan({ verbPhrase: passive, questionRole: 'directObject' }), true)).toEqual({ role: 'directObject', animate: false });
+    expect(resolveQuestion(plan({ verbPhrase: passive, questionRole: 'subject', questionAnimate: true }), true)).toEqual({ role: 'subject', animate: true });
+  });
 });

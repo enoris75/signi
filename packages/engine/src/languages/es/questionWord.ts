@@ -1,6 +1,7 @@
 import type { ConceptForms, ResolvedQuestion } from '../../types.js';
 import { type QuestionAdverb, questionAdverbial } from '../../functions/questionAdverbial.js';
-import { questionGapComplement } from '../../functions/questionGapComplement.js';
+import { questionGapComplement, questionStandIn } from '../../functions/questionGapComplement.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 
@@ -23,6 +24,8 @@ const ADVERBIAL: Record<QuestionAdverb, string> = { where: 'dónde', how: 'cómo
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
   // The possessor question's *de*-phrase, which fronts alone from the object (P09-E14).
   if (question.role === 'possessor') return 'de quién';
+  // A passive's agent asked about is the by-phrase over the stand-in (P09-E16): *por quién*, and *por qué cosa* for a thing, since *por qué* is *why*.
+  if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'quién' : 'qué cosa' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
   const gap = questionGapComplement(question, { base: question.animate ? 'quién' : 'qué' });

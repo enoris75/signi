@@ -329,10 +329,14 @@ export interface ResolvedComplement {
 /**
  * A wh-question's gap, resolved (see ResolvedPhrase.question): a clause slot (P09-E6), the possessor
  * inside one (P09-E14), or a complement in its relation (P09-E15). The translator refuses the gaps
- * that have no question here — the predicates, the purpose, most temporal relations.
+ * that have no question here — the predicates, the purpose, most temporal relations. Under a passive
+ * the role names the **passive** slots (P09-E16): the patient asked about is `'subject'`, the agent
+ * `'agent'`.
  */
 export interface ResolvedQuestion {
-  role: 'subject' | 'directObject' | 'possessor' | ComplementType;
+  // `'agent'` is a passive's by-phrase asked about (P09-E16): the plan's subject gap once the passive
+  // has moved it (see `passiveGap`), as the patient's object gap becomes `'subject'`.
+  role: 'subject' | 'directObject' | 'possessor' | 'agent' | ComplementType;
   /**
    * *who* rather than *what*: read on a subject, direct-object or complement gap, where it also
    * decides between an adverb and the complement path (`questionAdverbial`: "where does the cat come

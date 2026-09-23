@@ -1386,6 +1386,14 @@ export interface PhrasePlan {
    * temporal `ago` / `after` / `before` / `during`, and an instrument presented as an action
    * (`process` / `concept`, whose question is *how*).
    *
+   * Under a **passive** the roles still name the **active** slots, as `RelativeClause.headRole`'s do
+   * (P09-E16): the plan's `subject` is the agent and its `directObject` the patient, and the gap moves
+   * with them. `'directObject'` asks the patient, which is the passive's subject ("**what** is eaten
+   * by the cat?" — the third singular, *qu'est-ce qui*, が); `'subject'` asks the agent, through the
+   * by-phrase ("**who** is the food eaten by?", *da chi*, *par qui*, *von wem* — *wovon* for a thing —,
+   * *por quién*, *por quem*, 誰に); a complement gap is where it was ("**where** is the food eaten by the
+   * cat?"). A passive the verb cannot take is refused, not asked in the active.
+   *
    * It implies `interrogative`, so the question mark, the ¿, the か and the suppression under a
    * condition, a command or a citation all hold unchanged. The gap belongs to this clause alone: a
    * coordinated clause is a yes/no question beside it ("who eats, and does the dog run?").

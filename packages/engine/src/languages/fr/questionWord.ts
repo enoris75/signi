@@ -1,6 +1,7 @@
 import type { ConceptForms, ResolvedQuestion } from '../../types.js';
 import { type QuestionAdverb, questionAdverbial } from '../../functions/questionAdverbial.js';
-import { questionGapComplement } from '../../functions/questionGapComplement.js';
+import { questionGapComplement, questionStandIn } from '../../functions/questionGapComplement.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 
@@ -23,6 +24,8 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   // The possessor question's *de*-phrase, which fronts alone from the object — *de qui*, never the
   // relative *dont* (P09-E14).
   if (question.role === 'possessor') return 'de qui';
+  // A passive's agent asked about is the by-phrase over the stand-in (P09-E16): *par qui* / *par quoi*.
+  if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'qui' : 'quoi' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
   const gap = questionGapComplement(question, { base: question.animate ? 'qui' : 'quoi' });

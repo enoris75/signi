@@ -1,6 +1,7 @@
 import type { ConceptForms, ResolvedQuestion } from '../../types.js';
 import { type QuestionAdverb, questionAdverbial } from '../../functions/questionAdverbial.js';
-import { questionGapComplement } from '../../functions/questionGapComplement.js';
+import { questionGapComplement, questionStandIn } from '../../functions/questionGapComplement.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { woCompound } from './woCompound.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
@@ -31,6 +32,8 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'subject') return question.animate ? WER.nom : 'was';
   // The possessor's word is written by the possessor renderer, in the phrase it sits in (P09-E14).
   if (question.role === 'possessor') return 'wessen';
+  // A passive's agent asked about is the by-phrase over the stand-in (P09-E16): *von wem*, and for a thing *wovon*.
+  if (question.role === 'agent') return woCompound(agentPhrase(questionStandIn(question, { base: '', definiteness: 'question' })).replace(/\s+/g, ' ').trim());
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
   const gap = questionGapComplement(question, { base: '', definiteness: 'question' });

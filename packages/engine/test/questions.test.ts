@@ -554,6 +554,117 @@ describe('the question over a complement', () => {
   });
 });
 
+// A passive question names the plan's **active** slots, as a relative's head does (P09-E16): the
+// object gap is the patient, which the passive makes the subject, and the subject gap the agent,
+// which it makes the by-phrase.
+const passive = { voice: 'passive' } as const;
+
+describe('the passive question', () => {
+  test('the patient: what is eaten by the cat?', () => {
+    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: passive }), 'directObject'))).toEqual({
+      en: 'what is eaten by the cat?', // a subject question now: no inversion
+      it: 'che cosa è mangiato dal gatto?',
+      fr: "qu'est-ce qui est mangé par le chat ?",
+      de: 'was wird vom Kater gefressen?', // the sense is still the (animal) agent's
+      es: '¿qué es comido por el gato?',
+      ja: '何が猫に食べられますか？', // が, as E6's subject gap
+      pt: 'o que é comido pelo gato?',
+    });
+  });
+
+  test('the agent: who is the food eaten by?', () => {
+    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'subject', true))).toEqual({
+      en: 'who is the food eaten by?', // English strands its by
+      it: 'da chi è mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture est mangée ?',
+      de: 'von wem wird das Essen gegessen?', // a person asked about: gegessen, not gefressen
+      es: '¿por quién es comida la comida?',
+      ja: '食べ物は誰に食べられますか？', // the question keeps the passive, as the relative does not
+      pt: 'por quem a comida é comida?',
+    });
+  });
+
+  test('another gap: where is the food eaten by the cat?', () => {
+    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'locative'))).toEqual({
+      en: 'where is the food eaten by the cat?',
+      it: "dov'è mangiato dal gatto il cibo?", // E6's subject-last order, and its elision
+      fr: 'où est-ce que la nourriture est mangée par le chat ?',
+      de: 'wo wird das Essen vom Kater gefressen?',
+      es: '¿dónde es comida la comida por el gato?',
+      ja: '食べ物は猫にどこで食べられますか？',
+      pt: 'onde a comida é comida pelo gato?',
+    });
+  });
+
+  test('a plural patient asked about stays singular, and a person asked about is who', () => {
+    expect(sayAll(ask(clause(np('CAT', { number: 'plural' }), 'EAT', { verbPhrase: passive }), 'directObject'))).toMatchObject({
+      en: 'what is eaten by the cats?',
+      it: 'che cosa è mangiato dai gatti?',
+    });
+    expect(sayAll(ask(clause(np('CAT'), 'SEE', { verbPhrase: passive }), 'directObject', true))).toEqual({
+      en: 'who is seen by the cat?',
+      it: 'chi è visto dal gatto?',
+      fr: 'qui est vu par le chat ?',
+      de: 'wer wird vom Kater gesehen?',
+      es: '¿quién es visto por el gato?',
+      ja: '誰が猫に見られますか？',
+      pt: 'quem é visto pelo gato?',
+    });
+    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { ...passive, tense: 'past' } }), 'directObject'))).toMatchObject({
+      en: 'what was eaten by the cat?',
+      de: 'was wurde vom Kater gefressen?',
+    });
+  });
+
+  test('an inanimate agent: wovon, and por qué cosa where por qué is why', () => {
+    expect(sayAll(ask(clause(someone, 'DESTROY', { verbPhrase: passive, directObject: np('HOUSE') }), 'subject'))).toEqual({
+      en: 'what is the house destroyed by?',
+      it: 'da che cosa è distrutta la casa?',
+      fr: 'par quoi est-ce que la maison est détruite ?',
+      de: 'wovon wird das Haus zerstört?',
+      es: '¿por qué cosa es destruida la casa?',
+      ja: '家は何に破壊されますか？',
+      pt: 'por que coisa a casa é destruída?',
+    });
+  });
+
+  test('the stranded by keeps the by-phrase\'s slot', () => {
+    const plan = ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD'), complements: { locative: { phrase: np('HOUSE') } } }), 'subject', true);
+    expect(sayAll(plan)).toMatchObject({ en: 'who is the food eaten by in the house?', de: 'von wem wird das Essen im Haus gegessen?' });
+  });
+
+  test('a generic agent drops under a complement gap: where is the food eaten?', () => {
+    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'locative'))).toMatchObject({
+      en: 'where is the food eaten?',
+      de: 'wo wird das Essen gegessen?',
+      ja: '食べ物はどこで食べられますか？',
+    });
+  });
+
+  test('P09-E15\'s gaps fall out under the passive: a complement gap is unchanged by the remap', () => {
+    expect(sayAll(about(clause(np('CAT'), 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'locative', path('under')))).toEqual({
+      en: 'what is the food eaten by the cat under?',
+      it: 'sotto che cosa è mangiato dal gatto il cibo?',
+      fr: 'sous quoi est-ce que la nourriture est mangée par le chat ?',
+      de: 'worunter wird das Essen vom Kater gefressen?',
+      es: '¿debajo de qué es comida la comida por el gato?',
+      ja: '食べ物は猫に何の下で食べられますか？',
+      pt: 'debaixo de que a comida é comida pelo gato?',
+    });
+  });
+
+  test('P09-E14\'s possessor inside the patient is a subject possessor question; inside the agent it is refused', () => {
+    const food = clause(np('CAT'), 'EAT', { verbPhrase: passive, directObject: np('FOOD') });
+    expect(sayAll(whose(food, 'directObject'))).toMatchObject({
+      en: 'whose food is eaten by the cat?',
+      de: 'wessen Essen wird vom Kater gefressen?',
+      it: 'il cibo di chi è mangiato dal gatto?',
+      ja: '誰の食べ物が猫に食べられますか？',
+    });
+    expect(() => translateAll(whose(food, 'subject'))).toThrow(/agent.*P09-E16/);
+  });
+});
+
 describe('wh-questions: not built yet', () => {
   test('the gaps with no question, each refused by name, and the passive', () => {
     const eats = clause(np('CAT'), 'EAT');
@@ -564,6 +675,9 @@ describe('wh-questions: not built yet', () => {
     expect(() => translateAll(ask(clause(np('CAT'), 'BECOME'), 'predicative'))).toThrow(/predicative/);
     expect(() => translateAll(ask(eats, 'objectPredicative'))).toThrow(/objectPredicative/);
     expect(() => translateAll(about(eats, 'instrumental', [{ kind: 'abstraction', value: 'process' }]))).toThrow(/process.*how/);
-    expect(() => translateAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { voice: 'passive' } }), 'directObject'))).toThrow(/passive/);
+  });
+
+  test('the passive the plan asks of a verb that has none', () => {
+    expect(() => translateAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { voice: 'passive' } }), 'locative'))).toThrow(/passive.*P09-E16/);
   });
 });

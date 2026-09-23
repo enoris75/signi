@@ -26,13 +26,14 @@ export function questionStandIn(question: ResolvedQuestion, forms: Record<string
  * A wh-question's complement gap as a one-complement map for the engine's own `complementsPhrase`,
  * the way `relativeGapComplement` builds a relative's (P09-E15): the stand-in (`questionStandIn`)
  * in the gapped relation, its `specifiers` kept. `undefined` for a gap that is no complement — the
- * subject, the object, the possessor.
+ * subject, the object, the possessor, and a passive's agent, which is the by-phrase's (P09-E16).
  */
 export function questionGapComplement(
   question: ResolvedQuestion | undefined,
   forms: Record<string, string>,
 ): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
-  if (!question || question.role === 'subject' || question.role === 'directObject' || question.role === 'possessor') return undefined;
+  if (!question || question.role === 'subject' || question.role === 'directObject' || question.role === 'possessor'
+    || question.role === 'agent') return undefined;
   const complement: ResolvedComplement = {
     phrase: questionStandIn(question, forms),
     ...(question.specifiers ? { specifiers: question.specifiers } : {}),

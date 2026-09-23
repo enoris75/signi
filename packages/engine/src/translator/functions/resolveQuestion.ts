@@ -22,9 +22,8 @@ import { temporalRelation } from '../../functions/temporalRelation.js';
  *    "after what?" is not a question anyone asks of a time);
  *  - an instrument presented as an action (`process` / `concept`, "by choosing a word"), whose
  *    question is *how*.
- * So is a **passive** question: the passive re-maps the plan's slots (the object asked about would
- * become the subject), and the gap would have to move with them, as a relative clause's does
- * (`passiveRemap`).
+ * The roles are the plan's, the **active** slots, whatever its voice: a passive question's gap is
+ * moved by `resolvePhrase` once it knows the verb passivizes (P09-E16, see `passiveGap`).
  *
  * A **possessor** gap (P09-E14, "whose food does the cat eat?") asks inside the noun phrase that
  * `questionPossessed` names, the subject by default; that slot stays filled. It is always a person,
@@ -37,7 +36,6 @@ export function resolveQuestion(plan: PhrasePlan, asked: boolean): ResolvedQuest
   const role = plan.questionRole;
   if (!role || !asked) return undefined;
   const animate = plan.questionAnimate === true;
-  if (plan.verbPhrase?.voice === 'passive') throw new Error('a passive wh-question is not built yet (P09-E6)');
   if (role === 'possessor') return possessorQuestion(plan);
   if (role === 'subject' || role === 'directObject' || role === 'manner') return { role, animate };
   const specifiers = plan.questionSpecifiers;

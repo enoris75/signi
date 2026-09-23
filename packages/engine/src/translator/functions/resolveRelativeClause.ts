@@ -2,6 +2,7 @@ import type { RelativeClause } from '@signi/shared';
 import type { ResolvedNounElement, ResolvedRelativeClause } from '../../types.js';
 import { RELATIVIZES_AGENT } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { passiveGap } from './passiveGap.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
@@ -107,8 +108,10 @@ function passiveRemap(
   subject: ResolvedNounElement | undefined,
   directObject: ResolvedNounElement | undefined,
 ): Pick<ResolvedRelativeClause, 'headRole' | 'subject' | 'directObject' | 'agent'> {
-  if (headRole === 'subject') return { headRole: 'agent', subject: directObject };
+  // The gap moves as `passiveGap` moves it, which a passive wh-question shares (P09-E16).
+  const gap = passiveGap(headRole);
+  if (gap === 'agent') return { headRole: gap, subject: directObject };
   const agent = subject && subject.agreement['generic'] !== '1' ? { agent: subject } : {};
-  if (headRole === 'directObject') return { headRole: 'subject', ...agent };
-  return { headRole, subject: directObject, ...agent };
+  if (headRole === 'directObject') return { headRole: gap, ...agent };
+  return { headRole: gap, subject: directObject, ...agent };
 }

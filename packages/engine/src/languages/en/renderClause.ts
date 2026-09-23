@@ -1,4 +1,5 @@
 import type { ResolvedPhrase } from '../../types.js';
+import { questionStandIn } from '../../functions/questionGapComplement.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
@@ -70,10 +71,13 @@ export function renderClause(given: ResolvedPhrase): string {
   const agreement = inverts ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
   // A complement question strands its preposition in the complement's own slot: "what does the cat
   // eat under?", "who does the man give the book to?" (P09-E15, see `strandedGap`).
+  // A passive's agent asked about strands its "by" the same way, after the participle: "who is the
+  // food eaten by?" (P09-E16).
   const stranding = strandedGap(gap);
+  const agent = gap?.role === 'agent' ? questionStandIn(gap, { base: '' }) : phrase.agent;
   const parts = predicateParts(agreement, verbPhrase, objectPossessed ? undefined : phrase.directObject,
     stranding ? { ...phrase.complements, ...stranding } : phrase.complements,
-    subject.agreement['definiteness'] === 'no', phrase.agent);
+    subject.agreement['definiteness'] === 'no', agent);
   // A question puts the finite auxiliary before the subject: "is the server active?". A wh-question
   // fronts its word ahead of that — "what does the cat eat?", "why does the cat eat?" — and a verb
   // that takes its object with a preposition strands it: "what does the cat click on?".
@@ -82,7 +86,7 @@ export function renderClause(given: ResolvedPhrase): string {
   // A stranded complement's empty stand-in leaves its preposition a trailing space, which the
   // collapse below closes up: "what does the man cut the book with in the house?" (P09-E15).
   const joined = [fronted, ...(inverts ? invertSubject(subj, parts) : [subj, ...parts]), stranded].filter(Boolean).join(' ');
-  const clause = (stranding ? joined.replace(/ {2,}/g, ' ') : joined).trim();
+  const clause = (stranding || gap?.role === 'agent' ? joined.replace(/ {2,}/g, ' ') : joined).trim();
   // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
   const withContent = contentSubject ? `${clause} that ${renderClause(contentSubject)}` : clause;

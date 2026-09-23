@@ -179,4 +179,41 @@ describe('resolvePhrase', () => {
       expect(resolvePhrase(DOG_IS_NOT, 'it', LOOKUP).verbPhrase).not.toHaveProperty('elided');
     });
   });
+
+  describe('a passive wh-question (P09-E16)', () => {
+    const PASSIVE = lexicon({
+      CAT: { base: 'gatto', gender: 'masc', animal: '1' }, FOOD: { base: 'cibo', gender: 'masc' },
+      EAT: { base: 'mangiare', transitivity: 'transitive' }, RUN: { base: 'correre', transitivity: 'intransitive' },
+      BE: { base: 'essere', copula: '1' }, GENERIC_PERSON: { base: 'si', person: '3', generic: '1' },
+    });
+    const eaten = (extra: Partial<PhrasePlan>): PhrasePlan =>
+      ({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT', voice: 'passive' }, ...extra });
+
+    test('the patient gapped as the object is the subject stand-in, third singular, and the agent stays', () => {
+      const resolved = resolvePhrase(eaten({ questionRole: 'directObject' }), 'it', PASSIVE);
+      expect(resolved.verbPhrase?.voice).toBe('passive');
+      expect(resolved.question?.role).toBe('subject');
+      expect(resolved.subject.agreement).toEqual({ person: '3', number: 'singular', gender: 'masc' });
+      expect(resolved.agent?.conjuncts[0].head.forms['base']).toBe('gatto');
+      expect(resolved.directObject).toBeUndefined();
+    });
+
+    test('the agent gapped as the subject is the by-phrase\'s gap, and the object is promoted', () => {
+      const resolved = resolvePhrase(eaten({ directObject: { concept: 'FOOD' }, questionRole: 'subject', questionAnimate: true }), 'it', PASSIVE);
+      expect(resolved.question?.role).toBe('agent');
+      expect(resolved.subject.conjuncts[0].head.forms['base']).toBe('cibo');
+      expect(resolved.agent).toBeUndefined();
+    });
+
+    test('a complement gap stays, and a generic agent still drops', () => {
+      const resolved = resolvePhrase(eaten({ subject: { concept: 'GENERIC_PERSON' }, directObject: { concept: 'FOOD' }, questionRole: 'locative' }), 'it', PASSIVE);
+      expect(resolved.question?.role).toBe('locative');
+      expect(resolved.agent).toBeUndefined();
+    });
+
+    test('a passive the verb cannot take is refused, not asked in the active', () => {
+      expect(() => resolvePhrase({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN', voice: 'passive' }, questionRole: 'locative' }, 'it', PASSIVE))
+        .toThrow(/passive.*P09-E16/);
+    });
+  });
 });

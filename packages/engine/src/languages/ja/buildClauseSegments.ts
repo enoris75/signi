@@ -62,7 +62,8 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // A complement gap puts its word in the complement's own slot, in its relation (P09-E15); the
   // copula's manner puts どう in the predicate's.
   const askedSlot = asked?.role === 'manner' ? 'predicative'
-    : asked && asked.role !== 'subject' && asked.role !== 'directObject' && asked.role !== 'possessor' ? asked.role : undefined;
+    : asked && asked.role !== 'subject' && asked.role !== 'directObject' && asked.role !== 'possessor' && asked.role !== 'agent'
+      ? asked.role : undefined;
   // An imperative drops its subject/topic; the subject's person still selects the form. An
   // infinitive citation (「食物を消費する」) is likewise subject-less on the surface.
   const imperative = phrase.verbPhrase.mood === 'imperative';
@@ -104,7 +105,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // ditransitive, or the factitive object complement — the agent takes the compound によって
   // instead, because two に in one clause cannot be told apart: 本は猫によって子供にあげられます, never
   // 「猫に子供に」.
-  if (phrase.agent) segs.push(...elSegs(phrase.agent), ...jaParticleSegs(phrase.agent, jaAgentParticle(phrase.complements)));
+  // A passive's agent asked about is 誰 / 何 in that slot, with its に: 食べ物は誰に食べられますか (P09-E16).
+  // Unlike the relative (RELATIVIZES_AGENT), the question keeps the passive.
+  const agent = phrase.agent ?? (asked?.role === 'agent' ? askedNoun : undefined);
+  if (agent) segs.push(...elSegs(agent), ...jaParticleSegs(agent, jaAgentParticle(phrase.complements)));
   // An adverbial clause stands ahead of the predicate it modifies, behind the topic: plain, its
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
