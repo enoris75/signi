@@ -208,5 +208,5 @@ neither standard; both must print before plans carry them, for the round trip.
 - **The Romance possessor read as a standard** ("un gatto più grande della donna") — a bug, filed
   separately.
 - **"As big a cat as the dog"**, the English article-shifting equative (D2).
-- **The superlative's partitive** — [E19](P09-E19-superlative-partitive.md).
+- **The superlative's partitive** — [E19](Z-done/P09-E19-superlative-partitive.md).
 - **A clause as the standard** and **comparison of adverbs and nouns**, as in E5.
