@@ -13,7 +13,8 @@ E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped o
 engine and plan-only except E1's relations, which the toolbars offer (see §3). E6's existential
 ("there is"), split off by its task file, shipped the same day in a lane of its own, so **all eleven
 of §3's constructs are built**. P09 stays **open** for its follow-ups, which are **thirteen task
-files in this folder since 2026-09-23, E12–E24** (see §4). The decisions below were
+files since 2026-09-23, E12–E24** (see §4). The first, E12's builder controls, shipped the same day,
+so every §3 construct can now be built on the canvas and in the console; E13–E24 are open. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -270,7 +271,7 @@ is built at HEAD and recommends an answer to every decision it raises.
 
 | task | what | from |
 |---|---|---|
-| [P09-E12](P09-E12-builder-controls.md) | **Canvas and console controls** for the plan-only constructs — the temporal, purpose and topic boxes, the object and adverbial clauses, the standard slot, the mood control and the question slot, the existential toggle, the infinitive complement. One layout question, not seven. | C10, C29, E2, E4, E5, E6, §2's `infinitiveComplement` |
+| [P09-E12](Z-done/P09-E12-builder-controls.md) | **Shipped 2026-09-23.** **Canvas and console controls** for the plan-only constructs — the temporal, purpose and topic boxes, the object and adverbial clauses, the standard slot, the mood control and the question slot, the existential toggle, the infinitive complement. One layout question, not seven. | C10, C29, E2, E4, E5, E6, §2's `infinitiveComplement` |
 | [P09-E13](P09-E13-role-complement.md) | *as* — a role said of the subject ("works as a teacher") | E2 D3 |
 | [P09-E14](P09-E14-possessor-question.md) | "**whose** food does the cat eat?" | E6 D1 |
 | [P09-E15](P09-E15-question-over-a-marked-relation.md) | "under **what**…?", "thanks to **whom**…?" — the gaps `resolveQuestion` refuses | E6 Done |
@@ -308,7 +309,7 @@ backend runs the builds, not `src`.
   copula-kind modal and かもしれない as a suffix that leaves polarity and tense on its verb, the French
   negation of a multiword finite (*n'a pas besoin*), and the Romance position of SAME and LAST_FINAL
   with the article a predicate SAME keeps.
-- **A builder control this seeding wants, and no C ticket owns** — now part of [E12](P09-E12-builder-controls.md): the frontend never builds an
+- **A builder control this seeding wants, and no C ticket owns** — now part of [E12](Z-done/P09-E12-builder-controls.md): the frontend never builds an
   `infinitiveComplement`, so "needs to run" and "tries to run" render from a plan but cannot be
   built. One control would serve DESIRE, NEED and TRY alike.
 - **A second one, from §3: the temporal complement has no ring.**
@@ -324,7 +325,7 @@ backend runs the builds, not `src`.
   a container-to-container link like the conditional's; E5's standard wants a noun slot on the
   adjective; E6 wants a mood control and a way to mark a slot as the question — which C10's yes/no
   question has lacked since it shipped. Each task file's `## Done` names its own. All of them, with
-the temporal ring and the existential toggle, are now [E12](P09-E12-builder-controls.md).
+the temporal ring and the existential toggle, are now [E12](Z-done/P09-E12-builder-controls.md).
 - **Seven defects the 2026-09-23 lanes met, filed as [A247–A253](../../../bugs/engine-grammar-bugs.md)**
   and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
   Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
