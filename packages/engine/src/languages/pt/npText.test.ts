@@ -21,7 +21,9 @@ describe('npText', () => {
   });
 
   test('a pronominal possessor replaces the determiner', () => {
-    expect(npText(np(LIVRO, { definiteness: 'indefinite', number: 'plural' }, { possessor: my }))).toBe('os meus livros');
+    expect(npText(np(LIVRO, { definiteness: 'bare', number: 'plural' }, { possessor: my }))).toBe('os meus livros');
+    // The indefinite keeps its article and the possessive follows the noun (A277).
+    expect(npText(np(LIVRO, { definiteness: 'indefinite', number: 'plural' }, { possessor: my }))).toBe('uns livros meus');
   });
 
   test('a noun possessor and a relative clause trail the noun', () => {

@@ -11,7 +11,9 @@ const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'sing
 describe('possessedDeclension', () => {
   test('a possessive is an ein-word, so the phrase declines as "kein" does, whatever determiner was picked', () => {
     expect(possessedDeclension(np(KATER, {}, { possessor: my }))).toBe('no');
-    expect(possessedDeclension(np(KATER, { definiteness: 'indefinite' }, { possessor: my }))).toBe('no');
+    expect(possessedDeclension(np(KATER, { definiteness: 'bare' }, { possessor: my }))).toBe('no');
+    // The indefinite keeps its own article beside the possessive, and declines as it (A277).
+    expect(possessedDeclension(np(KATER, { definiteness: 'indefinite' }, { possessor: my }))).toBe('indefinite');
     const plural = np(KATER, { number: 'plural' }, { possessor: my });
     expect(possessedDeclension(plural, possessedHeadForms(plural, 'bare'))).toBe('no');
   });

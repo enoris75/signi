@@ -20,7 +20,9 @@ describe('possessorText', () => {
     expect(bookOf(np(HOMBRE, { definiteness: 'no' }, { possessor: his }))).toBe(' de ningún hombre suyo');
     expect(bookOf(np(MUJER, { definiteness: 'some', number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'plural' } })))
       .toBe(' de algunas mujeres nuestras');
-    expect(bookOf(np(HOMBRE, { definiteness: 'indefinite' }, { possessor: my }))).toBe(' de mi hombre');
+    // The indefinite keeps its slot too since A277 (it was " de mi hombre").
+    expect(bookOf(np(HOMBRE, { definiteness: 'indefinite' }, { possessor: my }))).toBe(' de un hombre mío');
+    expect(bookOf(np(HOMBRE, { definiteness: 'bare' }, { possessor: my }))).toBe(' de mi hombre');
   });
 
   test('is empty without a noun possessor', () => {

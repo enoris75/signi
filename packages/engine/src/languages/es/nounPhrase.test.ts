@@ -96,7 +96,13 @@ describe('nounPhrase', () => {
 
   test('a pronominal possessive replaces the article, whatever determiner was picked', () => {
     expect(nounPhrase(GATO, undefined, 'mi')).toBe('mi gato');
-    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'indefinite' }, { pre: '', post: 'grandes' }, 'sus')).toBe('sus casas grandes');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'bare' }, { pre: '', post: 'grandes' }, 'sus')).toBe('sus casas grandes');
+  });
+
+  // A277: the indefinite keeps its article like a demonstrative does.
+  test('an indefinite keeps its article and the possessive is stressed and postnominal', () => {
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'indefinite' }, { pre: '', post: 'grandes' }, 'sus')).toBe('unas casas grandes suyas');
+    expect(nounPhrase({ ...GATO, definiteness: 'indefinite' }, undefined, 'mi')).toBe('un gato mío');
   });
 
   // A187: a determiner of the head's own keeps its slot and the possessive goes behind the noun in

@@ -859,25 +859,26 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
       es: 'el perro es mi poseedor.', pt: 'o cão é o meu possuidor.',
     });
     // An unchosen determiner on a predicative defaults to indefinite, so the loss reads as an
-    // existential: "el perro es un libro" for "the dog is her book".
+    // existential: "el perro es un libro" for "the dog is her book". Since A277 the indefinite keeps
+    // its article beside the possessive, which then follows the noun in its stressed form.
     expect(dogIs(np('BOOK', { possessor: owner('3', 'singular', 'fem') }))).toMatchObject({
-      es: 'el perro es su libro.', pt: 'o cão é o seu livro.',
+      es: 'el perro es un libro suyo.', pt: 'o cão é um livro seu.',
     });
     expect(dogIs(np('HOUSE', { possessor: owner('1', 'plural') }))).toMatchObject({
-      es: 'el perro es nuestra casa.', pt: 'o cão é a nossa casa.',
+      es: 'el perro es una casa nuestra.', pt: 'o cão é uma casa nossa.',
     });
     expect(dogIs(np('BOOK', { number: 'plural', possessor: owner('3', 'plural') }))).toMatchObject({
       es: 'el perro es sus libros.', pt: 'o cão é os seus livros.',
     });
     // The other predicative verbs, and a relative clause on the predicate, go the same way.
     expect(sayAll(clause(np('DOG'), 'BECOME', { complements: { predicative: { phrase: np('POSSESSOR', { possessor: his }) } } }))).toMatchObject({
-      es: 'el perro se vuelve su poseedor.', pt: 'o cão se torna o seu possuidor.',
+      es: 'el perro se vuelve un poseedor suyo.', pt: 'o cão se torna um possuidor seu.',
     });
     expect(sayAll(clause(np('DOG'), 'SEEM', { complements: { predicative: { phrase: np('POSSESSOR', { possessor: his }) } } }))).toMatchObject({
-      es: 'el perro parece su poseedor.', pt: 'o cão parece o seu possuidor.',
+      es: 'el perro parece un poseedor suyo.', pt: 'o cão parece um possuidor seu.',
     });
     expect(dogIs(np('POSSESSOR', { possessor: his, relative: { verbPhrase: { verb: 'RUN' } } }))).toMatchObject({
-      es: 'el perro es su poseedor que corre.', pt: 'o cão é o seu possuidor que corre.',
+      es: 'el perro es un poseedor suyo que corre.', pt: 'o cão é um possuidor seu que corre.',
     });
   });
 
@@ -888,7 +889,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
     expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
       directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('PRISON', { possessor: his }) } },
     }))).toMatchObject({
-      es: 'el gato transforma la casa en su prisión.', // now: "… en una prisión."
+      es: 'el gato transforma la casa en una prisión suya.', // now: "… en una prisión." (the indefinite keeps its article beside "suya", A277)
       pt: 'o gato transforma a casa na sua prisão.', // now: "… em uma prisão."
     });
     expect(sayAll(clause(np('CAT'), 'USE', {
@@ -917,7 +918,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
       es: 'el perro no es ningún libro suyo.', pt: 'o cão não é nenhum livro seu.',
     });
     expect(dogIs(np('BOOK', { possessor: owner('3', 'singular', 'fem'), adjectives: ['BIG'] }))).toMatchObject({
-      es: 'el perro es su libro grande.', pt: 'o cão é o seu livro grande.',
+      es: 'el perro es un libro grande suyo.', pt: 'o cão é um livro grande seu.',
     });
     expect(sayAll(clause(np('DOG'), 'BE', {
       complements: {
@@ -929,7 +930,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
         },
       },
     }))).toMatchObject({
-      es: 'el perro es su poseedor y su libro.', pt: 'o cão é o seu possuidor e o seu livro.',
+      es: 'el perro es un poseedor suyo y un libro suyo.', pt: 'o cão é um possuidor seu e um livro seu.',
     });
   });
 

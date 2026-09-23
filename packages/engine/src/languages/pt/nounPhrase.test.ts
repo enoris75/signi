@@ -57,7 +57,9 @@ describe('nounPhrase', () => {
   });
 
   test('a pronominal possessive replaces the picked determiner', () => {
-    expect(nounPhrase({ ...CAO, definiteness: 'indefinite' }, undefined, 'o seu')).toBe('o seu cão');
+    expect(nounPhrase({ ...CAO, definiteness: 'bare' }, undefined, 'o seu')).toBe('o seu cão');
+    // The indefinite keeps its article and the possessive follows the noun (A277).
+    expect(nounPhrase({ ...CAO, definiteness: 'indefinite' }, undefined, 'o seu')).toBe('um cão seu');
     expect(nounPhrase({ ...CASA, number: 'plural' }, { pre: '', post: 'velhas' }, 'as minhas')).toBe('as minhas casas velhas');
   });
 

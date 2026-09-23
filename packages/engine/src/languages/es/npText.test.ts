@@ -39,7 +39,9 @@ describe('npText', () => {
   });
 
   test('a pronominal possessor replaces the article', () => {
-    expect(npText(np(CASA, { definiteness: 'indefinite' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe('mi casa');
+    expect(npText(np(CASA, { definiteness: 'bare' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe('mi casa');
+    // …but not the indefinite one, which keeps its slot as a demonstrative does (A277).
+    expect(npText(np(CASA, { definiteness: 'indefinite' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe('una casa mía');
   });
 
   test('attributive nouns, the possessor and a relative clause trail the noun', () => {

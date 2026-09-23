@@ -4,7 +4,7 @@ import { possessiveEn, possessiveEnIndependent } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './en.consts.js';
 import { determiner } from './determiner.js';
-import { isPostModified, keepsHeadDeterminer } from './isPostModified.js';
+import { isPostModified, keepsDeterminerBesidePossessive, keepsHeadDeterminer } from './isPostModified.js';
 import { possessivePrefix } from './possessivePrefix.js';
 import { possessorPhrase } from './possessorPhrase.js';
 
@@ -29,10 +29,11 @@ export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: s
   // A pronominal possessor ("his") is a possessive pronoun that replaces the article ("his book",
   // never "the his book"); English's is invariant of the possessed head. A head with a determiner
   // of its own keeps it and the possessor goes to the same of-genitive a noun possessor takes,
-  // with the *independent* possessive: "this book of hers", "no book of hers" (A187).
+  // with the *independent* possessive: "this book of hers", "no book of hers" (A187). The indefinite
+  // article is one of those determiners: "a friend of mine", "friends of mine" (A277).
   if (possessor && isPronominalPossessor(possessor)) {
     if (allHead) return `all ${possessiveEn(possessor)} ${a}${m}${word}`;
-    if (keepsHeadDeterminer(forms)) {
+    if (keepsDeterminerBesidePossessive(forms)) {
       return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${possessiveEnIndependent(possessor)}`;
     }
     return `${possessiveEn(possessor)} ${a}${m}${word}`;

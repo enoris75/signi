@@ -46,9 +46,10 @@ describe('possessiveEn', () => {
 
 // A187: the forms each language needs once the head keeps a determiner of its own.
 describe('the determiners a possessive stands beside', () => {
-  test('are the demonstratives and the quantifiers, but not all/definite/indefinite/bare', () => {
-    for (const d of ['this', 'that', 'some', 'many', 'few', 'no']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(true);
-    for (const d of ['definite', 'indefinite', 'bare', 'all']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(false);
+  // A277 moved `indefinite` across: "a friend of mine", not "my friend".
+  test('are the demonstratives, the quantifiers and the indefinite, but not all/definite/bare', () => {
+    for (const d of ['this', 'that', 'some', 'many', 'few', 'no', 'indefinite']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(true);
+    for (const d of ['definite', 'bare', 'all']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(false);
   });
 });
 

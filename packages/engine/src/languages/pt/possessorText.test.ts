@@ -18,7 +18,9 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(RAPOSA, { definiteness: 'this' }, { possessor: my }) }))).toBe(' desta raposa minha');
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'no' }, { possessor: his }) }))).toBe(' de nenhum gato seu');
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'some', number: 'plural' }, { possessor: his }) }))).toBe(' de alguns gatos seus');
-    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'indefinite' }, { possessor: his }) }))).toBe(' do seu gato');
+    // The indefinite keeps its slot too since A277 (it was " do seu gato").
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'indefinite' }, { possessor: his }) }))).toBe(' de um gato seu');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'bare' }, { possessor: his }) }))).toBe(' do seu gato');
   });
 
   test('is empty without a possessor', () => {
