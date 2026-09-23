@@ -825,6 +825,20 @@ describe('known bugs: a past progressive in a subjunctive clause drops its past 
     });
   });
 
+  test('under a past governor too: non credeva che il gatto stesse correndo', () => {
+    const past: PhrasePlan = { ...plan, verbPhrase: { verb: 'BELIEVE', negative: true, tense: 'past' } };
+    expect(sayAll(past)).toMatchObject({
+      it: "l'uomo non credeva che il gatto stesse correndo.",
+      es: 'el hombre no creía que el gato estuviera corriendo.',
+      pt: 'o homem não acreditava que o gato estivesse correndo.',
+    });
+    expect(sayAll({ ...past, contentObject: { ...plan.contentObject!, subject: { ...np('CAT'), number: 'plural' } } })).toMatchObject({
+      it: "l'uomo non credeva che i gatti stessero correndo.",
+      es: 'el hombre no creía que los gatos estuvieran corriendo.',
+      pt: 'o homem não acreditava que os gatos estivessem correndo.',
+    });
+  });
+
   test('regression: an indicative clause keeps its imperfect progressive, and English its past', () => {
     expect(sayAll({ ...plan, verbPhrase: { verb: 'SAY' } })).toMatchObject({
       en: 'the man says that the cat was running.', it: "l'uomo dice che il gatto stava correndo.",

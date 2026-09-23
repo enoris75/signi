@@ -91,7 +91,9 @@ export function contentClauseTense(
  * subjunctive, "non credeva che il gatto **avesse corso**", "no creía que el gato **hubiera corrido**".
  * French keeps its spoken perfect subjunctive ("ne croyait pas que le chat **ait couru**"), as it keeps
  * its present one for a simultaneous clause. A plain past **indicative** clause is left alone ("said
- * that the cat ran", "disse che il gatto corse" are grammatical), and so is any other aspect or tense.
+ * that the cat ran", "disse che il gatto corse" are grammatical). A past progressive in the subjunctive
+ * takes the imperfect subjunctive of its auxiliary, as under a present governor (A262: "non credeva che
+ * il gatto **stesse** correndo"), except in French; any other aspect or tense is left alone.
  */
 function anteriorToPast(
   language: string,
@@ -106,6 +108,12 @@ function anteriorToPast(
   if (mood === 'presentSubjunctive' && (pastNeutral || presentResultative)) {
     const perfect: VerbPhrase = { ...verbPhrase, tense: 'present', aspect: 'resultative' };
     return { ...unchanged, verbPhrase: perfect, mood: PAST_SUBJUNCTIVE_LANGUAGES.has(language) ? 'subjunctive' : mood };
+  }
+  // A past progressive is imperfective, simultaneous with a past of its own: the imperfect
+  // subjunctive of its auxiliary, as under a present governor (A262). French is left as it is.
+  if (mood === 'presentSubjunctive' && tense === 'past' && verbPhrase.aspect === 'progressive'
+    && PAST_SUBJUNCTIVE_LANGUAGES.has(language)) {
+    return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present' }, mood: 'subjunctive' };
   }
   if (mood === undefined && presentResultative) {
     return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'past' } };

@@ -50,3 +50,14 @@ Guarded by the formerly-`.fails` test and two new ones in the
 evaluative predicate, and an indicative clause keeping its imperfect progressive), and the A262 case
 in [contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts),
 whose A260 case now checks a past prospective where it checked the past progressive.
+
+**Under a past governor too** (2026-09-23, follow-up ruling). The same defect under a past subjunctive
+governor (`non credeva che il gatto stia correndo`, `no creía que el gato esté corriendo`, `não
+acreditava que o gato esteja correndo`) is fixed in `anteriorToPast`, the A263 helper in
+`contentClauseTense`: a past progressive in the `presentSubjunctive` takes the imperfect subjunctive of
+its auxiliary in Italian, Spanish and Portuguese — `stesse correndo`, `estuviera corriendo`,
+`estivesse correndo`. French is again untouched and unpinned. Guarded by the `under a past governor
+too` test in the A262 block of [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts)
+(singular and plural) and the past-governor A262 case in
+[contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts),
+whose A263 case now checks a past prospective where it checked the past progressive.
