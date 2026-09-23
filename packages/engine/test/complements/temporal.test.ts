@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { TEMPORAL_RELATIONS, type Definiteness, type TemporalRelation } from '@signi/shared';
+import { TEMPORAL_RELATIONS, type Definiteness, type NounPhrase, type TemporalRelation } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definiteness = 'this') =>
@@ -185,5 +185,35 @@ describe('temporal', () => {
     // German is the one language with a genuine merger: `ago` and `before` are both "vor" + dative.
     const expected = language === 'de' ? TEMPORAL_RELATIONS.length - 1 : TEMPORAL_RELATIONS.length;
     expect(new Set(rendered).size).toBe(expected);
+  });
+});
+
+// A265. French names a day, a week and a year's own `at` preposition — "en", the one that does not
+// fuse — and writes it before whatever determiner the phrase has. "en" takes a bare noun or a
+// demonstrative ("en mai", "en ce jour", "en cette semaine") and never an article: "en le jour" is
+// no French. A definite time is a bare noun phrase, the way French says every definite point in
+// time ("le lundi", "le jour de Noël", "la semaine suivante"), and an indefinite one likewise
+// ("un jour" — "en un jour" says *within* one day).
+describe('known bugs: French "en" before an article on a temporal noun (A265)', () => {
+  const runsAt = (concept: string, extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('MAN'), 'RUN', { complements: { temporal: { phrase: np(concept, { definiteness: 'definite', ...extra }) } } }));
+
+  test.fails('a definite day, week or year takes no preposition', () => {
+    expect(runsAt('DAY').fr).toBe("l'homme court le jour.");
+    expect(runsAt('WEEK').fr).toBe("l'homme court la semaine.");
+    expect(runsAt('YEAR').fr).toBe("l'homme court l'année.");
+    expect(runsAt('DAY', { number: 'plural' }).fr).toBe("l'homme court les jours.");
+  });
+
+  test.fails('an indefinite day takes none either', () => {
+    expect(runsAt('DAY', { definiteness: 'indefinite' }).fr).toBe("l'homme court un jour.");
+  });
+
+  test('regression: the demonstrative keeps "en", and the other languages their preposition', () => {
+    expect(runsAt('DAY', { definiteness: 'this' }).fr).toBe("l'homme court en ce jour.");
+    expect(runsAt('DAY')).toMatchObject({
+      en: 'the man runs on the day.', it: "l'uomo corre nel giorno.", de: 'der Mann läuft am Tag.',
+      es: 'el hombre corre en el día.', pt: 'o homem corre no dia.',
+    });
   });
 });

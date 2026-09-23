@@ -278,3 +278,24 @@ describe('ABLE and OBLIGED agree as predicates', () => {
     });
   });
 });
+
+// A266. German sets every extraposed zu-infinitive off with a comma, the bare one included: "der
+// Kater braucht, zu laufen". A zu-infinitive with nothing of its own takes none — "er braucht zu
+// laufen", "er versucht zu laufen", "fähig zu handeln" — and after *brauchen*, which governs its
+// infinitive the way a modal does, the comma is not merely unusual but wrong. The prospective already
+// draws the line here (`prospectiveFrame`: "ist im Begriff zu essen", "im Begriff, die Maus zu
+// essen"); a group that holds more than its infinitive keeps the comma, as does "um … zu".
+describe('known bugs: German sets a bare zu-infinitive off with a comma (A266)', () => {
+  test.fails('a bare zu-infinitive takes no comma, under a verb and under an adjective', () => {
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RUN') })).de).toBe('der Kater braucht zu laufen.');
+    expect(sayAll(clause(np('DOG'), 'DESIRE', { infinitiveComplement: acts() })).de).toBe('der Hund wünscht zu handeln.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: predicate('ABLE'), infinitiveComplement: acts('EAT') })).de)
+      .toBe('der Kater ist fähig zu fressen.');
+  });
+
+  test('regression: a group with more than its infinitive, and "um … zu", keep the comma', () => {
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('EAT', { directObject: np('FOOD') }) })).de)
+      .toBe('der Kater braucht, das Essen zu fressen.');
+    expect(sayAll(clause(np('MAN'), 'RUN', { purpose: { verbPhrase: { verb: 'CRY' } } })).de).toBe('der Mann läuft, um zu weinen.');
+  });
+});

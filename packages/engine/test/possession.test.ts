@@ -1089,3 +1089,30 @@ describe('known bugs: a Spanish or Portuguese possessor drops "all" beside a pos
     });
   });
 });
+
+// A271. Italian writes a possessor after the noun and its adjectives, so behind a compared adjective
+// it lands exactly where the standard goes — and Italian's standard is *di*: "un gatto più piccolo
+// della donna" says *a cat smaller than the woman*, not *the woman's smaller cat*. The possessor
+// ahead of the compared adjective takes the standard's slot away ("un gatto della donna più
+// piccolo"), and the adjective's agreement ties it to its noun. Spanish, French and Portuguese mark
+// the standard with *que* / *que* / *(do) que*, so their "de la mujer" is read as the possessor.
+describe('known bugs: an Italian possessor behind a compared adjective reads as its standard (A271)', () => {
+  const sees = (degree: 'more' | 'less' | 'equally', extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('MAN'), 'SEE', {
+      directObject: np('CAT', { definiteness: 'indefinite', adjectives: ['SMALL'], adjectiveDegrees: [degree], possessor: np('WOMAN'), ...extra }),
+    }));
+
+  test.fails('the possessor goes ahead of a compared adjective', () => {
+    expect(sees('more').it).toBe("l'uomo vede un gatto della donna più piccolo.");
+    expect(sees('less').it).toBe("l'uomo vede un gatto della donna meno piccolo.");
+    expect(sees('more', { number: 'plural' }).it).toBe("l'uomo vede gatti della donna più piccoli.");
+  });
+
+  test('regression: a positive adjective keeps its place, and the other Romance languages theirs', () => {
+    expect(sees('more', { adjectiveDegrees: ['positive'] }).it).toBe("l'uomo vede un piccolo gatto della donna.");
+    expect(sees('more')).toMatchObject({
+      es: 'el hombre ve un gato más pequeño de la mujer.', pt: 'o homem vê um gato menor da mulher.',
+      fr: "l'homme voit un chat plus petit de la femme.",
+    });
+  });
+});

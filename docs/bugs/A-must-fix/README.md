@@ -1,6 +1,26 @@
 # A-must-fix — confirmed bugs
 
-**Four open**, filed on 2026-09-23 while landing A254–A260:
+**Twelve open.** Eight of them, **A265–A272**, were filed on 2026-09-23 by P09-E12 (builder
+controls) and the writing of its tasks.
+[A265](A265-french-en-before-an-article-on-a-temporal-noun.md), French *en* before an article on a
+temporal noun (*court en le jour*, want *court le jour*).
+[A266](A266-german-comma-before-a-bare-zu-infinitive.md), a German comma before a bare zu-infinitive
+(*braucht, zu laufen*), which about thirty passing assertions and several definitions pin the wrong
+way. [A267](A267-linked-clause-with-no-subject-crashes-the-engine.md), a linked clause with no subject
+that crashes the engine, returns a 500 from the API, and is sent by the builder for an if-clause or a
+coordinate. The API refuses it as A253 did, and the builder waits for the subject as it already does
+for a subordinate clause. [A268](A268-a-question-can-become-an-if-clause.md), `canBeCondition`
+letting a question become an if-clause. [A269](A269-equative-object-predicative-writes-half-its-circumfix.md),
+an equative object predicative keeping half its circumfix once E5 has dropped its standard (*makes
+the house as big*). [A270](A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md), the German
+feminine of weak STUDENT keeping its -en (*die Studentinen*).
+[A271](A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md), an Italian
+possessor behind a compared adjective reading as its standard (*un gatto più piccolo della donna*).
+It is Italian only, because Spanish, French and Portuguese mark the standard with *que*.
+[A272](A272-question-inside-a-content-clause-leaks-into-it.md), a question leaking into a content
+clause (*says that does the cat run*). The translator strips it, as it does under a condition.
+
+The four before them, filed on 2026-09-23 while landing A254–A260:
 [A261](A261-italian-progressive-indicative-in-a-subjunctive-clause.md), Italian *stare* keeping the
 indicative in a subjunctive clause (*non crede che il gatto sta correndo*);
 [A262](A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md), a past progressive under a

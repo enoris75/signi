@@ -481,3 +481,28 @@ describe('known bugs: French does not elide before a verb opening on an h muet (
     expect(say(clause(I, 'EAT'), 'fr')).toBe('je mange.');
   });
 });
+
+// A267. A clause the plan links with no subject — a coordinate, an if-clause, an object clause or an
+// adverbial clause holding only its verb phrase — reaches `resolveNounElement` with `undefined` and
+// the engine dies on a TypeError from its innards ("Cannot use 'in' operator to search for
+// 'conjuncts' in undefined"). The top clause does the same; `/api/translate` only ever refused that
+// one (400 "plan.subject.concept is required"), so a linked one comes back as a 500. The consistent
+// behaviour is A253's and that check's: refuse the plan and name what is missing, never skip the
+// clause and serve half a sentence. Pinned here for the engine; the backend's 400 is pinned in
+// packages/backend/src/index.test.ts.
+describe('known bugs: a linked clause with no subject crashes the engine (A267)', () => {
+  const cry = { verbPhrase: { verb: 'CRY' } } as unknown as PhrasePlan;
+  const linked: [string, PhrasePlan][] = [
+    ['the top clause', cry],
+    ['a coordinate', clause(np('MAN'), 'RUN', { coordination: { conjunction: 'and', clause: cry } })],
+    ['an if-clause', clause(np('MAN'), 'RUN', { condition: cry })],
+    ['an object clause', clause(np('MAN'), 'SAY', { contentObject: cry as unknown as NonNullable<PhrasePlan['contentObject']> })],
+    ['an adverbial clause', clause(np('MAN'), 'RUN', {
+      adverbialClause: { conjunction: 'when', clause: cry as unknown as NonNullable<PhrasePlan['contentObject']> },
+    })],
+  ];
+
+  test.fails.each(linked)('%s is refused with an error naming its missing subject', (_, plan) => {
+    expect(() => say(plan, 'en')).toThrow(/subject/);
+  });
+});

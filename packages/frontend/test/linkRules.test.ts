@@ -158,3 +158,24 @@ describe('linkRules', () => {
     expect(setInstrumentalNegative(plain, 'B', true)).toEqual(plain);
   });
 });
+
+// A268. A question can be made the if-clause of another period. `canBeCondition` takes no containers,
+// so it cannot see that the period it lands on asks something; the engine renders a condition in its
+// own mood and drops the question there ("if the cat ran, the man would run."), while the period's
+// question control stays lit and locked. `canBeSubordinate` refuses a question for the same reason
+// (P09-E12 M5), and `canStartCondition` refuses one as the main clause. The fix gives
+// `canBeCondition` the containers first, as `canBeCoordinate` and `canBeSubordinate` take them; the
+// pin calls it in that shape, which today lands the containers where the links belong.
+describe('known bugs: a question can become an if-clause (A268)', () => {
+  const conditionAllowed = canBeCondition as unknown as (
+    containers: PhraseContainer[], links: PhraseLink[], mainId: string, ifId: string,
+  ) => boolean;
+  const question: PhraseContainer = { id: 'Q', selection: { ...B.selection, interrogative: true } };
+  const wh: PhraseContainer = { id: 'W', selection: { ...B.selection, interrogative: true, questionRole: 'subject' } };
+
+  it.fails('refuses a yes/no or a wh-question as the if-clause, and still takes a statement', () => {
+    expect(conditionAllowed([A, B, question, wh], [], 'A', 'Q')).toBe(false);
+    expect(conditionAllowed([A, B, question, wh], [], 'A', 'W')).toBe(false);
+    expect(conditionAllowed([A, B, question, wh], [], 'A', 'B')).toBe(true);
+  });
+});

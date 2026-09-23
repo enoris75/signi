@@ -570,3 +570,39 @@ describe('known bugs: a clause anterior to a past governor takes no pluperfect (
     });
   });
 });
+
+// A272. A content clause has no field for a question (`ContentClause`), and the builder refuses a
+// question as one (P09-E12 M5), but a plan that carries `interrogative` or `questionRole` on it is
+// rendered as asked: English inverts inside the clause ("says that does the cat run"), and a
+// wh-question writes its question word in five languages ("dice che che cosa mangia il gatto") while
+// French and German drop it (French keeps a subject's: "demande que qu'est-ce qui mange"). An adverbial clause, the same type, does the same ("runs when does the
+// cat run"). Until indirect questions exist (P09-E17), the translator drops the question inside a
+// subordinate clause, as it already does under a condition, a command and a citation — which is what
+// Italian, French, German, Spanish and Portuguese already render for the yes/no case.
+describe('known bugs: a question inside a content clause leaks into it (A272)', () => {
+  const yesNo = { subject: np('CAT'), verbPhrase: { verb: 'RUN' }, interrogative: true };
+  const what = { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, questionRole: 'directObject' as const };
+  const says = (contentObject: NonNullable<PhrasePlan['contentObject']>) => sayAll(clause(np('MAN'), 'SAY', { contentObject }));
+
+  test.fails('a yes/no question in an object clause is the plain statement', () => {
+    expect(says(yesNo).en).toBe('the man says that the cat runs.');
+  });
+
+  test.fails('a wh-question in an object clause writes no question word', () => {
+    expect(says(what)).toEqual(says({ subject: np('CAT'), verbPhrase: { verb: 'EAT' } }));
+  });
+
+  test.fails('nor does a subject clause or an adverbial clause ask', () => {
+    expect(sayAll({
+      subject: np('THING'), contentSubject: yesNo, verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+    }).en).toBe('it is right that the cat runs.');
+    expect(sayAll(clause(np('MAN'), 'RUN', { adverbialClause: { conjunction: 'when', clause: yesNo } })).en)
+      .toBe('the man runs when the cat runs.');
+  });
+
+  test('regression: the clause that governs it may ask', () => {
+    expect(sayAll(clause(np('MAN'), 'SAY', { interrogative: true, contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } } })).en)
+      .toBe('does the man say that the cat runs?');
+  });
+});

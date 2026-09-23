@@ -6,7 +6,8 @@ and reviewing its output for linguistic correctness. Each one is already pinned 
 A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
-`packages/frontend/test/`, and so is A179. A253 was a backend defect too — the boot-time renders of the
+`packages/frontend/test/`, and so are A179 and A268. A267 is pinned in all three packages: the engine's
+error, the backend's 400 and the builder's `workspaceToPlans`. A253 was a backend defect too — the boot-time renders of the
 definitions and the UI strings — pinned beside them, in `packages/backend/src/definitions.test.ts` and
 `uiStrings.test.ts`.
 
@@ -51,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds four, A261–A264, pinned by 7 `test.fails`, and Part B is empty).** If
+this writing Part A holds twelve, A261–A272, pinned by 22 `test.fails`, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -67,8 +68,27 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A262 | [A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md](A-must-fix/A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md) | Italian, Spanish, Portuguese | a past progressive under a subjunctive governor: `no cree que el gato esté corriendo` for *estuviera* |
 | A263 | [A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md](A-must-fix/A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md) | English, Italian, French, Spanish, Portuguese | no pluperfect under a past governor: `non credeva che il gatto corra`, `said that the cat has run` |
 | A264 | [A264-japanese-resultative-under-mae-ni-or-ato-de.md](A-must-fix/A264-japanese-resultative-under-mae-ni-or-ato-de.md) | Japanese | a resultative under 前に / 後で: 走った前に, 走っていた後で for 走る前に, 走った後で |
+| A265 | [A265-french-en-before-an-article-on-a-temporal-noun.md](A-must-fix/A265-french-en-before-an-article-on-a-temporal-noun.md) | French | *en* before an article on a temporal noun: `court en le jour` for *court le jour* |
+| A266 | [A266-german-comma-before-a-bare-zu-infinitive.md](A-must-fix/A266-german-comma-before-a-bare-zu-infinitive.md) | German | a comma before a bare zu-infinitive: `der Kater braucht, zu laufen` for *braucht zu laufen* |
+| A267 | [A267-linked-clause-with-no-subject-crashes-the-engine.md](A-must-fix/A267-linked-clause-with-no-subject-crashes-the-engine.md) | engine, backend, frontend | a linked clause with no subject: a TypeError, a 500, and a builder that sends it |
+| A268 | [A268-a-question-can-become-an-if-clause.md](A-must-fix/A268-a-question-can-become-an-if-clause.md) | frontend | `canBeCondition` lets a question become an if-clause, whose question the engine drops |
+| A269 | [A269-equative-object-predicative-writes-half-its-circumfix.md](A-must-fix/A269-equative-object-predicative-writes-half-its-circumfix.md) | English, Italian, German, Spanish, Portuguese | an equative object predicative with a standard: `makes the house as big` for *equally big* |
+| A270 | [A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md](A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md) | German | the feminine of weak STUDENT keeps its -en: `sieht die Studentinen` for *die Studentin* |
+| A271 | [A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md](A-must-fix/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md) | Italian | a possessor behind a compared adjective: `un gatto più piccolo della donna` reads *smaller than the woman* |
+| A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](A-must-fix/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | a question inside a content clause: `says that does the cat run`, `dice che che cosa mangia il gatto` |
 
-**Four open**, filed on 2026-09-23 while landing A254–A260: A261–A263 are what the content-clause
+**Twelve open.** The eight filed on 2026-09-23, **A265–A272**, were found by P09-E12 (builder
+controls) and by the writing of its tasks. Each one is a construct the builder or the tasks first
+reached. A French temporal *en* written before an article (A265). A German comma before a bare
+zu-infinitive (A266), shipped in about thirty assertions and several definitions. A linked clause with
+no subject that crashes the engine, returns a 500 from the API, and that the builder sends (A267). A
+question that can still become an if-clause (A268). An equative object predicative that keeps half
+its circumfix after E5 dropped the standard (A269). The German feminine of weak STUDENT (A270). An
+Italian possessor that reads as the standard of a compared adjective (A271). And a question that leaks
+into a content clause (A272). A267 is refused at the API as A253 was and waited on in the builder as
+a subordinate clause already is. A272 is stripped, as a condition already strips a question.
+
+The four before them, filed on 2026-09-23 while landing A254–A260: A261–A263 are what the content-clause
 tense fix left (Italian *stare*'s subjunctive, a past progressive, the pluperfect both A254 and A260
 ruled out), and A264 a Japanese resultative under 前に or 後で.
 

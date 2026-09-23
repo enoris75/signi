@@ -259,3 +259,43 @@ describe('known bugs: the Japanese essive drops an adjective head\'s degree (A23
     });
   });
 });
+
+// A269. P09-E5 renders a standard of comparison on the subject complement only: the object
+// predicative ignores `headStandard`. But the translator marks the head `standard: '1'` wherever it
+// meets one (`resolveStandard`), and that flag turns the equative's adverb into the first half of its
+// circumfix — *as* / *tanto* / *so* / *tan* / *tão*, waiting for an *as* / *quanto* / *wie* / *como*
+// that never comes: "makes the house as big.", and under the essive "sees the house as as big.". The
+// standard ignored, the equative is the one it is with none: "equally big". (French *aussi* is both
+// halves' word, so it already reads right; Japanese renders the standard, 犬と同じくらい大きく — a
+// correct sentence, and the one E5's follow-up will bring the other six to.)
+describe('known bugs: an equative object predicative with a standard writes half its circumfix (A269)', () => {
+  const equal = np('BIG', { headDegree: 'equally', headStandard: np('DOG') });
+  const makes = (phrase: NounPhrase) =>
+    sayAll(clause(np('MAN'), 'MAKE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase } } }));
+  const seesAs = (phrase: NounPhrase) =>
+    sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase, specifiers: ESSIVE } } }));
+
+  test.fails('the factitive: the equative without its standard', () => {
+    expect(makes(equal)).toMatchObject({
+      en: 'the man makes the house equally big.', it: "l'uomo fa la casa ugualmente grande.",
+      fr: "l'homme fait la maison aussi grande.", de: 'der Mann macht das Haus gleich groß.',
+      es: 'el hombre hace la casa igual de grande.', pt: 'o homem faz a casa igualmente grande.',
+    });
+  });
+
+  test.fails('the essive: the same', () => {
+    expect(seesAs(equal)).toMatchObject({
+      en: 'the man sees the house as equally big.', it: "l'uomo vede la casa come ugualmente grande.",
+      de: 'der Mann sieht das Haus als gleich groß.', es: 'el hombre ve la casa como igual de grande.',
+      pt: 'o homem vê a casa como igualmente grande.',
+    });
+  });
+
+  test('regression: the comparative and the lowered degree drop the standard cleanly, and the subject complement renders it', () => {
+    expect(makes(np('BIG', { headDegree: 'more', headStandard: np('DOG') })).en).toBe('the man makes the house bigger.');
+    expect(makes(np('BIG', { headDegree: 'less', headStandard: np('DOG') })).en).toBe('the man makes the house less big.');
+    expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: equal } } }))).toMatchObject({
+      en: 'the house is as big as the dog.', it: 'la casa è tanto grande quanto il cane.', de: 'das Haus ist so groß wie der Hund.',
+    });
+  });
+});

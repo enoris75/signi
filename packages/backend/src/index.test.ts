@@ -643,3 +643,23 @@ describe('known bugs: API errors sent as an HTML page', () => {
     expect(await res.json()).toEqual({ error: 'Not found' });
   });
 });
+
+// A267. `/api/translate` checks the top clause's subject and nothing below it, so a plan whose
+// coordinate, if-clause, object clause or adverbial clause has none reaches the engine, which dies on
+// a TypeError, and the client gets a 500. It is the same malformed request as a subjectless top
+// clause and wants the same answer: a 400 naming the field. The engine's side is pinned in
+// packages/engine/test/clause.test.ts.
+describe('known bugs: a linked clause with no subject answers 500 (A267)', () => {
+  const cry = { verbPhrase: { verb: 'CRY' } };
+  const main = { subject: { concept: 'MAN' }, verbPhrase: { verb: 'RUN' } };
+  test.fails.each([
+    ['plan.coordination.clause', { ...main, coordination: { conjunction: 'and', clause: cry } }],
+    ['plan.condition', { ...main, condition: cry }],
+    ['plan.contentObject', { subject: { concept: 'MAN' }, verbPhrase: { verb: 'SAY' }, contentObject: cry }],
+    ['plan.adverbialClause.clause', { ...main, adverbialClause: { conjunction: 'when', clause: cry } }],
+  ])('rejects a plan whose %s has no subject', async (path, plan) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: `${path}.subject.concept is required` });
+  });
+});

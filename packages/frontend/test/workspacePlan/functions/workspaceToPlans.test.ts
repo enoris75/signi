@@ -117,3 +117,18 @@ describe('workspaceToPlans', () => {
     expect(workspaceToPlans(periods, links)).toEqual([]);
   });
 });
+
+// A267. The builder hangs a linked period on its main clause as an if-clause or a coordinate whether
+// or not its subject box holds a word, so a period with only a verb reaches the engine as a clause
+// with no subject, and `/api/translate` answers 500. A subordinate clause already folds in nothing
+// until its subject has a head (above); the if-clause and the coordinate should wait the same way.
+describe('known bugs: a linked clause with no subject crashes the engine (A267)', () => {
+  const periods = [period('main', { subject: BOY, verb: SLEEP }), period('linked', { verb: EAT })];
+
+  it.fails('folds in no if-clause or coordinate until its period has a subject', () => {
+    const [{ plan: iffed }] = workspaceToPlans(periods, [conditional('c', 'main', 'linked')]);
+    expect(iffed).not.toHaveProperty('condition');
+    const [{ plan: joined }] = workspaceToPlans(periods, [coordinative('k', 'main', 'linked')]);
+    expect(joined).not.toHaveProperty('coordination');
+  });
+});

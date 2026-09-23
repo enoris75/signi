@@ -299,3 +299,34 @@ describe('the glosses render in every language', () => {
     expect(concepts.find((c) => c.id === 'THING')?.definition?.subject).toHaveProperty('conjuncts');
   });
 });
+
+// A270. German STUDENT is a weak masculine (*der Student, den Studenten*) with a feminine of its own,
+// *Studentin*. `applyNounGender` swaps in the feminine's forms and keeps the lexeme's `weak`, so every
+// oblique singular gets the n-declension's -en on a noun that has none: "sieht die Studentinen",
+// "gibt der Studentinen das Buch". A feminine noun does not inflect in the singular at all, and its
+// plural is the lexeme's own *Studentinnen*, which is already right.
+describe('known bugs: the German feminine of a weak noun takes the weak ending (A270)', () => {
+  const her = (extra: Partial<NounPhrase> = {}) => np('STUDENT', { definiteness: 'definite', gender: 'fem', ...extra });
+  const de = (plan: Parameters<typeof sayAll>[0]) => sayAll(plan).de;
+
+  test.fails('the accusative and the dative singular are the bare feminine', () => {
+    expect(de(clause(np('MAN'), 'SEE', { directObject: her() }))).toBe('der Mann sieht die Studentin.');
+    expect(de(clause(np('MAN'), 'SEE', { directObject: her({ definiteness: 'indefinite' }) }))).toBe('der Mann sieht eine Studentin.');
+    expect(de(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: her() } } })))
+      .toBe('der Mann gibt der Studentin das Buch.');
+  });
+
+  test.fails('and so is every prepositional slot', () => {
+    expect(de(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: her() } } }))).toBe('der Mann läuft mit der Studentin.');
+    expect(de(clause(np('MAN'), 'SPEAK', { complements: { topic: { phrase: her() } } }))).toBe('der Mann spricht über die Studentin.');
+  });
+
+  test('regression: the nominative, the genitive, the plural and the masculine', () => {
+    expect(de(clause(her(), 'RUN'))).toBe('die Studentin läuft.');
+    expect(de({ subject: np('NAME_NOUN', { definiteness: 'definite', possessor: her() }) })).toBe('der Name der Studentin.');
+    expect(de(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: her({ number: 'plural' }) } } })))
+      .toBe('der Mann gibt den Studentinnen das Buch.');
+    expect(de(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('STUDENT', { definiteness: 'definite' }) } } })))
+      .toBe('der Mann gibt dem Studenten das Buch.');
+  });
+});
