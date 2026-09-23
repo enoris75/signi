@@ -67,7 +67,9 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const cardinalForm = plural ? forms['cardinal_form_plural'] : forms['cardinal_form'];
   const counted = numeral && cardinalForm ? cardinalForm : noun;
   const words = [detWord, possWord, ...(numeral ? [numeral] : []), ...pre, counted].filter(Boolean);
-  const core = joinArt(headFor(plural, words[0] ?? noun), words.join(' '));
+  // A kept partitive elides into its noun like any article: "de l'eau à moi" (A277).
+  const [first = '', ...rest] = words;
+  const core = joinArt(headFor(plural, first || noun), rest.length ? joinArt(first, rest.join(' ')) : first);
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
   const postStr = joinConjuncts(post, ', ', () => ' et ');

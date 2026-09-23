@@ -16,12 +16,23 @@ import { isPlural } from './isPlural.js';
  * these forms, so `all` belongs in the list here even though the other languages prefix a bare
  * quantifier instead ("tous ses livres", "alle ihre Bücher") and let the possessive have the slot.
  * As with a possessed name, `proper` is dropped so the determiner is the one the user picked.
+ *
+ * The indefinite article stacks the same way, "un mio amico" (A277) — but only where Italian writes
+ * one. A plural or a mass indefinite has no article ("amici", "acqua"), and a possessive with
+ * nothing in front of it is no Italian noun phrase ("*miei amici corrono"), so those keep the
+ * definite article the possessive rides on: "i miei amici".
  */
 const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all']);
 
+function keepsOwnDeterminer(forms: Record<string, string>): boolean {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  if (definiteness === 'indefinite') return !isPlural(forms) && forms['uncountable'] !== '1';
+  return IT_KEPT_BESIDE_POSSESSIVE.has(definiteness);
+}
+
 export function itPossessedHeadForms(np: ResolvedNounPhrase): Record<string, string> {
   const poss = np.possessor;
-  if (poss && isPronominalPossessor(poss) && IT_KEPT_BESIDE_POSSESSIVE.has(np.head.forms['definiteness'] ?? 'definite')) {
+  if (poss && isPronominalPossessor(poss) && keepsOwnDeterminer(np.head.forms)) {
     const { proper: _name, ...forms } = np.head.forms;
     return forms;
   }

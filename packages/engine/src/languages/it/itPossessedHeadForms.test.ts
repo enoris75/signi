@@ -8,7 +8,15 @@ const pronominal = (person: '1' | '2' | '3', number: 'singular' | 'plural' = 'si
 
 describe('itPossessedHeadForms', () => {
   test('a possessive rides on the definite article', () => {
-    expect(itPossessedHeadForms(np(CANE, { definiteness: 'indefinite' }, { possessor: pronominal('3') }))['definiteness']).toBe('definite');
+    expect(itPossessedHeadForms(np(CANE, { definiteness: 'bare' }, { possessor: pronominal('3') }))['definiteness']).toBe('definite');
+  });
+
+  // A277: "un mio amico" — the singular indefinite article stacks like a demonstrative. A plural or a
+  // mass indefinite writes no article, so the possessive keeps the definite one: "i miei cani".
+  test('the singular indefinite keeps its article; the article-less plural takes the definite', () => {
+    expect(itPossessedHeadForms(np(CANE, { definiteness: 'indefinite' }, { possessor: pronominal('3') }))['definiteness']).toBe('indefinite');
+    expect(itPossessedHeadForms(np(PADRE, { definiteness: 'indefinite' }, { possessor: pronominal('1') }))['definiteness']).toBe('indefinite');
+    expect(itPossessedHeadForms(np(CANE, { definiteness: 'indefinite', number: 'plural' }, { possessor: pronominal('3') }))['definiteness']).toBe('definite');
   });
 
   test('a singular, unmodified kinship noun under a possessive goes bare', () => {

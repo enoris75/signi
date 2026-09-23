@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 import { hasPartitivePossessor } from './hasPartitivePossessor.js';
 
 /**
@@ -22,6 +23,19 @@ export function keepsHeadDeterminer(forms: Record<string, string>): boolean {
 }
 
 /**
+ * Whether a head with a *pronominal* possessor keeps a determiner of its own, so the possessive
+ * leaves the determiner slot for the of-genitive in its independent form: "this book of hers", "no
+ * book of hers" (A187), and — unlike a noun possessor, whose indefinite head stays on the Saxon
+ * clitic (A184) — "a friend of mine", "friends of mine" (A277). English's own `any` (the negative
+ * clause's stand-in for `no`) keeps its slot as it does beside a noun possessor. A proper name takes
+ * no determiner, so it keeps nothing.
+ */
+export function keepsDeterminerBesidePossessive(forms: Record<string, string>): boolean {
+  if (forms['proper'] === '1') return false;
+  return keepsHeadDeterminer(forms) || KEPT_BESIDE_POSSESSIVE.has(forms['definiteness'] ?? 'definite');
+}
+
+/**
  * Whether a possessor is post-modified — so heavy that the Saxon clitic "'s" would land on the
  * wrong word (the last word of a relative clause, or of an of-phrase) rather than on the
  * possessor's head. English forbids the Saxon genitive here (the "group genitive" constraint) and
@@ -37,8 +51,8 @@ export function isPostModified(np: ResolvedNounPhrase): boolean {
   if (!np.possessor) return false;
   // A pronominal possessor ("his") is a bare prenominal word, so it post-modifies nothing and
   // propagates nothing — unless the head kept its own determiner and sent it to the of-genitive
-  // too ("this book of hers", A187).
-  if (isPronominalPossessor(np.possessor)) return keepsHeadDeterminer(np.head.forms);
+  // too ("this book of hers", A187; "a friend of mine", A277).
+  if (isPronominalPossessor(np.possessor)) return keepsDeterminerBesidePossessive(np.head.forms);
   // A whole, or the parts a head is made up of, is always an of-phrase after the head ("a part of a
   // keyboard", "a group of canvases", C26), so the phrase trails one whatever its determiner: "the
   // name of a part of a keyboard", never "a part of a keyboard's name".

@@ -85,7 +85,9 @@ describe('complementsPhrase', () => {
 
     // A71: a possessive rides on the definite article, which the preposition fuses with.
     test('a possessive follows the fused preposition and article', () => {
-      expect(one('terminus', complement(np(CANE, { definiteness: 'indefinite' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('al mio cane');
+      expect(one('terminus', complement(np(CANE, { definiteness: 'bare' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('al mio cane');
+      // The indefinite article stays and the possessive stacks after it (A277).
+      expect(one('terminus', complement(np(CANE, { definiteness: 'indefinite' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('a un mio cane');
       expect(one('locative', complement(np(CASA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('nella mia casa');
     });
 

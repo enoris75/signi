@@ -22,16 +22,18 @@ type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';
 
 /**
  * The determiners a possessive stands *beside* rather than replaces (A187). A possessive fills the
- * determiner slot of a definite, indefinite or bare head ("her book", "il suo libro"), but a
- * demonstrative or a quantifier keeps its slot and pushes the possessive somewhere else — behind
- * the noun in French, German, English, Spanish and Portuguese ("ce livre à elle", "dieses Buch von
- * ihr", "this book of hers", "este libro suyo", "este livro seu"), stacked after it in Italian
- * ("questo suo libro"). `all` is not one of them: it prefixes the possessive rather than standing in
- * for it ("all her books", "tous ses livres", "alle ihre Bücher"), and each noun phrase adds it
- * itself — except Italian, which does stack the two ("tutti i suoi libri").
+ * determiner slot of a definite or bare head ("her book", "il suo libro"), but a demonstrative, a
+ * quantifier or the indefinite article keeps its slot and pushes the possessive somewhere else —
+ * behind the noun in French, German, English, Spanish and Portuguese ("ce livre à elle", "dieses
+ * Buch von ihr", "this book of hers", "este libro suyo", "este livro seu"; "un ami à moi", "ein
+ * Freund von mir", "a friend of mine", "un amigo mío", "um amigo meu"), stacked after it in Italian
+ * ("questo suo libro", "un mio amico"). The indefinite joined in A277: before, "a friend of mine"
+ * came out "my friend", a definite phrase. `all` is not one of them: it prefixes the possessive
+ * rather than standing in for it ("all her books", "tous ses livres", "alle ihre Bücher"), and each
+ * noun phrase adds it itself — except Italian, which does stack the two ("tutti i suoi libri").
  */
 export const KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> =
-  new Set(['this', 'that', 'some', 'many', 'few', 'no']);
+  new Set(['this', 'that', 'some', 'many', 'few', 'no', 'indefinite']);
 
 /** Grammatical gender/number of the possessed head — the Romance/German agreement target. */
 export interface PossessedAgreement {

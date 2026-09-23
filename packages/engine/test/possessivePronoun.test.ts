@@ -220,13 +220,22 @@ describe('pronominal possessor on a complement: every language', () => {
     });
   });
 
+  // A picked `bare` gives way to the possessive. The indefinite no longer does (A277): it keeps its
+  // article and the possessive detaches, as beside a demonstrative.
   test('the possessive overrides a picked determiner, on the direction and the instrument too', () => {
-    expect(eatsIn({ possessor: pron('1', 'singular'), definiteness: 'indefinite' })).toMatchObject({
+    expect(eatsIn({ possessor: pron('1', 'singular'), definiteness: 'bare' })).toMatchObject({
       de: 'der Kater frisst in meinem Haus.',
       it: 'il gatto mangia nella mia casa.',
       fr: 'le chat mange dans ma maison.',
       es: 'el gato come en mi casa.',
       pt: 'o gato come na minha casa.',
+    });
+    expect(eatsIn({ possessor: pron('1', 'singular'), definiteness: 'indefinite' })).toMatchObject({
+      de: 'der Kater frisst in einem Haus von mir.',
+      it: 'il gatto mangia in una mia casa.',
+      fr: 'le chat mange dans une maison à moi.',
+      es: 'el gato come en una casa mía.',
+      pt: 'o gato come em uma casa minha.',
     });
     expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('MARKET', { possessor: pron('3', 'singular', 'masc') }) } } }))).toMatchObject({
       de: 'der Kater geht zu seinem Markt.',
@@ -260,12 +269,13 @@ describe('pronominal possessor on a complement: every language', () => {
   });
 
   test('regression: a possessive on the subject and the object is unchanged', () => {
+    // The indefinite keeps its article beside the possessive since A277: "a dog of mine".
     expect(sayAll(clause(np('DOG', { possessor: pron('1', 'singular'), definiteness: 'indefinite' }), 'RUN'))).toMatchObject({
-      de: 'mein Hund läuft.',
-      it: 'il mio cane corre.',
-      fr: 'mon chien court.',
-      es: 'mi perro corre.',
-      pt: 'o meu cão corre.',
+      de: 'ein Hund von mir läuft.',
+      it: 'un mio cane corre.',
+      fr: 'un chien à moi court.',
+      es: 'un perro mío corre.',
+      pt: 'um cão meu corre.',
     });
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { possessor: pron('1', 'plural') }) }))).toMatchObject({
       de: 'der Kater sieht unser Haus.',
@@ -352,13 +362,15 @@ describe('known bugs: a pronominal possessor drops the head\'s determiner', () =
     });
   });
 
-  // Regression: the definite, indefinite and bare heads keep the plain possessive, a kinship noun
-  // keeps its bare Italian possessive, and a complement fuses as before.
+  // Regression: the definite and bare heads keep the plain possessive, a kinship noun keeps its bare
+  // Italian possessive, and a complement fuses as before. The indefinite is a kept determiner since
+  // A277 ("a book of hers"); possession.test.ts has its table.
   test('the definite head, a kinship noun and a complement are right', () => {
     expect(sayAll(clause(np('BOOK', { possessor: her }), 'BURN'))).toMatchObject({
       en: 'her book burns.', it: 'il suo libro brucia.', fr: 'son livre brûle.', de: 'ihr Buch brennt.', es: 'su libro arde.', pt: 'o seu livro arde.',
     });
-    expect(say(clause(np('BOOK', { definiteness: 'indefinite', possessor: her }), 'BURN'), 'en')).toBe('her book burns.');
+    expect(say(clause(np('BOOK', { definiteness: 'bare', possessor: her }), 'BURN'), 'en')).toBe('her book burns.');
+    expect(say(clause(np('BOOK', { definiteness: 'indefinite', possessor: her }), 'BURN'), 'en')).toBe('a book of hers burns.');
     expect(say(clause(np('FATHER', { possessor: mine }), 'RUN'), 'it')).toBe('mio padre corre.');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: mine }) } } }))).toMatchObject({
       it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.', de: 'der Kater läuft in meinem Haus.',

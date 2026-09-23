@@ -93,7 +93,9 @@ describe('renderNP', () => {
 
     test('the possessive leads the prenominal adjectives and forces the definite article', () => {
       expect(withDeterminer(np(CANE, {}, { adjectives: [BIG], possessor: pronominal('1') }))).toBe('il mio grande cane');
-      expect(withDeterminer(np(UOMO, { definiteness: 'indefinite' }, { possessor: pronominal('2') }))).toBe('il tuo uomo');
+      expect(withDeterminer(np(UOMO, { definiteness: 'bare' }, { possessor: pronominal('2') }))).toBe('il tuo uomo');
+      // The singular indefinite keeps its article, and the possessive stacks after it (A277).
+      expect(withDeterminer(np(UOMO, { definiteness: 'indefinite' }, { possessor: pronominal('2') }))).toBe('un tuo uomo');
     });
 
     test('a noun possessor trails as di fused with its own article', () => {

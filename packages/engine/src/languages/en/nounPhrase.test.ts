@@ -64,7 +64,7 @@ describe('nounPhrase', () => {
 
   describe('possessors', () => {
     test('a pronominal possessor replaces the article', () => {
-      expect(nounPhrase({ ...BOOK, definiteness: 'indefinite' }, 'big', undefined, { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' }))
+      expect(nounPhrase({ ...BOOK, definiteness: 'bare' }, 'big', undefined, { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' }))
         .toBe('her big book');
       expect(nounPhrase(BOOK, undefined, undefined, { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' })).toBe('his book');
       expect(nounPhrase({ ...BOOK, number: 'plural' }, undefined, undefined, { kind: 'pronominal', person: '1', number: 'plural' })).toBe('our books');
@@ -75,6 +75,9 @@ describe('nounPhrase', () => {
     test('a pronominal possessor detaches into "of mine/hers" when the head keeps its determiner', () => {
       const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
       expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, her)).toBe('this book of hers');
+      // The indefinite article is one of those determiners (A277).
+      expect(nounPhrase({ ...BOOK, definiteness: 'indefinite' }, 'big', undefined, her)).toBe('a big book of hers');
+      expect(nounPhrase({ ...BOOK, definiteness: 'indefinite', number: 'plural' }, undefined, undefined, her)).toBe('books of hers');
       expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'some' }, undefined, undefined, her)).toBe('some books of hers');
       expect(nounPhrase({ ...BOOK, definiteness: 'no' }, 'big', undefined, her)).toBe('no big book of hers');
       expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, { kind: 'pronominal', person: '1', number: 'singular' }))

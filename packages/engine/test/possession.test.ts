@@ -546,8 +546,13 @@ describe('known bugs: German adjective after a plural possessive', () => {
     expect(de(bigMine('CAT', { adjectiveDegrees: ['more'] }))).toBe('meine größeren Kater laufen.');
     expect(de(bigMine('CAT', { adjectiveDegrees: ['most'] }))).toBe('meine größten Kater laufen.');
     expect(de(bigMine('CAT', { adjectiveDegrees: ['least'] }))).toBe('meine am wenigsten großen Kater laufen.');
-    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', { complements: { predicative: { phrase: bigMine('DOG') } } })).de)
+    // A predicative's unchosen determiner is the indefinite, which keeps its slot beside the
+    // possessive since A277 ("große Hunde von mir"), so the possessive's own declension is asked for
+    // with the definite.
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', { complements: { predicative: { phrase: bigMine('DOG', { definiteness: 'definite' }) } } })).de)
       .toBe('die Kater sind meine großen Hunde.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', { complements: { predicative: { phrase: bigMine('DOG') } } })).de)
+      .toBe('die Kater sind große Hunde von mir.');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: bigMine('DOG') } } })).de)
       .toBe('der Kater läuft wie meine großen Hunde.');
   });
@@ -1008,9 +1013,11 @@ describe('known bugs: a Spanish or Portuguese possessor drops its own determiner
     });
   });
 
-  test('regression: a possessive still replaces an indefinite or bare possessor\'s determiner, and the other five say "no book of his"', () => {
+  // The indefinite keeps its article and takes the stressed possessive since A277, as the kept
+  // determiners above do.
+  test('regression: a possessive still replaces a bare possessor\'s determiner, and the other five say "no book of his"', () => {
     expect(esPt(housesOf(np('BOOK', { definiteness: 'indefinite', possessor: my })))).toEqual({
-      es: 'el gato ve la casa de mi libro.', pt: 'o gato vê a casa do meu livro.',
+      es: 'el gato ve la casa de un libro mío.', pt: 'o gato vê a casa de um livro meu.',
     });
     expect(esPt(housesOf(np('BOOK', { definiteness: 'bare', number: 'plural', possessor: my })))).toEqual({
       es: 'el gato ve la casa de mis libros.', pt: 'o gato vê a casa dos meus livros.',
@@ -1121,7 +1128,10 @@ describe('known bugs: an Italian possessor behind a compared adjective reads as 
   test('regression: a superlative keeps the possessor behind it, and a pronominal one stays prenominal', () => {
     expect(sees('more', { adjectiveDegrees: ['most'], definiteness: 'definite' }).it).toBe("l'uomo vede il gatto più piccolo della donna.");
     expect(sees('more', { adjectiveDegrees: ['least'], definiteness: 'definite' }).it).toBe("l'uomo vede il gatto meno piccolo della donna.");
+    // The indefinite keeps its article beside the possessive (A277).
     expect(sees('more', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }).it)
+      .toBe("l'uomo vede un suo gatto più piccolo.");
+    expect(sees('more', { definiteness: 'definite', possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }).it)
       .toBe("l'uomo vede il suo gatto più piccolo.");
   });
 
@@ -1130,6 +1140,125 @@ describe('known bugs: an Italian possessor behind a compared adjective reads as 
     expect(sees('more')).toMatchObject({
       es: 'el hombre ve un gato más pequeño de la mujer.', pt: 'o homem vê um gato menor da mulher.',
       fr: "l'homme voit un chat plus petit de la femme.",
+    });
+  });
+});
+
+// A277. A possessive and an indefinite article compete for the determiner slot, and the possessive
+// always won: `KEPT_BESIDE_POSSESSIVE` held the demonstratives and the quantifiers but not
+// `indefinite`, so a plan that asked for "a friend of mine" rendered "my friend" — a definite phrase,
+// the indefiniteness silently dropped in six languages. Each has a way to keep both, and the detached
+// branch A187 built already writes it: "a friend of mine", "un ami à moi", "ein Freund von mir", "un
+// amigo mío", "um amigo meu", and Italian stacks the possessive after the article, "un mio amico".
+// Japanese has no article to lose. Found by P11 (P11-E4).
+describe('known bugs: an indefinite possessed head reads as a definite one (A277)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const friendRuns = (extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('FRIEND', { definiteness: 'indefinite', possessor: mine, ...extra }), 'RUN'));
+
+  test('an indefinite keeps its article beside the possessive', () => {
+    expect(friendRuns()).toEqual({
+      en: 'a friend of mine runs.', // now: "my friend runs."
+      it: 'un mio amico corre.', // now: "il mio amico corre."
+      fr: 'un ami à moi court.', // now: "mon ami court."
+      de: 'ein Freund von mir läuft.', // now: "mein Freund läuft."
+      es: 'un amigo mío corre.', // now: "mi amigo corre."
+      pt: 'um amigo meu corre.', // now: "o meu amigo corre."
+      ja: '私の友達は走ります。',
+    });
+  });
+
+  // The plural indefinite has no article in four of them, so the possessive detaches with nothing in
+  // front: "friends of mine", "Freunde von mir". Italian cannot write a possessive with nothing before
+  // it ("*miei amici corrono"), so an article-less indefinite keeps the definite article there, as
+  // before. "some" is the set's older member and is unchanged.
+  test('the plural, and "some" beside it', () => {
+    expect(friendRuns({ number: 'plural' })).toEqual({
+      en: 'friends of mine run.', it: 'i miei amici corrono.', fr: 'des amis à moi courent.',
+      de: 'Freunde von mir laufen.', es: 'unos amigos míos corren.', pt: 'uns amigos meus correm.',
+      ja: '私の友達は走ります。',
+    });
+    expect(friendRuns({ definiteness: 'some', number: 'plural' })).toEqual({
+      en: 'some friends of mine run.', it: 'alcuni miei amici corrono.', fr: 'quelques amis à moi courent.',
+      de: 'einige Freunde von mir laufen.', es: 'algunos amigos míos corren.', pt: 'alguns amigos meus correm.',
+      ja: '私のいくつかの友達は走ります。',
+    });
+  });
+
+  test('the other persons and genders, and an adjective', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(friendRuns({ gender: 'fem', possessor: her })).toMatchObject({
+      en: 'a friend of hers runs.', it: 'una sua amica corre.', fr: 'une amie à elle court.',
+      de: 'eine Freundin von ihr läuft.', es: 'una amiga suya corre.', pt: 'uma amiga sua corre.',
+    });
+    expect(sayAll(clause(np('HOUSE', { definiteness: 'indefinite', possessor: { kind: 'pronominal', person: '1', number: 'plural' } }), 'BURN'))).toMatchObject({
+      en: 'a house of ours burns.', it: 'una nostra casa brucia.', fr: 'une maison à nous brûle.',
+      de: 'ein Haus von uns brennt.', es: 'una casa nuestra arde.', pt: 'uma casa nossa arde.',
+    });
+    expect(friendRuns({ adjectives: ['OLD'] })).toMatchObject({
+      en: 'an old friend of mine runs.', it: 'un mio vecchio amico corre.', fr: 'un vieil ami à moi court.',
+      de: 'ein alter Freund von mir läuft.', es: 'un amigo viejo mío corre.', pt: 'um amigo velho meu corre.',
+    });
+  });
+
+  // The object, the complements (German's own builder among them: A202's path), the dative, a
+  // genitive possessor and an explicit predicate nominal.
+  test('every slot keeps the indefinite', () => {
+    const aFriend = np('FRIEND', { definiteness: 'indefinite', possessor: mine });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: aFriend }))).toMatchObject({
+      en: 'the cat sees a friend of mine.', it: 'il gatto vede un mio amico.', fr: 'le chat voit un ami à moi.',
+      de: 'der Kater sieht einen Freund von mir.', pt: 'o gato vê um amigo meu.', ja: '猫は私の友達を見ます。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: aFriend } } }))).toMatchObject({
+      en: 'the cat runs with a friend of mine.', it: 'il gatto corre con un mio amico.', fr: 'le chat court avec un ami à moi.',
+      de: 'der Kater läuft mit einem Freund von mir.', es: 'el gato corre con un amigo mío.', pt: 'o gato corre com um amigo meu.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: mine }) } } }))).toMatchObject({
+      it: 'il gatto corre in una mia casa.', fr: 'le chat court dans une maison à moi.',
+      de: 'der Kater läuft in einem Haus von mir.', es: 'el gato corre en una casa mía.', pt: 'o gato corre em uma casa minha.',
+    });
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: aFriend } } }))).toMatchObject({
+      en: 'the cat gives the book to a friend of mine.', it: 'il gatto dà il libro a un mio amico.',
+      fr: 'le chat donne le livre à un ami à moi.', de: 'der Kater gibt einem Freund von mir das Buch.',
+      es: 'el gato da el libro a un amigo mío.', pt: 'o gato dá o livro a um amigo meu.',
+    });
+    expect(sayAll(clause(np('HOUSE', { possessor: aFriend }), 'BURN'))).toMatchObject({
+      en: 'the house of a friend of mine burns.', it: 'la casa di un mio amico brucia.', fr: "la maison d'un ami à moi brûle.",
+      de: 'das Haus eines Freundes von mir brennt.', es: 'la casa de un amigo mío arde.', pt: 'a casa de um amigo meu arde.',
+    });
+    expect(sayAll(clause(np('DOG'), 'BE', { complements: { predicative: { phrase: aFriend } } }))).toMatchObject({
+      en: 'the dog is a friend of mine.', it: 'il cane è un mio amico.', fr: 'le chien est un ami à moi.',
+      de: 'der Hund ist ein Freund von mir.', es: 'el perro es un amigo mío.', pt: 'o cão é um amigo meu.',
+    });
+    // German negates an indefinite with "kein", which keeps the detached possessive.
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: aFriend, verbPhrase: { verb: 'SEE', negative: true } })).de)
+      .toBe('der Kater sieht keinen Freund von mir.');
+  });
+
+  // A mass indefinite writes a partitive in French, which elides into its noun, and no article in
+  // Italian, which keeps the definite as the plural does.
+  test('a mass noun', () => {
+    expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'indefinite', possessor: mine }) }))).toMatchObject({
+      en: 'the cat drinks water of mine.', it: 'il gatto beve la mia acqua.', fr: "le chat boit de l'eau à moi.",
+      de: 'der Kater trinkt Wasser von mir.',
+    });
+  });
+
+  test('regression: the definite, the bare head and the kept determiners are unchanged', () => {
+    const plain = {
+      en: 'my friend runs.', it: 'il mio amico corre.', fr: 'mon ami court.', de: 'mein Freund läuft.',
+      es: 'mi amigo corre.', pt: 'o meu amigo corre.', ja: '私の友達は走ります。',
+    };
+    expect(friendRuns({ definiteness: 'definite' })).toEqual(plain);
+    expect(friendRuns({ definiteness: 'bare' })).toEqual(plain);
+    expect(friendRuns({ definiteness: 'this' })).toMatchObject({
+      en: 'this friend of mine runs.', it: 'questo mio amico corre.', fr: 'cet ami à moi court.',
+      de: 'dieser Freund von mir läuft.', es: 'este amigo mío corre.', pt: 'este amigo meu corre.',
+    });
+    // A genitive possessor under an indefinite stays on the English clitic (A184's decision; the
+    // double genitive "a friend of the cat's" is out of scope).
+    expect(sayAll(clause(np('FRIEND', { definiteness: 'indefinite', possessor: np('CAT') }), 'RUN'))).toMatchObject({
+      en: "the cat's friend runs.", de: 'ein Freund des Katers läuft.',
     });
   });
 });
