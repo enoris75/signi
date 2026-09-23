@@ -8,6 +8,12 @@ describe('resolveRelativeClause', () => {
     expect(resolveRelativeClause({ headRole: 'locative', verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP).headRole).toBe('locative');
   });
 
+  // A273
+  test('refuses a clause with no verb phrase by name', () => {
+    const verbless = { headRole: 'directObject', subject: { concept: 'DOG' } } as unknown as Parameters<typeof resolveRelativeClause>[0];
+    expect(() => resolveRelativeClause(verbless, 'it', LOOKUP)).toThrow(/relative\.verbPhrase\.verb is required/);
+  });
+
   test('resolves its own subject, its verb phrase in no mood, and its complements', () => {
     const clause = resolveRelativeClause({
       headRole: 'directObject',

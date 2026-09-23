@@ -1600,7 +1600,7 @@ describe('known bugs: a relative clause with no verb phrase crashes the engine (
   const bare = {} as unknown as RelativeClause;
   const gapOnly = { headRole: 'directObject', subject: np('DOG') } as unknown as RelativeClause;
 
-  test.fails.each([
+  test.each([
     ['on the subject', clause(np('CAT', { relative: bare }), 'RUN')],
     ['on the object', clause(np('MAN'), 'SEE', { directObject: np('CAT', { relative: bare }) })],
     ['naming only its gap and its subject', clause(np('CAT', { relative: gapOnly }), 'RUN')],
@@ -1611,6 +1611,17 @@ describe('known bugs: a relative clause with no verb phrase crashes the engine (
     expect(thrown).toBeInstanceOf(Error);
     expect(thrown).not.toBeInstanceOf(TypeError);
     expect((thrown as Error).message).toMatch(/verb ?phrase/i);
+  });
+
+  test('a verbless relative clause is refused on a complement too, and in a linked clause', () => {
+    expect(() => sayAll(clause(np('MAN'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { relative: bare }) } } })))
+      .toThrow(/relative\.verbPhrase\.verb is required/);
+    expect(() => sayAll(clause(np('MAN'), 'RUN', { condition: clause(np('CAT', { relative: bare }), 'EAT') })))
+      .toThrow(/relative\.verbPhrase\.verb is required/);
+  });
+
+  test('regression: a relative clause with its verb phrase and no subject renders', () => {
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')).en).toBe('the cat that eats runs.');
   });
 });
 

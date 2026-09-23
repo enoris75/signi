@@ -676,7 +676,7 @@ describe('known bugs: a linked clause with no subject answers 500 (A267)', () =>
 // request and wants a 400 naming what is missing. The engine's side is pinned in
 // packages/engine/test/relative.test.ts.
 describe('known bugs: a relative clause with no verb phrase answers 500 (A273)', () => {
-  test.fails.each([
+  test.each([
     ['on the subject', { subject: { concept: 'CAT', relative: {} }, verbPhrase: { verb: 'RUN' } }],
     ['on the object', { subject: { concept: 'MAN' }, verbPhrase: { verb: 'SEE' }, directObject: { concept: 'CAT', relative: {} } }],
   ])('rejects a plan with a verbless relative clause %s', async (_, plan) => {

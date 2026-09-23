@@ -41,3 +41,23 @@ Pinned by `known bugs: a relative clause with no verb phrase crashes the engine 
 with no verb phrase answers 500 (A273)` in [index.test.ts](../../../packages/backend/src/index.test.ts).
 
 Found while filing A265–A272, next to A267.
+
+## Resolved
+
+2026-09-23, on [A267](A267-linked-clause-with-no-subject-crashes-the-engine.md)'s check.
+
+- **Engine.** [`resolveRelativeClause`](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+  throws a named `Error` (`a relative clause needs a verb phrase: relative.verbPhrase.verb is required
+  (A273)`) before it reads the verb phrase.
+- **Backend.** [`planError`](../../../packages/backend/src/planError.ts) walks every slot of every
+  clause it checks — subject, objects, complements, possessors, conjuncts, the nouns inside a relative
+  clause, a purpose clause or an infinitive complement — and answers 400 for a relative with no
+  `verbPhrase.verb`, by its path: `plan.subject.relative.verbPhrase.verb is required`,
+  `plan.subject.conjuncts[1].relative.verbPhrase.verb is required`.
+
+Guarded by the formerly-`.fails` tests of the two `known bugs: … (A273)` blocks in
+[relative.test.ts](../../../packages/engine/test/relative.test.ts) (plus a complement's and a linked
+clause's verbless relative, and the subjectless subject relative still rendering) and
+[index.test.ts](../../../packages/backend/src/index.test.ts), by
+[planError.test.ts](../../../packages/backend/src/planError.test.ts) and a case in
+[resolveRelativeClause.test.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.test.ts).

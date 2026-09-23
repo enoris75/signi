@@ -45,3 +45,25 @@ describe('planError', () => {
     expect(planError({ ...main, purpose: cry, infinitiveComplement: cry })).toBeUndefined();
   });
 });
+
+// A273
+describe('planError: a relative clause with no verb phrase', () => {
+  const cat = (relative: object) => ({ concept: 'CAT', relative });
+  test.each([
+    ['plan.subject', { ...main, subject: cat({}) }],
+    ['plan.directObject', { ...main, directObject: cat({ headRole: 'directObject', subject: { concept: 'DOG' } }) }],
+    ['plan.complements.locative.phrase', { ...main, complements: { locative: { phrase: cat({ verbPhrase: {} }) } } }],
+    ['plan.subject.possessor', { ...main, subject: { concept: 'DOG', possessor: cat({}) } }],
+    ['plan.subject.conjuncts[1]', { ...main, subject: { conjunction: 'and', conjuncts: [{ concept: 'DOG' }, cat({})] } }],
+    ['plan.subject.relative.directObject', { ...main, subject: cat({ verbPhrase: { verb: 'SEE' }, directObject: cat({}) }) }],
+    ['plan.condition.subject', { ...main, condition: { ...main, subject: cat({}) } }],
+    ['plan.purpose.directObject', { ...main, purpose: { verbPhrase: { verb: 'SEE' }, directObject: cat({}) } }],
+  ])('names the relative clause on %s by its path', (path, plan) => {
+    expect(planError(plan)).toBe(`${path}.relative.verbPhrase.verb is required`);
+  });
+
+  test('passes a relative clause with its verb phrase', () => {
+    expect(planError({ ...main, subject: cat({ verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
+    expect(planError({ ...main, directObject: cat({ headRole: 'directObject', subject: { concept: 'DOG' }, verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
+  });
+});

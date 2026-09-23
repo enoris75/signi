@@ -31,6 +31,10 @@ export function resolveRelativeClause(
   lookup: LexiconLookup,
   headForms?: Record<string, string>,
 ): ResolvedRelativeClause {
+  // A relative clause is what its verb says of the head: one without a verb phrase is a malformed
+  // plan, refused by name rather than left to die destructuring it (A273). `/api/translate` says the
+  // same with the field's path.
+  if (!clause.verbPhrase) throw new Error('a relative clause needs a verb phrase: relative.verbPhrase.verb is required (A273)');
   const headRole = clause.headRole ?? 'subject';
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
   const resolvedObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
