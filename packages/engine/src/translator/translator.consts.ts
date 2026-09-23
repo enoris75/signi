@@ -199,3 +199,30 @@ export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' 
  * French is the imparfait a condition takes, which would be wrong here.
  */
 export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt']);
+
+/**
+ * The verb each language says the **existential** with (P09-E6 D5, see PhrasePlan.existential): the
+ * concept whose lexeme the translator resolves in BE's place. English and Italian keep BE (*there
+ * is*, *c'è*); French is *avoir* under *il y*, German *geben* under *es*. Spanish and Portuguese
+ * resolve HAVE for the shape of a transitive verb with an object, and their engines conjugate *haber*
+ * / *haver* in its place (`HABER_EXISTENTIAL`, `HAVER_EXISTENTIAL`), a verb neither corpus seeds.
+ * Japanese keeps BE, which its engine already says as いる / ある by animacy.
+ */
+export const EXISTENTIAL_VERBS: Readonly<Record<string, string>> = {
+  en: 'BE', it: 'BE', fr: 'HAVE', de: 'GIVE', es: 'HAVE', pt: 'HAVE', ja: 'BE',
+};
+
+/**
+ * The languages whose existential verb **agrees with the pivot** — "there are cats", "ci sono dei
+ * gatti" — where the other five are impersonal and stay in the third singular whatever the pivot is
+ * (*il y a des chats*, *es gibt Kater*, *hay gatos*, *há gatos*; Japanese does not agree at all).
+ */
+export const EXISTENTIAL_AGREEING_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it']);
+
+/**
+ * The pivot determiners English turns into *no* when an existential is negated: "there is no cat",
+ * "there are no cats", not "there is not a cat" (P09-E6 D5). A definite or quantified pivot keeps
+ * "not" ("there is not the cat"), and so does a modal clause ("there cannot be a cat"), where *no*
+ * would move the negation off the modal.
+ */
+export const EXISTENTIAL_NO_DETERMINERS: ReadonlySet<string> = new Set(['indefinite', 'bare']);

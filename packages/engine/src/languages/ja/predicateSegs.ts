@@ -85,14 +85,20 @@ export function predicateSegs(
   // Every other object takes を, unless its verb governs it with another particle, which its lexeme
   // names as `object_particle`: 続く takes its object with に, as one follows *after* a thing (猫は犬に
   // 続きます). Read off the verb as given, like `locative_particle` below.
-  const objectParticle = possessive ? 'が' : (givenVerbPhrase.verb.forms['object_particle'] ?? 'を');
+  // The pivot of an existential clause ("there is a cat") is what exists, in the object's slot: it is
+  // marked が as the thing possessed is, and it picks いる / ある as a located subject does — 猫がいます,
+  // 家に本があります (P09-E6 D5).
+  const pivot = copulaExistential && givenVerbPhrase.existential === true;
+  const objectParticle = possessive || pivot ? 'が' : (givenVerbPhrase.verb.forms['object_particle'] ?? 'を');
   // A passive is not a branch of the predicate but a different verb in the same slot: the 〜れる/られる
   // form standing where the active one stood (see `jaPassiveVerb`), which then conjugates for tense,
   // negation, aspect and the modal suffixes like any other ichidan verb. The existential substitution
   // above wins where both could apply — an existential clause has no agent to demote.
   // The existential verb follows what exists: the subject under BE (猫は家にいます), the thing possessed
   // under HAVE, whose owner is inanimate by definition (家は猫がいます, 家は壁があります; A217).
-  const animateExistent = possessive
+  const animateExistent = pivot
+    ? directObject !== undefined && isAnimate(directObject.conjuncts)
+    : possessive
     ? animateObject ?? (directObject !== undefined && isAnimate(directObject.conjuncts))
     : animateSubject;
   const verbPhrase: ResolvedVerbPhrase = existential

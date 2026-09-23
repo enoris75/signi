@@ -1347,6 +1347,27 @@ export interface PhrasePlan {
    */
   questionAnimate?: boolean;
   /**
+   * When true this clause is an **existential** — "there is a cat in the house" (P09-E6 D5, "the
+   * existential"). It states that `subject` exists, so `subject` is the **pivot**, the thing there
+   * is, and its determiner is the plan's own (indefinite is the usual one; a definite pivot renders
+   * as given). The verb must be BE — the translator refuses any other — and `verbPhrase` carries the
+   * tense, aspect, negation and modals as it does on any clause; the complements (a locative, a
+   * temporal …) render as they do on any clause, after the pivot in the six European languages and
+   * before it in Japanese. A `directObject` means nothing here and is ignored.
+   *
+   * Each language says it with its own verb: en *there is / there are* and it *c'è / ci sono*,
+   * agreeing with the pivot (a coordinated pivot is plural: *there are*); fr *il y a*, de *es gibt*
+   * (the pivot in the **accusative**: *einen Kater*), es *hay* and pt *há*, all four invariable,
+   * because the pivot is the object of an impersonal verb there; ja the existential verb by the
+   * pivot's animacy, the pivot marked が — 家に猫がいます, 家に本があります. A negation is *there is no
+   * cat*, *il n'y a pas de chat*, *es gibt keinen Kater*, 猫がいません; a pivot that is already `no`
+   * negates on its own. The yes/no question (`interrogative`) holds ("is there a cat?", "gibt es
+   * einen Kater?"); a wh-question (`questionRole`) is refused, and so are a passive, a command, an
+   * infinitive and a personal-pronoun pivot ("there is me"), none of which is built. Plan-only: no
+   * builder control sets it yet.
+   */
+  existential?: boolean;
+  /**
    * When true this clause is an **imperative** (a command — "eat the food!", "don't run!").
    * The verb is rendered in the imperative mood and the subject is dropped, but `subject`
    * still carries the addressee pronoun (2nd-singular by default, or 1st-plural "let's…" /
