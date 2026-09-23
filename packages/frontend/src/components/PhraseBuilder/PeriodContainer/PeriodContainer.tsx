@@ -56,11 +56,12 @@ export function PeriodContainer({
   instrumental,
   imperative,
   infinitive,
+  question,
   children,
   ...headerControls
 }: PeriodContainerProps) {
   const t = useUiString();
-  const controls = { conditional, coordinative, subordinate, instrumental, imperative, infinitive };
+  const controls = { conditional, coordinative, subordinate, instrumental, imperative, infinitive, question };
   const { dragging, dragHandlers } = useBorderDrag({
     enabled: floatable,
     position,
@@ -70,9 +71,11 @@ export function PeriodContainer({
   const accent = periodAccent(controls);
   // The border stack is centred on the card's right edge, so the card is never shorter than it
   // (widen, never hide: the canvas rule). Measured 2026-09-23: a compact *cat eats mouse* card is
-  // 142px tall, and five controls stack to 156px (28px each, 4px apart) — so the card grows to
-  // the stack plus 8px either side.
-  const borderControls = [imperative, infinitive, conditional, coordinative, subordinate].filter(Boolean).length;
+  // 142px tall, and five controls stack to 156px (28px each, 4px apart), standing 7px out of it at
+  // either end. So the card grows to the stack plus 8px clear of the border at either end: each
+  // 28px control and its 4px gap, less the last gap, plus 16 — 172px for five, 204px for all six
+  // (command, infinitive, question, conditional, coordination, subordinate clause).
+  const borderControls = [imperative, infinitive, question, conditional, coordinative, subordinate].filter(Boolean).length;
   const minHeight = borderControls ? `${borderControls * 32 - 4 + 16}px` : undefined;
 
   return (
@@ -117,6 +120,7 @@ export function PeriodContainer({
         subordinate={subordinate}
         imperative={imperative}
         infinitive={infinitive}
+        question={question}
       />
       <Box
         ref={controlsRef}

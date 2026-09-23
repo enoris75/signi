@@ -95,9 +95,9 @@ export interface InstrumentalControl {
   onPick: () => void;
 }
 
-// A mood toggle on the card border: the imperative (command) or the infinitive (citation). Every
-// period, standalone or not, can take either. Both moods occupy the finite slot, so they are
-// mutually exclusive — toggling one clears the other. Both are disabled while the period takes
+// A mood toggle on the card border: the imperative (command), the infinitive (citation) or the
+// question. Every period, standalone or not, can take any. The three are mutually exclusive —
+// toggling one clears the others (the question because the engine drops it under either). Both are disabled while the period takes
 // part in a conditional (a mood incompatible with one) or in a coordination, whose two clauses
 // share one mood: flipping it on one clause alone would break the pair, so the relation has to be
 // cleared first.
@@ -107,7 +107,7 @@ export interface MoodControl {
   onToggle: () => void;
 }
 
-export type Mood = "imperative" | "infinitive";
+export type Mood = "imperative" | "infinitive" | "question";
 
 // The cross-container relations a period card can light up for as a pick target.
 export type Relation = "conditional" | "coordinative" | "subordinate" | "instrumental";
@@ -129,6 +129,8 @@ export interface ClauseControls {
   // Infinitive (citation) toggle on the card border, a sibling of the imperative one. Present for
   // every period.
   infinitive?: MoodControl;
+  // Question toggle on the card border, the third mood (P09-E12 M5). Present for every period.
+  question?: MoodControl;
 }
 
 // The palette colour each relation and mood marks the card and its border control with.
@@ -139,4 +141,5 @@ export const ACCENT: Record<Relation | Mood, string> = {
   instrumental: "secondary.main",
   imperative: "success.main",
   infinitive: "primary.main",
+  question: "error.main",
 };

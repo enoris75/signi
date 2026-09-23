@@ -35,7 +35,9 @@ import {
   updateNounAt,
   toggleImperative,
   toggleInfinitive,
+  toggleInterrogative,
 } from "./phraseReducers.ts";
+import { moodLocked } from "./functions/moodLocked.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
@@ -394,6 +396,8 @@ export function PhraseBuilder({
     // to the verb — the citation's whole content — for the same reason the command toggle does.
     if (!selection.infinitive && !selection.verb) setActiveSlot("verb");
   };
+  // The question keeps the subject box (a question has a subject), so the cursor stays where it is.
+  const handleToggleQuestion = () => onPhraseUpdate(toggleInterrogative);
 
   // An owner's ring is shown while its owner is open, which the period's builder holds (see
   // `ownersOpen`), so that reads in place of the possessor satellite's own reveal.
@@ -408,8 +412,12 @@ export function PhraseBuilder({
     { ...revealed, ...ownerReveals },
     uiLanguage,
     t,
-    // A that-clause this period governs is its verb's object, so the object box gives way to it.
-    binding?.subordinate.asSource?.kind === "content",
+    {
+      // A question mark that would make the period a question respects the lock the border's toggle does.
+      moodLocked: moodLocked(binding),
+      // A that-clause this period governs is its verb's object, so the object box gives way to it.
+      clauseObject: binding?.subordinate.asSource?.kind === "content",
+    },
   );
 
   // The key each satellite's control answers to, read off the keymap for the scope of the box that
@@ -458,6 +466,12 @@ export function PhraseBuilder({
       onToggleNegative: commands.handleToggleNegative,
       onToggleReveal: handleToggleReveal,
       onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : commands.handleAddConjunct,
+      // A hosted ring's phrase is a noun phrase, not a clause: it asks nothing and states no existence.
+      ...(!ringHost && {
+        onToggleQuestion: commands.handleToggleQuestion,
+        onToggleQuestionAnimate: commands.handleToggleQuestionAnimate,
+        onToggleExistential: commands.handleToggleExistential,
+      }),
       t,
     });
   const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
@@ -933,6 +947,9 @@ export function PhraseBuilder({
       toggleGender: commands.handleToggleGender,
       toggleNegative: commands.handleToggleNegative,
       toggleCauseNegative: commands.handleToggleCauseNegative,
+      toggleQuestion: commands.handleToggleQuestion,
+      toggleQuestionAnimate: commands.handleToggleQuestionAnimate,
+      toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,
       cycleAspect: commands.handleCycleAspect,
       cycleVoice: commands.handleCycleVoice,
@@ -1128,6 +1145,7 @@ export function PhraseBuilder({
       onTidy={handleTidyPeriod}
       onToggleImperative={handleToggleImperative}
       onToggleInfinitive={handleToggleInfinitive}
+      onToggleQuestion={handleToggleQuestion}
       controlsRef={periodControlsRef}
       graphHeight={graphHeight}
       onGraphHeightChange={setGraphHeight}

@@ -130,11 +130,13 @@ export function removeRelativeLink(
  * Whether a period may *start* a condition. An IF clause can't also be a main clause (conditionals
  * don't chain), and a period in a coordination — or acting as a command or an infinitive citation —
  * can't take one either (a citation is a leaf; a command is a mood incompatible with a conditional).
+ * Nor can a question: the engine asks nothing in the conditional mood a main clause takes (P09-E12).
  */
 export function canStartCondition(links: PhraseLink[], c: PhraseContainer): boolean {
   return (
     !c.selection.imperative &&
     !c.selection.infinitive &&
+    !c.selection.interrogative &&
     !links.some((l) => isConditionalLink(l) && l.target.containerId === c.id) &&
     !links.some((l) => isCoordinativeLink(l) && (l.source.containerId === c.id || l.target.containerId === c.id)) &&
     !links.some((l) => isSubordinateLink(l) && l.target.containerId === c.id)
@@ -199,7 +201,12 @@ export function canBeCoordinate(
   const first = containers.find((c) => c.id === firstId);
   const second = containers.find((c) => c.id === secondId);
   if (!first || !second) return false;
-  return Boolean(first.selection.imperative) === Boolean(second.selection.imperative);
+  // A question coordinates with a question ("does the cat eat, and does the dog run?"), for the
+  // same reason: the pair shares one force (P09-E12).
+  return (
+    Boolean(first.selection.imperative) === Boolean(second.selection.imperative) &&
+    Boolean(first.selection.interrogative) === Boolean(second.selection.interrogative)
+  );
 }
 
 /** One coordination per first clause: the one it had is replaced. */

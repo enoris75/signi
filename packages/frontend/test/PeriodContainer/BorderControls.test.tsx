@@ -29,6 +29,7 @@ describe('BorderControls', () => {
       subordinate: subordinateControl(),
       coordinative: coordinativeControl(),
       conditional: conditionalControl(),
+      question: mood(false),
       infinitive: mood(false),
       imperative: mood(false),
     });
@@ -36,6 +37,8 @@ describe('BorderControls', () => {
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
       'Command',
       'Infinitive phrase',
+      // The third mood, right after the infinitive (P09-E12 M5).
+      'Question',
       'Add a condition (this period becomes the main clause)',
       'Coordinate this period',
       'Add a subordinate clause',

@@ -18,6 +18,7 @@ import type {
   GenderSlot,
   NounKey,
   NumberSlot,
+  QuestionRole,
   SlotKey,
   WorkspaceBinding,
 } from "../interfaces.ts";
@@ -86,6 +87,10 @@ export type PerimeterEntry = {
   // from it, as the owner's leaves from the possessor control.
   standard?: SatelliteIcon;
   conjunct?: SatelliteIcon;
+  // The wh-question's mark and its who / what chip, and the subject's existential (P09-E12 M6, M7).
+  question?: SatelliteIcon;
+  animacy?: SatelliteIcon;
+  existential?: SatelliteIcon;
 };
 
 export interface BuildSatelliteIconsArgs {
@@ -102,6 +107,11 @@ export interface BuildSatelliteIconsArgs {
   // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
   // coordinate any number of phrases, so each click adds one more ring to the group.
   onAddConjunct: (which: NounKey) => void;
+  // Mark or unmark the slot a wh-question asks about, flip its who / what, and make the period an
+  // existential or take it back (P09-E12 M6, M7). Optional: a builder without them offers none.
+  onToggleQuestion?: (which: QuestionRole) => void;
+  onToggleQuestionAnimate?: () => void;
+  onToggleExistential?: () => void;
   // The UI-string lookup: a link control says what state it is in and what a click will do, and
   // both are catalog entries (`status.linked`, `hint.clickToRemove`).
   t: UiStringLookup;

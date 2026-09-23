@@ -4,6 +4,7 @@ import { buildComplements } from "./buildComplements.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 import { buildVerbPhrase } from "./buildVerbPhrase.ts";
 import { imperativeSubject } from "./imperativeSubject.ts";
+import { asksQuestion, canBeExistential } from "../../functions/questionGates.ts";
 
 // Serialise one container's flat selection into a wire PhrasePlan (its noun phrases carry
 // no relative clauses; those are attached from cross-container links in workspacePlan).
@@ -37,5 +38,11 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
       ...(sel.imperativeRegister && { imperativeRegister: sel.imperativeRegister }),
     }),
     ...(infinitive && { infinitive: true }),
+    // A question is a force, not a mood: it needs a verb to ask with, and a command or a citation
+    // has none of its own (the reducers keep them exclusive; this keeps a hand-built selection
+    // honest too). The wh-question's gap is the root period's alone, so `askQuestion` adds it.
+    ...(asksQuestion(sel) && { interrogative: true }),
+    // The existential reaches the plan only where the engine builds one (see canBeExistential).
+    ...(sel.existential && canBeExistential(sel) && { existential: true }),
   };
 }

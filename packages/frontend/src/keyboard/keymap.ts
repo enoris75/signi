@@ -21,6 +21,7 @@ import type {
   NounAddress,
   NounKey,
   PhraseSelection,
+  QuestionRole,
   SlotKey,
 } from "../components/PhraseBuilder/interfaces.ts";
 import type { Satellite } from "../components/PhraseBuilder/satellites/index.ts";
@@ -101,6 +102,10 @@ export interface BoxContext {
   toggleGender: (which: NounKey, step: 1 | -1) => void;
   toggleNegative: (field: NegativeField) => void;
   toggleCauseNegative: () => void;
+  /** The wh-question's mark on this noun's slot, its who / what, and the existential (P09-E12). */
+  toggleQuestion: (which: QuestionRole) => void;
+  toggleQuestionAnimate: () => void;
+  toggleExistential: () => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
   cycleVoice: (step: 1 | -1) => void;
@@ -136,9 +141,10 @@ export interface PeriodContext {
   save: (() => void) | undefined;
   remove: (() => void) | undefined;
   hasContent: boolean;
-  /** C / T — the two moods, which share the finite slot and so exclude each other. */
+  /** C / T / Q — the three moods, which exclude each other. */
   toggleImperative: () => void;
   toggleInfinitive: () => void;
+  toggleQuestion: () => void;
   moodLocked: boolean;
   /** I / J — the two clause-level relations: start the pick, or drop the link there is. */
   condition: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
@@ -455,6 +461,42 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     reverses: "object.voice",
     when: (ctx) => has(ctx, "verbVoice"),
     run: (ctx) => ctx.cycleVoice(-1),
+  },
+  {
+    // The wh-question's mark (P09-E12 M6): ask about this slot, or stop asking. Q is free on a noun,
+    // and ? is the shortcuts sheet.
+    id: "noun.question",
+    scope: "box:noun",
+    keys: ["Q"],
+    label: "Question",
+    labelKey: "mood.question",
+    hint: true,
+    satellite: /Question$/,
+    when: (ctx) => ctx.slot === ctx.nounKey && has(ctx, `${ctx.nounKey}Question`),
+    run: (ctx) => ctx.toggleQuestion(ctx.nounKey as QuestionRole),
+  },
+  {
+    // Its who / what, on the marked subject or object. A flip, so it has no backwards twin.
+    id: "noun.question.animacy",
+    scope: "box:noun",
+    keys: ["Shift+Q"],
+    label: "Who or what",
+    labelKey: "question.who",
+    satellite: /QuestionAnimate$/,
+    when: (ctx) => ctx.slot === ctx.nounKey && has(ctx, `${ctx.nounKey}QuestionAnimate`),
+    run: (ctx) => ctx.toggleQuestionAnimate(),
+  },
+  {
+    // The existential, "there is a cat" (P09-E12 M7): on the subject, whose ring carries it.
+    id: "subject.existential",
+    scope: "box:noun",
+    keys: ["E"],
+    label: "Existential",
+    labelKey: "existential.toggle",
+    hint: true,
+    satellite: /^subjectExistential$/,
+    when: (ctx) => ctx.slot === "subject" && has(ctx, "subjectExistential"),
+    run: (ctx) => ctx.toggleExistential(),
   },
   {
     id: "noun.possessor",
@@ -977,6 +1019,16 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     hint: true,
     when: (ctx) => !ctx.moodLocked,
     run: (ctx) => ctx.toggleInfinitive(),
+  },
+  {
+    id: "period.question",
+    scope: "period",
+    keys: ["Q"],
+    label: "Question",
+    labelKey: "mood.question",
+    hint: true,
+    when: (ctx) => !ctx.moodLocked,
+    run: (ctx) => ctx.toggleQuestion(),
   },
   {
     id: "period.condition",

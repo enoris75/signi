@@ -12,6 +12,7 @@ import type {
   NounKey,
   NumberSlot,
   PhraseSelection,
+  QuestionRole,
   SlotKey,
 } from "../interfaces.ts";
 import {
@@ -35,6 +36,9 @@ import {
   toggleCauseNegative,
   toggleNegative,
   toggleNumber,
+  toggleExistential,
+  toggleQuestionAnimate,
+  toggleQuestionRole,
   type CycleStep,
   type NegativeField,
 } from "../phraseReducers.ts";
@@ -76,6 +80,11 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setImperativePerson(prev, person)),
     handleSetImperativeRegister: (register: ImperativeRegister) =>
       onPhraseUpdate((prev) => setImperativeRegister(prev, register)),
+    // The question's mark on a slot's ring, its who / what chip, and the subject's existential
+    // (P09-E12 M6, M7).
+    handleToggleQuestion: (which: QuestionRole) => onPhraseUpdate((prev) => toggleQuestionRole(prev, which)),
+    handleToggleQuestionAnimate: () => onPhraseUpdate(toggleQuestionAnimate),
+    handleToggleExistential: () => onPhraseUpdate(toggleExistential),
     handleSelectSpecifier: (spec: PathSpecifier) => onPhraseUpdate((prev) => setSpecifier(prev, spec, "route")),
     handleSelectLocativeSpecifier: (spec: PathSpecifier) =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),

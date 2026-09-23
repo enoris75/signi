@@ -18,6 +18,7 @@ import {
   canCoordinateImperative,
 } from '@signi/shared';
 import {
+  QUESTION_ROLES,
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
@@ -29,6 +30,8 @@ import {
 } from '../../src/components/PhraseBuilder/interfaces.ts';
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
+import { canAsk, canBeExistential } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
+import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
@@ -278,6 +281,33 @@ const OPS: Op[] = [
     else return undefined;
     return { ...s, containers: s.containers.map((x) => (x.id === c.id ? { ...x, selection: sel } : x)) };
   },
+  // The question, the third mood (P09-E12 M5); the slot it asks about and its who / what, where the
+  // slot's ring offers the mark (M6); the existential, where the subject's ring offers it (M7). The
+  // border's toggle and a mark that would make the period a question respect the mood's lock.
+  (s, rng) => {
+    const c = pick(rng, s.containers)!;
+    const locked = s.links.some(
+      (l) =>
+        ((l.kind === 'conditional' || l.kind === 'coordinative') && (l.source.containerId === c.id || l.target.containerId === c.id)) ||
+        // A subordinate clause has no mood of its own (P09-E12 D9), the question's included.
+        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive') && l.target.containerId === c.id),
+    );
+    let sel = c.selection;
+    const r = rng();
+    if (r < 0.3) {
+      if (locked) return undefined;
+      sel = R.toggleInterrogative(sel);
+    } else if (r < 0.75) {
+      const role = pick(rng, QUESTION_ROLES.filter((q) => canAsk(sel, q)));
+      if (!role || (locked && !sel.interrogative)) return undefined;
+      sel = R.toggleQuestionRole(sel, role);
+      if (sel.questionRole === role && (role === 'subject' || role === 'directObject') && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
+    } else {
+      if (!canBeExistential(sel)) return undefined;
+      sel = R.toggleExistential(sel);
+    }
+    return { ...s, containers: s.containers.map((x) => (x.id === c.id ? { ...x, selection: sel } : x)) };
+  },
   // Another period.
   (s, _rng, id) => ({ ...s, containers: [...s.containers, { id: id(), selection: {} }] }),
   // Links between periods, made only where a pick could make them.
@@ -439,6 +469,67 @@ describe('the round trip', () => {
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);
     expect(standards.some((p) => !/\/(more|less|equally) \/than/.test(p))).toBe(true);
   }, 30_000);
+});
+
+// No control reaches a plan the engine refuses (P09-E12 §Tests, "Gating"): every state the walk above
+// reaches — the question, its gap and the existential among its steps — translates in all seven
+// languages. The walk's words are the console vocabulary's, and all but two of them are real concepts
+// of the corpus; a plan naming one of those two has no lexeme to render and is left out.
+const throws = (fn: () => unknown): boolean => {
+  try {
+    fn();
+    return false;
+  } catch {
+    return true;
+  }
+};
+// A plan with its question and its existential taken out, on every clause it holds.
+function unasked(plan: object): object {
+  const {
+    interrogative: _i, questionRole: _r, questionSpecifiers: _s, questionAnimate: _a, existential: _e,
+    ...rest
+  } = plan as Record<string, unknown>;
+  const clause = (c: unknown) => (c && typeof c === 'object' ? unasked(c) : c);
+  const coordination = rest['coordination'] as { clause?: object } | undefined;
+  return {
+    ...rest,
+    ...(rest['condition'] ? { condition: clause(rest['condition']) } : {}),
+    ...(coordination ? { coordination: { ...coordination, clause: clause(coordination.clause) } } : {}),
+  };
+}
+
+describe('the question and the existential are gated as the engine is', () => {
+  it('translates every state the walk reaches without a refusal', async () => {
+    process.env['SIGNI_DB_PATH'] = ':memory:';
+    const { lookupLexicalEntry } = await import('../../../backend/src/lexicon.ts');
+    await import('../../../backend/src/seed.ts');
+    const { translate } = await import('@signi/engine');
+    const unseeded = /\b(SAIL|LIGHT_WEIGHT)\b/;
+    const SEEDS = Number(process.env.SEEDS ?? 400);
+    const refusals: string[] = [];
+    let asked = 0;
+    for (let seed = 1; seed <= SEEDS; seed++) {
+      const state = reach(seed, 10 + (seed % 30));
+      for (const { plan } of workspaceToPlans(state.containers, state.links)) {
+        const json = JSON.stringify(plan);
+        // The panel translates a period once its subject has a head (see useTranslation).
+        const subject = plan.subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
+        if (!(subject?.conjuncts?.[0]?.concept ?? subject?.concept) || unseeded.test(json)) continue;
+        if (plan.interrogative || plan.questionRole || plan.existential) asked++;
+        try {
+          translate(plan as never, lookupLexicalEntry);
+        } catch (e) {
+          // Only a throw these constructs cause counts: the same plan without them must render. (An
+          // empty linked clause throws on its own, with or without them — not this test's business.)
+          if (!throws(() => translate(unasked(plan) as never, lookupLexicalEntry)))
+            refusals.push(`seed ${seed}: ${(e as Error).message}\n${json}`);
+        }
+      }
+    }
+    expect(refusals.slice(0, 3)).toEqual([]);
+    // The walk does reach the constructs it is here to check.
+    expect(asked).toBeGreaterThan(SEEDS / 10);
+  }, 120_000);
 });
 
 // A179. A passive set on a finite period stays when the period is made an infinitive, and the

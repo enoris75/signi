@@ -3188,6 +3188,36 @@ export const UI_STRINGS = defineUiStrings({
   // beside the question and the command — it "Proposizione enunciativa", fr "Phrase déclarative", de
   // "Aussagesatz", es "Oración enunciativa", ja 平叙文.
   'mood.statement': { plan: nameOf('STATEMENT'), format: NAME_FORMAT, fallback: 'Statement' },
+  // What `/ask` sets and the border's third mood toggle is named by (P09-E12 M5): the QUESTION, beside
+  // the statement and the command — it "Domanda", fr "Question", de "Frage", ja 質問.
+  'mood.question': { plan: nameOf('QUESTION'), format: NAME_FORMAT, fallback: 'Question' },
+  // The who / what chip on a marked subject or object ring (P09-E12 M6): the question itself, asked of
+  // a subject gap on ACT, the most general act — "Who acts?" / "What acts?", it "Chi agisce?" / "Che
+  // cosa agisce?", fr "Qui agit ?" / "Qu'est-ce qui agit ?", ja 「誰が行動しますか？」. The engine's own
+  // wh-question, so each language says its own question word the way it asks with it.
+  'question.who': {
+    plan: {
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'ACT' },
+      questionRole: 'subject',
+      questionAnimate: true,
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Who acts?',
+  },
+  'question.what': {
+    plan: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'ACT' }, questionRole: 'subject' } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'What acts?',
+  },
+  // The existential toggle on the subject's ring (P09-E12 M7): the engine's own existential of
+  // SOMETHING — "There is something", it "C'è qualcosa", fr "Il y a quelque chose", de "Es gibt
+  // etwas", es "Hay algo", pt "Há algo", ja 「何かがあります」.
+  'existential.toggle': {
+    plan: { subject: { concept: 'SOMETHING' }, verbPhrase: { verb: 'BE' }, existential: true } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'There is something',
+  },
   // What `/plain` sets: the POSITIVE_DEGREE, an adjective compared with nothing (it "Grado positivo", de
   // "Positiv", pt "Grau normal", ja 原級). A noun of its own: `degree.value.positive` cites the degree on
   // an adjective, where the positive adds nothing ("—"), and POSITIVE is the polarity (ja 肯定).
@@ -4186,6 +4216,15 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'This period is an infinitive phrase',
   },
+  'period.isQuestion': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'QUESTION', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a question',
+  },
   'action.turnOff': {
     plan: {
       ...commandOf('TURN_OFF'),
@@ -4222,6 +4261,15 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Transform this period into an infinitive phrase',
+  },
+  'action.makeQuestion': {
+    plan: {
+      ...commandOf('TRANSFORM'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: { objectPredicative: { phrase: { concept: 'QUESTION', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Transform this period into a question',
   },
 
   // What they say while *locked* — the period is in a conditional or a coordination, and a mood
@@ -4268,6 +4316,25 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Remove the condition or the coordination to transform this period into an infinitive phrase',
+  },
+  'action.unlinkForQuestion': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: {
+        conjuncts: [
+          { concept: 'CONDITION', definiteness: 'definite' },
+          { concept: 'COORDINATION', definiteness: 'definite' },
+        ],
+        conjunction: 'or',
+      },
+      purpose: {
+        verbPhrase: { verb: 'TRANSFORM' },
+        directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+        complements: { objectPredicative: { phrase: { concept: 'QUESTION', definiteness: 'indefinite' } } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the condition or the coordination to transform this period into a question',
   },
 
   // Where the second command of a coordination gets its (locked) choices from — the tooltip on

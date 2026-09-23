@@ -45,6 +45,9 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     toggleGender: () => {},
     toggleNegative: () => {},
     toggleCauseNegative: () => {},
+    toggleQuestion: () => {},
+    toggleQuestionAnimate: () => {},
+    toggleExistential: () => {},
     cycleTense: () => {},
     cycleAspect: () => {},
     cycleVoice: () => {},
@@ -304,6 +307,52 @@ describe('the hints for a scope', () => {
     expect(ids).not.toContain('noun.number');
     // Backwards cycles are real bindings, but listing them would double the line.
     expect(ids).not.toContain('verb.tense.back');
+  });
+});
+
+// The question's keys (P09-E12 M5–M7): Q marks the noun box a wh-question asks about and ⇧Q flips its
+// who / what; E makes the subject an existential's pivot; Q on the period is the third mood.
+describe('the question keys', () => {
+  it('marks the noun under the cursor, and flips who / what on the marked one', () => {
+    const marked: string[] = [];
+    expect(commandFor('q')).toBe('noun.question');
+    expect(commandFor('q', { slot: 'locative', nounKey: 'locative' })).toBe('noun.question');
+    KEYMAP.find((c) => c.id === 'noun.question')!.run(
+      ctx({ slot: 'directObject', nounKey: 'directObject', toggleQuestion: (which) => marked.push(which) }),
+    );
+    expect(marked).toEqual(['directObject']);
+    const shifted = resolveCommand(
+      KEYMAP,
+      boxScopeChain('noun'),
+      (spec) => matchesKeySpec(spec, { key: 'Q', shiftKey: true, ctrlKey: false, metaKey: false, altKey: false }, 'other'),
+      ctx(),
+    );
+    expect(shifted?.id).toBe('noun.question.animacy');
+  });
+
+  it('offers them only where their controls are', () => {
+    const none = { satellite: () => undefined };
+    expect(commandFor('q', none)).toBeUndefined();
+    expect(commandFor('e', none)).toBeUndefined();
+  });
+
+  it('makes the subject an existential, and no other noun', () => {
+    expect(commandFor('e')).toBe('subject.existential');
+    expect(commandFor('e', { slot: 'directObject', nounKey: 'directObject' })).toBeUndefined();
+  });
+
+  it('is the third mood on the period, locked as the other two are', () => {
+    const question = PERIOD_KEYMAP.find((c) => c.id === 'period.question')!;
+    expect(question.keys).toEqual(['Q']);
+    expect(question.labelKey).toBe('mood.question');
+    const locked = PERIOD_KEYMAP.filter((c) => ['period.command', 'period.infinitive', 'period.question'].includes(c.id));
+    expect(locked.map((c) => c.when?.({ moodLocked: true } as never))).toEqual([false, false, false]);
+  });
+
+  it('wears Q and E on the controls they press', () => {
+    expect(satelliteKey('directObjectQuestion', boxScopeChain('noun'))).toBe('Q');
+    expect(satelliteKey('subjectQuestionAnimate', boxScopeChain('noun'))).toBe('Shift+Q');
+    expect(satelliteKey('subjectExistential', boxScopeChain('noun'))).toBe('E');
   });
 });
 

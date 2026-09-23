@@ -202,6 +202,8 @@ describe('rawSatellites', () => {
         'directObjectRelative',
         'directObjectPossessor',
         'directObjectConjunct',
+        // The wh-question's mark (P09-E12 M6): SEE takes an object to ask about.
+        'directObjectQuestion',
       ]);
       const ungendered = satellite({ verb: SEE, directObject: CAT }, 'directObjectGender');
       expect(ungendered.available).toBe(false);
@@ -216,6 +218,7 @@ describe('rawSatellites', () => {
         'directObject',
         ...controls,
         'directObjectConjunct',
+        'directObjectQuestion',
       ]);
     });
 
@@ -294,6 +297,8 @@ describe('rawSatellites', () => {
         'locativeRelative',
         'locativePossessor',
         'locativeConjunct',
+        // GO licenses the locative, and *where* asks it in its plain relation (P09-E12 M6).
+        'locativeQuestion',
       ]);
     });
 
@@ -350,6 +355,7 @@ describe('rawSatellites', () => {
         ...controls,
         'causeConjunct',
         'causeNegative',
+        'causeQuestion',
       ]);
     });
 

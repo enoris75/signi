@@ -8,10 +8,13 @@ import { mood, PRIMARY, SUCCESS, TEXT_SECONDARY } from './fixtures.ts';
 const NAME: Record<Mood, string> = {
   imperative: 'Command',
   infinitive: 'Infinitive phrase',
+  question: 'Question',
 };
+// The question's accent, MUI's error.main (P09-E12 M5).
+const ERROR = 'rgb(211, 47, 47)';
 
 describe('MoodToggle', () => {
-  it.each(['imperative', 'infinitive'] as const)('flips the %s mood', (m) => {
+  it.each(['imperative', 'infinitive', 'question'] as const)('flips the %s mood', (m) => {
     const control = mood(false);
     renderWithProviders(<MoodToggle mood={m} control={control} />);
 
@@ -21,7 +24,7 @@ describe('MoodToggle', () => {
   });
 
   // Named by its mode, the toggle says whether it is on without changing its name.
-  it.each(['imperative', 'infinitive'] as const)('says whether the %s mood is on', (m) => {
+  it.each(['imperative', 'infinitive', 'question'] as const)('says whether the %s mood is on', (m) => {
     const { rerender } = renderWithProviders(<MoodToggle mood={m} control={mood(false)} />);
     expect(screen.getByRole('button', { name: NAME[m], pressed: false })).toBeInTheDocument();
 
@@ -54,6 +57,15 @@ describe('MoodToggle', () => {
       true,
       'Remove the condition or the coordination to transform this period into an infinitive phrase',
     ],
+    ['question', 'off', false, false, 'Transform this period into a question'],
+    ['question', 'on', true, false, 'This period is a question — turn it off'],
+    [
+      'question',
+      'locked by a relation',
+      false,
+      true,
+      'Remove the condition or the coordination to transform this period into a question',
+    ],
   ])('explains the %s toggle while it is %s', (m, _, active, disabled, tooltip) => {
     renderWithProviders(<MoodToggle mood={m} control={mood(active, disabled)} />);
 
@@ -80,6 +92,7 @@ describe('MoodToggle', () => {
   it.each<[Mood, string]>([
     ['imperative', SUCCESS],
     ['infinitive', PRIMARY],
+    ['question', ERROR],
   ])('lights the %s toggle in its colour while on', (m, colour) => {
     const { rerender } = renderWithProviders(<MoodToggle mood={m} control={mood(false)} />);
     expect(getComputedStyle(screen.getByRole('button')).color).toBe(TEXT_SECONDARY);

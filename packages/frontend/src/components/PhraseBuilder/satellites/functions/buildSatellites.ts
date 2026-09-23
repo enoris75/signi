@@ -12,10 +12,11 @@ export function buildSatellites(
   revealed: Record<string, boolean>,
   language: LanguageCode,
   t: UiStringLookup,
-  // The period governs a that-clause, its verb's object (P09-E12 D9) — see rawSatellites.
-  clauseObject = false,
+  // What the selection alone cannot tell: whether a conditional, a coordination or a subordinate
+  // link locks the period's mood, and whether it governs a that-clause (see rawSatellites).
+  clause: { moodLocked?: boolean; clauseObject?: boolean } = {},
 ): BuiltSatellites {
-  return resolveSatellites(rawSatellites(selection, language, t, clauseObject), {
+  return resolveSatellites(rawSatellites(selection, language, t, clause), {
     revealed,
     // A command or an infinitive citation takes the subject's place on the canvas.
     subjectDropped: Boolean(selection.imperative || selection.infinitive),

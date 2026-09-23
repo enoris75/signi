@@ -44,6 +44,10 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleCycleVoice', (c) => c.handleCycleVoice(), reducers.cycleVoice],
   ['handleSetImperativePerson', (c) => c.handleSetImperativePerson('2pl'), (p) => reducers.setImperativePerson(p, '2pl')],
   ['handleSetImperativeRegister', (c) => c.handleSetImperativeRegister('instruction'), (p) => reducers.setImperativeRegister(p, 'instruction')],
+  // The question's mark, its who / what and the existential (P09-E12 M6, M7).
+  ['handleToggleQuestion', (c) => c.handleToggleQuestion('directObject'), (p) => reducers.toggleQuestionRole(p, 'directObject')],
+  ['handleToggleQuestionAnimate', (c) => c.handleToggleQuestionAnimate(), reducers.toggleQuestionAnimate],
+  ['handleToggleExistential', (c) => c.handleToggleExistential(), reducers.toggleExistential],
   ['handleSelectSpecifier', (c) => c.handleSelectSpecifier('over'), (p) => reducers.setSpecifier(p, 'over', 'route')],
   ['handleSelectLocativeSpecifier', (c) => c.handleSelectLocativeSpecifier('under'), (p) => reducers.setSpecifier(p, 'under', 'locative')],
   ['handleSelectTemporalRelation', (c) => c.handleSelectTemporalRelation('ago'), (p) => reducers.setTemporalRelation(p, 'ago')],
