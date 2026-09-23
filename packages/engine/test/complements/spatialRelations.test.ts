@@ -43,16 +43,30 @@ describe('on — support, apart from over', () => {
     });
   });
 
-  test('a goal: the same word, and German takes the accusative of motion onto it', () => {
+  // P09-E21: English writes the goal "onto", as it writes `in`'s "into"; the other six are the
+  // word of the place, German telling the goal by its accusative and Japanese by its へ.
+  test('a goal: English "onto", German the accusative of motion onto it', () => {
     expect(toward('on', np('WALL'))).toEqual({
-      // No "onto": "jumps on the wall" already reads as the goal.
-      en: 'the cat jumps on the wall.',
+      en: 'the cat jumps onto the wall.',
       it: 'il gatto salta sul muro.',
       fr: 'le chat saute sur le mur.',
       de: 'der Kater springt auf die Wand.',
       es: 'el gato salta sobre la pared.',
       pt: 'o gato pula sobre a parede.',
       ja: '猫は壁の上へ跳びます。',
+    });
+  });
+
+  // The goal's "onto" is the direction's alone: the place where the jumping happens keeps "on".
+  test('the locative on is unchanged beside the goal', () => {
+    expect(at('on', np('WALL'), 'JUMP')).toEqual({
+      en: 'the cat jumps on the wall.',
+      it: 'il gatto salta sul muro.',
+      fr: 'le chat saute sur le mur.',
+      de: 'der Kater springt auf der Wand.',
+      es: 'el gato salta sobre la pared.',
+      pt: 'o gato pula sobre a parede.',
+      ja: '猫は壁の上で跳びます。',
     });
   });
 

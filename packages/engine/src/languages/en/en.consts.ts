@@ -126,14 +126,15 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
 
 /**
  * The same relations as the *goal* of a motion — a `direction` complement that names one. Only
- * containment differs from the map above, and it is exactly the word English keeps for it: "jumps
- * **into** the air" is where it ends up, "jumps **in** the air" is where the jumping happens. The
- * others double for both readings ("runs **behind** the house" is either), so they are taken as they
- * are. That includes `on`: "onto" exists, but "jumps **on** the table" already reads as the goal, so
- * it needs no override of its own (P09-E1). A direction naming no relation at all is not here: that is the plain goal, "to" (see
- * `PathSpecifier`).
+ * containment and support differ from the map above, and each is exactly the word English keeps for
+ * it: "jumps **into** the air" / "jumps **onto** the wall" is where it ends up, "jumps **in** the air"
+ * / "jumps **on** the wall" is where the jumping happens (P09-E21; E1 had left "onto" out as a goal
+ * "on" already reads as). The others double for both readings ("runs **behind** the house" is
+ * either), so they are taken as they are. The override reaches every verb, a placement one too: "puts
+ * the book **onto** the house". A direction naming no relation at all is not here: that is the plain
+ * goal, "to" (see `PathSpecifier`).
  */
-export const GOAL_PREP: Record<PathSpecifier, string> = { ...PATH_PREP, in: 'into' };
+export const GOAL_PREP: Record<PathSpecifier, string> = { ...PATH_PREP, in: 'into', on: 'onto' };
 
 // The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
 // English says "at home", not "in the home".

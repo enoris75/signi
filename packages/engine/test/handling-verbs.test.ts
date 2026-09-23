@@ -222,6 +222,25 @@ describe('the frames', () => {
     });
   });
 
+  // P09-E21: English's goal `on` is "onto" on every verb, a placement one too, as its goal `in` is
+  // "into"; the locative keeps "on". Japanese へ after 置く is its own follow-up (it wants に).
+  test('PUT: a goal on is "onto" in English, and the place "on"', () => {
+    const on = (type: 'direction' | 'locative') => sayAll(clause(the('MAN'), 'PUT', {
+      directObject: the('BOOK'),
+      complements: { [type]: { phrase: the('HOUSE'), specifiers: [{ kind: 'path' as const, value: 'on' as const }] } },
+    }));
+    expect(on('direction')).toEqual({
+      en: 'the man puts the book onto the house.',
+      it: "l'uomo mette il libro sulla casa.",
+      fr: "l'homme met le livre sur la maison.",
+      de: 'der Mann legt das Buch auf das Haus.',
+      es: 'el hombre pone el libro sobre la casa.',
+      pt: 'o homem põe o livro sobre a casa.',
+      ja: '男は家の上へ本を置きます。',
+    });
+    expect(on('locative').en).toBe('the man puts the book on the house.');
+  });
+
   test('GET: the source is a plain "da" in Italian, a verb with no goal (A228)', () => {
     expect(sayAll(clause(the('MAN'), 'GET', { directObject: the('BOOK'), complements: { source: { phrase: the('CHILD') } } }))).toEqual({
       en: 'the man gets the book from the child.', it: "l'uomo ottiene il libro dal bambino.", fr: "l'homme obtient le livre de l'enfant.",
