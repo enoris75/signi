@@ -138,6 +138,33 @@ export const IMPERFECTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = 
 export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
 
 /**
+ * The **temporal** subordinating conjunctions — *when, while, before, after* — which place the main
+ * event against the clause's in time and do not assert the clause (A251, A252). A future event under
+ * one is not said in the future everywhere: English and German say it in the present
+ * (`FUTURE_AS_PRESENT_LANGUAGES`), Spanish and Portuguese in the subjunctive. *Because* asserts its clause and keeps the future ("because the cat
+ * will eat", "porque el gato comerá").
+ */
+export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['when', 'while', 'before', 'after']);
+
+/**
+ * The languages that say a future event under a `TEMPORAL_CONJUNCTIONS` word in the **present**, and
+ * keep the future for the main clause (A251): "the man will run when the cat **eats**", "der Mann wird
+ * laufen, wenn der Kater **frisst**". Italian and French keep the future ("quando il gatto mangerà",
+ * "quand le chat mangera"), and Japanese has none to drop.
+ */
+export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', 'de']);
+
+/**
+ * The temporal conjunctions under which a `FUTURE_AS_PRESENT_LANGUAGES` language says the future
+ * event in the **perfect** rather than the present, the same rule one tense back: German *nachdem*
+ * ("der Mann wird laufen, nachdem der Kater **gefressen hat**"). English *after* keeps the present
+ * ("after the cat eats").
+ */
+export const FUTURE_AS_PERFECT: Readonly<Record<string, ReadonlySet<SubordinatingConjunction>>> = {
+  de: new Set(['after']),
+};
+
+/**
  * The languages whose subjunctive clause says a **past** event in the imperfect subjunctive rather
  * than the present one: "prima che il gatto mangiasse", "antes de que el gato comiera", "antes que o
  * gato comesse". French is not among them — its imperfect subjunctive is literary, and the spoken

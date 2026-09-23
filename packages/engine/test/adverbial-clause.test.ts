@@ -248,14 +248,14 @@ describe('known bugs: a past while clause takes the perfective (A250)', () => {
 // "Because" is not temporal and keeps its future in both ("because the cat will eat"). German
 // "nachdem" wants the perfect ("nachdem der Kater gefressen hat") and is left out of the pin.
 describe('known bugs: an English or German future temporal clause keeps "will" (A251)', () => {
-  test.fails('English: when, while, before and after take the present', () => {
+  test('English: when, while, before and after take the present', () => {
     expect(say(whileEats('future', 'when'), 'en')).toBe('the man will run when the cat eats.');
     expect(say(whileEats('future', 'while'), 'en')).toBe('the man will run while the cat eats.');
     expect(say(whileEats('future', 'before'), 'en')).toBe('the man will run before the cat eats.');
     expect(say(whileEats('future', 'after'), 'en')).toBe('the man will run after the cat eats.');
   });
 
-  test.fails('German: wenn, während and bevor take the present', () => {
+  test('German: wenn, während and bevor take the present', () => {
     expect(say(whileEats('future', 'when'), 'de')).toBe('der Mann wird laufen, wenn der Kater frisst.');
     expect(say(whileEats('future', 'while'), 'de')).toBe('der Mann wird laufen, während der Kater frisst.');
     expect(say(whileEats('future', 'before'), 'de')).toBe('der Mann wird laufen, bevor der Kater frisst.');
@@ -264,6 +264,37 @@ describe('known bugs: an English or German future temporal clause keeps "will" (
   test('regression: "because" keeps its future', () => {
     expect(say(whileEats('future', 'because'), 'en')).toBe('the man will run because the cat will eat.');
     expect(say(whileEats('future', 'because'), 'de')).toBe('der Mann wird laufen, weil der Kater fressen wird.');
+  });
+
+  // The same rule one tense back: the clause's event is over before the main one begins.
+  test('German "nachdem" takes the perfect, with the auxiliary its verb selects', () => {
+    expect(say(whileEats('future', 'after'), 'de')).toBe('der Mann wird laufen, nachdem der Kater gefressen hat.');
+    expect(say(runs('after', { verbPhrase: { verb: 'RUN', tense: 'future' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'RUN', tense: 'future' },
+    }), 'de')).toBe('der Mann wird laufen, nachdem der Kater gelaufen ist.');
+    expect(say(runs('after', { verbPhrase: { verb: 'RUN', tense: 'future' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future', negative: true }, directObject: np('FOOD', { definiteness: 'definite' }),
+    }), 'de')).toBe('der Mann wird laufen, nachdem der Kater das Essen nicht gefressen hat.');
+  });
+
+  test('the present agrees, negates and keeps a modal', () => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    expect(say(whileEats('future', 'when', true), 'en')).toBe('the man will run when the cat does not eat.');
+    expect(say(whileEats('future', 'when', true), 'de')).toBe('der Mann wird laufen, wenn der Kater nicht frisst.');
+    const cats = { subject: np('CAT', { number: 'plural' }), verbPhrase: { verb: 'EAT', tense: 'future' as const } };
+    expect(say(runs('while', future, cats), 'en')).toBe('the man will run while the cats eat.');
+    expect(say(runs('while', future, cats), 'de')).toBe('der Mann wird laufen, während die Kater fressen.');
+    const canEat = { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' as const, modals: ['CAN'] } };
+    expect(say(runs('when', future, canEat), 'en')).toBe('the man will run when the cat can eat.');
+    expect(say(runs('when', future, canEat), 'de')).toBe('der Mann wird laufen, wenn der Kater fressen kann.');
+  });
+
+  test('regression: Italian and French keep the future, "après que" too', () => {
+    expect(sayAll(whileEats('future', 'when'))).toMatchObject({
+      it: "l'uomo correrà quando il gatto mangerà.", fr: "l'homme courra quand le chat mangera.",
+    });
+    expect(say(whileEats('future', 'after'), 'fr')).toBe("l'homme courra après que le chat mangera.");
+    expect(say(whileEats('future', 'after'), 'it')).toBe("l'uomo correrà dopo che il gatto mangerà.");
   });
 });
 

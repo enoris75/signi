@@ -2,6 +2,7 @@ import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan 
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
+import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
 import { contentClauseMood } from './contentClauseMood.js';
 import { controlledSubject } from './controlledSubject.js';
@@ -178,13 +179,20 @@ export function resolvePhrase(
       : undefined,
     // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
     // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.
-    // Under *while* its past is the imperfect of an event in progress (A250, see `imperfectivePast`).
+    // Under *while* its past is the imperfect of an event in progress (A250, see `imperfectivePast`);
+    // under a temporal conjunction English and German say its future in the present (A251, see
+    // `adverbialClauseTense`). The mood is read off the tense the plan names.
     adverbialClause: plan.adverbialClause && verbPhrase
       ? {
           conjunction: plan.adverbialClause.conjunction,
           clause: imperfectivePast(
-            resolvePhrase(plan.adverbialClause.clause, language, lookup, adverbialClauseMood(
-              plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase.tense)),
+            resolvePhrase(
+              {
+                ...plan.adverbialClause.clause,
+                verbPhrase: adverbialClauseTense(plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase),
+              },
+              language, lookup, adverbialClauseMood(
+                plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase.tense)),
             plan.adverbialClause.conjunction, language),
         }
       : undefined,
