@@ -322,14 +322,28 @@ describe('known bugs: the Japanese essive drops an i- or た-adjective\'s degree
   const seesAs = (adjective: NounPhrase) =>
     sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective, specifiers: ESSIVE } } }));
 
-  test.fails('an i-adjective takes its degree word ahead of it', () => {
+  test('an i-adjective takes its degree word ahead of it', () => {
     expect(seesAs(np('BIG', { headDegree: 'more' })).ja).toBe('猫は家をもっと大きいとして見ます。');
     expect(seesAs(np('BIG', { headDegree: 'most' })).ja).toBe('猫は家を最も大きいとして見ます。');
     expect(seesAs(np('BIG', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい大きいとして見ます。');
   });
 
-  test.fails('so does a た-adjective', () => {
+  test('so does a た-adjective', () => {
     expect(seesAs(np('TIRED', { headDegree: 'more' })).ja).toBe('猫は家をもっと疲れたとして見ます。');
+  });
+
+  test('the た-adjective takes the other degrees too, and the degree word carries no furigana of its own', () => {
+    expect(seesAs(np('TIRED', { headDegree: 'most' })).ja).toBe('猫は家を最も疲れたとして見ます。');
+    expect(seesAs(np('TIRED', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい疲れたとして見ます。');
+    expect(furigana(clause(np('CAT'), 'SEE', {
+      directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('BIG', { headDegree: 'more' }), specifiers: ESSIVE } },
+    }))).toEqual(['ねこ', 'いえ', 'おおきい', 'みます']);
+  });
+
+  test('the lowered degrees still drop, as A232 ruled for the na-adjective', () => {
+    expect(seesAs(np('BIG', { headDegree: 'less' })).ja).toBe('猫は家を大きいとして見ます。');
+    expect(seesAs(np('BIG', { headDegree: 'least' })).ja).toBe('猫は家を大きいとして見ます。');
+    expect(seesAs(np('TIRED', { headDegree: 'less' })).ja).toBe('猫は家を疲れたとして見ます。');
   });
 
   test('regression: the positive, the na-adjective, the factitive and the other six', () => {

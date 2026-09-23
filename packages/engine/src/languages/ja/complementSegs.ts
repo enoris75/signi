@@ -159,15 +159,17 @@ export function complementSegs(
     const essiveAdj = type === 'objectPredicative' && c.phrase.conjuncts.length === 1 && lone?.head.forms['role'] === 'adjective'
       ? jaAdjClass(lone.head.forms['base'] ?? '', lone.head.forms['reading'])
       : undefined;
-    if (essiveAdj?.kind === 'na' && lone) {
-      // The stem takes its degree adverb ahead of it, as the factitive's does (もっと幸せとして,
-      // 最も茶色として, 同じくらい幸せとして — A232). Not the lowered two: それほど and 最も are
-      // negative-polarity there (see `JA_DEGREE`) and want a negated adjective, which the factitive
-      // spells ではなく and として has no counterpart for, so "less" and "least" still drop the degree.
+    // The lone adjective takes its degree adverb ahead of it, as the factitive's does (もっと幸せとして,
+    // 最も茶色として, 同じくらい幸せとして — A232), whatever its class: an i- or た-adjective as it stands
+    // takes it too (もっと大きいとして, もっと疲れたとして — A274). Not the lowered two: それほど and 最も
+    // are negative-polarity there (see `JA_DEGREE`) and want a negated adjective, which the factitive
+    // spells ではなく and として has no counterpart for, so "less" and "least" still drop the degree.
+    if (essiveAdj && lone) {
       const degree = isLoweredDegree(lone.head) ? '' : JA_DEGREE[adjDegree(lone.head)];
       if (degree) segs.push({ t: degree });
-      segs.push(wordSeg(essiveAdj.stem, essiveAdj.reading));
-    } else segs.push(...elSegs(c.phrase));
+    }
+    if (essiveAdj?.kind === 'na') segs.push(wordSeg(essiveAdj.stem, essiveAdj.reading));
+    else segs.push(...elSegs(c.phrase));
     // The relational noun sits between the place and its particle, for a path and a place alike:
     // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
     const spec = type === 'route' || type === 'locative'
