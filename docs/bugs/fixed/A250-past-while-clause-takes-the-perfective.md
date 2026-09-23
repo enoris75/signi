@@ -37,3 +37,20 @@ Pinned by `known bugs: a past while clause takes the perfective (A250)` in
 
 Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), adverbial
 clauses.
+
+## Resolved
+
+2026-09-23. `IMPERFECTIVE_CONJUNCTIONS` (*while*) and `IMPERFECT_PAST_LANGUAGES` (it, fr, es, pt) sit
+beside `SUBJUNCTIVE_CONJUNCTIONS` in
+[`translator.consts.ts`](../../../packages/engine/src/translator/translator.consts.ts), and the new
+[`imperfectivePast`](../../../packages/engine/src/translator/functions/imperfectivePast.ts), applied
+where [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) resolves
+the adverbial clause, reads a past indicative clause under such a conjunction as a state — its verb
+and its passive auxiliary — so each Romance engine's existing state-verb past (A130) gives the
+imperfect. The main clause, a past *when* and English, German and Japanese are unchanged.
+
+Guarded by the two formerly-failing tests in `known bugs: a past while clause takes the perfective
+(A250)` in [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts), plus
+new cases there for a past *when* in all four, a plural subject, an irregular stem (andava, allait,
+iba, ia) and a passive's auxiliary (era mangiato, était mangée, era comida), and by the unit test
+[imperfectivePast.test.ts](../../../packages/engine/src/translator/functions/imperfectivePast.test.ts).

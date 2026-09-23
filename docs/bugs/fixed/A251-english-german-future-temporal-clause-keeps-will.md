@@ -37,3 +37,22 @@ Pinned by `known bugs: an English or German future temporal clause keeps "will" 
 
 Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), adverbial
 clauses.
+
+## Resolved
+
+2026-09-23. `TEMPORAL_CONJUNCTIONS` (*when, while, before, after*), `FUTURE_AS_PRESENT_LANGUAGES`
+(en, de) and `FUTURE_AS_PERFECT` (de *nachdem*) sit beside `SUBJUNCTIVE_CONJUNCTIONS` in
+[`translator.consts.ts`](../../../packages/engine/src/translator/translator.consts.ts), and the new
+[`adverbialClauseTense`](../../../packages/engine/src/translator/functions/adverbialClauseTense.ts),
+applied where [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts)
+resolves the adverbial clause, turns a future temporal clause's tense to the present in English and
+German, and German *nachdem*'s to the perfect (present + resultative: "nachdem der Kater gefressen
+hat", "gelaufen ist"). A marked aspect keeps its own and only the tense moves. English *after* stays
+present; *because*, Italian, French and Japanese are unchanged. The mood is still read off the tense
+the plan names.
+
+Guarded by the two formerly-failing tests in `known bugs: an English or German future temporal clause
+keeps "will" (A251)` in [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts),
+plus new cases there for *nachdem* (with *haben* and *sein*, negated with an object), a negated,
+plural and modal clause, and Italian / French keeping the future (*après que le chat mangera*), and by
+the unit test [adverbialClauseTense.test.ts](../../../packages/engine/src/translator/functions/adverbialClauseTense.test.ts).

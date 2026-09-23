@@ -147,6 +147,10 @@ export interface ResolvedNounElement {
  * clause asserts nothing about a real referent. A past relative there takes `'subjunctive'`, the
  * imperfect subjunctive the protasis already uses ("que comiera").
  *
+ * `'futureSubjunctive'` is engine-internal too, and Portuguese: the mood of a future event under a
+ * temporal conjunction ("quando o gato comer", A252, see `adverbialClauseMood`). Spanish says the same
+ * clause in its `'presentSubjunctive'` ("cuando el gato coma").
+ *
  * `'infinitive'` is the subject-less, tenseless citation form a verb definition is phrased as
  * ("to consume food"; see PhrasePlan.infinitive). Like the imperative it occupies the finite/mood
  * slot — the subject is dropped and there is no tense/aspect/modal — but it is not a speech act,
@@ -154,7 +158,7 @@ export interface ResolvedNounElement {
  *
  * Each engine maps this onto its own conditional / subjunctive / imperative / infinitive forms.
  */
-export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'presentSubjunctive' | 'imperative' | 'infinitive';
+export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'presentSubjunctive' | 'futureSubjunctive' | 'imperative' | 'infinitive';
 
 /** A resolved verb phrase: the verb, negation flags, tense, aspect, voice, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {

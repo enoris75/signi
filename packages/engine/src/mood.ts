@@ -141,17 +141,42 @@ function subjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string
   }
 }
 
+// Portuguese 2nd person is você / vocês, agreeing as the 3rd (A108).
+const PT_FUT_SUBJ: Record<PN, string> = { '1sg': 'r', '2sg': 'r', '3sg': 'r', '1pl': 'rmos', '2pl': 'rem', '3pl': 'rem' };
+
 /**
- * The finite conditional (apodosis), imperfect-subjunctive (protasis) or present-subjunctive surface
- * for a Romance verb, or undefined when there is no mood to apply or the source stem is missing (the
- * caller then falls back to its ordinary conjugation). `pn` is the "1sg".."3pl" person-number key.
- * The present subjunctive is Romance-wide (see `presentSubjunctiveForm`).
+ * The Portuguese **future subjunctive** (A252): a future event under a temporal conjunction, "quando
+ * o gato **comer**". Built, as the imperfect subjunctive is, on the 3rd-plural preterite stem
+ * (`3pl_past` minus -ram), so every irregular preterite carries through: fizeram → fizer, tiveram →
+ * tiver, foram → for, vieram → vier, viram → vir, deram → der, puseram → puser, disseram → disser. A
+ * regular verb's comes out as its infinitive (comer, falar, partir).
+ *
+ * The stem vowel a hiatus marks in the preterite (saíram, destruíram) keeps its accent only where
+ * the stress stays on it, before -rem (saírem); before -r and -rmos it is unstressed or final and
+ * unmarked (sair, sairmos). A lexeme whose stored preterite is no preterite seeds its stem as
+ * `subjunctive_stem` (SHOULD's deve-), and reads it here too.
+ */
+function futureSubjunctiveForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string | undefined {
+  if (lang !== 'pt') return undefined;
+  const stem = verb.forms['subjunctive_stem'] ?? verb.forms['3pl_past']?.replace(/ram$/, '');
+  if (!stem) return undefined;
+  const ending = PT_FUT_SUBJ[pn];
+  return (ending === 'rem' ? stem : stem.replace(/í$/, 'i')) + ending;
+}
+
+/**
+ * The finite conditional (apodosis), imperfect-subjunctive (protasis), present-subjunctive or
+ * future-subjunctive surface for a Romance verb, or undefined when there is no mood to apply or the
+ * source stem is missing (the caller then falls back to its ordinary conjugation). `pn` is the
+ * "1sg".."3pl" person-number key. The present subjunctive is Romance-wide (see
+ * `presentSubjunctiveForm`); the future subjunctive is Portuguese (see `futureSubjunctiveForm`).
  */
 export function moodForm(lang: LanguageCode, verb: ConceptForms, pn: PN, mood: Mood | undefined): string | undefined {
   return onLemmaHead(verb, (v) => {
     if (mood === 'conditional') return conditionalForm(lang, v, pn);
     if (mood === 'subjunctive') return subjunctiveForm(lang, v, pn);
     if (mood === 'presentSubjunctive') return presentSubjunctiveForm(lang, v, pn);
+    if (mood === 'futureSubjunctive') return futureSubjunctiveForm(lang, v, pn);
     return undefined;
   });
 }

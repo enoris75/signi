@@ -187,14 +187,14 @@ const whileEats = (tense: 'past' | 'present' | 'future', conjunction: Subordinat
 // "mangiava", "mangeait", "comía", "comia". The main clause keeps its perfective (C06), and "when",
 // which can name a completed event, is right as it is.
 describe('known bugs: a past while clause takes the perfective (A250)', () => {
-  test.fails('the four Romance languages take the imperfect', () => {
+  test('the four Romance languages take the imperfect', () => {
     expect(sayAll(whileEats('past'))).toMatchObject({
       it: "l'uomo corse mentre il gatto mangiava.", fr: "l'homme courut pendant que le chat mangeait.",
       es: 'el hombre corrió mientras el gato comía.', pt: 'o homem correu enquanto o gato comia.',
     });
   });
 
-  test.fails('and so does a negated one', () => {
+  test('and so does a negated one', () => {
     expect(sayAll(whileEats('past', 'while', true))).toMatchObject({
       it: "l'uomo corse mentre il gatto non mangiava.", fr: "l'homme courut pendant que le chat ne mangeait pas.",
       es: 'el hombre corrió mientras el gato no comía.', pt: 'o homem correu enquanto o gato não comia.',
@@ -210,6 +210,36 @@ describe('known bugs: a past while clause takes the perfective (A250)', () => {
       it: "l'uomo corse quando il gatto mangiò.", es: 'el hombre corrió cuando el gato comió.',
     });
   });
+
+  test('a past "when" keeps the perfective in all four, and the main clause keeps its own', () => {
+    expect(sayAll(whileEats('past', 'when'))).toMatchObject({
+      it: "l'uomo corse quando il gatto mangiò.", fr: "l'homme courut quand le chat mangea.",
+      es: 'el hombre corrió cuando el gato comió.', pt: 'o homem correu quando o gato comeu.',
+    });
+  });
+
+  test('the imperfect agrees with a plural subject and takes an irregular stem', () => {
+    const past = { verbPhrase: { verb: 'RUN', tense: 'past' as const } };
+    expect(sayAll(runs('while', past, { subject: np('CAT', { number: 'plural' }), verbPhrase: { verb: 'EAT', tense: 'past' } }))).toMatchObject({
+      it: "l'uomo corse mentre i gatti mangiavano.", fr: "l'homme courut pendant que les chats mangeaient.",
+      es: 'el hombre corrió mientras los gatos comían.', pt: 'o homem correu enquanto os gatos comiam.',
+    });
+    expect(sayAll(runs('while', past, { subject: np('DOG'), verbPhrase: { verb: 'GO', tense: 'past' } }))).toMatchObject({
+      it: "l'uomo corse mentre il cane andava.", fr: "l'homme courut pendant que le chien allait.",
+      es: 'el hombre corrió mientras el perro iba.', pt: 'o homem correu enquanto o cão ia.',
+    });
+  });
+
+  // The passive auxiliary takes over the finite slot, so it is the one in the imperfect.
+  test('a passive past while clause puts its auxiliary in the imperfect', () => {
+    expect(sayAll(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past', voice: 'passive' }, directObject: np('FOOD', { definiteness: 'definite' }),
+    }))).toMatchObject({
+      it: "l'uomo corse mentre il cibo era mangiato dal gatto.",
+      fr: "l'homme courut pendant que la nourriture était mangée par le chat.",
+      pt: 'o homem correu enquanto a comida era comida pelo gato.',
+    });
+  });
 });
 
 // A251. English and German write a future temporal clause with the future auxiliary: "when the cat
@@ -218,14 +248,14 @@ describe('known bugs: a past while clause takes the perfective (A250)', () => {
 // "Because" is not temporal and keeps its future in both ("because the cat will eat"). German
 // "nachdem" wants the perfect ("nachdem der Kater gefressen hat") and is left out of the pin.
 describe('known bugs: an English or German future temporal clause keeps "will" (A251)', () => {
-  test.fails('English: when, while, before and after take the present', () => {
+  test('English: when, while, before and after take the present', () => {
     expect(say(whileEats('future', 'when'), 'en')).toBe('the man will run when the cat eats.');
     expect(say(whileEats('future', 'while'), 'en')).toBe('the man will run while the cat eats.');
     expect(say(whileEats('future', 'before'), 'en')).toBe('the man will run before the cat eats.');
     expect(say(whileEats('future', 'after'), 'en')).toBe('the man will run after the cat eats.');
   });
 
-  test.fails('German: wenn, während and bevor take the present', () => {
+  test('German: wenn, während and bevor take the present', () => {
     expect(say(whileEats('future', 'when'), 'de')).toBe('der Mann wird laufen, wenn der Kater frisst.');
     expect(say(whileEats('future', 'while'), 'de')).toBe('der Mann wird laufen, während der Kater frisst.');
     expect(say(whileEats('future', 'before'), 'de')).toBe('der Mann wird laufen, bevor der Kater frisst.');
@@ -235,6 +265,37 @@ describe('known bugs: an English or German future temporal clause keeps "will" (
     expect(say(whileEats('future', 'because'), 'en')).toBe('the man will run because the cat will eat.');
     expect(say(whileEats('future', 'because'), 'de')).toBe('der Mann wird laufen, weil der Kater fressen wird.');
   });
+
+  // The same rule one tense back: the clause's event is over before the main one begins.
+  test('German "nachdem" takes the perfect, with the auxiliary its verb selects', () => {
+    expect(say(whileEats('future', 'after'), 'de')).toBe('der Mann wird laufen, nachdem der Kater gefressen hat.');
+    expect(say(runs('after', { verbPhrase: { verb: 'RUN', tense: 'future' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'RUN', tense: 'future' },
+    }), 'de')).toBe('der Mann wird laufen, nachdem der Kater gelaufen ist.');
+    expect(say(runs('after', { verbPhrase: { verb: 'RUN', tense: 'future' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future', negative: true }, directObject: np('FOOD', { definiteness: 'definite' }),
+    }), 'de')).toBe('der Mann wird laufen, nachdem der Kater das Essen nicht gefressen hat.');
+  });
+
+  test('the present agrees, negates and keeps a modal', () => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    expect(say(whileEats('future', 'when', true), 'en')).toBe('the man will run when the cat does not eat.');
+    expect(say(whileEats('future', 'when', true), 'de')).toBe('der Mann wird laufen, wenn der Kater nicht frisst.');
+    const cats = { subject: np('CAT', { number: 'plural' }), verbPhrase: { verb: 'EAT', tense: 'future' as const } };
+    expect(say(runs('while', future, cats), 'en')).toBe('the man will run while the cats eat.');
+    expect(say(runs('while', future, cats), 'de')).toBe('der Mann wird laufen, während die Kater fressen.');
+    const canEat = { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' as const, modals: ['CAN'] } };
+    expect(say(runs('when', future, canEat), 'en')).toBe('the man will run when the cat can eat.');
+    expect(say(runs('when', future, canEat), 'de')).toBe('der Mann wird laufen, wenn der Kater fressen kann.');
+  });
+
+  test('regression: Italian and French keep the future, "après que" too', () => {
+    expect(sayAll(whileEats('future', 'when'))).toMatchObject({
+      it: "l'uomo correrà quando il gatto mangerà.", fr: "l'homme courra quand le chat mangera.",
+    });
+    expect(say(whileEats('future', 'after'), 'fr')).toBe("l'homme courra après que le chat mangera.");
+    expect(say(whileEats('future', 'after'), 'it')).toBe("l'uomo correrà dopo che il gatto mangerà.");
+  });
 });
 
 // A252. Spanish and Portuguese write a future temporal clause in the future indicative: "cuando el
@@ -243,13 +304,13 @@ describe('known bugs: an English or German future temporal clause keeps "will" (
 // subjunctive ("quando o gato comer"), which the engine has no paradigm for yet. "Before" already
 // governs the subjunctive and is right; Italian and French keep the future and are right too.
 describe('known bugs: an Iberian future temporal clause takes the future indicative (A252)', () => {
-  test.fails('Spanish: cuando, mientras and después de que take the present subjunctive', () => {
+  test('Spanish: cuando, mientras and después de que take the present subjunctive', () => {
     expect(say(whileEats('future', 'when'), 'es')).toBe('el hombre correrá cuando el gato coma.');
     expect(say(whileEats('future', 'while'), 'es')).toBe('el hombre correrá mientras el gato coma.');
     expect(say(whileEats('future', 'after'), 'es')).toBe('el hombre correrá después de que el gato coma.');
   });
 
-  test.fails('Portuguese: quando, enquanto and depois que take the future subjunctive', () => {
+  test('Portuguese: quando, enquanto and depois que take the future subjunctive', () => {
     expect(say(whileEats('future', 'when'), 'pt')).toBe('o homem correrá quando o gato comer.');
     expect(say(whileEats('future', 'while'), 'pt')).toBe('o homem correrá enquanto o gato comer.');
     expect(say(whileEats('future', 'after'), 'pt')).toBe('o homem correrá depois que o gato comer.');
@@ -262,5 +323,63 @@ describe('known bugs: an Iberian future temporal clause takes the future indicat
       it: "l'uomo correrà quando il gatto mangerà.", fr: "l'homme courra quand le chat mangera.",
     });
     expect(say(whileEats('future', 'because'), 'es')).toBe('el hombre correrá porque el gato comerá.');
+  });
+
+  test('regression: Portuguese "because" keeps the future', () => {
+    expect(say(whileEats('future', 'because'), 'pt')).toBe('o homem correrá porque o gato comerá.');
+  });
+
+  // Built on the 3rd-plural preterite stem, so the irregular preterites carry through.
+  test.each<[string, string, string]>([
+    ['BE', 'for', 'forem'], ['GO', 'for', 'forem'], ['DO', 'fizer', 'fizerem'], ['HAVE', 'tiver', 'tiverem'],
+    ['SAY', 'disser', 'disserem'], ['SEE', 'vir', 'virem'], ['COME', 'vier', 'vierem'], ['GIVE', 'der', 'derem'],
+    ['PUT', 'puser', 'puserem'], ['BRING', 'trouxer', 'trouxerem'], ['KNOW', 'souber', 'souberem'],
+    ['LEAVE', 'sair', 'saírem'], ['DESTROY', 'destruir', 'destruírem'], ['READ', 'ler', 'lerem'],
+  ])('the Portuguese future subjunctive of %s is "%s" / "%s"', (verb, singular, plural) => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    expect(say(runs('when', future, { subject: np('CAT'), verbPhrase: { verb, tense: 'future' } }), 'pt'))
+      .toBe(`o homem correrá quando o gato ${singular}.`);
+    expect(say(runs('when', future, { subject: np('CAT', { number: 'plural' }), verbPhrase: { verb, tense: 'future' } }), 'pt'))
+      .toBe(`o homem correrá quando os gatos ${plural}.`);
+  });
+
+  test('the Spanish present subjunctive takes its irregular stems', () => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    const when = (verb: string) => say(runs('when', future, { subject: np('CAT'), verbPhrase: { verb, tense: 'future' } }), 'es');
+    expect(when('DO')).toBe('el hombre correrá cuando el gato haga.');
+    expect(when('HAVE')).toBe('el hombre correrá cuando el gato tenga.');
+    expect(when('GO')).toBe('el hombre correrá cuando el gato vaya.');
+    expect(when('BE')).toBe('el hombre correrá cuando el gato sea.');
+  });
+
+  test('a 1st plural, a negation, a clitic, a modal, a reflexive and a passive', () => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    const clause = (extra: Partial<NonNullable<PhrasePlan['contentSubject']>>, verbPhrase: PhrasePlan['verbPhrase']) =>
+      runs('when', future, { subject: np('CAT'), verbPhrase: { ...verbPhrase!, tense: 'future' }, ...extra });
+    expect(say(clause({ subject: np('FIRST_PERSON', { number: 'plural' }) }, { verb: 'LEAVE' }), 'pt')).toBe('o homem correrá quando sairmos.');
+    expect(say(clause({ subject: np('FIRST_PERSON', { number: 'plural' }) }, { verb: 'EAT' }), 'pt')).toBe('o homem correrá quando comermos.');
+    const negated = clause({ directObject: np('FOOD', { definiteness: 'definite' }) }, { verb: 'EAT', negative: true });
+    expect(say(negated, 'pt')).toBe('o homem correrá quando o gato não comer a comida.');
+    expect(say(negated, 'es')).toBe('el hombre correrá cuando el gato no coma la comida.');
+    const sees = clause({ directObject: np('THIRD_PERSON', { gender: 'masc' }) }, { verb: 'SEE' });
+    expect(say(sees, 'pt')).toBe('o homem correrá quando o gato o vir.');
+    expect(say(sees, 'es')).toBe('el hombre correrá cuando el gato lo vea.');
+    expect(say(clause({}, { verb: 'EAT', modals: ['CAN'] }), 'pt')).toBe('o homem correrá quando o gato puder comer.');
+    expect(say(clause({}, { verb: 'EAT', modals: ['MUST'] }), 'es')).toBe('el hombre correrá cuando el gato deba comer.');
+    expect(say(clause({}, { verb: 'BECOME' }), 'pt')).toBe('o homem correrá quando o gato se tornar.');
+    const passive = clause({ directObject: np('FOOD', { definiteness: 'definite' }) }, { verb: 'EAT', voice: 'passive' });
+    expect(say(passive, 'pt')).toBe('o homem correrá quando a comida for comida pelo gato.');
+    expect(say(passive, 'es')).toBe('el hombre correrá cuando la comida sea comida por el gato.');
+  });
+
+  // The aspect auxiliaries take the mood: estiver / esté, tiver / haya.
+  test('a marked aspect puts its auxiliary in the subjunctive', () => {
+    const future = { verbPhrase: { verb: 'RUN', tense: 'future' as const } };
+    const eating = { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' as const, aspect: 'progressive' as const } };
+    expect(say(runs('while', future, eating), 'pt')).toBe('o homem correrá enquanto o gato estiver comendo.');
+    expect(say(runs('while', future, eating), 'es')).toBe('el hombre correrá mientras el gato esté comiendo.');
+    const eaten = { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' as const, aspect: 'resultative' as const } };
+    expect(say(runs('after', future, eaten), 'pt')).toBe('o homem correrá depois que o gato tiver comido.');
+    expect(say(runs('after', future, eaten), 'es')).toBe('el hombre correrá después de que el gato haya comido.');
   });
 });

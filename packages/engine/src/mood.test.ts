@@ -160,6 +160,28 @@ describe('moodForm', () => {
   });
 });
 
+// A252: a future event under a temporal conjunction, "quando o gato comer".
+describe('moodForm: the Portuguese future subjunctive', () => {
+  const persons = ['1sg', '2sg', '3sg', '1pl', '2pl', '3pl'] as const;
+  const paradigm = (v: ReturnType<typeof verb>) => persons.map((pn) => moodForm('pt', v, pn, 'futureSubjunctive'));
+
+  test('it is built on the 3rd-plural preterite stem, the 2nd person agreeing as the 3rd (você)', () => {
+    expect(paradigm(verb('EAT', { base: 'comer', '3pl_past': 'comeram' }))).toEqual(['comer', 'comer', 'comer', 'comermos', 'comerem', 'comerem']);
+    expect(paradigm(verb('DO', { base: 'fazer', '3pl_past': 'fizeram' }))).toEqual(['fizer', 'fizer', 'fizer', 'fizermos', 'fizerem', 'fizerem']);
+    expect(paradigm(verb('BE', { base: 'ser', '3pl_past': 'foram' }))).toEqual(['for', 'for', 'for', 'formos', 'forem', 'forem']);
+  });
+
+  test('a hiatus accent stays only where the stress does, before -rem', () => {
+    expect(paradigm(verb('LEAVE', { base: 'sair', '3pl_past': 'saíram' }))).toEqual(['sair', 'sair', 'sair', 'sairmos', 'saírem', 'saírem']);
+  });
+
+  test('a seeded subjunctive stem wins, and without a stem, or outside Portuguese, there is none', () => {
+    expect(moodForm('pt', verb('SHOULD', { base: 'dever', subjunctive_stem: 'deve', '3pl_past': 'teriam devido' }), '3sg', 'futureSubjunctive')).toBe('dever');
+    expect(moodForm('pt', verb('EAT', { base: 'comer' }), '3sg', 'futureSubjunctive')).toBeUndefined();
+    expect(moodForm('es', verb('EAT', { base: 'comer', '3pl_past': 'comieron' }), '3sg', 'futureSubjunctive')).toBeUndefined();
+  });
+});
+
 // A170: the relative under a negated antecedent reads the present subjunctive in any person, not
 // only the imperative's three. The 3rd persons keep the stressed stem; only 1pl / 2pl take the
 // unstressed one.
