@@ -31,15 +31,19 @@ export interface ContentClauseTense {
  *   `FUTURE_IN_PAST_PERFECT_LANGUAGES`).
  *
  * A clause already in the past, or in the resultative, is anterior to its governor, not simultaneous
- * with it, and is left alone: its shift would be the pluperfect. German's *dass* clause keeps its own
- * tense and Japanese's is relative already, so neither is among the languages.
+ * with it, and takes the pluperfect where it can (A263, see `anteriorToPast`). German's *dass* clause
+ * keeps its own tense and Japanese's is relative already, so neither is among the languages.
  *
  * Under a governor that is not past, a **past** clause in the present subjunctive — which every Romance
  * engine builds from the stored present, whatever the tense — takes the perfect subjunctive instead
  * (A260): the aspect auxiliary in the present subjunctive and the participle, "non crede che il gatto
  * **abbia corso**", "ne croit pas que le chat **ait couru**", "no cree que el gato **haya corrido**",
  * "não acredita que o gato **tenha corrido**". A future one keeps the present subjunctive, which reads
- * as future in all four ("no cree que el gato corra"), and an indicative clause its own past.
+ * as future in all four ("no cree que el gato corra"), and an indicative clause its own past. A past
+ * **progressive** is imperfective, not a completed event, so its auxiliary takes the imperfect
+ * subjunctive instead (A262), the tense it has under a past governor: "non crede che il gatto **stesse**
+ * correndo", "no cree que el gato **estuviera** corriendo", "não acredita que o gato **estivesse**
+ * correndo". French, whose imperfect subjunctive is literary, is left as it was.
  */
 export function contentClauseTense(
   governorTense: Tense | undefined,
@@ -52,13 +56,18 @@ export function contentClauseTense(
   const tense = verbPhrase.tense ?? 'present';
   const neutral = (verbPhrase.aspect ?? 'neutral') === 'neutral';
   if (governorTense !== 'past') {
+    if (mood !== 'presentSubjunctive' || tense !== 'past') return unchanged;
     // A past clause in the present subjunctive is the perfect subjunctive (A260).
-    return mood === 'presentSubjunctive' && tense === 'past' && neutral
-      ? { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present', aspect: 'resultative' } }
-      : unchanged;
+    if (neutral) return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present', aspect: 'resultative' } };
+    // A past progressive is imperfective: its auxiliary takes the imperfect subjunctive (A262).
+    if (verbPhrase.aspect === 'progressive' && PAST_SUBJUNCTIVE_LANGUAGES.has(language)) {
+      return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present' }, mood: 'subjunctive' };
+    }
+    return unchanged;
   }
   if (!SEQUENCE_OF_TENSES_LANGUAGES.has(language)) return unchanged;
-  if (tense === 'past' || (verbPhrase.aspect ?? 'neutral') === 'resultative') return unchanged;
+  const resultative = verbPhrase.aspect === 'resultative';
+  if (resultative || tense === 'past') return anteriorToPast(language, mood, verbPhrase, tense, neutral, unchanged);
   if (mood === 'presentSubjunctive') {
     return PAST_SUBJUNCTIVE_LANGUAGES.has(language) ? { ...unchanged, mood: 'subjunctive' } : unchanged;
   }
@@ -72,4 +81,34 @@ export function contentClauseTense(
     };
   }
   return { verbPhrase: { ...verbPhrase, tense: 'past' }, mood, imperfect: IMPERFECT_PAST_LANGUAGES.has(language) };
+}
+
+/**
+ * A clause **anterior** to a past governor — a past-neutral or a present-resultative one — is the
+ * pluperfect (A263): the aspect auxiliary in the past plus the participle. In the indicative that is
+ * the resultative in the past, "said that the cat **had run**", "disse che il gatto **aveva corso**",
+ * "dijo que el gato **había corrido**"; in the subjunctive it is the resultative in the imperfect
+ * subjunctive, "non credeva che il gatto **avesse corso**", "no creía que el gato **hubiera corrido**".
+ * French keeps its spoken perfect subjunctive ("ne croyait pas que le chat **ait couru**"), as it keeps
+ * its present one for a simultaneous clause. A plain past **indicative** clause is left alone ("said
+ * that the cat ran", "disse che il gatto corse" are grammatical), and so is any other aspect or tense.
+ */
+function anteriorToPast(
+  language: string,
+  mood: Mood | undefined,
+  verbPhrase: VerbPhrase,
+  tense: Tense,
+  neutral: boolean,
+  unchanged: ContentClauseTense,
+): ContentClauseTense {
+  const pastNeutral = tense === 'past' && neutral;
+  const presentResultative = tense === 'present' && verbPhrase.aspect === 'resultative';
+  if (mood === 'presentSubjunctive' && (pastNeutral || presentResultative)) {
+    const perfect: VerbPhrase = { ...verbPhrase, tense: 'present', aspect: 'resultative' };
+    return { ...unchanged, verbPhrase: perfect, mood: PAST_SUBJUNCTIVE_LANGUAGES.has(language) ? 'subjunctive' : mood };
+  }
+  if (mood === undefined && presentResultative) {
+    return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'past' } };
+  }
+  return unchanged;
 }

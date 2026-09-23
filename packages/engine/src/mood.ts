@@ -467,6 +467,8 @@ const IT_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
   HAVE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' }, // avere (1sg "ho")
   // The resultative's auxiliary (it.consts `AVERE_AUX`), for the perfect subjunctive "abbia corso" (A260).
   AVERE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' },
+  // The progressive's auxiliary (it.consts `STARE_AUX`), for "stia correndo" (A261).
+  STARE: { '1sg': 'stia', '2sg': 'stia', '3sg': 'stia', '1pl': 'stiamo', '2pl': 'stiate', '3pl': 'stiano' },
   MUST: { '1sg': 'debba', '2sg': 'debba', '3sg': 'debba', '1pl': 'dobbiamo', '2pl': 'dobbiate', '3pl': 'debbano' }, // dovere
 };
 

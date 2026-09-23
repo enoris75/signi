@@ -36,7 +36,7 @@ describe('contentClauseTense', () => {
       .toEqual(runs({ tense: 'present', aspect: 'progressive' }));
   });
 
-  test('unchanged: a present governor, German and Japanese, a past or resultative clause', () => {
+  test('unchanged: a present governor, German and Japanese, a past indicative clause', () => {
     const present = runs();
     for (const governor of [undefined, 'present', 'future'] as const) {
       expect(contentClauseTense(governor, 'it', undefined, present)).toEqual({ verbPhrase: present, mood: undefined, imperfect: false });
@@ -45,10 +45,29 @@ describe('contentClauseTense', () => {
       expect(contentClauseTense('past', language, undefined, present).verbPhrase).toBe(present);
     }
     const past = runs({ tense: 'past' });
-    expect(contentClauseTense('past', 'es', 'presentSubjunctive', past)).toEqual({ verbPhrase: past, mood: 'presentSubjunctive', imperfect: false });
-    const resultative = runs({ aspect: 'resultative' });
-    expect(contentClauseTense('past', 'en', undefined, resultative).verbPhrase).toBe(resultative);
+    expect(contentClauseTense('past', 'es', undefined, past)).toEqual({ verbPhrase: past, mood: undefined, imperfect: false });
     expect(contentClauseTense('past', 'en', undefined, undefined).verbPhrase).toBeUndefined();
+  });
+
+  test('a clause anterior to a past governor is the pluperfect, the perfect subjunctive in French (A263)', () => {
+    const pluperfectSubjunctive = { verbPhrase: runs({ tense: 'present', aspect: 'resultative' }), mood: 'subjunctive', imperfect: false };
+    for (const language of ['it', 'es', 'pt']) {
+      expect(contentClauseTense('past', language, 'presentSubjunctive', runs({ tense: 'past' }))).toEqual(pluperfectSubjunctive);
+      expect(contentClauseTense('past', language, 'presentSubjunctive', runs({ aspect: 'resultative' }))).toEqual(pluperfectSubjunctive);
+    }
+    expect(contentClauseTense('past', 'fr', 'presentSubjunctive', runs({ tense: 'past' }))).toEqual({
+      verbPhrase: runs({ tense: 'present', aspect: 'resultative' }), mood: 'presentSubjunctive', imperfect: false,
+    });
+    for (const language of ['en', 'it', 'fr', 'es', 'pt']) {
+      expect(contentClauseTense('past', language, undefined, runs({ aspect: 'resultative' }))).toEqual({
+        verbPhrase: runs({ aspect: 'resultative', tense: 'past' }), mood: undefined, imperfect: false,
+      });
+    }
+    // A pluperfect already, and a past progressive, are left alone.
+    const pluperfect = runs({ tense: 'past', aspect: 'resultative' });
+    expect(contentClauseTense('past', 'en', undefined, pluperfect).verbPhrase).toBe(pluperfect);
+    const progressive = runs({ tense: 'past', aspect: 'progressive' });
+    expect(contentClauseTense('past', 'it', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
   });
 
   test('under a governor that is not past, a past subjunctive clause is the perfect subjunctive (A260)', () => {
@@ -62,7 +81,18 @@ describe('contentClauseTense', () => {
     expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', future).verbPhrase).toBe(future);
     const past = runs({ tense: 'past' });
     expect(contentClauseTense(undefined, 'it', undefined, past).verbPhrase).toBe(past);
+    const prospective = runs({ tense: 'past', aspect: 'prospective' });
+    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', prospective).verbPhrase).toBe(prospective);
+  });
+
+  test('under a governor that is not past, a past progressive takes the imperfect subjunctive, except in French (A262)', () => {
     const progressive = runs({ tense: 'past', aspect: 'progressive' });
-    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    for (const language of ['it', 'es', 'pt']) {
+      expect(contentClauseTense(undefined, language, 'presentSubjunctive', progressive)).toEqual({
+        verbPhrase: runs({ tense: 'present', aspect: 'progressive' }), mood: 'subjunctive', imperfect: false,
+      });
+    }
+    expect(contentClauseTense(undefined, 'fr', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    expect(contentClauseTense(undefined, 'it', undefined, progressive).verbPhrase).toBe(progressive);
   });
 });

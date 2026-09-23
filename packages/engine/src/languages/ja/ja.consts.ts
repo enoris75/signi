@@ -220,14 +220,16 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * takes whatever its own tense is — 後で follows the plain past (食べた後で) and 前に the non-past
  * (食べる前に), since each says the order of the two events itself — and `progressive` puts it in the
  * 〜ている form that says a stretch of time, the one 間に measures (食べている間に), in the non-past a
- * clause simultaneous with its main one takes (猫が食べている間に走りました).
+ * clause simultaneous with its main one takes (猫が食べている間に走りました). `plain` clears a resultative
+ * aspect as well: the order of the events is what 後で and 前に say, so a completed event before or after
+ * another is the plain one (走る前に, 走った後で, never 走った前に or 走っていた後で, A264).
  */
-export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true }> = {
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true }> = {
   when: { word: '時に' },
   while: { word: '間に', tense: 'present', progressive: true },
   because: { word: 'ので' },
-  after: { word: '後で', tense: 'past' },
-  before: { word: '前に', tense: 'present' },
+  after: { word: '後で', tense: 'past', plain: true },
+  before: { word: '前に', tense: 'present', plain: true },
 };
 
 /**

@@ -449,14 +449,28 @@ describe('known bugs: a Japanese while clause puts a modal\'s verb in the progre
 describe('known bugs: a Japanese resultative under 前に or 後で keeps its own form (A264)', () => {
   const resultative = { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'resultative' as const } };
 
-  test.fails('前に takes the non-past: 猫が走る前に', () => {
+  test('前に takes the non-past: 猫が走る前に', () => {
     expect(say(runs('before', {}, resultative), 'ja')).toBe('男は猫が走る前に走ります。');
     expect(say(runs('before', { verbPhrase: { verb: 'RUN', tense: 'past' } }, {
       ...resultative, verbPhrase: { ...resultative.verbPhrase, tense: 'past' },
     }), 'ja')).toBe('男は猫が走る前に走りました。');
   });
 
-  test.fails('後で takes the plain past: 猫が走った後で', () => {
+  test('後で takes the plain past: 猫が走った後で', () => {
     expect(say(runs('after', {}, resultative), 'ja')).toBe('男は猫が走った後で走ります。');
+  });
+
+  test('under a past main clause, and with an object: 猫が食べ物を食べた後で走りました', () => {
+    expect(say(runs('after', { verbPhrase: { verb: 'RUN', tense: 'past' } }, resultative), 'ja')).toBe('男は猫が走った後で走りました。');
+    const eaten = { subject: np('CAT'), verbPhrase: { verb: 'EAT', aspect: 'resultative' as const }, directObject: np('FOOD') };
+    expect(say(runs('before', {}, eaten), 'ja')).toBe('男は猫が食べ物を食べる前に走ります。');
+    expect(say(runs('after', {}, eaten), 'ja')).toBe('男は猫が食べ物を食べた後で走ります。');
+  });
+
+  test('regression: the resultative under when, and the European languages, keep it', () => {
+    expect(say(runs('when', {}, resultative), 'ja')).toBe('男は猫が走った時に走ります。');
+    expect(sayAll(runs('before', {}, resultative))).toMatchObject({
+      en: 'the man runs before the cat has run.', it: "l'uomo corre prima che il gatto abbia corso.",
+    });
   });
 });

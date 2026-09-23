@@ -33,3 +33,20 @@ Pinned by `known bugs: a past progressive in a subjunctive clause drops its past
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found landing A254–A260, from a lead the A254/A260 lane reported.
+
+## Resolved
+
+2026-09-23. [`contentClauseTense`](../../../packages/engine/src/translator/functions/contentClauseTense.ts)
+now turns a **past progressive** clause in the `presentSubjunctive` under a governor that is not past
+into the present progressive in the imperfect subjunctive (`'subjunctive'`), in the
+`PAST_SUBJUNCTIVE_LANGUAGES` (Italian, Spanish, Portuguese) — the shape A254 already gives a
+progressive under a past governor: `stesse correndo`, `estuviera corriendo`, `estivesse correndo`.
+**French is ruled out** and left as it was (`ne croit pas que le chat soit en train de courir`,
+unpinned); a past prospective is left as it was too.
+
+Guarded by the formerly-`.fails` test and two new ones in the
+`known bugs: a past progressive in a subjunctive clause drops its past (A262)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (the plural, an
+evaluative predicate, and an indicative clause keeping its imperfect progressive), and the A262 case
+in [contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts),
+whose A260 case now checks a past prospective where it checked the past progressive.

@@ -38,3 +38,26 @@ Pinned by `known bugs: a clause anterior to a past governor takes no pluperfect 
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found landing A254–A260; the case both A254 and A260 left to the other.
+
+## Resolved
+
+2026-09-23. [`contentClauseTense`](../../../packages/engine/src/translator/functions/contentClauseTense.ts)
+now sends a clause anterior to a past governor to `anteriorToPast`, which gives it the pluperfect:
+
+- a **past-neutral or present-resultative** clause in the `presentSubjunctive` becomes the resultative
+  in the imperfect subjunctive (`'subjunctive'`) in Italian, Spanish and Portuguese — `avesse corso`,
+  `fossero andati`, `hubiera corrido`, `tivesse corrido` — and in French keeps the present subjunctive
+  of its perfect, `ait couru`, `soient allés`;
+- a **present-resultative** indicative clause becomes the resultative in the past — `had run`,
+  `aveva corso`, `era andato`, `avait couru`, `había corrido`, `tinha corrido`.
+
+A plain past **indicative** clause is left alone, as ruled (`said that the cat ran`, `disse che il gatto
+corse`), and so are a pluperfect already, a past progressive or prospective, and German and Japanese.
+
+Guarded by the two formerly-`.fails` tests and three new ones in the
+`known bugs: a clause anterior to a past governor takes no pluperfect (A263)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (essere / être
+participles and their agreement, an object, a passive, an evaluative predicate, and the plain past,
+the pluperfect and German left alone), and the A263 case in
+[contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts),
+whose "unchanged" case no longer lists the past subjunctive and resultative clauses this fix moves.
