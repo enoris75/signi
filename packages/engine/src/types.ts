@@ -566,4 +566,9 @@ export interface LanguageEngine {
   questionMark?: string;
   /** The mark opening a question, where the language writes one: Spanish "¿". Defaults to none. */
   questionOpener?: string;
+  /**
+   * What sets the vocative off from its clause (`PhrasePlan.address`, P11-E3): "Mom, run". Defaults
+   * to ', '; Japanese writes 、 with no space (お母さん、走ってください).
+   */
+  addressSeparator?: string;
 }

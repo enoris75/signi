@@ -1526,6 +1526,11 @@ export interface PhrasePlan {
    * forces present tense / neutral aspect / no modals (the UI enforces this; the translator
    * also normalises it defensively). It may still take a `coordination` — a command coordinates
    * with a second command, which inherits its mood (see `coordination`).
+   *
+   * The addressee `subject` is not the vocative (`address`, P11-E3 D4): "Mom, run." names her in
+   * `address` and keeps the 2nd-singular pronoun here, and "Mom, let's run." pairs the same address
+   * with a 1st-plural subject. The subject is never derived from the address; a UI may default one
+   * from the other, as a convenience, but the plan states both.
    */
   imperative?: boolean;
   /**
@@ -1640,6 +1645,31 @@ export interface PhrasePlan {
    * *um … zu* after a comma) and precedes the predicate in Japanese.
    */
   purpose?: PurposeClause;
+  /**
+   * The **vocative** — who the sentence is spoken *to*, called by name before it: "**Mom**, run.",
+   * "**Mamma**, corri.", "**Mama**, lauf.", お母さん、走ってください。 (P11-E3). It is a slot, not a case (D2):
+   * five of the seven mark it with nothing but its place and a comma, Japanese with 、 and no
+   * particle, and none of them has a vocative case (Polish and Ukrainian do, which is P05's and
+   * P07's to build). So it renders **before** the clause, set off by the language's separator —
+   * a comma in six, 、 in Japanese — and opens the sentence: capitalized as its first word, and
+   * behind Spanish's opening mark ("¿Mamá, el gato corre?"). It is **determiner-less** in every
+   * language, "the Mom, run!" being wrong in all seven — the article-dropping an essive does
+   * (`ObjectPredication`) — and Italian drops the article its kin term keeps as a subject (*la
+   * mamma corre*, but *Mamma, corri*), Portuguese the one it gives a name (*o Pedro corre*, but
+   * *Pedro, corra*). A title stays with its name (*Signor Pietro, corri*).
+   *
+   * **Japanese** says the honorific of a kin term here, whoever's relative it is (D3): one calls
+   * one's own mother お母さん, where P11's own/other rule gives 母 for her in the third person.
+   * Address is a third context beside citation (母親) and possession (母 / お母さん), and the branch
+   * that says so is written beside that rule, in `applyPossessorForm`.
+   *
+   * It is **not** the subject of a command (D4). "Mom, run." has an addressee and an unspoken 2nd
+   * person subject that agree, but "Mom, let's run." addresses her with a 1st-plural subject; the
+   * `subject` an `imperative` carries still picks the verb's form, and nothing reads it off this.
+   * It is not restricted to a command either: "Mom, the cat runs." It belongs to the top clause and
+   * is read there only — a linked clause's is ignored. Plan-only: no builder control sets it yet.
+   */
+  address?: NounElement;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */

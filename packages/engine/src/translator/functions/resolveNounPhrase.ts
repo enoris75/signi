@@ -21,9 +21,10 @@ const EMPTY: ReadonlySet<number> = new Set();
  * Resolve a noun phrase for one language: resolve the possessor, then the head noun/pronoun with its
  * number/gender (synthesising the pronoun surface form, or applying noun gender) and the form its
  * possessor selects, then each adjective. This folds together what used to be four duplicated
- * subject/object/complement blocks.
+ * subject/object/complement blocks. `address` marks the vocative (`PhrasePlan.address`, P11-E3),
+ * whose kin term takes the form address takes (see `applyPossessorForm`).
  */
-export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup): ResolvedNounPhrase {
+export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup, address = false): ResolvedNounPhrase {
   const head = resolve(np.concept, language, lookup);
   // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical features —
   // it needs no lexicon lookup, so it passes straight through for the engine to spell as a
@@ -151,7 +152,7 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // …and last, the form the possessor selects: one's own 母 against someone else's お母さん, "ma
     // femme" against "une épouse" (P11 D2/D3/D6). It also marks a kin head as one's own, which the
     // phrase holding this one as its genitive possessor reads.
-    applyPossessorForm(head.forms, possessor);
+    applyPossessorForm(head.forms, possessor, address);
     // An indefinite article gives way to a numeral in every one of the seven — at one the numeral IS
     // that article in five of them, and above one no language writes both — so the phrase resolves
     // bare and each engine's article builder writes nothing without being told (C31). The value

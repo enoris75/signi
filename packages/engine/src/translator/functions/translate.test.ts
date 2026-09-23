@@ -68,4 +68,20 @@ describe('translate', () => {
     expect(ja.ruby?.at(-1)).toEqual({ t: '？' });
     expect(ja.ruby?.map((s) => s.t).join('')).toBe(ja.text);
   });
+
+  // P11-E3: the vocative opens the sentence, set off by the language's separator.
+  test('an address opens the sentence, capitalized, behind the opening mark', () => {
+    const translations = translate({ ...YOU_RUN, imperative: true, address: { concept: 'DOG' } }, LOOKUP);
+    expect(find(translations, 'en')?.text).toBe('Dog, run.');
+    const question = translate({ ...CAT_RUNS, interrogative: true, address: { concept: 'DOG' } }, LOOKUP);
+    expect(find(question, 'en')?.text).toBe('Dog, does the cat run?');
+    expect(find(question, 'es')?.text).toMatch(/^¿[A-Z][^,]*, .*\?$/);
+  });
+
+  test('Japanese sets the address off with 、, in the ruby too', () => {
+    const ja = find(translate({ ...CAT_RUNS, address: { concept: 'CAT' } }, LOOKUP), 'ja')!;
+    expect(ja.text.startsWith('猫、猫は')).toBe(true);
+    expect(ja.ruby?.slice(0, 2)).toEqual([{ t: '猫', r: 'ねこ' }, { t: '、' }]);
+    expect(ja.ruby?.map((s) => s.t).join('')).toBe(ja.text);
+  });
 });

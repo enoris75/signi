@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, PronominalPossessor } from '@signi/shared';
+import type { NounElement, PhrasePlan, PronominalPossessor } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // P11-E3: talking *to* family. Two halves: a casual kin term used as a **name** ("Mom runs"), which
@@ -66,5 +66,90 @@ describe('a kin term used as a name', () => {
       de: 'wessen Mama läuft?', es: '¿la mamá de quién corre?', ja: '誰のお母さんが走りますか？',
       pt: 'a mamãe de quem corre?',
     });
+  });
+});
+
+// The vocative is a slot of the top clause, rendered before it with the language's separator.
+const command = (address: NounElement, subject: NounElement = np('SECOND_PERSON')): PhrasePlan =>
+  ({ ...clause(subject, 'RUN'), imperative: true, address });
+
+describe('the vocative', () => {
+  test('Mom, run: set off by a comma, or 、 with no particle, and determiner-less in all seven', () => {
+    expect(sayAll(command(np('MOM')))).toEqual({
+      en: 'Mom, run.', it: 'Mamma, corri.', fr: 'Maman, cours.', de: 'Mama, lauf.',
+      es: 'Mamá, corre.', ja: 'お母さん、走ってください。', pt: 'Mamãe, corra.',
+    });
+  });
+
+  test('determiner-less whatever the plan picked, and capitalized as the first word', () => {
+    expect(sayAll(command(np('CAT', { definiteness: 'indefinite' })))).toEqual({
+      en: 'Cat, run.', it: 'Gatto, corri.', fr: 'Chat, cours.', de: 'Kater, lauf.',
+      es: 'Gato, corre.', ja: '猫、走ってください。', pt: 'Gato, corra.',
+    });
+    // A name the language articles as a subject (pt "o Pedro corre") is bare in address.
+    expect(sayAll(command(np('PETER')))).toMatchObject({ pt: 'Pedro, corra.', it: 'Pietro, corri.', ja: 'ピーター、走ってください。' });
+    expect(sayAll(command(np('PETER', { title: 'MR' })))).toMatchObject({
+      it: 'Signor Pietro, corri.', es: 'Señor Pedro, corre.', pt: 'Senhor Pedro, corra.', ja: 'ピーターさん、走ってください。',
+    });
+    expect(sayAll(command({ conjuncts: [np('MOM'), np('DAD')], conjunction: 'and' }, np('SECOND_PERSON', { number: 'plural' })))).toEqual({
+      en: 'Mom and Dad, run.', it: 'Mamma e papà, correte.', fr: 'Maman et Papa, courez.', de: 'Mama und Papa, lauft.',
+      es: 'Mamá y Papá, corred.', ja: 'お母さんとお父さん、走ってください。', pt: 'Mamãe e Papai, corram.',
+    });
+  });
+
+  // D3: one calls one's own mother お母さん, where P11's rule gives 母 for her in the third person.
+  test("Japanese: address takes the honorific, even for one's own mother", () => {
+    expect(sayAll(command(np('MOTHER', { possessor: of('1') })))).toMatchObject({
+      ja: 'お母さん、走ってください。', en: 'My mother, run.', fr: 'Ma mère, cours.', de: 'Meine Mutter, lauf.',
+    });
+    expect(sayAll(command(np('MOTHER')))).toMatchObject({ ja: 'お母さん、走ってください。', en: 'Mother, run.' });
+    expect(sayAll(command(np('PARENT', { number: 'plural', possessor: of('1') }), np('SECOND_PERSON', { number: 'plural' }))))
+      .toMatchObject({ ja: 'ご両親、走ってください。' });
+  });
+
+  test("…and P11's own / other's / nobody's rows are unchanged outside it", () => {
+    expect(runs(np('MOTHER', { possessor: of('1') }))).toMatchObject({ ja: '母は走ります。' });
+    expect(runs(np('MOTHER', { possessor: of('2') }))).toMatchObject({ ja: 'あなたのお母さんは走ります。' });
+    expect(runs(np('MOTHER'))).toMatchObject({ ja: '母親は走ります。' });
+    // The subject of an addressed clause is not the address: 母 in the clause, お母さん before it.
+    expect(sayAll({ ...clause(np('MOTHER', { possessor: of('1') }), 'RUN'), address: np('MOM') }))
+      .toMatchObject({ ja: 'お母さん、母は走ります。' });
+  });
+
+  test('a head with no honorific keeps the word it takes as a possessed noun', () => {
+    expect(sayAll(command(np('WIFE', { possessor: of('1') })))).toMatchObject({ fr: 'Ma femme, cours.', de: 'Meine Frau, lauf.' });
+  });
+
+  test('an address on a statement: Mom, the cat runs', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('MOM') })).toEqual({
+      en: 'Mom, the cat runs.', it: 'Mamma, il gatto corre.', fr: 'Maman, le chat court.', de: 'Mama, der Kater läuft.',
+      es: 'Mamá, el gato corre.', ja: 'お母さん、猫は走ります。', pt: 'Mamãe, o gato corre.',
+    });
+  });
+
+  test('an address on a question opens behind the Spanish ¿', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('MOM'), interrogative: true })).toEqual({
+      en: 'Mom, does the cat run?', it: 'Mamma, il gatto corre?', fr: 'Maman, est-ce que le chat court ?',
+      de: 'Mama, läuft der Kater?', es: '¿Mamá, el gato corre?', ja: 'お母さん、猫は走りますか？', pt: 'Mamãe, o gato corre?',
+    });
+  });
+
+  // D4: the address is not the command's subject. The same address takes a 1st-plural command.
+  test("Mom, let's run: the address does not pick the command's person", () => {
+    expect(sayAll(command(np('MOM'), np('FIRST_PERSON', { number: 'plural' })))).toEqual({
+      en: "Mom, let's run.", it: 'Mamma, corriamo.', fr: 'Maman, courons.', de: 'Mama, laufen wir.',
+      es: 'Mamá, corramos.', ja: 'お母さん、走りましょう。', pt: 'Mamãe, corramos.',
+    });
+    expect(sayAll(command(np('MOM'), np('SECOND_PERSON', { number: 'plural' })))).toMatchObject({
+      it: 'Mamma, correte.', fr: 'Maman, courez.', de: 'Mama, lauft.', es: 'Mamá, corred.',
+    });
+  });
+
+  test("the address belongs to the top clause: a linked clause's is not read", () => {
+    const coordinated: PhrasePlan = {
+      ...clause(np('CAT'), 'RUN'),
+      coordination: { conjunction: 'and', clause: { ...clause(np('DOG'), 'EAT'), address: np('MOM') } },
+    };
+    expect(sayAll(coordinated)).toMatchObject({ en: 'the cat runs, and the dog eats.' });
   });
 });

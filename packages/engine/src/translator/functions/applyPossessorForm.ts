@@ -42,7 +42,25 @@ const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
 export function applyPossessorForm(
   forms: Record<string, string>,
   possessor?: ResolvedNounPhrase | PronominalPossessor,
+  // The phrase is the vocative (`PhrasePlan.address`, P11-E3).
+  address = false,
 ): void {
+  // **Address** is a third context beside citation and possession (P11-E3 D3): one calls one's own
+  // mother お母さん, so the vocative takes the honorific whoever the relative is — whatever the
+  // possessor, and whatever the own/other rule below would say. Only Japanese stores an honorific;
+  // a head without one takes the ordinary rule below ("mon épouse" is "ma femme" in address too, and
+  // MOM's one お母さん is already right). A 1st-person possessor still marks the relative one's own,
+  // so its 私の is not said twice (お母さん、…, not 私のお母さん、…; D4).
+  const addressed = (forms['number'] ?? forms['count']) === 'plural' ? 'plural_honorific' : 'honorific';
+  if (address && forms[addressed]) {
+    const reading = forms[`${addressed}_reading`];
+    forms['base'] = forms[addressed]!;
+    if (addressed === 'plural_honorific') forms['plural'] = forms[addressed]!;
+    if (reading) forms['reading'] = reading; else delete forms['reading'];
+    if (addressed === 'plural_honorific') { if (reading) forms['plural_reading'] = reading; else delete forms['plural_reading']; }
+    if (forms['kin'] === '1' && possessor && isPronominalPossessor(possessor) && possessor.person === '1') forms['own'] = '1';
+    return;
+  }
   if (!possessor) return;
   if (!isPronominalPossessor(possessor) && NOBODY_IN_PARTICULAR.has(possessor.head.forms['definiteness'] ?? 'definite')) return;
   // The possessor in the only two terms this decides on: whether the relative is the speaker's own,
