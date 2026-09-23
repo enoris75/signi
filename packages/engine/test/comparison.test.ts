@@ -361,11 +361,250 @@ describe('the superlative set (P09-E19)', () => {
     const plan = clause(np('CAT'), 'BE', {
       complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headIntensifier: 'VERY', headStandard: ANIMALS }) } },
     });
-    expect(sayAll(plan)).toMatchObject({
+    expect(sayAll(plan)).toEqual({
       en: 'the cat is by far the biggest of the animals.',
       it: 'il gatto è di gran lunga il più grande degli animali.',
+      fr: 'le chat est de loin le plus grand des animaux.',
       de: 'der Kater ist bei weitem das größte der Tiere.',
+      es: 'el gato es con mucho el más grande de los animales.',
+      pt: 'o gato é de longe o maior dos animais.',
+      // 断然 leads 最も, after the set.
+      ja: '猫は動物の中で断然最も大きいです。',
     });
+  });
+
+  /** "<subject> <verb> the <adjective>-est of <set>". */
+  const most = (subject: NounPhrase, adjective: string, set: NounElement, verb = 'BE'): PhrasePlan => clause(subject, verb, {
+    complements: { predicative: { phrase: np(adjective, { headDegree: 'most', headStandard: set }) } },
+  });
+
+  test('a suppletive superlative keeps its set: the best, the worst', () => {
+    expect(sayAll(most(np('CAT'), 'GOOD', ANIMALS))).toEqual({
+      en: 'the cat is the best of the animals.',
+      it: 'il gatto è il più buono degli animali.',
+      fr: 'le chat est le meilleur des animaux.',
+      de: 'der Kater ist das beste der Tiere.',
+      es: 'el gato es el más bueno de los animales.',
+      pt: 'o gato é o melhor dos animais.',
+      ja: '猫は動物の中で最も良いです。',
+    });
+    expect(sayAll(most(np('CAT'), 'BAD', ANIMALS))).toEqual({
+      en: 'the cat is the worst of the animals.',
+      it: 'il gatto è il più cattivo degli animali.',
+      fr: 'le chat est le pire des animaux.',
+      de: 'der Kater ist das schlechteste der Tiere.',
+      es: 'el gato es el más malo de los animales.',
+      pt: 'o gato é o pior dos animais.',
+      ja: '猫は動物の中で最も悪いです。',
+    });
+  });
+
+  test('in a relative clause', () => {
+    const relative = clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: ANIMALS }) } } },
+    }), 'RUN');
+    expect(sayAll(relative)).toEqual({
+      en: 'the cat that is the biggest of the animals runs.',
+      it: 'il gatto che è il più grande degli animali corre.',
+      fr: 'le chat qui est le plus grand des animaux court.',
+      de: 'der Kater, der das größte der Tiere ist, läuft.',
+      es: 'el gato que es el más grande de los animales corre.',
+      pt: 'o gato que é o maior dos animais corre.',
+      ja: '動物の中で最も大きい猫は走ります。',
+    });
+  });
+
+  test('under SEEM and BECOME', () => {
+    expect(sayAll(most(np('CAT'), 'BIG', ANIMALS, 'SEEM'))).toEqual({
+      en: 'the cat seems the biggest of the animals.',
+      it: 'il gatto sembra il più grande degli animali.',
+      fr: 'le chat semble le plus grand des animaux.',
+      de: 'der Kater scheint das größte der Tiere.',
+      es: 'el gato parece el más grande de los animales.',
+      pt: 'o gato parece o maior dos animais.',
+      ja: '猫は動物の中で最も大きく思えます。',
+    });
+    expect(sayAll(most(np('CAT'), 'BIG', ANIMALS, 'BECOME'))).toEqual({
+      en: 'the cat becomes the biggest of the animals.',
+      it: 'il gatto diventa il più grande degli animali.',
+      fr: 'le chat devient le plus grand des animaux.',
+      de: 'der Kater wird das größte der Tiere.',
+      es: 'el gato se vuelve el más grande de los animales.',
+      pt: 'o gato se torna o maior dos animais.',
+      ja: '猫は動物の中で最も大きくなります。',
+    });
+  });
+
+  test('the article and the adjective agree with a feminine plural subject', () => {
+    expect(sayAll(most(np('WOMAN', { number: 'plural' }), 'BEAUTIFUL', np('FAMILY')))).toEqual({
+      en: 'the women are the most beautiful in the family.',
+      it: 'le donne sono le più belle della famiglia.',
+      fr: 'les femmes sont les plus belles de la famille.',
+      de: 'die Frauen sind die schönsten der Familie.',
+      es: 'las mujeres son las más hermosas de la familia.',
+      pt: 'as mulheres são as mais belas da família.',
+      ja: '女は家族の中で最も美しいです。',
+    });
+    expect(sayAll(most(np('WOMAN'), 'BEAUTIFUL', np('WOMAN', { number: 'plural' })))).toEqual({
+      en: 'the woman is the most beautiful of the women.',
+      it: 'la donna è la più bella delle donne.',
+      fr: 'la femme est la plus belle des femmes.',
+      de: 'die Frau ist die schönste der Frauen.',
+      es: 'la mujer es la más hermosa de las mujeres.',
+      pt: 'a mulher é a mais bela das mulheres.',
+      ja: '女は女の中で最も美しいです。',
+    });
+  });
+
+  test('a third-person pronoun set, feminine and masculine', () => {
+    expect(sayAll(most(np('WOMAN'), 'BEAUTIFUL', np('THIRD_PERSON', { number: 'plural', gender: 'fem' })))).toEqual({
+      en: 'the woman is the most beautiful of them.',
+      it: 'la donna è la più bella di loro.',
+      fr: "la femme est la plus belle d'entre elles.",
+      de: 'die Frau ist die schönste von ihnen.',
+      es: 'la mujer es la más hermosa de ellas.',
+      // de + elas contracts.
+      pt: 'a mulher é a mais bela delas.',
+      ja: '女は彼女らの中で最も美しいです。',
+    });
+    expect(sayAll(most(np('CAT'), 'BIG', np('THIRD_PERSON', { number: 'plural' })))).toEqual({
+      en: 'the cat is the biggest of them.',
+      it: 'il gatto è il più grande di loro.',
+      fr: "le chat est le plus grand d'entre eux.",
+      de: 'der Kater ist der größte von ihnen.',
+      es: 'el gato es el más grande de ellos.',
+      pt: 'o gato é o maior deles.',
+      ja: '猫は彼らの中で最も大きいです。',
+    });
+  });
+
+  test('a set with a demonstrative or a pronominal possessor', () => {
+    expect(sayAll(most(np('CAT'), 'BIG', np('ANIMAL', { number: 'plural', definiteness: 'this' })))).toEqual({
+      en: 'the cat is the biggest of these animals.',
+      it: 'il gatto è il più grande di questi animali.',
+      fr: 'le chat est le plus grand de ces animaux.',
+      // The demonstrative takes the genitive as the article does.
+      de: 'der Kater ist das größte dieser Tiere.',
+      es: 'el gato es el más grande de estos animales.',
+      pt: 'o gato é o maior destes animais.',
+      ja: '猫はこの動物の中で最も大きいです。',
+    });
+    const mine = np('ANIMAL', { number: 'plural', possessor: { kind: 'pronominal', person: '1', number: 'singular' } });
+    expect(sayAll(most(np('CAT'), 'BIG', mine))).toEqual({
+      en: 'the cat is the biggest of my animals.',
+      it: 'il gatto è il più grande dei miei animali.',
+      fr: 'le chat est le plus grand de mes animaux.',
+      de: 'der Kater ist das größte meiner Tiere.',
+      es: 'el gato es el más grande de mis animales.',
+      pt: 'o gato é o maior dos meus animais.',
+      ja: '猫は私の動物の中で最も大きいです。',
+    });
+  });
+
+  test('a standard with no degree is dropped: the plain positive', () => {
+    const plain = { en: 'the cat is big.', it: 'il gatto è grande.', fr: 'le chat est grand.', de: 'der Kater ist groß.',
+      es: 'el gato es grande.', pt: 'o gato é grande.', ja: '猫は大きいです。' };
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headStandard: ANIMALS }) } } }))).toEqual(plain);
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headStandard: DOG }) } } }))).toEqual(plain);
+  });
+});
+
+// A284. Spanish and Portuguese pick estar for a transient predicate adjective ("está feliz"), but a
+// superlative there is headed by its article — "el más feliz", "o mais feliz" — a noun phrase, and a
+// predicate noun phrase takes ser: "el gato es el más feliz de los animales".
+describe('known bugs: Spanish and Portuguese put estar before a transient superlative (A284)', () => {
+  const happy = (degree: Degree, set?: NounElement): PhrasePlan => clause(np('CAT'), 'BE', {
+    complements: { predicative: { phrase: np('HAPPY', { headDegree: degree, ...(set ? { headStandard: set } : {}) }) } },
+  });
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+
+  test.fails('with a set: es el gato es el más feliz, pt o gato é o mais feliz', () => {
+    expect(sayAll(happy('most', ANIMALS))).toMatchObject({
+      es: 'el gato es el más feliz de los animales.', pt: 'o gato é o mais feliz dos animais.',
+    });
+  });
+
+  test.fails('the bare superlative', () => {
+    expect(sayAll(happy('most'))).toMatchObject({ es: 'el gato es el más feliz.', pt: 'o gato é o mais feliz.' });
+  });
+
+  test.fails('least', () => {
+    expect(sayAll(happy('least', ANIMALS))).toMatchObject({
+      es: 'el gato es el menos feliz de los animales.', pt: 'o gato é o menos feliz dos animais.',
+    });
+  });
+
+  test('regression: the other five, and estar for the positive and the comparative', () => {
+    expect(sayAll(happy('most', ANIMALS))).toMatchObject({
+      en: 'the cat is the happiest of the animals.',
+      it: 'il gatto è il più felice degli animali.',
+      fr: 'le chat est le plus heureux des animaux.',
+      de: 'der Kater ist das glücklichste der Tiere.',
+      ja: '猫は動物の中で最も幸せです。',
+    });
+    expect(sayAll(happy('positive'))).toMatchObject({ es: 'el gato está feliz.', pt: 'o gato está feliz.' });
+    expect(sayAll(happy('more'))).toMatchObject({ es: 'el gato está más feliz.', pt: 'o gato está mais feliz.' });
+  });
+});
+
+// A285. Japanese says the least-degree by negating the superlative (最も大きくない, "the least big"),
+// so a negated superlative that negates the adjective too comes out the same: "the cat is not the
+// biggest" reads as "the cat is the least big". The negation denies the superlative proposition, and
+// goes over it as A249's does: 最も大きいわけではありません.
+describe('known bugs: Japanese reads a negated superlative as the least (A285)', () => {
+  const notMost = (set?: NounElement, tense?: 'past'): PhrasePlan => clause(np('CAT'), 'BE', {
+    verbPhrase: { negative: true, ...(tense ? { tense } : {}) },
+    complements: { predicative: { phrase: np('BIG', { headDegree: 'most', ...(set ? { headStandard: set } : {}) }) } },
+  });
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+
+  test.fails('with a set: 動物の中で最も大きいわけではありません', () => {
+    expect(say(notMost(ANIMALS), 'ja')).toBe('猫は動物の中で最も大きいわけではありません。');
+  });
+
+  test.fails('the bare superlative: 最も大きいわけではありません', () => {
+    expect(say(notMost(), 'ja')).toBe('猫は最も大きいわけではありません。');
+  });
+
+  test.fails('in the past: 最も大きいわけではありませんでした', () => {
+    expect(say(notMost(ANIMALS, 'past'), 'ja')).toBe('猫は動物の中で最も大きいわけではありませんでした。');
+  });
+
+  test('regression: the six European languages, and the affirmative least', () => {
+    expect(sayAll(notMost(ANIMALS))).toMatchObject({
+      en: 'the cat is not the biggest of the animals.',
+      it: 'il gatto non è il più grande degli animali.',
+      fr: "le chat n'est pas le plus grand des animaux.",
+      de: 'der Kater ist nicht das größte der Tiere.',
+      es: 'el gato no es el más grande de los animales.',
+      pt: 'o gato não é o maior dos animais.',
+    });
+    expect(say(cat('least', ANIMALS), 'ja')).toBe('猫は動物の中で最も大きくないです。');
+    expect(say(cat('least'), 'ja')).toBe('猫は最も大きくないです。');
+  });
+});
+
+// A286. German's superlative set is a bare genitive after a noun and "von" + the dative after a
+// pronoun (P09-E19). A coordinated set that starts with a pronoun puts "von" before the whole group,
+// so the noun after "und" is under "von" too and must be dative: "von uns und den Hunden".
+describe('known bugs: German leaves a noun genitive after "von" in a coordinated set (A286)', () => {
+  const set = (conjuncts: NounPhrase[]) => cat('most', { conjuncts, conjunction: 'and' });
+  const US = np('FIRST_PERSON', { number: 'plural' });
+  const DOGS = np('DOG', { number: 'plural' });
+
+  test.fails('von uns und den Hunden', () => {
+    expect(say(set([US, DOGS]), 'de')).toBe('der Kater ist der größte von uns und den Hunden.');
+  });
+
+  test('regression: the other languages, and a set of nouns alone', () => {
+    expect(sayAll(set([US, DOGS]))).toMatchObject({
+      en: 'the cat is the biggest of us and the dogs.',
+      it: 'il gatto è il più grande di noi e dei cani.',
+      es: 'el gato es el más grande de nosotros y de los perros.',
+      pt: 'o gato é o maior de nós e dos cães.',
+      ja: '猫は私たちと犬の中で最も大きいです。',
+    });
+    expect(say(set([np('ANIMAL', { number: 'plural' }), DOGS]), 'de')).toBe('der Kater ist der größte der Tiere und der Hunde.');
   });
 });
 
@@ -580,5 +819,190 @@ describe('attributive (P09-E18)', () => {
     expect(sayAll(cat('more', DOG))).toEqual(sayAll(clause(np('CAT'), 'BE', {
       complements: { predicative: { phrase: np('BIG', { headDegree: 'more', headStandard: DOG, adjectiveStandards: [np('FOX')] }) } },
     })));
+  });
+
+  test('a passive agent: German "von" gives the dative, and the standard follows it', () => {
+    expect(sayAll(clause(compared('CAT', 'more'), 'EAT', {
+      directObject: np('FOOD', { definiteness: 'definite' }), verbPhrase: { voice: 'passive' },
+    }))).toEqual({
+      en: 'the food is eaten by a bigger cat than the dog.',
+      it: 'il cibo è mangiato da un gatto più grande del cane.',
+      fr: 'la nourriture est mangée par un chat plus grand que le chien.',
+      de: 'das Essen wird von einem größeren Kater als dem Hund gefressen.',
+      es: 'la comida es comida por un gato más grande que el perro.',
+      pt: 'a comida é comida por um gato maior do que o cão.',
+      ja: '食べ物は犬より大きい猫に食べられます。',
+    });
+  });
+
+  test('a comitative: "mit" gives the dative', () => {
+    expect(sayAll(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: compared('CAT', 'more') } } }))).toEqual({
+      en: 'the man runs with a bigger cat than the dog.',
+      it: "l'uomo corre con un gatto più grande del cane.",
+      fr: "l'homme court avec un chat plus grand que le chien.",
+      de: 'der Mann läuft mit einem größeren Kater als dem Hund.',
+      es: 'el hombre corre con un gato más grande que el perro.',
+      pt: 'o homem corre com um gato maior do que o cão.',
+      ja: '男は犬より大きい猫と走ります。',
+    });
+  });
+
+  test('a possessor: the German genitive, and the standard in it', () => {
+    expect(sayAll(sees(np('BOOK', { possessor: compared('CAT', 'more') })))).toEqual({
+      en: 'the man sees the book of a bigger cat than the dog.',
+      it: "l'uomo vede il libro di un gatto più grande del cane.",
+      fr: "l'homme voit le livre d'un chat plus grand que le chien.",
+      de: 'der Mann sieht das Buch eines größeren Katers als des Hundes.',
+      es: 'el hombre ve el libro de un gato más grande que el perro.',
+      pt: 'o homem vê o livro de um gato maior do que o cão.',
+      ja: '男は犬より大きい猫の本を見ます。',
+    });
+  });
+
+  test('German: weak, strong and mixed declension, and the feminine', () => {
+    expect(say(sees(compared('CAT', 'more', DOG, { definiteness: 'definite' })), 'de')).toBe('der Mann sieht den größeren Kater als den Hund.');
+    expect(say(clause(compared('CAT', 'more', DOG, { definiteness: 'definite' }), 'EAT'), 'de')).toBe('der größere Kater als der Hund frisst.');
+    expect(say(sees(compared('CAT', 'more', DOG, { number: 'plural', definiteness: 'bare' })), 'de')).toBe('der Mann sieht größere Kater als den Hund.');
+    expect(say(sees(compared('CAT', 'more', DOG, {
+      possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' },
+    })), 'de')).toBe('der Mann sieht seinen größeren Kater als den Hund.');
+    expect(say(sees(compared('CAT', 'more', DOG, { gender: 'fem' })), 'de')).toBe('der Mann sieht eine größere Katze als den Hund.');
+  });
+
+  test('a pronoun standard, in the object and in the subject', () => {
+    expect(sayAll(sees(compared('CAT', 'more', np('FIRST_PERSON'))))).toEqual({
+      en: 'the man sees a bigger cat than me.',
+      it: "l'uomo vede un gatto più grande di me.",
+      fr: "l'homme voit un chat plus grand que moi.",
+      de: 'der Mann sieht einen größeren Kater als mich.',
+      // Spanish and Portuguese keep the subject form after "que", as E5's predicate does.
+      es: 'el hombre ve un gato más grande que yo.',
+      pt: 'o homem vê um gato maior do que eu.',
+      ja: '男は私より大きい猫を見ます。',
+    });
+    expect(sayAll(clause(compared('CAT', 'more', np('FIRST_PERSON')), 'EAT'))).toEqual({
+      en: 'a bigger cat than me eats.',
+      it: 'un gatto più grande di me mangia.',
+      fr: 'un chat plus grand que moi mange.',
+      de: 'ein größerer Kater als ich frisst.',
+      es: 'un gato más grande que yo come.',
+      pt: 'um gato maior do que eu come.',
+      ja: '私より大きい猫は食べます。',
+    });
+  });
+
+  test('Romance: the compared adjective agrees with a feminine plural head', () => {
+    expect(sayAll(sees(compared('CAT', 'equally', DOG, { gender: 'fem', number: 'plural' })))).toEqual({
+      en: 'the man sees cats as big as the dog.',
+      it: "l'uomo vede gatte tanto grandi quanto il cane.",
+      fr: "l'homme voit des chattes aussi grandes que le chien.",
+      de: 'der Mann sieht so große Katzen wie den Hund.',
+      es: 'el hombre ve unas gatas tan grandes como el perro.',
+      pt: 'o homem vê umas gatas tão grandes como o cão.',
+      ja: '男は犬と同じくらい大きい猫を見ます。',
+    });
+    expect(sayAll(sees(compared('CAT', 'more', DOG, { number: 'plural' })))).toEqual({
+      en: 'the man sees bigger cats than the dog.',
+      it: "l'uomo vede gatti più grandi del cane.",
+      fr: "l'homme voit des chats plus grands que le chien.",
+      de: 'der Mann sieht größere Kater als den Hund.',
+      es: 'el hombre ve unos gatos más grandes que el perro.',
+      pt: 'o homem vê uns gatos maiores do que o cão.',
+      ja: '男は犬より大きい猫を見ます。',
+    });
+  });
+
+  test('a prenominal positive adjective beside the compared one', () => {
+    expect(sayAll(sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BEAUTIFUL', 'BIG'], adjectiveDegrees: ['positive', 'more'], adjectiveStandards: [undefined, DOG],
+    })))).toEqual({
+      en: 'the man sees a beautiful bigger cat than the dog.',
+      // Italian and French keep BEAUTIFUL before the noun; Spanish and Portuguese coordinate it after.
+      it: "l'uomo vede un bel gatto più grande del cane.",
+      fr: "l'homme voit un beau chat plus grand que le chien.",
+      de: 'der Mann sieht einen schönen größeren Kater als den Hund.',
+      es: 'el hombre ve un gato hermoso y más grande que el perro.',
+      pt: 'o homem vê um gato belo e maior do que o cão.',
+      ja: '男は犬より大きい美しい猫を見ます。',
+    });
+  });
+
+  test('Italian "di" fuses with the standard\'s article, French "que" elides', () => {
+    expect(say(sees(compared('CAT', 'more', np('UNCLE'))), 'it')).toBe("l'uomo vede un gatto più grande dello zio.");
+    expect(say(sees(compared('CAT', 'more', np('MAN'))), 'it')).toBe("l'uomo vede un gatto più grande dell'uomo.");
+    expect(say(sees(compared('CAT', 'more', np('DOG', { number: 'plural' }))), 'it')).toBe("l'uomo vede un gatto più grande dei cani.");
+    expect(sayAll(sees(compared('CAT', 'more', np('DOG', { definiteness: 'indefinite' }))))).toEqual({
+      en: 'the man sees a bigger cat than a dog.',
+      it: "l'uomo vede un gatto più grande di un cane.",
+      fr: "l'homme voit un chat plus grand qu'un chien.",
+      de: 'der Mann sieht einen größeren Kater als einen Hund.',
+      es: 'el hombre ve un gato más grande que un perro.',
+      pt: 'o homem vê um gato maior do que um cão.',
+      ja: '男は犬より大きい猫を見ます。',
+    });
+  });
+
+  test('Japanese: the compared adjective leads a possessor, a relative clause and a numeral', () => {
+    expect(say(sees(compared('CAT', 'more', DOG, { possessor: np('WOMAN') })), 'ja')).toBe('男は犬より大きい女の猫を見ます。');
+    expect(say(sees(compared('CAT', 'more', DOG, { relative: { verbPhrase: { verb: 'RUN' } } })), 'ja')).toBe('男は犬より大きい走る猫を見ます。');
+    expect(say(sees(compared('CAT', 'more', DOG, { numeral: 2, number: 'plural' })), 'ja')).toBe('男は犬より大きい二匹の猫を見ます。');
+  });
+
+  test('VERY on the compared adjective: much bigger', () => {
+    expect(sayAll(sees(compared('CAT', 'more', DOG, { adjectiveIntensifiers: ['VERY'] })))).toEqual({
+      en: 'the man sees a much bigger cat than the dog.',
+      it: "l'uomo vede un gatto molto più grande del cane.",
+      fr: "l'homme voit un chat bien plus grand que le chien.",
+      de: 'der Mann sieht einen viel größeren Kater als den Hund.',
+      es: 'el hombre ve un gato mucho más grande que el perro.',
+      pt: 'o homem vê um gato muito maior do que o cão.',
+      // The standard leads ずっと.
+      ja: '男は犬よりずっと大きい猫を見ます。',
+    });
+  });
+});
+
+// A283. English VERY drops "just" before a noun (`attributive_drop_degrees`), since there is no "a
+// just as big cat". But an equative with a standard now stands after the noun (P09-E18), where
+// "just as big as the dog" is what the predicate says too; the drop still fires there, and "a cat as
+// big as the dog" has lost the intensifier the other six keep.
+describe('known bugs: English drops "just" from a postposed equative with VERY (A283)', () => {
+  const justAs = (concept = 'CAT', extra: Partial<NounPhrase> = {}): NounPhrase => np(concept, {
+    definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveStandards: [DOG], adjectiveIntensifiers: ['VERY'], ...extra,
+  });
+  const sees = (object: NounPhrase): PhrasePlan => clause(np('MAN'), 'SEE', { directObject: object });
+
+  test.fails('as the object: a cat just as big as the dog', () => {
+    expect(say(sees(justAs()), 'en')).toBe('the man sees a cat just as big as the dog.');
+  });
+
+  test.fails('as the subject', () => {
+    expect(say(clause(justAs(), 'EAT'), 'en')).toBe('a cat just as big as the dog eats.');
+  });
+
+  test.fails('as a predicate noun', () => {
+    expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: justAs('ANIMAL') } } }), 'en'))
+      .toBe('the cat is an animal just as big as the dog.');
+  });
+
+  test('regression: the other six keep their intensifier', () => {
+    expect(sayAll(sees(justAs()))).toMatchObject({
+      it: "l'uomo vede un gatto altrettanto grande quanto il cane.",
+      fr: "l'homme voit un chat tout aussi grand que le chien.",
+      de: 'der Mann sieht einen genauso großen Kater wie den Hund.',
+      es: 'el hombre ve un gato igual de grande que el perro.',
+      pt: 'o homem vê um gato tão grande como o cão.',
+      ja: '男は犬と同じくらい大きい猫を見ます。',
+    });
+  });
+
+  test('regression: before the noun, with no standard, "just" still drops; the predicate keeps it', () => {
+    expect(say(sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveIntensifiers: ['VERY'] })), 'en'))
+      .toBe('the man sees an equally big cat.');
+    expect(say(sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'] })), 'en'))
+      .toBe('the man sees a very big cat.');
+    expect(say(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'equally', headIntensifier: 'VERY', headStandard: DOG }) } },
+    }), 'en')).toBe('the cat is just as big as the dog.');
   });
 });
