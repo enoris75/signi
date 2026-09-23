@@ -303,7 +303,7 @@ backend runs the builds, not `src`.
 - **Seven defects the 2026-09-23 lanes met, filed as [A247–A253](../../../bugs/engine-grammar-bugs.md)**
   and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
   Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
-  future temporal clause (A250–A252), and a boot render that lets an unseeded concept through (A253).
+  future temporal clause (A250–A252), and a boot render that lets an unseeded concept through (A253). All seven were fixed the same day.
 - **The existential "there is"** (E6 D5) is the one §3 construct left, with E6's table of what each
   language needs (de *es gibt* + accusative, it *c'è / ci sono*, ja いる / ある already built). File it
   under its own id when it is scheduled.

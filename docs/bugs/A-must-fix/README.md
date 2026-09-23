@@ -1,6 +1,8 @@
 # A-must-fix — confirmed bugs
 
-**Seven open, A247–A253**, filed on 2026-09-23 by the lanes that shipped P09's grammar tasks
+**None open.** Everything catalogued in this class has been fixed and moved to
+[`../fixed/`](../fixed/). The last seven, **A247–A253**, were filed and fixed on 2026-09-23, met by
+the lanes that shipped P09's grammar tasks
 [E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
 [E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and
 [E5](../../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md), each a
@@ -12,8 +14,9 @@ comparative (*very bigger*, *très plus grand*) where a comparative takes *much*
 mangiò*); **A251**, an English or German future temporal clause keeping *will* / *wird* (*when the cat
 will eat*); **A252**, a Spanish or Portuguese one in the future indicative (*cuando el gato comerá*)
 where it takes the subjunctive; and **A253**, the backend's boot renders letting an unseeded concept
-through as a blank word, which `/api/translate` already refuses. No shipped gloss shows any of the
-seven.
+through as a blank word. Two needed the corpus: `content_clause_mood_negative` names the mood a
+governor takes under a negation (A247), and an intensifier's `comparative` names the word it becomes
+on a comparative (A248). A252 gave Portuguese its future subjunctive (*comer*, *fizer*, *tiver*).
 
 The eleven filed on 2026-09-22 were fixed the same day and moved to
 [`../fixed/`](../fixed/). **A236** was met while specifying
@@ -39,8 +42,7 @@ indirect-object clitics. Three of the other seven were fixed by re-keying a tabl
 than by concept** (the Italian contracted infinitives, the Spanish short *tú* commands), which
 closed four more concepts' worth of the same defect than the files named.
 
-Everything else catalogued in this class has been fixed and moved to [`../fixed/`](../fixed/).
-The last six, **A230**–**A235**, were filed and fixed on 2026-09-22, each met by the lane that fixed
+Before them, **A230**–**A235** were filed and fixed on 2026-09-22, each met by the lane that fixed
 an earlier bug beside it: a `no` object keeping its "kein" inside a negated German prospective
 (A230), a German ordinal left bare as an essive object predicate (A231), the Japanese essive dropping
 an adjective's degree (A232), a negated Portuguese reflexive infinitive keeping "-se" after the verb
