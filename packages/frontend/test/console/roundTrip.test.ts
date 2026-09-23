@@ -491,10 +491,13 @@ function unasked(plan: object): object {
   } = plan as Record<string, unknown>;
   const clause = (c: unknown) => (c && typeof c === 'object' ? unasked(c) : c);
   const coordination = rest['coordination'] as { clause?: object } | undefined;
+  const adverbial = rest['adverbialClause'] as { clause?: object } | undefined;
   return {
     ...rest,
     ...(rest['condition'] ? { condition: clause(rest['condition']) } : {}),
     ...(coordination ? { coordination: { ...coordination, clause: clause(coordination.clause) } } : {}),
+    ...(rest['contentObject'] ? { contentObject: clause(rest['contentObject']) } : {}),
+    ...(adverbial ? { adverbialClause: { ...adverbial, clause: clause(adverbial.clause) } } : {}),
   };
 }
 
@@ -507,6 +510,7 @@ describe('the question and the existential are gated as the engine is', () => {
     const unseeded = /\b(SAIL|LIGHT_WEIGHT)\b/;
     const SEEDS = Number(process.env.SEEDS ?? 400);
     const refusals: string[] = [];
+    const headless: string[] = [];
     let asked = 0;
     for (let seed = 1; seed <= SEEDS; seed++) {
       const state = reach(seed, 10 + (seed % 30));
@@ -516,6 +520,8 @@ describe('the question and the existential are gated as the engine is', () => {
         const subject = plan.subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
         if (!(subject?.conjuncts?.[0]?.concept ?? subject?.concept) || unseeded.test(json)) continue;
         if (plan.interrogative || plan.questionRole || plan.existential) asked++;
+        const finite = [plan.contentObject, plan.adverbialClause?.clause].filter(Boolean) as { subject?: { concept?: string; conjuncts?: { concept?: string }[] } }[];
+        if (finite.some((c) => !(c.subject?.conjuncts?.[0]?.concept ?? c.subject?.concept))) headless.push(`seed ${seed}: ${json}`);
         try {
           translate(plan as never, lookupLexicalEntry);
         } catch (e) {
@@ -527,6 +533,9 @@ describe('the question and the existential are gated as the engine is', () => {
       }
     }
     expect(refusals.slice(0, 3)).toEqual([]);
+    // The empty linked clause the filter above excuses is a condition's or a coordinate's: a finite
+    // subordinate clause is folded in only once it has a subject (see attachSubordinate).
+    expect(headless.slice(0, 3)).toEqual([]);
     // The walk does reach the constructs it is here to check.
     expect(asked).toBeGreaterThan(SEEDS / 10);
   }, 120_000);

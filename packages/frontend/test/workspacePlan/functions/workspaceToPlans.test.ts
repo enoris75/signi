@@ -94,6 +94,22 @@ describe('workspaceToPlans', () => {
     expect(plan.adverbialClause).toBeUndefined();
   });
 
+  // The engine renders no finite clause without its subject (it throws), so an empty subject box
+  // folds in nothing either; an infinitive's subject goes unsaid, so it folds in all the same.
+  it('folds in no that-clause or adverbial clause until its period has a subject', () => {
+    const periods = [
+      period('main', { subject: BOY, verb: SAY }),
+      period('that', { verb: SLEEP }),
+      period('need', { subject: CAT, verb: NEED }),
+    ];
+    const [{ plan: says }] = workspaceToPlans(periods, [subordinate('s', 'content', 'main', 'that')]);
+    expect(says).not.toHaveProperty('contentObject');
+    const [{ plan: runs }] = workspaceToPlans(periods, [subordinate('s', 'adverbial', 'main', 'that', 'when')]);
+    expect(runs).not.toHaveProperty('adverbialClause');
+    const needs = workspaceToPlans(periods, [subordinate('s', 'infinitive', 'need', 'that')]).find((p) => p.containerId === 'need')!;
+    expect(needs.plan.infinitiveComplement).toBeDefined();
+  });
+
   it('translates nothing when every period is some link’s target', () => {
     const periods = [period('a', { subject: CAT, verb: EAT }), period('b', { subject: DOG, verb: SLEEP })];
     const links = [conditional('x', 'a', 'b'), conditional('y', 'b', 'a')];

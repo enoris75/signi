@@ -14,8 +14,8 @@ import { attachLinks } from "./attachLinks.ts";
 //                 subject is the governing clause's and goes unsaid ("needs **to run**"). The period
 //                 is drawn in the infinitive mood while linked, and read in it here whatever it holds.
 //
-// A clause has a verb: a linked period without one yet contributes nothing, rather than half a
-// clause. Subordinate clauses do not nest, so the clause is given no condition, coordination or
+// A clause has a verb, and a finite one a subject: a linked period without them yet contributes
+// nothing, rather than half a clause. Subordinate clauses do not nest, so the clause is given no condition, coordination or
 // clause of its own — it has no field for any of them.
 export function attachSubordinate(
   plan: Partial<PhrasePlan>,
@@ -32,6 +32,11 @@ export function attachSubordinate(
     link.kind === "infinitive" ? { ...clause.selection, infinitive: true } : clause.selection,
   );
   if (!clausePlan.verbPhrase) return;
+  // A finite clause (a that-clause, an adverbial one) says its own subject, and the engine cannot
+  // render one without: until its subject box holds a word it contributes nothing either, as the
+  // panel translates a period only once its subject has a head (see useTranslation). An infinitive's
+  // subject is the governing clause's and goes unsaid, so it needs none.
+  if (link.kind !== "infinitive" && !hasHead(clausePlan.subject)) return;
   attachLinks(clausePlan, clause, links, byId, new Set([...seen, clause.id]));
   if (link.kind === "infinitive") {
     const { verbPhrase, directObject, complements } = clausePlan;
@@ -46,4 +51,10 @@ export function attachSubordinate(
   } else {
     plan.adverbialClause = { conjunction: link.conjunction, clause: clausePlan as ContentClause };
   }
+}
+
+// Whether a noun element has a word to say: its own head, or a coordinated group's first conjunct.
+function hasHead(subject: Partial<PhrasePlan>["subject"]): boolean {
+  const el = subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
+  return Boolean(el?.conjuncts?.[0]?.concept ?? el?.concept);
 }
