@@ -190,7 +190,7 @@ export const modals: ConceptSeed[] = [
     modal: true,
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to want to; volition',
-    // "to desire to act"; de "wünschen, zu handeln", ja 行動することを望む.
+    // "to desire to act"; de "wünschen zu handeln", ja 行動することを望む.
     definition: infinitiveGloss('DESIRE', { infinitive: 'ACT' }),
     // The English lemma is "want", so the gloss disambiguates rather than repeating it.
     synonym: 'wish',

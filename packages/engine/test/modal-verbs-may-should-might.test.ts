@@ -38,7 +38,7 @@ describe('the gloss B63 ships', () => {
   test('MAY — to be allowed to act', () => {
     expect(definitionAll('MAY')).toEqual({
       en: 'to be allowed to act.', it: 'essere autorizzato ad agire.', fr: 'être autorisé à agir.',
-      de: 'berechtigt sein, zu handeln.', es: 'estar autorizado a actuar.', ja: '行動することが許可されている。',
+      de: 'berechtigt sein zu handeln.', es: 'estar autorizado a actuar.', ja: '行動することが許可されている。',
       pt: 'estar autorizado a agir.',
     });
   });

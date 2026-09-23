@@ -128,7 +128,7 @@ export function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
 // → "to strike repeatedly".
 //
 // A gloss that governs a second verb names it as `infinitive` — infinitiveGloss('DESIRE', { infinitive:
-// 'ACT' }) → "to desire to act", it "desiderare agire", de "wünschen, zu handeln"; under BE with a
+// 'ACT' }) → "to desire to act", it "desiderare agire", de "wünschen zu handeln"; under BE with a
 // predicate adjective the adjective governs it — infinitiveGloss('BE', { predicate: 'ABLE', infinitive:
 // 'ACT' }) → "to be able to act", it "essere capace di agire", ja "行動することが可能である".
 //

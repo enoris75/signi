@@ -43,7 +43,7 @@ describe('the verb roots C28 glossed', () => {
     // LEAVE's own frame inside the caused clause: Italian, Spanish and Portuguese go out *of* it.
     ['REMOVE', { en: 'to cause an object to leave a place.', it: 'indurre un oggetto a uscire da un luogo.', fr: 'induire un objet à quitter un lieu.', de: 'einen Gegenstand veranlassen, einen Ort zu verlassen.', es: 'inducir un objeto a salir de un lugar.', ja: '物体が場所を出るようにする。', pt: 'induzir um objeto a sair de um lugar.' }],
     // German zurückkehren is separable: the zu goes between the particle and the stem.
-    ['RESTORE', { en: 'to cause an object to return.', it: 'indurre un oggetto a tornare.', fr: 'induire un objet à revenir.', de: 'einen Gegenstand veranlassen, zurückzukehren.', es: 'inducir un objeto a volver.', ja: '物体が戻るようにする。', pt: 'induzir um objeto a voltar.' }],
+    ['RESTORE', { en: 'to cause an object to return.', it: 'indurre un oggetto a tornare.', fr: 'induire un objet à revenir.', de: 'einen Gegenstand veranlassen zurückzukehren.', es: 'inducir un objeto a volver.', ja: '物体が戻るようにする。', pt: 'induzir um objeto a voltar.' }],
     // HIDE's shape on PIN's participle, with es/pt estar for the transient state.
     ['UNPIN', { en: 'to cause an object not to be pinned.', it: 'indurre un oggetto a non essere fissato.', fr: 'induire un objet à ne pas être épinglé.', de: 'einen Gegenstand veranlassen, nicht angeheftet zu sein.', es: 'inducir un objeto a no estar fijado.', ja: '物体がピン留め済みではないようにする。', pt: 'induzir um objeto a não estar fixado.' }],
     ['SET', { en: 'to choose a value.', it: 'scegliere un valore.', fr: 'choisir une valeur.', de: 'einen Wert wählen.', es: 'elegir un valor.', ja: '値を選ぶ。', pt: 'escolher um valor.' }],

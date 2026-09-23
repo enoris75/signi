@@ -285,7 +285,7 @@ describe('the glosses render in every language', () => {
     // A definite head and an object under `all`.
     ['WORLD', { en: 'the place that includes all countries.', it: 'il luogo che include tutti i paesi.', fr: 'le lieu qui inclut tous les pays.', de: 'der Ort, der alle Länder umfasst.', es: 'el lugar que incluye todos los países.', ja: 'すべての国を含む場所。', pt: 'o lugar que inclui todos os países.' }],
     // ACQUIRE's shape, "to begin to have", Japanese ことが始まる included.
-    ['LEARN', { en: 'to begin to know.', it: 'iniziare a sapere.', fr: 'commencer à savoir.', de: 'beginnen, zu wissen.', es: 'empezar a saber.', ja: '知ることが始まる。', pt: 'começar a saber.' }],
+    ['LEARN', { en: 'to begin to know.', it: 'iniziare a sapere.', fr: 'commencer à savoir.', de: 'beginnen zu wissen.', es: 'empezar a saber.', ja: '知ることが始まる。', pt: 'começar a saber.' }],
     // BUY's counterpart, on EXCHANGE's purpose clause.
     ['SELL', { en: 'to give objects to acquire money.', it: 'dare oggetti per acquisire denaro.', fr: "donner des objets pour acquérir de l'argent.", de: 'Gegenstände geben, um Geld zu erwerben.', es: 'dar objetos para adquirir dinero.', ja: 'お金を取得するために物体をあげる。', pt: 'dar objetos para adquirir dinheiro.' }],
   ])('%s', (concept, rendered) => {

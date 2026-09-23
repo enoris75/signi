@@ -43,3 +43,29 @@ Pinned by `known bugs: German sets a bare zu-infinitive off with a comma (A266)`
 [infinitive-complement.test.ts](../../../packages/engine/test/infinitive-complement.test.ts).
 
 Found by P09-E12 (the builder's infinitive link, `e2e/period-links.spec.ts`).
+
+## Resolved
+
+2026-09-23. [`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) joins a
+governed zu-infinitive through `zuGroupComma`: it renders the infinitive twice, as it is and cut down
+to its verb by the new [`zuVerbOnly`](../../../packages/engine/src/languages/de/zuVerbOnly.ts), and
+writes the comma only when the two differ. `zuVerbOnly` is a whitelist: it keeps the verb, its voice
+and passive auxiliary, mood, tense, aspect and register, and drops everything else. So:
+
+- **Bare, no comma:** `zu <verb>` and the one-word separable `zurückzukehren`, under any tense of the
+  governor (`der Kater wird brauchen zu laufen.`). A passive cluster (`gesehen zu werden`) would count
+  as bare too; no plan renders one today.
+- **A group, comma kept:** an object, a complement, an adverb, a negation of its own (`braucht,
+  nicht zu laufen`), a nested infinitive, and a modal chain, which is a nested infinitive
+  (`wünschen, handeln zu wollen.`). A reflexive pronoun is taken as part of the verb (none is pinned).
+- **Nested:** each level decides for itself, so the outer group keeps its comma and a bare inner
+  infinitive loses its own: `eine Person veranlassen, berechtigt zu sein zu handeln.`
+- `um … zu` is untouched and always keeps its comma.
+
+Guarded by the flipped test and three added ones in `known bugs: German sets a bare zu-infinitive off
+with a comma (A266)` in [infinitive-complement.test.ts](../../../packages/engine/test/infinitive-complement.test.ts),
+and by [zuVerbOnly.test.ts](../../../packages/engine/src/languages/de/zuVerbOnly.test.ts). About
+thirty assertions that pinned the comma moved with it, in doing-verbs, modals,
+modal-verbs-may-should-might, everyday-nouns, saying-verbs, handling-verbs, bare-infinitive,
+causative, negation, infinitive-complement, sweep-definitions and verb-roots, plus
+`e2e/definition-tooltip.spec.ts` and `e2e/period-links.spec.ts`.

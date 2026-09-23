@@ -80,7 +80,7 @@ describe('the causative definitions (localization C08)', () => {
       en: 'to cause an action to begin.',
       it: "indurre un'azione a iniziare.",
       fr: 'induire une action à commencer.',
-      de: 'eine Handlung veranlassen, zu beginnen.',
+      de: 'eine Handlung veranlassen zu beginnen.',
       es: 'inducir una acción a empezar.',
       ja: '動作が始まるようにする。', // 始まる, the inchoative, against the 始める it defines
       pt: 'induzir uma ação a começar.',
@@ -194,7 +194,7 @@ describe('object control', () => {
       en: 'the cats caused a person to run.',
       it: 'i gatti indussero una persona a correre.',
       fr: 'les chats induisirent une personne à courir.',
-      de: 'die Kater veranlassten eine Person, zu laufen.',
+      de: 'die Kater veranlassten eine Person zu laufen.',
       es: 'los gatos indujeron a una persona a correr.',
       ja: '猫は人が走るようにしました。',
       pt: 'os gatos induziram uma pessoa a correr.',
