@@ -143,12 +143,22 @@ export function canStartCondition(links: PhraseLink[], c: PhraseContainer): bool
   );
 }
 
-// Whether `ifId` may become the "if" clause of `mainId`: not itself, no cycle, and free of any
-// other clause-level relation.
-export function canBeCondition(links: PhraseLink[], mainId: string, ifId: string): boolean {
+// Whether `ifId` may become the "if" clause of `mainId`: not itself, no cycle, free of any other
+// clause-level relation, and not a question. The engine renders an if-clause in its own mood and asks
+// nothing there, so a question would lose its force while its control stayed lit (A268), as
+// `canBeSubordinate` and `canStartCondition` refuse one for the same reason.
+export function canBeCondition(
+  containers: PhraseContainer[],
+  links: PhraseLink[],
+  mainId: string,
+  ifId: string,
+): boolean {
   if (mainId === ifId) return false;
   if (isSelfOrAncestor(ifId, mainId, links)) return false;
-  return !inClauseRelation(links, ifId);
+  if (inClauseRelation(links, ifId)) return false;
+  const clause = containers.find((c) => c.id === ifId);
+  if (!clause) return false;
+  return !clause.selection.interrogative && !clause.selection.questionRole;
 }
 
 /** One "if" clause per main clause: the one it had is replaced. */

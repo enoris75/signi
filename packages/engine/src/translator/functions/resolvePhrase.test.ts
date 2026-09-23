@@ -31,6 +31,16 @@ describe('resolvePhrase', () => {
       .toThrow(/ASK takes an indirect question/);
   });
 
+  // A267: a clause with no subject is refused by name, wherever it is linked.
+  test('refuses a clause with no subject, top or linked, with a named error', () => {
+    const cries = { verbPhrase: { verb: 'RUN' } } as unknown as PhrasePlan;
+    expect(() => resolvePhrase(cries, 'it', LOOKUP)).toThrow(/plan\.subject\.concept is required/);
+    expect(() => resolvePhrase({ ...CAT_RUNS, condition: cries }, 'it', LOOKUP)).toThrow(/subject/);
+    expect(() => resolvePhrase({ ...CAT_RUNS, coordination: { conjunction: 'and', clause: cries } }, 'it', LOOKUP)).toThrow(/subject/);
+    expect(resolvePhrase({ ...CAT_RUNS, coordination: { conjunction: 'and', clause: cries } }, 'it', LOOKUP, 'imperative')
+      .coordination?.clause.subject.conjuncts[0].head.forms['base']).toBe('gatto');
+  });
+
   // A131: KNOW is "sapere" with no object and "conoscere" with one.
   test("takes the verb's object sense only when the plan has a direct object", () => {
     const KNOWING = lexicon({ KNOW: { base: 'sapere', object_sense: 'KNOW_ACQUAINTED' }, KNOW_ACQUAINTED: { base: 'conoscere' }, CAT: { base: 'gatto' }, DOG: { base: 'cane' } });

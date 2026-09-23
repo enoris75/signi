@@ -3623,6 +3623,18 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'This period is a statement',
   },
+  // The third mood, where a link cannot take a question — an if-clause or a subordinate clause asks
+  // nothing (A268): `mood.question`'s QUESTION ("This period is a question", it "Questo periodo è una
+  // domanda").
+  'diagnostic.periodIsQuestion': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'QUESTION', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a question',
+  },
   // A period already in another link between periods: LINKED, the topic's adjective, with ALREADY (it
   // "Quel periodo è già collegato", fr "Cette période est déjà liée", ja その文はもうリンク済みです).
   'diagnostic.periodAlreadyLinked': {

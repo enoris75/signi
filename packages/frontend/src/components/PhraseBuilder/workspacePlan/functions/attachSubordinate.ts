@@ -2,6 +2,7 @@ import type { ContentClause, InfinitiveComplement, PhrasePlan } from "@signi/sha
 import { isSubordinateLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
+import { hasHead } from "./hasHead.ts";
 
 // Attach the subordinate clause sourced from `container` onto `plan` (P09-E12 D9). The linked
 // container is serialised as its own plan, with its own relative links folded in, and hung where its
@@ -51,10 +52,4 @@ export function attachSubordinate(
   } else {
     plan.adverbialClause = { conjunction: link.conjunction, clause: clausePlan as ContentClause };
   }
-}
-
-// Whether a noun element has a word to say: its own head, or a coordinated group's first conjunct.
-function hasHead(subject: Partial<PhrasePlan>["subject"]): boolean {
-  const el = subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
-  return Boolean(el?.conjuncts?.[0]?.concept ?? el?.concept);
 }

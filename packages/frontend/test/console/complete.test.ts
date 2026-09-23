@@ -297,6 +297,15 @@ describe('links and references', () => {
     expect(c.candidates[0]).toMatchObject({ insert: '{', close: '}', detailKey: 'console.new.period' });
   });
 
+  // A268: an if-clause asks nothing, so a question is not offered as one.
+  it('offers no question as an if-condition', () => {
+    for (const ask of [{ interrogative: true }, { interrogative: true, questionRole: 'subject' as const }]) {
+      const state = two();
+      state.containers[1] = { ...state.containers[1]!, selection: { ...state.containers[1]!.selection, ...ask } };
+      expect(labels(at('/if ', { state }))).toEqual(['{ … }']);
+    }
+  });
+
   it('names the bracket a link opens by what it would hold: a period, a phrase, a clause', () => {
     const key = (text: string, opts: Parameters<typeof at>[1] = {}) => at(text, opts).candidates[0]!.detailKey;
     expect(key('/join and ', { state: two() })).toBe('console.new.period');

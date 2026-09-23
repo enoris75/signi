@@ -2,6 +2,7 @@ import type { PhrasePlan } from "@signi/shared";
 import { isConditionalLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
+import { hasHead } from "./hasHead.ts";
 
 // Attach the hypothetical condition (the "if" clause) sourced from `container` onto `plan`.
 // The IF container is serialised as its own plan (with its own relative links folded in) and
@@ -21,6 +22,9 @@ export function attachCondition(
   const ifContainer = byId.get(link.target.containerId);
   if (!ifContainer || seen.has(ifContainer.id)) return;
   const condPlan = selectionToPlan(ifContainer.selection);
+  // An if-clause says its own subject, and the engine cannot render one without (A267): until its
+  // subject box holds a word it contributes nothing, as a subordinate clause waits (attachSubordinate).
+  if (!hasHead(condPlan.subject)) return;
   attachLinks(condPlan, ifContainer, links, byId, new Set([...seen, ifContainer.id]));
   plan.condition = condPlan as PhrasePlan;
 }

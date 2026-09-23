@@ -217,6 +217,10 @@ const SEGMENTS = {
   linkCircle: (_: { period: number }) => [say("diagnostic.chooseOtherPeriod")],
   clauseSelf: (_: { role: ClauseRole }) => [say("diagnostic.chooseOtherPeriod")],
   clauseInOtherLink: (a: { period: number }) => [say("diagnostic.periodAlreadyLinked", `#${a.period}`)],
+  clauseQuestion: (_: { period: number; role: ClauseRole }) => [
+    say("diagnostic.periodIsQuestion"),
+    say("diagnostic.chooseOtherPeriod"),
+  ],
   clauseCannot: (_: { period: number; role: ClauseRole }) => [say("diagnostic.chooseOtherPeriod")],
 
   // ── The console's own (usePhraseConsole.ts) ──

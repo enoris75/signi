@@ -502,7 +502,22 @@ describe('known bugs: a linked clause with no subject crashes the engine (A267)'
     })],
   ];
 
-  test.fails.each(linked)('%s is refused with an error naming its missing subject', (_, plan) => {
+  test.each(linked)('%s is refused with an error naming its missing subject', (_, plan) => {
     expect(() => say(plan, 'en')).toThrow(/subject/);
+  });
+
+  test('the error is a named one, not a TypeError from the innards', () => {
+    for (const [, plan] of linked) {
+      let thrown: unknown;
+      try { say(plan, 'en'); } catch (error) { thrown = error; }
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown).not.toBeInstanceOf(TypeError);
+    }
+  });
+
+  test('regression: a command\'s coordinate takes its addressee, and a purpose clause needs none', () => {
+    const command = { ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('MOUSE') }), imperative: true };
+    expect(say({ ...command, coordination: { conjunction: 'and', clause: cry } }, 'en')).toBe('eat the mouse, and cry.');
+    expect(say(clause(np('MAN'), 'RUN', { purpose: { verbPhrase: { verb: 'CRY' } } }), 'de')).toBe('der Mann läuft, um zu weinen.');
   });
 });

@@ -43,7 +43,7 @@ describe('linkRules', () => {
   it('gives a period one subordinate role: a relative gap is no if-clause, coordinate or instrument', () => {
     const links = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'C', nounKey: 'subject' }, 'l1');
     expect(inClauseRelation(links, 'C')).toBe(true);
-    expect(canBeCondition(links, 'B', 'C')).toBe(false);
+    expect(canBeCondition(CONTAINERS, links, 'B', 'C')).toBe(false);
     expect(canBeCoordinate(CONTAINERS, links, 'B', 'C')).toBe(false);
     expect(canBeInstrument(CONTAINERS, links, 'B', 'C')).toBe(false);
   });
@@ -165,7 +165,7 @@ describe('linkRules', () => {
 // question control stays lit and locked. `canBeSubordinate` refuses a question for the same reason
 // (P09-E12 M5), and `canStartCondition` refuses one as the main clause. The fix gives
 // `canBeCondition` the containers first, as `canBeCoordinate` and `canBeSubordinate` take them; the
-// pin calls it in that shape, which today lands the containers where the links belong.
+// pin calls it in that shape, through the cast it was written with before the signature changed.
 describe('known bugs: a question can become an if-clause (A268)', () => {
   const conditionAllowed = canBeCondition as unknown as (
     containers: PhraseContainer[], links: PhraseLink[], mainId: string, ifId: string,
@@ -173,7 +173,7 @@ describe('known bugs: a question can become an if-clause (A268)', () => {
   const question: PhraseContainer = { id: 'Q', selection: { ...B.selection, interrogative: true } };
   const wh: PhraseContainer = { id: 'W', selection: { ...B.selection, interrogative: true, questionRole: 'subject' } };
 
-  it.fails('refuses a yes/no or a wh-question as the if-clause, and still takes a statement', () => {
+  it('refuses a yes/no or a wh-question as the if-clause, and still takes a statement', () => {
     expect(conditionAllowed([A, B, question, wh], [], 'A', 'Q')).toBe(false);
     expect(conditionAllowed([A, B, question, wh], [], 'A', 'W')).toBe(false);
     expect(conditionAllowed([A, B, question, wh], [], 'A', 'B')).toBe(true);

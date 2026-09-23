@@ -652,7 +652,7 @@ describe('known bugs: API errors sent as an HTML page', () => {
 describe('known bugs: a linked clause with no subject answers 500 (A267)', () => {
   const cry = { verbPhrase: { verb: 'CRY' } };
   const main = { subject: { concept: 'MAN' }, verbPhrase: { verb: 'RUN' } };
-  test.fails.each([
+  test.each([
     ['plan.coordination.clause', { ...main, coordination: { conjunction: 'and', clause: cry } }],
     ['plan.condition', { ...main, condition: cry }],
     ['plan.contentObject', { subject: { concept: 'MAN' }, verbPhrase: { verb: 'SAY' }, contentObject: cry }],
@@ -662,6 +662,13 @@ describe('known bugs: a linked clause with no subject answers 500 (A267)', () =>
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: `${path}.subject.concept is required` });
   });
+
+  test('translates a command whose coordinate has no subject of its own: it takes the addressee', async () => {
+    const plan = { subject: { concept: 'SECOND_PERSON' }, verbPhrase: { verb: 'EAT' }, imperative: true, coordination: { conjunction: 'and', clause: cry } };
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ translations: translate(plan as unknown as PhrasePlan, lookupLexicalEntry) });
+  });
 });
 
 // A273. A relative clause with no verb phrase gets past `/api/translate`'s checks and dies in the
@@ -669,7 +676,7 @@ describe('known bugs: a linked clause with no subject answers 500 (A267)', () =>
 // request and wants a 400 naming what is missing. The engine's side is pinned in
 // packages/engine/test/relative.test.ts.
 describe('known bugs: a relative clause with no verb phrase answers 500 (A273)', () => {
-  test.fails.each([
+  test.each([
     ['on the subject', { subject: { concept: 'CAT', relative: {} }, verbPhrase: { verb: 'RUN' } }],
     ['on the object', { subject: { concept: 'MAN' }, verbPhrase: { verb: 'SEE' }, directObject: { concept: 'CAT', relative: {} } }],
   ])('rejects a plan with a verbless relative clause %s', async (_, plan) => {
@@ -684,7 +691,7 @@ describe('known bugs: a relative clause with no verb phrase answers 500 (A273)',
 // and served as a 200. Like A267 and A273 it is a malformed plan, and wants a 400 naming what is
 // missing. The engine's side is pinned in packages/engine/test/relative.test.ts.
 describe('known bugs: an object relative with no subject is served (A275)', () => {
-  test.fails.each([
+  test.each([
     ['an object gap', { subject: { concept: 'CAT', relative: { headRole: 'directObject', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'RUN' } }],
     ['a place gap', { subject: { concept: 'HOUSE', relative: { headRole: 'locative', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'BURN' } }],
   ])('rejects a relative clause with %s and no subject', async (_, plan) => {

@@ -55,3 +55,34 @@ block of the first name in
 [workspaceToPlans.test.ts](../../../packages/frontend/test/workspacePlan/functions/workspaceToPlans.test.ts).
 
 Found by P09-E12 while its tasks were being written.
+
+## Resolved
+
+2026-09-23. Refused at all three layers, as the Shape asked.
+
+- **Engine.** [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts)
+  throws a named `Error` (`a clause needs a subject: plan.subject.concept is required (A267)`) for a
+  clause with no subject, before it resolves one. A command's coordinate is given its addressee
+  first, and a purpose clause or an infinitive complement its controller, so neither reaches it.
+- **Backend.** [`planError`](../../../packages/backend/src/planError.ts), which
+  [`/api/translate`](../../../packages/backend/src/index.ts) now calls in place of its top-clause
+  check, walks `condition`, `contentObject`, `contentSubject`, `coordination.clause` and
+  `adverbialClause.clause` recursively with the same first-conjunct test, and answers 400 with the
+  path: `plan.coordination.clause.subject.concept is required`,
+  `plan.condition.contentObject.subject.concept is required`. A top-level command's coordinate is
+  exempt (unless a condition outranks the command).
+- **Builder.** [`attachCondition`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/attachCondition.ts)
+  and [`attachCoordination`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/attachCoordination.ts)
+  return early on a clause whose subject has no head, as
+  [`attachSubordinate`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/attachSubordinate.ts)
+  does. The shared test is its own file now,
+  [`hasHead.ts`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/hasHead.ts).
+
+Guarded by the formerly-`.fails` tests of the three `known bugs: … (A267)` blocks, in
+[clause.test.ts](../../../packages/engine/test/clause.test.ts) (plus the named-error and the
+command/purpose regression tests), [index.test.ts](../../../packages/backend/src/index.test.ts) (plus a
+command's subjectless coordinate answering 200) and
+[workspaceToPlans.test.ts](../../../packages/frontend/test/workspacePlan/functions/workspaceToPlans.test.ts)
+(plus the fold-in once filled and the command's coordinate), and by
+[planError.test.ts](../../../packages/backend/src/planError.test.ts) and a case in
+[resolvePhrase.test.ts](../../../packages/engine/src/translator/functions/resolvePhrase.test.ts).

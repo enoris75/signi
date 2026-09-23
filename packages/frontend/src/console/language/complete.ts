@@ -789,7 +789,7 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
         return;
       }
       case "condition":
-        if (canBeCondition(state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
+        if (canBeCondition(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
         return;
       case "join":
         if (canBeCoordinate(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));

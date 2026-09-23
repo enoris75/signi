@@ -8,7 +8,7 @@ import { BOY, byId, CHOOSE, conditional, HOUSE, instrumental, KNIFE, period, rel
 const MAIN = period('main', { subject: BOY, verb: START, locative: HOUSE });
 
 const attach = (links: PhraseLink[], instrument: PhraseSelection, seen = new Set(['main'])) => {
-  const periods: PhraseContainer[] = [MAIN, period('tool', instrument), period('sees', { verb: SEE })];
+  const periods: PhraseContainer[] = [MAIN, period('tool', instrument), period('sees', { subject: BOY, verb: SEE })];
   const plan = selectionToPlan(MAIN.selection);
   attachInstrumental(plan, MAIN, links, byId(...periods), seen);
   return plan;

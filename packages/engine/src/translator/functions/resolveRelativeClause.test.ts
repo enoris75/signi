@@ -5,7 +5,22 @@ import { resolveRelativeClause } from './resolveRelativeClause.js';
 describe('resolveRelativeClause', () => {
   test('the head fills the subject slot unless the clause names another', () => {
     expect(resolveRelativeClause({ verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP).headRole).toBe('subject');
-    expect(resolveRelativeClause({ headRole: 'locative', verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP).headRole).toBe('locative');
+    expect(resolveRelativeClause({ headRole: 'locative', subject: { concept: 'DOG' }, verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP).headRole).toBe('locative');
+  });
+
+  // A273
+  test('refuses a clause with no verb phrase by name', () => {
+    const verbless = { headRole: 'directObject', subject: { concept: 'DOG' } } as unknown as Parameters<typeof resolveRelativeClause>[0];
+    expect(() => resolveRelativeClause(verbless, 'it', LOOKUP)).toThrow(/relative\.verbPhrase\.verb is required/);
+  });
+
+  // A275
+  test('refuses a non-subject gap with no subject of its own by name, and needs none for a subject gap', () => {
+    for (const headRole of ['directObject', 'locative', 'possessor'] as const) {
+      expect(() => resolveRelativeClause({ headRole, verbPhrase: { verb: 'EAT' } }, 'it', LOOKUP))
+        .toThrow(new RegExp(`head is its ${headRole} .*relative\\.subject\\.concept is required`));
+    }
+    expect(resolveRelativeClause({ headRole: 'subject', verbPhrase: { verb: 'EAT' } }, 'it', LOOKUP).subject).toBeUndefined();
   });
 
   test('resolves its own subject, its verb phrase in no mood, and its complements', () => {
@@ -29,10 +44,10 @@ describe('resolveRelativeClause', () => {
   });
 
   test("carries the gap's specifiers only when there are some", () => {
-    const withUnder = resolveRelativeClause({ headRole: 'locative', headSpecifiers: [{ kind: 'path', value: 'under' }], verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP);
+    const withUnder = resolveRelativeClause({ headRole: 'locative', subject: { concept: 'DOG' }, headSpecifiers: [{ kind: 'path', value: 'under' }], verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP);
     expect(withUnder.headSpecifiers).toEqual([{ kind: 'path', value: 'under' }]);
-    expect(resolveRelativeClause({ headRole: 'locative', headSpecifiers: [], verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
-    expect(resolveRelativeClause({ headRole: 'locative', verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
+    expect(resolveRelativeClause({ headRole: 'locative', subject: { concept: 'DOG' }, headSpecifiers: [], verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
+    expect(resolveRelativeClause({ headRole: 'locative', subject: { concept: 'DOG' }, verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
   });
 
   // A131: the head gapped as the object is an object too, so KNOW takes its object sense for it.

@@ -327,7 +327,7 @@ const OPS: Op[] = [
       return { ...s, links: L.addRelativeLink(s.links, { containerId: source.id, nounKey: from.address }, t, id()) };
     }
     if (r < 0.6) {
-      if (!L.canStartCondition(s.links, source) || !L.canBeCondition(s.links, source.id, target.id)) return undefined;
+      if (!L.canStartCondition(s.links, source) || !L.canBeCondition(s.containers, s.links, source.id, target.id)) return undefined;
       return { ...s, links: L.addConditional(s.links, source.id, target.id, id()) };
     }
     if (r < 0.8) {
@@ -520,7 +520,7 @@ describe('the question and the existential are gated as the engine is', () => {
         const subject = plan.subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
         if (!(subject?.conjuncts?.[0]?.concept ?? subject?.concept) || unseeded.test(json)) continue;
         if (plan.interrogative || plan.questionRole || plan.existential) asked++;
-        const finite = [plan.contentObject, plan.adverbialClause?.clause].filter(Boolean) as { subject?: { concept?: string; conjuncts?: { concept?: string }[] } }[];
+        const finite = [plan.contentObject, plan.adverbialClause?.clause, plan.condition, plan.coordination?.clause].filter(Boolean) as { subject?: { concept?: string; conjuncts?: { concept?: string }[] } }[];
         if (finite.some((c) => !(c.subject?.conjuncts?.[0]?.concept ?? c.subject?.concept))) headless.push(`seed ${seed}: ${json}`);
         try {
           translate(plan as never, lookupLexicalEntry);
@@ -533,8 +533,9 @@ describe('the question and the existential are gated as the engine is', () => {
       }
     }
     expect(refusals.slice(0, 3)).toEqual([]);
-    // The empty linked clause the filter above excuses is a condition's or a coordinate's: a finite
-    // subordinate clause is folded in only once it has a subject (see attachSubordinate).
+    // No linked clause is folded in without a subject: a finite subordinate clause, an if-clause and a
+    // coordinate wait for one (see attachSubordinate, attachCondition, attachCoordination; A267), and
+    // a command's coordinate is given the addressee.
     expect(headless.slice(0, 3)).toEqual([]);
     // The walk does reach the constructs it is here to check.
     expect(asked).toBeGreaterThan(SEEDS / 10);
