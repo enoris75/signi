@@ -2,8 +2,8 @@
 
 **Construct:** a role said of the **subject** while the verb does something else — "the woman acts
 **as a friend**", *come amica*, *als Freundin*, 友達として. From
-[P09-E2's D3](P09-E2-complement-types.md#d3-as-is-a-role-on-the-subject-and-its-host-is-the-open-question),
-deferred there with "if it is wanted, take (1)", and its [Done](P09-E2-complement-types.md#done)
+[P09-E2's D3](Z-done/P09-E2-complement-types.md#d3-as-is-a-role-on-the-subject-and-its-host-is-the-open-question),
+deferred there with "if it is wanted, take (1)", and its [Done](Z-done/P09-E2-complement-types.md#done)
 follow-ups.
 **Shape:** one new `ComplementType`, `role`, paying E2's seven-site table once more. Its marker, its
 article rule and its seven words are the essive's

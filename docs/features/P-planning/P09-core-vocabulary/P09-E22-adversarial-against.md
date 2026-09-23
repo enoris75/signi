@@ -8,8 +8,8 @@ E1 seeded the physical *against* (contact) and ruled this reading out.
 marker the way THINK governs its topic's (`topic_prep`).
 **Scope:** all 7 languages, plan-only (no box, like E2's two).
 **Status:** planning, unscheduled. Filed 2026-09-23 from P09's follow-ups
-([E1](P09-E1-spatial-relations.md#d3-against-is-contact-not-opposition) D3,
-[E2](P09-E2-complement-types.md#out-of-scope-follow-ups) *Out of scope*).
+([E1](Z-done/P09-E1-spatial-relations.md#d3-against-is-contact-not-opposition) D3,
+[E2](Z-done/P09-E2-complement-types.md#out-of-scope-follow-ups) *Out of scope*).
 **Words:** *against* (opposition). **FIGHT is not seeded**; PLAY_GAME is, and carries the tests.
 
 | lang | the cat plays **against the dog** | the cat plays **against him** | the man fights **against the dog** (FIGHT, unseeded) |

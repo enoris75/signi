@@ -78,9 +78,9 @@ the superlative, the Japanese lowered degree), and A259 Japanese *while* under a
 
 The seven filed on 2026-09-23, **A247–A253**, were met by the lanes that shipped P09's
 grammar tasks
-[E2](../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
-[E4](../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and
-[E5](../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md), and fixed the same
+[E2](../features/P-planning/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
+[E4](../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md) and
+[E5](../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md), and fixed the same
 day. Each was a construct those tasks first made reachable meeting a rule the engine did not have:
 mood read off polarity (A247, a lexeme's `content_clause_mood_negative`), a conjunction deciding its
 clause's tense (A250–A252, with a new Portuguese future subjunctive), an intensifier that changes word

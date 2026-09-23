@@ -105,4 +105,4 @@ One branch in `jaCounted`, and the two existing shapes left exactly as they are.
 
 - **Other compound counters** outside kinship (五人家族 is in D2's list; 三日月 is not a count at all).
 - **Ordinal kin** ("the second son", 次男), which is a different word rather than a counted phrase.
-- **"How many siblings?"** — needs [P09-E6](../P09-core-vocabulary/P09-E6-questions-and-existentials.md).
+- **"How many siblings?"** — needs [P09-E6](../P09-core-vocabulary/Z-done/P09-E6-questions-and-existentials.md).

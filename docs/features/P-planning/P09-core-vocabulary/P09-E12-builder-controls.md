@@ -13,14 +13,14 @@ the frontend lacks (§1–§3). All 7 languages for every new UI string.
 | # | construct | plan field | built by | seat (D1) |
 |---|---|---|---|---|
 | M1 | the temporal complement + its relation toolbar | `complements.temporal`, `{ kind: 'temporal' }` | [C29](../../../localization/done/C29-temporal-complement.md) | a box; toggle on the verb's dotted ring |
-| M2 | the purpose complement ("for the man") | `complements.purpose` | [E2](P09-E2-complement-types.md) | a box; toggle on the verb's dotted ring |
-| M3 | the topic complement ("about the cat") | `complements.topic` | [E2](P09-E2-complement-types.md) | a box; toggle on the verb's dotted ring |
-| M4 | the standard of comparison ("bigger than the dog") | `NounPhrase.headStandard` | [E5](P09-E5-standard-of-comparison.md) | a hosted ring on the predicative |
+| M2 | the purpose complement ("for the man") | `complements.purpose` | [E2](Z-done/P09-E2-complement-types.md) | a box; toggle on the verb's dotted ring |
+| M3 | the topic complement ("about the cat") | `complements.topic` | [E2](Z-done/P09-E2-complement-types.md) | a box; toggle on the verb's dotted ring |
+| M4 | the standard of comparison ("bigger than the dog") | `NounPhrase.headStandard` | [E5](Z-done/P09-E5-standard-of-comparison.md) | a hosted ring on the predicative |
 | M5 | the question mood (yes/no) | `interrogative` | [C10](../../../localization/done/C10-ui-questions.md) | the period border |
-| M6 | the slot asked about, and its animacy | `questionRole`, `questionSpecifiers`, `questionAnimate` | [E6](P09-E6-questions-and-existentials.md) | the ring of the asked constituent |
-| M7 | the existential ("there is") | `existential` | [E6](P09-E6-questions-and-existentials.md#the-existential) | the subject's ring |
-| M8 | the object content clause ("says that …") | `contentObject` | [E4](P09-E4-clauses.md) | the period border, a link |
-| M9 | the adverbial clause ("when …") | `adverbialClause` | [E4](P09-E4-clauses.md) | the period border, a link |
+| M6 | the slot asked about, and its animacy | `questionRole`, `questionSpecifiers`, `questionAnimate` | [E6](Z-done/P09-E6-questions-and-existentials.md) | the ring of the asked constituent |
+| M7 | the existential ("there is") | `existential` | [E6](Z-done/P09-E6-questions-and-existentials.md#the-existential) | the subject's ring |
+| M8 | the object content clause ("says that …") | `contentObject` | [E4](Z-done/P09-E4-clauses.md) | the period border, a link |
+| M9 | the adverbial clause ("when …") | `adverbialClause` | [E4](Z-done/P09-E4-clauses.md) | the period border, a link |
 | M10 | the infinitive complement ("needs to run") | `infinitiveComplement` | the engine, for the modals' glosses; [P09 Follow-ups](README.md#follow-ups) | the period border, a link |
 
 ## Why

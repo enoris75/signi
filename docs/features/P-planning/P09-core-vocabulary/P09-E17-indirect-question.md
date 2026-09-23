@@ -1,7 +1,7 @@
 # P09-E17. The indirect question — asks whether the cat runs, asks what the cat eats
 
 **Construct:** the **embedded question**: a content clause in object position
-([P09-E4](P09-E4-clauses.md)'s `contentObject`) whose force is interrogative — the yes/no one under
+([P09-E4](Z-done/P09-E4-clauses.md)'s `contentObject`) whose force is interrogative — the yes/no one under
 an interrogative complementizer ("asks **whether** the cat runs"), and the wh-one with its word
 fronted and **no inversion** ("asks **what** the cat eats").
 **Shape:** E4's object clause with E6's force moved inside it. The fields exist on `PhrasePlan`;

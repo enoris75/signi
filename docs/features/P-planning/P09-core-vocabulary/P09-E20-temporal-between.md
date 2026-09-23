@@ -9,7 +9,7 @@ second landmark.
 temporal relation. No new complement, no new field, no new lifting machinery.
 **Scope:** all 7 languages, plan-only like the rest of the temporal complement (no ring yet).
 **Status:** planning, unscheduled. Filed 2026-09-23 from P09's follow-ups
-([E1](P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`between` as a temporal relation*).
+([E1](Z-done/P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`between` as a temporal relation*).
 **Words:** *between* (of times).
 
 | lang | the cat runs **between this day and that day** | the cat runs **between the day and the night** |

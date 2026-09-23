@@ -2,9 +2,9 @@
 
 **Construct:** the standard of comparison on an **attributive** adjective — "a bigger cat than the
 dog", *un gatto più grande del cane*, *einen größeren Kater als den Hund*, 犬より大きい猫. From
-[P09-E5's D2](P09-E5-standard-of-comparison.md#d2-predicative-comparison-only-in-a-first-pass), which
+[P09-E5's D2](Z-done/P09-E5-standard-of-comparison.md#d2-predicative-comparison-only-in-a-first-pass), which
 shipped the predicative `headStandard` alone and named this as the follow-up, and its
-[Done](P09-E5-standard-of-comparison.md#done).
+[Done](Z-done/P09-E5-standard-of-comparison.md#done).
 **Shape:** one field beside [`adjectiveDegrees`](../../../../packages/shared/src/index.ts#L662),
 index-aligned like it (D1); E5's per-degree words, reused unchanged; a new **placement** per language
 (D2), which is the whole of the work.

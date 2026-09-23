@@ -2,9 +2,9 @@
 
 **Construct:** the set a superlative selects from — "the cat is the biggest **of the animals**", *il
 più grande degli animali*, *das größte der Tiere*, 動物の中で最も大きい. From
-[P09-E5's D3](P09-E5-standard-of-comparison.md#d3-the-superlative-takes-a-partitive-not-a-standard),
+[P09-E5's D3](Z-done/P09-E5-standard-of-comparison.md#d3-the-superlative-takes-a-partitive-not-a-standard),
 which had the translator drop a standard on `most` / `least` and filed this as the follow-up, and its
-[Done](P09-E5-standard-of-comparison.md#done) (the "`most` + standard (dropped)" row).
+[Done](Z-done/P09-E5-standard-of-comparison.md#done) (the "`most` + standard (dropped)" row).
 **Shape:** no new field — `headStandard` on `most` / `least` renders as the partitive (D1); a
 per-language `*_DOMAIN` word, and a predicative superlative that takes its article in English and
 German when a set follows (D3).

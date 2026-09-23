@@ -6,7 +6,7 @@
 **Shape:** one map entry and the tests that pin the old word. The other six languages change nothing.
 **Scope:** English only; the other six verified unchanged.
 **Status:** planning, unscheduled. Filed 2026-09-23 from P09's follow-ups
-([E1](P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`onto` as a distinct goal*).
+([E1](Z-done/P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`onto` as a distinct goal*).
 **Words:** *onto*.
 
 | lang | the cat jumps **onto** the wall (direction) | the cat jumps **on** the wall (locative) |

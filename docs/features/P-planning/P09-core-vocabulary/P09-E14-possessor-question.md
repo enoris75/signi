@@ -1,7 +1,7 @@
 # P09-E14. The possessor question — whose food does the cat eat?
 
 **Construct:** the wh-question whose word **carries a noun with it** — "**whose food** does the cat
-eat?", the one `RelativeClause.headRole` value [P09-E6](P09-E6-questions-and-existentials.md) D1
+eat?", the one `RelativeClause.headRole` value [P09-E6](Z-done/P09-E6-questions-and-existentials.md) D1
 left out of `questionRole`.
 **Shape:** a gap *inside* a noun phrase, not a clause slot. The slot stays filled (the possessed
 noun is spoken), its possessor is the question word, and the whole phrase — or, in Romance, the

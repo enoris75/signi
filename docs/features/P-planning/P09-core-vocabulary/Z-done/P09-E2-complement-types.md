@@ -1,7 +1,7 @@
 # P09-E2. New complement types — for, about, as, without
 
-**Construct:** the complements [`ComplementType`](../../../../packages/shared/src/index.ts#L238) has
-no member for, from [P09 §3](README.md#3-needs-the-engine-first-11-constructs--5-open).
+**Construct:** the complements [`ComplementType`](../../../../../packages/shared/src/index.ts#L238) has
+no member for, from [P09 §3](../README.md#3-needs-the-engine-first-11-constructs--5-open).
 **Shape:** P09 filed four. **Two are new types** (`purpose`, `topic`); the other two are already in
 the model and need a host, not a type — see *Today*.
 **Scope:** all 7 languages, and the first complement box added to the canvas since it was laid out.
@@ -100,18 +100,18 @@ Verified at HEAD, 2026-09-23. **Two of P09's four are already in the model**, wh
 that shapes this task:
 
 - **`without` is `instrumental` + `negative`, not a new type.**
-  [`Complement.negative`](../../../../packages/shared/src/index.ts#L1031) exists and its doc comment
+  [`Complement.negative`](../../../../../packages/shared/src/index.ts#L1031) exists and its doc comment
   says why it is on `Complement` rather than on the cause alone: "so a second adjunct can take it
   without a model change; every other complement ignores it today." A privative is the negated
   means, exactly as the negative cause is the denied reason. This is the change the field was put
   there for.
 - **`as` is already spelled in all seven.** The essive
-  ([`ObjectPredication`](../../../../packages/shared/src/index.ts#L475)) renders *as / come / comme /
+  ([`ObjectPredication`](../../../../../packages/shared/src/index.ts#L475)) renders *as / come / comme /
   como / als / として* and drops the article in Romance and German ("come condizione", "als
   Bedingung"). What it has no host for is a role said of the **subject** ("works as a teacher")
   rather than of the object ("use this as the condition"). The marker, the article-dropping and the
   seven words are done; only the slot is missing.
-- **`for` is not the purpose clause.** [`PurposeClause`](../../../../packages/shared/src/index.ts#L1126)
+- **`for` is not the purpose clause.** [`PurposeClause`](../../../../../packages/shared/src/index.ts#L1126)
   already renders the *clausal* purpose ("click **to change**", German *um … zu* extraposed, Japanese
   before the predicate). E2's *for* is the **nominal** one — a beneficiary or a goal that is a thing,
   not an act. The two must be told apart in the doc comment or they will be built twice.
@@ -120,14 +120,14 @@ What a new complement type costs, all of it verified:
 
 | site | file | what it is |
 |---|---|---|
-| the union | [`index.ts:238`](../../../../packages/shared/src/index.ts#L238) | `ComplementType` |
-| the builder's set | [`index.ts:248`](../../../../packages/shared/src/index.ts#L248) | `COMPLEMENT_TYPES` — **presence here is what gives a box on the canvas** |
-| the engine's order | [`index.ts:266`](../../../../packages/shared/src/index.ts#L266) | `COMPLEMENT_RENDER_ORDER` — holds all of them, not just the offered ones |
-| the label | [`index.ts:268`](../../../../packages/shared/src/index.ts#L268) | `COMPLEMENT_LABELS` |
-| the determiner rule | [`index.ts:291`](../../../../packages/shared/src/index.ts#L291) | `DETERMINER_COMPLEMENT_TYPES` |
-| what a verb licenses | [`index.ts:537`](../../../../packages/shared/src/index.ts#L537) | `Concept.complements` |
-| en | [`en.consts.ts:23`](../../../../packages/engine/src/languages/en/en.consts.ts#L23) | one `PREP` entry |
-| ja | [`ja.consts.ts:16`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L16) | one `PARTICLE` entry |
+| the union | [`index.ts:238`](../../../../../packages/shared/src/index.ts#L238) | `ComplementType` |
+| the builder's set | [`index.ts:248`](../../../../../packages/shared/src/index.ts#L248) | `COMPLEMENT_TYPES` — **presence here is what gives a box on the canvas** |
+| the engine's order | [`index.ts:266`](../../../../../packages/shared/src/index.ts#L266) | `COMPLEMENT_RENDER_ORDER` — holds all of them, not just the offered ones |
+| the label | [`index.ts:268`](../../../../../packages/shared/src/index.ts#L268) | `COMPLEMENT_LABELS` |
+| the determiner rule | [`index.ts:291`](../../../../../packages/shared/src/index.ts#L291) | `DETERMINER_COMPLEMENT_TYPES` |
+| what a verb licenses | [`index.ts:537`](../../../../../packages/shared/src/index.ts#L537) | `Concept.complements` |
+| en | [`en.consts.ts:23`](../../../../../packages/engine/src/languages/en/en.consts.ts#L23) | one `PREP` entry |
+| ja | [`ja.consts.ts:16`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L16) | one `PARTICLE` entry |
 | it/fr/es/pt/de | each `complementsPhrase` | one `else if (type === …)` branch in the head-selection chain |
 
 ## Design
@@ -145,7 +145,7 @@ duplicate machinery that renders today.
 seven — *per / pour / para / para / für / のために* — and no language splits them the way it splits
 the instrument from the companion. **Recommendation: one type, and let the noun's animacy carry the
 reading**, as `manner` lets the head noun carry its relation
-([`MannerRelation`](../../../../packages/shared/src/index.ts#L401), read off `Concept.mannerRelation`
+([`MannerRelation`](../../../../../packages/shared/src/index.ts#L401), read off `Concept.mannerRelation`
 and never exposed). If a language later needs the split, it is a specifier on the type, not a second
 type.
 
@@ -180,7 +180,7 @@ the `PARTICLE` entry's comment, because the word "topic" invites exactly this mi
 
 German `über` takes the **accusative** in this sense (*über den Kater*), against the dative it takes
 as a spatial relation (*über dem Kater*) — the same two-way alternation
-[`spatialCase`](../../../../packages/engine/src/languages/de/spatialCase.ts) already encodes for the
+[`spatialCase`](../../../../../packages/engine/src/languages/de/spatialCase.ts) already encodes for the
 locative, and a second reason the branch needs its own `_case`.
 
 ## 1. Shared types

@@ -1,10 +1,10 @@
 # P09-E1. Spatial relations — on, between, against
 
-**Construct:** the relations [`PathSpecifier`](../../../../packages/shared/src/index.ts#L323) is
-missing, the last row of [P09 §3](README.md#3-needs-the-engine-first-11-constructs--5-open) that is
+**Construct:** the relations [`PathSpecifier`](../../../../../packages/shared/src/index.ts#L323) is
+missing, the last row of [P09 §3](../README.md#3-needs-the-engine-first-11-constructs--5-open) that is
 pure vocabulary.
 **Shape:** two more `PathSpecifier` values (`on`, `against`) built exactly like
-[A02](../../A-ready/A02-locative-near-far/README.md), plus one — **`between`** — that is a value too
+[A02](../../../A-ready/A02-locative-near-far/README.md), plus one — **`between`** — that is a value too
 but the **first relation that scopes over a coordinated head instead of distributing across it**.
 **Scope:** all 7 languages. Offered on the locative and route toolbars; the `direction` complement
 reads the same set and needs no new offering.
@@ -24,7 +24,7 @@ renders — see *Today*.
 | ja | 猫は家の上にいます。 | 猫は家と市場の間で走ります。 | 猫は壁に走ります。 |
 
 **This is engine output** (2026-09-23), pinned in
-[`test/complements/spatialRelations.test.ts`](../../../../packages/engine/test/complements/spatialRelations.test.ts).
+[`test/complements/spatialRelations.test.ts`](../../../../../packages/engine/test/complements/spatialRelations.test.ts).
 The table first proposed here used *sleep*, *table* and *tree*, none of which is seeded; the house,
 the market and the wall stand in, since the relation belongs to the complement and not the noun.
 The proposed Japanese 壁にもたれて寝ます was a paraphrase no relation can produce — see D3 and *Done*.
@@ -44,21 +44,21 @@ see *Design*.
 
 Verified at HEAD, 2026-09-23.
 
-- [`PathSpecifier`](../../../../packages/shared/src/index.ts#L323) is
+- [`PathSpecifier`](../../../../../packages/shared/src/index.ts#L323) is
   `in | through | under | over | around | behind | in_front_of` — seven values, with
-  [`PATH_SPECIFIERS`](../../../../packages/shared/src/index.ts#L325) the list the toolbars read and
-  [`DEFAULT_ROUTE_SPECIFIER`](../../../../packages/shared/src/index.ts#L328) / `DEFAULT_LOCATIVE_SPECIFIER`
+  [`PATH_SPECIFIERS`](../../../../../packages/shared/src/index.ts#L325) the list the toolbars read and
+  [`DEFAULT_ROUTE_SPECIFIER`](../../../../../packages/shared/src/index.ts#L328) / `DEFAULT_LOCATIVE_SPECIFIER`
   the two fallbacks.
 - **`into` is already built, and P09 §3 was wrong to list it here.** A `direction` complement reads
-  the same set through [`directionSpecifier`](../../../../packages/engine/src/functions/directionSpecifier.ts),
+  the same set through [`directionSpecifier`](../../../../../packages/engine/src/functions/directionSpecifier.ts),
   English maps direction + `in` to *into* in
-  [`GOAL_PREP`](../../../../packages/engine/src/languages/en/en.consts.ts#L107) (`{ ...PATH_PREP, in: 'into' }`),
-  and German gets it from the case: [`spatialCase`](../../../../packages/engine/src/languages/de/spatialCase.ts)
+  [`GOAL_PREP`](../../../../../packages/engine/src/languages/en/en.consts.ts#L107) (`{ ...PATH_PREP, in: 'into' }`),
+  and German gets it from the case: [`spatialCase`](../../../../../packages/engine/src/languages/de/spatialCase.ts)
   returns `acc` for every relation under a `direction`, which is the whole of the difference between
   *in die Luft* and *in der Luft*. Nothing in E1 needs to touch it.
-- **A coordinated landmark is already representable.** [`Complement.phrase`](../../../../packages/shared/src/index.ts#L1018)
+- **A coordinated landmark is already representable.** [`Complement.phrase`](../../../../../packages/shared/src/index.ts#L1018)
   is a `NounElement`, so it may be a `NounGroup` of conjuncts joined by
-  [`NOUN_COORD_CONJUNCTIONS`](../../../../packages/shared/src/index.ts#L877). P09 §3's note that
+  [`NOUN_COORD_CONJUNCTIONS`](../../../../../packages/shared/src/index.ts#L877). P09 §3's note that
   "`between` needs two landmarks" is answered by the model as it stands — the problem is elsewhere,
   and D2 below states it.
 
@@ -67,13 +67,13 @@ The relation is rendered per language in a single place each, which is what make
 
 | lang | file | shape |
 |---|---|---|
-| en | [`en.consts.ts:89`](../../../../packages/engine/src/languages/en/en.consts.ts#L89) | `PATH_PREP` map, and `GOAL_PREP` overriding only `in` |
-| it | [`it/spatialHead.ts`](../../../../packages/engine/src/languages/it/spatialHead.ts) | switch; fusing `prepDet` vs. non-fusing `artFor` |
-| fr | [`fr/spatialHead.ts`](../../../../packages/engine/src/languages/fr/spatialHead.ts) | switch; `prepDet` vs. `deDet` |
-| es | [`es/spatialHead.ts`](../../../../packages/engine/src/languages/es/spatialHead.ts) | switch; `prepDet` vs. `deDet` |
-| pt | [`pt/spatialHead.ts`](../../../../packages/engine/src/languages/pt/spatialHead.ts) | switch; `contractDet` with `emPrep` / `dePrep` |
-| de | [`de/spatialHead.ts`](../../../../packages/engine/src/languages/de/spatialHead.ts) + [`spatialCase.ts`](../../../../packages/engine/src/languages/de/spatialCase.ts) | preposition **and** the case it governs |
-| ja | [`ja.consts.ts:100`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L100) | `REL_NOUN` + `REL_NOUN_READING`, a relational noun before the particle |
+| en | [`en.consts.ts:89`](../../../../../packages/engine/src/languages/en/en.consts.ts#L89) | `PATH_PREP` map, and `GOAL_PREP` overriding only `in` |
+| it | [`it/spatialHead.ts`](../../../../../packages/engine/src/languages/it/spatialHead.ts) | switch; fusing `prepDet` vs. non-fusing `artFor` |
+| fr | [`fr/spatialHead.ts`](../../../../../packages/engine/src/languages/fr/spatialHead.ts) | switch; `prepDet` vs. `deDet` |
+| es | [`es/spatialHead.ts`](../../../../../packages/engine/src/languages/es/spatialHead.ts) | switch; `prepDet` vs. `deDet` |
+| pt | [`pt/spatialHead.ts`](../../../../../packages/engine/src/languages/pt/spatialHead.ts) | switch; `contractDet` with `emPrep` / `dePrep` |
+| de | [`de/spatialHead.ts`](../../../../../packages/engine/src/languages/de/spatialHead.ts) + [`spatialCase.ts`](../../../../../packages/engine/src/languages/de/spatialCase.ts) | preposition **and** the case it governs |
+| ja | [`ja.consts.ts:100`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L100) | `REL_NOUN` + `REL_NOUN_READING`, a relational noun before the particle |
 
 ## Design
 
@@ -102,7 +102,7 @@ Two consequences, and they are the whole of D1:
    collide.** It is the honest rendering; の上 is what a dictionary gives for both, and the
    alternative (〜の表面に for contact) is a paraphrase, not a relation. Pin the collision in a test
    with a comment saying it is deliberate, the way the source-and-`far` overlap is pinned in
-   [A02](../../A-ready/A02-locative-near-far/README.md).
+   [A02](../../../A-ready/A02-locative-near-far/README.md).
 
 ### D2. `between` distributes wrongly over a coordinated head — and that is the real work
 
@@ -111,7 +111,7 @@ purpose and German says out loud:
 
 > The preposition governs a case, and the case is spelled on each conjunct's own article ("mit dem
 > Messer und dem Stock"), so preposition and determiner are emitted per conjunct.
-> — [`de/complementsPhrase.ts:97`](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L97)
+> — [`de/complementsPhrase.ts:97`](../../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L97)
 
 That is right for every relation in the set and **wrong for `between`**, which takes one preposition
 over the pair: *zwischen dem Haus und dem Baum*, not *zwischen dem Haus und zwischen dem Baum*.
@@ -131,7 +131,7 @@ declension. And Japanese needs nothing: it builds 家と木の間で out of the 
 **Open:** whether a `between` with a single landmark is an error or a rendering. Recommendation:
 render it (*between the house* is odd but not ill-formed, and Japanese 家の間 is fine), and leave the
 two-conjunct requirement to the builder, which is where the other "at least two" rule already lives
-([`NounGroup`](../../../../packages/shared/src/index.ts#L848)).
+([`NounGroup`](../../../../../packages/shared/src/index.ts#L848)).
 
 ### D3. `against` is contact, not opposition
 
@@ -147,14 +147,14 @@ is carried by the verb (もたれる, "to lean"), so **`against` is the one rela
 with に and nothing else**, and the proposed 壁にもたれて above is a paraphrase a relation cannot
 produce. Pin `against` in Japanese as plain に and record it as a known flattening, beside `on`'s.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
-- `PathSpecifier` ([L323](../../../../packages/shared/src/index.ts#L323)): add `'on' | 'between' | 'against'`.
-- `PATH_SPECIFIERS` ([L325](../../../../packages/shared/src/index.ts#L325)): append the three.
+- `PathSpecifier` ([L323](../../../../../packages/shared/src/index.ts#L323)): add `'on' | 'between' | 'against'`.
+- `PATH_SPECIFIERS` ([L325](../../../../../packages/shared/src/index.ts#L325)): append the three.
 - Add `GROUP_SCOPED_SPECIFIERS` (D2) with a doc comment naming the distribution rule it opts out of.
 - Extend the `PathSpecifier` doc comment with the support axis (D1), the group scope (D2) and the
   contact-only reading of `against` (D3), including both Japanese flattenings.
-- [`uiStrings.ts:2467`](../../../../packages/shared/src/uiStrings.ts#L2467): three
+- [`uiStrings.ts:2467`](../../../../../packages/shared/src/uiStrings.ts#L2467): three
   `specifier.value.*` entries, cited on a bare noun the way the existing seven are (it *su*, de
   *auf*, ja 〜の上で / 〜の間で).
 
@@ -172,10 +172,10 @@ two readings take different words.
 ## 3. Frontend and console
 
 The toolbars read `PATH_SPECIFIERS`, so the three appear automatically in
-[`Boxes.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx) and
-[`phraseCommands.ts`](../../../../packages/frontend/src/components/PhraseBuilder/functions/phraseCommands.ts),
+[`Boxes.tsx`](../../../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx) and
+[`phraseCommands.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/phraseCommands.ts),
 and the console's `{ id: "specifier" }` command
-([`commands.ts:41`](../../../../packages/frontend/src/console/language/commands.ts#L41)) widens with
+([`commands.ts:41`](../../../../../packages/frontend/src/console/language/commands.ts#L41)) widens with
 the type. **Ten relations on one toolbar is a layout question** — the locative row is already seven
 wide — and the rule for it is the feedback the canvas work has settled on: widen the container,
 do not hide controls.
@@ -188,7 +188,7 @@ do not hide controls.
 - A `between` test with a two-conjunct group in every language — the D2 regression, and the only
   new test shape in this task.
 - Colocated `*/spatialHead.test.ts` rows for it/fr/es/pt/de, and
-  [`de/spatialCase.test.ts`](../../../../packages/engine/src/languages/de/spatialCase.test.ts):
+  [`de/spatialCase.test.ts`](../../../../../packages/engine/src/languages/de/spatialCase.test.ts):
   all three dative under a locative, accusative under a direction.
 - Two deliberate-collision tests with comments: ja `on` = ja `over`, ja `against` = plain に.
 - Frontend: the locative toolbar offers ten relations; the console sets each.
@@ -212,7 +212,7 @@ do not hide controls.
   [E2](P09-E2-complement-types.md) if anywhere.
 - **Combined relations** ("far behind the house"), already A02's own follow-up.
 - **`between` as a temporal relation** ("between this day and that day"). The
-  [`TemporalRelation`](../../../../packages/shared/src/index.ts#L366) set C29 built has `until` but
+  [`TemporalRelation`](../../../../../packages/shared/src/index.ts#L366) set C29 built has `until` but
   no span with two ends; it would want the same group scope D2 builds here.
 
 ## Done
@@ -221,7 +221,7 @@ Shipped 2026-09-23. `PathSpecifier` gains `on | between | against`, `PATH_SPECIF
 and `GROUP_SCOPED_SPECIFIERS` (`between` alone) sits after `DEFAULT_LOCATIVE_SPECIFIER`, with the
 support axis, the group scope, the contact-only `against` and both Japanese flattenings in the doc
 comment. The engine's output, all pinned in
-[`spatialRelations.test.ts`](../../../../packages/engine/test/complements/spatialRelations.test.ts):
+[`spatialRelations.test.ts`](../../../../../packages/engine/test/complements/spatialRelations.test.ts):
 
 | lang | on — place / goal | between — place / goal | against — place / goal |
 |---|---|---|---|
@@ -240,9 +240,9 @@ The toolbar labels (`specifier.value.*`): en *on / between / against*; it *su / 
 **How the group scope is built.** Not by taking the head once and re-coordinating inside it, as D2
 sketched, but by *lifting*: each conjunct still goes through its engine's ordinary path — its own
 fused or plain article, its own German case, its own tonic pronoun, the French A196 *des* — and
-[`liftPreposition`](../../../../packages/engine/src/functions/liftPreposition.ts) takes the
+[`liftPreposition`](../../../../../packages/engine/src/functions/liftPreposition.ts) takes the
 relation's preposition off the front of each, to be said once over the group. Which complements
-scope is [`groupScopedRelation`](../../../../packages/engine/src/functions/groupScopedRelation.ts)
+scope is [`groupScopedRelation`](../../../../../packages/engine/src/functions/groupScopedRelation.ts)
 (a route, a locative or a direction whose relation is in `GROUP_SCOPED_SPECIFIERS`), and the word
 lifted is each engine's `BETWEEN_PREP`. That keeps every `spatialHead` self-contained — `between`
 still renders whole there, which is what the toolbar label and a single landmark need — and
