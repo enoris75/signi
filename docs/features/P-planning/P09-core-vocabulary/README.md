@@ -6,11 +6,12 @@ as the checklist.
 senses turn into more concepts, plus 36 words that need an engine construct before they can be used.
 **Scope:** all 7 languages, like every seed. Only the checklist is English: the other six languages
 get the same concepts, not their own top 200.
-**Status:** **§2 done, §3 half done**, both on 2026-09-22, by the localization tickets B59–B67 and
-C29–C40 (see *Follow-ups*), which supersede some rows below. Every word of §2 is seeded and every
-one of them is glossed or literal by design; six of §3's eleven constructs are built, and five are
-open (E1, E2, E4, E5 and E6's wh-question), each **a task file in this folder** since 2026-09-23
-(see §3). The decisions below were
+**Status:** **§2 and §3 done.** §2 and six of §3's eleven constructs landed on 2026-09-22, by the
+localization tickets B59–B67 and C29–C40 (see *Follow-ups*), which supersede some rows below. Every
+word of §2 is seeded and every one of them is glossed or literal by design. The other five — E1, E2,
+E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped on 2026-09-23**, in the
+engine and plan-only except E1's relations, which the toolbars offer (see §3). Only E6's existential
+("there is") is left, split off by its task file to be scheduled on its own. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -43,7 +44,7 @@ against the words the English engine writes itself
 | a form of the seeded I / you / he | 18 | I, me, we, us, my, our, you, your, he, him, his, she, her, it, its, they, them, their |
 | written by the engine | 33 | the, a (identifiability); this, that, these, those (deixis); some, all, no, many, few (quantity); more, most (degree); and, or, but, so, then (coordination); not (negation); if, would (hypothetical); will (future); who, which (relative clauses); of, in, to, with, at, from, by, through, over (complements) |
 | **left to seed** | ~~**70**~~ → **1** | §2 — **seeded on 2026-09-22**, see below |
-| **needs the engine first** | ~~**36**~~ → **18** | §3 — six of the eleven constructs **built on 2026-09-22**; E1, E2, E4, E5 and E6's wh-question are open |
+| **needs the engine first** | ~~**36**~~ → **18** | §3 — six of the eleven constructs **built on 2026-09-22**, the other five **on 2026-09-23**; only the existential ("there is") is left |
 
 **§2 is done.** Twelve of its words had been seeded in passing by the localization sweeps (LIVE,
 LIVE_ALIVE, FIND, HEAR, HAPPEN, WORK, COUNTRY, PART, NEXT, NOW, AGAIN, GROUP), three needed no
@@ -208,7 +209,7 @@ already treats *may* and *might* as true auxiliaries
 | 101 | back | `COME_BACK` | D3. |
 | 186 | off | — | D3. TURN_OFF covers the common case. "Take off" and "get off" can come later. |
 
-## 3. Needs the engine first (11 constructs → 5 open)
+## 3. Needs the engine first (11 constructs → all built)
 
 Each group was a construct the engine didn't have. **Six of the eleven were built on 2026-09-22** by
 the twelve C tickets this plan's *Follow-ups* filed: **E3** as
@@ -225,20 +226,24 @@ below; what each of the others shipped is in its own ticket and in
 [the Part C index](../../../localization/localization-tasks.md#part-c--needs-engine--deferred-c-needs-engine),
 which is the record.
 
-**Five are open**, and each is now **a task file of its own in this folder** — written on
-2026-09-23, when the breakdown was made:
+**The other five shipped on 2026-09-23**, each from **a task file of its own in this folder** —
+written the same morning, when the breakdown was made, and built in five parallel lanes. Each task
+file's `## Done` section carries the seven-language table the engine actually wrote and what landed
+differently from its plan. All five are **plan-only** — a plan can say them, the canvas cannot yet
+(see *Follow-ups*) — except E1's three relations, which the locative and route toolbars offer as
+they offer the other seven, and E2's privative, which is a toggle on the instrument.
 
-| task | construct | what it turned out to be |
-|---|---|---|
-| [P09-E1](P09-E1-spatial-relations.md) | Spatial relations | *on*, *between*, *against* — and **not *into***, which already renders. `between` is the first relation that scopes over a coordinated head instead of distributing across it. |
-| [P09-E2](P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. |
-| [P09-E4](P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. |
-| [P09-E5](P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. |
-| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. |
+| task | construct | what it turned out to be | shipped |
+|---|---|---|---|
+| [P09-E1](P09-E1-spatial-relations.md) | Spatial relations | *on*, *between*, *against* — and **not *into***, which already renders. `between` is the first relation that scopes over a coordinated head instead of distributing across it. | the three relations in all seven, on the locative, route and direction; `GROUP_SCOPED_SPECIFIERS` says the preposition once over the group (*zwischen dem Haus und dem Markt*); ja collides `on` with `over` (の上) and flattens `against` to に, both pinned as deliberate; toolbars and console (`/on`, `/between`, `/against`) |
+| [P09-E2](P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. | `purpose` (*for*) and `topic` (*about*, with THINK's own *pensa al / denkt an*) plan-only; the privative (*without*) on the instrument link, with a canvas toggle and `/without` in the console; *as* deferred |
+| [P09-E4](P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. | `contentObject` with the mood on the governing lexeme (`content_clause_mood`) and ja と against こと; `adverbialClause` with *when, while, because, after, before* (no *during*), German verb-final, the Romance subjunctive after *before* |
+| [P09-E5](P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. | `headStandard` on a predicative adjective: *than* / *as … as* per degree, it *del cane*, pt *do que*, ja 犬より / 犬と同じくらい / 犬ほど…ない; dropped on the superlative |
+| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. | `questionRole` (+ `questionAnimate`) for the subject, object, locative, manner and cause gaps: fronted in six languages, in place in Japanese, fr with *est-ce que*; implies `interrogative`, so C10's yes/no is unchanged. The existential is not built |
 
 E3 gets no task file: it shipped as [C29](../../../localization/done/C29-temporal-complement.md) on
-2026-09-22, and E7–E11 shipped the same day. Each open task states what is already built at HEAD,
-and in three of the five that turned out to be more than this plan knew — the rows below are the
+2026-09-22, and E7–E11 shipped the same day. Each task file states what was already built at HEAD
+when it was written, and in three of the five that turned out to be more than this plan knew — the rows below are the
 plan's own reading and the task files supersede them where they differ.
 
 | # | construct | words | notes |
@@ -289,6 +294,19 @@ backend runs the builds, not `src`.
   (at / ago / until / after / before / during), the way the route and locative rings draw one for
   their path. It would be the first complement box added since the canvas was laid out, so where it
   sits is a layout question as much as a control one.
+- **A third, from E2/E4/E5/E6 (2026-09-23): six plan-only constructs want controls**, and they are
+  one layout question, not six. E2's `purpose` and `topic` want boxes beside C29's temporal one (and
+  are kept out of `COMPLEMENT_TYPES` until they have them); E4's object and adverbial clauses want
+  a container-to-container link like the conditional's; E5's standard wants a noun slot on the
+  adjective; E6 wants a mood control and a way to mark a slot as the question — which C10's yes/no
+  question has lacked since it shipped. Each task file's `## Done` names its own.
+- **Seven defects the 2026-09-23 lanes met, filed as [A247–A253](../../../bugs/engine-grammar-bugs.md)**
+  and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
+  Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
+  future temporal clause (A250–A252), and a boot render that lets an unseeded concept through (A253).
+- **The existential "there is"** (E6 D5) is the one §3 construct left, with E6's table of what each
+  language needs (de *es gibt* + accusative, it *c'è / ci sono*, ja いる / ある already built). File it
+  under its own id when it is scheduled.
 - **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
   are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose
