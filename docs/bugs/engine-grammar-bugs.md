@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds fifteen, A261–A275, pinned by 29 `test.fails`, and Part B is empty).** If
+this writing Part A and Part B are both empty: no `test.fails` is left).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -62,29 +62,29 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Language | Summary |
-|---|---|---|---|
-| A261 | [A261-italian-progressive-indicative-in-a-subjunctive-clause.md](A-must-fix/A261-italian-progressive-indicative-in-a-subjunctive-clause.md) | Italian | *stare* in the indicative in a subjunctive clause: `non crede che il gatto sta correndo` for *stia* |
-| A262 | [A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md](A-must-fix/A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md) | Italian, Spanish, Portuguese | a past progressive under a subjunctive governor: `no cree que el gato esté corriendo` for *estuviera* |
-| A263 | [A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md](A-must-fix/A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md) | English, Italian, French, Spanish, Portuguese | no pluperfect under a past governor: `non credeva che il gatto corra`, `said that the cat has run` |
-| A264 | [A264-japanese-resultative-under-mae-ni-or-ato-de.md](A-must-fix/A264-japanese-resultative-under-mae-ni-or-ato-de.md) | Japanese | a resultative under 前に / 後で: 走った前に, 走っていた後で for 走る前に, 走った後で |
-| A265 | [A265-french-en-before-an-article-on-a-temporal-noun.md](A-must-fix/A265-french-en-before-an-article-on-a-temporal-noun.md) | French | *en* before an article on a temporal noun: `court en le jour` for *court le jour* |
-| A266 | [A266-german-comma-before-a-bare-zu-infinitive.md](A-must-fix/A266-german-comma-before-a-bare-zu-infinitive.md) | German | a comma before a bare zu-infinitive: `der Kater braucht, zu laufen` for *braucht zu laufen* |
-| A267 | [A267-linked-clause-with-no-subject-crashes-the-engine.md](A-must-fix/A267-linked-clause-with-no-subject-crashes-the-engine.md) | engine, backend, frontend | a linked clause with no subject: a TypeError, a 500, and a builder that sends it |
-| A268 | [A268-a-question-can-become-an-if-clause.md](A-must-fix/A268-a-question-can-become-an-if-clause.md) | frontend | `canBeCondition` lets a question become an if-clause, whose question the engine drops |
-| A269 | [A269-equative-object-predicative-writes-half-its-circumfix.md](A-must-fix/A269-equative-object-predicative-writes-half-its-circumfix.md) | English, Italian, German, Spanish, Portuguese | an equative object predicative with a standard: `makes the house as big` for *equally big* |
-| A270 | [A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md](A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md) | German | the feminine of weak STUDENT keeps its -en: `sieht die Studentinen` for *die Studentin* |
-| A271 | [A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md](A-must-fix/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md) | Italian | a possessor behind a compared adjective: `un gatto più piccolo della donna` reads *smaller than the woman* |
-| A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](A-must-fix/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | a relative clause with no verb phrase: a TypeError (`Cannot destructure property 'voice'`) and a 500 |
-| A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](A-must-fix/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | the essive drops an i- or た-adjective's degree: 大きいとして for もっと大きいとして |
-| A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](A-must-fix/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | a non-subject-gap relative with no subject reads as a subject relative: `the cat that eats` for *the cat that [someone] eats* |
-| A276 | [A276-italian-animate-source-question-fronts-the-ablative-via.md](A-must-fix/A276-italian-animate-source-question-fronts-the-ablative-via.md) | Italian | an animate source question fronts the ablative *via*: `via da chi viene il gatto?` for *da chi viene via* |
+None open. The fifteen still open on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
+same day by five lanes and are listed under **Fixed** below. The content-clause tense fix now covers
+the cases A254 and A260 left: Italian *stare* has its present subjunctive (A261), a past progressive
+under a subjunctive governor takes the imperfect subjunctive of its auxiliary under a present or a
+past governor alike (A262, *stesse correndo*, *estuviera corriendo*; French left as it was), and a
+clause anterior to a past governor takes the pluperfect (A263, *avesse corso*, *had run*). Japanese
+前に and 後で take the aspect along with the tense (A264). French *en* goes only before a bare or
+demonstrative temporal noun (A265, *court le jour*). German writes no comma before a bare
+zu-infinitive (A266), which moved about thirty German assertions and a dozen definitions (*beginnen
+zu wissen*, *veranlassen zu kommen*); a group keeps it. A malformed plan is refused with a named
+error in the engine and a 400 naming its path at `/api/translate`, and the builder waits for it: a
+linked clause with no subject (A267), a relative with no verb phrase (A273), a non-subject relative
+with no subject (A275). A question can no longer become an if-clause (A268). The object predicative
+drops the standard's flag, so its equative is *equally big* (A269), with the Japanese standard kept.
+The feminine of weak STUDENT drops `weak` (A270). An Italian possessor goes ahead of a compared
+adjective (A271), and the ablative *via* stays behind the verb in a source question (A276). The
+Japanese essive takes an i- or た-adjective's degree (A274).
 
-**Fifteen open.** The last, **A276**, filed on 2026-09-23 from P09-E15's lane, is the Italian
+The last filed, **A276**, filed on 2026-09-23 from P09-E15's lane, was the Italian
 ablative particle *via* fronted with an animate source question (*via da chi viene il gatto?*), where
 it belongs behind the verb (*da chi viene via*).
 
-The one before it, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
+The one before it, **A275**, filed on 2026-09-23, was an object (or any non-subject-gap)
 relative with no subject. It renders as a subject relative with its meaning flipped (*the cat that eats*
 for *the cat that someone eats*), and the builder sends it. It is refused as A267 and A273 are,
 not filled in with GENERIC_PERSON and not made passive.
@@ -439,7 +439,22 @@ is listed under **Fixed** below.
 | A258 | [A258-japanese-very-on-a-lowered-degree.md](fixed/A258-japanese-very-on-a-lowered-degree.md) | Japanese (corpus + engine) | 2026-09-23 |
 | A259 | [A259-japanese-while-clause-progressive-under-a-modal.md](fixed/A259-japanese-while-clause-progressive-under-a-modal.md) | Japanese | 2026-09-23 |
 | A260 | [A260-subjunctive-content-clause-drops-its-past.md](fixed/A260-subjunctive-content-clause-drops-its-past.md) | Italian, French, Spanish, Portuguese (translator) | 2026-09-23 |
+| A261 | [A261-italian-progressive-indicative-in-a-subjunctive-clause.md](fixed/A261-italian-progressive-indicative-in-a-subjunctive-clause.md) | Italian | 2026-09-23 |
+| A262 | [A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md](fixed/A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md) | Italian, Spanish, Portuguese | 2026-09-23 |
+| A263 | [A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md](fixed/A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md) | English, Italian, French, Spanish, Portuguese | 2026-09-23 |
+| A264 | [A264-japanese-resultative-under-mae-ni-or-ato-de.md](fixed/A264-japanese-resultative-under-mae-ni-or-ato-de.md) | Japanese | 2026-09-23 |
+| A265 | [A265-french-en-before-an-article-on-a-temporal-noun.md](fixed/A265-french-en-before-an-article-on-a-temporal-noun.md) | French | 2026-09-23 |
+| A266 | [A266-german-comma-before-a-bare-zu-infinitive.md](fixed/A266-german-comma-before-a-bare-zu-infinitive.md) | German | 2026-09-23 |
+| A267 | [A267-linked-clause-with-no-subject-crashes-the-engine.md](fixed/A267-linked-clause-with-no-subject-crashes-the-engine.md) | engine, backend, frontend | 2026-09-23 |
+| A268 | [A268-a-question-can-become-an-if-clause.md](fixed/A268-a-question-can-become-an-if-clause.md) | frontend | 2026-09-23 |
+| A269 | [A269-equative-object-predicative-writes-half-its-circumfix.md](fixed/A269-equative-object-predicative-writes-half-its-circumfix.md) | English, Italian, German, Spanish, Portuguese | 2026-09-23 |
+| A270 | [A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md](fixed/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md) | German | 2026-09-23 |
+| A271 | [A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md](fixed/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md) | Italian | 2026-09-23 |
 | A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](fixed/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | 2026-09-23 |
+| A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](fixed/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | 2026-09-23 |
+| A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](fixed/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | 2026-09-23 |
+| A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](fixed/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | 2026-09-23 |
+| A276 | [A276-italian-animate-source-question-fronts-the-ablative-via.md](fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md) | Italian | 2026-09-23 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

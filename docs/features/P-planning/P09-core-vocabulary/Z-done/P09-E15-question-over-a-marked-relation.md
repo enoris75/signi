@@ -103,7 +103,7 @@ What landed, and where it differs from the plan below:
 
 Follow-ups, beside *Out of scope* below:
 
-- **The Italian animate source fronts the ablative *via***, filed as [A276](../../../../bugs/A-must-fix/A276-italian-animate-source-question-fronts-the-ablative-via.md): "via da chi viene il gatto?", where "da
+- **The Italian animate source fronts the ablative *via***, filed as [A276](../../../../bugs/fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md): "via da chi viene il gatto?", where "da
   chi viene via il gatto?" is wanted. The statement already writes "il gatto viene via dalla donna"
   for COME (`SOURCE_ABLATIVE_ADVERB_VERBS` / `takesGoal` in `it/complementsPhrase.ts`), and the
   question fronts the whole complement, *via* included. A person source is the only case that

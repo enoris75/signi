@@ -1,20 +1,24 @@
 # A-must-fix — confirmed bugs
 
-**Fifteen open.** The newest,
-[A276](A276-italian-animate-source-question-fronts-the-ablative-via.md), is the Italian ablative
+**None open.** The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
+day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
+fix did. The history below is kept as it was written, in the present tense of each filing.
+
+The newest,
+[A276](../fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md), is the Italian ablative
 particle *via* fronted with an animate source question (*via da chi viene il gatto?* for *da chi viene
 via*). P09-E15's lane met it.
 
 The one before it,
-[A275](A275-object-relative-with-no-subject-reads-as-a-subject-relative.md), is an object, complement
+[A275](../fixed/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md), is an object, complement
 or possessor relative with no subject, which the engine renders as a subject relative with its meaning
 flipped (*the cat that eats runs.*). The builder sends it when a relative link lands on a period's
 object before its subject has a word. It is refused as A267 and A273 are.
 
 The two before it were filed on 2026-09-23 from leads met while filing A265–A272.
-[A273](A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) is a relative clause with no
+[A273](../fixed/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) is a relative clause with no
 verb phrase, which crashes the engine (`Cannot destructure property 'voice'`) and returns a 500. It is
-refused the way A267 is. [A274](A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) is the
+refused the way A267 is. [A274](../fixed/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) is the
 Japanese essive dropping an i- or た-adjective's degree (大きいとして for もっと大きいとして), a gap
 [A232](../fixed/A232-japanese-essive-drops-the-degree.md) left on purpose. A third lead, MORNING rendering as a
 blank word, was dropped: MORNING is unseeded, and the blank is the engine's contract for an unseeded
@@ -22,19 +26,19 @@ id (A253).
 
 Eight before them, **A265–A272**, were filed on 2026-09-23 by P09-E12 (builder
 controls) and the writing of its tasks.
-[A265](A265-french-en-before-an-article-on-a-temporal-noun.md), French *en* before an article on a
+[A265](../fixed/A265-french-en-before-an-article-on-a-temporal-noun.md), French *en* before an article on a
 temporal noun (*court en le jour*, want *court le jour*).
-[A266](A266-german-comma-before-a-bare-zu-infinitive.md), a German comma before a bare zu-infinitive
+[A266](../fixed/A266-german-comma-before-a-bare-zu-infinitive.md), a German comma before a bare zu-infinitive
 (*braucht, zu laufen*), which about thirty passing assertions and several definitions pin the wrong
-way. [A267](A267-linked-clause-with-no-subject-crashes-the-engine.md), a linked clause with no subject
+way. [A267](../fixed/A267-linked-clause-with-no-subject-crashes-the-engine.md), a linked clause with no subject
 that crashes the engine, returns a 500 from the API, and is sent by the builder for an if-clause or a
 coordinate. The API refuses it as A253 did, and the builder waits for the subject as it already does
-for a subordinate clause. [A268](A268-a-question-can-become-an-if-clause.md), `canBeCondition`
-letting a question become an if-clause. [A269](A269-equative-object-predicative-writes-half-its-circumfix.md),
+for a subordinate clause. [A268](../fixed/A268-a-question-can-become-an-if-clause.md), `canBeCondition`
+letting a question become an if-clause. [A269](../fixed/A269-equative-object-predicative-writes-half-its-circumfix.md),
 an equative object predicative keeping half its circumfix once E5 has dropped its standard (*makes
-the house as big*). [A270](A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md), the German
+the house as big*). [A270](../fixed/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md), the German
 feminine of weak STUDENT keeping its -en (*die Studentinen*).
-[A271](A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md), an Italian
+[A271](../fixed/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md), an Italian
 possessor behind a compared adjective reading as its standard (*un gatto più piccolo della donna*).
 It is Italian only, because Spanish, French and Portuguese mark the standard with *que*.
 [A272](../fixed/A272-question-inside-a-content-clause-leaks-into-it.md), a question leaking into a content
@@ -42,16 +46,16 @@ clause (*says that does the cat run*), fixed the same day by P09-E17: an object 
 (*says whether the cat runs*), and a subject or adverbial clause strips it, as a condition does.
 
 The four before them, filed on 2026-09-23 while landing A254–A260:
-[A261](A261-italian-progressive-indicative-in-a-subjunctive-clause.md), Italian *stare* keeping the
+[A261](../fixed/A261-italian-progressive-indicative-in-a-subjunctive-clause.md), Italian *stare* keeping the
 indicative in a subjunctive clause (*non crede che il gatto sta correndo*);
-[A262](A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md), a past progressive under a
+[A262](../fixed/A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md), a past progressive under a
 subjunctive governor losing its past (*no cree que el gato esté corriendo*, French left open);
-[A263](A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md), no pluperfect for a clause
+[A263](../fixed/A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md), no pluperfect for a clause
 anterior to a past governor (*non credeva che il gatto corra*, *said that the cat has run*); and
-[A264](A264-japanese-resultative-under-mae-ni-or-ato-de.md), a Japanese resultative under 前に or 後で
+[A264](../fixed/A264-japanese-resultative-under-mae-ni-or-ato-de.md), a Japanese resultative under 前に or 後で
 (走った前に). A261–A263 are what the A254/A260 content-clause tense fix left.
 
-Everything filed before them has been fixed and moved to [`../fixed/`](../fixed/). The seven before, **A254–A260**, were filed on 2026-09-23 by the lanes that fixed A247–A253 and
+The seven before, **A254–A260**, were filed on 2026-09-23 by the lanes that fixed A247–A253 and
 fixed the same day: [A254](../fixed/A254-content-clause-under-a-past-governor-keeps-the-present.md),
 a content clause under a past governor keeping the present (*non credeva che il gatto corra*, now
 *corresse*); [A255](../fixed/A255-very-on-an-equative.md), VERY on the equative (*very equally

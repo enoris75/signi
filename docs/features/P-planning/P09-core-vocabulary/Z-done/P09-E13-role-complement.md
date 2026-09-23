@@ -67,7 +67,7 @@ Shipped 2026-09-23, as designed. What landed, and where it differs from the plan
   circonstanciel de rôle", de "adverbiale Bestimmung der Rolle", es "complemento circunstancial de
   función", pt "adjunto adverbial de papel", ja 役割の副詞語句. ACT licenses `role`. **`signi.db`
   needs a reseed** for both.
-- **The weak-feminine defect** met in *Today* is [A270](../../../../bugs/A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md),
+- **The weak-feminine defect** met in *Today* is [A270](../../../../bugs/fixed/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md),
   already filed, and it does **not** reach the role: the nominative takes no weak ending, so "als
   Studentin" is right today. It was not fixed first, contrary to §3's note.
 
