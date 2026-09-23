@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, NounPhrase, Specifier } from '@signi/shared';
+import type { NounElement, NounPhrase, PronominalPossessor, RelativeClause, Specifier } from '@signi/shared';
 import { clause, np, say, sayAll } from '../harness.js';
 
 // The ROLE complement (P09-E13) — the capacity the subject acts in while the verb does something
@@ -185,5 +185,285 @@ describe('role: noun heads only', () => {
 
   test('a group holding either renders nothing', () => {
     expect(actsAs({ conjunction: 'and', conjuncts: [np('FRIEND'), np('HAPPY')] })).toEqual(bare);
+  });
+});
+
+// Where the role goes once the clause around it changes shape. German keeps it in the Mittelfeld, ahead
+// of a split verb's second half and of a subordinate clause's verb; Japanese keeps it with the
+// adjuncts, ahead of the object, whatever the verb's ending.
+describe('role in the other clause shapes', () => {
+  test('a resultative: German splits the verb around it', () => {
+    expect(sayAll(clause(np('MAN'), 'ACT', { verbPhrase: { aspect: 'resultative' }, complements: { role: { phrase: np('FRIEND') } } }))).toEqual({
+      en: 'the man has acted as a friend.',
+      it: "l'uomo ha agito come amico.",
+      fr: "l'homme a agi comme ami.",
+      de: 'der Mann hat als Freund gehandelt.',
+      es: 'el hombre ha actuado como amigo.',
+      ja: '男は友達として行動しました。',
+      pt: 'o homem agiu como amigo.',
+    });
+  });
+
+  test('a modal: the infinitive goes last, after the role', () => {
+    expect(sayAll(clause(np('MAN'), 'ACT', { verbPhrase: { modals: ['MUST'] }, complements: { role: { phrase: np('FRIEND') } } }))).toEqual({
+      en: 'the man must act as a friend.',
+      it: "l'uomo deve agire come amico.",
+      fr: "l'homme doit agir comme ami.",
+      de: 'der Mann muss als Freund handeln.',
+      es: 'el hombre debe actuar como amigo.',
+      ja: '男は友達として行動する必要があります。',
+      pt: 'o homem deve agir como amigo.',
+    });
+  });
+
+  test('a because-clause: the German verb goes last, the role stays behind the object', () => {
+    expect(sayAll(clause(np('WOMAN'), 'RUN', {
+      adverbialClause: {
+        conjunction: 'because',
+        clause: { subject: np('MAN'), verbPhrase: { verb: 'READ' }, directObject: np('BOOK'), complements: { role: { phrase: np('STUDENT') } } },
+      },
+    }))).toEqual({
+      en: 'the woman runs because the man reads the book as a student.',
+      it: 'la donna corre perché l\'uomo legge il libro come studente.',
+      fr: 'la femme court parce que l\'homme lit le livre comme étudiant.',
+      de: 'die Frau läuft, weil der Mann das Buch als Student liest.',
+      es: 'la mujer corre porque el hombre lee el libro como estudiante.',
+      ja: '女は男が学生として本を読むので走ります。',
+      pt: 'a mulher corre porque o homem lê o livro como estudante.',
+    });
+  });
+
+  test('a negation beside an object: German "nicht" goes ahead of the role', () => {
+    expect(sayAll(clause(np('MAN'), 'READ', {
+      verbPhrase: { negative: true }, directObject: np('BOOK'), complements: { role: { phrase: np('STUDENT') } },
+    }))).toEqual({
+      en: 'the man does not read the book as a student.',
+      it: "l'uomo non legge il libro come studente.",
+      fr: "l'homme ne lit pas le livre comme étudiant.",
+      de: 'der Mann liest das Buch nicht als Student.',
+      es: 'el hombre no lee el libro como estudiante.',
+      ja: '男は学生として本を読みません。',
+      pt: 'o homem não lê o livro como estudante.',
+    });
+  });
+
+  test('a passive: the role stays the agent\'s, after the by-phrase', () => {
+    expect(sayAll(clause(np('MAN'), 'READ', {
+      verbPhrase: { voice: 'passive' }, directObject: np('BOOK'), complements: { role: { phrase: np('STUDENT') } },
+    }))).toEqual({
+      en: 'the book is read by the man as a student.',
+      it: "il libro è letto dall'uomo come studente.",
+      fr: "le livre est lu par l'homme comme étudiant.",
+      de: 'das Buch wird vom Mann als Student gelesen.',
+      es: 'el libro es leído por el hombre como estudiante.',
+      ja: '本は男に学生として読まれます。',
+      pt: 'o livro é lido pelo homem como estudante.',
+    });
+  });
+
+  test('inside a subject relative', () => {
+    expect(sayAll(clause(np('MAN', { relative: { verbPhrase: { verb: 'ACT' }, complements: { role: { phrase: np('FRIEND') } } } }), 'RUN'))).toEqual({
+      en: 'the man who acts as a friend runs.',
+      it: "l'uomo che agisce come amico corre.",
+      fr: "l'homme qui agit comme ami court.",
+      de: 'der Mann, der als Freund handelt, läuft.',
+      es: 'el hombre que actúa como amigo corre.',
+      ja: '友達として行動する男は走ります。',
+      pt: 'o homem que age como amigo corre.',
+    });
+  });
+
+  test('inside a content clause', () => {
+    expect(sayAll(clause(np('WOMAN'), 'KNOW', {
+      contentObject: { subject: np('MAN'), verbPhrase: { verb: 'ACT' }, complements: { role: { phrase: np('FRIEND') } } },
+    }))).toEqual({
+      en: 'the woman knows that the man acts as a friend.',
+      it: "la donna sa che l'uomo agisce come amico.",
+      fr: "la femme sait que l'homme agit comme ami.",
+      de: 'die Frau weiß, dass der Mann als Freund handelt.',
+      es: 'la mujer sabe que el hombre actúa como amigo.',
+      ja: '女は男が友達として行動することを知っています。',
+      pt: 'a mulher sabe que o homem age como amigo.',
+    });
+  });
+
+  test('an imperative, a yes/no question and a who-question', () => {
+    const role = { role: { phrase: np('FRIEND') } };
+    expect(sayAll(clause(np('MAN'), 'ACT', { imperative: true, complements: role }))).toEqual({
+      en: 'act as a friend.', it: 'agisci come amico.', fr: 'agis comme ami.', de: 'handle als Freund.',
+      es: 'actúa como amigo.', ja: '友達として行動してください。', pt: 'aja como amigo.',
+    });
+    expect(sayAll(clause(np('MAN'), 'ACT', { interrogative: true, complements: role }))).toEqual({
+      en: 'does the man act as a friend?', it: "l'uomo agisce come amico?", fr: "est-ce que l'homme agit comme ami ?",
+      de: 'handelt der Mann als Freund?', es: '¿el hombre actúa como amigo?', ja: '男は友達として行動しますか？',
+      pt: 'o homem age como amigo?',
+    });
+    expect(sayAll(clause(np('MAN'), 'ACT', { interrogative: true, questionRole: 'subject', questionAnimate: true, complements: role }))).toEqual({
+      en: 'who acts as a friend?', it: 'chi agisce come amico?', fr: 'qui agit comme ami ?', de: 'wer handelt als Freund?',
+      es: '¿quién actúa como amigo?', ja: '誰が友達として行動しますか？', pt: 'quem age como amigo?',
+    });
+  });
+
+  test('an "or" group repeats the marker as "and" does', () => {
+    expect(actsAs({ conjunction: 'or', conjuncts: [np('FRIEND'), np('STUDENT')] })).toEqual({
+      en: 'the man acts as a friend or a student.',
+      it: "l'uomo agisce come amico o come studente.",
+      fr: "l'homme agit comme ami ou comme étudiant.",
+      de: 'der Mann handelt als Freund oder als Student.',
+      es: 'el hombre actúa como amigo o como estudiante.',
+      ja: '男は友達か学生として行動します。',
+      pt: 'o homem age como amigo ou como estudante.',
+    });
+  });
+});
+
+// What the role's noun carries: the bare-role rule (D3) drops the article and nothing else. An
+// attributive adjective agrees with the role noun and declines strong in German (no article to carry
+// the ending); a genitive possessor follows it as it follows any noun.
+describe('role: the noun\'s own modifiers', () => {
+  test('an attributive adjective', () => {
+    expect(actsAs(np('FRIEND', { adjectives: ['GOOD'] }))).toEqual({
+      en: 'the man acts as a good friend.',
+      it: "l'uomo agisce come buon amico.",
+      fr: "l'homme agit comme bon ami.",
+      de: 'der Mann handelt als guter Freund.',
+      es: 'el hombre actúa como amigo bueno.',
+      ja: '男は良い友達として行動します。',
+      pt: 'o homem age como amigo bom.',
+    });
+  });
+
+  test('a feminine attributive adjective', () => {
+    expect(actsAs(np('FRIEND', { gender: 'fem', adjectives: ['OLD'] }), np('WOMAN'))).toEqual({
+      en: 'the woman acts as an old friend.',
+      it: 'la donna agisce come vecchia amica.',
+      fr: 'la femme agit comme vieille amie.',
+      de: 'die Frau handelt als alte Freundin.',
+      es: 'la mujer actúa como amiga vieja.',
+      ja: '女は古い友達として行動します。',
+      pt: 'a mulher age como amiga velha.',
+    });
+  });
+
+  test('a genitive possessor — the role noun stays bare in front of it', () => {
+    expect(actsAs(np('FRIEND', { possessor: np('WOMAN') }))).toEqual({
+      en: "the man acts as the woman's friend.",
+      it: "l'uomo agisce come amico della donna.",
+      fr: "l'homme agit comme ami de la femme.",
+      de: 'der Mann handelt als Freund der Frau.',
+      es: 'el hombre actúa como amigo de la mujer.',
+      ja: '男は女の友達として行動します。',
+      pt: 'o homem age como amigo da mulher.',
+    });
+  });
+
+  // A270 guard: the nominative of a feminine weak noun takes no weak ending ("als Studentin").
+  test('a feminine plural, and the feminine of a weak noun', () => {
+    expect(actsAs(np('FRIEND', { gender: 'fem', number: 'plural' }), np('WOMAN', { number: 'plural' }))).toEqual({
+      en: 'the women act as friends.',
+      it: 'le donne agiscono come amiche.',
+      fr: 'les femmes agissent comme amies.',
+      de: 'die Frauen handeln als Freundinnen.',
+      es: 'las mujeres actúan como amigas.',
+      ja: '女は友達として行動します。',
+      pt: 'as mulheres agem como amigas.',
+    });
+    expect(sayAll(clause(np('WOMAN'), 'READ', {
+      directObject: np('BOOK'), complements: { role: { phrase: np('STUDENT', { gender: 'fem' }) } },
+    }))).toEqual({
+      en: 'the woman reads the book as a student.',
+      it: 'la donna legge il libro come studentessa.',
+      fr: 'la femme lit le livre comme étudiante.',
+      de: 'die Frau liest das Buch als Studentin.',
+      es: 'la mujer lee el libro como estudiante.',
+      ja: '女は学生として本を読みます。',
+      pt: 'a mulher lê o livro como estudante.',
+    });
+  });
+});
+
+// A287. D3 keeps the Romance role noun bare, since only the article tells "come amico" (the role)
+// from "come un amico" (the likeness). Italian's pronominal possessor brings its own definite article
+// back ("il suo amico"), and "come il suo amico" reads as the likeness again. The essive object
+// predicative shares the helper, and the defect. The other six are right, but English and Italian are
+// not pinned as regressions here: a pending fix (A277) re-spells an indefinite head with a pronominal
+// possessor ("a friend of mine", "un mio amico"), and the role noun is indefinite by default.
+describe('known bugs: an Italian role or essive noun with a pronominal possessor takes the article (A287)', () => {
+  const his: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' };
+  const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+
+  test.fails('the role noun stays bare before the possessive', () => {
+    expect(actsAs(np('FRIEND', { possessor: his }))['it']).toBe("l'uomo agisce come suo amico.");
+  });
+
+  test.fails('a feminine role noun', () => {
+    expect(actsAs(np('FRIEND', { gender: 'fem', possessor: her }), np('WOMAN'))['it']).toBe('la donna agisce come sua amica.');
+  });
+
+  test.fails('the essive object predicative', () => {
+    expect(say(clause(np('MAN'), 'USE', {
+      directObject: np('BOOK'),
+      complements: { objectPredicative: { phrase: np('FRIEND', { possessor: his }), specifiers: ESSIVE } },
+    }), 'it')).toBe("l'uomo usa il libro come suo amico.");
+  });
+
+  test('regression: the other Romance languages and German, and a genitive possessor in Italian', () => {
+    expect(actsAs(np('FRIEND', { possessor: his }))).toMatchObject({
+      fr: "l'homme agit comme son ami.",
+      de: 'der Mann handelt als sein Freund.',
+      es: 'el hombre actúa como su amigo.',
+      pt: 'o homem age como seu amigo.',
+    });
+    expect(actsAs(np('FRIEND', { gender: 'fem', possessor: her }), np('WOMAN'))).toMatchObject({
+      fr: 'la femme agit comme son amie.',
+      de: 'die Frau handelt als ihre Freundin.',
+      es: 'la mujer actúa como su amiga.',
+      pt: 'a mulher age como sua amiga.',
+    });
+    expect(actsAs(np('FRIEND', { possessor: np('WOMAN') }))['it']).toBe("l'uomo agisce come amico della donna.");
+    expect(say(clause(np('MAN'), 'USE', {
+      directObject: np('BOOK'),
+      complements: { objectPredicative: { phrase: np('FRIEND', { possessor: np('WOMAN') }), specifiers: ESSIVE } },
+    }), 'it')).toBe("l'uomo usa il libro come amico della donna.");
+  });
+});
+
+// A288. A relative clause whose gap is the role ("the friend the man acts as") has no natural
+// relative in Romance or German: "come quale", "comme quel", "como que", "como qual", and a German
+// "als" with no relative pronoun and a double space. No control builds one and randomPhrase leaves
+// it out, but the plan API accepts it. The target is a refusal, as a role question is refused
+// (resolveQuestion.test.ts); a refusal has no correct output to pin, so the pin asserts the throw.
+describe('known bugs: a relative clause over a role gap renders nonsense (A288)', () => {
+  const actsAsWhom = (): RelativeClause => ({ headRole: 'role', subject: np('MAN'), verbPhrase: { verb: 'ACT' } });
+
+  test.fails('the role gap is refused by name, as the object', () => {
+    expect(() => sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('FRIEND', { relative: actsAsWhom() }) }))).toThrow(/role/);
+  });
+
+  test.fails('the role gap is refused by name, as the subject', () => {
+    expect(() => sayAll(clause(np('FRIEND', { relative: actsAsWhom() }), 'RUN'))).toThrow(/role/);
+  });
+
+  test('regression: a comitative gap on the same clause, and a role inside an object relative', () => {
+    expect(sayAll(clause(np('FRIEND', { relative: { ...actsAsWhom(), headRole: 'comitative' } }), 'RUN'))).toEqual({
+      en: 'the friend with whom the man acts runs.',
+      it: "l'amico con il quale l'uomo agisce corre.",
+      fr: "l'ami avec lequel l'homme agit court.",
+      de: 'der Freund, mit dem der Mann handelt, läuft.',
+      es: 'el amigo con el que el hombre actúa corre.',
+      ja: '男が行動する友達は走ります。',
+      pt: 'o amigo com o qual o homem age corre.',
+    });
+    expect(sayAll(clause(np('BOOK', {
+      relative: { headRole: 'directObject', subject: np('MAN'), verbPhrase: { verb: 'READ' }, complements: { role: { phrase: np('STUDENT') } } },
+    }), 'BURN'))).toEqual({
+      en: 'the book that the man reads as a student burns.',
+      it: "il libro che l'uomo legge come studente brucia.",
+      fr: "le livre que l'homme lit comme étudiant brûle.",
+      de: 'das Buch, das der Mann als Student liest, brennt.',
+      es: 'el libro que el hombre lee como estudiante arde.',
+      ja: '男が学生として読む本は燃えます。',
+      pt: 'o livro que o homem lê como estudante arde.',
+    });
   });
 });
