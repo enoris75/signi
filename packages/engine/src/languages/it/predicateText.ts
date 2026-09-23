@@ -85,7 +85,10 @@ export function predicateText(
   // one, as the indirect-object clitic: "gli telefona", not the contrastive tonic "telefona a lui"
   // (A240). Any other preposition is spatial and keeps the tonic form after it ("clicca su di lui").
   const datClitic = objectPrep === 'a';
-  const cliticObject = directObject && (!objectPrep || datClitic) && isPronounElement(directObject)
+  // An existential's pivot is no object to cliticize: it is what the verb agrees with, spoken after
+  // it, and the clitic slot holds the existential "ci" (P09-E6 D5).
+  const existential = verbPhrase.existential === true;
+  const cliticObject = directObject && !existential && (!objectPrep || datClitic) && isPronounElement(directObject)
     ? firstConjunct(directObject).head.forms : undefined;
   // A dative clitic is no direct object, so no participle agrees with it ("gli ha telefonato").
   const agreeingObject = cliticObject?.['person'] === '3' && !datClitic ? cliticObject
@@ -165,11 +168,16 @@ export function predicateText(
   // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "lo" for
   // a predicate ("il cane non lo è", "i cani lo sono"), "ci" for a place ("il cane non c'è").
   const elided = verbPhrase.elided;
-  const objectClitic = cliticObject
-    ? (datClitic ? dativePronounForm(cliticObject) : objectPronounForm(cliticObject))
-    : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
+  // An existential is "c'è / ci sono": the same locative "ci", in the same slot, with the pivot after
+  // the verb as a noun object would stand (P09-E6 D5).
+  const objectClitic = existential ? 'ci'
+    : cliticObject
+      ? (datClitic ? dativePronounForm(cliticObject) : objectPronounForm(cliticObject))
+      : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
-  const elideCi = (text: string): string => (elided?.type === 'locative' ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'") : text);
+  const elideCi = (text: string): string => (elided?.type === 'locative' || existential
+    ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'")
+    : text);
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes its tonic
   // form with no article ("vede il cane e te", "vede lui e me"). The alarm a cry raises takes "a" and
   // the article ("gridò al lupo", A124).
@@ -187,7 +195,7 @@ export function predicateText(
   // after the verb carries the by-phrase instead ("è mangiato dal gatto nella casa").
   const directObjectText = passive ? agentPhrase(agent)
     // A focus particle singles the object out, from outside the phrase: "mangia solo il cibo" (C39).
-    : directObject && !objectClitic ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
+    : directObject && (!objectClitic || existential) ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // A focus adverb under a negation takes its negative-polarity word in the same slot, where
   // Italian has one: "non mangia neanche il cibo", not "*non mangia anche il cibo" (A245).
   const negAdverb = negativeAdverb(modifier, verbNegative === true);

@@ -10,8 +10,9 @@ get the same concepts, not their own top 200.
 localization tickets B59–B67 and C29–C40 (see *Follow-ups*), which supersede some rows below. Every
 word of §2 is seeded and every one of them is glossed or literal by design. The other five — E1, E2,
 E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped on 2026-09-23**, in the
-engine and plan-only except E1's relations, which the toolbars offer (see §3). Only E6's existential
-("there is") is left, split off by its task file to be scheduled on its own. The decisions below were
+engine and plan-only except E1's relations, which the toolbars offer (see §3). E6's existential
+("there is"), split off by its task file, shipped the same day in a lane of its own, so **all eleven
+of §3's constructs are built**. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -44,7 +45,7 @@ against the words the English engine writes itself
 | a form of the seeded I / you / he | 18 | I, me, we, us, my, our, you, your, he, him, his, she, her, it, its, they, them, their |
 | written by the engine | 33 | the, a (identifiability); this, that, these, those (deixis); some, all, no, many, few (quantity); more, most (degree); and, or, but, so, then (coordination); not (negation); if, would (hypothetical); will (future); who, which (relative clauses); of, in, to, with, at, from, by, through, over (complements) |
 | **left to seed** | ~~**70**~~ → **1** | §2 — **seeded on 2026-09-22**, see below |
-| **needs the engine first** | ~~**36**~~ → **18** | §3 — six of the eleven constructs **built on 2026-09-22**, the other five **on 2026-09-23**; only the existential ("there is") is left |
+| **needs the engine first** | ~~**36**~~ → **18** | §3 — six of the eleven constructs **built on 2026-09-22**, the other five **on 2026-09-23**, the existential ("there is") last |
 
 **§2 is done.** Twelve of its words had been seeded in passing by the localization sweeps (LIVE,
 LIVE_ALIVE, FIND, HEAR, HAPPEN, WORK, COUNTRY, PART, NEXT, NOW, AGAIN, GROUP), three needed no
@@ -189,7 +190,7 @@ already treats *may* and *might* as true auxiliaries
 
 | rank | en | proposed id | notes |
 |---|---|---|---|
-| 49 | there | `THERE` | Place only ("sleeps there"). "There is" is E6. |
+| 49 | there | `THERE` | Place only ("sleeps there"). "There is" is E6's existential, which the engine writes (built 2026-09-23). |
 | 62 | just | `JUST` | D4. The "only just / recently" sense. |
 | 68 | now | `NOW` | |
 | 83 | also | `ALSO` | D4. |
@@ -239,7 +240,7 @@ they offer the other seven, and E2's privative, which is a toggle on the instrum
 | [P09-E2](P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. | `purpose` (*for*) and `topic` (*about*, with THINK's own *pensa al / denkt an*) plan-only; the privative (*without*) on the instrument link, with a canvas toggle and `/without` in the console; *as* deferred |
 | [P09-E4](P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. | `contentObject` with the mood on the governing lexeme (`content_clause_mood`) and ja と against こと; `adverbialClause` with *when, while, because, after, before* (no *during*), German verb-final, the Romance subjunctive after *before* |
 | [P09-E5](P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. | `headStandard` on a predicative adjective: *than* / *as … as* per degree, it *del cane*, pt *do que*, ja 犬より / 犬と同じくらい / 犬ほど…ない; dropped on the superlative |
-| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. | `questionRole` (+ `questionAnimate`) for the subject, object, locative, manner and cause gaps: fronted in six languages, in place in Japanese, fr with *est-ce que*; implies `interrogative`, so C10's yes/no is unchanged. The existential is not built |
+| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. | `questionRole` (+ `questionAnimate`) for the subject, object, locative, manner and cause gaps: fronted in six languages, in place in Japanese, fr with *est-ce que*; implies `interrogative`, so C10's yes/no is unchanged. Then, in its own lane, `existential`: *there is / are*, *c'è / ci sono*, *il y a*, *es gibt* + accusative, *hay*, *há*, 家に猫がいます — the pivot the object of each language's existential verb |
 
 E3 gets no task file: it shipped as [C29](../../../localization/done/C29-temporal-complement.md) on
 2026-09-22, and E7–E11 shipped the same day. Each task file states what was already built at HEAD
@@ -253,7 +254,7 @@ plan's own reading and the task files supersede them where they differ.
 | ~~E3~~ | ~~Time~~ — **built 2026-09-22** | after, before, during | **Done** ([C29](../../../localization/done/C29-temporal-complement.md)): `ComplementType.temporal`, carrying a `TemporalRelation` — `at \| ago \| until \| after \| before \| during`. The three words are relations on a noun phrase ("after this day", *nach diesem Tag*, この日の後に), and the complement also gave TODAY, JUST and STILL the glosses they waited for. `at` turned out to be the one relation whose adposition the **head noun** picks, not the relation (en *on* a day but *at* a time). The same words as **clause** introducers are still E4's. |
 | [E4](P09-E4-clauses.md) | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
 | [E5](P09-E5-standard-of-comparison.md) | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
-| [E6](P09-E6-questions-and-existentials.md) | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
+| [E6](P09-E6-questions-and-existentials.md) | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too — **both built 2026-09-23**. |
 | E7 | Determiners and numbers | every, each, any, another, much, such, one, two, three, something | New values for [`DETERMINER_CATEGORY_VALUES`](../../../../packages/shared/src/index.ts#L53). Numbers need agreement (*un / una*, de *ein*) and Japanese counters (二匹の猫). *something* is an indefinite pronoun (*qualcosa, quelque chose, etwas, algo, 何か*). |
 | E8 | Adverbs on adjectives | very, too | Adverbs modify only verbs today (`VerbPhrase.modifier`). "Very big" / "too big" need a degree adverb on an adjective. |
 | E9 | Verbs whose object isn't a plain accusative | like, help, let | *like* swaps its roles in Romance (*mi piace*, *me gusta*, pt *gostar de*) and becomes an adjective in Japanese (猫が好き). *help* takes the dative in German (*hilft dem Hund*). *let* takes an object plus a bare infinitive (*lascia correre il gatto*, ja 〜させる). No verb can set its object's case today. |
@@ -304,9 +305,10 @@ backend runs the builds, not `src`.
   and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
   Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
   future temporal clause (A250–A252), and a boot render that lets an unseeded concept through (A253). All seven were fixed the same day.
-- **The existential "there is"** (E6 D5) is the one §3 construct left, with E6's table of what each
-  language needs (de *es gibt* + accusative, it *c'è / ci sono*, ja いる / ある already built). File it
-  under its own id when it is scheduled.
+- **The existential "there is"** (E6 D5), the last §3 construct, **shipped 2026-09-23**, plan-only:
+  `PhrasePlan.existential`, with the seven-language table and what landed differently in
+  [E6's *The existential*](P09-E6-questions-and-existentials.md#the-existential). It wants a builder
+  control (a toggle on BE) like the other plan-only constructs above.
 - **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
   are [B59–B67](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), whose

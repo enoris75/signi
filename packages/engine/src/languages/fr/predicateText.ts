@@ -188,12 +188,18 @@ export function predicateText(
   // ungrammatical (A240). No participle agrees with that one either.
   const objectPrep = objectPreposition(verb);
   const datClitic = objectPrep === 'à';
-  const dislocated = !!directObject && !objectPrep && directObject.conjuncts.length > 1 && !aucun
+  const dislocated = !!directObject && !objectPrep && directObject.conjuncts.length > 1 && !aucun && !verbPhrase.existential
     && directObject.conjuncts.some((np) => np.head.forms['person']);
   // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "le" for
   // a predicate ("le chien ne l'est pas", "les chiens le sont"), "y" for a place ("il n'y est pas").
   const elided = verbPhrase.elided;
-  const objectClitic = !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
+  // An existential is "il y a": the "y" takes the object clitic's slot, and every placement that slot
+  // has holds for it — inside "ne … pas" ("il n'y a pas de chat"), on the compound past's auxiliary
+  // ("il y a eu"), before a modal's infinitive ("il peut y avoir"). The pivot is still the object
+  // noun after the verb, where it takes a negation's "de" (P09-E6 D5).
+  const existential = verbPhrase.existential === true;
+  const objectClitic = existential ? 'y'
+    : !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
     : objectPrep && !datClitic ? ''
     : isPronounElement(directObject)
       ? (datClitic ? dativePronounForm(firstConjunct(directObject).head.forms) : objectPronounForm(firstConjunct(directObject).head.forms))
@@ -213,7 +219,7 @@ export function predicateText(
   };
   // A focus particle singles the object out, from outside the phrase: "mange seulement la
   // nourriture", "mange la nourriture aussi" (C39).
-  const objectGroup = directObject && (!objectClitic || dislocated)
+  const objectGroup = directObject && (!objectClitic || dislocated || existential)
     ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("est mangée par le chat dans la maison").
@@ -223,7 +229,7 @@ export function predicateText(
   // object ("le chat l'a vue", "les a vus"); a resumed group agrees as the group ("nous a vus, lui
   // et moi"). An object relative passes its antecedent instead (`precedingObjectForms`).
   // A pro-form is no object, and the participle does not agree with it ("l'a été").
-  const cliticObjectForms = !objectClitic || !directObject || datClitic ? undefined
+  const cliticObjectForms = !objectClitic || !directObject || datClitic || existential ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
   // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit

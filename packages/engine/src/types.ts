@@ -228,6 +228,17 @@ export interface ResolvedVerbPhrase {
    * clause coordinated with it) whose mood is indicative; a relative clause never carries it.
    */
   interrogative?: boolean;
+  /**
+   * The clause is an **existential** (see PhrasePlan.existential, P09-E6 D5): `verb` is the
+   * language's existential verb (`EXISTENTIAL_VERBS`), the phrase's `directObject` is the pivot and
+   * its `subject` the impersonal third person, agreeing with the pivot where the verb does (en, it).
+   * Each engine reads it for what the object path does not say: en writes "there" in the subject
+   * slot, it the clitic *ci* and fr *y* in the object clitic's, es / pt conjugate *haber* / *haver*
+   * for the HAVE they were resolved with, and ja drops the subject and marks the pivot が. German
+   * needs nothing: *es gibt einen Kater* is the plain clause. On the verb phrase, like
+   * `interrogative`, because the predicate builders see it and not the clause.
+   */
+  existential?: boolean;
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ResolvedModal[];

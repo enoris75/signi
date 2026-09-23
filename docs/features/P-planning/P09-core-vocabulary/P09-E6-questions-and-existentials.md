@@ -6,8 +6,9 @@ that P09 filed in the same row.
 wh-question is a gap plus a fronting rule, and the gap is a shape the engine already has. The
 existential is a clause with no subject and a verb six languages spell irregularly.
 **Scope:** all 7 languages.
-**Status:** **wh-question shipped, 2026-09-23** (plan-only, all seven languages; see [Done](#done)).
-The **existential** is split off (D5) and still unscheduled. The **yes/no** half of E6 shipped as
+**Status:** **done — the wh-question and the existential both shipped, 2026-09-23** (plan-only, all
+seven languages; see [Done](#done) and [The existential](#the-existential)). The existential was
+split off by D5 and built later the same day, in its own lane. The **yes/no** half of E6 shipped as
 [C10](../../../localization/done/C10-ui-questions.md) on an earlier sweep.
 **Words:** *what*, *how*, *why*, *where*, and *who* / *which* as question words.
 
@@ -21,8 +22,8 @@ The **existential** is split off (D5) and still unscheduled. The **yes/no** half
 | pt | quem come a comida? | o que o gato come? | onde o gato come? | há um gato. |
 | ja | 誰が食べ物を食べますか？ | 猫は何を食べますか？ | 猫はどこで食べますか？ | 猫がいます。 |
 
-**Proposed, not engine output** — the table as planned. What the engine renders is in [Done](#done);
-the existential column is still only a proposal.
+**Proposed, not engine output** — the table as planned. What the engine renders is in [Done](#done),
+and for the existential column in [The existential](#the-existential).
 
 ## Done
 
@@ -81,15 +82,87 @@ What landed differently from the plan below, and why:
 
 Follow-ups, none filed:
 
-- **The existential** (D5) — its own task, with D5's table: en/it agreement with the notional
-  subject (*there is / there are*, *c'è / ci sono*), fr invariable *il y a*, de *es gibt* + accusative,
-  es *hay*, pt *há*, ja いる / ある by [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts).
+- ~~**The existential** (D5)~~ — shipped the same day; see [The existential](#the-existential).
 - **The possessor question** ("whose food does the cat eat?") — D1: the wh-word carries a noun.
 - **Complement gaps under a preposition** ("under what?", "with whom?", "thanks to what?") and the
   passive question (the gap re-mapped as a relative's is).
 - **Indirect questions** ("asks whether / what …") — needs [E4](P09-E4-clauses.md).
 - **Builder control** (§3): a mood control and a slot marked as the question; the console too.
 - **The French inversion register** ("que mange le chat ?"), multiple gaps, echo questions.
+
+### The existential
+
+Shipped 2026-09-23 as `PhrasePlan.existential` (D5), **plan-only**: no builder or console control
+sets it yet. The plan's `subject` is the **pivot**, its verb is BE, and everything else — tense,
+aspect, negation, modals, complements, the yes/no question, the clauses around it — is any clause's.
+Pinned in [`test/existential.test.ts`](../../../../packages/engine/test/existential.test.ts), with
+[`existentialPlan`](../../../../packages/engine/src/translator/functions/existentialPlan.ts) and
+[`withExistential`](../../../../packages/engine/src/translator/functions/withExistential.ts) unit-tested
+beside their source.
+
+| lang | there is a cat | there are cats in the house | there is a book in the house | there was a cat in the house | there is no cat | is there a cat? | the man says that there is a cat |
+|---|---|---|---|---|---|---|---|
+| en | there is a cat. | there are cats in the house. | there is a book in the house. | there was a cat in the house. | there is no cat. | is there a cat? | the man says that there is a cat. |
+| it | c'è un gatto. | ci sono gatti nella casa. | c'è un libro nella casa. | c'era un gatto nella casa. | non c'è un gatto. | c'è un gatto? | l'uomo dice che c'è un gatto. |
+| fr | il y a un chat. | il y a des chats dans la maison. | il y a un livre dans la maison. | il y avait un chat dans la maison. | il n'y a pas de chat. | est-ce qu'il y a un chat ? | l'homme dit qu'il y a un chat. |
+| de | es gibt einen Kater. | es gibt Kater im Haus. | es gibt ein Buch im Haus. | es gab einen Kater im Haus. | es gibt keinen Kater. | gibt es einen Kater? | der Mann sagt, dass es einen Kater gibt. |
+| es | hay un gato. | hay unos gatos en la casa. | hay un libro en la casa. | había un gato en la casa. | no hay un gato. | ¿hay un gato? | el hombre dice que hay un gato. |
+| pt | há um gato. | há uns gatos na casa. | há um livro na casa. | havia um gato na casa. | não há um gato. | há um gato? | o homem diz que há um gato. |
+| ja | 猫がいます。 | 家に猫がいます。 | 家に本があります。 | 家に猫がいました。 | 猫がいません。 | 猫がいますか？ | 男は猫がいると言います。 |
+
+A coordinated pivot is plural where the verb agrees: "there are a cat and a dog", *ci sono un gatto
+e un cane*, 猫と犬がいます (an "or" pivot agrees with its first conjunct, "there is a cat or dogs"). The
+resultative is "there has been a cat", *c'è stato*, *il y a eu*, *es hat … gegeben*, *ha habido*,
+*houve*; a modal "there can be a cat", *ci può essere*, *il peut y avoir*, *puede haber*, *pode haver*.
+A `no` pivot is "there is no cat", *non c'è nessun gatto*, *il n'y a aucun chat*, *no hay ningún
+gato*, どの猫もいません, and SOMETHING turns into *niente / rien / nichts / nada* and 何もありません.
+
+What landed differently from D5, and why:
+
+- **The pivot is the object everywhere, not only in the four impersonal languages.** The translator
+  rewrites the plan once per language (`existentialPlan`): the pivot moves to the object slot of the
+  language's existential verb (`EXISTENTIAL_VERBS`: en/it/ja BE, fr HAVE, de GIVE, es/pt HAVE) under
+  the impersonal third person, which fr says as *il* and de as *es* with no engine change at all, and
+  it / es / pt drop as any pronoun subject. English and Italian then take the pivot's agreement back
+  onto that subject (`withExistential`), so "there **are**", *ci **sono***. Each engine reads one flag,
+  `ResolvedVerbPhrase.existential`: en writes *there*, it *ci* and fr *y* in the object clitic's slot
+  (so *non c'è*, *il n'y a pas*, *il y a eu* and *il peut y avoir* all come from the placement that
+  slot already has), and ja drops the subject and marks the pivot が right ahead of the verb — which
+  is also what puts a locative before it (家に猫がいます) without a word-order rule of its own.
+- **Spanish and Portuguese conjugate a verb neither corpus seeds.** HAVE is resolved for its
+  transitive shape, and the engines swap in `HABER_EXISTENTIAL` / `HAVER_EXISTENTIAL`, paradigms
+  shaped like the seeded ones (the defective *hay*, *hubo*, *habrá*; *há*, *houve*, *haverá*), so the
+  mood derivations work on them: *si hubiera*, *que haya*, *se houvesse*, *que haja* (added to the
+  Portuguese present-subjunctive table).
+- **The past is the imperfect in all four Romance languages** — *c'era*, *il y avait*, *había*,
+  *havia* — because a state's past is (A130), which is what the ruling asked for and what the
+  engines already say of BE and HAVE. The preterite *houve* appears only as the Portuguese
+  resultative, which that engine renders as the preterite of BE and HAVE too (*foram*, *teve*); the
+  Spanish resultative is *ha habido*.
+- **English says the negation on the pivot** where it can — one indefinite or bare noun phrase and
+  no modal: "there is no cat", "there are no cats"; a definite pivot keeps *not* ("there is not the
+  cat"), and so does a modal clause ("there can not be a cat", the engine's modal negation). The
+  other five negate as their object path does, which was the ruling: *non c'è un gatto*, *no hay un
+  gato*, *não há um gato* (no negative-polarity *nessun / ningún / nenhum* was built).
+- **An indefinite plural keeps the engine's article**: *hay unos gatos*, *há uns gatos*; a `bare`
+  plural pivot gives the more idiomatic *hay gatos*, *há gatos*.
+- **Japanese SOMETHING takes ある**: [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts)
+  counted every word with a person as animate, including the indefinite pronoun that stands for a
+  thing, so "there is something" was 何かがいます. It now excludes `thing` words, which also turns
+  "something is in the house" from 何かは家にいます into 何かは家にあります.
+- **Refused, with an error**: a verb other than BE, a verbless plan, a wh-question (`questionRole`),
+  a passive, a command, an infinitive, and a **personal-pronoun pivot** ("there is me" has no Spanish
+  or Portuguese object form — a clitic would say "*me hay*" — nor the nominative Italian wants). The
+  plan's own `directObject` is dropped.
+
+Follow-ups, none filed:
+
+- **Builder control**: a way to mark a clause existential (a toggle on BE), and the console too.
+- **The wh-question over an existential** ("what is there?", "where is there a cat?") and a pronoun
+  pivot ("there is me", *ci sono io*).
+- **Portuguese colloquial *tem*** ("tem um gato na casa") as a register choice, and the Italian /
+  Spanish negative-polarity determiners under a negated existential (*non c'è nessun gatto* from a
+  plain indefinite).
 
 ## Why
 
@@ -230,7 +303,8 @@ question, the way a slot is marked as the cursor's scope today.
 
 ## Out of scope (follow-ups)
 
-- **The existential** (D5) — its own task when scheduled.
+- ~~**The existential** (D5) — its own task when scheduled.~~ Built 2026-09-23; see
+  [The existential](#the-existential).
 - **The possessor question** ("whose food?") — D1.
 - **Indirect questions** ("asks whether the cat runs") — needs [E4](P09-E4-clauses.md) too.
 - **Multiple gaps** ("who eats what?"). One gap per plan, as there is one condition and one

@@ -17,7 +17,7 @@ import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { possessorIsNegative } from '../../functions/possessorIsNegative.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { ESTAR_COPULA, FOCUS_WORDS } from './pt.consts.js';
+import { ESTAR_COPULA, FOCUS_WORDS, HAVER_EXISTENTIAL } from './pt.consts.js';
 import { agentPhrase } from './agentPhrase.js';
 import { agreeAdj } from './agreeAdj.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -62,7 +62,11 @@ export function predicateText(
   // for "está" (A199).
   gapComplement?: ComplementType,
 ): string {
-  const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb: givenVerb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  // An existential conjugates "haver" for the HAVE it was resolved with (P09-E6 D5, see
+  // `HAVER_EXISTENTIAL`): every form below reads it, so the tense, the negation and the modals compose
+  // on it as on any verb.
+  const verb = verbPhrase.existential ? HAVER_EXISTENTIAL : givenVerb;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
   // or imperfect-subjunctive (protasis, "comesse") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
