@@ -843,14 +843,14 @@ describe('known bugs: a clause anterior to a past governor takes no pluperfect (
     contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', ...inner } },
   });
 
-  test.fails('a past clause under a past subjunctive governor: non credeva che il gatto avesse corso', () => {
+  test('a past clause under a past subjunctive governor: non credeva che il gatto avesse corso', () => {
     expect(sayAll(under({ verb: 'BELIEVE', negative: true, tense: 'past' }, { tense: 'past' }))).toMatchObject({
       it: "l'uomo non credeva che il gatto avesse corso.", fr: "l'homme ne croyait pas que le chat ait couru.",
       es: 'el hombre no creía que el gato hubiera corrido.', pt: 'o homem não acreditava que o gato tivesse corrido.',
     });
   });
 
-  test.fails('a resultative under a past governor: said that the cat had run', () => {
+  test('a resultative under a past governor: said that the cat had run', () => {
     expect(sayAll(under({ verb: 'SAY', tense: 'past' }, { aspect: 'resultative' }))).toMatchObject({
       en: 'the man said that the cat had run.', it: "l'uomo disse che il gatto aveva corso.",
       fr: "l'homme dit que le chat avait couru.", es: 'el hombre dijo que el gato había corrido.',
@@ -860,6 +860,63 @@ describe('known bugs: a clause anterior to a past governor takes no pluperfect (
       en: 'the man did not believe that the cat had run.', it: "l'uomo non credeva che il gatto avesse corso.",
       es: 'el hombre no creía que el gato hubiera corrido.', pt: 'o homem não acreditava que o gato tivesse corrido.',
     });
+  });
+
+  test('the auxiliary is the verb\'s own, and an essere / être participle agrees', () => {
+    expect(sayAll({
+      subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true, tense: 'past' },
+      contentObject: { subject: { ...np('CAT'), number: 'plural' }, verbPhrase: { verb: 'GO', tense: 'past' } },
+    })).toMatchObject({
+      it: "l'uomo non credeva che i gatti fossero andati.", fr: "l'homme ne croyait pas que les chats soient allés.",
+      es: 'el hombre no creía que los gatos hubieran ido.', pt: 'o homem não acreditava que os gatos tivessem ido.',
+    });
+    expect(sayAll({
+      subject: np('MAN'), verbPhrase: { verb: 'SAY', tense: 'past' },
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'GO', aspect: 'resultative' } },
+    })).toMatchObject({
+      it: "l'uomo disse che il gatto era andato.", fr: "l'homme dit que le chat était allé.",
+      es: 'el hombre dijo que el gato había ido.', pt: 'o homem disse que o gato tinha ido.',
+    });
+  });
+
+  test('an object, a passive and an evaluative predicate come along', () => {
+    expect(sayAll({
+      subject: np('MAN'), verbPhrase: { verb: 'SAY', tense: 'past' },
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT', aspect: 'resultative' }, directObject: np('FOOD') },
+    })).toMatchObject({
+      en: 'the man said that the cat had eaten the food.', it: "l'uomo disse che il gatto aveva mangiato il cibo.",
+      fr: "l'homme dit que le chat avait mangé la nourriture.", es: 'el hombre dijo que el gato había comido la comida.',
+      pt: 'o homem disse que o gato tinha comido a comida.',
+    });
+    expect(sayAll({
+      subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true, tense: 'past' },
+      contentObject: { subject: np('MAN'), verbPhrase: { verb: 'EAT', tense: 'past', voice: 'passive' }, directObject: np('FOOD') },
+    })).toMatchObject({
+      it: "l'uomo non credeva che il cibo fosse stato mangiato dall'uomo.",
+      fr: "l'homme ne croyait pas que la nourriture ait été mangée par l'homme.",
+      es: 'el hombre no creía que la comida hubiera sido comida por el hombre.',
+      pt: 'o homem não acreditava que a comida tivesse sido comida pelo homem.',
+    });
+    expect(sayAll({
+      subject: np('THING'), contentSubject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', tense: 'past' } },
+      verbPhrase: { verb: 'BE', tense: 'past' }, complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+    })).toMatchObject({
+      it: 'era giusto che il gatto avesse corso.', fr: 'il était juste que le chat ait couru.',
+      es: 'era correcto que el gato hubiera corrido.', pt: 'era certo que o gato tivesse corrido.',
+    });
+  });
+
+  test('regression: a plain past indicative, and a pluperfect already, are left alone; German keeps its tense', () => {
+    expect(sayAll(under({ verb: 'SAY', tense: 'past' }, { tense: 'past' }))).toMatchObject({
+      en: 'the man said that the cat ran.', it: "l'uomo disse che il gatto corse.",
+      es: 'el hombre dijo que el gato corrió.', pt: 'o homem disse que o gato correu.',
+    });
+    expect(sayAll(under({ verb: 'SAY', tense: 'past' }, { tense: 'past', aspect: 'resultative' }))).toMatchObject({
+      en: 'the man said that the cat had run.', it: "l'uomo disse che il gatto aveva corso.",
+      de: 'der Mann sagte, dass der Kater gelaufen war.',
+    });
+    expect(sayAll(under({ verb: 'SAY', tense: 'past' }, { aspect: 'resultative' })).de)
+      .toBe('der Mann sagte, dass der Kater gelaufen ist.');
   });
 });
 
