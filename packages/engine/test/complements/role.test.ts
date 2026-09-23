@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, NounPhrase, Specifier } from '@signi/shared';
+import type { NounElement, NounPhrase, PronominalPossessor, RelativeClause, Specifier } from '@signi/shared';
 import { clause, np, say, sayAll } from '../harness.js';
 
 // The ROLE complement (P09-E13) — the capacity the subject acts in while the verb does something
@@ -378,6 +378,92 @@ describe('role: the noun\'s own modifiers', () => {
       es: 'la mujer lee el libro como estudiante.',
       ja: '女は学生として本を読みます。',
       pt: 'a mulher lê o livro como estudante.',
+    });
+  });
+});
+
+// A287. D3 keeps the Romance role noun bare, since only the article tells "come amico" (the role)
+// from "come un amico" (the likeness). Italian's pronominal possessor brings its own definite article
+// back ("il suo amico"), and "come il suo amico" reads as the likeness again. The essive object
+// predicative shares the helper, and the defect. The other six are right, but English and Italian are
+// not pinned as regressions here: a pending fix (A277) re-spells an indefinite head with a pronominal
+// possessor ("a friend of mine", "un mio amico"), and the role noun is indefinite by default.
+describe('known bugs: an Italian role or essive noun with a pronominal possessor takes the article (A287)', () => {
+  const his: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' };
+  const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+
+  test.fails('the role noun stays bare before the possessive', () => {
+    expect(actsAs(np('FRIEND', { possessor: his }))['it']).toBe("l'uomo agisce come suo amico.");
+  });
+
+  test.fails('a feminine role noun', () => {
+    expect(actsAs(np('FRIEND', { gender: 'fem', possessor: her }), np('WOMAN'))['it']).toBe('la donna agisce come sua amica.');
+  });
+
+  test.fails('the essive object predicative', () => {
+    expect(say(clause(np('MAN'), 'USE', {
+      directObject: np('BOOK'),
+      complements: { objectPredicative: { phrase: np('FRIEND', { possessor: his }), specifiers: ESSIVE } },
+    }), 'it')).toBe("l'uomo usa il libro come suo amico.");
+  });
+
+  test('regression: the other Romance languages and German, and a genitive possessor in Italian', () => {
+    expect(actsAs(np('FRIEND', { possessor: his }))).toMatchObject({
+      fr: "l'homme agit comme son ami.",
+      de: 'der Mann handelt als sein Freund.',
+      es: 'el hombre actúa como su amigo.',
+      pt: 'o homem age como seu amigo.',
+    });
+    expect(actsAs(np('FRIEND', { gender: 'fem', possessor: her }), np('WOMAN'))).toMatchObject({
+      fr: 'la femme agit comme son amie.',
+      de: 'die Frau handelt als ihre Freundin.',
+      es: 'la mujer actúa como su amiga.',
+      pt: 'a mulher age como sua amiga.',
+    });
+    expect(actsAs(np('FRIEND', { possessor: np('WOMAN') }))['it']).toBe("l'uomo agisce come amico della donna.");
+    expect(say(clause(np('MAN'), 'USE', {
+      directObject: np('BOOK'),
+      complements: { objectPredicative: { phrase: np('FRIEND', { possessor: np('WOMAN') }), specifiers: ESSIVE } },
+    }), 'it')).toBe("l'uomo usa il libro come amico della donna.");
+  });
+});
+
+// A288. A relative clause whose gap is the role ("the friend the man acts as") has no natural
+// relative in Romance or German: "come quale", "comme quel", "como que", "como qual", and a German
+// "als" with no relative pronoun and a double space. No control builds one and randomPhrase leaves
+// it out, but the plan API accepts it. The target is a refusal, as a role question is refused
+// (resolveQuestion.test.ts); a refusal has no correct output to pin, so the pin asserts the throw.
+describe('known bugs: a relative clause over a role gap renders nonsense (A288)', () => {
+  const actsAsWhom = (): RelativeClause => ({ headRole: 'role', subject: np('MAN'), verbPhrase: { verb: 'ACT' } });
+
+  test.fails('the role gap is refused by name, as the object', () => {
+    expect(() => sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('FRIEND', { relative: actsAsWhom() }) }))).toThrow(/role/);
+  });
+
+  test.fails('the role gap is refused by name, as the subject', () => {
+    expect(() => sayAll(clause(np('FRIEND', { relative: actsAsWhom() }), 'RUN'))).toThrow(/role/);
+  });
+
+  test('regression: a comitative gap on the same clause, and a role inside an object relative', () => {
+    expect(sayAll(clause(np('FRIEND', { relative: { ...actsAsWhom(), headRole: 'comitative' } }), 'RUN'))).toEqual({
+      en: 'the friend with whom the man acts runs.',
+      it: "l'amico con il quale l'uomo agisce corre.",
+      fr: "l'ami avec lequel l'homme agit court.",
+      de: 'der Freund, mit dem der Mann handelt, läuft.',
+      es: 'el amigo con el que el hombre actúa corre.',
+      ja: '男が行動する友達は走ります。',
+      pt: 'o amigo com o qual o homem age corre.',
+    });
+    expect(sayAll(clause(np('BOOK', {
+      relative: { headRole: 'directObject', subject: np('MAN'), verbPhrase: { verb: 'READ' }, complements: { role: { phrase: np('STUDENT') } } },
+    }), 'BURN'))).toEqual({
+      en: 'the book that the man reads as a student burns.',
+      it: "il libro che l'uomo legge come studente brucia.",
+      fr: "le livre que l'homme lit comme étudiant brûle.",
+      de: 'das Buch, das der Mann als Student liest, brennt.',
+      es: 'el libro que el hombre lee como estudiante arde.',
+      ja: '男が学生として読む本は燃えます。',
+      pt: 'o livro que o homem lê como estudante arde.',
     });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
@@ -120,5 +120,62 @@ describe('the time words the numerals unlock', () => {
   test('HOUR and MONTH are seeded, and HOUR has no gloss', () => {
     expect(seed('HOUR')?.definition).toBeUndefined();
     expect(seed('MONTH')?.definition).toBeUndefined();
+  });
+});
+
+// A289. `objectArtFor` drops every article from a counted French object, to keep the partitive and
+// the negative "de" off "mange deux souris" (C31). Only the indefinite gives way to a numeral
+// (`numeralSuppressesArticle`), so a definite or demonstrative object loses a determiner the subject
+// keeps ("les deux livres brûlent"). The other six languages keep it.
+describe('known bugs: a French definite object with a numeral drops its article (A289)', () => {
+  const reads = (extra: Partial<NounPhrase> = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
+    clause(np('CAT'), 'READ', { verbPhrase, directObject: np('BOOK', { numeral: 2, ...extra }) });
+
+  test.fails('a definite object', () => {
+    expect(say(reads(), 'fr')).toBe('le chat lit les deux livres.');
+  });
+
+  test.fails('a definite object, negated — the definite article is no partitive', () => {
+    expect(say(reads({}, { negative: true }), 'fr')).toBe('le chat ne lit pas les deux livres.');
+  });
+
+  test.fails('a definite object with a genitive possessor', () => {
+    expect(say(reads({ possessor: np('MAN') }), 'fr')).toBe("le chat lit les deux livres de l'homme.");
+  });
+
+  test.fails('a demonstrative object', () => {
+    expect(say(reads({ definiteness: 'this' }), 'fr')).toBe('le chat lit ces deux livres.');
+  });
+
+  test.fails('an animate definite object', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { numeral: 3 }) }), 'fr')).toBe('le chat voit les trois chiens.');
+  });
+
+  test.fails('the object of a possessor question', () => {
+    expect(say({ ...reads(), questionRole: 'possessor', questionPossessed: 'directObject' }, 'fr'))
+      .toBe('de qui est-ce que le chat lit les deux livres ?');
+  });
+
+  test('regression: the other six keep it, as the French subject does; the indefinite and the possessive are right', () => {
+    expect(sayAll(reads())).toMatchObject({
+      en: 'the cat reads the two books.', it: 'il gatto legge i due libri.', de: 'der Kater liest die zwei Bücher.',
+      es: 'el gato lee los dos libros.', ja: '猫は二つの本を読みます。', pt: 'o gato lê os dois livros.',
+    });
+    expect(sayAll(reads({ definiteness: 'this' }))).toMatchObject({
+      en: 'the cat reads these two books.', it: 'il gatto legge questi due libri.', de: 'der Kater liest diese zwei Bücher.',
+      es: 'el gato lee estos dos libros.', ja: '猫はこの二つの本を読みます。', pt: 'o gato lê estes dois livros.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG', { numeral: 3 }) }))).toMatchObject({
+      en: 'the cat sees the three dogs.', it: 'il gatto vede i tre cani.', de: 'der Kater sieht die drei Hunde.',
+      es: 'el gato ve los tres perros.', ja: '猫は三匹の犬を見ます。', pt: 'o gato vê os três cães.',
+    });
+    expect(sayAll({ ...reads(), questionRole: 'possessor', questionPossessed: 'directObject' })).toMatchObject({
+      en: 'whose two books does the cat read?', it: 'di chi legge i due libri il gatto?', de: 'wessen zwei Bücher liest der Kater?',
+      es: '¿de quién lee el gato los dos libros?', ja: '猫は誰の二つの本を読みますか？', pt: 'de quem o gato lê os dois livros?',
+    });
+    expect(say(clause(np('BOOK', { numeral: 2 }), 'BURN'), 'fr')).toBe('les deux livres brûlent.');
+    expect(say(reads({ definiteness: 'indefinite' }), 'fr')).toBe('le chat lit deux livres.');
+    expect(say(reads({ possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }), 'fr'))
+      .toBe('le chat lit ses deux livres.');
   });
 });
