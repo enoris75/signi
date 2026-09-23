@@ -29,3 +29,16 @@ Pinned by `known bugs: the Italian progressive keeps the indicative in a subjunc
 in [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found landing A254–A260, from a lead the A254/A260 lane reported.
+
+## Resolved
+
+2026-09-23. The Italian present-subjunctive overrides in [`mood.ts`](../../../packages/engine/src/mood.ts)
+(`IT_SUBJ_PRES_OVERRIDE`) now cover `STARE`, the progressive's auxiliary concept (it.consts
+`STARE_AUX`): *stia*, *stia*, *stia*, *stiamo*, *stiate*, *stiano*, so every subjunctive governor says
+`stia correndo` where it said `sta correndo`.
+
+Guarded by the two formerly-`.fails` tests and two new ones in the
+`known bugs: the Italian progressive keeps the indicative in a subjunctive clause (A261)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (the plural `stiano
+correndo`, the past governor's `stesse correndo`, and an indicative clause keeping `sta correndo`),
+and the stare case in [mood.test.ts](../../../packages/engine/src/mood.test.ts).

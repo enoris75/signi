@@ -767,17 +767,31 @@ describe('known bugs: a subjunctive content clause drops its own past (A260)', (
 describe('known bugs: the Italian progressive keeps the indicative in a subjunctive clause (A261)', () => {
   const progressive = { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'progressive' as const } };
 
-  test.fails('under a negated belief: non crede che il gatto stia correndo', () => {
+  test('under a negated belief: non crede che il gatto stia correndo', () => {
     expect(say({ subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true }, contentObject: progressive }, 'it'))
       .toBe("l'uomo non crede che il gatto stia correndo.");
   });
 
-  test.fails('under an evaluative predicate and under "before": è giusto che, prima che il gatto stia correndo', () => {
+  test('under an evaluative predicate and under "before": è giusto che, prima che il gatto stia correndo', () => {
     expect(say(evaluative('RIGHT_CORRECT', progressive), 'it')).toBe('è giusto che il gatto stia correndo.');
     expect(say({
       subject: np('MAN'), verbPhrase: { verb: 'RUN' },
       adverbialClause: { conjunction: 'before', clause: progressive },
     }, 'it')).toBe("l'uomo corre prima che il gatto stia correndo.");
+  });
+
+  test('in the plural, and a past governor keeps its imperfect subjunctive', () => {
+    expect(say({
+      subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true },
+      contentObject: { ...progressive, subject: { ...np('CAT'), number: 'plural' } },
+    }, 'it')).toBe("l'uomo non crede che i gatti stiano correndo.");
+    expect(say({ subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true, tense: 'past' }, contentObject: progressive }, 'it'))
+      .toBe("l'uomo non credeva che il gatto stesse correndo.");
+  });
+
+  test('regression: an indicative clause keeps sta correndo', () => {
+    expect(say({ subject: np('MAN'), verbPhrase: { verb: 'SAY' }, contentObject: progressive }, 'it'))
+      .toBe("l'uomo dice che il gatto sta correndo.");
   });
 });
 

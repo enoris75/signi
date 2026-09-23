@@ -239,6 +239,13 @@ describe('moodForm: the present subjunctive (the four Romance languages)', () =>
     expect(['3sg', '3pl'].map((pn) => moodForm('fr', avoir, pn as '3sg', 'presentSubjunctive'))).toEqual(['ait', 'aient']);
   });
 
+  // The progressive's auxiliary, for "stia correndo" (A261).
+  test('the aspect auxiliary stare', () => {
+    const stare = verb('STARE', { '1sg_future': 'starò', base: 'stare' });
+    expect(['1sg', '3sg', '1pl', '2pl', '3pl'].map((pn) => moodForm('it', stare, pn as '3sg', 'presentSubjunctive')))
+      .toEqual(['stia', 'stia', 'stiamo', 'stiate', 'stiano']);
+  });
+
   test('is undefined with no stem to derive from, and in the three languages that have no such mood', () => {
     expect(moodForm('es', verb('EAT', { base: 'comer' }), '3sg', 'presentSubjunctive')).toBeUndefined();
     expect(moodForm('it', verb('EAT', { base: 'mangiare' }), '3sg', 'presentSubjunctive')).toBeUndefined();
