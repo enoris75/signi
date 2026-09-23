@@ -9,7 +9,8 @@ get the same concepts, not their own top 200.
 **Status:** **§2 done, §3 half done**, both on 2026-09-22, by the localization tickets B59–B67 and
 C29–C40 (see *Follow-ups*), which supersede some rows below. Every word of §2 is seeded and every
 one of them is glossed or literal by design; six of §3's eleven constructs are built, and five are
-open (E1, E2, E4, E5 and E6's wh-question), owned by no ticket. The decisions below were
+open (E1, E2, E4, E5 and E6's wh-question), each **a task file in this folder** since 2026-09-23
+(see §3). The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -224,18 +225,30 @@ below; what each of the others shipped is in its own ticket and in
 [the Part C index](../../../localization/localization-tasks.md#part-c--needs-engine--deferred-c-needs-engine),
 which is the record.
 
-**Five are open**, and each is still its own feature task, to be split off when it is scheduled:
-**E1** (`on` is still not a `PathSpecifier`), **E2** (`ComplementType` still has no purpose, topic,
-role or privative), **E4**, **E5**, and the wh-question half of **E6**.
+**Five are open**, and each is now **a task file of its own in this folder** — written on
+2026-09-23, when the breakdown was made:
+
+| task | construct | what it turned out to be |
+|---|---|---|
+| [P09-E1](P09-E1-spatial-relations.md) | Spatial relations | *on*, *between*, *against* — and **not *into***, which already renders. `between` is the first relation that scopes over a coordinated head instead of distributing across it. |
+| [P09-E2](P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. |
+| [P09-E4](P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. |
+| [P09-E5](P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. |
+| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. |
+
+E3 gets no task file: it shipped as [C29](../../../localization/done/C29-temporal-complement.md) on
+2026-09-22, and E7–E11 shipped the same day. Each open task states what is already built at HEAD,
+and in three of the five that turned out to be more than this plan knew — the rows below are the
+plan's own reading and the task files supersede them where they differ.
 
 | # | construct | words | notes |
 |---|---|---|---|
-| E1 | Spatial relations | on, into, between, against | `on` is one more [`PathSpecifier`](../../../../packages/shared/src/index.ts#L237) value, built exactly like [A02](../../A-ready/A02-locative-near-far/README.md) (*su, sur, auf, en/sobre, em/sobre, の上に*). `into` is `direction` plus the `in` relation, with de *in* + accusative. `between` needs two landmarks. |
-| E2 | New complement types | for, about, as, without | Purpose / beneficiary (*per, pour, für, para*), topic (*di, sur, über, sobre*), role (*come, comme, als, como*), and the negative of `instrumental` (*senza, sans, ohne, sin*). [`ComplementType`](../../../../packages/shared/src/index.ts#L183) has none of these. |
+| [E1](P09-E1-spatial-relations.md) | Spatial relations | on, into, between, against | `on` is one more [`PathSpecifier`](../../../../packages/shared/src/index.ts#L237) value, built exactly like [A02](../../A-ready/A02-locative-near-far/README.md) (*su, sur, auf, en/sobre, em/sobre, の上に*). `into` is `direction` plus the `in` relation, with de *in* + accusative. `between` needs two landmarks. |
+| [E2](P09-E2-complement-types.md) | New complement types | for, about, as, without | Purpose / beneficiary (*per, pour, für, para*), topic (*di, sur, über, sobre*), role (*come, comme, als, como*), and the negative of `instrumental` (*senza, sans, ohne, sin*). [`ComplementType`](../../../../packages/shared/src/index.ts#L183) has none of these. |
 | ~~E3~~ | ~~Time~~ — **built 2026-09-22** | after, before, during | **Done** ([C29](../../../localization/done/C29-temporal-complement.md)): `ComplementType.temporal`, carrying a `TemporalRelation` — `at \| ago \| until \| after \| before \| during`. The three words are relations on a noun phrase ("after this day", *nach diesem Tag*, この日の後に), and the complement also gave TODAY, JUST and STILL the glosses they waited for. `at` turned out to be the one relation whose adposition the **head noun** picks, not the relation (en *on* a day but *at* a time). The same words as **clause** introducers are still E4's. |
-| E4 | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
-| E5 | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
-| E6 | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
+| [E4](P09-E4-clauses.md) | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
+| [E5](P09-E5-standard-of-comparison.md) | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
+| [E6](P09-E6-questions-and-existentials.md) | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
 | E7 | Determiners and numbers | every, each, any, another, much, such, one, two, three, something | New values for [`DETERMINER_CATEGORY_VALUES`](../../../../packages/shared/src/index.ts#L53). Numbers need agreement (*un / una*, de *ein*) and Japanese counters (二匹の猫). *something* is an indefinite pronoun (*qualcosa, quelque chose, etwas, algo, 何か*). |
 | E8 | Adverbs on adjectives | very, too | Adverbs modify only verbs today (`VerbPhrase.modifier`). "Very big" / "too big" need a degree adverb on an adjective. |
 | E9 | Verbs whose object isn't a plain accusative | like, help, let | *like* swaps its roles in Romance (*mi piace*, *me gusta*, pt *gostar de*) and becomes an adjective in Japanese (猫が好き). *help* takes the dative in German (*hilft dem Hund*). *let* takes an object plus a bare infinitive (*lascia correre il gatto*, ja 〜させる). No verb can set its object's case today. |
