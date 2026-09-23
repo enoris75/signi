@@ -7,7 +7,7 @@ A134–A136 were the exception: defects in the backend's HTTP API (`packages/bac
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
 `packages/frontend/test/`, and so are A179 and A268. A267 is pinned in all three packages: the engine's
-error, the backend's 400 and the builder's `workspaceToPlans`; A273 in the engine and the backend. A253 was a backend defect too — the boot-time renders of the
+error, the backend's 400 and the builder's `workspaceToPlans`; A273 in the engine and the backend; A275 in all three again. A253 was a backend defect too — the boot-time renders of the
 definitions and the UI strings — pinned beside them, in `packages/backend/src/definitions.test.ts` and
 `uiStrings.test.ts`.
 
@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds fourteen, A261–A274, pinned by 26 `test.fails`, and Part B is empty).** If
+this writing Part A holds fifteen, A261–A275, pinned by 29 `test.fails`, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -78,8 +78,14 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](A-must-fix/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | a question inside a content clause: `says that does the cat run`, `dice che che cosa mangia il gatto` |
 | A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](A-must-fix/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | a relative clause with no verb phrase: a TypeError (`Cannot destructure property 'voice'`) and a 500 |
 | A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](A-must-fix/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | the essive drops an i- or た-adjective's degree: 大きいとして for もっと大きいとして |
+| A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](A-must-fix/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | a non-subject-gap relative with no subject reads as a subject relative: `the cat that eats` for *the cat that [someone] eats* |
 
-**Fourteen open.** Two more, **A273** and **A274**, were filed on 2026-09-23 from leads met while
+**Fifteen open.** The last, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
+relative with no subject. It renders as a subject relative with its meaning flipped (*the cat that eats*
+for *the cat that someone eats*), and the builder sends it. It is refused as A267 and A273 are,
+not filled in with GENERIC_PERSON and not made passive.
+
+Two more, **A273** and **A274**, were filed on 2026-09-23 from leads met while
 filing A265–A272. A273 is a relative clause with no verb phrase, which crashes the engine and is
 refused the way A267 is. A274 is the Japanese essive dropping an i- or た-adjective's degree
 (大きいとして), a gap A232 left on purpose, not a regression. A third lead was dropped: MORNING rendering

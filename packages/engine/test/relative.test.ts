@@ -1613,3 +1613,30 @@ describe('known bugs: a relative clause with no verb phrase crashes the engine (
     expect((thrown as Error).message).toMatch(/verb ?phrase/i);
   });
 });
+
+// A275. A relative clause whose gap is not its subject — the head is its object, a complement or a
+// possessor — needs a subject of its own (`RelativeClause.subject`, "present when headRole !==
+// 'subject'"). Without one the engine renders the clause as a subject relative: "the cat that eats
+// runs." for *the cat that [someone] eats*, the meaning flipped, and "the house where eats burns.",
+// fr "la maison qui mange brûle." for a place gap. As A267 and A273, the plan is refused with a named
+// error: not filled in with GENERIC_PERSON, and not turned into a passive (the user can pick the
+// generic person as the subject). The backend's 400 is pinned in packages/backend/src/index.test.ts,
+// the builder's side in packages/frontend/test/workspacePlan/functions/workspaceToPlans.test.ts.
+describe('known bugs: an object relative with no subject reads as a subject relative (A275)', () => {
+  const eats = (headRole: RelativeClause['headRole']): RelativeClause => ({ headRole, verbPhrase: { verb: 'EAT' } });
+
+  test.fails.each([
+    ['an object gap', clause(np('CAT', { relative: eats('directObject') }), 'RUN')],
+    ['a place gap', clause(np('HOUSE', { relative: eats('locative') }), 'BURN')],
+    ['a possessor gap', clause(np('CAT', { relative: eats('possessor') }), 'RUN')],
+  ])('%s with no subject is refused with an error naming the missing subject', (_, plan) => {
+    expect(() => sayAll(plan)).toThrow(/subject/);
+  });
+
+  test('regression: the object relative with its subject, and the subject relative', () => {
+    expect(sayAll(clause(np('CAT', { relative: { ...eats('directObject'), subject: np('DOG') } }), 'RUN'))).toMatchObject({
+      en: 'the cat that the dog eats runs.', fr: 'le chat que le chien mange court.', de: 'der Kater, den der Hund frisst, läuft.',
+    });
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')).en).toBe('the cat that eats runs.');
+  });
+});

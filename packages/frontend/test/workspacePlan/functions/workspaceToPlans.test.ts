@@ -132,3 +132,22 @@ describe('known bugs: a linked clause with no subject crashes the engine (A267)'
     expect(joined).not.toHaveProperty('coordination');
   });
 });
+
+// A275. A relative link may land on a period's object while its subject box is still empty, and
+// `buildRelativeClause` then hangs an object relative with no subject on the head, which the engine
+// renders as a subject relative ("the cat that eats", meaning flipped). A subordinate clause already
+// folds in nothing until its subject has a head; an object, complement or possessor relative should
+// wait the same way. A subject relative needs none, since the head is its subject.
+describe('known bugs: an object relative with no subject reads as a subject relative (A275)', () => {
+  it.fails('folds in no object relative until its period has a subject', () => {
+    const periods = [period('main', { subject: CAT, verb: SLEEP }), period('rel', { verb: EAT, directObject: DOG })];
+    const [{ plan }] = workspaceToPlans(periods, [relative('r', ['main', 'subject'], ['rel', 'directObject'])]);
+    expect(plan.subject).not.toHaveProperty('relative');
+  });
+
+  it('regression: a subject relative needs no subject of its own', () => {
+    const periods = [period('main', { subject: CAT, verb: SLEEP }), period('rel', { subject: DOG, verb: EAT })];
+    const [{ plan }] = workspaceToPlans(periods, [relative('r', ['main', 'subject'], ['rel', 'subject'])]);
+    expect(plan.subject).toHaveProperty('relative');
+  });
+});

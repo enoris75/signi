@@ -1,6 +1,12 @@
 # A-must-fix — confirmed bugs
 
-**Fourteen open.** The newest two were filed on 2026-09-23 from leads met while filing A265–A272.
+**Fifteen open.** The newest,
+[A275](A275-object-relative-with-no-subject-reads-as-a-subject-relative.md), is an object, complement
+or possessor relative with no subject, which the engine renders as a subject relative with its meaning
+flipped (*the cat that eats runs.*). The builder sends it when a relative link lands on a period's
+object before its subject has a word. It is refused as A267 and A273 are.
+
+The two before it were filed on 2026-09-23 from leads met while filing A265–A272.
 [A273](A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) is a relative clause with no
 verb phrase, which crashes the engine (`Cannot destructure property 'voice'`) and returns a 500. It is
 refused the way A267 is. [A274](A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) is the

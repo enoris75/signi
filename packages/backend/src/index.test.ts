@@ -678,3 +678,18 @@ describe('known bugs: a relative clause with no verb phrase answers 500 (A273)',
     expect(((await res.json()) as { error: string }).error).toMatch(/relative\.verbPhrase.* is required/);
   });
 });
+
+// A275. A relative clause whose gap is not its subject, carrying no subject of its own, is rendered as
+// a subject relative with its meaning flipped ("the cat that eats" for *the cat that someone eats*)
+// and served as a 200. Like A267 and A273 it is a malformed plan, and wants a 400 naming what is
+// missing. The engine's side is pinned in packages/engine/test/relative.test.ts.
+describe('known bugs: an object relative with no subject is served (A275)', () => {
+  test.fails.each([
+    ['an object gap', { subject: { concept: 'CAT', relative: { headRole: 'directObject', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'RUN' } }],
+    ['a place gap', { subject: { concept: 'HOUSE', relative: { headRole: 'locative', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'BURN' } }],
+  ])('rejects a relative clause with %s and no subject', async (_, plan) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: string }).error).toMatch(/relative\.subject.* is required/);
+  });
+});
