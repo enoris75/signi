@@ -83,6 +83,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     // A subject wh-question is never the topic: a question word is new information, which は cannot
     // mark, so it takes が — 誰が食べ物を食べますか (P09-E6).
     segs.push(...elSegs(askedNoun), { t: 'が' });
+  } else if (phrase.verbPhrase.existential) {
+    // An existential speaks no subject: the impersonal one it was resolved with is the six European
+    // languages' expletive, and what exists is the pivot, marked が in the object's slot, right ahead of
+    // the verb and behind any place — 家に猫がいます (P09-E6 D5, see `predicateSegs`).
   } else if (!dropsSubject && !(plain && phrase.subject.agreement['generic'] === '1')) {
     segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
   }

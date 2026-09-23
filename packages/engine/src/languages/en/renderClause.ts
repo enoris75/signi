@@ -44,7 +44,11 @@ export function renderClause(given: ResolvedPhrase): string {
   const contentSubject = phrase.contentSubject;
   // A subject wh-question writes its word in the subject's own slot (P09-E6).
   const gap = phrase.question;
-  const subj = contentSubject ? 'it' : dropsSubject ? '' : gap?.role === 'subject' ? questionWord(gap) : subjectText(subject);
+  // An existential's subject slot takes the expletive "there", the pivot following the verb as its
+  // object does and the verb agreeing with it: "there are cats in the house", "is there a cat?"
+  // (P09-E6 D5, see `withExistential`).
+  const subj = contentSubject ? 'it' : dropsSubject ? '' : gap?.role === 'subject' ? questionWord(gap)
+    : phrase.verbPhrase?.existential ? 'there' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
   // A `no` subject is the clause's negator and takes the other negatives with it (A160). Only the

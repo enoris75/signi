@@ -350,6 +350,7 @@ const PT_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
   GIVE: { '1sg': 'dê', '2sg': 'dê', '3sg': 'dê', '1pl': 'demos', '2pl': 'deem', '3pl': 'deem' },                         // dar (1sg "dou" breaks the -o rule)
   GO:   { '1sg': 'vá', '2sg': 'vá', '3sg': 'vá', '1pl': 'vamos', '2pl': 'vão', '3pl': 'vão' },                           // ir (1sg "vou" breaks the -o rule)
   TER:  { '1sg': 'tenha', '2sg': 'tenha', '3sg': 'tenha', '1pl': 'tenhamos', '2pl': 'tenham', '3pl': 'tenham' },         // the resultative's ter
+  HAVER: { '1sg': 'haja', '2sg': 'haja', '3sg': 'haja', '1pl': 'hajamos', '2pl': 'hajam', '3pl': 'hajam' },              // the existential's haver (P09-E6)
   WILL: { '1sg': 'queira', '2sg': 'queira', '3sg': 'queira', '1pl': 'queiramos', '2pl': 'queiram', '3pl': 'queiram' },   // querer (1sg "quero" hides the i)
 };
 

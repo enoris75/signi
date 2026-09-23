@@ -91,6 +91,21 @@ export const ESTAR_COPULA: ConceptForms = {
   },
 };
 
+// The existential "haber" (P09-E6 D5): "hay un gato", conjugated in place of the HAVE (tener) an
+// existential is resolved with, since the corpus seeds no haber as a lexical verb. Impersonal, so only
+// the third singular is ever read, and the present is the defective "hay", not the auxiliary's "ha".
+// Shaped like ESTAR_COPULA: a state, so its past is the imperfect "había" (A130); the future stem
+// gives the conditional "habría" and the 3pl preterite the imperfect subjunctive "hubiera"; the
+// present subjunctive "haya" is HABER's in `mood.ts`.
+export const HABER_EXISTENTIAL: ConceptForms = {
+  conceptId: 'HABER',
+  forms: {
+    base: 'haber', participle: 'habido', gerund: 'habiendo', stative: '1',
+    '3sg_present': 'hay', '3sg_past': 'hubo', '3sg_future': 'habrá',
+    '1sg_future': 'habré', '3pl_past': 'hubieron',
+  },
+};
+
 // A reflexive verb's clitic, agreeing with the subject (me/te/se/nos/os/se). Reflexivity is lexical:
 // the infinitive ends in the enclitic -se ("volverse"), and the finite present carries the clitic as
 // a proclitic word ("se vuelve"). The participle ("vuelto") drops it, so the compound perfect must

@@ -8,6 +8,7 @@ import { contentClauseMood } from './contentClauseMood.js';
 import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
+import { existentialPlan } from './existentialPlan.js';
 import { imperfectivePast } from './imperfectivePast.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
@@ -17,6 +18,7 @@ import { resolveNounElement } from './resolveNounElement.js';
 import { resolveQuestion } from './resolveQuestion.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 import { withAlarmCry } from './withAlarmCry.js';
+import { withExistential } from './withExistential.js';
 
 /** Whether `plan`'s infinitive complement is controlled by its direct object (see InfinitiveControl). */
 function objectControlled(plan: PhrasePlan): boolean {
@@ -72,6 +74,15 @@ export function resolvePhrase(
   // it does select one ("der Hund wünscht, das Essen zu fressen"), and the flag stops here.
   citation = false,
 ): ResolvedPhrase {
+  // An existential ("there is a cat", P09-E6 D5) is resolved as the plain clause its language says
+  // it with — the pivot the object of the existential verb, the subject the impersonal third person
+  // (see `existentialPlan`) — and then marked for the engines, with the pivot's agreement where the
+  // verb agrees with it (see `withExistential`). Everything else, the complements, the tense, the
+  // question, the clauses around it, is any clause's.
+  if (plan.existential) {
+    return withExistential(
+      resolvePhrase(existentialPlan(plan, language, mood), language, lookup, mood, register, citation), language);
+  }
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is

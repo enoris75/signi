@@ -126,6 +126,20 @@ export const ESTAR_COPULA: ConceptForms = {
   },
 };
 
+// The existential "haver" (P09-E6 D5): "há um gato", conjugated in place of the HAVE (ter) an
+// existential is resolved with, since the corpus seeds no haver. Impersonal, so only the third
+// singular is ever read. Shaped like the seeded paradigms for `conjugate` and `moodForm`: a state, so
+// its past is the imperfect "havia" (A130); the future stem gives the conditional "haveria", the 3pl
+// preterite the subjunctives "houvesse" / "houver"; the present subjunctive "haja" is in `mood.ts`.
+export const HAVER_EXISTENTIAL: ConceptForms = {
+  conceptId: 'HAVER',
+  forms: {
+    base: 'haver', participle: 'havido', gerund: 'havendo', stative: '1',
+    '3sg_present': 'há', '3sg_past': 'houve', '3sg_future': 'haverá',
+    '1sg_future': 'haverei', '3pl_past': 'houveram',
+  },
+};
+
 // A pronominal verb's clitic, agreeing with the subject: "me" and "nos", and "se" for the rest — você and
 // vocês agree as the 3rd person (A108). Reflexivity is lexical: the infinitive ends in "-se" ("tornar-se").
 export const PT_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'se', '3sg': 'se', '1pl': 'nos', '2pl': 'se', '3pl': 'se' };
