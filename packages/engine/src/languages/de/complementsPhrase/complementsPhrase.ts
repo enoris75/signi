@@ -17,6 +17,7 @@ import { tonicHeadForms } from '../../../functions/tonicHeadForms.js';
 import { TONIC_COMPLEMENTS } from '../../../functions/functions.consts.js';
 import { tonicPronounDe } from '../tonicPronounDe.js';
 import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../../possessive.js';
+import { adjectivalNoun } from '../adjectivalNoun.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
@@ -266,12 +267,15 @@ export function complementsParts(
       }
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
       if (definiteness === 'relative') return head;
-      // A weak masculine goal/place declines to -(e)n in the oblique ("zum/im/aus dem Jungen");
-      // every other noun takes the regular dative-plural -n, and a genitive its -(e)s ("wegen des
-      // Hundes").
-      const word = _case === 'gen'
-        ? genitiveS(compound, _case, f, plural)
-        : f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
+      // An adjectival noun takes the adjective ending its determiner and case select and none of the
+      // noun rules ("mit dem Verwandten", "zu einem Verlobten", P11 D8); a weak masculine goal/place
+      // declines to -(e)n in the oblique ("zum/im/aus dem Jungen"); every other noun takes the
+      // regular dative-plural -n, and a genitive its -(e)s ("wegen des Hundes").
+      const word = f['adjectival'] === '1'
+        ? adjectivalNoun(compound, f, _case, definiteness, plural)
+        : _case === 'gen'
+          ? genitiveS(compound, _case, f, plural)
+          : f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
       const possessive = poss && !detached

@@ -58,6 +58,19 @@ describe('applyPossessorForm', () => {
       expect(under(HAHAOYA, np({ base: '男の子', human: '1' }))).toMatchObject({ base: 'お母さん' });
     });
 
+    // A gloss's possessor is a kind of person, not a person: "a parent's mother" is 親の母親, where
+    // the boy's is 男の子のお母さん (localization B71).
+    test('an indefinite or bare possessor leaves the head its citation form', () => {
+      expect(under(HAHAOYA, np({ base: '親', human: '1' }, { definiteness: 'indefinite' })))
+        .toMatchObject({ base: '母親', reading: 'ははおや' });
+      expect(under(HAHAOYA, np({ base: '親', human: '1' }, { definiteness: 'bare' })))
+        .toMatchObject({ base: '母親' });
+      expect(under(EHEFRAU, np({ base: 'Kind' }, { definiteness: 'indefinite' })))
+        .toMatchObject({ base: 'Ehefrau' });
+      expect(under(HAHAOYA, np({ base: '男の子', human: '1' }, { definiteness: 'definite' })))
+        .toMatchObject({ base: 'お母さん' });
+    });
+
     // D3: 私の兄の妻 is 兄の妻 — one's own all the way down the chain.
     test('a genitive possessor that is itself one\'s own relative takes `possessed`', () => {
       const brother = np({ base: '兄', kin: '1', human: '1', own: '1' });

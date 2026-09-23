@@ -1,6 +1,7 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
+import { adjectivalNoun } from './adjectivalNoun.js';
 import { articledNameForms } from './articledNameForms.js';
 import { datPluralN } from './datPluralN.js';
 import { numeralText } from '../../functions/numeralText.js';
@@ -40,8 +41,12 @@ function vonDative(poss: ResolvedNounPhrase): string {
   const f = articledNameForms(poss);
   const plural = (f['number'] ?? f['count']) === 'plural';
   const compound = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
-  const word = f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
   const definiteness = f['definiteness'] ?? 'definite';
+  // An adjectival noun takes the dative adjective ending here too, and none of the noun rules: "eine
+  // Gruppe von Verwandten", not "*von Verwandtn" (P11 D8, localization B68).
+  const word = f['adjectival'] === '1'
+    ? adjectivalNoun(compound, f, 'dat', definiteness, plural)
+    : f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
   const words = [
     'von',
     determiner(f, 'dat', plural),

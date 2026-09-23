@@ -754,7 +754,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'], ['CLOSED', 'closed'],
   ['COLD', 'cold'], ['COLD_CLIMATE', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
-  ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
+  ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['ELDER', 'older'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
   ['FAILED', 'failed'], ['FAR', 'far'], ['FEMALE', 'female'],
   ['FIRST', 'first'], ['FUTURE', 'future'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HOT_CLIMATE', 'hot'], ['HUNGRY', 'hungry'],
@@ -771,7 +771,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['SPATIAL', 'spatial'], ['STRONG', 'strong'], ['SWEET', 'sweet'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIDY', 'tidy'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
   ['UNEXPECTED', 'unexpected'], ['UNIVERSAL', 'universal'], ['UNKNOWN', 'unknown'], ['UNPINNED', 'unpinned'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['VISIBLE', 'visible'], ['WARM', 'warm'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
   ['WILD', 'wild'],
-  ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
+  ['WRITTEN', 'written'], ['YOUNG', 'young'], ['YOUNGER', 'younger'], ['ZERO', 'zero'],
 ];
 
 describe('every adjective renders attributively', () => {

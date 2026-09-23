@@ -411,13 +411,21 @@ describe('subject: B02 kin and cattle nouns', () => {
       pt: 'o progenitor corre.',
     });
     // gender:'fem' selects the feminine lexeme where the language has one (genitrice / progenitora);
-    // French and German, which do not, keep the base form.
+    // French and German, which do not, keep the base form — and German's plural is another word
+    // altogether, "die Eltern", where *Elternteile* is what nobody says (P11 D7, localization B68).
     expect(subject(np('PARENT', { gender: 'fem', number: 'plural' }))).toMatchObject({
       it: 'le genitrici corrono.',
       es: 'las progenitoras corren.',
       pt: 'as progenitoras correm.',
       fr: 'les parents courent.',
-      de: 'die Elternteile laufen.',
+      de: 'die Eltern laufen.',
+    });
+    // The masculine plural is the word for two parents in Spanish and Portuguese: padres, pais.
+    expect(subject(np('PARENT', { number: 'plural' }))).toMatchObject({
+      de: 'die Eltern laufen.',
+      es: 'los padres corren.',
+      pt: 'os pais correm.',
+      ja: '両親は走ります。',
     });
   });
 

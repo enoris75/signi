@@ -1419,6 +1419,16 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'fluindo', participle: 'fluído' },
     ja: { te: '流れて', te_reading: 'ながれて', nai: '流れない', nai_reading: 'ながれない' },
   },
+  // The Spanish and Portuguese reflexives carry their clitic into the gerund (casandose →
+  // casándose), as BECOME's volverse does; 結婚する is a suru verb, so its te-form is 結婚して.
+  MARRY: {
+    en: { gerund: 'marrying', participle: 'married' },
+    it: { gerund: 'sposando', participle: 'sposato' },
+    fr: { participle: 'épousé' }, de: { participle: 'geheiratet' },
+    es: { gerund: 'casándose', participle: 'casado' },
+    pt: { gerund: 'casando', participle: 'casado' },
+    ja: { te: '結婚して', te_reading: 'けっこんして', nai: '結婚しない', nai_reading: 'けっこんしない', passive: '結婚される', passive_reading: 'けっこんされる' },
+  },
   ACCOMPANY: {
     en: { gerund: 'accompanying', participle: 'accompanied' },
     it: { gerund: 'accompagnando', participle: 'accompagnato' },

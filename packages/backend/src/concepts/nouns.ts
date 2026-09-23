@@ -160,6 +160,55 @@ const languageOf = (country: string): PhrasePlan => ({
   subject: { concept: 'LANGUAGE', definiteness: 'definite', possessor: { concept: country } },
 });
 
+// A kin gloss: the relative one is to somebody else, said as the genitive the languages already
+// have — kinGloss('BROTHER', 'PARENT') → en "a parent's brother", it "un fratello di un genitore",
+// de "ein Bruder eines Elternteils", ja 親の兄弟. The head takes `definite` where the relation is
+// unique (one father per parent, one mother per spouse): "the father of a parent", which English
+// still writes as the Saxon genitive, since that takes the possessor's determiner. The plain
+// `owner` role, not C26's part-whole: a father is not a part of a parent (localization B71–B73).
+const kinGloss = (head: string, whose: string, definiteness: Definiteness = 'indefinite'): PhrasePlan => ({
+  subject: {
+    concept: head,
+    definiteness,
+    possessor: { concept: whose, definiteness: 'indefinite' },
+  },
+});
+
+// The sibling gloss: a person who has the same parents, with an optional sex adjective on the head —
+// sameParentsGloss('MALE') → en "a male person who has the same parents", de "eine männliche Person,
+// die die gleichen Eltern hat", ja 同じ親を持つ男性の人. The head is PERSON rather than the genus
+// SIBLING because Romance has no neutral word for a sibling to modify ("una sorella femminile" for
+// SISTER), where PERSON is neutral in all seven (localization B69).
+const sameParentsGloss = (...adjectives: string[]): PhrasePlan => ({
+  subject: {
+    concept: 'PERSON',
+    definiteness: 'indefinite',
+    ...(adjectives.length ? { adjectives } : {}),
+    relative: {
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'PARENT', definiteness: 'definite', number: 'plural', adjectives: ['SAME'] },
+    },
+  },
+});
+
+// A step-parent gloss: a parent's spouse who is not the parent — kinGloss's genitive with a negated
+// copular relative beside it, because "a mother's husband" is true of every father —
+// stepParentGloss('HUSBAND', 'MOTHER', 'FATHER') → en "a mother's husband who is not a father", de
+// "ein Ehemann einer Mutter, der kein Vater ist", ja 父ではない母親の夫. One head carrying both a
+// genitive and a relative clause is BLADE's shape ("the part of an object that cuts").
+// Localization B73.
+const stepParentGloss = (head: string, whose: string, notA: string): PhrasePlan => ({
+  subject: {
+    concept: head,
+    definiteness: 'indefinite',
+    possessor: { concept: whose, definiteness: 'indefinite' },
+    relative: {
+      verbPhrase: { verb: 'BE', negative: true },
+      complements: { predicative: { phrase: { concept: notA, definiteness: 'indefinite' } } },
+    },
+  },
+});
+
 // A German noun's `compound` form is the stem it takes as the first element of a compound, its
 // linking element (Fugenelement) included: "Hunde" (Hundebuch), "Lebens", "Kinder", "Sprach". It is
 // seeded only where the engine's suffix rule would get it wrong — -s- after -ung/-heit/-keit/-schaft/
@@ -1426,25 +1475,36 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
-    // The kinship genus FATHER and MOTHER specialise. Grammatically masculine where the language
-    // has no neutral form, with a feminine counterpart (genitrice / progenitora) for a future
-    // MOTHER = glossOf('PARENT', 'FEMALE'). German uses the neuter Elternteil ("a parent-part").
+    // The kinship genus FATHER and MOTHER specialise, and the root of the RELATIVE subtree beside
+    // them. Grammatically masculine where the language has no neutral form, with a feminine
+    // counterpart (genitrice / progenitora) that MOTHER's gloss reads. German uses the neuter
+    // Elternteil ("a parent-part") in the singular, and another word in the plural.
     id: 'PARENT',
     role: 'noun',
     description: 'one who has a child',
-    definition: whoGloss('PERSON', 'HAVE', 'CHILD'),
+    // CHILD_OFFSPRING, not CHILD: a parent has sons and daughters of any age, where CHILD is a young
+    // person — "una persona che ha figli", not "che ha bambini" (P11 D11, localization B68).
+    definition: whoGloss('PERSON', 'HAVE', 'CHILD_OFFSPRING'),
     emoji: '🧑‍🍼',
     animate: true,
     human: true,
-    isA: 'PERSON',
+    isA: 'RELATIVE',
     forms: {
       en: { base: 'parent', plural: 'parents', count: 'singular' },
       it: { base: 'genitore', plural: 'genitori', gender: 'masc', count: 'singular', fem: 'genitrice', fem_plural: 'genitrici' },
       fr: { base: 'parent', plural: 'parents', gender: 'masc', count: 'singular' },
-      de: { base: 'Elternteil', plural: 'Elternteile', gender: 'neut', count: 'singular' },
-      es: { base: 'progenitor', plural: 'progenitores', gender: 'masc', count: 'singular', fem: 'progenitora', fem_plural: 'progenitoras' },
-      ja: { base: '親', count: 'singular', reading: 'おや' },
-      pt: { base: 'progenitor', plural: 'progenitores', gender: 'masc', count: 'singular', fem: 'progenitora', fem_plural: 'progenitoras' },
+      // Three plurals are another word: what speakers say for two parents is Eltern, padres, pais —
+      // never *Elternteile*, *progenitores*, *progenitores* (P11 D7). Japanese has 両親 for the pair.
+      de: { base: 'Elternteil', plural: 'Eltern', gender: 'neut', count: 'singular' },
+      es: { base: 'progenitor', plural: 'padres', gender: 'masc', count: 'singular', fem: 'progenitora', fem_plural: 'progenitoras' },
+      ja: {
+        base: '親', count: 'singular', reading: 'おや',
+        honorific: '親御さん', honorific_reading: 'おやごさん',
+        plural: '両親', plural_reading: 'りょうしん',
+        plural_honorific: 'ご両親', plural_honorific_reading: 'ごりょうしん',
+        kin: '1',
+      },
+      pt: { base: 'progenitor', plural: 'pais', gender: 'masc', count: 'singular', fem: 'progenitora', fem_plural: 'progenitoras' },
     },
   },
   {
@@ -1463,8 +1523,898 @@ export const nouns: ConceptSeed[] = [
       fr: { base: 'père', plural: 'pères', gender: 'masc', count: 'singular' },
       de: { base: 'Vater', plural: 'Väter', gender: 'masc', count: 'singular' },
       es: { base: 'padre', plural: 'padres', gender: 'masc', count: 'singular' },
-      ja: { base: '父', count: 'singular', reading: 'ちち' },
+      // Whose father he is picks the word (P11 D2): 父親 is nobody's in particular, 父 one's own,
+      // お父さん somebody else's.
+      ja: {
+        base: '父親', count: 'singular', reading: 'ちちおや',
+        possessed: '父', possessed_reading: 'ちち', honorific: 'お父さん', honorific_reading: 'おとうさん', kin: '1',
+      },
       pt: { base: 'pai', plural: 'pais', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── The family (P11 §4; localization B68–B74) ─────────────────────
+  // Forty kin terms and partners under RELATIVE, seeded with the four columns P11's engine reads:
+  // the Italian `kinship` article flag, the Japanese `possessed` / `honorific` / `kin` trio (母 is
+  // my mother, お母さん is yours, 母親 is nobody's) and its `with_<ADJECTIVE>` fusions (兄弟 + ELDER
+  // → 兄), the French and German `possessed` shortenings (ma **femme**, meine **Frau**), and
+  // German's adjectival noun (*der Verwandte*).
+  {
+    // The genus of every relative. German declines it as an adjective (`adjectival`, P11 D8), so its
+    // base is the bare stem and the plural and feminine are that same stem — the ending carries both.
+    // French has one word for this and PARENT, hence the synonym in the picker.
+    id: 'RELATIVE',
+    role: 'noun',
+    description: 'a person one is related to',
+    // A part-whole possessor read from the member's end (C26): what makes a relative a relative is
+    // being of the one family, as FAMILY's own gloss is that family read from the group's end.
+    definition: {
+      subject: {
+        concept: 'PERSON',
+        definiteness: 'indefinite',
+        possessor: { concept: 'FAMILY', definiteness: 'definite', adjectives: ['SAME'] },
+        possessorRole: 'whole',
+      },
+    },
+    emoji: '👪',
+    animate: true,
+    human: true,
+    synonym: 'family member',
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'relative', plural: 'relatives', count: 'singular' },
+      it: { base: 'parente', plural: 'parenti', gender: 'masc', count: 'singular', fem: 'parente', fem_plural: 'parenti' },
+      fr: { base: 'parent', plural: 'parents', gender: 'masc', count: 'singular', fem: 'parente', fem_plural: 'parentes' },
+      de: { base: 'Verwandt', plural: 'Verwandt', gender: 'masc', count: 'singular', fem: 'Verwandt', fem_plural: 'Verwandt', adjectival: '1' },
+      es: { base: 'pariente', plural: 'parientes', gender: 'masc', count: 'singular', fem: 'pariente', fem_plural: 'parientes' },
+      ja: { base: '親戚', count: 'singular', reading: 'しんせき', honorific: 'ご親戚', honorific_reading: 'ごしんせき', kin: '1' },
+      pt: { base: 'parente', plural: 'parentes', gender: 'masc', count: 'singular', fem: 'parente', fem_plural: 'parentes' },
+    },
+  },
+  {
+    // The group of relatives, and the one concept here that is not a person. No `kin` flag: it is a
+    // group rather than a relative, so 私の家族 keeps its 私の where 私の母 does not (D3/D4) — but
+    // someone else's family is still ご家族, which is the `honorific` column alone.
+    id: 'FAMILY',
+    role: 'noun',
+    description: 'a group of people related to one another',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'RELATIVE', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+      },
+    },
+    emoji: '👨‍👩‍👧‍👦',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'family', plural: 'families', count: 'singular' },
+      it: { base: 'famiglia', plural: 'famiglie', gender: 'fem', count: 'singular' },
+      fr: { base: 'famille', plural: 'familles', gender: 'fem', count: 'singular' },
+      de: { base: 'Familie', plural: 'Familien', gender: 'fem', count: 'singular' },
+      es: { base: 'familia', plural: 'familias', gender: 'fem', count: 'singular' },
+      ja: { base: '家族', count: 'singular', reading: 'かぞく', honorific: 'ご家族', honorific_reading: 'ごかぞく' },
+      pt: { base: 'família', plural: 'famílias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // FATHER's counterpart, and the one of the pair that needs the noun gender control in its own
+    // gloss: without `gender: 'fem'` Italian reads "un genitore femminile", a masculine article
+    // under a feminine adjective (B68 reading 2).
+    id: 'MOTHER',
+    role: 'noun',
+    description: 'a female parent',
+    definition: { subject: { concept: 'PARENT', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    emoji: '👩',
+    animate: true,
+    human: true,
+    isA: 'PARENT',
+    forms: {
+      en: { base: 'mother', plural: 'mothers', count: 'singular' },
+      it: { base: 'madre', plural: 'madri', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'mère', plural: 'mères', gender: 'fem', count: 'singular' },
+      de: { base: 'Mutter', plural: 'Mütter', gender: 'fem', count: 'singular' },
+      es: { base: 'madre', plural: 'madres', gender: 'fem', count: 'singular' },
+      ja: {
+        base: '母親', count: 'singular', reading: 'ははおや',
+        possessed: '母', possessed_reading: 'はは', honorific: 'お母さん', honorific_reading: 'おかあさん', kin: '1',
+      },
+      pt: { base: 'mãe', plural: 'mães', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A child as somebody's offspring, not as a young person, which is CHILD (P11 D11): "my child"
+    // is *mio figlio*, *mi hijo*, *meu filho*, where CHILD is *bambino*, *niño*, *criança*. Its own
+    // gloss is the corpus's one coordinated definition — a son or a daughter — which is why SON and
+    // DAUGHTER keep the literal (B68).
+    id: 'CHILD_OFFSPRING',
+    role: 'noun',
+    description: 'a son or daughter of a parent',
+    definition: {
+      subject: {
+        conjuncts: [
+          { concept: 'SON', definiteness: 'indefinite' },
+          { concept: 'DAUGHTER', definiteness: 'indefinite' },
+        ],
+        conjunction: 'or',
+      },
+    },
+    emoji: '🧒',
+    animate: true,
+    human: true,
+    synonym: 'offspring',
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'child', plural: 'children', count: 'singular' },
+      it: { base: 'figlio', plural: 'figli', gender: 'masc', count: 'singular', fem: 'figlia', fem_plural: 'figlie', kinship: '1' },
+      fr: { base: 'enfant', plural: 'enfants', gender: 'masc', count: 'singular', fem: 'enfant', fem_plural: 'enfants' },
+      de: { base: 'Kind', plural: 'Kinder', gender: 'neut', count: 'singular', compound: 'Kinder' },
+      es: { base: 'hijo', plural: 'hijos', gender: 'masc', count: 'singular', fem: 'hija', fem_plural: 'hijas' },
+      ja: { base: '子供', count: 'singular', reading: 'こども', honorific: 'お子さん', honorific_reading: 'おこさん', kin: '1' },
+      pt: { base: 'filho', plural: 'filhos', gender: 'masc', count: 'singular', fem: 'filha', fem_plural: 'filhas' },
+    },
+  },
+  {
+    // No definition: every lead closes a circle with CHILD_OFFSPRING, whose own gloss is "a son or a
+    // daughter" — a genus and its two species defining each other (B68 *Not solved* 1). Italian,
+    // Spanish and Portuguese say the offspring and the son with one word, which is the other half of it.
+    id: 'SON',
+    role: 'noun',
+    description: 'a male child of a parent',
+    emoji: '👦',
+    animate: true,
+    human: true,
+    isA: 'CHILD_OFFSPRING',
+    forms: {
+      en: { base: 'son', plural: 'sons', count: 'singular' },
+      it: { base: 'figlio', plural: 'figli', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'fils', plural: 'fils', gender: 'masc', count: 'singular' },
+      de: { base: 'Sohn', plural: 'Söhne', gender: 'masc', count: 'singular' },
+      es: { base: 'hijo', plural: 'hijos', gender: 'masc', count: 'singular' },
+      ja: { base: '息子', count: 'singular', reading: 'むすこ', honorific: '息子さん', honorific_reading: 'むすこさん', kin: '1' },
+      pt: { base: 'filho', plural: 'filhos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'DAUGHTER',
+    role: 'noun',
+    description: 'a female child of a parent',
+    emoji: '👧',
+    animate: true,
+    human: true,
+    isA: 'CHILD_OFFSPRING',
+    forms: {
+      en: { base: 'daughter', plural: 'daughters', count: 'singular' },
+      it: { base: 'figlia', plural: 'figlie', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'fille', plural: 'filles', gender: 'fem', count: 'singular' },
+      de: { base: 'Tochter', plural: 'Töchter', gender: 'fem', count: 'singular' },
+      es: { base: 'hija', plural: 'hijas', gender: 'fem', count: 'singular' },
+      ja: { base: '娘', count: 'singular', reading: 'むすめ', honorific: '娘さん', honorific_reading: 'むすめさん', kin: '1' },
+      pt: { base: 'filha', plural: 'filhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The three that go around their own genus (B69): "a female sibling" is *una sorella femminile*
+    // in Italian — Romance has no neutral singular to modify — so the gloss heads on PERSON, which
+    // is neutral in all seven, and says the parents instead. That overturns P11 D12, which filed
+    // BROTHER and SISTER as undefinable.
+    id: 'SIBLING',
+    role: 'noun',
+    description: 'a person who has the same parents as another',
+    definition: sameParentsGloss(),
+    emoji: '👫',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'sibling', plural: 'siblings', count: 'singular' },
+      it: { base: 'fratello', plural: 'fratelli', gender: 'masc', count: 'singular', fem: 'sorella', fem_plural: 'sorelle', kinship: '1' },
+      // French has no singular word: the plural is the coordination itself, "frères et sœurs" (D7).
+      fr: { base: 'frère', plural: 'frères et sœurs', gender: 'masc', count: 'singular', fem: 'sœur', fem_plural: 'sœurs' },
+      de: { base: 'Geschwister', plural: 'Geschwister', gender: 'neut', count: 'singular' },
+      es: { base: 'hermano', plural: 'hermanos', gender: 'masc', count: 'singular', fem: 'hermana', fem_plural: 'hermanas' },
+      ja: { base: '兄弟', count: 'singular', reading: 'きょうだい', honorific: 'ご兄弟', honorific_reading: 'ごきょうだい', kin: '1' },
+      pt: { base: 'irmão', plural: 'irmãos', gender: 'masc', count: 'singular', fem: 'irmã', fem_plural: 'irmãs' },
+    },
+  },
+  {
+    // Japanese has no word for a brother of unstated age: 兄 is the older one and 弟 the younger, so
+    // the lexeme fuses ELDER and YOUNGER into itself (`with_<ADJECTIVE>`, P11 D5) and says 兄弟 when
+    // neither is given.
+    id: 'BROTHER',
+    role: 'noun',
+    description: 'a male sibling',
+    definition: sameParentsGloss('MALE'),
+    emoji: '👦',
+    animate: true,
+    human: true,
+    isA: 'SIBLING',
+    forms: {
+      en: { base: 'brother', plural: 'brothers', count: 'singular' },
+      it: { base: 'fratello', plural: 'fratelli', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'frère', plural: 'frères', gender: 'masc', count: 'singular' },
+      de: { base: 'Bruder', plural: 'Brüder', gender: 'masc', count: 'singular' },
+      es: { base: 'hermano', plural: 'hermanos', gender: 'masc', count: 'singular' },
+      ja: {
+        base: '兄弟', count: 'singular', reading: 'きょうだい', honorific: 'ご兄弟', honorific_reading: 'ごきょうだい', kin: '1',
+        with_ELDER: '兄', with_ELDER_reading: 'あに', with_ELDER_honorific: 'お兄さん', with_ELDER_honorific_reading: 'おにいさん',
+        with_YOUNGER: '弟', with_YOUNGER_reading: 'おとうと', with_YOUNGER_honorific: '弟さん', with_YOUNGER_honorific_reading: 'おとうとさん',
+      },
+      pt: { base: 'irmão', plural: 'irmãos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'SISTER',
+    role: 'noun',
+    description: 'a female sibling',
+    definition: sameParentsGloss('FEMALE'),
+    emoji: '👧',
+    animate: true,
+    human: true,
+    isA: 'SIBLING',
+    forms: {
+      en: { base: 'sister', plural: 'sisters', count: 'singular' },
+      it: { base: 'sorella', plural: 'sorelle', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'sœur', plural: 'sœurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Schwester', plural: 'Schwestern', gender: 'fem', count: 'singular' },
+      es: { base: 'hermana', plural: 'hermanas', gender: 'fem', count: 'singular' },
+      ja: {
+        base: '姉妹', count: 'singular', reading: 'しまい', kin: '1',
+        with_ELDER: '姉', with_ELDER_reading: 'あね', with_ELDER_honorific: 'お姉さん', with_ELDER_honorific_reading: 'おねえさん',
+        with_YOUNGER: '妹', with_YOUNGER_reading: 'いもうと', with_YOUNGER_honorific: '妹さん', with_YOUNGER_honorific_reading: 'いもうとさん',
+      },
+      pt: { base: 'irmã', plural: 'irmãs', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The genus HUSBAND and WIFE specialise, and the one place D12's sex adjective works on a kin
+    // genus: *coniuge*, *conjoint*, *Ehepartner*, *cónyuge*, *cônjuge* and 配偶者 are neutral.
+    id: 'SPOUSE',
+    role: 'noun',
+    description: 'a person one is married to',
+    definition: patientGloss('PERSON', 'MARRY'),
+    emoji: '💍',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'spouse', plural: 'spouses', count: 'singular' },
+      it: { base: 'coniuge', plural: 'coniugi', gender: 'masc', count: 'singular', fem: 'coniuge', fem_plural: 'coniugi' },
+      fr: { base: 'conjoint', plural: 'conjoints', gender: 'masc', count: 'singular', fem: 'conjointe', fem_plural: 'conjointes' },
+      de: { base: 'Ehepartner', plural: 'Ehepartner', gender: 'masc', count: 'singular', fem: 'Ehepartnerin', fem_plural: 'Ehepartnerinnen' },
+      es: { base: 'cónyuge', plural: 'cónyuges', gender: 'masc', count: 'singular', fem: 'cónyuge', fem_plural: 'cónyuges' },
+      ja: { base: '配偶者', count: 'singular', reading: 'はいぐうしゃ', kin: '1' },
+      pt: { base: 'cônjuge', plural: 'cônjuges', gender: 'masc', count: 'singular', fem: 'cônjuge', fem_plural: 'cônjuges' },
+    },
+  },
+  {
+    // German and French shorten the word once it has an owner (`possessed`, D6): "meine **Frau**",
+    // "ma **femme**" — where the citation form keeps the Ehe- / épouse that says it is a marriage.
+    id: 'HUSBAND',
+    role: 'noun',
+    description: 'a male spouse',
+    definition: glossOf('SPOUSE', 'MALE'),
+    emoji: '🤵',
+    animate: true,
+    human: true,
+    isA: 'SPOUSE',
+    forms: {
+      en: { base: 'husband', plural: 'husbands', count: 'singular' },
+      it: { base: 'marito', plural: 'mariti', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'mari', plural: 'maris', gender: 'masc', count: 'singular' },
+      de: { base: 'Ehemann', plural: 'Ehemänner', gender: 'masc', count: 'singular', possessed: 'Mann', possessed_plural: 'Männer' },
+      es: { base: 'marido', plural: 'maridos', gender: 'masc', count: 'singular' },
+      ja: { base: '夫', count: 'singular', reading: 'おっと', honorific: 'ご主人', honorific_reading: 'ごしゅじん', kin: '1' },
+      pt: { base: 'marido', plural: 'maridos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'WIFE',
+    role: 'noun',
+    description: 'a female spouse',
+    definition: { subject: { concept: 'SPOUSE', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    emoji: '👰',
+    animate: true,
+    human: true,
+    isA: 'SPOUSE',
+    forms: {
+      en: { base: 'wife', plural: 'wives', count: 'singular' },
+      it: { base: 'moglie', plural: 'mogli', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'épouse', plural: 'épouses', gender: 'fem', count: 'singular', possessed: 'femme', possessed_plural: 'femmes' },
+      de: { base: 'Ehefrau', plural: 'Ehefrauen', gender: 'fem', count: 'singular', possessed: 'Frau', possessed_plural: 'Frauen' },
+      es: { base: 'esposa', plural: 'esposas', gender: 'fem', count: 'singular' },
+      ja: { base: '妻', count: 'singular', reading: 'つま', honorific: '奥さん', honorific_reading: 'おくさん', kin: '1' },
+      pt: { base: 'esposa', plural: 'esposas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The generation above the parents (B71). Three of the plurals are another word (de
+    // *Großeltern*, fr *grands-parents*, pt *avós*, D7); none of the six glosses reads one.
+    id: 'GRANDPARENT',
+    role: 'noun',
+    description: 'a parent of a parent',
+    definition: kinGloss('PARENT', 'PARENT'),
+    emoji: '👴',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'grandparent', plural: 'grandparents', count: 'singular' },
+      it: { base: 'nonno', plural: 'nonni', gender: 'masc', count: 'singular', fem: 'nonna', fem_plural: 'nonne', kinship: '1' },
+      fr: { base: 'grand-parent', plural: 'grands-parents', gender: 'masc', count: 'singular' },
+      de: { base: 'Großelternteil', plural: 'Großeltern', gender: 'neut', count: 'singular' },
+      es: { base: 'abuelo', plural: 'abuelos', gender: 'masc', count: 'singular', fem: 'abuela', fem_plural: 'abuelas' },
+      ja: { base: '祖父母', count: 'singular', reading: 'そふぼ', kin: '1' },
+      pt: { base: 'avô', plural: 'avós', gender: 'masc', count: 'singular', fem: 'avó', fem_plural: 'avós' },
+    },
+  },
+  {
+    // A definite head, because one has one father per parent (B71 reading 2) — English shows none of
+    // it, since the Saxon genitive takes the possessor's determiner ("a parent's father").
+    id: 'GRANDFATHER',
+    role: 'noun',
+    description: 'a father of a parent',
+    definition: kinGloss('FATHER', 'PARENT', 'definite'),
+    emoji: '👴',
+    animate: true,
+    human: true,
+    isA: 'GRANDPARENT',
+    forms: {
+      en: { base: 'grandfather', plural: 'grandfathers', count: 'singular' },
+      it: { base: 'nonno', plural: 'nonni', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'grand-père', plural: 'grands-pères', gender: 'masc', count: 'singular' },
+      de: { base: 'Großvater', plural: 'Großväter', gender: 'masc', count: 'singular' },
+      es: { base: 'abuelo', plural: 'abuelos', gender: 'masc', count: 'singular' },
+      ja: { base: '祖父', count: 'singular', reading: 'そふ', honorific: 'おじいさん', kin: '1' },
+      pt: { base: 'avô', plural: 'avôs', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'GRANDMOTHER',
+    role: 'noun',
+    description: 'a mother of a parent',
+    definition: kinGloss('MOTHER', 'PARENT', 'definite'),
+    emoji: '👵',
+    animate: true,
+    human: true,
+    isA: 'GRANDPARENT',
+    forms: {
+      en: { base: 'grandmother', plural: 'grandmothers', count: 'singular' },
+      it: { base: 'nonna', plural: 'nonne', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'grand-mère', plural: 'grands-mères', gender: 'fem', count: 'singular' },
+      de: { base: 'Großmutter', plural: 'Großmütter', gender: 'fem', count: 'singular' },
+      es: { base: 'abuela', plural: 'abuelas', gender: 'fem', count: 'singular' },
+      ja: { base: '祖母', count: 'singular', reading: 'そぼ', honorific: 'おばあさん', kin: '1' },
+      pt: { base: 'avó', plural: 'avós', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Italian *nipote* is four relatives at once — this, GRANDDAUGHTER, NEPHEW and NIECE — so the
+    // four tooltips are what tell them apart in the picker (B71, B72).
+    id: 'GRANDCHILD',
+    role: 'noun',
+    description: 'a child of a child',
+    definition: kinGloss('CHILD_OFFSPRING', 'CHILD_OFFSPRING'),
+    emoji: '🧒',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'grandchild', plural: 'grandchildren', count: 'singular' },
+      it: { base: 'nipote', plural: 'nipoti', gender: 'masc', count: 'singular', fem: 'nipote', fem_plural: 'nipoti', kinship: '1' },
+      fr: { base: 'petit-enfant', plural: 'petits-enfants', gender: 'masc', count: 'singular' },
+      de: { base: 'Enkelkind', plural: 'Enkelkinder', gender: 'neut', count: 'singular' },
+      es: { base: 'nieto', plural: 'nietos', gender: 'masc', count: 'singular', fem: 'nieta', fem_plural: 'nietas' },
+      ja: { base: '孫', count: 'singular', reading: 'まご', honorific: 'お孫さん', honorific_reading: 'おまごさん', kin: '1' },
+      pt: { base: 'neto', plural: 'netos', gender: 'masc', count: 'singular', fem: 'neta', fem_plural: 'netas' },
+    },
+  },
+  {
+    // The sex adjective, not the genitive: "a child's son" renders *un figlio di un figlio* in
+    // Italian, Spanish and Portuguese — GRANDCHILD's own gloss, character for character (B71
+    // reading 3). The word for a grandchild is neutral in every language, so the adjective reads well.
+    id: 'GRANDSON',
+    role: 'noun',
+    description: 'a male grandchild',
+    definition: glossOf('GRANDCHILD', 'MALE'),
+    emoji: '👦',
+    animate: true,
+    human: true,
+    isA: 'GRANDCHILD',
+    forms: {
+      en: { base: 'grandson', plural: 'grandsons', count: 'singular' },
+      it: { base: 'nipote', plural: 'nipoti', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'petit-fils', plural: 'petits-fils', gender: 'masc', count: 'singular' },
+      de: { base: 'Enkel', plural: 'Enkel', gender: 'masc', count: 'singular' },
+      es: { base: 'nieto', plural: 'nietos', gender: 'masc', count: 'singular' },
+      ja: { base: '孫息子', count: 'singular', reading: 'まごむすこ', honorific: 'お孫さん', honorific_reading: 'おまごさん', kin: '1' },
+      pt: { base: 'neto', plural: 'netos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'GRANDDAUGHTER',
+    role: 'noun',
+    description: 'a female grandchild',
+    definition: { subject: { concept: 'GRANDCHILD', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    emoji: '👧',
+    animate: true,
+    human: true,
+    isA: 'GRANDCHILD',
+    forms: {
+      en: { base: 'granddaughter', plural: 'granddaughters', count: 'singular' },
+      it: { base: 'nipote', plural: 'nipoti', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'petite-fille', plural: 'petites-filles', gender: 'fem', count: 'singular' },
+      de: { base: 'Enkelin', plural: 'Enkelinnen', gender: 'fem', count: 'singular' },
+      es: { base: 'nieta', plural: 'nietas', gender: 'fem', count: 'singular' },
+      ja: { base: '孫娘', count: 'singular', reading: 'まごむすめ', honorific: 'お孫さん', honorific_reading: 'おまごさん', kin: '1' },
+      pt: { base: 'neta', plural: 'netas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The extended family (B72), each gloss naming the relative it hangs off. おじ, おば and いとこ are
+    // kana on purpose: the kanji encode what the concept does not say — 伯父 is older than the parent
+    // and 叔父 younger, and 従兄 / 従弟 / 従姉 / 従妹 are the four cousins (P11 §4).
+    id: 'UNCLE',
+    role: 'noun',
+    description: 'a brother of a parent',
+    definition: kinGloss('BROTHER', 'PARENT'),
+    emoji: '👨',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'uncle', plural: 'uncles', count: 'singular' },
+      it: { base: 'zio', plural: 'zii', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'oncle', plural: 'oncles', gender: 'masc', count: 'singular' },
+      de: { base: 'Onkel', plural: 'Onkel', gender: 'masc', count: 'singular' },
+      es: { base: 'tío', plural: 'tíos', gender: 'masc', count: 'singular' },
+      ja: { base: 'おじ', count: 'singular', honorific: 'おじさん', kin: '1' },
+      pt: { base: 'tio', plural: 'tios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'AUNT',
+    role: 'noun',
+    description: 'a sister of a parent',
+    definition: kinGloss('SISTER', 'PARENT'),
+    emoji: '👩',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'aunt', plural: 'aunts', count: 'singular' },
+      it: { base: 'zia', plural: 'zie', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'tante', plural: 'tantes', gender: 'fem', count: 'singular' },
+      de: { base: 'Tante', plural: 'Tanten', gender: 'fem', count: 'singular' },
+      es: { base: 'tía', plural: 'tías', gender: 'fem', count: 'singular' },
+      ja: { base: 'おば', count: 'singular', honorific: 'おばさん', kin: '1' },
+      pt: { base: 'tia', plural: 'tias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The one gloss in the corpus with a possessor inside a possessor: a parent's sibling's child.
+    // The shorter "an uncle's child" is narrower than the word — an aunt's child is a cousin too —
+    // and no possessor can be a coordination, so the chain through SIBLING is what says both (B72).
+    id: 'COUSIN',
+    role: 'noun',
+    description: 'a child of an uncle or an aunt',
+    definition: {
+      subject: {
+        concept: 'CHILD_OFFSPRING',
+        definiteness: 'indefinite',
+        possessor: {
+          concept: 'SIBLING',
+          definiteness: 'indefinite',
+          possessor: { concept: 'PARENT', definiteness: 'indefinite' },
+        },
+      },
+    },
+    emoji: '🧑',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'cousin', plural: 'cousins', count: 'singular' },
+      it: { base: 'cugino', plural: 'cugini', gender: 'masc', count: 'singular', fem: 'cugina', fem_plural: 'cugine', kinship: '1' },
+      fr: { base: 'cousin', plural: 'cousins', gender: 'masc', count: 'singular', fem: 'cousine', fem_plural: 'cousines' },
+      de: { base: 'Cousin', plural: 'Cousins', gender: 'masc', count: 'singular', fem: 'Cousine', fem_plural: 'Cousinen' },
+      es: { base: 'primo', plural: 'primos', gender: 'masc', count: 'singular', fem: 'prima', fem_plural: 'primas' },
+      ja: { base: 'いとこ', count: 'singular', kin: '1' },
+      pt: { base: 'primo', plural: 'primos', gender: 'masc', count: 'singular', fem: 'prima', fem_plural: 'primas' },
+    },
+  },
+  {
+    // German *Neffe* is a weak masculine ("ich sehe meinen Neffen", `weak`).
+    id: 'NEPHEW',
+    role: 'noun',
+    description: 'a son of a sibling',
+    definition: kinGloss('SON', 'SIBLING'),
+    emoji: '👦',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'nephew', plural: 'nephews', count: 'singular' },
+      it: { base: 'nipote', plural: 'nipoti', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'neveu', plural: 'neveux', gender: 'masc', count: 'singular' },
+      de: { base: 'Neffe', plural: 'Neffen', gender: 'masc', count: 'singular', weak: '1' },
+      es: { base: 'sobrino', plural: 'sobrinos', gender: 'masc', count: 'singular' },
+      ja: { base: '甥', count: 'singular', reading: 'おい', honorific: '甥御さん', honorific_reading: 'おいごさん', kin: '1' },
+      pt: { base: 'sobrinho', plural: 'sobrinhos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'NIECE',
+    role: 'noun',
+    description: 'a daughter of a sibling',
+    definition: kinGloss('DAUGHTER', 'SIBLING'),
+    emoji: '👧',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'niece', plural: 'nieces', count: 'singular' },
+      it: { base: 'nipote', plural: 'nipoti', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'nièce', plural: 'nièces', gender: 'fem', count: 'singular' },
+      de: { base: 'Nichte', plural: 'Nichten', gender: 'fem', count: 'singular' },
+      es: { base: 'sobrina', plural: 'sobrinas', gender: 'fem', count: 'singular' },
+      ja: { base: '姪', count: 'singular', reading: 'めい', honorific: '姪御さん', honorific_reading: 'めいごさん', kin: '1' },
+      pt: { base: 'sobrinha', plural: 'sobrinhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The relatives by marriage (B73). French says *beau-père* and *belle-mère* for both the in-law
+    // and the step-parent, so there the tooltips are the whole difference; Japanese takes the
+    // unambiguous 継父 / 継母 for the step-parents rather than the 義父 / 義母 speech shares with these.
+    id: 'MOTHER_IN_LAW',
+    role: 'noun',
+    description: 'a mother of a spouse',
+    definition: kinGloss('MOTHER', 'SPOUSE', 'definite'),
+    emoji: '👵',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'mother-in-law', plural: 'mothers-in-law', count: 'singular' },
+      it: { base: 'suocera', plural: 'suocere', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'belle-mère', plural: 'belles-mères', gender: 'fem', count: 'singular' },
+      de: { base: 'Schwiegermutter', plural: 'Schwiegermütter', gender: 'fem', count: 'singular' },
+      es: { base: 'suegra', plural: 'suegras', gender: 'fem', count: 'singular' },
+      ja: { base: '義母', count: 'singular', reading: 'ぎぼ', honorific: 'お義母さん', honorific_reading: 'おかあさん', kin: '1' },
+      pt: { base: 'sogra', plural: 'sogras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'FATHER_IN_LAW',
+    role: 'noun',
+    description: 'a father of a spouse',
+    definition: kinGloss('FATHER', 'SPOUSE', 'definite'),
+    emoji: '👴',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'father-in-law', plural: 'fathers-in-law', count: 'singular' },
+      it: { base: 'suocero', plural: 'suoceri', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'beau-père', plural: 'beaux-pères', gender: 'masc', count: 'singular' },
+      de: { base: 'Schwiegervater', plural: 'Schwiegerväter', gender: 'masc', count: 'singular' },
+      es: { base: 'suegro', plural: 'suegros', gender: 'masc', count: 'singular' },
+      ja: { base: '義父', count: 'singular', reading: 'ぎふ', honorific: 'お義父さん', honorific_reading: 'おとうさん', kin: '1' },
+      pt: { base: 'sogro', plural: 'sogros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'SON_IN_LAW',
+    role: 'noun',
+    description: 'a husband of a child',
+    definition: kinGloss('HUSBAND', 'CHILD_OFFSPRING', 'definite'),
+    emoji: '🤵',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'son-in-law', plural: 'sons-in-law', count: 'singular' },
+      it: { base: 'genero', plural: 'generi', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'gendre', plural: 'gendres', gender: 'masc', count: 'singular' },
+      de: { base: 'Schwiegersohn', plural: 'Schwiegersöhne', gender: 'masc', count: 'singular' },
+      es: { base: 'yerno', plural: 'yernos', gender: 'masc', count: 'singular' },
+      ja: { base: '婿', count: 'singular', reading: 'むこ', honorific: 'お婿さん', honorific_reading: 'おむこさん', kin: '1' },
+      pt: { base: 'genro', plural: 'genros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'DAUGHTER_IN_LAW',
+    role: 'noun',
+    description: 'a wife of a child',
+    definition: kinGloss('WIFE', 'CHILD_OFFSPRING', 'definite'),
+    emoji: '👰',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'daughter-in-law', plural: 'daughters-in-law', count: 'singular' },
+      it: { base: 'nuora', plural: 'nuore', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'belle-fille', plural: 'belles-filles', gender: 'fem', count: 'singular' },
+      de: { base: 'Schwiegertochter', plural: 'Schwiegertöchter', gender: 'fem', count: 'singular' },
+      es: { base: 'nuera', plural: 'nueras', gender: 'fem', count: 'singular' },
+      ja: { base: '嫁', count: 'singular', reading: 'よめ', honorific: 'お嫁さん', honorific_reading: 'およめさん', kin: '1' },
+      pt: { base: 'nora', plural: 'noras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Japanese 義理の兄弟 says "in-law" in the word, and fuses ELDER and YOUNGER as BROTHER does.
+    id: 'BROTHER_IN_LAW',
+    role: 'noun',
+    description: 'a brother of a spouse',
+    definition: kinGloss('BROTHER', 'SPOUSE', 'definite'),
+    emoji: '👨',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'brother-in-law', plural: 'brothers-in-law', count: 'singular' },
+      it: { base: 'cognato', plural: 'cognati', gender: 'masc', count: 'singular', kinship: '1' },
+      fr: { base: 'beau-frère', plural: 'beaux-frères', gender: 'masc', count: 'singular' },
+      de: { base: 'Schwager', plural: 'Schwäger', gender: 'masc', count: 'singular' },
+      es: { base: 'cuñado', plural: 'cuñados', gender: 'masc', count: 'singular' },
+      ja: {
+        base: '義理の兄弟', count: 'singular', reading: 'ぎりのきょうだい', kin: '1',
+        with_ELDER: '義兄', with_ELDER_reading: 'ぎけい', with_ELDER_honorific: 'お義兄さん', with_ELDER_honorific_reading: 'おにいさん',
+        with_YOUNGER: '義弟', with_YOUNGER_reading: 'ぎてい', with_YOUNGER_honorific: '義弟さん', with_YOUNGER_honorific_reading: 'ぎていさん',
+      },
+      pt: { base: 'cunhado', plural: 'cunhados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'SISTER_IN_LAW',
+    role: 'noun',
+    description: 'a sister of a spouse',
+    definition: kinGloss('SISTER', 'SPOUSE', 'definite'),
+    emoji: '👩',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'sister-in-law', plural: 'sisters-in-law', count: 'singular' },
+      it: { base: 'cognata', plural: 'cognate', gender: 'fem', count: 'singular', kinship: '1' },
+      fr: { base: 'belle-sœur', plural: 'belles-sœurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Schwägerin', plural: 'Schwägerinnen', gender: 'fem', count: 'singular' },
+      es: { base: 'cuñada', plural: 'cuñadas', gender: 'fem', count: 'singular' },
+      ja: {
+        base: '義理の姉妹', count: 'singular', reading: 'ぎりのしまい', kin: '1',
+        with_ELDER: '義姉', with_ELDER_reading: 'ぎし', with_ELDER_honorific: 'お義姉さん', with_ELDER_honorific_reading: 'おねえさん',
+        with_YOUNGER: '義妹', with_YOUNGER_reading: 'ぎまい', with_YOUNGER_honorific: '義妹さん', with_YOUNGER_honorific_reading: 'ぎまいさん',
+      },
+      pt: { base: 'cunhada', plural: 'cunhadas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The two that have to say what they are *not*: "a mother's husband" is true of every father, so
+    // the gloss carries a negated copular relative beside the genitive (B73 reading 1). The head keeps
+    // the indefinite — a mother may have had more than one husband, which is the word's presupposition.
+    id: 'STEPFATHER',
+    role: 'noun',
+    description: "a husband of one's mother who is not one's father",
+    definition: stepParentGloss('HUSBAND', 'MOTHER', 'FATHER'),
+    emoji: '👨',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'stepfather', plural: 'stepfathers', count: 'singular' },
+      it: { base: 'patrigno', plural: 'patrigni', gender: 'masc', count: 'singular' },
+      fr: { base: 'beau-père', plural: 'beaux-pères', gender: 'masc', count: 'singular' },
+      de: { base: 'Stiefvater', plural: 'Stiefväter', gender: 'masc', count: 'singular' },
+      es: { base: 'padrastro', plural: 'padrastros', gender: 'masc', count: 'singular' },
+      ja: { base: '継父', count: 'singular', reading: 'けいふ', kin: '1' },
+      pt: { base: 'padrasto', plural: 'padrastos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'STEPMOTHER',
+    role: 'noun',
+    description: "a wife of one's father who is not one's mother",
+    definition: stepParentGloss('WIFE', 'FATHER', 'MOTHER'),
+    emoji: '👩',
+    animate: true,
+    human: true,
+    isA: 'RELATIVE',
+    forms: {
+      en: { base: 'stepmother', plural: 'stepmothers', count: 'singular' },
+      it: { base: 'matrigna', plural: 'matrigne', gender: 'fem', count: 'singular' },
+      fr: { base: 'belle-mère', plural: 'belles-mères', gender: 'fem', count: 'singular' },
+      de: { base: 'Stiefmutter', plural: 'Stiefmütter', gender: 'fem', count: 'singular' },
+      es: { base: 'madrastra', plural: 'madrastras', gender: 'fem', count: 'singular' },
+      ja: { base: '継母', count: 'singular', reading: 'けいぼ', kin: '1' },
+      pt: { base: 'madrasta', plural: 'madrastas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Casual speech, and the two concepts that prove both rules follow the **lexeme**, not the
+    // meaning (P11 D13): Italian keeps the article before these ("la mia mamma", where "mia madre"
+    // drops it), and Japanese casual speech says お母さん for everyone's mother, own or not — one
+    // word, marked `kin` and with no possessed / honorific split of its own. Register is not a
+    // differentia, so neither carries a definition (B68 *Not solved* 2).
+    id: 'MOM',
+    role: 'noun',
+    description: 'mother, in casual speech',
+    emoji: '👩',
+    animate: true,
+    human: true,
+    isA: 'MOTHER',
+    forms: {
+      en: { base: 'mom', plural: 'moms', count: 'singular' },
+      it: { base: 'mamma', plural: 'mamme', gender: 'fem', count: 'singular' },
+      fr: { base: 'maman', plural: 'mamans', gender: 'fem', count: 'singular' },
+      de: { base: 'Mama', plural: 'Mamas', gender: 'fem', count: 'singular' },
+      es: { base: 'mamá', plural: 'mamás', gender: 'fem', count: 'singular' },
+      ja: { base: 'お母さん', count: 'singular', reading: 'おかあさん', kin: '1' },
+      pt: { base: 'mamãe', plural: 'mamães', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'DAD',
+    role: 'noun',
+    description: 'father, in casual speech',
+    emoji: '👨',
+    animate: true,
+    human: true,
+    isA: 'FATHER',
+    forms: {
+      en: { base: 'dad', plural: 'dads', count: 'singular' },
+      it: { base: 'papà', plural: 'papà', gender: 'masc', count: 'singular' },
+      fr: { base: 'papa', plural: 'papas', gender: 'masc', count: 'singular' },
+      de: { base: 'Papa', plural: 'Papas', gender: 'masc', count: 'singular' },
+      es: { base: 'papá', plural: 'papás', gender: 'masc', count: 'singular' },
+      ja: { base: 'お父さん', count: 'singular', reading: 'おとうさん', kin: '1' },
+      pt: { base: 'papai', plural: 'papais', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The people one chooses rather than is born to (B74), and four surfaces that collide with
+    // concepts the corpus already has — de *Freund* (FRIEND and BOYFRIEND), it *ragazzo* (BOY), it
+    // *compagno* and fr *compagnon* (COMPANION). The tooltips are what tell them apart.
+    //
+    // TOGETHER is in the gloss for Japanese alone: a Japanese relative clause marks no gap role, so
+    // without the adverb 住む人 says "a person who lives" and the whole differentia is gone. With it,
+    // 一緒に住む人 (B74 reading 1).
+    id: 'PARTNER',
+    role: 'noun',
+    description: 'a person one shares one\'s life with',
+    definition: {
+      subject: {
+        concept: 'PERSON',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'comitative',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'LIVE', modifier: 'TOGETHER' },
+        },
+      },
+    },
+    emoji: '🧑‍🤝‍🧑',
+    animate: true,
+    human: true,
+    synonym: 'life partner',
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'partner', plural: 'partners', count: 'singular' },
+      it: { base: 'compagno', plural: 'compagni', gender: 'masc', count: 'singular', fem: 'compagna', fem_plural: 'compagne' },
+      fr: { base: 'compagnon', plural: 'compagnons', gender: 'masc', count: 'singular', fem: 'compagne', fem_plural: 'compagnes' },
+      de: { base: 'Partner', plural: 'Partner', gender: 'masc', count: 'singular', fem: 'Partnerin', fem_plural: 'Partnerinnen' },
+      // Spanish *pareja* is feminine whoever the partner is, so its agreement follows the word
+      // ("mi pareja está cansada") and BOYFRIEND's gloss reads *una pareja masculina*.
+      es: { base: 'pareja', plural: 'parejas', gender: 'fem', count: 'singular' },
+      ja: { base: 'パートナー', count: 'singular' },
+      pt: { base: 'companheiro', plural: 'companheiros', gender: 'masc', count: 'singular', fem: 'companheira', fem_plural: 'companheiras' },
+    },
+  },
+  {
+    // The sex, not the absence of a marriage: "a partner one is not married to" says something
+    // subtly false — one may well marry one's boyfriend — and MARRIED, the adjective that would say
+    // it properly, is a P11 follow-up (B74 reading 2).
+    id: 'BOYFRIEND',
+    role: 'noun',
+    description: 'a male romantic partner',
+    definition: glossOf('PARTNER', 'MALE'),
+    emoji: '👦',
+    animate: true,
+    human: true,
+    synonym: 'romantic partner',
+    isA: 'PARTNER',
+    forms: {
+      en: { base: 'boyfriend', plural: 'boyfriends', count: 'singular' },
+      it: { base: 'ragazzo', plural: 'ragazzi', gender: 'masc', count: 'singular' },
+      fr: { base: 'petit ami', plural: 'petits amis', gender: 'masc', count: 'singular' },
+      de: { base: 'Freund', plural: 'Freunde', gender: 'masc', count: 'singular' },
+      es: { base: 'novio', plural: 'novios', gender: 'masc', count: 'singular' },
+      ja: { base: '彼氏', count: 'singular', reading: 'かれし' },
+      pt: { base: 'namorado', plural: 'namorados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'GIRLFRIEND',
+    role: 'noun',
+    description: 'a female romantic partner',
+    definition: { subject: { concept: 'PARTNER', definiteness: 'indefinite', gender: 'fem', adjectives: ['FEMALE'] } },
+    emoji: '👧',
+    animate: true,
+    human: true,
+    synonym: 'romantic partner',
+    isA: 'PARTNER',
+    forms: {
+      en: { base: 'girlfriend', plural: 'girlfriends', count: 'singular' },
+      it: { base: 'ragazza', plural: 'ragazze', gender: 'fem', count: 'singular' },
+      fr: { base: 'petite amie', plural: 'petites amies', gender: 'fem', count: 'singular' },
+      de: { base: 'Freundin', plural: 'Freundinnen', gender: 'fem', count: 'singular' },
+      es: { base: 'novia', plural: 'novias', gender: 'fem', count: 'singular' },
+      ja: { base: '彼女', count: 'singular', reading: 'かのじょ' },
+      pt: { base: 'namorada', plural: 'namoradas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The prospective aspect inside a relative clause — *sta per sposare*, 結婚しようとしている — which
+    // is what keeps it apart from SPOUSE's "a person who one marries" (B74 reading 3). German is the
+    // adjectival noun *Verlobter* (D8), which its picker label reads and this gloss does not.
+    id: 'FIANCE',
+    role: 'noun',
+    description: 'a person one is engaged to marry',
+    definition: {
+      subject: {
+        concept: 'PERSON',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'MARRY', aspect: 'prospective' },
+        },
+      },
+    },
+    emoji: '💍',
+    animate: true,
+    human: true,
+    isA: 'PARTNER',
+    forms: {
+      en: { base: 'fiancé', plural: 'fiancés', count: 'singular', fem: 'fiancée', fem_plural: 'fiancées' },
+      it: { base: 'fidanzato', plural: 'fidanzati', gender: 'masc', count: 'singular', fem: 'fidanzata', fem_plural: 'fidanzate' },
+      fr: { base: 'fiancé', plural: 'fiancés', gender: 'masc', count: 'singular', fem: 'fiancée', fem_plural: 'fiancées' },
+      de: { base: 'Verlobt', plural: 'Verlobt', gender: 'masc', count: 'singular', fem: 'Verlobt', fem_plural: 'Verlobt', adjectival: '1' },
+      es: { base: 'prometido', plural: 'prometidos', gender: 'masc', count: 'singular', fem: 'prometida', fem_plural: 'prometidas' },
+      ja: { base: '婚約者', count: 'singular', reading: 'こんやくしゃ' },
+      pt: { base: 'noivo', plural: 'noivos', gender: 'masc', count: 'singular', fem: 'noiva', fem_plural: 'noivas' },
+    },
+  },
+  {
+    // Knowledge, not affection: the affection route ("a person to whom one feels affection") reads
+    // 愛情を感じる人 in Japanese, "a person who feels affection" — the wrong participant, because the
+    // terminus gap goes unmarked there. "Knows well" has no such reading in any of the seven (B74
+    // reading 4).
+    id: 'FRIEND',
+    role: 'noun',
+    description: 'a person one knows well and likes',
+    definition: {
+      subject: {
+        concept: 'PERSON',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'KNOW', modifier: 'WELL' },
+        },
+      },
+    },
+    emoji: '🧑‍🤝‍🧑',
+    animate: true,
+    human: true,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'friend', plural: 'friends', count: 'singular' },
+      it: { base: 'amico', plural: 'amici', gender: 'masc', count: 'singular', fem: 'amica', fem_plural: 'amiche' },
+      fr: { base: 'ami', plural: 'amis', gender: 'masc', count: 'singular', fem: 'amie', fem_plural: 'amies' },
+      de: { base: 'Freund', plural: 'Freunde', gender: 'masc', count: 'singular', fem: 'Freundin', fem_plural: 'Freundinnen' },
+      es: { base: 'amigo', plural: 'amigos', gender: 'masc', count: 'singular', fem: 'amiga', fem_plural: 'amigas' },
+      ja: { base: '友達', count: 'singular', reading: 'ともだち' },
+      pt: { base: 'amigo', plural: 'amigos', gender: 'masc', count: 'singular', fem: 'amiga', fem_plural: 'amigas' },
     },
   },
   {

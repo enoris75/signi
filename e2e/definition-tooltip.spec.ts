@@ -2602,11 +2602,20 @@ test.describe('word definition tooltip', () => {
     const let_ = page.locator('[data-testid="typeahead-option"][data-concept="LET"]');
     const help = page.locator('[data-testid="typeahead-option"][data-concept="HELP_VERB"]');
 
+    // Between two hovers in one dropdown the pointer has to leave the list: refilling it lands
+    // another row under the stationary pointer, whose tooltip then opens beside the outgoing one,
+    // and an assertion on the bare locator fails on the two of them rather than waiting one out.
+    const noTooltip = async () => {
+      await page.mouse.move(0, 0);
+      await expect(page.locator(tooltip)).toHaveCount(0);
+    };
+
     await app.verbInput.fill('like');
     await expect(like).toBeVisible();
     await like.hover();
     await expect(page.locator(tooltip)).toHaveText('to feel joy because of an object');
 
+    await noTooltip();
     await app.verbInput.fill('let');
     await expect(let_).toBeVisible();
     await let_.hover();
@@ -2614,6 +2623,7 @@ test.describe('word definition tooltip', () => {
 
     // HELP_VERB is literal by design — no construct-free gloss tells helping from cooperating —
     // so what it shows is its English literal, in every UI language.
+    await noTooltip();
     await app.verbInput.fill('help');
     await expect(help).toBeVisible();
     await help.hover();
@@ -2637,6 +2647,14 @@ test.describe('word definition tooltip', () => {
     await app.setSubject('CAT');
     await app.verbInput.fill('eat');
     await page.locator('[data-testid="typeahead-option"][data-concept="EAT"]').click();
+
+    // The subject box holds its word once it is filled, so its picker comes back the way a user
+    // brings it back: one click selects the box, a second re-opens the picker over the word
+    // (`canRepick` in phraseRender, ↵ on the keyboard).
+    const subjectBox = page.getByTestId('box-subject');
+    await subjectBox.click();
+    await subjectBox.click();
+    await expect(app.subjectInput).toBeVisible();
 
     // MR is a noun; the subject picker does not list it.
     await app.subjectInput.fill('mr');
@@ -2728,5 +2746,163 @@ test.describe('word definition tooltip', () => {
     await expect(now).toBeVisible();
     await now.hover();
     await expect(page.locator(tooltip)).toHaveText('a questo tempo');
+  });
+
+  // P11's kin terms (localization B68–B74): one row per ticket, each on what that ticket's shape
+  // turns on — the coordination, the relative clause that goes around a genus, the predicative a
+  // copula wants, the genitive, the chain of two, the negated relative and the adverb Japanese needs.
+
+  test('a coordinated noun definition renders (localize-seed B68: CHILD_OFFSPRING, PARENT)', async ({
+    app,
+    page,
+  }) => {
+    // Italian: "un figlio o una figlia" — the corpus's coordination in a gloss's subject, and the
+    // word the Italian picker most needs a tooltip on, since *figlio* is the son and the offspring.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('child');
+    const childIt = page.locator('[data-testid="typeahead-option"][data-concept="CHILD_OFFSPRING"]');
+    await expect(childIt).toBeVisible();
+    await childIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un figlio o una figlia');
+
+    // PARENT's own gloss, re-pointed from CHILD to CHILD_OFFSPRING: "figli", not "bambini" (P11 D11).
+    // The mouse leaves the list first: refilling it under the pointer opens whatever row lands there,
+    // and two tooltips at once fail the locator.
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await app.subjectInput.fill('parent');
+    const parentIt = page.locator('[data-testid="typeahead-option"][data-concept="PARENT"]');
+    await expect(parentIt).toBeVisible();
+    await parentIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona che ha figli');
+
+    // Japanese: the same coordination, with か between the two.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('child');
+    const childJa = page.locator('[data-testid="typeahead-option"][data-concept="CHILD_OFFSPRING"]');
+    await expect(childJa).toBeVisible();
+    await childJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('息子か娘');
+  });
+
+  test('a relative clause goes around the genus (localize-seed B69: SISTER)', async ({
+    app,
+    page,
+  }) => {
+    // Spanish: "tiene los mismos padres" — tener takes no personal "a", which this ticket's seed
+    // had to teach the engine; the head is PERSON, because *una sorella femminile* is not a gloss.
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('sister');
+    const sisterEs = page.locator('[data-testid="typeahead-option"][data-concept="SISTER"]');
+    await expect(sisterEs).toBeVisible();
+    await sisterEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona femenina que tiene los mismos padres');
+
+    // Japanese: the relative clause comes first and the sex adjective after it, on the head.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('sister');
+    const sisterJa = page.locator('[data-testid="typeahead-option"][data-concept="SISTER"]');
+    await expect(sisterJa).toBeVisible();
+    await sisterJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じ両親を持つ女性の人');
+  });
+
+  test('a copular verb definition takes a predicative, not an object (localize-seed B70: MARRY)', async ({
+    app,
+    page,
+  }) => {
+    // German: "ein Ehepartner werden" — the nominative the copula wants, where an object would give
+    // "einen Ehepartner werden".
+    await app.setUiLanguage('de');
+    await app.setSubject('CAT');
+    await app.verbInput.fill('marry');
+    const marryDe = page.locator('[data-testid="typeahead-option"][data-concept="MARRY"]');
+    await expect(marryDe).toBeVisible();
+    await marryDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Ehepartner werden');
+
+    // Japanese: に, not を — 配偶者になる.
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('marry');
+    const marryJa = page.locator('[data-testid="typeahead-option"][data-concept="MARRY"]');
+    await expect(marryJa).toBeVisible();
+    await marryJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('配偶者になる');
+  });
+
+  test('a kin genitive renders (localize-seed B71: GRANDPARENT, GRANDSON)', async ({
+    app,
+    page,
+  }) => {
+    // English writes the genitive as the Saxon one, which is what a speaker says.
+    await app.subjectInput.fill('grandparent');
+    const grandparentEn = page.locator('[data-testid="typeahead-option"][data-concept="GRANDPARENT"]');
+    await expect(grandparentEn).toBeVisible();
+    await grandparentEn.hover();
+    await expect(page.locator(tooltip)).toHaveText("a parent's parent");
+
+    // Italian: GRANDSON is the sex adjective, because "a child's son" would be GRANDCHILD's own
+    // gloss there — *un figlio di un figlio*, character for character.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('grandson');
+    const grandsonIt = page.locator('[data-testid="typeahead-option"][data-concept="GRANDSON"]');
+    await expect(grandsonIt).toBeVisible();
+    await grandsonIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un nipote maschile');
+  });
+
+  test('a genitive inside a genitive renders (localize-seed B72: COUSIN)', async ({
+    app,
+    page,
+  }) => {
+    // Japanese stacks の twice; German two genitives. No other gloss in the corpus chains them.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('cousin');
+    const cousinJa = page.locator('[data-testid="typeahead-option"][data-concept="COUSIN"]');
+    await expect(cousinJa).toBeVisible();
+    await cousinJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('親の兄弟の子供');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('cousin');
+    const cousinDe = page.locator('[data-testid="typeahead-option"][data-concept="COUSIN"]');
+    await expect(cousinDe).toBeVisible();
+    await cousinDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Kind eines Geschwisters eines Elternteils');
+  });
+
+  test('a genitive and a negated relative on one head (localize-seed B73: STEPFATHER)', async ({
+    app,
+    page,
+  }) => {
+    // German writes the negation in the article — "der **kein** Vater ist" — and keeps the comma.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('stepfather');
+    const stepfatherDe = page.locator('[data-testid="typeahead-option"][data-concept="STEPFATHER"]');
+    await expect(stepfatherDe).toBeVisible();
+    await stepfatherDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Ehemann einer Mutter, der kein Vater ist');
+
+    // Japanese puts the whole clause in front of the head it restricts.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('stepfather');
+    const stepfatherJa = page.locator('[data-testid="typeahead-option"][data-concept="STEPFATHER"]');
+    await expect(stepfatherJa).toBeVisible();
+    await stepfatherJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('父親ではない母親の夫');
+  });
+
+  test('an adverb keeps a gap Japanese cannot mark (localize-seed B74: PARTNER)', async ({
+    app,
+    page,
+  }) => {
+    // Without TOGETHER the Japanese relative reads 住む人, "a person who lives", because no Japanese
+    // relative clause marks which slot the head fills. 一緒に puts the differentia back.
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('partner');
+    const partnerJa = page.locator('[data-testid="typeahead-option"][data-concept="PARTNER"]');
+    await expect(partnerJa).toBeVisible();
+    await partnerJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('一緒に住む人');
   });
 });

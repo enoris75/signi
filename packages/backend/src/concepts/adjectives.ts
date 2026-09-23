@@ -1,14 +1,21 @@
 import type { ConceptSeed } from './types.js';
-import type { PhrasePlan } from '@signi/shared';
+import type { Degree, PhrasePlan } from '@signi/shared';
 import { namedAgentGloss, relativeGloss, stateGloss, subjectGapGloss } from './relativeGloss.js';
 
 // An adjective-definition gloss: a dimension noun carrying a degree adjective, rendered verblessly as
 // a prepositional fragment whose adposition the noun's `dimensionRelation` selects — dimGloss('SIZE',
 // 'GREAT') → en "of great size", it "di grande dimensione", de "von großer Größe", ja "大きさが大きい";
 // dimGloss('TEMPERATURE', 'HIGH') → "at high temperature" (the `measure` relation). See
-// NounPhrase.dimensionGloss and the engines' verbless branch.
-const dimGloss = (dimension: string, degree: string): PhrasePlan => ({
-  subject: { concept: dimension, definiteness: 'bare', adjectives: [degree], dimensionGloss: true },
+// NounPhrase.dimensionGloss and the engines' verbless branch. A `comparison` puts the degree
+// adjective itself one step up — ELDER is "of greater age", OLD's own gloss compared (B69).
+const dimGloss = (dimension: string, degree: string, comparison?: Degree): PhrasePlan => ({
+  subject: {
+    concept: dimension,
+    definiteness: 'bare',
+    adjectives: [degree],
+    ...(comparison ? { adjectiveDegrees: [comparison] } : {}),
+    dimensionGloss: true,
+  },
 });
 
 export const adjectives: ConceptSeed[] = [
@@ -243,6 +250,48 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'joven' },
       ja: { base: '若い', reading: 'わかい' },
       pt: { base: 'jovem' },
+    },
+  },
+  {
+    // The two age adjectives a family needs, seeded with P11's kin terms: an older and a younger
+    // brother. They are not OLD and YOUNG at the comparative degree — that gives *più vecchio*,
+    // *plus vieux*, *más viejo*, which say a brother is an old thing, and Japanese もっと古い, which
+    // is only said of things. Japanese fuses them into the kin noun itself (兄弟 + ELDER → 兄, P11
+    // D5), so its words here are what a head with no fusion column renders: 上の息子, the older son.
+    // Both end in の so that jaAdjClass links them (bare 上 gave 上息子).
+    id: 'ELDER',
+    role: 'adjective',
+    description: 'older, of two or more relatives',
+    // OLD's own "of great age" one degree up (localization B69). What the word means is older *than
+    // another relative*, and the engine has no standard of comparison to name; the dimension is what
+    // it can say, and it is what tells ELDER from YOUNGER.
+    definition: dimGloss('AGE', 'GREAT', 'more'),
+    emoji: '👴',
+    forms: {
+      en: { base: 'older' },
+      it: { base: 'maggiore' },
+      fr: { base: 'aîné' },
+      de: { base: 'älter' },
+      es: { base: 'mayor' },
+      ja: { base: '上の', reading: 'うえの' },
+      pt: { base: 'mais velho' },
+    },
+  },
+  {
+    id: 'YOUNGER',
+    role: 'adjective',
+    description: 'younger, of two or more relatives',
+    definition: dimGloss('AGE', 'LOW', 'more'),
+    emoji: '🧒',
+    forms: {
+      en: { base: 'younger' },
+      it: { base: 'minore' },
+      // The adjective rule gives *cousines cadetes*; cadet is irregular, and FR_ADJ_IRREGULAR has it.
+      fr: { base: 'cadet' },
+      de: { base: 'jünger' },
+      es: { base: 'menor' },
+      ja: { base: '下の', reading: 'したの' },
+      pt: { base: 'mais novo' },
     },
   },
   {

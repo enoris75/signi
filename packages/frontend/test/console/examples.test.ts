@@ -202,10 +202,10 @@ describe('the help pages’ examples, in another interface language', () => {
 
   it('writes the words in Italian, and keeps the rest as written', () => {
     expect(exampleIn(EXAMPLES.sg!, IT)).toBe('/subj ( gatto /sg )');
-    expect(exampleIn(EXAMPLES.rel!, IT)).toBe('/subj ( bambino /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )');
-    expect(exampleIn(EXAMPLES.poss!, IT)).toBe('/subj ( libro /poss [ bambino /adj vecchio ] )');
+    expect(exampleIn(EXAMPLES.rel!, IT)).toBe('/subj ( uomo /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )');
+    expect(exampleIn(EXAMPLES.poss!, IT)).toBe('/subj ( libro /poss [ uomo /adj vecchio ] )');
     expect(exampleIn(EXAMPLES.level!, IT)).toBe(
-      '/subj ( bambino ) /verb ( iniziare ) /inst { /verb ( scegliere ) /obj ( parola ) } /level process',
+      '/subj ( uomo ) /verb ( iniziare ) /inst { /verb ( scegliere ) /obj ( parola ) } /level process',
     );
     // A pronoun is its person in every language; a name, a language and a command are not words.
     expect(exampleIn(EXAMPLES.neut!, IT)).toBe('/subj ( 3rd /neut ) /verb ( correre )');

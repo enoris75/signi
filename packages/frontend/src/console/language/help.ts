@@ -54,32 +54,40 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
   }
 }
 
-/** An example for every command, each starting from an empty period, written as the console prints. */
+/**
+ * An example for every command, each starting from an empty period, written as the console prints.
+ *
+ * Every word here must name **one** concept of its slot's roles, or the example cannot be applied and
+ * the page falls back to this English line (see `exampleIn`). That rules out a word two concepts
+ * share: *child* was one until P11 seeded CHILD_OFFSPRING beside CHILD (en *child*, de *Kind*, fr
+ * *enfant*, ja 子供), so the human examples say *man* and the gender ones a *cat*, which has a
+ * feminine in every language that marks one.
+ */
 export const EXAMPLES: Record<string, string> = {
   // Roles
   subj: "/subj ( cat )",
   verb: "/subj ( cat ) /verb ( eat )",
   obj: "/subj ( cat ) /verb ( eat ) /obj ( food )",
   pred: "/subj ( cat ) /verb ( seem ) /pred ( happy )",
-  term: "/subj ( child ) /verb ( read ) /obj ( book ) /term ( dog )",
+  term: "/subj ( man ) /verb ( read ) /obj ( book ) /term ( dog )",
   manner: "/subj ( dog ) /verb ( run ) /manner ( speed )",
   loc: "/subj ( cat ) /verb ( eat ) /loc ( house )",
   dir: "/subj ( dog ) /verb ( run ) /dir ( house )",
   src: "/subj ( dog ) /verb ( run ) /src ( house )",
   route: "/subj ( dog ) /verb ( run ) /route ( house )",
   cause: "/subj ( dog ) /verb ( run ) /cause ( cat )",
-  inst: "/subj ( child ) /verb ( eat ) /obj ( food ) /inst { /subj ( stick ) }",
+  inst: "/subj ( man ) /verb ( eat ) /obj ( food ) /inst { /subj ( stick ) }",
   adj: "/subj ( cat /adj brown )",
   adv: "/subj ( dog ) /verb ( run /adv fast )",
   modal: "/subj ( cat ) /verb ( eat /modal can )",
-  poss: "/subj ( book /poss [ child /adj old ] )",
+  poss: "/subj ( book /poss [ man /adj old ] )",
   and: "/subj ( cat /and dog ) /verb ( run )",
   or: "/subj ( cat /or dog ) /verb ( run )",
   // Noun
   sg: "/subj ( cat /sg )",
   pl: "/subj ( cat /pl )",
-  masc: "/subj ( child /masc )",
-  fem: "/subj ( child /fem )",
+  masc: "/subj ( cat /masc )",
+  fem: "/subj ( cat /fem )",
   neut: "/subj ( 3rd /neut ) /verb ( run )",
   the: "/subj ( cat /the )",
   a: "/subj ( cat /a )",
@@ -91,7 +99,7 @@ export const EXAMPLES: Record<string, string> = {
   many: "/subj ( cat /pl /many )",
   few: "/subj ( cat /pl /few )",
   all: "/subj ( cat /pl /all ) /verb ( run )",
-  rel: "/subj ( child /rel subj { /verb ( love ) /obj ( cat ) } ) /verb ( run )",
+  rel: "/subj ( man /rel subj { /verb ( love ) /obj ( cat ) } ) /verb ( run )",
   in: "/subj ( cat ) /verb ( eat ) /loc ( house /in )",
   through: "/subj ( dog ) /verb ( run ) /route ( house /through )",
   under: "/subj ( cat ) /verb ( eat ) /loc ( house /under )",
@@ -137,7 +145,7 @@ export const EXAMPLES: Record<string, string> = {
   statement: "/command /verb ( eat ) /statement",
   if: "/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }",
   join: "/subj ( dog ) /verb ( run ) /join but { /subj ( cat ) /verb ( eat ) }",
-  level: "/subj ( child ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",
+  level: "/subj ( man ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",
   del: "/subj ( cat /adj brown ) /del adj",
   edit: "/edit",
   // Workspace

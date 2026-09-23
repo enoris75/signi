@@ -561,7 +561,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['LEAVE', 'la gatta è uscita.'],
     ['LINK', 'la gatta ha collegato.'], ['LIVE', 'la gatta ha abitato.'],
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
-    ['MAKE', 'la gatta ha fatto.'], ['MODIFY', 'la gatta ha modificato.'],
+    ['MAKE', 'la gatta ha fatto.'], ['MARRY', 'la gatta ha sposato.'],
+    ['MODIFY', 'la gatta ha modificato.'],
     ['MOVE', 'la gatta ha spostato.'],
     // A pronominal verb takes essere, its clitic ahead of it (C17).
     ['MOVE_ONESELF', 'la gatta si è mossa.'],

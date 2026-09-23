@@ -2498,7 +2498,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'hatten', '2pl_past': 'hattet', '3pl_past': 'hatten',
       },
       es: {
-        base: 'tener',
+        // Having somebody is not doing anything to them, so tener takes no personal "a": "tiene los
+        // mismos padres", where ver on the same object says "ve a los mismos padres" (B69).
+        base: 'tener', object_no_a: '1',
         '1sg_present': 'tengo', '2sg_present': 'tienes', '3sg_present': 'tiene',
         '1pl_present': 'tenemos', '2pl_present': 'tenéis', '3pl_present': 'tienen',
         '1sg_past': 'tuve', '2sg_past': 'tuviste', '3sg_past': 'tuvo',
@@ -9456,6 +9458,83 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'ajudamos', '2pl_past': 'ajudaram', '3pl_past': 'ajudaram',
         '1sg_future': 'ajudarei', '2sg_future': 'ajudará', '3sg_future': 'ajudará',
         '1pl_future': 'ajudaremos', '2pl_future': 'ajudarão', '3pl_future': 'ajudarão',
+      },
+    },
+  },
+
+  {
+    // The one verb the family needs (P11 §4). Data only in six languages: Spanish *casarse* is
+    // stored reflexive and takes its object with *con*, Portuguese *casar* with *com*, and Japanese
+    // 結婚する with と (`object_prep` / `object_particle`, as CLICK's) — "mi hijo se casa **con** tu
+    // hija", "娘**と**結婚します". Italian, French, German and English take a plain object.
+    id: 'MARRY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to take as a spouse',
+    // The spouse is a **predicative**, not an object: as `{ object: 'SPOUSE' }` the same gloss reads
+    // de *einen Ehepartner werden* (accusative where the copula wants the nominative), es *volverse a
+    // un cónyuge* (the personal *a*) and ja 配偶者**を**なる for になる (localization B70 reading 1).
+    definition: infinitiveGloss('BECOME', {
+      complements: { predicative: { phrase: { concept: 'SPOUSE', definiteness: 'indefinite' } } },
+    }),
+    emoji: '💒',
+    forms: {
+      en: {
+        base: 'marry',
+        '1sg_present': 'marry', '2sg_present': 'marry', '3sg_present': 'marries',
+        '1pl_present': 'marry', '2pl_present': 'marry', '3pl_present': 'marry',
+        past: 'married',
+      },
+      it: {
+        base: 'sposare',
+        '1sg_present': 'sposo', '2sg_present': 'sposi', '3sg_present': 'sposa',
+        '1pl_present': 'sposiamo', '2pl_present': 'sposate', '3pl_present': 'sposano',
+        '1sg_past': 'sposai', '2sg_past': 'sposasti', '3sg_past': 'sposò',
+        '1pl_past': 'sposammo', '2pl_past': 'sposaste', '3pl_past': 'sposarono',
+        '1sg_future': 'sposerò', '2sg_future': 'sposerai', '3sg_future': 'sposerà',
+        '1pl_future': 'sposeremo', '2pl_future': 'sposerete', '3pl_future': 'sposeranno',
+      },
+      fr: {
+        base: 'épouser',
+        '1sg_present': 'épouse', '2sg_present': 'épouses', '3sg_present': 'épouse',
+        '1pl_present': 'épousons', '2pl_present': 'épousez', '3pl_present': 'épousent',
+        '1sg_past': 'épousai', '2sg_past': 'épousas', '3sg_past': 'épousa',
+        '1pl_past': 'épousâmes', '2pl_past': 'épousâtes', '3pl_past': 'épousèrent',
+        '1sg_future': 'épouserai', '2sg_future': 'épouseras', '3sg_future': 'épousera',
+        '1pl_future': 'épouserons', '2pl_future': 'épouserez', '3pl_future': 'épouseront',
+      },
+      de: {
+        base: 'heiraten',
+        '1sg_present': 'heirate', '2sg_present': 'heiratest', '3sg_present': 'heiratet',
+        '1pl_present': 'heiraten', '2pl_present': 'heiratet', '3pl_present': 'heiraten',
+        '1sg_past': 'heiratete', '2sg_past': 'heiratetest', '3sg_past': 'heiratete',
+        '1pl_past': 'heirateten', '2pl_past': 'heiratetet', '3pl_past': 'heirateten',
+      },
+      es: {
+        base: 'casarse', object_prep: 'con',
+        '1sg_present': 'me caso', '2sg_present': 'te casas', '3sg_present': 'se casa',
+        '1pl_present': 'nos casamos', '2pl_present': 'os casáis', '3pl_present': 'se casan',
+        '1sg_past': 'me casé', '2sg_past': 'te casaste', '3sg_past': 'se casó',
+        '1pl_past': 'nos casamos', '2pl_past': 'os casasteis', '3pl_past': 'se casaron',
+        '1sg_future': 'me casaré', '2sg_future': 'te casarás', '3sg_future': 'se casará',
+        '1pl_future': 'nos casaremos', '2pl_future': 'os casaréis', '3pl_future': 'se casarán',
+      },
+      ja: {
+        base: '結婚する',
+        reading: 'けっこんする',
+        masu_present: '結婚します',
+        masu_present_reading: 'けっこんします',
+        object_particle: 'と',
+      },
+      pt: {
+        base: 'casar', object_prep: 'com',
+        '1sg_present': 'caso', '2sg_present': 'casa', '3sg_present': 'casa',
+        '1pl_present': 'casamos', '2pl_present': 'casam', '3pl_present': 'casam',
+        '1sg_past': 'casei', '2sg_past': 'casou', '3sg_past': 'casou',
+        '1pl_past': 'casamos', '2pl_past': 'casaram', '3pl_past': 'casaram',
+        '1sg_future': 'casarei', '2sg_future': 'casará', '3sg_future': 'casará',
+        '1pl_future': 'casaremos', '2pl_future': 'casarão', '3pl_future': 'casarão',
       },
     },
   },

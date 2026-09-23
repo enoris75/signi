@@ -186,10 +186,10 @@ test.describe('the phrase console', () => {
   test('rebuilds a workspace from a pasted two-period script, run with ↵', async ({ app, page }) => {
     await prompt(page).click();
     // A paste lands in the prompt, several lines and all, and previews before ↵ runs it.
-    await page.keyboard.insertText('/subj child /rel #2.subj /verb read /obj book\n/subj ( child\n  ) /verb ( love ) /obj ( cat )\n');
+    await page.keyboard.insertText('/subj man /rel #2.subj /verb read /obj book\n/subj ( man\n  ) /verb ( love ) /obj ( cat )\n');
     await expect(page.getByTestId('period-container')).toHaveCount(2);
     await run(page);
-    await app.expectSentences({ en: 'the child who loves the cat reads the book.' });
+    await app.expectSentences({ en: 'the man who loves the cat reads the book.' });
     await expect(page.getByTestId('transcript-typed')).toHaveCount(2);
     // The source strip holds the whole script, a numbered line per period.
     const lines = page.getByTestId('source-line');
@@ -258,7 +258,7 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('help-page')).toContainText('— to add a relative clause to a noun');
     // The example's sentence, in the interface language.
     await expect(page.getByTestId('transcript-help').getByTestId('transcript-sentence')).toHaveText(
-      'the child who loves the cat runs.',
+      'the man who loves the cat runs.',
     );
   });
 
@@ -285,10 +285,10 @@ test.describe('the phrase console', () => {
     const help = page.getByTestId('help-page');
     await expect(help.first()).toContainText('— aggiungere una proposizione relativa a un sostantivo'); // B47
     await expect(help.first().getByTestId('help-example')).toHaveText(
-      '/subj ( bambino /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )',
+      '/subj ( uomo /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )',
     );
     await expect(page.getByTestId('transcript-help').getByTestId('transcript-sentence')).toHaveText(
-      'il bambino che ama il gatto corre.',
+      "l'uomo che ama il gatto corre.",
     );
     await page.keyboard.type('/help subj');
     await run(page);
@@ -297,7 +297,7 @@ test.describe('the phrase console', () => {
     // German keeps its noun capitalized: the header shows the name as the engine renders it.
     await app.setUiLanguage('de');
     await expect(page.getByTestId('console-period')).toHaveText('Satzgefüge 1');
-    await expect(help.first().getByTestId('help-example')).toContainText('/subj ( Kind');
+    await expect(help.first().getByTestId('help-example')).toContainText('/subj ( Mann');
     await expect(help.first()).toContainText('— einen Relativsatz zu einem Substantiv hinzufügen'); // B47
   });
 

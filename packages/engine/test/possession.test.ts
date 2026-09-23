@@ -791,8 +791,8 @@ describe('known bugs: a `no` possessor does not negate its clause', () => {
       interrogative: true,
     })).toMatchObject({
       it: "la mucca nascosta e calda non rinchiude ripetutamente poco grande denaro per colpa di tutti i genitori di nessun'acqua?",
-      es: '¿la vaca oculta y caliente no encierra repetidamente poco dinero grande por culpa de todos los progenitores de ninguna agua?',
-      pt: 'a vaca oculta e quente não encarcera repetidamente pouco dinheiro grande por culpa de todos os progenitores de nenhuma água?',
+      es: '¿la vaca oculta y caliente no encierra repetidamente poco dinero grande por culpa de todos los padres de ninguna agua?',
+      pt: 'a vaca oculta e quente não encarcera repetidamente pouco dinheiro grande por culpa de todos os pais de nenhuma água?',
     });
   });
 

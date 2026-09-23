@@ -18,4 +18,12 @@ describe('takesPersonalA', () => {
     expect(takesPersonalA(np(PERRO), { object_a: '1' })).toBe(true);
     expect(takesPersonalA(np(PERRO, { definiteness: 'bare' }), { object_a: '1' })).toBe(false);
   });
+
+  // HAVE's tener marks none of them (`object_no_a`, B69): "tiene los mismos padres", where ver on the
+  // same object keeps the a.
+  test('a verb that marks no object takes it for a determined human either', () => {
+    expect(takesPersonalA(np(HOMBRE), { object_no_a: '1' })).toBe(false);
+    expect(takesPersonalA(np(HOMBRE, { definiteness: 'indefinite' }), { object_no_a: '1' })).toBe(false);
+    expect(takesPersonalA(np(HOMBRE))).toBe(true);
+  });
 });
