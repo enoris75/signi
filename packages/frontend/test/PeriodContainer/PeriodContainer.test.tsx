@@ -20,6 +20,7 @@ import {
   PRIMARY,
   SECONDARY,
   SUCCESS,
+  subordinateControl,
   TEXT_SECONDARY,
   WARNING,
 } from './fixtures.ts';
@@ -130,6 +131,34 @@ describe('PeriodContainer', () => {
       });
 
       expect(within(screen.getByTestId('period-border-controls')).getAllByRole('button')).toHaveLength(4);
+    });
+
+    // The stack is centred on the card's right edge, so the card grows to hold it (P09-E12): each
+    // 28px control and its 4px gap, less the last gap, and 8px clear of the border at either end.
+    it.each<[string, Partial<PeriodContainerProps>, string]>([
+      ['none', {}, 'auto'],
+      ['the three moods', { imperative: mood(false), infinitive: mood(false), question: mood(false) }, '108px'],
+      [
+        'five: the moods, the conditional and the coordination',
+        { imperative: mood(false), infinitive: mood(false), question: mood(false), conditional: conditionalControl(), coordinative: coordinativeControl() },
+        '172px',
+      ],
+      [
+        'all six, the subordinate clause with them',
+        {
+          imperative: mood(false),
+          infinitive: mood(false),
+          question: mood(false),
+          conditional: conditionalControl(),
+          coordinative: coordinativeControl(),
+          subordinate: subordinateControl(),
+        },
+        '204px',
+      ],
+    ])('make the card at least as tall as their stack: %s', (_, props, minHeight) => {
+      renderPeriod(props);
+
+      expect(getComputedStyle(card()).minHeight).toBe(minHeight);
     });
   });
 

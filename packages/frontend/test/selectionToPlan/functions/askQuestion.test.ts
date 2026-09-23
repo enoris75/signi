@@ -81,4 +81,28 @@ describe('the question and the existential in the plan', () => {
     expect(planOf({ subject: CAT, verb: EAT, existential: true })).not.toHaveProperty('existential');
     expect(planOf({ subject: ME, verb: BE, existential: true })).not.toHaveProperty('existential');
   });
+
+  // P09-E12 D9: a that-clause is its verb's object, so the object is no gap beside it.
+  it('asks no object of a period whose object is a that-clause', () => {
+    const SAY = concept('SAY', 'verb', { transitivity: 'transitive', clauseObject: 'content' });
+    const RUN = concept('RUN', 'verb', { transitivity: 'intransitive' });
+    const [{ plan }] = workspaceToPlans(
+      [
+        { id: 'p', selection: { subject: MAN, verb: SAY, interrogative: true, questionRole: 'directObject' } },
+        { id: 'q', selection: { subject: CAT, verb: RUN } },
+      ],
+      [{ id: 'l', kind: 'content', source: { containerId: 'p' }, target: { containerId: 'q' } }],
+    );
+    expect(plan).not.toHaveProperty('questionRole');
+    expect(plan).toMatchObject({ interrogative: true, contentObject: { verbPhrase: { verb: 'RUN' } } });
+    // Its subject still is one: "who says that the cat runs?"
+    const [{ plan: who }] = workspaceToPlans(
+      [
+        { id: 'p', selection: { subject: MAN, verb: SAY, interrogative: true, questionRole: 'subject' } },
+        { id: 'q', selection: { subject: CAT, verb: RUN } },
+      ],
+      [{ id: 'l', kind: 'content', source: { containerId: 'p' }, target: { containerId: 'q' } }],
+    );
+    expect(who).toMatchObject({ questionRole: 'subject', contentObject: { verbPhrase: { verb: 'RUN' } } });
+  });
 });

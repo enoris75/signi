@@ -109,6 +109,17 @@ describe('linkRules', () => {
       expect(canBeSubordinate(ALL, addCoordinative([], 'B', 'C', 'and', 'k'), 'S', 'B', 'content')).toBe(false);
       expect(canBeSubordinate(ALL, addInstrumental([], 'B', 'C', 'i'), 'S', 'B', 'content')).toBe(false);
       expect(canBeSubordinate(ALL, addSubordinate([], 'S', 'A', 'content', 's'), 'A', 'S', 'adverbial')).toBe(false);
+      // Nor a question (P09-E12 M5): a content clause keeps a statement's order, so the engine would
+      // speak a question inside it ("says that does the cat run").
+      const question = { ...B, selection: { ...B.selection, interrogative: true } };
+      expect(canBeSubordinate([A, question, SAYS], [], 'S', 'B', 'content')).toBe(false);
+      expect(canBeSubordinate([A, question, SAYS], [], 'S', 'B', 'adverbial')).toBe(false);
+      const wh = { ...B, selection: { ...B.selection, interrogative: true, questionRole: 'subject' as const } };
+      expect(canBeSubordinate([A, wh, SAYS], [], 'S', 'B', 'content')).toBe(false);
+      // The clause governing it may be a question ("does the man say that the cat runs?").
+      const asking = { ...SAYS, selection: { ...SAYS.selection, interrogative: true } };
+      expect(canStartSubordinate([], asking, 'content')).toBe(true);
+      expect(canBeSubordinate([A, B, asking], [], 'S', 'B', 'content')).toBe(true);
       // It may keep its relative clauses.
       const rel = addRelativeLink([], { containerId: 'B', nounKey: 'subject' }, { containerId: 'C', nounKey: 'subject' }, 'r');
       expect(canBeSubordinate(ALL, rel, 'S', 'B', 'content')).toBe(true);

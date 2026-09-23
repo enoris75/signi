@@ -10,8 +10,8 @@ const NAME: Record<Mood, string> = {
   infinitive: 'Infinitive phrase',
   question: 'Question',
 };
-// The question's accent, MUI's error.main (P09-E12 M5).
-const ERROR = 'rgb(211, 47, 47)';
+// The question's accent, the ink (text.primary): error.main is the subordinate clause's (P09-E12).
+const INK = 'rgba(0, 0, 0, 0.87)';
 
 describe('MoodToggle', () => {
   it.each(['imperative', 'infinitive', 'question'] as const)('flips the %s mood', (m) => {
@@ -92,7 +92,7 @@ describe('MoodToggle', () => {
   it.each<[Mood, string]>([
     ['imperative', SUCCESS],
     ['infinitive', PRIMARY],
-    ['question', ERROR],
+    ['question', INK],
   ])('lights the %s toggle in its colour while on', (m, colour) => {
     const { rerender } = renderWithProviders(<MoodToggle mood={m} control={mood(false)} />);
     expect(getComputedStyle(screen.getByRole('button')).color).toBe(TEXT_SECONDARY);

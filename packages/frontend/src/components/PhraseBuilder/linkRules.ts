@@ -257,8 +257,8 @@ export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kin
 /**
  * Whether `clauseId` may become the subordinate clause of `mainId`: not itself, no cycle, free of any
  * other clause-level relation, and a *plain* clause — no condition, coordination or instrument of its
- * own, and no mood (P09-E12 D9: the engine's clause has no field for any of them). It may keep its
- * relative clauses. The one mood allowed is the infinitive, on an infinitive link, which draws its
+ * own, and no mood — a command, a citation or a question (P09-E12 D9: the engine's clause has no
+ * field for any of them). It may keep its relative clauses. The one mood allowed is the infinitive, on an infinitive link, which draws its
  * clause in that mood anyway.
  */
 export function canBeSubordinate(
@@ -275,6 +275,10 @@ export function canBeSubordinate(
   const clause = containers.find((c) => c.id === clauseId);
   if (!clause) return false;
   const sel = clause.selection;
+  // Nor a question (P09-E12 M5): a content clause keeps a statement's order whatever hosts it, so the
+  // engine would render a question's words inside it ("says that does the cat run"). The clause that
+  // governs it may be one ("does the man say that the cat runs?").
+  if (sel.interrogative || sel.questionRole) return false;
   return !sel.imperative && (kind === "infinitive" || !sel.infinitive);
 }
 

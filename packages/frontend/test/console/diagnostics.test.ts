@@ -116,7 +116,7 @@ const SAMPLES: Samples = {
   noSuchConjunct: [[{ index: 3 }, 'Missing conjunct: 3']],
   noRelativeToRemove: [[{}, 'No noun has a relative clause']],
   unknownRemoval: [
-    [{ what: 'everything' }, 'Unknown value: “everything”. Choose a value: subj, verb, obj, adj, adv, modal, poss, than, and, …, rel, if, join, clause, sub, to, inst, period'],
+    [{ what: 'everything' }, 'Unknown value: “everything”. Choose a value: subj, verb, obj, adj, adv, modal, poss, than, and, …, wh, there, rel, if, join, clause, sub, to, inst, period'],
   ],
   removePeriodInBracket: [[{ kind: 'element', via: 'subj' }, 'Close the bracket: /subj ( … )']],
   linkTargetRemoved: [[{}, 'Missing period']],

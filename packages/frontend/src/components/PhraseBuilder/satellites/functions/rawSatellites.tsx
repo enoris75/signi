@@ -64,7 +64,11 @@ export function rawSatellites(
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
   // offered where the engine asks that gap (see canAsk), and — since marking a slot makes the period
   // a question — not where the mood is locked, unless the period is a question already.
-  const askable = (role: QuestionRole) => canAsk(selection, role) && (!moodLocked || Boolean(selection.interrogative));
+  // A that-clause the period governs is its verb's object, so the object is no gap to ask about.
+  const askable = (role: QuestionRole) =>
+    canAsk(selection, role) &&
+    (!moodLocked || Boolean(selection.interrogative)) &&
+    !(clauseObject && role === "directObject");
   const question = (role: QuestionRole): RawSatellite => ({
     key: `${role}Question`,
     parent: role,

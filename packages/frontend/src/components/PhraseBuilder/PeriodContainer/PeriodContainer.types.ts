@@ -133,7 +133,10 @@ export interface ClauseControls {
   question?: MoodControl;
 }
 
-// The palette colour each relation and mood marks the card and its border control with.
+// The palette colour each relation and mood marks the card and its border control with. The six
+// semantic colours are all taken — the subordinate clause has the last of them, error.main, which its
+// connector is drawn in — so the question wears the ink, text.primary: no hue of its own, and none
+// the others could be mistaken for (P09-E12).
 export const ACCENT: Record<Relation | Mood, string> = {
   conditional: "warning.main",
   coordinative: "info.main",
@@ -141,5 +144,5 @@ export const ACCENT: Record<Relation | Mood, string> = {
   instrumental: "secondary.main",
   imperative: "success.main",
   infinitive: "primary.main",
-  question: "error.main",
+  question: "text.primary",
 };

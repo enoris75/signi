@@ -189,7 +189,7 @@ const SEGMENTS = {
   noRelativeToRemove: () => [say("diagnostic.noNounHasRelative")],
   unknownRemoval: (a: { what: string }) => [
     say("diagnostic.unknownValue", quote(a.what)),
-    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, than, and, …, rel, if, join, clause, sub, to, inst, period"),
+    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, than, and, …, wh, there, rel, if, join, clause, sub, to, inst, period"),
   ],
   removePeriodInBracket: (a: Nest) => [closeBracket(a)],
   linkTargetRemoved: () => [say("diagnostic.missingPeriod")],

@@ -287,3 +287,21 @@ describe('every command', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
   });
 });
+
+// P09-E12: a subordinate clause has no mood of its own, the question's included — it would be spoken
+// inside the clause ("says that does the cat run") — so the question is locked on it as the other two
+// moods are, by /ask and by /wh alike; the clause that governs it may still ask ("does the man say
+// that the cat runs?").
+describe('the question on a subordinate clause', () => {
+  const linked = () => ok('/subj man /verb say /clause ( /subj cat /verb run )');
+
+  it.each(['/ask', '/wh subj', '/command'])('is locked on the clause: %s', (line) => {
+    const state = linked();
+    expect(run(line, { state, context: { containerId: state.containers[1]!.id } }).diagnostic).toMatchObject({ code: 'moodLocked' });
+  });
+
+  it('is free on the clause that governs it', () => {
+    expect(sel(ok('/ask', { state: linked() })).interrogative).toBe(true);
+    expect(sel(ok('/wh subj who', { state: linked() }))).toMatchObject({ interrogative: true, questionRole: 'subject' });
+  });
+});

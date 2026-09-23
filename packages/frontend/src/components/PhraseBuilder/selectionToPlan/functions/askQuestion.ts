@@ -20,6 +20,9 @@ export function askQuestion(plan: Partial<PhrasePlan>, sel: PhraseSelection): vo
   // The engine asks nothing under a condition (the main clause is in the conditional mood), so a
   // period that has one keeps its words.
   if (!role || plan.condition) return;
+  // A that-clause the period governs is its verb's object (see attachSubordinate), so the object is
+  // no gap: "what does the man say that the cat runs?" asks nothing a period can hold.
+  if (role === "directObject" && plan.contentObject) return;
   if (role === "subject") plan.subject = { concept: "GENERIC_PERSON" };
   else if (role === "directObject") delete plan.directObject;
   else {

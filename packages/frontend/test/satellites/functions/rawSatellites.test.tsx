@@ -898,4 +898,23 @@ describe('known bugs: A179 a passive infinitive', () => {
     expect(sel.verbVoice).toBe('active');
     expect(satellite(sel, 'verbVoice').available).toBe(false);
   });
+
+  // What the selection alone cannot tell, handed in by the period's builder (P09-E12 M6, D9).
+  describe('the clause around the period', () => {
+    const find = (sats: RawSatellite[], key: string) => sats.find((x) => x.key === key)!;
+
+    it('withdraws the question mark where the mood is locked, unless the period is a question already', () => {
+      const sel: PhraseSelection = { subject: CAT, verb: SEE, directObject: CAT };
+      expect(find(rawSatellites(sel, 'en', t, { moodLocked: true }), 'subjectQuestion').available).toBe(false);
+      expect(find(rawSatellites({ ...sel, interrogative: true }, 'en', t, { moodLocked: true }), 'subjectQuestion').available).toBe(true);
+    });
+
+    it('withdraws the object and its question mark from a period governing a that-clause', () => {
+      const sats = rawSatellites({ subject: CAT, verb: SEE }, 'en', t, { clauseObject: true });
+      expect(find(sats, 'directObject').available).toBe(false);
+      expect(find(sats, 'directObjectQuestion').available).toBe(false);
+      // The subject is still a gap to ask about ("who says that the cat runs?").
+      expect(find(sats, 'subjectQuestion').available).toBe(true);
+    });
+  });
 });
