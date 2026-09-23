@@ -271,8 +271,14 @@ export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite
  * object, so German declines it in the nominative ("als Student") and Japanese places it with the
  * adjuncts, ahead of the object (学生として本を読む). Its head is a noun: an adjective there is the
  * depictive and a pronoun no role, so the translator drops either.
+ *
+ * `opponent` (P09-E22) is the party an act is directed **against**: "plays **against the dog**".
+ * Not E1's spatial `against`, which is contact ("leans against the wall") and is *an* + dative in
+ * German, where the opponent is *gegen* + accusative. Its word is the language's own — *against /
+ * contro / contre / gegen / contra* / を相手に — unless the verb governs another (`opponent_prep`,
+ * see `opponentLink`), as FIGHT's Japanese 戦う takes と. Plan-only, as E2's two are.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'role' | 'temporal' | 'predicative' | 'objectPredicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'role' | 'temporal' | 'predicative' | 'objectPredicative' | 'opponent';
 
 /**
  * The complements the **builder** offers, in the order it presents them — the engine's render
@@ -313,9 +319,10 @@ export const ADJUNCT_COMPLEMENT_TYPES: ComplementType[] = ['temporal', 'purpose'
  * to the verb it all but completes ("speaks about the cat like the wind"), and the `purpose` ("for
  * the man") right after the cause, the reason and the goal together ("works because of the money
  * for the man"). The `role` of P09-E13 follows the recipient, ahead of the companion: "gives the book to
- * the cat as a friend" rather than "as a friend to the cat".
+ * the cat as a friend" rather than "as a friend to the cat". The `opponent` of P09-E22 follows the
+ * companion, the two co-participants together: "plays with the cat against the dog".
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause', 'purpose'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'opponent', 'instrumental', 'topic', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause', 'purpose'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
@@ -333,6 +340,7 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   cause: 'Cause',
   purpose: 'Purpose',
   topic: 'Topic',
+  opponent: 'Opponent',
 };
 
 /**
@@ -344,9 +352,10 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  * The `purpose` and `topic` of P09-E2 are plain adposition-bearing ones ("per l'uomo", "del gatto").
  * The `role` of P09-E13 carries its determiner to English alone ("as a friend", "as the speaker"):
- * every other engine drops it, as it drops the essive's.
+ * every other engine drops it, as it drops the essive's. P09-E22's `opponent` is another plain one
+ * ("contro il cane", "gegen einen Hund").
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'opponent'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs

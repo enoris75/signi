@@ -238,6 +238,9 @@ export function complementsPhrase(
           // The comitative companion takes the same "avec", with its ordinary article rather than the
           // instrument's partitive: a companion is a definite party, not a quantity ("avec le chien").
           type === 'comitative' ? prepDet('avec', nf, plural, lead) :
+          // P09-E22. The opponent "contre", which contracts with nothing either ("contre le chien",
+          // "contre lui"). A verb may name its own.
+          type === 'opponent'  ? prepDet(c.link || 'contre', nf, plural, lead) :
           // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
           // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
           type === 'manner'    ? (

@@ -1043,11 +1043,13 @@ export const intransitiveVerbs: ConceptSeed[] = [
   {
     // P09's play, of games (localization B62); PLAY_INSTRUMENT is music. German spielen and French
     // jouer say both, so there the two tooltips differ by the gloss alone: joy against sounds.
-    // Portuguese jogar (games and sport) over brincar (a child's play); the gloss fits both.
+    // Portuguese jogar (games and sport) over brincar (a child's play); the gloss fits both. One plays
+    // *against* someone (P09-E22's `opponent`), in the language's own word everywhere: "gioca contro
+    // il cane", "spielt gegen den Hund", 犬を相手に遊びます.
     id: 'PLAY_GAME',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    complements: ['manner', 'locative', 'cause', 'instrumental', 'opponent'],
     description: 'to take part in a game for enjoyment',
     definition: infinitiveGloss('ACT', { purpose: { verb: 'FEEL', object: 'JOY' } }),
     synonym: 'play a game',

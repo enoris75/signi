@@ -202,6 +202,9 @@ export function complementsPhrase(
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
         // The comitative companion takes the same "con": Spanish does not separate the two either.
         type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'sin' : 'con', af, plural) :
+        // P09-E22. The opponent "contra", which does not contract ("contra el perro") and takes the
+        // oblique tonic ("contra mí", "contra él"). A verb may name its own.
+        type === 'opponent'  ? prepDet(c.link || 'contra', af, plural) :
         // P09-E2. The purpose "para" ("para el hombre") and the topic "sobre" ("habla sobre el gato"),
         // neither of which contracts; the privative "sin" above does not either. A verb may govern
         // its own topic's, "en" for "pensar" ("piensa en el gato", see `topicLink`), which does not.

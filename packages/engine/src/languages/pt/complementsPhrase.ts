@@ -209,6 +209,9 @@ export function complementsPhrase(
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
         // The comitative companion takes the same "com": Portuguese does not separate the two either.
         type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'sem' : 'com', hf, plural) :
+        // P09-E22. The opponent "contra", which contracts with nothing ("contra o cão", "contra ele").
+        // A verb may name its own.
+        type === 'opponent'  ? prepDet(c.link || 'contra', hf, plural) :
         // P09-E2. The purpose "para" ("para o homem") and the topic "sobre" ("fala sobre o gato"),
         // neither of which contracts; the privative "sem" above does not either. A verb may govern
         // its own topic's, "em" for "pensar", which contracts as a link does ("pensa no gato", see

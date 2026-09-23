@@ -196,6 +196,9 @@ export function complementsPhrase(
         // separate the two either ("coordina con il periodo"). The instrument denied is "senza"
         // (P09-E2), which fuses with nothing either: "senza il coltello".
         type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'senza' : 'con', nf, plural, lead) :
+        // P09-E22. The opponent "contro", which fuses with nothing ("contro il cane") and reaches a
+        // pronoun through "di" (`IT_DI_BEFORE_PRONOUN`: "contro di lui"). A verb may name its own.
+        type === 'opponent'  ? prepDet((c.link || 'contro') as ItPreposition, nf, plural, lead) :
         // P09-E2. The purpose "per", which fuses with nothing ("per l'uomo"), and the topic "di",
         // which fuses as any simple preposition does: "parla del gatto", "di un gatto". A verb may
         // govern its own topic's instead ("pensa al gatto", see `topicLink`); it is a simple one.

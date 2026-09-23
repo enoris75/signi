@@ -331,7 +331,9 @@ export interface ResolvedComplement {
    *
    * The `topic` is the other complement a verb may link (P09-E2): *think* governs its own
    * preposition ("pensa **al** gatto", "denkt **an** den Kater"), read off `topic_prep` (see
-   * `topicLink`). Absent, the topic takes the language's own word.
+   * `topicLink`). Absent, the topic takes the language's own word. So may the `opponent` (P09-E22):
+   * Japanese 戦う marks its opponent with と (犬と戦います), not the generic を相手に, read off
+   * `opponent_prep` (see `opponentLink`).
    */
   link?: string;
   specifiers?: Specifier[];

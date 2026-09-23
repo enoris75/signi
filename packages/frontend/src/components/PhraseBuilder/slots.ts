@@ -175,6 +175,7 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
   purpose: "slot.purpose",
   topic: "slot.topic",
   role: "slot.role",
+  opponent: "slot.opponent",
 };
 
 /**
@@ -205,6 +206,9 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   // P09-E13's role takes E, from the essive whose "as" it is (its R is the route's, and the A of
   // "as" the temporal's). Plan-only, so no menu offers it yet.
   role: "E",
+  // P09-E22's opponent takes V, from "versus" (its O is the object complement's, and the A of
+  // "against" the temporal's). Plan-only, so no menu offers it yet.
+  opponent: "V",
 };
 
 /**

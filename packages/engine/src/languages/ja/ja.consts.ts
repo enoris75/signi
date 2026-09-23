@@ -70,6 +70,12 @@ export const PARTICLE: Record<ComplementType, string> = {
   // not the で of the instrument: Japanese keeps the companion and the means apart, where every
   // other engine here spells both "with".
   comitative: 'と',
+  // Opponent (P09-E22) — the party an act is directed against. Japanese has no neutral adposition
+  // for it (D3): 〜を相手に ("taking the dog as one's opponent") is the generic, which suits play,
+  // fight and compete (犬を相手に遊びます); 〜に対して would suit the attitude verbs and reads oddly
+  // with play. A verb whose own case frame marks its opponent names that instead, `opponent_prep`
+  // (戦う takes と, 犬と戦います — see `opponentLink`).
+  opponent: 'を相手に',
   // Object complement: the factitive に, the same one the subject complement takes — "この文を命令
   // にする" is what "この文が命令になる" becomes under a causer. The essive reading takes として
   // instead, which `complementSegs` supplies.

@@ -222,6 +222,9 @@ export function complementSegs(
       : type === 'objectPredicative' && objectPredication(c) === 'essive' ? JA_ESSIVE
       // The instrument denied: ナイフなしで where it would be ナイフで (P09-E2).
       : isPrivative(type, c) ? JA_PRIVATIVE
+      // The opponent a verb's own case frame marks (P09-E22): 戦う takes と, 犬と戦います, where the
+      // generic is 犬を相手に (see `opponentLink`).
+      : type === 'opponent' && c.link ? c.link
       : PARTICLE[type];
     // A `no` group closes its circumfix here: も after the particle (どの家でも, どの犬にも), or in place of
     // the route's を (どの市場も).

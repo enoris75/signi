@@ -11,11 +11,11 @@ import { prepArt } from './prepArt.js';
  * "con" (the instrumental) is the exception that fuses with nothing: modern standard Italian
  * writes "con il coltello", leaving the fused "col" to speech. "come" and "verso" never fuse, nor do
  * P09-E2's "per" (the purpose — "per l'uomo", the literary "pel" long gone) and "senza" (the
- * privative, "senza il coltello").
+ * privative, "senza il coltello"), nor P09-E22's "contro" (the opponent, "contro il cane").
  */
-export type ItPreposition = 'a' | 'da' | 'in' | 'di' | 'su' | 'con' | 'come' | 'verso' | 'per' | 'senza';
+export type ItPreposition = 'a' | 'da' | 'in' | 'di' | 'su' | 'con' | 'come' | 'verso' | 'per' | 'senza' | 'contro';
 
-const NON_FUSING = ['con', 'come', 'verso', 'per', 'senza'] as const;
+const NON_FUSING = ['con', 'come', 'verso', 'per', 'senza', 'contro'] as const;
 const fuses = (prep: ItPreposition): prep is Exclude<ItPreposition, typeof NON_FUSING[number]> =>
   !(NON_FUSING as readonly string[]).includes(prep);
 

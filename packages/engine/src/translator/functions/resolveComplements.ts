@@ -2,6 +2,7 @@ import type { ComplementType, NounElement, NounPhrase, PhrasePlan } from '@signi
 import { defaultDefiniteness, isNounGroup, nounConjuncts } from '@signi/shared';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredicativeLink } from '../../functions/objectPredicativeLink.js';
+import { opponentLink } from '../../functions/opponentLink.js';
 import { topicLink } from '../../functions/topicLink.js';
 import type { ResolvedComplement } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
@@ -85,12 +86,14 @@ export function resolveComplements(
       // none, and each engine reads the lexical forms (gerund / infinitive / te-form) it needs.
       action: value.action ? resolveVerbPhrase(value.action, language, lookup) : undefined,
       // Only the object predicative is linked by a word of the verb's own ("transform it INTO a
-      // command"), and the topic of a verb that governs its own ("pensa A qualcosa", P09-E2); every
-      // other complement's adposition belongs to the complement type.
+      // command"), the topic of a verb that governs its own ("pensa A qualcosa", P09-E2), and the
+      // opponent of one whose case frame marks it (ja 犬と戦います, P09-E22); every other complement's
+      // adposition belongs to the complement type.
       ...(type === 'objectPredicative' && objectPredicativeLink(verbForms)
         ? { link: objectPredicativeLink(verbForms) }
         : {}),
       ...(type === 'topic' && topicLink(verbForms) ? { link: topicLink(verbForms) } : {}),
+      ...(type === 'opponent' && opponentLink(verbForms) ? { link: opponentLink(verbForms) } : {}),
       specifiers: value.specifiers,
       // The complement's own negation ("not because of the dog"), which is not the clause's and so
       // is carried straight through, like the specifiers (see `Complement.negative`).
