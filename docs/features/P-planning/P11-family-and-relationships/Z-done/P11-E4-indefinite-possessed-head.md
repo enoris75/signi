@@ -3,10 +3,12 @@
 **Construct:** how a language says *a* friend of mine as opposed to *my* friend. P11 filed it as
 **German *ein Freund von mir***; it is the same gap in five of the seven.
 **Shape:** one member of one `Set`, and a per-language rule about which determiners a possessive
-stands beside. The smallest of [P11](README.md)'s follow-ups, and the only one that is arguably a
+stands beside. The smallest of [P11](../README.md)'s follow-ups, and the only one that is arguably a
 **defect** rather than a feature — see D3.
 **Scope:** all 7 languages.
-**Status:** planning, unscheduled. Split out of P11's follow-ups on 2026-09-23.
+**Status:** **shipped, 2026-09-24, as bug [A277](../../../../bugs/fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md)**
+— D3 was ruled a defect and fixed by the fix-bug protocol; see [Done](#done). Split out of P11's
+follow-ups on 2026-09-23.
 
 | lang | "my friend" (definite) | "a friend of mine" (indefinite) |
 |---|---|---|
@@ -19,7 +21,47 @@ stands beside. The smallest of [P11](README.md)'s follow-ups, and the only one t
 | ja | 私の友達 | 友達 (no article to lose) |
 
 **Proposed, not engine output.** The right-hand column is what the task wants; the left is what the
-engine writes today for **both**.
+engine wrote on 2026-09-23 for **both**. [Done](#done) has what it writes now.
+
+## Done
+
+Shipped 2026-09-24 as [A277](../../../../bugs/fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md),
+the design as recommended: D1 (`indefinite` joins `KEPT_BESIDE_POSSESSIVE`, its doc comment now
+"definite or bare"), D2 (no new field), D3 (a defect, filed and fixed as a bug), D4 (English writes
+the independent possessive). Engine output, all seven:
+
+| lang | "my friend" (definite) | "a friend of mine" (indefinite) | plural indefinite | "some friends of mine" |
+|---|---|---|---|---|
+| en | my friend | a friend of mine | friends of mine | some friends of mine |
+| it | il mio amico | un mio amico | i miei amici | alcuni miei amici |
+| fr | mon ami | un ami à moi | des amis à moi | quelques amis à moi |
+| de | mein Freund | ein Freund von mir | Freunde von mir | einige Freunde von mir |
+| es | mi amigo | un amigo mío | unos amigos míos | algunos amigos míos |
+| pt | o meu amigo | um amigo meu | uns amigos meus | alguns amigos meus |
+| ja | 私の友達 | 私の友達 | 私の友達 | 私のいくつかの友達 |
+
+German's complement surface too: *der Kater läuft mit einem Freund von mir*, *gibt einem Freund von
+mir das Buch*, *in einem Haus von mir*.
+
+Where it differs from the plan below:
+
+- **Italian (D1's second look)**: the stacked branch writes *un mio amico* as it stands. But a plural
+  or a mass indefinite has no Italian article, and a possessive with nothing before it is no noun
+  phrase (*\*miei amici corrono*), so those keep the definite: *i miei amici*, *la mia acqua*
+  ([`itPossessedHeadForms`](../../../../../packages/engine/src/languages/it/itPossessedHeadForms.ts)).
+  *Dei miei amici* is a follow-up.
+- **English (D4)**: `possessiveEnIndependent` held *mine / hers* already. The pronominal branch read
+  the Saxon genitive's own test, which keeps `indefinite` on the clitic by A184's decision, so it now
+  reads `keepsDeterminerBesidePossessive` (that test plus the set). A noun possessor under an
+  indefinite stays *the cat's friend*.
+- **The plural** is the article-less indefinite in five of the seven, not *some*; *some* was already
+  in the set and is unchanged.
+- **The predicative's unchosen determiner is the indefinite**, so an unchosen possessed predicate
+  detaches too (*el perro es un libro suyo*, *die Kater sind große Hunde von mir*), matching the
+  determiner the canvas shows for that slot. The tests that pinned the old *su libro* moved with it.
+
+Pinned in [`test/possession.test.ts`](../../../../../packages/engine/test/possession.test.ts),
+`known bugs: an indefinite possessed head reads as a definite one (A277)`.
 
 ## Why
 
@@ -34,9 +76,9 @@ ordinary way to introduce someone.
 
 ## Today
 
-Verified in the working tree on 2026-09-23.
+Verified in the working tree on 2026-09-23 (before A277).
 
-[`KEPT_BESIDE_POSSESSIVE`](../../../../packages/engine/src/possessive.ts#L33) is the set of
+[`KEPT_BESIDE_POSSESSIVE`](../../../../../packages/engine/src/possessive.ts#L33) is the set of
 determiners a possessive stands **beside** rather than replaces:
 
 ```
@@ -49,8 +91,8 @@ keeps its slot and pushes the possessive somewhere else."* **`indefinite` is del
 wrong side of that line** — and the machinery for the other side is fully built:
 
 - German moves the possessive into a postnominal *von* + dative ("dieses Buch von ihr"), in
-  [`nounPhrase.ts:51`](../../../../packages/engine/src/languages/de/nounPhrase.ts#L51) and again in
-  [`complementsPhrase.ts`](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  [`nounPhrase.ts:51`](../../../../../packages/engine/src/languages/de/nounPhrase.ts#L51) and again in
+  [`complementsPhrase.ts`](../../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
   — A187 for the phrase, A202 for the complement.
 - French postposes *à elle*, English *of hers*, Spanish *suyo*, Portuguese *seu*, and Italian
   **stacks** instead ("questo suo libro").
