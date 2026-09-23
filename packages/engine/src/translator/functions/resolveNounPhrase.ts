@@ -211,8 +211,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
       const deg = np.adjectiveDegrees?.[i];
       if (deg && deg !== 'positive') cf.forms['degree'] = deg;
       // The intensifier is a word of its own, so it is resolved in this language and its surface,
-      // reading and position ride on the adjective beside the degree (C33).
-      applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup);
+      // reading and position ride on the adjective beside the degree (C33). It stands before a
+      // noun here, which some words say differently (English has no "a just as big cat", A255).
+      applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, true);
       return [cf];
     })),
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can

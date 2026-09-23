@@ -672,16 +672,22 @@ export const adverbs: ConceptSeed[] = [
     // A comparative is intensified by a word of its own — "much bigger", "bien plus grand", "viel
     // größer", "mucho más grande", ずっと大きい — which `applyIntensifier` puts in place of `base` on
     // a `more` or `less` degree (A248). Italian and Portuguese keep molto / muito ("molto più grande").
+    // On the equative VERY is exactness, a word that replaces the degree's own: "just as big",
+    // "altrettanto grande", "tout aussi grand", "genauso groß" (A255). Spanish *igual de* already is
+    // "just as", so VERY keeps it even before a standard ("igual de grande que el perro", where the
+    // bare circumfix is "tan … como"); Portuguese and Japanese have none that is not a paraphrase,
+    // so there it is dropped. English drops it before a noun ("an equally big cat", never "a just as
+    // big cat").
     forms: {
-      en: { base: 'very', comparative: 'much' },
-      it: { base: 'molto' },
-      fr: { base: 'très', comparative: 'bien' },
-      de: { base: 'sehr', comparative: 'viel' },
-      es: { base: 'muy', comparative: 'mucho' },
+      en: { base: 'very', comparative: 'much', equative: 'just as', attributive_drop_degrees: 'equally' },
+      it: { base: 'molto', equative: 'altrettanto' },
+      fr: { base: 'très', comparative: 'bien', equative: 'tout aussi' },
+      de: { base: 'sehr', comparative: 'viel', equative: 'genauso' },
+      es: { base: 'muy', comparative: 'mucho', equative: 'igual de' },
       // Only on `more`: the lowered degree is a negation in Japanese (それほど大きくない), not a
       // comparative ずっと could intensify.
-      ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more' },
-      pt: { base: 'muito' },
+      ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
+      pt: { base: 'muito', drop_degrees: 'equally' },
     },
   },
   {

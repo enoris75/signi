@@ -5,8 +5,8 @@ import { applyIntensifier } from './applyIntensifier.js';
 
 const LEX: Record<string, Record<string, Record<string, string>>> = {
   VERY: {
-    en: { base: 'very', comparative: 'much' },
-    ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more' },
+    en: { base: 'very', comparative: 'much', equative: 'just as', attributive_drop_degrees: 'equally' },
+    ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
     it: { base: 'molto' },
   },
   TOO: { en: { base: 'too' }, pt: { base: 'demais', position: 'post' }, ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる' } },
@@ -73,5 +73,30 @@ describe('applyIntensifier', () => {
     const less = adj('less');
     applyIntensifier(less, 'VERY', 'ja', lookup);
     expect(less.forms['intensifier']).toBe('とても');
+  });
+
+  // A255: the equative takes the lexeme's equative word, which replaces the degree's own adverb.
+  test('an equative degree takes the lexeme\'s equative word', () => {
+    const a = adj('equally');
+    applyIntensifier(a, 'VERY', 'en', lookup);
+    expect(a.forms['intensifier']).toBe('just as');
+    expect(a.forms['intensifier_equative']).toBe('1');
+    expect(a.forms['intensifier_comparative']).toBeUndefined();
+    const it = adj('equally');
+    applyIntensifier(it, 'VERY', 'it', lookup);
+    expect(it.forms['intensifier']).toBe('molto');
+    expect(it.forms['intensifier_equative']).toBeUndefined();
+  });
+
+  test('a degree the lexeme drops, everywhere or before a noun, gets no intensifier', () => {
+    const ja = adj('equally');
+    applyIntensifier(ja, 'VERY', 'ja', lookup);
+    expect(ja.forms).toEqual({ base: 'big', role: 'adjective', degree: 'equally' });
+    const attributive = adj('equally');
+    applyIntensifier(attributive, 'VERY', 'en', lookup, true);
+    expect(attributive.forms['intensifier']).toBeUndefined();
+    const more = adj('more');
+    applyIntensifier(more, 'VERY', 'en', lookup, true);
+    expect(more.forms['intensifier']).toBe('much');
   });
 });

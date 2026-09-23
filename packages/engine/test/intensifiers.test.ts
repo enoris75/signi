@@ -245,7 +245,7 @@ const aBigCat = (degree: 'equally' | 'more' | 'less' | 'most', intensifier: stri
 // exactness, which four languages say with a word of their own — *just as*, *tout aussi*, *genauso*,
 // *altrettanto* — and the rest say with the equative alone (Spanish *igual de* already is "just as").
 describe('known bugs: VERY on an equative (A255)', () => {
-  test.fails('a predicate equative: just as big', () => {
+  test('a predicate equative: just as big', () => {
     expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY' })).toEqual({
       en: 'the cat is just as big.', it: 'il gatto è altrettanto grande.', fr: 'le chat est tout aussi grand.',
       de: 'der Kater ist genauso groß.', es: 'el gato es igual de grande.', ja: '猫は同じくらい大きいです。',
@@ -253,7 +253,7 @@ describe('known bugs: VERY on an equative (A255)', () => {
     });
   });
 
-  test.fails('with a standard: just as big as the dog', () => {
+  test('with a standard: just as big as the dog', () => {
     expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY', headStandard: np('DOG') })).toEqual({
       en: 'the cat is just as big as the dog.', it: 'il gatto è altrettanto grande quanto il cane.',
       fr: 'le chat est tout aussi grand que le chien.', de: 'der Kater ist genauso groß wie der Hund.',
@@ -263,10 +263,41 @@ describe('known bugs: VERY on an equative (A255)', () => {
   });
 
   // English does not put "just as" before a noun; the attributive equative keeps "equally" alone.
-  test.fails('an attributive equative: a cat just as big', () => {
+  test('an attributive equative: a cat just as big', () => {
     expect(aBigCat('equally', 'VERY')).toMatchObject({
       en: 'an equally big cat runs.', fr: 'un chat tout aussi grand court.',
       de: 'ein genauso großer Kater läuft.', es: 'un gato igual de grande corre.',
+    });
+  });
+
+  test('the whole attributive equative, and its plural', () => {
+    expect(aBigCat('equally', 'VERY')).toEqual({
+      en: 'an equally big cat runs.', it: 'un gatto altrettanto grande corre.', fr: 'un chat tout aussi grand court.',
+      de: 'ein genauso großer Kater läuft.', es: 'un gato igual de grande corre.', ja: '同じくらい大きい猫は走ります。',
+      pt: 'um gato igualmente grande corre.',
+    });
+    expect(sayAll(clause(np('CAT', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toEqual({
+      en: 'equally big cats run.', it: 'gatti altrettanto grandi corrono.', fr: 'des chats tout aussi grands courent.',
+      de: 'genauso große Kater laufen.', es: 'unos gatos igual de grandes corren.', ja: '同じくらい大きい猫は走ります。',
+      pt: 'uns gatos igualmente grandes correm.',
+    });
+  });
+
+  test('the adjective still agrees with the subject, and under estar', () => {
+    expect(sayAll(clause(np('HOUSE', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'equally', headIntensifier: 'VERY' }) } },
+    }))).toMatchObject({
+      en: 'the houses are just as big.', it: 'le case sono altrettanto grandi.', fr: 'les maisons sont tout aussi grandes.',
+      de: 'die Häuser sind genauso groß.', es: 'las casas son igual de grandes.', pt: 'as casas são igualmente grandes.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('HAPPY', { headDegree: 'equally', headIntensifier: 'VERY', headStandard: np('DOG') }) } },
+    }))).toEqual({
+      en: 'the cat is just as happy as the dog.', it: 'il gatto è altrettanto felice quanto il cane.',
+      fr: 'le chat est tout aussi heureux que le chien.', de: 'der Kater ist genauso glücklich wie der Hund.',
+      es: 'el gato está igual de feliz que el perro.', ja: '猫は犬と同じくらい幸せです。', pt: 'o gato está tão feliz como o cão.',
     });
   });
 

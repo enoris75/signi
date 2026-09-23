@@ -13,6 +13,11 @@ describe('frDeg', () => {
     expect(frDeg(adj(GRAND, { degree: 'equally' }), 'grands')).toBe('aussi grands');
   });
 
+  // A255: tout aussi replaces aussi.
+  test('an equative intensifier leaves out the degree adverb', () => {
+    expect(frDeg(adj(GRAND, { degree: 'equally', intensifier: 'tout aussi', intensifier_equative: '1' }), 'grand')).toBe('grand');
+  });
+
   test('the relative superlatives share the comparative adverb — the article is added elsewhere', () => {
     expect(frDeg(adj(GRAND, { degree: 'most' }), 'grand')).toBe('plus grand');
     expect(frDeg(adj(GRAND, { degree: 'least' }), 'grandes')).toBe('moins grandes');

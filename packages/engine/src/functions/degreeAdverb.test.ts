@@ -21,4 +21,11 @@ describe('degreeAdverb', () => {
     expect(degreeAdverb(adj(BIG, { degree: 'more', standard: '1' }), TABLE, { equally: 'as' })).toBe('more');
     expect(degreeAdverb(adj(BIG, { degree: 'equally', standard: '1' }), TABLE)).toBe('equally');
   });
+
+  // A255: an equative intensifier is the degree's word itself ("just as big").
+  test('an equative intensifier leaves the degree no adverb of its own', () => {
+    const under = { degree: 'equally', intensifier: 'just as', intensifier_equative: '1' };
+    expect(degreeAdverb(adj(BIG, under), TABLE, { equally: 'as' })).toBe('');
+    expect(degreeAdverb(adj(BIG, { ...under, standard: '1' }), TABLE, { equally: 'as' })).toBe('');
+  });
 });
