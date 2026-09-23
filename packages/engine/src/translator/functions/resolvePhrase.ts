@@ -7,6 +7,7 @@ import { contentClauseMood } from './contentClauseMood.js';
 import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
+import { imperfectivePast } from './imperfectivePast.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { questionSubject } from './questionSubject.js';
@@ -177,11 +178,14 @@ export function resolvePhrase(
       : undefined,
     // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
     // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.
+    // Under *while* its past is the imperfect of an event in progress (A250, see `imperfectivePast`).
     adverbialClause: plan.adverbialClause && verbPhrase
       ? {
           conjunction: plan.adverbialClause.conjunction,
-          clause: resolvePhrase(plan.adverbialClause.clause, language, lookup, adverbialClauseMood(
-            plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase.tense)),
+          clause: imperfectivePast(
+            resolvePhrase(plan.adverbialClause.clause, language, lookup, adverbialClauseMood(
+              plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase.tense)),
+            plan.adverbialClause.conjunction, language),
         }
       : undefined,
     // A clause of purpose is a clause of its own in the citation mood, its unspoken subject always

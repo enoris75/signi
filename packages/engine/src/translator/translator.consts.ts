@@ -122,6 +122,22 @@ export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditrans
 export const SUBJUNCTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['before']);
 
 /**
+ * The subordinating conjunctions whose clause, in the **past**, is an event in progress and takes
+ * the imperfect indicative in the four Romance languages (A250): *while* frames the main event inside
+ * one that is going on, "l'uomo corse mentre il gatto **mangiava**", "pendant que le chat
+ * **mangeait**", "mientras el gato **comía**", "enquanto o gato **comia**". A past *when* can name a
+ * completed event and keeps the perfective every Romance past takes (C06).
+ */
+export const IMPERFECTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['while']);
+
+/**
+ * The languages whose past splits perfective from imperfect on the verb, where a clause under an
+ * `IMPERFECTIVE_CONJUNCTIONS` word takes the imperfect: the four Romance ones. English and German have
+ * one simple past, and Japanese already says the duration with its progressive (〜ている間に).
+ */
+export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+
+/**
  * The languages whose subjunctive clause says a **past** event in the imperfect subjunctive rather
  * than the present one: "prima che il gatto mangiasse", "antes de que el gato comiera", "antes que o
  * gato comesse". French is not among them — its imperfect subjunctive is literary, and the spoken

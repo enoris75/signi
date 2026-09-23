@@ -187,14 +187,14 @@ const whileEats = (tense: 'past' | 'present' | 'future', conjunction: Subordinat
 // "mangiava", "mangeait", "comía", "comia". The main clause keeps its perfective (C06), and "when",
 // which can name a completed event, is right as it is.
 describe('known bugs: a past while clause takes the perfective (A250)', () => {
-  test.fails('the four Romance languages take the imperfect', () => {
+  test('the four Romance languages take the imperfect', () => {
     expect(sayAll(whileEats('past'))).toMatchObject({
       it: "l'uomo corse mentre il gatto mangiava.", fr: "l'homme courut pendant que le chat mangeait.",
       es: 'el hombre corrió mientras el gato comía.', pt: 'o homem correu enquanto o gato comia.',
     });
   });
 
-  test.fails('and so does a negated one', () => {
+  test('and so does a negated one', () => {
     expect(sayAll(whileEats('past', 'while', true))).toMatchObject({
       it: "l'uomo corse mentre il gatto non mangiava.", fr: "l'homme courut pendant que le chat ne mangeait pas.",
       es: 'el hombre corrió mientras el gato no comía.', pt: 'o homem correu enquanto o gato não comia.',
@@ -208,6 +208,36 @@ describe('known bugs: a past while clause takes the perfective (A250)', () => {
     });
     expect(sayAll(whileEats('past', 'when'))).toMatchObject({
       it: "l'uomo corse quando il gatto mangiò.", es: 'el hombre corrió cuando el gato comió.',
+    });
+  });
+
+  test('a past "when" keeps the perfective in all four, and the main clause keeps its own', () => {
+    expect(sayAll(whileEats('past', 'when'))).toMatchObject({
+      it: "l'uomo corse quando il gatto mangiò.", fr: "l'homme courut quand le chat mangea.",
+      es: 'el hombre corrió cuando el gato comió.', pt: 'o homem correu quando o gato comeu.',
+    });
+  });
+
+  test('the imperfect agrees with a plural subject and takes an irregular stem', () => {
+    const past = { verbPhrase: { verb: 'RUN', tense: 'past' as const } };
+    expect(sayAll(runs('while', past, { subject: np('CAT', { number: 'plural' }), verbPhrase: { verb: 'EAT', tense: 'past' } }))).toMatchObject({
+      it: "l'uomo corse mentre i gatti mangiavano.", fr: "l'homme courut pendant que les chats mangeaient.",
+      es: 'el hombre corrió mientras los gatos comían.', pt: 'o homem correu enquanto os gatos comiam.',
+    });
+    expect(sayAll(runs('while', past, { subject: np('DOG'), verbPhrase: { verb: 'GO', tense: 'past' } }))).toMatchObject({
+      it: "l'uomo corse mentre il cane andava.", fr: "l'homme courut pendant que le chien allait.",
+      es: 'el hombre corrió mientras el perro iba.', pt: 'o homem correu enquanto o cão ia.',
+    });
+  });
+
+  // The passive auxiliary takes over the finite slot, so it is the one in the imperfect.
+  test('a passive past while clause puts its auxiliary in the imperfect', () => {
+    expect(sayAll(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past', voice: 'passive' }, directObject: np('FOOD', { definiteness: 'definite' }),
+    }))).toMatchObject({
+      it: "l'uomo corse mentre il cibo era mangiato dal gatto.",
+      fr: "l'homme courut pendant que la nourriture était mangée par le chat.",
+      pt: 'o homem correu enquanto a comida era comida pelo gato.',
     });
   });
 });
