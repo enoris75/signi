@@ -691,7 +691,7 @@ describe('known bugs: a relative clause with no verb phrase answers 500 (A273)',
 // and served as a 200. Like A267 and A273 it is a malformed plan, and wants a 400 naming what is
 // missing. The engine's side is pinned in packages/engine/test/relative.test.ts.
 describe('known bugs: an object relative with no subject is served (A275)', () => {
-  test.fails.each([
+  test.each([
     ['an object gap', { subject: { concept: 'CAT', relative: { headRole: 'directObject', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'RUN' } }],
     ['a place gap', { subject: { concept: 'HOUSE', relative: { headRole: 'locative', verbPhrase: { verb: 'EAT' } } }, verbPhrase: { verb: 'BURN' } }],
   ])('rejects a relative clause with %s and no subject', async (_, plan) => {

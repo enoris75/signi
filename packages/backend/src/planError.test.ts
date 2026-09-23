@@ -62,6 +62,14 @@ describe('planError: a relative clause with no verb phrase', () => {
     expect(planError(plan)).toBe(`${path}.relative.verbPhrase.verb is required`);
   });
 
+  // A275
+  test.each(['directObject', 'locative', 'possessor'])('names the missing subject of a relative clause whose head is its %s', (headRole) => {
+    const eats = { headRole, verbPhrase: { verb: 'EAT' } };
+    expect(planError({ ...main, subject: cat(eats) })).toBe('plan.subject.relative.subject.concept is required');
+    expect(planError({ ...main, directObject: cat({ ...eats, subject: {} }) })).toBe('plan.directObject.relative.subject.concept is required');
+    expect(planError({ ...main, directObject: cat({ ...eats, subject: { concept: 'DOG' } }) })).toBeUndefined();
+  });
+
   test('passes a relative clause with its verb phrase', () => {
     expect(planError({ ...main, subject: cat({ verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
     expect(planError({ ...main, directObject: cat({ headRole: 'directObject', subject: { concept: 'DOG' }, verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();

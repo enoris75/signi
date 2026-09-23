@@ -1636,7 +1636,7 @@ describe('known bugs: a relative clause with no verb phrase crashes the engine (
 describe('known bugs: an object relative with no subject reads as a subject relative (A275)', () => {
   const eats = (headRole: RelativeClause['headRole']): RelativeClause => ({ headRole, verbPhrase: { verb: 'EAT' } });
 
-  test.fails.each([
+  test.each([
     ['an object gap', clause(np('CAT', { relative: eats('directObject') }), 'RUN')],
     ['a place gap', clause(np('HOUSE', { relative: eats('locative') }), 'BURN')],
     ['a possessor gap', clause(np('CAT', { relative: eats('possessor') }), 'RUN')],

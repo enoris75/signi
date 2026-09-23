@@ -53,3 +53,28 @@ and by `known bugs: an object relative with no subject is served (A275)` in
 [index.test.ts](../../../packages/backend/src/index.test.ts).
 
 Found while filing A265–A274, next to A273.
+
+## Resolved
+
+2026-09-23, refused as ruled, on [A267](A267-linked-clause-with-no-subject-crashes-the-engine.md)'s
+and [A273](A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md)'s checks.
+
+- **Engine.** [`resolveRelativeClause`](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+  throws a named `Error` for a gap other than the subject with no `subject`: `a relative clause
+  whose head is its directObject needs a subject of its own: relative.subject.concept is required
+  (A275)`. A subject relative needs none.
+- **Backend.** [`planError`](../../../packages/backend/src/planError.ts) adds it to the relative
+  walk: `plan.subject.relative.subject.concept is required`, for a missing subject or one with no head.
+- **Builder.** [`buildRelativeClause`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/buildRelativeClause.ts)
+  returns `undefined` for a non-subject gap while the period's subject has no head, as it does for a
+  period with no verb.
+
+Guarded by the formerly-`.fails` tests of the three `known bugs: … (A275)` blocks in
+[relative.test.ts](../../../packages/engine/test/relative.test.ts),
+[index.test.ts](../../../packages/backend/src/index.test.ts) and
+[workspaceToPlans.test.ts](../../../packages/frontend/test/workspacePlan/functions/workspaceToPlans.test.ts),
+and by cases in [resolveRelativeClause.test.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.test.ts),
+[planError.test.ts](../../../packages/backend/src/planError.test.ts) and
+[buildRelativeClause.test.ts](../../../packages/frontend/test/workspacePlan/functions/buildRelativeClause.test.ts).
+Two unit fixtures that leaned on the flipped reading were given a subject: the locative gaps in
+`resolveRelativeClause.test.ts` and the `sees` period of `attachInstrumental.test.ts`.

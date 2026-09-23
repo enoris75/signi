@@ -28,6 +28,14 @@ describe('buildRelativeClause', () => {
     });
   });
 
+  // A275: without a subject a non-subject relative would read as a subject relative.
+  it('yields nothing for a non-subject gap while the period’s subject box is empty', () => {
+    const eats = period('eats', { verb: EAT, directObject: DOG, locative: HOUSE });
+    expect(clause(eats, 'directObject')).toBeUndefined();
+    expect(clause(eats, 'locative')).toBeUndefined();
+    expect(clause(eats, 'subject')).toMatchObject({ headRole: 'subject', directObject: { concept: 'DOG' } });
+  });
+
   it('leaves out a complement gap, keeping its specifiers for the relativizer', () => {
     const sleeps = period('sleeps', { subject: CAT, verb: SLEEP, locative: HOUSE, locativeSpecifier: 'under' });
 

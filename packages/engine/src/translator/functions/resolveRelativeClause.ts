@@ -36,6 +36,13 @@ export function resolveRelativeClause(
   // same with the field's path.
   if (!clause.verbPhrase) throw new Error('a relative clause needs a verb phrase: relative.verbPhrase.verb is required (A273)');
   const headRole = clause.headRole ?? 'subject';
+  // A clause whose gap is not its subject says a subject of its own. Without one it would render as a
+  // subject relative, the head turned into the one who acts ("the cat that eats" for *the cat that
+  // [someone] eats*), so it is refused by name instead — not filled in with the generic person, which
+  // the plan can name itself, and not turned into a passive, another construct (A275).
+  if (headRole !== 'subject' && !clause.subject) {
+    throw new Error(`a relative clause whose head is its ${headRole} needs a subject of its own: relative.subject.concept is required (A275)`);
+  }
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
   const resolvedObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
   // Two gaps keep the relative **active** whatever voice its plan names, since the passive would demote
