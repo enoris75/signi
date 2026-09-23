@@ -12,6 +12,7 @@ import { isRelativeGloss } from './isRelativeGloss.js';
 import { joinSubject } from './joinSubject.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
+import { questionWord } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
@@ -36,7 +37,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const subj = contentSubject ? 'il'
     : phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive'
       ? ''
-      : subjectText(subject);
+      // A subject wh-question writes its word in the subject's slot, and asks with no "est-ce que":
+      // "qui mange la nourriture ?" (P09-E6).
+      : phrase.question?.role === 'subject' && phrase.verbPhrase
+        ? questionWord(phrase.question, phrase.verbPhrase.verb)
+        : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(

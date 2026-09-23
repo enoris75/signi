@@ -12,6 +12,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
+import { questionWord } from './questionWord.js';
 import { relativeGloss } from './relativeGloss.js';
 import { subjectText } from './subjectText.js';
 
@@ -43,11 +44,20 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
   // "che" / "que" and in the present subjunctive; these languages write no expletive in the slot it
   // left, because they write no subject pronoun at all (C30).
   const contentSubject = phrase.contentSubject;
-  const subj = contentSubject || dropSubject ? '' : subjectText(subject);
+  const spoken = contentSubject || dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("últimas notícias").
-  if (!phrase.verbPhrase) return subj.trim();
+  if (!phrase.verbPhrase) return spoken.trim();
+  // A wh-question fronts its word and keeps the statement's order behind it — "o que o gato come?",
+  // "onde o gato come?" — the everyday Portuguese question, as the yes/no one keeps it too; over the
+  // subject the word stands in the subject's slot, "quem come a comida?" (P09-E6).
+  const gap = phrase.question;
+  const word = gap ? questionWord(gap, phrase.verbPhrase.verb) : '';
+  const subj = gap?.role === 'subject' ? word : [word, spoken].filter(Boolean).join(' ');
+  // Something fronted leads the clause, so a clitic no longer opens it ("o que me dá?"). A place asked
+  // about is the gap, and predicates as a spoken one does: "onde o gato está?" (the relative's A199).
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, dropSubject && !subordinate, phrase.agent,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, dropSubject && !subordinate && !gap, phrase.agent,
+    subject.agreement['definiteness'] === 'no', gap?.role === 'locative' ? 'locative' : undefined,
   );
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("ser capaz de agir", "o gato deseja comer") or, under a causative, its object

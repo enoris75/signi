@@ -12,6 +12,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
+import { questionOrder } from './questionOrder.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
@@ -40,16 +41,18 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // "che" / "que" and in the present subjunctive; these languages write no expletive in the slot it
   // left, because they write no subject pronoun at all (C30).
   const contentSubject = phrase.contentSubject;
-  const subj = contentSubject || dropSubject ? '' : subjectText(subject);
+  const spoken = contentSubject || dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
-  if (!phrase.verbPhrase) return subj.trim();
+  if (!phrase.verbPhrase) return spoken.trim();
   // A citation's subject is nobody: the generic subject it carries only satisfies the plan, so its
   // predicate adjective takes the citation form, "essere attento", not the masculine plural the
   // impersonal si would ask for ("si è attenti", see `agreementForms`).
   const agreement = phrase.verbPhrase.mood === 'infinitive' ? withoutGeneric(subject.agreement) : subject.agreement;
-  const predicate = predicateText(
+  const statement = predicateText(
     agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, phrase.agent,
   );
+  // A wh-question fronts its word and moves the subject behind the predicate (P09-E6).
+  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, phrase.verbPhrase.verb);
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("essere capace di agire", "la gatta desidera essere attenta") or, under a causative,
   // its object ("indurre una casa a essere nascosta").

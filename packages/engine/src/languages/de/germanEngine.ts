@@ -9,6 +9,7 @@ import { determiner } from './determiner.js';
 import { prepDet } from './prepDet.js';
 import { spatialHead } from './spatialHead.js';
 import { punctuate } from './punctuate.js';
+import { questionWord } from './questionWord.js';
 import { renderClause } from './renderClause.js';
 
 export const germanEngine: LanguageEngine = {
@@ -21,11 +22,19 @@ export const germanEngine: LanguageEngine = {
     // laufen"). Without a condition the main clause takes ordinary V2 order.
     // A yes/no question leaves the front field empty, so its finite verb leads: V1, "ist der Server
     // aktiv?", "isst der Kater die Maus?". A clause coordinated with it is a question too.
+    // A wh-question fills that front field with its word, so the finite verb stands second behind it
+    // — the V2 order, reached by the same inversion: "was isst der Kater?", "wo isst der Kater?". Over
+    // the subject the word IS the subject, and the clause is the plain V2 statement: "wer isst das
+    // Essen?" (P09-E6).
     const question = !!phrase.verbPhrase?.interrogative;
-    const main = renderClause(phrase, /*inverted*/ !!phrase.condition || question);
-    const sentence = phrase.condition
-      ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${main}`
+    const gap = phrase.question;
+    const main = renderClause(phrase, /*inverted*/ !!phrase.condition || (question && gap?.role !== 'subject'));
+    const asked = gap && gap.role !== 'subject' && phrase.verbPhrase
+      ? `${questionWord(gap, phrase.verbPhrase.verb)} ${main}`
       : main;
+    const sentence = phrase.condition
+      ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${asked}`
+      : asked;
     // Coordination: "<first clause>, <conjunction> <second clause>" — with the second clause
     // inverted when the conjunction is an adverb that claims the front field. A parenthetical
     // connector takes a comma after it as well as before, since a whole clause follows it

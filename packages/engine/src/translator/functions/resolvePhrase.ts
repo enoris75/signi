@@ -6,8 +6,10 @@ import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { negativePolarity } from './negativePolarity.js';
+import { questionSubject } from './questionSubject.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
+import { resolveQuestion } from './resolveQuestion.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 import { withAlarmCry } from './withAlarmCry.js';
 
@@ -68,8 +70,10 @@ export function resolvePhrase(
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is
-  // indicative: a condition, a command or a citation keeps its own and drops the flag.
-  const question = !!plan.interrogative && mood === undefined;
+  // indicative: a condition, a command or a citation keeps its own and drops the flag. A wh-question
+  // (`questionRole`) implies the flag, and is the same force with a gap (P09-E6).
+  const question = (!!plan.interrogative || !!plan.questionRole) && mood === undefined;
+  const gap = resolveQuestion(plan, question);
   // An indefinite pronoun takes its negative form under negation — *something* is *anything* /
   // *niente* / 何も there (see `negativePolarity`, C32). The clause's polarity is this one: the
   // finite element's, or, under a modal, the governed group's.
@@ -79,9 +83,13 @@ export function resolvePhrase(
   // A **content clause** fills the subject slot, and what agrees with it agrees with a clause, not
   // with the throwaway noun the plan carries there: 3rd singular, and masculine where the language
   // genders a predicate adjective ("è giusto che si agisca", not "è giusta" — C30).
-  const subject = plan.contentSubject
-    ? { ...resolvedSubject, agreement: { person: '3', number: 'singular', gender: 'masc' } }
-    : resolvedSubject;
+  // A **subject** wh-question agrees with its question word, not with the throwaway its plan carries
+  // there: "who eats", "chi mangia", "wer isst" (P09-E6, see `questionSubject`).
+  const subject = gap?.role === 'subject'
+    ? questionSubject(gap)
+    : plan.contentSubject
+      ? { ...resolvedSubject, agreement: { person: '3', number: 'singular', gender: 'masc' } }
+      : resolvedSubject;
   // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
   // render just the subject when it is absent. Resolved before the rest, because a complement
   // reads the verb's lexeme for the word it links an object predicative with.
@@ -90,7 +98,10 @@ export function resolvePhrase(
         // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
         // coordination is read off its group agreement, an animal only when every conjunct is one.
         ...resolveVerbPhrase(
-          plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject,
+          plan.verbPhrase, language, lookup, mood, impRegister,
+          // A direct-object question gaps the object the verb still takes, as a relative does ("what
+          // does the cat eat?"); a passive has none left to ask about, and stays active without one.
+          !!plan.directObject || (gap?.role === 'directObject' && plan.verbPhrase.voice !== 'passive'),
           citation ? undefined : subject.agreement,
         ),
         ...(question ? { interrogative: true } : {}),
@@ -132,6 +143,7 @@ export function resolvePhrase(
     verbPhrase,
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic ? { agent: subject } : {}),
+    ...(gap ? { question: gap } : {}),
     complements: experiencer && !generic
       ? { ...resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
       : resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
@@ -176,7 +188,8 @@ export function resolvePhrase(
           clause: resolvePhrase(
             imperative
               ? { ...plan.coordination.clause, subject: plan.subject }
-              : { ...plan.coordination.clause, interrogative: question },
+              // The wh-gap is this clause's alone: the clause beside it is a yes/no question (P09-E6).
+              : { ...plan.coordination.clause, interrogative: question, questionRole: undefined },
             language,
             lookup,
             imperative ? 'imperative' : undefined,
