@@ -1,4 +1,5 @@
 import type { CoordConjunction, Degree, DimensionRelation, TemporalRelation } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 import type { Case, Slot } from './de.types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -141,6 +142,14 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'das heißt',
   therefore: 'also',
   then: 'und dann',
+};
+
+/**
+ * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). Each introduces a
+ * verb-final clause set off by a comma: "der Mann läuft, weil der Kater isst".
+ */
+export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
+  when: 'wenn', while: 'während', because: 'weil', after: 'nachdem', before: 'bevor',
 };
 
 /**

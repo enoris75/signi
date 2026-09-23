@@ -8045,7 +8045,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'diremos', '2pl_future': 'diréis', '3pl_future': 'dirán',
       },
       ja: {
-        base: '言う',
+        // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると言います —
+        // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
+        base: '言う', content_clause_link: 'と',
         reading: 'いう',
         masu_present: '言います',
         masu_present_reading: 'いいます',
@@ -8336,7 +8338,10 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'believed',
       },
       it: {
-        base: 'credere', object_prep: 'a',
+        // Italian puts what one believes in the subjunctive in the standard register, affirmed or not:
+        // "crede che il gatto corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese
+        // keep the affirmative's indicative.
+        base: 'credere', object_prep: 'a', content_clause_mood: 'subjunctive',
         '1sg_present': 'credo', '2sg_present': 'credi', '3sg_present': 'crede',
         '1pl_present': 'crediamo', '2pl_present': 'credete', '3pl_present': 'credono',
         '1sg_past': 'credetti', '2sg_past': 'credesti', '3sg_past': 'credette',
@@ -8371,7 +8376,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'creeremos', '2pl_future': 'creeréis', '3pl_future': 'creerán',
       },
       ja: {
-        base: '信じる',
+        // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると信じます —
+        // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
+        base: '信じる', content_clause_link: 'と',
         reading: 'しんじる',
         masu_present: '信じます',
         masu_present_reading: 'しんじます',

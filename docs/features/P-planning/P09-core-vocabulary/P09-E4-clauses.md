@@ -8,7 +8,7 @@ for the subject; and an **adverbial** clause with a subordinating conjunction ("
 eats"), which is new.
 **Scope:** all 7 languages. German verb-final order and the Romance mood choice are the two hard
 parts, and one of them is already solved.
-**Status:** planning, unscheduled. Split out of P09 §3 on 2026-09-23.
+**Status:** shipped, 2026-09-23 (see [Done](#done)). Split out of P09 §3 on 2026-09-23.
 **Words:** *that*, *when*, *while*, *because*, and the **clause** readings of *after*, *before*,
 *during* — which are E4's, not [E3](../../../localization/done/C29-temporal-complement.md)'s. C29
 built those three as relations on a **noun phrase** ("after this day"); a clause after them ("after
@@ -19,12 +19,13 @@ the cat ate") is a different construct with the same word.
 | en | the man says that the cat runs. | the man runs when the cat eats. | the man runs because the cat eats. |
 | it | l'uomo dice che il gatto corre. | l'uomo corre quando il gatto mangia. | l'uomo corre perché il gatto mangia. |
 | fr | l'homme dit que le chat court. | l'homme court quand le chat mange. | l'homme court parce que le chat mange. |
-| de | der Mann sagt, dass der Kater läuft. | der Mann läuft, wenn der Kater isst. | der Mann läuft, weil der Kater isst. |
+| de | der Mann sagt, dass der Kater läuft. | der Mann läuft, wenn der Kater frisst. | der Mann läuft, weil der Kater frisst. |
 | es | el hombre dice que el gato corre. | el hombre corre cuando el gato come. | el hombre corre porque el gato come. |
 | pt | o homem diz que o gato corre. | o homem corre quando o gato come. | o homem corre porque o gato come. |
-| ja | 男性は猫が走ると言います。 | 男性は猫が食べる時に走ります。 | 男性は猫が食べるので走ります。 |
+| ja | 男は猫が走ると言います。 | 男は猫が食べる時に走ります。 | 男は猫が食べるので走ります。 |
 
-**Proposed, not engine output.**
+**Engine output**, 2026-09-23 (the plan said 男性 and *isst*; the lexicon's MAN is 男, and a cat
+*frisst*, as German says of an animal). The full tables are under [Done](#done).
 
 ## Why
 
@@ -201,3 +202,114 @@ container-to-container link (`kind: 'conditional'` in
 - **A clause as a complement's head** ("speaks about *what the cat did*") — needs
   [E2](P09-E2-complement-types.md)'s topic too.
 - **The builder control** for either clause (§4).
+
+## Done
+
+**2026-09-23.** Both constructs, in all seven languages, plan-only.
+
+- **`PhrasePlan.contentObject`** — a `ContentClause` in the object slot. No expletive anywhere; German
+  extraposes it after a comma under *dass*, verb-final, exactly as the subject clause. The mood is
+  the governing verb's (`content_clause_mood` on the lexeme, `contentClauseMood` in the translator),
+  indicative by default; Japanese closes it on the verb's `content_clause_link` — と for SAY, THINK,
+  BELIEVE and TELL, the default ことを for the rest (KNOW).
+- **`PhrasePlan.adverbialClause`** — `{ conjunction: SubordinatingConjunction; clause: ContentClause }`,
+  one per plan, no nesting. `SUBORDINATING_CONJUNCTIONS` is `when | while | because | after |
+  before`; *during* is left out and the type's doc comment says why (D5). It follows the main clause
+  in the six European languages (German behind a comma, verb-final) and stands ahead of the
+  predicate, behind the topic, in Japanese — where the conditional's もし clause leads the sentence,
+  the adverbial clause is an adjunct of the predicate and sits where Japanese puts adjuncts.
+- **`ContentClause`'s doc comment** names its three hosts and that the host decides the expletive.
+- **`CONTENT_CLAUSE_MOOD` is the fallback**: what "subjunctive" means per language, and the mood of
+  a subject clause whose predicate declares nothing. RIGHT_CORRECT, POSSIBLE and GOOD now declare
+  the subjunctive themselves in it/fr/es/pt, so C30's definitions no longer depend on the fallback:
+  every concept `definition` was rendered before and after (and once more with the fallback
+  disabled) and the three dumps are byte-identical.
+
+### The object clause
+
+| lang | SAY | THINK | BELIEVE | KNOW | TELL (+ the dog) |
+|---|---|---|---|---|---|
+| en | the man says that the cat runs. | the man thinks that the cat runs. | the man believes that the cat runs. | the man knows that the cat runs. | the man tells the dog that the cat runs. |
+| it | l'uomo dice che il gatto corre. | l'uomo pensa che il gatto corra. | l'uomo crede che il gatto corra. | l'uomo sa che il gatto corre. | l'uomo racconta al cane che il gatto corre. |
+| fr | l'homme dit que le chat court. | l'homme pense que le chat court. | l'homme croit que le chat court. | l'homme sait que le chat court. | l'homme raconte au chien que le chat court. |
+| de | der Mann sagt, dass der Kater läuft. | der Mann denkt, dass der Kater läuft. | der Mann glaubt, dass der Kater läuft. | der Mann weiß, dass der Kater läuft. | der Mann erzählt dem Hund, dass der Kater läuft. |
+| es | el hombre dice que el gato corre. | el hombre piensa que el gato corre. | el hombre cree que el gato corre. | el hombre sabe que el gato corre. | el hombre cuenta al perro que el gato corre. |
+| pt | o homem diz que o gato corre. | o homem pensa que o gato corre. | o homem acredita que o gato corre. | o homem sabe que o gato corre. | o homem conta ao cão que o gato corre. |
+| ja | 男は猫が走ると言います。 | 男は猫が走ると考えます。 | 男は猫が走ると信じています。 | 男は猫が走ることを知っています。 | 男は猫が走ると犬に伝えます。 |
+
+Under a question the reported clause keeps its order: "does the man say that the cat runs?", "sagt
+der Mann, dass der Kater läuft?", "est-ce que l'homme dit que le chat court ?".
+
+### The adverbial clause
+
+| lang | when | while | because | after | before |
+|---|---|---|---|---|---|
+| en | the man runs when the cat eats. | the man runs while the cat eats. | the man runs because the cat eats. | the man runs after the cat eats. | the man runs before the cat eats. |
+| it | l'uomo corre quando il gatto mangia. | l'uomo corre mentre il gatto mangia. | l'uomo corre perché il gatto mangia. | l'uomo corre dopo che il gatto mangia. | l'uomo corre prima che il gatto mangi. |
+| fr | l'homme court quand le chat mange. | l'homme court pendant que le chat mange. | l'homme court parce que le chat mange. | l'homme court après que le chat mange. | l'homme court avant que le chat mange. |
+| de | der Mann läuft, wenn der Kater frisst. | der Mann läuft, während der Kater frisst. | der Mann läuft, weil der Kater frisst. | der Mann läuft, nachdem der Kater frisst. | der Mann läuft, bevor der Kater frisst. |
+| es | el hombre corre cuando el gato come. | el hombre corre mientras el gato come. | el hombre corre porque el gato come. | el hombre corre después de que el gato come. | el hombre corre antes de que el gato coma. |
+| pt | o homem corre quando o gato come. | o homem corre enquanto o gato come. | o homem corre porque o gato come. | o homem corre depois que o gato come. | o homem corre antes que o gato coma. |
+| ja | 男は猫が食べる時に走ります。 | 男は猫が食べている間に走ります。 | 男は猫が食べるので走ります。 | 男は猫が食べた後で走ります。 | 男は猫が食べる前に走ります。 |
+
+In the past: "l'uomo corse prima che il gatto mangiasse il cibo", "el hombre corrió antes de que el
+gato comiera la comida", "der Mann lief, als der Kater fraß", 男は猫が食べ物を食べる前に走りました.
+
+### What landed differently, and why
+
+1. **Italian *pensare* and *credere* declare the subjunctive.** D1 said "ship the affirmative
+   indicative", and that is right for French, Spanish and Portuguese — but standard Italian puts
+   what one thinks or believes in the subjunctive affirmed or not ("penso che sia"); the indicative
+   is colloquial. The lexeme field exists for exactly this, so the two Italian lemmas name it and
+   the other three languages keep the default. SAY, TELL and KNOW are indicative everywhere.
+2. **The subject host keeps a fallback, the object host does not.** "Default indicative" and "the
+   table becomes the fallback" are both true, per host: an object clause of a verb that declares
+   nothing is indicative; a subject clause of a predicate that declares nothing takes
+   `CONTENT_CLAUSE_MOOD`, since only evaluative predicates host one.
+3. **English TELL writes its addressee bare before a clause** — "tells the dog that the cat runs",
+   not "tells to the dog that". A new lexeme fact, `clause_terminus_bare` on the English TELL, which
+   the translator turns into the existing `terminus_bare` (A238) only when the object is a clause, so
+   "tells the story to the man" is unchanged.
+4. **Japanese 間に takes the non-past 〜ている** (猫が食べている間に), not the bare plain form the table
+   proposed: 間 measures a stretch, which the progressive says, and it is simultaneous with the main
+   clause, so the non-past holds in a past sentence too. 後で and 前に fix the tense the same way (plain
+   past / non-past) whatever the clause's own (`JA_SUBORDINATORS`, `shapeAdverbialClause`).
+5. **A quoted Japanese copula closes on its terminal form**: 猫が幸せであると言います, not the attributive
+   幸せな a nominalized or prenominal clause takes. `buildClauseSegments` / `predicateSegs` take
+   `plain: 'quote'` for it; a verb or an i-adjective is the same either way.
+6. **German past *when* is *als*** ("der Mann lief, als der Kater fraß"); *wenn* in the past reads
+   "whenever". A plan does not say whether a past clause is one event or a habit, so the past takes
+   the narrated reading.
+7. **A past clause under *before* takes the imperfect subjunctive** in Italian, Spanish and
+   Portuguese (*mangiasse*, *comiera*, *comesse*); French keeps the present subjunctive, its
+   imperfect one being literary (`PAST_SUBJUNCTIVE_LANGUAGES`).
+8. **Both clauses drop on a verbless period**, as `purpose` does: an object clause needs a verb to
+   govern it, and an adverbial clause modifies a predicate.
+9. **Interactions, kept simple:** neither clause ever inverts or becomes a question (a question asks
+   about the main clause only); a command, a citation, a condition and a coordination each keep
+   theirs, the clause being resolved in its own mood; a subordinate clause inside one of them has no
+   field for a question, a command, a condition or a clause of its own.
+
+Pinned in [`content-clause.test.ts`](../../../../packages/engine/test/content-clause.test.ts) (the
+object host: the five verbs, the Romance indicative, と against ことを, the expletive on the subject
+clause and not on the object one, a question) and
+[`adverbial-clause.test.ts`](../../../../packages/engine/test/adverbial-clause.test.ts) (5 × 7,
+German verb-final, the Romance subjunctive after *before*), with unit tests beside each new
+function. Seed files changed (reseed `signi.db`): `concepts/adjectives.ts` (RIGHT_CORRECT, POSSIBLE,
+GOOD), `concepts/verbs/transitive.ts` (SAY, BELIEVE), `concepts/verbs/intransitive.ts` (THINK),
+`concepts/verbs/ditransitive.ts` (TELL).
+
+### Follow-ups
+
+- **Negated belief** — *no creo que el gato **corra***: polarity-sensitive mood under BELIEVE and
+  THINK in es / pt / fr is not modelled; handed to the bug index (D1).
+- **The builder control** for either clause (§4) — reuse the conditional's container-to-container
+  link with a new `kind`.
+- **Tense in the Romance adverbial clause.** *While* in the past wants the imperfect ("mentre il
+  gatto **mangiava**", "mientras el gato **comía**"), not the preterite the engines give a past
+  event; a future *when* wants the Spanish subjunctive ("cuando el gato **coma**") and no English
+  *will* ("when the cat eats", not "will eat"). Sequence of tense in the object clause (*said that
+  the cat **had** run*) stays out of scope as planned.
+- **Spanish *después de que*** takes the subjunctive in much usage even for a past event; the
+  indicative ships, per the table.
+- **Indirect questions** and **a clause as a complement's head**, as planned (E6, E2).

@@ -1,4 +1,5 @@
 import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -120,6 +121,15 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: "c'est-à-dire",
   therefore: 'donc',
   then: 'et puis',
+};
+
+/**
+ * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). Every one but "quand" ends
+ * on "que", which elides before a vowel as it always does ("parce qu'il mange"). "Avant que" governs
+ * the subjunctive, which the translator resolves the clause in; "après que" takes the indicative.
+ */
+export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
+  when: 'quand', while: 'pendant que', because: 'parce que', after: 'après que', before: 'avant que',
 };
 
 /**

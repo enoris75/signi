@@ -1,4 +1,5 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, MannerRelation, PathSpecifier, TemporalRelation } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
@@ -148,6 +149,14 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'that is',
   therefore: 'so',
   then: 'and then',
+};
+
+/**
+ * The subordinating conjunctions, as English words (see PhrasePlan.adverbialClause, P09-E4). The
+ * clause they introduce follows the main one with no comma: "the man runs when the cat eats".
+ */
+export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
+  when: 'when', while: 'while', because: 'because', after: 'after', before: 'before',
 };
 
 /**

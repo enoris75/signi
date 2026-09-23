@@ -1,4 +1,5 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier, TemporalRelation } from '@signi/shared';
+import type { SubordinatingConjunction, Tense } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
 
@@ -185,6 +186,22 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'つまり',
   therefore: 'だから',
   then: 'それから',
+};
+
+/**
+ * The subordinating conjunctions, which Japanese **postposes** to a plain clause (see
+ * PhrasePlan.adverbialClause, P09-E4): 猫が食べる時に, 猫が食べるので. `tense` is the form the clause's verb
+ * takes whatever its own tense is — 後で follows the plain past (食べた後で) and 前に the non-past
+ * (食べる前に), since each says the order of the two events itself — and `progressive` puts it in the
+ * 〜ている form that says a stretch of time, the one 間に measures (食べている間に), in the non-past a
+ * clause simultaneous with its main one takes (猫が食べている間に走りました).
+ */
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true }> = {
+  when: { word: '時に' },
+  while: { word: '間に', tense: 'present', progressive: true },
+  because: { word: 'ので' },
+  after: { word: '後で', tense: 'past' },
+  before: { word: '前に', tense: 'present' },
 };
 
 /**

@@ -1134,10 +1134,23 @@ export interface LexicalEntry {
  * ("to desire to be able to act").
  */
 /**
- * A finite clause filling a slot a noun phrase would (see PhrasePlan.contentSubject). It is a whole
- * clause of its own — its subject is spoken, and it carries its own object and complements — unlike
- * an `InfinitiveComplement`, whose subject is the governing clause's and goes unsaid. Its mood is
- * not its own: the language puts it in the indicative or the present subjunctive.
+ * A finite clause filling a slot a noun phrase would. It is a whole clause of its own — its subject
+ * is spoken, and it carries its own object and complements — unlike an `InfinitiveComplement`, whose
+ * subject is the governing clause's and goes unsaid. Its mood is not its own: the language puts it in
+ * the indicative or the present subjunctive, as whatever hosts it decides.
+ *
+ * It has three hosts (P09-E4), and **the host decides the expletive**:
+ *  - `PhrasePlan.contentSubject` — the subject of an evaluative predicate ("**it** is right that one
+ *    acts"). A fronted clause cannot stay in the subject slot, so en / fr / de write *it* / *il* /
+ *    *es* there; the predicate adjective's lexeme names the mood (`content_clause_mood`).
+ *  - `PhrasePlan.contentObject` — the object of a verb of saying, thinking or knowing ("says that
+ *    the cat runs"). The object slot needs no stand-in, so no language writes an expletive; the verb's
+ *    lexeme names the mood, and in Japanese whether it quotes (と) or nominalizes (こと).
+ *  - `PhrasePlan.adverbialClause` — the clause a subordinating conjunction introduces ("when the cat
+ *    eats"). Nothing governs it, so no lexeme does: the conjunction fixes its mood.
+ *
+ * It never becomes a question, a command or a citation, never coordinates and never hosts a clause
+ * of its own: it has no field for any of them.
  */
 export interface ContentClause {
   subject: NounElement;
@@ -1193,6 +1206,34 @@ export interface PurposeClause {
   verbPhrase: VerbPhrase;
   directObject?: NounElement;
   complements?: Partial<Record<ComplementType, Complement>>;
+}
+
+/**
+ * A **subordinating conjunction** — the word that makes a finite clause an adjunct of another
+ * (see `PhrasePlan.adverbialClause`, P09-E4):
+ *  - `when`    temporal overlap or habit — when / quando / quand / wenn / cuando / quando / 〜時に
+ *  - `while`   temporal duration — while / mentre / pendant que / während / mientras / enquanto /
+ *              〜ている間に (Japanese says the clause's duration with its progressive)
+ *  - `because` cause — because / perché / parce que / weil / porque / porque / 〜ので
+ *  - `after`   the clause's event comes first — after / dopo che / après que / nachdem / después de
+ *              que / depois que / 〜た後で (on the plain past, whatever the tense)
+ *  - `before`  the clause's event comes second — before / prima che / avant que / bevor / antes de
+ *              que / antes que / 〜前に (on the plain non-past). The four Romance words govern the
+ *              **subjunctive**, a fixed fact about the conjunction and not about any verb.
+ *
+ * There is no `during`, although P09 §3 lists it among the words: *during* introduces a noun phrase
+ * ("during this day", a `TemporalRelation` C29 built), and no language here introduces a clause with
+ * it — English says "while the cat eats", not "during the cat eats", and so does each of the others
+ * with its own word. `while` is that clause reading.
+ */
+export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before';
+
+export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before'];
+
+/** See `PhrasePlan.adverbialClause`. */
+export interface AdverbialClause {
+  conjunction: SubordinatingConjunction;
+  clause: ContentClause;
 }
 
 export interface PhrasePlan {
@@ -1348,6 +1389,40 @@ export interface PhrasePlan {
    * clause carries, as an infinitive citation's is.
    */
   contentSubject?: ContentClause;
+  /**
+   * A **content clause standing where the direct object would** — "the man says **that the cat
+   * runs**", "l'uomo dice che il gatto corre", "der Mann sagt, dass der Kater läuft", 男性は猫が走ると
+   * 言います (P09-E4). It is what a verb of saying, thinking or knowing reports; a plan with one has no
+   * `directObject` (the clause *is* the object — a plan carrying both renders both).
+   *
+   * Three things set it apart from `contentSubject`, each a fact about the host:
+   *  - **No expletive.** English, French and German write *it* / *il* / *es* only because a fronted
+   *    subject clause cannot stay in the subject slot; an object clause needs nothing ("says that…",
+   *    "dit que…", "sagt, dass…"). German still extraposes it after a comma, verb-final.
+   *  - **The verb picks the mood**, from its lexeme's `content_clause_mood`, and the default is the
+   *    indicative an assertion takes — *dice che il gatto **corre***. Italian *pensare* and *credere*
+   *    declare the subjunctive their standard register asks for (*pensa che il gatto **corra***).
+   *  - **Japanese quotes or nominalizes**, as the verb's lexeme says (`content_clause_link`): the verbs
+   *    of saying and thinking quote with と on the plain clause (猫が走ると言います), the rest take the
+   *    nominalized ことを (猫が走ることを知っています). The clause's subject takes が either way.
+   *
+   * The clause keeps the order of a statement whatever its host does: under a question it does not
+   * invert ("does the man say that the cat runs?", "sagt der Mann, dass der Kater läuft?").
+   */
+  contentObject?: ContentClause;
+  /**
+   * An optional **adverbial clause** — a finite clause a subordinating conjunction attaches to this
+   * one as an adjunct: "the man runs **when the cat eats**", "… **because** the cat eats" (see
+   * `SubordinatingConjunction`, P09-E4). One per plan, and it does not nest, as a `condition` does
+   * not; unlike a condition it leaves this clause's mood alone.
+   *
+   * It follows the clause in the six European languages (German after a comma, verb-final: "der
+   * Mann läuft, weil der Kater isst") and precedes the predicate in Japanese, closed by its postposed
+   * conjunction on the plain form (男性は猫が食べる時に走ります). Its own mood is the indicative, except
+   * where the conjunction governs the subjunctive (Romance *before*). Like a content clause it never
+   * inverts, whatever the clause it hangs off is.
+   */
+  adverbialClause?: AdverbialClause;
   /**
    * An optional clause this clause's predicate governs in the infinitive — "the cat is able **to
    * eat**", "to desire **to act**" (see `InfinitiveComplement`). It follows the clause (German
