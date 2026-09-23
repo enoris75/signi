@@ -47,4 +47,69 @@ test.describe('period links', () => {
     await app.period(0).getByRole('button', { name: 'Remove the coordination (But)' }).click();
     await expect(app.sentences('en')).toHaveCount(2);
   });
+
+  // The subordinate clauses (P09-E12 D9): one border control, a menu of what the verb takes.
+  test('a that-clause becomes the object of a verb of saying', async ({ app }) => {
+    await app.buildClauseIn(0, 'MAN', 'SAY');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'RUN');
+
+    await app.linkSubordinate(0, 1, 'That');
+    await app.expectSentences({
+      en: 'the man says that the cat runs.',
+      it: "l'uomo dice che il gatto corre.",
+      fr: "l'homme dit que le chat court.",
+      de: 'der Mann sagt, dass der Kater läuft.',
+      es: 'el hombre dice que el gato corre.',
+      pt: 'o homem diz que o gato corre.',
+      ja: '男は猫が走ると言います。',
+    });
+    await expect(app.sentences('en')).toHaveCount(1);
+
+    await app.period(0).getByRole('button', { name: 'Remove the subordinate clause (That)' }).click();
+    await expect(app.sentences('en')).toHaveCount(2);
+  });
+
+  test('an adverbial clause joins any verb with its conjunction', async ({ app }) => {
+    await app.buildClauseIn(0, 'MAN', 'RUN');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'EAT');
+
+    // RUN takes no clause as its object, so the menu offers the conjunctions alone.
+    await app.period(0).getByRole('button', { name: 'Add a subordinate clause' }).click();
+    await expect(app.page.getByRole('menuitem', { name: /^That/ })).toHaveCount(0);
+    await app.page.keyboard.press('Escape');
+
+    await app.linkSubordinate(0, 1, 'When');
+    await app.expectSentences({
+      en: 'the man runs when the cat eats.',
+      it: "l'uomo corre quando il gatto mangia.",
+      fr: "l'homme court quand le chat mange.",
+      de: 'der Mann läuft, wenn der Kater frisst.',
+      es: 'el hombre corre cuando el gato come.',
+      pt: 'o homem corre quando o gato come.',
+      ja: '男は猫が食べる時に走ります。',
+    });
+    await expect(app.sentences('en')).toHaveCount(1);
+  });
+
+  test('an infinitive complement is drawn in the infinitive, its mood locked while linked', async ({ app }) => {
+    await app.buildClauseIn(0, 'CAT', 'NEED');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'DOG', 'RUN');
+
+    await app.linkSubordinate(0, 1, 'Infinitive phrase');
+    await expect(app.period(1).getByTestId('infinitive-box')).toBeVisible();
+    await expect(app.period(1).getByRole('button', { name: 'Infinitive phrase', exact: true })).toBeDisabled();
+    await app.expectSentences({
+      en: 'the cat needs to run.',
+      it: 'il gatto ha bisogno di correre.',
+      fr: 'le chat a besoin de courir.',
+      de: 'der Kater braucht, zu laufen.',
+      es: 'el gato necesita correr.',
+      pt: 'o gato precisa correr.',
+      ja: '猫は走ることを必要としています。',
+    });
+    await expect(app.sentences('en')).toHaveCount(1);
+  });
 });
