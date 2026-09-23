@@ -8,7 +8,7 @@ to the by-phrase, and the gap has to move with them — which is exactly what
 [`passiveRemap`](../../../../packages/engine/src/translator/functions/resolveRelativeClause.ts#L105)
 does for a relative clause's head.
 **Scope:** all 7 languages; the E6 gaps (and whatever
-[P09-E15](P09-E15-question-over-a-marked-relation.md) has shipped by then) under `voice: 'passive'`.
+[P09-E15](Z-done/P09-E15-question-over-a-marked-relation.md) has shipped by then) under `voice: 'passive'`.
 **Status:** planning, unscheduled. Filed 2026-09-23 from P09-E6's follow-ups.
 **Words:** none new. The by-phrase is each engine's `agentPhrase`; the word is E6's.
 

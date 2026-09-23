@@ -7,7 +7,7 @@ left out of `questionRole`.
 noun is spoken), its possessor is the question word, and the whole phrase — or, in Romance, the
 *de*-phrase alone — is what fronts.
 **Scope:** all 7 languages; the possessed noun in the **subject** or the **direct object**. A
-possessed complement ("in whose house?") needs [P09-E15](../P09-E15-question-over-a-marked-relation.md)'s
+possessed complement ("in whose house?") needs [P09-E15](P09-E15-question-over-a-marked-relation.md)'s
 fronted complement first (§ Out of scope).
 **Status:** **shipped, 2026-09-23**, plan-only — in the engine for all seven languages; see [Done](#done). Filed the same day from P09-E6's follow-ups.
 **Words:** *whose*, *di chi*, *de qui* (and the predicative *à qui*, a follow-up), *wessen*, *de
