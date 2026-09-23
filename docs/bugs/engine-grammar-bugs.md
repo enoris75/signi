@@ -75,12 +75,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A269 | [A269-equative-object-predicative-writes-half-its-circumfix.md](A-must-fix/A269-equative-object-predicative-writes-half-its-circumfix.md) | English, Italian, German, Spanish, Portuguese | an equative object predicative with a standard: `makes the house as big` for *equally big* |
 | A270 | [A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md](A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md) | German | the feminine of weak STUDENT keeps its -en: `sieht die Studentinen` for *die Studentin* |
 | A271 | [A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md](A-must-fix/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md) | Italian | a possessor behind a compared adjective: `un gatto più piccolo della donna` reads *smaller than the woman* |
-| A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](A-must-fix/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | a question inside a content clause: `says that does the cat run`, `dice che che cosa mangia il gatto` |
 | A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](A-must-fix/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | a relative clause with no verb phrase: a TypeError (`Cannot destructure property 'voice'`) and a 500 |
 | A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](A-must-fix/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | the essive drops an i- or た-adjective's degree: 大きいとして for もっと大きいとして |
 | A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](A-must-fix/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | a non-subject-gap relative with no subject reads as a subject relative: `the cat that eats` for *the cat that [someone] eats* |
 
-**Fifteen open.** The last, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
+**Fourteen open.** The last, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
 relative with no subject. It renders as a subject relative with its meaning flipped (*the cat that eats*
 for *the cat that someone eats*), and the builder sends it. It is refused as A267 and A273 are,
 not filled in with GENERIC_PERSON and not made passive.
@@ -101,7 +100,9 @@ question that can still become an if-clause (A268). An equative object predicati
 its circumfix after E5 dropped the standard (A269). The German feminine of weak STUDENT (A270). An
 Italian possessor that reads as the standard of a compared adjective (A271). And a question that leaks
 into a content clause (A272). A267 is refused at the API as A253 was and waited on in the builder as
-a subordinate clause already is. A272 is stripped, as a condition already strips a question.
+a subordinate clause already is. A272 was fixed the same day by P09-E17 (the indirect question): an
+object clause now asks under a governor that takes a question, and a subject or adverbial clause
+strips it, as a condition already strips a question.
 
 The four before them, filed on 2026-09-23 while landing A254–A260: A261–A263 are what the content-clause
 tense fix left (Italian *stare*'s subjunctive, a past progressive, the pluperfect both A254 and A260
@@ -433,6 +434,7 @@ is listed under **Fixed** below.
 | A258 | [A258-japanese-very-on-a-lowered-degree.md](fixed/A258-japanese-very-on-a-lowered-degree.md) | Japanese (corpus + engine) | 2026-09-23 |
 | A259 | [A259-japanese-while-clause-progressive-under-a-modal.md](fixed/A259-japanese-while-clause-progressive-under-a-modal.md) | Japanese | 2026-09-23 |
 | A260 | [A260-subjunctive-content-clause-drops-its-past.md](fixed/A260-subjunctive-content-clause-drops-its-past.md) | Italian, French, Spanish, Portuguese (translator) | 2026-09-23 |
+| A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](fixed/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | 2026-09-23 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

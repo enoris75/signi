@@ -1,6 +1,6 @@
 # A-must-fix — confirmed bugs
 
-**Fifteen open.** The newest,
+**Fourteen open.** The newest,
 [A275](A275-object-relative-with-no-subject-reads-as-a-subject-relative.md), is an object, complement
 or possessor relative with no subject, which the engine renders as a subject relative with its meaning
 flipped (*the cat that eats runs.*). The builder sends it when a relative link lands on a period's
@@ -32,8 +32,9 @@ feminine of weak STUDENT keeping its -en (*die Studentinen*).
 [A271](A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md), an Italian
 possessor behind a compared adjective reading as its standard (*un gatto più piccolo della donna*).
 It is Italian only, because Spanish, French and Portuguese mark the standard with *que*.
-[A272](A272-question-inside-a-content-clause-leaks-into-it.md), a question leaking into a content
-clause (*says that does the cat run*). The translator strips it, as it does under a condition.
+[A272](../fixed/A272-question-inside-a-content-clause-leaks-into-it.md), a question leaking into a content
+clause (*says that does the cat run*), fixed the same day by P09-E17: an object clause now asks
+(*says whether the cat runs*), and a subject or adverbial clause strips it, as a condition does.
 
 The four before them, filed on 2026-09-23 while landing A254–A260:
 [A261](A261-italian-progressive-indicative-in-a-subjunctive-clause.md), Italian *stare* keeping the
