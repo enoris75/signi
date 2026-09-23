@@ -1,4 +1,5 @@
 import type { PronominalPossessor } from '@signi/shared';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import { describe, expect, test } from 'vitest';
 import { possessorText } from './possessorText.js';
 import { adj, AFRICA, CAO, COMER, el, GATO, LIVRO, MENINO, np, RAPOSA, RATO, VELHO, vp } from './pt.fixtures.js';
@@ -46,5 +47,11 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: np(MENINO) }) }))).toBe(' do cão do menino');
     const eatsTheMouse = { headRole: 'subject' as const, verbPhrase: vp(COMER), directObject: el(np(RATO)) };
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, {}, { relative: eatsTheMouse }) }))).toBe(' do gato que come o rato');
+  });
+});
+
+describe('possessorText: the possessor question (P09-E14)', () => {
+  test('the stand-in is de quem, never fused', () => {
+    expect(possessorText(np(LIVRO, {}, { possessor: questionPossessor() }))).toBe(' de quem');
   });
 });

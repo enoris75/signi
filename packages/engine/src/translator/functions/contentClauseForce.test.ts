@@ -29,10 +29,10 @@ describe('contentClauseForce', () => {
 });
 
 describe('declarativeClause', () => {
-  test('drops the four question fields and keeps the rest', () => {
+  test('drops the five question fields and keeps the rest', () => {
     const asked: ContentClause = {
       ...statement, directObject: { concept: 'FOOD' }, questionRole: 'locative', interrogative: true,
-      questionSpecifiers: [{ kind: 'path', value: 'in' }], questionAnimate: true,
+      questionSpecifiers: [{ kind: 'path', value: 'in' }], questionAnimate: true, questionPossessed: 'directObject',
     };
     expect(declarativeClause(asked)).toEqual({ ...statement, directObject: { concept: 'FOOD' } });
   });

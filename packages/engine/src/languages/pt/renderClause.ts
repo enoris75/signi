@@ -1,4 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
+import { prepObjectText } from './prepObjectText.js';
+import { possessedPrepObject, withoutQuestionPossessor } from '../../functions/questionPossessor.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
@@ -53,12 +55,21 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
   // "onde o gato come?" — the everyday Portuguese question, as the yes/no one keeps it too; over the
   // subject the word stands in the subject's slot, "quem come a comida?" (P09-E6).
   const gap = phrase.question;
-  const word = gap ? questionWord(gap, phrase.verbPhrase.verb) : '';
-  const subj = gap?.role === 'subject' ? word : [word, spoken].filter(Boolean).join(' ');
+  // A verb that takes its object with a preposition fronts the whole phrase: "da casa de quem o gato
+  // depende?" (P09-E14, `possessedPrepObject`).
+  const prepFront = possessedPrepObject(phrase);
+  const word = prepFront ? prepObjectText(prepFront.np, prepFront.prep) : gap ? questionWord(gap, phrase.verbPhrase.verb) : '';
+  // A possessor question inside the subject fronts the whole subject, which is the statement's own
+  // order — "o gato de quem come a comida?", the colloquial register; extraction from a preverbal
+  // subject would read as the object's question. Inside the object its *de quem* fronts alone, and
+  // the object stays behind, definite: "de quem o gato come a comida?" (P09-E14).
+  const subjectPossessed = gap?.role === 'possessor' && gap.possessed !== 'directObject';
+  const subj = gap?.role === 'subject' ? word : subjectPossessed ? spoken : [word, spoken].filter(Boolean).join(' ');
   // Something fronted leads the clause, so a clitic no longer opens it ("o que me dá?"). A place asked
   // about is the gap, and predicates as a spoken one does: "onde o gato está?" (the relative's A199).
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, dropSubject && !subordinate && !gap, phrase.agent,
+    subject.agreement, phrase.verbPhrase, prepFront ? undefined : withoutQuestionPossessor(phrase.directObject, gap), phrase.complements,
+    dropSubject && !subordinate && !gap, phrase.agent,
     subject.agreement['definiteness'] === 'no', gap?.role === 'locative' ? 'locative' : undefined,
   );
   // An infinitive complement follows the clause, agreeing with its controller — this clause's

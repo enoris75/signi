@@ -109,8 +109,9 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   // the object slot it left takes no "es": "der Mann sagt, dass der Kater läuft" (P09-E4). An indirect
   // question takes "ob", or its question word, in the same place and the same verb-final order: "der
   // Mann fragt, ob der Kater läuft", "…, was der Kater frisst" (P09-E17).
-  const withObject = phrase.contentObject
-    ? `${withContent}, ${[objectClauseLead(phrase.contentObject), renderClause(phrase.contentObject, false, true)].filter(Boolean).join(' ')}`
+  const objectClause = phrase.contentObject && objectClauseLead(phrase.contentObject);
+  const withObject = objectClause
+    ? `${withContent}, ${[objectClause.lead, renderClause(objectClause.rest, false, true)].filter(Boolean).join(' ')}`
     : withContent;
   const governed = phrase.infinitiveComplement && !bare
     ? `${withObject}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`

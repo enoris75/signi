@@ -28,5 +28,8 @@ describe('objectClauseText', () => {
     expect(objectClauseText(where, 'le chat mange')).toBe('où le chat mange');
     const subject = clause(chat, mange, { embedded: true, question: { role: 'subject', animate: false } });
     expect(objectClauseText(subject, 'ce qui mange')).toBe('ce qui mange');
+    // P09-E14: a possessor inside the subject fronts with it, already written in the subject slot.
+    const whose = clause(chat, mange, { embedded: true, question: { role: 'possessor', possessed: 'subject', animate: true } });
+    expect(objectClauseText(whose, 'le chat de qui mange')).toBe('le chat de qui mange');
   });
 });

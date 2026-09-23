@@ -68,6 +68,8 @@ export function causePhrase(c: ResolvedComplement): string | undefined {
     if (blamed['definiteness'] === 'relative') {
       return `durch ${relativePronoun(blamed, 'gen', (blamed['number'] ?? blamed['count']) === 'plural')} Schuld`;
     }
+    // A question blames the same way, through *wessen*: "durch wessen Schuld läuft der Kater?" (P09-E15).
+    if (blamed['definiteness'] === 'question') return 'durch wessen Schuld';
     return `durch die Schuld ${coordinate(c.phrase, (np) => nounPhrase(np, 'gen'))}`;
   }
   return undefined;

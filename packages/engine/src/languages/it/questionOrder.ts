@@ -12,9 +12,16 @@ import { questionWord } from './questionWord.js';
  */
 export function questionOrder(
   question: ResolvedQuestion | undefined, subject: string, predicate: string, verb: ConceptForms,
+  // The fronted phrase where it is more than `questionWord`'s word (P09-E14): "dalla casa di chi".
+  fronted?: string,
 ): [string, string] {
   if (!question) return [subject, predicate];
-  const word = questionWord(question, verb);
+  // A possessor question inside the subject fronts the whole subject, which is the statement's own
+  // order: "il gatto di chi mangia il cibo?" (P09-E14). Extracting *di chi* from a preverbal subject
+  // would read as the object's question, and the cleft that would say it better ("di chi è il gatto
+  // che…") needs predicative possession; the pied-piped subject is the colloquial register.
+  if (question.role === 'possessor' && question.possessed !== 'directObject') return [subject, predicate];
+  const word = fronted ?? questionWord(question, verb);
   if (question.role === 'subject') return [word, predicate];
   const body = [predicate, subject].filter(Boolean).join(' ');
   return (word === 'dove' || word === 'come') && /^è( |$)/.test(body) ? [`${word.slice(0, -1)}'${body}`, ''] : [word, body];

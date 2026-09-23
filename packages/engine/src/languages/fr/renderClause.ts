@@ -1,4 +1,5 @@
 import type { ResolvedPhrase } from '../../types.js';
+import { possessedPrepObject, withoutQuestionPossessor } from '../../functions/questionPossessor.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
@@ -48,8 +49,13 @@ export function renderClause(phrase: ResolvedPhrase): string {
         : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
+  // A possessor question over the object fronts its *de qui* alone, and the object stays behind it,
+  // definite (P09-E14, see `withoutQuestionPossessor`) — unless the verb takes its object with a
+  // preposition, which fronts whole (`possessedPrepObject`, see `frenchEngine`).
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, undefined, phrase.agent,
+    subject.agreement, phrase.verbPhrase,
+    possessedPrepObject(phrase) ? undefined : withoutQuestionPossessor(phrase.directObject, phrase.question), phrase.complements,
+    undefined, phrase.agent,
   );
   const clause = joinSubject(subj, predicate, phrase.verbPhrase.verb.forms).trim();
   // An infinitive complement follows the clause, agreeing with its controller — this clause's

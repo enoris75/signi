@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../possessive.js';
@@ -59,7 +60,10 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   // drops it for a possessed name ("diese Asien von ihr").
   const ownForms = { ...possessedHeadForms(np, 'bare'), definiteness: forms['definiteness'] ?? 'definite' };
   // der/die/das · ein/eine/einen · (bare) · das große Asien
-  const art = !pronominal || detached ? determiner(articledNameForms(np, pronominal ? ownForms : undefined), _case, plural)
+  // A possessor question's stand-in is *wessen* in the determiner's place, the noun article-less:
+  // "wessen Essen", "wessen Bücher" (P09-E14).
+  const art = isQuestionPossessor(poss) ? 'wessen'
+    : !pronominal || detached ? determiner(articledNameForms(np, pronominal ? ownForms : undefined), _case, plural)
     : forms['definiteness'] === 'all' ? `${determiner(ownForms, _case, plural)} ${possessive}`
     : possessive;
   // A cardinal stands between the determiner and the declined adjectives: "die zwei großen Häuser"

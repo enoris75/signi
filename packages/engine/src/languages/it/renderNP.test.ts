@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor } from '@signi/shared';
 import { artFor } from './artFor.js';
 import {
@@ -133,5 +134,12 @@ describe('renderNP: the attributive standard (P09-E18)', () => {
       adjectiveStandard: { index: 0, standard: el(np(CANE, { definiteness: 'definite' })) },
     });
     expect(renderNP(phrase, (plural, lead) => artFor(itPossessedHeadForms(phrase), plural, lead))).toBe('un gatto vecchio e più grande del cane');
+  });
+});
+
+describe('renderNP: the possessor question (P09-E14)', () => {
+  test('the stand-in is di chi after the noun, which keeps its article', () => {
+    expect(withDeterminer(np(GATTO, {}, { possessor: questionPossessor() }))).toBe('il gatto di chi');
+    expect(withDeterminer(np(CASA, {}, { possessor: questionPossessor() }))).toBe('la casa di chi');
   });
 });

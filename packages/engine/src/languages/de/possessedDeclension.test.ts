@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor } from '@signi/shared';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { adj, GROSS, KATER, np } from './de.fixtures.js';
@@ -40,5 +41,11 @@ describe('possessedDeclension', () => {
     expect(possessedDeclension(np(KATER, { definiteness: 'indefinite' }))).toBe('indefinite');
     expect(possessedDeclension(np(KATER))).toBe('definite');
     expect(possessedDeclension(np(KATER, {}, { possessor: np(KATER) }), { definiteness: 'this' })).toBe('this');
+  });
+});
+
+describe('possessedDeclension: the possessor question (P09-E14)', () => {
+  test('wessen declines nothing, so the phrase declines as a bare one', () => {
+    expect(possessedDeclension(np(KATER, {}, { possessor: questionPossessor() }))).toBe('bare');
   });
 });

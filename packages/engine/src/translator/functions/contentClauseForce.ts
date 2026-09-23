@@ -32,6 +32,6 @@ export function contentClauseForce(clause: ContentClause, governor: ConceptForms
  * command and a citation already drop a question (A272).
  */
 export function declarativeClause<T extends ContentClause>(clause: T): T {
-  const { interrogative: _i, questionRole: _r, questionSpecifiers: _s, questionAnimate: _a, ...rest } = clause;
+  const { interrogative: _i, questionRole: _r, questionPossessed: _p, questionSpecifiers: _s, questionAnimate: _a, ...rest } = clause;
   return rest as T;
 }

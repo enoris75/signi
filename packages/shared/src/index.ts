@@ -1243,7 +1243,7 @@ export interface LexicalEntry {
  *    eats"). Nothing governs it, so no lexeme does: the conjunction fixes its mood.
  *
  * It becomes a question **only under `contentObject`** — the indirect question, "asks **whether**
- * the cat runs", "knows **where** the cat eats" (P09-E17). The four question fields mean what they
+ * the cat runs", "knows **where** the cat eats" (P09-E17). The five question fields mean what they
  * mean on `PhrasePlan` (a yes/no `interrogative`, a wh-`questionRole` with its specifiers and
  * animacy), and the governing verb's lexeme licenses them (`content_clause_force`). Under
  * `contentSubject` and `adverbialClause` they are dropped and the clause renders as the plain
@@ -1259,6 +1259,8 @@ export interface ContentClause {
   interrogative?: boolean;
   /** The gap of an indirect wh-question, "asks **what** the cat eats" (P09-E17; see `PhrasePlan.questionRole`). */
   questionRole?: PhrasePlan['questionRole'];
+  /** Whose noun a possessor gap asks about, "asks **whose food** the cat eats" (P09-E14; see `PhrasePlan.questionPossessed`). */
+  questionPossessed?: PhrasePlan['questionPossessed'];
   /** See `PhrasePlan.questionSpecifiers`. */
   questionSpecifiers?: Specifier[];
   /** See `PhrasePlan.questionAnimate`. */
@@ -1413,12 +1415,34 @@ export interface PhrasePlan {
    * The slot a **wh-question** asks about — its gap (P09-E6): "**who** eats the food?" is
    * `'subject'`, "**what** does the cat eat?" `'directObject'`, "**where** does the cat eat?"
    * `'locative'`, "**how**?" `'manner'`, "**why**?" `'cause'`. It is `RelativeClause.headRole`
-   * reused, minus `'possessor'` ("whose food?" asks inside a noun phrase, a follow-up): the same
-   * slots, and the gapped one is left out of the plan exactly as a relative clause leaves it out. A
-   * subject gap still carries a `subject`, because the type requires one; it is a throwaway, never
-   * rendered, as a `contentSubject` clause's is, and the verb agrees in the third singular ("who
-   * eats"). Only those five gaps have a question word yet; any other complement gap (and a
-   * locative or cause gap in a marked relation, "under what?", "thanks to whom?") is refused.
+   * reused: the same slots, and the gapped one is left out of the plan exactly as a relative clause
+   * leaves it out. A subject gap still carries a `subject`, because the type requires one; it is a
+   * throwaway, never rendered, as a `contentSubject` clause's is, and the verb agrees in the third
+   * singular ("who eats").
+   *
+   * Every other complement gap keeps its relation, named in `questionSpecifiers` (P09-E15): "**under
+   * what** does the cat eat?", "**thanks to whom**?", "**with what**?", "**to whom**?", "**where** does the
+   * cat come **from**?", "**when**?". The word is *who* / *what* rendered through the complement path —
+   * the preposition, case and contraction the relativizer gets there ("sotto che cosa", "dank wem",
+   * 何の下で) — or, where the relation is plain, an adverb: a direction or source asked of a place is
+   * *where (to)* / *where from* (asked of a person it is the complement path, "who does the cat go
+   * to?"), the temporal `at` *when* and `until` *until when*. English strands the preposition in the
+   * complement's own slot ("what does the cat eat under?"); German writes the *wo(r)-* compound for a
+   * thing where it has one ("worunter", "womit") and the preposition over *wer* for a person ("dank
+   * wem"); the Romance languages front the whole prepositional phrase. The negative cause asks *whose
+   * fault* ("through whose fault does the cat run?", "durch wessen Schuld", "per colpa di chi").
+   * Refused, each naming its follow-up: the `predicative`, `objectPredicative` and `role` gaps (no
+   * adposition — "what does the cat become?"), the `purpose` ("what for?" overlaps *why*), the
+   * temporal `ago` / `after` / `before` / `during`, and an instrument presented as an action
+   * (`process` / `concept`, whose question is *how*).
+   *
+   * Under a **passive** the roles still name the **active** slots, as `RelativeClause.headRole`'s do
+   * (P09-E16): the plan's `subject` is the agent and its `directObject` the patient, and the gap moves
+   * with them. `'directObject'` asks the patient, which is the passive's subject ("**what** is eaten
+   * by the cat?" — the third singular, *qu'est-ce qui*, が); `'subject'` asks the agent, through the
+   * by-phrase ("**who** is the food eaten by?", *da chi*, *par qui*, *von wem* — *wovon* for a thing —,
+   * *por quién*, *por quem*, 誰に); a complement gap is where it was ("**where** is the food eaten by the
+   * cat?"). A passive the verb cannot take is refused, not asked in the active.
    *
    * It implies `interrogative`, so the question mark, the ¿, the か and the suppression under a
    * condition, a command or a citation all hold unchanged. The gap belongs to this clause alone: a
@@ -1430,19 +1454,46 @@ export interface PhrasePlan {
    * keeps the statement's order ("o que o gato come?"); fr fronts before "est-ce que" ("qu'est-ce
    * que le chat mange ?"), a subject gap standing alone ("qui mange ?"). Japanese moves nothing:
    * the word sits in its slot with the slot's own particle (猫は何を食べますか).
+   *
+   * `'possessor'` is the one gap **inside** a noun phrase (P09-E14): "**whose** food does the cat
+   * eat?". The slot it sits in (`questionPossessed`) stays **filled** — the possessed noun is spoken —
+   * and only its possessor is the question word: *whose*, *di chi*, *de qui* (never the relative
+   * *dont*), *wessen*, *de quién*, *de quem*, 誰の. That slot must hold one noun phrase that is no
+   * pronoun and has no possessor of its own, in the owner relation (`possessorRole` `'whole'` /
+   * `'parts'` is a thing question, "the part of what?"); anything else is refused. What fronts:
+   *  - en / de: the whole phrase, the word in the determiner's place and the noun article-less
+   *    ("whose food does the cat eat?", "wessen Essen frisst der Kater?"); over the subject nothing
+   *    moves and nothing inverts ("whose cat eats the food?");
+   *  - it / fr / es / pt, the object possessed: the *de*-phrase alone, the possessed noun staying in
+   *    its slot, definite ("di chi mangia il cibo il gatto?"); the subject possessed: the whole
+   *    subject, possessor after the noun ("il gatto di chi mangia il cibo?") — extraction from a
+   *    preverbal subject would read as the object question, and the cleft needs predicative
+   *    possession, which the engine does not have;
+   *  - ja: nothing moves, and a possessed subject takes が as a subject gap does (誰の猫が).
    */
-  questionRole?: 'subject' | 'directObject' | ComplementType;
+  questionRole?: 'subject' | 'directObject' | 'possessor' | ComplementType;
+  /**
+   * Which slot holds the noun whose possessor a `'possessor'` question asks about (P09-E14): the
+   * subject ("whose cat eats the food?", the default — the genitive relative's own convention) or the
+   * direct object ("whose food does the cat eat?"). A possessed complement ("in whose house?") is not
+   * built and is refused. Unread on any other gap.
+   */
+  questionPossessed?: 'subject' | 'directObject';
   /**
    * The specifiers of the gapped complement when `questionRole` is a complement — the relation the
-   * question keeps though its noun is gone, exactly as `RelativeClause.headSpecifiers`. Only the
-   * plain relation has a word so far: `in` (or none) for *where*, a neutral cause for *why*.
+   * question keeps though its noun is gone, exactly as `RelativeClause.headSpecifiers`: `in` (or
+   * none) for *where* and a neutral cause for *why* (P09-E6), and every other relation too (P09-E15)
+   * — `under` for "under what?", a positive cause for "thanks to whom?", `until` for "until when?".
    */
   questionSpecifiers?: Specifier[];
   /**
    * Whether the answer to a subject or direct-object question is a **person** — *who* rather than
    * *what* (chi / che cosa, qui / que, wer / was, quién / qué, quem / o que, 誰 / 何). A gap has no
-   * noun to read animacy off, which is why the plan says it; absent is *what*. Unread on the other
-   * gaps.
+   * noun to read animacy off, which is why the plan says it; absent is *what*. Read on a complement
+   * gap too (P09-E15): *con chi* against *con che cosa*, and, over a direction or a source, the
+   * complement path ("who does the cat come from?") against the adverb ("where does the cat come
+   * from?"). Unread on the adverbial gaps — and on a `'possessor'` gap and a negative cause, which
+   * always ask for a person (*whose*): the inanimate owner is the part-whole relation, refused there.
    */
   questionAnimate?: boolean;
   /**

@@ -106,9 +106,17 @@ Follow-ups, beside *Out of scope* below:
 - **Italian *chi* over an object reads as a subject** — "l'uomo chiede chi vede il gatto" (who the cat
   sees) is E6's own order ("chi vede il gatto?"), and ambiguous there too; *chi vede, il gatto* or
   *chi il gatto vede* would disambiguate. Not new here.
-- **Lane Q's gaps** (the possessor, a marked relation, the passive) flow through `resolveQuestion`
-  and the per-language question words; the embedded forms of each want probing once they land,
-  French *ce que* after a preposition above all.
+- **The gaps of [E14](P09-E14-possessor-question.md), [E15](P09-E15-question-over-a-marked-relation.md)
+  and [E16](P09-E16-passive-question.md), embedded**, were probed and pinned when the three landed
+  together (`the indirect question over the possessor, a marked relation and the passive` in
+  content-clause.test.ts): "asks whose food the cat eats", "knows where the cat comes from", "asks
+  who the woman gives the book to", "asks who the food is eaten by", "fragt, worunter der Kater
+  frisst", "demande à qui la femme donne le livre". Two needed a fix at integration: German's
+  `objectClauseLead` now fronts through E14's `questionFront` (it had written "fragt, wessen der
+  Kater wessen Essen frisst"), and neither German nor French leads a possessed subject with a second
+  word ("demande de qui le chat de qui mange" → "demande le chat de qui mange"). The Romance
+  possessed subject pied-pipes as E14's direct question does ("chiede il gatto di chi mangia il
+  cibo"); a cleft would read better there, E14's follow-up.
 
 ## Why
 

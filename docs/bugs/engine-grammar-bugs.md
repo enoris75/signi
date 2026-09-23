@@ -78,8 +78,13 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](A-must-fix/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | a relative clause with no verb phrase: a TypeError (`Cannot destructure property 'voice'`) and a 500 |
 | A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](A-must-fix/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | the essive drops an i- or た-adjective's degree: 大きいとして for もっと大きいとして |
 | A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](A-must-fix/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | a non-subject-gap relative with no subject reads as a subject relative: `the cat that eats` for *the cat that [someone] eats* |
+| A276 | [A276-italian-animate-source-question-fronts-the-ablative-via.md](A-must-fix/A276-italian-animate-source-question-fronts-the-ablative-via.md) | Italian | an animate source question fronts the ablative *via*: `via da chi viene il gatto?` for *da chi viene via* |
 
-**Fourteen open.** The last, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
+**Fifteen open.** The last, **A276**, filed on 2026-09-23 from P09-E15's lane, is the Italian
+ablative particle *via* fronted with an animate source question (*via da chi viene il gatto?*), where
+it belongs behind the verb (*da chi viene via*).
+
+The one before it, **A275**, filed on 2026-09-23, is an object (or any non-subject-gap)
 relative with no subject. It renders as a subject relative with its meaning flipped (*the cat that eats*
 for *the cat that someone eats*), and the builder sends it. It is refused as A267 and A273 are,
 not filled in with GENERIC_PERSON and not made passive.

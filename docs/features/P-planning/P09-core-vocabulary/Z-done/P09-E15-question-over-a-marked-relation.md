@@ -2,14 +2,14 @@
 
 **Construct:** a wh-question whose gap is a **complement that takes an adposition**: a locative or
 cause in a marked relation ("**under what** does the cat eat?", "**thanks to whom** does the cat
-run?"), and the other complement gaps [`resolveQuestion`](../../../../packages/engine/src/translator/functions/resolveQuestion.ts)
+run?"), and the other complement gaps [`resolveQuestion`](../../../../../packages/engine/src/translator/functions/resolveQuestion.ts)
 throws on today — direction, source, route, instrumental, comitative, terminus, topic, temporal.
 **Shape:** E6's gap, with the complement's adposition kept. The word is *what* / *who* rendered
 **through the complement path** (preposition, case, contraction for free, as the relativizer does)
 and fronted — or, where the relation is plain, a place or time adverb (*where to*, *where from*,
 *when*).
 **Scope:** all 7 languages. One gap per plan, as in E6.
-**Status:** planning, unscheduled. Filed 2026-09-23 from P09-E6's follow-ups.
+**Status:** **shipped, 2026-09-23**, plan-only — in the engine for all seven languages, the negative cause included; see [Done](#done). Filed the same day from P09-E6's follow-ups.
 **Words:** no concept to seed. New question words: *when* (quando, quand, wann, cuándo, quando, いつ)
 and the directional *where* (wohin / woher, adónde / de dónde, aonde / de onde, どこへ / どこから).
 
@@ -25,6 +25,92 @@ and the directional *where* (wohin / woher, adónde / de dónde, aonde / de onde
 
 **Proposed, not engine output.** Today every column throws (see [Today](#today)).
 
+## Done
+
+Shipped 2026-09-23, **plan-only**. There is no builder control: the frontend's `QUESTION_ROLES` still
+offers E6's five. Pinned in
+[`test/questions.test.ts`](../../../../../packages/engine/test/questions.test.ts) (`describe('the
+question over a complement')`, and the rewritten `describe('wh-questions: not built yet')`). E6's
+gaps, E14's possessor question and `relative.test.ts` pass unchanged.
+
+| lang | under what does the cat eat? | thanks to whom does the cat run? | with what does the man cut the book? | to whom does the man give the book? | where does the cat come from? | when does the cat eat? |
+|---|---|---|---|---|---|---|
+| en | what does the cat eat under? | who does the cat run thanks to? | what does the man cut the book with? | who does the man give the book to? | where does the cat come from? | when does the cat eat? |
+| it | sotto che cosa mangia il gatto? | grazie a chi corre il gatto? | con che cosa taglia il libro l'uomo? | a chi dà il libro l'uomo? | da dove viene il gatto? | quando mangia il gatto? |
+| fr | sous quoi est-ce que le chat mange ? | grâce à qui est-ce que le chat court ? | avec quoi est-ce que l'homme coupe le livre ? | à qui est-ce que l'homme donne le livre ? | d'où est-ce que le chat vient ? | quand est-ce que le chat mange ? |
+| de | worunter frisst der Kater? | dank wem läuft der Kater? | womit schneidet der Mann das Buch? | wem gibt der Mann das Buch? | woher kommt der Kater? | wann frisst der Kater? |
+| es | ¿debajo de qué come el gato? | ¿gracias a quién corre el gato? | ¿con qué corta el hombre el libro? | ¿a quién da el hombre el libro? | ¿de dónde viene el gato? | ¿cuándo come el gato? |
+| pt | debaixo de que o gato come? | graças a quem o gato corre? | com que o homem corta o livro? | a quem o homem dá o livro? | de onde o gato vem? | quando o gato come? |
+| ja | 猫は何の下で食べますか？ | 猫は誰のおかげで走りますか？ | 男は何で本を切りますか？ | 男は誰に本をあげますか？ | 猫はどこから来ますか？ | 猫はいつ食べますか？ |
+
+The other gaps the Tests section lists, all engine output:
+
+| lang | through whose fault does the cat run? | who does the cat run with? | what does the man speak about? | what does the cat run through? | who does the man ask? | where does the cat go? | who does the cat go to? | until when does the cat eat? |
+|---|---|---|---|---|---|---|---|---|
+| en | through whose fault does the cat run? | who does the cat run with? | what does the man speak about? | what does the cat run through? | who does the man ask? | where does the cat go? | who does the cat go to? | until when does the cat eat? |
+| it | per colpa di chi corre il gatto? | con chi corre il gatto? | di che cosa parla l'uomo? | attraverso che cosa corre il gatto? | a chi chiede l'uomo? | dove va il gatto? | da chi va il gatto? | fino a quando mangia il gatto? |
+| fr | par la faute de qui est-ce que le chat court ? | avec qui est-ce que le chat court ? | de quoi est-ce que l'homme parle ? | à travers quoi est-ce que le chat court ? | à qui est-ce que l'homme demande ? | où est-ce que le chat va ? | vers qui est-ce que le chat va ? | jusqu'à quand est-ce que le chat mange ? |
+| de | durch wessen Schuld läuft der Kater? | mit wem läuft der Kater? | worüber spricht der Mann? | wodurch läuft der Kater? | wen fragt der Mann? | wohin geht der Kater? | zu wem geht der Kater? | bis wann frisst der Kater? |
+| es | ¿por culpa de quién corre el gato? | ¿con quién corre el gato? | ¿sobre qué habla el hombre? | ¿por dónde corre el gato? | ¿a quién pregunta el hombre? | ¿adónde va el gato? | ¿hacia quién va el gato? | ¿hasta cuándo come el gato? |
+| pt | por culpa de quem o gato corre? | com quem o gato corre? | sobre que o homem fala? | por onde o gato corre? | a quem o homem pergunta? | aonde o gato vai? | para quem o gato vai? | até quando o gato come? |
+| ja | 猫は誰のせいで走りますか？ | 猫は誰と走りますか？ | 男は何について話しますか？ | 猫はどこを走りますか？ | 男は誰に尋ねますか？ | 猫はどこへ行きますか？ | 猫は誰へ行きますか？ | 猫はいつまで食べますか？ |
+
+What landed, and where it differs from the plan below:
+
+- **Every cell of the planned table renders as proposed.**
+- **The gap keeps its relation** (D1). `ResolvedQuestion.role` is now `'subject' | 'directObject' |
+  'possessor' | ComplementType` with `specifiers`, and `resolveQuestion` passes `questionSpecifiers`
+  through. `questionAnimate` is read on complement gaps. Two shared helpers sit beside the
+  relativizer's:
+  [`questionGapComplement`](../../../../../packages/engine/src/functions/questionGapComplement.ts)
+  (with `questionStandIn`), a one-complement map around the engine's own word, and
+  [`questionAdverbial`](../../../../../packages/engine/src/functions/questionAdverbial.ts), which
+  decides where a plain relation is an adverb (`where`, `how`, `why`, `whereTo`, `whereFrom`,
+  `when`, `untilWhen`). Every engine's `ADVERBIAL` table is keyed by it.
+- **Each engine's `questionWord` renders the complement path itself**: it / fr / es / pt / de call
+  their own `complementsPhrase` over the stand-in (*che cosa* / *chi*, *quoi* / *qui*, *qué* /
+  *quién*, *que* / *quem*, and German's `definiteness: 'question'`). No fronting code changed:
+  `questionOrder`, `frontQuestion`, `germanEngine` and pt `renderClause` front whatever the word is.
+  English fronts *who* / *what* and strands the preposition through `strandedGap`, an empty stand-in
+  in the complement's own slot. Japanese puts 何 / 誰 / どこ / いつ in that slot through `questionNoun`
+  and `buildClauseSegments`. The plain *when* is `questionAdverb`'s いつ, with no particle.
+- **German** (D3): a new `questionPronoun` declines *wer* for the stand-in (`determiner` reads
+  `definiteness: 'question'`). `woCompound` then folds *was* into the preposition. **`WO_COMPOUND`
+  is wider than D3's list of eight**: German also has *woran*, *worauf*, *woraus*, *wobei*, *wofür*,
+  *wonach* and *wovon*, and the rule is "only where German has the compound". It leaves out *zu*
+  (*wozu* asks for a purpose), *dank*, *wegen* and *zwischen* ("dank was", "zwischen was"). The
+  negative cause is `causePhrase`'s "durch wessen Schuld", next to the relativizer's "durch dessen
+  Schuld".
+- **The negative cause is built** (D4, ruled): "through whose fault does the cat run?" is the one
+  English gap that fronts whole. It matches the statement's "through the fault of the dog". The
+  translator forces `animate` for it. Romance and Japanese need nothing: the stand-in after *di* /
+  *de* / の gives "per colpa di chi", "par la faute de qui", "por culpa de quién / quem", 誰のせいで.
+- **Not in the plan: the route in Spanish, Portuguese and Japanese.** Spanish and Portuguese write
+  the route's *por* over *qué* / *que*, and that spells the *why* question, so the plain route is
+  *por dónde* / *por onde*. Japanese asks どこを, because 何を would read as a question about the
+  object (猫はどこを走りますか).
+- **Not in the plan: French drops the instrument's article** on the stand-in. `questionStandIn`
+  marks it `question`, and `partitiveArtFor` reads that mark, giving "avec quoi" instead of "*avec le
+  quoi".
+- **An animate direction keeps the statement's preposition**: *da chi* (it), *vers qui* (fr), *hacia
+  quién* (es), *para quem* (pt), 誰へ (ja). D2's example wrote 誰に, but the statement says 女へ.
+- **Also refused: the `role` complement** (P09-E13), together with the predicative and the object
+  predicative, because it takes no adposition either. D5 did not name it; E13 shipped the same day.
+- **English whitespace**: a stranded preposition over the empty stand-in leaves a double space
+  before a following complement. `renderClause` closes it up when something strands.
+- **A widened helper signature**: `causeSentiment` now takes `Pick<ResolvedComplement,
+  'specifiers'>`, a strictly wider parameter. No call site changed.
+
+Follow-ups, beside *Out of scope* below:
+
+- **The Italian animate source fronts the ablative *via***, filed as [A276](../../../../bugs/A-must-fix/A276-italian-animate-source-question-fronts-the-ablative-via.md): "via da chi viene il gatto?", where "da
+  chi viene via il gatto?" is wanted. The statement already writes "il gatto viene via dalla donna"
+  for COME (`SOURCE_ABLATIVE_ADVERB_VERBS` / `takesGoal` in `it/complementsPhrase.ts`), and the
+  question fronts the whole complement, *via* included. A person source is the only case that
+  reaches it.
+- The pied-piped English register ("under what does the cat eat?"), the possessed complement ("in
+  whose house?", P09-E14 on top of this), and the builder control.
+
 ## Why
 
 E6 shipped the five gaps that need no adposition. Every other complement the builder offers can be
@@ -37,28 +123,28 @@ complement and cannot.
 
 Verified at HEAD, 2026-09-23.
 
-- [`resolveQuestion`](../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L19)
+- [`resolveQuestion`](../../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L19)
   accepts `subject`, `directObject`, `manner`, a `locative` whose path is `in` (L25) and a `cause`
   whose sentiment is `neutral` (L29), and throws "a wh-question cannot yet ask about a *X* gap in
   that relation (P09-E6)" (L30) on everything else. Probed at HEAD: locative `under`, cause
   `positive` / `negative`, and `source`, `direction`, `route`, `instrumental`, `comitative`,
   `terminus`, `topic`, `temporal`, `purpose`, `predicative`, `objectPredicative` all throw.
-- Pinned as refused in [`questions.test.ts`](../../../../packages/engine/test/questions.test.ts#L249)
+- Pinned as refused in [`questions.test.ts`](../../../../../packages/engine/test/questions.test.ts#L249)
   (locative `under`, `instrumental`) and
-  [`resolveQuestion.test.ts`](../../../../packages/engine/src/translator/functions/resolveQuestion.test.ts#L28).
-- [`ResolvedQuestion.role`](../../../../packages/engine/src/types.ts#L334) is the five slots, with no
+  [`resolveQuestion.test.ts`](../../../../../packages/engine/src/translator/functions/resolveQuestion.test.ts#L28).
+- [`ResolvedQuestion.role`](../../../../../packages/engine/src/types.ts#L334) is the five slots, with no
   specifiers — the engines never see a relation.
 - Each `questionWord` has an `ADVERBIAL` table of three (`locative | manner | cause`), e.g.
-  [`de/questionWord.ts:6`](../../../../packages/engine/src/languages/de/questionWord.ts#L6); German
+  [`de/questionWord.ts:6`](../../../../../packages/engine/src/languages/de/questionWord.ts#L6); German
   already builds *wo(r)-* compounds, and every Romance engine prefixes a preposition, but only for a
   verb's `object_prep` (L20–23 there; `objectPreposition` in the others).
 - **The relativizer already renders every one of these gaps through the complement path.**
-  [`relativeGapComplement`](../../../../packages/engine/src/functions/relativeGapComplement.ts#L18)
+  [`relativeGapComplement`](../../../../../packages/engine/src/functions/relativeGapComplement.ts#L18)
   builds a one-complement map around a stand-in
-  ([`relativizerStandIn`](../../../../packages/engine/src/functions/relativizerStandIn.ts#L16)) and
+  ([`relativizerStandIn`](../../../../../packages/engine/src/functions/relativizerStandIn.ts#L16)) and
   each engine's `complementsPhrase` gives it the preposition, case and contraction: "under which",
   "unter dem", "sotto la quale", "debajo de la que", "thanks to whom", "dank der", "grazie alla
-  quale" ([`relative.test.ts`](../../../../packages/engine/test/relative.test.ts#L803)). The
+  quale" ([`relative.test.ts`](../../../../../packages/engine/test/relative.test.ts#L803)). The
   statement forms the question would reuse, probed: "sotto la casa", "grâce à la femme", "dank der
   Frau", "debaixo da casa", 家の下で, 女のおかげで, 犬のせいで, "vient de la maison", "kommt aus dem
   Haus", 家から, 棒で, 女に, 猫について.
@@ -124,19 +210,19 @@ for?" against *pourquoi*). **Recommendation: keep them refused**, each with an e
 follow-up (see Out of scope). The abstraction specifier on an instrumental (`process` / `concept`,
 "by choosing a word") is refused too: its question is *how*.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
-- `questionRole`'s doc comment ([L1335](../../../../packages/shared/src/index.ts#L1335)): the gaps
+- `questionRole`'s doc comment ([L1335](../../../../../packages/shared/src/index.ts#L1335)): the gaps
   now built, and the ones still refused (D2, D5).
-- `questionSpecifiers` ([L1341](../../../../packages/shared/src/index.ts#L1341)): every relation, not
-  only the plain one. `questionAnimate` ([L1348](../../../../packages/shared/src/index.ts#L1348)):
+- `questionSpecifiers` ([L1341](../../../../../packages/shared/src/index.ts#L1341)): every relation, not
+  only the plain one. `questionAnimate` ([L1348](../../../../../packages/shared/src/index.ts#L1348)):
   read on complement gaps (D1).
 
 ## 2. Translator
 
-- [`resolveQuestion.ts`](../../../../packages/engine/src/translator/functions/resolveQuestion.ts):
+- [`resolveQuestion.ts`](../../../../../packages/engine/src/translator/functions/resolveQuestion.ts):
   accept D1–D2's gaps, carry `specifiers`, refuse D2's temporal relations and D5 by name.
-- [`types.ts`](../../../../packages/engine/src/types.ts#L333): widen `ResolvedQuestion`.
+- [`types.ts`](../../../../../packages/engine/src/types.ts#L333): widen `ResolvedQuestion`.
 - `functions/questionGapComplement.ts` (D1) and `functions/questionAdverbial.ts` — which gaps are
   adverbs (D2), shared by six engines as `isPlainLocativeGap` is.
 
@@ -149,7 +235,7 @@ follow-up (see Out of scope). The abstraction specifier on an instrumental (`pro
 - **it / fr / es / pt**: the fronted word is `complementsPhrase(questionGapComplement(…))` — tonic
   *quoi* in French, *quê* only clause-finally in Portuguese (never here), the personal *a* already
   in the Spanish terminus.
-- **ja**: [`questionNoun`](../../../../packages/engine/src/languages/ja/questionNoun.ts#L13) returns
+- **ja**: [`questionNoun`](../../../../../packages/engine/src/languages/ja/questionNoun.ts#L13) returns
   何 / 誰 / どこ for the complement slot and `complementSegs` supplies 下で, おかげで, から, で, と, に,
   について; いつ is `questionAdverb`'s, particle-less.
 

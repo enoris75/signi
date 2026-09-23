@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import {
@@ -143,5 +144,11 @@ describe('renderNP', () => {
     const relative = { headRole: 'subject' as const, verbPhrase: vp(MANGER) };
     expect(withArticle(np(CHAT, {}, { relative }))).toBe('le chat qui mange');
     expect(withArticle(np(CHAT, {}, { adjectives: [concept(FORT, 'STRONG')], relative }))).toBe('le chat fort qui mange');
+  });
+});
+
+describe('renderNP: the possessor question (P09-E14)', () => {
+  test('the stand-in is de qui after the noun, never the relative dont', () => {
+    expect(withArticle(np(CHAT, {}, { possessor: questionPossessor() }))).toBe('le chat de qui');
   });
 });

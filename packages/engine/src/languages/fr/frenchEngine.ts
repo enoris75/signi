@@ -1,4 +1,6 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
+import { prepObjectText } from './prepObjectText.js';
+import { possessedPrepObject } from '../../functions/questionPossessor.js';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveFr } from '../../possessive.js';
 import { elidesBefore } from './elidesBefore.js';
@@ -40,9 +42,17 @@ export const frenchEngine: LanguageEngine = {
     // A yes/no question asks about the whole statement, coordinated or not, from one "est-ce que". A
     // wh-question fronts its word ahead of it ("qu'est-ce que le chat mange ?"), except over the
     // subject, whose word already leads the statement and needs no "est-ce que" (P09-E6).
+    // A possessor question inside the subject is the subject's question too, standing alone: "le chat
+    // de qui mange la nourriture ?" (P09-E14) — pied-piped, the colloquial register; extraction from a
+    // preverbal subject would read as the object's question.
     const gap = phrase.question;
-    if (!phrase.verbPhrase?.interrogative || gap?.role === 'subject') return punctuate(sentence);
-    return punctuate(gap ? frontQuestion(questionWord(gap, phrase.verbPhrase.verb), sentence) : estCeQue(sentence));
+    const subjectAsked = gap?.role === 'subject' || (gap?.role === 'possessor' && gap.possessed !== 'directObject');
+    if (!phrase.verbPhrase?.interrogative || subjectAsked) return punctuate(sentence);
+    // A verb that takes its object with a preposition fronts the possessed object whole: "de la maison
+    // de qui est-ce que le chat dépend ?" (P09-E14, `possessedPrepObject`).
+    const prepFront = possessedPrepObject(phrase);
+    const word = prepFront ? prepObjectText(prepFront.np, prepFront.prep) : gap ? questionWord(gap, phrase.verbPhrase.verb) : '';
+    return punctuate(gap ? frontQuestion(word, sentence) : estCeQue(sentence));
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

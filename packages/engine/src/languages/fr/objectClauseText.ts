@@ -8,12 +8,13 @@ import { subordinateText } from './subordinateText.js';
  * yes/no question opens on "si", which elides before *il* and *ils* only — "demande s'il court", but
  * "si elle court", "si on court". An indirect wh-question opens on its word, with the statement's
  * order and no "est-ce que" — "demande ce que le chat mange", "ce qu'il mange", "où le chat mange" —
- * except over the subject, whose word the clause already wrote in its subject slot ("ce qui mange").
+ * except over the subject, or a possessor inside it, whose word the clause already wrote in its
+ * subject slot ("ce qui mange", "le chat de qui mange", P09-E14).
  */
 export function objectClauseText(clause: ResolvedPhrase, text: string): string {
   if (!clause.embedded) return subordinateText('que', text);
   const gap = clause.question;
   if (!gap) return /^ils?\b/.test(text) ? `s'${text}` : `si ${text}`;
-  if (gap.role === 'subject' || !clause.verbPhrase) return text;
+  if (gap.role === 'subject' || (gap.role === 'possessor' && gap.possessed === 'subject') || !clause.verbPhrase) return text;
   return subordinateText(indirectQuestionWord(gap, clause.verbPhrase.verb), text);
 }

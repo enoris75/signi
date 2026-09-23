@@ -440,6 +440,61 @@ describe('the indirect question', () => {
   });
 });
 
+// The gaps P09-E14, E15 and E16 added, embedded (P09-E17): the fronting is the direct question's, in
+// the indirect question's order — German verb-final behind the fronted phrase, French with no
+// "est-ce que", Japanese closing on か.
+describe('the indirect question over the possessor, a marked relation and the passive', () => {
+  const man = np('MAN');
+  const eatsFood = { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') };
+
+  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+    ['the man asks whose food the cat eats', clause(man, 'ASK', { contentObject: { ...eatsFood, questionRole: 'possessor', questionPossessed: 'directObject' } }), {
+      en: 'the man asks whose food the cat eats.', it: "l'uomo chiede di chi mangia il cibo il gatto.",
+      fr: "l'homme demande de qui le chat mange la nourriture.", de: 'der Mann fragt, wessen Essen der Kater frisst.',
+      es: 'el hombre pregunta de quién come el gato la comida.', ja: '男は猫が誰の食べ物を食べるか尋ねます。',
+      pt: 'o homem pergunta de quem o gato come a comida.',
+    }],
+    ['the man asks whose cat eats the food', clause(man, 'ASK', { contentObject: { ...eatsFood, questionRole: 'possessor' } }), {
+      en: 'the man asks whose cat eats the food.', it: "l'uomo chiede il gatto di chi mangia il cibo.",
+      fr: "l'homme demande le chat de qui mange la nourriture.", de: 'der Mann fragt, wessen Kater das Essen frisst.',
+      es: 'el hombre pregunta el gato de quién come la comida.', ja: '男は誰の猫が食べ物を食べるか尋ねます。',
+      pt: 'o homem pergunta o gato de quem come a comida.',
+    }],
+    ['the man knows where the cat comes from', clause(man, 'KNOW', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'COME' }, questionRole: 'source' } }), {
+      en: 'the man knows where the cat comes from.', it: "l'uomo sa da dove viene il gatto.",
+      fr: "l'homme sait d'où le chat vient.", de: 'der Mann weiß, woher der Kater kommt.',
+      es: 'el hombre sabe de dónde viene el gato.', ja: '男は猫がどこから来るか知っています。',
+      pt: 'o homem sabe de onde o gato vem.',
+    }],
+    ['the man asks who the woman gives the book to', clause(man, 'ASK', { contentObject: { subject: np('WOMAN'), verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK'), questionRole: 'terminus', questionAnimate: true } }), {
+      en: 'the man asks who the woman gives the book to.', it: "l'uomo chiede a chi dà il libro la donna.",
+      fr: "l'homme demande à qui la femme donne le livre.", de: 'der Mann fragt, wem die Frau das Buch gibt.',
+      es: 'el hombre pregunta a quién da la mujer el libro.', ja: '男は女が誰に本をあげるか尋ねます。',
+      pt: 'o homem pergunta a quem a mulher dá o livro.',
+    }],
+    ['the man asks what is eaten by the cat', clause(man, 'ASK', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT', voice: 'passive' }, questionRole: 'directObject' } }), {
+      en: 'the man asks what is eaten by the cat.', it: "l'uomo chiede che cosa è mangiato dal gatto.",
+      fr: "l'homme demande ce qui est mangé par le chat.", de: 'der Mann fragt, was vom Kater gefressen wird.',
+      es: 'el hombre pregunta qué es comido por el gato.', ja: '男は何が猫に食べられるか尋ねます。',
+      pt: 'o homem pergunta o que é comido pelo gato.',
+    }],
+    ['the man asks who the food is eaten by', clause(man, 'ASK', { contentObject: { ...eatsFood, verbPhrase: { verb: 'EAT', voice: 'passive' }, questionRole: 'subject', questionAnimate: true } }), {
+      en: 'the man asks who the food is eaten by.', it: "l'uomo chiede da chi è mangiato il cibo.",
+      fr: "l'homme demande par qui la nourriture est mangée.", de: 'der Mann fragt, von wem das Essen gegessen wird.',
+      es: 'el hombre pregunta por quién es comida la comida.', ja: '男は食べ物が誰に食べられるか尋ねます。',
+      pt: 'o homem pergunta por quem a comida é comida.',
+    }],
+  ])('%s', (_, plan, want) => {
+    expect(sayAll(plan)).toEqual(want);
+  });
+
+  test('under what: the stranded preposition stays in its slot', () => {
+    expect(sayAll(clause(man, 'ASK', { contentObject: {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT' }, questionRole: 'locative', questionSpecifiers: [{ kind: 'path', value: 'under' }],
+    } }))).toMatchObject({ en: 'the man asks what the cat eats under.', de: 'der Mann fragt, worunter der Kater frisst.' });
+  });
+});
+
 // A247. A content clause's mood is read off its governor (`content_clause_mood`, P09-E4) and never
 // off its polarity, so a negated belief keeps the indicative its affirmative takes in French, Spanish
 // and Portuguese: "no cree que el gato corre", "não acredita que o gato corre", "ne croit pas que le

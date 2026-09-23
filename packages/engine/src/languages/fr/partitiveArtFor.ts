@@ -15,6 +15,8 @@ import { dePrep } from './dePrep.js';
  * place. That bare is no zero article, so a caller with a pronominal possessor must not come here.
  */
 export function partitiveArtFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  // A question's stand-in takes none: "avec quoi", "avec qui" (P09-E15, see `questionStandIn`).
+  if (forms['question'] === '1') return '';
   if (forms['proper'] === '1' || forms['definiteness'] !== 'bare') return artFor(forms, plural, lead);
   const mass = forms['uncountable'] === '1';
   if (plural && !mass) return artFor({ ...forms, definiteness: 'indefinite' }, true, lead);
