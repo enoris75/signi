@@ -17,15 +17,21 @@ import { CONTENT_CLAUSE_MOOD } from '../translator.consts.js';
  * indicative an assertion takes. A subject clause falls back on `CONTENT_CLAUSE_MOOD`, the rule C30
  * shipped: only evaluative predicates host one, and what they are said of is judged.
  *
- * Polarity is not read: the negated belief that Spanish and Portuguese put in the subjunctive ("no
- * creo que **sea**") renders in the affirmative's indicative.
+ * Under a **negated** governor the lexeme may name another mood, `content_clause_mood_negative`
+ * (A247): negating a verb of belief denies the proposition, and French, Spanish and Portuguese put
+ * the denied one in the subjunctive — "ne croit pas que le chat **coure**", "no cree que el gato
+ * **corra**" — where the affirmative asserts it in the indicative. It is keyed on the word, not the
+ * language: a negated SAY still reports in the indicative ("no dice que corre"), so a governor that
+ * names no negative mood keeps the one it takes affirmed.
  */
 export function contentClauseMood(
   governor: Record<string, string> | undefined,
   language: string,
   host: 'subject' | 'object',
+  negative = false,
 ): Mood | undefined {
-  const declared = governor?.['content_clause_mood'];
+  const declared = (negative ? governor?.['content_clause_mood_negative'] : undefined)
+    ?? governor?.['content_clause_mood'];
   if (declared === 'subjunctive') return CONTENT_CLAUSE_MOOD[language];
   if (declared === 'indicative') return undefined;
   return host === 'subject' ? CONTENT_CLAUSE_MOOD[language] : undefined;

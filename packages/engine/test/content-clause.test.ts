@@ -250,17 +250,17 @@ describe('known bugs: a negated belief keeps the indicative (A247)', () => {
     contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } },
   });
 
-  test.fails('Spanish: no cree que el gato corra', () => {
+  test('Spanish: no cree que el gato corra', () => {
     expect(say(believes('BELIEVE'), 'es')).toBe('el hombre no cree que el gato corra.');
     expect(say(believes('THINK'), 'es')).toBe('el hombre no piensa que el gato corra.');
   });
 
-  test.fails('Portuguese: não acredita que o gato corra', () => {
+  test('Portuguese: não acredita que o gato corra', () => {
     expect(say(believes('BELIEVE'), 'pt')).toBe('o homem não acredita que o gato corra.');
     expect(say(believes('THINK'), 'pt')).toBe('o homem não pensa que o gato corra.');
   });
 
-  test.fails('French: ne croit pas que le chat coure', () => {
+  test('French: ne croit pas que le chat coure', () => {
     expect(say(believes('BELIEVE'), 'fr')).toBe("l'homme ne croit pas que le chat coure.");
     expect(say(believes('THINK'), 'fr')).toBe("l'homme ne pense pas que le chat coure.");
   });
@@ -274,6 +274,22 @@ describe('known bugs: a negated belief keeps the indicative (A247)', () => {
     expect(sayAll(believes('BELIEVE', false))).toMatchObject({
       fr: "l'homme croit que le chat court.", es: 'el hombre cree que el gato corre.',
       pt: 'o homem acredita que o gato corre.',
+    });
+  });
+
+  test('regression: the affirmative THINK keeps the indicative in French, Spanish and Portuguese', () => {
+    expect(sayAll(believes('THINK', false))).toMatchObject({
+      fr: "l'homme pense que le chat court.", es: 'el hombre piensa que el gato corre.',
+      pt: 'o homem pensa que o gato corre.', it: "l'uomo pensa che il gatto corra.",
+    });
+  });
+
+  test('regression: a negated SAY still reports in the indicative — the mood is the lexeme\'s, not the negation\'s', () => {
+    expect(sayAll(believes('SAY'))).toEqual({
+      en: 'the man does not say that the cat runs.', it: "l'uomo non dice che il gatto corre.",
+      fr: "l'homme ne dit pas que le chat court.", de: 'der Mann sagt nicht, dass der Kater läuft.',
+      es: 'el hombre no dice que el gato corre.', ja: '男は猫が走ると言いません。',
+      pt: 'o homem não diz que o gato corre.',
     });
   });
 });
