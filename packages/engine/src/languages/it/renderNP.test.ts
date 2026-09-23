@@ -124,3 +124,14 @@ describe('renderNP', () => {
     expect(withDeterminer(np(GATTO, { number: 'plural' }, { relative }))).toBe('i gatti che mangiano il topo');
   });
 });
+
+describe('renderNP: the attributive standard (P09-E18)', () => {
+  test('follows its adjective, ahead of a genitive possessor', () => {
+    const compared = adj(GRANDE, { degree: 'more', standard: '1' });
+    const phrase = np(GATTO, { definiteness: 'indefinite' }, {
+      adjectives: [compared, adj(VECCHIO)],
+      adjectiveStandard: { index: 0, standard: el(np(CANE, { definiteness: 'definite' })) },
+    });
+    expect(renderNP(phrase, (plural, lead) => artFor(itPossessedHeadForms(phrase), plural, lead))).toBe('un gatto vecchio e più grande del cane');
+  });
+});

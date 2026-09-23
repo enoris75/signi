@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { CAO, ELE, EU, GRANDE, HOMEM, NOS, el, np } from './pt.fixtures.js';
 import { ptComparison } from './ptComparison.js';
-import { ptStandard } from './ptStandard.js';
+import { ptStandard as render } from './ptStandard.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+
+/** The renderer reads the compared adjective and its standard; these tests build them as one phrase. */
+const ptStandard = (np: ResolvedNounPhrase) => render(np.head, np.standard);
 
 const the = { definiteness: 'definite' };
 const compared = (degree: string, standard = el(np(CAO, the))) =>

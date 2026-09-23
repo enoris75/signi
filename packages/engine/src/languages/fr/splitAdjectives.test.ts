@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { BON, CHAT, concept, FORT, GRAND, HAUT, HAUTEUR, HEUREUX, MAISON, np, PREMIER, SOURIS, TAILLE, VIEUX } from './fr.fixtures.js';
+import { adj, BON, BRUN, CHAT, CHIEN, concept, el, FORT, GRAND, HAUT, HAUTEUR, HEUREUX, MAISON, np, PREMIER, SOURIS, TAILLE, VIEUX } from './fr.fixtures.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
 describe('splitAdjectives', () => {
@@ -52,5 +52,15 @@ describe('splitAdjectives', () => {
   test('an adjective with no surface is skipped', () => {
     const phrase = np(CHAT, {}, { adjectives: [concept({ role: 'adjective' }, 'BIG'), concept(FORT, 'STRONG')] });
     expect(splitAdjectives(phrase)).toEqual({ pre: [], post: ['fort'] });
+  });
+});
+
+describe('splitAdjectives: the compared adjective with a standard (P09-E18)', () => {
+  test('is written with it and moves last among the postnominal adjectives', () => {
+    const phrase = np(CHAT, {}, {
+      adjectives: [adj(GRAND, { degree: 'more', standard: '1' }), adj(BRUN)],
+      adjectiveStandard: { index: 0, standard: el(np(CHIEN, { definiteness: 'definite' })) },
+    });
+    expect(splitAdjectives(phrase).post).toEqual(['brun', 'plus grand que le chien']);
   });
 });

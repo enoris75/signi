@@ -34,5 +34,5 @@ export function predicateLinkSegs(np: ResolvedNounPhrase, link: PredicateLink, p
   // A relational の-adjective keeps its の here too: this is the predicate position, one conjunct
   // earlier (アメリカので, アメリカのでも — A246).
   const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, np.head.forms['relational'] === '1', verbal);
-  return [...jaDegreeSegs(np), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
+  return [...jaDegreeSegs(np.head, np.standard), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
 }

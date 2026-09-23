@@ -81,7 +81,7 @@ export function complementsPhrase(
           }
           // A superlative's intensifier stands before the article: "con mucho el más grande" (A257).
           const { lead, adjective } = superlativeLead(np.head);
-          const surface = [esDeg(adjective, agreeAdj(adjective.forms['base'] ?? '', gender, plural)), esStandard(np)].filter(Boolean).join(' ');
+          const surface = [esDeg(adjective, agreeAdj(adjective.forms['base'] ?? '', gender, plural)), esStandard(np.head, np.standard)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
           // SAME keeps its article the same way: "es el mismo" (see `takesPredicateArticle`).

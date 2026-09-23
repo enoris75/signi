@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ConceptForms } from '../../types.js';
-import { adj, ALTO, BELLO, concept, DIMENSIONE, FELICE, FORTE, GATTO, GRANDE, np, PRIMO, STANCO, VECCHIO } from './it.fixtures.js';
+import { adj, ALTO, BELLO, CANE, concept, DIMENSIONE, el, FELICE, FORTE, GATTO, GRANDE, np, PRIMO, STANCO, VECCHIO } from './it.fixtures.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
 const ids = (xs: ConceptForms[]) => xs.map((a) => a.conceptId);
@@ -67,5 +67,14 @@ describe('splitAdjectives', () => {
 
   test('no adjectives, nothing either side', () => {
     expect(splitAdjectives(np(GATTO))).toEqual({ pre: [], post: [] });
+  });
+});
+
+describe('splitAdjectives: the compared adjective with a standard (P09-E18)', () => {
+  test('moves last among the postnominal adjectives', () => {
+    const compared = adj(GRANDE, { degree: 'more', standard: '1' });
+    const old = adj(VECCHIO);
+    const phrase = np(GATTO, {}, { adjectives: [compared, old], adjectiveStandard: { index: 0, standard: el(np(CANE)) } });
+    expect(splitAdjectives(phrase).post).toEqual([old, compared]);
   });
 });

@@ -75,7 +75,7 @@ export function complementsPhrase(
           if (np.head.forms['role'] !== 'adjective') return npText(np);
           // A superlative's intensifier stands before the article: "de loin le plus grand" (A257).
           const { lead, adjective } = superlativeLead(np.head);
-          const surface = [frComparison(adjective, gender, plural), frStandard(np)].filter(Boolean).join(' ');
+          const surface = [frComparison(adjective, gender, plural), frStandard(np.head, np.standard)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "semble LE plus heureux" — distinct from the comparative "plus heureux".
           // SAME keeps its article the same way: "est le même" (see `takesPredicateArticle`).

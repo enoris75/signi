@@ -222,3 +222,19 @@ describe('npSegs', () => {
     expect(npSegs(np(they))).toEqual([{ t: '彼女ら', r: 'かのじょら' }]);
   });
 });
+
+describe('npSegs: the attributive standard (P09-E18)', () => {
+  const compared = (degree: string, adjectives = [adj(OOKII, { degree, standard: '1' })], index = 0, head: Record<string, string> = {}) =>
+    np(NEKO, head, { adjectives, adjectiveStandard: { index, standard: el(np(INU)) } });
+
+  test('the standard takes the degree adverb\'s place', () => {
+    expect(text(npSegs(compared('more')))).toBe('犬より大きい猫');
+    expect(text(npSegs(compared('less')))).toBe('犬ほど大きくない猫');
+    expect(text(npSegs(compared('equally')))).toBe('犬と同じくらい大きい猫');
+  });
+
+  test('the compared adjective leads the phrase, so its standard takes no modifier before it', () => {
+    expect(text(npSegs(compared('more', [adj(CHAIRO), adj(OOKII, { degree: 'more', standard: '1' })], 1)))).toBe('犬より大きい茶色の猫');
+    expect(text(npSegs(compared('more', undefined, 0, { definiteness: 'this' })))).toBe('犬より大きいこの猫');
+  });
+});

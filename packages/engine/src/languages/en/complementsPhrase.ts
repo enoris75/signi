@@ -81,7 +81,7 @@ export function complementsPhrase(
             // A superlative with its set is definite: "is biggest", but "is the biggest of the
             // animals" (P09-E19). The bare one keeps no article.
             : superlativePredicate(np)
-              ?? [np.head.forms['domain'] === '1' && np.standard ? 'the' : '', enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
+              ?? [np.head.forms['domain'] === '1' && np.standard ? 'the' : '', enAdj(np.head), enStandard(np.head, np.standard)].filter(Boolean).join(' '),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }
@@ -155,5 +155,5 @@ export function complementsPhrase(
  */
 function superlativePredicate(np: ResolvedNounPhrase): string | undefined {
   const { lead, adjective } = superlativeLead(np.head);
-  return lead ? [lead, 'the', enAdj(adjective), enStandard(np)].filter(Boolean).join(' ') : undefined;
+  return lead ? [lead, 'the', enAdj(adjective), enStandard(np.head, np.standard)].filter(Boolean).join(' ') : undefined;
 }

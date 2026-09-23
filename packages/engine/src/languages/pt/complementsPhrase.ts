@@ -85,7 +85,7 @@ export function complementsPhrase(
           }
           // A superlative's intensifier stands before the article: "de longe o maior" (A257).
           const { lead, adjective } = superlativeLead(np.head);
-          const surface = [ptComparison(adjective, gender, plural), ptStandard(np)].filter(Boolean).join(' ');
+          const surface = [ptComparison(adjective, gender, plural), ptStandard(np.head, np.standard)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece O mais feliz" — distinct from the comparative "mais feliz".
           // SAME keeps its article the same way: "é o mesmo" (see `takesPredicateArticle`).

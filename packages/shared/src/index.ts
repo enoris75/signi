@@ -716,6 +716,32 @@ export interface NounPhrase {
    */
   adjectiveIntensifiers?: (string | undefined)[];
   /**
+   * A **standard of comparison** per adjective, index-aligned with `adjectives` — the attributive
+   * counterpart of `headStandard` (P09-E18): "a bigger cat **than the dog**", *un gatto più grande
+   * **del cane***, *einen größeren Kater **als den Hund***, **犬より**大きい猫. The words are
+   * `headStandard`'s, by degree (than / as, di / quanto, que, als / wie, que / como, do que / como,
+   * より / ほど / と同じくらい).
+   *
+   * **At most one renders**: the first adjective whose degree takes a standard (`STANDARD_DEGREES`:
+   * the comparatives and the equative) and whose entry is set. Every other entry is dropped — on a
+   * `positive` adjective, on a superlative (whose set is predicative only, P09-E19 D5), and on a
+   * second compared adjective, since no language says "a bigger-than-the-dog more-beautiful-than-the-
+   * fox cat".
+   *
+   * Where it goes is each language's:
+   *
+   *  - en: the comparative stays before the noun and the standard follows the head noun, ahead of
+   *    an of-possessor and a relative clause ("a bigger cat than the dog that sleeps"); the equative
+   *    adjective moves behind the noun with it ("a cat as big as the dog").
+   *  - it / fr / es / pt: the compared adjective, already post-nominal, moves last among the
+   *    post-nominal adjectives and the standard follows it ("un gatto marrone e più grande del
+   *    cane"), ahead of a genitive possessor.
+   *  - de: the adjective declines before the noun as ever and the standard follows the noun, in the
+   *    phrase's own case ("sieht einen größeren Kater als den Hund").
+   *  - ja: before the compared adjective, in its degree adverb's place (犬より大きい猫).
+   */
+  adjectiveStandards?: (NounElement | undefined)[];
+  /**
    * The intensifier of the *head* itself, the counterpart of `headDegree`: only meaningful when the
    * head is an adjective — the predicate adjective of a `predicative` subject complement ("is
    * **very** big"). Ignored for a noun or pronoun head.
@@ -749,12 +775,10 @@ export interface NounPhrase {
    * biggest of", "ist **das** größte der" (the gender of a plural noun set, else the subject's),
    * where the bare superlative stays "is biggest", "ist am größten".
    *
-   * Deliberately **predicative only**: there is a `headStandard` beside `headDegree` and nothing
-   * beside `adjectiveDegrees`. An attributive comparative ("a bigger cat than the dog") puts the
-   * standard at the far end of the noun phrase, placed differently against the other post-nominal
-   * material in each language, and an adjective list can hold several comparatives of which only one
-   * could take it — a follow-up with a name of its own, not an oversight (D2). It is a noun
-   * *element*, so a coordinated standard ("bigger than the dog and the man") is one like any other.
+   * It is the **predicate** adjective's: an attributive comparative ("a bigger cat than the dog")
+   * takes its standard from `adjectiveStandards`, index-aligned with the adjective it belongs to
+   * (P09-E18); the two fields are independent. It is a noun *element*, so a coordinated standard
+   * ("bigger than the dog and the man") is one like any other.
    * It is not a complement: it belongs to the adjective, is licensed by a degree rather than by a
    * lexeme, and in Japanese must stand beside its adjective rather than in the complement block (D5).
    */

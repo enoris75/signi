@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { ANIMAL, BIG, DOG, HOUSE, I, MAN, WE, el, np } from './en.fixtures.js';
 import { enAdj } from './enAdj.js';
-import { enStandard } from './enStandard.js';
+import { enStandard as render } from './enStandard.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+
+/** The renderer reads the compared adjective and its standard; these tests build them as one phrase. */
+const enStandard = (np: ResolvedNounPhrase) => render(np.head, np.standard);
 
 const the = { definiteness: 'definite' };
 const compared = (degree: string, standard = el(np(DOG, the))) =>

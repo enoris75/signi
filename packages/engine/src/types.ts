@@ -104,6 +104,15 @@ export interface ResolvedNounPhrase {
    * (P09-E19). The translator has dropped it on `positive`.
    */
   standard?: ResolvedNounElement;
+  /**
+   * The resolved standard of comparison of one **attributive** adjective (see
+   * NounPhrase.adjectiveStandards, P09-E18): "the dog" in "a bigger cat than the dog". `index` is
+   * that adjective's position in `adjectives` above — the resolved list, which may lead with a bound
+   * OWN or have lost a fused adjective, so not always the plan's index. At most one per phrase; the
+   * adjective carries `forms['standard'] = '1'` as a predicate one does, so its equative adverb swaps
+   * alone ("a cat as big as the dog", "un gatto tanto grande quanto il cane").
+   */
+  adjectiveStandard?: { index: number; standard: ResolvedNounElement };
 }
 
 /**
