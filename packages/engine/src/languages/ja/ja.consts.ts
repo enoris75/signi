@@ -295,7 +295,18 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
 export const JA_SOU: ResolvedComplement = {
   phrase: { conjuncts: [{ head: { conceptId: 'SOU', forms: { base: 'そう' } }, adjectives: [], nounModifiers: [] }], agreement: {} },
 };
-export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない' } };
+// The existential いる is the engine's word, not a lexeme — BE's own is the copula です — so its two
+// registers of respect live here beside it (P11-E1, see `jaRespectVerb`): 尊敬語 いらっしゃる,
+// 「いる」の尊敬語, and 謙譲語 おる, 「いる」の謙譲語 (大辞林, デジタル大辞泉) — あなたのお母さんは家に
+// いらっしゃいます, 父は家におります.
+export const JA_IRU: ConceptForms = {
+  conceptId: 'IRU',
+  forms: {
+    base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない',
+    honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない',
+    humble: 'おる', humble_masu_present: 'おります', humble_te: 'おって', humble_nai: 'おらない',
+  },
+};
 export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };
 
 /**

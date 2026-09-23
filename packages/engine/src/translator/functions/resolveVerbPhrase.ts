@@ -76,6 +76,8 @@ export function resolveVerbPhrase(
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
     // The outermost modal's negation has moved to `negative` above, so no engine reads it twice.
     modals: modals.map((m, i) => (i === 0 ? { ...m, negative: undefined } : m)),
+    // Carried as asked; whether the subject lets it apply is the Japanese engine's call (P11-E1 D4).
+    ...(vp.humble ? { humble: true } : {}),
   };
 }
 

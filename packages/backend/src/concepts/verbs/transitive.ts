@@ -136,6 +136,11 @@ export const transitiveVerbs: ConceptSeed[] = [
         reading: 'たべる',
         masu_present: '食べます',
         masu_present_reading: 'たべます',
+        // 尊敬語 召し上がる, 「食う」「飲む」の尊敬語; 謙譲語 いただく, 「食う」「飲む」の謙譲語 (大辞林,
+        // デジタル大辞泉). Someone else's relative 召し上がります; one's own, asked, いただきます (P11-E1).
+        honorific: '召し上がる', honorific_masu_present: '召し上がります', honorific_te: '召し上がって', honorific_nai: '召し上がらない',
+        honorific_reading: 'めしあがる', honorific_masu_present_reading: 'めしあがります', honorific_te_reading: 'めしあがって', honorific_nai_reading: 'めしあがらない',
+        humble: 'いただく', humble_masu_present: 'いただきます', humble_te: 'いただいて', humble_nai: 'いただかない',
       },
       pt: {
         base: 'comer',
@@ -279,6 +284,11 @@ export const transitiveVerbs: ConceptSeed[] = [
         reading: 'のむ',
         masu_present: '飲みます',
         masu_present_reading: 'のみます',
+        // 尊敬語 召し上がる, 「食う」「飲む」の尊敬語; 謙譲語 いただく, 「食う」「飲む」の謙譲語 (大辞林,
+        // デジタル大辞泉) — the pair EAT has, since neither register tells eating from drinking (P11-E1).
+        honorific: '召し上がる', honorific_masu_present: '召し上がります', honorific_te: '召し上がって', honorific_nai: '召し上がらない',
+        honorific_reading: 'めしあがる', honorific_masu_present_reading: 'めしあがります', honorific_te_reading: 'めしあがって', honorific_nai_reading: 'めしあがらない',
+        humble: 'いただく', humble_masu_present: 'いただきます', humble_te: 'いただいて', humble_nai: 'いただかない',
       },
       pt: {
         base: 'beber',
@@ -1923,6 +1933,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         reading: 'する',
         masu_present: 'します',
         masu_present_reading: 'します',
+        // 尊敬語 なさる, 「する」の尊敬語; 謙譲語 いたす, 「する」の謙譲語 (大辞林, デジタル大辞泉) (P11-E1).
+        honorific: 'なさる', honorific_masu_present: 'なさいます', honorific_te: 'なさって', honorific_nai: 'なさらない',
+        humble: 'いたす', humble_masu_present: 'いたします', humble_te: 'いたして', humble_nai: 'いたさない',
       },
       pt: {
         base: 'fazer',
@@ -8063,6 +8076,11 @@ export const transitiveVerbs: ConceptSeed[] = [
         reading: 'いう',
         masu_present: '言います',
         masu_present_reading: 'いいます',
+        // 尊敬語 おっしゃる, 「言う」の尊敬語; 謙譲語 申す, 「言う」の謙譲語 (大辞林, デジタル大辞泉). The
+        // quotative と stays: お母さんは猫が走るとおっしゃいます (P11-E1).
+        honorific: 'おっしゃる', honorific_masu_present: 'おっしゃいます', honorific_te: 'おっしゃって', honorific_nai: 'おっしゃらない',
+        humble: '申す', humble_masu_present: '申します', humble_te: '申して', humble_nai: '申さない',
+        humble_reading: 'もうす', humble_masu_present_reading: 'もうします', humble_te_reading: 'もうして', humble_nai_reading: 'もうさない',
       },
       pt: {
         base: 'dizer', content_clause_force: 'either',

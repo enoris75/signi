@@ -1,12 +1,12 @@
 # P11-E5. Counting relatives — 三人兄弟
 
 **Construct:** "we are three siblings" — a counted phrase where the numeral and its counter compound
-straight onto the noun, with no の. From [P11](README.md)'s *Out of scope* follow-ups.
+straight onto the noun, with no の. From [P11](../README.md)'s *Out of scope* follow-ups.
 **Shape:** a third value of a flag that already has two, in a builder that already exists
-([`jaCounted.ts`](../../../../packages/engine/src/languages/ja/jaCounted.ts)). The smallest task in
+([`jaCounted.ts`](../../../../../packages/engine/src/languages/ja/jaCounted.ts)). The smallest task in
 this folder, and Japanese-only.
 **Scope:** Japanese. The other six count relatives with a plain cardinal and need nothing.
-**Status:** planning, unscheduled. Split out of P11's follow-ups on 2026-09-23.
+**Status:** shipped 2026-09-24. Split out of P11's follow-ups on 2026-09-23.
 
 | lang | we are three siblings |
 |---|---|
@@ -18,7 +18,44 @@ this folder, and Japanese-only.
 | pt | somos três irmãos. |
 | ja | 私たちは**三人兄弟**です。 |
 
-**Proposed, not engine output.**
+**Proposed, not engine output.** The engine's output is in *Done* below.
+
+## Done
+
+Shipped 2026-09-24: data, plus one branch in
+[`jaCounted`](../../../../../packages/engine/src/languages/ja/jaCounted.ts). Pinned in
+[`test/counted-relatives.test.ts`](../../../../../packages/engine/test/counted-relatives.test.ts) and
+`jaCounted.test.ts`. C31's `numerals.test.ts` passes unchanged, and every concept `definition`
+renders the same in Japanese as before.
+
+| lang | we are three siblings |
+|---|---|
+| en | we are three siblings. |
+| it | siamo tre fratelli. |
+| fr | nous sommes trois frères et sœurs. |
+| de | wir sind drei Geschwister. |
+| es | somos tres hermanos. |
+| pt | somos três irmãos. |
+| ja | 私たちは**三人兄弟**です。 |
+
+As a subject it is 三人兄弟は走ります。 BROTHER also gives 三人兄弟, and SISTER gives 三人姉妹. The two
+shapes that already existed are unchanged: 二匹の猫, 二十四時間, 十二か月.
+
+What landed differently from the plan below:
+
+1. **`counter_join` replaces `counter_is_head`**, as D1 recommends. Absent is the の link. `'head'`
+   is the time word: DAY, HOUR, MONTH, WEEK and YEAR moved over from `counter_is_head: '1'`.
+   `'compound'` is the new shape. `jaCounted` was the only reader.
+2. **The compounding words are 兄弟 and 姉妹**, on SIBLING, BROTHER and SISTER. **FAMILY is left
+   out.** Its counter is つ, and the plan "three families" means 三つの家族. 三人家族 means a family
+   *of* three, which is a different meaning. 親子 has no concept of its own, and いとこ does not compound.
+3. **Only the lexeme's own word compounds.** A head that has become another word keeps the の: the
+   honorific for someone else's siblings (あなたの三人のご兄弟), or an adjective fused into the head
+   (三人の兄, "three elder brothers"). An adjective between the count and the head also keeps it
+   (三人の大きい兄弟). One's own siblings use the plain word, so they compound (私の三人の兄弟 →
+   三人兄弟).
+4. **Furigana (D3):** there is none over 三人, as planned. The head keeps its own reading
+   (兄弟 きょうだい), as it does after the の today.
 
 ## Why
 
@@ -33,7 +70,7 @@ It is the last of P11's follow-ups and the cheapest, and it is here so that it i
 
 Verified in the working tree on 2026-09-23.
 
-[`jaCounted`](../../../../packages/engine/src/languages/ja/jaCounted.ts) builds every counted phrase
+[`jaCounted`](../../../../../packages/engine/src/languages/ja/jaCounted.ts) builds every counted phrase
 and already has exactly two shapes, chosen by one lexeme flag:
 
 ```
@@ -82,7 +119,7 @@ this task must not be the one that relaxes it.
 ## 1. Corpus
 
 `counter_join` (D1) on the Japanese lexemes of the kin nouns in D2, and the flag documented in the
-[seed skill](../../../../.claude/skills/seed/SKILL.md) beside `counter` and `counter_is_head`.
+[seed skill](../../../../../.claude/skills/seed/SKILL.md) beside `counter` and `counter_is_head`.
 
 ## 2. Engine
 
@@ -105,4 +142,4 @@ One branch in `jaCounted`, and the two existing shapes left exactly as they are.
 
 - **Other compound counters** outside kinship (五人家族 is in D2's list; 三日月 is not a count at all).
 - **Ordinal kin** ("the second son", 次男), which is a different word rather than a counted phrase.
-- **"How many siblings?"** — needs [P09-E6](../P09-core-vocabulary/Z-done/P09-E6-questions-and-existentials.md).
+- **"How many siblings?"** — needs [P09-E6](../../P09-core-vocabulary/Z-done/P09-E6-questions-and-existentials.md).
