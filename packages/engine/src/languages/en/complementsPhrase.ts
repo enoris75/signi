@@ -16,8 +16,9 @@ import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { isPrivative } from '../../functions/isPrivative.js';
 import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
-import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
+import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, PRIVATIVE, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { enStandard } from './enStandard.js';
@@ -48,15 +49,18 @@ export function complementsPhrase(
       // nominalises with the same -ing form — but the concept level makes that gerund a *noun*:
       // it takes the definite article and reaches its object through "of", where the process
       // level keeps the verb's own direct object.
+      // Denied, the instrument is the privative (P09-E2), and "without" takes the gerund for either
+      // level: "without choosing a word", "without the choosing of a word".
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinate(c.phrase, npText);
           const adverb = c.action.modifier?.forms['base'] ?? '';
+          const privative = isPrivative(type, c);
           const words =
             level === 'process'
-              ? ['by', actionGerund(c.action), object]
-              : ['with the', actionGerund(c.action), 'of', object];
+              ? [privative ? PRIVATIVE : 'by', actionGerund(c.action), object]
+              : [privative ? `${PRIVATIVE} the` : 'with the', actionGerund(c.action), 'of', object];
           return [...words, adverb].filter(Boolean).join(' ');
         }
       }
@@ -114,6 +118,8 @@ export function complementsPhrase(
         : type === 'locative' ? PATH_PREP[pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER)]
         : goal ? GOAL_PREP[goal]
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
+        // The instrument denied: "without the knife" where it would be "with the knife" (P09-E2).
+        : isPrivative(type, c) ? PRIVATIVE
         : PREP[type];
       // A hearth noun takes its fixed locative idiom in place of preposition + noun phrase ("at
       // home", not "in the home"). The idiom carries its own preposition, so a group holding one

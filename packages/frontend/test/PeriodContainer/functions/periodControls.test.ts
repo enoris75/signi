@@ -54,7 +54,7 @@ describe('periodControls', () => {
 
   it('reads the instrumental target side off the workspace binding', () => {
     const b = binding({
-      instrumental: { hasSource: true, hasTarget: false, level: 'process', isPickTarget: true },
+      instrumental: { hasSource: true, hasTarget: false, level: 'process', negative: true, isPickTarget: true },
     });
 
     expect(periodControls(b, STATEMENT).instrumental).toEqual({
@@ -62,6 +62,8 @@ describe('periodControls', () => {
       hasInstrument: true,
       level: 'process',
       onLevelChange: b.instrumental.onLevelChange,
+      negative: true,
+      onNegativeChange: b.instrumental.onNegativeChange,
       isPickTarget: true,
       onPick: b.instrumental.onPick,
     });

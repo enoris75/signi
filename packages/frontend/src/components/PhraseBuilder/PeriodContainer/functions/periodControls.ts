@@ -22,6 +22,8 @@ export function periodControls(
       hasInstrument: instrumental.hasSource,
       level: instrumental.level,
       onLevelChange: instrumental.onLevelChange,
+      negative: instrumental.negative,
+      onNegativeChange: instrumental.onNegativeChange,
       isPickTarget: instrumental.isPickTarget,
       onPick: instrumental.onPick,
     },

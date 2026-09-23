@@ -1347,7 +1347,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
     id: 'SPEAK',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'instrumental', 'locative', 'cause'],
+    // What one speaks *about* is the `topic` (P09-E2), in each language's own word: "parla del gatto".
+    complements: ['topic', 'manner', 'instrumental', 'locative', 'cause'],
     description: 'to say words aloud',
     emoji: '🗣️',
     forms: {
@@ -1415,7 +1416,11 @@ export const intransitiveVerbs: ConceptSeed[] = [
     id: 'THINK',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'locative', 'cause'],
+    // The *about* is the `topic` complement (P09-E2), and five languages govern it with a
+    // preposition of the verb's own, `topic_prep`: it "pensa al gatto", fr "pense au chat", de "denkt
+    // an den Kater", es "piensa en el gato", pt "pensa no gato" (see `topicLink`). English and
+    // Japanese take their own, "about" and について.
+    complements: ['topic', 'manner', 'locative', 'cause'],
     description: 'to form thoughts in the mind',
     // "to use the mind", on the MIND seeded for it: 頭脳を使う is the idiom; the French and German
     // (utiliser l'esprit, den Verstand verwenden) are understood rather than idiomatic. Without MIND
@@ -1432,7 +1437,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
       it: {
         // Italian puts what one thinks in the subjunctive in the standard register: "pensa che il gatto
         // corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese keep the indicative.
-        base: 'pensare', content_clause_mood: 'subjunctive',
+        base: 'pensare', content_clause_mood: 'subjunctive', topic_prep: 'a',
         '1sg_present': 'penso', '2sg_present': 'pensi', '3sg_present': 'pensa',
         '1pl_present': 'pensiamo', '2pl_present': 'pensate', '3pl_present': 'pensano',
         '1sg_past': 'pensai', '2sg_past': 'pensasti', '3sg_past': 'pensò',
@@ -1441,7 +1446,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'penseremo', '2pl_future': 'penserete', '3pl_future': 'penseranno',
       },
       fr: {
-        base: 'penser',
+        base: 'penser', topic_prep: 'à',
         '1sg_present': 'pense', '2sg_present': 'penses', '3sg_present': 'pense',
         '1pl_present': 'pensons', '2pl_present': 'pensez', '3pl_present': 'pensent',
         '1sg_past': 'pensai', '2sg_past': 'pensas', '3sg_past': 'pensa',
@@ -1451,7 +1456,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       de: {
         // denken is mixed: a weak ending on the strong stem, dachte and gedacht.
-        base: 'denken',
+        base: 'denken', topic_prep: 'an',
         '1sg_present': 'denke', '2sg_present': 'denkst', '3sg_present': 'denkt',
         '1pl_present': 'denken', '2pl_present': 'denkt', '3pl_present': 'denken',
         '1sg_past': 'dachte', '2sg_past': 'dachtest', '3sg_past': 'dachte',
@@ -1459,7 +1464,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       es: {
         // pensar diphthongises e → ie under the stress: pienso, piensan, but pensamos.
-        base: 'pensar',
+        base: 'pensar', topic_prep: 'en',
         '1sg_present': 'pienso', '2sg_present': 'piensas', '3sg_present': 'piensa',
         '1pl_present': 'pensamos', '2pl_present': 'pensáis', '3pl_present': 'piensan',
         '1sg_past': 'pensé', '2sg_past': 'pensaste', '3sg_past': 'pensó',
@@ -1476,7 +1481,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'かんがえます',
       },
       pt: {
-        base: 'pensar',
+        base: 'pensar', topic_prep: 'em',
         '1sg_present': 'penso', '2sg_present': 'pensa', '3sg_present': 'pensa',
         '1pl_present': 'pensamos', '2pl_present': 'pensam', '3pl_present': 'pensam',
         '1sg_past': 'pensei', '2sg_past': 'pensou', '3sg_past': 'pensou',

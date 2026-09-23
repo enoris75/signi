@@ -149,6 +149,8 @@ export const EXAMPLES: Record<string, string> = {
   if: "/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }",
   join: "/subj ( dog ) /verb ( run ) /join but { /subj ( cat ) /verb ( eat ) }",
   level: "/subj ( man ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",
+  without: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without",
+  posinst: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without /posinst",
   del: "/subj ( cat /adj brown ) /del adj",
   edit: "/edit",
   // Workspace

@@ -49,5 +49,10 @@ export function attachInstrumental(
       ? { phrase: instrumentPlan.subject }
       : undefined;
   if (!complement) return;
-  plan.complements = { ...plan.complements, instrumental: complement };
+  // A denied instrument is the privative, "with" turned "without" (P09-E2). Omitted unless set, so
+  // a plain instrument is the plan it always was.
+  plan.complements = {
+    ...plan.complements,
+    instrumental: link.negative ? { ...complement, negative: true } : complement,
+  };
 }

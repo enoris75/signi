@@ -38,6 +38,13 @@ describe('prepDet', () => {
     expect(prepDet('con', { ...GATTO, definiteness: 'this' }, false, 'gatto')).toBe('con questo');
   });
 
+  // P09-E2's purpose and privative: "per l'uomo", "senza il bastone" — neither fuses.
+  test('per and senza never fuse', () => {
+    expect(prepDet('per', BASTONE, false, 'bastone')).toBe('per il');
+    expect(prepDet('senza', ACQUA, false, 'acqua')).toBe("senza l'");
+    expect(prepDet('senza', { ...GATTO, definiteness: 'indefinite' }, false, 'gatto')).toBe('senza un');
+  });
+
   test('all keeps its own unfused article: a tutte le case', () => {
     expect(prepDet('a', { ...CASA, definiteness: 'all' }, true, 'case')).toBe('a tutte le');
   });

@@ -5,21 +5,85 @@ no member for, from [P09 §3](README.md#3-needs-the-engine-first-11-constructs--
 **Shape:** P09 filed four. **Two are new types** (`purpose`, `topic`); the other two are already in
 the model and need a host, not a type — see *Today*.
 **Scope:** all 7 languages, and the first complement box added to the canvas since it was laid out.
-**Status:** planning, unscheduled. Split out of P09 §3 on 2026-09-23.
+**Status:** shipped, 2026-09-23. Split out of P09 §3 the same day. `purpose` and `topic` render in
+all seven, plan-only; the privative renders in all seven and has its toggle on the canvas and in the
+console. *as* (D3) is deferred — see *Done*.
 **Words:** *for*, *about*, *as*, *without*.
 
-| lang | speaks **about** the cat | works **for** the man | works **as** a teacher | cuts the bread **without** the knife |
+| lang | speaks **about** the cat | reads **for** the man | thinks **about** the cat | cuts **without** the stick |
 |---|---|---|---|---|
-| en | the woman speaks about the cat. | the woman works for the man. | the woman works as a teacher. | the woman cuts the bread without the knife. |
-| it | la donna parla del gatto. | la donna lavora per l'uomo. | la donna lavora come insegnante. | la donna taglia il pane senza il coltello. |
-| fr | la femme parle du chat. | la femme travaille pour l'homme. | la femme travaille comme enseignante. | la femme coupe le pain sans le couteau. |
-| de | die Frau spricht über den Kater. | die Frau arbeitet für den Mann. | die Frau arbeitet als Lehrerin. | die Frau schneidet das Brot ohne das Messer. |
-| es | la mujer habla sobre el gato. | la mujer trabaja para el hombre. | la mujer trabaja como maestra. | la mujer corta el pan sin el cuchillo. |
-| pt | a mulher fala sobre o gato. | a mulher trabalha para o homem. | a mulher trabalha como professora. | a mulher corta o pão sem a faca. |
-| ja | 女性は猫について話します。 | 女性は男性のために働きます。 | 女性は教師として働きます。 | 女性はナイフなしでパンを切ります。 |
+| en | the woman speaks about the cat. | the woman reads for the man. | the woman thinks about the cat. | the woman cuts without the stick. |
+| it | la donna parla del gatto. | la donna legge per l'uomo. | la donna pensa al gatto. | la donna taglia senza il bastone. |
+| fr | la femme parle du chat. | la femme lit pour l'homme. | la femme pense au chat. | la femme coupe sans le bâton. |
+| de | die Frau spricht über den Kater. | die Frau liest für den Mann. | die Frau denkt an den Kater. | die Frau schneidet ohne den Stock. |
+| es | la mujer habla sobre el gato. | la mujer lee para el hombre. | la mujer piensa en el gato. | la mujer corta sin el palo. |
+| pt | a mulher fala sobre o gato. | a mulher lê para o homem. | a mulher pensa no gato. | a mulher corta sem o pau. |
+| ja | 女は猫について話します。 | 女は男のために読みます。 | 女は猫について考えます。 | 女は棒なしで切ります。 |
 
-**Proposed, not engine output.** The forms are what the task expects; the `## Done` section rewrites
-them with what the engine wrote.
+**Engine output**, pinned in `test/complements/topic.test.ts`, `purpose.test.ts` and
+`privative.test.ts`. The planned table's *works for* and *bread / knife* are gone because the corpus
+has neither: its WORK is the *function* sense ("la donna funziona per l'uomo"), and BREAD and KNIFE
+are not seeded, so READ and STICK stand in. The *as* column is D3's, deferred.
+
+## Done
+
+Shipped 2026-09-23. What landed, and where it differs from the design below:
+
+- **Two types, plan-only** (D1, D2). `purpose` and `topic` are in `ComplementType`,
+  `COMPLEMENT_RENDER_ORDER` (topic between the instrument and the manner, purpose right after the
+  cause), `COMPLEMENT_LABELS` and `DETERMINER_COMPLEMENT_TYPES`, and **not** in `COMPLEMENT_TYPES`,
+  as C29's temporal: the canvas draws no box for either, and the frontend's exhaustive maps
+  (`COMPLEMENT_LABEL_KEYS`, `COMPLEMENT_KEYS` F / B, `complementIcons`, `BoxComplementType`) carry
+  them inertly. Both are adposition-bearing and in `TONIC_COMPLEMENTS`: "for her", "per lei",
+  "über ihn", "d'eux".
+- **German takes the accusative on all three** — *für*, *über*, *ohne* — each a `_case = 'acc'`
+  line in the head chain; the spatial *über* + dative is untouched (tested).
+- **Japanese** (D4): のために for the purpose, について for the topic with a comment in `PARTICLE`
+  that it is not は, なしで for the privative (`JA_PRIVATIVE`).
+- **A verb may govern its topic's preposition** — not in the plan. THINK in five languages does not
+  take the generic word ("*pensa del gatto*", "*pense du chat*"): it "pensare a", fr "penser à", de
+  "denken an", es "pensar en", pt "pensar em". The lexeme names it as `topic_prep`, the translator
+  carries it on `ResolvedComplement.link` (the factitive link's field, `topicLink`), and each engine
+  fuses it as that preposition fuses anywhere ("pensa al gatto", "denkt ans Haus", "pensa nele").
+  THINK and SPEAK now license `topic`.
+- **The privative** is `instrumental` + `Complement.negative` (`isPrivative`), a swap of the
+  adposition, never a negator: *without / senza / sans / sin / sem / ohne* / なしで. The clause stays
+  positive and a negated clause keeps its own negation beside it (tested). French "sans" drops the
+  plural indefinite and the partitive ("sans bâtons", "sans eau"); Italian reaches a pronoun through
+  "di" ("senza di lui"); Spanish and Portuguese fuse no pronoun ("sin mí", "sem mim").
+- **The action levels are denied too**, which the plan did not cover: en "without choosing a word",
+  it/fr/es/pt the bare infinitive ("senza scegliere", "sans choisir"), de the subjectless ", ohne ein
+  Wort zu wählen" in the Nachfeld and "ohne das Wählen eines Wortes", ja 選ばないで / 選ぶことなしで.
+  Without them the canvas toggle would have silently rendered a positive act.
+- **The privative toggle rides the instrumental link, not `PhraseSelection`** (§3). The cause's
+  polarity is `causeNegative` on the selection because the cause is a box; the instrument is a
+  period of its own reached by a link, and its reification level already lives on that link for
+  the same reason. So `negative` is on the instrumental `PhraseLink` (`setInstrumentalNegative` in
+  `linkRules`, `InstrumentalBinding.negative`, saved and hydrated), `attachInstrumental` puts it on
+  the plan, and the instrument period shows a polarity chip beside its reification switch
+  (`PrivativeSwitch`, the verb's `polarity.value.*` words under `satellite.polarity` — no new UI
+  string). Its key is ⇧N on the period, as the cause's is ⇧N on its box. The console takes
+  `/without` (aliases `/notinst`, `/privative`) and `/posinst`, said on either period of the pair
+  or on the line that makes the link, printed after `/level`; the round trip holds at 5000 seeds.
+- **Two grammar-name concepts seeded**, because `COMPLEMENT_LABEL_KEYS` is exhaustive:
+  PURPOSE_COMPLEMENT (glossed "a complement that indicates purposes") and TOPIC_COMPLEMENT (literal
+  by design: its gloss needs a TOPIC noun the corpus lacks), behind `slot.purpose` / `slot.topic`.
+  **`signi.db` needs a reseed** for them and for THINK / SPEAK's new forms.
+
+Follow-ups:
+
+- **The role complement** (D3), *works as a teacher* — deferred as recommended; if taken, option 1.
+- **Boxes for `purpose` and `topic`**, to be laid out together with the temporal ring (§3).
+- **A TOPIC noun**, so TOPIC_COMPLEMENT can be glossed like its siblings.
+- **More verbs licensing the two**: TALK and SAY are unseeded, and no verb licenses `purpose` yet —
+  it reads as a free adjunct in the plan, but the word map and the console name only what a verb
+  licenses.
+- The planned order put *for* before *because of* in its own example ("works for the man because
+  of the money"), against the ruling followed here (purpose after cause). Worth a look once a box
+  makes the order visible.
+- Japanese spells the purpose and the neutral cause alike (のために), so 犬のために男のために is
+  ambiguous in the one sentence that holds both; a purpose could take 〜のために and the cause
+  〜のせいで / 〜が原因で if that ever matters.
 
 ## Why
 

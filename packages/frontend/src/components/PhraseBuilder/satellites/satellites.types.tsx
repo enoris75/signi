@@ -11,6 +11,8 @@ import SpeedIcon from "@mui/icons-material/Speed";
 import TransformIcon from "@mui/icons-material/Transform";
 import GroupIcon from "@mui/icons-material/Group";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import FlagIcon from "@mui/icons-material/Flag";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import type { ComplementType, UiStringKey } from "@signi/shared";
 import type {
   GenderSlot,
@@ -126,4 +128,7 @@ export const complementIcons: Record<ComplementType, ReactNode> = {
   comitative: <GroupIcon sx={iconSx} />,
   // When the act happens. Plan-only today, so nothing draws this icon yet (see BoxComplementType).
   temporal: <ScheduleIcon sx={iconSx} />,
+  // What or whom the act is for, and what it is about (P09-E2). Plan-only, like the temporal.
+  purpose: <FlagIcon sx={iconSx} />,
+  topic: <ChatBubbleOutlineIcon sx={iconSx} />,
 };

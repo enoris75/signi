@@ -172,6 +172,19 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child ) /verb ( start ) /inst #2 /level process',
     misuse: { line: '/verb eat /level process', says: { code: 'noInstrumentLink' } },
   },
+  // The instrument denied — the privative, "eats without the stick" (P09-E2) — on the link, as the
+  // level is. Said on the clause, or on the line that makes the link.
+  without: {
+    line: '/subj child /verb eat /inst ( /subj stick ) /without',
+    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'object', negative: true }),
+    prints: '/subj ( child ) /verb ( eat ) /inst #2 /without',
+    misuse: { line: '/verb eat /without', says: { code: 'noInstrumentLink' } },
+  },
+  posinst: {
+    line: '/subj child /verb eat /inst ( /subj stick ) /without /posinst',
+    check: (s) => expect(s.links[0]).not.toHaveProperty('negative'),
+    prints: '/subj ( child ) /verb ( eat ) /inst #2',
+  },
   del: {
     line: '/subj cat /adj brown /adj big /del adj 2',
     check: (s) => {

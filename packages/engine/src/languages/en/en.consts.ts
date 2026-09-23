@@ -36,7 +36,9 @@ export const PREP: Record<ComplementType, string> = {
   source: 'from',
   route: 'through',
   cause: 'because of',
-  instrumental: 'with', // means / tool — "starts with a word"
+  purpose: 'for', // beneficiary or goal, a thing — "works for the man" (P09-E2); the act is PurposeClause
+  instrumental: 'with', // means / tool — "starts with a word"; denied, it is PRIVATIVE
+  topic: 'about', // what is spoken or thought of — "speaks about the cat" (P09-E2)
   manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
   comitative: 'with', // companion — "coordinates with the other period"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
@@ -170,6 +172,10 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
 // dog", which says the cat runs and the dog is not why (see `Complement.negative`). English sets
 // such a phrase off with nothing but the word itself.
 export const CONSTITUENT_NEGATOR = 'not';
+
+// The instrument denied — the privative, "cuts without the knife" (P09-E2). Not the negator above
+// in front of "with": English has a preposition of its own for it, and so does every language here.
+export const PRIVATIVE = 'without';
 
 /** The focus particles (see NounPhrase.focus, C39). English writes "too" after the phrase. */
 export const FOCUS_WORDS: FocusWords = {

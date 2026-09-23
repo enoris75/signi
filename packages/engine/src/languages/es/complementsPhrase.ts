@@ -21,6 +21,7 @@ import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { isPrivative } from '../../functions/isPrivative.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
@@ -111,11 +112,14 @@ export function complementsPhrase(
       // ("eligiendo una palabra"), the substantivized infinitive for the concept level ("con el
       // elegir una palabra") — a masculine singular noun, hence the invariant "el", whatever the
       // infinitive. The noun phrase is the action's direct object either way.
+      // Denied, it is the privative (P09-E2): "sin" + the infinitive at either level ("sin elegir
+      // una palabra").
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinateElement(c.phrase, npText);
           const verb =
+            isPrivative(type, c) ? `sin ${actionInfinitive(c.action)}` :
             level === 'process'
               ? actionGerund(c.action)
               : `con el ${actionInfinitive(c.action)}`;
@@ -142,6 +146,8 @@ export function complementsPhrase(
       // that carries no determiner for it to fuse with (`tonicHeadForms`), and the tonic form
       // follows it in place of the noun.
       const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+      // The privative "sin" fuses with none of them: "sin mí", "sin ti" (P09-E2).
+      if (tonic && isPrivative(type, c)) return `sin ${tonic}`;
       if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `con ${tonic}`;
       // A possessive replaces the article, so the head is the preposition alone ("en mi casa", "a tu perro").
       // Unless the head carries a determiner of its own: that keeps its slot, the preposition takes
@@ -190,7 +196,12 @@ export function complementsPhrase(
         type === 'terminus'  ? aDet(af, plural) :
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
         // The comitative companion takes the same "con": Spanish does not separate the two either.
-        type === 'instrumental' || type === 'comitative' ? prepDet('con', af, plural) :
+        type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'sin' : 'con', af, plural) :
+        // P09-E2. The purpose "para" ("para el hombre") and the topic "sobre" ("habla sobre el gato"),
+        // neither of which contracts; the privative "sin" above does not either. A verb may govern
+        // its own topic's, "en" for "pensar" ("piensa en el gato", see `topicLink`), which does not.
+        type === 'purpose'   ? prepDet('para', af, plural) :
+        type === 'topic'     ? prepDet(c.link || 'sobre', af, plural) :
         // Manner: similative "como" (como el viento — the default), means "con" (con cuidado),
         // measure "a" (a la velocidad de la luz), mode "de" (de manera…). Read off the head noun.
         type === 'manner'    ? (

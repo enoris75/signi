@@ -77,6 +77,22 @@ describe('PeriodContainer', () => {
       expect(instrumental.onLevelChange).toHaveBeenCalledExactlyOnceWith('concept');
     });
 
+    // The privative (P09-E2): the instrument's own polarity, beside its level.
+    it('offers the polarity toggle on an instrument phrase, and reports the denial', () => {
+      const instrumental = instrumentalControl({ isInstrument: true, negative: false });
+      renderPeriod({ instrumental });
+
+      fireEvent.click(screen.getByTestId('instrument-polarity'));
+
+      expect(instrumental.onNegativeChange).toHaveBeenCalledExactlyOnceWith(true);
+    });
+
+    it('offers no polarity toggle on the clause that acts with the instrument', () => {
+      renderPeriod(inst({ hasInstrument: true }));
+
+      expect(screen.queryByTestId('instrument-polarity')).not.toBeInTheDocument();
+    });
+
     it.each<[string, Partial<PeriodContainerProps>]>([
       ['a clause that acts with an instrument', inst({ hasInstrument: true })],
       ['a compact instrument phrase', { compact: true, ...inst({ isInstrument: true }) }],

@@ -298,6 +298,12 @@ const OPS: Op[] = [
     }
     return next;
   },
+  // An instrument denied, or taken back — the privative, "without the stick" (P09-E2).
+  (s, rng) => {
+    const link = pick(rng, s.links.filter((l) => l.kind === 'instrumental'));
+    if (!link || link.kind !== 'instrumental') return undefined;
+    return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
+  },
   // Clearing: an adjective, a modal, a possessor, a conjunct — never a word a link stands on.
   onPeriod((sel, rng, s, cid) => {
     if (isLinked(s, cid)) return undefined;

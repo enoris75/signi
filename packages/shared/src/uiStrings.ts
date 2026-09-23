@@ -774,6 +774,19 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Temporal',
   },
+  // The *for* and the *about* (P09-E2), named like their siblings (it "complemento di fine", "di
+  // argomento"; pt "adjunto adverbial de finalidade", "de assunto"). Plan-only as the temporal is, so
+  // nothing shows these yet; they are here because the label map is exhaustive over ComplementType.
+  'slot.purpose': {
+    plan: nameOf('PURPOSE_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Purpose',
+  },
+  'slot.topic': {
+    plan: nameOf('TOPIC_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Topic',
+  },
 
   // The verb's ring on the canvas: the verb with its modals, tense, aspect and adverb. The Romance
   // traditions call a phrase in this sense a "sintagma" / "syntagme" (it "sintagma verbale"), and

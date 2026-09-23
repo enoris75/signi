@@ -35,9 +35,17 @@ export const PARTICLE: Record<ComplementType, string> = {
   // Cause/reason: the neutral compound postposition "のために"; the sentiment swaps it (see
   // CAUSE_PARTICLE). Kept here for the type — cause is overridden per-sentiment below.
   cause: 'のために',
+  // Purpose (P09-E2) — the beneficiary or goal, "for the man": 男性のために. The same compound the
+  // neutral cause takes, and Japanese does mean both by it; the plan tells them apart, not the word.
+  purpose: 'のために',
   // Instrumental (means / tool) — で, the same particle the locative takes: Japanese marks
   // "with a word" (言葉で) and "at the house" (家で) alike, and only the verb tells them apart.
+  // Denied, it is the privative JA_PRIVATIVE.
   instrumental: 'で',
+  // Topic (P09-E2) — what is spoken or thought *about*: the compound postposition 〜について, 猫について
+  // 話します. NOT the topic particle は, whatever the name invites: 猫は話します is "the cat speaks".
+  // は already marks every subject; this complement never produces it.
+  topic: 'について',
   // Manner adverbial (complemento di modo) — で, the same means/locative particle: "at the speed
   // of light" is 光の速さで, "with care" 注意で. で serves every manner specifier; the possessor
   // (光の) renders through the shared noun-phrase path.
@@ -86,6 +94,13 @@ export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: str
   before: { noun: 'の前', reading: 'のまえ', particle: 'に' },
   during: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
 };
+
+/**
+ * The privative — the instrument denied, "without the knife" (P09-E2): 〜なしで on the noun, ナイフ
+ * なしで切ります, in place of the means' で. An act one does without takes the verb's ない-form and で
+ * instead (選ばないで), see `complementSegs`.
+ */
+export const JA_PRIVATIVE = 'なしで';
 
 /** The essive marker: the object *taken as* the complement rather than made into it. */
 export const JA_ESSIVE = 'として';

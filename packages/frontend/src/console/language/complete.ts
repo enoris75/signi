@@ -395,6 +395,7 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
       return frame.kind === "period" && c?.selection.verb?.complements?.includes("instrumental") ? 2 : undefined;
     }
     case "level":
+    case "privative":
       return state.links.some(
         (l) => isInstrumentalLink(l) && (l.source.containerId === frame.containerId || l.target.containerId === frame.containerId),
       )

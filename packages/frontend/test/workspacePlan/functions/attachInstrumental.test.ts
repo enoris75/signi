@@ -23,6 +23,18 @@ describe('attachInstrumental', () => {
     expect(plan.complements?.instrumental).toEqual({ phrase: expect.objectContaining({ concept: 'KNIFE' }) });
   });
 
+  // The privative (P09-E2): a denied instrument is the "without", at any level.
+  it('denies the instrument when its link is negative, and only then', () => {
+    const denied: PhraseLink = { ...instrumental('i', 'main', 'tool'), negative: true } as PhraseLink;
+    expect(attach([denied], { subject: KNIFE }).complements?.instrumental).toEqual({
+      phrase: expect.objectContaining({ concept: 'KNIFE' }),
+      negative: true,
+    });
+    const act: PhraseLink = { ...instrumental('i', 'main', 'tool', 'process'), negative: true } as PhraseLink;
+    expect(attach([act], { verb: CHOOSE, directObject: WORD }).complements?.instrumental).toMatchObject({ negative: true });
+    expect(attach([instrumental('i', 'main', 'tool')], { subject: KNIFE }).complements?.instrumental).not.toHaveProperty('negative');
+  });
+
   it('keeps the clause’s other complements', () => {
     const plan = attach([instrumental('i', 'main', 'tool', 'object')], { subject: KNIFE });
 

@@ -39,6 +39,7 @@ import {
   relativeTargetKeys,
   removeRelativeLink,
   setInstrumentalLevel,
+  setInstrumentalNegative,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import {
   addConjunct,
@@ -206,8 +207,9 @@ type LinkOp =
     }
   | { kind: "condition"; mainId: string; target: Target; span: Span }
   | { kind: "join"; firstId: string; target: Target; conjunction: CoordConjunction; span: Span }
-  | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; span: Span }
+  | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; span: Span }
   | { kind: "level"; containerId: string; level: AbstractionLevel; span: Span }
+  | { kind: "privative"; containerId: string; negative: boolean; span: Span }
   // A possessor pointing at another noun of its period, which the line may name after it.
   | { kind: "possessorRef"; containerId: string; possessed: NounAddress; antecedent: NounAddress; span: Span }
   | { kind: "unlink"; link: "relative" | "condition" | "join" | "instrument"; containerId: string; nounKey?: NounAddress; span: Span };
@@ -419,6 +421,8 @@ class Run {
         return this.clauseLink(item, def, frame);
       case "level":
         return this.level(item, frame);
+      case "privative":
+        return this.privative(item, action.negative, frame);
       case "mood":
         return this.mood(item, action.mood, frame);
       case "new":
@@ -766,6 +770,19 @@ class Run {
     else this.queue.push({ kind: "level", containerId: id, level, span: item });
   }
 
+  /** `/without`, `/posinst` — whether the instrument this period takes part in is denied (P09-E2). */
+  privative(item: Item, negative: boolean, frame: Frame): void {
+    const id = frame.containerId;
+    // An instrument this very line is linking takes the polarity with it, as it takes a level.
+    const pending = [...this.queue].reverse().find(
+      (op): op is Extract<LinkOp, { kind: "instrument" }> =>
+        op.kind === "instrument" &&
+        (op.clauseId === id || ("containerId" in op.target && op.target.containerId === id)),
+    );
+    if (pending) pending.negative = negative;
+    else this.queue.push({ kind: "privative", containerId: id, negative, span: item });
+  }
+
   mood(item: Item, mood: "command" | "infinitive" | "statement", frame: Frame): void {
     if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
     const id = frame.containerId;
@@ -1018,6 +1035,7 @@ class Run {
           fail(op.span, this.clauseRefusal(op.clauseId, instrument, "instrument"));
         }
         this.links = addInstrumental(this.links, op.clauseId, instrument, id(), op.level);
+        if (op.negative) this.links = setInstrumentalNegative(this.links, op.clauseId, true);
         return;
       }
       case "possessorRef": {
@@ -1032,6 +1050,12 @@ class Run {
         if (!this.links.some((l) => isInstrumentalLink(l) && (l.source.containerId === op.containerId || l.target.containerId === op.containerId)))
           fail(op.span, coded("noInstrumentLink"));
         this.links = setInstrumentalLevel(this.links, op.containerId, op.level);
+        return;
+      }
+      case "privative": {
+        if (!this.links.some((l) => isInstrumentalLink(l) && (l.source.containerId === op.containerId || l.target.containerId === op.containerId)))
+          fail(op.span, coded("noInstrumentLink"));
+        this.links = setInstrumentalNegative(this.links, op.containerId, op.negative);
         return;
       }
       case "unlink": {

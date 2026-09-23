@@ -83,6 +83,8 @@ export type Action =
   | { kind: "join" }
   | { kind: "instrument" }
   | { kind: "level" }
+  /** The instrument denied, or taken back: `/without`, `/posinst` (P09-E2). */
+  | { kind: "privative"; negative: boolean }
   | { kind: "mood"; mood: "command" | "infinitive" | "statement" }
   | { kind: "new" }
   | { kind: "del" }
@@ -663,6 +665,31 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "values", values: LEVEL_VALUES, max: 1 },
     action: { kind: "level" },
   },
+  // The instrument's own polarity, as "/notcause" is the cause's: "/without" denies it — the
+  // privative, "cuts without the knife" (P09-E2) — and "/posinst" takes that back. It rides the
+  // link, as the level does, so it is said on either period of the pair. The clause stays positive.
+  {
+    name: "without",
+    aliases: ["notinst", "privative"],
+    group: "period",
+    description: "without the instrument",
+    descriptionKey: "polarity.value.negative",
+    purposeKey: "purpose.negate",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "privative", negative: true },
+  },
+  {
+    name: "posinst",
+    aliases: ["withinst"],
+    group: "period",
+    description: "with the instrument, not denied",
+    descriptionKey: "polarity.value.positive",
+    purposeKey: "purpose.polarity",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "privative", negative: false },
+  },
   {
     name: "del",
     aliases: ["delete", "remove"],
@@ -917,7 +944,7 @@ export function topicOf(def: CommandDef): Topic {
               ? a.id
               : a.kind === "mood"
                 ? "mood"
-                : a.kind === "condition" || a.kind === "join" || a.kind === "instrument" || a.kind === "level"
+                : a.kind === "condition" || a.kind === "join" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative"
                   ? "links"
                   : a.kind === "new" || a.kind === "del" || (a.kind === "app" && a.app === "edit")
                     ? "period"

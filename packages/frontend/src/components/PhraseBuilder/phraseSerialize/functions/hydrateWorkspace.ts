@@ -51,6 +51,8 @@ export function hydrateWorkspace(
           kind: "instrumental" as const,
           // A missing or unknown level is the plain "with a thing" the link starts at.
           level: ABSTRACTION_LEVELS.includes(l.level as AbstractionLevel) ? (l.level as AbstractionLevel) : "object",
+          // The privative (P09-E2): only a literal true denies; anything else is the plain means.
+          ...(l.negative === true ? { negative: true } : {}),
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }

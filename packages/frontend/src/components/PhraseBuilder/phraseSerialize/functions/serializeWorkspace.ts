@@ -20,6 +20,7 @@ export function serializeWorkspace(
       target: { ...l.target },
       ...(l.kind === "coordinative" ? { conjunction: l.conjunction } : {}),
       ...(l.kind === "instrumental" ? { level: l.level } : {}),
+      ...(l.kind === "instrumental" && l.negative ? { negative: true } : {}),
     })),
   };
 }

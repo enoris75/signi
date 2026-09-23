@@ -30,6 +30,7 @@ import {
   dropContainerLinks,
   removeRelativeLink,
   setInstrumentalLevel as withInstrumentalLevel,
+  setInstrumentalNegative as withInstrumentalNegative,
 } from "../linkRules.ts";
 
 /** Fresh ids for both containers and links — one source, so they never collide. */
@@ -168,6 +169,11 @@ export function useWorkspaceLinks(
     setLinks((ls) => withInstrumentalLevel(ls, containerId, level));
   }
 
+  // Deny the instrument, or take the denial back (the privative, P09-E2) — from either end too.
+  function setInstrumentalNegative(containerId: string, negative: boolean) {
+    setLinks((ls) => withInstrumentalNegative(ls, containerId, negative));
+  }
+
   function clearInstrumental(containerId: string) {
     setLinks((ls) => withoutInstrumental(ls, containerId));
   }
@@ -268,6 +274,8 @@ export function useWorkspaceLinks(
         hasTarget: instrumentals.some((l) => l.target.containerId === c.id),
         level: instLink?.level ?? "object",
         onLevelChange: (level) => setInstrumentalLevel(c.id, level),
+        negative: instLink?.negative === true,
+        onNegativeChange: (negative) => setInstrumentalNegative(c.id, negative),
         isPickTarget:
           pick.active &&
           pick.kind === "instrumental" &&

@@ -1,11 +1,13 @@
 import type { ResolvedComplement } from '../../../types.js';
 import { abstractionLevel } from '../../../functions/abstractionLevel.js';
+import { isPrivative } from '../../../functions/isPrivative.js';
 import { actionInfinitive } from '../../../functions/actionInfinitive.js';
 import { coordinate } from '../coordinate.js';
 import { declineAdj } from '../declineAdj.js';
 import { nounPhrase } from '../nounPhrase.js';
 import { particleGap } from '../particleGap.js';
 import { personalPronoun } from '../personalPronoun.js';
+import { zuInfinitive } from '../zuInfinitive.js';
 
 // An instrument presented as an action. German has no gerund, so the two levels part ways
 // completely. The process level is a subordinate means clause — "indem er ein Wort wählt", with
@@ -20,6 +22,11 @@ import { personalPronoun } from '../personalPronoun.js';
 // "mit dem Wählen eines Wortes". The action's adverb comes along as an attributive
 // adjective on that noun ("mit dem schnellen Wählen"), which is what German adverbs are.
 //
+// Denied, the act is the privative (P09-E2), and the two levels part ways again. The process level
+// is the infinitive clause "ohne … zu", which needs no subject and so names no doer (", ohne ein
+// Wort zu wählen"), set off and placed in the Nachfeld as "indem" is. The concept level keeps its
+// nominalised infinitive under "ohne", which governs the accusative: "ohne das Wählen eines Wortes".
+//
 // Undefined at the object level or without an action: the instrument is then the plain "mit" +
 // dative noun of the prepositional path in `complementsPhrase`.
 export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<string, string>): string | undefined {
@@ -27,6 +34,11 @@ export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<stri
   const level = abstractionLevel(c);
   if (!action || level === 'object') return undefined;
   const adverb = action.modifier?.forms['base'] ?? '';
+  const privative = isPrivative('instrumental', c);
+  if (level === 'process' && privative) {
+    const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
+    return [', ohne', object, adverb, zuInfinitive(action.verb.forms)].filter(Boolean).join(' ');
+  }
   if (level === 'process') {
     const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
     const { pronoun, pn } = personalPronoun(doer ?? { generic: '1' });
@@ -46,7 +58,8 @@ export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<stri
   // A nominalized infinitive is one word, a particle written apart included: "das Rückgängigmachen" (B40).
   const infinitive = particleGap(action.verb.forms) ? actionInfinitive(action).replace(' ', '') : actionInfinitive(action);
   const act = infinitive.charAt(0).toUpperCase() + infinitive.slice(1);
-  // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en).
-  const attr = adverb ? declineAdj(adverb, 'dat', 'neut', false, 'definite') : '';
-  return ['mit dem', attr, act, object].filter(Boolean).join(' ');
+  // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en), or behind
+  // the privative's accusative "das" (neuter → -e).
+  const attr = adverb ? declineAdj(adverb, privative ? 'acc' : 'dat', 'neut', false, 'definite') : '';
+  return [privative ? 'ohne das' : 'mit dem', attr, act, object].filter(Boolean).join(' ');
 }
