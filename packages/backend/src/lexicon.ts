@@ -230,6 +230,26 @@ export function isSeededConcept(conceptId: string): boolean {
   return getConceptRole(conceptId) !== null;
 }
 
+/**
+ * The lexicon lookup, noting every id the engine asks for that has no concept row. The engine
+ * renders a concept the lexicon cannot find as an empty word, in every slot (subject, object,
+ * complement…), so a render through the plain lookup comes back with a hole where the concept
+ * was. Rather than walk the plan (and keep a walker in step with the plan model), note the ids
+ * the engine asks for: that covers every slot it reads. `/api/translate` turns the noted ids
+ * into a 400; the boot renders (definitions, UI strings) into a startup failure (A253).
+ */
+export function notingLookup(): { lookup: typeof lookupLexicalEntry; unknown: Set<string> } {
+  const unknown = new Set<string>();
+  const lookup: typeof lookupLexicalEntry = (conceptId, language) => {
+    if (typeof conceptId !== 'string' || !isSeededConcept(conceptId)) {
+      unknown.add(String(conceptId));
+      return undefined;
+    }
+    return lookupLexicalEntry(conceptId, language);
+  };
+  return { lookup, unknown };
+}
+
 export function clearLexiconCache(): void {
   entryCache.clear();
   roleCache.clear();

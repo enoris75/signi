@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { getDb } from './db.js';
-import { clearLexiconCache, isSeededConcept, lookupLexicalEntry } from './lexicon.js';
+import { clearLexiconCache, isSeededConcept, lookupLexicalEntry, notingLookup } from './lexicon.js';
 // Seeds the real corpus into this file's in-memory database (SIGNI_DB_PATH, see vitest.config.ts).
 import './seed.js';
 
@@ -189,6 +189,39 @@ describe('isSeededConcept', () => {
     } finally {
       db.prepare("DELETE FROM semantic_concepts WHERE id = 'ZEBRA'").run();
     }
+  });
+});
+
+describe('notingLookup', () => {
+  test('answers a seeded concept as the lexicon does, noting nothing', () => {
+    const { lookup, unknown } = notingLookup();
+    expect(lookup('CAT', 'en')).toBe(lookupLexicalEntry('CAT', 'en'));
+    expect(unknown.size).toBe(0);
+  });
+
+  test('notes each unseeded id once, and answers it with nothing', () => {
+    const { lookup, unknown } = notingLookup();
+    expect(lookup('UNICORN', 'en')).toBeUndefined();
+    lookup('UNICORN', 'ja');
+    lookup('GRIFFIN', 'en');
+    expect([...unknown]).toEqual(['UNICORN', 'GRIFFIN']);
+  });
+
+  test('does not note a seeded concept with no word in a language', () => {
+    db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('ZEBRA', 'noun', 'a striped horse')").run();
+    try {
+      const { lookup, unknown } = notingLookup();
+      expect(lookup('ZEBRA', 'en')).toBeUndefined();
+      expect(unknown.size).toBe(0);
+    } finally {
+      db.prepare("DELETE FROM semantic_concepts WHERE id = 'ZEBRA'").run();
+    }
+  });
+
+  test('keeps each lookup\'s notes to itself', () => {
+    const first = notingLookup();
+    first.lookup('UNICORN', 'en');
+    expect(notingLookup().unknown.size).toBe(0);
   });
 });
 

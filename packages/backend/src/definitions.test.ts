@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { translate } from '@signi/engine';
 import { LANGUAGES } from '@signi/shared';
-import type { LanguageCode, Translation } from '@signi/shared';
+import type { LanguageCode, PhrasePlan, Translation } from '@signi/shared';
 import { concepts } from './concepts/index.js';
 import { buildConceptDefinitions } from './definitions.js';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -14,6 +14,27 @@ vi.mock('@signi/engine', async (importOriginal) => {
   const engine = await importOriginal<typeof import('@signi/engine')>();
   return { ...engine, translate: vi.fn(engine.translate) };
 });
+
+// What a boot render hands the engine: not the plain lexicon but the noting lookup (A253), which
+// answers a seeded concept exactly as the lexicon does. An asymmetric matcher, so the call
+// assertions below still pin the lookup argument rather than accepting any function.
+const theLexicon = {
+  asymmetricMatch: (lookup: unknown) =>
+    typeof lookup === 'function' && lookup !== lookupLexicalEntry
+    && (lookup as typeof lookupLexicalEntry)('CAT', 'en') === lookupLexicalEntry('CAT', 'en'),
+  toString: () => 'theLexicon',
+};
+
+// The unseeded UNICORN in each slot the engine renders a blank for (A253): subject, object and
+// complement. GRIFFIN, also unseeded, shows the error naming every unknown id at once.
+const HOLES: [string, PhrasePlan][] = [
+  ['subject', { subject: { concept: 'UNICORN' }, verbPhrase: { verb: 'SPEAK' } }],
+  ['object', { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'EAT' }, directObject: { concept: 'UNICORN' } }],
+  ['complement', { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' }, complements: { manner: { phrase: { concept: 'UNICORN' } } } }],
+];
+const TWO_HOLES: PhrasePlan = {
+  subject: { concept: 'GRIFFIN' }, verbPhrase: { verb: 'EAT' }, directObject: { concept: 'UNICORN' },
+};
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 const planned = concepts.filter((c) => c.definition);
@@ -34,7 +55,7 @@ describe('buildConceptDefinitions', () => {
   test('renders each plan through the engine with the lexicon', () => {
     buildConceptDefinitions();
     expect(translate).toHaveBeenCalledTimes(planned.length);
-    for (const c of planned) expect(translate).toHaveBeenCalledWith(c.definition, lookupLexicalEntry);
+    for (const c of planned) expect(translate).toHaveBeenCalledWith(c.definition, theLexicon);
   });
 
   test('renders a definition into every language, without the period\'s full stop', () => {
@@ -87,13 +108,33 @@ describe('buildConceptDefinitions', () => {
 // the error names ("Check the concepts its plan references are seeded"); it should fail the same way
 // /api/translate does, naming the concept.
 describe('known bugs: a boot render serves the hole an unseeded concept leaves (A253)', () => {
-  test.fails('a definition naming an unseeded complement fails the boot, naming the concept', async () => {
+  test('a definition naming an unseeded complement fails the boot, naming the concept', async () => {
     const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
     vi.mocked(translate).mockImplementationOnce((_plan, lookup) => engine.translate({
       subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' },
       complements: { manner: { phrase: { concept: 'UNICORN' } } },
     }, lookup));
     expect(() => buildConceptDefinitions()).toThrow(/UNICORN/);
+  });
+
+  test.each(HOLES)('a definition naming an unseeded %s fails the boot, naming the concept', async (_slot, plan) => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    vi.mocked(translate).mockImplementationOnce((_plan, lookup) => engine.translate(plan, lookup));
+    expect(() => buildConceptDefinitions()).toThrow(
+      `Definition for "${planned[0]!.id}" names unknown concept: UNICORN. Seed them, or change the plan.`,
+    );
+  });
+
+  test('a definition naming several unseeded concepts names them all', async () => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    vi.mocked(translate).mockImplementationOnce((_plan, lookup) => engine.translate(TWO_HOLES, lookup));
+    expect(() => buildConceptDefinitions()).toThrow(
+      `Definition for "${planned[0]!.id}" names unknown concepts: GRIFFIN, UNICORN. Seed them, or change the plan.`,
+    );
+  });
+
+  test('regression: every shipped definition still boots against the seeded corpus', () => {
+    expect(() => buildConceptDefinitions()).not.toThrow();
   });
 
   test('regression: the hole is there to be caught, and a wholly blank language already is', async () => {

@@ -11,6 +11,7 @@ import {
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
 import type {
   LanguageCode,
+  PhrasePlan,
   Translation,
   UiStringConjunctionDef,
   UiStringDef,
@@ -41,6 +42,27 @@ vi.mock('@signi/engine', async (importOriginal) => {
     translateSpecifier: vi.fn(engine.translateSpecifier),
   };
 });
+
+// What a boot render hands the engine: not the plain lexicon but the noting lookup (A253), which
+// answers a seeded concept exactly as the lexicon does. An asymmetric matcher, so the call
+// assertions below still pin the lookup argument rather than accepting any function.
+const theLexicon = {
+  asymmetricMatch: (lookup: unknown) =>
+    typeof lookup === 'function' && lookup !== lookupLexicalEntry
+    && (lookup as typeof lookupLexicalEntry)('CAT', 'en') === lookupLexicalEntry('CAT', 'en'),
+  toString: () => 'theLexicon',
+};
+
+// The unseeded UNICORN in each slot the engine renders a blank for (A253): subject, object and
+// complement. GRIFFIN, also unseeded, shows the error naming every unknown id at once.
+const HOLES: [string, PhrasePlan][] = [
+  ['subject', { subject: { concept: 'UNICORN' }, verbPhrase: { verb: 'SPEAK' } }],
+  ['object', { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'EAT' }, directObject: { concept: 'UNICORN' } }],
+  ['complement', { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' }, complements: { manner: { phrase: { concept: 'UNICORN' } } } }],
+];
+const TWO_HOLES: PhrasePlan = {
+  subject: { concept: 'GRIFFIN' }, verbPhrase: { verb: 'EAT' }, directObject: { concept: 'UNICORN' },
+};
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 const CATALOG = Object.entries(UI_STRINGS as Record<string, UiStringDef>);
@@ -93,11 +115,11 @@ describe('buildUiStrings', () => {
 
     expect(translateDeterminer).toHaveBeenCalledTimes(byKind.determiner.length);
     for (const [, d] of byKind.determiner) {
-      expect(translateDeterminer).toHaveBeenCalledWith(d.determiner, lookupLexicalEntry, d.agreesWith);
+      expect(translateDeterminer).toHaveBeenCalledWith(d.determiner, theLexicon, d.agreesWith);
     }
     expect(translatePossessive).toHaveBeenCalledTimes(byKind.possessive.length);
     for (const [, d] of byKind.possessive) {
-      expect(translatePossessive).toHaveBeenCalledWith(d.possessive, lookupLexicalEntry, d.agreesWith);
+      expect(translatePossessive).toHaveBeenCalledWith(d.possessive, theLexicon, d.agreesWith);
     }
     expect(translateConjunction).toHaveBeenCalledTimes(byKind.conjunction.length);
     for (const [, d] of byKind.conjunction) {
@@ -106,18 +128,18 @@ describe('buildUiStrings', () => {
     }
     expect(translateSpecifier).toHaveBeenCalledTimes(byKind.specifier.length);
     for (const [, d] of byKind.specifier) {
-      expect(translateSpecifier).toHaveBeenCalledWith(d.specifier, lookupLexicalEntry, d.agreesWith);
+      expect(translateSpecifier).toHaveBeenCalledWith(d.specifier, theLexicon, d.agreesWith);
     }
     expect(translateDegree).toHaveBeenCalledTimes(byKind.degree.length);
     for (const [, d] of byKind.degree) {
-      expect(translateDegree).toHaveBeenCalledWith(d.degree, lookupLexicalEntry, d.agreesWith);
+      expect(translateDegree).toHaveBeenCalledWith(d.degree, theLexicon, d.agreesWith);
     }
     expect(translateWord).toHaveBeenCalledTimes(byKind.word.length);
     for (const [, d] of byKind.word) {
-      expect(translateWord).toHaveBeenCalledWith(d.word, lookupLexicalEntry, d.agreesWith);
+      expect(translateWord).toHaveBeenCalledWith(d.word, theLexicon, d.agreesWith);
     }
     expect(translate).toHaveBeenCalledTimes(byKind.plan.length);
-    for (const [, d] of byKind.plan) expect(translate).toHaveBeenCalledWith(d.plan, lookupLexicalEntry);
+    for (const [, d] of byKind.plan) expect(translate).toHaveBeenCalledWith(d.plan, theLexicon);
   });
 
   test('renders a word label capitalized when its format asks', () => {
@@ -1234,7 +1256,7 @@ describe('buildUiStrings', () => {
 // whole language comes back empty, so a plan whose unseeded concept is one word among others boots
 // and serves the hole ("the woman speaks like the."). It should fail naming the concept.
 describe('known bugs: a boot render serves the hole an unseeded concept leaves (A253)', () => {
-  test.fails('a UI string naming an unseeded complement fails the boot, naming the concept', async () => {
+  test('a UI string naming an unseeded complement fails the boot, naming the concept', async () => {
     const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
     const [firstPlanKey] = byKind.plan[0]!;
     // Every non-plan entry renders for real; the first plan entry names the unseeded concept.
@@ -1245,5 +1267,42 @@ describe('known bugs: a boot render serves the hole an unseeded concept leaves (
       lookup,
     ));
     expect(() => buildUiStrings()).toThrow(/UNICORN/);
+  });
+
+  // Swaps the first plan entry's plan for `hole`; every other entry renders for real.
+  const withFirstPlan = async (hole: PhrasePlan) => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    const [firstPlanKey, firstPlan] = byKind.plan[0]!;
+    vi.mocked(translate).mockImplementation((plan, lookup) =>
+      engine.translate(plan === firstPlan.plan ? hole : plan, lookup));
+    return firstPlanKey;
+  };
+
+  test.each(HOLES)('a UI string naming an unseeded %s fails the boot, naming the concept', async (_slot, plan) => {
+    const key = await withFirstPlan(plan);
+    expect(() => buildUiStrings()).toThrow(
+      `UI string "${key}" names unknown concept: UNICORN. Seed them, or change its entry.`,
+    );
+  });
+
+  test('a UI string naming several unseeded concepts names them all', async () => {
+    const key = await withFirstPlan(TWO_HOLES);
+    expect(() => buildUiStrings()).toThrow(
+      `UI string "${key}" names unknown concepts: GRIFFIN, UNICORN. Seed them, or change its entry.`,
+    );
+  });
+
+  test('a word entry naming an unseeded concept fails the boot the same way', async () => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    const [wordKey, wordDef] = byKind.word[0]!;
+    vi.mocked(translateWord).mockImplementation((word, lookup, agreesWith) =>
+      engine.translateWord(word === wordDef.word ? 'UNICORN' : word, lookup, agreesWith));
+    expect(() => buildUiStrings()).toThrow(
+      `UI string "${wordKey}" names unknown concept: UNICORN. Seed them, or change its entry.`,
+    );
+  });
+
+  test('regression: every shipped entry still boots against the seeded corpus', () => {
+    expect(() => buildUiStrings()).not.toThrow();
   });
 });

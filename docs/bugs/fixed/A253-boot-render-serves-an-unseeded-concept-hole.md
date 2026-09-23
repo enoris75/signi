@@ -37,3 +37,23 @@ Pinned by `known bugs: a boot render serves the hole an unseeded concept leaves 
 
 Found shipping [P09-E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
 where a manner complement naming the unseeded WIND rendered `like the`.
+
+## Resolved
+
+2026-09-23. The noting lookup `/api/translate` built inline moved into
+[`notingLookup`](../../../packages/backend/src/lexicon.ts), which hands back a lookup and the set of
+ids it was asked for that have no concept row. `/api/translate`
+([index.ts](../../../packages/backend/src/index.ts)) and both boot renders now share it:
+[`buildConceptDefinitions`](../../../packages/backend/src/definitions.ts) throws
+`Definition for "<id>" names unknown concept: UNICORN. Seed them, or change the plan.`, and
+[`buildUiStrings`](../../../packages/backend/src/uiStrings.ts) throws
+`UI string "<key>" names unknown concept: UNICORN. Seed them, or change its entry.`, for every entry
+kind that takes a lookup (plans and the five lookup-taking word kinds), before the whole-language
+check runs. Every shipped definition and UI string still boots against the seeded corpus.
+
+Guarded by the formerly-`.fails` tests in `known bugs: a boot render serves the hole an unseeded
+concept leaves (A253)` in [definitions.test.ts](../../../packages/backend/src/definitions.test.ts) and
+[uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts), plus new cases there for the
+unseeded id in subject, object and complement position, several unseeded ids named at once, a `word`
+entry naming one, and every shipped plan still booting; and by `notingLookup` in
+[lexicon.test.ts](../../../packages/backend/src/lexicon.test.ts).

@@ -2,7 +2,7 @@ import { translate } from '@signi/engine';
 import { LANGUAGES } from '@signi/shared';
 import type { LanguageCode } from '@signi/shared';
 import { concepts } from './concepts/index.js';
-import { lookupLexicalEntry } from './lexicon.js';
+import { notingLookup } from './lexicon.js';
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
@@ -16,8 +16,9 @@ function stripPeriod(text: string): string {
  * Renders every concept that carries a `definition` plan into all seven languages, exactly as the
  * UI-string catalog is rendered (see uiStrings.ts) — the engine composes the definition from
  * seeded concepts so it is localized the same way the rest of the app is. Built once at startup
- * and served from memory; a plan that fails to render in some language throws here, at boot, with
- * the concept and the missing languages named, rather than serving a half-translated tooltip.
+ * and served from memory; a plan that names an unseeded concept, or fails to render in some
+ * language, throws here, at boot, with the concept and the unknown ids or missing languages named,
+ * rather than serving a tooltip with a hole in it.
  *
  * Returns a map from concept id to its per-language definition; concepts without a plan are
  * absent and fall back to their stored `concept_definitions` literal at read time.
@@ -28,7 +29,17 @@ export function buildConceptDefinitions(): Map<string, Partial<Record<LanguageCo
   for (const c of concepts) {
     if (!c.definition) continue;
 
-    const rendered = translate(c.definition, lookupLexicalEntry);
+    const { lookup, unknown } = notingLookup();
+    const rendered = translate(c.definition, lookup);
+    // The engine renders an unseeded concept as an empty word, so a plan naming one still renders
+    // in every language, with a hole in it: refuse it the way /api/translate does (A253).
+    if (unknown.size > 0) {
+      const ids = [...unknown];
+      throw new Error(
+        `Definition for "${c.id}" names unknown concept${ids.length > 1 ? 's' : ''}: ${ids.join(', ')}. ` +
+          'Seed them, or change the plan.',
+      );
+    }
     const byLanguage: Partial<Record<LanguageCode, string>> = {};
     for (const t of rendered) {
       if (t.text) byLanguage[t.language] = stripPeriod(t.text);
