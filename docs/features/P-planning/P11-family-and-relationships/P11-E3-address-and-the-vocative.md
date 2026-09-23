@@ -1,4 +1,4 @@
-# P11-F3. Address — the vocative, and a kin term used as a name
+# P11-E3. Address — the vocative, and a kin term used as a name
 
 **Construct:** talking *to* family — calling one's own mother お母さん, and using *Mom* as a name
 ("Mom runs", *Mamá corre*, *Mama läuft*). From [P11](README.md)'s *Out of scope* follow-ups.

@@ -1,4 +1,4 @@
-# P11-F5. Counting relatives — 三人兄弟
+# P11-E5. Counting relatives — 三人兄弟
 
 **Construct:** "we are three siblings" — a counted phrase where the numeral and its counter compound
 straight onto the noun, with no の. From [P11](README.md)'s *Out of scope* follow-ups.

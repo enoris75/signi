@@ -1,4 +1,4 @@
-# P11-F2. Coreference — a possessor that is a link, not a bundle of features
+# P11-E2. Coreference — a possessor that is a link, not a bundle of features
 
 **Construct:** "**his** mother", where *he* is the speaker's brother; and Japanese 自分の for a
 possessor that is the clause's own subject. From [P11](README.md)'s *Out of scope* follow-ups.

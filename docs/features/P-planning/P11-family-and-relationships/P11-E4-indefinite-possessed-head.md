@@ -1,4 +1,4 @@
-# P11-F4. "A friend of mine" — the indefinite possessed head
+# P11-E4. "A friend of mine" — the indefinite possessed head
 
 **Construct:** how a language says *a* friend of mine as opposed to *my* friend. P11 filed it as
 **German *ein Freund von mir***; it is the same gap in five of the seven.

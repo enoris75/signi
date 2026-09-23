@@ -373,11 +373,11 @@ through a feature task.
 
 | task | what it is | size |
 |---|---|---|
-| [P11-F1](P11-F1-japanese-honorific-verbs.md) | Japanese honorific and humble verbs — いらっしゃる, 召し上がる, 参る | a lexeme column and one branch; reads the `own` mark D3 already sets |
-| [P11-F2](P11-F2-coreference.md) | Coreference — a possessor that is a **link**, not features. Answers both "his mother" (D3's own limit) and automatic 自分の | the one real model change: a third `Possessor` kind |
-| [P11-F3](P11-F3-address-and-the-vocative.md) | Address — a kin term as a name ("Mom runs") and the vocative ("Mom, run!") | two halves; the name half is data, the vocative is a new slot |
-| [P11-F4](P11-F4-indefinite-possessed-head.md) | "a friend of mine" / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
-| [P11-F5](P11-F5-counting-relatives.md) | 三人兄弟 | a third value of a flag that has two |
+| [P11-E1](P11-E1-japanese-honorific-verbs.md) | Japanese honorific and humble verbs — いらっしゃる, 召し上がる, 参る | a lexeme column and one branch; reads the `own` mark D3 already sets |
+| [P11-E2](P11-E2-coreference.md) | Coreference — a possessor that is a **link**, not features. Answers both "his mother" (D3's own limit) and automatic 自分の | the one real model change: a third `Possessor` kind |
+| [P11-E3](P11-E3-address-and-the-vocative.md) | Address — a kin term as a name ("Mom runs") and the vocative ("Mom, run!") | two halves; the name half is data, the vocative is a new slot |
+| [P11-E4](P11-E4-indefinite-possessed-head.md) | "a friend of mine" / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
+| [P11-E5](P11-E5-counting-relatives.md) | 三人兄弟 | a third value of a flag that has two |
 
 **No task, by design:**
 
@@ -393,7 +393,7 @@ through a feature task.
   no new construct); and
   [B73](../../../localization/done/B73-in-laws-and-step-parents.md) on half- and step-siblings, which
   says to settle Italian *fratellastro* — both the half- and the step-brother — before seeding either.
-  *Mum* waits on F3's name half.
+  *Mum* waits on E3's name half.
 - **The Russian and Ukrainian in-law split** (свекровь / тёща). This plan already says to decide it
   when [P06](../P06-russian/README.md) lands, and that is still right: the fusion it would need is
   keyed on a possessor no other language reads.
