@@ -1088,3 +1088,93 @@ describe('known bugs: an Italian animate source question fronts the ablative via
   });
 });
 
+// A280. A Japanese passive whose recipient is already に makes its agent によって (本は女によって男に
+// あげられます). The terminus asked about is 誰に / 何に in that same clause, but the agent's particle is
+// chosen before the asked slot joins the complements, so the clause says に twice.
+describe('known bugs: a Japanese passive terminus question doubles に (A280)', () => {
+  const given = (questionAnimate?: boolean) =>
+    ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', questionAnimate);
+
+  test.fails('who is the book given to by the woman: 女によって誰に', () => {
+    expect(sayAll(given(true)).ja).toBe('本は女によって誰にあげられますか？');
+  });
+
+  test.fails('what is the book given to by the woman: 女によって何に', () => {
+    expect(sayAll(given()).ja).toBe('本は女によって何にあげられますか？');
+  });
+
+  test('regression: the other six, the statement\'s によって and the agentless question', () => {
+    expect(sayAll(given(true))).toMatchObject({
+      en: 'who is the book given by the woman to?',
+      it: 'a chi è dato dalla donna il libro?',
+      fr: 'à qui est-ce que le livre est donné par la femme ?',
+      de: 'wem wird das Buch von der Frau gegeben?',
+      es: '¿a quién es dado el libro por la mujer?',
+      pt: 'a quem o livro é dado pela mulher?',
+    });
+    expect(say(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'ja'))
+      .toBe('本は女によって男にあげられます。');
+    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', true), 'ja')).toBe('本は誰にあげられますか？');
+  });
+});
+
+// A281. German `was` has no dative. A thing asked about in a dative slot — a recipient, the object of
+// helfen — is asked with `wem`, as the person is; the engine writes the nominative/accusative `was`.
+describe('known bugs: a German inanimate dative question asks with was (A281)', () => {
+  test.fails('the recipient: wem gibt der Mann das Buch?', () => {
+    expect(sayAll(about(clause(np('MAN'), 'GIVE', { directObject: np('BOOK') }), 'terminus')).de).toBe('wem gibt der Mann das Buch?');
+  });
+
+  test.fails('the recipient of a passive: wem wird das Buch von der Frau gegeben?', () => {
+    expect(sayAll(ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus')).de)
+      .toBe('wem wird das Buch von der Frau gegeben?');
+  });
+
+  test.fails('the dative object of helfen: wem hilft der Kater?', () => {
+    expect(sayAll(ask(clause(np('CAT'), 'HELP_VERB'), 'directObject')).de).toBe('wem hilft der Kater?');
+  });
+
+  test('regression: the other six, the statement\'s dative, and was where the slot is nominative or accusative', () => {
+    expect(sayAll(about(clause(np('MAN'), 'GIVE', { directObject: np('BOOK') }), 'terminus'))).toMatchObject({
+      en: 'what does the man give the book to?',
+      it: 'a che cosa dà il libro l\'uomo?',
+      fr: 'à quoi est-ce que l\'homme donne le livre ?',
+      es: '¿a qué da el hombre el libro?',
+      ja: '男は何に本をあげますか？',
+      pt: 'a que o homem dá o livro?',
+    });
+    expect(say(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('HOUSE') } } }), 'de'))
+      .toBe('der Mann gibt dem Haus das Buch.');
+    expect(say(ask(clause(someone, 'HELP_VERB', { directObject: np('CAT') }), 'subject'), 'de')).toBe('was hilft dem Kater?');
+    expect(say(about(clause(np('MAN'), 'ASK'), 'terminus'), 'de')).toBe('was fragt der Mann?'); // fragen's addressee is accusative
+  });
+});
+
+// A282. English strands the by of a passive agent question (P09-E16 D2), but writes it where the
+// by-phrase stands in the statement, ahead of the recipient: the preposition ends up between the
+// participle and an argument of the verb. It belongs after the verb's arguments.
+describe('known bugs: an English passive agent question strands by ahead of the recipient (A282)', () => {
+  const givenToTheChild = (questionAnimate?: boolean) =>
+    ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'subject', questionAnimate);
+
+  test.fails('who is the book given to the child by?', () => {
+    expect(sayAll(givenToTheChild(true)).en).toBe('who is the book given to the child by?');
+  });
+
+  test.fails('what is the book given to the child by?', () => {
+    expect(sayAll(givenToTheChild()).en).toBe('what is the book given to the child by?');
+  });
+
+  test('regression: the other six front the agent, and the statement keeps by-phrase then recipient', () => {
+    expect(sayAll(givenToTheChild(true))).toMatchObject({
+      it: 'da chi è dato al bambino il libro?',
+      fr: 'par qui est-ce que le livre est donné à l\'enfant ?',
+      de: 'von wem wird das Buch dem Kind gegeben?',
+      es: '¿por quién es dado el libro al niño?',
+      ja: '本は誰によって子供にあげられますか？',
+      pt: 'por quem o livro é dado à criança?',
+    });
+    expect(say(clause(np('MAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'en'))
+      .toBe('the book is given by the man to the child.');
+  });
+});
