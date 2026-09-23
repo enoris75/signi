@@ -2239,6 +2239,12 @@ export const nouns: ConceptSeed[] = [
     // drops it), and Japanese casual speech says お母さん for everyone's mother, own or not — one
     // word, marked `kin` and with no possessed / honorific split of its own. Register is not a
     // differentia, so neither carries a definition (B68 *Not solved* 2).
+    //
+    // `as_name` (P11-E3): "Mom runs", *Maman court*, *Mamá corre* — definite, with nothing to make it
+    // *a* mom, the word is a name: capitalized, and articled as the language articles a person's
+    // name — French and Portuguese, which article a name unless it says otherwise, carry PETER's
+    // `takes_article: '0'` beside it (read only on a name). Italian leaves the column off, because
+    // Italian keeps the article in the third person (*la mamma corre*).
     id: 'MOM',
     role: 'noun',
     description: 'mother, in casual speech',
@@ -2247,16 +2253,17 @@ export const nouns: ConceptSeed[] = [
     human: true,
     isA: 'MOTHER',
     forms: {
-      en: { base: 'mom', plural: 'moms', count: 'singular' },
+      en: { base: 'mom', plural: 'moms', count: 'singular', as_name: '1' },
       it: { base: 'mamma', plural: 'mamme', gender: 'fem', count: 'singular' },
-      fr: { base: 'maman', plural: 'mamans', gender: 'fem', count: 'singular' },
-      de: { base: 'Mama', plural: 'Mamas', gender: 'fem', count: 'singular' },
-      es: { base: 'mamá', plural: 'mamás', gender: 'fem', count: 'singular' },
-      ja: { base: 'お母さん', count: 'singular', reading: 'おかあさん', kin: '1' },
-      pt: { base: 'mamãe', plural: 'mamães', gender: 'fem', count: 'singular' },
+      fr: { base: 'maman', plural: 'mamans', gender: 'fem', count: 'singular', as_name: '1', takes_article: '0' },
+      de: { base: 'Mama', plural: 'Mamas', gender: 'fem', count: 'singular', as_name: '1' },
+      es: { base: 'mamá', plural: 'mamás', gender: 'fem', count: 'singular', as_name: '1' },
+      ja: { base: 'お母さん', count: 'singular', reading: 'おかあさん', kin: '1', as_name: '1' },
+      pt: { base: 'mamãe', plural: 'mamães', gender: 'fem', count: 'singular', as_name: '1', takes_article: '0' },
     },
   },
   {
+    // `as_name` as MOM's (P11-E3): "Dad runs", *Papa läuft*, *Papá corre*; Italian *il papà corre*.
     id: 'DAD',
     role: 'noun',
     description: 'father, in casual speech',
@@ -2265,13 +2272,13 @@ export const nouns: ConceptSeed[] = [
     human: true,
     isA: 'FATHER',
     forms: {
-      en: { base: 'dad', plural: 'dads', count: 'singular' },
+      en: { base: 'dad', plural: 'dads', count: 'singular', as_name: '1' },
       it: { base: 'papà', plural: 'papà', gender: 'masc', count: 'singular' },
-      fr: { base: 'papa', plural: 'papas', gender: 'masc', count: 'singular' },
-      de: { base: 'Papa', plural: 'Papas', gender: 'masc', count: 'singular' },
-      es: { base: 'papá', plural: 'papás', gender: 'masc', count: 'singular' },
-      ja: { base: 'お父さん', count: 'singular', reading: 'おとうさん', kin: '1' },
-      pt: { base: 'papai', plural: 'papais', gender: 'masc', count: 'singular' },
+      fr: { base: 'papa', plural: 'papas', gender: 'masc', count: 'singular', as_name: '1', takes_article: '0' },
+      de: { base: 'Papa', plural: 'Papas', gender: 'masc', count: 'singular', as_name: '1' },
+      es: { base: 'papá', plural: 'papás', gender: 'masc', count: 'singular', as_name: '1' },
+      ja: { base: 'お父さん', count: 'singular', reading: 'おとうさん', kin: '1', as_name: '1' },
+      pt: { base: 'papai', plural: 'papais', gender: 'masc', count: 'singular', as_name: '1', takes_article: '0' },
     },
   },
   {

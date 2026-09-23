@@ -154,4 +154,31 @@ describe('applyPossessorForm', () => {
       expect(under(EHEFRAU, pron('1'))['own']).toBeUndefined();
     });
   });
+
+  // P11-E3 D3: address is a third context, and it takes the honorific whoever's relative it is.
+  describe('in address', () => {
+    const addressed = (head: Forms, possessor?: Parameters<typeof applyPossessorForm>[1]): Forms => {
+      const forms = { ...head };
+      applyPossessorForm(forms, possessor, true);
+      return forms;
+    };
+
+    test('takes the honorific under any possessor, and none', () => {
+      for (const possessor of [undefined, pron('1'), pron('2'), np({ base: '猫' })]) {
+        expect(addressed(HAHAOYA, possessor)).toMatchObject({ base: 'お母さん', reading: 'おかあさん' });
+      }
+      expect(addressed(OYA, pron('1'))).toMatchObject({ base: 'ご両親', plural: 'ご両親', reading: 'ごりょうしん' });
+    });
+
+    test("one's own relative is still marked one's own, so 私の is not said twice", () => {
+      expect(addressed(HAHAOYA, pron('1'))['own']).toBe('1');
+      expect(addressed(HAHAOYA, pron('2'))['own']).toBeUndefined();
+    });
+
+    test('a head with no honorific takes the ordinary rule', () => {
+      expect(addressed(EHEFRAU, pron('1'))).toMatchObject({ base: 'Frau' });
+      expect(addressed(EHEFRAU)).toMatchObject({ base: 'Ehefrau' });
+      expect(addressed(HON, pron('1'))).toEqual(HON);
+    });
+  });
 });

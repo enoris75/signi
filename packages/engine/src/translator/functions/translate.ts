@@ -2,7 +2,11 @@ import type { PhrasePlan, Translation } from '@signi/shared';
 import type { Mood } from '../../types.js';
 import { engines } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { resolveAddress } from './resolveAddress.js';
 import { resolvePhrase } from './resolvePhrase.js';
+
+/** A sentence's first word, capitalized where the script has case. */
+const capitalized = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
 
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
@@ -25,11 +29,16 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
     const question = !!resolved.verbPhrase?.interrogative;
     const open = question ? (engine.questionOpener ?? '') : '';
     const stop = question ? (engine.questionMark ?? '?') : (engine.terminator ?? '.');
+    // The vocative opens the sentence, behind the opening mark, set off by the language's separator
+    // and capitalized as its first word (P11-E3): "Mom, run.", "¿Mamá, el gato corre?", お母さん、….
+    const address = plan.address ? resolveAddress(plan.address, engine.language, lookup) : undefined;
+    const called = address ? capitalized(engine.render(address)) + (engine.addressSeparator ?? ', ') : '';
     const ruby = engine.renderRuby?.(resolved);
+    const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: engine.addressSeparator ?? ', ' }] : [];
     return {
       language: engine.language,
-      text: open + engine.render(resolved) + stop,
-      ...(ruby ? { ruby: [...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
+      text: open + called + engine.render(resolved) + stop,
+      ...(ruby ? { ruby: [...(open ? [{ t: open }] : []), ...calledRuby, ...ruby, { t: stop }] } : {}),
     };
   });
 }

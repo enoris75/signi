@@ -14,6 +14,8 @@ export const japaneseEngine: LanguageEngine = {
   // The full-width question mark, after the か that already makes the sentence a question — the
   // closing a dialog writes (削除しますか？), where running prose would keep 。.
   questionMark: '？',
+  // The vocative is set off by the reading comma, with no particle (P11-E3): お母さん、走ってください。
+  addressSeparator: '、',
   render(phrase: ResolvedPhrase): string {
     return buildSegments(phrase)
       .map((s) => s.t)

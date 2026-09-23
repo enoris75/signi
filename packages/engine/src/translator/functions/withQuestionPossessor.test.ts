@@ -21,6 +21,14 @@ describe('withQuestionPossessor', () => {
     expect(withQuestionPossessor(food, false)).toBe(food);
   });
 
+  test('takes a kin name back to the common noun it was (P11-E3)', () => {
+    const asked = withQuestionPossessor(el({ base: 'Maman', name_of: 'maman', proper: '1', takes_article: '0' }), true);
+    const forms = asked.conjuncts[0].head.forms;
+    expect(forms['base']).toBe('maman');
+    expect(forms['proper']).toBeUndefined();
+    expect(forms['name_of']).toBeUndefined();
+  });
+
   test('refuses a pronoun', () => {
     expect(() => withQuestionPossessor(el({ base: 'I', person: '1' }), true)).toThrow(/pronoun.*P09-E14/);
   });

@@ -5,6 +5,7 @@ import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSE
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
+import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
@@ -20,9 +21,10 @@ const EMPTY: ReadonlySet<number> = new Set();
  * Resolve a noun phrase for one language: resolve the possessor, then the head noun/pronoun with its
  * number/gender (synthesising the pronoun surface form, or applying noun gender) and the form its
  * possessor selects, then each adjective. This folds together what used to be four duplicated
- * subject/object/complement blocks.
+ * subject/object/complement blocks. `address` marks the vocative (`PhrasePlan.address`, P11-E3),
+ * whose kin term takes the form address takes (see `applyPossessorForm`).
  */
-export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup): ResolvedNounPhrase {
+export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup, address = false): ResolvedNounPhrase {
   const head = resolve(np.concept, language, lookup);
   // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical features —
   // it needs no lexicon lookup, so it passes straight through for the engine to spell as a
@@ -118,6 +120,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // "多くのヨーロッパ", and no この/その either, as the other six languages already drop "this"), and the
     // negative concord a `no` would otherwise trigger with no negator to license it ("l'Asie ne brûle.").
     const superlative = (np.adjectives ?? []).some((_, i) => SUPERLATIVE_DEGREES.has(np.adjectiveDegrees?.[i] ?? 'positive'));
+    // A casual kin term the phrase uses as a name ("Mom runs") is one from here on (P11-E3).
+    applyKinName(np, head.forms);
     // A name the language leaves bare resolves **bare**, not definite (`takes_article: '0'`): a
     // personal name takes no article in five of the seven, and the paths that fuse a preposition
     // with an article read the determiner rather than the `proper` flag — "a Pietro", "de Pierre",
@@ -155,7 +159,7 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // …and last, the form the possessor selects: one's own 母 against someone else's お母さん, "ma
     // femme" against "une épouse" (P11 D2/D3/D6). It also marks a kin head as one's own, which the
     // phrase holding this one as its genitive possessor reads.
-    applyPossessorForm(head.forms, possessor);
+    applyPossessorForm(head.forms, possessor, address);
     // An indefinite article gives way to a numeral in every one of the seven — at one the numeral IS
     // that article in five of them, and above one no language writes both — so the phrase resolves
     // bare and each engine's article builder writes nothing without being told (C31). The value
