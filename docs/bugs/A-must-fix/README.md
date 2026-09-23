@@ -20,9 +20,9 @@ they are dropped on (`drop_degrees`, `attributive_drop_degrees`).
 The seven before them,
 **A247–A253**, were filed and fixed on 2026-09-23, met by
 the lanes that shipped P09's grammar tasks
-[E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
-[E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and
-[E5](../../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md), each a
+[E2](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
+[E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md) and
+[E5](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md), each a
 construct those tasks first made reachable: **A247**, a negated BELIEVE or THINK keeping the
 indicative in French, Spanish and Portuguese (*no cree que el gato corre*); **A248**, VERY on a
 comparative (*very bigger*, *très plus grand*) where a comparative takes *much*, *bien*, *viel*,
