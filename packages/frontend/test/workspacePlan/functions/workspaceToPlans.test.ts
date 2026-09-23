@@ -125,11 +125,24 @@ describe('workspaceToPlans', () => {
 describe('known bugs: a linked clause with no subject crashes the engine (A267)', () => {
   const periods = [period('main', { subject: BOY, verb: SLEEP }), period('linked', { verb: EAT })];
 
-  it.fails('folds in no if-clause or coordinate until its period has a subject', () => {
+  it('folds in no if-clause or coordinate until its period has a subject', () => {
     const [{ plan: iffed }] = workspaceToPlans(periods, [conditional('c', 'main', 'linked')]);
     expect(iffed).not.toHaveProperty('condition');
     const [{ plan: joined }] = workspaceToPlans(periods, [coordinative('k', 'main', 'linked')]);
     expect(joined).not.toHaveProperty('coordination');
+  });
+
+  it('folds them in once the subject box holds a word, and the if-clause keeps the main clause as its own sentence meanwhile', () => {
+    const filled = [periods[0]!, period('linked', { subject: CAT, verb: EAT })];
+    expect(workspaceToPlans(filled, [conditional('c', 'main', 'linked')])[0]!.plan.condition).toMatchObject({ subject: { concept: CAT.id } });
+    expect(workspaceToPlans(filled, [coordinative('k', 'main', 'linked')])[0]!.plan.coordination?.clause).toMatchObject({ subject: { concept: CAT.id } });
+    expect(workspaceToPlans(periods, [conditional('c', 'main', 'linked')])).toHaveLength(1);
+  });
+
+  it('regression: a command’s coordinate needs no subject box, as it takes the addressee', () => {
+    const commands = [period('main', { verb: SLEEP, imperative: true }), period('linked', { verb: EAT, imperative: true })];
+    const [{ plan }] = workspaceToPlans(commands, [coordinative('k', 'main', 'linked')]);
+    expect(plan.coordination?.clause.subject).toEqual(plan.subject);
   });
 });
 

@@ -112,6 +112,12 @@ export function resolvePhrase(
     return withExistential(
       resolvePhrase(existentialPlan(plan, language, mood), language, lookup, mood, register, citation), language);
   }
+  // Every clause resolved here has a subject: the plan's own, a command's coordinate its first
+  // clause's addressee, an infinitive or a purpose its controller's. One without is a malformed plan
+  // (a coordinate, an if-clause or a subordinate clause holding only its verb phrase), refused by
+  // name rather than left to die on a TypeError in the noun resolver (A267). `/api/translate` says the
+  // same with the field's path.
+  if (!plan.subject) throw new Error('a clause needs a subject: plan.subject.concept is required (A267)');
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is

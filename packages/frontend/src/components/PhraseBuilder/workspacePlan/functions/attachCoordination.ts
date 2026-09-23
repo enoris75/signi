@@ -2,6 +2,7 @@ import type { PhrasePlan } from "@signi/shared";
 import { isCoordinativeLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
+import { hasHead } from "./hasHead.ts";
 
 // Attach the coordinated second clause sourced from `container` onto `plan`. The coordinated
 // container is serialised as its own plan (with its own relative links folded in) and hung on
@@ -36,6 +37,11 @@ export function attachCoordination(
         }
       : second.selection,
   );
+  // A statement's or a question's coordinate says its own subject, and the engine cannot render one
+  // without (A267): until its subject box holds a word it contributes nothing, as a subordinate
+  // clause waits (attachSubordinate). A command's coordinate has one already: `selectionToPlan` gives
+  // it the addressee.
+  if (!hasHead(clausePlan.subject)) return;
   attachLinks(clausePlan, second, links, byId, new Set([...seen, second.id]));
   plan.coordination = { conjunction: link.conjunction, clause: clausePlan as PhrasePlan };
 }
