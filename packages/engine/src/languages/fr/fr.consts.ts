@@ -185,4 +185,6 @@ export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, stri
   after: 'après',
   before: 'avant',
   during: 'pendant',
+  // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
+  between: 'entre',
 };

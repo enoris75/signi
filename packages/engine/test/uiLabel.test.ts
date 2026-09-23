@@ -273,6 +273,10 @@ describe('relation toolbars: the adposition each specifier spells', () => {
     expect(temporal('during')).toEqual({
       en: 'during', it: 'durante', fr: 'pendant', de: 'während', es: 'durante', ja: '〜の間に', pt: 'durante',
     });
+    // P09-E20: the spatial `between` word, and in Japanese the same 〜の間に as `during` (D3).
+    expect(temporal('between')).toEqual({
+      en: 'between', it: 'tra', fr: 'entre', de: 'zwischen', es: 'entre', ja: '〜の間に', pt: 'entre',
+    });
   });
 
   test('a cause connector is a specifier too — the stance picks the word', () => {

@@ -220,4 +220,6 @@ export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   after: { word: 'después', de: true },
   before: { word: 'antes', de: true },
   during: { word: 'durante' },
+  // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
+  between: { word: 'entre' },
 };

@@ -1,12 +1,13 @@
 # P09-E21. *onto* — the goal of `on` in English
 
 **Construct:** a second override in English's
-[`GOAL_PREP`](../../../../packages/engine/src/languages/en/en.consts.ts#L124): `on` under a
+[`GOAL_PREP`](../../../../../packages/engine/src/languages/en/en.consts.ts#L124): `on` under a
 `direction` writes *onto*, as `in` already writes *into*.
 **Shape:** one map entry and the tests that pin the old word. The other six languages change nothing.
 **Scope:** English only; the other six verified unchanged.
-**Status:** planning, unscheduled. Filed 2026-09-23 from P09's follow-ups
-([E1](Z-done/P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`onto` as a distinct goal*).
+**Status:** **shipped, 2026-09-24**, as a rider on [E20](P09-E20-temporal-between.md); see
+[Done](#done). Filed 2026-09-23 from P09's follow-ups
+([E1](P09-E1-spatial-relations.md#out-of-scope-follow-ups), *`onto` as a distinct goal*).
 **Words:** *onto*.
 
 | lang | the cat jumps **onto** the wall (direction) | the cat jumps **on** the wall (locative) |
@@ -19,8 +20,27 @@
 | pt | o gato pula sobre a parede. | o gato pula sobre a parede. |
 | ja | 猫は壁の上へ跳びます。 | 猫は壁の上で跳びます。 |
 
-**Proposed, not engine output** for the English goal cell only; every other cell is the engine's
-output at HEAD (probed 2026-09-23).
+Engine output since 2026-09-24 in every cell (the English goal cell was the proposal).
+
+## Done
+
+Shipped 2026-09-24. `GOAL_PREP` is `{ ...PATH_PREP, in: 'into', on: 'onto' }`, its doc comment's
+`on` sentence rewritten. The other six languages are untouched. Engine output, pinned in
+[`spatialRelations.test.ts`](../../../../../packages/engine/test/complements/spatialRelations.test.ts)
+and [`handling-verbs.test.ts`](../../../../../packages/engine/test/handling-verbs.test.ts):
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| JUMP, direction `on` | the cat jumps onto the wall. | il gatto salta sul muro. | le chat saute sur le mur. | der Kater springt auf die Wand. | el gato salta sobre la pared. | o gato pula sobre a parede. | 猫は壁の上へ跳びます。 |
+| JUMP, locative `on` | the cat jumps on the wall. | il gatto salta sul muro. | le chat saute sur le mur. | der Kater springt auf der Wand. | el gato salta sobre la pared. | o gato pula sobre a parede. | 猫は壁の上で跳びます。 |
+| PUT, direction `on` | the man puts the book onto the house. | l'uomo mette il libro sulla casa. | l'homme met le livre sur la maison. | der Mann legt das Buch auf das Haus. | el hombre pone el libro sobre la casa. | o homem põe o livro sobre a casa. | 男は家の上へ本を置きます。 |
+| PUT, locative `on` (only en pinned) | the man puts the book on the house. | l'uomo mette il libro sulla casa. | l'homme met le livre sur la maison. | der Mann legt das Buch auf dem Haus. | el hombre pone el libro sobre la casa. | o homem põe o livro sobre a casa. | 男は家の上に本を置きます。 |
+
+What landed differently from the plan: nothing. The goal rows flipped, the "No 'onto'" comment went,
+a new spec pins the locative `on` beside the goal in all seven, and a PUT case in
+`handling-verbs.test.ts` pins the goal in all seven and the locative's English. No other engine,
+frontend or backend test pinned a goal *on*; e2e re-grepped for "jumps on" / "onto" on 2026-09-24 —
+only comments ("folded onto", "steps out … onto") match, none a rendering.
 
 ## Why
 
@@ -35,17 +55,17 @@ Verified at HEAD, 2026-09-23.
 
 - `GOAL_PREP` is `{ ...PATH_PREP, in: 'into' }`. Its doc comment says `on` was left out on purpose:
   "'onto' exists, but 'jumps **on** the table' already reads as the goal" — E1's *§2* decision, and the
-  pinned comment in [`spatialRelations.test.ts:48`](../../../../packages/engine/test/complements/spatialRelations.test.ts#L48)
+  pinned comment in [`spatialRelations.test.ts:48`](../../../../../packages/engine/test/complements/spatialRelations.test.ts#L48)
   ("No 'onto'").
 - Probed with `sayAll`, direction against locative on WALL / JUMP: **English, Italian, French,
   Spanish and Portuguese write the two identically**; German tells them apart by case (*auf die* /
-  *auf der*, [`spatialCase`](../../../../packages/engine/src/languages/de/spatialCase.ts)), Japanese by
+  *auf der*, [`spatialCase`](../../../../../packages/engine/src/languages/de/spatialCase.ts)), Japanese by
   particle (上へ / 上で). The Romance merger is the language's own — *sul muro* is both — so nothing
   there needs fixing.
 - The precedent applies to every verb: PUT with a `direction` `in` already writes "puts the book
   **into** the house", and with `on` "puts the book **on** the house" — so the change reaches PUT as
   well as JUMP ("puts the book onto the house", which is grammatical but less usual than *on*).
-- Blast radius: `GOAL_PREP` is read once, [`complementsPhrase.ts:119`](../../../../packages/engine/src/languages/en/complementsPhrase.ts#L119).
+- Blast radius: `GOAL_PREP` is read once, [`complementsPhrase.ts:119`](../../../../../packages/engine/src/languages/en/complementsPhrase.ts#L119).
   No seeded definition and no UI string uses a `direction` with `on` (the only `value: 'on'` in
   shared/backend is the toolbar label `specifier.value.on`, a bare path, not a goal).
 
@@ -65,7 +85,7 @@ word.
 
 ## 1. Engine
 
-- [`en.consts.ts:124`](../../../../packages/engine/src/languages/en/en.consts.ts#L124):
+- [`en.consts.ts:124`](../../../../../packages/engine/src/languages/en/en.consts.ts#L124):
   `{ ...PATH_PREP, in: 'into', on: 'onto' }`, and rewrite the doc comment's `on` sentence.
 
 ## Tests

@@ -425,9 +425,20 @@ export const DEFAULT_LOCATIVE_SPECIFIER: PathSpecifier = 'in';
  * subject to the pair, so it is said once over the group — *zwischen dem Haus und dem Baum*, never
  * *zwischen dem Haus und zwischen dem Baum* — while each conjunct keeps its own article and case
  * (P09-E1 D2). Japanese needs nothing for it, since its relational noun already follows the whole
- * group (家と木の間で).
+ * group (家と木の間で). A time bounded on both sides scopes the same way, and its relation is listed
+ * apart in `GROUP_SCOPED_TEMPORAL_RELATIONS` so that each set still says which family it is from.
  */
 export const GROUP_SCOPED_SPECIFIERS: ReadonlySet<PathSpecifier> = new Set<PathSpecifier>(['between']);
+
+/**
+ * The temporal relations that scope over a coordinated time as a whole, as `GROUP_SCOPED_SPECIFIERS`
+ * do over a landmark — `between` alone: "between this day and that day", *tra questo giorno e quel
+ * giorno*, never *tra questo giorno e tra quel giorno* (P09-E20 D2). Every other temporal relation
+ * distributes ("durante questo giorno e durante quel giorno"). The lifted word is the language's
+ * spatial `between` in all five languages that repeat a preposition, so the two sets share their
+ * machinery; they are kept apart only because `'between'` is the same string in both.
+ */
+export const GROUP_SCOPED_TEMPORAL_RELATIONS: ReadonlySet<TemporalRelation> = new Set<TemporalRelation>(['between']);
 
 /**
  * How a `temporal` complement places its act against the time its noun phrase names — the
@@ -448,11 +459,18 @@ export const GROUP_SCOPED_SPECIFIERS: ReadonlySet<PathSpecifier> = new Set<PathS
  *            の前に, *antes de*)
  *   during — throughout it: "runs **during this day**" (*durante*, *pendant*, *während*,
  *            *durante*, の間に, *durante*)
+ *   between — bounded on both sides: "runs **between this day and that day**" (*tra*, *entre*,
+ *            *zwischen* + dative, *entre*, の間に, *entre*). The one temporal relation that scopes
+ *            over a coordinated time instead of distributing across it (see
+ *            `GROUP_SCOPED_TEMPORAL_RELATIONS`), as the spatial `between` does over a landmark. A
+ *            single time still renders ("between this day"). **Japanese cannot tell it from
+ *            `during`**: both are 〜の間に, and the collision is deliberate, as `on` / `over` share
+ *            の上 (P09-E20 D3).
  *
  * **`at` is the one whose word the head noun picks**, not the relation: English is *on* a day, *at*
  * a time, *in* a week, and German *an* dem Tag, *zu* der Zeit, *in* der Woche. That is a fact about
  * the noun's meaning, as `mannerRelation` and `place_prep` are, so each lexeme may name its own
- * `temporal_prep` and the engines fall back on the language's generic one. The other five relations
+ * `temporal_prep` and the engines fall back on the language's generic one. The other six relations
  * are the same word whatever the noun.
  *
  * Three languages say `ago` with no adposition at all: English and Italian postpose a word ("a
@@ -463,9 +481,9 @@ export const GROUP_SCOPED_SPECIFIERS: ReadonlySet<PathSpecifier> = new Set<PathS
  * The canvas draws a box for it (P09-E12b), offered on every verb (`ADJUNCT_COMPLEMENT_TYPES`), and
  * its relation is the box's toolbar, as the route's path is.
  */
-export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during';
+export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during' | 'between';
 
-export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during'];
+export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during', 'between'];
 
 /** A temporal complement naming no relation simply places the act at that time. */
 export const DEFAULT_TEMPORAL_RELATION: TemporalRelation = 'at';

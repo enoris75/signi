@@ -1,8 +1,10 @@
+import { TEMPORAL_RELATIONS } from '@signi/shared';
 import { describe, expect, test } from 'vitest';
 import { complement, np } from '../languages/resolved.fixtures.js';
 import { groupScopedRelation } from './groupScopedRelation.js';
 
 const HOUSE = { base: 'house' };
+const DAY = { base: 'day' };
 const between = complement(np(HOUSE), [{ kind: 'path', value: 'between' }]);
 
 describe('groupScopedRelation', () => {
@@ -23,7 +25,26 @@ describe('groupScopedRelation', () => {
     expect(groupScopedRelation('direction', complement(np(HOUSE)))).toBeUndefined();
   });
 
-  test('a complement that is no spatial one has no relation to scope', () => {
+  test('a complement that is no spatial or temporal one has no relation to scope', () => {
     expect(groupScopedRelation('instrumental', between)).toBeUndefined();
+  });
+
+  // P09-E20: a time bounded on both sides scopes as a place between two landmarks does.
+  test('a temporal between scopes over the group', () => {
+    expect(groupScopedRelation('temporal', complement(np(DAY), [{ kind: 'temporal', value: 'between' }]))).toBe('between');
+  });
+
+  test('every other temporal relation distributes, and a bare temporal is the distributing at', () => {
+    for (const value of TEMPORAL_RELATIONS.filter((r) => r !== 'between')) {
+      expect(groupScopedRelation('temporal', complement(np(DAY), [{ kind: 'temporal', value }]))).toBeUndefined();
+    }
+    expect(groupScopedRelation('temporal', complement(np(DAY)))).toBeUndefined();
+  });
+
+  // The two families stay apart: a path `between` on a temporal, or a temporal one on a place, reads
+  // as nothing chosen at all.
+  test('a relation of the other family does not scope', () => {
+    expect(groupScopedRelation('temporal', between)).toBeUndefined();
+    expect(groupScopedRelation('locative', complement(np(HOUSE), [{ kind: 'temporal', value: 'between' }]))).toBeUndefined();
   });
 });

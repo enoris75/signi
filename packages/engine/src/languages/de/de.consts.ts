@@ -224,4 +224,7 @@ export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'dur
   ago: 'vor',
   after: 'nach',
   before: 'vor',
+  // The spatial BETWEEN_PREP with the dative, which the group scope lifts off each conjunct
+  // (P09-E20): "zwischen diesem Tag und jenem Tag".
+  between: 'zwischen',
 };
