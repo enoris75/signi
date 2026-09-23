@@ -669,13 +669,18 @@ export const adverbs: ConceptSeed[] = [
     // on the literal — see docs/localization/done/C33-degree-adverbs-on-adjectives.md.
     definition: complementGloss('direction', 'LEVEL', 'indefinite', { adjectives: ['HIGH'] }),
     emoji: '🔺',
+    // A comparative is intensified by a word of its own — "much bigger", "bien plus grand", "viel
+    // größer", "mucho más grande", ずっと大きい — which `applyIntensifier` puts in place of `base` on
+    // a `more` or `less` degree (A248). Italian and Portuguese keep molto / muito ("molto più grande").
     forms: {
-      en: { base: 'very' },
+      en: { base: 'very', comparative: 'much' },
       it: { base: 'molto' },
-      fr: { base: 'très' },
-      de: { base: 'sehr' },
-      es: { base: 'muy' },
-      ja: { base: 'とても' },
+      fr: { base: 'très', comparative: 'bien' },
+      de: { base: 'sehr', comparative: 'viel' },
+      es: { base: 'muy', comparative: 'mucho' },
+      // Only on `more`: the lowered degree is a negation in Japanese (それほど大きくない), not a
+      // comparative ずっと could intensify.
+      ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more' },
       pt: { base: 'muito' },
     },
   },

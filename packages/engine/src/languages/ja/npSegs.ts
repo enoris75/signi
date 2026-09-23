@@ -1,11 +1,11 @@
 import type { Definiteness } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
-import { adjDegree } from '../../functions/adjDegree.js';
 import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
-import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
+import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { jaCounted } from './jaCounted.js';
+import { jaDegreeAdverb } from './jaDegreeAdverb.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
@@ -90,11 +90,12 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     // already built into the base here (大きすぎる猫), and every other case keeps it.
     const { base, reading } = jaComparisonAdj(a);
     if (!base) continue;
-    // Prenominal intensifier and degree adverb, bound directly to the adjective (とてももっと大きい),
-    // no space. A suffix intensifier writes no word here — the base above carries it (C33).
+    // Prenominal intensifier and degree adverb, bound directly to the adjective (とても大きい), no
+    // space; a comparative intensifier stands in for もっと (ずっと大きい, A248). A suffix intensifier
+    // writes no word here — the base above carries it (C33).
     const intensifier = jaIntensifierSeg(a);
     if (intensifier) adjSegs.push(intensifier);
-    const deg = JA_DEGREE[adjDegree(a)];
+    const deg = jaDegreeAdverb(a);
     if (deg) adjSegs.push({ t: deg });
     adjSegs.push(wordSeg(base, reading));
   }

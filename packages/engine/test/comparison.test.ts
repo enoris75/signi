@@ -162,7 +162,8 @@ describe('Japanese: the standard before the adjective, ほど with the negative'
     const plan = clause(np('CAT'), 'BE', {
       complements: { predicative: { phrase: np('BIG', { headDegree: 'more', headIntensifier: 'VERY', headStandard: DOG }) } },
     });
-    expect(say(plan, 'ja')).toBe('猫は犬よりとても大きいです。');
+    // VERY on a comparative is ずっと, the standard leading it (A248).
+    expect(say(plan, 'ja')).toBe('猫は犬よりずっと大きいです。');
   });
 
   test('ほど negates every class of adjective', () => {
