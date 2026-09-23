@@ -7,7 +7,7 @@ A134–A136 were the exception: defects in the backend's HTTP API (`packages/bac
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
 `packages/frontend/test/`, and so are A179 and A268. A267 is pinned in all three packages: the engine's
-error, the backend's 400 and the builder's `workspaceToPlans`. A253 was a backend defect too — the boot-time renders of the
+error, the backend's 400 and the builder's `workspaceToPlans`; A273 in the engine and the backend. A253 was a backend defect too — the boot-time renders of the
 definitions and the UI strings — pinned beside them, in `packages/backend/src/definitions.test.ts` and
 `uiStrings.test.ts`.
 
@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds twelve, A261–A272, pinned by 22 `test.fails`, and Part B is empty).** If
+this writing Part A holds fourteen, A261–A274, pinned by 26 `test.fails`, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -76,8 +76,17 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A270 | [A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md](A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md) | German | the feminine of weak STUDENT keeps its -en: `sieht die Studentinen` for *die Studentin* |
 | A271 | [A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md](A-must-fix/A271-italian-possessor-behind-a-compared-adjective-reads-as-its-standard.md) | Italian | a possessor behind a compared adjective: `un gatto più piccolo della donna` reads *smaller than the woman* |
 | A272 | [A272-question-inside-a-content-clause-leaks-into-it.md](A-must-fix/A272-question-inside-a-content-clause-leaks-into-it.md) | English, Italian, French, Spanish, Portuguese, Japanese (translator) | a question inside a content clause: `says that does the cat run`, `dice che che cosa mangia il gatto` |
+| A273 | [A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md](A-must-fix/A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) | engine, backend | a relative clause with no verb phrase: a TypeError (`Cannot destructure property 'voice'`) and a 500 |
+| A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](A-must-fix/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | the essive drops an i- or た-adjective's degree: 大きいとして for もっと大きいとして |
 
-**Twelve open.** The eight filed on 2026-09-23, **A265–A272**, were found by P09-E12 (builder
+**Fourteen open.** Two more, **A273** and **A274**, were filed on 2026-09-23 from leads met while
+filing A265–A272. A273 is a relative clause with no verb phrase, which crashes the engine and is
+refused the way A267 is. A274 is the Japanese essive dropping an i- or た-adjective's degree
+(大きいとして), a gap A232 left on purpose, not a regression. A third lead was dropped: MORNING rendering
+as a blank word. MORNING is not a seeded concept, and a blank word is the engine's contract for an
+unseeded id, which `/api/translate` refuses (A253).
+
+The eight filed on 2026-09-23, **A265–A272**, were found by P09-E12 (builder
 controls) and by the writing of its tasks. Each one is a construct the builder or the tasks first
 reached. A French temporal *en* written before an article (A265). A German comma before a bare
 zu-infinitive (A266), shipped in about thirty assertions and several definitions. A linked clause with

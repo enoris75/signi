@@ -299,3 +299,36 @@ describe('known bugs: an equative object predicative with a standard writes half
     });
   });
 });
+
+// A274. A232 gave the essive a na-adjective's degree (もっと幸せとして) and left the i- and た-adjectives
+// as they were: they take `elSegs`, which writes the adjective as it stands and no degree word, so
+// "sees the house as bigger" is 大きいとして, the positive, where the other six compare and the
+// factitive and the attributive write the degree (もっと大きく作ります, もっと大きい家). The degree word
+// goes ahead of the adjective as it does everywhere else. Whether an i- or た-adjective's essive wants
+// another frame (大きいものとして, A224's open decision) is not this; the degree would carry into it.
+// The lowered degrees stay out, as A232 ruled.
+describe('known bugs: the Japanese essive drops an i- or た-adjective\'s degree (A274)', () => {
+  const seesAs = (adjective: NounPhrase) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective, specifiers: ESSIVE } } }));
+
+  test.fails('an i-adjective takes its degree word ahead of it', () => {
+    expect(seesAs(np('BIG', { headDegree: 'more' })).ja).toBe('猫は家をもっと大きいとして見ます。');
+    expect(seesAs(np('BIG', { headDegree: 'most' })).ja).toBe('猫は家を最も大きいとして見ます。');
+    expect(seesAs(np('BIG', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい大きいとして見ます。');
+  });
+
+  test.fails('so does a た-adjective', () => {
+    expect(seesAs(np('TIRED', { headDegree: 'more' })).ja).toBe('猫は家をもっと疲れたとして見ます。');
+  });
+
+  test('regression: the positive, the na-adjective, the factitive and the other six', () => {
+    expect(seesAs(np('BIG')).ja).toBe('猫は家を大きいとして見ます。');
+    expect(seesAs(np('HAPPY', { headDegree: 'more' })).ja).toBe('猫は家をもっと幸せとして見ます。');
+    expect(say(clause(np('CAT'), 'MAKE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('BIG', { headDegree: 'more' }) } } }), 'ja'))
+      .toBe('猫は家をもっと大きく作ります。');
+    expect(seesAs(np('BIG', { headDegree: 'more' }))).toMatchObject({
+      en: 'the cat sees the house as bigger.', de: 'der Kater sieht das Haus als größer.',
+      it: 'il gatto vede la casa come più grande.', es: 'el gato ve la casa como más grande.',
+    });
+  });
+});

@@ -663,3 +663,18 @@ describe('known bugs: a linked clause with no subject answers 500 (A267)', () =>
     expect(await res.json()).toEqual({ error: `${path}.subject.concept is required` });
   });
 });
+
+// A273. A relative clause with no verb phrase gets past `/api/translate`'s checks and dies in the
+// engine on a TypeError, so the client gets a 500. Like A267's subjectless clause, it is a malformed
+// request and wants a 400 naming what is missing. The engine's side is pinned in
+// packages/engine/test/relative.test.ts.
+describe('known bugs: a relative clause with no verb phrase answers 500 (A273)', () => {
+  test.fails.each([
+    ['on the subject', { subject: { concept: 'CAT', relative: {} }, verbPhrase: { verb: 'RUN' } }],
+    ['on the object', { subject: { concept: 'MAN' }, verbPhrase: { verb: 'SEE' }, directObject: { concept: 'CAT', relative: {} } }],
+  ])('rejects a plan with a verbless relative clause %s', async (_, plan) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: string }).error).toMatch(/relative\.verbPhrase.* is required/);
+  });
+});

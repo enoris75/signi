@@ -1588,3 +1588,28 @@ describe('known bugs: an Italian or French place relative ends on a bare copula 
     });
   });
 });
+
+// A273. A relative clause with no verb phrase (`relative: {}`, or one naming only its gap and its
+// subject) reaches `resolveRelativeClause`, which destructures `clause.verbPhrase` and dies on a
+// TypeError ("Cannot destructure property 'voice' of 'clause.verbPhrase' as it is undefined"), so
+// `/api/translate` answers 500. `RelativeClause.verbPhrase` is required, and the builder never sends
+// one without (`buildRelativeClause` returns nothing until the period has a verb): this is A267's
+// malformed plan in a relative clause, and wants A267's answer — refused, with the missing verb phrase
+// named. The backend's 400 is pinned in packages/backend/src/index.test.ts.
+describe('known bugs: a relative clause with no verb phrase crashes the engine (A273)', () => {
+  const bare = {} as unknown as RelativeClause;
+  const gapOnly = { headRole: 'directObject', subject: np('DOG') } as unknown as RelativeClause;
+
+  test.fails.each([
+    ['on the subject', clause(np('CAT', { relative: bare }), 'RUN')],
+    ['on the object', clause(np('MAN'), 'SEE', { directObject: np('CAT', { relative: bare }) })],
+    ['naming only its gap and its subject', clause(np('CAT', { relative: gapOnly }), 'RUN')],
+  ])('%s is refused with an error naming its missing verb phrase', (_, plan) => {
+    // Named, not the TypeError from the innards, whose message happens to say "verbPhrase" too.
+    let thrown: unknown;
+    try { sayAll(plan); } catch (error) { thrown = error; }
+    expect(thrown).toBeInstanceOf(Error);
+    expect(thrown).not.toBeInstanceOf(TypeError);
+    expect((thrown as Error).message).toMatch(/verb ?phrase/i);
+  });
+});

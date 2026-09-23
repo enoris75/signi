@@ -1,6 +1,15 @@
 # A-must-fix — confirmed bugs
 
-**Twelve open.** Eight of them, **A265–A272**, were filed on 2026-09-23 by P09-E12 (builder
+**Fourteen open.** The newest two were filed on 2026-09-23 from leads met while filing A265–A272.
+[A273](A273-relative-clause-with-no-verb-phrase-crashes-the-engine.md) is a relative clause with no
+verb phrase, which crashes the engine (`Cannot destructure property 'voice'`) and returns a 500. It is
+refused the way A267 is. [A274](A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) is the
+Japanese essive dropping an i- or た-adjective's degree (大きいとして for もっと大きいとして), a gap
+[A232](../fixed/A232-japanese-essive-drops-the-degree.md) left on purpose. A third lead, MORNING rendering as a
+blank word, was dropped: MORNING is unseeded, and the blank is the engine's contract for an unseeded
+id (A253).
+
+Eight before them, **A265–A272**, were filed on 2026-09-23 by P09-E12 (builder
 controls) and the writing of its tasks.
 [A265](A265-french-en-before-an-article-on-a-temporal-noun.md), French *en* before an article on a
 temporal noun (*court en le jour*, want *court le jour*).
