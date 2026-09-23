@@ -1158,7 +1158,7 @@ class Run {
         const main = this.containers.find((c) => c.id === op.mainId)!;
         if (!canStartCondition(this.links, main))
           fail(op.span, coded("cantTakeCondition"));
-        if (!canBeCondition(this.links, op.mainId, ifId)) fail(op.span, this.clauseRefusal(op.mainId, ifId, "condition"));
+        if (!canBeCondition(this.containers, this.links, op.mainId, ifId)) fail(op.span, this.clauseRefusal(op.mainId, ifId, "condition"));
         this.links = addConditional(this.links, op.mainId, ifId, id());
         return;
       }
@@ -1259,6 +1259,11 @@ class Run {
     if (sourceId === targetId) return coded("clauseSelf", { role });
     if (isSelfOrAncestor(targetId, sourceId, this.links)) return coded("linkCircle", { period: n });
     if (inClauseRelation(this.links, targetId)) return coded("clauseInOtherLink", { period: n });
+    // An if-clause and a subordinate clause ask nothing, so a question is refused as either (A268,
+    // P09-E12 M5); a coordinate's mood is the pair's, and a question joins a question.
+    const target = this.containers.find((c) => c.id === targetId)?.selection;
+    if ((role === "condition" || role === "subordinate") && (target?.interrogative || target?.questionRole))
+      return coded("clauseQuestion", { period: n, role });
     return coded("clauseCannot", { period: n, role });
   }
 }

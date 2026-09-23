@@ -140,7 +140,7 @@ export function useWorkspaceLinks(
     setLinks((ls) => withoutConditional(ls, mainContainerId));
   }
 
-  const canBeCondition = (mainId: string, ifId: string) => conditionAllowed(links, mainId, ifId);
+  const canBeCondition = (mainId: string, ifId: string) => conditionAllowed(containers, links, mainId, ifId);
 
   function completeConditional(ifContainerId: string) {
     if (!pick.active || pick.kind !== "conditional") return;

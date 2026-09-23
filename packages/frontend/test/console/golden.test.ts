@@ -305,3 +305,26 @@ describe('the question on a subordinate clause', () => {
     expect(sel(ok('/wh subj who', { state: linked() }))).toMatchObject({ interrogative: true, questionRole: 'subject' });
   });
 });
+
+// A268: an if-clause is rendered in its own mood and asks nothing, so `/if` refuses a question as one,
+// and says why, as it refuses one as a subordinate clause; the main clause may not ask either
+// (`cantTakeCondition`).
+describe('the question as an if-clause', () => {
+  const withQuestion = (line: string) => ok(`/new ${line}`, { state: ok('/subj man /verb run') });
+  const onFirst = (state: WorkspaceState) => ({ state, context: { containerId: state.containers[0]!.id } });
+
+  it.each(['/ask /subj cat /verb eat', '/wh subj /verb eat'])('refuses “%s” as the if-clause, naming the question', (line) => {
+    const refused = run('/if #2', onFirst(withQuestion(line))).diagnostic;
+    expect(refused).toMatchObject({ code: 'clauseQuestion', args: { period: 2, role: 'condition' } });
+    expect(refused?.message).toBe('This period is a question. Choose another period');
+  });
+
+  it('names the question on a subordinate clause the same way', () => {
+    expect(run('/sub because #2', onFirst(withQuestion('/ask /subj cat /verb eat'))).diagnostic)
+      .toMatchObject({ code: 'clauseQuestion', args: { period: 2, role: 'subordinate' } });
+  });
+
+  it('still takes a statement', () => {
+    expect(ok('/if #2', onFirst(withQuestion('/subj cat /verb eat'))).links[0]).toMatchObject({ kind: 'conditional' });
+  });
+});

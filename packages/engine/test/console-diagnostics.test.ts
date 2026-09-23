@@ -413,6 +413,10 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'This period is a statement', it: 'Questo periodo è una proposizione enunciativa', fr: 'Cette période est une phrase déclarative', de: 'Dieses Satzgefüge ist ein Aussagesatz',
       es: 'Este período es una oración enunciativa', pt: 'Este período é uma frase declarativa', ja: 'この文は平叙文です',
     },
+    'diagnostic.periodIsQuestion': {
+      en: 'This period is a question', it: 'Questo periodo è una domanda', fr: 'Cette période est une question', de: 'Dieses Satzgefüge ist eine Frage',
+      es: 'Este período es una pregunta', pt: 'Este período é uma pergunta', ja: 'この文は質問です',
+    },
     'diagnostic.periodAlreadyLinked': {
       en: 'That period is already linked', it: 'Quel periodo è già collegato', fr: 'Cette période est déjà liée', de: 'Jenes Satzgefüge ist schon verknüpft',
       es: 'Ese período está ya vinculado', pt: 'Esse período está já ligado', ja: 'その文はもうリンク済みです',

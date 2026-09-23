@@ -147,6 +147,7 @@ const SAMPLES: Samples = {
   linkCircle: [[{ period: 2 }, 'Choose another period']],
   clauseSelf: [[{ role: 'condition' }, 'Choose another period']],
   clauseInOtherLink: [[{ period: 2 }, 'That period is already linked: #2']],
+  clauseQuestion: [[{ period: 2, role: 'condition' }, 'This period is a question. Choose another period']],
   clauseCannot: [[{ period: 2, role: 'instrument' }, 'Choose another period']],
   lineNotRead: [[{}, 'This line could not be read.']],
   phraseNotSaved: [[{}, 'The phrase could not be saved.']],
