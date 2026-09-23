@@ -1436,7 +1436,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       it: {
         // Italian puts what one thinks in the subjunctive in the standard register: "pensa che il gatto
-        // corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese keep the indicative.
+        // corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese keep the indicative,
+        // and take the subjunctive only negated (A247).
         base: 'pensare', content_clause_mood: 'subjunctive', topic_prep: 'a',
         '1sg_present': 'penso', '2sg_present': 'pensi', '3sg_present': 'pensa',
         '1pl_present': 'pensiamo', '2pl_present': 'pensate', '3pl_present': 'pensano',
@@ -1446,7 +1447,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'penseremo', '2pl_future': 'penserete', '3pl_future': 'penseranno',
       },
       fr: {
-        base: 'penser', topic_prep: 'à',
+        // A denied thought is in the subjunctive: "ne pense pas que le chat coure"
+        // (`content_clause_mood_negative`, A247).
+        base: 'penser', topic_prep: 'à', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'pense', '2sg_present': 'penses', '3sg_present': 'pense',
         '1pl_present': 'pensons', '2pl_present': 'pensez', '3pl_present': 'pensent',
         '1sg_past': 'pensai', '2sg_past': 'pensas', '3sg_past': 'pensa',
@@ -1463,8 +1466,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'dachten', '2pl_past': 'dachtet', '3pl_past': 'dachten',
       },
       es: {
-        // pensar diphthongises e → ie under the stress: pienso, piensan, but pensamos.
-        base: 'pensar', topic_prep: 'en',
+        // pensar diphthongises e → ie under the stress: pienso, piensan, but pensamos. A denied
+        // thought is in the subjunctive: "no piensa que el gato corra" (`content_clause_mood_negative`, A247).
+        base: 'pensar', topic_prep: 'en', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'pienso', '2sg_present': 'piensas', '3sg_present': 'piensa',
         '1pl_present': 'pensamos', '2pl_present': 'pensáis', '3pl_present': 'piensan',
         '1sg_past': 'pensé', '2sg_past': 'pensaste', '3sg_past': 'pensó',
@@ -1481,7 +1485,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'かんがえます',
       },
       pt: {
-        base: 'pensar', topic_prep: 'em',
+        // A denied thought is in the subjunctive: "não pensa que o gato corra"
+        // (`content_clause_mood_negative`, A247).
+        base: 'pensar', topic_prep: 'em', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'penso', '2sg_present': 'pensa', '3sg_present': 'pensa',
         '1pl_present': 'pensamos', '2pl_present': 'pensam', '3pl_present': 'pensam',
         '1sg_past': 'pensei', '2sg_past': 'pensou', '3sg_past': 'pensou',

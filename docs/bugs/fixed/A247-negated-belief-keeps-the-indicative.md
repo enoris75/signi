@@ -41,3 +41,26 @@ is already right.
 
 Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), object
 content clauses.
+
+## Resolved
+
+2026-09-23. A governor's lexeme can now name the mood it takes under a negation,
+`content_clause_mood_negative`, alongside `content_clause_mood`.
+
+- **Engine** — [`contentClauseMood.ts`](../../../packages/engine/src/translator/functions/contentClauseMood.ts)
+  takes a `negative` flag and, when it is set, reads `content_clause_mood_negative` before
+  `content_clause_mood`. A governor that names no negative mood keeps the one it takes affirmed.
+  [`resolvePhrase.ts`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) passes the
+  governing verb phrase's `negative` in for an object clause.
+- **Corpus** — `content_clause_mood_negative: 'subjunctive'` on the fr/es/pt forms of BELIEVE
+  ([transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts): croire, creer,
+  acreditar) and THINK ([intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts):
+  penser, pensar, pensar). SAY names none, so *no dice que corre* keeps the indicative. Italian is
+  unchanged, since its `content_clause_mood: 'subjunctive'` already holds under negation.
+- **Tests** — the three pinning `test.fails` in
+  [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) →
+  *known bugs: a negated belief keeps the indicative (A247)* are now plain `test`s. The same block
+  adds regression guards for the affirmative THINK (fr/es/pt indicative, it subjunctive) and a
+  negated SAY in all seven (indicative). The unit test
+  [contentClauseMood.test.ts](../../../packages/engine/src/translator/functions/contentClauseMood.test.ts)
+  covers the negative lookup and its fallback.

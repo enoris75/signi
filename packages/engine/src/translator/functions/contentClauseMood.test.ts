@@ -22,6 +22,19 @@ describe('contentClauseMood', () => {
     expect(contentClauseMood(undefined, 'de', 'subject')).toBeUndefined();
   });
 
+  test('a negated governor takes the mood it names under a negation (no cree que corra, A247)', () => {
+    const creer = { base: 'creer', content_clause_mood_negative: 'subjunctive' };
+    expect(contentClauseMood(creer, 'es', 'object', true)).toBe('presentSubjunctive');
+    expect(contentClauseMood(creer, 'es', 'object', false)).toBeUndefined();
+    expect(contentClauseMood(creer, 'es', 'object')).toBeUndefined();
+  });
+
+  test('a negated governor naming no negative mood keeps its affirmed one (no dice que corre)', () => {
+    expect(contentClauseMood({ base: 'decir' }, 'es', 'object', true)).toBeUndefined();
+    expect(contentClauseMood({ base: 'credere', content_clause_mood: 'subjunctive' }, 'it', 'object', true))
+      .toBe('presentSubjunctive');
+  });
+
   test('a governor declaring the indicative overrides the subject fallback', () => {
     expect(contentClauseMood({ base: 'vero', content_clause_mood: 'indicative' }, 'it', 'subject')).toBeUndefined();
   });

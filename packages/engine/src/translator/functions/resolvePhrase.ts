@@ -170,10 +170,12 @@ export function resolvePhrase(
       : undefined,
     // A content clause standing where the object would ("says that the cat runs", P09-E4): a clause
     // of its own, in the mood the governing verb's lexeme names — the indicative unless it says
-    // otherwise. The verb is not in scope where the clause renders, so the choice is made here, where
-    // it is. Without a verb there is nothing to govern it, and a verbless period drops it.
+    // otherwise, or, the verb negated, the mood it names under a negation ("no cree que corra",
+    // A247). The verb is not in scope where the clause renders, so the choice is made here, where it
+    // is. Without a verb there is nothing to govern it, and a verbless period drops it.
     contentObject: plan.contentObject && verbPhrase
-      ? resolvePhrase(plan.contentObject, language, lookup, contentClauseMood(verbPhrase.verb.forms, language, 'object'))
+      ? resolvePhrase(plan.contentObject, language, lookup,
+        contentClauseMood(verbPhrase.verb.forms, language, 'object', plan.verbPhrase?.negative === true))
       : undefined,
     // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
     // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.

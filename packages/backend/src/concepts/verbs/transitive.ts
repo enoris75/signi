@@ -8340,7 +8340,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       it: {
         // Italian puts what one believes in the subjunctive in the standard register, affirmed or not:
         // "crede che il gatto corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese
-        // keep the affirmative's indicative.
+        // keep the affirmative's indicative, and take the subjunctive only negated (A247).
         base: 'credere', object_prep: 'a', content_clause_mood: 'subjunctive',
         '1sg_present': 'credo', '2sg_present': 'credi', '3sg_present': 'crede',
         '1pl_present': 'crediamo', '2pl_present': 'credete', '3pl_present': 'credono',
@@ -8350,7 +8350,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'crederemo', '2pl_future': 'crederete', '3pl_future': 'crederanno',
       },
       fr: {
-        base: 'croire',
+        // A denied belief is in the subjunctive, an affirmed one in the indicative: "ne croit pas que
+        // le chat coure", "croit que le chat court" (`content_clause_mood_negative`, A247).
+        base: 'croire', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'crois', '2sg_present': 'crois', '3sg_present': 'croit',
         '1pl_present': 'croyons', '2pl_present': 'croyez', '3pl_present': 'croient',
         '1sg_past': 'crus', '2sg_past': 'crus', '3sg_past': 'crut',
@@ -8366,8 +8368,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'glaubten', '2pl_past': 'glaubtet', '3pl_past': 'glaubten',
       },
       es: {
-        // creer writes the unstressed i between vowels as y: creyó, creyeron, creyendo.
-        base: 'creer',
+        // creer writes the unstressed i between vowels as y: creyó, creyeron, creyendo. A denied
+        // belief is in the subjunctive: "no cree que el gato corra" (`content_clause_mood_negative`, A247).
+        base: 'creer', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'creo', '2sg_present': 'crees', '3sg_present': 'cree',
         '1pl_present': 'creemos', '2pl_present': 'creéis', '3pl_present': 'creen',
         '1sg_past': 'creí', '2sg_past': 'creíste', '3sg_past': 'creyó',
@@ -8384,7 +8387,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'しんじます',
       },
       pt: {
-        base: 'acreditar', object_prep: 'em',
+        // A denied belief is in the subjunctive: "não acredita que o gato corra"
+        // (`content_clause_mood_negative`, A247).
+        base: 'acreditar', object_prep: 'em', content_clause_mood_negative: 'subjunctive',
         '1sg_present': 'acredito', '2sg_present': 'acredita', '3sg_present': 'acredita',
         '1pl_present': 'acreditamos', '2pl_present': 'acreditam', '3pl_present': 'acreditam',
         '1sg_past': 'acreditei', '2sg_past': 'acreditou', '3sg_past': 'acreditou',
