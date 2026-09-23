@@ -95,6 +95,8 @@ export const motionVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('GO', { modifier: 'BACKWARDS' }),
     emoji: '🔙',
     isA: 'GO',
+    // COME_BACK is folded into RETURN (P09 §2), so *come back* finds it (P09-E23).
+    aliases: { en: ['come back'] },
     forms: {
       en: {
         base: 'return',

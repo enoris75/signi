@@ -46,7 +46,9 @@ export function useConceptDefinition(): (concept: Concept) => string {
  * Returns `matches`, the predicate the pickers filter on. A search hits the word as shown (in
  * the current language) as well as its English label and gloss, so a user who knows the English
  * word can still find it while browsing in another language. It also hits the word's reading,
- * so a Japanese word can be found by typing the kana a keyboard actually produces (ねこ → 猫).
+ * so a Japanese word can be found by typing the kana a keyboard actually produces (ねこ → 猫), and
+ * its aliases in the current language and in English (P09-E23): *talk* finds SPEAK, *cominciare*
+ * finds BEGIN (shown as *iniziare*).
  */
 export function useConceptSearch(): (concept: Concept, query: string) => boolean {
   const { uiLanguage } = useUiLanguage();
@@ -57,7 +59,8 @@ export function useConceptSearch(): (concept: Concept, query: string) => boolean
       const q = query.trim().toLowerCase();
       if (!q) return true;
       const reading = concept.readings?.[uiLanguage] ?? '';
-      const haystack = `${word(concept)} ${reading} ${concept.label ?? ''} ${concept.synonym ?? ''}`;
+      const aliases = [...(concept.aliases?.[uiLanguage] ?? []), ...(concept.aliases?.en ?? [])].join(' ');
+      const haystack = `${word(concept)} ${reading} ${concept.label ?? ''} ${concept.synonym ?? ''} ${aliases}`;
       return haystack.toLowerCase().includes(q);
     },
     [word, uiLanguage],

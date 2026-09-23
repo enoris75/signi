@@ -129,6 +129,30 @@ const LABEL_SQL = `
   )
 `;
 
+// Every secondary lexeme (P09-E23), in every language: the other words that find a concept in the
+// pickers and the console (*talk* for SPEAK). Search-only — `labels` stays the primary lemma. Only
+// the lemma is read: an alias is found, never rendered, so it has no paradigm. Pronouns have none.
+const ALIAS_SQL = `
+  SELECT concept_id, language, word FROM (
+    SELECT cvl.concept_id, vl.language, vl.lemma AS word, vl.id AS lexeme_id
+    FROM verb_lexemes vl
+    JOIN concept_verb_links cvl ON cvl.lexeme_id = vl.id AND cvl.is_primary = 0
+    UNION ALL
+    SELECT cnl.concept_id, nl.language, nl.singular AS word, nl.id AS lexeme_id
+    FROM noun_lexemes nl
+    JOIN concept_noun_links cnl ON cnl.lexeme_id = nl.id AND cnl.is_primary = 0
+    UNION ALL
+    SELECT cal.concept_id, al.language, al.lemma AS word, al.id AS lexeme_id
+    FROM adjective_lexemes al
+    JOIN concept_adjective_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 0
+    UNION ALL
+    SELECT cal.concept_id, al.language, al.lemma AS word, al.id AS lexeme_id
+    FROM adverb_lexemes al
+    JOIN concept_adverb_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 0
+  )
+  ORDER BY lexeme_id
+`;
+
 // A lexical sense (`sense_of`) is left out: the engine selects it in place of the concept the user
 // picked (KNOW_ACQUAINTED for KNOW with an object, A131), so no picker should offer it.
 app.get('/api/concepts', (req, res) => {
@@ -164,6 +188,16 @@ app.get('/api/concepts', (req, res) => {
       readingByLanguage[r.language] = r.reading;
       readings.set(r.concept_id, readingByLanguage);
     }
+  }
+
+  const aliasRows = db
+    .prepare<[], { concept_id: string; language: LanguageCode; word: string }>(ALIAS_SQL)
+    .all();
+  const aliases = new Map<string, Partial<Record<LanguageCode, string[]>>>();
+  for (const r of aliasRows) {
+    const byLanguage = aliases.get(r.concept_id) ?? {};
+    (byLanguage[r.language] ??= []).push(r.word);
+    aliases.set(r.concept_id, byLanguage);
   }
 
   const definitionRows = db
@@ -228,6 +262,7 @@ app.get('/api/concepts', (req, res) => {
       number: pronounNumbers.get(r.id),
       gendered: genderedNouns.has(r.id) || undefined,
       isA: hypernyms.get(r.id),
+      aliases: aliases.get(r.id),
     })),
   };
   res.json(response);

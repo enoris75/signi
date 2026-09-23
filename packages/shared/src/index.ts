@@ -642,6 +642,15 @@ export interface Concept {
    * the full chain walks it, since every ancestor is itself in the concept list.
    */
   isA?: string;
+  /**
+   * Secondary lexemes — other words that name this concept, keyed by language (P09-E23): *talk*
+   * for SPEAK, *cominciare* for BEGIN, whose primary is *iniziare*. **Search-only**: the pickers
+   * and the console find the concept by them, but nothing ever renders or prints one — the word
+   * shown is still `labels`, the primary lemma. Ships every language, as `labels` does, so a
+   * search can match the English alias while browsing in another language. Absent when the
+   * concept has none.
+   */
+  aliases?: Partial<Record<LanguageCode, string[]>>;
 }
 
 /** A noun used attributively to modify a head noun, plus its semantic relation. */

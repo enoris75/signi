@@ -651,13 +651,16 @@ function wordCompletion(
   wordsFor(spec, vocab).forEach((concept, order) => {
     const insert = printWord(concept, spec, vocab);
     const shown = concept.role === "pronoun" ? PRONOUN_NAMES[concept.id] ?? insert : vocab.label(concept);
-    // Matched as the pickers match: the word as shown, its English word, its reading, its gloss.
+    // Matched as the pickers match: the word as shown, its English word, its reading, its gloss, its
+    // aliases in the interface language and English (P09-E23). The row still shows and inserts the word.
     const hay = [
       shown,
       concept.role === "pronoun" ? vocab.label(concept) : "",
       concept.label ?? "",
       concept.readings?.[vocab.language] ?? "",
       concept.synonym ?? "",
+      ...(concept.aliases?.[vocab.language] ?? []),
+      ...(concept.aliases?.en ?? []),
       concept.id,
     ].filter(Boolean);
     let cls: number | undefined;

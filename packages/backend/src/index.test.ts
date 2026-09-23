@@ -141,9 +141,27 @@ describe('GET /api/concepts', () => {
     expect(await find('CRY_OUT')).toMatchObject({ alarmCry: true });
 
     const divide = await find('DIVIDE');
-    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA']) {
+    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA', 'aliases']) {
       expect(divide).not.toHaveProperty(key);
     }
+  });
+
+  // P09-E23: the other words that find a concept, search-only — `labels` stays the primary lemma.
+  test('carries a concept\'s aliases in every language, and labels it by its primary still', async () => {
+    const begin = await find('BEGIN');
+    expect(begin.aliases).toEqual({ it: ['cominciare'], de: ['anfangen'], es: ['comenzar'] });
+    expect(begin.labels).toEqual({ en: 'begin', it: 'iniziare', fr: 'commencer', de: 'beginnen', es: 'empezar', pt: 'começar', ja: '始まる' });
+    expect(begin.label).toBe('begin');
+    expect(await find('SPEAK')).toMatchObject({ label: 'speak', labels: { en: 'speak' }, aliases: { en: ['talk'] } });
+    expect(await find('RETURN')).toMatchObject({ label: 'return', aliases: { en: ['come back'] } });
+    // The alias reaches the role-narrowed list too.
+    expect((await list('?role=verb')).find((c) => c.id === 'SPEAK')?.aliases).toEqual({ en: ['talk'] });
+  });
+
+  test('lists every seeded alias, and only those', async () => {
+    const served = Object.fromEntries((await list()).filter((c) => c.aliases).map((c) => [c.id, c.aliases]));
+    const seeded = Object.fromEntries(offered.filter((c) => c.aliases).map((c) => [c.id, c.aliases]));
+    expect(served).toEqual(seeded);
   });
 
   test('describes a concept with no words yet by its row alone', async () => {
