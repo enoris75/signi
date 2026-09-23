@@ -6,8 +6,9 @@ that P09 filed in the same row.
 wh-question is a gap plus a fronting rule, and the gap is a shape the engine already has. The
 existential is a clause with no subject and a verb six languages spell irregularly.
 **Scope:** all 7 languages.
-**Status:** planning, unscheduled. Split out of P09 §3 on 2026-09-23. The **yes/no** half of E6
-shipped as [C10](../../../localization/done/C10-ui-questions.md) on an earlier sweep.
+**Status:** **wh-question shipped, 2026-09-23** (plan-only, all seven languages; see [Done](#done)).
+The **existential** is split off (D5) and still unscheduled. The **yes/no** half of E6 shipped as
+[C10](../../../localization/done/C10-ui-questions.md) on an earlier sweep.
 **Words:** *what*, *how*, *why*, *where*, and *who* / *which* as question words.
 
 | lang | **who** eats the food? | **what** does the cat eat? | **where** does the cat eat? | **there is** a cat |
@@ -20,7 +21,75 @@ shipped as [C10](../../../localization/done/C10-ui-questions.md) on an earlier s
 | pt | quem come a comida? | o que o gato come? | onde o gato come? | há um gato. |
 | ja | 誰が食べ物を食べますか？ | 猫は何を食べますか？ | 猫はどこで食べますか？ | 猫がいます。 |
 
-**Proposed, not engine output.**
+**Proposed, not engine output** — the table as planned. What the engine renders is in [Done](#done);
+the existential column is still only a proposal.
+
+## Done
+
+Shipped 2026-09-23 as `PhrasePlan.questionRole` / `questionSpecifiers` / `questionAnimate` (D1, D2),
+**plan-only**: no builder control sets it yet (§3 is a follow-up). Pinned in
+[`test/questions.test.ts`](../../../../packages/engine/test/questions.test.ts); C10's
+`interrogative.test.ts` and the relative-clause suites pass unchanged.
+
+| lang | who eats the food? | what does the cat eat? | where does the cat eat? | how does the cat eat? | why does the cat eat the food? |
+|---|---|---|---|---|---|
+| en | who eats the food? | what does the cat eat? | where does the cat eat? | how does the cat eat? | why does the cat eat the food? |
+| it | chi mangia il cibo? | che cosa mangia il gatto? | dove mangia il gatto? | come mangia il gatto? | perché mangia il cibo il gatto? |
+| fr | qui mange la nourriture ? | qu'est-ce que le chat mange ? | où est-ce que le chat mange ? | comment est-ce que le chat mange ? | pourquoi est-ce que le chat mange la nourriture ? |
+| de | wer isst das Essen? | was frisst der Kater? | wo frisst der Kater? | wie frisst der Kater? | warum frisst der Kater das Essen? |
+| es | ¿quién come la comida? | ¿qué come el gato? | ¿dónde come el gato? | ¿cómo come el gato? | ¿por qué come el gato la comida? |
+| pt | quem come a comida? | o que o gato come? | onde o gato come? | como o gato come? | por que o gato come a comida? |
+| ja | 誰が食べ物を食べますか？ | 猫は何を食べますか？ | 猫はどこで食べますか？ | 猫はどうやって食べますか？ | 猫はなぜ食べ物を食べますか？ |
+
+*what* over the subject: "what eats the food?", "che cosa mangia il cibo?", "qu'est-ce qui mange la
+nourriture ?", "was isst das Essen?", "¿qué come la comida?", "o que come a comida?", 何が食べ物を食べますか？.
+*who* over the object: "who does the cat eat?", "chi mangia il gatto?", "qui est-ce que le chat mange ?",
+"wen frisst der Kater?", "¿a quién come el gato?", "quem o gato come?", 猫は誰を食べますか？.
+
+What landed differently from the plan below, and why:
+
+- **French fronts before *est-ce que*, not by inversion** (D3's recommendation, over the table's
+  "que mange le chat ?" / "où le chat mange-t-il ?"): *que* elides into "qu'est-ce que", and the
+  inanimate subject is "qu'est-ce qui", since a bare *que* cannot be a subject. The inversion register
+  is a follow-up.
+- **German says *frisst*, not *isst*, of the Kater**: the verb's `subject_sense` reads the (animal)
+  subject, as in every other Kater sentence. A subject gap agrees with a stand-in, so "wer isst".
+- **The subject gap has a stand-in subject** (`questionSubject`): the plan type requires a `subject`,
+  so a subject question carries a throwaway (the tests use GENERIC_PERSON), and the translator
+  replaces it with a wordless third-singular element carrying the gap's animacy — which is what the
+  Japanese existential reads (誰が家にいますか).
+- **Portuguese keeps the statement's order behind the word** (the ruling), and **Spanish puts the
+  subject behind the verb group** (VSO, "¿dónde come el gato la comida?"), falling back to the end of
+  the predicate where a clitic leads it ("¿dónde lo come el gato?"). **Italian closes the clause on the
+  subject** ("perché mangia il cibo il gatto?"), the order Italian gives a subject the question is not
+  about, and elides *dov'è* / *com'è*.
+- **A prepositional object asks with its preposition**, which was cheap because `object_prep` is one
+  key: en strands it ("what does the cat depend on?"), de writes *wo(r)-* for a thing ("wovon") and
+  the preposition over *wen / wem* for a person, fr *de quoi*, it *da che cosa*, es *de qué*, pt *de
+  que*; ja takes the verb's own `object_particle` (何に依存していますか). German declines *wer* for its
+  verb's `object_case` ("wem hilft der Kater?"); Spanish gives an asked-about person the personal *a*.
+- **The place asked about still selects the copula**: es/pt pass the gap to the `estar` choice the
+  relative clause already reads ("¿dónde está el gato?", "onde o gato está?"), and Japanese puts どこ in
+  the locative slot, so the existential's に follows (猫はどこにいますか). The copula's *how* is どう in
+  the predicate slot in Japanese (猫はどうですか), not どうやって.
+- **Five gaps only, and no passive**: `resolveQuestion` throws on any other complement gap, on a
+  locative or cause in a marked relation ("under what?", "thanks to whom?"), and on a passive clause,
+  whose slots are re-mapped and would need the gap to move with them. No control can produce these.
+- **The gap is the matrix clause's alone**: a coordinated clause is a yes/no question beside it
+  ("what does the cat eat, and does the dog run?"); a condition, a command and a citation drop the
+  question exactly as they drop C10's (the gapped slot stays empty there).
+
+Follow-ups, none filed:
+
+- **The existential** (D5) — its own task, with D5's table: en/it agreement with the notional
+  subject (*there is / there are*, *c'è / ci sono*), fr invariable *il y a*, de *es gibt* + accusative,
+  es *hay*, pt *há*, ja いる / ある by [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts).
+- **The possessor question** ("whose food does the cat eat?") — D1: the wh-word carries a noun.
+- **Complement gaps under a preposition** ("under what?", "with whom?", "thanks to what?") and the
+  passive question (the gap re-mapped as a relative's is).
+- **Indirect questions** ("asks whether / what …") — needs [E4](P09-E4-clauses.md).
+- **Builder control** (§3): a mood control and a slot marked as the question; the console too.
+- **The French inversion register** ("que mange le chat ?"), multiple gaps, echo questions.
 
 ## Why
 

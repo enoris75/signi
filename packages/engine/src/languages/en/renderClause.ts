@@ -9,7 +9,9 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { predicateParts } from './predicateParts.js';
+import { questionWord } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
@@ -39,7 +41,9 @@ export function renderClause(given: ResolvedPhrase): string {
   // A content clause standing where the subject would is extraposed behind the predicate, and the
   // slot it left takes the expletive "it": "it is right that one acts" (C30).
   const contentSubject = phrase.contentSubject;
-  const subj = contentSubject ? 'it' : dropsSubject ? '' : subjectText(subject);
+  // A subject wh-question writes its word in the subject's own slot (P09-E6).
+  const gap = phrase.question;
+  const subj = contentSubject ? 'it' : dropsSubject ? '' : gap?.role === 'subject' ? questionWord(gap) : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
   // A `no` subject is the clause's negator and takes the other negatives with it (A160). Only the
@@ -47,11 +51,20 @@ export function renderClause(given: ResolvedPhrase): string {
   // forms for agreement, but a `no` head negates THIS clause, not the relative one.
   // A question puts the verb ahead of the subject, so an "or" group agrees with its first conjunct,
   // the one nearest the verb (A210): "do the cats or the dog run?".
-  const agreement = phrase.verbPhrase.interrogative ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
-  const parts = predicateParts(agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+  // A wh-question over the **subject** is the one that does not invert — its word already stands
+  // where the subject does, ahead of the verb — so it takes no do-support either: "who eats the
+  // food?", "who does not eat?" (P09-E6). Every other question inverts.
+  const inverts = !!phrase.verbPhrase.interrogative && gap?.role !== 'subject';
+  const verbPhrase = inverts || !phrase.verbPhrase.interrogative ? phrase.verbPhrase : { ...phrase.verbPhrase, interrogative: false };
+  const agreement = inverts ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
+  const parts = predicateParts(agreement, verbPhrase, phrase.directObject, phrase.complements,
     subject.agreement['definiteness'] === 'no', phrase.agent);
-  // A question puts the finite auxiliary before the subject: "is the server active?".
-  const clause = (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
+  // A question puts the finite auxiliary before the subject: "is the server active?". A wh-question
+  // fronts its word ahead of that — "what does the cat eat?", "why does the cat eat?" — and a verb
+  // that takes its object with a preposition strands it: "what does the cat click on?".
+  const fronted = gap && gap.role !== 'subject' ? questionWord(gap) : '';
+  const stranded = gap?.role === 'directObject' ? objectPreposition(phrase.verbPhrase.verb) : '';
+  const clause = [fronted, ...(inverts ? invertSubject(subj, parts) : [subj, ...parts]), stranded]
     .filter(Boolean)
     .join(' ')
     .trim();

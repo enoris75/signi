@@ -1179,8 +1179,47 @@ export interface PhrasePlan {
    * Like a mood it belongs to the top clause, so it is ignored under a `condition`, an `imperative`
    * or an `infinitive`. A coordinated clause shares it (a question does not coordinate with a
    * statement, see `coordination`), and a relative clause never takes it.
+   *
+   * It is the yes/no case of a wider force: a plan that also names a `questionRole` is a
+   * **wh-question** ("what does the cat eat?"), which implies this flag and keeps every rule above.
    */
   interrogative?: boolean;
+  /**
+   * The slot a **wh-question** asks about — its gap (P09-E6): "**who** eats the food?" is
+   * `'subject'`, "**what** does the cat eat?" `'directObject'`, "**where** does the cat eat?"
+   * `'locative'`, "**how**?" `'manner'`, "**why**?" `'cause'`. It is `RelativeClause.headRole`
+   * reused, minus `'possessor'` ("whose food?" asks inside a noun phrase, a follow-up): the same
+   * slots, and the gapped one is left out of the plan exactly as a relative clause leaves it out. A
+   * subject gap still carries a `subject`, because the type requires one; it is a throwaway, never
+   * rendered, as a `contentSubject` clause's is, and the verb agrees in the third singular ("who
+   * eats"). Only those five gaps have a question word yet; any other complement gap (and a
+   * locative or cause gap in a marked relation, "under what?", "thanks to whom?") is refused.
+   *
+   * It implies `interrogative`, so the question mark, the ¿, the か and the suppression under a
+   * condition, a command or a citation all hold unchanged. The gap belongs to this clause alone: a
+   * coordinated clause is a yes/no question beside it ("who eats, and does the dog run?").
+   *
+   * Each language fronts the word by its own rule: en fronts and inverts with the yes/no
+   * *do*-support, except over a subject gap ("who eats?"); de fronts into V2; it and es put the
+   * subject behind the verb ("che cosa mangia il gatto?", "¿qué come el gato?"); pt fronts and
+   * keeps the statement's order ("o que o gato come?"); fr fronts before "est-ce que" ("qu'est-ce
+   * que le chat mange ?"), a subject gap standing alone ("qui mange ?"). Japanese moves nothing:
+   * the word sits in its slot with the slot's own particle (猫は何を食べますか).
+   */
+  questionRole?: 'subject' | 'directObject' | ComplementType;
+  /**
+   * The specifiers of the gapped complement when `questionRole` is a complement — the relation the
+   * question keeps though its noun is gone, exactly as `RelativeClause.headSpecifiers`. Only the
+   * plain relation has a word so far: `in` (or none) for *where*, a neutral cause for *why*.
+   */
+  questionSpecifiers?: Specifier[];
+  /**
+   * Whether the answer to a subject or direct-object question is a **person** — *who* rather than
+   * *what* (chi / che cosa, qui / que, wer / was, quién / qué, quem / o que, 誰 / 何). A gap has no
+   * noun to read animacy off, which is why the plan says it; absent is *what*. Unread on the other
+   * gaps.
+   */
+  questionAnimate?: boolean;
   /**
    * When true this clause is an **imperative** (a command — "eat the food!", "don't run!").
    * The verb is rendered in the imperative mood and the subject is dropped, but `subject`

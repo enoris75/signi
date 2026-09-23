@@ -3,6 +3,8 @@ import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase 
 import { possessiveFr } from '../../possessive.js';
 import { elidesBefore } from './elidesBefore.js';
 import { estCeQue } from './estCeQue.js';
+import { frontQuestion } from './frontQuestion.js';
+import { questionWord } from './questionWord.js';
 import { COORD_WORDS, FR_DEGREE } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
@@ -32,8 +34,12 @@ export const frenchEngine: LanguageEngine = {
     if (phrase.coordination) {
       sentence = `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
     }
-    // A yes/no question asks about the whole statement, coordinated or not, from one "est-ce que".
-    return punctuate(phrase.verbPhrase?.interrogative ? estCeQue(sentence) : sentence);
+    // A yes/no question asks about the whole statement, coordinated or not, from one "est-ce que". A
+    // wh-question fronts its word ahead of it ("qu'est-ce que le chat mange ?"), except over the
+    // subject, whose word already leads the statement and needs no "est-ce que" (P09-E6).
+    const gap = phrase.question;
+    if (!phrase.verbPhrase?.interrogative || gap?.role === 'subject') return punctuate(sentence);
+    return punctuate(gap ? frontQuestion(questionWord(gap, phrase.verbPhrase.verb), sentence) : estCeQue(sentence));
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

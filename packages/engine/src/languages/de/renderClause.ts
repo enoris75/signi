@@ -37,6 +37,7 @@ import { splitMeansClause } from './splitMeansClause.js';
 import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
+import { questionWord } from './questionWord.js';
 import { verbGroup } from './verbGroup.js';
 import { zuInfinitive } from './zuInfinitive.js';
 
@@ -265,7 +266,10 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // The translator has already moved the patient into the subject slot for every language, as a
     // personal passive needs; German is the one that declines it, so it is the one that undoes it.
     const impersonal = passive && objCase === 'dat';
+    // A subject wh-question writes its word in the subject's slot, which V2 keeps ahead of the verb:
+    // "wer isst das Essen?" (P09-E6; the engine renders it uninverted).
     const subj = phrase.contentSubject ? 'es'
+      : phrase.question?.role === 'subject' ? questionWord(phrase.question, verb)
       : impersonal ? elementPhrase(subject, 'dat') : subjectText(subject);
     const person = impersonal ? '3' : agreement['person'] ?? '3';
     const number = impersonal ? 'singular' : agreement['number'] ?? 'singular';

@@ -299,6 +299,16 @@ export interface ResolvedComplement {
   specifiers?: Specifier[];
 }
 
+/**
+ * A wh-question's gap, resolved (see ResolvedPhrase.question). `role` is narrowed to the five slots
+ * that have a question word — who/what, where, how and why; the translator refuses the rest.
+ */
+export interface ResolvedQuestion {
+  role: 'subject' | 'directObject' | 'locative' | 'manner' | 'cause';
+  /** *who* rather than *what*; read on a subject or direct-object gap only. */
+  animate: boolean;
+}
+
 export interface ResolvedPhrase {
   subject: ResolvedNounElement;
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
@@ -317,6 +327,14 @@ export interface ResolvedPhrase {
   agent?: ResolvedNounElement;
   // The recipient ("gives the book *to the cat*") arrives as the `terminus` complement.
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
+  /**
+   * The gap of a **wh-question** (see PhrasePlan.questionRole, P09-E6): which slot the question asks
+   * about, and whether its answer is a person. Set on a top clause only, alongside
+   * `verbPhrase.interrogative`, which it implies; the gapped slot is absent from the phrase, and a
+   * subject gap's `subject` is a stand-in that only agrees (third singular) and carries the gap's
+   * animacy for the Japanese existential. Each engine writes its own question word and fronting.
+   */
+  question?: ResolvedQuestion;
   /**
    * A resolved hypothetical condition (the "if" clause). When present this phrase is the
    * main clause of a conditional (its verb resolved in the `'conditional'` mood) and

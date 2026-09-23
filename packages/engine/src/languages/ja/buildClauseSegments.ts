@@ -20,6 +20,8 @@ import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
+import { questionAdverb } from './questionAdverb.js';
+import { questionNoun } from './questionNoun.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 
 /**
@@ -50,6 +52,12 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
       : elSegs(phrase.subject);
   }
   const segs: RubySegment[] = [];
+  // A wh-question moves nothing in Japanese: its word is the noun (or the adverb) its slot would hold,
+  // with the slot's own particle, and か closes the clause as it closes a yes/no one (P09-E6).
+  const asked = phrase.question;
+  const copula = phrase.verbPhrase.verb.forms['copula'] === '1';
+  const askedNoun = asked ? questionNoun(asked, copula) : undefined;
+  const askedSlot = asked?.role === 'locative' ? 'locative' : asked?.role === 'manner' ? 'predicative' : undefined;
   // An imperative drops its subject/topic; the subject's person still selects the form. An
   // infinitive citation (「食物を消費する」) is likewise subject-less on the surface.
   const imperative = phrase.verbPhrase.mood === 'imperative';
@@ -69,6 +77,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     // Nominalized, so the clause inside it is plain (行動する, not 行動します) — and a generic subject
     // is unsaid there, as it is in every citation: 行動することが正しい, not 人は行動することが正しい.
     segs.push(...buildClauseSegments(phrase.contentSubject, 'が', true), { t: 'ことが' });
+  } else if (asked?.role === 'subject' && askedNoun) {
+    // A subject wh-question is never the topic: a question word is new information, which は cannot
+    // mark, so it takes が — 誰が食べ物を食べますか (P09-E6).
+    segs.push(...elSegs(askedNoun), { t: 'が' });
   } else if (!dropsSubject && !(plain && phrase.subject.agreement['generic'] === '1')) {
     segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
   }
@@ -129,13 +141,17 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // A `no` causee is still this clause's object, and negates this clause, not the one it is spoken in
   // (A171): 猫はどの犬も食べるようにしません, "the cat causes no dog to eat". The clause keeps its own polarity.
   const causeeNegative = !!causee && isNegativeGroup(causee);
+  // The manner and the cause question words stand where an adverb would, ahead of the predicate.
+  segs.push(...questionAdverb(asked, copula));
   segs.push(...predicateSegs(
     // Under the suffix causative the governed verb's own object is this clause's, since the two
     // clauses have collapsed into one: 犬に食べ物を食べさせます.
     verbPhrase,
-    suffixCausative ? phrase.infinitiveComplement?.directObject : causee ? undefined : phrase.directObject,
+    suffixCausative ? phrase.infinitiveComplement?.directObject : causee ? undefined
+      : phrase.directObject ?? (asked?.role === 'directObject' ? askedNoun : undefined),
     // A nominalized clause is plain, as a prenominal one is (行動する, not 行動します).
-    phrase.complements, impPN, plain,
+    askedSlot && askedNoun ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun } } : phrase.complements,
+    impPN, plain,
     subjectNegative || causeeNegative, animate,
   ));
   return segs;
