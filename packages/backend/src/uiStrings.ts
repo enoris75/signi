@@ -9,7 +9,9 @@ import {
 } from '@signi/engine';
 import { UI_STRINGS, LANGUAGES } from '@signi/shared';
 import type { LanguageCode, Translation, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
-import { lookupLexicalEntry } from './lexicon.js';
+import { notingLookup } from './lexicon.js';
+
+type LexicalLookup = ReturnType<typeof notingLookup>['lookup'];
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
@@ -32,21 +34,21 @@ function applyFormat(text: string, format?: UiStringFormat): string {
  * whatever its initializer happens to be, and the catalog's literal types would collapse the union
  * before the later kinds were reached. A parameter narrows from its declared type.
  */
-function renderEntry(def: UiStringDef): Translation[] {
-  if (def.determiner !== undefined) return translateDeterminer(def.determiner, lookupLexicalEntry, def.agreesWith);
-  if (def.possessive !== undefined) return translatePossessive(def.possessive, lookupLexicalEntry, def.agreesWith);
+function renderEntry(def: UiStringDef, lookup: LexicalLookup): Translation[] {
+  if (def.determiner !== undefined) return translateDeterminer(def.determiner, lookup, def.agreesWith);
+  if (def.possessive !== undefined) return translatePossessive(def.possessive, lookup, def.agreesWith);
   if (def.conjunction !== undefined) return translateConjunction(def.conjunction);
-  if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookupLexicalEntry, def.agreesWith);
-  if (def.degree !== undefined) return translateDegree(def.degree, lookupLexicalEntry, def.agreesWith);
-  if (def.word !== undefined) return translateWord(def.word, lookupLexicalEntry, def.agreesWith);
-  return translate(def.plan, lookupLexicalEntry);
+  if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookup, def.agreesWith);
+  if (def.degree !== undefined) return translateDegree(def.degree, lookup, def.agreesWith);
+  if (def.word !== undefined) return translateWord(def.word, lookup, def.agreesWith);
+  return translate(def.plan, lookup);
 }
 
 /**
  * Renders every entry of the UI-string catalog into every language. The result depends only
  * on the lexicon, so index.ts builds it once at startup and serves it from memory — which
- * also means a plan referencing an unseeded concept crashes the server on boot rather than
- * silently serving a broken string.
+ * also means an entry referencing an unseeded concept crashes the server on boot, naming it,
+ * rather than silently serving a string with a hole in it (A253).
  */
 export function buildUiStrings(): UiStrings {
   const out = {} as UiStrings;
@@ -57,7 +59,17 @@ export function buildUiStrings(): UiStrings {
     const def: UiStringDef = UI_STRINGS[key];
     const byLanguage = {} as Record<LanguageCode, string>;
 
-    const rendered = renderEntry(def);
+    const { lookup, unknown } = notingLookup();
+    const rendered = renderEntry(def, lookup);
+    // The engine renders an unseeded concept as an empty word, so an entry naming one still
+    // renders in every language, with a hole in it: refuse it the way /api/translate does (A253).
+    if (unknown.size > 0) {
+      const ids = [...unknown];
+      throw new Error(
+        `UI string "${key}" names unknown concept${ids.length > 1 ? 's' : ''}: ${ids.join(', ')}. ` +
+          'Seed them, or change its entry.',
+      );
+    }
 
     for (const t of rendered) {
       if (t.text) byLanguage[t.language] = applyFormat(t.text, def.format);

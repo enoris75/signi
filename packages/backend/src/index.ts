@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
-import { isSeededConcept, lookupLexicalEntry } from './lexicon.js';
+import { notingLookup } from './lexicon.js';
 import { translate } from '@signi/engine';
 import { buildUiStrings } from './uiStrings.js';
 import { buildConceptDefinitions } from './definitions.js';
@@ -243,17 +243,9 @@ app.post('/api/translate', (req, res) => {
   }
 
   // The engine renders a concept the lexicon cannot find as an empty word, so a plan naming one
-  // would come back as a 200 with a hole in it. Rather than walk the plan (and keep a walker in
-  // step with the plan model), note every id the engine asks for that has no concept row: that
-  // covers every slot the engine reads.
-  const unknown = new Set<string>();
-  const lookup: typeof lookupLexicalEntry = (conceptId, language) => {
-    if (typeof conceptId !== 'string' || !isSeededConcept(conceptId)) {
-      unknown.add(String(conceptId));
-      return undefined;
-    }
-    return lookupLexicalEntry(conceptId, language);
-  };
+  // would come back as a 200 with a hole in it; the noting lookup collects every id it asked for
+  // that has no concept row.
+  const { lookup, unknown } = notingLookup();
   const translations = translate(body.plan, lookup);
   if (unknown.size > 0) {
     const ids = [...unknown];
