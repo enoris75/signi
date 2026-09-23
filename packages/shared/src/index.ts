@@ -118,7 +118,8 @@ export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'ma
  * but *so … wie*, es *igual de* but *tan … como*, pt *igualmente* but *tão … como* (fr *aussi … que*
  * keeps its word). Japanese puts the standard before the adjective and in place of the adverb:
  * 犬より大きい, 犬と同じくらい大きい, and the negative-polarity 犬ほど大きくない for `less`. The
- * superlatives take no standard (a partitive instead, a follow-up).
+ * superlatives take no standard: the same field is the **set** they select from instead, "the
+ * biggest **of the animals**" (P09-E19, see `NounPhrase.headStandard`).
  */
 export type Degree = 'positive' | 'more' | 'most' | 'less' | 'least' | 'equally';
 
@@ -127,9 +128,10 @@ export const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', '
 /**
  * The degrees that take a **standard of comparison** (NounPhrase.headStandard, P09-E5): the
  * comparatives ("bigger than the dog", "less big than the dog") and the equative ("as big as the
- * dog"). `positive` compares with nothing, and the superlatives select from a set with a partitive
- * ("the biggest of the cats") that no *than* can render, so the translator drops a standard on any
- * of those. The builder reads the same set to offer the standard's control (P09-E12 D5).
+ * dog"). `positive` compares with nothing, and the translator drops a standard there; the
+ * superlatives select from a set with a partitive ("the biggest of the cats") that no *than* can
+ * render, and read the same field as that set instead (P09-E19). The builder reads this set to offer
+ * the standard's control (P09-E12 D5).
  */
 export const STANDARD_DEGREES: ReadonlySet<Degree> = new Set<Degree>(['more', 'less', 'equally']);
 
@@ -727,16 +729,25 @@ export interface NounPhrase {
    */
   headDegree?: Degree;
   /**
-   * The **standard of comparison** of the head's degree — what the predicate adjective is compared
-   * *to*: "the cat is bigger **than the dog**", "as big **as the dog**", 猫は**犬より**大きい (P09-E5).
-   * Only meaningful beside a `headDegree` of `more`, `less` or `equally` on an adjective head; the
-   * translator drops it on `positive`, and on the superlatives `most` / `least`, which select from
-   * a set with a partitive ("the biggest **of** the cats") rather than compare with a standard —
-   * a construct of its own (D3).
+   * What the head's degree measures the predicate adjective **against**, read by the degree:
+   *
+   *  - on `more`, `less` or `equally`, the **standard of comparison** it is compared *to*: "the cat is
+   *    bigger **than the dog**", "as big **as the dog**", 猫は**犬より**大きい (P09-E5);
+   *  - on the superlatives `most` / `least`, the **set** it selects from: "the cat is the biggest **of
+   *    the animals**", *il più grande degli animali*, *das größte der Tiere*, 動物の中で最も大きい
+   *    (P09-E19). Cycling "bigger than the dogs" to `most` reads "the biggest of the dogs".
+   *
+   * Only meaningful on an adjective head; the translator drops it on `positive`.
    *
    * The word it takes is the degree's, not a constant: than / di / que / als / que / do que / より
    * for `more` and `less`, the circumfix as … as / tanto … quanto / aussi … que / so … wie /
-   * tan … como / tão … como / と同じくらい for `equally` (see `Degree`).
+   * tan … como / tão … como / と同じくらい for `equally` (see `Degree`). A set takes a partitive: en
+   * "of" before a plural, coordinated or pronoun set and "in" before a singular noun ("the most
+   * beautiful in the family"); it "di" and fr / es / pt "de", fused with each conjunct's article, fr
+   * "d'entre" before a pronoun; de the bare genitive, or "von" + the dative of a pronoun; ja の中で,
+   * the degree adverb 最も staying. A set also gives English and German the article: "is **the**
+   * biggest of", "ist **das** größte der" (the gender of a plural noun set, else the subject's),
+   * where the bare superlative stays "is biggest", "ist am größten".
    *
    * Deliberately **predicative only**: there is a `headStandard` beside `headDegree` and nothing
    * beside `adjectiveDegrees`. An attributive comparative ("a bigger cat than the dog") puts the

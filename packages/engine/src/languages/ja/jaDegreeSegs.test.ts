@@ -23,3 +23,11 @@ describe('jaDegreeSegs', () => {
     expect(text(jaDegreeSegs(compared('more', { intensifier: 'とても' })))).toBe('犬よりとても');
   });
 });
+
+describe('jaDegreeSegs: a superlative\'s set (P09-E19)', () => {
+  test('の中で, and the degree adverb stays', () => {
+    const selecting = (degree: string) => np(OOKII, { degree, domain: '1' }, { standard: el(np(INU)) });
+    expect(text(jaDegreeSegs(selecting('most')))).toBe('犬の中で最も');
+    expect(text(jaDegreeSegs(selecting('least')))).toBe('犬の中で最も');
+  });
+});

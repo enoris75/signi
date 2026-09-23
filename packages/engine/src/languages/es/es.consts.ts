@@ -21,6 +21,13 @@ export const ES_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 't
 export const ES_STANDARD: Partial<Record<Degree, string>> = { more: 'que', less: 'que', equally: 'como' };
 
 /**
+ * The word before the set a superlative selects from (P09-E19): the preposition "de", contracting
+ * with each conjunct's "el" ("el más grande de los animales", "del grupo") and governing a pronoun's
+ * tonic form ("de nosotros"), unlike the comparative's conjunction "que".
+ */
+export const ES_DOMAIN = 'de';
+
+/**
  * The word before the standard under an equative intensifier: VERY keeps *igual de* before a
  * standard ("igual de grande que el perro"), and *igual de* takes "que", not the circumfix's "como"
  * (see `applyIntensifier`, A255).

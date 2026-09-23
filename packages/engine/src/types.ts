@@ -98,8 +98,10 @@ export interface ResolvedNounPhrase {
   /**
    * The resolved standard of comparison of an adjective head (see NounPhrase.headStandard): "the
    * dog" in "is bigger than the dog". Present only where the head's degree licenses one (`more`,
-   * `less`, `equally`); the translator has dropped it everywhere else, and marks the head with
-   * `forms['standard'] = '1'` so a degree renderer can pick the circumfix's first half (P09-E5).
+   * `less`, `equally`), which the translator marks on the head with `forms['standard'] = '1'` so a
+   * degree renderer can pick the circumfix's first half (P09-E5) — or where it is a superlative's
+   * **set** ("the animals" in "is the biggest of the animals"), marked `forms['domain'] = '1'` instead
+   * (P09-E19). The translator has dropped it on `positive`.
    */
   standard?: ResolvedNounElement;
 }

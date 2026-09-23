@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { CAO, EU, GRANDE, HOMEM, el, np } from './pt.fixtures.js';
+import { CAO, ELE, EU, GRANDE, HOMEM, NOS, el, np } from './pt.fixtures.js';
 import { ptComparison } from './ptComparison.js';
 import { ptStandard } from './ptStandard.js';
 
@@ -26,5 +26,16 @@ describe('ptStandard', () => {
     expect(ptComparison(compared('more').head, 'masc', false)).toBe('maior');
     expect(ptComparison(compared('equally').head, 'masc', false)).toBe('tão grande');
     expect(ptComparison(np(GRANDE, { degree: 'equally' }).head, 'masc', false)).toBe('igualmente grande');
+  });
+});
+
+describe('ptStandard: a superlative\'s set (P09-E19)', () => {
+  const selecting = (standard: ReturnType<typeof el>) => np(GRANDE, { degree: 'most', domain: '1' }, { standard });
+
+  test('"de" contracting per conjunct, and the tonic pronoun', () => {
+    expect(ptStandard(selecting(el(np(CAO, the))))).toBe('do cão');
+    expect(ptStandard(selecting(el(np(CAO, { ...the, number: 'plural' }), np(HOMEM, { ...the, number: 'plural' }))))).toBe('dos cães e dos homens');
+    expect(ptStandard(selecting(el(np(NOS))))).toBe('de nós');
+    expect(ptStandard(selecting(el(np(ELE))))).toBe('dele');
   });
 });

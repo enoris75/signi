@@ -50,6 +50,12 @@ export const IT_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 't
  */
 export const IT_STANDARD: Partial<Record<Degree, 'di' | 'quanto'>> = { more: 'di', less: 'di', equally: 'quanto' };
 
+/**
+ * The word before the set a superlative selects from (P09-E19): the comparative's "di", fused with
+ * each conjunct's article the same way — "il più grande degli animali", "della famiglia", "di noi".
+ */
+export const IT_DOMAIN = 'di';
+
 export const VOWEL_START = /^[aeiouàèéìòù]/i;
 
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */

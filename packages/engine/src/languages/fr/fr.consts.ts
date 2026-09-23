@@ -20,6 +20,14 @@ export const FR_DEGREE: Record<Degree, string> = {
 export const FR_STANDARD: Partial<Record<Degree, string>> = { more: 'que', less: 'que', equally: 'que' };
 
 /**
+ * The words before the set a superlative selects from (P09-E19): "de", fused with each conjunct's
+ * article — "le plus grand des animaux", "de la famille" — and "d'entre" before a personal pronoun,
+ * which never takes the bare "de": "le plus grand d'entre nous", not "*de nous".
+ */
+export const FR_DOMAIN = 'de';
+export const FR_DOMAIN_PRONOUN = "d'entre";
+
+/**
  * The raised degrees (more/most) of these adjectives are suppletive in French — a single
  * word, never "plus" + base: bon → meilleur, mauvais → pire. "plus bon" is ungrammatical;
  * "plus mauvais" is merely dispreferred. Only "more"/"most" suppletise — the lowered and

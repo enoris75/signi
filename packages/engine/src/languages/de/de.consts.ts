@@ -25,6 +25,13 @@ export const ESSIVE_ROLE_CASE = 'nom';
  */
 export const DE_STANDARD: Partial<Record<Degree, string>> = { more: 'als', less: 'als', equally: 'wie' };
 
+/**
+ * The set a superlative selects from (P09-E19) is a bare **genitive** after a noun ("das größte der
+ * Tiere", "die schönste der Familie") and this preposition + the dative after a pronoun ("der größte
+ * von uns"): the genitive pronoun *unser* is archaic.
+ */
+export const DE_DOMAIN_PRONOUN = 'von';
+
 // The umlauted counterpart of each comparison-relevant stem vowel (see `deUmlaut`).
 export const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
 

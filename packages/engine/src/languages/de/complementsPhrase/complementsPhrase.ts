@@ -31,6 +31,7 @@ import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
 import { dePredOrdinal } from '../dePredOrdinal.js';
+import { dePredSuperlative } from '../dePredSuperlative.js';
 import { deStandard } from '../deStandard.js';
 import { genitiveS } from '../genitiveS.js';
 import { genitiveShows } from '../genitiveShows.js';
@@ -96,7 +97,9 @@ export function complementsParts(
         return coordinate(c.phrase, (np) =>
           np.head.forms['role'] !== 'adjective' ? nounPhrase(np, 'nom')
             : np.head.forms['ordinal'] === '1' ? dePredOrdinal(np.head, agreement)
-            : [dePredAdj(np.head), deStandard(np)].filter(Boolean).join(' '),
+            // A superlative with its set leaves "am …sten" for the article: "ist das größte der
+            // Tiere" (P09-E19, see `dePredSuperlative`).
+            : [np.head.forms['domain'] === '1' && np.standard ? dePredSuperlative(np.head, agreement, np.standard) : dePredAdj(np.head), deStandard(np)].filter(Boolean).join(' '),
         );
       }
       // The preposition governs a case, and the case is spelled on each conjunct's own article

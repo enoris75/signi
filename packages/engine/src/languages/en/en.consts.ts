@@ -20,6 +20,14 @@ export const EN_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 'a
 /** The word before the standard of comparison, by degree: "bigger than the dog", "as big as the dog" (P09-E5). */
 export const EN_STANDARD: Partial<Record<Degree, string>> = { more: 'than', less: 'than', equally: 'as' };
 
+/**
+ * The word before the set a superlative selects from (P09-E19), by the set's number: "the biggest
+ * **of** the animals", "of us", "of the dog and the man" before a plural, a coordinated or a pronoun
+ * set, but "the most beautiful **in** the family" before a singular noun, where "of the family" is
+ * marginal.
+ */
+export const EN_DOMAIN = { plural: 'of', singular: 'in' } as const;
+
 /** Suppletive comparatives — no spelling rule derives these. */
 export const EN_IRREGULAR: Record<string, [comparative: string, superlative: string]> = {
   good: ['better', 'best'],

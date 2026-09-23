@@ -78,7 +78,10 @@ export function complementsPhrase(
         const predicate = coordinate(c.phrase, (np) =>
           np.head.forms['role'] !== 'adjective' ? npText(np)
             : takesPredicateArticle(np.head) ? `the ${enAdj(np.head)}`
-            : superlativePredicate(np) ?? [enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
+            // A superlative with its set is definite: "is biggest", but "is the biggest of the
+            // animals" (P09-E19). The bare one keeps no article.
+            : superlativePredicate(np)
+              ?? [np.head.forms['domain'] === '1' && np.standard ? 'the' : '', enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }

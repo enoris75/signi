@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { BIG, DOG, I, MAN, el, np } from './en.fixtures.js';
+import { ANIMAL, BIG, DOG, HOUSE, I, MAN, WE, el, np } from './en.fixtures.js';
 import { enAdj } from './enAdj.js';
 import { enStandard } from './enStandard.js';
 
@@ -30,5 +30,16 @@ describe('enStandard', () => {
   test('the equative adverb is "as" before a standard and "equally" without one', () => {
     expect(enAdj(compared('equally').head)).toBe('as big');
     expect(enAdj(np(BIG, { degree: 'equally' }).head)).toBe('equally big');
+  });
+});
+
+describe('enStandard: a superlative\'s set (P09-E19)', () => {
+  const selecting = (standard: ReturnType<typeof el>) => np(BIG, { degree: 'most', domain: '1' }, { standard });
+
+  test('"of" before a plural, a coordinated or a pronoun set, "in" before a singular noun', () => {
+    expect(enStandard(selecting(el(np(ANIMAL, { ...the, number: 'plural' }))))).toBe('of the animals');
+    expect(enStandard(selecting(el(np(DOG, the), np(MAN, the))))).toBe('of the dog and the man');
+    expect(enStandard(selecting(el(np(WE))))).toBe('of us');
+    expect(enStandard(selecting(el(np(HOUSE, the))))).toBe('in the house');
   });
 });

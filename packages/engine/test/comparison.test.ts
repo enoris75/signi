@@ -7,7 +7,8 @@ import { clause, np, say, sayAll } from './harness.js';
 // comparatives, and for the equative a circumfix whose first half replaces the degree adverb itself
 // (as … as, tanto … quanto, aussi … que, so … wie, tan … como, tão … como, と同じくらい). Japanese puts the
 // standard before the adjective, in the adverb's place, and lowers a degree by negating it (犬ほど
-// 大きくない). Predicative only (D2); a superlative drops its standard (D3).
+// 大きくない). Predicative only (D2). On a superlative the same field is the set it selects from
+// (P09-E19, below), never a *than* (E5's D3).
 
 /** "the cat is <adjective at degree> [than <standard>]", with `extra` merged onto the clause. */
 const cat = (degree: Degree, standard?: NounElement, adjective = 'BIG', extra: Partial<PhrasePlan> = {}): PhrasePlan =>
@@ -222,10 +223,110 @@ describe('the standard beside the rest of the clause', () => {
   });
 });
 
-describe('the superlative takes no standard (D3)', () => {
-  test('most + a standard renders the plain superlative', () => {
-    expect(sayAll(cat('most', np('DOG', { number: 'plural' })))).toEqual(sayAll(cat('most')));
-    expect(sayAll(cat('most', DOG))).toEqual({
+// P09-E19: on a superlative `headStandard` is the set the adjective selects from — the partitive E5's
+// D3 kept apart from *than*. English says "of" before a plural set and "in" before a singular one,
+// French "d'entre" before a pronoun; English and German add the article the set forces ("is the
+// biggest of", "ist das größte der"), and German's agrees with the set's noun where it names one.
+describe('the superlative set (P09-E19)', () => {
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+  const DOGS = np('DOG', { number: 'plural' });
+  const woman = (degree: Degree, set?: NounElement): PhrasePlan => clause(np('WOMAN'), 'BE', {
+    complements: { predicative: { phrase: np('BEAUTIFUL', { headDegree: degree, ...(set ? { headStandard: set } : {}) }) } },
+  });
+
+  test('the biggest of the animals', () => {
+    expect(sayAll(cat('most', ANIMALS))).toEqual({
+      en: 'the cat is the biggest of the animals.',
+      it: 'il gatto è il più grande degli animali.',
+      fr: 'le chat est le plus grand des animaux.',
+      // The article agrees with the understood noun, the set's Tier (neuter), not with Kater (D4).
+      de: 'der Kater ist das größte der Tiere.',
+      es: 'el gato es el más grande de los animales.',
+      pt: 'o gato é o maior dos animais.',
+      // の中で, and 最も stays, unlike the adverb a standard replaces.
+      ja: '猫は動物の中で最も大きいです。',
+    });
+  });
+
+  test('the most beautiful in the family', () => {
+    expect(sayAll(woman('most', np('FAMILY')))).toEqual({
+      // A singular set takes "in".
+      en: 'the woman is the most beautiful in the family.',
+      it: 'la donna è la più bella della famiglia.',
+      fr: 'la femme est la plus belle de la famille.',
+      // A singular collective names no understood noun: the subject's gender.
+      de: 'die Frau ist die schönste der Familie.',
+      es: 'la mujer es la más hermosa de la familia.',
+      pt: 'a mulher é a mais bela da família.',
+      ja: '女は家族の中で最も美しいです。',
+    });
+  });
+
+  test('the biggest of us', () => {
+    expect(sayAll(cat('most', np('FIRST_PERSON', { number: 'plural' })))).toEqual({
+      en: 'the cat is the biggest of us.',
+      it: 'il gatto è il più grande di noi.',
+      // Never "*de nous".
+      fr: "le chat est le plus grand d'entre nous.",
+      // "von" + the dative, and the subject's gender.
+      de: 'der Kater ist der größte von uns.',
+      // The tonic form a preposition governs, not E5's subject form after "que".
+      es: 'el gato es el más grande de nosotros.',
+      pt: 'o gato é o maior de nós.',
+      ja: '猫は私たちの中で最も大きいです。',
+    });
+  });
+
+  test('least, which Japanese keeps negated', () => {
+    expect(sayAll(cat('least', ANIMALS))).toEqual({
+      en: 'the cat is the least big of the animals.',
+      it: 'il gatto è il meno grande degli animali.',
+      fr: 'le chat est le moins grand des animaux.',
+      de: 'der Kater ist das am wenigsten große der Tiere.',
+      es: 'el gato es el menos grande de los animales.',
+      pt: 'o gato é o menos grande dos animais.',
+      ja: '猫は動物の中で最も大きくないです。',
+    });
+  });
+
+  test('a coordinated set: the Romance preposition fuses per conjunct', () => {
+    expect(sayAll(cat('most', { conjuncts: [ANIMALS, np('MAN', { number: 'plural' })], conjunction: 'and' }))).toEqual({
+      en: 'the cat is the biggest of the animals and the men.',
+      it: 'il gatto è il più grande degli animali e degli uomini.',
+      fr: 'le chat est le plus grand des animaux et des hommes.',
+      // No one understood noun: the subject's gender.
+      de: 'der Kater ist der größte der Tiere und der Männer.',
+      es: 'el gato es el más grande de los animales y de los hombres.',
+      pt: 'o gato é o maior dos animais e dos homens.',
+      ja: '猫は動物と男の中で最も大きいです。',
+    });
+  });
+
+  test('English "of" against "in" goes by the set\'s number', () => {
+    expect(say(cat('most', DOGS), 'en')).toBe('the cat is the biggest of the dogs.');
+    expect(say(cat('most', np('FAMILY')), 'en')).toBe('the cat is the biggest in the family.');
+    expect(say(cat('most', np('FAMILY', { number: 'plural' })), 'en')).toBe('the cat is the biggest of the families.');
+  });
+
+  test('French "d\'entre" is for a pronoun only', () => {
+    expect(say(cat('most', DOGS), 'fr')).toBe('le chat est le plus grand des chiens.');
+    expect(say(cat('most', np('THIRD_PERSON', { number: 'plural' })), 'fr')).toBe("le chat est le plus grand d'entre eux.");
+  });
+
+  test('German: the set\'s gender, else the subject\'s; the number is the subject\'s; lower-case', () => {
+    expect(say(cat('most', ANIMALS), 'de')).toBe('der Kater ist das größte der Tiere.');
+    expect(say(cat('most', DOGS), 'de')).toBe('der Kater ist der größte der Hunde.');
+    expect(say(woman('most', np('FAMILY')), 'de')).toBe('die Frau ist die schönste der Familie.');
+    expect(say(cat('most', np('FIRST_PERSON', { number: 'plural' })), 'de')).toBe('der Kater ist der größte von uns.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: ANIMALS }) } },
+    }), 'de')).toBe('die Kater sind die größten der Tiere.');
+  });
+
+  // E5's "most + a standard renders the plain superlative", rewritten: the bare superlative is what
+  // stays exactly as it was, and a standard on `most` is now its set.
+  test('the bare superlative is unchanged in all seven', () => {
+    expect(sayAll(cat('most'))).toEqual({
       en: 'the cat is biggest.',
       it: 'il gatto è il più grande.',
       fr: 'le chat est le plus grand.',
@@ -234,11 +335,36 @@ describe('the superlative takes no standard (D3)', () => {
       pt: 'o gato é o maior.',
       ja: '猫は最も大きいです。',
     });
+    expect(sayAll(cat('least'))).toEqual({
+      en: 'the cat is least big.',
+      it: 'il gatto è il meno grande.',
+      fr: 'le chat est le moins grand.',
+      de: 'der Kater ist am wenigsten groß.',
+      es: 'el gato es el menos grande.',
+      pt: 'o gato é o menos grande.',
+      ja: '猫は最も大きくないです。',
+    });
   });
 
-  test('so do least and positive', () => {
-    expect(sayAll(cat('least', DOG))).toEqual(sayAll(cat('least')));
+  test('a set is no standard: no "than", and no equative circumfix', () => {
+    for (const text of Object.values(sayAll(cat('most', DOGS)))) {
+      expect(text).not.toMatch(/\b(than|que|als|wie|como|tanto|quanto|tan|tão|so)\b|より/);
+    }
+  });
+
+  test('positive still drops a standard', () => {
     expect(sayAll(cat('positive', DOG))).toEqual(sayAll(cat('positive')));
+  });
+
+  test('the superlative\'s own intensifier leads the article', () => {
+    const plan = clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headIntensifier: 'VERY', headStandard: ANIMALS }) } },
+    });
+    expect(sayAll(plan)).toMatchObject({
+      en: 'the cat is by far the biggest of the animals.',
+      it: 'il gatto è di gran lunga il più grande degli animali.',
+      de: 'der Kater ist bei weitem das größte der Tiere.',
+    });
   });
 });
 

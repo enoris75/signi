@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { GRANDE, HOMBRE, PERRO, YO, el, np } from './es.fixtures.js';
+import { GRANDE, HOMBRE, NOSOTROS, PERRO, YO, el, np } from './es.fixtures.js';
 import { esDeg } from './esDeg.js';
 import { esStandard } from './esStandard.js';
 
@@ -32,5 +32,15 @@ describe('esStandard', () => {
     const under = np(GRANDE, { degree: 'equally', standard: '1', intensifier: 'igual de', intensifier_equative: '1' }, { standard: el(np(PERRO, the)) });
     expect(esStandard(under)).toBe('que el perro');
     expect(esDeg(under.head, 'grande')).toBe('igual de grande');
+  });
+});
+
+describe('esStandard: a superlative\'s set (P09-E19)', () => {
+  const selecting = (standard: ReturnType<typeof el>) => np(GRANDE, { degree: 'most', domain: '1' }, { standard });
+
+  test('"de" contracting per conjunct, and the tonic pronoun', () => {
+    expect(esStandard(selecting(el(np(PERRO, the))))).toBe('del perro');
+    expect(esStandard(selecting(el(np(PERRO, { ...the, number: 'plural' }), np(HOMBRE, { ...the, number: 'plural' }))))).toBe('de los perros y de los hombres');
+    expect(esStandard(selecting(el(np(NOSOTROS))))).toBe('de nosotros');
   });
 });

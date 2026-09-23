@@ -163,7 +163,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   }
   // …and its intensifier, the same way ("is very big"; see `applyIntensifier`, C33).
   if (head.forms['role'] === 'adjective') applyIntensifier(head, np.headIntensifier, language, lookup);
-  // …and what its degree compares it with ("bigger than the dog"), where the degree takes one at all
+  // …and what its degree measures it against — the standard ("bigger than the dog") or the superlative's
+  // set ("the biggest of the animals", P09-E19) — where the degree takes one at all
   // (see `resolveStandard`, P09-E5).
   const standard = resolveStandard(np, head, language, lookup);
   // A title stands with a personal name and nowhere else: `proper` says it is a name and `human`
