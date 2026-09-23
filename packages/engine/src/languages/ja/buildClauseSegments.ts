@@ -132,7 +132,8 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   }
   // An object clause stands where the object would, right ahead of the verb: plain, its subject
   // marked が, and closed by the verb's と or ことを — 猫が走ると言います, 猫が走ることを知っています (P09-E4).
-  // A quoted clause closes on the terminal form, which only a copula tells apart (幸せであると).
+  // A quoted clause closes on the terminal form, which only a copula tells apart (幸せであると). An
+  // indirect question closes on か / かどうか instead, on the plain form (P09-E17, see `contentClauseLink`).
   if (phrase.contentObject) {
     const link = contentClauseLink(phrase);
     segs.push(...buildClauseSegments(phrase.contentObject, 'が', link === 'と' ? 'quote' : true), { t: link });

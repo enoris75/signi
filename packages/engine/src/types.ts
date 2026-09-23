@@ -356,8 +356,9 @@ export interface ResolvedPhrase {
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
   /**
    * The gap of a **wh-question** (see PhrasePlan.questionRole, P09-E6): which slot the question asks
-   * about, and whether its answer is a person. Set on a top clause only, alongside
-   * `verbPhrase.interrogative`, which it implies; the gapped slot is absent from the phrase, and a
+   * about, and whether its answer is a person. Set on a top clause, alongside
+   * `verbPhrase.interrogative`, which it implies, or on an `embedded` object clause, without it
+   * (P09-E17); the gapped slot is absent from the phrase, and a
    * subject gap's `subject` is a stand-in that only agrees (third singular) and carries the gap's
    * animacy for the Japanese existential. Each engine writes its own question word and fronting.
    */
@@ -403,8 +404,19 @@ export interface ResolvedPhrase {
    * otherwise. Nothing is written in the object slot for it; the engines put it where their own
    * grammar puts an object clause, behind the clause (German after a comma, verb-final) or, in
    * Japanese, ahead of the predicate under the verb's と or ことを (`content_clause_link`).
+   *
+   * When it asks — an **indirect question**, "asks whether the cat runs" (P09-E17) — it is marked
+   * `embedded`, carries its `question` if it is a wh-one, and has no `verbPhrase.interrogative`: it
+   * never inverts and takes no question mark or か of its own.
    */
   contentObject?: ResolvedPhrase;
+  /**
+   * Set on a resolved object clause that **asks** — the indirect question (P09-E17): a yes/no one
+   * without a `question`, a wh-one with it. The engines open it on their *whether* (whether / se / si
+   * / ob / si / se), or on the question word, in place of their *that*, and Japanese closes it on
+   * かどうか / か in place of the verb's link. Absent on a statement, and on every other clause.
+   */
+  embedded?: boolean;
   /**
    * A resolved **adverbial clause** (see PhrasePlan.adverbialClause): the conjunction, which each
    * engine spells, and a clause of its own in the mood the conjunction governs — the indicative, or

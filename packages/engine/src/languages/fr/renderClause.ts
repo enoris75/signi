@@ -5,6 +5,7 @@ import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { indirectQuestionWord } from './indirectQuestionWord.js';
 import { SUBORDINATORS } from './fr.consts.js';
 import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
@@ -12,6 +13,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { joinSubject } from './joinSubject.js';
 import { mannerGloss } from './mannerGloss.js';
+import { objectClauseText } from './objectClauseText.js';
 import { predicateText } from './predicateText.js';
 import { questionWord } from './questionWord.js';
 import { relativeText } from './relativeText.js';
@@ -40,9 +42,9 @@ export function renderClause(phrase: ResolvedPhrase): string {
     : phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive'
       ? ''
       // A subject wh-question writes its word in the subject's slot, and asks with no "est-ce que":
-      // "qui mange la nourriture ?" (P09-E6).
+      // "qui mange la nourriture ?" (P09-E6). An indirect one writes its own: "ce qui mange" (P09-E17).
       : phrase.question?.role === 'subject' && phrase.verbPhrase
-        ? questionWord(phrase.question, phrase.verbPhrase.verb)
+        ? (phrase.embedded ? indirectQuestionWord : questionWord)(phrase.question, phrase.verbPhrase.verb)
         : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
@@ -58,9 +60,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
     ? `${clause} ${((text) => (/^[aeiouyâêîôûéèh]/i.test(text) ? `qu'${text}` : `que ${text}`))(renderClause(contentSubject))}`
     : clause;
   // An object clause follows under "que", in the mood its verb's lexeme names, and the object slot
-  // takes no expletive: "l'homme dit que le chat court" (P09-E4).
+  // takes no expletive: "l'homme dit que le chat court" (P09-E4). An indirect question opens on "si"
+  // or on its word, in the statement's order: "demande ce que le chat mange" (P09-E17).
   const withObject = phrase.contentObject
-    ? `${withContent} ${subordinateText('que', renderClause(phrase.contentObject))}`
+    ? `${withContent} ${objectClauseText(phrase.contentObject, renderClause(phrase.contentObject))}`
     : withContent;
   const governed = phrase.infinitiveComplement
     ? `${withObject} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`

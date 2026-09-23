@@ -10,6 +10,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
+import { objectComplementizer } from '../../functions/objectComplementizer.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { predicateParts } from './predicateParts.js';
 import { questionWord } from './questionWord.js';
@@ -77,8 +78,12 @@ export function renderClause(given: ResolvedPhrase): string {
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
   const withContent = contentSubject ? `${clause} that ${renderClause(contentSubject)}` : clause;
   // An object clause follows the verb group under "that", and the object slot takes nothing: "the man
-  // says that the cat runs". Its clause never inverts, whatever this one does (P09-E4).
-  const withObject = phrase.contentObject ? `${withContent} that ${renderClause(phrase.contentObject)}` : withContent;
+  // says that the cat runs". Its clause never inverts, whatever this one does (P09-E4). An indirect
+  // question opens on "whether", or on its own word with no inversion and no do-support — "asks what
+  // the cat eats" — since the translator does not flag it interrogative (P09-E17).
+  const withObject = phrase.contentObject
+    ? [withContent, objectComplementizer(phrase.contentObject, 'that', 'whether'), renderClause(phrase.contentObject)].filter(Boolean).join(' ')
+    : withContent;
   const governed = phrase.infinitiveComplement ? `${withObject} ${renderClause(phrase.infinitiveComplement)}` : withObject;
   // A clause of purpose closes the sentence, and English marks it with the bare infinitive the
   // citation mood already gives: "click to change", "select a subject to see the translations".

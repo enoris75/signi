@@ -717,6 +717,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'KNOW',
     role: 'verb',
     // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    // It may report a question too, "knows where the cat eats" (`content_clause_force`, P09-E17).
     clauseObject: 'content',
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
@@ -731,13 +732,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     emoji: '🧠',
     forms: {
       en: {
-        base: 'know',
+        base: 'know', content_clause_force: 'either',
         '1sg_present': 'know', '2sg_present': 'know', '3sg_present': 'knows',
         '1pl_present': 'know', '2pl_present': 'know', '3pl_present': 'know',
         past: 'knew',
       },
       it: {
-        base: 'sapere', object_sense: 'KNOW_ACQUAINTED',
+        base: 'sapere', content_clause_force: 'either', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'so', '2sg_present': 'sai', '3sg_present': 'sa',
         '1pl_present': 'sappiamo', '2pl_present': 'sapete', '3pl_present': 'sanno',
         '1sg_past': 'seppi', '2sg_past': 'sapesti', '3sg_past': 'seppe',
@@ -746,7 +747,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'sapremo', '2pl_future': 'saprete', '3pl_future': 'sapranno',
       },
       fr: {
-        base: 'savoir', object_sense: 'KNOW_ACQUAINTED',
+        base: 'savoir', content_clause_force: 'either', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sais', '2sg_present': 'sais', '3sg_present': 'sait',
         '1pl_present': 'savons', '2pl_present': 'savez', '3pl_present': 'savent',
         '1sg_past': 'sus', '2sg_past': 'sus', '3sg_past': 'sut',
@@ -755,7 +756,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'saurons', '2pl_future': 'saurez', '3pl_future': 'sauront',
       },
       de: {
-        base: 'wissen', object_sense: 'KNOW_ACQUAINTED',
+        base: 'wissen', content_clause_force: 'either', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'weiß', '2sg_present': 'weißt', '3sg_present': 'weiß',
         '1pl_present': 'wissen', '2pl_present': 'wisst', '3pl_present': 'wissen',
         '1sg_past': 'wusste', '2sg_past': 'wusstest', '3sg_past': 'wusste',
@@ -763,7 +764,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '2sg_imperative': 'wisse', // suppletive du command
       },
       es: {
-        base: 'saber', object_sense: 'KNOW_ACQUAINTED',
+        base: 'saber', content_clause_force: 'either', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sé', '2sg_present': 'sabes', '3sg_present': 'sabe',
         '1pl_present': 'sabemos', '2pl_present': 'sabéis', '3pl_present': 'saben',
         '1sg_past': 'supe', '2sg_past': 'supiste', '3sg_past': 'supo',
@@ -774,14 +775,14 @@ export const transitiveVerbs: ConceptSeed[] = [
       ja: {
         // A state, so a main clause says it with 〜ている (知っています); but the state's negative is the
         // plain event form, 知りません, never 知っていません (`event_negative`, A132).
-        base: '知る',
+        base: '知る', content_clause_force: 'either',
         reading: 'しる',
         masu_present: '知ります',
         masu_present_reading: 'しります',
         event_negative: '1',
       },
       pt: {
-        base: 'saber', object_sense: 'KNOW_ACQUAINTED',
+        base: 'saber', content_clause_force: 'either', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sei', '2sg_present': 'sabe', '3sg_present': 'sabe',
         '1pl_present': 'sabemos', '2pl_present': 'sabem', '3pl_present': 'sabem',
         '1sg_past': 'soube', '2sg_past': 'soube', '3sg_past': 'soube',
@@ -7999,6 +8000,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'SAY',
     role: 'verb',
     // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    // It may report a question too, "says whether the cat runs" (`content_clause_force`, P09-E17).
     clauseObject: 'content',
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause', 'locative'],
@@ -8015,13 +8017,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     isA: 'EXPRESS',
     forms: {
       en: {
-        base: 'say',
+        base: 'say', content_clause_force: 'either',
         '1sg_present': 'say', '2sg_present': 'say', '3sg_present': 'says',
         '1pl_present': 'say', '2pl_present': 'say', '3pl_present': 'say',
         past: 'said',
       },
       it: {
-        base: 'dire',
+        base: 'dire', content_clause_force: 'either',
         '1sg_present': 'dico', '2sg_present': 'dici', '3sg_present': 'dice',
         '1pl_present': 'diciamo', '2pl_present': 'dite', '3pl_present': 'dicono',
         '1sg_past': 'dissi', '2sg_past': 'dicesti', '3sg_past': 'disse',
@@ -8030,7 +8032,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'diremo', '2pl_future': 'direte', '3pl_future': 'diranno',
       },
       fr: {
-        base: 'dire',
+        base: 'dire', content_clause_force: 'either',
         '1sg_present': 'dis', '2sg_present': 'dis', '3sg_present': 'dit',
         '1pl_present': 'disons', '2pl_present': 'dites', '3pl_present': 'disent',
         '1sg_past': 'dis', '2sg_past': 'dis', '3sg_past': 'dit',
@@ -8039,14 +8041,14 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'dirons', '2pl_future': 'direz', '3pl_future': 'diront',
       },
       de: {
-        base: 'sagen',
+        base: 'sagen', content_clause_force: 'either',
         '1sg_present': 'sage', '2sg_present': 'sagst', '3sg_present': 'sagt',
         '1pl_present': 'sagen', '2pl_present': 'sagt', '3pl_present': 'sagen',
         '1sg_past': 'sagte', '2sg_past': 'sagtest', '3sg_past': 'sagte',
         '1pl_past': 'sagten', '2pl_past': 'sagtet', '3pl_past': 'sagten',
       },
       es: {
-        base: 'decir',
+        base: 'decir', content_clause_force: 'either',
         '1sg_present': 'digo', '2sg_present': 'dices', '3sg_present': 'dice',
         '1pl_present': 'decimos', '2pl_present': 'decís', '3pl_present': 'dicen',
         '1sg_past': 'dije', '2sg_past': 'dijiste', '3sg_past': 'dijo',
@@ -8057,13 +8059,13 @@ export const transitiveVerbs: ConceptSeed[] = [
       ja: {
         // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると言います —
         // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
-        base: '言う', content_clause_link: 'と',
+        base: '言う', content_clause_force: 'either', content_clause_link: 'と',
         reading: 'いう',
         masu_present: '言います',
         masu_present_reading: 'いいます',
       },
       pt: {
-        base: 'dizer',
+        base: 'dizer', content_clause_force: 'either',
         '1sg_present': 'digo', '2sg_present': 'diz', '3sg_present': 'diz',
         '1pl_present': 'dizemos', '2pl_present': 'dizem', '3pl_present': 'dizem',
         '1sg_past': 'disse', '2sg_past': 'disse', '3sg_past': 'disse',

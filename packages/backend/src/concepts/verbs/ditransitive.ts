@@ -377,6 +377,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'TELL',
     role: 'verb',
     // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    // It may report a question too, "tells the dog what the cat eats" (`content_clause_force`, P09-E17).
     clauseObject: 'content',
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
@@ -395,13 +396,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         // What is told may be a clause, and then the addressee is a bare object ahead of it: "tells the
         // dog that the cat runs", never "tells to the dog that…" (`clause_terminus_bare`, P09-E4). A
         // story keeps its "to" ("tells the story to the man").
-        base: 'tell', clause_terminus_bare: '1',
+        base: 'tell', content_clause_force: 'either', clause_terminus_bare: '1',
         '1sg_present': 'tell', '2sg_present': 'tell', '3sg_present': 'tells',
         '1pl_present': 'tell', '2pl_present': 'tell', '3pl_present': 'tell',
         past: 'told',
       },
       it: {
-        base: 'raccontare',
+        base: 'raccontare', content_clause_force: 'either',
         '1sg_present': 'racconto', '2sg_present': 'racconti', '3sg_present': 'racconta',
         '1pl_present': 'raccontiamo', '2pl_present': 'raccontate', '3pl_present': 'raccontano',
         '1sg_past': 'raccontai', '2sg_past': 'raccontasti', '3sg_past': 'raccontò',
@@ -410,7 +411,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'racconteremo', '2pl_future': 'racconterete', '3pl_future': 'racconteranno',
       },
       fr: {
-        base: 'raconter',
+        base: 'raconter', content_clause_force: 'either',
         '1sg_present': 'raconte', '2sg_present': 'racontes', '3sg_present': 'raconte',
         '1pl_present': 'racontons', '2pl_present': 'racontez', '3pl_present': 'racontent',
         '1sg_past': 'racontai', '2sg_past': 'racontas', '3sg_past': 'raconta',
@@ -420,7 +421,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       de: {
         // erzählen is inseparable: no ge- in the participle (erzählt).
-        base: 'erzählen',
+        base: 'erzählen', content_clause_force: 'either',
         '1sg_present': 'erzähle', '2sg_present': 'erzählst', '3sg_present': 'erzählt',
         '1pl_present': 'erzählen', '2pl_present': 'erzählt', '3pl_present': 'erzählen',
         '1sg_past': 'erzählte', '2sg_past': 'erzähltest', '3sg_past': 'erzählte',
@@ -428,7 +429,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       es: {
         // contar diphthongises o → ue under the stress: cuento, cuentan, but contamos.
-        base: 'contar',
+        base: 'contar', content_clause_force: 'either',
         '1sg_present': 'cuento', '2sg_present': 'cuentas', '3sg_present': 'cuenta',
         '1pl_present': 'contamos', '2pl_present': 'contáis', '3pl_present': 'cuentan',
         '1sg_past': 'conté', '2sg_past': 'contaste', '3sg_past': 'contó',
@@ -439,13 +440,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       ja: {
         // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると伝えます —
         // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
-        base: '伝える', content_clause_link: 'と',
+        base: '伝える', content_clause_force: 'either', content_clause_link: 'と',
         reading: 'つたえる',
         masu_present: '伝えます',
         masu_present_reading: 'つたえます',
       },
       pt: {
-        base: 'contar',
+        base: 'contar', content_clause_force: 'either',
         '1sg_present': 'conto', '2sg_present': 'conta', '3sg_present': 'conta',
         '1pl_present': 'contamos', '2pl_present': 'contam', '3pl_present': 'contam',
         '1sg_past': 'contei', '2sg_past': 'contou', '3sg_past': 'contou',
@@ -463,6 +464,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // ditransitive: German fragen takes the person in the **accusative**, which its lexeme names
     // (`terminus_case`, the lexical case C35 built for helfen's dative object, the other way round):
     // "fragt den Mann nach dem Namen", not "fragt dem Mann".
+    // Its object clause is a question, never a statement (`content_clause_force: 'interrogative'`,
+    // P09-E17): "asks whether the cat runs", "asks what the cat eats". A that-clause would be the
+    // mandative "asks that the cat run", a sense it does not have, and is refused. It names no
+    // `clauseObject`, since the builder builds no indirect question yet.
     id: 'ASK',
     role: 'verb',
     transitivity: 'ditransitive',
@@ -482,13 +487,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       en: {
         // English asks the person, not *to* the person: the addressee is a bare object, and with a
         // thing asked it is the first of two ("asks the man the name", A238).
-        base: 'ask', terminus_bare: '1',
+        base: 'ask', content_clause_force: 'interrogative', terminus_bare: '1',
         '1sg_present': 'ask', '2sg_present': 'ask', '3sg_present': 'asks',
         '1pl_present': 'ask', '2pl_present': 'ask', '3pl_present': 'ask',
         past: 'asked',
       },
       it: {
-        base: 'chiedere',
+        base: 'chiedere', content_clause_force: 'interrogative',
         '1sg_present': 'chiedo', '2sg_present': 'chiedi', '3sg_present': 'chiede',
         '1pl_present': 'chiediamo', '2pl_present': 'chiedete', '3pl_present': 'chiedono',
         '1sg_past': 'chiesi', '2sg_past': 'chiedesti', '3sg_past': 'chiese',
@@ -497,7 +502,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'chiederemo', '2pl_future': 'chiederete', '3pl_future': 'chiederanno',
       },
       fr: {
-        base: 'demander',
+        base: 'demander', content_clause_force: 'interrogative',
         '1sg_present': 'demande', '2sg_present': 'demandes', '3sg_present': 'demande',
         '1pl_present': 'demandons', '2pl_present': 'demandez', '3pl_present': 'demandent',
         '1sg_past': 'demandai', '2sg_past': 'demandas', '3sg_past': 'demanda',
@@ -506,14 +511,14 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'demanderons', '2pl_future': 'demanderez', '3pl_future': 'demanderont',
       },
       de: {
-        base: 'fragen', object_prep: 'nach', terminus_case: 'acc',
+        base: 'fragen', content_clause_force: 'interrogative', object_prep: 'nach', terminus_case: 'acc',
         '1sg_present': 'frage', '2sg_present': 'fragst', '3sg_present': 'fragt',
         '1pl_present': 'fragen', '2pl_present': 'fragt', '3pl_present': 'fragen',
         '1sg_past': 'fragte', '2sg_past': 'fragtest', '3sg_past': 'fragte',
         '1pl_past': 'fragten', '2pl_past': 'fragtet', '3pl_past': 'fragten',
       },
       es: {
-        base: 'preguntar',
+        base: 'preguntar', content_clause_force: 'interrogative',
         '1sg_present': 'pregunto', '2sg_present': 'preguntas', '3sg_present': 'pregunta',
         '1pl_present': 'preguntamos', '2pl_present': 'preguntáis', '3pl_present': 'preguntan',
         '1sg_past': 'pregunté', '2sg_past': 'preguntaste', '3sg_past': 'preguntó',
@@ -522,13 +527,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'preguntaremos', '2pl_future': 'preguntaréis', '3pl_future': 'preguntarán',
       },
       ja: {
-        base: '尋ねる',
+        base: '尋ねる', content_clause_force: 'interrogative',
         reading: 'たずねる',
         masu_present: '尋ねます',
         masu_present_reading: 'たずねます',
       },
       pt: {
-        base: 'perguntar',
+        base: 'perguntar', content_clause_force: 'interrogative',
         '1sg_present': 'pergunto', '2sg_present': 'pergunta', '3sg_present': 'pergunta',
         '1pl_present': 'perguntamos', '2pl_present': 'perguntam', '3pl_present': 'perguntam',
         '1sg_past': 'perguntei', '2sg_past': 'perguntou', '3sg_past': 'perguntou',

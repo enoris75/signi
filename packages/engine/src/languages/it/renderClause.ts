@@ -4,6 +4,7 @@ import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
+import { objectComplementizer } from '../../functions/objectComplementizer.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { SUBORDINATORS } from './it.consts.js';
@@ -69,8 +70,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const content = contentSubject ? `che ${renderClause(contentSubject)}` : '';
   // An object clause takes the same place under "che", in the mood its verb's lexeme names — the
   // indicative an assertion takes unless it says otherwise — and nothing stands in the object slot for
-  // it (P09-E4).
-  const object = phrase.contentObject ? `che ${renderClause(phrase.contentObject)}` : '';
+  // it (P09-E4). An indirect question opens on "se", or on its own word with the subject last, as
+  // the direct one puts it (P09-E17).
+  const object = phrase.contentObject
+    ? [objectComplementizer(phrase.contentObject, 'che', 'se'), renderClause(phrase.contentObject)].filter(Boolean).join(' ')
+    : '';
   // An adverbial clause closes the sentence under its conjunction, in the mood that conjunction
   // governs (P09-E4).
   const adverbial = phrase.adverbialClause
