@@ -1,9 +1,10 @@
-import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan, Tense } from '@signi/shared';
+import type { ContentClause, ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan, Tense } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
 import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
+import { contentClauseForce, declarativeClause } from './contentClauseForce.js';
 import { contentClauseMood } from './contentClauseMood.js';
 import { contentClauseTense } from './contentClauseTense.js';
 import { controlledSubject } from './controlledSubject.js';
@@ -56,19 +57,24 @@ function resolveInfinitiveComplement(
 
 /**
  * A content clause resolved as a clause of its own, in the mood its governor names and the tense its
- * governor's shifts it to (A254, see `contentClauseTense`).
+ * governor's shifts it to (A254, see `contentClauseTense`). An `embedded` one is an indirect question
+ * (P09-E17): it keeps its force whatever the mood, and is marked for the engines instead of flagged
+ * interrogative, so none inverts it or closes it on a question mark.
  */
 function resolveContentClause(
-  clause: PhrasePlan,
+  clause: ContentClause,
   language: string,
   lookup: LexiconLookup,
   mood: Mood | undefined,
   governorTense: Tense | undefined,
+  embedded = false,
 ): ResolvedPhrase {
   const shifted = contentClauseTense(governorTense, language, mood, clause.verbPhrase);
   const resolved = resolvePhrase(
-    shifted.verbPhrase ? { ...clause, verbPhrase: shifted.verbPhrase } : clause, language, lookup, shifted.mood);
-  return shifted.imperfect ? asImperfect(resolved) : resolved;
+    shifted.verbPhrase ? { ...clause, verbPhrase: shifted.verbPhrase } : clause,
+    language, lookup, shifted.mood, undefined, false, embedded);
+  const marked = embedded ? { ...resolved, embedded: true } : resolved;
+  return shifted.imperfect ? asImperfect(marked) : marked;
 }
 
 /**
@@ -91,6 +97,9 @@ export function resolvePhrase(
   // COMPLEMENT is the opposite case — its subject is the governing clause's, by subject control, so
   // it does select one ("der Hund wünscht, das Essen zu fressen"), and the flag stops here.
   citation = false,
+  // An indirect question (P09-E17, see `resolveContentClause`): the clause's own question holds in
+  // whatever mood its governor puts it, and it is not flagged interrogative.
+  embedded = false,
 ): ResolvedPhrase {
   // An existential ("there is a cat", P09-E6 D5) is resolved as the plain clause its language says
   // it with — the pivot the object of the existential verb, the subject the impersonal third person
@@ -106,7 +115,7 @@ export function resolvePhrase(
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is
   // indicative: a condition, a command or a citation keeps its own and drops the flag. A wh-question
   // (`questionRole`) implies the flag, and is the same force with a gap (P09-E6).
-  const question = (!!plan.interrogative || !!plan.questionRole) && mood === undefined;
+  const question = (!!plan.interrogative || !!plan.questionRole) && (mood === undefined || embedded);
   const gap = resolveQuestion(plan, question);
   // An indefinite pronoun takes its negative form under negation — *something* is *anything* /
   // *niente* / 何も there (see `negativePolarity`, C32). The clause's polarity is this one: the
@@ -138,7 +147,7 @@ export function resolvePhrase(
           !!plan.directObject || (gap?.role === 'directObject' && plan.verbPhrase.voice !== 'passive'),
           citation ? undefined : subject.agreement,
         ),
-        ...(question ? { interrogative: true } : {}),
+        ...(question && !embedded ? { interrogative: true } : {}),
       }
     : undefined;
   // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
@@ -195,8 +204,9 @@ export function resolvePhrase(
       : undefined,
     // A content clause standing where the subject would ("it is right that one acts", C30): a clause
     // of its own, in the mood its predicate adjective's lexeme names (P09-E4, see `contentClauseMood`).
+    // It never asks there: its question fields are dropped (A272).
     contentSubject: plan.contentSubject
-      ? resolveContentClause(plan.contentSubject, language, lookup,
+      ? resolveContentClause(declarativeClause(plan.contentSubject), language, lookup,
         contentClauseMood(predicativeGovernor(plan, language, lookup), language, 'subject'), plan.verbPhrase?.tense)
       : undefined,
     // A content clause standing where the object would ("says that the cat runs", P09-E4): a clause
@@ -204,23 +214,25 @@ export function resolvePhrase(
     // otherwise, or, the verb negated, the mood it names under a negation ("no cree que corra",
     // A247). The verb is not in scope where the clause renders, so the choice is made here, where it
     // is. Without a verb there is nothing to govern it, and a verbless period drops it.
+    // It may ask — the indirect question, "asks whether the cat runs" (P09-E17) — where the verb's
+    // lexeme licenses one, which `contentClauseForce` checks.
     contentObject: plan.contentObject && verbPhrase
       ? resolveContentClause(plan.contentObject, language, lookup,
         contentClauseMood(verbPhrase.verb.forms, language, 'object', plan.verbPhrase?.negative === true),
-        plan.verbPhrase?.tense)
+        plan.verbPhrase?.tense, contentClauseForce(plan.contentObject, verbPhrase.verb))
       : undefined,
     // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
     // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.
     // Under *while* its past is the imperfect of an event in progress (A250, see `imperfectivePast`);
     // under a temporal conjunction English and German say its future in the present (A251, see
-    // `adverbialClauseTense`). The mood is read off the tense the plan names.
+    // `adverbialClauseTense`). The mood is read off the tense the plan names. It never asks (A272).
     adverbialClause: plan.adverbialClause && verbPhrase
       ? {
           conjunction: plan.adverbialClause.conjunction,
           clause: imperfectivePast(
             resolvePhrase(
               {
-                ...plan.adverbialClause.clause,
+                ...declarativeClause(plan.adverbialClause.clause),
                 verbPhrase: adverbialClauseTense(plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase),
               },
               language, lookup, adverbialClauseMood(

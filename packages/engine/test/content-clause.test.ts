@@ -237,6 +237,209 @@ describe('a content clause as the object', () => {
   });
 });
 
+// P09-E17. The indirect question: an object clause that asks. A yes/no one opens on the language's
+// *whether* (whether / se / si / ob / si / se / かどうか), a wh-one on its word, and neither inverts or
+// takes a question mark. English, French, German and Portuguese keep the statement's order behind the
+// word (German verb-final); Italian and Spanish the subject-last order their direct question has.
+describe('the indirect question', () => {
+  const man = np('MAN');
+  const dog = { terminus: { phrase: np('DOG') } };
+  const runs = { subject: np('CAT'), verbPhrase: { verb: 'RUN' } };
+  const eats = { subject: np('CAT'), verbPhrase: { verb: 'EAT' } };
+  const whether = { ...runs, interrogative: true };
+  const asks = (contentObject: NonNullable<PhrasePlan['contentObject']>, extra: Omit<Partial<PhrasePlan>, 'subject' | 'verbPhrase'> = {}) =>
+    sayAll(clause(man, 'ASK', { contentObject, ...extra }));
+
+  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+    ['the man asks whether the cat runs', clause(man, 'ASK', { contentObject: whether }), {
+      en: 'the man asks whether the cat runs.', it: "l'uomo chiede se il gatto corre.",
+      fr: "l'homme demande si le chat court.", de: 'der Mann fragt, ob der Kater läuft.',
+      es: 'el hombre pregunta si el gato corre.', ja: '男は猫が走るかどうか尋ねます。',
+      pt: 'o homem pergunta se o gato corre.',
+    }],
+    ['the man asks what the cat eats', clause(man, 'ASK', { contentObject: { ...eats, questionRole: 'directObject' } }), {
+      en: 'the man asks what the cat eats.', it: "l'uomo chiede che cosa mangia il gatto.",
+      fr: "l'homme demande ce que le chat mange.", de: 'der Mann fragt, was der Kater frisst.',
+      es: 'el hombre pregunta qué come el gato.', ja: '男は猫が何を食べるか尋ねます。',
+      pt: 'o homem pergunta o que o gato come.',
+    }],
+    ['the man knows where the cat eats', clause(man, 'KNOW', { contentObject: { ...eats, questionRole: 'locative' } }), {
+      en: 'the man knows where the cat eats.', it: "l'uomo sa dove mangia il gatto.",
+      fr: "l'homme sait où le chat mange.", de: 'der Mann weiß, wo der Kater frisst.',
+      es: 'el hombre sabe dónde come el gato.', ja: '男は猫がどこで食べるか知っています。',
+      pt: 'o homem sabe onde o gato come.',
+    }],
+    // The person asked stands before the clause, bare in English and accusative in German, and German
+    // ASK's "nach" is not read: there is no noun object to take it (D6).
+    ['the man asks the dog whether the cat runs', clause(man, 'ASK', { complements: dog, contentObject: whether }), {
+      en: 'the man asks the dog whether the cat runs.', it: "l'uomo chiede al cane se il gatto corre.",
+      fr: "l'homme demande au chien si le chat court.", de: 'der Mann fragt den Hund, ob der Kater läuft.',
+      es: 'el hombre pregunta al perro si el gato corre.', ja: '男は猫が走るかどうか犬に尋ねます。',
+      pt: 'o homem pergunta ao cão se o gato corre.',
+    }],
+  ])('%s', (_, plan, want) => {
+    expect(sayAll(plan)).toEqual(want);
+  });
+
+  test('TELL reports one to its addressee', () => {
+    expect(sayAll(clause(man, 'TELL', { complements: dog, contentObject: { ...eats, questionRole: 'directObject' } }))).toEqual({
+      en: 'the man tells the dog what the cat eats.', it: "l'uomo racconta al cane che cosa mangia il gatto.",
+      fr: "l'homme raconte au chien ce que le chat mange.", de: 'der Mann erzählt dem Hund, was der Kater frisst.',
+      es: 'el hombre cuenta al perro qué come el gato.', ja: '男は猫が何を食べるか犬に伝えます。',
+      pt: 'o homem conta ao cão o que o gato come.',
+    });
+  });
+
+  // Japanese takes neither of KNOW's ことを nor SAY's と after the question particle.
+  test('KNOW and SAY take a yes/no one too', () => {
+    expect(sayAll(clause(man, 'KNOW', { contentObject: whether }))).toEqual({
+      en: 'the man knows whether the cat runs.', it: "l'uomo sa se il gatto corre.",
+      fr: "l'homme sait si le chat court.", de: 'der Mann weiß, ob der Kater läuft.',
+      es: 'el hombre sabe si el gato corre.', ja: '男は猫が走るかどうか知っています。',
+      pt: 'o homem sabe se o gato corre.',
+    });
+    expect(sayAll(clause(man, 'SAY', { contentObject: whether })).ja).toBe('男は猫が走るかどうか言います。');
+  });
+
+  test('a negated governor keeps the indicative and the question', () => {
+    expect(sayAll(clause(man, 'KNOW', { verbPhrase: { negative: true }, contentObject: whether }))).toEqual({
+      en: 'the man does not know whether the cat runs.', it: "l'uomo non sa se il gatto corre.",
+      fr: "l'homme ne sait pas si le chat court.", de: 'der Mann weiß nicht, ob der Kater läuft.',
+      es: 'el hombre no sabe si el gato corre.', ja: '男は猫が走るかどうか知りません。',
+      pt: 'o homem não sabe se o gato corre.',
+    });
+  });
+
+  describe("each of E6's gaps, embedded", () => {
+    const eatsFood = { subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') };
+
+    test('who, over the subject: the word stands in the subject slot', () => {
+      expect(asks({ ...eatsFood, questionRole: 'subject', questionAnimate: true })).toEqual({
+        en: 'the man asks who eats the food.', it: "l'uomo chiede chi mangia il cibo.",
+        fr: "l'homme demande qui mange la nourriture.", de: 'der Mann fragt, wer das Essen isst.',
+        es: 'el hombre pregunta quién come la comida.', ja: '男は誰が食べ物を食べるか尋ねます。',
+        pt: 'o homem pergunta quem come a comida.',
+      });
+    });
+
+    // French asks a thing as a subject with "ce qui", where the direct question says "qu'est-ce qui".
+    test('what, over the subject: French "ce qui"', () => {
+      expect(asks({ ...eatsFood, questionRole: 'subject' })).toEqual({
+        en: 'the man asks what eats the food.', it: "l'uomo chiede che cosa mangia il cibo.",
+        fr: "l'homme demande ce qui mange la nourriture.", de: 'der Mann fragt, was das Essen isst.',
+        es: 'el hombre pregunta qué come la comida.', ja: '男は何が食べ物を食べるか尋ねます。',
+        pt: 'o homem pergunta o que come a comida.',
+      });
+    });
+
+    test('who, over the object', () => {
+      expect(asks({ subject: np('CAT'), verbPhrase: { verb: 'SEE' }, questionRole: 'directObject', questionAnimate: true })).toEqual({
+        en: 'the man asks who the cat sees.', it: "l'uomo chiede chi vede il gatto.",
+        fr: "l'homme demande qui le chat voit.", de: 'der Mann fragt, wen der Kater sieht.',
+        es: 'el hombre pregunta a quién ve el gato.', ja: '男は猫が誰を見るか尋ねます。',
+        pt: 'o homem pergunta quem o gato vê.',
+      });
+    });
+
+    test('how and why', () => {
+      expect(asks({ ...eats, questionRole: 'manner' })).toEqual({
+        en: 'the man asks how the cat eats.', it: "l'uomo chiede come mangia il gatto.",
+        fr: "l'homme demande comment le chat mange.", de: 'der Mann fragt, wie der Kater frisst.',
+        es: 'el hombre pregunta cómo come el gato.', ja: '男は猫がどうやって食べるか尋ねます。',
+        pt: 'o homem pergunta como o gato come.',
+      });
+      expect(asks({ ...eats, questionRole: 'cause' })).toEqual({
+        en: 'the man asks why the cat eats.', it: "l'uomo chiede perché mangia il gatto.",
+        fr: "l'homme demande pourquoi le chat mange.", de: 'der Mann fragt, warum der Kater frisst.',
+        es: 'el hombre pregunta por qué come el gato.', ja: '男は猫がなぜ食べるか尋ねます。',
+        pt: 'o homem pergunta por que o gato come.',
+      });
+    });
+  });
+
+  // French "si" elides before "il" and "ils" alone; "ce que" elides as "que" always does.
+  test('French "s\'il", but "si elle", and "ce qu\'il"', () => {
+    const he = np('THIRD_PERSON', { gender: 'masc' });
+    const she = np('THIRD_PERSON', { gender: 'fem' });
+    expect(asks({ subject: he, verbPhrase: { verb: 'RUN' }, interrogative: true })).toMatchObject({
+      en: 'the man asks whether he runs.', fr: "l'homme demande s'il court.", it: "l'uomo chiede se corre.",
+      de: 'der Mann fragt, ob er läuft.',
+    });
+    expect(asks({ subject: she, verbPhrase: { verb: 'RUN' }, interrogative: true }).fr).toBe("l'homme demande si elle court.");
+    expect(asks({ subject: he, verbPhrase: { verb: 'EAT' }, questionRole: 'directObject' }).fr).toBe("l'homme demande ce qu'il mange.");
+  });
+
+  // A past governor shifts the clause's future to the conditional where the language does, and the
+  // question holds in that mood (it is the clause's own, not the mood's).
+  test('the question holds under a past governor', () => {
+    expect(sayAll(clause(man, 'ASK', {
+      verbPhrase: { tense: 'past' },
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' }, questionRole: 'directObject' },
+    }))).toMatchObject({
+      en: 'the man asked what the cat would eat.', it: "l'uomo chiese che cosa avrebbe mangiato il gatto.",
+      fr: "l'homme demanda ce que le chat mangerait.", es: 'el hombre preguntó qué comería el gato.',
+      pt: 'o homem perguntou o que o gato comeria.', ja: '男は猫が何を食べるか尋ねました。',
+    });
+  });
+
+  describe('beside a direct question', () => {
+    test('a yes/no question over an indirect one asks once, in the matrix clause', () => {
+      expect(sayAll(clause(man, 'ASK', { interrogative: true, contentObject: whether }))).toEqual({
+        en: 'does the man ask whether the cat runs?', it: "l'uomo chiede se il gatto corre?",
+        fr: "est-ce que l'homme demande si le chat court\u00a0?", de: 'fragt der Mann, ob der Kater läuft?',
+        es: '¿el hombre pregunta si el gato corre?', ja: '男は猫が走るかどうか尋ねますか？',
+        pt: 'o homem pergunta se o gato corre?',
+      });
+    });
+
+    test('a wh-question over a statement stays E4 and E6\'s', () => {
+      expect(sayAll(clause(man, 'SAY', { questionRole: 'locative', contentObject: runs }))).toEqual({
+        en: 'where does the man say that the cat runs?', it: "dove dice l'uomo che il gatto corre?",
+        fr: "où est-ce que l'homme dit que le chat court\u00a0?", de: 'wo sagt der Mann, dass der Kater läuft?',
+        es: '¿dónde dice el hombre que el gato corre?', ja: '男は猫が走るとどこで言いますか？',
+        pt: 'onde o homem diz que o gato corre?',
+      });
+    });
+
+    test('a wh-question over an indirect one writes both words', () => {
+      expect(sayAll(clause(np('GENERIC_PERSON'), 'ASK', {
+        questionRole: 'subject', questionAnimate: true, contentObject: { ...eats, questionRole: 'directObject' },
+      }))).toEqual({
+        en: 'who asks what the cat eats?', it: 'chi chiede che cosa mangia il gatto?',
+        fr: 'qui demande ce que le chat mange\u00a0?', de: 'wer fragt, was der Kater frisst?',
+        es: '¿quién pregunta qué come el gato?', ja: '誰が猫が何を食べるか尋ねますか？',
+        pt: 'quem pergunta o que o gato come?',
+      });
+    });
+  });
+
+  describe('what licenses it', () => {
+    test('a verb of thinking takes no question', () => {
+      expect(() => sayAll(clause(man, 'THINK', { contentObject: whether }))).toThrow(/THINK does not take an indirect question/);
+      expect(() => sayAll(clause(man, 'BELIEVE', { contentObject: { ...eats, questionRole: 'directObject' } })))
+        .toThrow(/BELIEVE does not take an indirect question/);
+    });
+
+    test('ASK takes nothing but a question', () => {
+      expect(() => sayAll(clause(man, 'ASK', { contentObject: runs }))).toThrow(/ASK takes an indirect question, not a statement/);
+    });
+
+    // A subject clause and an adverbial clause never ask: the question is dropped (A272), not refused.
+    test('the other two hosts drop it and say the statement', () => {
+      const right = (contentSubject: NonNullable<PhrasePlan['contentSubject']>): PhrasePlan => ({
+        subject: np('THING'), contentSubject, verbPhrase: { verb: 'BE' },
+        complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+      });
+      expect(sayAll(right(whether))).toEqual(sayAll(right(runs)));
+      expect(sayAll(right({ ...eats, questionRole: 'directObject' }))).toEqual(sayAll(right(eats)));
+      const when = (c: NonNullable<PhrasePlan['adverbialClause']>['clause']) =>
+        sayAll(clause(man, 'RUN', { adverbialClause: { conjunction: 'when', clause: c } }));
+      expect(when(whether)).toEqual(when(runs));
+      expect(when({ ...eats, questionRole: 'locative' })).toEqual(when(eats));
+    });
+  });
+});
+
 // A247. A content clause's mood is read off its governor (`content_clause_mood`, P09-E4) and never
 // off its polarity, so a negated belief keeps the indicative its affirmative takes in French, Spanish
 // and Portuguese: "no cree que el gato corre", "não acredita que o gato corre", "ne croit pas que le
@@ -584,15 +787,21 @@ describe('known bugs: a question inside a content clause leaks into it (A272)', 
   const what = { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, questionRole: 'directObject' as const };
   const says = (contentObject: NonNullable<PhrasePlan['contentObject']>) => sayAll(clause(np('MAN'), 'SAY', { contentObject }));
 
-  test.fails('a yes/no question in an object clause is the plain statement', () => {
-    expect(says(yesNo).en).toBe('the man says that the cat runs.');
+  // Under an object clause the question is P09-E17's indirect question now, which this pin predates.
+  test('a yes/no question in an object clause is the indirect question, never an inverted one', () => {
+    expect(says(yesNo).en).toBe('the man says whether the cat runs.');
   });
 
-  test.fails('a wh-question in an object clause writes no question word', () => {
-    expect(says(what)).toEqual(says({ subject: np('CAT'), verbPhrase: { verb: 'EAT' } }));
+  test('a wh-question in an object clause writes its word once, in the indirect question\'s order', () => {
+    expect(says(what)).toEqual({
+      en: 'the man says what the cat eats.', it: "l'uomo dice che cosa mangia il gatto.",
+      fr: "l'homme dit ce que le chat mange.", de: 'der Mann sagt, was der Kater frisst.',
+      es: 'el hombre dice qué come el gato.', ja: '男は猫が何を食べるか言います。',
+      pt: 'o homem diz o que o gato come.',
+    });
   });
 
-  test.fails('nor does a subject clause or an adverbial clause ask', () => {
+  test('nor does a subject clause or an adverbial clause ask', () => {
     expect(sayAll({
       subject: np('THING'), contentSubject: yesNo, verbPhrase: { verb: 'BE' },
       complements: { predicative: { phrase: np('RIGHT_CORRECT') } },

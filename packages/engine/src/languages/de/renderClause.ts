@@ -27,6 +27,7 @@ import { modalAdverbs } from './modalAdverbs.js';
 import { modalStack } from './modalStack.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { objectClauseLead } from './objectClauseLead.js';
 import { objectCase } from './objectCase.js';
 import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
@@ -105,9 +106,11 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
     ? `${clause}, dass ${renderClause(phrase.contentSubject, false, true)}`
     : clause;
   // An object clause is extraposed exactly as a subject clause is — comma, "dass", verb-final — but
-  // the object slot it left takes no "es": "der Mann sagt, dass der Kater läuft" (P09-E4).
+  // the object slot it left takes no "es": "der Mann sagt, dass der Kater läuft" (P09-E4). An indirect
+  // question takes "ob", or its question word, in the same place and the same verb-final order: "der
+  // Mann fragt, ob der Kater läuft", "…, was der Kater frisst" (P09-E17).
   const withObject = phrase.contentObject
-    ? `${withContent}, dass ${renderClause(phrase.contentObject, false, true)}`
+    ? `${withContent}, ${[objectClauseLead(phrase.contentObject), renderClause(phrase.contentObject, false, true)].filter(Boolean).join(' ')}`
     : withContent;
   const governed = phrase.infinitiveComplement && !bare
     ? `${withObject}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`

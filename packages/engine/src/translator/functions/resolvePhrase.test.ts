@@ -19,6 +19,18 @@ describe('resolvePhrase', () => {
     expect(resolved.coordination).toBeUndefined();
   });
 
+  // P09-E17: an object clause that asks is marked `embedded`, keeps its gap, and is not flagged
+  // interrogative, so no engine inverts it; the matrix clause is a statement still.
+  test('resolves an indirect question as embedded, with its gap and no interrogative flag', () => {
+    const ASKING = lexicon({ ASK: { base: 'chiedere', content_clause_force: 'interrogative' }, CAT: { base: 'gatto' }, DOG: { base: 'cane' }, EAT: { base: 'mangiare' } });
+    const resolved = resolvePhrase({ ...DOG_EATS, verbPhrase: { verb: 'ASK' }, contentObject: { ...CAT_RUNS, verbPhrase: { verb: 'EAT' }, questionRole: 'directObject' } }, 'it', ASKING);
+    expect(resolved.contentObject).toMatchObject({ embedded: true, question: { role: 'directObject', animate: false } });
+    expect(resolved.contentObject?.verbPhrase?.interrogative).toBeUndefined();
+    expect(resolved.verbPhrase?.interrogative).toBeUndefined();
+    expect(() => resolvePhrase({ ...DOG_EATS, verbPhrase: { verb: 'ASK' }, contentObject: { ...CAT_RUNS, verbPhrase: { verb: 'EAT' } } }, 'it', ASKING))
+      .toThrow(/ASK takes an indirect question/);
+  });
+
   // A131: KNOW is "sapere" with no object and "conoscere" with one.
   test("takes the verb's object sense only when the plan has a direct object", () => {
     const KNOWING = lexicon({ KNOW: { base: 'sapere', object_sense: 'KNOW_ACQUAINTED' }, KNOW_ACQUAINTED: { base: 'conoscere' }, CAT: { base: 'gatto' }, DOG: { base: 'cane' } });

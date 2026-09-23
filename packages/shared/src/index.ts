@@ -1207,14 +1207,27 @@ export interface LexicalEntry {
  *  - `PhrasePlan.adverbialClause` — the clause a subordinating conjunction introduces ("when the cat
  *    eats"). Nothing governs it, so no lexeme does: the conjunction fixes its mood.
  *
- * It never becomes a question, a command or a citation, never coordinates and never hosts a clause
- * of its own: it has no field for any of them.
+ * It becomes a question **only under `contentObject`** — the indirect question, "asks **whether**
+ * the cat runs", "knows **where** the cat eats" (P09-E17). The four question fields mean what they
+ * mean on `PhrasePlan` (a yes/no `interrogative`, a wh-`questionRole` with its specifiers and
+ * animacy), and the governing verb's lexeme licenses them (`content_clause_force`). Under
+ * `contentSubject` and `adverbialClause` they are dropped and the clause renders as the plain
+ * statement (A272). It never becomes a command or a citation, never coordinates and never hosts a
+ * clause of its own: it has no field for any of them.
  */
 export interface ContentClause {
   subject: NounElement;
   verbPhrase: VerbPhrase;
   directObject?: NounElement;
   complements?: Partial<Record<ComplementType, Complement>>;
+  /** An indirect yes/no question, "asks **whether** the cat runs" (P09-E17; see `PhrasePlan.interrogative`). */
+  interrogative?: boolean;
+  /** The gap of an indirect wh-question, "asks **what** the cat eats" (P09-E17; see `PhrasePlan.questionRole`). */
+  questionRole?: PhrasePlan['questionRole'];
+  /** See `PhrasePlan.questionSpecifiers`. */
+  questionSpecifiers?: Specifier[];
+  /** See `PhrasePlan.questionAnimate`. */
+  questionAnimate?: boolean;
 }
 
 export interface InfinitiveComplement {
@@ -1499,6 +1512,18 @@ export interface PhrasePlan {
    *
    * The clause keeps the order of a statement whatever its host does: under a question it does not
    * invert ("does the man say that the cat runs?", "sagt der Mann, dass der Kater läuft?").
+   *
+   * It may itself **ask** — the **indirect question** (P09-E17), where the verb's lexeme licenses one
+   * (`content_clause_force`: `'interrogative'` on ASK, `'either'` on KNOW, SAY and TELL; a verb that
+   * names none takes a statement only, and ASK a question only). A yes/no one takes its own
+   * complementizer — *whether* / *se* / *si* / *ob* / *si* / *se* — and a wh-one opens on its word:
+   * "asks what the cat eats", "chiede che cosa mangia il gatto", "demande **ce que** le chat mange",
+   * "fragt, was der Kater frisst", "pregunta qué come el gato", "pergunta o que o gato come". It never
+   * inverts and takes no question mark: English, French, German and Portuguese keep the statement's
+   * order behind the word (German verb-final), Italian and Spanish the subject-last order their direct
+   * question has. Japanese closes it on か (a wh-clause) or かどうか (a yes/no one) in place of the
+   * verb's と / ことを: 猫が走るかどうか尋ねます, 猫が何を食べるか尋ねます. The mood is the governor's, as
+   * for a statement.
    */
   contentObject?: ContentClause;
   /**

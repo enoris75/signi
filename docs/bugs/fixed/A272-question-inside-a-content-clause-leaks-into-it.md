@@ -21,7 +21,7 @@ wh-question writes its question word in five languages, and French and German dr
 carry one. Under a condition, a command or a citation, `resolvePhrase` keeps the question only where
 the mood is indicative. Italian, French, German, Spanish and Portuguese already render the yes/no case
 as the plain statement. A content clause is one more such place until indirect questions exist
-([P09-E17](../../features/P-planning/P09-core-vocabulary/P09-E17-indirect-question.md): *asks whether the cat runs*, *what the cat eats*). A throw would refuse a plan that renders
+([P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md): *asks whether the cat runs*, *what the cat eats*). A throw would refuse a plan that renders
 correctly in five languages today. The builder does not build this plan, so it matters only to
 hand-written plans and the console.
 
@@ -39,3 +39,23 @@ Pinned by `known bugs: a question inside a content clause leaks into it (A272)` 
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found by P09-E12 while its tasks were being written.
+
+## Resolved
+
+2026-09-23, with [P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md).
+`ContentClause` now carries the four question fields, and
+[`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) reads them per
+host. Under `contentSubject` and `adverbialClause` it drops them (`declarativeClause` in
+[`contentClauseForce.ts`](../../../packages/engine/src/translator/functions/contentClauseForce.ts)), so
+the clause is the plain statement, as this file's "why strip" asked: `it is right that the cat runs.`,
+`the man runs when the cat runs.` Under `contentObject` the question is no longer a leak but E17's
+**indirect question**, licensed by the verb's `content_clause_force` and rendered with no inversion:
+the table's first two rows are now `the man says whether the cat runs.` and `the man says what the
+cat eats.` / `dice che cosa mangia il gatto` / `dit ce que le chat mange` / `sagt, was der Kater
+frisst` / 猫が何を食べるか言います — the want this file predates.
+
+Guarded by the three formerly-`.fails` tests of the
+`known bugs: a question inside a content clause leaks into it (A272)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (the two object-clause
+rows rewritten to E17's output), the "other two hosts drop it" test of its `the indirect question`
+block, and [`contentClauseForce.test.ts`](../../../packages/engine/src/translator/functions/contentClauseForce.test.ts).
