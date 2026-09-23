@@ -1,16 +1,16 @@
 # P09-E4. Subordinate and content clauses — when, while, because, that
 
 **Construct:** the clauses the engine cannot subordinate, from
-[P09 §3](README.md#3-needs-the-engine-first-11-constructs--5-open).
+[P09 §3](../README.md#3-needs-the-engine-first-11-constructs--5-open).
 **Shape:** **two constructs, not one.** A content clause in **object** position ("says *that* the cat
-runs"), which reuses the [`ContentClause`](../../../../packages/shared/src/index.ts#L1076) C30 built
+runs"), which reuses the [`ContentClause`](../../../../../packages/shared/src/index.ts#L1076) C30 built
 for the subject; and an **adverbial** clause with a subordinating conjunction ("runs *when* the cat
 eats"), which is new.
 **Scope:** all 7 languages. German verb-final order and the Romance mood choice are the two hard
 parts, and one of them is already solved.
 **Status:** shipped, 2026-09-23 (see [Done](#done)). Split out of P09 §3 on 2026-09-23.
 **Words:** *that*, *when*, *while*, *because*, and the **clause** readings of *after*, *before*,
-*during* — which are E4's, not [E3](../../../localization/done/C29-temporal-complement.md)'s. C29
+*during* — which are E4's, not [E3](../../../../localization/done/C29-temporal-complement.md)'s. C29
 built those three as relations on a **noun phrase** ("after this day"); a clause after them ("after
 the cat ate") is a different construct with the same word.
 
@@ -43,23 +43,23 @@ nothing relates two clauses in time or in cause, which is the join everyday pros
 Verified at HEAD, 2026-09-23. **Half of this task is already built**, which is the finding that
 shapes it:
 
-- [`ContentClause`](../../../../packages/shared/src/index.ts#L1076) exists — subject, verb phrase,
-  object, complements — and [`contentSubject`](../../../../packages/shared/src/index.ts#L1245)
+- [`ContentClause`](../../../../../packages/shared/src/index.ts#L1076) exists — subject, verb phrase,
+  object, complements — and [`contentSubject`](../../../../../packages/shared/src/index.ts#L1245)
   renders it in **subject** position (localization C30, "that one acts is right").
 - Every engine already spells the complementizer and knows where to put the clause:
   en `` `${clause} that ${renderClause(contentSubject)}` ``
-  ([`en/renderClause.ts:60`](../../../../packages/engine/src/languages/en/renderClause.ts#L60)),
+  ([`en/renderClause.ts:60`](../../../../../packages/engine/src/languages/en/renderClause.ts#L60)),
   de `` `${clause}, dass ${renderClause(…, false, true)}` `` — **extraposed after a comma with the
   verb-final flag already threaded**
-  ([`de/renderClause.ts:102`](../../../../packages/engine/src/languages/de/renderClause.ts#L102)),
+  ([`de/renderClause.ts:102`](../../../../../packages/engine/src/languages/de/renderClause.ts#L102)),
   ja nominalized こと + が
-  ([`ja/buildClauseSegments.ts:68`](../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L68)).
+  ([`ja/buildClauseSegments.ts:68`](../../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L68)).
 - The Romance subjunctive is a table:
-  [`CONTENT_CLAUSE_MOOD`](../../../../packages/engine/src/translator/translator.consts.ts#L63) puts
+  [`CONTENT_CLAUSE_MOOD`](../../../../../packages/engine/src/translator/translator.consts.ts#L63) puts
   it/fr/es/pt in the present subjunctive.
 - The expletive is per-engine and hardcoded to the subject reading: en `'it'`, de `'es'`
-  ([`de/renderClause.ts:268`](../../../../packages/engine/src/languages/de/renderClause.ts#L268)).
-- [`condition`](../../../../packages/shared/src/index.ts#L1149) is the precedent for a clause-valued
+  ([`de/renderClause.ts:268`](../../../../../packages/engine/src/languages/de/renderClause.ts#L268)).
+- [`condition`](../../../../../packages/shared/src/index.ts#L1149) is the precedent for a clause-valued
   field: a whole `PhrasePlan`, one per plan, which does not nest.
 
 So the object content clause is **a second host for machinery that exists**, and the three things
@@ -145,7 +145,7 @@ introducer, English says "while", not "during the cat eats". **Recommendation: l
 the conjunction set** and let `while` carry it — the other five all have a genuine clause reading.
 Say it in the type's doc comment, because P09 §3 lists *during* among E4's words.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
 - `contentObject?: ContentClause` on `PhrasePlan`, beside `contentSubject`, with a doc comment
   naming D1's mood, D2's と and D3's missing expletive.
@@ -173,7 +173,7 @@ There is no control for a content clause today — C30's renders from a plan onl
 complement. This task should not be the one that designs the canvas for nested clauses: a second
 clause on the canvas is the same layout question the conditional already answered with a
 container-to-container link (`kind: 'conditional'` in
-[`index.ts:1385`](../../../../packages/shared/src/index.ts#L1385)), and the recommendation is to
+[`index.ts:1385`](../../../../../packages/shared/src/index.ts#L1385)), and the recommendation is to
 **reuse that link kind with a new `kind` value** rather than draw a box inside a box.
 
 ## 5. Tests
@@ -290,10 +290,10 @@ gato comiera la comida", "der Mann lief, als der Kater fraß", 男は猫が食�
    theirs, the clause being resolved in its own mood; a subordinate clause inside one of them has no
    field for a question, a command, a condition or a clause of its own.
 
-Pinned in [`content-clause.test.ts`](../../../../packages/engine/test/content-clause.test.ts) (the
+Pinned in [`content-clause.test.ts`](../../../../../packages/engine/test/content-clause.test.ts) (the
 object host: the five verbs, the Romance indicative, と against ことを, the expletive on the subject
 clause and not on the object one, a question) and
-[`adverbial-clause.test.ts`](../../../../packages/engine/test/adverbial-clause.test.ts) (5 × 7,
+[`adverbial-clause.test.ts`](../../../../../packages/engine/test/adverbial-clause.test.ts) (5 × 7,
 German verb-final, the Romance subjunctive after *before*), with unit tests beside each new
 function. Seed files changed (reseed `signi.db`): `concepts/adjectives.ts` (RIGHT_CORRECT, POSSIBLE,
 GOOD), `concepts/verbs/transitive.ts` (SAY, BELIEVE), `concepts/verbs/intransitive.ts` (THINK),

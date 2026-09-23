@@ -39,7 +39,7 @@ Pinned by `known bugs: a negated belief keeps the indicative (A247)` in
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts), which also pins what
 is already right.
 
-Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), object
+Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md), object
 content clauses.
 
 ## Resolved

@@ -35,7 +35,7 @@ is resolved or in each engine's `renderClause`; German *nachdem* maps the future
 Pinned by `known bugs: an English or German future temporal clause keeps "will" (A251)` in
 [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts).
 
-Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), adverbial
+Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md), adverbial
 clauses.
 
 ## Resolved

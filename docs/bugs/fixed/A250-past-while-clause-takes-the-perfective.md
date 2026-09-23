@@ -35,7 +35,7 @@ the adverbial clause is resolved.
 Pinned by `known bugs: a past while clause takes the perfective (A250)` in
 [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts).
 
-Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), adverbial
+Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md), adverbial
 clauses.
 
 ## Resolved

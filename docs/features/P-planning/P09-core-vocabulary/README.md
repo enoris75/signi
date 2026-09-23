@@ -12,7 +12,8 @@ word of §2 is seeded and every one of them is glossed or literal by design. The
 E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped on 2026-09-23**, in the
 engine and plan-only except E1's relations, which the toolbars offer (see §3). E6's existential
 ("there is"), split off by its task file, shipped the same day in a lane of its own, so **all eleven
-of §3's constructs are built**. The decisions below were
+of §3's constructs are built**. P09 stays **open** for its follow-ups, which are **thirteen task
+files in this folder since 2026-09-23, E12–E24** (see §4). The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -236,11 +237,11 @@ they offer the other seven, and E2's privative, which is a toggle on the instrum
 
 | task | construct | what it turned out to be | shipped |
 |---|---|---|---|
-| [P09-E1](P09-E1-spatial-relations.md) | Spatial relations | *on*, *between*, *against* — and **not *into***, which already renders. `between` is the first relation that scopes over a coordinated head instead of distributing across it. | the three relations in all seven, on the locative, route and direction; `GROUP_SCOPED_SPECIFIERS` says the preposition once over the group (*zwischen dem Haus und dem Markt*); ja collides `on` with `over` (の上) and flattens `against` to に, both pinned as deliberate; toolbars and console (`/on`, `/between`, `/against`) |
-| [P09-E2](P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. | `purpose` (*for*) and `topic` (*about*, with THINK's own *pensa al / denkt an*) plan-only; the privative (*without*) on the instrument link, with a canvas toggle and `/without` in the console; *as* deferred |
-| [P09-E4](P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. | `contentObject` with the mood on the governing lexeme (`content_clause_mood`) and ja と against こと; `adverbialClause` with *when, while, because, after, before* (no *during*), German verb-final, the Romance subjunctive after *before* |
-| [P09-E5](P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. | `headStandard` on a predicative adjective: *than* / *as … as* per degree, it *del cane*, pt *do que*, ja 犬より / 犬と同じくらい / 犬ほど…ない; dropped on the superlative |
-| [P09-E6](P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. | `questionRole` (+ `questionAnimate`) for the subject, object, locative, manner and cause gaps: fronted in six languages, in place in Japanese, fr with *est-ce que*; implies `interrogative`, so C10's yes/no is unchanged. Then, in its own lane, `existential`: *there is / are*, *c'è / ci sono*, *il y a*, *es gibt* + accusative, *hay*, *há*, 家に猫がいます — the pivot the object of each language's existential verb |
+| [P09-E1](Z-done/P09-E1-spatial-relations.md) | Spatial relations | *on*, *between*, *against* — and **not *into***, which already renders. `between` is the first relation that scopes over a coordinated head instead of distributing across it. | the three relations in all seven, on the locative, route and direction; `GROUP_SCOPED_SPECIFIERS` says the preposition once over the group (*zwischen dem Haus und dem Markt*); ja collides `on` with `over` (の上) and flattens `against` to に, both pinned as deliberate; toolbars and console (`/on`, `/between`, `/against`) |
+| [P09-E2](Z-done/P09-E2-complement-types.md) | New complement types | **two** new types, not four: *without* is `instrumental` + the existing `Complement.negative`, and *as* is already spelled by the essive. | `purpose` (*for*) and `topic` (*about*, with THINK's own *pensa al / denkt an*) plan-only; the privative (*without*) on the instrument link, with a canvas toggle and `/without` in the console; *as* deferred |
+| [P09-E4](Z-done/P09-E4-clauses.md) | Subordinate and content clauses | half built: C30's `ContentClause` needs an **object** host. The adverbial clause is new. | `contentObject` with the mood on the governing lexeme (`content_clause_mood`) and ja と against こと; `adverbialClause` with *when, while, because, after, before* (no *during*), German verb-final, the Romance subjunctive after *before* |
+| [P09-E5](Z-done/P09-E5-standard-of-comparison.md) | Standard of comparison | one field beside `headDegree`; the standard's word depends on the degree. | `headStandard` on a predicative adjective: *than* / *as … as* per degree, it *del cane*, pt *do que*, ja 犬より / 犬と同じくらい / 犬ほど…ない; dropped on the superlative |
+| [P09-E6](Z-done/P09-E6-questions-and-existentials.md) | Questions and existentials | the wh-word is already written by the relative clause's gap. The **existential is a separate construct** and should be scheduled apart. | `questionRole` (+ `questionAnimate`) for the subject, object, locative, manner and cause gaps: fronted in six languages, in place in Japanese, fr with *est-ce que*; implies `interrogative`, so C10's yes/no is unchanged. Then, in its own lane, `existential`: *there is / are*, *c'è / ci sono*, *il y a*, *es gibt* + accusative, *hay*, *há*, 家に猫がいます — the pivot the object of each language's existential verb |
 
 E3 gets no task file: it shipped as [C29](../../../localization/done/C29-temporal-complement.md) on
 2026-09-22, and E7–E11 shipped the same day. Each task file states what was already built at HEAD
@@ -249,17 +250,39 @@ plan's own reading and the task files supersede them where they differ.
 
 | # | construct | words | notes |
 |---|---|---|---|
-| [E1](P09-E1-spatial-relations.md) | Spatial relations | on, into, between, against | `on` is one more [`PathSpecifier`](../../../../packages/shared/src/index.ts#L237) value, built exactly like [A02](../../A-ready/A02-locative-near-far/README.md) (*su, sur, auf, en/sobre, em/sobre, の上に*). `into` is `direction` plus the `in` relation, with de *in* + accusative. `between` needs two landmarks. |
-| [E2](P09-E2-complement-types.md) | New complement types | for, about, as, without | Purpose / beneficiary (*per, pour, für, para*), topic (*di, sur, über, sobre*), role (*come, comme, als, como*), and the negative of `instrumental` (*senza, sans, ohne, sin*). [`ComplementType`](../../../../packages/shared/src/index.ts#L183) has none of these. |
+| [E1](Z-done/P09-E1-spatial-relations.md) | Spatial relations | on, into, between, against | `on` is one more [`PathSpecifier`](../../../../packages/shared/src/index.ts#L237) value, built exactly like [A02](../../A-ready/A02-locative-near-far/README.md) (*su, sur, auf, en/sobre, em/sobre, の上に*). `into` is `direction` plus the `in` relation, with de *in* + accusative. `between` needs two landmarks. |
+| [E2](Z-done/P09-E2-complement-types.md) | New complement types | for, about, as, without | Purpose / beneficiary (*per, pour, für, para*), topic (*di, sur, über, sobre*), role (*come, comme, als, como*), and the negative of `instrumental` (*senza, sans, ohne, sin*). [`ComplementType`](../../../../packages/shared/src/index.ts#L183) has none of these. |
 | ~~E3~~ | ~~Time~~ — **built 2026-09-22** | after, before, during | **Done** ([C29](../../../localization/done/C29-temporal-complement.md)): `ComplementType.temporal`, carrying a `TemporalRelation` — `at \| ago \| until \| after \| before \| during`. The three words are relations on a noun phrase ("after this day", *nach diesem Tag*, この日の後に), and the complement also gave TODAY, JUST and STILL the glosses they waited for. `at` turned out to be the one relation whose adposition the **head noun** picks, not the relation (en *on* a day but *at* a time). The same words as **clause** introducers are still E4's. |
-| [E4](P09-E4-clauses.md) | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
-| [E5](P09-E5-standard-of-comparison.md) | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
-| [E6](P09-E6-questions-and-existentials.md) | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too — **both built 2026-09-23**. |
+| [E4](Z-done/P09-E4-clauses.md) | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
+| [E5](Z-done/P09-E5-standard-of-comparison.md) | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
+| [E6](Z-done/P09-E6-questions-and-existentials.md) | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too — **both built 2026-09-23**. |
 | E7 | Determiners and numbers | every, each, any, another, much, such, one, two, three, something | New values for [`DETERMINER_CATEGORY_VALUES`](../../../../packages/shared/src/index.ts#L53). Numbers need agreement (*un / una*, de *ein*) and Japanese counters (二匹の猫). *something* is an indefinite pronoun (*qualcosa, quelque chose, etwas, algo, 何か*). |
 | E8 | Adverbs on adjectives | very, too | Adverbs modify only verbs today (`VerbPhrase.modifier`). "Very big" / "too big" need a degree adverb on an adjective. |
 | E9 | Verbs whose object isn't a plain accusative | like, help, let | *like* swaps its roles in Romance (*mi piace*, *me gusta*, pt *gostar de*) and becomes an adjective in Japanese (猫が好き). *help* takes the dative in German (*hilft dem Hund*). *let* takes an object plus a bare infinitive (*lascia correre il gatto*, ja 〜させる). No verb can set its object's case today. |
 | E10 | The possessive intensifier | own | Only works with a possessor: *mein eigenes, il proprio, mon propre, mi propio*, and ja 自分の replaces the possessor. |
 | E11 | A title before a name | Mr | *signor, M., Herr, señor, senhor*, and ja 〜さん after the name. Needs personal names, and none are seeded. |
+
+## 4. Follow-up tasks (E12–E24)
+
+What §3's lanes and this plan's *Follow-ups* left, filed on 2026-09-23 as **a task file each**,
+numbered on from E11 so no id means two things. All are **planning, unscheduled**; each states what
+is built at HEAD and recommends an answer to every decision it raises.
+
+| task | what | from |
+|---|---|---|
+| [P09-E12](P09-E12-builder-controls.md) | **Canvas and console controls** for the plan-only constructs — the temporal, purpose and topic boxes, the object and adverbial clauses, the standard slot, the mood control and the question slot, the existential toggle, the infinitive complement. One layout question, not seven. | C10, C29, E2, E4, E5, E6, §2's `infinitiveComplement` |
+| [P09-E13](P09-E13-role-complement.md) | *as* — a role said of the subject ("works as a teacher") | E2 D3 |
+| [P09-E14](P09-E14-possessor-question.md) | "**whose** food does the cat eat?" | E6 D1 |
+| [P09-E15](P09-E15-question-over-a-marked-relation.md) | "under **what**…?", "thanks to **whom**…?" — the gaps `resolveQuestion` refuses | E6 Done |
+| [P09-E16](P09-E16-passive-question.md) | a wh-question over a passive clause | E6 Done |
+| [P09-E17](P09-E17-indirect-question.md) | "asks **whether** / **what**…" | E4, E6 |
+| [P09-E18](P09-E18-attributive-comparison.md) | "a bigger cat **than the dog**" | E5 D2 |
+| [P09-E19](P09-E19-superlative-partitive.md) | "the biggest **of** the cats" | E5 D3 |
+| [P09-E20](P09-E20-temporal-between.md) | "**between** this day and that day" | E1, C29 |
+| [P09-E21](P09-E21-onto.md) | *onto* as its own English goal | E1 |
+| [P09-E22](P09-E22-adversarial-against.md) | "fights **against** the dog" | E1 D3, E2 |
+| [P09-E23](P09-E23-secondary-lexemes.md) | non-primary lexeme links, so "talk" finds SPEAK (BEGIN has been its own concept since C08) | *Follow-ups* |
+| [P09-E24](P09-E24-ranks-201-400.md) | the same coverage check for ranks 201–400 | *Follow-ups* |
 
 ## Verification
 
@@ -285,7 +308,7 @@ backend runs the builds, not `src`.
   copula-kind modal and かもしれない as a suffix that leaves polarity and tense on its verb, the French
   negation of a multiword finite (*n'a pas besoin*), and the Romance position of SAME and LAST_FINAL
   with the article a predicate SAME keeps.
-- **A builder control this seeding wants, and no C ticket owns**: the frontend never builds an
+- **A builder control this seeding wants, and no C ticket owns** — now part of [E12](P09-E12-builder-controls.md): the frontend never builds an
   `infinitiveComplement`, so "needs to run" and "tries to run" render from a plan but cannot be
   built. One control would serve DESIRE, NEED and TRY alike.
 - **A second one, from §3: the temporal complement has no ring.**
@@ -300,14 +323,15 @@ backend runs the builds, not `src`.
   are kept out of `COMPLEMENT_TYPES` until they have them); E4's object and adverbial clauses want
   a container-to-container link like the conditional's; E5's standard wants a noun slot on the
   adjective; E6 wants a mood control and a way to mark a slot as the question — which C10's yes/no
-  question has lacked since it shipped. Each task file's `## Done` names its own.
+  question has lacked since it shipped. Each task file's `## Done` names its own. All of them, with
+the temporal ring and the existential toggle, are now [E12](P09-E12-builder-controls.md).
 - **Seven defects the 2026-09-23 lanes met, filed as [A247–A253](../../../bugs/engine-grammar-bugs.md)**
   and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
   Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
   future temporal clause (A250–A252), and a boot render that lets an unseeded concept through (A253). All seven were fixed the same day.
 - **The existential "there is"** (E6 D5), the last §3 construct, **shipped 2026-09-23**, plan-only:
   `PhrasePlan.existential`, with the seven-language table and what landed differently in
-  [E6's *The existential*](P09-E6-questions-and-existentials.md#the-existential). It wants a builder
+  [E6's *The existential*](Z-done/P09-E6-questions-and-existentials.md#the-existential). It wants a builder
   control (a toggle on BE) like the other plan-only constructs above.
 - **Localization tickets: catalogued on 2026-09-22**, before seeding rather than after — each word
   was seeded in memory and its gloss rendered against the real engine. The 61 words §2 still lacked
@@ -321,7 +345,7 @@ backend runs the builds, not `src`.
   verb is HELP_VERB; TRY is a lexical verb, not `modal: true`; EVEN cannot be seeded as a verb adverb
   (Japanese); and §3 lacks three constructs (a focus particle on a noun phrase, the French distal
   demonstrative, a continuative complement).
-- **Secondary lexemes.** The seeder always links a lexeme as primary
+- **Secondary lexemes** — now [E23](P09-E23-secondary-lexemes.md). The seeder always links a lexeme as primary
   ([`seed.ts:21`](../../../../packages/backend/src/seed.ts#L21)). Supporting non-primary links would
-  let "begin" find START in the English picker without a duplicate concept.
-- **Ranks 201–400.** Run the same check again once this list is done.
+  let "talk" find SPEAK in the English picker without a duplicate concept (BEGIN is its own concept since C08).
+- **Ranks 201–400** — now [E24](P09-E24-ranks-201-400.md). Run the same check again once this list is done.

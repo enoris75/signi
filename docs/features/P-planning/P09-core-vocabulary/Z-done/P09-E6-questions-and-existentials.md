@@ -9,7 +9,7 @@ existential is a clause with no subject and a verb six languages spell irregular
 **Status:** **done — the wh-question and the existential both shipped, 2026-09-23** (plan-only, all
 seven languages; see [Done](#done) and [The existential](#the-existential)). The existential was
 split off by D5 and built later the same day, in its own lane. The **yes/no** half of E6 shipped as
-[C10](../../../localization/done/C10-ui-questions.md) on an earlier sweep.
+[C10](../../../../localization/done/C10-ui-questions.md) on an earlier sweep.
 **Words:** *what*, *how*, *why*, *where*, and *who* / *which* as question words.
 
 | lang | **who** eats the food? | **what** does the cat eat? | **where** does the cat eat? | **there is** a cat |
@@ -29,7 +29,7 @@ and for the existential column in [The existential](#the-existential).
 
 Shipped 2026-09-23 as `PhrasePlan.questionRole` / `questionSpecifiers` / `questionAnimate` (D1, D2),
 **plan-only**: no builder control sets it yet (§3 is a follow-up). Pinned in
-[`test/questions.test.ts`](../../../../packages/engine/test/questions.test.ts); C10's
+[`test/questions.test.ts`](../../../../../packages/engine/test/questions.test.ts); C10's
 `interrogative.test.ts` and the relative-clause suites pass unchanged.
 
 | lang | who eats the food? | what does the cat eat? | where does the cat eat? | how does the cat eat? | why does the cat eat the food? |
@@ -95,9 +95,9 @@ Follow-ups, none filed:
 Shipped 2026-09-23 as `PhrasePlan.existential` (D5), **plan-only**: no builder or console control
 sets it yet. The plan's `subject` is the **pivot**, its verb is BE, and everything else — tense,
 aspect, negation, modals, complements, the yes/no question, the clauses around it — is any clause's.
-Pinned in [`test/existential.test.ts`](../../../../packages/engine/test/existential.test.ts), with
-[`existentialPlan`](../../../../packages/engine/src/translator/functions/existentialPlan.ts) and
-[`withExistential`](../../../../packages/engine/src/translator/functions/withExistential.ts) unit-tested
+Pinned in [`test/existential.test.ts`](../../../../../packages/engine/test/existential.test.ts), with
+[`existentialPlan`](../../../../../packages/engine/src/translator/functions/existentialPlan.ts) and
+[`withExistential`](../../../../../packages/engine/src/translator/functions/withExistential.ts) unit-tested
 beside their source.
 
 | lang | there is a cat | there are cats in the house | there is a book in the house | there was a cat in the house | there is no cat | is there a cat? | the man says that there is a cat |
@@ -146,7 +146,7 @@ What landed differently from D5, and why:
   gato*, *não há um gato* (no negative-polarity *nessun / ningún / nenhum* was built).
 - **An indefinite plural keeps the engine's article**: *hay unos gatos*, *há uns gatos*; a `bare`
   plural pivot gives the more idiomatic *hay gatos*, *há gatos*.
-- **Japanese SOMETHING takes ある**: [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts)
+- **Japanese SOMETHING takes ある**: [`isAnimate`](../../../../../packages/engine/src/languages/ja/isAnimate.ts)
   counted every word with a person as animate, including the indefinite pronoun that stands for a
   thing, so "there is something" was 何かがいます. It now excludes `thing` words, which also turns
   "something is in the house" from 何かは家にいます into 何かは家にあります.
@@ -177,9 +177,9 @@ sense every plan requires one, and it is how six of the seven introduce a refere
 
 Verified at HEAD, 2026-09-23. **The wh-words are already written — by the relative clause.**
 
-- [`RelativeClause.headRole`](../../../../packages/shared/src/index.ts#L903) is
+- [`RelativeClause.headRole`](../../../../../packages/shared/src/index.ts#L903) is
   `'subject' | 'directObject' | 'possessor' | ComplementType`, with
-  [`headSpecifiers`](../../../../packages/shared/src/index.ts#L910) carrying the gapped complement's
+  [`headSpecifiers`](../../../../../packages/shared/src/index.ts#L910) carrying the gapped complement's
   relation. That is exactly a wh-question's gap: **which slot the sentence is asking about.**
 - And the relativizer already renders the word, per language, from that gap: a `locative` gap in the
   default relation gives *where / dove / où / donde / onde*, a `possessor` gap gives *whose / il cui
@@ -187,13 +187,13 @@ Verified at HEAD, 2026-09-23. **The wh-words are already written — by the rela
   cat eats". English already picks *who* against *which* by animacy.
 - **`manner` and `cause` are `ComplementType`s**, so *how* and *why* are gaps in the same set — E6
   needs no new slot vocabulary for any of its five words.
-- [`interrogative?: boolean`](../../../../packages/shared/src/index.ts#L1183) carries the yes/no
+- [`interrogative?: boolean`](../../../../../packages/shared/src/index.ts#L1183) carries the yes/no
   force, and each engine implements its own realisation: English inverts and supplies *do*
-  (`invertSubject` in [`en/renderClause.ts`](../../../../packages/engine/src/languages/en/renderClause.ts)),
+  (`invertSubject` in [`en/renderClause.ts`](../../../../../packages/engine/src/languages/en/renderClause.ts)),
   German goes V1, French uses *est-ce que*, Spanish opens with ¿, Japanese closes with か.
   **There is no builder control for it** — C10 shipped it plan-only.
 - For the existential, Japanese is already done:
-  [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts) picks いる against ある and
+  [`isAnimate`](../../../../../packages/engine/src/languages/ja/isAnimate.ts) picks いる against ある and
   the existential possession uses it. No other engine has anything.
 
 ## Design
@@ -255,16 +255,16 @@ D1–D4. What it needs is its own:
 | de | es gibt einen Kater | **accusative**, and *geben* rather than *sein* |
 | es | hay un gato | a defective form of *haber*, invariable |
 | pt | há um gato | invariable |
-| ja | 猫がいます / 本があります | animacy — [`isAnimate`](../../../../packages/engine/src/languages/ja/isAnimate.ts) **already built** |
+| ja | 猫がいます / 本があります | animacy — [`isAnimate`](../../../../../packages/engine/src/languages/ja/isAnimate.ts) **already built** |
 
 **Recommendation: schedule it separately** and file it under its own id when it is. It is closer to
 the copula work than to the question work, and pairing them in one task would hold the wh-question
 behind a German accusative.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
 - `questionRole?`, `questionSpecifiers?` and the gap's `animate` flag on `PhrasePlan`, beside
-  `interrogative` ([L1183](../../../../packages/shared/src/index.ts#L1183)), doc-commented with D1's
+  `interrogative` ([L1183](../../../../../packages/shared/src/index.ts#L1183)), doc-commented with D1's
   reuse of `headRole`, D2's animacy, D4's implication and Japanese's in-place gap.
 - Extend `interrogative`'s doc comment: it is now the yes/no case of a wider force.
 

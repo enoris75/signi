@@ -1,8 +1,8 @@
 # P09-E5. The standard of comparison — than
 
 **Construct:** what a comparative is compared *to*, from
-[P09 §3](README.md#3-needs-the-engine-first-11-constructs--5-open).
-**Shape:** one new field beside [`headDegree`](../../../../packages/shared/src/index.ts#L629), and a
+[P09 §3](../README.md#3-needs-the-engine-first-11-constructs--5-open).
+**Shape:** one new field beside [`headDegree`](../../../../../packages/shared/src/index.ts#L629), and a
 per-language word that **depends on the degree** — *than* for `more`/`less`, *as … as* for
 `equally`.
 **Scope:** all 7 languages. Predicative comparison only in a first pass; see D2.
@@ -20,7 +20,7 @@ per-language word that **depends on the degree** — *than* for `more`/`less`, *
 | ja | 猫は犬より大きいです。 | 猫は犬と同じくらい大きいです。 | 猫は犬ほど大きくないです。 |
 
 **Engine output**, verbatim — every cell of the proposal rendered as written, pinned in
-[`test/comparison.test.ts`](../../../../packages/engine/test/comparison.test.ts).
+[`test/comparison.test.ts`](../../../../../packages/engine/test/comparison.test.ts).
 
 ## Done
 
@@ -43,12 +43,12 @@ standard on the noun phrase rather than among the complements.
 What landed, and where it differs from the plan's wording:
 
 - **The translator marks the head rather than threading the standard through the degree
-  renderers.** [`resolveStandard`](../../../../packages/engine/src/translator/functions/resolveStandard.ts)
+  renderers.** [`resolveStandard`](../../../../../packages/engine/src/translator/functions/resolveStandard.ts)
   resolves the standard as a `NounElement`, drops it off `STANDARD_DEGREES` (`more` / `less` /
   `equally`) and on a noun head, and sets `forms['standard'] = '1'` on the adjective. The degree
   renderers (`enAdj`, `itDeg`, `esDeg`, `ptDeg` via `ptComparison`, `deDegPrefix` via `dePredAdj`)
   read only forms, so the flag is what lets them pick the circumfix's first half; the shared
-  [`degreeAdverb`](../../../../packages/engine/src/functions/degreeAdverb.ts) does that from each
+  [`degreeAdverb`](../../../../../packages/engine/src/functions/degreeAdverb.ts) does that from each
   language's `*_DEGREE` and new `*_STANDARD_DEGREE` (`{ equally: 'as' | 'tanto' | 'tan' | 'tão' }`;
   German's `so` is inline in `deDegPrefix`, which spells its words there; French needs none). The
   resolved standard rides as `ResolvedNounPhrase.standard`.
@@ -57,7 +57,7 @@ What landed, and where it differs from the plan's wording:
 - **The standard is emitted by a per-language `<lang>Standard` beside the predicate adjective**, a
   one-line hunk in each `complementsPhrase` predicative branch (`enStandard`, `itStandard`,
   `frStandard`, `deStandard`, `esStandard`, `ptStandard`). Japanese has no such suffix: its
-  [`jaDegreeSegs`](../../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) builds what *leads*
+  [`jaDegreeSegs`](../../../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) builds what *leads*
   the adjective — standard + particle, intensifier, degree adverb, in that order — and replaced the
   inline intensifier/adverb pair at its three predicate sites (`copulaSegs`, `predicateLinkSegs`, the
   non-copular predicative in `complementSegs`). Since the standard takes the adverb's place, 犬より
@@ -88,7 +88,7 @@ Follow-ups:
 
 ## Why
 
-[`Degree`](../../../../packages/shared/src/index.ts#L112) renders "bigger" in all seven and has since
+[`Degree`](../../../../../packages/shared/src/index.ts#L112) renders "bigger" in all seven and has since
 the beginning, but a comparative with nothing to compare to is only half a sentence. "The cat is
 bigger" invites the question the construct cannot answer. It is the smallest of P09's five open
 constructs and the one with the highest ratio of sentences unlocked to code written: every adjective
@@ -98,12 +98,12 @@ in the corpus gains a use.
 
 Verified at HEAD, 2026-09-23.
 
-- [`Degree`](../../../../packages/shared/src/index.ts#L112) is
+- [`Degree`](../../../../../packages/shared/src/index.ts#L112) is
   `positive | more | most | less | least | equally`, with
-  [`DEGREES`](../../../../packages/shared/src/index.ts#L114) the list the UI cycles.
+  [`DEGREES`](../../../../../packages/shared/src/index.ts#L114) the list the UI cycles.
 - A degree is carried **on the noun phrase, index-aligned with its adjectives**:
-  [`adjectiveDegrees?: Degree[]`](../../../../packages/shared/src/index.ts#L604), and
-  [`headDegree?: Degree`](../../../../packages/shared/src/index.ts#L629) for a phrase whose head *is*
+  [`adjectiveDegrees?: Degree[]`](../../../../../packages/shared/src/index.ts#L604), and
+  [`headDegree?: Degree`](../../../../../packages/shared/src/index.ts#L629) for a phrase whose head *is*
   an adjective — which is what a predicative complement holds ("is bigger", German *wird müder*).
 - Each engine maps the degree to its own word: `EN_DEGREE`, `IT_DEGREE` (*più / meno /
   ugualmente*), `JA_DEGREE` (もっと / 最も / それほど), and the short-adjective inflection lives in
@@ -177,12 +177,12 @@ licensed by a degree rather than by a lexeme, and it must sit adjacent to its ad
 where every complement precedes the predicate as a block. Keep it on the noun phrase, beside the
 degree it depends on.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
 - `headStandard?: NounElement` on `NounPhrase`, beside `headDegree`
-  ([L629](../../../../packages/shared/src/index.ts#L629)), doc-commented with D1's degree
+  ([L629](../../../../../packages/shared/src/index.ts#L629)), doc-commented with D1's degree
   dependence, D2's predicative-only scope and D3's rejection on the superlative.
-- Extend the `Degree` doc comment ([L104](../../../../packages/shared/src/index.ts#L104)) with a
+- Extend the `Degree` doc comment ([L104](../../../../../packages/shared/src/index.ts#L104)) with a
   paragraph on the standard and on the equative circumfix.
 
 ## 2. Translator
