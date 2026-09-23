@@ -3,6 +3,7 @@ import {
   CONJUNCTION_KEY,
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
+  STANDARD_KEY,
   conjunctAddress,
   imperativePerson,
   imperativeRegisterOf,
@@ -11,6 +12,7 @@ import {
   isInstrumentalLink,
   isRelativeLink,
   possessorAddress,
+  standardAddress,
   type NounAddress,
   type NounKey,
   type PhraseSelection,
@@ -42,7 +44,7 @@ import { currentSetting, defaultSetting, settingTakes, wordInfo, type WordInfo }
  *
  * Subject → verb (adverb, modals and theirs, tense, aspect, voice, polarity) → object → complements in
  * render order → the period's own links. Within a noun: word → adjectives → number → gender →
- * determiner → relation → possessor → conjuncts → relative clause. Only what differs from the default
+ * determiner → relation → degree → standard of comparison → possessor → conjuncts → relative clause. Only what differs from the default
  * is written, so a plain period reads plainly.
  *
  * Every word of the period is written in its own bracket, with all that describes it:
@@ -187,7 +189,7 @@ class Printer {
     return this.state.containers.findIndex((c) => c.id === id) + 1;
   }
 
-  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "conjunct" = "period"): string {
+  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period"): string {
     return printWord(concept, wordSpecFor(slot, frame), this.vocab);
   }
 
@@ -328,7 +330,13 @@ class Printer {
    * of a phrase in square brackets, written as the bracket's first word, without a command or a
    * bracket of its own.
    */
-  noun(sel: PhraseSelection, which: NounKey, slice: NounAddress | undefined, frame: "period" | "possessor" | "conjunct", lead = false): void {
+  noun(
+    sel: PhraseSelection,
+    which: NounKey,
+    slice: NounAddress | undefined,
+    frame: "period" | "possessor" | "standard" | "conjunct",
+    lead = false,
+  ): void {
     const id = this.containerId;
     const concept = sel[which];
     if (!concept) return;
@@ -386,9 +394,16 @@ class Printer {
     }
     const afterAdjectives = this.tokens.length;
     this.settings(w, ["number", "gender", "determiner", "specifier", "sentiment", "causePolarity", "degree"]);
+    const address = w.address!;
+
+    // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its
+    // own in brackets. It is written under any degree — one that takes none only mutes it — so the
+    // word the user gave comes back with the line.
+    const standard = sel[STANDARD_KEY(which)] as PhraseSelection | undefined;
+    if (!slice && which === "predicative" && concept.role === "adjective" && standard && Object.keys(standard).length)
+      this.phrase(ref, "/than", `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
 
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
-    const address = w.address!;
     const possessorRef = sel[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
     const possessor = sel[POSSESSOR_KEY(which)] as PhraseSelection | undefined;
     // A reference whose noun has since gone points at nothing, and renders nothing.
@@ -449,9 +464,9 @@ class Printer {
     removal: string,
     sel: PhraseSelection,
     slice: NounAddress,
-    frame: "possessor" | "conjunct",
+    frame: "possessor" | "standard" | "conjunct",
   ): void {
-    const color = bracketColor(commandByAction(frame === "possessor" ? "possessor" : "conjunct"));
+    const color = bracketColor(commandByAction(frame));
     const statement = this.statement({ key, removal, owner, about: owner, scope: slice });
     const first = this.tokens.length;
     this.emit(command, "command", "primary", { word: { containerId: this.containerId, slice, slot: "subject" } });

@@ -696,7 +696,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(22);
+    expect(purposes).toHaveLength(23);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
@@ -718,6 +718,21 @@ describe('buildUiStrings', () => {
       de: 'eine andere Phrase mit einem Substantiv verbinden', ja: '名詞に別のフレーズをつなぐ',
     });
     expect(strings['purpose.possessor']).toMatchObject({ de: 'einen Besitzer zu einem Substantiv hinzufügen', ja: '名詞に所有者を加える' });
+    // The standard of comparison's ring, its remove control and `/than`'s purpose (P09-E12 D5), all
+    // from the one grammar noun STANDARD_OF_COMPARISON.
+    expect(strings['slot.standard']).toEqual({
+      en: 'Standard of comparison', it: 'Termine di paragone', fr: 'Terme de comparaison', de: 'Vergleichsgröße',
+      es: 'Término de comparación', ja: '比較の基準', pt: 'Termo de comparação',
+    });
+    expect(strings['action.removeStandard']).toEqual({
+      en: 'Remove this standard of comparison', it: 'Rimuovi questo termine di paragone', fr: 'Retirer ce terme de comparaison',
+      de: 'Diese Vergleichsgröße entfernen', es: 'Quitar este término de comparación', ja: 'この比較の基準を取り除き',
+      pt: 'Remover este termo de comparação',
+    });
+    expect(strings['purpose.standard']).toMatchObject({ de: 'eine Vergleichsgröße zu einem Adjektiv hinzufügen', ja: '形容詞に比較の基準を加える' });
+    expect(strings['diagnostic.noAdjectiveHasStandard']).toMatchObject({
+      en: 'No adjective has a standard of comparison', fr: "Aucun adjectif n'a de terme de comparaison", ja: 'どの形容詞も比較の基準がありません',
+    });
     expect(strings['purpose.modal']).toMatchObject({ en: 'to govern a verb', it: 'reggere un verbo', de: 'ein Verb regieren', ja: '動詞を支配する' });
     expect(strings['purpose.negate']).toMatchObject({ en: 'to negate a verb', fr: 'nier un verbe', de: 'ein Verb verneinen', ja: '動詞を否定する' });
     expect(strings['purpose.sentiment']).toMatchObject({ it: 'impostare la valutazione di un complemento di causa', ja: '原因の副詞語句の評価を設定する' });

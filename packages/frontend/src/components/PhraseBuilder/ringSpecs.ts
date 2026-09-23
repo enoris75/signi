@@ -47,6 +47,9 @@ export type GroupDef = {
   // Set on an owner's ring the same way: the group it belongs with, and its place there — just after
   // the ring it owns (see possessionsFor).
   owner?: { head: string; index: number };
+  // Set on the predicate adjective's standard of comparison the same way (P09-E12 D5): it packs just
+  // after the predicative and its conjuncts (see standardSpotFor).
+  standard?: { head: string; index: number };
 };
 
 export const VERB_PHRASE = "Verb Phrase";
@@ -85,7 +88,7 @@ export const clearControlKey = (mainKey: string) => `clear:${mainKey}`;
 export const collapseControlKey = (label: string) => `collapse:${label}`;
 export const removeControlKey = (label: string) => `remove:${label}`;
 export const perimeterControlKey = (
-  kind: "relative" | "possessor" | "conjunct" | "incoming",
+  kind: "relative" | "possessor" | "standard" | "conjunct" | "incoming",
   noun: string,
 ) => `${kind}:${noun}`;
 export const toolbarControlKey = (type: string, value: string) => `toolbar:${type}:${value}`;
@@ -143,6 +146,7 @@ export function buildRingSpecs({
   centerOf,
   linkPorts = {},
   possessorAims = {},
+  standardAims = {},
 }: {
   groups: GroupDef[];
   // Compact view keeps only the words and their clear buttons.
@@ -165,6 +169,9 @@ export function buildRingSpecs({
   // Where each noun's possessor control faces while the noun has an owner — the owner's ring, or the
   // ring of the noun it points to — by noun: the line to the owner leaves from the control.
   possessorAims?: Record<string, Pt>;
+  // Where the predicative's standard control faces while the standard's ring is drawn: that ring, by
+  // noun. The line to it leaves from the control (P09-E12 D5).
+  standardAims?: Record<string, Pt>;
 }): Record<string, RingSpec> {
   const verb = groups.find((g) => g.label === VERB_PHRASE);
   const specs: Record<string, RingSpec> = {};
@@ -227,8 +234,10 @@ export function buildRingSpecs({
       const entry = perimeterByNoun[mainKey as NounKey];
       const ownerAt = entry?.possessor ? possessorAims[mainKey] : undefined;
       if (ownerAt) outer.push({ key: perimeterControlKey("possessor", mainKey), aim: { point: ownerAt } });
-      const relations = (["relative", "possessor", "conjunct"] as const).filter(
-        (kind) => entry?.[kind] && !(kind === "possessor" && ownerAt),
+      const standardAt = entry?.standard ? standardAims[mainKey] : undefined;
+      if (standardAt) outer.push({ key: perimeterControlKey("standard", mainKey), aim: { point: standardAt } });
+      const relations = (["relative", "possessor", "standard", "conjunct"] as const).filter(
+        (kind) => entry?.[kind] && !(kind === "possessor" && ownerAt) && !(kind === "standard" && standardAt),
       );
       relations.forEach((kind, i) =>
         outer.push({

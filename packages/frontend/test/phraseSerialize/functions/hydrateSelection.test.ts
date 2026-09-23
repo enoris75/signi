@@ -65,6 +65,15 @@ describe('hydrateSelection', () => {
     });
   });
 
+  // P09-E12 D5: the predicate adjective's standard of comparison is a nested phrase like an owner,
+  // so it saves as one and comes back as one — without it, the key would hydrate to a bare id.
+  it('restores the standard of comparison of a predicate adjective', () => {
+    const selection = { predicative: BIG, adjectiveDegrees: { predicative: 'more' as const }, predicativeStandard: { subject: DOG, subjectDefiniteness: 'indefinite' as const } };
+    const saved = serializeSelection(selection);
+    expect(saved).toEqual({ predicative: 'BIG', adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: 'DOG', subjectDefiniteness: 'indefinite' } });
+    expect(hydrate(saved).selection).toEqual(selection);
+  });
+
   it('leaves out null fields', () => {
     expect(hydrate({ subject: 'CAT', verb: null, subjectPossessor: null }).selection).toEqual({ subject: CAT });
   });

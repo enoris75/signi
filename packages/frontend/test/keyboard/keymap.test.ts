@@ -49,6 +49,7 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     cycleAspect: () => {},
     cycleVoice: () => {},
     cycleDegree: () => {},
+    toggleStandard: () => {},
     cycleModifierRelation: () => {},
     cycleModifierNumber: () => {},
     openModifierAdjective: () => {},
@@ -209,6 +210,15 @@ describe('resolving a keystroke', () => {
     expect(commandFor('r', real)).toBeUndefined();
     expect(commandFor('r', attributive)).toBe('adjective.relation');
     expect(commandFor('m', attributive)).toBeUndefined();
+  });
+
+  // P09-E12 D5: H (t*h*an) opens the predicate adjective's standard of comparison, where it is offered.
+  it('opens a standard of comparison only on a predicate adjective that offers one', () => {
+    const big = { ...noun('BIG'), role: 'adjective' } as Concept;
+    const predicative = { slot: 'predicative' as const, nounKey: 'predicative' as const, selection: { predicative: big } as PhraseSelection };
+    expect(commandFor('h', predicative)).toBe('predicative.standard');
+    expect(commandFor('h', { ...predicative, satellite: () => undefined })).toBeUndefined();
+    expect(commandFor('h', { slot: 'subjectAdjective', selection: { subjectAdjective: big } as PhraseSelection })).toBeUndefined();
   });
 });
 

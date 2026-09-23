@@ -195,6 +195,27 @@ describe('buildRingSpecs', () => {
     expect((hour(perimeterControlKey('relative', 'subject')) + hour(perimeterControlKey('conjunct', 'subject'))) / 2).toBeCloseTo(6);
   });
 
+  // P09-E12 D5: the standard of comparison's control rides the predicate adjective's dotted ring
+  // beside the other relations, and turns to face the standard's ring once it is drawn.
+  it("fans the standard control with the relations, and turns it to face the standard's ring", () => {
+    const [subject] = groups([]);
+    const perimeterByNoun = { subject: { standard: icon('s'), conjunct: icon('c') } };
+    const row = specs([subject], { perimeterByNoun }).Subject;
+
+    expect(keys(row.outer)).toEqual([
+      collapseControlKey('Subject'),
+      perimeterControlKey('standard', 'subject'),
+      perimeterControlKey('conjunct', 'subject'),
+    ]);
+    const hour = (controls: RingControl[], key: string) => (aimOf(controls, key) as { clock: number }).clock;
+    expect((hour(row.outer, perimeterControlKey('standard', 'subject')) + hour(row.outer, perimeterControlKey('conjunct', 'subject'))) / 2).toBeCloseTo(6);
+
+    const ring = { x: 420, y: 380 };
+    const aimed = specs([subject], { perimeterByNoun, standardAims: { subject: ring } }).Subject;
+    expect(aimOf(aimed.outer, perimeterControlKey('standard', 'subject'))).toEqual({ point: ring });
+    expect(hour(aimed.outer, perimeterControlKey('conjunct', 'subject'))).toBeCloseTo(6);
+  });
+
   it("fans a complement's relation toolbar across the top of its ring, beside its remove control", () => {
     const defs = groups(['route'], ['subject', 'verb', 'route']);
     const route = specs(defs, { toolbars: { route: ['in', 'through', 'under'] } }).Route;

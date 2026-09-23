@@ -662,6 +662,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Possessor',
   },
 
+  // The standard of comparison's ring title ("bigger than **the dog**" — the dog's ring, P09-E12 D5):
+  // the grammar noun STANDARD_OF_COMPARISON, bare like the possessor's. It hangs off a predicate
+  // adjective in the comparative or the equative, and is what `/than` fills in the console.
+  'slot.standard': {
+    plan: nameOf('STANDARD_OF_COMPARISON'),
+    format: NAME_FORMAT,
+    fallback: 'Standard of comparison',
+  },
+
   // The other side of a coordination: one of the phrases it joins, which `/del and` removes. The
   // bare grammar noun, like the satellite names beside it — es and pt have no word of the linguists'
   // and say "the coordinated member" ("Miembro coordinado", ja 等位項).
@@ -2256,6 +2265,14 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Remove this possessor',
   },
+  'action.removeStandard': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'STANDARD_OF_COMPARISON', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove this standard of comparison',
+  },
 
   // What a possessor control that points at another noun shows in place of the owner's word, when
   // that antecedent no longer resolves (it was cleared, or its period went): some noun, unnamed.
@@ -2824,6 +2841,16 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'to add a possessor to a noun',
   },
+  // `/than`'s: what the adjective is compared to, added to the adjective it hangs off (P09-E12 D5).
+  'purpose.standard': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'STANDARD_OF_COMPARISON', definiteness: 'indefinite' },
+      { concept: 'ADJECTIVE', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a standard of comparison to an adjective',
+  },
   'purpose.relative': {
     plan: purposeOf(
       'ADD',
@@ -3262,6 +3289,16 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'No noun has a possessor',
+  },
+  // `/del than` with no standard of comparison to take off (P09-E12 D5): only an adjective has one.
+  'diagnostic.noAdjectiveHasStandard': {
+    plan: {
+      subject: { concept: 'ADJECTIVE', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'STANDARD_OF_COMPARISON', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No adjective has a standard of comparison',
   },
   'diagnostic.noNounHasRelative': {
     plan: {

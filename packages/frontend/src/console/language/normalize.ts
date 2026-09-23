@@ -52,7 +52,8 @@ function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel): 
     } else if (Array.isArray(value)) {
       if (value.length) out[key] = value.map((v) => normalizeSelection(v as PhraseSelection, root));
     } else if (typeof value === "object") {
-      if (key.endsWith("Possessor")) {
+      // A possessor, or a predicate adjective's standard of comparison: a phrase of its own.
+      if (key.endsWith("Possessor") || key.endsWith("Standard")) {
         const nested = normalizeSelection(value as PhraseSelection, root);
         if (Object.keys(nested).length) out[key] = nested;
         continue;

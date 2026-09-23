@@ -29,6 +29,11 @@ export function resolveAntecedent(
       if (!child) return undefined;
       sel = child;
       key = "subject";
+    } else if (steps[i] === "standard") {
+      const child = field<PhraseSelection>(sel, `${key}Standard`);
+      if (!child) return undefined;
+      sel = child;
+      key = "subject";
     } else {
       return undefined;
     }

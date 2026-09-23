@@ -83,6 +83,9 @@ describe('references', () => {
     expect(parseRef('1.subj.poss')).toEqual({ period: 1, address: 'subject/possessor' });
     expect(parseRef('1.obj.and2')).toEqual({ period: 1, address: 'directObject/conjunct/0' });
     expect(printRef(1, 'directObject/conjunct/0/possessor')).toBe('#1.obj.and2.poss');
+    // The predicate adjective's standard of comparison, by the command that names it (P09-E12 D5).
+    expect(parseRef('1.pred.than')).toEqual({ period: 1, address: 'predicative/standard' });
+    expect(printRef(1, 'predicative/standard/possessor')).toBe('#1.pred.than.poss');
     expect(parseRef('x')).toMatchObject({ error: { code: 'referenceStartsWithNumber' } });
   });
 });

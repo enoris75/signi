@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Box } from "@mui/material";
 import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
@@ -62,6 +63,7 @@ import {
   dropConjunctPosition,
 } from "./conjunctChain.ts";
 import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
+import { standardLink, standardSpotFor } from "./standardRing.ts";
 import { possessiveRequests } from "./functions/possessiveRequests.ts";
 import { usePossessivePhrases } from "../../i18n/usePossessivePhrase.ts";
 import { PeriodCard } from "./PeriodCard.tsx";
@@ -254,6 +256,9 @@ export function PhraseBuilder({
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
   const { hostedRings, reportRing } = useHostedRings();
   const { ownersOpen, setOwnerOpen } = useOwnersOpen(ringHost);
+  // Whether the predicate adjective's standard of comparison is open — its ring drawn: what the user
+  // last asked its control for; unset, a named standard shows and an empty one doesn't (P09-E12 D5).
+  const [standardOpen, setStandardOpen] = useState<boolean | undefined>(undefined);
   // A hosted ring's head slot wears its role's name and colour (see roleSlotFor).
   const roleSlot = roleSlotFor(ringHost);
   const visibleSlots = visibleSlotsFor(selection, roleSlot);
@@ -314,6 +319,8 @@ export function PhraseBuilder({
   function handleClear(slot: SlotKey) {
     onPhraseUpdate((prev) => applyClear(prev, slot));
     if (slot === "verb") setActiveSlot("verb");
+    // The predicative's standard goes with it (see clearNoun), and the next one starts folded.
+    if (slot === "predicative" || slot === "verb") setStandardOpen(undefined);
   }
 
   // Remove a complement entirely: clear its concept/number/gender and collapse
@@ -557,11 +564,19 @@ export function PhraseBuilder({
   // ring is the period canvas's.)
   const chains = ringHost ? [] : canvasChains(selection, groups);
 
-  // The owners on this canvas, however deep — an owner's owner, a conjunct's — and the nouns that
-  // point to theirs. The period's own nouns may take one wherever their possessor control is offered.
+  // The predicate adjective's standard of comparison, when its ring is drawn (P09-E12 D5). A hosted
+  // ring's builder draws none: only a period has a predicative.
+  const standard = ringHost ? undefined : standardSpotFor({ selection, groups, open: standardOpen });
+
+  // The owners on this canvas, however deep — an owner's owner, a conjunct's, a standard's — and the
+  // nouns that point to theirs. The period's own nouns may take one wherever their possessor control
+  // is offered.
   const { owners, pointers } = ringHost
     ? { owners: [], pointers: [] }
-    : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen });
+    : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen, standard });
+  // Every hosted ring placed beside the ring it hangs off: the standard first — its owners are
+  // placed beside it — then the owners, parents first.
+  const besideSpots = standard ? [standard, ...owners] : owners;
 
   // The possessed noun phrase each coreference link renders ("his horse", fr "son cheval"), which
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
@@ -572,7 +587,7 @@ export function PhraseBuilder({
 
   // The group-extending control rides the group's last ring; each possessor control names or points
   // to its noun's owner.
-  const perimeterByNoun = decoratePerimeterControls({
+  const decorated = decoratePerimeterControls({
     perimeterByNoun: satellitePerimeter,
     selection,
     ringHost,
@@ -582,10 +597,22 @@ export function PhraseBuilder({
     possessivePhrase,
     t,
   });
+  // The standard control opens the standard's ring (an empty one is its word picker) and folds it
+  // away again, keeping its word; the ring's own remove control takes the standard off.
+  const standardControl = decorated.predicative?.standard;
+  const perimeterByNoun = standardControl
+    ? {
+        ...decorated,
+        predicative: {
+          ...decorated.predicative,
+          standard: { ...standardControl, active: Boolean(standard), onToggle: handleToggleStandard },
+        },
+      }
+    : decorated;
 
   // What compact view packs, and in how big a cell (see compactPacking). A hosted ring's builder has
   // no canvas of its own to pack: its ring is placed by the period's.
-  const packing = compactPacking({ renderedSlots, chains, owners, groups, sizeOf, hostedRings });
+  const packing = compactPacking({ renderedSlots, chains, owners: besideSpots, groups, sizeOf, hostedRings });
   const compactLayout = useCompactLayout({
     enabled: compact && !ringHost,
     keys: packing.keys,
@@ -613,7 +640,7 @@ export function PhraseBuilder({
     positions,
     graphSize,
     chains,
-    owners,
+    owners: besideSpots,
   });
 
   // Where each noun's possessor control faces while the noun has an owner.
@@ -656,6 +683,7 @@ export function PhraseBuilder({
       possessorAims: ringHost
         ? ringHost.possessorToward && { subject: ringHost.possessorToward }
         : aims.byGroup,
+      standardAims: standard ? { predicative: centerOf(standard.address) } : undefined,
     }),
     centerOf,
     sizeOf,
@@ -679,15 +707,16 @@ export function PhraseBuilder({
 
   // The hosted rings as constituents of this canvas, once their builders have reported drawing them.
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
-  const { conjunctRects, ownerRects, standIns } = hostedRectsFor({
+  const { conjunctRects, ownerRects, standardRects, standIns } = hostedRectsFor({
     chains,
     owners,
+    standard,
     groupRects,
     hostedRings,
     centerOf,
     compact,
   });
-  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects];
+  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects, ...standardRects];
 
   const { edges, groupEdges } = buildEdges({
     groupRects,
@@ -724,9 +753,12 @@ export function PhraseBuilder({
     possessivePhrase,
     compact,
   });
+  // The line from the predicate adjective to its standard of comparison.
+  const standardLine = standard && standardLink({ spot: standard, ringOf, controlOn, compact });
+  const standardEdges: Edge[] = standardLine ? [linkEdge(standardLine, headOf("predicative")?.color ?? "", false)] : [];
 
   // What each hosted ring borrows from this canvas to draw its ring here.
-  const { conjunctHost, ownerHost } = ringHosts({
+  const { conjunctHost, ownerHost, standardHost } = ringHosts({
     hosting: {
       graphSize,
       compact,
@@ -762,6 +794,26 @@ export function PhraseBuilder({
     });
   }
 
+  // The standard control on the predicative's dotted ring: open the standard's ring, or fold it away.
+  function handleToggleStandard() {
+    setStandardOpen(!standard);
+  }
+
+  // Take the standard off the predicate adjective. Relative clauses sourced from it, or from an owner
+  // it holds, go with it; so does where its rings were.
+  function handleRemoveStandard() {
+    if (!standard) return;
+    const gone = [standard, ...ownersUnder(owners, standard.address)];
+    commands.handleRemoveStandard();
+    setStandardOpen(false);
+    for (const o of gone) binding?.relative.onRemoveLink(o.address);
+    setPositions((prev) => {
+      const next = { ...prev };
+      for (const o of gone) delete next[o.address];
+      return next;
+    });
+  }
+
   // Naming an owner ends the pick that offered to point to one instead.
   useSettleCorefPick({ enabled: !ringHost, coref, owners });
 
@@ -776,7 +828,7 @@ export function PhraseBuilder({
   useHostedRingPlacement({
     enabled: !ringHost,
     chains,
-    owners,
+    owners: besideSpots,
     positions,
     groupRects,
     hostedRings,
@@ -800,7 +852,7 @@ export function PhraseBuilder({
     positionsStaleRef,
     // An owner's empty ring is its word picker for as long as it takes to name or point to the owner:
     // it moves out of the other rings' way rather than shoving them, since pointing makes it vanish.
-    yielding: new Set(owners.filter((o) => !o.named).map((o) => o.address)),
+    yielding: new Set(besideSpots.filter((o) => !o.named).map((o) => o.address)),
   });
 
   // Tidy the whole period: pack the constituents' rings into non-overlapping rows in reading
@@ -851,6 +903,7 @@ export function PhraseBuilder({
       clearSlot: handleClear,
       removeComplement: handleRemoveComplement,
       togglePossessor: handleTogglePossessor,
+      toggleStandard: handleToggleStandard,
       addConjunct: ringHost?.onAddConjunct
         ? () => ringHost.onAddConjunct!()
         : commands.handleAddConjunct,
@@ -896,7 +949,8 @@ export function PhraseBuilder({
   const ctx: PhraseRenderContext = {
     selection,
     nounPhrase: nounPhraseMode,
-    pronounHead: ringHost?.kind === "conjunct",
+    // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him").
+    pronounHead: ringHost?.kind === "conjunct" || ringHost?.kind === "standard",
     showSubject: !actionMode,
     activeSlot,
     renderedSlots,
@@ -955,7 +1009,13 @@ export function PhraseBuilder({
     removeRing:
       ringHost && onRemove
         ? {
-            title: t(ringHost.kind === "owner" ? "action.removePossessor" : "action.removeConjunct"),
+            title: t(
+              ringHost.kind === "owner"
+                ? "action.removePossessor"
+                : ringHost.kind === "standard"
+                  ? "action.removeStandard"
+                  : "action.removeConjunct",
+            ),
             onRemove,
           }
         : undefined,
@@ -972,7 +1032,7 @@ export function PhraseBuilder({
       canvasHeight={canvasHeight}
       graphSize={graphSize}
       edges={edges}
-      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges]}
+      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges, ...standardEdges]}
       controlPos={controlPos}
       clearControls={clearControls}
       perimeterByNoun={perimeterByNoun}
@@ -1010,13 +1070,38 @@ export function PhraseBuilder({
               Builder={PhraseBuilder}
             />
           )}
+          {standard && (
+            // The standard of comparison is an owner-shaped phrase: the same lens, another host.
+            <OwnerRings
+              owners={[standard]}
+              pointers={[]}
+              selection={selection}
+              onPhraseUpdate={onPhraseUpdate}
+              onRemoveOwner={handleRemoveStandard}
+              hostFor={() => standardHost(standard)}
+              binding={binding}
+              Builder={PhraseBuilder}
+            />
+          )}
         </>
       }
     />
   );
 
-  // A hosted ring's builder paints its ring onto the period's canvas. It wears no card of its own.
-  if (ringHost) return <BoxScopeProvider scope={boxScope}>{canvas}</BoxScopeProvider>;
+  // A hosted ring's builder paints its ring onto the period's canvas. It wears no card of its own. A
+  // standard whose degree takes none is drawn faded, words and controls alike, and stays usable.
+  if (ringHost)
+    return (
+      <BoxScopeProvider scope={boxScope}>
+        {ringHost.dimmed ? (
+          <Box data-testid="standard-dimmed" sx={{ opacity: 0.45 }}>
+            {canvas}
+          </Box>
+        ) : (
+          canvas
+        )}
+      </BoxScopeProvider>
+    );
 
   const tree = (
     <PeriodCard

@@ -34,6 +34,20 @@ const rects = (over: Partial<Parameters<typeof hostedRectsFor>[0]> = {}) =>
   });
 
 describe('hostedRectsFor', () => {
+  // P09-E12 D5: the predicate adjective's standard of comparison, in the predicative's colour.
+  it('makes the reported standard ring a constituent packed after its predicative', () => {
+    const PREDICATIVE = head('predicative', 'Subject Complement', '#ed6c02');
+    const standard = { ...owner('predicative/standard', 'predicative', 'predicative', 0.5), dimmed: false };
+
+    expect(rects({ groupRects: [PREDICATIVE], standard }).standardRects).toEqual([]);
+    const { standardRects, ownerRects } = rects({ groupRects: [PREDICATIVE], standard, hostedRings: { 'predicative/standard': ring(60) } });
+    expect(standardRects).toEqual([
+      hostedRect({ key: 'predicative/standard', color: PREDICATIVE.color, kind: 'standard', head: 'Subject Complement', index: 0.5, center: centerOf('predicative/standard'), ring: ring(60), compact: false }),
+    ]);
+    expect(standardRects[0]!.standard).toEqual({ head: 'Subject Complement', index: 0.5 });
+    expect(ownerRects).toEqual([]);
+  });
+
   it('makes each reported conjunct ring a constituent in its head’s colour, in group order', () => {
     const { conjunctRects, standIns } = rects({
       chains: [{ which: 'subject', count: 2 }],

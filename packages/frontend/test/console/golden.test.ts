@@ -60,6 +60,14 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /pl /poss [ man /adj old ] )',
     misuse: { line: '/subj 1st /poss man', says: { code: 'noTarget', args: { command: 'poss', last: { kind: 'pronoun' } } } },
   },
+  // The standard of comparison (P09-E12 D5): a phrase in the predicate adjective's bracket, after its
+  // degree. A predicative noun is compared with nothing.
+  than: {
+    line: '/verb seem /pred big /more /than dog',
+    check: (s) => expect(noun(sel(s).predicativeStandard!)).toMatchObject({ subject: 'DOG' }),
+    prints: '/verb ( seem ) /pred ( big /more /than [ dog ] )',
+    misuse: { line: '/verb seem /pred dog /than cat', says: { code: 'noTarget', args: { command: 'than', last: { word: 'dog', kind: 'noun' } } } },
+  },
   and: {
     line: '/subj cat /and ( /subj dog /pl )',
     check: (s) => expect(noun(sel(s).subjectConjuncts![0]!)).toMatchObject({ subject: 'DOG', subjectNumber: 'plural' }),

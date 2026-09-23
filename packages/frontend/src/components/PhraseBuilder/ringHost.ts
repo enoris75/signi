@@ -11,7 +11,9 @@ import type { DragBoxProps, GroupDragProps } from "./phraseRender.tsx";
  * place it is handed and reports back the ring it drew.
  */
 export interface RingHost {
-  kind: "conjunct" | "owner";
+  // A standard of comparison ("bigger than **the dog**", P09-E12 D5) is hosted as an owner is: a noun
+  // phrase of its own, joined to the predicate adjective it is compared with.
+  kind: "conjunct" | "owner" | "standard";
   // The ring's node key on the period's canvas (see conjunctKey; an owner goes by its address).
   key: string;
   // The period noun the ring belongs with. A conjunct's head plays that noun's role — a direct
@@ -34,6 +36,9 @@ export interface RingHost {
   // Where the ring's own possessor control faces while its noun has an owner: that owner's ring, or
   // the ring of the noun it points to.
   possessorToward?: Pt;
+  // A standard whose degree no longer takes one (positive, most, least) is drawn faded: the
+  // translator drops it, and the word waits for the degree to come back.
+  dimmed?: boolean;
   // Report the ring as drawn, and null once it is gone.
   onRing: (ring: HostedRing | null) => void;
   // A conjunct's group: its last ring carries the control that extends the group.

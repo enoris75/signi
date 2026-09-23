@@ -68,6 +68,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'adjective.next': 'adj',
   'adjective.degree': 'more',
   'adjective.degree.back': 'less',
+  'predicative.standard': 'than',
   'adjective.relation': 'purpose',
   'adjective.relation.back': 'feature',
   'adjective.number': 'pl',

@@ -5,9 +5,9 @@ import { getTopElement } from "./getTopElement.ts";
 
 // Resolve a noun address to its noun phrase in `plan`. The first segment names a top-level
 // noun — the *head* of its slot, i.e. the first conjunct when the slot is coordinated — and
-// each trailing step descends: `possessor` into that noun's possessor, `conjunct/<i>` into the
-// i-th extra conjunct of the slot (both already built by buildNounElement). Returns undefined
-// if any step is absent.
+// each trailing step descends: `possessor` into that noun's possessor, `standard` into its standard
+// of comparison, `conjunct/<i>` into the i-th extra conjunct of the slot (all already built by
+// buildNounElement). Returns undefined if any step is absent.
 export function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPhrase | undefined {
   const [base, ...steps] = address.split("/");
   const element = getTopElement(plan, base as NounKey);
@@ -21,6 +21,10 @@ export function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPh
       // relative-clause endpoint — descending into it yields nothing.
       const p: Possessor | undefined = np.possessor;
       np = p && !isPronominalPossessor(p) ? p : undefined;
+    } else if (steps[i] === "standard") {
+      // The predicate adjective's standard of comparison ("bigger than the dog", P09-E12 D5): the
+      // head of its element, as a top-level noun's first conjunct is.
+      np = np.headStandard ? nounConjuncts(np.headStandard)[0] : undefined;
     } else if (steps[i] === "conjunct") {
       // `conjunct/<i>` addresses the i-th *extra* conjunct, so it is offset by one past the head.
       const index = Number(steps[++i]);

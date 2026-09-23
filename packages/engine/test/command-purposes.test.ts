@@ -209,6 +209,13 @@ describe('what each console command is for', () => {
       fr: 'ajouter un possesseur à un nom.', de: 'einen Besitzer zu einem Substantiv hinzufügen.',
       es: 'añadir un poseedor a un sustantivo.', ja: '名詞に所有者を加える。', pt: 'adicionar um possuidor a um substantivo.',
     },
+    // `/than`'s (P09-E12 D5): the standard added to the adjective it compares.
+    'purpose.standard': {
+      en: 'to add a standard of comparison to an adjective.', it: 'aggiungere un termine di paragone a un aggettivo.',
+      fr: 'ajouter un terme de comparaison à un adjectif.', de: 'eine Vergleichsgröße zu einem Adjektiv hinzufügen.',
+      es: 'añadir un término de comparación a un adjetivo.', ja: '形容詞に比較の基準を加える。',
+      pt: 'adicionar um termo de comparação a um adjetivo.',
+    },
     'purpose.relative': {
       en: 'to add a relative clause to a noun.', it: 'aggiungere una proposizione relativa a un sostantivo.',
       fr: 'ajouter une proposition relative à un nom.', de: 'einen Relativsatz zu einem Substantiv hinzufügen.',

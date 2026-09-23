@@ -160,6 +160,12 @@ export function buildSatelliteIcons({
       (perimeterByNoun[possessorNoun] ??= {}).possessor = iconEntry;
       continue;
     }
+    // So does the standard of comparison's: the line to its ring leaves from it. PhraseBuilder gives
+    // it what it does (open, fold or name the standard).
+    if (sat.key === "predicativeStandard") {
+      (perimeterByNoun.predicative ??= {}).standard = iconEntry;
+      continue;
+    }
     if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
       complementToggleIcons.push(iconEntry);
     } else {

@@ -22,6 +22,7 @@ import {
   cycleModifierRelation,
   cycleNounConjunction,
   cycleTense,
+  removeStandard,
   setDefiniteness,
   setImperativePerson,
   setImperativeRegister,
@@ -64,6 +65,8 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setModifierAdjective(prev, slotKey, concept)),
     handleCycleDegree: (slotKey: SlotKey, step: CycleStep = 1) =>
       onPhraseUpdate((prev) => cycleDegree(prev, slotKey, step)),
+    // Take the predicate adjective's standard of comparison off, word and all (P09-E12 D5).
+    handleRemoveStandard: () => onPhraseUpdate((prev) => removeStandard(prev, "predicative")),
     handleCycleTense: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleTense(prev, step)),
     handleCycleAspect: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleAspect(prev, step)),
     handleCycleVoice: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleVoice(prev, step)),

@@ -21,7 +21,7 @@ import {
   type NounKey,
   type PhraseSelection,
 } from "./interfaces.ts";
-import { conjunctsOf } from "./phraseReducers.ts";
+import { conjunctsOf, nounSliceAt } from "./phraseReducers.ts";
 import { conjunctKey, CONJUNCT_GAP, UNMEASURED_R } from "./conjunctChain.ts";
 import { angleTo, BUTTON_HALF, onCircle, type Pt } from "./ringLayout.ts";
 import { portKey } from "./ringSpecs.ts";
@@ -35,6 +35,8 @@ export function canvasKeyOf(address: NounAddress): string | undefined {
   const steps = address.split("/");
   if (steps.length === 1) return address;
   if (steps[steps.length - 1] === "possessor") return address;
+  // The predicate adjective's standard of comparison goes by its address too (see standardRing).
+  if (steps[steps.length - 1] === "standard") return address;
   if (steps.length === 3 && steps[1] === "conjunct") {
     const i = Number(steps[2]);
     return Number.isInteger(i) ? conjunctKey(steps[0] as NounKey, i) : undefined;
@@ -87,11 +89,15 @@ export function possessionsFor({
   nouns,
   chains,
   ownersOpen,
+  standard,
 }: {
   selection: PhraseSelection;
   nouns: readonly NounKey[];
   chains: readonly { which: NounKey; count: number }[];
   ownersOpen: Readonly<Record<NounAddress, boolean>>;
+  // The predicate adjective's standard of comparison, when its ring is drawn: a noun phrase that may
+  // take an owner of its own ("bigger than the boy's dog", P09-E12 D5).
+  standard?: Pick<OwnerSpot, "address" | "order">;
 }): { owners: OwnerSpot[]; pointers: PointerSpot[] } {
   const owners: OwnerSpot[] = [];
   const pointers: PointerSpot[] = [];
@@ -138,6 +144,9 @@ export function possessionsFor({
           visit(conjunct, "subject", conjunctAddress(which, i), conjunctKey(which, i), which, i, 0);
       });
   }
+  const standardSlice = standard && nounSliceAt(selection, standard.address)?.slice;
+  if (standard && standardSlice && isNoun(standardSlice.subject))
+    visit(standardSlice, "subject", standard.address, standard.address, "predicative", standard.order, 0);
   return { owners, pointers };
 }
 

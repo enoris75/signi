@@ -18,6 +18,8 @@ const PERIOD: PhraseSelection = {
   route: CAT,
   locative: CAT,
   cause: CAT,
+  predicative: BIG,
+  predicativeStandard: { subject: CAT },
   imperative: true,
 };
 
@@ -36,6 +38,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleCycleModifierNumber', (c) => c.handleCycleModifierNumber('modifier'), (p) => reducers.cycleModifierNumber(p, 'modifier')],
   ['handleSetModifierAdjective', (c) => c.handleSetModifierAdjective('modifier', BIG), (p) => reducers.setModifierAdjective(p, 'modifier', BIG)],
   ['handleCycleDegree', (c) => c.handleCycleDegree('subjectAdjective'), (p) => reducers.cycleDegree(p, 'subjectAdjective')],
+  ['handleRemoveStandard', (c) => c.handleRemoveStandard(), (p) => reducers.removeStandard(p, 'predicative')],
   ['handleCycleTense', (c) => c.handleCycleTense(), reducers.cycleTense],
   ['handleCycleAspect', (c) => c.handleCycleAspect(), reducers.cycleAspect],
   ['handleCycleVoice', (c) => c.handleCycleVoice(), reducers.cycleVoice],

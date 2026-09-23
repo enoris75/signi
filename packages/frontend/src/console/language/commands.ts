@@ -77,6 +77,8 @@ export type Action =
   /** A setting set to the value its argument names: `/tense past`, `/aspect progressive`. */
   | { kind: "set"; id: "tense" | "aspect" | "voice" }
   | { kind: "possessor" }
+  /** What a predicate adjective is compared to: `/than [ dog ]` (P09-E12 D5). */
+  | { kind: "standard" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
   | { kind: "condition" }
@@ -351,6 +353,23 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "possessor" },
     satellites: /Possessor$/,
     reducers: ["updatePossessor", "setPossessorRef"],
+  },
+  {
+    // The standard of comparison (P09-E12 D5): a noun phrase in square brackets, like a possessor's,
+    // written in the predicate adjective's own bracket after its degree — `/pred ( big /more /than [
+    // dog ] )`. It is kept, and printed, under any degree; the translator drops it off the ones that
+    // take none, as the canvas dims its ring.
+    name: "than",
+    aliases: ["standard"],
+    group: "role",
+    description: "standard of comparison",
+    descriptionKey: "slot.standard",
+    purposeKey: "purpose.standard",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "standard" },
+    satellites: /^predicativeStandard$/,
+    reducers: ["updateStandard"],
   },
   {
     name: "and",
@@ -701,7 +720,7 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "setting",
     arg: { kind: "text" },
     action: { kind: "del" },
-    reducers: ["applyClear", "removePossessor", "clearPossessorRef", "removeConjunct"],
+    reducers: ["applyClear", "removePossessor", "removeStandard", "clearPossessorRef", "removeConjunct"],
   },
   {
     name: "edit",
@@ -931,6 +950,8 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
 /** The topic a command is listed under. */
 export function topicOf(def: CommandDef): Topic {
   const a = def.action;
+  // The standard sits with the degree it depends on: no degree that compares, no standard.
+  if (a.kind === "standard") return TOPICS.find((t) => t.id === "degree")!;
   const id: TopicId =
     a.kind === "role"
       ? "words"
