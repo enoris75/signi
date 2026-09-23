@@ -59,7 +59,7 @@ describe('the help pages', () => {
     const needsPurpose = COMMANDS.filter((c) => attachesToWord(c.action) || c.action.kind === 'condition' || c.action.kind === 'join' || c.action.kind === 'instrument');
     expect(needsPurpose.filter((c) => !c.purposeKey || !UI_STRINGS[c.purposeKey]).map((c) => c.name)).toEqual([]);
     const keys = new Set(COMMANDS.flatMap((c) => (c.purposeKey ? [c.purposeKey] : [])));
-    expect(keys.size).toBe(23);
+    expect(keys.size).toBe(24);
     // Every purpose the catalogue holds is some command's.
     const catalogued = Object.keys(UI_STRINGS).filter((key) => key.startsWith('purpose.'));
     expect(catalogued.sort()).toEqual([...keys].sort());

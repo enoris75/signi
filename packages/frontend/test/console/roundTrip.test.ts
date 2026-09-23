@@ -397,9 +397,10 @@ describe('the round trip', () => {
 
   // P09-E12 D5: the walk reaches the standard of comparison, so the printer's `/than` is exercised —
   // under a degree that takes one, and muted under one that does not. A predicate adjective is a rare
-  // state (a copular verb, then an adjective in its box), so this looks further than the default 400.
+  // state (a copular verb, then an adjective in its box), and rarer still once E12b added its ops, so
+  // this looks much further than the default 400.
   it('reaches the standard of comparison, with and without a degree that takes it', () => {
-    const seeds = Math.max(SEEDS, 3000);
+    const seeds = Math.max(SEEDS, 20000);
     const texts = Array.from({ length: seeds }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
     const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/than \[/g) ?? []);
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);

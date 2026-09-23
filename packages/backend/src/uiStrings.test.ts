@@ -696,7 +696,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(23);
+    expect(purposes).toHaveLength(24);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
