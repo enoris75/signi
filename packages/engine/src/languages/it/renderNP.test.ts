@@ -108,6 +108,18 @@ describe('renderNP', () => {
       expect(withDeterminer(np(LIBRO, {}, { possessor: np(RAGAZZO, { definiteness: 'some', number: 'plural' }) }))).toBe('il libro di alcuni ragazzi');
     });
 
+    // A271: behind a compared adjective, its "di" would read as the standard.
+    test('a noun possessor goes ahead of a compared adjective, not a superlative', () => {
+      const more = adj(GRANDE, { degree: 'more' });
+      expect(withDeterminer(np(GATTO, { definiteness: 'indefinite' }, { adjectives: [more], possessor: np(DONNA) })))
+        .toBe('un gatto della donna più grande');
+      expect(withDeterminer(np(GATTO, {}, { adjectives: [adj(FELICE, { degree: 'less' })], possessor: np(DONNA) })))
+        .toBe('il gatto della donna meno felice');
+      expect(withDeterminer(np(GATTO, {}, { adjectives: [more], possessor: questionPossessor() }))).toBe('il gatto di chi più grande');
+      expect(withDeterminer(np(GATTO, {}, { adjectives: [adj(GRANDE, { degree: 'most' })], possessor: np(DONNA) })))
+        .toBe('il gatto più grande della donna');
+    });
+
     test('a noun possessor can carry its own possessor', () => {
       expect(withDeterminer(np(LIBRO, {}, { possessor: np(PADRE, {}, { possessor: np(GATTO) }) }))).toBe('il libro del padre del gatto');
     });

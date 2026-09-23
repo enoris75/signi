@@ -543,9 +543,11 @@ describe('attributive (P09-E18)', () => {
     expect(say(bigFirst, 'ja')).toBe('男は犬より大きい茶色の猫を見ます。');
   });
 
-  test('a genitive possessor keeps its place after the standard (A271 not widened)', () => {
+  // Italian puts it ahead of the compared adjective instead (A271), where it cannot read as the
+  // standard's possessor; the other Romance languages keep it after the standard.
+  test('a genitive possessor keeps its place after the standard, but for Italian (A271)', () => {
     expect(sayAll(sees(compared('CAT', 'more', DOG, { possessor: np('WOMAN') })))).toMatchObject({
-      it: "l'uomo vede un gatto più grande del cane della donna.",
+      it: "l'uomo vede un gatto della donna più grande del cane.",
       fr: "l'homme voit un chat plus grand que le chien de la femme.",
       es: 'el hombre ve un gato más grande que el perro de la mujer.',
       pt: 'o homem vê um gato maior do que o cão da mulher.',

@@ -1102,10 +1102,27 @@ describe('known bugs: an Italian possessor behind a compared adjective reads as 
       directObject: np('CAT', { definiteness: 'indefinite', adjectives: ['SMALL'], adjectiveDegrees: [degree], possessor: np('WOMAN'), ...extra }),
     }));
 
-  test.fails('the possessor goes ahead of a compared adjective', () => {
+  test('the possessor goes ahead of a compared adjective', () => {
     expect(sees('more').it).toBe("l'uomo vede un gatto della donna più piccolo.");
     expect(sees('less').it).toBe("l'uomo vede un gatto della donna meno piccolo.");
     expect(sees('more', { number: 'plural' }).it).toBe("l'uomo vede gatti della donna più piccoli.");
+  });
+
+  test('the equative, the definite article and a standard of its own follow the possessor too', () => {
+    expect(sees('equally').it).toBe("l'uomo vede un gatto della donna ugualmente piccolo.");
+    expect(sees('more', { definiteness: 'definite' }).it).toBe("l'uomo vede il gatto della donna più piccolo.");
+    expect(sees('more', { adjectiveStandards: [np('DOG')] }).it).toBe("l'uomo vede un gatto della donna più piccolo del cane.");
+    expect(sees('equally', { adjectiveStandards: [np('DOG')] }).it)
+      .toBe("l'uomo vede un gatto della donna tanto piccolo quanto il cane.");
+    expect(sees('more', { adjectives: ['SMALL', 'HAPPY'], adjectiveDegrees: ['more', 'positive'] }).it)
+      .toBe("l'uomo vede un gatto della donna più piccolo e felice.");
+  });
+
+  test('regression: a superlative keeps the possessor behind it, and a pronominal one stays prenominal', () => {
+    expect(sees('more', { adjectiveDegrees: ['most'], definiteness: 'definite' }).it).toBe("l'uomo vede il gatto più piccolo della donna.");
+    expect(sees('more', { adjectiveDegrees: ['least'], definiteness: 'definite' }).it).toBe("l'uomo vede il gatto meno piccolo della donna.");
+    expect(sees('more', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }).it)
+      .toBe("l'uomo vede il suo gatto più piccolo.");
   });
 
   test('regression: a positive adjective keeps its place, and the other Romance languages theirs', () => {
