@@ -222,7 +222,7 @@ the other five agree with the subject as they already do.**
 ### D5. Predicative only in a first pass
 
 The attributive superlative with a set ("the biggest cat of the house", *il gatto più grande della
-casa*) meets the possessor collision [E18](../P09-E18-attributive-comparison.md) records, and the
+casa*) meets the possessor collision [E18](P09-E18-attributive-comparison.md) records, and the
 headless one ("the biggest of the cats eats") needs an adjective-headed noun phrase in a subject slot,
 which the model has nowhere but the predicative.
 
@@ -288,7 +288,7 @@ before either reading reaches a plan.
 ## Out of scope (follow-ups)
 
 - **The attributive superlative with a set** ("the biggest cat of the house") — after
-  [E18](../P09-E18-attributive-comparison.md) (D5).
+  [E18](P09-E18-attributive-comparison.md) (D5).
 - **The headless superlative** ("the biggest of the cats eats") — an adjective-headed noun phrase
   outside the predicative.
 - **The absolute superlative** (*grandissimo*, *very big* in the sense of "extremely") — a degree
