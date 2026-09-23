@@ -55,11 +55,12 @@ export function PeriodContainer({
   instrumental,
   imperative,
   infinitive,
+  question,
   children,
   ...headerControls
 }: PeriodContainerProps) {
   const t = useUiString();
-  const controls = { conditional, coordinative, instrumental, imperative, infinitive };
+  const controls = { conditional, coordinative, instrumental, imperative, infinitive, question };
   const { dragging, dragHandlers } = useBorderDrag({
     enabled: floatable,
     position,
@@ -67,6 +68,12 @@ export function PeriodContainer({
   });
   const target = pickTarget(controls);
   const accent = periodAccent(controls);
+  // The border's stack is centred on the card's right edge, and the card must be tall enough to hold
+  // it: a compact card hugs its chips, and five controls (the question made it five, P09-E12 M5)
+  // stood 7px out of it at either end. Rule 1 — the card grows, no control goes: each 28px control
+  // and its 4px gap, and 8px clear of the border at either end.
+  const borderCount = [imperative, infinitive, question, conditional, coordinative].filter(Boolean).length;
+  const minHeight = borderCount > 0 ? `${borderCount * 32 - 4 + 16}px` : undefined;
 
   return (
     <Paper
@@ -83,6 +90,7 @@ export function PeriodContainer({
       sx={{
         ...(target || consoleNumber !== undefined ? pickBadgeSx : {}),
         p: paperPad,
+        minHeight,
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.
         position: "relative",
@@ -108,6 +116,7 @@ export function PeriodContainer({
         coordinative={coordinative}
         imperative={imperative}
         infinitive={infinitive}
+        question={question}
       />
       <Box
         ref={controlsRef}

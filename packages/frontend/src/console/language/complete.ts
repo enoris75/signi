@@ -402,6 +402,8 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
         ? 3
         : undefined;
     case "mood":
+    case "question":
+    case "existential":
       return frame.kind === "period" ? 3 : undefined;
     case "new":
       return top ? 3 : undefined;

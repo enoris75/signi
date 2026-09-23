@@ -11,6 +11,10 @@ import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
+import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
+import PersonIcon from "@mui/icons-material/Person";
+import CategoryIcon from "@mui/icons-material/Category";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import {
   DETERMINER_COMPLEMENT_TYPES,
   defaultDefiniteness,
@@ -19,7 +23,8 @@ import {
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY } from "../../interfaces.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
+import { canAsk, canBeExistential, questionAnimateOf } from "../../functions/questionGates.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -45,8 +50,42 @@ export function rawSatellites(
   // The UI-string lookup, for the one label the lexicon cannot give on its own: a pronoun,
   // which shows the person it stands for rather than a word.
   t: UiStringLookup,
+  // What the selection alone cannot tell: whether the period's mood is locked by a conditional or a
+  // coordination it takes part in (see moodLocked), which a question mark that would make it a
+  // question has to respect as the border's toggle does.
+  { moodLocked = false }: { moodLocked?: boolean } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
+  // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
+  // offered where the engine asks that gap (see canAsk), and — since marking a slot makes the period
+  // a question — not where the mood is locked, unless the period is a question already.
+  const askable = (role: QuestionRole) => canAsk(selection, role) && (!moodLocked || Boolean(selection.interrogative));
+  const question = (role: QuestionRole): RawSatellite => ({
+    key: `${role}Question`,
+    parent: role,
+    label: t("mood.question"),
+    labelKey: "mood.question",
+    icon: <QuestionMarkIcon sx={iconSx} />,
+    available: askable(role),
+    hasValue: selection.questionRole === role,
+    directToggle: true,
+  });
+  // Its who / what chip, on a marked subject or object: what the question asks for, a person or a
+  // thing, defaulting to the held word's (see questionAnimateOf). The chip names the question it
+  // makes ("Who acts?"), so its label is its value.
+  const questionAnimacy = (role: "subject" | "directObject"): RawSatellite => {
+    const who = questionAnimateOf(selection, role);
+    return {
+      key: `${role}QuestionAnimate`,
+      parent: role,
+      label: t(who ? "question.who" : "question.what"),
+      labelKey: who ? "question.who" : "question.what",
+      icon: who ? <PersonIcon sx={iconSx} /> : <CategoryIcon sx={iconSx} />,
+      available: askable(role) && selection.questionRole === role,
+      hasValue: who,
+      directToggle: true,
+    };
+  };
   const subjectRole = selection.subject?.role;
   // A command and an infinitive citation are both moods occupying the finite slot: each forces
   // present tense / neutral aspect / no modals and drops the subject, so the tense, aspect and
@@ -181,6 +220,21 @@ export function rawSatellites(
       available: Boolean(selection.subject),
       hasValue: conjunctCount("subject") > 0,
       valueLabel: t(conjunctCount("subject") > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
+    },
+    question("subject"),
+    questionAnimacy("subject"),
+    {
+      // The existential, "there is a cat" (P09-E12 M7): a fact about the subject, which it makes the
+      // pivot, so it rides the subject's ring rather than the verb's full one. Offered where the engine
+      // builds one (see canBeExistential); exclusive with the question mark, which shares its hour.
+      key: "subjectExistential",
+      parent: "subject",
+      label: t("existential.toggle"),
+      labelKey: "existential.toggle",
+      icon: <ViewInArIcon sx={iconSx} />,
+      available: canBeExistential(selection),
+      hasValue: Boolean(selection.existential),
+      directToggle: true,
     },
     {
       key: "verbNegative",
@@ -443,6 +497,8 @@ export function rawSatellites(
       hasValue: conjunctCount("directObject") > 0,
       valueLabel: t(conjunctCount("directObject") > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
     },
+    question("directObject"),
+    questionAnimacy("directObject"),
     // The instrumental has no box on this canvas: its noun phrase lives in a period container
     // of its own, and this control on the verb-phrase dotted ring is the link to it (started,
     // and later cleared, in buildSatelliteIcons off the workspace binding — like the
@@ -490,6 +546,8 @@ export function rawSatellites(
           available: supportedComplements.includes(type),
           hasValue: Boolean(concept),
           valueLabel: label(concept),
+          // A complement asked about is shown although the gap holds no word: its ring carries the mark.
+          ...(selection.questionRole === type && { defaultShown: true }),
         },
         {
           key: `${type}Adjective`,
@@ -626,6 +684,8 @@ export function rawSatellites(
             valueLabel: t(`polarity.value.${selection.causeNegative ? "negative" : "positive"}`),
           }]
           : []),
+        // The wh-question's mark on the three complements that have a question word (P09-E12 M6).
+        ...((QUESTION_ROLES as readonly string[]).includes(type) ? [question(type as QuestionRole)] : []),
       ];
     }),
   ];

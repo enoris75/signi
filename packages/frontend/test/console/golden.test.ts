@@ -153,6 +153,21 @@ const GOLDEN: Record<string, Golden> = {
     misuse: { line: '/command soon', says: { code: 'valueNotTaken', args: { command: 'command', given: 'soon' } } },
   },
   inf: { line: '/inf /verb eat', prints: '/inf /verb ( eat )', holds: { infinitive: true } },
+  // The question, its gap and the existential (P09-E12 M5–M7).
+  ask: {
+    line: '/ask /subj cat /verb eat', prints: '/ask /subj ( cat ) /verb ( eat )', holds: { interrogative: true },
+    misuse: { line: '/subj ( cat /ask )', says: { code: 'periodCommandInBracket', args: { command: 'ask' } } },
+  },
+  wh: {
+    line: '/wh obj who /subj cat /verb eat', prints: '/wh obj who /subj ( cat ) /verb ( eat )',
+    holds: { interrogative: true, questionRole: 'directObject', questionAnimate: true },
+    misuse: { line: '/wh who', says: { code: 'setNeedsValue', args: { command: 'wh' } } },
+  },
+  there: {
+    line: '/there /subj cat /verb be /loc house', prints: '/there /subj ( cat ) /verb ( be ) /loc ( house )',
+    holds: { existential: true },
+    misuse: { line: '/subj cat /del there', says: { code: 'nothingToRemove' } },
+  },
   statement: { line: '/command /verb eat /statement', holds: { imperative: false }, prints: '/verb ( eat )' },
   if: {
     line: '/subj dog /verb run /if ( /subj cat /verb eat )',

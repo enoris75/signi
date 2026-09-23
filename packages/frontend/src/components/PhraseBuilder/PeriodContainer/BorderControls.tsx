@@ -6,7 +6,7 @@ import type { ClauseControls } from "./PeriodContainer.types.ts";
 
 export type BorderControlsProps = Pick<
   ClauseControls,
-  "conditional" | "coordinative" | "imperative" | "infinitive"
+  "conditional" | "coordinative" | "imperative" | "infinitive" | "question"
 >;
 
 // The clause-level controls stacked on the card's right border: the moods on top, then the
@@ -17,8 +17,9 @@ export function BorderControls({
   coordinative,
   imperative,
   infinitive,
+  question,
 }: BorderControlsProps) {
-  if (!conditional && !coordinative && !imperative && !infinitive) return null;
+  if (!conditional && !coordinative && !imperative && !infinitive && !question) return null;
   return (
     <Box
       ref={conditional?.registerBorderAnchor}
@@ -37,6 +38,7 @@ export function BorderControls({
     >
       {imperative && <MoodToggle mood="imperative" control={imperative} />}
       {infinitive && <MoodToggle mood="infinitive" control={infinitive} />}
+      {question && <MoodToggle mood="question" control={question} />}
       {conditional && <ConditionalButton control={conditional} />}
       {coordinative && <CoordinationButton control={coordinative} />}
     </Box>

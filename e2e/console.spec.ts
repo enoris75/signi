@@ -110,6 +110,39 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('console-chip')).toContainText(/subject/i);
   });
 
+  // P09-E12 M5–M7: the question, its gap and the existential, each a period-level statement.
+  test('asks with /ask, and /statement takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/ask /subj cat /verb eat /obj food');
+    await run(page);
+    await app.expectSentences({ en: 'does the cat eat the food?', ja: '猫は食べ物を食べますか？' });
+    await expect(page.getByTestId('period-border-controls').getByRole('button', { name: 'Question', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.type('/statement');
+    await run(page);
+    await app.expectSentences({ en: 'the cat eats the food.' });
+  });
+
+  test('asks about a slot with /wh, and /del wh takes the gap back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/wh obj /subj cat /verb eat');
+    await run(page);
+    await app.expectSentences({ en: 'what does the cat eat?', it: 'che cosa mangia il gatto?', fr: "qu'est-ce que le chat mange ?" });
+    await expect(page.getByTestId('source-strip')).toContainText('/wh obj /subj ( cat ) /verb ( eat )');
+    await page.keyboard.type('/del wh');
+    await run(page);
+    await app.expectSentences({ en: 'does the cat eat?' });
+  });
+
+  test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');
+    await run(page);
+    await app.expectSentences({ en: 'there is a cat in the house.', de: 'es gibt einen Kater im Haus.', ja: '家に猫がいます。' });
+    await page.keyboard.type('/del there');
+    await run(page);
+    await app.expectSentences({ en: 'a cat is in the house.' });
+  });
+
   test('writes a click on the canvas into the period being edited, as if typed', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/subj cat /verb eat');

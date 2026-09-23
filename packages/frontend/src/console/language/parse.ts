@@ -1,6 +1,8 @@
 import {
   COORD_VALUES,
   PERSON_VALUES,
+  QUESTION_ANIMACY_VALUES,
+  QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   commandNamed,
   valueNamed,
@@ -266,7 +268,17 @@ export function parse(text: string): ParseResult {
 
 /** Whether two values say the same kind of thing — two addressees, two registers, two levels. */
 export function sameKind(a: ValueDef, b: ValueDef): boolean {
-  const kind = (v: ValueDef) => (PERSON_VALUES.includes(v) ? "person" : REGISTER_VALUES.includes(v) ? "register" : "value");
+  const kind = (v: ValueDef) =>
+    PERSON_VALUES.includes(v)
+      ? "person"
+      : REGISTER_VALUES.includes(v)
+        ? "register"
+        : // A wh-question's slot and its who / what, one of each: `/wh subj who` (P09-E12).
+          QUESTION_SLOT_VALUES.includes(v)
+          ? "slot"
+          : QUESTION_ANIMACY_VALUES.includes(v)
+            ? "animacy"
+            : "value";
   return kind(a) === kind(b);
 }
 

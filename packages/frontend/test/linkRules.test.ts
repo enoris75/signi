@@ -56,12 +56,19 @@ describe('linkRules', () => {
     expect(links).toEqual([expect.objectContaining({ id: 'l2', target: { containerId: 'C' } })]);
     expect(canStartCondition(links, { id: 'B', selection: { imperative: true } })).toBe(false);
     expect(canStartCondition([], A)).toBe(true);
+    // Nor from a question: the conditional mood drops it (P09-E12 M5).
+    expect(canStartCondition([], { id: 'Q', selection: { interrogative: true } })).toBe(false);
   });
 
   it('coordinates two periods of one mood', () => {
     const command: PhraseContainer = { id: 'D', selection: { imperative: true } };
     expect(canBeCoordinate([...CONTAINERS, command], [], 'A', 'D')).toBe(false);
     expect(canBeCoordinate(CONTAINERS, [], 'A', 'B')).toBe(true);
+    // A question with a question, not with a statement: the pair shares one force (P09-E12 M5).
+    const question: PhraseContainer = { id: 'Q', selection: { interrogative: true } };
+    const another: PhraseContainer = { id: 'R', selection: { interrogative: true } };
+    expect(canBeCoordinate([...CONTAINERS, question], [], 'A', 'Q')).toBe(false);
+    expect(canBeCoordinate([question, another], [], 'Q', 'R')).toBe(true);
     const links = addCoordinative([], 'A', 'B', 'but', 'l1');
     expect(canStartCoordination(links, B)).toBe(false);
     expect(links[0]).toMatchObject({ kind: 'coordinative', conjunction: 'but' });

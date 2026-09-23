@@ -6,6 +6,7 @@ import { usePeriodCursor, usePeriodHasCursor } from "../../keyboard/KeyboardProv
 import type { PeriodContext } from "../../keyboard/keymap.ts";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
+import { moodLocked } from "./functions/moodLocked.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
 import { Resizer } from "./Resizer.tsx";
 import { GRAPH_HEIGHT_KEY } from "./storageKeys.ts";
@@ -31,6 +32,7 @@ export interface PeriodCardProps {
   onTidy: () => void;
   onToggleImperative: () => void;
   onToggleInfinitive: () => void;
+  onToggleQuestion: () => void;
   // One more period, empty or loaded from the saved ones — the workspace's own two buttons, which
   // the period's N and L reach without leaving the card (see the keymap's period scope).
   onAddPeriod?: () => void;
@@ -45,18 +47,6 @@ export interface PeriodCardProps {
   // The period's canvas.
   children: ReactNode;
 }
-
-// A mood can't be flipped on a period alone while it takes part in a conditional or a coordination:
-// a command is mutually exclusive with a conditional and shared by the two clauses of a
-// coordination, and an infinitive occupies the finite slot the same way. The relation has to be
-// cleared first.
-const moodLocked = (binding: WorkspaceBinding | undefined): boolean =>
-  binding
-    ? binding.conditional.hasSource ||
-      binding.conditional.hasTarget ||
-      binding.coordinative.hasSource ||
-      binding.coordinative.hasTarget
-    : false;
 
 // The card a period's canvas wears: the period's header and border controls, the canvas's resize
 // grip, and — for a standalone period — the border drag that floats it about the viewport.
@@ -78,6 +68,7 @@ export function PeriodCard({
   onTidy,
   onToggleImperative,
   onToggleInfinitive,
+  onToggleQuestion,
   onAddPeriod,
   onLoadPeriod,
   controlsRef,
@@ -126,6 +117,7 @@ export function PeriodCard({
       hasContent,
       toggleImperative: onToggleImperative,
       toggleInfinitive: onToggleInfinitive,
+      toggleQuestion: onToggleQuestion,
       moodLocked: locked,
       condition: conditional && {
         canStart: conditional.canStart,
@@ -207,6 +199,7 @@ export function PeriodCard({
         instrumental={clauseControls.instrumental}
         imperative={{ active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }}
         infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}
+        question={{ active: Boolean(selection.interrogative), disabled: locked, onToggle: onToggleQuestion }}
       >
         {children}
 

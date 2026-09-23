@@ -57,6 +57,8 @@ export const VERBS = [
     ...complements('direction', 'source', 'route', 'locative', 'manner', 'cause'),
   }),
   verb('SEEM', 'seem', 'sembrare', { transitivity: 'intransitive', ...complements('predicative') }),
+  // The copula, the existential's verb (P09-E12 M7): "there is a cat in the house".
+  verb('BE', 'be', 'essere', { transitivity: 'intransitive', ...complements('predicative', 'locative', 'cause') }),
   // Two verbs that read "cry" in English: only the id tells them apart.
   verb('CRY', 'cry', 'piangere', { transitivity: 'intransitive', synonym: 'weep' }),
   verb('CRY_OUT', 'cry', 'gridare', { synonym: 'shout' }),

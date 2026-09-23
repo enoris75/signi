@@ -181,6 +181,37 @@ describe('buildRingSpecs', () => {
     expect(hour(perimeterControlKey('incoming', 'subject'))).toBe(12);
   });
 
+  // The clause's facts about a noun (P09-E12 M6, M7): the question's mark and its who / what, and the
+  // subject's existential, share one hour at the lower left, clear of the relations at the bottom.
+  it("seats the question mark, its who / what and the existential together on a noun's dotted ring", () => {
+    const [subject] = groups([]);
+    const { Subject } = specs([subject], {
+      perimeterByNoun: {
+        subject: { conjunct: icon('c'), question: icon('q'), animacy: icon('a'), existential: icon('e') },
+      },
+    });
+
+    expect(keys(Subject.outer)).toEqual([
+      collapseControlKey('Subject'),
+      perimeterControlKey('conjunct', 'subject'),
+      perimeterControlKey('question', 'subject'),
+      perimeterControlKey('animacy', 'subject'),
+      perimeterControlKey('existential', 'subject'),
+    ]);
+    const hour = (key: string) => (aimOf(Subject.outer, key) as { clock: number }).clock;
+    expect(hour(perimeterControlKey('animacy', 'subject'))).toBeCloseTo(8);
+    expect(hour(perimeterControlKey('question', 'subject'))).toBeGreaterThan(hour(perimeterControlKey('existential', 'subject')));
+  });
+
+  it.each(['subject', 'directObject', 'route'] as const)('puts the question mark on the %s ring alone', (noun) => {
+    const defs = groups([noun], ['subject', 'verb', 'directObject', 'route']);
+    const def = defs.find((g) => g.mainKey === noun)!;
+    const out = specs(defs, { perimeterByNoun: { [noun]: { question: icon('q') } } })[def.label]!;
+    expect(keys(out.outer)).toContain(perimeterControlKey('question', noun));
+    const others = defs.filter((g) => g !== def).flatMap((g) => keys(specs(defs, { perimeterByNoun: { [noun]: { question: icon('q') } } })[g.label]!.outer));
+    expect(others.some((k) => k.startsWith('question:'))).toBe(false);
+  });
+
   it("turns a noun's possessor control to face its owner, out of the row of relations", () => {
     const [subject] = groups([]);
     const owner = { x: 420, y: 380 };

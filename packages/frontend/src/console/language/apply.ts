@@ -14,6 +14,7 @@ import {
   possessorAddress,
   type ConceptSelectOpts,
   type ImperativePerson,
+  type QuestionRole,
   type NounAddress,
   type NounKey,
   type PhraseContainer,
@@ -53,6 +54,10 @@ import {
   setImperativePerson,
   setImperativeRegister,
   setInfinitive,
+  setInterrogative,
+  setExistential,
+  setQuestionAnimate,
+  setQuestionRole,
   setModifierAdjective,
   setNounConjunction,
   setPossessorRef,
@@ -68,6 +73,8 @@ import {
   COORD_VALUES,
   LEVEL_VALUES,
   PERSON_VALUES,
+  QUESTION_ANIMACY_VALUES,
+  QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   commandNamed,
   roleCommand,
@@ -425,6 +432,10 @@ class Run {
         return this.privative(item, action.negative, frame);
       case "mood":
         return this.mood(item, action.mood, frame);
+      case "question":
+        return this.question(item, frame);
+      case "existential":
+        return this.existential(item, frame);
       case "new":
         return this.newCommand(item, frame);
       case "del":
@@ -736,7 +747,12 @@ class Run {
     } else if (item.body) {
       // The new period is made already linked. A command's coordinate is a command too: the mood
       // rule would refuse a statement, and the bracket is the command's own.
-      const seed: PhraseSelection = kind === "join" && root.imperative ? setImperative({}, true) : {};
+      const seed: PhraseSelection =
+        kind === "join" && root.imperative
+          ? setImperative({}, true)
+          : kind === "join" && root.interrogative
+            ? setInterrogative({}, true)
+            : {};
       target = { containerId: this.newPeriod(seed) };
     } else {
       return unfinished(
@@ -783,7 +799,7 @@ class Run {
     else this.queue.push({ kind: "privative", containerId: id, negative, span: item });
   }
 
-  mood(item: Item, mood: "command" | "infinitive" | "statement", frame: Frame): void {
+  mood(item: Item, mood: "command" | "infinitive" | "question" | "statement", frame: Frame): void {
     if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
     const id = frame.containerId;
     const root = this.root(id);
@@ -792,16 +808,16 @@ class Run {
         ? setImperative(root, true)
         : mood === "infinitive"
           ? setInfinitive(root, true)
-          : setInfinitive(setImperative(root, false), false);
-    const flips = Boolean(next.imperative) !== Boolean(root.imperative) || Boolean(next.infinitive) !== Boolean(root.infinitive);
+          : mood === "question"
+            ? setInterrogative(root, true)
+            : setInterrogative(setInfinitive(setImperative(root, false), false), false);
+    const flips =
+      Boolean(next.imperative) !== Boolean(root.imperative) ||
+      Boolean(next.infinitive) !== Boolean(root.infinitive) ||
+      Boolean(next.interrogative) !== Boolean(root.interrogative);
     // A mood can't be flipped on a period alone while it takes part in a conditional or a
     // coordination (see PeriodCard's moodLocked): the relation has to go first.
-    const locked = this.links.some(
-      (l) =>
-        (isConditionalLink(l) || isCoordinativeLink(l)) &&
-        (l.source.containerId === id || l.target.containerId === id),
-    );
-    if (flips && locked)
+    if (flips && this.moodLocked(id))
       fail(item.head, coded("moodLocked"));
     let sel = next;
     if (mood === "command" && item.word) {
@@ -813,6 +829,45 @@ class Run {
       }
     }
     this.updateRoot(id, () => sel);
+    this.touch({ containerId: id, slot: "subject" });
+  }
+
+  /** Whether a conditional or a coordination this period takes part in locks its mood (see moodLocked). */
+  moodLocked(id: string): boolean {
+    return this.links.some(
+      (l) =>
+        (isConditionalLink(l) || isCoordinativeLink(l)) &&
+        (l.source.containerId === id || l.target.containerId === id),
+    );
+  }
+
+  /**
+   * `/wh obj`, `/wh subj who` — the slot the period's question asks about, and what it asks for there
+   * (P09-E12 M6). It makes the period a question, as the mark on the slot's ring does, so it is held to
+   * the same lock the mood is; the gap itself is the plan's to leave out (see askQuestion).
+   */
+  question(item: Item, frame: Frame): void {
+    if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
+    const parts = (item.word?.text ?? "").split(/\s+/).filter(Boolean);
+    const slot = parts.map((p) => valueNamed(QUESTION_SLOT_VALUES, p)).find(Boolean);
+    const animacy = parts.map((p) => valueNamed(QUESTION_ANIMACY_VALUES, p)).find(Boolean);
+    if (!slot) {
+      return unfinished(item.word ?? item.head, coded("setNeedsValue", { command: "wh", values: QUESTION_SLOT_VALUES.map((v) => v.name) }));
+    }
+    const id = frame.containerId;
+    const root = this.root(id);
+    if (!root.interrogative && this.moodLocked(id)) fail(item.head, coded("moodLocked"));
+    let sel = setQuestionRole(root, slot.value as QuestionRole);
+    if (animacy) sel = setQuestionAnimate(sel, animacy.value === "who");
+    this.updateRoot(id, () => sel);
+    this.touch({ containerId: id, slot: slot.value as QuestionRole });
+  }
+
+  /** `/there` — the period made an existential, "there is a cat" (P09-E12 M7). */
+  existential(item: Item, frame: Frame): void {
+    if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
+    const id = frame.containerId;
+    this.updateRoot(id, (root) => setExistential(root, true));
     this.touch({ containerId: id, slot: "subject" });
   }
 
@@ -925,6 +980,17 @@ class Run {
       }
       case "period":
         return this.removePeriod(item, frame);
+      // The question's gap, and the existential (P09-E12): the period's own, whatever is in reach.
+      case "wh": {
+        if (!this.root(containerId).questionRole) fail(span, coded("nothingToRemove"));
+        this.updateRoot(containerId, (s) => setQuestionRole(s, undefined));
+        return;
+      }
+      case "there": {
+        if (!this.root(containerId).existential) fail(span, coded("nothingToRemove"));
+        this.updateRoot(containerId, (s) => setExistential(s, false));
+        return;
+      }
     }
     fail(span, coded("unknownRemoval", { what }));
   }

@@ -332,6 +332,46 @@ describe('the set-value reducers', () => {
     expect(R.setInfinitive({}, false)).toEqual({});
   });
 
+  // The question, the third mood (P09-E12 M5): exclusive with the other two, forcing nothing else.
+  it('make a period a question, and a command or a citation stops being one', () => {
+    const past: PhraseSelection = { subject: CAT, verb: SEE, verbTense: 'past', verbModal: WANT };
+    const question = R.setInterrogative(past, true);
+    expect(question).toMatchObject({ interrogative: true, verbTense: 'past', verbModal: WANT });
+    expect(R.setInterrogative(question, true)).toBe(question);
+    expect(R.setInterrogative(R.setImperative(past, true), true)).toMatchObject({ interrogative: true, imperative: false });
+    expect(R.setInterrogative(R.setInfinitive(past, true), true)).toMatchObject({ interrogative: true, infinitive: false });
+    expect(R.setImperative(question, true)).toMatchObject({ imperative: true, interrogative: false });
+    expect(R.setInfinitive(question, true)).toMatchObject({ infinitive: true, interrogative: false });
+    // A statement's mood change leaves no question fields behind.
+    expect(R.setImperative(past, true)).not.toHaveProperty('interrogative');
+    expect(R.toggleInterrogative(R.toggleInterrogative(past)).interrogative).toBe(false);
+  });
+
+  // The slot a wh-question asks about (P09-E12 M6): one per period, making it a question.
+  it('mark one slot a question asks about, and turning the question off clears it', () => {
+    const s: PhraseSelection = { subject: CAT, verb: SEE, directObject: BOY };
+    const what = R.setQuestionRole(s, 'directObject');
+    expect(what).toMatchObject({ interrogative: true, questionRole: 'directObject' });
+    const who = R.setQuestionAnimate(what, true);
+    // Moving the mark takes the who / what chosen for the old slot with it.
+    expect(R.setQuestionRole(who, 'subject')).toMatchObject({ questionRole: 'subject', questionAnimate: undefined });
+    // Unmarking leaves the yes/no question standing.
+    expect(R.toggleQuestionRole(who, 'directObject')).toMatchObject({ interrogative: true, questionRole: undefined, questionAnimate: undefined });
+    expect(R.setInterrogative(who, false)).toMatchObject({ interrogative: false, questionRole: undefined, questionAnimate: undefined });
+    expect(R.setImperative(who, true)).toMatchObject({ questionRole: undefined });
+    // Marking a slot ends an existential; an existential unmarks the slot.
+    expect(R.setQuestionRole({ ...s, existential: true }, 'subject').existential).toBe(false);
+    expect(R.setExistential(who, true)).toMatchObject({ existential: true, interrogative: true, questionRole: undefined });
+  });
+
+  it('flip a subject or object question between who and what, from the held word’s default', () => {
+    const MAN: Concept = { ...noun('MAN'), human: true };
+    const asked = R.setQuestionRole({ subject: MAN, verb: SEE }, 'subject');
+    expect(R.toggleQuestionAnimate(asked).questionAnimate).toBe(false);
+    expect(R.toggleQuestionAnimate(R.setQuestionRole({ subject: CAT, verb: SEE }, 'subject')).questionAnimate).toBe(true);
+    expect(R.toggleExistential(R.toggleExistential({ subject: CAT })).existential).toBe(false);
+  });
+
   it('are what the toggles and cycles feed the next value', () => {
     const s: PhraseSelection = { subject: SHE };
     expect(R.toggleGender(R.toggleGender(s, 'subject'), 'subject').subjectGender).toBe('neut');

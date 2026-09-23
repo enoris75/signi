@@ -38,6 +38,8 @@ export function periodControls(
       canStart:
         !selection.imperative &&
         !selection.infinitive &&
+        // Nor a question, which the conditional mood drops (see canStartCondition).
+        !selection.interrogative &&
         !conditional.hasTarget &&
         !coordinative.hasSource &&
         !coordinative.hasTarget,

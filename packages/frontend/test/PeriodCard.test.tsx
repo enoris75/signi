@@ -43,6 +43,7 @@ function renderCard(props: Partial<PeriodCardProps> = {}, selection: PhraseSelec
     onTidy: vi.fn(),
     onToggleImperative: vi.fn(),
     onToggleInfinitive: vi.fn(),
+    onToggleQuestion: vi.fn(),
     graphHeight: 340,
     onGraphHeightChange: vi.fn(),
     children: <div data-testid="canvas" />,
@@ -53,6 +54,7 @@ function renderCard(props: Partial<PeriodCardProps> = {}, selection: PhraseSelec
 
 const COMMAND = 'Command';
 const CITATION = 'Infinitive phrase';
+const QUESTION = 'Question';
 
 describe('PeriodCard', () => {
   it('wears the canvas and the page’s words panel', () => {
@@ -68,9 +70,11 @@ describe('PeriodCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: COMMAND }));
     fireEvent.click(screen.getByRole('button', { name: CITATION }));
+    fireEvent.click(screen.getByRole('button', { name: QUESTION }));
 
     expect(props.onToggleImperative).toHaveBeenCalledOnce();
     expect(props.onToggleInfinitive).toHaveBeenCalledOnce();
+    expect(props.onToggleQuestion).toHaveBeenCalledOnce();
   });
 
   it.each([
@@ -78,11 +82,13 @@ describe('PeriodCard', () => {
     ['a conditional’s main clause', { conditional: { hasSource: true } }],
     ['a coordination’s first clause', { coordinative: { hasSource: true } }],
     ['a coordination’s second clause', { coordinative: { hasTarget: true } }],
-  ])('locks both moods on %s', (_what, relations) => {
+  ])('locks the moods on %s', (_what, relations) => {
     renderCard({ binding: binding(relations) });
 
     expect(screen.getByRole('button', { name: COMMAND })).toBeDisabled();
     expect(screen.getByRole('button', { name: CITATION })).toBeDisabled();
+    // The question too: the pair shares its force, and the conditional mood drops it (P09-E12 M5).
+    expect(screen.getByRole('button', { name: QUESTION })).toBeDisabled();
   });
 
   it('leaves the moods free on a period in no relation, or on a standalone one', () => {

@@ -1,4 +1,4 @@
-import type { GenderSlot, NounKey, NumberSlot, SlotKey } from "../../interfaces.ts";
+import type { GenderSlot, NounKey, NumberSlot, QuestionRole, SlotKey } from "../../interfaces.ts";
 import type { SatelliteIcon } from "../../Boxes.tsx";
 import type { NegativeField } from "../../phraseReducers.ts";
 import { COMPLEMENT_KEY_SET, isModalNegativeField, REVEALABLE_SLOT_KEYS } from "../../slots.ts";
@@ -24,6 +24,9 @@ export function buildSatelliteIcons({
   onToggleNegative,
   onToggleReveal,
   onAddConjunct,
+  onToggleQuestion,
+  onToggleQuestionAnimate,
+  onToggleExistential,
   t,
 }: BuildSatelliteIconsArgs): SatelliteIcons {
   // What a made link says of itself, and what clicking it will do — the same pair on the
@@ -62,6 +65,41 @@ export function buildSatelliteIcons({
             ? linkBinding.instrumental.onClear()
             : linkBinding.instrumental.onStart(),
       });
+      continue;
+    }
+    // The wh-question's mark, its who / what chip and the existential ride the noun's dotted ring
+    // (P09-E12 M6, M7): each is about the phrase and the clause it is in, not about the word, and the
+    // solid rings they would otherwise join are full. Each flips a value in place; each is named by
+    // its label alone, since the label says what it does ("Question", "Who acts?", "There is
+    // something") and it reveals no box.
+    const perimeterKind = sat.key.endsWith("QuestionAnimate")
+      ? ("animacy" as const)
+      : sat.key.endsWith("Question")
+        ? ("question" as const)
+        : sat.key === "subjectExistential"
+          ? ("existential" as const)
+          : null;
+    if (perimeterKind) {
+      const noun = sat.parent as NounKey;
+      const onToggle =
+        perimeterKind === "question"
+          ? onToggleQuestion && (() => onToggleQuestion(noun as QuestionRole))
+          : perimeterKind === "animacy"
+            ? onToggleQuestionAnimate
+            : onToggleExistential;
+      if (!onToggle) continue;
+      (perimeterByNoun[noun] ??= {})[perimeterKind] = {
+        key: sat.key,
+        icon: sat.icon,
+        label: sat.label,
+        labelKey: sat.labelKey,
+        active: false,
+        isSet: sat.hasValue,
+        valued: false,
+        directToggle: true,
+        named: true,
+        onToggle,
+      };
       continue;
     }
     // The "Relative clause" satellite is a cross-container link control, not a reveal.

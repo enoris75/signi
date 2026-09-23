@@ -65,6 +65,13 @@ export function GroupPerimeterControls({
         const relative = entry?.relative && controlPos[perimeterControlKey("relative", nounKey)];
         const possessor = entry?.possessor && controlPos[perimeterControlKey("possessor", nounKey)];
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
+        // The clause's own facts about this noun: the wh-question's mark, its who / what, the
+        // existential (P09-E12). Plain toggles: no line starts from them.
+        const clauseFacts = (["question", "animacy", "existential"] as const).flatMap((kind) => {
+          const sat = entry?.[kind];
+          const at = sat && controlPos[perimeterControlKey(kind, nounKey)];
+          return sat && at ? [{ kind, sat, at }] : [];
+        });
 
         return (
           <Box key={nounKey} component="span">
@@ -117,6 +124,16 @@ export function GroupPerimeterControls({
                 />
               </Box>
             )}
+            {clauseFacts.map(({ kind, sat, at }) => (
+              <Box key={kind} data-testid={`${kind}-ctl-${nounKey}`} sx={seat(at)}>
+                <SatelliteButton
+                  sat={sat}
+                  color={color}
+                  keySpec={satelliteKeys[sat.key]}
+                  tip={nounKey === cursorSlot}
+                />
+              </Box>
+            ))}
           </Box>
         );
       })}

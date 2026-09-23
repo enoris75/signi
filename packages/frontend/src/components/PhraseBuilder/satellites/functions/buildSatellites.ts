@@ -12,8 +12,10 @@ export function buildSatellites(
   revealed: Record<string, boolean>,
   language: LanguageCode,
   t: UiStringLookup,
+  // Whether a conditional or a coordination locks the period's mood (see rawSatellites).
+  clause: { moodLocked?: boolean } = {},
 ): BuiltSatellites {
-  return resolveSatellites(rawSatellites(selection, language, t), {
+  return resolveSatellites(rawSatellites(selection, language, t, clause), {
     revealed,
     // A command or an infinitive citation takes the subject's place on the canvas.
     subjectDropped: Boolean(selection.imperative || selection.infinitive),

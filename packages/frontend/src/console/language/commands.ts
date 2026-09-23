@@ -85,7 +85,11 @@ export type Action =
   | { kind: "level" }
   /** The instrument denied, or taken back: `/without`, `/posinst` (P09-E2). */
   | { kind: "privative"; negative: boolean }
-  | { kind: "mood"; mood: "command" | "infinitive" | "statement" }
+  | { kind: "mood"; mood: "command" | "infinitive" | "question" | "statement" }
+  /** The slot a wh-question asks about, and its who / what: `/wh obj`, `/wh subj who` (P09-E12). */
+  | { kind: "question" }
+  /** The period made an existential, "there is a cat": `/there` (P09-E12). */
+  | { kind: "existential" }
   | { kind: "new" }
   | { kind: "del" }
   | { kind: "app"; app: AppCommand };
@@ -258,6 +262,21 @@ export const REGISTER_VALUES: readonly ValueDef[] = [
     description: "instruction",
     descriptionKey: "imperative.register.instruction",
   },
+];
+
+// The slots a wh-question can ask about, by the role commands' own names, and what it asks for there
+// (P09-E12 M6). A value may reuse a command's name: `/wh subj` names the slot, not the command.
+export const QUESTION_SLOT_VALUES: readonly ValueDef[] = [
+  { name: "subj", aliases: ["subject"], value: "subject", description: "subject", descriptionKey: "slot.subject" },
+  { name: "obj", aliases: ["object"], value: "directObject", description: "direct object", descriptionKey: "slot.directObject" },
+  { name: "loc", aliases: ["locative", "place"], value: "locative", description: "place", descriptionKey: "slot.locative" },
+  { name: "manner", value: "manner", description: "manner", descriptionKey: "slot.manner" },
+  { name: "cause", value: "cause", description: "cause", descriptionKey: "slot.cause" },
+];
+
+export const QUESTION_ANIMACY_VALUES: readonly ValueDef[] = [
+  { name: "who", value: "who", description: "who", descriptionKey: "question.who" },
+  { name: "what", value: "what", description: "what", descriptionKey: "question.what" },
 ];
 
 export const LEVEL_VALUES: readonly ValueDef[] = [
@@ -620,6 +639,48 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "mood", mood: "infinitive" },
     reducers: ["setInfinitive"],
   },
+  // The third mood, the question (P09-E12 M5): "does the cat eat?". Printed under the same `:mood`
+  // statement and taken back by /statement, as /command and /inf are.
+  {
+    name: "ask",
+    aliases: ["question", "q"],
+    group: "period",
+    description: "question",
+    descriptionKey: "mood.question",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "mood", mood: "question" },
+    reducers: ["setInterrogative"],
+  },
+  // The slot the question asks about, and whether it asks who or what (P09-E12 M6): `/wh obj`,
+  // `/wh subj who`. Said of the period, not inside the slot's bracket — the gap usually holds no word,
+  // and the printer writes a noun only when it holds one. Taken back by `/del wh`.
+  {
+    name: "wh",
+    aliases: [],
+    group: "period",
+    description: "what the question asks about",
+    descriptionKey: "mood.question",
+    color: "setting",
+    arg: { kind: "values", values: [...QUESTION_SLOT_VALUES, ...QUESTION_ANIMACY_VALUES], max: 2 },
+    action: { kind: "question" },
+    satellites: /Question(Animate)?$/,
+    reducers: ["setQuestionRole", "setQuestionAnimate"],
+  },
+  // The existential, "there is a cat" (P09-E12 M7): a fact of the clause, said of the period after its
+  // mood, as /without is though its control sits elsewhere. Taken back by `/del there`.
+  {
+    name: "there",
+    aliases: ["existential"],
+    group: "period",
+    description: "there is …",
+    descriptionKey: "existential.toggle",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "existential" },
+    satellites: /^subjectExistential$/,
+    reducers: ["setExistential"],
+  },
   {
     name: "statement",
     aliases: ["indicative"],
@@ -630,7 +691,7 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "mood", mood: "statement" },
-    reducers: ["setImperative", "setInfinitive"],
+    reducers: ["setImperative", "setInfinitive", "setInterrogative"],
   },
   {
     name: "if",
@@ -942,7 +1003,7 @@ export function topicOf(def: CommandDef): Topic {
             ? SETTING_TOPICS[a.setting.id]
             : a.kind === "set"
               ? a.id
-              : a.kind === "mood"
+              : a.kind === "mood" || a.kind === "question" || a.kind === "existential"
                 ? "mood"
                 : a.kind === "condition" || a.kind === "join" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative"
                   ? "links"

@@ -23,6 +23,7 @@ import {
   COORD_VALUES,
   LEVEL_VALUES,
   PERSON_VALUES,
+  QUESTION_SLOT_VALUES,
   REGISTER_VALUES,
   commandByAction,
   roleCommand,
@@ -206,6 +207,23 @@ class Printer {
     } else if (root.infinitive) {
       this.statement({ key: ":mood", removal: "/statement" });
       this.emit("/inf", "command", "setting");
+    } else if (root.interrogative && !root.questionRole) {
+      // The question (P09-E12): a wh-question's /wh says it on its own, so /ask is the yes/no one's.
+      this.statement({ key: ":mood", removal: "/statement" });
+      this.emit("/ask", "command", "setting");
+    }
+    // The slot the question asks about, and its who / what where the user chose one — period-level,
+    // since the gap usually holds no word for a bracket to hang it on.
+    if (root.questionRole) {
+      this.statement({ key: ":wh", removal: "/del wh" });
+      this.emit("/wh", "command", "setting");
+      this.emit(QUESTION_SLOT_VALUES.find((v) => v.value === root.questionRole)!.name, "value", "setting");
+      if (root.questionAnimate !== undefined) this.emit(root.questionAnimate ? "who" : "what", "value", "setting");
+    }
+    // The existential, a fact of the clause after its force (P09-E12).
+    if (root.existential) {
+      this.statement({ key: ":there", removal: "/del there" });
+      this.emit("/there", "command", "setting");
     }
     this.noun(root, "subject", undefined, "period");
     this.verbBlock(root);

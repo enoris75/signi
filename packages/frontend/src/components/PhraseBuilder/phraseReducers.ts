@@ -29,8 +29,10 @@ import {
   PhraseSelection,
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
+  QuestionRole,
   SlotKey,
 } from "./interfaces.ts";
+import { questionAnimateOf } from "./functions/questionGates.ts";
 import type { ModalNegativeField } from "./slots.ts";
 import {
   adjectiveSlots,
@@ -473,8 +475,9 @@ export function setImperative(prev: PhraseSelection, value: boolean): PhraseSele
     ...prev,
     imperative: true,
     // Imperative and infinitive both occupy the finite/mood slot, so turning one on turns the
-    // other off.
+    // other off — and a command is not a question either (see setInterrogative).
     infinitive: false,
+    ...unasked(prev),
     imperativePerson: prev.imperativePerson ?? "2sg",
     verbTense: "present",
     verbAspect: "neutral",
@@ -508,6 +511,7 @@ export function setInfinitive(prev: PhraseSelection, value: boolean): PhraseSele
     ...prev,
     infinitive: true,
     imperative: false,
+    ...unasked(prev),
     verbTense: "present",
     verbAspect: "neutral",
     verbModal: undefined,
@@ -521,6 +525,77 @@ export function setInfinitive(prev: PhraseSelection, value: boolean): PhraseSele
 
 export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
   return setInfinitive(prev, !prev.infinitive);
+}
+
+// What a period that stops being a question drops: the force, the slot it asked about and that
+// slot's who / what.
+const NOT_A_QUESTION = {
+  interrogative: false,
+  questionRole: undefined,
+  questionAnimate: undefined,
+} as const;
+
+// The same, as the fields to spread over `prev` — none at all when it was no question, so a mood
+// change leaves a statement's selection exactly as it was.
+const unasked = (prev: PhraseSelection) =>
+  prev.interrogative || prev.questionRole || prev.questionAnimate !== undefined ? NOT_A_QUESTION : {};
+
+// Make this period a question, or a statement again (P09-E12 M5). The third mood: turning it on turns
+// the command and the infinitive off, since the engine drops a question under either, but it forces
+// nothing else — a question keeps its tense, aspect, modals and voice ("did the cat have to go?").
+// Turning it off takes the wh-question's gap with it (D7: turning the question off clears the mark).
+export function setInterrogative(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (Boolean(prev.interrogative) === value) return prev;
+  if (!value) return { ...prev, ...NOT_A_QUESTION };
+  return { ...setInfinitive(setImperative(prev, false), false), interrogative: true };
+}
+
+export function toggleInterrogative(prev: PhraseSelection): PhraseSelection {
+  return setInterrogative(prev, !prev.interrogative);
+}
+
+// Mark the slot this period's wh-question asks about, or unmark it (P09-E12 M6). One per period, so
+// marking one moves the mark; marking makes the period a question, which is what lights the border's
+// toggle, and ends an existential, which has no wh-question. A who / what set on the old slot does
+// not carry over to the new one. Unmarking leaves the yes/no question standing.
+export function setQuestionRole(prev: PhraseSelection, role: QuestionRole | undefined): PhraseSelection {
+  if (prev.questionRole === role) return prev;
+  if (!role) return { ...prev, questionRole: undefined, questionAnimate: undefined };
+  return {
+    ...setInterrogative(prev, true),
+    questionRole: role,
+    questionAnimate: undefined,
+    existential: false,
+  };
+}
+
+export function toggleQuestionRole(prev: PhraseSelection, role: QuestionRole): PhraseSelection {
+  return setQuestionRole(prev, prev.questionRole === role ? undefined : role);
+}
+
+// Whether the marked subject or object question asks *who* (true) or *what* (false). Kept as the
+// user's own choice once made; absent, the held word's `human` answers (see questionAnimateOf).
+export function setQuestionAnimate(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (prev.questionAnimate === value) return prev;
+  return { ...prev, questionAnimate: value };
+}
+
+// The who / what chip: flip what the question asks now, default or chosen.
+export function toggleQuestionAnimate(prev: PhraseSelection): PhraseSelection {
+  return setQuestionAnimate(prev, !questionAnimateOf(prev));
+}
+
+// Make this period an existential, "there is a cat", or take it back (P09-E12 M7). Exclusive with a
+// wh-question, which the engine does not build over an existential: turning one on unmarks the gap
+// (the yes/no question stays — "is there a cat?").
+export function setExistential(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (Boolean(prev.existential) === value) return prev;
+  if (!value) return { ...prev, existential: false };
+  return { ...prev, existential: true, questionRole: undefined, questionAnimate: undefined };
+}
+
+export function toggleExistential(prev: PhraseSelection): PhraseSelection {
+  return setExistential(prev, !prev.existential);
 }
 
 // Set the person the command's verb agrees with (2sg / 1pl "let's" / 2pl). Kept even under the

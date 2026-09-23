@@ -124,6 +124,9 @@ export interface SatelliteIcon {
   // link = clicking starts a link to a period in another container, or removes it (the relative
   // clause, the instrumental). It reveals no box, so its tooltip never offers to show or hide one.
   link?: boolean;
+  // named = its label says what it does and what it holds, so its tooltip is the label alone — the
+  // question mark, its who / what chip, the existential (P09-E12).
+  named?: boolean;
   onToggle: () => void;
 }
 
@@ -502,7 +505,7 @@ export function SatelliteButton({
   const tooltip =
     !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
       ? `${sat.label}: ${sat.valueLabel}`
-      : sat.link
+      : sat.link || sat.named
         ? sat.label
         : revealTitle(t, sat.active, sat.label, sat.labelKey);
   return (

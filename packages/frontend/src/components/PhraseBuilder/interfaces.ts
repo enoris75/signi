@@ -114,6 +114,11 @@ export interface SlotConfig {
 // the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
 export type ImperativePerson = "2sg" | "1pl" | "2pl";
 
+// The five slots a wh-question can ask about — the only gaps with a question word in every engine
+// (see the engine's resolveQuestion): who / what, where, how, why.
+export type QuestionRole = "subject" | "directObject" | "locative" | "manner" | "cause";
+export const QUESTION_ROLES: readonly QuestionRole[] = ["subject", "directObject", "locative", "manner", "cause"];
+
 // The person a selection's command agrees with (default 2sg). Still meaningful under the
 // `instruction` register — the selector only greys it there, it does not forget it, so
 // returning to an order restores the person the user last picked.
@@ -149,6 +154,24 @@ export interface PhraseSelection {
     // cleared. Mutually exclusive with `imperative` and with a conditional/coordination (the UI
     // enforces this). Unlike an imperative it addresses nobody, so it carries no person or register.
     infinitive?: boolean;
+    // When set, this period is a **question** (P09-E12 M5, PhrasePlan.interrogative): the yes/no
+    // question "does the cat eat?", or — with `questionRole` — a wh-question. The third mood toggle,
+    // exclusive with the command and the infinitive, and like them locked while the period takes
+    // part in a conditional or a coordination (a coordination's pair shares one force).
+    interrogative?: boolean;
+    // The slot a wh-question asks about (P09-E12 M6, PhrasePlan.questionRole): one per period, marked
+    // on that slot's own dotted ring. Marking one sets `interrogative` too; turning the question off
+    // clears it. The slot's word, if it holds one, is left out of the plan (the gap), and a subject
+    // gap takes the throwaway subject the plan type needs (see `askQuestion`).
+    questionRole?: QuestionRole;
+    // Whether a subject or direct-object question asks *who* rather than *what* (PhrasePlan
+    // .questionAnimate). Absent means the default, which is the held word's `human` — the who / what
+    // chip on the marked ring sets it only when the user flips it (see `questionAnimateOf`).
+    questionAnimate?: boolean;
+    // When set, this period is an **existential**, "there is a cat" (P09-E12 M7, PhrasePlan
+    // .existential): the subject is the pivot. Toggled on the subject's ring; it only reaches the
+    // plan where the engine builds one (see `canBeExistential`).
+    existential?: boolean;
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;

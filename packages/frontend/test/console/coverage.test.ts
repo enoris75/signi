@@ -30,6 +30,10 @@ const WRAPS: Record<string, string> = {
   cycleModifierNumber: 'setModifierNumber',
   toggleImperative: 'setImperative',
   toggleInfinitive: 'setInfinitive',
+  toggleInterrogative: 'setInterrogative',
+  toggleQuestionRole: 'setQuestionRole',
+  toggleQuestionAnimate: 'setQuestionAnimate',
+  toggleExistential: 'setExistential',
   cycleNounConjunction: 'setNounConjunction',
 };
 
@@ -57,6 +61,9 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'noun.gender.back': 'masc',
   'noun.determiner': 'a',
   'noun.adjective': 'adj',
+  'noun.question': 'wh',
+  'noun.question.animacy': 'wh',
+  'subject.existential': 'there',
   'noun.possessor': 'poss',
   'object.voice': 'passive',
   'object.voice.back': 'active',
@@ -108,6 +115,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'period.remove': 'del',
   'period.command': 'command',
   'period.infinitive': 'inf',
+  'period.question': 'ask',
   'period.condition': 'if',
   'period.join': 'join',
   'period.level': 'level',

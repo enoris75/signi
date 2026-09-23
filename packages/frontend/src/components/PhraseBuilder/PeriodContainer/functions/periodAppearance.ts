@@ -44,7 +44,7 @@ export interface PeriodAccent {
 // (periodLabel) ranks the other way round, mood before relation — a command that coordinates
 // another wears the coordination's rule but reads "Command".
 export function periodAccent(controls: ClauseControls): PeriodAccent {
-  const { conditional, coordinative, instrumental, imperative, infinitive } =
+  const { conditional, coordinative, instrumental, imperative, infinitive, question } =
     controls;
   const target = pickTarget(controls);
   const inConditional = Boolean(
@@ -68,7 +68,9 @@ export function periodAccent(controls: ClauseControls): PeriodAccent {
             ? "imperative"
             : infinitive?.active
               ? "infinitive"
-              : undefined);
+              : question?.active
+                ? "question"
+                : undefined);
   return {
     borderColor: target ? ACCENT[target] : "divider",
     borderLeftColor: rule ? ACCENT[rule] : "text.secondary",
@@ -79,12 +81,13 @@ export function periodAccent(controls: ClauseControls): PeriodAccent {
 
 // The header caption's label: the part this period plays, or "" for a free statement.
 export function periodLabel(
-  { conditional, coordinative, instrumental, imperative, infinitive }: ClauseControls,
+  { conditional, coordinative, instrumental, imperative, infinitive, question }: ClauseControls,
   t: (key: UiStringKey) => string,
 ): string {
   if (instrumental?.isInstrument) return t("slot.instrumental");
   if (imperative?.active) return t("imperative.command");
   if (infinitive?.active) return t("infinitive.phrase");
+  if (question?.active) return t("mood.question");
   if (conditional?.hasCondition) return t("clause.main");
   if (conditional?.isIfClause) return t("clause.conditional");
   if (coordinative?.hasCoordination) return t("clause.first");

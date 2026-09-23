@@ -72,6 +72,10 @@ const REMOVE_HOUR = 1.5;
 const INCOMING_HOUR = 12;
 const TOOLBAR_HOUR = 12;
 const RELATIONS_HOUR = 6;
+// The clause's facts that ride a noun's dotted ring (P09-E12): the wh-question's mark with its who /
+// what chip, and the subject's existential, which exclude each other and so share the hour — lower
+// left, beside the relations and clear of the collapse control above.
+const QUESTION_HOUR = 8;
 const COMPLEMENTS_HOUR = 6;
 const DIRECT_OBJECT_HOUR = 3;
 // How far apart, in hours, controls that aim at the same hour are fanned so they keep their order.
@@ -85,7 +89,7 @@ export const clearControlKey = (mainKey: string) => `clear:${mainKey}`;
 export const collapseControlKey = (label: string) => `collapse:${label}`;
 export const removeControlKey = (label: string) => `remove:${label}`;
 export const perimeterControlKey = (
-  kind: "relative" | "possessor" | "conjunct" | "incoming",
+  kind: "relative" | "possessor" | "conjunct" | "incoming" | "question" | "animacy" | "existential",
   noun: string,
 ) => `${kind}:${noun}`;
 export const toolbarControlKey = (type: string, value: string) => `toolbar:${type}:${value}`;
@@ -234,6 +238,13 @@ export function buildRingSpecs({
         outer.push({
           key: perimeterControlKey(kind, mainKey),
           aim: { clock: fanned(RELATIONS_HOUR, i, relations.length, true) },
+        }),
+      );
+      const asks = (["question", "animacy", "existential"] as const).filter((kind) => entry?.[kind]);
+      asks.forEach((kind, i) =>
+        outer.push({
+          key: perimeterControlKey(kind, mainKey),
+          aim: { clock: fanned(QUESTION_HOUR, i, asks.length, true) },
         }),
       );
     }
