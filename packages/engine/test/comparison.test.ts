@@ -240,3 +240,37 @@ describe('the superlative takes no standard (D3)', () => {
     expect(sayAll(cat('positive', DOG))).toEqual(sayAll(cat('positive')));
   });
 });
+
+// A249. Japanese renders a lowered degree as a negated predicate — それほど大きくない, 犬ほど大きくない —
+// and a negated clause then negates that predicate again: 猫はそれほど大きくなくないです. The stacked
+// 〜なくない is colloquial litotes at best, and nothing a polite sentence says. "Not less big" denies
+// the proposition the lowered degree already states, so the negation belongs over the whole of it,
+// which Japanese says with わけではない in the polite form the engine gives a negated noun predicate
+// (犬ではありません): 猫はそれほど大きくないわけではありません. The six European languages read
+// "not less big" as a plain negation and are right.
+describe('known bugs: Japanese negates a lowered degree twice (A249)', () => {
+  const notLess = (standard?: NounElement, tense?: 'past') =>
+    cat('less', standard, 'BIG', { verbPhrase: { verb: 'BE', negative: true, ...(tense ? { tense } : {}) } } as Partial<PhrasePlan>);
+
+  test.fails('without a standard: それほど大きくないわけではありません', () => {
+    expect(say(notLess(), 'ja')).toBe('猫はそれほど大きくないわけではありません。');
+  });
+
+  test.fails('with a standard: 犬ほど大きくないわけではありません', () => {
+    expect(say(notLess(DOG), 'ja')).toBe('猫は犬ほど大きくないわけではありません。');
+  });
+
+  test.fails('in the past: それほど大きくないわけではありませんでした', () => {
+    expect(say(notLess(undefined, 'past'), 'ja')).toBe('猫はそれほど大きくないわけではありませんでした。');
+  });
+
+  test('regression: the affirmative lowered degree, and the European negation, are right', () => {
+    expect(say(cat('less'), 'ja')).toBe('猫はそれほど大きくないです。');
+    expect(say(cat('less', DOG), 'ja')).toBe('猫は犬ほど大きくないです。');
+    expect(sayAll(notLess(DOG))).toMatchObject({
+      en: 'the cat is not less big than the dog.', it: 'il gatto non è meno grande del cane.',
+      fr: "le chat n'est pas moins grand que le chien.", de: 'der Kater ist nicht weniger groß als der Hund.',
+      es: 'el gato no es menos grande que el perro.', pt: 'o gato não é menos grande do que o cão.',
+    });
+  });
+});

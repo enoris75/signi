@@ -177,3 +177,90 @@ describe('with the other clause-level fields', () => {
     });
   });
 });
+
+const whileEats = (tense: 'past' | 'present' | 'future', conjunction: SubordinatingConjunction = 'while', negative = false): PhrasePlan =>
+  runs(conjunction, { verbPhrase: { verb: 'RUN', tense } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense, ...(negative ? { negative } : {}) } });
+
+// A250. A past "while" clause takes the Romance perfective past, as every past clause does: "mentre il
+// gatto mangiò", "pendant que le chat mangea", "mientras el gato comió", "enquanto o gato comeu".
+// "While" frames the main event inside one in progress, and the event in progress is the imperfect:
+// "mangiava", "mangeait", "comía", "comia". The main clause keeps its perfective (C06), and "when",
+// which can name a completed event, is right as it is.
+describe('known bugs: a past while clause takes the perfective (A250)', () => {
+  test.fails('the four Romance languages take the imperfect', () => {
+    expect(sayAll(whileEats('past'))).toMatchObject({
+      it: "l'uomo corse mentre il gatto mangiava.", fr: "l'homme courut pendant que le chat mangeait.",
+      es: 'el hombre corrió mientras el gato comía.', pt: 'o homem correu enquanto o gato comia.',
+    });
+  });
+
+  test.fails('and so does a negated one', () => {
+    expect(sayAll(whileEats('past', 'while', true))).toMatchObject({
+      it: "l'uomo corse mentre il gatto non mangiava.", fr: "l'homme courut pendant que le chat ne mangeait pas.",
+      es: 'el hombre corrió mientras el gato no comía.', pt: 'o homem correu enquanto o gato não comia.',
+    });
+  });
+
+  test('regression: the three without the distinction, and a past "when", are right', () => {
+    expect(sayAll(whileEats('past'))).toMatchObject({
+      en: 'the man ran while the cat ate.', de: 'der Mann lief, während der Kater fraß.',
+      ja: '男は猫が食べている間に走りました。',
+    });
+    expect(sayAll(whileEats('past', 'when'))).toMatchObject({
+      it: "l'uomo corse quando il gatto mangiò.", es: 'el hombre corrió cuando el gato comió.',
+    });
+  });
+});
+
+// A251. English and German write a future temporal clause with the future auxiliary: "when the cat
+// will eat", "wenn der Kater fressen wird". Both say a future event under a temporal conjunction in
+// the present — "when the cat eats", "wenn der Kater frisst" — and keep the future for the main clause.
+// "Because" is not temporal and keeps its future in both ("because the cat will eat"). German
+// "nachdem" wants the perfect ("nachdem der Kater gefressen hat") and is left out of the pin.
+describe('known bugs: an English or German future temporal clause keeps "will" (A251)', () => {
+  test.fails('English: when, while, before and after take the present', () => {
+    expect(say(whileEats('future', 'when'), 'en')).toBe('the man will run when the cat eats.');
+    expect(say(whileEats('future', 'while'), 'en')).toBe('the man will run while the cat eats.');
+    expect(say(whileEats('future', 'before'), 'en')).toBe('the man will run before the cat eats.');
+    expect(say(whileEats('future', 'after'), 'en')).toBe('the man will run after the cat eats.');
+  });
+
+  test.fails('German: wenn, während and bevor take the present', () => {
+    expect(say(whileEats('future', 'when'), 'de')).toBe('der Mann wird laufen, wenn der Kater frisst.');
+    expect(say(whileEats('future', 'while'), 'de')).toBe('der Mann wird laufen, während der Kater frisst.');
+    expect(say(whileEats('future', 'before'), 'de')).toBe('der Mann wird laufen, bevor der Kater frisst.');
+  });
+
+  test('regression: "because" keeps its future', () => {
+    expect(say(whileEats('future', 'because'), 'en')).toBe('the man will run because the cat will eat.');
+    expect(say(whileEats('future', 'because'), 'de')).toBe('der Mann wird laufen, weil der Kater fressen wird.');
+  });
+});
+
+// A252. Spanish and Portuguese write a future temporal clause in the future indicative: "cuando el
+// gato comerá", "quando o gato comerá". Both put a future event under a temporal conjunction in the
+// subjunctive — Spanish the present subjunctive ("cuando el gato coma"), Portuguese its future
+// subjunctive ("quando o gato comer"), which the engine has no paradigm for yet. "Before" already
+// governs the subjunctive and is right; Italian and French keep the future and are right too.
+describe('known bugs: an Iberian future temporal clause takes the future indicative (A252)', () => {
+  test.fails('Spanish: cuando, mientras and después de que take the present subjunctive', () => {
+    expect(say(whileEats('future', 'when'), 'es')).toBe('el hombre correrá cuando el gato coma.');
+    expect(say(whileEats('future', 'while'), 'es')).toBe('el hombre correrá mientras el gato coma.');
+    expect(say(whileEats('future', 'after'), 'es')).toBe('el hombre correrá después de que el gato coma.');
+  });
+
+  test.fails('Portuguese: quando, enquanto and depois que take the future subjunctive', () => {
+    expect(say(whileEats('future', 'when'), 'pt')).toBe('o homem correrá quando o gato comer.');
+    expect(say(whileEats('future', 'while'), 'pt')).toBe('o homem correrá enquanto o gato comer.');
+    expect(say(whileEats('future', 'after'), 'pt')).toBe('o homem correrá depois que o gato comer.');
+  });
+
+  test('regression: "before", Italian, French and "because" are right', () => {
+    expect(say(whileEats('future', 'before'), 'es')).toBe('el hombre correrá antes de que el gato coma.');
+    expect(say(whileEats('future', 'before'), 'pt')).toBe('o homem correrá antes que o gato coma.');
+    expect(sayAll(whileEats('future', 'when'))).toMatchObject({
+      it: "l'uomo correrà quando il gatto mangerà.", fr: "l'homme courra quand le chat mangera.",
+    });
+    expect(say(whileEats('future', 'because'), 'es')).toBe('el hombre correrá porque el gato comerá.');
+  });
+});

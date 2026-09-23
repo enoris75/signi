@@ -79,3 +79,30 @@ describe('buildConceptDefinitions', () => {
     );
   });
 });
+
+// A253. The boot render refuses a definition only when a whole language comes back empty, but the
+// engine renders an unseeded concept as an empty *word* (the contract /api/translate turns into a
+// 400, "Unknown concept: UNICORN"), so a plan whose unseeded concept is one word among others boots
+// and serves the hole: "speaks like the", 〜のように with nothing before it. The boot check is the one
+// the error names ("Check the concepts its plan references are seeded"); it should fail the same way
+// /api/translate does, naming the concept.
+describe('known bugs: a boot render serves the hole an unseeded concept leaves (A253)', () => {
+  test.fails('a definition naming an unseeded complement fails the boot, naming the concept', async () => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    vi.mocked(translate).mockImplementationOnce((_plan, lookup) => engine.translate({
+      subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' },
+      complements: { manner: { phrase: { concept: 'UNICORN' } } },
+    }, lookup));
+    expect(() => buildConceptDefinitions()).toThrow(/UNICORN/);
+  });
+
+  test('regression: the hole is there to be caught, and a wholly blank language already is', async () => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    const rendered = engine.translate({
+      subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' },
+      complements: { manner: { phrase: { concept: 'UNICORN' } } },
+    }, lookupLexicalEntry);
+    expect(rendered.find((t) => t.language === 'en')?.text).toBe('the woman speaks like the.');
+    expect(rendered.every((t) => t.text !== '')).toBe(true);
+  });
+});

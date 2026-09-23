@@ -1229,3 +1229,21 @@ describe('buildUiStrings', () => {
     });
   });
 });
+
+// A253. As for a definition (definitions.test.ts): the boot render refuses a UI string only when a
+// whole language comes back empty, so a plan whose unseeded concept is one word among others boots
+// and serves the hole ("the woman speaks like the."). It should fail naming the concept.
+describe('known bugs: a boot render serves the hole an unseeded concept leaves (A253)', () => {
+  test.fails('a UI string naming an unseeded complement fails the boot, naming the concept', async () => {
+    const engine = await vi.importActual<typeof import('@signi/engine')>('@signi/engine');
+    const [firstPlanKey] = byKind.plan[0]!;
+    // Every non-plan entry renders for real; the first plan entry names the unseeded concept.
+    vi.mocked(translate).mockImplementation((plan, lookup) => engine.translate(
+      plan === (UI_STRINGS as Record<string, UiStringDef>)[firstPlanKey]!.plan
+        ? { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SPEAK' }, complements: { manner: { phrase: { concept: 'UNICORN' } } } }
+        : plan,
+      lookup,
+    ));
+    expect(() => buildUiStrings()).toThrow(/UNICORN/);
+  });
+});

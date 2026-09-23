@@ -236,3 +236,44 @@ describe('a content clause as the object', () => {
     });
   });
 });
+
+// A247. A content clause's mood is read off its governor (`content_clause_mood`, P09-E4) and never
+// off its polarity, so a negated belief keeps the indicative its affirmative takes in French, Spanish
+// and Portuguese: "no cree que el gato corre", "não acredita que o gato corre", "ne croit pas que le
+// chat court". Negating a verb of belief denies the proposition, and the three languages put the
+// denied one in the subjunctive: "corra", "corra", "coure". Italian already has it (credere and
+// pensare govern the subjunctive either way), and the affirmative is right in all seven.
+describe('known bugs: a negated belief keeps the indicative (A247)', () => {
+  const believes = (verb: string, negative = true): PhrasePlan => ({
+    subject: np('MAN'),
+    verbPhrase: { verb, negative },
+    contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } },
+  });
+
+  test.fails('Spanish: no cree que el gato corra', () => {
+    expect(say(believes('BELIEVE'), 'es')).toBe('el hombre no cree que el gato corra.');
+    expect(say(believes('THINK'), 'es')).toBe('el hombre no piensa que el gato corra.');
+  });
+
+  test.fails('Portuguese: não acredita que o gato corra', () => {
+    expect(say(believes('BELIEVE'), 'pt')).toBe('o homem não acredita que o gato corra.');
+    expect(say(believes('THINK'), 'pt')).toBe('o homem não pensa que o gato corra.');
+  });
+
+  test.fails('French: ne croit pas que le chat coure', () => {
+    expect(say(believes('BELIEVE'), 'fr')).toBe("l'homme ne croit pas que le chat coure.");
+    expect(say(believes('THINK'), 'fr')).toBe("l'homme ne pense pas que le chat coure.");
+  });
+
+  test('regression: Italian, the three without a subjunctive, and the affirmative are right', () => {
+    expect(sayAll(believes('BELIEVE'))).toMatchObject({
+      en: 'the man does not believe that the cat runs.', it: "l'uomo non crede che il gatto corra.",
+      de: 'der Mann glaubt nicht, dass der Kater läuft.', ja: '男は猫が走ると信じていません。',
+    });
+    expect(say(believes('THINK'), 'it')).toBe("l'uomo non pensa che il gatto corra.");
+    expect(sayAll(believes('BELIEVE', false))).toMatchObject({
+      fr: "l'homme croit que le chat court.", es: 'el hombre cree que el gato corre.',
+      pt: 'o homem acredita que o gato corre.',
+    });
+  });
+});

@@ -139,3 +139,58 @@ describe('the words themselves', () => {
     expect(seed('REALLY')?.slot).toBeUndefined();
   });
 });
+
+// A248. An intensifier wraps the adjective's finished surface, degree included (`withIntensifier`),
+// so VERY on a comparative writes the positive's intensifier in front of it: "very bigger", "très
+// plus grand", "sehr größer", "muy más grande", とてももっと大きい. A comparative is intensified by
+// a word of its own — "much bigger", "bien plus grand", "viel größer", "mucho más grande", ずっと大きい
+// — which Italian and Portuguese happen to share with the positive ("molto più grande", "muito
+// maior"). The lowered comparative has the same shape ("very less big" for "much less big").
+describe('known bugs: an intensifier on a comparative (A248)', () => {
+  const isBigger = (extra: Parameters<typeof np>[1] = {}) =>
+    sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: 'more', headIntensifier: 'VERY', ...extra }) } } }));
+
+  test.fails('a predicate comparative: much bigger', () => {
+    expect(isBigger()).toEqual({
+      en: 'the cat is much bigger.', it: 'il gatto è molto più grande.', fr: 'le chat est bien plus grand.',
+      de: 'der Kater ist viel größer.', es: 'el gato es mucho más grande.', ja: '猫はずっと大きいです。',
+      pt: 'o gato é muito maior.',
+    });
+  });
+
+  // Japanese is left out here: the standard's より takes もっと's place, and 犬よりとても大きい is
+  // accepted (comparison.test.ts pins it); ずっと would be better, and the fix may move both.
+  test.fails('with a standard: much bigger than the dog', () => {
+    expect(isBigger({ headStandard: np('DOG') })).toMatchObject({
+      en: 'the cat is much bigger than the dog.', it: 'il gatto è molto più grande del cane.',
+      fr: 'le chat est bien plus grand que le chien.', de: 'der Kater ist viel größer als der Hund.',
+      es: 'el gato es mucho más grande que el perro.', pt: 'o gato é muito maior do que o cão.',
+    });
+  });
+
+  test.fails('an attributive comparative: a much bigger cat', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'], adjectiveDegrees: ['more'],
+    }), 'RUN'))).toEqual({
+      en: 'a much bigger cat runs.', it: 'un gatto molto più grande corre.', fr: 'un chat bien plus grand court.',
+      de: 'ein viel größerer Kater läuft.', es: 'un gato mucho más grande corre.', ja: 'ずっと大きい猫は走ります。',
+      pt: 'um gato muito maior corre.',
+    });
+  });
+
+  test.fails('the lowered comparative: much less big', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: 'less', headIntensifier: 'VERY' }) } } })))
+      .toMatchObject({
+        en: 'the cat is much less big.', it: 'il gatto è molto meno grande.', fr: 'le chat est bien moins grand.',
+        de: 'der Kater ist viel weniger groß.', es: 'el gato es mucho menos grande.', pt: 'o gato é muito menos grande.',
+      });
+  });
+
+  test('regression: the positive keeps its intensifier', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headIntensifier: 'VERY' }) } } }))).toEqual({
+      en: 'the cat is very big.', it: 'il gatto è molto grande.', fr: 'le chat est très grand.',
+      de: 'der Kater ist sehr groß.', es: 'el gato es muy grande.', ja: '猫はとても大きいです。',
+      pt: 'o gato é muito grande.',
+    });
+  });
+});

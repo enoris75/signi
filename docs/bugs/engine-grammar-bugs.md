@@ -6,7 +6,9 @@ and reviewing its output for linguistic correctness. Each one is already pinned 
 A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
-`packages/frontend/test/`, and so is A179.
+`packages/frontend/test/`, and so is A179. A253 is a backend defect too — the boot-time renders of the
+definitions and the UI strings — pinned beside them, in `packages/backend/src/definitions.test.ts` and
+`uiStrings.test.ts`.
 
 The individual defects now live one-per-file under the three subdirectories:
 
@@ -49,8 +51,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing there are none left — Part A and Part B are both empty, and the suite carries no
-expected failures).** If
+this writing Part A holds seven, A247–A253, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -60,13 +61,33 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**None open.** The eleven filed on 2026-09-22 — A236, A237 and the nine (A238–A246) that P09's
-core-vocabulary lanes met while seeding — were all fixed the same day and are listed under **Fixed**
-below. Four of them needed the corpus to carry something new, which is the pattern that keeps
-recurring in this class: a lexeme key for the shape the language wants (`terminus_bare` for an
-English addressee that takes no "to", `relational` for a Japanese の-adjective that keeps its の as a
-predicate, `negative` / `negative_slot` for an adverb that outscopes a negation) and a form family
-for a surface it had no slot for (the Romance `dative` clitics).
+**Seven open, A247–A253**, met on 2026-09-23 by the lanes that shipped P09's grammar tasks
+[E2](../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
+[E4](../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and
+[E5](../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md). Each is a
+construct those tasks first made reachable — the object content clause, the adverbial clause, the
+standard of comparison — meeting a rule the engine does not have yet: mood read off polarity
+(A247), a conjunction deciding its clause's tense (A250–A252), an intensifier that changes word on a
+comparative (A248), a negation scoping over a lowered degree (A249). A253 is the backend's: a boot
+render that lets an unseeded concept through. Every grammar **Want** column is written by hand.
+
+| # | File | Language | Summary |
+|---|---|---|---|
+| A247 | [A-must-fix/A247-negated-belief-keeps-the-indicative.md](A-must-fix/A247-negated-belief-keeps-the-indicative.md) | French, Spanish, Portuguese | a negated BELIEVE or THINK keeps the indicative its affirmative takes (*no cree que el gato corre*, *ne croit pas que le chat court*), because `content_clause_mood` is read off the governor and never off its polarity; the denied proposition is subjunctive (*corra*, *coure*) |
+| A248 | [A-must-fix/A248-intensifier-on-a-comparative.md](A-must-fix/A248-intensifier-on-a-comparative.md) | English, French, German, Spanish, Japanese | VERY on a comparative writes the positive's intensifier in front of it (*very bigger*, *très plus grand*, *sehr größer*, *muy más grande*, とてももっと大きい), where a comparative takes a word of its own (*much*, *bien*, *viel*, *mucho*, ずっと) |
+| A249 | [A-must-fix/A249-japanese-negated-lowered-degree-negates-twice.md](A-must-fix/A249-japanese-negated-lowered-degree-negates-twice.md) | Japanese | a negated clause negates the lowered degree's own ない again (猫は犬ほど大きくなくないです), where the negation belongs over the proposition (猫は犬ほど大きくないわけではありません) |
+| A250 | [A-must-fix/A250-past-while-clause-takes-the-perfective.md](A-must-fix/A250-past-while-clause-takes-the-perfective.md) | Italian, French, Spanish, Portuguese | a past *while* clause takes the perfective (*mentre il gatto mangiò*, *mientras el gato comió*), where the event in progress is the imperfect (*mangiava*, *mangeait*, *comía*, *comia*) |
+| A251 | [A-must-fix/A251-english-german-future-temporal-clause-keeps-will.md](A-must-fix/A251-english-german-future-temporal-clause-keeps-will.md) | English, German | a future *when* / *while* / *before* / *after* clause keeps the future auxiliary (*when the cat will eat*, *wenn der Kater fressen wird*), where both say it in the present |
+| A252 | [A-must-fix/A252-iberian-future-temporal-clause-indicative.md](A-must-fix/A252-iberian-future-temporal-clause-indicative.md) | Spanish, Portuguese | a future *when* / *while* / *after* clause takes the future indicative (*cuando el gato comerá*, *quando o gato comerá*), where Spanish takes the present subjunctive (*coma*) and Portuguese its future subjunctive (*comer*), a paradigm the engine lacks |
+| A253 | [A-must-fix/A253-boot-render-serves-an-unseeded-concept-hole.md](A-must-fix/A253-boot-render-serves-an-unseeded-concept-hole.md) | backend | the boot renders of the definitions and UI strings refuse a plan only when a whole language is empty, so an unseeded concept that is one word among others boots and serves the hole (*the woman speaks like the*); `/api/translate` already refuses it, naming the concept |
+
+The eleven filed on 2026-09-22 — A236, A237 and the nine (A238–A246) that P09's core-vocabulary
+lanes met while seeding — were all fixed the same day and are listed under **Fixed** below. Four of
+them needed the corpus to carry something new, which is the pattern that keeps recurring in this
+class: a lexeme key for the shape the language wants (`terminus_bare` for an English addressee that
+takes no "to", `relational` for a Japanese の-adjective that keeps its の as a predicate, `negative` /
+`negative_slot` for an adverb that outscopes a negation) and a form family for a surface it had no
+slot for (the Romance `dative` clitics).
 
 New ones are filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 

@@ -1,6 +1,21 @@
 # A-must-fix — confirmed bugs
 
-**None open.** The eleven filed on 2026-09-22 were fixed the same day and moved to
+**Seven open, A247–A253**, filed on 2026-09-23 by the lanes that shipped P09's grammar tasks
+[E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
+[E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and
+[E5](../../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md), each a
+construct those tasks first made reachable: **A247**, a negated BELIEVE or THINK keeping the
+indicative in French, Spanish and Portuguese (*no cree que el gato corre*); **A248**, VERY on a
+comparative (*very bigger*, *très plus grand*) where a comparative takes *much*, *bien*, *viel*,
+*mucho*, ずっと; **A249**, Japanese negating a lowered degree's own ない a second time
+(犬ほど大きくなくないです); **A250**, a past *while* clause in the Romance perfective (*mentre il gatto
+mangiò*); **A251**, an English or German future temporal clause keeping *will* / *wird* (*when the cat
+will eat*); **A252**, a Spanish or Portuguese one in the future indicative (*cuando el gato comerá*)
+where it takes the subjunctive; and **A253**, the backend's boot renders letting an unseeded concept
+through as a blank word, which `/api/translate` already refuses. No shipped gloss shows any of the
+seven.
+
+The eleven filed on 2026-09-22 were fixed the same day and moved to
 [`../fixed/`](../fixed/). **A236** was met while specifying
 [A03, modal polarity](../../features/Z-Done/A03-modal-polarity/README.md) — a negative adverb on the
 main verb under a modal negated the modal — and its fix routed the adverb through the inner negator
