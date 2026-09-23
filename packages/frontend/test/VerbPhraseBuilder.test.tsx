@@ -3,6 +3,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import {
   CAUSE_SENTIMENTS,
   PATH_SPECIFIERS,
+  TEMPORAL_RELATIONS,
   type CauseSentiment,
   type Concept,
 } from '@signi/shared';
@@ -107,6 +108,7 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}): PhraseRenderCont
     handleCycleVoice: vi.fn(),
     handleSelectSpecifier: vi.fn(),
     handleSelectLocativeSpecifier: vi.fn(),
+    handleSelectTemporalRelation: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
     handleRemoveComplement: vi.fn(),
@@ -360,6 +362,7 @@ describe('VerbPhraseBuilder', () => {
   describe('the relation toolbars', () => {
     const ROUTE = ring('Route', 'route', { removeKey: 'route' });
     const LOCATIVE = ring('Locative', 'locative', { removeKey: 'locative' });
+    const TEMPORAL = ring('Temporal', 'temporal', { removeKey: 'temporal' });
     const CAUSE = ring('Cause', 'cause', { removeKey: 'cause' });
     // One seat per relation, fanned across the top of each complement's dotted ring.
     const seats = (type: string, values: readonly string[], x: number) =>
@@ -367,6 +370,7 @@ describe('VerbPhraseBuilder', () => {
     const CONTROL_POS = {
       ...seats('route', PATH_SPECIFIERS, 20),
       ...seats('locative', PATH_SPECIFIERS, 220),
+      ...seats('temporal', TEMPORAL_RELATIONS, 620),
       ...seats('cause', CAUSE_SENTIMENTS, 420),
     };
 
@@ -409,6 +413,29 @@ describe('VerbPhraseBuilder', () => {
       fireEvent.click(screen.getByRole('button', { name: 'in front of' }));
 
       expect(ctx.handleSelectLocativeSpecifier).toHaveBeenCalledExactlyOnceWith('in_front_of');
+      expect(ctx.handleSelectSpecifier).not.toHaveBeenCalled();
+    });
+
+    // P09-E12b: the temporal's six relations, `at` until one is chosen.
+    it('ride the top of the temporal’s ring, on "at" until one is chosen', () => {
+      renderVerb({ selection: { temporal: noun('DAY') }, groupRects: [TEMPORAL], controlPos: CONTROL_POS });
+
+      expect(screen.getByTestId('temporal-toolbar')).toBeInTheDocument();
+      expect(highlighted()).toEqual(['at']);
+      expect(pinOf(screen.getByRole('button', { name: 'ago' }))).toEqual({ x: 642, y: 40 });
+    });
+
+    it('show and set the temporal’s relation', () => {
+      const { ctx } = renderVerb({
+        selection: { temporal: noun('DAY'), temporalRelation: 'until' },
+        groupRects: [TEMPORAL],
+        controlPos: CONTROL_POS,
+      });
+      expect(highlighted()).toEqual(['until']);
+
+      fireEvent.click(screen.getByRole('button', { name: 'during' }));
+
+      expect(ctx.handleSelectTemporalRelation).toHaveBeenCalledExactlyOnceWith('during');
       expect(ctx.handleSelectSpecifier).not.toHaveBeenCalled();
     });
 

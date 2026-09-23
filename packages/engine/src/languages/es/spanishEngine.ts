@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEs } from '../../possessive.js';
 import { COORD_WORDS, ES_DEGREE, PARENTHETICAL_CONNECTORS } from './es.consts.js';
+import { ES_TEMPORAL } from './es.consts.js';
+import { prepDet } from './prepDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
 import { aDet } from './aDet.js';
@@ -56,6 +58,13 @@ export const spanishEngine: LanguageEngine = {
       return specifier.value === 'positive' ? `gracias ${aDet(f, false)}`
         : specifier.value === 'negative' ? `por culpa ${deDet(f, false)}`
         : `a causa ${deDet(f, false)}`;
+    }
+    // The temporal's relation (P09-E12b), headed as `complementsPhrase` heads it: "en", "hace",
+    // "hasta", "después de", "antes de", "durante".
+    if (specifier.kind === 'temporal') {
+      if (specifier.value === 'at') return prepDet('en', f, false);
+      const { word, de } = ES_TEMPORAL[specifier.value];
+      return de ? `${word} ${deDet(f, false)}` : prepDet(word, f, false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, false, f) : '';
   },

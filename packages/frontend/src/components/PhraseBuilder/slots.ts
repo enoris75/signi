@@ -1,8 +1,10 @@
 import {
+  ADJUNCT_COMPLEMENT_TYPES,
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
   DETERMINER_COMPLEMENT_TYPES,
   type ComplementType,
+  type Concept,
   type GrammaticalRole,
   type Transitivity,
   type UiStringKey,
@@ -29,6 +31,18 @@ export const BOX_COMPLEMENT_TYPES: BoxComplementType[] = COMPLEMENT_TYPES.filter
  */
 export const isBoxComplement = (type: ComplementType): type is BoxComplementType =>
   (BOX_COMPLEMENT_TYPES as ComplementType[]).includes(type);
+
+/**
+ * The complements a period offers for its verb: the ones the verb licenses, plus the adjuncts any
+ * act can take (a time, a beneficiary — ADJUNCT_COMPLEMENT_TYPES, P09-E12 D2). No verb, none.
+ */
+export const offeredComplements = (verb: Concept | undefined): ComplementType[] =>
+  verb
+    ? [
+      ...(verb.complements ?? []),
+      ...ADJUNCT_COMPLEMENT_TYPES.filter((type) => !verb.complements?.includes(type)),
+    ]
+    : [];
 
 // Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
@@ -181,11 +195,10 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   route: "R",
   cause: "C",
   // The temporal answers to A, from the "at" it takes by default: its own initial is the
-  // terminus's, and the "when" that would name it is the comitative's W. Inert until the
-  // complement gets a box — a plan-only complement never reaches the menu (see BoxComplementType).
+  // terminus's, and the "when" that would name it is the comitative's W.
   temporal: "A",
-  // P09-E2's two, plan-only and so inert like the temporal's: the purpose takes F, from the "for"
-  // it is (its P is the subject complement's), and the topic B, from "about" (its A is the temporal's).
+  // P09-E2's two: the purpose takes F, from the "for" it is (its P is the subject complement's), and
+  // the topic B, from "about" (its A is the temporal's).
   purpose: "F",
   topic: "B",
 };
@@ -478,6 +491,12 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   cause: { x: 52, y: 84 },
   route: { x: 66, y: 84 },
   locative: { x: 84, y: 80 },
+  // P09-E12b's three: the topic beside the manner it reads next to ("speaks about the cat like the
+  // wind"), and the two adjuncts a row further down — the time under the place it follows, the
+  // purpose under the cause it follows.
+  topic: { x: 58, y: 66 },
+  temporal: { x: 76, y: 94 },
+  purpose: { x: 40, y: 94 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

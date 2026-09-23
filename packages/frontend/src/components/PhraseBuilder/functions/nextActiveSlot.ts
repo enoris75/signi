@@ -1,6 +1,6 @@
 import type { Concept } from "@signi/shared";
 import type { PhraseSelection, SlotKey } from "../interfaces.ts";
-import { getActiveSlots, isModalSlot, SATELLITE_SLOT_KEYS } from "../slots.ts";
+import { getActiveSlots, isModalSlot, offeredComplements, SATELLITE_SLOT_KEYS } from "../slots.ts";
 
 /**
  * Where the cursor goes once `concept` is picked into the empty `slot`: on to the next main word
@@ -26,7 +26,7 @@ export function nextActiveSlot({
       concept.transitivity,
       selection.subject?.role,
       Boolean(selection.subjectAdjective),
-      concept.complements,
+      offeredComplements(concept),
     );
     // A subject-dropping mood (command / infinitive citation) has no subject box to land on, so
     // after the verb the focus advances to the object instead of the dropped subject.

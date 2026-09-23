@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, type Concept } from "@signi/shared";
+import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
@@ -649,6 +649,7 @@ export function PhraseBuilder({
       toolbars: {
         ...(selection.route && { route: PATH_SPECIFIERS }),
         ...(selection.locative && { locative: PATH_SPECIFIERS }),
+        ...(selection.temporal && { temporal: TEMPORAL_RELATIONS }),
         ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
       },
       centerOf,
@@ -942,6 +943,7 @@ export function PhraseBuilder({
     handleCycleVoice: commands.handleCycleVoice,
     handleSelectSpecifier: commands.handleSelectSpecifier,
     handleSelectLocativeSpecifier: commands.handleSelectLocativeSpecifier,
+    handleSelectTemporalRelation: commands.handleSelectTemporalRelation,
     handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,

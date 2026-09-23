@@ -33,6 +33,10 @@ const GOLDEN: Record<string, Golden> = {
   dir: { line: '/verb run /dir house', prints: '/verb ( run ) /dir ( house )', holds: { direction: 'HOUSE' } },
   src: { line: '/verb run /src house', prints: '/verb ( run ) /src ( house )', holds: { source: 'HOUSE' } },
   route: { line: '/verb run /route house', prints: '/verb ( run ) /route ( house )', holds: { route: 'HOUSE' } },
+  // P09-E12b. The temporal and the purpose go with a verb that licenses neither; the topic does not.
+  time: { line: '/verb see /time day', prints: '/verb ( see ) /time ( day )', holds: { temporal: 'DAY' }, misuse: { line: '/time day', says: { code: 'complementNeedsVerb', args: { command: 'time' } } } },
+  for: { line: '/verb read /for her', prints: '/verb ( read ) /for ( 3rd /fem )', holds: { purpose: 'THIRD_PERSON', purposeGender: 'fem' } },
+  about: { line: '/verb think /about cat', prints: '/verb ( think ) /about ( cat )', holds: { topic: 'CAT' }, misuse: { line: '/verb run /about cat', says: { code: 'takesNoComplement', args: { verb: 'run', slot: 'topic' } } } },
   cause: { line: '/verb run /cause her', holds: { cause: 'THIRD_PERSON', causeGender: 'fem' }, prints: '/verb ( run ) /cause ( 3rd /fem )' },
   inst: {
     line: '/subj child /verb eat /inst ( /subj stick )',
@@ -99,6 +103,13 @@ const GOLDEN: Record<string, Golden> = {
   on: { line: '/verb run /loc house /on', prints: '/verb ( run ) /loc ( house /on )', holds: { locativeSpecifier: 'on' } },
   between: { line: '/verb run /loc ( house /and dog /between )', prints: '/verb ( run ) /loc ( house /between /and dog )', holds: { locativeSpecifier: 'between' } },
   against: { line: '/verb run /route house /against', prints: '/verb ( run ) /route ( house /against )', holds: { routeSpecifier: 'against' } },
+  // P09-E12b: the temporal's relations, `at` its default and so never printed.
+  at: { line: '/verb run /time day /ago /at', prints: '/verb ( run ) /time ( day )', holds: { temporalRelation: 'at' } },
+  ago: { line: '/verb run /time moment /a /ago', prints: '/verb ( run ) /time ( moment /a /ago )', holds: { temporalRelation: 'ago' }, misuse: { line: '/verb run /loc house /ago', says: { code: 'noTarget', args: { command: 'ago' } } } },
+  until: { line: '/verb run /time night /until', prints: '/verb ( run ) /time ( night /until )', holds: { temporalRelation: 'until' } },
+  after: { line: '/verb run /time night /after', prints: '/verb ( run ) /time ( night /after )', holds: { temporalRelation: 'after' } },
+  before: { line: '/verb run /time night /before', prints: '/verb ( run ) /time ( night /before )', holds: { temporalRelation: 'before' } },
+  during: { line: '/verb run /time day /during', prints: '/verb ( run ) /time ( day /during )', holds: { temporalRelation: 'during' } },
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
   thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },

@@ -1,4 +1,4 @@
-import { test } from './fixtures';
+import { expect, test } from './fixtures';
 
 // The complements a verb licenses, each revealed from its toggle on the Verb Phrase dotted box.
 // The manner adverbial has its own spec (manner.spec.ts); these cover the rest. Where a complement
@@ -151,6 +151,57 @@ test.describe('complements', () => {
       es: 'el gato corre gracias al perro.',
       pt: 'o gato corre graças ao cão.',
       ja: '猫は犬のおかげで走ります。',
+    });
+  });
+
+  // P09-E12b. The temporal and the purpose are offered on every verb (RUN and READ license
+  // neither); the topic only where the verb licenses it (THINK). The temporal's relation is a
+  // toolbar like the route's, `at` until one is chosen.
+  test('the temporal takes its relation from its toolbar', async ({ app, page }) => {
+    await app.buildClause('MAN', 'RUN');
+    await app.revealAndPick('temporal', 'DAY');
+    await app.expectSentences({ en: 'the man runs on the day.' });
+    await expect(page.getByTestId('temporal-toolbar')).toBeVisible();
+
+    await page.getByRole('button', { name: 'during', exact: true }).click();
+    await app.expectSentences({
+      en: 'the man runs during the day.',
+      it: "l'uomo corre durante il giorno.",
+      fr: "l'homme court pendant le jour.",
+      de: 'der Mann läuft während des Tages.', // "während" governs the genitive
+      es: 'el hombre corre durante el día.',
+      pt: 'o homem corre durante o dia.',
+      ja: '男は日の間に走ります。',
+    });
+  });
+
+  test('the purpose names who the act is for, on a verb that licenses none', async ({ app }) => {
+    await app.buildClause('WOMAN', 'READ');
+    await app.revealAndPick('purpose', 'MAN');
+
+    await app.expectSentences({
+      en: 'the woman reads for the man.',
+      it: "la donna legge per l'uomo.",
+      fr: "la femme lit pour l'homme.",
+      de: 'die Frau liest für den Mann.',
+      es: 'la mujer lee para el hombre.',
+      pt: 'a mulher lê para o homem.',
+      ja: '女は男のために読みます。',
+    });
+  });
+
+  test('the topic, where the verb licenses one', async ({ app }) => {
+    await app.buildClause('WOMAN', 'THINK');
+    await app.revealAndPick('topic', 'CAT');
+
+    await app.expectSentences({
+      en: 'the woman thinks about the cat.',
+      it: 'la donna pensa al gatto.',
+      fr: 'la femme pense au chat.',
+      de: 'die Frau denkt an den Kater.',
+      es: 'la mujer piensa en el gato.',
+      pt: 'a mulher pensa no gato.',
+      ja: '女は猫について考えます。',
     });
   });
 });

@@ -15,6 +15,7 @@ import {
   type ModifierRelation,
   type PathSpecifier,
   type Tense,
+  type TemporalRelation,
   type Voice,
 } from "@signi/shared";
 import {
@@ -41,6 +42,7 @@ import {
   modalNegativeFor,
   MODAL_SLOTS,
   NOUN_KEYS,
+  offeredComplements,
 } from "./slots.ts";
 
 /** A polarity field of the verb group: the main verb's, or one of the modals' own. */
@@ -119,6 +121,7 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   delete sel[CONJUNCTION_KEY(which)];
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
+  if (which === "temporal") delete sel.temporalRelation;
   if (which === "cause") {
     delete sel.causeSentiment;
     delete sel.causeNegative;
@@ -167,7 +170,7 @@ export function applyConceptSelect(
       concept.transitivity,
       prev.subject?.role,
       Boolean(prev.subjectAdjective),
-      concept.complements,
+      offeredComplements(concept),
     ).map((s) => s.key);
     if (!nowVisible.includes("directObject")) clearNoun(next, "directObject");
     if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
@@ -572,6 +575,15 @@ export function setSpecifier(
   return which === "locative"
     ? { ...prev, locativeSpecifier: spec }
     : { ...prev, routeSpecifier: spec };
+}
+
+// Set the temporal complement's relation (at / ago / until / after / before / during, P09-E12b):
+// its toolbar, as the route's path is. `at` is the default the plan omits (see buildComplements).
+export function setTemporalRelation(
+  prev: PhraseSelection,
+  relation: TemporalRelation,
+): PhraseSelection {
+  return { ...prev, temporalRelation: relation };
 }
 
 // Deny the cause rather than name it: "not because of the dog". It is the complement's own

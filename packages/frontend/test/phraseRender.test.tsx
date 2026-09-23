@@ -89,6 +89,7 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     handleCycleVoice: vi.fn(() => {}),
     handleSelectSpecifier: vi.fn(() => {}),
     handleSelectLocativeSpecifier: vi.fn(() => {}),
+    handleSelectTemporalRelation: vi.fn(() => {}),
     handleSelectSentiment: vi.fn(() => {}),
     handleToggleCollapse: vi.fn(() => {}),
     handleRemoveComplement: vi.fn(() => {}),

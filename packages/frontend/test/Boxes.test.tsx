@@ -5,6 +5,7 @@ import {
   ASPECTS,
   CAUSE_SENTIMENTS,
   PATH_SPECIFIERS,
+  TEMPORAL_RELATIONS,
   TENSES,
   type CauseSentiment,
   type Concept,
@@ -19,6 +20,8 @@ import {
   SentimentSelector,
   SlotBox,
   SpecifierSelector,
+  TEMPORAL_KEYS,
+  TemporalSelector,
   TenseToggleBox,
   ToggleBox,
   type SatelliteIcon,
@@ -599,6 +602,41 @@ describe('SpecifierSelector', () => {
     expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['in', 'over']);
     const seat = getComputedStyle(buttons[1].parentElement!);
     expect({ left: seat.left, top: seat.top }).toEqual({ left: '150px', top: '24px' });
+  });
+});
+
+// P09-E12b: the temporal complement's relations, the route's toolbar with a set of its own.
+describe('TemporalSelector', () => {
+  it('offers the six temporal relations, in order, each by its word', () => {
+    renderWithProviders(<TemporalSelector value="at" onSelect={() => {}} />);
+
+    expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
+      'at', 'ago', 'until', 'after', 'before', 'during',
+    ]);
+    expect(TEMPORAL_RELATIONS).toHaveLength(6);
+  });
+
+  it('answers to a letter heard in each word — A, G, U, F, B, D', () => {
+    renderWithProviders(<TemporalSelector value="at" onSelect={() => {}} />);
+
+    expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-keyshortcuts'))).toEqual([
+      'A', 'G', 'U', 'F', 'B', 'D',
+    ]);
+    expect(new Set(Object.values(TEMPORAL_KEYS)).size).toBe(6);
+  });
+
+  it('selects the relation clicked, and highlights only the current one', () => {
+    const onSelect = vi.fn();
+    renderWithProviders(<TemporalSelector value="until" onSelect={onSelect} />);
+
+    const highlighted = screen
+      .getAllByRole('button')
+      .filter((b) => !hasTransparentBackground(b))
+      .map((b) => b.getAttribute('aria-label'));
+    expect(highlighted).toEqual(['until']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'ago' }));
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith('ago');
   });
 });
 

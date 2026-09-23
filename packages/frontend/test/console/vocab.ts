@@ -25,6 +25,11 @@ export const NOUNS = [
   c('FOOD', 'noun', 'food', 'cibo', { countable: false }),
   c('BOOK', 'noun', 'book', 'libro'),
   c('HOUSE', 'noun', 'house', 'casa'),
+  // Times for the temporal box, and a second human for the purpose's beneficiary (P09-E12b).
+  c('DAY', 'noun', 'day', 'giorno'),
+  c('MOMENT', 'noun', 'moment', 'momento'),
+  c('NIGHT', 'noun', 'night', 'notte', { gendered: true }),
+  c('WOMAN', 'noun', 'woman', 'donna', { animate: true, human: true }),
   c('STICK', 'noun', 'stick', 'bastone'),
   c('WORD', 'noun', 'word', 'parola'),
   c('PHRASE', 'noun', 'phrase', 'frase'),
@@ -57,6 +62,8 @@ export const VERBS = [
     ...complements('direction', 'source', 'route', 'locative', 'manner', 'cause'),
   }),
   verb('SEEM', 'seem', 'sembrare', { transitivity: 'intransitive', ...complements('predicative') }),
+  // One of the two seeded verbs that license the topic ("thinks about the cat").
+  verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
   // Two verbs that read "cry" in English: only the id tells them apart.
   verb('CRY', 'cry', 'piangere', { transitivity: 'intransitive', synonym: 'weep' }),
   verb('CRY_OUT', 'cry', 'gridare', { synonym: 'shout' }),

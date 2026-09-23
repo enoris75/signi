@@ -1,6 +1,7 @@
 import type { CoordConjunction, Definiteness, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase, RubySegment } from '../../types.js';
 import { CAUSE_PARTICLE, COORD_WORDS, JA_DEGREE, JA_DETERMINERS, PATH_CITATION } from './ja.consts.js';
+import { JA_TEMPORAL } from './ja.consts.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { buildSegments } from './buildSegments.js';
 import { possessiveJa } from '../../possessive.js';
@@ -65,6 +66,12 @@ export const japaneseEngine: LanguageEngine = {
    */
   renderSpecifier(_noun: ConceptForms, specifier: Specifier): string {
     if (specifier.kind === 'sentiment') return `〜${CAUSE_PARTICLE[specifier.value]}`;
+    // The temporal's relation (P09-E12b): its relational noun and particle after the 〜 that stands
+    // for the time — 〜に, 〜前に, 〜まで, 〜の後に, 〜の前に, 〜の間に.
+    if (specifier.kind === 'temporal') {
+      const { noun, particle } = JA_TEMPORAL[specifier.value];
+      return `〜${noun}${particle}`;
+    }
     return specifier.kind === 'path' ? `〜${PATH_CITATION[specifier.value]}` : '';
   },
   /**

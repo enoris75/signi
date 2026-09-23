@@ -4,12 +4,14 @@ import {
   CAUSE_SENTIMENTS,
   DEFAULT_LOCATIVE_SPECIFIER,
   DEFAULT_ROUTE_SPECIFIER,
+  DEFAULT_TEMPORAL_RELATION,
 } from "@signi/shared";
 import {
   AspectToggleBox,
   SatelliteButton,
   SentimentSelector,
   SpecifierSelector,
+  TemporalSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
@@ -22,7 +24,7 @@ import { useUiString } from "../../i18n/useUiString.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb in its solid ring, the adverb, modal and
 // tense/aspect satellites on its orbit, the complement and direct-object toggles on its dotted
-// ring, and — on the route, locative and cause rings — the relation toolbar. (Polarity is a direct
+// ring, and — on the route, locative, temporal and cause rings — the relation toolbar. (Polarity is a direct
 // toggle on the verb's solid ring, drawn with the other satellite controls.)
 export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
   const {
@@ -40,6 +42,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleCycleAspect,
     handleSelectSpecifier,
     handleSelectLocativeSpecifier,
+    handleSelectTemporalRelation,
     handleSelectSentiment,
     registerVerbAnchor,
     satelliteKeys,
@@ -160,6 +163,17 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           onDisarm={disarm}
           onSelect={handleSelectLocativeSpecifier}
           placeAt={toolbarAt("locative")}
+        />
+      )}
+
+      {/* The temporal's relation (at / ago / until / …) rides the top of its ring the same way. */}
+      {!compact && selection.temporal && (
+        <TemporalSelector
+          value={selection.temporalRelation ?? DEFAULT_TEMPORAL_RELATION}
+          armed={toolbarFor === "temporal"}
+          onDisarm={disarm}
+          onSelect={handleSelectTemporalRelation}
+          placeAt={toolbarAt("temporal")}
         />
       )}
 

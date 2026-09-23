@@ -1,4 +1,5 @@
 import {
+  TEMPORAL_RELATIONS,
   type AbstractionLevel,
   type Aspect,
   type CauseSentiment,
@@ -8,6 +9,7 @@ import {
   type ImperativeRegister,
   type ModifierRelation,
   type PathSpecifier,
+  type TemporalRelation,
   type Tense,
   type UiStringKey,
   type Voice,
@@ -39,6 +41,7 @@ export type Setting =
   | { id: "gender"; value: Gender }
   | { id: "determiner"; value: Definiteness }
   | { id: "specifier"; value: PathSpecifier }
+  | { id: "temporal"; value: TemporalRelation }
   | { id: "sentiment"; value: CauseSentiment }
   | { id: "tense"; value: Tense }
   | { id: "aspect"; value: Aspect }
@@ -287,6 +290,13 @@ export const COMMANDS: readonly CommandDef[] = [
   role("dir", ["direction"], "direction", "direction", "slot.direction", "warning", /^direction$/),
   role("src", ["source"], "source", "source", "slot.source", "warning", /^source$/),
   role("route", [], "route", "route", "slot.route", "warning", /^route$/),
+  // P09-E12b's three boxes. The temporal and the purpose go with any verb; the topic only with the
+  // verbs of saying and thinking that license it. `/purpose` is the noun modifier's relation and
+  // `/topic` would read as the help's topics, so the purpose is `/for` (alias `benefit`) and the
+  // topic `/about`.
+  role("time", ["temporal"], "temporal", "time", "slot.temporal", "warning", /^temporal$/),
+  role("for", ["benefit"], "purpose", "purpose", "slot.purpose", "warning", /^purpose$/),
+  role("about", ["topic"], "topic", "topic", "slot.topic", "warning", /^topic$/),
   role("cause", [], "cause", "cause", "slot.cause", "warning", /^cause$/),
   {
     name: "inst",
@@ -446,6 +456,21 @@ export const COMMANDS: readonly CommandDef[] = [
       `specifier.value.${value}`,
       /^(locative|route)$/,
       ["setSpecifier"],
+    ),
+  ),
+  // The temporal's relation (P09-E12b), as the spatial ones set the place's: "/time ( day /ago )".
+  // `/at` is not the determiner `/a`, and none of the six is taken by another command.
+  ...TEMPORAL_RELATIONS.map((value) =>
+    setting(
+      value,
+      [],
+      "noun",
+      { id: "temporal", value },
+      value,
+      // The word the relation is spoken with, as the temporal's toolbar names it.
+      `temporal.value.${value}`,
+      /^temporal$/,
+      ["setTemporalRelation"],
     ),
   ),
   ...(
@@ -861,6 +886,7 @@ export type TopicId =
   | "gender"
   | "determiner"
   | "place"
+  | "time"
   | "cause"
   | "possessor"
   | "relative"
@@ -895,6 +921,8 @@ export const TOPICS: readonly Topic[] = [
   { id: "gender", label: "gender", labelKey: "satellite.gender", part: "noun" },
   { id: "determiner", label: "determiner", labelKey: "satellite.determiner", part: "noun" },
   { id: "place", label: "spatial relationship", labelKey: "console.topic.place", part: "noun" },
+  // The temporal's relation, headed by the box it sets, as the cause's stance is by the cause.
+  { id: "time", label: "temporal", labelKey: "slot.temporal", part: "noun" },
   { id: "cause", label: "cause", labelKey: "slot.cause", part: "noun" },
   { id: "possessor", label: "possessor", labelKey: "slot.possessor", part: "noun" },
   { id: "relative", label: "relative clause", labelKey: "satellite.relative", part: "noun" },
@@ -918,6 +946,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   gender: "gender",
   determiner: "determiner",
   specifier: "place",
+  temporal: "time",
   sentiment: "cause",
   tense: "tense",
   aspect: "aspect",

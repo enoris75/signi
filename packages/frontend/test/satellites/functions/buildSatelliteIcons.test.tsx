@@ -314,7 +314,8 @@ describe('buildSatelliteIcons', () => {
     it('carries a toggle per licensed complement, in canonical order, off the verb border', () => {
       const { complementToggleIcons, satelliteIconsByParent } = icons({ verb: PUT });
 
-      expect(keysOf(complementToggleIcons)).toEqual(['predicative', 'locative', 'cause']);
+      // The two adjuncts every verb offers (P09-E12 D2) take their place in the same order.
+      expect(keysOf(complementToggleIcons)).toEqual(['predicative', 'locative', 'temporal', 'cause', 'purpose']);
       expect(keysOf(satelliteIconsByParent['verb'])).not.toContain('locative');
     });
 
@@ -334,7 +335,7 @@ describe('buildSatelliteIcons', () => {
       );
 
       expect(satelliteIconsByParent['verb']).toBeUndefined();
-      expect(keysOf(complementToggleIcons)).toEqual(['terminus']);
+      expect(keysOf(complementToggleIcons)).toEqual(['terminus', 'temporal', 'purpose']);
       expect(directObjectToggle?.key).toBe('directObject');
     });
 

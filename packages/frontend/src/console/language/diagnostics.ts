@@ -38,7 +38,18 @@ export type WordKindName = "noun" | "pronoun" | "adjective" | "nounModifier" | "
 export type ClauseRole = "condition" | "coordinate" | "instrument";
 
 /** The complements a verb licenses, each a box a role command names. */
-export type ComplementSlot = "predicative" | "terminus" | "manner" | "locative" | "direction" | "source" | "route" | "cause";
+export type ComplementSlot =
+  | "predicative"
+  | "terminus"
+  | "manner"
+  | "locative"
+  | "direction"
+  | "source"
+  | "route"
+  // The temporal and the purpose are offered on every verb (ADJUNCT_COMPLEMENT_TYPES), so no verb
+  // refuses them; the topic is licensed.
+  | "topic"
+  | "cause";
 
 /** A word a command could not reach, and the word of the period that could take it. */
 export interface NoTargetArgs {

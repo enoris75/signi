@@ -2,6 +2,7 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
 import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS } from './de.consts.js';
+import { DE_TEMPORAL } from './de.consts.js';
 import { deComparative } from './deComparative.js';
 import { deStem } from './deStem.js';
 import { deSuperlativeSuffix } from './deSuperlativeSuffix.js';
@@ -76,6 +77,15 @@ export const germanEngine: LanguageEngine = {
       return specifier.value === 'positive' ? prepDet('dank', f, 'dat', false)
         : specifier.value === 'negative' ? 'durch die Schuld'
         : prepDet('wegen', f, 'gen', false);
+    }
+    // The temporal's relation (P09-E12b), headed as `complementsPhrase` heads it: the generic "zu",
+    // "bis zu", "während", and "vor" for both `ago` and `before` — German tells the two apart no
+    // more on the toolbar than in the sentence ("vor einem Augenblick", "vor dem Tag").
+    if (specifier.kind === 'temporal') {
+      const relation = specifier.value;
+      return relation === 'during' ? prepDet('während', f, 'gen', false)
+        : relation === 'until' ? `bis ${prepDet('zu', f, 'dat', false)}`
+        : prepDet(relation === 'at' ? 'zu' : DE_TEMPORAL[relation], f, 'dat', false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, 'locative') : '';
   },

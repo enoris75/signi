@@ -4,6 +4,7 @@ import type {
   Definiteness,
   ImperativeRegister,
   PathSpecifier,
+  TemporalRelation,
 } from "@signi/shared";
 import type {
   GenderSlot,
@@ -28,6 +29,7 @@ import {
   setModifierAdjective,
   setSentiment,
   setSpecifier,
+  setTemporalRelation,
   toggleGender,
   toggleCauseNegative,
   toggleNegative,
@@ -74,6 +76,8 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleSelectSpecifier: (spec: PathSpecifier) => onPhraseUpdate((prev) => setSpecifier(prev, spec, "route")),
     handleSelectLocativeSpecifier: (spec: PathSpecifier) =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
+    handleSelectTemporalRelation: (relation: TemporalRelation) =>
+      onPhraseUpdate((prev) => setTemporalRelation(prev, relation)),
     handleSelectSentiment: (sentiment: CauseSentiment) => onPhraseUpdate((prev) => setSentiment(prev, sentiment)),
   };
 }

@@ -536,6 +536,7 @@ export function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
     // The spatial relation is named by the adposition it spells, which the catalog now cites (C13):
     // "under" / "sotto" / 〜の下で, in place of the English label this row used to print.
     specifier: `specifier.value.${value}`,
+    temporal: `temporal.value.${value}`,
   };
   return { value, key: keys[id] as UiStringKey | undefined };
 }

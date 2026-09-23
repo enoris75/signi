@@ -77,6 +77,25 @@ describe('buildComplements', () => {
     expect(buildComplements(sel)?.route?.specifiers).toBeUndefined();
   });
 
+  // P09-E12b: the temporal's relation rides its complement, omitted at the default `at`.
+  it.each([['ago'], ['until'], ['during']] as const)('gives the temporal its %s relation', (relation) => {
+    const sel: PhraseSelection = { temporal: HOUSE, temporalRelation: relation };
+
+    expect(buildComplements(sel)?.temporal?.specifiers).toEqual([{ kind: 'temporal', value: relation }]);
+  });
+
+  it('leaves the temporal’s default `at` out of the plan', () => {
+    expect(buildComplements({ temporal: HOUSE, temporalRelation: 'at' })?.temporal?.specifiers).toBeUndefined();
+    expect(buildComplements({ temporal: HOUSE })?.temporal?.specifiers).toBeUndefined();
+  });
+
+  it('builds the purpose and the topic as plain noun phrases, a pronoun included', () => {
+    const complements = buildComplements({ purpose: BOY, topic: CAT, topicDefiniteness: 'this' } as PhraseSelection)!;
+
+    expect(complements.purpose).toEqual({ phrase: expect.objectContaining({ concept: 'BOY' }), specifiers: undefined });
+    expect(complements.topic?.phrase).toMatchObject({ concept: 'CAT', definiteness: 'this' });
+  });
+
   it.each([['negative'], ['positive']] as const)('gives the cause a %s sentiment', (sentiment) => {
     expect(buildComplements({ cause: DOG, causeSentiment: sentiment })?.cause?.specifiers).toEqual([
       { kind: 'sentiment', value: sentiment },

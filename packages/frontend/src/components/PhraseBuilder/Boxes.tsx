@@ -21,6 +21,12 @@ import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
 import LayersIcon from "@mui/icons-material/Layers";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import HistoryIcon from "@mui/icons-material/History";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import TimelapseIcon from "@mui/icons-material/Timelapse";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -28,10 +34,12 @@ import {
   CAUSE_SENTIMENTS,
   Concept,
   PATH_SPECIFIERS,
+  TEMPORAL_RELATIONS,
   type Aspect,
   type CauseSentiment,
   type Definiteness,
   type PathSpecifier,
+  type TemporalRelation,
   type Tense,
   type UiStringKey,
   type Voice,
@@ -860,6 +868,65 @@ export function SpecifierSelector({
       labels={labels}
       icons={SPECIFIER_ICONS}
       keys={SPECIFIER_KEYS}
+      armed={armed}
+      onDisarm={onDisarm}
+      onSelect={onSelect}
+      placeAt={placeAt}
+    />
+  );
+}
+
+/**
+ * The letter each temporal relation answers to while its toolbar is armed (P09-E12 D3): a letter
+ * heard in the English word, as E1 chose N / W / G — **A**t, a**G**o, **U**ntil, a**F**ter,
+ * **B**efore, **D**uring. A is not ago's: `at` is the default, and the one pressed most.
+ */
+export const TEMPORAL_KEYS: Record<TemporalRelation, string> = {
+  at: "A",
+  ago: "G",
+  until: "U",
+  after: "F",
+  before: "B",
+  during: "D",
+};
+
+const TEMPORAL_ICONS: Record<TemporalRelation, ReactNode> = {
+  at: <ScheduleIcon sx={{ fontSize: 15 }} />,
+  ago: <HistoryIcon sx={{ fontSize: 15 }} />,
+  until: <HourglassBottomIcon sx={{ fontSize: 15 }} />,
+  after: <SkipNextIcon sx={{ fontSize: 15 }} />,
+  before: <SkipPreviousIcon sx={{ fontSize: 15 }} />,
+  during: <TimelapseIcon sx={{ fontSize: 15 }} />,
+};
+
+// The temporal complement's relations — at / ago / until / after / before / during (P09-E12b) — the
+// route's toolbar with a set of its own. Each is named by the word its language says it with ("ago",
+// "fa", "il y a", 〜前に), cited on a bare noun as the spatial relations are.
+export function TemporalSelector({
+  value,
+  armed,
+  onDisarm,
+  onSelect,
+  placeAt,
+}: {
+  value: TemporalRelation;
+  armed?: boolean;
+  onDisarm?: () => void;
+  onSelect: (s: TemporalRelation) => void;
+  placeAt?: (s: TemporalRelation) => { x: number; y: number } | undefined;
+}) {
+  const t = useUiString();
+  const labels = Object.fromEntries(
+    TEMPORAL_RELATIONS.map((s) => [s, t(`temporal.value.${s}`)]),
+  ) as Record<TemporalRelation, string>;
+  return (
+    <RelationToolbar
+      testId="temporal-toolbar"
+      values={TEMPORAL_RELATIONS}
+      value={value}
+      labels={labels}
+      icons={TEMPORAL_ICONS}
+      keys={TEMPORAL_KEYS}
       armed={armed}
       onDisarm={onDisarm}
       onSelect={onSelect}

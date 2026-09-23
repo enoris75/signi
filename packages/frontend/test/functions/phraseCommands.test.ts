@@ -43,6 +43,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleSetImperativeRegister', (c) => c.handleSetImperativeRegister('instruction'), (p) => reducers.setImperativeRegister(p, 'instruction')],
   ['handleSelectSpecifier', (c) => c.handleSelectSpecifier('over'), (p) => reducers.setSpecifier(p, 'over', 'route')],
   ['handleSelectLocativeSpecifier', (c) => c.handleSelectLocativeSpecifier('under'), (p) => reducers.setSpecifier(p, 'under', 'locative')],
+  ['handleSelectTemporalRelation', (c) => c.handleSelectTemporalRelation('ago'), (p) => reducers.setTemporalRelation(p, 'ago')],
   ['handleSelectSentiment', (c) => c.handleSelectSentiment('positive'), (p) => reducers.setSentiment(p, 'positive')],
 ];
 

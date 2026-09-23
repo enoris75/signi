@@ -1,4 +1,5 @@
 import {
+  DEFAULT_TEMPORAL_RELATION,
   DETERMINER_COMPLEMENT_TYPES,
   defaultDefiniteness,
   type ComplementType,
@@ -27,6 +28,7 @@ import {
   setCauseNegative,
   setSentiment,
   setSpecifier,
+  setTemporalRelation,
   setTense,
   type Gender,
 } from "../../components/PhraseBuilder/phraseReducers.ts";
@@ -184,6 +186,9 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
       return w.kind === "noun" && c?.role === "noun" && hasDeterminer(w.which!, c);
     case "specifier":
       return w.kind === "noun" && !w.ref.slice && (w.which === "route" || w.which === "locative") && Boolean(c);
+    // The temporal's relation, on its box once it holds a word — where its toolbar is drawn.
+    case "temporal":
+      return w.kind === "noun" && !w.ref.slice && w.which === "temporal" && Boolean(c);
     case "sentiment":
     // The cause's own polarity is offered wherever its stance is: on the cause box, once it holds
     // a word. It is not the verb's "polarity" — that one negates the clause.
@@ -229,6 +234,8 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
       return setDefiniteness(slice, which, s.value);
     case "specifier":
       return setSpecifier(slice, s.value, which as "route" | "locative");
+    case "temporal":
+      return setTemporalRelation(slice, s.value);
     case "sentiment":
       return setSentiment(slice, s.value);
     case "causePolarity":
@@ -266,6 +273,8 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
       );
     case "specifier":
       return which === "route" ? sel.routeSpecifier ?? "through" : sel.locativeSpecifier ?? "in";
+    case "temporal":
+      return sel.temporalRelation ?? DEFAULT_TEMPORAL_RELATION;
     case "sentiment":
       return sel.causeSentiment ?? "neutral";
     case "causePolarity":
@@ -296,6 +305,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
       return defaultDefiniteness(w.which!);
     case "specifier":
       return w.which === "route" ? "through" : "in";
+    case "temporal":
+      return DEFAULT_TEMPORAL_RELATION;
     case "sentiment":
       return "neutral";
     case "causePolarity":

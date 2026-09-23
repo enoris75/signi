@@ -109,8 +109,9 @@ function pickerFor(
       if (slotKey === "modifier" || MODAL_ADVERB_SLOTS.includes(slotKey as SlotKey))
         return <AdverbTypeahead onSelect={pick} />;
       // The causal complement ("because of him") also accepts a pronoun, so it uses the
-      // pronoun-inclusive picker; the motion/locative complements stay noun-only.
-      if (slotKey === "cause")
+      // pronoun-inclusive picker, and so do the purpose and the topic ("for her", "about him");
+      // the motion/locative complements stay noun-only.
+      if (slotKey === "cause" || slotKey === "purpose" || slotKey === "topic")
         return (
           <SubjectTypeahead
             onSelect={pick}

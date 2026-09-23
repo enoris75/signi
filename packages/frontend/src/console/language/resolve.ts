@@ -36,7 +36,8 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "conj
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
   if (slot === "modifier" || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };
-  if (slot === "directObject" || slot === "cause") return { roles: ["noun", "pronoun"] };
+  if (slot === "directObject" || slot === "cause" || slot === "purpose" || slot === "topic")
+    return { roles: ["noun", "pronoun"] };
   if (slot === "predicative") return { roles: ["noun", "adjective"] };
   if (/Adjective\d?$/.test(slot)) return { roles: ["adjective", "noun"] };
   if (COMPLEMENT_KEY_SET.has(slot)) return { roles: ["noun"] };
@@ -176,6 +177,9 @@ export const NOUN_NAMES: Record<NounKey, string> = {
   direction: "dir",
   source: "src",
   route: "route",
+  temporal: "time",
+  purpose: "for",
+  topic: "about",
   cause: "cause",
 };
 

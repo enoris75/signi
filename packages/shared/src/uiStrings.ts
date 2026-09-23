@@ -253,6 +253,10 @@ const CANVAS_PARTS = {
   direction: { concept: 'DIRECTION', en: 'direction' },
   source: { concept: 'SOURCE', en: 'source' },
   route: { concept: 'ROUTE', en: 'route' },
+  // P09-E12b's three boxes, named by the grammar nouns that title them (`slot.temporal` and siblings).
+  temporal: { concept: 'TEMPORAL_COMPLEMENT', en: 'temporal' },
+  purpose: { concept: 'PURPOSE_COMPLEMENT', en: 'purpose' },
+  topic: { concept: 'TOPIC_COMPLEMENT', en: 'topic' },
   cause: { concept: 'CAUSE_COMPLEMENT', en: 'cause' },
 } as const;
 
@@ -262,7 +266,8 @@ export type CanvasPart = keyof typeof CANVAS_PARTS;
 // The complements the canvas draws as a boxed ring of their own: every one but the instrumental, which
 // lives in a period container of its own and is linked to (the canvas's BOX_COMPLEMENT_TYPES).
 const BOXED_COMPLEMENT_PARTS = [
-  'predicative', 'terminus', 'manner', 'locative', 'direction', 'source', 'route', 'cause',
+  'predicative', 'terminus', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose',
+  'topic', 'cause',
 ] as const satisfies readonly CanvasPart[];
 
 // Which parts each of those controls can act on — the members of each family below, exported so
@@ -767,16 +772,14 @@ export const UI_STRINGS = defineUiStrings({
   },
   // The *when* of a clause (C29). Named with the same tradition words as its siblings — it
   // "complemento di tempo", de "adverbiale Bestimmung der Zeit", pt "adjunto adverbial de tempo".
-  // The complement is plan-only, so nothing shows this title yet; it is here because the label map
-  // is exhaustive over ComplementType, and it is what the box would call itself.
+  // It titles the temporal box (P09-E12b), which every verb offers.
   'slot.temporal': {
     plan: nameOf('TEMPORAL_COMPLEMENT'),
     format: NAME_FORMAT,
     fallback: 'Temporal',
   },
   // The *for* and the *about* (P09-E2), named like their siblings (it "complemento di fine", "di
-  // argomento"; pt "adjunto adverbial de finalidade", "de assunto"). Plan-only as the temporal is, so
-  // nothing shows these yet; they are here because the label map is exhaustive over ComplementType.
+  // argomento"; pt "adjunto adverbial de finalidade", "de assunto"). Each titles its box (P09-E12b).
   'slot.purpose': {
     plan: nameOf('PURPOSE_COMPLEMENT'),
     format: NAME_FORMAT,
@@ -2491,6 +2494,17 @@ export const UI_STRINGS = defineUiStrings({
   'specifier.value.between': { specifier: { kind: 'path', value: 'between' }, fallback: 'between' },
   'specifier.value.against': { specifier: { kind: 'path', value: 'against' }, fallback: 'against' },
 
+  // The temporal complement's toolbar (P09-E12b), cited on a bare noun as the spatial relations are,
+  // so each comes back as the word its language says the relation with: en "ago", it "fa", fr "il y
+  // a", es "hace", pt "há", de "vor", ja 〜前に. German says `ago` and `before` alike ("vor"), as it
+  // does in the sentence. Keyed by TemporalRelation, so the toolbar writes t(`temporal.value.${v}`).
+  'temporal.value.at': { specifier: { kind: 'temporal', value: 'at' }, fallback: 'at' },
+  'temporal.value.ago': { specifier: { kind: 'temporal', value: 'ago' }, fallback: 'ago' },
+  'temporal.value.until': { specifier: { kind: 'temporal', value: 'until' }, fallback: 'until' },
+  'temporal.value.after': { specifier: { kind: 'temporal', value: 'after' }, fallback: 'after' },
+  'temporal.value.before': { specifier: { kind: 'temporal', value: 'before' }, fallback: 'before' },
+  'temporal.value.during': { specifier: { kind: 'temporal', value: 'during' }, fallback: 'during' },
+
   // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
   // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".
   // Two entries per stance, joined with a dash at the call site, because they are two different
@@ -2917,6 +2931,13 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set a complement's spatial relationship",
   },
+  // `/at /ago /until /after /before /during` set the temporal's relation (P09-E12b), named the way the
+  // spatial one is, under TEMPORAL: "to set a complement's temporal relationship".
+  'purpose.temporal': {
+    plan: setterOf('RELATIONSHIP', 'COMPLEMENT_GRAMMAR', ['TEMPORAL']),
+    format: { stripPeriod: true },
+    fallback: "to set a complement's temporal relationship",
+  },
   // `/because /fault /thanks` set the stance a cause is stated with, SENTIMENT (it "valutazione", de
   // "Bewertung", ja 評価). "How a cause is felt", the English it replaces, is an embedded question no plan
   // holds.
@@ -3190,6 +3211,8 @@ export const UI_STRINGS = defineUiStrings({
         ['direction', 'DIRECTION', 'direction'],
         ['source', 'SOURCE', 'source'],
         ['route', 'ROUTE', 'route'],
+        // The one licensed box of P09-E12b's three: the temporal and the purpose go with any verb.
+        ['topic', 'TOPIC_COMPLEMENT', 'topic'],
         ['cause', 'CAUSE_COMPLEMENT', 'cause'],
         ['instrumental', 'INSTRUMENTAL', 'instrumental'],
       ] as const
@@ -3206,7 +3229,7 @@ export const UI_STRINGS = defineUiStrings({
       },
     ]),
   ) as Record<
-    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental'}`,
+    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental'}`,
     UiStringPlanDef
   >,
   // A period that cannot be linked so: a command, an infinitive, an if-clause or a coordinated period

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { DEFINITENESS, type Definiteness, type PathSpecifier } from '@signi/shared';
+import { DEFINITENESS, type Definiteness, type PathSpecifier, type TemporalRelation } from '@signi/shared';
 import type { PronominalPossessor } from '@signi/shared';
 import { conjunctionAll, degreeAll, determinerAll, possessiveAll, specifierAll, wordAll } from './harness.js';
 
@@ -249,6 +249,30 @@ describe('relation toolbars: the adposition each specifier spells', () => {
     // 通る the particle leaves implicit, or the menu would show one word for two relations.
     expect(path('in').ja).toBe('〜の中で');
     expect(path('through').ja).toBe('〜を通って');
+  });
+
+  // P09-E12b: the temporal toolbar's six, headed as the temporal complement heads them. `ago` is the
+  // test of the citation: English and Italian postpose a word, Japanese a noun and a particle, and
+  // French, Spanish and Portuguese front an impersonal verb — each of which, on a bare noun, is the
+  // word alone.
+  test('a temporal relation, in every language — ago the one each says its own way', () => {
+    const temporal = (value: TemporalRelation) => specifierAll({ kind: 'temporal', value });
+    expect(temporal('ago')).toEqual({
+      en: 'ago', it: 'fa', fr: 'il y a', de: 'vor', es: 'hace', ja: '〜前に', pt: 'há',
+    });
+    expect(temporal('at')).toEqual({ en: 'at', it: 'a', fr: 'à', de: 'zu', es: 'en', ja: '〜に', pt: 'em' });
+    expect(temporal('until')).toEqual({
+      en: 'until', it: 'fino a', fr: "jusqu'à", de: 'bis zu', es: 'hasta', ja: '〜まで', pt: 'até',
+    });
+    expect(temporal('after')).toEqual({
+      en: 'after', it: 'dopo', fr: 'après', de: 'nach', es: 'después de', ja: '〜の後に', pt: 'depois de',
+    });
+    expect(temporal('before')).toEqual({
+      en: 'before', it: 'prima di', fr: 'avant', de: 'vor', es: 'antes de', ja: '〜の前に', pt: 'antes de',
+    });
+    expect(temporal('during')).toEqual({
+      en: 'during', it: 'durante', fr: 'pendant', de: 'während', es: 'durante', ja: '〜の間に', pt: 'durante',
+    });
   });
 
   test('a cause connector is a specifier too — the stance picks the word', () => {
