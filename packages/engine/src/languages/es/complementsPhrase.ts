@@ -32,6 +32,7 @@ import { defArticle } from './defArticle.js';
 import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
+import { esStandard } from './esStandard.js';
 import { isPlural } from './isPlural.js';
 import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
@@ -73,7 +74,7 @@ export function complementsPhrase(
             // already get (A198). `esPossessiveWord` is empty for a genitive or absent possessor.
             return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np)), np);
           }
-          const surface = esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+          const surface = [esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural)), esStandard(np)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
           // SAME keeps its article the same way: "es el mismo" (see `takesPredicateArticle`).

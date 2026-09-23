@@ -10,6 +10,7 @@ import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
+import { resolveStandard } from './resolveStandard.js';
 
 /** No adjective was fused into the head — the answer for every phrase but a Japanese kin term. */
 const EMPTY: ReadonlySet<number> = new Set();
@@ -162,6 +163,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   }
   // …and its intensifier, the same way ("is very big"; see `applyIntensifier`, C33).
   if (head.forms['role'] === 'adjective') applyIntensifier(head, np.headIntensifier, language, lookup);
+  // …and what its degree compares it with ("bigger than the dog"), where the degree takes one at all
+  // (see `resolveStandard`, P09-E5).
+  const standard = resolveStandard(np, head, language, lookup);
   // A title stands with a personal name and nowhere else: `proper` says it is a name and `human`
   // that it is a person's (C38). Its surface, its gender and the form Italian writes before a name
   // ride on the head's forms too, where every engine's article builder can reach them — the article
@@ -267,5 +271,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // The focus particle singling this phrase out ("only the cat", 猫も). Plain data: each engine
     // spells its own word and decides where it stands (C39).
     focus: np.focus,
+    // The standard of an adjective head's comparison, resolved above (P09-E5). Each engine places it
+    // beside the predicate adjective with the word its degree selects.
+    ...(standard ? { standard } : {}),
   };
 }

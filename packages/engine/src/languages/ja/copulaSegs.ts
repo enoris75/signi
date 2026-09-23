@@ -1,14 +1,12 @@
 import type { Tense } from '@signi/shared';
 import type { ResolvedComplement, RubySegment } from '../../types.js';
-import { adjDegree } from '../../functions/adjDegree.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import { JA_DEGREE } from './ja.consts.js';
 import type { JaForm } from './ja.types.js';
 import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
-import { jaIntensifierSeg } from './jaIntensifierSeg.js';
+import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -152,9 +150,8 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const { kind, stem, reading: stemReading, attributive, predicative } = jaAdjClass(base, reading, f['relational'] === '1', verbal);
   // The predicate adjective's intensifier and degree adverb lead, as they do attributively
   // (とても楽しいです, もっと楽しいです). A suffix intensifier is inside the stem instead (C33).
-  const deg = JA_DEGREE[adjDegree(head.head)];
-  const intensifier = jaIntensifierSeg(head.head);
-  const degSegs: RubySegment[] = [...(intensifier ? [intensifier] : []), ...(deg ? [{ t: deg }] : [])];
+  // A standard of comparison leads them both and takes the adverb's place (犬より大きいです, P09-E5).
+  const degSegs = jaDegreeSegs(head);
   // A na- or の-adjective before its noun keeps its own attributive particle (幸せな猫, 茶色の猫).
   // A relational one keeps its の in front of the copula too, where dropping it would name the thing
   // the stem is rather than predicate of the subject (猫はアメリカのです, not 猫はアメリカです — A246).

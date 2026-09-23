@@ -1,10 +1,8 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
-import { adjDegree } from '../../functions/adjDegree.js';
-import { JA_DEGREE } from './ja.consts.js';
 import type { PredicateLink } from './ja.types.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
-import { jaIntensifierSeg } from './jaIntensifierSeg.js';
+import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { npSegs } from './npSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -36,7 +34,5 @@ export function predicateLinkSegs(np: ResolvedNounPhrase, link: PredicateLink, p
   // A relational の-adjective keeps its の here too: this is the predicate position, one conjunct
   // earlier (アメリカので, アメリカのでも — A246).
   const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, np.head.forms['relational'] === '1', verbal);
-  const deg = JA_DEGREE[adjDegree(np.head)];
-  const intensifier = jaIntensifierSeg(np.head);
-  return [...(intensifier ? [intensifier] : []), ...(deg ? [{ t: deg }] : []), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
+  return [...jaDegreeSegs(np), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
 }

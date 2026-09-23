@@ -10,6 +10,15 @@ export const EN_DEGREE: Record<Degree, string> = {
   positive: '', more: 'more', most: 'most', less: 'less', least: 'least', equally: 'equally',
 };
 
+/**
+ * The degree adverb once a standard of comparison follows (P09-E5): the equative is the circumfix
+ * "as … as", so "equally big" becomes "as big as the dog". The comparatives keep their word.
+ */
+export const EN_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 'as' };
+
+/** The word before the standard of comparison, by degree: "bigger than the dog", "as big as the dog" (P09-E5). */
+export const EN_STANDARD: Partial<Record<Degree, string>> = { more: 'than', less: 'than', equally: 'as' };
+
 /** Suppletive comparatives — no spelling rule derives these. */
 export const EN_IRREGULAR: Record<string, [comparative: string, superlative: string]> = {
   good: ['better', 'best'],

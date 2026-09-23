@@ -94,6 +94,13 @@ export interface ResolvedNounPhrase {
    * head's too — this is here so an engine can tell a titled name from a bare one.
    */
   title?: ConceptForms;
+  /**
+   * The resolved standard of comparison of an adjective head (see NounPhrase.headStandard): "the
+   * dog" in "is bigger than the dog". Present only where the head's degree licenses one (`more`,
+   * `less`, `equally`); the translator has dropped it everywhere else, and marks the head with
+   * `forms['standard'] = '1'` so a degree renderer can pick the circumfix's first half (P09-E5).
+   */
+  standard?: ResolvedNounElement;
 }
 
 /**

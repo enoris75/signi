@@ -108,6 +108,16 @@ export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'ma
  *   more/less   — comparative superiority / inferiority ("more beautiful")
  *   most/least  — (relative) superlative superiority / inferiority ("the most beautiful")
  *   equally     — equality ("equally beautiful")
+ *
+ * A predicate adjective's comparative and equative may name what they compare with — the
+ * **standard** (`NounPhrase.headStandard`, P09-E5): "bigger than the dog", "as big as the dog".
+ * The standard's word depends on the degree: `more` / `less` take *than* (di, que, als, que,
+ * do que, より), `equally` a **circumfix** whose first half replaces the degree adverb itself —
+ * "equally big" but "**as** big **as** the dog", it *ugualmente* but *tanto … quanto*, de *gleich*
+ * but *so … wie*, es *igual de* but *tan … como*, pt *igualmente* but *tão … como* (fr *aussi … que*
+ * keeps its word). Japanese puts the standard before the adjective and in place of the adverb:
+ * 犬より大きい, 犬と同じくらい大きい, and the negative-polarity 犬ほど大きくない for `less`. The
+ * superlatives take no standard (a partitive instead, a follow-up).
  */
 export type Degree = 'positive' | 'more' | 'most' | 'less' | 'least' | 'equally';
 
@@ -627,6 +637,28 @@ export interface NounPhrase {
    * Threaded into the resolved head's `forms['degree']`, like `adjectiveDegrees`.
    */
   headDegree?: Degree;
+  /**
+   * The **standard of comparison** of the head's degree — what the predicate adjective is compared
+   * *to*: "the cat is bigger **than the dog**", "as big **as the dog**", 猫は**犬より**大きい (P09-E5).
+   * Only meaningful beside a `headDegree` of `more`, `less` or `equally` on an adjective head; the
+   * translator drops it on `positive`, and on the superlatives `most` / `least`, which select from
+   * a set with a partitive ("the biggest **of** the cats") rather than compare with a standard —
+   * a construct of its own (D3).
+   *
+   * The word it takes is the degree's, not a constant: than / di / que / als / que / do que / より
+   * for `more` and `less`, the circumfix as … as / tanto … quanto / aussi … que / so … wie /
+   * tan … como / tão … como / と同じくらい for `equally` (see `Degree`).
+   *
+   * Deliberately **predicative only**: there is a `headStandard` beside `headDegree` and nothing
+   * beside `adjectiveDegrees`. An attributive comparative ("a bigger cat than the dog") puts the
+   * standard at the far end of the noun phrase, placed differently against the other post-nominal
+   * material in each language, and an adjective list can hold several comparatives of which only one
+   * could take it — a follow-up with a name of its own, not an oversight (D2). It is a noun
+   * *element*, so a coordinated standard ("bigger than the dog and the man") is one like any other.
+   * It is not a complement: it belongs to the adjective, is licensed by a degree rather than by a
+   * lexeme, and in Japanese must stand beside its adjective rather than in the complement block (D5).
+   */
+  headStandard?: NounElement;
   /**
    * Nouns used attributively ("**sail** boat"), each with the semantic relation it bears
    * to the head. Distinct from `adjectives` (a noun-modifier doesn't inflect/agree — it is

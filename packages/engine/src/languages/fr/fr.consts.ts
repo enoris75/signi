@@ -12,6 +12,13 @@ export const FR_DEGREE: Record<Degree, string> = {
 };
 
 /**
+ * The word before the standard of comparison, by degree (P09-E5): "que" for all three, "plus grand
+ * que le chien", "aussi grand que le chien" — French's equative already has its circumfix's first
+ * half in "aussi", so there is no `FR_STANDARD_DEGREE`. It elides like every "que" ("qu'un chien").
+ */
+export const FR_STANDARD: Partial<Record<Degree, string>> = { more: 'que', less: 'que', equally: 'que' };
+
+/**
  * The raised degrees (more/most) of these adjectives are suppletive in French — a single
  * word, never "plus" + base: bon → meilleur, mauvais → pire. "plus bon" is ungrammatical;
  * "plus mauvais" is merely dispreferred. Only "more"/"most" suppletise — the lowered and

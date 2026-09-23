@@ -11,6 +11,15 @@ export const ES_DEGREE: Record<Degree, string> = {
 };
 
 /**
+ * The degree adverb once a standard of comparison follows (P09-E5): the equative is the circumfix
+ * "tan … como" ("tan grande como el perro"), where a bare one stays "igual de grande".
+ */
+export const ES_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 'tan' };
+
+/** The word before the standard of comparison, by degree: "más grande que el perro", "tan grande como el perro" (P09-E5). */
+export const ES_STANDARD: Partial<Record<Degree, string>> = { more: 'que', less: 'que', equally: 'como' };
+
+/**
  * Concept IDs of the adjectives that precede their noun in Spanish. The ordinals and OTHER are
  * here because that is simply where they go: "el primer día", "la segunda vez", "el otro gato".
  * NEW is here for a different reason — its position decides its sense. After the noun "nuevo" is

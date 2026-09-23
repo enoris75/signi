@@ -6,7 +6,7 @@
 per-language word that **depends on the degree** — *than* for `more`/`less`, *as … as* for
 `equally`.
 **Scope:** all 7 languages. Predicative comparison only in a first pass; see D2.
-**Status:** planning, unscheduled. Split out of P09 §3 on 2026-09-23.
+**Status:** shipped, 2026-09-23 (engine, plan-only; see [Done](#done)). Split out of P09 §3 on 2026-09-23.
 **Words:** *than*.
 
 | lang | the cat is **bigger than** the dog | the cat is **as big as** the dog | the cat is **less big than** the dog |
@@ -19,7 +19,72 @@ per-language word that **depends on the degree** — *than* for `more`/`less`, *
 | pt | o gato é maior do que o cão. | o gato é tão grande como o cão. | o gato é menos grande do que o cão. |
 | ja | 猫は犬より大きいです。 | 猫は犬と同じくらい大きいです。 | 猫は犬ほど大きくないです。 |
 
-**Proposed, not engine output.**
+**Engine output**, verbatim — every cell of the proposal rendered as written, pinned in
+[`test/comparison.test.ts`](../../../../packages/engine/test/comparison.test.ts).
+
+## Done
+
+Shipped 2026-09-23 in the engine, all seven languages, **plan-only**: a `PhrasePlan` carrying
+`headStandard` renders it; nothing in the frontend writes one yet (§4 is a follow-up). Every decision
+landed as designed — D1's per-degree `STANDARD` map and standard-aware equative adverb, D2's
+predicative-only field, D3's drop on the superlatives, D4's fused *di* and fixed *do que*, D5's
+standard on the noun phrase rather than among the complements.
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| definite | bigger than the dog | più grande del cane | plus grand que le chien | größer als der Hund | más grande que el perro | maior do que o cão | 犬より大きい |
+| indefinite | bigger than a dog | più grande di un cane | plus grand qu'un chien | größer als ein Hund | más grande que un perro | maior do que um cão | 犬より大きい |
+| pronoun (3sg) | bigger than him | più grande di lui | plus grand que lui | größer als er | más grande que él | maior do que ele | 彼より大きい |
+| pronoun (1sg), equative | as big as me | tanto grande quanto me | aussi grand que moi | so groß wie ich | tan grande como yo | tão grande como eu | 私と同じくらい大きい |
+| coordinated | than the dog and the man | del cane e dell'uomo | que le chien et l'homme | als der Hund und der Mann | que el perro y el hombre | do que o cão e o homem | 犬と男より |
+| bare equative (unchanged) | equally big | ugualmente grande | aussi grand | gleich groß | igual de grande | igualmente grande | 同じくらい大きい |
+| `most` + standard (dropped) | biggest | il più grande | le plus grand | am größten | el más grande | o maior | 最も大きい |
+
+What landed, and where it differs from the plan's wording:
+
+- **The translator marks the head rather than threading the standard through the degree
+  renderers.** [`resolveStandard`](../../../../packages/engine/src/translator/functions/resolveStandard.ts)
+  resolves the standard as a `NounElement`, drops it off `STANDARD_DEGREES` (`more` / `less` /
+  `equally`) and on a noun head, and sets `forms['standard'] = '1'` on the adjective. The degree
+  renderers (`enAdj`, `itDeg`, `esDeg`, `ptDeg` via `ptComparison`, `deDegPrefix` via `dePredAdj`)
+  read only forms, so the flag is what lets them pick the circumfix's first half; the shared
+  [`degreeAdverb`](../../../../packages/engine/src/functions/degreeAdverb.ts) does that from each
+  language's `*_DEGREE` and new `*_STANDARD_DEGREE` (`{ equally: 'as' | 'tanto' | 'tan' | 'tão' }`;
+  German's `so` is inline in `deDegPrefix`, which spells its words there; French needs none). The
+  resolved standard rides as `ResolvedNounPhrase.standard`.
+- **English also swaps its equative adverb**: "equally big" but "as big as the dog". The spec's D1
+  consequence named it/de/es/pt; English is the fifth, and the table's own "as big as" required it.
+- **The standard is emitted by a per-language `<lang>Standard` beside the predicate adjective**, a
+  one-line hunk in each `complementsPhrase` predicative branch (`enStandard`, `itStandard`,
+  `frStandard`, `deStandard`, `esStandard`, `ptStandard`). Japanese has no such suffix: its
+  [`jaDegreeSegs`](../../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) builds what *leads*
+  the adjective — standard + particle, intensifier, degree adverb, in that order — and replaced the
+  inline intensifier/adverb pair at its three predicate sites (`copulaSegs`, `predicateLinkSegs`, the
+  non-copular predicative in `complementSegs`). Since the standard takes the adverb's place, 犬より
+  never meets もっと, and ほど keeps the negated adjective `jaComparisonAdj` already builds for `less`
+  (the polarity comment on `JA_DEGREE` now says so). Politeness, tense, the relative clause's plain
+  form (犬より大きい猫) and a non-copular verb (犬より大きくなります) all come from the existing paths.
+- **Pronoun standards take three forms**, and the choice is recorded in each renderer: English the
+  object form ("than him" — the spoken standard; the formal "than he" is a clause), Italian and French
+  the tonic ("di me", "que moi"), German, Spanish and Portuguese the **subject** form ("als ich",
+  "que yo", "do que eu") — never the German dative or the Romance tonic *mí* / *mim* a preposition
+  would govern, because *als / que / do que / como* are conjunctions here.
+- **French elides "que"** before a vowel ("qu'un chien", "qu'elle"), as its relative and est-ce que
+  already do. Italian's *di* repeats per conjunct because it fuses (*del cane e dell'uomo*); every
+  other language says its word once before the group.
+- **Only the subject complement renders a standard.** The object predicative ("makes the cat bigger
+  than the dog") and the essive are untouched and ignore `headStandard`; see follow-ups.
+
+Follow-ups:
+
+- **Frontend**: the adjective's standard slot (§4) — a noun slot on the adjective control, widening
+  the container rather than hiding anything; and the **console** (`print.ts` prints `headDegree` but
+  would drop a `headStandard`, breaking the print → apply round trip once plans carry one).
+- **A standard on an object predicative** ("makes the cat bigger than the dog"): German would put the
+  standard in the object's case (*macht den Kater größer als den Hund*); every other language is the
+  same one-line hunk as the subject complement.
+- The out-of-scope list below stands: attributive comparison (D2), the superlative partitive (D3), a
+  clause as the standard, comparison of adverbs and nouns.
 
 ## Why
 

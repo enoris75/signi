@@ -36,6 +36,7 @@ import { prepDet } from './prepDet.js';
 import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
+import { ptStandard } from './ptStandard.js';
 import { spatialHead } from './spatialHead.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
@@ -77,7 +78,7 @@ export function complementsPhrase(
             // already get, article and all (A198). Empty for a genitive or absent possessor.
             return withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np), ptPossessiveWord(np)), np);
           }
-          const surface = ptComparison(np.head, gender, plural);
+          const surface = [ptComparison(np.head, gender, plural), ptStandard(np)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece O mais feliz" — distinct from the comparative "mais feliz".
           // SAME keeps its article the same way: "é o mesmo" (see `takesPredicateArticle`).
