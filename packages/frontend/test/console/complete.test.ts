@@ -195,6 +195,12 @@ describe('words', () => {
     expect(labels(c)).toEqual(expect.arrayContaining(['cat', '1st', '3rd', 'one']));
   });
 
+  it('finds a word by its alias, and offers and inserts the word itself (P09-E23)', () => {
+    const c = at('/verb pic');
+    expect(labels(c)).toEqual(['choose']);
+    expect(c.candidates[0]!.insert).toBe('choose');
+  });
+
   it('offers an ambiguous word by its id', () => {
     const c = at('/verb cry');
     expect(c.candidates.map((x) => x.insert)).toEqual(expect.arrayContaining(['CRY', 'CRY_OUT']));

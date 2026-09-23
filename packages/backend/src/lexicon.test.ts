@@ -173,6 +173,19 @@ describe('lookupLexicalEntry', () => {
       db.prepare('DELETE FROM verb_lexemes WHERE id = ?').run(lexemeId);
     }
   });
+
+  // P09-E23: BEGIN's aliases (cominciare, anfangen, comenzar) and SPEAK's (talk) are seeded rows,
+  // so this reads the real corpus rather than a planted one.
+  test.each([
+    ['BEGIN', { en: 'begin', it: 'iniziare', fr: 'commencer', de: 'beginnen', es: 'empezar', pt: 'começar', ja: '始まる' }],
+    ['SPEAK', { en: 'speak', it: 'parlare', fr: 'parler', de: 'sprechen', es: 'hablar', pt: 'falar', ja: '話す' }],
+    ['RETURN', { en: 'return', it: 'tornare', fr: 'revenir', de: 'zurückkehren' }],
+  ] as const)('still reads %s by its primary lexeme in every language, its aliases aside', (id, primaries) => {
+    for (const [language, base] of Object.entries(primaries)) {
+      expect(lookupLexicalEntry(id, language)?.forms['base'], `${id} ${language}`).toBe(base);
+    }
+    expect(lookupLexicalEntry(id, 'en')?.forms['past']).toBe({ BEGIN: 'began', SPEAK: 'spoke', RETURN: 'returned' }[id]);
+  });
 });
 
 describe('isSeededConcept', () => {

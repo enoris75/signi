@@ -1,4 +1,4 @@
-import type { ConceptSlot, PhrasePlan } from '@signi/shared';
+import type { ConceptSlot, LanguageCode, PhrasePlan } from '@signi/shared';
 
 export interface ConceptSeed {
   id: string;
@@ -32,5 +32,13 @@ export interface ConceptSeed {
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
   isA?: string;     // immediate hypernym — CARAVEL isA SAILING_SHIP. One parent only; see concepts/hierarchy.ts
+  /**
+   * Secondary lexemes (P09-E23): other words that find this concept in the pickers and the console
+   * (*talk* for SPEAK), seeded as `is_primary = 0` lexeme rows. A lemma only — never rendered, so
+   * no paradigm; a Japanese alias that needs a kana search lists the kana as a second alias.
+   * Not for pronouns, which are found by their person. Each must be a word a dictionary gives for
+   * *this* sense.
+   */
+  aliases?: Partial<Record<LanguageCode, string[]>>;
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }

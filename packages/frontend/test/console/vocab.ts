@@ -55,7 +55,8 @@ export const VERBS = [
   verb('SEE', 'see', 'vedere'),
   verb('LOVE', 'love', 'amare'),
   verb('READ', 'read', 'leggere', complements('terminus')),
-  verb('CHOOSE', 'choose', 'scegliere'),
+  // A verb found by a second word too (P09-E23): *pick* and *selezionare* find it; *choose* is what prints.
+  verb('CHOOSE', 'choose', 'scegliere', { aliases: { en: ['pick'], it: ['selezionare'] } }),
   verb('START', 'start', 'iniziare', complements('instrumental')),
   verb('RUN', 'run', 'correre', {
     transitivity: 'intransitive',

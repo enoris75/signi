@@ -22,7 +22,7 @@ function storedForms(db: Database.Database, role: string, conceptId: string, lan
     .prepare<[string, string], { form_key: string; form_value: string }>(`
       SELECT f.form_key, f.form_value FROM ${role}_forms f
       JOIN ${role}_lexemes l ON l.id = f.lexeme_id
-      JOIN concept_${role}_links k ON k.lexeme_id = l.id
+      JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 1
       WHERE k.concept_id = ? AND l.language = ?`)
     .all(conceptId, language);
   return Object.fromEntries(rows.map((r) => [r.form_key, r.form_value]));
@@ -74,10 +74,56 @@ describe('seeding the corpus', () => {
 
   test.each(ROLES)('links every %s to one primary lexeme per language', (role) => {
     const seeds = concepts.filter((c) => c.role === role);
-    expect(count(db, `SELECT COUNT(*) AS n FROM ${role}_lexemes`)).toBe(seeds.length * LANGUAGE_COUNT);
-    expect(count(db, `SELECT COUNT(*) AS n FROM concept_${role}_links WHERE is_primary = 1`)).toBe(
-      seeds.length * LANGUAGE_COUNT,
+    expect(
+      count(db, `SELECT COUNT(*) AS n FROM ${role}_lexemes l
+                 JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 1`),
+    ).toBe(seeds.length * LANGUAGE_COUNT);
+    // Exactly one per concept and language — the constraint the schema cannot state, and the one
+    // every lookup's `.get()` relies on (P09-E23).
+    expect(
+      db
+        .prepare(`
+          SELECT k.concept_id, l.language, COUNT(*) AS n FROM ${role}_lexemes l
+          JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 1
+          GROUP BY k.concept_id, l.language HAVING n <> 1`)
+        .all(),
+    ).toEqual([]);
+  });
+
+  test.each(ROLES)('stores every %s alias as a secondary lexeme, and nothing else as one', (role) => {
+    const expected = concepts
+      .filter((c) => c.role === role)
+      .flatMap((c) => Object.entries(c.aliases ?? {}).flatMap(([language, words]) =>
+        (words ?? []).map((word) => `${c.id}:${language}:${word}`)))
+      .sort();
+    const word = role === 'noun' ? 'l.singular' : 'l.lemma';
+    const stored = db
+      .prepare<[], { key: string }>(`
+        SELECT k.concept_id || ':' || l.language || ':' || ${word} AS key FROM ${role}_lexemes l
+        JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 0`)
+      .all()
+      .map((r) => r.key)
+      .sort();
+    expect(stored).toEqual(expected);
+    // Every lexeme is linked, primary or not: none is left an orphan.
+    expect(count(db, `SELECT COUNT(*) AS n FROM ${role}_lexemes`)).toBe(
+      count(db, `SELECT COUNT(*) AS n FROM concept_${role}_links`),
     );
+  });
+
+  test('stores an alias as a lemma and its base row, with no paradigm', () => {
+    const rows = db
+      .prepare(`
+        SELECT vl.language, vl.lemma, f.form_key, f.form_value FROM verb_lexemes vl
+        JOIN concept_verb_links cvl ON cvl.lexeme_id = vl.id AND cvl.is_primary = 0
+        JOIN verb_forms f ON f.lexeme_id = vl.id
+        WHERE cvl.concept_id = 'BEGIN' ORDER BY vl.language`)
+      .all();
+    expect(rows).toEqual([
+      { language: 'de', lemma: 'anfangen', form_key: 'base', form_value: 'anfangen' },
+      { language: 'es', lemma: 'comenzar', form_key: 'base', form_value: 'comenzar' },
+      { language: 'it', lemma: 'cominciare', form_key: 'base', form_value: 'cominciare' },
+    ]);
   });
 
   test('keeps a noun\'s singular, plural and gender in columns, not as form rows', () => {
@@ -265,6 +311,47 @@ describe('seeding a database again', () => {
     );
     const db = await seedFile();
     expect(storedForms(db, 'adjective', 'QUICK', 'en')).toEqual({ base: 'quick' });
+  });
+
+  test('seeds an alias of each role that takes one as a bare lemma', async () => {
+    withCorpus([
+      { id: 'SPEAK', role: 'verb', description: 'to speak', aliases: { en: ['talk', 'chat'] }, forms: { en: { base: 'speak' } } },
+      { id: 'CAR', role: 'noun', description: 'a car', aliases: { en: ['automobile'] }, forms: { en: { base: 'car', plural: 'cars', gender: 'masc' } } },
+      { id: 'BIG', role: 'adjective', description: 'large', aliases: { en: ['large'] }, forms: { en: { base: 'big' } } },
+      { id: 'FAST', role: 'adverb', description: 'quickly', aliases: { en: ['quickly'] }, forms: { en: { base: 'fast' } } },
+    ]);
+    const db = await seedFile();
+
+    const secondary = (role: string, word: string) =>
+      db.prepare(`
+        SELECT k.concept_id, ${word} AS word FROM ${role}_lexemes l
+        JOIN concept_${role}_links k ON k.lexeme_id = l.id AND k.is_primary = 0 ORDER BY l.id`).all();
+    expect(secondary('verb', 'l.lemma')).toEqual([{ concept_id: 'SPEAK', word: 'talk' }, { concept_id: 'SPEAK', word: 'chat' }]);
+    expect(secondary('noun', 'l.singular')).toEqual([{ concept_id: 'CAR', word: 'automobile' }]);
+    expect(secondary('adjective', 'l.lemma')).toEqual([{ concept_id: 'BIG', word: 'large' }]);
+    expect(secondary('adverb', 'l.lemma')).toEqual([{ concept_id: 'FAST', word: 'quickly' }]);
+    // A noun alias has no plural, no gender and no form rows; the others keep only their base row.
+    expect(db.prepare("SELECT plural, gender FROM noun_lexemes WHERE singular = 'automobile'").get()).toEqual({ plural: null, gender: null });
+    expect(count(db, "SELECT COUNT(*) AS n FROM noun_forms f JOIN noun_lexemes l ON l.id = f.lexeme_id WHERE l.singular = 'automobile'")).toBe(0);
+    expect(db.prepare("SELECT form_key, form_value FROM verb_forms f JOIN verb_lexemes l ON l.id = f.lexeme_id WHERE l.lemma = 'talk'").all())
+      .toEqual([{ form_key: 'base', form_value: 'talk' }]);
+    // The primary is untouched: still one row, still primary.
+    expect(storedForms(db, 'noun', 'CAR', 'en')).toEqual({});
+    expect(count(db, 'SELECT COUNT(*) AS n FROM concept_verb_links WHERE is_primary = 1')).toBe(1);
+  });
+
+  test.each([
+    ['a pronoun', { id: 'THEY', role: 'pronoun', description: 'them', aliases: { en: ['folk'] }, forms: { en: { base: 'they' } } }, 'THEY: a pronoun takes no aliases'],
+    ['its own primary', { id: 'SPEAK', role: 'verb', description: 'to speak', aliases: { en: ['speak'] }, forms: { en: { base: 'speak' } } }, 'SPEAK: the en alias "speak" repeats a word it already has'],
+    ['a repeated alias', { id: 'SPEAK', role: 'verb', description: 'to speak', aliases: { en: ['talk', 'talk'] }, forms: { en: { base: 'speak' } } }, 'SPEAK: the en alias "talk" repeats a word it already has'],
+    ['a blank alias', { id: 'SPEAK', role: 'verb', description: 'to speak', aliases: { en: [' '] }, forms: { en: { base: 'speak' } } }, 'SPEAK: a blank en alias'],
+  ] satisfies [string, ConceptSeed, string][])('refuses an alias on %s before touching the database', async (_what, seed, message) => {
+    const before = snapshot(await seedFile());
+    opened.pop()!.close();
+
+    withCorpus([seed]);
+    await expect(seedFile()).rejects.toThrow(message);
+    expect(snapshot(opened[opened.length - 1]!)).toEqual(before);
   });
 
   test('refuses an invalid hierarchy before touching the database', async () => {

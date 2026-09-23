@@ -113,7 +113,9 @@ const norm = (s: string) => s.trim().replace(/\s+/g, " ").toLowerCase();
 /**
  * The concept a word names among the words `spec` takes. Tried in order: a pronoun's person or form,
  * the concept's id as written, the word as the interface language shows it, the id in any case, the
- * English word, the kana reading, the gloss. The first rule that names exactly one concept wins; one that names several is ambiguous.
+ * English word, the kana reading, the gloss, and last an alias in the interface language or English
+ * (P09-E23) — last, so an alias never outranks a concept whose label is the word. The first rule that
+ * names exactly one concept wins; one that names several is ambiguous.
  */
 export function resolveWord(text: string, spec: WordSpec, vocab: Vocabulary): WordResolution {
   const q = norm(text);
@@ -138,6 +140,7 @@ export function resolveWord(text: string, spec: WordSpec, vocab: Vocabulary): Wo
     (c) => c.role !== "pronoun" && norm(c.label ?? "") === q,
     (c) => norm(c.readings?.[vocab.language] ?? "") === q,
     (c) => norm(c.synonym ?? "") === q,
+    (c) => [...(c.aliases?.[vocab.language] ?? []), ...(c.aliases?.en ?? [])].some((a) => norm(a) === q),
   ];
   for (const rule of rules) {
     const hits = words.filter(rule);

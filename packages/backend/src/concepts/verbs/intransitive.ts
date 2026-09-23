@@ -1134,6 +1134,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to come into being; to get under way',
     emoji: '▶️',
     synonym: 'get under way',
+    // The everyday doublets of the primaries (P09-E23): "cominciare" beside "iniziare", "anfangen"
+    // beside "beginnen", "comenzar" beside "empezar".
+    aliases: { it: ['cominciare'], de: ['anfangen'], es: ['comenzar'] },
     forms: {
       en: {
         base: 'begin',
@@ -1352,6 +1355,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['topic', 'manner', 'instrumental', 'locative', 'cause'],
     description: 'to say words aloud',
     emoji: '🗣️',
+    // TALK is folded into SPEAK (P09 §2), so *talk* finds it rather than seeding a second concept (P09-E23).
+    aliases: { en: ['talk'] },
     forms: {
       en: {
         base: 'speak',

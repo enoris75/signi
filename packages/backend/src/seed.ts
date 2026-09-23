@@ -12,6 +12,8 @@ interface RoleStmts {
   insertLexeme: AnyStmt;
   insertForm:   AnyStmt;
   insertLink:   AnyStmt;
+  /** A secondary lexeme's link (P09-E23): found by search, never rendered. */
+  insertAliasLink: AnyStmt;
 }
 
 function buildRoleStmts(role: string): RoleStmts {
@@ -19,6 +21,7 @@ function buildRoleStmts(role: string): RoleStmts {
     insertLexeme: db.prepare(roleInsertSql(role)) as unknown as AnyStmt,
     insertForm:   db.prepare(`INSERT INTO ${role}_forms (lexeme_id, form_key, form_value) VALUES (?, ?, ?)`) as unknown as AnyStmt,
     insertLink:   db.prepare(`INSERT INTO concept_${role}_links (concept_id, lexeme_id, is_primary) VALUES (?, ?, 1)`) as unknown as AnyStmt,
+    insertAliasLink: db.prepare(`INSERT INTO concept_${role}_links (concept_id, lexeme_id, is_primary) VALUES (?, ?, 0)`) as unknown as AnyStmt,
   };
 }
 
@@ -44,6 +47,26 @@ function lexemeArgs(role: string, lang: string, lemma: string, forms: Record<str
       return [lang, lemma, forms['person'] ?? '3', forms['number'] ?? 'singular', forms['gender'] ?? null];
     default:
       return [lang, lemma];
+  }
+}
+
+/**
+ * Refuse an alias the seed cannot mean: one on a pronoun (a pronoun lexeme carries person and
+ * number, and a pronoun is found by its person), a blank one, or one that repeats the concept's
+ * own primary lemma or another alias in the same language.
+ */
+function assertValidAliases(seeds: typeof concepts): void {
+  for (const c of seeds) {
+    if (!c.aliases) continue;
+    if (c.role === 'pronoun') throw new Error(`${c.id}: a pronoun takes no aliases`);
+    for (const [lang, words] of Object.entries(c.aliases)) {
+      const seen = new Set([c.forms[lang]?.['base']]);
+      for (const word of words ?? []) {
+        if (!word.trim()) throw new Error(`${c.id}: a blank ${lang} alias`);
+        if (seen.has(word)) throw new Error(`${c.id}: the ${lang} alias "${word}" repeats a word it already has`);
+        seen.add(word);
+      }
+    }
   }
 }
 
@@ -123,6 +146,18 @@ function seed() {
 
         rs.insertLink.run(c.id, lexemeId);
       }
+
+      // Secondary lexemes (P09-E23): a lemma and nothing more — a noun's singular with no plural
+      // or gender, or the lemma plus the `base` form row every other role keeps. Every reader that
+      // renders or labels filters on is_primary = 1, so these are seen only by the alias query.
+      for (const [lang, words] of Object.entries(c.aliases ?? {})) {
+        for (const word of words ?? []) {
+          const { lastInsertRowid } = rs.insertLexeme.run(...lexemeArgs(c.role, lang, word, {}));
+          const lexemeId = Number(lastInsertRowid);
+          if (c.role !== 'noun') rs.insertForm.run(lexemeId, 'base', word);
+          rs.insertAliasLink.run(c.id, lexemeId);
+        }
+      }
     }
 
     // Hypernyms go in a second pass: the FK points back at semantic_concepts, and a concept is
@@ -137,6 +172,7 @@ function seed() {
   // Neither is caught by the schema — a cycle satisfies every foreign key — and an undetected
   // one would hang the ancestor walk at request time instead of failing here.
   assertValidHierarchy(concepts);
+  assertValidAliases(concepts);
 
   run();
   clearLexiconCache();
