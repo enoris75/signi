@@ -4,6 +4,7 @@ import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { SUBORDINATORS } from './en.consts.js';
 import { invertSubject } from './invertSubject.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
@@ -58,8 +59,16 @@ export function renderClause(given: ResolvedPhrase): string {
   // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
   const withContent = contentSubject ? `${clause} that ${renderClause(contentSubject)}` : clause;
-  const governed = phrase.infinitiveComplement ? `${withContent} ${renderClause(phrase.infinitiveComplement)}` : withContent;
+  // An object clause follows the verb group under "that", and the object slot takes nothing: "the man
+  // says that the cat runs". Its clause never inverts, whatever this one does (P09-E4).
+  const withObject = phrase.contentObject ? `${withContent} that ${renderClause(phrase.contentObject)}` : withContent;
+  const governed = phrase.infinitiveComplement ? `${withObject} ${renderClause(phrase.infinitiveComplement)}` : withObject;
   // A clause of purpose closes the sentence, and English marks it with the bare infinitive the
   // citation mood already gives: "click to change", "select a subject to see the translations".
-  return phrase.purpose ? `${governed} ${renderClause(phrase.purpose)}` : governed;
+  const purposed = phrase.purpose ? `${governed} ${renderClause(phrase.purpose)}` : governed;
+  // An adverbial clause follows everything, under its conjunction and with no comma: "the man runs
+  // when the cat eats" (P09-E4).
+  return phrase.adverbialClause
+    ? `${purposed} ${SUBORDINATORS[phrase.adverbialClause.conjunction]} ${renderClause(phrase.adverbialClause.clause)}`
+    : purposed;
 }

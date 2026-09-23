@@ -32,14 +32,16 @@ import { wordSeg } from './wordSeg.js';
  * `imperativePN` is set only for a top-level command (relative clauses are never imperative).
  * `plain` is set only for a subordinate (prenominal relative) predicate: its finite verb takes
  * the plain form instead of the polite ます (see plainVerbSeg), and so does its aspect (see
- * aspectVerbSegs).
+ * aspectVerbSegs). `'quote'` is the plain form a clause takes before the quotative と (P09-E4), which
+ * differs only where a copula closes it: the terminal 幸せである, not the attributive 幸せな a head noun
+ * would follow (猫が幸せであると言います).
  */
 export function predicateSegs(
   givenVerbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounElement | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
-  plain = false,
+  plain: boolean | 'quote' = false,
   subjectNegative = false,
   // Whether the subject is animate (a person or an animal); picks いる over ある for a located subject.
   animateSubject = false,
@@ -230,7 +232,7 @@ export function predicateSegs(
     const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
     // An "if" clause takes the たら form (幸せだったら), a relative clause the prenominal one (幸せな猫), and
     // a citation the plain one (「行動することが可能である」 "to be able to act").
-    const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' ? 'citation' : plain ? 'prenominal' : 'polite';
+    const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' || plain === 'quote' ? 'citation' : plain ? 'prenominal' : 'polite';
     segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }

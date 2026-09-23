@@ -6,6 +6,7 @@ import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { SUBORDINATORS } from './pt.consts.js';
 import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
@@ -62,5 +63,14 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
   // The content clause closes the phrase, under "que" and in the present subjunctive the
   // translator resolved it in (C30).
   const content = contentSubject ? `que ${renderClause(contentSubject)}` : '';
-  return [subj, predicate, content, complement, purpose].filter(Boolean).join(' ').trim();
+  // An object clause takes the same place under "que", in the mood its verb's lexeme names — the
+  // indicative an assertion takes unless it says otherwise — and nothing stands in the object slot for
+  // it (P09-E4).
+  const object = phrase.contentObject ? `que ${renderClause(phrase.contentObject, true)}` : '';
+  // An adverbial clause closes the sentence under its conjunction, in the mood that conjunction
+  // governs (P09-E4).
+  const adverbial = phrase.adverbialClause
+    ? `${SUBORDINATORS[phrase.adverbialClause.conjunction]} ${renderClause(phrase.adverbialClause.clause, true)}`
+    : '';
+  return [subj, predicate, content, object, complement, purpose, adverbial].filter(Boolean).join(' ').trim();
 }

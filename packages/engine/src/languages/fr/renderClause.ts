@@ -5,6 +5,7 @@ import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { complementGloss } from './complementGloss.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { SUBORDINATORS } from './fr.consts.js';
 import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
@@ -14,6 +15,7 @@ import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
+import { subordinateText } from './subordinateText.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 export function renderClause(phrase: ResolvedPhrase): string {
@@ -50,12 +52,22 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const withContent = contentSubject
     ? `${clause} ${((text) => (/^[aeiouyâêîôûéèh]/i.test(text) ? `qu'${text}` : `que ${text}`))(renderClause(contentSubject))}`
     : clause;
-  const governed = phrase.infinitiveComplement
-    ? `${withContent} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`
+  // An object clause follows under "que", in the mood its verb's lexeme names, and the object slot
+  // takes no expletive: "l'homme dit que le chat court" (P09-E4).
+  const withObject = phrase.contentObject
+    ? `${withContent} ${subordinateText('que', renderClause(phrase.contentObject))}`
     : withContent;
+  const governed = phrase.infinitiveComplement
+    ? `${withObject} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`
+    : withObject;
   // A clause of purpose closes the sentence, under "pour" + the infinitive ("cliquer pour changer").
   // It is subject-controlled, so it agrees with this clause's own subject, as a complement does.
-  return phrase.purpose
+  const purposed = phrase.purpose
     ? `${governed} ${infinitiveComplementText(phrase.purpose, subject.agreement, 'pour')}`
     : governed;
+  // An adverbial clause follows everything, under its conjunction, in the mood that conjunction
+  // governs: "l'homme court parce que le chat mange", "… avant que le chat mange" (P09-E4).
+  return phrase.adverbialClause
+    ? `${purposed} ${subordinateText(SUBORDINATORS[phrase.adverbialClause.conjunction], renderClause(phrase.adverbialClause.clause))}`
+    : purposed;
 }

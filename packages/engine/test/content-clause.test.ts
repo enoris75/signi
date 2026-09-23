@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { LanguageCode, PhrasePlan } from '@signi/shared';
-import { np, say, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
@@ -115,5 +115,124 @@ describe('the two modals it unblocks', () => {
     expect(definitionAll('MIGHT')).not.toEqual(definitionAll('CAN'));
     expect(definitionAll('CAN').ja).toBe('行動することが可能である。');
     expect(definitionAll('MIGHT').ja).not.toContain('可能');
+  });
+});
+
+// P09-E4: the same clause in the object slot — what a verb of saying, thinking or knowing reports. The
+// host decides three things: the mood (the verb's lexeme, indicative by default), the expletive (none),
+// and in Japanese whether the clause is quoted (と) or nominalized (ことを).
+const reports = (verb: string, extra: Partial<PhrasePlan> = {}): PhrasePlan => ({
+  subject: np('MAN'),
+  verbPhrase: { verb },
+  contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } },
+  ...extra,
+});
+
+describe('a content clause as the object', () => {
+  test.each<[string, Record<LanguageCode, string>]>([
+    ['SAY', {
+      en: 'the man says that the cat runs.', it: "l'uomo dice che il gatto corre.",
+      fr: "l'homme dit que le chat court.", de: 'der Mann sagt, dass der Kater läuft.',
+      es: 'el hombre dice que el gato corre.', ja: '男は猫が走ると言います。', pt: 'o homem diz que o gato corre.',
+    }],
+    ['THINK', {
+      en: 'the man thinks that the cat runs.', it: "l'uomo pensa che il gatto corra.",
+      fr: "l'homme pense que le chat court.", de: 'der Mann denkt, dass der Kater läuft.',
+      es: 'el hombre piensa que el gato corre.', ja: '男は猫が走ると考えます。', pt: 'o homem pensa que o gato corre.',
+    }],
+    ['BELIEVE', {
+      en: 'the man believes that the cat runs.', it: "l'uomo crede che il gatto corra.",
+      fr: "l'homme croit que le chat court.", de: 'der Mann glaubt, dass der Kater läuft.',
+      es: 'el hombre cree que el gato corre.', ja: '男は猫が走ると信じています。', pt: 'o homem acredita que o gato corre.',
+    }],
+    ['KNOW', {
+      en: 'the man knows that the cat runs.', it: "l'uomo sa che il gatto corre.",
+      fr: "l'homme sait que le chat court.", de: 'der Mann weiß, dass der Kater läuft.',
+      es: 'el hombre sabe que el gato corre.', ja: '男は猫が走ることを知っています。', pt: 'o homem sabe que o gato corre.',
+    }],
+  ])('%s', (verb, rendered) => {
+    expect(sayAll(reports(verb))).toEqual(rendered);
+  });
+
+  // TELL is said *to* someone, and English writes that addressee bare ahead of a clause — "tells the
+  // dog that", never "tells to the dog that" — where a story keeps its "to".
+  test('TELL, with its addressee', () => {
+    expect(sayAll(reports('TELL', { complements: { terminus: { phrase: np('DOG') } } }))).toEqual({
+      en: 'the man tells the dog that the cat runs.', it: "l'uomo racconta al cane che il gatto corre.",
+      fr: "l'homme raconte au chien que le chat court.", de: 'der Mann erzählt dem Hund, dass der Kater läuft.',
+      es: 'el hombre cuenta al perro que el gato corre.', ja: '男は猫が走ると犬に伝えます。',
+      pt: 'o homem conta ao cão que o gato corre.',
+    });
+    expect(say(clause(np('MAN'), 'TELL', { directObject: np('STORY'), complements: { terminus: { phrase: np('DOG') } } }), 'en'))
+      .toBe('the man tells the story to the dog.');
+  });
+
+  // D1: an assertion is in the indicative. The subject clause's subjunctive must not leak into it — "dice
+  // che il gatto corre", never "corra" — and its object and complements come along intact. Italian
+  // pensare and credere are the verbs whose own lexeme asks for the subjunctive.
+  test('the Romance object clause is in the indicative unless the verb says otherwise', () => {
+    const eats = reports('SAY', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') } });
+    expect(sayAll(eats)).toMatchObject({
+      it: "l'uomo dice che il gatto mangia il cibo.", fr: "l'homme dit que le chat mange la nourriture.",
+      es: 'el hombre dice que el gato come la comida.', pt: 'o homem diz que o gato come a comida.',
+    });
+    expect(say(reports('THINK'), 'it')).toBe("l'uomo pensa che il gatto corra.");
+    expect(say(reports('THINK'), 'fr')).toBe("l'homme pense que le chat court.");
+  });
+
+  // KNOW's object sense (conoscere / connaître / kennen) is for a noun object. A clause is a fact, which
+  // is sapere / savoir / wissen.
+  test('KNOW keeps its fact sense before a clause', () => {
+    expect(sayAll(reports('KNOW'))).toMatchObject({
+      it: "l'uomo sa che il gatto corre.", fr: "l'homme sait que le chat court.", de: 'der Mann weiß, dass der Kater läuft.',
+    });
+  });
+
+  // D2: the verbs of saying and thinking quote with と, the rest nominalize with ことを — not
+  // interchangeable, since 猫が走ることを言います says "says the fact that the cat runs". The clause inside
+  // is plain either way, its subject が; a quoted copula closes on its terminal form, not the attributive
+  // な a head noun would take.
+  test('Japanese quotes with と and nominalizes with ことを', () => {
+    for (const verb of ['SAY', 'THINK', 'BELIEVE', 'TELL']) expect(say(reports(verb), 'ja')).toMatch(/^男は猫が走ると/);
+    expect(say(reports('KNOW'), 'ja')).toBe('男は猫が走ることを知っています。');
+    expect(say(reports('SAY', {
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('HAPPY') } } },
+    }), 'ja')).toBe('男は猫が幸せであると言います。');
+  });
+
+  // D3: the subject clause writes an expletive in the slot it left; the object clause leaves none.
+  test('a subject clause keeps its expletive and an object clause takes none', () => {
+    const subject = sayAll(evaluative('RIGHT_CORRECT'));
+    const object = sayAll(reports('SAY'));
+    expect([subject.en, subject.fr, subject.de].map((s) => s.split(' ')[0])).toEqual(['it', 'il', 'es']);
+    expect(object.en).not.toMatch(/\bit\b/);
+    expect(object.fr).not.toMatch(/\bil\b/);
+    expect(object.de).not.toMatch(/\bes\b/);
+  });
+
+  // German extraposes the object clause as it does the subject clause: comma, dass, verb-final.
+  test('the German object clause is verb-final behind a comma and "dass"', () => {
+    expect(say(reports('SAY', {
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') },
+    }), 'de')).toBe('der Mann sagt, dass der Kater das Essen frisst.');
+  });
+
+  // A question inverts the clause it asks, and never the clause it reports.
+  test('under a question the reported clause keeps its statement order', () => {
+    expect(say(reports('SAY', { interrogative: true }), 'en')).toBe('does the man say that the cat runs?');
+    expect(say(reports('SAY', { interrogative: true }), 'de')).toBe('sagt der Mann, dass der Kater läuft?');
+    expect(say(reports('SAY', { interrogative: true }), 'fr')).toBe("est-ce que l'homme dit que le chat court ?");
+  });
+
+  // "que" elides before a vowel, and the pro-drop languages drop a pronoun subject inside the clause
+  // as they do anywhere else.
+  test('a pronoun subject inside the clause', () => {
+    expect(sayAll(reports('SAY', {
+      contentObject: { subject: np('THIRD_PERSON', { gender: 'masc' }), verbPhrase: { verb: 'RUN' } },
+    }))).toEqual({
+      en: 'the man says that he runs.', it: "l'uomo dice che corre.", fr: "l'homme dit qu'il court.",
+      de: 'der Mann sagt, dass er läuft.', es: 'el hombre dice que corre.', ja: '男は彼が走ると言います。',
+      pt: 'o homem diz que corre.',
+    });
   });
 });

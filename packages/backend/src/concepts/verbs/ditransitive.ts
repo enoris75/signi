@@ -390,7 +390,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     isA: 'SAY',
     forms: {
       en: {
-        base: 'tell',
+        // What is told may be a clause, and then the addressee is a bare object ahead of it: "tells the
+        // dog that the cat runs", never "tells to the dog that…" (`clause_terminus_bare`, P09-E4). A
+        // story keeps its "to" ("tells the story to the man").
+        base: 'tell', clause_terminus_bare: '1',
         '1sg_present': 'tell', '2sg_present': 'tell', '3sg_present': 'tells',
         '1pl_present': 'tell', '2pl_present': 'tell', '3pl_present': 'tell',
         past: 'told',
@@ -432,7 +435,9 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'contaremos', '2pl_future': 'contaréis', '3pl_future': 'contarán',
       },
       ja: {
-        base: '伝える',
+        // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると伝えます —
+        // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
+        base: '伝える', content_clause_link: 'と',
         reading: 'つたえる',
         masu_present: '伝えます',
         masu_present_reading: 'つたえます',

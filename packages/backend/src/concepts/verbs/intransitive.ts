@@ -1430,7 +1430,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
         past: 'thought',
       },
       it: {
-        base: 'pensare',
+        // Italian puts what one thinks in the subjunctive in the standard register: "pensa che il gatto
+        // corra" (`content_clause_mood`, P09-E4). French, Spanish and Portuguese keep the indicative.
+        base: 'pensare', content_clause_mood: 'subjunctive',
         '1sg_present': 'penso', '2sg_present': 'pensi', '3sg_present': 'pensa',
         '1pl_present': 'pensiamo', '2pl_present': 'pensate', '3pl_present': 'pensano',
         '1sg_past': 'pensai', '2sg_past': 'pensasti', '3sg_past': 'pensò',
@@ -1466,7 +1468,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'pensaremos', '2pl_future': 'pensaréis', '3pl_future': 'pensarán',
       },
       ja: {
-        base: '考える',
+        // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると考えます —
+        // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
+        base: '考える', content_clause_link: 'と',
         reading: 'かんがえる',
         masu_present: '考えます',
         masu_present_reading: 'かんがえます',

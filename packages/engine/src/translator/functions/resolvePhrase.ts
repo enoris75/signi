@@ -1,11 +1,14 @@
 import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
-import { CONTENT_CLAUSE_MOOD } from '../translator.consts.js';
+import { adverbialClauseMood } from './adverbialClauseMood.js';
+import { clauseAddressee } from './clauseAddressee.js';
+import { contentClauseMood } from './contentClauseMood.js';
 import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { negativePolarity } from './negativePolarity.js';
+import { predicativeGovernor } from './predicativeGovernor.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
@@ -129,7 +132,8 @@ export function resolvePhrase(
   const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
   const resolved: ResolvedPhrase = {
     subject: passive || experiencer ? directObject : subject,
-    verbPhrase,
+    // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
+    verbPhrase: clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject),
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic ? { agent: subject } : {}),
     complements: experiencer && !generic
@@ -147,9 +151,26 @@ export function resolvePhrase(
           { ...plan, infinitiveComplement: plan.infinitiveComplement }, language, lookup, verbPhrase?.verb.forms)
       : undefined,
     // A content clause standing where the subject would ("it is right that one acts", C30): a clause
-    // of its own, in the mood this language puts such a clause in.
+    // of its own, in the mood its predicate adjective's lexeme names (P09-E4, see `contentClauseMood`).
     contentSubject: plan.contentSubject
-      ? resolvePhrase(plan.contentSubject, language, lookup, CONTENT_CLAUSE_MOOD[language])
+      ? resolvePhrase(plan.contentSubject, language, lookup,
+        contentClauseMood(predicativeGovernor(plan, language, lookup), language, 'subject'))
+      : undefined,
+    // A content clause standing where the object would ("says that the cat runs", P09-E4): a clause
+    // of its own, in the mood the governing verb's lexeme names — the indicative unless it says
+    // otherwise. The verb is not in scope where the clause renders, so the choice is made here, where
+    // it is. Without a verb there is nothing to govern it, and a verbless period drops it.
+    contentObject: plan.contentObject && verbPhrase
+      ? resolvePhrase(plan.contentObject, language, lookup, contentClauseMood(verbPhrase.verb.forms, language, 'object'))
+      : undefined,
+    // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
+    // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.
+    adverbialClause: plan.adverbialClause && verbPhrase
+      ? {
+          conjunction: plan.adverbialClause.conjunction,
+          clause: resolvePhrase(plan.adverbialClause.clause, language, lookup, adverbialClauseMood(
+            plan.adverbialClause.conjunction, language, plan.adverbialClause.clause.verbPhrase.tense)),
+        }
       : undefined,
     // A clause of purpose is a clause of its own in the citation mood, its unspoken subject always
     // this clause's own — the one who clicks is the one who changes — so it needs no control. It

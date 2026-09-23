@@ -36,6 +36,7 @@ import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
+import { subordinator } from './subordinator.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
 import { zuInfinitive } from './zuInfinitive.js';
@@ -102,14 +103,25 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   const withContent = phrase.contentSubject
     ? `${clause}, dass ${renderClause(phrase.contentSubject, false, true)}`
     : clause;
-  const governed = phrase.infinitiveComplement && !bare
-    ? `${withContent}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+  // An object clause is extraposed exactly as a subject clause is — comma, "dass", verb-final — but
+  // the object slot it left takes no "es": "der Mann sagt, dass der Kater läuft" (P09-E4).
+  const withObject = phrase.contentObject
+    ? `${withContent}, dass ${renderClause(phrase.contentObject, false, true)}`
     : withContent;
+  const governed = phrase.infinitiveComplement && !bare
+    ? `${withObject}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+    : withObject;
   // A clause of purpose is extraposed the same way, inside the "um … zu" frame German puts a final
   // clause in: "klicken, um zu ändern", "ein Subjekt selektieren, um die Übersetzungen zu sehen".
-  return phrase.purpose
+  const purposed = phrase.purpose
     ? `${governed}, um ${renderClause(phrase.purpose, false, false, true)}`
     : governed;
+  // An adverbial clause closes the sentence behind a comma, verb-final under its conjunction, as every
+  // subordinate clause is: "der Mann läuft, weil der Kater isst" (P09-E4). It stands behind the main
+  // clause, so the main clause keeps its V2 order.
+  return phrase.adverbialClause
+    ? `${purposed}, ${subordinator(phrase.adverbialClause)} ${renderClause(phrase.adverbialClause.clause, false, true)}`
+    : purposed;
 }
 
 function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean, bareGoverned = ''): string {

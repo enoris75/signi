@@ -159,15 +159,17 @@ export const adjectives: ConceptSeed[] = [
     description: 'of high quality or virtue',
     definition: dimGloss('QUALITY', 'HIGH'),
     emoji: '✨',
+    // An evaluative predicate: a clause it is said of is judged, not asserted, and the four Romance
+    // languages put it in the subjunctive — "è buono che si agisca" (`content_clause_mood`, P09-E4).
     forms: {
       en: { base: 'good' },
-      it: { base: 'buono' },
-      fr: { base: 'bon' },
+      it: { base: 'buono', content_clause_mood: 'subjunctive' },
+      fr: { base: 'bon', content_clause_mood: 'subjunctive' },
       // Suppletive: gut → besser / best, no rule derives it (cf. English good → better).
       de: { base: 'gut', comparative: 'besser', superlative: 'best' },
-      es: { base: 'bueno' },
+      es: { base: 'bueno', content_clause_mood: 'subjunctive' },
       ja: { base: '良い', reading: 'よい' },
-      pt: { base: 'bom' },
+      pt: { base: 'bom', content_clause_mood: 'subjunctive' },
     },
   },
   {
@@ -742,16 +744,18 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     description: 'that may come about',
     emoji: '🎲',
+    // Said of a clause, which the four Romance languages then put in the subjunctive — "è possibile
+    // che si agisca" (`content_clause_mood`, P09-E4).
     forms: {
       en: { base: 'possible' },
-      it: { base: 'possibile' },
-      fr: { base: 'possible' },
+      it: { base: 'possibile', content_clause_mood: 'subjunctive' },
+      fr: { base: 'possible', content_clause_mood: 'subjunctive' },
       de: { base: 'möglich' },
-      es: { base: 'posible' },
+      es: { base: 'posible', content_clause_mood: 'subjunctive' },
       // 起こり得る is 得る, an ichidan verb, so the predicate inflects as a verb and not through the
       // copula (`ja_verbal`): 行動することが起こり得ます, never "起こり得るです".
       ja: { base: '起こり得る', reading: 'おこりえる', ja_verbal: '1' },
-      pt: { base: 'possível' },
+      pt: { base: 'possível', content_clause_mood: 'subjunctive' },
     },
   },
   {
@@ -1758,15 +1762,17 @@ export const adjectives: ConceptSeed[] = [
     definition: subjectGapGloss('OBJECT_THING', 'HAVE', { object: 'ERROR', number: 'plural', negative: true }),
     emoji: '🎯',
     synonym: 'correct',
+    // Evaluative: the clause it is said of goes into the Romance subjunctive — "è giusto che si
+    // agisca" (`content_clause_mood`, P09-E4).
     forms: {
       en: { base: 'right' },
-      it: { base: 'giusto' },
+      it: { base: 'giusto', content_clause_mood: 'subjunctive' },
       // Juste, not bon: "la bonne réponse" is the idiom, but bon is GOOD's word.
-      fr: { base: 'juste' },
+      fr: { base: 'juste', content_clause_mood: 'subjunctive' },
       de: { base: 'richtig' },
-      es: { base: 'correcto' },
+      es: { base: 'correcto', content_clause_mood: 'subjunctive' },
       ja: { base: '正しい', reading: 'ただしい' },
-      pt: { base: 'certo' },
+      pt: { base: 'certo', content_clause_mood: 'subjunctive' },
     },
   },
   {

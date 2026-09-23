@@ -1,4 +1,5 @@
 import type { Aspect, ComplementType, CoordConjunction, Degree, FocusParticle, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -351,6 +352,21 @@ export interface ResolvedPhrase {
    * nothing, and Japanese the clause itself, nominalized.
    */
   contentSubject?: ResolvedPhrase;
+  /**
+   * A resolved **content clause standing where the direct object would** (see
+   * PhrasePlan.contentObject): "says **that the cat runs**". A clause of its own, resolved in the mood
+   * the governing verb's lexeme names (`content_clause_mood`) — the indicative unless it says
+   * otherwise. Nothing is written in the object slot for it; the engines put it where their own
+   * grammar puts an object clause, behind the clause (German after a comma, verb-final) or, in
+   * Japanese, ahead of the predicate under the verb's と or ことを (`content_clause_link`).
+   */
+  contentObject?: ResolvedPhrase;
+  /**
+   * A resolved **adverbial clause** (see PhrasePlan.adverbialClause): the conjunction, which each
+   * engine spells, and a clause of its own in the mood the conjunction governs — the indicative, or
+   * the subjunctive after the Romance *before*.
+   */
+  adverbialClause?: { conjunction: SubordinatingConjunction; clause: ResolvedPhrase };
   /**
    * A resolved clause of purpose — what the act is done for ("click **to change**", see
    * PhrasePlan.purpose). Like an infinitive complement it is a clause of its own in the

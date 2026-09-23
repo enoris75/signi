@@ -1,4 +1,5 @@
 import type { CoordConjunction, Degree, DimensionRelation, MannerRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -131,6 +132,14 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'cioè',
   therefore: 'quindi',
   then: 'e poi',
+};
+
+/**
+ * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). "Prima che" governs the
+ * subjunctive, which the translator resolves the clause in; the others take the indicative.
+ */
+export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
+  when: 'quando', while: 'mentre', because: 'perché', after: 'dopo che', before: 'prima che',
 };
 
 /**

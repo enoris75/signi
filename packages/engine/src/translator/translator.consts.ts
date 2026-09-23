@@ -6,6 +6,7 @@ import { italianEngine } from '../languages/it/index.js';
 import { japaneseEngine } from '../languages/ja/index.js';
 import { portugueseEngine } from '../languages/pt/index.js';
 import type { LanguageEngine } from '../types.js';
+import type { SubordinatingConjunction } from '@signi/shared';
 
 export const engines: LanguageEngine[] = [
   englishEngine,
@@ -55,10 +56,14 @@ export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
 export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);
 
 /**
- * The mood a **content clause** stands in as the subject of an evaluative predicate (see
- * PhrasePlan.contentSubject, C30). The four Romance languages put it in the present subjunctive —
- * "che si agisca", "qu'on agisse", "que se actúe", "que se aja" — because what it names is judged
- * rather than asserted. English, German and Japanese have no such mood and keep the indicative.
+ * The mood a **content clause** stands in when its governor asks for the subjunctive — the four
+ * Romance languages' present subjunctive, "che si agisca", "qu'on agisse", "que se actúe", "que se
+ * aja". English, German and Japanese have no such mood and keep the indicative.
+ *
+ * It was the rule for C30's clausal subject, which only evaluative predicates host; since P09-E4 the
+ * governor's lexeme names its own mood (`content_clause_mood`, see `contentClauseMood`), and this is
+ * what "subjunctive" means per language — and the **fallback** for a subject clause whose predicate
+ * declares nothing, because what a subject clause names is judged rather than asserted.
  */
 export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
   it: 'presentSubjunctive', fr: 'presentSubjunctive', es: 'presentSubjunctive', pt: 'presentSubjunctive',
@@ -99,3 +104,20 @@ export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr',
 
 /** Verb transitivities that have a patient to promote, and can therefore be passivized. */
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
+
+/**
+ * The subordinating conjunctions that govern the **subjunctive** in the four Romance languages (see
+ * PhrasePlan.adverbialClause, P09-E4): *prima che*, *avant que*, *antes de que*, *antes que* all do,
+ * where *when*, *after* and *because* take the indicative. A fact about the conjunction, so it lives
+ * here and not on any lexeme — nothing governs an adverbial clause but the word that introduces it.
+ */
+export const SUBJUNCTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['before']);
+
+/**
+ * The languages whose subjunctive clause says a **past** event in the imperfect subjunctive rather
+ * than the present one: "prima che il gatto mangiasse", "antes de que el gato comiera", "antes que o
+ * gato comesse". French is not among them — its imperfect subjunctive is literary, and the spoken
+ * language keeps the present ("avant que le chat mange") — and the engines' `'subjunctive'` in
+ * French is the imparfait a condition takes, which would be wrong here.
+ */
+export const PAST_SUBJUNCTIVE_LANGUAGES: ReadonlySet<string> = new Set(['it', 'es', 'pt']);

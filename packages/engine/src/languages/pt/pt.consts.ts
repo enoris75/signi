@@ -1,4 +1,5 @@
 import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, TemporalRelation, Tense } from '@signi/shared';
+import type { SubordinatingConjunction } from '@signi/shared';
 import type { ConceptForms } from '../../types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -136,6 +137,14 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   // As in Spanish, "então" spans both senses; "portanto" / "e depois" separate them.
   therefore: 'portanto',
   then: 'e depois',
+};
+
+/**
+ * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). "Antes que" governs the
+ * subjunctive, which the translator resolves the clause in; the others take the indicative.
+ */
+export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
+  when: 'quando', while: 'enquanto', because: 'porque', after: 'depois que', before: 'antes que',
 };
 
 /**
