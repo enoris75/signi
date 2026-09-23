@@ -2,16 +2,17 @@
 
 **Construct:** a role said of the **subject** while the verb does something else — "the woman acts
 **as a friend**", *come amica*, *als Freundin*, 友達として. From
-[P09-E2's D3](Z-done/P09-E2-complement-types.md#d3-as-is-a-role-on-the-subject-and-its-host-is-the-open-question),
-deferred there with "if it is wanted, take (1)", and its [Done](Z-done/P09-E2-complement-types.md#done)
+[P09-E2's D3](P09-E2-complement-types.md#d3-as-is-a-role-on-the-subject-and-its-host-is-the-open-question),
+deferred there with "if it is wanted, take (1)", and its [Done](P09-E2-complement-types.md#done)
 follow-ups.
 **Shape:** one new `ComplementType`, `role`, paying E2's seven-site table once more. Its marker, its
 article rule and its seven words are the essive's
-([`ObjectPredication`](../../../../packages/shared/src/index.ts#L533)); only the **controller**
+([`ObjectPredication`](../../../../../packages/shared/src/index.ts#L533)); only the **controller**
 differs — the subject instead of the object.
 **Scope:** all 7 languages, noun heads only (D4). Plan-only in a first pass: no box, like E2's
 `purpose` and `topic`.
-**Status:** planning, unscheduled. Filed 2026-09-23 from P09-E2's follow-ups.
+**Status:** **shipped, 2026-09-23**, plan-only — in the engine for all seven languages, carried
+inertly by the frontend; see [Done](#done). Filed the same day from P09-E2's follow-ups.
 **Words:** *as*. The brief's own "works as a teacher" needs TEACHER and a labour-sense WORK, neither
 seeded (the corpus's WORK is *function*: "funziona", "fonctionne"); ACT, READ, FRIEND and STUDENT
 stand in below. File the two as seed tickets if the table should use them.
@@ -32,6 +33,55 @@ object already renders at HEAD (*Today*); the third is where that stand-in goes 
 column is engine output today, the `manner` similative — shown because it is the construct the role
 must stay distinct from (D3).
 
+## Done
+
+Shipped 2026-09-23, as designed. What landed, and where it differs from the plan below:
+
+- **`role` is a `ComplementType`** (D1), doc-commented with D1–D4, placed right after `terminus` in
+  `COMPLEMENT_RENDER_ORDER` (D6), in `COMPLEMENT_LABELS` and `DETERMINER_COMPLEMENT_TYPES`, and
+  **not** in `COMPLEMENT_TYPES`: no box. `defaultDefiniteness('role')` is `indefinite` (D3), and
+  `ObjectPredication`'s doc comment names it as the essive's subject-oriented counterpart.
+- **Every column of the table renders as proposed**, the similative column unchanged — tested in
+  [`role.test.ts`](../../../../../packages/engine/test/complements/role.test.ts), with a plural, a
+  coordinated role, a past tense, the order beside a recipient, the article rule and D4's drops.
+- **One essive helper per engine** (D2), `essivePhrase(c, controller)` in the it / fr / es / pt
+  `complementsPhrase`, called by the essive `objectPredicative` with `objectForms` and by `role` with
+  the subject's forms. The factitive branch lost its `essive ?` ternaries; `objectPredicative.test.ts`
+  is untouched and green. Spanish's shared predicate-noun rendering became `predicateNoun`.
+- **German** treats `role` as the essive for the bare noun and takes `ESSIVE_ROLE_CASE = 'nom'`
+  ([`de.consts.ts`](../../../../../packages/engine/src/languages/de/de.consts.ts)): "liest das Buch
+  **als Student**" beside the essive's "verwendet das Buch als Studenten" (tested). It sits with the
+  adjuncts, not the Mittelfeld-final predicates.
+- **Japanese** needed no code beyond `PARTICLE.role = 'として'`: the role goes through the adjunct
+  block ahead of the object (男は学生として本を読みます), the essive stays after it (tested).
+- **English** is `PREP.role = 'as'` on the shared path, which keeps the plan's article.
+- **The translator drops a role headed by an adjective or a pronoun** (D4), the whole group if any
+  conjunct is one (`ROLE_EXCLUDED_HEADS` in `resolveComplements`).
+- **Gender and number are the plan's own** (D5): "la donna agisce come amic**a**" is FRIEND with
+  `gender: 'fem'`; nothing is inferred from the subject.
+- **Frontend, inert** (§4): `COMPLEMENT_LABEL_KEYS` → `slot.role`, `COMPLEMENT_KEYS` → **E** (from the
+  essive; R and A are taken), `complementIcons` → a badge, and `BoxComplementType` excludes it with
+  the object complement and the comitative.
+- **Seeded:** ROLE_COMPLEMENT behind `slot.role`, **literal by design** (no ROLE noun to gloss it
+  with: "a complement that indicates roles") — it "complemento di ruolo", fr "complément
+  circonstanciel de rôle", de "adverbiale Bestimmung der Rolle", es "complemento circunstancial de
+  función", pt "adjunto adverbial de papel", ja 役割の副詞語句. ACT licenses `role`. **`signi.db`
+  needs a reseed** for both.
+- **The weak-feminine defect** met in *Today* is [A270](../../../../bugs/A-must-fix/A270-german-feminine-of-a-weak-noun-takes-the-weak-ending.md),
+  already filed, and it does **not** reach the role: the nominative takes no weak ending, so "als
+  Studentin" is right today. It was not fixed first, contrary to §3's note.
+
+Follow-ups, beside *Out of scope* below:
+
+- **A relative clause over a role gap** — "the friend the man acts as" — renders wrong in six
+  languages ("the friend as whom the man acts", "l'amico come quale…", "den Freund, als  der Mann
+  handelt"). No control can build one (the console and the canvas relativise only `COMPLEMENT_TYPES`),
+  so the random-phrase tool now leaves `role` out of its gaps, as it does the predicates. Wants either
+  a stranded *as* or a refusal in the translator, like the predicative's.
+- **A ROLE noun**, so ROLE_COMPLEMENT can be glossed like PURPOSE_COMPLEMENT.
+- **More verbs licensing `role`** — only ACT does. READ and the others render it as a free adjunct,
+  but the word map and the console name only what a verb licenses.
+
 ## Why
 
 A role is how a sentence says in what capacity someone does something: "acts as a friend", "reads
@@ -45,29 +95,29 @@ for agreement in German and the wrong order in Japanese the moment the verb has 
 
 Verified at HEAD, 2026-09-23.
 
-- [`ComplementType`](../../../../packages/shared/src/index.ts#L254) has fourteen members and no
+- [`ComplementType`](../../../../../packages/shared/src/index.ts#L254) has fourteen members and no
   `role`. The subject's predication is `predicative`, the copula's complement ("becomes a
   student"), which renders a predicate noun **with** its article — "la donna diventa uno studente",
   "die Frau wird ein Student" (probe) — and German returns from it early
-  ([`de/complementsPhrase.ts#L95`](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L95)).
+  ([`de/complementsPhrase.ts#L95`](../../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L95)).
 - **The essive is spelled in all seven** and names a role: en
-  [`ESSIVE = 'as'`](../../../../packages/engine/src/languages/en/en.consts.ts#L53), it *come*
-  ([`it/complementsPhrase.ts#L99`](../../../../packages/engine/src/languages/it/complementsPhrase.ts#L99)),
-  fr *comme* ([L90](../../../../packages/engine/src/languages/fr/complementsPhrase.ts#L90)), es *como*
-  ([L94](../../../../packages/engine/src/languages/es/complementsPhrase.ts#L94)), pt *como*
-  ([L97](../../../../packages/engine/src/languages/pt/complementsPhrase.ts#L97)), de *als*
-  ([L108](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L108)),
-  ja [`JA_ESSIVE = 'として'`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L106). Romance and
+  [`ESSIVE = 'as'`](../../../../../packages/engine/src/languages/en/en.consts.ts#L53), it *come*
+  ([`it/complementsPhrase.ts#L99`](../../../../../packages/engine/src/languages/it/complementsPhrase.ts#L99)),
+  fr *comme* ([L90](../../../../../packages/engine/src/languages/fr/complementsPhrase.ts#L90)), es *como*
+  ([L94](../../../../../packages/engine/src/languages/es/complementsPhrase.ts#L94)), pt *como*
+  ([L97](../../../../../packages/engine/src/languages/pt/complementsPhrase.ts#L97)), de *als*
+  ([L108](../../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L108)),
+  ja [`JA_ESSIVE = 'として'`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L106). Romance and
   German force the noun bare (`withDefiniteness(conjunct, 'bare')`); English keeps the article.
 - **The essive's controller is the object, hard-wired.** Italian agrees an adjective head with
   `objectForms`
-  ([L101-L103](../../../../packages/engine/src/languages/it/complementsPhrase.ts#L101)); German takes
+  ([L101-L103](../../../../../packages/engine/src/languages/it/complementsPhrase.ts#L101)); German takes
   the object's case through
-  [`OBJECT_PREDICATIVE_CASE`](../../../../packages/engine/src/languages/de/de.consts.ts#L13)
+  [`OBJECT_PREDICATIVE_CASE`](../../../../../packages/engine/src/languages/de/de.consts.ts#L13)
   (`als: 'acc'`,
-  [L204-L208](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L204));
+  [L204-L208](../../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts#L204));
   Japanese emits the `objectPredicative` **after** the direct object
-  ([`predicateSegs.ts#L245-L247`](../../../../packages/engine/src/languages/ja/predicateSegs.ts#L245)),
+  ([`predicateSegs.ts#L245-L247`](../../../../../packages/engine/src/languages/ja/predicateSegs.ts#L245)),
   where the adjuncts precede it.
 - Probed with an essive `objectPredicative` and **no object** on ACT: "the woman acts as a friend",
   "la donna agisce come amica" (with `gender: 'fem'`), "die Frau handelt als Freundin", 女は友達として
@@ -75,17 +125,17 @@ Verified at HEAD, 2026-09-23.
   Mann liest das Buch als **Studenten**" (accusative), and 男は本を学生として読みます reads "treats the
   book as a student". Nothing rejects an `objectPredicative` on an intransitive verb: the engine does
   not check `Concept.complements`
-  ([`resolveComplements`](../../../../packages/engine/src/translator/functions/resolveComplements.ts#L20)).
+  ([`resolveComplements`](../../../../../packages/engine/src/translator/functions/resolveComplements.ts#L20)).
 - The **similative manner** is the neighbouring construct and renders today: "acts like a friend",
   "agisce come **un** amico", "handelt **wie** ein Freund", 友達**のように** — en
-  [`MANNER_PREP`](../../../../packages/engine/src/languages/en/en.consts.ts#L65), de
-  [`mannerPrepCase`](../../../../packages/engine/src/languages/de/mannerPrepCase.ts). The Romance
+  [`MANNER_PREP`](../../../../../packages/engine/src/languages/en/en.consts.ts#L65), de
+  [`mannerPrepCase`](../../../../../packages/engine/src/languages/de/mannerPrepCase.ts). The Romance
   engines spell both *come / comme / como*; only the article tells them apart.
-- [`defaultDefiniteness`](../../../../packages/shared/src/index.ts#L86) returns `indefinite` for
+- [`defaultDefiniteness`](../../../../../packages/shared/src/index.ts#L86) returns `indefinite` for
   `predicative` and `objectPredicative` only; every other slot defaults to `definite`.
 - **A defect met on the way, not this task's:** German declines the feminine counterpart of a weak
   noun as weak — "der Mann sieht die **Studentinen**", "gibt der Studentinen das Buch" (STUDENT
-  `weak: '1'` with `fem: 'Studentin'`; [`applyNounGender`](../../../../packages/engine/src/translator/functions/applyNounGender.ts)
+  `weak: '1'` with `fem: 'Studentin'`; [`applyNounGender`](../../../../../packages/engine/src/translator/functions/applyNounGender.ts)
   swaps the base and keeps the flag). Any slot, not only a role; it wants a bug file of its own.
 
 ## Design
@@ -158,43 +208,43 @@ gender is a follow-up for both slots at once.
 "acts as a friend in the house" and "in the house as a friend" are both fine.
 
 **Recommendation: `role` right after `terminus`** in
-[`COMPLEMENT_RENDER_ORDER`](../../../../packages/shared/src/index.ts#L287), before the comitative.
+[`COMPLEMENT_RENDER_ORDER`](../../../../../packages/shared/src/index.ts#L287), before the comitative.
 Japanese takes it from there into the adjunct block, before the object (D2).
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
 
-- `role` in `ComplementType` ([L254](../../../../packages/shared/src/index.ts#L254)), doc-commented
+- `role` in `ComplementType` ([L254](../../../../../packages/shared/src/index.ts#L254)), doc-commented
   with D1-D4 and pointed at `ObjectPredication` for the word.
-- `COMPLEMENT_RENDER_ORDER` ([L287](../../../../packages/shared/src/index.ts#L287)) per D6,
-  `COMPLEMENT_LABELS` ([L289](../../../../packages/shared/src/index.ts#L289)) `role: 'Role'`,
-  `DETERMINER_COMPLEMENT_TYPES` ([L315](../../../../packages/shared/src/index.ts#L315)). **Not** in
-  `COMPLEMENT_TYPES` ([L265](../../../../packages/shared/src/index.ts#L265)) — no box yet.
-- `defaultDefiniteness` ([L86](../../../../packages/shared/src/index.ts#L86)): `role` joins the two
+- `COMPLEMENT_RENDER_ORDER` ([L287](../../../../../packages/shared/src/index.ts#L287)) per D6,
+  `COMPLEMENT_LABELS` ([L289](../../../../../packages/shared/src/index.ts#L289)) `role: 'Role'`,
+  `DETERMINER_COMPLEMENT_TYPES` ([L315](../../../../../packages/shared/src/index.ts#L315)). **Not** in
+  `COMPLEMENT_TYPES` ([L265](../../../../../packages/shared/src/index.ts#L265)) — no box yet.
+- `defaultDefiniteness` ([L86](../../../../../packages/shared/src/index.ts#L86)): `role` joins the two
   predicatives' `indefinite`.
-- `ObjectPredication`'s doc comment ([L514](../../../../packages/shared/src/index.ts#L514)): one line
+- `ObjectPredication`'s doc comment ([L514](../../../../../packages/shared/src/index.ts#L514)): one line
   naming `role` as the essive's subject-oriented counterpart.
 
 ## 2. Translator
 
-[`resolveComplements`](../../../../packages/engine/src/translator/functions/resolveComplements.ts)
+[`resolveComplements`](../../../../../packages/engine/src/translator/functions/resolveComplements.ts)
 drops a `role` whose conjunct heads are not all nouns (D4). Nothing else: the controller's features
 are the subject's, which every engine already holds as `subjectForms`.
 
 ## 3. Per-engine rendering
 
-- **en**: `PREP.role = 'as'` in [`en.consts.ts`](../../../../packages/engine/src/languages/en/en.consts.ts#L33)
+- **en**: `PREP.role = 'as'` in [`en.consts.ts`](../../../../../packages/engine/src/languages/en/en.consts.ts#L33)
   (the shared path keeps the article), or reuse `ESSIVE`.
 - **it / fr / es / pt**: the essive helper (D2) with `agreementForms(subjectForms)`; a `role` branch
   beside `objectPredicative` in each `complementsPhrase`.
 - **de**: the helper with case `'nom'`; weak nouns then take their nominative ("als Student"). The
   weak-feminine defect in *Today* shows up here first ("als Studentinen") and should be fixed first.
-- **ja**: `PARTICLE.role = 'として'` in [`ja.consts.ts`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L30);
+- **ja**: `PARTICLE.role = 'として'` in [`ja.consts.ts`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L30);
   the na-adjective stem rule of A224 does not apply (D4 excludes adjectives).
 
 ## 4. Frontend (plan-only first pass)
 
 The exhaustive maps carry `role` inertly, as E2 did for `purpose` and `topic`: `COMPLEMENT_LABEL_KEYS`
-([`slots.ts#L148`](../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L148)),
+([`slots.ts#L148`](../../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L148)),
 `COMPLEMENT_KEYS`, `complementIcons`, `BoxComplementType`. That needs a grammar-name concept
 ROLE_COMPLEMENT behind `slot.role`, literal by design unless a ROLE noun is seeded to gloss it
 ("a complement that indicates roles") — reseed `signi.db`. ACT (and WORK, if a labour sense is
