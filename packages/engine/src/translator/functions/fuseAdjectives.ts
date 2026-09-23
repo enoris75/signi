@@ -12,7 +12,7 @@
  * for it — 上の息子, the older son. Nothing here fires for a lexeme without one.
  *
  * The fused word takes its own `honorific` along, the form someone else's relative wears
- * (`applyPossessorForm` picks between them), and drops the unfused word's `possessed`, which names
+ * (`applyPossessorForm` picks between them), and whether address uses it (`address_honorific`), and drops the unfused word's `possessed`, which names
  * the other lexeme. Returns the indices it spent, so the caller can drop exactly those while the
  * adjectives it kept stay aligned with their degrees and intensifiers.
  */
@@ -28,6 +28,8 @@ export function fuseAdjectives(forms: Record<string, string>, adjectives: readon
     put('reading', forms[`with_${id}_reading`]);
     put('honorific', forms[`with_${id}_honorific`]);
     put('honorific_reading', forms[`with_${id}_honorific_reading`]);
+    // Whether the vocative calls this relative by that honorific: 兄 is an elder, 弟 is not (P11-E3).
+    put('address_honorific', forms[`with_${id}_address_honorific`]);
     put('possessed');
     put('possessed_reading');
     fused.add(i);

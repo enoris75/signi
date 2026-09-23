@@ -116,6 +116,24 @@ describe('the vocative', () => {
       .toMatchObject({ ja: 'お母さん、母は走ります。' });
   });
 
+  // …but only for an elder (`address_honorific`): a wife or a younger brother is called by name, and
+  // takes the ordinary own / other's rule.
+  test('Japanese: the honorific is an elder\'s only', () => {
+    const ja = (address: NounElement) => sayAll(command(address)).ja;
+    expect(sayAll(command(np('WIFE', { possessor: of('1') })))).toEqual({
+      en: 'My wife, run.', it: 'Mia moglie, corri.', fr: 'Ma femme, cours.', de: 'Meine Frau, lauf.',
+      es: 'Mi esposa, corre.', ja: '妻、走ってください。', pt: 'A minha esposa, corra.',
+    });
+    expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['YOUNGER'] }))).toBe('弟、走ってください。');
+    expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['ELDER'] }))).toBe('お兄さん、走ってください。');
+    expect(ja(np('SISTER', { possessor: of('1'), adjectives: ['ELDER'] }))).toBe('お姉さん、走ってください。');
+    expect(ja(np('MOTHER', { possessor: of('1') }))).toBe('お母さん、走ってください。');
+    expect(ja(np('GRANDFATHER'))).toBe('おじいさん、走ってください。');
+    expect(ja(np('SON', { possessor: of('1') }))).toBe('息子、走ってください。');
+    // Someone else's relative takes the honorific in address as it does anywhere.
+    expect(ja(np('WIFE', { possessor: of('2') }))).toBe('あなたの奥さん、走ってください。');
+  });
+
   test('a head with no honorific keeps the word it takes as a possessed noun', () => {
     expect(sayAll(command(np('WIFE', { possessor: of('1') })))).toMatchObject({ fr: 'Ma femme, cours.', de: 'Meine Frau, lauf.' });
   });

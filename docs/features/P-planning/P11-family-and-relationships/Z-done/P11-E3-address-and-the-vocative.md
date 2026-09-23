@@ -26,15 +26,15 @@ tests beside [`applyKinName.ts`](../../../../../packages/engine/src/translator/f
 [`withQuestionPossessor.ts`](../../../../../packages/engine/src/translator/functions/withQuestionPossessor.ts).
 Every concept definition and word label renders as it did in all seven (none uses MOM or DAD).
 
-| lang | Mom runs (as a name) | Mom, run (address) | Mom, the cat runs | Mom, let's run | my mother, run (D3) |
-|---|---|---|---|---|---|
-| en | Mom runs. | Mom, run. | Mom, the cat runs. | Mom, let's run. | My mother, run. |
-| it | la mamma corre. | Mamma, corri. | Mamma, il gatto corre. | Mamma, corriamo. | Mia madre, corri. |
-| fr | Maman court. | Maman, cours. | Maman, le chat court. | Maman, courons. | Ma mère, cours. |
-| de | Mama läuft. | Mama, lauf. | Mama, der Kater läuft. | Mama, laufen wir. | Meine Mutter, lauf. |
-| es | Mamá corre. | Mamá, corre. | Mamá, el gato corre. | Mamá, corramos. | Mi madre, corre. |
-| pt | Mamãe corre. | Mamãe, corra. | Mamãe, o gato corre. | Mamãe, corramos. | A minha mãe, corra. |
-| ja | お母さんは走ります。 | お母さん、走ってください。 | お母さん、猫は走ります。 | お母さん、走りましょう。 | お母さん、走ってください。 |
+| lang | Mom runs (as a name) | Mom, run (address) | Mom, the cat runs | Mom, let's run | my mother, run (D3) | my wife, run (not an elder) |
+|---|---|---|---|---|---|---|
+| en | Mom runs. | Mom, run. | Mom, the cat runs. | Mom, let's run. | My mother, run. | My wife, run. |
+| it | la mamma corre. | Mamma, corri. | Mamma, il gatto corre. | Mamma, corriamo. | Mia madre, corri. | Mia moglie, corri. |
+| fr | Maman court. | Maman, cours. | Maman, le chat court. | Maman, courons. | Ma mère, cours. | Ma femme, cours. |
+| de | Mama läuft. | Mama, lauf. | Mama, der Kater läuft. | Mama, laufen wir. | Meine Mutter, lauf. | Meine Frau, lauf. |
+| es | Mamá corre. | Mamá, corre. | Mamá, el gato corre. | Mamá, corramos. | Mi madre, corre. | Mi esposa, corre. |
+| pt | Mamãe corre. | Mamãe, corra. | Mamãe, o gato corre. | Mamãe, corramos. | A minha mãe, corra. | A minha esposa, corra. |
+| ja | お母さんは走ります。 | お母さん、走ってください。 | お母さん、猫は走ります。 | お母さん、走りましょう。 | お母さん、走ってください。 | 妻、走ってください。 |
 
 Beside them, all engine output: "the cat sees Mom", *el gato ve **a** Mamá*, *le chat donne le livre
 à Papa*, "Mom's book" / *das Buch Mamas* / *o livro de Mamãe*; "Mom and Dad run", *Maman et Papa
@@ -71,7 +71,13 @@ What landed, and where it differs from the plan above:
    title stays. The first letter of the address is capitalized; the clause after it keeps its case.
 7. **D3 is one branch at the top of `applyPossessorForm`**, reached through a new `address`
    parameter that `resolveNounPhrase` passes down. It takes `honorific` / `plural_honorific` under
-   any possessor or none. A head with no honorific falls through to the ordinary rule, so French and
+   any possessor or none, **for an elder only**. The Japanese lexeme says which relatives are
+   elders with `address_honorific: '1'`: the parents (MOTHER, FATHER, PARENT, MOM, DAD, the
+   step-parents), the grandparents, UNCLE, AUNT and the parents-in-law. The siblings say it on their
+   elder word, `with_ELDER_address_honorific`, which `fuseAdjectives` carries along with the fused
+   word. So one's own older brother is お兄さん, and one's mother お母さん, but a wife (妻、…), a younger
+   brother (弟、…), a son (息子、…) and an unmarked sibling fall through to the ordinary own / other
+   rule. Someone else's wife is still あなたの奥さん. A head with no honorific falls through too, so French and
    German keep their possessed word (*Ma femme, cours*, *Meine Frau, lauf*), and MOM's single お母さん
    is already right. A 1st-person possessor still marks the relative one's own, so 私の is not said
    twice (お母さん、…).
@@ -84,15 +90,9 @@ What landed, and where it differs from the plan above:
 10. **`test/kinship.test.ts`'s MOM and DAD rows** (the definite singular citation, "the mom.")
     now read "Mom." / *Maman.* / *Mama.* / *Mamá.* / *Mamãe.*, and "Dad." / *Papa.* / *Papá.* /
     *Papai.* — the name rule applies to a verbless period too. Italian and Japanese are unchanged.
-    The file was not edited in this lane.
 
 ### Follow-ups found
 
-- **D3 over-reaches beyond elders.** 奥さん、走ってください for one's own wife (and a younger
-  sibling's honorific) is not how Japanese addresses them. One calls elder relatives by the
-  honorific kin term, and a wife or a younger sibling by name. The branch should be limited to
-  elders, by a lexeme column (`address` / `address_reading`) or a flag, once more than MOM and
-  DAD are addressed.
 - **Spanish and a leading vocative before a question.** The RAE keeps the vocative outside the
   marks (*Mamá, ¿el gato corre?*). The ruling here puts ¿ first.
 - A builder control for `address`, and British *Mum*, *Grandma*, *Grandpa* (below).

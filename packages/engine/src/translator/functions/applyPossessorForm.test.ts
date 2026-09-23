@@ -162,17 +162,27 @@ describe('applyPossessorForm', () => {
       applyPossessorForm(forms, possessor, true);
       return forms;
     };
+    // An elder, which address calls by the honorific; and ja WIFE, who is called by name.
+    const ELDER_HAHAOYA: Forms = { ...HAHAOYA, address_honorific: '1' };
+    const ELDER_OYA: Forms = { ...OYA, address_honorific: '1' };
+    const TSUMA: Forms = { base: '妻', reading: 'つま', kin: '1', honorific: '奥さん', honorific_reading: 'おくさん' };
 
-    test('takes the honorific under any possessor, and none', () => {
+    test('an elder takes the honorific under any possessor, and none', () => {
       for (const possessor of [undefined, pron('1'), pron('2'), np({ base: '猫' })]) {
-        expect(addressed(HAHAOYA, possessor)).toMatchObject({ base: 'お母さん', reading: 'おかあさん' });
+        expect(addressed(ELDER_HAHAOYA, possessor)).toMatchObject({ base: 'お母さん', reading: 'おかあさん' });
       }
-      expect(addressed(OYA, pron('1'))).toMatchObject({ base: 'ご両親', plural: 'ご両親', reading: 'ごりょうしん' });
+      expect(addressed(ELDER_OYA, pron('1'))).toMatchObject({ base: 'ご両親', plural: 'ご両親', reading: 'ごりょうしん' });
+    });
+
+    test('a relative who is not an elder takes the ordinary rule', () => {
+      expect(addressed(TSUMA, pron('1'))).toMatchObject({ base: '妻', reading: 'つま', own: '1' });
+      expect(addressed(TSUMA, pron('2'))).toMatchObject({ base: '奥さん' });
+      expect(addressed(HAHAOYA, pron('1'))).toMatchObject({ base: '母' });
     });
 
     test("one's own relative is still marked one's own, so 私の is not said twice", () => {
-      expect(addressed(HAHAOYA, pron('1'))['own']).toBe('1');
-      expect(addressed(HAHAOYA, pron('2'))['own']).toBeUndefined();
+      expect(addressed(ELDER_HAHAOYA, pron('1'))['own']).toBe('1');
+      expect(addressed(ELDER_HAHAOYA, pron('2'))['own']).toBeUndefined();
     });
 
     test('a head with no honorific takes the ordinary rule', () => {

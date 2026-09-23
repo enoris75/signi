@@ -7,7 +7,7 @@ const KYOUDAI = {
   base: '兄弟', reading: 'きょうだい', kin: '1',
   honorific: 'ご兄弟', honorific_reading: 'ごきょうだい',
   with_ELDER: '兄', with_ELDER_reading: 'あに',
-  with_ELDER_honorific: 'お兄さん', with_ELDER_honorific_reading: 'おにいさん',
+  with_ELDER_honorific: 'お兄さん', with_ELDER_honorific_reading: 'おにいさん', with_ELDER_address_honorific: '1',
   with_YOUNGER: '弟', with_YOUNGER_reading: 'おとうと',
   with_YOUNGER_honorific: '弟さん', with_YOUNGER_honorific_reading: 'おとうとさん',
 };
@@ -17,6 +17,16 @@ describe('fuseAdjectives', () => {
     const forms = { ...KYOUDAI };
     expect(fuseAdjectives(forms, ['ELDER'])).toEqual(new Set([0]));
     expect(forms).toMatchObject({ base: '兄', reading: 'あに', honorific: 'お兄さん', honorific_reading: 'おにいさん' });
+  });
+
+  // P11-E3: address calls an elder brother お兄さん, a younger one by name.
+  test('the fused word says whether address takes its honorific', () => {
+    const elder: Record<string, string> = { ...KYOUDAI };
+    fuseAdjectives(elder, ['ELDER']);
+    expect(elder['address_honorific']).toBe('1');
+    const younger: Record<string, string> = { ...KYOUDAI, address_honorific: '1' };
+    fuseAdjectives(younger, ['YOUNGER']);
+    expect(younger['address_honorific']).toBeUndefined();
   });
 
   test('each age word is the head\'s own, not a prefix of the unfused one', () => {

@@ -50,12 +50,15 @@ export function applyPossessorForm(
 ): void {
   // **Address** is a third context beside citation and possession (P11-E3 D3): one calls one's own
   // mother お母さん, so the vocative takes the honorific whoever the relative is — whatever the
-  // possessor, and whatever the own/other rule below would say. Only Japanese stores an honorific;
-  // a head without one takes the ordinary rule below ("mon épouse" is "ma femme" in address too, and
-  // MOM's one お母さん is already right). A 1st-person possessor still marks the relative one's own,
-  // so its 私の is not said twice (お母さん、…, not 私のお母さん、…; D4).
+  // possessor, and whatever the own/other rule below would say. Only for an **elder**, which the
+  // Japanese lexeme marks `address_honorific` (parents, grandparents, uncles and aunts, parents-in-law,
+  // and 兄 / 姉 through their `with_ELDER` word): a wife, a child or a younger brother is called by
+  // name, so they take the ordinary rule below (妻、…, 弟、…, never 奥さん、…). So does a head with
+  // no honorific ("mon épouse" is "ma femme" in address too, and MOM's one お母さん is already right).
+  // A 1st-person possessor still marks the relative one's own, so its 私の is not said twice
+  // (お母さん、…, not 私のお母さん、…; D4).
   const addressed = (forms['number'] ?? forms['count']) === 'plural' ? 'plural_honorific' : 'honorific';
-  if (address && forms[addressed]) {
+  if (address && forms['address_honorific'] === '1' && forms[addressed]) {
     const reading = forms[`${addressed}_reading`];
     forms['base'] = forms[addressed]!;
     if (addressed === 'plural_honorific') forms['plural'] = forms[addressed]!;
