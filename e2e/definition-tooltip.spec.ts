@@ -293,7 +293,7 @@ test.describe('word definition tooltip', () => {
   for (const [id, query, en, language, other] of [
     ['SHOW', 'show', 'to cause a person to see objects', 'ja', '人が物体を見るようにする'],
     ['HIDE', 'hide', 'to cause an object not to be visible', 'it', 'indurre un oggetto a non essere visibile'],
-    ['START', 'start', 'to cause an action to begin', 'de', 'eine Handlung veranlassen, zu beginnen'],
+    ['START', 'start', 'to cause an action to begin', 'de', 'eine Handlung veranlassen zu beginnen'],
     ['COMPACT', 'compact', 'to cause an object to become smaller', 'es', 'inducir un objeto a volverse más pequeño'],
     ['COORDINATE', 'coordinate', 'to cause people to act together', 'pt', 'induzir pessoas a agir juntas'],
     ['APPEAR', 'appear', 'to become visible', 'fr', 'devenir visible'],

@@ -42,6 +42,7 @@ import { verbFinalCluster } from './verbFinalCluster.js';
 import { questionWord } from './questionWord.js';
 import { verbGroup } from './verbGroup.js';
 import { zuInfinitive } from './zuInfinitive.js';
+import { zuVerbOnly } from './zuVerbOnly.js';
 
 /**
  * The determiners that make an object *known* — the ones that let it stand ahead of the negation
@@ -98,8 +99,8 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
     : '';
   const clause = clauseText(phrase, inverted, verbFinal, zu, bareGoverned);
   // An infinitive complement is extraposed behind the whole clause, verb-final tail included, after
-  // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen". A bare one was
-  // already spoken inside the clause above.
+  // a comma when it is a group: "der Kater wird wünschen, das Essen zu essen", but "fähig sein zu
+  // handeln" (A266). A bare one was already spoken inside the clause above.
   // A content clause is extraposed behind the whole clause, after a comma and under "dass", with
   // its own finite verb closing it: "es ist richtig, dass man handelt" (C30).
   const withContent = phrase.contentSubject
@@ -113,8 +114,10 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   const withObject = objectClause
     ? `${withContent}, ${[objectClause.lead, renderClause(objectClause.rest, false, true)].filter(Boolean).join(' ')}`
     : withContent;
+  // A zu-infinitive that is no more than its verb takes no comma: "der Kater braucht zu laufen",
+  // "fähig zu fressen"; a group does, "braucht, das Essen zu fressen" (A266, see `zuVerbOnly`).
   const governed = phrase.infinitiveComplement && !bare
-    ? `${withObject}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+    ? `${withObject}${zuGroupComma(phrase.infinitiveComplement)}`
     : withObject;
   // A clause of purpose is extraposed the same way, inside the "um … zu" frame German puts a final
   // clause in: "klicken, um zu ändern", "ein Subjekt selektieren, um die Übersetzungen zu sehen".
@@ -127,6 +130,16 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   return phrase.adverbialClause
     ? `${purposed}, ${subordinator(phrase.adverbialClause)} ${renderClause(phrase.adverbialClause.clause, false, true)}`
     : purposed;
+}
+
+/**
+ * The governed zu-infinitive with what joins it to its clause: a comma in front of a group, a space
+ * in front of a zu-infinitive that renders no more than its verb (A266, see `zuVerbOnly`).
+ */
+function zuGroupComma(given: ResolvedPhrase): string {
+  const text = renderClause(given, false, false, true);
+  const bare = renderClause(zuVerbOnly(foldModalGovernor(given)), false, false, true);
+  return text === bare ? ` ${text}` : `, ${text}`;
 }
 
 function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean, bareGoverned = ''): string {

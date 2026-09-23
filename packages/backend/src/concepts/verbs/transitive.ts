@@ -2098,7 +2098,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // P09's try (localization B62): "tries to run". A lexical verb that takes an infinitive complement
     // the way DESIRE does, not `modal: true` as P09 proposed: a modal's link is lost on the outermost
     // French modal ("essaie courir") and German stacks a bare infinitive ("versucht laufen"), where the
-    // lexical verb says "essaie de courir" and "versucht, zu laufen". The link is the lexeme's own:
+    // lexical verb says "essaie de courir" and "versucht zu laufen". The link is the lexeme's own:
     // provare a, essayer de, 試みる with its こと clause as object. RETRY sits under it. Literal by
     // design, beside DESIRE: no genus renders "attempt" in all seven (see the B62 task).
     id: 'TRY',

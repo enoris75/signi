@@ -869,7 +869,7 @@ describe('known bugs: a modal as the verb of a clause that governs an infinitive
     expect(sayAll(citeModal('CAN', ACT))).toMatchObject({ it: 'potere agire.', fr: 'pouvoir agir.', es: 'poder actuar.', pt: 'poder agir.' });
     expect(sayAll(citeModal('MUST', ACT))).toMatchObject({ it: 'dovere agire.', fr: 'devoir agir.', es: 'deber actuar.', pt: 'dever agir.' });
     expect(sayAll({ subject: G, verbPhrase: { verb: 'DESIRE' }, infinitiveComplement: ACT, infinitive: true })).toEqual({
-      en: 'to desire to act.', it: 'desiderare agire.', fr: 'désirer agir.', de: 'wünschen, zu handeln.',
+      en: 'to desire to act.', it: 'desiderare agire.', fr: 'désirer agir.', de: 'wünschen zu handeln.',
       es: 'desear actuar.', ja: '行動することを望む。', pt: 'desejar agir.',
     });
     expect(sayAll(clause(np('CAT'), 'HAVE', { verbPhrase: { modals: ['WILL'], tense: 'past' }, directObject: OBJECTS }))).toMatchObject({
@@ -912,7 +912,7 @@ describe('known bugs: a modal as the verb of a clause that governs an infinitive
     expect(sayAll(citeModal('WILL', { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('HAPPY') } } })))
       .toMatchObject({ en: 'to want to be happy.', de: 'glücklich sein wollen.', ja: '幸せでありたい。' });
     expect(sayAll(citeModal('WILL', { verbPhrase: { verb: 'DESIRE' }, infinitiveComplement: ACT })))
-      .toMatchObject({ en: 'to want to desire to act.', de: 'wünschen wollen, zu handeln.', ja: '行動することを望みたい。' });
+      .toMatchObject({ en: 'to want to desire to act.', de: 'wünschen wollen zu handeln.', ja: '行動することを望みたい。' });
   });
 });
 

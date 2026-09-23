@@ -41,7 +41,7 @@ describe('LET governs a bare infinitive', () => {
     expect(sayAll(clause(np('CAT'), 'CAUSE_VERB', {
       directObject: np('DOG'), infinitiveComplement: { verbPhrase: { verb: 'RUN' }, control: 'object' },
     }))).toMatchObject({
-      en: 'the cat causes the dog to run.', de: 'der Kater veranlasst den Hund, zu laufen.',
+      en: 'the cat causes the dog to run.', de: 'der Kater veranlasst den Hund zu laufen.',
       it: 'il gatto induce il cane a correre.', ja: '猫は犬が走るようにします。',
     });
   });
@@ -86,7 +86,7 @@ describe('the words', () => {
       en: 'to cause a person to be allowed to act.',
       it: 'indurre una persona a essere autorizzata ad agire.',
       fr: 'induire une personne à être autorisée à agir.',
-      de: 'eine Person veranlassen, berechtigt zu sein, zu handeln.',
+      de: 'eine Person veranlassen, berechtigt zu sein zu handeln.',
       es: 'inducir a una persona a estar autorizada a actuar.',
       ja: '人が行動することが許可されているようにする。',
       pt: 'induzir uma pessoa a estar autorizada a agir.',

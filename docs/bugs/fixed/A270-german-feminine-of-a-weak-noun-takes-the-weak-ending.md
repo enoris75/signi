@@ -36,3 +36,17 @@ Pinned by `known bugs: the German feminine of a weak noun takes the weak ending 
 [everyday-nouns.test.ts](../../../packages/engine/test/everyday-nouns.test.ts).
 
 Found by P09-E12 while its tasks were being written.
+
+## Resolved
+
+2026-09-23. [`applyNounGender`](../../../packages/engine/src/translator/functions/applyNounGender.ts)
+deletes `forms['weak']` when it applies the feminine: `weak` is the masculine's n-declension, and the
+feminine *Studentin* has none. One line covers every weak path (object, dative, prepositions, the
+passive agent, the possessor, the compound stem).
+
+Guarded by the two flipped tests of `known bugs: the German feminine of a weak noun takes the weak
+ending (A270)` in [everyday-nouns.test.ts](../../../packages/engine/test/everyday-nouns.test.ts),
+plus two added there (the passive agent *von der Studentin*, a possessed object *das Buch der
+Studentin*, the plural object *die Studentinnen*; and the masculine keeping *einen / dem / den /
+des Studenten*), and two cases in
+[applyNounGender.test.ts](../../../packages/engine/src/translator/functions/applyNounGender.test.ts).

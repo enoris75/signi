@@ -32,7 +32,7 @@ describe('the six glosses B62 ships', () => {
     // fazer, which is the trap the DO ruling set: the causative genus is indurre / induire.
     ['DO', {
       en: 'to cause an action to happen.', it: "indurre un'azione a succedere.", fr: 'induire une action à arriver.',
-      de: 'eine Handlung veranlassen, zu geschehen.', es: 'inducir una acción a ocurrir.', ja: '動作が起こるようにする。',
+      de: 'eine Handlung veranlassen zu geschehen.', es: 'inducir una acción a ocurrir.', ja: '動作が起こるようにする。',
       pt: 'induzir uma ação a acontecer.',
     }],
     // A purpose clause, as SAVE and EXCHANGE stand on: what the act is for.
@@ -386,7 +386,7 @@ describe('NEED: one lexical verb, with a multiword Italian and French lemma', ()
       en: 'the man needs to run.', it: "l'uomo ha bisogno di correre.", fr: "l'homme a besoin de courir.",
       // German brauchen takes a zu-clause under negation or "nur"; the positive "needs to" is "muss
       // laufen". The reading is B62's, recorded and accepted.
-      de: 'der Mann braucht, zu laufen.', es: 'el hombre necesita correr.', ja: '男は走ることを必要としています。',
+      de: 'der Mann braucht zu laufen.', es: 'el hombre necesita correr.', ja: '男は走ることを必要としています。',
       pt: 'o homem precisa correr.',
     });
     expect(sayAll(clause(the('MAN'), 'NEED', { infinitiveComplement: { verbPhrase: { verb: 'RUN' } }, verbPhrase: { negative: true } })))
@@ -405,12 +405,12 @@ describe('TRY: a lexical verb that takes an infinitive, not a modal', () => {
   test('"tries to run" in all seven, with each lexeme\'s own link', () => {
     expect(sayAll(clause(the('MAN'), 'TRY', { infinitiveComplement: { verbPhrase: { verb: 'RUN' } } }))).toEqual({
       en: 'the man tries to run.', it: "l'uomo prova a correre.", fr: "l'homme essaie de courir.",
-      de: 'der Mann versucht, zu laufen.', es: 'el hombre intenta correr.', ja: '男は走ることを試みます。',
+      de: 'der Mann versucht zu laufen.', es: 'el hombre intenta correr.', ja: '男は走ることを試みます。',
       pt: 'o homem tenta correr.',
     });
     expect(sayAll(clause(the('MAN'), 'TRY', { infinitiveComplement: { verbPhrase: { verb: 'RUN' } }, verbPhrase: { negative: true } }))).toEqual({
       en: 'the man does not try to run.', it: "l'uomo non prova a correre.", fr: "l'homme n'essaie pas de courir.",
-      de: 'der Mann versucht nicht, zu laufen.', es: 'el hombre no intenta correr.', ja: '男は走ることを試みません。',
+      de: 'der Mann versucht nicht zu laufen.', es: 'el hombre no intenta correr.', ja: '男は走ることを試みません。',
       pt: 'o homem não tenta correr.',
     });
     expect(sayAll(clause(the('MAN'), 'TRY', { infinitiveComplement: { verbPhrase: { verb: 'EAT' }, directObject: the('FOOD') } }))).toEqual({

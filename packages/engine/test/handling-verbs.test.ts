@@ -36,8 +36,8 @@ describe('the glosses', () => {
     ['GET', { en: 'to acquire objects from a person.', it: 'acquisire oggetti da una persona.', fr: "acquérir des objets d'une personne.", de: 'Gegenstände von einer Person erwerben.', es: 'adquirir objetos de una persona.', ja: '人から物体を取得する。', pt: 'adquirir objetos de uma pessoa.' }],
     // The causatives, REMOVE's shape: on BE, COME and STAY. A218 is fixed: German Ort takes "an".
     ['PUT', { en: 'to cause an object to be in a place.', it: 'indurre un oggetto a essere in un luogo.', fr: 'induire un objet à être dans un lieu.', de: 'einen Gegenstand veranlassen, an einem Ort zu sein.', es: 'inducir un objeto a estar en un lugar.', ja: '物体が場所にあるようにする。', pt: 'induzir um objeto a estar em um lugar.' }],
-    ['BRING', { en: 'to cause an object to come.', it: 'indurre un oggetto a venire.', fr: 'induire un objet à venir.', de: 'einen Gegenstand veranlassen, zu kommen.', es: 'inducir un objeto a venir.', ja: '物体が来るようにする。', pt: 'induzir um objeto a vir.' }],
-    ['LEAVE_BEHIND', { en: 'to cause an object to stay.', it: 'indurre un oggetto a restare.', fr: 'induire un objet à rester.', de: 'einen Gegenstand veranlassen, zu bleiben.', es: 'inducir un objeto a quedarse.', ja: '物体が残るようにする。', pt: 'induzir um objeto a ficar.' }],
+    ['BRING', { en: 'to cause an object to come.', it: 'indurre un oggetto a venire.', fr: 'induire un objet à venir.', de: 'einen Gegenstand veranlassen zu kommen.', es: 'inducir un objeto a venir.', ja: '物体が来るようにする。', pt: 'induzir um objeto a vir.' }],
+    ['LEAVE_BEHIND', { en: 'to cause an object to stay.', it: 'indurre un oggetto a restare.', fr: 'induire un objet à rester.', de: 'einen Gegenstand veranlassen zu bleiben.', es: 'inducir un objeto a quedarse.', ja: '物体が残るようにする。', pt: 'induzir um objeto a ficar.' }],
     // STILL before English's "to" is the frequency adverb's place by design.
     ['KEEP', { en: 'still to have objects.', it: 'avere ancora oggetti.', fr: 'avoir encore des objets.', de: 'noch Gegenstände haben.', es: 'tener todavía objetos.', ja: '物体をまだ持つ。', pt: 'ter ainda objetos.' }],
     ['STAY', { en: 'still to be in a place.', it: 'essere ancora in un luogo.', fr: 'être encore dans un lieu.', de: 'noch an einem Ort sein.', es: 'estar todavía en un lugar.', ja: '場所にまだいる。', pt: 'estar ainda em um lugar.' }],
@@ -46,7 +46,7 @@ describe('the glosses', () => {
     // French diriger fixes "vers"; Italian rivolgere takes "a".
     ['LOOK_AT', { en: 'to direct the eyes to an object.', it: 'rivolgere gli occhi a un oggetto.', fr: 'diriger les yeux vers un objet.', de: 'die Augen zu einem Gegenstand richten.', es: 'dirigir los ojos a un objeto.', ja: '物体へ目を向ける。', pt: 'dirigir os olhos a um objeto.' }],
     // ACQUIRE's inchoative on GO.
-    ['LEAVE_DEPART', { en: 'to begin to go.', it: 'iniziare ad andare.', fr: 'commencer à aller.', de: 'beginnen, zu gehen.', es: 'empezar a ir.', ja: '行くことが始まる。', pt: 'começar a ir.' }],
+    ['LEAVE_DEPART', { en: 'to begin to go.', it: 'iniziare ad andare.', fr: 'commencer à aller.', de: 'beginnen zu gehen.', es: 'empezar a ir.', ja: '行くことが始まる。', pt: 'começar a ir.' }],
     ['GO_OUT', { en: 'to go outside.', it: 'andare fuori.', fr: 'aller dehors.', de: 'nach draußen gehen.', es: 'ir afuera.', ja: '外に行く。', pt: 'ir para fora.' }],
     // C25's complement gloss, the goal as UP's is, narrowed by a relative clause.
     ['OUTSIDE', { en: 'to a place that is not in a building.', it: 'a un luogo che non è in un edificio.', fr: "à un lieu qui n'est pas dans un bâtiment.", de: 'zu einem Ort, der nicht in einem Gebäude ist.', es: 'a un lugar que no está en un edificio.', ja: '建物にない場所へ。', pt: 'a um lugar que não está em um edifício.' }],

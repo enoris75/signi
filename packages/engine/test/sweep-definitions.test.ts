@@ -141,7 +141,7 @@ describe('the glosses the sweep shipped', () => {
     ['CANVAS', { en: 'a place where one makes phrases.', it: 'un luogo dove si fanno frasi.', fr: "un lieu où l'on fait des phrases.", de: 'ein Ort, an dem man Phrasen macht.', es: 'un lugar donde se hacen frases.', ja: 'フレーズを作る場所。', pt: 'um lugar onde se fazem frases.' }],
     // A24. The infinitive closes the German clause; the governed one takes Italian's "ad".
     ['DELETE', { en: 'to remove objects.', it: 'rimuovere oggetti.', fr: 'retirer des objets.', de: 'Gegenstände entfernen.', es: 'quitar objetos.', ja: '物体を取り除く。', pt: 'remover objetos.' }],
-    ['ACQUIRE', { en: 'to begin to have.', it: 'iniziare ad avere.', fr: 'commencer à avoir.', de: 'beginnen, zu haben.', es: 'empezar a tener.', ja: '持つことが始まる。', pt: 'começar a ter.' }],
+    ['ACQUIRE', { en: 'to begin to have.', it: 'iniziare ad avere.', fr: 'commencer à avoir.', de: 'beginnen zu haben.', es: 'empezar a tener.', ja: '持つことが始まる。', pt: 'começar a ter.' }],
     // A25. The negation sits inside the governed infinitive, not on the causative verb.
     ['TURN_OFF', { en: 'to cause an object not to be active.', it: 'indurre un oggetto a non essere attivo.', fr: 'induire un objet à ne pas être actif.', de: 'einen Gegenstand veranlassen, nicht aktiv zu sein.', es: 'inducir un objeto a no estar activo.', ja: '物体が稼働中ではないようにする。', pt: 'induzir um objeto a não estar ativo.' }],
     // A26. A mass head takes the bare determiner: "liquid", not *"a liquid".

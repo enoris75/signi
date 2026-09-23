@@ -10,8 +10,8 @@ import { concepts } from '../../backend/src/concepts/index.js';
 // it is never spoken, and it renders as an infinitive citation. The word linking it belongs to the
 // governor — the predicate adjective when there is one, else the verb — so the lexeme names it:
 // capace DI, obbligato A, capable DE, capaz DE; desiderare / désirer / desear / desejar take it bare.
-// English links with "to", German extraposes a zu-infinitive after a comma, and Japanese puts a こと
-// clause ahead of the predicate, marked with the governor's particle (が / を).
+// English links with "to", German extraposes a zu-infinitive (after a comma when it is a group, A266),
+// and Japanese puts a こと clause ahead of the predicate, marked with the governor's particle (が / を).
 
 const acts = (verb = 'ACT', extra: Partial<InfinitiveComplement> = {}): InfinitiveComplement => ({
   verbPhrase: { verb },
@@ -34,7 +34,7 @@ describe('the modal definitions (localization C09)', () => {
       en: 'to be obliged to act.',
       it: 'essere obbligato ad agire.', // the euphonic d before another a
       fr: "être obligé d'agir.",
-      de: 'verpflichtet sein, zu handeln.',
+      de: 'verpflichtet sein zu handeln.',
       es: 'estar obligado a actuar.', // a duty that holds, not a trait: estar
       ja: '行動することが義務的である。',
       pt: 'estar obrigado a agir.',
@@ -46,7 +46,7 @@ describe('the modal definitions (localization C09)', () => {
       en: 'to be able to act.',
       it: 'essere capace di agire.',
       fr: "être capable d'agir.",
-      de: 'fähig sein, zu handeln.',
+      de: 'fähig sein zu handeln.',
       es: 'ser capaz de actuar.',
       ja: '行動することが可能である。',
       pt: 'ser capaz de agir.',
@@ -58,7 +58,7 @@ describe('the modal definitions (localization C09)', () => {
       en: 'to desire to act.',
       it: 'desiderare agire.',
       fr: 'désirer agir.',
-      de: 'wünschen, zu handeln.',
+      de: 'wünschen zu handeln.',
       es: 'desear actuar.',
       ja: '行動することを望む。',
       pt: 'desejar agir.',
@@ -133,7 +133,7 @@ describe('infinitive complement', () => {
       en: 'the dog is not able to run.',
       it: 'il cane non è capace di correre.',
       fr: "le chien n'est pas capable de courir.",
-      de: 'der Hund ist nicht fähig, zu laufen.',
+      de: 'der Hund ist nicht fähig zu laufen.',
       es: 'el perro no es capaz de correr.',
       ja: '犬は走ることが可能ではありません。',
       pt: 'o cão não é capaz de correr.',
@@ -164,7 +164,7 @@ describe('infinitive complement', () => {
       en: 'to desire to be able to act.',
       it: 'desiderare essere capace di agire.',
       fr: "désirer être capable d'agir.",
-      de: 'wünschen, fähig zu sein, zu handeln.',
+      de: 'wünschen, fähig zu sein zu handeln.',
       es: 'desear ser capaz de actuar.',
       ja: '行動することが可能であることを望む。',
       pt: 'desejar ser capaz de agir.',
@@ -188,7 +188,7 @@ describe('infinitive complement', () => {
     expect(sayAll(plan)).toMatchObject({
       en: 'if the cat ate, the dog would be able to run.',
       it: 'se il gatto mangiasse, il cane sarebbe capace di correre.',
-      de: 'wenn der Kater fressen würde, würde der Hund fähig sein, zu laufen.',
+      de: 'wenn der Kater fressen würde, würde der Hund fähig sein zu laufen.',
       ja: 'もし猫が食べたら、犬は走ることが可能です。',
     });
   });
@@ -286,11 +286,34 @@ describe('ABLE and OBLIGED agree as predicates', () => {
 // draws the line here (`prospectiveFrame`: "ist im Begriff zu essen", "im Begriff, die Maus zu
 // essen"); a group that holds more than its infinitive keeps the comma, as does "um … zu".
 describe('known bugs: German sets a bare zu-infinitive off with a comma (A266)', () => {
-  test.fails('a bare zu-infinitive takes no comma, under a verb and under an adjective', () => {
+  test('a bare zu-infinitive takes no comma, under a verb and under an adjective', () => {
     expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RUN') })).de).toBe('der Kater braucht zu laufen.');
     expect(sayAll(clause(np('DOG'), 'DESIRE', { infinitiveComplement: acts() })).de).toBe('der Hund wünscht zu handeln.');
     expect(sayAll(clause(np('CAT'), 'BE', { complements: predicate('ABLE'), infinitiveComplement: acts('EAT') })).de)
       .toBe('der Kater ist fähig zu fressen.');
+  });
+
+  test('a separable zu-infinitive is bare too, and so is one under any tense of its governor', () => {
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RETURN') })).de).toBe('der Kater braucht zurückzukehren.');
+    expect(sayAll(clause(np('CAT'), 'NEED', { verbPhrase: { tense: 'past' }, infinitiveComplement: acts('RUN') })).de)
+      .toBe('der Kater brauchte zu laufen.');
+    expect(sayAll(clause(np('CAT'), 'NEED', { verbPhrase: { tense: 'future' }, infinitiveComplement: acts('RUN') })).de)
+      .toBe('der Kater wird brauchen zu laufen.');
+  });
+
+  test('its own negation, adverb, complement or modal chain makes it a group, with the comma', () => {
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RUN', { verbPhrase: { verb: 'RUN', negative: true } }) })).de)
+      .toBe('der Kater braucht, nicht zu laufen.');
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RUN', { verbPhrase: { verb: 'RUN', modifier: 'WELL' } }) })).de)
+      .toBe('der Kater braucht, gut zu laufen.');
+    expect(sayAll(clause(np('CAT'), 'NEED', { infinitiveComplement: acts('RUN', { complements: { comitative: { phrase: np('DOG', { definiteness: 'definite' }) } } }) })).de)
+      .toBe('der Kater braucht, mit dem Hund zu laufen.');
+    expect(sayAll({ subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'DESIRE' }, infinitiveComplement: { verbPhrase: { verb: 'WILL' }, infinitiveComplement: acts() }, infinitive: true }).de)
+      .toBe('wünschen, handeln zu wollen.');
+  });
+
+  test('a nested group keeps its comma, and the bare infinitive inside it has none', () => {
+    expect(definitionAll('LET').de).toBe('eine Person veranlassen, berechtigt zu sein zu handeln.');
   });
 
   test('regression: a group with more than its infinitive, and "um … zu", keep the comma', () => {

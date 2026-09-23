@@ -989,7 +989,7 @@ describe('known bugs: a negative controller negates its infinitive', () => {
       en: 'no cat desires not to eat.', // now: "no cat desires to eat."
       it: 'nessun gatto desidera non mangiare.', // now: "desidera mangiare"
       fr: 'aucun chat ne désire ne pas manger.', // now: "ne désire ne manger"
-      de: 'kein Kater wünscht, nicht zu fressen.', // now: "wünscht, zu fressen"
+      de: 'kein Kater wünscht, nicht zu fressen.', // now: "wünscht zu fressen"
     });
     expect(runs(true)).toMatchObject({
       en: 'no cat runs not to eat.',
@@ -1019,7 +1019,7 @@ describe('known bugs: a negative controller negates its infinitive', () => {
   test('Spanish and Portuguese, and every definite controller, are already right', () => {
     expect(desires(true)).toMatchObject({ es: 'ningún gato desea no comer.', pt: 'nenhum gato deseja não comer.' });
     expect(desires(false)).toMatchObject({
-      en: 'no cat desires to eat.', it: 'nessun gatto desidera mangiare.', de: 'kein Kater wünscht, zu fressen.',
+      en: 'no cat desires to eat.', it: 'nessun gatto desidera mangiare.', de: 'kein Kater wünscht zu fressen.',
       es: 'ningún gato desea comer.', pt: 'nenhum gato deseja comer.',
     });
     expect(runs(true)).toMatchObject({ es: 'ningún gato corre para no comer.', pt: 'nenhum gato corre para não comer.' });
@@ -1045,7 +1045,7 @@ describe('known bugs: a negative controller negates its infinitive', () => {
       en: 'the cat causes no dog to eat.',
       it: 'il gatto non induce nessun cane a mangiare.',
       fr: "le chat n'induit aucun chien à manger.", // was "à ne manger"
-      de: 'der Kater veranlasst keinen Hund, zu fressen.',
+      de: 'der Kater veranlasst keinen Hund zu fressen.',
       es: 'el gato no induce ningún perro a comer.',
       ja: '猫はどの犬も食べるようにしません。', // was 食べないようにします: "makes no dog eat"
       pt: 'o gato não induz nenhum cão a comer.',

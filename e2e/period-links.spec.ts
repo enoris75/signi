@@ -105,7 +105,7 @@ test.describe('period links', () => {
       en: 'the cat needs to run.',
       it: 'il gatto ha bisogno di correre.',
       fr: 'le chat a besoin de courir.',
-      de: 'der Kater braucht, zu laufen.',
+      de: 'der Kater braucht zu laufen.',
       es: 'el gato necesita correr.',
       pt: 'o gato precisa correr.',
       ja: '猫は走ることを必要としています。',
