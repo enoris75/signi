@@ -32,3 +32,20 @@ describe('spatialHead', () => {
     expect(spatialHead('under', EUROPA, false, 'Europa')).toBe("sotto l'");
   });
 });
+
+// P09-E1.
+describe('spatialHead: on, between, against', () => {
+  test('su fuses as in does, apart from over\'s sopra', () => {
+    expect(spatialHead('on', MERCATO, false, 'mercato')).toBe('sul');
+    expect(spatialHead('on', CASA, false, 'casa')).toBe('sulla');
+    expect(spatialHead('on', { ...CASA, definiteness: 'indefinite' }, false, 'casa')).toBe('su una');
+    expect(spatialHead('over', CASA, false, 'casa')).toBe('sopra la');
+  });
+
+  test('tra and contro take a plain article', () => {
+    expect(spatialHead('between', CASA, false, 'casa')).toBe('tra la');
+    expect(spatialHead('between', UOMO, false, 'uomo')).toBe("tra l'");
+    expect(spatialHead('against', MERCATO, false, 'mercato')).toBe('contro il');
+    expect(spatialHead('against', { ...CASA, definiteness: 'bare' }, false, 'casa')).toBe('contro');
+  });
+});

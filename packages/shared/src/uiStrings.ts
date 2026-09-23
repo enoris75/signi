@@ -2471,6 +2471,12 @@ export const UI_STRINGS = defineUiStrings({
   'specifier.value.around': { specifier: { kind: 'path', value: 'around' }, fallback: 'around' },
   'specifier.value.behind': { specifier: { kind: 'path', value: 'behind' }, fallback: 'behind' },
   'specifier.value.in_front_of': { specifier: { kind: 'path', value: 'in_front_of' }, fallback: 'in front of' },
+  // P09-E1: it "su", de "auf", ja 〜の上で (the same as `over` — Japanese does not tell the two
+  // apart); "tra" / "zwischen" / 〜の間で; "contro" / "an", and ja 〜に, a relation Japanese keeps in
+  // the verb rather than an adposition.
+  'specifier.value.on': { specifier: { kind: 'path', value: 'on' }, fallback: 'on' },
+  'specifier.value.between': { specifier: { kind: 'path', value: 'between' }, fallback: 'between' },
+  'specifier.value.against': { specifier: { kind: 'path', value: 'against' }, fallback: 'against' },
 
   // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
   // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".

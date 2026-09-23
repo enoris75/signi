@@ -50,3 +50,24 @@ describe('spatialHead', () => {
     expect(spatialHead('around', HAUS, false, 'locative')).toBe('um das');
   });
 });
+
+// P09-E1.
+describe('spatialHead: on, between, against', () => {
+  test('auf, zwischen and an take the dative of place', () => {
+    expect(spatialHead('on', HAUS, false, 'locative')).toBe('auf dem');
+    expect(spatialHead('on', { ...HAUS, definiteness: 'indefinite' }, false, 'locative')).toBe('auf einem');
+    expect(spatialHead('between', KATZE, false, 'locative')).toBe('zwischen der');
+    expect(spatialHead('against', KATZE, false, 'locative')).toBe('an der');
+  });
+
+  test('an fuses with the definite dative, as a place one is at does', () => {
+    expect(spatialHead('against', HAUS, false, 'locative')).toBe('am');
+    expect(spatialHead('against', { ...HAUS, definiteness: 'indefinite' }, false, 'locative')).toBe('an einem');
+  });
+
+  test('under a direction all three take the accusative of motion', () => {
+    expect(spatialHead('on', HAUS, false, 'direction')).toBe('auf das');
+    expect(spatialHead('between', KATZE, false, 'direction')).toBe('zwischen die');
+    expect(spatialHead('against', HAUS, false, 'direction')).toBe('ans');
+  });
+});

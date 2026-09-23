@@ -429,6 +429,9 @@ export const COMMANDS: readonly CommandDef[] = [
       ["around", [], "around"],
       ["behind", [], "behind"],
       ["front", ["infront", "in_front_of"], "in_front_of"],
+      ["on", [], "on"],
+      ["between", [], "between"],
+      ["against", [], "against"],
     ] as const
   ).map(([name, aliases, value]) =>
     setting(

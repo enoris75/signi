@@ -13,6 +13,9 @@ import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
+import { liftPreposition } from '../../functions/liftPreposition.js';
+import { BETWEEN_PREP } from './es.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -244,7 +247,11 @@ export function complementsPhrase(
           np.head.forms['person'] ? pronoun(np.head.forms) : conjunctText(np, shared));
         return shared ? `${sent === 'positive' ? 'gracias' : 'a causa'} ${conjuncts}` : conjuncts;
       }
-      return coordinateElement(c.phrase, (np) => conjunctText(np), true);
+      // `between` is said once over the group, not per conjunct: each conjunct is built as above and
+      // its "entre" lifted off (P09-E1 D2) — "entre la casa y el árbol".
+      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const group = coordinateElement(c.phrase, (np) => liftPreposition(conjunctText(np), scoped), true);
+      return scoped ? `${scoped} ${group}` : group;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever
     // shape the sentiment gave it (see `withCauseNegator`).

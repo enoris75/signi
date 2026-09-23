@@ -1,4 +1,5 @@
 import type { PathSpecifier } from '@signi/shared';
+import { BETWEEN_PREP } from './it.consts.js';
 import { artFor } from './artFor.js';
 import { prepDet } from './prepDet.js';
 
@@ -11,6 +12,11 @@ import { prepDet } from './prepDet.js';
  * determiner rides straight off `artFor` ("sotto la casa" / "sotto una casa" / "sotto casa").
  * "intorno" and "davanti" govern "a", which fuses only with the definite ("intorno alla casa" but
  * "intorno a una casa"), so they route through `prepDet`. Plain "in" fuses outright ("nella casa").
+ *
+ * P09-E1: `on` is "su", a simple preposition that fuses as "in" does ("sul tavolo", "su un
+ * tavolo"), and so is kept apart from `over`'s "sopra"; `against` is the plain "contro" ("contro il
+ * muro"); `between` is "tra" with a plain article, built here per conjunct like any relation and
+ * lifted off to be said once over a group by the complement (see `GROUP_SCOPED_SPECIFIERS`).
  */
 export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, lead: string): string {
   const adv = (a: string): string => { const det = artFor(f, plural, lead); return det ? `${a} ${det}` : a; };
@@ -21,6 +27,9 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     case 'around':      return `intorno ${prepDet('a', f, plural, lead)}`;
     case 'behind':      return adv('dietro');
     case 'in_front_of': return `davanti ${prepDet('a', f, plural, lead)}`;
+    case 'on':          return prepDet('su', f, plural, lead);
+    case 'between':     return adv(BETWEEN_PREP);
+    case 'against':     return adv('contro');
     case 'through':
     default:            return adv('attraverso');
   }

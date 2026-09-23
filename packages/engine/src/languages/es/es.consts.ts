@@ -39,10 +39,11 @@ export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', '
  * "como" is an abbreviated comparison — "corre como yo" stands for "como yo corro" — so the pronoun
  * is the subject of the clause it shortens, not the object of a preposition: "como mí" is not
  * Spanish. German's "wie" is the same word and takes the nominative for the same reason (A203).
- * Spanish has a wider class of these — "según", "entre", "excepto", "salvo", "menos" — but "como"
- * is the only one a complement head emits.
+ * Spanish has a wider class of these — "según", "entre", "excepto", "salvo", "menos" — and a
+ * complement head emits two of them: "como", and `between`'s "entre" (P09-E1), "entre tú y yo",
+ * never "entre ti y mí".
  */
-export const NOMINATIVE_PREP: ReadonlySet<string> = new Set(['como']);
+export const NOMINATIVE_PREP: ReadonlySet<string> = new Set(['como', 'entre']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerundio / "a punto de"
 // + infinitivo. Past uses the imperfect ("estaba"), the aspectually-imperfective past.
@@ -106,6 +107,11 @@ export const ES_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', qu
 // The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
 // Spanish says a bare "en casa", not "en el hogar" — the hearth-word gives way to "casa".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'en casa' };
+
+// The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
+// (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
+// builds any relation, and the complement lifts it off every conjunct to say it in front of all.
+export const BETWEEN_PREP = 'entre';
 
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'y',

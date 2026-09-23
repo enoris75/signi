@@ -524,6 +524,9 @@ const SPECIFIER_LABEL: Record<PathSpecifier, string> = {
   around: 'around',
   behind: 'behind',
   in_front_of: 'in front of',
+  on: 'on',
+  between: 'between',
+  against: 'against',
 };
 const SENTIMENT_LABEL: Record<CauseSentiment, string> = {
   neutral: 'Neutral — because of',
@@ -542,6 +545,15 @@ describe('SpecifierSelector', () => {
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(
       PATH_SPECIFIERS.map((s) => SPECIFIER_LABEL[s]),
     );
+  });
+
+  // P09-E1: support, a landmark on each side, and contact join the seven.
+  it('offers ten relations, the last three on, between and against', () => {
+    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
+
+    const labels = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
+    expect(labels).toHaveLength(10);
+    expect(labels.slice(-3)).toEqual(['on', 'between', 'against']);
   });
 
   it('selects the relation clicked', () => {

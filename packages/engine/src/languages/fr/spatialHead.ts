@@ -1,4 +1,5 @@
 import type { PathSpecifier } from '@signi/shared';
+import { BETWEEN_PREP } from './fr.consts.js';
 import { deDet } from './deDet.js';
 import { prepDet } from './prepDet.js';
 
@@ -27,6 +28,12 @@ export function spatialHead(
     case 'around':      return `autour ${deDet(f, plural, lead)}`;
     case 'behind':      return prepDet('derrière', f, plural, lead);
     case 'in_front_of': return prepDet('devant', f, plural, lead);
+    // P09-E1. "sur" is support, apart from `over`'s "au-dessus de"; "contre" is contact; "entre" is
+    // lifted off each conjunct and said once over a group (see `GROUP_SCOPED_SPECIFIERS`). None of
+    // the three contracts: "sur la table", "entre la maison et l'arbre", "contre le mur".
+    case 'on':          return prepDet('sur', f, plural, lead);
+    case 'between':     return prepDet(BETWEEN_PREP, f, plural, lead);
+    case 'against':     return prepDet('contre', f, plural, lead);
     case 'through':
     default:            return prepDet('à travers', f, plural, lead);
   }

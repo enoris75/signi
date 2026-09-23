@@ -44,3 +44,18 @@ describe('spatialHead', () => {
     expect(spatialHead('around', false, ANTARTIDA)).toBe('alrededor de la');
   });
 });
+
+// P09-E1.
+describe('spatialHead: on, between, against', () => {
+  test('on is sobre, never the en that in spells', () => {
+    expect(spatialHead('on', false, CASA)).toBe('sobre la');
+    expect(spatialHead('on', false, MERCADO)).toBe('sobre el');
+    expect(spatialHead('on', false, { ...CASA, definiteness: 'indefinite' })).toBe('sobre una');
+    expect(spatialHead('on', false, CASA)).not.toBe(spatialHead('in', false, CASA));
+  });
+
+  test('entre and contra contract with nothing', () => {
+    expect(spatialHead('between', true, MERCADO)).toBe('entre los');
+    expect(spatialHead('against', false, MERCADO)).toBe('contra el');
+  });
+});

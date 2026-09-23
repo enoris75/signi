@@ -1,4 +1,5 @@
 import type { PathSpecifier } from '@signi/shared';
+import { BETWEEN_PREP } from './es.consts.js';
 import { deDet } from './deDet.js';
 import { prepDet } from './prepDet.js';
 
@@ -19,6 +20,13 @@ export function spatialHead(spec: PathSpecifier, plural: boolean, f: Record<stri
     case 'around':      return `alrededor ${deDet(f, plural)}`;
     case 'behind':      return `detrás ${deDet(f, plural)}`;
     case 'in_front_of': return `delante ${deDet(f, plural)}`;
+    // P09-E1. `on` is "sobre", not the "en" that `in` already spells — reusing it would render the
+    // two relations alike — and it contracts with nothing ("sobre el tablero"); nor do "entre",
+    // lifted off each conjunct and said once over a group (see `GROUP_SCOPED_SPECIFIERS`), and the
+    // contact "contra" ("contra la pared").
+    case 'on':          return prepDet('sobre', f, plural);
+    case 'between':     return prepDet(BETWEEN_PREP, f, plural);
+    case 'against':     return prepDet('contra', f, plural);
     case 'through':
     default:            return prepDet('por', f, plural);
   }

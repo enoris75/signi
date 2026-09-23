@@ -329,14 +329,48 @@ export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'ob
  * Plan-only for now: the canvas draws its specifier toolbar on the route and locative rings, and
  * the direction ring has none — the same way `objectPredicative` and `comitative` render from a
  * plan without a box of their own.
+ *
+ * Three more relations close the everyday set (P09-E1):
+ *
+ *   on      — **support**, contact from above: "sleeps **on** the table" (it *sul tavolo*, fr *sur*,
+ *             de *auf*, es/pt *sobre*). Not `over`, which is superiority without contact, and which
+ *             six of the seven spell apart from it. Spanish and Portuguese take *sobre* and not the
+ *             *en* / *em* they already spell `in` with, so the two relations stay apart there too.
+ *             **Japanese cannot tell `on` from `over`**: both are 〜の上, and the collision is
+ *             deliberate — 〜の表面に for contact is a paraphrase, not a relation.
+ *   between — one landmark on each side: "sleeps **between** the house and the tree". The one
+ *             relation that scopes over a coordinated landmark rather than distributing across it
+ *             (see `GROUP_SCOPED_SPECIFIERS`). A single landmark still renders ("between the
+ *             house"); asking for two is the builder's business, as `NounGroup`'s own "at least
+ *             two" is.
+ *   against — **physical contact** only, from the side: "sleeps **against** the wall" (*contro*,
+ *             *contre*, *contra*, de *an* + dative — not *gegen*, which is motion into it and which
+ *             the accusative of a `direction` already gives as *an die Wand*). The adversarial
+ *             "fights against the dog" is no spatial relation and is not this one. Japanese has no
+ *             adposition for it at all — the relation lives in a verb (もたれる, "to lean") — so it
+ *             renders with plain に, a known flattening pinned beside `on`'s.
+ *
+ * `into` is not among them and needs nothing: it is `in` under a `direction` (see above).
  */
-export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of';
+export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of' | 'on' | 'between' | 'against';
 
-export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of'];
+export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of', 'on', 'between', 'against'];
 
 /** The relation each specifier-bearing complement falls back on when none is chosen. */
 export const DEFAULT_ROUTE_SPECIFIER: PathSpecifier = 'through';
 export const DEFAULT_LOCATIVE_SPECIFIER: PathSpecifier = 'in';
+
+/**
+ * The relations whose adposition scopes over a coordinated landmark as a whole, instead of being
+ * repeated on each conjunct. Every other relation distributes: the Romance prepositions fuse with
+ * each conjunct's article ("nella casa e nel bosco") and German's governs each conjunct's case, so
+ * the engines emit preposition and determiner per conjunct. `between` cannot: it relates its
+ * subject to the pair, so it is said once over the group — *zwischen dem Haus und dem Baum*, never
+ * *zwischen dem Haus und zwischen dem Baum* — while each conjunct keeps its own article and case
+ * (P09-E1 D2). Japanese needs nothing for it, since its relational noun already follows the whole
+ * group (家と木の間で).
+ */
+export const GROUP_SCOPED_SPECIFIERS: ReadonlySet<PathSpecifier> = new Set<PathSpecifier>(['between']);
 
 /**
  * How a `temporal` complement places its act against the time its noun phrase names — the
