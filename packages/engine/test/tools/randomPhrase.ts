@@ -226,9 +226,10 @@ function relativeClause(r: Random, depth: number): RelativeClause {
   // The gap: the slot the head noun fills. The subject by default; the object ("the book that I
   // read"); a complement, whose specifiers pick the relativizer's preposition ("the house under
   // which…"); or the possessor, where the head owns the clause's subject ("the cat whose dog runs").
-  // A predicate is no slot a noun can be relativised out of.
+  // A predicate is no slot a noun can be relativised out of. Nor, yet, is P09-E13's role: "the friend
+  // the man acts as" strands its "as", which no engine spells today, and no builder control makes one.
   const complementGaps = (Object.keys(rc.complements ?? {}) as ComplementType[])
-    .filter((t) => t !== 'predicative' && t !== 'objectPredicative');
+    .filter((t) => t !== 'predicative' && t !== 'objectPredicative' && t !== 'role');
   const gap: RelativeClause['headRole'] = r.chance(0.08) ? 'possessor'
     : rc.directObject && r.chance(0.35) ? 'directObject'
     : complementGaps.length > 0 && r.chance(0.3) ? r.pick(complementGaps)

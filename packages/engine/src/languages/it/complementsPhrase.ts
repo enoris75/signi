@@ -100,23 +100,23 @@ export function complementsPhrase(
       // fuses with none and drops the article altogether — it names a role rather than picking a
       // referent out, so "come condizione", never "come la condizione".
       if (type === 'objectPredicative') {
-        const essive = objectPredication(c) === 'essive';
+        if (objectPredication(c) === 'essive') return essivePhrase(c, objectForms);
         const gender = objectForms['gender'] ?? 'masc';
         const plural = objectForms['number'] === 'plural';
-        return coordinate(c.phrase, (conjunct) => {
-          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+        return coordinate(c.phrase, (np) => {
           if (np.head.forms['role'] === 'adjective') {
-            const adj = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
-            return joinWords([essive ? 'come' : '', adj]);
+            return itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
           }
           const nf = itPossessedHeadForms(np);
           // The link is seeded on the verb, so it is one of the simple prepositions prepDet fuses.
           return renderNP(np, (pl, lead) =>
-            essive ? prepDet('come', nf, pl, lead)
-            : c.link ? prepDet(c.link as ItPreposition, nf, pl, lead)
-            : artFor(nf, pl, lead));
+            c.link ? prepDet(c.link as ItPreposition, nf, pl, lead) : artFor(nf, pl, lead));
         });
       }
+      // The role (P09-E13): the essive said of the subject, "agisce come amico". Its gender and
+      // number are the plan's own, as on any noun (D5): "la donna agisce come amica" asks for FRIEND's
+      // feminine rather than inferring it from the subject.
+      if (type === 'role') return essivePhrase(c, agreementForms(subjectForms));
       // An instrument presented as an action: the bare gerundio for the process level
       // ("scegliendo una parola" — Italian needs no preposition before it), and the substantivized
       // infinitive for the concept level ("con lo scegliere una parola"). That infinitive is an
@@ -272,4 +272,24 @@ export function complementsPhrase(
     .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * The essive "come" and the predicate it introduces — the object taken as a role ("usa il periodo
+ * come condizione") or the subject acting in one ("agisce come amico", P09-E13). "come" fuses with
+ * no article and drops it altogether: it names a role rather than picking a referent out, and "come
+ * **un** amico" is the likeness, the similative manner. `controller` is what the predicate is said
+ * of, whose gender and number an adjective head agrees with ("considera la parete come rossa").
+ */
+function essivePhrase(c: ResolvedComplement, controller: Record<string, string>): string {
+  const gender = controller['gender'] ?? 'masc';
+  const plural = controller['number'] === 'plural';
+  return coordinate(c.phrase, (conjunct) => {
+    const np = withDefiniteness(conjunct, 'bare');
+    if (np.head.forms['role'] === 'adjective') {
+      return joinWords(['come', itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))]);
+    }
+    const nf = itPossessedHeadForms(np);
+    return renderNP(np, (pl, lead) => prepDet('come', nf, pl, lead));
+  });
 }

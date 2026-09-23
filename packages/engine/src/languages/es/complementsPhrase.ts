@@ -97,22 +97,22 @@ export function complementsPhrase(
       // neither — so the marker simply leads the phrase. The essive drops the article: it names a
       // role rather than picking a referent out ("como condición", never "como la condición").
       if (type === 'objectPredicative') {
-        const essive = objectPredication(c) === 'essive';
+        if (objectPredication(c) === 'essive') return essivePhrase(c, objectForms);
         // The factitive link introduces a noun ("en una prisión"); an adjective predicate takes
         // none — "hace la casa hermosa", never "*en hermosa".
-        const marker = essive ? 'como' : isAdjectivePredicate(c) ? '' : (c.link ?? '');
+        const marker = isAdjectivePredicate(c) ? '' : (c.link ?? '');
         const gender = objectForms['gender'] ?? 'masc';
         const plural = objectForms['number'] === 'plural';
-        return coordinateElement(c.phrase, (conjunct) => {
-          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+        return coordinateElement(c.phrase, (np) => {
           const word = np.head.forms['role'] === 'adjective'
             ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))
-            // The object predicative owns things too: "en su prisión", "como su prisión" — neither
-            // marker contracts with a possessive in Spanish (A198).
-            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np)), np);
+            : predicateNoun(np);
           return [marker, word].filter(Boolean).join(' ');
         });
       }
+      // The role (P09-E13): the essive said of the subject, "actúa como amigo". Its gender and number
+      // are the plan's own (D5), so "la mujer actúa como amiga" asks for FRIEND's feminine.
+      if (type === 'role') return essivePhrase(c, subjectForms);
       // An instrument presented as an action: the bare gerundio for the process level
       // ("eligiendo una palabra"), the substantivized infinitive for the concept level ("con el
       // elegir una palabra") — a masculine singular noun, hence the invariant "el", whatever the
@@ -274,4 +274,29 @@ export function complementsPhrase(
     .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
+}
+
+// The object predicative owns things too: "en su prisión", "como su prisión" — neither marker
+// contracts with a possessive in Spanish (A198).
+function predicateNoun(np: ResolvedNounPhrase): string {
+  return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np), esPossessiveWord(np)), np);
+}
+
+/**
+ * The essive "como" and the predicate it introduces — the object taken as a role ("usa el período
+ * como condición") or the subject acting in one ("actúa como amigo", P09-E13). "como" contracts with
+ * nothing and drops the article: it names a role rather than picking a referent out, and "como **un**
+ * amigo" is the likeness, the similative manner. `controller` is what the predicate is said of, whose
+ * gender and number an adjective head agrees with.
+ */
+function essivePhrase(c: ResolvedComplement, controller: Record<string, string>): string {
+  const gender = controller['gender'] ?? 'masc';
+  const plural = controller['number'] === 'plural';
+  return coordinateElement(c.phrase, (conjunct) => {
+    const np = withDefiniteness(conjunct, 'bare');
+    const word = np.head.forms['role'] === 'adjective'
+      ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))
+      : predicateNoun(np);
+    return `como ${word}`;
+  });
 }

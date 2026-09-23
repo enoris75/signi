@@ -26,7 +26,7 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, DE_TEMPORAL, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { CONSTITUENT_NEGATOR, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -104,8 +104,10 @@ export function complementsParts(
       const conjunctText = (conjunct: ResolvedNounPhrase): string => {
       // The essive object complement names a role rather than picking a referent out, so German
       // leaves it article-less whatever determiner was chosen: "als Bedingung", not "als die
-      // Bedingung". Its adjectives then decline strong, which `definiteness` below arranges.
-      const essive = type === 'objectPredicative' && objectPredication(c) === 'essive';
+      // Bedingung". Its adjectives then decline strong, which `definiteness` below arranges. The
+      // role (P09-E13) is the same "als" said of the subject, and as bare: "als Freund", where "wie
+      // ein Freund" is the likeness, the similative manner.
+      const essive = (type === 'objectPredicative' && objectPredication(c) === 'essive') || type === 'role';
       const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
       // A German object predicative adjective is uninflected, as the subject one is ("streicht
       // die Wand rot", "betrachtet die Wand als rot"). An ordinal after "als" is nominalised
@@ -206,6 +208,11 @@ export function complementsParts(
           _case = OBJECT_PREDICATIVE_CASE[marker] ?? 'acc';
           head = essive ? 'als' : prepDet(marker, f, _case, plural);
         }
+        // The role's "als" takes the case of what it is said of, as the essive's does — the subject,
+        // so the nominative (ESSIVE_ROLE_CASE): "handelt als Freund", and a weak noun keeps its
+        // nominative, "liest das Buch als Student", where the object's essive declines it "als den
+        // Studenten".
+        else if (type === 'role') { _case = ESSIVE_ROLE_CASE; head = 'als'; }
         // Manner: similative "wie" + nominative ("wie der Wind" — the default); means/measure
         // "mit" + dative ("mit der Geschwindigkeit des Lichts", "mit Sorgfalt"); mode "auf" +
         // accusative ("auf eine gute Weise"); a temporal noun "zu" + dative ("zu allen Zeiten").

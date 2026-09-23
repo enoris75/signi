@@ -825,7 +825,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
     id: 'ACT',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    // `role` is the capacity one acts in, "acts as a friend" (P09-E13).
+    complements: ['manner', 'role', 'locative', 'cause', 'instrumental'],
     description: 'to do something; to take action',
     synonym: 'take action',
     emoji: '⚡',

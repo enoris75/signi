@@ -100,26 +100,23 @@ export function complementsPhrase(
       // with the article as any preposition does ("em" + "o" → "no"); the essive "como" contracts
       // with none and drops the article, naming a role rather than picking a referent out.
       if (type === 'objectPredicative') {
-        const essive = objectPredication(c) === 'essive';
+        if (objectPredication(c) === 'essive') return essivePhrase(c, objectForms);
         const link = c.link ?? '';
         const gender = objectForms['gender'] ?? 'masc';
         const plural = objectForms['number'] === 'plural';
-        return coordinateElement(c.phrase, (conjunct) => {
-          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
-          if (np.head.forms['role'] === 'adjective') {
-            return [essive ? 'como' : '', ptComparison(np.head, gender, plural)].filter(Boolean).join(' ');
-          }
+        return coordinateElement(c.phrase, (np) => {
+          if (np.head.forms['role'] === 'adjective') return ptComparison(np.head, gender, plural);
           // The object predicative owns things too (A198). A Portuguese possessive rides on the
           // definite article, and the factitive link contracts with that article as it does with
           // any other ("em" + "a" → "na sua prisão"), so a possessed head takes the definite
           // determiner for the marker and hands the possessive over without its own article. The
-          // essive "como" contracts with nothing and drops the article from both ("como sua prisão").
+          // essive "como" contracts with nothing and drops the article from both ("como sua prisão",
+          // see `essivePhrase`).
           const possessive = ptPossessiveWord(np, false);
           const f0 = predicativeForms(np.head.forms);
-          const f = possessive && !essive ? { ...f0, definiteness: 'definite' } : f0;
+          const f = possessive ? { ...f0, definiteness: 'definite' } : f0;
           const pl = isPlural(f);
-          const marker = essive ? prepDet('como', f, pl)
-            : !link ? ''
+          const marker = !link ? ''
             : LINK_CONTRACT[link] ? contractDet(LINK_CONTRACT[link], link, f, pl)
             : prepDet(link, f, pl);
           // The marker carries the determiner when there is one, so the phrase itself goes bare.
@@ -127,6 +124,9 @@ export function complementsPhrase(
           return [marker, withRelative(nounPhrase(bare, ptAdj(np), possessive), np)].filter(Boolean).join(' ');
         });
       }
+      // The role (P09-E13): the essive said of the subject, "age como amigo". Its gender and number
+      // are the plan's own (D5), so "a mulher age como amiga" asks for FRIEND's feminine.
+      if (type === 'role') return essivePhrase(c, subjectForms);
       // An instrument presented as an action: the bare gerúndio for the process level
       // ("escolhendo uma palavra"), the substantivized infinitive for the concept level ("com o
       // escolher uma palavra") — a masculine singular noun, hence the invariant "o", whatever the
@@ -292,4 +292,23 @@ export function complementsPhrase(
     .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * The essive "como" and the predicate it introduces — the object taken as a role ("usa o período
+ * como condição") or the subject acting in one ("age como amigo", P09-E13). "como" contracts with
+ * nothing and drops the article, a possessed head's too ("como sua prisão"): it names a role rather
+ * than picking a referent out, and "como **um** amigo" is the likeness, the similative manner.
+ * `controller` is what the predicate is said of, whose gender and number an adjective head agrees with.
+ */
+function essivePhrase(c: ResolvedComplement, controller: Record<string, string>): string {
+  const gender = controller['gender'] ?? 'masc';
+  const plural = controller['number'] === 'plural';
+  return coordinateElement(c.phrase, (conjunct) => {
+    const np = withDefiniteness(conjunct, 'bare');
+    if (np.head.forms['role'] === 'adjective') return `como ${ptComparison(np.head, gender, plural)}`;
+    const f = predicativeForms(np.head.forms);
+    const marker = prepDet('como', f, isPlural(f));
+    return [marker, withRelative(nounPhrase({ ...f, definiteness: 'bare' }, ptAdj(np), ptPossessiveWord(np, false)), np)].filter(Boolean).join(' ');
+  });
 }

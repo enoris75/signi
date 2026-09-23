@@ -828,6 +828,13 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Topic',
   },
+  // The *as* of a role said of the subject (P09-E13), "acts as a friend". Plan-only, like the object
+  // complement: no box shows it yet, and the word map names it on the verbs that license it (ACT).
+  'slot.role': {
+    plan: nameOf('ROLE_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Role',
+  },
 
   // The verb's ring on the canvas: the verb with its modals, tense, aspect and adverb. The Romance
   // traditions call a phrase in this sense a "sintagma" / "syntagme" (it "sintagma verbale"), and

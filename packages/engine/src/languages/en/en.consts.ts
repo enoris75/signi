@@ -42,6 +42,7 @@ export const PREP: Record<ComplementType, string> = {
   manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
   comitative: 'with', // companion — "coordinates with the other period"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
+  role: 'as', // the capacity the subject acts in — "acts as a friend" (P09-E13); the essive's word, ESSIVE
   temporal: 'at', // time — relation-driven, see TEMPORAL_PREP; 'at' is the generic `at` preposition
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
   // Object complement — the factitive link is the verb's ("transform it INTO a command"), the

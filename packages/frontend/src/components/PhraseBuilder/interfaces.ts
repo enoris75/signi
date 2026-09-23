@@ -134,14 +134,14 @@ export function subordinateOptions(
 /**
  * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
  * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
- * `objectPredicative` and the `comitative` have no builder slot at all: they are plan-only
+ * `objectPredicative`, the `comitative` and P09-E13's `role` have no builder slot at all: they are plan-only
  * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
  * strings built on them need, and all they need. Giving one a box means adding its selection fields
  * below, as every other complement has them.
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "objectPredicative" | "comitative"
+    "instrumental" | "objectPredicative" | "comitative" | "role"
 >;
 
 export interface SlotConfig {

@@ -3969,6 +3969,27 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The *as* of a role said of the subject (P09-E13) — the capacity someone acts in ("acts as a
+    // friend"). Named after its siblings, by the role each tradition calls it after. Literal by
+    // design for now: its gloss would be "a complement that indicates roles", and the corpus has no
+    // ROLE noun to say it with.
+    id: 'ROLE_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming the capacity in which someone does something (grammar)',
+    emoji: '🎭',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'role', plural: 'roles', count: 'singular' },
+      it: { base: 'complemento di ruolo', plural: 'complementi di ruolo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de rôle', plural: 'compléments circonstanciels de rôle', gender: 'masc', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Rolle', citation: 'adverbiale Bestimmung der Rolle', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de función', plural: 'complementos circunstanciales de función', gender: 'masc', count: 'singular' },
+      ja: { base: '役割の副詞語句', count: 'singular', reading: 'やくわりのふくしごく' },
+      pt: { base: 'adjunto adverbial de papel', plural: 'adjuntos adverbiais de papel', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The recipient or goal of the action ("gives the book to the cat"). Italian names it after the
     // goal ("complemento di termine"). The other traditions call it an object: the indirect one
     // (es, pt, ja 間接目的語), the second one (fr) or the dative one (de).

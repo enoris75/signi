@@ -91,20 +91,22 @@ export function complementsPhrase(
       // object predicative with neither — so the marker leads the phrase. The essive drops the
       // article: it names a role rather than picking a referent out ("comme condition").
       if (type === 'objectPredicative') {
-        const essive = objectPredication(c) === 'essive';
+        if (objectPredication(c) === 'essive') return essivePhrase(c, objectForms);
         // The factitive link introduces a noun ("en une prison"); an adjective predicate takes
         // none — "rend la maison belle", never "*en belle".
-        const marker = essive ? 'comme' : isAdjectivePredicate(c) ? '' : (c.link ?? '');
+        const marker = isAdjectivePredicate(c) ? '' : (c.link ?? '');
         const gender = objectForms['gender'] ?? 'masc';
         const plural = objectForms['number'] === 'plural';
-        return coordinate(c.phrase, (conjunct) => {
-          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+        return coordinate(c.phrase, (np) => {
           const word = np.head.forms['role'] === 'adjective'
             ? frComparison(np.head, gender, plural)
             : npText(np);
           return [marker, word].filter(Boolean).join(' ');
         });
       }
+      // The role (P09-E13): the essive said of the subject, "agit comme ami". Its gender and number
+      // are the plan's own (D5), so "la femme agit comme amie" asks for FRIEND's feminine.
+      if (type === 'role') return essivePhrase(c, subjectForms);
       // An instrument presented as an action: the gérondif for the process level ("en
       // choisissant un mot"), and for the concept level the periphrasis "avec le fait de choisir
       // un mot". French is the one language here that stays periphrastic, and not by choice: its
@@ -349,4 +351,21 @@ export function complementsPhrase(
     .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * The essive "comme" and the predicate it introduces — the object taken as a role ("utilise la
+ * période comme condition") or the subject acting in one ("agit comme ami", P09-E13). "comme"
+ * contracts with nothing and drops the article: it names a role rather than picking a referent out,
+ * and "comme **un** ami" is the likeness, the similative manner. `controller` is what the predicate
+ * is said of, whose gender and number an adjective head agrees with.
+ */
+function essivePhrase(c: ResolvedComplement, controller: Record<string, string>): string {
+  const gender = controller['gender'] ?? 'masc';
+  const plural = controller['number'] === 'plural';
+  return coordinate(c.phrase, (conjunct) => {
+    const np = withDefiniteness(conjunct, 'bare');
+    const word = np.head.forms['role'] === 'adjective' ? frComparison(np.head, gender, plural) : npText(np);
+    return `comme ${word}`;
+  });
 }

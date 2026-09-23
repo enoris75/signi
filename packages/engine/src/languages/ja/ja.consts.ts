@@ -55,6 +55,10 @@ export const PARTICLE: Record<ComplementType, string> = {
   temporal: 'に',
   // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
   terminus: 'に',
+  // Role (P09-E13) — the capacity the subject acts in, 友達として行動します: the essive's として
+  // (JA_ESSIVE), said of the subject. It rides with the adjuncts, so it stands ahead of the object
+  // (学生として本を読む), where the object's essive follows it (家を条件として使う).
+  role: 'として',
   // Comitative (companion) — と, the particle that joins one party to another ("犬と歩く"). It is
   // not the で of the instrument: Japanese keeps the companion and the means apart, where every
   // other engine here spells both "with".

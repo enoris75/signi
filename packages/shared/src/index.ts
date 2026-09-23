@@ -78,13 +78,14 @@ export const DEFINITENESS: Definiteness[] = DETERMINER_CATEGORIES.flatMap(
  * `indefinite`. `definite` there is the equative reading — an assertion of identity with a
  * known referent ("Clark Kent is *the* reporter") — which stays reachable by selecting it.
  * The `objectPredicative` ascribes the same way, of the object instead of the subject ("makes
- * the period *a* command"), so it shares the indefinite default.
+ * the period *a* command"), so it shares the indefinite default. So does the `role` (P09-E13), which
+ * names a class the subject acts as ("acts as *a* friend", not "as *the* friend").
  *
  * Read by the engine when resolving a plan, and by the UI to label the determiner toggle
  * and decide where its cycle starts. Both must agree, so both call this.
  */
 export function defaultDefiniteness(slot: string): Definiteness {
-  return slot === 'predicative' || slot === 'objectPredicative' ? 'indefinite' : 'definite';
+  return slot === 'predicative' || slot === 'objectPredicative' || slot === 'role' ? 'indefinite' : 'definite';
 }
 
 /**
@@ -259,14 +260,23 @@ export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite
  * **about the cat**". The purpose complement names a beneficiary or a goal that is a thing; an act
  * one does something *for* is the `PurposeClause` ("click **to change**"), not this. The privative
  * *without* is no type of its own: it is the `instrumental` with `Complement.negative` set.
+ *
+ * `role` (P09-E13) is the capacity the **subject** acts in while the verb does something else: "acts
+ * **as a friend**", "reads the book **as a student**". Its word is the essive's (see
+ * `ObjectPredication`) — *as / come / comme / como / als* / として — and so is its bare noun in the
+ * Romance languages and German, where an article would turn it into the similative manner ("agisce
+ * come **un** amico", "like a friend"). Only the controller differs: the subject rather than the
+ * object, so German declines it in the nominative ("als Student") and Japanese places it with the
+ * adjuncts, ahead of the object (学生として本を読む). Its head is a noun: an adjective there is the
+ * depictive and a pronoun no role, so the translator drops either.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'temporal' | 'predicative' | 'objectPredicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'role' | 'temporal' | 'predicative' | 'objectPredicative';
 
 /**
  * The complements the **builder** offers, in the order it presents them — the engine's render
  * order (`COMPLEMENT_RENDER_ORDER`) for the ones it has, so the reading order on the canvas is the
  * sentence's: the `topic` beside the manner, the `temporal` after the place, the `purpose` after the
- * cause (P09-E12b). Two complement types are not here: `objectPredicative` and `comitative` render
+ * cause (P09-E12b). Three complement types are not here: `objectPredicative`, `comitative` and `role` render
  * from a plan (the UI strings of C12 are built on them) but have no box on the canvas, so the
  * frontend — which derives its slots, satellites and selection fields from this list — does not
  * know about them. Add one here to give it a box.
@@ -300,15 +310,17 @@ export const ADJUNCT_COMPLEMENT_TYPES: ComplementType[] = ['temporal', 'purpose'
  * P09-E2's two sit where their meaning does: the `topic` ("about the cat") beside the manner, close
  * to the verb it all but completes ("speaks about the cat like the wind"), and the `purpose` ("for
  * the man") right after the cause, the reason and the goal together ("works because of the money
- * for the man").
+ * for the man"). The `role` of P09-E13 follows the recipient, ahead of the companion: "gives the book to
+ * the cat as a friend" rather than "as a friend to the cat".
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause', 'purpose'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause', 'purpose'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
   objectPredicative: 'Object Complement',
   comitative: 'Comitative',
   terminus: 'Terminus',
+  role: 'Role',
   instrumental: 'Instrumental',
   manner: 'Adverbial of manner',
   locative: 'Locative',
@@ -329,8 +341,10 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  * The `purpose` and `topic` of P09-E2 are plain adposition-bearing ones ("per l'uomo", "del gatto").
+ * The `role` of P09-E13 carries its determiner to English alone ("as a friend", "as the speaker"):
+ * every other engine drops it, as it drops the essive's.
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs
@@ -544,6 +558,9 @@ export function isActionLevel(level: AbstractionLevel): boolean {
  *               It names a role rather than picking a referent out, so the Romance engines and
  *               German leave its noun article-less whatever determiner the plan carries ("come
  *               condizione", "als Bedingung"); English keeps the article it was given.
+ *
+ * The `role` complement (P09-E13) is the essive's subject-oriented counterpart: the same word, said
+ * of the subject ("acts **as a friend**") rather than the object.
  *
  * Carried as a `predication` specifier on the complement; absent ⇒ `factitive`.
  */

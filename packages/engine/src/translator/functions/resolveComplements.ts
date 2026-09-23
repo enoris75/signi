@@ -8,6 +8,9 @@ import type { LexiconLookup } from '../translator.types.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 
+/** The head roles a `role` complement cannot take (see below). */
+const ROLE_EXCLUDED_HEADS = new Set(['adjective', 'pronoun']);
+
 /**
  * Resolve the complement map (locative / direction / source / route). Each value is a
  * noun phrase with any specifiers carried straight through as plain data. Shared by the
@@ -36,6 +39,11 @@ export function resolveComplements(
       ? { ...value.phrase, conjuncts: value.phrase.conjuncts.map(withDeterminer) }
       : withDeterminer(value.phrase);
     const resolvedPhrase = resolveNounElement(phrase, language, lookup);
+    // A role names a class the subject acts as, so its head is a noun (P09-E13 D4). An adjective
+    // there is the depictive ("arrives happy"), which would agree with nothing in the essive's
+    // shape ("*agit comme heureux"), and a pronoun is no role at all ("*as him"); either drops the
+    // whole complement rather than render one of them.
+    if (type === 'role' && resolvedPhrase.conjuncts.some((np) => ROLE_EXCLUDED_HEADS.has(np.head.forms['role'] ?? ''))) continue;
     // An *adjective-modified* measure manner adverbial names a generic rate ("at high speed"),
     // not an identifiable one, so a definite article reads oddly ("at *the* high speed"). Force
     // the definite — chosen, or the slot's default — bare. Two cases keep their article, as they

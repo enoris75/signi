@@ -13,6 +13,12 @@ import type { CardinalTable } from '../../functions/numeralWord.js';
 export const OBJECT_PREDICATIVE_CASE: Record<string, 'nom' | 'acc' | 'dat'> = { in: 'acc', zu: 'dat', als: 'acc' };
 
 /**
+ * The case the role's "als" takes (P09-E13): the case of what it is said of, as the essive's does —
+ * the subject, so the nominative ("handelt als Student").
+ */
+export const ESSIVE_ROLE_CASE = 'nom';
+
+/**
  * The word before the standard of comparison, by degree (P09-E5): "größer als der Hund", "so groß
  * wie der Hund". Both are conjunctions, not prepositions — they govern no case, and the standard
  * takes the case of what it is compared with: the nominative, for a subject's predicate adjective.
