@@ -80,7 +80,14 @@ The feminine of weak STUDENT drops `weak` (A270). An Italian possessor goes ahea
 adjective (A271), and the ablative *via* stays behind the verb in a source question (A276). The
 Japanese essive takes an i- or た-adjective's degree (A274).
 
-The last filed, **A276**, filed on 2026-09-23 from P09-E15's lane, was the Italian
+**A277**, filed and fixed on 2026-09-24 from [P11-E4](../features/P-planning/P11-family-and-relationships/Z-done/P11-E4-indefinite-possessed-head.md)
+(whose own D3 called it a defect), was an indefinite possessed head read as a definite one: *indefinite*
++ *my* rendered "my friend" in six languages. `KEPT_BESIDE_POSSESSIVE` now holds `indefinite`, so the
+possessive detaches — "a friend of mine", *un mio amico*, *un ami à moi*, *ein Freund von mir*, *un
+amigo mío*, *um amigo meu*. An unchosen predicative is indefinite by default, so it detaches too
+("the dog is a friend of mine"). No definition moved.
+
+The one before it, **A276**, filed on 2026-09-23 from P09-E15's lane, was the Italian
 ablative particle *via* fronted with an animate source question (*via da chi viene il gatto?*), where
 it belongs behind the verb (*da chi viene via*).
 
@@ -455,6 +462,7 @@ is listed under **Fixed** below.
 | A274 | [A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md](fixed/A274-japanese-essive-drops-an-i-or-ta-adjective-degree.md) | Japanese | 2026-09-23 |
 | A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](fixed/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | 2026-09-23 |
 | A276 | [A276-italian-animate-source-question-fronts-the-ablative-via.md](fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md) | Italian | 2026-09-23 |
+| A277 | [A277-an-indefinite-possessed-head-reads-as-a-definite-one.md](fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-24 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

@@ -366,18 +366,18 @@ changes in this plan:
 
 ## Tasks
 
-The follow-ups below were broken down on 2026-09-23. **Five need a construct** and are task files in
-this folder; the rest are vocabulary, which goes through
+The follow-ups below were broken down on 2026-09-23. **Five need a construct** and were task files in
+this folder — **all five shipped on 2026-09-24**, in one batch, and are in [`Z-done/`](Z-done/); the rest are vocabulary, which goes through
 [`/seed`](../../../../.claude/skills/seed/SKILL.md) and the B queue as P09 §2's words did, not
 through a feature task.
 
 | task | what it is | size |
 |---|---|---|
-| [P11-E1](P11-E1-japanese-honorific-verbs.md) | Japanese honorific and humble verbs — いらっしゃる, 召し上がる, 参る | a lexeme column and one branch; reads the `own` mark D3 already sets |
-| [P11-E2](P11-E2-coreference.md) | Coreference — a possessor that is a **link**, not features. Answers both "his mother" (D3's own limit) and automatic 自分の | the one real model change: a third `Possessor` kind |
-| [P11-E3](P11-E3-address-and-the-vocative.md) | Address — a kin term as a name ("Mom runs") and the vocative ("Mom, run!") | two halves; the name half is data, the vocative is a new slot |
-| [P11-E4](P11-E4-indefinite-possessed-head.md) | "a friend of mine" / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
-| [P11-E5](P11-E5-counting-relatives.md) | 三人兄弟 | a third value of a flag that has two |
+| [P11-E1](Z-done/P11-E1-japanese-honorific-verbs.md) | **Shipped 2026-09-24.** Japanese honorific and humble verbs — いらっしゃる, 召し上がる, 参る. The honorific is automatic on someone else's relative in a polite main clause; the humble is opt-in (`VerbPhrase.humble`) | a lexeme column and one branch; reads the `own` mark D3 already sets |
+| [P11-E2](Z-done/P11-E2-coreference.md) | **Shipped 2026-09-24.** Coreference — a possessor that is a **link** to the subject, not features: 自分の / 自分自身の in Japanese, the plain possessive in six, and the kin chain read through it (兄は自分の母を見ます); plan-only | the one real model change: a third `Possessor` kind |
+| [P11-E3](Z-done/P11-E3-address-and-the-vocative.md) | **Shipped 2026-09-24.** Address — MOM and DAD as names ("Mom runs", *la mamma corre*) and the vocative `PhrasePlan.address` ("Mom, run.", *Mamá, ¿el gato corre?*), the Japanese honorific for elders only; plan-only | two halves; the name half is data, the vocative is a new slot |
+| [P11-E4](Z-done/P11-E4-indefinite-possessed-head.md) | **Shipped 2026-09-24, as bug [A277](../../../bugs/fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md).** "a friend of mine" / *un mio amico* / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
+| [P11-E5](Z-done/P11-E5-counting-relatives.md) | **Shipped 2026-09-24.** 三人兄弟 — `counter_join: 'compound'` on 兄弟 and 姉妹, replacing `counter_is_head` | a third value of a flag that has two |
 
 **No task, by design:**
 
@@ -393,7 +393,7 @@ through a feature task.
   no new construct); and
   [B73](../../../localization/done/B73-in-laws-and-step-parents.md) on half- and step-siblings, which
   says to settle Italian *fratellastro* — both the half- and the step-brother — before seeding either.
-  *Mum* waits on E3's name half.
+  *Mum* no longer waits on anything: E3's name half shipped, and *Mum* is one more `as_name` lexeme.
 - **The Russian and Ukrainian in-law split** (свекровь / тёща). This plan already says to decide it
   when [P06](../P06-russian/README.md) lands, and that is still right: the fusion it would need is
   keyed on a possessor no other language reads.

@@ -4,7 +4,10 @@
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
 fix did. The history below is kept as it was written, in the present tense of each filing.
 
-The newest,
+The newest, [A277](../fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md), an indefinite possessed head read as a definite one ("my friend"
+for "a friend of mine"), was filed and fixed on 2026-09-24 from P11-E4 and never sat here.
+
+The one before it,
 [A276](../fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md), is the Italian ablative
 particle *via* fronted with an animate source question (*via da chi viene il gatto?* for *da chi viene
 via*). P09-E15's lane met it.

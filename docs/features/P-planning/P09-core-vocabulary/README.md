@@ -18,7 +18,8 @@ so every §3 construct can now be built on the canvas and in the console. The se
 complement (*as*), shipped the same day, plan-only, and so did **E14–E19**, all plan-only, in three
 lanes landed together: the possessor, marked-relation and passive questions (E14–E16), the indirect
 question (E17, which retired A272), and the superlative's set and attributive comparison (E19, E18).
-E20–E24 are open. The decisions below were
+**E20–E23 shipped on 2026-09-24** (E20 and E22 plan-only in the engine, E20 also on the temporal
+box), with E24 in the same batch. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -283,10 +284,10 @@ is built at HEAD and recommends an answer to every decision it raises.
 | [P09-E17](Z-done/P09-E17-indirect-question.md) | **Shipped 2026-09-23.** "asks **whether** / **what**…", licensed by `content_clause_force`; plan-only; retired A272 | E4, E6 |
 | [P09-E18](Z-done/P09-E18-attributive-comparison.md) | **Shipped 2026-09-23.** "a bigger cat **than the dog**" — `adjectiveStandards`; plan-only | E5 D2 |
 | [P09-E19](Z-done/P09-E19-superlative-partitive.md) | **Shipped 2026-09-23.** "the biggest **of** the cats" — `headStandard` read as the set on `most` / `least`; predicative, plan-only | E5 D3 |
-| [P09-E20](P09-E20-temporal-between.md) | "**between** this day and that day" | E1, C29 |
-| [P09-E21](P09-E21-onto.md) | *onto* as its own English goal | E1 |
-| [P09-E22](P09-E22-adversarial-against.md) | "fights **against** the dog" | E1 D3, E2 |
-| [P09-E23](P09-E23-secondary-lexemes.md) | non-primary lexeme links, so "talk" finds SPEAK (BEGIN has been its own concept since C08) | *Follow-ups* |
+| [P09-E20](Z-done/P09-E20-temporal-between.md) | **Shipped 2026-09-24.** "**between** this day and that day" — a seventh `TemporalRelation`, said once over the group; on the temporal box's toolbar and as the console's `/span` (the box E12 built), which the task file had not foreseen | E1, C29 |
+| [P09-E21](Z-done/P09-E21-onto.md) | **Shipped 2026-09-24.** *onto* as its own English goal — "jumps **onto** the wall", the locative *on* unchanged | E1 |
+| [P09-E22](Z-done/P09-E22-adversarial-against.md) | **Shipped 2026-09-24.** "plays **against** the dog" — the `opponent` complement, *gegen* + accusative, を相手に with a verb-governed `opponent_prep`; plan-only. FIGHT still unseeded | E1 D3, E2 |
+| [P09-E23](Z-done/P09-E23-secondary-lexemes.md) | **Shipped 2026-09-24.** non-primary lexeme links, so "talk" finds SPEAK and *cominciare* finds BEGIN — in the picker, console completion and word resolution; never rendered | *Follow-ups* |
 | [P09-E24](P09-E24-ranks-201-400.md) | the same coverage check for ranks 201–400 | *Follow-ups* |
 
 ## Verification
@@ -350,7 +351,7 @@ the temporal ring and the existential toggle, are now [E12](Z-done/P09-E12-build
   verb is HELP_VERB; TRY is a lexical verb, not `modal: true`; EVEN cannot be seeded as a verb adverb
   (Japanese); and §3 lacks three constructs (a focus particle on a noun phrase, the French distal
   demonstrative, a continuative complement).
-- **Secondary lexemes** — now [E23](P09-E23-secondary-lexemes.md). The seeder always links a lexeme as primary
-  ([`seed.ts:21`](../../../../packages/backend/src/seed.ts#L21)). Supporting non-primary links would
-  let "talk" find SPEAK in the English picker without a duplicate concept (BEGIN is its own concept since C08).
+- **Secondary lexemes** — [E23](Z-done/P09-E23-secondary-lexemes.md), **shipped 2026-09-24**: "talk"
+  finds SPEAK in the English picker without a duplicate concept, and an alias is found in the other
+  six too (*cominciare*, *anfangen*, *comenzar* find BEGIN).
 - **Ranks 201–400** — now [E24](P09-E24-ranks-201-400.md). Run the same check again once this list is done.
