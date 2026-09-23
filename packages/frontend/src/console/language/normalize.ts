@@ -2,6 +2,7 @@ import { defaultDefiniteness, type Concept } from "@signi/shared";
 import {
   isConditionalLink,
   isCoordinativeLink,
+  isSubordinateLink,
   isInstrumentalLink,
   type PhraseLink,
   type PhraseSelection,
@@ -84,6 +85,8 @@ function normalizeLink(link: PhraseLink, index: Map<string, number>): { [k: stri
   const t = index.get(link.target.containerId) ?? -1;
   if (isConditionalLink(link)) return { kind: "conditional", s, t };
   if (isCoordinativeLink(link)) return { kind: "coordinative", s, t, conjunction: link.conjunction };
+  if (isSubordinateLink(link))
+    return link.kind === "adverbial" ? { kind: link.kind, s, t, conjunction: link.conjunction } : { kind: link.kind, s, t };
   if (isInstrumentalLink(link)) return { kind: "instrumental", s, t, level: link.level ?? "object" };
   return { kind: "relative", s, sn: link.source.nounKey, t, tn: link.target.nounKey };
 }

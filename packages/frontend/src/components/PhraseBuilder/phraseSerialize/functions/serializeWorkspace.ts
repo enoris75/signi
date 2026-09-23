@@ -18,7 +18,7 @@ export function serializeWorkspace(
       kind: l.kind,
       source: { ...l.source },
       target: { ...l.target },
-      ...(l.kind === "coordinative" ? { conjunction: l.conjunction } : {}),
+      ...(l.kind === "coordinative" || l.kind === "adverbial" ? { conjunction: l.conjunction } : {}),
       ...(l.kind === "instrumental" ? { level: l.level } : {}),
       ...(l.kind === "instrumental" && l.negative ? { negative: true } : {}),
     })),

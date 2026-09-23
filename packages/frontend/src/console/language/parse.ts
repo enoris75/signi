@@ -1,5 +1,6 @@
 import {
   COORD_VALUES,
+  SUB_VALUES,
   PERSON_VALUES,
   REGISTER_VALUES,
   commandNamed,
@@ -214,7 +215,7 @@ export function parse(text: string): ParseResult {
     const next = peek();
     if (next?.kind === "ref") {
       if (kind === "conjunct") fail(next, coded("conjunctTakesNoReference", { command: def.name }));
-      if (item.word && kind !== "join") fail(next, coded("wordOrReference", { command: def.name }));
+      if (item.word && kind !== "join" && !takesConjunction(def)) fail(next, coded("wordOrReference", { command: def.name }));
       pos++;
       item.ref = { text: next.text, from: next.from, to: next.to };
       item.to = next.to;
@@ -243,7 +244,11 @@ export function parse(text: string): ParseResult {
           ? coded("clauseLinkTakes", { command: def.name })
           : kind === "join" && !valueNamed(COORD_VALUES, word.text)
             ? coded("joinTakes")
-            : undefined;
+            : kind === "subordinate" && !(takesConjunction(def) && valueNamed(SUB_VALUES, word.text))
+              ? takesConjunction(def)
+                ? coded("subTakes")
+                : coded("clauseLinkTakes", { command: def.name })
+              : undefined;
     if (!refusal) return;
     dropWord(item);
     fail(word, refusal);
@@ -263,6 +268,10 @@ export function parse(text: string): ParseResult {
     throw error;
   }
 }
+
+/** Whether a link command takes a conjunction before its target: `/join and #2`, `/sub when #2`. */
+export const takesConjunction = (def: CommandDef): boolean =>
+  def.action.kind === "join" || (def.action.kind === "subordinate" && def.action.link === "adverbial");
 
 /** Whether two values say the same kind of thing — two addressees, two registers, two levels. */
 export function sameKind(a: ValueDef, b: ValueDef): boolean {
@@ -295,6 +304,8 @@ export function bracketColor(def: CommandDef | undefined): TokenColor {
       return "secondary";
     case "join":
       return "info";
+    case "subordinate":
+      return "error";
     default:
       return "primary";
   }

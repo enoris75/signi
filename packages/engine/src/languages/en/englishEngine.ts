@@ -5,6 +5,8 @@ import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP
 import { enAdj } from './enAdj.js';
 import { determiner } from './determiner.js';
 import { renderClause } from './renderClause.js';
+import type { Subordinator } from '@signi/shared';
+import { SUBORDINATORS } from './en.consts.js';
 
 export const englishEngine: LanguageEngine = {
   language: 'en',
@@ -33,6 +35,11 @@ export const englishEngine: LanguageEngine = {
   },
   // The word between two clauses. English alone punctuates some of them ("…, that is, …"), which
   // belongs to the sentence and not to the word, so the label is the bare connector.
+  // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9): `that`, the object clause's complementizer, or a subordinating conjunction. English cites each word as it opens its clause ("after", "because").
+  renderSubordinator(sub: Subordinator): string {
+    return sub === 'that' ? 'that' : SUBORDINATORS[sub];
+  },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];
   },

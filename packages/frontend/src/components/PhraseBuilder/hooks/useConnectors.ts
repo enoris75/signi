@@ -7,6 +7,8 @@ import {
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
+  isSubordinateLink,
+  subordinateLabelKey,
 } from "../interfaces.ts";
 import { useUiString } from "../../../i18n/useUiString.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "../slots.ts";
@@ -19,7 +21,7 @@ export const boxKey = (containerId: string, nounKey: NounAddress) =>
 // stroke style: dashed faint line for a relative clause, solid arrowed line for a conditional.
 export type Connector = {
   id: string;
-  kind: "relative" | "conditional" | "coordinative" | "instrumental";
+  kind: "relative" | "conditional" | "coordinative" | "subordinate" | "instrumental";
   x1: number;
   y1: number;
   x2: number;
@@ -129,6 +131,30 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
         y2: t.top + t.height / 2 - rootRect.top,
         color: MUI_COLOR_HEX.info,
         label: uiString(COORD_CONJUNCTION_LABEL_KEY[link.conjunction]).toLowerCase(),
+      });
+    }
+    // Subordinate connectors (P09-E12 D9): the governing clause's border control → its clause's,
+    // labelled with the clause's word ("that", "when", the infinitive phrase).
+    for (const link of links) {
+      if (!isSubordinateLink(link)) continue;
+      const rect =
+        borderAnchorEls.current.get(link.source.containerId) ??
+        boxEls.current.get(`${link.source.containerId}:subject`);
+      const trect =
+        borderAnchorEls.current.get(link.target.containerId) ??
+        boxEls.current.get(`${link.target.containerId}:subject`);
+      if (!rect || !trect) continue;
+      const s = rect.getBoundingClientRect();
+      const t = trect.getBoundingClientRect();
+      next.push({
+        id: link.id,
+        kind: "subordinate",
+        x1: s.left + s.width / 2 - rootRect.left,
+        y1: s.top + s.height / 2 - rootRect.top,
+        x2: t.left + t.width / 2 - rootRect.left,
+        y2: t.top + t.height / 2 - rootRect.top,
+        color: MUI_COLOR_HEX.error,
+        label: uiString(subordinateLabelKey(link)).toLowerCase(),
       });
     }
     // Instrumental connectors: the clause's verb-phrase toggle row → the instrument period's

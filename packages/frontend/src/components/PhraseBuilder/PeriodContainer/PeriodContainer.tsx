@@ -52,6 +52,7 @@ export function PeriodContainer({
   consoleNumber,
   conditional,
   coordinative,
+  subordinate,
   instrumental,
   imperative,
   infinitive,
@@ -59,7 +60,7 @@ export function PeriodContainer({
   ...headerControls
 }: PeriodContainerProps) {
   const t = useUiString();
-  const controls = { conditional, coordinative, instrumental, imperative, infinitive };
+  const controls = { conditional, coordinative, subordinate, instrumental, imperative, infinitive };
   const { dragging, dragHandlers } = useBorderDrag({
     enabled: floatable,
     position,
@@ -106,6 +107,7 @@ export function PeriodContainer({
       <BorderControls
         conditional={conditional}
         coordinative={coordinative}
+        subordinate={subordinate}
         imperative={imperative}
         infinitive={infinitive}
       />

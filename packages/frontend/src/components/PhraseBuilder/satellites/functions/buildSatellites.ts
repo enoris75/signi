@@ -12,8 +12,10 @@ export function buildSatellites(
   revealed: Record<string, boolean>,
   language: LanguageCode,
   t: UiStringLookup,
+  // The period governs a that-clause, its verb's object (P09-E12 D9) — see rawSatellites.
+  clauseObject = false,
 ): BuiltSatellites {
-  return resolveSatellites(rawSatellites(selection, language, t), {
+  return resolveSatellites(rawSatellites(selection, language, t, clauseObject), {
     revealed,
     // A command or an infinitive citation takes the subject's place on the canvas.
     subjectDropped: Boolean(selection.imperative || selection.infinitive),

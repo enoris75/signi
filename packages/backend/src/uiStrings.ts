@@ -5,6 +5,7 @@ import {
   translateDeterminer,
   translatePossessive,
   translateSpecifier,
+  translateSubordinator,
   translateWord,
 } from '@signi/engine';
 import { UI_STRINGS, LANGUAGES } from '@signi/shared';
@@ -38,6 +39,7 @@ function renderEntry(def: UiStringDef, lookup: LexicalLookup): Translation[] {
   if (def.determiner !== undefined) return translateDeterminer(def.determiner, lookup, def.agreesWith);
   if (def.possessive !== undefined) return translatePossessive(def.possessive, lookup, def.agreesWith);
   if (def.conjunction !== undefined) return translateConjunction(def.conjunction);
+  if (def.subordinator !== undefined) return translateSubordinator(def.subordinator);
   if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookup, def.agreesWith);
   if (def.degree !== undefined) return translateDegree(def.degree, lookup, def.agreesWith);
   if (def.word !== undefined) return translateWord(def.word, lookup, def.agreesWith);

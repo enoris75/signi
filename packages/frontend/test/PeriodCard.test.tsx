@@ -11,7 +11,11 @@ const CAT: Concept = { id: 'CAT', role: 'noun', description: 'CAT', label: 'cat'
 Element.prototype.setPointerCapture = () => {};
 
 // A workspace binding whose clause-level relations are as given, and every hook a spy.
-function binding({ conditional = {}, coordinative = {} }: { conditional?: object; coordinative?: object } = {}) {
+function binding({
+  conditional = {},
+  coordinative = {},
+  subordinate = {},
+}: { conditional?: object; coordinative?: object; subordinate?: object } = {}) {
   const relation = (over: object) => ({
     hasSource: false,
     hasTarget: false,
@@ -27,6 +31,7 @@ function binding({ conditional = {}, coordinative = {} }: { conditional?: object
     geometry: { registerBorderAnchor: vi.fn() },
     conditional: relation(conditional),
     coordinative: relation(coordinative),
+    subordinate: { canStart: true, isPickTarget: false, onStart: vi.fn(), onClear: vi.fn(), onPick: vi.fn(), ...subordinate },
     instrumental: { ...relation({}), level: 'object', onLevelChange: vi.fn() },
   } as unknown as WorkspaceBinding;
 }
@@ -78,11 +83,20 @@ describe('PeriodCard', () => {
     ['a conditional’s main clause', { conditional: { hasSource: true } }],
     ['a coordination’s first clause', { coordinative: { hasSource: true } }],
     ['a coordination’s second clause', { coordinative: { hasTarget: true } }],
+    // A subordinate clause has no mood of its own (P09-E12 D9).
+    ['a subordinate clause', { subordinate: { asTarget: { kind: 'adverbial', conjunction: 'when' } } }],
   ])('locks both moods on %s', (_what, relations) => {
     renderCard({ binding: binding(relations) });
 
     expect(screen.getByRole('button', { name: COMMAND })).toBeDisabled();
     expect(screen.getByRole('button', { name: CITATION })).toBeDisabled();
+  });
+
+  it('leaves the moods free on the clause that governs a subordinate one', () => {
+    renderCard({ binding: binding({ subordinate: { asSource: { kind: 'content' } } }) });
+
+    expect(screen.getByRole('button', { name: COMMAND })).toBeEnabled();
+    expect(screen.getByRole('button', { name: CITATION })).toBeEnabled();
   });
 
   it('leaves the moods free on a period in no relation, or on a standalone one', () => {

@@ -8,6 +8,7 @@ import {
   imperativeRegisterOf,
   isConditionalLink,
   isCoordinativeLink,
+  isSubordinateLink,
   isInstrumentalLink,
   isRelativeLink,
   possessorAddress,
@@ -24,6 +25,8 @@ import {
   LEVEL_VALUES,
   PERSON_VALUES,
   REGISTER_VALUES,
+  SUBORDINATE_NAMES,
+  SUB_VALUES,
   commandByAction,
   roleCommand,
   settingCommand,
@@ -216,7 +219,7 @@ class Printer {
       if (!isBoxComplement(type)) continue;
       this.noun(root, type, undefined, "period");
     }
-    // The period's own links: its if-clause, its coordinate, its instrument.
+    // The period's own links: its if-clause, its coordinate, its subordinate clause, its instrument.
     for (const link of this.state.links) {
       if (link.source.containerId !== id || !this.periodNumber(link.target.containerId)) continue;
       if (isConditionalLink(link)) {
@@ -227,6 +230,14 @@ class Printer {
         this.statement({ key: ":join", removal: "/del join" });
         this.emit("/join", "command", "info");
         this.emit(COORD_VALUES.find((v) => v.value === link.conjunction)!.name, "value", "setting");
+        this.emit(printRef(this.periodNumber(link.target.containerId)), "ref", "ref");
+      } else if (isSubordinateLink(link)) {
+        // `/clause #2`, `/sub when #2`, `/to #2` (P09-E12 D9), each taken back by its own `/del`.
+        const name = SUBORDINATE_NAMES[link.kind];
+        this.statement({ key: `:${name}`, removal: `/del ${name}` });
+        this.emit(`/${name}`, "command", "error");
+        if (link.kind === "adverbial")
+          this.emit(SUB_VALUES.find((v) => v.value === link.conjunction)!.name, "value", "setting");
         this.emit(printRef(this.periodNumber(link.target.containerId)), "ref", "ref");
       } else if (isInstrumentalLink(link)) {
         this.statement({ key: ":inst", removal: "/del inst" });

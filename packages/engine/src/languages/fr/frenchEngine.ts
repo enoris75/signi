@@ -14,6 +14,8 @@ import { prepDet } from './prepDet.js';
 import { renderClause } from './renderClause.js';
 import { aDet } from './aDet.js';
 import { spatialHead } from './spatialHead.js';
+import type { Subordinator } from '@signi/shared';
+import { SUBORDINATORS } from './fr.consts.js';
 
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
@@ -67,6 +69,11 @@ export const frenchEngine: LanguageEngine = {
       { gender: (f['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
       elidesBefore(f, word),
     );
+  },
+  // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9): `that`, the object clause's complementizer, or a subordinating conjunction. French cites each as it opens its clause, before any elision ("que", "parce que").
+  renderSubordinator(sub: Subordinator): string {
+    return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];

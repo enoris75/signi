@@ -5,6 +5,7 @@ import { attachCondition } from "./attachCondition.ts";
 import { attachCoordination } from "./attachCoordination.ts";
 import { attachInstrumental } from "./attachInstrumental.ts";
 import { attachLinks } from "./attachLinks.ts";
+import { attachSubordinate } from "./attachSubordinate.ts";
 import { isRoot } from "./isRoot.ts";
 
 // Serialise the whole workspace: one PhrasePlan per root container, each with its linked
@@ -22,6 +23,7 @@ export function workspaceToPlans(
       attachInstrumental(plan, c, links, byId, new Set([c.id]));
       attachCondition(plan, c, links, byId, new Set([c.id]));
       attachCoordination(plan, c, links, byId, new Set([c.id]));
+      attachSubordinate(plan, c, links, byId, new Set([c.id]));
       return { containerId: c.id, plan };
     });
 }

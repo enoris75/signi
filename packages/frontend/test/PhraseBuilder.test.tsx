@@ -118,6 +118,13 @@ function makeBinding(overrides: BindingOverrides = {}): WorkspaceBinding {
       onClear: vi.fn(),
       onPick: vi.fn(),
     },
+    subordinate: {
+      canStart: false,
+      isPickTarget: false,
+      onStart: vi.fn(),
+      onClear: vi.fn(),
+      onPick: vi.fn(),
+    },
     instrumental: {
       hasSource: false,
       hasTarget: false,
@@ -137,6 +144,7 @@ function makeBinding(overrides: BindingOverrides = {}): WorkspaceBinding {
     relative: { ...base.relative, ...overrides.relative },
     conditional: { ...base.conditional, ...overrides.conditional },
     coordinative: { ...base.coordinative, ...overrides.coordinative },
+    subordinate: { ...base.subordinate, ...overrides.subordinate },
     instrumental: { ...base.instrumental, ...overrides.instrumental },
   };
 }

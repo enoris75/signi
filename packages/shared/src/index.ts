@@ -575,6 +575,13 @@ export interface Concept {
   transitivity?: Transitivity; // only set for verbs
   modal?: boolean;             // verb that governs another verb rather than heading a clause
   /**
+   * The clause a verb takes as its object, when it takes one (P09-E12 D9): a finite `content` clause
+   * ("says **that the cat runs**", `PhrasePlan.contentObject`) or an `infinitive` complement ("needs
+   * **to run**", `PhrasePlan.infinitiveComplement`). It is what offers the builder's subordinate-clause
+   * menu its *that* / *to* entries; the adverbial clause needs no licence. Absent for every other verb.
+   */
+  clauseObject?: ClauseObject;
+  /**
    * The slot this concept fills, where that is **not** the one its role implies (see `ConceptSlot`).
    * A picker offering its role must filter it out: *very* is an adverb that never modifies a verb,
    * *Mr* a noun that never fills a noun slot, *own* an adjective that exists only beside a possessor,
@@ -1247,6 +1254,16 @@ export interface PurposeClause {
  */
 export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before';
 
+/** What kind of clause a verb takes as its object — see `Concept.clauseObject`. */
+export type ClauseObject = 'content' | 'infinitive';
+
+/**
+ * A word that introduces a subordinate clause, as the builder's subordinate-clause menu names it:
+ * one of the subordinating conjunctions, or `that`, the complementizer of an object content clause
+ * (che / que / dass / と). See `UiStringSubordinatorDef`.
+ */
+export type Subordinator = SubordinatingConjunction | 'that';
+
 export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before'];
 
 /** See `PhrasePlan.adverbialClause`. */
@@ -1602,11 +1619,15 @@ export interface SerializedLink {
   // clause, target = second clause, joined by `conjunction`); 'instrumental' is a
   // container-to-container link whose target period holds the instrument noun phrase the source
   // clause acts with ("start **with a word**"). None of the three carries a noun key.
-  kind?: 'relative' | 'conditional' | 'coordinative' | 'instrumental';
+  // 'content', 'adverbial' and 'infinitive' are the subordinate clauses (P09-E12 D9): the target
+  // period is the source clause's object clause ("says that …"), its adverbial clause ("runs when
+  // …", joined by `conjunction`) or its infinitive complement ("needs to …").
+  kind?: 'relative' | 'conditional' | 'coordinative' | 'content' | 'adverbial' | 'infinitive' | 'instrumental';
   source: { containerId: string; nounKey?: string };
   target: { containerId: string; nounKey?: string };
-  // The coordinating conjunction, present only on a 'coordinative' link.
-  conjunction?: CoordConjunction;
+  // The coordinating conjunction, present only on a 'coordinative' link — or the subordinating one,
+  // on an 'adverbial' link.
+  conjunction?: CoordConjunction | SubordinatingConjunction;
   // The reification degree, present only on an 'instrumental' link (absent ⇒ 'object').
   level?: AbstractionLevel;
   // The instrument denied — the privative, "without the knife" (P09-E2) — present only on a denied

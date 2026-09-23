@@ -4,6 +4,7 @@ import {
   type Concept,
   type CoordConjunction,
   type ImperativeRegister,
+  type SubordinatingConjunction,
 } from "@signi/shared";
 import {
   conjunctAddress,
@@ -11,6 +12,7 @@ import {
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
+  isSubordinateLink,
   possessorAddress,
   type ConceptSelectOpts,
   type ImperativePerson,
@@ -19,20 +21,25 @@ import {
   type PhraseContainer,
   type PhraseSelection,
   type SlotKey,
+  type SubordinateKind,
 } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   addConditional,
   addCoordinative,
   addInstrumental,
   addRelativeLink,
+  addSubordinate,
   canBeCondition,
   canBeCoordinate,
   canBeInstrument,
+  canBeSubordinate,
   canStartCondition,
   canStartCoordination,
+  canStartSubordinate,
   clearConditional,
   clearCoordinative,
   clearInstrumental,
+  clearSubordinate,
   dropContainerLinks,
   inClauseRelation,
   isSelfOrAncestor,
@@ -69,6 +76,8 @@ import {
   LEVEL_VALUES,
   PERSON_VALUES,
   REGISTER_VALUES,
+  SUBORDINATE_NAMES,
+  SUB_VALUES,
   commandNamed,
   roleCommand,
   valueNamed,
@@ -207,12 +216,19 @@ type LinkOp =
     }
   | { kind: "condition"; mainId: string; target: Target; span: Span }
   | { kind: "join"; firstId: string; target: Target; conjunction: CoordConjunction; span: Span }
+  | { kind: "subordinate"; mainId: string; target: Target; link: SubordinateKind; conjunction?: SubordinatingConjunction; span: Span }
   | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; span: Span }
   | { kind: "level"; containerId: string; level: AbstractionLevel; span: Span }
   | { kind: "privative"; containerId: string; negative: boolean; span: Span }
   // A possessor pointing at another noun of its period, which the line may name after it.
   | { kind: "possessorRef"; containerId: string; possessed: NounAddress; antecedent: NounAddress; span: Span }
-  | { kind: "unlink"; link: "relative" | "condition" | "join" | "instrument"; containerId: string; nounKey?: NounAddress; span: Span };
+  | {
+      kind: "unlink";
+      link: "relative" | "condition" | "join" | SubordinateKind | "instrument";
+      containerId: string;
+      nounKey?: NounAddress;
+      span: Span;
+    };
 
 class ApplyError extends Error {
   readonly diagnostic: Diagnostic;
@@ -417,6 +433,7 @@ class Run {
         return this.role(item, def, action.slot, frame);
       case "condition":
       case "join":
+      case "subordinate":
       case "instrument":
         return this.clauseLink(item, def, frame);
       case "level":
@@ -711,9 +728,10 @@ class Run {
 
   // ── Periods ──
 
-  /** `/if`, `/join`, `/inst`: a clause-level link from the frame's period. */
+  /** `/if`, `/join`, `/clause`, `/sub`, `/to`, `/inst`: a clause-level link from the frame's period. */
   clauseLink(item: Item, def: CommandDef, frame: Frame): void {
-    const kind = def.action.kind as "condition" | "join" | "instrument";
+    const kind = def.action.kind as "condition" | "join" | "subordinate" | "instrument";
+    const subordinate = def.action.kind === "subordinate" ? def.action.link : undefined;
     if (frame.kind !== "period") fail(item.head, coded("linkInsideNounPhrase", { command: def.name, ...nest(frame) }));
     const id = frame.containerId;
     const root = this.root(id);
@@ -723,6 +741,9 @@ class Run {
       if (root.imperative && !canCoordinateImperative(conjunction))
         fail(item.word ?? item.head, coded("imperativeJoin"));
     }
+    let subordinator: SubordinatingConjunction | undefined;
+    if (subordinate === "adverbial")
+      subordinator = (valueNamed(SUB_VALUES, item.word?.text ?? "when")?.value ?? "when") as SubordinatingConjunction;
     if (kind === "instrument") {
       if (!root.verb) fail(item.head, coded("instrumentNeedsVerb"));
       if (!root.verb!.complements?.includes("instrumental"))
@@ -736,17 +757,29 @@ class Run {
     } else if (item.body) {
       // The new period is made already linked. A command's coordinate is a command too: the mood
       // rule would refuse a statement, and the bracket is the command's own.
-      const seed: PhraseSelection = kind === "join" && root.imperative ? setImperative({}, true) : {};
+      // An infinitive complement is drawn in the infinitive mood (P09-E12 D9), so its bracket is one.
+      const seed: PhraseSelection =
+        kind === "join" && root.imperative
+          ? setImperative({}, true)
+          : subordinate === "infinitive"
+            ? setInfinitive({}, true)
+            : {};
       target = { containerId: this.newPeriod(seed) };
     } else {
       return unfinished(
         item.head,
-        coded("clauseLinkNeedsTarget", { command: def.name, ...(kind === "join" && { conjunction: item.word?.text ?? "and" }) }),
+        coded("clauseLinkNeedsTarget", {
+          command: def.name,
+          ...(kind === "join" && { conjunction: item.word?.text ?? "and" }),
+          ...(subordinate === "adverbial" && { conjunction: item.word?.text ?? "when" }),
+        }),
       );
     }
     const span: Span = item;
     if (kind === "condition") this.queue.push({ kind, mainId: id, target, span });
     else if (kind === "join") this.queue.push({ kind, firstId: id, target, conjunction, span });
+    else if (kind === "subordinate")
+      this.queue.push({ kind, mainId: id, target, link: subordinate!, ...(subordinator && { conjunction: subordinator }), span });
     else this.queue.push({ kind, clauseId: id, target, level: "object", span });
     if (item.body) {
       const containerId = (target as { containerId: string }).containerId;
@@ -798,8 +831,10 @@ class Run {
     // coordination (see PeriodCard's moodLocked): the relation has to go first.
     const locked = this.links.some(
       (l) =>
-        (isConditionalLink(l) || isCoordinativeLink(l)) &&
-        (l.source.containerId === id || l.target.containerId === id),
+        ((isConditionalLink(l) || isCoordinativeLink(l)) &&
+          (l.source.containerId === id || l.target.containerId === id)) ||
+        // A subordinate clause has no mood of its own (P09-E12 D9); the clause governing it keeps its.
+        (isSubordinateLink(l) && l.target.containerId === id),
     );
     if (flips && locked)
       fail(item.head, coded("moodLocked"));
@@ -923,6 +958,13 @@ class Run {
         this.queue.push({ kind: "unlink", link, containerId, span: item });
         return;
       }
+      case "clause":
+      case "sub":
+      case "to": {
+        const link = (Object.keys(SUBORDINATE_NAMES) as SubordinateKind[]).find((k) => SUBORDINATE_NAMES[k] === what)!;
+        this.queue.push({ kind: "unlink", link, containerId, span: item });
+        return;
+      }
       case "period":
         return this.removePeriod(item, frame);
     }
@@ -993,7 +1035,15 @@ class Run {
     const id = () => this.opts.newId();
     // A period the line removed after naming it (`/if ( … ) /del period`) takes its links with it.
     const from =
-      op.kind === "relative" ? op.source.containerId : op.kind === "condition" ? op.mainId : op.kind === "join" ? op.firstId : op.kind === "instrument" ? op.clauseId : op.containerId;
+      op.kind === "relative"
+        ? op.source.containerId
+        : op.kind === "condition" || op.kind === "subordinate"
+          ? op.mainId
+          : op.kind === "join"
+            ? op.firstId
+            : op.kind === "instrument"
+              ? op.clauseId
+              : op.containerId;
     if (!this.containers.some((c) => c.id === from)) fail(op.span, coded("linkSourceRemoved"));
     switch (op.kind) {
       case "relative": {
@@ -1024,6 +1074,24 @@ class Run {
           fail(op.span, this.clauseRefusal(op.firstId, second, "coordinate"));
         }
         this.links = addCoordinative(this.links, op.firstId, second, op.conjunction, id());
+        return;
+      }
+      case "subordinate": {
+        const clauseId = this.resolveTarget(op.target);
+        const main = this.containers.find((c) => c.id === op.mainId)!;
+        const verb = main.selection.verb;
+        if (!verb) fail(op.span, coded("subordinateNeedsVerb"));
+        if (op.link === "content" && verb!.clauseObject !== "content")
+          fail(op.span, coded("takesNoContentClause", { verb: this.vocab.label(verb!) }));
+        if (op.link === "content" && main.selection.directObject) fail(op.span, coded("contentClauseHasObject"));
+        if (op.link === "infinitive" && verb!.clauseObject !== "infinitive")
+          fail(op.span, coded("takesNoInfinitive", { verb: this.vocab.label(verb!) }));
+        if (!canStartSubordinate(this.links, main, op.link)) fail(op.span, coded("cantTakeSubordinate"));
+        if (!canBeSubordinate(this.containers, this.links, op.mainId, clauseId, op.link))
+          fail(op.span, this.clauseRefusal(op.mainId, clauseId, "subordinate"));
+        this.links = addSubordinate(this.links, op.mainId, clauseId, op.link, id(), op.conjunction);
+        // The infinitive complement is drawn in the infinitive mood, as the canvas's pick sets it.
+        if (op.link === "infinitive") this.updateRoot(clauseId, (root) => setInfinitive(root, true));
         return;
       }
       case "instrument": {
@@ -1063,9 +1131,12 @@ class Run {
         if (op.link === "relative") this.links = removeRelativeLink(this.links, op.containerId, op.nounKey!);
         else if (op.link === "condition") this.links = clearConditional(this.links, op.containerId);
         else if (op.link === "join") this.links = clearCoordinative(this.links, op.containerId);
-        else this.links = clearInstrumental(this.links, op.containerId);
+        else if (op.link === "instrument") this.links = clearInstrumental(this.links, op.containerId);
+        else this.links = clearSubordinate(this.links, op.containerId, op.link);
         if (before.length === this.links.length && op.link !== "relative")
-          fail(op.span, coded("noLinkToRemove", { link: op.link }));
+          fail(op.span, coded("noLinkToRemove", {
+            link: op.link === "condition" || op.link === "join" || op.link === "instrument" ? op.link : "subordinate",
+          }));
         return;
       }
     }
@@ -1115,7 +1186,12 @@ export function roleRefusal(
   if (slot === "subject") return undefined;
   if (slot === "directObject") {
     if (!verb) return coded("objectNeedsVerb");
-    return verb.transitivity === "intransitive" ? coded("takesNoObject", { verb: verbName }) : undefined;
+    // A that-clause the period governs is its verb's object already (P09-E12 D9), as the canvas
+    // withdraws the object box for it.
+    const clauseObject = state.links.some(
+      (l) => isSubordinateLink(l) && l.kind === "content" && l.source.containerId === containerId,
+    );
+    return verb.transitivity === "intransitive" || clauseObject ? coded("takesNoObject", { verb: verbName }) : undefined;
   }
   if (!verb) return coded("complementNeedsVerb", { command: def.name });
   // The role commands left name the complements a verb licenses (see COMMANDS' role entries).

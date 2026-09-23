@@ -8,6 +8,8 @@ import { aDet } from './aDet.js';
 import { deDet } from './deDet.js';
 import { renderClause } from './renderClause.js';
 import { spatialHead } from './spatialHead.js';
+import type { Subordinator } from '@signi/shared';
+import { SUBORDINATORS } from './es.consts.js';
 
 export const spanishEngine: LanguageEngine = {
   language: 'es',
@@ -44,6 +46,11 @@ export const spanishEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9): `that`, the object clause's complementizer, or a subordinating conjunction. Spanish cites each as it opens its clause ("después de que").
+  renderSubordinator(sub: Subordinator): string {
+    return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];

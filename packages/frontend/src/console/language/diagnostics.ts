@@ -1,5 +1,5 @@
 import { UI_STRINGS, canCoordinateImperative, type CoordConjunction, type LanguageCode, type UiStringKey } from "@signi/shared";
-import { COORD_VALUES, LEVEL_VALUES, commandNamed } from "./commands.ts";
+import { COORD_VALUES, LEVEL_VALUES, SUB_VALUES, commandNamed } from "./commands.ts";
 import type { Span } from "./types.ts";
 
 /**
@@ -35,7 +35,7 @@ export interface Nest {
 export type WordKindName = "noun" | "pronoun" | "adjective" | "nounModifier" | "verb" | "modal" | "adverb";
 
 /** The link a clause refusal is about: a period cannot be *its if-condition* itself. */
-export type ClauseRole = "condition" | "coordinate" | "instrument";
+export type ClauseRole = "condition" | "coordinate" | "subordinate" | "instrument";
 
 /** The complements a verb licenses, each a box a role command names. */
 export type ComplementSlot = "predicative" | "terminus" | "manner" | "locative" | "direction" | "source" | "route" | "cause";
@@ -64,6 +64,7 @@ const names = (values: readonly { name: string }[]) => values.map((v) => v.name)
 
 const LEVELS = names(LEVEL_VALUES);
 const CONJUNCTIONS = names(COORD_VALUES);
+const SUBORDINATORS = names(SUB_VALUES);
 // The conjunctions two commands can be joined with (see IMPERATIVE_COORD_CONJUNCTIONS).
 const COMMAND_CONJUNCTIONS = names(COORD_VALUES.filter((v) => canCoordinateImperative(v.value as CoordConjunction)));
 const VERB_LINE = "/verb ( … )";
@@ -103,6 +104,7 @@ const SEGMENTS = {
   relativeTakes: () => [say("diagnostic.chooseRelativeClause", "/rel #2.subj, /rel subj { … }, /rel obj { … }")],
   clauseLinkTakes: (a: { command: string }) => [say("diagnostic.choosePeriod", `/${a.command} #2, /${a.command} { … }`)],
   joinTakes: () => [say("diagnostic.chooseConjunction", CONJUNCTIONS)],
+  subTakes: () => [say("diagnostic.chooseConjunction", SUBORDINATORS)],
 
   // ── References (resolve.ts) ──
   referenceStartsWithNumber: () => [say("diagnostic.choosePeriod", "#2, #2.obj")],
@@ -160,7 +162,7 @@ const SEGMENTS = {
   levelNeedsValue: () => [say("diagnostic.chooseValue", LEVELS)],
   levelNotTaken: (a: { text: string }) => [say("diagnostic.unknownValue", quote(a.text)), say("diagnostic.chooseValue", LEVELS)],
   moodInNounPhrase: (a: Nest) => [closeBracket(a)],
-  moodLocked: () => [say("diagnostic.removeConditionOrCoordination", "/del if, /del join")],
+  moodLocked: () => [say("diagnostic.removeConditionOrCoordination", "/del if, /del join, /del clause, /del sub, /del to")],
   newPeriodInBracket: (a: Nest) => [closeBracket(a)],
   nothingToRemove: () => [say("diagnostic.removeWordOrPeriod", "/del obj, /del adj, /del period")],
   nestedRemovesOnlySubj: (a: Nest) => [closeBracket(a)],
@@ -175,13 +177,20 @@ const SEGMENTS = {
   noRelativeToRemove: () => [say("diagnostic.noNounHasRelative")],
   unknownRemoval: (a: { what: string }) => [
     say("diagnostic.unknownValue", quote(a.what)),
-    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, and, …, rel, if, join, inst, period"),
+    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, and, …, rel, if, join, clause, sub, to, inst, period"),
   ],
   removePeriodInBracket: (a: Nest) => [closeBracket(a)],
   linkTargetRemoved: () => [say("diagnostic.missingPeriod")],
   linkSourceRemoved: () => [say("diagnostic.missingPeriod")],
   cantTakeCondition: () => [say("diagnostic.periodAcceptsNoCondition")],
   cantStartCoordination: () => [say("diagnostic.periodAcceptsNoCoordination")],
+  // The subordinate clauses (P09-E12 D9): a period folded into another governs none; a clause needs a
+  // verb to govern or modify; *that* and *to* need a verb that takes them, and *that* one with no object.
+  cantTakeSubordinate: () => [say("diagnostic.periodAcceptsNoSubordinate")],
+  subordinateNeedsVerb: () => [say("diagnostic.chooseVerb", VERB_LINE)],
+  takesNoContentClause: (a: { verb: string }) => [say("diagnostic.verbAcceptsNo.contentClause", a.verb)],
+  takesNoInfinitive: (a: { verb: string }) => [say("diagnostic.verbAcceptsNo.infinitive", a.verb)],
+  contentClauseHasObject: () => [say("diagnostic.periodHasObject", "/del obj")],
   joinMoodMismatch: (a: { imperative: boolean }) => [
     say(a.imperative ? "diagnostic.periodIsCommand" : "diagnostic.periodIsStatement"),
     say("diagnostic.chooseOtherPeriod"),
@@ -189,7 +198,7 @@ const SEGMENTS = {
   instrumentThingHasVerb: () => [say("diagnostic.thatPeriodHasVerb"), say("diagnostic.chooseLevel", "/level process, /level concept")],
   noNounAt: (a: { ref: string }) => [say("diagnostic.missingNoun", a.ref)],
   noInstrumentLink: () => [say("diagnostic.periodHasNo.instrument")],
-  noLinkToRemove: (a: { link: "condition" | "join" | "instrument" }) => [say(`diagnostic.periodHasNo.${a.link}`)],
+  noLinkToRemove: (a: { link: "condition" | "join" | "subordinate" | "instrument" }) => [say(`diagnostic.periodHasNo.${a.link}`)],
   relativeSamePeriod: () => [say("diagnostic.chooseOtherPeriod")],
   relativeGapEmpty: (a: { ref: string }) => [say("diagnostic.missingWord", a.ref)],
   relativeGapTaken: (a: { ref: string }) => [say("diagnostic.nounAlreadyTaken", a.ref)],

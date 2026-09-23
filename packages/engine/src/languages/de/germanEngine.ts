@@ -11,6 +11,8 @@ import { spatialHead } from './spatialHead.js';
 import { punctuate } from './punctuate.js';
 import { questionWord } from './questionWord.js';
 import { renderClause } from './renderClause.js';
+import type { Subordinator } from '@signi/shared';
+import { SUBORDINATORS } from './de.consts.js';
 
 export const germanEngine: LanguageEngine = {
   language: 'de',
@@ -61,6 +63,11 @@ export const germanEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9): `that`, the object clause's complementizer, or a subordinating conjunction. German cites each as it opens its verb-final clause ("dass", "nachdem").
+  renderSubordinator(sub: Subordinator): string {
+    return sub === 'that' ? 'dass' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];

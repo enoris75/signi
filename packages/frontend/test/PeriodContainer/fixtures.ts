@@ -4,6 +4,7 @@ import {
   COORD_CONJUNCTION_OPTIONS,
   type ConditionalBinding,
   type CoordinativeBinding,
+  type SubordinateBinding,
   type InstrumentalBinding,
   type PhraseSelection,
   type WorkspaceBinding,
@@ -103,11 +104,13 @@ export function binding({
   pickActive = false,
   conditional = {},
   coordinative = {},
+  subordinate = {},
   instrumental = {},
 }: {
   pickActive?: boolean;
   conditional?: Partial<ConditionalBinding>;
   coordinative?: Partial<CoordinativeBinding>;
+  subordinate?: Partial<SubordinateBinding>;
   instrumental?: Partial<InstrumentalBinding>;
 } = {}): WorkspaceBinding {
   return {
@@ -146,6 +149,14 @@ export function binding({
       onClear: vi.fn(),
       onPick: vi.fn(),
       ...coordinative,
+    },
+    subordinate: {
+      canStart: true,
+      isPickTarget: false,
+      onStart: vi.fn(),
+      onClear: vi.fn(),
+      onPick: vi.fn(),
+      ...subordinate,
     },
     instrumental: {
       hasSource: false,

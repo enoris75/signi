@@ -12,7 +12,7 @@ import {
   type UiStringKey,
   type Voice,
 } from "@signi/shared";
-import type { ImperativePerson, SlotConfig, SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import type { ImperativePerson, SlotConfig, SlotKey, SubordinateKind } from "../../components/PhraseBuilder/interfaces.ts";
 import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
 import { MODAL_NEGATIVE_FIELDS } from "../../components/PhraseBuilder/slots.ts";
 
@@ -81,6 +81,8 @@ export type Action =
   | { kind: "relative" }
   | { kind: "condition" }
   | { kind: "join" }
+  /** A subordinate clause (P09-E12 D9): `/clause` its object clause, `/sub` an adverbial one, `/to` its infinitive. */
+  | { kind: "subordinate"; link: SubordinateKind }
   | { kind: "instrument" }
   | { kind: "level" }
   /** The instrument denied, or taken back: `/without`, `/posinst` (P09-E2). */
@@ -216,6 +218,14 @@ export const COORD_VALUES: readonly ValueDef[] = [
   },
   { name: "then", value: "then", description: "temporal", descriptionKey: "conjunction.kind.then" },
 ];
+
+/** The conjunctions `/sub` opens an adverbial clause with (P09-E12 D9), each by the word it spells. */
+export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "after", "before"] as const).map(
+  (value) => ({ name: value, value, description: value, descriptionKey: `subordinator.value.${value}` as const }),
+);
+
+/** The name `/del` takes a subordinate link back by, and the command that prints it: one per kind. */
+export const SUBORDINATE_NAMES: Record<SubordinateKind, string> = { content: "clause", adverbial: "sub", infinitive: "to" };
 
 export const TENSE_VALUES: readonly ValueDef[] = (["past", "present", "future"] as const).map((value) => ({
   name: value,
@@ -654,6 +664,42 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "link" },
     action: { kind: "join" },
   },
+  // The subordinate clauses (P09-E12 D9). `/that`, `/because` and `/after` are taken or ambiguous, so
+  // the object clause is `/clause`, the adverbial one `/sub` with its conjunction (`/sub when #2`, in
+  // `/join and #2`'s shape), and the infinitive complement `/to`.
+  {
+    name: "clause",
+    aliases: ["content"],
+    group: "period",
+    description: "that-clause",
+    descriptionKey: "subordinator.value.that",
+    purposeKey: "purpose.join",
+    color: "error",
+    arg: { kind: "link" },
+    action: { kind: "subordinate", link: "content" },
+  },
+  {
+    name: "sub",
+    aliases: ["adverbial"],
+    group: "period",
+    description: "adverbial clause",
+    descriptionKey: "clause.subordinate",
+    purposeKey: "purpose.join",
+    color: "error",
+    arg: { kind: "link" },
+    action: { kind: "subordinate", link: "adverbial" },
+  },
+  {
+    name: "to",
+    aliases: ["infcomp"],
+    group: "period",
+    description: "infinitive complement",
+    descriptionKey: "infinitive.phrase",
+    purposeKey: "purpose.join",
+    color: "error",
+    arg: { kind: "link" },
+    action: { kind: "subordinate", link: "infinitive" },
+  },
   {
     name: "level",
     aliases: ["reification"],
@@ -944,7 +990,7 @@ export function topicOf(def: CommandDef): Topic {
               ? a.id
               : a.kind === "mood"
                 ? "mood"
-                : a.kind === "condition" || a.kind === "join" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative"
+                : a.kind === "condition" || a.kind === "join" || a.kind === "subordinate" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative"
                   ? "links"
                   : a.kind === "new" || a.kind === "del" || (a.kind === "app" && a.app === "edit")
                     ? "period"
