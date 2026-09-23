@@ -19,7 +19,7 @@ export const STANDARD_ADDRESS: NounAddress = standardAddress("predicative");
  * wears, where tidying packs it and whether it holds a word — plus whether it is dimmed.
  */
 export type StandardSpot = OwnerSpot & {
-  // The degree no longer takes a standard (positive, most, least): the translator drops it, so the
+  // The degree no longer takes a standard (positive, most, least): the plan leaves it out, so the
   // ring is drawn faded. The word is kept, and comes back into the sentence with the degree.
   dimmed: boolean;
 };

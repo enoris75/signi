@@ -37,8 +37,9 @@ describe('buildNounPhrase', () => {
     expect(buildNounPhrase(sel, 'locative')).toMatchObject({ concept: 'HOUSE', number: undefined, gender: 'fem' });
   });
 
-  // P09-E12 D5: the standard rides with the degree; the translator drops it where the degree takes none.
-  it('gives an adjective head its standard of comparison, whatever its degree', () => {
+  // P09-E12 D5: the standard rides with the degree that takes one; under the superlatives the
+  // translator would read it as the set (P09-E19), which the canvas dims and does not offer yet.
+  it('gives an adjective head its standard of comparison on the degrees that take one', () => {
     const sel: PhraseSelection = {
       predicative: BIG,
       adjectiveDegrees: { predicative: 'more' },
@@ -50,7 +51,9 @@ describe('buildNounPhrase', () => {
       headDegree: 'more',
       headStandard: { concept: 'DOG', definiteness: 'indefinite' },
     });
-    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'equally' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toBeUndefined();
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'positive' } }, 'predicative')?.headStandard).toBeUndefined();
     expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
   });
 

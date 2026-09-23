@@ -412,7 +412,7 @@ export interface PhraseSelection {
     // The standard of comparison of the predicate adjective ("bigger *than the dog*", P09-E12 D5):
     // a nested noun phrase whose head is its `subject`, the possessor's shape, which becomes
     // NounPhrase.headStandard. Offered while the predicative holds an adjective whose degree takes
-    // one (STANDARD_DEGREES); kept when the degree moves off those — the translator drops it there,
+    // one (STANDARD_DEGREES); kept when the degree moves off those — the plan leaves it out there,
     // and the canvas dims its ring — so the user's word survives a pass through the positive.
     predicativeStandard?: PhraseSelection;
     // Relative clauses are no longer stored inside a selection: a noun's relative clause

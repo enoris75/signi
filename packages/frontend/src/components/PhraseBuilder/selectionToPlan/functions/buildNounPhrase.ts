@@ -1,4 +1,4 @@
-import type { Concept, Definiteness, NounPhrase, Possessor } from "@signi/shared";
+import { STANDARD_DEGREES, type Concept, type Definiteness, type NounPhrase, type Possessor } from "@signi/shared";
 import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
@@ -40,9 +40,13 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     headDegree: concept.role === "adjective" ? sel.adjectiveDegrees?.[which] : undefined,
     // What that adjective is compared to ("bigger than the dog", P09-E12 D5): a nested noun phrase
     // headed by its `subject`, like a possessor, but a whole noun element — it may coordinate. It is
-    // passed whatever the degree: the translator drops it off the comparatives and the equative
-    // (STANDARD_DEGREES), once for every language, which is what dims its ring on the canvas.
-    headStandard: concept.role === "adjective" ? standardOf(sel, which, root) : undefined,
+    // passed only on the comparatives and the equative (STANDARD_DEGREES), the degrees whose ring the
+    // canvas draws undimmed: the translator would read it as the superlative's set ("the biggest of
+    // the dogs", P09-E19), which the canvas does not offer yet, and drops it on the positive.
+    headStandard:
+      concept.role === "adjective" && STANDARD_DEGREES.has(sel.adjectiveDegrees?.[which] ?? "positive")
+        ? standardOf(sel, which, root)
+        : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a

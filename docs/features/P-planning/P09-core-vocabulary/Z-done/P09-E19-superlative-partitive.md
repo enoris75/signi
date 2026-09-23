@@ -86,10 +86,14 @@ What landed, and where it differs from the plan's wording:
   the set with の中で and keeps 最も (and `least`'s negated adjective).
 - **Doc comments**: `Degree`, `STANDARD_DEGREES` and `headStandard` in shared, and
   `ResolvedNounPhrase.standard`, now describe both readings.
-- **The console round trip already holds** for the predicative: E12 prints `headStandard` as
-  `/than` after the degree ([`print.ts#L428`](../../../../../packages/frontend/src/console/language/print.ts#L428))
-  whatever the degree, so a set prints and applies back; only the word it prints is the
-  comparative's.
+- **The builder keeps the set out of its plans** (added at integration): `buildNounPhrase` passes
+  `headStandard` only on `STANDARD_DEGREES`
+  ([`buildNounPhrase.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/selectionToPlan/functions/buildNounPhrase.ts)).
+  Without that, a standard kept through a degree cycle to `most` would have **rendered** as the set
+  while the canvas drew its ring faded. The canvas and the console therefore behave exactly as before:
+  a dimmed standard is out of the sentence. The console still prints it as `/than` whatever the
+  degree ([`print.ts#L428`](../../../../../packages/frontend/src/console/language/print.ts#L428)), so
+  the text round trip holds.
 - Tests: `describe('the superlative set (P09-E19)')` in
   [`comparison.test.ts`](../../../../../packages/engine/test/comparison.test.ts) — the table, `least`,
   a coordinated set, en *of*/*in*, fr *d'entre* on a pronoun only, the German gender and number
@@ -100,12 +104,10 @@ What landed, and where it differs from the plan's wording:
 
 Follow-ups, beside *Out of scope* below:
 
-- **Frontend**: the canvas still reads `STANDARD_DEGREES` for the standard's control and its ring's
-  dimming ([`standardRing.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/standardRing.ts)),
-  so a standard kept through a cycle to `most` now **renders** as the set while its ring is drawn
-  faded, and the control is not offered on a superlative. The gate wants the superlatives, and the
-  control's label (and the console's `/than`) the set's word by degree — E19 §4's "label could follow
-  the degree".
+- **Frontend**: offer the set on the canvas — the standard's control and its ring's dimming
+  ([`standardRing.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/standardRing.ts))
+  and `buildNounPhrase`'s gate widened to the superlatives, the control's label (and the console's
+  `/than`) the set's word by degree — E19 §4's "label could follow the degree".
 - **The attributive superlative with a set** now has E18's `adjectiveStandards` to ride (D5).
 
 ## Why
