@@ -29,16 +29,17 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
     const question = !!resolved.verbPhrase?.interrogative;
     const open = question ? (engine.questionOpener ?? '') : '';
     const stop = question ? (engine.questionMark ?? '?') : (engine.terminator ?? '.');
-    // The vocative opens the sentence, behind the opening mark, set off by the language's separator
-    // and capitalized as its first word (P11-E3): "Mom, run.", "¿Mamá, el gato corre?", お母さん、….
+    // The vocative opens the sentence, set off by the language's separator and capitalized as its
+    // first word (P11-E3): "Mom, run.", お母さん、…. It stands **outside** Spanish's opening mark, which
+    // encloses only the question itself: "Mamá, ¿el gato corre?" (RAE, *Ortografía* 3.4.2.1).
     const address = plan.address ? resolveAddress(plan.address, engine.language, lookup) : undefined;
     const called = address ? capitalized(engine.render(address)) + (engine.addressSeparator ?? ', ') : '';
     const ruby = engine.renderRuby?.(resolved);
     const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: engine.addressSeparator ?? ', ' }] : [];
     return {
       language: engine.language,
-      text: open + called + engine.render(resolved) + stop,
-      ...(ruby ? { ruby: [...(open ? [{ t: open }] : []), ...calledRuby, ...ruby, { t: stop }] } : {}),
+      text: called + open + engine.render(resolved) + stop,
+      ...(ruby ? { ruby: [...calledRuby, ...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
     };
   });
 }

@@ -39,7 +39,7 @@ Every concept definition and word label renders as it did in all seven (none use
 Beside them, all engine output: "the cat sees Mom", *el gato ve **a** Mamá*, *le chat donne le livre
 à Papa*, "Mom's book" / *das Buch Mamas* / *o livro de Mamãe*; "Mom and Dad run", *Maman et Papa
 courent*; "a mom", "the moms", "my mom", "the old mom" unchanged; "Mom, does the cat run?",
-*¿Mamá, el gato corre?*; "Cat, run." for a common noun in address, *Pedro, corra* (the Portuguese
+*Mamá, ¿el gato corre?*; "Cat, run." for a common noun in address, *Pedro, corra* (the Portuguese
 name bare), *Signor Pietro, corri*; and 母は / あなたのお母さんは / 母親は走ります unchanged outside
 address.
 
@@ -57,8 +57,9 @@ What landed, and where it differs from the plan above:
 3. **A possessor question takes the name back.** "whose mom runs?", *la maman de qui court ?*:
    `withQuestionPossessor` restores the common noun that `applyKinName` kept in `name_of`.
 4. **No "!" and no "¡".** The engine closes a command with the full stop, as it always has, and
-   Spanish writes no ¡ for one. So the ¡ rule is the ¿ rule: the opening mark comes before the
-   address, *¿Mamá, el gato corre?*. Japanese's command is the request register the builder
+   Spanish writes no ¡ for one. The ¿ is the only opening mark left, and a leading
+   vocative stands **outside** it, as the RAE writes it: *Mamá, ¿el gato corre?* (the orchestrator
+   moved it there at merge; the lane had put ¿ first). Japanese's command is the request register the builder
    defaults to, 走ってください, and Portuguese's is its subjunctive, *corra*.
 5. **Where it renders.** `translate` is where a sentence's opening mark and full stop are put
    together, so the address goes there: opener + address + separator + clause + stop, in the text and

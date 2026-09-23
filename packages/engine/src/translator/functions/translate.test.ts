@@ -70,12 +70,12 @@ describe('translate', () => {
   });
 
   // P11-E3: the vocative opens the sentence, set off by the language's separator.
-  test('an address opens the sentence, capitalized, behind the opening mark', () => {
+  test('an address opens the sentence, capitalized, ahead of Spanish's opening mark', () => {
     const translations = translate({ ...YOU_RUN, imperative: true, address: { concept: 'DOG' } }, LOOKUP);
     expect(find(translations, 'en')?.text).toBe('Dog, run.');
     const question = translate({ ...CAT_RUNS, interrogative: true, address: { concept: 'DOG' } }, LOOKUP);
     expect(find(question, 'en')?.text).toBe('Dog, does the cat run?');
-    expect(find(question, 'es')?.text).toMatch(/^¿[A-Z][^,]*, .*\?$/);
+    expect(find(question, 'es')?.text).toMatch(/^[A-Z][^,]*, ¿.*\?$/);
   });
 
   test('Japanese sets the address off with 、, in the ruby too', () => {

@@ -145,10 +145,10 @@ describe('the vocative', () => {
     });
   });
 
-  test('an address on a question opens behind the Spanish ¿', () => {
+  test('an address on a question stands outside the Spanish ¿', () => {
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('MOM'), interrogative: true })).toEqual({
       en: 'Mom, does the cat run?', it: 'Mamma, il gatto corre?', fr: 'Maman, est-ce que le chat court ?',
-      de: 'Mama, läuft der Kater?', es: '¿Mamá, el gato corre?', ja: 'お母さん、猫は走りますか？', pt: 'Mamãe, o gato corre?',
+      de: 'Mama, läuft der Kater?', es: 'Mamá, ¿el gato corre?', ja: 'お母さん、猫は走りますか？', pt: 'Mamãe, o gato corre?',
     });
   });
 
