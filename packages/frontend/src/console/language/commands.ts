@@ -507,10 +507,12 @@ export const COMMANDS: readonly CommandDef[] = [
     ),
   ),
   // The temporal's relation (P09-E12b), as the spatial ones set the place's: "/time ( day /ago )".
-  // `/at` is not the determiner `/a`, and none of the six is taken by another command.
+  // `/at` is not the determiner `/a`, and none of the six is taken by another command. `between`
+  // (P09-E20) is: `/between` sets the place's relation, and a command has one name, so the time's
+  // is `/span` — "/time ( day /and night /span )".
   ...TEMPORAL_RELATIONS.map((value) =>
     setting(
-      value,
+      value === "between" ? "span" : value,
       [],
       "noun",
       { id: "temporal", value },

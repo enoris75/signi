@@ -104,6 +104,10 @@ export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: str
   after: { noun: 'の後', reading: 'のあと', particle: 'に' },
   before: { noun: 'の前', reading: 'のまえ', particle: 'に' },
   during: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
+  // The same 〜の間に as `during`, and deliberately so (P09-E20 D3): on a group it is the Japanese
+  // for "between this day and that day", and on a single time the two relations are one string,
+  // as `on` and `over` share の上. It takes the time's に, not the locative's で.
+  between: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
 };
 
 /**

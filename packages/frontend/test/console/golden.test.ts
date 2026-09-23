@@ -118,6 +118,8 @@ const GOLDEN: Record<string, Golden> = {
   after: { line: '/verb run /time night /after', prints: '/verb ( run ) /time ( night /after )', holds: { temporalRelation: 'after' } },
   before: { line: '/verb run /time night /before', prints: '/verb ( run ) /time ( night /before )', holds: { temporalRelation: 'before' } },
   during: { line: '/verb run /time day /during', prints: '/verb ( run ) /time ( day /during )', holds: { temporalRelation: 'during' } },
+  // P09-E20: the time's `between`, named apart from the place's `/between`, since a command has one name.
+  span: { line: '/verb run /time ( day /and night /span )', prints: '/verb ( run ) /time ( day /span /and night )', holds: { temporalRelation: 'between' }, misuse: { line: '/verb run /loc house /span', says: { code: 'noTarget', args: { command: 'span' } } } },
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
   thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },

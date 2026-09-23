@@ -2646,6 +2646,8 @@ export const UI_STRINGS = defineUiStrings({
   'temporal.value.after': { specifier: { kind: 'temporal', value: 'after' }, fallback: 'after' },
   'temporal.value.before': { specifier: { kind: 'temporal', value: 'before' }, fallback: 'before' },
   'temporal.value.during': { specifier: { kind: 'temporal', value: 'during' }, fallback: 'during' },
+  // P09-E20: the spatial `between` word, and ja 〜の間に, the same citation as `during`'s (D3).
+  'temporal.value.between': { specifier: { kind: 'temporal', value: 'between' }, fallback: 'between' },
 
   // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
   // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".
@@ -3083,8 +3085,8 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set a complement's spatial relationship",
   },
-  // `/at /ago /until /after /before /during` set the temporal's relation (P09-E12b), named the way the
-  // spatial one is, under TEMPORAL: "to set a complement's temporal relationship".
+  // `/at /ago /until /after /before /during /span` set the temporal's relation (P09-E12b, E20),
+  // named the way the spatial one is, under TEMPORAL: "to set a complement's temporal relationship".
   'purpose.temporal': {
     plan: setterOf('RELATIONSHIP', 'COMPLEMENT_GRAMMAR', ['TEMPORAL']),
     format: { stripPeriod: true },

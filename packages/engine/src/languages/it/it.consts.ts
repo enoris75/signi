@@ -27,6 +27,8 @@ export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' |
   after: { word: 'dopo' },
   before: { word: 'prima', prep: 'di' },
   during: { word: 'durante' },
+  // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
+  between: { word: 'tra' },
 };
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative

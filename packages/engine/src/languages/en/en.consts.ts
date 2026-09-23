@@ -100,6 +100,9 @@ export const TEMPORAL_PREP: Record<TemporalRelation, string> = {
   after: 'after',
   before: 'before',
   during: 'during',
+  // Said once over a coordinated time, as the spatial `between` is (P09-E20); English repeats no
+  // preposition across a group anyway.
+  between: 'between',
 };
 
 /** The relations English writes after the noun phrase rather than before it. */

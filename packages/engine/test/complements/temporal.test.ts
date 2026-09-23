@@ -9,9 +9,9 @@ const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definite
 
 // The *when* of a clause — the complement the engine had none of until C29 (P09 §3, E3). It carries
 // a `temporal` specifier naming its relation to the time: at / ago / until / after / before /
-// during. Each is a distinct adposition in every language, so all six are pinned here, and the two
-// that are not adpositions at all — the postposed "ago" and the fronted impersonal verb — are
-// pinned beside them.
+// during / between (P09-E20). Each is a distinct adposition in nearly every language, so all seven
+// are pinned here, and the two that are not adpositions at all — the postposed "ago" and the fronted
+// impersonal verb — are pinned beside them.
 describe('temporal', () => {
   // The default relation: no specifier means the act simply happens at that time.
   test('a complement naming no relation is the plain "at"', () => {
@@ -178,13 +178,113 @@ describe('temporal', () => {
   });
 
   // No relation renders empty, and no two render alike, in any language: the whole point of the
-  // specifier is that the six readings are told apart.
+  // specifier is that the seven readings are told apart.
   test.each(['en', 'it', 'fr', 'de', 'es', 'pt', 'ja'] as const)('every relation is distinct in %s', (language) => {
     const rendered = TEMPORAL_RELATIONS.map((relation) => runsAt(relation, 'DAY', 'this')[language]);
     expect(rendered.filter(Boolean)).toHaveLength(TEMPORAL_RELATIONS.length);
-    // German is the one language with a genuine merger: `ago` and `before` are both "vor" + dative.
-    const expected = language === 'de' ? TEMPORAL_RELATIONS.length - 1 : TEMPORAL_RELATIONS.length;
+    // Two languages have a genuine merger on a single time. German: `ago` and `before` are both
+    // "vor" + dative. Japanese: `during` and `between` are both 〜の間に (P09-E20 D3), which on a
+    // group is the right Japanese for "between" — see the `between` tests below.
+    const expected = language === 'de' || language === 'ja' ? TEMPORAL_RELATIONS.length - 1 : TEMPORAL_RELATIONS.length;
     expect(new Set(rendered).size).toBe(expected);
+  });
+
+  // P09-E20. The span with two ends: the one temporal relation that scopes over a coordinated time
+  // instead of distributing across it, exactly as the spatial `between` scopes over a landmark
+  // (`GROUP_SCOPED_TEMPORAL_RELATIONS`). Each fronting language says its `between` word once, and
+  // each conjunct keeps its own article and case — German's dative "zwischen diesem Tag und jenem
+  // Tag". Japanese needs no lift: its 〜の間に already follows the whole group, and takes the time's
+  // に where the locative `between` takes で.
+  describe('between', () => {
+    const runsBetween = (conjuncts: NounPhrase[]) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: {
+        temporal: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'between' }] },
+      },
+    }));
+    // French tells "ce jour-ci" from "ce jour-là" only with C40's `contrastive` on both (D4).
+    const thisDayAndThatDay = [
+      np('DAY', { definiteness: 'this', contrastive: true }),
+      np('DAY', { definiteness: 'that', contrastive: true }),
+    ];
+
+    test('between this day and that day — said once over the group', () => {
+      expect(runsBetween(thisDayAndThatDay)).toEqual({
+        en: 'the cat runs between this day and that day.',
+        it: 'il gatto corre tra questo giorno e quel giorno.',
+        fr: 'le chat court entre ce jour-ci et ce jour-là.',
+        de: 'der Kater läuft zwischen diesem Tag und jenem Tag.',
+        es: 'el gato corre entre este día y ese día.',
+        pt: 'o gato corre entre este dia e esse dia.',
+        ja: '猫はこの日とその日の間に走ります。',
+      });
+    });
+
+    test('between the day and the night — each conjunct keeps its own article and gender', () => {
+      expect(runsBetween([np('DAY'), np('NIGHT')])).toEqual({
+        en: 'the cat runs between the day and the night.',
+        it: 'il gatto corre tra il giorno e la notte.',
+        fr: 'le chat court entre le jour et la nuit.',
+        de: 'der Kater läuft zwischen dem Tag und der Nacht.',
+        es: 'el gato corre entre el día y la noche.',
+        pt: 'o gato corre entre o dia e a noite.',
+        ja: '猫は日と夜の間に走ります。',
+      });
+    });
+
+    // Without `contrastive` French has no way to tell the two demonstratives apart; that is the
+    // plan's choice, not the relation's.
+    test('French without contrastive writes the pair alike', () => {
+      expect(runsBetween([np('DAY', { definiteness: 'this' }), np('DAY', { definiteness: 'that' })]).fr)
+        .toBe('le chat court entre ce jour et ce jour.');
+    });
+
+    // A single time is odd but renders, as a single landmark does under the spatial `between` (D4).
+    test('a single time still renders', () => {
+      expect(runsAt('between')).toEqual({
+        en: 'the cat runs between this day.',
+        it: 'il gatto corre tra questo giorno.',
+        fr: 'le chat court entre ce jour.',
+        de: 'der Kater läuft zwischen diesem Tag.',
+        es: 'el gato corre entre este día.',
+        pt: 'o gato corre entre este dia.',
+        ja: '猫はこの日の間に走ります。',
+      });
+    });
+
+    // `during` over the same group still distributes — the group scope is `between`'s alone. In
+    // Japanese the two collide on a group too (D3, recorded as a follow-up).
+    test('during over a group still distributes', () => {
+      const plan = clause(np('CAT'), 'RUN', {
+        complements: {
+          temporal: { phrase: { conjuncts: [np('DAY'), np('NIGHT')], conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'during' }] },
+        },
+      });
+      expect(sayAll(plan)).toMatchObject({
+        it: 'il gatto corre durante il giorno e durante la notte.',
+        de: 'der Kater läuft während des Tages und während der Nacht.',
+        ja: '猫は日と夜の間に走ります。',
+      });
+    });
+
+    // The span lives in the temporal slot, so a plan can hold a place and a span together, each
+    // with its own adposition.
+    test('a place and a span in the same plan are independent', () => {
+      const plan = clause(np('CAT'), 'RUN', {
+        complements: {
+          locative: { phrase: np('HOUSE') },
+          temporal: { phrase: { conjuncts: thisDayAndThatDay, conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'between' }] },
+        },
+      });
+      expect(sayAll(plan)).toEqual({
+        en: 'the cat runs in the house between this day and that day.',
+        it: 'il gatto corre nella casa tra questo giorno e quel giorno.',
+        fr: 'le chat court dans la maison entre ce jour-ci et ce jour-là.',
+        de: 'der Kater läuft im Haus zwischen diesem Tag und jenem Tag.',
+        es: 'el gato corre en la casa entre este día y ese día.',
+        pt: 'o gato corre na casa entre este dia e esse dia.',
+        ja: '猫は家でこの日とその日の間に走ります。',
+      });
+    });
   });
 });
 
