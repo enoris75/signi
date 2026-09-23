@@ -31,3 +31,18 @@ Pinned by `known bugs: a Japanese resultative under 前に or 後で keeps its o
 [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts).
 
 Found landing A254–A260.
+
+## Resolved
+
+2026-09-23. `JA_SUBORDINATORS` in [`ja.consts.ts`](../../../packages/engine/src/languages/ja/ja.consts.ts)
+marks 後で and 前に `plain`, and
+[`shapeAdverbialClause`](../../../packages/engine/src/languages/ja/shapeAdverbialClause.ts) clears a
+resultative aspect under a `plain` conjunction as it sets the tense: `猫が走る前に`, `猫が走った後で`.
+A progressive under 前に is left as it was (unpinned), and so are the resultative under 時に and the
+six European languages.
+
+Guarded by the two formerly-`.fails` tests and two new ones in the
+`known bugs: a Japanese resultative under 前に or 後で keeps its own form (A264)` block of
+[adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts) (a past main
+clause, an object, and the 時に and European regressions), and the A264 case in
+[shapeAdverbialClause.test.ts](../../../packages/engine/src/languages/ja/shapeAdverbialClause.test.ts).

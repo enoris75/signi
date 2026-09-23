@@ -8,7 +8,8 @@ import { JA_SUBORDINATORS } from './ja.consts.js';
  *
  * Two conjunctions say the order of the events themselves, and fix the tense to match whatever the
  * clause's own is: 後で follows the plain past (猫が食べた後で, "after the cat eats" as much as "ate")
- * and 前に the non-past (猫が食べる前に). 間に measures a stretch of time, which the non-past 〜ている form
+ * and 前に the non-past (猫が食べる前に) — and clear a resultative aspect, since the order of the events is
+ * theirs to say: 猫が走る前に, 猫が走った後で, never 走った前に or 走っていた後で (A264). 間に measures a stretch of time, which the non-past 〜ている form
  * says (猫が食べている間に); a clause that already has an aspect of its own keeps it. So does a clause
  * under a modal: 必要がある and ことができる are states already, a stretch 間に can measure, and the
  * progressive would land on the governed verb (A259) — 猫が食べる必要がある間に, not 食べている必要がある.
@@ -16,12 +17,13 @@ import { JA_SUBORDINATORS } from './ja.consts.js';
 export function shapeAdverbialClause(
   adverbial: NonNullable<ResolvedPhrase['adverbialClause']>,
 ): { clause: ResolvedPhrase; word: string } {
-  const { word, tense, progressive } = JA_SUBORDINATORS[adverbial.conjunction];
+  const { word, tense, progressive, plain } = JA_SUBORDINATORS[adverbial.conjunction];
   const { clause } = adverbial;
   const vp = clause.verbPhrase;
   if (!vp) return { clause, word };
   const aspect = progressive && vp.modals.length === 0 && (vp.aspect ?? 'neutral') === 'neutral'
     ? 'progressive' as const
+    : plain && vp.aspect === 'resultative' ? 'neutral' as const
     : vp.aspect;
   return {
     clause: { ...clause, verbPhrase: { ...vp, tense: tense ?? vp.tense, aspect } },

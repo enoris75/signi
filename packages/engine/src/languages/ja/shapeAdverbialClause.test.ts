@@ -20,6 +20,17 @@ describe('shapeAdverbialClause', () => {
     expect([before.clause.verbPhrase?.tense, before.word]).toEqual(['present', '前に']);
   });
 
+  test('after and before clear a resultative aspect, and keep a progressive one (A264)', () => {
+    for (const conjunction of ['after', 'before'] as const) {
+      const { clause: shaped } = shapeAdverbialClause({ conjunction, clause: eats({ aspect: 'resultative' }) });
+      expect(shaped.verbPhrase?.aspect).toBe('neutral');
+    }
+    const { clause: progressive } = shapeAdverbialClause({ conjunction: 'after', clause: eats({ aspect: 'progressive' }) });
+    expect(progressive.verbPhrase?.aspect).toBe('progressive');
+    const { clause: when } = shapeAdverbialClause({ conjunction: 'when', clause: eats({ aspect: 'resultative' }) });
+    expect(when.verbPhrase?.aspect).toBe('resultative');
+  });
+
   test('while measures a stretch of time with the non-past 〜ている', () => {
     const { clause: shaped, word } = shapeAdverbialClause({ conjunction: 'while', clause: eats({ tense: 'past' }) });
     expect([shaped.verbPhrase?.aspect, shaped.verbPhrase?.tense, word]).toEqual(['progressive', 'present', '間に']);
