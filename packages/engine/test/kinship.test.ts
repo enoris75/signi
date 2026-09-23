@@ -410,3 +410,37 @@ describe('having somebody takes no personal a, seeing them does', () => {
     expect(definitionAll('SIBLING')).toMatchObject({ es: 'una persona que tiene los mismos padres.' });
   });
 });
+
+// ── Through the link (P11-E2 D3) ──────────────────────────────────────
+
+describe('whose family it is, read through a possessor linked to the subject (P11-E2 D3)', () => {
+  const link = { kind: 'coreferent', slot: 'subject' } as const;
+  const myBrother = np('BROTHER', { adjectives: ['ELDER'], possessor: of('1') });
+
+  // The genitive chain already carried it: my brother's mother is mine too, the boy's is not.
+  test('my brother\'s mother is 兄の母, the boy\'s is 男の子のお母さん', () => {
+    expect(runs('MOTHER', { possessor: myBrother })).toMatchObject({
+      ja: '兄の母は走ります。', en: "my older brother's mother runs.", de: 'die Mutter meines älteren Bruders läuft.',
+    });
+    expect(runs('MOTHER', { possessor: np('BOY') })).toMatchObject({ ja: '男の子のお母さんは走ります。' });
+  });
+
+  // …and the link carries it the same way: "his" is my brother, so his mother is 母.
+  test('my brother sees his mother: 自分の母, where the boy\'s is 自分のお母さん', () => {
+    expect(sayAll(clause(myBrother, 'SEE', { directObject: np('MOTHER', { possessor: link }) }))).toEqual({
+      en: 'my older brother sees his mother.', it: 'il mio fratello maggiore vede sua madre.',
+      fr: 'mon frère aîné voit sa mère.', de: 'mein älterer Bruder sieht seine Mutter.',
+      es: 'mi hermano mayor ve a su madre.', ja: '兄は自分の母を見ます。', pt: 'o meu irmão mais velho vê a sua mãe.',
+    });
+    expect(sayAll(clause(np('BOY'), 'SEE', { directObject: np('MOTHER', { possessor: link }) })))
+      .toMatchObject({ ja: '男の子は自分のお母さんを見ます。', en: 'the boy sees his mother.' });
+    // One link further down the chain: his mother's husband is the speaker's family too.
+    expect(sayAll(clause(myBrother, 'SEE', { directObject: np('HUSBAND', { possessor: np('MOTHER', { possessor: link }) }) })))
+      .toMatchObject({ ja: '兄は自分の母の夫を見ます。' });
+  });
+
+  // The narrowing P11's seeding found stays: a possessor nobody in particular takes neither word.
+  test('an indefinite possessor still leaves the head its citation form', () => {
+    expect(runs('MOTHER', { possessor: np('PARENT', { definiteness: 'indefinite' }) })).toMatchObject({ ja: '親の母親は走ります。' });
+  });
+});

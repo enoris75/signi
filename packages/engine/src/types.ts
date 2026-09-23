@@ -19,6 +19,12 @@ export interface BoundPossessor extends PronominalPossessor {
   coreferent: 'subject';
   /** Whether the subject is a person — what a Japanese kin head's honorific asks (P11 D3). */
   human: boolean;
+  /**
+   * Whether the subject is one of the speaker's own family — the `own` mark P11 D3 sets on a kin
+   * head, read through the link: "my brother sees **his** mother" is 兄は自分の**母**を見ます, because
+   * his mother is the speaker's too (P11-E2 D3).
+   */
+  own: boolean;
 }
 
 /** A resolved noun-modifier: the attributive noun's forms plus its semantic relation. */

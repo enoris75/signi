@@ -12,7 +12,13 @@ const element = (...forms: Record<string, string>[]): ResolvedNounElement => ({
 describe('subjectBinding', () => {
   test('takes the grammatical gender where the subject has one', () => {
     expect(subjectBinding(element({ gender: 'fem', number: 'singular', human: '1' }), { concept: 'WOMAN' }))
-      .toEqual({ kind: 'pronominal', person: '3', number: 'singular', gender: 'fem', coreferent: 'subject', human: true });
+      .toEqual({ kind: 'pronominal', person: '3', number: 'singular', gender: 'fem', coreferent: 'subject', human: true, own: false });
+  });
+
+  // P11-E2 D3: the kin chain reads through the link.
+  test('carries the subject\'s own mark, where every one of a group has it', () => {
+    expect(subjectBinding(element({ human: '1', kin: '1', own: '1' }), { concept: 'BROTHER' }).own).toBe(true);
+    expect(subjectBinding(element({ human: '1', own: '1' }, { human: '1' }), { conjuncts: [{ concept: 'BROTHER' }, { concept: 'BOY' }], conjunction: 'and' }).own).toBe(false);
   });
 
   test('without one, the stated gender, else neuter for a thing and nothing for a person', () => {

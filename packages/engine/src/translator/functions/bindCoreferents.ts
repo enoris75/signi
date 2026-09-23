@@ -27,6 +27,9 @@ export function subjectBinding(subject: ResolvedNounElement, planSubject: NounEl
   const human = subject.conjuncts.some((np) => np.head.forms['person']
     ? np.head.forms['person'] !== '3' || np.head.forms['gender'] !== 'neut'
     : np.head.forms['human'] === '1');
+  // One's own family is one's own: a subject that is (P11 D3's `own` mark, set on a kin head whose
+  // possessor is the speaker's) makes its relatives the speaker's too. Every one of a group must be.
+  const own = subject.conjuncts.every((np) => np.head.forms['own'] === '1');
   const planGender = isNounGroup(planSubject) ? undefined : planSubject.gender;
   const gender = grammatical ?? planGender ?? (human ? undefined : 'neut');
   return {
@@ -36,6 +39,7 @@ export function subjectBinding(subject: ResolvedNounElement, planSubject: NounEl
     ...(gender ? { gender } : {}),
     coreferent: 'subject',
     human,
+    own,
   };
 }
 
