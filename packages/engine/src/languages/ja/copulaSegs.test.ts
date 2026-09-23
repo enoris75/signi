@@ -32,6 +32,17 @@ describe('copulaSegs', () => {
         .toEqual([{ t: 'それほど' }, { t: '大きくな', r: 'おおきくな' }, { t: 'いです' }]);
       expect(text(copulaSegs(pred(OOKII, { degree: 'least' }), 'past', false))).toBe('最も大きくなかったです');
     });
+
+    // A249: a negated lowered degree keeps its plain 大きくない and closes on わけ + the negated copula,
+    // which carries the tense, rather than stacking 大きくなくないです.
+    test('a negated lowered degree closes on わけではない in every form', () => {
+      expect(copulaSegs(pred(OOKII, { degree: 'less' }), 'present', true))
+        .toEqual([{ t: 'それほど' }, { t: '大きくな', r: 'おおきくな' }, { t: 'いわけではありません' }]);
+      expect(text(copulaSegs(pred(OOKII, { degree: 'less' }), 'past', true))).toBe('それほど大きくないわけではありませんでした');
+      expect(text(copulaSegs(pred(OOKII, { degree: 'less' }), 'present', true, 'prenominal'))).toBe('それほど大きくないわけではない');
+      expect(text(copulaSegs(pred(OOKII, { degree: 'less' }), 'past', true, 'prenominal'))).toBe('それほど大きくないわけではなかった');
+      expect(text(copulaSegs(pred(SHIAWASE, { degree: 'less' }), 'present', true))).toBe('それほど幸せではないわけではありません');
+    });
   });
 
   // A115: the の- and た-adjectives lose their attributive ending in a predicate.

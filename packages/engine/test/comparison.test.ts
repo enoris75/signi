@@ -252,16 +252,58 @@ describe('known bugs: Japanese negates a lowered degree twice (A249)', () => {
   const notLess = (standard?: NounElement, tense?: 'past') =>
     cat('less', standard, 'BIG', { verbPhrase: { verb: 'BE', negative: true, ...(tense ? { tense } : {}) } } as Partial<PhrasePlan>);
 
-  test.fails('without a standard: それほど大きくないわけではありません', () => {
+  test('without a standard: それほど大きくないわけではありません', () => {
     expect(say(notLess(), 'ja')).toBe('猫はそれほど大きくないわけではありません。');
   });
 
-  test.fails('with a standard: 犬ほど大きくないわけではありません', () => {
+  test('with a standard: 犬ほど大きくないわけではありません', () => {
     expect(say(notLess(DOG), 'ja')).toBe('猫は犬ほど大きくないわけではありません。');
   });
 
-  test.fails('in the past: それほど大きくないわけではありませんでした', () => {
+  test('in the past: それほど大きくないわけではありませんでした', () => {
     expect(say(notLess(undefined, 'past'), 'ja')).toBe('猫はそれほど大きくないわけではありませんでした。');
+  });
+
+  test('in the past with a standard: 犬ほど大きくないわけではありませんでした', () => {
+    expect(say(notLess(DOG, 'past'), 'ja')).toBe('猫は犬ほど大きくないわけではありませんでした。');
+  });
+
+  // A relative clause closes on the plain わけではない, before its head noun; the past on わけではなかった.
+  const catWhoIsNotLess = (standard?: NounElement, tense?: 'past') =>
+    clause(np('CAT', {
+      relative: {
+        verbPhrase: { verb: 'BE', negative: true, ...(tense ? { tense } : {}) },
+        complements: { predicative: { phrase: np('BIG', { headDegree: 'less', ...(standard ? { headStandard: standard } : {}) }) } },
+      },
+    }), 'RUN');
+
+  test('in a relative clause: 犬ほど大きくないわけではない猫', () => {
+    expect(say(catWhoIsNotLess(DOG), 'ja')).toBe('犬ほど大きくないわけではない猫は走ります。');
+  });
+
+  test('in a past relative clause: それほど大きくないわけではなかった猫', () => {
+    expect(say(catWhoIsNotLess(undefined, 'past'), 'ja')).toBe('それほど大きくないわけではなかった猫は走ります。');
+  });
+
+  test('the other adjective classes keep their own lowered predicate under わけ', () => {
+    expect(say(cat('less', undefined, 'HAPPY', { verbPhrase: { verb: 'BE', negative: true } } as Partial<PhrasePlan>), 'ja'))
+      .toBe('猫はそれほど幸せではないわけではありません。');
+    expect(say(cat('less', undefined, 'TIRED', { verbPhrase: { verb: 'BE', negative: true } } as Partial<PhrasePlan>), 'ja'))
+      .toBe('猫はそれほど疲れていないわけではありません。');
+  });
+
+  test('regression: a negated plain or raised degree negates the adjective once, as before', () => {
+    const negated = (degree?: Degree, standard?: NounElement) =>
+      clause(np('CAT'), 'BE', {
+        verbPhrase: { negative: true },
+        complements: { predicative: { phrase: np('BIG', { ...(degree ? { headDegree: degree } : {}), ...(standard ? { headStandard: standard } : {}) }) } },
+      });
+    expect(say(negated(), 'ja')).toBe('猫は大きくないです。');
+    expect(say(negated('more'), 'ja')).toBe('猫はもっと大きくないです。');
+    expect(say(negated('more', DOG), 'ja')).toBe('猫は犬より大きくないです。');
+    expect(say(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('BIG', { headDegree: 'less', headStandard: DOG }) } } },
+    }), 'RUN'), 'ja')).toBe('犬ほど大きくない猫は走ります。');
   });
 
   test('regression: the affirmative lowered degree, and the European negation, are right', () => {

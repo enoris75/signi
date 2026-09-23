@@ -3,6 +3,7 @@ import type { ResolvedComplement, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import type { JaForm } from './ja.types.js';
 import { elSegs } from './elSegs.js';
+import { isLoweredDegree } from './isLoweredDegree.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
@@ -155,6 +156,13 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // A na- or の-adjective before its noun keeps its own attributive particle (幸せな猫, 茶色の猫).
   // A relational one keeps its の in front of the copula too, where dropping it would name the thing
   // the stem is rather than predicate of the subject (猫はアメリカのです, not 猫はアメリカです — A246).
+  // A negated lowered degree (A249) denies the proposition the lowered predicate already states, so
+  // the negation goes over it rather than into it: the predicate keeps its plain 大きくない and closes
+  // on わけ and the negated copula, which carries the tense — 犬ほど大きくないわけではありません(でした),
+  // 大きくないわけではない猫 — never the stacked litotes 大きくなくないです.
+  if (negative && isLoweredDegree(head.head)) {
+    return [...degSegs, wordSeg(stem, stemReading), { t: `${I_ENDINGS.dict[0]}わけ${COPULA_ENDINGS[form][cell]}` }];
+  }
   const ending = kind === 'i' ? I_ENDINGS[form][cell]
     : kind === 'ta' ? STATE_ENDINGS[form][cell]
     : kind === 'ru' ? RU_ENDINGS[form][cell]
