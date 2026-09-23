@@ -39,7 +39,11 @@ export interface ContentClauseTense {
  * (A260): the aspect auxiliary in the present subjunctive and the participle, "non crede che il gatto
  * **abbia corso**", "ne croit pas que le chat **ait couru**", "no cree que el gato **haya corrido**",
  * "não acredita que o gato **tenha corrido**". A future one keeps the present subjunctive, which reads
- * as future in all four ("no cree que el gato corra"), and an indicative clause its own past.
+ * as future in all four ("no cree que el gato corra"), and an indicative clause its own past. A past
+ * **progressive** is imperfective, not a completed event, so its auxiliary takes the imperfect
+ * subjunctive instead (A262), the tense it has under a past governor: "non crede che il gatto **stesse**
+ * correndo", "no cree que el gato **estuviera** corriendo", "não acredita que o gato **estivesse**
+ * correndo". French, whose imperfect subjunctive is literary, is left as it was.
  */
 export function contentClauseTense(
   governorTense: Tense | undefined,
@@ -52,10 +56,14 @@ export function contentClauseTense(
   const tense = verbPhrase.tense ?? 'present';
   const neutral = (verbPhrase.aspect ?? 'neutral') === 'neutral';
   if (governorTense !== 'past') {
+    if (mood !== 'presentSubjunctive' || tense !== 'past') return unchanged;
     // A past clause in the present subjunctive is the perfect subjunctive (A260).
-    return mood === 'presentSubjunctive' && tense === 'past' && neutral
-      ? { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present', aspect: 'resultative' } }
-      : unchanged;
+    if (neutral) return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present', aspect: 'resultative' } };
+    // A past progressive is imperfective: its auxiliary takes the imperfect subjunctive (A262).
+    if (verbPhrase.aspect === 'progressive' && PAST_SUBJUNCTIVE_LANGUAGES.has(language)) {
+      return { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present' }, mood: 'subjunctive' };
+    }
+    return unchanged;
   }
   if (!SEQUENCE_OF_TENSES_LANGUAGES.has(language)) return unchanged;
   if (tense === 'past' || (verbPhrase.aspect ?? 'neutral') === 'resultative') return unchanged;

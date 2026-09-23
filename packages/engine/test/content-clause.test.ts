@@ -804,11 +804,31 @@ describe('known bugs: a past progressive in a subjunctive clause drops its past 
     contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'progressive', tense: 'past' } },
   };
 
-  test.fails('the auxiliary is in the imperfect subjunctive: no cree que el gato estuviera corriendo', () => {
+  test('the auxiliary is in the imperfect subjunctive: no cree que el gato estuviera corriendo', () => {
     expect(sayAll(plan)).toMatchObject({
       it: "l'uomo non crede che il gatto stesse correndo.",
       es: 'el hombre no cree que el gato estuviera corriendo.',
       pt: 'o homem não acredita que o gato estivesse correndo.',
+    });
+  });
+
+  test('in the plural, and under an evaluative predicate: è giusto che il gatto stesse correndo', () => {
+    const cats = { subject: { ...np('CAT'), number: 'plural' as const }, verbPhrase: { verb: 'RUN', aspect: 'progressive' as const, tense: 'past' as const } };
+    expect(sayAll({ ...plan, contentObject: cats })).toMatchObject({
+      it: "l'uomo non crede che i gatti stessero correndo.",
+      es: 'el hombre no cree que los gatos estuvieran corriendo.',
+      pt: 'o homem não acredita que os gatos estivessem correndo.',
+    });
+    expect(sayAll(evaluative('RIGHT_CORRECT', plan.contentObject))).toMatchObject({
+      it: 'è giusto che il gatto stesse correndo.', es: 'es correcto que el gato estuviera corriendo.',
+      pt: 'é certo que o gato estivesse correndo.',
+    });
+  });
+
+  test('regression: an indicative clause keeps its imperfect progressive, and English its past', () => {
+    expect(sayAll({ ...plan, verbPhrase: { verb: 'SAY' } })).toMatchObject({
+      en: 'the man says that the cat was running.', it: "l'uomo dice che il gatto stava correndo.",
+      es: 'el hombre dice que el gato estaba corriendo.', pt: 'o homem diz que o gato estava correndo.',
     });
   });
 });

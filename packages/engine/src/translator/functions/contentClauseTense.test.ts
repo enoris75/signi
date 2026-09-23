@@ -62,7 +62,18 @@ describe('contentClauseTense', () => {
     expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', future).verbPhrase).toBe(future);
     const past = runs({ tense: 'past' });
     expect(contentClauseTense(undefined, 'it', undefined, past).verbPhrase).toBe(past);
+    const prospective = runs({ tense: 'past', aspect: 'prospective' });
+    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', prospective).verbPhrase).toBe(prospective);
+  });
+
+  test('under a governor that is not past, a past progressive takes the imperfect subjunctive, except in French (A262)', () => {
     const progressive = runs({ tense: 'past', aspect: 'progressive' });
-    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    for (const language of ['it', 'es', 'pt']) {
+      expect(contentClauseTense(undefined, language, 'presentSubjunctive', progressive)).toEqual({
+        verbPhrase: runs({ tense: 'present', aspect: 'progressive' }), mood: 'subjunctive', imperfect: false,
+      });
+    }
+    expect(contentClauseTense(undefined, 'fr', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    expect(contentClauseTense(undefined, 'it', undefined, progressive).verbPhrase).toBe(progressive);
   });
 });
