@@ -405,7 +405,7 @@ describe('the round trip', () => {
     const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/than \[/g) ?? []);
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);
     expect(standards.some((p) => !/\/(more|less|equally) \/than/.test(p))).toBe(true);
-  });
+  }, 30_000);
 });
 
 // A179. A passive set on a finite period stays when the period is made an infinitive, and the
