@@ -3,6 +3,8 @@ import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
 import { emPrep } from './emPrep.js';
 import { porPrep } from './porPrep.js';
+import { prepDet } from './prepDet.js';
+import { BETWEEN_PREP } from './pt.consts.js';
 
 /**
  * A spatial relation → preposition, honoring the head's determiner. Shared by route and locative:
@@ -22,6 +24,13 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     case 'around':      return `ao redor ${contractDet(dePrep, 'de', f, plural)}`;
     case 'behind':      return `atrás ${contractDet(dePrep, 'de', f, plural)}`;
     case 'in_front_of': return `em frente ${contractDet(dePrep, 'de', f, plural)}`;
+    // P09-E1. `on` is "sobre", not the "em" that `in` already spells — reusing it would render the
+    // two relations alike — and it contracts with nothing ("sobre a mesa", "sobre uma mesa"); nor do
+    // "entre", lifted off each conjunct and said once over a group (see `GROUP_SCOPED_SPECIFIERS`),
+    // and the contact "contra" ("contra a parede").
+    case 'on':          return prepDet('sobre', f, plural);
+    case 'between':     return prepDet(BETWEEN_PREP, f, plural);
+    case 'against':     return prepDet('contra', f, plural);
     case 'through':
     default:            return contractDet(porPrep, 'por', f, plural);
   }

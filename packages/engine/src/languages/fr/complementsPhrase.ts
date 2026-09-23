@@ -13,6 +13,9 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
+import { liftPreposition } from '../../functions/liftPreposition.js';
+import { BETWEEN_PREP } from './fr.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -306,10 +309,14 @@ export function complementsPhrase(
         const nf = tonicHeadForms(np);
         return tonicPhrase(headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic), tonic);
       };
-      return coordinate(c.phrase, (np) =>
+      // `between` is said once over the group, not per conjunct: each conjunct is built as above and
+      // its "entre" lifted off (P09-E1 D2) — "entre la maison et l'arbre".
+      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const group = coordinate(c.phrase, (np) => liftPreposition(
         tonicText(np)
         || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
-        || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))));
+        || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))), scoped));
+      return scoped ? `${scoped} ${group}` : group;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever
     // shape the sentiment gave it (see `withCauseNegator`).

@@ -11,7 +11,7 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
-import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { AGAINST_PARTICLE, CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
@@ -189,6 +189,10 @@ export function complementSegs(
     // means/measure/mode relations share; every other complement uses its fixed particle.
     const particle =
       type === 'locative' && locativeParticle !== undefined ? locativeParticle
+      // Contact has no relational noun, and takes plain に on a place and a goal (P09-E1 D3, see
+      // `AGAINST_PARTICLE`): 壁に, never the locative's 壁で or the goal's "towards" 壁へ. A route keeps
+      // its を, which marks the path whatever the relation (壁を行きます), as it does for every other.
+      : (type === 'locative' && spec === 'against') || (type === 'direction' && directionSpecifier(c) === 'against') ? AGAINST_PARTICLE
       // A place the action passes through (A176): a locative's で says only where, so `through` takes
       // the traversal tail 家を通って. A route keeps its bare を, which already marks the path (家を走ります).
       // A verb that puts something *at* the place wins over it: its に above says the same thing

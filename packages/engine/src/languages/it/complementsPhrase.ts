@@ -13,6 +13,9 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
+import { liftPreposition } from '../../functions/liftPreposition.js';
+import { BETWEEN_PREP } from './it.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -238,9 +241,13 @@ export function complementsPhrase(
       };
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
-      const phrase = coordinate(c.phrase, (np) =>
+      // `between` is said once over the group, not per conjunct: each conjunct is built as above and
+      // its "tra" lifted off (P09-E1 D2) — "tra la casa e l'albero".
+      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const group = coordinate(c.phrase, (np) => liftPreposition(
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicText(np) ||
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))), scoped));
+      const phrase = scoped ? `${scoped} ${group}` : group;
       // "fa" follows the whole group, as English's "ago" does: "un momento fa", "un giorno e una
       // notte fa". Every other temporal relation is an adposition and was emitted by `headFor`.
       const tail = type === 'temporal' ? IT_TEMPORAL[temporalRelation(c)].postposed : undefined;

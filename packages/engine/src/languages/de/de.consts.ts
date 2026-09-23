@@ -122,6 +122,11 @@ export const DE_DIM_PREP: Record<DimensionRelation, string> = { extent: 'von', q
 // German says "zu Hause" (with the old dative -e), not "im Zuhause".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'zu Hause' };
 
+// The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
+// (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
+// builds any relation, and the complement lifts it off every conjunct to say it in front of all.
+export const BETWEEN_PREP = 'zwischen';
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'und',
   or: 'oder',

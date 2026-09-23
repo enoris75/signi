@@ -18,6 +18,9 @@ import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import LoopIcon from "@mui/icons-material/Loop";
 import FlipToBackIcon from "@mui/icons-material/FlipToBack";
 import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
+import LayersIcon from "@mui/icons-material/Layers";
+import ViewColumnIcon from "@mui/icons-material/ViewColumn";
+import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -687,6 +690,11 @@ const SPECIFIER_KEYS: Record<PathSpecifier, string> = {
   around: "A",
   behind: "B",
   in_front_of: "F",
+  // P09-E1's three, whose initials are taken (O is `over`, B `behind`, A `around`): the next letter
+  // each is heard by — o**N**, bet**W**een, a**G**ainst.
+  on: "N",
+  between: "W",
+  against: "G",
 };
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
@@ -698,6 +706,10 @@ const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   around: <LoopIcon sx={{ fontSize: 15 }} />,
   behind: <FlipToBackIcon sx={{ fontSize: 15 }} />,
   in_front_of: <FlipToFrontIcon sx={{ fontSize: 15 }} />,
+  // Support (a layer resting on another), a landmark on each side, contact against a wall.
+  on: <LayersIcon sx={{ fontSize: 15 }} />,
+  between: <ViewColumnIcon sx={{ fontSize: 15 }} />,
+  against: <AlignHorizontalLeftIcon sx={{ fontSize: 15 }} />,
 };
 
 // A toolbar of selectable values for a complement's relation — one icon per value, the active one

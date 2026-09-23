@@ -41,3 +41,18 @@ describe('spatialHead', () => {
     expect(spatialHead('through', { ...CASA, definiteness: 'this' }, false)).toBe('por esta');
   });
 });
+
+// P09-E1.
+describe('spatialHead: on, between, against', () => {
+  test('on is sobre, which contracts with nothing, never the em that in spells', () => {
+    expect(spatialHead('on', CASA, false)).toBe('sobre a');
+    expect(spatialHead('on', { ...CASA, definiteness: 'indefinite' }, false)).toBe('sobre uma');
+    expect(spatialHead('on', LIVRO, false)).toBe('sobre o');
+    expect(spatialHead('on', CASA, false)).not.toBe(spatialHead('in', CASA, false));
+  });
+
+  test('entre and contra contract with nothing', () => {
+    expect(spatialHead('between', CASA, true)).toBe('entre as');
+    expect(spatialHead('against', LIVRO, false)).toBe('contra o');
+  });
+});

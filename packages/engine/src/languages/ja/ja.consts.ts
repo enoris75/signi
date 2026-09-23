@@ -96,6 +96,13 @@ export const CAUSE_PARTICLE: Record<CauseSentiment, string> = {
  * same way, from the same noun; only the particle that follows differs (を for a traversed path,
  * に for a place), which is why route and locative share this map. The neutral relations add no
  * noun: a bare route is 市場を, a bare locative 家に.
+ *
+ * P09-E1. `on` takes の上, **the same noun as `over`**: Japanese does not tell support from
+ * superiority, and the collision is deliberate — 〜の表面に for contact is a paraphrase, not a
+ * relation. `between` is の間, which follows the whole coordinated group as every relational noun
+ * here does (家と木の間で), so it needs nothing of the group scope the other engines build.
+ * `against` adds no noun at all: Japanese carries contact in the verb (もたれる, "to lean"), so it is
+ * the one relation rendered with a particle alone — に, see `AGAINST_PARTICLE` — a known flattening.
  */
 export const REL_NOUN: Record<PathSpecifier, string> = {
   in: '',
@@ -105,7 +112,19 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
   around: 'の周り',
   behind: 'の後ろ',
   in_front_of: 'の前',
+  on: 'の上',
+  between: 'の間',
+  against: '',
 };
+
+/**
+ * The particle `against` takes in place of its complement's own, on a place and a goal: plain に,
+ * what contact takes where the verb names it (壁に寄りかかる, 壁にぶつかる). Japanese has no adposition
+ * for the relation itself (see `REL_NOUN`), so this is a flattening — "sleeps against the wall"
+ * comes out 壁に寝ます — and it is pinned as one (P09-E1 D3). A route keeps its own を, which marks
+ * the traversal and not the relation (壁を行きます).
+ */
+export const AGAINST_PARTICLE = 'に';
 
 /**
  * The same relations as they are **cited** — named out of a sentence, for a label (see
@@ -126,6 +145,9 @@ export const PATH_CITATION: Record<PathSpecifier, string> = {
   around: 'の周りで',
   behind: 'の後ろで',
   in_front_of: 'の前で',
+  on: 'の上で',
+  between: 'の間で',
+  against: 'に',
 };
 
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
@@ -137,6 +159,9 @@ export const REL_NOUN_READING: Record<PathSpecifier, string> = {
   around: 'のまわり',
   behind: 'のうしろ',
   in_front_of: 'のまえ',
+  on: 'のうえ',
+  between: 'のあいだ',
+  against: '',
 };
 
 // Coordinating conjunctions as Japanese connective adverbs, placed after the first clause's 、.

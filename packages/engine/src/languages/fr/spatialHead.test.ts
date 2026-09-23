@@ -44,3 +44,19 @@ describe('spatialHead', () => {
     }
   });
 });
+
+// P09-E1.
+describe('spatialHead: on, between, against', () => {
+  test('sur, entre and contre contract with nothing', () => {
+    expect(spatialHead('on', MAISON, false, 'maison', 'locative')).toBe('sur la');
+    expect(spatialHead('on', { ...MAISON, definiteness: 'indefinite' }, false, 'maison', 'locative')).toBe('sur une');
+    expect(spatialHead('between', ANGE, false, 'ange', 'locative')).toBe("entre l'");
+    expect(spatialHead('against', MARCHE, false, 'marché', 'route')).toBe('contre le');
+  });
+
+  test('on is apart from over, as a place and as a path', () => {
+    expect(spatialHead('on', MARCHE, false, 'marché', 'locative')).toBe('sur le');
+    expect(spatialHead('on', MARCHE, false, 'marché', 'route')).toBe('sur le');
+    expect(spatialHead('over', MARCHE, false, 'marché', 'locative')).toBe('au-dessus du');
+  });
+});

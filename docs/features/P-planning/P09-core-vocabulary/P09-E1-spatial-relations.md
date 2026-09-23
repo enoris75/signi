@@ -8,23 +8,26 @@ pure vocabulary.
 but the **first relation that scopes over a coordinated head instead of distributing across it**.
 **Scope:** all 7 languages. Offered on the locative and route toolbars; the `direction` complement
 reads the same set and needs no new offering.
-**Status:** planning, unscheduled. Split out of P09 §3 on 2026-09-23.
+**Status: shipped, 2026-09-23.** All seven languages, on the locative, the route and the direction;
+see [*Done*](#done) for the engine's output and what landed differently from the plan.
 **Words:** *on*, *between*, *against*. **Not *into***, which P09 §3 listed here and which already
 renders — see *Today*.
 
-| lang | the cat sleeps **on** the table | the cat sleeps **between** the house and the tree | the cat sleeps **against** the wall |
+| lang | the cat is **on** the house | the cat runs **between** the house and the market | the cat runs **against** the wall |
 |---|---|---|---|
-| en | the cat sleeps on the table. | the cat sleeps between the house and the tree. | the cat sleeps against the wall. |
-| it | il gatto dorme sul tavolo. | il gatto dorme tra la casa e l'albero. | il gatto dorme contro il muro. |
-| fr | le chat dort sur la table. | le chat dort entre la maison et l'arbre. | le chat dort contre le mur. |
-| de | der Kater schläft auf dem Tisch. | der Kater schläft zwischen dem Haus und dem Baum. | der Kater schläft an der Wand. |
-| es | el gato duerme sobre la mesa. | el gato duerme entre la casa y el árbol. | el gato duerme contra la pared. |
-| pt | o gato dorme sobre a mesa. | o gato dorme entre a casa e a árvore. | o gato dorme contra a parede. |
-| ja | 猫はテーブルの上で寝ます。 | 猫は家と木の間で寝ます。 | 猫は壁にもたれて寝ます。 |
+| en | the cat is on the house. | the cat runs between the house and the market. | the cat runs against the wall. |
+| it | il gatto è sulla casa. | il gatto corre tra la casa e il mercato. | il gatto corre contro il muro. |
+| fr | le chat est sur la maison. | le chat court entre la maison et le marché. | le chat court contre le mur. |
+| de | der Kater ist auf dem Haus. | der Kater läuft zwischen dem Haus und dem Markt. | der Kater läuft an der Wand. |
+| es | el gato está sobre la casa. | el gato corre entre la casa y el mercado. | el gato corre contra la pared. |
+| pt | o gato está sobre a casa. | o gato corre entre a casa e o mercado. | o gato corre contra a parede. |
+| ja | 猫は家の上にいます。 | 猫は家と市場の間で走ります。 | 猫は壁に走ります。 |
 
-**The table is proposed, not engine output** — the construct does not exist, so nothing renders it
-yet. The localization protocol's rule holds here too: the forms are what the task expects, and the
-`## Done` section rewrites them with what the engine actually wrote.
+**This is engine output** (2026-09-23), pinned in
+[`test/complements/spatialRelations.test.ts`](../../../../packages/engine/test/complements/spatialRelations.test.ts).
+The table first proposed here used *sleep*, *table* and *tree*, none of which is seeded; the house,
+the market and the wall stand in, since the relation belongs to the complement and not the noun.
+The proposed Japanese 壁にもたれて寝ます was a paraphrase no relation can produce — see D3 and *Done*.
 
 ## Why
 
@@ -211,3 +214,68 @@ do not hide controls.
 - **`between` as a temporal relation** ("between this day and that day"). The
   [`TemporalRelation`](../../../../packages/shared/src/index.ts#L366) set C29 built has `until` but
   no span with two ends; it would want the same group scope D2 builds here.
+
+## Done
+
+Shipped 2026-09-23. `PathSpecifier` gains `on | between | against`, `PATH_SPECIFIERS` lists ten,
+and `GROUP_SCOPED_SPECIFIERS` (`between` alone) sits after `DEFAULT_LOCATIVE_SPECIFIER`, with the
+support axis, the group scope, the contact-only `against` and both Japanese flattenings in the doc
+comment. The engine's output, all pinned in
+[`spatialRelations.test.ts`](../../../../packages/engine/test/complements/spatialRelations.test.ts):
+
+| lang | on — place / goal | between — place / goal | against — place / goal |
+|---|---|---|---|
+| en | is on the house / jumps on the wall | runs between the house and the market / jumps between … | runs against the wall / jumps against the wall |
+| it | è sulla casa · su un muro / salta sul muro | corre tra la casa e il mercato / salta tra … | corre contro il muro / salta contro il muro |
+| fr | est sur la maison · sur un mur / saute sur le mur | court entre la maison et le marché / saute entre … | court contre le mur / saute contre le mur |
+| de | ist auf dem Haus · auf einer Wand / springt auf die Wand | läuft zwischen dem Haus und dem Markt / springt zwischen das Haus und den Markt | läuft an der Wand · am Haus / springt an die Wand |
+| es | está sobre la casa · sobre una pared / salta sobre la pared | corre entre la casa y el mercado; entre tú y yo | corre contra la pared / salta contra la pared |
+| pt | está sobre a casa · sobre uma parede / pula sobre a parede | corre entre a casa e o mercado / pula entre … | corre contra a parede / pula contra a parede |
+| ja | 家の上にいます / 壁の上へ跳びます | 家と市場の間で走ります / 家と市場の間へ跳びます | 壁に走ります / 壁に跳びます |
+
+The toolbar labels (`specifier.value.*`): en *on / between / against*; it *su / tra / contro*; fr
+*sur / entre / contre*; de *auf / zwischen / an*; es and pt *sobre / entre / contra*; ja 〜の上で /
+〜の間で / 〜に.
+
+**How the group scope is built.** Not by taking the head once and re-coordinating inside it, as D2
+sketched, but by *lifting*: each conjunct still goes through its engine's ordinary path — its own
+fused or plain article, its own German case, its own tonic pronoun, the French A196 *des* — and
+[`liftPreposition`](../../../../packages/engine/src/functions/liftPreposition.ts) takes the
+relation's preposition off the front of each, to be said once over the group. Which complements
+scope is [`groupScopedRelation`](../../../../packages/engine/src/functions/groupScopedRelation.ts)
+(a route, a locative or a direction whose relation is in `GROUP_SCOPED_SPECIFIERS`), and the word
+lifted is each engine's `BETWEEN_PREP`. That keeps every `spatialHead` self-contained — `between`
+still renders whole there, which is what the toolbar label and a single landmark need — and
+touches only the one `coordinate(c.phrase, …)` call per engine, as D2 promised. English needed no
+lift (its preposition was already said once over the group) and Japanese none either (の間 follows
+the group).
+
+What landed differently from the plan:
+
+- **Japanese `against` takes に on a place and a goal, but a route keeps its を** (D3 said plain に
+  throughout). The route's を marks the traversal, not the relation — the existing invariant that
+  "the traversed noun and its を survive for every relation" (`route.test.ts`) — so 猫は市場を行きます.
+  The locative's で and the goal's へ are what に replaces. Pinned in the collision test.
+- **Spanish `entre` governs the nominative**: it joins `como` in `NOMINATIVE_PREP`, so "entre tú y
+  yo", never "entre ti y mí". Portuguese keeps the prescriptive oblique ("entre ele e o cão",
+  "entre você e mim"). Italian takes "tra me e te" without the optional *di*; "su" and "contro" were
+  already in `IT_DI_BEFORE_PRONOUN` ("su di lui", "contro di lui").
+- **German `an` fuses** with the definite dative and accusative as the A218 place preposition already
+  does: "am Haus", "ans Haus".
+- **The console** takes `/on`, `/between`, `/against` as settings on a locative or route, like the
+  seven; a group's specifier prints inside its bracket after the head (`/loc ( house /between /and
+  dog )`). Canvas keys: N, W, G (O, B and A were taken by *over*, *behind*, *around*).
+- **Verification 3 and 4 were not run** (no backend boot or browser in this lane): the engine
+  harness is the same `translate` path, and the toolbar is checked in `Boxes.test.tsx` (ten
+  relations, the last three in order). The ring fans the toolbar by count (`fanned(TOOLBAR_HOUR, i,
+  n)`), so ten seat themselves, but nobody has looked at them on the canvas yet.
+
+`into` is untouched, and so is A02 (near/far), which is not implemented at HEAD: its two values
+would join `PATH_SPECIFIERS` and distribute, needing nothing from the group scope.
+
+Follow-ups, beyond the list above:
+
+- **Look at the ten-wide toolbar on the canvas** (verification 4), widening the ring rather than
+  hiding a relation if it crowds.
+- **`between` in the builder**: nothing asks for two landmarks yet; a single one renders ("between
+  the house").

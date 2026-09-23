@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, isPronominalPossessor, type ComplementType } from '@signi/shared';
-import type { ConceptForms, ResolvedComplement } from '../../../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedNounPhrase } from '../../../types.js';
 import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../../functions/withCauseNegator.js';
 import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNoun.js';
@@ -8,6 +8,9 @@ import { objectPredication } from '../../../functions/objectPredication.js';
 import { directionSpecifier } from '../../../functions/directionSpecifier.js';
 import { isNamedLand } from '../../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
+import { groupScopedRelation } from '../../../functions/groupScopedRelation.js';
+import { liftPreposition } from '../../../functions/liftPreposition.js';
+import { BETWEEN_PREP } from '../de.consts.js';
 import { temporalRelation } from '../../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
@@ -96,7 +99,7 @@ export function complementsParts(
       }
       // The preposition governs a case, and the case is spelled on each conjunct's own article
       // ("mit dem Messer und dem Stock"), so preposition and determiner are emitted per conjunct.
-      return coordinate(c.phrase, (conjunct) => {
+      const conjunctText = (conjunct: ResolvedNounPhrase): string => {
       // The essive object complement names a role rather than picking a referent out, so German
       // leaves it article-less whatever determiner was chosen: "als Bedingung", not "als die
       // Bedingung". Its adjectives then decline strong, which `definiteness` below arranges.
@@ -284,7 +287,13 @@ export function complementsParts(
       const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
       const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
-      });
+      };
+      // All but `between`, which is said once over the group: each conjunct is built as above, its
+      // own dative article and all, and its "zwischen" lifted off (P09-E1 D2) — "zwischen dem Haus
+      // und dem Baum", never "zwischen dem Haus und zwischen dem Baum".
+      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const group = coordinate(c.phrase, (conjunct) => liftPreposition(conjunctText(conjunct), scoped));
+      return scoped ? `${scoped} ${group}` : group;
   };
   // A cause the plan denies rather than the clause takes its negator here, directly before the
   // phrase, which is where a constituent negation stands in the Mittelfeld (see `withCauseNegator`).

@@ -101,6 +101,11 @@ export const FR_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', qu
 // French says "à la maison", not "dans le foyer" — the hearth-word gives way to "maison".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'à la maison' };
 
+// The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
+// (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
+// builds any relation, and the complement lifts it off every conjunct to say it in front of all.
+export const BETWEEN_PREP = 'entre';
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'et',
   or: 'ou',

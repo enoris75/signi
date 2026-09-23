@@ -22,3 +22,14 @@ describe('spatialCase', () => {
     expect(spatialCase('over', 'route')).toBe('acc');
   });
 });
+
+// P09-E1: auf, zwischen and an are two-way prepositions and follow the rule unchanged.
+describe('spatialCase: on, between, against', () => {
+  test('dative under a locative and a route, accusative under a direction', () => {
+    for (const spec of ['on', 'between', 'against'] as const) {
+      expect(spatialCase(spec, 'locative')).toBe('dat');
+      expect(spatialCase(spec, 'route')).toBe('dat');
+      expect(spatialCase(spec, 'direction')).toBe('acc');
+    }
+  });
+});
