@@ -442,3 +442,21 @@ describe('known bugs: a Japanese while clause puts a modal\'s verb in the progre
       });
   });
 });
+
+// 後で and 前に fix their clause's tense (後で the plain past, 前に the non-past) but not its aspect, so a
+// resultative clause renders its own た / 〜ていた form beside the one the conjunction asks for:
+// 走った前に, which 前に never takes, and 走っていた後で, a progressive the plan does not have.
+describe('known bugs: a Japanese resultative under 前に or 後で keeps its own form (A264)', () => {
+  const resultative = { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'resultative' as const } };
+
+  test.fails('前に takes the non-past: 猫が走る前に', () => {
+    expect(say(runs('before', {}, resultative), 'ja')).toBe('男は猫が走る前に走ります。');
+    expect(say(runs('before', { verbPhrase: { verb: 'RUN', tense: 'past' } }, {
+      ...resultative, verbPhrase: { ...resultative.verbPhrase, tense: 'past' },
+    }), 'ja')).toBe('男は猫が走る前に走りました。');
+  });
+
+  test.fails('後で takes the plain past: 猫が走った後で', () => {
+    expect(say(runs('after', {}, resultative), 'ja')).toBe('男は猫が走った後で走ります。');
+  });
+});

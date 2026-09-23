@@ -502,3 +502,71 @@ describe('known bugs: a subjunctive content clause drops its own past (A260)', (
     });
   });
 });
+
+// The Italian progressive's auxiliary, *stare*, keeps its indicative in a subjunctive clause: the
+// present subjunctive is built for the clause's own verb, and STARE_AUX has no override the way AVERE
+// and AVOIR gained one (A260), so the clause says "sta correndo" where it wants "stia correndo".
+describe('known bugs: the Italian progressive keeps the indicative in a subjunctive clause (A261)', () => {
+  const progressive = { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'progressive' as const } };
+
+  test.fails('under a negated belief: non crede che il gatto stia correndo', () => {
+    expect(say({ subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true }, contentObject: progressive }, 'it'))
+      .toBe("l'uomo non crede che il gatto stia correndo.");
+  });
+
+  test.fails('under an evaluative predicate and under "before": è giusto che, prima che il gatto stia correndo', () => {
+    expect(say(evaluative('RIGHT_CORRECT', progressive), 'it')).toBe('è giusto che il gatto stia correndo.');
+    expect(say({
+      subject: np('MAN'), verbPhrase: { verb: 'RUN' },
+      adverbialClause: { conjunction: 'before', clause: progressive },
+    }, 'it')).toBe("l'uomo corre prima che il gatto stia correndo.");
+  });
+});
+
+// A past progressive under a present subjunctive governor is built from the present subjunctive of
+// the progressive's auxiliary, whatever the clause's tense (A260 gave the neutral aspect its perfect
+// subjunctive and no more), so "does not believe that the cat was running" says "is running".
+describe('known bugs: a past progressive in a subjunctive clause drops its past (A262)', () => {
+  const plan: PhrasePlan = {
+    subject: np('MAN'), verbPhrase: { verb: 'BELIEVE', negative: true },
+    contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', aspect: 'progressive', tense: 'past' } },
+  };
+
+  test.fails('the auxiliary is in the imperfect subjunctive: no cree que el gato estuviera corriendo', () => {
+    expect(sayAll(plan)).toMatchObject({
+      it: "l'uomo non crede che il gatto stesse correndo.",
+      es: 'el hombre no cree que el gato estuviera corriendo.',
+      pt: 'o homem não acredita que o gato estivesse correndo.',
+    });
+  });
+});
+
+// A past or resultative clause under a past governor is left where A254 put it: A254 shifts only a
+// present or future clause, so a clause anterior to a past governor keeps the present subjunctive
+// ("non credeva che il gatto corra") or the present perfect ("said that the cat has run") where
+// both want the pluperfect.
+describe('known bugs: a clause anterior to a past governor takes no pluperfect (A263)', () => {
+  const under = (governor: PhrasePlan['verbPhrase'], inner: Partial<NonNullable<PhrasePlan['contentObject']>['verbPhrase']>): PhrasePlan => ({
+    subject: np('MAN'), verbPhrase: governor,
+    contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', ...inner } },
+  });
+
+  test.fails('a past clause under a past subjunctive governor: non credeva che il gatto avesse corso', () => {
+    expect(sayAll(under({ verb: 'BELIEVE', negative: true, tense: 'past' }, { tense: 'past' }))).toMatchObject({
+      it: "l'uomo non credeva che il gatto avesse corso.", fr: "l'homme ne croyait pas que le chat ait couru.",
+      es: 'el hombre no creía que el gato hubiera corrido.', pt: 'o homem não acreditava que o gato tivesse corrido.',
+    });
+  });
+
+  test.fails('a resultative under a past governor: said that the cat had run', () => {
+    expect(sayAll(under({ verb: 'SAY', tense: 'past' }, { aspect: 'resultative' }))).toMatchObject({
+      en: 'the man said that the cat had run.', it: "l'uomo disse che il gatto aveva corso.",
+      fr: "l'homme dit que le chat avait couru.", es: 'el hombre dijo que el gato había corrido.',
+      pt: 'o homem disse que o gato tinha corrido.',
+    });
+    expect(sayAll(under({ verb: 'BELIEVE', negative: true, tense: 'past' }, { aspect: 'resultative' }))).toMatchObject({
+      en: 'the man did not believe that the cat had run.', it: "l'uomo non credeva che il gatto avesse corso.",
+      es: 'el hombre no creía que el gato hubiera corrido.', pt: 'o homem não acreditava que o gato tivesse corrido.',
+    });
+  });
+});

@@ -51,7 +51,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Parts A and B are both empty, and no `test.fails` remains).** If
+this writing Part A holds four, A261–A264, pinned by 7 `test.fails`, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -61,7 +61,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open.
+| # | File | Language | Summary |
+|---|---|---|---|
+| A261 | [A261-italian-progressive-indicative-in-a-subjunctive-clause.md](A-must-fix/A261-italian-progressive-indicative-in-a-subjunctive-clause.md) | Italian | *stare* in the indicative in a subjunctive clause: `non crede che il gatto sta correndo` for *stia* |
+| A262 | [A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md](A-must-fix/A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md) | Italian, Spanish, Portuguese | a past progressive under a subjunctive governor: `no cree que el gato esté corriendo` for *estuviera* |
+| A263 | [A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md](A-must-fix/A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md) | English, Italian, French, Spanish, Portuguese | no pluperfect under a past governor: `non credeva che il gatto corra`, `said that the cat has run` |
+| A264 | [A264-japanese-resultative-under-mae-ni-or-ato-de.md](A-must-fix/A264-japanese-resultative-under-mae-ni-or-ato-de.md) | Japanese | a resultative under 前に / 後で: 走った前に, 走っていた後で for 走る前に, 走った後で |
+
+**Four open**, filed on 2026-09-23 while landing A254–A260: A261–A263 are what the content-clause
+tense fix left (Italian *stare*'s subjunctive, a past progressive, the pluperfect both A254 and A260
+ruled out), and A264 a Japanese resultative under 前に or 後で.
 
 The seven filed on 2026-09-23, **A254–A260**, were met by the lanes that fixed A247–A253 and fixed
 the same day. A254 and A260 are the tense of a content clause: a past governor now shifts a present

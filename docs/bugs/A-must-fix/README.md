@@ -1,8 +1,16 @@
 # A-must-fix — confirmed bugs
 
-**None open.** Everything filed so far has been fixed and moved to [`../fixed/`](../fixed/).
+**Four open**, filed on 2026-09-23 while landing A254–A260:
+[A261](A261-italian-progressive-indicative-in-a-subjunctive-clause.md), Italian *stare* keeping the
+indicative in a subjunctive clause (*non crede che il gatto sta correndo*);
+[A262](A262-past-progressive-in-a-subjunctive-clause-drops-its-past.md), a past progressive under a
+subjunctive governor losing its past (*no cree que el gato esté corriendo*, French left open);
+[A263](A263-anterior-clause-under-a-past-governor-takes-no-pluperfect.md), no pluperfect for a clause
+anterior to a past governor (*non credeva che il gatto corra*, *said that the cat has run*); and
+[A264](A264-japanese-resultative-under-mae-ni-or-ato-de.md), a Japanese resultative under 前に or 後で
+(走った前に). A261–A263 are what the A254/A260 content-clause tense fix left.
 
-The seven most recent, **A254–A260**, were filed on 2026-09-23 by the lanes that fixed A247–A253 and
+Everything filed before them has been fixed and moved to [`../fixed/`](../fixed/). The seven before, **A254–A260**, were filed on 2026-09-23 by the lanes that fixed A247–A253 and
 fixed the same day: [A254](../fixed/A254-content-clause-under-a-past-governor-keeps-the-present.md),
 a content clause under a past governor keeping the present (*non credeva che il gatto corra*, now
 *corresse*); [A255](../fixed/A255-very-on-an-equative.md), VERY on the equative (*very equally
