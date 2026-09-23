@@ -509,6 +509,105 @@ describe('the superlative set (P09-E19)', () => {
   });
 });
 
+// A284. Spanish and Portuguese pick estar for a transient predicate adjective ("está feliz"), but a
+// superlative there is headed by its article — "el más feliz", "o mais feliz" — a noun phrase, and a
+// predicate noun phrase takes ser: "el gato es el más feliz de los animales".
+describe('known bugs: Spanish and Portuguese put estar before a transient superlative (A284)', () => {
+  const happy = (degree: Degree, set?: NounElement): PhrasePlan => clause(np('CAT'), 'BE', {
+    complements: { predicative: { phrase: np('HAPPY', { headDegree: degree, ...(set ? { headStandard: set } : {}) }) } },
+  });
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+
+  test.fails('with a set: es el gato es el más feliz, pt o gato é o mais feliz', () => {
+    expect(sayAll(happy('most', ANIMALS))).toMatchObject({
+      es: 'el gato es el más feliz de los animales.', pt: 'o gato é o mais feliz dos animais.',
+    });
+  });
+
+  test.fails('the bare superlative', () => {
+    expect(sayAll(happy('most'))).toMatchObject({ es: 'el gato es el más feliz.', pt: 'o gato é o mais feliz.' });
+  });
+
+  test.fails('least', () => {
+    expect(sayAll(happy('least', ANIMALS))).toMatchObject({
+      es: 'el gato es el menos feliz de los animales.', pt: 'o gato é o menos feliz dos animais.',
+    });
+  });
+
+  test('regression: the other five, and estar for the positive and the comparative', () => {
+    expect(sayAll(happy('most', ANIMALS))).toMatchObject({
+      en: 'the cat is the happiest of the animals.',
+      it: 'il gatto è il più felice degli animali.',
+      fr: 'le chat est le plus heureux des animaux.',
+      de: 'der Kater ist das glücklichste der Tiere.',
+      ja: '猫は動物の中で最も幸せです。',
+    });
+    expect(sayAll(happy('positive'))).toMatchObject({ es: 'el gato está feliz.', pt: 'o gato está feliz.' });
+    expect(sayAll(happy('more'))).toMatchObject({ es: 'el gato está más feliz.', pt: 'o gato está mais feliz.' });
+  });
+});
+
+// A285. Japanese says the least-degree by negating the superlative (最も大きくない, "the least big"),
+// so a negated superlative that negates the adjective too comes out the same: "the cat is not the
+// biggest" reads as "the cat is the least big". The negation denies the superlative proposition, and
+// goes over it as A249's does: 最も大きいわけではありません.
+describe('known bugs: Japanese reads a negated superlative as the least (A285)', () => {
+  const notMost = (set?: NounElement, tense?: 'past'): PhrasePlan => clause(np('CAT'), 'BE', {
+    verbPhrase: { negative: true, ...(tense ? { tense } : {}) },
+    complements: { predicative: { phrase: np('BIG', { headDegree: 'most', ...(set ? { headStandard: set } : {}) }) } },
+  });
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+
+  test.fails('with a set: 動物の中で最も大きいわけではありません', () => {
+    expect(say(notMost(ANIMALS), 'ja')).toBe('猫は動物の中で最も大きいわけではありません。');
+  });
+
+  test.fails('the bare superlative: 最も大きいわけではありません', () => {
+    expect(say(notMost(), 'ja')).toBe('猫は最も大きいわけではありません。');
+  });
+
+  test.fails('in the past: 最も大きいわけではありませんでした', () => {
+    expect(say(notMost(ANIMALS, 'past'), 'ja')).toBe('猫は動物の中で最も大きいわけではありませんでした。');
+  });
+
+  test('regression: the six European languages, and the affirmative least', () => {
+    expect(sayAll(notMost(ANIMALS))).toMatchObject({
+      en: 'the cat is not the biggest of the animals.',
+      it: 'il gatto non è il più grande degli animali.',
+      fr: "le chat n'est pas le plus grand des animaux.",
+      de: 'der Kater ist nicht das größte der Tiere.',
+      es: 'el gato no es el más grande de los animales.',
+      pt: 'o gato não é o maior dos animais.',
+    });
+    expect(say(cat('least', ANIMALS), 'ja')).toBe('猫は動物の中で最も大きくないです。');
+    expect(say(cat('least'), 'ja')).toBe('猫は最も大きくないです。');
+  });
+});
+
+// A286. German's superlative set is a bare genitive after a noun and "von" + the dative after a
+// pronoun (P09-E19). A coordinated set that starts with a pronoun puts "von" before the whole group,
+// so the noun after "und" is under "von" too and must be dative: "von uns und den Hunden".
+describe('known bugs: German leaves a noun genitive after "von" in a coordinated set (A286)', () => {
+  const set = (conjuncts: NounPhrase[]) => cat('most', { conjuncts, conjunction: 'and' });
+  const US = np('FIRST_PERSON', { number: 'plural' });
+  const DOGS = np('DOG', { number: 'plural' });
+
+  test.fails('von uns und den Hunden', () => {
+    expect(say(set([US, DOGS]), 'de')).toBe('der Kater ist der größte von uns und den Hunden.');
+  });
+
+  test('regression: the other languages, and a set of nouns alone', () => {
+    expect(sayAll(set([US, DOGS]))).toMatchObject({
+      en: 'the cat is the biggest of us and the dogs.',
+      it: 'il gatto è il più grande di noi e dei cani.',
+      es: 'el gato es el más grande de nosotros y de los perros.',
+      pt: 'o gato é o maior de nós e dos cães.',
+      ja: '猫は私たちと犬の中で最も大きいです。',
+    });
+    expect(say(set([np('ANIMAL', { number: 'plural' }), DOGS]), 'de')).toBe('der Kater ist der größte der Tiere und der Hunde.');
+  });
+});
+
 // A249. Japanese renders a lowered degree as a negated predicate — それほど大きくない, 犬ほど大きくない —
 // and a negated clause then negates that predicate again: 猫はそれほど大きくなくないです. The stacked
 // 〜なくない is colloquial litotes at best, and nothing a polite sentence says. "Not less big" denies
@@ -860,5 +959,50 @@ describe('attributive (P09-E18)', () => {
       // The standard leads ずっと.
       ja: '男は犬よりずっと大きい猫を見ます。',
     });
+  });
+});
+
+// A283. English VERY drops "just" before a noun (`attributive_drop_degrees`), since there is no "a
+// just as big cat". But an equative with a standard now stands after the noun (P09-E18), where
+// "just as big as the dog" is what the predicate says too; the drop still fires there, and "a cat as
+// big as the dog" has lost the intensifier the other six keep.
+describe('known bugs: English drops "just" from a postposed equative with VERY (A283)', () => {
+  const justAs = (concept = 'CAT', extra: Partial<NounPhrase> = {}): NounPhrase => np(concept, {
+    definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveStandards: [DOG], adjectiveIntensifiers: ['VERY'], ...extra,
+  });
+  const sees = (object: NounPhrase): PhrasePlan => clause(np('MAN'), 'SEE', { directObject: object });
+
+  test.fails('as the object: a cat just as big as the dog', () => {
+    expect(say(sees(justAs()), 'en')).toBe('the man sees a cat just as big as the dog.');
+  });
+
+  test.fails('as the subject', () => {
+    expect(say(clause(justAs(), 'EAT'), 'en')).toBe('a cat just as big as the dog eats.');
+  });
+
+  test.fails('as a predicate noun', () => {
+    expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: justAs('ANIMAL') } } }), 'en'))
+      .toBe('the cat is an animal just as big as the dog.');
+  });
+
+  test('regression: the other six keep their intensifier', () => {
+    expect(sayAll(sees(justAs()))).toMatchObject({
+      it: "l'uomo vede un gatto altrettanto grande quanto il cane.",
+      fr: "l'homme voit un chat tout aussi grand que le chien.",
+      de: 'der Mann sieht einen genauso großen Kater wie den Hund.',
+      es: 'el hombre ve un gato igual de grande que el perro.',
+      pt: 'o homem vê um gato tão grande como o cão.',
+      ja: '男は犬と同じくらい大きい猫を見ます。',
+    });
+  });
+
+  test('regression: before the noun, with no standard, "just" still drops; the predicate keeps it', () => {
+    expect(say(sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveIntensifiers: ['VERY'] })), 'en'))
+      .toBe('the man sees an equally big cat.');
+    expect(say(sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'] })), 'en'))
+      .toBe('the man sees a very big cat.');
+    expect(say(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'equally', headIntensifier: 'VERY', headStandard: DOG }) } },
+    }), 'en')).toBe('the cat is just as big as the dog.');
   });
 });
