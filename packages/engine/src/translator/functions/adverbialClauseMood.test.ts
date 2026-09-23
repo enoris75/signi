@@ -25,4 +25,21 @@ describe('adverbialClauseMood', () => {
     expect(adverbialClauseMood('before', 'fr', 'past')).toBe('presentSubjunctive');
     expect(adverbialClauseMood('before', 'en', 'past')).toBeUndefined();
   });
+
+  test('a future event under a temporal conjunction is subjunctive in Spanish and Portuguese', () => {
+    for (const conjunction of ['when', 'while', 'after'] as const) {
+      expect(adverbialClauseMood(conjunction, 'es', 'future')).toBe('presentSubjunctive');
+      expect(adverbialClauseMood(conjunction, 'pt', 'future')).toBe('futureSubjunctive');
+      for (const language of ['en', 'it', 'fr', 'de', 'ja']) {
+        expect(adverbialClauseMood(conjunction, language, 'future')).toBeUndefined();
+      }
+    }
+    expect(adverbialClauseMood('before', 'es', 'future')).toBe('presentSubjunctive');
+    expect(adverbialClauseMood('before', 'pt', 'future')).toBe('presentSubjunctive');
+  });
+
+  test('because keeps the future indicative', () => {
+    expect(adverbialClauseMood('because', 'es', 'future')).toBeUndefined();
+    expect(adverbialClauseMood('because', 'pt', 'future')).toBeUndefined();
+  });
 });

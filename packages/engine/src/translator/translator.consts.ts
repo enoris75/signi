@@ -141,7 +141,8 @@ export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr'
  * The **temporal** subordinating conjunctions — *when, while, before, after* — which place the main
  * event against the clause's in time and do not assert the clause (A251, A252). A future event under
  * one is not said in the future everywhere: English and German say it in the present
- * (`FUTURE_AS_PRESENT_LANGUAGES`), Spanish and Portuguese in the subjunctive. *Because* asserts its clause and keeps the future ("because the cat
+ * (`FUTURE_AS_PRESENT_LANGUAGES`), Spanish and Portuguese in the subjunctive
+ * (`FUTURE_TEMPORAL_MOOD`). *Because* asserts its clause and keeps the future ("because the cat
  * will eat", "porque el gato comerá").
  */
 export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['when', 'while', 'before', 'after']);
@@ -162,6 +163,16 @@ export const FUTURE_AS_PRESENT_LANGUAGES: ReadonlySet<string> = new Set(['en', '
  */
 export const FUTURE_AS_PERFECT: Readonly<Record<string, ReadonlySet<SubordinatingConjunction>>> = {
   de: new Set(['after']),
+};
+
+/**
+ * The mood Spanish and Portuguese put a future event in under a `TEMPORAL_CONJUNCTIONS` word, which
+ * does not assert it (A252): Spanish its present subjunctive ("cuando el gato **coma**"), Portuguese
+ * its future subjunctive ("quando o gato **comer**"). *Before* governs the present subjunctive in any
+ * tense and is decided first (`SUBJUNCTIVE_CONJUNCTIONS`); Italian and French keep the future.
+ */
+export const FUTURE_TEMPORAL_MOOD: Readonly<Record<string, 'presentSubjunctive' | 'futureSubjunctive'>> = {
+  es: 'presentSubjunctive', pt: 'futureSubjunctive',
 };
 
 /**

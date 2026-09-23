@@ -38,3 +38,27 @@ Pinned by `known bugs: an Iberian future temporal clause takes the future indica
 
 Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md), adverbial
 clauses.
+
+## Resolved
+
+2026-09-23. `FUTURE_TEMPORAL_MOOD` (es `presentSubjunctive`, pt `futureSubjunctive`) sits beside
+`SUBJUNCTIVE_CONJUNCTIONS` and the shared `TEMPORAL_CONJUNCTIONS` (A251) in
+[`translator.consts.ts`](../../../packages/engine/src/translator/translator.consts.ts);
+[`adverbialClauseMood`](../../../packages/engine/src/translator/functions/adverbialClauseMood.ts)
+reads it for a future clause under *when*, *while* or *after* (*before* is decided first and keeps the
+present subjunctive). The engine-internal `Mood` gains `'futureSubjunctive'`
+([`types.ts`](../../../packages/engine/src/types.ts)), and
+[`mood.ts`](../../../packages/engine/src/mood.ts) builds the Portuguese future subjunctive on the
+3rd-plural preterite stem (`futureSubjunctiveForm`): comer, fizer, tiver, for, vier, vir, der, puser,
+disser, trouxer, souber, sair / saírem, and estiver / tiver for the aspect auxiliaries. The 2nd person
+agrees as the 3rd (você / vocês, A108), as every other Portuguese paradigm in the engine does, so
+*comeres* / *comerdes* are not produced. Spanish reuses its present subjunctive. *Because*, Italian and
+French keep the future.
+
+Guarded by the two formerly-failing tests in `known bugs: an Iberian future temporal clause takes the
+future indicative (A252)` in [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts),
+plus new cases there for Portuguese *because*, fourteen corpus irregulars in the singular and plural,
+Spanish irregular stems, a 1st plural, a negation, a clitic, a modal, a reflexive, a passive and the
+progressive / resultative auxiliaries, and by unit tests in
+[mood.test.ts](../../../packages/engine/src/mood.test.ts) and
+[adverbialClauseMood.test.ts](../../../packages/engine/src/translator/functions/adverbialClauseMood.test.ts).
