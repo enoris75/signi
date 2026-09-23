@@ -1,7 +1,8 @@
 import type { ConceptForms } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { degreeAdverb } from '../../functions/degreeAdverb.js';
 import { withIntensifier } from '../../functions/withIntensifier.js';
-import { EN_DEGREE, EN_IRREGULAR } from './en.consts.js';
+import { EN_DEGREE, EN_IRREGULAR, EN_STANDARD_DEGREE } from './en.consts.js';
 import { inflect } from './inflect.js';
 import { inflects } from './inflects.js';
 
@@ -22,6 +23,7 @@ export function enAdj(a: ConceptForms): string {
     // A two-syllable adjective the lexicon marks `inflects` compares with -er/-est ("cleverer").
     if (inflects(base, a.forms['inflects'] === '1')) return withIntensifier(a, inflect(base, degree === 'more' ? 'er' : 'est'));
   }
-  const d = EN_DEGREE[degree];
+  // The equative before a standard is "as big (as the dog)", not "equally big" (P09-E5).
+  const d = degreeAdverb(a, EN_DEGREE, EN_STANDARD_DEGREE);
   return withIntensifier(a, d ? `${d} ${base}` : base);
 }

@@ -15,8 +15,8 @@ import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_TEMPORAL, PARTICLE, PATH_CITAT
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
-import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
@@ -101,10 +101,7 @@ export function complementSegs(
           return;
         }
         const { base, reading, verbal } = jaComparisonAdj(np.head);
-        const intensifier = jaIntensifierSeg(np.head);
-        if (intensifier) segs.push(intensifier);
-        const deg = JA_DEGREE[adjDegree(np.head)];
-        if (deg) segs.push({ t: deg });
+        segs.push(...jaDegreeSegs(np));
         // By class (see `jaAdjClass`): an i-adjective takes its く-form, a na- or の-adjective its bare
         // stem + に (幸せに, 茶色に), and a た-adjective the state 〜ている as a ように clause, which takes no
         // に either (疲れているように思える).

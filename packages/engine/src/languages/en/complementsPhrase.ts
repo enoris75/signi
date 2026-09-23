@@ -20,6 +20,7 @@ import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
+import { enStandard } from './enStandard.js';
 import { npText } from './npText.js';
 
 // `verb` is the governing verb's forms: the predicative reads it to repair a predicate noun under a
@@ -72,7 +73,7 @@ export function complementsPhrase(
         const predicate = coordinate(c.phrase, (np) =>
           np.head.forms['role'] !== 'adjective' ? npText(np)
             : takesPredicateArticle(np.head) ? `the ${enAdj(np.head)}`
-            : enAdj(np.head),
+            : [enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }

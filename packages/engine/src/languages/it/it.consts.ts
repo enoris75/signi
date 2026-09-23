@@ -36,6 +36,19 @@ export const IT_DEGREE: Record<Degree, string> = {
   positive: '', more: 'più', most: 'più', less: 'meno', least: 'meno', equally: 'ugualmente',
 };
 
+/**
+ * The degree adverb once a standard of comparison follows (P09-E5): the equative is the circumfix
+ * "tanto … quanto" ("tanto grande quanto il cane"), where a bare one stays "ugualmente grande".
+ */
+export const IT_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 'tanto' };
+
+/**
+ * The word before the standard of comparison, by degree (P09-E5). The comparatives take "di", which
+ * fuses with the standard's article ("più grande del cane") — the standard is always a noun phrase,
+ * so the "che" of "più grande che bello" never arises (D4). The equative's "quanto" fuses with none.
+ */
+export const IT_STANDARD: Partial<Record<Degree, 'di' | 'quanto'>> = { more: 'di', less: 'di', equally: 'quanto' };
+
 export const VOWEL_START = /^[aeiouàèéìòù]/i;
 
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */

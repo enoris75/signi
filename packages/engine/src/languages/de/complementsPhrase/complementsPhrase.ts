@@ -27,6 +27,7 @@ import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
 import { dePredOrdinal } from '../dePredOrdinal.js';
+import { deStandard } from '../deStandard.js';
 import { genitiveS } from '../genitiveS.js';
 import { genitiveShows } from '../genitiveShows.js';
 import { germanCompound } from '../germanCompound.js';
@@ -91,7 +92,7 @@ export function complementsParts(
         return coordinate(c.phrase, (np) =>
           np.head.forms['role'] !== 'adjective' ? nounPhrase(np, 'nom')
             : np.head.forms['ordinal'] === '1' ? dePredOrdinal(np.head, agreement)
-            : dePredAdj(np.head),
+            : [dePredAdj(np.head), deStandard(np)].filter(Boolean).join(' '),
         );
       }
       // The preposition governs a case, and the case is spelled on each conjunct's own article

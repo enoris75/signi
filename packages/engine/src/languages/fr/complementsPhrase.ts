@@ -30,6 +30,7 @@ import { defArticle } from './defArticle.js';
 import { elidesBefore } from './elidesBefore.js';
 import { CONSTITUENT_NEGATOR, FR_TEMPORAL, LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
+import { frStandard } from './frStandard.js';
 import { joinArt } from './joinArt.js';
 import { npText } from './npText.js';
 import { partitiveArtFor } from './partitiveArtFor.js';
@@ -67,7 +68,7 @@ export function complementsPhrase(
         const plural = subjectForms['number'] === 'plural';
         return coordinate(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') return npText(np);
-          const surface = frComparison(np.head, gender, plural);
+          const surface = [frComparison(np.head, gender, plural), frStandard(np)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "semble LE plus heureux" — distinct from the comparative "plus heureux".
           // SAME keeps its article the same way: "est le même" (see `takesPredicateArticle`).

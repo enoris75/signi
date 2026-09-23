@@ -8,9 +8,22 @@ import type { CardinalTable } from '../../functions/numeralWord.js';
 // 'less' pairs それほど with the negative (それほど大きくない "not so big") and 'least' pairs 最も with
 // it (最も大きくない "least big") — see `jaComparisonAdj`. Reusing 最も for 'least' bare would make it
 // identical to 'most', and あまり on an affirmative adjective is ungrammatical.
+// With a standard of comparison the standard takes the adverb's place (see `JA_STANDARD`), and the
+// polarity carries over: 'less' is then 犬ほど + the same negated adjective (犬ほど大きくない "not as big
+// as the dog"), ほど being exactly the それほど this table writes bare — "to that extent" becomes "to
+// the dog's extent" (P09-E5).
 export const JA_DEGREE: Record<Degree, string> = {
   positive: '', more: 'もっと', most: '最も', less: 'それほど', least: '最も', equally: '同じくらい',
 };
+
+/**
+ * The particle after a standard of comparison, by degree (P09-E5). It stands **before** the
+ * adjective, as every Japanese modifier does, and replaces the degree adverb rather than joining it:
+ * 犬より大きい "bigger than the dog" (not もっと), 犬と同じくらい大きい "as big as the dog", and the
+ * negative-polarity 犬ほど大きくない "less big than (not as big as) the dog". A particle, not a
+ * preposition, so the standard needs no article or case of its own.
+ */
+export const JA_STANDARD: Partial<Record<Degree, string>> = { more: 'より', less: 'ほど', equally: 'と同じくらい' };
 
 /** Postposition particle per complement type. (Route を is safe: motion verbs are intransitive.) */
 export const PARTICLE: Record<ComplementType, string> = {

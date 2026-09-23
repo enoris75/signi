@@ -29,6 +29,7 @@ import { coordinate } from './coordinate.js';
 import { defArticle } from './defArticle.js';
 import { itDeg } from './itDeg.js';
 import { itPossessedHeadForms } from './itPossessedHeadForms.js';
+import { itStandard } from './itStandard.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { npText } from './npText.js';
@@ -75,7 +76,7 @@ export function complementsPhrase(
         const plural = agreeWith['number'] === 'plural';
         return coordinate(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') return npText(np);
-          const surface = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+          const surface = joinWords([itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural)), itStandard(np)]);
           // A predicative superlative has no noun's article to borrow (unlike "il gatto più
           // grande"), so it supplies its own, agreeing with the subject: "sembra IL più felice",
           // distinguishing it from the comparative "sembra più felice". SAME keeps its article the

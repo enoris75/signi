@@ -11,6 +11,19 @@ export const PT_DEGREE: Record<Degree, string> = {
 };
 
 /**
+ * The degree adverb once a standard of comparison follows (P09-E5): the equative is the circumfix
+ * "tão … como" ("tão grande como o cão"), where a bare one stays "igualmente grande".
+ */
+export const PT_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 'tão' };
+
+/**
+ * The word before the standard of comparison, by degree (P09-E5): the fixed "do que" for the
+ * comparatives — "maior do que o cão", its "do" never agreeing with the standard, which keeps its own
+ * article ("do que a gata") — and "como" for the equative. The bare "que" is a variant, not needed (D4).
+ */
+export const PT_STANDARD: Partial<Record<Degree, string>> = { more: 'do que', less: 'do que', equally: 'como' };
+
+/**
  * The raised degrees (more/most) of these adjectives are suppletive in Portuguese — a single
  * synthetic word, never "mais" + base: grande → maior, bom → melhor, pequeno → menor, mau →
  * pior. Only "more"/"most" suppletise; the lowered and equal degrees stay periphrastic ("menos

@@ -1,4 +1,4 @@
-import type { CoordConjunction, DimensionRelation, TemporalRelation } from '@signi/shared';
+import type { CoordConjunction, Degree, DimensionRelation, TemporalRelation } from '@signi/shared';
 import type { Case, Slot } from './de.types.js';
 import type { FocusWords } from '../../functions/withFocus.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
@@ -10,6 +10,13 @@ import type { CardinalTable } from '../../functions/numeralWord.js';
  * accusative object. A verb naming no link leaves the predicate a bare accusative.
  */
 export const OBJECT_PREDICATIVE_CASE: Record<string, 'nom' | 'acc' | 'dat'> = { in: 'acc', zu: 'dat', als: 'acc' };
+
+/**
+ * The word before the standard of comparison, by degree (P09-E5): "größer als der Hund", "so groß
+ * wie der Hund". Both are conjunctions, not prepositions — they govern no case, and the standard
+ * takes the case of what it is compared with: the nominative, for a subject's predicate adjective.
+ */
+export const DE_STANDARD: Partial<Record<Degree, string>> = { more: 'als', less: 'als', equally: 'wie' };
 
 // The umlauted counterpart of each comparison-relevant stem vowel (see `deUmlaut`).
 export const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
