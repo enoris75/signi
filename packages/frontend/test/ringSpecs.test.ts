@@ -212,6 +212,40 @@ describe('buildRingSpecs', () => {
     expect(hour('through')).toBe(12);
   });
 
+  // P09-E12b: the temporal's six relations fan across the top of its ring as the route's do.
+  it("fans the temporal's relation toolbar across the top of its ring", () => {
+    const defs = groups(['temporal'], ['subject', 'verb', 'temporal']);
+    const values = ['at', 'ago', 'until', 'after', 'before', 'during'];
+    const temporal = specs(defs, { toolbars: { temporal: values } }).Temporal;
+
+    expect(keys(temporal.outer).filter((k) => k.startsWith('toolbar:'))).toEqual(
+      values.map((v) => toolbarControlKey('temporal', v)),
+    );
+    const hour = (value: string) =>
+      (aimOf(temporal.outer, toolbarControlKey('temporal', value)) as { clock: number }).clock;
+    expect(values.map(hour)).toEqual([...values.map(hour)].sort((a, b) => a - b));
+    expect((hour('until') + hour('after')) / 2).toBeCloseTo(12);
+  });
+
+  // P09-E12 D2, measured on *cat eats mouse* (EAT licenses four): the two adjuncts every verb offers
+  // join the row of complement toggles waiting at six o'clock, in the builder's order, and the ring
+  // grows to seat them (the verb's group box went from 144 to 190px; the object kept its row, so
+  // D2's second arc was not needed).
+  it("waits the adjunct toggles in the verb's row at six, among the licensed ones", () => {
+    const defs = groups(['directObject'], ['subject', 'verb', 'directObject']);
+    const toggles = ['instrumental', 'manner', 'locative', 'temporal', 'cause', 'purpose'];
+    const verb = specs(defs, {
+      complementToggleIcons: toggles.map(icon),
+      directObjectToggle: icon('directObject'),
+    })[VERB_PHRASE];
+
+    expect(keys(verb.outer).filter((k) => toggles.includes(k))).toEqual(toggles);
+    const hours = toggles.map((k) => (aimOf(verb.outer, k) as { clock: number }).clock);
+    // Left first at the bottom of the ring, where the clock runs right to left.
+    expect(hours).toEqual([...hours].sort((a, b) => b - a));
+    expect((hours[2] + hours[3]) / 2).toBeCloseTo(6);
+  });
+
   it("faces the verb's toggles toward the constituents they show, and ports toward the rest", () => {
     const defs = groups(['directObject', 'route'], ['subject', 'verb', 'directObject', 'route']);
     const result = specs(defs, {

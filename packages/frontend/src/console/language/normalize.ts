@@ -25,6 +25,7 @@ const DEFAULTS: Record<string, string> = {
   causeSentiment: "neutral",
   routeSpecifier: "through",
   locativeSpecifier: "in",
+  temporalRelation: "at",
   imperativeRegister: "request",
 };
 

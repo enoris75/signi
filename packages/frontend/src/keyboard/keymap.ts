@@ -265,7 +265,7 @@ const filled = (ctx: BoxContext) => Boolean(ctx.selection[ctx.slot]);
 const goTo = (ctx: BoxKeyContext, slot: SlotKey) => ctx.revealSlot(slot, slot);
 
 /** The complements whose ring carries a relation toolbar, which S points the next key at. */
-const TOOLBAR_SLOTS: SlotKey[] = ["route", "locative", "cause"];
+const TOOLBAR_SLOTS: SlotKey[] = ["route", "locative", "temporal", "cause"];
 
 /**
  * The command box's three addressees, counted the way its rows are stacked. Each key is named by

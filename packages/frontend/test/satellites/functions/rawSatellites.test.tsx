@@ -245,13 +245,22 @@ describe('rawSatellites', () => {
   });
 
   describe('complements', () => {
-    it('offers a toggle only for the complements the verb licenses', () => {
+    it('offers a toggle only for the complements the verb licenses, and the adjuncts every verb takes', () => {
       const verb = concept('PUT', 'verb', { complements: ['cause', 'locative'] });
       const toggles = offered({ verb }).filter((key) =>
         (COMPLEMENT_TYPES as string[]).includes(key),
       );
 
-      expect(toggles).toEqual(['locative', 'cause']);
+      // The temporal and the purpose are offered on every verb (P09-E12 D2); the topic is not.
+      expect(toggles).toEqual(['locative', 'temporal', 'cause', 'purpose']);
+    });
+
+    it('offers the topic only where the verb licenses it, and no complement without a verb', () => {
+      const think = concept('THINK', 'verb', { complements: ['topic'] });
+
+      expect(offered({ verb: think })).toContain('topic');
+      expect(offered({ verb: concept('RUN', 'verb') })).not.toContain('topic');
+      expect(offered({}).filter((key) => (COMPLEMENT_TYPES as string[]).includes(key))).toEqual([]);
     });
 
     it.each<[ComplementType, string]>([

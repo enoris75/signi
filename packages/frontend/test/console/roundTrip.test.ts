@@ -13,6 +13,7 @@ import {
   DEGREES,
   MODIFIER_RELATIONS,
   PATH_SPECIFIERS,
+  TEMPORAL_RELATIONS,
   canCoordinateImperative,
 } from '@signi/shared';
 import {
@@ -26,7 +27,7 @@ import {
 } from '../../src/components/PhraseBuilder/interfaces.ts';
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
-import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor } from '../../src/components/PhraseBuilder/slots.ts';
+import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
 import { printWorkspace } from '../../src/console/language/print.ts';
@@ -69,7 +70,8 @@ type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut'
 function wordFor(rng: Rng, slot: SlotKey, frame: 'period' | 'possessor' | 'conjunct'): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
   if (slot === 'subject') return frame === 'possessor' ? { concept: pick(rng, NOUNS)! } : nounOrPronoun();
-  if (slot === 'directObject' || slot === 'cause') return nounOrPronoun();
+  // The purpose and the topic take a pronoun behind their adposition as the cause does ("for her").
+  if (slot === 'directObject' || slot === 'cause' || slot === 'purpose' || slot === 'topic') return nounOrPronoun();
   if (slot === 'predicative') return { concept: rng() < 0.5 ? pick(rng, ADJECTIVES)! : pick(rng, NOUNS)! };
   return { concept: pick(rng, NOUNS)! };
 }
@@ -130,7 +132,8 @@ const OPS: Op[] = [
     return R.applyConceptSelect(sel, 'directObject', w.concept, w.opts);
   }),
   onPeriod((sel, rng, s, cid) => {
-    const type = pick(rng, (sel.verb?.complements ?? []).filter((t) => t !== 'instrumental'));
+    // What the verb licenses, and the temporal and the purpose every verb offers (P09-E12 D2).
+    const type = pick(rng, offeredComplements(sel.verb).filter((t) => t !== 'instrumental'));
     if (!type || (isLinked(s, cid) && sel[type as SlotKey])) return undefined;
     const w = wordFor(rng, type as SlotKey, 'period');
     return R.applyConceptSelect(sel, type as SlotKey, w.concept, w.opts);
@@ -170,10 +173,13 @@ const OPS: Op[] = [
       const r = rng();
       if (r < 0.25 && c.role !== 'adjective') return R.toggleNumber(slice, which);
       if (r < 0.45 && (c.role === 'pronoun' || c.gendered)) return R.toggleGender(slice, which);
-      if (r < 0.65 && c.role === 'noun' && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
+      if (r < 0.65 && c.role === 'noun' && (which === 'subject' || which === 'directObject' || ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'topic'].includes(which) || (which === 'manner' && c.mannerRelation !== 'measure')))
         return R.setDefiniteness(slice, which, pick(rng, DEFINITENESS)!);
       if (r < 0.75 && (which === 'route' || which === 'locative') && head.frame === 'period')
         return R.setSpecifier(slice, pick(rng, PATH_SPECIFIERS)!, which);
+      // The temporal's relation (P09-E12b), in the same band: no noun is both.
+      if (r < 0.75 && which === 'temporal' && head.frame === 'period')
+        return R.setTemporalRelation(slice, pick(rng, TEMPORAL_RELATIONS)!);
       if (r < 0.80 && which === 'cause' && head.frame === 'period') return R.setSentiment(slice, pick(rng, CAUSE_SENTIMENTS)!);
       // The cause's own polarity, a second axis beside its stance ("not thanks to the dog").
       if (r < 0.85 && which === 'cause' && head.frame === 'period') return R.toggleCauseNegative(slice);

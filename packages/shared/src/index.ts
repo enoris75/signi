@@ -254,15 +254,24 @@ export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite
 export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'temporal' | 'predicative' | 'objectPredicative';
 
 /**
- * The complements the **builder** offers, in the order it presents them. Not every complement type
- * is here: `objectPredicative`, `comitative`, `temporal`, `purpose` and `topic` render from a plan
- * (the UI strings of C12 are built on the first two, the time adverbs' glosses on the third; the
- * last two are P09-E2's, waiting for a box laid out together with the temporal's) but have no box
- * on the canvas yet, so the frontend — which derives its slots, satellites and selection fields
- * from this list — does not know about them. Add one here to give it a box.
- * The engine's own order is `COMPLEMENT_RENDER_ORDER`, which holds all of them.
+ * The complements the **builder** offers, in the order it presents them — the engine's render
+ * order (`COMPLEMENT_RENDER_ORDER`) for the ones it has, so the reading order on the canvas is the
+ * sentence's: the `topic` beside the manner, the `temporal` after the place, the `purpose` after the
+ * cause (P09-E12b). Two complement types are not here: `objectPredicative` and `comitative` render
+ * from a plan (the UI strings of C12 are built on them) but have no box on the canvas, so the
+ * frontend — which derives its slots, satellites and selection fields from this list — does not
+ * know about them. Add one here to give it a box.
  */
-export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'cause'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose'];
+
+/**
+ * The complements the builder offers on **every** period with a verb, whether the verb licenses
+ * them or not (P09-E12 D2): a time ("runs on this day") and a beneficiary ("reads for the man") go
+ * with any act, and the engine renders both without a licence. Seeding the licence onto each verb
+ * would say nothing about any one of them. The `topic` is not here: "about the cat" is a fact about
+ * the verbs of saying and thinking, which license it (SPEAK, THINK).
+ */
+export const ADJUNCT_COMPLEMENT_TYPES: ComplementType[] = ['temporal', 'purpose'];
 
 /**
  * Order in which active complements are rendered within a sentence. The subject
@@ -417,9 +426,8 @@ export const GROUP_SCOPED_SPECIFIERS: ReadonlySet<PathSpecifier> = new Set<PathS
  * front an impersonal verb ("**il y a** un instant", "**hace** un momento", "**há** um momento").
  * German alone treats it as an ordinary preposition, the *vor* + dative it also uses for `before`.
  *
- * Plan-only for now, like `objectPredicative` and `comitative`: the complement renders from a plan
- * and glosses the time adverbs (TODAY, JUST, STILL), but the canvas draws no ring for it yet — it is
- * absent from `COMPLEMENT_TYPES`, which is what gives a complement a box.
+ * The canvas draws a box for it (P09-E12b), offered on every verb (`ADJUNCT_COMPLEMENT_TYPES`), and
+ * its relation is the box's toolbar, as the route's path is.
  */
 export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during';
 

@@ -61,7 +61,7 @@ import {
   updatePossessor,
 } from "../../components/PhraseBuilder/phraseReducers.ts";
 import { resolveAntecedent } from "../../components/PhraseBuilder/selectionToPlan/index.ts";
-import { adjectiveSlots, MODAL_SLOTS } from "../../components/PhraseBuilder/slots.ts";
+import { adjectiveSlots, MODAL_SLOTS, offeredComplements } from "../../components/PhraseBuilder/slots.ts";
 import { nextActiveSlot } from "../../components/PhraseBuilder/functions/nextActiveSlot.ts";
 import { visibleSlotsFor } from "../../components/PhraseBuilder/functions/visibleSlots.ts";
 import {
@@ -1119,7 +1119,7 @@ export function roleRefusal(
   }
   if (!verb) return coded("complementNeedsVerb", { command: def.name });
   // The role commands left name the complements a verb licenses (see COMMANDS' role entries).
-  return verb.complements?.includes(slot as never)
+  return offeredComplements(verb).includes(slot as never)
     ? undefined
     : coded("takesNoComplement", { verb: verbName, command: def.name, slot: slot as ComplementSlot });
 }

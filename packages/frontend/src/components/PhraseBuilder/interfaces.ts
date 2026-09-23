@@ -1,5 +1,6 @@
 import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
+import type { TemporalRelation } from "@signi/shared";
 
 export type { AbstractionLevel, CoordConjunction };
 
@@ -67,18 +68,14 @@ export function coordConjunctionOptions(
 /**
  * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
  * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
- * `objectPredicative`, the `comitative` and the `temporal` have no builder slot at all: they are
- * plan-only complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what
- * the UI strings built on the first two and the time adverbs' glosses built on the third need, and
- * all they need. Giving one a box means adding its selection fields below, as every other
- * complement has them — and, for the temporal, a toolbar for its relation (at / ago / until /
- * after / before / during), the way the route and locative rings draw one for their path.
- * P09-E2's `purpose` and `topic` are plan-only on the same terms, and are to be laid out together
- * with the temporal's ring rather than one at a time.
+ * `objectPredicative` and the `comitative` have no builder slot at all: they are plan-only
+ * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
+ * strings built on them need, and all they need. Giving one a box means adding its selection fields
+ * below, as every other complement has them.
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "objectPredicative" | "comitative" | "temporal" | "purpose" | "topic"
+    "instrumental" | "objectPredicative" | "comitative"
 >;
 
 export interface SlotConfig {
@@ -241,6 +238,31 @@ export interface PhraseSelection {
     // "behind the tree" rather than only the containment it falls back on. Route and locative
     // share the relations but not the default (through vs in), so they need separate keys.
     locativeSpecifier?: PathSpecifier;
+    // The time of the act ("runs *on this day*", P09-E12b) — a full noun phrase like the motion
+    // complements, offered on every verb (ADJUNCT_COMPLEMENT_TYPES). Its relation (at / ago / until
+    // / after / before / during) is the box's toolbar, as the route's path is; absent means `at`.
+    temporal?: Concept;
+    temporalNumber?: "singular" | "plural";
+    temporalGender?: "masc" | "fem" | "neut";
+    temporalAdjective?: Concept;
+    temporalAdjective2?: Concept;
+    temporalAdjective3?: Concept;
+    temporalRelation?: TemporalRelation;
+    // The beneficiary or goal ("reads *for the man*", P09-E2), offered on every verb like the
+    // temporal, and the topic ("thinks *about the cat*"), which only SPEAK and THINK license. Plain
+    // boxes: no relation to choose, and each takes a pronoun behind its adposition ("for her").
+    purpose?: Concept;
+    purposeNumber?: "singular" | "plural";
+    purposeGender?: "masc" | "fem" | "neut";
+    purposeAdjective?: Concept;
+    purposeAdjective2?: Concept;
+    purposeAdjective3?: Concept;
+    topic?: Concept;
+    topicNumber?: "singular" | "plural";
+    topicGender?: "masc" | "fem" | "neut";
+    topicAdjective?: Concept;
+    topicAdjective2?: Concept;
+    topicAdjective3?: Concept;
     // Cause / reason adjunct ("cried because of the dog"). Its one specifier is the
     // affective sentiment — neutral (because of) / negative (fault of) / positive (thanks to),
     // selected on the cause dotted ring. Defaults to 'neutral' when absent.
@@ -318,6 +340,9 @@ export interface PhraseSelection {
     directionConjuncts?: PhraseSelection[];
     sourceConjuncts?: PhraseSelection[];
     routeConjuncts?: PhraseSelection[];
+    temporalConjuncts?: PhraseSelection[];
+    purposeConjuncts?: PhraseSelection[];
+    topicConjuncts?: PhraseSelection[];
     causeConjuncts?: PhraseSelection[];
     terminusConjuncts?: PhraseSelection[];
     mannerConjuncts?: PhraseSelection[];
@@ -330,6 +355,9 @@ export interface PhraseSelection {
     directionConjunction?: CoordConjunction;
     sourceConjunction?: CoordConjunction;
     routeConjunction?: CoordConjunction;
+    temporalConjunction?: CoordConjunction;
+    purposeConjunction?: CoordConjunction;
+    topicConjunction?: CoordConjunction;
     causeConjunction?: CoordConjunction;
     terminusConjunction?: CoordConjunction;
     mannerConjunction?: CoordConjunction;
@@ -340,6 +368,9 @@ export interface PhraseSelection {
     directionPossessor?: PhraseSelection;
     sourcePossessor?: PhraseSelection;
     routePossessor?: PhraseSelection;
+    temporalPossessor?: PhraseSelection;
+    purposePossessor?: PhraseSelection;
+    topicPossessor?: PhraseSelection;
     causePossessor?: PhraseSelection;
     terminusPossessor?: PhraseSelection;
     mannerPossessor?: PhraseSelection;
@@ -355,6 +386,9 @@ export interface PhraseSelection {
     directionPossessorRef?: NounAddress;
     sourcePossessorRef?: NounAddress;
     routePossessorRef?: NounAddress;
+    temporalPossessorRef?: NounAddress;
+    purposePossessorRef?: NounAddress;
+    topicPossessorRef?: NounAddress;
     causePossessorRef?: NounAddress;
     terminusPossessorRef?: NounAddress;
     mannerPossessorRef?: NounAddress;
@@ -448,8 +482,9 @@ export function slotCategories(
       ? null
       : { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   // The direct object takes a pronoun on the same footing as the subject ("I see you"), and
-  // the causal complement takes one behind its adposition ("because of him").
-  if (slotKey === "directObject" || slotKey === "cause")
+  // the causal, purpose and topic complements take one behind their adposition ("because of him",
+  // "for her", "about him" — the engine's TONIC_COMPLEMENTS).
+  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic")
     return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
     return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };

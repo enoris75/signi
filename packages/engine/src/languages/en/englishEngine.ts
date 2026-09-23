@@ -2,6 +2,7 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEn } from '../../possessive.js';
 import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP } from './en.consts.js';
+import { TEMPORAL_PREP } from './en.consts.js';
 import { enAdj } from './enAdj.js';
 import { determiner } from './determiner.js';
 import { renderClause } from './renderClause.js';
@@ -40,6 +41,9 @@ export const englishEngine: LanguageEngine = {
   renderSpecifier(_noun: ConceptForms, specifier: Specifier): string {
     return specifier.kind === 'sentiment' ? CAUSE_PREP[specifier.value]
       : specifier.kind === 'path' ? PATH_PREP[specifier.value]
+      // The temporal's relation (P09-E12b): the word alone, "ago" included — it follows its noun
+      // in a sentence, but a citation has no noun to follow.
+      : specifier.kind === 'temporal' ? TEMPORAL_PREP[specifier.value]
       : '';
   },
   // English compares both ways, and which way is a fact about the adjective, not about the degree:

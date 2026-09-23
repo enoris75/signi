@@ -6,6 +6,7 @@ import { estCeQue } from './estCeQue.js';
 import { frontQuestion } from './frontQuestion.js';
 import { questionWord } from './questionWord.js';
 import { COORD_WORDS, FR_DEGREE } from './fr.consts.js';
+import { FR_TEMPORAL } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
 import { punctuate } from './punctuate.js';
@@ -82,6 +83,14 @@ export const frenchEngine: LanguageEngine = {
       return specifier.value === 'positive' ? `grâce ${aDet(f, false, word)}`
         : specifier.value === 'negative' ? `par la faute ${deDet(f, false, word)}`
         : `à cause ${deDet(f, false, word)}`;
+    }
+    // The temporal's relation (P09-E12b), headed as `complementsPhrase` heads it: "à", "jusqu'à",
+    // "il y a", "après", "avant", "pendant".
+    if (specifier.kind === 'temporal') {
+      const relation = specifier.value;
+      return relation === 'at' ? aDet(f, false, word)
+        : relation === 'until' ? `jusqu'${aDet(f, false, word)}`
+        : prepDet(FR_TEMPORAL[relation], f, false, word);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, word, 'locative') : '';
   },

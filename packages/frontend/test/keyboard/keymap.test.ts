@@ -238,13 +238,16 @@ describe('the menus and toolbars a key opens', () => {
   });
 
   it('points S at a relation toolbar only where there is one, and a word on it', () => {
-    const filled = (slot: 'locative' | 'cause' | 'directObject') => ({
+    const filled = (slot: 'locative' | 'cause' | 'temporal' | 'purpose' | 'directObject') => ({
       slot,
       nounKey: slot,
       selection: { [slot]: noun('HOUSE') } as PhraseSelection,
     });
     expect(commandFor('s', filled('locative'))).toBe('noun.relation');
     expect(commandFor('s', filled('cause'))).toBe('noun.relation');
+    // P09-E12b: the temporal's relation toolbar; the purpose has none.
+    expect(commandFor('s', filled('temporal'))).toBe('noun.relation');
+    expect(commandFor('s', filled('purpose'))).toBeUndefined();
     // The object carries no relation, and an empty complement has nothing to relate.
     expect(commandFor('s', filled('directObject'))).toBeUndefined();
     expect(commandFor('s', { slot: 'locative', nounKey: 'locative' })).toBeUndefined();

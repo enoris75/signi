@@ -24,6 +24,7 @@ import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
   COORDINABLE_NOUN_KEYS,
+  offeredComplements,
 } from "../../slots.ts";
 import {
   complementIcons,
@@ -55,7 +56,8 @@ export function rawSatellites(
   // How many phrases are coordinated with a noun block's own head ("Peter *and Paul*").
   const conjunctCount = (which: NounKey): number =>
     ((selection[CONJUNCTS_KEY(which)] as PhraseSelection[] | undefined) ?? []).length;
-  const supportedComplements = selection.verb?.complements ?? [];
+  // What the verb licenses, plus the adjuncts every verb offers (the temporal and the purpose).
+  const supportedComplements = offeredComplements(selection.verb);
   // Whether the verb has a patient at all. Only a transitive or ditransitive one does, and only
   // those can be put in the passive (see `VerbPhrase.voice`).
   const passivizable =

@@ -385,7 +385,7 @@ class Printer {
       }
     }
     const afterAdjectives = this.tokens.length;
-    this.settings(w, ["number", "gender", "determiner", "specifier", "sentiment", "causePolarity", "degree"]);
+    this.settings(w, ["number", "gender", "determiner", "specifier", "temporal", "sentiment", "causePolarity", "degree"]);
 
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
     const address = w.address!;

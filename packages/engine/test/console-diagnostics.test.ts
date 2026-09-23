@@ -317,6 +317,11 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'This verb accepts no route', it: 'Questo verbo non accetta nessun complemento di moto per luogo', fr: "Ce verbe n'accepte aucun complément circonstanciel de passage", de: 'Dieses Verb akzeptiert keine adverbiale Bestimmung des Weges',
       es: 'Este verbo no acepta ningún complemento circunstancial de trayecto', pt: 'Este verbo não aceita nenhum adjunto adverbial de percurso', ja: 'この動詞はどの経路の副詞語句も受け付けません',
     },
+    // P09-E12b: the one licensed box of the three (SPEAK, THINK).
+    'diagnostic.verbAcceptsNo.topic': {
+      en: 'This verb accepts no topic', it: 'Questo verbo non accetta nessun complemento di argomento', fr: "Ce verbe n'accepte aucun complément circonstanciel de propos", de: 'Dieses Verb akzeptiert keine adverbiale Bestimmung des Themas',
+      es: 'Este verbo no acepta ningún complemento circunstancial de tema', pt: 'Este verbo não aceita nenhum adjunto adverbial de assunto', ja: 'この動詞はどの話題の副詞語句も受け付けません',
+    },
     'diagnostic.verbAcceptsNo.cause': {
       en: 'This verb accepts no cause', it: 'Questo verbo non accetta nessun complemento di causa', fr: "Ce verbe n'accepte aucun complément circonstanciel de cause", de: 'Dieses Verb akzeptiert keine adverbiale Bestimmung des Grundes',
       es: 'Este verbo no acepta ningún complemento circunstancial de causa', pt: 'Este verbo não aceita nenhum adjunto adverbial de causa', ja: 'この動詞はどの原因の副詞語句も受け付けません',

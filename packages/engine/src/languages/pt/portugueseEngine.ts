@@ -2,6 +2,9 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessivePt } from '../../possessive.js';
 import { COORD_WORDS, PARENTHETICAL_CONNECTORS, PT_DEGREE } from './pt.consts.js';
+import { PT_TEMPORAL } from './pt.consts.js';
+import { emPrep } from './emPrep.js';
+import { prepDet } from './prepDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
 import { contractDet } from './contractDet.js';
@@ -54,6 +57,13 @@ export const portugueseEngine: LanguageEngine = {
       return specifier.value === 'positive' ? `graças ${contractDet(datPrep, 'a', f, false)}`
         : specifier.value === 'negative' ? `por culpa ${contractDet(dePrep, 'de', f, false)}`
         : `por causa ${contractDet(dePrep, 'de', f, false)}`;
+    }
+    // The temporal's relation (P09-E12b), headed as `complementsPhrase` heads it: "em", "há", "até",
+    // "depois de", "antes de", "durante".
+    if (specifier.kind === 'temporal') {
+      if (specifier.value === 'at') return contractDet(emPrep, 'em', f, false);
+      const { word, de } = PT_TEMPORAL[specifier.value];
+      return de ? `${word} ${contractDet(dePrep, 'de', f, false)}` : prepDet(word, f, false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false) : '';
   },

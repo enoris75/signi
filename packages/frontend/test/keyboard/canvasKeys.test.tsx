@@ -278,12 +278,15 @@ describe('the menus a key opens', () => {
     press('+');
 
     const rows = screen.getAllByRole('menuitem').map((row) => row.dataset['testid']);
-    // In the order their toggles ride the verb phrase's ring, so the menu reads as that row does.
+    // In the order their toggles ride the verb phrase's ring, so the menu reads as that row does —
+    // the temporal and the purpose among them, which every verb offers (P09-E12 D2).
     expect(rows).toEqual([
       'complement-row-manner',
       'complement-row-locative',
       'complement-row-route',
+      'complement-row-temporal',
       'complement-row-cause',
+      'complement-row-purpose',
     ]);
 
     press('l');

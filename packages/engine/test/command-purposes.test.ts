@@ -269,6 +269,13 @@ describe('what each console command is for', () => {
       es: 'establecer la relación espacial de un complemento.', ja: '補語の空間的な関係を設定する。',
       pt: 'definir a relação espacial de um complemento.',
     },
+    // P09-E12b: the temporal's relation, named as the spatial one is, under TEMPORAL.
+    'purpose.temporal': {
+      en: "to set a complement's temporal relationship.", it: 'impostare la relazione temporale di un complemento.',
+      fr: "définir la relation temporelle d'un complément.", de: 'die temporale Beziehung einer Ergänzung festlegen.',
+      es: 'establecer la relación temporal de un complemento.', ja: '補語の時間的な関係を設定する。',
+      pt: 'definir a relação temporal de um complemento.',
+    },
     'purpose.sentiment': {
       en: "to set a cause's sentiment.", it: 'impostare la valutazione di un complemento di causa.',
       fr: "définir l'appréciation d'un complément circonstanciel de cause.",

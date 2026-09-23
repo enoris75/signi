@@ -1,4 +1,4 @@
-import type { Complement, ComplementType } from "@signi/shared";
+import { DEFAULT_TEMPORAL_RELATION, type Complement, type ComplementType } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../slots.ts";
 import { buildNounElement } from "./buildNounElement.ts";
@@ -25,9 +25,12 @@ export function buildComplements(
           ? [{ kind: "path", value: sel.routeSpecifier }]
           : type === "locative" && sel.locativeSpecifier
             ? [{ kind: "path", value: sel.locativeSpecifier }]
-            : type === "cause" && sel.causeSentiment && sel.causeSentiment !== "neutral"
-              ? [{ kind: "sentiment", value: sel.causeSentiment }]
-              : undefined,
+            : type === "temporal" && sel.temporalRelation && sel.temporalRelation !== DEFAULT_TEMPORAL_RELATION
+              // The temporal's relation, omitted at its default `at` as the cause omits `neutral`.
+              ? [{ kind: "temporal", value: sel.temporalRelation }]
+              : type === "cause" && sel.causeSentiment && sel.causeSentiment !== "neutral"
+                ? [{ kind: "sentiment", value: sel.causeSentiment }]
+                : undefined,
     };
   }
   return Object.keys(out).length > 0 ? out : undefined;

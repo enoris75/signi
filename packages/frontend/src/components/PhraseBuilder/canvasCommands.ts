@@ -42,6 +42,9 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.direction": "direction",
   "slot.source": "source",
   "slot.route": "route",
+  "slot.temporal": "temporal",
+  "slot.purpose": "purpose",
+  "slot.topic": "topic",
   "slot.cause": "cause",
 };
 

@@ -3,7 +3,7 @@ import { Box, Popover, Tooltip } from "@mui/material";
 import type { SystemStyleObject, Theme } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
-import { type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier, type TemporalRelation } from "@signi/shared";
 import {
   BoxComplementType,
   ConceptSelectOpts,
@@ -121,6 +121,7 @@ export interface PhraseRenderContext {
   handleCycleVoice: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
   handleSelectLocativeSpecifier: (spec: PathSpecifier) => void;
+  handleSelectTemporalRelation: (relation: TemporalRelation) => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;

@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveIt } from '../../possessive.js';
 import { COORD_WORDS, IT_DEGREE } from './it.consts.js';
+import { IT_TEMPORAL } from './it.consts.js';
+import { joinWords } from './joinWords.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
 import { prepDet } from './prepDet.js';
@@ -55,6 +57,12 @@ export const italianEngine: LanguageEngine = {
       return specifier.value === 'positive' ? `grazie ${prepDet('a', f, false, word)}`
         : specifier.value === 'negative' ? `per colpa ${prepDet('di', f, false, word)}`
         : `a causa ${prepDet('di', f, false, word)}`;
+    }
+    // The temporal's relation (P09-E12b), as `complementsPhrase` heads the complement on a bare
+    // noun: "a", "fino a", "prima di", "dopo", "durante", and the postposed "fa" alone.
+    if (specifier.kind === 'temporal') {
+      const { word: lead, prep, postposed } = IT_TEMPORAL[specifier.value];
+      return joinWords([lead ?? '', prep ? prepDet(prep, f, false, word) : '', postposed ?? '']);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, word) : '';
   },

@@ -1,5 +1,5 @@
 import type { PhraseSelection, SlotConfig } from "../interfaces.ts";
-import { ALL_SLOTS, getActiveSlots, REVEALABLE_SLOT_KEYS } from "../slots.ts";
+import { ALL_SLOTS, getActiveSlots, offeredComplements, REVEALABLE_SLOT_KEYS } from "../slots.ts";
 import type { RingHost } from "../ringHost.ts";
 
 /** What a hosted ring's head slot wears in place of its builder's own `subject` slot. */
@@ -57,7 +57,7 @@ export function visibleSlotsFor(selection: PhraseSelection, roleSlot: RoleSlot |
       selection.verb?.transitivity,
       selection.subject?.role,
       Boolean(selection.subjectAdjective),
-      selection.verb?.complements,
+      offeredComplements(selection.verb),
     )
       // Objects hang off the verb, so a subject-only (verbless) period shows none —
       // otherwise an empty Direct Object box would appear before any verb is chosen.
