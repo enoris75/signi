@@ -5,4 +5,6 @@ export function applyNounGender(forms: Record<string, string>, gender?: 'masc' |
   forms['base']   = plural ? (forms['fem_plural'] ?? forms['fem']) : forms['fem'];
   if (plural && forms['fem_plural']) forms['plural'] = forms['fem_plural'];
   forms['gender'] = 'fem';
+  // `weak` is the masculine's n-declension (German *den Studenten*); the feminine has none (A270).
+  delete forms['weak'];
 }

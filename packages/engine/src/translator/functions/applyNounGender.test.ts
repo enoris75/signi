@@ -21,6 +21,18 @@ describe('applyNounGender', () => {
     expect(forms).toEqual({ base: 'gatta', plural: 'gatti', fem: 'gatta', number: 'plural', gender: 'fem' });
   });
 
+  test('the feminine drops the masculine\'s weak declension (A270)', () => {
+    const forms = { base: 'Student', plural: 'Studenten', fem: 'Studentin', fem_plural: 'Studentinnen', weak: '1', number: 'singular' };
+    applyNounGender(forms, 'fem');
+    expect(forms).toEqual({ base: 'Studentin', plural: 'Studenten', fem: 'Studentin', fem_plural: 'Studentinnen', number: 'singular', gender: 'fem' });
+  });
+
+  test('a masculine keeps its weak declension', () => {
+    const forms = { base: 'Student', fem: 'Studentin', weak: '1', number: 'singular' };
+    applyNounGender(forms, 'masc');
+    expect(forms['weak']).toBe('1');
+  });
+
   test('a masculine or unchosen gender leaves the forms alone', () => {
     for (const gender of [undefined, 'masc'] as const) {
       const forms = { ...GATTO };

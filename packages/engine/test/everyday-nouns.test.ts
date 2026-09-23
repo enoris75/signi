@@ -309,16 +309,32 @@ describe('known bugs: the German feminine of a weak noun takes the weak ending (
   const her = (extra: Partial<NounPhrase> = {}) => np('STUDENT', { definiteness: 'definite', gender: 'fem', ...extra });
   const de = (plan: Parameters<typeof sayAll>[0]) => sayAll(plan).de;
 
-  test.fails('the accusative and the dative singular are the bare feminine', () => {
+  test('the accusative and the dative singular are the bare feminine', () => {
     expect(de(clause(np('MAN'), 'SEE', { directObject: her() }))).toBe('der Mann sieht die Studentin.');
     expect(de(clause(np('MAN'), 'SEE', { directObject: her({ definiteness: 'indefinite' }) }))).toBe('der Mann sieht eine Studentin.');
     expect(de(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: her() } } })))
       .toBe('der Mann gibt der Studentin das Buch.');
   });
 
-  test.fails('and so is every prepositional slot', () => {
+  test('and so is every prepositional slot', () => {
     expect(de(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: her() } } }))).toBe('der Mann läuft mit der Studentin.');
     expect(de(clause(np('MAN'), 'SPEAK', { complements: { topic: { phrase: her() } } }))).toBe('der Mann spricht über die Studentin.');
+  });
+
+  test('the passive agent and a possessed object take the bare feminine too', () => {
+    expect(de(clause(her(), 'SEE', { directObject: np('MAN', { definiteness: 'definite' }), verbPhrase: { voice: 'passive' } })))
+      .toBe('der Mann wird von der Studentin gesehen.');
+    expect(de(clause(np('MAN'), 'SEE', { directObject: np('BOOK', { definiteness: 'definite', possessor: her() }) })))
+      .toBe('der Mann sieht das Buch der Studentin.');
+    expect(de(clause(np('MAN'), 'SEE', { directObject: her({ number: 'plural' }) }))).toBe('der Mann sieht die Studentinnen.');
+  });
+
+  test('regression: the masculine keeps its n-declension in every oblique slot', () => {
+    const him = (extra: Partial<NounPhrase> = {}) => np('STUDENT', { definiteness: 'definite', ...extra });
+    expect(de(clause(np('MAN'), 'SEE', { directObject: him({ definiteness: 'indefinite' }) }))).toBe('der Mann sieht einen Studenten.');
+    expect(de(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: him() } } }))).toBe('der Mann läuft mit dem Studenten.');
+    expect(de(clause(np('MAN'), 'SPEAK', { complements: { topic: { phrase: him() } } }))).toBe('der Mann spricht über den Studenten.');
+    expect(de({ subject: np('NAME_NOUN', { definiteness: 'definite', possessor: him() }) })).toBe('der Name des Studenten.');
   });
 
   test('regression: the nominative, the genitive, the plural and the masculine', () => {
