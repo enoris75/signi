@@ -77,11 +77,14 @@ export type BuiltSatellites = {
   shownMap: Record<string, boolean>;
 };
 
-// The relative-clause, possessor and coordination controls a noun carries on its *dotted* ring,
+// The relative-clause, possessor, standard and coordination controls a noun carries on its *dotted* ring,
 // rather than on its word's solid ring.
 export type PerimeterEntry = {
   relative?: SatelliteIcon;
   possessor?: SatelliteIcon;
+  // The predicate adjective's standard of comparison (P09-E12 D5): the line to its ring leaves
+  // from it, as the owner's leaves from the possessor control.
+  standard?: SatelliteIcon;
   conjunct?: SatelliteIcon;
 };
 

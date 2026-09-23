@@ -64,9 +64,10 @@ export function packPeriod(
     return i === -1 ? READING_ORDER.length : i;
   };
   // A conjunct's ring reads straight after the rings before it in its group: "the cat or the dog".
-  // An owner's reads straight after the ring it owns.
+  // An owner's reads straight after the ring it owns, and a standard of comparison after the
+  // predicate adjective it is compared with ("bigger than the dog").
   const order = (g: GroupRect) => {
-    const hosted = g.conjunct ?? g.owner;
+    const hosted = g.conjunct ?? g.owner ?? g.standard;
     return hosted ? rank(hosted.head) + (hosted.index + 1) / 100 : rank(g.label);
   };
   const boxes = [...groupRects].sort((a, b) => order(a) - order(b));
@@ -74,8 +75,8 @@ export function packPeriod(
   const gap = 20; // gutter between footprints, px
   const margin = 6;
   // The gutter before a box: a conjunct's is wide enough for the conjunction chip on its link, and an
-  // owner's matches it.
-  const gapBefore = (box: GroupRect) => (box.conjunct || box.owner ? CONJUNCT_GAP : gap);
+  // owner's and a standard's match it.
+  const gapBefore = (box: GroupRect) => (box.conjunct || box.owner || box.standard ? CONJUNCT_GAP : gap);
   const { w: svgW } = svgSize;
 
   // Fill each row until the next footprint would overhang the canvas; one wider than the canvas

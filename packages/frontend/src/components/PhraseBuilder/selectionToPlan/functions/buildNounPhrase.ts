@@ -1,5 +1,13 @@
 import type { Concept, Definiteness, NounPhrase, Possessor } from "@signi/shared";
-import { POSSESSOR_KEY, POSSESSOR_REF_KEY, type NounAddress, type NounKey, type PhraseSelection } from "../../interfaces.ts";
+import {
+  POSSESSOR_KEY,
+  POSSESSOR_REF_KEY,
+  STANDARD_KEY,
+  type NounAddress,
+  type NounKey,
+  type PhraseSelection,
+} from "../../interfaces.ts";
+import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
 import { resolveAntecedent } from "./resolveAntecedent.ts";
@@ -30,6 +38,11 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     // happy") — the one head that is compared, so it carries a degree of its own, stored
     // under the head's own slot key. A noun/pronoun head has none.
     headDegree: concept.role === "adjective" ? sel.adjectiveDegrees?.[which] : undefined,
+    // What that adjective is compared to ("bigger than the dog", P09-E12 D5): a nested noun phrase
+    // headed by its `subject`, like a possessor, but a whole noun element — it may coordinate. It is
+    // passed whatever the degree: the translator drops it off the comparatives and the equative
+    // (STANDARD_DEGREES), once for every language, which is what dims its ring on the canvas.
+    headStandard: concept.role === "adjective" ? standardOf(sel, which, root) : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a
@@ -41,4 +54,9 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     nounModifiers,
     possessor,
   };
+}
+
+function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
+  const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
+  return standard ? buildNounElement(standard, "subject", root) : undefined;
 }

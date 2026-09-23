@@ -1,6 +1,7 @@
 import type { NounKey } from "../interfaces.ts";
 import { chainKeys, chainPortKey, type HostedRing } from "../conjunctChain.ts";
 import { ownerPortKey, type OwnerSpot } from "../ownerChain.ts";
+import type { StandardSpot } from "../standardRing.ts";
 import type { Pt } from "../ringLayout.ts";
 import type { RingHost } from "../ringHost.ts";
 
@@ -37,7 +38,11 @@ export function ringHosts({
   possessorToward: (key: string) => Pt | undefined;
   reportRing: (key: string, ring: HostedRing | null) => void;
   onAddConjunct: (which: NounKey) => void;
-}): { conjunctHost: (which: NounKey, i: number) => RingHost; ownerHost: (spot: OwnerSpot) => RingHost } {
+}): {
+  conjunctHost: (which: NounKey, i: number) => RingHost;
+  ownerHost: (spot: OwnerSpot) => RingHost;
+  standardHost: (spot: StandardSpot) => RingHost;
+} {
   // Conjunct `i` of `which`: its ports face the rings either side of it in its group.
   const conjunctHost = (which: NounKey, i: number): RingHost => {
     const count = chains.find((c) => c.which === which)?.count ?? 0;
@@ -70,5 +75,13 @@ export function ringHosts({
     onRing: (ring) => reportRing(spot.address, ring),
   });
 
-  return { conjunctHost, ownerHost };
+  // The predicate adjective's standard of comparison: an owner's hand-off, faded while its degree
+  // takes none (P09-E12 D5).
+  const standardHost = (spot: StandardSpot): RingHost => ({
+    ...ownerHost(spot),
+    kind: "standard",
+    dimmed: spot.dimmed,
+  });
+
+  return { conjunctHost, ownerHost, standardHost };
 }

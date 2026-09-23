@@ -320,6 +320,12 @@ export interface PhraseSelection {
     // adjective ("seems happier") — which threads into NounPhrase.headDegree rather than
     // `adjectiveDegrees`. Defaults to 'positive'. See Degree.
     adjectiveDegrees?: Partial<Record<string, Degree>>;
+    // The standard of comparison of the predicate adjective ("bigger *than the dog*", P09-E12 D5):
+    // a nested noun phrase whose head is its `subject`, the possessor's shape, which becomes
+    // NounPhrase.headStandard. Offered while the predicative holds an adjective whose degree takes
+    // one (STANDARD_DEGREES); kept when the degree moves off those — the translator drops it there,
+    // and the canvas dims its ring — so the user's word survives a pass through the positive.
+    predicativeStandard?: PhraseSelection;
     // Relative clauses are no longer stored inside a selection: a noun's relative clause
     // is a *separate* phrase container linked to it (see PhraseLink / PhraseWorkspace).
     // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
@@ -415,12 +421,17 @@ export type NounKey = "subject" | "directObject" | BoxComplementType;
 // possessor-of-a-possessor, `directObject/possessor/possessor`); a coordinated conjunct is
 // that address followed by `/conjunct/<i>` (`subject/conjunct/0` is the *second* noun of the
 // subject — the block's own fields are the first). Steps compose, so a conjunct's possessor is
-// `subject/conjunct/0/possessor`. Only *sources* use the suffixes today (relativising a
+// `subject/conjunct/0/possessor`. The predicate adjective's standard of comparison is
+// `predicative/standard`. Only *sources* use the suffixes today (relativising a
 // possessor or a conjunct head); targets are always plain `NounKey`.
 export type NounAddress = string;
 
 // Append a `/possessor` step to a noun address — the address of that noun's possessor head.
 export const possessorAddress = (base: NounAddress): NounAddress => `${base}/possessor`;
+
+// Append a `/standard` step — the address of the head of that noun's standard of comparison
+// (`predicative/standard`, P09-E12 D5). Only the predicate adjective takes one.
+export const standardAddress = (base: NounAddress): NounAddress => `${base}/standard`;
 
 // Append a `/conjunct/<i>` step — the address of the i-th *extra* conjunct of that noun.
 export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
@@ -442,6 +453,9 @@ export const POSSESSOR_KEY = (which: NounKey) =>
 
 export const POSSESSOR_REF_KEY = (which: NounKey) =>
   `${which}PossessorRef` as keyof PhraseSelection;
+
+export const STANDARD_KEY = (which: NounKey) =>
+  `${which}Standard` as keyof PhraseSelection;
 
 export const CONJUNCTS_KEY = (which: NounKey) =>
   `${which}Conjuncts` as keyof PhraseSelection;

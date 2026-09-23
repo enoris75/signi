@@ -27,7 +27,7 @@ import type { Span } from "./types.ts";
 
 /** The bracket a diagnostic points out: the kind of frame it is, and the command that opened it. */
 export interface Nest {
-  kind: "period" | "possessor" | "conjunct" | "element";
+  kind: "period" | "possessor" | "standard" | "conjunct" | "element";
   via?: string;
 }
 
@@ -181,12 +181,13 @@ const SEGMENTS = {
   noModalToRemove: (a: { index?: number }) =>
     a.index === undefined ? [say("diagnostic.verbHasNoModal")] : [say("diagnostic.missingModal", String(a.index))],
   noPossessorToRemove: () => [say("diagnostic.noNounHasPossessor")],
+  noStandardToRemove: () => [say("diagnostic.noAdjectiveHasStandard")],
   noConjunctToRemove: () => [say("diagnostic.noNounIsCoordinated")],
   noSuchConjunct: (a: { index: number }) => [say("diagnostic.missingConjunct", String(a.index))],
   noRelativeToRemove: () => [say("diagnostic.noNounHasRelative")],
   unknownRemoval: (a: { what: string }) => [
     say("diagnostic.unknownValue", quote(a.what)),
-    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, and, …, rel, if, join, inst, period"),
+    say("diagnostic.chooseValue", "subj, verb, obj, adj, adv, modal, poss, than, and, …, rel, if, join, inst, period"),
   ],
   removePeriodInBracket: (a: Nest) => [closeBracket(a)],
   linkTargetRemoved: () => [say("diagnostic.missingPeriod")],

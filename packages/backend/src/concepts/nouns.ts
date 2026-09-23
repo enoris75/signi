@@ -4971,6 +4971,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What a comparative or an equative is compared *to*: "the dog" of "bigger than the dog"
+    // (NounPhrase.headStandard, P09-E5). It titles the standard's ring on the builder (P09-E12 D5).
+    // Each tradition names it with a phrase of its own — it "termine di paragone", fr "terme de
+    // comparaison", de "Vergleichsgröße", ja 比較の基準 — so it is one noun per language, not
+    // composed. It is governed by the degree that licenses it: no degree, no standard.
+    id: 'STANDARD_OF_COMPARISON',
+    role: 'noun',
+    description: 'what an adjective in the comparative or equative is compared to (grammar)',
+    definition: patientOfGloss('PHRASE', 'GOVERN', 'DEGREE_GRAMMAR'),
+    emoji: '⚖️',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'standard of comparison', plural: 'standards of comparison', count: 'singular' },
+      it: { base: 'termine di paragone', plural: 'termini di paragone', gender: 'masc', count: 'singular' },
+      fr: { base: 'terme de comparaison', plural: 'termes de comparaison', gender: 'masc', count: 'singular' },
+      de: { base: 'Vergleichsgröße', plural: 'Vergleichsgrößen', gender: 'fem', count: 'singular' },
+      es: { base: 'término de comparación', plural: 'términos de comparación', gender: 'masc', count: 'singular' },
+      ja: { base: '比較の基準', count: 'singular', reading: 'ひかくのきじゅん' },
+      pt: { base: 'termo de comparação', plural: 'termos de comparação', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A modal verb (must, can, will), named by its mood in every language (it "verbo modale",
     // fr "verbe modal", de "Modalverb", ja 法助動詞). Italian school grammar also says "verbo servile".
     id: 'MODAL',

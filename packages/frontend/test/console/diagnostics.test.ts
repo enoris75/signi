@@ -110,11 +110,12 @@ const SAMPLES: Samples = {
     [{ index: 2 }, 'Missing modal: 2'],
   ],
   noPossessorToRemove: [[{}, 'No noun has a possessor']],
+  noStandardToRemove: [[{}, 'No adjective has a standard of comparison']],
   noConjunctToRemove: [[{}, 'No noun is coordinated']],
   noSuchConjunct: [[{ index: 3 }, 'Missing conjunct: 3']],
   noRelativeToRemove: [[{}, 'No noun has a relative clause']],
   unknownRemoval: [
-    [{ what: 'everything' }, 'Unknown value: “everything”. Choose a value: subj, verb, obj, adj, adv, modal, poss, and, …, rel, if, join, inst, period'],
+    [{ what: 'everything' }, 'Unknown value: “everything”. Choose a value: subj, verb, obj, adj, adv, modal, poss, than, and, …, rel, if, join, inst, period'],
   ],
   removePeriodInBracket: [[{ kind: 'element', via: 'subj' }, 'Close the bracket: /subj ( … )']],
   linkTargetRemoved: [[{}, 'Missing period']],

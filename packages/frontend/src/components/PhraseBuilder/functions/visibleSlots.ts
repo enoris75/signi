@@ -14,9 +14,12 @@ export type RoleSlot = Pick<SlotConfig, "label" | "labelKey" | "required" | "col
 export function roleSlotFor(ringHost: Pick<RingHost, "kind" | "role"> | undefined): RoleSlot | undefined {
   const hostRole = ringHost && ALL_SLOTS.find((s) => s.key === ringHost.role);
   if (!hostRole) return undefined;
-  return ringHost.kind === "owner"
-    ? { label: "Possessor", labelKey: "slot.possessor", required: false, color: hostRole.color }
-    : hostRole;
+  if (ringHost.kind === "owner")
+    return { label: "Possessor", labelKey: "slot.possessor", required: false, color: hostRole.color };
+  // A standard of comparison is named for what it is too, in the predicative's colour (P09-E12 D5).
+  if (ringHost.kind === "standard")
+    return { label: "Standard of comparison", labelKey: "slot.standard", required: false, color: hostRole.color };
+  return hostRole;
 }
 
 /**

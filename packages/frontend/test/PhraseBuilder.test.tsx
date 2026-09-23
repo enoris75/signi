@@ -69,11 +69,12 @@ const WALK = concept('WALK', 'verb', {
   complements: ['route', 'locative', 'cause'],
 });
 const BIG = concept('BIG', 'adjective');
+const SEEM = concept('SEEM', 'verb', { transitivity: 'intransitive', complements: ['predicative'] });
 
 const CONCEPTS = {
   noun: [BOY, CAT, DOG, HORSE, HOUSE, PARK, SAIL, GIRL],
   pronoun: [THIRD],
-  verb: [EAT, SLEEP, WALK],
+  verb: [EAT, SLEEP, WALK, SEEM],
   adjective: [BIG],
   adverb: [],
 };
@@ -859,6 +860,61 @@ describe('PhraseBuilder', () => {
       press(screen.getAllByTestId('box-subject').at(-1)!);
 
       expect(lastEdit({})).toEqual({ subjectPossessorRef: 'directObject/possessor' });
+    });
+  });
+
+  // What a predicate adjective is compared to (P09-E12 D5): a noun phrase in a ring of its own beside
+  // the predicative's, like an owner, offered while the degree takes one.
+  describe('a standard of comparison', () => {
+    const BIGGER: PhraseSelection = { subject: CAT, verb: SEEM, predicative: BIG, adjectiveDegrees: { predicative: 'more' } };
+    const standardControl = () => screen.queryByTestId('satellite-predicativeStandard');
+
+    it('names the standard in a ring on the period’s canvas, its word landing in the standard slice', () => {
+      const { selection } = renderPeriod(BIGGER);
+
+      fireEvent.click(satellite('predicativeStandard'));
+      // A standard may be a pronoun ("bigger than him"): its picker has the pronoun tab.
+      expect(screen.getByTestId('pronoun-tab')).toBeInTheDocument();
+      pickOption('DOG');
+
+      expect(selection()).toEqual({ ...BIGGER, predicativeStandard: { subject: DOG } });
+      expect(screen.getAllByTestId('phrase-canvas')).toHaveLength(1);
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
+      expect(screen.queryByTestId('standard-dimmed')).not.toBeInTheDocument();
+    });
+
+    it('is offered only on a predicate adjective whose degree takes one', () => {
+      renderPeriod({ ...BIGGER, adjectiveDegrees: { predicative: 'most' } });
+      expect(standardControl()).not.toBeInTheDocument();
+    });
+
+    it('keeps the standard under a degree that takes none, its ring dimmed', () => {
+      renderPeriod({ ...BIGGER, adjectiveDegrees: { predicative: 'positive' }, predicativeStandard: { subject: DOG } });
+
+      expect(standardControl()).not.toBeInTheDocument();
+      expect(screen.getByTestId('standard-dimmed')).toBeInTheDocument();
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
+    });
+
+    it('folds the standard away and back, keeping its word', () => {
+      const { selection } = renderPeriod({ ...BIGGER, predicativeStandard: { subject: DOG } });
+
+      fireEvent.click(satellite('predicativeStandard'));
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(1);
+      fireEvent.click(satellite('predicativeStandard'));
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
+      expect(selection().predicativeStandard).toEqual({ subject: DOG });
+    });
+
+    it('takes the standard off with its ring’s remove control, and the links sourced from it', () => {
+      const binding = makeBinding();
+      const { selection } = renderPeriod({ ...BIGGER, predicativeStandard: { subject: DOG } }, { binding });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this standard of comparison' }));
+
+      expect(selection()).toEqual(BIGGER);
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledWith('predicative/standard');
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(1);
     });
   });
 

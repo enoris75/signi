@@ -28,6 +28,13 @@ describe('getNoun', () => {
     expect(getNoun(PLAN, 'subject/possessor')).toBe(OWNER);
   });
 
+  it('descends into a predicate adjective’s standard of comparison', () => {
+    const DOG_STANDARD: NounPhrase = { concept: 'DOG' };
+    const plan: Partial<PhrasePlan> = { complements: { predicative: { phrase: { concept: 'BIG', headStandard: DOG_STANDARD } } } };
+    expect(getNoun(plan, 'predicative/standard')).toBe(DOG_STANDARD);
+    expect(getNoun(PLAN, 'locative/standard')).toBeUndefined();
+  });
+
   it('counts conjuncts past the head', () => {
     expect(getNoun(PLAN, 'subject/conjunct/0')).toBe(DOG);
     expect(getNoun(PLAN, 'subject/conjunct/1')).toBe(BIRD);

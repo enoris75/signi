@@ -350,6 +350,12 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'No noun has a possessor', it: 'Nessun sostantivo ha un possessore', fr: "Aucun nom n'a de possesseur", de: 'Kein Substantiv hat einen Besitzer',
       es: 'Ningún sustantivo tiene un poseedor', pt: 'Nenhum substantivo tem um possuidor', ja: 'どの名詞も所有者がいません',
     },
+    // `/del than` with nothing to take off (P09-E12 D5).
+    'diagnostic.noAdjectiveHasStandard': {
+      en: 'No adjective has a standard of comparison', it: 'Nessun aggettivo ha un termine di paragone', fr: "Aucun adjectif n'a de terme de comparaison",
+      de: 'Kein Adjektiv hat eine Vergleichsgröße', es: 'Ningún adjetivo tiene un término de comparación', pt: 'Nenhum adjetivo tem um termo de comparação',
+      ja: 'どの形容詞も比較の基準がありません',
+    },
     'diagnostic.noNounHasRelative': {
       en: 'No noun has a relative clause', it: 'Nessun sostantivo ha una proposizione relativa', fr: "Aucun nom n'a de proposition relative", de: 'Kein Substantiv hat einen Relativsatz',
       es: 'Ningún sustantivo tiene una oración de relativo', pt: 'Nenhum substantivo tem uma oração relativa', ja: 'どの名詞も関係節がありません',

@@ -213,7 +213,8 @@ export function parse(text: string): ParseResult {
     if (item.word) checkLinkWord(item, def);
     const next = peek();
     if (next?.kind === "ref") {
-      if (kind === "conjunct") fail(next, coded("conjunctTakesNoReference", { command: def.name }));
+      // A conjunct and a standard are phrases of their own, never another noun of the period.
+      if (kind === "conjunct" || kind === "standard") fail(next, coded("conjunctTakesNoReference", { command: def.name }));
       if (item.word && kind !== "join") fail(next, coded("wordOrReference", { command: def.name }));
       pos++;
       item.ref = { text: next.text, from: next.from, to: next.to };
@@ -221,9 +222,9 @@ export function parse(text: string): ParseResult {
       return;
     }
     if (next?.kind === "open") {
-      const phrase = kind === "possessor" || kind === "conjunct";
+      const phrase = kind === "possessor" || kind === "standard" || kind === "conjunct";
       if (item.word && phrase) fail(next, coded("wordInsideBracket", { command: def.name, word: item.word.text, shape: "[" }));
-      // A possessor's or a conjunct's bracket opens with its head word.
+      // A possessor's, a standard's or a conjunct's bracket opens with its head word.
       takeBracket(item, phrase);
       return;
     }

@@ -71,6 +71,7 @@ describe('packPeriod', () => {
     width: number,
     conjunct?: GroupRect['conjunct'],
     owner?: GroupRect['owner'],
+    standard?: GroupRect['standard'],
   ): GroupRect => ({
     label,
     color: '',
@@ -78,6 +79,7 @@ describe('packPeriod', () => {
     nodeKeys: [label],
     conjunct,
     owner,
+    standard,
     x: 0,
     y: 0,
     width,
@@ -106,6 +108,27 @@ describe('packPeriod', () => {
     const px = (key: string) => (positions[key]!.x / 100) * 2000;
     expect(px('subject+1') - px('Subject')).toBeCloseTo(100 + CONJUNCT_GAP);
     expect(px('Verb Phrase') - px('subject+2')).toBeCloseTo(100 + 20);
+  });
+
+  // P09-E12 D5: "bigger and older than the dog" — the standard after the predicative's conjuncts.
+  it('packs a standard of comparison after the predicate adjective and its conjuncts, its owner after it', () => {
+    const { positions } = packPeriod(
+      [
+        rect('predicative/standard/possessor', 100, undefined, { head: 'Subject Complement', index: 1 }),
+        rect('predicative/standard', 100, undefined, undefined, { head: 'Subject Complement', index: 0.5 }),
+        rect('Subject Complement', 100),
+        rect('predicative+1', 100, { head: 'Subject Complement', index: 0 }),
+        rect('Subject', 100),
+      ],
+      { w: 2000, h: 400 },
+    );
+
+    const order = Object.entries(positions)
+      .sort(([, a], [, b]) => a.x - b.x)
+      .map(([key]) => key);
+    expect(order).toEqual(['Subject', 'Subject Complement', 'predicative+1', 'predicative/standard', 'predicative/standard/possessor']);
+    const px = (key: string) => (positions[key]!.x / 100) * 2000;
+    expect(px('predicative/standard') - px('predicative+1')).toBeCloseTo(100 + CONJUNCT_GAP);
   });
 
   it('packs each owner straight after the ring it owns, and an owner’s owner after that', () => {

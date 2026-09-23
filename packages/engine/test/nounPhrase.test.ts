@@ -571,6 +571,11 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
     ['DEGREE_GRAMMAR',
       { en: 'a degree.', it: 'un grado.', fr: 'un degré.', de: 'eine Steigerungsstufe.', es: 'un grado.', ja: '程度。', pt: 'um grau.' },
       { en: 'the degrees.', it: 'i gradi.', fr: 'les degrés.', de: 'die Steigerungsstufen.', es: 'los grados.', ja: '程度。', pt: 'os graus.' }],
+    // What a comparative is compared to (P09-E12 D5): a multi-word noun in six languages, German's one
+    // feminine compound.
+    ['STANDARD_OF_COMPARISON',
+      { en: 'a standard of comparison.', it: 'un termine di paragone.', fr: 'un terme de comparaison.', de: 'eine Vergleichsgröße.', es: 'un término de comparación.', ja: '比較の基準。', pt: 'um termo de comparação.' },
+      { en: 'the standards of comparison.', it: 'i termini di paragone.', fr: 'les termes de comparaison.', de: 'die Vergleichsgrößen.', es: 'los términos de comparación.', ja: '比較の基準。', pt: 'os termos de comparação.' }],
     ['MODAL',
       { en: 'a modal.', it: 'un verbo modale.', fr: 'un verbe modal.', de: 'ein Modalverb.', es: 'un verbo modal.', ja: '法助動詞。', pt: 'um verbo modal.' },
       { en: 'the modals.', it: 'i verbi modali.', fr: 'les verbes modaux.', de: 'die Modalverben.', es: 'los verbos modales.', ja: '法助動詞。', pt: 'os verbos modais.' }],

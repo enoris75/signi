@@ -20,6 +20,7 @@ import {
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
+  standardAddress,
   type NounAddress,
   type NounKey,
   type PhraseSelection,
@@ -67,7 +68,9 @@ function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
 type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut' };
 
 /** A word for a slot, from the categories its picker offers. */
-function wordFor(rng: Rng, slot: SlotKey, frame: 'period' | 'possessor' | 'conjunct'): { concept: Concept; opts?: R_Opts } {
+type Frame = 'period' | 'possessor' | 'standard' | 'conjunct';
+
+function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
   if (slot === 'subject') return frame === 'possessor' ? { concept: pick(rng, NOUNS)! } : nounOrPronoun();
   // The purpose and the topic take a pronoun behind their adposition as the cause does ("for her").
@@ -76,16 +79,18 @@ function wordFor(rng: Rng, slot: SlotKey, frame: 'period' | 'possessor' | 'conju
   return { concept: pick(rng, NOUNS)! };
 }
 
-// The noun heads of a period, however deep — period nouns, possessor heads, conjunct heads.
-function nounHeads(root: PhraseSelection): { address: NounAddress; frame: 'period' | 'possessor' | 'conjunct' }[] {
-  const out: { address: NounAddress; frame: 'period' | 'possessor' | 'conjunct' }[] = [];
-  const walk = (sel: PhraseSelection, slice: NounAddress | undefined, frame: 'period' | 'possessor' | 'conjunct', keys: NounKey[]) => {
+// The noun heads of a period, however deep — period nouns, possessor heads, conjunct heads, and the
+// head of the predicate adjective's standard of comparison.
+function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame }[] {
+  const out: { address: NounAddress; frame: Frame }[] = [];
+  const walk = (sel: PhraseSelection, slice: NounAddress | undefined, frame: Frame, keys: NounKey[]) => {
     for (const which of keys) {
       if (!sel[which]) continue;
       const address = builderNounAddress(slice, which);
       out.push({ address, frame });
       const poss = sel[`${which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined;
       if (poss) walk(poss, possessorAddress(address), 'possessor', ['subject']);
+      if (which === 'predicative' && sel.predicativeStandard) walk(sel.predicativeStandard, standardAddress(address), 'standard', ['subject']);
       R.conjunctsOf(sel, which).forEach((c, i) => walk(c, conjunctAddress(address, i), 'conjunct', ['subject']));
     }
   };
@@ -224,6 +229,16 @@ const OPS: Op[] = [
     if (rng() < 0.7) return R.updateNounAt(sel, head.address, (s, which) => R.updatePossessor(s, which, (p) => R.applyConceptSelect(p, 'subject', pick(rng, NOUNS)!)));
     const antecedent = pick(rng, nounHeads(sel).filter((h) => h.address !== head.address && !h.address.startsWith(`${head.address}/`)));
     return antecedent ? R.updateNounAt(sel, head.address, (s, which) => R.setPossessorRef(s, which, antecedent.address)) : undefined;
+  }),
+  // The predicate adjective's standard of comparison (P09-E12 D5), named or taken off. It is kept under
+  // any degree, so a degree the walk sets afterwards leaves it muted but printed.
+  onPeriod((sel, rng) => {
+    if (sel.predicative?.role !== 'adjective') return undefined;
+    if (sel.predicativeStandard && rng() < 0.25) return R.removeStandard(sel, 'predicative');
+    const w = wordFor(rng, 'subject', 'standard');
+    const next = R.updateStandard(sel, 'predicative', (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
+    // A standard is given for a degree that compares, and outlives a degree that does not.
+    return rng() < 0.6 ? R.setDegree(next, 'predicative', pick(rng, DEGREES)!) : next;
   }),
   // A conjunct, and a word and settings for it.
   onPeriod((sel, rng) => {
@@ -378,6 +393,17 @@ describe('the round trip', () => {
       const { text, back } = roundTrip(state, EN);
       expect(printWorkspace(back.state, EN)).toBe(text);
     }
+  });
+
+  // P09-E12 D5: the walk reaches the standard of comparison, so the printer's `/than` is exercised —
+  // under a degree that takes one, and muted under one that does not. A predicate adjective is a rare
+  // state (a copular verb, then an adjective in its box), so this looks further than the default 400.
+  it('reaches the standard of comparison, with and without a degree that takes it', () => {
+    const seeds = Math.max(SEEDS, 3000);
+    const texts = Array.from({ length: seeds }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/than \[/g) ?? []);
+    expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);
+    expect(standards.some((p) => !/\/(more|less|equally) \/than/.test(p))).toBe(true);
   });
 });
 

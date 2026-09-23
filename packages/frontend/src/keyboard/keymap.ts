@@ -105,6 +105,8 @@ export interface BoxContext {
   cycleAspect: (step: 1 | -1) => void;
   cycleVoice: (step: 1 | -1) => void;
   cycleDegree: (slotKey: SlotKey, step: 1 | -1) => void;
+  /** The predicate adjective's standard of comparison: open its ring, or fold it (P09-E12 D5). */
+  toggleStandard: () => void;
   cycleModifierRelation: (slotKey: SlotKey, step: 1 | -1) => void;
   cycleModifierNumber: (slotKey: SlotKey) => void;
   /** The chip that picks the adjective describing an attributive noun ("semantic *phrase* creator"). */
@@ -570,6 +572,19 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     reverses: "adjective.degree",
     when: isRealAdjective,
     run: (ctx) => ctx.cycleDegree(ctx.slot, -1),
+  },
+  {
+    // What a predicate adjective is compared to — "bigger *than the dog*" (P09-E12 D5): H, heard in
+    // t*h*an. Only the predicative takes one, and only while its degree does (the satellite's gate).
+    id: "predicative.standard",
+    scope: "box:adjective",
+    keys: ["H"],
+    label: "Standard of comparison",
+    labelKey: "slot.standard",
+    hint: true,
+    satellite: /^predicativeStandard$/,
+    when: (ctx) => ctx.slot === "predicative" && has(ctx, "predicativeStandard"),
+    run: (ctx) => ctx.toggleStandard(),
   },
   {
     id: "adjective.relation",

@@ -37,6 +37,23 @@ describe('buildNounPhrase', () => {
     expect(buildNounPhrase(sel, 'locative')).toMatchObject({ concept: 'HOUSE', number: undefined, gender: 'fem' });
   });
 
+  // P09-E12 D5: the standard rides with the degree; the translator drops it where the degree takes none.
+  it('gives an adjective head its standard of comparison, whatever its degree', () => {
+    const sel: PhraseSelection = {
+      predicative: BIG,
+      adjectiveDegrees: { predicative: 'more' },
+      predicativeStandard: { subject: DOG, subjectDefiniteness: 'indefinite' },
+    };
+
+    expect(buildNounPhrase(sel, 'predicative')).toMatchObject({
+      concept: 'BIG',
+      headDegree: 'more',
+      headStandard: { concept: 'DOG', definiteness: 'indefinite' },
+    });
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
+    expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
+  });
+
   it('gives an adjective head the degree stored under its own slot', () => {
     const sel: PhraseSelection = { predicative: HAPPY, adjectiveDegrees: { predicative: 'more' } };
 

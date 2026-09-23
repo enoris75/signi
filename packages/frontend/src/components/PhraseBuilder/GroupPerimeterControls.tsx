@@ -64,6 +64,7 @@ export function GroupPerimeterControls({
         const dot = linkTargetKeys?.has(nounKey) ? controlPos[perimeterControlKey("incoming", nounKey)] : undefined;
         const relative = entry?.relative && controlPos[perimeterControlKey("relative", nounKey)];
         const possessor = entry?.possessor && controlPos[perimeterControlKey("possessor", nounKey)];
+        const standard = entry?.standard && controlPos[perimeterControlKey("standard", nounKey)];
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
 
         return (
@@ -103,6 +104,16 @@ export function GroupPerimeterControls({
                   sat={entry!.possessor!}
                   color={color}
                   keySpec={satelliteKeys[entry!.possessor!.key]}
+                  tip={nounKey === cursorSlot}
+                />
+              </Box>
+            )}
+            {standard && (
+              <Box data-testid={`standard-ctl-${nounKey}`} sx={seat(standard)}>
+                <SatelliteButton
+                  sat={entry!.standard!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.standard!.key]}
                   tip={nounKey === cursorSlot}
                 />
               </Box>

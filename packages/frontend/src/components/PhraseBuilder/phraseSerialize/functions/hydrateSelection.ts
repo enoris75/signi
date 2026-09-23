@@ -4,7 +4,7 @@ import { SLOT_KEYED_MAPS } from "../phraseSerialize.consts.ts";
 import { fitsKey } from "./fitsKey.ts";
 import { isConceptKey } from "./isConceptKey.ts";
 import { isConjunctsKey } from "./isConjunctsKey.ts";
-import { isPossessorKey } from "./isPossessorKey.ts";
+import { isNestedSelectionKey } from "./isNestedSelectionKey.ts";
 import { isRecord } from "./isRecord.ts";
 import { migrateKey } from "./migrateKey.ts";
 import { migrateKeys } from "./migrateKeys.ts";
@@ -24,7 +24,7 @@ export function hydrateSelection(
   for (const [savedKey, value] of Object.entries(selection)) {
     const key = migrateKey(savedKey);
     if (value == null || !fitsKey(key, value)) continue;
-    if (isPossessorKey(key)) {
+    if (isNestedSelectionKey(key)) {
       out[key] = hydrateSelection(value as SerializedSelection, byId, missing);
     } else if (isConjunctsKey(key)) {
       out[key] = (value as unknown[]).filter(isRecord).map((c) => hydrateSelection(c, byId, missing));

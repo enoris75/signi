@@ -124,6 +124,15 @@ export type Degree = 'positive' | 'more' | 'most' | 'less' | 'least' | 'equally'
 export const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', 'equally'];
 
 /**
+ * The degrees that take a **standard of comparison** (NounPhrase.headStandard, P09-E5): the
+ * comparatives ("bigger than the dog", "less big than the dog") and the equative ("as big as the
+ * dog"). `positive` compares with nothing, and the superlatives select from a set with a partitive
+ * ("the biggest of the cats") that no *than* can render, so the translator drops a standard on any
+ * of those. The builder reads the same set to offer the standard's control (P09-E12 D5).
+ */
+export const STANDARD_DEGREES: ReadonlySet<Degree> = new Set<Degree>(['more', 'less', 'equally']);
+
+/**
  * Verb tense the phrase is rendered in. Only the simple tenses today; the
  * imperfect/continuous aspect is reserved for a later split of `past`.
  */

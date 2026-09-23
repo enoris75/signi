@@ -318,6 +318,21 @@ describe('rawSatellites', () => {
       ]);
     });
 
+    // P09-E12 D5: the standard of comparison, offered by the degrees that take one.
+    it.each([
+      ['more', true],
+      ['less', true],
+      ['equally', true],
+      ['positive', false],
+      ['most', false],
+      ['least', false],
+    ] as const)('offers a predicate adjective a standard of comparison under %s: %s', (degree, available) => {
+      const selection: PhraseSelection = { verb: GO, predicative: HAPPY, adjectiveDegrees: { predicative: degree } };
+      expect(satellite(selection, 'predicativeStandard')).toMatchObject({ parent: 'predicative', labelKey: 'slot.standard', available });
+      expect(satellite({ ...selection, predicativeStandard: { subject: CAT } }, 'predicativeStandard').hasValue).toBe(true);
+      expect(satellite({ verb: GO, predicative: CAT, adjectiveDegrees: { predicative: degree } }, 'predicativeStandard').available).toBe(false);
+    });
+
     // Every cause also coordinates, and carries its own polarity — the one complement that can be
     // denied rather than named ("not because of the dog"), whatever kind of word heads it.
     it.each<[string, Concept, string[]]>([

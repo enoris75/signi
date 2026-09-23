@@ -31,13 +31,9 @@ export const SUPERLATIVE_MAKES_DEFINITE: ReadonlySet<string> = new Set(['indefin
 /** The degrees of a relative superlative, which picks one member out of a set. */
 export const SUPERLATIVE_DEGREES: ReadonlySet<string> = new Set(['most', 'least']);
 
-/**
- * The degrees that take a **standard of comparison** (NounPhrase.headStandard, P09-E5): the
- * comparatives ("bigger than the dog", "less big than the dog") and the equative ("as big as the
- * dog"). `positive` compares with nothing, and the superlatives select from a set with a partitive
- * ("the biggest of the cats") that no *than* can render, so a standard on any of those is dropped.
- */
-export const STANDARD_DEGREES: ReadonlySet<string> = new Set(['more', 'less', 'equally']);
+// The degrees that take a standard of comparison live in shared (the builder gates its control on
+// them too); re-exported so the translator keeps one import site.
+export { STANDARD_DEGREES } from '@signi/shared';
 
 /**
  * Languages whose negative quantifier takes a singular noun whatever number was picked: it "nessuna

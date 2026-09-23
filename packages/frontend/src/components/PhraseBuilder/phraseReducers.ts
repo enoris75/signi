@@ -31,6 +31,7 @@ import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   SlotKey,
+  STANDARD_KEY,
 } from "./interfaces.ts";
 import type { ModalNegativeField } from "./slots.ts";
 import {
@@ -119,6 +120,7 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   clearSlotSettings(sel, [which]);
   delete sel[CONJUNCTS_KEY(which)];
   delete sel[CONJUNCTION_KEY(which)];
+  delete sel[STANDARD_KEY(which)];
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
   if (which === "temporal") delete sel.temporalRelation;
@@ -235,6 +237,9 @@ export function applyConceptSelect(
     if (concept.role !== "noun") clearNounPhraseParts(next, slot as NounKey);
     if (concept.role === "adjective")
       delete next[`${slot}Number` as keyof PhraseSelection];
+    // Only an adjective is compared, so only an adjective keeps its standard: another adjective
+    // placed there takes it over ("bigger than the dog" → "older than the dog"), a noun drops it.
+    else delete next[STANDARD_KEY(slot as NounKey)];
   }
   if (opts?.number !== undefined)
     (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] = opts.number as never;
@@ -638,6 +643,26 @@ export function removePossessor(
   return next;
 }
 
+// Apply `updater` to the standard of comparison hanging off `which` (the predicate adjective,
+// P09-E12 D5), seeding an empty one the first time — the lens `updatePossessor` gives an owner.
+export function updateStandard(
+  prev: PhraseSelection,
+  which: NounKey,
+  updater: (prev: PhraseSelection) => PhraseSelection,
+): PhraseSelection {
+  return {
+    ...prev,
+    [STANDARD_KEY(which)]: updater((prev[STANDARD_KEY(which)] as PhraseSelection | undefined) ?? {}),
+  };
+}
+
+// Remove a noun block's standard of comparison entirely.
+export function removeStandard(prev: PhraseSelection, which: NounKey): PhraseSelection {
+  const next = { ...prev };
+  delete next[STANDARD_KEY(which)];
+  return next;
+}
+
 // The antecedent a noun block's pronominal possessor points at, if any ("the boy and *his* horse").
 export function possessorRefOf(prev: PhraseSelection, which: NounKey): NounAddress | undefined {
   return prev[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
@@ -724,9 +749,10 @@ export function cycleNounConjunction(
 }
 
 // ── Addressed edits ──
-// A period's nouns nest: a possessor or a conjunct is a phrase slice of its own, whose head is its
-// `subject`. A `NounAddress` names any of them from the period root (see interfaces.ts), so these let
-// the root builder read and edit the slice that holds a noun, however deep it sits.
+// A period's nouns nest: a possessor, a conjunct or a standard of comparison is a phrase slice of
+// its own, whose head is its `subject`. A `NounAddress` names any of them from the period root (see
+// interfaces.ts), so these let the root builder read and edit the slice that holds a noun, however
+// deep it sits.
 
 /**
  * The slice holding the noun at `address`, and that noun's key within it: the period itself for a
@@ -747,6 +773,10 @@ export function nounSliceAt(
       slice = child;
     } else if (steps[i] === "conjunct") {
       const child = conjunctsOf(slice, which)[Number(steps[++i])];
+      if (!child) return undefined;
+      slice = child;
+    } else if (steps[i] === "standard") {
+      const child = slice[STANDARD_KEY(which)] as PhraseSelection | undefined;
       if (!child) return undefined;
       slice = child;
     } else {
@@ -773,6 +803,8 @@ export function updateNounAt(
       return updatePossessor(slice, which, (child) => walk(child, "subject", i + 1));
     if (steps[i] === "conjunct")
       return updateConjunct(slice, which, Number(steps[i + 1]), (child) => walk(child, "subject", i + 2));
+    if (steps[i] === "standard")
+      return updateStandard(slice, which, (child) => walk(child, "subject", i + 1));
     return slice;
   };
   return walk(root, base as NounKey, 0);

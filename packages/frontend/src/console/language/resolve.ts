@@ -31,7 +31,7 @@ export interface WordSpec {
  * one it falls back on. A noun phrase in brackets is a possessor's (a noun head) or a conjunct's (a
  * noun or a pronoun: "you and I").
  */
-export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "conjunct" = "period"): WordSpec {
+export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period"): WordSpec {
   if (slot === "subject") return frame === "possessor" ? { roles: ["noun"] } : { roles: ["noun", "pronoun"] };
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
@@ -212,6 +212,7 @@ export function parseRef(text: string): Ref | { error: Coded } {
   let address: NounAddress = noun;
   for (const step of steps.slice(1)) {
     if (step === "poss") address = `${address}/possessor`;
+    else if (step === "than") address = `${address}/standard`;
     else if (/^and\d+$/.test(step) && Number(step.slice(3)) >= 2)
       address = `${address}/conjunct/${Number(step.slice(3)) - 2}`;
     else return { error: coded("notAStep", { step }) };
@@ -226,6 +227,7 @@ export function printRef(period: number, address?: NounAddress): string {
   const parts = [NOUN_NAMES[base as NounKey] ?? base];
   for (let i = 0; i < steps.length; i++) {
     if (steps[i] === "possessor") parts.push("poss");
+    else if (steps[i] === "standard") parts.push("than");
     else if (steps[i] === "conjunct") parts.push(`and${Number(steps[++i]) + 2}`);
   }
   return `#${period}.${parts.join(".")}`;

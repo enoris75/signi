@@ -12,6 +12,7 @@ import {
   isInstrumentalLink,
   isRelativeLink,
   possessorAddress,
+  standardAddress,
   type ConceptSelectOpts,
   type ImperativePerson,
   type NounAddress,
@@ -49,6 +50,7 @@ import {
   conjunctsOf,
   removeConjunct,
   removePossessor,
+  removeStandard,
   setImperative,
   setImperativePerson,
   setImperativeRegister,
@@ -59,6 +61,7 @@ import {
   updateConjunct,
   updateNounAt,
   updatePossessor,
+  updateStandard,
 } from "../../components/PhraseBuilder/phraseReducers.ts";
 import { resolveAntecedent } from "../../components/PhraseBuilder/selectionToPlan/index.ts";
 import { adjectiveSlots, MODAL_SLOTS, offeredComplements } from "../../components/PhraseBuilder/slots.ts";
@@ -118,7 +121,7 @@ import {
  * It is pure: it reads the vocabulary it is handed and writes nothing but the state it returns.
  */
 
-export type NounFrameKind = "period" | "possessor" | "conjunct";
+export type NounFrameKind = "period" | "possessor" | "standard" | "conjunct";
 
 /**
  * A bracket level — the period itself at the top, then each phrase or clause opened inside it. An
@@ -572,6 +575,8 @@ class Run {
       }
       case "possessor":
         return this.possessor(item, w);
+      case "standard":
+        return this.standard(item, w);
       case "conjunct":
         return this.conjunct(item, action.conjunction, w);
       case "relative":
@@ -649,6 +654,23 @@ class Run {
     // A bracket that opens with the head word reaches it: `/poss [ child /adj old ]`.
     if (item.body)
       this.bracket(item, { kind: "possessor", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: "poss" });
+  }
+
+  /** `/than [ dog ]` — what the predicate adjective is compared to, a phrase of its own (P09-E12 D5). */
+  standard(item: Item, w: WordInfo): void {
+    const containerId = w.ref.containerId;
+    const compared = w.address!;
+    const headRef: WordRef = { containerId, slice: standardAddress(compared), slot: "subject" };
+    // Seeded on the way in, so a bracket with no word yet still holds a standard to fill.
+    this.updateRoot(containerId, (root) => updateNounAt(root, compared, (s, which) => updateStandard(s, which, (p) => p)));
+    this.touch(w.ref);
+    if (item.word) {
+      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "standard"), "than");
+      this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept, opts));
+      this.touch(headRef);
+    }
+    if (item.body)
+      this.bracket(item, { kind: "standard", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: "than" });
   }
 
   conjunct(item: Item, conjunction: "and" | "or", w: WordInfo): void {
@@ -893,6 +915,13 @@ class Run {
         this.touch(w!.ref);
         return;
       }
+      case "than": {
+        const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Standard` as keyof PhraseSelection]));
+        if (!w) fail(span, coded("noStandardToRemove"));
+        this.updateRoot(containerId, (root) => updateNounAt(root, w!.address!, (s, which) => removeStandard(s, which)));
+        this.touch(w!.ref);
+        return;
+      }
       case "and":
       case "or": {
         const w = closest((x) => x.kind === "noun" && !x.ref.slice && conjunctsOf(x.slice, x.which!).length > 0);
@@ -935,13 +964,17 @@ class Run {
     if (w.kind === "modifierAdjective") {
       this.updateSlice(containerId, slice, (s) => setModifierAdjective(s, slot, undefined));
     } else if (slice && slot === "subject") {
-      // A nested phrase's address ends in the step that made it: `…/possessor`, or `…/conjunct/<i>`.
+      // A nested phrase's address ends in the step that made it: `…/possessor`, `…/standard`, or
+      // `…/conjunct/<i>`.
       const steps = slice.split("/");
       if (steps.at(-1) === "possessor") {
         const possessed = steps.slice(0, -1).join("/");
         this.updateRoot(containerId, (root) =>
           updateNounAt(root, possessed, (s, which) => clearPossessorRef(removePossessor(s, which), which)),
         );
+      } else if (steps.at(-1) === "standard") {
+        const compared = steps.slice(0, -1).join("/");
+        this.updateRoot(containerId, (root) => updateNounAt(root, compared, (s, which) => removeStandard(s, which)));
       } else {
         const i = Number(steps.at(-1));
         const base = steps.slice(0, -2).join("/");

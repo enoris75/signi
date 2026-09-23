@@ -2,14 +2,14 @@ import type { Concept, SerializedSelection } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
 import { isConceptKey } from "./isConceptKey.ts";
 import { isConjunctsKey } from "./isConjunctsKey.ts";
-import { isPossessorKey } from "./isPossessorKey.ts";
+import { isNestedSelectionKey } from "./isNestedSelectionKey.ts";
 
-// A selection with every Concept replaced by its id, nested possessors and conjuncts included.
+// A selection with every Concept replaced by its id, nested possessors, standards and conjuncts included.
 export function serializeSelection(selection: PhraseSelection): SerializedSelection {
   const out: SerializedSelection = {};
   for (const [key, value] of Object.entries(selection)) {
     if (value == null) continue;
-    if (isPossessorKey(key)) {
+    if (isNestedSelectionKey(key)) {
       out[key] = serializeSelection(value as PhraseSelection);
     } else if (isConjunctsKey(key)) {
       out[key] = (value as PhraseSelection[]).map(serializeSelection);

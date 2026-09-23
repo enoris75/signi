@@ -11,8 +11,10 @@ import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
+import BalanceIcon from "@mui/icons-material/Balance";
 import {
   DETERMINER_COMPLEMENT_TYPES,
+  STANDARD_DEGREES,
   defaultDefiniteness,
   type Concept,
   type Definiteness,
@@ -611,6 +613,23 @@ export function rawSatellites(
           hasValue: conjunctCount(type) > 0,
           valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
         },
+        // What a predicate adjective is compared to — "bigger *than the dog*" (P09-E12 D5). A noun
+        // phrase of its own, drawn as a hosted ring beside the predicative's, whose line leaves from
+        // this control on the predicative's dotted ring. Offered where the degree takes a standard;
+        // one held under another degree stays, its ring dimmed, and is reached from the ring.
+        ...(type === "predicative"
+          ? [{
+            key: "predicativeStandard" as const,
+            parent: "predicative" as const,
+            label: t("slot.standard"),
+            labelKey: "slot.standard" as const,
+            icon: <BalanceIcon sx={iconSx} />,
+            available:
+              concept?.role === "adjective" &&
+              STANDARD_DEGREES.has(selection.adjectiveDegrees?.predicative ?? "positive"),
+            hasValue: Boolean(selection.predicativeStandard?.subject),
+          }]
+          : []),
         // The cause alone can be denied rather than named — "not because of the dog", the act
         // happened and this was not the reason. A toggle, like the verb's own polarity, and
         // independent of the sentiment beside it: a credit can be denied too.

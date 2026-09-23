@@ -250,6 +250,30 @@ describe('nounSliceAt', () => {
   });
 });
 
+// The predicate adjective's standard of comparison (P09-E12 D5): a nested phrase at `…/standard`.
+describe('the standard of comparison', () => {
+  const COMPARED: PhraseSelection = { verb: GO, predicative: BIG, adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: DOG } };
+
+  it('is a slice of its own at its address, seeded the first time it is written', () => {
+    expect(nounSliceAt(COMPARED, 'predicative/standard')).toEqual({ slice: { subject: DOG }, which: 'subject' });
+    expect(updateNounAt({ predicative: BIG }, 'predicative/standard', (slice) => ({ ...slice, subject: CAT }))).toEqual({
+      predicative: BIG,
+      predicativeStandard: { subject: CAT },
+    });
+    expect(R.removeStandard(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
+  });
+
+  it('passes to another adjective, and goes with a noun or with the predicative itself', () => {
+    expect(applyConceptSelect(COMPARED, 'predicative', RED).predicativeStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(COMPARED, 'predicative', HOUSE)).not.toHaveProperty('predicativeStandard');
+    expect(applyClear(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
+  });
+
+  it('outlives a degree that takes none', () => {
+    expect(R.setDegree(COMPARED, 'predicative', 'positive').predicativeStandard).toEqual({ subject: DOG });
+  });
+});
+
 describe('updateNounAt', () => {
   it('edits the slice holding a deep noun, leaving the rest of the period as it was', () => {
     const next = updateNounAt(PERIOD, 'subject/possessor/possessor', (slice, which) =>

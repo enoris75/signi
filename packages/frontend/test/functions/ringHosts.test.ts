@@ -79,6 +79,22 @@ describe('ringHosts', () => {
     });
   });
 
+  // P09-E12 D5: the standard is hosted as an owner is, faded while its degree takes none.
+  describe('a standard of comparison', () => {
+    it('is an owner’s hand-off of its own kind, dimmed as its spot says', () => {
+      const spot = { address: 'predicative/standard', possessed: 'predicative', possessedKey: 'predicative', role: 'predicative' as const, order: -0.5, named: true, dimmed: true };
+      const host = hosts().standardHost(spot);
+
+      expect(host).toMatchObject({
+        kind: 'standard',
+        key: 'predicative/standard',
+        role: 'predicative',
+        dimmed: true,
+        ports: [{ key: ownerPortKey(spot), toward: centerOf('predicative') }],
+      });
+    });
+  });
+
   describe('an owner', () => {
     const SPOT: OwnerSpot = {
       address: 'directObject/possessor',

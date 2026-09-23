@@ -273,7 +273,7 @@ function completeAt(
     // After an argument already given — the caret past it and a space — what follows is a new
     // command: a word's, a possessor's or a conjunct's word, or as many values as the command takes.
     const given = betweenWords.flatMap((t) => (t.kind === "word" ? t.text.split(/\s+/) : []));
-    const phraseWord = def.action.kind === "possessor" || def.action.kind === "conjunct";
+    const phraseWord = def.action.kind === "possessor" || def.action.kind === "standard" || def.action.kind === "conjunct";
     const argumentDone =
       !at &&
       (arg === "none" ||
@@ -302,6 +302,7 @@ function leadOwner(tokens: Token[], index: number): CommandDef | undefined {
 function leadSpec(def: CommandDef, parent: Frame, state: WorkspaceState): WordSpec | undefined {
   const action = def.action;
   if (action.kind === "possessor") return wordSpecFor("subject", "possessor");
+  if (action.kind === "standard") return wordSpecFor("subject", "standard");
   if (action.kind === "conjunct") return wordSpecFor("subject", "conjunct");
   return wordSpecForCommand(def, parent, frameWords(parent, state));
 }
@@ -736,6 +737,7 @@ const DEL_VALUES: readonly ValueDef[] = [
   { name: "adv", value: "adv", description: "the adverb", descriptionKey: "slot.adverb" },
   { name: "modal", value: "modal", description: "a modal", descriptionKey: "slot.modal" },
   { name: "poss", value: "poss", description: "the possessor", descriptionKey: "slot.possessor" },
+  { name: "than", value: "than", description: "the standard of comparison", descriptionKey: "slot.standard" },
   { name: "and", value: "and", description: "a coordinated phrase", descriptionKey: "slot.conjunct" },
   { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
   { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
@@ -862,16 +864,16 @@ function linkCompletion(
       { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", ...clause("slot.subject", "Subject") },
       { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", ...clause("slot.directObject", "Object") },
     );
-  } else if (action.kind === "possessor" || action.kind === "conjunct") {
+  } else if (action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") {
     rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase", detailKey: "console.new.phrase" });
   } else {
     rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period", detailKey: "console.new.period" });
   }
   // Then what exists already: the periods and nouns the rules let it reach.
-  if (action.kind !== "conjunct" && targetHere) rows.push(...linkTargets(def, frame, state, words));
-  // A possessor or a conjunct may also be named by its word.
-  if ((action.kind === "possessor" || action.kind === "conjunct") && q) {
-    const spec = wordSpecFor("subject", action.kind === "possessor" ? "possessor" : "conjunct");
+  if (action.kind !== "conjunct" && action.kind !== "standard" && targetHere) rows.push(...linkTargets(def, frame, state, words));
+  // A possessor, a standard or a conjunct may also be named by its word.
+  if ((action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") && q) {
+    const spec = wordSpecFor("subject", action.kind);
     rows.push(...wordCompletion(from, to, query, spec, opts, { title: "" }, "primary").candidates);
   }
   const candidates = rows.filter((r) => !q || r.kind === "word" || r.insert.toLowerCase().startsWith(q) || r.label.toLowerCase().includes(q));
@@ -903,6 +905,8 @@ function linkTitle(def: CommandDef): Title {
       return { title: "instrument", titleKey: "slot.instrumental" };
     case "possessor":
       return { title: "possessor", titleKey: "slot.possessor" };
+    case "standard":
+      return { title: "standard of comparison", titleKey: "slot.standard" };
     default:
       return { title: "coordination", titleKey: "satellite.coordination" };
   }
