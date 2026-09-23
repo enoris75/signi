@@ -1,5 +1,5 @@
 import type { NounPhrase, PhrasePlan, Possessor } from "@signi/shared";
-import { isPronominalPossessor, nounConjuncts } from "@signi/shared";
+import { isCoreferentPossessor, isPronominalPossessor, nounConjuncts } from "@signi/shared";
 import type { NounAddress, NounKey } from "../../interfaces.ts";
 import { getTopElement } from "./getTopElement.ts";
 
@@ -18,9 +18,10 @@ export function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPh
     if (!np) return undefined;
     if (steps[i] === "possessor") {
       // A pronominal possessor ("his") is not a real noun phrase, so it cannot be a
-      // relative-clause endpoint — descending into it yields nothing.
+      // relative-clause endpoint — descending into it yields nothing. Nor can a coreferent one, a
+      // link to the subject the builder never builds (P11-E2).
       const p: Possessor | undefined = np.possessor;
-      np = p && !isPronominalPossessor(p) ? p : undefined;
+      np = p && !isPronominalPossessor(p) && !isCoreferentPossessor(p) ? p : undefined;
     } else if (steps[i] === "standard") {
       // The predicate adjective's standard of comparison ("bigger than the dog", P09-E12 D5): the
       // head of its element, as a top-level noun's first conjunct is.

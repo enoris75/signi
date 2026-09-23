@@ -37,6 +37,10 @@ const LINKED_KEYS = new Set(LINKED_CLAUSES.map(([key]) => key));
  *    object, a complement, a possessor, a conjunct, or a noun inside another relative clause:
  *    `plan.directObject.relative.verbPhrase.verb is required`; and one whose head is not its subject
  *    needs a subject of its own (A275): `plan.subject.relative.subject.concept is required`.
+ *  - a coreferent possessor points at its clause's subject (P11-E2), so it cannot stand inside that
+ *    subject — in its possessor chain, a conjunct or a standard, though a relative clause there has a
+ *    subject of its own: `plan.subject.possessor: a coreferent possessor cannot stand in the subject it
+ *    points at`.
  */
 export function planError(plan: unknown): string | undefined {
   if (!isNode(plan)) return 'plan.subject.concept is required';
@@ -45,6 +49,8 @@ export function planError(plan: unknown): string | undefined {
 
 function clauseError(clause: Node, path: string, command = false, addressed = false): string | undefined {
   if (!addressed && !hasHead(clause['subject'])) return `${path}.subject.concept is required`;
+  const selfLink = coreferentPath(clause['subject'], `${path}.subject`);
+  if (selfLink) return selfLink;
   // The clause's own slots, where a noun may carry a relative clause; the linked clauses are
   // clauses of their own, checked below.
   for (const [key, value] of Object.entries(clause)) {
@@ -93,5 +99,30 @@ function relativeError(relative: Node, path: string): string | undefined {
   if (!isNode(verbPhrase) || !verbPhrase['verb']) return `${path}.verbPhrase.verb is required`;
   const headRole = relative['headRole'] ?? 'subject';
   if (headRole !== 'subject' && !hasHead(relative['subject'])) return `${path}.subject.concept is required`;
+  return coreferentPath(relative['subject'], `${path}.subject`);
+}
+
+/**
+ * Where a subject holds a coreferent possessor, which would point at the subject it stands in
+ * (P11-E2), as the message naming it — or `undefined`. A relative clause in the subject is a clause
+ * of its own whose links name its own subject, so it is not entered here.
+ */
+function coreferentPath(value: unknown, path: string): string | undefined {
+  if (Array.isArray(value)) {
+    for (const [i, item] of value.entries()) {
+      const found = coreferentPath(item, `${path}[${i}]`);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (!isNode(value)) return undefined;
+  if (isNode(value['possessor']) && value['possessor']['kind'] === 'coreferent') {
+    return `${path}.possessor: a coreferent possessor cannot stand in the subject it points at`;
+  }
+  for (const [key, inner] of Object.entries(value)) {
+    if (key === 'relative') continue;
+    const found = coreferentPath(inner, `${path}.${key}`);
+    if (found) return found;
+  }
   return undefined;
 }

@@ -1010,8 +1010,34 @@ export interface PronominalPossessor {
   gender?: 'masc' | 'fem' | 'neut';
 }
 
-/** A noun phrase's possessor: a genitive noun phrase, or a coreferent possessive pronoun. */
-export type Possessor = NounPhrase | PronominalPossessor;
+/**
+ * A possessor that **points at a slot** of the clause it stands in instead of carrying features of
+ * its own (P11-E2): "the cat sees **its** book", where *its* is the cat because it is the clause's
+ * subject. The engine resolves it against that slot's already-resolved phrase, in each language, so
+ * the possessive agrees with the subject the way that language reads it — its grammatical gender in
+ * German and Romance ("die Frau sieht **ihr** Buch"), its person and number everywhere — and Japanese
+ * says 自分の, which is what this kind is for: the possessor *is* the subject, with or without the
+ * emphasis OWN adds (自分自身の).
+ *
+ * It is a **slot link, not a referent**. Nothing here resolves a pronoun to something introduced
+ * earlier, tracks discourse, or gives a noun phrase an identity across sentences: it is one link,
+ * inside one clause, to one named slot. `'subject'` is the only slot so far; an object-coreferent
+ * possessor ("shows the cat its own book") is the same field with a second value, deferred until
+ * something asks for it. A clause's subject is its own: inside a relative, a content or an
+ * infinitive clause, the link names *that* clause's subject. The subject's own phrase cannot hold
+ * one (it would point at itself), and neither can a phrase outside any clause; the engine refuses
+ * both by name.
+ */
+export interface CoreferentPossessor {
+  kind: 'coreferent';
+  slot: 'subject';
+}
+
+/**
+ * A noun phrase's possessor: a genitive noun phrase, a possessive pronoun carrying its antecedent's
+ * features, or a link to a slot of the clause (P11-E2).
+ */
+export type Possessor = NounPhrase | PronominalPossessor | CoreferentPossessor;
 
 /**
  * Whether a possessor is the pronominal (possessive-pronoun) kind rather than a genitive phrase.
@@ -1022,6 +1048,14 @@ export type Possessor = NounPhrase | PronominalPossessor;
 export const isPronominalPossessor = <T>(p: T): p is Extract<T, PronominalPossessor> =>
   typeof p === 'object' && p !== null && 'kind' in p &&
   (p as { kind?: unknown }).kind === 'pronominal';
+
+/**
+ * Whether a possessor is a link to a slot of its clause (P11-E2) rather than a phrase or a bundle of
+ * features. The same shape as `isPronominalPossessor`, and generic for the same reason.
+ */
+export const isCoreferentPossessor = <T>(p: T): p is Extract<T, CoreferentPossessor> =>
+  typeof p === 'object' && p !== null && 'kind' in p &&
+  (p as { kind?: unknown }).kind === 'coreferent';
 
 /**
  * Two or more noun phrases coordinated into one noun element ("Peter **and** Paul", "aramaic

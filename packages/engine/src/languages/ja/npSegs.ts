@@ -2,6 +2,7 @@ import type { Definiteness } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
+import { isBoundPossessor } from '../../functions/boundPossessor.js';
 import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
 import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
@@ -9,6 +10,7 @@ import { jaCounted } from './jaCounted.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { JA_REFLEXIVE_POSSESSOR } from './reflexivePossessor.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -47,15 +49,21 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // possessive pronoun, it says it **in place of** one — 自分の猫, never 彼の自分の猫 — so a
   // pronominal possessor is dropped here and the adjective below is the whole of it. A genitive
   // possessor is still said, and OWN follows it as 自身の: 猫自身の本.
+  //
+  // A possessor that is the clause's own subject (P11-E2) is 自分 whether or not OWN is there: 猫は自分
+  // の本を見ます. It is the named owner OWN follows, so the emphasis on top of it is 自分自身の.
   const own = possessorBound(np);
-  const ownReplacesPossessor = !!own && !!np.possessor && isPronominalPossessor(np.possessor);
+  const reflexive = isBoundPossessor(np.possessor);
+  const ownReplacesPossessor = !!own && !!np.possessor && isPronominalPossessor(np.possessor) && !reflexive;
   // 母 already means "my mother" (see `applyPossessorForm`, P11 D4), so 私の in front of it says 私
   // twice: 母は走ります, 私は妻を愛しています. The drop is for the 1st person **singular** only — 私たちの
   // adds that the relative is shared — and only before one's own kin noun: 私の本 keeps its 私の.
   const ownKin = np.head.forms['own'] === '1';
   const redundantPossessive = ownKin && !!np.possessor && isPronominalPossessor(np.possessor)
     && np.possessor.person === '1' && np.possessor.number === 'singular';
-  if (np.possessor && !ownReplacesPossessor && !redundantPossessive) {
+  if (reflexive) {
+    core.push(JA_REFLEXIVE_POSSESSOR, ...(own ? [] : [{ t: 'の' }]));
+  } else if (np.possessor && !ownReplacesPossessor && !redundantPossessive) {
     core.push(
       ...(isPronominalPossessor(np.possessor)
         ? possessiveJa(np.possessor)

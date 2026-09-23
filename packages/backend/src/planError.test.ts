@@ -75,3 +75,22 @@ describe('planError: a relative clause with no verb phrase', () => {
     expect(planError({ ...main, directObject: cat({ headRole: 'directObject', subject: { concept: 'DOG' }, verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
   });
 });
+
+// P11-E2
+describe('planError: a coreferent possessor inside the subject it points at', () => {
+  const link = { kind: 'coreferent', slot: 'subject' };
+  test.each([
+    ['plan.subject', { ...main, subject: { concept: 'BOOK', possessor: link } }],
+    ['plan.subject.possessor', { ...main, subject: { concept: 'BOOK', possessor: { concept: 'MOTHER', possessor: link } } }],
+    ['plan.subject.conjuncts[1]', { ...main, subject: { conjunction: 'and', conjuncts: [{ concept: 'DOG' }, { concept: 'BOOK', possessor: link }] } }],
+    ['plan.condition.subject', { ...main, condition: { ...main, subject: { concept: 'BOOK', possessor: link } } }],
+    ['plan.directObject.relative.subject', { ...main, directObject: { concept: 'CAT', relative: { headRole: 'directObject', verbPhrase: { verb: 'SEE' }, subject: { concept: 'DOG', possessor: link } } } }],
+  ])('names the link in %s by its path', (path, plan) => {
+    expect(planError(plan)).toBe(`${path}.possessor: a coreferent possessor cannot stand in the subject it points at`);
+  });
+
+  test('passes a link in the object, and one in a relative clause the subject holds', () => {
+    expect(planError({ ...main, directObject: { concept: 'BOOK', possessor: link } })).toBeUndefined();
+    expect(planError({ ...main, subject: { concept: 'MAN', relative: { verbPhrase: { verb: 'SEE' }, directObject: { concept: 'BOOK', possessor: link } } } })).toBeUndefined();
+  });
+});

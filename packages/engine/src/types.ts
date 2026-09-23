@@ -8,6 +8,25 @@ export interface ConceptForms {
   forms: Record<string, string>;
 }
 
+/**
+ * A coreferent possessor (P11-E2) once it is bound to the slot it names: the features of that slot's
+ * phrase **in this language**, so it is a pronominal possessor to every engine that spells one ("the
+ * cat sees **its** book", "die Frau sieht **ihr** Buch"), and marked `coreferent` for the one that
+ * says it differently — Japanese, whose 自分の replaces the possessive. `human` is read off the
+ * subject's head, where a pronominal possessor's features have to guess it from person and gender.
+ */
+export interface BoundPossessor extends PronominalPossessor {
+  coreferent: 'subject';
+  /** Whether the subject is a person — what a Japanese kin head's honorific asks (P11 D3). */
+  human: boolean;
+  /**
+   * Whether the subject is one of the speaker's own family — the `own` mark P11 D3 sets on a kin
+   * head, read through the link: "my brother sees **his** mother" is 兄は自分の**母**を見ます, because
+   * his mother is the speaker's too (P11-E2 D3).
+   */
+  own: boolean;
+}
+
 /** A resolved noun-modifier: the attributive noun's forms plus its semantic relation. */
 export interface ResolvedNounModifier {
   concept: ConceptForms;
@@ -33,7 +52,7 @@ export interface ResolvedNounPhrase {
    * cat"), or a pronominal possessor whose features spell a possessive pronoun ("his"). Narrow
    * with `isPronominalPossessor`. The pronominal form carries no lexicon — it is pure features.
    */
-  possessor?: ResolvedNounPhrase | PronominalPossessor;
+  possessor?: ResolvedNounPhrase | PronominalPossessor | BoundPossessor;
   /**
    * What the genitive possessor is to this head (see NounPhrase.possessorRole): `'whole'` is the
    * whole the head is a part of ("a part of a keyboard"), `'parts'` what the head is made up of ("a

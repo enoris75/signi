@@ -12,6 +12,7 @@ import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { existentialPlan } from './existentialPlan.js';
 import { asImperfect, imperfectivePast } from './imperfectivePast.js';
+import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { passiveGap } from './passiveGap.js';
@@ -133,8 +134,11 @@ export function resolvePhrase(
   // A **possessor** question keeps the slot it asks inside, and swaps that noun's possessor for the
   // question stand-in each engine writes as *whose* (P09-E14, see `withQuestionPossessor`).
   const possessed = gap?.role === 'possessor' ? gap.possessed : undefined;
+  // The subject is resolved **first**: a possessor elsewhere in the clause may be a link to it
+  // (P11-E2, see `bindCoreferents`), and one inside the subject itself would point at itself.
   const resolvedSubject = withQuestionPossessor(
-    negativePolarity(resolveNounElement(plan.subject, language, lookup), clauseNegative, true)!, possessed === 'subject');
+    negativePolarity(resolveNounElement(bindCoreferents(plan.subject, undefined, 'subject'), language, lookup), clauseNegative, true)!,
+    possessed === 'subject');
   // A **content clause** fills the subject slot, and what agrees with it agrees with a clause, not
   // with the throwaway noun the plan carries there: 3rd singular, and masculine where the language
   // genders a predicate adjective ("è giusto che si agisca", not "è giusta" — C30).
@@ -145,6 +149,11 @@ export function resolvePhrase(
     : plan.contentSubject
       ? { ...resolvedSubject, agreement: { person: '3', number: 'singular', gender: 'masc' } }
       : resolvedSubject;
+  // What a possessor linked to the subject stands for in this language — the subject's person, number
+  // and gender, as whatever agrees with the subject reads them (P11-E2). The object and the
+  // complements are bound to it before they resolve; the clauses this one links bind to their own.
+  const binding = subjectBinding(subject, plan.subject);
+  const complements = bindComplements(plan.complements, binding);
   // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
   // render just the subject when it is absent. Resolved before the rest, because a complement
   // reads the verb's lexeme for the word it links an object predicative with.
@@ -166,7 +175,7 @@ export function resolvePhrase(
   // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
   const directObject = plan.directObject
     ? withQuestionPossessor(negativePolarity(
-        withAlarmCry(resolveNounElement(plan.directObject, language, lookup), verbPhrase?.verb, language),
+        withAlarmCry(resolveNounElement(bindCoreferents(plan.directObject, binding, 'directObject'), language, lookup), verbPhrase?.verb, language),
         clauseNegative,
       )!, possessed === 'directObject')
     : undefined;
@@ -219,8 +228,8 @@ export function resolvePhrase(
     ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
     ...(asked ? { question: asked } : {}),
     complements: experiencer && !generic
-      ? { ...resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
-      : resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
+      ? { ...resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
+      : resolveComplements(complements, language, lookup, verbPhrase?.verb.forms),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
     // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see

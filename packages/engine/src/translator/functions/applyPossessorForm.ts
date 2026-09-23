@@ -1,6 +1,7 @@
 import type { PronominalPossessor } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
-import type { ResolvedNounPhrase } from '../../types.js';
+import { isBoundPossessor } from '../../functions/boundPossessor.js';
+import type { BoundPossessor, ResolvedNounPhrase } from '../../types.js';
 
 /** The determiners under which a genitive possessor is a kind of person rather than a person. */
 const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
@@ -29,7 +30,9 @@ const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
  *
  * The chain is carried by `forms['own']`, set on a `kin` head one link at a time and read by the next
  * link up. Only nouns carry it, because a pronoun is features rather than a link, and only the
- * Japanese lexemes seed `kin`, so nothing marks itself in the other six.
+ * Japanese lexemes seed `kin`, so nothing marks itself in the other six. A possessor that **is** a
+ * link — one bound to the clause's subject (P11-E2) — carries its subject's mark across: "my brother
+ * sees his mother" is 兄は自分の母を見ます, where "the boy sees his mother" is 男の子は自分のお母さんを見ます.
  *
  * All of it presupposes **somebody in particular** whose relative this is — 母 is *my* mother and お母
  * さん *yours*, where 母親 is nobody's, and one is polite to a person, not to a kind of person. A
@@ -41,16 +44,20 @@ const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
  */
 export function applyPossessorForm(
   forms: Record<string, string>,
-  possessor?: ResolvedNounPhrase | PronominalPossessor,
+  possessor?: ResolvedNounPhrase | PronominalPossessor | BoundPossessor,
 ): void {
   if (!possessor) return;
   if (!isPronominalPossessor(possessor) && NOBODY_IN_PARTICULAR.has(possessor.head.forms['definiteness'] ?? 'definite')) return;
   // The possessor in the only two terms this decides on: whether the relative is the speaker's own,
-  // and whether the possessor is a person at all.
+  // and whether the possessor is a person at all. A possessor linked to the subject (P11-E2) knows
+  // both from the subject's own head, where a possessive pronoun's features can only guess them: the
+  // chain reads through the link, so "my brother sees his mother" is 兄は自分の母を見ます (P11-E2 D3).
   const { own, human } = isPronominalPossessor(possessor)
     ? {
-        own: possessor.person === '1',
-        human: possessor.person === '2' || (possessor.person === '3' && possessor.gender !== 'neut'),
+        own: possessor.person === '1' || (isBoundPossessor(possessor) && possessor.own),
+        human: isBoundPossessor(possessor)
+          ? possessor.human
+          : possessor.person === '2' || (possessor.person === '3' && possessor.gender !== 'neut'),
       }
     : {
         own: possessor.head.forms['own'] === '1',

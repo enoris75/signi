@@ -2,6 +2,7 @@ import type { RelativeClause } from '@signi/shared';
 import type { ResolvedNounElement, ResolvedRelativeClause } from '../../types.js';
 import { RELATIVIZES_AGENT } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { passiveGap } from './passiveGap.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -43,8 +44,20 @@ export function resolveRelativeClause(
   if (headRole !== 'subject' && !clause.subject) {
     throw new Error(`a relative clause whose head is its ${headRole} needs a subject of its own: relative.subject.concept is required (A275)`);
   }
-  const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
-  const resolvedObject = clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined;
+  const subject = clause.subject
+    ? resolveNounElement(bindCoreferents(clause.subject, undefined, 'subject'), language, lookup)
+    : undefined;
+  // A possessor linked to the subject names the relative's own (P11-E2, see `bindCoreferents`): its
+  // `subject`, or, where the gap is the subject, the head that fills it — "the man who sees his
+  // mother". The head's forms are final by now, the possessor's form and all.
+  const binding = subject && clause.subject
+    ? subjectBinding(subject, clause.subject)
+    : headRole === 'subject' && headForms
+      ? subjectBinding({ conjuncts: [{ head: { conceptId: '', forms: headForms }, adjectives: [], nounModifiers: [] }], agreement: headForms }, { concept: '' })
+      : undefined;
+  const resolvedObject = clause.directObject
+    ? resolveNounElement(bindCoreferents(clause.directObject, binding, 'directObject'), language, lookup)
+    : undefined;
   // Two gaps keep the relative **active** whatever voice its plan names, since the passive would demote
   // the head (or what it owns) to a by-phrase no relativizer here can say: a genitive relative's head
   // owns the agent ("*the girl by whose cat the food is eaten"), and Japanese relativises no agent at
@@ -68,7 +81,7 @@ export function resolveRelativeClause(
   const slots = verbPhrase.voice === 'passive'
     ? passiveRemap(headRole, subject, directObject)
     : experiencerSlots;
-  const complements = resolveComplements(clause.complements, language, lookup, verbPhrase.verb.forms);
+  const complements = resolveComplements(bindComplements(clause.complements, binding), language, lookup, verbPhrase.verb.forms);
   return {
     ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
