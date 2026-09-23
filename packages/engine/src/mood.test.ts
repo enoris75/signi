@@ -231,6 +231,14 @@ describe('moodForm: the present subjunctive (the four Romance languages)', () =>
     expect(moodForm('fr', verb('BE', { base: 'être', '3pl_present': 'sont' }), '3sg', 'presentSubjunctive')).toBe('soit');
   });
 
+  // The resultative's own auxiliary concepts, for the perfect subjunctive "abbia corso", "ait couru" (A260).
+  test('the aspect auxiliaries avere and avoir', () => {
+    const avere = verb('AVERE', { '1sg_future': 'avrò', base: 'avere' });
+    const avoir = verb('AVOIR', { '1sg_future': 'aurai', '1pl_present': 'avons' });
+    expect(['3sg', '3pl'].map((pn) => moodForm('it', avere, pn as '3sg', 'presentSubjunctive'))).toEqual(['abbia', 'abbiano']);
+    expect(['3sg', '3pl'].map((pn) => moodForm('fr', avoir, pn as '3sg', 'presentSubjunctive'))).toEqual(['ait', 'aient']);
+  });
+
   test('is undefined with no stem to derive from, and in the three languages that have no such mood', () => {
     expect(moodForm('es', verb('EAT', { base: 'comer' }), '3sg', 'presentSubjunctive')).toBeUndefined();
     expect(moodForm('it', verb('EAT', { base: 'mangiare' }), '3sg', 'presentSubjunctive')).toBeUndefined();

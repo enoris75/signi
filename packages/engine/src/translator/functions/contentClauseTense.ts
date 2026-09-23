@@ -32,8 +32,14 @@ export interface ContentClauseTense {
  *
  * A clause already in the past, or in the resultative, is anterior to its governor, not simultaneous
  * with it, and is left alone: its shift would be the pluperfect. German's *dass* clause keeps its own
- * tense and Japanese's is relative already, so neither is among the languages. Unchanged under a
- * governor that is not past.
+ * tense and Japanese's is relative already, so neither is among the languages.
+ *
+ * Under a governor that is not past, a **past** clause in the present subjunctive — which every Romance
+ * engine builds from the stored present, whatever the tense — takes the perfect subjunctive instead
+ * (A260): the aspect auxiliary in the present subjunctive and the participle, "non crede che il gatto
+ * **abbia corso**", "ne croit pas que le chat **ait couru**", "no cree que el gato **haya corrido**",
+ * "não acredita que o gato **tenha corrido**". A future one keeps the present subjunctive, which reads
+ * as future in all four ("no cree que el gato corra"), and an indicative clause its own past.
  */
 export function contentClauseTense(
   governorTense: Tense | undefined,
@@ -42,15 +48,23 @@ export function contentClauseTense(
   verbPhrase: VerbPhrase | undefined,
 ): ContentClauseTense {
   const unchanged: ContentClauseTense = { verbPhrase, mood, imperfect: false };
-  if (!verbPhrase || governorTense !== 'past' || !SEQUENCE_OF_TENSES_LANGUAGES.has(language)) return unchanged;
+  if (!verbPhrase) return unchanged;
   const tense = verbPhrase.tense ?? 'present';
+  const neutral = (verbPhrase.aspect ?? 'neutral') === 'neutral';
+  if (governorTense !== 'past') {
+    // A past clause in the present subjunctive is the perfect subjunctive (A260).
+    return mood === 'presentSubjunctive' && tense === 'past' && neutral
+      ? { ...unchanged, verbPhrase: { ...verbPhrase, tense: 'present', aspect: 'resultative' } }
+      : unchanged;
+  }
+  if (!SEQUENCE_OF_TENSES_LANGUAGES.has(language)) return unchanged;
   if (tense === 'past' || (verbPhrase.aspect ?? 'neutral') === 'resultative') return unchanged;
   if (mood === 'presentSubjunctive') {
     return PAST_SUBJUNCTIVE_LANGUAGES.has(language) ? { ...unchanged, mood: 'subjunctive' } : unchanged;
   }
   if (mood !== undefined) return unchanged;
   if (tense === 'future') {
-    const perfect = FUTURE_IN_PAST_PERFECT_LANGUAGES.has(language) && (verbPhrase.aspect ?? 'neutral') === 'neutral';
+    const perfect = FUTURE_IN_PAST_PERFECT_LANGUAGES.has(language) && neutral;
     return {
       verbPhrase: { ...verbPhrase, tense: 'present', ...(perfect ? { aspect: 'resultative' as const } : {}) },
       mood: 'conditional',

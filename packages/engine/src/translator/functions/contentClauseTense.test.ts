@@ -50,4 +50,19 @@ describe('contentClauseTense', () => {
     expect(contentClauseTense('past', 'en', undefined, resultative).verbPhrase).toBe(resultative);
     expect(contentClauseTense('past', 'en', undefined, undefined).verbPhrase).toBeUndefined();
   });
+
+  test('under a governor that is not past, a past subjunctive clause is the perfect subjunctive (A260)', () => {
+    for (const governor of [undefined, 'present', 'future'] as const) {
+      expect(contentClauseTense(governor, 'es', 'presentSubjunctive', runs({ tense: 'past' }))).toEqual({
+        verbPhrase: runs({ tense: 'present', aspect: 'resultative' }), mood: 'presentSubjunctive', imperfect: false,
+      });
+    }
+    // A future keeps the present subjunctive, an indicative its past, and a marked aspect its own.
+    const future = runs({ tense: 'future' });
+    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', future).verbPhrase).toBe(future);
+    const past = runs({ tense: 'past' });
+    expect(contentClauseTense(undefined, 'it', undefined, past).verbPhrase).toBe(past);
+    const progressive = runs({ tense: 'past', aspect: 'progressive' });
+    expect(contentClauseTense(undefined, 'it', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+  });
 });

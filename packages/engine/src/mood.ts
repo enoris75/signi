@@ -464,6 +464,8 @@ const IT_SUBJ_PRES_END: Record<'are' | 'other', Record<PN, string>> = {
 const IT_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
   BE:   { '1sg': 'sia', '2sg': 'sia', '3sg': 'sia', '1pl': 'siamo', '2pl': 'siate', '3pl': 'siano' },        // essere
   HAVE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' }, // avere (1sg "ho")
+  // The resultative's auxiliary (it.consts `AVERE_AUX`), for the perfect subjunctive "abbia corso" (A260).
+  AVERE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' },
   MUST: { '1sg': 'debba', '2sg': 'debba', '3sg': 'debba', '1pl': 'dobbiamo', '2pl': 'dobbiate', '3pl': 'debbano' }, // dovere
 };
 
@@ -474,6 +476,8 @@ const FR_SUBJ_PRES_END: Record<PN, string> = { '1sg': 'e', '2sg': 'es', '3sg': '
 const FR_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
   BE:    { '1sg': 'sois', '2sg': 'sois', '3sg': 'soit', '1pl': 'soyons', '2pl': 'soyez', '3pl': 'soient' },   // être
   HAVE:  { '1sg': 'aie', '2sg': 'aies', '3sg': 'ait', '1pl': 'ayons', '2pl': 'ayez', '3pl': 'aient' },        // avoir
+  // The resultative's auxiliary (fr.consts `AVOIR_AUX`), for the perfect subjunctive "ait couru" (A260).
+  AVOIR: { '1sg': 'aie', '2sg': 'aies', '3sg': 'ait', '1pl': 'ayons', '2pl': 'ayez', '3pl': 'aient' },
   GO:    { '1sg': 'aille', '2sg': 'ailles', '3sg': 'aille', '1pl': 'allions', '2pl': 'alliez', '3pl': 'aillent' }, // aller
   CAN:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' }, // pouvoir
   MAY:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' },
