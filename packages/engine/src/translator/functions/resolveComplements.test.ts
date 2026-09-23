@@ -53,6 +53,18 @@ describe('resolveComplements', () => {
     expect(Object.keys(resolved!)).toEqual(['route']);
   });
 
+  // A269: the object predicative renders no standard outside Japanese, so its head drops the flag
+  // that would open the equative's circumfix, and keeps the standard element for Japanese.
+  test('an object predicative keeps its standard but not the standard flag; a subject complement keeps both', () => {
+    const phrase: NounElement = { concept: 'BIG', headDegree: 'equally', headStandard: { concept: 'DOG' } };
+    const object = resolveIt({ objectPredicative: { phrase } })?.objectPredicative?.phrase.conjuncts[0];
+    expect(object?.head.forms['standard']).toBeUndefined();
+    expect(object?.standard).toBeDefined();
+    const subject = resolveIt({ predicative: { phrase } })?.predicative?.phrase.conjuncts[0];
+    expect(subject?.head.forms['standard']).toBe('1');
+    expect(subject?.standard).toBeDefined();
+  });
+
   describe('a manner adverbial', () => {
     test('an adjective-modified measure noun names a generic rate, and goes bare', () => {
       expect(determiners('manner', { concept: 'SPEED', adjectives: ['BIG'] })).toEqual(['bare']);

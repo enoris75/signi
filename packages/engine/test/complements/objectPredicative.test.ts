@@ -275,7 +275,7 @@ describe('known bugs: an equative object predicative with a standard writes half
   const seesAs = (phrase: NounPhrase) =>
     sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase, specifiers: ESSIVE } } }));
 
-  test.fails('the factitive: the equative without its standard', () => {
+  test('the factitive: the equative without its standard', () => {
     expect(makes(equal)).toMatchObject({
       en: 'the man makes the house equally big.', it: "l'uomo fa la casa ugualmente grande.",
       fr: "l'homme fait la maison aussi grande.", de: 'der Mann macht das Haus gleich groß.',
@@ -283,11 +283,22 @@ describe('known bugs: an equative object predicative with a standard writes half
     });
   });
 
-  test.fails('the essive: the same', () => {
+  test('the essive: the same', () => {
     expect(seesAs(equal)).toMatchObject({
       en: 'the man sees the house as equally big.', it: "l'uomo vede la casa come ugualmente grande.",
       de: 'der Mann sieht das Haus als gleich groß.', es: 'el hombre ve la casa como igual de grande.',
       pt: 'o homem vê a casa como igualmente grande.',
+    });
+  });
+
+  test('Japanese keeps the standard it renders on the factitive, equative and comparative alike', () => {
+    expect(makes(equal).ja).toBe('男は家を犬と同じくらい大きく作ります。');
+    expect(makes(np('BIG', { headDegree: 'more', headStandard: np('DOG') })).ja).toBe('男は家を犬より大きく作ります。');
+  });
+
+  test('the comparative drops the standard in the other six as it did', () => {
+    expect(makes(np('BIG', { headDegree: 'more', headStandard: np('DOG') }))).toMatchObject({
+      it: "l'uomo fa la casa più grande.", de: 'der Mann macht das Haus größer.',
     });
   });
 
@@ -311,14 +322,28 @@ describe('known bugs: the Japanese essive drops an i- or た-adjective\'s degree
   const seesAs = (adjective: NounPhrase) =>
     sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase: adjective, specifiers: ESSIVE } } }));
 
-  test.fails('an i-adjective takes its degree word ahead of it', () => {
+  test('an i-adjective takes its degree word ahead of it', () => {
     expect(seesAs(np('BIG', { headDegree: 'more' })).ja).toBe('猫は家をもっと大きいとして見ます。');
     expect(seesAs(np('BIG', { headDegree: 'most' })).ja).toBe('猫は家を最も大きいとして見ます。');
     expect(seesAs(np('BIG', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい大きいとして見ます。');
   });
 
-  test.fails('so does a た-adjective', () => {
+  test('so does a た-adjective', () => {
     expect(seesAs(np('TIRED', { headDegree: 'more' })).ja).toBe('猫は家をもっと疲れたとして見ます。');
+  });
+
+  test('the た-adjective takes the other degrees too, and the degree word carries no furigana of its own', () => {
+    expect(seesAs(np('TIRED', { headDegree: 'most' })).ja).toBe('猫は家を最も疲れたとして見ます。');
+    expect(seesAs(np('TIRED', { headDegree: 'equally' })).ja).toBe('猫は家を同じくらい疲れたとして見ます。');
+    expect(furigana(clause(np('CAT'), 'SEE', {
+      directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('BIG', { headDegree: 'more' }), specifiers: ESSIVE } },
+    }))).toEqual(['ねこ', 'いえ', 'おおきい', 'みます']);
+  });
+
+  test('the lowered degrees still drop, as A232 ruled for the na-adjective', () => {
+    expect(seesAs(np('BIG', { headDegree: 'less' })).ja).toBe('猫は家を大きいとして見ます。');
+    expect(seesAs(np('BIG', { headDegree: 'least' })).ja).toBe('猫は家を大きいとして見ます。');
+    expect(seesAs(np('TIRED', { headDegree: 'less' })).ja).toBe('猫は家を疲れたとして見ます。');
   });
 
   test('regression: the positive, the na-adjective, the factitive and the other six', () => {

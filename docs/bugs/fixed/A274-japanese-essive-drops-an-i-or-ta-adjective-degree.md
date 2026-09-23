@@ -41,3 +41,21 @@ Pinned by `known bugs: the Japanese essive drops an i- or た-adjective's degree
 [objectPredicative.test.ts](../../../packages/engine/test/complements/objectPredicative.test.ts).
 
 Found while filing A265–A272 (the A269 essive probe).
+
+## Resolved
+
+2026-09-23. The essive branch of
+[`complementSegs`](../../../packages/engine/src/languages/ja/complementSegs.ts) now pushes
+`JA_DEGREE[adjDegree(head)]` ahead of any lone adjective, whatever its class, before the na-adjective
+takes its stem or an i- or た-adjective falls through to `elSegs` as it stands: もっと大きいとして,
+最も大きいとして, 同じくらい大きいとして, もっと疲れたとして, 最も疲れたとして. The lowered degrees still drop
+the degree word, as A232 ruled (大きいとして for "less" and "least"). A224's open question, whether an
+i- or た-adjective's essive wants another frame (大きいものとして), stays open; the degree would carry
+into it.
+
+Guarded by the two formerly-`.fails` tests of the
+`known bugs: the Japanese essive drops an i- or た-adjective's degree (A274)` block of
+[objectPredicative.test.ts](../../../packages/engine/test/complements/objectPredicative.test.ts), two
+tests added to it (the た-adjective's other degrees with the furigana, and the lowered degrees still
+dropping), and the i-adjective case of the essive block of
+[`complementSegs.test.ts`](../../../packages/engine/src/languages/ja/complementSegs.test.ts).

@@ -87,6 +87,15 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ objectPredicative: complement(np(CHAIRO, { degree: 'most' }), essive) })))).toBe('最も茶色として');
       expect(text(complementSegs(complements({ objectPredicative: complement(np(SHIAWASE, { degree: 'equally' }), essive) })))).toBe('同じくらい幸せとして');
     });
+
+    // A274: an i-adjective, as it stands, takes the same degree adverb ahead of it; the lowered two drop.
+    test('a raised or equal degree leads an i-adjective too, and a lowered one still drops', () => {
+      expect(complementSegs(complements({ objectPredicative: complement(np(OOKII, { degree: 'more' }), essive) })))
+        .toEqual([{ t: 'もっと' }, { t: '大きい', r: 'おおきい' }, { t: 'として' }]);
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(OOKII, { degree: 'most' }), essive) })))).toBe('最も大きいとして');
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(OOKII, { degree: 'less' }), essive) })))).toBe('大きいとして');
+      expect(text(complementSegs(complements({ objectPredicative: complement(np(OOKII), essive) })))).toBe('大きいとして');
+    });
   });
 
   describe('terminus', () => {

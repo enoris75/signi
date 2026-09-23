@@ -40,3 +40,25 @@ Pinned by `known bugs: an equative object predicative with a standard writes hal
 (A269)` in [objectPredicative.test.ts](../../../packages/engine/test/complements/objectPredicative.test.ts).
 
 Found by P09-E12 while its tasks were being written.
+
+## Resolved
+
+2026-09-23. The flag is now set only where a renderer writes the standard.
+[`resolveComplements`](../../../packages/engine/src/translator/functions/resolveComplements.ts) deletes
+`forms['standard']` from each object-predicative conjunct's head once it has resolved, so English,
+Italian, German, Spanish and Portuguese write the equative they write with no standard: `the man makes
+the house equally big.`, `ugualmente grande`, `gleich groß`, `igual de grande`, `igualmente grande`, and
+under the essive `the man sees the house as equally big.` French keeps `aussi grande`. The resolved
+standard element itself stays on the conjunct, and Japanese, which reads the element and never the
+flag, keeps the standard it already rendered, on purpose: 男は家を犬と同じくらい大きく作ります。,
+男は家を犬より大きく作ります。. The subject complement and the attributive adjective keep the flag and
+their circumfix (`the house is as big as the dog.`).
+
+Guarded by the two formerly-`.fails` tests of the
+`known bugs: an equative object predicative with a standard writes half its circumfix (A269)` block of
+[objectPredicative.test.ts](../../../packages/engine/test/complements/objectPredicative.test.ts), two
+tests added to it (the Japanese standard pinned as it stands, and the comparative dropping the standard
+in Italian and German), and the object-predicative case of
+[`resolveComplements.test.ts`](../../../packages/engine/src/translator/functions/resolveComplements.test.ts).
+When E5's follow-up renders the object predicative's standard in the other six, it reinstates the flag
+there and this pin changes with it, as "Why this target" says.
