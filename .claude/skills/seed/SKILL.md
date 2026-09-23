@@ -98,6 +98,19 @@ irregular (いらっしゃいます). Each takes a `_reading` where the word has
 own lexeme is the copula, so its existential いる carries the pair in the engine (`JA_IRU`:
 いらっしゃる / おる).
 
+## A Japanese noun's counter
+
+A Japanese numeral never stands beside its noun alone: it takes a **counter**, and how the count
+joins the noun is the lexeme's business (localization C31, P11-E5).
+
+| column | language | what it does |
+| --- | --- | --- |
+| `counter` | ja | The noun's own counter: 軒 for a house (二軒の家), 時間 for an hour. Absent, the noun's animacy picks one — 人 for a `human` noun, 匹 for an `animate` one, つ for anything else. |
+| `counter_join` | ja | How the count joins the noun. Absent is the default, numeral + counter + の + noun (二匹の猫). `'head'`: the word **is** its counter and is not said again (二十四時間, 七日, 十二か月) — the time words. `'compound'`: the count compounds onto the noun with no の (三人兄弟, 三人姉妹); only the lexeme's own word compounds, so an honorific or fused head keeps the の (三人のご兄弟, 三人の兄). |
+
+Seed `'compound'` only where a dictionary gives the compound. 三人いとこ is not Japanese, and 三人家族
+is a family *of* three, not three families.
+
 ## A noun's language-specific columns
 
 A few noun columns belong to **one language's lexeme**, not to the concept: the fact they record is a
