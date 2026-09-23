@@ -235,14 +235,21 @@ export type FocusParticle = 'only' | 'even' | 'also';
  */
 export type ConceptSlot = 'intensifier' | 'title' | 'possessorOwn' | 'indefinite';
 
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'comitative' | 'terminus' | 'temporal' | 'predicative' | 'objectPredicative';
+/**
+ * `purpose` and `topic` (P09-E2) are the nominal *for* and *about*: "works **for the man**", "speaks
+ * **about the cat**". The purpose complement names a beneficiary or a goal that is a thing; an act
+ * one does something *for* is the `PurposeClause` ("click **to change**"), not this. The privative
+ * *without* is no type of its own: it is the `instrumental` with `Complement.negative` set.
+ */
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'purpose' | 'instrumental' | 'topic' | 'manner' | 'comitative' | 'terminus' | 'temporal' | 'predicative' | 'objectPredicative';
 
 /**
  * The complements the **builder** offers, in the order it presents them. Not every complement type
- * is here: `objectPredicative`, `comitative` and `temporal` render from a plan (the UI strings of
- * C12 are built on the first two, the time adverbs' glosses on the third) but have no box on the
- * canvas yet, so the frontend — which derives its slots, satellites and selection fields from this
- * list — does not know about them. Add one here to give it a box.
+ * is here: `objectPredicative`, `comitative`, `temporal`, `purpose` and `topic` render from a plan
+ * (the UI strings of C12 are built on the first two, the time adverbs' glosses on the third; the
+ * last two are P09-E2's, waiting for a box laid out together with the temporal's) but have no box
+ * on the canvas yet, so the frontend — which derives its slots, satellites and selection fields
+ * from this list — does not know about them. Add one here to give it a box.
  * The engine's own order is `COMPLEMENT_RENDER_ORDER`, which holds all of them.
  */
 export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'cause'];
@@ -262,8 +269,12 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'i
  * `temporal` adjunct — the *when* — comes after the place, the order English and the Romance
  * languages take ("runs in the house on this day"); German prefers the reverse and Japanese fronts
  * a time before everything, but neither reorders here today, as neither does for the others.
+ * P09-E2's two sit where their meaning does: the `topic` ("about the cat") beside the manner, close
+ * to the verb it all but completes ("speaks about the cat like the wind"), and the `purpose` ("for
+ * the man") right after the cause, the reason and the goal together ("works because of the money
+ * for the man").
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'source', 'direction', 'route', 'locative', 'temporal', 'cause', 'purpose'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
@@ -278,6 +289,8 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   route: 'Route',
   temporal: 'Temporal',
   cause: 'Cause',
+  purpose: 'Purpose',
+  topic: 'Topic',
 };
 
 /**
@@ -287,8 +300,9 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * fuse the preposition with a *definite* article (Italian "alla casa") but otherwise render the
  * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
+ * The `purpose` and `topic` of P09-E2 are plain adposition-bearing ones ("per l'uomo", "del gatto").
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'temporal'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs
@@ -1026,7 +1040,10 @@ export interface Complement {
    *
    * Read on the `cause` complement, the one adjunct whose whole point is to name a reason that can
    * be denied. The field is on `Complement` rather than on the cause alone so a second adjunct can
-   * take it without a model change; every other complement ignores it today.
+   * take it without a model change — and the `instrumental` is that second one (P09-E2): a denied
+   * means is the **privative**, "cuts the bread **without** the knife" (*senza / sans / sin / sem /
+   * ohne* / 〜なしで). It swaps the adposition rather than adding a negator, and like the denied
+   * cause it leaves the clause positive. Every other complement ignores it.
    */
   negative?: boolean;
   /**
@@ -1122,6 +1139,8 @@ export type InfinitiveControl = 'subject' | 'object';
  *
  * The clause renders as an infinitive citation (see `PhrasePlan.infinitive`), so it has no tense,
  * aspect or modals of its own, and it may be negated ("**in order not to** lose the phrase").
+ * It is the *clausal* purpose, an act; a thing one acts for is the `purpose` complement ("works
+ * **for the man**", P09-E2), and the two are not to be built twice.
  */
 export interface PurposeClause {
   verbPhrase: VerbPhrase;
@@ -1389,6 +1408,9 @@ export interface SerializedLink {
   conjunction?: CoordConjunction;
   // The reification degree, present only on an 'instrumental' link (absent ⇒ 'object').
   level?: AbstractionLevel;
+  // The instrument denied — the privative, "without the knife" (P09-E2) — present only on a denied
+  // 'instrumental' link.
+  negative?: boolean;
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

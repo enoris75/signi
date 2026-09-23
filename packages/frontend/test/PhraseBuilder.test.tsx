@@ -123,6 +123,8 @@ function makeBinding(overrides: BindingOverrides = {}): WorkspaceBinding {
       hasTarget: false,
       level: 'object',
       onLevelChange: vi.fn(),
+      negative: false,
+      onNegativeChange: vi.fn(),
       isPickTarget: false,
       onStart: vi.fn(),
       onClear: vi.fn(),

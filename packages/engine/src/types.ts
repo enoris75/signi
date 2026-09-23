@@ -294,6 +294,10 @@ export interface ResolvedComplement {
    * rendered, so the translator reads it off the verb once and carries it here. Absent (or "")
    * is the bare predicate, which is what English takes ("makes the period a command"), and it is
    * unread on every other complement and on the essive reading, whose word is the language's own.
+   *
+   * The `topic` is the other complement a verb may link (P09-E2): *think* governs its own
+   * preposition ("pensa **al** gatto", "denkt **an** den Kater"), read off `topic_prep` (see
+   * `topicLink`). Absent, the topic takes the language's own word.
    */
   link?: string;
   specifiers?: Specifier[];

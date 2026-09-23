@@ -11,7 +11,8 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
-import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { isPrivative } from '../../functions/isPrivative.js';
+import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
@@ -138,10 +139,17 @@ export function complementSegs(
         segs.push(...elSegs(c.phrase), ...jaParticleSegs(c.phrase, 'を'));
         const adverb = c.action.modifier;
         if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
-        if (level === 'process') {
+        // Denied (the privative, P09-E2), the te-form becomes the ない-form + で — 単語を選ばないで
+        // 始める, "starts without choosing a word" — and the nominalised act takes なしで for its で:
+        // 単語を選ぶことなしで. A verb seeding no ない-form keeps the positive te-form rather than
+        // guess at one.
+        const privative = isPrivative(type, c);
+        if (level === 'process' && privative && v['nai']) {
+          segs.push(wordSeg(`${v['nai']}で`, v['nai_reading'] ? `${v['nai_reading']}で` : undefined));
+        } else if (level === 'process') {
           segs.push(wordSeg(v['te'] ?? v['base'] ?? '', v['te_reading']));
         } else {
-          segs.push(wordSeg(v['base'] ?? '', v['reading']), { t: 'ことで' });
+          segs.push(wordSeg(v['base'] ?? '', v['reading']), { t: privative ? `こと${JA_PRIVATIVE}` : 'ことで' });
         }
         continue;
       }
@@ -209,6 +217,8 @@ export function complementSegs(
       // The object complement: the factitive に ("この文を命令にする"), or として where the object is
       // only taken as the thing ("この文を条件として使う").
       : type === 'objectPredicative' && objectPredication(c) === 'essive' ? JA_ESSIVE
+      // The instrument denied: ナイフなしで where it would be ナイフで (P09-E2).
+      : isPrivative(type, c) ? JA_PRIVATIVE
       : PARTICLE[type];
     // A `no` group closes its circumfix here: も after the particle (どの家でも, どの犬にも), or in place of
     // the route's を (どの市場も).

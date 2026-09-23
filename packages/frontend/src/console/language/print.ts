@@ -238,6 +238,11 @@ class Printer {
           this.emit("/level", "command", "setting");
           this.emit(LEVEL_VALUES.find((v) => v.value === level)!.name, "value", "setting");
         }
+        // The instrument denied, the privative (P09-E2): its own statement, taken back by /posinst.
+        if (link.negative) {
+          this.statement({ key: ":privative", removal: "/posinst" });
+          this.emit("/without", "command", "setting");
+        }
       }
     }
   }

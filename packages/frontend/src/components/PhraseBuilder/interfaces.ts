@@ -73,10 +73,12 @@ export function coordConjunctionOptions(
  * all they need. Giving one a box means adding its selection fields below, as every other
  * complement has them — and, for the temporal, a toolbar for its relation (at / ago / until /
  * after / before / during), the way the route and locative rings draw one for their path.
+ * P09-E2's `purpose` and `topic` are plan-only on the same terms, and are to be laid out together
+ * with the temporal's ring rather than one at a time.
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "objectPredicative" | "comitative" | "temporal"
+    "instrumental" | "objectPredicative" | "comitative" | "temporal" | "purpose" | "topic"
 >;
 
 export interface SlotConfig {
@@ -509,6 +511,11 @@ export type PhraseLink =
       // a word"). It belongs to the *link*, not to either period: it is the relation between the
       // clause and its instrument. Absent ⇒ 'object'. See AbstractionLevel.
       level?: AbstractionLevel;
+      // Whether the instrument is *denied* — the privative, "cuts **without** the knife" (P09-E2).
+      // It belongs to the link for the reason the level does: it is the relation between the clause
+      // and its instrument, not a property of either period. Absent ⇒ the plain means. It is the
+      // instrument's own negation, as `causeNegative` is the cause's, and never the clause's.
+      negative?: boolean;
       source: { containerId: string };
       target: { containerId: string };
     };
@@ -640,6 +647,10 @@ export interface InstrumentalBinding {
   // 'object' when there is no link — the level a new one starts at.
   level: AbstractionLevel;
   onLevelChange: (level: AbstractionLevel) => void;
+  // Whether the link denies its instrument (the privative, "without the knife"), and its setter —
+  // from either end, as the level. False when there is no link.
+  negative: boolean;
+  onNegativeChange: (negative: boolean) => void;
   // This container is the target of one — it *is* an instrument phrase.
   hasTarget: boolean;
   // During another container's instrumental pick, is this container a legal instrument target?
@@ -722,6 +733,8 @@ export function adaptPossessorBinding(
       hasTarget: false,
       level: 'object',
       onLevelChange: () => {},
+      negative: false,
+      onNegativeChange: () => {},
       isPickTarget: false,
       onStart: () => {},
       onClear: () => {},

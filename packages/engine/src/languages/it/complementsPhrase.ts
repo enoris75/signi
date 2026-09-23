@@ -17,6 +17,7 @@ import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
@@ -115,12 +116,15 @@ export function complementsPhrase(
       // ordinary masculine singular noun, so it takes the definite article its *own* sound selects
       // — "lo scegliere" (s-impura), "il mangiare", "l'aprire" — and "con" fuses with none of them.
       // The noun phrase is the action's direct object either way.
+      // Denied, it is the privative (P09-E2): "senza" + the bare infinitive at either level ("senza
+      // scegliere una parola"), the one form Italian gives an act it is without.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinate(c.phrase, npText);
           const infinitive = actionInfinitive(c.action);
           const verb =
+            isPrivative(type, c) ? `senza ${infinitive}` :
             level === 'process'
               ? actionGerund(c.action)
               : joinWords(['con', defArticle({ gender: 'masc' }, false, infinitive), infinitive]);
@@ -182,8 +186,14 @@ export function complementsPhrase(
         type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         // The comitative companion takes the same "con" as the instrument — Italian does not
-        // separate the two either ("coordina con il periodo").
-        type === 'instrumental' || type === 'comitative' ? prepDet('con', nf, plural, lead) :
+        // separate the two either ("coordina con il periodo"). The instrument denied is "senza"
+        // (P09-E2), which fuses with nothing either: "senza il coltello".
+        type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'senza' : 'con', nf, plural, lead) :
+        // P09-E2. The purpose "per", which fuses with nothing ("per l'uomo"), and the topic "di",
+        // which fuses as any simple preposition does: "parla del gatto", "di un gatto". A verb may
+        // govern its own topic's instead ("pensa al gatto", see `topicLink`); it is a simple one.
+        type === 'purpose'   ? prepDet('per', nf, plural, lead) :
+        type === 'topic'     ? prepDet((c.link || 'di') as ItPreposition, nf, plural, lead) :
         type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
         // A time. "fino a" and "prima di" are locutions ending in a simple preposition, so the
         // article fuses through it ("fino al giorno", "prima del giorno"); "dopo" and "durante" are

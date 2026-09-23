@@ -140,6 +140,18 @@ describe('hydrateWorkspace', () => {
     ]);
   });
 
+  it('restores a denied instrument, and reads anything but a literal true as the plain means (P09-E2)', () => {
+    expect(
+      linksOf(
+        { id: 'i', kind: 'instrumental', level: 'object', negative: true, source: { containerId: 'a' }, target: { containerId: 'b' } },
+        { id: 'j', kind: 'instrumental', level: 'object', negative: 'yes' as unknown as boolean, source: { containerId: 'a' }, target: { containerId: 'c' } },
+      ),
+    ).toStrictEqual([
+      { id: 'i', kind: 'instrumental', level: 'object', negative: true, source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'instrumental', level: 'object', source: { containerId: 'a' }, target: { containerId: 'c' } },
+    ]);
+  });
+
   it('loads a period saved with no selection as an empty one', () => {
     expect(
       hydrateWorkspace(damaged({ containers: [{ id: 'a' }, { id: 'b', selection: 'CAT' }], links: [] }), CATALOG).containers,

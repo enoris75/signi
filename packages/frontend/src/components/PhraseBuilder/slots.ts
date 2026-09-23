@@ -158,6 +158,8 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
   route: "slot.route",
   cause: "slot.cause",
   temporal: "slot.temporal",
+  purpose: "slot.purpose",
+  topic: "slot.topic",
 };
 
 /**
@@ -182,6 +184,10 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   // terminus's, and the "when" that would name it is the comitative's W. Inert until the
   // complement gets a box — a plan-only complement never reaches the menu (see BoxComplementType).
   temporal: "A",
+  // P09-E2's two, plan-only and so inert like the temporal's: the purpose takes F, from the "for"
+  // it is (its P is the subject complement's), and the topic B, from "about" (its A is the temporal's).
+  purpose: "F",
+  topic: "B",
 };
 
 /**

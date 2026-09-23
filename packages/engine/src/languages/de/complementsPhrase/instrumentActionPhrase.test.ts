@@ -61,4 +61,16 @@ describe('instrumentActionPhrase', () => {
     expect(instrumentActionPhrase(complement(np(WORT, { definiteness: 'indefinite' }), [abstraction('concept')], vp(HINZUFUEGEN))))
       .toBe('mit dem Hinzufügen eines Wortes');
   });
+
+  // P09-E2: the act denied. The process level is the subjectless "ohne … zu" clause, whoever the doer
+  // is; the concept level keeps its noun under an accusative "ohne", its adjective weak after "das".
+  test('a denied act is the "ohne … zu" clause, or "ohne das" + the nominalised infinitive', () => {
+    const denied = (level: AbstractionLevel, action = vp(WAEHLEN)) =>
+      ({ ...complement(np(WORT, { definiteness: 'indefinite' }), [abstraction(level)], action), negative: true });
+    expect(instrumentActionPhrase(denied('process'), KATER)).toBe(', ohne ein Wort zu wählen');
+    expect(instrumentActionPhrase(denied('process', vp(HINZUFUEGEN)))).toBe(', ohne ein Wort hinzuzufügen');
+    expect(instrumentActionPhrase(denied('concept'))).toBe('ohne das Wählen eines Wortes');
+    expect(instrumentActionPhrase(denied('concept', vp(WAEHLEN, { modifier: concept(SCHNELL) }))))
+      .toBe('ohne das schnelle Wählen eines Wortes');
+  });
 });

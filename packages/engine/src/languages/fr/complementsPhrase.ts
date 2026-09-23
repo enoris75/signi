@@ -18,6 +18,7 @@ import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { tonicPhrase } from './tonicPhrase.js';
@@ -103,11 +104,14 @@ export function complementsPhrase(
       // substantivized infinitive is fossilised (le boire, le manger) rather than productive, so
       // it has no counterpart of "lo scegliere" / "el elegir" / "the choosing" to reify the act
       // with. The noun phrase is the action's direct object.
+      // Denied, it is the privative (P09-E2): "sans" + the infinitive at either level ("sans choisir
+      // un mot") — no gérondif, and no periphrasis to reify it with.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinate(c.phrase, npText);
           const verb =
+            isPrivative(type, c) ? `sans ${actionInfinitive(c.action)}` :
             level === 'process'
               ? `en ${presentParticiple(c.action.verb)}`
               : `avec le fait de ${actionInfinitive(c.action)}`;
@@ -202,7 +206,25 @@ export function complementsPhrase(
           // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
           // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
           // the manner below.
+          // Denied, the instrument is the privative "sans" (P09-E2), which keeps a definite article or
+          // a singular "un" ("sans le couteau", "sans un mot") and drops the partitive and the plural
+          // indefinite, as "de" does: "sans eau", "sans couteaux". So it reads the head as it stood,
+          // before A196 gave the bare plural its "des".
+          type === 'instrumental' && isPrivative(type, c) ? (
+            !possessive && (plural || nf0['uncountable'] === '1')
+              && ['bare', 'indefinite', 'some'].includes(nf0['definiteness'] ?? 'definite')
+              ? 'sans' : prepDet('sans', nf0, plural, lead)
+          ) :
           type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
+          // P09-E2. The purpose "pour", which contracts with nothing ("pour l'homme"), and the topic
+          // "de", which does as any "de" does: "parle du chat", "d'un chat", "de chats". A verb may
+          // govern its own topic's instead, "à" for "penser" ("pense au chat", see `topicLink`).
+          type === 'purpose'   ? prepDet('pour', nf, plural, lead) :
+          type === 'topic'     ? (
+            c.link === 'à' ? aDet(nf, plural, lead) :
+            c.link ? prepDet(c.link, nf, plural, lead) :
+            deDet(nf, plural, lead)
+          ) :
           // The comitative companion takes the same "avec", with its ordinary article rather than the
           // instrument's partitive: a companion is a definite party, not a quantity ("avec le chien").
           type === 'comitative' ? prepDet('avec', nf, plural, lead) :
@@ -302,7 +324,7 @@ export function complementsPhrase(
         if (!tonic) return '';
         // The instrument's "avec" carries a partitive for a noun ("avec de l'argent", A149), and a
         // pronoun is no quantity: it takes the plain preposition, which is the comitative's too.
-        if (type === 'instrumental' || type === 'comitative') return `avec ${tonic}`;
+        if (type === 'instrumental' || type === 'comitative') return `${isPrivative(type, c) ? 'sans' : 'avec'} ${tonic}`;
         const nf = tonicHeadForms(np);
         return tonicPhrase(headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic), tonic);
       };

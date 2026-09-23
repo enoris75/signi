@@ -14,6 +14,7 @@ import {
   canStartCoordination,
   inClauseRelation,
   setInstrumentalLevel,
+  setInstrumentalNegative,
 } from '../src/components/PhraseBuilder/linkRules.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id });
@@ -72,5 +73,17 @@ describe('linkRules', () => {
     expect(canBeInstrument(CONTAINERS, [], 'A', 'B', 'process')).toBe(true);
     const links = setInstrumentalLevel(addInstrumental([], 'A', 'C', 'l1'), 'C', 'concept');
     expect(links[0]).toMatchObject({ kind: 'instrumental', level: 'concept' });
+  });
+
+  // The privative (P09-E2): the instrument denied, from either end of the link, and taken back.
+  it('denies an instrument from either end, and takes the denial back without a trace', () => {
+    const plain = addInstrumental([], 'A', 'C', 'l1');
+    expect(plain[0]).not.toHaveProperty('negative');
+    const denied = setInstrumentalNegative(plain, 'A', true);
+    expect(denied[0]).toMatchObject({ kind: 'instrumental', level: 'object', negative: true });
+    expect(setInstrumentalNegative(plain, 'C', true)).toEqual(denied);
+    expect(setInstrumentalNegative(denied, 'C', false)).toEqual(plain);
+    // A container in no instrumental link changes nothing.
+    expect(setInstrumentalNegative(plain, 'B', true)).toEqual(plain);
   });
 });

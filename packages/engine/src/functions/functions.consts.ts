@@ -32,4 +32,6 @@ export const SOURCE_ABLATIVE_ADVERB_VERBS = new Set(['RUN', 'JUMP']);
  */
 export const TONIC_COMPLEMENTS: ReadonlySet<ComplementType> = new Set<ComplementType>([
   'locative', 'terminus', 'direction', 'source', 'route', 'manner', 'comitative', 'instrumental',
+  // P09-E2's two: one works *for him* and speaks *about her*, as one goes *with him*.
+  'purpose', 'topic',
 ]);

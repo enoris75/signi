@@ -7,6 +7,7 @@ import { useBorderDrag } from "./hooks/useBorderDrag.ts";
 import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
+import { PrivativeSwitch } from "./PrivativeSwitch.tsx";
 import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
 import { useUiString } from "../../../i18n/useUiString.ts";
 
@@ -149,6 +150,12 @@ export function PeriodContainer({
           <ReificationSwitch
             level={instrumental.level}
             onChange={instrumental.onLevelChange}
+          />
+        )}
+        {!compact && instrumental?.isInstrument && (
+          <PrivativeSwitch
+            negative={instrumental.negative}
+            onChange={instrumental.onNegativeChange}
           />
         )}
         <HeaderControls compact={compact} {...headerControls} />

@@ -69,6 +69,18 @@ describe('serializeWorkspace', () => {
     expect(saved[1]).toHaveProperty('level', undefined);
   });
 
+  it('saves a denied instrument as such, and a plain one with no flag at all (P09-E2)', () => {
+    const links: PhraseLink[] = [
+      { id: 'i', kind: 'instrumental', level: 'object', negative: true, source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'instrumental', level: 'object', source: { containerId: 'a' }, target: { containerId: 'c' } },
+    ];
+
+    const saved = serializeWorkspace([], links).links;
+
+    expect(saved[0]).toHaveProperty('negative', true);
+    expect(saved[1]).not.toHaveProperty('negative');
+  });
+
   it('copies each link’s endpoints rather than sharing them', () => {
     const link: PhraseLink = { id: 'c', kind: 'conditional', source: { containerId: 'a' }, target: { containerId: 'b' } };
 

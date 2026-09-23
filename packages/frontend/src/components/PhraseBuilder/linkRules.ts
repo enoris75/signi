@@ -264,6 +264,21 @@ export function addInstrumental(
   ];
 }
 
+// Deny the instrument of the link a container takes part in, or take the denial back — the
+// privative, "cuts without the knife" (P09-E2). From either end, as the level. The flag is dropped
+// rather than set false, so a positive link is the link it always was.
+export function setInstrumentalNegative(
+  links: PhraseLink[],
+  containerId: string,
+  negative: boolean,
+): PhraseLink[] {
+  return links.map((l) => {
+    if (!isInstrumentalLink(l) || (l.source.containerId !== containerId && l.target.containerId !== containerId)) return l;
+    const { negative: _dropped, ...rest } = l;
+    return negative ? { ...rest, negative: true } : rest;
+  });
+}
+
 export function clearInstrumental(links: PhraseLink[], clauseId: string): PhraseLink[] {
   return links.filter((l) => !(isInstrumentalLink(l) && l.source.containerId === clauseId));
 }

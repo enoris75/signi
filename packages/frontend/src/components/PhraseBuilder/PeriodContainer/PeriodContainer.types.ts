@@ -62,6 +62,10 @@ export interface InstrumentalControl {
   // (a noun, or a verb and its object) and how the engines render it.
   level: AbstractionLevel;
   onLevelChange: (level: AbstractionLevel) => void;
+  // Whether the instrument is denied — the privative, "without the knife" (P09-E2) — and its
+  // setter. Shown as a polarity toggle beside the level switch, as the cause's sits beside its stance.
+  negative: boolean;
+  onNegativeChange: (negative: boolean) => void;
   // An instrumental pick is in progress and this period is a legal instrument target.
   isPickTarget: boolean;
   onPick: () => void;

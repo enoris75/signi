@@ -3926,6 +3926,49 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The *for* of a clause — the complement P09-E2 built, naming the beneficiary or goal an act is
+    // for ("works for the man"). Named with its siblings' tradition words: the Italian "complemento
+    // di fine" (or "di scopo"), the French circumstantial "de but", the German adverbial
+    // determination "des Zwecks", the Portuguese "adjunto adverbial de finalidade".
+    id: 'PURPOSE_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming what or whom something is done for (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PURPOSE'),
+    emoji: '🏁',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'purpose', plural: 'purposes', count: 'singular' },
+      it: { base: 'complemento di fine', plural: 'complementi di fine', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de but', plural: 'compléments circonstanciels de but', gender: 'masc', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Zwecks', citation: 'adverbiale Bestimmung des Zwecks', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de finalidad', plural: 'complementos circunstanciales de finalidad', gender: 'masc', count: 'singular' },
+      ja: { base: '目的の副詞語句', count: 'singular', reading: 'もくてきのふくしごく' },
+      pt: { base: 'adjunto adverbial de finalidade', plural: 'adjuntos adverbiais de finalidade', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The *about* of a clause (P09-E2) — what is spoken or thought of ("speaks about the cat"). The
+    // Italian "complemento di argomento" and the Portuguese "adjunto adverbial de assunto" are the
+    // school names; the others follow their siblings. Literal by design for now: its gloss would be
+    // "a complement that indicates a topic", and the corpus has no TOPIC noun to say it with.
+    id: 'TOPIC_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming what something is about (grammar)',
+    emoji: '💬',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'topic', plural: 'topics', count: 'singular' },
+      it: { base: 'complemento di argomento', plural: 'complementi di argomento', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de propos', plural: 'compléments circonstanciels de propos', gender: 'masc', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Themas', citation: 'adverbiale Bestimmung des Themas', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de tema', plural: 'complementos circunstanciales de tema', gender: 'masc', count: 'singular' },
+      ja: { base: '話題の副詞語句', count: 'singular', reading: 'わだいのふくしごく' },
+      pt: { base: 'adjunto adverbial de assunto', plural: 'adjuntos adverbiais de assunto', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The recipient or goal of the action ("gives the book to the cat"). Italian names it after the
     // goal ("complemento di termine"). The other traditions call it an object: the indirect one
     // (es, pt, ja 間接目的語), the second one (fr) or the dative one (de).

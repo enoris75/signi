@@ -111,6 +111,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'period.condition': 'if',
   'period.join': 'join',
   'period.level': 'level',
+  'period.privative': 'without',
   'period.compact': null,
   'period.tidy': null,
   'period.taller': null,

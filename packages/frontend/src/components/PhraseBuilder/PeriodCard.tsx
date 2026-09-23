@@ -150,6 +150,11 @@ export function PeriodCard({
               instrumental.onLevelChange(levels[(at + 1) % levels.length]!);
             }
           : undefined,
+      // Only an instrument period can be denied (the privative, "without the knife"), and ⇧N flips it.
+      togglePrivative:
+        instrumental?.isInstrument && binding
+          ? () => instrumental.onNegativeChange(!instrumental.negative)
+          : undefined,
       toggleCompact: onToggleCompact,
       tidy: onTidy,
       hasGroups,

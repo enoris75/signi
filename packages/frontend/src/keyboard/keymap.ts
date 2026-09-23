@@ -143,6 +143,8 @@ export interface PeriodContext {
   coordination: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
   /** R — how far an instrument period is reified: process → concept → object. */
   cycleLevel: (() => void) | undefined;
+  /** ⇧N — deny an instrument period, or take it back: the privative, "without the knife" (P09-E2). */
+  togglePrivative: (() => void) | undefined;
   /** Z / W / + − — the view: compact, tidy, and the canvas's height. */
   toggleCompact: () => void;
   tidy: () => void;
@@ -990,6 +992,18 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     labelKey: "instrumental.level",
     when: (ctx) => Boolean(ctx.cycleLevel),
     run: (ctx) => ctx.cycleLevel!(),
+  },
+  {
+    // The instrument denied — the privative, "cuts without the knife" (P09-E2). The cause box's
+    // polarity is ⇧N, and so is this one: N itself is a new period here, as it is the noun's number
+    // there. Neither is the clause's own negation, which the verb's N toggles.
+    id: "period.privative",
+    scope: "period",
+    keys: ["Shift+N"],
+    label: "Polarity",
+    labelKey: "satellite.polarity",
+    when: (ctx) => Boolean(ctx.togglePrivative),
+    run: (ctx) => ctx.togglePrivative!(),
   },
   {
     id: "period.compact",

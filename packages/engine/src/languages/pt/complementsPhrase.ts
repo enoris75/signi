@@ -17,6 +17,7 @@ import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { tonicPhrase } from './tonicPhrase.js';
@@ -121,11 +122,14 @@ export function complementsPhrase(
       // ("escolhendo uma palavra"), the substantivized infinitive for the concept level ("com o
       // escolher uma palavra") — a masculine singular noun, hence the invariant "o", whatever the
       // infinitive. The noun phrase is the action's direct object either way.
+      // Denied, it is the privative (P09-E2): "sem" + the infinitive at either level ("sem escolher
+      // uma palavra").
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinateElement(c.phrase, npText);
           const verb =
+            isPrivative(type, c) ? `sem ${actionInfinitive(c.action)}` :
             level === 'process'
               ? actionGerund(c.action)
               : `com o ${actionInfinitive(c.action)}`;
@@ -153,6 +157,8 @@ export function complementsPhrase(
       // the head below is built as it always is, from a forms bag that carries no determiner for it
       // to contract with (`tonicHeadForms`), and the tonic form follows it in place of the noun.
       const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
+      // The privative "sem" fuses with none of them: "sem mim", "sem ele" (P09-E2).
+      if (tonic && isPrivative(type, c)) return `sem ${tonic}`;
       if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `com ${tonic}`;
       // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
       // Unless the head carries a determiner of its own: that keeps its slot and takes the fusion
@@ -193,7 +199,15 @@ export function complementsPhrase(
         // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
         // The comitative companion takes the same "com": Portuguese does not separate the two either.
-        type === 'instrumental' || type === 'comitative' ? prepDet('com', hf, plural) :
+        type === 'instrumental' || type === 'comitative' ? prepDet(isPrivative(type, c) ? 'sem' : 'com', hf, plural) :
+        // P09-E2. The purpose "para" ("para o homem") and the topic "sobre" ("fala sobre o gato"),
+        // neither of which contracts; the privative "sem" above does not either. A verb may govern
+        // its own topic's, "em" for "pensar", which contracts as a link does ("pensa no gato", see
+        // `topicLink` and LINK_CONTRACT).
+        type === 'purpose'   ? prepDet('para', hf, plural) :
+        type === 'topic'     ? (
+          c.link && LINK_CONTRACT[c.link] ? contractDet(LINK_CONTRACT[c.link]!, c.link, hf, plural) : prepDet(c.link || 'sobre', hf, plural)
+        ) :
         // Manner: similative "como" (como o vento — the default), means "com" (com cuidado),
         // measure "a" (à velocidade da luz), mode "de" (de maneira…). Read off the head noun.
         type === 'manner'    ? (

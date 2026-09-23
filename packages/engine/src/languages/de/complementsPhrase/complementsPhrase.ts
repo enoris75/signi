@@ -13,6 +13,7 @@ import { temporalPreposition } from '../../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../../functions/tonicPronoun.js';
+import { isPrivative } from '../../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../../functions/tonicHeadForms.js';
 import { TONIC_COMPLEMENTS } from '../../../functions/functions.consts.js';
 import { tonicPronounDe } from '../tonicPronounDe.js';
@@ -125,7 +126,9 @@ export function complementsParts(
       // determiner to fuse with (`tonicHeadForms`) — and `_case` falls out of it alongside, which is
       // what picks the pronoun ("in ihm" dative, "durch ihn" accusative, "wie er" nominative).
       const pronoun = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
-      if (pronoun && (type === 'instrumental' || type === 'comitative')) return `mit ${pronoun}`;
+      // The privative's "ohne" is no "mit": it governs the accusative, which the path below declines
+      // the pronoun for ("ohne ihn", P09-E2).
+      if (pronoun && !isPrivative(type, c) && (type === 'instrumental' || type === 'comitative')) return `mit ${pronoun}`;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
       // the adjectives decline as they do after "kein" ("in meinem kleinen Haus", "deinem Hund",
       // "durch meine großen Häuser", see `possessedDeclension`). A bare-name place modified by an
@@ -179,7 +182,17 @@ export function complementsParts(
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
         // doesn't exist for "mit", so prepDet leaves it uncontracted. The comitative companion
         // takes the same "mit": German does not separate the two either.
+        // Denied, the instrument is the privative "ohne", which governs the **accusative** ("ohne das
+        // Messer", "ohne den Stock" — P09-E2).
+        else if (isPrivative(type, c)) { _case = 'acc'; head = prepDet('ohne', f, 'acc', plural); }
         else if (type === 'instrumental' || type === 'comitative') head = prepDet('mit', f, 'dat', plural);
+        // P09-E2. The purpose "für" and the topic "über" both govern the **accusative**: "arbeitet für
+        // den Mann", "spricht über den Kater". The topic's "über" is not the spatial one, which takes
+        // the dative of a place ("über dem Kater", see `spatialCase`) and is the locative's. Neither
+        // fuses in writing — "fürs" and "übers" are speech. A verb may govern its own topic's, "an"
+        // for "denken", in the same accusative: "denkt an den Kater" (see `topicLink`).
+        else if (type === 'purpose') { _case = 'acc'; head = prepDet('für', f, 'acc', plural); }
+        else if (type === 'topic') { _case = 'acc'; head = prepDet(c.link || 'über', f, 'acc', plural); }
         // Object complement: the essive "als" takes the case of the object it predicates of — the
         // accusative — and no article at all; the factitive link is the verb's own preposition and
         // governs its own case ("in einen Befehl", "zu einem Befehl"). A verb naming none leaves

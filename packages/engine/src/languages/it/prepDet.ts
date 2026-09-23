@@ -9,9 +9,15 @@ import { prepArt } from './prepArt.js';
  * article, which likewise doesn't fuse ("a tutte le case").
  *
  * "con" (the instrumental) is the exception that fuses with nothing: modern standard Italian
- * writes "con il coltello", leaving the fused "col" to speech. "come" and "verso" never fuse.
+ * writes "con il coltello", leaving the fused "col" to speech. "come" and "verso" never fuse, nor do
+ * P09-E2's "per" (the purpose — "per l'uomo", the literary "pel" long gone) and "senza" (the
+ * privative, "senza il coltello").
  */
-export type ItPreposition = 'a' | 'da' | 'in' | 'di' | 'su' | 'con' | 'come' | 'verso';
+export type ItPreposition = 'a' | 'da' | 'in' | 'di' | 'su' | 'con' | 'come' | 'verso' | 'per' | 'senza';
+
+const NON_FUSING = ['con', 'come', 'verso', 'per', 'senza'] as const;
+const fuses = (prep: ItPreposition): prep is Exclude<ItPreposition, typeof NON_FUSING[number]> =>
+  !(NON_FUSING as readonly string[]).includes(prep);
 
 export function prepDet(prep: ItPreposition, forms: Record<string, string>, plural: boolean, lead: string): string {
   // "con" (instrumental), "come" (similative) and "verso" (towards) fuse with no article — "con il",
@@ -24,7 +30,7 @@ export function prepDet(prep: ItPreposition, forms: Record<string, string>, plur
   // A name the language leaves bare says so, and takes none here either (`takes_article: '0'`, C38).
   const articledName = forms['proper'] === '1' && forms['takes_article'] !== '0';
   const definite = definiteness === 'definite' || articledName || partitive;
-  if (prep !== 'con' && prep !== 'come' && prep !== 'verso' && definite) return prepArt(prep, forms, plural, lead);
+  if (fuses(prep) && definite) return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
 }
