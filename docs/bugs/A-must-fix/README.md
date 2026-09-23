@@ -1,19 +1,23 @@
 # A-must-fix — confirmed bugs
 
-**Seven open**, filed on 2026-09-23 by the lanes that fixed A247–A253:
-[A254](A254-content-clause-under-a-past-governor-keeps-the-present.md), a content clause under a
-past governor keeping the present (*non credeva che il gatto corra*, *the man believed that the cat
-runs*); [A255](A255-very-on-an-equative.md), VERY on the equative (*very equally big*);
-[A256](A256-too-on-a-comparative.md), TOO on a comparative (*too bigger*);
-[A257](A257-very-on-a-superlative.md), VERY on a superlative (*very biggest*);
-[A258](A258-japanese-very-on-a-lowered-degree.md), Japanese とても inside a lowered degree
-(とてもそれほど大きくない); [A259](A259-japanese-while-clause-progressive-under-a-modal.md), Japanese
-*while* putting a modal's verb in the progressive (食べている必要がある間に); and
-[A260](A260-subjunctive-content-clause-drops-its-past.md), a subjunctive content clause dropping its
-own past (*non crede che il gatto corra* for *abbia corso*). A255–A258 are A248's leads and their
-kin; each target is a judgment call, ruled and argued in its file (A256 leaves French open).
+**None open.** Everything filed so far has been fixed and moved to [`../fixed/`](../fixed/).
 
-Everything filed before them has been fixed and moved to [`../fixed/`](../fixed/). The seven before,
+The seven most recent, **A254–A260**, were filed on 2026-09-23 by the lanes that fixed A247–A253 and
+fixed the same day: [A254](../fixed/A254-content-clause-under-a-past-governor-keeps-the-present.md),
+a content clause under a past governor keeping the present (*non credeva che il gatto corra*, now
+*corresse*); [A255](../fixed/A255-very-on-an-equative.md), VERY on the equative (*very equally
+big*, now *just as big*); [A256](../fixed/A256-too-on-a-comparative.md), TOO on a comparative (*too
+bigger*, now *too much bigger*); [A257](../fixed/A257-very-on-a-superlative.md), VERY on a
+superlative (*very biggest*, now *by far the biggest*);
+[A258](../fixed/A258-japanese-very-on-a-lowered-degree.md), Japanese とても inside a lowered degree,
+now dropped; [A259](../fixed/A259-japanese-while-clause-progressive-under-a-modal.md), Japanese
+*while* putting a modal's verb in the progressive (食べている必要がある間に, now 食べる必要がある間に); and
+[A260](../fixed/A260-subjunctive-content-clause-drops-its-past.md), a subjunctive content clause
+dropping its own past (*non crede che il gatto corra*, now *abbia corso*). A255–A258 needed the
+corpus: VERY and TOO name their `equative`, `superlative` and `comparative` words and the degrees
+they are dropped on (`drop_degrees`, `attributive_drop_degrees`).
+
+The seven before them,
 **A247–A253**, were filed and fixed on 2026-09-23, met by
 the lanes that shipped P09's grammar tasks
 [E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),

@@ -51,7 +51,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds seven, A254–A260, pinned by 18 `test.fails`, and Part B is empty).** If
+this writing Parts A and B are both empty, and no `test.fails` remains).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -61,20 +61,20 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Language | Summary |
-|---|---|---|---|
-| A254 | [A254-content-clause-under-a-past-governor-keeps-the-present.md](A-must-fix/A254-content-clause-under-a-past-governor-keeps-the-present.md) | English, Italian, French, Spanish, Portuguese | no sequence of tenses: `non credeva che il gatto corra`, `the man believed that the cat runs` |
-| A255 | [A255-very-on-an-equative.md](A-must-fix/A255-very-on-an-equative.md) | all seven | VERY on `equally`: `very equally big`, `très aussi grand` for *just as big*, *tout aussi grand* |
-| A256 | [A256-too-on-a-comparative.md](A-must-fix/A256-too-on-a-comparative.md) | English, German, Portuguese, Japanese | TOO on a comparative: `too bigger`, `zu größer`, もっと大きすぎる for *too much bigger* |
-| A257 | [A257-very-on-a-superlative.md](A-must-fix/A257-very-on-a-superlative.md) | all seven | VERY on a superlative: `very biggest`, `il molto più grande` for *by far the biggest* |
-| A258 | [A258-japanese-very-on-a-lowered-degree.md](A-must-fix/A258-japanese-very-on-a-lowered-degree.md) | Japanese | とてもそれほど大きくない, 犬ほどとても大きくない: とても inside the negation |
-| A259 | [A259-japanese-while-clause-progressive-under-a-modal.md](A-must-fix/A259-japanese-while-clause-progressive-under-a-modal.md) | Japanese | *while* under a modal: 食べている必要がある間に for 食べる必要がある間に |
-| A260 | [A260-subjunctive-content-clause-drops-its-past.md](A-must-fix/A260-subjunctive-content-clause-drops-its-past.md) | Italian, French, Spanish, Portuguese | a past subjunctive clause says the present: `non crede che il gatto corra` for *abbia corso* |
+None open.
 
-**Seven open**, filed on 2026-09-23 by the lanes that fixed A247–A253: A254 and A260 are the tense
-of a content clause (a past governor that does not shift it, a subjunctive that drops its own
-past), A255–A258 an intensifier on a degree A248 did not reach (the equative, TOO on a comparative,
-the superlative, the Japanese lowered degree), and A259 Japanese *while* under a modal.
+The seven filed on 2026-09-23, **A254–A260**, were met by the lanes that fixed A247–A253 and fixed
+the same day. A254 and A260 are the tense of a content clause: a past governor now shifts a present
+or future clause back (*credeva che il gatto corresse*, *said that the cat would run*, the Italian
+*condizionale composto* with the verb's own auxiliary), and a past clause under a subjunctive
+governor takes the perfect subjunctive (*non crede che il gatto abbia corso*), which gave Italian
+*avere* and French *avoir* their present subjunctive as auxiliaries. A255–A258 took A248's
+`comparative` word to the other degrees: an intensifier lexeme now names its `equative` word (*just
+as*, *altrettanto*, *tout aussi*, *genauso*) and its `superlative` phrase, written before the article
+(*by far the biggest*, *di gran lunga il più grande*), TOO names its comparative (*too much bigger*,
+*zu viel*, *demasiado*), and `drop_degrees` drops an intensifier where the language has none
+(Portuguese and Japanese on the equative, Japanese on the lowered degree). A259 stopped a Japanese
+*while* clause from adding 〜ている under a modal (食べる必要がある間に).
 
 The seven filed on 2026-09-23, **A247–A253**, were met by the lanes that shipped P09's
 grammar tasks
@@ -382,6 +382,13 @@ is listed under **Fixed** below.
 | A251 | [A251-english-german-future-temporal-clause-keeps-will.md](fixed/A251-english-german-future-temporal-clause-keeps-will.md) | English, German | 2026-09-23 |
 | A252 | [A252-iberian-future-temporal-clause-indicative.md](fixed/A252-iberian-future-temporal-clause-indicative.md) | Spanish, Portuguese | 2026-09-23 |
 | A253 | [A253-boot-render-serves-an-unseeded-concept-hole.md](fixed/A253-boot-render-serves-an-unseeded-concept-hole.md) | backend | 2026-09-23 |
+| A254 | [A254-content-clause-under-a-past-governor-keeps-the-present.md](fixed/A254-content-clause-under-a-past-governor-keeps-the-present.md) | English, Italian, French, Spanish, Portuguese (translator) | 2026-09-23 |
+| A255 | [A255-very-on-an-equative.md](fixed/A255-very-on-an-equative.md) | all seven (corpus + engine) | 2026-09-23 |
+| A256 | [A256-too-on-a-comparative.md](fixed/A256-too-on-a-comparative.md) | English, German, Portuguese, Japanese (corpus + engine) | 2026-09-23 |
+| A257 | [A257-very-on-a-superlative.md](fixed/A257-very-on-a-superlative.md) | all seven (corpus + engine) | 2026-09-23 |
+| A258 | [A258-japanese-very-on-a-lowered-degree.md](fixed/A258-japanese-very-on-a-lowered-degree.md) | Japanese (corpus + engine) | 2026-09-23 |
+| A259 | [A259-japanese-while-clause-progressive-under-a-modal.md](fixed/A259-japanese-while-clause-progressive-under-a-modal.md) | Japanese | 2026-09-23 |
+| A260 | [A260-subjunctive-content-clause-drops-its-past.md](fixed/A260-subjunctive-content-clause-drops-its-past.md) | Italian, French, Spanish, Portuguese (translator) | 2026-09-23 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._
