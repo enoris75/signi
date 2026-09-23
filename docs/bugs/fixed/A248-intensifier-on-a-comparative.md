@@ -45,3 +45,28 @@ Pinned by `known bugs: an intensifier on a comparative (A248)` in
 
 Found shipping [P09-E5](../../features/P-planning/P09-core-vocabulary/P09-E5-standard-of-comparison.md),
 the standard of comparison.
+
+## Resolved
+
+2026-09-23. An intensifier lexeme now names the word it becomes on a comparative: VERY carries
+`comparative` — en *much*, fr *bien*, de *viel*, es *mucho*, ja ずっと, none on it/pt, which keep
+*molto* / *muito* — in [adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts).
+[`applyIntensifier`](../../../packages/engine/src/translator/functions/applyIntensifier.ts) puts that
+word in place of the base on a `more` or `less` degree and marks it `intensifier_comparative`, so
+every engine's `withIntensifier` (and German's own prefix builders) writes it with no change of their
+own. A lexeme may narrow the degrees with `comparative_degrees`; Japanese names only `more`, since its
+lowered degree is a negation (それほど大きくない), not a comparative ずっと could intensify. Japanese
+drops もっと under a comparative intensifier through the new
+[`jaDegreeAdverb`](../../../packages/engine/src/languages/ja/jaDegreeAdverb.ts), read by
+[`jaDegreeSegs`](../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) and
+[`npSegs`](../../../packages/engine/src/languages/ja/npSegs.ts). With a standard Japanese moves too:
+猫は犬よりずっと大きいです。
+
+Guarded by the four formerly-`.fails` tests in `known bugs: an intensifier on a comparative (A248)`
+in [intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts), plus new cases there
+(the plural attributive, the attributive and with-a-standard lowered comparative, an inflecting
+comparative and one under *estar*, and a regression that Japanese's lowered degree and TOO are left
+alone), the Japanese with-a-standard pin in
+[comparison.test.ts](../../../packages/engine/test/comparison.test.ts), and colocated units in
+`applyIntensifier.test.ts` and `jaDegreeAdverb.test.ts`. VERY on a superlative and TOO on a
+comparative remain leads, not fixed here.
