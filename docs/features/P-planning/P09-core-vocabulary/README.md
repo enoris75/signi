@@ -12,7 +12,8 @@ word of §2 is seeded and every one of them is glossed or literal by design. The
 E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped on 2026-09-23**, in the
 engine and plan-only except E1's relations, which the toolbars offer (see §3). E6's existential
 ("there is"), split off by its task file, shipped the same day in a lane of its own, so **all eleven
-of §3's constructs are built**. The decisions below were
+of §3's constructs are built**. P09 stays **open** for its follow-ups, which are **thirteen task
+files in this folder since 2026-09-23, E12–E24** (see §4). The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -261,6 +262,28 @@ plan's own reading and the task files supersede them where they differ.
 | E10 | The possessive intensifier | own | Only works with a possessor: *mein eigenes, il proprio, mon propre, mi propio*, and ja 自分の replaces the possessor. |
 | E11 | A title before a name | Mr | *signor, M., Herr, señor, senhor*, and ja 〜さん after the name. Needs personal names, and none are seeded. |
 
+## 4. Follow-up tasks (E12–E24)
+
+What §3's lanes and this plan's *Follow-ups* left, filed on 2026-09-23 as **a task file each**,
+numbered on from E11 so no id means two things. All are **planning, unscheduled**; each states what
+is built at HEAD and recommends an answer to every decision it raises.
+
+| task | what | from |
+|---|---|---|
+| [P09-E12](P09-E12-builder-controls.md) | **Canvas and console controls** for the plan-only constructs — the temporal, purpose and topic boxes, the object and adverbial clauses, the standard slot, the mood control and the question slot, the existential toggle, the infinitive complement. One layout question, not seven. | C10, C29, E2, E4, E5, E6, §2's `infinitiveComplement` |
+| [P09-E13](P09-E13-role-complement.md) | *as* — a role said of the subject ("works as a teacher") | E2 D3 |
+| [P09-E14](P09-E14-possessor-question.md) | "**whose** food does the cat eat?" | E6 D1 |
+| [P09-E15](P09-E15-question-over-a-marked-relation.md) | "under **what**…?", "thanks to **whom**…?" — the gaps `resolveQuestion` refuses | E6 Done |
+| [P09-E16](P09-E16-passive-question.md) | a wh-question over a passive clause | E6 Done |
+| [P09-E17](P09-E17-indirect-question.md) | "asks **whether** / **what**…" | E4, E6 |
+| [P09-E18](P09-E18-attributive-comparison.md) | "a bigger cat **than the dog**" | E5 D2 |
+| [P09-E19](P09-E19-superlative-partitive.md) | "the biggest **of** the cats" | E5 D3 |
+| [P09-E20](P09-E20-temporal-between.md) | "**between** this day and that day" | E1, C29 |
+| [P09-E21](P09-E21-onto.md) | *onto* as its own English goal | E1 |
+| [P09-E22](P09-E22-adversarial-against.md) | "fights **against** the dog" | E1 D3, E2 |
+| [P09-E23](P09-E23-secondary-lexemes.md) | non-primary lexeme links, so "talk" finds SPEAK (BEGIN has been its own concept since C08) | *Follow-ups* |
+| [P09-E24](P09-E24-ranks-201-400.md) | the same coverage check for ranks 201–400 | *Follow-ups* |
+
 ## Verification
 
 Each seeding batch follows the seed skill's *Definition of done*:
@@ -285,7 +308,7 @@ backend runs the builds, not `src`.
   copula-kind modal and かもしれない as a suffix that leaves polarity and tense on its verb, the French
   negation of a multiword finite (*n'a pas besoin*), and the Romance position of SAME and LAST_FINAL
   with the article a predicate SAME keeps.
-- **A builder control this seeding wants, and no C ticket owns**: the frontend never builds an
+- **A builder control this seeding wants, and no C ticket owns** — now part of [E12](P09-E12-builder-controls.md): the frontend never builds an
   `infinitiveComplement`, so "needs to run" and "tries to run" render from a plan but cannot be
   built. One control would serve DESIRE, NEED and TRY alike.
 - **A second one, from §3: the temporal complement has no ring.**
@@ -300,7 +323,8 @@ backend runs the builds, not `src`.
   are kept out of `COMPLEMENT_TYPES` until they have them); E4's object and adverbial clauses want
   a container-to-container link like the conditional's; E5's standard wants a noun slot on the
   adjective; E6 wants a mood control and a way to mark a slot as the question — which C10's yes/no
-  question has lacked since it shipped. Each task file's `## Done` names its own.
+  question has lacked since it shipped. Each task file's `## Done` names its own. All of them, with
+the temporal ring and the existential toggle, are now [E12](P09-E12-builder-controls.md).
 - **Seven defects the 2026-09-23 lanes met, filed as [A247–A253](../../../bugs/engine-grammar-bugs.md)**
   and pinned: the negated-belief subjunctive (A247, E4's D1 deferral), "very bigger" (A248), a
   Japanese double negative on a negated lowered degree (A249), the tense of a past *while* and of a
@@ -321,7 +345,7 @@ backend runs the builds, not `src`.
   verb is HELP_VERB; TRY is a lexical verb, not `modal: true`; EVEN cannot be seeded as a verb adverb
   (Japanese); and §3 lacks three constructs (a focus particle on a noun phrase, the French distal
   demonstrative, a continuative complement).
-- **Secondary lexemes.** The seeder always links a lexeme as primary
+- **Secondary lexemes** — now [E23](P09-E23-secondary-lexemes.md). The seeder always links a lexeme as primary
   ([`seed.ts:21`](../../../../packages/backend/src/seed.ts#L21)). Supporting non-primary links would
-  let "begin" find START in the English picker without a duplicate concept.
-- **Ranks 201–400.** Run the same check again once this list is done.
+  let "talk" find SPEAK in the English picker without a duplicate concept (BEGIN is its own concept since C08).
+- **Ranks 201–400** — now [E24](P09-E24-ranks-201-400.md). Run the same check again once this list is done.
