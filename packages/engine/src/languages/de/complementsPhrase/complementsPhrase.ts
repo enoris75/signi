@@ -196,6 +196,10 @@ export function complementsParts(
         // Messer", "ohne den Stock" — P09-E2).
         else if (isPrivative(type, c)) { _case = 'acc'; head = prepDet('ohne', f, 'acc', plural); }
         else if (type === 'instrumental' || type === 'comitative') head = prepDet('mit', f, 'dat', plural);
+        // P09-E22. The opponent "gegen" governs the **accusative** ("spielt gegen den Hund", "gegen
+        // ihn"), and is not the spatial `against`, the contact "an" + dative ("am Hund"). It fuses in
+        // writing with nothing ("gegens" is speech). A verb may name its own.
+        else if (type === 'opponent') { _case = 'acc'; head = prepDet(c.link || 'gegen', f, 'acc', plural); }
         // P09-E2. The purpose "für" and the topic "über" both govern the **accusative**: "arbeitet für
         // den Mann", "spricht über den Kater". The topic's "über" is not the spatial one, which takes
         // the dative of a place ("über dem Kater", see `spatialCase`) and is the locative's. Neither

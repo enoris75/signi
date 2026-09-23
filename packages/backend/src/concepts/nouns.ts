@@ -3948,6 +3948,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The *against* of a clause (P09-E22) — the party an act is directed against ("plays against the
+    // dog"). The Italian school name is the "complemento di svantaggio", the *contro* of the pair
+    // "vantaggio e svantaggio"; the others name it after the opposition, with their siblings' words.
+    // Literal by design for now: its gloss would be "a complement that indicates an opponent", and
+    // the corpus has no OPPONENT noun to say it with.
+    id: 'OPPONENT_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming whom something is done against (grammar)',
+    emoji: '⚔️',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'opponent', plural: 'opponents', count: 'singular' },
+      it: { base: 'complemento di svantaggio', plural: 'complementi di svantaggio', gender: 'masc', count: 'singular' },
+      fr: { base: "complément circonstanciel d'opposition", plural: "compléments circonstanciels d'opposition", gender: 'masc', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Gegners', citation: 'adverbiale Bestimmung des Gegners', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de oposición', plural: 'complementos circunstanciales de oposición', gender: 'masc', count: 'singular' },
+      ja: { base: '相手の副詞語句', count: 'singular', reading: 'あいてのふくしごく' },
+      pt: { base: 'adjunto adverbial de oposição', plural: 'adjuntos adverbiais de oposição', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The *about* of a clause (P09-E2) — what is spoken or thought of ("speaks about the cat"). The
     // Italian "complemento di argomento" and the Portuguese "adjunto adverbial de assunto" are the
     // school names; the others follow their siblings. Literal by design for now: its gloss would be

@@ -835,6 +835,13 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Role',
   },
+  // The party an act is directed *against* (P09-E22), "plays against the dog". Plan-only, like the
+  // role: no box shows it yet, and the word map names it on the verbs that license it (PLAY_GAME).
+  'slot.opponent': {
+    plan: nameOf('OPPONENT_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Opponent',
+  },
 
   // The verb's ring on the canvas: the verb with its modals, tense, aspect and adverb. The Romance
   // traditions call a phrase in this sense a "sintagma" / "syntagme" (it "sintagma verbale"), and

@@ -49,6 +49,7 @@ export const PREP: Record<ComplementType, string> = {
   topic: 'about', // what is spoken or thought of — "speaks about the cat" (P09-E2)
   manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
   comitative: 'with', // companion — "coordinates with the other period"
+  opponent: 'against', // the party an act is directed against — "plays against the dog" (P09-E22)
   terminus: 'to', // dative recipient — "cut the hair to the cat"
   role: 'as', // the capacity the subject acts in — "acts as a friend" (P09-E13); the essive's word, ESSIVE
   temporal: 'at', // time — relation-driven, see TEMPORAL_PREP; 'at' is the generic `at` preposition

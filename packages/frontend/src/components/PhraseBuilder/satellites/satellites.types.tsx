@@ -14,6 +14,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import FlagIcon from "@mui/icons-material/Flag";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import BadgeIcon from "@mui/icons-material/Badge";
+import SportsKabaddiIcon from "@mui/icons-material/SportsKabaddi";
 import type { ComplementType, UiStringKey } from "@signi/shared";
 import type {
   GenderSlot,
@@ -147,4 +148,6 @@ export const complementIcons: Record<ComplementType, ReactNode> = {
   topic: <ChatBubbleOutlineIcon sx={iconSx} />,
   // The capacity the subject acts in (P09-E13). Plan-only, like the object complement.
   role: <BadgeIcon sx={iconSx} />,
+  // The party the act is directed against (P09-E22). Plan-only, like the role.
+  opponent: <SportsKabaddiIcon sx={iconSx} />,
 };

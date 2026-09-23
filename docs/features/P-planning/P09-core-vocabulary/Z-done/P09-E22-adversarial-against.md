@@ -1,15 +1,16 @@
 # P09-E22. The adversarial *against* — an opponent, not a place
 
 **Construct:** "plays **against** the dog", "fights **against** the dog" — the party an act is
-directed against. A complement, not a [`PathSpecifier`](../../../../packages/shared/src/index.ts#L369):
+directed against. A complement, not a [`PathSpecifier`](../../../../../packages/shared/src/index.ts#L369):
 E1 seeded the physical *against* (contact) and ruled this reading out.
-**Shape:** one new plan-only [`ComplementType`](../../../../packages/shared/src/index.ts#L254),
+**Shape:** one new plan-only [`ComplementType`](../../../../../packages/shared/src/index.ts#L254),
 `opponent`, built the way E2 built `purpose` and `topic`, with the verb allowed to govern its
 marker the way THINK governs its topic's (`topic_prep`).
 **Scope:** all 7 languages, plan-only (no box, like E2's two).
-**Status:** planning, unscheduled. Filed 2026-09-23 from P09's follow-ups
-([E1](Z-done/P09-E1-spatial-relations.md#d3-against-is-contact-not-opposition) D3,
-[E2](Z-done/P09-E2-complement-types.md#out-of-scope-follow-ups) *Out of scope*).
+**Status:** **shipped, 2026-09-24**, plan-only — in the engine for all seven languages, carried
+inertly by the frontend; see [Done](#done). Filed 2026-09-23 from P09's follow-ups
+([E1](P09-E1-spatial-relations.md#d3-against-is-contact-not-opposition) D3,
+[E2](P09-E2-complement-types.md#out-of-scope-follow-ups) *Out of scope*).
 **Words:** *against* (opposition). **FIGHT is not seeded**; PLAY_GAME is, and carries the tests.
 
 | lang | the cat plays **against the dog** | the cat plays **against him** | the man fights **against the dog** (FIGHT, unseeded) |
@@ -22,8 +23,65 @@ marker the way THINK governs its topic's (`topic_prep`).
 | pt | o gato joga contra o cão. | o gato joga contra ele. | o homem luta contra o cão. |
 | ja | 猫は犬を相手に遊びます。 | 猫は彼を相手に遊びます。 | 男は犬と戦います。 |
 
-**Proposed, not engine output.** The Japanese generic marker is D3's open question and wants a
-native check; 犬と戦います is the verb's own particle, not the complement's.
+**Proposed at filing.** The first two columns are now engine output, word for word (see
+[Done](#done)); the third waits on FIGHT, and its Japanese override is pinned on a test-only verb.
+
+## Done
+
+Shipped 2026-09-24. D1–D4 as recommended; D3 ruled **を相手に** as the generic, with the verb-governed
+override. The table as the engine now writes it (PLAY_GAME; the last column is a test-only verb with
+戦う's Japanese lexeme and `opponent_prep: 'と'`, its other six reading PLAY_GAME's):
+
+| lang | the cat plays **against the dog** | the cat plays **against him** | the cat plays **against me** | the man plays **with the cat against the dog** in the house | override (ja) |
+|---|---|---|---|---|---|
+| en | the cat plays against the dog. | the cat plays against him. | the cat plays against me. | the man plays with the cat against the dog in the house. | — |
+| it | il gatto gioca contro il cane. | il gatto gioca contro di lui. | il gatto gioca contro di me. | l'uomo gioca con il gatto contro il cane nella casa. | — |
+| fr | le chat joue contre le chien. | le chat joue contre lui. | le chat joue contre moi. | l'homme joue avec le chat contre le chien dans la maison. | — |
+| de | der Kater spielt gegen den Hund. | der Kater spielt gegen ihn. | der Kater spielt gegen mich. | der Mann spielt mit dem Kater gegen den Hund im Haus. | — |
+| es | el gato juega contra el perro. | el gato juega contra él. | el gato juega contra mí. | el hombre juega con el gato contra el perro en la casa. | — |
+| pt | o gato joga contra o cão. | o gato joga contra ele. | o gato joga contra mim. | o homem joga com o gato contra o cão na casa. | — |
+| ja | 猫は犬を相手に遊びます。 | 猫は彼を相手に遊びます。 | — | 男は猫と犬を相手に家で遊びます。 | 男は犬と戦います。 |
+
+What landed, and where it differs from the plan below:
+
+1. **`opponent` is a `ComplementType`**, doc-commented with D1 and D3, right after `comitative` in
+   `COMPLEMENT_RENDER_ORDER`, in `COMPLEMENT_LABELS` and `DETERMINER_COMPLEMENT_TYPES`, and **not** in
+   `COMPLEMENT_TYPES`: no box. `TONIC_COMPLEMENTS` gains it.
+2. **Italian needed `contro` in `ItPreposition`** and in its non-fusing set
+   ([`it/prepDet.ts`](../../../../../packages/engine/src/languages/it/prepDet.ts)), which the plan did
+   not list: the spatial `against` reaches it as an adverb through `spatialHead`, never through
+   `prepDet`. *Contro di lui* came for free from `IT_DI_BEFORE_PRONOUN`, as the plan said.
+3. **One branch per engine**, directly after its comitative: it / fr / es / pt `prepDet(c.link ||
+   <generic>)`, German `_case = 'acc'` with *gegen*. English and Japanese have no per-type branch;
+   each takes the word from `PREP` / `PARTICLE`, with one `c.link` line ahead of it. The oblique tonic
+   of Spanish and Portuguese (*contra mí*, *contra mim*) needed nothing: the shared tonic path already
+   gives it to every preposition but *entre*.
+4. **`opponentLink`** ([`functions/opponentLink.ts`](../../../../../packages/engine/src/functions/opponentLink.ts))
+   reads `opponent_prep`, and `resolveComplements` carries it on `ResolvedComplement.link` beside the
+   topic's. Every engine honours it, not only Japanese; no seeded lexeme names one yet.
+5. **The override is pinned on a test-only verb**, `TEST_FIGHT`, through a wrapped lookup in
+   [`opponent.test.ts`](../../../../../packages/engine/test/complements/opponent.test.ts): FIGHT stays
+   unseeded.
+6. **Questions over the gap needed nothing**: P09-E15's stand-in already reaches every complement —
+   "who does the cat play against?", it "contro chi gioca il gatto?", de "gegen wen spielt der
+   Kater?" / "wogegen spielt der Kater?", 猫は誰を相手に遊びますか？ (probed, not pinned). So do
+   relatives: "the dog against which the cat plays", de "der Hund, gegen den der Kater spielt".
+7. **Seeded:** OPPONENT_COMPLEMENT behind `slot.opponent`, **literal by design** (no OPPONENT noun
+   for "a complement that indicates an opponent") — it "complemento di svantaggio" (the school name
+   of the *contro* complement), fr "complément circonstanciel d'opposition", de "adverbiale
+   Bestimmung des Gegners", es "complemento circunstancial de oposición", pt "adjunto adverbial de
+   oposição", ja 相手の副詞語句. PLAY_GAME licenses `opponent`. **`signi.db` needs a reseed** for both.
+8. **Frontend, inert:** `COMPLEMENT_LABEL_KEYS` → `slot.opponent`, `COMPLEMENT_KEYS` → **V** (from
+   *versus*; O is the object complement's, A the temporal's), `complementIcons` → a grappling icon,
+   and `BoxComplementType` excludes it.
+9. **`Complement.negative` on an opponent is ignored**, as on the comitative ("not against the dog"
+   renders "against the dog"). Not in the plan; left as it is.
+
+Follow-ups, beside *Out of scope* below:
+
+- **Japanese relatives over a marked complement drop the marker**: "the dog against which the cat
+  plays" is 猫が遊ぶ犬, as it is for the comitative, the topic (猫が話す犬) and the purpose.
+  Pre-existing, not the opponent's own.
 
 ## Why
 
@@ -36,43 +94,43 @@ German and Japanese — see *Today*.
 
 Verified at HEAD, 2026-09-23.
 
-- **E1's `against` is contact only**, by its doc comment ([`index.ts:362`](../../../../packages/shared/src/index.ts#L362)):
+- **E1's `against` is contact only**, by its doc comment ([`index.ts:362`](../../../../../packages/shared/src/index.ts#L362)):
   "The adversarial 'fights against the dog' is no spatial relation and is not this one."
 - **Misusing it shows why it is not this construct.** Probed with `sayAll`, PLAY_GAME + locative
   `against` DOG: en "plays against the dog", it "gioca contro il cane", fr "joue contre le chien", es
   "juega contra el perro", pt "joga contra o cão" — right by coincidence — but de "**spielt am
-  Hund**" (the contact *an* + dative, [`de/spatialHead.ts:26`](../../../../packages/engine/src/languages/de/spatialHead.ts#L26))
-  and ja "**犬に遊びます**" (the contact flattening to に, [`ja.consts.ts:179`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L179)).
+  Hund**" (the contact *an* + dative, [`de/spatialHead.ts:26`](../../../../../packages/engine/src/languages/de/spatialHead.ts#L26))
+  and ja "**犬に遊びます**" (the contact flattening to に, [`ja.consts.ts:179`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L179)).
   As a direction it is de "spielt an den Hund". German needs *gegen* + accusative, which E1 kept out
   of the spatial set on purpose, and the misuse occupies the locative a real place needs ("plays
   against the dog in the house").
 - **The comitative is not it either.** PLAY_GAME + comitative DOG is "plays with the dog" / *con* /
   *avec* / *mit* / 犬と — a partner. `Complement.negative` on it is ignored (probed: unchanged), and
   would mean *without* if anything, not *against*.
-- **No seeded verb licenses it.** [`PLAY_GAME`](../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1046)
+- **No seeded verb licenses it.** [`PLAY_GAME`](../../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1046)
   licenses `manner, locative, cause, instrumental`. FIGHT, COMPETE, OPPOSE, DEFEND, ATTACK: none is
   seeded (grepped `packages/backend/src/concepts/`).
 - **What a new type costs** is E2's table, all still true at these lines:
-  [`ComplementType`](../../../../packages/shared/src/index.ts#L254),
-  [`COMPLEMENT_RENDER_ORDER`](../../../../packages/shared/src/index.ts#L287),
-  [`COMPLEMENT_LABELS`](../../../../packages/shared/src/index.ts#L289),
-  [`DETERMINER_COMPLEMENT_TYPES`](../../../../packages/shared/src/index.ts#L315),
-  [`TONIC_COMPLEMENTS`](../../../../packages/engine/src/functions/functions.consts.ts#L33), en
-  [`PREP`](../../../../packages/engine/src/languages/en/en.consts.ts#L33), ja
-  [`PARTICLE`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L30), one branch in each
+  [`ComplementType`](../../../../../packages/shared/src/index.ts#L254),
+  [`COMPLEMENT_RENDER_ORDER`](../../../../../packages/shared/src/index.ts#L287),
+  [`COMPLEMENT_LABELS`](../../../../../packages/shared/src/index.ts#L289),
+  [`DETERMINER_COMPLEMENT_TYPES`](../../../../../packages/shared/src/index.ts#L315),
+  [`TONIC_COMPLEMENTS`](../../../../../packages/engine/src/functions/functions.consts.ts#L33), en
+  [`PREP`](../../../../../packages/engine/src/languages/en/en.consts.ts#L33), ja
+  [`PARTICLE`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L30), one branch in each
   Romance/German `complementsPhrase`, and the frontend's total maps
-  ([`COMPLEMENT_LABEL_KEYS`](../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L148),
-  [`COMPLEMENT_KEYS`](../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L169),
-  [`complementIcons`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L116),
-  [`BoxComplementType`](../../../../packages/frontend/src/components/PhraseBuilder/interfaces.ts#L79))
+  ([`COMPLEMENT_LABEL_KEYS`](../../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L148),
+  [`COMPLEMENT_KEYS`](../../../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L169),
+  [`complementIcons`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L116),
+  [`BoxComplementType`](../../../../../packages/frontend/src/components/PhraseBuilder/interfaces.ts#L79))
   plus a grammar-name concept for the label, as
-  [`PURPOSE_COMPLEMENT`](../../../../packages/backend/src/concepts/nouns.ts#L3933) was.
+  [`PURPOSE_COMPLEMENT`](../../../../../packages/backend/src/concepts/nouns.ts#L3933) was.
 - **A verb can already govern a complement's preposition**: THINK's `topic_prep`, read by
-  [`topicLink`](../../../../packages/engine/src/functions/topicLink.ts) and carried on
-  `ResolvedComplement.link` by [`resolveComplements.ts:77`](../../../../packages/engine/src/translator/functions/resolveComplements.ts#L77)
+  [`topicLink`](../../../../../packages/engine/src/functions/topicLink.ts) and carried on
+  `ResolvedComplement.link` by [`resolveComplements.ts:77`](../../../../../packages/engine/src/translator/functions/resolveComplements.ts#L77)
   — for `topic` only.
 - Italian reaches a pronoun through *di* after *contro* already
-  ([`IT_DI_BEFORE_PRONOUN`](../../../../packages/engine/src/languages/it/it.consts.ts#L188)).
+  ([`IT_DI_BEFORE_PRONOUN`](../../../../../packages/engine/src/languages/it/it.consts.ts#L188)).
 
 ## Design
 

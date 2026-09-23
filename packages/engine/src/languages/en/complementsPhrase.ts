@@ -124,6 +124,8 @@ export function complementsPhrase(
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         // The instrument denied: "without the knife" where it would be "with the knife" (P09-E2).
         : isPrivative(type, c) ? PRIVATIVE
+        // A verb may name its own opponent's word (P09-E22, see `opponentLink`); none in English does.
+        : type === 'opponent' && c.link ? c.link
         : PREP[type];
       // A hearth noun takes its fixed locative idiom in place of preposition + noun phrase ("at
       // home", not "in the home"). The idiom carries its own preposition, so a group holding one
