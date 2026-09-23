@@ -15,7 +15,10 @@ engine and plan-only except E1's relations, which the toolbars offer (see §3). 
 of §3's constructs are built**. P09 stays **open** for its follow-ups, which are **thirteen task
 files since 2026-09-23, E12–E24** (see §4). The first, E12's builder controls, shipped the same day,
 so every §3 construct can now be built on the canvas and in the console. The second, E13's role
-complement (*as*), shipped the same day, plan-only; E14–E24 are open. The decisions below were
+complement (*as*), shipped the same day, plan-only, and so did **E14–E19**, all plan-only, in three
+lanes landed together: the possessor, marked-relation and passive questions (E14–E16), the indirect
+question (E17, which retired A272), and the superlative's set and attributive comparison (E19, E18).
+E20–E24 are open. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -274,12 +277,12 @@ is built at HEAD and recommends an answer to every decision it raises.
 |---|---|---|
 | [P09-E12](Z-done/P09-E12-builder-controls.md) | **Shipped 2026-09-23.** **Canvas and console controls** for the plan-only constructs — the temporal, purpose and topic boxes, the object and adverbial clauses, the standard slot, the mood control and the question slot, the existential toggle, the infinitive complement. One layout question, not seven. | C10, C29, E2, E4, E5, E6, §2's `infinitiveComplement` |
 | [P09-E13](Z-done/P09-E13-role-complement.md) | **Shipped 2026-09-23.** *as* — a role said of the subject ("acts as a friend"), the essive with the subject as controller; plan-only | E2 D3 |
-| [P09-E14](P09-E14-possessor-question.md) | "**whose** food does the cat eat?" | E6 D1 |
-| [P09-E15](P09-E15-question-over-a-marked-relation.md) | "under **what**…?", "thanks to **whom**…?" — the gaps `resolveQuestion` refuses | E6 Done |
-| [P09-E16](P09-E16-passive-question.md) | a wh-question over a passive clause | E6 Done |
-| [P09-E17](P09-E17-indirect-question.md) | "asks **whether** / **what**…" | E4, E6 |
-| [P09-E18](P09-E18-attributive-comparison.md) | "a bigger cat **than the dog**" | E5 D2 |
-| [P09-E19](P09-E19-superlative-partitive.md) | "the biggest **of** the cats" | E5 D3 |
+| [P09-E14](Z-done/P09-E14-possessor-question.md) | **Shipped 2026-09-23.** "**whose** food does the cat eat?" — the possessor gap, fronted whole in en/de, the *de*-phrase alone from a Romance object; plan-only | E6 D1 |
+| [P09-E15](Z-done/P09-E15-question-over-a-marked-relation.md) | **Shipped 2026-09-23.** "under **what**…?", "thanks to **whom**…?", *where from*, *when* — every complement gap with an adposition, English stranding, German *wo(r)-*; plan-only. Met [A276](../../../bugs/A-must-fix/A276-italian-animate-source-question-fronts-the-ablative-via.md) | E6 Done |
+| [P09-E16](Z-done/P09-E16-passive-question.md) | **Shipped 2026-09-23.** a wh-question over a passive clause — "what is eaten by the cat?", "who is the food eaten by?"; plan-only | E6 Done |
+| [P09-E17](Z-done/P09-E17-indirect-question.md) | **Shipped 2026-09-23.** "asks **whether** / **what**…", licensed by `content_clause_force`; plan-only; retired A272 | E4, E6 |
+| [P09-E18](Z-done/P09-E18-attributive-comparison.md) | **Shipped 2026-09-23.** "a bigger cat **than the dog**" — `adjectiveStandards`; plan-only | E5 D2 |
+| [P09-E19](Z-done/P09-E19-superlative-partitive.md) | **Shipped 2026-09-23.** "the biggest **of** the cats" — `headStandard` read as the set on `most` / `least`; predicative, plan-only | E5 D3 |
 | [P09-E20](P09-E20-temporal-between.md) | "**between** this day and that day" | E1, C29 |
 | [P09-E21](P09-E21-onto.md) | *onto* as its own English goal | E1 |
 | [P09-E22](P09-E22-adversarial-against.md) | "fights **against** the dog" | E1 D3, E2 |
