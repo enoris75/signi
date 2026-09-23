@@ -177,8 +177,8 @@ export const CARDINALS: CardinalTable = {
  * simply leads the phrase ("il y a un instant").
  *
  * `at`'s noun-named preposition is one that does **not** fuse, "en ce jour" being the form French
- * has; a day under a *definite* article would want "dans la journée" instead, which no plan builds
- * today — the construct is plan-only and its glosses are all deictic.
+ * has. It goes only before a bare or demonstrative phrase: under an article or a possessive the
+ * phrase stands alone, as French writes a definite point in time ("le jour", "un jour", A265).
  */
 export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, string> = {
   ago: 'il y a',

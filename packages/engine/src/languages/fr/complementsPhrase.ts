@@ -39,6 +39,7 @@ import { frStandard } from './frStandard.js';
 import { joinArt } from './joinArt.js';
 import { npText } from './npText.js';
 import { partitiveArtFor } from './partitiveArtFor.js';
+import { artFor } from './artFor.js';
 import { prepDet } from './prepDet.js';
 import { presentParticiple } from './presentParticiple.js';
 import { renderNP } from './renderNP.js';
@@ -254,7 +255,16 @@ export function complementsPhrase(
             const relation = temporalRelation(c);
             if (relation === 'at') {
               const prep = temporalPreposition(c, '');
-              return prep ? prepDet(prep, nf, plural, lead) : aDet(nf, plural, lead);
+              if (!prep) return aDet(nf, plural, lead);
+              // A265. The noun's own "en" takes a bare noun or a demonstrative ("en ce jour") and
+              // never a determiner of the article's kind: a definite, indefinite or possessed point
+              // in time is a bare noun phrase ("le jour", "un jour", "son jour"), as French writes
+              // every such time ("le lundi", "l'année dernière"). A196's bare plural has become
+              // "des" above, and stands alone too.
+              const definiteness = nf['definiteness'] ?? 'definite';
+              return !possessive && ['bare', 'this', 'that'].includes(definiteness)
+                ? prepDet(prep, nf, plural, lead)
+                : artFor(nf, plural, lead);
             }
             if (relation === 'until') return `jusqu'${aDet(nf, plural, lead)}`;
             return prepDet(FR_TEMPORAL[relation], nf, plural, lead);

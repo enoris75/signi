@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { questionWord } from './questionWord.js';
+import { questionParticle, questionWord } from './questionWord.js';
 
 const verb = (forms: Record<string, string> = {}) => ({ conceptId: 'V', forms: { base: 'x', ...forms } });
 
@@ -20,5 +20,24 @@ describe('questionWord (it)', () => {
     expect(questionWord({ role: 'locative', animate: false }, verb())).toBe('dove');
     expect(questionWord({ role: 'manner', animate: false }, verb())).toBe('come');
     expect(questionWord({ role: 'cause', animate: false }, verb())).toBe('perché');
+  });
+
+  // A276. The source's ablative "via" belongs to the verb, so the fronted phrase goes without it.
+  test('an animate source is asked with da chi, its via left to questionParticle', () => {
+    const run = { conceptId: 'RUN', forms: { base: 'correre' } };
+    expect(questionWord({ role: 'source', animate: true }, verb())).toBe('da chi');
+    expect(questionParticle({ role: 'source', animate: true }, verb())).toBe('via');
+    expect(questionWord({ role: 'source', animate: true }, run)).toBe('da chi');
+    expect(questionParticle({ role: 'source', animate: true }, run)).toBe('via');
+    // A verb with no goal for "da" to collide with takes no particle (A228).
+    expect(questionParticle({ role: 'source', animate: true }, verb({ complements: 'source' }))).toBe('');
+  });
+
+  test('the inanimate source is da dove, with no particle, and no other gap takes one', () => {
+    const run = { conceptId: 'RUN', forms: { base: 'correre' } };
+    expect(questionWord({ role: 'source', animate: false }, run)).toBe('da dove');
+    expect(questionParticle({ role: 'source', animate: false }, run)).toBe('');
+    expect(questionParticle({ role: 'direction', animate: true }, verb())).toBe('');
+    expect(questionParticle({ role: 'directObject', animate: true }, verb())).toBe('');
   });
 });

@@ -42,3 +42,22 @@ Pinned by `known bugs: an Italian possessor behind a compared adjective reads as
 in [possession.test.ts](../../../packages/engine/test/possession.test.ts).
 
 Found by P09-E12 while its tasks were being written.
+
+## Resolved
+
+2026-09-23. The Italian noun phrase now writes a genitive possessor (and the possessor question's
+*di chi*) ahead of the post-nominal adjectives when one of them carries a `more`, `less` or `equally`
+degree: `l'uomo vede un gatto della donna più piccolo.` A superlative keeps the possessor behind it
+(`il gatto più piccolo della donna`), a pronominal possessor stays prenominal, and Spanish, French and
+Portuguese are unchanged. With P09-E18's attributive standard the possessor goes ahead of the
+standard too: `un gatto della donna più grande del cane` (it was `un gatto più grande del cane della
+donna`, which read as the dog's owner), so the Italian line of `comparison.test.ts`'s possessor test
+moved with it.
+
+- Engine: [renderNP.ts](../../../packages/engine/src/languages/it/renderNP.ts).
+- Tests: `known bugs: an Italian possessor behind a compared adjective reads as its standard (A271)`
+  in [possession.test.ts](../../../packages/engine/test/possession.test.ts) — its `test.fails`
+  flipped, plus the equative, the definite article, a standard of its own, a second adjective, and a
+  superlative / pronominal guard; `a genitive possessor keeps its place after the standard, but for
+  Italian (A271)` in [comparison.test.ts](../../../packages/engine/test/comparison.test.ts); a unit
+  case in [renderNP.test.ts](../../../packages/engine/src/languages/it/renderNP.test.ts).
