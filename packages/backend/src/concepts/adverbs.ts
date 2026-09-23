@@ -690,10 +690,10 @@ export const adverbs: ConceptSeed[] = [
       fr: { base: 'très', comparative: 'bien', equative: 'tout aussi', superlative: 'de loin' },
       de: { base: 'sehr', comparative: 'viel', equative: 'genauso', superlative: 'bei weitem' },
       es: { base: 'muy', comparative: 'mucho', equative: 'igual de', superlative: 'con mucho' },
-      // Only on `more`: the lowered degree is a negation in Japanese (それほど大きくない), not a
-      // comparative ずっと could intensify.
+      // Dropped on `less`: the lowered degree is a negation in Japanese (それほど大きくない), not a
+      // comparative ずっと could intensify, and とても inside it reads "not very" (A258).
       ja: {
-        base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally',
+        base: 'とても', comparative: 'ずっと', drop_degrees: 'equally,less',
         superlative: '断然', superlative_reading: 'だんぜん',
       },
       pt: { base: 'muito', drop_degrees: 'equally', superlative: 'de longe' },

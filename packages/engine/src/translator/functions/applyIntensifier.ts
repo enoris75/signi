@@ -21,7 +21,8 @@ import { resolve } from './resolve.js';
  * off the adjective) that word goes in place of `base`, and `intensifier_comparative` says so — the
  * Japanese engine drops もっと under it, as ずっと大きい already says "much bigger". A lexeme with
  * none (it *molto*, pt *muito*) keeps its base on a comparative too ("molto più grande"). A lexeme
- * may narrow the degrees with `comparative_degrees` (a comma list, `more,less` when absent). A248.
+ * may narrow the degrees with `comparative_degrees` (a comma list, `more,less` when absent): ja TOO
+ * names only `more`, since its lowered degree is a negation (それほど大きすぎない). A248.
  *
  * The equative takes a word of its own the same way, the lexeme's `equative`, and that word
  * **replaces** the degree adverb rather than leading it: VERY is "just as" (en), *altrettanto* (it),
@@ -39,8 +40,10 @@ import { resolve } from './resolve.js';
  * falling back to the lexeme's: pt TOO follows the positive (*grande demais*) but leads a
  * comparative (*demasiado maior*, A256).
  *
- * `drop_degrees` names the degrees the intensifier is not written on at all (a comma list): Spanish,
- * Portuguese and Japanese VERY on the equative, whose own word already is the exact one (A255).
+ * `drop_degrees` names the degrees the intensifier is not written on at all (a comma list):
+ * Portuguese and Japanese VERY on the equative, whose own word already is the exact one (A255), and
+ * Japanese VERY on the lowered degree, a negation とても would stand inside (とても大きくない is "not
+ * very big", A258).
  * `attributive_drop_degrees` drops it only before a noun (`attributive`): English has "just as big"
  * but no "a just as big cat".
  */

@@ -452,10 +452,22 @@ describe('known bugs: VERY on a superlative (A257)', () => {
 // alone is the closest rendering — as it is for a comparative, where A248 made VERY ずっと and so the
 // fix drops とても here, not the degree.
 describe('known bugs: Japanese VERY on a lowered degree (A258)', () => {
-  test.fails('bare, with a standard, and attributive: VERY is dropped', () => {
+  test('bare, with a standard, and attributive: VERY is dropped', () => {
     expect(isBig({ headDegree: 'less', headIntensifier: 'VERY' }).ja).toBe('猫はそれほど大きくないです。');
     expect(isBig({ headDegree: 'less', headIntensifier: 'VERY', headStandard: np('DOG') }).ja).toBe('猫は犬ほど大きくないです。');
     expect(aBigCat('less', 'VERY').ja).toBe('それほど大きくない猫は走ります。');
+  });
+
+  test('other adjective classes, the past, the negated clause and the plural attributive', () => {
+    const ja = (adjective: string, verbPhrase = {}) => say(clause(np('CAT'), 'BE', {
+      verbPhrase, complements: { predicative: { phrase: np(adjective, { headDegree: 'less', headIntensifier: 'VERY' }) } },
+    }), 'ja');
+    expect(ja('HAPPY')).toBe('猫はそれほど幸せではないです。');
+    expect(ja('BIG', { tense: 'past' })).toBe('猫はそれほど大きくなかったです。');
+    expect(ja('BIG', { negative: true })).toBe('猫はそれほど大きくないわけではありません。');
+    expect(say(clause(np('HOUSE', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['HAPPY'], adjectiveDegrees: ['less'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'), 'ja')).toBe('それほど幸せではない家は走ります。');
   });
 
   test('regression: the other six say much less big, and VERY on the positive keeps とても', () => {

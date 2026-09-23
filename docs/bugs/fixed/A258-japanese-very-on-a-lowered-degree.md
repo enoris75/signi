@@ -35,3 +35,20 @@ Pinned by `known bugs: Japanese VERY on a lowered degree (A258)` in
 [intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts).
 
 Found fixing A248 and A249, the intensifier on a comparative and the Japanese lowered degree.
+
+## Resolved
+
+2026-09-23. VERY's Japanese lexeme in [adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts)
+names `less` among its `drop_degrees` (A255's key, read by
+[`applyIntensifier`](../../../packages/engine/src/translator/functions/applyIntensifier.ts)), so no
+intensifier reaches the lowered degree and
+[`jaDegreeSegs`](../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) and
+[`npSegs`](../../../packages/engine/src/languages/ja/npSegs.ts) write the lowered degree alone:
+`猫はそれほど大きくないです。`, `猫は犬ほど大きくないです。`, `それほど大きくない猫は走ります。`. The
+`comparative_degrees: 'more'` A248 put on the lexeme is gone, since `less` no longer reaches it
+(TOO's Japanese lexeme still uses the key). `jaDegreeSegs`'s comment no longer cites
+とてもそれほど大きくない as an example.
+
+Guarded by the formerly-`.fails` test in `known bugs: Japanese VERY on a lowered degree (A258)` in
+[intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts), plus a new case there (a
+な-adjective, the past, the negated clause and the plural attributive).
