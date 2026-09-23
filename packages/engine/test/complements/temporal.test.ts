@@ -198,15 +198,29 @@ describe('known bugs: French "en" before an article on a temporal noun (A265)', 
   const runsAt = (concept: string, extra: Partial<NounPhrase> = {}) =>
     sayAll(clause(np('MAN'), 'RUN', { complements: { temporal: { phrase: np(concept, { definiteness: 'definite', ...extra }) } } }));
 
-  test.fails('a definite day, week or year takes no preposition', () => {
+  test('a definite day, week or year takes no preposition', () => {
     expect(runsAt('DAY').fr).toBe("l'homme court le jour.");
     expect(runsAt('WEEK').fr).toBe("l'homme court la semaine.");
     expect(runsAt('YEAR').fr).toBe("l'homme court l'année.");
     expect(runsAt('DAY', { number: 'plural' }).fr).toBe("l'homme court les jours.");
   });
 
-  test.fails('an indefinite day takes none either', () => {
+  test('an indefinite day takes none either', () => {
     expect(runsAt('DAY', { definiteness: 'indefinite' }).fr).toBe("l'homme court un jour.");
+  });
+
+  test('a month, a possessed day and every quantifier stand alone too', () => {
+    expect(runsAt('MONTH').fr).toBe("l'homme court le mois.");
+    expect(runsAt('DAY', { definiteness: 'indefinite', number: 'plural' }).fr).toBe("l'homme court des jours.");
+    expect(runsAt('DAY', { definiteness: 'all', number: 'plural' }).fr).toBe("l'homme court tous les jours.");
+    expect(runsAt('DAY', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }).fr)
+      .toBe("l'homme court son jour.");
+    expect(runsAt('DAY', { possessor: np('CAT') }).fr).toBe("l'homme court le jour du chat.");
+  });
+
+  test('every demonstrative keeps "en"', () => {
+    expect(runsAt('WEEK', { definiteness: 'that' }).fr).toBe("l'homme court en cette semaine.");
+    expect(runsAt('DAY', { definiteness: 'this', number: 'plural' }).fr).toBe("l'homme court en ces jours.");
   });
 
   test('regression: the demonstrative keeps "en", and the other languages their preposition', () => {

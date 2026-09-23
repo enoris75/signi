@@ -41,3 +41,18 @@ Pinned by `known bugs: French "en" before an article on a temporal noun (A265)` 
 [temporal.test.ts](../../../packages/engine/test/complements/temporal.test.ts).
 
 Found while writing the tasks for P09-E12.
+
+## Resolved
+
+2026-09-23. In French `at`, the noun's own non-fusing `temporal_prep` ("en") now goes only before a
+bare or demonstrative phrase; under an article, a quantifier or a possessive the phrase stands alone
+(`l'homme court le jour.`, `un jour`, `tous les jours`, `son jour`). A possessive is an article-like
+determiner, so it takes no "en" either (*son jour*, not *en son jour*). A196's bare plural, already
+rewritten to "des", stands alone too (`des jours`). The stale "which no plan builds today" is gone
+from the `FR_TEMPORAL` comment.
+
+- Engine: [complementsPhrase.ts](../../../packages/engine/src/languages/fr/complementsPhrase.ts),
+  comment in [fr.consts.ts](../../../packages/engine/src/languages/fr/fr.consts.ts).
+- Tests: `known bugs: French "en" before an article on a temporal noun (A265)` in
+  [temporal.test.ts](../../../packages/engine/test/complements/temporal.test.ts) — its two
+  `test.fails` flipped, plus a month / quantifier / possessive case and a demonstrative guard.
