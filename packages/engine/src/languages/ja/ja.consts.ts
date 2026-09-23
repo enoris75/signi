@@ -26,6 +26,13 @@ export const JA_DEGREE: Record<Degree, string> = {
  */
 export const JA_STANDARD: Partial<Record<Degree, string>> = { more: 'より', less: 'ほど', equally: 'と同じくらい' };
 
+/**
+ * The particle after the set a superlative selects from (P09-E19): 動物の中で最も大きい "the biggest of
+ * the animals". Unlike a standard it does **not** take the degree adverb's place — 最も stays, and so
+ * does `least`'s negated adjective (動物の中で最も大きくない).
+ */
+export const JA_DOMAIN = 'の中で';
+
 /** Postposition particle per complement type. (Route を is safe: motion verbs are intransitive.) */
 export const PARTICLE: Record<ComplementType, string> = {
   locative: 'で',

@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import type { EsAdjectives } from './es.types.js';
 import { PRENOMINAL } from './es.consts.js';
@@ -7,14 +8,22 @@ import { agreeAdj } from './agreeAdj.js';
 import { apocopate } from './apocopate.js';
 import { coordinate } from './coordinate.js';
 import { esDeg } from './esDeg.js';
+import { esStandard } from './esStandard.js';
 import { isPlural } from './isPlural.js';
 
-/** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
+/**
+ * Agree a noun phrase's adjectives with the head's gender/number and split them around it.
+ *
+ * The compared adjective that carries a standard (P09-E18) is written with it and moves **last**
+ * among the postnominal ones, which are coordinated, so the standard attaches to it alone: "un gato
+ * negro y más grande que el perro", never "*más grande que el perro y negro".
+ */
 export function esAdj(np: ResolvedNounPhrase): EsAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = isPlural(np.head.forms);
   const pre: string[] = [];
   const post: string[] = [];
+  let compared = '';
   for (const a of np.adjectives) {
     const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
     if (!surface) continue;
@@ -24,8 +33,11 @@ export function esAdj(np: ResolvedNounPhrase): EsAdjectives {
     if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a)) {
       pre.push(apocopate(a.conceptId, surface, gender, plural));
     } else {
-      post.push(esDeg(a, surface));
+      const standard = attributiveStandard(np, a);
+      if (standard) compared = [esDeg(a, surface), esStandard(a, standard)].filter(Boolean).join(' ');
+      else post.push(esDeg(a, surface));
     }
   }
+  if (compared) post.push(compared);
   return { pre: pre.join(' '), post: coordinate(post) };
 }

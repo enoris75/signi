@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import type { PtAdjectives } from './pt.types.js';
@@ -7,13 +8,21 @@ import { PRENOMINAL, PT_SUPPLETIVE } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { isPlural } from './isPlural.js';
 import { ptComparison } from './ptComparison.js';
+import { ptStandard } from './ptStandard.js';
 
-/** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
+/**
+ * Agree a noun phrase's adjectives with the head's gender/number and split them around it.
+ *
+ * The compared adjective that carries a standard (P09-E18) is written with it and moves **last**
+ * among the postnominal ones, which are coordinated, so the standard attaches to it alone: "um gato
+ * preto e maior do que o cão".
+ */
 export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = isPlural(np.head.forms);
   const pre: string[] = [];
   const post: string[] = [];
+  let compared = '';
   for (const a of np.adjectives) {
     // A compared adjective follows the noun even when its plain form precedes it: its degree
     // marking belongs with the phrase, not between the article and the noun — "o gato maior" (the
@@ -30,9 +39,12 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
       if (surface) pre.push(surface);
     } else {
       const surface = ptComparison(a, gender, plural);
-      if (surface) post.push(surface);
+      const standard = attributiveStandard(np, a);
+      if (surface && standard) compared = [surface, ptStandard(a, standard)].filter(Boolean).join(' ');
+      else if (surface) post.push(surface);
     }
   }
+  if (compared) post.push(compared);
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "e"
   // only before the last ("grande, velho e belo"), like a coordinated noun slot.
   return { pre: pre.join(' '), post: joinConjuncts(post, ', ', () => ' e ') };

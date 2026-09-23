@@ -152,7 +152,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // The predicate adjective's intensifier and degree adverb lead, as they do attributively
   // (とても楽しいです, もっと楽しいです). A suffix intensifier is inside the stem instead (C33).
   // A standard of comparison leads them both and takes the adverb's place (犬より大きいです, P09-E5).
-  const degSegs = jaDegreeSegs(head);
+  const degSegs = jaDegreeSegs(head.head, head.standard);
   // A na- or の-adjective before its noun keeps its own attributive particle (幸せな猫, 茶色の猫).
   // A relational one keeps its の in front of the copula too, where dropping it would name the thing
   // the stem is rather than predicate of the subject (猫はアメリカのです, not 猫はアメリカです — A246).

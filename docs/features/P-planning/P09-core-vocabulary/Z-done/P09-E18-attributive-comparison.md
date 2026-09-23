@@ -1,0 +1,305 @@
+# P09-E18. Attributive comparison — a bigger cat than the dog
+
+**Construct:** the standard of comparison on an **attributive** adjective — "a bigger cat than the
+dog", *un gatto più grande del cane*, *einen größeren Kater als den Hund*, 犬より大きい猫. From
+[P09-E5's D2](P09-E5-standard-of-comparison.md#d2-predicative-comparison-only-in-a-first-pass), which
+shipped the predicative `headStandard` alone and named this as the follow-up, and its
+[Done](P09-E5-standard-of-comparison.md#done).
+**Shape:** one field beside [`adjectiveDegrees`](../../../../../packages/shared/src/index.ts#L705),
+index-aligned like it (D1); E5's per-degree words, reused unchanged; a new **placement** per language
+(D2), which is the whole of the work.
+**Scope:** all 7 languages, every noun-phrase slot (subject, object, complements, predicate noun).
+Plan-only in a first pass.
+**Status:** **shipped, 2026-09-23**, plan-only — in the engine for all seven languages and every
+noun-phrase slot; nothing in the frontend writes it yet; see [Done](#done). Filed the same day from
+P09-E5's follow-ups.
+**Words:** none new — *than* / *as … as* are E5's `*_STANDARD` and `*_STANDARD_DEGREE` maps.
+
+| lang | the man sees **a bigger cat than the dog** | the cat is **a bigger animal than the dog** | **a cat as big as the dog** eats |
+|---|---|---|---|
+| en | the man sees a bigger cat than the dog. | the cat is a bigger animal than the dog. | a cat as big as the dog eats. |
+| it | l'uomo vede un gatto più grande del cane. | il gatto è un animale più grande del cane. | un gatto tanto grande quanto il cane mangia. |
+| fr | l'homme voit un chat plus grand que le chien. | le chat est un animal plus grand que le chien. | un chat aussi grand que le chien mange. |
+| de | der Mann sieht einen größeren Kater als den Hund. | der Kater ist ein größeres Tier als der Hund. | ein so großer Kater wie der Hund frisst. |
+| es | el hombre ve un gato más grande que el perro. | el gato es un animal más grande que el perro. | un gato tan grande como el perro come. |
+| pt | o homem vê um gato maior do que o cão. | o gato é um animal maior do que o cão. | um gato tão grande como o cão come. |
+| ja | 男は犬より大きい猫を見ます。 | 猫は犬より大きい動物です。 | 犬と同じくらい大きい猫は食べます。 |
+
+**Proposed, and shipped as proposed** — [Done](#done) has the engine's own table. Before it, every
+cell but the equative's English rendered without its standard as the table shows ("a bigger cat",
+"un gatto più grande", "einen größeren Kater", もっと大きい猫).
+
+## Done
+
+Shipped 2026-09-23 in the engine, all seven languages, **plan-only**: a `PhrasePlan` whose noun
+phrase carries `adjectiveStandards` renders the standard inside the phrase, in every slot (subject,
+object, complement, predicate noun, possessor). D1's index-aligned field and one-renders rule, D2's
+placements, D3's reorder and D4's reuse landed as designed, with the deviations below. Engine output:
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| the man sees a bigger cat than the dog | the man sees a bigger cat than the dog. | l'uomo vede un gatto più grande del cane. | l'homme voit un chat plus grand que le chien. | der Mann sieht einen größeren Kater als den Hund. | el hombre ve un gato más grande que el perro. | o homem vê um gato maior do que o cão. | 男は犬より大きい猫を見ます。 |
+| the cat is a bigger animal than the dog | the cat is a bigger animal than the dog. | il gatto è un animale più grande del cane. | le chat est un animal plus grand que le chien. | der Kater ist ein größeres Tier als der Hund. | el gato es un animal más grande que el perro. | o gato é um animal maior do que o cão. | 猫は犬より大きい動物です。 |
+| a cat as big as the dog eats | a cat as big as the dog eats. | un gatto tanto grande quanto il cane mangia. | un chat aussi grand que le chien mange. | ein so großer Kater wie der Hund frisst. | un gato tan grande como el perro come. | um gato tão grande como o cão come. | 犬と同じくらい大きい猫は食べます。 |
+| `less` | the man sees a less big cat than the dog. | l'uomo vede un gatto meno grande del cane. | l'homme voit un chat moins grand que le chien. | der Mann sieht einen weniger großen Kater als den Hund. | el hombre ve un gato menos grande que el perro. | o homem vê um gato menos grande do que o cão. | 男は犬ほど大きくない猫を見ます。 |
+| a recipient | the man gives the book to a bigger cat than the dog. | l'uomo dà il libro a un gatto più grande del cane. | l'homme donne le livre à un chat plus grand que le chien. | der Mann gibt einem größeren Kater als dem Hund das Buch. | el hombre da el libro a un gato más grande que el perro. | o homem dá o livro a um gato maior do que o cão. | 男は犬より大きい猫に本をあげます。 |
+| a brown bigger cat (D3) | the man sees a brown bigger cat than the dog. | l'uomo vede un gatto marrone e più grande del cane. | l'homme voit un chat brun et plus grand que le chien. | der Mann sieht einen braunen größeren Kater als den Hund. | el hombre ve un gato marrón y más grande que el perro. | o homem vê um gato castanho e maior do que o cão. | 男は犬より大きい茶色の猫を見ます。 |
+| + a relative clause on the cat | the man sees a bigger cat than the dog that runs. | l'uomo vede un gatto più grande del cane che corre. | l'homme voit un chat plus grand que le chien qui court. | der Mann sieht einen größeren Kater als den Hund, der läuft. | el hombre ve un gato más grande que el perro que corre. | o homem vê um gato maior do que o cão que corre. | 男は犬より大きい走る猫を見ます。 |
+| + a possessor (WOMAN) | the man sees the woman's bigger cat than the dog. | l'uomo vede un gatto più grande del cane della donna. | l'homme voit un chat plus grand que le chien de la femme. | der Mann sieht einen größeren Kater der Frau als den Hund. | el hombre ve un gato más grande que el perro de la mujer. | o homem vê um gato maior do que o cão da mulher. | 男は犬より大きい女の猫を見ます。 |
+| a pronoun standard | the man sees a bigger cat than me. | l'uomo vede un gatto più grande di me. | l'homme voit un chat plus grand que moi. | der Mann sieht einen größeren Kater als mich. | el hombre ve un gato más grande que yo. | o homem vê um gato maior do que eu. | 男は私より大きい猫を見ます。 |
+
+What landed, and where it differs from the plan below:
+
+- **Shared** (§1): `adjectiveStandards?: (NounElement | undefined)[]` on `NounPhrase` after
+  `adjectiveIntensifiers`, doc-commented with D1's rule and D2's placements; `headStandard`'s comment
+  now points at it instead of "a follow-up with a name of its own".
+- **Translator** (§2): [`resolveAdjectiveStandard`](../../../../../packages/engine/src/translator/functions/resolveAdjectiveStandard.ts)
+  picks the first adjective whose degree is in `STANDARD_DEGREES` (the comparatives and the
+  equative — **not** the superlatives, whose set stays predicative, E19 D5) and whose entry is set;
+  [`resolveNounPhrase`](../../../../../packages/engine/src/translator/functions/resolveNounPhrase.ts#L207)
+  marks that adjective `standard: '1'` and carries `ResolvedNounPhrase.adjectiveStandard: { index,
+  standard }`. The index is the adjective's place in the **resolved** list, which a bound OWN may lead
+  and a fused adjective may have left, so not always the plan's. A shared
+  [`attributiveStandard(np, a)`](../../../../../packages/engine/src/functions/attributiveStandard.ts)
+  answers "does this adjective carry it" for every engine.
+- **The standard renderers' signatures changed**, as §3 said: `enStandard`, `itStandard`,
+  `frStandard`, `esStandard`, `ptStandard` now take `(adj: ConceptForms, standard:
+  ResolvedNounElement | undefined)`; `deStandard(adj, standard, _case)` gained the case; and
+  `jaDegreeSegs(adj, standard)` likewise. The predicative call sites pass `(np.head, np.standard)`
+  (German `'nom'`); nothing they render changed.
+- **English**: `npStandard` writes what follows the head noun, and `nounPhrase` takes it as a new
+  `post` argument, placed after the noun and before an of-possessor; `withRelative` adds the clause
+  after it. `npAdj` leaves the equative out of the prenominal list and `npStandard` postposes it with
+  its standard, so the article agrees with the noun ("**a** cat as big as the dog", "**an** old cat as
+  big as the dog"). **Not in the plan**: a phrase with an attributive standard counts as
+  post-modified (`isPostModified`), so as a possessor it takes the of-genitive — "the book of a
+  bigger cat than the dog", never "*a bigger cat than the dog's book".
+- **Romance** (D3): it `splitAdjectives`, fr `splitAdjectives`, `esAdj` and `ptAdj` move the compared
+  adjective last among the post-nominal ones and write its standard right after it, ahead of the
+  attributive nouns and a genitive possessor. The post-nominal adjectives were already coordinated,
+  so D3's "un gatto nero più grande del cane" ships as **"un gatto marrone e più grande del cane"**
+  (fr "brun et plus grand", es "marrón y más grande", pt "castanho e maior"; BLACK is not seeded).
+- **German**: [`nounStandard`](../../../../../packages/engine/src/languages/de/nounStandard.ts) writes the
+  standard in the phrase's own case at all four of German's noun-phrase builders (`nounPhrase`, the
+  prepositional complement, the agent, the *von* possessor). **Deviation:** it stands after the
+  noun's **genitives, the possessor included**, and before the relative clause — "einen größeren
+  Kater der Frau als den Hund" — because "*als den Hund der Frau" would say the woman's dog. A
+  pronoun standard takes the case too ("als **mich**"), where E5's predicative "als ich" is the same
+  rule at the nominative.
+- **Japanese**: `npSegs` calls `jaDegreeSegs` for every adjective (identical to the old intensifier +
+  `jaDegreeAdverb` pair without a standard). **Deviation:** the adjective with the standard moves to
+  the **front of the phrase**, ahead of the relative clause, the possessor, the determiner and the
+  other adjectives. The plan kept it in place, but a prenominal modifier binds to the nearest noun
+  after it and the standard ends in one: 茶色の犬より大きい猫 is "bigger than the brown dog", この犬より
+  "than this dog", 女の犬より "than the woman's dog", 走る犬より "than the running dog". In front, the
+  standard's noun has nothing before it: 犬より大きい茶色の猫, 犬より大きいこの猫, 犬より大きい女の猫.
+- **A271 is not widened** (D3): a genitive possessor keeps its place after the standard, so in
+  Romance it now reads as the **standard's** possessor ("più grande del cane della donna") rather
+  than as the standard itself; neither is the plan's cat of the woman, and A271 stays open.
+- Tests: `describe('attributive (P09-E18)')` in
+  [`comparison.test.ts`](../../../../../packages/engine/test/comparison.test.ts) — the table, `less`, the
+  German cases (accusative object, nominative subject and predicate noun, dative recipient, a
+  pronoun), English's relative clause and of-genitive, the Romance reorder from either plan order,
+  the possessor, D1's one-renders rule, the drops on `positive` and `most`, Japanese's second
+  adjective, and the head's and an adjective's standards being independent. Unit tests for
+  `resolveAdjectiveStandard` (with `resolveNounPhrase`'s index), `attributiveStandard`, `npStandard`,
+  `nounStandard`, it/fr `splitAdjectives`, it `renderNP`, `esAdj`, `ptAdj`, `npSegs`; every E5 and
+  E19 test and `adjectives.test.ts` unchanged.
+
+Follow-ups, beside *Out of scope* below:
+
+- **Frontend and console**: nothing writes `adjectiveStandards` yet. The console's
+  [`print.ts`](../../../../../packages/frontend/src/console/language/print.ts#L431) prints the
+  predicative's `headStandard` (E12) but no attributive one, so the print → apply round trip needs an
+  attributive `/than` before any control can set the field.
+- **A relative clause after a standard** attaches to the standard's noun in English and Romance ("a
+  bigger cat than the dog that runs" reads as the dog running) — the placement D2 chose; an
+  extraposed or fronted standard would lift it.
+- **A269** (the object predicative's half circumfix) can now call `deStandard(adj, standard, 'acc')`.
+- **The attributive superlative with a set** ("the biggest cat of the house", E19 D5) can ride this
+  field, with E19's `*_DOMAIN` words, once its possessor collision is settled.
+
+## Why
+
+E5 gave comparison its standard, but only after a copula: "the cat is bigger than the dog". The
+commoner attributive use — a predicate **noun** with a compared adjective ("is a bigger animal than
+the dog"), a compared object ("sees a bigger cat than the dog") — still cannot say what it compares
+with. The words are done; what is missing is where each language puts them inside a noun phrase.
+
+## Today
+
+Verified at HEAD, 2026-09-23.
+
+- [`headStandard`](../../../../../packages/shared/src/index.ts#L785) is predicative only, and its doc
+  comment says so deliberately ("nothing beside `adjectiveDegrees`", D2). There is no attributive
+  field.
+- [`resolveStandard`](../../../../../packages/engine/src/translator/functions/resolveStandard.ts#L21)
+  returns nothing unless the **head** is an adjective, so a `headStandard` on a noun phrase headed by
+  a noun is dropped silently: `np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['more'],
+  headStandard: np('DOG') })` renders "a bigger cat eats" in English, "un gatto più grande" in
+  Italian (probe).
+- **The Romance engines already put a compared adjective after the noun**, even one whose plain form
+  precedes it: [`it/splitAdjectives`](../../../../../packages/engine/src/languages/it/splitAdjectives.ts#L32)
+  and [`fr/splitAdjectives`](../../../../../packages/engine/src/languages/fr/splitAdjectives.ts#L41) keep
+  only `positive` prenominal ("un gatto più bello", "un chat plus beau"), as do
+  [`esAdj`](../../../../../packages/engine/src/languages/es/esAdj.ts#L33) and
+  [`ptAdj`](../../../../../packages/engine/src/languages/pt/ptAdj.ts#L37). So the Romance standard lands
+  **adjacent** to its adjective by construction.
+- English's attributive adjectives are prenominal
+  ([`npAdj`](../../../../../packages/engine/src/languages/en/npAdj.ts) →
+  [`nounPhrase`](../../../../../packages/engine/src/languages/en/nounPhrase.ts#L15)); the bare equative
+  is "an equally big cat" (probe). German declines them prenominally inside
+  [`nounPhrase(np, _case)`](../../../../../packages/engine/src/languages/de/nounPhrase.ts#L23), which
+  already knows the phrase's case. Japanese writes each adjective's degree adverb before it in
+  [`npSegs`](../../../../../packages/engine/src/languages/ja/npSegs.ts#L107) via `jaDegreeAdverb`; the
+  predicative's [`jaDegreeSegs`](../../../../../packages/engine/src/languages/ja/jaDegreeSegs.ts) is the
+  version that also emits a standard in the adverb's place.
+- The per-language standard renderers (`enStandard`, `itStandard`, `frStandard`, `deStandard`,
+  `esStandard`, `ptStandard`) each take a `ResolvedNounPhrase` and read `np.standard` and the
+  **head's** degree ([`enStandard.ts`](../../../../../packages/engine/src/languages/en/enStandard.ts#L21),
+  [`itStandard.ts`](../../../../../packages/engine/src/languages/it/itStandard.ts#L25)). `deStandard`
+  has no case parameter: in the predicative it is always nominative.
+- **A Romance collision that exists already:** a genitive possessor after a post-nominal comparative
+  reads as the standard. "l'uomo vede un gatto più grande **della donna**" (possessor WOMAN) says "a cat
+  bigger than the woman"; es "más grande de la mujer", fr "plus grand de la femme" and pt "maior da
+  mulher" are no better (probe). Worth a bug file of its own; this task must not make it worse (D3).
+
+### The object predicative's standard — a separate item, and a live defect
+
+E5's Done notes that the object predicative ("makes the cat bigger than the dog") ignores a standard.
+It does not belong here: it is the **predicative** field `headStandard` on an adjective head, resolved
+already by `resolveStandard`, and the fix is a one-line hunk in six `objectPredicative` branches —
+nothing about noun-phrase placement. It stays separate. But the probe shows it is not merely
+unimplemented, it is **wrong at HEAD**:
+
+- `TRANSFORM` + `objectPredicative: np('BIG', { headDegree: 'equally', headStandard: np('DOG') })`
+  renders "the cat transforms the house **as big**.", "trasforma la casa **tanto** grande", "so groß",
+  "tan grande", "tão grande" — the translator sets `forms['standard'] = '1'`, the adverb swaps to the
+  circumfix's first half, and the second half is never written.
+- Japanese is the exception the other way: the factitive shares the predicative's path in
+  [`complementSegs`](../../../../../packages/engine/src/languages/ja/complementSegs.ts#L105), so it
+  **does** render the standard (家を犬より大きく変えます).
+
+**Recommendation: file it in the bug catalogue**, as an A-bug (half a circumfix is wrong output),
+with the fix being E5's per-language `<lang>Standard` call in each `objectPredicative` adjective
+branch — German with the accusative (*macht den Kater größer als den Hund*). The one thing it shares
+with this task is `deStandard` gaining a case (D2); whichever lands first adds the parameter.
+
+## Design
+
+### D1. One standard per adjective, index-aligned
+
+E5's D2 worried that "an adjective list can hold several comparatives and only one can reasonably
+take a standard". Two shapes:
+
+1. **`adjectiveStandards?: (NounElement | undefined)[]`**, index-aligned with `adjectives`, as
+   `adjectiveDegrees` and `adjectiveIntensifiers` are.
+2. **`adjectiveStandard?: NounElement`**, one per phrase, attached to "the" compared adjective.
+
+Option 2 needs a rule for which adjective that is, and moves the standard when the degree cycles on
+a different adjective. Option 1 mirrors the selection the frontend already keeps: `buildNounPhrase`
+reads `sel.adjectiveDegrees[which]` for the head and the list alike
+([`buildNounPhrase.ts#L40`](../../../../../packages/frontend/src/components/PhraseBuilder/selectionToPlan/functions/buildNounPhrase.ts#L40)),
+so the standard slot E5 §4 puts on an adjective control is the same slot here.
+
+**Recommendation: (1), and the translator renders at most one** — the first adjective whose degree is
+in `STANDARD_DEGREES` and whose entry is set; the rest are dropped, as `resolveStandard` drops a
+standard on a superlative. No language says "a bigger-than-the-dog more-beautiful-than-the-fox cat".
+Keep `headStandard` for the adjective head; the two fields are independent, each read on its own
+adjective.
+
+### D2. Placement is per language, and the degree matters in English
+
+| lang | where the standard goes | why |
+|---|---|---|
+| en | comparative: **after the head noun**, before the of-possessor and the relative ("a bigger cat than the dog that sleeps"); equative: the adjective **postposed** with it ("a cat as big as the dog") | "an as big cat as the dog" is ungrammatical; the idiomatic "as big a cat as the dog" moves the article, which no other construct does |
+| it / fr / es / pt | **right after the compared adjective**, which is already post-nominal (*Today*) | the adjective and its standard are one phrase; the circumfix (*tanto … quanto*) stays tight |
+| de | **after the head noun**, the adjective prenominal and declined as today; the standard in **the phrase's own case** ("sieht einen größeren Kater als **den** Hund", "ist ein größeres Tier als **der** Hund") | *als* / *wie* are conjunctions and the standard is parallel to the phrase it compares with |
+| ja | **before the compared adjective**, in the adverb's place — 犬より大きい猫 | exactly `jaDegreeSegs`' rule, per adjective |
+
+**Recommendation: as the table.** German's is the one new mechanism: `deStandard(np, case)`, with
+`'nom'` at the predicative's call site. English needs a postposed branch for the equative only; the
+comparative keeps "bigger" prenominal.
+
+### D3. The standard follows the compared adjective, not the adjective group
+
+A phrase may carry several post-nominal adjectives ("un gatto nero più grande"), which Italian,
+Spanish and Portuguese coordinate ("más grande y hermoso"). A standard after the whole group attaches
+to the last adjective, which may not be the compared one.
+
+**Recommendation: in it/fr/es/pt, the compared adjective that carries a standard moves last among
+the post-nominal adjectives**, and its standard follows it: "un gatto nero più grande del cane".
+Ahead of a genitive possessor, which keeps its place after it — the collision in *Today* is not
+widened, and not fixed here either.
+
+### D4. The standard's own determiner and pronoun forms are E5's
+
+Nothing new: E5 settled definite / indefinite / pronoun / coordinated standards per language
+(Italian *di* fused per conjunct, French elision, subject-form pronouns in de/es/pt). The attributive
+reuses the renderers; only the call site and German's case change.
+
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../../packages/shared/src/index.ts)
+
+- `adjectiveStandards?: (NounElement | undefined)[]` on `NounPhrase`, after `adjectiveIntensifiers`
+  ([L717](../../../../../packages/shared/src/index.ts#L717)), doc-commented with D1's one-renders rule
+  and D2's placement table.
+- `headStandard`'s doc comment ([L757-L784](../../../../../packages/shared/src/index.ts#L757)): replace
+  "a follow-up with a name of its own" with a pointer to `adjectiveStandards`.
+
+## 2. Translator
+
+In [`resolveNounPhrase`](../../../../../packages/engine/src/translator/functions/resolveNounPhrase.ts#L170),
+beside the `resolveStandard` call: resolve the first surviving `adjectiveStandards` entry (D1), mark
+**that adjective's** forms `standard: '1'` (so the equative adverb swaps on it alone), and carry the
+resolved standard on `ResolvedNounPhrase` with the index it belongs to — e.g. a new
+`adjectiveStandard?: { index: number; standard: ResolvedNounElement }` in
+[`types.ts`](../../../../../packages/engine/src/types.ts#L106), beside `standard`.
+
+## 3. Per-engine rendering
+
+- **en**: `npText` / `nounPhrase` emit `enStandard`'s text after the head for `more` / `less`; for
+  `equally`, the adjective leaves the prenominal list and "as big as the dog" follows the noun. The
+  standard renderers take the adjective's forms rather than `np.head` — a small signature change,
+  shared by all six.
+- **it / fr / es / pt**: `splitAdjectives` / `esAdj` / `ptAdj` reorder per D3; the renderer that
+  joins the post-nominal list appends the standard after the compared adjective.
+- **de**: `nounPhrase(np, _case)` appends `deStandard(standard, _case)` after the head noun.
+- **ja**: `npSegs` calls a per-adjective form of `jaDegreeSegs` in place of `jaDegreeAdverb` for the
+  indexed adjective.
+
+## 4. Frontend (plan-only first pass)
+
+Nothing in the first pass. The adjective control's standard slot is E5 §4's follow-up; built once,
+it serves both fields — `headStandard` when the adjective is the head, `adjectiveStandards[i]`
+otherwise — through `buildNounPhrase`. The console's `print.ts`
+([L431](../../../../../packages/frontend/src/console/language/print.ts#L431)) prints the degree and
+neither standard; both must print before plans carry them, for the round trip.
+
+## Tests
+
+- `test/comparison.test.ts`, a new `describe('attributive')`: the table in all seven.
+- German case: the standard in the accusative on an object, nominative on a subject and a predicate
+  noun, dative inside a dative complement ("gibt einem größeren Kater als dem Hund das Buch").
+- English: comparative after the noun, equative postposed; a relative clause after the standard.
+- Romance reorder (D3): "un gatto nero più grande del cane" with the positive adjective first in the
+  plan.
+- One-renders rule (D1): two comparatives with two standards render only the first; a standard on a
+  `positive` or superlative adjective is dropped.
+- Japanese: 犬より大きい猫, 犬ほど大きくない猫, and a second plain adjective after it.
+- `test/adjectives.test.ts` and every E5 test unchanged.
+
+## Verification
+
+1. `npm run build -w @signi/shared && npm run build -w @signi/engine`.
+2. Engine, frontend and backend suites green; typecheck clean.
+3. `POST /api/translate` with a subject, an object and a predicate noun carrying `adjectiveStandards`,
+   for each column of the table.
+
+## Out of scope (follow-ups)
+
+- **The object predicative's standard** — a bug, filed separately (*Today*).
+- **The Romance possessor read as a standard** ("un gatto più grande della donna") — a bug, filed
+  separately.
+- **"As big a cat as the dog"**, the English article-shifting equative (D2).
+- **The superlative's partitive** — [E19](P09-E19-superlative-partitive.md).
+- **A clause as the standard** and **comparison of adverbs and nouns**, as in E5.

@@ -31,7 +31,9 @@ export function keepsHeadDeterminer(forms: Record<string, string>): boolean {
  * father of the cat").
  */
 export function isPostModified(np: ResolvedNounPhrase): boolean {
-  if (np.relative) return true;
+  // An attributive standard trails the head noun just as a relative clause does (P09-E18): "the book
+  // of a bigger cat than the dog", never "a bigger cat than the dog's book".
+  if (np.relative || np.adjectiveStandard) return true;
   if (!np.possessor) return false;
   // A pronominal possessor ("his") is a bare prenominal word, so it post-modifies nothing and
   // propagates nothing — unless the head kept its own determiner and sent it to the of-genitive

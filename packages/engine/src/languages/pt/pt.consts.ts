@@ -25,6 +25,13 @@ export const PT_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 't
 export const PT_STANDARD: Partial<Record<Degree, string>> = { more: 'do que', less: 'do que', equally: 'como' };
 
 /**
+ * The word before the set a superlative selects from (P09-E19): the preposition "de", contracting
+ * with each conjunct's article ("o maior dos animais", "da família") and governing a pronoun's tonic
+ * form ("de nós", "dele"), unlike the comparative's fixed "do que".
+ */
+export const PT_DOMAIN = 'de';
+
+/**
  * The raised degrees (more/most) of these adjectives are suppletive in Portuguese — a single
  * synthetic word, never "mais" + base: grande → maior, bom → melhor, pequeno → menor, mau →
  * pior. Only "more"/"most" suppletise; the lowered and equal degrees stay periphrastic ("menos

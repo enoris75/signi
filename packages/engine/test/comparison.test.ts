@@ -7,7 +7,9 @@ import { clause, np, say, sayAll } from './harness.js';
 // comparatives, and for the equative a circumfix whose first half replaces the degree adverb itself
 // (as … as, tanto … quanto, aussi … que, so … wie, tan … como, tão … como, と同じくらい). Japanese puts the
 // standard before the adjective, in the adverb's place, and lowers a degree by negating it (犬ほど
-// 大きくない). Predicative only (D2); a superlative drops its standard (D3).
+// 大きくない). `headStandard` is the predicate adjective's (E5's D2); an attributive adjective's is
+// `adjectiveStandards` (P09-E18, at the end). On a superlative the predicate's field is the set it
+// selects from (P09-E19, below), never a *than* (E5's D3).
 
 /** "the cat is <adjective at degree> [than <standard>]", with `extra` merged onto the clause. */
 const cat = (degree: Degree, standard?: NounElement, adjective = 'BIG', extra: Partial<PhrasePlan> = {}): PhrasePlan =>
@@ -222,10 +224,110 @@ describe('the standard beside the rest of the clause', () => {
   });
 });
 
-describe('the superlative takes no standard (D3)', () => {
-  test('most + a standard renders the plain superlative', () => {
-    expect(sayAll(cat('most', np('DOG', { number: 'plural' })))).toEqual(sayAll(cat('most')));
-    expect(sayAll(cat('most', DOG))).toEqual({
+// P09-E19: on a superlative `headStandard` is the set the adjective selects from — the partitive E5's
+// D3 kept apart from *than*. English says "of" before a plural set and "in" before a singular one,
+// French "d'entre" before a pronoun; English and German add the article the set forces ("is the
+// biggest of", "ist das größte der"), and German's agrees with the set's noun where it names one.
+describe('the superlative set (P09-E19)', () => {
+  const ANIMALS = np('ANIMAL', { number: 'plural' });
+  const DOGS = np('DOG', { number: 'plural' });
+  const woman = (degree: Degree, set?: NounElement): PhrasePlan => clause(np('WOMAN'), 'BE', {
+    complements: { predicative: { phrase: np('BEAUTIFUL', { headDegree: degree, ...(set ? { headStandard: set } : {}) }) } },
+  });
+
+  test('the biggest of the animals', () => {
+    expect(sayAll(cat('most', ANIMALS))).toEqual({
+      en: 'the cat is the biggest of the animals.',
+      it: 'il gatto è il più grande degli animali.',
+      fr: 'le chat est le plus grand des animaux.',
+      // The article agrees with the understood noun, the set's Tier (neuter), not with Kater (D4).
+      de: 'der Kater ist das größte der Tiere.',
+      es: 'el gato es el más grande de los animales.',
+      pt: 'o gato é o maior dos animais.',
+      // の中で, and 最も stays, unlike the adverb a standard replaces.
+      ja: '猫は動物の中で最も大きいです。',
+    });
+  });
+
+  test('the most beautiful in the family', () => {
+    expect(sayAll(woman('most', np('FAMILY')))).toEqual({
+      // A singular set takes "in".
+      en: 'the woman is the most beautiful in the family.',
+      it: 'la donna è la più bella della famiglia.',
+      fr: 'la femme est la plus belle de la famille.',
+      // A singular collective names no understood noun: the subject's gender.
+      de: 'die Frau ist die schönste der Familie.',
+      es: 'la mujer es la más hermosa de la familia.',
+      pt: 'a mulher é a mais bela da família.',
+      ja: '女は家族の中で最も美しいです。',
+    });
+  });
+
+  test('the biggest of us', () => {
+    expect(sayAll(cat('most', np('FIRST_PERSON', { number: 'plural' })))).toEqual({
+      en: 'the cat is the biggest of us.',
+      it: 'il gatto è il più grande di noi.',
+      // Never "*de nous".
+      fr: "le chat est le plus grand d'entre nous.",
+      // "von" + the dative, and the subject's gender.
+      de: 'der Kater ist der größte von uns.',
+      // The tonic form a preposition governs, not E5's subject form after "que".
+      es: 'el gato es el más grande de nosotros.',
+      pt: 'o gato é o maior de nós.',
+      ja: '猫は私たちの中で最も大きいです。',
+    });
+  });
+
+  test('least, which Japanese keeps negated', () => {
+    expect(sayAll(cat('least', ANIMALS))).toEqual({
+      en: 'the cat is the least big of the animals.',
+      it: 'il gatto è il meno grande degli animali.',
+      fr: 'le chat est le moins grand des animaux.',
+      de: 'der Kater ist das am wenigsten große der Tiere.',
+      es: 'el gato es el menos grande de los animales.',
+      pt: 'o gato é o menos grande dos animais.',
+      ja: '猫は動物の中で最も大きくないです。',
+    });
+  });
+
+  test('a coordinated set: the Romance preposition fuses per conjunct', () => {
+    expect(sayAll(cat('most', { conjuncts: [ANIMALS, np('MAN', { number: 'plural' })], conjunction: 'and' }))).toEqual({
+      en: 'the cat is the biggest of the animals and the men.',
+      it: 'il gatto è il più grande degli animali e degli uomini.',
+      fr: 'le chat est le plus grand des animaux et des hommes.',
+      // No one understood noun: the subject's gender.
+      de: 'der Kater ist der größte der Tiere und der Männer.',
+      es: 'el gato es el más grande de los animales y de los hombres.',
+      pt: 'o gato é o maior dos animais e dos homens.',
+      ja: '猫は動物と男の中で最も大きいです。',
+    });
+  });
+
+  test('English "of" against "in" goes by the set\'s number', () => {
+    expect(say(cat('most', DOGS), 'en')).toBe('the cat is the biggest of the dogs.');
+    expect(say(cat('most', np('FAMILY')), 'en')).toBe('the cat is the biggest in the family.');
+    expect(say(cat('most', np('FAMILY', { number: 'plural' })), 'en')).toBe('the cat is the biggest of the families.');
+  });
+
+  test('French "d\'entre" is for a pronoun only', () => {
+    expect(say(cat('most', DOGS), 'fr')).toBe('le chat est le plus grand des chiens.');
+    expect(say(cat('most', np('THIRD_PERSON', { number: 'plural' })), 'fr')).toBe("le chat est le plus grand d'entre eux.");
+  });
+
+  test('German: the set\'s gender, else the subject\'s; the number is the subject\'s; lower-case', () => {
+    expect(say(cat('most', ANIMALS), 'de')).toBe('der Kater ist das größte der Tiere.');
+    expect(say(cat('most', DOGS), 'de')).toBe('der Kater ist der größte der Hunde.');
+    expect(say(woman('most', np('FAMILY')), 'de')).toBe('die Frau ist die schönste der Familie.');
+    expect(say(cat('most', np('FIRST_PERSON', { number: 'plural' })), 'de')).toBe('der Kater ist der größte von uns.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: ANIMALS }) } },
+    }), 'de')).toBe('die Kater sind die größten der Tiere.');
+  });
+
+  // E5's "most + a standard renders the plain superlative", rewritten: the bare superlative is what
+  // stays exactly as it was, and a standard on `most` is now its set.
+  test('the bare superlative is unchanged in all seven', () => {
+    expect(sayAll(cat('most'))).toEqual({
       en: 'the cat is biggest.',
       it: 'il gatto è il più grande.',
       fr: 'le chat est le plus grand.',
@@ -234,11 +336,36 @@ describe('the superlative takes no standard (D3)', () => {
       pt: 'o gato é o maior.',
       ja: '猫は最も大きいです。',
     });
+    expect(sayAll(cat('least'))).toEqual({
+      en: 'the cat is least big.',
+      it: 'il gatto è il meno grande.',
+      fr: 'le chat est le moins grand.',
+      de: 'der Kater ist am wenigsten groß.',
+      es: 'el gato es el menos grande.',
+      pt: 'o gato é o menos grande.',
+      ja: '猫は最も大きくないです。',
+    });
   });
 
-  test('so do least and positive', () => {
-    expect(sayAll(cat('least', DOG))).toEqual(sayAll(cat('least')));
+  test('a set is no standard: no "than", and no equative circumfix', () => {
+    for (const text of Object.values(sayAll(cat('most', DOGS)))) {
+      expect(text).not.toMatch(/\b(than|que|als|wie|como|tanto|quanto|tan|tão|so)\b|より/);
+    }
+  });
+
+  test('positive still drops a standard', () => {
     expect(sayAll(cat('positive', DOG))).toEqual(sayAll(cat('positive')));
+  });
+
+  test('the superlative\'s own intensifier leads the article', () => {
+    const plan = clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headIntensifier: 'VERY', headStandard: ANIMALS }) } },
+    });
+    expect(sayAll(plan)).toMatchObject({
+      en: 'the cat is by far the biggest of the animals.',
+      it: 'il gatto è di gran lunga il più grande degli animali.',
+      de: 'der Kater ist bei weitem das größte der Tiere.',
+    });
   });
 });
 
@@ -315,5 +442,141 @@ describe('known bugs: Japanese negates a lowered degree twice (A249)', () => {
       fr: "le chat n'est pas moins grand que le chien.", de: 'der Kater ist nicht weniger groß als der Hund.',
       es: 'el gato no es menos grande que el perro.', pt: 'o gato não é menos grande do que o cão.',
     });
+  });
+});
+
+// P09-E18: the standard of an attributive adjective, `adjectiveStandards`, index-aligned with the
+// adjectives. The words are E5's; what is new is where each language puts them inside the noun
+// phrase — after the noun in English (the equative adjective with it) and German, right after the
+// compared adjective in Romance, before it in Japanese.
+describe('attributive (P09-E18)', () => {
+  const compared = (concept: string, degree: Degree, standard: NounElement = DOG, extra: Partial<NounPhrase> = {}): NounPhrase =>
+    np(concept, { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [standard], ...extra });
+  const sees = (object: NounPhrase): PhrasePlan => clause(np('MAN'), 'SEE', { directObject: object });
+
+  test('the man sees a bigger cat than the dog', () => {
+    expect(sayAll(sees(compared('CAT', 'more')))).toEqual({
+      en: 'the man sees a bigger cat than the dog.',
+      it: "l'uomo vede un gatto più grande del cane.",
+      fr: "l'homme voit un chat plus grand que le chien.",
+      // The standard in the object's accusative.
+      de: 'der Mann sieht einen größeren Kater als den Hund.',
+      es: 'el hombre ve un gato más grande que el perro.',
+      pt: 'o homem vê um gato maior do que o cão.',
+      ja: '男は犬より大きい猫を見ます。',
+    });
+  });
+
+  test('the cat is a bigger animal than the dog', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: compared('ANIMAL', 'more') } } }))).toEqual({
+      en: 'the cat is a bigger animal than the dog.',
+      it: 'il gatto è un animale più grande del cane.',
+      fr: 'le chat est un animal plus grand que le chien.',
+      // A predicate noun is nominative, and so is its standard.
+      de: 'der Kater ist ein größeres Tier als der Hund.',
+      es: 'el gato es un animal más grande que el perro.',
+      pt: 'o gato é um animal maior do que o cão.',
+      ja: '猫は犬より大きい動物です。',
+    });
+  });
+
+  test('a cat as big as the dog eats', () => {
+    expect(sayAll(clause(compared('CAT', 'equally'), 'EAT'))).toEqual({
+      // "*an as big cat as the dog": the equative moves behind the noun with its standard.
+      en: 'a cat as big as the dog eats.',
+      it: 'un gatto tanto grande quanto il cane mangia.',
+      fr: 'un chat aussi grand que le chien mange.',
+      de: 'ein so großer Kater wie der Hund frisst.',
+      es: 'un gato tan grande como el perro come.',
+      pt: 'um gato tão grande como o cão come.',
+      ja: '犬と同じくらい大きい猫は食べます。',
+    });
+  });
+
+  test('less, and Japanese\'s negated ほど', () => {
+    expect(sayAll(sees(compared('CAT', 'less')))).toEqual({
+      en: 'the man sees a less big cat than the dog.',
+      it: "l'uomo vede un gatto meno grande del cane.",
+      fr: "l'homme voit un chat moins grand que le chien.",
+      de: 'der Mann sieht einen weniger großen Kater als den Hund.',
+      es: 'el hombre ve un gato menos grande que el perro.',
+      pt: 'o homem vê um gato menos grande do que o cão.',
+      ja: '男は犬ほど大きくない猫を見ます。',
+    });
+  });
+
+  test('German: the standard takes the case of the phrase it compares with', () => {
+    expect(say(sees(compared('CAT', 'more')), 'de')).toBe('der Mann sieht einen größeren Kater als den Hund.');
+    expect(say(clause(compared('CAT', 'more'), 'EAT'), 'de')).toBe('ein größerer Kater als der Hund frisst.');
+    expect(say(clause(np('MAN'), 'GIVE', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: compared('CAT', 'more') } },
+    }), 'de')).toBe('der Mann gibt einem größeren Kater als dem Hund das Buch.');
+    // A pronoun standard declines too: "als mich", parallel to the object.
+    expect(say(sees(compared('CAT', 'more', np('FIRST_PERSON'))), 'de')).toBe('der Mann sieht einen größeren Kater als mich.');
+  });
+
+  test('English: the comparative stays before the noun, and the standard precedes a relative clause', () => {
+    expect(say(sees(compared('CAT', 'more', DOG, { relative: { verbPhrase: { verb: 'RUN' } } })), 'en'))
+      .toBe('the man sees a bigger cat than the dog that runs.');
+    // A possessor with a standard is post-modified: the of-genitive, never "*a bigger cat than the dog's book".
+    expect(say(clause(np('BOOK', { possessor: compared('CAT', 'more') }), 'EAT'), 'en')).toMatch(/^the book of a bigger cat than the dog /);
+  });
+
+  test('Romance: the compared adjective moves last among the postnominal ones, its standard after it (D3)', () => {
+    const brownFirst = sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BROWN', 'BIG'], adjectiveDegrees: ['positive', 'more'], adjectiveStandards: [undefined, DOG],
+    }));
+    const bigFirst = sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG', 'BROWN'], adjectiveDegrees: ['more', 'positive'], adjectiveStandards: [DOG],
+    }));
+    for (const plan of [brownFirst, bigFirst]) {
+      expect(sayAll(plan)).toMatchObject({
+        it: "l'uomo vede un gatto marrone e più grande del cane.",
+        fr: "l'homme voit un chat brun et plus grand que le chien.",
+        es: 'el hombre ve un gato marrón y más grande que el perro.',
+        pt: 'o homem vê um gato castanho e maior do que o cão.',
+      });
+    }
+    // Japanese leads with it, so the standard's noun takes no modifier before it (茶色の犬 would be
+    // "the brown dog").
+    expect(say(brownFirst, 'ja')).toBe('男は犬より大きい茶色の猫を見ます。');
+    expect(say(bigFirst, 'ja')).toBe('男は犬より大きい茶色の猫を見ます。');
+  });
+
+  test('a genitive possessor keeps its place after the standard (A271 not widened)', () => {
+    expect(sayAll(sees(compared('CAT', 'more', DOG, { possessor: np('WOMAN') })))).toMatchObject({
+      it: "l'uomo vede un gatto più grande del cane della donna.",
+      fr: "l'homme voit un chat plus grand que le chien de la femme.",
+      es: 'el hombre ve un gato más grande que el perro de la mujer.',
+      pt: 'o homem vê um gato maior do que o cão da mulher.',
+      // German puts it after the possessor: "*als den Hund der Frau" would be the woman's dog.
+      de: 'der Mann sieht einen größeren Kater der Frau als den Hund.',
+    });
+  });
+
+  test('at most one renders: the first compared adjective with a standard (D1)', () => {
+    const two = sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG', 'BEAUTIFUL'], adjectiveDegrees: ['more', 'more'], adjectiveStandards: [DOG, np('FOX')],
+    }));
+    for (const text of Object.values(sayAll(two))) expect(text).not.toMatch(/fox|volpe|renard|Fuchs|zorro|raposa|キツネ/);
+    expect(say(two, 'en')).toBe('the man sees a bigger more beautiful cat than the dog.');
+  });
+
+  test('a standard on a positive or a superlative adjective is dropped', () => {
+    const plain = (degree: Degree) => sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: [degree] }));
+    expect(sayAll(sees(compared('CAT', 'positive')))).toEqual(sayAll(plain('positive')));
+    expect(sayAll(sees(compared('CAT', 'most')))).toEqual(sayAll(plain('most')));
+  });
+
+  test('Japanese: a second plain adjective after the compared one', () => {
+    expect(say(sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG', 'OLD'], adjectiveDegrees: ['more', 'positive'], adjectiveStandards: [DOG],
+    })), 'ja')).toBe('男は犬より大きい古い猫を見ます。');
+  });
+
+  test('the head\'s standard and an adjective\'s are independent', () => {
+    expect(sayAll(cat('more', DOG))).toEqual(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'more', headStandard: DOG, adjectiveStandards: [np('FOX')] }) } },
+    })));
   });
 });

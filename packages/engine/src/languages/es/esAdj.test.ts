@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, AGUA, CASA, concept, FRIO, GATO, GRANDE, HERMOSO, np, NUEVO, PRIMERO, RATON, SEGUNDO, TERCERO, VIEJO } from './es.fixtures.js';
+import { adj, AGUA, CASA, concept, el, FRIO, GATO, GRANDE, HERMOSO, MARRON, np, NUEVO, PERRO, PRIMERO, RATON, SEGUNDO, TERCERO, VIEJO } from './es.fixtures.js';
 import { esAdj } from './esAdj.js';
 
 describe('esAdj', () => {
@@ -39,5 +39,15 @@ describe('esAdj', () => {
 
   test('skips an adjective with no Spanish form', () => {
     expect(esAdj(np(CASA, {}, { adjectives: [adj({ role: 'adjective' }), adj(VIEJO)] })).post).toBe('vieja');
+  });
+});
+
+describe('esAdj: the compared adjective with a standard (P09-E18)', () => {
+  test('is written with it and coordinated last', () => {
+    const phrase = np(GATO, {}, {
+      adjectives: [adj(GRANDE, { degree: 'more', standard: '1' }), adj(MARRON)],
+      adjectiveStandard: { index: 0, standard: el(np(PERRO, { definiteness: 'definite' })) },
+    });
+    expect(esAdj(phrase).post).toBe('marrón y más grande que el perro');
   });
 });

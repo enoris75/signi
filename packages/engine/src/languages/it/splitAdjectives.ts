@@ -1,5 +1,6 @@
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { PRENOMINAL, PRENOMINAL_QUALIFYING } from './it.consts.js';
 
@@ -14,6 +15,10 @@ import { PRENOMINAL, PRENOMINAL_QUALIFYING } from './it.consts.js';
  *
  * A determiner-like prenominal (an ordinal, OTHER) does not qualify the noun, so it does not take
  * that slot and does not stop a qualifying adjective from taking it: "un altro grande topo".
+ *
+ * The compared adjective that carries a standard (P09-E18) moves **last** among the postnominal ones,
+ * so its standard can follow it without attaching to another adjective: "un gatto marrone e più grande
+ * del cane", whatever order the plan listed them in.
  */
 export function splitAdjectives(np: ResolvedNounPhrase): { pre: ConceptForms[]; post: ConceptForms[] } {
   const pre: ConceptForms[] = [];
@@ -28,5 +33,7 @@ export function splitAdjectives(np: ResolvedNounPhrase): { pre: ConceptForms[]; 
     if (prenominal && qualifying) qualified = true;
     (prenominal ? pre : post).push(a);
   }
+  const compared = post.findIndex((a) => attributiveStandard(np, a) !== undefined);
+  if (compared >= 0) post.push(...post.splice(compared, 1));
   return { pre, post };
 }

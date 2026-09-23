@@ -1,15 +1,24 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
 import { PRENOMINAL } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
+import { frStandard } from './frStandard.js';
 
-/** Split a phrase's adjectives (surface = base form) into pre- and post-nominal groups. */
+/**
+ * Split a phrase's adjectives (surface = base form) into pre- and post-nominal groups.
+ *
+ * The compared adjective that carries a standard (P09-E18) is written with it and moves **last**
+ * among the postnominal ones, so the standard attaches to it alone: "un chat brun et plus grand que le
+ * chien".
+ */
 export function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[] } {
   const pre: string[] = [];
   const post: string[] = [];
+  let compared = '';
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   for (const a of np.adjectives) {
@@ -30,7 +39,10 @@ export function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: 
     // "le chat meilleur"), even when its plain form would precede the noun — this also avoids
     // elision artefacts ("l'aussi grand chat"). An intensifier moves it the same way (C33).
     const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a);
+    const standard = attributiveStandard(np, a);
+    if (standard) { compared = [word, frStandard(a, standard)].filter(Boolean).join(' '); continue; }
     (prenominal ? pre : post).push(word);
   }
+  if (compared) post.push(compared);
   return { pre, post };
 }

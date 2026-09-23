@@ -14,15 +14,25 @@ describe('resolveStandard', () => {
       const standard = resolveStandard(plan(degree), h, 'it', LOOKUP);
       expect(standard?.conjuncts.map((c) => c.head.forms['base'])).toEqual(['cane']);
       expect(h.forms['standard']).toBe('1');
+      expect(h.forms).not.toHaveProperty('domain');
     }
   });
 
-  test('positive and the superlatives drop it, leaving the head unmarked', () => {
-    for (const degree of ['positive', 'most', 'least'] as const) {
+  test('the superlatives resolve it as their set and mark the head domain, never standard (P09-E19)', () => {
+    for (const degree of ['most', 'least'] as const) {
       const h = head();
-      expect(resolveStandard(plan(degree), h, 'it', LOOKUP)).toBeUndefined();
+      const set = resolveStandard(plan(degree), h, 'it', LOOKUP);
+      expect(set?.conjuncts.map((c) => c.head.forms['base'])).toEqual(['cane']);
+      expect(h.forms['domain']).toBe('1');
       expect(h.forms).not.toHaveProperty('standard');
     }
+  });
+
+  test('positive drops it, leaving the head unmarked', () => {
+    const h = head();
+    expect(resolveStandard(plan('positive'), h, 'it', LOOKUP)).toBeUndefined();
+    expect(h.forms).not.toHaveProperty('standard');
+    expect(h.forms).not.toHaveProperty('domain');
   });
 
   test('a noun head takes no standard', () => {

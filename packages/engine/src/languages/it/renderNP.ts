@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessiveIt } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
@@ -8,6 +9,7 @@ import { agreeAdj } from './agreeAdj.js';
 import { defArticle } from './defArticle.js';
 import { isPlural } from './isPlural.js';
 import { itDeg } from './itDeg.js';
+import { itStandard } from './itStandard.js';
 import { itMods } from './itMods.js';
 import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { joinArt } from './joinArt.js';
@@ -51,8 +53,11 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, the
   // conjunction only before the last ("forte, felice e freddo"), the way a coordinated noun slot
   // is joined — not the conjunction repeated between every pair.
+  // The compared adjective, last among them (see `splitAdjectives`), is followed by its standard of
+  // comparison, ahead of the attributive nouns and a genitive possessor: "un gatto più grande del
+  // cane" (P09-E18).
   const postStr = joinConjuncts(
-    post.map((a) => itDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural))),
+    post.map((a) => joinWords([itDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)), itStandard(a, attributiveStandard(np, a))])),
     ', ',
     (next) => (/^e/i.test(next) ? ' ed ' : ' e '),
   );

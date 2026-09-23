@@ -5,9 +5,9 @@ import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
 import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { jaCounted } from './jaCounted.js';
-import { jaDegreeAdverb } from './jaDegreeAdverb.js';
+import { attributiveStandard } from '../../functions/attributiveStandard.js';
+import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
-import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -79,6 +79,8 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     core.push(wordSeg(base, m.concept.forms['reading']), { t: 'の' });
   }
   const adjSegs: RubySegment[] = [];
+  // The one adjective with a standard of comparison (P09-E18), which leads the whole phrase.
+  const comparedSegs: RubySegment[] = [];
   for (const a of np.adjectives) {
     // OWN after a genitive possessor is 自身の, the word Japanese uses when the owner has been
     // named ("猫自身の本"); standing for the possessor it is 自分の, which the base already is.
@@ -93,11 +95,16 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     // Prenominal intensifier and degree adverb, bound directly to the adjective (とても大きい), no
     // space; a comparative intensifier stands in for もっと (ずっと大きい, A248). A suffix intensifier
     // writes no word here — the base above carries it (C33).
-    const intensifier = jaIntensifierSeg(a);
-    if (intensifier) adjSegs.push(intensifier);
-    const deg = jaDegreeAdverb(a);
-    if (deg) adjSegs.push({ t: deg });
-    adjSegs.push(wordSeg(base, reading));
+    //
+    // The one adjective with a standard of comparison has the standard lead them, in the adverb's
+    // place — 犬より大きい猫 (P09-E18), exactly as a predicate adjective does (see `jaDegreeSegs`) —
+    // and it moves to the **front of the phrase**, ahead of the relative clause, the possessor, the
+    // determiner and the other adjectives. A prenominal modifier modifies the nearest noun after it,
+    // and the standard ends in one: 茶色の犬より大きい猫 is "bigger than the brown dog", この犬より is
+    // "than this dog", 女の犬より "than the woman's dog". In front, the standard's noun has nothing
+    // before it to take: 犬より大きい茶色の猫, 犬より大きいこの猫, 犬より大きい女の猫.
+    const standard = attributiveStandard(np, a);
+    (standard ? comparedSegs : adjSegs).push(...jaDegreeSegs(a, standard), wordSeg(base, reading));
   }
   const head = np.head.forms;
   // A cardinal is written with the counter its noun chooses, ahead of the adjectives (二匹の大きい猫);
@@ -116,5 +123,5 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
       : wordSeg(head['base'] ?? '', head['reading']));
   }
   // A relative clause is prenominal: the whole clause precedes everything else (see relativeClauseSegs).
-  return [...relativeClauseSegs(np), ...core];
+  return [...comparedSegs, ...relativeClauseSegs(np), ...core];
 }

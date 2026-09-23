@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { CHIEN, GRAND, HOMME, JE, el, np } from './fr.fixtures.js';
+import { ANIMAL, CHIEN, GRAND, HOMME, JE, el, np } from './fr.fixtures.js';
 import { frComparison } from './frComparison.js';
-import { frStandard } from './frStandard.js';
+import { frStandard as render } from './frStandard.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+
+/** The renderer reads the compared adjective and its standard; these tests build them as one phrase. */
+const frStandard = (np: ResolvedNounPhrase) => render(np.head, np.standard);
 
 const the = { definiteness: 'definite' };
 const compared = (degree: string, standard = el(np(CHIEN, the))) =>
@@ -30,5 +34,20 @@ describe('frStandard', () => {
   test('the equative keeps "aussi" either way', () => {
     expect(frComparison(compared('equally').head, 'masc', false)).toBe('aussi grand');
     expect(frComparison(np(GRAND, { degree: 'equally' }).head, 'masc', false)).toBe('aussi grand');
+  });
+});
+
+describe('frStandard: a superlative\'s set (P09-E19)', () => {
+  const selecting = (standard: ReturnType<typeof el>) => np(GRAND, { degree: 'most', domain: '1' }, { standard });
+  const plural = { ...the, number: 'plural' };
+
+  test('"de" fused with each conjunct\'s article', () => {
+    expect(frStandard(selecting(el(np(ANIMAL, plural))))).toBe('des animaux');
+    expect(frStandard(selecting(el(np(CHIEN, the))))).toBe('du chien');
+    expect(frStandard(selecting(el(np(ANIMAL, plural), np(HOMME, plural))))).toBe('des animaux et des hommes');
+  });
+
+  test('"d\'entre" before a pronoun, never the bare "de"', () => {
+    expect(frStandard(selecting(el(np(JE, { number: 'plural', disjunctive: 'nous' }))))).toBe("d'entre nous");
   });
 });

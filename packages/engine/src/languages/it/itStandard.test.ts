@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { CANE, GRANDE, IO, UOMO, el, np } from './it.fixtures.js';
+import { ANIMALE, CANE, GRANDE, IO, NOI, UOMO, el, np } from './it.fixtures.js';
 import { itDeg } from './itDeg.js';
-import { itStandard } from './itStandard.js';
+import { itStandard as render } from './itStandard.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+
+/** The renderer reads the compared adjective and its standard; these tests build them as one phrase. */
+const itStandard = (np: ResolvedNounPhrase) => render(np.head, np.standard);
 
 const the = { definiteness: 'definite' };
 const compared = (degree: string, standard = el(np(CANE, the))) =>
@@ -31,5 +35,16 @@ describe('itStandard', () => {
   test('the equative adverb is "tanto" before a standard and "ugualmente" without one', () => {
     expect(itDeg(compared('equally').head, 'grande')).toBe('tanto grande');
     expect(itDeg(np(GRANDE, { degree: 'equally' }).head, 'grande')).toBe('ugualmente grande');
+  });
+});
+
+describe('itStandard: a superlative\'s set (P09-E19)', () => {
+  const selecting = (standard: ReturnType<typeof el>) => np(GRANDE, { degree: 'most', domain: '1' }, { standard });
+  const plural = { ...the, number: 'plural' };
+
+  test('the comparative\'s fused "di", per conjunct, and the tonic pronoun', () => {
+    expect(itStandard(selecting(el(np(ANIMALE, plural))))).toBe('degli animali');
+    expect(itStandard(selecting(el(np(ANIMALE, plural), np(UOMO, plural))))).toBe('degli animali e degli uomini');
+    expect(itStandard(selecting(el(np(NOI))))).toBe('di noi');
   });
 });

@@ -102,7 +102,7 @@ export function complementSegs(
           return;
         }
         const { base, reading, verbal } = jaComparisonAdj(np.head);
-        segs.push(...jaDegreeSegs(np));
+        segs.push(...jaDegreeSegs(np.head, np.standard));
         // By class (see `jaAdjClass`): an i-adjective takes its く-form, a na- or の-adjective its bare
         // stem + に (幸せに, 茶色に), and a た-adjective the state 〜ている as a ように clause, which takes no
         // に either (疲れているように思える).

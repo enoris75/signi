@@ -1,6 +1,6 @@
 import type { NounPhrase } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
-import type { ResolvedNounPhrase } from '../../types.js';
+import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
 import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
@@ -9,6 +9,7 @@ import { applyNounGender } from './applyNounGender.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
+import { resolveAdjectiveStandard } from './resolveAdjectiveStandard.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
 import { resolveStandard } from './resolveStandard.js';
 
@@ -163,7 +164,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   }
   // …and its intensifier, the same way ("is very big"; see `applyIntensifier`, C33).
   if (head.forms['role'] === 'adjective') applyIntensifier(head, np.headIntensifier, language, lookup);
-  // …and what its degree compares it with ("bigger than the dog"), where the degree takes one at all
+  // …and what its degree measures it against — the standard ("bigger than the dog") or the superlative's
+  // set ("the biggest of the animals", P09-E19) — where the degree takes one at all
   // (see `resolveStandard`, P09-E5).
   const standard = resolveStandard(np, head, language, lookup);
   // A title stands with a personal name and nowhere else: `proper` says it is a name and `human`
@@ -199,23 +201,35 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   // bind it to and the flag is ignored (C37).
   const own = np.possessorOwn && np.possessor ? resolve(POSSESSOR_OWN_ADJECTIVE, language, lookup) : undefined;
   if (own) own.forms['possessor_bound'] = '1';
+  // The standard of one attributive adjective ("a bigger cat than the dog"), at most one per phrase
+  // (see `resolveAdjectiveStandard`, P09-E18). Its index is looked up in the resolved list below,
+  // which a bound OWN leads and a fused adjective has left.
+  const attributive = resolveAdjectiveStandard(np, language, lookup);
+  let compared: ConceptForms | undefined;
+  const adjectives = (own ? [own] : []).concat((np.adjectives ?? []).flatMap((id, i) => {
+    // An adjective the head fused into its own word is already said (兄 IS "older brother"), so it
+    // is dropped here. The ones that stay keep their index, and with it their degree and intensifier.
+    if (fused.has(i)) return [];
+    const cf = resolve(id, language, lookup);
+    // Thread the per-adjective comparative degree onto its forms (like number/gender/
+    // definiteness) so each engine reads it off `forms['degree']`. Omit the plain form.
+    const deg = np.adjectiveDegrees?.[i];
+    if (deg && deg !== 'positive') cf.forms['degree'] = deg;
+    // The intensifier is a word of its own, so it is resolved in this language and its surface,
+    // reading and position ride on the adjective beside the degree (C33). It stands before a
+    // noun here, which some words say differently (English has no "a just as big cat", A255).
+    applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, true);
+    // The one attributive standard, on the adjective it belongs to (P09-E18): marked as a predicate
+    // adjective's is, so its equative adverb takes the circumfix ("a cat as big as the dog").
+    if (i === attributive?.planIndex) { cf.forms['standard'] = '1'; compared = cf; }
+    return [cf];
+  }));
+  const adjectiveStandard = attributive && compared
+    ? { index: adjectives.indexOf(compared), standard: attributive.standard }
+    : undefined;
   return {
     head,
-    adjectives: (own ? [own] : []).concat((np.adjectives ?? []).flatMap((id, i) => {
-      // An adjective the head fused into its own word is already said (兄 IS "older brother"), so it
-      // is dropped here. The ones that stay keep their index, and with it their degree and intensifier.
-      if (fused.has(i)) return [];
-      const cf = resolve(id, language, lookup);
-      // Thread the per-adjective comparative degree onto its forms (like number/gender/
-      // definiteness) so each engine reads it off `forms['degree']`. Omit the plain form.
-      const deg = np.adjectiveDegrees?.[i];
-      if (deg && deg !== 'positive') cf.forms['degree'] = deg;
-      // The intensifier is a word of its own, so it is resolved in this language and its surface,
-      // reading and position ride on the adjective beside the degree (C33). It stands before a
-      // noun here, which some words say differently (English has no "a just as big cat", A255).
-      applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, true);
-      return [cf];
-    })),
+    adjectives,
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can
     // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise). Apply
     // the modifier's own number (so Romance engines can select its plural surface and
@@ -275,5 +289,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // The standard of an adjective head's comparison, resolved above (P09-E5). Each engine places it
     // beside the predicate adjective with the word its degree selects.
     ...(standard ? { standard } : {}),
+    // …and the standard of one attributive adjective, with that adjective's index (P09-E18). Each
+    // engine places it inside the noun phrase: after the noun (en, de), after the adjective (Romance)
+    // or before it (ja).
+    ...(adjectiveStandard ? { adjectiveStandard } : {}),
   };
 }
