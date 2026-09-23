@@ -354,6 +354,32 @@ changes in this plan:
   ([P05](../P05-polish/README.md)) uses one word, *teściowa*, for both.
 - **Catalan ([P03](../P03-catalan/README.md))** keeps the article: "la meva mare". It needs no flag.
 
+## Tasks
+
+The follow-ups below were broken down on 2026-09-23. **Five need a construct** and are task files in
+this folder; the rest are vocabulary, which goes through
+[`/seed`](../../../../.claude/skills/seed/SKILL.md) and the B queue as P09 §2's words did, not
+through a feature task.
+
+| task | what it is | size |
+|---|---|---|
+| [P11-F1](P11-F1-japanese-honorific-verbs.md) | Japanese honorific and humble verbs — いらっしゃる, 召し上がる, 参る | a lexeme column and one branch; reads the `own` mark D3 already sets |
+| [P11-F2](P11-F2-coreference.md) | Coreference — a possessor that is a **link**, not features. Answers both "his mother" (D3's own limit) and automatic 自分の | the one real model change: a third `Possessor` kind |
+| [P11-F3](P11-F3-address-and-the-vocative.md) | Address — a kin term as a name ("Mom runs") and the vocative ("Mom, run!") | two halves; the name half is data, the vocative is a new slot |
+| [P11-F4](P11-F4-indefinite-possessed-head.md) | "a friend of mine" / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
+| [P11-F5](P11-F5-counting-relatives.md) | 三人兄弟 | a third value of a flag that has two |
+
+**No task, by design:**
+
+- **Half- and step-siblings, step-children, great-grandparents, godparents, *ex-*; MARRIED, SINGLE,
+  DIVORCE, BE_BORN, RAISE_CHILD; British *Mum*.** Seeding. Verified unseeded in the working tree on
+  2026-09-23 — MARRIED, SINGLE, DIVORCE, BE_BORN, RAISE_CHILD, GODPARENT, GREAT_GRANDFATHER and
+  HALF_BROTHER are all absent, and each is a `/seed` away once someone wants it. *Mum* waits on
+  F3's name half.
+- **The Russian and Ukrainian in-law split** (свекровь / тёща). This plan already says to decide it
+  when [P06](../P06-russian/README.md) lands, and that is still right: the fusion it would need is
+  keyed on a possessor no other language reads.
+
 ## Out of scope (follow-ups)
 
 - **Japanese honorific verbs:** お母さんがいらっしゃいます and 召し上がります, 父が参ります. The `own`
