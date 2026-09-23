@@ -1,6 +1,7 @@
 import type { PronominalPossessor } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
-import type { ResolvedNounPhrase } from '../../types.js';
+import { isBoundPossessor } from '../../functions/boundPossessor.js';
+import type { BoundPossessor, ResolvedNounPhrase } from '../../types.js';
 
 /** The determiners under which a genitive possessor is a kind of person rather than a person. */
 const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
@@ -41,16 +42,19 @@ const NOBODY_IN_PARTICULAR = new Set(['indefinite', 'bare']);
  */
 export function applyPossessorForm(
   forms: Record<string, string>,
-  possessor?: ResolvedNounPhrase | PronominalPossessor,
+  possessor?: ResolvedNounPhrase | PronominalPossessor | BoundPossessor,
 ): void {
   if (!possessor) return;
   if (!isPronominalPossessor(possessor) && NOBODY_IN_PARTICULAR.has(possessor.head.forms['definiteness'] ?? 'definite')) return;
   // The possessor in the only two terms this decides on: whether the relative is the speaker's own,
-  // and whether the possessor is a person at all.
+  // and whether the possessor is a person at all. A possessor linked to the subject (P11-E2) knows the
+  // second from the subject's own head, where a possessive pronoun's features can only guess it.
   const { own, human } = isPronominalPossessor(possessor)
     ? {
         own: possessor.person === '1',
-        human: possessor.person === '2' || (possessor.person === '3' && possessor.gender !== 'neut'),
+        human: isBoundPossessor(possessor)
+          ? possessor.human
+          : possessor.person === '2' || (possessor.person === '3' && possessor.gender !== 'neut'),
       }
     : {
         own: possessor.head.forms['own'] === '1',

@@ -1,5 +1,5 @@
 import type { NounPhrase } from '@signi/shared';
-import { isPronominalPossessor } from '@signi/shared';
+import { isCoreferentPossessor, isPronominalPossessor } from '@signi/shared';
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
 import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
@@ -33,6 +33,13 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   // word depends on who owns it: 母 is my mother and お母さん is yours, "ma femme" but "une épouse"
   // (P11 §2, `applyPossessorForm`). A possessor deep in a genitive chain therefore reaches the head
   // that names it, one link at a time.
+  //
+  // A coreferent possessor is a link to the clause's subject, bound to that subject's features by the
+  // clause before its phrases resolve (see `bindCoreferents`, P11-E2). One still unbound here stands
+  // in a phrase no clause holds — a word, a gloss — and has nothing to refer to.
+  if (np.possessor && isCoreferentPossessor(np.possessor)) {
+    throw new Error('a coreferent possessor needs a clause whose subject it names, and this phrase stands in none (P11-E2)');
+  }
   const possessor = np.possessor
     ? (isPronominalPossessor(np.possessor)
         ? np.possessor
