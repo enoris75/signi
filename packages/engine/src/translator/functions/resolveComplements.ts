@@ -44,6 +44,14 @@ export function resolveComplements(
     // shape ("*agit comme heureux"), and a pronoun is no role at all ("*as him"); either drops the
     // whole complement rather than render one of them.
     if (type === 'role' && resolvedPhrase.conjuncts.some((np) => ROLE_EXCLUDED_HEADS.has(np.head.forms['role'] ?? ''))) continue;
+    // The object predicative renders no standard in six of the seven (P09-E5), so its head keeps no
+    // `standard` flag either: that flag turns the equative's adverb into the first half of a
+    // circumfix whose second half never comes ("makes the house *as* big.", A269). The resolved
+    // standard itself stays, for Japanese, which does render it (家を犬と同じくらい大きく作ります) and
+    // reads the element, never the flag.
+    if (type === 'objectPredicative') {
+      for (const conjunct of resolvedPhrase.conjuncts) delete conjunct.head.forms['standard'];
+    }
     // An *adjective-modified* measure manner adverbial names a generic rate ("at high speed"),
     // not an identifiable one, so a definite article reads oddly ("at *the* high speed"). Force
     // the definite — chosen, or the slot's default — bare. Two cases keep their article, as they

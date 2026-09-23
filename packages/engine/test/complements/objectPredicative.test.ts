@@ -275,7 +275,7 @@ describe('known bugs: an equative object predicative with a standard writes half
   const seesAs = (phrase: NounPhrase) =>
     sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE'), complements: { objectPredicative: { phrase, specifiers: ESSIVE } } }));
 
-  test.fails('the factitive: the equative without its standard', () => {
+  test('the factitive: the equative without its standard', () => {
     expect(makes(equal)).toMatchObject({
       en: 'the man makes the house equally big.', it: "l'uomo fa la casa ugualmente grande.",
       fr: "l'homme fait la maison aussi grande.", de: 'der Mann macht das Haus gleich groß.',
@@ -283,11 +283,22 @@ describe('known bugs: an equative object predicative with a standard writes half
     });
   });
 
-  test.fails('the essive: the same', () => {
+  test('the essive: the same', () => {
     expect(seesAs(equal)).toMatchObject({
       en: 'the man sees the house as equally big.', it: "l'uomo vede la casa come ugualmente grande.",
       de: 'der Mann sieht das Haus als gleich groß.', es: 'el hombre ve la casa como igual de grande.',
       pt: 'o homem vê a casa como igualmente grande.',
+    });
+  });
+
+  test('Japanese keeps the standard it renders on the factitive, equative and comparative alike', () => {
+    expect(makes(equal).ja).toBe('男は家を犬と同じくらい大きく作ります。');
+    expect(makes(np('BIG', { headDegree: 'more', headStandard: np('DOG') })).ja).toBe('男は家を犬より大きく作ります。');
+  });
+
+  test('the comparative drops the standard in the other six as it did', () => {
+    expect(makes(np('BIG', { headDegree: 'more', headStandard: np('DOG') }))).toMatchObject({
+      it: "l'uomo fa la casa più grande.", de: 'der Mann macht das Haus größer.',
     });
   });
 
