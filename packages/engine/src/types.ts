@@ -261,6 +261,8 @@ export interface ResolvedVerbPhrase {
    * (en, pt), and reads the complement to pick its copula (es/pt estar). Never a rendered complement.
    */
   elided?: ElidedComplement;
+  /** The plan asked for the humble register (see VerbPhrase.humble). Read by Japanese alone. */
+  humble?: boolean;
 }
 
 /** An elided subject complement and the slot it came from (see ResolvedVerbPhrase.elided). */

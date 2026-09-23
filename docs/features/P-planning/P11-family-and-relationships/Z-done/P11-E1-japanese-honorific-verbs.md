@@ -1,12 +1,12 @@
 # P11-E1. Japanese honorific and humble verbs
 
 **Construct:** the verb register Japanese picks from **whose** the subject is — お母さんが
-いらっしゃいます against 母が参ります. The first of [P11](README.md)'s *Out of scope* follow-ups.
+いらっしゃいます against 母が参ります. The first of [P11](../README.md)'s *Out of scope* follow-ups.
 **Shape:** a lexeme-level suppletion in Japanese only, keyed on a mark the engine **already sets**:
 `forms['own']`, which D3 put on a `kin` head one link at a time.
 **Scope:** Japanese alone. The other six languages change nothing — this is the same asymmetry P11
 itself had.
-**Status:** planning, unscheduled. Split out of P11's follow-ups on 2026-09-23.
+**Status:** shipped 2026-09-24. Split out of P11's follow-ups on 2026-09-23.
 
 | plan | ja today | ja wanted |
 |---|---|---|
@@ -15,7 +15,66 @@ itself had.
 | my father comes | 父が来ます | 父が**参ります** |
 | the cat eats | 猫が食べます | 猫が食べます (unchanged) |
 
-**Proposed, not engine output.**
+**Proposed, not engine output.** The engine's output is in *Done* below.
+
+## Done
+
+Shipped 2026-09-24. Engine and corpus together; the humble is **plan-only** (no builder control yet).
+Pinned in [`test/honorific-verbs.test.ts`](../../../../../packages/engine/test/honorific-verbs.test.ts),
+with the two ja units
+[`jaRespectRegister`](../../../../../packages/engine/src/languages/ja/jaRespectRegister.ts) (whose the
+subject is) and [`jaRespectVerb`](../../../../../packages/engine/src/languages/ja/jaRespectVerb.ts)
+(the register's paradigm swapped in). Every concept `definition` renders the same in Japanese as
+before (a before/after dump of all 486), and `kinship.test.ts` passes unchanged.
+
+| plan | ja |
+|---|---|
+| your mother is (at home) | あなたのお母さんは家に**いらっしゃいます**。 |
+| your mother eats | あなたのお母さんは**召し上がります**。 |
+| my father comes | 父は来ます。 |
+| my father comes, `humble` | 父は**参ります**。 |
+| the cat eats | 猫は食べます。 (unchanged) |
+
+The verbs and their words, each citing its dictionary sense in a comment on the lexeme:
+
+| verb | 尊敬語 `honorific` | 謙譲語 `humble` |
+|---|---|---|
+| BE (the existential いる) | いらっしゃる | おる |
+| GO, COME | いらっしゃる | 参る |
+| EAT, DRINK | 召し上がる | いただく |
+| DO | なさる | いたす |
+| SAY | おっしゃる | 申す |
+| GIVE (あげる) | — | 差し上げる |
+
+What landed differently from the plan below:
+
+1. **A column is a small paradigm, not one word.** `honorific` is the dictionary form, and beside it
+   `honorific_masu_present`, `honorific_te` and `honorific_nai` (the same four for `humble`), each
+   with a `_reading` where the word has kanji. The ます stem of these verbs is irregular
+   (いらっしゃいます, なさいます), so it cannot be derived from the dictionary form. The te and nai forms
+   are what the progressive, the たら and the modal suffixes build on (召し上がっています,
+   いらっしゃったら, 召し上がりたいです).
+2. **BE's pair lives on the engine's いる** (`JA_IRU` in `ja.consts.ts`), not on BE's lexeme. BE's
+   Japanese lexeme is the copula です, and the existential いる is a word the engine puts in its place.
+   The copula itself (でいらっしゃる) stays out of scope, as §Out of scope says.
+3. **"Someone else's" means what the noun already decided.** The verb is honorific exactly where
+   `applyPossessorForm` gives the noun its honorific: a `kin` head that is not `own`, whose possessor
+   is a person in particular (a 2nd person, a 3rd person that isn't neuter, or a definite human
+   noun). A kin subject with no possessor (母親), an animal's (猫の母) or a kind of person's (子供の母親)
+   keeps the plain verb. A coordinated subject is raised only when every conjunct is.
+4. **GIVE has no honorific, and RECEIVE is not seeded.** くださる is the honorific of くれる (giving
+   *towards* the speaker), not of あげる. GET is 手に入れる, which has no suppletive pair, and no もらう
+   verb is seeded.
+5. **Plain means more than the `plain` flag.** Besides every clause built plain (relative, content,
+   adverbial), a citation or purpose clause (`mood: 'infinitive'`), a command, a passive and a
+   causative keep the plain verb: each of them swaps in another verb (〜られる, 〜させる, する). The たら of
+   an "if" clause and a yes/no question take the register (もしあなたのお母さんがいらっしゃったら).
+6. **The humble flag reaches Japanese through the translator.** `VerbPhrase.humble` is copied onto
+   `ResolvedVerbPhrase.humble` in `resolveVerbPhrase` (one line). The Japanese clause decides whether
+   the subject lets it apply.
+7. **Tests** are in the new `honorific-verbs.test.ts`, not in `kinship.test.ts`. It covers the four
+   rows, every verb's pair, the conjugations, the negatives and the furigana (めしあがります,
+   まいります, もうします, and no reading left over the kana いらっしゃる / いただく).
 
 ## Why
 
@@ -28,17 +87,16 @@ It is the follow-up P11 named first, and the one whose groundwork is already lai
 
 ## Today
 
-Verified in the working tree on 2026-09-23. **P11's own work is uncommitted in this tree**, so the
-`own` mark below is read from the working copy, not from HEAD.
+Verified in the working tree on 2026-09-23, before this task shipped (P11 has since been committed).
 
-- [`applyPossessorForm.ts`](../../../../packages/engine/src/translator/functions/applyPossessorForm.ts)
+- [`applyPossessorForm.ts`](../../../../../packages/engine/src/translator/functions/applyPossessorForm.ts)
   sets `forms['own'] = '1'` on a `kin` head whose possessor is one's own, and carries the chain down
   (`own: possessor.head.forms['own'] === '1'`) — "my older brother's wife" is own all the way.
 - **There is no verb register anywhere.** No honorific, humble or polite-suppletion field on a
   lexeme, and no branch in the Japanese verb path: `grep -rn "honorific" packages/engine/src/languages/ja`
   returns nothing outside the noun phrase.
 - Japanese already distinguishes **plain** from **polite** (the `plain` flag threaded through
-  [`buildClauseSegments`](../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L29)),
+  [`buildClauseSegments`](../../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L29)),
   but that is a register of the *sentence*, not of the referent, and it is not this axis.
 
 ## Design
@@ -92,7 +150,7 @@ lowering one's own is a register the speaker chooses.
 `honorific` (and `humble`, D4) on the Japanese lexemes of the verbs that have one: BE / GO / COME,
 EAT, DRINK, DO, SAY, GIVE, RECEIVE. About eight verbs, all seeded.
 
-Record the columns in the [seed skill](../../../../.claude/skills/seed/SKILL.md)'s *A verb's
+Record the columns in the [seed skill](../../../../../.claude/skills/seed/SKILL.md)'s *A verb's
 language-specific columns*, where P11 recorded the noun's five.
 
 ## 2. Engine
@@ -124,5 +182,5 @@ existing reading columns carry.
 - **Social deixis beyond kin** (D3) — a teacher, a customer, a superior.
 - **The productive お+stem+になる / お+stem+する** (D2).
 - **Automatic humble** (D4), which needs an addressee in the model — the same gap
-  [P11-E3](P11-E3-address-and-the-vocative.md) runs into from the other side.
+  [P11-E3](../P11-E3-address-and-the-vocative.md) runs into from the other side.
 - **Honorific adjectives and copulas** (でいらっしゃる).

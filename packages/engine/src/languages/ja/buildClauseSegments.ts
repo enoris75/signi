@@ -19,6 +19,7 @@ import { jaCausativeVerb } from './jaCausativeVerb.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
+import { jaRespectRegister } from './jaRespectRegister.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
 import { questionAdverb } from './questionAdverb.js';
@@ -171,6 +172,14 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // A `no` causee is still this clause's object, and negates this clause, not the one it is spoken in
   // (A171): 猫はどの犬も食べるようにしません, "the cat causes no dog to eat". The clause keeps its own polarity.
   const causeeNegative = !!causee && isNegativeGroup(causee);
+  // Whose the subject is picks the verb's register (P11-E1): the honorific for someone else's
+  // relative, the humble for one's own side when the plan asks. A register belongs to the polite
+  // sentence a speaker addresses to someone, so a plain clause — a definition, a clause inside
+  // another, a citation, a command — keeps the plain verb, as does a verb this clause has swapped for
+  // another word (the passive's 〜られる, the causative's 〜させる or する).
+  const respect = !plain && !dropsSubject && !suffixCausative && verbPhrase === voiced && voiced.voice !== 'passive'
+    ? jaRespectRegister(phrase.subject, phrase.verbPhrase.humble)
+    : undefined;
   // The manner and the cause question words stand where an adverb would, ahead of the predicate.
   segs.push(...questionAdverb(asked, copula));
   segs.push(...predicateSegs(
@@ -184,7 +193,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
       ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun, ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}) } }
       : phrase.complements,
     impPN, plain,
-    subjectNegative || causeeNegative, animate,
+    subjectNegative || causeeNegative, animate, undefined, respect,
   ));
   return segs;
 }

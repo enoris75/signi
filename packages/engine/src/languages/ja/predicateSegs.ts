@@ -17,6 +17,8 @@ import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
 import { jaModifierSeg } from './jaModifierSeg.js';
 import { jaPassiveVerb } from './jaPassiveVerb.js';
+import type { JaRespect } from './jaRespectRegister.js';
+import { jaRespectVerb } from './jaRespectVerb.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
 import { plainVerbSeg } from './plainVerbSeg.js';
@@ -49,6 +51,9 @@ export function predicateSegs(
   // clause: a relative clause on the thing possessed (家にいる猫), where the head fills the gap. Read
   // off `directObject` when omitted.
   animateObject?: boolean,
+  // The register of respect the subject calls for (P11-E1, see `jaRespectRegister`), decided by the
+  // clause, which alone knows whose the subject is. Only a polite main predicate passes one.
+  respect?: JaRespect,
 ): RubySegment[] {
   // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
   // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
@@ -101,7 +106,7 @@ export function predicateSegs(
     : possessive
     ? animateObject ?? (directObject !== undefined && isAnimate(directObject.conjuncts))
     : animateSubject;
-  const verbPhrase: ResolvedVerbPhrase = existential
+  const substituted: ResolvedVerbPhrase = existential
     ? {
         ...givenVerbPhrase,
         verb: animateExistent ? JA_IRU : JA_ARU,
@@ -111,6 +116,13 @@ export function predicateSegs(
     : givenVerbPhrase.voice === 'passive'
       ? { ...givenVerbPhrase, verb: jaPassiveVerb(givenVerbPhrase.verb) }
       : givenVerbPhrase;
+  // Someone else's relative is spoken of with the honorific word and one's own side, when asked, with
+  // the humble one — いらっしゃいます, 召し上がります, 参ります (P11-E1). It is the verb actually said that
+  // changes, so the existential いる takes it too (お母さんは家にいらっしゃいます); a verb with no word
+  // of its own for the register keeps its plain one.
+  const verbPhrase: ResolvedVerbPhrase = respect
+    ? { ...substituted, verb: jaRespectVerb(substituted.verb, respect) }
+    : substituted;
   const { verb, negative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).

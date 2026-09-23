@@ -62,6 +62,10 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       ja: {
         base: 'あげる',
         masu_present: 'あげます',
+        // 謙譲語 差し上げる, 「与える」「やる」の謙譲語 (大辞林, デジタル大辞泉). No 尊敬語: くださる is
+        // くれる's, a giving *towards* the speaker, which あげる is not (P11-E1).
+        humble: '差し上げる', humble_masu_present: '差し上げます', humble_te: '差し上げて', humble_nai: '差し上げない',
+        humble_reading: 'さしあげる', humble_masu_present_reading: 'さしあげます', humble_te_reading: 'さしあげて', humble_nai_reading: 'さしあげない',
       },
       pt: {
         base: 'dar',

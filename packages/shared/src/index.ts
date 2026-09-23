@@ -1150,6 +1150,15 @@ export interface VerbPhrase {
    * for a plain modal) or a `ModalVerb` object carrying its own `modifier` and `negative`.
    */
   modals?: ModalRef[];
+  /**
+   * Speak the verb in the **humble** register (謙譲語, P11-E1 D4): 父が参ります, 私がいただきます.
+   * Japanese only, and only where it is the speaker's own side acting — the subject is the 1st
+   * person or one's own relative (a `kin` head marked own, 私の父). It is ignored for any other
+   * subject, on a verb with no humble word of its own, and in the other six languages, which have no
+   * such register. Opt-in because humility is towards a listener the plan does not model; the
+   * honorific (尊敬語) for someone else's relative needs no flag and is applied automatically.
+   */
+  humble?: boolean;
 }
 
 /**

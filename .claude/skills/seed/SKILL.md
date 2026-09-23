@@ -79,6 +79,25 @@ Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
      Pin the *actual* rendered output — run first, read what the engine produces, assert that — never
      guess the foreign-language strings.
 
+## A verb's language-specific columns
+
+A few verb columns belong to **one language's lexeme**, as the noun's below do: ordinary `forms` keys
+that only the engine reading them knows about, and a lexeme without one is the regular case.
+
+| column | language | what it does |
+| --- | --- | --- |
+| `honorific`, `honorific_masu_present`, `honorific_te`, `honorific_nai` | ja | The **尊敬語** word, said when the subject is **someone else's relative** (あなたのお母さんは召し上がります, P11-E1). Automatic, in a polite main clause only — a relative, content, adverbial or citation clause keeps the plain verb. |
+| `humble`, `humble_masu_present`, `humble_te`, `humble_nai` | ja | The **謙譲語** word, said when the plan sets `VerbPhrase.humble` and the subject is the 1st person or one's own relative (父は参ります, P11-E1 D4). Ignored for any other subject. |
+
+Seed a register only where the verb has a **suppletive** word a dictionary gives as its 尊敬語 or
+謙譲語 (召し上がる, いらっしゃる, なさる, おっしゃる; いただく, 参る, いたす, 申す, 差し上げる), and cite the
+sense in a comment beside it — the productive お〜になる / お〜する is not seeded. The four columns are
+the forms every polite path conjugates from, and the ます form is stored because the stem is
+irregular (いらっしゃいます). Each takes a `_reading` where the word has kanji (`honorific_reading`,
+`humble_masu_present_reading`, …); a kana word takes none, and none of the plain verb's is kept. BE's
+own lexeme is the copula, so its existential いる carries the pair in the engine (`JA_IRU`:
+いらっしゃる / おる).
+
 ## A noun's language-specific columns
 
 A few noun columns belong to **one language's lexeme**, not to the concept: the fact they record is a
