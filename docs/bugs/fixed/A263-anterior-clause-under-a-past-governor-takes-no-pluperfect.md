@@ -52,7 +52,8 @@ now sends a clause anterior to a past governor to `anteriorToPast`, which gives 
   `aveva corso`, `era andato`, `avait couru`, `había corrido`, `tinha corrido`.
 
 A plain past **indicative** clause is left alone, as ruled (`said that the cat ran`, `disse che il gatto
-corse`), and so are a pluperfect already, a past progressive or prospective, and German and Japanese.
+corse`), and so are a pluperfect already, a past prospective, and German and Japanese (a past progressive
+in the subjunctive is A262's, fixed under a past governor too).
 
 Guarded by the two formerly-`.fails` tests and three new ones in the
 `known bugs: a clause anterior to a past governor takes no pluperfect (A263)` block of

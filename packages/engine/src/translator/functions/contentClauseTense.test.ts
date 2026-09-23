@@ -63,11 +63,22 @@ describe('contentClauseTense', () => {
         verbPhrase: runs({ aspect: 'resultative', tense: 'past' }), mood: undefined, imperfect: false,
       });
     }
-    // A pluperfect already, and a past progressive, are left alone.
+    // A pluperfect already, and a past prospective, are left alone.
     const pluperfect = runs({ tense: 'past', aspect: 'resultative' });
     expect(contentClauseTense('past', 'en', undefined, pluperfect).verbPhrase).toBe(pluperfect);
+    const prospective = runs({ tense: 'past', aspect: 'prospective' });
+    expect(contentClauseTense('past', 'it', 'presentSubjunctive', prospective).verbPhrase).toBe(prospective);
+  });
+
+  test('under a past governor too, a past progressive takes the imperfect subjunctive, except in French (A262)', () => {
     const progressive = runs({ tense: 'past', aspect: 'progressive' });
-    expect(contentClauseTense('past', 'it', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    for (const language of ['it', 'es', 'pt']) {
+      expect(contentClauseTense('past', language, 'presentSubjunctive', progressive)).toEqual({
+        verbPhrase: runs({ tense: 'present', aspect: 'progressive' }), mood: 'subjunctive', imperfect: false,
+      });
+    }
+    expect(contentClauseTense('past', 'fr', 'presentSubjunctive', progressive).verbPhrase).toBe(progressive);
+    expect(contentClauseTense('past', 'it', undefined, progressive).verbPhrase).toBe(progressive);
   });
 
   test('under a governor that is not past, a past subjunctive clause is the perfect subjunctive (A260)', () => {
