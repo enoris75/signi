@@ -57,3 +57,29 @@ Pinned by `known bugs: a content clause under a past governor keeps the present 
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found fixing A247, the negated belief.
+
+## Resolved
+
+2026-09-23. A content clause now takes its tense from its governor's as well as its mood.
+[`contentClauseTense`](../../../packages/engine/src/translator/functions/contentClauseTense.ts),
+called from `resolveContentClause` in
+[`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) for both
+`contentObject` and `contentSubject`, shifts a present or future clause under a past governor in
+`SEQUENCE_OF_TENSES_LANGUAGES` (en/it/fr/es/pt, beside `CONTENT_CLAUSE_MOOD` in
+[`translator.consts.ts`](../../../packages/engine/src/translator/translator.consts.ts)): the present
+subjunctive becomes the imperfect `subjunctive` in it/es/pt (French keeps the present); the
+indicative present becomes the past, read as the imperfect in the Romance four through `asImperfect`
+(split out of [`imperfectivePast`](../../../packages/engine/src/translator/functions/imperfectivePast.ts),
+A250's rule); the future becomes the conditional, and in Italian (`FUTURE_IN_PAST_PERFECT_LANGUAGES`)
+the *condizionale composto* with the verb's own auxiliary — `avrebbe corso`, `sarebbe andato`. A past
+or resultative clause under a past governor (the pluperfect) is left alone, as are German and
+Japanese.
+
+Guarded by the five formerly-`.fails` tests and four new ones in the
+`known bugs: a content clause under a past governor keeps the present (A254)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (the Italian
+condizionale composto; progressive, modal, passive and plural clauses; a past clause keeping its own
+past), and by
+[contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts)
+and the `asImperfect` case in
+[imperfectivePast.test.ts](../../../packages/engine/src/translator/functions/imperfectivePast.test.ts).

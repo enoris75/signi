@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedVerbPhrase } from '../../types.js';
 import { clause, concept, np, vp } from '../../languages/resolved.fixtures.js';
-import { imperfectivePast } from './imperfectivePast.js';
+import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 
 const eats = (extra: Partial<Omit<ResolvedVerbPhrase, 'verb'>>) => clause(np({ base: 'gatto' }), vp({ base: 'mangiare' }, extra));
 
@@ -25,5 +25,14 @@ describe('imperfectivePast', () => {
     expect(imperfectivePast(present, 'while', 'it')).toBe(present);
     const subjunctive = eats({ tense: 'past', mood: 'subjunctive' });
     expect(imperfectivePast(subjunctive, 'while', 'es')).toBe(subjunctive);
+  });
+});
+
+describe('asImperfect', () => {
+  test('reads the verb and the passive auxiliary as a state, whatever the clause', () => {
+    const passive = eats({ tense: 'present', voice: 'passive', passiveAux: concept({ base: 'essere' }, 'BE') });
+    const imperfect = asImperfect(passive);
+    expect(imperfect.verbPhrase?.verb.forms['stative']).toBe('1');
+    expect(imperfect.verbPhrase?.passiveAux?.forms['stative']).toBe('1');
   });
 });

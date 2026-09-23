@@ -294,8 +294,8 @@ describe('known bugs: a negated belief keeps the indicative (A247)', () => {
   });
 });
 
-// A254. A content clause's tense is resolved as any clause's is, absolutely, so under a past governor
-// it keeps the present its plan names: "non credeva che il gatto corra", "no creía que el gato corra",
+// A254. A content clause's tense was resolved as any clause's is, absolutely, so under a past governor
+// it kept the present its plan names: "non credeva che il gatto corra", "no creía que el gato corra",
 // "the man believed that the cat runs". A clause simultaneous with a past governor shifts back — the
 // Romance subjunctive into the imperfect subjunctive ("corresse", "corriera"), the indicative into the
 // imperfect ("correva", "courait", "corría", "corria"), English into the past ("ran"), and a future
@@ -309,7 +309,7 @@ describe('known bugs: a content clause under a past governor keeps the present (
     contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', ...inner } },
   });
 
-  test.fails('the subjunctive shifts to the imperfect subjunctive: non credeva che il gatto corresse', () => {
+  test('the subjunctive shifts to the imperfect subjunctive: non credeva che il gatto corresse', () => {
     expect(sayAll(past('BELIEVE', true))).toMatchObject({
       it: "l'uomo non credeva che il gatto corresse.", es: 'el hombre no creía que el gato corriera.',
       pt: 'o homem não acreditava que o gato corresse.',
@@ -321,7 +321,7 @@ describe('known bugs: a content clause under a past governor keeps the present (
     });
   });
 
-  test.fails('the indicative shifts to the imperfect: credeva, croyait, creía que el gato corría', () => {
+  test('the indicative shifts to the imperfect: credeva, croyait, creía que el gato corría', () => {
     expect(sayAll(past('BELIEVE'))).toMatchObject({
       fr: "l'homme croyait que le chat courait.", es: 'el hombre creía que el gato corría.',
       pt: 'o homem acreditava que o gato corria.',
@@ -336,25 +336,69 @@ describe('known bugs: a content clause under a past governor keeps the present (
     });
   });
 
-  test.fails('English backshifts: the man did not believe that the cat ran', () => {
+  test('English backshifts: the man did not believe that the cat ran', () => {
     expect(say(past('BELIEVE', true), 'en')).toBe('the man did not believe that the cat ran.');
     expect(say(past('BELIEVE'), 'en')).toBe('the man believed that the cat ran.');
     expect(say(past('SAY'), 'en')).toBe('the man said that the cat ran.');
   });
 
-  test.fails('a future under a past governor is the conditional: would run, courrait, correría', () => {
+  test('a future under a past governor is the conditional: would run, courrait, correría', () => {
     expect(sayAll(past('SAY', false, { tense: 'future' }))).toMatchObject({
       en: 'the man said that the cat would run.', fr: "l'homme dit que le chat courrait.",
       es: 'el hombre dijo que el gato correría.', pt: 'o homem disse que o gato correria.',
     });
   });
 
-  test.fails('a subject clause under a past predicate shifts too: era giusto che il gatto corresse', () => {
+  test('a subject clause under a past predicate shifts too: era giusto che il gatto corresse', () => {
     expect(sayAll({
       subject: np('THING'), contentSubject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } },
       verbPhrase: { verb: 'BE', tense: 'past' }, complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
     })).toMatchObject({
       it: 'era giusto che il gatto corresse.', es: 'era correcto que el gato corriera.', pt: 'era certo que o gato corresse.',
+    });
+  });
+
+  test('the Italian future in the past is the condizionale composto, with the verb\'s own auxiliary', () => {
+    expect(say(past('SAY', false, { tense: 'future' }), 'it')).toBe("l'uomo disse che il gatto avrebbe corso.");
+    expect(say(past('SAY', false, { verb: 'GO', tense: 'future' }), 'it')).toBe("l'uomo disse che il gatto sarebbe andato.");
+    expect(say({ ...past('SAY', false, { verb: 'EAT', tense: 'future' }), contentObject: {
+      subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future' }, directObject: np('FOOD'),
+    } }, 'it')).toBe("l'uomo disse che il gatto avrebbe mangiato il cibo.");
+  });
+
+  test('a marked aspect, a modal, a passive and a plural shift with it', () => {
+    expect(sayAll(past('SAY', false, { aspect: 'progressive' }))).toMatchObject({
+      en: 'the man said that the cat was running.', it: "l'uomo disse che il gatto stava correndo.",
+      fr: "l'homme dit que le chat était en train de courir.", es: 'el hombre dijo que el gato estaba corriendo.',
+      pt: 'o homem disse que o gato estava correndo.',
+    });
+    expect(sayAll(past('BELIEVE', true, { aspect: 'progressive' }))).toMatchObject({
+      it: "l'uomo non credeva che il gatto stesse correndo.", es: 'el hombre no creía que el gato estuviera corriendo.',
+      pt: 'o homem não acreditava que o gato estivesse correndo.',
+    });
+    expect(sayAll(past('SAY', false, { modals: ['CAN'] }))).toMatchObject({
+      en: 'the man said that the cat could run.', it: "l'uomo disse che il gatto poteva correre.",
+      fr: "l'homme dit que le chat pouvait courir.", es: 'el hombre dijo que el gato podía correr.',
+      pt: 'o homem disse que o gato podia correr.',
+    });
+    expect(sayAll({ ...past('SAY'), contentObject: {
+      subject: np('MAN'), verbPhrase: { verb: 'EAT', voice: 'passive' }, directObject: np('FOOD'),
+    } })).toMatchObject({
+      en: 'the man said that the food was eaten by the man.', it: "l'uomo disse che il cibo era mangiato dall'uomo.",
+      es: 'el hombre dijo que la comida era comida por el hombre.',
+    });
+    expect(sayAll({ ...past('KNOW'), contentObject: { subject: { ...np('CAT'), number: 'plural' }, verbPhrase: { verb: 'RUN' } } }))
+      .toMatchObject({
+        en: 'the man knew that the cats ran.', it: "l'uomo sapeva che i gatti correvano.",
+        fr: "l'homme savait que les chats couraient.", es: 'el hombre sabía que los gatos corrían.',
+        pt: 'o homem sabia que os gatos corriam.',
+      });
+  });
+
+  test('regression: a past clause under a past governor keeps its own past', () => {
+    expect(sayAll(past('SAY', false, { tense: 'past' }))).toMatchObject({
+      en: 'the man said that the cat ran.', it: "l'uomo disse che il gatto corse.",
+      es: 'el hombre dijo que el gato corrió.', pt: 'o homem disse que o gato correu.',
     });
   });
 

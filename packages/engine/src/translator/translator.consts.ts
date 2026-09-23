@@ -78,6 +78,22 @@ export const CONTENT_CLAUSE_MOOD: Record<string, 'presentSubjunctive'> = {
 };
 
 /**
+ * The languages whose content clause shifts back under a **past** governor — the sequence of tenses
+ * (A254, see `contentClauseTense`): "the man said that the cat **ran**", "l'uomo disse che il gatto
+ * **correva**", "no creía que el gato **corriera**". German's *dass* clause keeps its own tense ("der
+ * Mann glaubte nicht, dass der Kater läuft"), which is standard, and Japanese's clause tense is
+ * relative to its governor already (猫が走ると信じていませんでした).
+ */
+export const SEQUENCE_OF_TENSES_LANGUAGES: ReadonlySet<string> = new Set(['en', 'it', 'fr', 'es', 'pt']);
+
+/**
+ * The languages that say a future **in the past** in the perfect conditional, not the simple one
+ * (A254): Italian's *condizionale composto*, "disse che il gatto **avrebbe corso**", its auxiliary the
+ * verb's own. The others take the simple conditional ("would run", "courrait", "correría").
+ */
+export const FUTURE_IN_PAST_PERFECT_LANGUAGES: ReadonlySet<string> = new Set(['it']);
+
+/**
  * The adjective a `possessorOwn` phrase writes beside its possessor — "my **own** cat" (see
  * NounPhrase.possessorOwn, C37). It is a seeded concept like any other, so each language reads its
  * own word out of the lexicon (proprio / propre / eigen / propio / 自分の / próprio); the id is fixed
