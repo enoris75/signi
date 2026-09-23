@@ -18,7 +18,14 @@ export function withQuestionPossessor(el: ResolvedNounElement, asked: boolean): 
   if (!asked) return el;
   const [np] = el.conjuncts;
   if (np.head.forms['person']) throw new Error('a possessor question cannot ask inside a pronoun (P09-E14)');
-  const forms = { ...np.head.forms, definiteness: 'definite' };
+  const forms: Record<string, string> = { ...np.head.forms, definiteness: 'definite' };
+  // A kin term the plan left bare reads as a name ("Mom", see `applyKinName`), but a possessed one is
+  // the common noun again: "whose mom", "la mamma di chi", never "Maman de qui" (P11-E3).
+  if (forms['name_of'] !== undefined) {
+    forms['base'] = forms['name_of'];
+    delete forms['name_of'];
+    delete forms['proper'];
+  }
   const possessed = { ...np, head: { ...np.head, forms }, possessor: questionPossessor() };
   return { ...el, conjuncts: [possessed], agreement: { ...el.agreement, definiteness: 'definite' } };
 }

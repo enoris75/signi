@@ -5,6 +5,7 @@ import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSE
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
+import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
@@ -111,6 +112,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // "多くのヨーロッパ", and no この/その either, as the other six languages already drop "this"), and the
     // negative concord a `no` would otherwise trigger with no negator to license it ("l'Asie ne brûle.").
     const superlative = (np.adjectives ?? []).some((_, i) => SUPERLATIVE_DEGREES.has(np.adjectiveDegrees?.[i] ?? 'positive'));
+    // A casual kin term the phrase uses as a name ("Mom runs") is one from here on (P11-E3).
+    applyKinName(np, head.forms);
     // A name the language leaves bare resolves **bare**, not definite (`takes_article: '0'`): a
     // personal name takes no article in five of the seven, and the paths that fuse a preposition
     // with an article read the determiner rather than the `proper` flag — "a Pietro", "de Pierre",
