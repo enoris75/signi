@@ -672,16 +672,31 @@ export const adverbs: ConceptSeed[] = [
     // A comparative is intensified by a word of its own — "much bigger", "bien plus grand", "viel
     // größer", "mucho más grande", ずっと大きい — which `applyIntensifier` puts in place of `base` on
     // a `more` or `less` degree (A248). Italian and Portuguese keep molto / muito ("molto più grande").
+    // On the equative VERY is exactness, a word that replaces the degree's own: "just as big",
+    // "altrettanto grande", "tout aussi grand", "genauso groß" (A255). Spanish *igual de* already is
+    // "just as", so VERY keeps it even before a standard ("igual de grande que el perro", where the
+    // bare circumfix is "tan … como"); Portuguese and Japanese have none that is not a paraphrase,
+    // so there it is dropped. English drops it before a noun ("an equally big cat", never "a just as
+    // big cat").
+    // On a superlative VERY is a phrase that stands before the article: "by far the biggest", "di
+    // gran lunga il più grande", "bei weitem am größten" (A257) — except English before a noun, "the
+    // very biggest cat", where VERY after the article is the superlative's own intensifier.
     forms: {
-      en: { base: 'very', comparative: 'much' },
-      it: { base: 'molto' },
-      fr: { base: 'très', comparative: 'bien' },
-      de: { base: 'sehr', comparative: 'viel' },
-      es: { base: 'muy', comparative: 'mucho' },
-      // Only on `more`: the lowered degree is a negation in Japanese (それほど大きくない), not a
-      // comparative ずっと could intensify.
-      ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more' },
-      pt: { base: 'muito' },
+      en: {
+        base: 'very', comparative: 'much', equative: 'just as', superlative: 'by far',
+        attributive_drop_degrees: 'equally', attributive_plain_degrees: 'most,least',
+      },
+      it: { base: 'molto', equative: 'altrettanto', superlative: 'di gran lunga' },
+      fr: { base: 'très', comparative: 'bien', equative: 'tout aussi', superlative: 'de loin' },
+      de: { base: 'sehr', comparative: 'viel', equative: 'genauso', superlative: 'bei weitem' },
+      es: { base: 'muy', comparative: 'mucho', equative: 'igual de', superlative: 'con mucho' },
+      // Dropped on `less`: the lowered degree is a negation in Japanese (それほど大きくない), not a
+      // comparative ずっと could intensify, and とても inside it reads "not very" (A258).
+      ja: {
+        base: 'とても', comparative: 'ずっと', drop_degrees: 'equally,less',
+        superlative: '断然', superlative_reading: 'だんぜん',
+      },
+      pt: { base: 'muito', drop_degrees: 'equally', superlative: 'de longe' },
     },
   },
   {
@@ -690,15 +705,21 @@ export const adverbs: ConceptSeed[] = [
     slot: 'intensifier',
     description: 'to a degree that is more than is wanted',
     emoji: '🔝',
+    // On a comparative TOO says the difference is excessive — "too much bigger", "zu viel größer" —
+    // TOO on the comparative's own intensifier (A256). Italian and Spanish already say it with the
+    // plain word ("troppo più grande", "demasiado más grande"); Portuguese's postposed *demais*
+    // belongs to the positive, and a comparative takes the preposed *demasiado*; Japanese keeps
+    // 〜すぎる and drops もっと under it (大きすぎる), as its standard already does. French has no
+    // settled form and keeps "trop plus grand".
     forms: {
-      en: { base: 'too' },
+      en: { base: 'too', comparative: 'too much' },
       it: { base: 'troppo' },
       fr: { base: 'trop' },
-      de: { base: 'zu' },
+      de: { base: 'zu', comparative: 'zu viel' },
       es: { base: 'demasiado' },
       // Not a word before the adjective: the ichidan suffix 〜すぎる on its stem.
-      ja: { base: 'すぎる', position: 'suffix' },
-      pt: { base: 'demais', position: 'post' },
+      ja: { base: 'すぎる', position: 'suffix', comparative: 'すぎる', comparative_degrees: 'more' },
+      pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
     },
   },
 ];

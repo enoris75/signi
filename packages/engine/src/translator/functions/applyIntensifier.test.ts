@@ -5,11 +5,18 @@ import { applyIntensifier } from './applyIntensifier.js';
 
 const LEX: Record<string, Record<string, Record<string, string>>> = {
   VERY: {
-    en: { base: 'very', comparative: 'much' },
-    ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more' },
+    en: {
+      base: 'very', comparative: 'much', equative: 'just as', superlative: 'by far',
+      attributive_drop_degrees: 'equally', attributive_plain_degrees: 'most,least',
+    },
+    ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
     it: { base: 'molto' },
   },
-  TOO: { en: { base: 'too' }, pt: { base: 'demais', position: 'post' }, ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる' } },
+  TOO: {
+    en: { base: 'too', comparative: 'too much' },
+    pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
+    ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる', comparative: 'すぎる', comparative_degrees: 'more' },
+  },
   MUTE: { en: {} },
 };
 const lookup = (id: string, language: string) => {
@@ -58,8 +65,8 @@ describe('applyIntensifier', () => {
     expect(positive.forms['intensifier']).toBe('very');
     expect(positive.forms['intensifier_comparative']).toBeUndefined();
     const most = adj('most');
-    applyIntensifier(most, 'VERY', 'en', lookup);
-    expect(most.forms['intensifier']).toBe('very');
+    applyIntensifier(most, 'VERY', 'it', lookup);
+    expect(most.forms['intensifier']).toBe('molto');
   });
 
   test('a lexeme with no comparative word keeps its base, and one may narrow the degrees', () => {
@@ -73,5 +80,65 @@ describe('applyIntensifier', () => {
     const less = adj('less');
     applyIntensifier(less, 'VERY', 'ja', lookup);
     expect(less.forms['intensifier']).toBe('とても');
+  });
+
+  // A255: the equative takes the lexeme's equative word, which replaces the degree's own adverb.
+  test('an equative degree takes the lexeme\'s equative word', () => {
+    const a = adj('equally');
+    applyIntensifier(a, 'VERY', 'en', lookup);
+    expect(a.forms['intensifier']).toBe('just as');
+    expect(a.forms['intensifier_equative']).toBe('1');
+    expect(a.forms['intensifier_comparative']).toBeUndefined();
+    const it = adj('equally');
+    applyIntensifier(it, 'VERY', 'it', lookup);
+    expect(it.forms['intensifier']).toBe('molto');
+    expect(it.forms['intensifier_equative']).toBeUndefined();
+  });
+
+  test('a degree the lexeme drops, everywhere or before a noun, gets no intensifier', () => {
+    const ja = adj('equally');
+    applyIntensifier(ja, 'VERY', 'ja', lookup);
+    expect(ja.forms).toEqual({ base: 'big', role: 'adjective', degree: 'equally' });
+    const attributive = adj('equally');
+    applyIntensifier(attributive, 'VERY', 'en', lookup, true);
+    expect(attributive.forms['intensifier']).toBeUndefined();
+    const more = adj('more');
+    applyIntensifier(more, 'VERY', 'en', lookup, true);
+    expect(more.forms['intensifier']).toBe('much');
+  });
+
+  // A256: a degree word may name a position of its own, and a suffix keeps its place.
+  test('a comparative word takes its own position, falling back to the lexeme\'s', () => {
+    const pt = adj('more');
+    applyIntensifier(pt, 'TOO', 'pt', lookup);
+    expect(pt.forms['intensifier']).toBe('demasiado');
+    expect(pt.forms['intensifier_position']).toBe('pre');
+    const positive = adj();
+    applyIntensifier(positive, 'TOO', 'pt', lookup);
+    expect(positive.forms['intensifier_position']).toBe('post');
+    const ja = adj('more');
+    applyIntensifier(ja, 'TOO', 'ja', lookup);
+    expect(ja.forms['intensifier_position']).toBe('suffix');
+    expect(ja.forms['intensifier_comparative']).toBe('1');
+    const en = adj('less');
+    applyIntensifier(en, 'TOO', 'en', lookup);
+    expect(en.forms['intensifier']).toBe('too much');
+  });
+
+  // A257: a superlative takes the lexeme's superlative word, except where it keeps its plain one.
+  test('a superlative degree takes the lexeme\'s superlative word', () => {
+    for (const degree of ['most', 'least']) {
+      const a = adj(degree);
+      applyIntensifier(a, 'VERY', 'en', lookup);
+      expect(a.forms['intensifier']).toBe('by far');
+      expect(a.forms['intensifier_superlative']).toBe('1');
+    }
+    const attributive = adj('most');
+    applyIntensifier(attributive, 'VERY', 'en', lookup, true);
+    expect(attributive.forms['intensifier']).toBe('very');
+    expect(attributive.forms['intensifier_superlative']).toBeUndefined();
+    const too = adj('most');
+    applyIntensifier(too, 'TOO', 'en', lookup);
+    expect(too.forms['intensifier']).toBe('too');
   });
 });

@@ -7,7 +7,7 @@ import { jaIntensifierSeg } from './jaIntensifierSeg.js';
 
 /**
  * What leads a predicate adjective: its standard of comparison, its intensifier and its degree
- * adverb, in that order — 犬よりずっと大きい, とてもそれほど大きくない. The standard takes the degree
+ * adverb, in that order — 犬よりずっと大きい, とても大きい. The standard takes the degree
  * adverb's place rather than joining it (犬より大きい, not 犬よりもっと大きい; see `JA_STANDARD`, P09-E5),
  * and so does a comparative intensifier (ずっと大きい; see `jaDegreeAdverb`, A248). A lowered degree
  * keeps its negated adjective, which `jaComparisonAdj` builds: 犬ほど大きくない. The standard is a

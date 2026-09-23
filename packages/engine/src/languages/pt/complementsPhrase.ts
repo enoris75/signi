@@ -6,6 +6,7 @@ import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
+import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
@@ -82,11 +83,15 @@ export function complementsPhrase(
             // already get, article and all (A198). Empty for a genitive or absent possessor.
             return withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np), ptPossessiveWord(np)), np);
           }
-          const surface = [ptComparison(np.head, gender, plural), ptStandard(np)].filter(Boolean).join(' ');
+          // A superlative's intensifier stands before the article: "de longe o maior" (A257).
+          const { lead, adjective } = superlativeLead(np.head);
+          const surface = [ptComparison(adjective, gender, plural), ptStandard(np)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece O mais feliz" — distinct from the comparative "mais feliz".
           // SAME keeps its article the same way: "é o mesmo" (see `takesPredicateArticle`).
-          return isRelativeSuperlative(np.head) || takesPredicateArticle(np.head) ?`${defArticle({ gender }, plural)} ${surface}` : surface;
+          return isRelativeSuperlative(np.head) || takesPredicateArticle(np.head)
+            ? [lead, `${defArticle({ gender }, plural)} ${surface}`].filter(Boolean).join(' ')
+            : surface;
         });
       }
       // Object complement: what the object is *made into* ("transformar o período em um comando")

@@ -9,12 +9,16 @@ import { adjDegree } from './adjDegree.js';
  * first half of a circumfix: "equally big" but "**as** big as the dog", it *ugualmente* but *tanto
  * … quanto*, es *igual de* but *tan … como*, pt *igualmente* but *tão … como*. A degree the second
  * table leaves out keeps its plain word (*più grande del cane*), and a bare degree is untouched.
+ *
+ * An equative intensifier is the degree's word itself ("just as big", *altrettanto grande*; see
+ * `applyIntensifier`, A255), so under one there is no adverb of the degree's own.
  */
 export function degreeAdverb(
   a: ConceptForms,
   table: Record<Degree, string>,
   withStandard: Partial<Record<Degree, string>> = {},
 ): string {
+  if (a.forms['intensifier_equative'] === '1') return '';
   const degree = adjDegree(a);
   return (a.forms['standard'] === '1' ? withStandard[degree] : undefined) ?? table[degree];
 }

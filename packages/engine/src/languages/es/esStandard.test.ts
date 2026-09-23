@@ -26,4 +26,11 @@ describe('esStandard', () => {
     expect(esDeg(compared('equally').head, 'grande')).toBe('tan grande');
     expect(esDeg(np(GRANDE, { degree: 'equally' }).head, 'grande')).toBe('igual de grande');
   });
+
+  // A255: VERY keeps "igual de" before a standard, and "igual de" takes "que".
+  test('under an equative intensifier the standard takes "que"', () => {
+    const under = np(GRANDE, { degree: 'equally', standard: '1', intensifier: 'igual de', intensifier_equative: '1' }, { standard: el(np(PERRO, the)) });
+    expect(esStandard(under)).toBe('que el perro');
+    expect(esDeg(under.head, 'grande')).toBe('igual de grande');
+  });
 });

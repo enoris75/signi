@@ -21,6 +21,7 @@ import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, PRIVATIVE, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
+import { superlativeLead } from '../../functions/superlativeLead.js';
 import { enStandard } from './enStandard.js';
 import { npText } from './npText.js';
 
@@ -77,7 +78,7 @@ export function complementsPhrase(
         const predicate = coordinate(c.phrase, (np) =>
           np.head.forms['role'] !== 'adjective' ? npText(np)
             : takesPredicateArticle(np.head) ? `the ${enAdj(np.head)}`
-            : [enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
+            : superlativePredicate(np) ?? [enAdj(np.head), enStandard(np)].filter(Boolean).join(' '),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }
@@ -142,4 +143,14 @@ export function complementsPhrase(
     .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * A predicate superlative under its own intensifier, which stands before an article the bare one
+ * does without: "is biggest", but "is by far the biggest" (A257; see `superlativeLead`). Undefined
+ * for any other predicate adjective.
+ */
+function superlativePredicate(np: ResolvedNounPhrase): string | undefined {
+  const { lead, adjective } = superlativeLead(np.head);
+  return lead ? [lead, 'the', enAdj(adjective), enStandard(np)].filter(Boolean).join(' ') : undefined;
 }

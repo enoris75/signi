@@ -219,7 +219,7 @@ describe('known bugs: an intensifier on a comparative (A248)', () => {
   });
 
   // Japanese's lowered degree is a negation, not a comparative, so VERY does not turn to ずっと there; and TOO
-  // does not turn into VERY's comparative word (TOO on a comparative is A256's own).
+  // does not turn into VERY's comparative word (it takes its own, "too much", A256).
   test('regression: Japanese lowered degree and TOO keep their positive word', () => {
     expect(isBigger({ headDegree: 'less' }).ja).not.toContain('ずっと');
     expect(isBigger({ headIntensifier: 'TOO' }).en).not.toBe('the cat is much bigger.');
@@ -245,7 +245,7 @@ const aBigCat = (degree: 'equally' | 'more' | 'less' | 'most', intensifier: stri
 // exactness, which four languages say with a word of their own — *just as*, *tout aussi*, *genauso*,
 // *altrettanto* — and the rest say with the equative alone (Spanish *igual de* already is "just as").
 describe('known bugs: VERY on an equative (A255)', () => {
-  test.fails('a predicate equative: just as big', () => {
+  test('a predicate equative: just as big', () => {
     expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY' })).toEqual({
       en: 'the cat is just as big.', it: 'il gatto è altrettanto grande.', fr: 'le chat est tout aussi grand.',
       de: 'der Kater ist genauso groß.', es: 'el gato es igual de grande.', ja: '猫は同じくらい大きいです。',
@@ -253,7 +253,7 @@ describe('known bugs: VERY on an equative (A255)', () => {
     });
   });
 
-  test.fails('with a standard: just as big as the dog', () => {
+  test('with a standard: just as big as the dog', () => {
     expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY', headStandard: np('DOG') })).toEqual({
       en: 'the cat is just as big as the dog.', it: 'il gatto è altrettanto grande quanto il cane.',
       fr: 'le chat est tout aussi grand que le chien.', de: 'der Kater ist genauso groß wie der Hund.',
@@ -263,10 +263,41 @@ describe('known bugs: VERY on an equative (A255)', () => {
   });
 
   // English does not put "just as" before a noun; the attributive equative keeps "equally" alone.
-  test.fails('an attributive equative: a cat just as big', () => {
+  test('an attributive equative: a cat just as big', () => {
     expect(aBigCat('equally', 'VERY')).toMatchObject({
       en: 'an equally big cat runs.', fr: 'un chat tout aussi grand court.',
       de: 'ein genauso großer Kater läuft.', es: 'un gato igual de grande corre.',
+    });
+  });
+
+  test('the whole attributive equative, and its plural', () => {
+    expect(aBigCat('equally', 'VERY')).toEqual({
+      en: 'an equally big cat runs.', it: 'un gatto altrettanto grande corre.', fr: 'un chat tout aussi grand court.',
+      de: 'ein genauso großer Kater läuft.', es: 'un gato igual de grande corre.', ja: '同じくらい大きい猫は走ります。',
+      pt: 'um gato igualmente grande corre.',
+    });
+    expect(sayAll(clause(np('CAT', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toEqual({
+      en: 'equally big cats run.', it: 'gatti altrettanto grandi corrono.', fr: 'des chats tout aussi grands courent.',
+      de: 'genauso große Kater laufen.', es: 'unos gatos igual de grandes corren.', ja: '同じくらい大きい猫は走ります。',
+      pt: 'uns gatos igualmente grandes correm.',
+    });
+  });
+
+  test('the adjective still agrees with the subject, and under estar', () => {
+    expect(sayAll(clause(np('HOUSE', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'equally', headIntensifier: 'VERY' }) } },
+    }))).toMatchObject({
+      en: 'the houses are just as big.', it: 'le case sono altrettanto grandi.', fr: 'les maisons sont tout aussi grandes.',
+      de: 'die Häuser sind genauso groß.', es: 'las casas son igual de grandes.', pt: 'as casas são igualmente grandes.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('HAPPY', { headDegree: 'equally', headIntensifier: 'VERY', headStandard: np('DOG') }) } },
+    }))).toEqual({
+      en: 'the cat is just as happy as the dog.', it: 'il gatto è altrettanto felice quanto il cane.',
+      fr: 'le chat est tout aussi heureux que le chien.', de: 'der Kater ist genauso glücklich wie der Hund.',
+      es: 'el gato está igual de feliz que el perro.', ja: '猫は犬と同じくらい幸せです。', pt: 'o gato está tão feliz como o cão.',
     });
   });
 
@@ -287,14 +318,14 @@ describe('known bugs: VERY on an equative (A255)', () => {
 // drops もっと under すぎる as the standard's より already makes it (犬より大きすぎる). French has no
 // settled form ("trop plus grand" is colloquial at best) and is left out of the pin.
 describe('known bugs: TOO on a comparative (A256)', () => {
-  test.fails('a predicate comparative: too much bigger', () => {
+  test('a predicate comparative: too much bigger', () => {
     expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
       en: 'the cat is too much bigger.', de: 'der Kater ist zu viel größer.',
       ja: '猫は大きすぎます。', pt: 'o gato é demasiado maior.',
     });
   });
 
-  test.fails('with a standard, attributively, and lowered', () => {
+  test('with a standard, attributively, and lowered', () => {
     expect(isBig({ headDegree: 'more', headIntensifier: 'TOO', headStandard: np('DOG') })).toMatchObject({
       en: 'the cat is too much bigger than the dog.', de: 'der Kater ist zu viel größer als der Hund.',
       pt: 'o gato é demasiado maior do que o cão.',
@@ -303,6 +334,39 @@ describe('known bugs: TOO on a comparative (A256)', () => {
     expect(isBig({ headDegree: 'less', headIntensifier: 'TOO' })).toMatchObject({
       en: 'the cat is too much less big.', de: 'der Kater ist zu viel weniger groß.', pt: 'o gato é demasiado menos grande.',
     });
+  });
+
+  test('the whole predicate, attributive and with-a-standard comparative, French aside', () => {
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
+      en: 'the cat is too much bigger.', it: 'il gatto è troppo più grande.', de: 'der Kater ist zu viel größer.',
+      es: 'el gato es demasiado más grande.', ja: '猫は大きすぎます。', pt: 'o gato é demasiado maior.',
+    });
+    expect(aBigCat('more', 'TOO')).toMatchObject({
+      en: 'a too much bigger cat runs.', it: 'un gatto troppo più grande corre.', de: 'ein zu viel größerer Kater läuft.',
+      es: 'un gato demasiado más grande corre.', ja: '大きすぎる猫は走ります。', pt: 'um gato demasiado maior corre.',
+    });
+    expect(isBig({ headDegree: 'less', headIntensifier: 'TOO', headStandard: np('DOG') })).toMatchObject({
+      en: 'the cat is too much less big than the dog.', de: 'der Kater ist zu viel weniger groß als der Hund.',
+      pt: 'o gato é demasiado menos grande do que o cão.',
+    });
+  });
+
+  test('the comparative still agrees, and inflects, under the preposed demasiado', () => {
+    expect(sayAll(clause(np('CAT', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveIntensifiers: ['TOO'],
+    }), 'RUN'))).toMatchObject({
+      en: 'too much bigger cats run.', de: 'zu viel größere Kater laufen.', pt: 'uns gatos demasiado maiores correm.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY', { headDegree: 'more', headIntensifier: 'TOO' }) } } }))).toMatchObject({
+      en: 'the cat is too much happier.', de: 'der Kater ist zu viel glücklicher.', ja: '猫は幸せすぎます。',
+      pt: 'o gato está demasiado mais feliz.',
+    });
+  });
+
+  // The Japanese lowered degree is a negation (それほど大きくない), not a comparative, so もっと's rule
+  // does not reach it and 〜すぎる negates with the adjective as before.
+  test('regression: the Japanese lowered degree keeps its adverb under すぎる', () => {
+    expect(isBig({ headDegree: 'less', headIntensifier: 'TOO' }).ja).toBe('猫はそれほど大きすぎないです。');
   });
 
   test('regression: Italian, Spanish and the Japanese standard already say it', () => {
@@ -319,7 +383,7 @@ describe('known bugs: TOO on a comparative (A256)', () => {
 // *de loin*, *bei weitem*, *con mucho*, *de longe*, 断然. English attributive "the very biggest cat" is
 // the one place VERY itself is right, after the article, and is already what the engine writes.
 describe('known bugs: VERY on a superlative (A257)', () => {
-  test.fails('a predicate superlative: by far the biggest', () => {
+  test('a predicate superlative: by far the biggest', () => {
     expect(isBig({ headDegree: 'most', headIntensifier: 'VERY' })).toEqual({
       en: 'the cat is by far the biggest.', it: 'il gatto è di gran lunga il più grande.',
       fr: 'le chat est de loin le plus grand.', de: 'der Kater ist bei weitem am größten.',
@@ -327,7 +391,7 @@ describe('known bugs: VERY on a superlative (A257)', () => {
     });
   });
 
-  test.fails('the lowered superlative: by far the least big', () => {
+  test('the lowered superlative: by far the least big', () => {
     expect(isBig({ headDegree: 'least', headIntensifier: 'VERY' })).toMatchObject({
       en: 'the cat is by far the least big.', it: 'il gatto è di gran lunga il meno grande.',
       fr: 'le chat est de loin le moins grand.', de: 'der Kater ist bei weitem am wenigsten groß.',
@@ -335,9 +399,44 @@ describe('known bugs: VERY on a superlative (A257)', () => {
     });
   });
 
-  test.fails('an attributive superlative: der bei weitem größte Kater', () => {
+  test('an attributive superlative: der bei weitem größte Kater', () => {
     expect(aBigCat('most', 'VERY')).toMatchObject({
       de: 'der bei weitem größte Kater läuft.', fr: 'le chat de loin le plus grand court.',
+    });
+  });
+
+  test('the subject\'s agreement, an inflecting superlative and a suppletive one', () => {
+    expect(sayAll(clause(np('HOUSE', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headIntensifier: 'VERY' }) } },
+    }))).toEqual({
+      en: 'the houses are by far the biggest.', it: 'le case sono di gran lunga le più grandi.',
+      fr: 'les maisons sont de loin les plus grandes.', de: 'die Häuser sind bei weitem am größten.',
+      es: 'las casas son con mucho las más grandes.', ja: '家は断然最も大きいです。', pt: 'as casas são de longe as maiores.',
+    });
+    const most = (adjective: string) => sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np(adjective, { headDegree: 'most', headIntensifier: 'VERY' }) } },
+    }));
+    expect(most('HAPPY')).toEqual({
+      en: 'the cat is by far the happiest.', it: 'il gatto è di gran lunga il più felice.',
+      fr: 'le chat est de loin le plus heureux.', de: 'der Kater ist bei weitem am glücklichsten.',
+      es: 'el gato está con mucho el más feliz.', ja: '猫は断然最も幸せです。', pt: 'o gato está de longe o mais feliz.',
+    });
+    expect(most('GOOD')).toMatchObject({
+      en: 'the cat is by far the best.', fr: 'le chat est de loin le meilleur.',
+      de: 'der Kater ist bei weitem am besten.', pt: 'o gato é de longe o melhor.',
+    });
+  });
+
+  test('the attributive superlative, plural and lowered', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      number: 'plural', adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toMatchObject({
+      en: 'the very biggest houses run.', fr: 'les maisons de loin les plus grandes courent.',
+      de: 'die bei weitem größten Häuser laufen.', ja: '断然最も大きい家は走ります。',
+    });
+    expect(sayAll(clause(np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['least'], adjectiveIntensifiers: ['VERY'] }), 'RUN'))).toMatchObject({
+      en: 'the very least big cat runs.', fr: 'le chat de loin le moins grand court.',
+      de: 'der bei weitem am wenigsten große Kater läuft.',
     });
   });
 
@@ -353,10 +452,22 @@ describe('known bugs: VERY on a superlative (A257)', () => {
 // alone is the closest rendering — as it is for a comparative, where A248 made VERY ずっと and so the
 // fix drops とても here, not the degree.
 describe('known bugs: Japanese VERY on a lowered degree (A258)', () => {
-  test.fails('bare, with a standard, and attributive: VERY is dropped', () => {
+  test('bare, with a standard, and attributive: VERY is dropped', () => {
     expect(isBig({ headDegree: 'less', headIntensifier: 'VERY' }).ja).toBe('猫はそれほど大きくないです。');
     expect(isBig({ headDegree: 'less', headIntensifier: 'VERY', headStandard: np('DOG') }).ja).toBe('猫は犬ほど大きくないです。');
     expect(aBigCat('less', 'VERY').ja).toBe('それほど大きくない猫は走ります。');
+  });
+
+  test('other adjective classes, the past, the negated clause and the plural attributive', () => {
+    const ja = (adjective: string, verbPhrase = {}) => say(clause(np('CAT'), 'BE', {
+      verbPhrase, complements: { predicative: { phrase: np(adjective, { headDegree: 'less', headIntensifier: 'VERY' }) } },
+    }), 'ja');
+    expect(ja('HAPPY')).toBe('猫はそれほど幸せではないです。');
+    expect(ja('BIG', { tense: 'past' })).toBe('猫はそれほど大きくなかったです。');
+    expect(ja('BIG', { negative: true })).toBe('猫はそれほど大きくないわけではありません。');
+    expect(say(clause(np('HOUSE', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['HAPPY'], adjectiveDegrees: ['less'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'), 'ja')).toBe('それほど幸せではない家は走ります。');
   });
 
   test('regression: the other six say much less big, and VERY on the positive keeps とても', () => {

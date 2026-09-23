@@ -21,6 +21,13 @@ export const ES_STANDARD_DEGREE: Partial<Record<Degree, string>> = { equally: 't
 export const ES_STANDARD: Partial<Record<Degree, string>> = { more: 'que', less: 'que', equally: 'como' };
 
 /**
+ * The word before the standard under an equative intensifier: VERY keeps *igual de* before a
+ * standard ("igual de grande que el perro"), and *igual de* takes "que", not the circumfix's "como"
+ * (see `applyIntensifier`, A255).
+ */
+export const ES_EQUATIVE_INTENSIFIER_STANDARD = 'que';
+
+/**
  * Concept IDs of the adjectives that precede their noun in Spanish. The ordinals and OTHER are
  * here because that is simply where they go: "el primer día", "la segunda vez", "el otro gato".
  * NEW is here for a different reason — its position decides its sense. After the noun "nuevo" is

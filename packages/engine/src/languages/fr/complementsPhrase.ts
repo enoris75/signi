@@ -5,6 +5,7 @@ import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
+import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
@@ -72,12 +73,14 @@ export function complementsPhrase(
         const plural = subjectForms['number'] === 'plural';
         return coordinate(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') return npText(np);
-          const surface = [frComparison(np.head, gender, plural), frStandard(np)].filter(Boolean).join(' ');
+          // A superlative's intensifier stands before the article: "de loin le plus grand" (A257).
+          const { lead, adjective } = superlativeLead(np.head);
+          const surface = [frComparison(adjective, gender, plural), frStandard(np)].filter(Boolean).join(' ');
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "semble LE plus heureux" — distinct from the comparative "plus heureux".
           // SAME keeps its article the same way: "est le même" (see `takesPredicateArticle`).
           return isRelativeSuperlative(np.head) || takesPredicateArticle(np.head)
-            ? joinArt(defArticle({ gender }, plural, surface), surface)
+            ? [lead, joinArt(defArticle({ gender }, plural, surface), surface)].filter(Boolean).join(' ')
             : surface;
         });
       }
