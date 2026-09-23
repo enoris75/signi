@@ -184,3 +184,14 @@ What landed differently from the plan:
    someone else's family is ご家族 while 私の家族 keeps its 私の, where 私の母 drops it (D3/D4).
 7. **RELATIVE took the synonym "family member"** so the French picker can tell it from PARENT, both
    of which are *parent* (reading 5).
+8. **CHILD_OFFSPRING makes the word *child* ambiguous, and the console's help examples had to move
+   off it.** Two nouns now share a label in four languages (en *child*, de *Kind*, fr *enfant*, ja
+   子供), and the [phrase console](../../features/Z-Done/P02-phrase-console/README.md) writes a
+   concept's **id** wherever its word would read back as another concept — by design, as it already
+   did for Spanish *niño* (CHILD / BOY) and Italian *casa* (HOUSE / HOME). But the help pages'
+   examples are written in English and applied before they are printed, so `/subj ( child … )`
+   stopped applying at all and those pages fell back to their English source. The examples now say
+   *man* (unambiguous in all seven) and the two gender ones a *cat*, which has a feminine wherever a
+   language marks one
+   ([help.ts](../../../packages/frontend/src/console/language/help.ts)). A user's own script still
+   reaches either concept by its id, and the picker tells them apart by CHILD_OFFSPRING's synonym.

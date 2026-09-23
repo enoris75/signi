@@ -6,6 +6,9 @@ BOYFRIEND, GIRLFRIEND, FIANCE and FRIEND. All five gloss. Four surfaces collide 
 corpus already has — de *Freund*, it *ragazzo* and *compagno*, fr *compagnon* — and these tooltips
 are what tell them apart.)_
 
+**Shipped on 2026-09-22** — see [Done](#done-2026-09-22). Reading 1's trade was taken, and FIANCE's
+German label found the last surface P11 D8 had not taught.
+
 ## Seed first
 
 Proposed forms, for the seed author to check — suggestions, not renders.

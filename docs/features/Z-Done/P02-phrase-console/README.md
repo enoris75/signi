@@ -388,6 +388,10 @@ in square brackets, its head word first:
 
 (Sample renderings.)
 
+(*child* named one concept when these were written. P11 seeded CHILD_OFFSPRING beside CHILD, so it
+now names two and the console asks which — paste them with `CHILD` in its place, as the help pages'
+own examples moved to *man*.)
+
 - **`{`** after `/rel subj`, `/rel obj`, `/if`, `/inst` or `/join` opens a new period already
   linked to the command before it. **`[`** after `/poss`, `/and` or `/or` opens a nested noun
   phrase. Where nothing but a new period may follow, the console opens the braces itself.

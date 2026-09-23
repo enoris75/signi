@@ -117,29 +117,44 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**Seven open: B68–B74**, the [P11](../features/P-planning/P11-family-and-relationships/README.md)
-kin terms, filed on 2026-09-22 (see [the P11 sweep](#the-p11-sweep-of-2026-09-22)). They seed **41
-concepts** — about forty relatives and partners, the two adjectives ELDER and YOUNGER, and the verb
-MARRY — of which **37 ship a gloss**; with PARENT's re-point that is 38 definitions authored.
-Like B59–B67 the concepts do not exist yet, so each **Seed first** table is P11 §4's own row set
-with the forms checked; unlike them, the feature they come from has engine work of its own (P11
-§2–§3), and **none of these
-tooltips waits on it**: a definition has no possessor, so it never reads the `possessed`,
-`honorific`, `kin` or `with_<ADJECTIVE>` columns that feature adds.
+**None open.** B68–B74, the [P11](../features/P-planning/P11-family-and-relationships/README.md) kin
+terms, were filed on 2026-09-22 (see [the P11 sweep](#the-p11-sweep-of-2026-09-22)) and authored the
+same day; all seven are in [`done/`](done/). They seeded **41 concepts** — forty relatives and
+partners, the two adjectives ELDER and YOUNGER, and the verb MARRY — and authored **38 definitions**:
+37 glosses plus PARENT's re-point, which is every one the tickets forecast. The corpus went from 626
+concepts to 667 and from 445 composed definitions to 482.
 
 | # | File | Words seeded | Glosses | Not glossed |
 |---|---|---|---|---|
-| B68 | [B-needs-seed/B68-the-family.md](B-needs-seed/B68-the-family.md) | 8 | 4 + PARENT's re-point to CHILD_OFFSPRING (P11 D11) and its three D7 plurals | SON, DAUGHTER (a circle), MOM, DAD (register), all literal by design |
-| B69 | [B-needs-seed/B69-brothers-and-sisters.md](B-needs-seed/B69-brothers-and-sisters.md) | 5 | **5** — SIBLING, BROTHER and SISTER on one shape, which overturns P11 D12; ELDER and YOUNGER | none |
-| B70 | [B-needs-seed/B70-spouses-and-marriage.md](B-needs-seed/B70-spouses-and-marriage.md) | 4 | 4 | none |
-| B71 | [B-needs-seed/B71-grandparents-and-grandchildren.md](B-needs-seed/B71-grandparents-and-grandchildren.md) | 6 | 6 | none |
-| B72 | [B-needs-seed/B72-the-extended-family.md](B-needs-seed/B72-the-extended-family.md) | 5 | 5 | none |
-| B73 | [B-needs-seed/B73-in-laws-and-step-parents.md](B-needs-seed/B73-in-laws-and-step-parents.md) | 8 | 8 | none |
-| B74 | [B-needs-seed/B74-partners-and-friends.md](B-needs-seed/B74-partners-and-friends.md) | 5 | 5 | none |
+| B68 | [done/B68-the-family.md](done/B68-the-family.md) | 8 | 4 + PARENT's re-point to CHILD_OFFSPRING (P11 D11), its D7 plurals and FATHER's D2 columns | SON, DAUGHTER (a circle), MOM, DAD (register), all literal by design |
+| B69 | [done/B69-brothers-and-sisters.md](done/B69-brothers-and-sisters.md) | 5 | **5** — SIBLING, BROTHER and SISTER on one shape, which overturns P11 D12; ELDER and YOUNGER | none |
+| B70 | [done/B70-spouses-and-marriage.md](done/B70-spouses-and-marriage.md) | 4 | 4 | none |
+| B71 | [done/B71-grandparents-and-grandchildren.md](done/B71-grandparents-and-grandchildren.md) | 6 | 6 | none |
+| B72 | [done/B72-the-extended-family.md](done/B72-the-extended-family.md) | 5 | 5 | none |
+| B73 | [done/B73-in-laws-and-step-parents.md](done/B73-in-laws-and-step-parents.md) | 8 | 8 | none |
+| B74 | [done/B74-partners-and-friends.md](done/B74-partners-and-friends.md) | 5 | 5 | none |
 
-**Authoring order:** B68 first (every other ticket stands on CHILD_OFFSPRING, MOTHER or PARENT's
-plurals), then B69 and B70, then B71–B74. One engine defect must be fixed with B69's seed: Spanish
-puts the personal *a* after *tener*.
+**Four engine defects came with the seeding**, one of them the only one the batch forecast:
+
+- **Spanish put the personal *a* after *tener*** ("tiene **a** los mismos padres"), which B69 had
+  found and no bug file covered. `tener` now says `object_no_a` and
+  [`takesPersonalA`](../../packages/engine/src/languages/es/takesPersonalA.ts) reads it; *ver* keeps
+  the a on the very same object.
+- **A definition's genitive possessor read P11's honorific columns**, which every one of these files
+  had said no tooltip would: "a parent's mother" came out 親の**お母さん**. Both the own word and the
+  honorific presuppose somebody in particular, so an indefinite or bare possessor now leaves the head
+  its citation form ([B68](done/B68-the-family.md)'s report).
+- **Two of German's four adjectival-noun surfaces were missing** (P11 D8 landed the other two): the
+  "von" + dative a genitive that cannot show takes, which B68's FAMILY gloss caught as "von
+  Verwandt**n**", and the dative of a complement, which read "meinem Verwandt" / "meinem Verlobt"
+  ([B74](done/B74-partners-and-friends.md)'s).
+
+The batch is pinned by [`kinship.test.ts`](../../packages/engine/test/kinship.test.ts) — 95 tests: the
+38 glosses, every word's singular and plural in all seven languages, and what the kin lexemes do that
+no other noun does (the Japanese own / other's / nobody's split and its chain, the ELDER / YOUNGER
+fusion, the French and German short words, the plurals that are another word, the German adjectival
+noun, the Italian article) — and by seven rows in
+[`definition-tooltip.spec.ts`](../../e2e/definition-tooltip.spec.ts), one per ticket.
 
 B59–B67, the P09 core vocabulary, were filed on 2026-09-22 (see
 [the P09 sweep](#the-p09-sweep-of-2026-09-22)) and authored the same day; all nine are in
@@ -254,13 +269,16 @@ waited. A retired row says what the construct turned out to be.
 They were filed as one ticket and split the same day at review: the twelve share nothing but P09,
 and each retires on its own construct. Eleven did, on 2026-09-22.
 
-**The P11 sweep of 2026-09-22 filed none.** Its 41 kin concepts
-([B68–B74](#part-b--needs-seeding-b-needs-seed)) compose 37 glosses on the corpus as it stands, and
-the four that stay on the literal — SON, DAUGHTER, MOM and DAD — are literal by design, not blocked:
-no construct would move them. The engine work that feature needs (the Japanese `possessed` and
-`honorific` columns, German's adjectival noun, the sibling fusion) belongs to
-[P11](../features/P-planning/P11-family-and-relationships/README.md) itself, and no definition reads
-any of it.
+**The P11 sweep of 2026-09-22 filed none, and the seeding the same day needed none.** Its 41 kin
+concepts ([B68–B74](#part-b--needs-seeding-b-needs-seed)) composed 37 glosses on the corpus as it
+stood, and the four that stay on the literal — SON, DAUGHTER, MOM and DAD — are literal by design,
+not blocked: no construct would move them. The engine work that feature needs (the Japanese
+`possessed` and `honorific` columns, German's adjectival noun, the sibling fusion) belongs to
+[P11](../features/P-planning/P11-family-and-relationships/README.md) itself — but "no definition
+reads any of it", which this paragraph said and every ticket repeated, turned out to be false: eleven
+of the glosses are genitives, and a genitive possessor selects the head's word. The rule that keeps a
+tooltip out of the honorific is in [B68](done/B68-the-family.md)'s report; it is a narrowing of P11's
+own D3, not a new construct, so there is still no C ticket here.
 
 C23–C28, the six the sweep of 2026-09-22 filed, were driven to a verdict the same day
 and all six are in [`done/`](done/) — **123 of their concepts shipped a gloss**, four constructs were
@@ -581,13 +599,13 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
    their genus gives *un fratello maschile* ("a male brother") — true, and probed. The way around it
    is not the genus but the **relative clause**: a *person* who has the same parents, where the head
    is neutral in all seven languages. SIBLING, BROTHER and SISTER all ship on that one shape
-   ([B69](B-needs-seed/B69-brothers-and-sisters.md)), and so do GRANDSON and GRANDDAUGHTER on a
+   ([B69](done/B69-brothers-and-sisters.md)), and so do GRANDSON and GRANDDAUGHTER on a
    different route — the grandchild word is neutral everywhere (it *nipote*, ja 孫), so the sex
    adjective works there.
 2. **SON and DAUGHTER are the two that stay on the literal, and not for D12's reason.** Their
    working gloss ("a parent's male child") renders in all seven; what refuses it is that
    CHILD_OFFSPRING is glossed "a son or a daughter", and a genus and its species cannot define each
-   other. [B68](B-needs-seed/B68-the-family.md) spends the definition on CHILD_OFFSPRING, where the
+   other. [B68](done/B68-the-family.md) spends the definition on CHILD_OFFSPRING, where the
    Italian, Spanish and Portuguese word is genuinely ambiguous (*figlio* is both the son and the
    offspring), and records the swap for whoever prefers it the other way round.
 3. **FAMILY is not seeded.** D10 marks it ✓ ("FAMILY under GROUP ✓"), and the corpus has no such
@@ -606,7 +624,30 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
    (German *dunkele*). Two more defects were met on rejected leads and are recorded, not ticketed:
    the superlative's unfused article (it *di l'età più grande*, pt *de a maior idade*) and the
    Japanese comitative gap, which goes unmarked in a relative clause and which
-   [B74](B-needs-seed/B74-partners-and-friends.md) works around with an adverb (一緒に住む人).
+   [B74](done/B74-partners-and-friends.md) works around with an adverb (一緒に住む人).
+
+**What the authoring found, the same day.** All 38 definitions shipped, and five of the sweep's own
+statements did not survive the seeding:
+
+1. **A definition does read P11's lexeme columns.** Every one of these files opens by saying it does
+   not — a definition has no possessor — but eleven of the glosses are genitives, and an indefinite
+   PARENT or SPOUSE possessor is human, so the engine reached for the honorific: 親の**お母さん** for
+   "a parent's mother". The rule now is that both the own word and the honorific presuppose somebody
+   in particular, so an indefinite or bare possessor leaves the head its citation form.
+2. **CHILD_OFFSPRING's coordination is not the corpus's first in subject position** (reading 5):
+   THING has glossed as "an object or a concept" since B65. What was new is nothing.
+3. **Two more German defects, not one Spanish.** P11 D8's adjectival noun had been taught to the
+   noun phrase, the genitive and the agent phrase, and not to the "von" + dative or to a complement's
+   dative, which B68's FAMILY gloss and B74's FIANCE label caught ("von Verwandt**n**", "meinem
+   Verlobt"). The Spanish *tener* defect was fixed as forecast.
+4. **A second word for *child* is a word the console can no longer print.** CHILD_OFFSPRING shares a
+   label with CHILD in four languages, and the console writes an id wherever a word would read back
+   as another concept — which is how it has always handled Spanish *niño* (CHILD / BOY). The help
+   pages' examples, though, are written in English and applied before they are printed, so the five
+   that said *child* stopped applying; they now say *man*, and the gender pair a *cat*.
+5. **FATHER's own Japanese lexeme had to move with MOTHER's**, which no ticket had listed: D2 gives
+   it 父親 · 父 · お父さん, and leaving it at 父 would have made the corpus's oldest kin word the one
+   that did not follow the rule its neighbours ship with.
 
 ### Done
 
@@ -749,6 +790,14 @@ SPOUSE ↔ MARRY (a verb and its typical object, as EAT ↔ FOOD).
 | C39 | [done/C39-focus-particle-on-a-noun-phrase.md](done/C39-focus-particle-on-a-noun-phrase.md) | **built the focus particle**, `NounPhrase.focus` — `only \| even \| also`, a value, so **EVEN is not a concept** and its gloss question dissolves with it. Six languages write a word beside the phrase (en *too* and fr *aussi* after it); Japanese writes a particle that replaces が / を / は and follows every other, which is the `no` circumfix's own rule and so one site: 猫だけ, 猫さえ, 猫も, 家にも. A coordination takes none. The six reach the subject and the direct object; a complement's focus, which belongs in front of the adposition, is what is left |
 | C40 | [done/C40-french-distal-demonstrative.md](done/C40-french-distal-demonstrative.md) | **built the contrastive demonstrative**, `NounPhrase.contrastive` — read by French alone, which neutralises this/that in *ce* and marks the distance with the postposed clitic (*ce lieu-là*, *ce chat-ci*). It closes the noun's own words, behind its adjectives and ahead of a modifier, possessor or relative. THERE → in that place, which without it was HERE's gloss character for character |
 | C29 | [done/C29-temporal-complement.md](done/C29-temporal-complement.md) | **built the temporal complement**, the *when* a clause had no slot for — `ComplementType.temporal` carrying a `TemporalRelation` specifier: `at \| ago \| until \| after \| before \| during`, all six of the ticket's list. `at` is the one whose word the **noun** picks (`temporal_prep`: en *on* a day but *at* a time and *in* a week, de *an* / *zu* / *in*), each language keeping a generic fallback; the other five are the relation's own. Three languages have no preposition for *ago* at all — en / it postpose a word, ja postposes 前に, and fr / es / pt front an impersonal verb (*il y a*, *hace*, *há*) — while German spells it with the *vor* it also spells *before* with, and *während* is the one that governs the genitive. TODAY → on this day; JUST → a moment ago; STILL → until this time, which the *until* finally tells from NOW's "at this time". Seeded **MOMENT** (literal by design: "short" is not in the corpus) and **TEMPORAL_COMPLEMENT**; **Spanish JUST changed lexeme to *recién***, because its gloss rendered its old word back. Plan-only, like the object predicative and the comitative |
+
+| B68 | [done/B68-the-family.md](done/B68-the-family.md) | RELATIVE → a person of the same family; FAMILY → a group of relatives; MOTHER → a female parent; CHILD_OFFSPRING → a son or a daughter (a coordination, as THING's is); **PARENT re-pointed** to CHILD_OFFSPRING, so Italian, Spanish and Portuguese say *figli*, *hijos*, *filhos* where they said *bambini*, *niños*, *crianças* (P11 D11), and took D7's plurals (*Eltern*, *padres*, *pais*, 両親) and D2's Japanese columns, as FATHER did beside it (父親 · 父 · お父さん). SON, DAUGHTER, MOM and DAD literal by design. Two engine fixes: the honorific a definition's genitive was reaching for, and German's "von" + dative adjectival noun (*von Verwandten*) |
+| B69 | [done/B69-brothers-and-sisters.md](done/B69-brothers-and-sisters.md) | SIBLING → a person who has the same parents; BROTHER and SISTER the same with MALE / FEMALE on the head — **not** the sex adjective on their genus, which says "a female brother" in Romance, so **P11 D12 is overturned**. ELDER → of greater age, YOUNGER → of lower age, OLD's own gloss one degree up (`dimGloss` gained the degree). **Fixed the Spanish personal *a* after *tener***, `object_no_a` on the lexeme: "tiene los mismos padres", where *ver* keeps it |
+| B70 | [done/B70-spouses-and-marriage.md](done/B70-spouses-and-marriage.md) | SPOUSE → a person who one marries; HUSBAND → a male spouse; WIFE → a female spouse; **MARRY** → to become a spouse, the spouse a **predicative** and not an object, which is what keeps German's nominative, Spanish's missing *a* and Japanese's に. Seeded MARRY with its `object_prep` / `object_particle` columns (es *casarse con*, pt *casar com*, ja と) |
+| B71 | [done/B71-grandparents-and-grandchildren.md](done/B71-grandparents-and-grandchildren.md) | GRANDPARENT → a parent's parent; GRANDFATHER → a parent's father; GRANDMOTHER → a parent's mother; GRANDCHILD → a child's child — the kin genitive, now `kinGloss`, which carries eleven of the batch's glosses; GRANDSON → a male grandchild and GRANDDAUGHTER → a female grandchild on the sex adjective, because the genitive route would repeat GRANDCHILD's own Italian gloss |
+| B72 | [done/B72-the-extended-family.md](done/B72-the-extended-family.md) | UNCLE → a parent's brother; AUNT → a parent's sister; NEPHEW → a sibling's son; NIECE → a sibling's daughter; COUSIN → a parent's sibling's child, the corpus's **first genitive inside a genitive** (ja 親の兄弟の子供, de *ein Kind eines Geschwisters eines Elternteils*). おじ, おば and いとこ seeded in kana, because the kanji would guess an age |
+| B73 | [done/B73-in-laws-and-step-parents.md](done/B73-in-laws-and-step-parents.md) | the six in-laws on one genitive (MOTHER_IN_LAW → a spouse's mother, SON_IN_LAW → a child's husband, …) and the two step-parents on `stepParentGloss`, a genitive **and** a negated copular relative on one head: STEPFATHER → a mother's husband who is not a father, which is what keeps it off FATHER (de *der **kein** Vater ist*, ja 父親ではない母親の夫) |
+| B74 | [done/B74-partners-and-friends.md](done/B74-partners-and-friends.md) | PARTNER → a person with whom one lives together, the adverb kept for Japanese alone (一緒に住む人, where the bare clause says "a person who lives"); BOYFRIEND → a male partner; GIRLFRIEND → a female partner; FIANCE → a person who one is about to marry (the prospective aspect inside a relative clause); FRIEND → a person who one knows well. Fixed the last two of P11 D8's German surfaces: the adjectival noun in a complement's dative (*meinem Verwandten*, *meinem Verlobten*) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

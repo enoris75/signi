@@ -6,6 +6,9 @@ All four gloss. HUSBAND and WIFE are the pair D12 keeps on `glossOf(genus, MALE 
 work because *coniuge*, *conjoint*, *Ehepartner*, *cónyuge*, *cônjuge* and 配偶者 are neutral in every
 language.)_
 
+**Shipped on 2026-09-22** — see [Done](#done-2026-09-22). Every render came out as the table below
+forecast.
+
 ## Seed first
 
 Proposed forms, for the seed author to check — suggestions, not renders. **(k)** is the Italian

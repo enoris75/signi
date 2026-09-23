@@ -6,6 +6,9 @@ _(from the P11 family-and-relationships sweep of 2026-09-22. SIBLING, BROTHER an
 the one P11 D12 assumed — see reading 1 — and it meets one Spanish defect, which the seed has to fix
 (reading 2).)_
 
+**Shipped on 2026-09-22** — see [Done](#done-2026-09-22). The Spanish defect was fixed with the
+seed, as reading 2 asked.
+
 ## Seed first
 
 Proposed forms, for the seed author to check — suggestions, not renders. **(k)** is the Italian

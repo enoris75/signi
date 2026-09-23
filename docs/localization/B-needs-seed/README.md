@@ -1,15 +1,18 @@
 # B-needs-seed — tasks waiting on words
 
-**Seven open: [B68](B68-the-family.md)–[B74](B74-partners-and-friends.md)**, the
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, filed on
-2026-09-22: one ticket per branch of the family, **41 concepts** to seed and **37 glosses** to
-author, plus a re-point of PARENT's — 38 definitions in all. Read them in order — B68 seeds
-CHILD_OFFSPRING, MOTHER and PARENT's new plurals, which the other six stand on — and note one engine defect B69's seed has to
-fix: Spanish puts the personal *a* after *tener*. Four of the 41 stay on the English literal by
-design (SON and DAUGHTER, which would close a circle with CHILD_OFFSPRING; MOM and DAD, which differ
-from MOTHER and FATHER only in register), each named in its file with every lead probed. **None of
-the seven waits on P11's own engine work**: a definition has no possessor, so no tooltip reads the
-`possessed`, `honorific`, `kin` or `with_<ADJECTIVE>` columns that feature adds.
+**Empty.** [B68](../done/B68-the-family.md)–[B74](../done/B74-partners-and-friends.md), the
+[P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, were filed on
+2026-09-22 and authored the same day: **41 concepts seeded** — forty relatives and partners, the two
+adjectives ELDER and YOUNGER, and the verb MARRY — and **38 definitions**, which is every one they
+forecast. Four of the 41 stay on the English literal by design (SON and DAUGHTER, which would close a
+circle with CHILD_OFFSPRING; MOM and DAD, which differ from MOTHER and FATHER only in register), each
+with its leads probed in its file.
+
+Four engine defects came with them, three of which no ticket had forecast: the Spanish personal *a*
+after *tener* (which B69 had), the honorific a definition's own genitive was reaching for
+(親のお母さん for "a parent's mother"), and two of German's four adjectival-noun surfaces, which P11
+D8 had not taught — the "von" + dative and a complement's dative. Each is written up in the ticket
+that met it.
 
 [B59](../done/B59-time-words.md)–[B67](../done/B67-place-and-focus-adverbs.md), the
 [P09](../../features/P-planning/P09-core-vocabulary/README.md) core vocabulary, were filed on

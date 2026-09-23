@@ -9,11 +9,13 @@ changes with whose relative it is: 母 is my mother, お母さん is yours.
 **Scope:** all 7 languages. Japanese needs the most work. German needs the adjectival noun, and French
 and German read the new `possessed` column. English, Italian, Spanish and Portuguese need only data,
 because Italian's article rule for kin nouns already exists ([A85](../../../bugs/fixed/A85-italian-kinship-possessive-article.md)).
-**Status:** the **engine is built** (§1–§3, 2026-09-22): the decisions below are settled and the
-columns are read. What is left is the **corpus** (§4) and the sentence-level suite (§5), which are
-[B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed)'s to seed —
-until they land, nothing in the corpus carries a `possessed`, `honorific`, `kin`, `with_<ADJECTIVE>` or
-`adjectival` column, so every rendering is exactly what it was. See *What landed* below for the files.
+**Status:** **done** (2026-09-22). The engine landed first (§1–§3) and the corpus the same day
+(§4), seeded by [B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed):
+41 concepts, every column above carried by the words that need it, and 38 of their picker tooltips
+composed. The sentence-level suite (§5) is
+[`kinship.test.ts`](../../../../packages/engine/test/kinship.test.ts), which holds both tables at the
+top of this doc. The seeding found three defects the engine work had left, and fixed the Spanish
+one B69 forecast — see *What landed* below.
 The **localization tickets for these concepts' definitions are catalogued** as B68–B74 (2026-09-22, see
 *Localization tickets* below); they seed every word in §4 and correct some of D12's rows.
 
@@ -286,8 +288,8 @@ The Japanese adjectives end in の so that
 
 ## What landed (2026-09-22)
 
-§1–§3, with the colocated unit tests. No corpus, so no rendering changes yet: the columns are read
-where they exist and nothing seeds them.
+§1–§3 first, with the colocated unit tests, and §4–§5 the same day with
+[B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed).
 
 | file | what |
 | --- | --- |
@@ -298,6 +300,11 @@ where they exist and nothing seeds them.
 | [`de/adjectivalNoun.ts`](../../../../packages/engine/src/languages/de/adjectivalNoun.ts), [`de/nounPhrase.ts`](../../../../packages/engine/src/languages/de/nounPhrase.ts), [`de/agentPhrase.ts`](../../../../packages/engine/src/languages/de/agentPhrase.ts) | D8. `adjectival: '1'` declines through `declineAdj`/`endingsFor` and takes none of the noun rules — genitive, compound and agent phrase alike. |
 | [`fr/fr.consts.ts`](../../../../packages/engine/src/languages/fr/fr.consts.ts) | `cadet` in `FR_ADJ_IRREGULAR`. |
 | [seed skill](../../../../.claude/skills/seed/SKILL.md) | *A noun's language-specific columns* — the five new ones, next to `kinship` and `weak`. |
+| [`nouns.ts`](../../../../packages/backend/src/concepts/nouns.ts), [`adjectives.ts`](../../../../packages/backend/src/concepts/adjectives.ts), [`verbs/transitive.ts`](../../../../packages/backend/src/concepts/verbs/transitive.ts) | §4. The 41 concepts, with every column above on the lexemes that need it, and 38 composed definitions. PARENT re-pointed and given D7's plurals; FATHER given D2's three Japanese columns (父親 · 父 · お父さん), which moves its picker label. |
+| [`kinship.test.ts`](../../../../packages/engine/test/kinship.test.ts) | §5. Both tables at the top of this doc, the 38 glosses, and every word's singular and plural in all seven languages. |
+| [`applyPossessorForm.ts`](../../../../packages/engine/src/translator/functions/applyPossessorForm.ts) | D2/D3, narrowed by the seeding: the own word and the honorific presuppose **somebody in particular**, so a genitive possessor under the indefinite or bare determiner selects neither. Without it every kin definition read an honorific — 親のお母さん for "a parent's mother". |
+| [`de/possessorText.ts`](../../../../packages/engine/src/languages/de/possessorText.ts), [`de/complementsPhrase/complementsPhrase.ts`](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts) | D8's two missing surfaces, found by FAMILY's gloss and FIANCE's dative: the "von" + dative a genitive that cannot show takes ("von Verwandt**n**") and a complement's dative ("meinem Verwandt", "meinem Verlobt"). |
+| [`es/takesPersonalA.ts`](../../../../packages/engine/src/languages/es/takesPersonalA.ts) | `object_no_a` on *tener*: having somebody is not doing anything to them, so no personal "a" — "tiene los mismos padres", where *ver* keeps it (localization B69). |
 
 Two things the seeding has to honour, found while building D8: a German `adjectival` lexeme seeds
 `plural` (and `fem`) as the **same bare stem**, because the ending carries the number and gender and
@@ -321,10 +328,13 @@ and its definition rendered through the engine source at HEAD, the way
 [B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), one
 ticket per branch of the family, and their **Seed first** tables are this plan's §4 with the forms
 checked, so authoring one is the seeding and the tooltips in a single pass. **37 of the 41 concepts
-ship a gloss**, PARENT's is re-pointed (D11), and **no C ticket was needed**: every definition
-composes on the corpus as it stands, and none of them reads the columns §2 and §3 add, because a
-definition has no possessor. The tickets can therefore be authored before, during or after the
-engine work here.
+ship a gloss** and PARENT's is re-pointed (D11), which is what landed on 2026-09-22; **no C ticket was
+needed**. One thing the tickets said was wrong, and the authoring found it: a definition has no
+possessor of its own, but eleven of the glosses are **genitives**, and an indefinite PARENT or SPOUSE
+possessor is human — so the honorific of D2 fired inside a tooltip (親の**お母さん** for "a
+parent's mother"). Both the own word and the honorific presuppose somebody in particular, so a
+possessor under the indefinite or bare determiner now leaves the head its citation form; the examples
+in this doc are untouched.
 
 What [the P11 sweep](../../../localization/localization-tasks.md#the-p11-sweep-of-2026-09-22)
 changes in this plan:
@@ -332,13 +342,13 @@ changes in this plan:
 - **D12 is too pessimistic.** BROTHER and SISTER *can* be defined — not by the sex adjective on
   their genus (*un fratello maschile*, as D12 says) but by a relative clause on PERSON, which is
   neutral in all seven: "a male person who has the same parents"
-  ([B69](../../../localization/B-needs-seed/B69-brothers-and-sisters.md)). GRANDSON and
+  ([B69](../../../localization/done/B69-brothers-and-sisters.md)). GRANDSON and
   GRANDDAUGHTER ship on the adjective after all, because *nipote*, *petit-enfant*, *Enkelkind* and
-  孫 are neutral ([B71](../../../localization/B-needs-seed/B71-grandparents-and-grandchildren.md)).
+  孫 are neutral ([B71](../../../localization/done/B71-grandparents-and-grandchildren.md)).
 - **SON and DAUGHTER are the two that stay on the literal**, and for a different reason than D12
   gives: their working gloss ("a parent's male child") would define CHILD_OFFSPRING's species by the
   genus its own gloss names ("a son or a daughter"), a circle
-  ([B68](../../../localization/B-needs-seed/B68-the-family.md)). MOM and DAD stay literal because
+  ([B68](../../../localization/done/B68-the-family.md)). MOM and DAD stay literal because
   register is not a differentia, which is D13 read from the definitions' side.
 - **D10's ✓ on FAMILY is wrong** — the corpus has no FAMILY concept; B68 seeds it.
 - **One engine defect blocks three tooltips**: Spanish puts the personal *a* after *tener* ("tiene
