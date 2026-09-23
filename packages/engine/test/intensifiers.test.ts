@@ -219,10 +219,10 @@ describe('known bugs: an intensifier on a comparative (A248)', () => {
   });
 
   // Japanese's lowered degree is a negation, not a comparative, so VERY does not turn to ずっと there; and TOO
-  // names no comparative word, so it is unchanged (TOO on a comparative is a lead of its own).
+  // does not turn into VERY's comparative word (TOO on a comparative is A256's own).
   test('regression: Japanese lowered degree and TOO keep their positive word', () => {
     expect(isBigger({ headDegree: 'less' }).ja).not.toContain('ずっと');
-    expect(isBigger({ headIntensifier: 'TOO' }).en).toBe('the cat is too bigger.');
+    expect(isBigger({ headIntensifier: 'TOO' }).en).not.toBe('the cat is much bigger.');
   });
 
   test('regression: the positive keeps its intensifier', () => {
@@ -231,5 +231,138 @@ describe('known bugs: an intensifier on a comparative (A248)', () => {
       de: 'der Kater ist sehr groß.', es: 'el gato es muy grande.', ja: '猫はとても大きいです。',
       pt: 'o gato é muito grande.',
     });
+  });
+});
+
+const isBig = (extra: Parameters<typeof np>[1]) =>
+  sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', extra) } } }));
+const aBigCat = (degree: 'equally' | 'more' | 'less' | 'most', intensifier: string) =>
+  sayAll(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveIntensifiers: [intensifier] }), 'RUN'));
+
+// A255. VERY wraps the equative's finished surface as it wraps any degree (`withIntensifier`), so it
+// stacks in front of it: "very equally big", "très aussi grand", "sehr gleich groß", "muy igual de
+// grande", 犬と同じくらいとても大きい. Equality is not a scale VERY can raise; the emphasis it can add is
+// exactness, which four languages say with a word of their own — *just as*, *tout aussi*, *genauso*,
+// *altrettanto* — and the rest say with the equative alone (Spanish *igual de* already is "just as").
+describe('known bugs: VERY on an equative (A255)', () => {
+  test.fails('a predicate equative: just as big', () => {
+    expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY' })).toEqual({
+      en: 'the cat is just as big.', it: 'il gatto è altrettanto grande.', fr: 'le chat est tout aussi grand.',
+      de: 'der Kater ist genauso groß.', es: 'el gato es igual de grande.', ja: '猫は同じくらい大きいです。',
+      pt: 'o gato é igualmente grande.',
+    });
+  });
+
+  test.fails('with a standard: just as big as the dog', () => {
+    expect(isBig({ headDegree: 'equally', headIntensifier: 'VERY', headStandard: np('DOG') })).toEqual({
+      en: 'the cat is just as big as the dog.', it: 'il gatto è altrettanto grande quanto il cane.',
+      fr: 'le chat est tout aussi grand que le chien.', de: 'der Kater ist genauso groß wie der Hund.',
+      es: 'el gato es igual de grande que el perro.', ja: '猫は犬と同じくらい大きいです。',
+      pt: 'o gato é tão grande como o cão.',
+    });
+  });
+
+  // English does not put "just as" before a noun; the attributive equative keeps "equally" alone.
+  test.fails('an attributive equative: a cat just as big', () => {
+    expect(aBigCat('equally', 'VERY')).toMatchObject({
+      en: 'an equally big cat runs.', fr: 'un chat tout aussi grand court.',
+      de: 'ein genauso großer Kater läuft.', es: 'un gato igual de grande corre.',
+    });
+  });
+
+  test('regression: the bare equative', () => {
+    expect(isBig({ headDegree: 'equally' })).toEqual({
+      en: 'the cat is equally big.', it: 'il gatto è ugualmente grande.', fr: 'le chat est aussi grand.',
+      de: 'der Kater ist gleich groß.', es: 'el gato es igual de grande.', ja: '猫は同じくらい大きいです。',
+      pt: 'o gato é igualmente grande.',
+    });
+  });
+});
+
+// A256. TOO wraps the comparative's finished surface: "too bigger", "zu größer", "maior demais",
+// もっと大きすぎる. TOO on a comparative says the difference is excessive — "too much bigger" — which is
+// TOO on the comparative's own intensifier (A248's *much*, *viel*), not *much too big* (VERY on TOO on
+// the positive, which drops the comparison). Italian and Spanish already say it ("troppo più grande",
+// "demasiado más grande"); Portuguese takes the preposed *demasiado* a comparative allows; Japanese
+// drops もっと under すぎる as the standard's より already makes it (犬より大きすぎる). French has no
+// settled form ("trop plus grand" is colloquial at best) and is left out of the pin.
+describe('known bugs: TOO on a comparative (A256)', () => {
+  test.fails('a predicate comparative: too much bigger', () => {
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
+      en: 'the cat is too much bigger.', de: 'der Kater ist zu viel größer.',
+      ja: '猫は大きすぎます。', pt: 'o gato é demasiado maior.',
+    });
+  });
+
+  test.fails('with a standard, attributively, and lowered', () => {
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO', headStandard: np('DOG') })).toMatchObject({
+      en: 'the cat is too much bigger than the dog.', de: 'der Kater ist zu viel größer als der Hund.',
+      pt: 'o gato é demasiado maior do que o cão.',
+    });
+    expect(aBigCat('more', 'TOO')).toMatchObject({ de: 'ein zu viel größerer Kater läuft.', ja: '大きすぎる猫は走ります。' });
+    expect(isBig({ headDegree: 'less', headIntensifier: 'TOO' })).toMatchObject({
+      en: 'the cat is too much less big.', de: 'der Kater ist zu viel weniger groß.', pt: 'o gato é demasiado menos grande.',
+    });
+  });
+
+  test('regression: Italian, Spanish and the Japanese standard already say it', () => {
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
+      it: 'il gatto è troppo più grande.', es: 'el gato es demasiado más grande.',
+    });
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO', headStandard: np('DOG') }).ja).toBe('猫は犬より大きすぎます。');
+  });
+});
+
+// A257. VERY wraps the superlative's finished surface: "the cat is very biggest", "il molto più
+// grande", "el muy más grande", "le très plus grand", "sehr am größten", とても最も大きい. A superlative is
+// intensified by a phrase of its own that stands outside the article: *by far*, *di gran lunga*,
+// *de loin*, *bei weitem*, *con mucho*, *de longe*, 断然. English attributive "the very biggest cat" is
+// the one place VERY itself is right, after the article, and is already what the engine writes.
+describe('known bugs: VERY on a superlative (A257)', () => {
+  test.fails('a predicate superlative: by far the biggest', () => {
+    expect(isBig({ headDegree: 'most', headIntensifier: 'VERY' })).toEqual({
+      en: 'the cat is by far the biggest.', it: 'il gatto è di gran lunga il più grande.',
+      fr: 'le chat est de loin le plus grand.', de: 'der Kater ist bei weitem am größten.',
+      es: 'el gato es con mucho el más grande.', ja: '猫は断然最も大きいです。', pt: 'o gato é de longe o maior.',
+    });
+  });
+
+  test.fails('the lowered superlative: by far the least big', () => {
+    expect(isBig({ headDegree: 'least', headIntensifier: 'VERY' })).toMatchObject({
+      en: 'the cat is by far the least big.', it: 'il gatto è di gran lunga il meno grande.',
+      fr: 'le chat est de loin le moins grand.', de: 'der Kater ist bei weitem am wenigsten groß.',
+      es: 'el gato es con mucho el menos grande.', pt: 'o gato é de longe o menos grande.',
+    });
+  });
+
+  test.fails('an attributive superlative: der bei weitem größte Kater', () => {
+    expect(aBigCat('most', 'VERY')).toMatchObject({
+      de: 'der bei weitem größte Kater läuft.', fr: 'le chat de loin le plus grand court.',
+    });
+  });
+
+  test('regression: English attributive VERY after the article is right', () => {
+    expect(aBigCat('most', 'VERY').en).toBe('the very biggest cat runs.');
+  });
+});
+
+// A258. Japanese's lowered degree is a negated positive (それほど大きくない, 犬ほど大きくない), and VERY
+// leads it as it leads any degree (`jaDegreeSegs`): とてもそれほど大きくない, 犬ほどとても大きくない.
+// An adverb inside the negation reads "not very" (とても大きくない), so とても there says the opposite
+// of "much less big"; Japanese has no intensifier that scopes over the lowering, and the lowered degree
+// alone is the closest rendering — as it is for a comparative, where A248 made VERY ずっと and so the
+// fix drops とても here, not the degree.
+describe('known bugs: Japanese VERY on a lowered degree (A258)', () => {
+  test.fails('bare, with a standard, and attributive: VERY is dropped', () => {
+    expect(isBig({ headDegree: 'less', headIntensifier: 'VERY' }).ja).toBe('猫はそれほど大きくないです。');
+    expect(isBig({ headDegree: 'less', headIntensifier: 'VERY', headStandard: np('DOG') }).ja).toBe('猫は犬ほど大きくないです。');
+    expect(aBigCat('less', 'VERY').ja).toBe('それほど大きくない猫は走ります。');
+  });
+
+  test('regression: the other six say much less big, and VERY on the positive keeps とても', () => {
+    expect(isBig({ headDegree: 'less', headIntensifier: 'VERY' })).toMatchObject({
+      en: 'the cat is much less big.', de: 'der Kater ist viel weniger groß.', fr: 'le chat est bien moins grand.',
+    });
+    expect(isBig({ headIntensifier: 'VERY' }).ja).toBe('猫はとても大きいです。');
   });
 });

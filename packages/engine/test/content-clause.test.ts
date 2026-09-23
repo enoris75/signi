@@ -293,3 +293,119 @@ describe('known bugs: a negated belief keeps the indicative (A247)', () => {
     });
   });
 });
+
+// A254. A content clause's tense is resolved as any clause's is, absolutely, so under a past governor
+// it keeps the present its plan names: "non credeva che il gatto corra", "no creía que el gato corra",
+// "the man believed that the cat runs". A clause simultaneous with a past governor shifts back — the
+// Romance subjunctive into the imperfect subjunctive ("corresse", "corriera"), the indicative into the
+// imperfect ("correva", "courait", "corría", "corria"), English into the past ("ran"), and a future
+// into the conditional ("would run", "courrait"). French keeps the present subjunctive of speech
+// ("ne croyait pas que le chat coure"), German's dass-clause keeps its own tense, and Japanese's
+// clause tense is relative already — all three are right.
+describe('known bugs: a content clause under a past governor keeps the present (A254)', () => {
+  const past = (verb: string, negative = false, inner: Partial<NonNullable<PhrasePlan['contentObject']>['verbPhrase']> = {}): PhrasePlan => ({
+    subject: np('MAN'),
+    verbPhrase: { verb, negative, tense: 'past' },
+    contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', ...inner } },
+  });
+
+  test.fails('the subjunctive shifts to the imperfect subjunctive: non credeva che il gatto corresse', () => {
+    expect(sayAll(past('BELIEVE', true))).toMatchObject({
+      it: "l'uomo non credeva che il gatto corresse.", es: 'el hombre no creía que el gato corriera.',
+      pt: 'o homem não acreditava que o gato corresse.',
+    });
+    expect(say(past('BELIEVE'), 'it')).toBe("l'uomo credeva che il gatto corresse.");
+    expect(sayAll(past('THINK', true))).toMatchObject({
+      it: "l'uomo non pensò che il gatto corresse.", es: 'el hombre no pensó que el gato corriera.',
+      pt: 'o homem não pensou que o gato corresse.',
+    });
+  });
+
+  test.fails('the indicative shifts to the imperfect: credeva, croyait, creía que el gato corría', () => {
+    expect(sayAll(past('BELIEVE'))).toMatchObject({
+      fr: "l'homme croyait que le chat courait.", es: 'el hombre creía que el gato corría.',
+      pt: 'o homem acreditava que o gato corria.',
+    });
+    expect(sayAll(past('SAY'))).toMatchObject({
+      it: "l'uomo disse che il gatto correva.", fr: "l'homme dit que le chat courait.",
+      es: 'el hombre dijo que el gato corría.', pt: 'o homem disse que o gato corria.',
+    });
+    expect(sayAll(past('KNOW'))).toMatchObject({
+      it: "l'uomo sapeva che il gatto correva.", fr: "l'homme savait que le chat courait.",
+      es: 'el hombre sabía que el gato corría.', pt: 'o homem sabia que o gato corria.',
+    });
+  });
+
+  test.fails('English backshifts: the man did not believe that the cat ran', () => {
+    expect(say(past('BELIEVE', true), 'en')).toBe('the man did not believe that the cat ran.');
+    expect(say(past('BELIEVE'), 'en')).toBe('the man believed that the cat ran.');
+    expect(say(past('SAY'), 'en')).toBe('the man said that the cat ran.');
+  });
+
+  test.fails('a future under a past governor is the conditional: would run, courrait, correría', () => {
+    expect(sayAll(past('SAY', false, { tense: 'future' }))).toMatchObject({
+      en: 'the man said that the cat would run.', fr: "l'homme dit que le chat courrait.",
+      es: 'el hombre dijo que el gato correría.', pt: 'o homem disse que o gato correria.',
+    });
+  });
+
+  test.fails('a subject clause under a past predicate shifts too: era giusto che il gatto corresse', () => {
+    expect(sayAll({
+      subject: np('THING'), contentSubject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } },
+      verbPhrase: { verb: 'BE', tense: 'past' }, complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+    })).toMatchObject({
+      it: 'era giusto che il gatto corresse.', es: 'era correcto que el gato corriera.', pt: 'era certo que o gato corresse.',
+    });
+  });
+
+  test('regression: French speech, German, Japanese and a present governor are right', () => {
+    expect(sayAll(past('BELIEVE', true))).toMatchObject({
+      fr: "l'homme ne croyait pas que le chat coure.", de: 'der Mann glaubte nicht, dass der Kater läuft.',
+      ja: '男は猫が走ると信じていませんでした。',
+    });
+    expect(say(past('SAY'), 'ja')).toBe('男は猫が走ると言いました。');
+    expect(sayAll({ ...past('BELIEVE', true), verbPhrase: { verb: 'BELIEVE', negative: true } })).toMatchObject({
+      it: "l'uomo non crede che il gatto corra.", es: 'el hombre no cree que el gato corra.',
+      en: 'the man does not believe that the cat runs.',
+    });
+  });
+});
+
+// A260. A subjunctive content clause is resolved in `presentSubjunctive`, which every Romance engine
+// builds from the stored present whatever the clause's own tense: a past clause loses its past —
+// "crede che il gatto corra", "no cree que el gato corra" for "believes the cat ran". The indicative
+// keeps it ("cree que el gato corrió"), so only the subjunctive is wrong. A past clause under a present
+// governor is the perfect subjunctive: "abbia corso", "ait couru", "haya corrido", "tenha corrido".
+describe('known bugs: a subjunctive content clause drops its own past (A260)', () => {
+  const believes = (negative: boolean): PhrasePlan => ({
+    subject: np('MAN'),
+    verbPhrase: { verb: 'BELIEVE', negative },
+    contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', tense: 'past' } },
+  });
+
+  test.fails('under a negated belief: no cree que el gato haya corrido', () => {
+    expect(sayAll(believes(true))).toMatchObject({
+      it: "l'uomo non crede che il gatto abbia corso.", fr: "l'homme ne croit pas que le chat ait couru.",
+      es: 'el hombre no cree que el gato haya corrido.', pt: 'o homem não acredita que o gato tenha corrido.',
+    });
+    expect(say(believes(false), 'it')).toBe("l'uomo crede che il gatto abbia corso.");
+  });
+
+  test.fails('under an evaluative predicate: è giusto che il gatto abbia corso', () => {
+    expect(sayAll({
+      subject: np('THING'), contentSubject: { subject: np('CAT'), verbPhrase: { verb: 'RUN', tense: 'past' } },
+      verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+    })).toMatchObject({
+      it: 'è giusto che il gatto abbia corso.', fr: 'il est juste que le chat ait couru.',
+      es: 'es correcto que el gato haya corrido.', pt: 'é certo que o gato tenha corrido.',
+    });
+  });
+
+  test('regression: the indicative keeps its past, and the three without a subjunctive are right', () => {
+    expect(sayAll(believes(false))).toMatchObject({
+      en: 'the man believes that the cat ran.', fr: "l'homme croit que le chat courut.",
+      de: 'der Mann glaubt, dass der Kater lief.', es: 'el hombre cree que el gato corrió.',
+      ja: '男は猫が走ったと信じています。', pt: 'o homem acredita que o gato correu.',
+    });
+  });
+});

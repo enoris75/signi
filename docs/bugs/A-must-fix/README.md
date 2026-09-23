@@ -1,7 +1,20 @@
 # A-must-fix — confirmed bugs
 
-**None open.** Everything catalogued in this class has been fixed and moved to
-[`../fixed/`](../fixed/). The last seven, **A247–A253**, were filed and fixed on 2026-09-23, met by
+**Seven open**, filed on 2026-09-23 by the lanes that fixed A247–A253:
+[A254](A254-content-clause-under-a-past-governor-keeps-the-present.md), a content clause under a
+past governor keeping the present (*non credeva che il gatto corra*, *the man believed that the cat
+runs*); [A255](A255-very-on-an-equative.md), VERY on the equative (*very equally big*);
+[A256](A256-too-on-a-comparative.md), TOO on a comparative (*too bigger*);
+[A257](A257-very-on-a-superlative.md), VERY on a superlative (*very biggest*);
+[A258](A258-japanese-very-on-a-lowered-degree.md), Japanese とても inside a lowered degree
+(とてもそれほど大きくない); [A259](A259-japanese-while-clause-progressive-under-a-modal.md), Japanese
+*while* putting a modal's verb in the progressive (食べている必要がある間に); and
+[A260](A260-subjunctive-content-clause-drops-its-past.md), a subjunctive content clause dropping its
+own past (*non crede che il gatto corra* for *abbia corso*). A255–A258 are A248's leads and their
+kin; each target is a judgment call, ruled and argued in its file (A256 leaves French open).
+
+Everything filed before them has been fixed and moved to [`../fixed/`](../fixed/). The seven before,
+**A247–A253**, were filed and fixed on 2026-09-23, met by
 the lanes that shipped P09's grammar tasks
 [E2](../../features/P-planning/P09-core-vocabulary/P09-E2-complement-types.md),
 [E4](../../features/P-planning/P09-core-vocabulary/P09-E4-clauses.md) and

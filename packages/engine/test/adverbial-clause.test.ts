@@ -383,3 +383,34 @@ describe('known bugs: an Iberian future temporal clause takes the future indicat
     expect(say(runs('after', future, eaten), 'es')).toBe('el hombre correrá después de que el gato haya comido.');
   });
 });
+
+// A259. Japanese *while* puts its clause in 〜ている (`JA_SUBORDINATORS`, `shapeAdverbialClause`), the
+// stretch of time 間に measures, by setting the clause's aspect to progressive. Under a modal that
+// aspect lands on the governed verb, so the clause says "while the cat needs to be eating"
+// (食べている必要がある間) where the plan said "while the cat had to eat". 必要がある and ことができる are
+// states already, a stretch 間に can measure: 食べる必要がある間に, 食べることができる間に.
+describe('known bugs: a Japanese while clause puts a modal\'s verb in the progressive (A259)', () => {
+  const whileModal = (tense: 'past' | 'present', modal: string) =>
+    say(runs('while', { verbPhrase: { verb: 'RUN', tense } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense, modals: [modal] } }), 'ja');
+
+  test.fails('MUST: 猫が食べる必要がある間に', () => {
+    expect(whileModal('past', 'MUST')).toBe('男は猫が食べる必要がある間に走りました。');
+    expect(whileModal('present', 'MUST')).toBe('男は猫が食べる必要がある間に走ります。');
+  });
+
+  test.fails('CAN: 猫が食べることができる間に', () => {
+    expect(whileModal('past', 'CAN')).toBe('男は猫が食べることができる間に走りました。');
+  });
+
+  test('regression: a plain while clause, a modal under when, and the European languages', () => {
+    expect(say(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past' } }), 'ja'))
+      .toBe('男は猫が食べている間に走りました。');
+    expect(say(runs('when', { verbPhrase: { verb: 'RUN', tense: 'past' } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past', modals: ['MUST'] } }), 'ja'))
+      .toBe('男は猫が食べる必要があった時に走りました。');
+    expect(sayAll(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past', modals: ['MUST'] } })))
+      .toMatchObject({
+        en: 'the man ran while the cat had to eat.', it: "l'uomo corse mentre il gatto doveva mangiare.",
+        de: 'der Mann lief, während der Kater fressen musste.', es: 'el hombre corrió mientras el gato debía comer.',
+      });
+  });
+});
