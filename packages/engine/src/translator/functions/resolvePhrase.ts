@@ -1,14 +1,15 @@
-import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan } from '@signi/shared';
+import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan, Tense } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
 import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
 import { contentClauseMood } from './contentClauseMood.js';
+import { contentClauseTense } from './contentClauseTense.js';
 import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
-import { imperfectivePast } from './imperfectivePast.js';
+import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { questionSubject } from './questionSubject.js';
@@ -49,6 +50,23 @@ function resolveInfinitiveComplement(
     ...(bare ? { verbPhrase: { ...resolved.verbPhrase!, bareInfinitive: true } } : {}),
     ...(byObject ? { control: 'object' as const } : {}),
   };
+}
+
+/**
+ * A content clause resolved as a clause of its own, in the mood its governor names and the tense its
+ * governor's shifts it to (A254, see `contentClauseTense`).
+ */
+function resolveContentClause(
+  clause: PhrasePlan,
+  language: string,
+  lookup: LexiconLookup,
+  mood: Mood | undefined,
+  governorTense: Tense | undefined,
+): ResolvedPhrase {
+  const shifted = contentClauseTense(governorTense, language, mood, clause.verbPhrase);
+  const resolved = resolvePhrase(
+    shifted.verbPhrase ? { ...clause, verbPhrase: shifted.verbPhrase } : clause, language, lookup, shifted.mood);
+  return shifted.imperfect ? asImperfect(resolved) : resolved;
 }
 
 /**
@@ -167,8 +185,8 @@ export function resolvePhrase(
     // A content clause standing where the subject would ("it is right that one acts", C30): a clause
     // of its own, in the mood its predicate adjective's lexeme names (P09-E4, see `contentClauseMood`).
     contentSubject: plan.contentSubject
-      ? resolvePhrase(plan.contentSubject, language, lookup,
-        contentClauseMood(predicativeGovernor(plan, language, lookup), language, 'subject'))
+      ? resolveContentClause(plan.contentSubject, language, lookup,
+        contentClauseMood(predicativeGovernor(plan, language, lookup), language, 'subject'), plan.verbPhrase?.tense)
       : undefined,
     // A content clause standing where the object would ("says that the cat runs", P09-E4): a clause
     // of its own, in the mood the governing verb's lexeme names — the indicative unless it says
@@ -176,8 +194,9 @@ export function resolvePhrase(
     // A247). The verb is not in scope where the clause renders, so the choice is made here, where it
     // is. Without a verb there is nothing to govern it, and a verbless period drops it.
     contentObject: plan.contentObject && verbPhrase
-      ? resolvePhrase(plan.contentObject, language, lookup,
-        contentClauseMood(verbPhrase.verb.forms, language, 'object', plan.verbPhrase?.negative === true))
+      ? resolveContentClause(plan.contentObject, language, lookup,
+        contentClauseMood(verbPhrase.verb.forms, language, 'object', plan.verbPhrase?.negative === true),
+        plan.verbPhrase?.tense)
       : undefined,
     // An adverbial clause ("runs when the cat eats", P09-E4): a clause of its own, in the mood its
     // conjunction governs. It hangs off the predicate, as a purpose does, so a verbless period drops it.

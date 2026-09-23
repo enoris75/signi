@@ -41,3 +41,25 @@ Pinned by `known bugs: a subjunctive content clause drops its own past (A260)` i
 [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts).
 
 Found while reproducing A254.
+
+## Resolved
+
+2026-09-23. [`contentClauseTense`](../../../packages/engine/src/translator/functions/contentClauseTense.ts)
+(A254's rule, called from `resolveContentClause` in
+[`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts)) now also turns a
+**past**, neutral-aspect clause in the `presentSubjunctive` under a governor that is not past into the
+resultative present, which each engine already builds as the aspect auxiliary in the present
+subjunctive and the participle, with the verb's own auxiliary: `abbia corso`, `sia andato`,
+`ait couru`, `soit allé`, `haya corrido`, `tenha corrido`. Italian and French name their avere / avoir
+auxiliaries `AVERE` / `AVOIR`, which the present-subjunctive overrides in
+[`mood.ts`](../../../packages/engine/src/mood.ts) did not cover (they fell back to the indicative
+`ha corso` / `a couru`); both now carry an override. A future clause keeps the present subjunctive, and
+a past clause under a past governor (`avesse corso`, the pluperfect subjunctive) is left alone.
+
+Guarded by the two formerly-`.fails` tests and four new ones in the
+`known bugs: a subjunctive content clause drops its own past (A260)` block of
+[content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) (essere / être
+participles and their agreement, an object and a passive, a future governor, a future clause keeping
+the present subjunctive), the A260 case in
+[contentClauseTense.test.ts](../../../packages/engine/src/translator/functions/contentClauseTense.test.ts),
+and the avere / avoir case in [mood.test.ts](../../../packages/engine/src/mood.test.ts).

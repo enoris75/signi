@@ -23,6 +23,17 @@ export function imperfectivePast(
   const verbPhrase = clause.verbPhrase;
   if (!verbPhrase || verbPhrase.tense !== 'past' || (verbPhrase.mood !== undefined && verbPhrase.mood !== 'indicative')) return clause;
   if (!IMPERFECTIVE_CONJUNCTIONS.has(conjunction) || !IMPERFECT_PAST_LANGUAGES.has(language)) return clause;
+  return asImperfect(clause);
+}
+
+/**
+ * `clause` with its verb — and the passive auxiliary that takes over its finite slot — read as a
+ * state's, so a Romance past says the imperfect. Shared by a *while* clause (A250) and a content clause
+ * shifted back under a past governor (A254, see `contentClauseTense`).
+ */
+export function asImperfect(clause: ResolvedPhrase): ResolvedPhrase {
+  const verbPhrase = clause.verbPhrase;
+  if (!verbPhrase) return clause;
   return {
     ...clause,
     verbPhrase: {
