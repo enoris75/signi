@@ -44,3 +44,30 @@ Pinned by `known bugs: VERY on a superlative (A257)` in
 [intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts).
 
 Found fixing A248, the intensifier on a comparative.
+
+## Resolved
+
+2026-09-23. A248's mechanism, one degree over. VERY's lexeme names a `superlative` phrase in
+[adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts) — en *by far*, it *di gran lunga*, fr
+*de loin*, de *bei weitem*, es *con mucho*, pt *de longe*, ja 断然 (with its reading) — which
+[`applyIntensifier`](../../../packages/engine/src/translator/functions/applyIntensifier.ts) puts in
+place of the base on `most` / `least` and marks `intensifier_superlative`. English names
+`attributive_plain_degrees: 'most,least'`, so before a noun it keeps *very* (`the very biggest cat
+runs.`). The new [`superlativeLead`](../../../packages/engine/src/functions/superlativeLead.ts) splits
+that phrase off the adjective at each site that writes the superlative's article, which puts it before
+the article: the predicate in [en](../../../packages/engine/src/languages/en/complementsPhrase.ts) (which
+now writes *the* under it: `by far the biggest`), [it](../../../packages/engine/src/languages/it/complementsPhrase.ts),
+[fr](../../../packages/engine/src/languages/fr/complementsPhrase.ts),
+[es](../../../packages/engine/src/languages/es/complementsPhrase.ts) and
+[pt](../../../packages/engine/src/languages/pt/complementsPhrase.ts), and French's doubled attributive
+article in [`splitAdjectives`](../../../packages/engine/src/languages/fr/splitAdjectives.ts). German
+(`bei weitem am größten`, `der bei weitem größte Kater`) and Japanese (断然最も大きい) have no article to
+pass, and `withIntensifier`'s ordinary pre position already is right there. The Italian, Spanish and
+Portuguese attributives (`il gatto di gran lunga più grande`) and the Japanese lowered superlative stay
+unpinned, as the ticket says.
+
+Guarded by the three formerly-`.fails` tests in `known bugs: VERY on a superlative (A257)` in
+[intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts), plus new cases there
+(subject agreement in all seven, an inflecting and a suppletive superlative, and the plural and
+lowered attributive), and colocated units in `superlativeLead.test.ts`, `applyIntensifier.test.ts`
+and `splitAdjectives.test.ts` (fr).

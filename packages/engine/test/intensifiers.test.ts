@@ -383,7 +383,7 @@ describe('known bugs: TOO on a comparative (A256)', () => {
 // *de loin*, *bei weitem*, *con mucho*, *de longe*, 断然. English attributive "the very biggest cat" is
 // the one place VERY itself is right, after the article, and is already what the engine writes.
 describe('known bugs: VERY on a superlative (A257)', () => {
-  test.fails('a predicate superlative: by far the biggest', () => {
+  test('a predicate superlative: by far the biggest', () => {
     expect(isBig({ headDegree: 'most', headIntensifier: 'VERY' })).toEqual({
       en: 'the cat is by far the biggest.', it: 'il gatto è di gran lunga il più grande.',
       fr: 'le chat est de loin le plus grand.', de: 'der Kater ist bei weitem am größten.',
@@ -391,7 +391,7 @@ describe('known bugs: VERY on a superlative (A257)', () => {
     });
   });
 
-  test.fails('the lowered superlative: by far the least big', () => {
+  test('the lowered superlative: by far the least big', () => {
     expect(isBig({ headDegree: 'least', headIntensifier: 'VERY' })).toMatchObject({
       en: 'the cat is by far the least big.', it: 'il gatto è di gran lunga il meno grande.',
       fr: 'le chat est de loin le moins grand.', de: 'der Kater ist bei weitem am wenigsten groß.',
@@ -399,9 +399,44 @@ describe('known bugs: VERY on a superlative (A257)', () => {
     });
   });
 
-  test.fails('an attributive superlative: der bei weitem größte Kater', () => {
+  test('an attributive superlative: der bei weitem größte Kater', () => {
     expect(aBigCat('most', 'VERY')).toMatchObject({
       de: 'der bei weitem größte Kater läuft.', fr: 'le chat de loin le plus grand court.',
+    });
+  });
+
+  test('the subject\'s agreement, an inflecting superlative and a suppletive one', () => {
+    expect(sayAll(clause(np('HOUSE', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headIntensifier: 'VERY' }) } },
+    }))).toEqual({
+      en: 'the houses are by far the biggest.', it: 'le case sono di gran lunga le più grandi.',
+      fr: 'les maisons sont de loin les plus grandes.', de: 'die Häuser sind bei weitem am größten.',
+      es: 'las casas son con mucho las más grandes.', ja: '家は断然最も大きいです。', pt: 'as casas são de longe as maiores.',
+    });
+    const most = (adjective: string) => sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np(adjective, { headDegree: 'most', headIntensifier: 'VERY' }) } },
+    }));
+    expect(most('HAPPY')).toEqual({
+      en: 'the cat is by far the happiest.', it: 'il gatto è di gran lunga il più felice.',
+      fr: 'le chat est de loin le plus heureux.', de: 'der Kater ist bei weitem am glücklichsten.',
+      es: 'el gato está con mucho el más feliz.', ja: '猫は断然最も幸せです。', pt: 'o gato está de longe o mais feliz.',
+    });
+    expect(most('GOOD')).toMatchObject({
+      en: 'the cat is by far the best.', fr: 'le chat est de loin le meilleur.',
+      de: 'der Kater ist bei weitem am besten.', pt: 'o gato é de longe o melhor.',
+    });
+  });
+
+  test('the attributive superlative, plural and lowered', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      number: 'plural', adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveIntensifiers: ['VERY'],
+    }), 'RUN'))).toMatchObject({
+      en: 'the very biggest houses run.', fr: 'les maisons de loin les plus grandes courent.',
+      de: 'die bei weitem größten Häuser laufen.', ja: '断然最も大きい家は走ります。',
+    });
+    expect(sayAll(clause(np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['least'], adjectiveIntensifiers: ['VERY'] }), 'RUN'))).toMatchObject({
+      en: 'the very least big cat runs.', fr: 'le chat de loin le moins grand court.',
+      de: 'der bei weitem am wenigsten große Kater läuft.',
     });
   });
 

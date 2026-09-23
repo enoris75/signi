@@ -5,7 +5,10 @@ import { applyIntensifier } from './applyIntensifier.js';
 
 const LEX: Record<string, Record<string, Record<string, string>>> = {
   VERY: {
-    en: { base: 'very', comparative: 'much', equative: 'just as', attributive_drop_degrees: 'equally' },
+    en: {
+      base: 'very', comparative: 'much', equative: 'just as', superlative: 'by far',
+      attributive_drop_degrees: 'equally', attributive_plain_degrees: 'most,least',
+    },
     ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
     it: { base: 'molto' },
   },
@@ -62,8 +65,8 @@ describe('applyIntensifier', () => {
     expect(positive.forms['intensifier']).toBe('very');
     expect(positive.forms['intensifier_comparative']).toBeUndefined();
     const most = adj('most');
-    applyIntensifier(most, 'VERY', 'en', lookup);
-    expect(most.forms['intensifier']).toBe('very');
+    applyIntensifier(most, 'VERY', 'it', lookup);
+    expect(most.forms['intensifier']).toBe('molto');
   });
 
   test('a lexeme with no comparative word keeps its base, and one may narrow the degrees', () => {
@@ -120,5 +123,22 @@ describe('applyIntensifier', () => {
     const en = adj('less');
     applyIntensifier(en, 'TOO', 'en', lookup);
     expect(en.forms['intensifier']).toBe('too much');
+  });
+
+  // A257: a superlative takes the lexeme's superlative word, except where it keeps its plain one.
+  test('a superlative degree takes the lexeme\'s superlative word', () => {
+    for (const degree of ['most', 'least']) {
+      const a = adj(degree);
+      applyIntensifier(a, 'VERY', 'en', lookup);
+      expect(a.forms['intensifier']).toBe('by far');
+      expect(a.forms['intensifier_superlative']).toBe('1');
+    }
+    const attributive = adj('most');
+    applyIntensifier(attributive, 'VERY', 'en', lookup, true);
+    expect(attributive.forms['intensifier']).toBe('very');
+    expect(attributive.forms['intensifier_superlative']).toBeUndefined();
+    const too = adj('most');
+    applyIntensifier(too, 'TOO', 'en', lookup);
+    expect(too.forms['intensifier']).toBe('too');
   });
 });

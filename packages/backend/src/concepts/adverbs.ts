@@ -678,16 +678,25 @@ export const adverbs: ConceptSeed[] = [
     // bare circumfix is "tan … como"); Portuguese and Japanese have none that is not a paraphrase,
     // so there it is dropped. English drops it before a noun ("an equally big cat", never "a just as
     // big cat").
+    // On a superlative VERY is a phrase that stands before the article: "by far the biggest", "di
+    // gran lunga il più grande", "bei weitem am größten" (A257) — except English before a noun, "the
+    // very biggest cat", where VERY after the article is the superlative's own intensifier.
     forms: {
-      en: { base: 'very', comparative: 'much', equative: 'just as', attributive_drop_degrees: 'equally' },
-      it: { base: 'molto', equative: 'altrettanto' },
-      fr: { base: 'très', comparative: 'bien', equative: 'tout aussi' },
-      de: { base: 'sehr', comparative: 'viel', equative: 'genauso' },
-      es: { base: 'muy', comparative: 'mucho', equative: 'igual de' },
+      en: {
+        base: 'very', comparative: 'much', equative: 'just as', superlative: 'by far',
+        attributive_drop_degrees: 'equally', attributive_plain_degrees: 'most,least',
+      },
+      it: { base: 'molto', equative: 'altrettanto', superlative: 'di gran lunga' },
+      fr: { base: 'très', comparative: 'bien', equative: 'tout aussi', superlative: 'de loin' },
+      de: { base: 'sehr', comparative: 'viel', equative: 'genauso', superlative: 'bei weitem' },
+      es: { base: 'muy', comparative: 'mucho', equative: 'igual de', superlative: 'con mucho' },
       // Only on `more`: the lowered degree is a negation in Japanese (それほど大きくない), not a
       // comparative ずっと could intensify.
-      ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
-      pt: { base: 'muito', drop_degrees: 'equally' },
+      ja: {
+        base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally',
+        superlative: '断然', superlative_reading: 'だんぜん',
+      },
+      pt: { base: 'muito', drop_degrees: 'equally', superlative: 'de longe' },
     },
   },
   {

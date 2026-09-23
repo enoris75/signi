@@ -42,6 +42,13 @@ describe('splitAdjectives', () => {
     expect(splitAdjectives(phrase)).toEqual({ pre: [], post: ['la meilleure'] });
   });
 
+  // A257: "de loin" stands before the doubled article, never inside it ("le de loin plus grand").
+  test('a superlative intensifier leads the doubled article', () => {
+    const intensified = { degree: 'most', intensifier: 'de loin', intensifier_position: 'pre', intensifier_superlative: '1' };
+    const phrase = np(SOURIS, {}, { adjectives: [concept({ ...GRAND, ...intensified }, 'BIG')] });
+    expect(splitAdjectives(phrase)).toEqual({ pre: [], post: ['de loin la plus grande'] });
+  });
+
   test('an adjective with no surface is skipped', () => {
     const phrase = np(CHAT, {}, { adjectives: [concept({ role: 'adjective' }, 'BIG'), concept(FORT, 'STRONG')] });
     expect(splitAdjectives(phrase)).toEqual({ pre: [], post: ['fort'] });

@@ -28,6 +28,13 @@ import { resolve } from './resolve.js';
  * *tout aussi* (fr), *genauso* (de) — "just as big", never "very equally big" — and
  * `intensifier_equative` tells the degree-adverb builders to write none of their own (A255).
  *
+ * A superlative takes the lexeme's `superlative` the same way — VERY is "by far", *di gran lunga*,
+ * *de loin*, *bei weitem*, *con mucho*, *de longe*, 断然 — marked `intensifier_superlative`, since
+ * it is a phrase that stands before the superlative's article rather than inside it: "by far the
+ * biggest", "di gran lunga il più grande" (see `superlativeLead`, A257). `attributive_plain_degrees`
+ * keeps the lexeme's plain word before a noun on the degrees it names: English "the very biggest
+ * cat", where VERY after the article is the superlative's own intensifier.
+ *
  * Each word may name its own position and reading (`comparative_position`, `equative_reading`, …),
  * falling back to the lexeme's: pt TOO follows the positive (*grande demais*) but leads a
  * comparative (*demasiado maior*, A256).
@@ -51,7 +58,8 @@ export function applyIntensifier(
   const degree = adjDegree(adjective);
   const listed = (key: string) => (word[key] ?? '').split(',').includes(degree);
   if (listed('drop_degrees') || (attributive && listed('attributive_drop_degrees'))) return;
-  const kind = degreeKind(degree, (word['comparative_degrees'] ?? 'more,less').split(','));
+  const plain = attributive && listed('attributive_plain_degrees');
+  const kind = plain ? undefined : degreeKind(degree, (word['comparative_degrees'] ?? 'more,less').split(','));
   const own = kind ? word[kind] : undefined;
   adjective.forms['intensifier'] = own ?? base;
   const position = (own && kind ? word[`${kind}_position`] : undefined) ?? word['position'] ?? 'pre';
@@ -62,8 +70,9 @@ export function applyIntensifier(
 }
 
 /** Which of the lexeme's degree-specific words a degree reads, if any. */
-function degreeKind(degree: string, comparativeDegrees: string[]): 'comparative' | 'equative' | undefined {
+function degreeKind(degree: string, comparativeDegrees: string[]): 'comparative' | 'equative' | 'superlative' | undefined {
   if (comparativeDegrees.includes(degree)) return 'comparative';
   if (degree === 'equally') return 'equative';
+  if (degree === 'most' || degree === 'least') return 'superlative';
   return undefined;
 }
