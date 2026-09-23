@@ -185,6 +185,29 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( dog ) /verb ( run ) /join but #2',
     misuse: { line: '/command /verb run /join therefore ( /verb eat )', says: { code: 'imperativeJoin' } },
   },
+  // The subordinate clauses (P09-E12 D9): the object clause of a verb that takes one, an adverbial
+  // clause on any verb, and the infinitive complement, whose period is drawn in the infinitive mood.
+  clause: {
+    line: '/subj man /verb say /clause ( /subj cat /verb run )',
+    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'content' }),
+    prints: '/subj ( man ) /verb ( say ) /clause #2',
+    misuse: { line: '/subj man /verb run /clause ( /subj cat /verb eat )', says: { code: 'takesNoContentClause', args: { verb: 'run' } } },
+  },
+  sub: {
+    line: '/subj man /verb run /sub because ( /subj cat /verb eat )',
+    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'adverbial', conjunction: 'because' }),
+    prints: '/subj ( man ) /verb ( run ) /sub because #2',
+    misuse: { line: '/subj man /verb run /sub soon ( /subj cat /verb eat )', says: { code: 'subTakes' } },
+  },
+  to: {
+    line: '/subj cat /verb need /to ( /verb run )',
+    check: (s) => {
+      expect(s.links[0]).toMatchObject({ kind: 'infinitive' });
+      expect(s.containers[1]!.selection.infinitive).toBe(true);
+    },
+    prints: '/subj ( cat ) /verb ( need ) /to #2',
+    misuse: { line: '/subj cat /verb say /to ( /verb run )', says: { code: 'takesNoInfinitive', args: { verb: 'say' } } },
+  },
   level: {
     line: '/subj child /verb start /inst ( /verb choose /obj word ) /level process',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'process' }),

@@ -52,6 +52,7 @@ export function PeriodContainer({
   consoleNumber,
   conditional,
   coordinative,
+  subordinate,
   instrumental,
   imperative,
   infinitive,
@@ -59,7 +60,7 @@ export function PeriodContainer({
   ...headerControls
 }: PeriodContainerProps) {
   const t = useUiString();
-  const controls = { conditional, coordinative, instrumental, imperative, infinitive };
+  const controls = { conditional, coordinative, subordinate, instrumental, imperative, infinitive };
   const { dragging, dragHandlers } = useBorderDrag({
     enabled: floatable,
     position,
@@ -67,6 +68,12 @@ export function PeriodContainer({
   });
   const target = pickTarget(controls);
   const accent = periodAccent(controls);
+  // The border stack is centred on the card's right edge, so the card is never shorter than it
+  // (widen, never hide: the canvas rule). Measured 2026-09-23: a compact *cat eats mouse* card is
+  // 142px tall, and five controls stack to 156px (28px each, 4px apart) — so the card grows to
+  // the stack plus 8px either side.
+  const borderControls = [imperative, infinitive, conditional, coordinative, subordinate].filter(Boolean).length;
+  const minHeight = borderControls ? `${borderControls * 32 - 4 + 16}px` : undefined;
 
   return (
     <Paper
@@ -83,6 +90,7 @@ export function PeriodContainer({
       sx={{
         ...(target || consoleNumber !== undefined ? pickBadgeSx : {}),
         p: paperPad,
+        minHeight,
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.
         position: "relative",
@@ -106,6 +114,7 @@ export function PeriodContainer({
       <BorderControls
         conditional={conditional}
         coordinative={coordinative}
+        subordinate={subordinate}
         imperative={imperative}
         infinitive={infinitive}
       />

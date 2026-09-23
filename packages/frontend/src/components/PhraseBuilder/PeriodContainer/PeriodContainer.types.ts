@@ -1,7 +1,10 @@
 import type { AbstractionLevel } from "@signi/shared";
+import type { SubordinatingConjunction } from "@signi/shared";
 import type {
   COORD_CONJUNCTION_OPTIONS,
   CoordConjunction,
+  SubordinateKind,
+  SubordinateOption,
 } from "../interfaces.ts";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
@@ -48,6 +51,27 @@ export interface CoordinativeControl {
   onPick: () => void;
 }
 
+// The subordinate-clause control state (P09-E12 D9), threaded from the workspace binding. Mirrors
+// CoordinativeControl: starting one first picks what kind of clause from a menu (*that*, *to*, or a
+// subordinating conjunction), then the period that is to be it. Undefined for a standalone period.
+export interface SubordinateControl {
+  // The subordinate clause this period governs, if any: its kind, and an adverbial one's conjunction.
+  asSource?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  // The one this period is, if any.
+  asTarget?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  // What the menu offers here, by the verb (see subordinateOptions). Empty without a verb.
+  options: SubordinateOption[];
+  // A subordinate pick is in progress and this period is a legal target.
+  isPickTarget: boolean;
+  // Any pick is currently in progress.
+  pickActive: boolean;
+  // May this period govern a subordinate clause (see canStartSubordinate).
+  canStart: boolean;
+  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
+  onClear: () => void;
+  onPick: () => void;
+}
+
 // The instrumental control state, threaded from the workspace binding. Unlike the two clause-level
 // relations this period has no *border* control for it: the link is started from the verb-phrase
 // dotted ring of the clause that acts (inside the canvas), so all a period needs here is the target
@@ -86,7 +110,7 @@ export interface MoodControl {
 export type Mood = "imperative" | "infinitive";
 
 // The cross-container relations a period card can light up for as a pick target.
-export type Relation = "conditional" | "coordinative" | "instrumental";
+export type Relation = "conditional" | "coordinative" | "subordinate" | "instrumental";
 
 // Every clause-level control a period card can carry.
 export interface ClauseControls {
@@ -94,6 +118,9 @@ export interface ClauseControls {
   conditional?: ConditionalControl;
   // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
   coordinative?: CoordinativeControl;
+  // Subordinate-clause (that / to / when / …) connector control on the card border. Absent for a
+  // standalone period.
+  subordinate?: SubordinateControl;
   // Instrumental link state — target side only (the control that starts it lives on the verb
   // phrase's dotted ring). Absent for a standalone period.
   instrumental?: InstrumentalControl;
@@ -108,6 +135,7 @@ export interface ClauseControls {
 export const ACCENT: Record<Relation | Mood, string> = {
   conditional: "warning.main",
   coordinative: "info.main",
+  subordinate: "error.main",
   instrumental: "secondary.main",
   imperative: "success.main",
   infinitive: "primary.main",

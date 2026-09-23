@@ -46,6 +46,7 @@ interface ConceptRow {
   synonym: string | null;
   countable: number;
   modal: number;
+  clause_object: string | null;
   slot: string | null;
   manner_relation: string | null;
   dimension_relation: string | null;
@@ -54,7 +55,7 @@ interface ConceptRow {
 }
 
 const CONCEPT_COLS =
-  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, slot, manner_relation, dimension_relation, alarm, alarm_cry';
+  'id, role, description, emoji, transitivity, complements, synonym, countable, modal, clause_object, slot, manner_relation, dimension_relation, alarm, alarm_cry';
 
 const PRONOUN_META_SQL = `
   SELECT cpl.concept_id, pl.person, pl.number
@@ -212,6 +213,7 @@ app.get('/api/concepts', (req, res) => {
       countable: r.countable === 0 ? false : undefined,
       emoji: r.emoji ?? undefined,
       modal: r.modal === 1 || undefined,
+      clauseObject: (r.clause_object as import('@signi/shared').ClauseObject | null) ?? undefined,
       slot: (r.slot as import('@signi/shared').ConceptSlot | null) ?? undefined,
       mannerRelation: (r.manner_relation as import('@signi/shared').MannerRelation) ?? undefined,
       dimensionRelation: (r.dimension_relation as import('@signi/shared').DimensionRelation) ?? undefined,

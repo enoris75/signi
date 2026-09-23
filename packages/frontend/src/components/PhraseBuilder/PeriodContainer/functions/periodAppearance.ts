@@ -1,5 +1,5 @@
 import type { UiStringKey } from "@signi/shared";
-import { COORD_CONJUNCTION_LABEL_KEY } from "../../interfaces.ts";
+import { COORD_CONJUNCTION_LABEL_KEY, subordinateLabelKey } from "../../interfaces.ts";
 import {
   ACCENT,
   type ClauseControls,
@@ -11,6 +11,7 @@ import {
 const PICK_SHADOW: Record<Relation, string> = {
   conditional: "0 0 0 2px rgba(237,108,2,0.35)",
   coordinative: "0 0 0 2px rgba(2,136,209,0.35)",
+  subordinate: "0 0 0 2px rgba(139,26,26,0.35)",
   instrumental: "0 0 0 2px rgba(139,62,42,0.35)",
 };
 
@@ -19,10 +20,12 @@ const PICK_SHADOW: Record<Relation, string> = {
 export function pickTarget({
   conditional,
   coordinative,
+  subordinate,
   instrumental,
 }: ClauseControls): Relation | undefined {
   if (conditional?.isPickTarget) return "conditional";
   if (coordinative?.isPickTarget) return "coordinative";
+  if (subordinate?.isPickTarget) return "subordinate";
   if (instrumental?.isPickTarget) return "instrumental";
   return undefined;
 }
@@ -44,7 +47,7 @@ export interface PeriodAccent {
 // (periodLabel) ranks the other way round, mood before relation — a command that coordinates
 // another wears the coordination's rule but reads "Command".
 export function periodAccent(controls: ClauseControls): PeriodAccent {
-  const { conditional, coordinative, instrumental, imperative, infinitive } =
+  const { conditional, coordinative, subordinate, instrumental, imperative, infinitive } =
     controls;
   const target = pickTarget(controls);
   const inConditional = Boolean(
@@ -53,6 +56,7 @@ export function periodAccent(controls: ClauseControls): PeriodAccent {
   const inCoordination = Boolean(
     coordinative?.hasCoordination || coordinative?.isCoordinated,
   );
+  const inSubordinate = Boolean(subordinate?.asSource || subordinate?.asTarget);
   const inInstrumental = Boolean(
     instrumental?.hasInstrument || instrumental?.isInstrument,
   );
@@ -62,7 +66,9 @@ export function periodAccent(controls: ClauseControls): PeriodAccent {
       ? "conditional"
       : inCoordination
         ? "coordinative"
-        : instrumental?.isInstrument
+        : inSubordinate
+          ? "subordinate"
+          : instrumental?.isInstrument
           ? "instrumental"
           : imperative?.active
             ? "imperative"
@@ -73,21 +79,27 @@ export function periodAccent(controls: ClauseControls): PeriodAccent {
     borderColor: target ? ACCENT[target] : "divider",
     borderLeftColor: rule ? ACCENT[rule] : "text.secondary",
     boxShadow: target && PICK_SHADOW[target],
-    gutter: inConditional || inCoordination || inInstrumental,
+    gutter: inConditional || inCoordination || inSubordinate || inInstrumental,
   };
 }
 
 // The header caption's label: the part this period plays, or "" for a free statement.
 export function periodLabel(
-  { conditional, coordinative, instrumental, imperative, infinitive }: ClauseControls,
+  { conditional, coordinative, subordinate, instrumental, imperative, infinitive }: ClauseControls,
   t: (key: UiStringKey) => string,
 ): string {
   if (instrumental?.isInstrument) return t("slot.instrumental");
+  // A subordinate clause says so before its mood: the infinitive link draws its clause in the
+  // infinitive, and that period is the complement first. Its word in brackets, as the coordinated
+  // clause's conjunction: "Subordinate clause (When)", it "Proposizione subordinata (Quando)".
+  if (subordinate?.asTarget)
+    return `${t("clause.subordinate")} (${t(subordinateLabelKey(subordinate.asTarget))})`;
   if (imperative?.active) return t("imperative.command");
   if (infinitive?.active) return t("infinitive.phrase");
   if (conditional?.hasCondition) return t("clause.main");
   if (conditional?.isIfClause) return t("clause.conditional");
   if (coordinative?.hasCoordination) return t("clause.first");
+  if (subordinate?.asSource) return t("clause.main");
   // The conjunction in brackets is the catalog's word for it (C13): "Coordinated clause (But)",
   // it "Proposizione coordinata (Ma)", ja 「等位節（しかし）」.
   if (coordinative?.isCoordinated) {

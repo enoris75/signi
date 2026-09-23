@@ -5,6 +5,8 @@ import { JA_TEMPORAL } from './ja.consts.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { buildSegments } from './buildSegments.js';
 import { possessiveJa } from '../../possessive.js';
+import type { Subordinator } from '@signi/shared';
+import { JA_SUBORDINATORS } from './ja.consts.js';
 
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
@@ -48,6 +50,14 @@ export const japaneseEngine: LanguageEngine = {
   // furigana of the ruby segments are dropped — a label shows the written word.
   renderPossessive(_noun: ConceptForms, possessor: PronominalPossessor): string {
     return possessiveJa(possessor).map((seg) => seg.t).join('');
+  },
+  // The word that closes a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9). Japanese postposes it, so it is written with the 〜 that stands for the clause, as a
+  // dictionary writes a bound form: the quotative 〜と of a reported clause, 〜時に, 〜ので. 後で follows
+  // the plain past, which the citation keeps (〜た後で).
+  renderSubordinator(sub: Subordinator): string {
+    if (sub === 'that') return '〜と';
+    return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}` : `〜${JA_SUBORDINATORS[sub].word}`;
   },
   // The connective adverb Japanese writes between two clauses (そして, しかし, つまり). It follows the
   // first clause's 、 in a sentence; standing alone as a menu entry it is the word itself.

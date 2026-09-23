@@ -1415,6 +1415,8 @@ export const intransitiveVerbs: ConceptSeed[] = [
     // on constructs, and neither is a concept of its own.
     id: 'THINK',
     role: 'verb',
+    // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    clauseObject: 'content',
     transitivity: 'intransitive',
     // The *about* is the `topic` complement (P09-E2), and five languages govern it with a
     // preposition of the verb's own, `topic_prep`: it "pensa al gatto", fr "pense au chat", de "denkt

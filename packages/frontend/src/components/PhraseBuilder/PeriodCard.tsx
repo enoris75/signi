@@ -49,13 +49,16 @@ export interface PeriodCardProps {
 // A mood can't be flipped on a period alone while it takes part in a conditional or a coordination:
 // a command is mutually exclusive with a conditional and shared by the two clauses of a
 // coordination, and an infinitive occupies the finite slot the same way. The relation has to be
-// cleared first.
+// cleared first. A subordinate clause has no mood of its own either — an infinitive complement is
+// drawn in the infinitive, and the others in none (P09-E12 D9) — so its moods lock too; the clause
+// that governs it keeps its own.
 const moodLocked = (binding: WorkspaceBinding | undefined): boolean =>
   binding
     ? binding.conditional.hasSource ||
       binding.conditional.hasTarget ||
       binding.coordinative.hasSource ||
-      binding.coordinative.hasTarget
+      binding.coordinative.hasTarget ||
+      Boolean(binding.subordinate.asTarget)
     : false;
 
 // The card a period's canvas wears: the period's header and border controls, the canvas's resize
@@ -104,7 +107,7 @@ export function PeriodCard({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const hasCursor = usePeriodHasCursor(cardRef.current);
   const cursor = usePeriodCursor((): PeriodContext => {
-    const { conditional, coordinative, instrumental } = clauseControls;
+    const { conditional, coordinative, subordinate, instrumental } = clauseControls;
     return {
       id: binding?.containerId,
       selection,
@@ -140,6 +143,13 @@ export function PeriodCard({
         // border control — so J presses that control rather than lifting its menu out of it.
         start: () => pressControl("coordinate", cardRef.current ?? document),
         clear: coordinative.onClear,
+      },
+      // The subordinate clause's menu hangs off its border control too, so U presses the control.
+      subordination: subordinate && {
+        canStart: subordinate.canStart && subordinate.options.length > 0,
+        hasLink: Boolean(subordinate.asSource),
+        start: () => pressControl("subordinate", cardRef.current ?? document),
+        clear: subordinate.onClear,
       },
       // Only an instrument period carries a reification degree, and R walks the three in turn.
       cycleLevel:
@@ -204,6 +214,7 @@ export function PeriodCard({
         controlsRef={controlsRef}
         conditional={clauseControls.conditional}
         coordinative={clauseControls.coordinative}
+        subordinate={clauseControls.subordinate}
         instrumental={clauseControls.instrumental}
         imperative={{ active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }}
         infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}

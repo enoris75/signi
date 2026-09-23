@@ -408,6 +408,8 @@ export function PhraseBuilder({
     { ...revealed, ...ownerReveals },
     uiLanguage,
     t,
+    // A that-clause this period governs is its verb's object, so the object box gives way to it.
+    binding?.subordinate.asSource?.kind === "content",
   );
 
   // The key each satellite's control answers to, read off the keymap for the scope of the box that

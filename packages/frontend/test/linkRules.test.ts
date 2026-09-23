@@ -6,12 +6,16 @@ import {
   addCoordinative,
   addInstrumental,
   addRelativeLink,
+  addSubordinate,
   canBeCondition,
   canBeCoordinate,
   canBeInstrument,
   canBeRelativeTarget,
+  canBeSubordinate,
   canStartCondition,
   canStartCoordination,
+  canStartSubordinate,
+  clearSubordinate,
   inClauseRelation,
   setInstrumentalLevel,
   setInstrumentalNegative,
@@ -65,6 +69,55 @@ describe('linkRules', () => {
     const links = addCoordinative([], 'A', 'B', 'but', 'l1');
     expect(canStartCoordination(links, B)).toBe(false);
     expect(links[0]).toMatchObject({ kind: 'coordinative', conjunction: 'but' });
+  });
+
+  // P09-E12 D9: the three subordinate clauses.
+  describe('subordinate clauses', () => {
+    const say: Concept = { ...verb('SAY'), clauseObject: 'content' };
+    const need: Concept = { ...verb('NEED'), clauseObject: 'infinitive' };
+    const SAYS: PhraseContainer = { id: 'S', selection: { subject: noun('MAN'), verb: say } };
+    const NEEDS: PhraseContainer = { id: 'N', selection: { subject: noun('CAT'), verb: need } };
+    const ALL = [...CONTAINERS, SAYS, NEEDS];
+
+    it('lets a verb govern what it takes: a that-clause with no object, an infinitive, an adverbial clause always', () => {
+      expect(canStartSubordinate([], SAYS, 'content')).toBe(true);
+      expect(canStartSubordinate([], { ...SAYS, selection: { ...SAYS.selection, directObject: noun('WORD') } }, 'content')).toBe(false);
+      expect(canStartSubordinate([], SAYS, 'infinitive')).toBe(false);
+      expect(canStartSubordinate([], NEEDS, 'infinitive')).toBe(true);
+      expect(canStartSubordinate([], NEEDS, 'content')).toBe(false);
+      expect(canStartSubordinate([], A, 'adverbial')).toBe(true);
+      expect(canStartSubordinate([], C, 'adverbial')).toBe(false);
+      // A period folded into another governs none: subordinate clauses do not nest.
+      expect(canStartSubordinate(addSubordinate([], 'A', 'S', 'adverbial', 'l1'), SAYS)).toBe(false);
+    });
+
+    it('takes a plain clause: no mood, no link of its own, no cycle', () => {
+      expect(canBeSubordinate(ALL, [], 'S', 'B', 'content')).toBe(true);
+      expect(canBeSubordinate(ALL, [], 'S', 'S', 'content')).toBe(false);
+      const command = { ...B, selection: { ...B.selection, imperative: true } };
+      expect(canBeSubordinate([A, command, SAYS], [], 'S', 'B', 'adverbial')).toBe(false);
+      const citation = { ...B, selection: { ...B.selection, infinitive: true } };
+      expect(canBeSubordinate([A, citation, NEEDS], [], 'N', 'B', 'adverbial')).toBe(false);
+      expect(canBeSubordinate([A, citation, NEEDS], [], 'N', 'B', 'infinitive')).toBe(true);
+      expect(canBeSubordinate(ALL, addCoordinative([], 'B', 'C', 'and', 'k'), 'S', 'B', 'content')).toBe(false);
+      expect(canBeSubordinate(ALL, addInstrumental([], 'B', 'C', 'i'), 'S', 'B', 'content')).toBe(false);
+      expect(canBeSubordinate(ALL, addSubordinate([], 'S', 'A', 'content', 's'), 'A', 'S', 'adverbial')).toBe(false);
+      // It may keep its relative clauses.
+      const rel = addRelativeLink([], { containerId: 'B', nounKey: 'subject' }, { containerId: 'C', nounKey: 'subject' }, 'r');
+      expect(canBeSubordinate(ALL, rel, 'S', 'B', 'content')).toBe(true);
+    });
+
+    it('keeps one subordinate clause per governing clause, and ties the clause up in it', () => {
+      let links = addSubordinate([], 'S', 'A', 'content', 's1');
+      links = addSubordinate(links, 'S', 'B', 'adverbial', 's2', 'before');
+      expect(links).toEqual([{ id: 's2', kind: 'adverbial', conjunction: 'before', source: { containerId: 'S' }, target: { containerId: 'B' } }]);
+      expect(inClauseRelation(links, 'B')).toBe(true);
+      expect(inClauseRelation(links, 'S')).toBe(true);
+      expect(canStartCondition(links, B)).toBe(false);
+      expect(canStartCoordination(links, B)).toBe(false);
+      expect(clearSubordinate(links, 'S', 'content')).toEqual(links);
+      expect(clearSubordinate(links, 'S')).toEqual([]);
+    });
   });
 
   it('holds an instrument as a thing only when its period has no verb, and as an act either way', () => {

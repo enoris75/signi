@@ -1909,6 +1909,26 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'coordenado' },
     },
   },
+  // A clause that depends on another — its object clause, its adverbial clause or its infinitive
+  // complement (P09-E12 D9): the Romance "proposizione subordinata", "proposition subordonnée",
+  // "oración subordinada"; German "untergeordnet", the counterpart of MAIN's "übergeordnet"; Japanese
+  // compounds it on 節 like the others (従属節).
+  {
+    id: 'SUBORDINATE',
+    role: 'adjective',
+    description: 'depending on another clause (grammar)',
+    definition: subjectGapGloss('CLAUSE', 'DEPEND', { object: 'CLAUSE', adjectives: ['OTHER'] }),
+    emoji: '🪜',
+    forms: {
+      en: { base: 'subordinate' },
+      it: { base: 'subordinato' },
+      fr: { base: 'subordonné' },
+      de: { base: 'untergeordnet' },
+      es: { base: 'subordinado' },
+      ja: { base: '従属', reading: 'じゅうぞく' },
+      pt: { base: 'subordinado' },
+    },
+  },
   // ── Kinds of conjunction ─────────────────────────────────────────
   // The relation each coordinating conjunction sets up, as the grammar traditions name it: and adds
   // (copulative), or offers a choice (disjunctive), but opposes (adversative), that is explains

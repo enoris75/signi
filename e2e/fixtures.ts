@@ -315,6 +315,21 @@ export class Builder {
   }
 
   /**
+   * Make period `clauseIndex` a subordinate clause of period `mainIndex` (P09-E12 D9). The border
+   * control opens its menu first — "That", "Infinitive phrase", "When", … matched as the row's
+   * prefix — and the pick follows on the clause period's own control.
+   */
+  async linkSubordinate(mainIndex: number, clauseIndex: number, entry: string): Promise<void> {
+    await this.period(mainIndex)
+      .getByRole('button', { name: 'Add a subordinate clause' })
+      .click();
+    await this.page.getByRole('menuitem', { name: new RegExp(`^${entry}`) }).click();
+    await this.period(clauseIndex)
+      .getByRole('button', { name: 'Use this period as the subordinate clause' })
+      .click();
+  }
+
+  /**
    * Link period `instrumentIndex` as the instrumental of the verb in period `clauseIndex`. The
    * instrumental has no target-side control: a pending pick lights the whole card, and a click on
    * it — clear of the border, where a press starts a card drag instead — makes the link.

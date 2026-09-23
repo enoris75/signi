@@ -1,5 +1,6 @@
 import type { Concept, SerializedWorkspace } from "@signi/shared";
-import { ABSTRACTION_LEVELS, COORD_CONJUNCTIONS, SAVED_PHRASE_VERSION } from "@signi/shared";
+import { ABSTRACTION_LEVELS, COORD_CONJUNCTIONS, SAVED_PHRASE_VERSION, SUBORDINATING_CONJUNCTIONS } from "@signi/shared";
+import type { SubordinatingConjunction } from "@signi/shared";
 import type {
   AbstractionLevel,
   CoordConjunction,
@@ -44,7 +45,7 @@ export function hydrateWorkspace(
       }),
     );
   const nounKey = (key: unknown): string => migrateKey(typeof key === "string" ? key : "subject");
-  const links: PhraseLink[] = saved(workspace.links).filter(isSavedLink).map((l) =>
+  const links: PhraseLink[] = saved(workspace.links).filter(isSavedLink).map((l): PhraseLink =>
     l.kind === "instrumental"
       ? {
           id: l.id,
@@ -71,6 +72,24 @@ export function hydrateWorkspace(
           conjunction: COORD_CONJUNCTIONS.includes(l.conjunction as CoordConjunction)
             ? (l.conjunction as CoordConjunction)
             : "and",
+          source: { containerId: l.source.containerId },
+          target: { containerId: l.target.containerId },
+        }
+      : l.kind === "content" || l.kind === "infinitive"
+      ? {
+          id: l.id,
+          kind: l.kind as "content" | "infinitive",
+          source: { containerId: l.source.containerId },
+          target: { containerId: l.target.containerId },
+        }
+      : l.kind === "adverbial"
+      ? {
+          id: l.id,
+          kind: "adverbial" as const,
+          // A missing or unknown conjunction is the plain temporal "when" (always written on save).
+          conjunction: SUBORDINATING_CONJUNCTIONS.includes(l.conjunction as SubordinatingConjunction)
+            ? (l.conjunction as SubordinatingConjunction)
+            : "when",
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }

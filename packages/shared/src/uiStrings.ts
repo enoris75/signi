@@ -9,6 +9,7 @@ import type {
   PhrasePlan,
   PronominalPossessor,
   Specifier,
+  Subordinator,
 } from './index.js';
 
 /**
@@ -44,6 +45,7 @@ export interface UiStringPlanDef extends UiStringCommon {
   determiner?: never;
   possessive?: never;
   conjunction?: never;
+  subordinator?: never;
   specifier?: never;
   degree?: never;
 }
@@ -74,6 +76,7 @@ export interface UiStringWordDef extends UiStringCommon {
   determiner?: never;
   possessive?: never;
   conjunction?: never;
+  subordinator?: never;
   specifier?: never;
   degree?: never;
 }
@@ -98,6 +101,7 @@ export interface UiStringDeterminerDef extends UiStringCommon {
   word?: never;
   possessive?: never;
   conjunction?: never;
+  subordinator?: never;
   specifier?: never;
   degree?: never;
 }
@@ -123,6 +127,7 @@ export interface UiStringPossessiveDef extends UiStringCommon {
   word?: never;
   determiner?: never;
   conjunction?: never;
+  subordinator?: never;
   specifier?: never;
   degree?: never;
 }
@@ -142,6 +147,27 @@ export interface UiStringConjunctionDef extends UiStringCommon {
   word?: never;
   determiner?: never;
   possessive?: never;
+  subordinator?: never;
+  specifier?: never;
+  degree?: never;
+}
+
+/**
+ * One subordinating word, named by the word it spells — the entries of the subordinate-clause menu
+ * (P09-E12 D9): the conjunction an adverbial clause opens on ("when" / quando / wenn / 〜時に) or
+ * `that`, the complementizer of an object clause (che / que / dass / 〜と). The sibling of the
+ * coordinating conjunction's entry, and cited for the same reason: no lexicon holds it and what
+ * counts as one word is the language's own ("dopo che", "parce que"). Japanese postposes it to its
+ * clause, so it is written with the 〜 that stands for the clause, as a dictionary writes a bound form.
+ */
+export interface UiStringSubordinatorDef extends UiStringCommon {
+  /** The word this string names ("because" → perché / parce que / weil / 〜ので). */
+  subordinator: Subordinator;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  conjunction?: never;
   specifier?: never;
   degree?: never;
 }
@@ -168,6 +194,7 @@ export interface UiStringSpecifierDef extends UiStringCommon {
   determiner?: never;
   possessive?: never;
   conjunction?: never;
+  subordinator?: never;
   degree?: never;
 }
 
@@ -192,6 +219,7 @@ export interface UiStringDegreeDef extends UiStringCommon {
   determiner?: never;
   possessive?: never;
   conjunction?: never;
+  subordinator?: never;
   specifier?: never;
 }
 
@@ -201,6 +229,7 @@ export type UiStringDef =
   | UiStringDeterminerDef
   | UiStringPossessiveDef
   | UiStringConjunctionDef
+  | UiStringSubordinatorDef
   | UiStringSpecifierDef
   | UiStringDegreeDef;
 
@@ -2151,6 +2180,18 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Coordinate this period',
   },
 
+  // The subordinate-clause control on a period's border (P09-E12 D9), before any subordinate clause
+  // exists: ADD a subordinate clause, indefinite, as the conditional's control adds a condition. The
+  // menu it opens says which kind — *that*, *to*, or a conjunction — and the pick says which period.
+  'action.addSubordinate': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['SUBORDINATE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a subordinate clause',
+  },
+
   // The badge in a period's caption naming the part the period plays in a link: CLAUSE with the
   // adjective for that part. The Romance traditions name clauses exactly so ("proposizione principale",
   // "proposition conditionnelle", "oración coordinada"); German says "übergeordneter Satz" for the
@@ -2177,6 +2218,13 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Coordinated clause',
   },
+  // A period that is another's subordinate clause — its object clause, its adverbial clause or its
+  // infinitive complement (P09-E12 D9): it "proposizione subordinata", de "untergeordneter Satz", ja 従属節.
+  'clause.subordinate': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['SUBORDINATE'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Subordinate clause',
+  },
 
   // What the conditional and coordination controls say of the period they sit on once it is the second
   // half of a link: a statement, BE with the clause as its subject complement ("this period is a
@@ -2202,6 +2250,17 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'This period is a coordinated clause',
+  },
+  'period.isSubordinate': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: {
+        predicative: { phrase: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['SUBORDINATE'] } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a subordinate clause',
   },
 
   // The conditional control before any condition exists: ADD a condition, indefinite, since the user
@@ -2246,6 +2305,14 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Remove the coordination',
+  },
+  'action.removeSubordinate': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'CLAUSE', definiteness: 'definite', adjectives: ['SUBORDINATE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the subordinate clause',
   },
 
   // The remove control on a hosted ring, which drops that phrase from the noun it hangs off: one of a
@@ -2393,6 +2460,32 @@ export const UI_STRINGS = defineUiStrings({
     format: { capitalize: true },
     fallback: 'Click the period in another period container to coordinate with this clause.',
   },
+  // The subordinate-clause pick names the period by the part it will play, as the condition's does.
+  'pick.subordinate': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: {
+        concept: 'PERIOD_SENTENCE',
+        definiteness: 'definite',
+        relative: {
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: { concept: 'CLAUSE', definiteness: 'definite', adjectives: ['SUBORDINATE'] } } },
+        },
+      },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            adjectives: ['OTHER'],
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Click the period that is the subordinate clause in another period container.',
+  },
   // The instrument pick names the period by what it *owns*: the genitive relative (C12), the one
   // relative that gaps no slot — the head is the possessor of the clause's subject. en "whose
   // noun", it "il cui sostantivo", fr "dont le nom", de "dessen Substantiv", es/pt "cuyo/cujo".
@@ -2459,6 +2552,20 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Use this period as the coordinated clause',
   },
+  'action.useAsSubordinate': {
+    plan: {
+      ...commandOf('USE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'CLAUSE', definiteness: 'definite', adjectives: ['SUBORDINATE'] },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Use this period as the subordinate clause',
+  },
 
   // The conjunction menu's hints: the kind of relation each conjunction sets up, as the grammar
   // traditions name it. An adjective agreeing with CONJUNCTION, feminine in the Romance languages
@@ -2486,6 +2593,17 @@ export const UI_STRINGS = defineUiStrings({
   // clauses. "Therefore" is the adverb, and the menu is offering a join.
   'conjunction.value.therefore': { conjunction: 'therefore', format: { capitalize: true }, fallback: 'So' },
   'conjunction.value.then': { conjunction: 'then', format: { capitalize: true }, fallback: 'And then' },
+
+  // The subordinate-clause menu's entries (P09-E12 D9): `that`, the object clause's complementizer,
+  // and the five subordinating conjunctions, each the word the engine writes before (or, in
+  // Japanese, after) the clause — it "dopo che", fr "parce que", de "nachdem", ja 〜ので. Keyed by
+  // Subordinator, so the menu writes t(`subordinator.value.${value}`).
+  'subordinator.value.that': { subordinator: 'that', format: { capitalize: true }, fallback: 'That' },
+  'subordinator.value.when': { subordinator: 'when', format: { capitalize: true }, fallback: 'When' },
+  'subordinator.value.while': { subordinator: 'while', format: { capitalize: true }, fallback: 'While' },
+  'subordinator.value.because': { subordinator: 'because', format: { capitalize: true }, fallback: 'Because' },
+  'subordinator.value.after': { subordinator: 'after', format: { capitalize: true }, fallback: 'After' },
+  'subordinator.value.before': { subordinator: 'before', format: { capitalize: true }, fallback: 'Before' },
 
   // The spatial-relation toolbar on a route or a locative: one icon per relation, its tooltip the
   // adposition that relation is spoken with. Not a word of the lexicon — the Romance prepositions
@@ -3259,6 +3377,27 @@ export const UI_STRINGS = defineUiStrings({
     `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental'}`,
     UiStringPlanDef
   >,
+  // A verb that takes no clause as its object (P09-E12 D9): `/clause` on one whose `clauseObject` is
+  // not `content`, `/to` on one whose is not `infinitive` — the subordinate clause and the infinitive
+  // phrase by the grammar nouns the canvas names them with.
+  'diagnostic.verbAcceptsNo.contentClause': {
+    plan: {
+      subject: { concept: 'VERB', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'CLAUSE', definiteness: 'no', adjectives: ['SUBORDINATE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This verb accepts no subordinate clause',
+  },
+  'diagnostic.verbAcceptsNo.infinitive': {
+    plan: {
+      subject: { concept: 'VERB', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'INFINITIVE_PHRASE', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This verb accepts no infinitive phrase',
+  },
   // A period that cannot be linked so: a command, an infinitive, an if-clause or a coordinated period
   // takes no condition (it "Questo periodo non accetta nessuna condizione", ja この文はどの条件も受け付けません).
   'diagnostic.periodAcceptsNoCondition': {
@@ -3278,6 +3417,15 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'This period accepts no coordination',
+  },
+  'diagnostic.periodAcceptsNoSubordinate': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'CLAUSE', definiteness: 'no', adjectives: ['SUBORDINATE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period accepts no subordinate clause',
   },
 
   // `/del` with nothing of its kind in reach: HAVE with a `no` subject — "No noun has an adjective", it
@@ -3374,6 +3522,27 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'This period has no coordination',
+  },
+  // `/del clause`, `/del sub` and `/del to` on a period without the subordinate clause (P09-E12 D9).
+  'diagnostic.periodHasNo.subordinate': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'CLAUSE', definiteness: 'no', adjectives: ['SUBORDINATE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period has no subordinate clause',
+  },
+  // `/clause` on a period whose verb already has its object: the content clause *is* the object, so
+  // the two exclude each other (P09-E12 D9) — "This period has an object", ja この文は目的語があります.
+  'diagnostic.periodHasObject': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'OBJECT_GRAMMAR', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period has an object',
   },
   'diagnostic.periodHasNo.instrument': {
     plan: {

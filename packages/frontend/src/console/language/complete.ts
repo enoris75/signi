@@ -7,16 +7,19 @@ import { isInstrumentalLink, type NounKey, type SlotKey } from "../../components
 import {
   canBeCondition,
   canBeCoordinate,
+  canBeSubordinate,
   canBeInstrument,
   canBeRelativeTarget,
   canStartCondition,
   canStartCoordination,
+  canStartSubordinate,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
 import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
   COORD_VALUES,
+  SUB_VALUES,
   commandNamed,
   shortcutOf,
   topicOf,
@@ -27,7 +30,7 @@ import {
   type TokenColor,
   type ValueDef,
 } from "./commands.ts";
-import { sameKind } from "./parse.ts";
+import { sameKind, takesConjunction } from "./parse.ts";
 import { CLOSER, lex, type Shape, type Token } from "./lex.ts";
 import {
   NOUN_NAMES,
@@ -391,6 +394,10 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
       const c = state.containers.find((x) => x.id === frame.containerId);
       return frame.kind === "period" && c && canStartCoordination(state.links, c) ? 3 : undefined;
     }
+    case "subordinate": {
+      const c = state.containers.find((x) => x.id === frame.containerId);
+      return frame.kind === "period" && c && canStartSubordinate(state.links, c, action.link) ? 3 : undefined;
+    }
     case "instrument": {
       const c = state.containers.find((x) => x.id === frame.containerId);
       return frame.kind === "period" && c?.selection.verb?.complements?.includes("instrumental") ? 2 : undefined;
@@ -718,7 +725,7 @@ function valueCompletion(
     // A command's values are headed by the command after the title, outside the phrase: "values · /tense".
     ...(free
       ? { title: "saved phrases", titleKey: "console.list.savedPhrases" as const }
-      : def.action.kind === "join"
+      : def.action.kind === "join" || def.action.kind === "subordinate"
         ? { title: "conjunctions", titleKey: "console.list.conjunctions" as const }
         : { title: "values", titleKey: "console.list.values" as const, about: `/${def.name}` }),
     auto: true,
@@ -742,6 +749,9 @@ const DEL_VALUES: readonly ValueDef[] = [
   { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
   { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
   { name: "join", value: "join", description: "the coordination", descriptionKey: "clause.coordinated" },
+  { name: "clause", value: "clause", description: "the that-clause", descriptionKey: "subordinator.value.that" },
+  { name: "sub", value: "sub", description: "the adverbial clause", descriptionKey: "clause.subordinate" },
+  { name: "to", value: "to", description: "the infinitive complement", descriptionKey: "infinitive.phrase" },
   { name: "inst", value: "inst", description: "the instrument", descriptionKey: "slot.instrumental" },
   { name: "period", value: "period", description: "the whole period", descriptionKey: "period.name" },
   { name: "subj", value: "subj", description: "the subject", descriptionKey: "slot.subject" },
@@ -781,6 +791,10 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
         return;
       case "join":
         if (canBeCoordinate(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
+        return;
+      case "subordinate":
+        if (canBeSubordinate(state.containers, state.links, frame.containerId, c.id, action.link))
+          out.push(periodCandidate(n, c.selection));
         return;
       case "instrument":
         if (canBeInstrument(state.containers, state.links, frame.containerId, c.id)) out.push(periodCandidate(n, c.selection));
@@ -838,16 +852,18 @@ function linkCompletion(
   const q = query.trim().toLowerCase();
   const head = words.find((w) => takes(action, w));
   const headName = head?.concept ? opts.vocab.label(head.concept) : undefined;
-  // `/join` first takes its conjunction; with one given, the target follows.
+  // `/join` first takes its conjunction; with one given, the target follows. So does `/sub`.
   if (action.kind === "join" && between.length === 0) {
     const root = state.containers.find((c) => c.id === frame.containerId)?.selection;
     const values = COORD_VALUES.filter((v) => !root?.imperative || canCoordinateImperative(v.value as never));
     return valueCompletion(from, to, query, values, def);
   }
+  if (takesConjunction(def) && action.kind === "subordinate" && between.length === 0)
+    return valueCompletion(from, to, query, SUB_VALUES, def);
   const rows: Candidate[] = [];
   // Where the target goes: straight after the command, or after the word it takes first — the
   // conjunction of a join, the gap of a relative clause.
-  const targetHere = between.length === (action.kind === "join" ? 1 : 0);
+  const targetHere = between.length === (takesConjunction(def) ? 1 : 0);
   // New phrases first: `subj {` and `obj {` for a relative clause, `{` for a period of the others'
   // own, `[` for a possessor's or a conjunct's phrase.
   if (action.kind === "relative" && between.length === 0) {
@@ -901,6 +917,8 @@ function linkTitle(def: CommandDef): Title {
       return { title: "if-condition", titleKey: "clause.conditional" };
     case "join":
       return { title: "coordinated clause", titleKey: "clause.coordinated" };
+    case "subordinate":
+      return { title: "subordinate clause", titleKey: "clause.subordinate" };
     case "instrument":
       return { title: "instrument", titleKey: "slot.instrumental" };
     case "possessor":

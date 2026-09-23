@@ -1,5 +1,5 @@
 import type { Aspect, ComplementType, CoordConjunction, Degree, FocusParticle, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
-import type { SubordinatingConjunction } from '@signi/shared';
+import type { SubordinatingConjunction, Subordinator } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -478,6 +478,14 @@ export interface LanguageEngine {
    * them, which is why it comes back as two words ("e poi", "und dann").
    */
   renderConjunction?(conjunction: CoordConjunction): string;
+  /**
+   * The word that introduces a subordinate clause, alone, for the builder's subordinate-clause menu
+   * (P09-E12 D9): `that`, the complementizer of an object clause, or one of the subordinating
+   * conjunctions (see `translateSubordinator`). The sibling of `renderConjunction`: a word no lexicon
+   * holds, and one word or two as the language writes it ("dopo che", "parce que"). A language that
+   * postposes it (Japanese) writes it after a 〜.
+   */
+  renderSubordinator?(sub: Subordinator): string;
   /**
    * The adposition a complement specifier spells, cited on a noun — the spatial relation of a
    * route or a locative ("under" / "sotto" / "unter" / 〜の下に), or the connector a cause takes for

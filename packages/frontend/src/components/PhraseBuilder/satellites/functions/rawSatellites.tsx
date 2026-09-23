@@ -48,6 +48,9 @@ export function rawSatellites(
   // The UI-string lookup, for the one label the lexicon cannot give on its own: a pronoun,
   // which shows the person it stands for rather than a word.
   t: UiStringLookup,
+  // Whether the period governs a that-clause (P09-E12 D9), which is its verb's object: the object
+  // box is then withdrawn, as the clause and a direct object exclude each other.
+  clauseObject = false,
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   const subjectRole = selection.subject?.role;
@@ -334,7 +337,8 @@ export function rawSatellites(
       icon: <AdjustIcon sx={iconSx} />,
       available:
         Boolean(selection.verb) &&
-        selection.verb?.transitivity !== "intransitive",
+        selection.verb?.transitivity !== "intransitive" &&
+        !clauseObject,
       hasValue: Boolean(selection.directObject),
       valueLabel: label(selection.directObject),
       defaultShown: true,

@@ -130,6 +130,10 @@ describe('GET /api/concepts', () => {
   test('carries a concept\'s flags and relations only when set', async () => {
     expect(await find('WATER')).toMatchObject({ countable: false });
     expect(await find('MUST')).toMatchObject({ modal: true, synonym: 'have to' });
+    // The clause a verb takes as its object (P09-E12 D9), carried as `modal` is.
+    expect(await find('SAY')).toMatchObject({ clauseObject: 'content' });
+    expect(await find('NEED')).toMatchObject({ clauseObject: 'infinitive' });
+    expect((await find('EAT')).clauseObject).toBeUndefined();
     expect(await find('SPEED')).toMatchObject({ mannerRelation: 'measure' });
     expect(await find('SIZE')).toMatchObject({ dimensionRelation: 'extent' });
     // A164: the canvas withdraws the determiner of the alarm a cry raises, and it reads both words.

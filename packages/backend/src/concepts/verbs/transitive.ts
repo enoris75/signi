@@ -577,6 +577,8 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'DESIRE',
     role: 'verb',
+    // Takes an infinitive complement as its object (P09-E12 D9): the builder's subordinate-clause menu offers *to*.
+    clauseObject: 'infinitive',
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
@@ -714,6 +716,8 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'KNOW',
     role: 'verb',
+    // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    clauseObject: 'content',
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['cause'],
@@ -2016,6 +2020,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     // to have objects" (Longman: "to have to have something").
     id: 'NEED',
     role: 'verb',
+    // Takes an infinitive complement as its object (P09-E12 D9): the builder's subordinate-clause menu offers *to*.
+    clauseObject: 'infinitive',
     stative: true,
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
@@ -2096,6 +2102,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     // design, beside DESIRE: no genus renders "attempt" in all seven (see the B62 task).
     id: 'TRY',
     role: 'verb',
+    // Takes an infinitive complement as its object (P09-E12 D9): the builder's subordinate-clause menu offers *to*.
+    clauseObject: 'infinitive',
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to make an attempt',
@@ -7990,6 +7998,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     // parole a una persona"), which TELL's and ANSWER's glosses name.
     id: 'SAY',
     role: 'verb',
+    // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    clauseObject: 'content',
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause', 'locative'],
     description: 'to utter words',
@@ -8314,6 +8324,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     // storia", "acredita na história". A state: credeva, 信じています.
     id: 'BELIEVE',
     role: 'verb',
+    // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    clauseObject: 'content',
     stative: true,
     transitivity: 'transitive',
     complements: ['manner', 'cause'],

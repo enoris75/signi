@@ -8,6 +8,7 @@ import { PhraseBuilder } from "./PhraseBuilder.tsx";
 import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
   COORD_CONJUNCTION_LABEL_KEY,
+  subordinateLabelKey,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
@@ -53,6 +54,7 @@ export function PhraseWorkspace({
     containers,
     links,
     setLinks,
+    setContainers,
   );
   // While a pick is in flight every eligible target is numbered where it sits, and its digit takes
   // it — the keyboard's way of pointing (see usePickKeys). A target marks itself; what taking it
@@ -161,6 +163,17 @@ export function PhraseWorkspace({
               <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.info} />
             </marker>
             <marker
+              id="subordinate-arrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="6"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.error} />
+            </marker>
+            <marker
               id="instrumental-arrow"
               markerWidth="8"
               markerHeight="8"
@@ -176,6 +189,7 @@ export function PhraseWorkspace({
             if (
               c.kind === "conditional" ||
               c.kind === "coordinative" ||
+              c.kind === "subordinate" ||
               c.kind === "instrumental"
             ) {
               // Elbow route through the right-hand gutter: out from the first clause's control,
@@ -191,7 +205,9 @@ export function PhraseWorkspace({
                   ? "url(#conditional-arrow)"
                   : c.kind === "coordinative"
                     ? "url(#coordinative-arrow)"
-                    : "url(#instrumental-arrow)";
+                    : c.kind === "subordinate"
+                      ? "url(#subordinate-arrow)"
+                      : "url(#instrumental-arrow)";
               return (
                 <g key={c.id}>
                   <path
@@ -362,6 +378,9 @@ export function PhraseWorkspace({
                 // The conjunction the pick will join with trails the sentence in brackets, as the
                 // coordination control's own label writes it — the catalog's word now (C13).
                 ? `${t("pick.coordinated")} (${t(COORD_CONJUNCTION_LABEL_KEY[pick.conjunction])})`
+                : pick.active && pick.kind === "subordinate"
+                  // The clause's word trails the sentence in brackets, as the coordination's does.
+                  ? `${t("pick.subordinate")} (${t(subordinateLabelKey({ kind: pick.link, conjunction: pick.conjunction }))})`
                 : pick.active && pick.kind === "instrumental"
                   ? t("pick.instrumental")
                   : t("pick.relativeHead")}

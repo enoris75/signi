@@ -37,6 +37,10 @@ function initSchema(db: Database.Database): void {
       -- rather than heading a clause. Modals conjugate like any verb, so they reuse the
       -- verb lexeme/form tables; this flag is what keeps them out of the main-verb picker.
       modal        INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1)),
+      -- The clause a verb takes as its object (P09-E12 D9): 'content' for a finite that-clause
+      -- (SAY, THINK, KNOW …), 'infinitive' for an infinitive complement (NEED, TRY, DESIRE). It
+      -- offers the builder's subordinate-clause menu its entries. NULL for every other concept.
+      clause_object TEXT CHECK (clause_object IN ('content','infinitive') OR clause_object IS NULL),
       -- The slot a concept fills where that is not the one its role implies: very and too are
       -- adverbs that modify an adjective, Mr a noun that stands with a name, own an adjective bound
       -- to a possessor, something a pronoun that is not a person. Each reuses its role's lexeme and
@@ -349,6 +353,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('modal')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN modal INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1))');
+  }
+  if (!conceptCols.includes('clause_object')) {
+    db.exec("ALTER TABLE semantic_concepts ADD COLUMN clause_object TEXT CHECK (clause_object IN ('content','infinitive') OR clause_object IS NULL)");
   }
   if (!conceptCols.includes('slot')) {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN slot TEXT CHECK (slot IN ('intensifier','title','possessorOwn','indefinite') OR slot IS NULL)");

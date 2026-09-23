@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import type { SubordinatingConjunction } from "@signi/shared";
 import {
   AbstractionLevel,
   CoordConjunction,
@@ -7,6 +8,7 @@ import {
   PhraseContainer,
   PhraseLink,
   PickMode,
+  SubordinateKind,
   WorkspaceBinding,
   imperativePerson,
   imperativeRegisterOf,
@@ -14,18 +16,24 @@ import {
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
+  isSubordinateLink,
 } from "../interfaces.ts";
+import { setInfinitive } from "../phraseReducers.ts";
 import {
   addConditional,
   addCoordinative,
   addInstrumental,
   addRelativeLink,
+  addSubordinate,
   canBeCondition as conditionAllowed,
   canBeCoordinate as coordinateAllowed,
+  canBeSubordinate as subordinateAllowed,
+  canStartSubordinate,
   canBeInstrument as instrumentAllowed,
   canBeRelativeTarget,
   clearConditional as withoutConditional,
   clearCoordinative as withoutCoordinative,
+  clearSubordinate as withoutSubordinate,
   clearInstrumental as withoutInstrumental,
   dropContainerLinks,
   removeRelativeLink,
@@ -43,7 +51,7 @@ export const uid = () =>
  *  the connector registry (see useConnectors) rather than to the link graph. */
 export type LinkCompartments = Pick<
   WorkspaceBinding,
-  "relative" | "conditional" | "coordinative" | "instrumental"
+  "relative" | "conditional" | "coordinative" | "subordinate" | "instrumental"
 >;
 
 export interface WorkspaceLinks {
@@ -68,6 +76,8 @@ export interface WorkspaceLinks {
  *  relative     — a noun in one container is the head of the clause in another.
  *  conditional  — a clause takes another as its "if" clause.
  *  coordinative — two clauses of the same mood are joined by a conjunction.
+ *  subordinate  — a clause takes another as its object clause, its adverbial clause or its
+ *                 infinitive complement (P09-E12 D9).
  *  instrumental — a clause acts with the instrument a third container holds, at a chosen
  *                 reification degree (see AbstractionLevel).
  *
@@ -80,6 +90,9 @@ export function useWorkspaceLinks(
   containers: PhraseContainer[],
   links: PhraseLink[],
   setLinks: React.Dispatch<React.SetStateAction<PhraseLink[]>>,
+  // Only an infinitive link needs it: its clause is drawn in the infinitive mood, which linking sets
+  // on the target period (and which its mood toggle then shows, locked, while the link holds).
+  setContainers?: React.Dispatch<React.SetStateAction<PhraseContainer[]>>,
 ): WorkspaceLinks {
   const [pick, setPick] = useState<PickMode>({ active: false });
 
@@ -158,6 +171,34 @@ export function useWorkspaceLinks(
     setLinks((ls) => addCoordinative(ls, firstId, secondContainerId, conjunction, uid()));
   }
 
+  // ── Subordinate (container-to-container) linking ───────────────────────────
+  function startSubordinate(containerId: string, kind: SubordinateKind, conjunction?: SubordinatingConjunction) {
+    setPick({
+      active: true,
+      kind: "subordinate",
+      link: kind,
+      ...(kind === "adverbial" ? { conjunction: conjunction ?? "when" } : {}),
+      source: { containerId },
+    });
+  }
+
+  function clearSubordinate(mainContainerId: string) {
+    setLinks((ls) => withoutSubordinate(ls, mainContainerId));
+  }
+
+  function completeSubordinate(clauseContainerId: string) {
+    if (!pick.active || pick.kind !== "subordinate") return;
+    const mainId = pick.source.containerId;
+    const { link: kind, conjunction } = pick;
+    cancelPick();
+    if (!subordinateAllowed(containers, links, mainId, clauseContainerId, kind)) return;
+    setLinks((ls) => addSubordinate(ls, mainId, clauseContainerId, kind, uid(), conjunction));
+    if (kind === "infinitive")
+      setContainers?.((cs) =>
+        cs.map((c) => (c.id === clauseContainerId ? { ...c, selection: setInfinitive(c.selection, true) } : c)),
+      );
+  }
+
   // ── Instrumental (verb box → instrument period) linking ────────────────────
   function startInstrumental(containerId: string) {
     setPick({ active: true, kind: "instrumental", source: { containerId } });
@@ -219,6 +260,12 @@ export function useWorkspaceLinks(
       ? containers.find((x) => x.id === coordAsTarget.source.containerId)
       : undefined;
 
+    const subordinates = links.filter(isSubordinateLink);
+    const subAsSource = subordinates.find((l) => l.source.containerId === c.id);
+    const subAsTarget = subordinates.find((l) => l.target.containerId === c.id);
+    const subStanding = (l: typeof subAsSource) =>
+      l && { kind: l.kind, ...(l.kind === "adverbial" ? { conjunction: l.conjunction } : {}) };
+
     const instrumentals = links.filter(isInstrumentalLink);
     const instLink = instrumentals.find(
       (l) => l.source.containerId === c.id || l.target.containerId === c.id,
@@ -268,6 +315,18 @@ export function useWorkspaceLinks(
         onStart: (conjunction) => startCoordinative(c.id, conjunction),
         onClear: () => clearCoordinative(c.id),
         onPick: () => completeCoordinative(c.id),
+      },
+      subordinate: {
+        asSource: subStanding(subAsSource),
+        asTarget: subStanding(subAsTarget),
+        canStart: canStartSubordinate(links, c),
+        isPickTarget:
+          pick.active &&
+          pick.kind === "subordinate" &&
+          subordinateAllowed(containers, links, pick.source.containerId, c.id, pick.link),
+        onStart: (kind, conjunction) => startSubordinate(c.id, kind, conjunction),
+        onClear: () => clearSubordinate(c.id),
+        onPick: () => completeSubordinate(c.id),
       },
       instrumental: {
         hasSource: instrumentals.some((l) => l.source.containerId === c.id),

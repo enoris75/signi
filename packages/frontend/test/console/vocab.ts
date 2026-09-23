@@ -64,6 +64,9 @@ export const VERBS = [
   verb('SEEM', 'seem', 'sembrare', { transitivity: 'intransitive', ...complements('predicative') }),
   // One of the two seeded verbs that license the topic ("thinks about the cat").
   verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
+  // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
+  verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
+  verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive' }),
   // Two verbs that read "cry" in English: only the id tells them apart.
   verb('CRY', 'cry', 'piangere', { transitivity: 'intransitive', synonym: 'weep' }),
   verb('CRY_OUT', 'cry', 'gridare', { synonym: 'shout' }),

@@ -1,5 +1,6 @@
 import {
   coordConjunctionOptions,
+  subordinateOptions,
   type PhraseSelection,
   type WorkspaceBinding,
 } from "../../interfaces.ts";
@@ -13,9 +14,9 @@ import type { ClauseControls } from "../PeriodContainer.types.ts";
 export function periodControls(
   binding: WorkspaceBinding | undefined,
   selection: PhraseSelection,
-): Pick<ClauseControls, "conditional" | "coordinative" | "instrumental"> {
+): Pick<ClauseControls, "conditional" | "coordinative" | "subordinate" | "instrumental"> {
   if (!binding) return {};
-  const { conditional, coordinative, instrumental } = binding;
+  const { conditional, coordinative, subordinate, instrumental } = binding;
   return {
     instrumental: {
       isInstrument: instrumental.hasTarget,
@@ -40,7 +41,8 @@ export function periodControls(
         !selection.infinitive &&
         !conditional.hasTarget &&
         !coordinative.hasSource &&
-        !coordinative.hasTarget,
+        !coordinative.hasTarget &&
+        !subordinate.asTarget,
       onStart: conditional.onStart,
       onClear: conditional.onClear,
       onPick: conditional.onPick,
@@ -61,10 +63,25 @@ export function periodControls(
         !selection.infinitive &&
         !coordinative.hasTarget &&
         !conditional.hasSource &&
-        !conditional.hasTarget,
+        !conditional.hasTarget &&
+        !subordinate.asTarget,
       onStart: coordinative.onStart,
       onClear: coordinative.onClear,
       onPick: coordinative.onPick,
+    },
+    // The subordinate clause (P09-E12 D9): the menu offers what the verb takes — *that* only with no
+    // object, since the clause is the object — and a period with no verb, or one that is itself
+    // folded into another, governs none (the binding's canStart).
+    subordinate: {
+      asSource: subordinate.asSource,
+      asTarget: subordinate.asTarget,
+      options: subordinateOptions(selection.verb, Boolean(selection.directObject)),
+      isPickTarget: subordinate.isPickTarget,
+      pickActive: binding.pickActive,
+      canStart: subordinate.canStart,
+      onStart: subordinate.onStart,
+      onClear: subordinate.onClear,
+      onPick: subordinate.onPick,
     },
   };
 }

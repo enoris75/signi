@@ -376,6 +376,8 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // narrating 語る: "女は男に物語を伝えます".
     id: 'TELL',
     role: 'verb',
+    // Takes a that-clause as its object (P09-E12 D9): the builder's subordinate-clause menu offers *that*.
+    clauseObject: 'content',
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to relate something to someone',

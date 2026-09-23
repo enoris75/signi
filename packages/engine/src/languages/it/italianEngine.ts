@@ -9,6 +9,8 @@ import { artFor } from './artFor.js';
 import { prepDet } from './prepDet.js';
 import { renderClause } from './renderClause.js';
 import { spatialHead } from './spatialHead.js';
+import type { Subordinator } from '@signi/shared';
+import { SUBORDINATORS } from './it.consts.js';
 
 export const italianEngine: LanguageEngine = {
   language: 'it',
@@ -43,6 +45,11 @@ export const italianEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
+  // D9): `that`, the object clause's complementizer, or a subordinating conjunction. Italian cites each as it opens its clause, two words where it writes two ("dopo che", "prima che").
+  renderSubordinator(sub: Subordinator): string {
+    return sub === 'that' ? 'che' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];

@@ -143,6 +143,8 @@ export interface PeriodContext {
   /** I / J — the two clause-level relations: start the pick, or drop the link there is. */
   condition: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
   coordination: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
+  /** U — the subordinate clause (P09-E12 D9): open its menu, or drop the one this period governs. */
+  subordination?: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
   /** R — how far an instrument period is reified: process → concept → object. */
   cycleLevel: (() => void) | undefined;
   /** ⇧N — deny an instrument period, or take it back: the privative, "without the knife" (P09-E2). */
@@ -998,6 +1000,19 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     when: (ctx) => Boolean(ctx.coordination?.canStart || ctx.coordination?.hasLink),
     run: (ctx) =>
       ctx.coordination!.hasLink ? ctx.coordination!.clear() : ctx.coordination!.start(),
+  },
+  {
+    // The subordinate clause (P09-E12 D9) — U for s*u*bordinate, a letter the period left free. As J,
+    // it presses the border control, whose menu then takes one more letter (T that, O to, W when …).
+    id: "period.subordinate",
+    scope: "period",
+    keys: ["U"],
+    label: "Subordinate clause",
+    labelKey: "action.addSubordinate",
+    hint: true,
+    when: (ctx) => Boolean(ctx.subordination?.canStart || ctx.subordination?.hasLink),
+    run: (ctx) =>
+      ctx.subordination!.hasLink ? ctx.subordination!.clear() : ctx.subordination!.start(),
   },
   {
     id: "period.level",

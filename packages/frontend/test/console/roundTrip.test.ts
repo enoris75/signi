@@ -9,6 +9,7 @@ import type { Concept } from '@signi/shared';
 import {
   CAUSE_SENTIMENTS,
   COORD_CONJUNCTIONS,
+  SUBORDINATING_CONJUNCTIONS,
   DEFINITENESS,
   DEGREES,
   MODIFIER_RELATIONS,
@@ -133,6 +134,8 @@ const OPS: Op[] = [
   onPeriod((sel, rng, s, cid) => {
     if (!sel.verb || sel.verb.transitivity === 'intransitive') return undefined;
     if (isLinked(s, cid) && sel.directObject) return undefined;
+    // A that-clause is its verb's object, and the canvas withdraws the object box for it (P09-E12 D9).
+    if (s.links.some((l) => l.kind === 'content' && l.source.containerId === cid)) return undefined;
     const w = wordFor(rng, 'directObject', 'period');
     return R.applyConceptSelect(sel, 'directObject', w.concept, w.opts);
   }),
@@ -256,7 +259,12 @@ const OPS: Op[] = [
   // A mood, unless a clause-level link fixes it.
   (s, rng) => {
     const c = pick(rng, s.containers)!;
-    const locked = s.links.some((l) => (l.kind === 'conditional' || l.kind === 'coordinative') && (l.source.containerId === c.id || l.target.containerId === c.id));
+    const locked = s.links.some(
+      (l) =>
+        ((l.kind === 'conditional' || l.kind === 'coordinative') && (l.source.containerId === c.id || l.target.containerId === c.id)) ||
+        // A subordinate clause has no mood of its own (P09-E12 D9).
+        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive') && l.target.containerId === c.id),
+    );
     if (locked) return undefined;
     const r = rng();
     let sel = c.selection;
@@ -300,6 +308,22 @@ const OPS: Op[] = [
     if (!source.selection.verb?.complements?.includes('instrumental')) return undefined;
     if (!L.canBeInstrument(s.containers, s.links, source.id, target.id)) return undefined;
     return { ...s, links: L.addInstrumental(s.links, source.id, target.id, id()) };
+  },
+  // A subordinate clause (P09-E12 D9), made only where the border control's menu and pick could make
+  // it: a that-clause and an infinitive where the verb takes one, an adverbial clause on any verb.
+  // Linking an infinitive draws its clause in the infinitive mood, as the pick does.
+  (s, rng, id) => {
+    const source = pick(rng, s.containers)!;
+    const target = pick(rng, s.containers)!;
+    const kind = pick(rng, ['content', 'adverbial', 'infinitive'] as const)!;
+    if (!L.canStartSubordinate(s.links, source, kind)) return undefined;
+    if (!L.canBeSubordinate(s.containers, s.links, source.id, target.id, kind)) return undefined;
+    const links = L.addSubordinate(s.links, source.id, target.id, kind, id(), pick(rng, SUBORDINATING_CONJUNCTIONS)!);
+    const containers =
+      kind === 'infinitive'
+        ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInfinitive(c.selection, true) } : c))
+        : s.containers;
+    return { ...s, containers, links };
   },
   // An instrument's level, and — raised to an act — a verb for it.
   (s, rng) => {
@@ -385,6 +409,15 @@ describe('the round trip', () => {
       if (want !== got) failures.push(`seed ${seed}:\n${text}\nwant ${want}\n got ${got}`);
     }
     expect(failures.slice(0, 3)).toEqual([]);
+  });
+
+  // The walk's subordinate-clause op is what exercises `/clause`, `/sub` and `/to` (P09-E12 D9). A
+  // that-clause needs SAY with no object and an infinitive NEED, so the two are rarer than the others.
+  it('reaches each of the three subordinate clauses', () => {
+    const kinds = new Set<string>();
+    for (let seed = 1; seed <= 4000; seed++)
+      for (const l of reach(seed, 10 + (seed % 30)).links) kinds.add(l.kind ?? 'relative');
+    expect([...kinds]).toEqual(expect.arrayContaining(['content', 'adverbial', 'infinitive']));
   });
 
   it('prints a reached state the same way twice', () => {

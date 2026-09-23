@@ -1,24 +1,26 @@
 import { Box } from "@mui/material";
 import { ConditionalButton } from "./ConditionalButton.tsx";
 import { CoordinationButton } from "./CoordinationButton.tsx";
+import { SubordinateButton } from "./SubordinateButton.tsx";
 import { MoodToggle } from "./MoodToggle.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 
 export type BorderControlsProps = Pick<
   ClauseControls,
-  "conditional" | "coordinative" | "imperative" | "infinitive"
+  "conditional" | "coordinative" | "subordinate" | "imperative" | "infinitive"
 >;
 
 // The clause-level controls stacked on the card's right border: the moods on top, then the
-// conditional, then the coordinative. The conditional/coordinative connectors run from this
+// conditional, then the coordinative, then the subordinate clause. The conditional/coordinative connectors run from this
 // cluster's registered anchor. A press on it never starts the card's border drag.
 export function BorderControls({
   conditional,
   coordinative,
+  subordinate,
   imperative,
   infinitive,
 }: BorderControlsProps) {
-  if (!conditional && !coordinative && !imperative && !infinitive) return null;
+  if (!conditional && !coordinative && !subordinate && !imperative && !infinitive) return null;
   return (
     <Box
       ref={conditional?.registerBorderAnchor}
@@ -39,6 +41,7 @@ export function BorderControls({
       {infinitive && <MoodToggle mood="infinitive" control={infinitive} />}
       {conditional && <ConditionalButton control={conditional} />}
       {coordinative && <CoordinationButton control={coordinative} />}
+      {subordinate && <SubordinateButton control={subordinate} />}
     </Box>
   );
 }

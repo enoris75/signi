@@ -1,21 +1,23 @@
-import type { AbstractionLevel, CoordConjunction } from "@signi/shared";
+import type { AbstractionLevel, CoordConjunction, SubordinatingConjunction } from "@signi/shared";
 import {
   isConditionalLink,
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
+  isSubordinateLink,
   type NounAddress,
   type NounKey,
   type PhraseContainer,
   type PhraseLink,
   type PhraseSelection,
+  type SubordinateKind,
 } from "./interfaces.ts";
 
 /**
  * The rules of the workspace's link graph, as pure functions of the containers and the links.
  *
- * Four relations join periods — a relative clause, an if-condition, a coordination and an
- * instrument — and every one is made the same way on the canvas: a pick starts from one period and
+ * Five relations join periods — a relative clause, an if-condition, a coordination, a subordinate
+ * clause and an instrument — and every one is made the same way on the canvas: a pick starts from one period and
  * lands on another. What a pick may land on, and what the link it makes replaces, is stated here
  * once, so the canvas's picks (useWorkspaceLinks) and the console's commands (console/language)
  * accept exactly the same links: no cycles, one subordinate role per period, and the mood rules.
@@ -50,7 +52,7 @@ export function isSelfOrAncestor(
 export function inClauseRelation(links: PhraseLink[], id: string): boolean {
   return links.some(
     (l) =>
-      ((isConditionalLink(l) || isCoordinativeLink(l)) &&
+      ((isConditionalLink(l) || isCoordinativeLink(l) || isSubordinateLink(l)) &&
         (l.source.containerId === id || l.target.containerId === id)) ||
       ((isInstrumentalLink(l) || isRelativeLink(l)) && l.target.containerId === id),
   );
@@ -134,7 +136,8 @@ export function canStartCondition(links: PhraseLink[], c: PhraseContainer): bool
     !c.selection.imperative &&
     !c.selection.infinitive &&
     !links.some((l) => isConditionalLink(l) && l.target.containerId === c.id) &&
-    !links.some((l) => isCoordinativeLink(l) && (l.source.containerId === c.id || l.target.containerId === c.id))
+    !links.some((l) => isCoordinativeLink(l) && (l.source.containerId === c.id || l.target.containerId === c.id)) &&
+    !links.some((l) => isSubordinateLink(l) && l.target.containerId === c.id)
   );
 }
 
@@ -174,7 +177,8 @@ export function canStartCoordination(links: PhraseLink[], c: PhraseContainer): b
   return (
     !c.selection.infinitive &&
     !links.some((l) => isCoordinativeLink(l) && l.target.containerId === c.id) &&
-    !links.some((l) => isConditionalLink(l) && (l.source.containerId === c.id || l.target.containerId === c.id))
+    !links.some((l) => isConditionalLink(l) && (l.source.containerId === c.id || l.target.containerId === c.id)) &&
+    !links.some((l) => isSubordinateLink(l) && l.target.containerId === c.id)
   );
 }
 
@@ -220,6 +224,76 @@ export function addCoordinative(
 
 export function clearCoordinative(links: PhraseLink[], firstId: string): PhraseLink[] {
   return links.filter((l) => !(isCoordinativeLink(l) && l.source.containerId === firstId));
+}
+
+// ── Subordinate (container-to-container, P09-E12 D9) ────────────────────────
+
+/**
+ * Whether a period may *govern* a subordinate clause of `kind`. It needs a verb — an object clause
+ * is governed by one, and an adverbial clause modifies one — and it must be a clause of its own,
+ * the target of no link: a subordinate clause does not nest, and an if-clause, a coordinate or a
+ * relative clause is folded into its host with no room for one. Beyond that:
+ *  - `content` — the verb takes a that-clause (`clauseObject: 'content'`) and holds no direct
+ *    object, since the clause *is* its object;
+ *  - `infinitive` — the verb takes an infinitive complement (`clauseObject: 'infinitive'`);
+ *  - `adverbial` — any verb: nothing licenses an adjunct.
+ * With no `kind`, whether it may govern any of the three (what the border control asks).
+ */
+export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kind?: SubordinateKind): boolean {
+  const verb = c.selection.verb;
+  if (!verb || links.some((l) => l.target.containerId === c.id)) return false;
+  if (kind === "content") return verb.clauseObject === "content" && !c.selection.directObject;
+  if (kind === "infinitive") return verb.clauseObject === "infinitive";
+  return true;
+}
+
+/**
+ * Whether `clauseId` may become the subordinate clause of `mainId`: not itself, no cycle, free of any
+ * other clause-level relation, and a *plain* clause — no condition, coordination or instrument of its
+ * own, and no mood (P09-E12 D9: the engine's clause has no field for any of them). It may keep its
+ * relative clauses. The one mood allowed is the infinitive, on an infinitive link, which draws its
+ * clause in that mood anyway.
+ */
+export function canBeSubordinate(
+  containers: PhraseContainer[],
+  links: PhraseLink[],
+  mainId: string,
+  clauseId: string,
+  kind: SubordinateKind,
+): boolean {
+  if (mainId === clauseId) return false;
+  if (isSelfOrAncestor(clauseId, mainId, links)) return false;
+  if (inClauseRelation(links, clauseId)) return false;
+  if (links.some((l) => isInstrumentalLink(l) && l.source.containerId === clauseId)) return false;
+  const clause = containers.find((c) => c.id === clauseId);
+  if (!clause) return false;
+  const sel = clause.selection;
+  return !sel.imperative && (kind === "infinitive" || !sel.infinitive);
+}
+
+/** One subordinate clause per governing clause: the one it had, of whatever kind, is replaced. */
+export function addSubordinate(
+  links: PhraseLink[],
+  mainId: string,
+  clauseId: string,
+  kind: SubordinateKind,
+  id: string,
+  conjunction: SubordinatingConjunction = "when",
+): PhraseLink[] {
+  const source = { containerId: mainId };
+  const target = { containerId: clauseId };
+  const link: PhraseLink =
+    kind === "adverbial"
+      ? { id, kind, conjunction, source, target }
+      : { id, kind, source, target };
+  return [...clearSubordinate(links, mainId), link];
+}
+
+/** Drop the subordinate clause `mainId` governs — of `kind` only, when one is given. */
+export function clearSubordinate(links: PhraseLink[], mainId: string, kind?: SubordinateKind): PhraseLink[] {
+  return links.filter(
+    (l) => !(isSubordinateLink(l) && l.source.containerId === mainId && (!kind || l.kind === kind)),
+  );
 }
 
 // ── Instrumental (verb box → instrument period) ─────────────────────────────

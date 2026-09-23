@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|rel|if|join|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|rel|if|join|clause|sub|to|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -50,6 +50,8 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "link":
       if (action.kind === "relative") return `${name} #n.noun · ${name} subj { … } · ${name} obj { … }`;
       if (action.kind === "join") return `${name} and|or|but|thatis|therefore|then #n · { … }`;
+      if (action.kind === "subordinate" && action.link === "adverbial")
+        return `${name} when|while|because|after|before #n · { … }`;
       return `${name} #n · ${name} { … }`;
   }
 }
@@ -158,6 +160,9 @@ export const EXAMPLES: Record<string, string> = {
   statement: "/command /verb ( eat ) /statement",
   if: "/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }",
   join: "/subj ( dog ) /verb ( run ) /join but { /subj ( cat ) /verb ( eat ) }",
+  clause: "/subj ( man ) /verb ( say ) /clause { /subj ( cat ) /verb ( run ) }",
+  sub: "/subj ( man ) /verb ( run ) /sub when { /subj ( cat ) /verb ( eat ) }",
+  to: "/subj ( cat ) /verb ( need ) /to { /verb ( run ) }",
   level: "/subj ( man ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",
   without: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without",
   posinst: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without /posinst",

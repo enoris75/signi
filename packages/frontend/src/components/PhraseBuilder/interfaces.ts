@@ -1,6 +1,7 @@
 import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
 import type { TemporalRelation } from "@signi/shared";
+import type { ClauseObject, SubordinatingConjunction } from "@signi/shared";
 
 export type { AbstractionLevel, CoordConjunction };
 
@@ -53,6 +54,71 @@ export function coordConjunctionOptions(
   if (!imperative) return COORD_CONJUNCTION_OPTIONS;
   return COORD_CONJUNCTION_OPTIONS.filter((o) =>
     canCoordinateImperative(o.value),
+  );
+}
+
+// The three subordinate clauses a period can take (P09-E12 D9), each a kind of link: its object
+// clause ("says **that the cat runs**"), an adverbial clause a conjunction opens ("runs **when the
+// cat eats**"), and its infinitive complement ("needs **to run**").
+export type SubordinateKind = "content" | "adverbial" | "infinitive";
+
+// One entry of the subordinate-clause menu: the link it starts, the conjunction an adverbial one
+// carries, the catalog key of its word, and the letter it answers to while the menu is open. `that`
+// is the object clause's complementizer; the infinitive has no word of its own in most of the seven
+// (a bare infinitive, or the governing verb's own di / de), so it is named by the phrase it makes.
+export interface SubordinateOption {
+  link: SubordinateKind;
+  conjunction?: SubordinatingConjunction;
+  labelKey: UiStringKey;
+  key: string;
+}
+
+export const SUBORDINATE_OPTIONS: readonly SubordinateOption[] = [
+  { link: "content", labelKey: "subordinator.value.that", key: "T" },
+  { link: "infinitive", labelKey: "infinitive.phrase", key: "O" },
+  { link: "adverbial", conjunction: "when", labelKey: "subordinator.value.when", key: "W" },
+  { link: "adverbial", conjunction: "while", labelKey: "subordinator.value.while", key: "H" },
+  { link: "adverbial", conjunction: "because", labelKey: "subordinator.value.because", key: "C" },
+  { link: "adverbial", conjunction: "after", labelKey: "subordinator.value.after", key: "A" },
+  { link: "adverbial", conjunction: "before", labelKey: "subordinator.value.before", key: "B" },
+];
+
+// The catalog key naming each subordinating conjunction, for the connector's label and the badge.
+export const SUBORDINATOR_LABEL_KEY: Record<SubordinatingConjunction, UiStringKey> = {
+  when: "subordinator.value.when",
+  while: "subordinator.value.while",
+  because: "subordinator.value.because",
+  after: "subordinator.value.after",
+  before: "subordinator.value.before",
+};
+
+// The catalog key naming a subordinate link by its word: *that*, the infinitive phrase, or its
+// conjunction — for the control's tooltip, the connector's label and the clause's badge.
+export const subordinateLabelKey = (s: {
+  kind: SubordinateKind;
+  conjunction?: SubordinatingConjunction;
+}): UiStringKey =>
+  s.kind === "content"
+    ? "subordinator.value.that"
+    : s.kind === "infinitive"
+      ? "infinitive.phrase"
+      : SUBORDINATOR_LABEL_KEY[s.conjunction ?? "when"];
+
+// The menu's entries for a period whose verb is `verb` and which holds, or not, a direct object:
+// *that* only for a verb that takes a content clause and has no object (the clause *is* the object),
+// *to* only for a verb that takes an infinitive, and the five conjunctions whenever there is a verb.
+// A period with no verb is offered nothing (see canStartSubordinate).
+export function subordinateOptions(
+  verb: { clauseObject?: ClauseObject } | undefined,
+  hasObject: boolean,
+): SubordinateOption[] {
+  if (!verb) return [];
+  return SUBORDINATE_OPTIONS.filter((o) =>
+    o.link === "content"
+      ? verb.clauseObject === "content" && !hasObject
+      : o.link === "infinitive"
+        ? verb.clauseObject === "infinitive"
+        : true,
   );
 }
 
@@ -546,6 +612,28 @@ export type PhraseLink =
       source: { containerId: string };
       target: { containerId: string };
     }
+  // The subordinate clauses (P09-E12 D9): the *source* is the governing clause (its border control
+  // was clicked), the *target* the period that becomes its object clause, its adverbial clause —
+  // opened by `conjunction` — or its infinitive complement. One per governing clause.
+  | {
+      id: string;
+      kind: 'content';
+      source: { containerId: string };
+      target: { containerId: string };
+    }
+  | {
+      id: string;
+      kind: 'adverbial';
+      conjunction: SubordinatingConjunction;
+      source: { containerId: string };
+      target: { containerId: string };
+    }
+  | {
+      id: string;
+      kind: 'infinitive';
+      source: { containerId: string };
+      target: { containerId: string };
+    }
   | {
       // The instrumental complement: the *source* container is the clause that acts, and the
       // *target* container holds the noun phrase it acts with — its subject noun and nothing
@@ -573,7 +661,10 @@ export type PhraseLink =
 export const isRelativeLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind?: 'relative' }> =>
-  l.kind !== 'conditional' && l.kind !== 'coordinative' && l.kind !== 'instrumental';
+  l.kind !== 'conditional' &&
+  l.kind !== 'coordinative' &&
+  !isSubordinateLink(l) &&
+  l.kind !== 'instrumental';
 
 /** Narrow a link to the conditional kind. */
 export const isConditionalLink = (
@@ -584,6 +675,12 @@ export const isConditionalLink = (
 export const isCoordinativeLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind: 'coordinative' }> => l.kind === 'coordinative';
+
+/** Narrow a link to one of the three subordinate kinds (content, adverbial, infinitive). */
+export const isSubordinateLink = (
+  l: PhraseLink,
+): l is Extract<PhraseLink, { kind: SubordinateKind }> =>
+  l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive';
 
 /** Narrow a link to the instrumental kind. */
 export const isInstrumentalLink = (
@@ -599,6 +696,13 @@ export type PickMode =
   | { active: true; kind: 'relative'; source: { containerId: string; nounKey: NounAddress } }
   | { active: true; kind: 'conditional'; source: { containerId: string } }
   | { active: true; kind: 'coordinative'; conjunction: CoordConjunction; source: { containerId: string } }
+  | {
+      active: true;
+      kind: 'subordinate';
+      link: SubordinateKind;
+      conjunction?: SubordinatingConjunction;
+      source: { containerId: string };
+    }
   | { active: true; kind: 'instrumental'; source: { containerId: string } };
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
@@ -684,6 +788,25 @@ export interface CoordinativeBinding {
   onPick: () => void;
 }
 
+// Clause-level subordination (P09-E12 D9) for one container: the object clause, the adverbial
+// clause and the infinitive complement it governs, or the one it is. Mirrors CoordinativeBinding,
+// but a subordinate link has a kind, and an adverbial one a conjunction, which onStart takes.
+export interface SubordinateBinding {
+  // The subordinate link this container governs (it is the main clause), if any.
+  asSource?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  // The subordinate link this container is the clause of, if any.
+  asTarget?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  // May this container start one (see canStartSubordinate)?
+  canStart: boolean;
+  // During another container's subordinate pick, is this container a legal target?
+  isPickTarget: boolean;
+  // Start a subordinate link of `kind` from this container (awaits the clause's pick); clear the
+  // one sourced here; choose this container as a pending pick's clause.
+  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
+  onClear: () => void;
+  onPick: () => void;
+}
+
 // The instrumental link for one container. Mirrors ConditionalBinding, but the two ends are of
 // different kinds: the *source* is a clause (its verb-phrase box carries the control) and the
 // *target* is a period holding the instrument noun phrase, so the two roles are not symmetric
@@ -719,6 +842,7 @@ export interface WorkspaceBinding {
   relative: RelativeBinding;
   conditional: ConditionalBinding;
   coordinative: CoordinativeBinding;
+  subordinate: SubordinateBinding;
   instrumental: InstrumentalBinding;
 }
 
@@ -772,6 +896,13 @@ export function adaptPossessorBinding(
       hasSource: false,
       hasTarget: false,
       conjunction: undefined,
+      isPickTarget: false,
+      onStart: () => {},
+      onClear: () => {},
+      onPick: () => {},
+    },
+    subordinate: {
+      canStart: false,
       isPickTarget: false,
       onStart: () => {},
       onClear: () => {},
