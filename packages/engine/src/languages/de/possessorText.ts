@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { adjectivalNoun } from './adjectivalNoun.js';
@@ -30,7 +31,8 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const poss = np.possessor;
   // A pronominal possessor ("sein") is prenominal — rendered as an ein-word in place of the
   // article — so it adds nothing postposed here.
-  if (!poss || isPronominalPossessor(poss)) return '';
+  // A possessor question's *wessen* is prenominal too (see `nounPhrase`, P09-E14).
+  if (!poss || isPronominalPossessor(poss) || isQuestionPossessor(poss)) return '';
   return ` ${genitiveShows(poss) ? nounPhrase(poss, 'gen') : vonDative(poss)}`;
 }
 

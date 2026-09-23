@@ -10,6 +10,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
+import { npText } from './npText.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { predicateParts } from './predicateParts.js';
 import { questionWord } from './questionWord.js';
@@ -42,8 +43,13 @@ export function renderClause(given: ResolvedPhrase): string {
   // A content clause standing where the subject would is extraposed behind the predicate, and the
   // slot it left takes the expletive "it": "it is right that one acts" (C30).
   const contentSubject = phrase.contentSubject;
-  // A subject wh-question writes its word in the subject's own slot (P09-E6).
+  // A subject wh-question writes its word in the subject's own slot (P09-E6). A possessor question
+  // inside the subject writes the subject itself, *whose* in its Saxon slot, and is a subject
+  // question for the order: "whose cat eats the food?" (P09-E14). Inside the object it fronts the
+  // whole object phrase, which leaves the object slot: "whose food does the cat eat?".
   const gap = phrase.question;
+  const subjectAsked = gap?.role === 'subject' || (gap?.role === 'possessor' && gap.possessed === 'subject');
+  const objectPossessed = gap?.role === 'possessor' && gap.possessed === 'directObject' ? phrase.directObject : undefined;
   // An existential's subject slot takes the expletive "there", the pivot following the verb as its
   // object does and the verb agreeing with it: "there are cats in the house", "is there a cat?"
   // (P09-E6 D5, see `withExistential`).
@@ -59,16 +65,16 @@ export function renderClause(given: ResolvedPhrase): string {
   // A wh-question over the **subject** is the one that does not invert — its word already stands
   // where the subject does, ahead of the verb — so it takes no do-support either: "who eats the
   // food?", "who does not eat?" (P09-E6). Every other question inverts.
-  const inverts = !!phrase.verbPhrase.interrogative && gap?.role !== 'subject';
+  const inverts = !!phrase.verbPhrase.interrogative && !subjectAsked;
   const verbPhrase = inverts || !phrase.verbPhrase.interrogative ? phrase.verbPhrase : { ...phrase.verbPhrase, interrogative: false };
   const agreement = inverts ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
-  const parts = predicateParts(agreement, verbPhrase, phrase.directObject, phrase.complements,
+  const parts = predicateParts(agreement, verbPhrase, objectPossessed ? undefined : phrase.directObject, phrase.complements,
     subject.agreement['definiteness'] === 'no', phrase.agent);
   // A question puts the finite auxiliary before the subject: "is the server active?". A wh-question
   // fronts its word ahead of that — "what does the cat eat?", "why does the cat eat?" — and a verb
   // that takes its object with a preposition strands it: "what does the cat click on?".
-  const fronted = gap && gap.role !== 'subject' ? questionWord(gap) : '';
-  const stranded = gap?.role === 'directObject' ? objectPreposition(phrase.verbPhrase.verb) : '';
+  const fronted = objectPossessed ? npText(firstConjunct(objectPossessed)) : gap && !subjectAsked ? questionWord(gap) : '';
+  const stranded = gap?.role === 'directObject' || objectPossessed ? objectPreposition(phrase.verbPhrase.verb) : '';
   const clause = [fronted, ...(inverts ? invertSubject(subj, parts) : [subj, ...parts]), stranded]
     .filter(Boolean)
     .join(' ')

@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
@@ -84,7 +85,10 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // the definite article ("le livre du chat", "d'un chat", "de quelques chats"). Rendering it
   // through renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor
   // was already rendered prenominally above.)
-  const base = poss && !isPronominalPossessor(poss)
+  // A possessor question's stand-in is *de qui* in the same slot — never the relative *dont*: "le chat
+  // de qui" (P09-E14).
+  const base = isQuestionPossessor(poss) ? `${withPost} de qui`
+    : poss && !isPronominalPossessor(poss)
     ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead))}`
     // The detached possessor takes the genitive's own postnominal slot: "ce livre à elle".
     : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`

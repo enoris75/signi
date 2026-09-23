@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, EUROPA, GROSS, HAUS, JUNGE, KATER, KATZE, KLEIN, np, nounModifier, SEGEL, VERWANDT, vp, WORT } from './de.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 
@@ -163,5 +164,13 @@ describe('nounPhrase', () => {
       expect(nounPhrase(np(VERWANDT, { definiteness: 'indefinite' }, { nounModifiers: [nounModifier(BUCH)] }), 'nom'))
         .toBe('ein Buchverwandter');
     });
+  });
+});
+
+describe('nounPhrase: the possessor question (P09-E14)', () => {
+  test('wessen takes the determiner\'s place, and what follows it declines strong', () => {
+    expect(nounPhrase(np(HAUS, {}, { possessor: questionPossessor() }), 'acc')).toBe('wessen Haus');
+    expect(nounPhrase(np(KATER, {}, { possessor: questionPossessor(), adjectives: [adj(GROSS)] }), 'nom')).toBe('wessen großer Kater');
+    expect(nounPhrase(np(BUCH, { number: 'plural' }, { possessor: questionPossessor() }), 'acc')).toBe('wessen Bücher');
   });
 });

@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 
@@ -21,6 +22,9 @@ import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
  */
 export function possessedDeclension(np: ResolvedNounPhrase, forms: Record<string, string> = np.head.forms): string {
   const definiteness = forms['definiteness'] ?? 'definite';
+  // *wessen* is a genitive in the determiner's place that declines nothing itself, so what follows
+  // it declines strong, as after any prenominal genitive: "wessen großes Essen" (P09-E14).
+  if (isQuestionPossessor(np.possessor)) return 'bare';
   if (np.possessor && isPronominalPossessor(np.possessor) && !KEPT_BESIDE_POSSESSIVE.has(definiteness)) return 'no';
   return definiteness;
 }

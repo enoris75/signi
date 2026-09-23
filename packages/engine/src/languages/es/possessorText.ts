@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
@@ -22,6 +23,8 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A pronominal possessor ("su") is prenominal — rendered by `esPossessiveWord` in place of the
   // article — so it contributes nothing postnominally here.
   if (!poss || isPronominalPossessor(poss)) return '';
+  // A possessor question's stand-in is *de quién* in the same slot: "el gato de quién" (P09-E14).
+  if (isQuestionPossessor(poss)) return ' de quién';
   // The possessor's own possessive replaces its article after "de" ("el libro de mi perro").
   const possessive = esPossessiveWord(poss);
   // Unless the possessor carries a determiner of its own. That keeps its slot and the possessive

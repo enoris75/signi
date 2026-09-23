@@ -12,6 +12,8 @@ const ADVERBIAL: Record<'locative' | 'manner' | 'cause', string> = { locative: '
  * its own (`object_prep`) asks with that: "¿a qué sigue el perro?" (see `takesPersonalA`).
  */
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
+  // The possessor question's *de*-phrase, which fronts alone from the object (P09-E14).
+  if (question.role === 'possessor') return 'de quién';
   if (question.role !== 'subject' && question.role !== 'directObject') return ADVERBIAL[question.role];
   const word = question.animate ? 'quién' : 'qué';
   if (question.role === 'subject') return word;

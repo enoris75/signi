@@ -12,9 +12,15 @@ import { questionWord } from './questionWord.js';
  */
 export function questionOrder(
   question: ResolvedQuestion | undefined, subject: string, predicate: string, verbGroup: string, verb: ConceptForms,
+  // The fronted phrase where it is more than `questionWord`'s word (P09-E14): "de la casa de quién".
+  fronted?: string,
 ): [string, string] {
   if (!question) return [subject, predicate];
-  const word = questionWord(question, verb);
+  // A possessor question inside the subject fronts the whole subject, which is the statement's own
+  // order: "¿el gato de quién come la comida?" (P09-E14) — the colloquial register; extraction from a
+  // preverbal subject would read as the object's question.
+  if (question.role === 'possessor' && question.possessed !== 'directObject') return [subject, predicate];
+  const word = fronted ?? questionWord(question, verb);
   if (question.role === 'subject') return [word, predicate];
   if (!subject) return [word, predicate];
   const opens = verbGroup && (predicate === verbGroup || predicate.startsWith(`${verbGroup} `));

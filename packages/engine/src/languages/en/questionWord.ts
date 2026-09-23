@@ -14,5 +14,7 @@ const ADVERBIAL: Record<'locative' | 'manner' | 'cause', string> = { locative: '
  */
 export function questionWord(question: ResolvedQuestion): string {
   if (question.role === 'subject' || question.role === 'directObject') return question.animate ? 'who' : 'what';
+  // The possessor's word is written by the possessor renderer, in the phrase it sits in (P09-E14).
+  if (question.role === 'possessor') return 'whose';
   return ADVERBIAL[question.role];
 }

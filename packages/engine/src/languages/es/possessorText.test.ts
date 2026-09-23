@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adj, AGUA, ANTARTIDA, CASA, COMER, concept, EUROPA, GATO, GRANDE, HOMBRE, LIBRO, MUJER, NINO, np, PRIMERO, vp } from './es.fixtures.js';
 import { possessorText } from './possessorText.js';
@@ -54,5 +55,11 @@ describe('possessorText', () => {
   test('possessors nest, and a possessor can carry a relative clause', () => {
     expect(bookOf(np(NINO, {}, { possessor: np(HOMBRE) }))).toBe(' del niño del hombre');
     expect(bookOf(np(GATO, {}, { relative: { headRole: 'subject', verbPhrase: vp(COMER) } }))).toBe(' del gato que come');
+  });
+});
+
+describe('possessorText: the possessor question (P09-E14)', () => {
+  test('the stand-in is de quién', () => {
+    expect(bookOf(questionPossessor())).toBe(' de quién');
   });
 });

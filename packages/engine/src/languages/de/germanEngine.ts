@@ -10,7 +10,7 @@ import { determiner } from './determiner.js';
 import { prepDet } from './prepDet.js';
 import { spatialHead } from './spatialHead.js';
 import { punctuate } from './punctuate.js';
-import { questionWord } from './questionWord.js';
+import { questionFront } from './questionFront.js';
 import { renderClause } from './renderClause.js';
 import type { Subordinator } from '@signi/shared';
 import { SUBORDINATORS } from './de.consts.js';
@@ -29,12 +29,16 @@ export const germanEngine: LanguageEngine = {
     // — the V2 order, reached by the same inversion: "was isst der Kater?", "wo isst der Kater?". Over
     // the subject the word IS the subject, and the clause is the plain V2 statement: "wer isst das
     // Essen?" (P09-E6).
+    //
+    // A possessor question fronts the whole phrase *wessen* sits in (P09-E14): over the subject that
+    // is the V2 statement again, "wessen Kater frisst das Essen?"; over the object the phrase leaves
+    // the Mittelfeld for the front field, in its own case, "wessen Essen frisst der Kater?".
     const question = !!phrase.verbPhrase?.interrogative;
     const gap = phrase.question;
-    const main = renderClause(phrase, /*inverted*/ !!phrase.condition || (question && gap?.role !== 'subject'));
-    const asked = gap && gap.role !== 'subject' && phrase.verbPhrase
-      ? `${questionWord(gap, phrase.verbPhrase.verb)} ${main}`
-      : main;
+    const subjectAsked = gap?.role === 'subject' || (gap?.role === 'possessor' && gap.possessed === 'subject');
+    const front = gap && !subjectAsked && phrase.verbPhrase ? questionFront(phrase) : undefined;
+    const main = renderClause(front?.rest ?? phrase, /*inverted*/ !!phrase.condition || (question && !subjectAsked));
+    const asked = front ? `${front.word} ${main}` : main;
     const sentence = phrase.condition
       ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${asked}`
       : asked;

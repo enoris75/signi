@@ -12,6 +12,9 @@ const ADVERBIAL: Record<'locative' | 'manner' | 'cause', string> = { locative: '
  */
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
   if (question.role === 'subject') return question.animate ? 'qui' : "qu'est-ce qui";
+  // The possessor question's *de*-phrase, which fronts alone from the object — *de qui*, never the
+  // relative *dont* (P09-E14).
+  if (question.role === 'possessor') return 'de qui';
   if (question.role !== 'directObject') return ADVERBIAL[question.role];
   const prep = objectPreposition(verb);
   const word = question.animate ? 'qui' : prep ? 'quoi' : 'que';

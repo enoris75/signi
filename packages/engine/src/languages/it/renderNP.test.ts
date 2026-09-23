@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor } from '@signi/shared';
 import { artFor } from './artFor.js';
 import {
@@ -122,5 +123,12 @@ describe('renderNP', () => {
     const relative = { headRole: 'subject' as const, verbPhrase: vp(MANGIARE), directObject: el(np(TOPO)) };
     expect(withDeterminer(np(GATTO, {}, { adjectives: [adj(FELICE)], relative }))).toBe('il gatto felice che mangia il topo');
     expect(withDeterminer(np(GATTO, { number: 'plural' }, { relative }))).toBe('i gatti che mangiano il topo');
+  });
+});
+
+describe('renderNP: the possessor question (P09-E14)', () => {
+  test('the stand-in is di chi after the noun, which keeps its article', () => {
+    expect(withDeterminer(np(GATTO, {}, { possessor: questionPossessor() }))).toBe('il gatto di chi');
+    expect(withDeterminer(np(CASA, {}, { possessor: questionPossessor() }))).toBe('la casa di chi');
   });
 });

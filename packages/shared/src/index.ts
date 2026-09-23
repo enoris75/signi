@@ -1365,8 +1365,8 @@ export interface PhrasePlan {
    * The slot a **wh-question** asks about — its gap (P09-E6): "**who** eats the food?" is
    * `'subject'`, "**what** does the cat eat?" `'directObject'`, "**where** does the cat eat?"
    * `'locative'`, "**how**?" `'manner'`, "**why**?" `'cause'`. It is `RelativeClause.headRole`
-   * reused, minus `'possessor'` ("whose food?" asks inside a noun phrase, a follow-up): the same
-   * slots, and the gapped one is left out of the plan exactly as a relative clause leaves it out. A
+   * reused: the same slots, and the gapped one is left out of the plan exactly as a relative clause
+   * leaves it out. A
    * subject gap still carries a `subject`, because the type requires one; it is a throwaway, never
    * rendered, as a `contentSubject` clause's is, and the verb agrees in the third singular ("who
    * eats"). Only those five gaps have a question word yet; any other complement gap (and a
@@ -1382,8 +1382,31 @@ export interface PhrasePlan {
    * keeps the statement's order ("o que o gato come?"); fr fronts before "est-ce que" ("qu'est-ce
    * que le chat mange ?"), a subject gap standing alone ("qui mange ?"). Japanese moves nothing:
    * the word sits in its slot with the slot's own particle (猫は何を食べますか).
+   *
+   * `'possessor'` is the one gap **inside** a noun phrase (P09-E14): "**whose** food does the cat
+   * eat?". The slot it sits in (`questionPossessed`) stays **filled** — the possessed noun is spoken —
+   * and only its possessor is the question word: *whose*, *di chi*, *de qui* (never the relative
+   * *dont*), *wessen*, *de quién*, *de quem*, 誰の. That slot must hold one noun phrase that is no
+   * pronoun and has no possessor of its own, in the owner relation (`possessorRole` `'whole'` /
+   * `'parts'` is a thing question, "the part of what?"); anything else is refused. What fronts:
+   *  - en / de: the whole phrase, the word in the determiner's place and the noun article-less
+   *    ("whose food does the cat eat?", "wessen Essen frisst der Kater?"); over the subject nothing
+   *    moves and nothing inverts ("whose cat eats the food?");
+   *  - it / fr / es / pt, the object possessed: the *de*-phrase alone, the possessed noun staying in
+   *    its slot, definite ("di chi mangia il cibo il gatto?"); the subject possessed: the whole
+   *    subject, possessor after the noun ("il gatto di chi mangia il cibo?") — extraction from a
+   *    preverbal subject would read as the object question, and the cleft needs predicative
+   *    possession, which the engine does not have;
+   *  - ja: nothing moves, and a possessed subject takes が as a subject gap does (誰の猫が).
    */
-  questionRole?: 'subject' | 'directObject' | ComplementType;
+  questionRole?: 'subject' | 'directObject' | 'possessor' | ComplementType;
+  /**
+   * Which slot holds the noun whose possessor a `'possessor'` question asks about (P09-E14): the
+   * subject ("whose cat eats the food?", the default — the genitive relative's own convention) or the
+   * direct object ("whose food does the cat eat?"). A possessed complement ("in whose house?") is not
+   * built and is refused. Unread on any other gap.
+   */
+  questionPossessed?: 'subject' | 'directObject';
   /**
    * The specifiers of the gapped complement when `questionRole` is a complement — the relation the
    * question keeps though its noun is gone, exactly as `RelativeClause.headSpecifiers`. Only the
@@ -1394,7 +1417,8 @@ export interface PhrasePlan {
    * Whether the answer to a subject or direct-object question is a **person** — *who* rather than
    * *what* (chi / che cosa, qui / que, wer / was, quién / qué, quem / o que, 誰 / 何). A gap has no
    * noun to read animacy off, which is why the plan says it; absent is *what*. Unread on the other
-   * gaps.
+   * gaps — and on a `'possessor'` gap, which always asks for a person (*whose*): the inanimate owner
+   * is the part-whole relation, refused there.
    */
   questionAnimate?: boolean;
   /**

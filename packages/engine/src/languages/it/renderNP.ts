@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessiveIt } from '../../possessive.js';
@@ -66,7 +67,9 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // definite article ("il libro del gatto", "di un uomo", "di alcuni uomini"). Rendering it through
   // renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor was
   // already rendered prenominally above, so it is excluded here.)
-  const base = poss && !isPronominalPossessor(poss)
+  // A possessor question's stand-in is *di chi* in the same slot: "il gatto di chi" (P09-E14).
+  const base = isQuestionPossessor(poss) ? `${withPost} di chi`
+    : poss && !isPronominalPossessor(poss)
     ? `${withPost} ${renderNP(poss, (plural, lead) => prepDet('di', itPossessedHeadForms(poss), plural, lead))}`
     : withPost;
   const rel = relativeText(np);

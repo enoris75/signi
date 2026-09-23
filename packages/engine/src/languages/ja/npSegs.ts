@@ -1,4 +1,5 @@
 import type { Definiteness } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
 import { possessorBound } from '../../functions/possessorBound.js';
@@ -61,7 +62,8 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
         // A `no` possessor writes only its どの here: its も closes the whole phrase, where the phrase's
         // particle goes (どの猫の本も, see `isNegativeGroup` and `jaParticleSegs`; A216).
         // OWN's 自身の carries the の itself, so the possessor before it writes none (猫自身の本).
-        : [...npSegs(np.possessor), ...(own ? [] : [{ t: 'の' }])]),
+        // A possessor question's stand-in is 誰, joined with の as any owner is: 誰の猫 (P09-E14).
+        : [...(isQuestionPossessor(np.possessor) ? [wordSeg('誰', 'だれ')] : npSegs(np.possessor)), ...(own ? [] : [{ t: 'の' }])]),
     );
   }
   core.push(...detSegs);

@@ -1,4 +1,5 @@
 import { isPronominalPossessor } from '@signi/shared';
+import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
@@ -22,6 +23,8 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A pronominal possessor ("o seu") is prenominal — rendered by `ptPossessiveWord` in place of
   // the article — so it contributes nothing postnominally here.
   if (!poss || isPronominalPossessor(poss)) return '';
+  // A possessor question's stand-in is *de quem* in the same slot: "o gato de quem" (P09-E14).
+  if (isQuestionPossessor(poss)) return ' de quem';
   // The possessor's own possessive rides on the article "de" fuses with ("o livro do meu cão").
   // Unless the possessor carries a determiner of its own: that keeps its slot and takes the fusion
   // ("deste", "de nenhum"), and the possessive follows the noun, article and all left to the

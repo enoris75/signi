@@ -13,7 +13,7 @@ import type { ResolvedNounElement, ResolvedQuestion } from '../../types.js';
 export function questionNoun(question: ResolvedQuestion, copula = false): ResolvedNounElement | undefined {
   const forms: Record<string, string> | undefined = question.role === 'locative' ? { base: 'どこ' }
     : question.role === 'manner' ? (copula ? { base: 'どう' } : undefined)
-    : question.role === 'cause' ? undefined
+    : question.role === 'cause' || question.role === 'possessor' ? undefined
     : question.animate ? { base: '誰', reading: 'だれ', animate: '1', human: '1' } : { base: '何', reading: 'なに' };
   if (!forms) return undefined;
   return {

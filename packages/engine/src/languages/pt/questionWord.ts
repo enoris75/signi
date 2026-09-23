@@ -10,6 +10,8 @@ const ADVERBIAL: Record<'locative' | 'manner' | 'cause', string> = { locative: '
  * *que* ("em que pensa o gato?" — "de que", never "*de o que").
  */
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
+  // The possessor question's *de*-phrase, which fronts alone from the object (P09-E14).
+  if (question.role === 'possessor') return 'de quem';
   if (question.role !== 'subject' && question.role !== 'directObject') return ADVERBIAL[question.role];
   const prep = question.role === 'directObject' ? objectPreposition(verb) : '';
   if (question.animate) return prep ? `${prep} quem` : 'quem';

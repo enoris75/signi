@@ -16,6 +16,8 @@ const WER: Record<'nom' | 'acc' | 'dat', string> = { nom: 'wer', acc: 'wen', dat
  */
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
   if (question.role === 'subject') return question.animate ? WER.nom : 'was';
+  // The possessor's word is written by the possessor renderer, in the phrase it sits in (P09-E14).
+  if (question.role === 'possessor') return 'wessen';
   if (question.role !== 'directObject') return ADVERBIAL[question.role];
   const prep = objectPreposition(verb);
   if (!prep) return question.animate ? WER[objectCase(verb)] : 'was';

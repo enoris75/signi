@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { questionPossessor } from '../../functions/questionPossessor.js';
 import {
   adj, BASHO, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HAHA, HITO_GENERIC, HON, IE, IMITEKI, INU, KABE, KODOMO,
   MIZU, MOTSU, NARU, NEKO, NEZUMI, NOMU, np, nounModifier, OKAASAN, OOKII, OYA, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
@@ -220,5 +221,11 @@ describe('npSegs', () => {
     // 彼女ら is written into `base` with its own reading; `plural_reading` still holds かれら.
     const they = { base: '彼女ら', reading: 'かのじょら', plural: '彼女ら', plural_reading: 'かれら', person: '3', number: 'plural' };
     expect(npSegs(np(they))).toEqual([{ t: '彼女ら', r: 'かのじょら' }]);
+  });
+});
+
+describe('npSegs: the possessor question (P09-E14)', () => {
+  test('the stand-in is 誰, joined with の', () => {
+    expect(npSegs(np(NEKO, {}, { possessor: questionPossessor() }))).toEqual([{ t: '誰', r: 'だれ' }, { t: 'の' }, { t: '猫', r: 'ねこ' }]);
   });
 });

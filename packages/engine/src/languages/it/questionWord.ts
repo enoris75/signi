@@ -10,6 +10,8 @@ const ADVERBIAL: Record<'locative' | 'manner' | 'cause', string> = { locative: '
  * A verb that takes its object with a preposition asks with it: "a che cosa pensa il gatto?".
  */
 export function questionWord(question: ResolvedQuestion, verb: ConceptForms): string {
+  // The possessor question's *de*-phrase, which fronts alone from the object (P09-E14).
+  if (question.role === 'possessor') return 'di chi';
   if (question.role !== 'subject' && question.role !== 'directObject') return ADVERBIAL[question.role];
   const word = question.animate ? 'chi' : 'che cosa';
   const prep = question.role === 'directObject' ? objectPreposition(verb) : '';

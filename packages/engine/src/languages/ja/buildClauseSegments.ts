@@ -69,7 +69,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   const animate = isAnimate(phrase.subject.conjuncts);
   // The owner in an existential possession is where the thing is, so an "if" clause marks it with に,
   // not が (もし家に壁があったら, A150). The topic は stays (家は壁があります).
-  const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
+  // A subject a possessor question asks inside is new information too, and takes が where a subject
+  // gap does: 誰の猫が食べ物を食べますか (P09-E14).
+  const particle = asked?.role === 'possessor' && asked.possessed !== 'directObject' ? 'が'
+    : subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
   // A content clause standing where the subject would really is the subject in Japanese: it is
   // nominalized with こと and marked が, in the slot the noun phrase would have filled — 行動すること

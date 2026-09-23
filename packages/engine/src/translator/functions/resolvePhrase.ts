@@ -14,6 +14,7 @@ import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { questionSubject } from './questionSubject.js';
+import { withQuestionPossessor } from './withQuestionPossessor.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveQuestion } from './resolveQuestion.js';
@@ -113,7 +114,11 @@ export function resolvePhrase(
   // finite element's, or, under a modal, the governed group's.
   const clauseNegative = plan.verbPhrase?.negative === true
     || plan.verbPhrase?.modals?.some((m) => typeof m !== 'string' && m.negative === true) === true;
-  const resolvedSubject = negativePolarity(resolveNounElement(plan.subject, language, lookup), clauseNegative, true)!;
+  // A **possessor** question keeps the slot it asks inside, and swaps that noun's possessor for the
+  // question stand-in each engine writes as *whose* (P09-E14, see `withQuestionPossessor`).
+  const possessed = gap?.role === 'possessor' ? gap.possessed : undefined;
+  const resolvedSubject = withQuestionPossessor(
+    negativePolarity(resolveNounElement(plan.subject, language, lookup), clauseNegative, true)!, possessed === 'subject');
   // A **content clause** fills the subject slot, and what agrees with it agrees with a clause, not
   // with the throwaway noun the plan carries there: 3rd singular, and masculine where the language
   // genders a predicate adjective ("è giusto che si agisca", not "è giusta" — C30).
@@ -143,10 +148,10 @@ export function resolvePhrase(
     : undefined;
   // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
   const directObject = plan.directObject
-    ? negativePolarity(
+    ? withQuestionPossessor(negativePolarity(
         withAlarmCry(resolveNounElement(plan.directObject, language, lookup), verbPhrase?.verb, language),
         clauseNegative,
-      )
+      )!, possessed === 'directObject')
     : undefined;
   // A passive re-maps the clause's core arguments (A01). The patient becomes the grammatical
   // subject — it drives the verb's agreement, and a Romance participle agrees with it — the object

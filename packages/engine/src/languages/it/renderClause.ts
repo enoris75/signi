@@ -1,4 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
+import { prepObjectText } from './prepObjectText.js';
+import { possessedPrepObject, withoutQuestionPossessor } from '../../functions/questionPossessor.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
@@ -49,11 +51,17 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // predicate adjective takes the citation form, "essere attento", not the masculine plural the
   // impersonal si would ask for ("si è attenti", see `agreementForms`).
   const agreement = phrase.verbPhrase.mood === 'infinitive' ? withoutGeneric(subject.agreement) : subject.agreement;
+  // A possessor question over the object fronts its *di chi* alone, and the object stays behind it,
+  // definite (P09-E14, see `withoutQuestionPossessor`) — unless the verb takes its object with a
+  // preposition, which fronts whole: "dalla casa di chi dipende il gatto?" (`possessedPrepObject`).
+  const prepFront = possessedPrepObject(phrase);
   const statement = predicateText(
-    agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, phrase.agent,
+    agreement, phrase.verbPhrase, prepFront ? undefined : withoutQuestionPossessor(phrase.directObject, phrase.question),
+    phrase.complements, phrase.agent,
   );
   // A wh-question fronts its word and moves the subject behind the predicate (P09-E6).
-  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, phrase.verbPhrase.verb);
+  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, phrase.verbPhrase.verb,
+    prepFront ? prepObjectText(prepFront.np, prepFront.prep) : undefined);
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("essere capace di agire", "la gatta desidera essere attenta") or, under a causative,
   // its object ("indurre una casa a essere nascosta").

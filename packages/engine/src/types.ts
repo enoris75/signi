@@ -327,13 +327,20 @@ export interface ResolvedComplement {
 }
 
 /**
- * A wh-question's gap, resolved (see ResolvedPhrase.question). `role` is narrowed to the five slots
- * that have a question word — who/what, where, how and why; the translator refuses the rest.
+ * A wh-question's gap, resolved (see ResolvedPhrase.question). `role` is narrowed to the slots that
+ * have a question word — who/what, where, how and why, and *whose* (P09-E14); the translator refuses
+ * the rest.
  */
 export interface ResolvedQuestion {
-  role: 'subject' | 'directObject' | 'locative' | 'manner' | 'cause';
-  /** *who* rather than *what*; read on a subject or direct-object gap only. */
+  role: 'subject' | 'directObject' | 'possessor' | 'locative' | 'manner' | 'cause';
+  /** *who* rather than *what*; read on a subject or direct-object gap only, and always true on a possessor gap. */
   animate: boolean;
+  /**
+   * The slot whose noun a `'possessor'` gap sits in (P09-E14). That slot is **not** gapped: it is in
+   * the phrase, and its (single) conjunct's `possessor` is the question stand-in (`questionPossessor`),
+   * which each engine's possessor renderer writes as *whose* / *wessen* / *di chi* / 誰の.
+   */
+  possessed?: 'subject' | 'directObject';
 }
 
 export interface ResolvedPhrase {

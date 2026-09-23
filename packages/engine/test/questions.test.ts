@@ -245,6 +245,104 @@ describe('wh-questions: C10 holds', () => {
   });
 });
 
+// A possessor question asks inside a noun phrase the plan keeps (P09-E14): `questionPossessed` names
+// the slot, the subject by default, and *whose* stands where its genitive would.
+const whose = (plan: PhrasePlan, questionPossessed?: 'subject' | 'directObject'): PhrasePlan =>
+  ({ ...plan, questionRole: 'possessor', ...(questionPossessed ? { questionPossessed } : {}) });
+
+describe('the possessor question', () => {
+  test('inside the object: whose food does the cat eat?', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD') }), 'directObject'))).toEqual({
+      en: 'whose food does the cat eat?',
+      it: 'di chi mangia il cibo il gatto?', // the de-phrase fronts alone, the object stays, definite
+      fr: 'de qui est-ce que le chat mange la nourriture ?',
+      de: 'wessen Essen frisst der Kater?', // the whole phrase fronts, wessen in the article's place
+      es: '¿de quién come el gato la comida?', // E6's VSO behind the fronted phrase
+      ja: '猫は誰の食べ物を食べますか？',
+      pt: 'de quem o gato come a comida?',
+    });
+  });
+
+  test('inside the subject: whose cat eats the food?', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD') })))).toEqual({
+      en: 'whose cat eats the food?', // a subject question: no inversion
+      it: 'il gatto di chi mangia il cibo?', // Romance pied-pipes the whole subject
+      fr: 'le chat de qui mange la nourriture ?', // and asks with no est-ce que
+      de: 'wessen Kater frisst das Essen?',
+      es: '¿el gato de quién come la comida?',
+      ja: '誰の猫が食べ物を食べますか？', // が, not は
+      pt: 'o gato de quem come a comida?',
+    });
+  });
+
+  test('the subject is the default slot, and questionAnimate is not read', () => {
+    const plan = clause(np('CAT'), 'EAT', { directObject: np('FOOD') });
+    expect(sayAll(whose(plan, 'subject'))).toEqual(sayAll(whose(plan)));
+    expect(sayAll({ ...whose(plan), questionAnimate: false }).it).toBe('il gatto di chi mangia il cibo?');
+  });
+
+  test('a plural possessed noun, and an adjective on it', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'READ', { directObject: np('BOOK', { number: 'plural' }) }), 'directObject'))).toMatchObject({
+      en: 'whose books does the cat read?',
+      it: 'di chi legge i libri il gatto?',
+      de: 'wessen Bücher liest der Kater?',
+      ja: '猫は誰の本を読みますか？',
+    });
+    // German declines strong after wessen, which declines nothing itself.
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { adjectives: ['GREAT'] }) }), 'directObject'))).toMatchObject({
+      en: 'whose great food does the cat eat?',
+      de: 'wessen großes Essen frisst der Kater?',
+      es: '¿de quién come el gato la comida grande?',
+    });
+    expect(sayAll(whose(clause(np('DOG', { adjectives: ['GREAT'] }), 'RUN')))).toMatchObject({
+      de: 'wessen großer Hund läuft?',
+      it: 'il grande cane di chi corre?',
+      fr: 'le grand chien de qui court ?',
+    });
+  });
+
+  test('the possessed noun is definite, whatever determiner the plan gave it', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { definiteness: 'indefinite' }) }), 'directObject')))
+      .toEqual(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD') }), 'directObject')));
+  });
+
+  test('the tenses, negation and a dropped pronoun subject keep the order', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'past', negative: true } }), 'directObject')))
+      .toMatchObject({
+        en: 'whose food did the cat not eat?',
+        de: 'wessen Essen fraß der Kater nicht?',
+        it: 'di chi non mangiò il cibo il gatto?',
+      });
+    expect(sayAll(whose(clause(np('FIRST_PERSON'), 'EAT', { directObject: np('FOOD') }), 'directObject'))).toMatchObject({
+      en: 'whose food do I eat?',
+      it: 'di chi mangio il cibo?',
+      es: '¿de quién como la comida?',
+      pt: 'de quem como a comida?',
+    });
+  });
+
+  test('a verb that takes its object with a preposition fronts it whole in Romance and German', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'DEPEND', { directObject: np('HOUSE') }), 'directObject'))).toEqual({
+      en: 'whose house does the cat depend on?', // English strands it
+      it: 'dalla casa di chi dipende il gatto?',
+      fr: 'de la maison de qui est-ce que le chat dépend ?',
+      de: 'von wessen Haus hängt der Kater ab?',
+      es: '¿de la casa de quién depende el gato?',
+      ja: '猫は誰の家に依存していますか？',
+      pt: 'da casa de quem o gato depende?',
+    });
+  });
+
+  test('refused: a noun with a possessor of its own, a pronoun, a coordination, a part-whole relation, a complement', () => {
+    const eats = (directObject: PhrasePlan['directObject']) => whose(clause(np('CAT'), 'EAT', { directObject }), 'directObject');
+    expect(() => translateAll(eats(np('FOOD', { possessor: np('MAN') })))).toThrow(/already has a possessor.*P09-E14/);
+    expect(() => translateAll(eats(np('THIRD_PERSON')))).toThrow(/pronoun.*P09-E14/);
+    expect(() => translateAll(eats({ conjuncts: [np('FOOD'), np('BOOK')], conjunction: 'and' }))).toThrow(/coordination.*P09-E14/);
+    expect(() => translateAll(eats(np('FOOD', { possessorRole: 'whole' })))).toThrow(/owner.*P09-E14/);
+    expect(() => translateAll({ ...whose(clause(np('CAT'), 'EAT')), questionPossessed: 'locative' as never })).toThrow(/P09-E14/);
+  });
+});
+
 describe('wh-questions: not built yet', () => {
   test('a marked relation, another complement gap, and the passive are refused', () => {
     const under = { ...ask(clause(np('CAT'), 'EAT'), 'locative'), questionSpecifiers: [{ kind: 'path', value: 'under' }] } as PhrasePlan;

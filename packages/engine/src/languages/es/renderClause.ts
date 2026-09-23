@@ -1,4 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
+import { prepObjectText } from './prepObjectText.js';
+import { possessedPrepObject, withoutQuestionPossessor } from '../../functions/questionPossessor.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
 import { infinitiveController } from '../../functions/infinitiveController.js';
@@ -49,15 +51,22 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // "*es" (P09-E6; the relative's A199).
   const askedPlace = phrase.question?.role === 'locative' ? 'locative' as const : undefined;
   const noSubject = subject.agreement['definiteness'] === 'no';
+  // A possessor question over the object fronts its *de quién* alone, and the object stays behind it,
+  // definite (P09-E14, see `withoutQuestionPossessor`) — unless the verb takes its object with a
+  // preposition, which fronts whole: "¿de la casa de quién depende el gato?" (`possessedPrepObject`).
+  const prepFront = possessedPrepObject(phrase);
   const statement = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, phrase.agent, noSubject, askedPlace,
+    subject.agreement, phrase.verbPhrase,
+    prepFront ? undefined : withoutQuestionPossessor(phrase.directObject, phrase.question), phrase.complements,
+    phrase.agent, noSubject, askedPlace,
   );
   // A wh-question fronts its word and puts the subject behind the verb group, which is the predicate
   // with nothing after the verb (P09-E6).
   const verbGroup = phrase.question && spoken
     ? predicateText(subject.agreement, phrase.verbPhrase, undefined, undefined, undefined, noSubject, askedPlace)
     : '';
-  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, verbGroup, phrase.verbPhrase.verb);
+  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, verbGroup, phrase.verbPhrase.verb,
+    prepFront ? prepObjectText(prepFront.np, prepFront.prep) : undefined);
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("ser capaz de actuar", "el gato desea comer") or, under a causative, its object
   // ("llevar una casa a estar oculta").
