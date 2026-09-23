@@ -5,7 +5,7 @@ import {
   type BorderControlsProps,
 } from '../../src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx';
 import { renderWithProviders } from '../render.tsx';
-import { conditionalControl, coordinativeControl, mood } from './fixtures.ts';
+import { conditionalControl, coordinativeControl, mood, subordinateControl } from './fixtures.ts';
 
 function renderControls(props: BorderControlsProps) {
   const onCardPointerDown = vi.fn();
@@ -24,8 +24,9 @@ describe('BorderControls', () => {
     expect(screen.queryByTestId('period-border-controls')).not.toBeInTheDocument();
   });
 
-  it('stacks the moods on top, then the conditional, then the coordinative', () => {
+  it('stacks the moods on top, then the conditional, the coordinative and the subordinate clause', () => {
     renderControls({
+      subordinate: subordinateControl(),
       coordinative: coordinativeControl(),
       conditional: conditionalControl(),
       infinitive: mood(false),
@@ -37,6 +38,7 @@ describe('BorderControls', () => {
       'Infinitive phrase',
       'Add a condition (this period becomes the main clause)',
       'Coordinate this period',
+      'Add a subordinate clause',
     ]);
   });
 

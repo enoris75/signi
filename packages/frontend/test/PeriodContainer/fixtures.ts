@@ -14,7 +14,9 @@ import type {
   CoordinativeControl,
   InstrumentalControl,
   MoodControl,
+  SubordinateControl,
 } from '../../src/components/PhraseBuilder/PeriodContainer/PeriodContainer.types.ts';
+import { SUBORDINATE_OPTIONS } from '../../src/components/PhraseBuilder/interfaces.ts';
 
 // The default MUI palette, as jsdom serializes the computed colours.
 export const WARNING = 'rgb(237, 108, 2)';
@@ -56,6 +58,20 @@ export function coordinativeControl(
     hasCoordination: false,
     isCoordinated: false,
     conjunctions: COORD_CONJUNCTION_OPTIONS,
+    isPickTarget: false,
+    pickActive: false,
+    canStart: true,
+    onStart: vi.fn(),
+    onClear: vi.fn(),
+    onPick: vi.fn(),
+    ...overrides,
+  };
+}
+
+// A period free to govern any of the three subordinate clauses (P09-E12 D9): the menu's seven rows.
+export function subordinateControl(overrides: Partial<SubordinateControl> = {}): SubordinateControl {
+  return {
+    options: [...SUBORDINATE_OPTIONS],
     isPickTarget: false,
     pickActive: false,
     canStart: true,

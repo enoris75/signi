@@ -128,6 +128,23 @@ describe('hydrateWorkspace', () => {
     ).toEqual(['but', 'and']);
   });
 
+  // P09-E12 D9: the subordinate clauses, an adverbial one with its conjunction ("when" if lost).
+  it('restores the subordinate clauses, an adverbial one with its conjunction', () => {
+    expect(
+      linksOf(
+        { id: 's', kind: 'content', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b' } },
+        { id: 't', kind: 'adverbial', conjunction: 'because', source: { containerId: 'a' }, target: { containerId: 'c' } },
+        { id: 'u', kind: 'adverbial', conjunction: 'and', source: { containerId: 'b' }, target: { containerId: 'c' } },
+        { id: 'v', kind: 'infinitive', source: { containerId: 'c' }, target: { containerId: 'a' } },
+      ),
+    ).toStrictEqual([
+      { id: 's', kind: 'content', source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 't', kind: 'adverbial', conjunction: 'because', source: { containerId: 'a' }, target: { containerId: 'c' } },
+      { id: 'u', kind: 'adverbial', conjunction: 'when', source: { containerId: 'b' }, target: { containerId: 'c' } },
+      { id: 'v', kind: 'infinitive', source: { containerId: 'c' }, target: { containerId: 'a' } },
+    ]);
+  });
+
   it('restores an instrument with its level, the object when none was saved', () => {
     expect(
       linksOf(

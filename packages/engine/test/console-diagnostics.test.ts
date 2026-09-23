@@ -333,6 +333,19 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'This period accepts no coordination', it: 'Questo periodo non accetta nessuna coordinazione', fr: "Cette période n'accepte aucune coordination", de: 'Dieses Satzgefüge akzeptiert keine Koordination',
       es: 'Este período no acepta ninguna coordinación', pt: 'Este período não aceita nenhuma coordenação', ja: 'この文はどの等位接続も受け付けません',
     },
+    // P09-E12 D9: the subordinate clauses.
+    'diagnostic.periodAcceptsNoSubordinate': {
+      en: 'This period accepts no subordinate clause', it: 'Questo periodo non accetta nessuna proposizione subordinata', fr: "Cette période n'accepte aucune proposition subordonnée", de: 'Dieses Satzgefüge akzeptiert keinen untergeordneten Satz',
+      es: 'Este período no acepta ninguna oración subordinada', pt: 'Este período não aceita nenhuma oração subordinada', ja: 'この文はどの従属節も受け付けません',
+    },
+    'diagnostic.verbAcceptsNo.contentClause': {
+      en: 'This verb accepts no subordinate clause', it: 'Questo verbo non accetta nessuna proposizione subordinata', fr: "Ce verbe n'accepte aucune proposition subordonnée", de: 'Dieses Verb akzeptiert keinen untergeordneten Satz',
+      es: 'Este verbo no acepta ninguna oración subordinada', pt: 'Este verbo não aceita nenhuma oração subordinada', ja: 'この動詞はどの従属節も受け付けません',
+    },
+    'diagnostic.verbAcceptsNo.infinitive': {
+      en: 'This verb accepts no infinitive phrase', it: 'Questo verbo non accetta nessuna frase infinitiva', fr: "Ce verbe n'accepte aucune proposition infinitive", de: 'Dieses Verb akzeptiert keine Infinitivphrase',
+      es: 'Este verbo no acepta ninguna frase de infinitivo', pt: 'Este verbo não aceita nenhuma frase infinitiva', ja: 'この動詞はどの不定詞句も受け付けません',
+    },
     'diagnostic.noNounHasAdjective': {
       en: 'No noun has an adjective', it: 'Nessun sostantivo ha un aggettivo', fr: "Aucun nom n'a d'adjectif", de: 'Kein Substantiv hat ein Adjektiv',
       es: 'Ningún sustantivo tiene un adjetivo', pt: 'Nenhum substantivo tem um adjetivo', ja: 'どの名詞も形容詞がありません',
@@ -364,6 +377,14 @@ describe('the diagnostics, as the catalogue plans them', () => {
     'diagnostic.periodHasNo.join': {
       en: 'This period has no coordination', it: 'Questo periodo non ha nessuna coordinazione', fr: "Cette période n'a aucune coordination", de: 'Dieses Satzgefüge hat keine Koordination',
       es: 'Este período no tiene ninguna coordinación', pt: 'Este período não tem nenhuma coordenação', ja: 'この文はどの等位接続もありません',
+    },
+    'diagnostic.periodHasNo.subordinate': {
+      en: 'This period has no subordinate clause', it: 'Questo periodo non ha nessuna proposizione subordinata', fr: "Cette période n'a aucune proposition subordonnée", de: 'Dieses Satzgefüge hat keinen untergeordneten Satz',
+      es: 'Este período no tiene ninguna oración subordinada', pt: 'Este período não tem nenhuma oração subordinada', ja: 'この文はどの従属節もありません',
+    },
+    'diagnostic.periodHasObject': {
+      en: 'This period has an object', it: 'Questo periodo ha un complemento oggetto', fr: "Cette période a un complément d'objet", de: 'Dieses Satzgefüge hat ein Objekt',
+      es: 'Este período tiene un complemento', pt: 'Este período tem um objeto', ja: 'この文は目的語があります',
     },
     'diagnostic.periodHasNo.instrument': {
       en: 'This period has no instrumental', it: 'Questo periodo non ha nessun complemento di mezzo', fr: "Cette période n'a aucun complément de moyen", de: 'Dieses Satzgefüge hat keinen Instrumental',

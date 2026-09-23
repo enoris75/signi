@@ -1,6 +1,6 @@
 // Shared fixtures for the workspacePlan tests: hand-built concepts, and shorthands for periods and
 // the four kinds of link between them.
-import type { AbstractionLevel, Concept, CoordConjunction } from '@signi/shared';
+import type { AbstractionLevel, Concept, CoordConjunction, SubordinatingConjunction } from '@signi/shared';
 import type {
   NounAddress,
   NounKey,
@@ -22,6 +22,8 @@ export const SEE = concept('SEE', 'verb');
 export const SLEEP = concept('SLEEP', 'verb');
 export const CHOOSE = concept('CHOOSE', 'verb');
 export const START = concept('START', 'verb');
+export const SAY: Concept = { ...concept('SAY', 'verb'), clauseObject: 'content' };
+export const NEED: Concept = { ...concept('NEED', 'verb'), clauseObject: 'infinitive' };
 
 export const period = (id: string, selection: PhraseSelection): PhraseContainer => ({ id, selection });
 
@@ -54,6 +56,18 @@ export const coordinative = (
   source: { containerId: first },
   target: { containerId: second },
 });
+
+/** A subordinate clause (P09-E12 D9): `main`'s that-clause, adverbial clause or infinitive. */
+export const subordinate = (
+  id: string,
+  kind: 'content' | 'adverbial' | 'infinitive',
+  main: string,
+  clause: string,
+  conjunction: SubordinatingConjunction = 'when',
+): PhraseLink =>
+  kind === 'adverbial'
+    ? { id, kind, conjunction, source: { containerId: main }, target: { containerId: clause } }
+    : { id, kind, source: { containerId: main }, target: { containerId: clause } };
 
 export const instrumental = (id: string, clause: string, instrument: string, level?: AbstractionLevel): PhraseLink => ({
   id,

@@ -6,6 +6,7 @@ import {
   translateDeterminer,
   translatePossessive,
   translateSpecifier,
+  translateSubordinator,
   translateWord,
 } from '@signi/engine';
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
@@ -20,6 +21,7 @@ import type {
   UiStringPlanDef,
   UiStringPossessiveDef,
   UiStringSpecifierDef,
+  UiStringSubordinatorDef,
   UiStringWordDef,
 } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -36,6 +38,7 @@ vi.mock('@signi/engine', async (importOriginal) => {
     translate: vi.fn(engine.translate),
     translateWord: vi.fn(engine.translateWord),
     translateConjunction: vi.fn(engine.translateConjunction),
+    translateSubordinator: vi.fn(engine.translateSubordinator),
     translateDegree: vi.fn(engine.translateDegree),
     translateDeterminer: vi.fn(engine.translateDeterminer),
     translatePossessive: vi.fn(engine.translatePossessive),
@@ -72,6 +75,7 @@ const kindOf = (d: UiStringDef): string =>
   d.determiner !== undefined ? 'determiner'
   : d.possessive !== undefined ? 'possessive'
   : d.conjunction !== undefined ? 'conjunction'
+  : d.subordinator !== undefined ? 'subordinator'
   : d.specifier !== undefined ? 'specifier'
   : d.degree !== undefined ? 'degree'
   : d.word !== undefined ? 'word'
@@ -82,6 +86,7 @@ const byKind = {
   determiner: of<UiStringDeterminerDef>('determiner'),
   possessive: of<UiStringPossessiveDef>('possessive'),
   conjunction: of<UiStringConjunctionDef>('conjunction'),
+  subordinator: of<UiStringSubordinatorDef>('subordinator'),
   specifier: of<UiStringSpecifierDef>('specifier'),
   degree: of<UiStringDegreeDef>('degree'),
   word: of<UiStringWordDef>('word'),
@@ -92,7 +97,7 @@ const rendering = (text: (language: LanguageCode) => string): Translation[] =>
   LANGUAGE_CODES.map((language) => ({ language, text: text(language) }) as Translation);
 
 afterEach(() => {
-  const fns = [translate, translateWord, translateConjunction, translateDegree,
+  const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
     translateDeterminer, translatePossessive, translateSpecifier];
   for (const fn of fns) vi.mocked(fn).mockReset();
 });
@@ -125,6 +130,11 @@ describe('buildUiStrings', () => {
     for (const [, d] of byKind.conjunction) {
       // The one function word cited on nothing: a conjunction agrees with neither side.
       expect(translateConjunction).toHaveBeenCalledWith(d.conjunction);
+    }
+    expect(translateSubordinator).toHaveBeenCalledTimes(byKind.subordinator.length);
+    for (const [, d] of byKind.subordinator) {
+      // Its sibling (P09-E12 D9), cited on nothing either.
+      expect(translateSubordinator).toHaveBeenCalledWith(d.subordinator);
     }
     expect(translateSpecifier).toHaveBeenCalledTimes(byKind.specifier.length);
     for (const [, d] of byKind.specifier) {
@@ -220,7 +230,7 @@ describe('buildUiStrings', () => {
 
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
-    const fns = [translate, translateWord, translateConjunction, translateDegree,
+    const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
       translateDeterminer, translatePossessive, translateSpecifier];
     for (const fn of fns) vi.mocked(fn).mockReturnValue(rendered);
 
@@ -354,6 +364,18 @@ describe('buildUiStrings', () => {
       it: 'Clicca sul periodo che è la condizione in un altro contenitore di periodo.',
       ja: '文の別の容器で条件である文をクリック。',
     });
+    // P09-E12 D9: the subordinate-clause menu's words, as each engine cites them.
+    expect(strings['subordinator.value.after']).toEqual({
+      en: 'After', it: 'Dopo che', fr: 'Après que', de: 'Nachdem', es: 'Después de que', pt: 'Depois que', ja: '〜た後で',
+    });
+    expect(strings['subordinator.value.that']).toEqual({
+      en: 'That', it: 'Che', fr: 'Que', de: 'Dass', es: 'Que', pt: 'Que', ja: '〜と',
+    });
+    expect(strings['clause.subordinate']).toEqual({
+      en: 'Subordinate clause', it: 'Proposizione subordinata', fr: 'Proposition subordonnée', de: 'Untergeordneter Satz',
+      es: 'Oración subordinada', pt: 'Oração subordinada', ja: '従属節',
+    });
+    expect(strings['action.addSubordinate']).toMatchObject({ en: 'Add a subordinate clause', ja: '従属節を追加' });
     expect(strings['conjunction.kind.then']).toEqual({
       en: 'temporal',
       it: 'temporale',
