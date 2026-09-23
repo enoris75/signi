@@ -25,9 +25,29 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'chi' : 'che cosa' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
-  const gap = questionGapComplement(question, { base: question.animate ? 'chi' : 'che cosa' });
-  if (gap) return complementsPhrase(gap, {}, verb.conceptId, {}, verb.forms).replace(/\s+/g, ' ').trim();
+  const gap = gapText(question, verb);
+  if (gap) return gap.replace(SOURCE_PARTICLE, '');
   const word = question.animate ? 'chi' : 'che cosa';
   const prep = question.role === 'directObject' ? objectPreposition(verb) : '';
   return prep ? `${prep} ${word}` : word;
+}
+
+// The ablative particle a source takes under a self-propelled motion verb, or over a person under a
+// verb that takes a goal (see `complementsPhrase`): "corre via dalla casa", "viene via dalla donna".
+const SOURCE_PARTICLE = /^via /;
+
+function gapText(question: ResolvedQuestion, verb: ConceptForms): string {
+  const gap = questionGapComplement(question, { base: question.animate ? 'chi' : 'che cosa' });
+  return gap ? complementsPhrase(gap, {}, verb.conceptId, {}, verb.forms).replace(/\s+/g, ' ').trim() : '';
+}
+
+/**
+ * The particle a question's gap leaves behind the verb (A276): the ablative *via* of a source,
+ * which belongs to the verb (*venire via*, *correre via*), so the fronted *da*-phrase goes without it
+ * and the particle stays where the statement writes it: "da chi viene via il gatto?". Empty for any
+ * other gap, and for the adverb *da dove*, which takes none.
+ */
+export function questionParticle(question: ResolvedQuestion, verb: ConceptForms): string {
+  if (question.role !== 'source' || questionAdverbial(question)) return '';
+  return SOURCE_PARTICLE.test(gapText(question, verb)) ? 'via' : '';
 }

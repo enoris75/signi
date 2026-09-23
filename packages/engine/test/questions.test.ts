@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { PhrasePlan, Specifier } from '@signi/shared';
-import { clause, np, sayAll, translateAll } from './harness.js';
+import { clause, np, say, sayAll, translateAll } from './harness.js';
 
 // A wh-question is a clause with a gap (PhrasePlan.questionRole, P09-E6): the slot it asks about is
 // left out of the plan, as a relative clause leaves its head's slot out, and the question word stands
@@ -686,11 +686,26 @@ describe('wh-questions: not built yet', () => {
 // but an animate source question fronts the whole complement, the particle with it. It should stay
 // behind the verb, as a phrasal verb's particle does.
 describe('known bugs: an Italian animate source question fronts the ablative via (A276)', () => {
-  test.fails.each([
+  test.each([
     ['COME', 'da chi viene via il gatto?'],
     ['RUN', 'da chi corre via il gatto?'],
     ['GO', 'da chi va via il gatto?'],
   ])('%s', (verb, want) => {
     expect(sayAll(about(clause(np('CAT'), verb), 'source', undefined, true)).it).toBe(want);
+  });
+
+  test('the embedded question (P09-E17) leaves it behind the verb too', () => {
+    const from = (verb: string) =>
+      ({ subject: np('CAT'), verbPhrase: { verb }, questionRole: 'source', questionAnimate: true }) as const;
+    const comes = from('COME');
+    const runs = from('RUN');
+    expect(say(clause(np('MAN'), 'ASK', { contentObject: comes }), 'it')).toBe("l'uomo chiede da chi viene via il gatto.");
+    expect(say(clause(np('MAN'), 'KNOW', { contentObject: runs }), 'it')).toBe("l'uomo sa da chi corre via il gatto.");
+  });
+
+  test('regression: the inanimate source is the adverb da dove, with no particle, and the statement keeps its via', () => {
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'source')).it).toBe('da dove corre il gatto?');
+    expect(sayAll(about(clause(np('CAT'), 'COME'), 'source')).it).toBe('da dove viene il gatto?');
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('WOMAN') } } })).it).toBe('il gatto viene via dalla donna.');
   });
 });

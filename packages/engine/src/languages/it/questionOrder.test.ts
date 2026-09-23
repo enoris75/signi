@@ -25,4 +25,9 @@ describe('questionOrder (it)', () => {
     expect(questionOrder({ role: 'manner', animate: false }, 'il gatto', 'è', verb)).toEqual(["com'è il gatto", '']);
     expect(questionOrder({ role: 'locative', animate: false }, 'il gatto', 'era', verb)).toEqual(['dove', 'era il gatto']);
   });
+
+  test('a source question leaves its via behind the verb (A276)', () => {
+    expect(questionOrder({ role: 'source', animate: true }, 'il gatto', 'viene', verb)).toEqual(['da chi', 'viene via il gatto']);
+    expect(questionOrder({ role: 'source', animate: false }, 'il gatto', 'viene', verb)).toEqual(['da dove', 'viene il gatto']);
+  });
 });

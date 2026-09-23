@@ -1,5 +1,5 @@
 import type { ConceptForms, ResolvedQuestion } from '../../types.js';
-import { questionWord } from './questionWord.js';
+import { questionParticle, questionWord } from './questionWord.js';
 
 /**
  * The subject and the predicate of an Italian clause in the order a wh-question puts them (P09-E6),
@@ -23,6 +23,7 @@ export function questionOrder(
   if (question.role === 'possessor' && question.possessed !== 'directObject') return [subject, predicate];
   const word = fronted ?? questionWord(question, verb);
   if (question.role === 'subject') return [word, predicate];
-  const body = [predicate, subject].filter(Boolean).join(' ');
+  // A source's ablative *via* stays behind the verb, where the statement has it (A276).
+  const body = [predicate, fronted ? '' : questionParticle(question, verb), subject].filter(Boolean).join(' ');
   return (word === 'dove' || word === 'come') && /^è( |$)/.test(body) ? [`${word.slice(0, -1)}'${body}`, ''] : [word, body];
 }

@@ -33,3 +33,23 @@ Pinned by `known bugs: an Italian animate source question fronts the ablative vi
 [questions.test.ts](../../../packages/engine/test/questions.test.ts).
 
 Found by P09-E15's lane on 2026-09-23.
+
+## Resolved
+
+2026-09-23. The Italian `questionWord` now renders a source gap without the ablative particle
+(`da chi`), and the new `questionParticle` gives the *via* the statement would write
+(`SOURCE_ABLATIVE_ADVERB_VERBS`, or an animate source under a verb that takes a direction), which
+`questionOrder` writes right after the predicate: `da chi viene via il gatto?`, `da chi corre via il
+gatto?`, `da chi va via il gatto?`. The embedded question goes through the same order: `l'uomo chiede
+da chi viene via il gatto.` A verb with no goal (A228) takes no particle, as its statement takes none.
+
+**Settled:** RUN's inanimate source question stays `da dove corre il gatto?`, with no *via*
+(ruled 2026-09-23): the adverb *da dove* takes no particle, and `questionParticle` returns none for it.
+
+- Engine: [questionWord.ts](../../../packages/engine/src/languages/it/questionWord.ts),
+  [questionOrder.ts](../../../packages/engine/src/languages/it/questionOrder.ts).
+- Tests: `known bugs: an Italian animate source question fronts the ablative via (A276)` in
+  [questions.test.ts](../../../packages/engine/test/questions.test.ts) — its three `test.fails.each`
+  rows flipped, plus the embedded question and a guard on *da dove* and the statement; unit cases in
+  [questionWord.test.ts](../../../packages/engine/src/languages/it/questionWord.test.ts) and
+  [questionOrder.test.ts](../../../packages/engine/src/languages/it/questionOrder.test.ts).
