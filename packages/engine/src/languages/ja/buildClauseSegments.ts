@@ -59,7 +59,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   const asked = phrase.question;
   const copula = phrase.verbPhrase.verb.forms['copula'] === '1';
   const askedNoun = asked ? questionNoun(asked, copula) : undefined;
-  const askedSlot = asked?.role === 'locative' ? 'locative' : asked?.role === 'manner' ? 'predicative' : undefined;
+  // A complement gap puts its word in the complement's own slot, in its relation (P09-E15); the
+  // copula's manner puts どう in the predicate's.
+  const askedSlot = asked?.role === 'manner' ? 'predicative'
+    : asked && asked.role !== 'subject' && asked.role !== 'directObject' && asked.role !== 'possessor' ? asked.role : undefined;
   // An imperative drops its subject/topic; the subject's person still selects the form. An
   // infinitive citation (「食物を消費する」) is likewise subject-less on the surface.
   const imperative = phrase.verbPhrase.mood === 'imperative';
@@ -172,7 +175,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     suffixCausative ? phrase.infinitiveComplement?.directObject : causee ? undefined
       : phrase.directObject ?? (asked?.role === 'directObject' ? askedNoun : undefined),
     // A nominalized clause is plain, as a prenominal one is (行動する, not 行動します).
-    askedSlot && askedNoun ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun } } : phrase.complements,
+    askedSlot && askedNoun
+      ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun, ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}) } }
+      : phrase.complements,
     impPN, plain,
     subjectNegative || causeeNegative, animate,
   ));

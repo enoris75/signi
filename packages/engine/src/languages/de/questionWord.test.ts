@@ -25,3 +25,25 @@ describe('questionWord (de)', () => {
     expect(questionWord({ role: 'cause', animate: false }, verb())).toBe('warum');
   });
 });
+
+describe('questionWord (de): complement gaps (P09-E15)', () => {
+  test('a thing is the wo(r)- compound where German has one, the preposition over was where not', () => {
+    expect(questionWord({ role: 'locative', animate: false, specifiers: [{ kind: 'path', value: 'under' }] }, verb())).toBe('worunter');
+    expect(questionWord({ role: 'instrumental', animate: false }, verb())).toBe('womit');
+    expect(questionWord({ role: 'cause', animate: false, specifiers: [{ kind: 'sentiment', value: 'positive' }] }, verb())).toBe('dank was');
+  });
+
+  test('a person is the preposition over wer in its case, or the bare dative', () => {
+    expect(questionWord({ role: 'cause', animate: true, specifiers: [{ kind: 'sentiment', value: 'positive' }] }, verb())).toBe('dank wem');
+    expect(questionWord({ role: 'comitative', animate: true }, verb())).toBe('mit wem');
+    expect(questionWord({ role: 'terminus', animate: true }, verb())).toBe('wem');
+  });
+
+  test('the negative cause is durch wessen Schuld, and the plain relations adverbs', () => {
+    expect(questionWord({ role: 'cause', animate: true, specifiers: [{ kind: 'sentiment', value: 'negative' }] }, verb())).toBe('durch wessen Schuld');
+    expect(questionWord({ role: 'direction', animate: false }, verb())).toBe('wohin');
+    expect(questionWord({ role: 'source', animate: false }, verb())).toBe('woher');
+    expect(questionWord({ role: 'temporal', animate: false }, verb())).toBe('wann');
+    expect(questionWord({ role: 'temporal', animate: false, specifiers: [{ kind: 'temporal', value: 'until' }] }, verb())).toBe('bis wann');
+  });
+});

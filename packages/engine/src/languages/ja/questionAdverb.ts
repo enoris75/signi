@@ -1,4 +1,5 @@
 import type { ResolvedQuestion, RubySegment } from '../../types.js';
+import { questionAdverbial } from '../../functions/questionAdverbial.js';
 
 /**
  * The Japanese question word of an adverbial gap (P09-E6): どうやって for the manner — "by doing
@@ -9,6 +10,9 @@ import type { ResolvedQuestion, RubySegment } from '../../types.js';
  */
 export function questionAdverb(question: ResolvedQuestion | undefined, copula = false): RubySegment[] {
   if (question?.role === 'manner') return copula ? [] : [{ t: 'どうやって' }];
-  if (question?.role === 'cause') return [{ t: 'なぜ' }];
+  if (question?.role === 'cause' && questionAdverbial(question) === 'why') return [{ t: 'なぜ' }];
+  // A plain *when* takes no particle: 猫はいつ食べますか (P09-E15); *until when* is the noun いつ in the
+  // temporal's slot (いつまで, see `questionNoun`).
+  if (questionAdverbial(question) === 'when') return [{ t: 'いつ' }];
   return [];
 }

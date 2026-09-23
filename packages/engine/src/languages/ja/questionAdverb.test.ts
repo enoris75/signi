@@ -14,3 +14,11 @@ describe('questionAdverb', () => {
     expect(questionAdverb({ role: 'cause', animate: false }, true)).toEqual([{ t: 'なぜ' }]);
   });
 });
+
+describe('questionAdverb: time (P09-E15)', () => {
+  test('a plain when is いつ, with no particle; until when is questionNoun\'s', () => {
+    expect(questionAdverb({ role: 'temporal', animate: false })).toEqual([{ t: 'いつ' }]);
+    expect(questionAdverb({ role: 'temporal', animate: false, specifiers: [{ kind: 'temporal', value: 'until' }] })).toEqual([]);
+    expect(questionAdverb({ role: 'cause', animate: true, specifiers: [{ kind: 'sentiment', value: 'negative' }] })).toEqual([]);
+  });
+});

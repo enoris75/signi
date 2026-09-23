@@ -13,7 +13,7 @@ import { mannerGloss } from './mannerGloss.js';
 import { npText } from './npText.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { predicateParts } from './predicateParts.js';
-import { questionWord } from './questionWord.js';
+import { questionWord, strandedGap } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 
@@ -68,17 +68,21 @@ export function renderClause(given: ResolvedPhrase): string {
   const inverts = !!phrase.verbPhrase.interrogative && !subjectAsked;
   const verbPhrase = inverts || !phrase.verbPhrase.interrogative ? phrase.verbPhrase : { ...phrase.verbPhrase, interrogative: false };
   const agreement = inverts ? subject.invertedAgreement ?? subject.agreement : subject.agreement;
-  const parts = predicateParts(agreement, verbPhrase, objectPossessed ? undefined : phrase.directObject, phrase.complements,
+  // A complement question strands its preposition in the complement's own slot: "what does the cat
+  // eat under?", "who does the man give the book to?" (P09-E15, see `strandedGap`).
+  const stranding = strandedGap(gap);
+  const parts = predicateParts(agreement, verbPhrase, objectPossessed ? undefined : phrase.directObject,
+    stranding ? { ...phrase.complements, ...stranding } : phrase.complements,
     subject.agreement['definiteness'] === 'no', phrase.agent);
   // A question puts the finite auxiliary before the subject: "is the server active?". A wh-question
   // fronts its word ahead of that — "what does the cat eat?", "why does the cat eat?" — and a verb
   // that takes its object with a preposition strands it: "what does the cat click on?".
   const fronted = objectPossessed ? npText(firstConjunct(objectPossessed)) : gap && !subjectAsked ? questionWord(gap) : '';
   const stranded = gap?.role === 'directObject' || objectPossessed ? objectPreposition(phrase.verbPhrase.verb) : '';
-  const clause = [fronted, ...(inverts ? invertSubject(subj, parts) : [subj, ...parts]), stranded]
-    .filter(Boolean)
-    .join(' ')
-    .trim();
+  // A stranded complement's empty stand-in leaves its preposition a trailing space, which the
+  // collapse below closes up: "what does the man cut the book with in the house?" (P09-E15).
+  const joined = [fronted, ...(inverts ? invertSubject(subj, parts) : [subj, ...parts]), stranded].filter(Boolean).join(' ');
+  const clause = (stranding ? joined.replace(/ {2,}/g, ' ') : joined).trim();
   // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
   const withContent = contentSubject ? `${clause} that ${renderClause(contentSubject)}` : clause;

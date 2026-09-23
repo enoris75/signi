@@ -327,14 +327,24 @@ export interface ResolvedComplement {
 }
 
 /**
- * A wh-question's gap, resolved (see ResolvedPhrase.question). `role` is narrowed to the slots that
- * have a question word — who/what, where, how and why, and *whose* (P09-E14); the translator refuses
- * the rest.
+ * A wh-question's gap, resolved (see ResolvedPhrase.question): a clause slot (P09-E6), the possessor
+ * inside one (P09-E14), or a complement in its relation (P09-E15). The translator refuses the gaps
+ * that have no question here — the predicates, the purpose, most temporal relations.
  */
 export interface ResolvedQuestion {
-  role: 'subject' | 'directObject' | 'possessor' | 'locative' | 'manner' | 'cause';
-  /** *who* rather than *what*; read on a subject or direct-object gap only, and always true on a possessor gap. */
+  role: 'subject' | 'directObject' | 'possessor' | ComplementType;
+  /**
+   * *who* rather than *what*: read on a subject, direct-object or complement gap, where it also
+   * decides between an adverb and the complement path (`questionAdverbial`: "where does the cat come
+   * from?" against "who does the cat come from?"); always true on a possessor gap and on a negative
+   * cause ("through whose fault?").
+   */
   animate: boolean;
+  /**
+   * The gapped complement's relation, as `PhrasePlan.questionSpecifiers` gave it (P09-E15): what
+   * `questionAdverbial` and `questionGapComplement` read, so that "under what?" keeps its *under*.
+   */
+  specifiers?: Specifier[];
   /**
    * The slot whose noun a `'possessor'` gap sits in (P09-E14). That slot is **not** gapped: it is in
    * the phrase, and its (single) conjunct's `possessor` is the question stand-in (`questionPossessor`),

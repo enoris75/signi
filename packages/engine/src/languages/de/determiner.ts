@@ -1,4 +1,5 @@
 import type { Case } from './de.types.js';
+import { questionPronoun } from './questionPronoun.js';
 import { defArticle } from './defArticle.js';
 import { demForm } from './demForm.js';
 import { indefArticle } from './indefArticle.js';
@@ -23,6 +24,10 @@ export function determiner(forms: Record<string, string>, _case: Case, plural: b
   if (definiteness === 'definite') return defArticle(forms, _case, plural);
   // The relativizer stand-in of a complement relative (see `relativeGapComplement`): "in dem", "mit denen".
   if (definiteness === 'relative') return relativePronoun(forms, _case, plural);
+  // The question stand-in of a complement question (see `questionGapComplement`, P09-E15): *wer*
+  // declined for a person — "mit wem", "über wen", the bare dative "wem" — and *was* for a thing,
+  // which does not decline ("dank was"); a thing's compound with the preposition is `woCompound`'s.
+  if (definiteness === 'question') return questionPronoun(forms, _case);
   const gender = forms['gender'] ?? 'neut';
   // Mass nouns ("Wasser") stay singular and take the invariant mass quantifiers
   // "etwas / viel / wenig"; "all das Wasser"; no indefinite article.
