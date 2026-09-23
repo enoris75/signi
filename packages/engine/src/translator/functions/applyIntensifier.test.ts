@@ -9,7 +9,11 @@ const LEX: Record<string, Record<string, Record<string, string>>> = {
     ja: { base: 'とても', comparative: 'ずっと', comparative_degrees: 'more', drop_degrees: 'equally' },
     it: { base: 'molto' },
   },
-  TOO: { en: { base: 'too' }, pt: { base: 'demais', position: 'post' }, ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる' } },
+  TOO: {
+    en: { base: 'too', comparative: 'too much' },
+    pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
+    ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる', comparative: 'すぎる', comparative_degrees: 'more' },
+  },
   MUTE: { en: {} },
 };
 const lookup = (id: string, language: string) => {
@@ -98,5 +102,23 @@ describe('applyIntensifier', () => {
     const more = adj('more');
     applyIntensifier(more, 'VERY', 'en', lookup, true);
     expect(more.forms['intensifier']).toBe('much');
+  });
+
+  // A256: a degree word may name a position of its own, and a suffix keeps its place.
+  test('a comparative word takes its own position, falling back to the lexeme\'s', () => {
+    const pt = adj('more');
+    applyIntensifier(pt, 'TOO', 'pt', lookup);
+    expect(pt.forms['intensifier']).toBe('demasiado');
+    expect(pt.forms['intensifier_position']).toBe('pre');
+    const positive = adj();
+    applyIntensifier(positive, 'TOO', 'pt', lookup);
+    expect(positive.forms['intensifier_position']).toBe('post');
+    const ja = adj('more');
+    applyIntensifier(ja, 'TOO', 'ja', lookup);
+    expect(ja.forms['intensifier_position']).toBe('suffix');
+    expect(ja.forms['intensifier_comparative']).toBe('1');
+    const en = adj('less');
+    applyIntensifier(en, 'TOO', 'en', lookup);
+    expect(en.forms['intensifier']).toBe('too much');
   });
 });

@@ -696,15 +696,21 @@ export const adverbs: ConceptSeed[] = [
     slot: 'intensifier',
     description: 'to a degree that is more than is wanted',
     emoji: '🔝',
+    // On a comparative TOO says the difference is excessive — "too much bigger", "zu viel größer" —
+    // TOO on the comparative's own intensifier (A256). Italian and Spanish already say it with the
+    // plain word ("troppo più grande", "demasiado más grande"); Portuguese's postposed *demais*
+    // belongs to the positive, and a comparative takes the preposed *demasiado*; Japanese keeps
+    // 〜すぎる and drops もっと under it (大きすぎる), as its standard already does. French has no
+    // settled form and keeps "trop plus grand".
     forms: {
-      en: { base: 'too' },
+      en: { base: 'too', comparative: 'too much' },
       it: { base: 'troppo' },
       fr: { base: 'trop' },
-      de: { base: 'zu' },
+      de: { base: 'zu', comparative: 'zu viel' },
       es: { base: 'demasiado' },
       // Not a word before the adjective: the ichidan suffix 〜すぎる on its stem.
-      ja: { base: 'すぎる', position: 'suffix' },
-      pt: { base: 'demais', position: 'post' },
+      ja: { base: 'すぎる', position: 'suffix', comparative: 'すぎる', comparative_degrees: 'more' },
+      pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
     },
   },
 ];

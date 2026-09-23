@@ -47,3 +47,23 @@ Pinned by `known bugs: TOO on a comparative (A256)` in
 [intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts).
 
 Found fixing A248, the intensifier on a comparative.
+
+## Resolved
+
+2026-09-23. TOO's lexeme names its comparative word the way VERY's does (A248), in
+[adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts): en *too much*, de *zu viel*, pt
+*demasiado* with `comparative_position: 'pre'` (A255 let a degree word name its own position, read by
+[`applyIntensifier`](../../../packages/engine/src/translator/functions/applyIntensifier.ts)), and ja
+*すぎる* itself, narrowed to `more`, so it stays the suffix but marks `intensifier_comparative` and
+[`jaDegreeAdverb`](../../../packages/engine/src/languages/ja/jaDegreeAdverb.ts) drops もっと under it.
+Italian and Spanish name none and keep *troppo più grande* / *demasiado más grande*. **French is left
+as it was** (`le chat est trop plus grand.`), unpinned, until a target is decided. The A248 regression
+line only pins that TOO does not turn into VERY's *much*. TOO on a superlative remains a product
+question, not fixed here.
+
+Guarded by the two formerly-`.fails` tests in `known bugs: TOO on a comparative (A256)` in
+[intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts), plus new cases there (the
+predicate and attributive comparative in the six pinned languages, the lowered comparative with a
+standard, the plural attributive, an inflecting comparative under *estar*, and a regression that the
+Japanese lowered degree keeps それほど under すぎる), and colocated units in `applyIntensifier.test.ts`
+and `jaDegreeAdverb.test.ts`.

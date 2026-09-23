@@ -219,7 +219,7 @@ describe('known bugs: an intensifier on a comparative (A248)', () => {
   });
 
   // Japanese's lowered degree is a negation, not a comparative, so VERY does not turn to ずっと there; and TOO
-  // does not turn into VERY's comparative word (TOO on a comparative is A256's own).
+  // does not turn into VERY's comparative word (it takes its own, "too much", A256).
   test('regression: Japanese lowered degree and TOO keep their positive word', () => {
     expect(isBigger({ headDegree: 'less' }).ja).not.toContain('ずっと');
     expect(isBigger({ headIntensifier: 'TOO' }).en).not.toBe('the cat is much bigger.');
@@ -318,14 +318,14 @@ describe('known bugs: VERY on an equative (A255)', () => {
 // drops もっと under すぎる as the standard's より already makes it (犬より大きすぎる). French has no
 // settled form ("trop plus grand" is colloquial at best) and is left out of the pin.
 describe('known bugs: TOO on a comparative (A256)', () => {
-  test.fails('a predicate comparative: too much bigger', () => {
+  test('a predicate comparative: too much bigger', () => {
     expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
       en: 'the cat is too much bigger.', de: 'der Kater ist zu viel größer.',
       ja: '猫は大きすぎます。', pt: 'o gato é demasiado maior.',
     });
   });
 
-  test.fails('with a standard, attributively, and lowered', () => {
+  test('with a standard, attributively, and lowered', () => {
     expect(isBig({ headDegree: 'more', headIntensifier: 'TOO', headStandard: np('DOG') })).toMatchObject({
       en: 'the cat is too much bigger than the dog.', de: 'der Kater ist zu viel größer als der Hund.',
       pt: 'o gato é demasiado maior do que o cão.',
@@ -334,6 +334,39 @@ describe('known bugs: TOO on a comparative (A256)', () => {
     expect(isBig({ headDegree: 'less', headIntensifier: 'TOO' })).toMatchObject({
       en: 'the cat is too much less big.', de: 'der Kater ist zu viel weniger groß.', pt: 'o gato é demasiado menos grande.',
     });
+  });
+
+  test('the whole predicate, attributive and with-a-standard comparative, French aside', () => {
+    expect(isBig({ headDegree: 'more', headIntensifier: 'TOO' })).toMatchObject({
+      en: 'the cat is too much bigger.', it: 'il gatto è troppo più grande.', de: 'der Kater ist zu viel größer.',
+      es: 'el gato es demasiado más grande.', ja: '猫は大きすぎます。', pt: 'o gato é demasiado maior.',
+    });
+    expect(aBigCat('more', 'TOO')).toMatchObject({
+      en: 'a too much bigger cat runs.', it: 'un gatto troppo più grande corre.', de: 'ein zu viel größerer Kater läuft.',
+      es: 'un gato demasiado más grande corre.', ja: '大きすぎる猫は走ります。', pt: 'um gato demasiado maior corre.',
+    });
+    expect(isBig({ headDegree: 'less', headIntensifier: 'TOO', headStandard: np('DOG') })).toMatchObject({
+      en: 'the cat is too much less big than the dog.', de: 'der Kater ist zu viel weniger groß als der Hund.',
+      pt: 'o gato é demasiado menos grande do que o cão.',
+    });
+  });
+
+  test('the comparative still agrees, and inflects, under the preposed demasiado', () => {
+    expect(sayAll(clause(np('CAT', {
+      number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveIntensifiers: ['TOO'],
+    }), 'RUN'))).toMatchObject({
+      en: 'too much bigger cats run.', de: 'zu viel größere Kater laufen.', pt: 'uns gatos demasiado maiores correm.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY', { headDegree: 'more', headIntensifier: 'TOO' }) } } }))).toMatchObject({
+      en: 'the cat is too much happier.', de: 'der Kater ist zu viel glücklicher.', ja: '猫は幸せすぎます。',
+      pt: 'o gato está demasiado mais feliz.',
+    });
+  });
+
+  // The Japanese lowered degree is a negation (それほど大きくない), not a comparative, so もっと's rule
+  // does not reach it and 〜すぎる negates with the adjective as before.
+  test('regression: the Japanese lowered degree keeps its adverb under すぎる', () => {
+    expect(isBig({ headDegree: 'less', headIntensifier: 'TOO' }).ja).toBe('猫はそれほど大きすぎないです。');
   });
 
   test('regression: Italian, Spanish and the Japanese standard already say it', () => {
