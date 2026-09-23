@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { clause, np, vp, NEKO } from './ja.fixtures.js';
+import { clause, modal, np, vp, HITSUYOU_GA_ARU, KOTO_GA_DEKIRU, NEKO } from './ja.fixtures.js';
 import { shapeAdverbialClause } from './shapeAdverbialClause.js';
 
 const TABERU = { base: '食べる', reading: 'たべる' };
@@ -28,5 +28,17 @@ describe('shapeAdverbialClause', () => {
   test('a clause with an aspect of its own keeps it under while', () => {
     const { clause: shaped } = shapeAdverbialClause({ conjunction: 'while', clause: eats({ aspect: 'resultative' }) });
     expect(shaped.verbPhrase?.aspect).toBe('resultative');
+  });
+
+  // A259: a modal is a state already, which 間に measures as it is.
+  test('a clause under a modal takes no progressive under while, and keeps an aspect of its own', () => {
+    for (const m of [HITSUYOU_GA_ARU, KOTO_GA_DEKIRU]) {
+      const { clause: shaped, word } = shapeAdverbialClause({ conjunction: 'while', clause: eats({ tense: 'past', modals: [modal(m)] }) });
+      expect([shaped.verbPhrase?.aspect, shaped.verbPhrase?.tense, word]).toEqual([undefined, 'present', '間に']);
+    }
+    const { clause: own } = shapeAdverbialClause({
+      conjunction: 'while', clause: eats({ aspect: 'resultative', modals: [modal(HITSUYOU_GA_ARU)] }),
+    });
+    expect(own.verbPhrase?.aspect).toBe('resultative');
   });
 });

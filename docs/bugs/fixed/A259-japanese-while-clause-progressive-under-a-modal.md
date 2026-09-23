@@ -31,3 +31,15 @@ Pinned by `known bugs: a Japanese while clause puts a modal's verb in the progre
 [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts).
 
 Found fixing A250, the past *while* clause.
+
+## Resolved
+
+2026-09-23. [`shapeAdverbialClause`](../../../packages/engine/src/languages/ja/shapeAdverbialClause.ts)
+adds *while*'s progressive only when the clause has no modal; the non-past it sets is unchanged, and a
+clause's own aspect is still left alone (under a modal it lands on the governed verb, as B07 has it).
+The two pins in [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts) are
+plain tests now, joined by cases for the present CAN, SHOULD, MAY, a MUST+CAN chain, the modal's and
+the verb's own negation, a future clause, the plain present and future (still 〜ている), and a modal
+clause's own progressive and resultative. The colocated
+[`shapeAdverbialClause.test.ts`](../../../packages/engine/src/languages/ja/shapeAdverbialClause.test.ts)
+pins the shaping for MUST and CAN.

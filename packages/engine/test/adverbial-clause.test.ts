@@ -386,20 +386,48 @@ describe('known bugs: an Iberian future temporal clause takes the future indicat
 
 // A259. Japanese *while* puts its clause in 〜ている (`JA_SUBORDINATORS`, `shapeAdverbialClause`), the
 // stretch of time 間に measures, by setting the clause's aspect to progressive. Under a modal that
-// aspect lands on the governed verb, so the clause says "while the cat needs to be eating"
+// aspect landed on the governed verb, so the clause said "while the cat needs to be eating"
 // (食べている必要がある間) where the plan said "while the cat had to eat". 必要がある and ことができる are
 // states already, a stretch 間に can measure: 食べる必要がある間に, 食べることができる間に.
 describe('known bugs: a Japanese while clause puts a modal\'s verb in the progressive (A259)', () => {
   const whileModal = (tense: 'past' | 'present', modal: string) =>
     say(runs('while', { verbPhrase: { verb: 'RUN', tense } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense, modals: [modal] } }), 'ja');
 
-  test.fails('MUST: 猫が食べる必要がある間に', () => {
+  test('MUST: 猫が食べる必要がある間に', () => {
     expect(whileModal('past', 'MUST')).toBe('男は猫が食べる必要がある間に走りました。');
     expect(whileModal('present', 'MUST')).toBe('男は猫が食べる必要がある間に走ります。');
   });
 
-  test.fails('CAN: 猫が食べることができる間に', () => {
+  test('CAN: 猫が食べることができる間に', () => {
     expect(whileModal('past', 'CAN')).toBe('男は猫が食べることができる間に走りました。');
+  });
+
+  test('the other modals, a chain of two, and either negation take no 〜ている either', () => {
+    expect(whileModal('present', 'CAN')).toBe('男は猫が食べることができる間に走ります。');
+    expect(whileModal('past', 'SHOULD')).toBe('男は猫が食べるべきである間に走りました。');
+    expect(whileModal('past', 'MAY')).toBe('男は猫が食べることが許される間に走りました。');
+    const cat = (verbPhrase: NonNullable<PhrasePlan['verbPhrase']>) =>
+      say(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, { subject: np('CAT'), verbPhrase }), 'ja');
+    expect(cat({ verb: 'EAT', tense: 'past', modals: ['MUST', 'CAN'] })).toBe('男は猫が食べることができる必要がある間に走りました。');
+    expect(cat({ verb: 'EAT', tense: 'past', modals: [{ verb: 'MUST', negative: true }] })).toBe('男は猫が食べる必要がない間に走りました。');
+    expect(cat({ verb: 'EAT', tense: 'past', modals: ['MUST'], negative: true })).toBe('男は猫が食べない必要がある間に走りました。');
+  });
+
+  test('a future while clause under a modal, and a plain present or future one, which keeps 〜ている', () => {
+    const w = (tense: 'present' | 'future', modals?: string[]) =>
+      say(runs('while', { verbPhrase: { verb: 'RUN', tense } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense, modals } }), 'ja');
+    expect(w('future', ['MUST'])).toBe('男は猫が食べる必要がある間に走ります。');
+    expect(w('present')).toBe('男は猫が食べている間に走ります。');
+    expect(w('future')).toBe('男は猫が食べている間に走ります。');
+  });
+
+  // The fix withholds only the progressive while adds; a clause's own aspect still lands on the
+  // governed verb, as B07 has it everywhere else.
+  test('a modal clause keeps an aspect of its own', () => {
+    const own = (aspect: 'progressive' | 'resultative') =>
+      say(runs('while', { verbPhrase: { verb: 'RUN', tense: 'past' } }, { subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'past', aspect, modals: ['MUST'] } }), 'ja');
+    expect(own('progressive')).toBe('男は猫が食べている必要がある間に走りました。');
+    expect(own('resultative')).toBe('男は猫が食べている必要がある間に走りました。');
   });
 
   test('regression: a plain while clause, a modal under when, and the European languages', () => {
