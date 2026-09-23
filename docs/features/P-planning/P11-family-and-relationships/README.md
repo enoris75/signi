@@ -382,10 +382,18 @@ through a feature task.
 **No task, by design:**
 
 - **Half- and step-siblings, step-children, great-grandparents, godparents, *ex-*; MARRIED, SINGLE,
-  DIVORCE, BE_BORN, RAISE_CHILD; British *Mum*.** Seeding. Verified unseeded in the working tree on
-  2026-09-23 — MARRIED, SINGLE, DIVORCE, BE_BORN, RAISE_CHILD, GODPARENT, GREAT_GRANDFATHER and
-  HALF_BROTHER are all absent, and each is a `/seed` away once someone wants it. *Mum* waits on
-  F3's name half.
+  DIVORCE, BE_BORN, RAISE_CHILD; British *Mum*.** Seeding, and none of them was ever a §4 row —
+  verified absent on 2026-09-23 (MARRIED, SINGLE, DIVORCE, BE_BORN, RAISE_CHILD, GODPARENT,
+  GREAT_GRANDFATHER, HALF_BROTHER). **Three already carry a recorded verdict**, so whoever seeds
+  them should start there rather than from this line:
+  [B70](../../../localization/done/B70-spouses-and-marriage.md) on MARRIED, SINGLE and DIVORCE
+  (nothing in the batch needed them, and BOYFRIEND shipped on the sex adjective instead of on
+  MARRIED); [B71](../../../localization/done/B71-grandparents-and-grandchildren.md) on
+  great-grandparents (曽祖父 and the Japanese generation counters — the genitive chains for them with
+  no new construct); and
+  [B73](../../../localization/done/B73-in-laws-and-step-parents.md) on half- and step-siblings, which
+  says to settle Italian *fratellastro* — both the half- and the step-brother — before seeding either.
+  *Mum* waits on F3's name half.
 - **The Russian and Ukrainian in-law split** (свекровь / тёща). This plan already says to decide it
   when [P06](../P06-russian/README.md) lands, and that is still right: the fusion it would need is
   keyed on a possessor no other language reads.
