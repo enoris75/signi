@@ -1074,6 +1074,20 @@ export interface NounGroup {
   /** At least two — a lone phrase is not a group, it is a `NounPhrase` (see `NounElement`). */
   conjuncts: NounPhrase[];
   conjunction: CoordConjunction;
+  /**
+   * A **correlative** before the first conjunct, announcing the second: "**both** the cat **and** the
+   * dog run" (P09-E26). Five of the six other languages replace the plain *and* with a two-part word
+   * — *sia … sia*, *et … et*, *sowohl … als auch*, *tanto … como*, *tanto … quanto* — and Japanese
+   * writes も after every conjunct in place of と and of the topic は (猫も犬も走ります), as the focus
+   * particle *also* (C39) does.
+   *
+   * Valid with `and` only, and on **two** conjuncts only: *sia A sia B sia C* stretches awkwardly,
+   * so on three or more — or on `or` — the flag is ignored and the plain coordination renders.
+   * *Either … or* (the same field on `or`) and *neither … nor* are follow-ups. Japanese honours it on
+   * a slot its も can replace the particle of (subject, object); a complement keeps its plain と.
+   * Plan-only: no builder control sets it yet.
+   */
+  correlative?: true;
 }
 
 /**

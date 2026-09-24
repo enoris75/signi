@@ -15,6 +15,17 @@ const REPLACED_BY_MO: ReadonlySet<string> = new Set(['', 'が', 'を', 'は']);
 const FOCUS_PARTICLE: Record<FocusParticle, string> = { only: 'だけ', even: 'さえ', also: 'も' };
 
 /**
+ * Whether a slot spells its correlative pair ("both … and", P09-E26) as も after every conjunct —
+ * 猫も犬も走ります, 猫はネズミも食べ物も食べます. Only where も replaces the slot's particle outright (が, を,
+ * the topic は, or none), as the focus particle *also* does; a slot whose particle も would follow
+ * (に, で, から) would need it repeated per conjunct (家にも市場にも), and keeps its plain と instead.
+ * `elSegs` and this function both read it, so the join and the closing particle always agree.
+ */
+export function correlativeMo(el: ResolvedNounElement, particle: string | undefined): boolean {
+  return !!el.correlative && particle !== undefined && REPLACED_BY_MO.has(particle);
+}
+
+/**
  * The case particle after a noun group. A `no` group closes its どの … も circumfix here: も replaces
  * が, を and は (どの猫も, どのネズミも) and follows any other particle (どの家でも, どの犬にも, どの市場からも,
  * どの犬のためにも), which npSegs cannot know.
@@ -24,6 +35,7 @@ const FOCUS_PARTICLE: Record<FocusParticle, string> = { only: 'だけ', even: '�
  * phrase and so have to know which slot it is (C39). 猫も食べます, 食べ物さえ食べます, 家にも住みます.
  */
 export function jaParticleSegs(el: ResolvedNounElement, particle: string): RubySegment[] {
+  if (correlativeMo(el, particle)) return [{ t: 'も' }];
   const focus = slotFocus(el);
   if (focus) {
     const word = FOCUS_PARTICLE[focus];

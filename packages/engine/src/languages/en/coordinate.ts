@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { COORD_WORDS } from './en.consts.js';
 
@@ -8,5 +9,7 @@ import { COORD_WORDS } from './en.consts.js';
  * one phrase is just that phrase.
  */
 export function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
-  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${COORD_WORDS[el.conjunction ?? 'and']} `);
+  const parts = el.conjuncts.map(render);
+  // "both the cat and the dog" (P09-E26).
+  return correlate(el, parts, ['both', 'and']) ?? joinConjuncts(parts, ', ', () => ` ${COORD_WORDS[el.conjunction ?? 'and']} `);
 }

@@ -7,6 +7,7 @@ import { complementGlossSegs } from './complementGlossSegs.js';
 import { contentClauseLink } from './contentClauseLink.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
+import { slotSegs } from './slotSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
@@ -18,7 +19,6 @@ import { isPotentialPassive } from './isPotentialPassive.js';
 import { jaCausativeVerb } from './jaCausativeVerb.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
-import { jaParticleSegs } from './jaParticleSegs.js';
 import { jaRespectRegister } from './jaRespectRegister.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
@@ -52,7 +52,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   if (!phrase.verbPhrase) {
     return isNegativeGroup(phrase.subject)
       ? [...elSegs(phrase.subject), { t: JA_NEGATIVE_DETERMINER.post }, { t: 'ない' }]
-      : elSegs(phrase.subject);
+      // A correlative pair closes on its last も even here, with no particle for it to replace
+      // ("both the cat and the dog." 猫も犬も。, P09-E26).
+      : phrase.subject.correlative ? slotSegs(phrase.subject, '') : elSegs(phrase.subject);
   }
   const segs: RubySegment[] = [];
   // A wh-question moves nothing in Japanese: its word is the noun (or the adverb) its slot would hold,
@@ -96,7 +98,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     // languages' expletive, and what exists is the pivot, marked が in the object's slot, right ahead of
     // the verb and behind any place — 家に猫がいます (P09-E6 D5, see `predicateSegs`).
   } else if (!dropsSubject && !(plain && phrase.subject.agreement['generic'] === '1')) {
-    segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+    segs.push(...slotSegs(phrase.subject, particle));
   }
   // The demoted agent of a passive takes に, right after the topic and before everything else the
   // predicate holds: 食べ物は猫に食べられます ("the food is eaten by the cat"). The agentless passive has
@@ -109,7 +111,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // A passive's agent asked about is 誰 / 何 in that slot, with its に: 食べ物は誰に食べられますか (P09-E16).
   // Unlike the relative (RELATIVIZES_AGENT), the question keeps the passive.
   const agent = phrase.agent ?? (asked?.role === 'agent' ? askedNoun : undefined);
-  if (agent) segs.push(...elSegs(agent), ...jaParticleSegs(agent, jaAgentParticle(phrase.complements)));
+  if (agent) segs.push(...slotSegs(agent, jaAgentParticle(phrase.complements)));
   // An adverbial clause stands ahead of the predicate it modifies, behind the topic: plain, its
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
@@ -136,9 +138,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   const suffixCausative = !!causee && phrase.verbPhrase?.verb.forms['causative_suffix'] === '1'
     && !!phrase.infinitiveComplement?.verbPhrase;
   if (suffixCausative && causee) {
-    segs.push(...elSegs(causee), ...jaParticleSegs(causee, phrase.infinitiveComplement?.directObject ? 'に' : 'を'));
+    segs.push(...slotSegs(causee, phrase.infinitiveComplement?.directObject ? 'に' : 'を'));
   } else if (phrase.infinitiveComplement) {
-    if (causee) segs.push(...elSegs(causee), ...jaParticleSegs(causee, 'が'));
+    if (causee) segs.push(...slotSegs(causee, 'が'));
     segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: infinitiveLink(phrase) || 'ことを' });
   }
   // An object clause stands where the object would, right ahead of the verb: plain, its subject

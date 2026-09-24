@@ -146,6 +146,11 @@ export interface ResolvedNounElement {
   /** The conjunction joining them; absent iff there is a single conjunct. */
   conjunction?: CoordConjunction;
   /**
+   * "**both** A **and** B" (`NounGroup.correlative`, P09-E26) — set only where it applies: an `and`
+   * group of exactly two conjuncts. Each engine's joiner spells its pair of words from it.
+   */
+  correlative?: true;
+  /**
    * The person/number/gender the *group* agrees as — what a verb agreeing with this slot, or an
    * adjective agreeing with it, must read. "Peter and Paul" is 3rd plural though both conjuncts
    * are singular; "il gatto e la volpe" is masculine plural though one conjunct is feminine.

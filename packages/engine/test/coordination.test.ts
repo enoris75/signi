@@ -83,6 +83,66 @@ describe('coordinated noun groups', () => {
   });
 });
 
+// P09-E26: "both … and" — a correlative on an "and" pair. Five of the six other languages replace
+// the plain "and" with a two-part word, and Japanese writes も after each conjunct, dropping と and は.
+describe('a correlative pair: both … and', () => {
+  const both = (a: NounPhrase, b: NounPhrase, conjunction: CoordConjunction = 'and'): NounElement =>
+    ({ conjuncts: [a, b], conjunction, correlative: true });
+
+  test('subject: both the cat and the dog run', () => {
+    expect(sayAll(clause(both(np('CAT'), np('DOG')), 'RUN'))).toEqual({
+      en: 'both the cat and the dog run.',
+      it: 'sia il gatto sia il cane corrono.',
+      fr: 'et le chat et le chien courent.',
+      de: 'sowohl der Kater als auch der Hund laufen.',
+      es: 'tanto el gato como el perro corren.',
+      pt: 'tanto o gato quanto o cão correm.',
+      ja: '猫も犬も走ります。',
+    });
+  });
+
+  test('object: the boy sees both the cat and the dog', () => {
+    expect(sayAll(clause(np('BOY'), 'SEE', { directObject: both(np('CAT'), np('DOG')) }))).toEqual({
+      en: 'the boy sees both the cat and the dog.',
+      it: 'il ragazzo vede sia il gatto sia il cane.',
+      fr: 'le garçon voit et le chat et le chien.',
+      de: 'der Junge sieht sowohl den Kater als auch den Hund.',
+      es: 'el niño ve tanto el gato como el perro.', // no personal a for animals, as without the pair
+      pt: 'o menino vê tanto o gato quanto o cão.',
+      ja: '男の子は猫も犬も見ます。',
+    });
+  });
+
+  test('a verbless period: Japanese closes on the last も with no particle to replace', () => {
+    expect(sayAll({ subject: both(np('CAT'), np('DOG')) })).toEqual({
+      en: 'both the cat and the dog.', it: 'sia il gatto sia il cane.', fr: 'et le chat et le chien.',
+      de: 'sowohl der Kater als auch der Hund.', es: 'tanto el gato como el perro.',
+      pt: 'tanto o gato quanto o cão.', ja: '猫も犬も。',
+    });
+  });
+
+  test('three conjuncts ignore the flag: the plain coordination (D2)', () => {
+    expect(sayAll(clause(
+      { conjuncts: [np('CAT'), np('DOG'), np('MOUSE')], conjunction: 'and', correlative: true }, 'RUN',
+    ))).toEqual(sayAll(clause({ conjuncts: [np('CAT'), np('DOG'), np('MOUSE')], conjunction: 'and' }, 'RUN')));
+  });
+
+  test('"or" ignores the flag: either … or is a follow-up (D1)', () => {
+    expect(sayAll(clause(both(np('CAT'), np('DOG'), 'or'), 'RUN')))
+      .toEqual(sayAll(clause({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'or' }, 'RUN')));
+  });
+
+  test('Japanese: a complement keeps its plain と, which も cannot replace there', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: both(np('HOUSE'), np('MARKET')) } },
+    }))).toMatchObject({
+      ja: '猫は家と市場で走ります。',
+      it: 'il gatto corre sia nella casa sia nel mercato.',
+      de: 'der Kater läuft sowohl im Haus als auch im Markt.',
+    });
+  });
+});
+
 // Two independent clauses joined by a conjunction. Symmetric, unlike a condition.
 describe('coordinated clauses', () => {
   test('copulative and adversative', () => {

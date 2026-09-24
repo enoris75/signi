@@ -1,12 +1,11 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { JA_SOU } from './ja.consts.js';
-import { elSegs } from './elSegs.js';
+import { slotSegs } from './slotSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
-import { jaParticleSegs } from './jaParticleSegs.js';
 import { predicateSegs } from './predicateSegs.js';
 
 /**
@@ -31,12 +30,12 @@ export function relativeClauseSegs(np: ResolvedNounPhrase): RubySegment[] {
   const clauseSubjectParticle = isPossessiveExistential(rel.verbPhrase.verb, relAnimate) ? 'に' : 'が';
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
-      ? [...elSegs(rel.subject), ...jaParticleSegs(rel.subject, clauseSubjectParticle)] : [];
+      ? [...slotSegs(rel.subject, clauseSubjectParticle)] : [];
   // A passive relative's agent follows its subject, as in a main clause, and the clause precedes the
   // head all the same: アフリカに読まれる本 "the book that is read by Africa". (Japanese relativises no
   // agent, so the head is never the one gapped here — see RELATIVIZES_AGENT.)
   const agentSegs: RubySegment[] = rel.agent
-    ? [...elSegs(rel.agent), ...jaParticleSegs(rel.agent, jaAgentParticle(rel.complements))] : [];
+    ? [...slotSegs(rel.agent, jaAgentParticle(rel.complements))] : [];
   const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // A head that fills the copula's subject complement leaves a gap Japanese cannot leave empty: the
   // pro-form そう takes its place, with the plain copula a relative takes (犬がそうではない伝説, 犬がそう
