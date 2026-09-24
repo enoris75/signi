@@ -1,6 +1,15 @@
 # B-needs-seed — tasks waiting on words
 
-**Empty.** [B68](../done/B68-the-family.md)–[B74](../done/B74-partners-and-friends.md), the
+**Sixteen open: [B75](B75-girl-guy-kid-member.md)–[B90](B90-everything.md)**, filed on 2026-09-24 by
+[P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the
+coverage check of COCA lemma ranks 201–400. They propose **85 concepts** that do not exist yet: the
+E24 words and one differentia, LENGTH. They carry **70 probed glosses**, one proposed gloss and 13
+literal-by-design verdicts. Every non-verb row was seeded in memory and rendered; the verb rows
+give lexemes and paradigm facts, and their glosses were rendered. See
+[the index](../localization-tasks.md#part-b--needs-seeding-b-needs-seed) for the table and the
+seeding order (four tickets stand on another's word).
+
+[B68](../done/B68-the-family.md)–[B74](../done/B74-partners-and-friends.md), the
 [P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, were filed on
 2026-09-22 and authored the same day: **41 concepts seeded** — forty relatives and partners, the two
 adjectives ELDER and YOUNGER, and the verb MARRY — and **38 definitions**, which is every one they

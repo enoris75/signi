@@ -117,7 +117,47 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**None open.** B68–B74, the [P11](../features/P-planning/P11-family-and-relationships/README.md) kin
+**Sixteen open.** B75–B90 were filed on 2026-09-24 by
+[P09-E24](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the coverage
+check of COCA lemma ranks 201–400. Like B59–B67, their concepts **do not exist yet**, so each
+**Seed first** table is the E24 words themselves, plus one differentia (LENGTH). **85 concepts** are
+proposed. Every noun, adjective, adverb and pronoun was seeded in memory and rendered in a sentence;
+the verbs' forms are proposals, and their glosses were rendered. **70 glosses** were probed in all
+seven languages against the engine at 1229928, one more (LOSE_GAME) is proposed on a word the batch
+seeds, and **13 concepts are literal by design**, each with its leads probed in its file. LENGTH,
+the differentia, is a dimension root like SIZE. Five engine defects the probes met are named in the
+tickets and in E24's *Done*, not filed.
+
+| # | File | Words to seed | Glosses probed | Not glossed |
+|---|---|---|---|---|
+| B75 | [B-needs-seed/B75-girl-guy-kid-member.md](B-needs-seed/B75-girl-guy-kid-member.md) | 4 | 2 — GIRL (shared with YOUNG_WOMAN by design), MEMBER | GUY, KID (register) |
+| B76 | [B-needs-seed/B76-government-and-the-law.md](B-needs-seed/B76-government-and-the-law.md) | 7 | 7 | none |
+| B77 | [B-needs-seed/B77-teams-institutions-and-business.md](B-needs-seed/B77-teams-institutions-and-business.md) | 5 | 5 | none |
+| B78 | [B-needs-seed/B78-places-and-things.md](B-needs-seed/B78-places-and-things.md) | 9 | 8 | CENTER |
+| B79 | [B-needs-seed/B79-head-face-back-health.md](B-needs-seed/B79-head-face-back-health.md) | 4 | 3 | BACK_BODY |
+| B80 | [B-needs-seed/B80-minute-morning-later-once-often.md](B-needs-seed/B80-minute-morning-later-once-often.md) | 5 | 4 | ONCE |
+| B81 | [B-needs-seed/B81-ideas-reasons-and-information.md](B-needs-seed/B81-ideas-reasons-and-information.md) | 7 | 7 | none |
+| B82 | [B-needs-seed/B82-kinds-changes-games-and-parties.md](B-needs-seed/B82-kinds-changes-games-and-parties.md) | 5 | 4 | PERCENT |
+| B83 | [B-needs-seed/B83-sit-stand-walk-run-away-lead.md](B-needs-seed/B83-sit-stand-walk-run-away-lead.md) | 6 | 3 — RUN_AWAY, LEAD, HOLD_GRASP | SIT_DOWN, STAND_UP, WALK |
+| B84 | [B-needs-seed/B84-stop-wait-die-continue.md](B-needs-seed/B84-stop-wait-die-continue.md) | 5 | 5, three after the NO_LONGER defect | none |
+| B85 | [B-needs-seed/B85-pay-provide-spend-win-lose-thank-allow.md](B-needs-seed/B85-pay-provide-spend-win-lose-thank-allow.md) | 9 | 8, + LOSE_GAME proposed | none |
+| B86 | [B-needs-seed/B86-meet-remember-consider.md](B-needs-seed/B86-meet-remember-consider.md) | 3 | 2 | MEET |
+| B87 | [B-needs-seed/B87-core-adjectives.md](B-needs-seed/B87-core-adjectives.md) | 8 + LENGTH | 5 | REAL_GENUINE, BLACK, WHITE |
+| B88 | [B-needs-seed/B88-relational-adjectives.md](B-needs-seed/B88-relational-adjectives.md) | 4 | 4 | none |
+| B89 | [B-needs-seed/B89-a-little-and-far-away.md](B-needs-seed/B89-a-little-and-far-away.md) | 2 | 2 | none |
+| B90 | [B-needs-seed/B90-everything.md](B-needs-seed/B90-everything.md) | 1 | 1 | none |
+
+**Order.** Four tickets stand on another's word: B88 on B76's GOVERNMENT and B77's COMMUNITY, B78's
+LINE_MARK on B87's LONG, and B85's WIN on B82's GAME. Seed those words first, as B59–B67 seeded
+their shared base. Two tickets carry engine work: B87, with three French feminines and the Japanese
+of DIFFERENT, and B88, which shares the French *publique*.
+
+The E24 words that are **not** here are constructs, not seeds:
+[P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs).
+Three of them seed words when they land: NEWS (E41), SOMEONE (E40), and MAYBE, PROBABLY, ACTUALLY and
+OF_COURSE (E39).
+
+B68–B74, the [P11](../features/P-planning/P11-family-and-relationships/README.md) kin
 terms, were filed on 2026-09-22 (see [the P11 sweep](#the-p11-sweep-of-2026-09-22)) and authored the
 same day; all seven are in [`done/`](done/). They seeded **41 concepts** — forty relatives and
 partners, the two adjectives ELDER and YOUNGER, and the verb MARRY — and authored **38 definitions**:
