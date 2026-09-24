@@ -22,13 +22,14 @@ test.describe('the phrase console', () => {
   test('builds the plan’s session from the console, completing with ⇥', async ({ app, page }) => {
     await prompt(page).click();
 
-    // /su ⇥ ca ⇥ — each ⇥ takes the ghost, and the subject's bracket opens for its word.
+    // /su ⇥ — ⇥ takes the ghost, and the subject's bracket opens for its word.
     await page.keyboard.type('/su');
     await expect(page.getByTestId('console-ghost')).toHaveText('bj');
     await page.keyboard.press('Tab');
     await expect(prompt(page)).toHaveValue('/subj (  )');
-    await page.keyboard.type('ca');
-    await expect(page.getByTestId('console-ghost')).toHaveText('t');
+    // cat ⇥ — typed whole, since `ca` is car as much as cat: with nothing left to ghost, ⇥ takes the word.
+    await page.keyboard.type('cat');
+    await expect(page.getByTestId('console-ghost')).toHaveCount(0);
     await page.keyboard.press('Tab');
     await expect(prompt(page)).toHaveValue('/subj ( cat  )');
     await page.keyboard.type('/adj br');
