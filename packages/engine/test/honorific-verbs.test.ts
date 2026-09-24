@@ -250,22 +250,30 @@ describe('the other six languages ignore a negative and a progressive register',
 // Known bugs — each pinned at its correct output, and flipped to a plain `test` when fixed.
 
 describe('known bugs: the たい stem of いらっしゃる, なさる and おっしゃる is taken from the ます form (A333)', () => {
-  test.fails('いらっしゃる before たい is いらっしゃり', () => {
+  test('いらっしゃる before たい is いらっしゃり', () => {
     expect(ja(yourMother, 'GO', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいです。');
     expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいです。');
     expect(ja(yourMother, 'BE', { complements: home, verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは家にいらっしゃりたいです。');
   });
-  test.fails('and in every form of たい: denied, past, bridged, and in an "if" clause', () => {
+  test('and in every form of たい: denied, past, bridged, and in an "if" clause', () => {
     expect(ja(yourMother, 'COME', { verbPhrase: { modals: [{ verb: 'WILL', negative: true }] } })).toBe('あなたのお母さんはいらっしゃりたくないです。');
     expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['WILL'], tense: 'past' } })).toBe('あなたのお母さんはいらっしゃりたかったです。');
     expect(ja(yourMother, 'GO', { verbPhrase: { modals: ['CAN', 'WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいと思うことができます。');
     expect(ja(np('CAT'), 'RUN', { condition: clause(yourMother, 'GO', { verbPhrase: { modals: ['WILL'] } }) }))
       .toBe('もしあなたのお母さんがいらっしゃりたかったら、猫は走ります。');
   });
-  test.fails('おっしゃる and なさる before たい are おっしゃり and なさり', () => {
+  test('おっしゃる and なさる before たい are おっしゃり and なさり', () => {
     expect(ja(yourMother, 'SAY', { contentObject: inner(np('CAT'), 'RUN'), verbPhrase: { modals: ['WILL'] } }))
       .toBe('あなたのお母さんは猫が走るとおっしゃりたいです。');
     expect(ja(yourMother, 'DO', { directObject: np('FOOD'), verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは食べ物をなさりたいです。');
+  });
+  test('the り stem in なさる\'s past and おっしゃる\'s denial; the dictionary and polite forms are untouched', () => {
+    expect(ja(yourMother, 'DO', { directObject: np('FOOD'), verbPhrase: { modals: ['WILL'], tense: 'past' } }))
+      .toBe('あなたのお母さんは食べ物をなさりたかったです。');
+    expect(ja(yourMother, 'SAY', { contentObject: inner(np('CAT'), 'RUN'), verbPhrase: { modals: [{ verb: 'WILL', negative: true }] } }))
+      .toBe('あなたのお母さんは猫が走るとおっしゃりたくないです。');
+    expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['MUST'] } })).toBe('あなたのお母さんはいらっしゃる必要があります。');
+    expect(ja(yourMother, 'COME')).toBe('あなたのお母さんはいらっしゃいます。');
   });
   test('a regular honorific and the humble words take their ます stem, and the polite forms keep the い', () => {
     expect(ja(yourMother, 'EAT', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは召し上がりたいです。');

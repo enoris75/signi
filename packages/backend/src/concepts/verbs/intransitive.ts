@@ -212,7 +212,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'きます',
         // 尊敬語 いらっしゃる, 「来る」の尊敬語; 謙譲語 参る, 「来る」の謙譲語 (大辞林, デジタル大辞泉) — the
         // same two words GO takes, since Japanese does not tell coming from going in either register (P11-E1).
-        honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない',
+        honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない', honorific_stem: 'いらっしゃり',
         humble: '参る', humble_masu_present: '参ります', humble_te: '参って', humble_nai: '参らない',
         humble_reading: 'まいる', humble_masu_present_reading: 'まいります', humble_te_reading: 'まいって', humble_nai_reading: 'まいらない',
       },

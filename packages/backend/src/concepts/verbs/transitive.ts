@@ -1934,7 +1934,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: 'します',
         masu_present_reading: 'します',
         // 尊敬語 なさる, 「する」の尊敬語; 謙譲語 いたす, 「する」の謙譲語 (大辞林, デジタル大辞泉) (P11-E1).
-        honorific: 'なさる', honorific_masu_present: 'なさいます', honorific_te: 'なさって', honorific_nai: 'なさらない',
+        honorific: 'なさる', honorific_masu_present: 'なさいます', honorific_te: 'なさって', honorific_nai: 'なさらない', honorific_stem: 'なさり',
         humble: 'いたす', humble_masu_present: 'いたします', humble_te: 'いたして', humble_nai: 'いたさない',
       },
       pt: {
@@ -8078,7 +8078,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'いいます',
         // 尊敬語 おっしゃる, 「言う」の尊敬語; 謙譲語 申す, 「言う」の謙譲語 (大辞林, デジタル大辞泉). The
         // quotative と stays: お母さんは猫が走るとおっしゃいます (P11-E1).
-        honorific: 'おっしゃる', honorific_masu_present: 'おっしゃいます', honorific_te: 'おっしゃって', honorific_nai: 'おっしゃらない',
+        honorific: 'おっしゃる', honorific_masu_present: 'おっしゃいます', honorific_te: 'おっしゃって', honorific_nai: 'おっしゃらない', honorific_stem: 'おっしゃり',
         humble: '申す', humble_masu_present: '申します', humble_te: '申して', humble_nai: '申さない',
         humble_reading: 'もうす', humble_masu_present_reading: 'もうします', humble_te_reading: 'もうして', humble_nai_reading: 'もうさない',
       },

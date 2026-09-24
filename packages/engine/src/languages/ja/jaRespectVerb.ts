@@ -2,7 +2,7 @@ import type { ConceptForms } from '../../types.js';
 import type { JaRespect } from './jaRespectRegister.js';
 
 /** The forms a Japanese verb conjugates from, each with its `_reading`, as a register column stores them. */
-const PARADIGM = ['base', 'masu_present', 'te', 'nai'] as const;
+const PARADIGM = ['base', 'masu_present', 'te', 'nai', 'stem'] as const;
 
 /**
  * The verb in a register of respect (P11-E1 D2): the lexeme's `honorific` or `humble` word, which
@@ -11,7 +11,9 @@ const PARADIGM = ['base', 'masu_present', 'te', 'nai'] as const;
  * predicate conjugates from: `honorific` (the dictionary form), `honorific_masu_present`,
  * `honorific_te` and `honorific_nai`, each with a `_reading` where the word has kanji. The
  * irregular polite stems are why the ます form is stored: いらっしゃる is いらっしゃいます, not
- * いらっしゃります.
+ * いらっしゃります. The same three verbs (いらっしゃる, なさる, おっしゃる) keep the regular り stem
+ * before every other stem suffix, which the ます form cannot give, so they also store `honorific_stem`
+ * (いらっしゃりたい, A333; see `verbFormSeg`). A column without one clears the key.
  *
  * Everything else the lexeme says — its object particle, its content-clause link (おっしゃると) —
  * stays, since it is the same verb in another register. A reading the register has none of is

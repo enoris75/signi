@@ -64,3 +64,24 @@ Pinned by `known bugs: the たい stem of いらっしゃる, なさる and お�
 (A333)` in [honorific-verbs.test.ts](../../../packages/engine/test/honorific-verbs.test.ts).
 
 Found on 2026-09-24 by the P11-E1 coverage audit (rendering the register through every modal).
+
+## Resolved
+
+2026-09-24, as sketched. The register paradigm (`PARADIGM` in
+[jaRespectVerb.ts](../../../packages/engine/src/languages/ja/jaRespectVerb.ts)) carries a `stem` key,
+stored as `honorific_stem` on GO and COME ([motion.ts](../../../packages/backend/src/concepts/verbs/motion.ts)),
+BE ([intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts)), DO and SAY
+([transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts)) and on `JA_IRU`
+([ja.consts.ts](../../../packages/engine/src/languages/ja/ja.consts.ts)): いらっしゃり, なさり, おっしゃり.
+A column without one clears the key. [verbFormSeg.ts](../../../packages/engine/src/languages/ja/verbFormSeg.ts)
+reads `forms.stem` (with `stem_reading`) before falling back to `masuStem`, which still gives the
+ます stem that `verbSeg` and the cohortative want. The column is a general `stem`, so any lexeme may
+store one, but only these three verbs need it. The seed skill's column table says so. `signi.db`
+needs a reseed for the new column. The tests read the concept sources, so they don't depend on it.
+
+Guarded by the three formerly-`test.fails` in `known bugs: the たい stem of いらっしゃる, なさる and
+おっしゃる is taken from the ます form (A333)` in [honorific-verbs.test.ts](../../../packages/engine/test/honorific-verbs.test.ts),
+now plain tests, plus a new one there (なさりたかった, おっしゃりたくない, and the untouched
+いらっしゃる必要 and いらっしゃいます), and new cases in
+[verbFormSeg.test.ts](../../../packages/engine/src/languages/ja/verbFormSeg.test.ts) and
+[jaRespectVerb.test.ts](../../../packages/engine/src/languages/ja/jaRespectVerb.test.ts).

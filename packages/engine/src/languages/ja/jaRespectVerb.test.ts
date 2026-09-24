@@ -31,6 +31,21 @@ describe('jaRespectVerb', () => {
     for (const key of ['reading', 'masu_present_reading', 'te_reading', 'nai_reading']) expect(forms[key]).toBeUndefined();
   });
 
+  // A333: an irregular ます form's regular り stem rides with the column, and a column without one
+  // stores none.
+  test('a stored stem comes with its column, and is cleared by one without', () => {
+    const COME: ConceptForms = {
+      conceptId: 'COME',
+      forms: {
+        base: '来る', masu_present: '来ます', stem: '来',
+        honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_stem: 'いらっしゃり',
+        humble: '参る', humble_masu_present: '参ります',
+      },
+    };
+    expect(jaRespectVerb(COME, 'honorific').forms).toMatchObject({ masu_present: 'いらっしゃいます', stem: 'いらっしゃり' });
+    expect(jaRespectVerb(COME, 'humble').forms['stem']).toBeUndefined();
+  });
+
   test('no register, or a verb with no word for it, is the verb unchanged', () => {
     expect(jaRespectVerb(EAT, undefined)).toBe(EAT);
     const run: ConceptForms = { conceptId: 'RUN', forms: { base: '走る', masu_present: '走ります' } };

@@ -86,7 +86,7 @@ that only the engine reading them knows about, and a lexeme without one is the r
 
 | column | language | what it does |
 | --- | --- | --- |
-| `honorific`, `honorific_masu_present`, `honorific_te`, `honorific_nai` | ja | The **尊敬語** word, said when the subject is **someone else's relative** (あなたのお母さんは召し上がります, P11-E1). Automatic, in a polite main clause only — a relative, content, adverbial or citation clause keeps the plain verb. |
+| `honorific`, `honorific_masu_present`, `honorific_te`, `honorific_nai` | ja | The **尊敬語** word, said when the subject is **someone else's relative** (あなたのお母さんは召し上がります, P11-E1). Automatic, in a polite main clause only — a relative, content, adverbial or citation clause keeps the plain verb. Add `honorific_stem` only where the ます form is irregular (いらっしゃいます, なさいます, おっしゃいます): the regular り stem たい attaches to (いらっしゃり, A333). |
 | `humble`, `humble_masu_present`, `humble_te`, `humble_nai` | ja | The **謙譲語** word, said when the plan sets `VerbPhrase.humble` and the subject is the 1st person or one's own relative (父は参ります, P11-E1 D4). Ignored for any other subject. |
 
 Seed a register only where the verb has a **suppletive** word a dictionary gives as its 尊敬語 or

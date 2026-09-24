@@ -354,7 +354,7 @@ export const JA_IRU: ConceptForms = {
   conceptId: 'IRU',
   forms: {
     base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない',
-    honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない',
+    honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない', honorific_stem: 'いらっしゃり',
     humble: 'おる', humble_masu_present: 'おります', humble_te: 'おって', humble_nai: 'おらない',
   },
 };
