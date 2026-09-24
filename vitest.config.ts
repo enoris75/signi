@@ -34,6 +34,13 @@ export default defineConfig({
       },
       {
         extends: true,
+        resolve: {
+          alias: {
+            // The console's round-trip test translates through the engine; like the backend
+            // project below, against its source rather than its (unbuilt in CI) dist.
+            '@signi/engine': path.resolve(__dirname, 'packages/engine/src/index.ts'),
+          },
+        },
         test: {
           // Component tests for the frontend: one component rendered into jsdom, no backend. The
           // geometry and wiring of the whole builder stay with the Playwright suite.
