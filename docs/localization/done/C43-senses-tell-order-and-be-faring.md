@@ -86,7 +86,7 @@ The * row uses ORDER_VERB, which is not seeded (forms below).
 - **"To be in a good state" says the word back in Spanish and Portuguese.** BE_FARING *is* *estar*
   there, and BE takes *estar* before a locative, so the gloss opens on the concept's own word. It
   also bakes in the *good* that the predicate supplies: BE_FARING is the neutral *fare* (*sta bene,
-  sta male*), and OKAY's gloss ([A33](../A-ready/A33-okay.md)) already says the good half.
+  sta male*), and OKAY's gloss ([A33](A33-okay.md)) already says the good half.
 - **"To live well"** is to lead a good life (*vivere bene, gut leben*), not to be all right today.
 - **"Not to have problems"** is OKAY's meaning, not the verb's, and Japanese 問題を持たない is not said
   (問題がない is).
@@ -114,3 +114,15 @@ and the leads above are the record.
 ## Retires
 
 To [`done/`](../done/) once the verdict is accepted, beside C28.
+
+## Done
+
+2026-09-24. **Literal by design** for both senses, verdict accepted beside
+[C28](C28-verb-roots-without-a-gloss.md). Re-verified against the current engine and seed:
+TELL_ORDER (sense of TELL) and BE_FARING (sense of BE) are seeded with no `definition`;
+`/api/concepts` still selects `sense_of IS NULL` in both its queries
+([index.ts](../../../packages/backend/src/index.ts)), so no surface can show a sense's tooltip;
+ORDER_VERB is still not seeded; and the two circles hold (TELL + infinitive swaps TELL_ORDER in,
+BE + OKAY swaps BE_FARING in). OKAY's own gloss shipped as [A33](A33-okay.md) ("that does not have
+problems") without naming BE_FARING. No file changed but this one; no engine change. Re-opens with a
+surface that shows senses (see [What would re-open it](#what-would-re-open-it)).

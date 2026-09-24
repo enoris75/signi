@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness } from '@signi/shared';
 import { clause, np, sayAll, wordAll } from './harness.js';
+import { concepts } from '../../backend/src/concepts/index.js';
 
 // P09-E41. A plurale tantum is a noun plural in every use in one language and singular (or mass) in
 // another. NEWS is the one seeded: mass and singular in English (*the news seems good*) and Japanese,
@@ -189,6 +190,23 @@ describe('pluralia tantum: NEWS', () => {
     expect(sayAll(clause(np('WATER', { number: 'plural' }), 'SEEM', good))).toMatchObject({
       it: "l'acqua sembra buona.",
       de: 'das Wasser scheint gut.',
+    });
+  });
+});
+
+// Localization A32: NEWS's tooltip, the report and its recency on a bare plural head (FACT), which
+// matches the plural-only lexeme in five languages and never says the word back.
+describe("NEWS's definition", () => {
+  test('facts that one has told recently, in all seven', () => {
+    const news = concepts.find((c) => c.id === 'NEWS');
+    expect(sayAll(news!.definition!)).toEqual({
+      en: 'facts that one has told recently.',
+      it: 'fatti che si sono raccontati di recente.',
+      fr: "faits qu'on a racontés récemment.",
+      de: 'Tatsachen, die man kürzlich erzählt hat.',
+      es: 'hechos que se han contado recientemente.',
+      ja: '最近伝えた事実。',
+      pt: 'fatos que se contaram recentemente.',
     });
   });
 });

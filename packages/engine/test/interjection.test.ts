@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { PhrasePlan } from '@signi/shared';
 import { clause, np, sayAll, translateAll } from './harness.js';
+import { concepts } from '../../backend/src/concepts/index.js';
 
 // P09-E30: an interjection — a word outside the clause that opens it and takes no part in its
 // grammar. A sibling of the vocative (P11-E3), not part of it: "hey, the cat runs" has no addressee.
@@ -82,6 +83,23 @@ describe('an interjection with a vocative: interjection, vocative, clause', () =
   test('without an interjection the vocative is unchanged', () => {
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('MOM') })).toMatchObject({
       en: 'Mom, the cat runs.', it: 'Mamma, il gatto corre.',
+    });
+  });
+});
+
+// Localization A34: HEY's tooltip, the instrument gap on CALL with a person as its object. No picker
+// lists an interjection yet; the gloss is rendered (and served) all the same.
+describe("HEY's definition", () => {
+  test('a word with which one calls a person, in all seven', () => {
+    const heyConcept = concepts.find((c) => c.id === 'HEY');
+    expect(sayAll(heyConcept!.definition!)).toEqual({
+      en: 'a word with which one calls a person.',
+      it: 'una parola con la quale si chiama una persona.',
+      fr: 'un mot avec lequel on appelle une personne.',
+      de: 'ein Wort, mit dem man eine Person ruft.',
+      es: 'una palabra con la que se llama a una persona.',
+      ja: '人を呼ぶ単語。',
+      pt: 'uma palavra com a qual se chama uma pessoa.',
     });
   });
 });

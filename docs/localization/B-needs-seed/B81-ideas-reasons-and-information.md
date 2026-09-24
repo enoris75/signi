@@ -112,7 +112,7 @@ Readings to judge on authoring:
 ## Not solved by this seed
 
 1. **NEWS** — seeded by [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md); its gloss is
-   [A32](../A-ready/A32-news.md)'s, which needs no INFORMATION ("new information" on B81's word would be a B route it does not take).
+   [A32](../done/A32-news.md)'s, which needs no INFORMATION ("new information" on B81's word would be a B route it does not take).
 2. **The verb STUDY** and REASON's faculty sense — later.
 3. **ISSUE's and STUDY_NOUN's Japanese homographs** (readings 3 and 5) — the author's call.
 

@@ -10,6 +10,21 @@ export const interjections: ConceptSeed[] = [
     id: 'HEY',
     role: 'interjection',
     description: "a word said to catch someone's attention",
+    // "A word with which one calls a person" (localization A34): the instrument gap on CALL, the
+    // person its object — what all seven say plainly, where "calls attention" is not said. No picker
+    // lists an interjection yet, so the tooltip waits for one; /api/concepts serves it already.
+    definition: {
+      subject: {
+        concept: 'WORD',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'instrumental',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'CALL' },
+          directObject: { concept: 'PERSON', definiteness: 'indefinite' },
+        },
+      },
+    },
     emoji: '👋',
     forms: {
       en: { base: 'hey' },

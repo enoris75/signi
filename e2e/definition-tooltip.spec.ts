@@ -2905,4 +2905,39 @@ test.describe('word definition tooltip', () => {
     await partnerJa.hover();
     await expect(page.locator(tooltip)).toHaveText('一緒に住む人');
   });
+
+  test('a bare plural head over an object gap (localize-seed A32: NEWS)', async ({ app, page }) => {
+    // English: the report and its recency, on FACT; the plural head suits a plural-only word.
+    await app.subjectInput.fill('news');
+    const newsEn = page.locator('[data-testid="typeahead-option"][data-concept="NEWS"]');
+    await expect(newsEn).toBeVisible();
+    await newsEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('facts that one has told recently');
+
+    // German: the relative pronoun agrees with the plural Tatsachen, the perfect goes last.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('news');
+    const newsDe = page.locator('[data-testid="typeahead-option"][data-concept="NEWS"]');
+    await expect(newsDe).toBeVisible();
+    await newsDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Tatsachen, die man kürzlich erzählt hat');
+  });
+
+  test('a negated HAVE in a headless relative (localize-seed A33: OKAY)', async ({ app, page }) => {
+    // English: fine without saying good or well.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('okay');
+    const okayEn = page.locator('[data-testid="typeahead-option"][data-concept="OKAY"]');
+    await expect(okayEn).toBeVisible();
+    await okayEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that does not have problems');
+
+    // Japanese: the everyday paraphrase of 大丈夫, with no head.
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('okay');
+    const okayJa = page.locator('[data-testid="typeahead-option"][data-concept="OKAY"]');
+    await expect(okayJa).toBeVisible();
+    await okayJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('問題がない');
+  });
 });

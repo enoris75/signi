@@ -10,7 +10,7 @@ it is to PROBABLY what SPEED is to FAST.
 _(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. E39's Done called it "a root noun; not probed for a gloss". It is probed
 here. It was filed with NEWS, the batch's other root noun, and split from it: NEWS composes today,
-[A32](../A-ready/A32-news.md).)_
+[A32](A32-news.md).)_
 
 ## The concept
 
@@ -77,3 +77,14 @@ German and Japanese say a degree (it *grado*, fr *degré*, de *Grad*, es *grado*
 *grau*), a sibling of LEVEL rather than a change to it (the abstraction level needs *Ebene*), with
 POSSIBILITY beside it. That would also give the six C26 dimension nouns a genus, so it is a
 C26-wide lead, not this ticket's alone.
+
+## Done
+
+2026-09-24. **Literal by design**, verdict accepted. Re-verified against the current engine and seed:
+PROBABILITY is seeded with no `definition`; LEVEL still renders *Ebene* / 段階; POSSIBILITY and a
+degree noun (DEGREE) are still not seeded, so every lead in the probe table still needs a word the
+corpus lacks. One change since filing: **POSSIBLE is now seeded**, but the engine cannot turn an
+adjective into a noun ("how possible something is"), and a gloss on POSSIBLE would still need a
+degree genus to stand on, so it opens no new lead. PROBABILITY keeps its literal ("how likely
+something is to be or to happen"). No file changed but this one; no engine change. The re-open
+condition above (a degree noun sibling of LEVEL, plus POSSIBILITY) stands, as a C26-wide lead.
