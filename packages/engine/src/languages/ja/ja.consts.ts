@@ -103,7 +103,7 @@ export const PARTICLE: Record<ComplementType, string> = {
  * The `at` row's に is the fallback; a lexeme naming its own `temporal_prep` wins, as one naming
  * `locative_particle` wins over the locative's で.
  */
-export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: string; particle: string }> = {
+export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: string; particle: string; citation?: string }> = {
   at: { noun: '', particle: 'に' },
   ago: { noun: '前', reading: 'まえ', particle: 'に' },
   until: { noun: '', particle: 'まで' },
@@ -118,6 +118,9 @@ export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: str
   since: { noun: '', particle: 'から' },
   // P09-E34: 以内 is a suffix straight on the measure, as `ago`'s 前 is — 一時間以内に, never の以内.
   within: { noun: '以内', reading: 'いない', particle: 'に' },
+  // P09-E35: the duration is the bare measure, an adverbial with no particle — 一時間走ります. With
+  // nothing to cite, the toolbar names it by 〜間, the suffix Japanese counts a stretch of time with.
+  for: { noun: '', particle: '', citation: '〜間' },
 };
 
 /**

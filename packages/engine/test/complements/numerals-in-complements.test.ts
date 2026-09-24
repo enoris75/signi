@@ -233,6 +233,7 @@ describe('known bugs: french writes de before a bare numeral in a complement (A2
     expect(fr('comitative', np('DOG', { numeral: 1, ...bare }))).toBe('le chat joue avec un chien.');
     expect(fr('instrumental', np('STICK', { numeral: 1, ...bare }))).toBe('le chat coupe avec un bâton.');
     const hours = np('HOUR', { numeral: 2, ...bare });
+    expect(fr('temporal', hours, { specifiers: [{ kind: 'temporal', value: 'for' }] })).toBe('le chat court pendant deux heures.');
     expect(fr('temporal', hours, { specifiers: [{ kind: 'temporal', value: 'within' }] })).toBe("le chat court d'ici deux heures.");
     expect(fr('temporal', np('DAY', { numeral: 2, ...bare }))).toBe('le chat court deux jours.');
     // The subject and the object were right before and are unchanged.

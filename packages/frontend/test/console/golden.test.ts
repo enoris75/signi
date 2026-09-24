@@ -124,6 +124,8 @@ const GOLDEN: Record<string, Golden> = {
   since: { line: '/verb run /time day /since', prints: '/verb ( run ) /time ( day /since )', holds: { temporalRelation: 'since' }, misuse: { line: '/verb run /loc house /since', says: { code: 'noTarget', args: { command: 'since' } } } },
   // P09-E34: the deadline, free as a command name.
   within: { line: '/verb run /time day /within', prints: '/verb ( run ) /time ( day /within )', holds: { temporalRelation: 'within' } },
+  // P09-E35: the duration, named apart from the purpose's `/for`, since a command has one name.
+  lasting: { line: '/verb run /time day /lasting', prints: '/verb ( run ) /time ( day /lasting )', holds: { temporalRelation: 'for' }, misuse: { line: '/verb run /loc house /lasting', says: { code: 'noTarget', args: { command: 'lasting' } } } },
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
   thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },

@@ -261,6 +261,11 @@ export function complementsParts(
             head = prepDet(DE_GENITIVE_TEMPORAL[relation], f, _case, plural);
           } else if (relation === 'until') {
             head = `bis ${prepDet('zu', f, 'dat', plural)}`;
+          } else if (relation === 'for') {
+            // P09-E35. A duration takes no preposition: the measure in the bare accusative, "läuft
+            // eine Stunde", "läuft zwei Stunden".
+            _case = 'acc';
+            head = prepDet('', f, 'acc', plural);
           } else {
             head = prepDet(relation === 'at' ? temporalPreposition(c, 'zu') : DE_TEMPORAL[relation], f, 'dat', plural);
           }

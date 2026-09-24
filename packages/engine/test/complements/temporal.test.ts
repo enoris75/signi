@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { TEMPORAL_RELATIONS, type Definiteness, type NounPhrase, type TemporalRelation } from '@signi/shared';
+import { TEMPORAL_RELATIONS, type Definiteness, type NounElement, type NounPhrase, type TemporalRelation } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definiteness = 'this') =>
@@ -9,9 +9,10 @@ const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definite
 
 // The *when* of a clause — the complement the engine had none of until C29 (P09 §3, E3). It carries
 // a `temporal` specifier naming its relation to the time: at / ago / until / after / before /
-// during / between (P09-E20) / since (P09-E27) / within (P09-E34). Each is a distinct adposition
-// in nearly every language, so all are pinned here, and the two that are not adpositions at all —
-// the postposed "ago" and the fronted impersonal verb — are pinned beside them.
+// during / between (P09-E20) / since (P09-E27) / within (P09-E34) / for (P09-E35). Each is a
+// distinct adposition in nearly every language, so all are pinned here, and the ones that are not
+// adpositions at all — the postposed "ago", the fronted impersonal verb, and the German and Japanese
+// bare measure of `for` — are pinned beside them.
 describe('temporal', () => {
   // The default relation: no specifier means the act simply happens at that time.
   test('a complement naming no relation is the plain "at"', () => {
@@ -240,6 +241,105 @@ describe('temporal', () => {
     });
   });
 
+  // P09-E35. How long the act lasts, a measure with no point or boundary. French and Spanish say it
+  // with their `during` word ("pendant", "durante"); English, Italian and Portuguese have a word of
+  // its own ("for", "per", "por", which fuses with the definite: "pelas duas horas"). German and
+  // Japanese have no adposition: German's measure is a bare accusative ("eine Stunde", "zwei
+  // Stunden"), Japanese's a bare measure with no particle (一時間, HOUR's counter on the numeral).
+  describe('for', () => {
+    const runsFor = (phrase: NounElement) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'for' }] } },
+    }));
+
+    test('for an hour', () => {
+      expect(runsFor(np('HOUR', { definiteness: 'indefinite' }))).toEqual({
+        en: 'the cat runs for an hour.',
+        it: "il gatto corre per un'ora.",
+        fr: 'le chat court pendant une heure.',
+        de: 'der Kater läuft eine Stunde.',
+        es: 'el gato corre durante una hora.',
+        pt: 'o gato corre por uma hora.',
+        ja: '猫は時間走ります。',
+      });
+    });
+
+    // With a numeral (after A291 and A292): one hour is 一時間 in Japanese, and German's feminine
+    // "eine" is the accusative already.
+    test('for one hour, and two', () => {
+      expect(runsFor(np('HOUR', { definiteness: 'bare', numeral: 1 }))).toMatchObject({
+        en: 'the cat runs for one hour.',
+        fr: 'le chat court pendant une heure.',
+        de: 'der Kater läuft eine Stunde.',
+        es: 'el gato corre durante una hora.',
+        pt: 'o gato corre por uma hora.',
+        ja: '猫は一時間走ります。',
+      });
+      expect(runsFor(np('HOUR', { definiteness: 'bare', numeral: 2 }))).toEqual({
+        en: 'the cat runs for two hours.',
+        it: 'il gatto corre per due ore.',
+        fr: 'le chat court pendant deux heures.',
+        de: 'der Kater läuft zwei Stunden.',
+        es: 'el gato corre durante dos horas.',
+        pt: 'o gato corre por duas horas.',
+        ja: '猫は二時間走ります。',
+      });
+      expect(runsFor(np('HOUR', { numeral: 2 }))).toMatchObject({
+        de: 'der Kater läuft die zwei Stunden.', pt: 'o gato corre pelas duas horas.', it: 'il gatto corre per le due ore.',
+      });
+    });
+
+    test('for a time, and the time', () => {
+      expect(runsFor(np('TIME', { definiteness: 'indefinite' }))).toEqual({
+        en: 'the cat runs for a time.',
+        it: 'il gatto corre per un tempo.',
+        fr: 'le chat court pendant un temps.',
+        de: 'der Kater läuft eine Zeit.',
+        es: 'el gato corre durante un tiempo.',
+        pt: 'o gato corre por um tempo.',
+        ja: '猫は時間走ります。',
+      });
+      expect(runsFor(np('TIME'))).toMatchObject({
+        de: 'der Kater läuft die Zeit.', pt: 'o gato corre pelo tempo.', it: 'il gatto corre per il tempo.',
+      });
+    });
+
+    // The accusative shows on a masculine: "diesen Tag", where the dative relations say "diesem".
+    test('German declines the measure in the accusative', () => {
+      expect(runsFor(np('DAY', { definiteness: 'this' })).de).toBe('der Kater läuft diesen Tag.');
+      expect(runsFor(np('MOMENT', { definiteness: 'indefinite' })).de).toBe('der Kater läuft einen Augenblick.');
+    });
+
+    // `during` places the act inside the stretch; `for` measures it. Three languages tell the two
+    // apart by the word, and German and Japanese by having none.
+    test('is told apart from during', () => {
+      const during = runsAt('during', 'HOUR', 'indefinite');
+      expect(during).toMatchObject({
+        en: 'the cat runs during an hour.', it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.',
+        pt: 'o gato corre durante uma hora.', ja: '猫は時間の間に走ります。',
+      });
+      const measure = runsFor(np('HOUR', { definiteness: 'indefinite' }));
+      for (const language of ['en', 'it', 'de', 'pt', 'ja'] as const) expect(measure[language]).not.toBe(during[language]);
+      expect(measure.fr).toBe(during.fr);
+      expect(measure.es).toBe(during.es);
+    });
+
+    // The measure is a phrase like any other: a verb with an object keeps it, and a coordinated
+    // measure repeats a fronted word as the other relations do.
+    test('beside an object, and over a group', () => {
+      expect(sayAll(clause(np('CAT'), 'EAT', {
+        directObject: np('FOOD'),
+        complements: { temporal: { phrase: np('DAY', { definiteness: 'bare', numeral: 2 }), specifiers: [{ kind: 'temporal', value: 'for' }] } },
+      }))).toMatchObject({
+        en: 'the cat eats the food for two days.', de: 'der Kater frisst das Essen zwei Tage.', ja: '猫は二日食べ物を食べます。',
+      });
+      expect(runsFor({ conjuncts: [np('HOUR', { definiteness: 'bare', numeral: 2 }), np('MOMENT', { definiteness: 'indefinite' })], conjunction: 'and' }))
+        .toMatchObject({
+          it: 'il gatto corre per due ore e per un momento.', de: 'der Kater läuft zwei Stunden und einen Augenblick.',
+          ja: '猫は二時間と瞬間走ります。',
+        });
+    });
+  });
+
   // A bare plural has no genitive to show, so "während" falls back on the dative — the same guard
   // the cause's "wegen" has (`genitiveShows`). A determiner that does show it keeps the genitive.
   test('during — a bare plural falls back on the dative in German', () => {
@@ -287,10 +387,12 @@ describe('temporal', () => {
   test.each(['en', 'it', 'fr', 'de', 'es', 'pt', 'ja'] as const)('every relation is distinct in %s', (language) => {
     const rendered = TEMPORAL_RELATIONS.map((relation) => runsAt(relation, 'DAY', 'this')[language]);
     expect(rendered.filter(Boolean)).toHaveLength(TEMPORAL_RELATIONS.length);
-    // Two languages have a genuine merger on a single time. German: `ago` and `before` are both
+    // Four languages have a genuine merger on a single time. German: `ago` and `before` are both
     // "vor" + dative. Japanese: `during` and `between` are both 〜の間に (P09-E20 D3), which on a
-    // group is the right Japanese for "between" — see the `between` tests below.
-    const expected = language === 'de' || language === 'ja' ? TEMPORAL_RELATIONS.length - 1 : TEMPORAL_RELATIONS.length;
+    // group is the right Japanese for "between" — see the `between` tests below. French and Spanish
+    // say the duration `for` with their `during` word, "pendant", "durante" (P09-E35).
+    const merged = { de: 1, ja: 1, fr: 1, es: 1 } as Partial<Record<typeof language, number>>;
+    const expected = TEMPORAL_RELATIONS.length - (merged[language] ?? 0);
     expect(new Set(rendered).size).toBe(expected);
   });
 

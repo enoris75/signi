@@ -106,6 +106,8 @@ export const TEMPORAL_PREP: Record<TemporalRelation, string> = {
   between: 'between',
   since: 'since',
   within: 'within',
+  // P09-E35: the duration, "for an hour" — not "during an hour", which places the act inside it.
+  for: 'for',
 };
 
 /** The relations English writes after the noun phrase rather than before it. */

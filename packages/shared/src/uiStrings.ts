@@ -2664,6 +2664,9 @@ export const UI_STRINGS = defineUiStrings({
   'temporal.value.since': { specifier: { kind: 'temporal', value: 'since' }, fallback: 'since' },
   // P09-E34: entro / d'ici / innerhalb / dentro de / dentro de / 〜以内に.
   'temporal.value.within': { specifier: { kind: 'temporal', value: 'within' }, fallback: 'within' },
+  // P09-E35: per / pendant / durante / por, and the two with no adposition cited by their duration
+  // word — de "lang" ("eine Stunde lang"), ja 〜間.
+  'temporal.value.for': { specifier: { kind: 'temporal', value: 'for' }, fallback: 'for' },
 
   // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
   // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".
@@ -3101,7 +3104,7 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set a complement's spatial relationship",
   },
-  // `/at /ago /until /after /before /during /span /since /within` set the temporal's relation (P09-E12b, E20, E27, E34),
+  // `/at /ago /until /after /before /during /span /since /within /lasting` set the temporal's relation (P09-E12b, E20, E27, E34, E35),
   // named the way the spatial one is, under TEMPORAL: "to set a complement's temporal relationship".
   'purpose.temporal': {
     plan: setterOf('RELATIONSHIP', 'COMPLEMENT_GRAMMAR', ['TEMPORAL']),

@@ -83,8 +83,8 @@ export const japaneseEngine: LanguageEngine = {
     // The temporal's relation (P09-E12b): its relational noun and particle after the 〜 that stands
     // for the time — 〜に, 〜前に, 〜まで, 〜の後に, 〜の前に, 〜の間に.
     if (specifier.kind === 'temporal') {
-      const { noun, particle } = JA_TEMPORAL[specifier.value];
-      return `〜${noun}${particle}`;
+      const { noun, particle, citation } = JA_TEMPORAL[specifier.value];
+      return citation ?? `〜${noun}${particle}`;
     }
     return specifier.kind === 'path' ? `〜${PATH_CITATION[specifier.value]}` : '';
   },

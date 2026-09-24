@@ -28,6 +28,7 @@ import { tonicPhrase } from './tonicPhrase.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
+import { porPrep } from './porPrep.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { defArticle } from './defArticle.js';
@@ -244,8 +245,10 @@ export function complementsPhrase(
             const named = temporalPreposition(c, '');
             return named ? prepDet(named, hf, plural) : contractDet(emPrep, 'em', hf, plural);
           }
-          const { word, de } = PT_TEMPORAL[relation];
-          return de ? `${word} ${contractDet(dePrep, 'de', hf, plural)}` : prepDet(word, hf, plural);
+          const { word, de, por } = PT_TEMPORAL[relation];
+          return de ? `${word} ${contractDet(dePrep, 'de', hf, plural)}`
+            : por ? contractDet(porPrep, 'por', hf, plural)
+            : prepDet(word, hf, plural);
         })() :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal, spelled as the place is ("salta

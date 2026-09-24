@@ -33,6 +33,8 @@ export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' |
   since: { prep: 'da' },
   // P09-E34: a word that fuses with nothing, as "dopo" and "durante" are — "entro il giorno".
   within: { word: 'entro' },
+  // P09-E35: the duration "per un'ora"; "per" fuses with nothing in the modern language.
+  for: { word: 'per' },
 };
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative

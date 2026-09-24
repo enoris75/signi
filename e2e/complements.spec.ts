@@ -173,6 +173,20 @@ test.describe('complements', () => {
       pt: 'o homem corre durante o dia.',
       ja: '男は日の間に走ります。',
     });
+
+    // P09-E27, E34, E35: the toolbar's last three. The duration takes no adposition in German
+    // (a bare accusative) or Japanese (a bare measure).
+    await page.getByRole('button', { name: 'since', exact: true }).click();
+    await app.expectSentences({ en: 'the man runs since the day.', de: 'der Mann läuft seit dem Tag.', ja: '男は日から走ります。' });
+    await page.getByRole('button', { name: 'within', exact: true }).click();
+    await app.expectSentences({ en: 'the man runs within the day.', de: 'der Mann läuft innerhalb des Tages.' });
+    await page.getByRole('button', { name: 'for', exact: true }).click();
+    await app.expectSentences({
+      en: 'the man runs for the day.',
+      it: "l'uomo corre per il giorno.",
+      de: 'der Mann läuft den Tag.',
+      ja: '男は日走ります。',
+    });
   });
 
   test('the purpose names who the act is for, on a verb that licenses none', async ({ app }) => {

@@ -228,4 +228,6 @@ export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   since: { word: 'desde' },
   // P09-E34: a locution ending in "de", fused through it like "después de" ("dentro del día").
   within: { word: 'dentro', de: true },
+  // P09-E35: the duration is "durante", as `during` is — Spanish does not tell the two apart.
+  for: { word: 'durante' },
 };

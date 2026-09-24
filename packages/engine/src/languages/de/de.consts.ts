@@ -223,7 +223,7 @@ export const CARDINALS: CardinalTable = {
  * Augenblick" is a moment ago and "vor dem Tag" is before the day, one preposition for the two
  * readings English splits into "ago" and "before" and Japanese into 前に and の前に.
  */
-export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during' | 'within'>, string> = {
+export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during' | 'within' | 'for'>, string> = {
   ago: 'vor',
   after: 'nach',
   before: 'vor',
@@ -239,6 +239,14 @@ export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'dur
  * and P09-E34's deadline "innerhalb einer Stunde". Each falls back on the dative where a bare plural
  * has no genitive to show ("während Tagen", "innerhalb Tagen"), as the cause's "wegen" does.
  */
+/**
+ * The word the toolbar names the duration `for` by (P09-E35). German says a duration with no
+ * preposition at all, the measure in the bare accusative ("der Kater läuft eine Stunde"), so there is
+ * nothing to cite; "lang" is the word it may follow the measure with ("eine Stunde lang") and the one
+ * a speaker reads as *how long*.
+ */
+export const DE_DURATION_CITATION = 'lang';
+
 export const DE_GENITIVE_TEMPORAL: Record<'during' | 'within', string> = {
   during: 'während',
   within: 'innerhalb',

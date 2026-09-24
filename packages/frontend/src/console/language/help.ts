@@ -125,6 +125,7 @@ export const EXAMPLES: Record<string, string> = {
   span: "/subj ( man ) /verb ( run ) /time ( day /span /and night )",
   since: "/subj ( man ) /verb ( run ) /time ( day /this /since )",
   within: "/subj ( man ) /verb ( run ) /time ( day /a /within )",
+  lasting: "/subj ( man ) /verb ( run ) /time ( day /a /lasting )",
   because: "/subj ( dog ) /verb ( run ) /cause ( cat /because )",
   fault: "/subj ( dog ) /verb ( run ) /cause ( cat /fault )",
   thanks: "/subj ( dog ) /verb ( run ) /cause ( cat /thanks )",
