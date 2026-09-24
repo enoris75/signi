@@ -445,16 +445,26 @@ describe('known bugs: Italian "a" does not become "ad" before a word starting wi
   const gives = (recipient: ReturnType<typeof np>) =>
     sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: recipient } } })).it;
 
-  test.fails('enough', () => {
+  test('enough', () => {
     expect(gives(np('DOG', { number: 'plural', definiteness: 'enough' }))).toBe('il gatto dà il libro ad abbastanza cani.');
   });
 
-  test.fails('some', () => {
+  test('some', () => {
     expect(gives(np('DOG', { number: 'plural', definiteness: 'some' }))).toBe('il gatto dà il libro ad alcuni cani.');
   });
 
-  test.fails('a bare plural starting with a', () => {
+  test('a bare plural starting with a', () => {
     expect(gives(np('FRIEND', { number: 'plural', definiteness: 'bare' }))).toBe('il gatto dà il libro ad amici.');
+  });
+
+  test('every unfused "a" takes it: a direction, and each conjunct of a coordinated recipient', () => {
+    expect(sayAll(clause(np('CAT'), 'GO', {
+      complements: { direction: { phrase: np('HOUSE', { number: 'plural', definiteness: 'some' }) } },
+    })).it).toBe('il gatto va ad alcune case.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: { conjuncts: [np('DOG'), np('DOG', { number: 'plural', definiteness: 'some' })], conjunction: 'and' } } },
+    })).it).toBe('il gatto dà il libro al cane e ad alcuni cani.');
   });
 
   test('regression: "a" before another vowel, before a consonant and fused with the article', () => {

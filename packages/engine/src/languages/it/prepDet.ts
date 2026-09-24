@@ -1,4 +1,5 @@
 import { artFor } from './artFor.js';
+import { euphonicA } from './euphonicA.js';
 import { prepArt } from './prepArt.js';
 
 /**
@@ -37,6 +38,9 @@ export function prepDet(prep: ItPreposition, forms: Record<string, string>, plur
   if (fuses(prep) && definiteness === 'most') {
     return `${prepArt(prep, { gender: 'fem' }, false, 'maggior')} ${artFor(forms, plural, lead).replace(/^la /, '')}`;
   }
+  // An unfused "a" meets the next word directly, and takes the euphonic d before an a: "ad
+  // abbastanza cani", "ad alcuni cani", "ad amici" (A312).
   const det = artFor(forms, plural, lead);
-  return det ? `${prep} ${det}` : prep;
+  const word = euphonicA(prep, det || lead);
+  return det ? `${word} ${det}` : word;
 }

@@ -387,7 +387,7 @@ describe('known bugs: a measure manner adverbial loses the determiner it was giv
       fr: 'le chat court à cet autre temps.', de: 'der Kater läuft zu jener anderen Zeit.',
     });
     expect(four(runManner(OTHER_TIME({ definiteness: 'some', number: 'plural' })))).toEqual({
-      en: 'the cat runs at some other times.', it: 'il gatto corre a alcuni altri tempi.',
+      en: 'the cat runs at some other times.', it: 'il gatto corre ad alcuni altri tempi.',
       fr: 'le chat court à quelques autres temps.', de: 'der Kater läuft zu einigen anderen Zeiten.',
     });
     expect(runManner(np('SPEED', { adjectives: ['HIGH'], definiteness: 'many', number: 'plural' })))
