@@ -62,3 +62,24 @@ the trial.
 | **Test** | `possession.test.ts` → *known bugs: the Spanish personal a drops the determiner beside a possessive (A325)* (8 `test.fails`, one per row, plus a regression test for a thing, the definite, the plain indefinite, the comitative and the terminus) |
 
 Found on 2026-09-24 by the P11-E4 / A277 coverage audit (lane P1).
+
+## Resolved
+
+Fixed on 2026-09-24 with the trial's early return, in
+[es/prepObjectText.ts](../../../packages/engine/src/languages/es/prepObjectText.ts). When the phrase
+has a possessive and its own determiner is `all` or kept beside it (`keptBesidePossessive`, which
+since A329 also takes a head whose indefinite gave way to a numeral), the function returns
+`` `${prep} ${npText(np)}` ``. None of those determiners fuses with the preposition.
+
+The other callers were checked. A verb's own object preposition takes the same return (*depende de
+una condición mía*, *de esta condición mía*, *de todas mis condiciones*; the definite is still *de mi
+condición*). A relative's preposition-led head and a domain standard hand it a relativizer or a
+standard, not a possessed phrase. The fronted prepositional object goes through the same function.
+
+The 8 `test.fails` in `known bugs: the Spanish personal a drops the determiner beside a possessive
+(A325)` in [possession.test.ts](../../../packages/engine/test/possession.test.ts) are plain tests now.
+The same block gained the verb's own preposition, a relative clause (*a un amigo mío que corre*) and
+an adjective (*a una mujer vieja mía*). The colocated `prepObjectText.test.ts` gained a case for the
+kept determiners and *todos*.
+
+This also answers A330's unsettled Spanish plural object: *los perros ven a unos amigos míos*.

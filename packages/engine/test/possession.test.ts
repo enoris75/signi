@@ -1417,7 +1417,7 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     directObject: np('FRIEND', { possessor: mine, ...extra }), ...(negative ? { verbPhrase: { negative: true } } : {}),
   }));
 
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(seesFriend({ definiteness: 'indefinite' })).toEqual({
       en: 'the cat sees a friend of mine.', it: 'il gatto vede un mio amico.', fr: 'le chat voit un ami à moi.',
       de: 'der Kater sieht einen Freund von mir.',
@@ -1426,31 +1426,31 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     });
   });
 
-  test.fails('the plural indefinite', () => {
+  test('the plural indefinite', () => {
     expect(seesFriend({ definiteness: 'indefinite', number: 'plural' }).es).toBe('el gato ve a unos amigos míos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('"this"', () => {
+  test('"this"', () => {
     expect(seesFriend({ definiteness: 'this' }).es).toBe('el gato ve a este amigo mío.'); // now: "ve a mi amigo"
   });
 
-  test.fails('"some"', () => {
+  test('"some"', () => {
     expect(seesFriend({ definiteness: 'some', number: 'plural' }).es).toBe('el gato ve a algunos amigos míos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('"no"', () => {
+  test('"no"', () => {
     expect(seesFriend({ definiteness: 'no' }).es).toBe('el gato no ve a ningún amigo mío.'); // now: "no ve a mi amigo"
   });
 
-  test.fails('"all"', () => {
+  test('"all"', () => {
     expect(seesFriend({ definiteness: 'all', number: 'plural' }).es).toBe('el gato ve a todos mis amigos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('under a negation', () => {
+  test('under a negation', () => {
     expect(seesFriend({ definiteness: 'indefinite' }, true).es).toBe('el gato no ve a un amigo mío.'); // now: "no ve a mi amigo"
   });
 
-  test.fails('a possessor linked to the subject (P11-E2)', () => {
+  test('a possessor linked to the subject (P11-E2)', () => {
     expect(say(clause(np('MAN'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: { kind: 'coreferent', slot: 'subject' } }) }), 'es'))
       .toBe('el hombre ve a un amigo suyo.'); // now: "el hombre ve a su amigo."
   });
@@ -1464,6 +1464,21 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: aFriend } } }), 'es')).toBe('el gato corre con un amigo mío.');
     expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('FRIEND', { definiteness: 'this', possessor: mine }) } } }), 'es'))
       .toBe('el gato da el libro a este amigo mío.');
+  });
+
+  // The fix is in `prepObjectText`, so a verb's own object preposition takes it too ("depende de"),
+  // and a relative clause and an adjective ride along.
+  test('a verb\'s own object preposition, a relative clause and an adjective', () => {
+    const dependsOn = (extra: Partial<NounPhrase>) =>
+      say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { possessor: mine, ...extra }) }), 'es');
+    expect(dependsOn({ definiteness: 'indefinite' })).toBe('el gato depende de una condición mía.');
+    expect(dependsOn({ definiteness: 'this' })).toBe('el gato depende de esta condición mía.');
+    expect(dependsOn({ definiteness: 'all', number: 'plural' })).toBe('el gato depende de todas mis condiciones.');
+    expect(dependsOn({ definiteness: 'definite' })).toBe('el gato depende de mi condición.');
+    expect(seesFriend({ definiteness: 'indefinite', relative: { verbPhrase: { verb: 'RUN' } } }).es)
+      .toBe('el gato ve a un amigo mío que corre.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('WOMAN', { definiteness: 'indefinite', possessor: mine, adjectives: ['OLD'] }) }), 'es'))
+      .toBe('el gato ve a una mujer vieja mía.');
   });
 });
 
