@@ -97,18 +97,17 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ### Part A — Ready (`A-ready/`)
 
-**Three open, 3 concepts: A32–A34**, filed on 2026-09-24 for the nine concepts
+**None is open.** A32–A34, filed on 2026-09-24 for three of the nine concepts
 [P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
-shipped with no `definition` (the other six are [C41–C43](#part-c--needs-engine--deferred-c-needs-engine)).
-Each composes today from seeded words, and each overturns the "left literal" of the E task that
-seeded it. Probe tables at 2c4cee46, checked against all 497 shipped definitions and against the
-concept's own word in all seven languages.
+shipped with no `definition` (the other six were [C41–C43](#part-c--needs-engine--deferred-c-needs-engine)),
+were authored the same day and are in [`done/`](done/). All three shipped the ticket's proposed
+row, re-probed in all seven languages; no engine change was needed.
 
-| # | File | Concepts | Shape |
+| # | File | Concept | Shipped |
 |---|---|---|---|
-| A32 | [A-ready/A32-news.md](A-ready/A32-news.md) | 1 — NEWS | a bare plural FACT over an object-gap TELL, resultative, with RECENTLY — "facts that one has told recently"; INFORMATION (B81) not needed |
-| A33 | [A-ready/A33-okay.md](A-ready/A33-okay.md) | 1 — OKAY | `subjectGapGloss` on a negated HAVE PROBLEM, DARK's shape — "that does not have problems" (ja 問題がない) |
-| A34 | [A-ready/A34-hey.md](A-ready/A34-hey.md) | 1 — HEY | `instrumentGloss` on CALL a PERSON — "a word with which one calls a person"; **no surface shows it** until a picker lists the `interjection` role |
+| A32 | [done/A32-news.md](done/A32-news.md) | NEWS | facts that one has told recently (de *Tatsachen, die man kürzlich erzählt hat*) |
+| A33 | [done/A33-okay.md](done/A33-okay.md) | OKAY | that does not have problems (ja 問題がない) |
+| A34 | [done/A34-hey.md](done/A34-hey.md) | HEY | a word with which one calls a person — **no surface shows it** until a picker lists the `interjection` role; pinned through `/api/concepts?role=interjection` |
 
 A23–A30, the eight the sweep of 2026-09-22 filed, were all authored on 2026-09-22 and
 are in [`done/`](done/) — **51 of their 60 concepts** shipped a gloss. The nine that did not are
@@ -130,40 +129,56 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-**Sixteen open.** B75–B90 were filed on 2026-09-24 by
+**None is open.** B75–B90, filed on 2026-09-24 by
 [P09-E24](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the coverage
-check of COCA lemma ranks 201–400. Like B59–B67, their concepts **do not exist yet**, so each
-**Seed first** table is the E24 words themselves, plus one differentia (LENGTH). **85 concepts** are
-proposed. Every noun, adjective, adverb and pronoun was seeded in memory and rendered in a sentence;
-the verbs' forms are proposals, and their glosses were rendered. **70 glosses** were probed in all
-seven languages against the engine at 1229928, one more (LOSE_GAME) is proposed on a word the batch
-seeds, and **13 concepts are literal by design**, each with its leads probed in its file. LENGTH,
-the differentia, is a dimension root like SIZE. Five engine defects the probes met are named in the
-tickets and in E24's *Done*, not filed.
+check of COCA lemma ranks 201–400, were authored the same day in eight parallel lanes and are all in
+[`done/`](done/). Like B59–B67, their concepts **did not exist**, so each ticket was the E24 seeding
+and its tooltips in one pass. They **seeded 84 words and shipped 70 glosses** — every one the tickets
+forecast. B85's ALLOW, the 85th proposed concept, was already seeded and glossed by
+[P09-E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md); LOSE_GAME, the
+proposed gloss, shipped. The **13 literal-by-design verdicts** stand as filed, and LENGTH is a
+dimension root like SIZE.
 
-| # | File | Words to seed | Glosses probed | Not glossed |
+| # | File | Words seeded | Glosses shipped | Literal by design |
 |---|---|---|---|---|
-| B75 | [B-needs-seed/B75-girl-guy-kid-member.md](B-needs-seed/B75-girl-guy-kid-member.md) | 4 | 2 — GIRL (shared with YOUNG_WOMAN by design), MEMBER | GUY, KID (register) |
-| B76 | [B-needs-seed/B76-government-and-the-law.md](B-needs-seed/B76-government-and-the-law.md) | 7 | 7 | none |
-| B77 | [B-needs-seed/B77-teams-institutions-and-business.md](B-needs-seed/B77-teams-institutions-and-business.md) | 5 | 5 | none |
-| B78 | [B-needs-seed/B78-places-and-things.md](B-needs-seed/B78-places-and-things.md) | 9 | 8 | CENTER |
-| B79 | [B-needs-seed/B79-head-face-back-health.md](B-needs-seed/B79-head-face-back-health.md) | 4 | 3 | BACK_BODY |
-| B80 | [B-needs-seed/B80-minute-morning-later-once-often.md](B-needs-seed/B80-minute-morning-later-once-often.md) | 5 | 4 | ONCE |
-| B81 | [B-needs-seed/B81-ideas-reasons-and-information.md](B-needs-seed/B81-ideas-reasons-and-information.md) | 7 | 7 | none |
-| B82 | [B-needs-seed/B82-kinds-changes-games-and-parties.md](B-needs-seed/B82-kinds-changes-games-and-parties.md) | 5 | 4 | PERCENT |
-| B83 | [B-needs-seed/B83-sit-stand-walk-run-away-lead.md](B-needs-seed/B83-sit-stand-walk-run-away-lead.md) | 6 | 3 — RUN_AWAY, LEAD, HOLD_GRASP | SIT_DOWN, STAND_UP, WALK |
-| B84 | [B-needs-seed/B84-stop-wait-die-continue.md](B-needs-seed/B84-stop-wait-die-continue.md) | 5 | 5, three after the NO_LONGER defect | none |
-| B85 | [B-needs-seed/B85-pay-provide-spend-win-lose-thank-allow.md](B-needs-seed/B85-pay-provide-spend-win-lose-thank-allow.md) | 9 | 8, + LOSE_GAME proposed | none |
-| B86 | [B-needs-seed/B86-meet-remember-consider.md](B-needs-seed/B86-meet-remember-consider.md) | 3 | 2 | MEET |
-| B87 | [B-needs-seed/B87-core-adjectives.md](B-needs-seed/B87-core-adjectives.md) | 8 + LENGTH | 5 | REAL_GENUINE, BLACK, WHITE |
-| B88 | [B-needs-seed/B88-relational-adjectives.md](B-needs-seed/B88-relational-adjectives.md) | 4 | 4 | none |
-| B89 | [B-needs-seed/B89-a-little-and-far-away.md](B-needs-seed/B89-a-little-and-far-away.md) | 2 | 2 | none |
-| B90 | [B-needs-seed/B90-everything.md](B-needs-seed/B90-everything.md) | 1 | 1 | none |
+| B75 | [done/B75-girl-guy-kid-member.md](done/B75-girl-guy-kid-member.md) | 4 | 2 — GIRL (shared with YOUNG_WOMAN by design, allow-listed), MEMBER | GUY, KID (register) |
+| B76 | [done/B76-government-and-the-law.md](done/B76-government-and-the-law.md) | 7 | 7 — LAW on WRITE, not GIVE | none |
+| B77 | [done/B77-teams-institutions-and-business.md](done/B77-teams-institutions-and-business.md) | 5 | 5 | none |
+| B78 | [done/B78-places-and-things.md](done/B78-places-and-things.md) | 9 | 8 | CENTER |
+| B79 | [done/B79-head-face-back-health.md](done/B79-head-face-back-health.md) | 4 | 3 | BACK_BODY (pt *costas*, plural-only) |
+| B80 | [done/B80-minute-morning-later-once-often.md](done/B80-minute-morning-later-once-often.md) | 5 | 4 | ONCE |
+| B81 | [done/B81-ideas-reasons-and-information.md](done/B81-ideas-reasons-and-information.md) | 7 | 7 | none |
+| B82 | [done/B82-kinds-changes-games-and-parties.md](done/B82-kinds-changes-games-and-parties.md) | 5 | 4 | PERCENT |
+| B83 | [done/B83-sit-stand-walk-run-away-lead.md](done/B83-sit-stand-walk-run-away-lead.md) | 6 | 3 — RUN_AWAY, LEAD, HOLD_GRASP | SIT_DOWN, STAND_UP, WALK |
+| B84 | [done/B84-stop-wait-die-continue.md](done/B84-stop-wait-die-continue.md) | 5 | 5, on the NO_LONGER fix | none |
+| B85 | [done/B85-pay-provide-spend-win-lose-thank-allow.md](done/B85-pay-provide-spend-win-lose-thank-allow.md) | 8 (ALLOW was seeded) | 8, LOSE_GAME included; LOSE on STOP_DOING | none |
+| B86 | [done/B86-meet-remember-consider.md](done/B86-meet-remember-consider.md) | 3 | 2 | MEET |
+| B87 | [done/B87-core-adjectives.md](done/B87-core-adjectives.md) | 8 + LENGTH | 5 | REAL_GENUINE, BLACK, WHITE |
+| B88 | [done/B88-relational-adjectives.md](done/B88-relational-adjectives.md) | 4 | 4 | none |
+| B89 | [done/B89-a-little-and-far-away.md](done/B89-a-little-and-far-away.md) | 2 | 2 | none |
+| B90 | [done/B90-everything.md](done/B90-everything.md) | 1 | 1 | none |
 
-**Order.** Four tickets stand on another's word: B88 on B76's GOVERNMENT and B77's COMMUNITY, B78's
-LINE_MARK on B87's LONG, and B85's WIN on B82's GAME. Seed those words first, as B59–B67 seeded
-their shared base. Two tickets carry engine work: B87, with three French feminines and the Japanese
-of DIFFERENT, and B88, which shares the French *publique*.
+**Engine work came with the seeding**, each change pinned by a unit test and written up in the ticket
+that needed it; none was filed as a bug:
+
+- **B87**: French *longue, blanche, publique* (B88 needed the same row); REAL_GENUINE before the noun
+  in it/fr/es/pt; and Japanese verb-adjectives conjugate on their own row of kana (違います, not 違ます).
+- **B88**: the Japanese の-adjectives take A246's `relational` column (法律は国のです).
+- **B81**: a topic-gap relative keeps its verb's own preposition (*al quale si pensa*, *an den man
+  denkt*), and French writes *dont* for *de*.
+- **B84**: es/pt NO_LONGER leads the negator it carries (*ya no correr*, *já não se mover*).
+- **B86**: French pronominal verbs with a direct object (*se le rappelle*, *rappelle-le-toi*,
+  *s'est rappelé l'homme*), on the new `reflexive_indirect` column.
+- **B80**: `temporal_bare` for a time with no preposition (*la mattina*, *ce matin*, "in the morning").
+- **B89**: an intensifier's attributive word ("a slightly big cat", *ein etwas großer Kater*).
+- **B90**: a declining pronoun's fused OTHER per slot (*mit allem anderen*).
+- **B82**: a French purpose over a bare mass noun takes the article (*pour la joie*).
+
+**Left open**, each in its ticket's Done note: EVERYTHING with an adjective or a relative ("tout que"
+for *tout ce que*, "alles, das" for *alles, was*) and German "sieht alles nicht" (B90); the Spanish
+dative pronoun of THANK, "lo agradece" for *le agradece* (B85, a `test.fails`); German *nicht mehr*
+before a bare object (B85); English *realer* (B87); a relative clause dropping an
+`infinitiveComplement`, and French losing *des* on a bare plural subject (B76).
 
 The E24 words that are **not** here are constructs, not seeds:
 [P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs).
@@ -294,15 +309,16 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-**Three open, 6 concepts: C41–C43**, filed on 2026-09-24 with [A32–A34](#part-a--ready-a-ready) for
-the P09-E25–E43 concepts shipped with no `definition`. Five are literal by design, every lead probed
-in the file; one, OF_COURSE, has a single lead, and it needs a construct.
+**None is open.** C41–C43, filed on 2026-09-24 with [A32–A34](#part-a--ready-a-ready) for the
+P09-E25–E43 concepts shipped with no `definition`, were driven to a verdict the same day and are in
+[`done/`](done/). **One construct was built** and one concept shipped on it; the other five are literal
+by design, every lead re-probed against the engine as it now stands.
 
-| # | File | Concepts | Blocked on |
-|---|---|---|---|
-| C41 | [C-needs-engine/C41-sentence-adverbs-maybe-actually-of-course.md](C-needs-engine/C41-sentence-adverbs-maybe-actually-of-course.md) | 3 — MAYBE, ACTUALLY, OF_COURSE | MAYBE and ACTUALLY **literal by design** ("in reality" is REALLY's, "in fact" is *en fait* itself and *in Tatsache*, "it is possible that…" is MIGHT's); OF_COURSE on **an *as* clause said alone** ("as one expects": no `as` conjunction, and a verbless period drops its adverbial clause) |
-| C42 | [C-needs-engine/C42-probability.md](C-needs-engine/C42-probability.md) | 1 — PROBABILITY | **literal by design**: the dimension PROBABLY scales on, SPEED's case in C26; every lead needs POSSIBILITY and LEVEL's *Ebene* / 段階 |
-| C43 | [C-needs-engine/C43-senses-tell-order-and-be-faring.md](C-needs-engine/C43-senses-tell-order-and-be-faring.md) | 2 — TELL_ORDER, BE_FARING | **literal by design**, as C28 ruled EAT_ANIMAL and KNOW_ACQUAINTED; a sense is never served by `/api/concepts`, so no tooltip could show a gloss |
+| # | File | Concepts | Shipped | Literal by design | Built |
+|---|---|---|---|---|---|
+| C41 | [done/C41-sentence-adverbs-maybe-actually-of-course.md](done/C41-sentence-adverbs-maybe-actually-of-course.md) | 3 | OF_COURSE → as one expects (fr *comme on s'y attend*, ja 予想するように) | MAYBE, ACTUALLY | **the similative *as* clause** (`SubordinatingConjunction` `as`, in the builder's menu on L and the console's `/sub`), **an adverbial clause said alone** (`PhrasePlan.adverbialGloss`), and EXPECT's French *s'y attendre* in an *as* gap |
+| C42 | [done/C42-probability.md](done/C42-probability.md) | 1 | — | PROBABILITY: the dimension PROBABLY scales on; POSSIBLE is seeded now, but no plan nominalizes an adjective | none |
+| C43 | [done/C43-senses-tell-order-and-be-faring.md](done/C43-senses-tell-order-and-be-faring.md) | 2 | — | TELL_ORDER, BE_FARING: `/api/concepts` still serves no sense, so no tooltip could show one | none |
 
 C29–C40 were filed with the P09 batch on 2026-09-22, one per construct, and **all
 twelve were built the same day** — see the Done table below and each file's own `## Done`. C29, the
@@ -861,6 +877,28 @@ statements did not survive the seeding:
 | B72 | [done/B72-the-extended-family.md](done/B72-the-extended-family.md) | UNCLE → a parent's brother; AUNT → a parent's sister; NEPHEW → a sibling's son; NIECE → a sibling's daughter; COUSIN → a parent's sibling's child, the corpus's **first genitive inside a genitive** (ja 親の兄弟の子供, de *ein Kind eines Geschwisters eines Elternteils*). おじ, おば and いとこ seeded in kana, because the kanji would guess an age |
 | B73 | [done/B73-in-laws-and-step-parents.md](done/B73-in-laws-and-step-parents.md) | the six in-laws on one genitive (MOTHER_IN_LAW → a spouse's mother, SON_IN_LAW → a child's husband, …) and the two step-parents on `stepParentGloss`, a genitive **and** a negated copular relative on one head: STEPFATHER → a mother's husband who is not a father, which is what keeps it off FATHER (de *der **kein** Vater ist*, ja 父親ではない母親の夫) |
 | B74 | [done/B74-partners-and-friends.md](done/B74-partners-and-friends.md) | PARTNER → a person with whom one lives together, the adverb kept for Japanese alone (一緒に住む人, where the bare clause says "a person who lives"); BOYFRIEND → a male partner; GIRLFRIEND → a female partner; FIANCE → a person who one is about to marry (the prospective aspect inside a relative clause); FRIEND → a person who one knows well. Fixed the last two of P11 D8's German surfaces: the adjectival noun in a complement's dative (*meinem Verwandten*, *meinem Verlobten*) |
+| A32 | [done/A32-news.md](done/A32-news.md) | NEWS → facts that one has told recently (de *Tatsachen, die man kürzlich erzählt hat*), on FACT, TELL and RECENTLY; INFORMATION not needed |
+| A33 | [done/A33-okay.md](done/A33-okay.md) | OKAY → that does not have problems (ja 問題がない), DARK's shape |
+| A34 | [done/A34-hey.md](done/A34-hey.md) | HEY → a word with which one calls a person, the instrument gap; no picker lists interjections yet |
+| B75 | [done/B75-girl-guy-kid-member.md](done/B75-girl-guy-kid-member.md) | GIRL → a young female person (YOUNG_WOMAN's, allow-listed); MEMBER → a part of a group. GUY, KID literal by design |
+| B76 | [done/B76-government-and-the-law.md](done/B76-government-and-the-law.md) | POWER → an ability with which one governs; GOVERNMENT → a group that governs a state; PARTY_POLITICAL → a group that desires power; LAW → an instruction that a state writes; COURT_LAW → a group that applies the laws; RIGHT_NOUN → an action that one may do; WAR → a period where nations kill |
+| B77 | [done/B77-teams-institutions-and-business.md](done/B77-teams-institutions-and-business.md) | TEAM → a group that plays; COMMUNITY → a group of people that lives in the same place; UNIVERSITY → a school where adult people learn; SERVICE → work that one does for other people; BUSINESS → work with which one trades |
+| B78 | [done/B78-places-and-things.md](done/B78-places-and-things.md) | CITY → a big place where many people live; ROOM → a part of a building; OFFICE → a room where one works; DOOR → a part of a wall that one opens; CAR → an object with which one goes to a place; AREA → a part of a place; SIDE → a part of an object that is not the center; LINE_MARK → a long shape. CENTER literal |
+| B79 | [done/B79-head-face-back-health.md](done/B79-head-face-back-health.md) | HEAD → the high part of a body; FACE → the part of a head that has the eyes; HEALTH → a body's good state. BACK_BODY literal |
+| B80 | [done/B80-minute-morning-later-once-often.md](done/B80-minute-morning-later-once-often.md) | MINUTE → a part of an hour; MORNING → the first part of a day; LATER → after this time; OFTEN → in many cases (built `temporal_bare`). ONCE literal |
+| B81 | [done/B81-ideas-reasons-and-information.md](done/B81-ideas-reasons-and-information.md) | IDEA → a concept that is in a mind; REASON → a fact that causes an action; ISSUE → a problem about which one speaks (fr *dont*); INFORMATION → content that one learns; RESEARCH → work with which one finds new facts; STUDY_NOUN → a text that describes research; HISTORY_PAST → the past facts |
+| B82 | [done/B82-kinds-changes-games-and-parties.md](done/B82-kinds-changes-games-and-parties.md) | KIND_SORT → a group of things that has the same features; CHANGE_NOUN → a process that changes objects; GAME → an action that one does for joy; PARTY_CELEBRATION → a group of happy people. PERCENT literal |
+| B83 | [done/B83-sit-stand-walk-run-away-lead.md](done/B83-sit-stand-walk-run-away-lead.md) | RUN_AWAY → to leave fast; LEAD → to cause a person to go to a place; HOLD_GRASP → to have an object in the hand. SIT_DOWN, STAND_UP, WALK literal |
+| B84 | [done/B84-stop-wait-die-continue.md](done/B84-stop-wait-die-continue.md) | STOP → to cause an object no longer to move; STOP_ONESELF → no longer to move; WAIT → to stay until a time; DIE → no longer to live; CONTINUE → still to do an action (fixed es/pt NO_LONGER, *ya no*) |
+| B85 | [done/B85-pay-provide-spend-win-lose-thank-allow.md](done/B85-pay-provide-spend-win-lose-thank-allow.md) | PAY → to give money to a person; PROVIDE → to cause a person to have objects; SPEND_MONEY → to use money; SPEND_TIME → to stay in a place for a period; LOSE → to stop having objects; WIN → to be best in a game; LOSE_GAME → not to win in a game; THANK → to say good words to a person |
+| B86 | [done/B86-meet-remember-consider.md](done/B86-meet-remember-consider.md) | REMEMBER → still to know facts; CONSIDER → to think about a thing (built French *se rappeler* with an object). MEET literal |
+| B87 | [done/B87-core-adjectives.md](done/B87-core-adjectives.md) | DIFFERENT → that is not the same; SURE → who knows well; REAL_EXISTING → that is in reality; IMPORTANT → of high value; LONG → of great length (seeded LENGTH). REAL_GENUINE, BLACK, WHITE literal |
+| B88 | [done/B88-relational-adjectives.md](done/B88-relational-adjectives.md) | NATIONAL → that indicates a nation; SOCIAL → …a community; POLITICAL → …a government; PUBLIC → that is open for all people |
+| B89 | [done/B89-a-little-and-far-away.md](done/B89-a-little-and-far-away.md) | A_LITTLE → to a low level; FAR_AWAY → in a far place |
+| B90 | [done/B90-everything.md](done/B90-everything.md) | EVERYTHING → all things |
+| C41 | [done/C41-sentence-adverbs-maybe-actually-of-course.md](done/C41-sentence-adverbs-maybe-actually-of-course.md) | **built the similative *as* clause and an adverbial clause said alone** (`PhrasePlan.adverbialGloss`); OF_COURSE → as one expects (fr *comme on s'y attend*). MAYBE, ACTUALLY literal by design |
+| C42 | [done/C42-probability.md](done/C42-probability.md) | PROBABILITY literal by design, a dimension root |
+| C43 | [done/C43-senses-tell-order-and-be-faring.md](done/C43-senses-tell-order-and-be-faring.md) | TELL_ORDER, BE_FARING literal by design: no surface serves a sense |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

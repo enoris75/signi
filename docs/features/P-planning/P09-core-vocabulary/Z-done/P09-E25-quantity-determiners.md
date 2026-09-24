@@ -199,7 +199,7 @@ verb agreement of D4.
 - ***Enough* after an adjective** ("big enough": *groß genug*, *grande o suficiente*): a postposed
   degree adverb, [P09-E38](P09-E38-approximators.md)'s neighbour, not a determiner. It is left for a
   degree-adverb task when a phrase needs it.
-- ***A little* as a determiner** ("a little water"): [B89](../../../../localization/B-needs-seed/B89-a-little-and-far-away.md)
+- ***A little* as a determiner** ("a little water"): [B89](../../../../localization/done/B89-a-little-and-far-away.md)
   seeds the degree adverb. The determiner is `few` on a mass noun, which English already writes as
   *little*, so it is covered.
 - **The correlative *both … and*** — [P09-E26](P09-E26-both-and.md).

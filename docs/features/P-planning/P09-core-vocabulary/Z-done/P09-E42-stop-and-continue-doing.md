@@ -12,7 +12,7 @@ languages; the builder offers both verbs with *to* as it offers TRY; see [Done](
 2026-09-24 from [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *stop* (rank 257) and *continue* (350), in their aspectual use. Their plain uses (*stop
 the car*, *continue the work*) are seeded by
-[B84](../../../../localization/B-needs-seed/B84-stop-wait-die-continue.md). P09's sweep noted the same
+[B84](../../../../localization/done/B84-stop-wait-die-continue.md). P09's sweep noted the same
 gap as the "continuative complement" only KEEP's fallback would have used.
 
 | lang | the cat **stops running** (proposed) | the cat **continues to run** (proposed) | the cat **keeps to run** (engine: KEEP + infinitive) | the cat **tries to run** (engine: TRY) |

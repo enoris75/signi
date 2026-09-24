@@ -5,7 +5,7 @@ coverage check of 2026-09-24: *national* (rank 310), *social* (344), *political*
 (370). None is a concept at 1229928. Four adjectives, four glosses, all on shipped shapes. SOCIAL
 stands on [B77](B77-teams-institutions-and-business.md)'s COMMUNITY and POLITICAL on
 [B76](B76-government-and-the-law.md)'s GOVERNMENT, so this ticket ships after both. PUBLIC shares
-[B87](../B-needs-seed/B87-core-adjectives.md)'s French feminine fix. None goes to a C ticket.)_
+[B87](B87-core-adjectives.md)'s French feminine fix. None goes to a C ticket.)_
 
 ## Seed first
 

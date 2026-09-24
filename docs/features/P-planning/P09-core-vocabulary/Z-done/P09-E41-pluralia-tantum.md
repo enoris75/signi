@@ -9,8 +9,8 @@ proposed, honoured by every engine's article, adjective and verb agreement.
 languages, NEWS seeded with it; see [Done](#done). Filed 2026-09-24 from
 [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *news* (rank 345). The same construct unblocks the plural words
-[B77](../../../../localization/B-needs-seed/B77-teams-institutions-and-business.md)'s BUSINESS and
-[B79](../../../../localization/B-needs-seed/B79-head-face-back-health.md)'s BACK_BODY want (*gli affari,
+[B77](../../../../localization/done/B77-teams-institutions-and-business.md)'s BUSINESS and
+[B79](../../../../localization/done/B79-head-face-back-health.md)'s BACK_BODY want (*gli affari,
 les affaires, los negocios, os negócios*; pt *as costas*), and P08's POLICE (en) and PEOPLE_GENERAL
 (fr *gens*, de *Leute*).
 
@@ -69,7 +69,7 @@ What landed differently from the plan:
 5. **NEWS seeded with the construct**, beside STORY: en *news* (mass), it *notizie*, fr *nouvelles*,
    de *Nachrichten*, es *noticias*, pt *notícias* (all `fem`, `count: 'plural'`, no `plural` column),
    ja ニュース. **Literal** definition ("reports of recent events"): INFORMATION, which a gloss would
-   stand on, is not seeded ([B81](../../../../localization/B-needs-seed/B81-ideas-reasons-and-information.md)).
+   stand on, is not seeded ([B81](../../../../localization/done/B81-ideas-reasons-and-information.md)).
 6. **POLICE is not seeded**, so the English plural-only row the Tests section asked for is not pinned.
 7. **Known gap: *no* + a plurale tantum.** The negative determiner keeps Romance singular
    (`NO_TAKES_SINGULAR`, "nessuna frase"), and its spelling tables have no plural, so NEWS under *no*

@@ -5,7 +5,7 @@ coverage check of 2026-09-24: *business* (rank 254), *team* (282), *service* (29
 and *university* (359). None is a concept at 1229928. TEAM and COMMUNITY are rows of
 [P08](../../features/P-planning/P08-collective-nouns/README.md), still planning, and the forms here
 are P08's. Five words, five glosses. None goes to a C ticket. OFFICE, the sixth institution word,
-is [B78](../B-needs-seed/B78-places-and-things.md)'s, because its gloss stands on B78's ROOM.)_
+is [B78](B78-places-and-things.md)'s, because its gloss stands on B78's ROOM.)_
 
 ## Seed first
 
@@ -79,7 +79,7 @@ Readings to judge on authoring:
 1. **TEAM's Japanese reads as "a group that plays around"** (遊ぶグループ). PLAY_GAME's Japanese is
    遊ぶ, which is children's play; a team *plays a match* (試合をする). The other six are right. The
    same lexeme reading is in PLAY_GAME's own shipped gloss. The author either accepts it or waits for
-   a match concept (GAME's match sense, [B82](../B-needs-seed/B82-kinds-changes-games-and-parties.md) reading 3).
+   a match concept (GAME's match sense, [B82](B82-kinds-changes-games-and-parties.md) reading 3).
 2. **COMMUNITY's verb agrees with GROUP**, singular in all seven (*che abita*, *die … wohnt*), as
    SYSTEM's does ("a group of parts that works"). English "a group of people that lives" is the
    collective singular, and it is what SYSTEM ships.

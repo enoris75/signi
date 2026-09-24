@@ -7,7 +7,7 @@
 the temporal toolbar (key O) and in the console as `/lasting`; "for a long time" is deferred (D2); see
 [Done](#done). Filed 2026-09-24 from [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *long* (rank 284, the adverb: "for long", "a long time"). The adjective LONG is
-[B87](../../../../localization/B-needs-seed/B87-core-adjectives.md)'s. The same relation serves the band's
+[B87](../../../../localization/done/B87-core-adjectives.md)'s. The same relation serves the band's
 *hour* (308) and *minute* (326).
 
 | lang | the cat runs **for an hour** (proposed) | … **during** an hour (engine) | the cat sleeps **for a long time** (proposed) |

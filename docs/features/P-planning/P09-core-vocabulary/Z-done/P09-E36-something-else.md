@@ -146,4 +146,4 @@ Engine suite green. SOMETHING's shipped gloss ("an unknown thing") is a noun, so
 
 - ***Who else, what else*** — OTHER after a wh-word, once the question word takes modifiers.
 - **SOMEONE and EVERYTHING** take the same path once seeded
-  ([P09-E40](P09-E40-someone.md), [B90](../../../../localization/B-needs-seed/B90-everything.md)).
+  ([P09-E40](P09-E40-someone.md), [B90](../../../../localization/done/B90-everything.md)).

@@ -5,7 +5,7 @@ seeded with no `definition`. NEWS was seeded by
 [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md) with the
 plural-only construct, and its Done item 5 left it on the literal ("reports of recent events")
 because INFORMATION, the word a gloss was expected to stand on, is not seeded
-([B81](../B-needs-seed/B81-ideas-reasons-and-information.md)). The gloss does not need it: FACT, TELL
+([B81](B81-ideas-reasons-and-information.md)). The gloss does not need it: FACT, TELL
 and RECENTLY are all seeded. No new word, no new construct. It was filed with PROBABILITY, the other
 root noun of the batch, and split from it here: PROBABILITY is a dimension root on the literal by
 design, [C42](C42-probability.md).)_

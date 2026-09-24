@@ -4,12 +4,11 @@ Tasks composable **now** from seeded concepts, one per file (`A<n>-<slug>.md`). 
 [index](../localization-tasks.md#part-a--ready-a-ready) for how they are encoded and which skill
 drives them.
 
-**Three open: [A32](A32-news.md) (NEWS), [A33](A33-okay.md) (OKAY) and [A34](A34-hey.md) (HEY)**,
-filed on 2026-09-24 for the nine concepts
+**None is open.** [A32](../done/A32-news.md) (NEWS), [A33](../done/A33-okay.md) (OKAY) and
+[A34](../done/A34-hey.md) (HEY), filed on 2026-09-24 for three of the nine concepts
 [P09-E25–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
-shipped with no `definition`; the other six are [C41–C43](../C-needs-engine/). Each composes today
-on seeded words, and each overturns the "left literal" of the E task that seeded it. A34's gloss has
-no surface yet: no picker lists the `interjection` role (see its file).
+shipped with no `definition`, were authored the same day and are in [`done/`](../done/), each on its
+ticket's proposed row. The other six were [C41–C43](../done/C41-sentence-adverbs-maybe-actually-of-course.md).
 
 A23–A30, the eight the
 [sweep of 2026-09-22](../localization-tasks.md#the-sweep-of-2026-09-22) filed, were authored the
