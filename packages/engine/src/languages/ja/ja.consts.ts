@@ -116,6 +116,8 @@ export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: str
   between: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
   // P09-E27 D3: から straight on the time, as まで is — この日から.
   since: { noun: '', particle: 'から' },
+  // P09-E34: 以内 is a suffix straight on the measure, as `ago`'s 前 is — 一時間以内に, never の以内.
+  within: { noun: '以内', reading: 'いない', particle: 'に' },
 };
 
 /**

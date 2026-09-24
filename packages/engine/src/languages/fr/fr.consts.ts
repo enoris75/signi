@@ -190,4 +190,6 @@ export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, stri
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: 'entre',
   since: 'depuis',
+  // P09-E34 D2: the deadline "d'ici une heure", not the "taking" sense of "en une heure".
+  within: "d'ici",
 };

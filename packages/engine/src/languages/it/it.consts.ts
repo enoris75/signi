@@ -31,6 +31,8 @@ export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' |
   between: { word: 'tra' },
   // A simple preposition, fused with the article like `at`'s "a": "dal giorno" (P09-E27 D3).
   since: { prep: 'da' },
+  // P09-E34: a word that fuses with nothing, as "dopo" and "durante" are — "entro il giorno".
+  within: { word: 'entro' },
 };
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative

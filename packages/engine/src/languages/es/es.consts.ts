@@ -226,4 +226,6 @@ export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: { word: 'entre' },
   since: { word: 'desde' },
+  // P09-E34: a locution ending in "de", fused through it like "después de" ("dentro del día").
+  within: { word: 'dentro', de: true },
 };

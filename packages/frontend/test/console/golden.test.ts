@@ -122,6 +122,8 @@ const GOLDEN: Record<string, Golden> = {
   span: { line: '/verb run /time ( day /and night /span )', prints: '/verb ( run ) /time ( day /span /and night )', holds: { temporalRelation: 'between' }, misuse: { line: '/verb run /loc house /span', says: { code: 'noTarget', args: { command: 'span' } } } },
   // P09-E27: the time's `since`, free as a command name.
   since: { line: '/verb run /time day /since', prints: '/verb ( run ) /time ( day /since )', holds: { temporalRelation: 'since' }, misuse: { line: '/verb run /loc house /since', says: { code: 'noTarget', args: { command: 'since' } } } },
+  // P09-E34: the deadline, free as a command name.
+  within: { line: '/verb run /time day /within', prints: '/verb ( run ) /time ( day /within )', holds: { temporalRelation: 'within' } },
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
   thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },

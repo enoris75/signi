@@ -9,9 +9,9 @@ const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definite
 
 // The *when* of a clause — the complement the engine had none of until C29 (P09 §3, E3). It carries
 // a `temporal` specifier naming its relation to the time: at / ago / until / after / before /
-// during / between (P09-E20) / since (P09-E27). Each is a distinct adposition in nearly every
-// language, so all are pinned here, and the two that are not adpositions at all — the postposed "ago" and the fronted
-// impersonal verb — are pinned beside them.
+// during / between (P09-E20) / since (P09-E27) / within (P09-E34). Each is a distinct adposition
+// in nearly every language, so all are pinned here, and the two that are not adpositions at all —
+// the postposed "ago" and the fronted impersonal verb — are pinned beside them.
 describe('temporal', () => {
   // The default relation: no specifier means the act simply happens at that time.
   test('a complement naming no relation is the plain "at"', () => {
@@ -176,6 +176,67 @@ describe('temporal', () => {
       es: 'el gato corre desde el día y desde la noche.',
       pt: 'o gato corre desde o dia e desde a noite.',
       ja: '猫は日と夜から走ります。',
+    });
+  });
+
+  // P09-E34. A deadline: the act closes before the limit. German "innerhalb" governs the genitive
+  // as "während" does; Spanish and Portuguese "dentro de" fuse through their "de" ("dentro del día",
+  // "dentro do dia"); French says the deadline "d'ici" (D2); Japanese puts 以内に straight on the
+  // measure, as `ago`'s 前に is — one hour is 一時間, the numeral with HOUR's counter, since an
+  // article says nothing in Japanese.
+  describe('within', () => {
+    const runsWithin = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'within' }] } },
+    }));
+
+    test('within an hour', () => {
+      expect(runsAt('within', 'HOUR', 'indefinite')).toEqual({
+        en: 'the cat runs within an hour.',
+        it: "il gatto corre entro un'ora.",
+        fr: "le chat court d'ici une heure.",
+        de: 'der Kater läuft innerhalb einer Stunde.',
+        es: 'el gato corre dentro de una hora.',
+        pt: 'o gato corre dentro de uma hora.',
+        ja: '猫は時間以内に走ります。',
+      });
+      expect(runsWithin(np('HOUR', { definiteness: 'bare', numeral: 1 })).ja).toBe('猫は一時間以内に走ります。');
+    });
+
+    test('within this day, and the day', () => {
+      expect(runsAt('within')).toEqual({
+        en: 'the cat runs within this day.',
+        it: 'il gatto corre entro questo giorno.',
+        fr: "le chat court d'ici ce jour.",
+        de: 'der Kater läuft innerhalb dieses Tages.',
+        es: 'el gato corre dentro de este día.',
+        pt: 'o gato corre dentro deste dia.',
+        ja: '猫はこの日以内に走ります。',
+      });
+      expect(runsAt('within', 'DAY', 'definite')).toEqual({
+        en: 'the cat runs within the day.',
+        it: 'il gatto corre entro il giorno.',
+        fr: "le chat court d'ici le jour.",
+        de: 'der Kater läuft innerhalb des Tages.',
+        es: 'el gato corre dentro del día.',
+        pt: 'o gato corre dentro do dia.',
+        ja: '猫は日以内に走ります。',
+      });
+      expect(runsAt('within', 'DAY', 'indefinite')).toMatchObject({
+        de: 'der Kater läuft innerhalb eines Tages.', es: 'el gato corre dentro de un día.', pt: 'o gato corre dentro de um dia.',
+      });
+    });
+
+    // The genitive falls back on the dative where a bare plural cannot show it, as during's does.
+    test('a bare plural falls back on the dative in German', () => {
+      expect(runsWithin(np('DAY', { definiteness: 'bare', number: 'plural' })).de).toBe('der Kater läuft innerhalb Tagen.');
+      expect(runsWithin(np('DAY', { definiteness: 'definite', number: 'plural' })).de).toBe('der Kater läuft innerhalb der Tage.');
+    });
+
+    // The other two columns of the task's table: a point and a stretch are not a deadline.
+    test('is told apart from at and during', () => {
+      const hour = (value: TemporalRelation) => runsAt(value, 'HOUR', 'indefinite');
+      expect(hour('at')).toMatchObject({ it: "il gatto corre a un'ora.", fr: 'le chat court à une heure.', de: 'der Kater läuft zu einer Stunde.', ja: '猫は時間に走ります。' });
+      expect(hour('during')).toMatchObject({ it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.', ja: '猫は時間の間に走ります。' });
     });
   });
 

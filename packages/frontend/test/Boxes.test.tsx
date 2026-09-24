@@ -607,23 +607,23 @@ describe('SpecifierSelector', () => {
 
 // P09-E12b: the temporal complement's relations, the route's toolbar with a set of its own.
 describe('TemporalSelector', () => {
-  // P09-E20 added the seventh, between; P09-E27 the eighth, since.
-  it('offers the eight temporal relations, in order, each by its word', () => {
+  // P09-E20 added the seventh, between; P09-E27 the eighth, since; P09-E34 the ninth, within.
+  it('offers the nine temporal relations, in order, each by its word', () => {
     renderWithProviders(<TemporalSelector value="at" onSelect={() => {}} />);
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
-      'at', 'ago', 'until', 'after', 'before', 'during', 'between', 'since',
+      'at', 'ago', 'until', 'after', 'before', 'during', 'between', 'since', 'within',
     ]);
-    expect(TEMPORAL_RELATIONS).toHaveLength(8);
+    expect(TEMPORAL_RELATIONS).toHaveLength(9);
   });
 
-  it('answers to a letter heard in each word — A, G, U, F, B, D, the spatial between\'s W, and S', () => {
+  it('answers to a letter heard in each word — A, G, U, F, B, D, the spatial between\'s W, S and I', () => {
     renderWithProviders(<TemporalSelector value="at" onSelect={() => {}} />);
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-keyshortcuts'))).toEqual([
-      'A', 'G', 'U', 'F', 'B', 'D', 'W', 'S',
+      'A', 'G', 'U', 'F', 'B', 'D', 'W', 'S', 'I',
     ]);
-    expect(new Set(Object.values(TEMPORAL_KEYS)).size).toBe(8);
+    expect(new Set(Object.values(TEMPORAL_KEYS)).size).toBe(9);
   });
 
   it('selects the relation clicked, and highlights only the current one', () => {

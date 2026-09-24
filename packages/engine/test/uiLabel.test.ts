@@ -281,6 +281,10 @@ describe('relation toolbars: the adposition each specifier spells', () => {
     expect(temporal('since')).toEqual({
       en: 'since', it: 'da', fr: 'depuis', de: 'seit', es: 'desde', ja: '〜から', pt: 'desde',
     });
+    // P09-E34: the genitive "innerhalb", and Japanese 以内 cited on the 〜 as `ago`'s 前 is.
+    expect(temporal('within')).toEqual({
+      en: 'within', it: 'entro', fr: "d'ici", de: 'innerhalb', es: 'dentro de', ja: '〜以内に', pt: 'dentro de',
+    });
   });
 
   test('a cause connector is a specifier too — the stance picks the word', () => {

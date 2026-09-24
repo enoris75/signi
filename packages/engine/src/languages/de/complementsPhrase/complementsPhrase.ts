@@ -26,7 +26,7 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -249,14 +249,15 @@ export function complementsParts(
         // and `before` — German makes no difference between "vor einem Augenblick" and "vor dem
         // Tag", where English has two words and Japanese marks the two apart with の.
         //
-        // "während" is the exception: it governs the **genitive** ("während des Tages"), and falls
-        // back on the dative exactly where the cause's "wegen" does — a bare plural has no genitive
+        // "während" is the exception, and P09-E34's "innerhalb" with it: they govern the **genitive**
+        // ("während des Tages", "innerhalb einer Stunde"), and fall back on the dative exactly where
+        // the cause's "wegen" does — a bare plural has no genitive
         // to show ("während Tagen", see `genitiveShows`).
         else if (type === 'temporal') {
           const relation = temporalRelation(c);
-          if (relation === 'during') {
+          if (relation === 'during' || relation === 'within') {
             _case = genitiveShows(np, f) ? 'gen' : 'dat';
-            head = prepDet('während', f, _case, plural);
+            head = prepDet(DE_GENITIVE_TEMPORAL[relation], f, _case, plural);
           } else if (relation === 'until') {
             head = `bis ${prepDet('zu', f, 'dat', plural)}`;
           } else {

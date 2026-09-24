@@ -105,6 +105,7 @@ export const TEMPORAL_PREP: Record<TemporalRelation, string> = {
   // preposition across a group anyway.
   between: 'between',
   since: 'since',
+  within: 'within',
 };
 
 /** The relations English writes after the noun phrase rather than before it. */

@@ -216,13 +216,14 @@ export const CARDINALS: CardinalTable = {
  * The dative preposition each temporal relation takes in German (C29). `at` is not here — it reads
  * the head noun's own `temporal_prep` and falls back on "zu", the word a temporal noun already takes
  * in a manner adverbial ("zu allen Zeiten", A60) — and neither is `until`, which reaches its time
- * through that same "zu" ("bis zum Tag"), nor `during`, which governs the genitive.
+ * through that same "zu" ("bis zum Tag"), nor `during` and `within`, which govern the genitive
+ * (`DE_GENITIVE_TEMPORAL`).
  *
  * **"vor" spells both `ago` and `before`**, and that is the language, not a shortcut: "vor einem
  * Augenblick" is a moment ago and "vor dem Tag" is before the day, one preposition for the two
  * readings English splits into "ago" and "before" and Japanese into 前に and の前に.
  */
-export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during'>, string> = {
+export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during' | 'within'>, string> = {
   ago: 'vor',
   after: 'nach',
   before: 'vor',
@@ -231,4 +232,14 @@ export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'dur
   between: 'zwischen',
   // P09-E27 D3: "seit" + dative, "seit diesem Tag", "seit dem Tag".
   since: 'seit',
+};
+
+/**
+ * The temporal relations whose German preposition governs the **genitive**: "während des Tages",
+ * and P09-E34's deadline "innerhalb einer Stunde". Each falls back on the dative where a bare plural
+ * has no genitive to show ("während Tagen", "innerhalb Tagen"), as the cause's "wegen" does.
+ */
+export const DE_GENITIVE_TEMPORAL: Record<'during' | 'within', string> = {
+  during: 'während',
+  within: 'innerhalb',
 };

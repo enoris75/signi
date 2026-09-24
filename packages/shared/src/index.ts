@@ -461,6 +461,10 @@ export const GROUP_SCOPED_TEMPORAL_RELATIONS: ReadonlySet<TemporalRelation> = ne
  *            *durante*, の間に, *durante*)
  *   since  — from that time on: "runs **since this day**" (*da*, *depuis*, *seit* + dative,
  *            *desde*, から, *desde*), P09-E27 D3
+ *   within — a deadline, closing before that limit: "runs **within an hour**" (*entro*, *d'ici*,
+ *            *innerhalb* + genitive, *dentro de*, 〜以内に, *dentro de*), P09-E34. French *d'ici* is
+ *            the deadline ("an hour from now"), not *en une heure* ("taking an hour"). The spatial
+ *            "within the house" is the locative `in` and needs nothing
  *   between — bounded on both sides: "runs **between this day and that day**" (*tra*, *entre*,
  *            *zwischen* + dative, *entre*, の間に, *entre*). The one temporal relation that scopes
  *            over a coordinated time instead of distributing across it (see
@@ -483,9 +487,9 @@ export const GROUP_SCOPED_TEMPORAL_RELATIONS: ReadonlySet<TemporalRelation> = ne
  * The canvas draws a box for it (P09-E12b), offered on every verb (`ADJUNCT_COMPLEMENT_TYPES`), and
  * its relation is the box's toolbar, as the route's path is.
  */
-export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during' | 'between' | 'since';
+export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during' | 'between' | 'since' | 'within';
 
-export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during', 'between', 'since'];
+export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during', 'between', 'since', 'within'];
 
 /** A temporal complement naming no relation simply places the act at that time. */
 export const DEFAULT_TEMPORAL_RELATION: TemporalRelation = 'at';
