@@ -44,4 +44,17 @@ describe('frCliticize', () => {
     expect(frCliticize('y', 'ne sera pas')).toBe("n'y sera pas");
     expect(frCliticize('y', 'est')).toBe('y est');
   });
+
+  // localization B86: a pronominal verb with a direct object (se rappeler) keeps its own clitic first,
+  // and that one is judged again against the object clitic after it.
+  test('a pronominal verb keeps its own clitic ahead of the object', () => {
+    expect(frCliticize('le', 'se rappelle')).toBe('se le rappelle');
+    expect(frCliticize('la', 'me rappelle')).toBe('me la rappelle');
+    expect(frCliticize('les', 'nous rappelons')).toBe('nous les rappelons');
+    expect(frCliticize('le', "s'est rappelé")).toBe("se l'est rappelé");
+    expect(frCliticize('le', 'ne se rappelle pas')).toBe('ne se le rappelle pas');
+    expect(frCliticize('le', "ne s'est pas rappelé")).toBe("ne se l'est pas rappelé");
+    expect(frCliticize('y', "s'arrête")).toBe("s'y arrête");
+    expect(frCliticize('y', "ne s'arrête pas")).toBe("ne s'y arrête pas");
+  });
 });

@@ -39,4 +39,9 @@ describe('verbGroupInfinitiveFr', () => {
     expect(verbGroupInfinitiveFr(EFFONDRER, CHAT, 'resultative')).toBe("s'être effondré");
     expect(verbGroupInfinitiveFr(EFFONDRER, { ...FEMME }, 'resultative')).toBe("s'être effondrée");
   });
+
+  // localization B86: se rappeler agrees with no subject.
+  test('an indirect pronominal verb keeps its participle unagreed', () => {
+    expect(verbGroupInfinitiveFr({ base: 'se rappeler', reflexive_indirect: '1', participle: 'rappelé', aux: 'be', '3sg_present': 'se rappelle' }, FEMME, 'resultative')).toBe("s'être rappelé");
+  });
 });
