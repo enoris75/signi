@@ -154,6 +154,34 @@ test.describe('complements', () => {
     });
   });
 
+  // The cause's connector fuses only the definite article ("a causa del cane"); any other
+  // determiner follows it unfused, and "no" brings the Romance preverbal negator with it.
+  test('the cause takes a determiner', async ({ app }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.revealAndPick('cause', 'DOG');
+
+    await app.setDeterminer('cause', 'Indefinite');
+    await app.expectSentences({
+      en: 'the cat runs because of a dog.',
+      it: 'il gatto corre a causa di un cane.',
+      fr: "le chat court à cause d'un chien.",
+      de: 'der Kater läuft wegen eines Hundes.',
+      es: 'el gato corre a causa de un perro.',
+      pt: 'o gato corre por causa de um cão.',
+    });
+
+    await app.setDeterminer('cause', 'Negative');
+    await app.expectSentences({
+      en: 'the cat runs because of no dog.',
+      it: 'il gatto non corre a causa di nessun cane.',
+      fr: "le chat ne court à cause d'aucun chien.",
+      de: 'der Kater läuft wegen keines Hundes.',
+      es: 'el gato no corre a causa de ningún perro.',
+      pt: 'o gato não corre por causa de nenhum cão.',
+      ja: '猫はどの犬のためにも走りません。',
+    });
+  });
+
   // P09-E12b. The temporal and the purpose are offered on every verb (RUN and READ license
   // neither); the topic only where the verb licenses it (THINK). The temporal's relation is a
   // toolbar like the route's, `at` until one is chosen.

@@ -347,7 +347,7 @@ describe('rawSatellites', () => {
       [
         'a gendered noun its gender beside the rest of its family',
         FRIEND,
-        ['causeAdjective', 'causeNumber', 'causeGender', 'causeRelative', 'causePossessor'],
+        ['causeAdjective', 'causeNumber', 'causeGender', 'causeDefiniteness', 'causeRelative', 'causePossessor'],
       ],
     ])('gives a cause that is %s', (_, cause, controls) => {
       expect(offered({ verb: GO, cause }, 'cause')).toEqual([
@@ -376,8 +376,8 @@ describe('rawSatellites', () => {
       ['direction', true],
       ['source', true],
       ['route', true],
-      // The cause folds its quantifier into the connector instead.
-      ['cause', false],
+      // The connector fuses only the definite article and leads any other ("a causa di un cane").
+      ['cause', true],
     ])('offers a determiner to a %s noun: %s', (type, available) => {
       const determiner = satellite({ verb: GO, [type]: CARE }, `${type}Definiteness`);
       expect(determiner.available).toBe(available);

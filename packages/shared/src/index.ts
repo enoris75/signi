@@ -375,14 +375,16 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * `predicative` keeps its own article; the spatial/dative/instrumental complements (locative /
  * direction / source / route / terminus / instrumental) are adposition-bearing — their engines
  * fuse the preposition with a *definite* article (Italian "alla casa") but otherwise render the
- * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
- * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
+ * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` joins
+ * them for a noun head (a pronoun takes none): its connector fuses only the definite article
+ * ("a causa del cane", "grâce au chien") and otherwise leads the determiner ("a causa di un cane",
+ * "grâce à aucun chien", "wegen keines Hundes"), the engines' A65 fix.
  * The `purpose` and `topic` of P09-E2 are plain adposition-bearing ones ("per l'uomo", "del gatto").
  * The `role` of P09-E13 carries its determiner to English alone ("as a friend", "as the speaker"):
  * every other engine drops it, as it drops the essive's. P09-E22's `opponent` is another plain one
  * ("contro il cane", "gegen einen Hund").
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose', 'opponent'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'role', 'comitative', 'instrumental', 'topic', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'cause', 'purpose', 'opponent'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs

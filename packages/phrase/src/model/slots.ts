@@ -443,8 +443,8 @@ export const COLLAPSIBLE_GROUPS: {
     mainKey: type as string,
     childKeys: [
       ...adjectiveSlots(type),
-      // The predicative plus the adposition-bearing spatial/dative complements carry a
-      // determiner (cause is excluded — it weaves the quantifier into its connector).
+      // The predicative plus the adposition-bearing complements, the cause among them, carry a
+      // determiner.
       ...(DETERMINER_COMPLEMENT_TYPES.includes(type) ? [`${type}Definiteness`] : []),
     ],
   })),

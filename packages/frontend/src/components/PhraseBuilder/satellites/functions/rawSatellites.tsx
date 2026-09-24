@@ -627,9 +627,8 @@ export function rawSatellites(
           label: t("satellite.determiner"),
           labelKey: "satellite.determiner",
           icon: <ArticleOutlinedIcon sx={iconSx} />,
-          // The predicative plus the adposition-bearing spatial/dative complements carry a
-          // determiner, and only for a noun head (a pronoun cause takes none). Cause is not
-          // in the set — it folds the quantifier into its connector. A *measure* manner adverbial
+          // The predicative plus the adposition-bearing complements, the cause among them, carry a
+          // determiner, and only for a noun head (a pronoun cause takes none). A *measure* manner adverbial
           // names a rate, not an identifiable thing, so the engine fixes it bare (see the
           // translator) — the determiner is not user-changeable there, so it is withdrawn.
           available:
