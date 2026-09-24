@@ -155,4 +155,4 @@ reads the shared list).
 - **Causal *since*, *as*** (D2).
 - ***Once* as a conjunction** ("once the dog eats") — rank 343 is the adverb, seeded by
   [B80](../../../../localization/B-needs-seed/B80-minute-morning-later-once-often.md).
-- ***However*** is a connector, not a subordinator — [P09-E29](../P09-E29-however.md).
+- ***However*** is a connector, not a subordinator — [P09-E29](P09-E29-however.md).

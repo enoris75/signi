@@ -9,7 +9,7 @@ spelled by each engine before its first conjunct.
 languages, plan-only (no builder control); see [Done](#done). Filed 2026-09-24 from
 [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *both* (rank 396, the adverb; the determiner *both*, rank 291, is
-[P09-E25](../P09-E25-quantity-determiners.md)'s).
+[P09-E25](P09-E25-quantity-determiners.md)'s).
 
 | lang | **both** the cat **and** the dog run (engine, 2026-09-24) | the cat and the dog run (engine, 1229928) |
 |---|---|---|

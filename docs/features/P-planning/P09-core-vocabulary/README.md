@@ -299,25 +299,25 @@ need only seeding are [B75–B90](../../../localization/localization-tasks.md#pa
 
 | task | construct |
 |---|---|
-| [P09-E25](P09-E25-quantity-determiners.md) | More quantity determiners — *each, both, most, several, enough, a lot of* |
-| [P09-E26](P09-E26-both-and.md) | *Both … and* — a correlative on a coordinated group |
-| [P09-E27](P09-E27-until-since-though.md) | *Until, since, though* — three more adverbial-clause conjunctions |
-| [P09-E28](P09-E28-yet-and-ever.md) | *Yet* and *ever* — the polarity forms of ALREADY and NEVER |
-| [P09-E29](P09-E29-however.md) | *However* — a parenthetical adversative connector |
-| [P09-E30](P09-E30-interjections.md) | *Hey* — an interjection before a clause |
-| [P09-E31](P09-E31-state-predicate-okay.md) | *Okay* — a well-being predicate whose copula is lexical |
-| [P09-E32](P09-E32-among.md) | *Among* — a spatial relation over a plural set |
-| [P09-E33](P09-E33-including-such-as.md) | *Including* and *such as* — naming members of a noun's set |
-| [P09-E34](P09-E34-within.md) | *Within* — a deadline relation on the temporal complement |
-| [P09-E35](P09-E35-duration.md) | Duration — "for an hour", "for a long time" |
-| [P09-E36](P09-E36-something-else.md) | *Something else*, *something big* — a modifier on an indefinite pronoun |
-| [P09-E37](P09-E37-goes-home.md) | *Goes home* — the direction idiom of HOME |
-| [P09-E38](P09-E38-approximators.md) | Approximators — *about five*, *almost all* |
-| [P09-E39](P09-E39-sentence-adverbs.md) | Sentence adverbs — *maybe, probably, actually, of course* |
-| [P09-E40](P09-E40-someone.md) | *Someone* — a human indefinite pronoun |
-| [P09-E41](P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* |
-| [P09-E42](P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb |
-| [P09-E43](P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object |
+| [P09-E25](Z-done/P09-E25-quantity-determiners.md) | More quantity determiners — *each, both, most, several, enough, a lot of* |
+| [P09-E26](Z-done/P09-E26-both-and.md) | *Both … and* — a correlative on a coordinated group |
+| [P09-E27](Z-done/P09-E27-until-since-though.md) | *Until, since, though* — three more adverbial-clause conjunctions |
+| [P09-E28](Z-done/P09-E28-yet-and-ever.md) | *Yet* and *ever* — the polarity forms of ALREADY and NEVER |
+| [P09-E29](Z-done/P09-E29-however.md) | *However* — a parenthetical adversative connector |
+| [P09-E30](Z-done/P09-E30-interjections.md) | *Hey* — an interjection before a clause |
+| [P09-E31](Z-done/P09-E31-state-predicate-okay.md) | *Okay* — a well-being predicate whose copula is lexical |
+| [P09-E32](Z-done/P09-E32-among.md) | *Among* — a spatial relation over a plural set |
+| [P09-E33](Z-done/P09-E33-including-such-as.md) | *Including* and *such as* — naming members of a noun's set |
+| [P09-E34](Z-done/P09-E34-within.md) | *Within* — a deadline relation on the temporal complement |
+| [P09-E35](Z-done/P09-E35-duration.md) | Duration — "for an hour", "for a long time" |
+| [P09-E36](Z-done/P09-E36-something-else.md) | *Something else*, *something big* — a modifier on an indefinite pronoun |
+| [P09-E37](Z-done/P09-E37-goes-home.md) | *Goes home* — the direction idiom of HOME |
+| [P09-E38](Z-done/P09-E38-approximators.md) | Approximators — *about five*, *almost all* |
+| [P09-E39](Z-done/P09-E39-sentence-adverbs.md) | Sentence adverbs — *maybe, probably, actually, of course* |
+| [P09-E40](Z-done/P09-E40-someone.md) | *Someone* — a human indefinite pronoun |
+| [P09-E41](Z-done/P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* |
+| [P09-E42](Z-done/P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb |
+| [P09-E43](Z-done/P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object |
 
 ## Verification
 

@@ -5,7 +5,7 @@ coverage check of 2026-09-24: *study* as a noun (rank 259), *issue* (261), *idea
 (320), *reason* (336), *history* (374) and *research* (383). None is a concept at 1229928 (the seeded
 HISTORY is the console's typed history, *cronologia / Verlauf* / 履歴). Seven words, seven glosses.
 *News*, the eighth word of the family, is plural-only in five languages and is
-[P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md)'s. None goes to a
+[P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)'s. None goes to a
 C ticket.)_
 
 ## Seed first
@@ -111,7 +111,7 @@ Readings to judge on authoring:
 
 ## Not solved by this seed
 
-1. **NEWS** — [P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md).
+1. **NEWS** — [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md).
 2. **The verb STUDY** and REASON's faculty sense — later.
 3. **ISSUE's and STUDY_NOUN's Japanese homographs** (readings 3 and 5) — the author's call.
 

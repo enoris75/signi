@@ -63,9 +63,9 @@ What landed differently from the plan:
    `many` from `ALMOST_DETERMINERS`). *Almost* on a numeral ("almost five cats") is ignored, as D1
    says, though it is natural in all seven.
 5. **Inside a complement `about` inherits the numeral defects already filed**: de/es/pt drop the
-   numeral there ([A291](../../../../bugs/A-must-fix/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md):
+   numeral there ([A291](../../../../bugs/fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md):
    "läuft in Häusern" for *in etwa fünf Häusern*), and French writes *de* before a bare numeral
-   ([A292](../../../../bugs/A-must-fix/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md):
+   ([A292](../../../../bugs/fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md):
    "dans d'environ cinq maisons"). Not pinned; they close with those bugs. *almost* inside a
    complement renders correctly (row above).
 6. The tests are all in `approximators.test.ts` (twelve cases) rather than split with

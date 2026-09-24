@@ -127,4 +127,4 @@ Engine suite green; the console's connector completion lists it.
 ## Out of scope (follow-ups)
 
 - ***Though* as a sentence adverb** ("the dog eats, though") — the same connector at the end in
-  English only; [P09-E27](../P09-E27-until-since-though.md) takes *though* as a conjunction.
+  English only; [P09-E27](P09-E27-until-since-though.md) takes *though* as a conjunction.

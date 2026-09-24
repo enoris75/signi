@@ -23,7 +23,7 @@ Proposed forms, for the seed author to check. Every row was **seeded in memory a
   "business" (*gli affari, les affaires, los negocios, os negócios*). A noun that is plural in every
   use (a *plurale tantum*) does not render today: seeded as `count: 'plural'` with no singular, the
   probe wrote *l'affari*, *la notizie*, *el negocios*. That is
-  [P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md), which also
+  [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md), which also
   owns NEWS. When it lands, the author can swap BUSINESS to the plural forms. *Commercio / commerce /
   Handel* are the trade itself and are correct as they stand, just less colloquial.
   **E41 has landed (2026-09-24):** a lexeme seeded `count: 'plural'` with its plural as `base` now renders plural throughout ([P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
@@ -95,7 +95,7 @@ Readings to judge on authoring:
 ## Not solved by this seed
 
 1. **The plural business words** (*affari, affaires, negocios, negócios*) wait on
-   [P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md).
+   [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md).
 2. **P08's `member` relation** ("a team of players") — P08's own work.
 3. **SERVICE's religious and military senses** (*funzione, office, Gottesdienst*) — not proposed.
 

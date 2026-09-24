@@ -132,7 +132,7 @@ Engine, backend (the role is new) and frontend suites green.
 ## Out of scope (follow-ups)
 
 - ***Yeah, oh, yes*** — seeds on this slot, from a spoken list (P09 *Why*).
-- ***Okay*** as an answer — [P09-E31](../P09-E31-state-predicate-okay.md) takes its predicate use.
+- ***Okay*** as an answer — [P09-E31](P09-E31-state-predicate-okay.md) takes its predicate use.
 - **A picker heading and a builder control** for the role (needs an INTERJECTION grammar noun for
   `palette.interjection`).
 - **An exclamative clause** and Spanish ¡…!.

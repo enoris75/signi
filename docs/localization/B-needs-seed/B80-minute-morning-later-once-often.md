@@ -98,7 +98,7 @@ Readings to judge on authoring:
 
 1. **ONCE's gloss** (reading 4), and its *formerly* sense.
 2. **The numeral under `ago`** (reading 6) — an A bug, not this ticket.
-3. **"For five minutes"**, the duration — [P09-E35](../../features/P-planning/P09-core-vocabulary/P09-E35-duration.md).
+3. **"For five minutes"**, the duration — [P09-E35](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E35-duration.md).
 4. **Evening, afternoon, tomorrow** — not in the band.
 
 ## Coverage

@@ -67,7 +67,7 @@ complement would say `mit ein Hund` / `in ein Haus` where German wants `mit eine
 Haus`. That is why the German `one` row is left out. It belongs to the cardinal table (`numeralWord`,
 `de.consts.ts`), not to this bug. The Portuguese `em uma casa` (for `numa casa`) is a style choice,
 not settled here either. The French `de` before a bare numeral in a complement is
-[A292](../A-must-fix/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md).
+[A292](A292-french-writes-de-before-a-bare-numeral-in-a-complement.md).
 
 | | |
 |---|---|

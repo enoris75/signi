@@ -4,7 +4,7 @@ _(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E2
 coverage check of 2026-09-24: *everything* (rank 309). Not a concept at 1229928. *Anything* (245)
 and *nothing* (246) are forms of the seeded SOMETHING. *Someone* (302) is not this ticket's: a
 **person** indefinite is cliticized and dropped as a personal pronoun would be, which is
-[P09-E40](../../features/P-planning/P09-core-vocabulary/P09-E40-someone.md). EVERYTHING is a thing,
+[P09-E40](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E40-someone.md). EVERYTHING is a thing,
 so SOMETHING's `thing` flag keeps it a phrase. One word, one gloss. None goes to a C ticket.)_
 
 ## Seed first

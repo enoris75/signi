@@ -143,5 +143,5 @@ Engine suite green.
 
 ## Out of scope (follow-ups)
 
-- ***Such* as a determiner** ("such a cat") — [P09-E25](../P09-E25-quantity-determiners.md) D3.
+- ***Such* as a determiner** ("such a cat") — [P09-E25](P09-E25-quantity-determiners.md) D3.
 - ***Excluding / except*** — the negative relation, later.

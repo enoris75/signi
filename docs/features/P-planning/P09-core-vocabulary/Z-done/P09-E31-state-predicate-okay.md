@@ -129,5 +129,5 @@ Engine suite green; one new concept seeded with the construct.
 
 ## Out of scope (follow-ups)
 
-- ***Okay* as an answer or an interjection** — [P09-E30](../P09-E30-interjections.md).
+- ***Okay* as an answer or an interjection** — [P09-E30](P09-E30-interjections.md).
 - ***Well* as a predicate** (D2).
