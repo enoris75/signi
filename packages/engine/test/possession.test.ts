@@ -1550,7 +1550,7 @@ describe('known bugs: a French negated object keeps un beside a detached possess
   const notSee = (object: NounPhrase, verb = 'SEE') => sayAll(clause(np('CAT'), verb, { directObject: object, verbPhrase: { negative: true } }));
 
   // Spanish is left out: its "no ve a mi amigo" is A325's, and would tie the two fixes together.
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
       en: 'the cat does not see a friend of mine.', it: 'il gatto non vede un mio amico.',
       fr: "le chat ne voit pas d'ami à moi.", // now: "le chat ne voit pas un ami à moi."
@@ -1558,7 +1558,7 @@ describe('known bugs: a French negated object keeps un beside a detached possess
     });
   });
 
-  test.fails('a thing, the plural and a mass noun', () => {
+  test('a thing, the plural and a mass noun', () => {
     expect(notSee(np('HOUSE', { definiteness: 'indefinite', possessor: mine })).fr).toBe('le chat ne voit pas de maison à moi.'); // now: "pas une maison"
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine })).fr).toBe("le chat ne voit pas d'amis à moi."); // now: "pas des amis"
     expect(notSee(np('WATER', { definiteness: 'indefinite', possessor: mine }), 'DRINK').fr).toBe("le chat ne boit pas d'eau à moi."); // now: "pas de l'eau"
@@ -1571,6 +1571,18 @@ describe('known bugs: a French negated object keeps un beside a detached possess
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: mine }) }), 'fr'))
       .toBe('le chat voit un ami à moi.');
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine })).it).toBe('il gatto non vede un mio amico.');
+  });
+
+  // The negated object now reads its determiner off the head's own forms through `objectArtFor`, so
+  // the other kept determiners, a prenominal adjective, a counted object and another person go the
+  // way the unpossessed negation goes.
+  test('the other kept determiners, an adjective, a numeral and another person', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(notSee(np('FRIEND', { definiteness: 'no', possessor: mine })).fr).toBe('le chat ne voit aucun ami à moi.');
+    expect(notSee(np('FRIEND', { definiteness: 'some', number: 'plural', possessor: mine })).fr).toBe('le chat ne voit pas quelques amis à moi.');
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite', adjectives: ['OLD'], possessor: mine })).fr).toBe('le chat ne voit pas de vieil ami à moi.');
+    expect(notSee(np('FRIEND', { numeral: 2, definiteness: 'indefinite', possessor: mine })).fr).toBe('le chat ne voit pas deux amis à moi.');
+    expect(notSee(np('HOUSE', { definiteness: 'indefinite', possessor: her })).fr).toBe('le chat ne voit pas de maison à elle.');
   });
 });
 
