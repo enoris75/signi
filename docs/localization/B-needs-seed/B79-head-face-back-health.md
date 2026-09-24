@@ -21,6 +21,7 @@ Proposed forms, for the seed author to check. Every row was **seeded in memory a
   with no singular it rendered *o gato vê **uma** costas* and *a costas grande parece boa*: the
   engine has no plurale tantum ([P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md)).
   Seed *dorso*, the anatomical singular, now, and swap to *costas* when E41 lands.
+  **E41 has landed (2026-09-24):** a lexeme seeded `count: 'plural'` with its plural as `base` now renders plural throughout ([P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
 - **Italian *viso* against *faccia***: both are the face. *Faccia* is also "cheek" (nerve) and
   appears in idioms; *viso* is the neutral word. Spanish *cara* is also "expensive" (fem. of CARO),
   which no seeded adjective is.
