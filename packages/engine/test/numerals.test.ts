@@ -692,3 +692,36 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 });
+
+// A363. A French verb's own preposition other than "de" / "à" (CLICK's "sur") is written before the
+// partitive article, which a numeral leaves empty, so the phrase gains a second space.
+describe('known bugs: a French prepositional object with a numeral and no article writes a double space (A363)', () => {
+  const clicks = (object: NounPhrase, negative = false) =>
+    say(clause(np('CAT'), 'CLICK', { directObject: object, verbPhrase: { negative } }), 'fr');
+
+  test.fails('the indefinite one and two, the bare two, negated', () => {
+    expect([
+      clicks(np('BUTTON', { numeral: 1, definiteness: 'indefinite' })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'indefinite' })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'bare' })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'indefinite' }), true),
+    ]).toEqual([
+      'le chat clique sur un bouton.',
+      'le chat clique sur deux boutons.',
+      'le chat clique sur deux boutons.',
+      'le chat ne clique pas sur deux boutons.',
+    ]);
+  });
+
+  test('regression: no numeral, the definite and the demonstrative two', () => {
+    expect([
+      clicks(np('BUTTON', { definiteness: 'indefinite', number: 'plural' })),
+      clicks(np('BUTTON', { numeral: 2 })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'this' })),
+    ]).toEqual([
+      'le chat clique sur des boutons.',
+      'le chat clique sur les deux boutons.',
+      'le chat clique sur ces deux boutons.',
+    ]);
+  });
+});
