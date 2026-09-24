@@ -36,3 +36,18 @@ says the possessor counts one beside a definite or demonstrative, as `nounPhrase
 | **Test** | `numerals.test.ts` → *known bugs: a Spanish or Portuguese noun possessor counted by one beside a definite keeps the one (A339)* (3 `test.fails`: the object's possessor, the subject's and a comitative's, the demonstratives; plus a regression test for it / fr / de, the indefinite one and the definite two) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24 in [es/possessorText.ts](../../../packages/engine/src/languages/es/possessorText.ts)
+and [pt/possessorText.ts](../../../packages/engine/src/languages/pt/possessorText.ts): the cardinal is
+left out when [oneBesideDeterminer](../../../packages/engine/src/functions/oneBesideDeterminer.ts)
+says the possessor counts one beside a definite or demonstrative (and no possessive stands in the
+determiner's place), as `nounPhrase.ts` and `complementsPhrase.ts` do since A319.
+
+The 3 `test.fails` in `known bugs: a Spanish or Portuguese noun possessor counted by one beside a
+definite keeps the one (A339)` in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts)
+are plain tests now. The same block gained an adjectived, a nested and a masculine distal possessor,
+and the demonstrative two (*de estos dos hombres*, *destes dois homens*). The colocated
+`possessorText.test.ts` of each language gained a case for the definite and demonstrative one and the
+definite two.

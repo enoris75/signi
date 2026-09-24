@@ -4,6 +4,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { keptBesidePossessive } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS } from './pt.consts.js';
 import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
@@ -44,7 +45,10 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
   // A counted possessor keeps its cardinal: "um período de vinte e quatro horas" (C31).
-  const head = [numeralText(f, CARDINALS), withAdj(word, ptAdj(poss))].filter(Boolean).join(' ');
+  // …and at one beside a definite or demonstrative it is left out: "do homem", not "*do um
+  // homem" (A319, A339).
+  const numeral = oneBesideDeterminer(poss.head.forms) && !possessive ? '' : numeralText(f, CARDINALS);
+  const head = [numeral, withAdj(word, ptAdj(poss))].filter(Boolean).join(' ');
   const noun = (detached ? [head, possessive] : [possessive, head]).filter(Boolean).join(' ');
   return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${noun}`, poss)}`;
 }

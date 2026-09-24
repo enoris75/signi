@@ -1,6 +1,9 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { keptBesidePossessive } from '../../possessive.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
+import { CARDINALS } from './es.consts.js';
 import { npText } from './npText.js';
 import { aDet } from './aDet.js';
 import { artForms } from './artForms.js';
@@ -33,7 +36,11 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const plural = isPlural(f);
   const adj = esAdj(np);
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const noun = [possessive, withAdj(word, adj)].filter(Boolean).join(' ');
+  // A cardinal stands after the determiner and possessive, before the noun, as `nounPhrase` places it —
+  // and at one beside a definite or demonstrative it is left out (A319): "a los dos amigos", "a
+  // estos dos amigos", "a dos amigos" (A340).
+  const numeral = oneBesideDeterminer(f) && !possessive ? '' : numeralText(f, CARDINALS);
+  const noun = [possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');
   // The article is chosen from the adjective-aware forms: a prenominal adjective changes the one a
   // stressed-a noun takes ("en la primera agua").
   const af = artForms(f, adj);

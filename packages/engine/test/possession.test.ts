@@ -1682,17 +1682,17 @@ describe('known bugs: the Portuguese prepositional object drops the determiner b
   const dependsOn = (extra: Partial<NounPhrase>) =>
     say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { possessor: mine, ...extra }) }), 'pt');
 
-  test.fails('the demonstratives', () => {
+  test('the demonstratives', () => {
     expect(dependsOn({ definiteness: 'this' })).toBe('o gato depende desta condição minha.');
     expect(dependsOn({ definiteness: 'that' })).toBe('o gato depende dessa condição minha.');
   });
 
-  test.fails('the indefinite, singular and plural', () => {
+  test('the indefinite, singular and plural', () => {
     expect(dependsOn({ definiteness: 'indefinite' })).toBe('o gato depende de uma condição minha.');
     expect(dependsOn({ definiteness: 'indefinite', number: 'plural' })).toBe('o gato depende de umas condições minhas.');
   });
 
-  test.fails('no and all', () => {
+  test('no and all', () => {
     expect(dependsOn({ definiteness: 'no' })).toBe('o gato não depende de nenhuma condição minha.');
     expect(dependsOn({ definiteness: 'all', number: 'plural' })).toBe('o gato depende de todas as minhas condições.');
   });
@@ -1707,6 +1707,13 @@ describe('known bugs: the Portuguese prepositional object drops the determiner b
     expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { definiteness: 'this', possessor: mine }) }), 'es'))
       .toBe('el gato depende de esta condición mía.');
   });
+
+  test('some and most, and a verb whose preposition is em', () => {
+    expect(dependsOn({ definiteness: 'some', number: 'plural' })).toBe('o gato depende de algumas condições minhas.');
+    expect(dependsOn({ definiteness: 'most', number: 'plural' })).toBe('o gato depende da maioria das minhas condições.');
+    expect(say(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { definiteness: 'this', possessor: mine }) }), 'pt')).toBe('o gato clica neste botão meu.');
+    expect(say(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { possessor: mine }) }), 'pt')).toBe('o gato clica no meu botão.');
+  });
 });
 
 // A342. A326 folded French de + des into de for a detached plural indefinite possessor in the
@@ -1716,7 +1723,7 @@ describe('known bugs: the Portuguese prepositional object drops the determiner b
 describe('known bugs: the French prepositional object writes de des before a detached possessive (A342)', () => {
   const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
 
-  test.fails('de + des is de', () => {
+  test('de + des is de', () => {
     expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { number: 'plural', definiteness: 'indefinite', possessor: mine }) }), 'fr'))
       .toBe('le chat dépend de conditions à moi.');
   });
@@ -1728,5 +1735,18 @@ describe('known bugs: the French prepositional object writes de des before a det
       .toBe("le chat dépend d'une condition à moi.");
     expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: mine }) } } }), 'fr'))
       .toBe('le chat court avec des amis à moi.');
+  });
+
+  test('the elided de, the negation, the other kept determiners, and a preposition other than de', () => {
+    const dependsOn = (concept: string, extra: Partial<NounPhrase>, verbPhrase: Partial<VerbPhrase> = {}) =>
+      say(clause(np('CAT'), 'DEPEND', { directObject: np(concept, { possessor: mine, ...extra }), verbPhrase }), 'fr');
+    expect(dependsOn('FRIEND', { number: 'plural', definiteness: 'indefinite' })).toBe("le chat dépend d'amis à moi.");
+    expect(dependsOn('CONDITION', { number: 'plural', definiteness: 'indefinite' }, { negative: true })).toBe('le chat ne dépend pas de conditions à moi.');
+    expect(dependsOn('CONDITION', { definiteness: 'this' })).toBe('le chat dépend de cette condition à moi.');
+    expect(dependsOn('CONDITION', { definiteness: 'no' })).toBe("le chat ne dépend d'aucune condition à moi.");
+    expect(dependsOn('CONDITION', { number: 'plural', definiteness: 'some' })).toBe('le chat dépend de quelques conditions à moi.');
+    expect(dependsOn('CONDITION', {})).toBe('le chat dépend de ma condition.');
+    expect(say(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { number: 'plural', definiteness: 'indefinite', possessor: mine }) }), 'fr'))
+      .toBe('le chat clique sur des boutons à moi.');
   });
 });

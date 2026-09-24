@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import { PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { contractDet } from './contractDet.js';
 import { datPrep } from './datPrep.js';
@@ -31,10 +32,20 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
     return withRelative((prep === 'em' || prep === 'de') && PT_DE_FUSING_PRONOUN.test(tonic) ? `${prep === 'em' ? 'n' : 'd'}${tonic}` : `${prep} ${tonic}`, np);
   }
   // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
-  const f = possessedHeadForms(np, 'definite');
+  // Unless the head carries a determiner of its own: that keeps its slot and takes the fusion, and the
+  // possessive follows the noun — "desta condição minha", "de uma condição minha", "de nenhuma
+  // condição minha" (A341, as `complementsPhrase` builds it since A202, and Spanish since A325).
+  // "todas" and the partitive "most" keep theirs too, in front of the possessive: "de todas as minhas
+  // condições", "da maioria das minhas condições".
+  const possessive = ptPossessiveWord(np, false);
+  const ownDeterminer = pf['definiteness'] ?? 'definite';
+  const detached = !!possessive && keptBesidePossessive(pf);
+  const f = !!possessive && (detached || ownDeterminer === 'all' || ownDeterminer === 'most')
+    ? ownHeadForms(np)
+    : possessedHeadForms(np, 'definite');
   const plural = isPlural(f);
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const noun = [ptPossessiveWord(np, false), withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
+  const noun = (detached ? [withAdj(word, ptAdj(np)), possessive] : [possessive, withAdj(word, ptAdj(np))]).filter(Boolean).join(' ');
   const contract = CONTRACTING[prep];
   const head = contract ? contractDet(contract, prep, f, plural) : prepDet(prep, f, plural);
   return withRelative(`${head} ${noun}`, np);

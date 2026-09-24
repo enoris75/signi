@@ -38,4 +38,11 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(JE), 'sur')).toBe('sur moi');
     expect(prepObjectText(np(IL), 'sur')).toBe('sur lui');
   });
+
+  // A342: "de" before a detached plural indefinite drops its "des", as without the possessive.
+  test('de + des is de before a detached possessive', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(prepObjectText(np(MAISON, { definiteness: 'indefinite', number: 'plural' }, { possessor: my }), 'de')).toBe('de maisons à moi');
+    expect(prepObjectText(np(MAISON, { definiteness: 'indefinite' }, { possessor: my }), 'de')).toBe("d'une maison à moi");
+  });
 });
