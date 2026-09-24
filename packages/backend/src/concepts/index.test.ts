@@ -10,7 +10,7 @@ import { ancestors, assertValidHierarchy } from './hierarchy.js';
 // a word missing from one language's picker.
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES);
-const ROLES: GrammaticalRole[] = ['pronoun', 'noun', 'verb', 'adjective', 'adverb'];
+const ROLES: GrammaticalRole[] = ['pronoun', 'noun', 'verb', 'adjective', 'adverb', 'interjection'];
 const byId = new Map(concepts.map((c) => [c.id, c]));
 
 describe('the concept corpus', () => {

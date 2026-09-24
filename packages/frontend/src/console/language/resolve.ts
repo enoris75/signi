@@ -1,4 +1,4 @@
-import type { Concept, GrammaticalRole } from "@signi/shared";
+import type { Concept, PickerRole } from "@signi/shared";
 import type {
   ConceptSelectOpts,
   NounAddress,
@@ -21,7 +21,7 @@ import type { Vocabulary } from "./types.ts";
 
 /** Which words a slot takes: the roles searched, in order, and which verbs. */
 export interface WordSpec {
-  roles: GrammaticalRole[];
+  roles: PickerRole[];
   /** Verbs only: the modal verbs (`/modal`) or every other one (`/verb`). */
   modal?: boolean;
 }

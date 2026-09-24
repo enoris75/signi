@@ -1,4 +1,14 @@
-export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb';
+/**
+ * A concept's part of speech. `interjection` (P09-E30) is a word outside the clause that opens it
+ * ("**hey**, the cat runs", see `PhrasePlan.interjection`); no picker offers one yet.
+ */
+export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
+
+/**
+ * The roles a word palette lists and a console slot searches — every role but `interjection`, which
+ * no picker offers yet (P09-E30) and so has no `palette.*` heading of its own.
+ */
+export type PickerRole = Exclude<GrammaticalRole, 'interjection'>;
 
 export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
 
@@ -1763,6 +1773,16 @@ export interface PhrasePlan {
    * is read there only — a linked clause's is ignored. Plan-only: no builder control sets it yet.
    */
   address?: NounElement;
+  /**
+   * An **interjection** before the clause — "**hey**, the cat runs", "**ehi**, il gatto corre", ねえ、猫は
+   * 走ります (P09-E30): the id of a concept of role `interjection`. A word outside the clause that takes
+   * no part in its grammar, and a sibling of the vocative, not part of it: "hey, the cat runs" has no
+   * addressee. It renders first, set off by the vocative's separator (a comma in six, 、 in Japanese)
+   * and capitalized as the sentence's first word; a vocative follows it ("Hey, Mom, run."), and both
+   * stand outside Spanish's opening ¿ ("Oye, Mamá, ¿el gato corre?"), which encloses only the question.
+   * Top clause only, like `address`. Plan-only: no builder control or picker offers it yet.
+   */
+  interjection?: string;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */

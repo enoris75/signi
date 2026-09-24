@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
+import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, ImperativeRegister, PickerRole, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
 import type { TemporalRelation } from "@signi/shared";
 import type { ClauseObject, SubordinatingConjunction } from "@signi/shared";
@@ -171,7 +171,7 @@ export interface SlotConfig {
     // name used in tooltips / group headings). Slots migrate to a key as their word is seeded.
     labelKey?: UiStringKey;
     required: boolean;
-    roles: GrammaticalRole[];
+    roles: PickerRole[];
     color: "primary" | "secondary" | "success" | "warning" | "info" | "error";
 }
 

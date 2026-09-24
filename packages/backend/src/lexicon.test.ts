@@ -150,6 +150,12 @@ describe('lookupLexicalEntry', () => {
     });
   });
 
+  // P09-E30: an interjection is one fixed word per language, read as an adverb is.
+  test('reads an interjection\'s word', () => {
+    expect(lookupLexicalEntry('HEY', 'es')).toEqual({ conceptId: 'HEY', language: 'es', forms: { base: 'oye', role: 'interjection' } });
+    expect(lookupLexicalEntry('HEY', 'ja')!.forms).toEqual({ base: 'ねえ', role: 'interjection' });
+  });
+
   test('is undefined for an unknown concept, in any language', () => {
     expect(lookupLexicalEntry('UNICORN', 'en')).toBeUndefined();
     expect(lookupLexicalEntry('UNICORN', 'it')).toBeUndefined();

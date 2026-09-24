@@ -681,7 +681,7 @@ function wordCompletion(
       },
       // Among words that match alike, the shorter is the closer to what was typed: `ca` is cat
       // before it is care.
-      rank: [cls, spec.roles.indexOf(concept.role), cls <= 1 ? shown.length : 0, order],
+      rank: [cls, (spec.roles as readonly string[]).indexOf(concept.role), cls <= 1 ? shown.length : 0, order],
     });
   });
   ranked.sort((a, b) => compareRanks(a.rank, b.rank));

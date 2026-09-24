@@ -78,6 +78,7 @@ function seed() {
     wipePronouns: db.prepare('DELETE FROM pronoun_lexemes'),
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
+    wipeInterjections: db.prepare('DELETE FROM interjection_lexemes'),
 
     insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, number, string | null, number, number, string | null, string | null, number, string | null, string | null, number, number, number, number, number, string | null]>(
       'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, human, synonym, countable, modal, clause_object, slot, proper, manner_relation, dimension_relation, temporal, transient, alarm, alarm_cry, stative, sense_of) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -101,6 +102,7 @@ function seed() {
     pronoun:   buildRoleStmts('pronoun'),
     adjective: buildRoleStmts('adjective'),
     adverb:    buildRoleStmts('adverb'),
+    interjection: buildRoleStmts('interjection'),
   };
 
   const run = db.transaction(() => {
@@ -110,6 +112,7 @@ function seed() {
     stmts.wipePronouns.run();
     stmts.wipeAdjectives.run();
     stmts.wipeAdverbs.run();
+    stmts.wipeInterjections.run();
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {

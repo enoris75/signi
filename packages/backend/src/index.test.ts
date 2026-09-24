@@ -88,6 +88,16 @@ describe('GET /api/concepts', () => {
     );
   });
 
+  // P09-E30: the interjection is a role like the others to the API — no picker asks for it yet.
+  test('lists an interjection under its own role, with its labels', async () => {
+    const [hey] = await list('?role=interjection');
+    expect(hey).toMatchObject({
+      id: 'HEY', role: 'interjection', emoji: '👋',
+      labels: { en: 'hey', it: 'ehi', fr: 'hé', de: 'hey', es: 'oye', ja: 'ねえ', pt: 'ei' },
+    });
+    expect(hey!.readings).toBeUndefined();
+  });
+
   test('lists nothing for a role that does not exist', async () => {
     expect(await list('?role=article')).toEqual([]);
   });
@@ -543,6 +553,15 @@ describe('known bugs: translating a plan that names an unseeded concept', () => 
     });
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: 'Unknown concepts: UNICORN, GRIFFIN' });
+  });
+
+  // P09-E30: the interjection is read through the same noting lookup as every other slot.
+  test('translates a seeded interjection, and rejects an unseeded one', async () => {
+    const res = await post('/api/translate', { plan: { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, interjection: 'HEY' } });
+    expect(res.status).toBe(200);
+    const { translations } = (await res.json()) as { translations: { language: string; text: string }[] };
+    expect(translations.find((t) => t.language === 'es')?.text).toBe('Oye, el gato corre.');
+    await expectRejected({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, interjection: 'UNICORN' }, 'UNICORN');
   });
 
   test('accepts a seeded concept that has no word in some language', async () => {

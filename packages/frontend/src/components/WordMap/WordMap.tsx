@@ -71,6 +71,8 @@ const ROLE_COLOR: Record<GrammaticalRole, "primary" | "secondary" | "success" | 
   verb: "secondary",
   adjective: "warning",
   adverb: "info",
+  // HEY (P09-E30) is a concept like any other on the map, drawn in the adverbs' colour.
+  interjection: "info",
 };
 
 interface Props {
