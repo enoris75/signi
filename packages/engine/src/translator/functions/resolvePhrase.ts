@@ -58,11 +58,15 @@ function resolveInfinitiveComplement(
   const bare = governor?.['infinitive_bare'] === '1' && resolved.verbPhrase;
   // A governor that takes a **gerund** names it the same way (`complement_form: 'gerund'`): English
   // *stop* and *continue*, Spanish *seguir* — "stops running", "sigue corriendo" (P09-E42).
-  const gerund = governor?.['complement_form'] === 'gerund' && resolved.verbPhrase;
+  // A negated complement may take a link of its own instead, which carries the negation: Spanish
+  // *seguir sin* + infinitive, "sigue sin correr", never "*sigue no corriendo" (A315).
+  const negativeLink = resolved.verbPhrase?.negative === true ? governor?.['negative_complement_link'] : undefined;
+  const gerund = !negativeLink && governor?.['complement_form'] === 'gerund' && resolved.verbPhrase;
   return {
     ...resolved,
     ...(bare ? { verbPhrase: { ...resolved.verbPhrase!, bareInfinitive: true } } : {}),
     ...(gerund ? { verbPhrase: { ...resolved.verbPhrase!, gerundComplement: true } } : {}),
+    ...(negativeLink ? { verbPhrase: { ...resolved.verbPhrase!, negativeLink } } : {}),
     ...(byObject ? { control: 'object' as const } : {}),
   };
 }

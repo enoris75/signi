@@ -320,7 +320,9 @@ export function predicateText(
     // "sigue comiéndola" (P09-E42, `complement_form`).
     const head = verbPhrase.gerundComplement ? (copulaVerb.forms['gerund'] ?? copulaVerb.forms['base']) : copulaVerb.forms['base'];
     const inf = [head ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
+    // A negative link ("sigue sin correr", A315) is the clause's negator, so it writes no "no" of its
+    // own, and a negative word after it concords with it: "sin comer ninguna comida".
+    const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)

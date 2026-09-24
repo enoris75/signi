@@ -21,6 +21,13 @@ describe('infinitiveLink', () => {
     expect(infinitiveLink(clause(np(GENERIC), vp({ base: 'desiderare' })))).toBe('');
   });
 
+  test("a negated complement's own link wins over the governor's (seguir sin, A315)", () => {
+    const seguir = clause(np(GENERIC), vp({ base: 'seguir', complement_form: 'gerund' }), {
+      infinitiveComplement: clause(np(GENERIC), vp({ base: 'correr' }, { negative: true, negativeLink: 'sin' })),
+    });
+    expect(infinitiveLink(seguir)).toBe('sin');
+  });
+
   test('is empty for a verbless clause', () => {
     expect(infinitiveLink(clause(np(GENERIC)))).toBe('');
   });

@@ -43,6 +43,28 @@ describe('fuseGovernedVerb', () => {
     });
   });
 
+  test('a German negated complement takes the lexeme\'s adverb over the negated verb (läuft weiterhin nicht, A315)', () => {
+    const weiter = { base: 'weitermachen', complement_particle: 'weiter', negative_complement_adverb: 'weiterhin' };
+    const phrase = clause(CAT, vp(weiter, { tense: 'past' }), { infinitiveComplement: clause(CAT, vp({ base: 'laufen' }, { negative: true })) });
+    const fused = fuseGovernedVerb(phrase, 'de');
+    expect(fused.infinitiveComplement).toBeUndefined();
+    expect(fused.verbPhrase).toMatchObject({ tense: 'past', negative: true });
+    expect(fused.verbPhrase?.verb.forms['base']).toBe('laufen');
+    expect(fused.verbPhrase?.modifier?.forms).toEqual({ base: 'weiterhin', negative_slot: 'pre-negator' });
+    // A negated governor has a negation of its own to keep apart: the linked infinitive stays.
+    const both = clause(CAT, vp(weiter, { negative: true }), { infinitiveComplement: clause(CAT, vp({ base: 'laufen' }, { negative: true })) });
+    expect(fuseGovernedVerb(both, 'de')).toBe(both);
+  });
+
+  test('a Japanese copular complement marks the governor for the engine\'s であり続ける (A315)', () => {
+    const tsuzukeru = { base: '続ける', masu_present: '続けます', ja_complement: 'stem' };
+    const happy = { predicative: { phrase: el(np({ base: '幸せな', role: 'adjective' })) } };
+    const phrase = clause(CAT, vp(tsuzukeru), { infinitiveComplement: clause(CAT, vp({ base: 'である', copula: '1' }), { complements: happy }) });
+    const fused = fuseGovernedVerb(phrase, 'ja');
+    expect(fused.verbPhrase?.verb.forms).toMatchObject({ base: '続ける', copular_compound: '1' });
+    expect(fused.complements?.['predicative']).toBe(happy.predicative);
+  });
+
   test('an object-controlled or self-negated infinitive, another language or governor, is unchanged', () => {
     const plain = governing({ base: 'weitermachen', complement_particle: 'weiter' });
     expect(fuseGovernedVerb(plain, 'it')).toBe(plain);

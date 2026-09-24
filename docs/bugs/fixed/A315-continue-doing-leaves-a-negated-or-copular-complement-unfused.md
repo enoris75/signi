@@ -49,3 +49,37 @@ and the per-language complement forms it hands over.
 | | |
 |---|---|
 | **Test** | `infinitive-complement.test.ts` → *known bugs: CONTINUE_DOING leaves a negated or copular complement unfused (A315)* (4 `test.fails`: Spanish, German, the Japanese な/noun predicate, the Japanese い-adjective; plus a regression test for the other languages and the plain fusion) |
+
+## Resolved
+
+2026-09-24. Rulings: German *weiterhin* + the negated verb (the recommended Want, kept as written);
+Spanish *seguir sin* as a property of the lexeme; Japanese fixes the copular cases only.
+
+- **Spanish.** *seguir*'s lexeme names `negative_complement_link: 'sin'`
+  ([verbs/intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts), **needs a
+  reseed**). [resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts)
+  marks a negated governed clause with it (`ResolvedVerbPhrase.negativeLink`, no gerund),
+  [infinitiveLink.ts](../../../packages/engine/src/functions/infinitiveLink.ts) returns it as the link,
+  and [es/predicateText.ts](../../../packages/engine/src/languages/es/predicateText.ts) writes no *no*
+  under it, so a negative object still concords: `el gato sigue sin comer ninguna comida.`
+- **German.** *weitermachen*'s lexeme names `negative_complement_adverb: 'weiterhin'` (same seed
+  file). [fuseGovernedVerb.ts](../../../packages/engine/src/translator/functions/fuseGovernedVerb.ts)
+  (`negatedContinuation`) turns a negated complement into the governed verb, negated, with that
+  adverb in the pre-negator slot (`läuft weiterhin nicht`, `frisst das Essen weiterhin nicht`, `ist
+  weiterhin nicht glücklich`), when the governing clause is not negated too and has no adverb of its
+  own; otherwise the linked infinitive stays (`macht nicht weiter, nicht zu laufen`). No change to
+  de/renderClause.
+- **Japanese.** fuseGovernedVerb marks 続ける `copular_compound` over a single copular predicate,
+  and the new [ja/copularContinuation.ts](../../../packages/engine/src/languages/ja/copularContinuation.ts),
+  called from [ja/predicateSegs.ts](../../../packages/engine/src/languages/ja/predicateSegs.ts), says
+  the predicate in its connective form before the compound: 幸せであり続けます, 友達であり続けます,
+  大きくあり続けます, a た-adjective on いる's stem (疲れてい続けます). The negated complement is unchanged,
+  `猫は走らないことを続けます。` (and `猫は幸せではないことを続けます。`); 走らないままです was not taken
+  up, as the copular branch does not reach it.
+
+Guarded by the four formerly-failing tests and four new ones in `known bugs: CONTINUE_DOING leaves a
+negated or copular complement unfused (A315)` in
+[infinitive-complement.test.ts](../../../packages/engine/test/infinitive-complement.test.ts), plus unit
+cases in fuseGovernedVerb.test.ts, infinitiveLink.test.ts and the new copularContinuation.test.ts.
+One passing test moved: "stop doing, continue doing (P09-E42) › a separable governed verb, and a
+copula" now expects `猫は幸せであり続けます。` where it pinned `猫は幸せであることを続けます。`.

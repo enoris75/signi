@@ -1333,8 +1333,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       de: {
         // The picker's word is weitermachen; in a clause the particle rides the governed verb
-        // (`complement_particle`): "läuft weiter", "ist weitergelaufen".
-        base: 'weitermachen', particle: 'weiter', complement_particle: 'weiter',
+        // (`complement_particle`): "läuft weiter", "ist weitergelaufen". A negated complement takes
+        // the adverb over the negated verb instead (`negative_complement_adverb`): "läuft weiterhin
+        // nicht", since "läuft nicht weiter" denies the continuing (A315).
+        base: 'weitermachen', particle: 'weiter', complement_particle: 'weiter', negative_complement_adverb: 'weiterhin',
         '1sg_present': 'mache', '2sg_present': 'machst', '3sg_present': 'macht',
         '1pl_present': 'machen', '2pl_present': 'macht', '3pl_present': 'machen',
         '1sg_past': 'machte', '2sg_past': 'machtest', '3sg_past': 'machte',
@@ -1342,8 +1344,9 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       es: {
         // seguir + gerund (`complement_form`): "sigue corriendo". e → i under the stress, and gu → g
-        // before o (sigo).
-        base: 'seguir', complement_form: 'gerund',
+        // before o (sigo). A negated complement is seguir sin + the infinitive
+        // (`negative_complement_link`): "sigue sin correr", never "*sigue no corriendo" (A315).
+        base: 'seguir', complement_form: 'gerund', negative_complement_link: 'sin',
         '1sg_present': 'sigo', '2sg_present': 'sigues', '3sg_present': 'sigue',
         '1pl_present': 'seguimos', '2pl_present': 'seguís', '3pl_present': 'siguen',
         '1sg_past': 'seguí', '2sg_past': 'seguiste', '3sg_past': 'siguió',

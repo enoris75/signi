@@ -11,6 +11,7 @@ import { aspectFormSegs } from './aspectFormSegs.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
+import { copularContinuation } from './copularContinuation.js';
 import { slotSegs } from './slotSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
@@ -39,9 +40,9 @@ import { wordSeg } from './wordSeg.js';
  * would follow (猫が幸せであると言います).
  */
 export function predicateSegs(
-  givenVerbPhrase: ResolvedVerbPhrase,
+  plannedVerbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounElement | undefined,
-  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  plannedComplements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
   plain: boolean | 'quote' = false,
   subjectNegative = false,
@@ -55,6 +56,16 @@ export function predicateSegs(
   // clause, which alone knows whose the subject is. Only a polite main predicate passes one.
   respect?: JaRespect,
 ): RubySegment[] {
+  // 続ける over a copular complement compounds on the copula's stem, the predicate before it in its
+  // connective form — 幸せであり続けます, 大きくあり続けます (A315, see `copularContinuation`). The
+  // predicate is then no complement of the clause but the head of its verb group, said right before
+  // the verb, behind any adverb (`continuation.segs` below).
+  const continuedPredicative = plannedVerbPhrase.verb.forms['copular_compound'] === '1' ? plannedComplements?.['predicative'] : undefined;
+  const continuation = continuedPredicative ? copularContinuation(plannedVerbPhrase.verb, continuedPredicative) : undefined;
+  const givenVerbPhrase = continuation ? { ...plannedVerbPhrase, verb: continuation.verb } : plannedVerbPhrase;
+  const complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined = continuation
+    ? (({ predicative: _, ...rest }) => (Object.keys(rest).length ? rest : undefined))(plannedComplements!)
+    : plannedComplements;
   // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
   // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
   // A verb Japanese says as an **adjective** (localization C34): 好き is a な-adjective, not a verb,
@@ -211,6 +222,7 @@ export function predicateSegs(
     if (directObject) segs.push(...slotSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
     if (adverb) segs.push(adverb);
+    if (continuation) segs.push(...continuation.segs);
     segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
     return segs;
   }
@@ -231,6 +243,7 @@ export function predicateSegs(
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
     if (adverb) segs.push(adverb);
+    if (continuation) segs.push(...continuation.segs);
     segs.push(...(modals.length > 0
       ? modalSegs(modals, verb, 'present', negated, 0, undefined, 'plain', undefined, undefined, governedNeg)
       : [plainVerbSeg(verb, 'present', negated)]));
@@ -285,6 +298,7 @@ export function predicateSegs(
     if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
   }
   if (adverb) segs.push(adverb);
+  if (continuation) segs.push(...continuation.segs);
   // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form on whatever closes
   // its verb group — the verb (食べたら, 食べなかったら), the outermost modal (食べることができたら) or the
   // aspect (食べていたら). The main clause (conditional) falls through to the ordinary polite

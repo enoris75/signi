@@ -55,18 +55,32 @@ function stemCompound(governor: ConceptForms, governed: ConceptForms): ConceptFo
  *
  * Only a subject-controlled infinitive that is not negated of its own fuses: "continues not to run"
  * has two verbs to negate apart, so it keeps the governed clause as it was, under the lexeme's word.
+ * The one exception is a German governor that names an adverb for it (`negative_complement_adverb`):
+ * *weiter* cannot ride a negated verb ("läuft nicht weiter" denies the continuing), so the aspect
+ * becomes that adverb beside the governed verb, which takes the negation — "der Kater läuft
+ * weiterhin nicht" (A315, see `negatedContinuation`).
  * Unchanged in every other language and for every other governor.
  */
 export function fuseGovernedVerb(phrase: ResolvedPhrase, language: string): ResolvedPhrase {
   const governed = phrase.infinitiveComplement;
   const governor = phrase.verbPhrase?.verb;
-  if (!governed?.verbPhrase || !governor || governed.control === 'object' || governed.verbPhrase.negative) return phrase;
+  if (!governed?.verbPhrase || !governor || governed.control === 'object') return phrase;
+  if (governed.verbPhrase.negative) return language === 'de' ? negatedContinuation(phrase) : phrase;
   const particle = language === 'de' ? governor.forms['complement_particle'] : undefined;
+  const stem = language === 'ja' && governor.forms['ja_complement'] === 'stem';
+  // A copular complement has no verb stem to compound on: Japanese compounds on the copula's own ある,
+  // with the predicate before it in its connective form — 幸せであり続けます, 大きくあり続けます (A315).
+  // That form is the Japanese engine's to say, so the governor goes over marked for it, beside the
+  // predicative (see `copularContinuation`). One predicate only: a coordinated one keeps the clause.
+  const predicative = governed.complements?.['predicative'];
+  const copularStem = stem && governed.verbPhrase.verb.forms['copula'] === '1' && predicative?.phrase.conjuncts.length === 1;
   const verb = particle
     ? particleVerb(governed.verbPhrase.verb, particle)
-    : language === 'ja' && governor.forms['ja_complement'] === 'stem'
-      ? stemCompound(governor, governed.verbPhrase.verb)
-      : undefined;
+    : copularStem
+      ? { conceptId: governor.conceptId, forms: { ...governor.forms, copular_compound: '1' } }
+      : stem
+        ? stemCompound(governor, governed.verbPhrase.verb)
+        : undefined;
   if (!verb) return phrase;
   const complements = { ...phrase.complements, ...governed.complements };
   // A copula has no particle to take: German says the particle as an adverb beside it instead, "die
@@ -77,6 +91,32 @@ export function fuseGovernedVerb(phrase: ResolvedPhrase, language: string): Reso
   return {
     ...phrase,
     verbPhrase: { ...phrase.verbPhrase!, verb: copula ? governed.verbPhrase.verb : verb, ...(modifier ? { modifier } : {}) },
+    directObject: governed.directObject ?? phrase.directObject,
+    complements: Object.keys(complements).length ? complements : undefined,
+    infinitiveComplement: governed.infinitiveComplement,
+  };
+}
+
+/**
+ * A German governor's negated complement said as its adverb over the governed verb, negated (see
+ * `fuseGovernedVerb`): "der Kater läuft weiterhin nicht", "frisst das Essen weiterhin nicht". Only
+ * where the adverb slot is free and the governing clause is not negated too — "does not continue not
+ * running" has two negations to keep apart — so any other clause keeps the linked infinitive.
+ */
+function negatedContinuation(phrase: ResolvedPhrase): ResolvedPhrase {
+  const governed = phrase.infinitiveComplement!;
+  const vp = phrase.verbPhrase!;
+  const adverb = vp.verb.forms['negative_complement_adverb'];
+  if (!adverb || vp.negative || vp.modifier || governed.verbPhrase!.modifier) return phrase;
+  const complements = { ...phrase.complements, ...governed.complements };
+  return {
+    ...phrase,
+    // The adverb scopes over the negation, so it stands ahead of the "nicht" (`negative_slot`), as
+    // "noch nicht" does: "läuft weiterhin nicht", "frisst das Essen weiterhin nicht".
+    verbPhrase: {
+      ...vp, verb: governed.verbPhrase!.verb, negative: true,
+      modifier: { conceptId: vp.verb.conceptId, forms: { base: adverb, negative_slot: 'pre-negator' } },
+    },
     directObject: governed.directObject ?? phrase.directObject,
     complements: Object.keys(complements).length ? complements : undefined,
     infinitiveComplement: governed.infinitiveComplement,

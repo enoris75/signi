@@ -261,6 +261,14 @@ export interface ResolvedVerbPhrase {
    */
   gerundComplement?: boolean;
   /**
+   * Set on a negated governed infinitive clause whose governor links a negated complement with a word
+   * of its own, which carries the negation in place of the clause's "no": Spanish *seguir sin* +
+   * infinitive, "sigue **sin** correr", where the positive is the gerund "sigue corriendo". Lexical,
+   * named by the governor (`negative_complement_link`); the clause stays `negative`, so a negative
+   * object still concords ("sigue sin comer ninguna comida"). A315.
+   */
+  negativeLink?: string;
+  /**
    * The register of an imperative (see PhrasePlan.imperativeRegister). Absent ⇒ `'request'`,
    * a command spoken to someone. `'instruction'` is the impersonal directive a UI control or a
    * recipe step carries; each engine renders it in the form its language conventionally uses

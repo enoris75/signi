@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { InfinitiveComplement, LanguageCode, PhrasePlan } from '@signi/shared';
+import type { InfinitiveComplement, LanguageCode, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
@@ -594,7 +594,7 @@ describe('stop doing, continue doing (P09-E42)', () => {
       fr: 'la chatte continue à être heureuse.',
       de: 'die Katze ist weiter glücklich.',
       es: 'la gata sigue estando feliz.',
-      ja: '猫は幸せであることを続けます。', // a copula has no ます stem to compound
+      ja: '猫は幸せであり続けます。', // on the copula's ある (A315)
       pt: 'a gata continua a estar feliz.',
     });
   });
@@ -659,24 +659,63 @@ describe('known bugs: CONTINUE_DOING leaves a negated or copular complement unfu
   const isA = (phrase: string): InfinitiveComplement =>
     ({ verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np(phrase) } } });
 
-  test.fails('Spanish: a negated infinitive is "sin" + the infinitive', () => {
+  test('Spanish: a negated infinitive is "sin" + the infinitive', () => {
     expect(continues({ verbPhrase: { verb: 'RUN', negative: true } }).es).toBe('el gato sigue sin correr.');
     expect(continues({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD') }).es).toBe('el gato sigue sin comer la comida.');
   });
 
-  test.fails('German: a negated infinitive is still not done, weiterhin nicht', () => {
+  test('German: a negated infinitive is still not done, weiterhin nicht', () => {
     expect(continues({ verbPhrase: { verb: 'RUN', negative: true } }).de).toBe('der Kater läuft weiterhin nicht.');
     expect(continues({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD') }).de).toBe('der Kater frisst das Essen weiterhin nicht.');
   });
 
-  test.fails('Japanese: a な-adjective or noun predicate compounds on であり', () => {
+  test('Japanese: a な-adjective or noun predicate compounds on であり', () => {
     expect(continues(isA('HAPPY')).ja).toBe('猫は幸せであり続けます。');
     expect(continues({ verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('FRIEND', { definiteness: 'indefinite' }) } } }).ja)
       .toBe('猫は友達であり続けます。');
   });
 
-  test.fails('Japanese: an い-adjective predicate compounds on くあり', () => {
+  test('Japanese: an い-adjective predicate compounds on くあり', () => {
     expect(continues(isA('BIG')).ja).toBe('猫は大きくあり続けます。');
+  });
+
+  const notRunning: InfinitiveComplement = { verbPhrase: { verb: 'RUN', negative: true } };
+  const continuesWith = (infinitiveComplement: InfinitiveComplement, verbPhrase: Partial<VerbPhrase> = {}, subject = np('CAT')) =>
+    sayAll(clause(subject, 'CONTINUE_DOING', { infinitiveComplement, verbPhrase }));
+
+  test('Spanish "sin" in the past and the plural, with a negative object, and under a negated seguir', () => {
+    expect(continuesWith(notRunning, { tense: 'past' }, np('CAT', { number: 'plural' })).es).toBe('los gatos siguieron sin correr.');
+    expect(continuesWith({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD', { definiteness: 'no' }) }).es)
+      .toBe('el gato sigue sin comer ninguna comida.');
+    expect(continuesWith(notRunning, { negative: true }).es).toBe('el gato no sigue sin correr.');
+  });
+
+  test('German "weiterhin nicht" in the past, a question, a copula and under a modal; a negated governor keeps the link', () => {
+    expect(continuesWith(notRunning, { tense: 'past' }).de).toBe('der Kater lief weiterhin nicht.');
+    expect(sayAll({ ...clause(np('CAT'), 'CONTINUE_DOING', { infinitiveComplement: notRunning }), interrogative: true }).de)
+      .toBe('läuft der Kater weiterhin nicht?');
+    expect(continuesWith({ verbPhrase: { verb: 'BE', negative: true }, complements: { predicative: { phrase: np('HAPPY') } } }).de)
+      .toBe('der Kater ist weiterhin nicht glücklich.');
+    expect(continuesWith(notRunning, { modals: ['MUST'] }).de).toBe('der Kater muss weiterhin nicht laufen.');
+    // "does not continue not running" has two negations to keep apart.
+    expect(continuesWith(notRunning, { negative: true }).de).toBe('der Kater macht nicht weiter, nicht zu laufen.');
+  });
+
+  test('Japanese であり続ける through the tense, the negation, an adverb, a degree, a modal and the citation', () => {
+    expect(continuesWith(isA('HAPPY'), { tense: 'past' }).ja).toBe('猫は幸せであり続けました。');
+    expect(continuesWith(isA('HAPPY'), { negative: true }).ja).toBe('猫は幸せであり続けません。');
+    expect(continuesWith(isA('BIG'), { modifier: 'ALWAYS' }).ja).toBe('猫はいつも大きくあり続けます。');
+    expect(continuesWith({ verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('BIG', { headDegree: 'more' }) } } }).ja)
+      .toBe('猫はもっと大きくあり続けます。');
+    expect(continuesWith(isA('HAPPY'), { modals: ['MUST'] }).ja).toBe('猫は幸せであり続ける必要があります。');
+    expect(sayAll({ ...clause(np('CAT'), 'CONTINUE_DOING', { infinitiveComplement: isA('HAPPY') }), infinitive: true }).ja)
+      .toBe('幸せであり続ける。');
+  });
+
+  test('Japanese: a た-adjective compounds on いる\'s stem; a negated complement keeps the nominalised clause', () => {
+    expect(continuesWith(isA('TIRED')).ja).toBe('猫は疲れてい続けます。');
+    // Not pinned by the bug: 走らないままです would be the natural form (see A315's Resolved note).
+    expect(continuesWith(notRunning).ja).toBe('猫は走らないことを続けます。');
   });
 
   test('regression: the other languages\' negated and copular complements, and the plain fusion', () => {
