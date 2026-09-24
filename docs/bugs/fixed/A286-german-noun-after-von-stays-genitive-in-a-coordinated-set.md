@@ -41,3 +41,20 @@ Pinned by `known bugs: German leaves a noun genitive after "von" in a coordinate
 [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).
 
 Found on 2026-09-24 while auditing P09-E19's test coverage.
+
+## Resolved
+
+2026-09-24. [`de/deStandard.ts`](../../../packages/engine/src/languages/de/deStandard.ts), the
+`forms['domain']` branch: a coordinated set with a pronoun among its conjuncts writes *von* once,
+before the group, and puts every conjunct in the dative (`nounPhrase(s, 'dat')`,
+`tonicPronounDe(…, 'dat')`). A set of nouns alone keeps its genitives, a lone pronoun its *von*.
+Decided on the reverse order: *von den Hunden und uns* (the smoother one), not the mixed *der Hunde
+und von uns*. The French *d'entre nous et des chiens* ruling is left open.
+
+The `test.fails` in [comparison.test.ts](../../../packages/engine/test/comparison.test.ts) (*known
+bugs: German leaves a noun genitive after "von" in a coordinated set (A286)*) is a plain test now,
+assertion unchanged. Added in the same block: the noun-first order (*von den Hunden und uns*), three
+conjuncts (*von den Tieren, uns und den Männern*), two pronouns (*von euch und uns*), *oder* (*von der
+Familie oder uns*) and the one-conjunct set (*von uns*). `deStandard.test.ts` gained a case for both
+orders and the noun-only set.
+

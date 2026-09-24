@@ -592,8 +592,17 @@ describe('known bugs: German leaves a noun genitive after "von" in a coordinated
   const US = np('FIRST_PERSON', { number: 'plural' });
   const DOGS = np('DOG', { number: 'plural' });
 
-  test.fails('von uns und den Hunden', () => {
+  test('von uns und den Hunden', () => {
     expect(say(set([US, DOGS]), 'de')).toBe('der Kater ist der größte von uns und den Hunden.');
+  });
+
+  test('von once before any mixed set, every conjunct dative: noun first, three conjuncts, or', () => {
+    expect(say(set([DOGS, US]), 'de')).toBe('der Kater ist der größte von den Hunden und uns.');
+    expect(say(set([np('ANIMAL', { number: 'plural' }), US, np('MAN', { number: 'plural' })]), 'de'))
+      .toBe('der Kater ist der größte von den Tieren, uns und den Männern.');
+    expect(say(set([np('SECOND_PERSON', { number: 'plural' }), US]), 'de')).toBe('der Kater ist der größte von euch und uns.');
+    expect(say(cat('most', { conjuncts: [np('FAMILY'), US], conjunction: 'or' }), 'de')).toBe('der Kater ist der größte von der Familie oder uns.');
+    expect(say(set([US]), 'de')).toBe('der Kater ist der größte von uns.');
   });
 
   test('regression: the other languages, and a set of nouns alone', () => {
