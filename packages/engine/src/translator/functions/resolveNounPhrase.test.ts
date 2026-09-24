@@ -39,8 +39,10 @@ describe('resolveNounPhrase', () => {
       }
     });
 
-    test('a plural with no plural surface stays singular', () => {
-      expect(headForms({ concept: 'WATER', number: 'plural' })['number']).toBe('singular');
+    test('a plural with no plural surface stays singular, and remembers the plural asked (A348)', () => {
+      expect(headForms({ concept: 'WATER', number: 'plural' })).toMatchObject({ number: 'singular', plural_unmarked: '1' });
+      expect(headForms({ concept: 'CAT', number: 'plural' })['plural_unmarked']).toBeUndefined();
+      expect(headForms({ concept: 'WATER' })['plural_unmarked']).toBeUndefined();
     });
 
     test.each(['some', 'many', 'few', 'all'] as const)('%s forces the plural surface', (definiteness) => {

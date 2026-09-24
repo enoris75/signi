@@ -179,6 +179,10 @@ export function complementsPhrase(
       // A bare land name is "in" and goes "to" with "en" when it is feminine or opens on a vowel ("en
       // Italie", "en Antarctique"), and with "au" when it is a masculine opening on a consonant ("au
       // Japon", "au Portugal"). All the continents take "en"; the countries split (localization B36).
+      // A352. The pronouns that are no personal "lui" / "elle" / "eux": SOMETHING and SOMEONE, and
+      // the neuter singular "cela".
+      const frThingPronoun = (nf: Record<string, string>, plural: boolean): boolean =>
+        nf['indefinite'] === '1' || nf['thing'] === '1' || (nf['gender'] === 'neut' && !plural);
       const landIn = (nf: Record<string, string>, plural: boolean, lead: string): string =>
         nf['gender'] === 'fem' || elidesBefore(nf, lead) ? 'en' : aDet(nf, plural, lead);
       // A196. French has no zero article on a plural noun phrase: where English writes a bare plural
@@ -206,8 +210,12 @@ export function complementsPhrase(
           // article between the preposition and the word (A203). Every other relation keeps its own
           // adposition, which is idiomatic before a pronoun as it stands: "sous lui", "derrière
           // elle", "au-dessus d'eux".
+          // A352. That "en" is the personal pronoun's alone. An indefinite pronoun and the neuter
+          // "cela" are things with no article, and French puts them "dans" as it does a determined
+          // noun: "court dans quelque chose", "dans quelqu'un", "dans cela", never "en quelque chose".
           type === 'locative'  ? (
-            nf['person'] && locSpec === 'in' ? 'en' :
+            nf['person'] && locSpec === 'in' && !frThingPronoun(nf, plural) ? 'en' :
+            nf['person'] && locSpec === 'in' ? 'dans' :
             bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') :
             // A219. "Dans" needs a determiner after it, never "dans groupe": the preposition French
             // puts before a bare singular is "en" ("en groupe", "en prison", "en parenthèse"). A mass

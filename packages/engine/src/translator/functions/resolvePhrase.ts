@@ -22,6 +22,7 @@ import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
+import { refuseGenericObject } from './refuseGenericObject.js';
 import { withQuestionPossessor } from './withQuestionPossessor.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -222,6 +223,10 @@ export function resolvePhrase(
     throw new Error(`a passive wh-question needs a verb that takes the passive in ${language} (P09-E16)`);
   }
   const passive = verbPhrase?.voice === 'passive' && (!!directObject || gap?.role === 'directObject');
+  // The generic person has no object form: as a direct object it is refused by name (A354, see
+  // `refuseGenericObject`) — after the addressee has left the object slot for the dative, and not
+  // where the passive promotes it to the subject ("one is seen by the cat").
+  refuseGenericObject(plan.directObject, 'plan.directObject', passive);
   if (passive && gap?.role === 'possessor' && gap.possessed === 'subject') {
     throw new Error('a possessor question inside a passive\'s agent is not built (P09-E16)');
   }

@@ -28,3 +28,17 @@ possessive.
 | **Test** | `possession.test.ts` → *known bugs: the French prepositional object writes de des before a detached possessive (A342)* (1 `test.fails`, plus a regression test for the phrase without the possessive, the singular and the comitative) |
 
 Found by the cross-lane probe while filing A341 (the same DEPEND plans), after fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24 in [fr/prepObjectText.ts](../../../packages/engine/src/languages/fr/prepObjectText.ts)
+(the object_prep conjunct builder `predicateText.ts` calls), not in `complementsPhrase.ts`: for *de*
+it now passes `renderNP` the `ownHeadFor` builder A326 gave the complements, `deDet` over the head's
+own forms (`ownHeadForms`), so a head that keeps its determiner beside a detached possessive takes
+*de* as it would without the possessive: *dépend de conditions à moi*, *dépend d'amis à moi*.
+
+The `test.fails` in `known bugs: the French prepositional object writes de des before a detached
+possessive (A342)` in [possession.test.ts](../../../packages/engine/test/possession.test.ts) is a plain
+test now. The same block gained the elided *d'amis*, the negation, the demonstrative, *aucune*,
+*quelques*, the definite (*de ma condition*) and CLICK's *sur* (*sur des boutons à moi*, unchanged).
+The colocated `prepObjectText.test.ts` gained a case for the plural and the singular indefinite.

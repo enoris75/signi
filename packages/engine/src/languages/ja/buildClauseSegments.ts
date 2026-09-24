@@ -220,8 +220,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
  */
 function adverbialSegs(given: NonNullable<ResolvedPhrase['adverbialClause']>): RubySegment[] {
   const adverbial = shapeAdverbialClause(given);
-  // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323).
-  const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : true);
+  // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323);
+  // ので, 時に and のに a state holding, which a state verb says with 〜ている (持っているので, A347).
+  const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : adverbial.held ? 'held' : true);
   // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
   // turns into.
   return [...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word }];

@@ -784,3 +784,34 @@ describe('A288: a relative clause over a role gap answers 400', () => {
     expect(await res.json()).toEqual({ error: `${path}.relative.headRole: a relative clause cannot gap a role` });
   });
 });
+
+// A354. The generic person (one, si, on, man) has no object form, and the engine refuses it as a
+// direct object by name; `/api/translate` answers a 400 naming the field. An addressee beside a
+// content clause, which the verb sends to the dative, still translates. The engine's side is pinned
+// in packages/engine/test/clause.test.ts.
+describe('A354: the generic person as a direct object answers 400', () => {
+  const G = { concept: 'GENERIC_PERSON' };
+  test.each([
+    ['the object', { subject: { concept: 'CAT' }, verbPhrase: { verb: 'SEE' }, directObject: G }, 'plan'],
+    ['a relative\'s object', { subject: { concept: 'DOG', relative: { verbPhrase: { verb: 'SEE' }, directObject: G } }, verbPhrase: { verb: 'RUN' } }, 'plan.subject.relative'],
+  ])('rejects the generic person as %s', async (_, plan, path) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: `${path}.directObject: the generic person (GENERIC_PERSON) cannot be a direct object` });
+  });
+
+  test('translates the generic patient of a passive, its subject', async () => {
+    const plan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'SEE', voice: 'passive' }, directObject: G };
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(200);
+  });
+
+  test('translates the generic addressee of a content clause', async () => {
+    const plan = {
+      subject: { concept: 'CAT' }, verbPhrase: { verb: 'TELL' }, directObject: G,
+      contentObject: { subject: { concept: 'DOG' }, verbPhrase: { verb: 'RUN' } },
+    };
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(200);
+  });
+});

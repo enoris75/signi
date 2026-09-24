@@ -10,6 +10,7 @@ import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
+import { jaStateVerb } from './jaStateVerb.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -21,16 +22,19 @@ import { wordSeg } from './wordSeg.js';
  * prenominal form in every cell but a na- or の-adjective's present affirmative, which takes the terminal
  * である where a noun would follow its attributive な (幸せであるかどうか, 幸せだったかどうか).
  * `reach` stands before まで and 前に, which name a state reached (A323): the affirmative is the change of
- * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる); the
- * negative and a state (疲れている) keep the prenominal form.
+ * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる), and a
+ * state (疲れている) is its verb's dictionary form (疲れる, A346). The negative is the change of state of
+ * the negative, the adverbial negative + なる (大きくなくなる, 幸せでなくなる, 友達でなくなる, 疲れなくなる,
+ * A345), with なる taking the tense.
  */
 export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | 'closing' | 'reach' | JaForm;
 // The forms with endings of their own; the others borrow a row (see `row`).
 type CopulaRow = Exclude<CopulaForm, 'closing' | 'reach'>;
 const row = (form: CopulaForm): CopulaRow => (form === 'closing' || form === 'reach' ? 'prenominal' : form);
-// The change of state `reach` says in its affirmative cells, [present, past], after the i-adjective's
-// く or the na-adjective's and the noun's に.
-const NARU = ['なる', 'なった'];
+// The change of state `reach` says, by cell (see the endings below): the affirmative after the
+// i-adjective's く or the na-adjective's and the noun's に, the negative after their adverbial negative
+// (くなく, でなく: 大きくなくなる, 幸せでなくなる, A345).
+const NARU = ['なる', 'なった', 'なくなる', 'なくなった'];
 
 // The endings by class and form, as [affirmative present, affirmative past, negative present, negative
 // past]. A たら form ignores tense, so it repeats its two cells; a governed form ignores both, so it
@@ -157,9 +161,14 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const cell = (negative ? 2 : 0) + (tense === 'past' ? 1 : 0);
   // A `no` noun predicate closes its circumfix in the copula: でもありません, not ではありません, and under a
   // modal でもある — or, where the modal denies it, でもない (A03).
-  const reached = form === 'reach' && cell < 2 ? NARU[cell] : undefined;
+  const reached = form === 'reach' ? NARU[cell] : undefined;
+  // The link before なる: に in the affirmative, the adverbial negative's で in the negative (でなくなる).
+  const toNaru = negative ? 'で' : 'に';
   if (f['role'] !== 'adjective') {
-    if (reached) return [...elSegs(pred.phrase), { t: `に${reached}` }];
+    if (reached) {
+      const ending = `${toNaru}${reached}`;
+      return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^で/, 'でも') : ending }];
+    }
     const ending = COPULA_ENDINGS[row(form)][cell];
     return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^では|^で(?=[あな])/, 'でも') : ending }];
   }
@@ -195,8 +204,19 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   if (negative && adjDegree(head.head) === 'most') {
     return [...degSegs, wordSeg(stem, stemReading), { t: `${endingOf('prenominal', 0)}わけ${COPULA_ENDINGS[at][cell]}` }];
   }
+  // A state (疲れている) reached is its verb's event, the dictionary form (疲れるまで, A346), where the
+  // plain past says which verb that is (see `jaStateVerb`); the past is the plain past itself (疲れた).
+  // Its negative stops the state (疲れなくなる, "until it stops being tired", A345): the verb's
+  // nai-stem + なくなる, as an i-adjective's く + なくなる.
+  const stateVerb = reached && kind === 'ta' ? jaStateVerb(base) : undefined;
+  if (stateVerb) {
+    const toDict = (s: string) => (negative ? `${s.slice(0, -stateVerb.cut)}${stateVerb.nai}${reached}`
+      : tense === 'past' ? s : `${s.slice(0, -stateVerb.cut)}${stateVerb.dict}`);
+    return [...degSegs, wordSeg(toDict(base), reading === undefined ? undefined : toDict(reading))];
+  }
   const ending = reached && kind === 'i' ? `く${reached}`
-    : reached && kind === 'na' ? `${predicative}に${reached}`
+    : reached && kind === 'na' ? `${predicative}${toNaru}${reached}`
+    : reached && kind === 'ru' && negative ? reached
     : endingOf(form, cell);
   return [...degSegs, wordSeg(stem, stemReading), { t: ending }];
 }

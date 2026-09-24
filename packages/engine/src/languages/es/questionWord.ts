@@ -28,7 +28,7 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'quién' : 'qué cosa' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
-  const gap = questionGapComplement(question, { base: question.animate ? 'quién' : 'qué' });
+  const gap = questionGapComplement(question, { base: question.animate ? 'quién' : 'qué' }, verb.forms);
   // The route's *por* over *qué* would be the *why* of "¿por qué?", so a place gone through is asked
   // *por dónde*, as Spanish asks it anyway (P09-E15).
   const text = gap ? complementsPhrase(gap, {}, verb.conceptId).replace(/\s+/g, ' ').trim() : '';

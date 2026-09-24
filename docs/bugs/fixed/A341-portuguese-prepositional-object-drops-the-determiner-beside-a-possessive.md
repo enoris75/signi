@@ -39,3 +39,20 @@ when the phrase has a possessive and its own determiner is `all` or kept beside 
 | **Test** | `possession.test.ts` → *known bugs: the Portuguese prepositional object drops the determiner beside a possessive (A341)* (3 `test.fails`: the demonstratives, the indefinite, *no* and *all*; plus a regression test for the definite, a noun possessor, the plain object, a complement and Spanish) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24 in [pt/prepObjectText.ts](../../../packages/engine/src/languages/pt/prepObjectText.ts).
+Rather than an early return through `npText`, the phrase is built the way
+[pt/complementsPhrase.ts](../../../packages/engine/src/languages/pt/complementsPhrase.ts) builds it
+since A202: when the phrase has a possessive and its own determiner is kept beside it
+(`keptBesidePossessive`), `all` or `most`, the head keeps its own forms (`ownHeadForms`), so
+`contractDet` fuses the preposition with a demonstrative (*desta*, *neste*) and leads any other
+determiner (*de uma*, *de nenhuma*, *de todas as*); a kept determiner puts the possessive after the
+noun (*desta condição minha*).
+
+The 3 `test.fails` in `known bugs: the Portuguese prepositional object drops the determiner beside a
+possessive (A341)` in [possession.test.ts](../../../packages/engine/test/possession.test.ts) are plain
+tests now. The same block gained *some*, *most* (*da maioria das minhas condições*) and CLICK's *em*
+(*clica neste botão meu*, *clica no meu botão*). The colocated `prepObjectText.test.ts` gained a case
+for the kept determiners and *todas*.

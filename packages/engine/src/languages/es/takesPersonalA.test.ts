@@ -13,6 +13,12 @@ describe('takesPersonalA', () => {
     expect(takesPersonalA(np(PERRO))).toBe(false);
   });
 
+  // A340: a head made bare by its numeral is counted, not generic.
+  test('a human bare only because of its numeral takes it', () => {
+    expect(takesPersonalA(np(HOMBRE, { definiteness: 'bare', numeral: '2', number: 'plural' }))).toBe(true);
+    expect(takesPersonalA(np(PERRO, { definiteness: 'bare', numeral: '2', number: 'plural' }))).toBe(false);
+  });
+
   // FOLLOW's seguir marks every determined object so (`object_a`), a bare one still not.
   test('a verb that marks every object takes it for a non-human too', () => {
     expect(takesPersonalA(np(PERRO), { object_a: '1' })).toBe(true);

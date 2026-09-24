@@ -4,6 +4,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { keptBesidePossessive } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS } from './es.consts.js';
 import { artForms } from './artForms.js';
 import { deDet } from './deDet.js';
@@ -43,6 +44,9 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
   const adj = esAdj(poss);
   // A counted possessor keeps its cardinal: "un período de veinticuatro horas" (C31).
-  const noun = [possessive, numeralText(f, CARDINALS), withAdj(word, adj)].filter(Boolean).join(' ');
+  // …and at one beside a definite or demonstrative it is left out: "del hombre", not "*del un
+  // hombre" (A319, A339).
+  const numeral = oneBesideDeterminer(poss.head.forms) && !possessive ? '' : numeralText(f, CARDINALS);
+  const noun = [possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');
   return ` ${withRelative(`${deDet(artForms(f, adj), plural)} ${noun}`, poss)}`;
 }

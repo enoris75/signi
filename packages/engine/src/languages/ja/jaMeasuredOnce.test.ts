@@ -18,4 +18,14 @@ describe('jaMeasuredOnce', () => {
     expect(numeral(jaMeasuredOnce(el(np(HOUR, { definiteness: 'indefinite', numeral: '2' })), 'for'))).toEqual(['2']);
     expect(numeral(jaMeasuredOnce(el(np(JIKAN, { definiteness: 'indefinite' })), 'for'))).toEqual([undefined]);
   });
+
+  // A348: an unspecified many under `for`, whether `number` kept the plural or only `plural_unmarked` did.
+  test('marks a plural indefinite or bare measure under for as many, and only under for', () => {
+    const many = (phrase: ReturnType<typeof el>) => phrase.conjuncts.map((c) => [c.head.forms['many'], c.head.forms['numeral']]);
+    expect(many(jaMeasuredOnce(el(np(HOUR, { definiteness: 'indefinite', plural_unmarked: '1' })), 'for'))).toEqual([['1', undefined]]);
+    expect(many(jaMeasuredOnce(el(np(HOUR, { definiteness: 'bare', number: 'plural' })), 'for'))).toEqual([['1', undefined]]);
+    expect(many(jaMeasuredOnce(el(np(HOUR, { definiteness: 'definite', plural_unmarked: '1' })), 'for'))).toEqual([[undefined, undefined]]);
+    expect(many(jaMeasuredOnce(el(np(HOUR, { definiteness: 'indefinite', plural_unmarked: '1' })), 'within'))).toEqual([[undefined, '1']]);
+    expect(many(jaMeasuredOnce(el(np(JIKAN, { definiteness: 'indefinite', plural_unmarked: '1' })), 'for'))).toEqual([[undefined, undefined]]);
+  });
 });

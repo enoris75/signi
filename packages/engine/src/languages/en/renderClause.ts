@@ -80,7 +80,7 @@ export function renderClause(given: ResolvedPhrase): string {
   // eat under?", "who does the man give the book to?" (P09-E15, see `strandedGap`).
   // A passive's agent asked about strands its "by" the same way, after the participle: "who is the
   // food eaten by?" (P09-E16).
-  const stranding = strandedGap(gap);
+  const stranding = strandedGap(gap, phrase.verbPhrase.verb);
   const agent = gap?.role === 'agent' ? questionStandIn(gap, { base: '' }) : phrase.agent;
   const parts = predicateParts(agreement, verbPhrase, objectPossessed ? undefined : phrase.directObject,
     stranding ? { ...phrase.complements, ...stranding } : phrase.complements,

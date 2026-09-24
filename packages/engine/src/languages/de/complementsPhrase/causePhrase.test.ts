@@ -22,6 +22,16 @@ describe('causePhrase', () => {
     expect(causePhrase(complement(el(np(MANN), np(KATZE)), negative))).toBe('durch die Schuld des Mannes und der Katze');
   });
 
+  // A343: a genitive with nothing to show it gives way to "von" + the dative, conjunct by conjunct.
+  test('a negative noun cause whose genitive cannot show takes "von" + the dative', () => {
+    const indefinitePlural = { number: 'plural', definiteness: 'indefinite' };
+    expect(causePhrase(complement(np(MANN, indefinitePlural), negative))).toBe('durch die Schuld von Männern');
+    expect(causePhrase(complement(el(np(KATZE), np(MANN, indefinitePlural)), negative)))
+      .toBe('durch die Schuld der Katze und von Männern');
+    expect(causePhrase(complement(el(np(DU), np(MANN, indefinitePlural)), negative)))
+      .toBe('durch deine Schuld und durch die Schuld von Männern');
+  });
+
   test('a negative relativizer blames through its genitive, ahead of "Schuld"', () => {
     expect(causePhrase(complement(np(MANN, { definiteness: 'relative' }), negative))).toBe('durch dessen Schuld');
     expect(causePhrase(complement(np(KATZE, { definiteness: 'relative' }), negative))).toBe('durch deren Schuld');

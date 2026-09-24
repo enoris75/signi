@@ -32,3 +32,17 @@ write `von` + `nounPhrase(np, 'dat')` where it says no.
 | **Test** | `complements/cause.test.ts` → *known bugs: the German negative cause writes a genitive that cannot show (A343)* (3 `test.fails`: the indefinite and bare plural, a numeral and a detached possessive, a mass noun; plus a regression test for the genitives that show) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. [de/complementsPhrase/causePhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/causePhrase.ts)
+writes the blamed party through a new `schuldOf`, which asks
+[genitiveShows](../../../packages/engine/src/languages/de/genitiveShows.ts) as `nounWegen` does and
+falls back to `von` + the dative. Both the negative noun branch and the mixed pronoun-and-noun group
+use it, conjunct by conjunct (*durch die Schuld des Hundes und von Freunden*, *durch deine Schuld und
+durch die Schuld von Freunden*).
+
+Guarded by `complements/cause.test.ts` → *known bugs: the German negative cause writes a genitive that
+cannot show (A343)*: the three former `test.fails`, now plain tests, a new test (an invariant mass
+quantifier, a noun group, a group mixing in a pronoun either way round), and the regression test.
+Unit case in `de/complementsPhrase/causePhrase.test.ts`.

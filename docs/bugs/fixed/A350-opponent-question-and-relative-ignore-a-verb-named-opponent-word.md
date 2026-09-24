@@ -48,3 +48,23 @@ stand-in.
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24 (A318's lane saw the
 German question and relative and left them).
+
+## Resolved
+
+2026-09-24. The two shared gap builders now carry the verb's `opponentLink` on an opponent gap, as
+`resolveComplements` does for the statement's complement:
+[questionGapComplement.ts](../../../packages/engine/src/functions/questionGapComplement.ts) takes the
+clause's verb forms (a new optional argument) and
+[relativeGapComplement.ts](../../../packages/engine/src/functions/relativeGapComplement.ts) reads the
+relative's own verb. The callers pass the verb:
+[en/questionWord.ts](../../../packages/engine/src/languages/en/questionWord.ts) (`strandedGap`, called
+from [en/renderClause.ts](../../../packages/engine/src/languages/en/renderClause.ts)) and the
+`questionWord.ts` of it, de, fr, es and pt. French, Spanish and Portuguese get the same wiring from
+the shared code (*avec qui*, *con quién*, *com quem*, *avec lesquels*, *con los que*, *com os quais*
+when a word is named); they stay unpinned, as decided. Japanese is untouched.
+
+Guarded by [complements/opponent.test.ts](../../../packages/engine/test/complements/opponent.test.ts)
+→ *known bugs: the opponent question and relative ignore a verb-named opponent word (A350)*: the three
+formerly-`.fails` tests, the regression test, and a new test for the plural and feminine relatives, a
+complement after the stranded *with*, and German's case under *von* and *um*; plus unit cases in
+`questionGapComplement.test.ts` and `relativeGapComplement.test.ts`.

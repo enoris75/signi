@@ -40,3 +40,21 @@ adverbial clause under ので, 時に and のに wants the same held-state endin
 | **Test** | `adverbial-clause.test.ts` → *known bugs: a Japanese state verb in an adverbial clause takes the dictionary form (A347)* (3 `test.fails`: ので / 時に / のに, the past and the negative, KNOW; plus a regression test for 間に, 前に, 後で and まで) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. A new `held` flag on ので, 時に and のに in `JA_SUBORDINATORS`
+([ja/ja.consts.ts](../../../packages/engine/src/languages/ja/ja.consts.ts)), passed on by
+[ja/shapeAdverbialClause.ts](../../../packages/engine/src/languages/ja/shapeAdverbialClause.ts), makes
+[ja/buildClauseSegments.ts](../../../packages/engine/src/languages/ja/buildClauseSegments.ts) build the
+clause with a new `JaPlain` value `'held'`, which
+[ja/predicateSegs.ts](../../../packages/engine/src/languages/ja/predicateSegs.ts) counts with A279's
+reported values for `heldState` (持っているので, 持っていた時に, 持っていないのに). 前に, 後で and まで keep
+`true` / `'reach'` (持つ前に, 持った後で, 持つまで); から is untouched (持ってから); KNOW's negative stays
+知らない (`event_negative`).
+
+Tests: the three `test.fails` in `adverbial-clause.test.ts` (*known bugs: a Japanese state verb in an
+adverbial clause takes the dictionary form (A347)*) now pass, plus a new case for 知らないので, the past
+under 時に, the past negative under のに and から; `shapeAdverbialClause.test.ts` asserts `held`.
+`content-clause.test.ts`'s A279 regression, which pinned 持つので, now pins the adverbial clause under
+前に (持つ前に).

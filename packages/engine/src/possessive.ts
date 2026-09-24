@@ -172,6 +172,9 @@ export function possessiveFr(
  * slot: "ce livre **à elle**", "cette maison **à moi**" (A187).
  */
 export function disjunctiveFr(feats: PronominalPossessor): string {
+  // *on* binds the reflexive disjunctive: "on voit un ami à **soi**", where "à lui" is someone
+  // else's (A344).
+  if (isGenericBound(feats)) return 'soi';
   if (pn(feats) === '3sg') return feats.gender === 'fem' ? 'elle' : 'lui';
   if (pn(feats) === '3pl') return feats.gender === 'fem' ? 'elles' : 'eux';
   const table: Record<PN, string> = {
@@ -277,6 +280,9 @@ export function possessiveDe(
  * determiner slot: "dieses Buch **von ihr**", "einige Bücher **von mir**" (A187).
  */
 export function dativePronounDe(feats: PronominalPossessor): string {
+  // *man* binds the reflexive after the preposition: "man sieht einen Freund von **sich**", where
+  // "von ihm" is someone else's (A344).
+  if (isGenericBound(feats)) return 'sich';
   if (pn(feats) === '3sg') return feats.gender === 'fem' ? 'ihr' : 'ihm';
   const table: Record<PN, string> = {
     '1sg': 'mir', '2sg': 'dir', '3sg': 'ihm',

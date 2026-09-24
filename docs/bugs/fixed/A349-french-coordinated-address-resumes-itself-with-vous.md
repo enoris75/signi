@@ -32,3 +32,19 @@ the resumption belongs to a subject.
 | **Test** | `address.test.ts` → *known bugs: a French coordinated address resumes itself with vous (A349)* (3 `test.fails`: the command in both orders, negated and with an object, the statement; plus a regression test for the other six and a French address with no pronoun or a single one) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. [fr/subjectText.ts](../../../packages/engine/src/languages/fr/subjectText.ts) takes a
+`resume` flag (default true), and [fr/renderClause.ts](../../../packages/engine/src/languages/fr/renderClause.ts)
+passes false for a verbless period, which is how the vocative is rendered: the resumptive *nous* /
+*vous* belongs to a clause, so the address writes the group alone (*Toi et Maman, courez.*, *Toi et
+Maman, vous courez.*). `resolveAddress.ts` is unchanged. A coordinated pronoun subject keeps its
+resumption (*toi et Maman, vous courez.*); a bare verbless group now reads *toi et Maman.* (was
+*toi et Maman, vous.*).
+
+The three `test.fails` in [address.test.ts](../../../packages/engine/test/address.test.ts) (*known
+bugs: a French coordinated address resumes itself with vous (A349)*) are plain tests now, assertions
+unchanged. Added in the same block: an *or* group, three conjuncts, the group as a verbless period and
+as a subject. `fr/subjectText.test.ts` gained *without resume, a 1st or 2nd person group is not
+resumed*.

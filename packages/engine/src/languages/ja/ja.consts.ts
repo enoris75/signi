@@ -261,16 +261,19 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * **て-form** (猫が食べてから), which `te` asks for: the clause is built on the plain past and its last
  * word turned from 〜た into 〜て (see `teFromPlainPast`). `reach` marks まで and 前に, which name a
  * state reached: a copula predicate before them is the change of state 〜になる (幸せになるまで, A323).
+ * `held` marks ので, 時に and のに, which report the clause as holding: a state verb there takes its
+ * 〜ている (犬が本を持っているので, A347), as in a main clause, where 前に, 後で and まで name the event
+ * (持つ前に, 持った後で, 持つまで).
  */
-export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true; reach?: true }> = {
-  when: { word: '時に' },
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true; reach?: true; held?: true }> = {
+  when: { word: '時に', held: true },
   while: { word: '間に', tense: 'present', progressive: true },
-  because: { word: 'ので' },
+  because: { word: 'ので', held: true },
   after: { word: '後で', tense: 'past', plain: true },
   before: { word: '前に', tense: 'present', plain: true, reach: true },
   until: { word: 'まで', tense: 'present', plain: true, reach: true },
   since: { word: 'から', tense: 'past', plain: true, te: true },
-  though: { word: 'のに' },
+  though: { word: 'のに', held: true },
   // Localization C41: ように says the likeness on the plain form of the clause's own tense —
   // 犬が走るように, 犬が走ったように, 予想するように ("as one expects").
   as: { word: 'ように' },

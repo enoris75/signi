@@ -173,6 +173,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     const forcesSingular = (definiteness === 'no' && NO_TAKES_SINGULAR.has(language)) || SINGULAR_DETERMINERS.has(definiteness);
     const num = pluralOnly || forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
+    // A plural the lexeme has no word for (every Japanese noun) is still the plural the plan asked for;
+    // an engine that counts it reads it here (ja: 何時間も for "for hours", A348).
+    if (num === 'plural' && !head.forms['plural']) head.forms['plural_unmarked'] = '1';
     applyNounGender(head.forms, np.gender);
     // Then the head's *own* word, where an adjective is part of it (ja 兄弟 + ELDER → 兄, P11 D5) —
     // before the possessor picks a form of that word, so 兄 can still become お兄さん. The gender step

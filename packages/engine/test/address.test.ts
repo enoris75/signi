@@ -436,19 +436,27 @@ describe('known bugs: a French coordinated address resumes itself with vous (A34
   const youAll = np('SECOND_PERSON', { number: 'plural' });
   const youAndMom: NounElement = { conjuncts: [you, np('MOM')], conjunction: 'and' };
 
-  test.fails('the command', () => {
+  test('the command', () => {
     expect(sayAll(command(youAndMom, youAll)).fr).toBe('Toi et Maman, courez.');
     expect(sayAll(command({ conjuncts: [np('MOM'), you], conjunction: 'and' }, youAll)).fr).toBe('Maman et toi, courez.');
   });
 
-  test.fails('negated, and with an object', () => {
+  test('negated, and with an object', () => {
     expect(sayAll({ ...command(youAndMom, youAll), verbPhrase: { verb: 'RUN', negative: true } }).fr).toBe('Toi et Maman, ne courez pas.');
     expect(sayAll({ ...clause(youAll, 'EAT', { directObject: np('FOOD') }), imperative: true, address: youAndMom }).fr)
       .toBe('Toi et Maman, mangez la nourriture.');
   });
 
-  test.fails('a statement', () => {
+  test('a statement', () => {
     expect(sayAll({ ...clause(youAll, 'RUN'), address: youAndMom }).fr).toBe('Toi et Maman, vous courez.');
+  });
+
+  test('an or-group, three conjuncts, and the group as a verbless period or a subject', () => {
+    expect(sayAll(command({ conjuncts: [you, np('MOM')], conjunction: 'or' }, youAll)).fr).toBe('Toi ou Maman, courez.');
+    expect(sayAll(command({ conjuncts: [np('DAD'), you, np('MOM')], conjunction: 'and' }, youAll)).fr).toBe('Papa, toi et Maman, courez.');
+    // The same group standing as a verbless period is no clause either; as a subject it keeps "vous".
+    expect(sayAll({ subject: youAndMom }).fr).toBe('toi et Maman.');
+    expect(sayAll(clause(youAndMom, 'RUN')).fr).toBe('toi et Maman, vous courez.');
   });
 
   test('regression: the other six, and a French address with no pronoun or a single one', () => {

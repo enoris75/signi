@@ -130,7 +130,8 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/wh obj /subj ( cat ) /verb ( eat )');
     await page.keyboard.type('/del wh');
     await run(page);
-    await app.expectSentences({ en: 'does the cat eat?' });
+    // /wh alone implied the question, so taking the gap back ends it (2c4cee46).
+    await app.expectSentences({ en: 'the cat eats.' });
   });
 
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {

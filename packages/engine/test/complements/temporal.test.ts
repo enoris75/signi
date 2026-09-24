@@ -779,18 +779,29 @@ describe('known bugs: a Japanese plural measure noun under for reads as one (A34
     complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'for' }] } },
   }));
 
-  test.fails('for hours', () => {
+  test('for hours', () => {
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何時間も走ります。');
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' }), 'past').ja).toBe('猫は何時間も走りました。');
   });
 
-  test.fails('for days and for years', () => {
+  test('for days and for years', () => {
     expect(runsFor(np('DAY', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何日も走ります。');
     expect(runsFor(np('YEAR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何年も走ります。');
   });
 
-  test.fails('a bare plural', () => {
+  test('a bare plural', () => {
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'bare' })).ja).toBe('猫は何時間も走ります。');
+  });
+
+  // Within, during and ago are A362's; a definite plural is left to its fixer.
+  test('a definite plural and a plural subject are left alone', () => {
+    const runsAt = (value: string, definiteness: 'indefinite' | 'definite' = 'indefinite') => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { number: 'plural', definiteness }), specifiers: [{ kind: 'temporal', value }] } },
+    } as never)).ja;
+    expect([runsAt('for', 'definite'),
+      sayAll(clause(np('HOUR', { number: 'plural', definiteness: 'indefinite' }), 'BURN')).ja]).toEqual([
+      '猫は時間走ります。', '時間は燃えます。',
+    ]);
   });
 
   test('regression: an hour, two hours, and the other six', () => {
@@ -800,5 +811,49 @@ describe('known bugs: a Japanese plural measure noun under for reads as one (A34
       en: 'the cat runs for hours.', it: 'il gatto corre per ore.', fr: 'le chat court pendant des heures.',
       de: 'der Kater läuft Stunden.', es: 'el gato corre durante unas horas.', pt: 'o gato corre por umas horas.',
     });
+  });
+});
+
+// A362. A348 made an unspecified plural under `for` 何時間も, and left within, during and ago counting
+// one: "within hours" reads 一時間以内に, "hours ago" 一時間前に, and a bare plural loses the count
+// (時間以内に). An unspecified few there is 数 + the counter: 数時間以内に, 数時間の間に, 数時間前に,
+// 数日, 数年. A348's "only for" was a scope call, not a ruling; it is overturned here.
+describe('known bugs: a Japanese plural measure noun under within, during and ago reads as one (A362)', () => {
+  const runsAt = (value: string, concept = 'HOUR', definiteness: 'indefinite' | 'bare' = 'indefinite', tense?: 'past') =>
+    sayAll(clause(np('CAT'), 'RUN', {
+      ...(tense ? { verbPhrase: { tense } } : {}),
+      complements: { temporal: { phrase: np(concept, { number: 'plural', definiteness }), specifiers: [{ kind: 'temporal', value }] } },
+    } as never));
+
+  test.fails('within, during and ago hours', () => {
+    expect(['within', 'during', 'ago'].map((v) => runsAt(v).ja)).toEqual([
+      '猫は数時間以内に走ります。', '猫は数時間の間に走ります。', '猫は数時間前に走ります。',
+    ]);
+    expect(runsAt('ago', 'HOUR', 'indefinite', 'past').ja).toBe('猫は数時間前に走りました。');
+  });
+
+  test.fails('days and years', () => {
+    expect(['within', 'during', 'ago'].flatMap((v) => [runsAt(v, 'DAY').ja, runsAt(v, 'YEAR').ja])).toEqual([
+      '猫は数日以内に走ります。', '猫は数年以内に走ります。',
+      '猫は数日の間に走ります。', '猫は数年の間に走ります。',
+      '猫は数日前に走ります。', '猫は数年前に走ります。',
+    ]);
+  });
+
+  test.fails('a bare plural', () => {
+    expect(['within', 'during', 'ago'].map((v) => runsAt(v, 'HOUR', 'bare').ja)).toEqual([
+      '猫は数時間以内に走ります。', '猫は数時間の間に走ります。', '猫は数時間前に走ります。',
+    ]);
+  });
+
+  test('regression: one hour, for hours, and English', () => {
+    const one = (value: string) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { definiteness: 'indefinite' }), specifiers: [{ kind: 'temporal', value }] } },
+    } as never)).ja;
+    expect(['within', 'during', 'ago'].map(one)).toEqual(['猫は一時間以内に走ります。', '猫は一時間の間に走ります。', '猫は一時間前に走ります。']);
+    expect(runsAt('for').ja).toBe('猫は何時間も走ります。');
+    expect(['within', 'during', 'ago'].map((v) => runsAt(v).en)).toEqual([
+      'the cat runs within hours.', 'the cat runs during hours.', 'the cat runs hours ago.',
+    ]);
   });
 });

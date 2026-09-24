@@ -531,13 +531,42 @@ describe('known bugs: a linked clause with no subject crashes the engine (A267)'
 describe('known bugs: the generic subject as a direct object renders its subject form (A354)', () => {
   const G = np('GENERIC_PERSON');
 
-  test.fails('the direct object is refused by name', () => {
+  test('the direct object is refused by name', () => {
     expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: G }))).toThrow(/GENERIC_PERSON/);
   });
 
-  test.fails('negated, and another verb', () => {
+  test('negated, and another verb', () => {
     expect(() => sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: G }))).toThrow(/GENERIC_PERSON/);
     expect(() => sayAll(clause(np('CAT'), 'EAT', { directObject: G }))).toThrow(/GENERIC_PERSON/);
+  });
+
+  test('a conjunct, and the object of a relative, a content clause, an infinitive and a purpose', () => {
+    const refused = /the generic person \(GENERIC_PERSON\) cannot be a direct object/;
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), G], conjunction: 'and' } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('DOG', { relative: { headRole: 'subject', verbPhrase: { verb: 'SEE' }, directObject: G } }), 'RUN')))
+      .toThrow(/relative\.directObject, A354/);
+    expect(() => sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('CAT'), 'WANT', { infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('CAT'), 'RUN', { purpose: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+  });
+
+  // The passive promotes the generic patient to the subject, where it has its form.
+  test('the passive is not refused: the generic patient is its subject', () => {
+    // es/pt "se es visto" / "se é visto" is a separate defect, A355, pinned below.
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      en: 'one is seen by the cat.',
+      fr: 'on est vu par le chat.',
+      de: 'man wird vom Kater gesehen.',
+      it: 'si è visti dal gatto.',
+      ja: '人は猫に見られます。',
+    });
+  });
+
+  // The addressee beside a content clause leaves the object for the dative (A317), where German and
+  // Spanish have the generic's form (A316); the other five say what their terminus says.
+  test('an addressee beside a content clause is the dative, not refused', () => {
+    expect(sayAll(clause(np('CAT'), 'TELL', { directObject: G, contentObject: { subject: np('DOG'), verbPhrase: { verb: 'RUN' } } })))
+      .toMatchObject({ de: 'der Kater erzählt einem, dass der Hund läuft.', es: 'el gato cuenta a uno que el perro corre.' });
   });
 
   test('regression: the generic subject, its passive, and the generic dative', () => {
@@ -547,5 +576,29 @@ describe('known bugs: the generic subject as a direct object renders its subject
     expect(sayAll(clause(G, 'SEE', { directObject: np('CAT'), verbPhrase: { voice: 'passive' } })).en).toBe('the cat is seen.');
     expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: G } } })))
       .toMatchObject({ de: 'der Kater gibt einem das Buch.', es: 'el gato da el libro a uno.' });
+  });
+});
+
+// A355. The passive promotes the generic patient to the subject (A354's exemption), and Spanish writes
+// that subject as the impersonal clitic: "se es visto por el gato", which is no sentence, since ser has
+// no impersonal se. The generic subject there is "uno", the word Spanish already writes where the
+// clitic cannot stand ("uno se mueve", A152). Portuguese says "se é visto" too, but no standard target
+// is settled ("a gente é vista" is colloquial), so it is left to the fixer and not pinned.
+describe('known bugs: the Spanish generic patient of a passive is the impersonal se (A355)', () => {
+  const G = np('GENERIC_PERSON');
+  const seen = (negative = false) => say(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', negative } }), 'es');
+
+  test.fails('the generic patient of a passive is uno', () => {
+    expect([seen(), seen(true)]).toEqual(['uno es visto por el gato.', 'uno no es visto por el gato.']);
+  });
+
+  test('regression: the other five, a noun patient, and the reflexive generic', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', negative: true } }))).toMatchObject({
+      en: 'one is not seen by the cat.', fr: "on n'est pas vu par le chat.", de: 'man wird vom Kater nicht gesehen.',
+      it: 'non si è visti dal gatto.', ja: '人は猫に見られません。',
+    });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG'), verbPhrase: { voice: 'passive' } }), 'es')).toBe('el perro es visto por el gato.');
+    expect(say(clause(G, 'MOVE_ONESELF'), 'es')).toBe('uno se mueve.');
+    expect(say(clause(G, 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG') } } }), 'es')).toBe('se da el libro al perro.');
   });
 });

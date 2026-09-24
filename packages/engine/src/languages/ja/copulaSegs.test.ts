@@ -93,14 +93,19 @@ describe('copulaSegs', () => {
     });
 
     // A323: before まで and 前に the affirmative is the change of state 〜になる.
-    test('a reach copula is 〜になる in the affirmative, prenominal otherwise', () => {
+    test('a reach copula is 〜になる, a state its verb, the negative 〜なくなる', () => {
       expect(copulaSegs(pred(SHIAWASE), 'present', false, 'reach')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'になる' }]);
       expect(text(copulaSegs(pred(OOKII), 'present', false, 'reach'))).toBe('大きくなる');
       expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'reach'))).toBe('伝説になる');
       expect(text(copulaSegs(pred(CHAIRO), 'present', false, 'reach'))).toBe('茶色になる');
       expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'reach'))).toBe('幸せになった');
-      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'reach'))).toBe('幸せではない');
-      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'reach'))).toBe('疲れている');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'reach'))).toBe('幸せでなくなる');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', true, 'reach'))).toBe('幸せでなくなった');
+      expect(text(copulaSegs(pred(OOKII), 'present', true, 'reach'))).toBe('大きくなくなる');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'reach'))).toBe('伝説でなくなる');
+      expect(copulaSegs(pred(TSUKARETA), 'present', true, 'reach')).toEqual([{ t: '疲れなくなる', r: 'つかれなくなる' }]);
+      expect(copulaSegs(pred(TSUKARETA), 'present', false, 'reach')).toEqual([{ t: '疲れる', r: 'つかれる' }]);
+      expect(text(copulaSegs(pred(TSUKARETA), 'past', false, 'reach'))).toBe('疲れた');
     });
   });
 

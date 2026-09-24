@@ -38,3 +38,16 @@ should read that mark and write *soi* / *sich*.
 | **Test** | `coreference.test.ts` → *known bugs: the French and German detached possessor linked to the generic subject names someone else (A344)* (2 `test.fails`: the object, then the plural, a thing and a comitative; plus a regression test for the definite head, a noun subject and the other five) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. [possessive.ts](../../../packages/engine/src/possessive.ts): `disjunctiveFr` and
+`dativePronounDe` read A332's generic mark (`isGenericBound`) and write *soi* / *sich*. Every detached
+slot goes through them (the French noun phrase, the German noun phrase, the German complements and
+[de/possessorText.ts](../../../packages/engine/src/languages/de/possessorText.ts)), so the object, the
+complements and a possessor chain all bind the reflexive; `bindCoreferents.ts` needed no change.
+
+Guarded by `coreference.test.ts` → *known bugs: the French and German detached possessor linked to the
+generic subject names someone else (A344)*: the two former `test.fails`, now plain tests, a new test (a
+demonstrative, a numeral, a locative, a possessor chain), and the regression test. Unit case in
+`possessive.test.ts`.

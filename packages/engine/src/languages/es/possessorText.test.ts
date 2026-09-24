@@ -44,6 +44,13 @@ describe('possessorText', () => {
     expect(bookOf(np(GATO, { definiteness: 'some', number: 'plural' }))).toBe(' de algunos gatos');
   });
 
+  // A339: at one beside a definite or demonstrative the cardinal is left out (A319).
+  test('a possessor counted by one beside a definite or demonstrative is the singular', () => {
+    expect(bookOf(np(HOMBRE, { numeral: '1' }))).toBe(' del hombre');
+    expect(bookOf(np(MUJER, { numeral: '1', definiteness: 'that' }))).toBe(' de esa mujer');
+    expect(bookOf(np(HOMBRE, { numeral: '2', number: 'plural' }))).toBe(' de los dos hombres');
+  });
+
   test('a proper possessor is bare unless inherently articled', () => {
     expect(bookOf(np(EUROPA))).toBe(' de Europa');
     expect(bookOf(np(ANTARTIDA))).toBe(' de la Antártida');

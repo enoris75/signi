@@ -6,6 +6,7 @@ import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { copulaSwap, expletiveSubject } from './lexicalCopula.js';
 import { passiveGap } from './passiveGap.js';
+import { refuseGenericObject } from './refuseGenericObject.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
@@ -81,6 +82,9 @@ export function resolveRelativeClause(
   );
   // The alarm a cry raises has no determiner slot, as in a main clause: "the boy who cried wolf" (A163).
   const directObject = resolvedObject && withAlarmCry(resolvedObject, verbPhrase.verb, language);
+  // Nor can its object be the generic person, as a main clause's cannot (A354), unless the passive
+  // the relative keeps promotes it to the subject.
+  refuseGenericObject(clause.directObject, 'relative.directObject', verbPhrase.voice === 'passive');
   // An experiencer verb re-maps a relative clause as it re-maps a main one (see `resolvePhrase`,
   // C34), and the gap moves with the slot the head fills.
   const { experiencer, ...experiencerSlots } = verbPhrase.verb.forms['experiencer'] === '1'

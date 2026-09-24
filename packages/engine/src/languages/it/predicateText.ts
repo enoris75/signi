@@ -37,6 +37,7 @@ import { npText } from './npText.js';
 import { prepObjectText } from './prepObjectText.js';
 import { withRelative } from './withRelative.js';
 import { reflexiveClitic } from './reflexiveClitic.js';
+import { recipientPronoun, withoutTerminus } from '../../functions/recipientPronoun.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -175,6 +176,12 @@ export function predicateText(
     : cliticObject
       ? (datClitic ? dativePronounForm(cliticObject) : objectPronounForm(cliticObject))
       : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
+  // A pronoun recipient is the dative clitic in the same slot, "le dà il libro", "gli racconta che"
+  // (A351) — where the slot is free: the clitic path writes one clitic, and beside an object clitic,
+  // a reflexive or the impersonal si the recipient keeps its tonic "a lei" rather than half a cluster.
+  const recipientForms = !objectClitic && !reflexive && subjectForms['generic'] !== '1' ? recipientPronoun(complements, verb.forms) : undefined;
+  const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
+  const clitic = objectClitic || recipientClitic;
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
   const elideCi = (text: string): string => (elided?.type === 'locative' || existential
     ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'")
@@ -211,7 +218,7 @@ export function predicateText(
   // does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
-  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+  const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
@@ -228,7 +235,7 @@ export function predicateText(
     const infinitive = negText === 'non' && impPN === '2sg';
     const short = !infinitive && impPN === '2sg' && IT_SHORT_IMPERATIVE.has(verb.conceptId);
     const impReflexive = reflexive ? (IT_REFLEXIVE[impPN] ?? '') : '';
-    const impVerb = itEnclitic(impForm, `${impReflexive}${objectClitic}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
+    const impVerb = itEnclitic(impForm, `${impReflexive}${clitic}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
     return [negText, impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -244,7 +251,7 @@ export function predicateText(
     const inf = passive
       ? [plain.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
       : verb.forms['base'] ?? verbText;
-    const infWithClitic = itEnclitic(inf, objectClitic, 'infinitive');
+    const infWithClitic = itEnclitic(inf, clitic, 'infinitive');
     return [negText, infWithClitic, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -267,7 +274,7 @@ export function predicateText(
   if (isFrequency && modifierText && periphrastic && modals.length === 0) {
     const [finite, ...rest] = verbText.split(' ');
     const withAdverb = [finite, modifierText, ...rest].join(' ');
-    return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
+    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
   }
   // A multiword lemma's noun, "bisogno" in avere bisogno (NEED, B62), sits where a participle does:
   // the frequency adverb splits the lemma instead of trailing the whole thing ("non ha MAI bisogno
@@ -278,10 +285,10 @@ export function predicateText(
   const lemmaNoun = periphrastic ? '' : lemmaTail(plain);
   const [finiteHead, lemmaEnd] = splitLemmaTail(verbText, lemmaNoun);
   if (isFrequency && modifierText && lemmaEnd) {
-    return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, directObjectText, complementsText]
+    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, directObjectText, complementsText]
       .filter(Boolean).join(' '));
   }
-  return elideCi([negLead, leadingReflexive, objectClitic, impersonalClitic, verbText, leadsNon ? '' : modifierText, directObjectText, complementsText]
+  return elideCi([negLead, leadingReflexive, clitic, impersonalClitic, verbText, leadsNon ? '' : modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' '));
 }

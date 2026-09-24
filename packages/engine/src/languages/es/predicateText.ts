@@ -15,6 +15,7 @@ import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import { dativePronounForm } from '../../functions/dativePronounForm.js';
+import { recipientPronoun, withoutTerminus } from '../../functions/recipientPronoun.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -280,7 +281,15 @@ export function predicateText(
   const genericSubject = isGeneric && reflexiveClitic(copulaVerb.forms, subjectForms)
     ? (subjectForms['generic_reflexive'] ?? '') : '';
   const impersonalClitic = isGeneric && !genericSubject ? (subjectForms['base'] ?? '') : '';
-  const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
+  // A pronoun recipient is the dative clitic in the same slot, "le da el libro", "me da el libro"
+  // (A351): the plain clitic, undoubled. Only where the slot is free: the clitic path writes one
+  // clitic, and beside an object clitic, a pronominal verb's own or the impersonal se the recipient
+  // keeps its "a ella" rather than half a cluster.
+  const recipientForms = !objectClitic && !isGeneric && !reflexiveClitic(copulaVerb.forms, subjectForms)
+    ? recipientPronoun(complements, verb.forms) : undefined;
+  const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
+  const clitic = objectClitic || recipientClitic;
+  const proclitics = [impersonalClitic, clitic].filter(Boolean).join(' ');
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("es comida por el gato en la casa").
   const directObjectText = passive ? agentPhrase(agent)
@@ -291,7 +300,7 @@ export function predicateText(
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo || leadsNo ? modifierText : '';
   const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo || (!!lead && governedNo !== '') ? '' : modifierText;
-  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+  const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
@@ -313,8 +322,8 @@ export function predicateText(
       : (imperativeForm('es', nonReflexiveVerb(copulaVerb), moodPN(subjectForms), impNeg) ?? conjugated);
     const enclitic = register === 'instruction' || !impNeg;
     const negated = enclitic
-      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${objectClitic}`)}`
-      : esCliticize([reflexive, objectClitic].filter(Boolean).join(' '), `no ${impForm}`);
+      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${clitic}`)}`
+      : esCliticize([reflexive, clitic].filter(Boolean).join(' '), `no ${impForm}`);
     const impVerb = impNeg && lead ? `${lead} ${negated}` : negated;
     return [impVerb, lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
@@ -332,7 +341,7 @@ export function predicateText(
     // A negative link ("sigue sin correr", A315) is the clause's negator, so it writes no "no" of its
     // own, and a negative word after it concords with it: "sin comer ninguna comida".
     const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
-    const infVerb = `${infNeg ? (lead ? `${lead} no ` : 'no ') : ''}${esEnclitic(inf, objectClitic)}`;
+    const infVerb = `${infNeg ? (lead ? `${lead} no ` : 'no ') : ''}${esEnclitic(inf, clitic)}`;
     return [infVerb, infNeg && lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
