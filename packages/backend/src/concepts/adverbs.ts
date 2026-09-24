@@ -450,14 +450,18 @@ export const adverbs: ConceptSeed[] = [
     description: 'by this time; before now',
     definition: mannerGloss('TIME', 'indefinite', 'PREVIOUS'),
     emoji: '✔️',
+    // Under a negation it is *not yet* (P09-E28): "has not eaten yet" at the end in English, "noch
+    // nicht" / "ainda não" / "todavía no" ahead of the negator (the Spanish "no" stays, where
+    // *tampoco* absorbs it), *ancora* and *encore* in place. Japanese まだ also puts the denied verb
+    // in 〜ている (`negative_aspect`): まだ食べていません, where もう食べていません is "no longer".
     forms: {
-      en: { base: 'already', subtype: 'frequency' },
-      it: { base: 'già', subtype: 'frequency' },
-      fr: { base: 'déjà', subtype: 'frequency' },
-      de: { base: 'schon', subtype: 'frequency' },
-      es: { base: 'ya', subtype: 'frequency' },
-      ja: { base: 'もう', subtype: 'frequency' },
-      pt: { base: 'já', subtype: 'frequency' },
+      en: { base: 'already', subtype: 'frequency', negative: 'yet', negative_slot: 'final' },
+      it: { base: 'già', subtype: 'frequency', negative: 'ancora' },
+      fr: { base: 'déjà', subtype: 'frequency', negative: 'encore' },
+      de: { base: 'schon', subtype: 'frequency', negative: 'noch', negative_slot: 'pre-negator' },
+      es: { base: 'ya', subtype: 'frequency', negative: 'todavía', negative_slot: 'pre-negator' },
+      ja: { base: 'もう', subtype: 'frequency', negative: 'まだ', negative_aspect: 'resultative' },
+      pt: { base: 'já', subtype: 'frequency', negative: 'ainda', negative_slot: 'pre-negator' },
     },
   },
   {
@@ -528,14 +532,17 @@ export const adverbs: ConceptSeed[] = [
     description: 'at no time, not ever',
     definition: frequencyGloss('no'),
     emoji: '🚫',
+    // Asked, and not denied, it is *ever* (P09-E28, `interrogativeAdverb`): a positive word in the
+    // same slot. Japanese has no adverb for it — 〜たことがある is a verb construction, deferred —
+    // and asks with いつか "at some time" meanwhile.
     forms: {
-      en: { base: 'never', subtype: 'frequency', polarity: 'negative' },
-      it: { base: 'mai', subtype: 'frequency', polarity: 'negative' },
-      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative' },
-      de: { base: 'nie', subtype: 'frequency', polarity: 'negative' },
-      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
-      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして' },
-      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
+      en: { base: 'never', subtype: 'frequency', polarity: 'negative', interrogative: 'ever' },
+      it: { base: 'mai', subtype: 'frequency', polarity: 'negative', interrogative: 'mai' },
+      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative', interrogative: 'déjà' },
+      de: { base: 'nie', subtype: 'frequency', polarity: 'negative', interrogative: 'je' },
+      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguna vez' },
+      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして', interrogative: 'いつか' },
+      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguma vez' },
     },
   },
   {
@@ -646,6 +653,90 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'realmente', subtype: 'frequency' },
       ja: { base: '本当に', subtype: 'frequency', reading: 'ほんとうに' },
       pt: { base: 'realmente', subtype: 'frequency' },
+    },
+  },
+
+  // ── SENTENCE ADVERBS ─────────────────────────────────────────────────
+  // P09-E39: adverbs that comment on the whole clause and stand outside its negation — "maybe the
+  // cat did not eat", never "did not maybe eat". `subtype: 'sentence'` opens a main statement in the
+  // European languages (German as the first constituent, inverting: *vielleicht fraß der Kater*) and
+  // follows the topic in Japanese; anywhere else — a question, a subordinate clause — it stands where
+  // a frequency adverb does ("did the cat maybe eat?"), and `negative_slot` keeps it outside a
+  // negation there, as STILL's does ("…that the cat maybe does not eat", *vielleicht nicht*,
+  // *ne mange peut-être pas*, *forse non*, *quizás no*). `fronted` names what joins a fronted adverb
+  // to its clause: `que` (*peut-être que*, *claro que*) or a `comma` ("actually, the cat…"). REALLY
+  // is not one of them: "does not really eat" is its scope inside the negation (E39 *Today*).
+  //
+  // ACTUALLY, MAYBE and OF_COURSE are literal by design: E24 probed their leads — "in a possible way"
+  // reads as *possible*, "in fact" as *in Tatsache* / *en hecho*. PROBABLY is glossed (below).
+  {
+    // Perhaps, possibly. Portuguese *talvez* ahead of its verb puts it in the subjunctive (`mood`):
+    // *talvez o gato não tenha comido*, where Spanish *quizás* keeps the indicative (E39 D2).
+    id: 'MAYBE',
+    role: 'adverb',
+    description: 'perhaps; it is possible that',
+    emoji: '🤷',
+    forms: {
+      en: { base: 'maybe', subtype: 'sentence', negative_slot: 'pre-negation' },
+      it: { base: 'forse', subtype: 'sentence', negative_slot: 'pre-negator' },
+      fr: { base: 'peut-être', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'que' },
+      de: { base: 'vielleicht', subtype: 'sentence', negative_slot: 'pre-negator' },
+      es: { base: 'quizás', subtype: 'sentence', negative_slot: 'pre-negator' },
+      ja: { base: 'もしかすると', subtype: 'sentence' },
+      pt: { base: 'talvez', subtype: 'sentence', negative_slot: 'pre-negator', mood: 'subjunctive' },
+    },
+  },
+  {
+    // Glossed on PROBABILITY, seeded with it: "with high probability" / "mit hoher Wahrscheinlichkeit"
+    // / 高い確率で. French writes it "avec probabilité haute", the corpus's postposed HIGH as FAST's
+    // "à vitesse haute" does.
+    id: 'PROBABLY',
+    role: 'adverb',
+    description: 'very likely; almost certainly',
+    definition: mannerGloss('PROBABILITY', 'bare', 'HIGH'),
+    emoji: '🎲',
+    forms: {
+      en: { base: 'probably', subtype: 'sentence', negative_slot: 'pre-negation' },
+      it: { base: 'probabilmente', subtype: 'sentence', negative_slot: 'pre-negator' },
+      fr: { base: 'probablement', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+      de: { base: 'wahrscheinlich', subtype: 'sentence', negative_slot: 'pre-negator' },
+      es: { base: 'probablemente', subtype: 'sentence', negative_slot: 'pre-negator' },
+      ja: { base: 'たぶん', subtype: 'sentence' },
+      pt: { base: 'provavelmente', subtype: 'sentence', negative_slot: 'pre-negator' },
+    },
+  },
+  {
+    // In fact, contrary to what one might think — not REALLY's "truly", which scopes inside a
+    // negation. Japanese 実は, the "the truth is" that opens a statement.
+    id: 'ACTUALLY',
+    role: 'adverb',
+    description: 'in fact; contrary to what one might think',
+    emoji: '💡',
+    forms: {
+      en: { base: 'actually', subtype: 'sentence', negative_slot: 'pre-negation', fronted: 'comma' },
+      it: { base: 'in realtà', subtype: 'sentence', negative_slot: 'pre-negator' },
+      fr: { base: 'en fait', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+      de: { base: 'eigentlich', subtype: 'sentence', negative_slot: 'pre-negator' },
+      es: { base: 'en realidad', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+      ja: { base: '実は', subtype: 'sentence', reading: 'じつは' },
+      pt: { base: 'na verdade', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+    },
+  },
+  {
+    // Naturally, as expected. Portuguese *claro* fronted takes *que* (*claro que o gato…*); bare, it
+    // is the interjection "sure!".
+    id: 'OF_COURSE',
+    role: 'adverb',
+    description: 'naturally; as one would expect',
+    emoji: '👌',
+    forms: {
+      en: { base: 'of course', subtype: 'sentence', negative_slot: 'pre-negation' },
+      it: { base: 'naturalmente', subtype: 'sentence', negative_slot: 'pre-negator' },
+      fr: { base: 'bien sûr', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+      de: { base: 'natürlich', subtype: 'sentence', negative_slot: 'pre-negator' },
+      es: { base: 'por supuesto', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'comma' },
+      ja: { base: 'もちろん', subtype: 'sentence' },
+      pt: { base: 'claro', subtype: 'sentence', negative_slot: 'pre-negator', fronted: 'que' },
     },
   },
 

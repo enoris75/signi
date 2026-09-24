@@ -27,6 +27,9 @@ import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
+import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 
 /**
  * A restrictive relative clause on `np`, German-style: comma, relative pronoun agreeing
@@ -152,6 +155,13 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
   // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
   const prospectiveFrequency = isFrequencyAdverb(modifier) && modals.length === 0 ? modifierText : '';
+  // An adverb that outscopes the "nicht" leads it here too, in its negative word where it has one:
+  // "der das Essen noch nicht frisst", "der … vielleicht nicht frisst" (A244, P09-E28, P09-E39) —
+  // `adverbSlots` has already written the pair.
+  const outscopes = negativeAdverb(modifier, !!nicht.beforeAdverb)?.slot === 'pre-negator' && !isDirectionAdverb(modifier) && !isPlaceAdverb(modifier);
+  const adverbGroup = outscopes
+    ? [adverb.nichtBeforeObject, modalAdverbsText]
+    : [nicht.beforeAdverb, modalAdverbsText, modifierText];
   const predicate = complex.zuInfinitive
     ? prospectiveFrame(complex, {
       nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
@@ -159,7 +169,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
       directionAdverb: adverb.afterObject, complements: complementsText,
     }, true)
-    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, complementsText, nicht.after, ...verbFinalCluster(complex)];
+    : [objectPronounText, mid, dativeText, directObjectText, ...adverbGroup, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');

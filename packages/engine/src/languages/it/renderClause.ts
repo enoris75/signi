@@ -19,9 +19,12 @@ import { predicateText } from './predicateText.js';
 import { questionOrder } from './questionOrder.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
+import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 export function renderClause(phrase: ResolvedPhrase): string {
+  // A sentence adverb opens the statement, outside its negation (P09-E39, see `liftSentenceAdverb`).
+  if (phrase.sentenceAdverb) return withSentenceAdverb(phrase.sentenceAdverb, renderClause({ ...phrase, sentenceAdverb: undefined }));
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("di
   // grande dimensione"), not a bare subject noun phrase — wrap the dimension NP in its adposition.

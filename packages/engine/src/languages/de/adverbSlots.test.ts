@@ -25,6 +25,13 @@ describe('adverbSlots', () => {
       .toEqual({ beforeObject: '', afterObject: 'nach oben', nichtBeforeObject: 'nicht', nichtAfterObject: '' });
   });
 
+  test('an adverb that outscopes "nicht" leads it, in its negative word where it has one (P09-E28)', () => {
+    expect(adverbSlots(concept({ base: 'schon', subtype: 'frequency', negative: 'noch', negative_slot: 'pre-negator' }), NICHT, ''))
+      .toEqual({ beforeObject: '', afterObject: '', nichtBeforeObject: 'noch nicht', nichtAfterObject: '' });
+    expect(adverbSlots(concept({ base: 'auch', subtype: 'frequency', negative_slot: 'pre-negator' }), NICHT, ''))
+      .toEqual({ beforeObject: '', afterObject: '', nichtBeforeObject: 'auch nicht', nichtAfterObject: '' });
+  });
+
   test('no adverb at all', () => {
     expect(adverbSlots(undefined, NONE, ''))
       .toEqual({ beforeObject: '', afterObject: '', nichtBeforeObject: '', nichtAfterObject: '' });

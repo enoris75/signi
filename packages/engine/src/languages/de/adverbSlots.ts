@@ -29,9 +29,10 @@ export function adverbSlots(
 ): { beforeObject: string; afterObject: string; nichtBeforeObject: string; nichtAfterObject: string } {
   const text = modifier?.forms['base'] ?? '';
   if (!isDirectionAdverb(modifier) && !isPlaceAdverb(modifier)) {
-    const outscopes = negativeAdverb(modifier, !!nicht.beforeAdverb)?.slot === 'pre-negator';
-    if (outscopes) {
-      return { beforeObject: '', afterObject: '', nichtBeforeObject: `${text} ${nicht.beforeAdverb}`, nichtAfterObject: '' };
+    const negAdverb = negativeAdverb(modifier, !!nicht.beforeAdverb);
+    if (negAdverb?.slot === 'pre-negator') {
+      // Its negative word where it has one: ALREADY's "schon" is "noch nicht" (P09-E28).
+      return { beforeObject: '', afterObject: '', nichtBeforeObject: `${negAdverb.text} ${nicht.beforeAdverb}`, nichtAfterObject: '' };
     }
     return { beforeObject: text, afterObject: '', nichtBeforeObject: nicht.beforeAdverb, nichtAfterObject: '' };
   }

@@ -251,8 +251,10 @@ export function predicateText(
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   // A focus adverb that scopes over the negation stands in front of the "não" it outscopes:
   // "também não come a comida", not "não come também a comida" (A245).
-  const outscopesNao = negativeAdverb(modifier, verbText.startsWith('não '))?.slot === 'pre-negator';
-  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? modifierText : '';
+  const negAdverb = negativeAdverb(modifier, verbText.startsWith('não '));
+  const outscopesNao = negAdverb?.slot === 'pre-negator';
+  // Its negative word where it has one: ALREADY's "já" is "ainda não" (P09-E28).
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? (modifier?.forms['negative'] ? negAdverb.text : modifierText) : '';
   const postVerb = mainIsFronted || splitFrequency || outscopesNao ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
