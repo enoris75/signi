@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { PathSpecifier, PhrasePlan, Specifier, VerbPhrase } from '@signi/shared';
+import type { ContentClause, PathSpecifier, PhrasePlan, Specifier, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll, translateAll } from './harness.js';
 
 // A wh-question is a clause with a gap (PhrasePlan.questionRole, P09-E6): the slot it asks about is
@@ -1176,5 +1176,54 @@ describe('known bugs: an English passive agent question strands by ahead of the 
     });
     expect(say(clause(np('MAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'en'))
       .toBe('the book is given by the man to the child.');
+  });
+});
+
+// P09-E28 D3: NEVER in a question that is not denied is *ever* — its `interrogative` form, a positive
+// word in NEVER's own slot. Japanese has no adverb for it (〜たことがある is deferred) and asks with
+// いつか "at some time" meanwhile (D4). A negated question keeps *never*.
+describe('P09-E28: ever — NEVER in a question', () => {
+  const the = (concept: string) => np(concept, { definiteness: 'definite' });
+  const eats = (verbPhrase: Partial<VerbPhrase>, object = false): PhrasePlan =>
+    clause(the('CAT'), 'EAT', { ...(object ? { directObject: the('FOOD') } : {}), verbPhrase: { modifier: 'NEVER', ...verbPhrase } });
+  const yesNo = (plan: PhrasePlan): PhrasePlan => ({ ...plan, interrogative: true });
+
+  test('the perfect: has the cat ever eaten?', () => {
+    expect(sayAll(yesNo(eats({ aspect: 'resultative' })))).toEqual({
+      en: 'has the cat ever eaten?', it: 'il gatto ha mai mangiato?', fr: 'est-ce que le chat a déjà mangé ?',
+      de: 'hat der Kater je gefressen?', es: '¿el gato ha comido alguna vez?', ja: '猫はいつか食べましたか？',
+      pt: 'o gato comeu alguma vez?',
+    });
+  });
+
+  test('the present and the past', () => {
+    expect(sayAll(yesNo(eats({}, true)))).toEqual({
+      en: 'does the cat ever eat the food?', it: 'il gatto mangia mai il cibo?', fr: 'est-ce que le chat mange déjà la nourriture ?',
+      de: 'frisst der Kater je das Essen?', es: '¿el gato come alguna vez la comida?', ja: '猫は食べ物をいつか食べますか？',
+      pt: 'o gato come alguma vez a comida?',
+    });
+    expect(sayAll(yesNo(eats({ tense: 'past' })))).toMatchObject({
+      en: 'did the cat ever eat?', de: 'fraß der Kater je?', es: '¿el gato comió alguna vez?', ja: '猫はいつか食べましたか？',
+    });
+  });
+
+  test('a wh-question and an indirect question ask with it too', () => {
+    expect(sayAll(ask(eats({ aspect: 'resultative' }), 'directObject'))).toMatchObject({
+      en: 'what has the cat ever eaten?', it: 'che cosa ha mai mangiato il gatto?', de: 'was hat der Kater je gefressen?',
+    });
+    expect(sayAll(clause(the('DOG'), 'ASK', { contentObject: yesNo(eats({ aspect: 'resultative' })) as ContentClause }))).toMatchObject({
+      en: 'the dog asks whether the cat has ever eaten.', de: 'der Hund fragt, ob der Kater je gefressen hat.',
+      es: 'el perro pregunta si el gato ha comido alguna vez.',
+    });
+  });
+
+  test('a negated question and a statement keep never', () => {
+    expect(sayAll(yesNo(eats({ negative: true })))).toMatchObject({
+      en: 'does the cat never eat?', it: 'il gatto non mangia mai?', de: 'frisst der Kater nie?', ja: '猫は決して食べませんか？',
+    });
+    expect(sayAll(eats({}))).toEqual({
+      en: 'the cat never eats.', it: 'il gatto non mangia mai.', fr: 'le chat ne mange jamais.', de: 'der Kater frisst nie.',
+      es: 'el gato nunca come.', ja: '猫は決して食べません。', pt: 'o gato nunca come.',
+    });
   });
 });

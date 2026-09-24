@@ -450,14 +450,18 @@ export const adverbs: ConceptSeed[] = [
     description: 'by this time; before now',
     definition: mannerGloss('TIME', 'indefinite', 'PREVIOUS'),
     emoji: '✔️',
+    // Under a negation it is *not yet* (P09-E28): "has not eaten yet" at the end in English, "noch
+    // nicht" / "ainda não" / "todavía no" ahead of the negator (the Spanish "no" stays, where
+    // *tampoco* absorbs it), *ancora* and *encore* in place. Japanese まだ also puts the denied verb
+    // in 〜ている (`negative_aspect`): まだ食べていません, where もう食べていません is "no longer".
     forms: {
-      en: { base: 'already', subtype: 'frequency' },
-      it: { base: 'già', subtype: 'frequency' },
-      fr: { base: 'déjà', subtype: 'frequency' },
-      de: { base: 'schon', subtype: 'frequency' },
-      es: { base: 'ya', subtype: 'frequency' },
-      ja: { base: 'もう', subtype: 'frequency' },
-      pt: { base: 'já', subtype: 'frequency' },
+      en: { base: 'already', subtype: 'frequency', negative: 'yet', negative_slot: 'final' },
+      it: { base: 'già', subtype: 'frequency', negative: 'ancora' },
+      fr: { base: 'déjà', subtype: 'frequency', negative: 'encore' },
+      de: { base: 'schon', subtype: 'frequency', negative: 'noch', negative_slot: 'pre-negator' },
+      es: { base: 'ya', subtype: 'frequency', negative: 'todavía', negative_slot: 'pre-negator' },
+      ja: { base: 'もう', subtype: 'frequency', negative: 'まだ', negative_aspect: 'resultative' },
+      pt: { base: 'já', subtype: 'frequency', negative: 'ainda', negative_slot: 'pre-negator' },
     },
   },
   {
@@ -528,14 +532,17 @@ export const adverbs: ConceptSeed[] = [
     description: 'at no time, not ever',
     definition: frequencyGloss('no'),
     emoji: '🚫',
+    // Asked, and not denied, it is *ever* (P09-E28, `interrogativeAdverb`): a positive word in the
+    // same slot. Japanese has no adverb for it — 〜たことがある is a verb construction, deferred —
+    // and asks with いつか "at some time" meanwhile.
     forms: {
-      en: { base: 'never', subtype: 'frequency', polarity: 'negative' },
-      it: { base: 'mai', subtype: 'frequency', polarity: 'negative' },
-      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative' },
-      de: { base: 'nie', subtype: 'frequency', polarity: 'negative' },
-      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
-      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして' },
-      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative' },
+      en: { base: 'never', subtype: 'frequency', polarity: 'negative', interrogative: 'ever' },
+      it: { base: 'mai', subtype: 'frequency', polarity: 'negative', interrogative: 'mai' },
+      fr: { base: 'jamais', subtype: 'frequency', polarity: 'negative', interrogative: 'déjà' },
+      de: { base: 'nie', subtype: 'frequency', polarity: 'negative', interrogative: 'je' },
+      es: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguna vez' },
+      ja: { base: '決して', subtype: 'frequency', polarity: 'negative', reading: 'けっして', interrogative: 'いつか' },
+      pt: { base: 'nunca', subtype: 'frequency', polarity: 'negative', interrogative: 'alguma vez' },
     },
   },
   {

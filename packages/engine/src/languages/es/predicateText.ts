@@ -158,6 +158,9 @@ export function predicateText(
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   const outscopesNo = negAdverb?.slot === 'pre-negation';
+  // An adverb that outscopes the negation without carrying it stands in front of the "no" and keeps
+  // it: ALREADY's "ya" is "todavía no ha comido", where *tampoco* and *nunca* stand alone (P09-E28).
+  const leadsNo = negAdverb?.slot === 'pre-negator';
   // Spanish fronts one negative frequency adverb ("nunca") preverbally without "no", whichever verb
   // it modifies. Scan the group outermost-first (each modal, then the main verb); the first negative
   // adverb takes that slot and is suppressed from its in-group position. `frontIdx` indexes this
@@ -266,8 +269,8 @@ export function predicateText(
       ? withFocus(coordinateElement(directObject, tonicOrNoun, true), slotFocus(directObject), FOCUS_WORDS) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
-  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo ? modifierText : '';
-  const postVerb = mainIsFronted || splitFrequency || outscopesNo ? '' : modifierText;
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo || leadsNo ? modifierText : '';
+  const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /

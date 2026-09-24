@@ -76,11 +76,11 @@ describe('interrogative', () => {
       en: 'does the cat always eat?',
       de: 'frisst der Kater immer?',
     });
-    // NEVER negates the clause itself, so it takes do-support rather than a "not".
+    // NEVER asked is *ever*, a positive adverb in the same frequency slot (P09-E28 D3).
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'NEVER' } })))).toMatchObject({
-      en: 'does the cat never eat?',
-      fr: 'est-ce que le chat ne mange jamais ?',
-      ja: '猫は決して食べませんか？',
+      en: 'does the cat ever eat?',
+      fr: 'est-ce que le chat mange déjà ?',
+      ja: '猫はいつか食べますか？',
     });
     expect(sayAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { modifier: 'FAST' } }))).en)
       .toBe('does the cat run fast?');

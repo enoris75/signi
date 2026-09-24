@@ -4,6 +4,7 @@ import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb
 import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
+import { negativeAdverb } from '../../functions/negativeAdverb.js';
 import type { JaForm, JaIPN } from './ja.types.js';
 import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
 import { aspectFormSegs } from './aspectFormSegs.js';
@@ -120,9 +121,27 @@ export function predicateSegs(
   // the humble one — いらっしゃいます, 召し上がります, 参ります (P11-E1). It is the verb actually said that
   // changes, so the existential いる takes it too (お母さんは家にいらっしゃいます); a verb with no word
   // of its own for the register keeps its plain one.
-  const verbPhrase: ResolvedVerbPhrase = respect
+  const respected: ResolvedVerbPhrase = respect
     ? { ...substituted, verb: jaRespectVerb(substituted.verb, respect) }
     : substituted;
+  // An adverb with a negative word of its own says it under the negation (`negativeAdverb`), and
+  // one whose lexeme names `negative_aspect: 'resultative'` puts the denied verb in the resultant
+  // 〜ている: ALREADY's もう is まだ食べていません "has not eaten yet", where the plain まだ食べません is
+  // "won't eat yet" and もう食べていません "no longer" (P09-E28 D2). Only a plain verb takes it — an
+  // existential or a copula has no 〜ている to give, a modal governs its own form.
+  const negAdverb = negativeAdverb(respected.modifier, respected.negative === true);
+  const { reading: _reading, ...unread } = respected.modifier?.forms ?? {};
+  const yetForms = negAdverb && respected.modifier?.forms['negative']
+    ? { ...respected.modifier, forms: { ...unread, base: negAdverb.text } }
+    : respected.modifier;
+  const resultativeNegative = !!negAdverb && respected.modifier?.forms['negative_aspect'] === 'resultative'
+    && !existential && respected.verb.forms['copula'] !== '1' && !adjectival
+    && (respected.aspect ?? 'neutral') === 'neutral' && respected.modals.length === 0;
+  const verbPhrase: ResolvedVerbPhrase = {
+    ...respected,
+    modifier: yetForms,
+    ...(resultativeNegative ? { aspect: 'resultative' as const } : {}),
+  };
   const { verb, negative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).

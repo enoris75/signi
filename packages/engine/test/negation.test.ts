@@ -1595,3 +1595,64 @@ describe('known bugs: a `no` object keeps its "kein" inside a negated German pro
     });
   });
 });
+
+// P09-E28: ALREADY under a negation is *not yet* — the `negative` / `negative_slot` keys ALSO and
+// STILL use (English postposes *yet*, German and Portuguese lead the negator, Spanish leads its "no"
+// and keeps it), and Japanese puts the denied verb in the resultant 〜ている (`negative_aspect`), so
+// まだ食べていません is "has not eaten yet", where もう食べていません would be "no longer".
+describe('P09-E28: not yet — ALREADY under a negation', () => {
+  const the = (concept: string) => np(concept, { definiteness: 'definite' });
+  const eats = (verbPhrase: Partial<VerbPhrase>, object = false): PhrasePlan =>
+    clause(the('CAT'), 'EAT', { ...(object ? { directObject: the('FOOD') } : {}), verbPhrase: { modifier: 'ALREADY', negative: true, ...verbPhrase } });
+
+  test('the perfect: the cat has not eaten yet', () => {
+    expect(sayAll(eats({ aspect: 'resultative' }))).toEqual({
+      en: 'the cat has not eaten yet.', it: 'il gatto non ha ancora mangiato.', fr: "le chat n'a pas encore mangé.",
+      de: 'der Kater hat noch nicht gefressen.', es: 'el gato todavía no ha comido.', ja: '猫はまだ食べていません。',
+      pt: 'o gato ainda não comeu.',
+    });
+  });
+
+  test('the perfect with an object: yet closes the English clause, noch nicht follows the known object', () => {
+    expect(sayAll(eats({ aspect: 'resultative' }, true))).toEqual({
+      en: 'the cat has not eaten the food yet.', it: 'il gatto non ha ancora mangiato il cibo.',
+      fr: "le chat n'a pas encore mangé la nourriture.", de: 'der Kater hat das Essen noch nicht gefressen.',
+      es: 'el gato todavía no ha comido la comida.', ja: '猫は食べ物をまだ食べていません。', pt: 'o gato ainda não comeu a comida.',
+    });
+  });
+
+  test('the present: Japanese takes 〜ている from the adverb', () => {
+    expect(sayAll(eats({}, true))).toEqual({
+      en: 'the cat does not eat the food yet.', it: 'il gatto non mangia ancora il cibo.',
+      fr: 'le chat ne mange pas encore la nourriture.', de: 'der Kater frisst das Essen noch nicht.',
+      es: 'el gato todavía no come la comida.', ja: '猫は食べ物をまだ食べていません。', pt: 'o gato ainda não come a comida.',
+    });
+  });
+
+  test('the past and the progressive', () => {
+    expect(sayAll(eats({ tense: 'past' }, true))).toMatchObject({
+      en: 'the cat did not eat the food yet.', de: 'der Kater fraß das Essen noch nicht.',
+      es: 'el gato todavía no comió la comida.', ja: '猫は食べ物をまだ食べていませんでした。', pt: 'o gato ainda não comeu a comida.',
+    });
+    expect(sayAll(eats({ aspect: 'progressive' }))).toMatchObject({
+      en: 'the cat is not eating yet.', it: 'il gatto non sta ancora mangiando.', ja: '猫はまだ食べていません。',
+      es: 'el gato todavía no está comiendo.',
+    });
+  });
+
+  test('the copula keeps its own predicate, and a question keeps not yet', () => {
+    expect(sayAll(clause(the('CAT'), 'BE', { verbPhrase: { modifier: 'ALREADY', negative: true }, complements: { predicative: { phrase: np('TIRED') } } })))
+      .toMatchObject({ en: 'the cat is not tired yet.', fr: "le chat n'est pas encore fatigué.", de: 'der Kater ist noch nicht müde.', es: 'el gato todavía no está cansado.' });
+    expect(sayAll({ ...eats({ aspect: 'resultative' }), interrogative: true })).toMatchObject({
+      en: 'has the cat not eaten yet?', de: 'hat der Kater noch nicht gefressen?', ja: '猫はまだ食べていませんか？',
+    });
+  });
+
+  test('the affirmative keeps already in all seven, and ALSO keeps tampoco without a "no"', () => {
+    expect(sayAll(clause(the('CAT'), 'EAT', { verbPhrase: { modifier: 'ALREADY', aspect: 'resultative' } }))).toEqual({
+      en: 'the cat has already eaten.', it: 'il gatto ha già mangiato.', fr: 'le chat a déjà mangé.',
+      de: 'der Kater hat schon gefressen.', es: 'el gato ha comido ya.', ja: '猫はもう食べました。', pt: 'o gato comeu já.',
+    });
+    expect(sayAll(clause(the('CAT'), 'EAT', { verbPhrase: { modifier: 'ALSO', negative: true } })).es).toBe('el gato tampoco come.');
+  });
+});

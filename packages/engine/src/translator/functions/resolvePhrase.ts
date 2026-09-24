@@ -21,6 +21,7 @@ import { withQuestionPossessor } from './withQuestionPossessor.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveQuestion } from './resolveQuestion.js';
+import { interrogativeAdverb } from './interrogativeAdverb.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 import { withAlarmCry } from './withAlarmCry.js';
 import { withExistential } from './withExistential.js';
@@ -157,18 +158,23 @@ export function resolvePhrase(
   // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
   // render just the subject when it is absent. Resolved before the rest, because a complement
   // reads the verb's lexeme for the word it links an object predicative with.
-  const verbPhrase = plan.verbPhrase
-    ? {
+  const resolvedVerbPhrase = plan.verbPhrase
+    ? resolveVerbPhrase(
+        plan.verbPhrase, language, lookup, mood, impRegister,
+        // A direct-object question gaps the object the verb still takes, as a relative does ("what
+        // does the cat eat?") — and under the passive that gapped object is the patient to promote
+        // ("what is eaten by the cat?", P09-E16).
+        !!plan.directObject || gap?.role === 'directObject',
         // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
         // coordination is read off its group agreement, an animal only when every conjunct is one.
-        ...resolveVerbPhrase(
-          plan.verbPhrase, language, lookup, mood, impRegister,
-          // A direct-object question gaps the object the verb still takes, as a relative does ("what
-          // does the cat eat?") — and under the passive that gapped object is the patient to promote
-          // ("what is eaten by the cat?", P09-E16).
-          !!plan.directObject || gap?.role === 'directObject',
-          citation ? undefined : subject.agreement,
-        ),
+        citation ? undefined : subject.agreement,
+      )
+    : undefined;
+  const verbPhrase = resolvedVerbPhrase
+    ? {
+        ...resolvedVerbPhrase,
+        // NEVER asked and not denied is *ever* (P09-E28, see `interrogativeAdverb`).
+        modifier: interrogativeAdverb(resolvedVerbPhrase.modifier, question, clauseNegative),
         ...(question && !embedded ? { interrogative: true } : {}),
       }
     : undefined;
