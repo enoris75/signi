@@ -1816,18 +1816,25 @@ export const adjectives: ConceptSeed[] = [
     // Different from the one already named: "the other cat", "another cat". Prenominal in the
     // Romance languages (it "un altro gatto", fr "un autre chat"), and Spanish and Portuguese drop
     // the indefinite article before it ("otro gato", "outro gato"), as English fuses it ("another").
+    //
+    // On an indefinite pronoun it is a word of its own (P09-E36), `after_pronoun`: English *else*
+    // ("something else", "nobody else"), French *d'autre* ("quelqu'un d'autre"), German the
+    // lowercase *anderes* ("etwas anderes"), Spanish *más* ("alguien más"), Portuguese *mais*. Where a
+    // pronoun fuses with it instead (it *qualcos'altro*, fr *autre chose*, es *otra cosa*) the
+    // pronoun carries that as `with_other`. Japanese keeps 別の before the pronoun (別の何か) and says
+    // the negative with ほかに, `before_negative_pronoun`: ほかに何も食べません, "eats nothing else".
     id: 'OTHER',
     role: 'adjective',
     description: 'different from the one already named',
     emoji: '🔁',
     forms: {
-      en: { base: 'other' },
-      it: { base: 'altro' },
-      fr: { base: 'autre' },
-      de: { base: 'andere' },
-      es: { base: 'otro' },
-      ja: { base: '別の', reading: 'べつの' },
-      pt: { base: 'outro' },
+      en: { base: 'other', after_pronoun: 'else' },
+      it: { base: 'altro', after_pronoun: 'altro' },
+      fr: { base: 'autre', after_pronoun: 'autre' },
+      de: { base: 'andere', after_pronoun: 'andere' },
+      es: { base: 'otro', after_pronoun: 'más' },
+      ja: { base: '別の', reading: 'べつの', before_negative_pronoun: 'ほかに' },
+      pt: { base: 'outro', after_pronoun: 'mais' },
     },
   },
   {

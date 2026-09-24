@@ -9,6 +9,7 @@ import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
 import { applyPluralOnly } from './applyPluralOnly.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
+import { foldIndefiniteModifier } from './foldIndefiniteModifier.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
 import { resolveAdjectiveStandard } from './resolveAdjectiveStandard.js';
@@ -244,9 +245,18 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   const adjectiveStandard = attributive && compared
     ? { index: adjectives.indexOf(compared), standard: attributive.standard }
     : undefined;
+  // A pronoun's adjective (P09-E36). An indefinite one writes it into its own surfaces, the way each
+  // language spells it (*something big*, *qualcosa di grande*, *etwas Großes*), and the adjectives
+  // are spent; Japanese keeps them on the ordinary prenominal path (大きい何か). A personal pronoun
+  // has no way to say one in any of the seven ("*big him"), and a plan that gives it one is refused
+  // rather than rendered without it — the builder offers no adjective on a pronoun.
+  const spent = !!head.forms['person'] && adjectives.length > 0 && (() => {
+    if (head.forms['indefinite'] !== '1') throw new Error('a personal pronoun takes no adjective (P09-E36)');
+    return foldIndefiniteModifier(head, adjectives, language);
+  })();
   return {
     head,
-    adjectives,
+    adjectives: spent ? [] : adjectives,
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can
     // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise). Apply
     // the modifier's own number (so Romance engines can select its plural surface and

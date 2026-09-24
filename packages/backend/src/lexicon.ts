@@ -140,9 +140,10 @@ function isA(conceptId: string, ancestor: string): boolean {
 
 function lookupPronoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; person: string; number: string; gender: string | null }>(`
-    SELECT pl.id, pl.person, pl.number, pl.gender FROM concept_pronoun_links cpl
+  const lexeme = db.prepare<[string, string], { id: number; person: string; number: string; gender: string | null; slot: string | null; human: number }>(`
+    SELECT pl.id, pl.person, pl.number, pl.gender, sc.slot, sc.human FROM concept_pronoun_links cpl
     JOIN pronoun_lexemes pl ON pl.id = cpl.lexeme_id
+    JOIN semantic_concepts sc ON sc.id = cpl.concept_id
     WHERE cpl.concept_id = ? AND pl.language = ? AND cpl.is_primary = 1
   `).get(conceptId, language);
   if (!lexeme) return undefined;
@@ -155,6 +156,11 @@ function lookupPronoun(conceptId: string, language: string): LexicalEntry | unde
   forms['person'] = lexeme.person;
   forms['number'] = lexeme.number;
   if (lexeme.gender) forms['gender'] = lexeme.gender;
+  // An indefinite pronoun (SOMETHING, SOMEONE — the concept's `slot`, P09-E40) is a pronoun by its
+  // lexicon and a full phrase by its syntax: no clitic, no pro-drop (see `isPronounElement`). The
+  // flag is the concept's, so it reaches every language without a per-lexeme form.
+  if (lexeme.slot === 'indefinite') forms['indefinite'] = '1';
+  if (lexeme.human) forms['human'] = '1';
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }

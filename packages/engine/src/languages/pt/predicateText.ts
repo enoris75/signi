@@ -217,10 +217,12 @@ export function predicateText(
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes the
   // normative tonic object, "a" + its tonic form ("vê a ele e a mim", "vê o cão e a você").
   // The personal "a" marks a person, so the indefinite pronoun that stands for a **thing** takes
-  // none: "come algo", never "*come a algo" (C32).
+  // none: "come algo", never "*come a algo" (C32). Nor does the one for a person: Portuguese keeps
+  // its "a" for the tonic personal pronoun, and says "vê alguém", "não vê ninguém" (P09-E40), where
+  // Spanish says "ve a alguien".
   const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
     : np.head.forms['person']
-      ? `${np.head.forms['thing'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
+      ? `${np.head.forms['thing'] === '1' || np.head.forms['indefinite'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
       : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
