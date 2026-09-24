@@ -325,25 +325,34 @@ describe('known bugs: the Italian cardinal una does not elide before a vowel (A3
     complements: { temporal: { phrase: np('HOUR', { definiteness: 'bare', numeral: 1 }), specifiers: [{ kind: 'temporal', value }] } },
   }), 'it');
 
-  test.fails('within one hour', () => {
+  test('within one hour', () => {
     expect(temporal('within')).toBe("il gatto corre entro un'ora.");
   });
 
-  test.fails('for one hour', () => {
+  test('for one hour', () => {
     expect(temporal('for')).toBe("il gatto corre per un'ora.");
   });
 
-  test.fails('during one hour', () => {
+  test('during one hour', () => {
     expect(temporal('during')).toBe("il gatto corre durante un'ora.");
   });
 
-  test.fails('as the subject', () => {
+  test('as the subject', () => {
     expect(say(clause(np('HOUR', { definiteness: 'bare', numeral: 1 }), 'BURN'), 'it')).toBe("un'ora brucia.");
   });
 
-  test.fails('as the object, a feminine person', () => {
+  test('as the object, a feminine person', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { gender: 'fem', definiteness: 'bare', numeral: 1 }) }), 'it'))
       .toBe("il gatto vede un'amica.");
+  });
+
+  test('the masculine takes uno before an s-impura, and the elision survives an approximator or an adjective', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('STUDENT', { definiteness: 'bare', numeral: 1 }) }), 'it'))
+      .toBe('il gatto vede uno studente.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { definiteness: 'bare', numeral: 1, approximator: 'about' }), specifiers: [{ kind: 'temporal', value: 'for' }] } },
+    }), 'it')).toBe("il gatto corre per circa un'ora.");
+    expect(say(clause(np('HOUR', { definiteness: 'bare', numeral: 1, adjectives: ['OTHER'] }), 'BURN'), 'it')).toBe("un'altra ora brucia.");
   });
 
   test('regression: the indefinite article elides already, and a consonant or a masculine keeps its form', () => {

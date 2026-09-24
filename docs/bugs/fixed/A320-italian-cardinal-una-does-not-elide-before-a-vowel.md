@@ -36,3 +36,18 @@ Italian `CARDINALS` table already says by agreeing it.
 | | |
 |---|---|
 | **Test** | `numerals.test.ts` → *known bugs: the Italian cardinal una does not elide before a vowel (A320)* (5 `test.fails`, one per row, plus a regression test for the indefinite article, a consonant and the masculine) |
+
+## Resolved
+
+2026-09-24. Italian's [renderNP.ts](../../../packages/engine/src/languages/it/renderNP.ts) spells the
+cardinal one with `indefArticle` (its approximator still in front), taking the word that follows it as
+the lead, so the feminine elides before a vowel (`un'ora`, `un'amica`, `un'altra ora`) and the masculine
+takes `uno` before an s-impura (`uno studente`), as the article does. Every other value still comes from
+`numeralText`. The noun phrase is Italian's only `numeralText` site, so the complement follows.
+
+Guarded by the five tests of *known bugs: the Italian cardinal una does not elide before a vowel
+(A320)* in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts), now plain tests with
+their assertions unchanged, plus a new case in the same block (`uno studente`, `per circa un'ora`,
+`un'altra ora brucia`). The colocated
+[renderNP.test.ts](../../../packages/engine/src/languages/it/renderNP.test.ts) gained a cardinal-one
+case (`un'ala`, `un'azione`, `una casa`, `un cane`, `uno studente`).
