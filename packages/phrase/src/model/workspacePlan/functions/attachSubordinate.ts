@@ -1,4 +1,4 @@
-import type { ContentClause, InfinitiveComplement, PhrasePlan } from "@signi/shared";
+import type { ContentClause, InfinitiveComplement, NounElement, NounPhrase, PhrasePlan } from "@signi/shared";
 import { isSubordinateLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
@@ -29,17 +29,25 @@ export function attachSubordinate(
   if (!link || !isSubordinateLink(link)) return;
   const clause = byId.get(link.target.containerId);
   if (!clause || seen.has(clause.id)) return;
-  const clausePlan = selectionToPlan(
-    link.kind === "infinitive" ? { ...clause.selection, infinitive: true } : clause.selection,
-  );
+  const nonfinite = link.kind === "infinitive" || link.kind === "purpose";
+  const clausePlan = selectionToPlan(nonfinite ? { ...clause.selection, infinitive: true } : clause.selection);
   if (!clausePlan.verbPhrase) return;
   // A finite clause (a that-clause, an adverbial one) says its own subject, and the engine cannot
   // render one without: until its subject box holds a word it contributes nothing either, as the
   // panel translates a period only once its subject has a head (see useTranslation). An infinitive's
   // subject is the governing clause's and goes unsaid, so it needs none.
-  if (link.kind !== "infinitive" && !hasHead(clausePlan.subject)) return;
+  if (!nonfinite && !hasHead(clausePlan.subject)) return;
   attachLinks(clausePlan, clause, links, byId, new Set([...seen, clause.id]));
-  if (link.kind === "infinitive") {
+  if (link.kind === "purpose") {
+    const { verbPhrase, directObject, complements } = clausePlan;
+    plan.purpose = {
+      verbPhrase: verbPhrase!,
+      // "…to load **it**": a third-person pronoun object stands for the governing clause's object, and
+      // is given it as its antecedent, which each language takes its gender from (P13).
+      ...(directObject ? { directObject: withAntecedent(directObject, plan.directObject) } : {}),
+      ...(complements ? { complements } : {}),
+    };
+  } else if (link.kind === "infinitive") {
     const { verbPhrase, directObject, complements } = clausePlan;
     plan.infinitiveComplement = {
       verbPhrase,
@@ -54,4 +62,15 @@ export function attachSubordinate(
   } else {
     plan.adverbialClause = { conjunction: link.conjunction, clause: clausePlan as ContentClause };
   }
+}
+
+// A purpose clause's third-person pronoun object, given the governing clause's object as what it
+// stands for (P13) — "to write content to load it", where "it" is the content.
+function withAntecedent(object: NounElement, governing: NounElement | undefined): NounElement {
+  const np = object as NounPhrase;
+  const head = governing && !("conjuncts" in governing) ? governing.concept : undefined;
+  if ("conjuncts" in object || np.concept !== "THIRD_PERSON" || np.antecedent || !head) return object;
+  // The antecedent's word gives the pronoun its gender in each language, as the gender chip cannot.
+  const { gender: _gender, ...rest } = np;
+  return { ...rest, antecedent: head };
 }

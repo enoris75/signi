@@ -42,7 +42,7 @@ describe('the help pages', () => {
     expect(usage('help')).toBe('/help [comando]');
     // The values, the references and the brackets are the console's own, in every language.
     expect(usage('level')).toBe('/level process|concept|object');
-    expect(usage('del')).toBe('/del [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|if|join|clause|sub|to|inst|period]');
+    expect(usage('del')).toBe('/del [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|if|join|clause|sub|to|so|inst|period]');
     expect(helpPage('adj', it_)?.usage).toBe('/adj parola · /adj ( parola … )');
   });
 

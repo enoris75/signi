@@ -200,7 +200,7 @@ export function useWorkspaceLinks(
     cancelPick();
     if (!subordinateAllowed(containers, links, mainId, clauseContainerId, kind)) return;
     setLinks((ls) => addSubordinate(ls, mainId, clauseContainerId, kind, uid(), conjunction));
-    if (kind === "infinitive")
+    if (kind === "infinitive" || kind === "purpose")
       setContainers?.((cs) =>
         cs.map((c) => (c.id === clauseContainerId ? { ...c, selection: setInfinitive(c.selection, true) } : c)),
       );

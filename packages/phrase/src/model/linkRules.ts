@@ -312,7 +312,7 @@ export function canBeSubordinate(
   // engine would render a question's words inside it ("says that does the cat run"). The clause that
   // governs it may be one ("does the man say that the cat runs?").
   if (sel.interrogative || sel.questionRole) return false;
-  return !sel.imperative && (kind === "infinitive" || !sel.infinitive);
+  return !sel.imperative && (kind === "infinitive" || kind === "purpose" || !sel.infinitive);
 }
 
 /** One subordinate clause per governing clause: the one it had, of whatever kind, is replaced. */

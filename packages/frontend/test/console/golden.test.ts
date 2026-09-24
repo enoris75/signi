@@ -321,6 +321,16 @@ const GOLDEN: Record<string, Golden> = {
     check: (s) => expect(s.links[0]).not.toHaveProperty('control'),
     prints: '/subj ( cat ) /verb ( need ) /obj ( dog ) /to #2',
   },
+  // A clause of purpose (P13), what the act is for — any verb has one, drawn in the infinitive.
+  so: {
+    line: '/subj cat /verb eat /obj food /so ( /verb run )',
+    check: (s) => {
+      expect(s.links[0]).toMatchObject({ kind: 'purpose' });
+      expect(s.containers[1]!.selection.infinitive).toBe(true);
+    },
+    prints: '/subj ( cat ) /verb ( eat ) /obj ( food ) /so #2',
+    misuse: { line: '/subj cat /so ( /verb run )', says: { code: 'subordinateNeedsVerb' } },
+  },
   posinst: {
     line: '/subj child /verb eat /inst ( /subj stick ) /without /posinst',
     check: (s) => expect(s.links[0]).not.toHaveProperty('negative'),

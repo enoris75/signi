@@ -2332,6 +2332,9 @@ export const UI_STRINGS = defineUiStrings({
   },
   // A period that is another's subordinate clause — its object clause, its adverbial clause or its
   // infinitive complement (P09-E12 D9): it "proposizione subordinata", de "untergeordneter Satz", ja 従属節.
+  // A period that is another's clause of purpose (P13): named by its PURPOSE alone (it "Scopo", de
+  // "Zweck", ja 目的), which the menu row and the connector read beside *that* and *to*.
+  'clause.purpose': { plan: nameOf('PURPOSE'), format: NAME_FORMAT, fallback: 'Purpose' },
   'clause.subordinate': {
     plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['SUBORDINATE'] } } as PhrasePlan,
     format: NAME_FORMAT,

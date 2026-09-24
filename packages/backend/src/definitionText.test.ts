@@ -24,7 +24,6 @@ const WAITING = new Set([
   'NounPhrase.numeral',
   'NounPhrase.contrastive',
   'PhrasePlan.adverbialGloss',
-  'PhrasePlan.purpose',
   'PhrasePlan.contentSubject',
   'PhrasePlan.infinitiveComplement governed by the predicate',
   'InfinitiveComplement.infinitiveComplement',
@@ -66,7 +65,7 @@ describe('definitions in the phrase language (P13)', () => {
 
   test('most definitions are said already', () => {
     // A floor, not a count: it moves up as phase 4 lands, and catches the inverse losing ground.
-    expect(said.length).toBeGreaterThanOrEqual(548);
+    expect(said.length).toBeGreaterThanOrEqual(556);
   });
 });
 

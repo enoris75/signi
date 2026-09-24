@@ -10,6 +10,7 @@ import type {
   NounGroup,
   NounPhrase,
   PhrasePlan,
+  PurposeClause,
   RelativeClause,
   VerbPhrase,
 } from "@signi/shared";
@@ -55,12 +56,12 @@ type NewLink = PhraseLink extends infer L ? (L extends PhraseLink ? Omit<L, "id"
 const PERIOD_FIELDS = new Set([
   "subject", "verbPhrase", "directObject", "complements", "condition", "coordination", "interrogative",
   "existential", "imperative", "imperativeRegister", "infinitive", "contentObject", "adverbialClause",
-  "infinitiveComplement",
+  "infinitiveComplement", "purpose",
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
   "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
-  "complementGloss", "possessorRole",
+  "complementGloss", "possessorRole", "antecedent",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -79,6 +80,8 @@ class Builder {
   links: PhraseLink[] = [];
   unsupported = new Set<string>();
   private n = 0;
+  // The one antecedent a pronoun may carry where it is being built: a purpose clause's object's (P13).
+  private antecedentAllowed: string | undefined;
   constructor(private readonly conceptOf: (id: string) => Concept | undefined) {}
 
   private concept(id: string): Concept | undefined {
@@ -130,6 +133,7 @@ class Builder {
       this.link({ kind: "coordinative", conjunction: plan.coordination.conjunction, source: { containerId: c.id }, target: { containerId: second.id } });
     }
     if (plan.contentObject) this.subordinate(c, "content", plan.contentObject);
+    if (plan.purpose) this.purpose(c, plan.purpose, plan.directObject);
     if (plan.adverbialClause) this.subordinate(c, "adverbial", plan.adverbialClause.clause, plan.adverbialClause.conjunction);
     if (plan.infinitiveComplement) {
       // Only a verb that governs an infinitive takes one on the canvas; "to be able to act" is
@@ -145,6 +149,18 @@ class Builder {
     const c = this.open();
     this.clause(c, clause);
     this.link({ kind, ...(conjunction ? { conjunction } : {}), source: { containerId: main.id }, target: { containerId: c.id } } as NewLink);
+  }
+
+  // A clause of purpose (P13): a period in the infinitive, linked as the governing clause's purpose.
+  // A third-person pronoun object in it stands for that clause's object, which the serialiser gives
+  // it as its antecedent — so an antecedent anything else is not said.
+  private purpose(main: PhraseContainer, clause: PurposeClause, governing: NounElement | undefined): void {
+    this.check("PurposeClause", clause, INFINITIVE_FIELDS);
+    const c = this.open({ infinitive: true });
+    this.antecedentAllowed = governing && !("conjuncts" in governing) ? governing.concept : undefined;
+    this.clause(c, { subject: undefined as unknown as NounElement, ...clause });
+    this.antecedentAllowed = undefined;
+    this.link({ kind: "purpose", source: { containerId: main.id }, target: { containerId: c.id } });
   }
 
   private infinitive(main: PhraseContainer, inf: InfinitiveComplement): void {
@@ -269,6 +285,8 @@ class Builder {
     this.check("NounPhrase", np, NOUN_FIELDS);
     const head = this.concept(np.concept);
     if (!head) return;
+    if (np.antecedent && (np.antecedent !== this.antecedentAllowed || which !== "directObject"))
+      this.unsupported.add("NounPhrase.antecedent");
     set(sel, which, head);
     set(sel, `${which}Number`, np.number);
     set(sel, `${which}Gender`, np.gender);

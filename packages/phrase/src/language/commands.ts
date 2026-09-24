@@ -254,7 +254,7 @@ export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "af
 const TEMPORAL_COMMAND_NAME: Partial<Record<TemporalRelation, string>> = { between: "span", for: "lasting" };
 
 /** The name `/del` takes a subordinate link back by, and the command that prints it: one per kind. */
-export const SUBORDINATE_NAMES: Record<SubordinateKind, string> = { content: "clause", adverbial: "sub", infinitive: "to" };
+export const SUBORDINATE_NAMES: Record<SubordinateKind, string> = { content: "clause", adverbial: "sub", infinitive: "to", purpose: "so" };
 
 // The readings `/gloss` sets, each named by what the subject reads as (P13).
 export const GLOSS_VALUES: readonly ValueDef[] = [
@@ -894,6 +894,20 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "error",
     arg: { kind: "link" },
     action: { kind: "subordinate", link: "infinitive" },
+  },
+  // What the act is for (P13): "/inf /verb ( write ) /obj ( content ) /so { /verb ( load ) /obj ( 3rd ) }"
+  // is SAVE's "to write content to load it". Any verb has one; its period is drawn in the infinitive.
+  // `/purpose` is the noun modifier's relation, so it is `/so`, as in "so as to".
+  {
+    name: "so",
+    aliases: ["inorder", "soasto"],
+    group: "period",
+    description: "clause of purpose",
+    descriptionKey: "clause.purpose",
+    purposeKey: "purpose.join",
+    color: "error",
+    arg: { kind: "link" },
+    action: { kind: "subordinate", link: "purpose" },
   },
   {
     name: "level",

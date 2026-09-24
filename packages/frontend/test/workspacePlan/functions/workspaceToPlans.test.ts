@@ -97,6 +97,19 @@ describe('workspaceToPlans', () => {
     expect(plan.infinitiveComplement).toMatchObject({ verbPhrase: { verb: 'SLEEP' }, control: 'object' });
   });
 
+  // P13: SAVE is "to write content to load it" — the clause of purpose, whose "it" is the content.
+  it('folds a clause of purpose in, its third-person object standing for the governing clause’s', () => {
+    const IT = { id: 'THIRD_PERSON', role: 'pronoun' as const, description: 'it', person: '3' as const };
+    const periods = [period('main', { subject: CAT, verb: EAT, directObject: DOG }), period('so', { verb: SEE, directObject: IT, directObjectGender: 'masc' })];
+    const link = { id: 'p', kind: 'purpose', source: { containerId: 'main' }, target: { containerId: 'so' } } as PhraseLink;
+    const [{ plan }] = workspaceToPlans(periods, [link]);
+
+    expect(plan.purpose).toMatchObject({ verbPhrase: { verb: 'SEE' }, directObject: { concept: 'THIRD_PERSON', antecedent: 'DOG' } });
+    // The antecedent gives the pronoun its gender in each language, so the chip's is not said.
+    expect(plan.purpose?.directObject).not.toHaveProperty('gender');
+    expect(plan).not.toHaveProperty('infinitiveComplement');
+  });
+
   it('folds in no subordinate clause until its period has a verb', () => {
     const periods = [period('main', { subject: BOY, verb: SLEEP }), period('when', { subject: CAT })];
     const [{ plan }] = workspaceToPlans(periods, [subordinate('s', 'adverbial', 'main', 'when')]);

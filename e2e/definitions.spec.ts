@@ -157,3 +157,21 @@ test.describe('a relative clause whose gap no box holds', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/rel #2.inst');
   });
 });
+
+test.describe('a clause of purpose', () => {
+  test('says SAVE, "to write content to load it", its "it" taking the content’s gender', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/inf /verb WRITE /obj ( CONTENT /zero ) /so ( /verb LOAD /obj 3rd )');
+    await run(page);
+    await app.expectSentences({ en: 'to write content to load it.', de: 'Inhalt schreiben, um ihn zu laden.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/so #2');
+  });
+
+  test('is a row of the subordinate clause menu, P', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj man /verb read /obj book\n/verb learn');
+    await run(page);
+    await app.linkSubordinate(0, 1, 'Purpose');
+    await app.expectSentences({ en: 'the man reads the book to learn.' });
+  });
+});

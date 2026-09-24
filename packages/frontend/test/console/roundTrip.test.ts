@@ -267,7 +267,7 @@ const OPS: Op[] = [
       (l) =>
         ((l.kind === 'conditional' || l.kind === 'coordinative') && (l.source.containerId === c.id || l.target.containerId === c.id)) ||
         // A subordinate clause has no mood of its own (P09-E12 D9).
-        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive') && l.target.containerId === c.id),
+        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive' || l.kind === 'purpose') && l.target.containerId === c.id),
     );
     if (locked) return undefined;
     const r = rng();
@@ -291,7 +291,7 @@ const OPS: Op[] = [
       (l) =>
         ((l.kind === 'conditional' || l.kind === 'coordinative') && (l.source.containerId === c.id || l.target.containerId === c.id)) ||
         // A subordinate clause has no mood of its own (P09-E12 D9), the question's included.
-        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive') && l.target.containerId === c.id),
+        ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive' || l.kind === 'purpose') && l.target.containerId === c.id),
     );
     let sel = c.selection;
     const r = rng();
@@ -350,12 +350,12 @@ const OPS: Op[] = [
   (s, rng, id) => {
     const source = pick(rng, s.containers)!;
     const target = pick(rng, s.containers)!;
-    const kind = pick(rng, ['content', 'adverbial', 'infinitive'] as const)!;
+    const kind = pick(rng, ['content', 'adverbial', 'infinitive', 'purpose'] as const)!;
     if (!L.canStartSubordinate(s.links, source, kind)) return undefined;
     if (!L.canBeSubordinate(s.containers, s.links, source.id, target.id, kind)) return undefined;
     const links = L.addSubordinate(s.links, source.id, target.id, kind, id(), pick(rng, SUBORDINATING_CONJUNCTIONS)!);
     const containers =
-      kind === 'infinitive'
+      kind === 'infinitive' || kind === 'purpose'
         ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInfinitive(c.selection, true) } : c))
         : s.containers;
     return { ...s, containers, links };
@@ -473,11 +473,11 @@ describe('the round trip', () => {
 
   // The walk's subordinate-clause op is what exercises `/clause`, `/sub` and `/to` (P09-E12 D9). A
   // that-clause needs SAY with no object and an infinitive NEED, so the two are rarer than the others.
-  it('reaches each of the three subordinate clauses', () => {
+  it('reaches each of the subordinate clauses, the clause of purpose (P13) among them', () => {
     const kinds = new Set<string>();
     for (let seed = 1; seed <= 4000; seed++)
       for (const l of reach(seed, 10 + (seed % 30)).links) kinds.add(l.kind ?? 'relative');
-    expect([...kinds]).toEqual(expect.arrayContaining(['content', 'adverbial', 'infinitive']));
+    expect([...kinds]).toEqual(expect.arrayContaining(['content', 'adverbial', 'infinitive', 'purpose']));
   });
 
   it('prints a reached state the same way twice', () => {

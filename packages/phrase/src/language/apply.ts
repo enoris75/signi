@@ -1219,8 +1219,9 @@ class Run {
         if (!canBeSubordinate(this.containers, this.links, op.mainId, clauseId, op.link))
           fail(op.span, this.clauseRefusal(op.mainId, clauseId, "subordinate"));
         this.links = addSubordinate(this.links, op.mainId, clauseId, op.link, id(), op.conjunction);
-        // The infinitive complement is drawn in the infinitive mood, as the canvas's pick sets it.
-        if (op.link === "infinitive") this.updateRoot(clauseId, (root) => setInfinitive(root, true));
+        // The infinitive complement and the clause of purpose (P13) are drawn in the infinitive mood, as
+        // the canvas's pick sets them.
+        if (op.link === "infinitive" || op.link === "purpose") this.updateRoot(clauseId, (root) => setInfinitive(root, true));
         return;
       }
       case "instrument": {

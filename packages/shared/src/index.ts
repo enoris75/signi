@@ -2008,8 +2008,9 @@ export interface SerializedLink {
   // clause acts with ("start **with a word**"). None of the three carries a noun key.
   // 'content', 'adverbial' and 'infinitive' are the subordinate clauses (P09-E12 D9): the target
   // period is the source clause's object clause ("says that …"), its adverbial clause ("runs when
-  // …", joined by `conjunction`) or its infinitive complement ("needs to …").
-  kind?: 'relative' | 'conditional' | 'coordinative' | 'content' | 'adverbial' | 'infinitive' | 'instrumental';
+  // …", joined by `conjunction`) or its infinitive complement ("needs to …"); 'purpose' its clause of
+  // purpose ("writes content to load it", P13).
+  kind?: 'relative' | 'conditional' | 'coordinative' | 'content' | 'adverbial' | 'infinitive' | 'purpose' | 'instrumental';
   source: { containerId: string; nounKey?: string };
   target: { containerId: string; nounKey?: string };
   // The coordinating conjunction, present only on a 'coordinative' link — or the subordinating one,

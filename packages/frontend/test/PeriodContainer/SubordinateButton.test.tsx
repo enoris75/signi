@@ -41,6 +41,8 @@ describe('SubordinateButton', () => {
     expect(within(menu).getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
       'ThatT',
       'Infinitive phraseO',
+      // P13.
+      'PurposeP',
       'WhenW',
       'WhileH',
       'BecauseC',
@@ -77,8 +79,9 @@ describe('SubordinateButton', () => {
 describe('subordinateOptions', () => {
   const kinds = (verb: Parameters<typeof subordinateOptions>[0], hasObject = false) =>
     subordinateOptions(verb, hasObject).map((o) => o.conjunction ?? o.link);
-  // P09-E27 added until, since and though, localization C41 the similative as.
-  const ADVERBIAL = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as'];
+  // P09-E27 added until, since and though, localization C41 the similative as. The clause of purpose
+  // (P13) goes with any verb, as the adverbial ones do, and sits after the infinitive.
+  const ADVERBIAL = ['purpose', 'when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as'];
 
   it('offers *that* to a verb that takes a content clause and has no object, *to* to one that takes an infinitive', () => {
     expect(kinds({ clauseObject: 'content' })).toEqual(['content', ...ADVERBIAL]);

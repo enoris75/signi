@@ -62,7 +62,7 @@ export function coordConjunctionOptions(
 // The three subordinate clauses a period can take (P09-E12 D9), each a kind of link: its object
 // clause ("says **that the cat runs**"), an adverbial clause a conjunction opens ("runs **when the
 // cat eats**"), and its infinitive complement ("needs **to run**").
-export type SubordinateKind = "content" | "adverbial" | "infinitive";
+export type SubordinateKind = "content" | "adverbial" | "infinitive" | "purpose";
 
 // One entry of the subordinate-clause menu: the link it starts, the conjunction an adverbial one
 // carries, the catalog key of its word, and the letter it answers to while the menu is open. `that`
@@ -78,6 +78,9 @@ export interface SubordinateOption {
 export const SUBORDINATE_OPTIONS: readonly SubordinateOption[] = [
   { link: "content", labelKey: "subordinator.value.that", key: "T" },
   { link: "infinitive", labelKey: "infinitive.phrase", key: "O" },
+  // P13: what the act is *for*, "to write content **to load it**" — any act has one, as any has a
+  // time; **P** for purpose.
+  { link: "purpose", labelKey: "clause.purpose", key: "P" },
   { link: "adverbial", conjunction: "when", labelKey: "subordinator.value.when", key: "W" },
   { link: "adverbial", conjunction: "while", labelKey: "subordinator.value.while", key: "H" },
   { link: "adverbial", conjunction: "because", labelKey: "subordinator.value.because", key: "C" },
@@ -114,7 +117,9 @@ export const subordinateLabelKey = (s: {
     ? "subordinator.value.that"
     : s.kind === "infinitive"
       ? "infinitive.phrase"
-      : SUBORDINATOR_LABEL_KEY[s.conjunction ?? "when"];
+      : s.kind === "purpose"
+        ? "clause.purpose"
+        : SUBORDINATOR_LABEL_KEY[s.conjunction ?? "when"];
 
 // The menu's entries for a period whose verb is `verb` and which holds, or not, a direct object:
 // *that* only for a verb that takes a content clause and has no object (the clause *is* the object),
@@ -718,6 +723,15 @@ export type PhraseLink =
       source: { containerId: string };
       target: { containerId: string };
     }
+  // A clause of purpose (P13, PhrasePlan.purpose): what the act is done for, "to write content **to
+  // load it**". Like the infinitive its subject is the governing clause's, and it is drawn in the
+  // infinitive; unlike it, nothing licenses it — any act has a purpose.
+  | {
+      id: string;
+      kind: 'purpose';
+      source: { containerId: string };
+      target: { containerId: string };
+    }
   | {
       id: string;
       kind: 'infinitive';
@@ -774,7 +788,7 @@ export const isCoordinativeLink = (
 export const isSubordinateLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind: SubordinateKind }> =>
-  l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive';
+  l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive' || l.kind === 'purpose';
 
 /** Narrow a link to the instrumental kind. */
 export const isInstrumentalLink = (

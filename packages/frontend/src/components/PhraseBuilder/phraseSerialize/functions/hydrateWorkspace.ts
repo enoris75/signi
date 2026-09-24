@@ -75,10 +75,10 @@ export function hydrateWorkspace(
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }
-      : l.kind === "content" || l.kind === "infinitive"
+      : l.kind === "content" || l.kind === "infinitive" || l.kind === "purpose"
       ? {
           id: l.id,
-          kind: l.kind as "content" | "infinitive",
+          kind: l.kind as "content" | "infinitive" | "purpose",
           // The causee's infinitive (P13): only a literal "object" hands it to the object.
           ...(l.kind === "infinitive" && l.control === "object" ? { control: "object" as const } : {}),
           source: { containerId: l.source.containerId },
