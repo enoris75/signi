@@ -702,12 +702,22 @@ describe('known bugs: a Japanese ている state before まで and 前に keeps 
     },
   });
 
-  test.fails('until the dog is tired', () => {
+  test('until the dog is tired', () => {
     expect(say(runs('until'), 'ja')).toBe('猫は犬が疲れるまで走ります。');
   });
 
-  test.fails('before the dog is tired', () => {
+  test('before the dog is tired', () => {
     expect(say(runs('before'), 'ja')).toBe('猫は犬が疲れる前に走ります。');
+  });
+
+  test('other た-adjectives: an ichidan, a する and a godan verb', () => {
+    const until = (adjective: string): PhrasePlan => ({
+      subject: np('CAT'), verbPhrase: { verb: 'RUN' },
+      adverbialClause: { conjunction: 'until', clause: { subject: np('DOG'), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np(adjective) } } } },
+    });
+    expect(['CLOSED', 'UNCONNECTED', 'OPEN_ADJECTIVE'].map((a) => say(until(a), 'ja'))).toEqual([
+      '猫は犬が閉じるまで走ります。', '猫は犬が孤立するまで走ります。', '猫は犬が開くまで走ります。',
+    ]);
   });
 
   test('regression: when keeps the state, and the other six', () => {

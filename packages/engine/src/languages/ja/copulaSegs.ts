@@ -9,6 +9,7 @@ import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
+import { jaStateVerb } from './jaStateVerb.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -20,8 +21,8 @@ import { wordSeg } from './wordSeg.js';
  * prenominal form in every cell but a na- or の-adjective's present affirmative, which takes the terminal
  * である where a noun would follow its attributive な (幸せであるかどうか, 幸せだったかどうか).
  * `reach` stands before まで and 前に, which name a state reached (A323): the affirmative is the change of
- * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる); the
- * negative and a state (疲れている) keep the prenominal form.
+ * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる), and a
+ * state (疲れている) is its verb's dictionary form (疲れる, A346); the negative keeps the prenominal form.
  */
 export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | 'closing' | 'reach' | JaForm;
 // The forms with endings of their own; the others borrow a row (see `row`).
@@ -191,6 +192,13 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // tense — 最も大きいわけではありません(でした), 最も大きいわけではない猫.
   if (negative && adjDegree(head.head) === 'most') {
     return [...degSegs, wordSeg(stem, stemReading), { t: `${endingOf('prenominal', 0)}わけ${COPULA_ENDINGS[at][cell]}` }];
+  }
+  // A state (疲れている) reached is its verb's event, the dictionary form (疲れるまで, A346), where the
+  // plain past says which verb that is (see `jaStateVerb`); the past is the plain past itself (疲れた).
+  const verb = reached && kind === 'ta' ? jaStateVerb(base) : undefined;
+  if (verb) {
+    const toDict = (s: string) => (tense === 'past' ? s : `${s.slice(0, -verb.cut)}${verb.dict}`);
+    return [...degSegs, wordSeg(toDict(base), reading === undefined ? undefined : toDict(reading))];
   }
   const ending = reached && kind === 'i' ? `く${reached}`
     : reached && kind === 'na' ? `${predicative}に${reached}`
