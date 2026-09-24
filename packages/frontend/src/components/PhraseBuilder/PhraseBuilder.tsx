@@ -935,6 +935,8 @@ export function PhraseBuilder({
           has: linkBinding.relative.sourceKeys.has(address),
           start: () => linkBinding.relative.onStartLink(address),
           clear: () => linkBinding.relative.onRemoveLink(address),
+          headless: linkBinding.relative.headlessKeys.has(address),
+          setHeadless: (headless: boolean) => linkBinding.relative.onSetHeadless(address, headless),
         };
       })(),
       openDeterminerMenu,

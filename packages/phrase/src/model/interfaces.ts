@@ -632,6 +632,10 @@ export type PhraseLink =
       kind?: 'relative';
       source: { containerId: string; nounKey: NounAddress };
       target: { containerId: string; nounKey: NounKey };
+      // Whether the clause is said *alone*, its head unspoken — "that has no problems" for OKAY, an
+      // adjective's definition (P13, NounPhrase.relativeGloss). The head still picks the relativizer
+      // and the agreement, so it stays in its box. Absent ⇒ the head is said.
+      headless?: boolean;
     }
   | {
       id: string;

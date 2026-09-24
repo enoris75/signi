@@ -59,7 +59,7 @@ const PERIOD_FIELDS = new Set([
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
-  "headStandard", "nounModifiers", "relative", "possessor",
+  "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -235,6 +235,11 @@ class Builder {
       this.check("NounGroup", el, GROUP_FIELDS);
       const [first, ...rest] = el.conjuncts;
       if (!first) return;
+      // A conjunct's box holds a noun: predicate adjectives joined, "not male or female", have none yet.
+      if (el.conjuncts.some((np) => this.conceptOf(np.concept)?.role === "adjective")) {
+        this.unsupported.add("NounGroup of adjectives");
+        return;
+      }
       this.phrase(c, sel, which, first, address);
       set(sel, `${which}Conjuncts`, rest.map((np, i) => {
         const conjunct: PhraseSelection = {};
@@ -275,7 +280,8 @@ class Builder {
         set(sel, `${which}Possessor`, owner);
       }
     }
-    if (np.relative) this.relative(c, address, head, np.relative);
+    if (np.relative) this.relative(c, address, head, np.relative, Boolean(np.relativeGloss));
+    else if (np.relativeGloss) this.unsupported.add("NounPhrase.relativeGloss without a relative");
   }
 
   // Adjectives and attributive nouns share a block's three adjective slots; the plan keeps them in two
@@ -309,7 +315,7 @@ class Builder {
 
   // A relative clause is a period whose gap is the noun the link targets. The gap holds the head's
   // word, as a gap the canvas links to always holds one; the serialiser leaves it out.
-  private relative(c: PhraseContainer, address: NounAddress, head: Concept, rc: RelativeClause): void {
+  private relative(c: PhraseContainer, address: NounAddress, head: Concept, rc: RelativeClause, headless: boolean): void {
     this.check("RelativeClause", rc, RELATIVE_FIELDS);
     const gap = rc.headRole ?? "subject";
     const box = gap === "subject" || gap === "directObject" || (BOX_COMPLEMENT_TYPES as string[]).includes(gap);
@@ -326,6 +332,10 @@ class Builder {
       else if (s.kind === "sentiment" && gap === "cause") target.selection.causeSentiment = s.value;
       else this.unsupported.add(`RelativeClause.headSpecifiers.${s.kind}`);
     }
-    this.link({ source: { containerId: c.id, nounKey: address }, target: { containerId: target.id, nounKey: gap as NounKey } });
+    this.link({
+      source: { containerId: c.id, nounKey: address },
+      target: { containerId: target.id, nounKey: gap as NounKey },
+      ...(headless ? { headless: true } : {}),
+    });
   }
 }

@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|if|join|clause|sub|to|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|if|join|clause|sub|to|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -113,6 +113,7 @@ export const EXAMPLES: Record<string, string> = {
   enough: "/subj ( cat ) /verb ( eat ) /obj ( food /enough )",
   such: "/subj ( cat /such ) /verb ( run )",
   rel: "/subj ( man /rel subj { /verb ( love ) /obj ( cat ) } ) /verb ( run )",
+  headless: "/subj ( man /rel subj { /verb ( love ) /obj ( cat ) } /headless )",
   in: "/subj ( cat ) /verb ( eat ) /loc ( house /in )",
   through: "/subj ( dog ) /verb ( run ) /route ( house /through )",
   under: "/subj ( cat ) /verb ( eat ) /loc ( house /under )",

@@ -135,6 +135,7 @@ const SAMPLES: Samples = {
   instrumentThingHasVerb: [[{}, 'That period has a verb. Choose a level: /level process, /level concept']],
   noNounAt: [[{ ref: '#1.obj' }, 'Missing noun: #1.obj']],
   noInstrumentLink: [[{}, 'This period has no instrumental']],
+  noRelativeLink: [[{}, 'This noun has no relative clause']],
   noLinkToRemove: [
     [{ link: 'condition' }, 'This period has no condition'],
     [{ link: 'join' }, 'This period has no coordination'],

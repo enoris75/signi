@@ -37,6 +37,7 @@ import {
   clearInstrumental as withoutInstrumental,
   dropContainerLinks,
   removeRelativeLink,
+  setRelativeHeadless,
   setInstrumentalLevel as withInstrumentalLevel,
   setInstrumentalNegative as withInstrumentalNegative,
 } from "../linkRules.ts";
@@ -120,6 +121,11 @@ export function useWorkspaceLinks(
 
   function removeLink(containerId: string, nounKey: NounAddress) {
     setLinks((ls) => removeRelativeLink(ls, containerId, nounKey));
+  }
+
+  // Say a noun's relative clause alone, its head unspoken, or say the head again (P13).
+  function setHeadless(containerId: string, nounKey: NounAddress, headless: boolean) {
+    setLinks((ls) => setRelativeHeadless(ls, containerId, nounKey, headless));
   }
 
   function completeLink(targetContainerId: string, targetNoun: NounKey) {
@@ -286,6 +292,10 @@ export function useWorkspaceLinks(
         onPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
         onStartLink: (nounKey) => startLink(c.id, nounKey),
         onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
+        headlessKeys: new Set(
+          relatives.filter((l) => l.source.containerId === c.id && l.headless).map((l) => l.source.nounKey),
+        ),
+        onSetHeadless: (nounKey, headless) => setHeadless(c.id, nounKey, headless),
       },
       conditional: {
         hasSource: conditionals.some((l) => l.source.containerId === c.id),

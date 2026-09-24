@@ -2,6 +2,7 @@ import type { ComplementType, RelativeClause } from "@signi/shared";
 import type { NounKey, PhraseContainer, PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { COMPLEMENT_KEYS } from "../workspacePlan.consts.ts";
+import { attachInstrumental } from "./attachInstrumental.ts";
 import { attachLinks } from "./attachLinks.ts";
 import { hasHead } from "./hasHead.ts";
 
@@ -24,6 +25,8 @@ export function buildRelativeClause(
   if (!plan.verbPhrase) return undefined;
   if (gap !== "subject" && !hasHead(plan.subject)) return undefined;
   attachLinks(plan, container, links, byId, new Set([...seen, container.id]));
+  // A relative clause says its own instrument, "the phrase that one makes with meanings" (P13).
+  attachInstrumental(plan, container, links, byId, new Set([...seen, container.id]));
   const complements = plan.complements ? { ...plan.complements } : undefined;
   const headSpecifiers = COMPLEMENT_KEYS.has(gap) ? complements?.[gap as ComplementType]?.specifiers : undefined;
   if (complements && COMPLEMENT_KEYS.has(gap)) delete complements[gap as ComplementType];

@@ -75,6 +75,7 @@ describe('rawSatellites', () => {
         'subjectNumber',
         'subjectDefiniteness',
         'subjectRelative',
+        'subjectHeadless',
         'subjectPossessor',
         'subjectConjunct',
       ]);
@@ -200,6 +201,7 @@ describe('rawSatellites', () => {
         'directObjectGender',
         'directObjectDefiniteness',
         'directObjectRelative',
+        'directObjectHeadless',
         'directObjectPossessor',
         'directObjectConjunct',
         // The wh-question's mark (P09-E12 M6): SEE takes an object to ask about.
@@ -295,6 +297,7 @@ describe('rawSatellites', () => {
         'locativeNumber',
         'locativeDefiniteness',
         'locativeRelative',
+        'locativeHeadless',
         'locativePossessor',
         'locativeConjunct',
         // GO licenses the locative, and *where* asks it in its plain relation (P09-E12 M6).
@@ -347,7 +350,7 @@ describe('rawSatellites', () => {
       [
         'a gendered noun its gender beside the rest of its family',
         FRIEND,
-        ['causeAdjective', 'causeNumber', 'causeGender', 'causeDefiniteness', 'causeRelative', 'causePossessor'],
+        ['causeAdjective', 'causeNumber', 'causeGender', 'causeDefiniteness', 'causeRelative', 'causeHeadless', 'causePossessor'],
       ],
     ])('gives a cause that is %s', (_, cause, controls) => {
       expect(offered({ verb: GO, cause }, 'cause')).toEqual([

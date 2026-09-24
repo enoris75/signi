@@ -478,6 +478,11 @@ class Printer {
       this.statement({ key: `${wordKey(ref)}:rel`, removal: "/del rel", owner: ref, about: ref });
       this.emit("/rel", "command", "primary", { word: ref });
       this.emit(printRef(this.periodNumber(rel.target.containerId), rel.target.nounKey), "ref", "ref");
+      // Said alone, its head unspoken (P13).
+      if (rel.headless) {
+        this.statement({ key: `${wordKey(ref)}:headless`, removal: "/del headless", owner: ref, about: ref });
+        this.emit("/headless", "command", "setting", { word: ref });
+      }
     }
     // Nothing came after the last noun modifier: its bracket says nothing.
     if (bare && this.tokens.length === afterAdjectives)

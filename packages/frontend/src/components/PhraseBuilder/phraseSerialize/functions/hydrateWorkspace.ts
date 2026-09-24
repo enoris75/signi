@@ -100,6 +100,8 @@ export function hydrateWorkspace(
           // legacy relative link, which always carries noun keys.
           source: { containerId: l.source.containerId, nounKey: nounKey(l.source.nounKey) as NounAddress },
           target: { containerId: l.target.containerId, nounKey: nounKey(l.target.nounKey) as NounKey },
+          // The clause said alone (P13): only a literal true drops the head.
+          ...(l.headless === true ? { headless: true } : {}),
         },
   );
   return { containers, links, missing: [...missing] };

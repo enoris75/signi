@@ -91,7 +91,7 @@ found four more, and the canonical names the test keeps (`WAITING` in
 
 | Waiting construct (as the inverse names it) | Definitions |
 |---|---|
-| `NounPhrase.relativeGloss` | 100 |
+| ~~`NounPhrase.relativeGloss`~~ — `/headless`, ✅ 2026-09-24 | 100 |
 | `NounPhrase.dimensionGloss` | 30 |
 | `NounPhrase.possessorRole` | 29 |
 | `InfinitiveComplement.control` | 25 |
@@ -107,12 +107,24 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | `PhrasePlan.contentSubject` | 2 |
 | `RelativeClause.headRole.comitative` | 1 |
 | `InfinitiveComplement.infinitiveComplement` | 1 |
-| `complements.cause.definiteness` — the canvas gives the cause no determiner | 1 |
+| ~~`complements.cause.definiteness`~~ — the cause's determiner, ✅ 4c0511aa | 1 |
 | `complements.direction.specifiers.path` — a path relation on the direction | 1 |
 | `NounPhrase.contrastive` | 1 |
 | `PhrasePlan.adverbialGloss` | 1 |
+| `NounGroup of adjectives` — predicate adjectives joined, NEUTER "that is not male or female"; found once `/headless` let NEUTER through | 1 |
 
 A definition can wait on several.
+
+**Built so far.** Each row struck through above is a construct phase 4 has shipped, with its canvas
+control, console command, printer case, catalogue strings and tests:
+
+| Construct | Console | Canvas | Notes |
+|---|---|---|---|
+| Relative clause said alone | `/headless` after `/rel` in the head's bracket; `/del headless` | a chip beside the relative control on the noun's dotted ring, <kbd>⇧R</kbd> | A flag on the relative link (`headless`), saved with it; `attachLinks` sets `relativeGloss` on the head. Unblocked 90 definitions (324 → 414). |
+
+Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
+if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a
+conjunct left possessor references aimed at the conjuncts after it pointing at the wrong noun.
 
 ## 2. Architecture
 

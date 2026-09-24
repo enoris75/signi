@@ -379,6 +379,12 @@ const OPS: Op[] = [
     if (!link || link.kind !== 'instrumental') return undefined;
     return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
   },
+  // A relative clause said alone, or headed again (P13).
+  (s, rng) => {
+    const link = pick(rng, s.links.filter((l) => !l.kind));
+    if (!link || link.kind || !('nounKey' in link.source)) return undefined;
+    return { ...s, links: L.setRelativeHeadless(s.links, link.source.containerId, link.source.nounKey, !link.headless) };
+  },
   // Clearing: an adjective, a modal, a possessor, a conjunct — never a word a link stands on.
   onPeriod((sel, rng, s, cid) => {
     if (isLinked(s, cid)) return undefined;
@@ -537,8 +543,9 @@ describe('the question and the existential are gated as the engine is', () => {
     // coordinate wait for one (see attachSubordinate, attachCondition, attachCoordination; A267), and
     // a command's coordinate is given the addressee.
     expect(headless.slice(0, 3)).toEqual([]);
-    // The walk does reach the constructs it is here to check.
-    expect(asked).toBeGreaterThan(SEEDS / 10);
+    // The walk does reach the constructs it is here to check. A floor, not a share: each op the walk
+    // gains (P13 adds one per construct) makes every other one rarer.
+    expect(asked).toBeGreaterThan(SEEDS / 20);
   }, 120_000);
 });
 

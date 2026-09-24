@@ -19,6 +19,7 @@ import {
   inClauseRelation,
   setInstrumentalLevel,
   setInstrumentalNegative,
+  setRelativeHeadless,
 } from '../src/components/PhraseBuilder/linkRules.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id });
@@ -156,6 +157,15 @@ describe('linkRules', () => {
     expect(setInstrumentalNegative(denied, 'C', false)).toEqual(plain);
     // A container in no instrumental link changes nothing.
     expect(setInstrumentalNegative(plain, 'B', true)).toEqual(plain);
+  });
+
+  it('says a noun’s relative clause alone, and says its head again with no flag left (P13)', () => {
+    const headed = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'B', nounKey: 'directObject' }, 'l1');
+    const headless = setRelativeHeadless(headed, 'A', 'subject', true);
+    expect(headless[0]).toMatchObject({ source: { nounKey: 'subject' }, headless: true });
+    expect(setRelativeHeadless(headless, 'A', 'subject', false)).toEqual(headed);
+    // Only the link that noun heads.
+    expect(setRelativeHeadless(headed, 'A', 'directObject', true)).toEqual(headed);
   });
 });
 

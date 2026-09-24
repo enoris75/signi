@@ -84,6 +84,8 @@ export type BuiltSatellites = {
 // rather than on its word's solid ring.
 export type PerimeterEntry = {
   relative?: SatelliteIcon;
+  // Beside it, the chip that says the relative clause alone, its head unspoken (P13).
+  headless?: SatelliteIcon;
   possessor?: SatelliteIcon;
   // The predicate adjective's standard of comparison (P09-E12 D5): the line to its ring leaves
   // from it, as the owner's leaves from the possessor control.

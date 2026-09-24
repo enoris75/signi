@@ -63,6 +63,7 @@ export function GroupPerimeterControls({
         const entry = perimeterByNoun[nounKey];
         const dot = linkTargetKeys?.has(nounKey) ? controlPos[perimeterControlKey("incoming", nounKey)] : undefined;
         const relative = entry?.relative && controlPos[perimeterControlKey("relative", nounKey)];
+        const headless = entry?.headless && controlPos[perimeterControlKey("headless", nounKey)];
         const possessor = entry?.possessor && controlPos[perimeterControlKey("possessor", nounKey)];
         const standard = entry?.standard && controlPos[perimeterControlKey("standard", nounKey)];
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
@@ -101,6 +102,17 @@ export function GroupPerimeterControls({
                   sat={entry!.relative!}
                   color={color}
                   keySpec={satelliteKeys[entry!.relative!.key]}
+                  tip={nounKey === cursorSlot}
+                />
+              </Box>
+            )}
+            {/* The relative clause said alone (P13): a plain toggle beside the relative control. */}
+            {headless && (
+              <Box data-testid={`headless-ctl-${nounKey}`} sx={seat(headless)}>
+                <SatelliteButton
+                  sat={entry!.headless!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.headless!.key]}
                   tip={nounKey === cursorSlot}
                 />
               </Box>

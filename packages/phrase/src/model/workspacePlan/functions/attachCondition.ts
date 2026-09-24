@@ -1,6 +1,7 @@
 import type { PhrasePlan } from "@signi/shared";
 import { isConditionalLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
+import { attachInstrumental } from "./attachInstrumental.ts";
 import { attachLinks } from "./attachLinks.ts";
 import { hasHead } from "./hasHead.ts";
 
@@ -26,5 +27,6 @@ export function attachCondition(
   // subject box holds a word it contributes nothing, as a subordinate clause waits (attachSubordinate).
   if (!hasHead(condPlan.subject)) return;
   attachLinks(condPlan, ifContainer, links, byId, new Set([...seen, ifContainer.id]));
+  attachInstrumental(condPlan, ifContainer, links, byId, new Set([...seen, ifContainer.id]));
   plan.condition = condPlan as PhrasePlan;
 }

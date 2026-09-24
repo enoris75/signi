@@ -2018,6 +2018,8 @@ export interface SerializedLink {
   // The instrument denied — the privative, "without the knife" (P09-E2) — present only on a denied
   // 'instrumental' link.
   negative?: boolean;
+  // The relative clause said alone, its head unspoken (P13) — present only on such a relative link.
+  headless?: boolean;
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

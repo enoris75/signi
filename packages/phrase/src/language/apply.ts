@@ -49,6 +49,7 @@ import {
   removeRelativeLink,
   setInstrumentalLevel,
   setInstrumentalNegative,
+  setRelativeHeadless,
 } from "../model/linkRules.ts";
 import {
   addConjunct,
@@ -230,6 +231,8 @@ type LinkOp =
   | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; span: Span }
   | { kind: "level"; containerId: string; level: AbstractionLevel; span: Span }
   | { kind: "privative"; containerId: string; negative: boolean; span: Span }
+  // The relative clause of a noun said alone or headed again (P13), once the line's links are made.
+  | { kind: "headless"; containerId: string; nounKey: NounAddress; headless: boolean; span: Span }
   // A possessor pointing at another noun of its period, which the line may name after it.
   | { kind: "possessorRef"; containerId: string; possessed: NounAddress; antecedent: NounAddress; span: Span }
   | {
@@ -609,6 +612,10 @@ class Run {
         return this.conjunct(item, action.conjunction, w);
       case "relative":
         return this.relative(item, w);
+      case "headless":
+        this.queue.push({ kind: "headless", containerId: w.ref.containerId, nounKey: w.address!, headless: true, span: item });
+        this.touch(w.ref);
+        return;
     }
   }
 
@@ -1036,6 +1043,19 @@ class Run {
         this.touch(w!.ref);
         return;
       }
+      // The head said again (P13): the closest noun whose relative clause is said alone.
+      case "headless": {
+        const w = closest(
+          (x) =>
+            x.kind === "noun" &&
+            (this.links.some((l) => isRelativeLink(l) && l.headless && l.source.containerId === containerId && l.source.nounKey === x.address) ||
+              this.queue.some((op) => op.kind === "headless" && op.headless && op.containerId === containerId && op.nounKey === x.address)),
+        );
+        if (!w) fail(span, coded("nothingToRemove"));
+        this.queue.push({ kind: "headless", containerId, nounKey: w!.address!, headless: false, span: item });
+        this.touch(w!.ref);
+        return;
+      }
       case "if":
       case "join":
       case "inst": {
@@ -1224,6 +1244,12 @@ class Run {
         if (!this.links.some((l) => isInstrumentalLink(l) && (l.source.containerId === op.containerId || l.target.containerId === op.containerId)))
           fail(op.span, coded("noInstrumentLink"));
         this.links = setInstrumentalNegative(this.links, op.containerId, op.negative);
+        return;
+      }
+      case "headless": {
+        if (!this.links.some((l) => isRelativeLink(l) && l.source.containerId === op.containerId && l.source.nounKey === op.nounKey))
+          fail(op.span, coded("noRelativeLink"));
+        this.links = setRelativeHeadless(this.links, op.containerId, op.nounKey, op.headless);
         return;
       }
       case "unlink": {

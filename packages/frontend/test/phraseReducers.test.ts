@@ -415,3 +415,27 @@ describe('a noun replacing a pronoun', () => {
     expect(applyConceptSelect({ subjectGender: 'fem' }, 'subject', gendered).subjectGender).toBe('fem');
   });
 });
+
+// A possessor that points at a conjunct names it by position; when a conjunct goes, the ones after it
+// move up, so a reference to it or past it would name another noun — its own, even ("the house and
+// its food" turned "the food's food"). It is dropped, as the relative links sourced there are.
+describe('removeConjunct', () => {
+  const group: PhraseSelection = {
+    subject: HOUSE,
+    subjectConjuncts: [{ subject: BOOK }, { subject: DOG, subjectPossessorRef: 'subject/conjunct/0' }],
+    directObject: CAT,
+    directObjectPossessorRef: 'subject/conjunct/1',
+  };
+
+  it('drops the possessors that pointed at the conjunct removed or at one after it', () => {
+    const next = R.removeConjunct(group, 'subject', 0);
+    expect(next.subjectConjuncts).toEqual([{ subject: DOG }]);
+    expect(next).not.toHaveProperty('directObjectPossessorRef');
+  });
+
+  it('keeps a possessor that points before the conjunct removed', () => {
+    const next = R.removeConjunct(group, 'subject', 1);
+    expect(next.subjectConjuncts).toEqual([{ subject: BOOK }]);
+    expect(R.removeConjunct({ ...group, directObjectPossessorRef: 'subject' }, 'subject', 0).directObjectPossessorRef).toBe('subject');
+  });
+});

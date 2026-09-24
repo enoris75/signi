@@ -1076,6 +1076,14 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Relative clause',
   },
+  // The chip beside it that says the clause alone, its head unspoken (P13): an adjective's definition
+  // is its relative clause alone, OKAY "that has no problems". "Only the relative clause", it "Solo la
+  // proposizione relativa", de "Nur der Relativsatz".
+  'relative.headless': {
+    plan: { subject: { concept: 'RELATIVE_CLAUSE', definiteness: 'definite', focus: 'only' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Only the relative clause',
+  },
 
   // The control on a noun that coordinates another phrase with it ("the cat and the dog").
   'satellite.coordination': {
@@ -3095,6 +3103,13 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'to add a relative clause to a noun',
   },
+  // `/headless` (P13): "to say only the relative clause", it "dire solo la proposizione relativa", ja
+  // 関係節だけ言う.
+  'purpose.headless': {
+    plan: purposeOf('SAY', { concept: 'RELATIVE_CLAUSE', definiteness: 'definite', focus: 'only' }),
+    format: { stripPeriod: true },
+    fallback: 'to say only the relative clause',
+  },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un
   // periodo", ja 文に条件を加える).
@@ -3685,6 +3700,17 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'This period has no instrumental',
+  },
+  // `/headless` or `/del headless` on a noun that heads no relative clause (P13): "This noun has no
+  // relative clause", it "Questo sostantivo non ha nessuna proposizione relativa".
+  'diagnostic.nounHasNo.relative': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'RELATIVE_CLAUSE', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This noun has no relative clause',
   },
   // An instrument held as a thing is a noun phrase, and the period linked as one has a verb: `that`
   // period, the other end of the link (it "Quel periodo ha un verbo", de "Jenes Satzgefüge hat ein Verb").

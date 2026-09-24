@@ -147,6 +147,8 @@ export function binding({
       onPick: vi.fn(),
       onStartLink: vi.fn(),
       onRemoveLink: vi.fn(),
+      headlessKeys: new Set(),
+      onSetHeadless: vi.fn(),
     },
     conditional: {
       hasSource: false,

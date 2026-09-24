@@ -3,7 +3,7 @@ import {
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
-import { isInstrumentalLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import { isInstrumentalLink, isRelativeLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   canBeCondition,
   canBeCoordinate,
@@ -375,7 +375,12 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
   const action = def.action;
   const top = frame.words.length === 0 || frame.kind === "period";
   if (attachesToWord(action)) {
-    const i = words.findIndex((w) => takes(action, w));
+    // A relative clause said alone is offered only on a noun that heads one (P13).
+    const fits = (w: WordInfo) =>
+      takes(action, w) &&
+      (action.kind !== "headless" ||
+        state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address));
+    const i = words.findIndex(fits);
     if (i === -1) return undefined;
     return i === 0 ? 0 : 1;
   }

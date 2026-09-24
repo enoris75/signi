@@ -81,6 +81,18 @@ describe('serializeWorkspace', () => {
     expect(saved[1]).not.toHaveProperty('negative');
   });
 
+  it('saves a relative clause said alone as such, and a headed one with no flag (P13)', () => {
+    const links: PhraseLink[] = [
+      { id: 'r', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b', nounKey: 'subject' }, headless: true },
+      { id: 's', source: { containerId: 'a', nounKey: 'directObject' }, target: { containerId: 'c', nounKey: 'subject' } },
+    ];
+
+    const saved = serializeWorkspace([], links).links;
+
+    expect(saved[0]).toHaveProperty('headless', true);
+    expect(saved[1]).not.toHaveProperty('headless');
+  });
+
   it('copies each link’s endpoints rather than sharing them', () => {
     const link: PhraseLink = { id: 'c', kind: 'conditional', source: { containerId: 'a' }, target: { containerId: 'b' } };
 

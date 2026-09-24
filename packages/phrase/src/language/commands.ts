@@ -85,6 +85,8 @@ export type Action =
   | { kind: "standard" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
+  /** The noun's relative clause said alone, its head unspoken: `/headless` (P13). */
+  | { kind: "headless" }
   | { kind: "condition" }
   | { kind: "join" }
   /** A subordinate clause (P09-E12 D9): `/clause` its object clause, `/sub` an adverbial one, `/to` its infinitive. */
@@ -496,6 +498,21 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "link" },
     action: { kind: "relative" },
     satellites: /Relative$/,
+  },
+  // The relative clause said alone, its head unspoken (P13): an adjective's definition is its relative
+  // clause, OKAY "that has no problems". The head still picks "who" or "that" and the agreement, so it
+  // stays in its box. Written after `/rel` in the head's bracket; `/del headless` says the head again.
+  {
+    name: "headless",
+    aliases: ["alone"],
+    group: "noun",
+    description: "only the relative clause",
+    descriptionKey: "relative.headless",
+    purposeKey: "purpose.headless",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "headless" },
+    satellites: /Headless$/,
   },
   ...(
     [
@@ -1115,6 +1132,8 @@ export function topicOf(def: CommandDef): Topic {
       ? "words"
       : a.kind === "adjective" || a.kind === "adverb" || a.kind === "modal" || a.kind === "possessor" || a.kind === "relative"
         ? a.kind
+        : a.kind === "headless"
+          ? "relative"
         : a.kind === "conjunct"
           ? "coordination"
           : a.kind === "setting"

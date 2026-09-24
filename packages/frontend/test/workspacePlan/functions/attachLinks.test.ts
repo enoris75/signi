@@ -25,6 +25,14 @@ describe('attachLinks', () => {
     expect(noun(plan, 'directObject').relative).toBeUndefined();
   });
 
+  // P13: an adjective's definition is its relative clause said alone, OKAY "that has no problems".
+  it('marks a relative clause said alone on its head, and a headed one not at all', () => {
+    const link = relative('l', ['main', 'subject'], ['sleeps', 'subject']);
+
+    expect(noun(attach([{ ...link, headless: true } as typeof link]), 'subject').relativeGloss).toBe(true);
+    expect(noun(attach([link]), 'subject')).not.toHaveProperty('relativeGloss');
+  });
+
   it('hangs each link on its own noun', () => {
     const plan = attach([
       relative('a', ['main', 'subject'], ['sleeps', 'subject']),

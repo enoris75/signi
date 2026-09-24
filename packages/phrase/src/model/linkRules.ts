@@ -113,6 +113,21 @@ export function addRelativeLink(
   return [...kept, { id, source, target }];
 }
 
+// Say the relative clause headed by the noun at `nounKey` alone, its head unspoken (P13), or say the
+// head again. The flag is dropped rather than set false, so a headed link is the link it always was.
+export function setRelativeHeadless(
+  links: PhraseLink[],
+  containerId: string,
+  nounKey: NounAddress,
+  headless: boolean,
+): PhraseLink[] {
+  return links.map((l) => {
+    if (!isRelativeLink(l) || l.source.containerId !== containerId || l.source.nounKey !== nounKey) return l;
+    const { headless: _dropped, ...rest } = l;
+    return headless ? { ...rest, headless: true } : rest;
+  });
+}
+
 export function removeRelativeLink(
   links: PhraseLink[],
   containerId: string,

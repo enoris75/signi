@@ -29,12 +29,14 @@ import {
 } from '../fixtures.tsx';
 
 // Only the parts of the workspace binding the satellite controls reach for.
-function workspace({ relativeSources = [] as string[], instrumentalLinked = false } = {}) {
+function workspace({ relativeSources = [] as string[], headless = [] as string[], instrumentalLinked = false } = {}) {
   return {
     relative: {
       sourceKeys: new Set(relativeSources),
       onStartLink: vi.fn(),
       onRemoveLink: vi.fn(),
+      headlessKeys: new Set(headless),
+      onSetHeadless: vi.fn(),
     },
     instrumental: { hasSource: instrumentalLinked, onStart: vi.fn(), onClear: vi.fn() },
   };
@@ -481,6 +483,28 @@ describe('buildSatelliteIcons', () => {
         expect(perimeterByNoun['locative']!.relative!.isSet).toBe(false);
         perimeterByNoun['locative']!.relative!.onToggle();
         expect(binding.relative.onStartLink).toHaveBeenCalledExactlyOnceWith('locative');
+      });
+    });
+
+    // P13: the clause said alone, its head unspoken — a chip beside the relative control.
+    describe('the relative clause said alone', () => {
+      it('offers the chip only on a noun that heads a relative clause', () => {
+        expect(icons({ subject: CAT }, { binding: workspace() }).perimeterByNoun['subject']?.headless).toBeUndefined();
+        expect(icons({ subject: CAT }).perimeterByNoun['subject']?.headless).toBeUndefined();
+        const headless = icons({ subject: CAT }, { binding: workspace({ relativeSources: ['subject'] }) }).perimeterByNoun['subject']!.headless!;
+        expect(headless).toMatchObject({ key: 'subjectHeadless', labelKey: 'relative.headless', isSet: false, directToggle: true });
+      });
+
+      it('says the clause alone, and says the head again', () => {
+        const binding = workspace({ relativeSources: ['subject'] });
+        icons({ subject: CAT }, { binding }).perimeterByNoun['subject']!.headless!.onToggle();
+        expect(binding.relative.onSetHeadless).toHaveBeenCalledExactlyOnceWith('subject', true);
+
+        const alone = workspace({ relativeSources: ['subject'], headless: ['subject'] });
+        const chip = icons({ subject: CAT }, { binding: alone }).perimeterByNoun['subject']!.headless!;
+        expect(chip.isSet).toBe(true);
+        chip.onToggle();
+        expect(alone.relative.onSetHeadless).toHaveBeenCalledExactlyOnceWith('subject', false);
       });
     });
 

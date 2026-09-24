@@ -1,5 +1,5 @@
 import type { SerializedContainer, SerializedWorkspace } from "@signi/shared";
-import type { PhraseContainer, PhraseLink } from "../../interfaces.ts";
+import { isRelativeLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { serializeSelection } from "./serializeSelection.ts";
 
 export function serializeWorkspace(
@@ -21,6 +21,8 @@ export function serializeWorkspace(
       ...(l.kind === "coordinative" || l.kind === "adverbial" ? { conjunction: l.conjunction } : {}),
       ...(l.kind === "instrumental" ? { level: l.level } : {}),
       ...(l.kind === "instrumental" && l.negative ? { negative: true } : {}),
+      // A relative clause said alone (P13).
+      ...(isRelativeLink(l) && l.headless ? { headless: true } : {}),
     })),
   };
 }

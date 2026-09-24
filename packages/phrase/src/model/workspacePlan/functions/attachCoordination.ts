@@ -1,6 +1,7 @@
 import type { PhrasePlan } from "@signi/shared";
 import { isCoordinativeLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
+import { attachInstrumental } from "./attachInstrumental.ts";
 import { attachLinks } from "./attachLinks.ts";
 import { hasHead } from "./hasHead.ts";
 
@@ -43,5 +44,6 @@ export function attachCoordination(
   // it the addressee.
   if (!hasHead(clausePlan.subject)) return;
   attachLinks(clausePlan, second, links, byId, new Set([...seen, second.id]));
+  attachInstrumental(clausePlan, second, links, byId, new Set([...seen, second.id]));
   plan.coordination = { conjunction: link.conjunction, clause: clausePlan as PhrasePlan };
 }

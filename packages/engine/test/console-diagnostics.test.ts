@@ -401,6 +401,10 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'This period has no instrumental', it: 'Questo periodo non ha nessun complemento di mezzo', fr: "Cette période n'a aucun complément de moyen", de: 'Dieses Satzgefüge hat keinen Instrumental',
       es: 'Este período no tiene ningún complemento circunstancial de instrumento', pt: 'Este período não tem nenhum adjunto adverbial de instrumento', ja: 'この文はどの手段語もありません',
     },
+    'diagnostic.nounHasNo.relative': {
+      en: 'This noun has no relative clause', it: 'Questo sostantivo non ha nessuna proposizione relativa', fr: "Ce nom n'a aucune proposition relative", de: 'Dieses Substantiv hat keinen Relativsatz',
+      es: 'Este sustantivo no tiene ninguna oración de relativo', pt: 'Este substantivo não tem nenhuma oração relativa', ja: 'この名詞はどの関係節もありません',
+    },
     'diagnostic.thatPeriodHasVerb': {
       en: 'That period has a verb', it: 'Quel periodo ha un verbo', fr: 'Cette période a un verbe', de: 'Jenes Satzgefüge hat ein Verb',
       es: 'Ese período tiene un verbo', pt: 'Esse período tem um verbo', ja: 'その文は動詞があります',

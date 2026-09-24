@@ -107,6 +107,13 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /rel #2.subj ) /verb ( read )',
     misuse: { line: '/subj child /verb read /rel #1.subj', says: { code: 'relativeSamePeriod' } },
   },
+  // The relative clause said alone, its head unspoken (P13) — on the link, as /without is.
+  headless: {
+    line: '/subj child /rel subj ( /verb love /obj cat ) /headless',
+    check: (s) => expect(s.links[0]).toMatchObject({ source: { nounKey: 'subject' }, headless: true }),
+    prints: '/subj ( child /rel #2.subj /headless )',
+    misuse: { line: '/subj child /verb read /headless', says: { code: 'noRelativeLink' } },
+  },
   in: { line: '/verb run /route house /in', prints: '/verb ( run ) /route ( house /in )', holds: { routeSpecifier: 'in' } },
   through: { line: '/verb run /loc house /through', prints: '/verb ( run ) /loc ( house /through )', holds: { locativeSpecifier: 'through' } },
   under: { line: '/verb run /loc house /under', prints: '/verb ( run ) /loc ( house /under )', holds: { locativeSpecifier: 'under' }, misuse: { line: '/verb run /dir house /under', says: { code: 'noTarget', args: { command: 'under' } } } },

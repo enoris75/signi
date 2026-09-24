@@ -169,6 +169,18 @@ describe('hydrateWorkspace', () => {
     ]);
   });
 
+  it('restores a relative clause said alone, and reads anything but a literal true as headed (P13)', () => {
+    expect(
+      linksOf(
+        { id: 'r', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b', nounKey: 'subject' }, headless: true },
+        { id: 's', source: { containerId: 'a', nounKey: 'directObject' }, target: { containerId: 'c', nounKey: 'subject' }, headless: 1 as unknown as boolean },
+      ),
+    ).toStrictEqual([
+      { id: 'r', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b', nounKey: 'subject' }, headless: true },
+      { id: 's', source: { containerId: 'a', nounKey: 'directObject' }, target: { containerId: 'c', nounKey: 'subject' } },
+    ]);
+  });
+
   it('loads a period saved with no selection as an empty one', () => {
     expect(
       hydrateWorkspace(damaged({ containers: [{ id: 'a' }, { id: 'b', selection: 'CAT' }], links: [] }), CATALOG).containers,

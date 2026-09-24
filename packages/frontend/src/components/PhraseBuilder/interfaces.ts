@@ -54,6 +54,9 @@ export interface RelativeBinding {
   // Start / remove a relative-clause link sourced from this noun.
   onStartLink: (nounKey: NounAddress) => void;
   onRemoveLink: (nounKey: NounAddress) => void;
+  // Nouns whose relative clause is said alone, their head unspoken (P13), and the setter.
+  headlessKeys: Set<NounAddress>;
+  onSetHeadless: (nounKey: NounAddress, headless: boolean) => void;
 }
 
 // Clause-level conditional (IF / MAIN) linking for one container.
@@ -188,6 +191,8 @@ export function adaptPossessorBinding(
       isPickTarget: () => false,
       onPick: (nounKey) => root.relative.onPick(map(nounKey)),
       onStartLink: (nounKey) => root.relative.onStartLink(map(nounKey)),
+      headlessKeys: new Set(root.relative.headlessKeys.has(headPath) ? ["subject"] : []),
+      onSetHeadless: (nounKey, headless) => root.relative.onSetHeadless(map(nounKey), headless),
       onRemoveLink: (nounKey) => root.relative.onRemoveLink(map(nounKey)),
     },
     // Inert: a hosted ring's builder is never a conditional/coordinative endpoint.

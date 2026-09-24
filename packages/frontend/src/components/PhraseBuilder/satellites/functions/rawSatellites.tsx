@@ -7,6 +7,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GavelIcon from "@mui/icons-material/Gavel";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -204,6 +205,17 @@ export function rawSatellites(
       // A relative clause attaches only to a noun head (pronoun subjects render without
       // one). It is now a cross-container link; `hasValue` (is-a-link-source) is supplied
       // by PhraseBuilder from the workspace binding.
+      available: subjectRole === "noun",
+      hasValue: false,
+    },
+    // Beside it, the chip that says the clause alone, its head unspoken (P13): shown only while the
+    // noun heads a clause, and set from the binding, as the relative control is.
+    {
+      key: "subjectHeadless",
+      parent: "subject",
+      label: t("relative.headless"),
+      labelKey: "relative.headless",
+      icon: <VisibilityOffIcon sx={iconSx} />,
       available: subjectRole === "noun",
       hasValue: false,
     },
@@ -491,6 +503,15 @@ export function rawSatellites(
       hasValue: false,
     },
     {
+      key: "directObjectHeadless",
+      parent: "directObject",
+      label: t("relative.headless"),
+      labelKey: "relative.headless",
+      icon: <VisibilityOffIcon sx={iconSx} />,
+      available: directObjectRole === "noun",
+      hasValue: false,
+    },
+    {
       key: "directObjectPossessor",
       parent: "directObject",
       label: t("slot.possessor"),
@@ -646,6 +667,15 @@ export function rawSatellites(
           parent: type,
           label: t("satellite.relative"),
           icon: <AccountTreeIcon sx={iconSx} />,
+          available: concept?.role === "noun",
+          hasValue: false,
+        },
+        {
+          key: `${type}Headless`,
+          parent: type,
+          label: t("relative.headless"),
+          labelKey: "relative.headless",
+          icon: <VisibilityOffIcon sx={iconSx} />,
           available: concept?.role === "noun",
           hasValue: false,
         },

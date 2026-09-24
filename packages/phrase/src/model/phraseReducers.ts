@@ -812,7 +812,36 @@ export function removeConjunct(
     delete next[CONJUNCTS_KEY(which)];
     delete next[CONJUNCTION_KEY(which)];
   }
-  return next;
+  // The conjuncts after it move up one, and an address is positional: a possessor that pointed at the
+  // removed conjunct, or at one after it, would now name another noun — its own, even. It is dropped,
+  // as the workspace drops the relative links sourced there (see handleRemoveConjunct).
+  const moved = (address: string) => {
+    const m = address.match(new RegExp(`^${which}/conjunct/(\\d+)(/|$)`));
+    return m !== null && Number(m[1]) >= i;
+  };
+  return dropPossessorRefs(next, moved);
+}
+
+/** A selection with every pronominal possessor, at any depth, that points at an address `drop` names cleared. */
+function dropPossessorRefs(sel: PhraseSelection, drop: (address: string) => boolean): PhraseSelection {
+  let out = sel;
+  for (const [key, value] of Object.entries(sel)) {
+    const set = (v: unknown) => {
+      if (out === sel) out = { ...sel };
+      (out as Record<string, unknown>)[key] = v;
+    };
+    if (key.endsWith("PossessorRef") && typeof value === "string" && drop(value)) {
+      if (out === sel) out = { ...sel };
+      delete (out as Record<string, unknown>)[key];
+    } else if ((key.endsWith("Possessor") || key.endsWith("Standard")) && value && typeof value === "object" && !Array.isArray(value)) {
+      const inner = dropPossessorRefs(value as PhraseSelection, drop);
+      if (inner !== value) set(inner);
+    } else if (key.endsWith("Conjuncts") && Array.isArray(value)) {
+      const inner = (value as PhraseSelection[]).map((c) => dropPossessorRefs(c, drop));
+      if (inner.some((c, j) => c !== value[j])) set(inner);
+    }
+  }
+  return out;
 }
 
 // Cycle a block's conjunction through the ones that may join noun phrases (and / or).

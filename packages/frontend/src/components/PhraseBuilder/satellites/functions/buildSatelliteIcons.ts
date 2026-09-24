@@ -102,6 +102,28 @@ export function buildSatelliteIcons({
       };
       continue;
     }
+    // The chip that says a noun's relative clause alone, its head unspoken (P13): it rides beside the
+    // relative control, and only while the noun heads a clause. It flips the link's flag in place.
+    const headlessNoun: NounKey | null = sat.key.endsWith("Headless")
+      ? (sat.key.slice(0, -"Headless".length) as NounKey)
+      : null;
+    if (headlessNoun) {
+      if (!linkBinding?.relative.sourceKeys.has(headlessNoun)) continue;
+      const headless = linkBinding.relative.headlessKeys.has(headlessNoun);
+      (perimeterByNoun[headlessNoun] ??= {}).headless = {
+        key: sat.key,
+        icon: sat.icon,
+        label: sat.label,
+        labelKey: sat.labelKey,
+        active: false,
+        isSet: headless,
+        valued: false,
+        directToggle: true,
+        named: true,
+        onToggle: () => linkBinding.relative.onSetHeadless(headlessNoun, !headless),
+      };
+      continue;
+    }
     // The "Relative clause" satellite is a cross-container link control, not a reveal.
     // It only exists in a workspace container (needs the binding); clicking it starts a
     // link (pick a noun in another container) or, when already a source, removes it.

@@ -87,8 +87,13 @@ export interface BoxContext {
   togglePossessor: (which: NounKey) => void;
   addConjunct: (which: NounKey) => void;
   cycleConjunction: (which: NounKey) => void;
-  /** The noun's relative clause: start the pick for one, or drop the link there is. */
-  relative: { has: boolean; start: () => void; clear: () => void } | undefined;
+  /**
+   * The noun's relative clause: start the pick for one, or drop the link there is — and, while there
+   * is one, say it alone, its head unspoken, or say the head again (P13).
+   */
+  relative:
+    | { has: boolean; start: () => void; clear: () => void; headless: boolean; setHeadless: (headless: boolean) => void }
+    | undefined;
   openDeterminerMenu: (which: NounKey) => void;
   /** The verb's *Add a complement* menu — every complement it licenses, one keystroke each. */
   openComplementMenu: () => void;
@@ -541,6 +546,17 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     // gives this noun a clause, or drop the clause it has.
     when: (ctx) => Boolean(ctx.relative),
     run: (ctx) => (ctx.relative!.has ? ctx.relative!.clear() : ctx.relative!.start()),
+  },
+  {
+    // The relative clause said alone, its head unspoken (P13) — R's own clause, shifted.
+    id: "noun.headless",
+    scope: "box:noun",
+    keys: ["Shift+R"],
+    label: "Only the relative clause",
+    labelKey: "relative.headless",
+    satellite: /Headless$/,
+    when: (ctx) => Boolean(ctx.relative?.has),
+    run: (ctx) => ctx.relative!.setHeadless(!ctx.relative!.headless),
   },
   {
     id: "noun.relation",

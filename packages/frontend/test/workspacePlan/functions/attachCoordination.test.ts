@@ -3,7 +3,7 @@ import type { NounPhrase } from '@signi/shared';
 import { attachCoordination } from '../../../src/components/PhraseBuilder/workspacePlan/functions/attachCoordination.ts';
 import { selectionToPlan } from '../../../src/components/PhraseBuilder/selectionToPlan/index.ts';
 import type { PhraseContainer, PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import { byId, CAT, coordinative, DOG, EAT, period, relative, SEE, SLEEP } from '../fixtures.ts';
+import { byId, CAT, coordinative, DOG, EAT, instrumental, KNIFE, period, relative, SEE, SLEEP } from '../fixtures.ts';
 
 const MAIN = period('main', { subject: CAT, verb: SLEEP });
 const SECOND = period('second', { subject: DOG, verb: EAT, directObject: CAT });
@@ -42,6 +42,14 @@ describe('attachCoordination', () => {
     const plan = attach([coordinative('c', 'main', 'second'), relative('r', ['second', 'subject'], ['sees', 'subject'])]);
 
     expect((plan.coordination?.clause.subject as NounPhrase).relative?.verbPhrase.verb).toBe('SEE');
+  });
+
+  it('folds the second clause’s own instrument in (P13)', () => {
+    const knife = period('knife', { subject: KNIFE });
+    const plan = selectionToPlan(MAIN.selection);
+    attachCoordination(plan, MAIN, [coordinative('c', 'main', 'second', 'and'), instrumental('i', 'second', 'knife')], byId(MAIN, SECOND, knife), new Set(['main']));
+
+    expect(plan.coordination?.clause.complements?.instrumental?.phrase).toMatchObject({ concept: 'KNIFE' });
   });
 
   it('gives the second clause no coordination of its own', () => {

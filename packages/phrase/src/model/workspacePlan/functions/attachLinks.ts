@@ -21,6 +21,9 @@ export function attachLinks(
     const head = getNoun(plan, link.source.nounKey);
     if (!head) continue;
     const relative = buildRelativeClause(target, link.target.nounKey, links, byId, seen);
-    if (relative) head.relative = relative;
+    if (!relative) continue;
+    head.relative = relative;
+    // Said alone, its head unspoken (P13): the head still picks the relativizer and the agreement.
+    if (link.headless) head.relativeGloss = true;
   }
 }

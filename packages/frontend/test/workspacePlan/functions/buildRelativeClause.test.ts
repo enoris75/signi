@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
 import { buildRelativeClause } from '../../../src/components/PhraseBuilder/workspacePlan/functions/buildRelativeClause.ts';
 import type { NounKey, PhraseContainer, PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import { BOY, byId, CAT, DOG, EAT, HOUSE, KNIFE, period, relative, SLEEP } from '../fixtures.ts';
+import { BOY, byId, CAT, DOG, EAT, HOUSE, instrumental, KNIFE, period, relative, SLEEP } from '../fixtures.ts';
 
 const clause = (target: PhraseContainer, gap: NounKey, links: PhraseLink[] = [], periods = [target]) =>
   buildRelativeClause(target, gap, links, byId(...periods), new Set(['main']));
@@ -91,5 +91,14 @@ describe('buildRelativeClause', () => {
     const relativeClause = clause(EATS, 'subject', [relative('back', ['eats', 'directObject'], ['main', 'subject'])], [EATS, main]);
 
     expect((relativeClause?.directObject as NounPhrase).relative).toBeUndefined();
+  });
+
+  // P13: SEMANTIC is "a phrase that one makes with meanings" — the relative clause's own instrument.
+  it('keeps the clause’s own instrument', () => {
+    const knife = period('knife', { subject: KNIFE });
+
+    const relativeClause = clause(EATS, 'subject', [instrumental('i', 'eats', 'knife')], [EATS, knife]);
+
+    expect(relativeClause?.complements?.instrumental?.phrase).toMatchObject({ concept: 'KNIFE' });
   });
 });

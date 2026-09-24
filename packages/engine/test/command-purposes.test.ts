@@ -222,6 +222,11 @@ describe('what each console command is for', () => {
       es: 'añadir una oración de relativo a un sustantivo.', ja: '名詞に関係節を加える。',
       pt: 'adicionar uma oração relativa a um substantivo.',
     },
+    'purpose.headless': {
+      en: 'to say only the relative clause.', it: 'dire solo la proposizione relativa.',
+      fr: 'dire seulement la proposition relative.', de: 'nur den Relativsatz sagen.',
+      es: 'decir solo la oración de relativo.', ja: '関係節だけ言う。', pt: 'dizer só a oração relativa.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

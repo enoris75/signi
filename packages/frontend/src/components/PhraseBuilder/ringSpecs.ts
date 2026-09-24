@@ -92,7 +92,7 @@ export const clearControlKey = (mainKey: string) => `clear:${mainKey}`;
 export const collapseControlKey = (label: string) => `collapse:${label}`;
 export const removeControlKey = (label: string) => `remove:${label}`;
 export const perimeterControlKey = (
-  kind: "relative" | "possessor" | "standard" | "conjunct" | "incoming" | "question" | "animacy" | "existential",
+  kind: "relative" | "headless" | "possessor" | "standard" | "conjunct" | "incoming" | "question" | "animacy" | "existential",
   noun: string,
 ) => `${kind}:${noun}`;
 export const toolbarControlKey = (type: string, value: string) => `toolbar:${type}:${value}`;
@@ -240,7 +240,7 @@ export function buildRingSpecs({
       if (ownerAt) outer.push({ key: perimeterControlKey("possessor", mainKey), aim: { point: ownerAt } });
       const standardAt = entry?.standard ? standardAims[mainKey] : undefined;
       if (standardAt) outer.push({ key: perimeterControlKey("standard", mainKey), aim: { point: standardAt } });
-      const relations = (["relative", "possessor", "standard", "conjunct"] as const).filter(
+      const relations = (["relative", "headless", "possessor", "standard", "conjunct"] as const).filter(
         (kind) => entry?.[kind] && !(kind === "possessor" && ownerAt) && !(kind === "standard" && standardAt),
       );
       relations.forEach((kind, i) =>

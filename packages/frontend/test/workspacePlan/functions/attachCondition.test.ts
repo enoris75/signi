@@ -3,7 +3,7 @@ import type { NounPhrase, PhrasePlan } from '@signi/shared';
 import { attachCondition } from '../../../src/components/PhraseBuilder/workspacePlan/functions/attachCondition.ts';
 import { selectionToPlan } from '../../../src/components/PhraseBuilder/selectionToPlan/index.ts';
 import type { PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import { byId, CAT, conditional, DOG, EAT, period, relative, SEE, SLEEP } from '../fixtures.ts';
+import { byId, CAT, conditional, DOG, EAT, instrumental, KNIFE, period, relative, SEE, SLEEP } from '../fixtures.ts';
 
 const MAIN = period('main', { subject: CAT, verb: SLEEP });
 const IF = period('if', { subject: DOG, verb: EAT, directObject: CAT });
@@ -37,6 +37,15 @@ describe('attachCondition', () => {
     const plan = attach([conditional('c', 'main', 'if'), relative('r', ['if', 'directObject'], ['sees', 'subject'])]);
 
     expect(((plan.condition as PhrasePlan).directObject as NounPhrase).relative?.verbPhrase.verb).toBe('SEE');
+  });
+
+  // P13: an instrument hangs off whichever clause the canvas linked it from, not only the root's.
+  it('folds the IF clause’s own instrument in', () => {
+    const knife = period('knife', { subject: KNIFE });
+    const plan = selectionToPlan(MAIN.selection);
+    attachCondition(plan, MAIN, [conditional('c', 'main', 'if'), instrumental('i', 'if', 'knife')], byId(MAIN, IF, knife), new Set(['main']));
+
+    expect((plan.condition as PhrasePlan).complements?.instrumental?.phrase).toMatchObject({ concept: 'KNIFE' });
   });
 
   it('gives the IF clause no condition of its own', () => {

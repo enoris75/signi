@@ -70,6 +70,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'noun.coordinate': 'and',
   'noun.conjunction': 'or',
   'noun.relative': 'rel',
+  'noun.headless': 'headless',
   'noun.relation': 'under',
   'noun.removeComplement': 'del',
   'adjective.next': 'adj',
