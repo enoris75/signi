@@ -114,3 +114,65 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 PAY in German and Japanese (GIVE's dative recipient with a mass object: *einer Person Geld geben*,
 人にお金をあげる) and PROVIDE in French and Portuguese (a causative over HAVE with a bare plural
 object).
+
+## Done
+
+Shipped 2026-09-24. **Eight verbs seeded**, ALLOW being P09-E43's: PAY and PROVIDE in
+[ditransitive.ts](../../../packages/backend/src/concepts/verbs/ditransitive.ts) after SELL;
+SPEND_MONEY and SPEND_TIME after USE, LOSE and WIN after KEEP, THANK after HELP_VERB in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts); LOSE_GAME after
+PLAY_GAME in [intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts); all
+eight in [nonfinite.ts](../../../packages/backend/src/concepts/verbs/nonfinite.ts) (Portuguese *pago*
+and *gasto* as the short passive participles), and in verb.test.ts's Italian table. **Eight glosses**:
+the seven probed ones plus LOSE_GAME's proposal; ALLOW's P09-E43 gloss is unchanged.
+
+Rendered fresh from the shipped seed:
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| PAY | to give money to a person | dare denaro a una persona | donner de l'argent à une personne | einer Person Geld geben | dar dinero a una persona | 人にお金をあげる | dar dinheiro a uma pessoa |
+| PROVIDE | to cause a person to have objects | indurre una persona ad avere oggetti | induire une personne à avoir des objets | eine Person veranlassen, Gegenstände zu haben | inducir a una persona a tener objetos | 人が物体を持つようにする | induzir uma pessoa a ter objetos |
+| SPEND_MONEY | to use money | usare denaro | utiliser de l'argent | Geld verwenden | usar dinero | お金を使う | usar dinheiro |
+| SPEND_TIME | to stay in a place for a period | restare in un luogo per un periodo | rester dans un lieu pendant une période | an einem Ort einen Zeitraum bleiben | quedarse en un lugar durante un período | 場所に期間残る | ficar em um lugar por um período |
+| LOSE | to stop having objects | smettere di avere oggetti | arrêter d'avoir des objets | aufhören, Gegenstände zu haben | dejar de tener objetos | 物体を持つのをやめる | parar de ter objetos |
+| WIN | to be best in a game | essere il più buono in un gioco | être le meilleur dans un jeu | in einem Spiel am besten sein | ser el más bueno en un juego | ゲームで最も良い | ser o melhor em um jogo |
+| LOSE_GAME | not to win in a game | non vincere in un gioco | ne pas gagner dans un jeu | nicht in einem Spiel gewinnen | no ganar en un juego | ゲームで勝たない | não vencer em um jogo |
+| THANK | to say good words to a person | dire buone parole a una persona | dire de bons mots à une personne | einer Person gute Wörter sagen | decir palabras buenas a una persona | 人に良い単語を言う | dizer palavras boas a uma pessoa |
+
+All pass `sweep-definitions.test.ts`.
+
+### What landed differently from the plan
+
+1. **LOSE is "to stop having objects"**, on P09-E42's STOP_DOING, not "no longer to have objects":
+   the NO_LONGER infinitive still reads *no tener ya no objetos* / *não ter já não objetos* (B84's
+   defect) and German *nicht mehr Gegenstände haben* (reading 4, unfiled). The STOP_DOING lead is
+   right in all seven, so the gloss ships without waiting on either defect; neither was fixed here.
+2. **SPEND_TIME takes the duration `for`**, not `during` (reading 3): Japanese 場所に期間残る for the
+   heavy 期間の間に, Italian *per un periodo*, German the accusative *einen Zeitraum*; English "for a
+   period" is the natural preposition too.
+3. **WIN's Italian and Spanish periphrasis was accepted** (reading 5): *il più buono*, *el más bueno*;
+   adding suppletive tables would move every GOOD comparative in both languages.
+4. **Japanese WIN and LOSE_GAME** mark the opponent に (`opponent_prep`, 犬に勝ちます, 犬に負けます), the
+   first lexemes to seed that column, and WIN marks its game に too (`object_particle`: ゲームに勝ちます,
+   where the default gave ゲームを勝ちます). Every other language says the opponent with its generic
+   *contro / contre / gegen / contra*.
+5. **THANK's objects**: German `object_case: 'dat'` (*dankt dem Kind*, *dankt ihm*), Japanese
+   `object_particle: 'に'` (子供に感謝します), Portuguese `object_prep: 'a'` (*agradece à criança*).
+   Spanish takes no column: the personal *a* already gives *agradece al niño*. **Defect left**: a
+   Spanish pronoun object reads *lo agradece* for *le agradece* — the Romance `object_case: 'dat'` is
+   read under object control only (ALLOW's), so a plain dative object has no key. Pinned as a
+   `test.fails` in games-and-transactions.test.ts. Portuguese pronoun reads the colloquial *agradece a
+   ele*. No gloss shows either.
+6. **German PROVIDE is *liefern*** (supply), with the dative recipient; *zur Verfügung stellen* would
+   be closer but is a phrase the engine cannot place. German LOSE_GAME's *nicht in einem Spiel
+   gewinnen* follows the engine's rule that *nicht* precedes a locative (negation.test.ts).
+7. **Readings 1, 2, 6 and 7 as filed**: PAY on GIVE (あげる), PROVIDE causative, THANK "good words",
+   ALLOW unchanged.
+
+### Coverage shipped
+
+Five rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts): PAY in German
+and Japanese, PROVIDE in French and Portuguese, WIN in German, each with English.
+[games-and-transactions.test.ts](../../../packages/engine/test/games-and-transactions.test.ts) pins
+the glosses, every verb's present, past, resultative, future and negation, the frames (recipient,
+place, opponent), the commands, and the Spanish dative clitic as a known bug.

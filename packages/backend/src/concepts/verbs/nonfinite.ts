@@ -311,6 +311,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'ajudando', participle: 'ajudado' },
     ja: { te: '手伝って', te_reading: 'てつだって', nai: '手伝わない', nai_reading: 'てつだわない', passive: '手伝われる', passive_reading: 'てつだわれる' },
   },
+  // B85's thank: danken is weak (gedankt), ringraziare and remercier regular.
+  THANK: {
+    en: { gerund: 'thanking', participle: 'thanked' },
+    it: { gerund: 'ringraziando', participle: 'ringraziato' },
+    fr: { participle: 'remercié' }, de: { participle: 'gedankt' },
+    es: { gerund: 'agradeciendo', participle: 'agradecido' },
+    pt: { gerund: 'agradecendo', participle: 'agradecido' },
+    ja: { te: '感謝して', te_reading: 'かんしゃして', nai: '感謝しない', nai_reading: 'かんしゃしない', passive: '感謝される', passive_reading: 'かんしゃされる' },
+  },
   CLICK: {
     en: { gerund: 'clicking', participle: 'clicked' },
     it: { gerund: 'cliccando', participle: 'cliccato' },
@@ -370,6 +379,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'vendiendo', participle: 'vendido' },
     pt: { gerund: 'vendendo', participle: 'vendido' },
     ja: { te: '売って', te_reading: 'うって', nai: '売らない', nai_reading: 'うらない', passive: '売られる', passive_reading: 'うられる' },
+  },
+  // B85's pay and provide, both HAVE. Portuguese pagar is abundant: tem pagado, but foi pago.
+  // German bezahlen takes no ge- after its unstressed be-.
+  PAY: {
+    en: { gerund: 'paying', participle: 'paid' },
+    it: { gerund: 'pagando', participle: 'pagato' },
+    fr: { participle: 'payé' }, de: { participle: 'bezahlt' },
+    es: { gerund: 'pagando', participle: 'pagado' },
+    pt: { gerund: 'pagando', participle: 'pagado', participle_passive: 'pago' },
+    ja: { te: '払って', te_reading: 'はらって', nai: '払わない', nai_reading: 'はらわない', passive: '払われる', passive_reading: 'はらわれる' },
+  },
+  PROVIDE: {
+    en: { gerund: 'providing', participle: 'provided' },
+    it: { gerund: 'fornendo', participle: 'fornito' },
+    fr: { participle: 'fourni' }, de: { participle: 'geliefert' },
+    es: { gerund: 'proporcionando', participle: 'proporcionado' },
+    pt: { gerund: 'fornecendo', participle: 'fornecido' },
+    ja: { te: '提供して', te_reading: 'ていきょうして', nai: '提供しない', nai_reading: 'ていきょうしない', passive: '提供される', passive_reading: 'ていきょうされる' },
   },
   LEARN: {
     en: { gerund: 'learning', participle: 'learned' },
@@ -653,6 +680,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'jogando', participle: 'jogado' },
     ja: { te: '遊んで', te_reading: 'あそんで', nai: '遊ばない', nai_reading: 'あそばない' },
   },
+  // B85's lose a game: LOSE's paradigm, and Japanese 負ける, ichidan. HAVE throughout (ha perso).
+  LOSE_GAME: {
+    en: { gerund: 'losing', participle: 'lost' },
+    it: { gerund: 'perdendo', participle: 'perso' },
+    fr: { participle: 'perdu' }, de: { participle: 'verloren' },
+    es: { gerund: 'perdiendo', participle: 'perdido' },
+    pt: { gerund: 'perdendo', participle: 'perdido' },
+    ja: { te: '負けて', te_reading: 'まけて', nai: '負けない', nai_reading: 'まけない' },
+  },
   CREATE: {
     en: { gerund: 'creating', participle: 'created' },
     it: { gerund: 'creando', participle: 'creato' },
@@ -735,6 +771,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'conservando', participle: 'conservado' },
     pt: { gerund: 'guardando', participle: 'guardado' },
     ja: { te: '取っておいて', te_reading: 'とっておいて', nai: '取っておかない', nai_reading: 'とっておかない', passive: '取っておかれる', passive_reading: 'とっておかれる' },
+  },
+  // B85's lose and win. All take HAVE: perdere and vincere select avere; the strong participles are
+  // en lost / won, it perso / vinto, fr perdu, de verloren / gewonnen (no ge- after ver- or ge-).
+  LOSE: {
+    en: { gerund: 'losing', participle: 'lost' },
+    it: { gerund: 'perdendo', participle: 'perso' },
+    fr: { participle: 'perdu' }, de: { participle: 'verloren' },
+    es: { gerund: 'perdiendo', participle: 'perdido' },
+    pt: { gerund: 'perdendo', participle: 'perdido' },
+    ja: { te: '失って', te_reading: 'うしなって', nai: '失わない', nai_reading: 'うしなわない', passive: '失われる', passive_reading: 'うしなわれる' },
+  },
+  WIN: {
+    en: { gerund: 'winning', participle: 'won' },
+    it: { gerund: 'vincendo', participle: 'vinto' },
+    fr: { participle: 'gagné' }, de: { participle: 'gewonnen' },
+    es: { gerund: 'ganando', participle: 'ganado' },
+    pt: { gerund: 'vencendo', participle: 'vencido' },
+    ja: { te: '勝って', te_reading: 'かって', nai: '勝たない', nai_reading: 'かたない' },
   },
   // 持ってくる conjugates as 来る: 持ってきて, 持ってこない, 持ってこられる.
   BRING: {
@@ -1029,6 +1083,25 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'usando', participle: 'usado' },
     pt: { gerund: 'usando', participle: 'usado' },
     ja: { te: '使って', te_reading: 'つかって', nai: '使わない', nai_reading: 'つかわない', passive: '使われる', passive_reading: 'つかわれる' },
+  },
+  // B85's two spends, HAVE both: spendere's strong speso; ausgeben puts its ge- after the particle
+  // (ausgegeben), and verbringen, inseparable, takes none (verbracht). Portuguese gastar is abundant
+  // (tem gastado, foi gasto).
+  SPEND_MONEY: {
+    en: { gerund: 'spending', participle: 'spent' },
+    it: { gerund: 'spendendo', participle: 'speso' },
+    fr: { participle: 'dépensé' }, de: { participle: 'ausgegeben' },
+    es: { gerund: 'gastando', participle: 'gastado' },
+    pt: { gerund: 'gastando', participle: 'gastado', participle_passive: 'gasto' },
+    ja: { te: '費やして', te_reading: 'ついやして', nai: '費やさない', nai_reading: 'ついやさない', passive: '費やされる', passive_reading: 'ついやされる' },
+  },
+  SPEND_TIME: {
+    en: { gerund: 'spending', participle: 'spent' },
+    it: { gerund: 'passando', participle: 'passato' },
+    fr: { participle: 'passé' }, de: { participle: 'verbracht' },
+    es: { gerund: 'pasando', participle: 'pasado' },
+    pt: { gerund: 'passando', participle: 'passado' },
+    ja: { te: '過ごして', te_reading: 'すごして', nai: '過ごさない', nai_reading: 'すごさない', passive: '過ごされる', passive_reading: 'すごされる' },
   },
   COPY: {
     en: { gerund: 'copying', participle: 'copied' },

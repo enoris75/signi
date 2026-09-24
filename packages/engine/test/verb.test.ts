@@ -565,6 +565,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['LEAVE', 'la gatta è uscita.'],
     ['LINK', 'la gatta ha collegato.'], ['LIVE', 'la gatta ha abitato.'],
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
+    // B85: perdere's strong perso, for both losing senses.
+    ['LOSE', 'la gatta ha perso.'], ['LOSE_GAME', 'la gatta ha perso.'],
     ['MAKE', 'la gatta ha fatto.'], ['MARRY', 'la gatta ha sposato.'],
     ['MODIFY', 'la gatta ha modificato.'],
     ['MOVE', 'la gatta ha spostato.'],
@@ -573,9 +575,10 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['NAME', 'la gatta ha nominato.'], ['NEGATE', 'la gatta ha negato.'],
     // OPEN: aprire's participle is the irregular aperto.
     ['OPEN', 'la gatta ha aperto.'], ['OWN', 'la gatta ha posseduto.'],
+    ['PAY', 'la gatta ha pagato.'],
     ['PERCEIVE', 'la gatta ha percepito.'], ['PIN', 'la gatta ha fissato.'],
     ['PRESS', 'la gatta ha premuto.'],
-    ['PRODUCE', 'la gatta ha prodotto.'],
+    ['PRODUCE', 'la gatta ha prodotto.'], ['PROVIDE', 'la gatta ha fornito.'],
     ['READ', 'la gatta ha letto.'], ['REDO', 'la gatta ha ripetuto.'],
     ['REMOVE', 'la gatta ha rimosso.'],
     ['REPLACE', 'la gatta ha sostituito.'], ['RESIZE', 'la gatta ha ridimensionato.'],
@@ -592,10 +595,13 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['SHOW', 'la gatta ha mostrato.'], ['SHRINK', 'la gatta ha rimpicciolito.'],
     ['SPECIFY', 'la gatta ha specificato.'],
     ['SPEAK', 'la gatta ha parlato.'],
+    // B85: spendere's strong speso; the transitive passare takes avere.
+    ['SPEND_MONEY', 'la gatta ha speso.'], ['SPEND_TIME', 'la gatta ha passato.'],
     ['START', 'la gatta ha iniziato.'],
     ['STRIKE', 'la gatta ha colpito.'],
     // soffrire's participle is the strong sofferto, under avere.
-    ['SUFFER', 'la gatta ha sofferto.'], ['TAKE', 'la gatta ha preso.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['SUFFER', 'la gatta ha sofferto.'], ['TAKE', 'la gatta ha preso.'], ['THANK', 'la gatta ha ringraziato.'],
+    ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TRANSFORM', 'la gatta ha trasformato.'],
     // -durre keeps its Latin stem in the participle: tradotto, not *tradutto.
@@ -606,6 +612,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // UNDO shares CANCEL's verb (B40).
     ['UNDO', 'la gatta ha annullato.'], ['UNPIN', 'la gatta ha sbloccato.'],
     ['USE', 'la gatta ha usato.'],
+    // B85: vincere's strong vinto.
+    ['WIN', 'la gatta ha vinto.'],
     // A thing that works takes avere, as ACT does (C22).
     ['WORK', 'la gatta ha funzionato.'],
     ['WRITE', 'la gatta ha scritto.'],

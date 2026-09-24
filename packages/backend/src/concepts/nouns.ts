@@ -4926,6 +4926,26 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's *percent* (rank 265; localization B82). Invariable everywhere: the plural is the
+    // singular (five percent, cinque per cento, fünf Prozent, cinq pour cent). It is always counted,
+    // and "one part in a hundred" needs 100, which the cardinals do not reach (C31), so it stays on
+    // the literal by design (B82 reading 4). Japanese counts it as its own counter (五パーセント, as
+    // 時間 is), never 五つのパーセント.
+    id: 'PERCENT',
+    role: 'noun',
+    description: 'one part in a hundred',
+    emoji: '💯',
+    forms: {
+      en: { base: 'percent', plural: 'percent', count: 'singular' },
+      it: { base: 'per cento', plural: 'per cento', gender: 'masc', count: 'singular' },
+      fr: { base: 'pour cent', plural: 'pour cent', gender: 'masc', count: 'singular' },
+      de: { base: 'Prozent', plural: 'Prozent', gender: 'neut', count: 'singular' },
+      es: { base: 'por ciento', plural: 'por ciento', gender: 'masc', count: 'singular' },
+      ja: { base: 'パーセント', count: 'singular', counter: 'パーセント', counter_join: 'head' },
+      pt: { base: 'por cento', plural: 'por cento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A class of things that share a feature, and the genus of grammatical number (localization B39):
     // "a category that indicates quantities". Japanese 範疇, the linguist's word (文法範疇), not the
     // everyday カテゴリー. TENSE, ASPECT, VOICE, GENDER and PERSON_GRAMMAR could hang under it too;
@@ -4942,6 +4962,38 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'categoría', plural: 'categorías', gender: 'fem', count: 'singular' },
       ja: { base: '範疇', count: 'singular', reading: 'はんちゅう' },
       pt: { base: 'categoria', plural: 'categorias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *kind* (rank 256; localization B82): a sort, not the adjective (KINDNESS is the
+    // quality). "A group of things that has the same features", SYSTEM's shape: the relative agrees
+    // with GROUP in all seven. CATEGORY is the formal word (categoria, 範疇) and stays on its literal.
+    // Italian and Spanish tipo is also GUY's word (B75); the gender and the context tell them apart.
+    id: 'KIND_SORT',
+    role: 'noun',
+    description: 'a group of things that have something in common',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'THING', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+        relative: {
+          verbPhrase: { verb: 'HAVE' },
+          directObject: { concept: 'FEATURE', definiteness: 'definite', number: 'plural', adjectives: ['SAME'] },
+        },
+      },
+    },
+    emoji: '🔖',
+    synonym: 'sort',
+    forms: {
+      en: { base: 'kind', plural: 'kinds', count: 'singular' },
+      it: { base: 'tipo', plural: 'tipi', gender: 'masc', count: 'singular' },
+      fr: { base: 'sorte', plural: 'sortes', gender: 'fem', count: 'singular' },
+      de: { base: 'Art', plural: 'Arten', gender: 'fem', count: 'singular' },
+      es: { base: 'tipo', plural: 'tipos', gender: 'masc', count: 'singular' },
+      ja: { base: '種類', count: 'singular', reading: 'しゅるい' },
+      pt: { base: 'tipo', plural: 'tipos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -5550,6 +5602,33 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'miembro', plural: 'miembros', gender: 'masc', count: 'singular' },
       ja: { base: '一員', count: 'singular', reading: 'いちいん' },
       pt: { base: 'membro', plural: 'membros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *party* (rank 327; localization B82), the celebration — the political party is B76's
+    // PARTY_POLITICAL. German Fest, not the loan Party (plural Partys). Glossed as the gathering, "a
+    // group of happy people": the event ("a time when people celebrate") needs CELEBRATE.
+    id: 'PARTY_CELEBRATION',
+    role: 'noun',
+    description: 'a social gathering to celebrate or have fun',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['HAPPY'] },
+        possessorRole: 'parts',
+      },
+    },
+    emoji: '🎉',
+    synonym: 'celebration',
+    forms: {
+      en: { base: 'party', plural: 'parties', count: 'singular' },
+      it: { base: 'festa', plural: 'feste', gender: 'fem', count: 'singular' },
+      fr: { base: 'fête', plural: 'fêtes', gender: 'fem', count: 'singular' },
+      de: { base: 'Fest', plural: 'Feste', gender: 'neut', count: 'singular' },
+      es: { base: 'fiesta', plural: 'fiestas', gender: 'fem', count: 'singular' },
+      ja: { base: 'パーティー', count: 'singular' },
+      pt: { base: 'festa', plural: 'festas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -6425,6 +6504,26 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'processo', plural: 'processos', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // P09-E24's *change* as a noun (rank 364; localization B82), P09 D2's _NOUN suffix beside the
+    // verbs CHANGE and CHANGE_ONESELF. A process, not an action: "an action with which one changes
+    // an object" reads as the means. German Änderung (ändern is CHANGE's word), Japanese 変化.
+    id: 'CHANGE_NOUN',
+    role: 'noun',
+    description: 'the act or result of becoming different',
+    definition: whoGloss('PROCESS', 'CHANGE', 'OBJECT_THING'),
+    emoji: '🔀',
+    isA: 'PROCESS',
+    forms: {
+      en: { base: 'change', plural: 'changes', count: 'singular' },
+      it: { base: 'cambiamento', plural: 'cambiamenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'changement', plural: 'changements', gender: 'masc', count: 'singular' },
+      de: { base: 'Änderung', plural: 'Änderungen', gender: 'fem', count: 'singular' },
+      es: { base: 'cambio', plural: 'cambios', gender: 'masc', count: 'singular' },
+      ja: { base: '変化', count: 'singular', reading: 'へんか' },
+      pt: { base: 'mudança', plural: 'mudanças', gender: 'fem', count: 'singular' },
+    },
+  },
   // ── P09's system and the two programs (localization B65) ─────────────
   {
     // "A group of parts that works": WORK is the machine sense (funzionare, funktionieren), and the
@@ -6559,6 +6658,38 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'acción', plural: 'acciones', gender: 'fem', count: 'singular' },
       ja: { base: '動作', count: 'singular', reading: 'どうさ' },
       pt: { base: 'ação', plural: 'ações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *game* (rank 210; localization B82), the game one plays (gioco, jeu, Spiel, juego,
+    // ゲーム, jogo); a match (partita, partie, partido, 試合) is another concept. "An action that one
+    // does for joy": the purpose complement on DO, near PLAY_GAME's "to act to feel joy" without
+    // restating it. PLAY_GAME's own word would be circular (un'azione che si gioca).
+    id: 'GAME',
+    role: 'noun',
+    description: 'an activity one plays for fun, often with rules',
+    definition: {
+      subject: {
+        concept: 'ACTION',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO' },
+          complements: { purpose: { phrase: { concept: 'JOY', definiteness: 'bare' } } },
+        },
+      },
+    },
+    emoji: '🎮',
+    isA: 'ACTION',
+    forms: {
+      en: { base: 'game', plural: 'games', count: 'singular' },
+      it: { base: 'gioco', plural: 'giochi', gender: 'masc', count: 'singular' },
+      fr: { base: 'jeu', plural: 'jeux', gender: 'masc', count: 'singular' },
+      de: { base: 'Spiel', plural: 'Spiele', gender: 'neut', count: 'singular' },
+      es: { base: 'juego', plural: 'juegos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ゲーム', count: 'singular' },
+      pt: { base: 'jogo', plural: 'jogos', gender: 'masc', count: 'singular' },
     },
   },
   {

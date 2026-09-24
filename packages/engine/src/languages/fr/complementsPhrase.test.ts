@@ -89,6 +89,19 @@ describe('complementsPhrase', () => {
         .toBe('avec des mots');
     });
 
+    // Localization B82: "pour joie" is not French; a bare mass purpose takes the generic article.
+    test('a bare mass purpose takes the generic definite article, a counted one keeps its own', () => {
+      expect(complementsPhrase(complements({ purpose: complement(np(NOURRITURE, { definiteness: 'bare' })) })))
+        .toBe('pour la nourriture');
+      expect(complementsPhrase(complements({ purpose: complement(np(HOMME, { definiteness: 'indefinite' })) })))
+        .toBe('pour un homme');
+      expect(complementsPhrase(complements({ purpose: complement(np(MOT, { definiteness: 'bare', number: 'plural' })) })))
+        .toBe('pour des mots');
+      expect(complementsPhrase(complements({
+        purpose: complement(np(NOURRITURE, { definiteness: 'bare' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })),
+      }))).toBe('pour ma nourriture');
+    });
+
     test('a bare instrument takes the indefinite or partitive article (A149)', () => {
       expect(complementsPhrase(complements({ instrumental: complement(np(MOT, { definiteness: 'bare', number: 'plural' })) })))
         .toBe('avec des mots');

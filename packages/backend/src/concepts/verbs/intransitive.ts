@@ -1117,6 +1117,81 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // P09-E24's *lose* (rank 273), P09 D2's second half (localization B85): to be beaten. Only
+    // Japanese splits it from LOSE (負ける, "be defeated", against 失う, "lose hold of"), so the six
+    // others render it with LOSE's word, as the two PROGRAMs share theirs in four languages. The game
+    // is the locative ("perde in un gioco") and the winner the opponent, which Japanese marks に
+    // (犬に負けます), as WIN's. "Not to win in a game", on WIN.
+    id: 'LOSE_GAME',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative', 'opponent'],
+    description: 'to be defeated in a contest',
+    definition: infinitiveGloss('WIN', {
+      negative: true,
+      complements: { locative: { phrase: { concept: 'GAME', definiteness: 'indefinite' } } },
+    }),
+    synonym: 'be defeated',
+    emoji: '🥈',
+    forms: {
+      en: {
+        base: 'lose',
+        '1sg_present': 'lose', '2sg_present': 'lose', '3sg_present': 'loses',
+        '1pl_present': 'lose', '2pl_present': 'lose', '3pl_present': 'lose',
+        past: 'lost',
+      },
+      it: {
+        base: 'perdere',
+        '1sg_present': 'perdo', '2sg_present': 'perdi', '3sg_present': 'perde',
+        '1pl_present': 'perdiamo', '2pl_present': 'perdete', '3pl_present': 'perdono',
+        '1sg_past': 'persi', '2sg_past': 'perdesti', '3sg_past': 'perse',
+        '1pl_past': 'perdemmo', '2pl_past': 'perdeste', '3pl_past': 'persero',
+        '1sg_future': 'perderò', '2sg_future': 'perderai', '3sg_future': 'perderà',
+        '1pl_future': 'perderemo', '2pl_future': 'perderete', '3pl_future': 'perderanno',
+      },
+      fr: {
+        base: 'perdre',
+        '1sg_present': 'perds', '2sg_present': 'perds', '3sg_present': 'perd',
+        '1pl_present': 'perdons', '2pl_present': 'perdez', '3pl_present': 'perdent',
+        '1sg_past': 'perdis', '2sg_past': 'perdis', '3sg_past': 'perdit',
+        '1pl_past': 'perdîmes', '2pl_past': 'perdîtes', '3pl_past': 'perdirent',
+        '1sg_future': 'perdrai', '2sg_future': 'perdras', '3sg_future': 'perdra',
+        '1pl_future': 'perdrons', '2pl_future': 'perdrez', '3pl_future': 'perdront',
+      },
+      de: {
+        base: 'verlieren',
+        '1sg_present': 'verliere', '2sg_present': 'verlierst', '3sg_present': 'verliert',
+        '1pl_present': 'verlieren', '2pl_present': 'verliert', '3pl_present': 'verlieren',
+        '1sg_past': 'verlor', '2sg_past': 'verlorst', '3sg_past': 'verlor',
+        '1pl_past': 'verloren', '2pl_past': 'verlort', '3pl_past': 'verloren',
+      },
+      es: {
+        base: 'perder',
+        '1sg_present': 'pierdo', '2sg_present': 'pierdes', '3sg_present': 'pierde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdéis', '3pl_present': 'pierden',
+        '1sg_past': 'perdí', '2sg_past': 'perdiste', '3sg_past': 'perdió',
+        '1pl_past': 'perdimos', '2pl_past': 'perdisteis', '3pl_past': 'perdieron',
+        '1sg_future': 'perderé', '2sg_future': 'perderás', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderéis', '3pl_future': 'perderán',
+      },
+      ja: {
+        base: '負ける', opponent_prep: 'に',
+        reading: 'まける',
+        masu_present: '負けます',
+        masu_present_reading: 'まけます',
+      },
+      pt: {
+        base: 'perder',
+        '1sg_present': 'perco', '2sg_present': 'perde', '3sg_present': 'perde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdem', '3pl_present': 'perdem',
+        '1sg_past': 'perdi', '2sg_past': 'perdeu', '3sg_past': 'perdeu',
+        '1pl_past': 'perdemos', '2pl_past': 'perderam', '3pl_past': 'perderam',
+        '1sg_future': 'perderei', '2sg_future': 'perderá', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderão', '3pl_future': 'perderão',
+      },
+    },
+  },
 
   // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
   // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
