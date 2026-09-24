@@ -77,8 +77,8 @@ export function nounPhrase(counted: ResolvedNounPhrase, _case: Case): string {
   // A cardinal stands between the determiner and the declined adjectives: "die zwei großen Häuser"
   // (C31). It declines only at one, where it is the indefinite article's own word: bare, the article
   // builder has already written that (`cardinalOne`), and after der or dieser it declines weak, "der
-  // eine Hund" (`numeralDe`, A319). From two up German's cardinals are invariable.
-  const numeral = numeralDe(forms, nounCase, declension, !!pronominal || isQuestionPossessor(poss));
+  // eine Hund" (`numeralDe`, A319), after a possessive mixed, "ihr einer Freund" (A357). From two up German's cardinals are invariable.
+  const numeral = numeralDe(forms, nounCase, declension, isQuestionPossessor(poss));
   const lead = [art, numeral].filter(Boolean).map((w) => `${w} `).join('');
   const vonPhrase = detached && pronominal ? ` von ${dativePronounDe(pronominal)}` : '';
   return `${lead}${a}${word}${postnominal(forms)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;

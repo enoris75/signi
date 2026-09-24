@@ -648,7 +648,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
 
 // A357. A319 left out the numeral one beside a definite or demonstrative determiner (Romance) or
 // declined it (German), and left a pronominal possessive in the determiner's place to A329, which fixed
-// the indefinite and recorded the definite as its own defect. The one is still written there: "il suo
+// the indefinite and recorded the definite as its own defect. The one was still written there: "il suo
 // un amico", "son un ami", "su un amigo", "o seu um amigo", "ihr ein Freund". The Romance Want is the
 // phrase without the numeral, A319's; the German is A319's adjectival ein, with the mixed ending.
 describe('known bugs: the numeral one beside a pronominal possessive keeps the one (A357)', () => {
@@ -656,7 +656,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
   const friend = (extra: Partial<NounPhrase> = {}) => np('FRIEND', { numeral: 1, possessor: hers, ...extra });
   const reads = (possessor: NounPhrase) => sayAll(clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor }) }));
 
-  test.fails('Romance leaves the one out, subject and object', () => {
+  test('Romance leaves the one out, subject and object', () => {
     expect(sayAll(clause(friend(), 'RUN'))).toMatchObject({
       it: 'il suo amico corre.', fr: 'son ami court.', es: 'su amigo corre.', pt: 'o seu amigo corre.',
     });
@@ -665,7 +665,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('Romance leaves the one out of a possessor and a comitative', () => {
+  test('Romance leaves the one out of a possessor and a comitative', () => {
     expect(reads(friend())).toMatchObject({
       it: 'il gatto legge il libro del suo amico.', fr: 'le chat lit le livre de son ami.',
       es: 'el gato lee el libro de su amigo.', pt: 'o gato lê o livro do seu amigo.',
@@ -676,7 +676,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('Romance leaves the one out beside a demonstrative and a detached possessive', () => {
+  test('Romance leaves the one out beside a demonstrative and a detached possessive', () => {
     expect(sayAll(clause(friend({ definiteness: 'this' }), 'RUN'))).toMatchObject({
       it: 'questo suo amico corre.', fr: 'cet ami à elle court.', es: 'este amigo suyo corre.', pt: 'este amigo seu corre.',
     });
@@ -686,7 +686,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('German declines the one after the possessive', () => {
+  test('German declines the one after the possessive', () => {
     expect([
       say(clause(friend(), 'RUN'), 'de'),
       say(clause(np('CAT'), 'SEE', { directObject: friend() }), 'de'),
@@ -713,6 +713,41 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
     expect(sayAll(clause(friend({ numeral: 2, number: 'plural' }), 'RUN'))).toMatchObject({
       es: 'sus dos amigos corren.', pt: 'os seus dois amigos correm.',
+    });
+  });
+
+  test('a verb\'s own preposition, a place, a kinship noun and that', () => {
+    const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(sayAll(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { numeral: 1, possessor: mine }) }))).toMatchObject({
+      it: 'il gatto dipende dalla mia condizione.', fr: 'le chat dépend de ma condition.',
+      es: 'el gato depende de mi condición.', pt: 'o gato depende da minha condição.',
+      de: 'der Kater hängt von meiner einen Bedingung ab.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { numeral: 1, possessor: mine }) }))).toMatchObject({
+      it: 'il gatto clicca sul mio pulsante.', fr: 'le chat clique sur mon bouton.',
+      es: 'el gato clica en mi botón.', pt: 'o gato clica no meu botão.',
+      de: 'der Kater klickt auf meine eine Taste.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { numeral: 1, possessor: mine }) } } }))).toMatchObject({
+      it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.',
+      es: 'el gato corre en mi casa.', pt: 'o gato corre na minha casa.',
+      de: 'der Kater läuft in meinem einen Haus.',
+    });
+    expect(sayAll(clause(np('MOTHER', { numeral: 1, possessor: hers }), 'RUN'))).toMatchObject({
+      it: 'sua madre corre.', fr: 'sa mère court.', es: 'su madre corre.', pt: 'a sua mãe corre.',
+      de: 'ihre eine Mutter läuft.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: friend({ definiteness: 'that' }) }))).toMatchObject({
+      it: 'il gatto vede quel suo amico.', fr: 'le chat voit cet ami à elle.',
+      es: 'el gato ve a ese amigo suyo.', pt: 'o gato vê esse amigo seu.',
+      de: 'der Kater sieht jenen einen Freund von ihr.',
+    });
+  });
+
+  test('regression: the indefinite one beside a possessive keeps its word in every language', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: friend({ definiteness: 'indefinite' }) }))).toMatchObject({
+      it: 'il gatto vede un suo amico.', fr: 'le chat voit un ami à elle.', es: 'el gato ve a un amigo suyo.',
+      pt: 'o gato vê um amigo seu.', de: 'der Kater sieht einen Freund von ihr.',
     });
   });
 });

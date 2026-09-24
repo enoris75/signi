@@ -51,6 +51,13 @@ describe('possessorText', () => {
     expect(bookOf(np(HOMBRE, { numeral: '2', number: 'plural' }))).toBe(' de los dos hombres');
   });
 
+  // A357: a pronominal possessive beside or in place of that determiner changes nothing.
+  test('a possessor counted by one beside a possessive is the singular', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(bookOf(np(HOMBRE, { numeral: '1' }, { possessor: my }))).toBe(' de mi hombre');
+    expect(bookOf(np(MUJER, { numeral: '1', definiteness: 'that' }, { possessor: my }))).toBe(' de esa mujer mía');
+  });
+
   test('a proper possessor is bare unless inherently articled', () => {
     expect(bookOf(np(EUROPA))).toBe(' de Europa');
     expect(bookOf(np(ANTARTIDA))).toBe(' de la Antártida');

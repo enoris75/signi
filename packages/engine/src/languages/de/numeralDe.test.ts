@@ -16,6 +16,16 @@ describe('numeralDe', () => {
   test('any other count is the cardinal table\'s word', () => {
     expect(numeralDe({ ...HUND, numeral: '2', definiteness: 'definite' }, 'acc', 'definite', false)).toBe('zwei');
     expect(numeralDe({ ...HUND, definiteness: 'bare' }, 'nom', 'bare', false)).toBe('ein');
-    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'nom', 'no', true)).toBe('ein');
+    // After wessen, which declines nothing, the one is left as it is.
+    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'nom', 'bare', true)).toBe('ein');
+  });
+
+  // A357: a possessive in the definite's place is an ein-word, and one takes the mixed ending after it.
+  test('one after a possessive takes the mixed ending', () => {
+    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'nom', 'no', false)).toBe('einer');
+    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'acc', 'no', false)).toBe('einen');
+    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'gen', 'no', false)).toBe('einen');
+    expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'dat', 'no', false)).toBe('einen');
+    expect(numeralDe({ ...STUNDE, definiteness: 'definite' }, 'nom', 'no', false)).toBe('eine');
   });
 });

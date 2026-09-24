@@ -50,7 +50,7 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
   // `complementsPhrase` places it — and at one beside a definite or demonstrative it is left out
   // (A319): "das duas condições", "destas duas condições", "de duas condições", "em um botão" (A356).
-  const numeral = oneBesideDeterminer(f) && !possessive ? '' : numeralText(f, CARDINALS);
+  const numeral = oneBesideDeterminer(pf) ? '' : numeralText(f, CARDINALS);
   const noun = (detached
     ? [numeral, withAdj(word, ptAdj(np)), possessive]
     : [possessive, numeral, withAdj(word, ptAdj(np))]).filter(Boolean).join(' ');

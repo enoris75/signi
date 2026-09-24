@@ -341,8 +341,10 @@ export function complementsParts(
       // A cardinal stands after the determiner and possessive and before the declined adjectives, as
       // `nounPhrase` places it: "in den drei Häusern", "mit meinen drei Hunden" (C31, A291). The
       // determiner is in `head`, so a fusion like "im" / "zum" is untouched.
-      // At one after der or dieser it declines weak: "mit dem einen Hund" (`numeralDe`, A319).
-      const numeral = numeralDe(f, nounCase, definiteness, !!poss || isQuestionPossessor(np.possessor));
+      // At one after der or dieser it declines weak: "mit dem einen Hund" (`numeralDe`, A319); after a
+      // possessive mixed, read off the head's own determiner, which `f` gave to it: "mit ihrem einen
+      // Freund" (A357).
+      const numeral = numeralDe({ ...f, definiteness: ownDeterminer }, nounCase, definiteness, isQuestionPossessor(np.possessor));
       const counted = numeral ? `${numeral} ` : '';
       const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;

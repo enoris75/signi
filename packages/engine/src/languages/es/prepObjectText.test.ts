@@ -30,6 +30,8 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(NINO, { numeral: '2', number: 'plural', definiteness: 'bare' }), 'a')).toBe('a dos niños');
     expect(prepObjectText(np(CASA, { numeral: '2', number: 'plural', definiteness: 'this' }), 'en')).toBe('en estas dos casas');
     expect(prepObjectText(np(NINO, { numeral: '1' }), 'a')).toBe('al niño');
+    // …and beside a possessive in the definite's place (A357).
+    expect(prepObjectText(np(CASA, { numeral: '1' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), 'en')).toBe('en mi casa');
   });
 
   test('a pronoun takes its tonic form', () => {

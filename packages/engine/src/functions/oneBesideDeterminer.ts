@@ -8,7 +8,11 @@ const IDENTIFYING: ReadonlySet<string> = new Set(['definite', 'this', 'that']);
  * perro". German declines it as an adjective after that determiner instead: "der eine Hund", "den
  * einen Hund". English and Japanese keep their numeral as it is.
  *
- * A pronominal possessive in the determiner's place is not asked about here: the caller leaves it out.
+ * A pronominal possessive beside or in place of that determiner changes nothing (A357): "il suo
+ * amico", "este amigo suyo", German "ihr einer Freund". So `forms` are the phrase's *own* head forms,
+ * with the determiner the user picked, not the builder's possessed forms that gave it to the
+ * possessive. The indefinite one keeps its word there, its slot given to it by `keptBesidePossessive`
+ * (A329): "un mio amico".
  */
 export function oneBesideDeterminer(forms: Record<string, string>): boolean {
   return forms['numeral'] === '1' && IDENTIFYING.has(forms['definiteness'] ?? 'definite');

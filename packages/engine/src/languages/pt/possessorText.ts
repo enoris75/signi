@@ -47,7 +47,7 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A counted possessor keeps its cardinal: "um período de vinte e quatro horas" (C31).
   // …and at one beside a definite or demonstrative it is left out: "do homem", not "*do um
   // homem" (A319, A339).
-  const numeral = oneBesideDeterminer(poss.head.forms) && !possessive ? '' : numeralText(f, CARDINALS);
+  const numeral = oneBesideDeterminer(poss.head.forms) ? '' : numeralText(f, CARDINALS);
   const head = [numeral, withAdj(word, ptAdj(poss))].filter(Boolean).join(' ');
   const noun = (detached ? [head, possessive] : [possessive, head]).filter(Boolean).join(' ');
   return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${noun}`, poss)}`;
