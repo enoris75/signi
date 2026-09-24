@@ -35,4 +35,10 @@ describe('ptPossessiveWord', () => {
   test('the indefinite article the head picked gives way to the definite', () => {
     expect(ptPossessiveWord(np(CAO, { definiteness: 'indefinite' }, { possessor: my }))).toBe('o meu');
   });
+
+  // A336: an address takes the possessive without its article.
+  test('a vocative head takes the possessive alone', () => {
+    expect(ptPossessiveWord(np(CAO, { vocative: '1' }, { possessor: my }))).toBe('meu');
+    expect(ptPossessiveWord(np(CASA, { vocative: '1', number: 'plural' }, { possessor: our }))).toBe('nossas');
+  });
 });

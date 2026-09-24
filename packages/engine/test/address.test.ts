@@ -122,7 +122,7 @@ describe('the vocative', () => {
     const ja = (address: NounElement) => sayAll(command(address)).ja;
     expect(sayAll(command(np('WIFE', { possessor: of('1') })))).toEqual({
       en: 'My wife, run.', it: 'Mia moglie, corri.', fr: 'Ma femme, cours.', de: 'Meine Frau, lauf.',
-      es: 'Mi esposa, corre.', ja: '妻、走ってください。', pt: 'A minha esposa, corra.',
+      es: 'Mi esposa, corre.', ja: '妻、走ってください。', pt: 'Minha esposa, corra.',
     });
     expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['YOUNGER'] }))).toBe('弟、走ってください。');
     expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['ELDER'] }))).toBe('お兄さん、走ってください。');
@@ -321,7 +321,7 @@ describe('known bugs: a French pronoun addressee takes the clitic (A335)', () =>
 // amico, corri", "O meu pai, corra". A vocative has no article, possessed or not: "Mio amico", "Meu
 // pai". P11-E3's Done §9 left it to the possessed-head work of P11-E4.
 describe('known bugs: an Italian or Portuguese addressee with a possessive keeps the article (A336)', () => {
-  test.fails('Italian and Portuguese: a possessed address off the kin-noun rule drops the article', () => {
+  test('Italian and Portuguese: a possessed address off the kin-noun rule drops the article', () => {
     expect(sayAll(command(np('FRIEND', { possessor: of('1') })))).toEqual({
       en: 'My friend, run.', it: 'Mio amico, corri.', fr: 'Mon ami, cours.', de: 'Mein Freund, lauf.',
       es: 'Mi amigo, corre.', ja: '私の友達、走ってください。', pt: 'Meu amigo, corra.',
@@ -343,7 +343,7 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
     });
   });
 
-  test.fails('Portuguese: a possessed kin noun drops the article', () => {
+  test('Portuguese: a possessed kin noun drops the article', () => {
     expect(sayAll(command(np('FATHER', { possessor: of('1') })))).toEqual({
       en: 'My father, run.', it: 'Mio padre, corri.', fr: 'Mon père, cours.', de: 'Mein Vater, lauf.',
       es: 'Mi padre, corre.', ja: 'お父さん、走ってください。', pt: 'Meu pai, corra.',
@@ -352,6 +352,27 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
       en: 'Your mother, run.', it: 'Tua madre, corri.', fr: 'Ta mère, cours.', de: 'Deine Mutter, lauf.',
       es: 'Tu madre, corre.', ja: 'あなたのお母さん、走ってください。', pt: 'Sua mãe, corra.',
     });
+  });
+
+  test('the article goes in a coordinated address, before a statement and for a plural possessor; the object keeps it', () => {
+    expect(sayAll(command({ conjuncts: [np('FRIEND', { possessor: of('1') }), np('MOM')], conjunction: 'and' }, YouAll))).toEqual({
+      en: 'My friend and Mom, run.', it: 'Mio amico e mamma, correte.', fr: 'Mon ami et Maman, courez.',
+      de: 'Mein Freund und Mama, lauft.', es: 'Mi amigo y Mamá, corred.', ja: '私の友達とお母さん、走ってください。',
+      pt: 'Meu amigo e Mamãe, corram.',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FRIEND', { possessor: of('1') }) }))
+      .toMatchObject({ it: 'Mio amico, il gatto corre.', pt: 'Meu amigo, o gato corre.' });
+    const ours: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'plural' };
+    expect(sayAll(command(np('FRIEND', { possessor: ours })))).toMatchObject({ it: 'Nostro amico, corri.', pt: 'Nosso amigo, corra.' });
+    // The same possessed noun as the command's object is an argument, and keeps its article.
+    expect(sayAll({ ...command(np('FRIEND', { possessor: of('1') })), verbPhrase: { verb: 'SEE' }, directObject: np('FRIEND', { possessor: of('1') }) }))
+      .toMatchObject({ it: 'Mio amico, vedi il mio amico.', pt: 'Meu amigo, veja o meu amigo.' });
+  });
+
+  // Italian loro takes its article everywhere, and in address too.
+  test('regression: Italian loro keeps its article in address', () => {
+    const theirs: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'plural' };
+    expect(sayAll(command(np('FATHER', { possessor: theirs })))).toMatchObject({ it: 'Il loro padre, corri.', pt: 'Seu pai, corra.' });
   });
 
   test('regression: a name possessor in address, and the possessed subject outside it', () => {

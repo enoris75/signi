@@ -20,7 +20,9 @@ const TONIC_ADDRESS = new Set(['fr']);
  * It is **determiner-less** in every language (D2). Each conjunct resolves as the definite phrase
  * that a name is (so a kin term with `as_name` is one, "Mom and Dad", see `applyKinName`) and is then
  * marked bare, whatever the plan picked; a name is marked bare too, so a language that articles a
- * person's name as a subject leaves it off here ("Pedro, corra", not "o Pedro"). The head takes the
+ * person's name as a subject leaves it off here ("Pedro, corra", not "o Pedro"), and so is a possessed
+ * head, which the `vocative` form keeps off the article its possessive rides on elsewhere ("Mio amico,
+ * corri", "Meu pai, corra"; A336). The head takes the
  * form address takes — the Japanese honorific of a kin term (D3, see `applyPossessorForm`), and the
  * French tonic pronoun (A335, see `TONIC_ADDRESS`).
  */
@@ -30,6 +32,9 @@ export function resolveAddress(address: NounElement, language: string, lookup: L
     const forms = resolved.head.forms;
     if (!forms['person']) {
       forms['definiteness'] = 'bare';
+      // A possessed head's builders put the article back beside a possessive (it "il mio amico", pt
+      // "o meu amigo"); `vocative` tells them this one has none (A336).
+      forms['vocative'] = '1';
       if (forms['proper'] === '1') forms['takes_article'] = '0';
     } else if (TONIC_ADDRESS.has(language) && forms['disjunctive']) {
       forms['base'] = forms['disjunctive'];

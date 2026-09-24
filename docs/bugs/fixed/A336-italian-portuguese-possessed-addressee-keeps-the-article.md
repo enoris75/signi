@@ -59,3 +59,24 @@ Pinned by `known bugs: an Italian or Portuguese addressee with a possessive keep
 (A336)` in [address.test.ts](../../../packages/engine/test/address.test.ts).
 
 Found on 2026-09-24 in the P11-E3 coverage audit, which found Done §9's follow-up still open.
+
+## Resolved
+
+2026-09-24. [`resolveAddress.ts`](../../../packages/engine/src/translator/functions/resolveAddress.ts)
+marks each non-pronoun conjunct with a `vocative` head form (the trial fix's choice: a form, which
+every builder already reads, rather than a flag on the resolved phrase).
+[`it/itPossessedHeadForms.ts`](../../../packages/engine/src/languages/it/itPossessedHeadForms.ts)
+returns the `bare` possessed forms for a vocative head, and
+[`pt/ptPossessiveWord.ts`](../../../packages/engine/src/languages/pt/ptPossessiveWord.ts) leaves
+the article off the possessive for one. Decided: Italian *loro* keeps its article in address too
+(*Il loro padre, corri.*), as it does everywhere.
+
+The two `test.fails` in [address.test.ts](../../../packages/engine/test/address.test.ts) (*known
+bugs: an Italian or Portuguese addressee with a possessive keeps the article (A336)*) are plain tests
+now, assertions unchanged. The row the bug file named moved as it said: *the honorific is an elder's
+only* now expects `'Minha esposa, corra.'` (was `'A minha esposa, corra.'`). Added in the same block:
+a coordinated address (*Mio amico e mamma, correte.*, *Meu amigo e Mamãe, corram.*), an address
+before a statement, a 1st-plural possessor (*Nostro amico*, *Nosso amigo*), the command's possessed
+object keeping its article (*Mio amico, vedi il mio amico.*), and a *loro* regression.
+`itPossessedHeadForms.test.ts` and `ptPossessiveWord.test.ts` each gained a vocative case.
+

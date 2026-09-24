@@ -48,4 +48,11 @@ describe('itPossessedHeadForms', () => {
     expect(itPossessedHeadForms(np(PADRE, { definiteness: 'indefinite' }))['definiteness']).toBe('indefinite');
     expect(itPossessedHeadForms(np(PADRE, {}, { possessor: np(CANE) }))['definiteness']).toBeUndefined();
   });
+
+  // A336: an address has no article for the possessive to ride on — but loro keeps its own.
+  test('a vocative head is bare beside any possessive but loro', () => {
+    expect(itPossessedHeadForms(np(CANE, { vocative: '1', definiteness: 'bare' }, { possessor: pronominal('1') }))['definiteness']).toBe('bare');
+    expect(itPossessedHeadForms(np(PADRE, { vocative: '1', number: 'plural' }, { possessor: pronominal('1') }))['definiteness']).toBe('bare');
+    expect(itPossessedHeadForms(np(PADRE, { vocative: '1' }, { possessor: pronominal('3', 'plural') }))['definiteness']).toBe('definite');
+  });
 });
