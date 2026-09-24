@@ -15,7 +15,7 @@ Proposed forms, for the seed author to check. Every row was **seeded in memory a
 |---|---|---|---|---|---|---|---|---|---|
 | POWER | noun | **E24**, rank 274. Authority over people and events, `synonym: 'authority'`. The electrical sense (*corrente, courant, Strom*, 電力) is another concept, later | power / powers | potere / poteri *m* | pouvoir / pouvoirs *m* | Macht / Mächte *f* | poder / poderes *m* | 権力 (けんりょく) | poder / poderes *m* |
 | GOVERNMENT | noun | **E24**, rank 220. P08's row, forms as P08 has them. `isA: 'GROUP'` | government / governments | governo / governi *m* | gouvernement / gouvernements *m* | Regierung / Regierungen *f* | gobierno / gobiernos *m* | 政府 (せいふ) | governo / governos *m* |
-| PARTY_POLITICAL | noun | **E24**, rank 327, D2: the political party, `synonym: 'political'`. `isA: 'GROUP'`. The celebration is [B82](B82-kinds-changes-games-and-parties.md)'s PARTY_CELEBRATION | party / parties | partito / partiti *m* | parti / partis *m* | Partei / Parteien *f* | partido / partidos *m* | 政党 (せいとう) | partido / partidos *m* |
+| PARTY_POLITICAL | noun | **E24**, rank 327, D2: the political party, `synonym: 'political'`. `isA: 'GROUP'`. The celebration is [B82](../B-needs-seed/B82-kinds-changes-games-and-parties.md)'s PARTY_CELEBRATION | party / parties | partito / partiti *m* | parti / partis *m* | Partei / Parteien *f* | partido / partidos *m* | 政党 (せいとう) | partido / partidos *m* |
 | LAW | noun | **E24**, rank 268. One statute. The field (*diritto, droit, Recht*) is RIGHT_NOUN's word in three languages and is not proposed | law / laws | legge / leggi *f* | loi / lois *f* | Gesetz / Gesetze *n* | ley / leyes *f* | 法律 (ほうりつ) | lei / leis *f* |
 | COURT_LAW | noun | **E24**, rank 388, D2: the law court, `synonym: 'of law'`. The sports court (*campo, terrain, Platz, cancha*, コート, *quadra*) is later | court / courts | tribunale / tribunali *m* | tribunal / tribunaux *m* | Gericht / Gerichte *n* | tribunal / tribunales *m* | 裁判所 (さいばんしょ) | tribunal / tribunais *m* |
 | RIGHT_NOUN | noun | **E24**, rank 243, D2: the entitlement, `synonym: 'entitlement'`. The adjectives RIGHT_CORRECT and RIGHT_SIDE are seeded | right / rights | diritto / diritti *m* | droit / droits *m* | Recht / Rechte *n* | derecho / derechos *m* | 権利 (けんり) | direito / direitos *m* |
@@ -116,3 +116,42 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 WAR in French and Spanish (the indefinite plural subject in a locative relative: *une période où des
 nations tuent*), and RIGHT_NOUN in German and Japanese (the modal in an object-gap relative: *die man
 tun darf*, することが許される動作).
+
+## Done
+
+Shipped 2026-09-24. **Seven words seeded** in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts), placed after STATE_NATION: POWER,
+GOVERNMENT, PARTY_POLITICAL, LAW, COURT_LAW, RIGHT_NOUN and WAR, with the forms this file proposed. It
+also has **seven glosses**, seven of seven, and nothing is literal. The paradigms and glosses are pinned in
+[government-and-institutions.test.ts](../../../packages/engine/test/government-and-institutions.test.ts),
+which also carries B77's and B88's words.
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| POWER | an ability with which one governs | una capacità con la quale si governa | une capacité avec laquelle on gouverne | eine Fähigkeit, mit der man regiert | una capacidad con la que se gobierna | 統治する能力 | uma capacidade com a qual se governa |
+| GOVERNMENT | a group that governs a state | un gruppo che governa uno Stato | un groupe qui gouverne un État | eine Gruppe, die einen Staat regiert | un grupo que gobierna un Estado | 国家を統治するグループ | um grupo que governa um Estado |
+| PARTY_POLITICAL | a group that desires power | un gruppo che desidera potere | un groupe qui désire le pouvoir | eine Gruppe, die Macht wünscht | un grupo que desea poder | 権力を望むグループ | um grupo que deseja poder |
+| LAW | an instruction that a state writes | un'istruzione che uno Stato scrive | une instruction qu'un État écrit | eine Anweisung, die ein Staat schreibt | una instrucción que un Estado escribe | 国家が書く指示 | uma instrução que um Estado escreve |
+| COURT_LAW | a group that applies the laws | un gruppo che applica le leggi | un groupe qui applique les lois | eine Gruppe, die die Gesetze anwendet | un grupo que aplica las leyes | 法律を適用するグループ | um grupo que aplica as leis |
+| RIGHT_NOUN | an action that one may do | un'azione che si può fare | une action qu'on peut faire | eine Handlung, die man tun darf | una acción que se puede hacer | することが許される動作 | uma ação que se pode fazer |
+| WAR | a period where nations kill | un periodo dove nazioni uccidono | une période où des nations tuent | ein Zeitraum, in dem Nationen töten | un período donde unas naciones matan | 国民が殺す期間 | um período onde umas nações matam |
+
+Six renders match the probe table exactly. The seventh, LAW, changed on purpose:
+
+1. **LAW is on WRITE, not GIVE** (reading 3). GIVE's Japanese is the benefactive あげる
+   (国家があげる指示), and MAKE's 作る reads as "manufactures". WRITE was probed next to SET, CREATE and
+   PRODUCE. It is the only one of them that reads right in all seven languages: SET gives *imposta*,
+   *définit* and 設定する, which are what you do to a software setting.
+2. **German compound stems are seeded** where the rule would miss them: *Gesetzes-* (Gesetzestext),
+   *Gerichts-* (Gerichtsgebäude), *Rechts-* (Rechtssystem) and *Kriegs-* (Kriegsbuch). *Regierungs-*
+   comes from the -ung rule. *Partei-* and *Macht-* take no linking element.
+3. **`isA`**: GOVERNMENT and PARTY_POLITICAL are under GROUP, as P08 proposes. The other five are roots,
+   because their genus is in the gloss.
+4. **seed.test.ts's hypernym check sorted two ways.** SQLite's binary `ORDER BY` puts GO_OUT after
+   GOVERNMENT, but `localeCompare` puts it before. GOVERNMENT was the first isA id to show the
+   difference, so the test now sorts both sides with one comparator.
+5. **The two unfiled defects stand as reported**: a relative clause drops an `infinitiveComplement`
+   (reading 2), and a bare plural subject loses French *des* (reading 5). WAR avoids the second with
+   the indefinite plural.
+6. **e2e**: one test after B64's in [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts)
+   covers WAR in French and Spanish and RIGHT_NOUN in German and Japanese.
