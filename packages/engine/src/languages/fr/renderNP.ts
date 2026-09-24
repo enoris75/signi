@@ -81,7 +81,7 @@ export function renderNP(
   // bare noun is "année" (`cardinal_form`).
   // The cardinal one is the indefinite article's own word: beside a definite or demonstrative
   // determiner it is left out, and the phrase is the singular it counts: "le chien", "ce chien" (A319).
-  const numeral = oneBesideDeterminer(forms) && !pronominal ? '' : numeralText(forms, CARDINALS);
+  const numeral = oneBesideDeterminer(forms) ? '' : numeralText(forms, CARDINALS);
   const cardinalForm = plural ? forms['cardinal_form_plural'] : forms['cardinal_form'];
   const counted = numeral && cardinalForm ? cardinalForm : noun;
   const words = [detWord, possWord, ...(numeral ? [numeral] : []), ...pre, counted].filter(Boolean);

@@ -47,3 +47,20 @@ indefinite one needs the numeral in the determiner's place (*em um botão*), whi
 
 Found after fixing A340, whose Spanish *a verb's own preposition keeps the numeral* Portuguese lacks,
 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24 in [pt/prepObjectText.ts](../../../packages/engine/src/languages/pt/prepObjectText.ts),
+A340's shape: the numeral is written through `numeralText(f, CARDINALS)` after the fused determiner
+and a prenominal possessive and before the noun and its adjective (after the determiner and before
+the noun where a possessive detaches), leaving out the one beside a definite or demonstrative
+(`oneBesideDeterminer`, A319), as `complementsPhrase.ts` does: *depende das duas condições*, *destas
+duas condições*, *das minhas duas condições*, *de duas condições*, *clica em um botão*.
+
+The 3 `test.fails` in `known bugs: the Portuguese prepositional object drops the numeral (A356)` in
+[numerals.test.ts](../../../packages/engine/test/numerals.test.ts) are plain tests now. The same block
+gained a detached possessive (*destas duas condições minhas*, *de duas condições minhas*, *de uma
+condição minha*), the one beside *this* and the indefinite one under *de*, an adjective (*nos três
+botões grandes*), the bare two, *that* (*nesses dois botões*) and an approximator (*em cerca de cinco
+botões*). The colocated `prepObjectText.test.ts` gained the definite, demonstrative and possessive
+numeral and the one beside a definite.

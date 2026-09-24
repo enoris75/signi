@@ -567,8 +567,8 @@ describe('known bugs: the Spanish personal a drops or loses the numeral of a cou
 });
 
 // A356. A340's gap in Portuguese: a verb's own preposition (DEPEND's de, CLICK's em) builds its object
-// in prepObjectText, which never writes the numeral. The count is lost after every determiner ("das
-// condições" for "das duas condições"), and the indefinite one loses its article too ("clica em
+// in prepObjectText, which wrote no numeral. The count was lost after every determiner ("das
+// condições" for "das duas condições"), and the indefinite one lost its article too ("clica em
 // botão"). The Wants are the plain object's ("vê as duas condições") after the fused preposition.
 describe('known bugs: the Portuguese prepositional object drops the numeral (A356)', () => {
   const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
@@ -576,7 +576,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     say(clause(np('CAT'), 'DEPEND', { directObject: object, verbPhrase: { negative } }), 'pt');
   const clicks = (object: NounPhrase) => say(clause(np('CAT'), 'CLICK', { directObject: object }), 'pt');
 
-  test.fails('the definite and the indefinite', () => {
+  test('the definite and the indefinite', () => {
     expect([
       depends(np('CONDITION', { numeral: 2 })),
       depends(np('CONDITION', { numeral: 2 }), true),
@@ -588,7 +588,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     ]);
   });
 
-  test.fails('the demonstratives and the possessive', () => {
+  test('the demonstratives and the possessive', () => {
     expect([
       depends(np('CONDITION', { numeral: 2, definiteness: 'this' })),
       depends(np('CONDITION', { numeral: 3, definiteness: 'that' })),
@@ -600,13 +600,37 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     ]);
   });
 
-  test.fails('CLICK\'s em', () => {
+  test('CLICK\'s em', () => {
     expect([
       clicks(np('BUTTON', { numeral: 2 })),
       clicks(np('BUTTON', { numeral: 1, definiteness: 'indefinite' })),
     ]).toEqual([
       'o gato clica nos dois botões.',
       'o gato clica em um botão.',
+    ]);
+  });
+
+  test('a detached possessive, an adjective, the bare, that, an approximator and the one beside this', () => {
+    expect([
+      depends(np('CONDITION', { numeral: 2, definiteness: 'this', possessor: mine })),
+      depends(np('CONDITION', { numeral: 2, definiteness: 'indefinite', possessor: mine })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'indefinite', possessor: mine })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'this' })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'indefinite' })),
+      clicks(np('BUTTON', { numeral: 3, adjectives: ['BIG'] })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'bare' })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'that' })),
+      clicks(np('BUTTON', { numeral: 5, definiteness: 'indefinite', approximator: 'about' })),
+    ]).toEqual([
+      'o gato depende destas duas condições minhas.',
+      'o gato depende de duas condições minhas.',
+      'o gato depende de uma condição minha.',
+      'o gato depende desta condição.',
+      'o gato depende de uma condição.',
+      'o gato clica nos três botões grandes.',
+      'o gato clica em dois botões.',
+      'o gato clica nesses dois botões.',
+      'o gato clica em cerca de cinco botões.',
     ]);
   });
 
@@ -624,7 +648,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
 
 // A357. A319 left out the numeral one beside a definite or demonstrative determiner (Romance) or
 // declined it (German), and left a pronominal possessive in the determiner's place to A329, which fixed
-// the indefinite and recorded the definite as its own defect. The one is still written there: "il suo
+// the indefinite and recorded the definite as its own defect. The one was still written there: "il suo
 // un amico", "son un ami", "su un amigo", "o seu um amigo", "ihr ein Freund". The Romance Want is the
 // phrase without the numeral, A319's; the German is A319's adjectival ein, with the mixed ending.
 describe('known bugs: the numeral one beside a pronominal possessive keeps the one (A357)', () => {
@@ -632,7 +656,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
   const friend = (extra: Partial<NounPhrase> = {}) => np('FRIEND', { numeral: 1, possessor: hers, ...extra });
   const reads = (possessor: NounPhrase) => sayAll(clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor }) }));
 
-  test.fails('Romance leaves the one out, subject and object', () => {
+  test('Romance leaves the one out, subject and object', () => {
     expect(sayAll(clause(friend(), 'RUN'))).toMatchObject({
       it: 'il suo amico corre.', fr: 'son ami court.', es: 'su amigo corre.', pt: 'o seu amigo corre.',
     });
@@ -641,7 +665,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('Romance leaves the one out of a possessor and a comitative', () => {
+  test('Romance leaves the one out of a possessor and a comitative', () => {
     expect(reads(friend())).toMatchObject({
       it: 'il gatto legge il libro del suo amico.', fr: 'le chat lit le livre de son ami.',
       es: 'el gato lee el libro de su amigo.', pt: 'o gato lê o livro do seu amigo.',
@@ -652,7 +676,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('Romance leaves the one out beside a demonstrative and a detached possessive', () => {
+  test('Romance leaves the one out beside a demonstrative and a detached possessive', () => {
     expect(sayAll(clause(friend({ definiteness: 'this' }), 'RUN'))).toMatchObject({
       it: 'questo suo amico corre.', fr: 'cet ami à elle court.', es: 'este amigo suyo corre.', pt: 'este amigo seu corre.',
     });
@@ -662,7 +686,7 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
     });
   });
 
-  test.fails('German declines the one after the possessive', () => {
+  test('German declines the one after the possessive', () => {
     expect([
       say(clause(friend(), 'RUN'), 'de'),
       say(clause(np('CAT'), 'SEE', { directObject: friend() }), 'de'),
@@ -691,15 +715,50 @@ describe('known bugs: the numeral one beside a pronominal possessive keeps the o
       es: 'sus dos amigos corren.', pt: 'os seus dois amigos correm.',
     });
   });
+
+  test('a verb\'s own preposition, a place, a kinship noun and that', () => {
+    const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(sayAll(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { numeral: 1, possessor: mine }) }))).toMatchObject({
+      it: 'il gatto dipende dalla mia condizione.', fr: 'le chat dépend de ma condition.',
+      es: 'el gato depende de mi condición.', pt: 'o gato depende da minha condição.',
+      de: 'der Kater hängt von meiner einen Bedingung ab.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { numeral: 1, possessor: mine }) }))).toMatchObject({
+      it: 'il gatto clicca sul mio pulsante.', fr: 'le chat clique sur mon bouton.',
+      es: 'el gato clica en mi botón.', pt: 'o gato clica no meu botão.',
+      de: 'der Kater klickt auf meine eine Taste.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { numeral: 1, possessor: mine }) } } }))).toMatchObject({
+      it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.',
+      es: 'el gato corre en mi casa.', pt: 'o gato corre na minha casa.',
+      de: 'der Kater läuft in meinem einen Haus.',
+    });
+    expect(sayAll(clause(np('MOTHER', { numeral: 1, possessor: hers }), 'RUN'))).toMatchObject({
+      it: 'sua madre corre.', fr: 'sa mère court.', es: 'su madre corre.', pt: 'a sua mãe corre.',
+      de: 'ihre eine Mutter läuft.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: friend({ definiteness: 'that' }) }))).toMatchObject({
+      it: 'il gatto vede quel suo amico.', fr: 'le chat voit cet ami à elle.',
+      es: 'el gato ve a ese amigo suyo.', pt: 'o gato vê esse amigo seu.',
+      de: 'der Kater sieht jenen einen Freund von ihr.',
+    });
+  });
+
+  test('regression: the indefinite one beside a possessive keeps its word in every language', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: friend({ definiteness: 'indefinite' }) }))).toMatchObject({
+      it: 'il gatto vede un suo amico.', fr: 'le chat voit un ami à elle.', es: 'el gato ve a un amigo suyo.',
+      pt: 'o gato vê um amigo seu.', de: 'der Kater sieht einen Freund von ihr.',
+    });
+  });
 });
 
 // A363. A French verb's own preposition other than "de" / "à" (CLICK's "sur") is written before the
-// partitive article, which a numeral leaves empty, so the phrase gains a second space.
+// partitive article, which a numeral leaves empty, so the phrase gained a second space.
 describe('known bugs: a French prepositional object with a numeral and no article writes a double space (A363)', () => {
   const clicks = (object: NounPhrase, negative = false) =>
     say(clause(np('CAT'), 'CLICK', { directObject: object, verbPhrase: { negative } }), 'fr');
 
-  test.fails('the indefinite one and two, the bare two, negated', () => {
+  test('the indefinite one and two, the bare two, negated', () => {
     expect([
       clicks(np('BUTTON', { numeral: 1, definiteness: 'indefinite' })),
       clicks(np('BUTTON', { numeral: 2, definiteness: 'indefinite' })),
@@ -722,6 +781,19 @@ describe('known bugs: a French prepositional object with a numeral and no articl
       'le chat clique sur des boutons.',
       'le chat clique sur les deux boutons.',
       'le chat clique sur ces deux boutons.',
+    ]);
+  });
+
+  test('a counted object with adjectives or a possessive keeps one space after the preposition', () => {
+    const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect([
+      clicks(np('BUTTON', { numeral: 3, definiteness: 'indefinite', adjectives: ['BIG'] })),
+      clicks(np('BUTTON', { numeral: 2, possessor: mine })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'indefinite', possessor: mine })),
+    ]).toEqual([
+      'le chat clique sur trois grands boutons.',
+      'le chat clique sur mes deux boutons.',
+      'le chat clique sur deux boutons à moi.',
     ]);
   });
 });

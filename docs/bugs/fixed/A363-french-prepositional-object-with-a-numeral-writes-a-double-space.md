@@ -28,3 +28,16 @@ preposition and the article only when the article is not empty.
 | **Test** | `numerals.test.ts` → *known bugs: a French prepositional object with a numeral and no article writes a double space (A363)* (1 `test.fails`: the indefinite one and two, the bare two, negated; plus a regression test for no numeral, the definite and the demonstrative two) |
 
 Found by the filing lane for A355–A360, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24 in [fr/prepObjectText.ts](../../../packages/engine/src/languages/fr/prepObjectText.ts):
+a verb's own preposition other than *de* and *à* is joined to the partitive article only when the
+article is not empty, so a numeral with no article follows the preposition after one space (*clique
+sur deux boutons*), as `prepDet` already did on the possessive's path.
+
+The `test.fails` in `known bugs: a French prepositional object with a numeral and no article writes a
+double space (A363)` in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts) is a plain
+test now. The same block gained a counted object with an adjective (*sur trois grands boutons*), a
+prenominal possessive (*sur mes deux boutons*) and a detached one (*sur deux boutons à moi*); the
+colocated `prepObjectText.test.ts` gained the indefinite, bare and definite counted object.

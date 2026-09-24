@@ -51,6 +51,13 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { numeral: '2', number: 'plural' }) }))).toBe(' dos dois gatos');
   });
 
+  // A357: a pronominal possessive beside or in place of that determiner changes nothing.
+  test('a possessor counted by one beside a possessive is the singular', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { numeral: '1' }, { possessor: my }) }))).toBe(' do meu gato');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(RAPOSA, { numeral: '1', definiteness: 'this' }, { possessor: my }) }))).toBe(' desta raposa minha');
+  });
+
   test('the possessor carries its own adjectives, possessor and relative clause', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, {}, { adjectives: [adj(VELHO)] }) }))).toBe(' do gato velho');
     expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: np(MENINO) }) }))).toBe(' do cão do menino');

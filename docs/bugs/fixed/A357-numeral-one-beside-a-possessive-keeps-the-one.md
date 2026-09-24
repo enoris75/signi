@@ -59,3 +59,35 @@ determiner but not when `possessed`; it should after a possessive too, with the 
 | **Test** | `numerals.test.ts` → *known bugs: the numeral one beside a pronominal possessive keeps the one (A357)* (4 `test.fails`: the subject and the object, the possessor and the comitative, beside a demonstrative, German; plus a regression test for English and Japanese, the indefinite one, no numeral and the definite two) |
 
 Found by the lanes' cross-lane probe after A319 and A329, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24. Every caller asks
+[oneBesideDeterminer](../../../packages/engine/src/functions/oneBesideDeterminer.ts) about the phrase's
+*own* head forms, the determiner the user picked, and no longer exempts a pronominal possessive
+(`&& !possessive`, `&& !pronominalPoss`, `&& !pronominal` dropped):
+
+- Romance leaves the one out beside a definite or demonstrative with a possessive, prenominal or
+  detached: [it/renderNP.ts](../../../packages/engine/src/languages/it/renderNP.ts),
+  [fr/renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts), `nounPhrase.ts`,
+  `possessorText.ts`, `complementsPhrase.ts` and `prepObjectText.ts` in
+  [es/](../../../packages/engine/src/languages/es/) and [pt/](../../../packages/engine/src/languages/pt/).
+  The complement and prepositional-object sites read `np.head.forms` rather than the possessed
+  builder forms, which had given the determiner to the possessive. The indefinite one keeps its word
+  (*un mio amico*, *un amigo suyo*, *ein Freund von ihr*): its own forms are `bare` with A329's
+  `indefinite_dropped`, not an identifying determiner.
+- German [numeralDe.ts](../../../packages/engine/src/languages/de/numeralDe.ts) declines *ein* after a
+  possessive too, with the ending the phrase's adjectives take after that ein-word (the mixed
+  `no` declension): *ihr einer Freund*, *ihren einen Freund*, *ihres einen Freundes*, *mit ihrem einen
+  Freund*, and after a demonstrative with a detached possessive, *dieser eine Freund von ihr*. Its last
+  parameter now names only *wessen*, after which the one stays as it was. The complement
+  ([de/complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts))
+  hands it the head's own determiner.
+
+The 4 `test.fails` in `known bugs: the numeral one beside a pronominal possessive keeps the one
+(A357)` in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts) are plain tests now. The
+same block gained DEPEND's and CLICK's own prepositions, a locative, a kinship noun (*sua madre*, *ihre
+eine Mutter*) and *that*, plus a regression test for the indefinite one as an object in all five
+languages. The colocated `numeralDe.test.ts` gained the mixed ending by case and gender,
+`es/possessorText.test.ts` and `pt/possessorText.test.ts` a possessor counted by one beside a
+possessive, and `es/prepObjectText.test.ts` a case.
