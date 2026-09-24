@@ -115,8 +115,14 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // 「猫に子供に」.
   // A passive's agent asked about is 誰 / 何 in that slot, with its に: 食べ物は誰に食べられますか (P09-E16).
   // Unlike the relative (RELATIVIZES_AGENT), the question keeps the passive.
+  // The complement slot a question asks about is merged in once, here, so the agent's particle sees
+  // it too: an asked recipient is still the clause's に, and the agent takes によって beside it —
+  // 本は女によって誰にあげられますか (A280), as 本は女によって男にあげられます does.
+  const complements = askedSlot && askedNoun
+    ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun, ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}) } }
+    : phrase.complements;
   const agent = phrase.agent ?? (asked?.role === 'agent' ? askedNoun : undefined);
-  if (agent) segs.push(...slotSegs(agent, jaAgentParticle(phrase.complements)));
+  if (agent) segs.push(...slotSegs(agent, jaAgentParticle(complements)));
   // An adverbial clause stands ahead of the predicate it modifies, behind the topic: plain, its
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
@@ -204,9 +210,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     suffixCausative ? phrase.infinitiveComplement?.directObject : causee ? undefined
       : phrase.directObject ?? (asked?.role === 'directObject' ? askedNoun : undefined),
     // A nominalized clause is plain, as a prenominal one is (行動する, not 行動します).
-    askedSlot && askedNoun
-      ? { ...phrase.complements, [askedSlot]: { phrase: askedNoun, ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}) } }
-      : phrase.complements,
+    complements,
     impPN, plain,
     subjectNegative || causeeNegative, animate, undefined, respect,
   ));

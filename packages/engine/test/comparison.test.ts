@@ -558,15 +558,15 @@ describe('known bugs: Japanese reads a negated superlative as the least (A285)',
   });
   const ANIMALS = np('ANIMAL', { number: 'plural' });
 
-  test.fails('with a set: 動物の中で最も大きいわけではありません', () => {
+  test('with a set: 動物の中で最も大きいわけではありません', () => {
     expect(say(notMost(ANIMALS), 'ja')).toBe('猫は動物の中で最も大きいわけではありません。');
   });
 
-  test.fails('the bare superlative: 最も大きいわけではありません', () => {
+  test('the bare superlative: 最も大きいわけではありません', () => {
     expect(say(notMost(), 'ja')).toBe('猫は最も大きいわけではありません。');
   });
 
-  test.fails('in the past: 最も大きいわけではありませんでした', () => {
+  test('in the past: 最も大きいわけではありませんでした', () => {
     expect(say(notMost(ANIMALS, 'past'), 'ja')).toBe('猫は動物の中で最も大きいわけではありませんでした。');
   });
 
@@ -581,6 +581,43 @@ describe('known bugs: Japanese reads a negated superlative as the least (A285)',
     });
     expect(say(cat('least', ANIMALS), 'ja')).toBe('猫は動物の中で最も大きくないです。');
     expect(say(cat('least'), 'ja')).toBe('猫は最も大きくないです。');
+  });
+
+  test('the other adjective classes put their prenominal superlative under わけ', () => {
+    const neg = { verbPhrase: { verb: 'BE', negative: true } } as Partial<PhrasePlan>;
+    expect({
+      happy: say(cat('most', undefined, 'HAPPY', neg), 'ja'),
+      tired: say(cat('most', undefined, 'TIRED', neg), 'ja'),
+      happyAff: say(cat('most', undefined, 'HAPPY'), 'ja'),
+      happyLeast: say(cat('least', undefined, 'HAPPY'), 'ja'),
+    }).toEqual({
+      // Built on the prenominal な of 最も幸せな猫; the least stays the negated copula.
+      happy: '猫は最も幸せなわけではありません。',
+      tired: '猫は最も疲れているわけではありません。',
+      happyAff: '猫は最も幸せです。',
+      happyLeast: '猫は最も幸せではないです。',
+    });
+  });
+
+  test('in a relative clause: the plain わけではない before the head', () => {
+    const catWhoIsNotMost = (tense?: 'past') => clause(np('CAT', {
+      relative: {
+        verbPhrase: { verb: 'BE', negative: true, ...(tense ? { tense } : {}) },
+        complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: ANIMALS }) } },
+      },
+    }), 'RUN');
+    expect({ now: say(catWhoIsNotMost(), 'ja'), past: say(catWhoIsNotMost('past'), 'ja') }).toEqual({
+      now: '動物の中で最も大きいわけではない猫は走ります。',
+      past: '動物の中で最も大きいわけではなかった猫は走ります。',
+    });
+  });
+
+  test('regression: the negated least keeps A249\'s わけ, and the affirmative most is unchanged', () => {
+    const negLeast = cat('least', ANIMALS, 'BIG', { verbPhrase: { verb: 'BE', negative: true } } as Partial<PhrasePlan>);
+    expect({ negLeast: say(negLeast, 'ja'), most: say(cat('most', ANIMALS), 'ja') }).toEqual({
+      negLeast: '猫は動物の中で最も大きくないわけではありません。',
+      most: '猫は動物の中で最も大きいです。',
+    });
   });
 });
 

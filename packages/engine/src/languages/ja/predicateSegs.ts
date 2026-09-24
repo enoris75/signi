@@ -63,6 +63,10 @@ export function predicateSegs(
   // The register of respect the subject calls for (P11-E1, see `jaRespectRegister`), decided by the
   // clause, which alone knows whose the subject is. Only a polite main predicate passes one.
   respect?: JaRespect,
+  // The word a relative clause says for the relation its gap's particle carried (A290: 一緒に,
+  // 相手にして, see `relativeClauseSegs`). It stands where the particle's phrase would: ahead of a
+  // manner adverb (一緒に速く走る), behind a frequency one (いつも一緒に走る).
+  gapRelation: RubySegment[] = [],
 ): RubySegment[] {
   // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
   // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
@@ -170,6 +174,7 @@ export function predicateSegs(
   // The verb's adverb, which an adverb of place says with the same particle (ここにいます, ここで食べます;
   // see `jaModifierSeg`).
   const adverb = jaModifierSeg(modifier, locativeParticle);
+  const frequency = modifier?.forms['subtype'] === 'frequency';
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -257,10 +262,12 @@ export function predicateSegs(
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
+    if (!frequency) segs.push(...gapRelation);
     if (modifier) {
       const base = modifier.forms['base'] ?? '';
       if (base) segs.push(wordSeg(base, modifier.forms['reading']));
     }
+    if (frequency) segs.push(...gapRelation);
     // A modal suffixes the predicate in the form it governs, and takes the tense, polarity and ending
     // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
     // A polarity of the predicate's own goes on the predicate, in that same governed form (A03:
@@ -295,7 +302,9 @@ export function predicateSegs(
     const b = m.modifier?.forms['base'] ?? '';
     if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
   }
+  if (!frequency) segs.push(...gapRelation);
   if (adverb) segs.push(adverb);
+  if (frequency) segs.push(...gapRelation);
   // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form on whatever closes
   // its verb group — the verb (食べたら, 食べなかったら), the outermost modal (食べることができたら) or the
   // aspect (食べていたら). The main clause (conditional) falls through to the ordinary polite

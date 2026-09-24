@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { DENSETSU, DESU, el, HITO_GENERIC, HON, IE, INU, KABE, MIZU, MOTSU, NEKO, NOMU, np, vp, WATASHI, YOMU } from './ja.fixtures.js';
+import { concept, DENSETSU, DESU, el, HAYAKU, HITO_GENERIC, HON, IE, IKU, INU, ITSUMO, KABE, MIZU, MOTSU, NEKO, NOMU, np, vp, WATASHI, YOMU } from './ja.fixtures.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 
 const text = (segs: { t: string }[]) => segs.map((s) => s.t).join('');
@@ -47,5 +47,22 @@ describe('relativeClauseSegs', () => {
   test('a gap on the copula\'s subject complement is filled with そう', () => {
     const theDogIs = { headRole: 'predicative' as const, subject: el(np(INU)), verbPhrase: vp(DESU, { negative: true }) };
     expect(text(relativeClauseSegs(np(DENSETSU, {}, { relative: theDogIs })))).toBe('犬がそうではない');
+  });
+
+  // A290: a comitative or opponent gap takes its particle with it, so the clause says the relation.
+  test('a comitative gap says 一緒に, an opponent gap 相手にして, before the predicate', () => {
+    const goesWith = (extra = {}) => ({ headRole: 'comitative' as const, subject: el(np(NEKO)), verbPhrase: vp(IKU, extra) });
+    expect(relativeClauseSegs(np(INU, {}, { relative: goesWith() }))).toEqual([
+      { t: '猫', r: 'ねこ' }, { t: 'が' }, { t: '一緒に', r: 'いっしょに' }, { t: '行く', r: 'いく' },
+    ]);
+    expect(text(relativeClauseSegs(np(INU, {}, { relative: goesWith({ modifier: concept(HAYAKU) }) })))).toBe('猫が一緒に速く行く');
+    expect(text(relativeClauseSegs(np(INU, {}, { relative: goesWith({ modifier: concept(ITSUMO) }) })))).toBe('猫がいつも一緒に行く');
+    // Not twice where the clause says TOGETHER itself.
+    expect(text(relativeClauseSegs(np(INU, {}, { relative: goesWith({ modifier: concept({ base: '一緒に', reading: 'いっしょに' }, 'TOGETHER') }) }))))
+      .toBe('猫が一緒に行く');
+    const against = { headRole: 'opponent' as const, subject: el(np(NEKO)), verbPhrase: vp(IKU) };
+    expect(text(relativeClauseSegs(np(INU, {}, { relative: against })))).toBe('猫が相手にして行く');
+    // A verb whose own case frame names its opponent says it already.
+    expect(text(relativeClauseSegs(np(INU, {}, { relative: { ...against, verbPhrase: vp({ ...IKU, opponent_prep: 'と' }) } })))).toBe('猫が行く');
   });
 });

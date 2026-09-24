@@ -17,7 +17,8 @@ import { CARDINALS } from './ja.consts.js';
  * - `'compound'` — the count compounds straight onto the noun with no の, the way Japanese says how
  *   many siblings there are: 三人兄弟, 三人姉妹 (P11-E5). It is the lexeme's own word that compounds,
  *   so a head that has become another word keeps the の — the honorific (三人のご兄弟), an adjective
- *   fused into it (三人の兄) — and so does a head with an adjective between them (三人の大きい兄弟).
+ *   fused into it (三人の兄) — and so does a head with an adjective between them (三人の大きい兄弟), and a
+  count of one, which the compound cannot say (一人の兄弟, A331).
  *
  * No furigana is drawn over the compound: the readings of a numeral and its counter fuse
  * irregularly (一匹 *ippiki*, 三匹 *sanbiki*, 七日 *nanoka*), and a reading guessed from the parts
@@ -30,7 +31,9 @@ export function jaCounted(np: ResolvedNounPhrase): { segs: RubySegment[]; replac
   const counter = forms['counter'] ?? (forms['human'] === '1' ? '人' : forms['animate'] === '1' ? '匹' : 'つ');
   const join = forms['counter_join'];
   const head = join === 'head';
-  const compound = join === 'compound' && np.adjectives.length === 0 && isCitationWord(forms);
+  // The compound says how many siblings a family has, so it needs two at least: one sibling is
+  // 一人の兄弟, never a 一人兄弟 (A331; an only child is 一人っ子).
+  const compound = join === 'compound' && Number(forms['numeral']) > 1 && np.adjectives.length === 0 && isCitationWord(forms);
   return {
     segs: head || compound ? [{ t: `${numeral}${counter}` }] : [{ t: `${numeral}${counter}` }, { t: 'の' }],
     replacesHead: head,

@@ -37,3 +37,16 @@ Pinned by `known bugs: a Japanese passive terminus question doubles に (A280)` 
 [questions.test.ts](../../../packages/engine/test/questions.test.ts).
 
 Found by the P09-E16 coverage audit on 2026-09-24.
+
+## Resolved
+
+2026-09-24. [ja/buildClauseSegments.ts](../../../packages/engine/src/languages/ja/buildClauseSegments.ts)
+merges the asked complement slot into the complements once, ahead of the agent, so
+`jaAgentParticle` sees the asked recipient and gives the agent によって; `predicateSegs` takes the
+same merged complements. Both Want strings render, and the past (本は女によって誰にあげられましたか？)
+with them.
+
+Guarded by `known bugs: a Japanese passive terminus question doubles に (A280)` in
+[questions.test.ts](../../../packages/engine/test/questions.test.ts): the two former `test.fails`,
+the regression test, and a new test for the past and for an asked agent beside a stated recipient
+(本は誰によって男にあげられますか？).

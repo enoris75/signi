@@ -1,5 +1,6 @@
 import type { Tense } from '@signi/shared';
 import type { ResolvedComplement, RubySegment } from '../../types.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import type { JaForm } from './ja.types.js';
 import { elSegs } from './elSegs.js';
@@ -178,12 +179,21 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
     return [...degSegs, wordSeg(stem, stemReading), { t: `${I_ENDINGS.dict[0]}わけ${COPULA_ENDINGS[row(form)][cell]}` }];
   }
   const at = row(form);
+  const endingOf = (f: CopulaForm, c: number): string => kind === 'i' ? I_ENDINGS[row(f)][c]
+    : kind === 'ta' ? STATE_ENDINGS[row(f)][c]
+    : kind === 'ru' ? RU_ENDINGS[row(f)][c]
+    : f === 'prenominal' && c === 0 && attributive ? attributive
+    : `${predicative}${COPULA_ENDINGS[row(f)][c]}`;
+  // A negated superlative (A285) denies the superlative proposition — someone else is bigger — and
+  // must not read as the least, which Japanese already says by negating the adjective (最も大きくない).
+  // So the negation goes over it as A249's does: the affirmative superlative in its prenominal form
+  // (最も大きい, 最も幸せな, 最も疲れている) closes on わけ and the negated copula, which carries the
+  // tense — 最も大きいわけではありません(でした), 最も大きいわけではない猫.
+  if (negative && adjDegree(head.head) === 'most') {
+    return [...degSegs, wordSeg(stem, stemReading), { t: `${endingOf('prenominal', 0)}わけ${COPULA_ENDINGS[at][cell]}` }];
+  }
   const ending = reached && kind === 'i' ? `く${reached}`
     : reached && kind === 'na' ? `${predicative}に${reached}`
-    : kind === 'i' ? I_ENDINGS[at][cell]
-    : kind === 'ta' ? STATE_ENDINGS[at][cell]
-    : kind === 'ru' ? RU_ENDINGS[at][cell]
-    : form === 'prenominal' && cell === 0 && attributive ? attributive
-    : `${predicative}${COPULA_ENDINGS[at][cell]}`;
+    : endingOf(form, cell);
   return [...degSegs, wordSeg(stem, stemReading), { t: ending }];
 }

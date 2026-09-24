@@ -198,7 +198,7 @@ describe('temporal', () => {
         de: 'der Kater läuft innerhalb einer Stunde.',
         es: 'el gato corre dentro de una hora.',
         pt: 'o gato corre dentro de uma hora.',
-        ja: '猫は時間以内に走ります。',
+        ja: '猫は一時間以内に走ります。',
       });
       expect(runsWithin(np('HOUR', { definiteness: 'bare', numeral: 1 })).ja).toBe('猫は一時間以内に走ります。');
     });
@@ -237,7 +237,7 @@ describe('temporal', () => {
     test('is told apart from at and during', () => {
       const hour = (value: TemporalRelation) => runsAt(value, 'HOUR', 'indefinite');
       expect(hour('at')).toMatchObject({ it: "il gatto corre a un'ora.", fr: 'le chat court à une heure.', de: 'der Kater läuft zu einer Stunde.', ja: '猫は時間に走ります。' });
-      expect(hour('during')).toMatchObject({ it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.', ja: '猫は時間の間に走ります。' });
+      expect(hour('during')).toMatchObject({ it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.', ja: '猫は一時間の間に走ります。' });
     });
   });
 
@@ -259,7 +259,7 @@ describe('temporal', () => {
         de: 'der Kater läuft eine Stunde.',
         es: 'el gato corre durante una hora.',
         pt: 'o gato corre por uma hora.',
-        ja: '猫は時間走ります。',
+        ja: '猫は一時間走ります。',
       });
     });
 
@@ -315,7 +315,7 @@ describe('temporal', () => {
       const during = runsAt('during', 'HOUR', 'indefinite');
       expect(during).toMatchObject({
         en: 'the cat runs during an hour.', it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.',
-        pt: 'o gato corre durante uma hora.', ja: '猫は時間の間に走ります。',
+        pt: 'o gato corre durante uma hora.', ja: '猫は一時間の間に走ります。',
       });
       const measure = runsFor(np('HOUR', { definiteness: 'indefinite' }));
       for (const language of ['en', 'it', 'de', 'pt', 'ja'] as const) expect(measure[language]).not.toBe(during[language]);
@@ -714,22 +714,23 @@ describe('known bugs: French "en" before an article on a temporal noun (A265)', 
 // says "one" with the numeral (一時間, 一日), and an article says nothing in Japanese. So the
 // indefinite "within an hour" / "for an hour" is 一時間以内に / 一時間走ります, as `numeral: 1` already
 // renders. The indefinite drops the count instead and leaves the bare noun: 時間以内に, 時間走ります,
-// 日以内に, 日走ります, which read "within time" / "runs time". Two P09-E34/E35 tests above pin that
-// output ('within an hour', 'for an hour') and move with the fix.
+// 日以内に, 日走ります, which read "within time" / "runs time". Four P09-E34/E35 tests above pinned that
+// output ('within an hour', 'for an hour', and the `during` rows of the two 'is told apart' tests)
+// and moved with the fix.
 describe('known bugs: a Japanese indefinite measure noun drops its count (A322)', () => {
-  test.fails('within an hour', () => {
+  test('within an hour', () => {
     expect(runsAt('within', 'HOUR', 'indefinite').ja).toBe('猫は一時間以内に走ります。');
   });
 
-  test.fails('for an hour', () => {
+  test('for an hour', () => {
     expect(runsAt('for', 'HOUR', 'indefinite').ja).toBe('猫は一時間走ります。');
   });
 
-  test.fails('within a day', () => {
+  test('within a day', () => {
     expect(runsAt('within', 'DAY', 'indefinite').ja).toBe('猫は一日以内に走ります。');
   });
 
-  test.fails('for a day', () => {
+  test('for a day', () => {
     expect(runsAt('for', 'DAY', 'indefinite').ja).toBe('猫は一日走ります。');
   });
 
@@ -745,4 +746,25 @@ describe('known bugs: a Japanese indefinite measure noun drops its count (A322)'
       de: 'der Kater läuft eine Stunde.', es: 'el gato corre durante una hora.', pt: 'o gato corre por uma hora.',
     });
   });
+
+  test('the four measuring relations count one; a point, a definite, a subject and TIME stay bare', () => {
+    expect({
+      duringDay: runsAt('during', 'DAY', 'indefinite').ja,
+      agoHour: runsAt('ago', 'HOUR', 'indefinite').ja,
+      atHour: runsAt('at', 'HOUR', 'indefinite').ja,
+      withinTheDay: runsAt('within', 'DAY', 'definite').ja,
+      forTime: runsAt('for', 'TIME', 'indefinite').ja,
+      subject: sayAll(clause(np('HOUR', { definiteness: 'indefinite' }), 'BURN')).ja,
+    }).toEqual({
+      duringDay: '猫は一日の間に走ります。',
+      agoHour: '猫は一時間前に走ります。',
+      // Not a measure: 一時間に would read oddly as a point in time.
+      atHour: '猫は時間に走ります。',
+      withinTheDay: '猫は日以内に走ります。',
+      // TIME has no counter of its own; しばらく would be a lexical question.
+      forTime: '猫は時間走ります。',
+      subject: '時間は燃えます。',
+    });
+  });
+
 });
