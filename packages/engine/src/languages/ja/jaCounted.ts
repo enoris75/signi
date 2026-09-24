@@ -26,6 +26,10 @@ import { CARDINALS } from './ja.consts.js';
  */
 export function jaCounted(np: ResolvedNounPhrase): { segs: RubySegment[]; replacesHead: boolean } | undefined {
   const forms = np.head.forms;
+  // An unspecified many a measure counts (see `jaMeasuredOnce`, A348): 何時間も, in the counter's place.
+  if (forms['many'] === '1' && forms['counter_join'] === 'head' && forms['counter']) {
+    return { segs: [{ t: `何${forms['counter']}も` }], replacesHead: true };
+  }
   const numeral = numeralText(forms, CARDINALS);
   if (!numeral) return undefined;
   const counter = forms['counter'] ?? (forms['human'] === '1' ? '人' : forms['animate'] === '1' ? '匹' : 'つ');

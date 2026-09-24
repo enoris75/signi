@@ -13,6 +13,13 @@ describe('jaCounted', () => {
     expect(jaCounted(np({ numeral: '2' }))?.segs).toEqual([{ t: '二つ' }, { t: 'の' }]);
   });
 
+  test('an unspecified many is 何 + the counter + も, in the head\'s place (A348)', () => {
+    const counted = jaCounted(np({ many: '1', counter: '時間', counter_join: 'head' }));
+    expect(counted?.segs).toEqual([{ t: '何時間も' }]);
+    expect(counted?.replacesHead).toBe(true);
+    expect(jaCounted(np({ many: '1', counter: '匹' }))).toBeUndefined();
+  });
+
   test('a time word is its own counter, and is not said twice', () => {
     const counted = jaCounted(np({ numeral: '24', counter: '時間', counter_join: 'head' }));
     expect(counted?.segs).toEqual([{ t: '二十四時間' }]);
