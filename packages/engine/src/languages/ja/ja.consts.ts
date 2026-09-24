@@ -349,13 +349,16 @@ export const JA_SOU: ResolvedComplement = {
 // The existential いる is the engine's word, not a lexeme — BE's own is the copula です — so its two
 // registers of respect live here beside it (P11-E1, see `jaRespectVerb`): 尊敬語 いらっしゃる,
 // 「いる」の尊敬語, and 謙譲語 おる, 「いる」の謙譲語 (大辞林, デジタル大辞泉) — あなたのお母さんは家に
-// いらっしゃいます, 父は家におります.
+// いらっしゃいます, 父は家におります. The humble おる is standard only in its polite forms (おります,
+// おりました, おりたい on the ます stem); its plain おる, おった, おらない are Kansai's everyday いる. So the
+// humble column keeps いる's own plain forms, and a plain slot says いる while the polite verb carries
+// the humility: もし父が家にいたら, 父は家にいる必要があります (A334).
 export const JA_IRU: ConceptForms = {
   conceptId: 'IRU',
   forms: {
     base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない',
     honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない', honorific_stem: 'いらっしゃり',
-    humble: 'おる', humble_masu_present: 'おります', humble_te: 'おって', humble_nai: 'おらない',
+    humble: 'いる', humble_masu_present: 'おります', humble_te: 'いて', humble_nai: 'いない',
   },
 };
 export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };

@@ -290,11 +290,11 @@ describe('known bugs: the たい stem of いらっしゃる, なさる and お�
 
 describe('known bugs: the humble いる is a dialectal おる in a plain slot (A334)', () => {
   const atHome = (vp: Partial<NonNullable<Extra['verbPhrase']>>): Extra => ({ complements: home, verbPhrase: { ...vp, humble: true } });
-  test.fails('an "if" clause says いたら, not おったら', () => {
+  test('an "if" clause says いたら, not おったら', () => {
     expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'BE', atHome({})) })).toBe('もし父が家にいたら、猫は走ります。');
     expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'BE', atHome({ negative: true })) })).toBe('もし父が家にいなかったら、猫は走ります。');
   });
-  test.fails('a modal governs いる, not おる', () => {
+  test('a modal governs いる, not おる', () => {
     expect(ja(myFather, 'BE', atHome({ modals: ['MUST'] }))).toBe('父は家にいる必要があります。');
     expect(ja(myFather, 'BE', atHome({ modals: ['MUST'], negative: true }))).toBe('父は家にいない必要があります。');
     expect(ja(myFather, 'BE', atHome({ modals: ['CAN'], tense: 'past' }))).toBe('父は家にいることができました。');
@@ -304,5 +304,11 @@ describe('known bugs: the humble いる is a dialectal おる in a plain slot (A
     expect(ja(myFather, 'BE', atHome({ tense: 'past', negative: true }))).toBe('父は家におりませんでした。');
     expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'GO', { verbPhrase: { humble: true } }) })).toBe('もし父が参ったら、猫は走ります。');
     expect(ja(myFather, 'GO', { verbPhrase: { modals: ['MUST'], humble: true } })).toBe('父は参る必要があります。');
+  });
+  test('the polite past and おりたい keep おる, and the 1st person\'s plain slot says いる', () => {
+    expect(ja(myFather, 'BE', atHome({ tense: 'past' }))).toBe('父は家におりました。');
+    expect(ja(myFather, 'BE', atHome({ modals: ['WILL'] }))).toBe('父は家におりたいです。');
+    expect(ja(np('FIRST_PERSON'), 'BE', atHome({}))).toBe('私は家におります。');
+    expect(ja(np('FIRST_PERSON'), 'BE', atHome({ modals: ['MUST'] }))).toBe('私は家にいる必要があります。');
   });
 });
