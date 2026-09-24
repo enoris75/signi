@@ -72,12 +72,16 @@ export function relativeText(np: ResolvedNounPhrase): string {
   if (isPlainLocativeGap(rel)) return `où ${isGenericSubject(rel.subject) ? `l'${clause}` : clause}`.trim();
   // An object the verb takes with "de" relativises as "dont", not "duquel": "la condition dont la
   // proposition dépend", as French writes every de-complement of a verb.
+  // The verb's forms, for a goal preposition its lexeme fixes: "la maison vers laquelle le chat se déplace".
+  const gapText = gap ? complementsPhrase(gap, {}, '', {}, rel.verbPhrase.verb.forms) : '';
   const lequel = agentGap ? agentPhrase(agentGap)
     : alarmHead ? alarmCryText(alarmHead)
     : prepHead?.prep === 'de' ? 'dont'
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
-    // The verb's forms, for a goal preposition its lexeme fixes: "la maison vers laquelle le chat se déplace".
-    : gap ? complementsPhrase(gap, {}, '', {}, rel.verbPhrase.verb.forms) : '';
+    // So is a topic the verb takes with "de": "un problème dont on parle", not "duquel" (B81). A verb
+    // that governs its topic with another preposition keeps lequel: "le chat auquel on pense".
+    : rel.headRole === 'topic' && /^(du|de la|des) quel/.test(gapText) ? 'dont'
+    : gapText;
   return (lequel
     ? `${lequel.replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`
     : joinArt(VOWEL_START.test(clause) ? "qu'" : 'que', clause)).trim();

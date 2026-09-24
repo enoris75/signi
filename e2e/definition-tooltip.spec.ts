@@ -2235,6 +2235,57 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('ein Organ, mit dem man einen Gegenstand nimmt');
   });
 
+  test('a member is a part of a group (localize-seed B75: MEMBER)', async ({ app, page }) => {
+    // partOfGloss on the genus every collective hangs under; German's genitive is feminine.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('member');
+    const memberDe = page.locator('[data-testid="typeahead-option"][data-concept="MEMBER"]');
+    await expect(memberDe).toBeVisible();
+    await memberDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Teil einer Gruppe');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('member');
+    const memberJa = page.locator('[data-testid="typeahead-option"][data-concept="MEMBER"]');
+    await expect(memberJa).toBeVisible();
+    await memberJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('グループの部分');
+  });
+
+  test('a part-whole head carries a relative (localize-seed B79: FACE)', async ({ app, page }) => {
+    // FACE stands on HEAD, B79's other word: the whole is a genitive, the relative follows it.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('face');
+    const faceDe = page.locator('[data-testid="typeahead-option"][data-concept="FACE"]');
+    await expect(faceDe).toBeVisible();
+    await faceDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('der Teil eines Kopfes, der die Augen hat');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('face');
+    const faceJa = page.locator('[data-testid="typeahead-option"][data-concept="FACE"]');
+    await expect(faceJa).toBeVisible();
+    await faceJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('目がある頭の部分');
+  });
+
+  test('a topic-gap relative (localize-seed B81: ISSUE)', async ({ app, page }) => {
+    // The corpus's first gloss on a topic gap: German über + the relative, French dont.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('issue');
+    const issueDe = page.locator('[data-testid="typeahead-option"][data-concept="ISSUE"]');
+    await expect(issueDe).toBeVisible();
+    await issueDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Problem, über das man spricht');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('issue');
+    const issueFr = page.locator('[data-testid="typeahead-option"][data-concept="ISSUE"]');
+    await expect(issueFr).toBeVisible();
+    await issueFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un problème dont on parle');
+  });
+
   test('an institution stands on a verb it seeded, or on B65\'s SYSTEM (localization B64: SCHOOL, WORLD, STATE_NATION)', async ({
     app,
     page,

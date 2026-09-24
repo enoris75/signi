@@ -1,6 +1,7 @@
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounPhrase } from '../types.js';
 import { relativizerStandIn } from './relativizerStandIn.js';
+import { topicLink } from './topicLink.js';
 
 /**
  * The gap complement of a relative clause whose head fills a complement slot — "the house the cat
@@ -22,9 +23,14 @@ export function relativeGapComplement(
   const rel = np.relative;
   if (!rel || rel.headRole === 'subject' || rel.headRole === 'directObject' || rel.headRole === 'possessor'
     || rel.headRole === 'agent' || rel.headRole === 'predicative' || rel.headRole === 'objectPredicative') return undefined;
+  // A topic gap keeps the preposition its verb governs the topic with, as the complement itself does
+  // (see `resolveComplements`): "the cat of which one thinks" is it "al quale si pensa", fr "auquel
+  // on pense", de "an den man denkt", not the generic topic word *speak* takes (B81).
+  const link = rel.headRole === 'topic' ? topicLink(rel.verbPhrase.verb.forms) : '';
   const complement: ResolvedComplement = {
     phrase: relativizerStandIn(np, forms),
     ...(rel.headSpecifiers ? { specifiers: rel.headSpecifiers } : {}),
+    ...(link ? { link } : {}),
   };
   return { [rel.headRole]: complement };
 }
