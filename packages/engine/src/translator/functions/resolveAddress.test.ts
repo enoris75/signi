@@ -39,4 +39,14 @@ describe('resolveAddress', () => {
     const base = (language: string) => resolveAddress({ concept: 'SECOND_PERSON' }, language, lookup).subject.conjuncts[0].head.forms['base'];
     expect([base('fr'), base('de'), base('it')]).toEqual(['toi', 'du', 'tu']);
   });
+
+  test('a 1st- or 3rd-person pronoun is refused, an indefinite one is not (A338)', () => {
+    const lookup = lexicon({
+      I: { base: 'io', person: '1' }, HE: { base: 'lui', person: '3' },
+      SOMEONE: { base: 'qualcuno', person: '3', indefinite: '1' },
+    });
+    expect(() => resolveAddress({ concept: 'I' }, 'it', lookup)).toThrow(/1st-person pronoun/);
+    expect(() => resolveAddress({ conjuncts: [{ concept: 'SOMEONE' }, { concept: 'HE' }], conjunction: 'and' }, 'it', lookup)).toThrow(/3rd-person pronoun/);
+    expect(resolveAddress({ concept: 'SOMEONE' }, 'it', lookup).subject.conjuncts[0].head.forms['base']).toBe('qualcuno');
+  });
 });

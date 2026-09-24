@@ -36,6 +36,11 @@ export function resolveAddress(address: NounElement, language: string, lookup: L
       // "o meu amigo"); `vocative` tells them this one has none (A336).
       forms['vocative'] = '1';
       if (forms['proper'] === '1') forms['takes_article'] = '0';
+    } else if (forms['person'] !== '2' && forms['indefinite'] !== '1') {
+      // The one a vocative calls is the hearer, so a personal pronoun there is the 2nd person; "I,
+      // the cat runs" or "He, run" is no address. Refused by name, a group with such a conjunct whole
+      // (A338). An indefinite pronoun calls whoever hears it ("Someone, run!"), and is not refused.
+      throw new Error(`an address calls the hearer: plan.address cannot be a ${forms['person'] === '1' ? '1st' : '3rd'}-person pronoun (A338)`);
     } else if (TONIC_ADDRESS.has(language) && forms['disjunctive']) {
       forms['base'] = forms['disjunctive'];
     }

@@ -43,3 +43,34 @@ Pinned by `known bugs: contradictory address plans are not refused (A338)` in
 
 Found on 2026-09-24 in the P11-E3 coverage audit, by rendering the address against the plan keys it
 contradicts.
+
+## Resolved
+
+2026-09-24. Refused, not dropped: a plan error stays visible. Decided on the open questions:
+
+- **Instruction.** [`translate.ts`](../../../packages/engine/src/translator/functions/translate.ts)
+  throws, once and before any language renders, when the top clause is an `imperative` with
+  `imperativeRegister: 'instruction'` and an `address`: *an instruction addresses nobody, so it takes
+  no address: plan.address must be left out (A338)*. A register on a non-imperative clause is moot,
+  so it is not checked.
+- **Pronoun.** [`resolveAddress.ts`](../../../packages/engine/src/translator/functions/resolveAddress.ts)
+  throws on a conjunct whose `person` is 1 or 3: *an address calls the hearer: plan.address cannot be
+  a 1st-person pronoun (A338)*. A group with one such conjunct (*Mom and I*) is refused whole. An
+  indefinite pronoun (`indefinite: '1'`, SOMEONE) is not a personal one and stays an address
+  (*Someone, run.*, all seven).
+- **Backend.** As for A273/A275, [`planError.ts`](../../../packages/backend/src/planError.ts) names
+  both at the boundary, so `/api/translate` answers a 400 rather than the 500 of an engine throw:
+  `plan.address: an instruction addresses nobody, so it takes no address`, and `plan.address` (or
+  `plan.address.conjuncts[i]`) `: an address calls the hearer, so it cannot be a 1st-person pronoun`.
+  The pronoun check reads the lexicon, which [`index.ts`](../../../packages/backend/src/index.ts)
+  passes in as `formsOf`.
+- **UI.** The builder sets no `address` (Plan-only, as `PhrasePlan.address` says), so it needs no
+  guard.
+
+The three `test.fails` in [address.test.ts](../../../packages/engine/test/address.test.ts) (*known
+bugs: contradictory address plans are not refused (A338)*) are plain tests now, assertions unchanged.
+Added in the same block: the 1st plural, a group with a 1st-person conjunct and the 3rd plural
+refused, and an indefinite-pronoun regression. `resolveAddress.test.ts` and `translate.test.ts` each
+gained a case; `planError.test.ts` gained *planError: the address* and `index.test.ts` *the address on
+/api/translate (A338)*.
+

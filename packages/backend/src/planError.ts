@@ -41,10 +41,39 @@ const LINKED_KEYS = new Set(LINKED_CLAUSES.map(([key]) => key));
  *    subject — in its possessor chain, a conjunct or a standard, though a relative clause there has a
  *    subject of its own: `plan.subject.possessor: a coreferent possessor cannot stand in the subject it
  *    points at`.
+ *  - the address calls the hearer (A338): an instruction takes none, and a personal pronoun there is
+ *    the 2nd person: `plan.address: an instruction addresses nobody, so it takes no address`.
  */
-export function planError(plan: unknown): string | undefined {
+export function planError(plan: unknown, formsOf?: FormsOf): string | undefined {
   if (!isNode(plan)) return 'plan.subject.concept is required';
-  return clauseError(plan, 'plan', plan['imperative'] === true && !plan['condition']);
+  return clauseError(plan, 'plan', plan['imperative'] === true && !plan['condition']) ?? addressError(plan, formsOf);
+}
+
+/** A concept's forms, as the lexicon hands them to the engine, for the checks that read a word's kind. */
+export type FormsOf = (conceptId: string) => Record<string, string> | undefined;
+
+/**
+ * What contradicts the top clause's address (A338). An address calls the hearer, so an instruction,
+ * addressed to nobody, takes none; and a personal pronoun there is the 2nd person, the hearer's
+ * (an indefinite one, "Someone, run!", calls whoever hears it). The pronoun check needs the lexicon
+ * (`formsOf`), and is skipped without it.
+ */
+function addressError(plan: Node, formsOf?: FormsOf): string | undefined {
+  const address = plan['address'];
+  if (!isNode(address)) return undefined;
+  if (plan['imperative'] === true && plan['imperativeRegister'] === 'instruction') {
+    return 'plan.address: an instruction addresses nobody, so it takes no address';
+  }
+  if (!formsOf) return undefined;
+  for (const [i, np] of nounConjuncts(address as unknown as NounElement).entries()) {
+    const forms = typeof np?.concept === 'string' ? formsOf(np.concept) : undefined;
+    const person = forms?.['indefinite'] === '1' ? undefined : forms?.['person'];
+    if (person && person !== '2') {
+      const path = 'conjuncts' in address ? `plan.address.conjuncts[${i}]` : 'plan.address';
+      return `${path}: an address calls the hearer, so it cannot be a ${person === '1' ? '1st' : '3rd'}-person pronoun`;
+    }
+  }
+  return undefined;
 }
 
 function clauseError(clause: Node, path: string, command = false, addressed = false): string | undefined {

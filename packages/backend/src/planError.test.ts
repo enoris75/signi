@@ -94,3 +94,31 @@ describe('planError: a coreferent possessor inside the subject it points at', ()
     expect(planError({ ...main, subject: { concept: 'MAN', relative: { verbPhrase: { verb: 'SEE' }, directObject: { concept: 'BOOK', possessor: link } } } })).toBeUndefined();
   });
 });
+
+// A338: an address calls the hearer.
+describe('planError: the address', () => {
+  const run = { subject: { concept: 'SECOND_PERSON' }, verbPhrase: { verb: 'RUN' }, imperative: true };
+  const FORMS: Record<string, Record<string, string>> = {
+    FIRST_PERSON: { person: '1' }, SECOND_PERSON: { person: '2' }, THIRD_PERSON: { person: '3' },
+    SOMEONE: { person: '3', indefinite: '1' }, MOM: { base: 'Mom' },
+  };
+  const formsOf = (id: string) => FORMS[id];
+
+  test('an instruction takes no address; a request does', () => {
+    expect(planError({ ...run, imperativeRegister: 'instruction', address: { concept: 'MOM' } }))
+      .toBe('plan.address: an instruction addresses nobody, so it takes no address');
+    expect(planError({ ...run, imperativeRegister: 'request', address: { concept: 'MOM' } }, formsOf)).toBeUndefined();
+  });
+
+  test('a 1st- or 3rd-person pronoun is no address, by its path; the 2nd person and an indefinite are', () => {
+    expect(planError({ ...main, address: { concept: 'FIRST_PERSON' } }, formsOf))
+      .toBe('plan.address: an address calls the hearer, so it cannot be a 1st-person pronoun');
+    expect(planError({ ...main, address: { conjuncts: [{ concept: 'MOM' }, { concept: 'THIRD_PERSON' }], conjunction: 'and' } }, formsOf))
+      .toBe('plan.address.conjuncts[1]: an address calls the hearer, so it cannot be a 3rd-person pronoun');
+    expect(planError({ ...run, address: { concept: 'SECOND_PERSON' } }, formsOf)).toBeUndefined();
+    expect(planError({ ...run, address: { concept: 'SOMEONE' } }, formsOf)).toBeUndefined();
+    // Without the lexicon the pronoun check is skipped.
+    expect(planError({ ...main, address: { concept: 'FIRST_PERSON' } })).toBeUndefined();
+  });
+});
+

@@ -389,16 +389,30 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
 // has no correct output to pin, so the pins assert the throw. Refusing or dropping the address is the
 // fixer's decision; a drop would turn these pins into rendered rows.
 describe('known bugs: contradictory address plans are not refused (A338)', () => {
-  test.fails('an address on an instruction is refused by name', () => {
+  test('an address on an instruction is refused by name', () => {
     expect(() => sayAll({ ...command(np('MOM')), imperativeRegister: 'instruction' })).toThrow(/address/);
   });
 
-  test.fails('a 1st-person pronoun address is refused by name', () => {
+  test('a 1st-person pronoun address is refused by name', () => {
     expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FIRST_PERSON') })).toThrow(/address/);
   });
 
-  test.fails('a 3rd-person pronoun address is refused by name', () => {
+  test('a 3rd-person pronoun address is refused by name', () => {
     expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('THIRD_PERSON') })).toThrow(/address/);
+  });
+
+  test('the 1st plural and a group with one bad conjunct are refused too', () => {
+    expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FIRST_PERSON', { number: 'plural' }) })).toThrow(/address.*1st-person/);
+    expect(() => sayAll(command({ conjuncts: [np('MOM'), np('FIRST_PERSON')], conjunction: 'and' }, YouAll))).toThrow(/address.*1st-person/);
+    expect(() => sayAll(command(np('THIRD_PERSON', { number: 'plural' }), YouAll))).toThrow(/address.*3rd-person/);
+  });
+
+  // An indefinite pronoun calls whoever hears it, so it is an address.
+  test('regression: an indefinite pronoun address is not refused', () => {
+    expect(sayAll(command(np('SOMEONE')))).toEqual({
+      en: 'Someone, run.', it: 'Qualcuno, corri.', fr: "Quelqu'un, cours.", de: 'Jemand, lauf.',
+      es: 'Alguien, corre.', ja: '誰か、走ってください。', pt: 'Alguém, corra.',
+    });
   });
 
   test('regression: a request takes the address, and an instruction without one is its infinitive', () => {

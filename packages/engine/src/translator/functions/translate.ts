@@ -18,6 +18,12 @@ const interjectionSeg = (forms: Record<string, string>): RubySegment => {
 const capitalized = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
 
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
+  // An address calls the hearer, and an instruction (the label on a control, a recipe step) is
+  // addressed to nobody, so the two contradict each other: refused by name rather than rendered as a
+  // name before an infinitive (A338). `/api/translate` says the same as a 400 (`planError`).
+  if (plan.address && plan.imperative && plan.imperativeRegister === 'instruction') {
+    throw new Error('an instruction addresses nobody, so it takes no address: plan.address must be left out (A338)');
+  }
   return engines.map((engine) => {
     // The top clause's mood: 'conditional' when a hypothetical condition is attached,
     // 'imperative' for a command, 'infinitive' for a bare citation phrase (a verb definition),
