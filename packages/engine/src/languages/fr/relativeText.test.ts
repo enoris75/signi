@@ -129,6 +129,17 @@ describe('relativeText', () => {
     expect(relativeText(np(MAISON, {}, { relative: depends }))).toBe('dont le chat dépend');
   });
 
+  // B81: a topic taken with "de" ("parler du chat") relativises as "dont" too, not "duquel"; a verb that
+  // governs its topic with "à" ("penser au chat") keeps its lequel.
+  test('a topic head takes dont when its preposition is de, and lequel otherwise', () => {
+    const PARLER: Forms = { base: 'parler', participle: 'parlé', '3sg_present': 'parle', '3pl_present': 'parlent' };
+    const PENSER: Forms = { base: 'penser', topic_prep: 'à', participle: 'pensé', '3sg_present': 'pense' };
+    const about = (verb: Forms) => ({ headRole: 'topic' as const, subject: el(np(ON)), verbPhrase: vp(verb) });
+    expect(relativeText(np(LIVRE, {}, { relative: about(PARLER) }))).toBe('dont on parle');
+    expect(relativeText(np(MAISON, { number: 'plural' }, { relative: about(PARLER) }))).toBe('dont on parle');
+    expect(relativeText(np(LIVRE, {}, { relative: about(PENSER) }))).toBe('auquel on pense');
+  });
+
   // A167: an "aucun" head negates the matrix clause, not the relative, so it is no self-negating
   // subject of the relative: a positive relative stays positive and a negative one takes "ne … pas".
   // The relative's OWN "aucun" subject does negate it, with "ne" alone.
