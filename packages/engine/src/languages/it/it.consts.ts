@@ -189,6 +189,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, { word: string; exp
   until: { word: 'finché', expletiveNegation: true },
   since: { word: 'da quando' },
   though: { word: 'sebbene' },
+  // Localization C41: the similative, on the indicative ("come il cane corre", "come si prevede").
+  as: { word: 'come' },
 };
 
 /**

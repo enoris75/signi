@@ -168,6 +168,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   // P09-E27: "hasta que" governs the subjunctive; "aunque" asserts its clause here (the factual
   // reading "though the dog eats") and keeps the indicative, as "desde que" does.
   until: 'hasta que', since: 'desde que', though: 'aunque',
+  // Localization C41: the similative, on the indicative ("como el perro corre", "como se espera").
+  as: 'como',
 };
 
 /**

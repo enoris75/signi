@@ -191,6 +191,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quando', while: 'enquanto', because: 'porque', after: 'depois que', before: 'antes que',
   // P09-E27: "até que" and "embora" govern the subjunctive, "desde que" the indicative.
   until: 'até que', since: 'desde que', though: 'embora',
+  // Localization C41: the similative, on the indicative ("como o cão corre", "como se espera").
+  as: 'como',
 };
 
 /**

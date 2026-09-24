@@ -312,6 +312,14 @@ export interface ResolvedVerbPhrase {
    * (en, pt), and reads the complement to pick its copula (es/pt estar). Never a rendered complement.
    */
   elided?: ElidedComplement;
+  /**
+   * The pro-form a similative clause writes for the object its likeness gaps (localization C41):
+   * "as one expects" says *expects it*, the main clause, and French resumes it with the clitic the
+   * verb's lexeme names (`as_clitic`), `pronominal` where that verb is the pronominal one there —
+   * *comme on s'y attend*, s'attendre à. Set by the French engine alone, on an `as` clause with no
+   * object of its own; the other six leave the gap.
+   */
+  gapClitic?: { clitic: string; pronominal: boolean };
   /** The plan asked for the humble register (see VerbPhrase.humble). Read by Japanese alone. */
   humble?: boolean;
 }

@@ -911,6 +911,10 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'attendîmes', '2pl_past': 'attendîtes', '3pl_past': 'attendirent',
         '1sg_future': 'attendrai', '2sg_future': 'attendras', '3sg_future': 'attendra',
         '1pl_future': 'attendrons', '2pl_future': 'attendrez', '3pl_future': 'attendront',
+        // Localization C41: a similative clause gaps what one expects, and French says it with the
+        // pronominal s'attendre à, the "à" resumed by "y": "comme on s'y attend" (OF_COURSE's gloss),
+        // where "comme on attend" is "as one waits".
+        as_clitic: 'y', as_pronominal: '1',
       },
       de: {
         base: 'erwarten',

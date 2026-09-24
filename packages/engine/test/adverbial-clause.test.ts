@@ -47,9 +47,9 @@ describe('the five conjunctions in the seven languages', () => {
   });
 
   // D5: "during" introduces a noun phrase, not a clause, so it is not a conjunction here. P09-E27
-  // added until, since and though.
+  // added until, since and though, and localization C41 the similative as (similative-clause.test.ts).
   test('there is no "during"', () => {
-    expect(SUBORDINATING_CONJUNCTIONS).toEqual(['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though']);
+    expect(SUBORDINATING_CONJUNCTIONS).toEqual(['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as']);
   });
 });
 
