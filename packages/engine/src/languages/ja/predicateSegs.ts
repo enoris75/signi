@@ -39,8 +39,11 @@ import { wordSeg } from './wordSeg.js';
  * would follow (猫が幸せであると言います). `'question'` is the plain form before an indirect question's
  * か / かどうか (P09-E17), which takes the terminal である where a na-adjective would write its
  * attributive な (猫が幸せであるかどうか, A278) and is otherwise the prenominal form (幸せだったかどうか).
+ * `'content'` is a nominalized content clause, before こと (猫が幸せなことを): prenominal, as `true` is.
+ * The three content values say that the clause reports something, where `true` (a relative clause, an
+ * adverbial one) does not, so only they give a state verb its 〜ている (A279: 猫が本を持っていると).
  */
-export type JaPlain = boolean | 'quote' | 'question';
+export type JaPlain = boolean | 'quote' | 'question' | 'content';
 
 export function predicateSegs(
   givenVerbPhrase: ResolvedVerbPhrase,
@@ -301,8 +304,11 @@ export function predicateSegs(
   // resultant 〜ている, as the progressive is built: 持っています, 持っていました, 持っていたら. Its plain
   // 〜ます names the change of state ("picks up"). Two lexemes keep the plain form: a Japanese state verb
   // (`state_verb`: 思える, like ある), and a state whose negative is the event's (`event_negative`: 知りません).
-  // A relative clause and the dictionary form a modal governs keep the plain verb (本を持つ猫).
-  const heldState = aspect === 'neutral' && !plain && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
+  // A content clause reports the state as the main clause does, in the plain 〜ている (A279: 猫が本を
+  // 持っていると言います, 持っているかどうか, 持っていることを). A relative clause and the dictionary form a
+  // modal governs keep the plain verb (本を持つ猫).
+  const reported = plain === 'quote' || plain === 'question' || plain === 'content';
+  const heldState = aspect === 'neutral' && (!plain || reported) && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
     && !(negated && verb.forms['event_negative'] === '1');
   // A modal suffixes the verb and takes the tense and the finite polarity itself; the polarity of what
   // it governs goes on the governed group as its ない form (A03: 行かない必要があります, 行かないでい
@@ -316,7 +322,7 @@ export function predicateSegs(
       : (t: Tense, n: boolean) => aspectVerbSegs({ ...verbPhrase, tense: t }, n, 'plain');
     segs.push(...modalSegs(modals, verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite', governed, finite, governedNeg));
   }
-  else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara ? 'tara' : 'polite'));
+  else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara ? 'tara' : plain ? 'plain' : 'polite'));
   else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));
   // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫), in the
   // negative too (食べない猫 / 食べなかった猫, 決して食べない猫; B13).

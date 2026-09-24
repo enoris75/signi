@@ -65,3 +65,22 @@ Pinned by `known bugs: a Japanese state verb in a content clause takes its dicti
 regression test.
 
 Found by the P09-E17 coverage audit on 2026-09-24.
+
+## Resolved
+
+2026-09-24. A content clause now tells itself apart from a relative clause:
+[`buildClauseSegments.ts`](../../../packages/engine/src/languages/ja/buildClauseSegments.ts) builds the
+object clause with `'quote'` before と, `'question'` before か / かどうか (A278's value) and `'content'`
+before ことを, and the subject clause (ことが) with `'content'` too. In
+[`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts) `heldState` admits those
+three values (`true`, the relative and adverbial clause's, still keeps the dictionary form) and a
+held state under `plain` takes the `'plain'` ending: 持っている, 持っていた, 持っていない. The
+`event_negative` (知らない) and `state_verb` exceptions carry over, a modal still governs the
+dictionary form (持つ必要がある), and the adverbial clause (持つので) is left as it was.
+
+Guarded by the five formerly-`test.fails` in `known bugs: a Japanese state verb in a content clause
+takes its dictionary form (A279)` in [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts),
+now plain tests, plus two new ones there (the subject clause 持っていることが, the past question
+持っていたかどうか, the past negative 持っていなかったと, THINK's と; and a regression for the relative
+本を持つ猫, the adverbial 持つので and the modal 持つ必要があると), and a content-clause case in
+[predicateSegs.test.ts](../../../packages/engine/src/languages/ja/predicateSegs.test.ts).

@@ -90,7 +90,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   if (phrase.contentSubject) {
     // Nominalized, so the clause inside it is plain (行動する, not 行動します) — and a generic subject
     // is unsaid there, as it is in every citation: 行動することが正しい, not 人は行動することが正しい.
-    segs.push(...buildClauseSegments(phrase.contentSubject, 'が', true), { t: 'ことが' });
+    segs.push(...buildClauseSegments(phrase.contentSubject, 'が', 'content'), { t: 'ことが' });
   } else if (asked?.role === 'subject' && askedNoun) {
     // A subject wh-question is never the topic: a question word is new information, which は cannot
     // mark, so it takes が — 誰が食べ物を食べますか (P09-E6).
@@ -160,7 +160,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // which is terminal too before the particle (幸せであるかどうか, A278).
   if (phrase.contentObject) {
     const link = contentClauseLink(phrase);
-    const closing: JaPlain = link === 'と' ? 'quote' : link === 'か' || link === 'かどうか' ? 'question' : true;
+    const closing: JaPlain = link === 'と' ? 'quote' : link === 'か' || link === 'かどうか' ? 'question' : 'content';
     segs.push(...buildClauseSegments(phrase.contentObject, 'が', closing), { t: link });
   }
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;

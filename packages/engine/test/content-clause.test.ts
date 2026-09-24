@@ -1291,16 +1291,16 @@ describe('known bugs: a Japanese state verb in a content clause takes its dictio
   const knowsCat = { subject: np('WOMAN'), verbPhrase: { verb: 'KNOW' }, directObject: np('CAT') };
   const ja = (verb: string, contentObject: NonNullable<PhrasePlan['contentObject']>) => say(clause(man, verb, { contentObject }), 'ja');
 
-  test.fails('a yes/no question: 女が猫を知っているかどうか, 猫が本を持っているかどうか', () => {
+  test('a yes/no question: 女が猫を知っているかどうか, 猫が本を持っているかどうか', () => {
     expect(ja('ASK', { ...knowsCat, interrogative: true })).toBe('男は女が猫を知っているかどうか尋ねます。');
     expect(ja('ASK', { ...hasBook, interrogative: true })).toBe('男は猫が本を持っているかどうか尋ねます。');
   });
 
-  test.fails('a wh-question: 猫が何を持っているか', () => {
+  test('a wh-question: 猫が何を持っているか', () => {
     expect(ja('ASK', { subject: np('CAT'), verbPhrase: { verb: 'HAVE' }, questionRole: 'directObject' })).toBe('男は猫が何を持っているか尋ねます。');
   });
 
-  test.fails('a quoted clause: 猫が本を持っていると, and its past and negative', () => {
+  test('a quoted clause: 猫が本を持っていると, and its past and negative', () => {
     expect(ja('SAY', hasBook)).toBe('男は猫が本を持っていると言います。');
     expect(ja('SAY', { ...hasBook, verbPhrase: { verb: 'HAVE', tense: 'past' } })).toBe('男は猫が本を持っていたと言います。');
     expect(ja('SAY', { ...hasBook, verbPhrase: { verb: 'HAVE', negative: true } })).toBe('男は猫が本を持っていないと言います。');
@@ -1308,14 +1308,30 @@ describe('known bugs: a Japanese state verb in a content clause takes its dictio
     expect(ja('SAY', knowsCat)).toBe('男は女が猫を知っていると言います。');
   });
 
-  test.fails('a nominalized clause: 猫が本を持っていることを', () => {
+  test('a nominalized clause: 猫が本を持っていることを', () => {
     expect(ja('KNOW', hasBook)).toBe('男は猫が本を持っていることを知っています。');
   });
 
-  test.fails('an indirect question under KNOW, itself in an indirect question', () => {
+  test('an indirect question under KNOW, itself in an indirect question', () => {
     expect(ja('ASK', {
       subject: np('WOMAN'), verbPhrase: { verb: 'KNOW' }, contentObject: { subject: np('CAT'), verbPhrase: { verb: 'EAT' }, questionRole: 'directObject' }, interrogative: true,
     } as NonNullable<PhrasePlan['contentObject']>)).toBe('男は女が猫が何を食べるか知っているかどうか尋ねます。');
+  });
+
+  test('the subject clause, the past of a question, the past negative, and THINK\'s と', () => {
+    expect(say({
+      subject: np('THING'), contentSubject: hasBook, verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('RIGHT_CORRECT') } },
+    }, 'ja')).toBe('猫が本を持っていることが正しいです。');
+    expect(ja('ASK', { ...hasBook, verbPhrase: { verb: 'HAVE', tense: 'past' }, interrogative: true })).toBe('男は猫が本を持っていたかどうか尋ねます。');
+    expect(ja('SAY', { ...hasBook, verbPhrase: { verb: 'HAVE', tense: 'past', negative: true } })).toBe('男は猫が本を持っていなかったと言います。');
+    expect(ja('THINK', hasBook)).toBe('男は猫が本を持っていると考えます。');
+  });
+
+  test('regression: a relative clause, an adverbial clause and a modal keep the dictionary form', () => {
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'HAVE' }, directObject: np('BOOK') } }), 'RUN'), 'ja')).toBe('本を持つ猫は走ります。');
+    expect(say({ subject: man, verbPhrase: { verb: 'RUN' }, adverbialClause: { conjunction: 'because', clause: hasBook } }, 'ja'))
+      .toBe('男は猫が本を持つので走ります。');
+    expect(ja('SAY', { ...hasBook, verbPhrase: { verb: 'HAVE', modals: ['MUST'] } })).toBe('男は猫が本を持つ必要があると言います。');
   });
 
   test('regression: an event verb, KNOW\'s negative, the progressive and the main clause are right', () => {

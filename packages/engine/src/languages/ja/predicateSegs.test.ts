@@ -192,6 +192,15 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive', negative: true }), undefined, undefined, undefined, false, false, true))).toBe('持っていなかったら');
     });
 
+    // A279: a content clause reports the state in the plain 〜ている; a relative clause (`true`) does not.
+    test('a content clause takes the plain 〜ている, a relative clause the dictionary form', () => {
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, 'quote', false, true))).toBe('持っている');
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, 'question', false, true))).toBe('持っていた');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true }), undefined, undefined, undefined, 'content', false, true))).toBe('持っていない');
+      expect(text(predicateSegs(vp(SHIRU, { negative: true }), undefined, undefined, undefined, 'quote', false, true))).toBe('知らない');
+      expect(text(predicateSegs(vp(MOTSU), undefined, undefined, undefined, true, false, true))).toBe('持つ');
+    });
+
     test('a state whose negative is the event\'s takes the plain negative', () => {
       expect(text(predicateSegs(vp(SHIRU, { negative: true }), undefined, undefined))).toBe('知りません');
       expect(text(predicateSegs(vp(SHIRU, { negative: true, tense: 'past' }), undefined, undefined))).toBe('知りませんでした');
