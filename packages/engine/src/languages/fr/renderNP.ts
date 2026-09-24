@@ -5,6 +5,7 @@ import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { disjunctiveFr, keptBesidePossessive, possessiveFr } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS } from './fr.consts.js';
 import { artFor } from './artFor.js';
 import { deDet } from './deDet.js';
@@ -64,7 +65,9 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // A cardinal stands between the determiner and the prenominal adjectives: "les deux grandes
   // maisons" (C31). A count noun whose cardinal form differs takes it here — "deux ans", where the
   // bare noun is "année" (`cardinal_form`).
-  const numeral = numeralText(forms, CARDINALS);
+  // The cardinal one is the indefinite article's own word: beside a definite or demonstrative
+  // determiner it is left out, and the phrase is the singular it counts: "le chien", "ce chien" (A319).
+  const numeral = oneBesideDeterminer(forms) && !pronominal ? '' : numeralText(forms, CARDINALS);
   const cardinalForm = plural ? forms['cardinal_form_plural'] : forms['cardinal_form'];
   const counted = numeral && cardinalForm ? cardinalForm : noun;
   const words = [detWord, possWord, ...(numeral ? [numeral] : []), ...pre, counted].filter(Boolean);

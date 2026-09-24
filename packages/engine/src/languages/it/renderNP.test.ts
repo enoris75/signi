@@ -3,7 +3,7 @@ import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor } from '@signi/shared';
 import { artFor } from './artFor.js';
 import {
-  adj, BARCA, BELLO, CANE, CASA, concept, DONNA, el, FELICE, type Forms, FORTE, FREDDO, GATTA, GATTO, GRANDE, LIBRO,
+  adj, ALA, AZIONE, BARCA, BELLO, CANE, CASA, concept, DONNA, el, FELICE, type Forms, FORTE, FREDDO, GATTA, GATTO, GRANDE, LIBRO,
   MANGIARE, nounModifier, np, PADRE, RAGAZZO, SLOT, TOPO, UOMO, VECCHIO, VELA, vp,
 } from './it.fixtures.js';
 import { renderNP } from './renderNP.js';
@@ -156,4 +156,15 @@ describe('renderNP: the possessor question (P09-E14)', () => {
     expect(withDeterminer(np(GATTO, {}, { possessor: questionPossessor() }))).toBe('il gatto di chi');
     expect(withDeterminer(np(CASA, {}, { possessor: questionPossessor() }))).toBe('la casa di chi');
   });
+
+  // The cardinal one is the indefinite article's own word, so it takes that article's form (A320).
+  test('the cardinal one elides as the indefinite article does', () => {
+    const one = (forms: Forms) => withDeterminer(np(forms, { definiteness: 'bare', numeral: '1' }));
+    expect(one(ALA)).toBe("un'ala");
+    expect(one(AZIONE)).toBe("un'azione");
+    expect(one(CASA)).toBe('una casa');
+    expect(one(CANE)).toBe('un cane');
+    expect(one({ ...CANE, base: 'studente' })).toBe('uno studente');
+  });
 });
+

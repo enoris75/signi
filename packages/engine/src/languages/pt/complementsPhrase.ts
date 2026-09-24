@@ -41,6 +41,7 @@ import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS, COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
@@ -199,7 +200,8 @@ export function complementsPhrase(
       // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
       // `nounPhrase` places it: "nas três casas", "com os meus três cães", "nestas três casas minhas"
       // (C31, A291).
-      const numeral = numeralText(f, CARDINALS);
+      // …and at one beside a definite or demonstrative determiner it is left out, as there (A319).
+      const numeral = oneBesideDeterminer(f) && !possessive ? '' : numeralText(f, CARDINALS);
       const noun = detached
         ? [numeral, withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
         : [possessive, numeral, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');

@@ -47,3 +47,18 @@ their own. They are not part of this bug.
 | | |
 |---|---|
 | **Test** | `numerals.test.ts` → *known bugs: a French definite object with a numeral drops its article (A289)* (6 `test.fails`, one per row, plus a regression test for the other six languages on the definite, demonstrative, animate and possessor-question objects, the French subject, the indefinite object and the possessive) |
+
+## Resolved
+
+2026-09-24. `objectArtFor` in [fr/objectArtFor.ts](../../../packages/engine/src/languages/fr/objectArtFor.ts)
+now writes no article for a counted object only where `resolveNounPhrase` resolved it `bare` (the
+numeral took the indefinite's place, C31). A definite or demonstrative counted object falls through to
+`partitiveArtFor` and keeps `les` / `ces`, negated or not; the indefinite still takes no partitive and
+no negative *de*.
+
+Guarded by the six tests of *known bugs: a French definite object with a numeral drops its article
+(A289)* in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts), now plain tests with
+their assertions unchanged, plus a new case in the same block (a feminine counted object with the
+definite and the distal, negated or not, and the negated indefinite). The colocated
+[objectArtFor.test.ts](../../../packages/engine/src/languages/fr/objectArtFor.test.ts) gained a bare
+counted case and a definite / demonstrative counted case.

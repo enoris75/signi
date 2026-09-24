@@ -131,29 +131,38 @@ describe('known bugs: a French definite object with a numeral drops its article 
   const reads = (extra: Partial<NounPhrase> = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
     clause(np('CAT'), 'READ', { verbPhrase, directObject: np('BOOK', { numeral: 2, ...extra }) });
 
-  test.fails('a definite object', () => {
+  test('a definite object', () => {
     expect(say(reads(), 'fr')).toBe('le chat lit les deux livres.');
   });
 
-  test.fails('a definite object, negated — the definite article is no partitive', () => {
+  test('a definite object, negated — the definite article is no partitive', () => {
     expect(say(reads({}, { negative: true }), 'fr')).toBe('le chat ne lit pas les deux livres.');
   });
 
-  test.fails('a definite object with a genitive possessor', () => {
+  test('a definite object with a genitive possessor', () => {
     expect(say(reads({ possessor: np('MAN') }), 'fr')).toBe("le chat lit les deux livres de l'homme.");
   });
 
-  test.fails('a demonstrative object', () => {
+  test('a demonstrative object', () => {
     expect(say(reads({ definiteness: 'this' }), 'fr')).toBe('le chat lit ces deux livres.');
   });
 
-  test.fails('an animate definite object', () => {
+  test('an animate definite object', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { numeral: 3 }) }), 'fr')).toBe('le chat voit les trois chiens.');
   });
 
-  test.fails('the object of a possessor question', () => {
+  test('the object of a possessor question', () => {
     expect(say({ ...reads(), questionRole: 'possessor', questionPossessed: 'directObject' }, 'fr'))
       .toBe('de qui est-ce que le chat lit les deux livres ?');
+  });
+
+  test('a feminine counted object keeps the definite and the distal, negated or not; the indefinite takes no de', () => {
+    const eats = (extra: Partial<NounPhrase>, negative = false) =>
+      say(clause(np('CAT'), 'EAT', { verbPhrase: { negative }, directObject: np('MOUSE', { numeral: 3, ...extra }) }), 'fr');
+    expect(eats({ definiteness: 'that' })).toBe('le chat mange ces trois souris.');
+    expect(eats({}, true)).toBe('le chat ne mange pas les trois souris.');
+    expect(eats({ definiteness: 'this' }, true)).toBe('le chat ne mange pas ces trois souris.');
+    expect(eats({ definiteness: 'indefinite' }, true)).toBe('le chat ne mange pas trois souris.');
   });
 
   test('regression: the other six keep it, as the French subject does; the indefinite and the possessive are right', () => {
@@ -295,7 +304,7 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
 describe('known bugs: the numeral one beside a definite or demonstrative determiner (A319)', () => {
   const one = (definiteness: 'definite' | 'this') => np('DOG', { numeral: 1, definiteness });
 
-  test.fails('Romance drops the one beside the definite, subject and object', () => {
+  test('Romance drops the one beside the definite, subject and object', () => {
     expect(sayAll(clause(one('definite'), 'RUN'))).toMatchObject({
       it: 'il cane corre.', fr: 'le chien court.', es: 'el perro corre.', pt: 'o cão corre.',
     });
@@ -304,19 +313,19 @@ describe('known bugs: the numeral one beside a definite or demonstrative determi
     });
   });
 
-  test.fails('Romance drops the one beside the demonstrative', () => {
+  test('Romance drops the one beside the demonstrative', () => {
     expect(sayAll(clause(one('this'), 'RUN'))).toMatchObject({
       it: 'questo cane corre.', fr: 'ce chien court.', es: 'este perro corre.', pt: 'este cão corre.',
     });
   });
 
-  test.fails('Romance drops the one in a complement', () => {
+  test('Romance drops the one in a complement', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }))).toMatchObject({
       it: 'il gatto corre con il cane.', fr: 'le chat court avec le chien.',
     });
   });
 
-  test.fails('German declines ein weak after der and dieser', () => {
+  test('German declines ein weak after der and dieser', () => {
     expect([
       say(clause(one('definite'), 'RUN'), 'de'),
       say(clause(np('CAT'), 'SEE', { directObject: one('definite') }), 'de'),
@@ -328,6 +337,30 @@ describe('known bugs: the numeral one beside a definite or demonstrative determi
       'dieser eine Hund läuft.',
       'der Kater läuft mit dem einen Hund.',
     ]);
+  });
+
+  test('the distal, the feminine, an adjective, the other complements and the French object', () => {
+    expect(sayAll(clause(np('DOG', { numeral: 1, definiteness: 'that' }), 'RUN'))).toMatchObject({
+      it: 'quel cane corre.', fr: 'ce chien court.', de: 'jener eine Hund läuft.', es: 'ese perro corre.', pt: 'esse cão corre.',
+    });
+    expect(sayAll(clause(np('HOUR', { numeral: 1 }), 'BURN'))).toMatchObject({
+      it: "l'ora brucia.", fr: "l'heure brûle.", de: 'die eine Stunde brennt.', es: 'la hora arde.', pt: 'a hora arde.',
+    });
+    expect(sayAll(clause(np('DOG', { numeral: 1, adjectives: ['OLD'] }), 'RUN'))).toMatchObject({
+      it: 'il vecchio cane corre.', fr: 'le vieux chien court.', de: 'der eine alte Hund läuft.',
+      es: 'el perro viejo corre.', pt: 'o cão velho corre.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }))).toMatchObject({
+      es: 'el gato corre con el perro.', pt: 'o gato corre com o cão.',
+    });
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: one('definite') } } }), 'de'))
+      .toBe('der Kater gibt dem einen Hund das Buch.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { numeral: 1 }), specifiers: [{ kind: 'temporal', value: 'during' }] } },
+    }), 'de')).toBe('der Kater läuft während der einen Stunde.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: one('definite') }), 'fr')).toBe('le chat voit le chien.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: np('MOUSE', { numeral: 1 }) }), 'fr'))
+      .toBe('le chat ne mange pas la souris.');
   });
 
   test('regression: English, Japanese, the indefinite one and the definite two', () => {
@@ -358,25 +391,34 @@ describe('known bugs: the Italian cardinal una does not elide before a vowel (A3
     complements: { temporal: { phrase: np('HOUR', { definiteness: 'bare', numeral: 1 }), specifiers: [{ kind: 'temporal', value }] } },
   }), 'it');
 
-  test.fails('within one hour', () => {
+  test('within one hour', () => {
     expect(temporal('within')).toBe("il gatto corre entro un'ora.");
   });
 
-  test.fails('for one hour', () => {
+  test('for one hour', () => {
     expect(temporal('for')).toBe("il gatto corre per un'ora.");
   });
 
-  test.fails('during one hour', () => {
+  test('during one hour', () => {
     expect(temporal('during')).toBe("il gatto corre durante un'ora.");
   });
 
-  test.fails('as the subject', () => {
+  test('as the subject', () => {
     expect(say(clause(np('HOUR', { definiteness: 'bare', numeral: 1 }), 'BURN'), 'it')).toBe("un'ora brucia.");
   });
 
-  test.fails('as the object, a feminine person', () => {
+  test('as the object, a feminine person', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { gender: 'fem', definiteness: 'bare', numeral: 1 }) }), 'it'))
       .toBe("il gatto vede un'amica.");
+  });
+
+  test('the masculine takes uno before an s-impura, and the elision survives an approximator or an adjective', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('STUDENT', { definiteness: 'bare', numeral: 1 }) }), 'it'))
+      .toBe('il gatto vede uno studente.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { definiteness: 'bare', numeral: 1, approximator: 'about' }), specifiers: [{ kind: 'temporal', value: 'for' }] } },
+    }), 'it')).toBe("il gatto corre per circa un'ora.");
+    expect(say(clause(np('HOUR', { definiteness: 'bare', numeral: 1, adjectives: ['OTHER'] }), 'BURN'), 'it')).toBe("un'altra ora brucia.");
   });
 
   test('regression: the indefinite article elides already, and a consonant or a masculine keeps its form', () => {

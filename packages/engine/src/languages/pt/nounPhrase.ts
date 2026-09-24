@@ -1,6 +1,7 @@
 import { keptBesidePossessive } from '../../possessive.js';
 import type { PtAdjectives } from './pt.types.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS } from './pt.consts.js';
 import { artFor } from './artFor.js';
 import { isPlural } from './isPlural.js';
@@ -11,7 +12,9 @@ export function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives, po
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   // A cardinal stands between the determiner and the prenominal adjectives: "las dos casas
   // grandes" (C31). It agrees only at one — and in Portuguese at two as well (dois / duas).
-  const numeral = numeralText(forms, CARDINALS);
+  // At one the cardinal is the indefinite article's own word: beside a definite or demonstrative
+  // determiner it is left out, and the phrase is the singular it counts: "o cão", "este cão" (A319).
+  const numeral = oneBesideDeterminer(forms) && !possessive ? '' : numeralText(forms, CARDINALS);
   const noun = `${numeral ? `${numeral} ` : ''}${withAdj(word, adj)}`;
   const definiteness = forms['definiteness'] ?? 'definite';
   // A pronominal possessive ("o seu cão") replaces the picked determiner with the definite
