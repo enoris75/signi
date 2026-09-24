@@ -511,13 +511,13 @@ describe('known bugs: the French and German detached possessor linked to the gen
   const linked: CoreferentPossessor = { kind: 'coreferent', slot: 'subject' };
   const one = np('GENERIC_PERSON');
 
-  test.fails('an indefinite head, the object', () => {
+  test('an indefinite head, the object', () => {
     expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
       fr: 'on voit un ami à soi.', de: 'man sieht einen Freund von sich.',
     });
   });
 
-  test.fails('the plural, a thing, and a comitative', () => {
+  test('the plural, a thing, and a comitative', () => {
     expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
       fr: 'on voit des amis à soi.', de: 'man sieht Freunde von sich.',
     });
@@ -527,6 +527,21 @@ describe('known bugs: the French and German detached possessor linked to the gen
     expect(sayAll(clause(one, 'RUN', { complements: { comitative: { phrase: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) } } }))).toMatchObject({
       fr: 'on court avec un ami à soi.', de: 'man läuft mit einem Freund von sich.',
     });
+  });
+
+  test('a demonstrative, a numeral, a locative and a possessor chain take the reflexive too', () => {
+    const frDe = (o: Record<string, string>) => [o['fr'], o['de']];
+    expect([
+      frDe(sayAll(clause(one, 'SEE', { directObject: np('BOOK', { definiteness: 'this', possessor: linked }) }))),
+      frDe(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { numeral: 2, definiteness: 'indefinite', possessor: linked }) }))),
+      frDe(sayAll(clause(one, 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: linked }) } } }))),
+      frDe(sayAll(clause(one, 'SEE', { directObject: np('MOTHER', { possessor: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) }) }))),
+    ]).toEqual([
+      ['on voit ce livre à soi.', 'man sieht dieses Buch von sich.'],
+      ['on voit deux amis à soi.', 'man sieht zwei Freunde von sich.'],
+      ['on court dans une maison à soi.', 'man läuft in einem Haus von sich.'],
+      ["on voit la mère d'un ami à soi.", 'man sieht die Mutter eines Freundes von sich.'],
+    ]);
   });
 
   test('regression: the definite head, a noun subject, and the other five', () => {

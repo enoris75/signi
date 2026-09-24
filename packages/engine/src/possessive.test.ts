@@ -227,4 +227,12 @@ describe('a possessor bound to the generic subject', () => {
     expect([MASC_SG, FEM_SG, MASC_PL, FEM_PL].map((a) => possessiveIt(generic, a))).toEqual(['proprio', 'propria', 'propri', 'proprie']);
     expect(possessiveIt(linked, MASC_SG)).toBe('suo');
   });
+
+  // A344: the detached slot takes the reflexive *on* / *man* bind.
+  test('the French and German detached pronoun is the reflexive soi / sich', () => {
+    expect(disjunctiveFr(generic)).toBe('soi');
+    expect(dativePronounDe(generic)).toBe('sich');
+    expect(disjunctiveFr(linked)).toBe('lui');
+    expect(dativePronounDe(linked)).toBe('ihm');
+  });
 });
