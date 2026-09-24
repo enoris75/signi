@@ -1121,17 +1121,30 @@ describe('known bugs: a Japanese passive terminus question doubles に (A280)', 
 // A281. German `was` has no dative. A thing asked about in a dative slot — a recipient, the object of
 // helfen — is asked with `wem`, as the person is; the engine writes the nominative/accusative `was`.
 describe('known bugs: a German inanimate dative question asks with was (A281)', () => {
-  test.fails('the recipient: wem gibt der Mann das Buch?', () => {
+  test('the recipient: wem gibt der Mann das Buch?', () => {
     expect(sayAll(about(clause(np('MAN'), 'GIVE', { directObject: np('BOOK') }), 'terminus')).de).toBe('wem gibt der Mann das Buch?');
   });
 
-  test.fails('the recipient of a passive: wem wird das Buch von der Frau gegeben?', () => {
+  test('the recipient of a passive: wem wird das Buch von der Frau gegeben?', () => {
     expect(sayAll(ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus')).de)
       .toBe('wem wird das Buch von der Frau gegeben?');
   });
 
-  test.fails('the dative object of helfen: wem hilft der Kater?', () => {
+  test('the dative object of helfen: wem hilft der Kater?', () => {
     expect(sayAll(ask(clause(np('CAT'), 'HELP_VERB'), 'directObject')).de).toBe('wem hilft der Kater?');
+  });
+
+  test('wem in the past and over a plural subject', () => {
+    expect(say(ask(clause(np('MAN'), 'GIVE', { verbPhrase: { tense: 'past' }, directObject: np('BOOK') }), 'terminus'), 'de'))
+      .toBe('wem gab der Mann das Buch?');
+    expect(say(ask(clause(np('CAT'), 'HELP_VERB', { verbPhrase: { tense: 'past' } }), 'directObject'), 'de')).toBe('wem half der Kater?');
+    expect(say(ask(clause(np('CAT', { number: 'plural' }), 'HELP_VERB'), 'directObject'), 'de')).toBe('wem helfen die Kater?');
+    // the person was already wem; the other six are unchanged
+    expect(say(ask(clause(np('CAT'), 'HELP_VERB'), 'directObject', true), 'de')).toBe('wem hilft der Kater?');
+    expect(sayAll(ask(clause(np('CAT'), 'HELP_VERB'), 'directObject'))).toMatchObject({
+      en: 'what does the cat help?', it: 'che cosa aiuta il gatto?', fr: 'qu\'est-ce que le chat aide ?',
+      es: '¿a qué ayuda el gato?', ja: '猫は何を手伝いますか？', pt: 'o que o gato ajuda?',
+    });
   });
 
   test('regression: the other six, the statement\'s dative, and was where the slot is nominative or accusative', () => {
