@@ -443,6 +443,8 @@ class Printer {
       this.emit(printRef(this.periodNumber(id), possessorRef), "ref", "ref");
     } else if (possessor && Object.keys(possessor).length) {
       this.phrase(ref, "/poss", `${wordKey(ref)}:poss`, "/del poss", possessor, possessorAddress(address), "possessor");
+      // What it is to the noun (P13), once it is there to be read back onto.
+      this.settings(w, ["possessorRole"]);
     }
 
     // Its conjuncts: a bare word where the phrase is only its word, else a bracket.

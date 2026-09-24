@@ -696,6 +696,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Possessor',
   },
 
+  // What a genitive possessor is to its noun (P13, `/whole`, `/parts`): the WHOLE the noun is a part of
+  // (it "Intero", de "Ganz"), or its PARTs (it "Parti", de "Teile"). The owner is `slot.possessor`.
+  'possessorRole.value.whole': { plan: { subject: { concept: 'WHOLE', definiteness: 'bare' } } as PhrasePlan, format: NAME_FORMAT, fallback: 'Whole' },
+  'possessorRole.value.parts': {
+    plan: { subject: { concept: 'PART', definiteness: 'bare', number: 'plural' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Parts',
+  },
+
   // The standard of comparison's ring title ("bigger than **the dog**" — the dog's ring, P09-E12 D5):
   // the grammar noun STANDARD_OF_COMPARISON, bare like the possessor's. It hangs off a predicate
   // adjective in the comparative or the equative, and is what `/than` fills in the console.
@@ -3120,6 +3129,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: setterOf('MEANING', 'NOUN'),
     format: { stripPeriod: true },
     fallback: "to set a noun's meaning",
+  },
+  // `/owner`, `/whole`, `/parts` (P13): "to set a possessor's relationship", it "impostare la relazione di
+  // un possessore".
+  'purpose.possessorRole': {
+    plan: setterOf('RELATIONSHIP', 'POSSESSOR'),
+    format: { stripPeriod: true },
+    fallback: "to set a possessor's relationship",
   },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un

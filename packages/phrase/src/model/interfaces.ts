@@ -201,6 +201,9 @@ export const QUESTION_ROLES: readonly QuestionRole[] = ["subject", "directObject
 // dimension an adjective measures ("of great size", BIG), as a manner adverbial ("at high speed",
 // FAST), or as the place, direction or time complement a clause would carry ("in a group", TOGETHER;
 // "to a higher place", UP; "until this time", STILL). Each is a NounPhrase gloss flag in the plan.
+export type PossessorRole = "whole" | "parts";
+export const POSSESSOR_ROLES: readonly PossessorRole[] = ["whole", "parts"];
+
 export type NounGloss = "dimension" | "manner" | "locative" | "direction" | "temporal";
 export const NOUN_GLOSSES: readonly NounGloss[] = ["dimension", "manner", "locative", "direction", "temporal"];
 
@@ -417,6 +420,11 @@ export interface PhraseSelection {
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
     // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
     modifierRelations?: Partial<Record<string, ModifierRelation>>;
+    // What a noun's genitive possessor is to it, keyed by the noun block (P13, NounPhrase
+    // .possessorRole): the whole it is a part of ("a part of a place", AREA) or the parts it is made
+    // up of ("a group of relatives", FAMILY). Absent ⇒ the owner. Only English says the difference,
+    // with an of-phrase where the owner takes the Saxon genitive.
+    possessorRoles?: Partial<Record<string, PossessorRole>>;
     // Grammatical number of an attributive-noun modifier ("creatore di *frasi*"), keyed by
     // the adjective slot key like `modifierRelations`. Only consulted when that slot holds a
     // noun; defaults to 'singular'. See NounModifier.number in @signi/shared.

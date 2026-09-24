@@ -82,3 +82,21 @@ test.describe('the subject’s reading', () => {
     await expect(app.period(0).getByTestId('gloss-ctl-subject')).toHaveCount(0);
   });
 });
+
+test.describe('what a possessor is to its noun', () => {
+  test('says a part of a place, as AREA does, typed or clicked', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj part /a /poss ( /subj place /a )');
+    await run(page);
+    await app.expectSentences({ en: "a place's part." });
+
+    const chip = app.period(0).getByTestId('possessorRole-ctl-subject').locator('button');
+    await chip.click();
+    await app.expectSentences({ en: 'a part of a place.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/poss [ place /a ] /whole');
+    // whole → parts → owner
+    await chip.click();
+    await chip.click();
+    await app.expectSentences({ en: "a place's part." });
+  });
+});

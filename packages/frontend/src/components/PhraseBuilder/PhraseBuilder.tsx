@@ -466,6 +466,7 @@ export function PhraseBuilder({
       onToggleNegative: commands.handleToggleNegative,
       onToggleReveal: handleToggleReveal,
       onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : commands.handleAddConjunct,
+      onCyclePossessorRole: (which: NounKey) => commands.handleCyclePossessorRole(which),
       // A hosted ring's phrase is a noun phrase, not a clause: it asks nothing and states no existence.
       ...(!ringHost && {
         onToggleQuestion: commands.handleToggleQuestion,
@@ -956,6 +957,7 @@ export function PhraseBuilder({
       toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,
       cycleGloss: commands.handleCycleGloss,
+      cyclePossessorRole: commands.handleCyclePossessorRole,
       cycleGlossRelation: commands.handleCycleGlossRelation,
       cycleAspect: commands.handleCycleAspect,
       cycleVoice: commands.handleCycleVoice,

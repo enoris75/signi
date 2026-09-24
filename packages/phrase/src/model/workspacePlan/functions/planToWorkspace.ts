@@ -60,7 +60,7 @@ const PERIOD_FIELDS = new Set([
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
   "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
-  "complementGloss",
+  "complementGloss", "possessorRole",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -279,6 +279,8 @@ class Builder {
         const owner: PhraseSelection = {};
         this.phrase(c, owner, "subject", np.possessor, possessorAddress(address));
         set(sel, `${which}Possessor`, owner);
+        if (np.possessorRole && np.possessorRole !== "owner")
+          sel.possessorRoles = { ...sel.possessorRoles, [which]: np.possessorRole };
       }
     }
     this.gloss(c, sel, which, np);

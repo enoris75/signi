@@ -51,6 +51,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   // How a verbless period's subject reads, and a time reading's relation (P13).
   ['handleCycleGloss', (c) => c.handleCycleGloss(-1), (p) => reducers.cycleSubjectGloss(p, -1)],
   ['handleCycleGlossRelation', (c) => c.handleCycleGlossRelation(), reducers.cycleGlossRelation],
+  ['handleCyclePossessorRole', (c) => c.handleCyclePossessorRole('subject'), (p) => reducers.cyclePossessorRole(p, 'subject')],
   ['handleSelectSpecifier', (c) => c.handleSelectSpecifier('over'), (p) => reducers.setSpecifier(p, 'over', 'route')],
   ['handleSelectLocativeSpecifier', (c) => c.handleSelectLocativeSpecifier('under'), (p) => reducers.setSpecifier(p, 'under', 'locative')],
   ['handleSelectTemporalRelation', (c) => c.handleSelectTemporalRelation('ago'), (p) => reducers.setTemporalRelation(p, 'ago')],

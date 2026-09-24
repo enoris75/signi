@@ -29,6 +29,7 @@ export function buildSatelliteIcons({
   onToggleExistential,
   onCycleGloss,
   onCycleGlossRelation,
+  onCyclePossessorRole,
   t,
 }: BuildSatelliteIconsArgs): SatelliteIcons {
   // What a made link says of itself, and what clicking it will do — the same pair on the
@@ -113,6 +114,28 @@ export function buildSatelliteIcons({
           ? { valueLabel: sat.valueLabel }
           : {}),
         onToggle,
+      };
+      continue;
+    }
+    // What a noun's genitive possessor is to it (P13): a chip beside the possessor control that names
+    // the role it holds and moves it on — owner, whole, parts.
+    const roleNoun: NounKey | null = sat.key.endsWith("PossessorRole")
+      ? (sat.key.slice(0, -"PossessorRole".length) as NounKey)
+      : null;
+    if (roleNoun) {
+      if (!onCyclePossessorRole) continue;
+      (perimeterByNoun[roleNoun] ??= {}).possessorRole = {
+        key: sat.key,
+        icon: sat.icon,
+        label: sat.label,
+        labelKey: sat.labelKey,
+        active: false,
+        isSet: sat.hasValue,
+        valued: false,
+        directToggle: true,
+        named: true,
+        valueLabel: sat.valueLabel,
+        onToggle: () => onCyclePossessorRole(roleNoun),
       };
       continue;
     }

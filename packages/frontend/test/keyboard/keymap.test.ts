@@ -50,6 +50,7 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     toggleExistential: () => {},
     cycleGloss: () => {},
     cycleGlossRelation: () => {},
+    cyclePossessorRole: () => {},
     cycleTense: () => {},
     cycleAspect: () => {},
     cycleVoice: () => {},
@@ -133,7 +134,7 @@ describe('the keymap', () => {
     const reversing = commands.filter((c) => c.reverses);
     expect(reversing.map((c) => c.id).sort()).toEqual([
       'adjective.degree.back', 'adjective.relation.back', 'noun.gender.back',
-      'object.voice.back', 'subject.gloss.back', 'subject.glossRelation.back', 'verb.aspect.back', 'verb.tense.back',
+      'noun.possessorRole.back', 'object.voice.back', 'subject.gloss.back', 'subject.glossRelation.back', 'verb.aspect.back', 'verb.tense.back',
     ]);
     for (const command of reversing) {
       const forward = commands.find((c) => c.id === command.reverses);

@@ -8,6 +8,8 @@ import {
 } from "@signi/shared";
 import {
   builderNounAddress,
+  POSSESSOR_KEY,
+  POSSESSOR_REF_KEY,
   type NounAddress,
   type NounKey,
   type PhraseContainer,
@@ -30,6 +32,7 @@ import {
   setSpecifier,
   setGlossRelation,
   setSubjectGloss,
+  setPossessorRole,
   setTemporalRelation,
   setTense,
   type Gender,
@@ -195,6 +198,13 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
         w.kind === "noun" && !w.ref.slice && Boolean(c) &&
         (w.which === "temporal" || (w.which === "subject" && w.slice.subjectGloss === "temporal"))
       );
+    // What a genitive possessor is to its noun (P13), once there is one — a pronominal one has no role.
+    case "possessorRole":
+      return (
+        w.kind === "noun" && c?.role === "noun" &&
+        Boolean((w.slice[POSSESSOR_KEY(w.which!)] as PhraseSelection | undefined)?.subject) &&
+        !w.slice[POSSESSOR_REF_KEY(w.which!)]
+      );
     // How the subject of a period reads (P13): a noun's, its phrase the whole of a verbless period.
     case "gloss":
       return w.kind === "noun" && !w.ref.slice && w.which === "subject" && c?.role === "noun";
@@ -247,6 +257,8 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
       return which === "subject" ? setGlossRelation(slice, s.value) : setTemporalRelation(slice, s.value);
     case "gloss":
       return setSubjectGloss(slice, s.value === "plain" ? undefined : s.value);
+    case "possessorRole":
+      return setPossessorRole(slice, which, s.value === "owner" ? undefined : s.value);
     case "sentiment":
       return setSentiment(slice, s.value);
     case "causePolarity":
@@ -288,6 +300,8 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
       return (which === "subject" ? sel.subjectGlossRelation : sel.temporalRelation) ?? DEFAULT_TEMPORAL_RELATION;
     case "gloss":
       return sel.subjectGloss ?? "plain";
+    case "possessorRole":
+      return sel.possessorRoles?.[which!] ?? "owner";
     case "sentiment":
       return sel.causeSentiment ?? "neutral";
     case "causePolarity":
@@ -322,6 +336,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
       return DEFAULT_TEMPORAL_RELATION;
     case "gloss":
       return "plain";
+    case "possessorRole":
+      return "owner";
     case "sentiment":
       return "neutral";
     case "causePolarity":

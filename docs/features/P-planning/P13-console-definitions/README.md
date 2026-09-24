@@ -93,7 +93,7 @@ found four more, and the canonical names the test keeps (`WAITING` in
 |---|---|
 | ~~`NounPhrase.relativeGloss`~~ — `/headless`, ✅ 2026-09-24 | 100 |
 | ~~`NounPhrase.dimensionGloss`~~ — `/gloss dimension`, ✅ | 30 |
-| `NounPhrase.possessorRole` | 29 |
+| ~~`NounPhrase.possessorRole`~~ — `/whole`, `/parts`, ✅ | 29 |
 | `InfinitiveComplement.control` | 25 |
 | ~~`NounPhrase.complementGloss`~~ — `/gloss place · direction · time`, ✅ | 17 |
 | ~~`NounPhrase.mannerGloss`~~ — `/gloss manner`, ✅ | 12 |
@@ -122,6 +122,7 @@ control, console command, printer case, catalogue strings and tests:
 |---|---|---|---|
 | Relative clause said alone | `/headless` after `/rel` in the head's bracket; `/del headless` | a chip beside the relative control on the noun's dotted ring, <kbd>⇧R</kbd> | A flag on the relative link (`headless`), saved with it; `attachLinks` sets `relativeGloss` on the head. Unblocked 90 definitions (324 → 414). |
 | How a verbless period's subject reads | `/gloss dimension · manner · place · direction · time · plain` in the subject's bracket; a time reading takes `/until`, `/ago`, … | a chip on the subject's dotted ring that cycles the reading (<kbd>M</kbd>), and one for a time reading's relation (<kbd>L</kbd>) | `subjectGloss` and `subjectGlossRelation` on the period; `selectionToPlan` sets `dimensionGloss`, `mannerGloss` or `complementGloss` on a verbless subject. The first setting printed as its `set` command and a value (`/gloss manner`), since `/manner` is the complement's. 415 → 473. |
+| What a possessor is to its noun | `/whole` · `/parts` · `/owner` after the possessor's bracket | a chip beside the possessor control that cycles owner → whole → parts (<kbd>O</kbd>) | `possessorRoles`, keyed by noun block like `modifierRelations`; dropped with the genitive possessor (a pronominal one has no role). 473 → 499. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a

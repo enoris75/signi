@@ -15,7 +15,7 @@ import {
   type UiStringKey,
   type Voice,
 } from "@signi/shared";
-import type { ImperativePerson, NounGloss, SlotConfig, SlotKey, SubordinateKind } from "../model/interfaces.ts";
+import type { ImperativePerson, NounGloss, PossessorRole, SlotConfig, SlotKey, SubordinateKind } from "../model/interfaces.ts";
 import type { Gender } from "../model/phraseReducers.ts";
 import { MODAL_NEGATIVE_FIELDS } from "../model/slots.ts";
 
@@ -52,7 +52,9 @@ export type Setting =
   | { id: "degree"; value: Degree }
   | { id: "relation"; value: ModifierRelation }
   /** How a verbless period's subject reads (P13): `plain` is none. */
-  | { id: "gloss"; value: NounGloss | "plain" };
+  | { id: "gloss"; value: NounGloss | "plain" }
+  /** What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, its parts. */
+  | { id: "possessorRole"; value: PossessorRole | "owner" };
 
 export type SettingId = Setting["id"];
 
@@ -554,6 +556,12 @@ export const COMMANDS: readonly CommandDef[] = [
       ["setSpecifier"],
     ),
   ),
+  // What a noun's genitive possessor is to it (P13), said after the possessor's bracket: "/subj ( part /a
+  // /poss [ place /a ] /whole )" is AREA, "a part of a place"; "/parts" FAMILY's "a group of relatives".
+  // "/owner" is the default, possession.
+  setting("owner", [], "noun", { id: "possessorRole", value: "owner" }, "the possessor owns it", "slot.possessor", /PossessorRole$/, ["setPossessorRole"]),
+  setting("whole", [], "noun", { id: "possessorRole", value: "whole" }, "the possessor is the whole it is part of", "possessorRole.value.whole", /PossessorRole$/, ["setPossessorRole"]),
+  setting("parts", [], "noun", { id: "possessorRole", value: "parts" }, "the possessor is what it is made of", "possessorRole.value.parts", /PossessorRole$/, ["setPossessorRole"]),
   // The temporal's relation (P09-E12b), as the spatial ones set the place's: "/time ( day /ago )".
   // `/at` is not the determiner `/a`, and none of the six is taken by another command. `between`
   // (P09-E20) is: `/between` sets the place's relation, and a command has one name, so the time's
@@ -1152,6 +1160,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   degree: "degree",
   relation: "relation",
   gloss: "gloss",
+  possessorRole: "possessor",
 };
 
 /** The topic a command is listed under. */

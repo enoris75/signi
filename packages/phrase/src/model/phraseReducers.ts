@@ -27,6 +27,8 @@ import {
   GenderSlot,
   ImperativePerson,
   NOUN_GLOSSES,
+  POSSESSOR_ROLES,
+  type PossessorRole,
   NounAddress,
   NounGloss,
   NounKey,
@@ -111,6 +113,11 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
   delete sel[`${which}Definiteness` as keyof PhraseSelection];
   delete sel[POSSESSOR_KEY(which)];
   delete sel[POSSESSOR_REF_KEY(which)];
+  if (sel.possessorRoles?.[which]) {
+    const { [which]: _dropped, ...rest } = sel.possessorRoles;
+    if (Object.keys(rest).length > 0) sel.possessorRoles = rest;
+    else delete sel.possessorRoles;
+  }
   // A subject's reading (P13) is a noun phrase's: a pronoun or an adjective has none.
   if (which === "subject") {
     delete sel.subjectGloss;
@@ -752,6 +759,27 @@ export function removePossessor(
 ): PhraseSelection {
   const next = { ...prev };
   delete next[POSSESSOR_KEY(which)];
+  return dropPossessorRole(next, which);
+}
+
+// What a noun's genitive possessor is to it (P13): the whole it is part of, the parts it is made of,
+// or — undefined — its owner.
+export function setPossessorRole(prev: PhraseSelection, which: NounKey, role: PossessorRole | undefined): PhraseSelection {
+  if (!role) return dropPossessorRole(prev, which);
+  return { ...prev, possessorRoles: { ...prev.possessorRoles, [which]: role } };
+}
+
+// Cycle owner → whole → parts → owner.
+export function cyclePossessorRole(prev: PhraseSelection, which: NounKey, step: CycleStep = 1): PhraseSelection {
+  return setPossessorRole(prev, which, cycled([undefined, ...POSSESSOR_ROLES] as const, prev.possessorRoles?.[which], step));
+}
+
+// The role goes with the genitive possessor it describes: a pronominal one ("its part") has none.
+function dropPossessorRole(prev: PhraseSelection, which: NounKey): PhraseSelection {
+  if (!prev.possessorRoles?.[which]) return prev;
+  const { [which]: _dropped, ...rest } = prev.possessorRoles;
+  const next: PhraseSelection = { ...prev, possessorRoles: rest };
+  if (Object.keys(rest).length === 0) delete next.possessorRoles;
   return next;
 }
 
@@ -789,7 +817,7 @@ export function setPossessorRef(
 ): PhraseSelection {
   const next: PhraseSelection = { ...prev, [POSSESSOR_REF_KEY(which)]: address };
   delete next[POSSESSOR_KEY(which)];
-  return next;
+  return dropPossessorRole(next, which);
 }
 
 // Remove a noun block's pronominal possessor reference.

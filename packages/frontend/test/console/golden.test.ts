@@ -107,6 +107,23 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /rel #2.subj ) /verb ( read )',
     misuse: { line: '/subj child /verb read /rel #1.subj', says: { code: 'relativeSamePeriod' } },
   },
+  // What a noun's genitive possessor is to it (P13), said after the possessor's bracket.
+  whole: {
+    line: '/subj house /poss cat /whole',
+    prints: '/subj ( house /poss [ cat ] /whole )',
+    check: (s) => expect(sel(s).possessorRoles).toEqual({ subject: 'whole' }),
+    misuse: { line: '/subj house /whole', says: { code: 'noTarget', args: { command: 'whole' } } },
+  },
+  parts: {
+    line: '/subj house /poss ( /subj cat /pl ) /parts',
+    prints: '/subj ( house /poss [ cat /pl ] /parts )',
+    check: (s) => expect(sel(s).possessorRoles).toEqual({ subject: 'parts' }),
+  },
+  owner: {
+    line: '/subj house /poss cat /whole /owner',
+    prints: '/subj ( house /poss [ cat ] )',
+    check: (s) => expect(sel(s)).not.toHaveProperty('possessorRoles'),
+  },
   // How a verbless period's subject reads (P13): a setting whose values have no command of their own.
   gloss: {
     line: '/subj speed /adj big /gloss manner',

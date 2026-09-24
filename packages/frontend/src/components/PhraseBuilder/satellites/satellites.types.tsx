@@ -98,6 +98,8 @@ export type PerimeterEntry = {
   // How a verbless period's subject reads, and a time reading's relation (P13).
   gloss?: SatelliteIcon;
   glossRelation?: SatelliteIcon;
+  // What the noun's genitive possessor is to it: owner, whole or parts (P13).
+  possessorRole?: SatelliteIcon;
 };
 
 export interface BuildSatelliteIconsArgs {
@@ -122,6 +124,8 @@ export interface BuildSatelliteIconsArgs {
   // Move the subject's reading, and a time reading's relation, on by one (P13). A hosted ring's
   // builder has neither, as it has no existential: its phrase is not a period's subject.
   onCycleGloss?: () => void;
+  // Move what a noun's possessor is to it on by one: owner → whole → parts (P13).
+  onCyclePossessorRole?: (which: NounKey) => void;
   onCycleGlossRelation?: () => void;
   // The UI-string lookup: a link control says what state it is in and what a click will do, and
   // both are catalog entries (`status.linked`, `hint.clickToRemove`).

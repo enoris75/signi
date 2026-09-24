@@ -9,6 +9,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import TranslateIcon from "@mui/icons-material/Translate";
+import PieChartOutlineIcon from "@mui/icons-material/PieChartOutline";
 import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
@@ -106,6 +107,24 @@ export function rawSatellites(
       icon: who ? <PersonIcon sx={iconSx} /> : <CategoryIcon sx={iconSx} />,
       available: askable(role) && selection.questionRole === role,
       hasValue: who,
+      directToggle: true,
+    };
+  };
+  // What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, or the parts it
+  // is made of. Each click moves it on; it rides beside the possessor control while there is one to
+  // describe — a pronominal possessor ("its part") has no role.
+  const possessorRole = (which: NounKey): RawSatellite => {
+    const owner = selection[`${which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined;
+    const role = selection.possessorRoles?.[which];
+    return {
+      key: `${which}PossessorRole`,
+      parent: which,
+      label: t("modifier.relation"),
+      labelKey: "modifier.relation",
+      icon: <PieChartOutlineIcon sx={iconSx} />,
+      available: Boolean(owner?.subject) && !selection[`${which}PossessorRef` as keyof PhraseSelection],
+      hasValue: Boolean(role),
+      valueLabel: t(role ? `possessorRole.value.${role}` : "slot.possessor"),
       directToggle: true,
     };
   };
@@ -244,6 +263,7 @@ export function rawSatellites(
       // Set by either a genitive possessor phrase or a pronominal reference to another noun.
       hasValue: Boolean(selection.subjectPossessor?.subject) || Boolean(selection.subjectPossessorRef),
     },
+    possessorRole("subject"),
     {
       key: "subjectConjunct",
       parent: "subject",
@@ -559,6 +579,7 @@ export function rawSatellites(
       available: directObjectRole === "noun",
       hasValue: Boolean(selection.directObjectPossessor?.subject) || Boolean(selection.directObjectPossessorRef),
     },
+    possessorRole("directObject"),
     {
       key: "directObjectConjunct",
       parent: "directObject",
@@ -734,6 +755,7 @@ export function rawSatellites(
               )?.subject,
             ) || Boolean(selection[`${type}PossessorRef` as keyof PhraseSelection]),
         },
+        possessorRole(type),
         {
           key: `${type}Conjunct`,
           parent: type,

@@ -232,6 +232,11 @@ describe('what each console command is for', () => {
       fr: "définir le sens d'un nom.", de: 'die Bedeutung eines Substantivs festlegen.',
       es: 'establecer el significado de un sustantivo.', ja: '名詞の意味を設定する。', pt: 'definir o significado de um substantivo.',
     },
+    'purpose.possessorRole': {
+      en: "to set a possessor's relationship.", it: 'impostare la relazione di un possessore.',
+      fr: "définir la relation d'un possesseur.", de: 'die Beziehung eines Besitzers festlegen.',
+      es: 'establecer la relación de un poseedor.', ja: '所有者の関係を設定する。', pt: 'definir a relação de um possuidor.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

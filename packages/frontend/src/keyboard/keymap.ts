@@ -114,6 +114,8 @@ export interface BoxContext {
   /** How a verbless period's subject reads, and a time reading's relation (P13). */
   cycleGloss: (step: 1 | -1) => void;
   cycleGlossRelation: (step: 1 | -1) => void;
+  /** What a noun's genitive possessor is to it: owner, whole, parts (P13). */
+  cyclePossessorRole: (which: NounKey, step: 1 | -1) => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
   cycleVoice: (step: 1 | -1) => void;
@@ -536,6 +538,27 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     labelKey: "satellite.conjunction",
     when: (ctx) => Boolean(ctx.satellite(`${ctx.nounKey}Conjunct`)?.hasValue),
     run: (ctx) => ctx.cycleConjunction(ctx.nounKey!),
+  },
+  {
+    // What the noun's possessor is to it (P13): its owner, the whole it is part of, its parts — O, ⇧O back.
+    id: "noun.possessorRole",
+    scope: "box:noun",
+    keys: ["O"],
+    label: "Relationship",
+    labelKey: "modifier.relation",
+    satellite: /PossessorRole$/,
+    when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}PossessorRole`),
+    run: (ctx) => ctx.cyclePossessorRole(ctx.nounKey!, 1),
+  },
+  {
+    id: "noun.possessorRole.back",
+    scope: "box:noun",
+    keys: ["Shift+O"],
+    label: "Relationship, backwards",
+    labelKey: "hint.backwards",
+    reverses: "noun.possessorRole",
+    when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}PossessorRole`),
+    run: (ctx) => ctx.cyclePossessorRole(ctx.nounKey!, -1),
   },
   {
     // How a verbless period's subject reads (P13) — M for its meaning, ⇧M back.

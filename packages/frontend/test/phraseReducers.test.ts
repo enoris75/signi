@@ -469,3 +469,22 @@ describe('a subject that is no noun any more', () => {
     expect(next).not.toHaveProperty('subjectGlossRelation');
   });
 });
+
+// P13: what a genitive possessor is to its noun — its owner, the whole the noun is a part of, its parts.
+describe('the possessor’s role', () => {
+  const withOwner: PhraseSelection = { subject: HOUSE, subjectPossessor: { subject: CAT } };
+
+  it('cycles owner → whole → parts → owner, leaving no key at the owner', () => {
+    const whole = R.cyclePossessorRole(withOwner, 'subject');
+    expect(whole.possessorRoles).toEqual({ subject: 'whole' });
+    expect(R.cyclePossessorRole(whole, 'subject').possessorRoles).toEqual({ subject: 'parts' });
+    expect(R.cyclePossessorRole(R.cyclePossessorRole(whole, 'subject'), 'subject')).not.toHaveProperty('possessorRoles');
+  });
+
+  it('goes with the genitive possessor it describes', () => {
+    const whole = R.setPossessorRole(withOwner, 'subject', 'whole');
+    expect(R.removePossessor(whole, 'subject')).not.toHaveProperty('possessorRoles');
+    expect(R.setPossessorRef(whole, 'subject', 'directObject')).not.toHaveProperty('possessorRoles');
+    expect(R.applyClear({ ...whole, directObject: CAT }, 'subject')).not.toHaveProperty('possessorRoles');
+  });
+});

@@ -39,6 +39,7 @@ import {
   toggleExistential,
   cycleGlossRelation,
   cycleSubjectGloss,
+  cyclePossessorRole,
   toggleQuestionAnimate,
   toggleQuestionRole,
   type CycleStep,
@@ -90,6 +91,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     // How a verbless period's subject reads, and a time reading's relation (P13).
     handleCycleGloss: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleSubjectGloss(prev, step)),
     handleCycleGlossRelation: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleGlossRelation(prev, step)),
+    // What a noun's genitive possessor is to it: owner → whole → parts (P13).
+    handleCyclePossessorRole: (which: NounKey, step: CycleStep = 1) =>
+      onPhraseUpdate((prev) => cyclePossessorRole(prev, which, step)),
     handleSelectSpecifier: (spec: PathSpecifier) => onPhraseUpdate((prev) => setSpecifier(prev, spec, "route")),
     handleSelectLocativeSpecifier: (spec: PathSpecifier) =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),

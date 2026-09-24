@@ -379,6 +379,14 @@ const OPS: Op[] = [
     if (!link || link.kind !== 'instrumental') return undefined;
     return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
   },
+  // What a noun's genitive possessor is to it (P13).
+  onPeriod((sel, rng) => {
+    const head = pick(rng, nounHeads(sel).filter((h) => {
+      const at = R.nounSliceAt(sel, h.address);
+      return at && (at.slice[`${at.which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject;
+    }));
+    return head ? R.updateNounAt(sel, head.address, (s, which) => R.cyclePossessorRole(s, which)) : undefined;
+  }),
   // The reading of a verbless period's subject, and a time reading's relation (P13).
   onPeriod((sel, rng) => {
     if (sel.verb || sel.subject?.role !== 'noun') return undefined;
