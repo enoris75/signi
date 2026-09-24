@@ -19,7 +19,7 @@ import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
 import { liftPreposition } from '../../functions/liftPreposition.js';
 import { AMONG_PREP, BETWEEN_PREP } from './fr.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
-import { temporalPreposition } from '../../functions/temporalPreposition.js';
+import { temporalBare, temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -264,6 +264,9 @@ export function complementsPhrase(
           type === 'temporal'  ? (() => {
             const relation = temporalRelation(c);
             if (relation === 'at') {
+              // A noun may take none at all, whatever its determiner: "le matin", "ce matin", "un
+              // matin" (`temporalBare`, B80), never "au matin" or "à ce matin".
+              if (temporalBare(c)) return artFor(nf, plural, lead);
               const prep = temporalPreposition(c, '');
               if (!prep) return aDet(nf, plural, lead);
               // A265. The noun's own "en" takes a bare noun or a demonstrative ("en ce jour") and
