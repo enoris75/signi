@@ -49,6 +49,9 @@ export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string, s
   // -et doubles its t in the feminine ("cadet → cadette"); the rule would give "cadete" (P11 §3).
   // YOUNGER is the one seeded -et adjective; its elder counterpart "aîné" needs no entry.
   cadet: ['cadet', 'cadette', 'cadets', 'cadettes', 'cadet'],
+  // -c takes -que in the feminine here ("public → publique"); the rule would give "publice". Not a
+  // rule of its own: blanc → blanche and sec → sèche take -che (localization B87, B88).
+  public: ['public', 'publique', 'publics', 'publiques', 'public'],
 };
 
 // œ and æ are vowel letters too, and one seeded noun opens on one: œil, l'œil (localization B52).
