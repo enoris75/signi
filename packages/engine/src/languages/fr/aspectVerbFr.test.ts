@@ -75,4 +75,12 @@ describe('aspectVerbFr', () => {
     expect(aspectVerbFr(EFFONDRER, { ...JE, number: 'plural' }, 'present', 'prospective')).toEqual({ finite: 'sommes', tail: 'sur le point de nous effondrer' });
     expect(aspectVerbFr(EFFONDRER, CHAT, 'present', 'progressive')).toEqual({ finite: 'est', tail: "en train de s'effondrer" });
   });
+
+  // localization B86: se rappeler's se is the indirect object, so its être participle agrees as an
+  // avoir one does — never with the subject, and with a preceding direct object.
+  test('an indirect pronominal verb does not agree its participle with the subject', () => {
+    const RAPPELER = { base: 'se rappeler', reflexive_indirect: '1', participle: 'rappelé', aux: 'be', '3sg_present': 'se rappelle' };
+    expect(aspectVerbFr(RAPPELER, FEMME, 'present', 'resultative')).toEqual({ finite: "s'est", tail: 'rappelé' });
+    expect(aspectVerbFr(RAPPELER, FEMME, 'present', 'resultative', undefined, SOURIS)).toEqual({ finite: "s'est", tail: 'rappelée' });
+  });
 });

@@ -12,6 +12,13 @@ describe('jaModifierSeg', () => {
     expect(jaModifierSeg(DOKODEMO, 'に')).toEqual({ t: 'どこにでも' });
   });
 
+  // Localization B89: FAR_AWAY's に form has kanji, so it takes a reading of its own.
+  test('a に form with kanji takes its own reading', () => {
+    const TOOKUDE = concept({ base: '遠くで', reading: 'とおくで', subtype: 'place', locative_ni: '遠くに', locative_ni_reading: 'とおくに' });
+    expect(jaModifierSeg(TOOKUDE, 'に')).toEqual({ t: '遠くに', r: 'とおくに' });
+    expect(jaModifierSeg(TOOKUDE, 'で')).toEqual({ t: '遠くで', r: 'とおくで' });
+  });
+
   test('and keeps its で form anywhere else', () => {
     expect(jaModifierSeg(KOKODE)).toEqual({ t: 'ここで' });
     expect(jaModifierSeg(KOKODE, 'で')).toEqual({ t: 'ここで' });

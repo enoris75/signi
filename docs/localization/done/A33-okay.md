@@ -59,7 +59,7 @@ Readings to judge on authoring:
 
 OKAY stands on BEING, HAVE and PROBLEM; PROBLEM stands on STATE, MUST and CHANGE. None names OKAY.
 OKAY's lexemes name BE_FARING as their `copula`, but its gloss does not, so the two senses of
-[C43](../C-needs-engine/C43-senses-tell-order-and-be-faring.md) are untouched.
+[C43](C43-senses-tell-order-and-be-faring.md) are untouched.
 
 ## Where the tooltip shows
 
@@ -69,7 +69,7 @@ attributively as well as in the predicate) and the gloss is visible wherever the
 ## Not solved
 
 Nothing: OKAY is the ticket's one concept. BE_FARING, the sense its copula names, is
-[C43](../C-needs-engine/C43-senses-tell-order-and-be-faring.md)'s.
+[C43](C43-senses-tell-order-and-be-faring.md)'s.
 
 ## Coverage
 
@@ -78,3 +78,23 @@ A unit pin beside OKAY's predicate table in
 [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored (OKAY in
 English and Japanese, 問題がない). [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts)
 must pass.
+
+## Done
+
+2026-09-24. Shipped the proposed row, **that does not have problems**, as
+`subjectGapGloss('BEING', 'HAVE', { object: 'PROBLEM', number: 'plural', negative: true })` on the
+OKAY block in [concepts/adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts). E31's
+Done item 5 ("no plan says it without *good* or *well*") is overturned. Re-probed against the current
+engine: every language matches the probe table.
+
+| en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|
+| that does not have problems | che non ha problemi | qui n'a pas de problèmes | das keine Probleme hat | que no tiene problemas | 問題がない | que não tem problemas |
+
+- The backend boots clean with it, and `/api/concepts` serves all seven.
+- Unit pin: "OKAY's definition" in
+  [okay-predicate.test.ts](../../../packages/engine/test/okay-predicate.test.ts).
+- e2e: "a negated HAVE in a headless relative (localize-seed A33: OKAY)" in
+  [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), English and Japanese.
+- [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts) passes. No
+  engine change. BE_FARING stays on the literal ([C43](C43-senses-tell-order-and-be-faring.md)).

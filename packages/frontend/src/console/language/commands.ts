@@ -231,7 +231,7 @@ export const COORD_VALUES: readonly ValueDef[] = [
 ];
 
 /** The conjunctions `/sub` opens an adverbial clause with (P09-E12 D9), each by the word it spells. */
-export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "after", "before", "until", "since", "though"] as const).map(
+export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "after", "before", "until", "since", "though", "as"] as const).map(
   (value) => ({ name: value, value, description: value, descriptionKey: `subordinator.value.${value}` as const }),
 );
 

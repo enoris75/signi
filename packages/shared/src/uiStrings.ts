@@ -2694,6 +2694,8 @@ export const UI_STRINGS = defineUiStrings({
   'subordinator.value.until': { subordinator: 'until', format: { capitalize: true }, fallback: 'Until' },
   'subordinator.value.since': { subordinator: 'since', format: { capitalize: true }, fallback: 'Since' },
   'subordinator.value.though': { subordinator: 'though', format: { capitalize: true }, fallback: 'Though' },
+  // Localization C41: the similative — "come", "comme", "wie", 〜ように.
+  'subordinator.value.as': { subordinator: 'as', format: { capitalize: true }, fallback: 'As' },
 
   // The spatial-relation toolbar on a route or a locative: one icon per relation, its tooltip the
   // adposition that relation is spoken with. Not a word of the lexicon — the Romance prepositions

@@ -313,7 +313,9 @@ export function resolvePhrase(
     // Under *while* its past is the imperfect of an event in progress (A250, see `imperfectivePast`);
     // under a temporal conjunction English and German say its future in the present (A251, see
     // `adverbialClauseTense`). The mood is read off the tense the plan names. It never asks (A272).
-    adverbialClause: plan.adverbialClause && verbPhrase
+    // A verbless period keeps it only as an adverbial gloss, the clause said alone ("as one expects",
+    // C41, see `PhrasePlan.adverbialGloss`), which the engines render as the whole fragment.
+    adverbialClause: plan.adverbialClause && (verbPhrase || plan.adverbialGloss)
       ? {
           conjunction: plan.adverbialClause.conjunction,
           clause: imperfectivePast(

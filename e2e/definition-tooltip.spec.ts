@@ -273,6 +273,8 @@ test.describe('word definition tooltip', () => {
     test(`a reflexive-genus verb definition renders (localize-seed C17: ${id})`, async ({ app, page }) => {
       const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
       await app.setSubject('CAT');
+      // Park the pointer: left where the list opens, it held GOVERN's tooltip open beside GO's.
+      await page.mouse.move(0, 0);
 
       await app.verbInput.fill(query);
       await expect(option).toBeVisible();
@@ -2235,6 +2237,57 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('ein Organ, mit dem man einen Gegenstand nimmt');
   });
 
+  test('a member is a part of a group (localize-seed B75: MEMBER)', async ({ app, page }) => {
+    // partOfGloss on the genus every collective hangs under; German's genitive is feminine.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('member');
+    const memberDe = page.locator('[data-testid="typeahead-option"][data-concept="MEMBER"]');
+    await expect(memberDe).toBeVisible();
+    await memberDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Teil einer Gruppe');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('member');
+    const memberJa = page.locator('[data-testid="typeahead-option"][data-concept="MEMBER"]');
+    await expect(memberJa).toBeVisible();
+    await memberJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('グループの部分');
+  });
+
+  test('a part-whole head carries a relative (localize-seed B79: FACE)', async ({ app, page }) => {
+    // FACE stands on HEAD, B79's other word: the whole is a genitive, the relative follows it.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('face');
+    const faceDe = page.locator('[data-testid="typeahead-option"][data-concept="FACE"]');
+    await expect(faceDe).toBeVisible();
+    await faceDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('der Teil eines Kopfes, der die Augen hat');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('face');
+    const faceJa = page.locator('[data-testid="typeahead-option"][data-concept="FACE"]');
+    await expect(faceJa).toBeVisible();
+    await faceJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('目がある頭の部分');
+  });
+
+  test('a topic-gap relative (localize-seed B81: ISSUE)', async ({ app, page }) => {
+    // The corpus's first gloss on a topic gap: German über + the relative, French dont.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('issue');
+    const issueDe = page.locator('[data-testid="typeahead-option"][data-concept="ISSUE"]');
+    await expect(issueDe).toBeVisible();
+    await issueDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Problem, über das man spricht');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('issue');
+    const issueFr = page.locator('[data-testid="typeahead-option"][data-concept="ISSUE"]');
+    await expect(issueFr).toBeVisible();
+    await issueFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un problème dont on parle');
+  });
+
   test('an institution stands on a verb it seeded, or on B65\'s SYSTEM (localization B64: SCHOOL, WORLD, STATE_NATION)', async ({
     app,
     page,
@@ -2284,6 +2337,76 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('国を統治するシステム');
   });
 
+  test('war is a period where nations kill, a right what one may do (localize-seed B76: WAR, RIGHT_NOUN)', async ({
+    app,
+    page,
+  }) => {
+    // The indefinite plural subject of a locative relative: French keeps its des.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('war');
+    const warFr = page.locator('[data-testid="typeahead-option"][data-concept="WAR"]');
+    await expect(warFr).toBeVisible();
+    await warFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('une période où des nations tuent');
+
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('war');
+    const warEs = page.locator('[data-testid="typeahead-option"][data-concept="WAR"]');
+    await expect(warEs).toBeVisible();
+    await warEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('un período donde unas naciones matan');
+
+    // The modal in an object-gap relative: German and Japanese keep the permission.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('right');
+    const rightDe = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_NOUN"]');
+    await expect(rightDe).toBeVisible();
+    await rightDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Handlung, die man tun darf');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('right');
+    const rightJa = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_NOUN"]');
+    await expect(rightJa).toBeVisible();
+    await rightJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('することが許される動作');
+  });
+
+  test('a community lives in one place, a service is done for others (localize-seed B77: COMMUNITY, SERVICE)', async ({
+    app,
+    page,
+  }) => {
+    // The `parts` genitive with a locative relative that agrees with GROUP.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('community');
+    const communityDe = page.locator('[data-testid="typeahead-option"][data-concept="COMMUNITY"]');
+    await expect(communityDe).toBeVisible();
+    await communityDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Gruppe von Personen, die am gleichen Ort wohnt');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('community');
+    const communityJa = page.locator('[data-testid="typeahead-option"][data-concept="COMMUNITY"]');
+    await expect(communityJa).toBeVisible();
+    await communityJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じ場所に住む人のグループ');
+
+    // The purpose complement inside an object-gap relative, on a bare mass head.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('service');
+    const serviceIt = page.locator('[data-testid="typeahead-option"][data-concept="SERVICE"]');
+    await expect(serviceIt).toBeVisible();
+    await serviceIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('lavoro che si fa per altre persone');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('service');
+    const serviceFr = page.locator('[data-testid="typeahead-option"][data-concept="SERVICE"]');
+    await expect(serviceFr).toBeVisible();
+    await serviceFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("travail qu'on fait pour d'autres personnes");
+  });
+
   // B61: P09's handling and leaving verbs. The tooltip is what tells apart the words a picker shows
   // twice — the Japanese 見る of SEE and LOOK_AT, and the three English "leave" — and GET's Italian
   // source is the plain "da" A228's fix left it with.
@@ -2295,6 +2418,37 @@ test.describe('word definition tooltip', () => {
     ['GET', 'get', 'to acquire objects from a person', 'it', 'acquisire oggetti da una persona'],
   ] as const) {
     test(`a verb definition renders (localization B61: ${id})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+
+  // B83, B84 and B86: the E24 body, ending and mind verbs. LEAD is a causative with its goal inside
+  // the caused clause; WAIT carries C29's `until` inside a verb's gloss; DIE says NO_LONGER's Spanish
+  // and Portuguese negator once, which B84's fix made so; CONSIDER is THINK's lexical topic
+  // preposition in a verb's gloss.
+  for (const [ticket, id, query, en, language, other] of [
+    ['B83', 'LEAD', 'lead', 'to cause a person to go to a place', 'de', 'eine Person veranlassen, zu einem Ort zu gehen'],
+    ['B83', 'LEAD', 'lead', 'to cause a person to go to a place', 'ja', '人が場所へ行くようにする'],
+    ['B84', 'WAIT', 'wait', 'to stay until a time', 'de', 'bis zu einer Zeit bleiben'],
+    ['B84', 'WAIT', 'wait', 'to stay until a time', 'ja', '時間まで残る'],
+    ['B84', 'DIE', 'die', 'no longer to live', 'es', 'ya no vivir'],
+    ['B84', 'DIE', 'die', 'no longer to live', 'pt', 'já não viver'],
+    ['B86', 'CONSIDER', 'consider', 'to think about a thing', 'de', 'an ein Ding denken'],
+    ['B86', 'CONSIDER', 'consider', 'to think about a thing', 'it', 'pensare a una cosa'],
+  ] as const) {
+    test(`a verb definition renders (localization ${ticket}: ${id}, ${language})`, async ({ app, page }) => {
       const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
       await app.setSubject('CAT');
 
@@ -2345,6 +2499,8 @@ test.describe('word definition tooltip', () => {
   test('a verb whose gloss may not repeat its own lemma (localization B62: DO)', async ({ app, page }) => {
     const option = page.locator('[data-testid="typeahead-option"][data-concept="DO"]');
     await app.setSubject('CAT');
+    // Park the pointer: left where the list opens, it held UNDO's tooltip open beside DO's.
+    await page.mouse.move(0, 0);
 
     await app.verbInput.fill('do');
     await expect(option).toBeVisible();
@@ -2428,6 +2584,95 @@ test.describe('word definition tooltip', () => {
     await expect(correctJa).toBeVisible();
     await correctJa.hover();
     await expect(page.locator(tooltip)).toHaveText('誤りがない');
+  });
+
+  test('a dimension gloss on the new LENGTH (localization B87: LONG)', async ({ app, page }) => {
+    // BIG's "of great size" on LENGTH, which B87 seeded for it.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('long');
+    const longDe = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longDe).toBeVisible();
+    await longDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von großer Länge');
+
+    // French grand precedes its noun and agrees with the feminine longueur.
+    await app.setUiLanguage('fr');
+    await app.openSubjectAdjective('long');
+    const longFr = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longFr).toBeVisible();
+    await longFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('de grande longueur');
+  });
+
+  test('SAME negated as a predicate (localization B87: DIFFERENT)', async ({ app, page }) => {
+    // The predicate SAME keeps its article in Spanish; Japanese negates the の-less 同じ.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('different');
+    const differentJa = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentJa).toBeVisible();
+    await differentJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じではない');
+
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('different');
+    const differentEs = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentEs).toBeVisible();
+    await differentEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que no es el mismo');
+  });
+
+  test('a many subject inside a locative relative (localization B78: CITY)', async ({ app, page }) => {
+    // German relativises the place on an with the dative; Japanese fronts the clause, 多くの included.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('city');
+    const cityDe = page.locator('[data-testid="typeahead-option"][data-concept="CITY"]');
+    await expect(cityDe).toBeVisible();
+    await cityDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein großer Ort, an dem viele Personen wohnen');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('city');
+    const cityJa = page.locator('[data-testid="typeahead-option"][data-concept="CITY"]');
+    await expect(cityJa).toBeVisible();
+    await cityJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('多くの人が住む大きい場所');
+  });
+
+  test('a part-whole genitive carrying a relative (localization B78: DOOR)', async ({ app, page }) => {
+    // French elides the relative's que before the generic on; Portuguese says it with the impersonal se.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('door');
+    const doorFr = page.locator('[data-testid="typeahead-option"][data-concept="DOOR"]');
+    await expect(doorFr).toBeVisible();
+    await doorFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("une partie d'un mur qu'on ouvre");
+
+    await app.setUiLanguage('pt');
+    await app.subjectInput.fill('door');
+    const doorPt = page.locator('[data-testid="typeahead-option"][data-concept="DOOR"]');
+    await expect(doorPt).toBeVisible();
+    await doorPt.hover();
+    await expect(page.locator(tooltip)).toHaveText('uma parte de uma parede que se abre');
+  });
+
+  test('public is open for all people (localize-seed B88: PUBLIC)', async ({ app, page }) => {
+    // A predicate adjective with a purpose complement: Spanish takes estar, OPEN_ADJECTIVE's copula.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('public');
+    const publicEs = page.locator('[data-testid="typeahead-option"][data-concept="PUBLIC"]');
+    await expect(publicEs).toBeVisible();
+    await publicEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que está abierto para todas las personas');
+
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('public');
+    const publicJa = page.locator('[data-testid="typeahead-option"][data-concept="PUBLIC"]');
+    await expect(publicJa).toBeVisible();
+    await publicJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('すべての人のために開いている');
   });
 
   test('a place, a manner and a fact adverb (localization B67: HERE, ALSO, REALLY)', async ({
@@ -2748,6 +2993,81 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('a questo tempo');
   });
 
+  // P09-E24's time, degree and place words (localization B80, B89, B90): one row per ticket.
+  test('a frequency adverb as a locative, and a time adverb as "after" (localization B80: OFTEN, LATER)', async ({
+    app,
+    page,
+  }) => {
+    // OFTEN is the locative complement gloss on CASE_INSTANCE under `many`: REPEATEDLY has "at many times".
+    await app.setUiLanguage('de');
+    await app.buildClause('CAT', 'EAT');
+    const often = page.locator('[data-testid="typeahead-option"][data-concept="OFTEN"]');
+    const later = page.locator('[data-testid="typeahead-option"][data-concept="LATER"]');
+    await app.openVerbAdverb('oft');
+    await expect(often).toBeVisible();
+    await often.hover();
+    await expect(page.locator(tooltip)).toHaveText('in vielen Fällen');
+
+    // Japanese よく is also WELL's word; the row is OFTEN's by its concept.
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('よく');
+    await expect(often).toBeVisible();
+    await often.hover();
+    await expect(page.locator(tooltip)).toHaveText('多くの場合で');
+
+    // LATER is C29's `after` relation on TIME, with NOW's "this".
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('plus tard');
+    await expect(later).toBeVisible();
+    await later.hover();
+    await expect(page.locator(tooltip)).toHaveText('après ce temps');
+
+    await app.setUiLanguage('es');
+    await app.openVerbAdverb('más tarde');
+    await expect(later).toBeVisible();
+    await later.hover();
+    await expect(page.locator(tooltip)).toHaveText('después de este tiempo');
+  });
+
+  test('a place adverb on FAR, and an intensifier no picker offers (localization B89: FAR_AWAY, A_LITTLE)', async ({
+    app,
+    page,
+  }) => {
+    await app.setUiLanguage('de');
+    await app.buildClause('CAT', 'EAT');
+    const farAway = page.locator('[data-testid="typeahead-option"][data-concept="FAR_AWAY"]');
+    await app.openVerbAdverb('weit');
+    await expect(farAway).toBeVisible();
+    await farAway.hover();
+    await expect(page.locator(tooltip)).toHaveText('an einem fernen Ort');
+
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('遠く');
+    await expect(farAway).toBeVisible();
+    await farAway.hover();
+    await expect(page.locator(tooltip)).toHaveText('遠い場所で');
+
+    // A_LITTLE is an intensifier, like VERY: the verb's adverb picker leaves it out, so its gloss —
+    // VERY's with LOW — is checked where the tooltip reads it from.
+    await app.openVerbAdverb('少し');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="A_LITTLE"]')).toHaveCount(0);
+    const res = await page.request.get('/api/concepts?role=adverb');
+    const { concepts } = (await res.json()) as { concepts: { id: string; definitions?: Record<string, string> }[] };
+    expect(concepts.find((c) => c.id === 'A_LITTLE')?.definitions).toMatchObject({
+      de: 'zu einer niedrigen Ebene', ja: '低い段階へ',
+    });
+  });
+
+  test('the universal thing pronoun is "all things" (localization B90: EVERYTHING)', async ({ page }) => {
+    // EVERYTHING is a pronoun of the indefinite slot, which the person chooser does not offer (as
+    // SOMETHING); its gloss is SOMETHING's genus under `all`.
+    const res = await page.request.get('/api/concepts?role=pronoun');
+    const { concepts } = (await res.json()) as { concepts: { id: string; definitions?: Record<string, string> }[] };
+    expect(concepts.find((c) => c.id === 'EVERYTHING')?.definitions).toMatchObject({
+      en: 'all things', de: 'alle Dinge', ja: 'すべてのもの',
+    });
+  });
+
   // P11's kin terms (localization B68–B74): one row per ticket, each on what that ticket's shape
   // turns on — the coordination, the relative clause that goes around a genus, the predicative a
   // copula wants, the genitive, the chain of two, the negated relative and the adverb Japanese needs.
@@ -2904,5 +3224,103 @@ test.describe('word definition tooltip', () => {
     await expect(partnerJa).toBeVisible();
     await partnerJa.hover();
     await expect(page.locator(tooltip)).toHaveText('一緒に住む人');
+  });
+
+  test('a bare plural head over an object gap (localize-seed A32: NEWS)', async ({ app, page }) => {
+    // English: the report and its recency, on FACT; the plural head suits a plural-only word.
+    await app.subjectInput.fill('news');
+    const newsEn = page.locator('[data-testid="typeahead-option"][data-concept="NEWS"]');
+    await expect(newsEn).toBeVisible();
+    await newsEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('facts that one has told recently');
+
+    // German: the relative pronoun agrees with the plural Tatsachen, the perfect goes last.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('news');
+    const newsDe = page.locator('[data-testid="typeahead-option"][data-concept="NEWS"]');
+    await expect(newsDe).toBeVisible();
+    await newsDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Tatsachen, die man kürzlich erzählt hat');
+  });
+
+  test('a negated HAVE in a headless relative (localize-seed A33: OKAY)', async ({ app, page }) => {
+    // English: fine without saying good or well.
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('okay');
+    const okayEn = page.locator('[data-testid="typeahead-option"][data-concept="OKAY"]');
+    await expect(okayEn).toBeVisible();
+    await okayEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('that does not have problems');
+
+    // Japanese: the everyday paraphrase of 大丈夫, with no head.
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('okay');
+    const okayJa = page.locator('[data-testid="typeahead-option"][data-concept="OKAY"]');
+    await expect(okayJa).toBeVisible();
+    await okayJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('問題がない');
+  });
+
+  // B82: the nouns of ranks 201–400. KIND_SORT's relative agrees with GROUP across the `parts`
+  // genitive; GAME's French purpose takes the generic article the engine now gives a bare mass noun.
+  for (const [id, query, language, rendered] of [
+    ['KIND_SORT', 'kind', 'de', 'eine Gruppe von Dingen, die die gleichen Merkmale hat'],
+    ['KIND_SORT', 'kind', 'ja', '同じ特徴があるもののグループ'],
+    ['GAME', 'game', 'fr', "une action qu'on fait pour la joie"],
+  ] as const) {
+    test(`a noun definition renders (localization B82: ${id}, ${language})`, async ({ app, page }) => {
+      await app.setUiLanguage(language);
+      await app.subjectInput.fill(query);
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(rendered);
+    });
+  }
+
+  // B85: the verbs of giving and getting. PAY is GIVE's dative recipient with a mass object, PROVIDE
+  // a causative over HAVE with a bare plural object, WIN the first gloss on B82's GAME.
+  for (const [id, query, en, language, other] of [
+    ['PAY', 'pay', 'to give money to a person', 'de', 'einer Person Geld geben'],
+    ['PAY', 'pay', 'to give money to a person', 'ja', '人にお金をあげる'],
+    ['PROVIDE', 'provide', 'to cause a person to have objects', 'fr', 'induire une personne à avoir des objets'],
+    ['PROVIDE', 'provide', 'to cause a person to have objects', 'pt', 'induzir uma pessoa a ter objetos'],
+    ['WIN', 'win', 'to be best in a game', 'de', 'in einem Spiel am besten sein'],
+  ] as const) {
+    test(`a verb definition renders (localization B85: ${id}, ${language})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+  test('an adverbial clause said alone (localization C41: OF_COURSE)', async ({ app, page }) => {
+    // The similative clause is the whole gloss, as it follows a verb: "as one expects".
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('of course');
+    const ofCourse = page.locator('[data-testid="typeahead-option"][data-concept="OF_COURSE"]');
+    await expect(ofCourse).toBeVisible();
+    await ofCourse.hover();
+    await expect(page.locator(tooltip)).toHaveText('as one expects');
+
+    // French resumes what one expects with the pronominal s'attendre à and its "y": "comme on
+    // attend" would be "as one waits".
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('bien sûr');
+    const ofCourseFr = page.locator('[data-testid="typeahead-option"][data-concept="OF_COURSE"]');
+    await expect(ofCourseFr).toBeVisible();
+    await ofCourseFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("comme on s'y attend");
   });
 });

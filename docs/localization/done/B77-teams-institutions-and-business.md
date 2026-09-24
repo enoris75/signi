@@ -105,3 +105,32 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 COMMUNITY in German and Japanese (the `parts` genitive with a locative relative: *eine Gruppe von
 Personen, die am gleichen Ort wohnt*, 同じ場所に住む人のグループ) and SERVICE in Italian and French (the
 purpose complement inside an object-gap relative).
+
+## Done
+
+Shipped 2026-09-24. **Five words seeded** in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts), placed after COMPANY_BUSINESS: TEAM,
+COMMUNITY, UNIVERSITY, SERVICE and BUSINESS. It also has **five glosses**, five of five, and nothing is
+literal. They are pinned in
+[government-and-institutions.test.ts](../../../packages/engine/test/government-and-institutions.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| TEAM | a group that plays | un gruppo che gioca | un groupe qui joue | eine Gruppe, die spielt | un grupo que juega | 遊ぶグループ | um grupo que joga |
+| COMMUNITY | a group of people that lives in the same place | un gruppo di persone che abita nello stesso luogo | un groupe de personnes qui habite dans le même lieu | eine Gruppe von Personen, die am gleichen Ort wohnt | un grupo de personas que vive en el mismo lugar | 同じ場所に住む人のグループ | um grupo de pessoas que mora no mesmo lugar |
+| UNIVERSITY | a school where adult people learn | una scuola dove persone adulte imparano | une école où des personnes adultes apprennent | eine Schule, in der erwachsene Personen lernen | una escuela donde unas personas adultas aprenden | 大人の人が学ぶ学校 | uma escola onde umas pessoas adultas aprendem |
+| SERVICE | work that one does for other people | lavoro che si fa per altre persone | travail qu'on fait pour d'autres personnes | Arbeit, die man für andere Personen tut | trabajo que se hace para otras personas | 別の人のためにする仕事 | trabalho que se faz para outras pessoas |
+| BUSINESS | work with which one trades | lavoro con il quale si commercia | travail avec lequel on commerce | Arbeit, mit der man handelt | trabajo con el que se comercia | 売買する仕事 | trabalho com o qual se comercia |
+
+Every render matches the probe table.
+
+1. **TEAM's Japanese 遊ぶ is accepted** (reading 1). It is PLAY_GAME's lexeme, and PLAY_GAME's own gloss
+   uses it too. A match concept (B82) could replace it later.
+2. **BUSINESS keeps the singular mass words** (*commercio, commerce, Handel*), even though P09-E41 has
+   landed. The plural *affari / affaires / negocios / negócios* are "dealings", not the trade that the
+   synonym *commerce* names. COMPANY_BUSINESS keeps `synonym: 'business'`. German seeds the compound
+   stem *Handels-*.
+3. **`isA`**: TEAM and COMMUNITY are under GROUP, and UNIVERSITY is under SCHOOL
+   (SCHOOL → BUILDING → PLACE). SERVICE and BUSINESS are roots.
+4. **e2e**: one test after B76's in [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts)
+   covers COMMUNITY in German and Japanese and SERVICE in Italian and French.

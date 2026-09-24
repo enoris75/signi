@@ -33,6 +33,13 @@ describe('translateSubordinator', () => {
     });
   });
 
+  // Localization C41: the similative, Japanese ように on the plain form it closes.
+  it('cites the similative as', () => {
+    expect(byLanguage('as')).toEqual({
+      en: 'as', it: 'come', fr: 'comme', de: 'wie', es: 'como', pt: 'como', ja: '〜ように',
+    });
+  });
+
   it('has a word for every conjunction in every language', () => {
     for (const c of SUBORDINATING_CONJUNCTIONS)
       expect(translateSubordinator(c).every((t) => t.text && t.text !== '—')).toBe(true);

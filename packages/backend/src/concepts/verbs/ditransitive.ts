@@ -156,6 +156,155 @@ export const ditransitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // P09-E24's *pay* (rank 258; localization B85): "to give money to a person", GIVE with money as
+    // SELL is GIVE for money. The sum or the bill is the object and the payee GIVE's `terminus`
+    // (German dative: "dem Mann das Geld bezahlen"). Italian pagare keeps its h before i and e
+    // (paghi, pagherò); French payer takes the ai of the y-verbs where the ending is mute (paie,
+    // paierai); German bezahlen is inseparable (bezahlt, no ge-); Spanish pagar writes gu before e
+    // (pagué); Portuguese pagar's participle is the short pago under the copula.
+    id: 'PAY',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'cause'],
+    description: 'to give money in return for something',
+    definition: infinitiveGloss('GIVE', {
+      object: 'MONEY',
+      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
+    emoji: '💳',
+    forms: {
+      en: {
+        base: 'pay',
+        '1sg_present': 'pay', '2sg_present': 'pay', '3sg_present': 'pays',
+        '1pl_present': 'pay', '2pl_present': 'pay', '3pl_present': 'pay',
+        past: 'paid',
+      },
+      it: {
+        base: 'pagare',
+        '1sg_present': 'pago', '2sg_present': 'paghi', '3sg_present': 'paga',
+        '1pl_present': 'paghiamo', '2pl_present': 'pagate', '3pl_present': 'pagano',
+        '1sg_past': 'pagai', '2sg_past': 'pagasti', '3sg_past': 'pagò',
+        '1pl_past': 'pagammo', '2pl_past': 'pagaste', '3pl_past': 'pagarono',
+        '1sg_future': 'pagherò', '2sg_future': 'pagherai', '3sg_future': 'pagherà',
+        '1pl_future': 'pagheremo', '2pl_future': 'pagherete', '3pl_future': 'pagheranno',
+      },
+      fr: {
+        base: 'payer',
+        '1sg_present': 'paie', '2sg_present': 'paies', '3sg_present': 'paie',
+        '1pl_present': 'payons', '2pl_present': 'payez', '3pl_present': 'paient',
+        '1sg_past': 'payai', '2sg_past': 'payas', '3sg_past': 'paya',
+        '1pl_past': 'payâmes', '2pl_past': 'payâtes', '3pl_past': 'payèrent',
+        '1sg_future': 'paierai', '2sg_future': 'paieras', '3sg_future': 'paiera',
+        '1pl_future': 'paierons', '2pl_future': 'paierez', '3pl_future': 'paieront',
+      },
+      de: {
+        base: 'bezahlen', terminus_dative: '1',
+        '1sg_present': 'bezahle', '2sg_present': 'bezahlst', '3sg_present': 'bezahlt',
+        '1pl_present': 'bezahlen', '2pl_present': 'bezahlt', '3pl_present': 'bezahlen',
+        '1sg_past': 'bezahlte', '2sg_past': 'bezahltest', '3sg_past': 'bezahlte',
+        '1pl_past': 'bezahlten', '2pl_past': 'bezahltet', '3pl_past': 'bezahlten',
+      },
+      es: {
+        base: 'pagar',
+        '1sg_present': 'pago', '2sg_present': 'pagas', '3sg_present': 'paga',
+        '1pl_present': 'pagamos', '2pl_present': 'pagáis', '3pl_present': 'pagan',
+        '1sg_past': 'pagué', '2sg_past': 'pagaste', '3sg_past': 'pagó',
+        '1pl_past': 'pagamos', '2pl_past': 'pagasteis', '3pl_past': 'pagaron',
+        '1sg_future': 'pagaré', '2sg_future': 'pagarás', '3sg_future': 'pagará',
+        '1pl_future': 'pagaremos', '2pl_future': 'pagaréis', '3pl_future': 'pagarán',
+      },
+      ja: {
+        base: '払う',
+        reading: 'はらう',
+        masu_present: '払います',
+        masu_present_reading: 'はらいます',
+      },
+      pt: {
+        base: 'pagar',
+        '1sg_present': 'pago', '2sg_present': 'paga', '3sg_present': 'paga',
+        '1pl_present': 'pagamos', '2pl_present': 'pagam', '3pl_present': 'pagam',
+        '1sg_past': 'paguei', '2sg_past': 'pagou', '3sg_past': 'pagou',
+        '1pl_past': 'pagamos', '2pl_past': 'pagaram', '3pl_past': 'pagaram',
+        '1sg_future': 'pagarei', '2sg_future': 'pagará', '3sg_future': 'pagará',
+        '1pl_future': 'pagaremos', '2pl_future': 'pagarão', '3pl_future': 'pagarão',
+      },
+    },
+  },
+
+  {
+    // P09-E24's *provide* (rank 272; localization B85): "to cause a person to have objects", the
+    // causative of HAVE, as PUT is the causative of BE (C08). The thing is the object and the one
+    // provided for GIVE's `terminus`. Italian fornire takes the -isc- infix, French fournir is a
+    // second-group -ir (fournissons), German liefern the dative, Portuguese fornecer writes ç before
+    // o and a (forneço, forneça).
+    id: 'PROVIDE',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'cause'],
+    description: 'to make something available to someone',
+    definition: causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'HAVE', object: 'OBJECT_THING', number: 'plural' }),
+    synonym: 'supply',
+    emoji: '📦',
+    forms: {
+      en: {
+        base: 'provide',
+        '1sg_present': 'provide', '2sg_present': 'provide', '3sg_present': 'provides',
+        '1pl_present': 'provide', '2pl_present': 'provide', '3pl_present': 'provide',
+        past: 'provided',
+      },
+      it: {
+        base: 'fornire',
+        '1sg_present': 'fornisco', '2sg_present': 'fornisci', '3sg_present': 'fornisce',
+        '1pl_present': 'forniamo', '2pl_present': 'fornite', '3pl_present': 'forniscono',
+        '1sg_past': 'fornii', '2sg_past': 'fornisti', '3sg_past': 'fornì',
+        '1pl_past': 'fornimmo', '2pl_past': 'forniste', '3pl_past': 'fornirono',
+        '1sg_future': 'fornirò', '2sg_future': 'fornirai', '3sg_future': 'fornirà',
+        '1pl_future': 'forniremo', '2pl_future': 'fornirete', '3pl_future': 'forniranno',
+      },
+      fr: {
+        base: 'fournir',
+        '1sg_present': 'fournis', '2sg_present': 'fournis', '3sg_present': 'fournit',
+        '1pl_present': 'fournissons', '2pl_present': 'fournissez', '3pl_present': 'fournissent',
+        '1sg_past': 'fournis', '2sg_past': 'fournis', '3sg_past': 'fournit',
+        '1pl_past': 'fournîmes', '2pl_past': 'fournîtes', '3pl_past': 'fournirent',
+        '1sg_future': 'fournirai', '2sg_future': 'fourniras', '3sg_future': 'fournira',
+        '1pl_future': 'fournirons', '2pl_future': 'fournirez', '3pl_future': 'fourniront',
+      },
+      de: {
+        base: 'liefern', terminus_dative: '1',
+        '1sg_present': 'liefere', '2sg_present': 'lieferst', '3sg_present': 'liefert',
+        '1pl_present': 'liefern', '2pl_present': 'liefert', '3pl_present': 'liefern',
+        '1sg_past': 'lieferte', '2sg_past': 'liefertest', '3sg_past': 'lieferte',
+        '1pl_past': 'lieferten', '2pl_past': 'liefertet', '3pl_past': 'lieferten',
+      },
+      es: {
+        base: 'proporcionar',
+        '1sg_present': 'proporciono', '2sg_present': 'proporcionas', '3sg_present': 'proporciona',
+        '1pl_present': 'proporcionamos', '2pl_present': 'proporcionáis', '3pl_present': 'proporcionan',
+        '1sg_past': 'proporcioné', '2sg_past': 'proporcionaste', '3sg_past': 'proporcionó',
+        '1pl_past': 'proporcionamos', '2pl_past': 'proporcionasteis', '3pl_past': 'proporcionaron',
+        '1sg_future': 'proporcionaré', '2sg_future': 'proporcionarás', '3sg_future': 'proporcionará',
+        '1pl_future': 'proporcionaremos', '2pl_future': 'proporcionaréis', '3pl_future': 'proporcionarán',
+      },
+      ja: {
+        base: '提供する',
+        reading: 'ていきょうする',
+        masu_present: '提供します',
+        masu_present_reading: 'ていきょうします',
+      },
+      pt: {
+        base: 'fornecer',
+        '1sg_present': 'forneço', '2sg_present': 'fornece', '3sg_present': 'fornece',
+        '1pl_present': 'fornecemos', '2pl_present': 'fornecem', '3pl_present': 'fornecem',
+        '1sg_past': 'forneci', '2sg_past': 'forneceu', '3sg_past': 'forneceu',
+        '1pl_past': 'fornecemos', '2pl_past': 'forneceram', '3pl_past': 'forneceram',
+        '1sg_future': 'fornecerei', '2sg_future': 'fornecerá', '3sg_future': 'fornecerá',
+        '1pl_future': 'forneceremos', '2pl_future': 'fornecerão', '3pl_future': 'fornecerão',
+      },
+    },
+  },
+
+  {
     // The genus of GIVE and SEND (B15) and of EXPORT and IMPORT (B19) — the verb of moving something
     // from one holder or place to another that their dictionary definitions cite as their genus. Besides GIVE's recipient (`terminus`) it licenses the place it moves from and to
     // (`source` / `direction`). English doubles its r (transferred / transferring), Italian

@@ -2,6 +2,7 @@ import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, De
 import type { SubordinatingConjunction, Tense } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import type { CardinalTable } from '../../functions/numeralWord.js';
+import type { JaVerbRow } from './ja.types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -273,6 +274,9 @@ export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; 
   until: { word: 'まで', tense: 'present', plain: true, reach: true },
   since: { word: 'から', tense: 'past', plain: true, te: true },
   though: { word: 'のに', held: true },
+  // Localization C41: ように says the likeness on the plain form of the clause's own tense —
+  // 犬が走るように, 犬が走ったように, 予想するように ("as one expects").
+  as: { word: 'ように' },
 };
 
 /**
@@ -394,4 +398,21 @@ export const CARDINALS: CardinalTable = {
   5: { word: '五' }, 6: { word: '六' }, 7: { word: '七' }, 8: { word: '八' },
   9: { word: '九' }, 10: { word: '十' }, 11: { word: '十一' }, 12: { word: '十二' },
   24: { word: '二十四' },
+};
+
+// A verb-form adjective's endings (see `jaAdjClass`'s `ru` class, localization B87). An ichidan verb
+// writes nothing for its continuative and negative bases (大きすぎ + ます, 大きすぎ + ない); a godan
+// verb's row is picked by its dictionary form's last kana (違う → 違い, 違わ, 違って, 違った).
+export const JA_ICHIDAN: JaVerbRow = { u: 'る', i: '', a: '', te: 'て', ta: 'た' };
+// A noun + する verb (実在する) conjugates する itself, on the noun: 実在します, 実在しない, 実在した.
+export const JA_SURU_ROW: JaVerbRow = { u: 'する', i: 'し', a: 'し', te: 'して', ta: 'した' };
+export const JA_GODAN: Record<string, JaVerbRow> = {
+  う: { u: 'う', i: 'い', a: 'わ', te: 'って', ta: 'った' },
+  つ: { u: 'つ', i: 'ち', a: 'た', te: 'って', ta: 'った' },
+  く: { u: 'く', i: 'き', a: 'か', te: 'いて', ta: 'いた' },
+  ぐ: { u: 'ぐ', i: 'ぎ', a: 'が', te: 'いで', ta: 'いだ' },
+  す: { u: 'す', i: 'し', a: 'さ', te: 'して', ta: 'した' },
+  む: { u: 'む', i: 'み', a: 'ま', te: 'んで', ta: 'んだ' },
+  ぶ: { u: 'ぶ', i: 'び', a: 'ば', te: 'んで', ta: 'んだ' },
+  ぬ: { u: 'ぬ', i: 'に', a: 'な', te: 'んで', ta: 'んだ' },
 };

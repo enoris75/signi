@@ -46,6 +46,10 @@ import { resolve } from './resolve.js';
  * very big", A258).
  * `attributive_drop_degrees` drops it only before a noun (`attributive`): English has "just as big"
  * but no "a just as big cat".
+ *
+ * `attributive` is the word said instead of `base` before a noun, where the plain one would stack
+ * a second article: A_LITTLE is "a little tired" but "a slightly big cat", German "ein bisschen
+ * müde" but "ein etwas großer Kater" (localization B89). A degree's own word still wins over it.
  */
 export function applyIntensifier(
   adjective: ConceptForms,
@@ -64,10 +68,11 @@ export function applyIntensifier(
   const plain = attributive && listed('attributive_plain_degrees');
   const kind = plain ? undefined : degreeKind(degree, (word['comparative_degrees'] ?? 'more,less').split(','));
   const own = kind ? word[kind] : undefined;
-  adjective.forms['intensifier'] = own ?? base;
+  const before = attributive ? word['attributive'] : undefined;
+  adjective.forms['intensifier'] = own ?? before ?? base;
   const position = (own && kind ? word[`${kind}_position`] : undefined) ?? word['position'] ?? 'pre';
   adjective.forms['intensifier_position'] = position;
-  const reading = own && kind ? word[`${kind}_reading`] : word['reading'];
+  const reading = own && kind ? word[`${kind}_reading`] : before ? word['attributive_reading'] : word['reading'];
   if (reading) adjective.forms['intensifier_reading'] = reading;
   if (own && kind) adjective.forms[`intensifier_${kind}`] = '1';
 }

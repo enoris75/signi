@@ -17,6 +17,10 @@ const LEX: Record<string, Record<string, Record<string, string>>> = {
     pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
     ja: { base: 'すぎる', position: 'suffix', reading: 'すぎる', comparative: 'すぎる', comparative_degrees: 'more' },
   },
+  A_LITTLE: {
+    en: { base: 'a little', attributive: 'slightly', drop_degrees: 'equally,most,least' },
+    ja: { base: '少し', reading: 'すこし', comparative: '少し', comparative_reading: 'すこし', comparative_degrees: 'more' },
+  },
   MUTE: { en: {} },
 };
 const lookup = (id: string, language: string) => {
@@ -140,5 +144,24 @@ describe('applyIntensifier', () => {
     const too = adj('most');
     applyIntensifier(too, 'TOO', 'en', lookup);
     expect(too.forms['intensifier']).toBe('too');
+  });
+
+  // Localization B89: before a noun a lexeme may say another word, which a degree's own still beats.
+  test('an attributive word replaces the base before a noun only', () => {
+    const predicate = adj();
+    applyIntensifier(predicate, 'A_LITTLE', 'en', lookup);
+    expect(predicate.forms['intensifier']).toBe('a little');
+    const attributive = adj();
+    applyIntensifier(attributive, 'A_LITTLE', 'en', lookup, true);
+    expect(attributive.forms['intensifier']).toBe('slightly');
+    const compared = adj('more');
+    applyIntensifier(compared, 'A_LITTLE', 'en', lookup, true);
+    expect(compared.forms['intensifier']).toBe('slightly');
+    const ja = adj('more');
+    applyIntensifier(ja, 'A_LITTLE', 'ja', lookup, true);
+    expect(ja.forms).toMatchObject({ intensifier: '少し', intensifier_reading: 'すこし', intensifier_comparative: '1' });
+    const superlative = adj('most');
+    applyIntensifier(superlative, 'A_LITTLE', 'en', lookup, true);
+    expect(superlative.forms['intensifier']).toBeUndefined();
   });
 });

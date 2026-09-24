@@ -27,6 +27,16 @@ describe('agreeAdjFr', () => {
     expect(agreeAdjFr('jaloux', 'masc', true)).toBe('jaloux');
   });
 
+  // Localization B87: the +e rule would write "longe", "blance" and "publice".
+  test('long, blanc and public are seeded whole', () => {
+    expect(['masc', 'fem'].flatMap((g) => [false, true].map((pl) => agreeAdjFr('long', g, pl))))
+      .toEqual(['long', 'longs', 'longue', 'longues']);
+    expect(['masc', 'fem'].flatMap((g) => [false, true].map((pl) => agreeAdjFr('blanc', g, pl))))
+      .toEqual(['blanc', 'blancs', 'blanche', 'blanches']);
+    expect(['masc', 'fem'].flatMap((g) => [false, true].map((pl) => agreeAdjFr('public', g, pl))))
+      .toEqual(['public', 'publics', 'publique', 'publiques']);
+  });
+
   test('-f → -ve', () => {
     expect(agreeAdjFr('négatif', 'fem', false)).toBe('négative');
     expect(agreeAdjFr('négatif', 'masc', true)).toBe('négatifs');
@@ -67,6 +77,14 @@ describe('agreeAdjFr', () => {
     expect(agreeAdjFr('cadet', 'fem', false)).toBe('cadette');
     expect(agreeAdjFr('cadet', 'fem', true)).toBe('cadettes');
     expect(agreeAdjFr('cadet', 'masc', true)).toBe('cadets');
+  });
+
+  // PUBLIC (localization B88): the rule's default would give "publice" / "publices".
+  test('public takes -que in the feminine', () => {
+    expect(agreeAdjFr('public', 'masc', false)).toBe('public');
+    expect(agreeAdjFr('public', 'fem', false)).toBe('publique');
+    expect(agreeAdjFr('public', 'masc', true)).toBe('publics');
+    expect(agreeAdjFr('public', 'fem', true)).toBe('publiques');
   });
 
   // ELDER (P11) needs no entry: -é takes the regular +e / +s, "mon frère aîné", "mes sœurs aînées".

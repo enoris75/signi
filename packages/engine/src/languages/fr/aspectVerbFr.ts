@@ -52,7 +52,10 @@ export function aspectVerbFr(
     // An être participle agrees with the subject ("elle est allée"). An avoir participle does NOT
     // agree with the subject ("elle a vu"), but DOES agree with a PRECEDING direct object — the
     // accord du COD antéposé: "la souris que le chat a mangée". Without one it keeps its base.
-    tail: pre(etre
+    // A pronominal verb whose clitic is the INDIRECT object (se rappeler: one recalls a thing *to*
+    // oneself, `reflexive_indirect`) agrees as an avoir participle does, never with the subject:
+    // "elle s'est rappelé l'homme", "l'homme qu'elle s'est rappelé" (localization B86).
+    tail: pre(etre && verbForms['reflexive_indirect'] !== '1'
       ? agreeParticipleFr(part, subjectForms)
       : precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part),
   };

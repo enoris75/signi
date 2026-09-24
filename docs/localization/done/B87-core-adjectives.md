@@ -125,3 +125,68 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 LONG in German and French (the dimension gloss on the new LENGTH: *von großer Länge*, *de grande
 longueur*) and DIFFERENT in Japanese and Spanish (the negated predicate SAME: 同じではない, *que no es el
 mismo*).
+
+## Done
+
+2026-09-24. **Nine words seeded, five glosses shipped, three literal by design**, plus the engine
+work the ticket named and one piece it did not forecast.
+
+**Seeded.** LENGTH (noun, `dimensionRelation: 'extent'`, beside HEIGHT in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts)); DIFFERENT, SURE (`transient`),
+REAL_EXISTING (`synonym: 'existing'`), REAL_GENUINE (`synonym: 'genuine'`), IMPORTANT, LONG, BLACK
+and WHITE in [adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts). All eight
+adjectives are in `EVERY_ADJECTIVE`. Three Japanese forms changed from the proposals, because the
+predicate showed them wrong:
+
+- **REAL_EXISTING is 実在する**, not 現実の. 家は現実です says "the house is reality". 実在する is a
+  する verb (`ja_verbal`), so the forms are 実在する家 and 家は実在します.
+- **REAL_GENUINE is 本物の**, not 本当の. 本当の is "true" (本当の話); 家は本物です is the genuine
+  article.
+- **SURE is 確信した**, not 確かな. 確かな is said of a fact, not of a person. 確信した is a state, as
+  TIRED's 疲れた is: 猫は確信しています.
+
+The other forms are the proposals as given.
+
+**Glosses** (en · it · fr · de · es · ja · pt):
+
+| concept | renders |
+|---|---|
+| DIFFERENT | that is not the same · che non è lo stesso · qui n'est pas le même · der nicht gleich ist · que no es el mismo · 同じではない · que não é o mesmo |
+| SURE | who knows well · che sa bene · qui sait bien · die gut weiß · que sabe bien · よく知る · que sabe bem |
+| REAL_EXISTING | that is in reality · che è in realtà · qui est en réalité · der in Wirklichkeit ist · que está en realidad · 現実にある · que está em realidade |
+| IMPORTANT | of high value · di valore alto · de valeur haute · von hohem Wert · de valor alto · 値が高い · de valor alto |
+| LONG | of great length · di grande lunghezza · de grande longueur · von großer Länge · de longitud grande · 長さが大きい · de comprimento grande |
+
+These match the probe table. Readings 2 (SURE is weak) and 3 (the Spanish *estar*) were taken as
+the ticket leaves them: each gloss is still true of its word and unlike any shipped one.
+
+**Literal by design**: REAL_GENUINE, BLACK and WHITE (readings 4 and 5). LENGTH is a dimension
+root, as SIZE is.
+
+**Engine changes.**
+
+- `FR_ADJ_IRREGULAR` gets rows for *long*, *blanc* and *public*: *longue*, *blanche*, *publique*.
+  B88's PUBLIC row is included, as this ticket asked. B88 should not add it again.
+- **REAL_GENUINE goes before the noun** in Italian (`PRENOMINAL_DETERMINER`, so it leaves the one
+  qualifying slot free: *un vero grande gatto*) and in French. It does so in the Spanish and
+  Portuguese `PRENOMINAL` sets too, where the ticket named only it/fr: *un verdadero problema*, with
+  *una historia verdadera* after the noun meaning "true", is the same split.
+- **Japanese verb-adjectives.** 違う was the ticket's check, and the TIRED path did not cover it:
+  `ja_verbal` assumed an ichidan verb, and the predicate came out as 家は違ます. `jaAdjClass`'s `ru`
+  class now carries the verb's row of kana (`JaVerbRow`: `JA_ICHIDAN`, `JA_GODAN` by the last kana,
+  `JA_SURU_ROW`). Every site builds on it: the copula (違います, 違いませんでした), the prenominal
+  (違わなかった), the connectives (違って, 違っても, 違ったか), the lowered degree (それほど違わない), the
+  ように complement (違うように思える), 続ける (違い続けます), 〜たい (違いたい) and the 〜すぎる suffix
+  (違いすぎる). The する row is what REAL_EXISTING's 実在する needed.
+
+**Tests.** [core-adjectives-e24.test.ts](../../../packages/engine/test/core-adjectives-e24.test.ts)
+pins the glosses, the literal verdicts, LENGTH's paradigm, each adjective attributive and
+predicative on HOUSE, the comparatives (*länger*, *schwärzer*, *weißer*), the positions, and the
+Japanese verb-adjective paths with an ichidan regression. `agreeAdjFr.test.ts` and
+`jaAdjClass.test.ts` pin the unit changes. Two e2e rows are in
+[definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts): LONG in de and fr, and
+DIFFERENT in ja and es.
+
+**Left as found.** English compares *real* by inflection (*realer*, *realest*), because the syllable
+rule counts one syllable. Dictionaries attest the forms, but *more real* is the common one, and no
+lexeme flag opts a one-syllable word out.

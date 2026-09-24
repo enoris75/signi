@@ -670,6 +670,82 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // E24's *die* (rank 371): LIVE_ALIVE's end, and its gloss is that verb negated, as LOSE negates
+  // HAVE (localization B84). Unaccusative: essere / être / sein in the perfect, the participle agreeing
+  // ("è morta", "est morte", "ist gestorben"). The Spanish and Portuguese *morirse* / *morrer-se* are
+  // emphatic, so the plain verb is seeded. Spanish morir diphthongs under the stress (muero, murió) and
+  // narrows to u in the unstressed subjunctive (muramos, `ES_SUBJ_OVERRIDE`); German sterben raises e
+  // to i in the du / er present and the du command (stirbst, stirbt, stirb).
+  {
+    id: 'DIE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to stop living',
+    // "no longer to live" (localization B84): LIVE_ALIVE under NO_LONGER, which B84's fix lets Spanish
+    // and Portuguese say once ("ya no vivir", "já não viver").
+    definition: infinitiveGloss('LIVE_ALIVE', { modifier: 'NO_LONGER' }),
+    emoji: '🪦',
+    forms: {
+      en: {
+        base: 'die',
+        '1sg_present': 'die', '2sg_present': 'die', '3sg_present': 'dies',
+        '1pl_present': 'die', '2pl_present': 'die', '3pl_present': 'die',
+        past: 'died',
+      },
+      it: {
+        base: 'morire',
+        '1sg_present': 'muoio', '2sg_present': 'muori', '3sg_present': 'muore',
+        '1pl_present': 'moriamo', '2pl_present': 'morite', '3pl_present': 'muoiono',
+        '1sg_past': 'morii', '2sg_past': 'moristi', '3sg_past': 'morì',
+        '1pl_past': 'morimmo', '2pl_past': 'moriste', '3pl_past': 'morirono',
+        '1sg_future': 'morirò', '2sg_future': 'morirai', '3sg_future': 'morirà',
+        '1pl_future': 'moriremo', '2pl_future': 'morirete', '3pl_future': 'moriranno',
+      },
+      fr: {
+        base: 'mourir',
+        '1sg_present': 'meurs', '2sg_present': 'meurs', '3sg_present': 'meurt',
+        '1pl_present': 'mourons', '2pl_present': 'mourez', '3pl_present': 'meurent',
+        '1sg_past': 'mourus', '2sg_past': 'mourus', '3sg_past': 'mourut',
+        '1pl_past': 'mourûmes', '2pl_past': 'mourûtes', '3pl_past': 'moururent',
+        '1sg_future': 'mourrai', '2sg_future': 'mourras', '3sg_future': 'mourra',
+        '1pl_future': 'mourrons', '2pl_future': 'mourrez', '3pl_future': 'mourront',
+      },
+      de: {
+        base: 'sterben',
+        '1sg_present': 'sterbe', '2sg_present': 'stirbst', '3sg_present': 'stirbt',
+        '1pl_present': 'sterben', '2pl_present': 'sterbt', '3pl_present': 'sterben',
+        '1sg_past': 'starb', '2sg_past': 'starbst', '3sg_past': 'starb',
+        '1pl_past': 'starben', '2pl_past': 'starbt', '3pl_past': 'starben',
+        '2sg_imperative': 'stirb', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'morir',
+        '1sg_present': 'muero', '2sg_present': 'mueres', '3sg_present': 'muere',
+        '1pl_present': 'morimos', '2pl_present': 'morís', '3pl_present': 'mueren',
+        '1sg_past': 'morí', '2sg_past': 'moriste', '3sg_past': 'murió',
+        '1pl_past': 'morimos', '2pl_past': 'moristeis', '3pl_past': 'murieron',
+        '1sg_future': 'moriré', '2sg_future': 'morirás', '3sg_future': 'morirá',
+        '1pl_future': 'moriremos', '2pl_future': 'moriréis', '3pl_future': 'morirán',
+      },
+      ja: {
+        base: '死ぬ',
+        reading: 'しぬ',
+        masu_present: '死にます',
+        masu_present_reading: 'しにます',
+      },
+      pt: {
+        base: 'morrer',
+        '1sg_present': 'morro', '2sg_present': 'morre', '3sg_present': 'morre',
+        '1pl_present': 'morremos', '2pl_present': 'morrem', '3pl_present': 'morrem',
+        '1sg_past': 'morri', '2sg_past': 'morreu', '3sg_past': 'morreu',
+        '1pl_past': 'morremos', '2pl_past': 'morreram', '3pl_past': 'morreram',
+        '1sg_future': 'morrerei', '2sg_future': 'morrerá', '3sg_future': 'morrerá',
+        '1pl_future': 'morreremos', '2pl_future': 'morrerão', '3pl_future': 'morrerão',
+      },
+    },
+  },
+
   // Remaining where one is: LEAVE_BEHIND's differentia, "to cause an object to stay" (localization
   // B61). The place is a `locative`, which Japanese 残る takes with に (`locative_particle`, as 住む
   // does: 家に残ります). Spanish quedarse is pronominal, as moverse is: the clitic rides inside each
@@ -744,6 +820,84 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'ficamos', '2pl_past': 'ficaram', '3pl_past': 'ficaram',
         '1sg_future': 'ficarei', '2sg_future': 'ficará', '3sg_future': 'ficará',
         '1pl_future': 'ficaremos', '2pl_future': 'ficarão', '3pl_future': 'ficarão',
+      },
+    },
+  },
+
+  // E24's *wait* (rank 289): to stay until something comes. The awaited thing is an object where one
+  // is named, as FOLLOW's is: English takes it with "for" and German with auf + accusative
+  // (`object_prep`: "waits for the dog", "wartet auf den Hund"); the other five take it plain, and
+  // Spanish marks a person with its personal a. French attendre, Spanish and Portuguese esperar are
+  // EXPECT's words too, which is the languages' own merger (localization B84). German warten keeps the
+  // du command's -e (warte), as arbeiten does.
+  {
+    id: 'WAIT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to stay until something happens or someone comes',
+    // "to stay until a time" (localization B84): STAY with C29's `until` on TIME.
+    definition: infinitiveGloss('STAY', {
+      complements: { temporal: { phrase: { concept: 'TIME', definiteness: 'indefinite' }, specifiers: [{ kind: 'temporal', value: 'until' }] } },
+    }),
+    emoji: '⏳',
+    isA: 'STAY',
+    forms: {
+      en: {
+        base: 'wait', object_prep: 'for',
+        '1sg_present': 'wait', '2sg_present': 'wait', '3sg_present': 'waits',
+        '1pl_present': 'wait', '2pl_present': 'wait', '3pl_present': 'wait',
+        past: 'waited',
+      },
+      it: {
+        base: 'aspettare',
+        '1sg_present': 'aspetto', '2sg_present': 'aspetti', '3sg_present': 'aspetta',
+        '1pl_present': 'aspettiamo', '2pl_present': 'aspettate', '3pl_present': 'aspettano',
+        '1sg_past': 'aspettai', '2sg_past': 'aspettasti', '3sg_past': 'aspettò',
+        '1pl_past': 'aspettammo', '2pl_past': 'aspettaste', '3pl_past': 'aspettarono',
+        '1sg_future': 'aspetterò', '2sg_future': 'aspetterai', '3sg_future': 'aspetterà',
+        '1pl_future': 'aspetteremo', '2pl_future': 'aspetterete', '3pl_future': 'aspetteranno',
+      },
+      fr: {
+        base: 'attendre',
+        '1sg_present': 'attends', '2sg_present': 'attends', '3sg_present': 'attend',
+        '1pl_present': 'attendons', '2pl_present': 'attendez', '3pl_present': 'attendent',
+        '1sg_past': 'attendis', '2sg_past': 'attendis', '3sg_past': 'attendit',
+        '1pl_past': 'attendîmes', '2pl_past': 'attendîtes', '3pl_past': 'attendirent',
+        '1sg_future': 'attendrai', '2sg_future': 'attendras', '3sg_future': 'attendra',
+        '1pl_future': 'attendrons', '2pl_future': 'attendrez', '3pl_future': 'attendront',
+      },
+      de: {
+        base: 'warten', object_prep: 'auf',
+        '1sg_present': 'warte', '2sg_present': 'wartest', '3sg_present': 'wartet',
+        '1pl_present': 'warten', '2pl_present': 'wartet', '3pl_present': 'warten',
+        '1sg_past': 'wartete', '2sg_past': 'wartetest', '3sg_past': 'wartete',
+        '1pl_past': 'warteten', '2pl_past': 'wartetet', '3pl_past': 'warteten',
+        '2sg_imperative': 'warte', // a stem in -t keeps the du -e
+      },
+      es: {
+        base: 'esperar',
+        '1sg_present': 'espero', '2sg_present': 'esperas', '3sg_present': 'espera',
+        '1pl_present': 'esperamos', '2pl_present': 'esperáis', '3pl_present': 'esperan',
+        '1sg_past': 'esperé', '2sg_past': 'esperaste', '3sg_past': 'esperó',
+        '1pl_past': 'esperamos', '2pl_past': 'esperasteis', '3pl_past': 'esperaron',
+        '1sg_future': 'esperaré', '2sg_future': 'esperarás', '3sg_future': 'esperará',
+        '1pl_future': 'esperaremos', '2pl_future': 'esperaréis', '3pl_future': 'esperarán',
+      },
+      ja: {
+        base: '待つ',
+        reading: 'まつ',
+        masu_present: '待ちます',
+        masu_present_reading: 'まちます',
+      },
+      pt: {
+        base: 'esperar',
+        '1sg_present': 'espero', '2sg_present': 'espera', '3sg_present': 'espera',
+        '1pl_present': 'esperamos', '2pl_present': 'esperam', '3pl_present': 'esperam',
+        '1sg_past': 'esperei', '2sg_past': 'esperou', '3sg_past': 'esperou',
+        '1pl_past': 'esperamos', '2pl_past': 'esperaram', '3pl_past': 'esperaram',
+        '1sg_future': 'esperarei', '2sg_future': 'esperará', '3sg_future': 'esperará',
+        '1pl_future': 'esperaremos', '2pl_future': 'esperarão', '3pl_future': 'esperarão',
       },
     },
   },
@@ -1117,6 +1271,81 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // P09-E24's *lose* (rank 273), P09 D2's second half (localization B85): to be beaten. Only
+    // Japanese splits it from LOSE (負ける, "be defeated", against 失う, "lose hold of"), so the six
+    // others render it with LOSE's word, as the two PROGRAMs share theirs in four languages. The game
+    // is the locative ("perde in un gioco") and the winner the opponent, which Japanese marks に
+    // (犬に負けます), as WIN's. "Not to win in a game", on WIN.
+    id: 'LOSE_GAME',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative', 'opponent'],
+    description: 'to be defeated in a contest',
+    definition: infinitiveGloss('WIN', {
+      negative: true,
+      complements: { locative: { phrase: { concept: 'GAME', definiteness: 'indefinite' } } },
+    }),
+    synonym: 'be defeated',
+    emoji: '🥈',
+    forms: {
+      en: {
+        base: 'lose',
+        '1sg_present': 'lose', '2sg_present': 'lose', '3sg_present': 'loses',
+        '1pl_present': 'lose', '2pl_present': 'lose', '3pl_present': 'lose',
+        past: 'lost',
+      },
+      it: {
+        base: 'perdere',
+        '1sg_present': 'perdo', '2sg_present': 'perdi', '3sg_present': 'perde',
+        '1pl_present': 'perdiamo', '2pl_present': 'perdete', '3pl_present': 'perdono',
+        '1sg_past': 'persi', '2sg_past': 'perdesti', '3sg_past': 'perse',
+        '1pl_past': 'perdemmo', '2pl_past': 'perdeste', '3pl_past': 'persero',
+        '1sg_future': 'perderò', '2sg_future': 'perderai', '3sg_future': 'perderà',
+        '1pl_future': 'perderemo', '2pl_future': 'perderete', '3pl_future': 'perderanno',
+      },
+      fr: {
+        base: 'perdre',
+        '1sg_present': 'perds', '2sg_present': 'perds', '3sg_present': 'perd',
+        '1pl_present': 'perdons', '2pl_present': 'perdez', '3pl_present': 'perdent',
+        '1sg_past': 'perdis', '2sg_past': 'perdis', '3sg_past': 'perdit',
+        '1pl_past': 'perdîmes', '2pl_past': 'perdîtes', '3pl_past': 'perdirent',
+        '1sg_future': 'perdrai', '2sg_future': 'perdras', '3sg_future': 'perdra',
+        '1pl_future': 'perdrons', '2pl_future': 'perdrez', '3pl_future': 'perdront',
+      },
+      de: {
+        base: 'verlieren',
+        '1sg_present': 'verliere', '2sg_present': 'verlierst', '3sg_present': 'verliert',
+        '1pl_present': 'verlieren', '2pl_present': 'verliert', '3pl_present': 'verlieren',
+        '1sg_past': 'verlor', '2sg_past': 'verlorst', '3sg_past': 'verlor',
+        '1pl_past': 'verloren', '2pl_past': 'verlort', '3pl_past': 'verloren',
+      },
+      es: {
+        base: 'perder',
+        '1sg_present': 'pierdo', '2sg_present': 'pierdes', '3sg_present': 'pierde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdéis', '3pl_present': 'pierden',
+        '1sg_past': 'perdí', '2sg_past': 'perdiste', '3sg_past': 'perdió',
+        '1pl_past': 'perdimos', '2pl_past': 'perdisteis', '3pl_past': 'perdieron',
+        '1sg_future': 'perderé', '2sg_future': 'perderás', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderéis', '3pl_future': 'perderán',
+      },
+      ja: {
+        base: '負ける', opponent_prep: 'に',
+        reading: 'まける',
+        masu_present: '負けます',
+        masu_present_reading: 'まけます',
+      },
+      pt: {
+        base: 'perder',
+        '1sg_present': 'perco', '2sg_present': 'perde', '3sg_present': 'perde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdem', '3pl_present': 'perdem',
+        '1sg_past': 'perdi', '2sg_past': 'perdeu', '3sg_past': 'perdeu',
+        '1pl_past': 'perdemos', '2pl_past': 'perderam', '3pl_past': 'perderam',
+        '1sg_future': 'perderei', '2sg_future': 'perderá', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderão', '3pl_future': 'perderão',
+      },
+    },
+  },
 
   // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
   // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
@@ -1284,6 +1513,81 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'parar', infinitive_link: 'de',
+        '1sg_present': 'paro', '2sg_present': 'para', '3sg_present': 'para',
+        '1pl_present': 'paramos', '2pl_present': 'param', '3pl_present': 'param',
+        '1sg_past': 'parei', '2sg_past': 'parou', '3sg_past': 'parou',
+        '1pl_past': 'paramos', '2pl_past': 'pararam', '3pl_past': 'pararam',
+        '1sg_future': 'pararei', '2sg_future': 'parará', '3sg_future': 'parará',
+        '1pl_future': 'pararemos', '2pl_future': 'pararão', '3pl_future': 'pararão',
+      },
+    },
+  },
+
+  // E24's *stop* in its intransitive half (rank 257, D2): to come to a halt, as CHANGE_ONESELF is
+  // CHANGE's; STOP is the transitive one and STOP_DOING the aspectual (P09-E42). Reflexive in Italian,
+  // French and Spanish (fermarsi, s'arrêter, detenerse), and so essere / être ("si è fermata");
+  // Portuguese parar is both halves. German says the everyday *stehen bleiben*, with *stehen* as a
+  // particle written apart ("bleibt stehen", "stehen zu bleiben", "ist stehen geblieben"), as WALK's
+  // *zu Fuß*; Japanese 止まる is the intransitive of STOP's 止める, as 始まる is of 始める.
+  {
+    id: 'STOP_ONESELF',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to come to a halt',
+    synonym: 'come to a halt',
+    // "no longer to move" (localization B84): MOVE_ONESELF under NO_LONGER.
+    definition: infinitiveGloss('MOVE_ONESELF', { modifier: 'NO_LONGER' }),
+    emoji: '🛑',
+    forms: {
+      en: {
+        base: 'stop',
+        '1sg_present': 'stop', '2sg_present': 'stop', '3sg_present': 'stops',
+        '1pl_present': 'stop', '2pl_present': 'stop', '3pl_present': 'stop',
+        past: 'stopped',
+      },
+      it: {
+        base: 'fermarsi',
+        '1sg_present': 'mi fermo', '2sg_present': 'ti fermi', '3sg_present': 'si ferma',
+        '1pl_present': 'ci fermiamo', '2pl_present': 'vi fermate', '3pl_present': 'si fermano',
+        '1sg_past': 'mi fermai', '2sg_past': 'ti fermasti', '3sg_past': 'si fermò',
+        '1pl_past': 'ci fermammo', '2pl_past': 'vi fermaste', '3pl_past': 'si fermarono',
+        '1sg_future': 'mi fermerò', '2sg_future': 'ti fermerai', '3sg_future': 'si fermerà',
+        '1pl_future': 'ci fermeremo', '2pl_future': 'vi fermerete', '3pl_future': 'si fermeranno',
+      },
+      fr: {
+        base: 's\'arrêter',
+        '1sg_present': 'm\'arrête', '2sg_present': 't\'arrêtes', '3sg_present': 's\'arrête',
+        '1pl_present': 'nous arrêtons', '2pl_present': 'vous arrêtez', '3pl_present': 's\'arrêtent',
+        '1sg_past': 'm\'arrêtai', '2sg_past': 't\'arrêtas', '3sg_past': 's\'arrêta',
+        '1pl_past': 'nous arrêtâmes', '2pl_past': 'vous arrêtâtes', '3pl_past': 's\'arrêtèrent',
+        '1sg_future': 'm\'arrêterai', '2sg_future': 't\'arrêteras', '3sg_future': 's\'arrêtera',
+        '1pl_future': 'nous arrêterons', '2pl_future': 'vous arrêterez', '3pl_future': 's\'arrêteront',
+      },
+      de: {
+        base: 'stehen bleiben', particle: 'stehen',
+        '1sg_present': 'bleibe', '2sg_present': 'bleibst', '3sg_present': 'bleibt',
+        '1pl_present': 'bleiben', '2pl_present': 'bleibt', '3pl_present': 'bleiben',
+        '1sg_past': 'blieb', '2sg_past': 'bliebst', '3sg_past': 'blieb',
+        '1pl_past': 'blieben', '2pl_past': 'bliebt', '3pl_past': 'blieben',
+      },
+      es: {
+        base: 'detenerse',
+        '1sg_present': 'me detengo', '2sg_present': 'te detienes', '3sg_present': 'se detiene',
+        '1pl_present': 'nos detenemos', '2pl_present': 'os detenéis', '3pl_present': 'se detienen',
+        '1sg_past': 'me detuve', '2sg_past': 'te detuviste', '3sg_past': 'se detuvo',
+        '1pl_past': 'nos detuvimos', '2pl_past': 'os detuvisteis', '3pl_past': 'se detuvieron',
+        '1sg_future': 'me detendré', '2sg_future': 'te detendrás', '3sg_future': 'se detendrá',
+        '1pl_future': 'nos detendremos', '2pl_future': 'os detendréis', '3pl_future': 'se detendrán',
+      },
+      ja: {
+        base: '止まる',
+        reading: 'とまる',
+        masu_present: '止まります',
+        masu_present_reading: 'とまります',
+      },
+      pt: {
+        base: 'parar',
         '1sg_present': 'paro', '2sg_present': 'para', '3sg_present': 'para',
         '1pl_present': 'paramos', '2pl_present': 'param', '3pl_present': 'param',
         '1sg_past': 'parei', '2sg_past': 'parou', '3sg_past': 'parou',

@@ -49,6 +49,11 @@ export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string, s
   // -et doubles its t in the feminine ("cadet → cadette"); the rule would give "cadete" (P11 §3).
   // YOUNGER is the one seeded -et adjective; its elder counterpart "aîné" needs no entry.
   cadet: ['cadet', 'cadette', 'cadets', 'cadettes', 'cadet'],
+  // Three feminines the +e rule misses (localization B87): long → longue (LONG), blanc → blanche
+  // (WHITE), public → publique (B88's PUBLIC). The rule would write "longe", "blance", "publice".
+  long: ['long', 'longue', 'longs', 'longues', 'long'],
+  blanc: ['blanc', 'blanche', 'blancs', 'blanches', 'blanc'],
+  public: ['public', 'publique', 'publics', 'publiques', 'public'],
 };
 
 // œ and æ are vowel letters too, and one seeded noun opens on one: œil, l'œil (localization B52).
@@ -65,10 +70,11 @@ export const VOWEL_START = /^[aeiouéèêëàâîïôùûüœæ]/i;
 // deuxième fois"), whatever its "BAGS" membership. So does OTHER ("un autre chat").
 // SAME and the final LAST precede for their sense (localization B66): after the noun, "le jour même"
 // is the day itself and "le jour dernier" the previous one, which is LAST_PREVIOUS ("la semaine
-// dernière") and follows the noun, as NEXT_COMING's "la semaine prochaine" does.
+// dernière") and follows the noun, as NEXT_COMING's "la semaine prochaine" does. So does the genuine
+// REAL (localization B87): "un vrai problème", where "une histoire vraie" is a true story.
 export const PRENOMINAL = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE',
+  'FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE', 'REAL_GENUINE',
 ]);
 
 // The verbs whose present-participle stem the "nous" present rule misses (see `presentParticiple`).
@@ -149,6 +155,9 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quand', while: 'pendant que', because: 'parce que', after: 'après que', before: 'avant que',
   // P09-E27: "jusqu'à ce que" and "bien que" govern the subjunctive, "depuis que" the indicative.
   until: "jusqu'à ce que", since: 'depuis que', though: 'bien que',
+  // Localization C41: the similative, on the indicative. "Comme" is no "que" and never elides
+  // ("comme on s'y attend"); a verb whose object the likeness gaps takes its `as_clitic`.
+  as: 'comme',
 };
 
 /**

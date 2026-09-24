@@ -1,13 +1,13 @@
 # B-needs-seed — tasks waiting on words
 
-**Sixteen open: [B75](B75-girl-guy-kid-member.md)–[B90](B90-everything.md)**, filed on 2026-09-24 by
+**None is open.** [B75](../done/B75-girl-guy-kid-member.md)–[B90](../done/B90-everything.md),
+filed on 2026-09-24 by
 [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the
-coverage check of COCA lemma ranks 201–400. They propose **85 concepts** that do not exist yet: the
-E24 words and one differentia, LENGTH. They carry **70 probed glosses**, one proposed gloss and 13
-literal-by-design verdicts. Every non-verb row was seeded in memory and rendered; the verb rows
-give lexemes and paradigm facts, and their glosses were rendered. See
-[the index](../localization-tasks.md#part-b--needs-seeding-b-needs-seed) for the table and the
-seeding order (four tickets stand on another's word).
+coverage check of COCA lemma ranks 201–400, were authored the same day and are in
+[`done/`](../done/). They **seeded 84 words and shipped 70 glosses**, every one they forecast; the 13
+literal-by-design verdicts stand, and B85's ALLOW was already seeded (P09-E43). Nine engine changes
+came with them, each pinned and written up in its ticket — see
+[the index](../localization-tasks.md#part-b--needs-seeding-b-needs-seed).
 
 [B68](../done/B68-the-family.md)–[B74](../done/B74-partners-and-friends.md), the
 [P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, were filed on

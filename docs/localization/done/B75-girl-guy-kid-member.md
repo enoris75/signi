@@ -97,3 +97,29 @@ Readings to judge on authoring:
 
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 MEMBER in German and Japanese (*ein Teil einer Gruppe*, グループの部分).
+
+## Done (2026-09-24)
+
+**Four words seeded, two glossed, two literal by design**, as the ticket forecast. The seeds are in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts), each beside its kin: KID after CHILD, GIRL
+after BOY, GUY after MAN, MEMBER after GROUP. They are pinned in
+[people-body-and-ideas.test.ts](../../../packages/engine/test/people-body-and-ideas.test.ts) and covered by
+one row in [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) (MEMBER in German and
+Japanese).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| GIRL | a young female person | una giovane persona femminile | une jeune personne féminine | eine junge weibliche Person | una persona joven y femenina | 若い女性の人 | uma pessoa jovem e feminina |
+| MEMBER | a part of a group | una parte di un gruppo | une partie d'un groupe | ein Teil einer Gruppe | una parte de un grupo | グループの部分 | uma parte de um grupo |
+
+What landed differently from the plan:
+
+1. **GIRL shares YOUNG_WOMAN's gloss by design** (reading 1). The pair is now in
+   `sweep-definitions.test.ts`'s `GLOSSES_SHARED_BY_DESIGN`, beside BOY and YOUNG_MAN.
+2. **GUY and KID are literal by design** (reading 3). Both carry `synonym: 'informal'`, `isA` MAN / CHILD,
+   and `human`. KID has the Romance feminines CHILD has (*ragazzina, gamine, chica, garota*).
+3. **GUY's Japanese is 男の人, not やつ**, on the ticket's own advice. The word stands unglossed beside
+   MAN's 男, and やつ is pejorative in many contexts.
+4. **German *Typ* carries `weak: '1'`**, and the check the ticket asked for passes: *einen Typen*,
+   *dem Typen*, *des Typen*.
+5. No engine change.

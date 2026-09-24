@@ -123,3 +123,46 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 CITY in German and Japanese (a `many` subject inside a locative relative: *an dem viele Personen
 wohnen*, 多くの人が住む大きい場所) and DOOR in French and Portuguese (the part-whole genitive carrying a
 relative: *une partie d'un mur qu'on ouvre*).
+
+## Done
+
+2026-09-24. **Nine nouns seeded, eight glosses shipped, CENTER literal by design.** B87 landed first,
+so LONG and its French *longue* were in place for LINE_MARK (reading 1).
+
+**Seeded**, each beside its neighbours in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts):
+
+- CITY beside COUNTRY (`isA: 'PLACE'`).
+- ROOM (`isA: 'PLACE'`), OFFICE (`isA: 'ROOM'`), DOOR and CAR (`isA: 'OBJECT_THING'`, Japanese
+  counter 台) after HOME.
+- AREA (`isA: 'PLACE'`), CENTER (`synonym: 'middle'`) and SIDE (`isA: 'PART'`) after POINT_NOUN.
+- LINE_MARK (`isA: 'SHAPE'`, `synonym: 'stroke'`) after CIRCLE.
+
+Every form is the proposal, with one exception: **SIDE's Japanese is 側面 (そくめん)**, the free noun
+the ticket offered, because 側 is bound in everyday use and 猫は側を見ます is stiff. The ticket's
+choices stand for the rest: Spanish *coche* and Portuguese *carro*, *habitación* and *cômodo*.
+
+**Glosses** (en · it · fr · de · es · ja · pt):
+
+| concept | renders |
+|---|---|
+| CITY | a big place where many people live · un grande luogo dove molte persone abitano · un grand lieu où beaucoup de personnes habitent · ein großer Ort, an dem viele Personen wohnen · un lugar grande donde muchas personas viven · 多くの人が住む大きい場所 · um lugar grande onde muitas pessoas moram |
+| ROOM | a part of a building · una parte di un edificio · une partie d'un bâtiment · ein Teil eines Gebäudes · una parte de un edificio · 建物の部分 · uma parte de um edifício |
+| OFFICE | a room where one works · una stanza dove si lavora · une pièce où l'on travaille · ein Zimmer, in dem man arbeitet · una habitación donde se trabaja · 働く部屋 · um cômodo onde se trabalha |
+| DOOR | a part of a wall that one opens · una parte di un muro che si apre · une partie d'un mur qu'on ouvre · ein Teil einer Wand, den man öffnet · una parte de una pared que se abre · 開く壁の部分 · uma parte de uma parede que se abre |
+| CAR | an object with which one goes to a place · un oggetto con il quale si va a un luogo · un objet avec lequel on va à un lieu · ein Gegenstand, mit dem man zu einem Ort geht · un objeto con el que se va a un lugar · 場所へ行く物体 · um objeto com o qual se vai a um lugar |
+| AREA | a part of a place · una parte di un luogo · une partie d'un lieu · ein Teil eines Ortes · una parte de un lugar · 場所の部分 · uma parte de um lugar |
+| SIDE | a part of an object that is not the center · una parte di un oggetto che non è il centro · une partie d'un objet qui n'est pas le centre · ein Teil eines Gegenstands, der nicht die Mitte ist · una parte de un objeto que no es el centro · 中心ではない物体の部分 · uma parte de um objeto que não é o centro |
+| LINE_MARK | a long shape · una forma lunga · une forme longue · eine lange Form · una forma larga · 長い形 · uma forma longa |
+
+Each matches the probe table. LINE_MARK's French is now *longue*, where the probe had *longe*. SIDE
+takes the gloss despite reading 4's "thin": it is the one lead that did not come out as every part.
+
+**Literal by design**: CENTER (reading 5).
+
+**Engine changes**: none of this ticket's own. The French feminine it waited on is B87's.
+
+**Tests.** [places-and-things.test.ts](../../../packages/engine/test/places-and-things.test.ts)
+pins the eight glosses, CENTER's literal, the synonyms and the hypernyms, every noun's singular
+with a gender-agreeing adjective and its plural, and LINE_MARK against LINE. Two e2e rows are in
+[definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts): CITY in de and ja, and DOOR
+in fr and pt.

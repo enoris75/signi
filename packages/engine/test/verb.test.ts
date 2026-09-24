@@ -529,11 +529,15 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['COMPLETE', 'la gatta ha completato.'],
     ['CONFINE', 'la gatta ha rinchiuso.'],
     ['CONNECT', 'la gatta ha connesso.'],
+    // localization B84 / B86: considerare, and the transitive continuare.
+    ['CONSIDER', 'la gatta ha considerato.'], ['CONTINUE', 'la gatta ha continuato.'],
     ['COORDINATE', 'la gatta ha coordinato.'], ['COPY', 'la gatta ha copiato.'],
     ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
     ['CRY_OUT', 'la gatta ha gridato.'], ['CUT', 'la gatta ha tagliato.'],
     ['DELETE', 'la gatta ha eliminato.'], ['DESIRE', 'la gatta ha desiderato.'],
+    // morire is unaccusative: essere, and the strong participle agrees (B84).
+    ['DIE', 'la gatta è morta.'],
     ['DESCRIBE', 'la gatta ha descritto.'], ['DESTROY', 'la gatta ha distrutto.'],
     ['DIVIDE', 'la gatta ha diviso.'], ['DRAG', 'la gatta ha trascinato.'],
     ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],
@@ -557,15 +561,22 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['GOVERN_STATE', 'la gatta ha governato.'], ['HAVE', 'la gatta ha avuto.'],
     ['HIDE', 'la gatta ha nascosto.'],
     ['HEAR', 'la gatta ha sentito.'], ['HOLD', 'la gatta ha contenuto.'],
+    // The hand's hold is tenere (B83).
+    ['HOLD_GRASP', 'la gatta ha tenuto.'],
     ['IMPORT', 'la gatta ha importato.'], ['INCLUDE', 'la gatta ha incluso.'],
     ['INDICATE', 'la gatta ha indicato.'],
     ['JUMP', 'la gatta ha saltato.'],
     ['KILL', 'la gatta ha ucciso.'], ['KNOW', 'la gatta ha saputo.'],
+    // condurre keeps its Latin stem: condotto (B83).
+    ['LEAD', 'la gatta ha condotto.'],
     // LEAVE is uscire (da), which selects essere and agrees.
     ['LEAVE', 'la gatta è uscita.'],
     ['LINK', 'la gatta ha collegato.'], ['LIVE', 'la gatta ha abitato.'],
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
+    // B85: perdere's strong perso, for both losing senses.
+    ['LOSE', 'la gatta ha perso.'], ['LOSE_GAME', 'la gatta ha perso.'],
     ['MAKE', 'la gatta ha fatto.'], ['MARRY', 'la gatta ha sposato.'],
+    ['MEET', 'la gatta ha incontrato.'],
     ['MODIFY', 'la gatta ha modificato.'],
     ['MOVE', 'la gatta ha spostato.'],
     // A pronominal verb takes essere, its clitic ahead of it (C17).
@@ -573,29 +584,40 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['NAME', 'la gatta ha nominato.'], ['NEGATE', 'la gatta ha negato.'],
     // OPEN: aprire's participle is the irregular aperto.
     ['OPEN', 'la gatta ha aperto.'], ['OWN', 'la gatta ha posseduto.'],
+    ['PAY', 'la gatta ha pagato.'],
     ['PERCEIVE', 'la gatta ha percepito.'], ['PIN', 'la gatta ha fissato.'],
     ['PRESS', 'la gatta ha premuto.'],
-    ['PRODUCE', 'la gatta ha prodotto.'],
+    ['PRODUCE', 'la gatta ha prodotto.'], ['PROVIDE', 'la gatta ha fornito.'],
     ['READ', 'la gatta ha letto.'], ['REDO', 'la gatta ha ripetuto.'],
     ['REMOVE', 'la gatta ha rimosso.'],
+    ['REMEMBER', 'la gatta ha ricordato.'],
     ['REPLACE', 'la gatta ha sostituito.'], ['RESIZE', 'la gatta ha ridimensionato.'],
     ['RESTORE', 'la gatta ha ripristinato.'],
     ['RETRY', 'la gatta ha riprovato.'],
     // Going back takes essere, as GO does, and agrees (B43).
     ['RETURN', 'la gatta è tornata.'],
     ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
+    // Running away is scappare, which takes essere where correre takes avere (B83).
+    ['RUN_AWAY', 'la gatta è scappata.'],
     ['SEE', 'la gatta ha visto.'],
     ['SEARCH', 'la gatta ha cercato.'], ['SEEM', 'la gatta è sembrata.'],
     ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
     ['SET', 'la gatta ha impostato.'],
     ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHED', 'la gatta ha versato.'],
     ['SHOW', 'la gatta ha mostrato.'], ['SHRINK', 'la gatta ha rimpicciolito.'],
+    // The posture events are pronominal: essere, the clitic ahead of it (B83).
+    ['SIT_DOWN', 'la gatta si è seduta.'], ['STAND_UP', 'la gatta si è alzata.'],
     ['SPECIFY', 'la gatta ha specificato.'],
     ['SPEAK', 'la gatta ha parlato.'],
+    // B85: spendere's strong speso; the transitive passare takes avere.
+    ['SPEND_MONEY', 'la gatta ha speso.'], ['SPEND_TIME', 'la gatta ha passato.'],
     ['START', 'la gatta ha iniziato.'],
+    // Stopping a thing takes avere; stopping oneself is the pronominal fermarsi (B84).
+    ['STOP', 'la gatta ha fermato.'], ['STOP_ONESELF', 'la gatta si è fermata.'],
     ['STRIKE', 'la gatta ha colpito.'],
     // soffrire's participle is the strong sofferto, under avere.
-    ['SUFFER', 'la gatta ha sofferto.'], ['TAKE', 'la gatta ha preso.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['SUFFER', 'la gatta ha sofferto.'], ['TAKE', 'la gatta ha preso.'], ['THANK', 'la gatta ha ringraziato.'],
+    ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TRANSFORM', 'la gatta ha trasformato.'],
     // -durre keeps its Latin stem in the participle: tradotto, not *tradutto.
@@ -606,6 +628,10 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // UNDO shares CANCEL's verb (B40).
     ['UNDO', 'la gatta ha annullato.'], ['UNPIN', 'la gatta ha sbloccato.'],
     ['USE', 'la gatta ha usato.'],
+    // B85: vincere's strong vinto.
+    ['WIN', 'la gatta ha vinto.'],
+    // aspettare and camminare take avere (B83, B84).
+    ['WAIT', 'la gatta ha aspettato.'], ['WALK', 'la gatta ha camminato.'],
     // A thing that works takes avere, as ACT does (C22).
     ['WORK', 'la gatta ha funzionato.'],
     ['WRITE', 'la gatta ha scritto.'],

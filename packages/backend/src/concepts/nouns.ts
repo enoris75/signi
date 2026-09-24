@@ -519,6 +519,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The scale LONG sits on, as SIZE is BIG's: "of great length" (localization B87). Portuguese
+    // comprimento, the measured length (longitude is the geographic one); Spanish longitud.
+    id: 'LENGTH',
+    role: 'noun',
+    description: 'how long something is; extent from end to end',
+    emoji: '↔️',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'length', plural: 'lengths', count: 'singular' },
+      it: { base: 'lunghezza', plural: 'lunghezze', gender: 'fem', count: 'singular' },
+      fr: { base: 'longueur', plural: 'longueurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Länge', plural: 'Längen', gender: 'fem', count: 'singular' },
+      es: { base: 'longitud', plural: 'longitudes', gender: 'fem', count: 'singular' },
+      ja: { base: '長さ', count: 'singular', reading: 'ながさ' },
+      pt: { base: 'comprimento', plural: 'comprimentos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // Italian/Portuguese "qualità/qualidade" and the Romance feminines; `quality` relation so a
     // gloss reads "of high quality" (di alta qualità). Italian "qualità" is invariable in the plural.
     id: 'QUALITY',
@@ -638,6 +656,28 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
       ja: { base: '円', count: 'singular', reading: 'えん' },
       pt: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The drawn line, `synonym: 'stroke'` (localization B78): "a long shape", on B87's LONG. LINE is
+    // the line of text typed as one command (riga, Zeile, 行), and a queue (fila, file, Schlange, 列)
+    // would be a third concept. French ligne, Spanish línea and Portuguese linha are LINE's words too;
+    // Italian linea / riga, German Linie / Zeile and Japanese 線 / 行 split them.
+    id: 'LINE_MARK',
+    role: 'noun',
+    description: 'a long thin mark drawn or printed on a surface',
+    definition: glossOf('SHAPE', 'LONG'),
+    emoji: '➖',
+    isA: 'SHAPE',
+    synonym: 'stroke',
+    forms: {
+      en: { base: 'line', plural: 'lines', count: 'singular' },
+      it: { base: 'linea', plural: 'linee', gender: 'fem', count: 'singular' },
+      fr: { base: 'ligne', plural: 'lignes', gender: 'fem', count: 'singular' },
+      de: { base: 'Linie', plural: 'Linien', gender: 'fem', count: 'singular' },
+      es: { base: 'línea', plural: 'líneas', gender: 'fem', count: 'singular' },
+      ja: { base: '線', count: 'singular', reading: 'せん' },
+      pt: { base: 'linha', plural: 'linhas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -800,6 +840,78 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'ponto', plural: 'pontos', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // A part of a place or of land (localization B78), not REGION, the UI's "part of a page or a
+    // screen". French zone, Spanish zona and Portuguese área are REGION's words too; the glosses tell
+    // them apart. German Gebiet and Japanese 地域 differ from REGION's Bereich and 領域.
+    id: 'AREA',
+    role: 'noun',
+    description: 'a part of a place, a town or a country',
+    definition: partOfGloss('PLACE'),
+    emoji: '🗾',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'area', plural: 'areas', count: 'singular' },
+      it: { base: 'zona', plural: 'zone', gender: 'fem', count: 'singular' },
+      fr: { base: 'zone', plural: 'zones', gender: 'fem', count: 'singular' },
+      de: { base: 'Gebiet', plural: 'Gebiete', gender: 'neut', count: 'singular' },
+      es: { base: 'zona', plural: 'zonas', gender: 'fem', count: 'singular' },
+      ja: { base: '地域', count: 'singular', reading: 'ちいき' },
+      pt: { base: 'área', plural: 'áreas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The middle of a thing, `synonym: 'middle'`; the institution (centro, Zentrum, センター) is another
+    // concept. Literal by design (localization B78): a center is defined by its distance from the
+    // edges, and neither EDGE nor MIDDLE is seeded; MAIN is the grammar's "not depending on another
+    // clause" (übergeordnet, 主), and "a point that is far" says the opposite.
+    id: 'CENTER',
+    role: 'noun',
+    description: 'the middle point or part of something',
+    emoji: '🎯',
+    synonym: 'middle',
+    forms: {
+      en: { base: 'center', plural: 'centers', count: 'singular' },
+      it: { base: 'centro', plural: 'centri', gender: 'masc', count: 'singular' },
+      fr: { base: 'centre', plural: 'centres', gender: 'masc', count: 'singular' },
+      de: { base: 'Mitte', plural: 'Mitten', gender: 'fem', count: 'singular' },
+      es: { base: 'centro', plural: 'centros', gender: 'masc', count: 'singular' },
+      ja: { base: '中心', count: 'singular', reading: 'ちゅうしん' },
+      pt: { base: 'centro', plural: 'centros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A part of an object that is not the center: a genitive and a negated copular relative on one
+    // head, STEPFATHER's shape. Thin (a corner is one too), but the one lead that does not come out
+    // as every part. Japanese 側面, the free noun: 側 (がわ) is bound in everyday use (右側, 向こう側),
+    // and 猫は側を見ます is stiff.
+    id: 'SIDE',
+    role: 'noun',
+    description: 'a part of a thing away from its middle; a face or edge of it',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'indefinite',
+        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+        relative: {
+          verbPhrase: { verb: 'BE', negative: true },
+          complements: { predicative: { phrase: { concept: 'CENTER', definiteness: 'definite' } } },
+        },
+      },
+    },
+    emoji: '🔲',
+    isA: 'PART',
+    forms: {
+      en: { base: 'side', plural: 'sides', count: 'singular' },
+      it: { base: 'lato', plural: 'lati', gender: 'masc', count: 'singular' },
+      fr: { base: 'côté', plural: 'côtés', gender: 'masc', count: 'singular' },
+      de: { base: 'Seite', plural: 'Seiten', gender: 'fem', count: 'singular' },
+      es: { base: 'lado', plural: 'lados', gender: 'masc', count: 'singular' },
+      ja: { base: '側面', count: 'singular', reading: 'そくめん' },
+      pt: { base: 'lado', plural: 'lados', gender: 'masc', count: 'singular' },
+    },
+  },
   // ── The places of a motion ────────────────────────────────────────
   // Where a motion ends, starts and passes: what the direction, source and route complements indicate
   // (localization B37, "a complement that indicates destinations"). Each is a place, but one reached,
@@ -951,6 +1063,104 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'lar', plural: 'lares', gender: 'masc', count: 'singular' },
     },
   },
+  // ── The parts of a building, and what one goes in (localization B78) ─
+  {
+    // The part of a building, not room as space (posto, place, Platz), which is another concept.
+    // Portuguese cômodo, the generic room (quarto is a bedroom, sala a living room); Spanish
+    // habitación. German Zimmer is the same in the plural.
+    id: 'ROOM',
+    role: 'noun',
+    description: 'a part of a building enclosed by walls',
+    definition: partOfGloss('BUILDING'),
+    emoji: '🛋️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'room', plural: 'rooms', count: 'singular' },
+      it: { base: 'stanza', plural: 'stanze', gender: 'fem', count: 'singular' },
+      fr: { base: 'pièce', plural: 'pièces', gender: 'fem', count: 'singular' },
+      de: { base: 'Zimmer', plural: 'Zimmer', gender: 'neut', count: 'singular' },
+      es: { base: 'habitación', plural: 'habitaciones', gender: 'fem', count: 'singular' },
+      ja: { base: '部屋', count: 'singular', reading: 'へや' },
+      pt: { base: 'cômodo', plural: 'cômodos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A room where one works, not a building: a building where one works is a factory too, and
+    // every office is at least a room. French bureau pluralises in -x.
+    id: 'OFFICE',
+    role: 'noun',
+    description: 'a room where people work',
+    definition: whereGloss('ROOM', 'WORK_LABOUR'),
+    emoji: '🗄️',
+    isA: 'ROOM',
+    forms: {
+      en: { base: 'office', plural: 'offices', count: 'singular' },
+      it: { base: 'ufficio', plural: 'uffici', gender: 'masc', count: 'singular' },
+      fr: { base: 'bureau', plural: 'bureaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Büro', plural: 'Büros', gender: 'neut', count: 'singular' },
+      es: { base: 'oficina', plural: 'oficinas', gender: 'fem', count: 'singular' },
+      ja: { base: '事務所', count: 'singular', reading: 'じむしょ' },
+      pt: { base: 'escritório', plural: 'escritórios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A part of a wall that one opens: C26's part-whole genitive carrying an object-gap relative.
+    // Japanese 開く壁の部分 can also read "the part of the wall that opens", which is a door as well.
+    id: 'DOOR',
+    role: 'noun',
+    description: 'a panel in a wall that opens and closes',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'indefinite',
+        possessor: { concept: 'WALL', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+        relative: { headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'OPEN' } },
+      },
+    },
+    emoji: '🚪',
+    forms: {
+      en: { base: 'door', plural: 'doors', count: 'singular' },
+      it: { base: 'porta', plural: 'porte', gender: 'fem', count: 'singular' },
+      fr: { base: 'porte', plural: 'portes', gender: 'fem', count: 'singular' },
+      de: { base: 'Tür', plural: 'Türen', gender: 'fem', count: 'singular' },
+      es: { base: 'puerta', plural: 'puertas', gender: 'fem', count: 'singular' },
+      ja: { base: 'ドア', count: 'singular' },
+      pt: { base: 'porta', plural: 'portas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // An object with which one goes to a place. It is not a vehicle gloss (VEHICLE is not seeded):
+    // a bicycle fits it too. The goal keeps German from "mit dem man geht" ("walks with"), and MOVE
+    // would say the UI's verschieben. Spanish coche, the peninsular word; Portuguese carro, the
+    // Brazilian one the corpus's Portuguese already is. Japanese counts cars with 台.
+    id: 'CAR',
+    role: 'noun',
+    description: 'a road vehicle with an engine, for a few people',
+    definition: {
+      subject: {
+        concept: 'OBJECT_THING',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'instrumental',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'GO' },
+          complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+        },
+      },
+    },
+    emoji: '🚗',
+    isA: 'OBJECT_THING',
+    forms: {
+      en: { base: 'car', plural: 'cars', count: 'singular' },
+      it: { base: 'macchina', plural: 'macchine', gender: 'fem', count: 'singular' },
+      fr: { base: 'voiture', plural: 'voitures', gender: 'fem', count: 'singular' },
+      de: { base: 'Auto', plural: 'Autos', gender: 'neut', count: 'singular' },
+      es: { base: 'coche', plural: 'coches', gender: 'masc', count: 'singular' },
+      ja: { base: '車', count: 'singular', reading: 'くるま', counter: '台' },
+      pt: { base: 'carro', plural: 'carros', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     id: 'CHILD',
     role: 'noun',
@@ -968,6 +1178,29 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'niño', plural: 'niños', gender: 'masc', count: 'singular', fem: 'niña', fem_plural: 'niñas' },
       ja: { base: '子供', count: 'singular', reading: 'こども' },
       pt: { base: 'criança', plural: 'crianças', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's kid (localization B75): CHILD in casual speech, a register word like MOM and DAD and
+    // literal by design on their precedent — "a child" restates CHILD's word and carries no register.
+    // German has no everyday informal word for a child, so its Kind is CHILD's; Japanese 子 is 子供
+    // in short. The Romance words have the feminine CHILD's do (ragazzina, gamine, chica, garota).
+    id: 'KID',
+    role: 'noun',
+    description: 'a child, in casual speech',
+    emoji: '🧒',
+    animate: true,
+    human: true,
+    synonym: 'informal',
+    isA: 'CHILD',
+    forms: {
+      en: { base: 'kid', plural: 'kids', count: 'singular' },
+      it: { base: 'ragazzino', plural: 'ragazzini', gender: 'masc', count: 'singular', fem: 'ragazzina', fem_plural: 'ragazzine' },
+      fr: { base: 'gamin', plural: 'gamins', gender: 'masc', count: 'singular', fem: 'gamine', fem_plural: 'gamines' },
+      de: { base: 'Kind', plural: 'Kinder', gender: 'neut', count: 'singular', compound: 'Kinder' },
+      es: { base: 'chico', plural: 'chicos', gender: 'masc', count: 'singular', fem: 'chica', fem_plural: 'chicas' },
+      ja: { base: '子', count: 'singular', reading: 'こ' },
+      pt: { base: 'garoto', plural: 'garotos', gender: 'masc', count: 'singular', fem: 'garota', fem_plural: 'garotas' },
     },
   },
   {
@@ -1088,6 +1321,31 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's girl (localization B75), BOY's counterpart. Its gloss is YOUNG_WOMAN's, character for
+    // character in all seven, as BOY's is YOUNG_MAN's: the one lead that tells them apart, "a female
+    // child", fails where CHILD's word is masculine and FEMALE does not feminize it (un bambino
+    // femminile, un niño femenino). sweep-definitions.test.ts allows the pair by design.
+    id: 'GIRL',
+    role: 'noun',
+    description: 'a young female human',
+    definition: glossOf('PERSON', 'YOUNG', 'FEMALE'),
+    emoji: '👧',
+    animate: true,
+    human: true,
+    sex: 'fem',
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'girl', plural: 'girls', count: 'singular' },
+      it: { base: 'ragazza', plural: 'ragazze', gender: 'fem', count: 'singular' },
+      fr: { base: 'fille', plural: 'filles', gender: 'fem', count: 'singular' },
+      // Mädchen is neuter, as every -chen diminutive is, and the same word in the plural.
+      de: { base: 'Mädchen', plural: 'Mädchen', gender: 'neut', count: 'singular' },
+      es: { base: 'niña', plural: 'niñas', gender: 'fem', count: 'singular' },
+      ja: { base: '女の子', count: 'singular', reading: 'おんなのこ' },
+      pt: { base: 'menina', plural: 'meninas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'MAN',
     role: 'noun',
     description: 'an adult male human',
@@ -1107,6 +1365,29 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'hombre', plural: 'hombres', gender: 'masc', count: 'singular' },
       ja: { base: '男', count: 'singular', reading: 'おとこ' },
       pt: { base: 'homem', plural: 'homens', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's guy (localization B75): MAN in casual speech, literal by design as KID is. German Typ
+    // is the weak masculine of the colloquial sense (den Typen, dem Typen). Japanese takes the neutral
+    // 男の人 over やつ, which is pejorative in many contexts and would stand unglossed beside MAN's 男.
+    id: 'GUY',
+    role: 'noun',
+    description: 'a man, in casual speech',
+    emoji: '🧔',
+    animate: true,
+    human: true,
+    sex: 'masc',
+    synonym: 'informal',
+    isA: 'MAN',
+    forms: {
+      en: { base: 'guy', plural: 'guys', count: 'singular' },
+      it: { base: 'tipo', plural: 'tipi', gender: 'masc', count: 'singular' },
+      fr: { base: 'type', plural: 'types', gender: 'masc', count: 'singular' },
+      de: { base: 'Typ', plural: 'Typen', gender: 'masc', count: 'singular', weak: '1' },
+      es: { base: 'tipo', plural: 'tipos', gender: 'masc', count: 'singular' },
+      ja: { base: '男の人', count: 'singular', reading: 'おとこのひと' },
+      pt: { base: 'cara', plural: 'caras', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -2834,6 +3115,55 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'fato', plural: 'fatos', gender: 'masc', count: 'singular' },
     },
   },
+  // ── P09-E24's reasons and information (localization B81) ─────────────
+  {
+    // The motive (E24 D2), "a fact that causes an action": Italian induce and French induit are
+    // CAUSE_VERB's causative lexemes (C08), which read "leads to", as a motive does. The faculty
+    // (ragione, Vernunft, 理性) is another concept, and so is CAUSE (causa, Ursache, 原因).
+    id: 'REASON',
+    role: 'noun',
+    description: 'why someone does something',
+    definition: {
+      subject: {
+        concept: 'FACT',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'CAUSE_VERB' },
+          directObject: { concept: 'ACTION', definiteness: 'indefinite' },
+        },
+      },
+    },
+    emoji: '🤔',
+    synonym: 'motive',
+    forms: {
+      en: { base: 'reason', plural: 'reasons', count: 'singular' },
+      it: { base: 'motivo', plural: 'motivi', gender: 'masc', count: 'singular' },
+      fr: { base: 'raison', plural: 'raisons', gender: 'fem', count: 'singular' },
+      de: { base: 'Grund', plural: 'Gründe', gender: 'masc', count: 'singular' },
+      es: { base: 'razón', plural: 'razones', gender: 'fem', count: 'singular' },
+      ja: { base: '理由', count: 'singular', reading: 'りゆう' },
+      pt: { base: 'razão', plural: 'razões', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // "Content that one learns": HELP's mass shape. Mass, as in English; everyday Italian and French
+    // say it in the plural (le informazioni, les informations), but the singular is grammatical.
+    id: 'INFORMATION',
+    role: 'noun',
+    description: 'facts told or learned about something',
+    definition: patientGloss('CONTENT', 'LEARN', 'bare'),
+    emoji: 'ℹ️',
+    countable: false,
+    forms: {
+      en: { base: 'information', count: 'singular' },
+      it: { base: 'informazione', gender: 'fem', count: 'singular' },
+      fr: { base: 'information', gender: 'fem', count: 'singular' },
+      de: { base: 'Information', gender: 'fem', count: 'singular' },
+      es: { base: 'información', gender: 'fem', count: 'singular' },
+      ja: { base: '情報', count: 'singular', reading: 'じょうほう' },
+      pt: { base: 'informação', gender: 'fem', count: 'singular' },
+    },
+  },
   {
     // How likely a thing is: PROBABLY is "with high probability" (P09-E39), which is how five of the
     // seven say it — "con alta probabilità", "mit hoher Wahrscheinlichkeit", 高い確率で. A `means`
@@ -3208,6 +3538,37 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
       ja: { base: '国', count: 'singular', reading: 'くに' },
       pt: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A big place where many people live (localization B78): HOME's LIVE, under a `many` subject.
+    // Italian città is invariable; German Stadt umlauts in the plural (Städte). Japanese 都市, the
+    // city as a kind of place (町 is also the town).
+    id: 'CITY',
+    role: 'noun',
+    description: 'a large town; a big place where many people live',
+    definition: {
+      subject: {
+        concept: 'PLACE',
+        definiteness: 'indefinite',
+        adjectives: ['BIG'],
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'PERSON', definiteness: 'many', number: 'plural' },
+          verbPhrase: { verb: 'LIVE' },
+        },
+      },
+    },
+    emoji: '🏙️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'city', plural: 'cities', count: 'singular' },
+      it: { base: 'città', plural: 'città', gender: 'fem', count: 'singular' },
+      fr: { base: 'ville', plural: 'villes', gender: 'fem', count: 'singular' },
+      de: { base: 'Stadt', plural: 'Städte', gender: 'fem', count: 'singular' },
+      es: { base: 'ciudad', plural: 'ciudades', gender: 'fem', count: 'singular' },
+      ja: { base: '都市', count: 'singular', reading: 'とし' },
+      pt: { base: 'cidade', plural: 'cidades', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -3592,6 +3953,27 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's minute (localization B80), the unit an hour is counted in. A period of time like DAY
+    // and WEEK. Its own counter in Japanese, as 時間 is HOUR's: 五分, never 五つの分 (C31). A counted
+    // compound draws no furigana, so the ふん / ぷん of 一分 (いっぷん) and 三分 (さんぷん) is not the
+    // lexeme's to spell. Glossed on C26's part-whole shape, with HOUR as the whole.
+    id: 'MINUTE',
+    role: 'noun',
+    description: 'a period of sixty seconds; a sixtieth of an hour',
+    definition: partOfGloss('HOUR'),
+    emoji: '⏲️',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'minute', plural: 'minutes', count: 'singular' },
+      it: { base: 'minuto', plural: 'minuti', gender: 'masc', count: 'singular' },
+      fr: { base: 'minute', plural: 'minutes', gender: 'fem', count: 'singular' },
+      de: { base: 'Minute', plural: 'Minuten', gender: 'fem', count: 'singular' },
+      es: { base: 'minuto', plural: 'minutos', gender: 'masc', count: 'singular' },
+      ja: { base: '分', count: 'singular', reading: 'ふん', counter: '分', counter_join: 'head' },
+      pt: { base: 'minuto', plural: 'minutos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'MONTH',
     role: 'noun',
     description: 'a period of about thirty days',
@@ -3654,6 +4036,40 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'noche', plural: 'noches', gender: 'fem', count: 'singular' },
       ja: { base: '夜', count: 'singular', reading: 'よる' },
       pt: { base: 'noite', plural: 'noites', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's morning (localization B80). Glossed as NIGHT is, FLAME's part-whole shape with DAY as
+    // the whole, and FIRST as the differentia: "the first part of a day". Definite, as NIGHT's: a day
+    // has one first part.
+    id: 'MORNING',
+    role: 'noun',
+    description: 'the early part of the day, from sunrise to noon',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        adjectives: ['FIRST'],
+        possessor: { concept: 'DAY', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
+    emoji: '🌄',
+    isA: 'PERIOD_TIME',
+    forms: {
+      // The time it is said at (C29): English "in the morning" but "this morning", with no
+      // preposition under a demonstrative (`temporal_bare`); Italian and French with none at all,
+      // "la mattina", "questa mattina", "le matin", "ce matin"; German "am Morgen", "an diesem
+      // Morgen". Spanish and Portuguese take the generic "en" / "em" ("en la mañana", "nesta
+      // manhã", the American usage the corpus writes; Spain says "por la mañana"), and Japanese
+      // its に (朝に). The fused deictic words (stamattina, 今朝) are not composed.
+      en: { base: 'morning', plural: 'mornings', count: 'singular', temporal_prep: 'in', temporal_bare: 'this,that' },
+      it: { base: 'mattina', plural: 'mattine', gender: 'fem', count: 'singular', temporal_bare: '1' },
+      fr: { base: 'matin', plural: 'matins', gender: 'masc', count: 'singular', temporal_bare: '1' },
+      de: { base: 'Morgen', plural: 'Morgen', gender: 'masc', count: 'singular', temporal_prep: 'an' },
+      es: { base: 'mañana', plural: 'mañanas', gender: 'fem', count: 'singular' },
+      ja: { base: '朝', count: 'singular', reading: 'あさ' },
+      pt: { base: 'manhã', plural: 'manhãs', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -4794,6 +5210,26 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's *percent* (rank 265; localization B82). Invariable everywhere: the plural is the
+    // singular (five percent, cinque per cento, fünf Prozent, cinq pour cent). It is always counted,
+    // and "one part in a hundred" needs 100, which the cardinals do not reach (C31), so it stays on
+    // the literal by design (B82 reading 4). Japanese counts it as its own counter (五パーセント, as
+    // 時間 is), never 五つのパーセント.
+    id: 'PERCENT',
+    role: 'noun',
+    description: 'one part in a hundred',
+    emoji: '💯',
+    forms: {
+      en: { base: 'percent', plural: 'percent', count: 'singular' },
+      it: { base: 'per cento', plural: 'per cento', gender: 'masc', count: 'singular' },
+      fr: { base: 'pour cent', plural: 'pour cent', gender: 'masc', count: 'singular' },
+      de: { base: 'Prozent', plural: 'Prozent', gender: 'neut', count: 'singular' },
+      es: { base: 'por ciento', plural: 'por ciento', gender: 'masc', count: 'singular' },
+      ja: { base: 'パーセント', count: 'singular', counter: 'パーセント', counter_join: 'head' },
+      pt: { base: 'por cento', plural: 'por cento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A class of things that share a feature, and the genus of grammatical number (localization B39):
     // "a category that indicates quantities". Japanese 範疇, the linguist's word (文法範疇), not the
     // everyday カテゴリー. TENSE, ASPECT, VOICE, GENDER and PERSON_GRAMMAR could hang under it too;
@@ -4810,6 +5246,38 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'categoría', plural: 'categorías', gender: 'fem', count: 'singular' },
       ja: { base: '範疇', count: 'singular', reading: 'はんちゅう' },
       pt: { base: 'categoria', plural: 'categorias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *kind* (rank 256; localization B82): a sort, not the adjective (KINDNESS is the
+    // quality). "A group of things that has the same features", SYSTEM's shape: the relative agrees
+    // with GROUP in all seven. CATEGORY is the formal word (categoria, 範疇) and stays on its literal.
+    // Italian and Spanish tipo is also GUY's word (B75); the gender and the context tell them apart.
+    id: 'KIND_SORT',
+    role: 'noun',
+    description: 'a group of things that have something in common',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'THING', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+        relative: {
+          verbPhrase: { verb: 'HAVE' },
+          directObject: { concept: 'FEATURE', definiteness: 'definite', number: 'plural', adjectives: ['SAME'] },
+        },
+      },
+    },
+    emoji: '🔖',
+    synonym: 'sort',
+    forms: {
+      en: { base: 'kind', plural: 'kinds', count: 'singular' },
+      it: { base: 'tipo', plural: 'tipi', gender: 'masc', count: 'singular' },
+      fr: { base: 'sorte', plural: 'sortes', gender: 'fem', count: 'singular' },
+      de: { base: 'Art', plural: 'Arten', gender: 'fem', count: 'singular' },
+      es: { base: 'tipo', plural: 'tipos', gender: 'masc', count: 'singular' },
+      ja: { base: '種類', count: 'singular', reading: 'しゅるい' },
+      pt: { base: 'tipo', plural: 'tipos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -5399,6 +5867,52 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'grupo', plural: 'grupos', gender: 'masc', count: 'singular' },
       ja: { base: 'グループ', count: 'singular' },
       pt: { base: 'grupo', plural: 'grupos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's member (localization B75), the word P08 asked for beside GROUP: "a part of a group",
+    // partOfGloss on the genus every collective hangs under. Not `human`, since a state can be a
+    // member of a union too.
+    id: 'MEMBER',
+    role: 'noun',
+    description: 'one of the persons or things a group is made of',
+    definition: partOfGloss('GROUP'),
+    emoji: '🧩',
+    forms: {
+      en: { base: 'member', plural: 'members', count: 'singular' },
+      it: { base: 'membro', plural: 'membri', gender: 'masc', count: 'singular' },
+      fr: { base: 'membre', plural: 'membres', gender: 'masc', count: 'singular' },
+      de: { base: 'Mitglied', plural: 'Mitglieder', gender: 'neut', count: 'singular', compound: 'Mitglieder' },
+      es: { base: 'miembro', plural: 'miembros', gender: 'masc', count: 'singular' },
+      ja: { base: '一員', count: 'singular', reading: 'いちいん' },
+      pt: { base: 'membro', plural: 'membros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *party* (rank 327; localization B82), the celebration — the political party is B76's
+    // PARTY_POLITICAL. German Fest, not the loan Party (plural Partys). Glossed as the gathering, "a
+    // group of happy people": the event ("a time when people celebrate") needs CELEBRATE.
+    id: 'PARTY_CELEBRATION',
+    role: 'noun',
+    description: 'a social gathering to celebrate or have fun',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['HAPPY'] },
+        possessorRole: 'parts',
+      },
+    },
+    emoji: '🎉',
+    synonym: 'celebration',
+    forms: {
+      en: { base: 'party', plural: 'parties', count: 'singular' },
+      it: { base: 'festa', plural: 'feste', gender: 'fem', count: 'singular' },
+      fr: { base: 'fête', plural: 'fêtes', gender: 'fem', count: 'singular' },
+      de: { base: 'Fest', plural: 'Feste', gender: 'neut', count: 'singular' },
+      es: { base: 'fiesta', plural: 'fiestas', gender: 'fem', count: 'singular' },
+      ja: { base: 'パーティー', count: 'singular' },
+      pt: { base: 'festa', plural: 'festas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -6164,6 +6678,56 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's research (localization B81): "work with which one finds new facts", WORK_NOUN on the
+    // instrument gap it is itself glossed on. Mass. The Romance ricerca / recherche is also a search,
+    // which SEARCH, a verb only, does not collide with. STUDY_NOUN is glossed on it.
+    id: 'RESEARCH',
+    role: 'noun',
+    description: 'careful study to find out new facts',
+    definition: {
+      subject: {
+        concept: 'WORK_NOUN',
+        definiteness: 'bare',
+        relative: {
+          headRole: 'instrumental',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'FIND' },
+          directObject: { concept: 'FACT', definiteness: 'bare', number: 'plural', adjectives: ['NEW'] },
+        },
+      },
+    },
+    emoji: '🔬',
+    countable: false,
+    forms: {
+      en: { base: 'research', count: 'singular' },
+      it: { base: 'ricerca', gender: 'fem', count: 'singular' },
+      fr: { base: 'recherche', gender: 'fem', count: 'singular' },
+      de: { base: 'Forschung', gender: 'fem', count: 'singular' },
+      es: { base: 'investigación', gender: 'fem', count: 'singular' },
+      ja: { base: '研究', count: 'singular', reading: 'けんきゅう' },
+      pt: { base: 'pesquisa', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A piece of research written up (E24 D2), "a text that describes research"; the verb STUDY is not
+    // in the band. Japanese says the paper, 研究論文, since RESEARCH's 研究 would make the tooltip hold
+    // its own word (研究: 研究を描写するテキスト) and give two nouns one label.
+    id: 'STUDY_NOUN',
+    role: 'noun',
+    description: 'a piece of research, written up',
+    definition: whoGloss('TEXT', 'DESCRIBE', 'RESEARCH', 'singular'),
+    emoji: '📑',
+    forms: {
+      en: { base: 'study', plural: 'studies', count: 'singular' },
+      it: { base: 'studio', plural: 'studi', gender: 'masc', count: 'singular' },
+      fr: { base: 'étude', plural: 'études', gender: 'fem', count: 'singular' },
+      de: { base: 'Studie', plural: 'Studien', gender: 'fem', count: 'singular' },
+      es: { base: 'estudio', plural: 'estudios', gender: 'masc', count: 'singular' },
+      ja: { base: '研究論文', count: 'singular', reading: 'けんきゅうろんぶん' },
+      pt: { base: 'estudo', plural: 'estudos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // What a thing is made of. French "matériau" (a material to build with), not "matériel" (equipment).
     // Glossed "substance with which one makes an object" (localization C26): SUBSTANCE is matter,
     // and a material is the substance a thing is made *with* — the instrument gap, bare because
@@ -6240,6 +6804,26 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'proceso', plural: 'procesos', gender: 'masc', count: 'singular' },
       ja: { base: '過程', count: 'singular', reading: 'かてい' },
       pt: { base: 'processo', plural: 'processos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *change* as a noun (rank 364; localization B82), P09 D2's _NOUN suffix beside the
+    // verbs CHANGE and CHANGE_ONESELF. A process, not an action: "an action with which one changes
+    // an object" reads as the means. German Änderung (ändern is CHANGE's word), Japanese 変化.
+    id: 'CHANGE_NOUN',
+    role: 'noun',
+    description: 'the act or result of becoming different',
+    definition: whoGloss('PROCESS', 'CHANGE', 'OBJECT_THING'),
+    emoji: '🔀',
+    isA: 'PROCESS',
+    forms: {
+      en: { base: 'change', plural: 'changes', count: 'singular' },
+      it: { base: 'cambiamento', plural: 'cambiamenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'changement', plural: 'changements', gender: 'masc', count: 'singular' },
+      de: { base: 'Änderung', plural: 'Änderungen', gender: 'fem', count: 'singular' },
+      es: { base: 'cambio', plural: 'cambios', gender: 'masc', count: 'singular' },
+      ja: { base: '変化', count: 'singular', reading: 'へんか' },
+      pt: { base: 'mudança', plural: 'mudanças', gender: 'fem', count: 'singular' },
     },
   },
   // ── P09's system and the two programs (localization B65) ─────────────
@@ -6335,6 +6919,33 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's idea (localization B81): "a concept that is in a mind", B60's MIND. "A concept that one
+    // thinks" is marginal in French and German (qu'on pense, den man denkt, with a noun object).
+    id: 'IDEA',
+    role: 'noun',
+    description: 'a thought or a plan one has in mind',
+    definition: {
+      subject: {
+        concept: 'CONCEPT',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'BE' },
+          complements: { locative: { phrase: { concept: 'MIND', definiteness: 'indefinite' } } },
+        },
+      },
+    },
+    emoji: '💭',
+    forms: {
+      en: { base: 'idea', plural: 'ideas', count: 'singular' },
+      it: { base: 'idea', plural: 'idee', gender: 'fem', count: 'singular' },
+      fr: { base: 'idée', plural: 'idées', gender: 'fem', count: 'singular' },
+      de: { base: 'Idee', plural: 'Ideen', gender: 'fem', count: 'singular' },
+      es: { base: 'idea', plural: 'ideas', gender: 'fem', count: 'singular' },
+      ja: { base: '考え', count: 'singular', reading: 'かんがえ' },
+      pt: { base: 'ideia', plural: 'ideias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // The physical thing, as against the grammatical OBJECT_GRAMMAR the same English word also
     // means: this is the one a hand closes on (ja 物体, not 目的語), which is why the ids split.
     id: 'ACTION',
@@ -6349,6 +6960,38 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'acción', plural: 'acciones', gender: 'fem', count: 'singular' },
       ja: { base: '動作', count: 'singular', reading: 'どうさ' },
       pt: { base: 'ação', plural: 'ações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's *game* (rank 210; localization B82), the game one plays (gioco, jeu, Spiel, juego,
+    // ゲーム, jogo); a match (partita, partie, partido, 試合) is another concept. "An action that one
+    // does for joy": the purpose complement on DO, near PLAY_GAME's "to act to feel joy" without
+    // restating it. PLAY_GAME's own word would be circular (un'azione che si gioca).
+    id: 'GAME',
+    role: 'noun',
+    description: 'an activity one plays for fun, often with rules',
+    definition: {
+      subject: {
+        concept: 'ACTION',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO' },
+          complements: { purpose: { phrase: { concept: 'JOY', definiteness: 'bare' } } },
+        },
+      },
+    },
+    emoji: '🎮',
+    isA: 'ACTION',
+    forms: {
+      en: { base: 'game', plural: 'games', count: 'singular' },
+      it: { base: 'gioco', plural: 'giochi', gender: 'masc', count: 'singular' },
+      fr: { base: 'jeu', plural: 'jeux', gender: 'masc', count: 'singular' },
+      de: { base: 'Spiel', plural: 'Spiele', gender: 'neut', count: 'singular' },
+      es: { base: 'juego', plural: 'juegos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ゲーム', count: 'singular' },
+      pt: { base: 'jogo', plural: 'jogos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -6425,6 +7068,34 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'problema', plural: 'problemas', gender: 'masc', count: 'singular' },
       ja: { base: '問題', count: 'singular', reading: 'もんだい' },
       pt: { base: 'problema', plural: 'problemas', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's issue (localization B81), a matter in dispute; a magazine's issue (numero, 号) is
+    // another concept. "A problem about which one speaks", the corpus's first gloss on a **topic**
+    // gap. It shares its word with QUESTION in French and German (question, Frage) and with PROBLEM
+    // in Japanese (問題), which is the everyday word (環境問題), so the Japanese tooltip holds its own
+    // word: 問題: 話す問題. 論点 would keep the gloss and lose the everyday word.
+    id: 'ISSUE',
+    role: 'noun',
+    description: 'a matter that people discuss or argue about',
+    definition: {
+      subject: {
+        concept: 'PROBLEM',
+        definiteness: 'indefinite',
+        relative: { headRole: 'topic', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'SPEAK' } },
+      },
+    },
+    emoji: '🗯️',
+    synonym: 'matter',
+    forms: {
+      en: { base: 'issue', plural: 'issues', count: 'singular' },
+      it: { base: 'questione', plural: 'questioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'question', plural: 'questions', gender: 'fem', count: 'singular' },
+      de: { base: 'Frage', plural: 'Fragen', gender: 'fem', count: 'singular' },
+      es: { base: 'cuestión', plural: 'cuestiones', gender: 'fem', count: 'singular' },
+      ja: { base: '問題', count: 'singular', reading: 'もんだい' },
+      pt: { base: 'questão', plural: 'questões', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -6627,6 +7298,110 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'mão', plural: 'mãos', gender: 'fem', count: 'singular' },
     },
   },
+  // ── P09-E24's head, face, back and health (localization B79) ─────────
+  {
+    // The body part; the leader (capo, chef, Leiter, jefe, 長) is another concept. "The high part of a
+    // body": NIGHT's shape, a definite part picked out by an adjective, and ORGAN's partOfGloss('BODY')
+    // narrowed. No `isA`, as EYE has none. FACE is glossed on it, so it is seeded first.
+    id: 'HEAD',
+    role: 'noun',
+    description: 'the top part of the body, with the face and the brain',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        adjectives: ['HIGH'],
+        possessor: { concept: 'BODY', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
+    emoji: '👤',
+    forms: {
+      en: { base: 'head', plural: 'heads', count: 'singular' },
+      it: { base: 'testa', plural: 'teste', gender: 'fem', count: 'singular' },
+      fr: { base: 'tête', plural: 'têtes', gender: 'fem', count: 'singular' },
+      de: { base: 'Kopf', plural: 'Köpfe', gender: 'masc', count: 'singular' },
+      es: { base: 'cabeza', plural: 'cabezas', gender: 'fem', count: 'singular' },
+      ja: { base: '頭', count: 'singular', reading: 'あたま' },
+      pt: { base: 'cabeça', plural: 'cabeças', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // "The part of a head that has the eyes", standing on HEAD as CASE_INSTANCE stood on THING. The
+    // eyes are definite plural, as the parents are in the sibling glosses. Italian viso, the neutral
+    // word, over faccia; Spanish cara, which is also CARO's feminine, a word no seed has.
+    id: 'FACE',
+    role: 'noun',
+    description: 'the front of the head, with the eyes, the nose and the mouth',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        possessor: { concept: 'HEAD', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+        relative: {
+          verbPhrase: { verb: 'HAVE' },
+          directObject: { concept: 'EYE', definiteness: 'definite', number: 'plural' },
+        },
+      },
+    },
+    emoji: '🙂',
+    forms: {
+      en: { base: 'face', plural: 'faces', count: 'singular' },
+      it: { base: 'viso', plural: 'visi', gender: 'masc', count: 'singular' },
+      fr: { base: 'visage', plural: 'visages', gender: 'masc', count: 'singular' },
+      de: { base: 'Gesicht', plural: 'Gesichter', gender: 'neut', count: 'singular' },
+      es: { base: 'cara', plural: 'caras', gender: 'fem', count: 'singular' },
+      ja: { base: '顔', count: 'singular', reading: 'かお' },
+      pt: { base: 'rosto', plural: 'rostos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The body's back (E24 D2); the rear of a thing (retro, arrière, Rückseite, 後ろ) is another
+    // concept, and the adverb is COME_BACK's. Literal by design: "the opposite part of a body" needs
+    // something to be opposite to, which OPPOSITE takes no complement for, and "the part behind the
+    // chest" would seed CHEST for one tooltip. Portuguese says *as costas*, plural in every use: a
+    // plurale tantum (P09-E41), seeded as NEWS's five are, with the plural surface as `base`.
+    id: 'BACK_BODY',
+    role: 'noun',
+    description: 'the rear part of the body, from the neck to the hips',
+    emoji: '🔙',
+    forms: {
+      en: { base: 'back', plural: 'backs', count: 'singular' },
+      it: { base: 'schiena', plural: 'schiene', gender: 'fem', count: 'singular' },
+      fr: { base: 'dos', plural: 'dos', gender: 'masc', count: 'singular' },
+      de: { base: 'Rücken', plural: 'Rücken', gender: 'masc', count: 'singular' },
+      es: { base: 'espalda', plural: 'espaldas', gender: 'fem', count: 'singular' },
+      ja: { base: '背中', count: 'singular', reading: 'せなか' },
+      pt: { base: 'costas', gender: 'fem', count: 'plural' },
+    },
+  },
+  {
+    // "A body's good state": the Saxon genitive in English, since health is not a *part* of the body
+    // (the `whole` role would say "of a body"). Mass. When "healthy" is seeded it has its genus here.
+    id: 'HEALTH',
+    role: 'noun',
+    description: 'the state of being well in body',
+    definition: {
+      subject: {
+        concept: 'STATE',
+        definiteness: 'definite',
+        adjectives: ['GOOD'],
+        possessor: { concept: 'BODY', definiteness: 'indefinite' },
+      },
+    },
+    emoji: '🩺',
+    countable: false,
+    forms: {
+      en: { base: 'health', count: 'singular' },
+      it: { base: 'salute', gender: 'fem', count: 'singular' },
+      fr: { base: 'santé', gender: 'fem', count: 'singular' },
+      de: { base: 'Gesundheit', gender: 'fem', count: 'singular' },
+      es: { base: 'salud', gender: 'fem', count: 'singular' },
+      ja: { base: '健康', count: 'singular', reading: 'けんこう' },
+      pt: { base: 'saúde', gender: 'fem', count: 'singular' },
+    },
+  },
   {
     id: 'STORY',
     role: 'noun',
@@ -6644,6 +7419,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's history (localization B81), the past and its study, not the console's typed HISTORY
+    // (cronologia, Verlauf, 履歴). "The past facts", PAST being the grammar's past (C24). It shares its
+    // word with STORY in five languages (storia, histoire, Geschichte, historia, história), which the
+    // synonym tells apart in the picker; French histoire opens on an h muet, as STORY's does. Mass.
+    id: 'HISTORY_PAST',
+    role: 'noun',
+    description: 'the past, and the study of it',
+    definition: { subject: { concept: 'FACT', definiteness: 'definite', number: 'plural', adjectives: ['PAST'] } },
+    emoji: '🏛️',
+    countable: false,
+    synonym: 'the past',
+    forms: {
+      en: { base: 'history', count: 'singular' },
+      it: { base: 'storia', gender: 'fem', count: 'singular' },
+      fr: { base: 'histoire', gender: 'fem', count: 'singular', elides: '1' },
+      de: { base: 'Geschichte', gender: 'fem', count: 'singular' },
+      es: { base: 'historia', gender: 'fem', count: 'singular' },
+      ja: { base: '歴史', count: 'singular', reading: 'れきし' },
+      pt: { base: 'história', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // A **plurale tantum** in five of the seven (P09-E41): *le notizie, les nouvelles, die
     // Nachrichten, las noticias, as notícias* are plural in every use — the singular *la notizia* is
     // "a news item" — while English *news* is mass and singular ("the news seems good"). Each of the
@@ -6654,6 +7451,19 @@ export const nouns: ConceptSeed[] = [
     id: 'NEWS',
     role: 'noun',
     description: 'reports of recent events',
+    // "Facts that one has told recently" (localization A32): the report and its recency, a bare
+    // plural head over an object-gap clause, on FACT, TELL and RECENTLY. It avoids NEW, whose en
+    // *new* and fr *nouveaux* would echo *news* and *nouvelles*.
+    definition: {
+      subject: {
+        concept: 'FACT', definiteness: 'bare', number: 'plural',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'TELL', aspect: 'resultative', modifier: 'RECENTLY' },
+        },
+      },
+    },
     emoji: '📰',
     countable: false,
     forms: {
@@ -6975,6 +7785,137 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'empresa', plural: 'empresas', gender: 'fem', count: 'singular' },
     },
   },
+  // ── P09-E24's teams, institutions and business (localization B77) ──
+  {
+    // P08's collective, seeded ahead of it under the GROUP P08 proposes; its `member` relation ("a
+    // team of players") is P08's own work. Japanese PLAY_GAME is 遊ぶ, a child's play, which PLAY_GAME's
+    // own gloss says too.
+    id: 'TEAM',
+    role: 'noun',
+    description: 'a group of people who play or work together',
+    definition: whoGloss('GROUP', 'PLAY_GAME'),
+    emoji: '🏅',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'team', plural: 'teams', count: 'singular' },
+      it: { base: 'squadra', plural: 'squadre', gender: 'fem', count: 'singular' },
+      fr: { base: 'équipe', plural: 'équipes', gender: 'fem', count: 'singular' },
+      de: { base: 'Mannschaft', plural: 'Mannschaften', gender: 'fem', count: 'singular' },
+      es: { base: 'equipo', plural: 'equipos', gender: 'masc', count: 'singular' },
+      ja: { base: 'チーム', count: 'singular' },
+      pt: { base: 'equipe', plural: 'equipes', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P08's collective, as TEAM is. SYSTEM's shape, "a group of parts that works": the relative
+    // agrees with GROUP, so the whole lives in one place.
+    id: 'COMMUNITY',
+    role: 'noun',
+    description: 'the people who live in one place, taken together',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+        relative: {
+          verbPhrase: { verb: 'LIVE' },
+          complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'definite', adjectives: ['SAME'] } } },
+        },
+      },
+    },
+    emoji: '🏘️',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'community', plural: 'communities', count: 'singular' },
+      // Italian comunità is invariable, as every -tà noun is.
+      it: { base: 'comunità', plural: 'comunità', gender: 'fem', count: 'singular' },
+      fr: { base: 'communauté', plural: 'communautés', gender: 'fem', count: 'singular' },
+      de: { base: 'Gemeinschaft', plural: 'Gemeinschaften', gender: 'fem', count: 'singular' },
+      es: { base: 'comunidad', plural: 'comunidades', gender: 'fem', count: 'singular' },
+      ja: { base: '共同体', count: 'singular', reading: 'きょうどうたい' },
+      pt: { base: 'comunidade', plural: 'comunidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // SCHOOL's locative gap with a subject of its own: "a school where adult people learn". The
+    // indefinite plural, as WAR's, keeps French des.
+    id: 'UNIVERSITY',
+    role: 'noun',
+    description: 'a school of higher learning for adults',
+    definition: {
+      subject: {
+        concept: 'SCHOOL',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'PERSON', definiteness: 'indefinite', number: 'plural', adjectives: ['ADULT'] },
+          verbPhrase: { verb: 'LEARN' },
+        },
+      },
+    },
+    emoji: '🎓',
+    isA: 'SCHOOL',
+    forms: {
+      en: { base: 'university', plural: 'universities', count: 'singular' },
+      it: { base: 'università', plural: 'università', gender: 'fem', count: 'singular' },
+      fr: { base: 'université', plural: 'universités', gender: 'fem', count: 'singular' },
+      de: { base: 'Universität', plural: 'Universitäten', gender: 'fem', count: 'singular' },
+      es: { base: 'universidad', plural: 'universidades', gender: 'fem', count: 'singular' },
+      ja: { base: '大学', count: 'singular', reading: 'だいがく' },
+      pt: { base: 'universidade', plural: 'universidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Work done for others; the religious and military senses (funzione, office, Gottesdienst) are
+    // not this concept. German Dienst, not the loan Service a customer desk says.
+    id: 'SERVICE',
+    role: 'noun',
+    description: 'work done for other people',
+    definition: {
+      subject: {
+        concept: 'WORK_NOUN',
+        definiteness: 'bare',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO' },
+          complements: { purpose: { phrase: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] } } },
+        },
+      },
+    },
+    emoji: '🛎️',
+    forms: {
+      en: { base: 'service', plural: 'services', count: 'singular' },
+      it: { base: 'servizio', plural: 'servizi', gender: 'masc', count: 'singular' },
+      fr: { base: 'service', plural: 'services', gender: 'masc', count: 'singular' },
+      de: { base: 'Dienst', plural: 'Dienste', gender: 'masc', count: 'singular' },
+      es: { base: 'servicio', plural: 'servicios', gender: 'masc', count: 'singular' },
+      ja: { base: 'サービス', count: 'singular' },
+      pt: { base: 'serviço', plural: 'serviços', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Commerce, the activity; the firm is COMPANY_BUSINESS. A mass noun in its singular word
+    // (commercio, commerce, Handel): the plural affari, affaires, negocios and negócios are the
+    // colloquial words and render since P09-E41, but they are "dealings", not the trade itself.
+    id: 'BUSINESS',
+    role: 'noun',
+    description: 'the buying and selling of goods and services',
+    definition: instrumentGloss('WORK_NOUN', 'TRADE', undefined, 'bare'),
+    emoji: '💹',
+    countable: false,
+    synonym: 'commerce',
+    forms: {
+      en: { base: 'business', count: 'singular' },
+      it: { base: 'commercio', gender: 'masc', count: 'singular' },
+      fr: { base: 'commerce', gender: 'masc', count: 'singular' },
+      de: { base: 'Handel', gender: 'masc', count: 'singular', compound: 'Handels' },
+      es: { base: 'comercio', gender: 'masc', count: 'singular' },
+      ja: { base: 'ビジネス', count: 'singular' },
+      pt: { base: 'comércio', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     // The polity half of P09's "state"; the condition is STATE. Italian, French, Spanish and
     // Portuguese say both with one word and write the polity with a capital (Stato, État, Estado),
@@ -7000,6 +7941,172 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
       ja: { base: '国家', count: 'singular', reading: 'こっか' },
       pt: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── P09-E24's government and the law (localization B76) ────────────
+  {
+    // Authority over people and events, not the electrical current (corrente, courant, Strom, 電力),
+    // which is another concept. "An ability with which one governs": ABILITY is the genus, and the
+    // instrument gap says what the ability is for.
+    id: 'POWER',
+    role: 'noun',
+    description: 'the authority to direct people and events',
+    definition: instrumentGloss('ABILITY', 'GOVERN_STATE'),
+    emoji: '👑',
+    synonym: 'authority',
+    forms: {
+      en: { base: 'power', plural: 'powers', count: 'singular' },
+      it: { base: 'potere', plural: 'poteri', gender: 'masc', count: 'singular' },
+      fr: { base: 'pouvoir', plural: 'pouvoirs', gender: 'masc', count: 'singular' },
+      de: { base: 'Macht', plural: 'Mächte', gender: 'fem', count: 'singular' },
+      es: { base: 'poder', plural: 'poderes', gender: 'masc', count: 'singular' },
+      ja: { base: '権力', count: 'singular', reading: 'けんりょく' },
+      pt: { base: 'poder', plural: 'poderes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P08's collective, seeded ahead of it under the GROUP P08 proposes. The group, where
+    // STATE_NATION is the system it governs: "a group that governs a state".
+    id: 'GOVERNMENT',
+    role: 'noun',
+    description: 'the group of people who govern a state',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'GOVERN_STATE' }, directObject: { concept: 'STATE_NATION', definiteness: 'indefinite' } },
+      },
+    },
+    emoji: '🏛️',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'government', plural: 'governments', count: 'singular' },
+      it: { base: 'governo', plural: 'governi', gender: 'masc', count: 'singular' },
+      fr: { base: 'gouvernement', plural: 'gouvernements', gender: 'masc', count: 'singular' },
+      de: { base: 'Regierung', plural: 'Regierungen', gender: 'fem', count: 'singular' },
+      es: { base: 'gobierno', plural: 'gobiernos', gender: 'masc', count: 'singular' },
+      ja: { base: '政府', count: 'singular', reading: 'せいふ' },
+      pt: { base: 'governo', plural: 'governos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The political party; the celebration is PARTY_CELEBRATION (festa, fête, Fest), which shares
+    // only the English word. POWER is the bare mass object: "a group that desires power".
+    id: 'PARTY_POLITICAL',
+    role: 'noun',
+    description: 'an organized group that seeks political power',
+    definition: whoGloss('GROUP', 'DESIRE', 'POWER', 'singular'),
+    emoji: '🗳️',
+    isA: 'GROUP',
+    synonym: 'political',
+    forms: {
+      en: { base: 'party', plural: 'parties', count: 'singular' },
+      it: { base: 'partito', plural: 'partiti', gender: 'masc', count: 'singular' },
+      fr: { base: 'parti', plural: 'partis', gender: 'masc', count: 'singular' },
+      de: { base: 'Partei', plural: 'Parteien', gender: 'fem', count: 'singular' },
+      es: { base: 'partido', plural: 'partidos', gender: 'masc', count: 'singular' },
+      ja: { base: '政党', count: 'singular', reading: 'せいとう' },
+      pt: { base: 'partido', plural: 'partidos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // One statute. The field of law (diritto, droit, Recht) is RIGHT_NOUN's word in five languages
+    // and has no concept yet. WRITE, not GIVE: GIVE's Japanese is the benefactive あげる, and a state
+    // does not *ageru* a law (国家が書く指示, not 国家があげる指示).
+    id: 'LAW',
+    role: 'noun',
+    description: 'a rule a state makes that everyone must follow',
+    definition: patientOfGloss('INSTRUCTION', 'WRITE', 'STATE_NATION'),
+    emoji: '📜',
+    forms: {
+      en: { base: 'law', plural: 'laws', count: 'singular' },
+      it: { base: 'legge', plural: 'leggi', gender: 'fem', count: 'singular' },
+      fr: { base: 'loi', plural: 'lois', gender: 'fem', count: 'singular' },
+      de: { base: 'Gesetz', plural: 'Gesetze', gender: 'neut', count: 'singular', compound: 'Gesetzes' },
+      es: { base: 'ley', plural: 'leyes', gender: 'fem', count: 'singular' },
+      ja: { base: '法律', count: 'singular', reading: 'ほうりつ' },
+      pt: { base: 'lei', plural: 'leis', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The law court, not the sports court (campo, terrain, Platz, cancha, コート, quadra).
+    id: 'COURT_LAW',
+    role: 'noun',
+    description: 'the body that judges cases under the law',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'APPLY' }, directObject: { concept: 'LAW', definiteness: 'definite', number: 'plural' } },
+      },
+    },
+    emoji: '⚖️',
+    synonym: 'of law',
+    forms: {
+      en: { base: 'court', plural: 'courts', count: 'singular' },
+      it: { base: 'tribunale', plural: 'tribunali', gender: 'masc', count: 'singular' },
+      fr: { base: 'tribunal', plural: 'tribunaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Gericht', plural: 'Gerichte', gender: 'neut', count: 'singular', compound: 'Gerichts' },
+      es: { base: 'tribunal', plural: 'tribunales', gender: 'masc', count: 'singular' },
+      ja: { base: '裁判所', count: 'singular', reading: 'さいばんしょ' },
+      pt: { base: 'tribunal', plural: 'tribunais', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The entitlement. French droit, Spanish derecho and Portuguese direito are also RIGHT_SIDE's
+    // adjective, which the synonym tells apart in the picker: "right (entitlement)".
+    id: 'RIGHT_NOUN',
+    role: 'noun',
+    description: 'what one is allowed to do or have',
+    definition: {
+      subject: {
+        concept: 'ACTION',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO', modals: ['MAY'] },
+        },
+      },
+    },
+    emoji: '✊',
+    synonym: 'entitlement',
+    forms: {
+      en: { base: 'right', plural: 'rights', count: 'singular' },
+      it: { base: 'diritto', plural: 'diritti', gender: 'masc', count: 'singular' },
+      fr: { base: 'droit', plural: 'droits', gender: 'masc', count: 'singular' },
+      de: { base: 'Recht', plural: 'Rechte', gender: 'neut', count: 'singular', compound: 'Rechts' },
+      es: { base: 'derecho', plural: 'derechos', gender: 'masc', count: 'singular' },
+      ja: { base: '権利', count: 'singular', reading: 'けんり' },
+      pt: { base: 'direito', plural: 'direitos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "A period where nations kill": the locative gap on PERIOD_TIME. The subject is the
+    // indefinite plural, not the bare one, which French would write without its des.
+    id: 'WAR',
+    role: 'noun',
+    description: 'armed fighting between nations',
+    definition: {
+      subject: {
+        concept: 'PERIOD_TIME',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'NATION', definiteness: 'indefinite', number: 'plural' },
+          verbPhrase: { verb: 'KILL' },
+        },
+      },
+    },
+    emoji: '⚔️',
+    forms: {
+      en: { base: 'war', plural: 'wars', count: 'singular' },
+      it: { base: 'guerra', plural: 'guerre', gender: 'fem', count: 'singular' },
+      fr: { base: 'guerre', plural: 'guerres', gender: 'fem', count: 'singular' },
+      de: { base: 'Krieg', plural: 'Kriege', gender: 'masc', count: 'singular', compound: 'Kriegs' },
+      es: { base: 'guerra', plural: 'guerras', gender: 'fem', count: 'singular' },
+      ja: { base: '戦争', count: 'singular', reading: 'せんそう' },
+      pt: { base: 'guerra', plural: 'guerras', gender: 'fem', count: 'singular' },
     },
   },
   {

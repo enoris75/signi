@@ -24,4 +24,11 @@ describe('frEnclitic', () => {
     expect(frEnclitic('donne', 'le me', false, '2sg')).toBe('donne-le-moi');
     expect(frEnclitic('donnez', 'les leur', false, '2pl')).toBe('donnez-les-leur');
   });
+
+  // localization B86: a pronominal verb's direct object (se rappeler) comes before its own pronoun.
+  test('a third-person direct object precedes the reflexive pronoun', () => {
+    expect(frEnclitic('te rappelle', 'le', true, '2sg')).toBe('rappelle-le-toi');
+    expect(frEnclitic('vous rappelez', 'la', true, '2pl')).toBe('rappelez-la-vous');
+    expect(frEnclitic('nous rappelons', 'les', true, '1pl')).toBe('rappelons-les-nous');
+  });
 });

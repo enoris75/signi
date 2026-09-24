@@ -33,7 +33,10 @@ const KEYS: readonly IndefiniteKey[] = ['base', 'object', 'disjunctive'];
  *
  * OTHER is the one adjective with a pronoun form of its own (`after_pronoun`: *else*, *d'autre*,
  * *anderes*, *más*), and where a pronoun fuses with it the pronoun says so (`with_other` /
- * `negative_with_other`: *qualcos'altro*, *autre chose*, *otra cosa*, *nada más*), replacing it.
+ * `negative_with_other`: *qualcos'altro*, *autre chose*, *otra cosa*, *nada más*), replacing it. A
+ * pronoun that declines names the fused form per slot, `with_other_object` / `with_other_disjunctive`
+ * falling back on `with_other`: German EVERYTHING is *alles andere*, *mit allem anderen*
+ * (localization B90).
  *
  * What it cannot say it refuses rather than drop (the plan names a word the sentence would lose):
  * more than one adjective, and a degree or an intensifier on it. Japanese says all of these on its
@@ -52,7 +55,8 @@ export function foldIndefiniteModifier(head: ConceptForms, adjectives: ConceptFo
   const citation = f['base'] ?? '';
   const folded: Record<string, string> = {};
   for (const key of KEYS) {
-    folded[key] = other && f['with_other'] ? f['with_other'] : speller(f[key] ?? citation, citation, adjective, key);
+    const withOther = key === 'base' ? f['with_other'] : f[`with_other_${key}`] ?? f['with_other'];
+    folded[key] = other && withOther ? withOther : speller(f[key] ?? citation, citation, adjective, key);
   }
   const negative = f['negative'];
   if (negative) {

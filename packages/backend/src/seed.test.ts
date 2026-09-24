@@ -180,11 +180,14 @@ describe('seeding the corpus', () => {
         "SELECT concept_a_id, concept_b_id FROM concept_relations WHERE relation = 'hypernym' ORDER BY concept_a_id",
       )
       .all();
+    // Both sides sorted by the one comparator: SQLite's binary ORDER BY puts GO_OUT after GOVERNMENT
+    // (_ sorts after the letters), localeCompare before it.
+    const byId = (a: { concept_a_id: string }, b: { concept_a_id: string }) => a.concept_a_id.localeCompare(b.concept_a_id);
     const expected = concepts
       .filter((c) => c.isA)
       .map((c) => ({ concept_a_id: c.id, concept_b_id: c.isA }))
-      .sort((a, b) => a.concept_a_id.localeCompare(b.concept_a_id));
-    expect(rows).toEqual(expected);
+      .sort(byId);
+    expect([...rows].sort(byId)).toEqual(expected);
   });
 });
 

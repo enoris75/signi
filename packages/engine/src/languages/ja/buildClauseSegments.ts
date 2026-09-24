@@ -48,6 +48,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // A relative-clause gloss (保存した) is the head's prenominal clause alone, in the plain form it
   // takes before a head.
   if (!phrase.verbPhrase && isRelativeGloss(phrase.subject)) return relativeClauseSegs(firstConjunct(phrase.subject));
+  // An adverbial gloss is the adverbial clause said alone, as it stands before a predicate
+  // (予想するように, C41): the translator keeps a verbless period's adverbial clause only when asked to.
+  if (!phrase.verbPhrase && phrase.adverbialClause) return adverbialSegs(phrase.adverbialClause);
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate. A
   // `no` group still closes its どの … も circumfix on ない, which no predicate is there to supply
   // ("どの保存済みのフレーズもない", "no saved phrases"), as the manner gloss does.
@@ -125,15 +128,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   if (agent) segs.push(...slotSegs(agent, jaAgentParticle(complements)));
   // An adverbial clause stands ahead of the predicate it modifies, behind the topic: plain, its
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
-  if (phrase.adverbialClause) {
-    const adverbial = shapeAdverbialClause(phrase.adverbialClause);
-    // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323);
-    // ので, 時に and のに a state holding, which a state verb says with 〜ている (持っているので, A347).
-    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : adverbial.held ? 'held' : true);
-    // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
-    // turns into.
-    segs.push(...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word });
-  }
+  if (phrase.adverbialClause) segs.push(...adverbialSegs(phrase.adverbialClause));
   // A clause of purpose precedes what it is done for, closed by ために on the dictionary form:
   // 「変更するためにクリック」, 「翻訳を見るために主語を選択」. It is a citation clause, so it speaks no
   // subject of its own — the one it shares with this clause is already the topic above.
@@ -216,4 +211,19 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
     subjectNegative || causeeNegative, animate, undefined, respect,
   ));
   return segs;
+}
+
+/**
+ * An adverbial clause closed by its postposed conjunction: plain, its subject marked が — 猫が食べる時に,
+ * 犬が走るように (P09-E4, C41). It stands ahead of the predicate it modifies, or alone as an adverbial
+ * gloss (予想するように).
+ */
+function adverbialSegs(given: NonNullable<ResolvedPhrase['adverbialClause']>): RubySegment[] {
+  const adverbial = shapeAdverbialClause(given);
+  // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323);
+  // ので, 時に and のに a state holding, which a state verb says with 〜ている (持っているので, A347).
+  const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : adverbial.held ? 'held' : true);
+  // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
+  // turns into.
+  return [...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word }];
 }

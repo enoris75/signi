@@ -203,6 +203,7 @@ describe('the glosses the sweep shipped', () => {
 const GLOSSES_SHARED_BY_DESIGN: [string, string, string][] = [
   ['CAT', 'MOUSE', 'both are small mammals; SIZE is the only dimension the corpus has for them'],
   ['BOY', 'YOUNG_MAN', 'the two ages of a young male person differ by a degree no adjective carries'],
+  ['GIRL', 'YOUNG_WOMAN', 'BOY and YOUNG_MAN again, the female pair (B75): "a female child" fails where CHILD is masculine'],
   ['BUILDER', 'CREATOR', 'a builder makes objects; what narrows it is the building, which is not the object'],
   ['COLD', 'COLD_CLIMATE', 'B48 split the sense, not the gloss: both are at low temperature'],
   ['HOT', 'HOT_CLIMATE', 'B48 again, the other pole'],

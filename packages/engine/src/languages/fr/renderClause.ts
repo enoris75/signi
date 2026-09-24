@@ -20,6 +20,7 @@ import { questionWord } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 import { subordinateText } from './subordinateText.js';
+import { similativeGap } from './similativeGap.js';
 import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
 import { VOWEL_START } from './fr.consts.js';
 
@@ -42,6 +43,9 @@ export function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // A relative-clause gloss ("qu'on a enregistré") is the head's relative alone, still agreeing with it.
   if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeText(firstConjunct(subject));
+  // An adverbial gloss is the adverbial clause said alone, as it follows a verb ("comme on s'y
+  // attend", C41): the translator keeps a verbless period's adverbial clause only when asked to.
+  if (!phrase.verbPhrase && phrase.adverbialClause) return adverbialText(phrase.adverbialClause);
   // An imperative drops its subject (the person still drives the form — see predicateText); an
   // infinitive citation ("consommer la nourriture") is likewise subject-less on the surface.
   // A content clause standing where the subject would is extraposed behind the predicate, under
@@ -90,7 +94,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
     : governed;
   // An adverbial clause follows everything, under its conjunction, in the mood that conjunction
   // governs: "l'homme court parce que le chat mange", "… avant que le chat mange" (P09-E4).
-  return phrase.adverbialClause
-    ? `${purposed} ${subordinateText(SUBORDINATORS[phrase.adverbialClause.conjunction], renderClause(phrase.adverbialClause.clause))}`
-    : purposed;
+  return phrase.adverbialClause ? `${purposed} ${adverbialText(phrase.adverbialClause)}` : purposed;
+}
+
+/** An adverbial clause under its conjunction: "parce que le chat mange", "comme on s'y attend" (P09-E4, C41). */
+function adverbialText({ conjunction, clause }: NonNullable<ResolvedPhrase['adverbialClause']>): string {
+  return subordinateText(SUBORDINATORS[conjunction], renderClause(similativeGap(conjunction, clause)));
 }

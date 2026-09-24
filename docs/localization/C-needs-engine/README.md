@@ -1,13 +1,14 @@
 # C-needs-engine — tasks blocked on a construct, or deferred
 
-**Three open, filed on 2026-09-24** for the P09-E25–E43 concepts shipped with no `definition`
-(with [A32–A34](../A-ready/)):
+**None is open.** The three filed on 2026-09-24 for the P09-E25–E43 concepts shipped with no
+`definition` were driven to a verdict the same day and are in [`done/`](../done/):
 
-- [C41](C41-sentence-adverbs-maybe-actually-of-course.md) the sentence adverbs — MAYBE and ACTUALLY
-  literal by design; OF_COURSE blocked on an *as* clause said alone ("as one expects")
-- [C42](C42-probability.md) PROBABILITY — literal by design, the dimension PROBABLY scales on
-- [C43](C43-senses-tell-order-and-be-faring.md) the senses TELL_ORDER and BE_FARING — literal by
-  design, and no surface could show a gloss: `/api/concepts` never serves a sense
+- [C41](../done/C41-sentence-adverbs-maybe-actually-of-course.md) the sentence adverbs — **built the
+  similative *as* clause and an adverbial clause said alone** (`PhrasePlan.adverbialGloss`);
+  OF_COURSE → "as one expects" (*comme on s'y attend*); MAYBE and ACTUALLY literal by design
+- [C42](../done/C42-probability.md) PROBABILITY — literal by design, the dimension PROBABLY scales on
+- [C43](../done/C43-senses-tell-order-and-be-faring.md) the senses TELL_ORDER and BE_FARING — literal
+  by design: `/api/concepts` never serves a sense
 
 A new one lands here when a string or gloss turns out to need a construct the engine cannot render,
 or is left on the literal by design with its leads probed.

@@ -322,6 +322,83 @@ export const motionVerbs: ConceptSeed[] = [
     },
   },
   {
+    // E24's *run away* (rank 267, *away* as P09 D3's phrasal verb): to flee. *Go away* is LEAVE_DEPART
+    // and *take away* is REMOVE, so this is the one *away* that needs a concept (localization B83): the
+    // six languages say it with one verb of its own. English phrasal, as GO_OUT; German weglaufen is
+    // separable (läuft … weg). BE in it/fr/de (è scappata, s'est enfuie, ist weggelaufen). French
+    // s'enfuir is pronominal, its clitic inside each form as COLLAPSE's; Spanish huir inserts its y
+    // before a vowel (huyo, huye, huyó), and Portuguese fugir writes its j before o (fujo) and its
+    // stressed o (foge).
+    id: 'RUN_AWAY',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'source', 'cause'],
+    description: 'to leave quickly in order to escape',
+    // "to leave fast" (localization B83): LEAVE_DEPART with FAST, as RUN is "to move fast".
+    definition: infinitiveGloss('LEAVE_DEPART', { modifier: 'FAST' }),
+    emoji: '🏃',
+    isA: 'LEAVE_DEPART',
+    synonym: 'flee',
+    forms: {
+      en: {
+        base: 'run away',
+        '1sg_present': 'run away', '2sg_present': 'run away', '3sg_present': 'runs away',
+        '1pl_present': 'run away', '2pl_present': 'run away', '3pl_present': 'run away',
+        past: 'ran away',
+        particle: 'away',
+      },
+      it: {
+        base: 'scappare',
+        '1sg_present': 'scappo', '2sg_present': 'scappi', '3sg_present': 'scappa',
+        '1pl_present': 'scappiamo', '2pl_present': 'scappate', '3pl_present': 'scappano',
+        '1sg_past': 'scappai', '2sg_past': 'scappasti', '3sg_past': 'scappò',
+        '1pl_past': 'scappammo', '2pl_past': 'scappaste', '3pl_past': 'scapparono',
+        '1sg_future': 'scapperò', '2sg_future': 'scapperai', '3sg_future': 'scapperà',
+        '1pl_future': 'scapperemo', '2pl_future': 'scapperete', '3pl_future': 'scapperanno',
+      },
+      fr: {
+        base: 's\'enfuir',
+        '1sg_present': 'm\'enfuis', '2sg_present': 't\'enfuis', '3sg_present': 's\'enfuit',
+        '1pl_present': 'nous enfuyons', '2pl_present': 'vous enfuyez', '3pl_present': 's\'enfuient',
+        '1sg_past': 'm\'enfuis', '2sg_past': 't\'enfuis', '3sg_past': 's\'enfuit',
+        '1pl_past': 'nous enfuîmes', '2pl_past': 'vous enfuîtes', '3pl_past': 's\'enfuirent',
+        '1sg_future': 'm\'enfuirai', '2sg_future': 't\'enfuiras', '3sg_future': 's\'enfuira',
+        '1pl_future': 'nous enfuirons', '2pl_future': 'vous enfuirez', '3pl_future': 's\'enfuiront',
+      },
+      de: {
+        base: 'weglaufen', particle: 'weg',
+        '1sg_present': 'laufe', '2sg_present': 'läufst', '3sg_present': 'läuft',
+        '1pl_present': 'laufen', '2pl_present': 'lauft', '3pl_present': 'laufen',
+        '1sg_past': 'lief', '2sg_past': 'liefst', '3sg_past': 'lief',
+        '1pl_past': 'liefen', '2pl_past': 'lieft', '3pl_past': 'liefen',
+      },
+      es: {
+        base: 'huir',
+        '1sg_present': 'huyo', '2sg_present': 'huyes', '3sg_present': 'huye',
+        '1pl_present': 'huimos', '2pl_present': 'huis', '3pl_present': 'huyen',
+        '1sg_past': 'hui', '2sg_past': 'huiste', '3sg_past': 'huyó',
+        '1pl_past': 'huimos', '2pl_past': 'huisteis', '3pl_past': 'huyeron',
+        '1sg_future': 'huiré', '2sg_future': 'huirás', '3sg_future': 'huirá',
+        '1pl_future': 'huiremos', '2pl_future': 'huiréis', '3pl_future': 'huirán',
+      },
+      ja: {
+        base: '逃げる',
+        reading: 'にげる',
+        masu_present: '逃げます',
+        masu_present_reading: 'にげます',
+      },
+      pt: {
+        base: 'fugir',
+        '1sg_present': 'fujo', '2sg_present': 'foge', '3sg_present': 'foge',
+        '1pl_present': 'fugimos', '2pl_present': 'fogem', '3pl_present': 'fogem',
+        '1sg_past': 'fugi', '2sg_past': 'fugiu', '3sg_past': 'fugiu',
+        '1pl_past': 'fugimos', '2pl_past': 'fugiram', '3pl_past': 'fugiram',
+        '1sg_future': 'fugirei', '2sg_future': 'fugirá', '3sg_future': 'fugirá',
+        '1pl_future': 'fugiremos', '2pl_future': 'fugirão', '3pl_future': 'fugirão',
+      },
+    },
+  },
+  {
     // P09's go out (D3): to go outside. English phrasal, German separable hinausgehen; BE in it/fr/de
     // (è uscito, est sorti, ist hinausgegangen). No `source`: "goes out of the house" is the seeded
     // LEAVE's frame, which it/es/ja/pt already say with this verb (esce dalla casa, 家を出る), and
@@ -393,6 +470,79 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_past': 'saímos', '2pl_past': 'saíram', '3pl_past': 'saíram',
         '1sg_future': 'sairei', '2sg_future': 'sairá', '3sg_future': 'sairá',
         '1pl_future': 'sairemos', '2pl_future': 'sairão', '3pl_future': 'sairão',
+      },
+    },
+  },
+
+  {
+    // E24's *walk* (rank 384): to go on foot. German has no single verb — gehen is GO's and laufen
+    // RUN's — so it says *zu Fuß gehen*, with *zu Fuß* as a particle written apart, as UNDO's
+    // *rückgängig* is (B40): "geht zu Fuß", "…, weil er zu Fuß geht", "zu Fuß zu gehen", "zu Fuß
+    // gegangen". Italian camminare and French marcher take avere / avoir; zu Fuß gehen takes sein.
+    // The gloss wants FOOT ("to go on foot"), which the corpus does not have, and "to go slowly" is
+    // wrong (a walk can be brisk), so it stays on the literal (localization B83 reading 3).
+    id: 'WALK',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'direction', 'route', 'source', 'locative', 'cause'],
+    description: 'to move along on foot',
+    emoji: '🚶',
+    isA: 'GO',
+    forms: {
+      en: {
+        base: 'walk',
+        '1sg_present': 'walk', '2sg_present': 'walk', '3sg_present': 'walks',
+        '1pl_present': 'walk', '2pl_present': 'walk', '3pl_present': 'walk',
+        past: 'walked',
+      },
+      it: {
+        base: 'camminare',
+        '1sg_present': 'cammino', '2sg_present': 'cammini', '3sg_present': 'cammina',
+        '1pl_present': 'camminiamo', '2pl_present': 'camminate', '3pl_present': 'camminano',
+        '1sg_past': 'camminai', '2sg_past': 'camminasti', '3sg_past': 'camminò',
+        '1pl_past': 'camminammo', '2pl_past': 'camminaste', '3pl_past': 'camminarono',
+        '1sg_future': 'camminerò', '2sg_future': 'camminerai', '3sg_future': 'camminerà',
+        '1pl_future': 'cammineremo', '2pl_future': 'camminerete', '3pl_future': 'cammineranno',
+      },
+      fr: {
+        base: 'marcher',
+        '1sg_present': 'marche', '2sg_present': 'marches', '3sg_present': 'marche',
+        '1pl_present': 'marchons', '2pl_present': 'marchez', '3pl_present': 'marchent',
+        '1sg_past': 'marchai', '2sg_past': 'marchas', '3sg_past': 'marcha',
+        '1pl_past': 'marchâmes', '2pl_past': 'marchâtes', '3pl_past': 'marchèrent',
+        '1sg_future': 'marcherai', '2sg_future': 'marcheras', '3sg_future': 'marchera',
+        '1pl_future': 'marcherons', '2pl_future': 'marcherez', '3pl_future': 'marcheront',
+      },
+      de: {
+        base: 'zu Fuß gehen', particle: 'zu Fuß',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+        '1sg_past': 'ging', '2sg_past': 'gingst', '3sg_past': 'ging',
+        '1pl_past': 'gingen', '2pl_past': 'gingt', '3pl_past': 'gingen',
+      },
+      es: {
+        base: 'caminar',
+        '1sg_present': 'camino', '2sg_present': 'caminas', '3sg_present': 'camina',
+        '1pl_present': 'caminamos', '2pl_present': 'camináis', '3pl_present': 'caminan',
+        '1sg_past': 'caminé', '2sg_past': 'caminaste', '3sg_past': 'caminó',
+        '1pl_past': 'caminamos', '2pl_past': 'caminasteis', '3pl_past': 'caminaron',
+        '1sg_future': 'caminaré', '2sg_future': 'caminarás', '3sg_future': 'caminará',
+        '1pl_future': 'caminaremos', '2pl_future': 'caminaréis', '3pl_future': 'caminarán',
+      },
+      ja: {
+        base: '歩く',
+        reading: 'あるく',
+        masu_present: '歩きます',
+        masu_present_reading: 'あるきます',
+      },
+      pt: {
+        base: 'caminhar',
+        '1sg_present': 'caminho', '2sg_present': 'caminha', '3sg_present': 'caminha',
+        '1pl_present': 'caminhamos', '2pl_present': 'caminham', '3pl_present': 'caminham',
+        '1sg_past': 'caminhei', '2sg_past': 'caminhou', '3sg_past': 'caminhou',
+        '1pl_past': 'caminhamos', '2pl_past': 'caminharam', '3pl_past': 'caminharam',
+        '1sg_future': 'caminharei', '2sg_future': 'caminhará', '3sg_future': 'caminhará',
+        '1pl_future': 'caminharemos', '2pl_future': 'caminharão', '3pl_future': 'caminharão',
       },
     },
   },
@@ -471,6 +621,152 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_past': 'nos movemos', '2pl_past': 'se moveram', '3pl_past': 'se moveram',
         '1sg_future': 'me moverei', '2sg_future': 'se moverá', '3sg_future': 'se moverá',
         '1pl_future': 'nos moveremos', '2pl_future': 'se moverão', '3pl_future': 'se moverão',
+      },
+    },
+  },
+
+  // ── E24's posture events (localization B83) ──────────────────────
+  // SIT_DOWN and STAND_UP are the events (*sedersi*, *alzarsi*), not the states of being seated or
+  // standing (*sitzen*, *stehen*, 座っている, 立っている), which are later concepts. Reflexive in the four
+  // Romance languages, their clitic inside each form as MOVE_ONESELF's, and so essere / être in the
+  // perfect ("si è seduta", "s'est assise"); English phrasal, as GO_OUT. German sich setzen is
+  // reflexive (haben: "hat sich gesetzt"); aufstehen is separable and takes sein ("ist
+  // aufgestanden"). Both stay on the literal: every lead is as true of lying down or climbing, and
+  // the posture words (a seat, an upright body) are not in the corpus (B83 reading 2).
+  {
+    id: 'SIT_DOWN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'direction', 'cause'],
+    description: 'to move into a sitting position',
+    emoji: '🪑',
+    isA: 'MOVE_ONESELF',
+    forms: {
+      en: {
+        base: 'sit down',
+        '1sg_present': 'sit down', '2sg_present': 'sit down', '3sg_present': 'sits down',
+        '1pl_present': 'sit down', '2pl_present': 'sit down', '3pl_present': 'sit down',
+        past: 'sat down',
+        particle: 'down',
+      },
+      it: {
+        // sedere diphthongs under the stress (siedo, siedi, siede, siedono); the future is siederò.
+        base: 'sedersi',
+        '1sg_present': 'mi siedo', '2sg_present': 'ti siedi', '3sg_present': 'si siede',
+        '1pl_present': 'ci sediamo', '2pl_present': 'vi sedete', '3pl_present': 'si siedono',
+        '1sg_past': 'mi sedetti', '2sg_past': 'ti sedesti', '3sg_past': 'si sedette',
+        '1pl_past': 'ci sedemmo', '2pl_past': 'vi sedeste', '3pl_past': 'si sedettero',
+        '1sg_future': 'mi siederò', '2sg_future': 'ti siederai', '3sg_future': 'si siederà',
+        '1pl_future': 'ci siederemo', '2pl_future': 'vi siederete', '3pl_future': 'si siederanno',
+      },
+      fr: {
+        // asseoir in its -ie- conjugation (assieds, asseyons), the commoner of the two.
+        base: 's\'asseoir',
+        '1sg_present': 'm\'assieds', '2sg_present': 't\'assieds', '3sg_present': 's\'assied',
+        '1pl_present': 'nous asseyons', '2pl_present': 'vous asseyez', '3pl_present': 's\'asseyent',
+        '1sg_past': 'm\'assis', '2sg_past': 't\'assis', '3sg_past': 's\'assit',
+        '1pl_past': 'nous assîmes', '2pl_past': 'vous assîtes', '3pl_past': 's\'assirent',
+        '1sg_future': 'm\'assiérai', '2sg_future': 't\'assiéras', '3sg_future': 's\'assiéra',
+        '1pl_future': 'nous assiérons', '2pl_future': 'vous assiérez', '3pl_future': 's\'assiéront',
+      },
+      de: {
+        base: 'sich setzen',
+        '1sg_present': 'setze', '2sg_present': 'setzt', '3sg_present': 'setzt',
+        '1pl_present': 'setzen', '2pl_present': 'setzt', '3pl_present': 'setzen',
+        '1sg_past': 'setzte', '2sg_past': 'setztest', '3sg_past': 'setzte',
+        '1pl_past': 'setzten', '2pl_past': 'setztet', '3pl_past': 'setzten',
+      },
+      es: {
+        base: 'sentarse',
+        '1sg_present': 'me siento', '2sg_present': 'te sientas', '3sg_present': 'se sienta',
+        '1pl_present': 'nos sentamos', '2pl_present': 'os sentáis', '3pl_present': 'se sientan',
+        '1sg_past': 'me senté', '2sg_past': 'te sentaste', '3sg_past': 'se sentó',
+        '1pl_past': 'nos sentamos', '2pl_past': 'os sentasteis', '3pl_past': 'se sentaron',
+        '1sg_future': 'me sentaré', '2sg_future': 'te sentarás', '3sg_future': 'se sentará',
+        '1pl_future': 'nos sentaremos', '2pl_future': 'os sentaréis', '3pl_future': 'se sentarán',
+      },
+      ja: {
+        base: '座る',
+        reading: 'すわる',
+        masu_present: '座ります',
+        masu_present_reading: 'すわります',
+      },
+      pt: {
+        base: 'sentar-se',
+        '1sg_present': 'me sento', '2sg_present': 'se senta', '3sg_present': 'se senta',
+        '1pl_present': 'nos sentamos', '2pl_present': 'se sentam', '3pl_present': 'se sentam',
+        '1sg_past': 'me sentei', '2sg_past': 'se sentou', '3sg_past': 'se sentou',
+        '1pl_past': 'nos sentamos', '2pl_past': 'se sentaram', '3pl_past': 'se sentaram',
+        '1sg_future': 'me sentarei', '2sg_future': 'se sentará', '3sg_future': 'se sentará',
+        '1pl_future': 'nos sentaremos', '2pl_future': 'se sentarão', '3pl_future': 'se sentarão',
+      },
+    },
+  },
+  {
+    id: 'STAND_UP',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to rise to an upright position',
+    emoji: '🧍',
+    isA: 'MOVE_ONESELF',
+    forms: {
+      en: {
+        base: 'stand up',
+        '1sg_present': 'stand up', '2sg_present': 'stand up', '3sg_present': 'stands up',
+        '1pl_present': 'stand up', '2pl_present': 'stand up', '3pl_present': 'stand up',
+        past: 'stood up',
+        particle: 'up',
+      },
+      it: {
+        base: 'alzarsi',
+        '1sg_present': 'mi alzo', '2sg_present': 'ti alzi', '3sg_present': 'si alza',
+        '1pl_present': 'ci alziamo', '2pl_present': 'vi alzate', '3pl_present': 'si alzano',
+        '1sg_past': 'mi alzai', '2sg_past': 'ti alzasti', '3sg_past': 'si alzò',
+        '1pl_past': 'ci alzammo', '2pl_past': 'vi alzaste', '3pl_past': 'si alzarono',
+        '1sg_future': 'mi alzerò', '2sg_future': 'ti alzerai', '3sg_future': 'si alzerà',
+        '1pl_future': 'ci alzeremo', '2pl_future': 'vi alzerete', '3pl_future': 'si alzeranno',
+      },
+      fr: {
+        // lever takes the grave accent where the next syllable is mute (lève, lèverai).
+        base: 'se lever',
+        '1sg_present': 'me lève', '2sg_present': 'te lèves', '3sg_present': 'se lève',
+        '1pl_present': 'nous levons', '2pl_present': 'vous levez', '3pl_present': 'se lèvent',
+        '1sg_past': 'me levai', '2sg_past': 'te levas', '3sg_past': 'se leva',
+        '1pl_past': 'nous levâmes', '2pl_past': 'vous levâtes', '3pl_past': 'se levèrent',
+        '1sg_future': 'me lèverai', '2sg_future': 'te lèveras', '3sg_future': 'se lèvera',
+        '1pl_future': 'nous lèverons', '2pl_future': 'vous lèverez', '3pl_future': 'se lèveront',
+      },
+      de: {
+        base: 'aufstehen', particle: 'auf',
+        '1sg_present': 'stehe', '2sg_present': 'stehst', '3sg_present': 'steht',
+        '1pl_present': 'stehen', '2pl_present': 'steht', '3pl_present': 'stehen',
+        '1sg_past': 'stand', '2sg_past': 'standst', '3sg_past': 'stand',
+        '1pl_past': 'standen', '2pl_past': 'standet', '3pl_past': 'standen',
+      },
+      es: {
+        base: 'levantarse',
+        '1sg_present': 'me levanto', '2sg_present': 'te levantas', '3sg_present': 'se levanta',
+        '1pl_present': 'nos levantamos', '2pl_present': 'os levantáis', '3pl_present': 'se levantan',
+        '1sg_past': 'me levanté', '2sg_past': 'te levantaste', '3sg_past': 'se levantó',
+        '1pl_past': 'nos levantamos', '2pl_past': 'os levantasteis', '3pl_past': 'se levantaron',
+        '1sg_future': 'me levantaré', '2sg_future': 'te levantarás', '3sg_future': 'se levantará',
+        '1pl_future': 'nos levantaremos', '2pl_future': 'os levantaréis', '3pl_future': 'se levantarán',
+      },
+      ja: {
+        base: '立つ',
+        reading: 'たつ',
+        masu_present: '立ちます',
+        masu_present_reading: 'たちます',
+      },
+      pt: {
+        base: 'levantar-se',
+        '1sg_present': 'me levanto', '2sg_present': 'se levanta', '3sg_present': 'se levanta',
+        '1pl_present': 'nos levantamos', '2pl_present': 'se levantam', '3pl_present': 'se levantam',
+        '1sg_past': 'me levantei', '2sg_past': 'se levantou', '3sg_past': 'se levantou',
+        '1pl_past': 'nos levantamos', '2pl_past': 'se levantaram', '3pl_past': 'se levantaram',
+        '1sg_future': 'me levantarei', '2sg_future': 'se levantará', '3sg_future': 'se levantará',
+        '1pl_future': 'nos levantaremos', '2pl_future': 'se levantarão', '3pl_future': 'se levantarão',
       },
     },
   },

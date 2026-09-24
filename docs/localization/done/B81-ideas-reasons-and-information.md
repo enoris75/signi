@@ -112,7 +112,7 @@ Readings to judge on authoring:
 ## Not solved by this seed
 
 1. **NEWS** — seeded by [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md); its gloss is
-   [A32](../A-ready/A32-news.md)'s, which needs no INFORMATION ("new information" on B81's word would be a B route it does not take).
+   [A32](../done/A32-news.md)'s, which needs no INFORMATION ("new information" on B81's word would be a B route it does not take).
 2. **The verb STUDY** and REASON's faculty sense — later.
 3. **ISSUE's and STUDY_NOUN's Japanese homographs** (readings 3 and 5) — the author's call.
 
@@ -121,3 +121,46 @@ Readings to judge on authoring:
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 ISSUE in German and French, the first gloss on a topic gap (*ein Problem, über das man spricht*,
 *un problème duquel on parle*).
+
+## Done (2026-09-24)
+
+**Seven words seeded, seven glossed**: every one the ticket forecast. The seeds are in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts), each beside a related word: IDEA after
+CONCEPT, REASON and INFORMATION after FACT, ISSUE after PROBLEM, RESEARCH and STUDY_NOUN after WORK_NOUN,
+and HISTORY_PAST after STORY. They are pinned in
+[people-body-and-ideas.test.ts](../../../packages/engine/test/people-body-and-ideas.test.ts) and covered by
+one row in [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) (ISSUE in German and
+French).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| IDEA | a concept that is in a mind | un concetto che è in una mente | un concept qui est dans un esprit | ein Begriff, der in einem Verstand ist | un concepto que está en una mente | 頭脳にある概念 | um conceito que está em uma mente |
+| REASON | a fact that causes an action | un fatto che induce un'azione | un fait qui induit une action | eine Tatsache, die eine Handlung veranlasst | un hecho que induce una acción | 動作を引き起こす事実 | um fato que induz uma ação |
+| ISSUE | a problem about which one speaks | un problema del quale si parla | un problème dont on parle | ein Problem, über das man spricht | un problema sobre el que se habla | 話す問題 | um problema sobre o qual se fala |
+| INFORMATION | content that one learns | contenuto che si impara | contenu qu'on apprend | Inhalt, den man lernt | contenido que se aprende | 学ぶ内容 | conteúdo que se aprende |
+| RESEARCH | work with which one finds new facts | lavoro con il quale si trovano nuovi fatti | travail avec lequel on trouve de nouveaux faits | Arbeit, mit der man neue Tatsachen findet | trabajo con el que se encuentran nuevos hechos | 新しい事実を見つける仕事 | trabalho com o qual se encontram novos fatos |
+| STUDY_NOUN | a text that describes research | un testo che descrive ricerca | un texte qui décrit de la recherche | ein Text, der Forschung beschreibt | un texto que describe investigación | 研究を描写するテキスト | um texto que descreve pesquisa |
+| HISTORY_PAST | the past facts | i fatti passati | les faits passés | die vergangenen Tatsachen | los hechos pasados | 過去の事実 | os fatos passados |
+
+What landed differently from the plan:
+
+1. **French ISSUE says *dont*, not *duquel*.** The probe's *un problème duquel on parle* is not standard
+   French: a verb's *de*-complement relativises as *dont*, which French already did for a *de*-object
+   (DEPEND's *dont … dépend*). A topic gap taken with *de* now does the same
+   ([fr/relativeText.ts](../../../packages/engine/src/languages/fr/relativeText.ts)).
+2. **A topic gap lost its verb's own preposition, in every language.** This is a defect no ticket had
+   found. THINK's topic complement is *pensa al gatto* / *pense au chat* / *denkt an den Kater*, but its
+   relative came out *al quale* → *del quale*, *auquel* → *duquel*, *an den* → *über den*, *en el que* →
+   *sobre el que* and *no qual* → *sobre o qual*. The reason was that
+   [relativeGapComplement](../../../packages/engine/src/functions/relativeGapComplement.ts) dropped the
+   `topic_prep` link that `resolveComplements` gives the complement. It now carries the link: *un gatto
+   al quale si pensa*, *un chat auquel on pense*, *ein Kater, an den man denkt*. This is pinned in the lane
+   test and in `fr/relativeText.test.ts`. SPEAK, which ISSUE uses, was not affected.
+3. **STUDY_NOUN's Japanese is 研究論文 (けんきゅうろんぶん)**, the alternative in reading 5. With 研究 the
+   tooltip would have held its own word and given RESEARCH and STUDY_NOUN one label. The gloss itself is
+   unchanged, 研究を描写するテキスト.
+4. **ISSUE keeps 問題** (reading 3), because it is the everyday word. The Japanese tooltip reads
+   "問題: 話す問題", and ISSUE shares a Japanese label with PROBLEM, as it shares *question* / *Frage*
+   with QUESTION in French and German.
+5. **HISTORY_PAST carries French `elides: '1'`**: *l'histoire*, *de l'histoire*. The probe's *la
+   histoire* is gone.

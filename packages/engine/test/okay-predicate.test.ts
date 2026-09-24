@@ -189,3 +189,20 @@ describe('known bugs: a generic subject in a dative experiencer frame (A316)', (
     expect(sayAll(okay(np('SOMEONE'))).de).toBe('jemandem geht es gut.');
   });
 });
+
+// Localization A33: OKAY's tooltip, DARK's negated HAVE in a headless relative on BEING — fine without
+// *good*, *well* or BE_FARING, the copula its lexemes name.
+describe("OKAY's definition", () => {
+  test('that does not have problems, in all seven', () => {
+    const okayConcept = concepts.find((c) => c.id === 'OKAY');
+    expect(sayAll(okayConcept!.definition!)).toEqual({
+      en: 'that does not have problems.',
+      it: 'che non ha problemi.',
+      fr: "qui n'a pas de problèmes.",
+      de: 'das keine Probleme hat.',
+      es: 'que no tiene problemas.',
+      ja: '問題がない。',
+      pt: 'que não tem problemas.',
+    });
+  });
+});

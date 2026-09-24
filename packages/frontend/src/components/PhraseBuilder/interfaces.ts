@@ -87,6 +87,8 @@ export const SUBORDINATE_OPTIONS: readonly SubordinateOption[] = [
   { link: "adverbial", conjunction: "until", labelKey: "subordinator.value.until", key: "U" },
   { link: "adverbial", conjunction: "since", labelKey: "subordinator.value.since", key: "S" },
   { link: "adverbial", conjunction: "though", labelKey: "subordinator.value.though", key: "G" },
+  // Localization C41: the similative *as*, **L** for *like* — A and S are taken.
+  { link: "adverbial", conjunction: "as", labelKey: "subordinator.value.as", key: "L" },
 ];
 
 // The catalog key naming each subordinating conjunction, for the connector's label and the badge.
@@ -99,6 +101,7 @@ export const SUBORDINATOR_LABEL_KEY: Record<SubordinatingConjunction, UiStringKe
   until: "subordinator.value.until",
   since: "subordinator.value.since",
   though: "subordinator.value.though",
+  as: "subordinator.value.as",
 };
 
 // The catalog key naming a subordinate link by its word: *that*, the infinitive phrase, or its

@@ -10,7 +10,7 @@ lexical object case (C35) and `infinitive_link`, read together.
 controller (the builder never sets `control: 'object'`); see [Done](#done). Filed 2026-09-24 from
 [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *allow* (rank 346, with a person and an infinitive; ALLOW with a thing is seeded by
-[B85](../../../../localization/B-needs-seed/B85-pay-provide-spend-win-lose-thank-allow.md)). The same
+[B85](../../../../localization/done/B85-pay-provide-spend-win-lose-thank-allow.md)). The same
 construct serves HELP_VERB (*aiuta il gatto a correre*) and TELL (*dice al gatto di correre*).
 
 | lang | the man **allows the cat to run** (proposed) | the man helps the cat to run (engine) | the man tells the cat to run (engine) |

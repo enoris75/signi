@@ -14,7 +14,7 @@ import { jaMeasuredOnce } from './jaMeasuredOnce.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { isPrivative } from '../../functions/isPrivative.js';
-import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_DEGREE, JA_ESSIVE, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_DEGREE, JA_ESSIVE, JA_ICHIDAN, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { slotSegs } from './slotSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
@@ -114,7 +114,7 @@ export function complementSegs(
         // By class (see `jaAdjClass`): an i-adjective takes its く-form, a na- or の-adjective its bare
         // stem + に (幸せに, 茶色に), and a た-adjective the state 〜ている as a ように clause, which takes no
         // に either (疲れているように思える).
-        const { kind, stem, reading: stemReading } = jaAdjClass(base, reading, false, verbal);
+        const { kind, stem, reading: stemReading, verb } = jaAdjClass(base, reading, false, verbal);
         if (kind === 'i') {
           segs.push(wordSeg(`${stem}く`, stemReading === undefined ? undefined : `${stemReading}く`));
           takesNi = false;
@@ -122,8 +122,9 @@ export function complementSegs(
           segs.push(wordSeg(stem, stemReading), { t: 'いるように' });
           takesNi = false;
         } else if (kind === 'ru') {
-          // A verb becomes a ように clause, as the た-adjective's state does: 大きすぎるようになる (C33).
-          segs.push(wordSeg(stem, stemReading), { t: 'るように' });
+          // A verb becomes a ように clause, as the た-adjective's state does: 大きすぎるようになる (C33),
+          // 違うように思える, on the dictionary form its own row writes (localization B87).
+          segs.push(wordSeg(stem, stemReading), { t: `${(verb ?? JA_ICHIDAN).u}ように` });
           takesNi = false;
         } else {
           segs.push(wordSeg(stem, stemReading));

@@ -103,6 +103,10 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   // A modal governing an infinitive is the modal chain over it, in the verb cluster: "handeln wollen",
   // never "wollen, zu handeln" (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);
+  // An adverbial gloss is the adverbial clause said alone, verb-final under its conjunction as it
+  // follows a verb ("wie man erwartet", C41): the translator keeps a verbless period's adverbial
+  // clause only when the plan asks for it.
+  if (!phrase.verbPhrase && phrase.adverbialClause) return adverbialText(phrase.adverbialClause);
   // A governor that takes the **bare** infinitive keeps the governed verb in this clause's own verb
   // cluster, with no "zu" and no comma to set it off (C36). Where the cluster stands is where German
   // always puts it: behind the finite verb in a V2 clause ("der Kater lässt den Hund **laufen**") and
@@ -144,9 +148,12 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   // An adverbial clause closes the sentence behind a comma, verb-final under its conjunction, as every
   // subordinate clause is: "der Mann läuft, weil der Kater isst" (P09-E4). It stands behind the main
   // clause, so the main clause keeps its V2 order.
-  return phrase.adverbialClause
-    ? `${purposed}, ${subordinator(phrase.adverbialClause)} ${renderClause(phrase.adverbialClause.clause, false, true)}`
-    : purposed;
+  return phrase.adverbialClause ? `${purposed}, ${adverbialText(phrase.adverbialClause)}` : purposed;
+}
+
+/** An adverbial clause under its conjunction, verb-final: "weil der Kater isst", "wie man erwartet" (P09-E4, C41). */
+function adverbialText(adverbial: NonNullable<ResolvedPhrase['adverbialClause']>): string {
+  return `${subordinator(adverbial)} ${renderClause(adverbial.clause, false, true)}`;
 }
 
 /**

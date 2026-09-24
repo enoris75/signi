@@ -46,8 +46,11 @@ export const ES_EQUATIVE_INTENSIFIER_STANDARD = 'que';
  * SAME and the final LAST precede for the same reason (localization B66): "el mismo día", "el último
  * día", where "el día mismo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("la semana
  * pasada", "la semana próxima"). Neither apocopates: "el último día", never "*el últim día".
+ *
+ * So does the genuine REAL (localization B87): "un verdadero problema"; after the noun it is "true"
+ * ("una historia verdadera").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE', 'REAL_GENUINE']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
@@ -171,6 +174,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   // P09-E27: "hasta que" governs the subjunctive; "aunque" asserts its clause here (the factual
   // reading "though the dog eats") and keeps the indicative, as "desde que" does.
   until: 'hasta que', since: 'desde que', though: 'aunque',
+  // Localization C41: the similative, on the indicative ("como el perro corre", "como se espera").
+  as: 'como',
 };
 
 /**

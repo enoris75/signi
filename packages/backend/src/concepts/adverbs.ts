@@ -54,6 +54,17 @@ const frequencyGloss = (definiteness: Definiteness, number?: 'singular' | 'plura
   subject: { concept: 'TIME', definiteness, number, mannerGloss: true },
 });
 
+// A clause gloss the engine renders into every language: the similative adverbial clause said alone,
+// "as one expects" / "come si prevede" / "comme on s'y attend" / "wie man erwartet" / "como se espera"
+// / 予想するように, exactly as "the cat runs as one expects" says it after the verb. The act is the
+// generic one's, as in the evaluative modals' glosses; the plan's THING is the throwaway a verbless
+// period carries (see PhrasePlan.adverbialGloss, localization C41).
+const asGloss = (verb: string): PhrasePlan => ({
+  subject: { concept: 'THING' },
+  adverbialGloss: true,
+  adverbialClause: { conjunction: 'as', clause: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb } } },
+});
+
 export const adverbs: ConceptSeed[] = [
   // ── ADVERBS ──────────────────────────────────────────────────────
   {
@@ -167,6 +178,29 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'de nuevo' },
       ja: { base: 'もう一度', reading: 'もういちど' },
       pt: { base: 'de novo' },
+    },
+  },
+  {
+    // P09-E24's once (localization B80): one time, and no more. No `frequency` subtype, though it
+    // counts times as ALWAYS does: English puts a frequency adverb before the verb, and "the cat once
+    // ran" is the *formerly* sense (un tempo, autrefois, einst, かつて), another concept. Without one it
+    // follows the verb in all seven, "the cat ran once", as AGAIN does.
+    //
+    // Left on the English literal by design: "at a sole time" is stilted (SOLE is "the only one"),
+    // and the numeral on TIME ("at one time") drops or garbles the count in German, Spanish and
+    // Portuguese. See docs/localization/done/B80-minute-morning-later-once-often.md.
+    id: 'ONCE',
+    role: 'adverb',
+    description: 'one time only',
+    emoji: '1️⃣',
+    forms: {
+      en: { base: 'once' },
+      it: { base: 'una volta' },
+      fr: { base: 'une fois' },
+      de: { base: 'einmal' },
+      es: { base: 'una vez' },
+      ja: { base: '一度', reading: 'いちど' },
+      pt: { base: 'uma vez' },
     },
   },
   {
@@ -402,6 +436,27 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's far, the adverb (localization B89): a place adverb like HERE and THERE, after the
+    // object. Not FAR's adverb form — the adjective is lontano / lointain / fern / 遠い, the adverb
+    // lontano / loin / weit weg / 遠く — so it is a concept of its own, named for the phrase English
+    // says. Glossed HERE's way with FAR for the deixis: "in a far place". Japanese 遠くで is the place
+    // an act goes on in, and being or living far away is 遠くに (`locative_ni`, as HERE's).
+    id: 'FAR_AWAY',
+    role: 'adverb',
+    description: 'at or to a great distance',
+    definition: complementGloss('locative', 'PLACE', 'indefinite', { adjectives: ['FAR'] }),
+    emoji: '🔭',
+    forms: {
+      en: { base: 'far away', subtype: 'place' },
+      it: { base: 'lontano', subtype: 'place' },
+      fr: { base: 'loin', subtype: 'place' },
+      de: { base: 'weit weg', subtype: 'place' },
+      es: { base: 'lejos', subtype: 'place' },
+      ja: { base: '遠くで', subtype: 'place', reading: 'とおくで', locative_ni: '遠くに', locative_ni_reading: 'とおくに' },
+      pt: { base: 'longe', subtype: 'place' },
+    },
+  },
+  {
     // At the present time: what a setting holds now, in the console's list ("now singular").
     // Japanese 今, not 現在, which is also the present tense's name (現在 現在 on the tense's row).
     id: 'NOW',
@@ -511,6 +566,26 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's later (localization B80): at a time after this one. No subtype, as NOW has none, so it
+    // follows the verb ("the cat runs later", "il gatto corre più tardi"). Glossed on C29's `after`
+    // relation on TIME with NOW's deixis — "after this time" — beside NOW's "at this time" and
+    // ALREADY's "at a previous time".
+    id: 'LATER',
+    role: 'adverb',
+    description: 'at a time after the present one',
+    definition: temporalGloss('after', 'TIME', 'this'),
+    emoji: '⏭️',
+    forms: {
+      en: { base: 'later' },
+      it: { base: 'più tardi' },
+      fr: { base: 'plus tard' },
+      de: { base: 'später' },
+      es: { base: 'más tarde' },
+      ja: { base: '後で', reading: 'あとで' },
+      pt: { base: 'mais tarde' },
+    },
+  },
+  {
     id: 'ALWAYS',
     role: 'adverb',
     description: 'at all times, on every occasion',
@@ -524,6 +599,26 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'siempre', subtype: 'frequency' },
       ja: { base: 'いつも', subtype: 'frequency' },
       pt: { base: 'sempre', subtype: 'frequency' },
+    },
+  },
+  {
+    // P09-E24's often (localization B80): a frequency adverb like ALWAYS, before the verb in English
+    // and between the auxiliary and the participle. REPEATEDLY already ships "at many times", so
+    // OFTEN is glossed as the locative on B65's CASE_INSTANCE, EVERYWHERE's shape under `many`: "in
+    // many cases". Portuguese frequentemente, not the phrase "muitas vezes"; Japanese よく.
+    id: 'OFTEN',
+    role: 'adverb',
+    description: 'many times; in many cases',
+    definition: complementGloss('locative', 'CASE_INSTANCE', 'many', { number: 'plural' }),
+    emoji: '🔄',
+    forms: {
+      en: { base: 'often', subtype: 'frequency' },
+      it: { base: 'spesso', subtype: 'frequency' },
+      fr: { base: 'souvent', subtype: 'frequency' },
+      de: { base: 'oft', subtype: 'frequency' },
+      es: { base: 'a menudo', subtype: 'frequency' },
+      ja: { base: 'よく', subtype: 'frequency' },
+      pt: { base: 'frequentemente', subtype: 'frequency' },
     },
   },
   {
@@ -559,9 +654,13 @@ export const adverbs: ConceptSeed[] = [
       it: { base: 'più', subtype: 'frequency', polarity: 'negative' },
       fr: { base: 'plus', subtype: 'frequency', polarity: 'negative' },
       de: { base: 'nicht mehr', subtype: 'frequency', polarity: 'negative' },
-      es: { base: 'ya no', subtype: 'frequency', polarity: 'negative' },
+      // Spanish and Portuguese say it with the negator itself, behind "ya" / "já": where the clause
+      // writes its own "no" (an infinitive, a command, the group a modal governs) the lead stands in
+      // front of it and the adverb is not said again — "ya no correr", never "no correr ya no"
+      // (`negator_lead`, localization B84).
+      es: { base: 'ya no', subtype: 'frequency', polarity: 'negative', negator_lead: 'ya' },
       ja: { base: 'もう', subtype: 'frequency', polarity: 'negative' },
-      pt: { base: 'já não', subtype: 'frequency', polarity: 'negative' },
+      pt: { base: 'já não', subtype: 'frequency', polarity: 'negative', negator_lead: 'já' },
     },
   },
   // ── P09's focus adverbs (localization B67) ───────────────────────
@@ -667,8 +766,10 @@ export const adverbs: ConceptSeed[] = [
   // to its clause: `que` (*peut-être que*, *claro que*) or a `comma` ("actually, the cat…"). REALLY
   // is not one of them: "does not really eat" is its scope inside the negation (E39 *Today*).
   //
-  // ACTUALLY, MAYBE and OF_COURSE are literal by design: E24 probed their leads — "in a possible way"
-  // reads as *possible*, "in fact" as *in Tatsache* / *en hecho*. PROBABLY is glossed (below).
+  // MAYBE and ACTUALLY are literal by design (localization C41): "maybe" leaves the odds open, which
+  // no degree of PROBABILITY says, and its content-clause gloss is MIGHT's; "in fact" is an idiom in
+  // English alone, and "in reality" is REALLY's gloss. PROBABLY is glossed on PROBABILITY, and
+  // OF_COURSE on the similative clause said alone, "as one expects" (both below).
   {
     // Perhaps, possibly. Portuguese *talvez* ahead of its verb puts it in the subjunctive (`mood`):
     // *talvez o gato não tenha comido*, where Spanish *quizás* keeps the indicative (E39 D2).
@@ -728,6 +829,9 @@ export const adverbs: ConceptSeed[] = [
     id: 'OF_COURSE',
     role: 'adverb',
     description: 'naturally; as one would expect',
+    // "As one expects": the statement-level reading, which a manner ("in the way that one expects")
+    // does not have. French says it with the pronominal s'attendre à, "comme on s'y attend" (C41).
+    definition: asGloss('EXPECT'),
     emoji: '👌',
     forms: {
       en: { base: 'of course', subtype: 'sentence', negative_slot: 'pre-negation' },
@@ -811,6 +915,38 @@ export const adverbs: ConceptSeed[] = [
       // Not a word before the adjective: the ichidan suffix 〜すぎる on its stem.
       ja: { base: 'すぎる', position: 'suffix', comparative: 'すぎる', comparative_degrees: 'more' },
       pt: { base: 'demais', position: 'post', comparative: 'demasiado', comparative_position: 'pre' },
+    },
+  },
+  {
+    // P09-E24's *a little* (localization B89), VERY's counterpart on the scale: an intensifier, so it
+    // modifies an adjective ("a little tired", "un po' stanco", "ein bisschen müde", 少し疲れている).
+    // Glossed as VERY is with LOW for HIGH: "to a low level". On a verb ("runs a little") it would
+    // need a second use of the slot, not planned.
+    //
+    // Before a noun English and German take another word (`attributive`): "a slightly big cat", "ein
+    // etwas großer Kater", where "an a little big cat" and "ein ein bisschen großer Kater" stack two
+    // articles. A comparative keeps the word in six languages ("a little bigger", "un po' più
+    // grande", "ein bisschen größer"); Japanese says 少し大きい with no もっと, so 少し is its own
+    // comparative word (`comparative`, as VERY's ずっと). It is not said on an equative or a
+    // superlative in any of the seven ("*a little as big", "*a little the biggest"), nor on the
+    // Japanese lowered degree, which is a negation (それほど大きくない).
+    id: 'A_LITTLE',
+    role: 'adverb',
+    slot: 'intensifier',
+    description: 'to a small degree; somewhat',
+    definition: complementGloss('direction', 'LEVEL', 'indefinite', { adjectives: ['LOW'] }),
+    emoji: '🤏',
+    forms: {
+      en: { base: 'a little', attributive: 'slightly', drop_degrees: 'equally,most,least' },
+      it: { base: "un po'", drop_degrees: 'equally,most,least' },
+      fr: { base: 'un peu', drop_degrees: 'equally,most,least' },
+      de: { base: 'ein bisschen', attributive: 'etwas', drop_degrees: 'equally,most,least' },
+      es: { base: 'un poco', drop_degrees: 'equally,most,least' },
+      ja: {
+        base: '少し', reading: 'すこし', comparative: '少し', comparative_reading: 'すこし',
+        comparative_degrees: 'more', drop_degrees: 'equally,less,most,least',
+      },
+      pt: { base: 'um pouco', drop_degrees: 'equally,most,least' },
     },
   },
 ];

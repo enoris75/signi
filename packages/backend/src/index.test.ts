@@ -94,6 +94,16 @@ describe('GET /api/concepts', () => {
     expect(hey).toMatchObject({
       id: 'HEY', role: 'interjection', emoji: '👋',
       labels: { en: 'hey', it: 'ehi', fr: 'hé', de: 'hey', es: 'oye', ja: 'ねえ', pt: 'ei' },
+      // Localization A34: composed like any other role's, ready for the day a picker lists it.
+      definitions: {
+        en: 'a word with which one calls a person',
+        it: 'una parola con la quale si chiama una persona',
+        fr: 'un mot avec lequel on appelle une personne',
+        de: 'ein Wort, mit dem man eine Person ruft',
+        es: 'una palabra con la que se llama a una persona',
+        ja: '人を呼ぶ単語',
+        pt: 'uma palavra com a qual se chama uma pessoa',
+      },
     });
     expect(hey!.readings).toBeUndefined();
   });

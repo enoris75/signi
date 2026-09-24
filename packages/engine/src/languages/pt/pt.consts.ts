@@ -76,8 +76,11 @@ export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
  * SAME and the final LAST precede for the same reason (localization B66): "o mesmo dia", "o último
  * dia", where "o dia mesmo" is the day itself. LAST_PREVIOUS and NEXT_COMING follow ("a semana
  * passada", "a semana próxima").
+ *
+ * So does the genuine REAL (localization B87): "um verdadeiro problema"; after the noun it is "true"
+ * ("uma história verdadeira").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'NEW', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE', 'REAL_GENUINE']);
 
 /**
  * The adpositions that govern the NOMINATIVE pronoun rather than the tonic one. The similative
@@ -191,6 +194,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quando', while: 'enquanto', because: 'porque', after: 'depois que', before: 'antes que',
   // P09-E27: "até que" and "embora" govern the subjunctive, "desde que" the indicative.
   until: 'até que', since: 'desde que', though: 'embora',
+  // Localization C41: the similative, on the indicative ("como o cão corre", "como se espera").
+  as: 'como',
 };
 
 /**
