@@ -3,7 +3,7 @@ import {
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
-import { isInstrumentalLink, isRelativeLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   canBeCondition,
   canBeCoordinate,
@@ -407,6 +407,12 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
       const c = state.containers.find((x) => x.id === frame.containerId);
       return frame.kind === "period" && c?.selection.verb?.complements?.includes("instrumental") ? 2 : undefined;
     }
+    case "control":
+      return state.links.some(
+        (l) => isSubordinateLink(l) && l.kind === "infinitive" && (l.source.containerId === frame.containerId || l.target.containerId === frame.containerId),
+      )
+        ? 3
+        : undefined;
     case "level":
     case "privative":
       return state.links.some(

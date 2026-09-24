@@ -136,6 +136,7 @@ const SAMPLES: Samples = {
   noNounAt: [[{ ref: '#1.obj' }, 'Missing noun: #1.obj']],
   noInstrumentLink: [[{}, 'This period has no instrumental']],
   noRelativeLink: [[{}, 'This noun has no relative clause']],
+  noInfinitiveLink: [[{}, 'This period has no subordinate clause']],
   noLinkToRemove: [
     [{ link: 'condition' }, 'This period has no condition'],
     [{ link: 'join' }, 'This period has no coordination'],

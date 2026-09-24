@@ -165,6 +165,8 @@ export interface PeriodContext {
   cycleLevel: (() => void) | undefined;
   /** ⇧N — deny an instrument period, or take it back: the privative, "without the knife" (P09-E2). */
   togglePrivative: (() => void) | undefined;
+  /** O — whose an infinitive period is: the governing clause's object, or its subject (P13). */
+  toggleObjectControl?: (() => void) | undefined;
   /** Z / W / + − — the view: compact, tidy, and the canvas's height. */
   toggleCompact: () => void;
   tidy: () => void;
@@ -1170,6 +1172,16 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     labelKey: "satellite.polarity",
     when: (ctx) => Boolean(ctx.togglePrivative),
     run: (ctx) => ctx.togglePrivative!(),
+  },
+  {
+    // Whose the infinitive is (P13): the governing clause's object, the causee, or its subject.
+    id: "period.objectControl",
+    scope: "period",
+    keys: ["O"],
+    label: "Agent",
+    labelKey: "slot.agent",
+    when: (ctx) => Boolean(ctx.toggleObjectControl),
+    run: (ctx) => ctx.toggleObjectControl!(),
   },
   {
     id: "period.compact",

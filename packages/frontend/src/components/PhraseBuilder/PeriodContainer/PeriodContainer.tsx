@@ -8,6 +8,7 @@ import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
 import { PrivativeSwitch } from "./PrivativeSwitch.tsx";
+import { ControlSwitch } from "./ControlSwitch.tsx";
 import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
 import { useUiString } from "../../../i18n/useUiString.ts";
 
@@ -170,6 +171,9 @@ export function PeriodContainer({
             negative={instrumental.negative}
             onChange={instrumental.onNegativeChange}
           />
+        )}
+        {!compact && subordinate?.objectControl && (
+          <ControlSwitch object={subordinate.objectControl.object} onChange={subordinate.objectControl.onChange} />
         )}
         <HeaderControls compact={compact} {...headerControls} />
       </Box>

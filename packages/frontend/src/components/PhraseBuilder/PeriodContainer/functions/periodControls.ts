@@ -84,6 +84,7 @@ export function periodControls(
       onStart: subordinate.onStart,
       onClear: subordinate.onClear,
       onPick: subordinate.onPick,
+      ...(subordinate.objectControl ? { objectControl: subordinate.objectControl } : {}),
     },
   };
 }

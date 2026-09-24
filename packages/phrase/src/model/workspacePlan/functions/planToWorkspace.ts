@@ -65,7 +65,7 @@ const NOUN_FIELDS = new Set([
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
-const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements"]);
+const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control"]);
 const CLAUSE_FIELDS = new Set(["subject", "verbPhrase", "directObject", "complements"]);
 
 const isSet = (v: unknown) => v !== undefined && v !== false && !(Array.isArray(v) && v.length === 0);
@@ -151,7 +151,12 @@ class Builder {
     this.check("InfinitiveComplement", inf, INFINITIVE_FIELDS);
     const c = this.open({ infinitive: true });
     this.clause(c, { subject: undefined as unknown as NounElement, ...inf });
-    this.link({ kind: "infinitive", source: { containerId: main.id }, target: { containerId: c.id } });
+    this.link({
+      kind: "infinitive",
+      ...(inf.control === "object" ? { control: "object" as const } : {}),
+      source: { containerId: main.id },
+      target: { containerId: c.id },
+    });
   }
 
   /** The words of a clause into a container's selection, and the periods its nouns' links lead to. */

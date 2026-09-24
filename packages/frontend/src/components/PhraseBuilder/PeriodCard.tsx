@@ -154,6 +154,10 @@ export function PeriodCard({
         instrumental?.isInstrument && binding
           ? () => instrumental.onNegativeChange(!instrumental.negative)
           : undefined,
+      // Only an infinitive whose governing clause has an object can be the object's, and O flips it (P13).
+      toggleObjectControl: subordinate?.objectControl
+        ? () => subordinate.objectControl!.onChange(!subordinate.objectControl!.object)
+        : undefined,
       toggleCompact: onToggleCompact,
       tidy: onTidy,
       hasGroups,

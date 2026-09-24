@@ -38,6 +38,7 @@ import {
   dropContainerLinks,
   removeRelativeLink,
   setRelativeHeadless,
+  setInfinitiveControl,
   setInstrumentalLevel as withInstrumentalLevel,
   setInstrumentalNegative as withInstrumentalNegative,
 } from "../linkRules.ts";
@@ -337,6 +338,16 @@ export function useWorkspaceLinks(
         onStart: (kind, conjunction) => startSubordinate(c.id, kind, conjunction),
         onClear: () => clearSubordinate(c.id),
         onPick: () => completeSubordinate(c.id),
+        // Whose the infinitive is (P13): offered where the governing clause has an object to hand it.
+        ...(subAsTarget?.kind === "infinitive" &&
+        containers.find((x) => x.id === subAsTarget.source.containerId)?.selection.directObject
+          ? {
+              objectControl: {
+                object: subAsTarget.control === "object",
+                onChange: (object: boolean) => setLinks((ls) => setInfinitiveControl(ls, c.id, object)),
+              },
+            }
+          : {}),
       },
       instrumental: {
         hasSource: instrumentals.some((l) => l.source.containerId === c.id),

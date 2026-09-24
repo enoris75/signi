@@ -79,6 +79,8 @@ export function hydrateWorkspace(
       ? {
           id: l.id,
           kind: l.kind as "content" | "infinitive",
+          // The causee's infinitive (P13): only a literal "object" hands it to the object.
+          ...(l.kind === "infinitive" && l.control === "object" ? { control: "object" as const } : {}),
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }

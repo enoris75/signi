@@ -187,6 +187,8 @@ export const EXAMPLES: Record<string, string> = {
   level: "/subj ( man ) /verb ( start ) /inst { /verb ( choose ) /obj ( word ) } /level process",
   without: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without",
   posinst: "/subj ( man ) /verb ( start ) /inst { /subj ( word ) } /without /posinst",
+  objctl: "/subj ( cat ) /verb ( need ) /obj ( dog ) /to { /verb ( run ) } /objctl",
+  subjctl: "/subj ( cat ) /verb ( need ) /obj ( dog ) /to { /verb ( run ) } /objctl /subjctl",
   del: "/subj ( cat /adj brown ) /del adj",
   edit: "/edit",
   // Workspace

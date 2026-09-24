@@ -74,6 +74,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'noun.conjunction': 'or',
   'noun.relative': 'rel',
   'noun.headless': 'headless',
+  'period.objectControl': 'objctl',
   'noun.possessorRole': 'whole',
   'noun.possessorRole.back': 'whole',
   'subject.gloss': 'gloss',

@@ -237,6 +237,11 @@ describe('what each console command is for', () => {
       fr: "définir la relation d'un possesseur.", de: 'die Beziehung eines Besitzers festlegen.',
       es: 'establecer la relación de un poseedor.', ja: '所有者の関係を設定する。', pt: 'definir a relação de um possuidor.',
     },
+    'purpose.objectControl': {
+      en: "to set an infinitive phrase's agent.", it: "impostare l'agente di una frase infinitiva.",
+      fr: "définir l'agent d'une proposition infinitive.", de: 'das Agens einer Infinitivphrase festlegen.',
+      es: 'establecer el agente de una frase de infinitivo.', ja: '不定詞句の動作主を設定する。', pt: 'definir o agente de uma frase infinitiva.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

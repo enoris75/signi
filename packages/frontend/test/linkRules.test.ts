@@ -20,6 +20,7 @@ import {
   setInstrumentalLevel,
   setInstrumentalNegative,
   setRelativeHeadless,
+  setInfinitiveControl,
 } from '../src/components/PhraseBuilder/linkRules.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id });
@@ -157,6 +158,15 @@ describe('linkRules', () => {
     expect(setInstrumentalNegative(denied, 'C', false)).toEqual(plain);
     // A container in no instrumental link changes nothing.
     expect(setInstrumentalNegative(plain, 'B', true)).toEqual(plain);
+  });
+
+  it('hands an infinitive to the governing clause’s object from either end, and back with no flag (P13)', () => {
+    const plain = addSubordinate([], 'B', 'C', 'infinitive', 'l1');
+    const object = setInfinitiveControl(plain, 'B', true);
+    expect(object[0]).toMatchObject({ kind: 'infinitive', control: 'object' });
+    expect(setInfinitiveControl(plain, 'C', true)).toEqual(object);
+    expect(setInfinitiveControl(object, 'C', false)).toEqual(plain);
+    expect(setInfinitiveControl(addSubordinate([], 'B', 'C', 'content', 'l2'), 'B', true)[0]).not.toHaveProperty('control');
   });
 
   it('says a noun’s relative clause alone, and says its head again with no flag left (P13)', () => {

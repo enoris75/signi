@@ -690,6 +690,10 @@ export type PhraseLink =
   | {
       id: string;
       kind: 'infinitive';
+      // Whose infinitive it is (P13, InfinitiveControl): the governing clause's subject by default, or —
+      // `object` — its object, the causee of a causative: "to cause **a person** to see objects" (DO,
+      // PUT, BRING…), where the person sees.
+      control?: 'object';
       source: { containerId: string };
       target: { containerId: string };
     }

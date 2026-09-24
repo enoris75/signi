@@ -290,6 +290,18 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child ) /verb ( eat ) /inst #2 /without',
     misuse: { line: '/verb eat /without', says: { code: 'noInstrumentLink' } },
   },
+  // Whose the infinitive is (P13): the object's, a causee's — on the link, as /without is.
+  objctl: {
+    line: '/subj cat /verb need /obj dog /to ( /verb run ) /objctl',
+    check: (s) => expect(s.links[0]).toMatchObject({ kind: 'infinitive', control: 'object' }),
+    prints: '/subj ( cat ) /verb ( need ) /obj ( dog ) /to #2 /objctl',
+    misuse: { line: '/verb need /objctl', says: { code: 'noInfinitiveLink' } },
+  },
+  subjctl: {
+    line: '/subj cat /verb need /obj dog /to ( /verb run ) /objctl /subjctl',
+    check: (s) => expect(s.links[0]).not.toHaveProperty('control'),
+    prints: '/subj ( cat ) /verb ( need ) /obj ( dog ) /to #2',
+  },
   posinst: {
     line: '/subj child /verb eat /inst ( /subj stick ) /without /posinst',
     check: (s) => expect(s.links[0]).not.toHaveProperty('negative'),

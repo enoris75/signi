@@ -45,6 +45,8 @@ export function attachSubordinate(
       verbPhrase,
       ...(directObject ? { directObject } : {}),
       ...(complements ? { complements } : {}),
+      // The causee's infinitive (P13): its unspoken subject is the governing clause's object.
+      ...(link.control === "object" ? { control: "object" as const } : {}),
     } as InfinitiveComplement;
   } else if (link.kind === "content") {
     delete plan.directObject;

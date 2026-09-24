@@ -259,6 +259,11 @@ class Printer {
         if (link.kind === "adverbial")
           this.emit(SUB_VALUES.find((v) => v.value === link.conjunction)!.name, "value", "setting");
         this.emit(printRef(this.periodNumber(link.target.containerId)), "ref", "ref");
+        // The object's infinitive, a causee's (P13): its own statement, taken back by /subjctl.
+        if (link.kind === "infinitive" && link.control === "object") {
+          this.statement({ key: ":objctl", removal: "/subjctl" });
+          this.emit("/objctl", "command", "setting");
+        }
       } else if (isInstrumentalLink(link)) {
         this.statement({ key: ":inst", removal: "/del inst" });
         this.emit("/inst", "command", "secondary");

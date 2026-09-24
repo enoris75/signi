@@ -99,6 +99,8 @@ export type Action =
   | { kind: "level" }
   /** The instrument denied, or taken back: `/without`, `/posinst` (P09-E2). */
   | { kind: "privative"; negative: boolean }
+  /** Whose the infinitive is: the governing clause's object, `/objctl`, or its subject, `/subjctl` (P13). */
+  | { kind: "control"; object: boolean }
   | { kind: "mood"; mood: "command" | "infinitive" | "question" | "statement" }
   /** The slot a wh-question asks about, and its who / what: `/wh obj`, `/wh subj who` (P09-E12). */
   | { kind: "question" }
@@ -917,6 +919,31 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "none" },
     action: { kind: "privative", negative: false },
   },
+  // Whose the infinitive is (P13): the governing clause's object — the causee of a causative, DO "to
+  // cause an action to happen" — or, as by default, its subject. On the link, as /without is, so it is
+  // said on either period of the pair.
+  {
+    name: "objctl",
+    aliases: ["objectcontrol", "causee"],
+    group: "period",
+    description: "the object does the infinitive",
+    descriptionKey: "slot.directObject",
+    purposeKey: "purpose.objectControl",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "control", object: true },
+  },
+  {
+    name: "subjctl",
+    aliases: ["subjectcontrol"],
+    group: "period",
+    description: "the subject does the infinitive",
+    descriptionKey: "slot.subject",
+    purposeKey: "purpose.objectControl",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "control", object: false },
+  },
   {
     name: "del",
     aliases: ["delete", "remove"],
@@ -1183,7 +1210,7 @@ export function topicOf(def: CommandDef): Topic {
               ? a.id
               : a.kind === "mood" || a.kind === "question" || a.kind === "existential"
                 ? "mood"
-                : a.kind === "condition" || a.kind === "join" || a.kind === "subordinate" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative"
+                : a.kind === "condition" || a.kind === "join" || a.kind === "subordinate" || a.kind === "instrument" || a.kind === "level" || a.kind === "privative" || a.kind === "control"
                   ? "links"
                   : a.kind === "new" || a.kind === "del" || (a.kind === "app" && a.app === "edit")
                     ? "period"

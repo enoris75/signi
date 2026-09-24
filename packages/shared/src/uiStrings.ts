@@ -3137,6 +3137,13 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set a possessor's relationship",
   },
+  // `/objctl`, `/subjctl` (P13): whose the infinitive is — "to set an infinitive phrase's agent", it
+  // "impostare l'agente di una frase infinitiva".
+  'purpose.objectControl': {
+    plan: setterOf('AGENT_GRAMMAR', 'INFINITIVE_PHRASE'),
+    format: { stripPeriod: true },
+    fallback: "to set an infinitive phrase's agent",
+  },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un
   // periodo", ja 文に条件を加える).

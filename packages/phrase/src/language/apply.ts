@@ -21,6 +21,7 @@ import {
   type NounAddress,
   type NounKey,
   type PhraseContainer,
+  type PhraseLink,
   type PhraseSelection,
   type SlotKey,
   type SubordinateKind,
@@ -50,6 +51,7 @@ import {
   setInstrumentalLevel,
   setInstrumentalNegative,
   setRelativeHeadless,
+  setInfinitiveControl,
 } from "../model/linkRules.ts";
 import {
   addConjunct,
@@ -231,6 +233,7 @@ type LinkOp =
   | { kind: "instrument"; clauseId: string; target: Target; level: AbstractionLevel; negative?: boolean; span: Span }
   | { kind: "level"; containerId: string; level: AbstractionLevel; span: Span }
   | { kind: "privative"; containerId: string; negative: boolean; span: Span }
+  | { kind: "control"; containerId: string; object: boolean; span: Span }
   // The relative clause of a noun said alone or headed again (P13), once the line's links are made.
   | { kind: "headless"; containerId: string; nounKey: NounAddress; headless: boolean; span: Span }
   // A possessor pointing at another noun of its period, which the line may name after it.
@@ -453,6 +456,9 @@ class Run {
         return this.level(item, frame);
       case "privative":
         return this.privative(item, action.negative, frame);
+      case "control":
+        this.queue.push({ kind: "control", containerId: frame.containerId, object: action.object, span: item });
+        return;
       case "mood":
         return this.mood(item, action.mood, frame);
       case "question":
@@ -1244,6 +1250,13 @@ class Run {
         if (!this.links.some((l) => isInstrumentalLink(l) && (l.source.containerId === op.containerId || l.target.containerId === op.containerId)))
           fail(op.span, coded("noInstrumentLink"));
         this.links = setInstrumentalNegative(this.links, op.containerId, op.negative);
+        return;
+      }
+      case "control": {
+        const infinitive = (l: PhraseLink) =>
+          isSubordinateLink(l) && l.kind === "infinitive" && (l.source.containerId === op.containerId || l.target.containerId === op.containerId);
+        if (!this.links.some(infinitive)) fail(op.span, coded("noInfinitiveLink"));
+        this.links = setInfinitiveControl(this.links, op.containerId, op.object);
         return;
       }
       case "headless": {

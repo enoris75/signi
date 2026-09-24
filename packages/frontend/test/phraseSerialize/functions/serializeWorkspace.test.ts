@@ -93,6 +93,18 @@ describe('serializeWorkspace', () => {
     expect(saved[1]).not.toHaveProperty('headless');
   });
 
+  it('saves an infinitive its object does, and a plain one with no flag (P13)', () => {
+    const links: PhraseLink[] = [
+      { id: 'i', kind: 'infinitive', control: 'object', source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'infinitive', source: { containerId: 'c' }, target: { containerId: 'd' } },
+    ];
+
+    const saved = serializeWorkspace([], links).links;
+
+    expect(saved[0]).toHaveProperty('control', 'object');
+    expect(saved[1]).not.toHaveProperty('control');
+  });
+
   it('copies each link’s endpoints rather than sharing them', () => {
     const link: PhraseLink = { id: 'c', kind: 'conditional', source: { containerId: 'a' }, target: { containerId: 'b' } };
 

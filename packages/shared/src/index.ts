@@ -2020,6 +2020,8 @@ export interface SerializedLink {
   negative?: boolean;
   // The relative clause said alone, its head unspoken (P13) — present only on such a relative link.
   headless?: boolean;
+  // Whose an infinitive is (P13) — present only on an 'infinitive' link whose object does it.
+  control?: 'object';
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

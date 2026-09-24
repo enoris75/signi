@@ -115,6 +115,9 @@ export interface SubordinateBinding {
   onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
   onClear: () => void;
   onPick: () => void;
+  // Whose this infinitive period is (P13): present only on an infinitive whose governing clause has
+  // an object, which may be the one who does it — the causee of a causative.
+  objectControl?: { object: boolean; onChange: (object: boolean) => void };
 }
 
 // The instrumental link for one container. Mirrors ConditionalBinding, but the two ends are of

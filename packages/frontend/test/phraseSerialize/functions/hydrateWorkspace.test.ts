@@ -181,6 +181,18 @@ describe('hydrateWorkspace', () => {
     ]);
   });
 
+  it('restores an infinitive its object does, and reads anything else as the subject’s (P13)', () => {
+    expect(
+      linksOf(
+        { id: 'i', kind: 'infinitive', control: 'object', source: { containerId: 'a' }, target: { containerId: 'b' } },
+        { id: 'j', kind: 'infinitive', control: 'subject' as unknown as 'object', source: { containerId: 'c' }, target: { containerId: 'd' } },
+      ),
+    ).toStrictEqual([
+      { id: 'i', kind: 'infinitive', control: 'object', source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'j', kind: 'infinitive', source: { containerId: 'c' }, target: { containerId: 'd' } },
+    ]);
+  });
+
   it('loads a period saved with no selection as an empty one', () => {
     expect(
       hydrateWorkspace(damaged({ containers: [{ id: 'a' }, { id: 'b', selection: 'CAT' }], links: [] }), CATALOG).containers,

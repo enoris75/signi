@@ -70,6 +70,8 @@ export interface SubordinateControl {
   onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
   onClear: () => void;
   onPick: () => void;
+  // Whose this infinitive period is, where it can be the governing clause's object's (P13).
+  objectControl?: { object: boolean; onChange: (object: boolean) => void };
 }
 
 // The instrumental control state, threaded from the workspace binding. Unlike the two clause-level

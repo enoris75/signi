@@ -1,3 +1,4 @@
+import type { PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import { describe, expect, it } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
 import { workspaceToPlans } from '../../../src/components/PhraseBuilder/workspacePlan/functions/workspaceToPlans.ts';
@@ -85,6 +86,15 @@ describe('workspaceToPlans', () => {
     const [{ plan }] = workspaceToPlans(periods, [subordinate('s', 'infinitive', 'main', 'to')]);
 
     expect(plan.infinitiveComplement).toEqual({ verbPhrase: selectionToPlan({ verb: SLEEP, infinitive: true }).verbPhrase });
+  });
+
+  // P13: a causative's infinitive is its object's, "to cause a person to see objects".
+  it('hands the infinitive to the governing clause’s object when its link says so', () => {
+    const periods = [period('main', { subject: CAT, verb: NEED, directObject: DOG }), period('to', { verb: SLEEP })];
+    const link = { ...subordinate('s', 'infinitive', 'main', 'to'), control: 'object' } as PhraseLink;
+    const [{ plan }] = workspaceToPlans(periods, [link]);
+
+    expect(plan.infinitiveComplement).toMatchObject({ verbPhrase: { verb: 'SLEEP' }, control: 'object' });
   });
 
   it('folds in no subordinate clause until its period has a verb', () => {

@@ -325,6 +325,18 @@ export function addSubordinate(
   return [...clearSubordinate(links, mainId), link];
 }
 
+// Make the object of the clause governing an infinitive that infinitive's subject — the causee of a
+// causative (P13) — or give it back to the clause's subject. From either end of the link, as the
+// instrument's privative is. The flag is dropped rather than set false.
+export function setInfinitiveControl(links: PhraseLink[], containerId: string, object: boolean): PhraseLink[] {
+  return links.map((l) => {
+    if (!isSubordinateLink(l) || l.kind !== "infinitive") return l;
+    if (l.source.containerId !== containerId && l.target.containerId !== containerId) return l;
+    const { control: _dropped, ...rest } = l;
+    return object ? { ...rest, control: "object" as const } : rest;
+  });
+}
+
 /** Drop the subordinate clause `mainId` governs — of `kind` only, when one is given. */
 export function clearSubordinate(links: PhraseLink[], mainId: string, kind?: SubordinateKind): PhraseLink[] {
   return links.filter(

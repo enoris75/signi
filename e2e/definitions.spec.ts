@@ -100,3 +100,20 @@ test.describe('what a possessor is to its noun', () => {
     await app.expectSentences({ en: "a place's part." });
   });
 });
+
+test.describe('whose an infinitive is', () => {
+  test('is the object’s with /objctl, as DO’s causee is, and the switch gives it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/inf /verb CAUSE_VERB /obj action /a /to ( /verb happen ) /objctl');
+    await run(page);
+    // Japanese says whose it is: the causee's 〜ようにする, not the causer's.
+    await app.expectSentences({ en: 'to cause an action to happen.', ja: '動作が起こるようにする。' });
+    await expect(page.getByTestId('source-strip')).toContainText('/to #2 /objctl');
+
+    const control = app.period(1).getByTestId('infinitive-control');
+    await expect(control).toHaveAttribute('aria-checked', 'true');
+    await control.click();
+    await app.expectSentences({ ja: '起こるように動作を引き起こす。' });
+    await expect(page.getByTestId('source-strip')).not.toContainText('/objctl');
+  });
+});
