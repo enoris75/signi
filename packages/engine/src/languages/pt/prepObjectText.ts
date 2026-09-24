@@ -1,7 +1,9 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { keptBesidePossessive } from '../../possessive.js';
-import { PT_DE_FUSING_PRONOUN } from './pt.consts.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
+import { CARDINALS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { contractDet } from './contractDet.js';
 import { datPrep } from './datPrep.js';
 import { dePrep } from './dePrep.js';
@@ -45,7 +47,13 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
     : possessedHeadForms(np, 'definite');
   const plural = isPlural(f);
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const noun = (detached ? [withAdj(word, ptAdj(np)), possessive] : [possessive, withAdj(word, ptAdj(np))]).filter(Boolean).join(' ');
+  // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
+  // `complementsPhrase` places it — and at one beside a definite or demonstrative it is left out
+  // (A319): "das duas condições", "destas duas condições", "de duas condições", "em um botão" (A356).
+  const numeral = oneBesideDeterminer(f) && !possessive ? '' : numeralText(f, CARDINALS);
+  const noun = (detached
+    ? [numeral, withAdj(word, ptAdj(np)), possessive]
+    : [possessive, numeral, withAdj(word, ptAdj(np))]).filter(Boolean).join(' ');
   const contract = CONTRACTING[prep];
   const head = contract ? contractDet(contract, prep, f, plural) : prepDet(prep, f, plural);
   return withRelative(`${head} ${noun}`, np);

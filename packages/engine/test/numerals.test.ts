@@ -567,8 +567,8 @@ describe('known bugs: the Spanish personal a drops or loses the numeral of a cou
 });
 
 // A356. A340's gap in Portuguese: a verb's own preposition (DEPEND's de, CLICK's em) builds its object
-// in prepObjectText, which never writes the numeral. The count is lost after every determiner ("das
-// condições" for "das duas condições"), and the indefinite one loses its article too ("clica em
+// in prepObjectText, which wrote no numeral. The count was lost after every determiner ("das
+// condições" for "das duas condições"), and the indefinite one lost its article too ("clica em
 // botão"). The Wants are the plain object's ("vê as duas condições") after the fused preposition.
 describe('known bugs: the Portuguese prepositional object drops the numeral (A356)', () => {
   const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
@@ -576,7 +576,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     say(clause(np('CAT'), 'DEPEND', { directObject: object, verbPhrase: { negative } }), 'pt');
   const clicks = (object: NounPhrase) => say(clause(np('CAT'), 'CLICK', { directObject: object }), 'pt');
 
-  test.fails('the definite and the indefinite', () => {
+  test('the definite and the indefinite', () => {
     expect([
       depends(np('CONDITION', { numeral: 2 })),
       depends(np('CONDITION', { numeral: 2 }), true),
@@ -588,7 +588,7 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     ]);
   });
 
-  test.fails('the demonstratives and the possessive', () => {
+  test('the demonstratives and the possessive', () => {
     expect([
       depends(np('CONDITION', { numeral: 2, definiteness: 'this' })),
       depends(np('CONDITION', { numeral: 3, definiteness: 'that' })),
@@ -600,13 +600,37 @@ describe('known bugs: the Portuguese prepositional object drops the numeral (A35
     ]);
   });
 
-  test.fails('CLICK\'s em', () => {
+  test('CLICK\'s em', () => {
     expect([
       clicks(np('BUTTON', { numeral: 2 })),
       clicks(np('BUTTON', { numeral: 1, definiteness: 'indefinite' })),
     ]).toEqual([
       'o gato clica nos dois botões.',
       'o gato clica em um botão.',
+    ]);
+  });
+
+  test('a detached possessive, an adjective, the bare, that, an approximator and the one beside this', () => {
+    expect([
+      depends(np('CONDITION', { numeral: 2, definiteness: 'this', possessor: mine })),
+      depends(np('CONDITION', { numeral: 2, definiteness: 'indefinite', possessor: mine })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'indefinite', possessor: mine })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'this' })),
+      depends(np('CONDITION', { numeral: 1, definiteness: 'indefinite' })),
+      clicks(np('BUTTON', { numeral: 3, adjectives: ['BIG'] })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'bare' })),
+      clicks(np('BUTTON', { numeral: 2, definiteness: 'that' })),
+      clicks(np('BUTTON', { numeral: 5, definiteness: 'indefinite', approximator: 'about' })),
+    ]).toEqual([
+      'o gato depende destas duas condições minhas.',
+      'o gato depende de duas condições minhas.',
+      'o gato depende de uma condição minha.',
+      'o gato depende desta condição.',
+      'o gato depende de uma condição.',
+      'o gato clica nos três botões grandes.',
+      'o gato clica em dois botões.',
+      'o gato clica nesses dois botões.',
+      'o gato clica em cerca de cinco botões.',
     ]);
   });
 

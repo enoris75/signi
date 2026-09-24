@@ -24,6 +24,16 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(CASA, { definiteness: 'all', number: 'plural' }, { possessor: my }), 'em')).toBe('em todas as minhas casas');
   });
 
+  // A356: the numeral stands after the fused determiner and a possessive, before the noun; the one
+  // beside a definite is left out (A319).
+  test('a numeral follows the determiner and the possessive', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(prepObjectText(np(CASA, { number: 'plural', numeral: '2' }), 'de')).toBe('das duas casas');
+    expect(prepObjectText(np(CASA, { definiteness: 'this', number: 'plural', numeral: '3' }), 'em')).toBe('nestas três casas');
+    expect(prepObjectText(np(CASA, { number: 'plural', numeral: '2' }, { possessor: my }), 'de')).toBe('das minhas duas casas');
+    expect(prepObjectText(np(CASA, { numeral: '1' }), 'em')).toBe('na casa');
+  });
+
   test('a pronoun takes its tonic form, fused with em in the 3rd person', () => {
     expect(prepObjectText(np(EU), 'em')).toBe('em mim');
     expect(prepObjectText(np(VOCE), 'em')).toBe('em você');
