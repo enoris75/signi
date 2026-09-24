@@ -52,3 +52,31 @@ terminus) should take the same path in Italian, French and Spanish, outside a co
 | **Test** | `complements/terminus.test.ts` → *known bugs: a Romance pronoun recipient is the tonic pronoun, not the dative clitic (A351)* (4 `test.fails`: GIVE's 3rd person, its 1st and 2nd, negated, TELL's routed addressee; plus a regression test for a noun, a coordinated pronoun, TELL's 2nd person and the other languages) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. A new helper, [`recipientPronoun`](../../../packages/engine/src/functions/recipientPronoun.ts),
+finds a terminus that is one lone personal pronoun (not coordinated, indefinite, generic, focused,
+negated or specified). [it/predicateText.ts](../../../packages/engine/src/languages/it/predicateText.ts),
+[fr/predicateText.ts](../../../packages/engine/src/languages/fr/predicateText.ts) and
+[es/predicateText.ts](../../../packages/engine/src/languages/es/predicateText.ts) write it as A240's
+`dativePronounForm` in the object-clitic slot and drop it from the complements, so it climbs, sits on
+the auxiliary, encliticizes on a command and sits inside the negation: *le dà il libro*, *lui donne
+le livre*, *le da el libro*, *le può dare*, *dalle il libro*, *donne-lui le livre*, *ne lui donne pas*.
+TELL's routed addressee (A317) is a terminus, so it follows (*le racconta che*, *lui raconte que*).
+
+Rulings: Spanish 3rd person is the plain clitic, undoubled (*le da el libro*). Italian 3rd plural is
+A240's seeded *gli* (*gli dà il libro*). Portuguese is unchanged (*dá o livro a ela*).
+
+Not done: **a pronoun object beside a pronoun recipient.** The clitic path writes one clitic and does
+not build clusters (*glielo*, *le lui*, *se lo*), so the recipient keeps its tonic phrase there (*lo dà
+a lei*, *le donne à elle*, *lo da a ella*), as it did before. Likewise beside a reflexive verb's clitic
+and, in Italian and Spanish, the impersonal *si* / *se*.
+
+The four `test.fails` in [terminus.test.ts](../../../packages/engine/test/complements/terminus.test.ts)
+(*known bugs: a Romance pronoun recipient is the tonic pronoun, not the dative clitic (A351)*) are
+plain tests now, assertions unchanged. Added in the same block: the plural and the Spanish clitic;
+the modal, the compound past, the passive and the command (affirmative, 1st person, negated); the
+generic recipient and Portuguese as regressions. `recipientPronoun.test.ts` is new. One previously
+passing expectation moved, in [comitative.test.ts](../../../packages/engine/test/complements/comitative.test.ts):
+Spanish *el hombre da el libro a él.* is now *el hombre le da el libro.*

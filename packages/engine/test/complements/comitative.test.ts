@@ -254,7 +254,8 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
     });
     expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: HIM } } })))
       .toMatchObject({
-        en: 'the man gives the book to him.', es: 'el hombre da el libro a él.', pt: 'o homem dá o livro a ele.',
+        // A recipient pronoun is the Spanish dative clitic, not the tonic after "a" (A351).
+        en: 'the man gives the book to him.', es: 'el hombre le da el libro.', pt: 'o homem dá o livro a ele.',
       });
   });
 

@@ -22,6 +22,13 @@ describe('subjectText', () => {
     expect(subjectText(el(np(JE), np(TU)))).toBe('moi et toi, nous');
   });
 
+  // A349: the resumption is the clause's; a verbless period (the vocative) writes the group alone.
+  test('without resume, a 1st or 2nd person group is not resumed', () => {
+    expect(subjectText(el(np(TU), np(CHAT)), false)).toBe('toi et le chat');
+    expect(subjectText(group('or', np(CHAT), np(JE)), false)).toBe('le chat ou moi');
+    expect(subjectText(el(np(TU)), false)).toBe('tu');
+  });
+
   test('a 3rd person group takes the tonic form without resumption', () => {
     expect(subjectText(el(np(IL), np(CHAT)))).toBe('lui et le chat');
     expect(subjectText(el(np(IL, { gender: 'fem', base: 'elle', disjunctive: 'elle' }), np(CHIEN)))).toBe('elle et le chien');

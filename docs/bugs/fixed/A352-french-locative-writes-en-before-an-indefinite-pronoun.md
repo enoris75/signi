@@ -35,3 +35,19 @@ should treat an indefinite pronoun (`forms['indefinite'] === '1'`) as it treats 
 | **Test** | `complements/locative.test.ts` → *known bugs: the French locative writes en before an indefinite pronoun (A352)* (2 `test.fails`: SOMETHING on two verbs, with a relative and negated; plus a regression test for a noun, the direction and the other six) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. The locative's pronoun branch in
+[fr/complementsPhrase.ts](../../../packages/engine/src/languages/fr/complementsPhrase.ts) keeps the
+bare *en* for a personal pronoun only (*en lui*, *en moi*, *en eux*, A203). An indefinite pronoun
+(`indefinite` / `thing`) and the neuter singular *cela* take *dans*, as a determined noun does: *court
+dans quelque chose*, *dans quelqu'un*, *dans cela*, *ne court dans rien*. The bare noun (*en maison*)
+is unchanged.
+
+The two `test.fails` in [locative.test.ts](../../../packages/engine/test/complements/locative.test.ts)
+(*known bugs: the French locative writes en before an indefinite pronoun (A352)*) are plain tests now,
+assertions unchanged. Added in the same block: SOMEONE, *cela* and a pronoun in a coordination, and a
+regression for the personal pronouns, the bare noun and *sous quelque chose*.
+`fr/complementsPhrase.test.ts` gained *a personal pronoun takes en, an indefinite or thing pronoun
+dans*.
