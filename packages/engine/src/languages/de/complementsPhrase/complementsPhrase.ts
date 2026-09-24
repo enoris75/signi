@@ -15,13 +15,13 @@ import { BETWEEN_PREP } from '../de.consts.js';
 import { temporalRelation } from '../../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../../functions/tonicPronoun.js';
 import { isPrivative } from '../../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../../functions/tonicHeadForms.js';
 import { TONIC_COMPLEMENTS } from '../../../functions/functions.consts.js';
 import { tonicPronounDe } from '../tonicPronounDe.js';
-import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../../possessive.js';
+import { dativePronounDe, keptBesidePossessive, possessiveDe } from '../../../possessive.js';
 import { adjectivalNoun } from '../adjectivalNoun.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
@@ -160,11 +160,10 @@ export function complementsParts(
       // possessive rather than in its place ("in allen meinen Häusern"), so the head keeps its own
       // determiner there too while the possessive stays prenominal.
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
-      const detached = !!poss && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
-      const possessedForms = possessedHeadForms(np, 'bare');
+      const detached = !!poss && keptBesidePossessive(np.head.forms);
       const nounForms = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all')
-        ? { ...possessedForms, definiteness: ownDeterminer }
-        : possessedForms);
+        ? ownHeadForms(np)
+        : possessedHeadForms(np, 'bare'));
       const f = pronoun ? tonicHeadForms(np) : nounForms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = possessedDeclension(np, f);

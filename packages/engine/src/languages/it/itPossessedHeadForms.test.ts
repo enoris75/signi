@@ -19,6 +19,15 @@ describe('itPossessedHeadForms', () => {
     expect(itPossessedHeadForms(np(CANE, { definiteness: 'indefinite', number: 'plural' }, { possessor: pronominal('3') }))['definiteness']).toBe('definite');
   });
 
+  // A329: a numeral that took the indefinite's place stacks like the article: "due miei cani". A bare
+  // head with no numeral (A330's predicate) keeps the definite: "i miei amici".
+  test('a numeral standing in for the indefinite keeps the slot; a bare head without one does not', () => {
+    const counted = { definiteness: 'bare', indefinite_dropped: '1', numeral: '2', number: 'plural' };
+    expect(itPossessedHeadForms(np(CANE, counted, { possessor: pronominal('1') }))['definiteness']).toBe('bare');
+    const { numeral: _n, ...uncounted } = counted;
+    expect(itPossessedHeadForms(np(CANE, uncounted, { possessor: pronominal('1') }))['definiteness']).toBe('definite');
+  });
+
   test('a singular, unmodified kinship noun under a possessive goes bare', () => {
     expect(itPossessedHeadForms(np(PADRE, {}, { possessor: pronominal('1') }))['definiteness']).toBe('bare');
     expect(itPossessedHeadForms(np(PADRE, {}, { possessor: pronominal('2', 'plural') }))['definiteness']).toBe('bare');

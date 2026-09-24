@@ -21,13 +21,13 @@ import { BETWEEN_PREP } from './es.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
-import { KEPT_BESIDE_POSSESSIVE, possessiveEs, possessiveEsStressed, pronounPossessor } from '../../possessive.js';
+import { keptBesidePossessive, possessiveEs, possessiveEsStressed, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -166,9 +166,8 @@ export function complementsPhrase(
       // detached possessive asks for the head's own determiner back.
       const possessive = esPossessiveWord(np);
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
-      const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
-      const possessed = possessedHeadForms(np, 'bare');
-      const f = detached ? { ...possessed, definiteness: ownDeterminer } : possessed;
+      const detached = !!possessive && keptBesidePossessive(np.head.forms);
+      const f = detached ? ownHeadForms(np) : possessedHeadForms(np, 'bare');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const adj = esAdj(np);

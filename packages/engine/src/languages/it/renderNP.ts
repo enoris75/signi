@@ -49,7 +49,12 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
     : '';
   // A cardinal stands between the determiner and the prenominal adjectives: "le due grandi case" (C31).
   const numeral = numeralText(forms, CARDINALS);
-  const preChain = [...(pronominalPoss ? [possWord] : []), ...(numeral ? [numeral] : []), ...preSurfaces];
+  // A numeral standing in for the indefinite article is the article's word, so it leads and the
+  // possessive stacks after it, as after "un": "due miei amici", "un mio amico" (A329).
+  const numeralLeads = !!numeral && forms['indefinite_dropped'] === '1';
+  const preChain = numeralLeads
+    ? [numeral, ...(pronominalPoss ? [possWord] : []), ...preSurfaces]
+    : [...(pronominalPoss ? [possWord] : []), ...(numeral ? [numeral] : []), ...preSurfaces];
   const lead = preChain[0] ?? noun;
   // The caller builds the head from `itPossessedHeadForms`, so a possessive gets the definite article,
   // or the preposition fused with it ("il tuo cane", "al tuo cane", "nella mia casa").

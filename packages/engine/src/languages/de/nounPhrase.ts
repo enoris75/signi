@@ -2,7 +2,7 @@ import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../possessive.js';
+import { dativePronounDe, keptBesidePossessive, possessiveDe } from '../../possessive.js';
 import type { Case } from './de.types.js';
 import { adjectivalNoun } from './adjectivalNoun.js';
 import { adjPhrase } from './adjPhrase.js';
@@ -51,7 +51,7 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   // possessive stays prenominal, with "alle" in front of it: "alle ihre Bücher".
   const poss = np.possessor;
   const pronominal = poss && isPronominalPossessor(poss) ? poss : undefined;
-  const detached = !!pronominal && KEPT_BESIDE_POSSESSIVE.has(forms['definiteness'] ?? 'definite');
+  const detached = !!pronominal && keptBesidePossessive(forms);
   const declined = adjPhrase(np, _case, declension);
   const a = declined ? `${declined} ` : '';
   const possessive = pronominal

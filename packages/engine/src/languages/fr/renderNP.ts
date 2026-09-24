@@ -3,7 +3,7 @@ import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { disjunctiveFr, KEPT_BESIDE_POSSESSIVE, possessiveFr } from '../../possessive.js';
+import { disjunctiveFr, keptBesidePossessive, possessiveFr } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './fr.consts.js';
 import { artFor } from './artFor.js';
@@ -46,7 +46,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const poss = np.possessor;
   const pronominal = !!poss && isPronominalPossessor(poss);
   const definiteness = forms['definiteness'] ?? 'definite';
-  const detached = pronominal && KEPT_BESIDE_POSSESSIVE.has(definiteness);
+  const detached = pronominal && keptBesidePossessive(forms);
   const possWord = poss && isPronominalPossessor(poss) && !detached
     ? possessiveFr(
         poss,

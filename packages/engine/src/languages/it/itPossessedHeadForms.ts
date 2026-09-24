@@ -27,6 +27,9 @@ const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_P
 function keepsOwnDeterminer(forms: Record<string, string>): boolean {
   const definiteness = forms['definiteness'] ?? 'definite';
   if (definiteness === 'indefinite') return !isPlural(forms) && forms['uncountable'] !== '1';
+  // A numeral that took the indefinite's place is written where the article would be, so the
+  // possessive stacks after it as after "un": "due miei amici", and at one "un mio amico" (A329).
+  if (definiteness === 'bare') return forms['indefinite_dropped'] === '1' && forms['numeral'] !== undefined;
   return IT_KEPT_BESIDE_POSSESSIVE.has(definiteness);
 }
 

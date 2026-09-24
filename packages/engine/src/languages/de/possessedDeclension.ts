@@ -1,7 +1,7 @@
 import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { keptBesidePossessive } from '../../possessive.js';
 
 /**
  * The determiner a German noun phrase's adjectives decline after, the companion of the forms
@@ -25,6 +25,6 @@ export function possessedDeclension(np: ResolvedNounPhrase, forms: Record<string
   // *wessen* is a genitive in the determiner's place that declines nothing itself, so what follows
   // it declines strong, as after any prenominal genitive: "wessen großes Essen" (P09-E14).
   if (isQuestionPossessor(np.possessor)) return 'bare';
-  if (np.possessor && isPronominalPossessor(np.possessor) && !KEPT_BESIDE_POSSESSIVE.has(definiteness)) return 'no';
+  if (np.possessor && isPronominalPossessor(np.possessor) && !keptBesidePossessive(forms)) return 'no';
   return definiteness;
 }

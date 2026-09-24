@@ -213,7 +213,7 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
   const friends = (numeral: number, extra: Partial<NounPhrase> = {}) =>
     sayAll(clause(np('FRIEND', { numeral, definiteness: 'indefinite', possessor: mine, ...extra }), 'RUN'));
 
-  test.fails('two friends of mine', () => {
+  test('two friends of mine', () => {
     expect(friends(2, { number: 'plural' })).toEqual({
       en: 'two friends of mine run.', it: 'due miei amici corrono.', fr: 'deux amis à moi courent.',
       de: 'zwei Freunde von mir laufen.', es: 'dos amigos míos corren.', ja: '私の二人の友達は走ります。',
@@ -221,7 +221,7 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
     });
   });
 
-  test.fails('one friend of mine: at one the numeral is the article in five of the seven', () => {
+  test('one friend of mine: at one the numeral is the article in five of the seven', () => {
     expect(friends(1)).toEqual({
       en: 'one friend of mine runs.', it: 'un mio amico corre.', fr: 'un ami à moi court.',
       de: 'ein Freund von mir läuft.', es: 'un amigo mío corre.', ja: '私の一人の友達は走ります。',
@@ -241,6 +241,48 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
     expect(sayAll(clause(np('FRIEND', { numeral: 1, definiteness: 'indefinite' }), 'RUN'))).toEqual({
       en: 'one friend runs.', it: 'un amico corre.', fr: 'un ami court.',
       de: 'ein Freund läuft.', es: 'un amigo corre.', ja: '一人の友達は走ります。', pt: 'um amigo corre.',
+    });
+  });
+
+  // The fix marks the bare head as one whose indefinite gave way (`keptBesidePossessive`), so every
+  // builder that detaches a possessive beside a kept determiner takes it: the object, the complement
+  // and another person with an adjective alike.
+  const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+  const houses = np('HOUSE', { numeral: 2, definiteness: 'indefinite', possessor: mine });
+
+  test('the object, a complement, and another person with an adjective', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: houses }))).toEqual({
+      en: 'the cat sees two houses of mine.', it: 'il gatto vede due mie case.', fr: 'le chat voit deux maisons à moi.',
+      de: 'der Kater sieht zwei Häuser von mir.', es: 'el gato ve dos casas mías.', ja: '猫は私の二軒の家を見ます。',
+      pt: 'o gato vê duas casas minhas.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: houses } } }))).toEqual({
+      en: 'the cat runs in two houses of mine.', it: 'il gatto corre in due mie case.', fr: 'le chat court dans deux maisons à moi.',
+      de: 'der Kater läuft in zwei Häusern von mir.', es: 'el gato corre en dos casas mías.', ja: '猫は私の二軒の家で走ります。',
+      pt: 'o gato corre em duas casas minhas.',
+    });
+    expect(friends(2, { possessor: her, adjectives: ['OLD'] })).toEqual({
+      en: 'two old friends of hers run.', it: 'due suoi vecchi amici corrono.', fr: 'deux vieux amis à elle courent.',
+      de: 'zwei alte Freunde von ihr laufen.', es: 'dos amigos viejos suyos corren.', ja: '彼女の二人の古い友達は走ります。',
+      pt: 'dois amigos velhos seus correm.',
+    });
+  });
+
+  test('regression: the definite, a demonstrative and a genuinely bare head keep their shapes', () => {
+    expect(friends(2, { definiteness: 'definite' })).toEqual({
+      en: 'my two friends run.', it: 'i miei due amici corrono.', fr: 'mes deux amis courent.',
+      de: 'meine zwei Freunde laufen.', es: 'mis dos amigos corren.', ja: '私の二人の友達は走ります。',
+      pt: 'os meus dois amigos correm.',
+    });
+    expect(friends(2, { definiteness: 'this' })).toEqual({
+      en: 'these two friends of mine run.', it: 'questi miei due amici corrono.', fr: 'ces deux amis à moi courent.',
+      de: 'diese zwei Freunde von mir laufen.', es: 'estos dos amigos míos corren.', ja: '私のこの二人の友達は走ります。',
+      pt: 'estes dois amigos meus correm.',
+    });
+    // A bare head the plan asked for has no indefinite behind it, so the possessive still has its slot.
+    expect(sayAll(clause(np('FRIEND', { number: 'plural', definiteness: 'bare', possessor: mine }), 'RUN'))).toEqual({
+      en: 'my friends run.', it: 'i miei amici corrono.', fr: 'mes amis courent.',
+      de: 'meine Freunde laufen.', es: 'mis amigos corren.', ja: '私の友達は走ります。', pt: 'os meus amigos correm.',
     });
   });
 });

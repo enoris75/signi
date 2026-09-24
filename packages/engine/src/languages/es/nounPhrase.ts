@@ -1,4 +1,4 @@
-import { KEPT_BESIDE_POSSESSIVE, possessiveEsStressed } from '../../possessive.js';
+import { keptBesidePossessive, possessiveEsStressed } from '../../possessive.js';
 import type { EsAdjectives } from './es.types.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './es.consts.js';
@@ -24,7 +24,7 @@ export function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives, po
     if (definiteness === 'all') {
       return `${plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo')} ${possessive} ${noun}`;
     }
-    if (KEPT_BESIDE_POSSESSIVE.has(definiteness)) {
+    if (keptBesidePossessive(forms)) {
       const stressed = possessiveEsStressed(possessive, { gender: fem ? 'fem' : 'masc', number: plural ? 'plural' : 'singular' });
       const det = artFor(artForms(forms, adj), plural);
       return det ? `${det} ${noun} ${stressed}` : `${noun} ${stressed}`;

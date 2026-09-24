@@ -20,14 +20,14 @@ import { BETWEEN_PREP } from './pt.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { tonicPhrase } from './tonicPhrase.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
-import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
+import { keptBesidePossessive, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { porPrep } from './porPrep.js';
 import { coordinateElement } from './coordinateElement.js';
@@ -185,9 +185,9 @@ export function complementsPhrase(
       // prenominal without an article of its own.
       const possessive = ptPossessiveWord(np, false);
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
-      const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
+      const detached = !!possessive && keptBesidePossessive(np.head.forms);
       const f = !!possessive && (detached || ownDeterminer === 'all')
-        ? { ...possessedHeadForms(np, 'definite'), definiteness: ownDeterminer }
+        ? ownHeadForms(np)
         : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');

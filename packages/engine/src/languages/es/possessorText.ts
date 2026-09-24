@@ -2,7 +2,7 @@ import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './es.consts.js';
 import { artForms } from './artForms.js';
@@ -35,7 +35,7 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // stands in front of the unstressed one, "de todos mis libros" (A237). The object builds that
   // phrase as well, so both go through `npText`.
   const ownDeterminer = poss.head.forms['definiteness'] ?? 'definite';
-  if (possessive && (ownDeterminer === 'all' || KEPT_BESIDE_POSSESSIVE.has(ownDeterminer))) {
+  if (possessive && (ownDeterminer === 'all' || keptBesidePossessive(poss.head.forms))) {
     return ` de ${npText(poss)}`;
   }
   const f = possessedHeadForms(poss, 'bare');

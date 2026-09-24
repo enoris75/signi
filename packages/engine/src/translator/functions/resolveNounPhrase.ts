@@ -183,6 +183,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     head.forms['definiteness'] = np.numeral !== undefined && (definiteness === 'indefinite' || (about && definiteness === 'definite'))
       ? 'bare'
       : definiteness;
+    // The article that gave way is remembered for a pronominal possessive: the head keeps its (empty)
+    // determiner slot beside it, "two friends of mine", not the definite "my two friends" (A329).
+    if (np.numeral !== undefined && definiteness === 'indefinite') head.forms['indefinite_dropped'] = '1';
     if (np.numeral !== undefined) head.forms['numeral'] = String(np.numeral);
     // The approximator's word rides on the forms with its separator, as the numeral does: `approximator`
     // before the numeral (see `numeralText`), `approximator_det` before the determiner (see

@@ -37,6 +37,21 @@ export const KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> =
     // P09-E25's seven keep their slot too: "each book of hers", "ogni suo libro".
     'each', 'every', 'both', 'most', 'several', 'enough', 'such']);
 
+/**
+ * Whether a possessed head's forms keep their determiner beside a pronominal possessive, so the
+ * possessive detaches (or, in Italian, stacks) instead of taking the determiner slot. That is a
+ * determiner in `KEPT_BESIDE_POSSESSIVE`, or no determiner at all where the head is bare only
+ * because its indefinite article gave way (`indefinite_dropped`): to a numeral, "two friends of
+ * mine", "zwei Freunde von mir" (A329), or to the Spanish and Portuguese plural predicate, "son
+ * amigos míos" (A330). A genuinely bare head (`definiteness: 'bare'` from the plan) carries no such
+ * mark and still gives its slot to the possessive.
+ */
+export function keptBesidePossessive(forms: Record<string, string>): boolean {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  return KEPT_BESIDE_POSSESSIVE.has(definiteness)
+    || (definiteness === 'bare' && forms['indefinite_dropped'] === '1');
+}
+
 /** Grammatical gender/number of the possessed head — the Romance/German agreement target. */
 export interface PossessedAgreement {
   gender: 'masc' | 'fem' | 'neut';

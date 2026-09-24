@@ -1,4 +1,4 @@
-import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import type { PtAdjectives } from './pt.types.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './pt.consts.js';
@@ -24,7 +24,7 @@ export function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives, po
       const fem = (forms['gender'] ?? 'masc') === 'fem';
       return `${plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo')} ${possessive} ${noun}`;
     }
-    if (KEPT_BESIDE_POSSESSIVE.has(definiteness)) {
+    if (keptBesidePossessive(forms)) {
       // `ptPossessiveWord` hands over the possessive with its leading definite article ("o seu");
       // postnominally that article belongs to the head's own determiner, so only the possessive goes.
       const own = possessive.split(' ').at(-1) ?? possessive;
