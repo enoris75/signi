@@ -2335,6 +2335,76 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('国を統治するシステム');
   });
 
+  test('war is a period where nations kill, a right what one may do (localize-seed B76: WAR, RIGHT_NOUN)', async ({
+    app,
+    page,
+  }) => {
+    // The indefinite plural subject of a locative relative: French keeps its des.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('war');
+    const warFr = page.locator('[data-testid="typeahead-option"][data-concept="WAR"]');
+    await expect(warFr).toBeVisible();
+    await warFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('une période où des nations tuent');
+
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('war');
+    const warEs = page.locator('[data-testid="typeahead-option"][data-concept="WAR"]');
+    await expect(warEs).toBeVisible();
+    await warEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('un período donde unas naciones matan');
+
+    // The modal in an object-gap relative: German and Japanese keep the permission.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('right');
+    const rightDe = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_NOUN"]');
+    await expect(rightDe).toBeVisible();
+    await rightDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Handlung, die man tun darf');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('right');
+    const rightJa = page.locator('[data-testid="typeahead-option"][data-concept="RIGHT_NOUN"]');
+    await expect(rightJa).toBeVisible();
+    await rightJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('することが許される動作');
+  });
+
+  test('a community lives in one place, a service is done for others (localize-seed B77: COMMUNITY, SERVICE)', async ({
+    app,
+    page,
+  }) => {
+    // The `parts` genitive with a locative relative that agrees with GROUP.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('community');
+    const communityDe = page.locator('[data-testid="typeahead-option"][data-concept="COMMUNITY"]');
+    await expect(communityDe).toBeVisible();
+    await communityDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Gruppe von Personen, die am gleichen Ort wohnt');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('community');
+    const communityJa = page.locator('[data-testid="typeahead-option"][data-concept="COMMUNITY"]');
+    await expect(communityJa).toBeVisible();
+    await communityJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じ場所に住む人のグループ');
+
+    // The purpose complement inside an object-gap relative, on a bare mass head.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('service');
+    const serviceIt = page.locator('[data-testid="typeahead-option"][data-concept="SERVICE"]');
+    await expect(serviceIt).toBeVisible();
+    await serviceIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('lavoro che si fa per altre persone');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('service');
+    const serviceFr = page.locator('[data-testid="typeahead-option"][data-concept="SERVICE"]');
+    await expect(serviceFr).toBeVisible();
+    await serviceFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("travail qu'on fait pour d'autres personnes");
+  });
+
   // B61: P09's handling and leaving verbs. The tooltip is what tells apart the words a picker shows
   // twice — the Japanese 見る of SEE and LOOK_AT, and the three English "leave" — and GET's Italian
   // source is the plain "da" A228's fix left it with.
@@ -2581,6 +2651,24 @@ test.describe('word definition tooltip', () => {
     await expect(doorPt).toBeVisible();
     await doorPt.hover();
     await expect(page.locator(tooltip)).toHaveText('uma parte de uma parede que se abre');
+  });
+
+  test('public is open for all people (localize-seed B88: PUBLIC)', async ({ app, page }) => {
+    // A predicate adjective with a purpose complement: Spanish takes estar, OPEN_ADJECTIVE's copula.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('public');
+    const publicEs = page.locator('[data-testid="typeahead-option"][data-concept="PUBLIC"]');
+    await expect(publicEs).toBeVisible();
+    await publicEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que está abierto para todas las personas');
+
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('public');
+    const publicJa = page.locator('[data-testid="typeahead-option"][data-concept="PUBLIC"]');
+    await expect(publicJa).toBeVisible();
+    await publicJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('すべての人のために開いている');
   });
 
   test('a place, a manner and a fact adverb (localization B67: HERE, ALSO, REALLY)', async ({

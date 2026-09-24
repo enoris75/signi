@@ -5,7 +5,7 @@ coverage check of 2026-09-24: *national* (rank 310), *social* (344), *political*
 (370). None is a concept at 1229928. Four adjectives, four glosses, all on shipped shapes. SOCIAL
 stands on [B77](B77-teams-institutions-and-business.md)'s COMMUNITY and POLITICAL on
 [B76](B76-government-and-the-law.md)'s GOVERNMENT, so this ticket ships after both. PUBLIC shares
-[B87](B87-core-adjectives.md)'s French feminine fix. None goes to a C ticket.)_
+[B87](../B-needs-seed/B87-core-adjectives.md)'s French feminine fix. None goes to a C ticket.)_
 
 ## Seed first
 
@@ -87,3 +87,35 @@ Readings to judge on authoring:
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 PUBLIC in Spanish and Japanese (a predicate adjective with a purpose complement: *que está abierto
 para todas las personas*, すべての人のために開いている).
+
+## Done
+
+Shipped 2026-09-24, after B76 and B77 in the same pass. **Four adjectives seeded** in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts), placed after SPATIAL: NATIONAL,
+SOCIAL, POLITICAL and PUBLIC. It also has **four glosses**, four of four, and nothing is literal. They are
+pinned in
+[government-and-institutions.test.ts](../../../packages/engine/test/government-and-institutions.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| NATIONAL | that indicates a nation | che indica una nazione | qui indique une nation | der eine Nation bezeichnet | que indica a una nación | 国民を示す | que indica uma nação |
+| SOCIAL | that indicates a community | che indica una comunità | qui indique une communauté | der eine Gemeinschaft bezeichnet | que indica una comunidad | 共同体を示す | que indica uma comunidade |
+| POLITICAL | that indicates a government | che indica un governo | qui indique un gouvernement | der eine Regierung bezeichnet | que indica un gobierno | 政府を示す | que indica um governo |
+| PUBLIC | that is open for all people | che è aperto per tutte le persone | qui est ouvert pour toutes les personnes | der für alle Personen offen ist | que está abierto para todas las personas | すべての人のために開いている | que está aberto para todas as pessoas |
+
+Every render matches the probe table.
+
+1. **Engine: French *publique*.** `public: ['public', 'publique', 'publics', 'publiques', 'public']`
+   is now in `FR_ADJ_IRREGULAR`
+   ([fr.consts.ts](../../../packages/engine/src/languages/fr/fr.consts.ts)), pinned in
+   `agreeAdjFr.test.ts`. It is the same row B87 proposes, so whichever lane merges second should keep
+   one copy.
+2. **Found on seeding: the Japanese の-adjectives needed `relational: '1'`.** This is AMERICAN's A246
+   column. Without it, the predicate dropped the の, and 法律は国のです ("the law is national") came out
+   法律は国です, "the law is a country". NATIONAL (国の) and PUBLIC (公共の) now carry it. The 的な pair
+   drops to 的です, as the language does.
+3. **The plurals agree by rule**: *nationaux, sociaux*, *politici, pubblici*. The feminines are
+   *nationale, publique, politica, pubbliche*.
+4. **e2e**: one test after B66's RIGHT_CORRECT in
+   [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) covers PUBLIC in Spanish and
+   Japanese.

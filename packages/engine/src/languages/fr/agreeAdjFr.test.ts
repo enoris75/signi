@@ -79,6 +79,14 @@ describe('agreeAdjFr', () => {
     expect(agreeAdjFr('cadet', 'masc', true)).toBe('cadets');
   });
 
+  // PUBLIC (localization B88): the rule's default would give "publice" / "publices".
+  test('public takes -que in the feminine', () => {
+    expect(agreeAdjFr('public', 'masc', false)).toBe('public');
+    expect(agreeAdjFr('public', 'fem', false)).toBe('publique');
+    expect(agreeAdjFr('public', 'masc', true)).toBe('publics');
+    expect(agreeAdjFr('public', 'fem', true)).toBe('publiques');
+  });
+
   // ELDER (P11) needs no entry: -é takes the regular +e / +s, "mon frère aîné", "mes sœurs aînées".
   test('an -é adjective agrees by the default rule', () => {
     expect(agreeAdjFr('aîné', 'masc', false)).toBe('aîné');

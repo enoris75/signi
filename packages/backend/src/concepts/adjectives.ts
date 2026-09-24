@@ -2391,6 +2391,84 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'espacial' },
     },
   },
+  // ── P09-E24's relational adjectives (localization B88) ─────────────
+  // C24's IMPERSONAL shape, "that indicates …", where *indicates* reads "concerns". Each follows the
+  // noun in the Romance languages with no flag (una legge nazionale, un parti politique).
+  {
+    // Japanese 国の, a の-adjective like AMERICAN's アメリカの; 全国的な is "nationwide".
+    id: 'NATIONAL',
+    role: 'adjective',
+    description: 'of or belonging to a whole nation',
+    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'NATION', definiteness: 'indefinite' }),
+    emoji: '🏳️',
+    forms: {
+      en: { base: 'national' },
+      it: { base: 'nazionale' },
+      fr: { base: 'national' },
+      de: { base: 'national' },
+      es: { base: 'nacional' },
+      // `relational`, as AMERICAN's: the predicate keeps the の (法律は国のです), or it says the law IS a
+      // country (A246).
+      ja: { base: '国の', reading: 'くにの', relational: '1' },
+      pt: { base: 'nacional' },
+    },
+  },
+  {
+    // Of people living together: B77's COMMUNITY, since SOCIETY is not seeded.
+    id: 'SOCIAL',
+    role: 'adjective',
+    description: 'of society, of people living together',
+    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'COMMUNITY', definiteness: 'indefinite' }),
+    emoji: '👥',
+    forms: {
+      en: { base: 'social' },
+      it: { base: 'sociale' },
+      fr: { base: 'social' },
+      de: { base: 'sozial' },
+      es: { base: 'social' },
+      ja: { base: '社会的な', reading: 'しゃかいてきな' },
+      pt: { base: 'social' },
+    },
+  },
+  {
+    // Of government and the state: B76's GOVERNMENT.
+    id: 'POLITICAL',
+    role: 'adjective',
+    description: 'of government and the state',
+    definition: subjectGapGloss('OBJECT_THING', 'INDICATE', { object: 'GOVERNMENT', definiteness: 'indefinite' }),
+    emoji: '🏛️',
+    forms: {
+      en: { base: 'political' },
+      it: { base: 'politico' },
+      fr: { base: 'politique' },
+      de: { base: 'politisch' },
+      es: { base: 'político' },
+      ja: { base: '政治的な', reading: 'せいじてきな' },
+      pt: { base: 'político' },
+    },
+  },
+  {
+    // Open to all: OPEN_ADJECTIVE with E2's purpose, so Spanish and Portuguese take estar, the
+    // transient word's own copula. French publique is a FR_ADJ_IRREGULAR row (B87, B88).
+    id: 'PUBLIC',
+    role: 'adjective',
+    description: 'open to or shared by all people',
+    definition: subjectGapGloss('OBJECT_THING', 'BE', {
+      predicate: 'OPEN_ADJECTIVE',
+      complements: { purpose: { phrase: { concept: 'PERSON', definiteness: 'all', number: 'plural' } } },
+    }),
+    emoji: '🏞️',
+    forms: {
+      en: { base: 'public' },
+      it: { base: 'pubblico' },
+      fr: { base: 'public' },
+      de: { base: 'öffentlich' },
+      es: { base: 'público' },
+      // `relational`, as NATIONAL's 国の: 場所は公共のです, not *場所は公共です.
+      ja: { base: '公共の', reading: 'こうきょうの', relational: '1' },
+      pt: { base: 'público' },
+    },
+  },
   // ── Aspects and polarity ─────────────────────────────────────────
   // The values of the verb's aspect and polarity controls, said of ASPECT and POLARITY. NEGATIVE is
   // seeded above with the determiner values. NEUTRAL is the everyday word (it "neutrale"), which the

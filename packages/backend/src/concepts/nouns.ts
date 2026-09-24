@@ -7724,6 +7724,137 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'empresa', plural: 'empresas', gender: 'fem', count: 'singular' },
     },
   },
+  // ── P09-E24's teams, institutions and business (localization B77) ──
+  {
+    // P08's collective, seeded ahead of it under the GROUP P08 proposes; its `member` relation ("a
+    // team of players") is P08's own work. Japanese PLAY_GAME is 遊ぶ, a child's play, which PLAY_GAME's
+    // own gloss says too.
+    id: 'TEAM',
+    role: 'noun',
+    description: 'a group of people who play or work together',
+    definition: whoGloss('GROUP', 'PLAY_GAME'),
+    emoji: '🏅',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'team', plural: 'teams', count: 'singular' },
+      it: { base: 'squadra', plural: 'squadre', gender: 'fem', count: 'singular' },
+      fr: { base: 'équipe', plural: 'équipes', gender: 'fem', count: 'singular' },
+      de: { base: 'Mannschaft', plural: 'Mannschaften', gender: 'fem', count: 'singular' },
+      es: { base: 'equipo', plural: 'equipos', gender: 'masc', count: 'singular' },
+      ja: { base: 'チーム', count: 'singular' },
+      pt: { base: 'equipe', plural: 'equipes', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P08's collective, as TEAM is. SYSTEM's shape, "a group of parts that works": the relative
+    // agrees with GROUP, so the whole lives in one place.
+    id: 'COMMUNITY',
+    role: 'noun',
+    description: 'the people who live in one place, taken together',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        possessor: { concept: 'PERSON', definiteness: 'bare', number: 'plural' },
+        possessorRole: 'parts',
+        relative: {
+          verbPhrase: { verb: 'LIVE' },
+          complements: { locative: { phrase: { concept: 'PLACE', definiteness: 'definite', adjectives: ['SAME'] } } },
+        },
+      },
+    },
+    emoji: '🏘️',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'community', plural: 'communities', count: 'singular' },
+      // Italian comunità is invariable, as every -tà noun is.
+      it: { base: 'comunità', plural: 'comunità', gender: 'fem', count: 'singular' },
+      fr: { base: 'communauté', plural: 'communautés', gender: 'fem', count: 'singular' },
+      de: { base: 'Gemeinschaft', plural: 'Gemeinschaften', gender: 'fem', count: 'singular' },
+      es: { base: 'comunidad', plural: 'comunidades', gender: 'fem', count: 'singular' },
+      ja: { base: '共同体', count: 'singular', reading: 'きょうどうたい' },
+      pt: { base: 'comunidade', plural: 'comunidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // SCHOOL's locative gap with a subject of its own: "a school where adult people learn". The
+    // indefinite plural, as WAR's, keeps French des.
+    id: 'UNIVERSITY',
+    role: 'noun',
+    description: 'a school of higher learning for adults',
+    definition: {
+      subject: {
+        concept: 'SCHOOL',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'PERSON', definiteness: 'indefinite', number: 'plural', adjectives: ['ADULT'] },
+          verbPhrase: { verb: 'LEARN' },
+        },
+      },
+    },
+    emoji: '🎓',
+    isA: 'SCHOOL',
+    forms: {
+      en: { base: 'university', plural: 'universities', count: 'singular' },
+      it: { base: 'università', plural: 'università', gender: 'fem', count: 'singular' },
+      fr: { base: 'université', plural: 'universités', gender: 'fem', count: 'singular' },
+      de: { base: 'Universität', plural: 'Universitäten', gender: 'fem', count: 'singular' },
+      es: { base: 'universidad', plural: 'universidades', gender: 'fem', count: 'singular' },
+      ja: { base: '大学', count: 'singular', reading: 'だいがく' },
+      pt: { base: 'universidade', plural: 'universidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Work done for others; the religious and military senses (funzione, office, Gottesdienst) are
+    // not this concept. German Dienst, not the loan Service a customer desk says.
+    id: 'SERVICE',
+    role: 'noun',
+    description: 'work done for other people',
+    definition: {
+      subject: {
+        concept: 'WORK_NOUN',
+        definiteness: 'bare',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO' },
+          complements: { purpose: { phrase: { concept: 'PERSON', definiteness: 'bare', number: 'plural', adjectives: ['OTHER'] } } },
+        },
+      },
+    },
+    emoji: '🛎️',
+    forms: {
+      en: { base: 'service', plural: 'services', count: 'singular' },
+      it: { base: 'servizio', plural: 'servizi', gender: 'masc', count: 'singular' },
+      fr: { base: 'service', plural: 'services', gender: 'masc', count: 'singular' },
+      de: { base: 'Dienst', plural: 'Dienste', gender: 'masc', count: 'singular' },
+      es: { base: 'servicio', plural: 'servicios', gender: 'masc', count: 'singular' },
+      ja: { base: 'サービス', count: 'singular' },
+      pt: { base: 'serviço', plural: 'serviços', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Commerce, the activity; the firm is COMPANY_BUSINESS. A mass noun in its singular word
+    // (commercio, commerce, Handel): the plural affari, affaires, negocios and negócios are the
+    // colloquial words and render since P09-E41, but they are "dealings", not the trade itself.
+    id: 'BUSINESS',
+    role: 'noun',
+    description: 'the buying and selling of goods and services',
+    definition: instrumentGloss('WORK_NOUN', 'TRADE', undefined, 'bare'),
+    emoji: '💹',
+    countable: false,
+    synonym: 'commerce',
+    forms: {
+      en: { base: 'business', count: 'singular' },
+      it: { base: 'commercio', gender: 'masc', count: 'singular' },
+      fr: { base: 'commerce', gender: 'masc', count: 'singular' },
+      de: { base: 'Handel', gender: 'masc', count: 'singular', compound: 'Handels' },
+      es: { base: 'comercio', gender: 'masc', count: 'singular' },
+      ja: { base: 'ビジネス', count: 'singular' },
+      pt: { base: 'comércio', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     // The polity half of P09's "state"; the condition is STATE. Italian, French, Spanish and
     // Portuguese say both with one word and write the polity with a capital (Stato, État, Estado),
@@ -7749,6 +7880,172 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
       ja: { base: '国家', count: 'singular', reading: 'こっか' },
       pt: { base: 'Estado', plural: 'Estados', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── P09-E24's government and the law (localization B76) ────────────
+  {
+    // Authority over people and events, not the electrical current (corrente, courant, Strom, 電力),
+    // which is another concept. "An ability with which one governs": ABILITY is the genus, and the
+    // instrument gap says what the ability is for.
+    id: 'POWER',
+    role: 'noun',
+    description: 'the authority to direct people and events',
+    definition: instrumentGloss('ABILITY', 'GOVERN_STATE'),
+    emoji: '👑',
+    synonym: 'authority',
+    forms: {
+      en: { base: 'power', plural: 'powers', count: 'singular' },
+      it: { base: 'potere', plural: 'poteri', gender: 'masc', count: 'singular' },
+      fr: { base: 'pouvoir', plural: 'pouvoirs', gender: 'masc', count: 'singular' },
+      de: { base: 'Macht', plural: 'Mächte', gender: 'fem', count: 'singular' },
+      es: { base: 'poder', plural: 'poderes', gender: 'masc', count: 'singular' },
+      ja: { base: '権力', count: 'singular', reading: 'けんりょく' },
+      pt: { base: 'poder', plural: 'poderes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // P08's collective, seeded ahead of it under the GROUP P08 proposes. The group, where
+    // STATE_NATION is the system it governs: "a group that governs a state".
+    id: 'GOVERNMENT',
+    role: 'noun',
+    description: 'the group of people who govern a state',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'GOVERN_STATE' }, directObject: { concept: 'STATE_NATION', definiteness: 'indefinite' } },
+      },
+    },
+    emoji: '🏛️',
+    isA: 'GROUP',
+    forms: {
+      en: { base: 'government', plural: 'governments', count: 'singular' },
+      it: { base: 'governo', plural: 'governi', gender: 'masc', count: 'singular' },
+      fr: { base: 'gouvernement', plural: 'gouvernements', gender: 'masc', count: 'singular' },
+      de: { base: 'Regierung', plural: 'Regierungen', gender: 'fem', count: 'singular' },
+      es: { base: 'gobierno', plural: 'gobiernos', gender: 'masc', count: 'singular' },
+      ja: { base: '政府', count: 'singular', reading: 'せいふ' },
+      pt: { base: 'governo', plural: 'governos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The political party; the celebration is PARTY_CELEBRATION (festa, fête, Fest), which shares
+    // only the English word. POWER is the bare mass object: "a group that desires power".
+    id: 'PARTY_POLITICAL',
+    role: 'noun',
+    description: 'an organized group that seeks political power',
+    definition: whoGloss('GROUP', 'DESIRE', 'POWER', 'singular'),
+    emoji: '🗳️',
+    isA: 'GROUP',
+    synonym: 'political',
+    forms: {
+      en: { base: 'party', plural: 'parties', count: 'singular' },
+      it: { base: 'partito', plural: 'partiti', gender: 'masc', count: 'singular' },
+      fr: { base: 'parti', plural: 'partis', gender: 'masc', count: 'singular' },
+      de: { base: 'Partei', plural: 'Parteien', gender: 'fem', count: 'singular' },
+      es: { base: 'partido', plural: 'partidos', gender: 'masc', count: 'singular' },
+      ja: { base: '政党', count: 'singular', reading: 'せいとう' },
+      pt: { base: 'partido', plural: 'partidos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // One statute. The field of law (diritto, droit, Recht) is RIGHT_NOUN's word in five languages
+    // and has no concept yet. WRITE, not GIVE: GIVE's Japanese is the benefactive あげる, and a state
+    // does not *ageru* a law (国家が書く指示, not 国家があげる指示).
+    id: 'LAW',
+    role: 'noun',
+    description: 'a rule a state makes that everyone must follow',
+    definition: patientOfGloss('INSTRUCTION', 'WRITE', 'STATE_NATION'),
+    emoji: '📜',
+    forms: {
+      en: { base: 'law', plural: 'laws', count: 'singular' },
+      it: { base: 'legge', plural: 'leggi', gender: 'fem', count: 'singular' },
+      fr: { base: 'loi', plural: 'lois', gender: 'fem', count: 'singular' },
+      de: { base: 'Gesetz', plural: 'Gesetze', gender: 'neut', count: 'singular', compound: 'Gesetzes' },
+      es: { base: 'ley', plural: 'leyes', gender: 'fem', count: 'singular' },
+      ja: { base: '法律', count: 'singular', reading: 'ほうりつ' },
+      pt: { base: 'lei', plural: 'leis', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The law court, not the sports court (campo, terrain, Platz, cancha, コート, quadra).
+    id: 'COURT_LAW',
+    role: 'noun',
+    description: 'the body that judges cases under the law',
+    definition: {
+      subject: {
+        concept: 'GROUP',
+        definiteness: 'indefinite',
+        relative: { verbPhrase: { verb: 'APPLY' }, directObject: { concept: 'LAW', definiteness: 'definite', number: 'plural' } },
+      },
+    },
+    emoji: '⚖️',
+    synonym: 'of law',
+    forms: {
+      en: { base: 'court', plural: 'courts', count: 'singular' },
+      it: { base: 'tribunale', plural: 'tribunali', gender: 'masc', count: 'singular' },
+      fr: { base: 'tribunal', plural: 'tribunaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Gericht', plural: 'Gerichte', gender: 'neut', count: 'singular', compound: 'Gerichts' },
+      es: { base: 'tribunal', plural: 'tribunales', gender: 'masc', count: 'singular' },
+      ja: { base: '裁判所', count: 'singular', reading: 'さいばんしょ' },
+      pt: { base: 'tribunal', plural: 'tribunais', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The entitlement. French droit, Spanish derecho and Portuguese direito are also RIGHT_SIDE's
+    // adjective, which the synonym tells apart in the picker: "right (entitlement)".
+    id: 'RIGHT_NOUN',
+    role: 'noun',
+    description: 'what one is allowed to do or have',
+    definition: {
+      subject: {
+        concept: 'ACTION',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'DO', modals: ['MAY'] },
+        },
+      },
+    },
+    emoji: '✊',
+    synonym: 'entitlement',
+    forms: {
+      en: { base: 'right', plural: 'rights', count: 'singular' },
+      it: { base: 'diritto', plural: 'diritti', gender: 'masc', count: 'singular' },
+      fr: { base: 'droit', plural: 'droits', gender: 'masc', count: 'singular' },
+      de: { base: 'Recht', plural: 'Rechte', gender: 'neut', count: 'singular', compound: 'Rechts' },
+      es: { base: 'derecho', plural: 'derechos', gender: 'masc', count: 'singular' },
+      ja: { base: '権利', count: 'singular', reading: 'けんり' },
+      pt: { base: 'direito', plural: 'direitos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // "A period where nations kill": the locative gap on PERIOD_TIME. The subject is the
+    // indefinite plural, not the bare one, which French would write without its des.
+    id: 'WAR',
+    role: 'noun',
+    description: 'armed fighting between nations',
+    definition: {
+      subject: {
+        concept: 'PERIOD_TIME',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'NATION', definiteness: 'indefinite', number: 'plural' },
+          verbPhrase: { verb: 'KILL' },
+        },
+      },
+    },
+    emoji: '⚔️',
+    forms: {
+      en: { base: 'war', plural: 'wars', count: 'singular' },
+      it: { base: 'guerra', plural: 'guerre', gender: 'fem', count: 'singular' },
+      fr: { base: 'guerre', plural: 'guerres', gender: 'fem', count: 'singular' },
+      de: { base: 'Krieg', plural: 'Kriege', gender: 'masc', count: 'singular', compound: 'Kriegs' },
+      es: { base: 'guerra', plural: 'guerras', gender: 'fem', count: 'singular' },
+      ja: { base: '戦争', count: 'singular', reading: 'せんそう' },
+      pt: { base: 'guerra', plural: 'guerras', gender: 'fem', count: 'singular' },
     },
   },
   {
