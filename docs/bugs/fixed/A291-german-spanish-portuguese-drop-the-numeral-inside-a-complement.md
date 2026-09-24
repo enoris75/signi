@@ -99,4 +99,6 @@ renderer's colocated `complementsPhrase.test.ts` gained a counted-phrase case.
 
 Still open, as the bug file said: German `one` (`mit ein Hund`, from the undeclined cardinal *ein*),
 and a *definite* `one` in every slot, subject and object included (`el un perro`, `der ein Hund`),
-which the complement now says the same way the noun phrase always did.
+which the complement now says the same way the noun phrase always did. Both were filed the same day: the German cardinal as
+[A321](../A-must-fix/A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md) and the definite `one` as
+[A319](../A-must-fix/A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md).

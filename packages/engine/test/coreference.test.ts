@@ -94,6 +94,219 @@ describe('a possessor linked to the subject', () => {
   });
 });
 
+/** A phrase whose possessor is the link. */
+const L = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { possessor: link, ...extra });
+
+describe('a linked possessor in its case, number and article', () => {
+  // German declines the possessive for the possessed head's own case, and reads the subject's gender
+  // for the stem: seinen Hund (accusative), mit seinem Hund (dative), die Frau … ihren / in ihrem.
+  test('declines in German for the case its phrase stands in', () => {
+    expect(sees(np('MAN'), L('DOG'))).toEqual({
+      en: 'the man sees his dog.', it: "l'uomo vede il suo cane.", fr: "l'homme voit son chien.",
+      de: 'der Mann sieht seinen Hund.', es: 'el hombre ve su perro.', ja: '男は自分の犬を見ます。',
+      pt: 'o homem vê o seu cão.',
+    });
+    expect(sees(np('WOMAN', { gender: 'fem' }), L('DOG'))).toEqual({
+      en: 'the woman sees her dog.', it: 'la donna vede il suo cane.', fr: 'la femme voit son chien.',
+      de: 'die Frau sieht ihren Hund.', es: 'la mujer ve su perro.', ja: '女は自分の犬を見ます。',
+      pt: 'a mulher vê o seu cão.',
+    });
+    expect(sayAll(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: L('DOG') } } }))).toEqual({
+      en: 'the man runs with his dog.', it: "l'uomo corre con il suo cane.", fr: "l'homme court avec son chien.",
+      de: 'der Mann läuft mit seinem Hund.', es: 'el hombre corre con su perro.', ja: '男は自分の犬と走ります。',
+      pt: 'o homem corre com o seu cão.',
+    });
+    expect(sayAll(clause(np('MAN'), 'RUN', { complements: { comitative: { phrase: L('MOTHER') } } }))).toEqual({
+      en: 'the man runs with his mother.', it: "l'uomo corre con sua madre.", fr: "l'homme court avec sa mère.",
+      de: 'der Mann läuft mit seiner Mutter.', es: 'el hombre corre con su madre.', ja: '男は自分のお母さんと走ります。',
+      pt: 'o homem corre com a sua mãe.',
+    });
+    expect(sayAll(clause(np('WOMAN', { gender: 'fem' }), 'RUN', { complements: { locative: { phrase: L('HOUSE') } } }))).toEqual({
+      en: 'the woman runs in her house.', it: 'la donna corre nella sua casa.', fr: 'la femme court dans sa maison.',
+      de: 'die Frau läuft in ihrem Haus.', es: 'la mujer corre en su casa.', ja: '女は自分の家で走ります。',
+      pt: 'a mulher corre na sua casa.',
+    });
+  });
+
+  // The Romance possessive agrees with what is owned, not with the owner: i suoi libri, ses livres.
+  test('agrees with a plural head, and takes its article where Romance writes one', () => {
+    expect(sees(np('CAT'), L('BOOK', { number: 'plural' }))).toEqual({
+      en: 'the cat sees its books.', it: 'il gatto vede i suoi libri.', fr: 'le chat voit ses livres.',
+      de: 'der Kater sieht seine Bücher.', es: 'el gato ve sus libros.', ja: '猫は自分の本を見ます。',
+      pt: 'o gato vê os seus livros.',
+    });
+    // A plural kin noun takes back the article a singular one drops in Italian.
+    expect(sees(np('MAN'), L('SISTER', { number: 'plural' }))).toEqual({
+      en: 'the man sees his sisters.', it: "l'uomo vede le sue sorelle.", fr: "l'homme voit ses sœurs.",
+      de: 'der Mann sieht seine Schwestern.', es: 'el hombre ve a sus hermanas.', ja: '男は自分の姉妹を見ます。',
+      pt: 'o homem vê as suas irmãs.',
+    });
+    // So does loro, the plural owner's possessive.
+    expect(sees(np('BOY', { number: 'plural' }), L('MOTHER'))).toEqual({
+      en: 'the boys see their mother.', it: 'i ragazzi vedono la loro madre.', fr: 'les garçons voient leur mère.',
+      de: 'die Jungen sehen ihre Mutter.', es: 'los niños ven a su madre.', ja: '男の子は自分のお母さんを見ます。',
+      pt: 'os meninos veem a sua mãe.',
+    });
+    // …and so does an adjective on the kin noun.
+    expect(sees(np('MAN'), L('MOTHER', { adjectives: ['OLD'] }))).toEqual({
+      en: 'the man sees his old mother.', it: "l'uomo vede la sua vecchia madre.", fr: "l'homme voit sa vieille mère.",
+      de: 'der Mann sieht seine alte Mutter.', es: 'el hombre ve a su madre vieja.', ja: '男は自分の古いお母さんを見ます。',
+      pt: 'o homem vê a sua mãe velha.',
+    });
+  });
+
+  // French writes son, not sa, before a vowel-initial feminine: son aile, son amie.
+  test('is son in French before a vowel-initial feminine', () => {
+    expect(sees(np('CAT'), L('WING'))).toEqual({
+      en: 'the cat sees its wing.', it: 'il gatto vede la sua ala.', fr: 'le chat voit son aile.',
+      de: 'der Kater sieht seinen Flügel.', es: 'el gato ve su ala.', ja: '猫は自分の翼を見ます。',
+      pt: 'o gato vê a sua asa.',
+    });
+    expect(sees(np('MAN'), L('FRIEND', { gender: 'fem' }))).toEqual({
+      en: 'the man sees his friend.', it: "l'uomo vede la sua amica.", fr: "l'homme voit son amie.",
+      de: 'der Mann sieht seine Freundin.', es: 'el hombre ve a su amiga.', ja: '男は自分の友達を見ます。',
+      pt: 'o homem vê a sua amiga.',
+    });
+  });
+});
+
+describe('a linked possessor under a pronoun subject', () => {
+  test('takes the pronoun\'s person and number', () => {
+    expect(sees(np('FIRST_PERSON', { number: 'plural' }), L('BOOK'))).toEqual({
+      en: 'we see our book.', it: 'vediamo il nostro libro.', fr: 'nous voyons notre livre.',
+      de: 'wir sehen unser Buch.', es: 'vemos nuestro libro.', ja: '私たちは自分の本を見ます。',
+      pt: 'vemos o nosso livro.',
+    });
+    expect(sees(np('SECOND_PERSON'), L('BOOK'))).toEqual({
+      en: 'you see your book.', it: 'vedi il tuo libro.', fr: 'tu vois ton livre.', de: 'du siehst dein Buch.',
+      es: 'ves tu libro.', ja: 'あなたは自分の本を見ます。', pt: 'vê o seu livro.',
+    });
+    expect(sees(np('SECOND_PERSON', { number: 'plural' }), L('BOOK'))).toEqual({
+      en: 'you see your book.', it: 'vedete il vostro libro.', fr: 'vous voyez votre livre.', de: 'ihr seht euer Buch.',
+      es: 'veis vuestro libro.', ja: 'あなたたちは自分の本を見ます。', pt: 'veem o seu livro.',
+    });
+    expect(sees(np('THIRD_PERSON', { number: 'plural' }), L('BOOK'))).toEqual({
+      en: 'they see their book.', it: 'vedono il loro libro.', fr: 'ils voient leur livre.', de: 'sie sehen ihr Buch.',
+      es: 'ven su libro.', ja: '彼らは自分の本を見ます。', pt: 'veem o seu livro.',
+    });
+  });
+
+  // A 3rd-person pronoun names its gender, so English and German have it to read.
+  test('takes a 3rd-person pronoun\'s gender', () => {
+    expect(sees(np('THIRD_PERSON', { gender: 'fem' }), L('BOOK'))).toEqual({
+      en: 'she sees her book.', it: 'vede il suo libro.', fr: 'elle voit son livre.', de: 'sie sieht ihr Buch.',
+      es: 've su libro.', ja: '彼女は自分の本を見ます。', pt: 'vê o seu livro.',
+    });
+  });
+});
+
+describe('a linked possessor under negation and questions', () => {
+  test('is unchanged by a negated verb and a yes/no question', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: L('BOOK') }))).toEqual({
+      en: 'the cat does not see its book.', it: 'il gatto non vede il suo libro.', fr: 'le chat ne voit pas son livre.',
+      de: 'der Kater sieht sein Buch nicht.', es: 'el gato no ve su libro.', ja: '猫は自分の本を見ません。',
+      pt: 'o gato não vê o seu livro.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: L('BOOK'), interrogative: true }))).toEqual({
+      en: 'does the cat see its book?', it: 'il gatto vede il suo libro?', fr: 'est-ce que le chat voit son livre\u00a0?',
+      de: 'sieht der Kater sein Buch?', es: '¿el gato ve su libro?', ja: '猫は自分の本を見ますか？',
+      pt: 'o gato vê o seu livro?',
+    });
+  });
+
+  // The asked subject is a person of unknown sex, so the unmarked his, as for PERSON.
+  test('binds to an asked subject', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: L('BOOK'), questionRole: 'subject', questionAnimate: true }))).toEqual({
+      en: 'who sees his book?', it: 'chi vede il suo libro?', fr: 'qui voit son livre\u00a0?', de: 'wer sieht sein Buch?',
+      es: '¿quién ve su libro?', ja: '誰が自分の本を見ますか？', pt: 'quem vê o seu livro?',
+    });
+  });
+});
+
+describe('a linked possessor in a subordinate clause binds to that clause\'s own subject', () => {
+  const woman = np('WOMAN', { gender: 'fem' });
+
+  test('in a content clause', () => {
+    expect(sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: woman, verbPhrase: { verb: 'SEE' }, directObject: L('BOOK') } }))).toEqual({
+      en: 'the man says that the woman sees her book.', it: "l'uomo dice che la donna vede il suo libro.",
+      fr: "l'homme dit que la femme voit son livre.", de: 'der Mann sagt, dass die Frau ihr Buch sieht.',
+      es: 'el hombre dice que la mujer ve su libro.', ja: '男は女が自分の本を見ると言います。',
+      pt: 'o homem diz que a mulher vê o seu livro.',
+    });
+  });
+
+  // An infinitive's subject is its controller: the object of CAUSE, the subject of DESIRE and of the purpose.
+  test('in an infinitive, a purpose and a causative, bound to the controller', () => {
+    expect(sayAll({
+      subject: woman, verbPhrase: { verb: 'CAUSE_VERB' }, directObject: np('MAN'),
+      infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: L('BOOK'), control: 'object' },
+    })).toEqual({
+      en: 'the woman causes the man to see his book.', it: "la donna induce l'uomo a vedere il suo libro.",
+      fr: "la femme induit l'homme à voir son livre.", de: 'die Frau veranlasst den Mann, sein Buch zu sehen.',
+      es: 'la mujer induce al hombre a ver su libro.', ja: '女は男が自分の本を見るようにします。',
+      pt: 'a mulher induz o homem a ver o seu livro.',
+    });
+    expect(sayAll(clause(np('MAN'), 'RUN', { purpose: { verbPhrase: { verb: 'SEE' }, directObject: L('MOTHER') } }))).toEqual({
+      en: 'the man runs to see his mother.', it: "l'uomo corre per vedere sua madre.", fr: "l'homme court pour voir sa mère.",
+      de: 'der Mann läuft, um seine Mutter zu sehen.', es: 'el hombre corre para ver a su madre.',
+      ja: '男は自分のお母さんを見るために走ります。', pt: 'o homem corre para ver a sua mãe.',
+    });
+    expect(sayAll(clause(woman, 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: L('MOTHER') } }))).toEqual({
+      en: 'the woman desires to see her mother.', it: 'la donna desidera vedere sua madre.', fr: 'la femme désire voir sa mère.',
+      de: 'die Frau wünscht, ihre Mutter zu sehen.', es: 'la mujer desea ver a su madre.',
+      ja: '女は自分のお母さんを見ることを望んでいます。', pt: 'a mulher deseja ver a sua mãe.',
+    });
+  });
+
+  test('in a coordinated clause', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'and', clause: clause(woman, 'SEE', { directObject: L('BOOK') }) } })).toEqual({
+      en: 'the cat runs, and the woman sees her book.', it: 'il gatto corre, e la donna vede il suo libro.',
+      fr: 'le chat court, et la femme voit son livre.', de: 'der Kater läuft, und die Frau sieht ihr Buch.',
+      es: 'el gato corre, y la mujer ve su libro.', ja: '猫は走ります。そして、女は自分の本を見ます。',
+      pt: 'o gato corre, e a mulher vê o seu livro.',
+    });
+  });
+
+  // An object relative's subject is its own (the man), a subject relative's is its head (the cat).
+  test('in a relative clause, to the relative\'s subject', () => {
+    const cat = np('CAT', { relative: { headRole: 'directObject', subject: np('MAN'), verbPhrase: { verb: 'SEE' }, complements: { locative: { phrase: L('HOUSE') } } } });
+    expect(sayAll(clause(cat, 'RUN'))).toEqual({
+      en: 'the cat that the man sees in his house runs.', it: "il gatto che l'uomo vede nella sua casa corre.",
+      fr: "le chat que l'homme voit dans sa maison court.", de: 'der Kater, den der Mann in seinem Haus sieht, läuft.',
+      es: 'el gato que el hombre ve en su casa corre.', ja: '男が自分の家で見る猫は走ります。',
+      pt: 'o gato que o homem vê na sua casa corre.',
+    });
+    expect(sees(np('MAN'), np('CAT', { relative: { verbPhrase: { verb: 'SEE' }, directObject: L('BOOK') } }))).toEqual({
+      en: 'the man sees the cat that sees its book.', it: "l'uomo vede il gatto che vede il suo libro.",
+      fr: "l'homme voit le chat qui voit son livre.", de: 'der Mann sieht den Kater, der sein Buch sieht.',
+      es: 'el hombre ve el gato que ve su libro.', ja: '男は自分の本を見る猫を見ます。',
+      pt: 'o homem vê o gato que vê o seu livro.',
+    });
+  });
+});
+
+// The standards of comparison are the clause's own phrases, so a link in one binds to its subject.
+describe('a linked possessor in a standard of comparison', () => {
+  test('in an attributive adjective\'s standard', () => {
+    const bigger = np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveStandards: [L('DOG')] });
+    expect(sees(np('MAN'), bigger)).toEqual({
+      en: 'the man sees a bigger cat than his dog.', it: "l'uomo vede un gatto più grande del suo cane.",
+      fr: "l'homme voit un chat plus grand que son chien.", de: 'der Mann sieht einen größeren Kater als seinen Hund.',
+      es: 'el hombre ve un gato más grande que su perro.', ja: '男は自分の犬より大きい猫を見ます。',
+      pt: 'o homem vê um gato maior do que o seu cão.',
+    });
+  });
+
+  test('in a predicative head\'s standard', () => {
+    const bigger = np('BIG', { headDegree: 'more', headStandard: L('DOG') });
+    expect(sayAll(clause(np('MAN'), 'BE', { complements: { predicative: { phrase: bigger } } }))).toEqual({
+      en: 'the man is bigger than his dog.', it: "l'uomo è più grande del suo cane.", fr: "l'homme est plus grand que son chien.",
+      de: 'der Mann ist größer als sein Hund.', es: 'el hombre es más grande que su perro.', ja: '男は自分の犬より大きいです。',
+      pt: 'o homem é maior do que o seu cão.',
+    });
+  });
+});
+
 describe('a possessor linked to a subject that is not there to name', () => {
   // The subject cannot hold a link to itself, and a verbless period is nothing but its subject.
   test('is refused by name inside the subject, not left to crash', () => {
@@ -107,6 +320,18 @@ describe('a possessor linked to a subject that is not there to name', () => {
   test('is refused inside a relative clause\'s own subject', () => {
     const cat = np('CAT', { relative: { headRole: 'directObject', subject: np('DOG', { possessor: link }), verbPhrase: { verb: 'SEE' } } });
     expect(() => sayAll(clause(cat, 'RUN'))).toThrow(/cannot stand in the subject itself/);
+  });
+
+  // A content clause's subject is the subject its own links name, so it cannot hold one either.
+  test('is refused inside a content clause\'s own subject', () => {
+    expect(() => sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: L('MOTHER'), verbPhrase: { verb: 'RUN' } } })))
+      .toThrow(/cannot stand in the subject itself/);
+  });
+
+  // The vocative stands outside the clause, so no clause binds a link in it.
+  test('is refused in the address', () => {
+    expect(() => sayAll({ ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true, address: L('MOM') }))
+      .toThrow('a coreferent possessor needs a clause whose subject it names, and this phrase stands in none (P11-E2)');
   });
 });
 
@@ -153,11 +378,22 @@ describe('known bugs: english writes his for a possessor linked to a female subj
     expect(sayAll(clause(mother, 'RUN')).en).toBe('the mother who sees her book runs.');
   });
 
+  test.fails('my mother, on her older sister', () => {
+    const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(sees(np('MOTHER', { possessor: mine }), np('SISTER', { adjectives: ['ELDER'], possessor: link })).en)
+      .toBe('my mother sees her older sister.');
+  });
+
   test('regression: the other six, a gender the plan names, a man, a person of unknown sex, the plural and the pronominal possessor', () => {
     expect(sees(np('MOTHER', { possessor: you }), np('BOOK', { possessor: link }))).toMatchObject({
       it: 'tua madre vede il suo libro.', fr: 'ta mère voit son livre.', de: 'deine Mutter sieht ihr Buch.',
       es: 'tu madre ve su libro.', ja: 'あなたのお母さんは自分の本を見ます。', pt: 'a sua mãe vê o seu livro.',
     });
+    expect(sees(np('MOTHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), np('SISTER', { adjectives: ['ELDER'], possessor: link })))
+      .toMatchObject({
+        it: 'mia madre vede la sua sorella maggiore.', fr: 'ma mère voit sa sœur aînée.', de: 'meine Mutter sieht ihre ältere Schwester.',
+        es: 'mi madre ve a su hermana mayor.', ja: '母は自分の姉を見ます。', pt: 'a minha mãe vê a sua irmã mais velha.',
+      });
     expect(her(np('WOMAN', { gender: 'fem' }))).toBe('the woman sees her book.');
     expect(her(np('FRIEND', { gender: 'fem' }))).toBe('the friend sees her book.');
     expect(her(np('MAN'))).toBe('the man sees his book.');
@@ -171,5 +407,65 @@ describe('known bugs: english writes his for a possessor linked to a female subj
     }));
     expect(third()).toMatchObject({ en: 'the mother sees his book.', de: 'die Mutter sieht sein Buch.' });
     expect(third('fem')).toMatchObject({ en: 'the mother sees her book.', de: 'die Mutter sieht ihr Buch.' });
+  });
+});
+
+// A332. `subjectBinding` hands the engines the generic subject's agreement as an ordinary 3rd-person
+// possessor, so English writes *his* after *one* and Italian *suo* after *si*, both someone else's.
+// English says *one's*, and Italian's impersonal si binds only *proprio*. French, German and Japanese
+// bind their ordinary possessive, and Spanish and Portuguese se binds *su* / *seu* as well. Only the
+// link knows the owner is the generic subject: a pronominal possessor names a 3rd person of its own.
+describe('known bugs: english and italian write his / suo for a possessor linked to the generic subject (A332)', () => {
+  const one = np('GENERIC_PERSON');
+
+  test.fails('the link', () => {
+    expect(sees(one, L('BOOK'))).toEqual({
+      en: "one sees one's book.", it: 'si vede il proprio libro.', fr: 'on voit son livre.', de: 'man sieht sein Buch.',
+      es: 'se ve su libro.', ja: '人は自分の本を見ます。', pt: 'se vê o seu livro.',
+    });
+  });
+
+  // proprio is already the emphasis, so Italian does not stack a second one.
+  test.fails('with OWN', () => {
+    expect(sees(one, L('BOOK', { possessorOwn: true }))).toEqual({
+      en: "one sees one's own book.", it: 'si vede il proprio libro.', fr: 'on voit son propre livre.',
+      de: 'man sieht sein eigenes Buch.', es: 'se ve su propio libro.', ja: '人は自分自身の本を見ます。',
+      pt: 'se vê o seu próprio livro.',
+    });
+  });
+
+  // A kin noun keeps its article before proprio, as it does before an adjective.
+  test.fails('on a kin noun', () => {
+    expect(sees(one, L('MOTHER'))).toEqual({
+      en: "one sees one's mother.", it: 'si vede la propria madre.', fr: 'on voit sa mère.', de: 'man sieht seine Mutter.',
+      es: 'se ve a su madre.', ja: '人は自分のお母さんを見ます。', pt: 'se vê a sua mãe.',
+    });
+  });
+
+  test.fails('in a complement', () => {
+    expect(sayAll(clause(one, 'RUN', { complements: { comitative: { phrase: L('DOG') } } }))).toEqual({
+      en: "one runs with one's dog.", it: 'si corre con il proprio cane.', fr: 'on court avec son chien.',
+      de: 'man läuft mit seinem Hund.', es: 'se corre con su perro.', ja: '人は自分の犬と走ります。',
+      pt: 'se corre com o seu cão.',
+    });
+  });
+
+  test('regression: the other five, the pronominal possessor and the subject question', () => {
+    expect(sees(one, L('BOOK'))).toMatchObject({
+      fr: 'on voit son livre.', de: 'man sieht sein Buch.', es: 'se ve su libro.', ja: '人は自分の本を見ます。',
+      pt: 'se vê o seu livro.',
+    });
+    expect(sees(one, L('BOOK', { possessorOwn: true }))).toMatchObject({
+      fr: 'on voit son propre livre.', de: 'man sieht sein eigenes Buch.', es: 'se ve su propio libro.',
+      ja: '人は自分自身の本を見ます。', pt: 'se vê o seu próprio livro.',
+    });
+    // A pronominal possessor names a 3rd person of its own, not the generic subject.
+    expect(sees(one, np('BOOK', { possessor: { kind: 'pronominal', person: '3', number: 'singular' } }))).toEqual({
+      en: 'one sees his book.', it: 'si vede il suo libro.', fr: 'on voit son livre.', de: 'man sieht sein Buch.',
+      es: 'se ve su libro.', ja: '人は彼の本を見ます。', pt: 'se vê o seu livro.',
+    });
+    // The wh-word that stands in for an asked subject is not the generic one.
+    expect(sayAll(clause(one, 'SEE', { directObject: L('BOOK'), questionRole: 'subject', questionAnimate: true })))
+      .toMatchObject({ en: 'who sees his book?', it: 'chi vede il suo libro?' });
   });
 });

@@ -440,6 +440,64 @@ describe('whose family it is, read through a possessor linked to the subject (P1
       .toMatchObject({ ja: '兄は自分の母の夫を見ます。' });
   });
 
+  // A group is the speaker's family only when every one of it is: my brother and my sister's mother is
+  // 母, my brother and the boy's is お母さん.
+  test('a coordinated subject is one\'s own family only when all of it is', () => {
+    const mySister = np('SISTER', { adjectives: ['ELDER'], possessor: of('1') });
+    expect(sayAll(clause({ conjuncts: [myBrother, mySister], conjunction: 'and' }, 'SEE', { directObject: np('MOTHER', { possessor: link }) }))).toEqual({
+      en: 'my older brother and my older sister see their mother.',
+      it: 'il mio fratello maggiore e la mia sorella maggiore vedono la loro madre.',
+      fr: 'mon frère aîné et ma sœur aînée voient leur mère.',
+      de: 'mein älterer Bruder und meine ältere Schwester sehen ihre Mutter.',
+      es: 'mi hermano mayor y mi hermana mayor ven a su madre.', ja: '兄と姉は自分の母を見ます。',
+      pt: 'o meu irmão mais velho e a minha irmã mais velha veem a sua mãe.',
+    });
+    expect(sayAll(clause({ conjuncts: [myBrother, np('BOY')], conjunction: 'and' }, 'SEE', { directObject: np('MOTHER', { possessor: link }) }))).toEqual({
+      en: 'my older brother and the boy see their mother.',
+      it: 'il mio fratello maggiore e il ragazzo vedono la loro madre.',
+      fr: 'mon frère aîné et le garçon voient leur mère.',
+      de: 'mein älterer Bruder und der Junge sehen ihre Mutter.',
+      es: 'mi hermano mayor y el niño ven a su madre.', ja: '兄と男の子は自分のお母さんを見ます。',
+      pt: 'o meu irmão mais velho e o menino veem a sua mãe.',
+    });
+  });
+
+  // A subject relative binds to its head, which is my brother, so his mother is 母 there too.
+  test('a subject relative on one\'s own relative binds to him', () => {
+    const brother = np('BROTHER', { adjectives: ['ELDER'], possessor: of('1'), relative: { verbPhrase: { verb: 'SEE' }, directObject: np('MOTHER', { possessor: link }) } });
+    expect(sayAll(clause(brother, 'RUN'))).toEqual({
+      en: 'my older brother who sees his mother runs.', it: 'il mio fratello maggiore che vede sua madre corre.',
+      fr: 'mon frère aîné qui voit sa mère court.', de: 'mein älterer Bruder, der seine Mutter sieht, läuft.',
+      es: 'mi hermano mayor que ve a su madre corre.', ja: '自分の母を見る兄は走ります。',
+      pt: 'o meu irmão mais velho que vê a sua mãe corre.',
+    });
+  });
+
+  // The spouse splits the same way: my brother's wife is 妻, the man's 奥さん.
+  test('my brother sees his wife: 自分の妻, where the man\'s is 自分の奥さん', () => {
+    expect(sayAll(clause(myBrother, 'SEE', { directObject: np('WIFE', { possessor: link }) }))).toEqual({
+      en: 'my older brother sees his wife.', it: 'il mio fratello maggiore vede sua moglie.',
+      fr: 'mon frère aîné voit sa femme.', de: 'mein älterer Bruder sieht seine Frau.',
+      es: 'mi hermano mayor ve a su esposa.', ja: '兄は自分の妻を見ます。',
+      pt: 'o meu irmão mais velho vê a sua esposa.',
+    });
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: np('WIFE', { possessor: link }) }))).toEqual({
+      en: 'the man sees his wife.', it: "l'uomo vede sua moglie.", fr: "l'homme voit sa femme.",
+      de: 'der Mann sieht seine Frau.', es: 'el hombre ve a su esposa.', ja: '男は自分の奥さんを見ます。',
+      pt: 'o homem vê a sua esposa.',
+    });
+  });
+
+  // Down the chain from someone else's: the boy's mother is お母さん, and her sister the plain 姉妹.
+  test('the boy sees his mother\'s sister', () => {
+    expect(sayAll(clause(np('BOY'), 'SEE', { directObject: np('SISTER', { possessor: np('MOTHER', { possessor: link }) }) }))).toEqual({
+      en: "the boy sees his mother's sister.", it: 'il ragazzo vede la sorella di sua madre.',
+      fr: 'le garçon voit la sœur de sa mère.', de: 'der Junge sieht die Schwester seiner Mutter.',
+      es: 'el niño ve a la hermana de su madre.', ja: '男の子は自分のお母さんの姉妹を見ます。',
+      pt: 'o menino vê a irmã da sua mãe.',
+    });
+  });
+
   // The narrowing P11's seeding found stays: a possessor nobody in particular takes neither word.
   test('an indefinite possessor still leaves the head its citation form', () => {
     expect(runs('MOTHER', { possessor: np('PARENT', { definiteness: 'indefinite' }) })).toMatchObject({ ja: '親の母親は走ります。' });

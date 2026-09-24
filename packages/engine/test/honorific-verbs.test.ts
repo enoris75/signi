@@ -140,3 +140,161 @@ describe('furigana follows the word said', () => {
     expect(furigana(clause(myFather, 'EAT', { verbPhrase: { humble: true } }))).toEqual(['ちち']);
   });
 });
+
+// The P11-E1 coverage audit: the register reaches every conjugation path that reads the paradigm —
+// the nai form under たら and a governing modal, the te form under an aspect — and every way a kin
+// subject can be built, and it stays out of the clauses and languages it does not belong to.
+
+describe('the register through the nai and te forms', () => {
+  test('the negative たら is built on the register\'s nai form', () => {
+    expect(ja(np('CAT'), 'RUN', { condition: { ...clause(yourMother, 'COME'), verbPhrase: { verb: 'COME', negative: true } } }))
+      .toBe('もしあなたのお母さんがいらっしゃらなかったら、猫は走ります。');
+    expect(ja(np('CAT'), 'RUN', { condition: { ...clause(myFather, 'COME'), verbPhrase: { verb: 'COME', negative: true, humble: true } } }))
+      .toBe('もし父が参らなかったら、猫は走ります。');
+  });
+  test('a modal governing a negative takes the register\'s nai form', () => {
+    expect(ja(yourMother, 'EAT', { verbPhrase: { modals: ['MUST'], negative: true } })).toBe('あなたのお母さんは召し上がらない必要があります。');
+    expect(ja(myFather, 'GIVE', { directObject: np('FOOD'), verbPhrase: { modals: ['MUST'], negative: true, humble: true } }))
+      .toBe('父は食べ物を差し上げない必要があります。');
+  });
+  test('the progressive is built on the register\'s te form', () => {
+    expect(ja(yourMother, 'SAY', { contentObject: inner(np('CAT'), 'RUN'), verbPhrase: { aspect: 'progressive', tense: 'past' } }))
+      .toBe('あなたのお母さんは猫が走るとおっしゃっていました。');
+    expect(ja(myFather, 'EAT', { verbPhrase: { aspect: 'progressive', humble: true } })).toBe('父はいただいています。');
+  });
+});
+
+describe('the register in a question and the prospective', () => {
+  test('a wh-question keeps the honorific', () => {
+    expect(say({ ...clause(yourMother, 'BE'), questionRole: 'locative' }, 'ja')).toBe('あなたのお母さんはどこにいらっしゃいますか？');
+    expect(say({ ...clause(yourMother, 'EAT'), questionRole: 'directObject' }, 'ja')).toBe('あなたのお母さんは何を召し上がりますか？');
+  });
+  test('the prospective ところ stands on the honorific\'s dictionary form', () => {
+    expect(ja(yourMother, 'COME', { verbPhrase: { aspect: 'prospective' } })).toBe('あなたのお母さんはいらっしゃるところです。');
+  });
+});
+
+describe('the trigger through a chain of owners, a plural and a mixed "or"', () => {
+  test('the relative of someone else\'s relative is raised', () => {
+    expect(ja(np('WIFE', { possessor: np('BROTHER', { possessor: of('2') }) }), 'EAT')).toBe('あなたのご兄弟の奥さんは召し上がります。');
+  });
+  test('a plural relative is raised', () => {
+    expect(ja(np('PARENT', { possessor: of('2'), number: 'plural' }), 'EAT')).toBe('あなたのご両親は召し上がります。');
+  });
+  test('the relative of one\'s own relative is lowered when asked', () => {
+    expect(ja(np('WIFE', { possessor: np('BROTHER', { possessor: of('1') }) }), 'EAT', { verbPhrase: { humble: true } }))
+      .toBe('兄弟の妻はいただきます。');
+  });
+  test('"my mother or your mother", asked for the humble, is neither raised nor lowered', () => {
+    const either: NounElement = { conjuncts: [np('MOTHER', { possessor: of('1') }), yourMother], conjunction: 'or' };
+    expect(ja(either, 'EAT', { verbPhrase: { humble: true } })).toBe('母かあなたのお母さんは食べます。');
+  });
+});
+
+describe('every verb with a register of its own, negative and past', () => {
+  // Each row: the negative, the past negative and the past, raised (your mother) and lowered (my father).
+  test.each<[string, Extra, string[], string[]]>([
+    ['GO', {}, ['いらっしゃいません', 'いらっしゃいませんでした', 'いらっしゃいました'], ['参りません', '参りませんでした', '参りました']],
+    ['COME', {}, ['いらっしゃいません', 'いらっしゃいませんでした', 'いらっしゃいました'], ['参りません', '参りませんでした', '参りました']],
+    ['BE', { complements: home }, ['家にいらっしゃいません', '家にいらっしゃいませんでした', '家にいらっしゃいました'], ['家におりません', '家におりませんでした', '家におりました']],
+    ['EAT', {}, ['召し上がりません', '召し上がりませんでした', '召し上がりました'], ['いただきません', 'いただきませんでした', 'いただきました']],
+    ['DRINK', {}, ['召し上がりません', '召し上がりませんでした', '召し上がりました'], ['いただきません', 'いただきませんでした', 'いただきました']],
+    ['DO', { directObject: np('FOOD') }, ['食べ物をなさいません', '食べ物をなさいませんでした', '食べ物をなさいました'], ['食べ物をいたしません', '食べ物をいたしませんでした', '食べ物をいたしました']],
+    ['SAY', { contentObject: inner(np('CAT'), 'RUN') }, ['猫が走るとおっしゃいません', '猫が走るとおっしゃいませんでした', '猫が走るとおっしゃいました'], ['猫が走ると申しません', '猫が走ると申しませんでした', '猫が走ると申しました']],
+    ['GIVE', { directObject: np('FOOD') }, ['食べ物をあげません', '食べ物をあげませんでした', '食べ物をあげました'], ['食べ物を差し上げません', '食べ物を差し上げませんでした', '食べ物を差し上げました']],
+  ])('%s', (verb, extra, honorific, humble) => {
+    const forms = (subject: NounPhrase, humbleAsked: boolean) => [
+      ja(subject, verb, { ...extra, verbPhrase: { humble: humbleAsked, negative: true } }),
+      ja(subject, verb, { ...extra, verbPhrase: { humble: humbleAsked, negative: true, tense: 'past' } }),
+      ja(subject, verb, { ...extra, verbPhrase: { humble: humbleAsked, tense: 'past' } }),
+    ];
+    expect(forms(yourMother, false)).toEqual(honorific.map((v) => `あなたのお母さんは${v}。`));
+    expect(forms(myFather, true)).toEqual(humble.map((v) => `父は${v}。`));
+  });
+});
+
+describe('the register in the bare infinitive, a coordination and an address', () => {
+  test('a bare infinitive has no subject to raise', () => {
+    expect(say({ ...clause(yourMother, 'EAT'), infinitive: true }, 'ja')).toBe('食べる。');
+  });
+  test('a coordinated clause keeps its own register', () => {
+    expect(say({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'and', clause: clause(yourMother, 'EAT') } }, 'ja'))
+      .toBe('猫は走ります。そして、あなたのお母さんは召し上がります。');
+  });
+  test('a vocative leaves the register alone', () => {
+    expect(say({ ...clause(yourMother, 'EAT'), address: np('MOM') }, 'ja')).toBe('お母さん、あなたのお母さんは召し上がります。');
+  });
+});
+
+describe('the other six languages ignore a negative and a progressive register', () => {
+  test('a negative humble', () => {
+    expect(sayAll(clause(myFather, 'EAT', { verbPhrase: { negative: true, humble: true } }))).toEqual({
+      en: 'my father does not eat.', it: 'mio padre non mangia.', fr: 'mon père ne mange pas.', de: 'mein Vater isst nicht.',
+      es: 'mi padre no come.', ja: '父はいただきません。', pt: 'o meu pai não come.',
+    });
+    const { ja: _humble, ...lowered } = sayAll(clause(myFather, 'EAT', { verbPhrase: { negative: true, humble: true } }));
+    const { ja: _plain, ...plain } = sayAll(clause(myFather, 'EAT', { verbPhrase: { negative: true } }));
+    expect(lowered).toEqual(plain);
+  });
+  test('a progressive humble', () => {
+    expect(sayAll(clause(myFather, 'COME', { verbPhrase: { aspect: 'progressive', humble: true } }))).toEqual({
+      en: 'my father is coming.', it: 'mio padre sta venendo.', fr: 'mon père est en train de venir.', de: 'mein Vater kommt gerade.',
+      es: 'mi padre está viniendo.', ja: '父は参っています。', pt: 'o meu pai está vindo.',
+    });
+    const { ja: _humble, ...lowered } = sayAll(clause(myFather, 'COME', { verbPhrase: { aspect: 'progressive', humble: true } }));
+    const { ja: _plain, ...plain } = sayAll(clause(myFather, 'COME', { verbPhrase: { aspect: 'progressive' } }));
+    expect(lowered).toEqual(plain);
+  });
+});
+
+// Known bugs — each pinned at its correct output, and flipped to a plain `test` when fixed.
+
+describe('known bugs: the たい stem of いらっしゃる, なさる and おっしゃる is taken from the ます form (A333)', () => {
+  test.fails('いらっしゃる before たい is いらっしゃり', () => {
+    expect(ja(yourMother, 'GO', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいです。');
+    expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいです。');
+    expect(ja(yourMother, 'BE', { complements: home, verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは家にいらっしゃりたいです。');
+  });
+  test.fails('and in every form of たい: denied, past, bridged, and in an "if" clause', () => {
+    expect(ja(yourMother, 'COME', { verbPhrase: { modals: [{ verb: 'WILL', negative: true }] } })).toBe('あなたのお母さんはいらっしゃりたくないです。');
+    expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['WILL'], tense: 'past' } })).toBe('あなたのお母さんはいらっしゃりたかったです。');
+    expect(ja(yourMother, 'GO', { verbPhrase: { modals: ['CAN', 'WILL'] } })).toBe('あなたのお母さんはいらっしゃりたいと思うことができます。');
+    expect(ja(np('CAT'), 'RUN', { condition: clause(yourMother, 'GO', { verbPhrase: { modals: ['WILL'] } }) }))
+      .toBe('もしあなたのお母さんがいらっしゃりたかったら、猫は走ります。');
+  });
+  test.fails('おっしゃる and なさる before たい are おっしゃり and なさり', () => {
+    expect(ja(yourMother, 'SAY', { contentObject: inner(np('CAT'), 'RUN'), verbPhrase: { modals: ['WILL'] } }))
+      .toBe('あなたのお母さんは猫が走るとおっしゃりたいです。');
+    expect(ja(yourMother, 'DO', { directObject: np('FOOD'), verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは食べ物をなさりたいです。');
+  });
+  test('a regular honorific and the humble words take their ます stem, and the polite forms keep the い', () => {
+    expect(ja(yourMother, 'EAT', { verbPhrase: { modals: ['WILL'] } })).toBe('あなたのお母さんは召し上がりたいです。');
+    expect(ja(myFather, 'COME', { verbPhrase: { modals: ['WILL'], humble: true } })).toBe('父は参りたいです。');
+    expect(ja(myFather, 'EAT', { verbPhrase: { modals: ['WILL'], humble: true } })).toBe('父はいただきたいです。');
+    expect(ja(myFather, 'DO', { directObject: np('FOOD'), verbPhrase: { modals: ['WILL'], humble: true } })).toBe('父は食べ物をいたしたいです。');
+    expect(ja(myFather, 'SAY', { contentObject: inner(np('CAT'), 'RUN'), verbPhrase: { modals: ['WILL'], humble: true } }))
+      .toBe('父は猫が走ると申したいです。');
+    // A denied clause under たい takes the nai form, not the stem.
+    expect(ja(yourMother, 'COME', { verbPhrase: { modals: ['WILL'], negative: true } })).toBe('あなたのお母さんはいらっしゃらないでいたいです。');
+    expect(ja(yourMother, 'COME', { verbPhrase: { tense: 'past', negative: true } })).toBe('あなたのお母さんはいらっしゃいませんでした。');
+  });
+});
+
+describe('known bugs: the humble いる is a dialectal おる in a plain slot (A334)', () => {
+  const atHome = (vp: Partial<NonNullable<Extra['verbPhrase']>>): Extra => ({ complements: home, verbPhrase: { ...vp, humble: true } });
+  test.fails('an "if" clause says いたら, not おったら', () => {
+    expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'BE', atHome({})) })).toBe('もし父が家にいたら、猫は走ります。');
+    expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'BE', atHome({ negative: true })) })).toBe('もし父が家にいなかったら、猫は走ります。');
+  });
+  test.fails('a modal governs いる, not おる', () => {
+    expect(ja(myFather, 'BE', atHome({ modals: ['MUST'] }))).toBe('父は家にいる必要があります。');
+    expect(ja(myFather, 'BE', atHome({ modals: ['MUST'], negative: true }))).toBe('父は家にいない必要があります。');
+    expect(ja(myFather, 'BE', atHome({ modals: ['CAN'], tense: 'past' }))).toBe('父は家にいることができました。');
+  });
+  test('the polite おります stays, and the other humble words stand plain', () => {
+    expect(ja(myFather, 'BE', atHome({}))).toBe('父は家におります。');
+    expect(ja(myFather, 'BE', atHome({ tense: 'past', negative: true }))).toBe('父は家におりませんでした。');
+    expect(ja(np('CAT'), 'RUN', { condition: clause(myFather, 'GO', { verbPhrase: { humble: true } }) })).toBe('もし父が参ったら、猫は走ります。');
+    expect(ja(myFather, 'GO', { verbPhrase: { modals: ['MUST'], humble: true } })).toBe('父は参る必要があります。');
+  });
+});

@@ -115,6 +115,120 @@ describe('on — support, apart from over', () => {
   });
 });
 
+// P09-E21: the goal `on` wherever the clause puts it — asked about, relativized, a pronoun, a group,
+// and under the verb's own negation, tense and mood. English keeps "onto" in every one of them.
+describe('onto — the goal on through the clause', () => {
+  const ON: PathSpecifier = 'on';
+  const onto = [{ kind: 'path' as const, value: ON }];
+
+  test('asked about: German its wo-compound, English a stranded "onto"', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'JUMP'), interrogative: true, questionRole: 'direction', questionSpecifiers: onto })).toEqual({
+      en: 'what does the cat jump onto?',
+      it: 'su che cosa salta il gatto?',
+      fr: 'sur quoi est-ce que le chat saute ?',
+      de: 'worauf springt der Kater?',
+      es: '¿sobre qué salta el gato?',
+      pt: 'sobre que o gato pula?',
+      ja: '猫は何の上へ跳びますか？',
+    });
+  });
+
+  test('an indirect question under KNOW', () => {
+    expect(sayAll(clause(np('MAN'), 'KNOW', {
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'JUMP' }, questionRole: 'direction', questionSpecifiers: onto },
+    }))).toEqual({
+      en: 'the man knows what the cat jumps onto.',
+      it: "l'uomo sa su che cosa salta il gatto.",
+      fr: "l'homme sait sur quoi le chat saute.",
+      de: 'der Mann weiß, worauf der Kater springt.',
+      es: 'el hombre sabe sobre qué salta el gato.',
+      pt: 'o homem sabe sobre que o gato pula.',
+      ja: '男は猫が何の上へ跳ぶか知っています。',
+    });
+  });
+
+  // German tells the goal from the place by the relative pronoun's case, English by onto / on.
+  const wallThe = (headRole: 'direction' | 'locative') => sayAll(clause(np('MAN'), 'SEE', {
+    directObject: np('WALL', { relative: { headRole, headSpecifiers: onto, subject: np('CAT'), verbPhrase: { verb: 'JUMP' } } }),
+  }));
+
+  // Japanese is left out: 猫が跳ぶ壁 drops the path (上に / 上へ) with the gap's particle, the
+  // question A290 leaves open for gaps other than the comitative and the opponent.
+  test('relativized: the goal and its locative twin', () => {
+    expect(wallThe('direction')).toMatchObject({
+      en: 'the man sees the wall onto which the cat jumps.',
+      it: "l'uomo vede il muro sul quale il gatto salta.",
+      fr: "l'homme voit le mur sur lequel le chat saute.",
+      de: 'der Mann sieht die Wand, auf die der Kater springt.',
+      es: 'el hombre ve la pared sobre la que el gato salta.',
+      pt: 'o homem vê a parede sobre a qual o gato pula.',
+    });
+    expect(wallThe('locative')).toMatchObject({
+      en: 'the man sees the wall on which the cat jumps.',
+      it: "l'uomo vede il muro sul quale il gatto salta.",
+      fr: "l'homme voit le mur sur lequel le chat saute.",
+      de: 'der Mann sieht die Wand, auf der der Kater springt.',
+      es: 'el hombre ve la pared sobre la que el gato salta.',
+      pt: 'o homem vê a parede sobre a qual o gato pula.',
+    });
+  });
+
+  test('a pronoun goal: the tonic form, German its accusative', () => {
+    expect(toward(ON, np('THIRD_PERSON', { gender: 'masc' }))).toEqual({
+      en: 'the cat jumps onto him.',
+      it: 'il gatto salta su di lui.',
+      fr: 'le chat saute sur lui.',
+      de: 'der Kater springt auf ihn.',
+      es: 'el gato salta sobre él.',
+      pt: 'o gato pula sobre ele.',
+      ja: '猫は彼の上へ跳びます。',
+    });
+  });
+
+  // English says "onto" once over the group; the others distribute it, as they do the place.
+  test('a coordinated goal', () => {
+    expect(toward(ON, and(np('WALL'), np('HOUSE')))).toEqual({
+      en: 'the cat jumps onto the wall and the house.',
+      it: 'il gatto salta sul muro e sulla casa.',
+      fr: 'le chat saute sur le mur et sur la maison.',
+      de: 'der Kater springt auf die Wand und auf das Haus.',
+      es: 'el gato salta sobre la pared y sobre la casa.',
+      pt: 'o gato pula sobre a parede e sobre a casa.',
+      ja: '猫は壁と家の上へ跳びます。',
+    });
+  });
+
+  test('negated in the past', () => {
+    expect(sayAll(clause(np('CAT'), 'JUMP', {
+      verbPhrase: { negative: true, tense: 'past' },
+      complements: { direction: { phrase: np('WALL'), specifiers: onto } },
+    }))).toEqual({
+      en: 'the cat did not jump onto the wall.',
+      it: 'il gatto non saltò sul muro.',
+      fr: 'le chat ne sauta pas sur le mur.',
+      de: 'der Kater sprang nicht auf die Wand.',
+      es: 'el gato no saltó sobre la pared.',
+      pt: 'o gato não pulou sobre a parede.',
+      ja: '猫は壁の上へ跳びませんでした。',
+    });
+  });
+
+  test('a command', () => {
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'JUMP', { complements: { direction: { phrase: np('WALL'), specifiers: onto } } }),
+      imperative: true,
+    })).toEqual({
+      en: 'jump onto the wall.',
+      it: 'salta sul muro.',
+      fr: 'saute sur le mur.',
+      de: 'spring auf die Wand.',
+      es: 'salta sobre la pared.',
+      pt: 'pule sobre a parede.',
+      ja: '壁の上へ跳んでください。',
+    });
+  });
+});
+
 // D2: the one relation whose adposition scopes over the coordinated group rather than being said
 // on each conjunct. Each conjunct keeps its own article, and in German its own case.
 describe('between — one preposition over the whole group', () => {

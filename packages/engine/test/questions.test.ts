@@ -1046,7 +1046,7 @@ describe('the passive question', () => {
 describe('wh-questions: not built yet', () => {
   test('the gaps with no question, each refused by name, and the passive', () => {
     const eats = clause(np('CAT'), 'EAT');
-    for (const value of ['ago', 'after', 'before', 'during'] as const) {
+    for (const value of ['ago', 'after', 'before', 'during', 'between'] as const) {
       expect(() => translateAll(about(eats, 'temporal', [{ kind: 'temporal', value }]))).toThrow(new RegExp(`temporal.*${value}`));
     }
     expect(() => translateAll(ask(eats, 'purpose'))).toThrow(/purpose/);

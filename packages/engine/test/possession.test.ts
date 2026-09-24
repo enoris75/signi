@@ -1262,3 +1262,343 @@ describe('known bugs: an indefinite possessed head reads as a definite one (A277
     });
   });
 });
+
+// A277's coverage, filled in: the persons and genders it did not reach, the clause shapes an
+// indefinite possessed head can stand in, Italian kin nouns, the slots it left out, the coreferent
+// possessor (P11-E2) and a demonstrative with a cardinal. All seven were right when this landed.
+describe('an indefinite possessed head across persons, clauses and slots (A277)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const ind = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { definiteness: 'indefinite', ...extra });
+  const runs = (subject: NounPhrase) => sayAll(clause(subject, 'RUN'));
+
+  test('the other persons', () => {
+    expect(runs(ind('FRIEND', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }))).toEqual({
+      en: 'a friend of yours runs.', it: 'un tuo amico corre.', fr: 'un ami à toi court.', de: 'ein Freund von dir läuft.',
+      es: 'un amigo tuyo corre.', pt: 'um amigo seu corre.', ja: 'あなたの友達は走ります。',
+    });
+    expect(runs(ind('FRIEND', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }))).toEqual({
+      en: 'a friend of his runs.', it: 'un suo amico corre.', fr: 'un ami à lui court.', de: 'ein Freund von ihm läuft.',
+      es: 'un amigo suyo corre.', pt: 'um amigo seu corre.', ja: '彼の友達は走ります。',
+    });
+    expect(runs(ind('FRIEND', { possessor: { kind: 'pronominal', person: '2', number: 'plural' } }))).toEqual({
+      en: 'a friend of yours runs.', it: 'un vostro amico corre.', fr: 'un ami à vous court.', de: 'ein Freund von euch läuft.',
+      es: 'un amigo vuestro corre.', pt: 'um amigo seu corre.', ja: 'あなたたちの友達は走ります。',
+    });
+    expect(runs(ind('FRIEND', { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }))).toEqual({
+      en: 'a friend of theirs runs.', it: 'un loro amico corre.', fr: 'un ami à eux court.', de: 'ein Freund von ihnen läuft.',
+      es: 'un amigo suyo corre.', pt: 'um amigo seu corre.', ja: '彼らの友達は走ります。',
+    });
+  });
+
+  // The possessed head's gender and number agree on the article and the stressed possessive alike;
+  // Italian's article-less plural keeps the definite (A277's design).
+  test('a feminine plural head', () => {
+    expect(runs(ind('FRIEND', { number: 'plural', gender: 'fem', possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }))).toEqual({
+      en: 'friends of hers run.', it: 'le sue amiche corrono.', fr: 'des amies à elle courent.', de: 'Freundinnen von ihr laufen.',
+      es: 'unas amigas suyas corren.', pt: 'umas amigas suas correm.', ja: '彼女の友達は走ります。',
+    });
+  });
+
+  test('the clause around it: negation, "no", a question, the past', () => {
+    expect(sayAll(clause(ind('FRIEND', { possessor: mine }), 'RUN', { verbPhrase: { negative: true } }))).toEqual({
+      en: 'a friend of mine does not run.', it: 'un mio amico non corre.', fr: 'un ami à moi ne court pas.',
+      de: 'ein Freund von mir läuft nicht.', es: 'un amigo mío no corre.', pt: 'um amigo meu não corre.', ja: '私の友達は走りません。',
+    });
+    expect(runs(np('FRIEND', { definiteness: 'no', possessor: mine }))).toEqual({
+      en: 'no friend of mine runs.', it: 'nessun mio amico corre.', fr: 'aucun ami à moi ne court.',
+      de: 'kein Freund von mir läuft.', es: 'ningún amigo mío corre.', pt: 'nenhum amigo meu corre.', ja: '私のどの友達も走りません。',
+    });
+    expect(sayAll({ ...clause(ind('FRIEND', { possessor: mine }), 'RUN'), interrogative: true })).toEqual({
+      en: 'does a friend of mine run?', it: 'un mio amico corre?', fr: "est-ce qu'un ami à moi court ?",
+      de: 'läuft ein Freund von mir?', es: '¿un amigo mío corre?', pt: 'um amigo meu corre?', ja: '私の友達は走りますか？',
+    });
+    expect(sayAll(clause(ind('FRIEND', { possessor: mine }), 'RUN', { verbPhrase: { tense: 'past' } }))).toEqual({
+      en: 'a friend of mine ran.', it: 'un mio amico corse.', fr: 'un ami à moi courut.',
+      de: 'ein Freund von mir lief.', es: 'un amigo mío corrió.', pt: 'um amigo meu correu.', ja: '私の友達は走りました。',
+    });
+  });
+
+  // German closes the relative behind the detached "von mir", not between it and the noun.
+  test('a relative on the head, the head inside a relative, and a content clause', () => {
+    expect(runs(ind('FRIEND', { possessor: mine, relative: { verbPhrase: { verb: 'EAT' } } }))).toEqual({
+      en: 'a friend of mine who eats runs.', it: 'un mio amico che mangia corre.', fr: 'un ami à moi qui mange court.',
+      de: 'ein Freund von mir, der isst, läuft.', es: 'un amigo mío que come corre.', pt: 'um amigo meu que come corre.',
+      ja: '食べる私の友達は走ります。',
+    });
+    expect(runs(np('CAT', { relative: { headRole: 'directObject', subject: ind('FRIEND', { possessor: mine }), verbPhrase: { verb: 'SEE' } } }))).toEqual({
+      en: 'the cat that a friend of mine sees runs.', it: 'il gatto che un mio amico vede corre.',
+      fr: "le chat qu'un ami à moi voit court.", de: 'der Kater, den ein Freund von mir sieht, läuft.',
+      es: 'el gato que un amigo mío ve corre.', pt: 'o gato que um amigo meu vê corre.', ja: '私の友達が見る猫は走ります。',
+    });
+    expect(sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: ind('FRIEND', { possessor: mine }), verbPhrase: { verb: 'RUN' } } }))).toEqual({
+      en: 'the man says that a friend of mine runs.', it: "l'uomo dice che un mio amico corre.",
+      fr: "l'homme dit qu'un ami à moi court.", de: 'der Mann sagt, dass ein Freund von mir läuft.',
+      es: 'el hombre dice que un amigo mío corre.', pt: 'o homem diz que um amigo meu corre.', ja: '男は私の友達が走ると言います。',
+    });
+  });
+
+  // An Italian singular kin noun drops the article beside a possessive ("mio fratello"), but the
+  // indefinite keeps it: "un mio fratello" is *a* brother of mine. Japanese leaves a first-person kin
+  // possessor unsaid (P11-E1).
+  test('Italian kin nouns keep the indefinite article', () => {
+    expect(runs(ind('BROTHER', { possessor: mine }))).toEqual({
+      en: 'a brother of mine runs.', it: 'un mio fratello corre.', fr: 'un frère à moi court.', de: 'ein Bruder von mir läuft.',
+      es: 'un hermano mío corre.', pt: 'um irmão meu corre.', ja: '兄弟は走ります。',
+    });
+    expect(runs(np('BROTHER', { possessor: mine }))).toEqual({
+      en: 'my brother runs.', it: 'mio fratello corre.', fr: 'mon frère court.', de: 'mein Bruder läuft.',
+      es: 'mi hermano corre.', pt: 'o meu irmão corre.', ja: '兄弟は走ります。',
+    });
+    expect(runs(ind('SISTER', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }))).toEqual({
+      en: 'a sister of hers runs.', it: 'una sua sorella corre.', fr: 'une sœur à elle court.', de: 'eine Schwester von ihr läuft.',
+      es: 'una hermana suya corre.', pt: 'uma irmã sua corre.', ja: '彼女の姉妹は走ります。',
+    });
+    expect(runs(ind('BROTHER', { possessor: mine, adjectives: ['OLD'] }))).toEqual({
+      en: 'an old brother of mine runs.', it: 'un mio vecchio fratello corre.', fr: 'un vieux frère à moi court.',
+      de: 'ein alter Bruder von mir läuft.', es: 'un hermano viejo mío corre.', pt: 'um irmão velho meu corre.', ja: '古い兄弟は走ります。',
+    });
+  });
+
+  test('the slots A277 left out: a plural dative, the source, a Spanish mass object, a negated predicate', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: ind('FRIEND', { number: 'plural', possessor: mine }) } } }))).toEqual({
+      en: 'the cat runs with friends of mine.', it: 'il gatto corre con i miei amici.', fr: 'le chat court avec des amis à moi.',
+      de: 'der Kater läuft mit Freunden von mir.', es: 'el gato corre con unos amigos míos.', pt: 'o gato corre com uns amigos meus.',
+      ja: '猫は私の友達と走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: ind('HOUSE', { possessor: mine }) } } }))).toEqual({
+      en: 'the cat runs from a house of mine.', it: 'il gatto corre via da una mia casa.', fr: "le chat court loin d'une maison à moi.",
+      de: 'der Kater läuft aus einem Haus von mir.', es: 'el gato corre lejos de una casa mía.', pt: 'o gato corre longe de uma casa minha.',
+      ja: '猫は私の家から走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: ind('WATER', { possessor: mine }) }))).toEqual({
+      en: 'the cat drinks water of mine.', it: 'il gatto beve la mia acqua.', fr: "le chat boit de l'eau à moi.",
+      de: 'der Kater trinkt Wasser von mir.', es: 'el gato bebe agua mía.', pt: 'o gato bebe água minha.', ja: '猫は私の水を飲みます。',
+    });
+    expect(sayAll(clause(np('DOG'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: ind('FRIEND', { possessor: mine }) } } }))).toEqual({
+      en: 'the dog is not a friend of mine.', it: 'il cane non è un mio amico.', fr: "le chien n'est pas un ami à moi.",
+      de: 'der Hund ist kein Freund von mir.', es: 'el perro no es un amigo mío.', pt: 'o cão não é um amigo meu.',
+      ja: '犬は私の友達ではありません。',
+    });
+  });
+
+  // P11-E2's coreferent link detaches like a pronominal possessor, taking the subject's features.
+  // Spanish is A325 (the personal "a"); English under a female subject is A293.
+  test('a possessor linked to the subject', () => {
+    const own = { kind: 'coreferent', slot: 'subject' } as const;
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toMatchObject({
+      en: 'the man sees a friend of his.', it: "l'uomo vede un suo amico.", fr: "l'homme voit un ami à lui.",
+      de: 'der Mann sieht einen Freund von ihm.', pt: 'o homem vê um amigo seu.', ja: '男は自分の友達を見ます。',
+    });
+    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toMatchObject({
+      it: 'la donna vede un suo amico.', fr: 'la femme voit un ami à elle.', de: 'die Frau sieht einen Freund von ihr.',
+      pt: 'a mulher vê um amigo seu.', ja: '女は自分の友達を見ます。',
+    });
+  });
+
+  // Italian puts the cardinal after the possessive, "questi miei due amici".
+  test('a demonstrative with a cardinal', () => {
+    expect(runs(np('FRIEND', { definiteness: 'this', numeral: 2, number: 'plural', possessor: mine }))).toEqual({
+      en: 'these two friends of mine run.', it: 'questi miei due amici corrono.', fr: 'ces deux amis à moi courent.',
+      de: 'diese zwei Freunde von mir laufen.', es: 'estos dos amigos míos corren.', pt: 'estes dois amigos meus correm.',
+      ja: '私のこの二人の友達は走ります。',
+    });
+  });
+});
+
+// A325. The Spanish personal "a" builds a human object through `prepObjectText`, which puts the
+// prenominal possessive in the determiner's place without asking whether the head keeps a
+// determiner of its own. So every determiner a possessive detaches beside (A187, A277) is lost on a
+// human object, and "todos" (A237) too: "ve a mi amigo" for a, this, some, no. A thing, which takes
+// no "a", is right ("ve una casa mía"), and so is every complement, which has its own builder.
+// A277's slot test left Spanish out of its object row, which is how this was missed.
+describe('known bugs: the Spanish personal a drops the determiner beside a possessive (A325)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const seesFriend = (extra: Partial<NounPhrase>, negative = false) => sayAll(clause(np('CAT'), 'SEE', {
+    directObject: np('FRIEND', { possessor: mine, ...extra }), ...(negative ? { verbPhrase: { negative: true } } : {}),
+  }));
+
+  test.fails('the indefinite', () => {
+    expect(seesFriend({ definiteness: 'indefinite' })).toEqual({
+      en: 'the cat sees a friend of mine.', it: 'il gatto vede un mio amico.', fr: 'le chat voit un ami à moi.',
+      de: 'der Kater sieht einen Freund von mir.',
+      es: 'el gato ve a un amigo mío.', // now: "el gato ve a mi amigo."
+      pt: 'o gato vê um amigo meu.', ja: '猫は私の友達を見ます。',
+    });
+  });
+
+  test.fails('the plural indefinite', () => {
+    expect(seesFriend({ definiteness: 'indefinite', number: 'plural' }).es).toBe('el gato ve a unos amigos míos.'); // now: "ve a mis amigos"
+  });
+
+  test.fails('"this"', () => {
+    expect(seesFriend({ definiteness: 'this' }).es).toBe('el gato ve a este amigo mío.'); // now: "ve a mi amigo"
+  });
+
+  test.fails('"some"', () => {
+    expect(seesFriend({ definiteness: 'some', number: 'plural' }).es).toBe('el gato ve a algunos amigos míos.'); // now: "ve a mis amigos"
+  });
+
+  test.fails('"no"', () => {
+    expect(seesFriend({ definiteness: 'no' }).es).toBe('el gato no ve a ningún amigo mío.'); // now: "no ve a mi amigo"
+  });
+
+  test.fails('"all"', () => {
+    expect(seesFriend({ definiteness: 'all', number: 'plural' }).es).toBe('el gato ve a todos mis amigos.'); // now: "ve a mis amigos"
+  });
+
+  test.fails('under a negation', () => {
+    expect(seesFriend({ definiteness: 'indefinite' }, true).es).toBe('el gato no ve a un amigo mío.'); // now: "no ve a mi amigo"
+  });
+
+  test.fails('a possessor linked to the subject (P11-E2)', () => {
+    expect(say(clause(np('MAN'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: { kind: 'coreferent', slot: 'subject' } }) }), 'es'))
+      .toBe('el hombre ve a un amigo suyo.'); // now: "el hombre ve a su amigo."
+  });
+
+  test('regression: a thing, the definite, the plain indefinite and the complements', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { definiteness: 'indefinite', possessor: mine }) }), 'es'))
+      .toBe('el gato ve una casa mía.');
+    expect(seesFriend({}).es).toBe('el gato ve a mi amigo.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite' }) }), 'es')).toBe('el gato ve a un amigo.');
+    const aFriend = np('FRIEND', { definiteness: 'indefinite', possessor: mine });
+    expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: aFriend } } }), 'es')).toBe('el gato corre con un amigo mío.');
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('FRIEND', { definiteness: 'this', possessor: mine }) } } }), 'es'))
+      .toBe('el gato da el libro a este amigo mío.');
+  });
+});
+
+// A326. A plural or mass indefinite has no article after "de" in French ("la maison d'amis") and
+// no genitive to show in German ("das Haus von Freunden"). Once A277 detached the possessive beside
+// that indefinite, both lost it: French writes "de" in front of the kept "des" / "de l'" (the
+// possessor, the source, the cause), and German, whose `genitiveShows` answers yes for any
+// pronominal possessor, writes the genitive nothing marks ("das Haus Freunde von mir", "wegen
+// Freunde von mir"). Without the possessive both are right, and so is a singular or "some".
+describe('known bugs: a French or German plural indefinite possessor detaches into a broken phrase (A326)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const friends = np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine });
+  const houseOf = (possessor: NounPhrase) => sayAll(clause(np('HOUSE', { possessor }), 'BURN'));
+
+  test.fails('the possessor', () => {
+    expect(houseOf(friends)).toEqual({
+      en: 'the house of friends of mine burns.', it: 'la casa dei miei amici brucia.',
+      fr: "la maison d'amis à moi brûle.", // now: "la maison de des amis à moi brûle."
+      de: 'das Haus von Freunden von mir brennt.', // now: "das Haus Freunde von mir brennt."
+      es: 'la casa de unos amigos míos arde.', pt: 'a casa de uns amigos meus arde.', ja: '私の友達の家は燃えます。',
+    });
+  });
+
+  test.fails('a mass possessor', () => {
+    expect(houseOf(np('WATER', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
+      fr: "la maison d'eau à moi brûle.", // now: "la maison de de l'eau à moi brûle."
+      de: 'das Haus von Wasser von mir brennt.', // now: "das Haus Wassers von mir brennt."
+    });
+  });
+
+  test.fails('the French source', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural', possessor: mine }) } } }))).toEqual({
+      en: 'the cat runs from houses of mine.', it: 'il gatto corre via dalle mie case.',
+      fr: 'le chat court loin de maisons à moi.', // now: "loin de des maisons à moi"
+      de: 'der Kater läuft aus Häusern von mir.', es: 'el gato corre lejos de unas casas mías.',
+      pt: 'o gato corre longe de umas casas minhas.', ja: '猫は私の家から走ります。',
+    });
+  });
+
+  test.fails('the cause', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: friends } } }))).toMatchObject({
+      fr: "le chat court à cause d'amis à moi.", // now: "à cause de des amis à moi"
+      de: 'der Kater läuft wegen Freunden von mir.', // now: "wegen Freunde von mir"
+    });
+  });
+
+  test('regression: without the possessive, the singular and "some"', () => {
+    expect(houseOf(np('FRIEND', { definiteness: 'indefinite', number: 'plural' }))).toMatchObject({
+      fr: "la maison d'amis brûle.", de: 'das Haus von Freunden brennt.',
+    });
+    expect(houseOf(np('FRIEND', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
+      fr: "la maison d'un ami à moi brûle.", de: 'das Haus eines Freundes von mir brennt.',
+    });
+    expect(houseOf(np('FRIEND', { definiteness: 'some', number: 'plural', possessor: mine }))).toMatchObject({
+      fr: 'la maison de quelques amis à moi brûle.', de: 'das Haus einiger Freunde von mir brennt.',
+    });
+    expect(say(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural' }) } } }), 'fr'))
+      .toBe('le chat court loin de maisons.');
+  });
+});
+
+// A327. A French negated direct object turns its indefinite or partitive article into "de" (`objectArtFor`:
+// "ne voit pas d'ami"). A possessed object bypasses it (`objectNpText` sends it to `npText`), which was
+// harmless while the possessive replaced the article; now that A277 keeps the indefinite beside it,
+// the kept article escapes the negative "de": "ne voit pas un ami à moi". Italian "non vede un mio
+// amico" is right, and so is every determiner that is not the indefinite.
+describe('known bugs: a French negated object keeps un beside a detached possessive (A327)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const notSee = (object: NounPhrase, verb = 'SEE') => sayAll(clause(np('CAT'), verb, { directObject: object, verbPhrase: { negative: true } }));
+
+  // Spanish is left out: its "no ve a mi amigo" is A325's, and would tie the two fixes together.
+  test.fails('the indefinite', () => {
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
+      en: 'the cat does not see a friend of mine.', it: 'il gatto non vede un mio amico.',
+      fr: "le chat ne voit pas d'ami à moi.", // now: "le chat ne voit pas un ami à moi."
+      de: 'der Kater sieht keinen Freund von mir.', pt: 'o gato não vê um amigo meu.', ja: '猫は私の友達を見ません。',
+    });
+  });
+
+  test.fails('a thing, the plural and a mass noun', () => {
+    expect(notSee(np('HOUSE', { definiteness: 'indefinite', possessor: mine })).fr).toBe('le chat ne voit pas de maison à moi.'); // now: "pas une maison"
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine })).fr).toBe("le chat ne voit pas d'amis à moi."); // now: "pas des amis"
+    expect(notSee(np('WATER', { definiteness: 'indefinite', possessor: mine }), 'DRINK').fr).toBe("le chat ne boit pas d'eau à moi."); // now: "pas de l'eau"
+  });
+
+  test('regression: without the possessive, the other determiners, the positive, and Italian', () => {
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite' })).fr).toBe("le chat ne voit pas d'ami.");
+    expect(notSee(np('FRIEND', { possessor: mine })).fr).toBe('le chat ne voit pas mon ami.');
+    expect(notSee(np('FRIEND', { definiteness: 'this', possessor: mine })).fr).toBe('le chat ne voit pas cet ami à moi.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: mine }) }), 'fr'))
+      .toBe('le chat voit un ami à moi.');
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine })).it).toBe('il gatto non vede un mio amico.');
+  });
+});
+
+// A328. OWN (`possessorOwn`, C37) is bound to the possessor, and English writes it after the possessive
+// ("my own friend"). When the head keeps a determiner and the possessor detaches (A187, A277), OWN
+// stays among the head's adjectives and lands behind the article: "an own friend of mine", "this own
+// friend of mine" — the "an own cat" C37 set out to avoid. English says "a friend of my own". French
+// "un propre ami à moi" and Spanish "un propio amigo mío" have the same shape; their targets are the
+// fixer's decision (see the bug file), so only English is pinned.
+describe('known bugs: OWN beside a kept determiner stays on the head (A328)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const ownFriendRuns = (extra: Partial<NounPhrase>) =>
+    say(clause(np('FRIEND', { possessor: mine, possessorOwn: true, ...extra }), 'RUN'), 'en');
+
+  test.fails('the indefinite', () => {
+    expect(ownFriendRuns({ definiteness: 'indefinite' })).toBe('a friend of my own runs.'); // now: "an own friend of mine runs."
+  });
+
+  test.fails('"this"', () => {
+    expect(ownFriendRuns({ definiteness: 'this' })).toBe('this friend of my own runs.'); // now: "this own friend of mine runs."
+  });
+
+  test.fails('"no"', () => {
+    expect(ownFriendRuns({ definiteness: 'no' })).toBe('no friend of my own runs.'); // now: "no own friend of mine runs."
+  });
+
+  test.fails('an adjective beside it', () => {
+    expect(ownFriendRuns({ definiteness: 'indefinite', adjectives: ['OLD'] })).toBe('an old friend of my own runs.'); // now: "an own old friend of mine runs."
+  });
+
+  test.fails('the plural', () => {
+    expect(say(clause(np('FRIEND', {
+      definiteness: 'indefinite', number: 'plural', possessorOwn: true,
+      possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' },
+    }), 'RUN'), 'en')).toBe('friends of her own run.'); // now: "own friends of hers run."
+  });
+
+  test('regression: the definite, and Italian, which stacks OWN after the possessive', () => {
+    expect(sayAll(clause(np('FRIEND', { possessor: mine, possessorOwn: true }), 'RUN'))).toEqual({
+      en: 'my own friend runs.', it: 'il mio proprio amico corre.', fr: 'mon propre ami court.', de: 'mein eigener Freund läuft.',
+      es: 'mi propio amigo corre.', pt: 'o meu próprio amigo corre.', ja: '自分の友達は走ります。',
+    });
+    expect(say(clause(np('FRIEND', { definiteness: 'indefinite', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('un mio proprio amico corre.');
+    expect(say(clause(np('FRIEND', { definiteness: 'this', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('questo mio proprio amico corre.');
+  });
+});

@@ -180,6 +180,133 @@ describe('known bugs: a French definite object with a numeral drops its article 
   });
 });
 
+// A demonstrative keeps its slot beside a pronominal possessive, and the numeral stands after it; the
+// possessive goes behind the noun where A187 detaches it, and stacks in Italian (P11-E4 audit).
+describe('a counted phrase beside a pronominal possessive', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+
+  test('these two friends of mine', () => {
+    expect(sayAll(clause(np('FRIEND', { numeral: 2, number: 'plural', definiteness: 'this', possessor: mine }), 'RUN'))).toEqual({
+      en: 'these two friends of mine run.', it: 'questi miei due amici corrono.', fr: 'ces deux amis à moi courent.',
+      de: 'diese zwei Freunde von mir laufen.', es: 'estos dos amigos míos corren.', ja: '私のこの二人の友達は走ります。',
+      pt: 'estes dois amigos meus correm.',
+    });
+  });
+
+  test('my two friends: the definite gives its slot to the possessive, and the numeral follows', () => {
+    expect(sayAll(clause(np('FRIEND', { numeral: 2, number: 'plural', possessor: mine }), 'RUN'))).toEqual({
+      en: 'my two friends run.', it: 'i miei due amici corrono.', fr: 'mes deux amis courent.',
+      de: 'meine zwei Freunde laufen.', es: 'mis dos amigos corren.', ja: '私の二人の友達は走ります。',
+      pt: 'os meus dois amigos correm.',
+    });
+  });
+});
+
+// A329. An indefinite gives way to a numeral by resolving `bare` (C31), and a bare head gives its
+// determiner slot to a pronominal possessive, so "two friends of mine" comes out as the definite "my
+// two friends": the indefinite A277 taught every builder to keep is lost again once a numeral stands
+// beside it. At one the numeral lands behind the possessive as if it were an adjective ("mein ein
+// Freund", "il mio un amico"), which predates A277. Distinct from A289 (French objects) and A291/A292
+// (numerals inside a complement).
+describe('known bugs: a numeral beside a possessive ignores the indefinite (A329)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const friends = (numeral: number, extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('FRIEND', { numeral, definiteness: 'indefinite', possessor: mine, ...extra }), 'RUN'));
+
+  test.fails('two friends of mine', () => {
+    expect(friends(2, { number: 'plural' })).toEqual({
+      en: 'two friends of mine run.', it: 'due miei amici corrono.', fr: 'deux amis à moi courent.',
+      de: 'zwei Freunde von mir laufen.', es: 'dos amigos míos corren.', ja: '私の二人の友達は走ります。',
+      pt: 'dois amigos meus correm.',
+    });
+  });
+
+  test.fails('one friend of mine: at one the numeral is the article in five of the seven', () => {
+    expect(friends(1)).toEqual({
+      en: 'one friend of mine runs.', it: 'un mio amico corre.', fr: 'un ami à moi court.',
+      de: 'ein Freund von mir läuft.', es: 'un amigo mío corre.', ja: '私の一人の友達は走ります。',
+      pt: 'um amigo meu corre.',
+    });
+  });
+
+  test('regression: the same phrases without the numeral, or without the possessive, are right', () => {
+    expect(sayAll(clause(np('FRIEND', { definiteness: 'indefinite', possessor: mine }), 'RUN'))).toEqual({
+      en: 'a friend of mine runs.', it: 'un mio amico corre.', fr: 'un ami à moi court.',
+      de: 'ein Freund von mir läuft.', es: 'un amigo mío corre.', ja: '私の友達は走ります。', pt: 'um amigo meu corre.',
+    });
+    expect(sayAll(clause(np('FRIEND', { numeral: 2, number: 'plural', definiteness: 'indefinite' }), 'RUN'))).toEqual({
+      en: 'two friends run.', it: 'due amici corrono.', fr: 'deux amis courent.',
+      de: 'zwei Freunde laufen.', es: 'dos amigos corren.', ja: '二人の友達は走ります。', pt: 'dois amigos correm.',
+    });
+    expect(sayAll(clause(np('FRIEND', { numeral: 1, definiteness: 'indefinite' }), 'RUN'))).toEqual({
+      en: 'one friend runs.', it: 'un amico corre.', fr: 'un ami court.',
+      de: 'ein Freund läuft.', es: 'un amigo corre.', ja: '一人の友達は走ります。', pt: 'um amigo corre.',
+    });
+  });
+});
+
+// A319. The numeral one beside a definite or demonstrative determiner: Romance writes the article
+// and then the numeral that is its own indefinite article (l'un cane, el un perro, o um cão), and
+// German leaves ein undeclined (der ein Hund, den ein Hund). Romance drops the one, which is what the
+// same plan says without it; German declines it weak, as an adjective after der (der alte Hund).
+// The French object (le chat voit un chien) is A289's; the German complement is A291's for now.
+describe('known bugs: the numeral one beside a definite or demonstrative determiner (A319)', () => {
+  const one = (definiteness: 'definite' | 'this') => np('DOG', { numeral: 1, definiteness });
+
+  test.fails('Romance drops the one beside the definite, subject and object', () => {
+    expect(sayAll(clause(one('definite'), 'RUN'))).toMatchObject({
+      it: 'il cane corre.', fr: 'le chien court.', es: 'el perro corre.', pt: 'o cão corre.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: one('definite') }))).toMatchObject({
+      it: 'il gatto vede il cane.', es: 'el gato ve el perro.', pt: 'o gato vê o cão.',
+    });
+  });
+
+  test.fails('Romance drops the one beside the demonstrative', () => {
+    expect(sayAll(clause(one('this'), 'RUN'))).toMatchObject({
+      it: 'questo cane corre.', fr: 'ce chien court.', es: 'este perro corre.', pt: 'este cão corre.',
+    });
+  });
+
+  test.fails('Romance drops the one in a complement', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }))).toMatchObject({
+      it: 'il gatto corre con il cane.', fr: 'le chat court avec le chien.',
+    });
+  });
+
+  test.fails('German declines ein weak after der and dieser', () => {
+    expect([
+      say(clause(one('definite'), 'RUN'), 'de'),
+      say(clause(np('CAT'), 'SEE', { directObject: one('definite') }), 'de'),
+      say(clause(one('this'), 'RUN'), 'de'),
+      say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }), 'de'),
+    ]).toEqual([
+      'der eine Hund läuft.',
+      'der Kater sieht den einen Hund.',
+      'dieser eine Hund läuft.',
+      'der Kater läuft mit dem einen Hund.',
+    ]);
+  });
+
+  test('regression: English, Japanese, the indefinite one and the definite two', () => {
+    expect(sayAll(clause(one('definite'), 'RUN'))).toMatchObject({ en: 'the one dog runs.', ja: '一匹の犬は走ります。' });
+    expect(sayAll(clause(np('DOG', { numeral: 1, definiteness: 'indefinite' }), 'RUN'))).toEqual({
+      en: 'one dog runs.', it: 'un cane corre.', fr: 'un chien court.', de: 'ein Hund läuft.',
+      es: 'un perro corre.', ja: '一匹の犬は走ります。', pt: 'um cão corre.',
+    });
+    expect(sayAll(clause(np('DOG', { numeral: 2, number: 'plural', definiteness: 'definite' }), 'RUN'))).toMatchObject({
+      it: 'i due cani corrono.', fr: 'les deux chiens courent.', de: 'die zwei Hunde laufen.',
+      es: 'los dos perros corren.', pt: 'os dois cães correm.',
+    });
+    // The Romance Want is the plan without the numeral; the German one is the weak ending after der.
+    expect(sayAll(clause(np('DOG', { definiteness: 'definite' }), 'RUN'))).toMatchObject({
+      it: 'il cane corre.', fr: 'le chien court.', es: 'el perro corre.', pt: 'o cão corre.',
+    });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { definiteness: 'definite', adjectives: ['OLD'] }) }), 'de'))
+      .toBe('der Kater sieht den alten Hund.');
+  });
+});
+
 // A320. Italian elides the feminine indefinite before a vowel ("un'ora", "un'amica"), and the
 // article path does it ("entro un'ora" for an indefinite HOUR). The cardinal one is spelled from the
 // numeral table instead, which writes "una" whatever follows: "entro una ora", "per una ora", "una

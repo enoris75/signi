@@ -43,6 +43,39 @@ mangée*, *a été bien mangée*). [A295](A295-german-attributive-noun-drops-its
 for *großer junger Frauen*). [A296](A296-english-manner-adverb-after-the-by-phrase.md), English putting a manner adverb after the by-phrase (*is eaten by the
 dog well* for *is eaten well by the dog*).
 
+**Sixteen more**, **A325–A338**, **A318** and **A319**, filed on 2026-09-24 by an audit of the
+engine test coverage of P09-E20 to E22 and P11-E1 to E5 (A308–A317 and A320–A323 are another session's, A294–A296 a third's). Thirty-five
+are open, with A294–A296.
+A277's detached indefinite possessor meets the paths that still spell the old shape:
+[A325](A325-spanish-personal-a-drops-the-determiner-beside-a-possessive.md), the Spanish personal *a* dropping the determiner (*ve a mi amigo* for *a un amigo mío*),
+in `es/prepObjectText.ts`;
+[A326](A326-french-german-plural-indefinite-possessor-detaches-into-a-broken-phrase.md), a French or German plural or mass possessor detaching into *la maison de des amis à moi*,
+*das Haus Freunde von mir*;
+[A327](A327-french-negated-object-keeps-un-beside-a-detached-possessive.md), the French negated object keeping *un* (*pas un ami à moi* for *pas d'ami à moi*);
+[A328](A328-own-beside-a-kept-determiner-stays-on-the-head.md), OWN staying on the head (*an own friend of mine* for *a friend of my own*), with French,
+Spanish and Portuguese left to the fixer;
+[A329](A329-a-numeral-beside-a-possessive-ignores-the-indefinite.md), a numeral beside a possessive losing the indefinite (*my two friends* for *two friends of
+mine*; *mein ein Freund*);
+[A330](A330-spanish-portuguese-plural-predicate-with-a-possessive-keeps-the-determiner.md), the Spanish and Portuguese plural predicate keeping the determiner (*son mis amigos* for
+*amigos míos*), whose fix moves two passing pins in predicative.test.ts.
+The rest:
+[A331](A331-japanese-compounds-a-count-of-one-onto-kyoudai.md), Japanese 一人兄弟 for 一人の兄弟;
+[A332](A332-english-italian-write-his-for-a-possessor-linked-to-the-generic-subject.md), a possessor linked to the generic subject read as *his* / *suo* (*one's*, *il proprio*);
+[A333](A333-japanese-tai-stem-of-irassharu-nasaru-ossharu.md), the たい stem of いらっしゃる, なさる and おっしゃる (*いらっしゃいたい* for *いらっしゃりたい*);
+[A334](A334-japanese-humble-iru-is-a-dialectal-oru-in-a-plain-slot.md), the humble いる surfacing as the dialectal おる in plain slots, the fixer ruling between
+plain いる (recommended, pinned) and a documented simplification;
+[A335](A335-french-pronoun-addressee-takes-the-clitic.md), a French pronoun addressee taking the clitic (*Tu, cours.* for *Toi*);
+[A336](A336-italian-portuguese-possessed-addressee-keeps-the-article.md), an Italian or Portuguese possessed addressee keeping the article (*Il mio amico, corri.*,
+*O meu pai, corra.*), whose fix moves the pinned *A minha esposa, corra.*;
+[A337](../fixed/A337-french-hour-does-not-elide.md), French HOUR missing its h-muet elision (*la heure*), with HYPERNYM beside it;
+[A338](A338-contradictory-address-plans-are-not-refused.md), an address on an instruction or a non-hearer pronoun rendering instead of being refused;
+[A318](A318-german-keeps-gegen-accusative-under-a-verb-named-opponent-word.md), German keeping *gegen*'s accusative under a verb-named opponent word (*mit den Hund*),
+latent;
+[A319](A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md), the numeral one beside a definite or demonstrative (*l'un cane*, *el un perro*, *der ein
+Hund*).
+[A290](A290-japanese-comitative-relative-drops-its-company.md) now covers the opponent gap (*猫が遊ぶ犬* for *猫が相手にして遊ぶ犬*) beside the comitative, and
+[A293](A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md) a kin object (*my mother sees his older sister*).
+
 **Fourteen more**, filed the same day while landing P09-E25 to E43 (A318–A319 are the peer's).
 [A308](A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md), negation not reaching SOMEONE / SOMETHING inside a complement (*does not run with
 someone*, *läuft nicht mit jemandem* for *with anyone*, *mit niemandem*).
@@ -65,8 +98,8 @@ cats of hers* for *la plupart de ses chats*, *most of her cats*); A187's one sha
 [A322](A322-japanese-indefinite-measure-noun-drops-its-count.md), a Japanese indefinite measure noun dropping its count (*時間以内に* for *一時間以内に*).
 [A323](A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md), a Japanese な-adjective taking な before まで and 前に (*大丈夫なまで*), beside A278.
 
-**Two left** the same day, fixed by that batch: [A291](../fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md) and
-[A292](../fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md). **Thirty-one are open.**
+**Three left** the same day, fixed by that batch: [A291](../fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md), [A292](../fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md) and
+[A337](../fixed/A337-french-hour-does-not-elide.md). **Forty-six are open.**
 
 The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each

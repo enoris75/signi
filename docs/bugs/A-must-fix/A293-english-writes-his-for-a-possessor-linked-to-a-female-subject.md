@@ -21,9 +21,12 @@ away from the subject: `your mother sees his book.` reads as someone else's book
 | the AUNT … | `the aunt sees his book.` | `the aunt sees her book.` |
 | the MOTHER SEEs BOOK {coreferent, possessorOwn} | `the mother sees his own book.` | `the mother sees her own book.` |
 | the MOTHER who SEEs BOOK {coreferent} RUNs (subject relative) | `the mother who sees his book runs.` | `the mother who sees her book runs.` |
+| my MOTHER SEEs SISTER {adjectives: ELDER, possessor: coreferent} (a kin object) | `my mother sees his older sister.` | `my mother sees her older sister.` |
 
 Every Want string was rendered by the engine with the fix sketched below applied to a throwaway copy
-of the tree. GRANDMOTHER behaves the same (`the grandmother sees his book.`). GIRL is not seeded.
+of the tree, except the older-sister row, added later by the P11-E2 coverage audit: its Want is the
+same plan with `gender: 'fem'` named on the subject, which the fix supplies.
+GRANDMOTHER behaves the same (`the grandmother sees his book.`). GIRL is not seeded.
 
 **What the link introduces, and what was already so.**
 
@@ -87,4 +90,4 @@ The fixer must decide:
 
 | | |
 |---|---|
-| **Test** | `coreference.test.ts` → *known bugs: english writes his for a possessor linked to a female subject whose english noun records no gender (A293)* (8 `test.fails`, one per row, plus a regression test for the other six, a gender the plan names, MAN and FATHER, PERSON's unmarked *his*, the plural and the pronominal possessor with and without a gender) |
+| **Test** | `coreference.test.ts` → *known bugs: english writes his for a possessor linked to a female subject whose english noun records no gender (A293)* (9 `test.fails`, one per row, plus a regression test for the other six (on BOOK and on the older sister), a gender the plan names, MAN and FATHER, PERSON's unmarked *his*, the plural and the pronominal possessor with and without a gender) |

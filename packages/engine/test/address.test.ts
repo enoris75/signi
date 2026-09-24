@@ -171,3 +171,207 @@ describe('the vocative', () => {
     expect(sayAll(coordinated)).toMatchObject({ en: 'the cat runs, and the dog eats.' });
   });
 });
+
+const You = np('SECOND_PERSON');
+const YouAll = np('SECOND_PERSON', { number: 'plural' });
+const momAndDad = (conjunction: 'and' | 'or' = 'and'): NounElement => ({ conjuncts: [np('MOM'), np('DAD')], conjunction });
+const dontRun = { verb: 'RUN', negative: true };
+
+describe('the vocative on every clause shape', () => {
+  test("a negated command: Mom, don't run", () => {
+    expect(sayAll({ ...command(np('MOM')), verbPhrase: dontRun })).toEqual({
+      en: 'Mom, do not run.', it: 'Mamma, non correre.', fr: 'Maman, ne cours pas.', de: 'Mama, lauf nicht.',
+      es: 'Mamá, no corras.', ja: 'お母さん、走るな。', pt: 'Mamãe, não corra.',
+    });
+    expect(sayAll({ ...command(momAndDad(), YouAll), verbPhrase: dontRun })).toEqual({
+      en: 'Mom and Dad, do not run.', it: 'Mamma e papà, non correte.', fr: 'Maman et Papa, ne courez pas.',
+      de: 'Mama und Papa, lauft nicht.', es: 'Mamá y Papá, no corráis.', ja: 'お母さんとお父さん、走るな。',
+      pt: 'Mamãe e Papai, não corram.',
+    });
+    expect(sayAll({ ...command(np('MOM'), np('FIRST_PERSON', { number: 'plural' })), verbPhrase: dontRun })).toEqual({
+      en: "Mom, let's not run.", it: 'Mamma, non corriamo.', fr: 'Maman, ne courons pas.', de: 'Mama, laufen wir nicht.',
+      es: 'Mamá, no corramos.', ja: 'お母さん、走るのはやめましょう。', pt: 'Mamãe, não corramos.',
+    });
+  });
+
+  test('a wh-question: the address stands outside the Spanish ¿ here too', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'EAT'), questionRole: 'directObject', address: np('MOM') })).toEqual({
+      en: 'Mom, what does the cat eat?', it: 'Mamma, che cosa mangia il gatto?', fr: "Maman, qu'est-ce que le chat mange ?",
+      de: 'Mama, was frisst der Kater?', es: 'Mamá, ¿qué come el gato?', ja: 'お母さん、猫は何を食べますか？',
+      pt: 'Mamãe, o que o gato come?',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), questionRole: 'subject', address: np('DAD') })).toEqual({
+      en: 'Dad, what runs?', it: 'Papà, che cosa corre?', fr: "Papa, qu'est-ce qui court ?", de: 'Papa, was läuft?',
+      es: 'Papá, ¿qué corre?', ja: 'お父さん、何が走りますか？', pt: 'Papai, o que corre?',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN', { verbPhrase: { negative: true } }), interrogative: true, address: np('MOM') })).toEqual({
+      en: 'Mom, does the cat not run?', it: 'Mamma, il gatto non corre?', fr: 'Maman, est-ce que le chat ne court pas ?',
+      de: 'Mama, läuft der Kater nicht?', es: 'Mamá, ¿el gato no corre?', ja: 'お母さん、猫は走りませんか？',
+      pt: 'Mamãe, o gato não corre?',
+    });
+  });
+
+  test('a subordinate, a condition and a linked clause follow the address', () => {
+    expect(sayAll({ ...command(np('MOM')), adverbialClause: { conjunction: 'when', clause: { subject: np('CAT'), verbPhrase: { verb: 'EAT' } } } })).toEqual({
+      en: 'Mom, run when the cat eats.', it: 'Mamma, corri quando il gatto mangia.', fr: 'Maman, cours quand le chat mange.',
+      de: 'Mama, lauf, wenn der Kater frisst.', es: 'Mamá, corre cuando el gato come.',
+      ja: 'お母さん、猫が食べる時に走ってください。', pt: 'Mamãe, corra quando o gato come.',
+    });
+    expect(sayAll({ ...clause(np('DOG'), 'EAT'), address: np('MOM'), condition: clause(np('CAT'), 'RUN') })).toEqual({
+      en: 'Mom, if the cat ran, the dog would eat.', it: 'Mamma, se il gatto corresse, il cane mangerebbe.',
+      fr: 'Maman, si le chat courait, le chien mangerait.', de: 'Mama, wenn der Kater laufen würde, würde der Hund fressen.',
+      es: 'Mamá, si el gato corriera, el perro comería.', ja: 'お母さん、もし猫が走ったら、犬は食べます。',
+      pt: 'Mamãe, se o gato corresse, o cão comeria.',
+    });
+    expect(sayAll({ ...command(np('MOM')), coordination: { conjunction: 'and', clause: clause(You, 'EAT') } })).toEqual({
+      en: 'Mom, run, and eat.', it: 'Mamma, corri, e mangia.', fr: 'Maman, cours, et mange.', de: 'Mama, lauf, und iss.',
+      es: 'Mamá, corre, y come.', ja: 'お母さん、走ってください。そして、食べてください。', pt: 'Mamãe, corra, e coma.',
+    });
+  });
+
+  test('Mom inside the clause is the name there; a verbless period takes an address too', () => {
+    expect(sayAll({ ...command(np('DAD')), complements: { comitative: { phrase: np('MOM') } } })).toEqual({
+      en: 'Dad, run with Mom.', it: 'Papà, corri con la mamma.', fr: 'Papa, cours avec Maman.', de: 'Papa, lauf mit Mama.',
+      es: 'Papá, corre con Mamá.', ja: 'お父さん、お母さんと走ってください。', pt: 'Papai, corra com Mamãe.',
+    });
+    expect(sayAll({ subject: np('CAT'), address: np('MOM') })).toEqual({
+      en: 'Mom, the cat.', it: 'Mamma, il gatto.', fr: 'Maman, le chat.', de: 'Mama, der Kater.',
+      es: 'Mamá, el gato.', ja: 'お母さん、猫。', pt: 'Mamãe, o gato.',
+    });
+  });
+});
+
+describe('the vocative on a common noun', () => {
+  test('plural, modified, and an either-or address', () => {
+    expect(sayAll(command(np('CAT', { number: 'plural' }), YouAll))).toEqual({
+      en: 'Cats, run.', it: 'Gatti, correte.', fr: 'Chats, courez.', de: 'Kater, lauft.',
+      es: 'Gatos, corred.', ja: '猫、走ってください。', pt: 'Gatos, corram.',
+    });
+    expect(sayAll(command(np('CAT', { adjectives: ['SMALL'] })))).toEqual({
+      en: 'Small cat, run.', it: 'Piccolo gatto, corri.', fr: 'Petit chat, cours.', de: 'Kleiner Kater, lauf.',
+      es: 'Gato pequeño, corre.', ja: '小さい猫、走ってください。', pt: 'Gato pequeno, corra.',
+    });
+    expect(sayAll(command(momAndDad('or')))).toEqual({
+      en: 'Mom or Dad, run.', it: 'Mamma o papà, corri.', fr: 'Maman ou Papa, cours.', de: 'Mama oder Papa, lauf.',
+      es: 'Mamá o Papá, corre.', ja: 'お母さんかお父さん、走ってください。', pt: 'Mamãe ou Papai, corra.',
+    });
+  });
+
+  // Portuguese, and Italian off a singular unmodified kin noun, are left out where the address is
+  // possessed by a pronoun: they keep the possessive's article (A336).
+  test("Japanese: an elder's honorific under a name's, one's own and nobody's possession", () => {
+    expect(sayAll(command(np('MOTHER', { possessor: np('PETER') })))).toEqual({
+      en: "Peter's mother, run.", it: 'Madre di Pietro, corri.', fr: 'Mère de Pierre, cours.', de: 'Mutter Peters, lauf.',
+      es: 'Madre de Pedro, corre.', ja: 'ピーターのお母さん、走ってください。', pt: 'Mãe do Pedro, corra.',
+    });
+    expect(sayAll(command(np('FATHER', { possessor: of('1') })))).toMatchObject({
+      en: 'My father, run.', it: 'Mio padre, corri.', fr: 'Mon père, cours.', de: 'Mein Vater, lauf.',
+      es: 'Mi padre, corre.', ja: 'お父さん、走ってください。',
+    });
+    expect(sayAll(command(np('GRANDMOTHER', { possessor: of('1') })))).toMatchObject({
+      en: 'My grandmother, run.', it: 'Mia nonna, corri.', fr: 'Ma grand-mère, cours.', de: 'Meine Großmutter, lauf.',
+      es: 'Mi abuela, corre.', ja: 'おばあさん、走ってください。',
+    });
+    expect(sayAll(command(np('UNCLE')))).toEqual({
+      en: 'Uncle, run.', it: 'Zio, corri.', fr: 'Oncle, cours.', de: 'Onkel, lauf.',
+      es: 'Tío, corre.', ja: 'おじさん、走ってください。', pt: 'Tio, corra.',
+    });
+    expect(sayAll(command(np('SISTER', { possessor: of('1'), adjectives: ['YOUNGER'] })))).toMatchObject({
+      en: 'My younger sister, run.', fr: 'Ma sœur cadette, cours.', de: 'Meine jüngere Schwester, lauf.',
+      es: 'Mi hermana menor, corre.', ja: '妹、走ってください。',
+    });
+  });
+});
+
+// A335. A French pronoun addressee takes the subject clitic, "Tu, cours." A vocative pronoun stands
+// on its own, detached from any verb, so French takes the tonic form, as after a preposition.
+describe('known bugs: a French pronoun addressee takes the clitic (A335)', () => {
+  test.fails('a 2nd-singular pronoun address is the tonic toi', () => {
+    expect(sayAll(command(You))).toEqual({
+      en: 'You, run.', it: 'Tu, corri.', fr: 'Toi, cours.', de: 'Du, lauf.',
+      es: 'Tú, corre.', ja: 'あなた、走ってください。', pt: 'Você, corra.',
+    });
+  });
+
+  // vous is its own tonic form, so the plural is right today.
+  test('regression: the 2nd-plural pronoun address', () => {
+    expect(sayAll(command(YouAll, YouAll))).toEqual({
+      en: 'You, run.', it: 'Voi, correte.', fr: 'Vous, courez.', de: 'Ihr, lauft.',
+      es: 'Vosotros, corred.', ja: 'あなたたち、走ってください。', pt: 'Vocês, corram.',
+    });
+  });
+});
+
+// A336. Italian and Portuguese keep the definite article a possessive rides on in address: "Il mio
+// amico, corri", "O meu pai, corra". A vocative has no article, possessed or not: "Mio amico", "Meu
+// pai". P11-E3's Done §9 left it to the possessed-head work of P11-E4.
+describe('known bugs: an Italian or Portuguese addressee with a possessive keeps the article (A336)', () => {
+  test.fails('Italian and Portuguese: a possessed address off the kin-noun rule drops the article', () => {
+    expect(sayAll(command(np('FRIEND', { possessor: of('1') })))).toEqual({
+      en: 'My friend, run.', it: 'Mio amico, corri.', fr: 'Mon ami, cours.', de: 'Mein Freund, lauf.',
+      es: 'Mi amigo, corre.', ja: '私の友達、走ってください。', pt: 'Meu amigo, corra.',
+    });
+    expect(sayAll(command(np('SISTER', { possessor: of('1'), adjectives: ['YOUNGER'] })))).toEqual({
+      en: 'My younger sister, run.', it: 'Mia sorella minore, corri.', fr: 'Ma sœur cadette, cours.',
+      de: 'Meine jüngere Schwester, lauf.', es: 'Mi hermana menor, corre.', ja: '妹、走ってください。',
+      pt: 'Minha irmã mais nova, corra.',
+    });
+    expect(sayAll(command(np('BROTHER', { possessor: of('1'), adjectives: ['ELDER'] })))).toEqual({
+      en: 'My older brother, run.', it: 'Mio fratello maggiore, corri.', fr: 'Mon frère aîné, cours.',
+      de: 'Mein älterer Bruder, lauf.', es: 'Mi hermano mayor, corre.', ja: 'お兄さん、走ってください。',
+      pt: 'Meu irmão mais velho, corra.',
+    });
+    // Japanese is left out: 祖父母 is a seed gap (GRANDPARENT has no honorific column), not this bug.
+    expect(sayAll(command(np('GRANDPARENT', { number: 'plural', possessor: of('1') }), YouAll))).toMatchObject({
+      en: 'My grandparents, run.', it: 'Miei nonni, correte.', fr: 'Mes grands-parents, courez.',
+      de: 'Meine Großeltern, lauft.', es: 'Mis abuelos, corred.', pt: 'Meus avós, corram.',
+    });
+  });
+
+  test.fails('Portuguese: a possessed kin noun drops the article', () => {
+    expect(sayAll(command(np('FATHER', { possessor: of('1') })))).toEqual({
+      en: 'My father, run.', it: 'Mio padre, corri.', fr: 'Mon père, cours.', de: 'Mein Vater, lauf.',
+      es: 'Mi padre, corre.', ja: 'お父さん、走ってください。', pt: 'Meu pai, corra.',
+    });
+    expect(sayAll(command(np('MOTHER', { possessor: of('2') })))).toEqual({
+      en: 'Your mother, run.', it: 'Tua madre, corri.', fr: 'Ta mère, cours.', de: 'Deine Mutter, lauf.',
+      es: 'Tu madre, corre.', ja: 'あなたのお母さん、走ってください。', pt: 'Sua mãe, corra.',
+    });
+  });
+
+  test('regression: a name possessor in address, and the possessed subject outside it', () => {
+    expect(sayAll(command(np('MOTHER', { possessor: np('PETER') })))).toMatchObject({ it: 'Madre di Pietro, corri.', pt: 'Mãe do Pedro, corra.' });
+    expect(sayAll(command(np('MOTHER', { possessor: of('1') })))).toMatchObject({ it: 'Mia madre, corri.', es: 'Mi madre, corre.' });
+    // Outside address the article stays.
+    expect(runs(np('FRIEND', { possessor: of('1') }))).toMatchObject({ it: 'il mio amico corre.', pt: 'o meu amigo corre.' });
+  });
+});
+
+// A338. An address calls the hearer, so two plans contradict it: an instruction, which is addressed
+// to nobody ("Maman, courir."), and a pronoun that is not the hearer ("Je, le chat court."). The
+// target is a refusal by name, as the engine refuses other malformed plans (A267, A273). A refusal
+// has no correct output to pin, so the pins assert the throw. Refusing or dropping the address is the
+// fixer's decision; a drop would turn these pins into rendered rows.
+describe('known bugs: contradictory address plans are not refused (A338)', () => {
+  test.fails('an address on an instruction is refused by name', () => {
+    expect(() => sayAll({ ...command(np('MOM')), imperativeRegister: 'instruction' })).toThrow(/address/);
+  });
+
+  test.fails('a 1st-person pronoun address is refused by name', () => {
+    expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FIRST_PERSON') })).toThrow(/address/);
+  });
+
+  test.fails('a 3rd-person pronoun address is refused by name', () => {
+    expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('THIRD_PERSON') })).toThrow(/address/);
+  });
+
+  test('regression: a request takes the address, and an instruction without one is its infinitive', () => {
+    expect(sayAll({ ...command(np('MOM')), imperativeRegister: 'request' })).toEqual({
+      en: 'Mom, run.', it: 'Mamma, corri.', fr: 'Maman, cours.', de: 'Mama, lauf.',
+      es: 'Mamá, corre.', ja: 'お母さん、走ってください。', pt: 'Mamãe, corra.',
+    });
+    expect(sayAll({ ...clause(You, 'RUN'), imperative: true, imperativeRegister: 'instruction' })).toEqual({
+      en: 'run.', it: 'corri.', fr: 'courir.', de: 'laufen.', es: 'correr.', ja: '走り。', pt: 'correr.',
+    });
+  });
+});

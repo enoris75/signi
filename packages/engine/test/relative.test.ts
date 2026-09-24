@@ -1653,11 +1653,35 @@ describe('known bugs: an object relative with no subject reads as a subject rela
 });
 
 // A290. A Japanese relative clause drops the gap's particle, which is fine for an object, a place or
-// an instrument, but leaves nothing to say a comitative head was company: 猫が走る犬 for 猫が一緒に走る犬.
-// The Want is what the engine writes once the clause carries TOGETHER (一緒に) itself.
-describe('known bugs: a Japanese comitative relative drops its company (A290)', () => {
+// an instrument, but leaves nothing to say how the head takes part when the particle carried the
+// relation itself: a comitative head was company (猫が走る犬 for 猫が一緒に走る犬), an opponent head
+// the one played against (猫が遊ぶ犬 for 猫が相手にして遊ぶ犬). The comitative Want is what the engine
+// writes once the clause carries TOGETHER (一緒に); the opponent's, once it carries an adverb whose
+// Japanese is 相手にして (see the bug file).
+describe('known bugs: a Japanese relative drops the relation its gap\'s particle carried (A290)', () => {
   const runsWith = (verbPhrase: VerbPhrase = { verb: 'RUN' }): RelativeClause =>
     ({ headRole: 'comitative', subject: np('CAT'), verbPhrase });
+  const playsAgainst: RelativeClause = { headRole: 'opponent', subject: np('CAT'), verbPhrase: { verb: 'PLAY_GAME' } };
+
+  test.fails('the opponent gap says 相手にして, on a subject', () => {
+    expect(sayAll(clause(np('DOG', { relative: playsAgainst }), 'RUN')).ja).toBe('猫が相手にして遊ぶ犬は走ります。');
+  });
+
+  test.fails('the opponent gap says 相手にして, on an object', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: np('DOG', { relative: playsAgainst }) })).ja)
+      .toBe('男は猫が相手にして遊ぶ犬を見ます。');
+  });
+
+  test('regression: the other six keep the opponent\'s preposition', () => {
+    expect(sayAll(clause(np('DOG', { relative: playsAgainst }), 'RUN'))).toMatchObject({
+      en: 'the dog against which the cat plays runs.',
+      it: 'il cane contro il quale il gatto gioca corre.',
+      fr: 'le chien contre lequel le chat joue court.',
+      de: 'der Hund, gegen den der Kater spielt, läuft.',
+      es: 'el perro contra el que el gato juega corre.',
+      pt: 'o cão contra o qual o gato joga corre.',
+    });
+  });
 
   test.fails('the comitative gap says 一緒に, on an object', () => {
     expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith() }) })).ja)

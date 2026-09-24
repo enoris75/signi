@@ -492,6 +492,177 @@ describe('temporal', () => {
         ja: '猫は家でこの日とその日の間に走ります。',
       });
     });
+
+    const dayAndNight = { phrase: { conjuncts: [np('DAY'), np('NIGHT')], conjunction: 'and' as const }, specifiers: [{ kind: 'temporal' as const, value: 'between' as const }] };
+
+    // Each conjunct takes its own plural article, and a bare plural its own zero one — French its
+    // partitive "des", which is the bare plural's article there.
+    test('plural conjuncts keep their own articles, definite or bare', () => {
+      expect(runsBetween([np('DAY', { number: 'plural' }), np('NIGHT', { number: 'plural' })])).toEqual({
+        en: 'the cat runs between the days and the nights.',
+        it: 'il gatto corre tra i giorni e le notti.',
+        fr: 'le chat court entre les jours et les nuits.',
+        de: 'der Kater läuft zwischen den Tagen und den Nächten.',
+        es: 'el gato corre entre los días y las noches.',
+        pt: 'o gato corre entre os dias e as noites.',
+        ja: '猫は日と夜の間に走ります。',
+      });
+      expect(runsBetween([
+        np('DAY', { number: 'plural', definiteness: 'bare' }),
+        np('NIGHT', { number: 'plural', definiteness: 'bare' }),
+      ])).toEqual({
+        en: 'the cat runs between days and nights.',
+        it: 'il gatto corre tra giorni e notti.',
+        fr: 'le chat court entre des jours et des nuits.',
+        de: 'der Kater läuft zwischen Tagen und Nächten.',
+        es: 'el gato corre entre días y noches.',
+        pt: 'o gato corre entre dias e noites.',
+        ja: '猫は日と夜の間に走ります。',
+      });
+    });
+
+    // The article elides against its own conjunct, not the group's first word.
+    test('an article elides against its own conjunct', () => {
+      expect(runsBetween([np('YEAR'), np('WEEK')])).toEqual({
+        en: 'the cat runs between the year and the week.',
+        it: "il gatto corre tra l'anno e la settimana.",
+        fr: "le chat court entre l'année et la semaine.",
+        de: 'der Kater läuft zwischen dem Jahr und der Woche.',
+        es: 'el gato corre entre el año y la semana.',
+        pt: 'o gato corre entre o ano e a semana.',
+        ja: '猫は年と週の間に走ります。',
+      });
+    });
+
+    // German declines each demonstrative for its own gender, feminine then neuter.
+    test('demonstratives agree with their own conjunct', () => {
+      expect(runsBetween([
+        np('WEEK', { definiteness: 'this', contrastive: true }),
+        np('YEAR', { definiteness: 'that', contrastive: true }),
+      ])).toEqual({
+        en: 'the cat runs between this week and that year.',
+        it: "il gatto corre tra questa settimana e quell'anno.",
+        fr: 'le chat court entre cette semaine-ci et cette année-là.',
+        de: 'der Kater läuft zwischen dieser Woche und jenem Jahr.',
+        es: 'el gato corre entre esta semana y ese año.',
+        pt: 'o gato corre entre esta semana e esse ano.',
+        ja: '猫はこの週とその年の間に走ります。',
+      });
+    });
+
+    test('indefinite conjuncts', () => {
+      expect(runsBetween([np('DAY', { definiteness: 'indefinite' }), np('NIGHT', { definiteness: 'indefinite' })])).toEqual({
+        en: 'the cat runs between a day and a night.',
+        it: 'il gatto corre tra un giorno e una notte.',
+        fr: 'le chat court entre un jour et une nuit.',
+        de: 'der Kater läuft zwischen einem Tag und einer Nacht.',
+        es: 'el gato corre entre un día y una noche.',
+        pt: 'o gato corre entre um dia e uma noite.',
+        ja: '猫は日と夜の間に走ります。',
+      });
+    });
+
+    // The adjective declines weak after German's dative article, and follows the noun in Spanish
+    // and Portuguese.
+    test('an adjective on one conjunct', () => {
+      expect(runsBetween([np('DAY', { adjectives: ['OLD'] }), np('NIGHT')])).toEqual({
+        en: 'the cat runs between the old day and the night.',
+        it: 'il gatto corre tra il vecchio giorno e la notte.',
+        fr: 'le chat court entre le vieux jour et la nuit.',
+        de: 'der Kater läuft zwischen dem alten Tag und der Nacht.',
+        es: 'el gato corre entre el día viejo y la noche.',
+        pt: 'o gato corre entre o dia velho e a noite.',
+        ja: '猫は古い日と夜の間に走ります。',
+      });
+    });
+
+    test('three conjuncts: the preposition once, the list comma-joined', () => {
+      expect(runsBetween([np('DAY'), np('NIGHT'), np('WEEK')])).toEqual({
+        en: 'the cat runs between the day, the night and the week.',
+        it: 'il gatto corre tra il giorno, la notte e la settimana.',
+        fr: 'le chat court entre le jour, la nuit et la semaine.',
+        de: 'der Kater läuft zwischen dem Tag, der Nacht und der Woche.',
+        es: 'el gato corre entre el día, la noche y la semana.',
+        pt: 'o gato corre entre o dia, a noite e a semana.',
+        ja: '猫は日と夜と週の間に走ります。',
+      });
+    });
+
+    test('negated', () => {
+      expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: { temporal: dayAndNight } }))).toEqual({
+        en: 'the cat does not run between the day and the night.',
+        it: 'il gatto non corre tra il giorno e la notte.',
+        fr: 'le chat ne court pas entre le jour et la nuit.',
+        de: 'der Kater läuft nicht zwischen dem Tag und der Nacht.',
+        es: 'el gato no corre entre el día y la noche.',
+        pt: 'o gato não corre entre o dia e a noite.',
+        ja: '猫は日と夜の間に走りません。',
+      });
+    });
+
+    // The span follows the object, and in Japanese precedes it, as a time does.
+    test('beside a direct object', () => {
+      expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('BOOK'), complements: { temporal: dayAndNight } }))).toEqual({
+        en: 'the cat eats the book between the day and the night.',
+        it: 'il gatto mangia il libro tra il giorno e la notte.',
+        fr: 'le chat mange le livre entre le jour et la nuit.',
+        de: 'der Kater frisst das Buch zwischen dem Tag und der Nacht.',
+        es: 'el gato come el libro entre el día y la noche.',
+        pt: 'o gato come o livro entre o dia e a noite.',
+        ja: '猫は日と夜の間に本を食べます。',
+      });
+    });
+
+    // German's verb-final relative puts the whole span before the verb, not only its first conjunct.
+    test('inside a relative clause', () => {
+      expect(sayAll(clause(np('MAN'), 'SEE', {
+        directObject: np('CAT', { relative: { verbPhrase: { verb: 'RUN' }, complements: { temporal: dayAndNight } } }),
+      }))).toEqual({
+        en: 'the man sees the cat that runs between the day and the night.',
+        it: "l'uomo vede il gatto che corre tra il giorno e la notte.",
+        fr: "l'homme voit le chat qui court entre le jour et la nuit.",
+        de: 'der Mann sieht den Kater, der zwischen dem Tag und der Nacht läuft.',
+        es: 'el hombre ve el gato que corre entre el día y la noche.',
+        pt: 'o homem vê o gato que corre entre o dia e a noite.',
+        ja: '男は日と夜の間に走る猫を見ます。',
+      });
+    });
+  });
+});
+
+// A337. "heure" opens on an h muet, so French elides the article before it as before a vowel:
+// "l'heure". Unlike a vowel, an h says nothing about its sound, so the lexeme must say so
+// (`elides: '1'`, as "homme" and "histoire" do); HOUR does not, and comes out "la heure".
+describe('known bugs: French HOUR does not elide (A337)', () => {
+  const during = (concept: string) => sayAll(clause(np('CAT'), 'RUN', {
+    complements: { temporal: { phrase: np(concept), specifiers: [{ kind: 'temporal', value: 'during' }] } },
+  }));
+
+  test('the hour as a subject', () => {
+    expect(sayAll(clause(np('HOUR'), 'RUN')).fr).toBe("l'heure court.");
+  });
+
+  test('the hour as a time', () => {
+    expect(during('HOUR').fr).toBe("le chat court pendant l'heure.");
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: {
+        temporal: { phrase: { conjuncts: [np('DAY'), np('HOUR')], conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'between' }] },
+      },
+    })).fr).toBe("le chat court entre le jour et l'heure.");
+  });
+
+  test('regression: a vowel-initial time elides, and HOUR is right in the other languages', () => {
+    expect(sayAll(clause(np('YEAR'), 'RUN')).fr).toBe("l'année court.");
+    expect(during('YEAR').fr).toBe("le chat court pendant l'année.");
+    expect(sayAll(clause(np('HOUR', { definiteness: 'this' }), 'RUN')).fr).toBe('cette heure court.');
+    expect(during('HOUR')).toMatchObject({
+      en: 'the cat runs during the hour.',
+      it: "il gatto corre durante l'ora.",
+      de: 'der Kater läuft während der Stunde.',
+      es: 'el gato corre durante la hora.',
+      pt: 'o gato corre durante a hora.',
+      ja: '猫は時間の間に走ります。',
+    });
   });
 });
 

@@ -965,6 +965,70 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
   });
 });
 
+// A330. A plural indefinite predicate has no article in Spanish and Portuguese ("son amigos", "são
+// amigos"): it resolves bare, and a bare head gives its determiner slot to a pronominal possessive,
+// so "friends of mine" comes out as the definite "mis amigos", "os meus amigos". A277 detaches the
+// possessive behind the noun when the article is kept, as in the singular ("un amigo mío"); a
+// dropped article should detach it the same way. The Portuguese factitive loses its indefinite to
+// the possessive too ("na sua prisão" for "em uma prisão sua"), where Spanish keeps it.
+describe('known bugs: Spanish and Portuguese plural predicate with a possessive keeps the determiner (A330)', () => {
+  const mine: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+  const his: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' };
+  const dogsAre = (extra: Partial<NounPhrase> = {}) => sayAll({
+    subject: np('DOG', { number: 'plural' }),
+    verbPhrase: { verb: 'BE' },
+    complements: { predicative: { phrase: np('FRIEND', { number: 'plural', possessor: mine, ...extra }) } },
+  });
+  const intoAPrison = () => sayAll(clause(np('CAT'), 'TRANSFORM', {
+    directObject: np('HOUSE'),
+    complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'indefinite', possessor: his }) } },
+  }));
+
+  test.fails('the dogs are friends of mine', () => {
+    expect(dogsAre({ definiteness: 'indefinite' })).toMatchObject({
+      es: 'los perros son amigos míos.', pt: 'os cães são amigos meus.',
+    });
+  });
+
+  test.fails('the unchosen determiner is the indefinite, and goes the same way', () => {
+    expect(dogsAre()).toMatchObject({ es: 'los perros son amigos míos.', pt: 'os cães são amigos meus.' });
+  });
+
+  test.fails('Portuguese: the cat transforms the house into a prison of his', () => {
+    expect(intoAPrison().pt).toBe('o gato transforma a casa em uma prisão sua.');
+  });
+
+  test('regression: the other five, the definite, the singular, and the Spanish factitive are right', () => {
+    expect(dogsAre({ definiteness: 'indefinite' })).toMatchObject({
+      en: 'the dogs are friends of mine.', it: 'i cani sono i miei amici.', fr: 'les chiens sont des amis à moi.',
+      de: 'die Hunde sind Freunde von mir.', ja: '犬は私の友達です。',
+    });
+    expect(dogsAre({ definiteness: 'definite' })).toEqual({
+      en: 'the dogs are my friends.', it: 'i cani sono i miei amici.', fr: 'les chiens sont mes amis.',
+      de: 'die Hunde sind meine Freunde.', es: 'los perros son mis amigos.', ja: '犬は私の友達です。',
+      pt: 'os cães são os meus amigos.',
+    });
+    expect(sayAll(clause(np('DOG'), 'BE', {
+      complements: { predicative: { phrase: np('FRIEND', { definiteness: 'indefinite', possessor: mine }) } },
+    }))).toEqual({
+      en: 'the dog is a friend of mine.', it: 'il cane è un mio amico.', fr: 'le chien est un ami à moi.',
+      de: 'der Hund ist ein Freund von mir.', es: 'el perro es un amigo mío.', ja: '犬は私の友達です。',
+      pt: 'o cão é um amigo meu.',
+    });
+    expect(dogsAre({ possessor: undefined, definiteness: 'indefinite' })).toMatchObject({
+      es: 'los perros son amigos.', pt: 'os cães são amigos.',
+    });
+    expect(intoAPrison()).toMatchObject({
+      en: 'the cat transforms the house into a prison of his.', it: 'il gatto trasforma la casa in una sua prigione.',
+      fr: 'le chat transforme la maison en une prison à lui.', de: 'der Kater verwandelt das Haus in ein Gefängnis von ihm.',
+      es: 'el gato transforma la casa en una prisión suya.', ja: '猫は家を彼の刑務所に変えます。',
+    });
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: his }) } },
+    }), 'pt')).toBe('o gato corre em uma casa sua.');
+  });
+});
+
 // A225. A German predicate adjective is undeclined ("der Kater ist müde"), and `dePredAdj` gave an
 // ordinal the same bare form: "der Kater ist erste". An ordinal has no such predicative form. German
 // says the rank with the definite article and the nominalised ordinal, which takes the subject's
