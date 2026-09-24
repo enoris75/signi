@@ -210,15 +210,28 @@ describe('P09-E39: where the adverb cannot open the sentence', () => {
 });
 
 describe('P09-E39: the seeds', () => {
-  test('PROBABLY is glossed on PROBABILITY; the other three stay on the literal', () => {
+  test('PROBABLY is glossed on PROBABILITY; MAYBE and ACTUALLY stay on the literal', () => {
     const def = concepts.find((c) => c.id === 'PROBABLY')?.definition;
     expect(Object.fromEntries(translate(def!, lookupLexicalEntry).map((t) => [t.language, t.text]))).toEqual({
       en: 'with high probability.', it: 'con probabilità alta.', fr: 'avec probabilité haute.', de: 'mit hoher Wahrscheinlichkeit.',
       es: 'con probabilidad alta.', ja: '高い確率で。', pt: 'com probabilidade alta.',
     });
-    for (const id of ['MAYBE', 'ACTUALLY', 'OF_COURSE', 'PROBABILITY']) {
+    for (const id of ['MAYBE', 'ACTUALLY', 'PROBABILITY']) {
       expect(concepts.find((c) => c.id === id)?.definition, id).toBeUndefined();
     }
+  });
+
+  // Localization C41: OF_COURSE is the similative clause said alone, the statement-level "as one
+  // expects" that a manner ("in the way that one expects") cannot say. French takes the pronominal
+  // s'attendre à, its "à" resumed by "y": "comme on attend" would be "as one waits". None of the
+  // seven says OF_COURSE's own word back (of course, naturalmente, bien sûr, natürlich, por
+  // supuesto, もちろん, claro).
+  test('OF_COURSE is glossed "as one expects"', () => {
+    const def = concepts.find((c) => c.id === 'OF_COURSE')?.definition;
+    expect(Object.fromEntries(translate(def!, lookupLexicalEntry).map((t) => [t.language, t.text]))).toEqual({
+      en: 'as one expects.', it: 'come si prevede.', fr: "comme on s'y attend.", de: 'wie man erwartet.',
+      es: 'como se espera.', ja: '予想するように。', pt: 'como se espera.',
+    });
   });
 
   test('PROBABILITY: a singular and a plural in every language', () => {

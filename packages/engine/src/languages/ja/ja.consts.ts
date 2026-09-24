@@ -271,6 +271,9 @@ export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; 
   until: { word: 'まで', tense: 'present', plain: true, reach: true },
   since: { word: 'から', tense: 'past', plain: true, te: true },
   though: { word: 'のに' },
+  // Localization C41: ように says the likeness on the plain form of the clause's own tense —
+  // 犬が走るように, 犬が走ったように, 予想するように ("as one expects").
+  as: { word: 'ように' },
 };
 
 /**

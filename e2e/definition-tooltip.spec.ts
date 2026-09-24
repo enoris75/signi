@@ -3211,4 +3211,24 @@ test.describe('word definition tooltip', () => {
       await expect(page.locator(tooltip)).toHaveText(other);
     });
   }
+  test('an adverbial clause said alone (localization C41: OF_COURSE)', async ({ app, page }) => {
+    // The similative clause is the whole gloss, as it follows a verb: "as one expects".
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('of course');
+    const ofCourse = page.locator('[data-testid="typeahead-option"][data-concept="OF_COURSE"]');
+    await expect(ofCourse).toBeVisible();
+    await ofCourse.hover();
+    await expect(page.locator(tooltip)).toHaveText('as one expects');
+
+    // French resumes what one expects with the pronominal s'attendre à and its "y": "comme on
+    // attend" would be "as one waits".
+    await page.mouse.move(0, 0);
+    await expect(page.locator(tooltip)).toHaveCount(0);
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('bien sûr');
+    const ofCourseFr = page.locator('[data-testid="typeahead-option"][data-concept="OF_COURSE"]');
+    await expect(ofCourseFr).toBeVisible();
+    await ofCourseFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("comme on s'y attend");
+  });
 });

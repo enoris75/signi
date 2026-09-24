@@ -155,6 +155,9 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quand', while: 'pendant que', because: 'parce que', after: 'après que', before: 'avant que',
   // P09-E27: "jusqu'à ce que" and "bien que" govern the subjunctive, "depuis que" the indicative.
   until: "jusqu'à ce que", since: 'depuis que', though: 'bien que',
+  // Localization C41: the similative, on the indicative. "Comme" is no "que" and never elides
+  // ("comme on s'y attend"); a verb whose object the likeness gaps takes its `as_clitic`.
+  as: 'comme',
 };
 
 /**

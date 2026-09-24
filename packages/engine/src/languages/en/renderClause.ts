@@ -40,6 +40,9 @@ export function renderClause(given: ResolvedPhrase): string {
   // A verbless period marked as a relative-clause gloss is the head's relative alone ("that one has
   // saved"): the head is unsaid, but it is still the antecedent the relativizer reads (who / that).
   if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeText(firstConjunct(subject));
+  // An adverbial gloss is the adverbial clause said alone, as it follows a verb ("as one expects",
+  // C41): the translator keeps a verbless period's adverbial clause only when the plan asks for it.
+  if (!phrase.verbPhrase && phrase.adverbialClause) return adverbialText(phrase.adverbialClause);
   // An imperative drops its subject from the surface, but the subject's person/number still
   // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
   // An infinitive citation ("to consume food") is likewise subject-less on the surface.
@@ -107,7 +110,10 @@ export function renderClause(given: ResolvedPhrase): string {
   const purposed = phrase.purpose ? `${governed} ${renderClause(phrase.purpose)}` : governed;
   // An adverbial clause follows everything, under its conjunction and with no comma: "the man runs
   // when the cat eats" (P09-E4).
-  return phrase.adverbialClause
-    ? `${purposed} ${SUBORDINATORS[phrase.adverbialClause.conjunction]} ${renderClause(phrase.adverbialClause.clause)}`
-    : purposed;
+  return phrase.adverbialClause ? `${purposed} ${adverbialText(phrase.adverbialClause)}` : purposed;
+}
+
+/** An adverbial clause under its conjunction: "when the cat eats", "as one expects" (P09-E4, C41). */
+function adverbialText({ conjunction, clause }: NonNullable<ResolvedPhrase['adverbialClause']>): string {
+  return `${SUBORDINATORS[conjunction]} ${renderClause(clause)}`;
 }

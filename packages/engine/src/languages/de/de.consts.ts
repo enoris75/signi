@@ -170,6 +170,8 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'wenn', while: 'während', because: 'weil', after: 'nachdem', before: 'bevor',
   // P09-E27: German has no subjunctive to govern, so each is the indicative, verb-final.
   until: 'bis', since: 'seit', though: 'obwohl',
+  // Localization C41: the similative, verb-final like the rest ("…, wie der Hund läuft").
+  as: 'wie',
 };
 
 /**

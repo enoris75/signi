@@ -29,7 +29,8 @@ import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { slotFocus } from '../../functions/slotFocus.js';
 import { withFocus } from '../../functions/withFocus.js';
-import { FOCUS_WORDS } from './fr.consts.js';
+import { FOCUS_WORDS, FR_REFLEXIVE } from './fr.consts.js';
+import { auxKey } from './auxKey.js';
 import { coordinate } from './coordinate.js';
 import { elidesBeforeVerb } from './elidesBeforeVerb.js';
 import { frCliticize } from './frCliticize.js';
@@ -208,8 +209,19 @@ export function predicateText(
   // ("il y a eu"), before a modal's infinitive ("il peut y avoir"). The pivot is still the object
   // noun after the verb, where it takes a negation's "de" (P09-E6 D5).
   const existential = verbPhrase.existential === true;
+  // A similative clause resumes the object its likeness gaps with the clitic its verb's lexeme names,
+  // behind the reflexive one where that verb is pronominal there: "comme on s'y attend" (C41, see
+  // `similativeGap`). It takes every placement an object clitic takes: "ne s'y attend pas", "s'y est
+  // attendu", "doit s'y attendre".
+  // me / te / se elide before "y" and "en" as before a vowel: "s'y", "m'en".
+  const gap = verbPhrase.gapClitic;
+  const gapReflexive = FR_REFLEXIVE[auxKey(subjectForms)] ?? 'se';
+  const gapClitic = !gap ? ''
+    : !gap.pronominal ? gap.clitic
+    : /^(me|te|se)$/.test(gapReflexive) && /^(y|en)$/.test(gap.clitic) ? `${gapReflexive[0]}'${gap.clitic}`
+    : `${gapReflexive} ${gap.clitic}`;
   const objectClitic = existential ? 'y'
-    : !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
+    : !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : gapClitic)
     : objectPrep && !datClitic ? ''
     : isPronounElement(directObject)
       ? (datClitic ? dativePronounForm(firstConjunct(directObject).head.forms) : objectPronounForm(firstConjunct(directObject).head.forms))

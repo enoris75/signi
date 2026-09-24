@@ -185,6 +185,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'when', while: 'while', because: 'because', after: 'after', before: 'before',
   until: 'until', since: 'since', though: 'though',
+  // Localization C41: the similative, "the cat runs as the dog runs", "as one expects".
+  as: 'as',
 };
 
 /**

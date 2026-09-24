@@ -1499,13 +1499,20 @@ export interface PurposeClause {
  *  - `though`  concession — though / sebbene / bien que / obwohl / aunque / embora / 〜のに. Italian,
  *              French and Portuguese govern the subjunctive; Spanish *aunque* asserts its clause and
  *              keeps the indicative, as German and Japanese have nothing else (D4).
+ *  - `as`      likeness, the **similative** — as / come / comme / wie / como / como / 〜ように: "the
+ *              cat runs as the dog runs", and alone "as one expects" (localization C41). The clause
+ *              is asserted and takes the indicative everywhere, on its own tense (犬が走るように,
+ *              犬が走ったように). It is the clausal *like*; the noun phrase one is the `manner`
+ *              complement of a similative noun ("like a cat"). A verb whose object the likeness gaps
+ *              — "as one expects" says *expects it*, the main clause — takes the pro-form its lexeme
+ *              names in French (`as_clitic`: *comme on s'y attend*); the other six leave the gap.
  *
  * There is no `during`, although P09 §3 lists it among the words: *during* introduces a noun phrase
  * ("during this day", a `TemporalRelation` C29 built), and no language here introduces a clause with
  * it — English says "while the cat eats", not "during the cat eats", and so does each of the others
  * with its own word. `while` is that clause reading.
  */
-export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before' | 'until' | 'since' | 'though';
+export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before' | 'until' | 'since' | 'though' | 'as';
 
 /** What kind of clause a verb takes as its object — see `Concept.clauseObject`. */
 export type ClauseObject = 'content' | 'infinitive';
@@ -1517,7 +1524,7 @@ export type ClauseObject = 'content' | 'infinitive';
  */
 export type Subordinator = SubordinatingConjunction | 'that';
 
-export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though'];
+export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though', 'as'];
 
 /** See `PhrasePlan.adverbialClause`. */
 export interface AdverbialClause {
@@ -1799,6 +1806,17 @@ export interface PhrasePlan {
    * inverts, whatever the clause it hangs off is.
    */
   adverbialClause?: AdverbialClause;
+  /**
+   * Render this verbless period as its **adverbial clause said alone** — the whole fragment is the
+   * conjunction and its clause, exactly as it would follow a verb: OF_COURSE → "as one expects" /
+   * "come si prevede" / "comme on s'y attend" / "wie man erwartet" / "como se espera" / 予想するように
+   * (localization C41). It is to a clause what `NounPhrase.complementGloss` is to a place or a time
+   * (C25, C29): the gloss of an adverb that is a clause's worth of meaning. The plan's `subject` is
+   * the throwaway a verbless period carries, as it is under `contentSubject`, and is not rendered.
+   * Only meaningful with `adverbialClause` and no `verbPhrase`; without the flag a verbless period
+   * drops its adverbial clause, as it drops every clause that hangs off a predicate.
+   */
+  adverbialGloss?: boolean;
   /**
    * An optional clause this clause's predicate governs in the infinitive — "the cat is able **to
    * eat**", "to desire **to act**" (see `InfinitiveComplement`). It follows the clause (German

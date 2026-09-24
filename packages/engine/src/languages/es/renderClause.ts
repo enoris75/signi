@@ -36,6 +36,9 @@ export function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // A relative-clause gloss ("que se ha guardado") is the head's relative alone, still agreeing with it.
   if (!phrase.verbPhrase && isRelativeGloss(subject)) return relativeGloss(firstConjunct(subject));
+  // An adverbial gloss is the adverbial clause said alone, as it follows a verb ("como se espera",
+  // C41): the translator keeps a verbless period's adverbial clause only when the plan asks for it.
+  if (!phrase.verbPhrase && phrase.adverbialClause) return adverbialText(phrase.adverbialClause);
   // Spanish is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("como", not "yo como"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun
@@ -93,8 +96,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
     : '';
   // An adverbial clause closes the sentence under its conjunction, in the mood that conjunction
   // governs (P09-E4).
-  const adverbial = phrase.adverbialClause
-    ? `${SUBORDINATORS[phrase.adverbialClause.conjunction]} ${renderClause(phrase.adverbialClause.clause)}`
-    : '';
+  const adverbial = phrase.adverbialClause ? adverbialText(phrase.adverbialClause) : '';
   return [subj, predicate, content, object, complement, purpose, adverbial].filter(Boolean).join(' ').trim();
+}
+
+/** An adverbial clause under its conjunction: "cuando el gato come", "como se espera" (P09-E4, C41). */
+function adverbialText({ conjunction, clause }: NonNullable<ResolvedPhrase['adverbialClause']>): string {
+  return `${SUBORDINATORS[conjunction]} ${renderClause(clause)}`;
 }
