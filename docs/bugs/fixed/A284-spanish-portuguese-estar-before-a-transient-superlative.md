@@ -51,3 +51,18 @@ Pinned by `known bugs: Spanish and Portuguese put estar before a transient super
 [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).
 
 Found on 2026-09-24 while auditing P09-E19's test coverage.
+
+## Resolved
+
+2026-09-24. `transientPredicative` in
+[es/predicateText.ts](../../../packages/engine/src/languages/es/predicateText.ts) and
+[pt/predicateText.ts](../../../packages/engine/src/languages/pt/predicateText.ts) no longer holds
+for a head at `most` or `least`, so the article-headed superlative takes *ser* as a predicate noun
+does; the positive and the comparative keep *estar*. The elided complement (A121) and a relative
+clause follow through the same flag. Guarded by the three formerly-failing tests and a new one
+(plural, past, negated, relative clause, elided complement) in `known bugs: Spanish and Portuguese
+put estar before a transient superlative (A284)` in
+[comparison.test.ts](../../../packages/engine/test/comparison.test.ts). As the bug file foresaw,
+[intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts)'s A257 case "the
+subject's agreement, an inflecting superlative and a suppletive one" moved to `el gato es con mucho
+el más feliz.` / `o gato é de longe o mais feliz.`.

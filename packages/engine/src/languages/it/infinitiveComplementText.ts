@@ -1,3 +1,4 @@
+import { euphonicA } from './euphonicA.js';
 import type { ResolvedPhrase } from '../../types.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { predicateText } from './predicateText.js';
@@ -20,6 +21,6 @@ export function infinitiveComplementText(clause: ResolvedPhrase, controller: Rec
     ? `${own} ${infinitiveComplementText(clause.infinitiveComplement, controller, infinitiveLink(clause))}`
     : own;
   // "a" takes the euphonic d before another a: "obbligato ad agire", but "obbligato a essere".
-  const word = link === 'a' && /^a/i.test(text) ? 'ad' : link;
+  const word = euphonicA(link, text);
   return [word, text].filter(Boolean).join(' ');
 }

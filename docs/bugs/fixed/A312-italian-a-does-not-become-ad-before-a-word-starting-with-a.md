@@ -34,3 +34,17 @@ put it in one helper that both call.
 | | |
 |---|---|
 | **Test** | `complements/terminus.test.ts` → *known bugs: Italian "a" does not become "ad" before a word starting with a (A312)* (3 `test.fails`, one per row, plus a regression test for *a ogni*, *a un*, a consonant and the fused article) |
+
+## Resolved
+
+2026-09-24. A new helper, [it/euphonicA.ts](../../../packages/engine/src/languages/it/euphonicA.ts)
+(`/^a/i`, with its unit test), is called by
+[it/prepDet.ts](../../../packages/engine/src/languages/it/prepDet.ts) for every unfused preposition
+(the terminus, a direction or place with *a*, the measure manner *a*, *grazie a*, the dative object)
+and by [it/infinitiveComplementText.ts](../../../packages/engine/src/languages/it/infinitiveComplementText.ts),
+which had its own copy of the rule. Guarded by the three formerly-failing tests and a new one (a
+direction, a coordinated recipient) in `known bugs: Italian "a" does not become "ad" before a word
+starting with a (A312)` in [complements/terminus.test.ts](../../../packages/engine/test/complements/terminus.test.ts).
+One passing test moved: [complements/manner.test.ts](../../../packages/engine/test/complements/manner.test.ts)
+(A226, "the other demonstrative and quantifiers stay…") now reads `il gatto corre ad alcuni altri
+tempi.` where it pinned `a alcuni`.

@@ -109,7 +109,10 @@ export function predicateText(
   const locative = complements?.locative ?? (elided?.type === 'locative' ? elided.complement : undefined);
   const predicativeHead = predicative ? firstConjunct(predicative.phrase).head.forms : undefined;
   const transientPredicative =
-    predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
+    predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1'
+    // A superlative is headed by its article, a noun phrase with the noun understood, and that
+    // identifies the subject as a predicate noun does: "el gato es el más feliz" (A284).
+    && predicativeHead['degree'] !== 'most' && predicativeHead['degree'] !== 'least';
   // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
   // "la casa donde el gato está arde" (A199). So does an adverb of place, which says where as a
   // locative does: "el gato está aquí", "está en todas partes", never "*es aquí" (localization B67).
@@ -319,7 +322,9 @@ export function predicateText(
     // "sigue comiéndola" (P09-E42, `complement_form`).
     const head = verbPhrase.gerundComplement ? (copulaVerb.forms['gerund'] ?? copulaVerb.forms['base']) : copulaVerb.forms['base'];
     const inf = [head ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
-    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
+    // A negative link ("sigue sin correr", A315) is the clause's negator, so it writes no "no" of its
+    // own, and a negative word after it concords with it: "sin comer ninguna comida".
+    const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)

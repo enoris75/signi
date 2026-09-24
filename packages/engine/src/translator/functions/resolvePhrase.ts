@@ -2,6 +2,7 @@ import type { ContentClause, ImperativeRegister, InfinitiveComplement, NounEleme
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { addresseeObject } from './addresseeObject.js';
+import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
 import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
@@ -58,11 +59,15 @@ function resolveInfinitiveComplement(
   const bare = governor?.['infinitive_bare'] === '1' && resolved.verbPhrase;
   // A governor that takes a **gerund** names it the same way (`complement_form: 'gerund'`): English
   // *stop* and *continue*, Spanish *seguir* — "stops running", "sigue corriendo" (P09-E42).
-  const gerund = governor?.['complement_form'] === 'gerund' && resolved.verbPhrase;
+  // A negated complement may take a link of its own instead, which carries the negation: Spanish
+  // *seguir sin* + infinitive, "sigue sin correr", never "*sigue no corriendo" (A315).
+  const negativeLink = resolved.verbPhrase?.negative === true ? governor?.['negative_complement_link'] : undefined;
+  const gerund = !negativeLink && governor?.['complement_form'] === 'gerund' && resolved.verbPhrase;
   return {
     ...resolved,
     ...(bare ? { verbPhrase: { ...resolved.verbPhrase!, bareInfinitive: true } } : {}),
     ...(gerund ? { verbPhrase: { ...resolved.verbPhrase!, gerundComplement: true } } : {}),
+    ...(negativeLink ? { verbPhrase: { ...resolved.verbPhrase!, negativeLink } } : {}),
     ...(byObject ? { control: 'object' as const } : {}),
   };
 }
@@ -235,7 +240,9 @@ export function resolvePhrase(
   // `terminus` complement, the bare dative it already renders as (localization C34).
   //
   // A **generic** experiencer is dropped there rather than rendered, exactly as a generic agent is
-  // under the passive: no language says *piace a si*. What is left is the plain citation of the verb
+  // under the passive: no language says *piace a si*. A language whose generic has a dative form
+  // keeps it: Spanish *uno*, "el gato le gusta a uno" (A316, see `genericWithoutDative`) — but not
+  // in a citation, whose generic subject is the unspoken one: "gustar". What is left is the plain citation of the verb
   // ("piacere", "gustar"), which cannot name the thing liked because that thing is its subject and a
   // citation has none — a fact about Italian and Spanish, not a gap in the plan.
   const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
@@ -249,7 +256,7 @@ export function resolvePhrase(
     ...(asked ? { question: asked } : {}),
     // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
     // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
-    complements: experiencer && !generic
+    complements: experiencer && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'))
       ? { ...negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative), terminus: { phrase: subject } }
       : negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the

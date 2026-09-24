@@ -55,3 +55,13 @@ In the trial these five edits rendered every row and the engine suite stayed gre
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: French "bien" before the passive participle* (2 `test.fails`: the simple tenses and the periphrastic passives; plus a regression test for the active participle, a *-ment* adverb and a frequency adverb) |
+
+## Resolved
+
+2026-09-24. [fr/predicateText.ts](../../../packages/engine/src/languages/fr/predicateText.ts): on a
+passive the auxiliary groups (`modalGroupFr`, `aspectVerbFr`) and the non-passive citation take no
+short adverb of their own (`auxiliaryPreInfinitive`), and the passive block and the passive citation
+put it right before the participe, clearing the trailing slot. Guarded by the two formerly-failing
+tests and a new one (prospective, passé simple, plural participle, agentless passive, negated
+citation) in `known bugs: French "bien" before the passive participle` in
+[adverb.test.ts](../../../packages/engine/test/adverb.test.ts).

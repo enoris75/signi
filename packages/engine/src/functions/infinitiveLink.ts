@@ -9,8 +9,13 @@ import { firstConjunct } from './firstConjunct.js';
  * the nominalized clause — 行動する**ことが**可能 / 行動する**ことを**望む, and 見る**ように**する for the
  * causative, which nominalizes with よう in place of こと (the ja engine defaults to ことを). English
  * and German always link with "to" / "zu" and do not read it.
+ *
+ * A negated complement whose governor names a link of its own for it takes that one, which carries
+ * the negation: Spanish "sigue **sin** correr" (see `ResolvedVerbPhrase.negativeLink`, A315).
  */
 export function infinitiveLink(phrase: ResolvedPhrase): string {
+  const negativeLink = phrase.infinitiveComplement?.verbPhrase?.negativeLink;
+  if (negativeLink) return negativeLink;
   const predicative = phrase.complements?.['predicative'];
   const governor = predicative ? firstConjunct(predicative.phrase).head.forms : phrase.verbPhrase?.verb.forms;
   return governor?.['infinitive_link'] ?? '';

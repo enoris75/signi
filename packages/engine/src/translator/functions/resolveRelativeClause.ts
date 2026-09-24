@@ -2,6 +2,7 @@ import type { RelativeClause } from '@signi/shared';
 import type { ResolvedNounElement, ResolvedRelativeClause } from '../../types.js';
 import { RELATIVIZES_AGENT } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { copulaSwap, expletiveSubject } from './lexicalCopula.js';
 import { passiveGap } from './passiveGap.js';
@@ -122,14 +123,15 @@ export function resolveRelativeClause(
  *    experiencer follows as the dative — "il cane **che** piace al gatto";
  *  - the head fills a **complement**, which the frame leaves where it was.
  *
- * A generic experiencer is dropped, as a generic agent is under the passive.
+ * A generic experiencer is dropped, as a generic agent is under the passive, unless its language gives
+ * it a dative (see `genericWithoutDative`, A316).
  */
 function experiencerRemap(
   headRole: ResolvedRelativeClause['headRole'],
   subject: ResolvedNounElement | undefined,
   directObject: ResolvedNounElement | undefined,
 ): Pick<ResolvedRelativeClause, 'headRole' | 'subject' | 'directObject'> & { experiencer?: ResolvedNounElement } {
-  const dative = subject && subject.agreement['generic'] !== '1' ? subject : undefined;
+  const dative = subject && !genericWithoutDative(subject) ? subject : undefined;
   if (headRole === 'subject') return { headRole: 'terminus', subject: directObject };
   if (headRole === 'directObject') return { headRole: 'subject', experiencer: dative };
   return { headRole, subject: directObject, experiencer: dative };

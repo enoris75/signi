@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedPhrase, ResolvedVerbPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { resolve } from './resolve.js';
 import { resolveNounElement } from './resolveNounElement.js';
 
@@ -17,19 +18,21 @@ import { resolveNounElement } from './resolveNounElement.js';
  * *gehen* says the one who fares in the **dative**, with *es* as the grammatical subject. The subject
  * then becomes the `terminus`, the bare dative it already renders as, the subject slot takes the
  * neuter third person, and the clause is marked `dativeFront` for the German engine to put the dative
- * ahead of the verb. A generic subject keeps the plain frame: there is no one to put in the dative.
+ * ahead of the verb. A generic subject has a dative only where its lexeme gives it one (see
+ * `genericWithoutDative`): German *einem*, which takes the frame but not the front field, "es geht
+ * einem gut" (A316). Where it has none it keeps the plain frame.
  */
 export function lexicalCopula(phrase: ResolvedPhrase, language: string, lookup: LexiconLookup): ResolvedPhrase {
   const swapped = copulaSwap(phrase.verbPhrase, phrase.complements, language, lookup);
   if (!swapped) return phrase;
   const withVerb: ResolvedPhrase = { ...phrase, verbPhrase: swapped.verbPhrase };
   // An infinitive's subject is unspoken, so it has no one to put in the dative: "gut gehen".
-  if (!swapped.experiencer || phrase.subject.agreement['generic'] === '1' || swapped.verbPhrase.mood === 'infinitive') return withVerb;
+  if (!swapped.experiencer || genericWithoutDative(phrase.subject) || swapped.verbPhrase.mood === 'infinitive') return withVerb;
   return {
     ...withVerb,
     subject: expletiveSubject(language, lookup),
     complements: { ...phrase.complements, terminus: { phrase: phrase.subject } },
-    dativeFront: true,
+    ...(phrase.subject.agreement['generic'] === '1' ? {} : { dativeFront: true }),
   };
 }
 
