@@ -59,7 +59,8 @@ const PERIOD_FIELDS = new Set([
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
-  "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor",
+  "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
+  "complementGloss",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -280,8 +281,25 @@ class Builder {
         set(sel, `${which}Possessor`, owner);
       }
     }
+    this.gloss(c, sel, which, np);
     if (np.relative) this.relative(c, address, head, np.relative, Boolean(np.relativeGloss));
     else if (np.relativeGloss) this.unsupported.add("NounPhrase.relativeGloss without a relative");
+  }
+
+  // The reading of a period's own subject (P13): the one noun a gloss flag is said on.
+  private gloss(c: PhraseContainer, sel: PhraseSelection, which: NounKey, np: NounPhrase): void {
+    const flag = np.dimensionGloss ? "dimension" : np.mannerGloss ? "manner" : np.complementGloss?.type;
+    if (!flag) return;
+    if (sel !== c.selection || which !== "subject") {
+      this.unsupported.add("NounPhrase gloss off a period's subject");
+      return;
+    }
+    sel.subjectGloss = flag;
+    for (const s of np.complementGloss?.specifiers ?? []) {
+      if (s.kind === "temporal" && flag === "temporal") {
+        if (s.value !== DEFAULT_TEMPORAL_RELATION) sel.subjectGlossRelation = s.value;
+      } else this.unsupported.add(`NounPhrase.complementGloss.specifiers.${s.kind}`);
+    }
   }
 
   // Adjectives and attributive nouns share a block's three adjective slots; the plan keeps them in two

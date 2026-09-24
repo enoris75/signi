@@ -15,7 +15,7 @@ import {
   type UiStringKey,
   type Voice,
 } from "@signi/shared";
-import type { ImperativePerson, SlotConfig, SlotKey, SubordinateKind } from "../model/interfaces.ts";
+import type { ImperativePerson, NounGloss, SlotConfig, SlotKey, SubordinateKind } from "../model/interfaces.ts";
 import type { Gender } from "../model/phraseReducers.ts";
 import { MODAL_NEGATIVE_FIELDS } from "../model/slots.ts";
 
@@ -50,7 +50,9 @@ export type Setting =
   | { id: "polarity"; value: "positive" | "negative" }
   | { id: "causePolarity"; value: "positive" | "negative" }
   | { id: "degree"; value: Degree }
-  | { id: "relation"; value: ModifierRelation };
+  | { id: "relation"; value: ModifierRelation }
+  /** How a verbless period's subject reads (P13): `plain` is none. */
+  | { id: "gloss"; value: NounGloss | "plain" };
 
 export type SettingId = Setting["id"];
 
@@ -79,7 +81,7 @@ export type Action =
   | { kind: "modal" }
   | { kind: "setting"; setting: Setting }
   /** A setting set to the value its argument names: `/tense past`, `/aspect progressive`. */
-  | { kind: "set"; id: "tense" | "aspect" | "voice" }
+  | { kind: "set"; id: "tense" | "aspect" | "voice" | "gloss" }
   | { kind: "possessor" }
   /** What a predicate adjective is compared to: `/than [ dog ]` (P09-E12 D5). */
   | { kind: "standard" }
@@ -246,6 +248,16 @@ const TEMPORAL_COMMAND_NAME: Partial<Record<TemporalRelation, string>> = { betwe
 
 /** The name `/del` takes a subordinate link back by, and the command that prints it: one per kind. */
 export const SUBORDINATE_NAMES: Record<SubordinateKind, string> = { content: "clause", adverbial: "sub", infinitive: "to" };
+
+// The readings `/gloss` sets, each named by what the subject reads as (P13).
+export const GLOSS_VALUES: readonly ValueDef[] = [
+  { name: "plain", value: "plain", description: "a noun phrase", descriptionKey: "category.noun" },
+  { name: "dimension", value: "dimension", description: "an adjective's dimension", descriptionKey: "category.adjective" },
+  { name: "manner", value: "manner", description: "a manner adverbial", descriptionKey: "slot.manner" },
+  { name: "place", aliases: ["locative"], value: "locative", description: "a place adverbial", descriptionKey: "slot.locative" },
+  { name: "direction", value: "direction", description: "a direction adverbial", descriptionKey: "slot.direction" },
+  { name: "time", aliases: ["temporal"], value: "temporal", description: "a time adverbial", descriptionKey: "slot.temporal" },
+];
 
 export const TENSE_VALUES: readonly ValueDef[] = (["past", "present", "future"] as const).map((value) => ({
   name: value,
@@ -556,8 +568,9 @@ export const COMMANDS: readonly CommandDef[] = [
       value,
       // The word the relation is spoken with, as the temporal's toolbar names it.
       `temporal.value.${value}`,
-      /^temporal$/,
-      ["setTemporalRelation"],
+      // …and a time reading's (P13): "/subj ( TIME /this /gloss time /until )".
+      /^(temporal|subjectGlossRelation)$/,
+      ["setTemporalRelation", "setGlossRelation"],
     ),
   ),
   ...(
@@ -591,6 +604,22 @@ export const COMMANDS: readonly CommandDef[] = [
   // ── Verb ──────────────────────────────────────────────────────────────────
   // A setting named, its value the argument: the family whole in one command, for whoever thinks
   // "the tense" before "the past".
+  // How a verbless period's subject reads when it defines an adjective or an adverb (P13): BIG is
+  // "/subj ( SIZE /zero /adj GREAT /gloss dimension )", "of great size". A setting with no command per
+  // value — /manner is the manner complement's — so it is written as /gloss and its value.
+  {
+    name: "gloss",
+    aliases: ["reading", "meaning"],
+    group: "noun",
+    description: "how the subject reads",
+    descriptionKey: "gloss.name",
+    purposeKey: "purpose.gloss",
+    color: "setting",
+    arg: { kind: "values", values: GLOSS_VALUES, max: 1 },
+    action: { kind: "set", id: "gloss" },
+    satellites: /^subjectGloss$/,
+    reducers: ["setSubjectGloss"],
+  },
   {
     name: "tense",
     aliases: [],
@@ -1064,6 +1093,7 @@ export type TopicId =
   | "polarity"
   | "degree"
   | "relation"
+  | "gloss"
   | "mood"
   | "links"
   | "period"
@@ -1100,6 +1130,7 @@ export const TOPICS: readonly Topic[] = [
   { id: "polarity", label: "polarity", labelKey: "satellite.polarity", part: "verb" },
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
+  { id: "gloss", label: "meaning", labelKey: "gloss.name", part: "noun" },
   { id: "mood", label: "mood", labelKey: "console.topic.mood", part: "period" },
   { id: "links", label: "linked periods", labelKey: "console.topic.links", part: "period" },
   { id: "period", label: "the period", labelKey: "console.topic.period", part: "period" },
@@ -1120,6 +1151,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   causePolarity: "cause",
   degree: "degree",
   relation: "relation",
+  gloss: "gloss",
 };
 
 /** The topic a command is listed under. */
@@ -1164,6 +1196,21 @@ export function shortcutOf(def: CommandDef): string | undefined {
   if (named?.arg.kind !== "values") return undefined;
   const value = named.arg.values.find((v) => v.value === a.setting.value);
   return value ? `/${named.name} ${value.name}` : undefined;
+}
+
+/**
+ * How the printer writes a setting: its own command (`/past`), or — for a setting whose values have
+ * none, `/gloss` — its `set` command and the value's name (`/gloss dimension`).
+ */
+export function settingWords(s: Setting): { command: string; value?: string } {
+  const own = COMMANDS.find(
+    (c) => c.action.kind === "setting" && c.action.setting.id === s.id && c.action.setting.value === s.value,
+  );
+  if (own) return { command: `/${own.name}` };
+  const named = COMMANDS.find((c) => c.action.kind === "set" && c.action.id === s.id);
+  const value = named?.arg.kind === "values" ? named.arg.values.find((v) => v.value === s.value) : undefined;
+  if (!named || !value) throw new Error(`no command sets ${s.id} to ${String(s.value)}`);
+  return { command: `/${named.name}`, value: value.name };
 }
 
 /** The command that sets a setting to a value — what the printer writes for it. */

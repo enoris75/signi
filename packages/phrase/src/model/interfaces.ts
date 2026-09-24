@@ -197,6 +197,13 @@ export const QUESTION_ROLES: readonly QuestionRole[] = ["subject", "directObject
 // The person a selection's command agrees with (default 2sg). Still meaningful under the
 // `instruction` register — the selector only greys it there, it does not forget it, so
 // returning to an order restores the person the user last picked.
+// How a verbless period's subject reads when it defines an adjective or an adverb (P13): as the
+// dimension an adjective measures ("of great size", BIG), as a manner adverbial ("at high speed",
+// FAST), or as the place, direction or time complement a clause would carry ("in a group", TOGETHER;
+// "to a higher place", UP; "until this time", STILL). Each is a NounPhrase gloss flag in the plan.
+export type NounGloss = "dimension" | "manner" | "locative" | "direction" | "temporal";
+export const NOUN_GLOSSES: readonly NounGloss[] = ["dimension", "manner", "locative", "direction", "temporal"];
+
 export function imperativePerson(selection: PhraseSelection): ImperativePerson {
   return selection.imperativePerson ?? "2sg";
 }
@@ -247,6 +254,11 @@ export interface PhraseSelection {
     // .existential): the subject is the pivot. Toggled on the subject's ring; it only reaches the
     // plan where the engine builds one (see `canBeExistential`).
     existential?: boolean;
+    // How the subject of a verbless period reads (P13, see NounGloss), and the relation a time reading
+    // says it with ("until this time"; absent ⇒ `at`). Only a verbless period says either: with a
+    // verb the subject is the one who acts, and the plan leaves them out.
+    subjectGloss?: NounGloss;
+    subjectGlossRelation?: TemporalRelation;
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;

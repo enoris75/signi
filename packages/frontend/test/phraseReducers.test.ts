@@ -439,3 +439,33 @@ describe('removeConjunct', () => {
     expect(R.removeConjunct({ ...group, directObjectPossessorRef: 'subject' }, 'subject', 0).directObjectPossessorRef).toBe('subject');
   });
 });
+
+// P13: a verbless period's subject reads as an adjective's or an adverb's definition.
+describe('the subject’s reading', () => {
+  it('cycles none → dimension → manner → place → direction → time → none', () => {
+    const seen: (string | undefined)[] = [];
+    let sel: PhraseSelection = { subject: CAT };
+    for (let i = 0; i < 6; i++) {
+      sel = R.cycleSubjectGloss(sel);
+      seen.push(sel.subjectGloss);
+    }
+    expect(seen).toEqual(['dimension', 'manner', 'locative', 'direction', 'temporal', undefined]);
+    expect(sel).not.toHaveProperty('subjectGloss');
+  });
+
+  it('keeps a relation for the time reading alone, and drops the default', () => {
+    const until = R.setGlossRelation({ subject: CAT, subjectGloss: 'temporal' }, 'until');
+    expect(until.subjectGlossRelation).toBe('until');
+    expect(R.setGlossRelation(until, 'at')).not.toHaveProperty('subjectGlossRelation');
+    expect(R.setSubjectGloss(until, 'manner')).not.toHaveProperty('subjectGlossRelation');
+  });
+});
+
+describe('a subject that is no noun any more', () => {
+  it('drops its reading, which only a noun phrase has (P13)', () => {
+    const me: Concept = { id: 'FIRST_PERSON', role: 'pronoun', description: 'I', person: '1' };
+    const next = applyConceptSelect({ subject: CAT, subjectGloss: 'temporal', subjectGlossRelation: 'until' }, 'subject', me);
+    expect(next).not.toHaveProperty('subjectGloss');
+    expect(next).not.toHaveProperty('subjectGlossRelation');
+  });
+});

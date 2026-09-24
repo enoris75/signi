@@ -67,4 +67,28 @@ describe('selectionToPlan', () => {
     expect(plan).not.toHaveProperty('imperativeRegister');
     expect(plan).not.toHaveProperty('infinitive');
   });
+
+  // P13: the subject of a verbless period read as an adjective's or an adverb's definition.
+  describe('the subject’s reading', () => {
+    it.each([
+      ['dimension', { dimensionGloss: true }],
+      ['manner', { mannerGloss: true }],
+      ['locative', { complementGloss: { type: 'locative' } }],
+      ['direction', { complementGloss: { type: 'direction' } }],
+      ['temporal', { complementGloss: { type: 'temporal' } }],
+    ] as const)('says a %s reading as its gloss flag', (gloss, flag) => {
+      expect(selectionToPlan({ subject: HOUSE, subjectGloss: gloss }).subject).toEqual(expect.objectContaining(flag));
+    });
+
+    it('gives a time reading its relation, and leaves out the default', () => {
+      expect(selectionToPlan({ subject: HOUSE, subjectGloss: 'temporal', subjectGlossRelation: 'until' }).subject).toMatchObject({
+        complementGloss: { type: 'temporal', specifiers: [{ kind: 'temporal', value: 'until' }] },
+      });
+    });
+
+    it('says none with a verb, where the subject is the one who acts', () => {
+      const subject = selectionToPlan({ subject: HOUSE, subjectGloss: 'manner', verb: GO }).subject;
+      expect(subject).not.toHaveProperty('mannerGloss');
+    });
+  });
 });

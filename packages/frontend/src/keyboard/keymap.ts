@@ -111,6 +111,9 @@ export interface BoxContext {
   toggleQuestion: (which: QuestionRole) => void;
   toggleQuestionAnimate: () => void;
   toggleExistential: () => void;
+  /** How a verbless period's subject reads, and a time reading's relation (P13). */
+  cycleGloss: (step: 1 | -1) => void;
+  cycleGlossRelation: (step: 1 | -1) => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
   cycleVoice: (step: 1 | -1) => void;
@@ -533,6 +536,48 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     labelKey: "satellite.conjunction",
     when: (ctx) => Boolean(ctx.satellite(`${ctx.nounKey}Conjunct`)?.hasValue),
     run: (ctx) => ctx.cycleConjunction(ctx.nounKey!),
+  },
+  {
+    // How a verbless period's subject reads (P13) — M for its meaning, ⇧M back.
+    id: "subject.gloss",
+    scope: "box:noun",
+    keys: ["M"],
+    label: "Meaning",
+    labelKey: "gloss.name",
+    satellite: /^subjectGloss$/,
+    when: (ctx) => ctx.slot === "subject" && !ctx.path && has(ctx, "subjectGloss"),
+    run: (ctx) => ctx.cycleGloss(1),
+  },
+  {
+    id: "subject.gloss.back",
+    scope: "box:noun",
+    keys: ["Shift+M"],
+    label: "Meaning, backwards",
+    labelKey: "hint.backwards",
+    reverses: "subject.gloss",
+    when: (ctx) => ctx.slot === "subject" && !ctx.path && has(ctx, "subjectGloss"),
+    run: (ctx) => ctx.cycleGloss(-1),
+  },
+  {
+    // The relation of a time reading, "until this time" — L, ⇧L back.
+    id: "subject.glossRelation",
+    scope: "box:noun",
+    keys: ["L"],
+    label: "Temporal",
+    labelKey: "slot.temporal",
+    satellite: /^subjectGlossRelation$/,
+    when: (ctx) => ctx.slot === "subject" && !ctx.path && has(ctx, "subjectGlossRelation"),
+    run: (ctx) => ctx.cycleGlossRelation(1),
+  },
+  {
+    id: "subject.glossRelation.back",
+    scope: "box:noun",
+    keys: ["Shift+L"],
+    label: "Temporal, backwards",
+    labelKey: "hint.backwards",
+    reverses: "subject.glossRelation",
+    when: (ctx) => ctx.slot === "subject" && !ctx.path && has(ctx, "subjectGlossRelation"),
+    run: (ctx) => ctx.cycleGlossRelation(-1),
   },
   {
     id: "noun.relative",

@@ -78,7 +78,11 @@ describe('rawSatellites', () => {
         'subjectHeadless',
         'subjectPossessor',
         'subjectConjunct',
+        // A verbless period's subject reads as something (P13): its relation only under a time reading.
+        'subjectGloss',
       ]);
+      expect(offered({ subject: CAT, subjectGloss: 'temporal' }, 'subject')).toContain('subjectGlossRelation');
+      expect(offered({ subject: CAT, verb: SLEEP }, 'subject')).not.toContain('subjectGloss');
     });
 
     it('offers a pronoun only number, gender and coordination', () => {

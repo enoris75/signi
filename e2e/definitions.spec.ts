@@ -47,3 +47,38 @@ test.describe('a relative clause said alone', () => {
     await expect(app.period(0).getByTestId('headless-ctl-subject')).toHaveCount(0);
   });
 });
+
+test.describe('the subject’s reading', () => {
+  test('is typed as /gloss, and says FAST as the manner it defines', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj speed /zero /adj high /gloss manner');
+    await run(page);
+    await app.expectSentences({ en: 'at high speed.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/subj ( speed /adj high /zero /gloss manner )');
+  });
+
+  test('is a chip on a verbless period’s subject, each click the next reading, and a time reading has a relation', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj time /this');
+    await run(page);
+    await app.expectSentences({ en: 'this time.' });
+
+    const chip = app.period(0).getByTestId('gloss-ctl-subject').locator('button');
+    // dimension → manner → place → direction → time
+    for (let i = 0; i < 5; i++) await chip.click();
+    await expect(page.getByTestId('source-strip')).toContainText('/gloss time');
+    // at → ago → until, as the temporal's own toolbar orders them.
+    const relation = app.period(0).getByTestId('glossRelation-ctl-subject').locator('button');
+    await relation.click();
+    await relation.click();
+    await app.expectSentences({ en: 'until this time.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/gloss time /until');
+  });
+
+  test('offers no chip on a period with a verb', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj man /verb run');
+    await run(page);
+    await expect(app.period(0).getByTestId('gloss-ctl-subject')).toHaveCount(0);
+  });
+});

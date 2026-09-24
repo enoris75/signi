@@ -27,6 +27,8 @@ export function buildSatelliteIcons({
   onToggleQuestion,
   onToggleQuestionAnimate,
   onToggleExistential,
+  onCycleGloss,
+  onCycleGlossRelation,
   t,
 }: BuildSatelliteIconsArgs): SatelliteIcons {
   // What a made link says of itself, and what clicking it will do — the same pair on the
@@ -78,7 +80,11 @@ export function buildSatelliteIcons({
         ? ("question" as const)
         : sat.key === "subjectExistential"
           ? ("existential" as const)
-          : null;
+          : sat.key === "subjectGloss"
+            ? ("gloss" as const)
+            : sat.key === "subjectGlossRelation"
+              ? ("glossRelation" as const)
+              : null;
     if (perimeterKind) {
       const noun = sat.parent as NounKey;
       const onToggle =
@@ -86,7 +92,11 @@ export function buildSatelliteIcons({
           ? onToggleQuestion && (() => onToggleQuestion(noun as QuestionRole))
           : perimeterKind === "animacy"
             ? onToggleQuestionAnimate
-            : onToggleExistential;
+            : perimeterKind === "gloss"
+              ? onCycleGloss
+              : perimeterKind === "glossRelation"
+                ? onCycleGlossRelation
+                : onToggleExistential;
       if (!onToggle) continue;
       (perimeterByNoun[noun] ??= {})[perimeterKind] = {
         key: sat.key,
@@ -98,6 +108,10 @@ export function buildSatelliteIcons({
         valued: false,
         directToggle: true,
         named: true,
+        // A reading and its relation say which one they hold (P13).
+        ...(sat.valueLabel !== undefined && (perimeterKind === "gloss" || perimeterKind === "glossRelation")
+          ? { valueLabel: sat.valueLabel }
+          : {}),
         onToggle,
       };
       continue;

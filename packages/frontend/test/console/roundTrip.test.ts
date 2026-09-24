@@ -379,6 +379,11 @@ const OPS: Op[] = [
     if (!link || link.kind !== 'instrumental') return undefined;
     return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
   },
+  // The reading of a verbless period's subject, and a time reading's relation (P13).
+  onPeriod((sel, rng) => {
+    if (sel.verb || sel.subject?.role !== 'noun') return undefined;
+    return rng() < 0.7 ? R.cycleSubjectGloss(sel) : sel.subjectGloss === 'temporal' ? R.cycleGlossRelation(sel) : undefined;
+  }),
   // A relative clause said alone, or headed again (P13).
   (s, rng) => {
     const link = pick(rng, s.links.filter((l) => !l.kind));

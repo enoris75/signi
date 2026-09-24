@@ -1084,6 +1084,10 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Only the relative clause',
   },
+  // The chip on a verbless period's subject that says how it reads when it defines an adjective or an
+  // adverb (P13, `/gloss`): its MEANING, it "Significato", de "Bedeutung", ja 意味. Each reading is named
+  // by what the phrase reads as, with the catalogue's own names (category.*, slot.*).
+  'gloss.name': { plan: nameOf('MEANING'), format: NAME_FORMAT, fallback: 'Meaning' },
 
   // The control on a noun that coordinates another phrase with it ("the cat and the dog").
   'satellite.coordination': {
@@ -3109,6 +3113,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: purposeOf('SAY', { concept: 'RELATIVE_CLAUSE', definiteness: 'definite', focus: 'only' }),
     format: { stripPeriod: true },
     fallback: 'to say only the relative clause',
+  },
+  // `/gloss` (P13), as the settings say theirs: "to set a noun's meaning", it "impostare il significato
+  // di un sostantivo".
+  'purpose.gloss': {
+    plan: setterOf('MEANING', 'NOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's meaning",
   },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un

@@ -114,6 +114,7 @@ export const EXAMPLES: Record<string, string> = {
   such: "/subj ( cat /such ) /verb ( run )",
   rel: "/subj ( man /rel subj { /verb ( love ) /obj ( cat ) } ) /verb ( run )",
   headless: "/subj ( man /rel subj { /verb ( love ) /obj ( cat ) } /headless )",
+  gloss: "/subj ( speed /adj big /gloss manner )",
   in: "/subj ( cat ) /verb ( eat ) /loc ( house /in )",
   through: "/subj ( dog ) /verb ( run ) /route ( house /through )",
   under: "/subj ( cat ) /verb ( eat ) /loc ( house /under )",

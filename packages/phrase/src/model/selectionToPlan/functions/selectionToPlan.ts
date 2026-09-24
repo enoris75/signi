@@ -1,10 +1,28 @@
-import type { PhrasePlan } from "@signi/shared";
+import type { NounElement, NounPhrase, PhrasePlan } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
 import { buildComplements } from "./buildComplements.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 import { buildVerbPhrase } from "./buildVerbPhrase.ts";
 import { imperativeSubject } from "./imperativeSubject.ts";
 import { asksQuestion, canBeExistential } from "../../functions/questionGates.ts";
+
+// The subject of a verbless period, read as the definition of an adjective or an adverb (P13): the
+// NounPhrase gloss flag its reading names. With a verb the subject is the one who acts, and a group
+// has no one phrase to flag, so both are left as they are.
+function glossed(sel: PhraseSelection, subject: NounElement | undefined): NounElement | undefined {
+  if (!sel.subjectGloss || sel.verb || !subject || "conjuncts" in subject) return subject;
+  const np: NounPhrase = { ...subject };
+  if (sel.subjectGloss === "dimension") np.dimensionGloss = true;
+  else if (sel.subjectGloss === "manner") np.mannerGloss = true;
+  else
+    np.complementGloss = {
+      type: sel.subjectGloss,
+      ...(sel.subjectGloss === "temporal" && sel.subjectGlossRelation
+        ? { specifiers: [{ kind: "temporal" as const, value: sel.subjectGlossRelation }] }
+        : {}),
+    };
+  return np;
+}
 
 // Serialise one container's flat selection into a wire PhrasePlan (its noun phrases carry
 // no relative clauses; those are attached from cross-container links in workspacePlan).
@@ -27,7 +45,7 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
       ? imperativeSubject(sel.imperativePerson)
       : infinitive
         ? { concept: "GENERIC_PERSON" }
-        : buildNounElement(sel, "subject"),
+        : glossed(sel, buildNounElement(sel, "subject")),
     verbPhrase: buildVerbPhrase(sel),
     directObject: buildNounElement(sel, "directObject"),
     complements: buildComplements(sel),

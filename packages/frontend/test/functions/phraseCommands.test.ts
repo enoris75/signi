@@ -48,6 +48,9 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleToggleQuestion', (c) => c.handleToggleQuestion('directObject'), (p) => reducers.toggleQuestionRole(p, 'directObject')],
   ['handleToggleQuestionAnimate', (c) => c.handleToggleQuestionAnimate(), reducers.toggleQuestionAnimate],
   ['handleToggleExistential', (c) => c.handleToggleExistential(), reducers.toggleExistential],
+  // How a verbless period's subject reads, and a time reading's relation (P13).
+  ['handleCycleGloss', (c) => c.handleCycleGloss(-1), (p) => reducers.cycleSubjectGloss(p, -1)],
+  ['handleCycleGlossRelation', (c) => c.handleCycleGlossRelation(), reducers.cycleGlossRelation],
   ['handleSelectSpecifier', (c) => c.handleSelectSpecifier('over'), (p) => reducers.setSpecifier(p, 'over', 'route')],
   ['handleSelectLocativeSpecifier', (c) => c.handleSelectLocativeSpecifier('under'), (p) => reducers.setSpecifier(p, 'under', 'locative')],
   ['handleSelectTemporalRelation', (c) => c.handleSelectTemporalRelation('ago'), (p) => reducers.setTemporalRelation(p, 'ago')],

@@ -8,6 +8,8 @@ import GavelIcon from "@mui/icons-material/Gavel";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import TranslateIcon from "@mui/icons-material/Translate";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
@@ -18,6 +20,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import {
+  DEFAULT_TEMPORAL_RELATION,
   DETERMINER_COMPLEMENT_TYPES,
   STANDARD_DEGREES,
   defaultDefiniteness,
@@ -46,6 +49,16 @@ import { genderLabel } from "./genderLabel.ts";
 // Every satellite the selection could carry, each saying whether its own head licenses it and
 // whether it holds a value. Rules that reach across satellites — a dropped subject, a folded
 // object — and whether each box is shown are left to resolveSatellites.
+/** The catalogue's name for what a subject reads as (P13): the word class or the complement it becomes. */
+const GLOSS_LABEL_KEY = {
+  plain: "category.noun",
+  dimension: "category.adjective",
+  manner: "slot.manner",
+  locative: "slot.locative",
+  direction: "slot.direction",
+  temporal: "slot.temporal",
+} as const;
+
 export function rawSatellites(
   selection: PhraseSelection,
   // The UI language: a satellite that carries a word (an adjective, a modal, a complement)
@@ -245,6 +258,32 @@ export function rawSatellites(
     },
     question("subject"),
     questionAnimacy("subject"),
+    // How the subject of a verbless period reads when it defines an adjective or an adverb (P13): each
+    // click moves it on — a noun phrase, an adjective's dimension, a manner, a place, a direction, a
+    // time. A period with a verb has no reading: its subject is the one who acts.
+    {
+      key: "subjectGloss",
+      parent: "subject",
+      label: t("gloss.name"),
+      labelKey: "gloss.name",
+      icon: <TranslateIcon sx={iconSx} />,
+      available: subjectRole === "noun" && !selection.verb,
+      hasValue: Boolean(selection.subjectGloss),
+      valueLabel: t(GLOSS_LABEL_KEY[selection.subjectGloss ?? "plain"]),
+      directToggle: true,
+    },
+    // The relation a time reading says it with, "until this time" (P13).
+    {
+      key: "subjectGlossRelation",
+      parent: "subject",
+      label: t("slot.temporal"),
+      labelKey: "slot.temporal",
+      icon: <EventRepeatIcon sx={iconSx} />,
+      available: subjectRole === "noun" && !selection.verb && selection.subjectGloss === "temporal",
+      hasValue: Boolean(selection.subjectGlossRelation),
+      valueLabel: t(`temporal.value.${selection.subjectGlossRelation ?? DEFAULT_TEMPORAL_RELATION}` as const),
+      directToggle: true,
+    },
     {
       // The existential, "there is a cat" (P09-E12 M7): a fact about the subject, which it makes the
       // pivot, so it rides the subject's ring rather than the verb's full one. Offered where the engine

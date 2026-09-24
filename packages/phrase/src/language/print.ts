@@ -32,7 +32,7 @@ import {
   SUB_VALUES,
   commandByAction,
   roleCommand,
-  settingCommand,
+  settingWords,
   type Setting,
   type TokenColor,
 } from "./commands.ts";
@@ -334,10 +334,11 @@ class Printer {
 
   /** A setting on a word, written as the command that sets its current value. */
   setting(s: Setting, w: WordInfo): void {
-    const def = settingCommand(s);
-    const back = settingCommand({ id: s.id, value: defaultSetting(s.id, w) } as Setting);
-    this.statement({ key: `${wordKey(w.ref)}:${s.id}`, removal: `/${back.name}`, owner: w.ref, about: w.ref });
-    this.emit(`/${def.name}`, "command", "setting", { word: w.ref });
+    const def = settingWords(s);
+    const back = settingWords({ id: s.id, value: defaultSetting(s.id, w) } as Setting);
+    this.statement({ key: `${wordKey(w.ref)}:${s.id}`, removal: [back.command, back.value].filter(Boolean).join(" "), owner: w.ref, about: w.ref });
+    this.emit(def.command, "command", "setting", { word: w.ref });
+    if (def.value) this.emit(def.value, "value", "setting", { word: w.ref });
   }
 
   /** The settings a word holds, other than its defaults, in canonical order. */
@@ -422,7 +423,7 @@ class Printer {
       }
     }
     const afterAdjectives = this.tokens.length;
-    this.settings(w, ["number", "gender", "determiner", "specifier", "temporal", "sentiment", "causePolarity", "degree"]);
+    this.settings(w, ["number", "gender", "determiner", "specifier", "gloss", "temporal", "sentiment", "causePolarity", "degree"]);
     const address = w.address!;
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its

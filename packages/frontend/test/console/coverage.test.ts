@@ -34,6 +34,8 @@ const WRAPS: Record<string, string> = {
   toggleQuestionRole: 'setQuestionRole',
   toggleQuestionAnimate: 'setQuestionAnimate',
   toggleExistential: 'setExistential',
+  cycleSubjectGloss: 'setSubjectGloss',
+  cycleGlossRelation: 'setGlossRelation',
   cycleNounConjunction: 'setNounConjunction',
 };
 
@@ -71,6 +73,10 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'noun.conjunction': 'or',
   'noun.relative': 'rel',
   'noun.headless': 'headless',
+  'subject.gloss': 'gloss',
+  'subject.gloss.back': 'gloss',
+  'subject.glossRelation': 'until',
+  'subject.glossRelation.back': 'until',
   'noun.relation': 'under',
   'noun.removeComplement': 'del',
   'adjective.next': 'adj',

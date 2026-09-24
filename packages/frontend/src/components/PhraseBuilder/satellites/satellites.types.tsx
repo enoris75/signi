@@ -95,6 +95,9 @@ export type PerimeterEntry = {
   question?: SatelliteIcon;
   animacy?: SatelliteIcon;
   existential?: SatelliteIcon;
+  // How a verbless period's subject reads, and a time reading's relation (P13).
+  gloss?: SatelliteIcon;
+  glossRelation?: SatelliteIcon;
 };
 
 export interface BuildSatelliteIconsArgs {
@@ -116,6 +119,10 @@ export interface BuildSatelliteIconsArgs {
   onToggleQuestion?: (which: QuestionRole) => void;
   onToggleQuestionAnimate?: () => void;
   onToggleExistential?: () => void;
+  // Move the subject's reading, and a time reading's relation, on by one (P13). A hosted ring's
+  // builder has neither, as it has no existential: its phrase is not a period's subject.
+  onCycleGloss?: () => void;
+  onCycleGlossRelation?: () => void;
   // The UI-string lookup: a link control says what state it is in and what a click will do, and
   // both are catalog entries (`status.linked`, `hint.clickToRemove`).
   t: UiStringLookup;

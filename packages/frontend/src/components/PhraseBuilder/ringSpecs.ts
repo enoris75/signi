@@ -92,7 +92,7 @@ export const clearControlKey = (mainKey: string) => `clear:${mainKey}`;
 export const collapseControlKey = (label: string) => `collapse:${label}`;
 export const removeControlKey = (label: string) => `remove:${label}`;
 export const perimeterControlKey = (
-  kind: "relative" | "headless" | "possessor" | "standard" | "conjunct" | "incoming" | "question" | "animacy" | "existential",
+  kind: "relative" | "headless" | "possessor" | "standard" | "conjunct" | "incoming" | "question" | "animacy" | "existential" | "gloss" | "glossRelation",
   noun: string,
 ) => `${kind}:${noun}`;
 export const toolbarControlKey = (type: string, value: string) => `toolbar:${type}:${value}`;
@@ -249,7 +249,8 @@ export function buildRingSpecs({
           aim: { clock: fanned(RELATIONS_HOUR, i, relations.length, true) },
         }),
       );
-      const asks = (["question", "animacy", "existential"] as const).filter((kind) => entry?.[kind]);
+      // A reading and its relation share the hour: only a verbless period has them, and it asks nothing.
+      const asks = (["question", "animacy", "existential", "gloss", "glossRelation"] as const).filter((kind) => entry?.[kind]);
       asks.forEach((kind, i) =>
         outer.push({
           key: perimeterControlKey(kind, mainKey),

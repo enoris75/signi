@@ -45,7 +45,7 @@ describe('commands', () => {
     expect(c.topics).toBe(true);
     expect(labels(c).slice(0, 5)).toEqual(['/adj', '/sg', '/pl', '/masc', '/fem']);
     const topics = [...new Set(c.candidates.map((x) => x.topic))];
-    expect(topics.slice(0, 8)).toEqual(['adjective', 'number', 'gender', 'determiner', 'possessor', 'relative clause', 'coordination', "the period's words"]);
+    expect(topics.slice(0, 8)).toEqual(['adjective', 'number', 'gender', 'determiner', 'possessor', 'relative clause', 'coordination', 'meaning']);
     expect(c.candidates.find((x) => x.insert === '/subj')!.topicKey).toBe('console.topic.words');
     expect(c.candidates.find((x) => x.label === '/pl')!.current).toEqual({ value: 'singular', key: 'number.value.singular' });
     // Roles, period and workspace commands follow the noun's own.

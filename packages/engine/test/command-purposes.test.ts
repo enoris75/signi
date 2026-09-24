@@ -227,6 +227,11 @@ describe('what each console command is for', () => {
       fr: 'dire seulement la proposition relative.', de: 'nur den Relativsatz sagen.',
       es: 'decir solo la oración de relativo.', ja: '関係節だけ言う。', pt: 'dizer só a oração relativa.',
     },
+    'purpose.gloss': {
+      en: "to set a noun's meaning.", it: 'impostare il significato di un sostantivo.',
+      fr: "définir le sens d'un nom.", de: 'die Bedeutung eines Substantivs festlegen.',
+      es: 'establecer el significado de un sustantivo.', ja: '名詞の意味を設定する。', pt: 'definir o significado de um substantivo.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

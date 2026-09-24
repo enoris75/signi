@@ -69,7 +69,7 @@ export function GroupPerimeterControls({
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
         // The clause's own facts about this noun: the wh-question's mark, its who / what, the
         // existential (P09-E12). Plain toggles: no line starts from them.
-        const clauseFacts = (["question", "animacy", "existential"] as const).flatMap((kind) => {
+        const clauseFacts = (["question", "animacy", "existential", "gloss", "glossRelation"] as const).flatMap((kind) => {
           const sat = entry?.[kind];
           const at = sat && controlPos[perimeterControlKey(kind, nounKey)];
           return sat && at ? [{ kind, sat, at }] : [];

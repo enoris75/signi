@@ -107,6 +107,13 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /rel #2.subj ) /verb ( read )',
     misuse: { line: '/subj child /verb read /rel #1.subj', says: { code: 'relativeSamePeriod' } },
   },
+  // How a verbless period's subject reads (P13): a setting whose values have no command of their own.
+  gloss: {
+    line: '/subj speed /adj big /gloss manner',
+    prints: '/subj ( speed /adj big /gloss manner )',
+    holds: { subject: 'SPEED', subjectGloss: 'manner' },
+    misuse: { line: '/verb eat /obj food /gloss manner', says: { code: 'noTarget', args: { command: 'gloss' } } },
+  },
   // The relative clause said alone, its head unspoken (P13) — on the link, as /without is.
   headless: {
     line: '/subj child /rel subj ( /verb love /obj cat ) /headless',

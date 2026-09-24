@@ -1,8 +1,10 @@
 import {
   ASPECTS,
+  DEFAULT_TEMPORAL_RELATION,
   DEGREES,
   MODIFIER_RELATIONS,
   NOUN_COORD_CONJUNCTIONS,
+  TEMPORAL_RELATIONS,
   TENSES,
   VOICES,
   type Aspect,
@@ -24,7 +26,9 @@ import {
   ConceptSelectOpts,
   GenderSlot,
   ImperativePerson,
+  NOUN_GLOSSES,
   NounAddress,
+  NounGloss,
   NounKey,
   NumberSlot,
   PhraseSelection,
@@ -107,6 +111,11 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
   delete sel[`${which}Definiteness` as keyof PhraseSelection];
   delete sel[POSSESSOR_KEY(which)];
   delete sel[POSSESSOR_REF_KEY(which)];
+  // A subject's reading (P13) is a noun phrase's: a pronoun or an adjective has none.
+  if (which === "subject") {
+    delete sel.subjectGloss;
+    delete sel.subjectGlossRelation;
+  }
 }
 
 // Drop everything a noun block holds besides its head — number, gender, determiner, adjectives,
@@ -661,6 +670,32 @@ export function setSpecifier(
 
 // Set the temporal complement's relation (at / ago / until / after / before / during, P09-E12b):
 // its toolbar, as the route's path is. `at` is the default the plan omits (see buildComplements).
+// The reading of a verbless period's subject (P13), or none. A relation belongs to the time
+// reading alone, so another reading drops it.
+export function setSubjectGloss(prev: PhraseSelection, gloss: NounGloss | undefined): PhraseSelection {
+  const next: PhraseSelection = { ...prev, subjectGloss: gloss };
+  if (!gloss) delete next.subjectGloss;
+  if (gloss !== "temporal") delete next.subjectGlossRelation;
+  return next;
+}
+
+// Cycle none → dimension → manner → place → direction → time → none.
+export function cycleSubjectGloss(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
+  const values = [undefined, ...NOUN_GLOSSES] as const;
+  return setSubjectGloss(prev, cycled(values, prev.subjectGloss, step));
+}
+
+// The relation a time reading says it with (P13): "until this time", "a moment ago".
+export function setGlossRelation(prev: PhraseSelection, relation: TemporalRelation): PhraseSelection {
+  const next: PhraseSelection = { ...prev, subjectGlossRelation: relation };
+  if (relation === DEFAULT_TEMPORAL_RELATION) delete next.subjectGlossRelation;
+  return next;
+}
+
+export function cycleGlossRelation(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
+  return setGlossRelation(prev, cycled(TEMPORAL_RELATIONS, prev.subjectGlossRelation ?? DEFAULT_TEMPORAL_RELATION, step));
+}
+
 export function setTemporalRelation(
   prev: PhraseSelection,
   relation: TemporalRelation,

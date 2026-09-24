@@ -471,6 +471,8 @@ export function PhraseBuilder({
         onToggleQuestion: commands.handleToggleQuestion,
         onToggleQuestionAnimate: commands.handleToggleQuestionAnimate,
         onToggleExistential: commands.handleToggleExistential,
+        onCycleGloss: () => commands.handleCycleGloss(1),
+        onCycleGlossRelation: () => commands.handleCycleGlossRelation(1),
       }),
       t,
     });
@@ -953,6 +955,8 @@ export function PhraseBuilder({
       toggleQuestionAnimate: commands.handleToggleQuestionAnimate,
       toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,
+      cycleGloss: commands.handleCycleGloss,
+      cycleGlossRelation: commands.handleCycleGlossRelation,
       cycleAspect: commands.handleCycleAspect,
       cycleVoice: commands.handleCycleVoice,
       cycleDegree: commands.handleCycleDegree,

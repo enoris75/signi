@@ -37,6 +37,8 @@ import {
   toggleNegative,
   toggleNumber,
   toggleExistential,
+  cycleGlossRelation,
+  cycleSubjectGloss,
   toggleQuestionAnimate,
   toggleQuestionRole,
   type CycleStep,
@@ -85,6 +87,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleToggleQuestion: (which: QuestionRole) => onPhraseUpdate((prev) => toggleQuestionRole(prev, which)),
     handleToggleQuestionAnimate: () => onPhraseUpdate(toggleQuestionAnimate),
     handleToggleExistential: () => onPhraseUpdate(toggleExistential),
+    // How a verbless period's subject reads, and a time reading's relation (P13).
+    handleCycleGloss: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleSubjectGloss(prev, step)),
+    handleCycleGlossRelation: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleGlossRelation(prev, step)),
     handleSelectSpecifier: (spec: PathSpecifier) => onPhraseUpdate((prev) => setSpecifier(prev, spec, "route")),
     handleSelectLocativeSpecifier: (spec: PathSpecifier) =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
