@@ -198,7 +198,9 @@ export function predicateText(
     : directObject && (!objectClitic || existential) ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
   // A focus adverb under a negation takes its negative-polarity word in the same slot, where
   // Italian has one: "non mangia neanche il cibo", not "*non mangia anche il cibo" (A245).
-  const negAdverb = negativeAdverb(modifier, verbNegative === true);
+  // A negation a modal governs denies the main verb's group, its adverb with it: "può non mangiare
+  // ancora il cibo" (P09-E28 follow-up).
+  const negAdverb = negativeAdverb(modifier, verbNegative === true || (governedNegative === true && modals.length > 0));
   const adverbText = negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : '');
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the

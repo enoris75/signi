@@ -141,7 +141,11 @@ export function predicateText(
       ? agreeAdj(stem, subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
       : (a.forms['base'] ?? '');
   };
-  const adverbText = adverbSurface(modifier);
+  // Under a negation a modal governs, the adverb is in the governed group behind its "não", and takes
+  // its negative word there without moving: "pode não comer ainda" (P09-E28 follow-up).
+  const governedOnly = verbNegative !== true && governedNegative === true && modals.length > 0;
+  const governedWord = governedOnly ? negativeAdverb(modifier, true) : undefined;
+  const adverbText = governedWord && modifier?.forms['negative'] ? governedWord.text : adverbSurface(modifier);
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the

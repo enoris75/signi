@@ -32,7 +32,7 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
           ? 'infinitive'
           : undefined;
     // A sentence adverb opens a main statement (P09-E39, see `liftSentenceAdverb`).
-    const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive));
+    const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive), topMood);
     // Every rendered period closes with its language's full stop, appended here rather
     // than by each engine — the ruby segments must carry the same one, unread. A question closes
     // on its question mark instead, and opens on one where the language writes it (es "¿").

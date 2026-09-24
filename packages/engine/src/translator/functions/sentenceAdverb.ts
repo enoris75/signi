@@ -1,4 +1,4 @@
-import type { ConceptForms, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, Mood, ResolvedPhrase } from '../../types.js';
 
 /**
  * A **sentence adverb** (`subtype: 'sentence'` — *maybe, probably, actually, of course*) comments on
@@ -28,11 +28,13 @@ export function asFrequencyAdverb(modifier: ConceptForms | undefined): ConceptFo
  * verb takes the subjunctive, *talvez o gato coma*, and a past event the perfect one, *talvez o gato
  * não tenha comido* (P09-E39 D2).
  */
-export function liftSentenceAdverb(resolved: ResolvedPhrase): ResolvedPhrase {
+export function liftSentenceAdverb(resolved: ResolvedPhrase, topMood?: Mood): ResolvedPhrase {
   const vp = resolved.verbPhrase;
   const modifier = vp?.modifier;
   if (!vp || modifier?.forms['sentence'] !== '1') return resolved;
-  if (vp.interrogative || vp.mood !== undefined) return resolved;
+  // The clause's own mood, not the verb phrase's: a negated statement may already be in the
+  // subjunctive its adverb asked for (see `preverbalSentenceMood`), and the shift below is the same.
+  if (vp.interrogative || topMood !== undefined) return resolved;
   const { sentence: _sentence, ...forms } = modifier.forms;
   const adverb: ConceptForms = { ...modifier, forms: { ...forms, subtype: 'sentence' } };
   return {
@@ -43,6 +45,23 @@ export function liftSentenceAdverb(resolved: ResolvedPhrase): ResolvedPhrase {
 }
 
 type Vp = NonNullable<ResolvedPhrase['verbPhrase']>;
+
+/**
+ * The subjunctive a sentence adverb asks for (`mood: 'subjunctive'`, Portuguese *talvez*) where it
+ * stays inside the clause and still precedes its verb: under a finite negation it outscopes, it
+ * stands in front of the negator (`negative_slot`), so "o cão diz que o gato **talvez não coma**",
+ * "o gato que talvez não coma", "o gato talvez não tenha comido?" (P09-E39 follow-up). Affirmative,
+ * it follows the verb ("diz que o gato come talvez"), and the verb keeps the indicative, as D2 has
+ * it. A clause already in a mood of its own — a command, a condition, a citation, a governed
+ * subjunctive — and a modal chain are left alone; so is every lexeme that asks for no mood.
+ */
+export function preverbalSentenceMood(vp: Vp): Partial<Vp> {
+  const forms = vp.modifier?.forms;
+  if (forms?.['sentence'] !== '1' || forms['mood'] !== 'subjunctive') return {};
+  if (vp.mood !== undefined || vp.modals.length > 0 || vp.negative !== true) return {};
+  const slot = forms['negative_slot'];
+  return slot === 'pre-negator' || slot === 'pre-negation' ? subjunctive(vp) : {};
+}
 
 /**
  * The subjunctive a sentence adverb puts its clause in: the present for a present or future event,

@@ -37,7 +37,7 @@ MAYBE, affirmative present, and in a question and a content clause:
 | fr | peut-être que le chat mange la nourriture. | est-ce que le chat mangea peut-être la nourriture ? | le chien dit que le chat ne mange peut-être pas la nourriture. |
 | de | vielleicht frisst der Kater das Essen. | fraß der Kater vielleicht das Essen? | der Hund sagt, dass der Kater das Essen vielleicht nicht frisst. |
 | es | quizás el gato come la comida. | ¿el gato comió quizás la comida? | el perro dice que el gato quizás no come la comida. |
-| pt | talvez o gato coma a comida. | o gato comeu talvez a comida? | o cão diz que o gato talvez não come a comida. |
+| pt | talvez o gato coma a comida. | o gato comeu talvez a comida? | o cão diz que o gato talvez não coma a comida. |
 | ja | 猫はもしかすると食べ物を食べます。 | 猫は食べ物をもしかすると食べましたか？ | 犬は猫が食べ物をもしかすると食べないと言います。 |
 
 What landed:
@@ -90,10 +90,18 @@ What landed differently from the plan:
    and English *actually*.
 3. **Portuguese *claro* takes *que*** (`fronted: 'que'`), since bare fronted *claro* is the interjection
    "sure!". D3 did not say it.
-4. **The Portuguese subjunctive is a main statement's only.** In a subordinate clause *talvez* stands
-   in the frequency slot and the verb keeps the indicative ("o cão diz que o gato talvez não come"),
-   where the norm wants *coma*. The mood is a clause-level choice the translator makes for the main
-   clause; a content clause's mood is its governor's.
+4. **The Portuguese subjunctive follows D2's "when the adverb precedes the verb" literally**
+   (follow-up, same day). A main statement fronts *talvez*, so it always takes the subjunctive.
+   Elsewhere — a content or relative clause, a question — *talvez* stays in the clause: ahead of a
+   negator it outscopes, it precedes the verb and the verb takes the subjunctive too
+   (`preverbalSentenceMood`, in `resolveVerbPhrase`): "o cão diz que o gato talvez não coma a
+   comida", "…talvez não tenha comido…", "o gato que talvez não coma a comida corre", "o gato talvez
+   não tenha comido a comida?". Affirmative, it follows the verb there ("o cão diz que o gato come
+   talvez a comida") and the indicative stays. A clause already in a mood of its own (a condition,
+   a command, a governed subjunctive) and a modal chain are left alone. The shipped version had the
+   indicative in every subordinate clause ("…talvez não come…"). The lift now reads the top clause's
+   mood rather than the verb phrase's, since a negated statement may already carry the subjunctive
+   its adverb asked for.
 5. **Japanese follows the topic even where the topic is absent**: the existential has no topic, and
    the adverb opens the clause (もしかすると家に猫がいます). 実は usually opens the sentence (実は猫は…);
    the ruling puts it after the topic with the other three.
