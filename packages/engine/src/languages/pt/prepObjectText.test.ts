@@ -14,6 +14,16 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(CASA, { definiteness: 'no' }), 'em')).toBe('em nenhuma casa');
   });
 
+  // A341: a determiner kept beside a possessive keeps its slot and the fusion; the possessive follows
+  // the noun. "todas" stands in front of it.
+  test('a determiner beside a possessive keeps its slot, the possessive following the noun', () => {
+    const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+    expect(prepObjectText(np(CASA, {}, { possessor: my }), 'de')).toBe('da minha casa');
+    expect(prepObjectText(np(CASA, { definiteness: 'this' }, { possessor: my }), 'de')).toBe('desta casa minha');
+    expect(prepObjectText(np(CASA, { definiteness: 'indefinite' }, { possessor: my }), 'de')).toBe('de uma casa minha');
+    expect(prepObjectText(np(CASA, { definiteness: 'all', number: 'plural' }, { possessor: my }), 'em')).toBe('em todas as minhas casas');
+  });
+
   test('a pronoun takes its tonic form, fused with em in the 3rd person', () => {
     expect(prepObjectText(np(EU), 'em')).toBe('em mim');
     expect(prepObjectText(np(VOCE), 'em')).toBe('em você');

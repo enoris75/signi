@@ -1682,17 +1682,17 @@ describe('known bugs: the Portuguese prepositional object drops the determiner b
   const dependsOn = (extra: Partial<NounPhrase>) =>
     say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { possessor: mine, ...extra }) }), 'pt');
 
-  test.fails('the demonstratives', () => {
+  test('the demonstratives', () => {
     expect(dependsOn({ definiteness: 'this' })).toBe('o gato depende desta condição minha.');
     expect(dependsOn({ definiteness: 'that' })).toBe('o gato depende dessa condição minha.');
   });
 
-  test.fails('the indefinite, singular and plural', () => {
+  test('the indefinite, singular and plural', () => {
     expect(dependsOn({ definiteness: 'indefinite' })).toBe('o gato depende de uma condição minha.');
     expect(dependsOn({ definiteness: 'indefinite', number: 'plural' })).toBe('o gato depende de umas condições minhas.');
   });
 
-  test.fails('no and all', () => {
+  test('no and all', () => {
     expect(dependsOn({ definiteness: 'no' })).toBe('o gato não depende de nenhuma condição minha.');
     expect(dependsOn({ definiteness: 'all', number: 'plural' })).toBe('o gato depende de todas as minhas condições.');
   });
@@ -1706,6 +1706,13 @@ describe('known bugs: the Portuguese prepositional object drops the determiner b
       .toBe('o gato corre com um amigo meu.');
     expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { definiteness: 'this', possessor: mine }) }), 'es'))
       .toBe('el gato depende de esta condición mía.');
+  });
+
+  test('some and most, and a verb whose preposition is em', () => {
+    expect(dependsOn({ definiteness: 'some', number: 'plural' })).toBe('o gato depende de algumas condições minhas.');
+    expect(dependsOn({ definiteness: 'most', number: 'plural' })).toBe('o gato depende da maioria das minhas condições.');
+    expect(say(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { definiteness: 'this', possessor: mine }) }), 'pt')).toBe('o gato clica neste botão meu.');
+    expect(say(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { possessor: mine }) }), 'pt')).toBe('o gato clica no meu botão.');
   });
 });
 
