@@ -27,6 +27,13 @@ describe('partitiveArtFor', () => {
     expect(partitiveArtFor({ ...ANGE, definiteness: 'bare' }, false, 'ange')).toBe("l'");
   });
 
+  // A292: the numeral is the article of a counted argument, plural or singular.
+  test('a counted bare phrase takes none', () => {
+    expect(partitiveArtFor({ ...MOT, definiteness: 'bare', numeral: '2' }, true, 'deux')).toBe('');
+    expect(partitiveArtFor({ ...MOT, definiteness: 'bare', numeral: '1' }, false, 'un')).toBe('');
+    expect(partitiveArtFor({ ...MOT, numeral: '2' }, true, 'deux')).toBe('les');
+  });
+
   test('any other determiner is the article artFor gives', () => {
     expect(partitiveArtFor(MOT, false, 'mot')).toBe('le');
     expect(partitiveArtFor({ ...MOT, definiteness: 'indefinite' }, false, 'mot')).toBe('un');

@@ -19,6 +19,20 @@ describe('translateSubordinator', () => {
     expect(byLanguage('while')).toMatchObject({ fr: 'pendant que', ja: '〜間に' });
   });
 
+  // P09-E27: Italian "finché" without its expletive non (that is the clause's, not the word's), and
+  // Japanese から on the て-form it closes.
+  it('cites until, since and though', () => {
+    expect(byLanguage('until')).toEqual({
+      en: 'until', it: 'finché', fr: "jusqu'à ce que", de: 'bis', es: 'hasta que', pt: 'até que', ja: '〜まで',
+    });
+    expect(byLanguage('since')).toEqual({
+      en: 'since', it: 'da quando', fr: 'depuis que', de: 'seit', es: 'desde que', pt: 'desde que', ja: '〜てから',
+    });
+    expect(byLanguage('though')).toEqual({
+      en: 'though', it: 'sebbene', fr: 'bien que', de: 'obwohl', es: 'aunque', pt: 'embora', ja: '〜のに',
+    });
+  });
+
   it('has a word for every conjunction in every language', () => {
     for (const c of SUBORDINATING_CONJUNCTIONS)
       expect(translateSubordinator(c).every((t) => t.text && t.text !== '—')).toBe(true);

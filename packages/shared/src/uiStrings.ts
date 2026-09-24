@@ -2671,6 +2671,11 @@ export const UI_STRINGS = defineUiStrings({
   'subordinator.value.because': { subordinator: 'because', format: { capitalize: true }, fallback: 'Because' },
   'subordinator.value.after': { subordinator: 'after', format: { capitalize: true }, fallback: 'After' },
   'subordinator.value.before': { subordinator: 'before', format: { capitalize: true }, fallback: 'Before' },
+  // P09-E27: each cited as its clause opens on it — "finché", "jusqu'à ce que", 〜まで; "da quando",
+  // 〜てから; "sebbene", "obwohl", 〜のに.
+  'subordinator.value.until': { subordinator: 'until', format: { capitalize: true }, fallback: 'Until' },
+  'subordinator.value.since': { subordinator: 'since', format: { capitalize: true }, fallback: 'Since' },
+  'subordinator.value.though': { subordinator: 'though', format: { capitalize: true }, fallback: 'Though' },
 
   // The spatial-relation toolbar on a route or a locative: one icon per relation, its tooltip the
   // adposition that relation is spoken with. Not a word of the lexicon — the Romance prepositions
@@ -2710,6 +2715,13 @@ export const UI_STRINGS = defineUiStrings({
   'temporal.value.during': { specifier: { kind: 'temporal', value: 'during' }, fallback: 'during' },
   // P09-E20: the spatial `between` word, and ja 〜の間に, the same citation as `during`'s (D3).
   'temporal.value.between': { specifier: { kind: 'temporal', value: 'between' }, fallback: 'between' },
+  // P09-E27: da / depuis / seit / desde / desde / 〜から.
+  'temporal.value.since': { specifier: { kind: 'temporal', value: 'since' }, fallback: 'since' },
+  // P09-E34: entro / d'ici / innerhalb / dentro de / dentro de / 〜以内に.
+  'temporal.value.within': { specifier: { kind: 'temporal', value: 'within' }, fallback: 'within' },
+  // P09-E35: per / pendant / durante / por, and the two with no adposition cited by their duration
+  // word — de "lang" ("eine Stunde lang"), ja 〜間.
+  'temporal.value.for': { specifier: { kind: 'temporal', value: 'for' }, fallback: 'for' },
 
   // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
   // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".
@@ -3147,7 +3159,7 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set a complement's spatial relationship",
   },
-  // `/at /ago /until /after /before /during /span` set the temporal's relation (P09-E12b, E20),
+  // `/at /ago /until /after /before /during /span /since /within /lasting` set the temporal's relation (P09-E12b, E20, E27, E34, E35),
   // named the way the spatial one is, under TEMPORAL: "to set a complement's temporal relationship".
   'purpose.temporal': {
     plan: setterOf('RELATIONSHIP', 'COMPLEMENT_GRAMMAR', ['TEMPORAL']),

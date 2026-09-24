@@ -35,7 +35,8 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS, COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { esStandard } from './esStandard.js';
@@ -181,9 +182,13 @@ export function complementsPhrase(
       const every = possessive && ownDeterminer === 'all'
         ? (plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo'))
         : '';
+      // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
+      // `nounPhrase` places it: "en las tres casas", "con mis tres perros", "en estas tres casas mías"
+      // (C31, A291).
+      const numeral = numeralText(f, CARDINALS);
       const noun = detached
-        ? [withAdj(word, adj), stressed].filter(Boolean).join(' ')
-        : [every, possessive, withAdj(word, adj)].filter(Boolean).join(' ');
+        ? [numeral, withAdj(word, adj), stressed].filter(Boolean).join(' ')
+        : [every, possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');
       // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
       // stressed-a nouns take ("en la primera agua").
       const af = tonic ? tonicHeadForms(np) : artForms(f, adj);

@@ -147,6 +147,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quand', while: 'pendant que', because: 'parce que', after: 'après que', before: 'avant que',
+  // P09-E27: "jusqu'à ce que" and "bien que" govern the subjunctive, "depuis que" the indicative.
+  until: "jusqu'à ce que", since: 'depuis que', though: 'bien que',
 };
 
 /**
@@ -196,4 +198,9 @@ export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, stri
   during: 'pendant',
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: 'entre',
+  since: 'depuis',
+  // P09-E34 D2: the deadline "d'ici une heure", not the "taking" sense of "en une heure".
+  within: "d'ici",
+  // P09-E35: the duration is "pendant" too — French says "for an hour" and "during an hour" alike.
+  for: 'pendant',
 };

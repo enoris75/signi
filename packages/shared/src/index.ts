@@ -491,6 +491,17 @@ export const GROUP_SCOPED_TEMPORAL_RELATIONS: ReadonlySet<TemporalRelation> = ne
  *            の前に, *antes de*)
  *   during — throughout it: "runs **during this day**" (*durante*, *pendant*, *während*,
  *            *durante*, の間に, *durante*)
+ *   since  — from that time on: "runs **since this day**" (*da*, *depuis*, *seit* + dative,
+ *            *desde*, から, *desde*), P09-E27 D3
+ *   within — a deadline, closing before that limit: "runs **within an hour**" (*entro*, *d'ici*,
+ *            *innerhalb* + genitive, *dentro de*, 〜以内に, *dentro de*), P09-E34. French *d'ici* is
+ *            the deadline ("an hour from now"), not *en une heure* ("taking an hour"). The spatial
+ *            "within the house" is the locative `in` and needs nothing
+ *   for    — how long the act lasts, a measure with no point or boundary: "runs **for an hour**"
+ *            (*per*, *pendant*, *durante*, *por*), P09-E35. Where `during` places the act inside a
+ *            stretch, `for` measures it. **German and Japanese have no adposition for it**: German
+ *            says the measure in the bare accusative (*eine Stunde*), Japanese the bare measure with
+ *            no particle (一時間走ります)
  *   between — bounded on both sides: "runs **between this day and that day**" (*tra*, *entre*,
  *            *zwischen* + dative, *entre*, の間に, *entre*). The one temporal relation that scopes
  *            over a coordinated time instead of distributing across it (see
@@ -513,9 +524,9 @@ export const GROUP_SCOPED_TEMPORAL_RELATIONS: ReadonlySet<TemporalRelation> = ne
  * The canvas draws a box for it (P09-E12b), offered on every verb (`ADJUNCT_COMPLEMENT_TYPES`), and
  * its relation is the box's toolbar, as the route's path is.
  */
-export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during' | 'between';
+export type TemporalRelation = 'at' | 'ago' | 'until' | 'after' | 'before' | 'during' | 'between' | 'since' | 'within' | 'for';
 
-export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during', 'between'];
+export const TEMPORAL_RELATIONS: TemporalRelation[] = ['at', 'ago', 'until', 'after', 'before', 'during', 'between', 'since', 'within', 'for'];
 
 /** A temporal complement naming no relation simply places the act at that time. */
 export const DEFAULT_TEMPORAL_RELATION: TemporalRelation = 'at';
@@ -1477,13 +1488,24 @@ export interface PurposeClause {
  *  - `before`  the clause's event comes second — before / prima che / avant que / bevor / antes de
  *              que / antes que / 〜前に (on the plain non-past). The four Romance words govern the
  *              **subjunctive**, a fixed fact about the conjunction and not about any verb.
+ *  - `until`   the main event lasts up to the clause's — until / finché (non) / jusqu'à ce que / bis /
+ *              hasta que / até que / 〜まで (on the plain non-past). French, Spanish and Portuguese
+ *              govern the subjunctive; Italian keeps the indicative and takes an **expletive** *non*
+ *              (*finché il cane non mangia*), which negates nothing (P09-E27 D1).
+ *  - `since`   the main event runs on from the clause's — since / da quando / depuis que / seit /
+ *              desde que / desde que / 〜てから (on the て-form). **Temporal only**: the causal *since*
+ *              ("since it rains", *poiché*) is not this value (D2). The main clause's tense is the
+ *              plan's: English says "has run since", the others the present (*corre da quando*).
+ *  - `though`  concession — though / sebbene / bien que / obwohl / aunque / embora / 〜のに. Italian,
+ *              French and Portuguese govern the subjunctive; Spanish *aunque* asserts its clause and
+ *              keeps the indicative, as German and Japanese have nothing else (D4).
  *
  * There is no `during`, although P09 §3 lists it among the words: *during* introduces a noun phrase
  * ("during this day", a `TemporalRelation` C29 built), and no language here introduces a clause with
  * it — English says "while the cat eats", not "during the cat eats", and so does each of the others
  * with its own word. `while` is that clause reading.
  */
-export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before';
+export type SubordinatingConjunction = 'when' | 'while' | 'because' | 'after' | 'before' | 'until' | 'since' | 'though';
 
 /** What kind of clause a verb takes as its object — see `Concept.clauseObject`. */
 export type ClauseObject = 'content' | 'infinitive';
@@ -1495,7 +1517,7 @@ export type ClauseObject = 'content' | 'infinitive';
  */
 export type Subordinator = SubordinatingConjunction | 'that';
 
-export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before'];
+export const SUBORDINATING_CONJUNCTIONS: SubordinatingConjunction[] = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though'];
 
 /** See `PhrasePlan.adverbialClause`. */
 export interface AdverbialClause {

@@ -162,12 +162,23 @@ export const RELATIVIZES_AGENT: ReadonlySet<string> = new Set(['en', 'it', 'fr',
 export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);
 
 /**
- * The subordinating conjunctions that govern the **subjunctive** in the four Romance languages (see
- * PhrasePlan.adverbialClause, P09-E4): *prima che*, *avant que*, *antes de que*, *antes que* all do,
- * where *when*, *after* and *because* take the indicative. A fact about the conjunction, so it lives
- * here and not on any lexeme — nothing governs an adverbial clause but the word that introduces it.
+ * The subordinating conjunctions that govern the **subjunctive**, and the languages whose word for
+ * each does (see PhrasePlan.adverbialClause, P09-E4): *prima che*, *avant que*, *antes de que*,
+ * *antes que* all do, where *when*, *after* and *because* take the indicative. A fact about the
+ * conjunction, so it lives here and not on any lexeme — nothing governs an adverbial clause but the
+ * word that introduces it.
+ *
+ * P09-E27 made it per language, since the words for one conjunction disagree: *until* is
+ * subjunctive in French, Spanish and Portuguese (*jusqu'à ce que … mange*, *hasta que … coma*, *até
+ * que … coma*), while Italian *finché* keeps the indicative under its expletive *non* (D1); *though*
+ * is subjunctive in Italian, French and Portuguese (*sebbene*, *bien que*, *embora*), while Spanish
+ * *aunque* asserts a fact and keeps the indicative (D4).
  */
-export const SUBJUNCTIVE_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['before']);
+export const SUBJUNCTIVE_CONJUNCTIONS: Readonly<Partial<Record<SubordinatingConjunction, ReadonlySet<string>>>> = {
+  before: new Set(['it', 'fr', 'es', 'pt']),
+  until: new Set(['fr', 'es', 'pt']),
+  though: new Set(['it', 'fr', 'pt']),
+};
 
 /**
  * The subordinating conjunctions whose clause, in the **past**, is an event in progress and takes
@@ -191,9 +202,10 @@ export const IMPERFECT_PAST_LANGUAGES: ReadonlySet<string> = new Set(['it', 'fr'
  * one is not said in the future everywhere: English and German say it in the present
  * (`FUTURE_AS_PRESENT_LANGUAGES`), Spanish and Portuguese in the subjunctive
  * (`FUTURE_TEMPORAL_MOOD`). *Because* asserts its clause and keeps the future ("because the cat
- * will eat", "porque el gato comerá").
+ * will eat", "porque el gato comerá"). *Until* is one too (P09-E27: "the man will run until the cat
+ * eats"); *since* looks back and *though* concedes a fact, so both keep a future as they find it.
  */
-export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['when', 'while', 'before', 'after']);
+export const TEMPORAL_CONJUNCTIONS: ReadonlySet<SubordinatingConjunction> = new Set(['when', 'while', 'before', 'after', 'until']);
 
 /**
  * The languages that say a future event under a `TEMPORAL_CONJUNCTIONS` word in the **present**, and

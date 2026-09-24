@@ -27,7 +27,7 @@ export function adverbialClauseMood(
   language: string,
   tense: Tense | undefined,
 ): Mood | undefined {
-  if (SUBJUNCTIVE_CONJUNCTIONS.has(conjunction)) {
+  if (SUBJUNCTIVE_CONJUNCTIONS[conjunction]?.has(language)) {
     if (tense === 'past' && PAST_SUBJUNCTIVE_LANGUAGES.has(language)) return 'subjunctive';
     return CONTENT_CLAUSE_MOOD[language];
   }

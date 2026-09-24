@@ -189,6 +189,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quando', while: 'enquanto', because: 'porque', after: 'depois que', before: 'antes que',
+  // P09-E27: "até que" and "embora" govern the subjunctive, "desde que" the indicative.
+  until: 'até que', since: 'desde que', though: 'embora',
 };
 
 /**
@@ -234,7 +236,7 @@ export const CARDINALS: CardinalTable = {
  * "há" is an impersonal verb, not a preposition — "há um momento" is literally "it has a moment" —
  * but it stands where a preposition would and takes the phrase's own article, so its row is enough.
  */
-export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string; de?: boolean }> = {
+export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string; de?: boolean; por?: true }> = {
   ago: { word: 'há' },
   until: { word: 'até' },
   after: { word: 'depois', de: true },
@@ -242,4 +244,10 @@ export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   during: { word: 'durante' },
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: { word: 'entre' },
+  since: { word: 'desde' },
+  // P09-E34: a locution ending in "de", fused through it like "depois de" ("dentro do dia").
+  within: { word: 'dentro', de: true },
+  // P09-E35: the duration "por uma hora". `por` marks the one simple preposition here that fuses
+  // with the definite article, through `porPrep` ("pela hora").
+  for: { word: 'por', por: true },
 };

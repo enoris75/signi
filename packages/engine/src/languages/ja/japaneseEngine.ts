@@ -59,7 +59,9 @@ export const japaneseEngine: LanguageEngine = {
   // the plain past, which the citation keeps (〜た後で).
   renderSubordinator(sub: Subordinator): string {
     if (sub === 'that') return '〜と';
-    return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}` : `〜${JA_SUBORDINATORS[sub].word}`;
+    return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}`
+      : JA_SUBORDINATORS[sub].te ? `〜て${JA_SUBORDINATORS[sub].word}`
+      : `〜${JA_SUBORDINATORS[sub].word}`;
   },
   // The connective adverb Japanese writes between two clauses (そして, しかし, つまり). It follows the
   // first clause's 、 in a sentence; standing alone as a menu entry it is the word itself.
@@ -81,8 +83,8 @@ export const japaneseEngine: LanguageEngine = {
     // The temporal's relation (P09-E12b): its relational noun and particle after the 〜 that stands
     // for the time — 〜に, 〜前に, 〜まで, 〜の後に, 〜の前に, 〜の間に.
     if (specifier.kind === 'temporal') {
-      const { noun, particle } = JA_TEMPORAL[specifier.value];
-      return `〜${noun}${particle}`;
+      const { noun, particle, citation } = JA_TEMPORAL[specifier.value];
+      return citation ?? `〜${noun}${particle}`;
     }
     return specifier.kind === 'path' ? `〜${PATH_CITATION[specifier.value]}` : '';
   },

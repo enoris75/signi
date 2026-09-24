@@ -230,9 +230,16 @@ export const COORD_VALUES: readonly ValueDef[] = [
 ];
 
 /** The conjunctions `/sub` opens an adverbial clause with (P09-E12 D9), each by the word it spells. */
-export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "after", "before"] as const).map(
+export const SUB_VALUES: readonly ValueDef[] = (["when", "while", "because", "after", "before", "until", "since", "though"] as const).map(
   (value) => ({ name: value, value, description: value, descriptionKey: `subordinator.value.${value}` as const }),
 );
+
+/**
+ * The temporal relations whose console command is not the relation's own name, because another
+ * command already has it (a command has one name, `BY_NAME`): `/between` is the place's relation, so
+ * the time's is `/span` (P09-E20); `/for` is the purpose, so the duration is `/lasting` (P09-E35).
+ */
+const TEMPORAL_COMMAND_NAME: Partial<Record<TemporalRelation, string>> = { between: "span", for: "lasting" };
 
 /** The name `/del` takes a subordinate link back by, and the command that prints it: one per kind. */
 export const SUBORDINATE_NAMES: Record<SubordinateKind, string> = { content: "clause", adverbial: "sub", infinitive: "to" };
@@ -520,10 +527,11 @@ export const COMMANDS: readonly CommandDef[] = [
   // The temporal's relation (P09-E12b), as the spatial ones set the place's: "/time ( day /ago )".
   // `/at` is not the determiner `/a`, and none of the six is taken by another command. `between`
   // (P09-E20) is: `/between` sets the place's relation, and a command has one name, so the time's
-  // is `/span` — "/time ( day /and night /span )".
+  // is `/span` — "/time ( day /and night /span )". `/since` (P09-E27) and `/within` (P09-E34) are free;
+  // `/for` is the purpose's, so the duration (P09-E35) is `/lasting` — "/time ( hour /lasting )".
   ...TEMPORAL_RELATIONS.map((value) =>
     setting(
-      value === "between" ? "span" : value,
+      TEMPORAL_COMMAND_NAME[value] ?? value,
       [],
       "noun",
       { id: "temporal", value },

@@ -44,7 +44,7 @@ const SAMPLES: Samples = {
   relativeTakes: [[{}, 'Choose a relative clause: /rel #2.subj, /rel subj { … }, /rel obj { … }']],
   clauseLinkTakes: [[{ command: 'if' }, 'Choose a period: /if #2, /if { … }']],
   joinTakes: [[{}, 'Choose a conjunction: and, or, but, thatis, therefore, then, however']],
-  subTakes: [[{}, 'Choose a conjunction: when, while, because, after, before']],
+  subTakes: [[{}, 'Choose a conjunction: when, while, because, after, before, until, since, though']],
   referenceStartsWithNumber: [[{}, 'Choose a period: #2, #2.obj']],
   periodsFromOne: [[{}, 'Missing period: #0']],
   notANoun: [[{ step: 'foo' }, 'Unknown noun: “foo”. Choose a noun: subj, obj, pred, loc, …']],

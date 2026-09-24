@@ -21,6 +21,13 @@ describe('complementsPhrase', () => {
     expect(complementsPhrase({})).toBe('');
   });
 
+  // A291: the cardinal stands after the determiner and possessive, before the adjectives (C31).
+  test('a counted phrase keeps its numeral', () => {
+    expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural', numeral: '3' })) }))).toBe('in den drei Häusern');
+    expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural', numeral: '2', definiteness: 'bare' })) })))
+      .toBe('in zwei Häusern');
+  });
+
   describe('predicative', () => {
     test('a predicate adjective is undeclined but still compared', () => {
       expect(complementsPhrase(complements({ predicative: complement(np(MUEDE)) }))).toBe('müde');

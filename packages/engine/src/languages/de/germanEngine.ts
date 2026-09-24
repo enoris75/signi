@@ -2,7 +2,7 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
 import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS } from './de.consts.js';
-import { DE_TEMPORAL } from './de.consts.js';
+import { DE_DURATION_CITATION, DE_GENITIVE_TEMPORAL, DE_TEMPORAL } from './de.consts.js';
 import { deComparative } from './deComparative.js';
 import { deStem } from './deStem.js';
 import { deSuperlativeSuffix } from './deSuperlativeSuffix.js';
@@ -104,8 +104,10 @@ export const germanEngine: LanguageEngine = {
     // more on the toolbar than in the sentence ("vor einem Augenblick", "vor dem Tag").
     if (specifier.kind === 'temporal') {
       const relation = specifier.value;
-      return relation === 'during' ? prepDet('während', f, 'gen', false)
+      return relation === 'during' || relation === 'within' ? prepDet(DE_GENITIVE_TEMPORAL[relation], f, 'gen', false)
         : relation === 'until' ? `bis ${prepDet('zu', f, 'dat', false)}`
+        // The duration has no preposition to cite (P09-E35), so the toolbar names it by "lang".
+        : relation === 'for' ? DE_DURATION_CITATION
         : prepDet(relation === 'at' ? 'zu' : DE_TEMPORAL[relation], f, 'dat', false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, 'locative') : '';

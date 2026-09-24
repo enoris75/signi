@@ -67,8 +67,36 @@ complement would say `mit ein Hund` / `in ein Haus` where German wants `mit eine
 Haus`. That is why the German `one` row is left out. It belongs to the cardinal table (`numeralWord`,
 `de.consts.ts`), not to this bug. The Portuguese `em uma casa` (for `numa casa`) is a style choice,
 not settled here either. The French `de` before a bare numeral in a complement is
-[A292](A292-french-writes-de-before-a-bare-numeral-in-a-complement.md).
+[A292](../A-must-fix/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md).
 
 | | |
 |---|---|
 | **Test** | `complements/numerals-in-complements.test.ts` → *known bugs: german, spanish and portuguese drop the numeral inside a complement (A291)* (15 `test.fails`, one per row, plus a regression test for the other four languages, the subject and object in the three, and complements without a numeral) |
+
+## Resolved
+
+2026-09-24. Each of the three complement renderers now spells the cardinal with `numeralText(forms,
+CARDINALS)` where its `nounPhrase` does, between the determiner (or possessive) and the noun:
+
+- [de/complementsPhrase/complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts):
+  `rest` is `${possessive}${numeral }${adj}${word}…`, the determiner staying in the preposition's head
+  (so `im` / `zum` are untouched);
+- [es/complementsPhrase.ts](../../../packages/engine/src/languages/es/complementsPhrase.ts) and
+  [pt/complementsPhrase.ts](../../../packages/engine/src/languages/pt/complementsPhrase.ts): the `noun`
+  array takes the numeral after `todos` / the possessive, and ahead of the noun for a detached
+  possessive (`en estas tres casas mías`, `nestas três casas minhas`).
+
+The 15 `test.fails` in
+[`complements/numerals-in-complements.test.ts`](../../../packages/engine/test/complements/numerals-in-complements.test.ts)
+(*known bugs: german, spanish and portuguese drop the numeral inside a complement (A291)*) are plain
+tests now, assertions unchanged. Added in the same block: the detached possessive, `todos` / `allen`
+before a possessive (`in allen meinen drei Häusern`, `en todas mis tres casas`, `em todas as minhas
+três casas`), a prenominal adjective after the numeral (`mit den drei ersten Hunden`, `con los tres
+primeros perros`), the relations with their own case or scope (`während der zwei Nächte`, `wegen zwei
+Hunden`, `zwischen den zwei Häusern`), P09-E24's `two days ago` (`vor zwei Tagen`, `hace dos días`,
+`há dois dias`), and the feminine agreement (`en una casa`, `em uma casa`, `de duas casas`). Each
+renderer's colocated `complementsPhrase.test.ts` gained a counted-phrase case.
+
+Still open, as the bug file said: German `one` (`mit ein Hund`, from the undeclined cardinal *ein*),
+and a *definite* `one` in every slot, subject and object included (`el un perro`, `der ein Hund`),
+which the complement now says the same way the noun phrase always did.

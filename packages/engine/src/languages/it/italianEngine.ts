@@ -53,7 +53,7 @@ export const italianEngine: LanguageEngine = {
   // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
   // D9): `that`, the object clause's complementizer, or a subordinating conjunction. Italian cites each as it opens its clause, two words where it writes two ("dopo che", "prima che").
   renderSubordinator(sub: Subordinator): string {
-    return sub === 'that' ? 'che' : SUBORDINATORS[sub];
+    return sub === 'that' ? 'che' : SUBORDINATORS[sub].word;
   },
   renderConjunction(conjunction: CoordConjunction): string {
     return COORD_WORDS[conjunction];

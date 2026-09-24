@@ -168,6 +168,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'wenn', while: 'während', because: 'weil', after: 'nachdem', before: 'bevor',
+  // P09-E27: German has no subjunctive to govern, so each is the indicative, verb-final.
+  until: 'bis', since: 'seit', though: 'obwohl',
 };
 
 /**
@@ -222,17 +224,38 @@ export const CARDINALS: CardinalTable = {
  * The dative preposition each temporal relation takes in German (C29). `at` is not here — it reads
  * the head noun's own `temporal_prep` and falls back on "zu", the word a temporal noun already takes
  * in a manner adverbial ("zu allen Zeiten", A60) — and neither is `until`, which reaches its time
- * through that same "zu" ("bis zum Tag"), nor `during`, which governs the genitive.
+ * through that same "zu" ("bis zum Tag"), nor `during` and `within`, which govern the genitive
+ * (`DE_GENITIVE_TEMPORAL`).
  *
  * **"vor" spells both `ago` and `before`**, and that is the language, not a shortcut: "vor einem
  * Augenblick" is a moment ago and "vor dem Tag" is before the day, one preposition for the two
  * readings English splits into "ago" and "before" and Japanese into 前に and の前に.
  */
-export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during'>, string> = {
+export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'during' | 'within' | 'for'>, string> = {
   ago: 'vor',
   after: 'nach',
   before: 'vor',
   // The spatial BETWEEN_PREP with the dative, which the group scope lifts off each conjunct
   // (P09-E20): "zwischen diesem Tag und jenem Tag".
   between: 'zwischen',
+  // P09-E27 D3: "seit" + dative, "seit diesem Tag", "seit dem Tag".
+  since: 'seit',
+};
+
+/**
+ * The temporal relations whose German preposition governs the **genitive**: "während des Tages",
+ * and P09-E34's deadline "innerhalb einer Stunde". Each falls back on the dative where a bare plural
+ * has no genitive to show ("während Tagen", "innerhalb Tagen"), as the cause's "wegen" does.
+ */
+/**
+ * The word the toolbar names the duration `for` by (P09-E35). German says a duration with no
+ * preposition at all, the measure in the bare accusative ("der Kater läuft eine Stunde"), so there is
+ * nothing to cite; "lang" is the word it may follow the measure with ("eine Stunde lang") and the one
+ * a speaker reads as *how long*.
+ */
+export const DE_DURATION_CITATION = 'lang';
+
+export const DE_GENITIVE_TEMPORAL: Record<'during' | 'within', string> = {
+  during: 'während',
+  within: 'innerhalb',
 };

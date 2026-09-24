@@ -277,6 +277,19 @@ describe('relation toolbars: the adposition each specifier spells', () => {
     expect(temporal('between')).toEqual({
       en: 'between', it: 'tra', fr: 'entre', de: 'zwischen', es: 'entre', ja: '〜の間に', pt: 'entre',
     });
+    // P09-E27: the Italian "da" cited bare, as `at`'s "a" is.
+    expect(temporal('since')).toEqual({
+      en: 'since', it: 'da', fr: 'depuis', de: 'seit', es: 'desde', ja: '〜から', pt: 'desde',
+    });
+    // P09-E34: the genitive "innerhalb", and Japanese 以内 cited on the 〜 as `ago`'s 前 is.
+    expect(temporal('within')).toEqual({
+      en: 'within', it: 'entro', fr: "d'ici", de: 'innerhalb', es: 'dentro de', ja: '〜以内に', pt: 'dentro de',
+    });
+    // P09-E35: German and Japanese say the duration with no adposition, so each is cited by its
+    // duration word — "lang" ("eine Stunde lang"), 〜間.
+    expect(temporal('for')).toEqual({
+      en: 'for', it: 'per', fr: 'pendant', de: 'lang', es: 'durante', ja: '〜間', pt: 'por',
+    });
   });
 
   test('a cause connector is a specifier too — the stance picks the word', () => {

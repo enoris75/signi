@@ -29,6 +29,7 @@ import { tonicPhrase } from './tonicPhrase.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
+import { porPrep } from './porPrep.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { defArticle } from './defArticle.js';
@@ -39,7 +40,8 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS, COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { ptStandard } from './ptStandard.js';
@@ -189,9 +191,13 @@ export function complementsPhrase(
         : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
+      // `nounPhrase` places it: "nas três casas", "com os meus três cães", "nestas três casas minhas"
+      // (C31, A291).
+      const numeral = numeralText(f, CARDINALS);
       const noun = detached
-        ? [withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
-        : [possessive, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
+        ? [numeral, withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
+        : [possessive, numeral, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para
@@ -242,8 +248,10 @@ export function complementsPhrase(
             const named = temporalPreposition(c, '');
             return named ? prepDet(named, hf, plural) : contractDet(emPrep, 'em', hf, plural);
           }
-          const { word, de } = PT_TEMPORAL[relation];
-          return de ? `${word} ${contractDet(dePrep, 'de', hf, plural)}` : prepDet(word, hf, plural);
+          const { word, de, por } = PT_TEMPORAL[relation];
+          return de ? `${word} ${contractDet(dePrep, 'de', hf, plural)}`
+            : por ? contractDet(porPrep, 'por', hf, plural)
+            : prepDet(word, hf, plural);
         })() :
         type === 'direction' ? (
           // A direction naming a relation is that relation's goal, spelled as the place is ("salta

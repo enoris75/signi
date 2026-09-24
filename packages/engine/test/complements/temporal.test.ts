@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { TEMPORAL_RELATIONS, type Definiteness, type NounPhrase, type TemporalRelation } from '@signi/shared';
+import { TEMPORAL_RELATIONS, type Definiteness, type NounElement, type NounPhrase, type TemporalRelation } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definiteness = 'this') =>
@@ -9,9 +9,10 @@ const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definite
 
 // The *when* of a clause — the complement the engine had none of until C29 (P09 §3, E3). It carries
 // a `temporal` specifier naming its relation to the time: at / ago / until / after / before /
-// during / between (P09-E20). Each is a distinct adposition in nearly every language, so all seven
-// are pinned here, and the two that are not adpositions at all — the postposed "ago" and the fronted
-// impersonal verb — are pinned beside them.
+// during / between (P09-E20) / since (P09-E27) / within (P09-E34) / for (P09-E35). Each is a
+// distinct adposition in nearly every language, so all are pinned here, and the ones that are not
+// adpositions at all — the postposed "ago", the fronted impersonal verb, and the German and Japanese
+// bare measure of `for` — are pinned beside them.
 describe('temporal', () => {
   // The default relation: no specifier means the act simply happens at that time.
   test('a complement naming no relation is the plain "at"', () => {
@@ -135,6 +136,210 @@ describe('temporal', () => {
     });
   });
 
+  // P09-E27 D3. From that time on: Italian "da" is a simple preposition and fuses with the article
+  // ("dal giorno", "dalla settimana") as `at`'s "a" does; German "seit" takes the dative, and Japanese
+  // puts から straight on the time, as まで is.
+  test('since — Italian fuses its "da", German takes the dative', () => {
+    expect(runsAt('since')).toEqual({
+      en: 'the cat runs since this day.',
+      it: 'il gatto corre da questo giorno.',
+      fr: 'le chat court depuis ce jour.',
+      de: 'der Kater läuft seit diesem Tag.',
+      es: 'el gato corre desde este día.',
+      pt: 'o gato corre desde este dia.',
+      ja: '猫はこの日から走ります。',
+    });
+    expect(runsAt('since', 'WEEK', 'definite')).toEqual({
+      en: 'the cat runs since the week.',
+      it: 'il gatto corre dalla settimana.',
+      fr: 'le chat court depuis la semaine.',
+      de: 'der Kater läuft seit der Woche.',
+      es: 'el gato corre desde la semana.',
+      pt: 'o gato corre desde a semana.',
+      ja: '猫は週から走ります。',
+    });
+    expect(runsAt('since', 'MOMENT', 'indefinite')).toMatchObject({
+      it: 'il gatto corre da un momento.', de: 'der Kater läuft seit einem Augenblick.', fr: 'le chat court depuis un instant.',
+    });
+  });
+
+  // It distributes over a coordinated time, as every relation but `between` does.
+  test('since — repeated on each conjunct', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: {
+        temporal: { phrase: { conjuncts: [np('DAY'), np('NIGHT')], conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'since' }] },
+      },
+    }))).toEqual({
+      en: 'the cat runs since the day and the night.',
+      it: 'il gatto corre dal giorno e dalla notte.',
+      fr: 'le chat court depuis le jour et depuis la nuit.',
+      de: 'der Kater läuft seit dem Tag und seit der Nacht.',
+      es: 'el gato corre desde el día y desde la noche.',
+      pt: 'o gato corre desde o dia e desde a noite.',
+      ja: '猫は日と夜から走ります。',
+    });
+  });
+
+  // P09-E34. A deadline: the act closes before the limit. German "innerhalb" governs the genitive
+  // as "während" does; Spanish and Portuguese "dentro de" fuse through their "de" ("dentro del día",
+  // "dentro do dia"); French says the deadline "d'ici" (D2); Japanese puts 以内に straight on the
+  // measure, as `ago`'s 前に is — one hour is 一時間, the numeral with HOUR's counter, since an
+  // article says nothing in Japanese.
+  describe('within', () => {
+    const runsWithin = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'within' }] } },
+    }));
+
+    test('within an hour', () => {
+      expect(runsAt('within', 'HOUR', 'indefinite')).toEqual({
+        en: 'the cat runs within an hour.',
+        it: "il gatto corre entro un'ora.",
+        fr: "le chat court d'ici une heure.",
+        de: 'der Kater läuft innerhalb einer Stunde.',
+        es: 'el gato corre dentro de una hora.',
+        pt: 'o gato corre dentro de uma hora.',
+        ja: '猫は時間以内に走ります。',
+      });
+      expect(runsWithin(np('HOUR', { definiteness: 'bare', numeral: 1 })).ja).toBe('猫は一時間以内に走ります。');
+    });
+
+    test('within this day, and the day', () => {
+      expect(runsAt('within')).toEqual({
+        en: 'the cat runs within this day.',
+        it: 'il gatto corre entro questo giorno.',
+        fr: "le chat court d'ici ce jour.",
+        de: 'der Kater läuft innerhalb dieses Tages.',
+        es: 'el gato corre dentro de este día.',
+        pt: 'o gato corre dentro deste dia.',
+        ja: '猫はこの日以内に走ります。',
+      });
+      expect(runsAt('within', 'DAY', 'definite')).toEqual({
+        en: 'the cat runs within the day.',
+        it: 'il gatto corre entro il giorno.',
+        fr: "le chat court d'ici le jour.",
+        de: 'der Kater läuft innerhalb des Tages.',
+        es: 'el gato corre dentro del día.',
+        pt: 'o gato corre dentro do dia.',
+        ja: '猫は日以内に走ります。',
+      });
+      expect(runsAt('within', 'DAY', 'indefinite')).toMatchObject({
+        de: 'der Kater läuft innerhalb eines Tages.', es: 'el gato corre dentro de un día.', pt: 'o gato corre dentro de um dia.',
+      });
+    });
+
+    // The genitive falls back on the dative where a bare plural cannot show it, as during's does.
+    test('a bare plural falls back on the dative in German', () => {
+      expect(runsWithin(np('DAY', { definiteness: 'bare', number: 'plural' })).de).toBe('der Kater läuft innerhalb Tagen.');
+      expect(runsWithin(np('DAY', { definiteness: 'definite', number: 'plural' })).de).toBe('der Kater läuft innerhalb der Tage.');
+    });
+
+    // The other two columns of the task's table: a point and a stretch are not a deadline.
+    test('is told apart from at and during', () => {
+      const hour = (value: TemporalRelation) => runsAt(value, 'HOUR', 'indefinite');
+      expect(hour('at')).toMatchObject({ it: "il gatto corre a un'ora.", fr: 'le chat court à une heure.', de: 'der Kater läuft zu einer Stunde.', ja: '猫は時間に走ります。' });
+      expect(hour('during')).toMatchObject({ it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.', ja: '猫は時間の間に走ります。' });
+    });
+  });
+
+  // P09-E35. How long the act lasts, a measure with no point or boundary. French and Spanish say it
+  // with their `during` word ("pendant", "durante"); English, Italian and Portuguese have a word of
+  // its own ("for", "per", "por", which fuses with the definite: "pelas duas horas"). German and
+  // Japanese have no adposition: German's measure is a bare accusative ("eine Stunde", "zwei
+  // Stunden"), Japanese's a bare measure with no particle (一時間, HOUR's counter on the numeral).
+  describe('for', () => {
+    const runsFor = (phrase: NounElement) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'for' }] } },
+    }));
+
+    test('for an hour', () => {
+      expect(runsFor(np('HOUR', { definiteness: 'indefinite' }))).toEqual({
+        en: 'the cat runs for an hour.',
+        it: "il gatto corre per un'ora.",
+        fr: 'le chat court pendant une heure.',
+        de: 'der Kater läuft eine Stunde.',
+        es: 'el gato corre durante una hora.',
+        pt: 'o gato corre por uma hora.',
+        ja: '猫は時間走ります。',
+      });
+    });
+
+    // With a numeral (after A291 and A292): one hour is 一時間 in Japanese, and German's feminine
+    // "eine" is the accusative already.
+    test('for one hour, and two', () => {
+      expect(runsFor(np('HOUR', { definiteness: 'bare', numeral: 1 }))).toMatchObject({
+        en: 'the cat runs for one hour.',
+        fr: 'le chat court pendant une heure.',
+        de: 'der Kater läuft eine Stunde.',
+        es: 'el gato corre durante una hora.',
+        pt: 'o gato corre por uma hora.',
+        ja: '猫は一時間走ります。',
+      });
+      expect(runsFor(np('HOUR', { definiteness: 'bare', numeral: 2 }))).toEqual({
+        en: 'the cat runs for two hours.',
+        it: 'il gatto corre per due ore.',
+        fr: 'le chat court pendant deux heures.',
+        de: 'der Kater läuft zwei Stunden.',
+        es: 'el gato corre durante dos horas.',
+        pt: 'o gato corre por duas horas.',
+        ja: '猫は二時間走ります。',
+      });
+      expect(runsFor(np('HOUR', { numeral: 2 }))).toMatchObject({
+        de: 'der Kater läuft die zwei Stunden.', pt: 'o gato corre pelas duas horas.', it: 'il gatto corre per le due ore.',
+      });
+    });
+
+    test('for a time, and the time', () => {
+      expect(runsFor(np('TIME', { definiteness: 'indefinite' }))).toEqual({
+        en: 'the cat runs for a time.',
+        it: 'il gatto corre per un tempo.',
+        fr: 'le chat court pendant un temps.',
+        de: 'der Kater läuft eine Zeit.',
+        es: 'el gato corre durante un tiempo.',
+        pt: 'o gato corre por um tempo.',
+        ja: '猫は時間走ります。',
+      });
+      expect(runsFor(np('TIME'))).toMatchObject({
+        de: 'der Kater läuft die Zeit.', pt: 'o gato corre pelo tempo.', it: 'il gatto corre per il tempo.',
+      });
+    });
+
+    // The accusative shows on a masculine: "diesen Tag", where the dative relations say "diesem".
+    test('German declines the measure in the accusative', () => {
+      expect(runsFor(np('DAY', { definiteness: 'this' })).de).toBe('der Kater läuft diesen Tag.');
+      expect(runsFor(np('MOMENT', { definiteness: 'indefinite' })).de).toBe('der Kater läuft einen Augenblick.');
+    });
+
+    // `during` places the act inside the stretch; `for` measures it. Three languages tell the two
+    // apart by the word, and German and Japanese by having none.
+    test('is told apart from during', () => {
+      const during = runsAt('during', 'HOUR', 'indefinite');
+      expect(during).toMatchObject({
+        en: 'the cat runs during an hour.', it: "il gatto corre durante un'ora.", de: 'der Kater läuft während einer Stunde.',
+        pt: 'o gato corre durante uma hora.', ja: '猫は時間の間に走ります。',
+      });
+      const measure = runsFor(np('HOUR', { definiteness: 'indefinite' }));
+      for (const language of ['en', 'it', 'de', 'pt', 'ja'] as const) expect(measure[language]).not.toBe(during[language]);
+      expect(measure.fr).toBe(during.fr);
+      expect(measure.es).toBe(during.es);
+    });
+
+    // The measure is a phrase like any other: a verb with an object keeps it, and a coordinated
+    // measure repeats a fronted word as the other relations do.
+    test('beside an object, and over a group', () => {
+      expect(sayAll(clause(np('CAT'), 'EAT', {
+        directObject: np('FOOD'),
+        complements: { temporal: { phrase: np('DAY', { definiteness: 'bare', numeral: 2 }), specifiers: [{ kind: 'temporal', value: 'for' }] } },
+      }))).toMatchObject({
+        en: 'the cat eats the food for two days.', de: 'der Kater frisst das Essen zwei Tage.', ja: '猫は二日食べ物を食べます。',
+      });
+      expect(runsFor({ conjuncts: [np('HOUR', { definiteness: 'bare', numeral: 2 }), np('MOMENT', { definiteness: 'indefinite' })], conjunction: 'and' }))
+        .toMatchObject({
+          it: 'il gatto corre per due ore e per un momento.', de: 'der Kater läuft zwei Stunden und einen Augenblick.',
+          ja: '猫は二時間と瞬間走ります。',
+        });
+    });
+  });
+
   // A bare plural has no genitive to show, so "während" falls back on the dative — the same guard
   // the cause's "wegen" has (`genitiveShows`). A determiner that does show it keeps the genitive.
   test('during — a bare plural falls back on the dative in German', () => {
@@ -182,10 +387,12 @@ describe('temporal', () => {
   test.each(['en', 'it', 'fr', 'de', 'es', 'pt', 'ja'] as const)('every relation is distinct in %s', (language) => {
     const rendered = TEMPORAL_RELATIONS.map((relation) => runsAt(relation, 'DAY', 'this')[language]);
     expect(rendered.filter(Boolean)).toHaveLength(TEMPORAL_RELATIONS.length);
-    // Two languages have a genuine merger on a single time. German: `ago` and `before` are both
+    // Four languages have a genuine merger on a single time. German: `ago` and `before` are both
     // "vor" + dative. Japanese: `during` and `between` are both 〜の間に (P09-E20 D3), which on a
-    // group is the right Japanese for "between" — see the `between` tests below.
-    const expected = language === 'de' || language === 'ja' ? TEMPORAL_RELATIONS.length - 1 : TEMPORAL_RELATIONS.length;
+    // group is the right Japanese for "between" — see the `between` tests below. French and Spanish
+    // say the duration `for` with their `during` word, "pendant", "durante" (P09-E35).
+    const merged = { de: 1, ja: 1, fr: 1, es: 1 } as Partial<Record<typeof language, number>>;
+    const expected = TEMPORAL_RELATIONS.length - (merged[language] ?? 0);
     expect(new Set(rendered).size).toBe(expected);
   });
 

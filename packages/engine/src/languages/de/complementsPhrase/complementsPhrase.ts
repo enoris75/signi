@@ -27,7 +27,8 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { numeralText } from '../../../functions/numeralText.js';
+import { CARDINALS, CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -253,16 +254,22 @@ export function complementsParts(
         // and `before` — German makes no difference between "vor einem Augenblick" and "vor dem
         // Tag", where English has two words and Japanese marks the two apart with の.
         //
-        // "während" is the exception: it governs the **genitive** ("während des Tages"), and falls
-        // back on the dative exactly where the cause's "wegen" does — a bare plural has no genitive
+        // "während" is the exception, and P09-E34's "innerhalb" with it: they govern the **genitive**
+        // ("während des Tages", "innerhalb einer Stunde"), and fall back on the dative exactly where
+        // the cause's "wegen" does — a bare plural has no genitive
         // to show ("während Tagen", see `genitiveShows`).
         else if (type === 'temporal') {
           const relation = temporalRelation(c);
-          if (relation === 'during') {
+          if (relation === 'during' || relation === 'within') {
             _case = genitiveShows(np, f) ? 'gen' : 'dat';
-            head = prepDet('während', f, _case, plural);
+            head = prepDet(DE_GENITIVE_TEMPORAL[relation], f, _case, plural);
           } else if (relation === 'until') {
             head = `bis ${prepDet('zu', f, 'dat', plural)}`;
+          } else if (relation === 'for') {
+            // P09-E35. A duration takes no preposition: the measure in the bare accusative, "läuft
+            // eine Stunde", "läuft zwei Stunden".
+            _case = 'acc';
+            head = prepDet('', f, 'acc', plural);
           } else {
             head = prepDet(relation === 'at' ? temporalPreposition(c, 'zu') : DE_TEMPORAL[relation], f, 'dat', plural);
           }
@@ -318,7 +325,12 @@ export function complementsParts(
         ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
       const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
-      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
+      // A cardinal stands after the determiner and possessive and before the declined adjectives, as
+      // `nounPhrase` places it: "in den drei Häusern", "mit meinen drei Hunden" (C31, A291). The
+      // determiner is in `head`, so a fusion like "im" / "zum" is untouched.
+      const numeral = numeralText(f, CARDINALS);
+      const counted = numeral ? `${numeral} ` : '';
+      const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;
       };
       // All but `between`, which is said once over the group: each conjunct is built as above, its

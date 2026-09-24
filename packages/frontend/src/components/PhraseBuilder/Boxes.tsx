@@ -29,6 +29,9 @@ import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import StartIcon from "@mui/icons-material/Start";
+import TimerIcon from "@mui/icons-material/Timer";
+import AvTimerIcon from "@mui/icons-material/AvTimer";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -889,7 +892,9 @@ export function SpecifierSelector({
  * The letter each temporal relation answers to while its toolbar is armed (P09-E12 D3): a letter
  * heard in the English word, as E1 chose N / W / G — **A**t, a**G**o, **U**ntil, a**F**ter,
  * **B**efore, **D**uring. A is not ago's: `at` is the default, and the one pressed most. `between`
- * (P09-E20) takes the spatial toolbar's W, the same relation answering to the same letter.
+ * (P09-E20) takes the spatial toolbar's W, the same relation answering to the same letter, and
+ * **S**ince (P09-E27) its initial, w**I**thin (P09-E34) the letter after the W `between` took,
+ * and f**O**r (P09-E35) the one after the F `after` took.
  */
 export const TEMPORAL_KEYS: Record<TemporalRelation, string> = {
   at: "A",
@@ -899,6 +904,9 @@ export const TEMPORAL_KEYS: Record<TemporalRelation, string> = {
   before: "B",
   during: "D",
   between: "W",
+  since: "S",
+  within: "I",
+  for: "O",
 };
 
 const TEMPORAL_ICONS: Record<TemporalRelation, ReactNode> = {
@@ -909,10 +917,13 @@ const TEMPORAL_ICONS: Record<TemporalRelation, ReactNode> = {
   before: <SkipPreviousIcon sx={{ fontSize: 15 }} />,
   during: <TimelapseIcon sx={{ fontSize: 15 }} />,
   between: <DateRangeIcon sx={{ fontSize: 15 }} />,
+  since: <StartIcon sx={{ fontSize: 15 }} />,
+  within: <TimerIcon sx={{ fontSize: 15 }} />,
+  for: <AvTimerIcon sx={{ fontSize: 15 }} />,
 };
 
-// The temporal complement's relations — at / ago / until / after / before / during (P09-E12b) and
-// between (P09-E20) — the route's toolbar with a set of its own. Each is named by the word its
+// The temporal complement's relations — at / ago / until / after / before / during (P09-E12b),
+// between (P09-E20), since (P09-E27), within (P09-E34) and for (P09-E35) — the route's toolbar with a set of its own. Each is named by the word its
 // language says it with ("ago", "fa", "il y a", 〜前に), cited on a bare noun as the spatial
 // relations are.
 export function TemporalSelector({

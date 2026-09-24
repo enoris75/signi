@@ -18,6 +18,9 @@ export function partitiveArtFor(forms: Record<string, string>, plural: boolean, 
   // A question's stand-in takes none: "avec quoi", "avec qui" (P09-E15, see `questionStandIn`).
   if (forms['question'] === '1') return '';
   if (forms['proper'] === '1' || forms['definiteness'] !== 'bare') return artFor(forms, plural, lead);
+  // A counted bare phrase takes none either: the numeral is its article (C31, A292) — "avec deux
+  // bâtons", "avec un bâton", never the generic singular's "l'un bâton".
+  if (forms['numeral'] !== undefined) return '';
   const mass = forms['uncountable'] === '1';
   if (plural && !mass) return artFor({ ...forms, definiteness: 'indefinite' }, true, lead);
   return mass || plural ? dePrep(forms, false, lead) : defArticle(forms, false, lead);

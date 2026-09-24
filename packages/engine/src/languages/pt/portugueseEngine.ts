@@ -10,6 +10,7 @@ import { artFor } from './artFor.js';
 import { contractDet } from './contractDet.js';
 import { datPrep } from './datPrep.js';
 import { dePrep } from './dePrep.js';
+import { porPrep } from './porPrep.js';
 import { renderClause } from './renderClause.js';
 import { spatialHead } from './spatialHead.js';
 import type { Subordinator } from '@signi/shared';
@@ -74,8 +75,10 @@ export const portugueseEngine: LanguageEngine = {
     // "depois de", "antes de", "durante".
     if (specifier.kind === 'temporal') {
       if (specifier.value === 'at') return contractDet(emPrep, 'em', f, false);
-      const { word, de } = PT_TEMPORAL[specifier.value];
-      return de ? `${word} ${contractDet(dePrep, 'de', f, false)}` : prepDet(word, f, false);
+      const { word, de, por } = PT_TEMPORAL[specifier.value];
+      return de ? `${word} ${contractDet(dePrep, 'de', f, false)}`
+        : por ? contractDet(porPrep, 'por', f, false)
+        : prepDet(word, f, false);
     }
     return specifier.kind === 'path' ? spatialHead(specifier.value, f, false) : '';
   },
