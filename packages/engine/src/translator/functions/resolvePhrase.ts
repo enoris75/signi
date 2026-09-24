@@ -1,6 +1,7 @@
 import type { ContentClause, ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan, Tense } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
 import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
@@ -231,7 +232,9 @@ export function resolvePhrase(
   // `terminus` complement, the bare dative it already renders as (localization C34).
   //
   // A **generic** experiencer is dropped there rather than rendered, exactly as a generic agent is
-  // under the passive: no language says *piace a si*. What is left is the plain citation of the verb
+  // under the passive: no language says *piace a si*. A language whose generic has a dative form
+  // keeps it: Spanish *uno*, "el gato le gusta a uno" (A316, see `genericWithoutDative`) — but not
+  // in a citation, whose generic subject is the unspoken one: "gustar". What is left is the plain citation of the verb
   // ("piacere", "gustar"), which cannot name the thing liked because that thing is its subject and a
   // citation has none — a fact about Italian and Spanish, not a gap in the plan.
   const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
@@ -243,7 +246,7 @@ export function resolvePhrase(
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
     ...(asked ? { question: asked } : {}),
-    complements: experiencer && !generic
+    complements: experiencer && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'))
       ? { ...resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
       : resolveComplements(complements, language, lookup, verbPhrase?.verb.forms),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the

@@ -102,11 +102,13 @@ export const pronouns: ConceptSeed[] = [
       // generic subject is spelled out as a word (A152). Spanish has the standard pronoun "uno";
       // Portuguese has no single form, and takes the colloquial "a gente" that the engine's "você"
       // paradigm (A108) already leans towards. The other five have no clash to resolve.
+      // `disjunctive` is the generic's dative, where the language has one (A316): German *einem* ("es
+      // geht einem gut"), Spanish *uno* ("el gato le gusta a uno"). Italian *si* has none settled.
       en: { base: 'one', person: '3', number: 'singular', generic: '1' },
       it: { base: 'si',  person: '3', number: 'singular', generic: '1' },
       fr: { base: 'on',  person: '3', number: 'singular', generic: '1' },
-      de: { base: 'man', person: '3', number: 'singular', generic: '1' },
-      es: { base: 'se',  person: '3', number: 'singular', generic: '1', generic_reflexive: 'uno' },
+      de: { base: 'man', person: '3', number: 'singular', generic: '1', disjunctive: 'einem' },
+      es: { base: 'se',  person: '3', number: 'singular', generic: '1', generic_reflexive: 'uno', disjunctive: 'uno' },
       ja: { base: '人',  person: '3', number: 'singular', generic: '1', reading: 'ひと' },
       pt: { base: 'se',  person: '3', number: 'singular', generic: '1', generic_reflexive: 'a gente' },
     },

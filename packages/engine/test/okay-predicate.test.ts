@@ -143,20 +143,42 @@ describe('okay, a predicate with a lexical copula (P09-E31)', () => {
 describe('known bugs: a generic subject in a dative experiencer frame (A316)', () => {
   const okayFor = (verbPhrase: Partial<VerbPhrase> = {}) => sayAll(okay(np('GENERIC_PERSON'), verbPhrase));
 
-  test.fails('German OKAY, present', () => {
+  test('German OKAY, present', () => {
     expect(okayFor().de).toBe('es geht einem gut.');
   });
 
-  test.fails('German OKAY, negated', () => {
+  test('German OKAY, negated', () => {
     expect(okayFor({ negative: true }).de).toBe('es geht einem nicht gut.');
   });
 
-  test.fails('German OKAY, past', () => {
+  test('German OKAY, past', () => {
     expect(okayFor({ tense: 'past' }).de).toBe('es ging einem gut.');
   });
 
-  test.fails('Spanish LIKE', () => {
+  test('Spanish LIKE', () => {
     expect(sayAll(clause(np('GENERIC_PERSON'), 'LIKE', { directObject: np('CAT') })).es).toBe('el gato le gusta a uno.');
+  });
+
+  test('German keeps "es … einem" in a question, under a modal and in a content clause', () => {
+    const G = np('GENERIC_PERSON');
+    expect(sayAll({ ...okay(G), interrogative: true }).de).toBe('geht es einem gut?');
+    expect(okayFor({ modals: ['MUST'] }).de).toBe('es muss einem gut gehen.');
+    const { subject, verbPhrase, complements } = okay(G);
+    expect(sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject, verbPhrase: verbPhrase!, complements } })).de).toBe('der Mann sagt, dass es einem gut geht.');
+  });
+
+  test('Spanish keeps "le … a uno" negated, with a plural thing liked and in a relative clause; Italian still drops it', () => {
+    const G = np('GENERIC_PERSON');
+    expect(sayAll(clause(G, 'LIKE', { directObject: np('CAT'), verbPhrase: { negative: true } })))
+      .toMatchObject({ es: 'el gato no le gusta a uno.', it: 'il gatto non piace.' });
+    expect(sayAll(clause(G, 'LIKE', { directObject: np('CAT', { number: 'plural' }) })).es).toBe('los gatos le gustan a uno.');
+    expect(sayAll(clause(np('CAT', { relative: { headRole: 'directObject', subject: G, verbPhrase: { verb: 'LIKE' } } }), 'RUN')).es)
+      .toBe('el gato que le gusta a uno corre.');
+  });
+
+  test('the generic dative serves any dative slot: a recipient', () => {
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('GENERIC_PERSON') } } })))
+      .toMatchObject({ de: 'der Kater gibt einem das Buch.', es: 'el gato da el libro a uno.' });
   });
 
   test('regression: the generic subject in the other languages, and a noun or pronoun experiencer in German', () => {

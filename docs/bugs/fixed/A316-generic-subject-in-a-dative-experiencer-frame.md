@@ -45,3 +45,27 @@ The Spanish experiencer builder now drops the *se* subject and the clitic with i
 | | |
 |---|---|
 | **Test** | `okay-predicate.test.ts` → *known bugs: a generic subject in a dative experiencer frame (A316)* (4 `test.fails`, one per row, plus a regression test for the other languages' generic subject and a noun or pronoun experiencer in German) |
+
+## Resolved
+
+2026-09-24. The seed form, as proposed: GENERIC_PERSON gets a `disjunctive` (its dative) in German,
+*einem*, and in Spanish, *uno*
+([backend/src/concepts/pronouns.ts](../../../packages/backend/src/concepts/pronouns.ts); **needs a
+reseed of signi.db**). A new helper,
+[functions/genericWithoutDative.ts](../../../packages/engine/src/functions/genericWithoutDative.ts),
+says whether a generic has no such form, and the three places that dropped a generic experiencer
+now drop it only then:
+[lexicalCopula.ts](../../../packages/engine/src/translator/functions/lexicalCopula.ts) (German OKAY
+takes the frame; a generic dative does not take the front field, so "es geht einem gut"),
+[resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts) (Spanish LIKE,
+"el gato le gusta a uno"; the citation still drops it, "gustar.") and
+[resolveRelativeClause.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+("el gato que le gusta a uno corre"). Italian *si* has no dative form, so Italian LIKE still drops
+the generic (`il gatto piace.`): no settled generic dative, left as the bug file allowed. The seed
+also fixes any other dative slot: `der Kater gibt einem das Buch.`, `el gato da el libro a uno.`.
+
+Guarded by the four formerly-failing tests and three new ones (German question, modal and content
+clause; Spanish negated, plural and relative, Italian still dropped; the recipient) in `known bugs: a
+generic subject in a dative experiencer frame (A316)` in
+[okay-predicate.test.ts](../../../packages/engine/test/okay-predicate.test.ts), and the helper's own
+[genericWithoutDative.test.ts](../../../packages/engine/src/functions/genericWithoutDative.test.ts).
