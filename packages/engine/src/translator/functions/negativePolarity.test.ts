@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedNounElement } from '../../types.js';
-import { negativePolarity } from './negativePolarity.js';
+import { negativeComplements, negativePolarity } from './negativePolarity.js';
 
 const el = (forms: Record<string, string>): ResolvedNounElement =>
   ({ conjuncts: [{ head: { conceptId: 'SOMETHING', forms }, adjectives: [], nounModifiers: [] }], agreement: {} });
@@ -31,5 +31,25 @@ describe('negativePolarity', () => {
     const cat = el({ base: 'cat' });
     expect(negativePolarity(cat, true)).toBe(cat);
     expect(negativePolarity(undefined, true)).toBeUndefined();
+  });
+});
+
+// A308
+describe('negativeComplements', () => {
+  test('swaps the indefinite pronoun every complement holds, keeping the rest of the complement', () => {
+    const out = negativeComplements({
+      comitative: { phrase: el({ base: 'someone', disjunctive: 'someone', person: '3', negative: 'anyone' }) },
+      locative: { phrase: el({ base: 'house' }), specifiers: [{ kind: 'path', value: 'in' }] },
+    }, true);
+    expect(head(out?.comitative?.phrase)['disjunctive']).toBe('anyone');
+    expect(head(out?.comitative?.phrase)['definiteness']).toBe('no');
+    expect(head(out?.locative?.phrase)['definiteness']).toBeUndefined();
+    expect(out?.locative?.specifiers).toEqual([{ kind: 'path', value: 'in' }]);
+  });
+
+  test('an affirmative clause, and no complements, are untouched', () => {
+    const complements = { comitative: { phrase: el({ base: 'someone', negative: 'anyone' }) } };
+    expect(negativeComplements(complements, false)).toBe(complements);
+    expect(negativeComplements(undefined, true)).toBeUndefined();
   });
 });

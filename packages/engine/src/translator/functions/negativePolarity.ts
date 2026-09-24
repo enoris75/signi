@@ -1,4 +1,5 @@
-import type { ResolvedNounElement } from '../../types.js';
+import type { ComplementType } from '@signi/shared';
+import type { ResolvedComplement, ResolvedNounElement } from '../../types.js';
 
 // The surfaces an indefinite pronoun swaps under negation, each keyed by the form its negative
 // counterpart replaces. `negative` is the citation/subject form; the others fall back to it, because
@@ -46,4 +47,19 @@ export function negativePolarity(
     // off it, not off the conjuncts (A160's "no" subject is the clause's own negator).
     agreement: { ...el.agreement, definiteness: 'no' },
   };
+}
+
+/**
+ * `negativePolarity` over every complement's phrase: an indefinite pronoun a complement holds is as
+ * much under the clause's negation as the object is — "does not run with anyone", "ne court avec
+ * personne", 誰とも走りません (A308). The swap marks the phrase `definiteness: 'no'`, the flag each
+ * engine's concord already reads off a `no` complement.
+ */
+export function negativeComplements(
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  negative: boolean,
+): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
+  if (!complements || !negative) return complements;
+  return Object.fromEntries(Object.entries(complements).map(([type, c]) =>
+    [type, c && { ...c, phrase: negativePolarity(c.phrase, true)! }])) as Partial<Record<ComplementType, ResolvedComplement>>;
 }

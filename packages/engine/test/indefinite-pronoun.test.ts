@@ -323,33 +323,57 @@ describe('known bugs: negation does not reach an indefinite pronoun inside a com
   const notRun = (complements: NonNullable<PhrasePlan['complements']>) =>
     sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements }));
 
-  test.fails('SOMEONE, comitative', () => {
+  test('SOMEONE, comitative', () => {
     expect(notRun({ comitative: { phrase: np('SOMEONE') } })).toEqual({
       en: 'the cat does not run with anyone.', it: 'il gatto non corre con nessuno.', fr: 'le chat ne court avec personne.',
       de: 'der Kater läuft mit niemandem.', es: 'el gato no corre con nadie.', ja: '猫は誰とも走りません。', pt: 'o gato não corre com ninguém.',
     });
   });
 
-  test.fails('SOMETHING, comitative', () => {
+  test('SOMETHING, comitative', () => {
     expect(notRun({ comitative: { phrase: np('SOMETHING') } })).toEqual({
       en: 'the cat does not run with anything.', it: 'il gatto non corre con niente.', fr: 'le chat ne court avec rien.',
       de: 'der Kater läuft mit nichts.', es: 'el gato no corre con nada.', ja: '猫は何とも走りません。', pt: 'o gato não corre com nada.',
     });
   });
 
-  test.fails('SOMEONE, purpose', () => {
+  test('SOMEONE, purpose', () => {
     expect(notRun({ purpose: { phrase: np('SOMEONE') } })).toEqual({
       en: 'the cat does not run for anyone.', it: 'il gatto non corre per nessuno.', fr: 'le chat ne court pour personne.',
       de: 'der Kater läuft für niemanden.', es: 'el gato no corre para nadie.', ja: '猫は誰のためにも走りません。', pt: 'o gato não corre para ninguém.',
     });
   });
 
-  test.fails('SOMEONE, terminus', () => {
+  test('SOMEONE, terminus', () => {
     expect(sayAll(clause(np('CAT'), 'GIVE', {
       verbPhrase: { negative: true }, directObject: np('BOOK'), complements: { terminus: { phrase: np('SOMEONE') } },
     }))).toEqual({
       en: 'the cat does not give the book to anyone.', it: 'il gatto non dà il libro a nessuno.', fr: 'le chat ne donne le livre à personne.',
       de: 'der Kater gibt niemandem das Buch.', es: 'el gato no da el libro a nadie.', ja: '猫は誰にも本をあげません。', pt: 'o gato não dá o livro a ninguém.',
+    });
+  });
+
+  test('in the past, and SOMETHING as the purpose', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true, tense: 'past' }, complements: { comitative: { phrase: np('SOMEONE') } } }))).toEqual({
+      en: 'the cat did not run with anyone.', it: 'il gatto non corse con nessuno.', fr: 'le chat ne courut avec personne.',
+      de: 'der Kater lief mit niemandem.', es: 'el gato no corrió con nadie.', ja: '猫は誰とも走りませんでした。', pt: 'o gato não correu com ninguém.',
+    });
+  });
+
+  // Two negative words: Romance concord says both ("non dà niente a nessuno"), French drops its "pas"
+  // for both, English keeps "anything … anyone" under the one "not", and Japanese writes the も…ない
+  // circumfix on each. German, which has no negative concord, is left out: it wants one negative word
+  // ("gibt niemandem etwas"), and the engine writes two.
+  test('two negative words: a negative object beside a negative complement, and a negative subject', () => {
+    expect(sayAll(clause(np('CAT'), 'GIVE', {
+      verbPhrase: { negative: true }, directObject: np('SOMETHING'), complements: { terminus: { phrase: np('SOMEONE') } },
+    }))).toMatchObject({
+      en: 'the cat does not give anything to anyone.', it: 'il gatto non dà niente a nessuno.', fr: 'le chat ne donne rien à personne.',
+      es: 'el gato no da nada a nadie.', ja: '猫は誰にも何もあげません。', pt: 'o gato não dá nada a ninguém.',
+    });
+    expect(sayAll(clause(np('SOMEONE'), 'RUN', { verbPhrase: { negative: true }, complements: { comitative: { phrase: np('SOMEONE') } } }))).toMatchObject({
+      en: 'nobody runs with anyone.', it: 'nessuno corre con nessuno.', fr: 'personne ne court avec personne.',
+      es: 'nadie corre con nadie.', ja: '誰も誰とも走りません。', pt: 'ninguém corre com ninguém.',
     });
   });
 

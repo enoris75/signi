@@ -16,7 +16,7 @@ import { fuseGovernedVerb } from './fuseGovernedVerb.js';
 import { lexicalCopula } from './lexicalCopula.js';
 import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
-import { negativePolarity } from './negativePolarity.js';
+import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
@@ -243,9 +243,11 @@ export function resolvePhrase(
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
     ...(asked ? { question: asked } : {}),
+    // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
+    // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
     complements: experiencer && !generic
-      ? { ...resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), terminus: { phrase: subject } }
-      : resolveComplements(complements, language, lookup, verbPhrase?.verb.forms),
+      ? { ...negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative), terminus: { phrase: subject } }
+      : negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
     // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see
