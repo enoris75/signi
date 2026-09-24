@@ -134,6 +134,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // 〜も on every conjunct and the negative existential after the last: 大きくも幸せでもありませんでした,
   // 大きくも疲れてもいない猫. A governed form spells the same circumfix under a modal that denies what it
   // governs (A03: 大きくも幸せでもない必要があります).
+  // Before まで and 前に the negative is the change of state 〜もなくなる (A361).
   if (conjuncts.length > 1) {
     const last = conjuncts[conjuncts.length - 1];
     const governed = form === 'dict' || form === 'stem';
@@ -143,7 +144,12 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
         ? jaAdjClass(lastForms.base, lastForms.reading, false, lastForms.verbal).kind
         : 'na';
       const table = lastKind === 'ta' ? STATE_NEITHER : lastKind === 'ru' ? RU_NEITHER : NEITHER;
-      const tail = table[row(form)][tense === 'past' ? 1 : 0];
+      // Before まで and 前に the negative is reached (A361), as a single predicate's is (A345): the
+      // existential's ない becomes なくなる, with なる taking the tense (大きくも幸せでもなくなる). A state's
+      // いない and a verb's しない change the same way (疲れてもいなくなる, 小さすぎてもしなくなる).
+      const tail = form === 'reach'
+        ? `${lastKind === 'ta' ? 'い' : lastKind === 'ru' ? 'し' : ''}${NARU[tense === 'past' ? 3 : 2]}`
+        : table[row(form)][tense === 'past' ? 1 : 0];
       return [...conjuncts.flatMap((np) => predicateLinkSegs(np, 'mo')), { t: tail }];
     }
     const link = conjunction === 'or' ? 'ka' : 'te';

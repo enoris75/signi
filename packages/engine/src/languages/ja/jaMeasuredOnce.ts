@@ -14,9 +14,10 @@ const MEASURING: ReadonlySet<TemporalRelation> = new Set<TemporalRelation>(['wit
  * in time (時間に), where 一 would be odd. A word with no counter of its own (TIME) is left alone.
  *
  * A plural, indefinite or bare, under `for` is an unspecified many, which `jaCounted` writes 何 + the
- * counter + も (`many`: 何時間も走ります, 何日も, 何年も, A348). The plural reaches here as
- * `plural_unmarked`, since a Japanese noun has no plural word to keep `number` plural. Under the other
- * measuring relations a plural is left as it was, counted as one (一時間以内に; not ruled on).
+ * counter + も (`many`: 何時間も走ります, 何日も, 何年も, A348). Under the other measuring relations it is
+ * an unspecified few, 数 + the counter (`few`: 数時間以内に, 数日の間に, 数年前に, A362). The plural
+ * reaches here as `plural_unmarked`, since a Japanese noun has no plural word to keep `number` plural.
+ * A definite plural is left alone (猫は時間走ります; not ruled on).
  */
 export function jaMeasuredOnce(phrase: ResolvedNounElement, relation: TemporalRelation): ResolvedNounElement {
   if (!MEASURING.has(relation)) return phrase;
@@ -26,10 +27,11 @@ export function jaMeasuredOnce(phrase: ResolvedNounElement, relation: TemporalRe
       const f = np.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const measure = f['counter_join'] === 'head' && f['numeral'] === undefined;
-      // An unspecified many under `for` is 何 + the counter + も, "for hours on end" (A348).
-      if (measure && (plural || f['plural_unmarked'] === '1') && relation === 'for'
+      // An unspecified plural is 何 + the counter + も under `for`, "for hours on end" (A348), and 数 +
+      // the counter under within, during and ago, "within hours", "hours ago" (A362).
+      if (measure && (plural || f['plural_unmarked'] === '1')
         && (f['definiteness'] === 'indefinite' || f['definiteness'] === 'bare')) {
-        return { ...np, head: { ...np.head, forms: { ...f, many: '1' } } };
+        return { ...np, head: { ...np.head, forms: { ...f, [relation === 'for' ? 'many' : 'few']: '1' } } };
       }
       const once = measure && f['definiteness'] === 'indefinite' && !plural;
       return once ? { ...np, head: { ...np.head, forms: { ...f, numeral: '1' } } } : np;
