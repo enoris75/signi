@@ -39,7 +39,10 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
     case 'bare':       return '';
     // Written French drops the plural "des" to "de" before an adjective that precedes the noun:
     // "d'autres chats", "de grands chats". The noun leading means no adjective stands in between.
-    case 'indefinite': return plural && lead !== (forms['plural'] ?? forms['base']) ? de : indefArticle(forms, plural);
+    // A counted phrase has none: the numeral takes the indefinite article's place outright (C31,
+    // A292) — "avec trois chiens", never the "de" a prenominal adjective would call for.
+    case 'indefinite': return forms['numeral'] !== undefined ? ''
+      : plural && lead !== (forms['plural'] ?? forms['base']) ? de : indefArticle(forms, plural);
     case 'this':
     case 'that':       return demArticle(forms, plural, lead);
     case 'some':       return 'quelques';

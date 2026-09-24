@@ -31,7 +31,7 @@ les deux bâtons`. So is a relation that governs *de* itself (`vient de deux mai
 chiens`). The other six languages write no article before a bare counted companion (`with three
 dogs`, `con tre cani`, 三匹の犬と; for de/es/pt see A291).
 
-**Related:** [A289](A289-french-definite-object-with-a-numeral-drops-its-article.md) is the
+**Related:** [A289](../A-must-fix/A289-french-definite-object-with-a-numeral-drops-its-article.md) is the
 opposite problem on the direct object. There `objectArtFor` drops the definite article of a counted
 object (`lit deux livres` for *the two books*). The two bugs share C31's rule, that a numeral replaces
 only the indefinite, but they are in different code and neither fix touches the other's rows.
@@ -67,3 +67,30 @@ separate.
 | | |
 |---|---|
 | **Test** | `complements/numerals-in-complements.test.ts` → *known bugs: french writes de before a bare numeral in a complement (A292)* (8 `test.fails`, one per row, plus a regression test for the bare plural's *des*/*de*, the counted phrase with a determiner, the *de*-governing relations and the other six languages) |
+
+## Resolved
+
+2026-09-24, fixed with P09-E35 (its French *pendant deux heures* was this bug: `pendant de deux
+heures`). The fix is the one sketched above, plus one guard it did not need for its own rows:
+
+- [fr/artFor.ts](../../../packages/engine/src/languages/fr/artFor.ts), `case 'indefinite'`: a counted
+  phrase (`forms['numeral'] !== undefined`) returns `''`, the numeral being its article. A196's
+  `headFor` rewrite and the instrument's partitive both reach it.
+- [fr/complementsPhrase.ts](../../../packages/engine/src/languages/fr/complementsPhrase.ts): the
+  instrumental branch joins `avec` and the partitive over the non-empty parts (no `avec  deux`).
+- [fr/partitiveArtFor.ts](../../../packages/engine/src/languages/fr/partitiveArtFor.ts): a counted
+  *bare* phrase returns `''` before the bare-singular generic definite (A207), which had made a bare
+  `one` instrument `avec l'un bâton`; it is now `avec un bâton`. A counted phrase with a determiner
+  still takes it (`avec les deux bâtons`).
+
+The 8 `test.fails` in
+[`complements/numerals-in-complements.test.ts`](../../../packages/engine/test/complements/numerals-in-complements.test.ts)
+(*known bugs: french writes de before a bare numeral in a complement (A292)*) are plain tests now,
+assertions unchanged. Added in the same block: a bare `one` companion and instrument (`avec un
+chien`, `avec un bâton`), the temporal `for` and `within` over a count (`pendant deux heures`, `d'ici
+deux heures`), the bare counted time the file left open (`le chat court deux jours.`, the measure
+alone), and the subject and object unchanged (`trois chiens courent.`, `le chat voit trois chiens.`).
+`artFor.test.ts` and `partitiveArtFor.test.ts` each gained a counted case.
+
+Still open, as the bug file said: A219's bare-singular `en une maison` for a `one` in the plain
+locative.

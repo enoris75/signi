@@ -193,36 +193,51 @@ describe('known bugs: german, spanish and portuguese drop the numeral inside a c
 // numeral is no adjective and replaces the article outright (C31): "avec trois chiens". Related to
 // A289, the definite *object* that loses its article to a numeral; this is the bare complement.
 describe('known bugs: french writes de before a bare numeral in a complement (A292)', () => {
-  test.fails('a bare companion', () => {
+  test('a bare companion', () => {
     expect(inComplement('comitative', dogs(bare)).fr).toBe('le chat joue avec trois chiens.');
   });
 
-  test.fails('a companion picked as indefinite', () => {
+  test('a companion picked as indefinite', () => {
     expect(inComplement('comitative', dogs({ definiteness: 'indefinite' })).fr).toBe('le chat joue avec trois chiens.');
   });
 
-  test.fails('a bare companion with an adjective', () => {
+  test('a bare companion with an adjective', () => {
     expect(inComplement('comitative', dogs({ ...bare, adjectives: ['BIG'] })).fr).toBe('le chat joue avec trois grands chiens.');
   });
 
-  test.fails('a bare place', () => {
+  test('a bare place', () => {
     expect(inComplement('locative', houses(bare)).fr).toBe('le chat court dans trois maisons.');
   });
 
-  test.fails('a bare place under a spatial relation', () => {
+  test('a bare place under a spatial relation', () => {
     expect(inComplement('locative', np('HOUSE', { numeral: 2, ...bare }), under).fr).toBe('le chat court sous deux maisons.');
   });
 
-  test.fails('a bare goal', () => {
+  test('a bare goal', () => {
     expect(inComplement('direction', np('HOUSE', { numeral: 2, ...bare })).fr).toBe('le chat court à deux maisons.');
   });
 
-  test.fails('a bare opponent', () => {
+  test('a bare opponent', () => {
     expect(inComplement('opponent', dogs(bare)).fr).toBe('le chat joue contre trois chiens.');
   });
 
-  test.fails('a bare instrument', () => {
+  test('a bare instrument', () => {
     expect(inComplement('instrumental', np('STICK', { numeral: 2, ...bare })).fr).toBe('le chat coupe avec deux bâtons.');
+  });
+
+  // Beyond the catalogued rows: a bare "one" (the instrument's generic definite no longer reads
+  // "l'un bâton"), the temporal relations P09-E34 and E35 count with, and a bare counted time under
+  // `at`, which the bug file left open and which now says the measure alone.
+  test('the numeral is the article of every counted bare complement', () => {
+    const fr = (type: ComplementType, phrase: NounPhrase, extra?: object) => inComplement(type, phrase, extra).fr;
+    expect(fr('comitative', np('DOG', { numeral: 1, ...bare }))).toBe('le chat joue avec un chien.');
+    expect(fr('instrumental', np('STICK', { numeral: 1, ...bare }))).toBe('le chat coupe avec un bâton.');
+    const hours = np('HOUR', { numeral: 2, ...bare });
+    expect(fr('temporal', hours, { specifiers: [{ kind: 'temporal', value: 'within' }] })).toBe("le chat court d'ici deux heures.");
+    expect(fr('temporal', np('DAY', { numeral: 2, ...bare }))).toBe('le chat court deux jours.');
+    // The subject and the object were right before and are unchanged.
+    expect(sayAll(clause(np('DOG', { numeral: 3, definiteness: 'indefinite' }), 'RUN')).fr).toBe('trois chiens courent.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: dogs({ definiteness: 'indefinite' }) })).fr).toBe('le chat voit trois chiens.');
   });
 
   test('regression: the bare plural keeps its des, a counted phrase with a determiner is right, and de-governing relations say de', () => {

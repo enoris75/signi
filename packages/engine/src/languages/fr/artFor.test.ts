@@ -24,6 +24,14 @@ describe('artFor', () => {
     expect(artFor({ ...CHAT, definiteness: 'indefinite' }, false, 'autre')).toBe('un');
   });
 
+  // A292: a numeral is the indefinite's own word, so a counted phrase takes no article — not the
+  // "de" a prenominal adjective calls for, which the leading numeral used to trip.
+  test('a counted indefinite takes no article', () => {
+    expect(artFor({ ...CHAT, definiteness: 'indefinite', numeral: '3' }, true, 'trois')).toBe('');
+    expect(artFor({ ...MAISON, definiteness: 'indefinite', numeral: '1' }, false, 'une')).toBe('');
+    expect(artFor({ ...CHAT, numeral: '3' }, true, 'trois')).toBe('les');
+  });
+
   test('the countable quantifiers', () => {
     expect(artFor({ ...CHAT, definiteness: 'some' }, true, 'chats')).toBe('quelques');
     expect(artFor({ ...CHAT, definiteness: 'many' }, true, 'chats')).toBe('beaucoup de');

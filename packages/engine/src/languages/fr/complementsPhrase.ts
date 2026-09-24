@@ -225,7 +225,8 @@ export function complementsPhrase(
               && ['bare', 'indefinite', 'some'].includes(nf0['definiteness'] ?? 'definite')
               ? 'sans' : prepDet('sans', nf0, plural, lead)
           ) :
-          type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
+          // The partitive is empty for a counted instrument (A292), so the two join as `prepDet` joins.
+          type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : ['avec', partitiveArtFor(nf, plural, lead)].filter(Boolean).join(' ')) :
           // P09-E2. The purpose "pour", which contracts with nothing ("pour l'homme"), and the topic
           // "de", which does as any "de" does: "parle du chat", "d'un chat", "de chats". A verb may
           // govern its own topic's instead, "à" for "penser" ("pense au chat", see `topicLink`).
