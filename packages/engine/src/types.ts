@@ -400,6 +400,12 @@ export interface ResolvedQuestion {
 
 export interface ResolvedPhrase {
   subject: ResolvedNounElement;
+  /**
+   * The clause puts its `terminus` — a dative experiencer — ahead of the verb, with the expletive
+   * subject after it: German "**dem Kater** geht es gut" (P09-E31, see `lexicalCopula`). Read by the
+   * German engine in a main declarative clause; every other engine and clause type ignores it.
+   */
+  dativeFront?: boolean;
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
   verbPhrase?: ResolvedVerbPhrase;
   directObject?: ResolvedNounElement;

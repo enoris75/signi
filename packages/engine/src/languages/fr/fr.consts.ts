@@ -145,7 +145,7 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
  * so is a prepositional phrase standing for one ("les phrases sans titre"). The agreement rule would otherwise
  * inflect either like any adjective with its ending ("*sans titres").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro', 'sans titre']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro', 'sans titre', 'bien']);
 
 // The negator of one constituent rather than the clause: "court **non pas** à cause du chien". The
 // full "non pas" and not a bare "pas", which after a verb reads as the colloquial dropped-"ne"

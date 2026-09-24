@@ -173,7 +173,7 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
  * so is a prepositional phrase standing for one ("la frase senza titolo", "le frasi senza titolo"). The agreement
  * rule would otherwise inflect either like any adjective with its ending ("*senza titola").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'senza titolo']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'senza titolo', 'bene']);
 
 /**
  * The "-ico" adjectives of three or more syllables that keep the hard "-chi" in the masculine plural,

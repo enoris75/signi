@@ -603,6 +603,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
   // versuchen is inseparable, so its participle has no ge-.
   // P09-E42's aspectual verbs take avere / avoir / haben. German weitermachen's participle is only
   // its own: in a clause the particle rides the governed verb, which brings its own participle.
+  // BE's faring sense (P09-E31): stare, aller and gehen take the BE auxiliary.
+  BE_FARING: {
+    en: { gerund: 'faring', participle: 'fared' },
+    it: { gerund: 'stando', participle: 'stato', aux: 'be' },
+    fr: { participle: 'allé', aux: 'be' }, de: { participle: 'gegangen', aux: 'be' },
+    es: { gerund: 'estando', participle: 'estado' },
+    pt: { gerund: 'estando', participle: 'estado' },
+    ja: { te: '過ごして', te_reading: 'すごして', nai: '過ごさない', nai_reading: 'すごさない' },
+  },
   STOP_DOING: {
     en: { gerund: 'stopping', participle: 'stopped' },
     it: { gerund: 'smettendo', participle: 'smesso' },

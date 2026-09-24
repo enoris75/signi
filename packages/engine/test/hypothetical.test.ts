@@ -313,6 +313,8 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
       SAY: 'disséssemos',
       // TELL_ORDER is dizer too (P09-E43).
       TELL_ORDER: 'disséssemos',
+      // BE_FARING is estar (P09-E31): estive, esteve.
+      BE_FARING: 'estivéssemos',
       // B61: pôr itself (pus, pôs), and trazer's strong trouxe.
       PUT: 'puséssemos', BRING: 'trouxéssemos',
     };

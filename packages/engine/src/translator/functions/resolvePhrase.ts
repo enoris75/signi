@@ -13,6 +13,7 @@ import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { existentialPlan } from './existentialPlan.js';
 import { fuseGovernedVerb } from './fuseGovernedVerb.js';
+import { lexicalCopula } from './lexicalCopula.js';
 import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { negativePolarity } from './negativePolarity.js';
@@ -327,7 +328,8 @@ export function resolvePhrase(
   // back to its protasis first, so a coordinated clause can then look back to a main clause that
   // itself elides one.
   // German *weiter-* and Japanese 〜続ける fuse the governing verb with the one it governs (P09-E42).
-  const fused = fuseGovernedVerb(resolved, language);
+  // A predicate adjective may name the verb it is said with in place of BE (P09-E31).
+  const fused = lexicalCopula(fuseGovernedVerb(resolved, language), language, lookup);
   const main = fused.condition ? elideSubjectComplement(fused, fused.condition) : fused;
   return main.coordination
     ? { ...main, coordination: { ...main.coordination, clause: elideSubjectComplement(main.coordination.clause, main) } }
