@@ -1120,7 +1120,7 @@ describe('known bugs: a Japanese passive terminus question doubles に (A280)', 
   test('the past keeps によって, and an asked agent beside a stated recipient takes it too', () => {
     expect(say(ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: { ...passive, tense: 'past' }, directObject: np('BOOK') }), 'terminus', true), 'ja'))
       .toBe('本は女によって誰にあげられましたか？');
-    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'agent', true), 'ja'))
+    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'subject', true), 'ja'))
       .toBe('本は誰によって男にあげられますか？');
   });
 });
