@@ -6593,6 +6593,19 @@ export const nouns: ConceptSeed[] = [
     id: 'NEWS',
     role: 'noun',
     description: 'reports of recent events',
+    // "Facts that one has told recently" (localization A32): the report and its recency, a bare
+    // plural head over an object-gap clause, on FACT, TELL and RECENTLY. It avoids NEW, whose en
+    // *new* and fr *nouveaux* would echo *news* and *nouvelles*.
+    definition: {
+      subject: {
+        concept: 'FACT', definiteness: 'bare', number: 'plural',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'TELL', aspect: 'resultative', modifier: 'RECENTLY' },
+        },
+      },
+    },
     emoji: '📰',
     countable: false,
     forms: {
