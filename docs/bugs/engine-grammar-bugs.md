@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds eight, A355–A357 and A359–A363, and Part B is empty).** If
+this writing Part A and Part B are both empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -64,14 +64,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
-| A355 | [A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md](A-must-fix/A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md) | Spanish | the generic patient of a passive is the impersonal se (*se es visto por el gato* for *uno es visto*); Portuguese left to the fixer |
-| A356 | [A356-portuguese-prepositional-object-drops-the-numeral.md](A-must-fix/A356-portuguese-prepositional-object-drops-the-numeral.md) | Portuguese | a verb's own preposition drops the numeral (*depende das condições* for *das duas condições*, *clica em botão*), A340's gap |
-| A357 | [A357-numeral-one-beside-a-possessive-keeps-the-one.md](A-must-fix/A357-numeral-one-beside-a-possessive-keeps-the-one.md) | Italian, French, Spanish, Portuguese, German | the numeral one beside a definite or demonstrative with a pronominal possessive is kept (*su un amigo*, *o seu um amigo*, *il suo un amico*, *son un ami*, *ihr ein Freund*), A319's case A329 left |
-| A359 | [A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md](A-must-fix/A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md) | Italian, French, Spanish | a pronoun object beside a pronoun recipient builds no clitic cluster (*lo dà a lei*, *le donne à elle*, *lo da a ella* for *glielo dà*, *le lui donne*, *se lo da*) |
-| A360 | [A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md](A-must-fix/A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md) | Italian, Spanish | beside the impersonal si / se a pronoun recipient stays tonic (*si dà il libro a lei*, *se da el libro a ella* for *le si dà il libro*, *se le da el libro*) |
-| A361 | [A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md](A-must-fix/A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md) | Japanese | a negated coordination before まで / 前に: 大きくも幸せでもないまで for 大きくも幸せでもなくなるまで |
-| A362 | [A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md](A-must-fix/A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md) | Japanese | a plural measure noun under within / during / ago: 一時間以内に for 数時間以内に (overturns A348's "only for") |
-| A363 | [A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md](A-must-fix/A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md) | French | a verb's own *sur* before a numeral with no article writes two spaces: *clique sur  un bouton* |
 
 **Eight open**, **A355–A357** and **A359–A363**, filed on 2026-09-24 from the leads the A339–A354
 lanes reported. Most are a fix's neighbour it did not reach: A354's passive patient in Spanish
@@ -82,7 +74,21 @@ rest: French *sur* with a numeral writes a double space (A363). A355, A357, A359
 decisions for the fixer. A358 and A364 were not filed: a focused complement is the part of C39 left
 open, and the generic addressee falls under A203's ruling on GENERIC_PERSON in the complements.
 
-The sixteen before them, A339–A354, were fixed on 2026-09-24 and are listed under **Fixed** below.
+**All eight were fixed on 2026-09-24** by three lanes, and are listed under **Fixed** below. The
+rulings the files left to the fixer: Spanish writes a passive's generic patient *uno* (*uno es visto
+por el gato*) and Portuguese keeps *se é visto*, having no settled target (A355); beside a definite
+or demonstrative with a pronominal possessive Romance drops the one and German declines it with the
+mixed ending (*ihr einer Freund*), while the indefinite one keeps A329's slot (A357); the clusters are
+built with a 3rd-person object clitic only, Italian's compound tense keeps the unelided *glielo ha
+dato* as its single clitic does (*lo ha dato*), Spanish is undoubled (*se lo da*), and a reflexive
+verb's clitic beside a pronoun recipient is not done (A359); beside the impersonal clitic Italian
+puts the cluster before *si* (*glielo si dà*) and Spanish keeps the tonic recipient with a pronoun
+object (*se lo da a ella*) (A360); a ている or verb conjunct last takes the mechanical
+〜もいなくなる / 〜もしなくなる, and the negated lowered degree and superlative keep their prenominal
+わけではない (A361); *within*, *during* and *ago* count an unspecified plural as 数 + the counter
+(数時間前に), *for* keeps 何時間も, and the definite plural is unchanged (A362).
+
+The sixteen before those, A339–A354, were fixed on 2026-09-24 and are listed under **Fixed** below.
 
 **Sixteen open**, **A339–A354**, filed on 2026-09-24 from the leads the A278–A338 lanes and their
 cross-lane probe reported while fixing that batch. Most are a fix's neighbour it did not reach: the
@@ -659,6 +665,14 @@ is listed under **Fixed** below.
 | A352 | [A352-french-locative-writes-en-before-an-indefinite-pronoun.md](fixed/A352-french-locative-writes-en-before-an-indefinite-pronoun.md) | French | 2026-09-24 |
 | A353 | [A353-english-direction-adverb-after-the-by-phrase.md](fixed/A353-english-direction-adverb-after-the-by-phrase.md) | English | 2026-09-24 |
 | A354 | [A354-generic-subject-as-a-direct-object-renders-its-subject-form.md](fixed/A354-generic-subject-as-a-direct-object-renders-its-subject-form.md) | all (refusal) | 2026-09-24 |
+| A355 | [A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md](fixed/A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md) | Spanish | 2026-09-24 |
+| A356 | [A356-portuguese-prepositional-object-drops-the-numeral.md](fixed/A356-portuguese-prepositional-object-drops-the-numeral.md) | Portuguese | 2026-09-24 |
+| A357 | [A357-numeral-one-beside-a-possessive-keeps-the-one.md](fixed/A357-numeral-one-beside-a-possessive-keeps-the-one.md) | Italian, French, Spanish, Portuguese, German | 2026-09-24 |
+| A359 | [A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md](fixed/A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md) | Italian, French, Spanish | 2026-09-24 |
+| A360 | [A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md](fixed/A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md) | Italian, Spanish | 2026-09-24 |
+| A361 | [A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md](fixed/A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md) | Japanese | 2026-09-24 |
+| A362 | [A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md](fixed/A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md) | Japanese | 2026-09-24 |
+| A363 | [A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md](fixed/A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md) | French | 2026-09-24 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

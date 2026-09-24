@@ -1,15 +1,19 @@
 # A-must-fix — confirmed bugs
 
+**None open.** The eight listed below, A355–A357 and A359–A363, were all fixed on 2026-09-24 and
+moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) records the rulings each fix
+took. The history below is kept as it was written, in the present tense of each filing.
+
 **Eight open**, **A355–A357** and **A359–A363**, filed on 2026-09-24 from the leads the A339–A354
 lanes reported. Each was reproduced at c30fbcf4.
-[A355](A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md), the Spanish generic patient of a passive written as the impersonal clitic (*se es visto por el gato* for *uno es visto por el gato*); Portuguese is left to the fixer.
-[A356](A356-portuguese-prepositional-object-drops-the-numeral.md), A340's Spanish fix in Portuguese: a verb's own preposition drops the numeral (*depende das condições* for *das duas condições*, *clica em botão* for *em um botão*).
-[A357](A357-numeral-one-beside-a-possessive-keeps-the-one.md), the numeral one beside a pronominal possessive (*de su un amigo*, *deste um amigo seu*, *ihr ein Freund*), the case A319 and A329 left; Romance drops it, German declines it.
-[A359](A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md), A351's "Not done": a pronoun object beside a pronoun recipient builds no clitic cluster (*le donne à elle* for *le lui donne*, *lo dà a lei* for *glielo dà*).
-[A360](A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md), A351's "Not done" beside the impersonal clitic: *si dà il libro a lei*, *se da el libro a ella* for *le si dà il libro*, *se le da el libro*.
-[A361](A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md), a Japanese "neither … nor" before まで / 前に (大きくも幸せでもないまで for 大きくも幸せでもなくなるまで); the わけではない rows are left to the fixer.
-[A362](A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md), a Japanese plural measure noun under within / during / ago (一時間以内に for 数時間以内に), overturning A348's "only for"; the definite plural is left to the fixer.
-[A363](A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md), French *clique sur  un bouton*, two spaces where a numeral leaves the article empty.
+[A355](../fixed/A355-spanish-generic-patient-of-a-passive-is-the-impersonal-se.md), the Spanish generic patient of a passive written as the impersonal clitic (*se es visto por el gato* for *uno es visto por el gato*); Portuguese is left to the fixer.
+[A356](../fixed/A356-portuguese-prepositional-object-drops-the-numeral.md), A340's Spanish fix in Portuguese: a verb's own preposition drops the numeral (*depende das condições* for *das duas condições*, *clica em botão* for *em um botão*).
+[A357](../fixed/A357-numeral-one-beside-a-possessive-keeps-the-one.md), the numeral one beside a pronominal possessive (*de su un amigo*, *deste um amigo seu*, *ihr ein Freund*), the case A319 and A329 left; Romance drops it, German declines it.
+[A359](../fixed/A359-romance-pronoun-object-and-pronoun-recipient-build-no-clitic-cluster.md), A351's "Not done": a pronoun object beside a pronoun recipient builds no clitic cluster (*le donne à elle* for *le lui donne*, *lo dà a lei* for *glielo dà*).
+[A360](../fixed/A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md), A351's "Not done" beside the impersonal clitic: *si dà il libro a lei*, *se da el libro a ella* for *le si dà il libro*, *se le da el libro*.
+[A361](../fixed/A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md), a Japanese "neither … nor" before まで / 前に (大きくも幸せでもないまで for 大きくも幸せでもなくなるまで); the わけではない rows are left to the fixer.
+[A362](../fixed/A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md), a Japanese plural measure noun under within / during / ago (一時間以内に for 数時間以内に), overturning A348's "only for"; the definite plural is left to the fixer.
+[A363](../fixed/A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md), French *clique sur  un bouton*, two spaces where a numeral leaves the article empty.
 A355, A357, A359, A361 and A362 leave decisions for the fixer.
 
 The sixteen listed below, A339–A354, were all fixed on 2026-09-24 and moved to
