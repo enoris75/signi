@@ -362,19 +362,36 @@ describe('known bugs: negation does not reach an indefinite pronoun inside a com
 
   // Two negative words: Romance concord says both ("non dà niente a nessuno"), French drops its "pas"
   // for both, English keeps "anything … anyone" under the one "not", and Japanese writes the も…ない
-  // circumfix on each. German, which has no negative concord, is left out: it wants one negative word
-  // ("gibt niemandem etwas"), and the engine writes two.
+  // circumfix on each. German has no negative concord: the first negative word denies the clause and
+  // every later indefinite keeps its positive form ("gibt niemandem etwas", see `singleNegativeWord`).
   test('two negative words: a negative object beside a negative complement, and a negative subject', () => {
     expect(sayAll(clause(np('CAT'), 'GIVE', {
       verbPhrase: { negative: true }, directObject: np('SOMETHING'), complements: { terminus: { phrase: np('SOMEONE') } },
-    }))).toMatchObject({
+    }))).toEqual({
       en: 'the cat does not give anything to anyone.', it: 'il gatto non dà niente a nessuno.', fr: 'le chat ne donne rien à personne.',
+      de: 'der Kater gibt niemandem etwas.',
       es: 'el gato no da nada a nadie.', ja: '猫は誰にも何もあげません。', pt: 'o gato não dá nada a ninguém.',
     });
-    expect(sayAll(clause(np('SOMEONE'), 'RUN', { verbPhrase: { negative: true }, complements: { comitative: { phrase: np('SOMEONE') } } }))).toMatchObject({
+    expect(sayAll(clause(np('SOMEONE'), 'RUN', { verbPhrase: { negative: true }, complements: { comitative: { phrase: np('SOMEONE') } } }))).toEqual({
       en: 'nobody runs with anyone.', it: 'nessuno corre con nessuno.', fr: 'personne ne court avec personne.',
+      de: 'niemand läuft mit jemandem.',
       es: 'nadie corre con nadie.', ja: '誰も誰とも走りません。', pt: 'ninguém corre com ninguém.',
     });
+  });
+
+  test('German keeps the first negative word only: a subject, an object, a passive, NEVER, a kein noun', () => {
+    const de = (plan: PhrasePlan) => say(plan, 'de');
+    expect(de(clause(np('SOMEONE'), 'SEE', { verbPhrase: { negative: true, tense: 'past' }, directObject: np('SOMETHING') }))).toBe('niemand sah etwas.');
+    expect(de(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: np('SOMETHING'), complements: { comitative: { phrase: np('SOMEONE') } } })))
+      .toBe('der Kater sieht nichts mit jemandem.');
+    expect(de(clause(np('SOMEONE'), 'SEE', { verbPhrase: { negative: true, voice: 'passive' }, directObject: np('SOMETHING') }))).toBe('nichts wird von jemandem gesehen.');
+    expect(de(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true, modifier: 'NEVER' }, complements: { comitative: { phrase: np('SOMEONE') } } })))
+      .toBe('der Kater läuft nie mit jemandem.');
+    expect(de(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true, modifier: 'NEVER' }, directObject: np('SOMEONE') }))).toBe('der Kater sieht nie jemanden.');
+    expect(de(clause(np('DOG', { definiteness: 'no' }), 'RUN', { verbPhrase: { negative: true }, complements: { comitative: { phrase: np('SOMEONE') } } })))
+      .toBe('kein Hund läuft mit jemandem.');
+    // One negative word is still the one: the complement swaps alone.
+    expect(de(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: { comitative: { phrase: np('SOMEONE') } } }))).toBe('der Kater läuft mit niemandem.');
   });
 
   test('regression: the direct object swaps already, and the positive complement keeps the positive pronoun', () => {

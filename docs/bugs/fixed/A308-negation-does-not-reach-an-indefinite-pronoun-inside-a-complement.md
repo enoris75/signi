@@ -60,9 +60,16 @@ Japanese writes 誰とも / 誰にも / 誰のためにも), as it does for a `n
 **Two negative words** (the fixer's check): with a negative object beside a negative complement,
 Romance concord says both, *non dà niente a nessuno*, *no da nada a nadie*, *não dá nada a ninguém*;
 French *ne donne rien à personne*; English keeps *does not give anything to anyone*; Japanese
-誰にも何もあげません. These are pinned. German writes *gibt niemandem nichts*, two negative words in a
-language with no negative concord (standard German wants *gibt niemandem etwas*); that is left
-unpinned and reported as a lead.
+誰にも何もあげません. These are pinned. German has no negative concord, and the swap first gave it *gibt niemandem
+nichts*. The follow-up
+[singleNegativeWord.ts](../../../packages/engine/src/translator/functions/singleNegativeWord.ts), run
+by `resolvePhrase` for a negated clause, keeps only the first negative word in German order and puts
+every later swapped indefinite back in the positive series. That order is the subject (under the
+passive, the patient and then the agent), then *nie*, then the bare dative that leads the object,
+then the object, then the other complements. So: *gibt niemandem etwas*, *niemand läuft mit
+jemandem*, *niemand sah etwas*, *nichts wird von jemandem gesehen*, *läuft nie mit jemandem*, *kein
+Hund läuft mit jemandem*. These are pinned beside the other languages' two-negative cells, and in
+[singleNegativeWord.test.ts](../../../packages/engine/src/translator/functions/singleNegativeWord.test.ts).
 
 - **Tests:** [indefinite-pronoun.test.ts](../../../packages/engine/test/indefinite-pronoun.test.ts) →
   *known bugs: negation does not reach an indefinite pronoun inside a complement (A308)*: all four pins
