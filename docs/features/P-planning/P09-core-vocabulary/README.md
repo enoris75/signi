@@ -19,7 +19,9 @@ complement (*as*), shipped the same day, plan-only, and so did **E14–E19**, al
 lanes landed together: the possessor, marked-relation and passive questions (E14–E16), the indirect
 question (E17, which retired A272), and the superlative's set and attributive comparison (E19, E18).
 **E20–E23 shipped on 2026-09-24** (E20 and E22 plan-only in the engine, E20 also on the temporal
-box), and E24's coverage check for ranks 201–400 filed B75–B90 and E25–E43 (§5). The decisions below were
+box), and E24's coverage check for ranks 201–400 filed B75–B90 and E25–E43 (§5). **All nineteen of
+E25–E43 shipped on 2026-09-24**, in eight lanes landed together (§5), with A291 and A292 fixed on
+the way. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -294,30 +296,31 @@ is built at HEAD and recommends an answer to every decision it raises.
 ## 5. Constructs from ranks 201–400 (E25–E43)
 
 Filed on 2026-09-24 by [E24](Z-done/P09-E24-ranks-201-400.md)'s checklist, one per construct, each
-with a *Today* probed at 1229928. All are **planning, unscheduled**. The words of the same band that
+with a *Today* probed at 1229928. **All nineteen shipped on 2026-09-24**; each task file's `## Done`
+has its render table and what landed differently. The words of the same band that
 need only seeding are [B75–B90](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed).
 
 | task | construct |
 |---|---|
-| [P09-E25](Z-done/P09-E25-quantity-determiners.md) | More quantity determiners — *each, both, most, several, enough, a lot of* |
-| [P09-E26](Z-done/P09-E26-both-and.md) | *Both … and* — a correlative on a coordinated group |
-| [P09-E27](Z-done/P09-E27-until-since-though.md) | *Until, since, though* — three more adverbial-clause conjunctions |
-| [P09-E28](Z-done/P09-E28-yet-and-ever.md) | *Yet* and *ever* — the polarity forms of ALREADY and NEVER |
-| [P09-E29](Z-done/P09-E29-however.md) | *However* — a parenthetical adversative connector |
-| [P09-E30](Z-done/P09-E30-interjections.md) | *Hey* — an interjection before a clause |
-| [P09-E31](Z-done/P09-E31-state-predicate-okay.md) | *Okay* — a well-being predicate whose copula is lexical |
-| [P09-E32](Z-done/P09-E32-among.md) | *Among* — a spatial relation over a plural set |
-| [P09-E33](Z-done/P09-E33-including-such-as.md) | *Including* and *such as* — naming members of a noun's set |
-| [P09-E34](Z-done/P09-E34-within.md) | *Within* — a deadline relation on the temporal complement |
-| [P09-E35](Z-done/P09-E35-duration.md) | Duration — "for an hour", "for a long time" |
-| [P09-E36](Z-done/P09-E36-something-else.md) | *Something else*, *something big* — a modifier on an indefinite pronoun |
-| [P09-E37](Z-done/P09-E37-goes-home.md) | *Goes home* — the direction idiom of HOME |
-| [P09-E38](Z-done/P09-E38-approximators.md) | Approximators — *about five*, *almost all* |
-| [P09-E39](Z-done/P09-E39-sentence-adverbs.md) | Sentence adverbs — *maybe, probably, actually, of course* |
-| [P09-E40](Z-done/P09-E40-someone.md) | *Someone* — a human indefinite pronoun |
-| [P09-E41](Z-done/P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* |
-| [P09-E42](Z-done/P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb |
-| [P09-E43](Z-done/P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object |
+| [P09-E25](Z-done/P09-E25-quantity-determiners.md) | More quantity determiners — *each, both, most, several, enough, a lot of* — **Shipped.** seven values (*each, every, both, most, several, enough, such*) in the determiner menu and console (`/mostof`); *another* needed none |
+| [P09-E26](Z-done/P09-E26-both-and.md) | *Both … and* — a correlative on a coordinated group — **Shipped**, plan-only. `NounGroup.correlative`; ja も…も on a subject or object |
+| [P09-E27](Z-done/P09-E27-until-since-though.md) | *Until, since, though* — three more adverbial-clause conjunctions — **Shipped.** three conjunctions (Italian expletive *non*, the Romance subjunctive) and `since` as a relation; menu, toolbar and console |
+| [P09-E28](Z-done/P09-E28-yet-and-ever.md) | *Yet* and *ever* — the polarity forms of ALREADY and NEVER — **Shipped.** ALREADY's negative forms and NEVER's question form; ja まだ〜ていない, いつか for *ever* |
+| [P09-E29](Z-done/P09-E29-however.md) | *However* — a parenthetical adversative connector — **Shipped.** a `however` connector after a semicolon; German *jedoch* after the finite verb; menu key H |
+| [P09-E30](Z-done/P09-E30-interjections.md) | *Hey* — an interjection before a clause — **Shipped**, plan-only. `PhrasePlan.interjection` and a new `interjection` role; HEY seeded |
+| [P09-E31](Z-done/P09-E31-state-predicate-okay.md) | *Okay* — a well-being predicate whose copula is lexical — **Shipped.** OKAY with a `copula` key (BE_FARING: *stare, aller*, de *dem Kater geht es gut*); predicative-only is engine-side only |
+| [P09-E32](Z-done/P09-E32-among.md) | *Among* — a spatial relation over a plural set — **Shipped.** a new `PathSpecifier`, merged with `between` in five languages; toolbar key M, `/among` |
+| [P09-E33](Z-done/P09-E33-including-such-as.md) | *Including* and *such as* — naming members of a noun's set — **Shipped**, plan-only. `NounPhrase.examples` with *such as* / *including* |
+| [P09-E34](Z-done/P09-E34-within.md) | *Within* — a deadline relation on the temporal complement — **Shipped.** a `within` relation (*d'ici*, *innerhalb* + genitive, 以内に); toolbar and `/within` |
+| [P09-E35](Z-done/P09-E35-duration.md) | Duration — "for an hour", "for a long time" — **Shipped.** a `for` relation, bare in German and Japanese; `/lasting`. "For a long time" deferred |
+| [P09-E36](Z-done/P09-E36-something-else.md) | *Something else*, *something big* — a modifier on an indefinite pronoun — **Shipped.** the adjective on an indefinite pronoun, OTHER as *else*; an adjective a pronoun cannot take is refused |
+| [P09-E37](Z-done/P09-E37-goes-home.md) | *Goes home* — the direction idiom of HOME — **Shipped.** `DIRECTION_IDIOMS`: *goes home, va a casa, geht nach Hause*, ja 家に |
+| [P09-E38](Z-done/P09-E38-approximators.md) | Approximators — *about five*, *almost all* — **Shipped**, plan-only. `NounPhrase.approximator` (*about* on a numeral, *almost* on all / no / many) |
+| [P09-E39](Z-done/P09-E39-sentence-adverbs.md) | Sentence adverbs — *maybe, probably, actually, of course* — **Shipped.** `subtype: 'sentence'`, clause-initial (German V2, French *peut-être que*, pt *talvez* + subjunctive); four adverbs and PROBABILITY seeded |
+| [P09-E40](Z-done/P09-E40-someone.md) | *Someone* — a human indefinite pronoun — **Shipped.** `isPronounElement` keys on the indefinite slot; SOMEONE seeded with German case forms |
+| [P09-E41](Z-done/P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* — **Shipped.** `count: 'plural'` makes the phrase plural; NEWS seeded |
+| [P09-E42](Z-done/P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb — **Shipped.** STOP_DOING and CONTINUE_DOING: the English/Spanish gerund, German *weiter-*, ja 続ける |
+| [P09-E43](Z-done/P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object — **Shipped**, plan-only control. the controller's dative and the infinitive's link under object control; ALLOW and TELL_ORDER seeded |
 
 ## Verification
 
