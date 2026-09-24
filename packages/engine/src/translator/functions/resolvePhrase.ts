@@ -28,6 +28,7 @@ import { resolveNounElement } from './resolveNounElement.js';
 import { resolveQuestion } from './resolveQuestion.js';
 import { interrogativeAdverb } from './interrogativeAdverb.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
+import { singleNegativeWord } from './singleNegativeWord.js';
 import { withAlarmCry } from './withAlarmCry.js';
 import { withExistential } from './withExistential.js';
 
@@ -153,9 +154,8 @@ export function resolvePhrase(
   const possessed = gap?.role === 'possessor' ? gap.possessed : undefined;
   // The subject is resolved **first**: a possessor elsewhere in the clause may be a link to it
   // (P11-E2, see `bindCoreferents`), and one inside the subject itself would point at itself.
-  const resolvedSubject = withQuestionPossessor(
-    negativePolarity(resolveNounElement(bindCoreferents(plan.subject, undefined, 'subject'), language, lookup), clauseNegative, true)!,
-    possessed === 'subject');
+  const positiveSubject = resolveNounElement(bindCoreferents(plan.subject, undefined, 'subject'), language, lookup);
+  const resolvedSubject = withQuestionPossessor(negativePolarity(positiveSubject, clauseNegative, true)!, possessed === 'subject');
   // A **content clause** fills the subject slot, and what agrees with it agrees with a clause, not
   // with the throwaway noun the plan carries there: 3rd singular, and masculine where the language
   // genders a predicate adjective ("è giusto che si agisca", not "è giusta" — C30).
@@ -197,11 +197,11 @@ export function resolvePhrase(
       }
     : undefined;
   // The alarm a cry raises has no determiner slot, so the one the plan carries is dropped (A163).
-  const directObject = plan.directObject
-    ? withQuestionPossessor(negativePolarity(
-        withAlarmCry(resolveNounElement(bindCoreferents(plan.directObject, binding, 'directObject'), language, lookup), verbPhrase?.verb, language),
-        clauseNegative,
-      )!, possessed === 'directObject')
+  const positiveObject = plan.directObject
+    ? withAlarmCry(resolveNounElement(bindCoreferents(plan.directObject, binding, 'directObject'), language, lookup), verbPhrase?.verb, language)
+    : undefined;
+  const directObject = positiveObject
+    ? withQuestionPossessor(negativePolarity(positiveObject, clauseNegative)!, possessed === 'directObject')
     : undefined;
   // A passive re-maps the clause's core arguments (A01). The patient becomes the grammatical
   // subject — it drives the verb's agreement, and a Romance participle agrees with it — the object
@@ -246,6 +246,7 @@ export function resolvePhrase(
   // ("piacere", "gustar"), which cannot name the thing liked because that thing is its subject and a
   // citation has none — a fact about Italian and Spanish, not a gap in the plan.
   const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
+  const positiveComplements = resolveComplements(complements, language, lookup, verbPhrase?.verb.forms);
   const resolved: ResolvedPhrase = {
     subject: passive ? patient! : experiencer ? directObject! : subject,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
@@ -257,8 +258,8 @@ export function resolvePhrase(
     // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
     // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
     complements: experiencer && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'))
-      ? { ...negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative), terminus: { phrase: subject } }
-      : negativeComplements(resolveComplements(complements, language, lookup, verbPhrase?.verb.forms), clauseNegative),
+      ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: subject } }
+      : negativeComplements(positiveComplements, clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
     // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see
@@ -348,7 +349,15 @@ export function resolvePhrase(
   // itself elides one.
   // German *weiter-* and Japanese 〜続ける fuse the governing verb with the one it governs (P09-E42).
   // A predicate adjective may name the verb it is said with in place of BE (P09-E31).
-  const fused = lexicalCopula(fuseGovernedVerb(resolved, language), language, lookup);
+  // German keeps only the first negative word of a negated clause (see `singleNegativeWord`).
+  const single = clauseNegative
+    ? singleNegativeWord(resolved, {
+        subject: withQuestionPossessor(positiveSubject, possessed === 'subject'),
+        ...(positiveObject ? { directObject: withQuestionPossessor(positiveObject, possessed === 'directObject') } : {}),
+        ...(positiveComplements ? { complements: positiveComplements } : {}),
+      }, language, passive)
+    : resolved;
+  const fused = lexicalCopula(fuseGovernedVerb(single, language), language, lookup);
   const main = fused.condition ? elideSubjectComplement(fused, fused.condition) : fused;
   return main.coordination
     ? { ...main, coordination: { ...main.coordination, clause: elideSubjectComplement(main.coordination.clause, main) } }
