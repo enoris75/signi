@@ -446,13 +446,13 @@ describe('known bugs: the Italian cardinal una does not elide before a vowel (A3
 describe('known bugs: a Spanish or Portuguese noun possessor counted by one beside a definite keeps the one (A339)', () => {
   const reads = (possessor: NounPhrase) => clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor }) });
 
-  test.fails('the definite possessor of the object', () => {
+  test('the definite possessor of the object', () => {
     expect(sayAll(reads(np('MAN', { numeral: 1 })))).toMatchObject({
       es: 'el gato lee el libro del hombre.', pt: 'o gato lê o livro do homem.',
     });
   });
 
-  test.fails('the definite possessor of the subject and of a comitative', () => {
+  test('the definite possessor of the subject and of a comitative', () => {
     expect(sayAll(clause(np('BOOK', { possessor: np('MAN', { numeral: 1 }) }), 'BURN'))).toMatchObject({
       es: 'el libro del hombre arde.', pt: 'o livro do homem arde.',
     });
@@ -461,7 +461,7 @@ describe('known bugs: a Spanish or Portuguese noun possessor counted by one besi
     });
   });
 
-  test.fails('the demonstrative possessor', () => {
+  test('the demonstrative possessor', () => {
     expect(sayAll(reads(np('MAN', { numeral: 1, definiteness: 'this' })))).toMatchObject({
       es: 'el gato lee el libro de este hombre.', pt: 'o gato lê o livro deste homem.',
     });
@@ -482,6 +482,21 @@ describe('known bugs: a Spanish or Portuguese noun possessor counted by one besi
       es: 'el gato lee el libro de los dos hombres.', pt: 'o gato lê o livro dos dois homens.',
     });
     expect(sayAll(reads(np('MAN')))).toMatchObject({ es: 'el gato lee el libro del hombre.', pt: 'o gato lê o livro do homem.' });
+  });
+
+  test('the one is left out of an adjectived, a nested and a masculine distal possessor, and the demonstrative two keeps its numeral', () => {
+    expect(sayAll(reads(np('MAN', { numeral: 1, adjectives: ['OLD'] })))).toMatchObject({
+      es: 'el gato lee el libro del hombre viejo.', pt: 'o gato lê o livro do homem velho.',
+    });
+    expect(sayAll(reads(np('DOG', { possessor: np('MAN', { numeral: 1 }) })))).toMatchObject({
+      es: 'el gato lee el libro del perro del hombre.', pt: 'o gato lê o livro do cão do homem.',
+    });
+    expect(sayAll(reads(np('MAN', { numeral: 1, definiteness: 'that' })))).toMatchObject({
+      es: 'el gato lee el libro de ese hombre.', pt: 'o gato lê o livro desse homem.',
+    });
+    expect(sayAll(reads(np('MAN', { numeral: 2, definiteness: 'this' })))).toMatchObject({
+      es: 'el gato lee el libro de estos dos hombres.', pt: 'o gato lê o livro destes dois homens.',
+    });
   });
 });
 

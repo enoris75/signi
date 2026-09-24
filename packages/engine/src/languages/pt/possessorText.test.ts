@@ -44,6 +44,13 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'some', number: 'plural' }) }))).toBe(' de alguns gatos');
   });
 
+  // A339: at one beside a definite or demonstrative the cardinal is left out (A319).
+  test('a possessor counted by one beside a definite or demonstrative is the singular', () => {
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { numeral: '1' }) }))).toBe(' do gato');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(RAPOSA, { numeral: '1', definiteness: 'this' }) }))).toBe(' desta raposa');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { numeral: '2', number: 'plural' }) }))).toBe(' dos dois gatos');
+  });
+
   test('the possessor carries its own adjectives, possessor and relative clause', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, {}, { adjectives: [adj(VELHO)] }) }))).toBe(' do gato velho');
     expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: np(MENINO) }) }))).toBe(' do cão do menino');
