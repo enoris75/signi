@@ -223,6 +223,10 @@ export const adjectives: ConceptSeed[] = [
     role: 'adjective',
     transient: true, // a state that holds now → es/pt predicate with estar (A47)
     description: 'in a satisfactory state; all right',
+    // "That does not have problems" (localization A33), DARK's negated HAVE: fine without saying
+    // *good* or *well*, which OKAY is weaker than, and without BE_FARING, its own copula. BEING is the
+    // class it is said of (de *das*, of *Wesen*).
+    definition: subjectGapGloss('BEING', 'HAVE', { object: 'PROBLEM', number: 'plural', negative: true }),
     synonym: 'all right',
     emoji: '👌',
     forms: {
