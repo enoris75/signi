@@ -974,15 +974,15 @@ describe('known bugs: English drops "just" from a postposed equative with VERY (
   });
   const sees = (object: NounPhrase): PhrasePlan => clause(np('MAN'), 'SEE', { directObject: object });
 
-  test.fails('as the object: a cat just as big as the dog', () => {
+  test('as the object: a cat just as big as the dog', () => {
     expect(say(sees(justAs()), 'en')).toBe('the man sees a cat just as big as the dog.');
   });
 
-  test.fails('as the subject', () => {
+  test('as the subject', () => {
     expect(say(clause(justAs(), 'EAT'), 'en')).toBe('a cat just as big as the dog eats.');
   });
 
-  test.fails('as a predicate noun', () => {
+  test('as a predicate noun', () => {
     expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: justAs('ANIMAL') } } }), 'en'))
       .toBe('the cat is an animal just as big as the dog.');
   });
@@ -996,6 +996,22 @@ describe('known bugs: English drops "just" from a postposed equative with VERY (
       pt: 'o homem vê um gato tão grande como o cão.',
       ja: '男は犬と同じくらい大きい猫を見ます。',
     });
+  });
+
+  test('definite and plural heads keep "just" behind the noun', () => {
+    expect(say(sees(justAs('CAT', { definiteness: 'definite' })), 'en')).toBe('the man sees the cat just as big as the dog.');
+    expect(say(sees(justAs('CAT', { number: 'plural' })), 'en')).toBe('the man sees cats just as big as the dog.');
+  });
+
+  test('only the adjective with the standard keeps "just"; a second equative before the noun still drops it', () => {
+    expect(say(sees(np('CAT', {
+      definiteness: 'indefinite', adjectives: ['BIG', 'SMALL'], adjectiveDegrees: ['equally', 'equally'],
+      adjectiveStandards: [DOG], adjectiveIntensifiers: ['VERY', 'VERY'],
+    })), 'en')).toBe('the man sees an equally small cat just as big as the dog.');
+  });
+
+  test('regression: a comparative with a standard stays before the noun with "much"', () => {
+    expect(say(sees(justAs('CAT', { adjectiveDegrees: ['more'] })), 'en')).toBe('the man sees a much bigger cat than the dog.');
   });
 
   test('regression: before the noun, with no standard, "just" still drops; the predicate keeps it', () => {

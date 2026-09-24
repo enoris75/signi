@@ -43,3 +43,17 @@ Pinned by `known bugs: English drops "just" from a postposed equative with VERY 
 [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).
 
 Found on 2026-09-24 while auditing P09-E18's test coverage.
+
+## Resolved
+
+2026-09-24. [`resolveNounPhrase.ts`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts)
+now threads the intensifier with `attributive = false` on the one adjective that carries the
+phrase's standard: that adjective is said the predicate's way, with its standard, so the lexeme's
+before-the-noun keys (`attributive_drop_degrees`, `attributive_plain_degrees`) do not apply to it.
+This is right in general rather than an English special case: a standard is only ever carried by a
+comparative or the equative (`resolveAdjectiveStandard`), `attributive_plain_degrees` names only
+superlatives, and English VERY is the one lexeme with attributive keys; English's comparative with a
+standard keeps "much" before the noun as before. Guarded by the three formerly-failing tests and three
+new ones (definite and plural heads, a second standard-less equative that still drops, the
+comparative regression) in `known bugs: English drops "just" from a postposed equative with VERY
+(A283)` in [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).

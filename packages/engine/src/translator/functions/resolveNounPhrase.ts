@@ -252,8 +252,11 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     if (deg && deg !== 'positive') cf.forms['degree'] = deg;
     // The intensifier is a word of its own, so it is resolved in this language and its surface,
     // reading and position ride on the adjective beside the degree (C33). It stands before a
-    // noun here, which some words say differently (English has no "a just as big cat", A255).
-    applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, true);
+    // noun here, which some words say differently (English has no "a just as big cat", A255) —
+    // unless it carries the phrase's standard: that adjective is said the predicate's way, with its
+    // standard, and where it would not fit before the noun it follows it, "a cat just as big as the
+    // dog" (A283; only English moves one, and the Romance words have no attributive keys).
+    applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, i !== attributive?.planIndex);
     // The one attributive standard, on the adjective it belongs to (P09-E18): marked as a predicate
     // adjective's is, so its equative adverb takes the circumfix ("a cat as big as the dog").
     if (i === attributive?.planIndex) { cf.forms['standard'] = '1'; compared = cf; }
