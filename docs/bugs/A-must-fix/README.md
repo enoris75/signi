@@ -1,6 +1,9 @@
 # A-must-fix — confirmed bugs
 
-None open. A365 and A366 were fixed on 2026-09-24 and moved to [`../fixed/`](../fixed/). The
+**One open**, **A370**, filed on 2026-09-24 from ten random phrases.
+[A370](A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md), Portuguese ALREADY beside the concord "não" of a `no` object or complement, written "ainda não" (*not yet*) for "já não".
+
+A365 and A366 were fixed on 2026-09-24 and moved to [`../fixed/`](../fixed/). The
 history below is kept as it was written.
 
 **Two open**, **A365** and **A366**, filed on 2026-09-24 from the leads the A355–A363 lanes

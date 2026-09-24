@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A and Part B are both empty).** If
+this writing Part A holds one file, A370, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -64,8 +64,13 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
+| A370 | [A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md](A-must-fix/A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md) | Portuguese | ALREADY beside the concord "não" of a `no` object or complement becomes "ainda não" (*not yet*) instead of "já não" |
 
-None open. A365 and A366 were fixed on 2026-09-24 and are listed under **Fixed** below; A366's fix
+**One open**, **A370**, filed on 2026-09-24 from ten random phrases: Portuguese reads the concord
+"não" of a `no` object as the verb's own negation and turns ALREADY into *not yet* ("ainda não come
+nenhuma comida" for "já não come nenhuma comida").
+
+A365 and A366 were fixed on 2026-09-24 and are listed under **Fixed** below; A366's fix
 covers every verb conjunct, so the godan 違う's "neither … nor" reads 違いも, not the concessive
 違っても.
 

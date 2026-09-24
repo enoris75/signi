@@ -1693,6 +1693,39 @@ describe('P09-E28: not yet — ALREADY under a negation', () => {
   });
 });
 
+// A370. P09-E28's "not yet" is for a verb that is itself negated. A `no` object or complement leaves
+// the verb positive, and Portuguese adds its "não" only for concord ("não come nenhuma comida"), so
+// ALREADY keeps its own word, ahead of that "não": "já não come nenhuma comida", as Spanish keeps
+// "ya", Japanese もう and English "already". Portuguese reads the "não" off the verb's text instead
+// of its polarity, and swaps in "ainda": "ainda não come nenhuma comida" says "does not eat any food
+// yet". Found by the random phrase of seed 239952 ("… will already ask no far death …").
+describe('known bugs: Portuguese ALREADY turns into "ainda não" beside a concord "não" (A370)', () => {
+  const already = (extra: Omit<Partial<PhrasePlan>, 'subject' | 'verbPhrase'>, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'EAT', { ...extra, verbPhrase: { modifier: 'ALREADY', ...verbPhrase } }));
+  const noFood = { directObject: noNP('FOOD') };
+
+  test.fails('a `no` object or complement keeps "já" ahead of the concord "não"', () => {
+    expect(already(noFood).pt).toBe('o gato já não come nenhuma comida.'); // now: "o gato ainda não come …"
+    expect(already(noFood, { tense: 'past' }).pt).toBe('o gato já não comeu nenhuma comida.');
+    expect(already(noFood, { modals: ['CAN'] }).pt).toBe('o gato já não pode comer nenhuma comida.');
+    expect(already({ complements: { locative: { phrase: noNP('HOUSE') } } }).pt).toBe('o gato já não come em nenhuma casa.');
+    expect(say(clause(np('CHILD'), 'ASK', { verbPhrase: { modifier: 'ALREADY', tense: 'future' }, directObject: noNP('MAN') }), 'pt'))
+      .toBe('a criança já não perguntará nenhum homem.');
+  });
+
+  test('the other languages keep already, and a negated verb is still not yet', () => {
+    expect(already(noFood)).toMatchObject({
+      en: 'the cat already eats no food.', de: 'der Kater frisst schon kein Essen.',
+      es: 'el gato no come ya ninguna comida.', ja: '猫はどの食べ物ももう食べません。',
+    });
+    expect(already({ ...noFood }, { negative: true }).pt).toBe('o gato ainda não come nenhuma comida.');
+    expect(already({ directObject: np('FOOD') }, { negative: true }).pt).toBe('o gato ainda não come a comida.');
+    expect(already({ directObject: np('FOOD') }).pt).toBe('o gato come já a comida.');
+    // STILL and ALSO lead the concord "não" with their own word, which is right.
+    expect(sayAll(clause(np('CAT'), 'EAT', { ...noFood, verbPhrase: { modifier: 'ALSO' } })).pt).toBe('o gato também não come nenhuma comida.');
+  });
+});
+
 // A310. German puts "nicht" after a definite object ("frisst das Essen nicht") and turns an indefinite
 // one into "kein" (A182). An object counted by an amount quantifier is neither: "viel", "genug" and
 // "wenig" are what the negation denies, so "nicht" stands in front of them, as English "not much" and
