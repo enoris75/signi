@@ -469,6 +469,8 @@ const IT_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
   AVERE: { '1sg': 'abbia', '2sg': 'abbia', '3sg': 'abbia', '1pl': 'abbiamo', '2pl': 'abbiate', '3pl': 'abbiano' },
   // The progressive's auxiliary (it.consts `STARE_AUX`), for "stia correndo" (A261).
   STARE: { '1sg': 'stia', '2sg': 'stia', '3sg': 'stia', '1pl': 'stiamo', '2pl': 'stiate', '3pl': 'stiano' },
+  // OKAY's lexical copula, *stare bene* (P09-E31): "prima che il gatto stia bene".
+  BE_FARING: { '1sg': 'stia', '2sg': 'stia', '3sg': 'stia', '1pl': 'stiamo', '2pl': 'stiate', '3pl': 'stiano' },
   MUST: { '1sg': 'debba', '2sg': 'debba', '3sg': 'debba', '1pl': 'dobbiamo', '2pl': 'dobbiate', '3pl': 'debbano' }, // dovere
 };
 
@@ -482,6 +484,8 @@ const FR_SUBJ_PRES_OVERRIDE: Record<string, Record<PN, string>> = {
   // The resultative's auxiliary (fr.consts `AVOIR_AUX`), for the perfect subjunctive "ait couru" (A260).
   AVOIR: { '1sg': 'aie', '2sg': 'aies', '3sg': 'ait', '1pl': 'ayons', '2pl': 'ayez', '3pl': 'aient' },
   GO:    { '1sg': 'aille', '2sg': 'ailles', '3sg': 'aille', '1pl': 'allions', '2pl': 'alliez', '3pl': 'aillent' }, // aller
+  // OKAY's lexical copula, *aller bien* (P09-E31): "avant que le chat aille bien".
+  BE_FARING: { '1sg': 'aille', '2sg': 'ailles', '3sg': 'aille', '1pl': 'allions', '2pl': 'alliez', '3pl': 'aillent' },
   CAN:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' }, // pouvoir
   MAY:   { '1sg': 'puisse', '2sg': 'puisses', '3sg': 'puisse', '1pl': 'puissions', '2pl': 'puissiez', '3pl': 'puissent' },
   MAKE:  { '1sg': 'fasse', '2sg': 'fasses', '3sg': 'fasse', '1pl': 'fassions', '2pl': 'fassiez', '3pl': 'fassent' },  // faire

@@ -114,6 +114,19 @@ describe('okay, a predicate with a lexical copula (P09-E31)', () => {
     expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('OKAY') } } })).it).toBe('il gatto sembra bene.');
   });
 
+  test('the subjunctive a conjunction governs takes the copula\'s irregular stem', () => {
+    // BE_FARING is *stare* / *aller*, whose present subjunctive the stored present cannot derive
+    // ("sti", "vonte"): it borrows STARE's and GO's (found landing P09-E27 beside E31).
+    const before = (subject = np('CAT')): PhrasePlan => ({ ...clause(np('DOG'), 'RUN'), adverbialClause: { conjunction: 'before', clause: okay(subject) } });
+    expect(sayAll(before())).toMatchObject({
+      it: 'il cane corre prima che il gatto stia bene.', fr: 'le chien court avant que le chat aille bien.',
+      es: 'el perro corre antes de que el gato esté bien.', pt: 'o cão corre antes que o gato esteja bem.',
+    });
+    expect(sayAll(before(np('CAT', { number: 'plural' })))).toMatchObject({
+      it: 'il cane corre prima che i gatti stiano bene.', fr: 'le chien court avant que les chats aillent bien.',
+    });
+  });
+
   test('BE_FARING is a sense of BE, which no picker offers', () => {
     const faring = concepts.find((c) => c.id === 'BE_FARING');
     expect(faring?.senseOf).toBe('BE');
