@@ -37,9 +37,14 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
   const gap = questionGapComplement(question, { base: '', definiteness: 'question' });
-  if (gap) return woCompound(complementsPhrase(gap, verb.forms).replace(/\s+/g, ' ').trim());
+  if (gap) {
+    const word = woCompound(complementsPhrase(gap, verb.forms).replace(/\s+/g, ' ').trim());
+    // *was* has no dative: a thing in the bare dative slot of a recipient asks with *wem* (A281).
+    return word === 'was' && question.role === 'terminus' && verb.forms['terminus_case'] !== 'acc' ? WER.dat : word;
+  }
   const prep = objectPreposition(verb);
-  if (!prep) return question.animate ? WER[objectCase(verb)] : 'was';
+  // … and so does the thing a dative verb takes as its object ("wem hilft der Kater?", A281).
+  if (!prep) return question.animate || objectCase(verb) === 'dat' ? WER[objectCase(verb)] : 'was';
   if (question.animate) return `${prep} ${WER[objectPrepCase(prep)]}`;
   return /^[aeiouäöü]/.test(prep) ? `wor${prep}` : `wo${prep}`;
 }

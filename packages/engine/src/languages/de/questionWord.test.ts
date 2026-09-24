@@ -9,7 +9,18 @@ describe('questionWord (de)', () => {
     expect(questionWord({ role: 'directObject', animate: true }, verb())).toBe('wen');
     expect(questionWord({ role: 'directObject', animate: true }, verb({ object_case: 'dat' }))).toBe('wem');
     expect(questionWord({ role: 'subject', animate: false }, verb())).toBe('was');
-    expect(questionWord({ role: 'directObject', animate: false }, verb({ object_case: 'dat' }))).toBe('was');
+    expect(questionWord({ role: 'directObject', animate: false }, verb())).toBe('was');
+  });
+
+  test('was has no dative: a thing in a dative slot asks with wem (A281)', () => {
+    expect(questionWord({ role: 'directObject', animate: false }, verb({ object_case: 'dat' }))).toBe('wem');
+    expect(questionWord({ role: 'terminus', animate: false }, verb({ terminus_dative: '1' }))).toBe('wem');
+    // an inanimate goal of a verb without a dative terminus is a destination, not a recipient
+    expect(questionWord({ role: 'terminus', animate: false }, verb())).toBe('in was');
+    // fragen's addressee is accusative (`terminus_case`), so a thing there stays was
+    expect(questionWord({ role: 'terminus', animate: false }, verb({ terminus_case: 'acc' }))).toBe('was');
+    // the prepositional gaps keep the preposition's own word
+    expect(questionWord({ role: 'directObject', animate: false }, verb({ object_case: 'dat', object_prep: 'auf' }))).toBe('worauf');
   });
 
   test('a prepositional object: the preposition over wen / wem, or the wo(r)- compound', () => {

@@ -13,7 +13,7 @@ import { splitBareTerminus } from '../../functions/splitBareTerminus.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
-import { FINITE_BE, FOCUS_WORDS, MODAL_AUX } from './en.consts.js';
+import { AGENT_PREP, FINITE_BE, FOCUS_WORDS, MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { agentPhrase } from './agentPhrase.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -29,6 +29,7 @@ import { npText } from './npText.js';
 import { objectPronounText } from './objectPronounText.js';
 import { perfectInfinitive } from './perfectInfinitive.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The adverb that leads a negated predicate, ahead of the auxiliary carrying the "not" — "the cat
@@ -152,12 +153,22 @@ function predicateWords(
   // the food", "eats the food too" (see `withFocus`, C39).
   const objectWords = passive || !directObject ? ''
     : withFocus(coordinate(directObject, (np) =>
-      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms)
+      // An indefinite pronoun keeps its relative clause: "sees someone who runs" (A309).
+      np.head.forms['person'] ? withRelative(objectPronounText(np.head.forms, subjectForms), np)
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np)),
       slotFocus(directObject), FOCUS_WORDS);
+  // A question about the agent strands its "by" (P09-E16 D2), and a stranded preposition closes the
+  // verb's arguments: the recipient, an argument of the verb, moves ahead of it, "who is the book
+  // given to the child by?", where the by-phrase's own slot would leave "*given by to the child"
+  // (A282). An adjunct keeps its place after it: "who is the food eaten by in the house?".
+  // The complements the clause has settled the "any"-series on (see the bare terminus below).
+  const settledComplements = anyComplement ? withComplementDefiniteness(complements, 'any') : complements;
+  const byPhrase = passive ? agentPhrase(agent, subjectForms) : '';
+  const strandedTerminus = passive && byPhrase === AGENT_PREP ? settledComplements?.['terminus'] : undefined;
   const objectText = passive
-    ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
+    ? [passiveParticiple(lexical), strandedTerminus ? complementsPhrase({ terminus: strandedTerminus }, lexical.forms) : '', byPhrase]
+      .filter(Boolean).join(' ')
     : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
   // A focus adverb that scopes over the negation leaves the frequency slot between the auxiliary
   // and the verb, which reads as the negation scoping over IT. STILL steps ahead of the whole
@@ -197,15 +208,14 @@ function predicateWords(
   // ahead of the thing: "asks the man the name", "answers the man". A pronoun addressee takes the
   // object form the direct object's does ("asks him the name"). A passive has promoted the patient,
   // so the recipient trails the by-phrase as an ordinary complement there instead.
-  // It is split off the complements the clause has already settled the "any"-series on, so a `no`
-  // addressee gives way to it like any other complement ("does not ask any man the name").
-  const settledComplements = anyComplement ? withComplementDefiniteness(complements, 'any') : complements;
+  // It is split off the complements the clause has already settled the "any"-series on (above), so a
+  // `no` addressee gives way to it like any other complement ("does not ask any man the name").
   const { bare: bareTerminus, rest: trailingComplements } = passive
-    ? { bare: undefined, rest: settledComplements }
+    ? { bare: undefined, rest: strandedTerminus ? withoutTerminus(settledComplements) : settledComplements }
     : splitBareTerminus(settledComplements, lexical.forms);
   const bareTerminusText = bareTerminus
     ? coordinate(bareTerminus.phrase, (np) =>
-      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms) : npText(np))
+      np.head.forms['person'] ? withRelative(objectPronounText(np.head.forms, subjectForms), np) : npText(np))
     : '';
   const directObjectText = [
     particleFirst ? adverbText : '',
@@ -426,4 +436,13 @@ function predicateWords(
   const preVerb  = isFrequency ? modifierText : '';
   const postVerb = isFrequency ? '' : modifierText;
   return [preVerb, verbText, directObjectText, complementsText, postVerb];
+}
+
+/** The complements with the terminus taken out, for the recipient a stranded "by" has moved ahead of itself (A282). */
+function withoutTerminus(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
+  if (!complements) return complements;
+  const { terminus: _t, ...rest } = complements;
+  return rest;
 }

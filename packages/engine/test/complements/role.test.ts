@@ -441,16 +441,16 @@ describe('known bugs: an Italian role or essive noun with a pronominal possessor
 // A288. A relative clause whose gap is the role ("the friend the man acts as") has no natural
 // relative in Romance or German: "come quale", "comme quel", "como que", "como qual", and a German
 // "als" with no relative pronoun and a double space. No control builds one and randomPhrase leaves
-// it out, but the plan API accepts it. The target is a refusal, as a role question is refused
+// it out, but the plan API accepted it. The target is a refusal, as a role question is refused
 // (resolveQuestion.test.ts); a refusal has no correct output to pin, so the pin asserts the throw.
 describe('known bugs: a relative clause over a role gap renders nonsense (A288)', () => {
   const actsAsWhom = (): RelativeClause => ({ headRole: 'role', subject: np('MAN'), verbPhrase: { verb: 'ACT' } });
 
-  test.fails('the role gap is refused by name, as the object', () => {
+  test('the role gap is refused by name, as the object', () => {
     expect(() => sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('FRIEND', { relative: actsAsWhom() }) }))).toThrow(/role/);
   });
 
-  test.fails('the role gap is refused by name, as the subject', () => {
+  test('the role gap is refused by name, as the subject', () => {
     expect(() => sayAll(clause(np('FRIEND', { relative: actsAsWhom() }), 'RUN'))).toThrow(/role/);
   });
 

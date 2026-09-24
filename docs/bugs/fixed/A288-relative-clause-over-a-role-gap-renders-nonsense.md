@@ -55,3 +55,24 @@ correct-output pins.
 | | |
 |---|---|
 | **Test** | `complements/role.test.ts` → *known bugs: a relative clause over a role gap renders nonsense (A288)* (2 `test.fails` asserting the refusal, the gap as object and as subject, plus a regression test for the comitative gap and a role inside an object relative) |
+
+## Resolved
+
+Fixed 2026-09-24 by **refusing** the plan.
+[resolveRelativeClause.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+throws a named `Error` when `headRole === 'role'`, beside A273's and A275's checks, before A275's
+missing-subject check so a role gap is refused as such with or without a subject: `a relative clause
+cannot yet gap a role: no relative pronoun here says "as whom" (relative.headRole 'role', A288)`,
+worded as `resolveQuestion`'s refusal of a role question is. The backend's
+[planError.ts](../../../packages/backend/src/planError.ts) names the same plan at the boundary, so
+`/api/translate` answers a 400 (`plan.directObject.relative.headRole: a relative clause cannot gap a
+role`) instead of a 500.
+
+- **Tests:** [complements/role.test.ts](../../../packages/engine/test/complements/role.test.ts) →
+  *known bugs: a relative clause over a role gap renders nonsense (A288)*: both refusal pins now pass,
+  and the comitative / role-inside-a-relative regression is unchanged.
+  [resolveRelativeClause.test.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.test.ts)
+  refuses the role gap in three languages and without a subject;
+  [planError.test.ts](../../../packages/backend/src/planError.test.ts) names it on the subject and the
+  object and passes the comitative gap; [index.test.ts](../../../packages/backend/src/index.test.ts) →
+  *A288: a relative clause over a role gap answers 400*.

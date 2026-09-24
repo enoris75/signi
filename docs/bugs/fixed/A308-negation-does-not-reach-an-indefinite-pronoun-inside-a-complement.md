@@ -47,3 +47,26 @@ reads for concord, but the complement renderers have to read it too:
 | | |
 |---|---|
 | **Test** | `indefinite-pronoun.test.ts` → *known bugs: negation does not reach an indefinite pronoun inside a complement (A308)* (4 `test.fails`, one per row, plus a regression test for the direct object and the positive complement) |
+
+## Resolved
+
+Fixed 2026-09-24. [resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts)
+now runs every complement's phrase through `negativePolarity` when the clause is negative, through the
+new `negativeComplements` in [negativePolarity.ts](../../../packages/engine/src/translator/functions/negativePolarity.ts).
+No engine needed a change: the swap marks the phrase `definiteness: 'no'`, and every renderer already
+reads a `no` complement for concord (French drops *pas*, German *nicht* and moves the dative ahead,
+Japanese writes 誰とも / 誰にも / 誰のためにも), as it does for a `no` noun complement.
+
+**Two negative words** (the fixer's check): with a negative object beside a negative complement,
+Romance concord says both, *non dà niente a nessuno*, *no da nada a nadie*, *não dá nada a ninguém*;
+French *ne donne rien à personne*; English keeps *does not give anything to anyone*; Japanese
+誰にも何もあげません. These are pinned. German writes *gibt niemandem nichts*, two negative words in a
+language with no negative concord (standard German wants *gibt niemandem etwas*); that is left
+unpinned and reported as a lead.
+
+- **Tests:** [indefinite-pronoun.test.ts](../../../packages/engine/test/indefinite-pronoun.test.ts) →
+  *known bugs: negation does not reach an indefinite pronoun inside a complement (A308)*: all four pins
+  now pass, plus the past, and the two-negative-word cases (a negative object beside a negative
+  recipient, a negative subject beside a negative comitative) in the six languages with concord or
+  *any*. [negativePolarity.test.ts](../../../packages/engine/src/translator/functions/negativePolarity.test.ts)
+  covers `negativeComplements`.

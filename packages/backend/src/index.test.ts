@@ -759,3 +759,18 @@ describe('the address on /api/translate (A338)', () => {
   });
 });
 
+// A288. A relative clause whose head is its role ("the friend the man acts as") has no relative in
+// Romance or German, and the engine refuses it by name. `/api/translate` answers it with a 400 naming
+// the field, as it does A273's and A275's. The engine's side is pinned in
+// packages/engine/test/complements/role.test.ts.
+describe('A288: a relative clause over a role gap answers 400', () => {
+  const actsAs = { headRole: 'role', subject: { concept: 'MAN' }, verbPhrase: { verb: 'ACT' } };
+  test.each([
+    ['on the subject', { subject: { concept: 'FRIEND', relative: actsAs }, verbPhrase: { verb: 'RUN' } }, 'plan.subject'],
+    ['on the object', { subject: { concept: 'WOMAN' }, verbPhrase: { verb: 'SEE' }, directObject: { concept: 'FRIEND', relative: actsAs } }, 'plan.directObject'],
+  ])('rejects a role-gap relative clause %s', async (_, plan, path) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: `${path}.relative.headRole: a relative clause cannot gap a role` });
+  });
+});

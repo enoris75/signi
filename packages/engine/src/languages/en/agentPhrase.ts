@@ -3,6 +3,7 @@ import { AGENT_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { npText } from './npText.js';
 import { objectPronounText } from './objectPronounText.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The by-phrase of a passive clause — the demoted agent under "by" ("is eaten **by the cat**",
@@ -19,7 +20,7 @@ import { objectPronounText } from './objectPronounText.js';
 export function agentPhrase(agent?: ResolvedNounElement, subjectForms: Record<string, string> = {}): string {
   if (!agent) return '';
   const group = coordinate(agent, (np) =>
-    np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms) : npText(np));
+    np.head.forms['person'] ? withRelative(objectPronounText(np.head.forms, subjectForms), np) : npText(np));
   // A question's stand-in for the agent asked about is wordless, and leaves "by" stranded after the
   // participle: "who is the food eaten **by**?" (P09-E16).
   if (!group) return agent.conjuncts[0]?.head.forms['question'] === '1' ? AGENT_PREP : '';

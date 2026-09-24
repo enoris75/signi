@@ -1,6 +1,7 @@
 import type { ResolvedNounElement } from '../../types.js';
 import { coordinate } from './coordinate.js';
 import { npText } from './npText.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The by-phrase of a passive clause — the demoted agent under "par" ("est mangée **par le chat**").
@@ -13,6 +14,6 @@ import { npText } from './npText.js';
 export function agentPhrase(agent?: ResolvedNounElement): string {
   if (!agent) return '';
   const group = coordinate(agent, (np) =>
-    np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np));
+    np.head.forms['person'] ? withRelative(np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '', np) : npText(np));
   return group ? `par ${group}` : '';
 }

@@ -7,6 +7,7 @@ import { deDet } from './deDet.js';
 import { partitiveArtFor } from './partitiveArtFor.js';
 import { prepDet } from './prepDet.js';
 import { renderNP } from './renderNP.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * One conjunct of the object of a verb that takes it with a preposition (A139), as a complement's
@@ -18,7 +19,7 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const f = np.head.forms;
   if (f['person']) {
     const tonic = f['disjunctive'] ?? f['base'] ?? '';
-    return prep === 'de' && VOWEL_START.test(tonic) ? `d'${tonic}` : `${prep} ${tonic}`;
+    return withRelative(prep === 'de' && VOWEL_START.test(tonic) ? `d'${tonic}` : `${prep} ${tonic}`, np);
   }
   const head = possessedHeadForms(np, 'bare');
   // An object is never bare, with a preposition or without one: "clique sur des boutons" (A149). A

@@ -3,6 +3,7 @@ import { IT_DI_BEFORE_PRONOUN } from './it.consts.js';
 import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { type ItPreposition, prepDet } from './prepDet.js';
 import { renderNP } from './renderNP.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * One conjunct of the object of a verb that takes it with a preposition (A139): the preposition fused
@@ -12,7 +13,7 @@ import { renderNP } from './renderNP.js';
  */
 export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const f = np.head.forms;
-  if (f['person']) return [prep, IT_DI_BEFORE_PRONOUN.has(prep) ? 'di' : '', f['disjunctive'] ?? f['base'] ?? ''].filter(Boolean).join(' ');
+  if (f['person']) return withRelative([prep, IT_DI_BEFORE_PRONOUN.has(prep) ? 'di' : '', f['disjunctive'] ?? f['base'] ?? ''].filter(Boolean).join(' '), np);
   // The lexeme names one of the prepositions `prepDet` knows.
   return renderNP(np, (plural, lead) => prepDet(prep as ItPreposition, itPossessedHeadForms(np), plural, lead));
 }

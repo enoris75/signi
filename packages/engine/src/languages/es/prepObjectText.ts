@@ -18,7 +18,7 @@ import { withRelative } from './withRelative.js';
  */
 export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const pf = np.head.forms;
-  if (pf['person']) return `${prep} ${pf['disjunctive'] ?? pf['base'] ?? ''}`;
+  if (pf['person']) return withRelative(`${prep} ${pf['disjunctive'] ?? pf['base'] ?? ''}`, np);
   const f = possessedHeadForms(np, 'bare');
   const plural = isPlural(f);
   const adj = esAdj(np);

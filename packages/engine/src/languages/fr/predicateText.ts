@@ -38,6 +38,7 @@ import { modalGroupFr } from './modalGroupFr.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { objectNpText } from './objectNpText.js';
 import { prepObjectText } from './prepObjectText.js';
+import { withRelative } from './withRelative.js';
 import { reflexiveFinite } from './reflexiveFinite.js';
 
 /**
@@ -218,7 +219,7 @@ export function predicateText(
   const negatedClause = verbNegative === true || groupNegative || aucun || governedNeg;
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
     if (objectPrep) return prepObjectText(np, objectPrep);
-    if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
+    if (np.head.forms['person']) return withRelative(np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '', np);
     const cry = alarmCry(verb, np);
     return cry ? alarmCryText(cry) : objectNpText(np, negatedClause);
   };

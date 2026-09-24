@@ -25,7 +25,7 @@ import { withRelative } from './withRelative.js';
 export function agentPhrase(agent?: ResolvedNounElement): string {
   if (!agent) return '';
   return coordinateElement(agent, (np) =>
-    np.head.forms['person'] ? `por ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : nounAgent(np));
+    np.head.forms['person'] ? withRelative(`por ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`, np) : nounAgent(np));
 }
 
 function nounAgent(np: ResolvedNounPhrase): string {

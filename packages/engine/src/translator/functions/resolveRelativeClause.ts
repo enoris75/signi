@@ -38,6 +38,12 @@ export function resolveRelativeClause(
   // same with the field's path.
   if (!clause.verbPhrase) throw new Error('a relative clause needs a verb phrase: relative.verbPhrase.verb is required (A273)');
   const headRole = clause.headRole ?? 'subject';
+  // The role is no slot a relative clause can gap: Romance and German have no relative over an
+  // essive *as* ("*l'amico come quale l'uomo agisce"), so the plan is refused by name, as a question
+  // about the role is (see `resolveQuestion`) — A288. `/api/translate` says the same with its path.
+  if (headRole === 'role') {
+    throw new Error('a relative clause cannot yet gap a role: no relative pronoun here says "as whom" (relative.headRole \'role\', A288)');
+  }
   // A clause whose gap is not its subject says a subject of its own. Without one it would render as a
   // subject relative, the head turned into the one who acts ("the cat that eats" for *the cat that
   // [someone] eats*), so it is refused by name instead — not filled in with the generic person, which

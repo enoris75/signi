@@ -42,9 +42,27 @@ unchanged.
 the question or rephrase it. This file takes *wem*, the form German
 grammars give as the stand-in for the missing dative of *was*.
 
-The `was` in the passive row comes from this bug. That row's Japanese is [A280](A280-japanese-passive-terminus-question-doubles-ni.md).
+The `was` in the passive row comes from this bug. That row's Japanese is [A280](../A-must-fix/A280-japanese-passive-terminus-question-doubles-ni.md).
 
 Pinned by `known bugs: a German inanimate dative question asks with was (A281)` in
 [questions.test.ts](../../../packages/engine/test/questions.test.ts).
 
 Found by the P09-E15 coverage audit on 2026-09-24.
+
+## Resolved
+
+Fixed 2026-09-24, taking *wem* as the target. [de/questionWord.ts](../../../packages/engine/src/languages/de/questionWord.ts)
+now returns *wem* for a thing in two places: a bare-object gap whose `objectCase(verb)` is dative
+("wem hilft der Kater?"), and a terminus gap that renders as a bare *was* while the verb's
+`terminus_case` is not `acc` ("wem gibt der Mann das Buch?", "wem wird das Buch von der Frau
+gegeben?"). `questionPronoun` is unchanged, so "dank was", "zwischen was", "womit" and fragen's
+accusative "was fragt der Mann?" stay as they were.
+
+- **Tests:** [questions.test.ts](../../../packages/engine/test/questions.test.ts) → *known bugs: a
+  German inanimate dative question asks with was (A281)*: the three pins now pass, plus the past
+  ("wem gab der Mann das Buch?", "wem half der Kater?") and a plural subject ("wem helfen die
+  Kater?"), with the other six unchanged. The colocated
+  [questionWord.test.ts](../../../packages/engine/src/languages/de/questionWord.test.ts) now asserts
+  *wem* for the inanimate dative object (it asserted the bug's *was* before), *wem* for a
+  `terminus_dative` recipient, *was* under `terminus_case: 'acc'`, and the *wo(r)-* compound for a
+  dative verb's prepositional object.

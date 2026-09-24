@@ -46,3 +46,34 @@ the branch that drops it.
 | | |
 |---|---|
 | **Test** | `indefinite-pronoun.test.ts` → *known bugs: a relative clause on SOMEONE or SOMETHING is dropped (A309)* (5 `test.fails`, one per row, plus a regression test for a noun head) |
+
+## Resolved
+
+Fixed 2026-09-24. Each European engine's pronoun branches now join the relative clause an indefinite
+pronoun carries, the way the noun path does (a personal pronoun carries none, so nothing else moves):
+
+- English: the object and bare-recipient branches of
+  [predicateParts.ts](../../../packages/engine/src/languages/en/predicateParts.ts), the by-phrase in
+  [agentPhrase.ts](../../../packages/engine/src/languages/en/agentPhrase.ts), and the tonic pronoun in
+  [complementsPhrase.ts](../../../packages/engine/src/languages/en/complementsPhrase.ts), through `withRelative`.
+- Italian and French: a new `withRelative` each ([it](../../../packages/engine/src/languages/it/withRelative.ts),
+  [fr](../../../packages/engine/src/languages/fr/withRelative.ts)) over `relativeText`, used by
+  `subjectPhrase`, `predicateText`'s object, `prepObjectText`, `agentPhrase` and `complementsPhrase`'s
+  tonic path (and French `subjectText`'s coordinated subject).
+- German: `subordinateClause` after the pronoun in
+  [elementPhrase.ts](../../../packages/engine/src/languages/de/elementPhrase.ts),
+  [subjectPhrase.ts](../../../packages/engine/src/languages/de/subjectPhrase.ts),
+  [agentPhrase.ts](../../../packages/engine/src/languages/de/agentPhrase.ts) and
+  [complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts),
+  the comma pair included. *etwas* takes *das*: the translator's
+  [resolveNounPhrase.ts](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts) now
+  keeps an indefinite pronoun's lexical gender (de/en SOMETHING are `neut`) where the plan names none,
+  instead of the pronoun default `masc`.
+- Spanish and Portuguese: their `withRelative` around the pronoun in `predicateText`'s object,
+  `prepObjectText`, `agentPhrase` and `complementsPhrase`'s tonic path.
+
+- **Tests:** [indefinite-pronoun.test.ts](../../../packages/engine/test/indefinite-pronoun.test.ts) →
+  *known bugs: a relative clause on SOMEONE or SOMETHING is dropped (A309)*: all five pins now pass,
+  plus SOMETHING that burns as the subject, SOMEONE as the recipient and as the passive agent. New
+  colocated [it/withRelative.test.ts](../../../packages/engine/src/languages/it/withRelative.test.ts)
+  and [fr/withRelative.test.ts](../../../packages/engine/src/languages/fr/withRelative.test.ts).
