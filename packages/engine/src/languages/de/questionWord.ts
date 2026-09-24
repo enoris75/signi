@@ -36,7 +36,7 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'agent') return woCompound(agentPhrase(questionStandIn(question, { base: '', definiteness: 'question' })).replace(/\s+/g, ' ').trim());
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
-  const gap = questionGapComplement(question, { base: '', definiteness: 'question' });
+  const gap = questionGapComplement(question, { base: '', definiteness: 'question' }, verb.forms);
   if (gap) {
     const word = woCompound(complementsPhrase(gap, verb.forms).replace(/\s+/g, ' ').trim());
     // *was* has no dative: a thing in the bare dative slot of a recipient asks with *wem* (A281).

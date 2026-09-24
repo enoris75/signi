@@ -28,6 +28,14 @@ describe('questionGapComplement', () => {
     expect(questionGapComplement({ role: 'terminus', animate: true }, { base: 'qui' })?.terminus?.specifiers).toBeUndefined();
   });
 
+  // A350: an opponent gap takes the word the verb names for its opponent, as the statement does.
+  test('an opponent gap carries the verb\'s own opponent word as its link, and no other gap does', () => {
+    expect(questionGapComplement({ role: 'opponent', animate: true }, { base: '' }, { opponent_prep: 'with' })?.opponent?.link).toBe('with');
+    expect(questionGapComplement({ role: 'opponent', animate: true }, { base: '' }, {})?.opponent?.link).toBeUndefined();
+    expect(questionGapComplement({ role: 'opponent', animate: true }, { base: '' })?.opponent?.link).toBeUndefined();
+    expect(questionGapComplement({ role: 'comitative', animate: true }, { base: '' }, { opponent_prep: 'with' })?.comitative?.link).toBeUndefined();
+  });
+
   test('undefined for a gap that is no complement', () => {
     expect(questionGapComplement({ role: 'subject', animate: true }, {})).toBeUndefined();
     expect(questionGapComplement({ role: 'directObject', animate: false }, {})).toBeUndefined();

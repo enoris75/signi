@@ -1,5 +1,6 @@
 import type { ComplementType } from '@signi/shared';
-import type { ResolvedComplement, ResolvedNounElement, ResolvedQuestion } from '../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedQuestion } from '../types.js';
+import { opponentLink } from './opponentLink.js';
 
 /**
  * The stand-in for a wh-question's word where it fills a noun slot (P09-E15): the word the engine
@@ -27,16 +28,22 @@ export function questionStandIn(question: ResolvedQuestion, forms: Record<string
  * the way `relativeGapComplement` builds a relative's (P09-E15): the stand-in (`questionStandIn`)
  * in the gapped relation, its `specifiers` kept. `undefined` for a gap that is no complement — the
  * subject, the object, the possessor, and a passive's agent, which is the by-phrase's (P09-E16).
+ *
+ * `verb` is the clause's verb forms. An opponent gap takes the word the verb names for its opponent,
+ * as the statement's complement does (`opponentLink`): "who does the cat play with?", "mit wem"
+ * (A350). Without it the relation's own word stands.
  */
 export function questionGapComplement(
   question: ResolvedQuestion | undefined,
   forms: Record<string, string>,
+  verb?: ConceptForms['forms'],
 ): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
   if (!question || question.role === 'subject' || question.role === 'directObject' || question.role === 'possessor'
     || question.role === 'agent') return undefined;
   const complement: ResolvedComplement = {
     phrase: questionStandIn(question, forms),
     ...(question.specifiers ? { specifiers: question.specifiers } : {}),
+    ...(question.role === 'opponent' && opponentLink(verb) ? { link: opponentLink(verb) } : {}),
   };
   return { [question.role]: complement };
 }

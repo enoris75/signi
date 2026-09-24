@@ -50,6 +50,14 @@ describe('relativeGapComplement', () => {
     expect(relativeGapComplement(house, { base: 'que', number: 'plural' })?.locative?.phrase.agreement['number']).toBe('plural');
   });
 
+  // A350: an opponent gap takes the word the relative's verb names for its opponent: "with which".
+  test("an opponent gap carries the verb's own opponent word as its link, and no other gap does", () => {
+    const play = vp({ base: 'play', opponent_prep: 'with' });
+    expect(relativeGapComplement(np(HOUSE, {}, { relative: clause({ headRole: 'opponent', verbPhrase: play }) }), WHICH)?.opponent?.link).toBe('with');
+    expect(relativeGapComplement(np(HOUSE, {}, { relative: clause({ headRole: 'opponent' }) }), WHICH)?.opponent?.link).toBeUndefined();
+    expect(relativeGapComplement(np(HOUSE, {}, { relative: clause({ verbPhrase: play }) }), WHICH)?.locative?.link).toBeUndefined();
+  });
+
   test("the gap's specifiers ride along on the complement", () => {
     const house = np(HOUSE, {}, { relative: clause({ headSpecifiers: [{ kind: 'path', value: 'under' }] }) });
     expect(relativeGapComplement(house, WHICH)?.locative?.specifiers).toEqual([{ kind: 'path', value: 'under' }]);

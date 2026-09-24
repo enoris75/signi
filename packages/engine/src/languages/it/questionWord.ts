@@ -37,7 +37,7 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
 const SOURCE_PARTICLE = /^via /;
 
 function gapText(question: ResolvedQuestion, verb: ConceptForms): string {
-  const gap = questionGapComplement(question, { base: question.animate ? 'chi' : 'che cosa' });
+  const gap = questionGapComplement(question, { base: question.animate ? 'chi' : 'che cosa' }, verb.forms);
   return gap ? complementsPhrase(gap, {}, verb.conceptId, {}, verb.forms).replace(/\s+/g, ' ').trim() : '';
 }
 

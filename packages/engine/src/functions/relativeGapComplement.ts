@@ -1,5 +1,6 @@
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounPhrase } from '../types.js';
+import { opponentLink } from './opponentLink.js';
 import { relativizerStandIn } from './relativizerStandIn.js';
 
 /**
@@ -13,7 +14,9 @@ import { relativizerStandIn } from './relativizerStandIn.js';
  *
  * The complement's noun phrase is a stand-in for the head (see `relativizerStandIn`). Rendering it
  * through the complement path gives the relativizer the preposition, case and contraction the head
- * would take there: "in which", "in dem", "nella quale", "al que".
+ * would take there: "in which", "in dem", "nella quale", "al que". An opponent gap takes the word the
+ * relative's verb names for its opponent, as the statement does (`opponentLink`): "with which", "mit
+ * dem", "con il quale" (A350).
  */
 export function relativeGapComplement(
   np: ResolvedNounPhrase,
@@ -25,6 +28,7 @@ export function relativeGapComplement(
   const complement: ResolvedComplement = {
     phrase: relativizerStandIn(np, forms),
     ...(rel.headSpecifiers ? { specifiers: rel.headSpecifiers } : {}),
+    ...(rel.headRole === 'opponent' && opponentLink(rel.verbPhrase.verb.forms) ? { link: opponentLink(rel.verbPhrase.verb.forms) } : {}),
   };
   return { [rel.headRole]: complement };
 }

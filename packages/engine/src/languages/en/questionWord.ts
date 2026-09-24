@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import type { ResolvedComplement, ResolvedQuestion } from '../../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedQuestion } from '../../types.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { type QuestionAdverb, questionAdverbial } from '../../functions/questionAdverbial.js';
 import { questionGapComplement } from '../../functions/questionGapComplement.js';
@@ -40,12 +40,13 @@ export function questionWord(question: ResolvedQuestion): string {
  * render it, so a complement after it does not read it as its own ("what does the man cut the book
  * with in the house?"). A bare addressee strands nothing ("who does the man ask?"). `undefined` where
  * nothing strands: the clause slots, the adverbs that say it all (*where to*, *when*, *how*, *why*),
- * and the fronted negative cause.
+ * and the fronted negative cause. `verb` is the clause's verb: an opponent gap strands the word it
+ * names for its opponent, "who does the cat play **with**?" (A350, see `questionGapComplement`).
  */
-export function strandedGap(question: ResolvedQuestion | undefined): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
+export function strandedGap(question: ResolvedQuestion | undefined, verb?: ConceptForms): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
   if (!question) return undefined;
   const adverb = questionAdverbial(question);
   if (adverb && adverb !== 'whereFrom') return undefined;
   if (question.role === 'cause' && causeSentiment(question) === 'negative') return undefined;
-  return questionGapComplement(question, { base: '' });
+  return questionGapComplement(question, { base: '' }, verb?.forms);
 }
