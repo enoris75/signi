@@ -519,6 +519,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The scale LONG sits on, as SIZE is BIG's: "of great length" (localization B87). Portuguese
+    // comprimento, the measured length (longitude is the geographic one); Spanish longitud.
+    id: 'LENGTH',
+    role: 'noun',
+    description: 'how long something is; extent from end to end',
+    emoji: '↔️',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'length', plural: 'lengths', count: 'singular' },
+      it: { base: 'lunghezza', plural: 'lunghezze', gender: 'fem', count: 'singular' },
+      fr: { base: 'longueur', plural: 'longueurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Länge', plural: 'Längen', gender: 'fem', count: 'singular' },
+      es: { base: 'longitud', plural: 'longitudes', gender: 'fem', count: 'singular' },
+      ja: { base: '長さ', count: 'singular', reading: 'ながさ' },
+      pt: { base: 'comprimento', plural: 'comprimentos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // Italian/Portuguese "qualità/qualidade" and the Romance feminines; `quality` relation so a
     // gloss reads "of high quality" (di alta qualità). Italian "qualità" is invariable in the plural.
     id: 'QUALITY',

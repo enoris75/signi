@@ -74,6 +74,26 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // BIG's gloss on the length scale (localization B87): "of great length". French long has an
+    // irregular feminine, longue, seeded in the engine's FR_ADJ_IRREGULAR; Italian lungo keeps its
+    // hard g (lunghi, lunghe). German lang umlauts under comparison (länger, am längsten). Spanish
+    // largo is "long", not "large". Portuguese longo; the everyday comprido renders as well.
+    id: 'LONG',
+    role: 'adjective',
+    description: 'great in length',
+    definition: dimGloss('LENGTH', 'GREAT'),
+    emoji: '🐍',
+    forms: {
+      en: { base: 'long' },
+      it: { base: 'lungo' },
+      fr: { base: 'long' },
+      de: { base: 'lang', umlaut: 'true' },
+      es: { base: 'largo' },
+      ja: { base: '長い', reading: 'ながい' },
+      pt: { base: 'longo' },
+    },
+  },
+  {
     // A degree word for the adjective-definition glosses (BIG → "of great size", STRONG → "of great
     // strength"). Same surface as BIG in most languages ("grande"/"groß") — a dictionary defines
     // "big" as "of great size", so the reuse is the gloss, not a bug. German umlauts like BIG.
@@ -620,6 +640,26 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // INTERESTING's gloss on VALUE (localization B87): "of high value". VALUE is the UI's setting
+    // value, but its word is the everyday one in six languages (valore, valeur, Wert, valor), and the
+    // gloss takes it in that sense; Japanese 値が高い leans to "high-priced". ATTENTION would be
+    // INTERESTING's own gloss again.
+    id: 'IMPORTANT',
+    role: 'adjective',
+    description: 'of great significance or value',
+    definition: dimGloss('VALUE', 'HIGH'),
+    emoji: '🔑',
+    forms: {
+      en: { base: 'important' },
+      it: { base: 'importante' },
+      fr: { base: 'important' },
+      de: { base: 'wichtig' },
+      es: { base: 'importante' },
+      ja: { base: '重要な', reading: 'じゅうような' },
+      pt: { base: 'importante' },
+    },
+  },
+  {
     id: 'QUICK',
     role: 'adjective',
     description: 'moving or capable of moving fast',
@@ -648,6 +688,40 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'marrón' },
       ja: { base: '茶色の', reading: 'ちゃいろの' },
       pt: { base: 'castanho' },
+    },
+  },
+  // The colours are roots, literal by design as BROWN is (localization B54, B87): COLOUR is not a
+  // concept, and DARK already ships "that does not have light". French blanc has an irregular
+  // feminine, blanche (FR_ADJ_IRREGULAR); Italian bianco keeps its hard c (bianchi). German schwarz
+  // umlauts under comparison (schwärzer); weiß does not. Portuguese preto, the everyday black.
+  {
+    id: 'BLACK',
+    role: 'adjective',
+    description: 'of the darkest colour, the colour of coal',
+    emoji: '🖤',
+    forms: {
+      en: { base: 'black' },
+      it: { base: 'nero' },
+      fr: { base: 'noir' },
+      de: { base: 'schwarz', umlaut: 'true' },
+      es: { base: 'negro' },
+      ja: { base: '黒い', reading: 'くろい' },
+      pt: { base: 'preto' },
+    },
+  },
+  {
+    id: 'WHITE',
+    role: 'adjective',
+    description: 'of the lightest colour, the colour of snow',
+    emoji: '🤍',
+    forms: {
+      en: { base: 'white' },
+      it: { base: 'bianco' },
+      fr: { base: 'blanc' },
+      de: { base: 'weiß' },
+      es: { base: 'blanco' },
+      ja: { base: '白い', reading: 'しろい' },
+      pt: { base: 'branco' },
     },
   },
   {
@@ -1875,6 +1949,95 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'mismo', predicate_article: '1' },
       ja: { base: '同じ', reading: 'おなじ' },
       pt: { base: 'mesmo', predicate_article: '1' },
+    },
+  },
+  {
+    // SAME's gloss inverted (localization B87): "that is not the same". An antonym pair, not a circle,
+    // since SAME's gloss says OTHER and not this word. Not OTHER either, which is "different from the
+    // one already named" (altro, autre, 別の). After the noun in the Romance languages, where before it
+    // it reads "various" (diverse case, diferentes casas). Japanese has no adjective for it: 違う is a
+    // godan verb, and inflects as one (`ja_verbal`) — 違う家, 家は違います, 違わない.
+    id: 'DIFFERENT',
+    role: 'adjective',
+    description: 'not the same; unlike',
+    definition: subjectGapGloss('OBJECT_THING', 'BE', { predicate: 'SAME', negative: true }),
+    emoji: '🔀',
+    forms: {
+      en: { base: 'different' },
+      it: { base: 'diverso' },
+      fr: { base: 'différent' },
+      de: { base: 'verschieden' },
+      es: { base: 'diferente' },
+      ja: { base: '違う', reading: 'ちがう', ja_verbal: '1' },
+      pt: { base: 'diferente' },
+    },
+  },
+  {
+    // Of a person: certain (localization B87). A state, so es/pt predicate it with estar (A47). Four of
+    // these words are also "safe" (sicuro, sûr, sicher, seguro), which SAFE, when it is seeded, shares.
+    // "Who knows well" is the knowledge it names; "sure that …" would want a content clause on the
+    // adjective, which C30's is not.
+    id: 'SURE',
+    role: 'adjective',
+    transient: true,
+    description: 'certain; having no doubt',
+    definition: subjectGapGloss('PERSON', 'KNOW', { modifier: 'WELL' }),
+    emoji: '👍',
+    forms: {
+      en: { base: 'sure' },
+      it: { base: 'sicuro' },
+      fr: { base: 'sûr' },
+      de: { base: 'sicher' },
+      es: { base: 'seguro' },
+      // 確信した, a state as TIRED's 疲れた is: 猫は確信しています, "the cat is sure". 確かな is said of a
+      // fact or a thing (確かな情報), not of a person.
+      ja: { base: '確信した', reading: 'かくしんした' },
+      pt: { base: 'certo' },
+    },
+  },
+  // English real is two words elsewhere (localization B87): existing in fact (reale, réel, wirklich,
+  // 実在する) and genuine, not fake (vero, vrai, echt, 本物の). REAL_EXISTING is what is in reality;
+  // REAL_GENUINE is literal by design, since "that seems real" says REAL_EXISTING's own word in six
+  // languages and "that is known" is not what it means.
+  {
+    id: 'REAL_EXISTING',
+    role: 'adjective',
+    description: 'existing in fact, not imagined',
+    definition: subjectGapGloss('OBJECT_THING', 'BE', {
+      complements: { locative: { phrase: { concept: 'REALITY', definiteness: 'bare' } } },
+    }),
+    emoji: '🌍',
+    synonym: 'existing',
+    forms: {
+      en: { base: 'real' },
+      it: { base: 'reale' },
+      fr: { base: 'réel' },
+      de: { base: 'wirklich' },
+      es: { base: 'real' },
+      // 実在する, "to exist in fact", a する verb (`ja_verbal`): 実在する家, 家は実在します. The の-adjective
+      // 現実の would predicate the noun, 家は現実です ("the house is reality").
+      ja: { base: '実在する', reading: 'じつざいする', ja_verbal: '1' },
+      pt: { base: 'real' },
+    },
+  },
+  {
+    // Before the noun in the Romance languages, where the sense is (un vero problema, un vrai
+    // problème, un verdadero problema, um verdadeiro problema); after it, it is "true" (una storia
+    // vera, une histoire vraie).
+    id: 'REAL_GENUINE',
+    role: 'adjective',
+    description: 'genuine; not fake or imitation',
+    emoji: '💎',
+    synonym: 'genuine',
+    forms: {
+      en: { base: 'real' },
+      it: { base: 'vero' },
+      fr: { base: 'vrai' },
+      de: { base: 'echt' },
+      es: { base: 'verdadero' },
+      // 本物の, the genuine article (家は本物です); 本当の is "true" (本当の話), REALLY's 本当に.
+      ja: { base: '本物の', reading: 'ほんものの' },
+      pt: { base: 'verdadeiro' },
     },
   },
   {

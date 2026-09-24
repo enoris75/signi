@@ -2430,6 +2430,43 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('誤りがない');
   });
 
+  test('a dimension gloss on the new LENGTH (localization B87: LONG)', async ({ app, page }) => {
+    // BIG's "of great size" on LENGTH, which B87 seeded for it.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('long');
+    const longDe = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longDe).toBeVisible();
+    await longDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von großer Länge');
+
+    // French grand precedes its noun and agrees with the feminine longueur.
+    await app.setUiLanguage('fr');
+    await app.openSubjectAdjective('long');
+    const longFr = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longFr).toBeVisible();
+    await longFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('de grande longueur');
+  });
+
+  test('SAME negated as a predicate (localization B87: DIFFERENT)', async ({ app, page }) => {
+    // The predicate SAME keeps its article in Spanish; Japanese negates the の-less 同じ.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('different');
+    const differentJa = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentJa).toBeVisible();
+    await differentJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じではない');
+
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('different');
+    const differentEs = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentEs).toBeVisible();
+    await differentEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que no es el mismo');
+  });
+
   test('a place, a manner and a fact adverb (localization B67: HERE, ALSO, REALLY)', async ({
     app,
     page,
