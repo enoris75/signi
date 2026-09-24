@@ -19,7 +19,7 @@ complement (*as*), shipped the same day, plan-only, and so did **E14–E19**, al
 lanes landed together: the possessor, marked-relation and passive questions (E14–E16), the indirect
 question (E17, which retired A272), and the superlative's set and attributive comparison (E19, E18).
 **E20–E23 shipped on 2026-09-24** (E20 and E22 plan-only in the engine, E20 also on the temporal
-box), with E24 in the same batch. The decisions below were
+box), and E24's coverage check for ranks 201–400 filed B75–B90 and E25–E43 (§5). The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -288,7 +288,36 @@ is built at HEAD and recommends an answer to every decision it raises.
 | [P09-E21](Z-done/P09-E21-onto.md) | **Shipped 2026-09-24.** *onto* as its own English goal — "jumps **onto** the wall", the locative *on* unchanged | E1 |
 | [P09-E22](Z-done/P09-E22-adversarial-against.md) | **Shipped 2026-09-24.** "plays **against** the dog" — the `opponent` complement, *gegen* + accusative, を相手に with a verb-governed `opponent_prep`; plan-only. FIGHT still unseeded | E1 D3, E2 |
 | [P09-E23](Z-done/P09-E23-secondary-lexemes.md) | **Shipped 2026-09-24.** non-primary lexeme links, so "talk" finds SPEAK and *cominciare* finds BEGIN — in the picker, console completion and word resolution; never rendered | *Follow-ups* |
-| [P09-E24](P09-E24-ranks-201-400.md) | the same coverage check for ranks 201–400 | *Follow-ups* |
+| [P09-E24](Z-done/P09-E24-ranks-201-400.md) | **Done 2026-09-24.** the same coverage check for ranks 201–400, on the free COCA top-5000 lemma sample: 192 lemmas — 69 seeded, 2 pronoun forms, 14 written by the engine, 80 left to seed (B75–B90) and 27 needing the engine first (E25–E43) | *Follow-ups* |
+
+
+## 5. Constructs from ranks 201–400 (E25–E43)
+
+Filed on 2026-09-24 by [E24](Z-done/P09-E24-ranks-201-400.md)'s checklist, one per construct, each
+with a *Today* probed at 1229928. All are **planning, unscheduled**. The words of the same band that
+need only seeding are [B75–B90](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed).
+
+| task | construct |
+|---|---|
+| [P09-E25](P09-E25-quantity-determiners.md) | More quantity determiners — *each, both, most, several, enough, a lot of* |
+| [P09-E26](P09-E26-both-and.md) | *Both … and* — a correlative on a coordinated group |
+| [P09-E27](P09-E27-until-since-though.md) | *Until, since, though* — three more adverbial-clause conjunctions |
+| [P09-E28](P09-E28-yet-and-ever.md) | *Yet* and *ever* — the polarity forms of ALREADY and NEVER |
+| [P09-E29](P09-E29-however.md) | *However* — a parenthetical adversative connector |
+| [P09-E30](P09-E30-interjections.md) | *Hey* — an interjection before a clause |
+| [P09-E31](P09-E31-state-predicate-okay.md) | *Okay* — a well-being predicate whose copula is lexical |
+| [P09-E32](P09-E32-among.md) | *Among* — a spatial relation over a plural set |
+| [P09-E33](P09-E33-including-such-as.md) | *Including* and *such as* — naming members of a noun's set |
+| [P09-E34](P09-E34-within.md) | *Within* — a deadline relation on the temporal complement |
+| [P09-E35](P09-E35-duration.md) | Duration — "for an hour", "for a long time" |
+| [P09-E36](P09-E36-something-else.md) | *Something else*, *something big* — a modifier on an indefinite pronoun |
+| [P09-E37](P09-E37-goes-home.md) | *Goes home* — the direction idiom of HOME |
+| [P09-E38](P09-E38-approximators.md) | Approximators — *about five*, *almost all* |
+| [P09-E39](P09-E39-sentence-adverbs.md) | Sentence adverbs — *maybe, probably, actually, of course* |
+| [P09-E40](P09-E40-someone.md) | *Someone* — a human indefinite pronoun |
+| [P09-E41](P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* |
+| [P09-E42](P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb |
+| [P09-E43](P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object |
 
 ## Verification
 
@@ -354,4 +383,5 @@ the temporal ring and the existential toggle, are now [E12](Z-done/P09-E12-build
 - **Secondary lexemes** — [E23](Z-done/P09-E23-secondary-lexemes.md), **shipped 2026-09-24**: "talk"
   finds SPEAK in the English picker without a duplicate concept, and an alias is found in the other
   six too (*cominciare*, *anfangen*, *comenzar* find BEGIN).
-- **Ranks 201–400** — now [E24](P09-E24-ranks-201-400.md). Run the same check again once this list is done.
+- **Ranks 201–400** — [E24](Z-done/P09-E24-ranks-201-400.md), **done 2026-09-24**: its checklist filed
+  B75–B90 for the words and E25–E43 (§5) for the constructs.
