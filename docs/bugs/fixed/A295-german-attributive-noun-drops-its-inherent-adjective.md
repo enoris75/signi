@@ -59,3 +59,22 @@ is a separate question from this defect.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: German attributive noun drops its inherent adjective* (3 `test.fails`: beside its own adjective, out of the compound, the grammar term's adjective and postnominal; plus a regression test for WOMAN and for YOUNG_WOMAN as head and possessor) |
+
+## Resolved
+
+2026-09-24. As the trial fix sketched, in two files of `languages/de/`:
+[`modifierGenitives.ts`](../../../packages/engine/src/languages/de/modifierGenitives.ts) gains
+`isGenitiveModifier` (an own adjective, a `forms.adjective` or a `forms.postnominal`), takes every such
+modifier into the postposed genitive, declines the inherent adjective after the modifier's own and
+writes `postnominal` after the noun; [`germanCompound.ts`](../../../packages/engine/src/languages/de/germanCompound.ts)
+leaves the same modifiers out of the compound. Decided: the bare singular keeps the house form, *das
+Buch junger Frau* (A57's *der Schöpfer kleinen Jungen*), now pinned with a comment; whether a bare
+count singular should stand there is a separate question.
+
+The three `test.fails` in [adjectives.test.ts](../../../packages/engine/test/adjectives.test.ts)
+(*known bugs: German attributive noun drops its inherent adjective*) are plain tests now, assertions
+unchanged. Added in the same block: YOUNG_WOMAN as a modifier in an object (*sieht das Buch junger
+Frauen*) and under a possessor (*der Kater des Mannes junger Frauen*), the bare singular, and the
+LOCATIVE modifier in all seven. `modifierGenitives.test.ts` and `germanCompound.test.ts` each gained a
+case.
+
