@@ -17,4 +17,11 @@ describe('frEnclitic', () => {
   test('a plain verb with no pronoun is unchanged', () => {
     expect(frEnclitic('cours', '', false, '2sg')).toBe('cours');
   });
+
+  // A359: an affirmative command takes the object first, each pronoun hyphenated, me / te stressed.
+  test('a cluster attaches object first', () => {
+    expect(frEnclitic('donne', 'le lui', false, '2sg')).toBe('donne-le-lui');
+    expect(frEnclitic('donne', 'le me', false, '2sg')).toBe('donne-le-moi');
+    expect(frEnclitic('donnez', 'les leur', false, '2pl')).toBe('donnez-les-leur');
+  });
 });

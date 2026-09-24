@@ -579,29 +579,70 @@ describe('known bugs: a Romance pronoun recipient is the tonic pronoun, not the 
 describe('known bugs: a Romance pronoun object and pronoun recipient build no clitic cluster (A359)', () => {
   const it3 = np('THIRD_PERSON', { gender: 'neut' });
   const her = np('THIRD_PERSON', { gender: 'fem' });
-  const givesIt = (recipient: NounElement, verbPhrase: Partial<VerbPhrase> = {}) =>
-    sayAll(clause(np('MAN'), 'GIVE', { verbPhrase, directObject: it3, complements: { terminus: { phrase: recipient } } }));
+  const givesIt = (recipient: NounElement, verbPhrase: Partial<VerbPhrase> = {}, object: NounElement = it3) =>
+    sayAll(clause(np('MAN'), 'GIVE', { verbPhrase, directObject: object, complements: { terminus: { phrase: recipient } } }));
 
-  test.fails('the 3rd person recipient', () => {
+  test('the 3rd person recipient', () => {
     expect(givesIt(her)).toMatchObject({ it: "l'uomo glielo dà.", fr: "l'homme le lui donne.", es: 'el hombre se lo da.' });
   });
 
-  test.fails('the 1st and 2nd person recipient', () => {
+  test('the 1st and 2nd person recipient', () => {
     expect(givesIt(np('FIRST_PERSON'))).toMatchObject({ it: "l'uomo me lo dà.", fr: "l'homme me le donne.", es: 'el hombre me lo da.' });
     expect(givesIt(np('SECOND_PERSON'))).toMatchObject({ it: "l'uomo te lo dà.", fr: "l'homme te le donne.", es: 'el hombre te lo da.' });
   });
 
-  test.fails('negated', () => {
+  test('negated', () => {
     expect(givesIt(her, { negative: true })).toMatchObject({
       it: "l'uomo non glielo dà.", fr: "l'homme ne le lui donne pas.", es: 'el hombre no se lo da.',
     });
   });
 
-  test.fails('an affirmative command attaches the cluster', () => {
+  test('an affirmative command attaches the cluster', () => {
     expect(sayAll({
       ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: it3, complements: { terminus: { phrase: her } } }),
       imperative: true,
     })).toMatchObject({ it: 'daglielo.', fr: 'donne-le-lui.', es: 'dáselo.' });
+  });
+
+  test('the object\'s gender and number, and a plural recipient', () => {
+    const them = np('THIRD_PERSON', { number: 'plural' });
+    expect(givesIt(np('FIRST_PERSON'), {}, her)).toMatchObject({ it: "l'uomo me la dà.", fr: "l'homme me la donne.", es: 'el hombre me la da.' });
+    expect(givesIt(them, {}, them)).toMatchObject({ it: "l'uomo glieli dà.", fr: "l'homme les leur donne.", es: 'el hombre se los da.' });
+    expect(givesIt(np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({ it: "l'uomo ce lo dà.", fr: "l'homme nous le donne.", es: 'el hombre nos lo da.' });
+  });
+
+  // The cluster rides where the lone clitic rides: on the auxiliary, whose participle agrees with the
+  // object (Italian writes "glielo ha" as it writes "lo ha" here, unelided), up a modal in Italian and
+  // Spanish, before the infinitive in French, and a French cluster elides its last clitic.
+  test('the compound tense, a modal and the progressive', () => {
+    expect(givesIt(her, { aspect: 'resultative' }, her)).toMatchObject({
+      it: "l'uomo gliela ha data.", fr: "l'homme la lui a donnée.", es: 'el hombre se la ha dado.',
+    });
+    expect(givesIt(np('FIRST_PERSON'), { aspect: 'resultative' }).fr).toBe("l'homme me l'a donné.");
+    expect(givesIt(her, { modals: ['MUST'] })).toMatchObject({
+      it: "l'uomo glielo deve dare.", fr: "l'homme doit le lui donner.", es: 'el hombre se lo debe dar.',
+    });
+    expect(givesIt(her, { aspect: 'progressive' })).toMatchObject({
+      it: "l'uomo glielo sta dando.", fr: "l'homme est en train de le lui donner.", es: 'el hombre se lo está dando.',
+    });
+  });
+
+  test('a command to me, a negative command, and a plural recipient', () => {
+    const command = (recipient: NounElement, negative = false) => sayAll({
+      ...clause(np('SECOND_PERSON'), 'GIVE', { verbPhrase: { negative }, directObject: it3, complements: { terminus: { phrase: recipient } } }),
+      imperative: true,
+    });
+    expect(command(np('FIRST_PERSON'))).toMatchObject({ it: 'dammelo.', fr: 'donne-le-moi.', es: 'dámelo.' });
+    expect(command(her, true)).toMatchObject({ it: 'non darglielo.', fr: 'ne le lui donne pas.', es: 'no se lo des.' });
+    expect(command(np('THIRD_PERSON', { number: 'plural' }))).toMatchObject({ it: 'daglielo.', fr: 'donne-le-leur.', es: 'dáselo.' });
+  });
+
+  // A 1st / 2nd person object admits no dative clitic beside it (*me lui, *me le): the recipient keeps
+  // its phrase.
+  test('regression: a 1st person object keeps the tonic recipient', () => {
+    expect(givesIt(her, {}, np('FIRST_PERSON'))).toMatchObject({
+      it: "l'uomo mi dà a lei.", fr: "l'homme me donne à elle.", es: 'el hombre me da a ella.', pt: 'o homem me dá a ela.',
+    });
   });
 
   test('regression: a noun recipient, a noun object, Portuguese, and the other languages', () => {
@@ -625,13 +666,35 @@ describe('known bugs: the impersonal si / se with a pronoun recipient keeps the 
     verbPhrase: { negative }, directObject: np('BOOK'), complements: { terminus: { phrase: recipient } },
   }));
 
-  test.fails('the 3rd and the 1st person recipient', () => {
+  test('the 3rd and the 1st person recipient', () => {
     expect(oneGives(her)).toMatchObject({ it: 'le si dà il libro.', es: 'se le da el libro.' });
     expect(oneGives(np('FIRST_PERSON'))).toMatchObject({ it: 'mi si dà il libro.', es: 'se me da el libro.' });
   });
 
-  test.fails('negated', () => {
+  test('negated', () => {
     expect(oneGives(her, true)).toMatchObject({ it: 'non le si dà il libro.', es: 'no se le da el libro.' });
+  });
+
+  const one = (recipient: NounElement, verbPhrase: Partial<VerbPhrase> = {}, object: NounElement = np('BOOK')) =>
+    sayAll(clause(np('GENERIC_PERSON'), 'GIVE', { verbPhrase, directObject: object, complements: { terminus: { phrase: recipient } } }));
+
+  // With a plural noun object Italian's si is the passive si, and the dative leads it all the same.
+  test('the 2nd person, a plural noun object, the compound tense, a modal, and TELL', () => {
+    expect(one(np('SECOND_PERSON'))).toMatchObject({ it: 'ti si dà il libro.', es: 'se te da el libro.' });
+    expect(one(her, {}, np('BOOK', { number: 'plural' }))).toMatchObject({ it: 'le si danno i libri.', es: 'se le dan los libros.' });
+    expect(one(her, { aspect: 'resultative' })).toMatchObject({ it: 'le si è dato il libro.', es: 'se le ha dado el libro.' });
+    expect(one(her, { modals: ['MUST'] })).toMatchObject({ it: 'le si deve dare il libro.', es: 'se le debe dar el libro.' });
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'TELL', {
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } }, complements: { terminus: { phrase: her } },
+    }))).toMatchObject({ it: 'le si racconta che il gatto corre.', es: 'se le cuenta que el gato corre.' });
+  });
+
+  // Italian's impersonal si takes a whole cluster in front (A359): "glielo si dà". Spanish's cannot,
+  // since the cluster's own se would double it ("*se se lo da"), so the recipient keeps its phrase.
+  test('beside a pronoun object: the Italian cluster, the Spanish tonic recipient', () => {
+    expect(one(her, {}, np('THIRD_PERSON', { gender: 'neut' }))).toMatchObject({
+      it: 'glielo si dà.', fr: 'on le lui donne.', es: 'se lo da a ella.', pt: 'se o dá a ela.',
+    });
   });
 
   test('regression: French, a noun recipient, Portuguese, and the other languages', () => {

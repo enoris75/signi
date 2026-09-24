@@ -552,7 +552,7 @@ describe('known bugs: the generic subject as a direct object renders its subject
 
   // The passive promotes the generic patient to the subject, where it has its form.
   test('the passive is not refused: the generic patient is its subject', () => {
-    // es/pt "se es visto" / "se é visto" is a separate defect, A355, pinned below.
+    // es "uno es visto" is A355's, pinned below; pt "se é visto" has no settled target.
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive' } }))).toMatchObject({
       en: 'one is seen by the cat.',
       fr: 'on est vu par le chat.',
@@ -587,9 +587,23 @@ describe('known bugs: the generic subject as a direct object renders its subject
 describe('known bugs: the Spanish generic patient of a passive is the impersonal se (A355)', () => {
   const G = np('GENERIC_PERSON');
   const seen = (negative = false) => say(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', negative } }), 'es');
+  const seenPt = (negative = false) => say(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', negative } }), 'pt');
 
-  test.fails('the generic patient of a passive is uno', () => {
+  test('the generic patient of a passive is uno', () => {
     expect([seen(), seen(true)]).toEqual(['uno es visto por el gato.', 'uno no es visto por el gato.']);
+  });
+
+  test('the passive composes on uno: tense, aspect, a modal, a fronted nunca', () => {
+    const es = (vp: Partial<VerbPhrase>) =>
+      say(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', ...vp } }), 'es');
+    expect([es({ tense: 'past' }), es({ aspect: 'perfect' }), es({ modals: ['MUST'] }), es({ modifier: 'NEVER' })]).toEqual([
+      'uno fue visto por el gato.', 'uno ha sido visto por el gato.', 'uno debe ser visto por el gato.', 'uno nunca es visto por el gato.',
+    ]);
+  });
+
+  // Portuguese is left as it is: no standard target is settled (see the bug file).
+  test('regression: Portuguese keeps its output', () => {
+    expect([seenPt(), seenPt(true)]).toEqual(['se é visto pelo gato.', 'não se é visto pelo gato.']);
   });
 
   test('regression: the other five, a noun patient, and the reflexive generic', () => {

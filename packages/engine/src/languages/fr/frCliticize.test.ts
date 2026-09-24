@@ -44,4 +44,12 @@ describe('frCliticize', () => {
     expect(frCliticize('y', 'ne sera pas')).toBe("n'y sera pas");
     expect(frCliticize('y', 'est')).toBe('y est');
   });
+
+  // A359: a cluster elides only its last clitic, against the verb, and "ne" is judged on its first.
+  test('a cluster elides its last clitic', () => {
+    expect(frCliticize('me le', 'a donné')).toBe("me l'a donné");
+    expect(frCliticize('le lui', 'a donné')).toBe('le lui a donné');
+    expect(frCliticize('le lui', 'ne donne pas')).toBe('ne le lui donne pas');
+    expect(frCliticize('me la', "n'a pas donnée")).toBe("ne me l'a pas donnée");
+  });
 });

@@ -56,3 +56,46 @@ modal, inside the negation and enclitic on a command.
 | **Test** | `complements/terminus.test.ts` → *known bugs: a Romance pronoun object and pronoun recipient build no clitic cluster (A359)* (4 `test.fails`: the 3rd person, the 1st and 2nd, negated, the command; plus a regression test for a noun recipient, a noun object, Portuguese and the other languages) |
 
 Found in A351's Resolved section ("Not done"), 2026-09-24.
+
+## Resolved
+
+2026-09-24. A pronoun recipient now takes the dative clitic beside a **3rd-person** object clitic too,
+and the pair is written as one cluster in each language's order by a new per-language helper:
+[it/itCliticCluster.ts](../../../packages/engine/src/languages/it/itCliticCluster.ts) (*glielo*,
+*gliela*, *glieli*, *me lo*, *ce lo*),
+[fr/frCliticCluster.ts](../../../packages/engine/src/languages/fr/frCliticCluster.ts) (*le lui*, *les
+leur*, *me le*, *nous le*) and
+[es/esCliticCluster.ts](../../../packages/engine/src/languages/es/esCliticCluster.ts) (*se lo*, *se
+los*, *me lo*, *nos lo*). The three `predicateText.ts` files build the cluster where they built the
+single clitic and drop the terminus from the complements, so it rides where the clitic rode: inside
+the negation, on the auxiliary (the participle agreeing with the object: *gliela ha data*, *la lui a
+donnée*, *se la ha dado*), up a modal (*glielo deve dare*, *se lo debe dar*; French *doit le lui
+donner*), and enclitic on a command (*daglielo*, *dammelo*, *non darglielo*, *dáselo*, *dámelo*).
+Italian and Spanish attach the cluster as one word. French needed two small changes:
+[frCliticize.ts](../../../packages/engine/src/languages/fr/frCliticize.ts) elides only a cluster's
+last clitic (*me l'a donné*), and
+[frEnclitic.ts](../../../packages/engine/src/languages/fr/frEnclitic.ts) hyphenates each pronoun of a
+command cluster, which the caller passes object first (*donne-le-lui*, *donne-le-moi*,
+*donne-le-leur*).
+
+Rulings applied:
+
+- **Italian compound tenses** follow the single clitic, which is not elided before the auxiliary here
+  (*lo ha dato*), so the cluster reads *glielo ha dato*.
+- **Spanish** writes the plain cluster, undoubled (*se lo da*).
+- **Portuguese** is unchanged (*o dá a ela*), as A351 ruled.
+
+A 1st / 2nd person object admits no dative clitic beside it (*\*me lui*, *\*me le*), so the recipient
+keeps its phrase there (*mi dà a lei*, *me donne à elle*, *me da a ella*).
+
+**Not done:** a reflexive (pronominal) verb's clitic beside a pronoun recipient still keeps the tonic
+recipient. The impersonal *si / se* beside one is
+[A360](A360-impersonal-si-se-with-a-pronoun-recipient-keeps-the-tonic-recipient.md).
+
+Guarded by `complements/terminus.test.ts` → *known bugs: a Romance pronoun object and pronoun recipient
+build no clitic cluster (A359)*: the four former `test.fails`, now plain tests; three new tests (the
+object's gender and number and a plural recipient; the compound tense, a modal and the progressive; a
+command to me, a negative command and a plural recipient); a new regression test for a 1st person
+object; and the existing regression test. Unit tests in `itCliticCluster.test.ts`,
+`frCliticCluster.test.ts`, `esCliticCluster.test.ts`, and new cases in `frCliticize.test.ts` and
+`frEnclitic.test.ts`.

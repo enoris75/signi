@@ -31,6 +31,7 @@ import { conjugate } from './conjugate.js';
 import { slotFocus } from '../../functions/slotFocus.js';
 import { withFocus } from '../../functions/withFocus.js';
 import { coordinate } from './coordinate.js';
+import { itCliticCluster } from './itCliticCluster.js';
 import { itEnclitic } from './itEnclitic.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
@@ -177,11 +178,19 @@ export function predicateText(
       ? (datClitic ? dativePronounForm(cliticObject) : objectPronounForm(cliticObject))
       : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
   // A pronoun recipient is the dative clitic in the same slot, "le dà il libro", "gli racconta che"
-  // (A351) — where the slot is free: the clitic path writes one clitic, and beside an object clitic,
-  // a reflexive or the impersonal si the recipient keeps its tonic "a lei" rather than half a cluster.
-  const recipientForms = !objectClitic && !reflexive && subjectForms['generic'] !== '1' ? recipientPronoun(complements, verb.forms) : undefined;
+  // (A351). Beside a 3rd-person object clitic the two are one cluster, dative first: "glielo dà", "me
+  // lo dà", riding wherever the lone clitic rides — inside "non", up a modal, onto a command
+  // ("daglielo") (A359). Beside the impersonal si the dative leads it, as an object clitic does: "le
+  // si dà il libro", "mi si dà", "non le si dà", "glielo si dà" (A360). A 1st / 2nd person object
+  // admits no dative clitic beside it, and beside a reflexive the recipient keeps its tonic "a lei"
+  // rather than half a cluster.
+  const clusterObject = !!cliticObject && !datClitic && cliticObject['person'] === '3';
+  const recipientForms = (!objectClitic || clusterObject) && !reflexive
+    ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
-  const clitic = objectClitic || recipientClitic;
+  const clitic = itCliticCluster(recipientClitic, objectClitic);
+  // Attached to its host, a cluster is one word: "dammelo", "darglielo".
+  const encliticCluster = clitic.replace(/ /g, '');
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
   const elideCi = (text: string): string => (elided?.type === 'locative' || existential
     ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'")
@@ -235,7 +244,7 @@ export function predicateText(
     const infinitive = negText === 'non' && impPN === '2sg';
     const short = !infinitive && impPN === '2sg' && IT_SHORT_IMPERATIVE.has(verb.conceptId);
     const impReflexive = reflexive ? (IT_REFLEXIVE[impPN] ?? '') : '';
-    const impVerb = itEnclitic(impForm, `${impReflexive}${clitic}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
+    const impVerb = itEnclitic(impForm, `${impReflexive}${encliticCluster}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
     return [negText, impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -251,7 +260,7 @@ export function predicateText(
     const inf = passive
       ? [plain.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
       : verb.forms['base'] ?? verbText;
-    const infWithClitic = itEnclitic(inf, clitic, 'infinitive');
+    const infWithClitic = itEnclitic(inf, encliticCluster, 'infinitive');
     return [negText, infWithClitic, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

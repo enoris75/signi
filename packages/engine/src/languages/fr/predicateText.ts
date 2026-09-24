@@ -33,6 +33,7 @@ import { withFocus } from '../../functions/withFocus.js';
 import { FOCUS_WORDS } from './fr.consts.js';
 import { coordinate } from './coordinate.js';
 import { elidesBeforeVerb } from './elidesBeforeVerb.js';
+import { frCliticCluster } from './frCliticCluster.js';
 import { frCliticize } from './frCliticize.js';
 import { frEnclitic } from './frEnclitic.js';
 import { modalGroupFr } from './modalGroupFr.js';
@@ -243,12 +244,17 @@ export function predicateText(
   const cliticObjectForms = !objectClitic || !directObject || datClitic || existential ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
   // A pronoun recipient is the dative clitic in the same slot, "lui donne le livre", "leur raconte
-  // que", "ne me donne pas" (A351) — where the slot is free: the clitic path writes one clitic, and
-  // beside an object clitic or a pronominal verb's "se" the recipient keeps its "à elle" rather than
+  // que", "ne me donne pas" (A351). Beside a 3rd-person object clitic the two are one cluster, "le lui
+  // donne", "me le donne", riding wherever the lone clitic rides (A359); an affirmative command puts
+  // the object first, "donne-le-lui", "donne-le-moi". A 1st / 2nd person object admits no dative
+  // clitic beside it, and beside a pronominal verb's "se" the recipient keeps its "à elle" rather than
   // half a cluster.
-  const recipientForms = !objectClitic && !/^(?:s'|se )/.test(verb.forms['base'] ?? '') ? recipientPronoun(complements, verb.forms) : undefined;
+  const clusterObject = !dislocated && cliticObjectForms?.['person'] === '3';
+  const recipientForms = (!objectClitic || clusterObject) && !/^(?:s'|se )/.test(verb.forms['base'] ?? '')
+    ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
-  const clitic = objectClitic || recipientClitic;
+  const clitic = frCliticCluster(recipientClitic, objectClitic);
+  const commandClitic = [objectClitic, recipientClitic].filter(Boolean).join(' ');
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
   // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit
   // l'avoir vu"); only the compound past keeps it on the finite auxiliary ("l'a vu").
@@ -341,7 +347,7 @@ export function predicateText(
     const reflexive = /^(?:s'|se )/.test(verb.forms['base'] ?? '');
     // A multiword command keeps its noun after the negation and the inner adverb: "n'aie pas besoin".
     const impVerb = affirmative
-      ? frEnclitic(negateFinite(impForm), clitic, reflexive, pn)
+      ? frEnclitic(negateFinite(impForm), commandClitic, reflexive, pn)
       : frCliticize(clitic, negateFinite(impForm));
     return withDislocated([impVerb, innerAdverb(impForm) ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)

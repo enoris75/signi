@@ -46,3 +46,27 @@ missing cluster, filed apart.
 | **Test** | `complements/terminus.test.ts` → *known bugs: the impersonal si / se with a pronoun recipient keeps the tonic recipient (A360)* (2 `test.fails`: the 3rd and 1st person, negated; plus a regression test for French, a noun recipient, Portuguese and the other languages) |
 
 Found in A351's Resolved section ("Not done"), 2026-09-24.
+
+## Resolved
+
+2026-09-24. [it/predicateText.ts](../../../packages/engine/src/languages/it/predicateText.ts) and
+[es/predicateText.ts](../../../packages/engine/src/languages/es/predicateText.ts) no longer refuse the
+recipient clitic under a generic subject. The dative goes where an object clitic already went beside
+the impersonal clitic: Italian before *si* (*le si dà il libro*, *mi si dà*, *ti si dà*, *non le si
+dà*), Spanish after *se* (*se le da el libro*, *se me da*, *se te da*, *no se le da*). It composes as
+the lone clitic does: the passive *si* (*le si danno i libri*, *se le dan los libros*), the compound
+tense (*le si è dato*, *se le ha dado*), a modal (*le si deve dare*, *se le debe dar*) and TELL's
+addressee (*le si racconta che*, *se le cuenta que*). Both conditions sit beside A359's cluster, in
+the same place in each file.
+
+With a pronoun object as well, Italian writes A359's cluster before *si*: *glielo si dà*. Spanish
+cannot, since the cluster's own *se* would double the impersonal one (*\*se se lo da*), so there the
+recipient keeps its phrase: *se lo da a ella*, as before.
+
+French and Portuguese are unchanged (*on lui donne le livre*, *se dá o livro a ela*). A reflexive
+verb's clitic beside a pronoun recipient is still out of scope (see A359's Resolved section).
+
+Guarded by `complements/terminus.test.ts` → *known bugs: the impersonal si / se with a pronoun
+recipient keeps the tonic recipient (A360)*: the two former `test.fails`, now plain tests; two new
+tests (the 2nd person, a plural noun object, the compound tense, a modal and TELL; beside a pronoun
+object, the Italian cluster and the Spanish tonic recipient); and the existing regression test.

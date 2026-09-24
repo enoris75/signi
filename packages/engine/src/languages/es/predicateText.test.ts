@@ -279,6 +279,13 @@ describe('predicateText', () => {
       expect(predicateText(SE, vp(COMER), el(np(EL)))).toBe('se lo come');
     });
 
+    // A355: ser has no impersonal se, so the generic subject of a passive is the word "uno".
+    test('the generic subject of a passive is uno, not the impersonal se', () => {
+      const uno = { ...SE, generic_reflexive: 'uno' };
+      const seen = (negative = false) => predicateText(uno, vp(VER, { voice: 'passive', passiveAux: concept(SER), negative }));
+      expect([seen(), seen(true)]).toEqual(['uno es visto', 'uno no es visto']);
+    });
+
     // A73: with a plural noun object se is passive, and the finite verb agrees with its patient.
     test('a plural noun object agrees the finite verb, in the compound tense too', () => {
       expect(predicateText(SE, vp(COMER), el(np(RATON, { number: 'plural' })))).toBe('se comen los ratones');
