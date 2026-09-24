@@ -2,6 +2,7 @@ import type { NounElement } from '@signi/shared';
 import { isNounGroup, nounConjuncts } from '@signi/shared';
 import type { ResolvedNounElement } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { MOST_AGREES_SINGULAR } from '../translator.consts.js';
 import { groupAgreement } from './groupAgreement.js';
 import { resolveNounPhrase } from './resolveNounPhrase.js';
 
@@ -18,7 +19,11 @@ import { resolveNounPhrase } from './resolveNounPhrase.js';
 export function resolveNounElement(el: NounElement, language: string, lookup: LexiconLookup): ResolvedNounElement {
   const conjuncts = nounConjuncts(el).map((np) => resolveNounPhrase(np, language, lookup));
   if (!isNounGroup(el) || conjuncts.length < 2) {
-    return { conjuncts, agreement: conjuncts[0].head.forms };
+    const forms = conjuncts[0].head.forms;
+    // The partitive *most* agrees as its singular head in it/es/pt: "la maggior parte dei gatti
+    // corre" (P09-E25 D4). The phrase itself keeps its plural noun.
+    const most = forms['definiteness'] === 'most' && forms['number'] === 'plural' && MOST_AGREES_SINGULAR.has(language);
+    return { conjuncts, agreement: most ? { ...forms, number: 'singular' } : forms };
   }
   return {
     conjuncts,

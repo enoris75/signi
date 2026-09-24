@@ -31,6 +31,12 @@ export function prepDet(prep: ItPreposition, forms: Record<string, string>, plur
   const articledName = forms['proper'] === '1' && forms['takes_article'] !== '0';
   const definite = definiteness === 'definite' || articledName || partitive;
   if (fuses(prep) && definite) return prepArt(prep, forms, plural, lead);
+  // The partitive "most" opens with an article of its own, the feminine "la" of "la maggior parte",
+  // and a fusing preposition takes it: "alla maggior parte dei gatti", "nella maggior parte delle case"
+  // (P09-E25).
+  if (fuses(prep) && definiteness === 'most') {
+    return `${prepArt(prep, { gender: 'fem' }, false, 'maggior')} ${artFor(forms, plural, lead).replace(/^la /, '')}`;
+  }
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
 }

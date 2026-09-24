@@ -1,3 +1,4 @@
+import { artFor } from './artFor.js';
 import { demonstrative } from './demonstrative.js';
 import { isBareName } from './isBareName.js';
 import { prepDet } from './prepDet.js';
@@ -24,5 +25,9 @@ export function contractDet(
   if ((definiteness === 'this' || definiteness === 'that') && (prep === 'em' || prep === 'de')) {
     return `${prep === 'em' ? 'n' : 'd'}${demonstrative(definiteness === 'that', forms, plural)}`;
   }
+  // The partitive "most" opens with an article of its own, the feminine "a" of "a maioria" / "a maior
+  // parte", and a contracting preposition takes it: "na maioria dos gatos", "da maior parte da água"
+  // (P09-E25).
+  if (definiteness === 'most') return `${contract({ gender: 'fem' }, false)} ${artFor(forms, plural).replace(/^a /, '')}`;
   return prepDet(prep, forms, plural);
 }

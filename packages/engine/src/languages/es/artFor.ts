@@ -1,4 +1,5 @@
 import { defArticle } from './defArticle.js';
+import { dePrep } from './dePrep.js';
 import { demonstrative } from './demonstrative.js';
 import { indefArticle } from './indefArticle.js';
 
@@ -29,6 +30,13 @@ export function artFor(forms: Record<string, string>, plural = false): string {
       case 'few':        return fem ? 'poca' : 'poco';
       case 'all':        return `${fem ? 'toda' : 'todo'} ${defArticle(forms, false)}`;
       case 'no':         return fem ? 'ninguna' : 'ningún';
+      // P09-E25 on a mass noun: "cada agua", "la mayor parte del agua" (la mayoría is the count
+      // noun's), "suficiente agua", "tal agua".
+      case 'each':
+      case 'every':      return 'cada';
+      case 'most':       return `la mayor parte ${dePrep(forms, false)}`;
+      case 'enough':     return 'suficiente';
+      case 'such':       return 'tal';
       default:           return defArticle(forms, false);
     }
   }
@@ -42,6 +50,16 @@ export function artFor(forms: Record<string, string>, plural = false): string {
     case 'few':        return fem ? 'pocas' : 'pocos';
     case 'all':        return `${fem ? 'todas' : 'todos'} ${defArticle(forms, true)}`;
     case 'no':         return fem ? 'ninguna' : 'ningún';
+    // P09-E25. "cada" is invariant and singular (each and every share it); "ambos/as" and
+    // "varios/as" agree in gender and take no article; "la mayoría" + the definite genitive;
+    // "suficiente(s)" and "tal(es)" agree in number only.
+    case 'each':
+    case 'every':      return 'cada';
+    case 'both':       return fem ? 'ambas' : 'ambos';
+    case 'most':       return `la mayoría ${dePrep(forms, true)}`;
+    case 'several':    return fem ? 'varias' : 'varios';
+    case 'enough':     return plural ? 'suficientes' : 'suficiente';
+    case 'such':       return plural ? 'tales' : 'tal';
     default:           return defArticle(forms, plural);
   }
 }

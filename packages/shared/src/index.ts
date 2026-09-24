@@ -26,6 +26,13 @@ export type Definiteness =
   | 'many'
   | 'few'
   | 'all'
+  | 'each'
+  | 'every'
+  | 'both'
+  | 'most'
+  | 'several'
+  | 'enough'
+  | 'such'
   | 'this'
   | 'that';
 
@@ -55,7 +62,9 @@ export const DETERMINER_CATEGORY_VALUES: Record<DeterminerCategory, Definiteness
   // Historically the definite article descends from the distal demonstrative in most of these
   // languages, which is why the two compete for the one slot rather than stacking.
   deixis: ['this', 'that'],
-  quantity: ['some', 'no', 'many', 'few', 'all'],
+  // P09-E25 added the seven after `all`: the distributives (each, every), the dual (both), the
+  // partitive majority (most), and the plain quantities several / enough / such.
+  quantity: ['some', 'no', 'many', 'few', 'all', 'each', 'every', 'both', 'most', 'several', 'enough', 'such'],
 };
 
 /** The dimension each determiner value belongs to — the inverse of DETERMINER_CATEGORY_VALUES. */

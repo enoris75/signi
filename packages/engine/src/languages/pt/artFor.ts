@@ -1,4 +1,5 @@
 import { defArticle } from './defArticle.js';
+import { dePrep } from './dePrep.js';
 import { demonstrative } from './demonstrative.js';
 import { indefArticle } from './indefArticle.js';
 import { isBareName } from './isBareName.js';
@@ -29,6 +30,13 @@ export function artFor(forms: Record<string, string>, plural = false): string {
       case 'few':        return fem ? 'pouca' : 'pouco';
       case 'all':        return `${fem ? 'toda' : 'todo'} ${defArticle(forms, false)}`;
       case 'no':         return fem ? 'nenhuma' : 'nenhum';
+      // P09-E25 on a mass noun: "cada água", "a maior parte da água" (a maioria is the count noun's),
+      // "tal água". "Suficiente" follows the noun ("água suficiente"): `ptAdj` writes it.
+      case 'each':
+      case 'every':      return 'cada';
+      case 'most':       return `a maior parte ${dePrep(forms, false)}`;
+      case 'enough':     return '';
+      case 'such':       return 'tal';
       default:           return defArticle(forms, false);
     }
   }
@@ -42,6 +50,17 @@ export function artFor(forms: Record<string, string>, plural = false): string {
     case 'few':        return fem ? 'poucas' : 'poucos';
     case 'all':        return `${fem ? 'todas' : 'todos'} ${defArticle(forms, true)}`;
     case 'no':         return fem ? 'nenhuma' : 'nenhum';
+    // P09-E25. "cada" is invariant and singular (each and every share it); "ambos/as" keeps the
+    // definite article as "todos" does; "a maioria" + the definite genitive ("dos gatos"); "vários/as"
+    // agrees in gender; "tal/tais" in number. "Suficiente(s)" follows the noun, so it spells nothing
+    // here ("gatos suficientes"): `ptAdj` writes it after the other adjectives.
+    case 'each':
+    case 'every':      return 'cada';
+    case 'both':       return `${fem ? 'ambas' : 'ambos'} ${defArticle(forms, true)}`;
+    case 'most':       return `a maioria ${dePrep(forms, true)}`;
+    case 'several':    return fem ? 'várias' : 'vários';
+    case 'enough':     return '';
+    case 'such':       return plural ? 'tais' : 'tal';
     default:           return defArticle(forms, plural);
   }
 }

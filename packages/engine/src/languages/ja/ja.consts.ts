@@ -256,7 +256,19 @@ export const JA_PRENOMINAL_DET: Partial<Record<Definiteness, string>> = {
   many: '多くの',
   few: '少しの',
   all: 'すべての',
+  // P09-E25. `every` merges with `all` (すべての) and `several` with `some` (いくつかの); そんな and
+  // 十分な are prenominal forms of their own, with no の.
+  each: 'それぞれの',
+  every: 'すべての',
+  both: '両方の',
+  most: 'ほとんどの',
+  several: 'いくつかの',
+  enough: '十分な',
+  such: 'そんな',
 };
+
+/** `enough` on a count noun: enough of a number (十分な数の猫), see `npSegs` (P09-E25). */
+export const JA_ENOUGH_OF_COUNT = '十分な数の';
 
 /**
  * The `no` quantifier is a circumfix (どの … も … ない), split across three owners: the noun phrase
@@ -280,6 +292,15 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
   many: '多くの',
   few: '少しの',
   all: 'すべての',
+  // P09-E25. `every` merges with `all` (すべての) and `several` with `some` (いくつかの); そんな and
+  // 十分な are prenominal forms of their own, with no の.
+  each: 'それぞれの',
+  every: 'すべての',
+  both: '両方の',
+  most: 'ほとんどの',
+  several: 'いくつかの',
+  enough: '十分な',
+  such: 'そんな',
 };
 
 /**

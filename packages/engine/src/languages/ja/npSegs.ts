@@ -5,7 +5,7 @@ import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
 import { isBoundPossessor } from '../../functions/boundPossessor.js';
 import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
-import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
+import { JA_ENOUGH_OF_COUNT, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { jaCounted } from './jaCounted.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
@@ -36,7 +36,11 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // the negative indefinite pronoun writes 何 and lets the circumfix's も close it (何も, C32).
   const pronounHead = !!np.head.forms['person'];
   const definiteness = (np.head.forms['definiteness'] ?? 'definite') as Definiteness;
-  const prenominalDet = pronounHead ? undefined : JA_PRENOMINAL_DET[definiteness];
+  // "Enough" of a count noun is enough *of a number* of it, 十分な数の猫; 十分な猫 would be a
+  // satisfactory cat. A mass noun takes 十分な directly: 十分な食べ物 (P09-E25).
+  const prenominalDet = pronounHead ? undefined
+    : definiteness === 'enough' && np.head.forms['uncountable'] !== '1' ? JA_ENOUGH_OF_COUNT
+    : JA_PRENOMINAL_DET[definiteness];
   const detSegs: RubySegment[] =
     prenominalDet ? [{ t: prenominalDet }]
     : !pronounHead && definiteness === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.pre }]

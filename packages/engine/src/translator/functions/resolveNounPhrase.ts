@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isCoreferentPossessor, isPronominalPossessor } from '@signi/shared';
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
-import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
+import { MASS_DETERMINER, NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SINGULAR_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
@@ -138,17 +138,19 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // test is the same one the two engines' prenominal branches make (C33).
     const otherLeads = (np.adjectives ?? []).some((id, i) =>
       id === 'OTHER' && (np.adjectiveDegrees?.[i] ?? 'positive') === 'positive' && !np.adjectiveIntensifiers?.[i]);
-    const definiteness =
+    const unmassed =
       picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && otherLeads
         ? 'bare'
         : picked;
+    // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25).
+    const definiteness = head.forms['uncountable'] === '1' ? MASS_DETERMINER[unmassed] ?? unmassed : unmassed;
     // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
     // A cardinal above one counts, so it pluralises the head wherever the language has a plural —
     // "two cats", "le due case" — which is the first thing the numeral does (C31). At one it leaves
     // the number alone, and a mass noun is never counted.
     const counted = (np.numeral ?? 0) > 1 && head.forms['uncountable'] !== '1';
     const forcesPlural = counted || (PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1');
-    const forcesSingular = definiteness === 'no' && NO_TAKES_SINGULAR.has(language);
+    const forcesSingular = (definiteness === 'no' && NO_TAKES_SINGULAR.has(language)) || SINGULAR_DETERMINERS.has(definiteness);
     const num = forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);

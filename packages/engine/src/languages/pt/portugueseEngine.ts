@@ -36,7 +36,10 @@ export const portugueseEngine: LanguageEngine = {
   // The determiner alone, for the menu that picks one.
   renderDeterminer(noun: ConceptForms): string {
     const f = noun.forms;
-    return artFor(f, (f['number'] ?? f['count']) === 'plural');
+    const plural = (f['number'] ?? f['count']) === 'plural';
+    // "Suficiente" follows the noun, so `artFor` leaves it to `ptAdj`; the menu still names it (P09-E25).
+    if (f['definiteness'] === 'enough') return plural ? 'suficientes' : 'suficiente';
+    return artFor(f, plural);
   },
   // The possessive alone, for the label on a coreference link. Portuguese agrees it with the
   // possessed head in gender/number, so it is cited on a noun; the definite article the phrase puts

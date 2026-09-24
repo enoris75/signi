@@ -32,6 +32,13 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
       case 'few':        return `peu ${de}`;
       case 'all':        return `${fem ? 'toute' : 'tout'} ${defArticle(forms, false, lead)}`;
       case 'no':         return fem ? 'aucune' : 'aucun';
+      // P09-E25 on a mass noun: "chaque eau", "la plus grande partie de l'eau" (la plupart is the
+      // count noun's), "assez d'eau", "une telle nourriture".
+      case 'each':
+      case 'every':      return 'chaque';
+      case 'most':       return `la plus grande partie ${dePrep(forms, false, lead)}`;
+      case 'enough':     return `assez ${de}`;
+      case 'such':       return `${indefArticle(forms, false)} ${fem ? 'telle' : 'tel'}`;
       default:           return defArticle(forms, false, lead);
     }
   }
@@ -47,6 +54,18 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
     case 'few':        return `peu ${de}`;
     case 'all':        return `${fem ? 'toutes' : 'tous'} ${defArticle(forms, true, lead)}`;
     case 'no':         return fem ? 'aucune' : 'aucun';
+    // P09-E25. "chaque" is invariant and singular (each and every share it); "les deux" is the
+    // article + the numeral (fused by a preposition: "aux deux chats", "des deux chats", see `aDet` /
+    // `deDet`); "la plupart" + the definite genitive; "plusieurs" is invariant; "assez de" works like
+    // "beaucoup de"; "tel" is an adjective before the noun, with the indefinite article in the
+    // singular ("un tel chat") and "de" in the plural ("de tels chats", as "de grands chats").
+    case 'each':
+    case 'every':      return 'chaque';
+    case 'both':       return 'les deux';
+    case 'most':       return `la plupart ${dePrep(forms, true, lead)}`;
+    case 'several':    return 'plusieurs';
+    case 'enough':     return `assez ${de}`;
+    case 'such':       return plural ? `de ${fem ? 'telles' : 'tels'}` : `${indefArticle(forms, false)} ${fem ? 'telle' : 'tel'}`;
     default:           return defArticle(forms, plural, lead);
   }
 }

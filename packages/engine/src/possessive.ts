@@ -33,7 +33,9 @@ type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';
  * noun phrase adds it itself — except Italian, which does stack the two ("tutti i suoi libri").
  */
 export const KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> =
-  new Set(['this', 'that', 'some', 'many', 'few', 'no', 'indefinite']);
+  new Set(['this', 'that', 'some', 'many', 'few', 'no', 'indefinite',
+    // P09-E25's seven keep their slot too: "each book of hers", "ogni suo libro".
+    'each', 'every', 'both', 'most', 'several', 'enough', 'such']);
 
 /** Grammatical gender/number of the possessed head — the Romance/German agreement target. */
 export interface PossessedAgreement {
