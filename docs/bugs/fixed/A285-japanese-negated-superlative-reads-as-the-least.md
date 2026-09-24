@@ -49,3 +49,18 @@ Pinned by `known bugs: Japanese reads a negated superlative as the least (A285)`
 [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).
 
 Found on 2026-09-24 while auditing P09-E19's test coverage.
+
+## Resolved
+
+2026-09-24. [ja/copulaSegs.ts](../../../packages/engine/src/languages/ja/copulaSegs.ts): a negated
+adjective predicate at `most` keeps its affirmative superlative in the prenominal form and closes on
+わけ + the negated copula of its form, beside A249's lowered-degree branch. The na-adjective is
+brought under わけ too, as the bug file allowed: the branch builds each class's prenominal form
+(最も大きい, 最も幸せな, 最も疲れている) rather than hard-coding い, so the negated HAPPY at `most` is now
+猫は最も幸せなわけではありません。 and no longer sits one polite ending away from the affirmative least
+(猫は最も幸せではないです。, unchanged). A relative clause takes the plain わけではない / わけではなかった.
+
+Guarded by `known bugs: Japanese reads a negated superlative as the least (A285)` in
+[comparison.test.ts](../../../packages/engine/test/comparison.test.ts): the three former
+`test.fails`, the regression test, and new tests for the na- and た-adjective classes, the relative
+clause (now and past), and the unchanged negated least and affirmative most.
