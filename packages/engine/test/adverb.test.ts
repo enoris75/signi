@@ -552,14 +552,31 @@ describe('known bugs: English direction adverb after the by-phrase (A353)', () =
   const moved = (verbPhrase: Partial<VerbPhrase>, extra: Omit<Partial<PhrasePlan>, 'verbPhrase'> = {}) =>
     sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', ...verbPhrase }, ...extra })).en;
 
-  test.fails('the simple tenses', () => {
+  test('the simple tenses', () => {
     expect(moved({ modifier: 'UP' })).toBe('the book is moved up by the cat.');
     expect(moved({ modifier: 'DOWN', tense: 'past' })).toBe('the book was moved down by the cat.');
   });
 
-  test.fails('under a modal, and with a complement', () => {
+  test('under a modal, and with a complement', () => {
     expect(moved({ modifier: 'UP', modals: ['MUST'] })).toBe('the book must be moved up by the cat.');
     expect(moved({ modifier: 'UP' }, { complements: { locative: { phrase: np('HOUSE') } } })).toBe('the book is moved up by the cat in the house.');
+  });
+
+  test('the prospective, the negative, a plural or pronoun agent, a recipient and an agent question', () => {
+    expect(moved({ modifier: 'UP', aspect: 'prospective' })).toBe('the book is about to be moved up by the cat.');
+    expect(moved({ modifier: 'UP', negative: true })).toBe('the book is not moved up by the cat.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', modifier: 'DOWN', tense: 'past' } })).en)
+      .toBe('the book was moved down by the cats.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', modifier: 'UP' } })).en)
+      .toBe('the book is moved up by me.');
+    expect(moved({ modifier: 'UP' }, { complements: { terminus: { phrase: np('CHILD') } } })).toBe('the book is moved up by the cat to the child.');
+    // The stranded "by" of an agent question still closes the verb's arguments (A282).
+    const whoMoves = (extra: Omit<Partial<PhrasePlan>, 'verbPhrase'> = {}): PhrasePlan => ({
+      ...clause(np('GENERIC_PERSON'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', modifier: 'UP' }, ...extra }),
+      questionRole: 'subject', questionAnimate: true,
+    });
+    expect(sayAll(whoMoves()).en).toBe('who is the book moved up by?');
+    expect(sayAll(whoMoves({ complements: { terminus: { phrase: np('CHILD') } } })).en).toBe('who is the book moved up to the child by?');
   });
 
   test('regression: the agentless passive, the active, and a manner adverb', () => {

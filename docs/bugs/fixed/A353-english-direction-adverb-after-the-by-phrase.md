@@ -33,3 +33,16 @@ take the same seat, after the participle and before the by-phrase.
 | **Test** | `adverb.test.ts` → *known bugs: English direction adverb after the by-phrase (A353)* (2 `test.fails`: the simple tenses, a modal and a complement; plus a regression test for the agentless passive, the active and a manner adverb) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. [en/predicateParts.ts](../../../packages/engine/src/languages/en/predicateParts.ts) seats a
+direction adverb in A296's passive seat, between the participle and the by-phrase
+(`passiveParticle`), and leaves it out of the complements slot it would otherwise lead. With no agent
+the trailing slot is unchanged (*the book is moved up.*); the stranded *by* of an agent question
+still closes the verb's arguments (*who is the book moved up to the child by?*).
+
+Guarded by [adverb.test.ts](../../../packages/engine/test/adverb.test.ts) → *known bugs: English
+direction adverb after the by-phrase (A353)*: the two formerly-`.fails` tests, the regression test,
+and a new test for the prospective, the negative, a plural and a pronoun agent, a recipient and the
+agent question.

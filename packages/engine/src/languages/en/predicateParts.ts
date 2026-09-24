@@ -200,8 +200,13 @@ function predicateWords(
   // the agent. With no agent the trailing slot already reads "is eaten well".
   const passiveManner = byPhrase && !modifier?.forms['subtype'] && !negAdverb ? clauseModifierText : '';
   const modifierText = passiveManner ? '' : clauseModifierText;
+  // A direction particle takes the same seat: it goes with the participle, as it does with no agent
+  // ("is moved up"), not after the demoted agent: "is moved up by the cat", never "*is moved by the
+  // cat up" (A353). It is spelled here, so the complements slot it would otherwise lead is left
+  // without it.
+  const passiveParticle = byPhrase && isDirection ? adverbText : '';
   const objectText = passive
-    ? [passiveParticiple(lexical), passiveManner,
+    ? [passiveParticiple(lexical), passiveManner, passiveParticle,
       strandedTerminus ? complementsPhrase({ terminus: strandedTerminus }, lexical.forms) : '', byPhrase]
       .filter(Boolean).join(' ')
     : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
@@ -234,7 +239,7 @@ function predicateWords(
   // would otherwise lead.
   const complementsText = complementsAroundAdverb(
     modifier,
-    particleFirst ? '' : adverbText,
+    particleFirst || passiveParticle ? '' : adverbText,
     trailingComplements,
     (c) => complementsPhrase(c, lexical.forms),
   );
