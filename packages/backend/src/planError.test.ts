@@ -138,10 +138,9 @@ describe('planError: the generic person as a direct object', () => {
   const formsOf = (id: string) => FORMS[id];
   const refused = (path: string) => `${path}.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`;
 
-  test('refuses it by its path, as a conjunct and wherever the object hangs', () => {
+  test('refuses it by its path, as a conjunct and wherever an active object hangs', () => {
     expect(planError({ ...sees, directObject: G })).toBe(refused('plan'));
     expect(planError({ ...sees, directObject: { conjuncts: [{ concept: 'DOG' }, G], conjunction: 'and' } })).toBe(refused('plan'));
-    expect(planError({ ...sees, directObject: G, verbPhrase: { verb: 'SEE', voice: 'passive' } })).toBe(refused('plan'));
     expect(planError({ ...main, subject: { concept: 'DOG', relative: { verbPhrase: { verb: 'SEE' }, directObject: G } } }))
       .toBe(refused('plan.subject.relative'));
     expect(planError({ ...main, verbPhrase: { verb: 'SAY' }, contentObject: { ...sees, directObject: G } })).toBe(refused('plan.contentObject'));
@@ -149,8 +148,12 @@ describe('planError: the generic person as a direct object', () => {
     expect(planError({ ...main, purpose: { verbPhrase: { verb: 'SEE' }, directObject: G } })).toBe(refused('plan.purpose'));
   });
 
-  test('passes the generic subject, the generic dative, and an addressee the verb sends to the dative', () => {
+  test('passes the generic subject, a passive\'s patient, the generic dative, and an addressee the verb sends to the dative', () => {
     expect(planError({ ...sees, subject: G, directObject: { concept: 'CAT' } })).toBeUndefined();
+    // The passive promotes the object to the subject, wherever the passive clause hangs.
+    expect(planError({ ...sees, directObject: G, verbPhrase: { verb: 'SEE', voice: 'passive' } })).toBeUndefined();
+    expect(planError({ ...main, subject: { concept: 'DOG', relative: { verbPhrase: { verb: 'SEE', voice: 'passive' }, directObject: G } } })).toBeUndefined();
+    expect(planError({ ...main, verbPhrase: { verb: 'SAY' }, contentObject: { ...sees, verbPhrase: { verb: 'SEE', voice: 'passive' }, directObject: G } })).toBeUndefined();
     expect(planError({ ...main, verbPhrase: { verb: 'GIVE' }, directObject: { concept: 'BOOK' }, complements: { terminus: { phrase: G } } })).toBeUndefined();
     const tells = { ...sees, verbPhrase: { verb: 'TELL' }, directObject: G, contentObject: { subject: { concept: 'DOG' }, verbPhrase: { verb: 'RUN' } } };
     expect(planError(tells, formsOf)).toBeUndefined();

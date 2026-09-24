@@ -11,6 +11,8 @@ describe('refuseGenericObject', () => {
 
   test('lets any other object, and none, through', () => {
     expect(() => refuseGenericObject(undefined, 'plan.directObject')).not.toThrow();
+    // The passive promotes it to the subject.
+    expect(() => refuseGenericObject({ concept: 'GENERIC_PERSON' }, 'plan.directObject', true)).not.toThrow();
     expect(() => refuseGenericObject({ concept: 'THIRD_PERSON' }, 'plan.directObject')).not.toThrow();
     expect(() => refuseGenericObject({ conjuncts: [{ concept: 'CAT' }, { concept: 'DOG' }], conjunction: 'and' }, 'plan.directObject')).not.toThrow();
   });

@@ -48,7 +48,8 @@ const LINKED_KEYS = new Set(LINKED_CLAUSES.map(([key]) => key));
  *  - the generic person (GENERIC_PERSON) is never a direct object, wherever the object hangs — a
  *    clause's, a relative's, a content clause's, an infinitive's or a purpose's (A354):
  *    `plan.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`. An addressee
- *    beside a content clause is exempt where the verb takes it to the dative, as the engine moves it.
+ *    beside a content clause is exempt where the verb takes it to the dative, as the engine moves it,
+ *    and so is the patient of a passive, which is its subject ("one is seen by the cat").
  */
 export function planError(plan: unknown, formsOf?: FormsOf): string | undefined {
   if (!isNode(plan)) return 'plan.subject.concept is required';
@@ -168,7 +169,8 @@ function coreferentPath(value: unknown, path: string): string | undefined {
 
 /**
  * Where a direct object anywhere below `value` is the generic person, which has no object form in
- * five of the languages (A354), as the message naming it — or `undefined`. A clause's object beside a
+ * five of the languages (A354), as the message naming it — or `undefined`. A passive's object is its
+ * subject ("one is seen by the cat"), so it passes. A clause's object beside a
  * content clause is the addressee the engine moves to the dative where the verb licenses a terminus
  * and the plan names none (see the engine's `addresseeObject`), so it is exempt there; without the
  * lexicon (`formsOf`) that cannot be read, and such an object is let through for the engine to judge.
@@ -183,8 +185,10 @@ function genericObjectPath(value: unknown, path: string, formsOf?: FormsOf): str
   }
   if (!isNode(value)) return undefined;
   const object = value['directObject'];
+  const verbPhrase = value['verbPhrase'];
+  const passive = isNode(verbPhrase) && verbPhrase['voice'] === 'passive';
   if (isNode(object) && nounConjuncts(object as unknown as NounElement).some((np) => np?.concept === 'GENERIC_PERSON')
-    && !movesToAddressee(value, formsOf)) {
+    && !passive && !movesToAddressee(value, formsOf)) {
     return `${path}.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`;
   }
   for (const [key, inner] of Object.entries(value)) {

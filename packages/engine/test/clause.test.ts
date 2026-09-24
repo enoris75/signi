@@ -540,15 +540,26 @@ describe('known bugs: the generic subject as a direct object renders its subject
     expect(() => sayAll(clause(np('CAT'), 'EAT', { directObject: G }))).toThrow(/GENERIC_PERSON/);
   });
 
-  test('a conjunct, the passive, and the object of a relative, a content clause, an infinitive and a purpose', () => {
+  test('a conjunct, and the object of a relative, a content clause, an infinitive and a purpose', () => {
     const refused = /the generic person \(GENERIC_PERSON\) cannot be a direct object/;
     expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), G], conjunction: 'and' } }))).toThrow(refused);
-    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive' } }))).toThrow(refused);
     expect(() => sayAll(clause(np('DOG', { relative: { headRole: 'subject', verbPhrase: { verb: 'SEE' }, directObject: G } }), 'RUN')))
       .toThrow(/relative\.directObject, A354/);
     expect(() => sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
     expect(() => sayAll(clause(np('CAT'), 'WANT', { infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
     expect(() => sayAll(clause(np('CAT'), 'RUN', { purpose: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+  });
+
+  // The passive promotes the generic patient to the subject, where it has its form.
+  test('the passive is not refused: the generic patient is its subject', () => {
+    // es/pt "se es visto" / "se é visto" is a separate defect, pending its own ticket.
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      en: 'one is seen by the cat.',
+      fr: 'on est vu par le chat.',
+      de: 'man wird vom Kater gesehen.',
+      it: 'si è visti dal gatto.',
+      ja: '人は猫に見られます。',
+    });
   });
 
   // The addressee beside a content clause leaves the object for the dative (A317), where German and

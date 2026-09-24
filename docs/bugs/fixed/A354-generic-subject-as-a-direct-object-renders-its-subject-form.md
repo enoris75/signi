@@ -53,21 +53,23 @@ Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24
 clause's object, which covers a content clause's, an infinitive's and a purpose's, and
 [resolveRelativeClause.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
 on a relative's. The check runs after `addresseeObject`, so an addressee beside a content clause,
-moved to the dative (A317), still renders: *erzählt einem, dass*, *cuenta a uno que*. The passive
-refuses too: its patient is the plan's object. The generic subject, its agentless passive and A316's
-generic dative are unchanged.
+moved to the dative (A317), still renders: *erzählt einem, dass*, *cuenta a uno que*. A passive
+(a clause's or a relative's, as resolved) is exempt: it promotes the generic patient to the subject,
+where it has its form (*one is seen by the cat*, *on est vu par le chat*, *man wird vom Kater
+gesehen*, *si è visti dal gatto*, 人は猫に見られます). The generic subject, its agentless passive and
+A316's generic dative are unchanged.
 
 `/api/translate` answers with a 400 naming the path
 (`plan.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`), from
 [planError.ts](../../../packages/backend/src/planError.ts). It uses the verb's `complements` to exempt
-the addressee, as the engine does.
+the addressee, as the engine does, and exempts any clause whose verb phrase is passive.
 
 The builder still offers *one* in the object's pronoun chooser. No filter hook for refused plans exists
 (A288's refusal is not kept out of the builder either), and a per-slot filter would have to know when
 the object is an addressee, so it was left out.
 
 Guarded by `clause.test.ts` → *known bugs: the generic subject as a direct object renders its subject
-form (A354)*: the two former `test.fails`, now plain tests, two new tests (a conjunct, the passive, a
-relative's, a content clause's, an infinitive's and a purpose's object; the addressee kept as the
-dative), and the regression test. Unit cases in `refuseGenericObject.test.ts` and the backend's
+form (A354)*: the two former `test.fails`, now plain tests, three new tests (a conjunct, a relative's,
+a content clause's, an infinitive's and a purpose's object refused; the passive's generic patient
+rendered in en/fr/de/it/ja; the addressee kept as the dative), and the regression test. Unit cases in `refuseGenericObject.test.ts` and the backend's
 `planError.test.ts`; the 400 in `index.test.ts`.

@@ -138,9 +138,6 @@ export function resolvePhrase(
   // Beside a content clause the direct object is the addressee, and goes where the verb's addressee
   // goes (A317, see `addresseeObject`).
   plan = addresseeObject(plan, language, lookup);
-  // The generic person has no object form: as a direct object it is refused by name (A354, see
-  // `refuseGenericObject`) — after the addressee has left the object slot for the dative.
-  refuseGenericObject(plan.directObject, 'plan.directObject');
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is
@@ -226,6 +223,10 @@ export function resolvePhrase(
     throw new Error(`a passive wh-question needs a verb that takes the passive in ${language} (P09-E16)`);
   }
   const passive = verbPhrase?.voice === 'passive' && (!!directObject || gap?.role === 'directObject');
+  // The generic person has no object form: as a direct object it is refused by name (A354, see
+  // `refuseGenericObject`) — after the addressee has left the object slot for the dative, and not
+  // where the passive promotes it to the subject ("one is seen by the cat").
+  refuseGenericObject(plan.directObject, 'plan.directObject', passive);
   if (passive && gap?.role === 'possessor' && gap.possessed === 'subject') {
     throw new Error('a possessor question inside a passive\'s agent is not built (P09-E16)');
   }

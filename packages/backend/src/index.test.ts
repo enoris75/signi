@@ -790,6 +790,12 @@ describe('A354: the generic person as a direct object answers 400', () => {
     expect(await res.json()).toEqual({ error: `${path}.directObject: the generic person (GENERIC_PERSON) cannot be a direct object` });
   });
 
+  test('translates the generic patient of a passive, its subject', async () => {
+    const plan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'SEE', voice: 'passive' }, directObject: G };
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(200);
+  });
+
   test('translates the generic addressee of a content clause', async () => {
     const plan = {
       subject: { concept: 'CAT' }, verbPhrase: { verb: 'TELL' }, directObject: G,
