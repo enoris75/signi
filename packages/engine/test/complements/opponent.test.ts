@@ -363,3 +363,49 @@ describe('known bugs: German keeps gegen\'s accusative under a verb-named oppone
       .toBe('der Kater spielt mit dem Hund.');
   });
 });
+
+// A350. A verb may name its own opponent word in its lexeme (`opponent_prep`), and the statement takes
+// it outside Japanese ("the cat plays with the dog", "gioca con il cane", and since A318 "spielt mit
+// dem Hund"). The opponent question and the relative over an opponent gap still write the generic
+// word: "who does the cat play against?", "contro chi gioca il gatto?", "gegen wen spielt der Kater?",
+// "der Hund, gegen den der Kater spielt". They should ask and relativize with the verb's word, as the
+// statement says it. No seeded verb names one yet: TEST_PLAY is the stand-in A318 uses.
+describe('known bugs: the opponent question and relative ignore a verb-named opponent word (A350)', () => {
+  const preps = { en: 'with', it: 'con', de: 'mit' };
+  const plays = clause(np('CAT'), 'TEST_PLAY');
+  const playedBy = (head: string, extra: Record<string, unknown> = {}) =>
+    clause(np(head, { ...extra, relative: { headRole: 'opponent', subject: np('CAT'), verbPhrase: { verb: 'TEST_PLAY' } } }), 'RUN');
+
+  test.fails('the question on a person', () => {
+    expect(sayAllWithPrep(ask(plays, true), preps)).toMatchObject({
+      en: 'who does the cat play with?', it: 'con chi gioca il gatto?', de: 'mit wem spielt der Kater?',
+    });
+  });
+
+  test.fails('the question on a thing', () => {
+    expect(sayAllWithPrep(ask(plays), preps)).toMatchObject({
+      en: 'what does the cat play with?', it: 'con che cosa gioca il gatto?', de: 'womit spielt der Kater?',
+    });
+  });
+
+  test.fails('the relative', () => {
+    expect(sayAllWithPrep(playedBy('DOG'), preps)).toMatchObject({
+      en: 'the dog with which the cat plays runs.', it: 'il cane con il quale il gatto gioca corre.', de: 'der Hund, mit dem der Kater spielt, läuft.',
+    });
+    expect(sayAllWithPrep(playedBy('DOG', { number: 'plural' }), preps).de).toBe('die Hunde, mit denen der Kater spielt, laufen.');
+    expect(sayAllWithPrep(playedBy('WOMAN'), preps)).toMatchObject({
+      en: 'the woman with whom the cat plays runs.', de: 'die Frau, mit der der Kater spielt, läuft.',
+    });
+  });
+
+  test('regression: with no word named, the question and the relative keep the generic word', () => {
+    expect(sayAllWithPrep(ask(plays, true), {})).toMatchObject({
+      en: 'who does the cat play against?', it: 'contro chi gioca il gatto?', de: 'gegen wen spielt der Kater?',
+    });
+    expect(sayAllWithPrep(ask(plays), {}).de).toBe('wogegen spielt der Kater?');
+    expect(sayAllWithPrep(playedBy('DOG'), {})).toMatchObject({
+      en: 'the dog against which the cat plays runs.', de: 'der Hund, gegen den der Kater spielt, läuft.',
+      ja: '猫が相手にして遊ぶ犬は走ります。',
+    });
+  });
+});

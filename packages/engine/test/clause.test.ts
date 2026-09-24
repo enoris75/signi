@@ -521,3 +521,31 @@ describe('known bugs: a linked clause with no subject crashes the engine (A267)'
     expect(say(clause(np('MAN'), 'RUN', { purpose: { verbPhrase: { verb: 'CRY' } } }), 'de')).toBe('der Mann läuft, um zu weinen.');
   });
 });
+
+// A354. GENERIC_PERSON is the generic subject (one, si, on, man, se, 人). As a direct object it keeps
+// its subject form, and the sentence says something else or nothing: "il gatto si vede" and "el gato
+// se ve" (the cat is seen, or sees itself), "le chat on voit", "der Kater sieht man" (man is never an
+// object). No control builds one. A197 and A203 left the complements alone (con si, avec on) and
+// A316 gave German and Spanish a generic dative (gibt einem, a uno). The object is refused by name,
+// as a relative over a role gap is (A288).
+describe('known bugs: the generic subject as a direct object renders its subject form (A354)', () => {
+  const G = np('GENERIC_PERSON');
+
+  test.fails('the direct object is refused by name', () => {
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: G }))).toThrow(/GENERIC_PERSON/);
+  });
+
+  test.fails('negated, and another verb', () => {
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: G }))).toThrow(/GENERIC_PERSON/);
+    expect(() => sayAll(clause(np('CAT'), 'EAT', { directObject: G }))).toThrow(/GENERIC_PERSON/);
+  });
+
+  test('regression: the generic subject, its passive, and the generic dative', () => {
+    expect(sayAll(clause(G, 'SEE', { directObject: np('CAT') }))).toMatchObject({
+      en: 'one sees the cat.', fr: 'on voit le chat.', de: 'man sieht den Kater.',
+    });
+    expect(sayAll(clause(G, 'SEE', { directObject: np('CAT'), verbPhrase: { voice: 'passive' } })).en).toBe('the cat is seen.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: G } } })))
+      .toMatchObject({ de: 'der Kater gibt einem das Buch.', es: 'el gato da el libro a uno.' });
+  });
+});

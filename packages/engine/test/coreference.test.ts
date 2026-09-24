@@ -501,3 +501,44 @@ describe('known bugs: english and italian write his / suo for a possessor linked
       .toMatchObject({ en: 'who sees his book?', it: 'chi vede il suo libro?' });
   });
 });
+
+// A344. A possessor linked to the generic subject, on an indefinite head, detaches as A277 has it
+// ("a friend of mine"). French and German write the detached pronoun as the 3rd person's, "on voit un
+// ami à lui", "man sieht einen Freund von ihm", which names someone else. The generic subject binds
+// the reflexive there: "un ami à soi", "einen Freund von sich". The definite head is right (son ami,
+// seinen Freund), as A332 found.
+describe('known bugs: the French and German detached possessor linked to the generic subject names someone else (A344)', () => {
+  const linked: CoreferentPossessor = { kind: 'coreferent', slot: 'subject' };
+  const one = np('GENERIC_PERSON');
+
+  test.fails('an indefinite head, the object', () => {
+    expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
+      fr: 'on voit un ami à soi.', de: 'man sieht einen Freund von sich.',
+    });
+  });
+
+  test.fails('the plural, a thing, and a comitative', () => {
+    expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
+      fr: 'on voit des amis à soi.', de: 'man sieht Freunde von sich.',
+    });
+    expect(sayAll(clause(one, 'SEE', { directObject: np('BOOK', { definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
+      fr: 'on voit un livre à soi.', de: 'man sieht ein Buch von sich.',
+    });
+    expect(sayAll(clause(one, 'RUN', { complements: { comitative: { phrase: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) } } }))).toMatchObject({
+      fr: 'on court avec un ami à soi.', de: 'man läuft mit einem Freund von sich.',
+    });
+  });
+
+  test('regression: the definite head, a noun subject, and the other five', () => {
+    expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { possessor: linked }) }))).toMatchObject({
+      fr: 'on voit son ami.', de: 'man sieht seinen Freund.',
+    });
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
+      fr: "l'homme voit un ami à lui.", de: 'der Mann sieht einen Freund von ihm.',
+    });
+    expect(sayAll(clause(one, 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: linked }) }))).toMatchObject({
+      en: "one sees a friend of one's own.", it: 'si vede un proprio amico.', es: 'se ve a un amigo suyo.',
+      ja: '人は自分の友達を見ます。', pt: 'se vê um amigo seu.',
+    });
+  });
+});

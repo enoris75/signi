@@ -438,3 +438,90 @@ describe('known bugs: the Italian cardinal una does not elide before a vowel (A3
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { definiteness: 'bare', numeral: 1 }) }), 'it')).toBe('il gatto vede un cane.');
   });
 });
+
+// A339. A319 drops the numeral one beside a definite or demonstrative determiner, but not in a
+// Spanish or Portuguese noun possessor: that phrase is built by possessorText, whose numeralText call
+// still writes the one after the article the preposition fuses with ("del un hombre", "do um homem",
+// "de este un hombre"). The Want is A319's: the phrase the same plan renders without the numeral.
+describe('known bugs: a Spanish or Portuguese noun possessor counted by one beside a definite keeps the one (A339)', () => {
+  const reads = (possessor: NounPhrase) => clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor }) });
+
+  test.fails('the definite possessor of the object', () => {
+    expect(sayAll(reads(np('MAN', { numeral: 1 })))).toMatchObject({
+      es: 'el gato lee el libro del hombre.', pt: 'o gato lê o livro do homem.',
+    });
+  });
+
+  test.fails('the definite possessor of the subject and of a comitative', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: np('MAN', { numeral: 1 }) }), 'BURN'))).toMatchObject({
+      es: 'el libro del hombre arde.', pt: 'o livro do homem arde.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('DOG', { possessor: np('WOMAN', { numeral: 1 }) }) } } }))).toMatchObject({
+      es: 'el gato corre con el perro de la mujer.', pt: 'o gato corre com o cão da mulher.',
+    });
+  });
+
+  test.fails('the demonstrative possessor', () => {
+    expect(sayAll(reads(np('MAN', { numeral: 1, definiteness: 'this' })))).toMatchObject({
+      es: 'el gato lee el libro de este hombre.', pt: 'o gato lê o livro deste homem.',
+    });
+    expect(sayAll(reads(np('WOMAN', { numeral: 1, definiteness: 'that' })))).toMatchObject({
+      es: 'el gato lee el libro de esa mujer.', pt: 'o gato lê o livro dessa mulher.',
+    });
+  });
+
+  test('regression: Italian, French and German, the indefinite one, and the definite two', () => {
+    expect(sayAll(reads(np('MAN', { numeral: 1 })))).toMatchObject({
+      it: "il gatto legge il libro dell'uomo.", fr: "le chat lit le livre de l'homme.", de: 'der Kater liest das Buch des einen Mannes.',
+    });
+    expect(sayAll(reads(np('WOMAN', { numeral: 1, definiteness: 'that' }))).de).toBe('der Kater liest das Buch jener einen Frau.');
+    expect(sayAll(reads(np('MAN', { numeral: 1, definiteness: 'indefinite' })))).toMatchObject({
+      es: 'el gato lee el libro de un hombre.', pt: 'o gato lê o livro de um homem.',
+    });
+    expect(sayAll(reads(np('MAN', { numeral: 2 })))).toMatchObject({
+      es: 'el gato lee el libro de los dos hombres.', pt: 'o gato lê o livro dos dois homens.',
+    });
+    expect(sayAll(reads(np('MAN')))).toMatchObject({ es: 'el gato lee el libro del hombre.', pt: 'o gato lê o livro do homem.' });
+  });
+});
+
+// A340. The Spanish personal a and a numeral: a counted human object with no article of its own
+// loses the a ("ve dos amigos" for "ve a dos amigos"), and a definite or demonstrative one keeps the a
+// but loses the numeral ("ve a los amigos" for "ve a los dos amigos"). A counted animal takes no a,
+// and is right.
+describe('known bugs: the Spanish personal a drops or loses the numeral of a counted human object (A340)', () => {
+  const sees = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) => say(clause(np('CAT'), 'SEE', { directObject: object, verbPhrase }), 'es');
+
+  test.fails('a counted human object with no article takes the a', () => {
+    expect([
+      sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite' })),
+      sees(np('FRIEND', { numeral: 2, definiteness: 'bare' })),
+      sees(np('WOMAN', { numeral: 3, definiteness: 'indefinite' })),
+      sees(np('FRIEND', { numeral: 1, definiteness: 'indefinite' })),
+    ]).toEqual([
+      'el gato ve a dos amigos.',
+      'el gato ve a dos amigos.',
+      'el gato ve a tres mujeres.',
+      'el gato ve a un amigo.',
+    ]);
+  });
+
+  test.fails('negated, and with an approximator', () => {
+    expect(sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite' }), { negative: true })).toBe('el gato no ve a dos amigos.');
+    expect(sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite', approximator: 'about' }))).toBe('el gato ve a unos dos amigos.');
+  });
+
+  test.fails('a definite or demonstrative counted human object keeps its numeral', () => {
+    expect(sees(np('FRIEND', { numeral: 2, definiteness: 'definite' }))).toBe('el gato ve a los dos amigos.');
+    expect(sees(np('FRIEND', { numeral: 2, definiteness: 'this' }))).toBe('el gato ve a estos dos amigos.');
+  });
+
+  test('regression: a counted animal, an uncounted human object, and the other languages', () => {
+    expect(sees(np('DOG', { numeral: 2, definiteness: 'indefinite' }))).toBe('el gato ve dos perros.');
+    expect(sees(np('FRIEND', { number: 'plural', definiteness: 'indefinite' }))).toBe('el gato ve a unos amigos.');
+    expect(sees(np('FRIEND'))).toBe('el gato ve al amigo.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { numeral: 2, definiteness: 'definite' }) }))).toMatchObject({
+      en: 'the cat sees the two friends.', it: 'il gatto vede i due amici.', pt: 'o gato vê os dois amigos.',
+    });
+  });
+});

@@ -1672,3 +1672,61 @@ describe('known bugs: OWN beside a kept determiner stays on the head (A328)', ()
     expect(ownFriendRuns({ definiteness: 'all', number: 'plural' })).toBe('all my own friends run.');
   });
 });
+
+// A341. A325's Spanish fix, in Portuguese: a verb's own object preposition (DEPEND's de) builds the
+// phrase with the prenominal possessive in place of whatever determiner the head has, so this, that,
+// the indefinite, no and all all come out as "da minha condição". The plain object and the
+// complements are right (este livro meu, com um amigo meu), and so is Spanish since A325.
+describe('known bugs: the Portuguese prepositional object drops the determiner beside a possessive (A341)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const dependsOn = (extra: Partial<NounPhrase>) =>
+    say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { possessor: mine, ...extra }) }), 'pt');
+
+  test.fails('the demonstratives', () => {
+    expect(dependsOn({ definiteness: 'this' })).toBe('o gato depende desta condição minha.');
+    expect(dependsOn({ definiteness: 'that' })).toBe('o gato depende dessa condição minha.');
+  });
+
+  test.fails('the indefinite, singular and plural', () => {
+    expect(dependsOn({ definiteness: 'indefinite' })).toBe('o gato depende de uma condição minha.');
+    expect(dependsOn({ definiteness: 'indefinite', number: 'plural' })).toBe('o gato depende de umas condições minhas.');
+  });
+
+  test.fails('no and all', () => {
+    expect(dependsOn({ definiteness: 'no' })).toBe('o gato não depende de nenhuma condição minha.');
+    expect(dependsOn({ definiteness: 'all', number: 'plural' })).toBe('o gato depende de todas as minhas condições.');
+  });
+
+  test('regression: the definite, a noun possessor, the plain object, a complement, and Spanish', () => {
+    expect(dependsOn({})).toBe('o gato depende da minha condição.');
+    expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { definiteness: 'this', possessor: np('WOMAN') }) }), 'pt'))
+      .toBe('o gato depende desta condição da mulher.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { definiteness: 'this', possessor: mine }) }), 'pt')).toBe('o gato vê este livro meu.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('FRIEND', { definiteness: 'indefinite', possessor: mine }) } } }), 'pt'))
+      .toBe('o gato corre com um amigo meu.');
+    expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { definiteness: 'this', possessor: mine }) }), 'es'))
+      .toBe('el gato depende de esta condición mía.');
+  });
+});
+
+// A342. A326 folded French de + des into de for a detached plural indefinite possessor in the
+// possessor, source and cause slots ("la maison d'amis à moi"), but a verb's own object preposition
+// still writes both: "le chat dépend de des conditions à moi". The same plan without the possessive
+// is right ("dépend de conditions").
+describe('known bugs: the French prepositional object writes de des before a detached possessive (A342)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+
+  test.fails('de + des is de', () => {
+    expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { number: 'plural', definiteness: 'indefinite', possessor: mine }) }), 'fr'))
+      .toBe('le chat dépend de conditions à moi.');
+  });
+
+  test('regression: without the possessive, the singular, and the comitative', () => {
+    expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { number: 'plural', definiteness: 'indefinite' }) }), 'fr'))
+      .toBe('le chat dépend de conditions.');
+    expect(say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { definiteness: 'indefinite', possessor: mine }) }), 'fr'))
+      .toBe("le chat dépend d'une condition à moi.");
+    expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: mine }) } } }), 'fr'))
+      .toBe('le chat court avec des amis à moi.');
+  });
+});

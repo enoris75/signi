@@ -542,3 +542,30 @@ describe('known bugs: English manner adverb after the by-phrase', () => {
     expect(mouseEaten({ tense: 'future', modifier: 'ALWAYS' })).toBe('the mouse will always be eaten by the dog.');
   });
 });
+
+// A353. A156 put English UP and DOWN right after the verb or its object, ahead of the complements
+// ("moves the book up in the house"). In a passive the by-phrase comes first, so the particle trails
+// the agent: "the book is moved by the cat up". The particle goes with the participle, as it does
+// with no agent ("the book is moved up"): "the book is moved up by the cat". A296 did the same for a
+// manner adverb.
+describe('known bugs: English direction adverb after the by-phrase (A353)', () => {
+  const moved = (verbPhrase: Partial<VerbPhrase>, extra: Omit<Partial<PhrasePlan>, 'verbPhrase'> = {}) =>
+    sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', ...verbPhrase }, ...extra })).en;
+
+  test.fails('the simple tenses', () => {
+    expect(moved({ modifier: 'UP' })).toBe('the book is moved up by the cat.');
+    expect(moved({ modifier: 'DOWN', tense: 'past' })).toBe('the book was moved down by the cat.');
+  });
+
+  test.fails('under a modal, and with a complement', () => {
+    expect(moved({ modifier: 'UP', modals: ['MUST'] })).toBe('the book must be moved up by the cat.');
+    expect(moved({ modifier: 'UP' }, { complements: { locative: { phrase: np('HOUSE') } } })).toBe('the book is moved up by the cat in the house.');
+  });
+
+  test('regression: the agentless passive, the active, and a manner adverb', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive', modifier: 'UP' } })).en)
+      .toBe('the book is moved up.');
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP' } })).en).toBe('the cat moves the book up.');
+    expect(moved({ modifier: 'WELL' })).toBe('the book is moved well by the cat.');
+  });
+});

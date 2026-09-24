@@ -669,3 +669,42 @@ describe('a denied cause', () => {
     }))).toMatchObject({ en: 'the cat runs in the house.', de: 'der Kater läuft im Haus.' });
   });
 });
+
+// A343. German lays blame with the genitive, "durch die Schuld des Hundes". A phrase with no article
+// or quantifier to show the genitive (an indefinite or bare plural, a bare numeral, a bare mass noun)
+// is written in the plain nominative-looking form: "durch die Schuld Freunde". German then takes von
+// + the dative, as it does after any genitive that cannot show: "durch die Schuld von Freunden".
+describe('known bugs: the German negative cause writes a genitive that cannot show (A343)', () => {
+  const blamedOn = (phrase: NounPhrase) => say(clause(np('CAT'), 'RUN', {
+    complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
+  }), 'de');
+
+  test.fails('an indefinite or bare plural', () => {
+    expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'indefinite' }))).toBe('der Kater läuft durch die Schuld von Freunden.');
+    expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'bare' }))).toBe('der Kater läuft durch die Schuld von Freunden.');
+  });
+
+  test.fails('a bare numeral, and a detached possessive', () => {
+    expect(blamedOn(np('FRIEND', { numeral: 2, definiteness: 'indefinite' }))).toBe('der Kater läuft durch die Schuld von zwei Freunden.');
+    expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))
+      .toBe('der Kater läuft durch die Schuld von Freunden von mir.');
+  });
+
+  test.fails('a bare mass noun', () => {
+    expect(blamedOn(np('WATER', { definiteness: 'bare' }))).toBe('der Kater läuft durch die Schuld von Wasser.');
+  });
+
+  test('regression: a genitive that shows keeps it', () => {
+    expect([
+      blamedOn(np('FRIEND', { definiteness: 'indefinite' })),
+      blamedOn(np('FRIEND', { number: 'plural', definiteness: 'some' })),
+      blamedOn(np('FRIEND', { number: 'plural', definiteness: 'many' })),
+      blamedOn(np('DOG', { number: 'plural' })),
+    ]).toEqual([
+      'der Kater läuft durch die Schuld eines Freundes.',
+      'der Kater läuft durch die Schuld einiger Freunde.',
+      'der Kater läuft durch die Schuld vieler Freunde.',
+      'der Kater läuft durch die Schuld der Hunde.',
+    ]);
+  });
+});

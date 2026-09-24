@@ -768,3 +768,37 @@ describe('known bugs: a Japanese indefinite measure noun drops its count (A322)'
   });
 
 });
+
+// A348. Japanese counts an indefinite HOUR or DAY as one under `for` (A322: 一時間走ります). A plural
+// one is counted as one too, so "for hours" reads "for an hour" (猫は一時間走ります), and a bare plural
+// loses the count altogether (猫は時間走ります). An unspecified many under `for` is 何時間も / 何日も /
+// 何年も. The other six are right.
+describe('known bugs: a Japanese plural measure noun under for reads as one (A348)', () => {
+  const runsFor = (phrase: NounPhrase, tense?: 'past') => sayAll(clause(np('CAT'), 'RUN', {
+    ...(tense ? { verbPhrase: { tense } } : {}),
+    complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'for' }] } },
+  }));
+
+  test.fails('for hours', () => {
+    expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何時間も走ります。');
+    expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' }), 'past').ja).toBe('猫は何時間も走りました。');
+  });
+
+  test.fails('for days and for years', () => {
+    expect(runsFor(np('DAY', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何日も走ります。');
+    expect(runsFor(np('YEAR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何年も走ります。');
+  });
+
+  test.fails('a bare plural', () => {
+    expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'bare' })).ja).toBe('猫は何時間も走ります。');
+  });
+
+  test('regression: an hour, two hours, and the other six', () => {
+    expect(runsFor(np('HOUR', { definiteness: 'indefinite' })).ja).toBe('猫は一時間走ります。');
+    expect(runsFor(np('HOUR', { numeral: 2, definiteness: 'indefinite' })).ja).toBe('猫は二時間走ります。');
+    expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' }))).toMatchObject({
+      en: 'the cat runs for hours.', it: 'il gatto corre per ore.', fr: 'le chat court pendant des heures.',
+      de: 'der Kater läuft Stunden.', es: 'el gato corre durante unas horas.', pt: 'o gato corre por umas horas.',
+    });
+  });
+});

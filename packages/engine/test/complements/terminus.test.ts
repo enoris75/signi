@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { NounElement } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // The recipient. Not a slot of its own — it is the `terminus` complement, declared by every verb
@@ -472,5 +473,54 @@ describe('known bugs: Italian "a" does not become "ad" before a word starting wi
     expect(gives(np('FRIEND', { definiteness: 'indefinite' }))).toBe('il gatto dà il libro a un amico.');
     expect(gives(np('DOG', { number: 'plural', definiteness: 'several' }))).toBe('il gatto dà il libro a parecchi cani.');
     expect(gives(np('FRIEND'))).toBe("il gatto dà il libro all'amico.");
+  });
+});
+
+// A351. A Romance pronoun recipient is written as the tonic pronoun after the dative preposition:
+// "l'uomo dà il libro a lei", "l'homme donne le livre à elle", "el hombre da el libro a ti". The
+// unmarked sentence has the dative clitic (le dà, lui donne, te da); French "à elle" is ungrammatical
+// there, and Italian "a lei" is contrastive only. A240 gave a verb's prepositional object the clitic
+// (gli telefona, lui téléphone), and A229 recorded GIVE's recipient and left it. A317 routes TELL's
+// addressee into this slot beside a content clause, so "racconta a lei che" and "raconte à elle que"
+// come the same way. The 1st and 2nd person stay clitics on TELL (ti racconta), which A317 keeps.
+describe('known bugs: a Romance pronoun recipient is the tonic pronoun, not the dative clitic (A351)', () => {
+  const her = np('THIRD_PERSON', { gender: 'fem' });
+  const him = np('THIRD_PERSON', { gender: 'masc' });
+  const gives = (recipient: NounElement, negative = false) => sayAll(clause(np('MAN'), 'GIVE', {
+    ...(negative ? { verbPhrase: { negative } } : {}),
+    directObject: np('BOOK'), complements: { terminus: { phrase: recipient } },
+  }));
+  const tells = (addressee: NounElement) =>
+    sayAll(clause(np('MAN'), 'TELL', { directObject: addressee, contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } } }));
+
+  test.fails('the 3rd person recipient of GIVE', () => {
+    expect(gives(her)).toMatchObject({ it: "l'uomo le dà il libro.", fr: "l'homme lui donne le livre." });
+    expect(gives(him)).toMatchObject({ it: "l'uomo gli dà il libro.", fr: "l'homme lui donne le livre." });
+    expect(gives(np('THIRD_PERSON', { number: 'plural', gender: 'masc' })).fr).toBe("l'homme leur donne le livre.");
+  });
+
+  test.fails('the 1st and 2nd person recipient of GIVE', () => {
+    expect(gives(np('FIRST_PERSON'))).toMatchObject({ it: "l'uomo mi dà il libro.", fr: "l'homme me donne le livre.", es: 'el hombre me da el libro.' });
+    expect(gives(np('SECOND_PERSON'))).toMatchObject({ it: "l'uomo ti dà il libro.", fr: "l'homme te donne le livre.", es: 'el hombre te da el libro.' });
+  });
+
+  test.fails('negated', () => {
+    expect(gives(her, true)).toMatchObject({ it: "l'uomo non le dà il libro.", fr: "l'homme ne lui donne pas le livre." });
+  });
+
+  test.fails('TELL\'s routed 3rd person addressee', () => {
+    expect(tells(her)).toMatchObject({ it: "l'uomo le racconta che il gatto corre.", fr: "l'homme lui raconte que le chat court." });
+    expect(tells(him)).toMatchObject({ it: "l'uomo gli racconta che il gatto corre.", fr: "l'homme lui raconte que le chat court." });
+  });
+
+  test('regression: a noun, a coordinated pronoun, TELL\'s 2nd person, and the other languages', () => {
+    expect(gives(np('DOG'))).toMatchObject({ it: "l'uomo dà il libro al cane.", fr: "l'homme donne le livre au chien.", es: 'el hombre da el libro al perro.' });
+    expect(gives({ conjuncts: [her, np('DOG')], conjunction: 'and' })).toMatchObject({
+      it: "l'uomo dà il libro a lei e al cane.", fr: "l'homme donne le livre à elle et au chien.",
+    });
+    expect(tells(np('SECOND_PERSON'))).toMatchObject({ it: "l'uomo ti racconta che il gatto corre.", fr: "l'homme te raconte que le chat court." });
+    expect(gives(her)).toMatchObject({
+      en: 'the man gives the book to her.', de: 'der Mann gibt ihr das Buch.', ja: '男は彼女に本をあげます。', pt: 'o homem dá o livro a ela.',
+    });
   });
 });

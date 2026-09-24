@@ -1307,3 +1307,32 @@ describe('known bugs: a Japanese direction noun as a locative takes で (A220)',
     });
   });
 });
+
+// A352. French writes the locative "in" as "en" before a word with no article ("en maison" is the
+// bare noun's) and as "dans" before a determiner ("dans la maison"). An indefinite pronoun has no
+// article, so it takes "en": "le chat court en quelque chose", which is not French. The pronoun wants
+// "dans", as the direction already writes it ("court dans quelque chose").
+describe('known bugs: the French locative writes en before an indefinite pronoun (A352)', () => {
+  const inside = (phrase: NounPhrase, verbPhrase: Partial<VerbPhrase> = { verb: 'RUN' }) =>
+    say(clause(np('CAT'), verbPhrase.verb ?? 'RUN', { verbPhrase, complements: { locative: { phrase } } }), 'fr');
+
+  test.fails('SOMETHING', () => {
+    expect(inside(np('SOMETHING'))).toBe('le chat court dans quelque chose.');
+    expect(inside(np('SOMETHING'), { verb: 'EAT' })).toBe('le chat mange dans quelque chose.');
+  });
+
+  test.fails('with a relative clause, and negated', () => {
+    expect(inside(np('SOMETHING', { relative: { verbPhrase: { verb: 'BURN' } } }))).toBe('le chat court dans quelque chose qui brûle.');
+    expect(inside(np('SOMETHING'), { verb: 'RUN', negative: true })).toBe('le chat ne court dans rien.');
+  });
+
+  test('regression: a noun, the direction, and the other six', () => {
+    expect(inside(np('HOUSE'))).toBe('le chat court dans la maison.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { direction: { phrase: np('SOMETHING'), specifiers: [{ kind: 'path', value: 'in' }] } } }), 'fr'))
+      .toBe('le chat court dans quelque chose.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('SOMETHING') } } }))).toMatchObject({
+      en: 'the cat runs in something.', it: 'il gatto corre in qualcosa.', de: 'der Kater läuft in etwas.',
+      es: 'el gato corre en algo.', pt: 'o gato corre em algo.',
+    });
+  });
+});

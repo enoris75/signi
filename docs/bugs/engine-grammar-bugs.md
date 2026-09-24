@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A and Part B are both empty).** If
+this writing Part A holds sixteen, A339–A354, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -62,7 +62,37 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. The last forty-six, A278–A338, were fixed on 2026-09-24 and are listed under **Fixed** below.
+| # | File | Language | Summary |
+|---|---|---|---|
+| A339 | [A339-spanish-portuguese-noun-possessor-counted-by-one-keeps-the-one.md](A-must-fix/A339-spanish-portuguese-noun-possessor-counted-by-one-keeps-the-one.md) | Spanish, Portuguese | a noun possessor counted by one beside a definite keeps the one: *el libro del un hombre*, *o livro do um homem* for *del hombre*, *do homem* (A319's ruling) |
+| A340 | [A340-spanish-personal-a-drops-or-loses-the-numeral-of-a-counted-human-object.md](A-must-fix/A340-spanish-personal-a-drops-or-loses-the-numeral-of-a-counted-human-object.md) | Spanish | the personal *a* and a numeral: *ve dos amigos* for *ve a dos amigos*, and *ve a los amigos* for *ve a los dos amigos* |
+| A341 | [A341-portuguese-prepositional-object-drops-the-determiner-beside-a-possessive.md](A-must-fix/A341-portuguese-prepositional-object-drops-the-determiner-beside-a-possessive.md) | Portuguese | a verb's own object preposition drops the determiner beside a possessive: *depende da minha condição* for *desta condição minha*, *de uma condição minha* (A325 in Portuguese) |
+| A342 | [A342-french-prepositional-object-writes-de-des-before-a-detached-possessive.md](A-must-fix/A342-french-prepositional-object-writes-de-des-before-a-detached-possessive.md) | French | a verb's own *de* before a detached plural possessive: *dépend de des conditions à moi* for *de conditions à moi* (A326's missed path) |
+| A343 | [A343-german-negative-cause-writes-a-genitive-that-cannot-show.md](A-must-fix/A343-german-negative-cause-writes-a-genitive-that-cannot-show.md) | German | the negative cause writes a genitive that cannot show: *durch die Schuld Freunde* for *durch die Schuld von Freunden* |
+| A344 | [A344-french-german-detached-possessor-linked-to-the-generic-subject-names-someone-else.md](A-must-fix/A344-french-german-detached-possessor-linked-to-the-generic-subject-names-someone-else.md) | French, German | a detached possessor linked to the generic subject: *on voit un ami à lui*, *man sieht einen Freund von ihm* for *à soi*, *von sich* |
+| A345 | [A345-japanese-negated-predicate-before-made-and-mae-ni-is-not-a-change-of-state.md](A-must-fix/A345-japanese-negated-predicate-before-made-and-mae-ni-is-not-a-change-of-state.md) | Japanese | a negated predicate before まで / 前に: 幸せではないまで for 幸せでなくなるまで |
+| A346 | [A346-japanese-teiru-state-before-made-and-mae-ni-keeps-its-teiru.md](A-must-fix/A346-japanese-teiru-state-before-made-and-mae-ni-keeps-its-teiru.md) | Japanese | a 〜ている state before まで / 前に: 疲れているまで for 疲れるまで (A323's related case) |
+| A347 | [A347-japanese-state-verb-in-an-adverbial-clause-takes-the-dictionary-form.md](A-must-fix/A347-japanese-state-verb-in-an-adverbial-clause-takes-the-dictionary-form.md) | Japanese | a state verb under ので / 時に / のに: 持つので for 持っているので (A279 left the adverbial clause) |
+| A348 | [A348-japanese-plural-measure-noun-under-for-reads-as-one.md](A-must-fix/A348-japanese-plural-measure-noun-under-for-reads-as-one.md) | Japanese | *for hours* reads as one hour: 一時間走ります (and a bare 時間走ります) for 何時間も走ります |
+| A349 | [A349-french-coordinated-address-resumes-itself-with-vous.md](A-must-fix/A349-french-coordinated-address-resumes-itself-with-vous.md) | French | a coordinated address resumes itself: *Toi et Maman, vous, courez.* for *Toi et Maman, courez.* |
+| A350 | [A350-opponent-question-and-relative-ignore-a-verb-named-opponent-word.md](A-must-fix/A350-opponent-question-and-relative-ignore-a-verb-named-opponent-word.md) | English, Italian, German | the opponent question and relative ignore a verb-named word: *gegen wen*, *gegen den* for *mit wem*, *mit dem* (latent, TEST_PLAY) |
+| A351 | [A351-romance-pronoun-recipient-is-the-tonic-pronoun-not-the-dative-clitic.md](A-must-fix/A351-romance-pronoun-recipient-is-the-tonic-pronoun-not-the-dative-clitic.md) | Italian, French, Spanish | a pronoun recipient is the tonic pronoun: *dà il libro a lei*, *donne le livre à elle*, *racconta a lei che* for *le dà*, *lui donne*, *le racconta che* |
+| A352 | [A352-french-locative-writes-en-before-an-indefinite-pronoun.md](A-must-fix/A352-french-locative-writes-en-before-an-indefinite-pronoun.md) | French | the locative writes *en* before an indefinite pronoun: *court en quelque chose* for *dans quelque chose* |
+| A353 | [A353-english-direction-adverb-after-the-by-phrase.md](A-must-fix/A353-english-direction-adverb-after-the-by-phrase.md) | English | a direction adverb after the by-phrase: *the book is moved by the cat up* for *moved up by the cat* |
+| A354 | [A354-generic-subject-as-a-direct-object-renders-its-subject-form.md](A-must-fix/A354-generic-subject-as-a-direct-object-renders-its-subject-form.md) | all (refusal) | the generic subject as a direct object renders its subject form (*il gatto si vede*, *der Kater sieht man*); to be refused by name |
+
+**Sixteen open**, **A339–A354**, filed on 2026-09-24 from the leads the A278–A338 lanes and their
+cross-lane probe reported while fixing that batch. Most are a fix's neighbour it did not reach: the
+possessor path A319 left (A339), A325's Spanish fix in Portuguese (A341), A326's fold on a verb's own
+*de* (A342), A323's negative and 〜ている rows (A345, A346), A279's adverbial clause (A347), A322's
+plural (A348), A317's routed 3rd-person addressee (A351, with GIVE's recipient that A229 left), A156's
+particle in a passive (A353) and A318's question and relative (A350, latent). The rest: the Spanish
+personal *a* with a numeral (A340), the German negative cause's genitive (A343), the generic subject's
+detached possessor (A344), the French address's resumption (A349), French *en* before a pronoun
+(A352), and the generic subject as an object, to be refused (A354). A345, A347, A348, A350, A351,
+A352 and A354 leave decisions for the fixer.
+
+The forty-six before them, A278–A338, were fixed on 2026-09-24 and are listed under **Fixed** below.
 
 **Thirteen open**, **A278–A290**, all filed on 2026-09-24 by an audit of the engine test coverage
 of P09-E13 to E19 (the role complement, the possessor, marked-relation and passive questions, the
