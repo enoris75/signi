@@ -8,6 +8,7 @@ import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
@@ -38,7 +39,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { ptStandard } from './ptStandard.js';
@@ -155,7 +156,9 @@ export function complementsPhrase(
       const conjunctText = (np: ResolvedNounPhrase, connectorShared = false): string => {
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — a bare
       // "em casa", not the contracted "no lar" — so no article, adjective or relative is built for it.
-      const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
+      const idiom = (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        // …and the goal's, as a plain direction takes it (P09-E37).
+        || (type === 'direction' && directionIdiom(c, np, DIRECTION_IDIOMS));
       if (idiom) return idiom;
       // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
       // ("em ele" → "nele", never "no ele" — A197 for the comitative and the instrumental, A203 for

@@ -15,15 +15,23 @@ export function locativeIdiom(
   np: ResolvedNounPhrase,
   idioms: Readonly<Record<string, string>>,
 ): string | undefined {
+  return pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER) === 'in' && isIdiomNoun(np) ? idioms[np.head.conceptId] : undefined;
+}
+
+/**
+ * The noun phrase a frozen idiom can stand for: the definite (the default) or bare singular noun,
+ * with no adjective, attributive noun, possessor or relative clause. Shared by the locative's idiom
+ * above and the direction's (`directionIdiom`).
+ */
+export function isIdiomNoun(np: ResolvedNounPhrase): boolean {
   const f = np.head.forms;
   const definiteness = f['definiteness'] ?? 'definite';
-  const plain =
-    pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER) === 'in' &&
+  return (
     (definiteness === 'definite' || definiteness === 'bare') &&
     (f['number'] ?? f['count']) !== 'plural' &&
     np.adjectives.length === 0 &&
     np.nounModifiers.length === 0 &&
     !np.possessor &&
-    !np.relative;
-  return plain ? idioms[np.head.conceptId] : undefined;
+    !np.relative
+  );
 }

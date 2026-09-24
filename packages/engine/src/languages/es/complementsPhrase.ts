@@ -8,6 +8,7 @@ import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
@@ -34,7 +35,7 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
+import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { esStandard } from './esStandard.js';
@@ -141,7 +142,9 @@ export function complementsPhrase(
       const conjunctText = (np: ResolvedNounPhrase, connectorShared = false): string => {
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — a bare
       // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
-      const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
+      const idiom = (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        // …and the goal's, as a plain direction takes it (P09-E37).
+        || (type === 'direction' && directionIdiom(c, np, DIRECTION_IDIOMS));
       if (idiom) return idiom;
       // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
       // ("en él", never "en el él" — A197 for the comitative and the instrumental, A203 for the

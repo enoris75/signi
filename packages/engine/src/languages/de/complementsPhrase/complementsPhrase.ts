@@ -3,6 +3,7 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounPhrase } from '../..
 import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { withCauseNegator } from '../../../functions/withCauseNegator.js';
 import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNoun.js';
+import { directionIdiom } from '../../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../../functions/locativeIdiom.js';
 import { objectPredication } from '../../../functions/objectPredication.js';
 import { directionSpecifier } from '../../../functions/directionSpecifier.js';
@@ -26,7 +27,7 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { CONSTITUENT_NEGATOR, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -126,7 +127,9 @@ export function complementsParts(
       }
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "zu Hause",
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.
-      const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
+      const idiom = (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        // …and the goal's, as a plain direction takes it (P09-E37).
+        || (type === 'direction' && directionIdiom(c, np, DIRECTION_IDIOMS));
       if (idiom) return idiom;
       // A pronoun behind an adposition is the bare preposition + the pronoun, with no article and no
       // declension of its own ("mit ihm", never "mit dem er" — A197 for the comitative and the

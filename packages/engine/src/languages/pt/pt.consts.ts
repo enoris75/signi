@@ -163,6 +163,10 @@ export const PT_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', qu
 // Portuguese says a bare "em casa", not "no lar" — the hearth-word gives way to "casa".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'em casa' };
 
+// The same noun's idiom as a plain goal (see `directionIdiom`, P09-E37): "vai para casa", not "vai
+// ao lar" — the goal's "para" where the place took "em".
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'para casa' };
+
 // The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
 // (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
 // builds any relation, and the complement lifts it off every conjunct to say it in front of all.

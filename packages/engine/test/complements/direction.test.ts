@@ -674,3 +674,132 @@ describe('known bugs: German continent goal "nach"', () => {
     }), 'de')).toBe('der Kater fügt das Buch zu Afrika hinzu.');
   });
 });
+
+// P09-E37. HOME as a plain goal takes its article-less idiom, as the locative already did ("at
+// home"): "goes home", not "goes to the home". Each engine reads its own `DIRECTION_IDIOMS`, and
+// Japanese its particle — 家に, where one goes home, not the "towards" 家へ.
+//
+//     was   to the home / alla casa / au foyer / zum Zuhause / al hogar / ao lar / 家へ
+//     now   home        / a casa    / à la maison / nach Hause / a casa / para casa / 家に
+describe('direction: HOME takes its goal idiom (P09-E37)', () => {
+  const toHome = (verb: string, phrase: NounElement = np('HOME'), specifiers?: [{ kind: 'path'; value: 'in' }]) =>
+    sayAll(clause(np('CAT'), verb, { complements: { direction: { phrase, ...(specifiers ? { specifiers } : {}) } } }));
+
+  test('GO', () => {
+    expect(toHome('GO')).toEqual({
+      en: 'the cat goes home.',
+      it: 'il gatto va a casa.',
+      fr: 'le chat va à la maison.',
+      de: 'der Kater geht nach Hause.',
+      es: 'el gato va a casa.',
+      ja: '猫は家に行きます。', // 帰る for "go home" is GO's lexeme, not this idiom (out of scope)
+      pt: 'o gato vai para casa.',
+    });
+  });
+
+  test('RETURN', () => {
+    expect(toHome('RETURN')).toEqual({
+      en: 'the cat returns home.',
+      it: 'il gatto torna a casa.',
+      fr: 'le chat revient à la maison.',
+      de: 'der Kater kehrt nach Hause zurück.',
+      es: 'el gato vuelve a casa.',
+      ja: '猫は家に戻ります。',
+      pt: 'o gato volta para casa.',
+    });
+  });
+
+  test('COME', () => {
+    expect(toHome('COME')).toEqual({
+      en: 'the cat comes home.',
+      it: 'il gatto viene a casa.',
+      fr: 'le chat vient à la maison.',
+      de: 'der Kater kommt nach Hause.',
+      es: 'el gato viene a casa.',
+      ja: '猫は家に来ます。',
+      pt: 'o gato vem para casa.',
+    });
+  });
+
+  test('the bare determiner reads as the same idiom', () => {
+    expect(toHome('GO', np('HOME', { definiteness: 'bare' }))).toEqual(toHome('GO'));
+  });
+
+  // "Goes to this home" keeps the ordinary path: the idiom is the default definite's alone.
+  test.each<[Definiteness, Record<string, string>]>([
+    ['this', {
+      en: 'the cat goes to this home.',
+      it: 'il gatto va a questa casa.',
+      fr: 'le chat va à ce foyer.',
+      de: 'der Kater geht zu diesem Zuhause.',
+      es: 'el gato va a este hogar.',
+      ja: '猫はこの家へ行きます。',
+      pt: 'o gato vai a este lar.',
+    }],
+    ['indefinite', {
+      en: 'the cat goes to a home.',
+      it: 'il gatto va a una casa.',
+      fr: 'le chat va à un foyer.',
+      de: 'der Kater geht zu einem Zuhause.',
+      es: 'el gato va a un hogar.',
+      ja: '猫は家へ行きます。',
+      pt: 'o gato vai a um lar.',
+    }],
+  ])('a chosen determiner (%s) keeps the ordinary goal', (definiteness, want) => {
+    expect(toHome('GO', np('HOME', { definiteness }))).toEqual(want);
+  });
+
+  test('a modified HOME, or one under a relation, is an ordinary goal again', () => {
+    expect(toHome('GO', np('HOME', { adjectives: ['BIG'] }))).toEqual({
+      en: 'the cat goes to the big home.',
+      it: 'il gatto va alla grande casa.',
+      fr: 'le chat va au grand foyer.',
+      de: 'der Kater geht zum großen Zuhause.',
+      es: 'el gato va al hogar grande.',
+      ja: '猫は大きい家へ行きます。',
+      pt: 'o gato vai ao lar grande.',
+    });
+    expect(toHome('GO', np('HOME'), [{ kind: 'path', value: 'in' }])).toEqual({
+      en: 'the cat goes into the home.',
+      it: 'il gatto va nella casa.',
+      fr: 'le chat va dans le foyer.',
+      de: 'der Kater geht ins Zuhause.',
+      es: 'el gato va en el hogar.',
+      ja: '猫は家の中へ行きます。',
+      pt: 'o gato vai no lar.',
+    });
+    expect(toHome('GO', np('HOME', { number: 'plural' }))).toMatchObject({
+      en: 'the cat goes to the homes.',
+      it: 'il gatto va alle case.',
+      de: 'der Kater geht zu den Zuhausen.',
+      pt: 'o gato vai aos lares.',
+    });
+  });
+
+  // The idiom brings its own preposition, so the other conjuncts keep theirs; Japanese's particle
+  // follows the whole group, which is two goals and keeps へ.
+  test('a coordinated goal keeps the idiom on its HOME conjunct', () => {
+    expect(toHome('GO', { conjuncts: [np('HOME'), place()], conjunction: 'and' })).toEqual({
+      en: 'the cat goes home and to the market.',
+      it: 'il gatto va a casa e al mercato.',
+      fr: 'le chat va à la maison et au marché.',
+      de: 'der Kater geht nach Hause und zum Markt.',
+      es: 'el gato va a casa y al mercado.',
+      ja: '猫は家と市場へ行きます。',
+      pt: 'o gato vai para casa e ao mercado.',
+    });
+  });
+
+  // A verb that fixes its goal's preposition in Italian and French keeps it, idiom or not: "si
+  // muove a casa" would say where the moving happens (Localization B34).
+  test("MOVE_ONESELF's own 'verso' / 'vers' wins over the idiom", () => {
+    expect(toHome('MOVE_ONESELF')).toMatchObject({
+      en: 'the cat moves home.',
+      it: 'il gatto si muove verso la casa.',
+      fr: 'le chat se déplace vers le foyer.',
+      de: 'der Kater bewegt sich nach Hause.',
+      es: 'el gato se mueve a casa.',
+      pt: 'o gato se move para casa.',
+    });
+  });
+});

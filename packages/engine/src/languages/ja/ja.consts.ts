@@ -177,6 +177,15 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
 export const AGAINST_PARTICLE = 'に';
 
 /**
+ * The particle a hearth noun takes in place of the goal's へ, keyed by concept id (see
+ * `directionIdiom`, P09-E37) — the Japanese side of the other engines' `DIRECTION_IDIOMS`. Japanese
+ * needs no idiom for the noun itself (家 is already article-less), only the particle: 家に帰る / 家に
+ * 行く is where one goes home to, where 家へ is "towards the house". A lone conjunct only, since the
+ * particle follows the whole group: 家と市場へ keeps its へ.
+ */
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'に' };
+
+/**
  * The same relations as they are **cited** — named out of a sentence, for a label (see
  * `translateSpecifier`). A clause builds a place from the relational noun above plus its particle
  * (ベッドの下で), and two relations add no noun at all: plain containment and a plain traversal are

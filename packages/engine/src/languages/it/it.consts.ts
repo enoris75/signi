@@ -146,6 +146,10 @@ export const IT_DIM_PREP: Record<DimensionRelation, string> = { extent: 'di', qu
 // Italian says "a casa" (or "in casa"), not "nella casa".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'a casa' };
 
+// The same noun's idiom as a plain goal (see `directionIdiom`, P09-E37): Italian spells the goal as
+// it spells the place, "va a casa", not "va alla casa".
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'a casa' };
+
 // The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
 // (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
 // builds any relation, and the complement lifts it off every conjunct to say it in front of all.

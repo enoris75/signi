@@ -141,6 +141,10 @@ export const GOAL_PREP: Record<PathSpecifier, string> = { ...PATH_PREP, in: 'int
 // English says "at home", not "in the home".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'at home' };
 
+// The same noun's idiom as a plain goal (see `directionIdiom`, P09-E37): "goes home", with no
+// preposition at all, not "goes to the home".
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'home' };
+
 /**
  * The true English modal auxiliaries. They are defective — no infinitive, no participle,
  * no do-support — and take "not" straight after themselves ("must not go", "could not go").

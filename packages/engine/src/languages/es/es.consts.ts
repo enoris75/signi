@@ -138,6 +138,10 @@ export const ES_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', qu
 // Spanish says a bare "en casa", not "en el hogar" — the hearth-word gives way to "casa".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'en casa' };
 
+// The same noun's idiom as a plain goal (see `directionIdiom`, P09-E37): "va a casa", not "va al
+// hogar" — the goal's "a" where the place took "en".
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'a casa' };
+
 // The preposition of `between`, said once over a coordinated landmark rather than on each conjunct
 // (P09-E1 D2, see `GROUP_SCOPED_SPECIFIERS`): `spatialHead` builds each conjunct with it as it
 // builds any relation, and the complement lifts it off every conjunct to say it in front of all.
