@@ -342,6 +342,8 @@ const ES_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
   ACQUIRE: {
     '1sg': 'adquiera', '2sg': 'adquieras', '3sg': 'adquiera', '1pl': 'adquiramos', '2pl': 'adquiráis', '3pl': 'adquieran',
   }, // adquirir (i→ie, back to i)
+  // morir's stressed ue narrows to u in the unstressed 1pl/2pl, as sentir's ie does to i (localization B84).
+  DIE: { '1sg': 'muera', '2sg': 'mueras', '3sg': 'muera', '1pl': 'muramos', '2pl': 'muráis', '3pl': 'mueran' }, // morir
 };
 const PT_SUBJ_OVERRIDE: Record<string, Record<PN, string>> = {
   BE:   { '1sg': 'seja', '2sg': 'seja', '3sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam', '3pl': 'sejam' },               // ser (você/vocês)

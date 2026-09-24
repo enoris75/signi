@@ -144,6 +144,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'conhecendo', participle: 'conhecido' },
     ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない', passive: '知られる', passive_reading: 'しられる' },
   },
+  // localization B86. REMEMBER's French is pronominal and so takes être ("s'est rappelé"); the German
+  // reflexive takes haben ("hat sich erinnert"). erwägen is inseparable and strong: erwogen.
+  REMEMBER: {
+    en: { gerund: 'remembering', participle: 'remembered' },
+    it: { gerund: 'ricordando', participle: 'ricordato' },
+    fr: { participle: 'rappelé', aux: 'be' }, de: { participle: 'erinnert' },
+    es: { gerund: 'recordando', participle: 'recordado' },
+    pt: { gerund: 'lembrando', participle: 'lembrado' },
+    ja: { te: '覚えて', te_reading: 'おぼえて', nai: '覚えない', nai_reading: 'おぼえない', passive: '覚えられる', passive_reading: 'おぼえられる' },
+  },
+  CONSIDER: {
+    en: { gerund: 'considering', participle: 'considered' },
+    it: { gerund: 'considerando', participle: 'considerato' },
+    fr: { participle: 'considéré' }, de: { participle: 'erwogen' },
+    es: { gerund: 'considerando', participle: 'considerado' },
+    pt: { gerund: 'considerando', participle: 'considerado' },
+    ja: { te: '考慮して', te_reading: 'こうりょして', nai: '考慮しない', nai_reading: 'こうりょしない', passive: '考慮される', passive_reading: 'こうりょされる' },
+  },
   // prevedere's participle is vedere's strong visto, prefixed: previsto.
   EXPECT: {
     en: { gerund: 'expecting', participle: 'expected' },
@@ -264,6 +282,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'conteniendo', participle: 'contenido' },
     pt: { gerund: 'contendo', participle: 'contido' },
     ja: { te: '保持して', te_reading: 'ほじして', nai: '保持しない', nai_reading: 'ほじしない', passive: '保持される', passive_reading: 'ほじされる' },
+  },
+  // localization B83: the hand's hold. tenere / tenir / halten are strong (tenuto, tenu, gehalten).
+  HOLD_GRASP: {
+    en: { gerund: 'holding', participle: 'held' },
+    it: { gerund: 'tenendo', participle: 'tenuto' },
+    fr: { participle: 'tenu' }, de: { participle: 'gehalten' },
+    es: { gerund: 'sosteniendo', participle: 'sostenido' },
+    pt: { gerund: 'segurando', participle: 'segurado' },
+    ja: { te: '握って', te_reading: 'にぎって', nai: '握らない', nai_reading: 'にぎらない', passive: '握られる', passive_reading: 'にぎられる' },
   },
   // it includere → incluso, fr inclure → inclus (the feminine incluse); ja 含む is godan.
   INCLUDE: {
@@ -628,6 +655,34 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'continuando', participle: 'continuado' },
     ja: { te: '続けて', te_reading: 'つづけて', nai: '続けない', nai_reading: 'つづけない', passive: '続けられる', passive_reading: 'つづけられる' },
   },
+  // localization B84's transitive CONTINUE: fortsetzen's particle goes inside its participle.
+  CONTINUE: {
+    en: { gerund: 'continuing', participle: 'continued' },
+    it: { gerund: 'continuando', participle: 'continuato' },
+    fr: { participle: 'continué' }, de: { participle: 'fortgesetzt' },
+    es: { gerund: 'continuando', participle: 'continuado' },
+    pt: { gerund: 'continuando', participle: 'continuado' },
+    ja: { te: '続けて', te_reading: 'つづけて', nai: '続けない', nai_reading: 'つづけない', passive: '続けられる', passive_reading: 'つづけられる' },
+  },
+  // The two halves of B84's stop. The transitive takes avere / avoir; the pronominal fermarsi and
+  // s'arrêter take essere / être, and German stehen bleiben sein, its particle written apart in the
+  // participle too ("ist stehen geblieben"). anhalten's particle goes inside it: angehalten.
+  STOP: {
+    en: { gerund: 'stopping', participle: 'stopped' },
+    it: { gerund: 'fermando', participle: 'fermato' },
+    fr: { participle: 'arrêté' }, de: { participle: 'angehalten' },
+    es: { gerund: 'deteniendo', participle: 'detenido' },
+    pt: { gerund: 'parando', participle: 'parado' },
+    ja: { te: '止めて', te_reading: 'とめて', nai: '止めない', nai_reading: 'とめない', passive: '止められる', passive_reading: 'とめられる' },
+  },
+  STOP_ONESELF: {
+    en: { gerund: 'stopping', participle: 'stopped' },
+    it: { gerund: 'fermandosi', participle: 'fermato', aux: 'be' },
+    fr: { participle: 'arrêté', aux: 'be' }, de: { participle: 'stehen geblieben', aux: 'be' },
+    es: { gerund: 'deteniéndose', participle: 'detenido' },
+    pt: { gerund: 'parando', participle: 'parado' },
+    ja: { te: '止まって', te_reading: 'とまって', nai: '止まらない', nai_reading: 'とまらない' },
+  },
   TRY: {
     en: { gerund: 'trying', participle: 'tried' },
     it: { gerund: 'provando', participle: 'provato' },
@@ -745,6 +800,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'trazendo', participle: 'trazido' },
     ja: { te: '持ってきて', te_reading: 'もってきて', nai: '持ってこない', nai_reading: 'もってこない', passive: '持ってこられる', passive_reading: 'もってこられる' },
   },
+  // localization B83's LEAD: condurre keeps its Latin stem (condotto), führen is weak (geführt).
+  LEAD: {
+    en: { gerund: 'leading', participle: 'led' },
+    it: { gerund: 'conducendo', participle: 'condotto' },
+    fr: { participle: 'mené' }, de: { participle: 'geführt' },
+    es: { gerund: 'guiando', participle: 'guiado' },
+    pt: { gerund: 'conduzindo', participle: 'conduzido' },
+    ja: { te: '導いて', te_reading: 'みちびいて', nai: '導かない', nai_reading: 'みちびかない', passive: '導かれる', passive_reading: 'みちびかれる' },
+  },
   // 置いていく conjugates as 行く: the te-form is 置いていって.
   LEAVE_BEHIND: {
     en: { gerund: 'leaving', participle: 'left' },
@@ -781,6 +845,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'ficando', participle: 'ficado' },
     ja: { te: '残って', te_reading: 'のこって', nai: '残らない', nai_reading: 'のこらない' },
   },
+  // localization B84's WAIT takes avere / avoir / haben ("ha aspettato", "hat gewartet").
+  WAIT: {
+    en: { gerund: 'waiting', participle: 'waited' },
+    it: { gerund: 'aspettando', participle: 'aspettato' },
+    fr: { participle: 'attendu' }, de: { participle: 'gewartet' },
+    es: { gerund: 'esperando', participle: 'esperado' },
+    pt: { gerund: 'esperando', participle: 'esperado' },
+    ja: { te: '待って', te_reading: 'まって', nai: '待たない', nai_reading: 'またない', passive: '待たれる', passive_reading: 'またれる' },
+  },
   TURN: {
     en: { gerund: 'turning', participle: 'turned' },
     it: { gerund: 'girando', participle: 'girato' },
@@ -797,6 +870,16 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'partindo', participle: 'partido' },
     ja: { te: '出発して', te_reading: 'しゅっぱつして', nai: '出発しない', nai_reading: 'しゅっぱつしない' },
   },
+  // localization B83's RUN_AWAY selects BE in it/fr/de (è scappata, s'est enfuie, ist weggelaufen);
+  // the Spanish gerund of huir writes its y (huyendo).
+  RUN_AWAY: {
+    en: { gerund: 'running away', participle: 'run away' },
+    it: { gerund: 'scappando', participle: 'scappato', aux: 'be' },
+    fr: { participle: 'enfui', aux: 'be' }, de: { participle: 'weggelaufen', aux: 'be' },
+    es: { gerund: 'huyendo', participle: 'huido' },
+    pt: { gerund: 'fugindo', participle: 'fugido' },
+    ja: { te: '逃げて', te_reading: 'にげて', nai: '逃げない', nai_reading: 'にげない' },
+  },
   GO_OUT: {
     en: { gerund: 'going out', participle: 'gone out' },
     it: { gerund: 'uscendo', participle: 'uscito', aux: 'be' },
@@ -804,6 +887,35 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'saliendo', participle: 'salido' },
     pt: { gerund: 'saindo', participle: 'saído' },
     ja: { te: '出て', te_reading: 'でて', nai: '出ない', nai_reading: 'でない' },
+  },
+  // localization B83's WALK: camminare and marcher take avere / avoir, zu Fuß gehen sein, its
+  // particle written apart in the participle ("ist zu Fuß gegangen").
+  WALK: {
+    en: { gerund: 'walking', participle: 'walked' },
+    it: { gerund: 'camminando', participle: 'camminato' },
+    fr: { participle: 'marché' }, de: { participle: 'zu Fuß gegangen', aux: 'be' },
+    es: { gerund: 'caminando', participle: 'caminado' },
+    pt: { gerund: 'caminhando', participle: 'caminhado' },
+    ja: { te: '歩いて', te_reading: 'あるいて', nai: '歩かない', nai_reading: 'あるかない' },
+  },
+  // B83's posture events are pronominal in Romance, so essere / être ("si è seduta", "s'est levée");
+  // sich setzen takes haben, aufstehen sein. The it / es / pt gerunds carry the clitic, as
+  // MOVE_ONESELF's do.
+  SIT_DOWN: {
+    en: { gerund: 'sitting down', participle: 'sat down' },
+    it: { gerund: 'sedendosi', participle: 'seduto', aux: 'be' },
+    fr: { participle: 'assis', aux: 'be' }, de: { participle: 'gesetzt' },
+    es: { gerund: 'sentándose', participle: 'sentado' },
+    pt: { gerund: 'sentando-se', participle: 'sentado' },
+    ja: { te: '座って', te_reading: 'すわって', nai: '座らない', nai_reading: 'すわらない' },
+  },
+  STAND_UP: {
+    en: { gerund: 'standing up', participle: 'stood up' },
+    it: { gerund: 'alzandosi', participle: 'alzato', aux: 'be' },
+    fr: { participle: 'levé', aux: 'be' }, de: { participle: 'aufgestanden', aux: 'be' },
+    es: { gerund: 'levantándose', participle: 'levantado' },
+    pt: { gerund: 'levantando-se', participle: 'levantado' },
+    ja: { te: '立って', te_reading: 'たって', nai: '立たない', nai_reading: 'たたない' },
   },
   DIVIDE: {
     en: { gerund: 'dividing', participle: 'divided' },
@@ -1309,6 +1421,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'vivendo', participle: 'vivido' },
     ja: { te: '生きて', te_reading: 'いきて', nai: '生きない', nai_reading: 'いきない' },
   },
+  // localization B84's DIE is unaccusative: essere / être / sein, and the participle agrees ("è morta").
+  DIE: {
+    en: { gerund: 'dying', participle: 'died' },
+    it: { gerund: 'morendo', participle: 'morto', aux: 'be' },
+    fr: { participle: 'mort', aux: 'be' }, de: { participle: 'gestorben', aux: 'be' },
+    es: { gerund: 'muriendo', participle: 'muerto' },
+    pt: { gerund: 'morrendo', participle: 'morrido' },
+    ja: { te: '死んで', te_reading: 'しんで', nai: '死なない', nai_reading: 'しなない' },
+  },
   TRADE: {
     en: { gerund: 'trading', participle: 'traded' },
     it: { gerund: 'commerciando', participle: 'commerciato' },
@@ -1503,6 +1624,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'encontrando', participle: 'encontrado' },
     pt: { gerund: 'encontrando', participle: 'encontrado' },
     ja: { te: '見つけて', te_reading: 'みつけて', nai: '見つけない', nai_reading: 'みつけない', passive: '見つけられる', passive_reading: 'みつけられる' },
+  },
+  // localization B86's MEET: treffen is strong (getroffen); encontrarse's gerund carries its clitic.
+  MEET: {
+    en: { gerund: 'meeting', participle: 'met' },
+    it: { gerund: 'incontrando', participle: 'incontrato' },
+    fr: { participle: 'rencontré' }, de: { participle: 'getroffen' },
+    es: { gerund: 'encontrándose', participle: 'encontrado' },
+    pt: { gerund: 'encontrando', participle: 'encontrado' },
+    ja: { te: '会って', te_reading: 'あって', nai: '会わない', nai_reading: 'あわない', passive: '会われる', passive_reading: 'あわれる' },
   },
   // anordnen is separable: the ge- goes between the particle and the stem, angeordnet.
   ARRANGE: {
