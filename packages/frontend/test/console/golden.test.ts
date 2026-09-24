@@ -94,6 +94,13 @@ const GOLDEN: Record<string, Golden> = {
   many: { line: '/subj cat /many', prints: '/subj ( cat /many )', holds: { subjectDefiniteness: 'many' } },
   few: { line: '/subj cat /few', prints: '/subj ( cat /few )', holds: { subjectDefiniteness: 'few' } },
   all: { line: '/subj cat /all', prints: '/subj ( cat /all )', holds: { subjectDefiniteness: 'all' } },
+  each: { line: '/subj cat /each', prints: '/subj ( cat /each )', holds: { subjectDefiniteness: 'each' } },
+  every: { line: '/subj cat /every', prints: '/subj ( cat /every )', holds: { subjectDefiniteness: 'every' } },
+  both: { line: '/subj cat /both', prints: '/subj ( cat /both )', holds: { subjectDefiniteness: 'both' } },
+  mostof: { line: '/subj cat /mostof', prints: '/subj ( cat /mostof )', holds: { subjectDefiniteness: 'most' } },
+  several: { line: '/subj cat /several', prints: '/subj ( cat /several )', holds: { subjectDefiniteness: 'several' } },
+  enough: { line: '/subj cat /enough', prints: '/subj ( cat /enough )', holds: { subjectDefiniteness: 'enough' } },
+  such: { line: '/subj cat /such', prints: '/subj ( cat /such )', holds: { subjectDefiniteness: 'such' } },
   rel: {
     line: '/subj child /rel subj ( /verb love /obj cat ) /verb read',
     check: (s) => expect(s.links[0]).toMatchObject({ source: { nounKey: 'subject' }, target: { nounKey: 'subject' } }),

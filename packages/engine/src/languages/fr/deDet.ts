@@ -16,6 +16,10 @@ export function deDet(forms: Record<string, string>, plural: boolean, lead: stri
   // A name the language leaves bare says so, and takes none here either (`takes_article: '0'`, C38).
   const articledName = forms['proper'] === '1' && forms['takes_article'] !== '0';
   if (def === 'definite' || articledName) return dePrep(forms, plural, lead);
+  // P09-E25: the article of "les deux" fuses ("des deux chats"), and the plural "de tels" already
+  // is the "de" a plural indefinite drops to ("de tels chats", never "*de de tels").
+  if (def === 'both') return `${dePrep(forms, true, lead)} deux`;
+  if (def === 'such' && plural && forms['uncountable'] !== '1') return artFor(forms, plural, lead);
   const det = artFor(forms, plural, lead);
   const drops =
     (def === 'indefinite' && (plural || forms['uncountable'] === '1')) ||

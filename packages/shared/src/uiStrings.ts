@@ -1343,7 +1343,7 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Quantifier',
   },
 
-  // What the ten values *mean*, as each grammar tradition names them — the determiner menu's
+  // What the seventeen values *mean*, as each grammar tradition names them — the determiner menu's
   // labels. A bare adjective, like the `pronoun.*` values: an article that is definite, a
   // demonstrative that is proximal, a quantifier that is universal. `agreesWith` names the noun
   // of the section the value sits under, which is what makes the Italian read "determinativo"
@@ -1353,7 +1353,7 @@ export const UI_STRINGS = defineUiStrings({
   // These say what the slot does; `determiner.value.*` below says what it spells. The menu
   // shows both, because a user who has not met "paucal" learns it from the "few" beside it.
   // Keyed `determiner.name.<Definiteness>`, parallel to the values, so the menu can write
-  // t(`determiner.name.${value}`) for any of the ten.
+  // t(`determiner.name.${value}`) for any of the seventeen.
   'determiner.name.definite': {
     word: 'DEFINITE',
     agreesWith: 'ARTICLE',
@@ -1414,12 +1414,55 @@ export const UI_STRINGS = defineUiStrings({
     format: { capitalize: true },
     fallback: 'Universal',
   },
+  // P09-E25's seven, under the quantifiers.
+  'determiner.name.each': {
+    word: 'DISTRIBUTIVE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Distributive',
+  },
+  'determiner.name.every': {
+    word: 'EXHAUSTIVE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Exhaustive',
+  },
+  'determiner.name.both': {
+    word: 'DUAL',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Dual',
+  },
+  'determiner.name.most': {
+    word: 'PROPORTIONAL',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Proportional',
+  },
+  'determiner.name.several': {
+    word: 'MULTIPLE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Multiple',
+  },
+  'determiner.name.enough': {
+    word: 'SUFFICIENT',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Sufficient',
+  },
+  'determiner.name.such': {
+    word: 'SIMILATIVE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Similative',
+  },
 
   // The words those values spell — the hint beside each menu label, and the word the determiner
   // box on the canvas shows. Each names itself with the word that realizes it in the language
   // ("the" / "il" / "der" / "この"), cited on the grammar noun NOUN, whose gender and initial
   // sound settle the form (see UiStringDeterminerDef). Keyed `determiner.value.<Definiteness>`
-  // so a call site can write t(`determiner.value.${value}`) for any of the ten.
+  // so a call site can write t(`determiner.value.${value}`) for any of the seventeen.
   //
   // Lower-case and unformatted: these are words shown as words, not headings — the same choice
   // the `pronoun.*` value labels make. `bare` is the determiner that is *no word at all*, so
@@ -1435,6 +1478,13 @@ export const UI_STRINGS = defineUiStrings({
   'determiner.value.many': { determiner: 'many', fallback: 'many' },
   'determiner.value.few': { determiner: 'few', fallback: 'few' },
   'determiner.value.all': { determiner: 'all', fallback: 'all' },
+  'determiner.value.each': { determiner: 'each', fallback: 'each' },
+  'determiner.value.every': { determiner: 'every', fallback: 'every' },
+  'determiner.value.both': { determiner: 'both', fallback: 'both' },
+  'determiner.value.most': { determiner: 'most', fallback: 'most' },
+  'determiner.value.several': { determiner: 'several', fallback: 'several' },
+  'determiner.value.enough': { determiner: 'enough', fallback: 'enough' },
+  'determiner.value.such': { determiner: 'such', fallback: 'such a' },
 
   // The headings of the word palette's sections, one per grammatical role — the same grammar
   // nouns as `category.*` but in the plural, because a section lists many words. Keyed
@@ -2963,7 +3013,7 @@ export const UI_STRINGS = defineUiStrings({
 
   // What each command that acts on a word is for, after its description on its help page: "/pl · plural
   // — to set a noun's number" (B47). One key per distinct purpose, which the command names as its
-  // `purposeKey`; commands that do the same thing share one (`/sg` and `/pl`, the ten determiners).
+  // `purposeKey`; commands that do the same thing share one (`/sg` and `/pl`, the seventeen determiners).
   // Each is the infinitive citation of `purposeOf`, lower-case and without its full stop, as a gloss
   // is. The console's misuse diagnostic still says the purpose in English ("/more sets an adjective’s
   // degree, and cat is a noun"): a sentence about the user's word is C21's.

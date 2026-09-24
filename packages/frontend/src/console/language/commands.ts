@@ -455,6 +455,14 @@ export const COMMANDS: readonly CommandDef[] = [
       ["many", [], "many"],
       ["few", [], "few"],
       ["all", [], "all"],
+      // P09-E25. `/most` is the adjective's superlative degree, so the determiner is `/mostof`.
+      ["each", [], "each"],
+      ["every", [], "every"],
+      ["both", [], "both"],
+      ["mostof", ["most_of"], "most"],
+      ["several", [], "several"],
+      ["enough", [], "enough"],
+      ["such", [], "such"],
     ] as const
   ).map(([name, aliases, value]) =>
     setting(

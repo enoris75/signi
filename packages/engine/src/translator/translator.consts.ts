@@ -19,7 +19,43 @@ export const engines: LanguageEngine[] = [
 ];
 
 /** Determiners that are inherently plural, so they render the plural noun surface. */
-export const PLURAL_DETERMINERS = new Set(['some', 'many', 'few', 'all']);
+export const PLURAL_DETERMINERS = new Set(['some', 'many', 'few', 'all', 'both', 'most', 'several', 'enough']);
+
+/**
+ * The approximators' words (P09-E38), each with the separator that joins it to what follows it —
+ * Japanese writes none. `about` stands before a numeral and agrees in Spanish (*unos / unas cinco*,
+ * the article, D2); `almost` stands before a quantity determiner.
+ */
+export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean) => string; almost: string }>> = {
+  en: { about: () => 'about ', almost: 'almost ' },
+  it: { about: () => 'circa ', almost: 'quasi ' },
+  fr: { about: () => 'environ ', almost: 'presque ' },
+  de: { about: () => 'etwa ', almost: 'fast ' },
+  es: { about: (fem) => (fem ? 'unas ' : 'unos '), almost: 'casi ' },
+  pt: { about: () => 'cerca de ', almost: 'quase ' },
+  ja: { about: () => '約', almost: 'ほとんど' },
+};
+
+/** The determiners `almost` modifies (P09-E38 D1): "almost all", "almost no", "almost many". */
+export const ALMOST_DETERMINERS: ReadonlySet<string> = new Set(['all', 'no', 'many']);
+
+/** The distributive determiners, which take a singular noun in every language: "each cat", "ogni gatto" (P09-E25). */
+export const SINGULAR_DETERMINERS: ReadonlySet<string> = new Set(['each', 'every']);
+
+/**
+ * What a determiner that only counts becomes on a mass noun, which cannot be counted (P09-E25):
+ * *several* is `some` ("some water", never "*several water"), and *both* the definite, which picks
+ * out the known stuff as *both* picks out the known two ("the water").
+ */
+export const MASS_DETERMINER: Readonly<Record<string, string>> = { several: 'some', both: 'definite' };
+
+/**
+ * Languages whose verb agrees with the singular head of the partitive *most* rather than with the
+ * plural noun it takes: it "la maggior parte dei gatti corre", es "la mayoría de los gatos corre", pt
+ * "a maioria dos gatos corre". French agrees with the noun ("la plupart des chats courent"), as do
+ * English and German, whose *most* is a plain determiner (P09-E25 D4).
+ */
+export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'pt']);
 
 /**
  * The determiners a relative superlative cannot stand under, which it makes definite: "the biggest

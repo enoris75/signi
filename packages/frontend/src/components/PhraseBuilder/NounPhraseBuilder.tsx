@@ -16,13 +16,14 @@ import { activatable } from "../../keyboard/activate.ts";
 import { Keycap } from "../../keyboard/Keycap.tsx";
 import { digitKeys, useMenuKeys } from "../../keyboard/useMenuKeys.ts";
 
-// The ten determiner values in menu order, each answering to the digit it is counted by: 1–9 then
-// 0, the order they sit on the keyboard.
+// The determiner values in menu order, the first ten answering to the digit they are counted by:
+// 1–9 then 0, the order they sit on the keyboard. P09-E25's seven quantifiers come after them and
+// have no digit (there are none left); they are picked by pointer or arrow key.
 const DETERMINER_DIGITS = digitKeys(
   DETERMINER_CATEGORIES.flatMap((category) => DETERMINER_CATEGORY_VALUES[category]),
 );
 
-// The determiner picker: the ten values are too many to cycle blindly, so the box opens a
+// The determiner picker: the seventeen values are too many to cycle blindly, so the box opens a
 // menu grouped by the dimension each value belongs to — article / demonstrative / quantifier,
 // section headings the engine renders in the current UI language like any other UI string.
 //
@@ -49,7 +50,7 @@ function DeterminerMenu({
   onClose: () => void;
 }) {
   const t = useUiString();
-  // A digit per row, counted down the menu as it is shown: the ten values are too many to cycle,
+  // A digit per row, counted down the menu as it is shown: the values are too many to cycle,
   // and too many to arrow through, but each is one keystroke after the D that opened them.
   useMenuKeys({ open, keys: DETERMINER_DIGITS, onPick: (v) => { onPick(v as Definiteness); onClose(); } });
   return (
@@ -92,7 +93,12 @@ function DeterminerMenu({
             }}
           >
             <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Keycap spec={DETERMINER_DIGITS[v]!} />
+              {DETERMINER_DIGITS[v] ? (
+                <Keycap spec={DETERMINER_DIGITS[v]} />
+              ) : (
+                // A hidden cap holds the column, so the digitless rows' names line up with the rest.
+                <Box component="span" aria-hidden sx={{ visibility: "hidden" }}><Keycap spec="0" /></Box>
+              )}
               {t(`determiner.name.${v}`)}
             </Box>
             <Box component="span" sx={{ color: "text.secondary", fontSize: "0.72rem" }}>

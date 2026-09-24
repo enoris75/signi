@@ -26,6 +26,13 @@ export type Definiteness =
   | 'many'
   | 'few'
   | 'all'
+  | 'each'
+  | 'every'
+  | 'both'
+  | 'most'
+  | 'several'
+  | 'enough'
+  | 'such'
   | 'this'
   | 'that';
 
@@ -44,6 +51,9 @@ export type Definiteness =
  * Demonstrative / Quantifier — see the `determiner.category.*` UI strings); the model keeps
  * the semantic name.
  */
+/** What `NounPhrase.approximator` can say (P09-E38). */
+export type Approximator = 'about' | 'almost';
+
 export type DeterminerCategory = 'identifiability' | 'deixis' | 'quantity';
 
 /** Display order of the dimensions. */
@@ -55,7 +65,9 @@ export const DETERMINER_CATEGORY_VALUES: Record<DeterminerCategory, Definiteness
   // Historically the definite article descends from the distal demonstrative in most of these
   // languages, which is why the two compete for the one slot rather than stacking.
   deixis: ['this', 'that'],
-  quantity: ['some', 'no', 'many', 'few', 'all'],
+  // P09-E25 added the seven after `all`: the distributives (each, every), the dual (both), the
+  // partitive majority (most), and the plain quantities several / enough / such.
+  quantity: ['some', 'no', 'many', 'few', 'all', 'each', 'every', 'both', 'most', 'several', 'enough', 'such'],
 };
 
 /** The dimension each determiner value belongs to — the inverse of DETERMINER_CATEGORY_VALUES. */
@@ -976,6 +988,14 @@ export interface NounPhrase {
    * other value renders as its digits, which every one of the seven writes that way.
    */
   numeral?: number;
+  /**
+   * A word that makes the phrase's quantity approximate (P09-E38): `about` on a numeral ("**about**
+   * five cats", *circa, environ, etwa, unos/unas, cerca de*, 約), `almost` on the quantity
+   * determiners `all`, `no` and `many` ("**almost** all cats", *quasi, presque, fast, casi, quase*,
+   * ほとんど). Anywhere else it is ignored. An approximated numeral drops the article: "about five
+   * cats", never "the about five cats".
+   */
+  approximator?: Approximator;
   /**
    * A **title** standing with a personal name — "**Mr** Peter", "il **signor** Pietro", ピーター**さん**
    * (localization C38). The id of a concept flagged `title`; meaningful only on a head that is both

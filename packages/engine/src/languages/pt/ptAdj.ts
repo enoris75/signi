@@ -47,5 +47,10 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   if (compared) post.push(compared);
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "e"
   // only before the last ("grande, velho e belo"), like a coordinated noun slot.
-  return { pre: pre.join(' '), post: joinConjuncts(post, ', ', () => ' e ') };
+  const adjectives = joinConjuncts(post, ', ', () => ' e ');
+  // The determiner "enough" is the postnominal "suficiente(s)" in Portuguese ("comida suficiente",
+  // "gatos suficientes"), after the adjectives and outside their coordination (P09-E25). It is the
+  // determiner, not one more adjective, so it closes the phrase: "comida quente suficiente".
+  const enough = np.head.forms['definiteness'] === 'enough' ? (plural ? 'suficientes' : 'suficiente') : '';
+  return { pre: pre.join(' '), post: [adjectives, enough].filter(Boolean).join(' ') };
 }

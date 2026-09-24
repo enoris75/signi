@@ -9,5 +9,6 @@ import { numeralWord, type CardinalTable } from './numeralWord.js';
 export function numeralText(forms: Record<string, string>, table: CardinalTable): string {
   const value = forms['numeral'];
   if (value === undefined) return '';
-  return numeralWord(table, Number(value), (forms['gender'] ?? 'masc') === 'fem');
+  // An approximator stands before the numeral, its separator included: "about five", 約五 (P09-E38).
+  return `${forms['approximator'] ?? ''}${numeralWord(table, Number(value), (forms['gender'] ?? 'masc') === 'fem')}`;
 }

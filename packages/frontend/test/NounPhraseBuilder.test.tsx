@@ -249,6 +249,14 @@ describe('NounPhraseBuilder', () => {
         '8Multal|many',
         '9Paucal|few',
         '0Universal|all',
+        // P09-E25's seven have no digit left; a hidden cap holds the column, so its "0" still reads.
+        '0Distributive|each',
+        '0Exhaustive|every',
+        '0Dual|both',
+        '0Proportional|most',
+        '0Multiple|several',
+        '0Sufficient|enough',
+        '0Similative|such a',
       ]);
       expect(within(menu).getByRole('menuitem', { name: /Distal/ })).toHaveClass('Mui-selected');
       expect(within(menu).getByRole('menuitem', { name: /Definite/ })).not.toHaveClass(

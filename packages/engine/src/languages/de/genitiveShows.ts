@@ -5,8 +5,8 @@ import { articledNameForms } from './articledNameForms.js';
 import { determiner } from './determiner.js';
 import { genitiveS } from './genitiveS.js';
 
-// The mass quantifiers "etwas / viel / wenig" are invariant: they carry no case to show.
-const INVARIANT_MASS_DETERMINERS: ReadonlySet<string> = new Set(['some', 'many', 'few']);
+// The mass quantifiers "etwas / viel / wenig" (and P09-E25's "genug") are invariant: they carry no case to show.
+const INVARIANT_MASS_DETERMINERS: ReadonlySet<string> = new Set(['some', 'many', 'few', 'enough']);
 
 /**
  * Whether a noun phrase's genitive would show. Standard German puts a noun possessor, and the object
@@ -29,5 +29,8 @@ export function genitiveShows(np: ResolvedNounPhrase, forms: Record<string, stri
   }
   const definiteness = forms['definiteness'] ?? 'definite';
   if (forms['uncountable'] === '1' && INVARIANT_MASS_DETERMINERS.has(definiteness)) return false;
+  // "genug" is invariant on a count noun too, so only a strong adjective can show the case: "das Buch
+  // von genug Katern", but "das Buch genug kleiner Katzen" (P09-E25).
+  if (definiteness === 'enough') return adjPhrase(np, 'gen', definiteness) !== '';
   return determiner(forms, 'gen', plural) !== '' || adjPhrase(np, 'gen', definiteness) !== '';
 }

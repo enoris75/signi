@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isCoreferentPossessor, isPronominalPossessor } from '@signi/shared';
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
-import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
+import { ALMOST_DETERMINERS, APPROXIMATOR_WORDS, MASS_DETERMINER, NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SINGULAR_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
@@ -141,7 +141,7 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // test is the same one the two engines' prenominal branches make (C33).
     const otherLeads = (np.adjectives ?? []).some((id, i) =>
       id === 'OTHER' && (np.adjectiveDegrees?.[i] ?? 'positive') === 'positive' && !np.adjectiveIntensifiers?.[i]);
-    const definiteness =
+    const unmassed =
       picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && otherLeads
         ? 'bare'
         : picked;
@@ -153,9 +153,15 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // asks — the lexeme wins, as a mass noun's singular does (P09-E41 D2). Settled first, since it also
     // sheds the concept's mass flag, which the quantifiers below read.
     const pluralOnly = applyPluralOnly(head.forms);
+    // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25), read after
+    // a plurale tantum has shed its mass flag. A plurale tantum has no singular for the distributives
+    // to take, so each / every take it whole, as `all`: "tutte le notizie", never "*ogni notizie".
+    const definiteness = head.forms['uncountable'] === '1' ? MASS_DETERMINER[unmassed] ?? unmassed
+      : pluralOnly && SINGULAR_DETERMINERS.has(unmassed) ? 'all'
+      : unmassed;
     const counted = (np.numeral ?? 0) > 1 && head.forms['uncountable'] !== '1';
     const forcesPlural = counted || (PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1');
-    const forcesSingular = definiteness === 'no' && NO_TAKES_SINGULAR.has(language);
+    const forcesSingular = (definiteness === 'no' && NO_TAKES_SINGULAR.has(language)) || SINGULAR_DETERMINERS.has(definiteness);
     const num = pluralOnly || forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);
@@ -171,8 +177,19 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // that article in five of them, and above one no language writes both — so the phrase resolves
     // bare and each engine's article builder writes nothing without being told (C31). The value
     // itself rides on the forms, as the determiner and the degree do.
-    head.forms['definiteness'] = np.numeral !== undefined && definiteness === 'indefinite' ? 'bare' : definiteness;
+    // An approximated numeral is no identified set, so it drops the definite article too: "about five
+    // cats", "circa cinque gatti", never "the about five cats" (P09-E38).
+    const about = np.approximator === 'about' && np.numeral !== undefined;
+    head.forms['definiteness'] = np.numeral !== undefined && (definiteness === 'indefinite' || (about && definiteness === 'definite'))
+      ? 'bare'
+      : definiteness;
     if (np.numeral !== undefined) head.forms['numeral'] = String(np.numeral);
+    // The approximator's word rides on the forms with its separator, as the numeral does: `approximator`
+    // before the numeral (see `numeralText`), `approximator_det` before the determiner (see
+    // `withApproximator`). Anywhere else it is ignored (P09-E38 D1).
+    const words = APPROXIMATOR_WORDS[language];
+    if (words && about) head.forms['approximator'] = words.about(head.forms['gender'] === 'fem');
+    if (words && np.approximator === 'almost' && ALMOST_DETERMINERS.has(definiteness)) head.forms['approximator_det'] = words.almost;
   }
   // An adjective head is the predicate adjective of a subject complement ("seems happy") —
   // the one head that carries a comparative degree of its own. Thread it onto the head's
