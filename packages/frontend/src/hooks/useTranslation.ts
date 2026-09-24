@@ -1,4 +1,4 @@
-import { useQueries } from '@tanstack/react-query';
+import { hashKey, useQueries } from '@tanstack/react-query';
 import { fetchTranslation } from '../api.ts';
 import { nounConjuncts, type PhrasePlan, type Translation } from '@signi/shared';
 
@@ -19,20 +19,28 @@ function hasSubject(plan: Partial<PhrasePlan>): boolean {
 
 // Translate every root sentence of the workspace in one hook. `useQueries` takes a
 // dynamic list, so periods can be added and removed without breaking the rules of hooks.
+// Periods that say the same thing (two empty ones, say) share one query: the same key twice in
+// one `useQueries` is a duplicate it warns about.
 export function useTranslations(plans: Partial<PhrasePlan>[]): SentenceResult[] {
+  const keys = plans.map((plan) => hashKey(['translation', plan]));
+  const unique = [...new Map(plans.map((plan, i) => [keys[i]!, plan])).entries()];
+  const slot = new Map(unique.map(([key], i) => [key, i]));
   return useQueries({
-    queries: plans.map((plan) => ({
+    queries: unique.map(([, plan]) => ({
       queryKey: ['translation', plan],
       queryFn: () => fetchTranslation(plan as PhrasePlan),
       enabled: hasSubject(plan),
       staleTime: 1000 * 60,
     })),
     combine: (results) =>
-      results.map((r, i) => ({
-        translations: r.data,
-        isLoading: r.isLoading,
-        isError: r.isError,
-        isReady: hasSubject(plans[i]),
-      })),
+      plans.map((plan, i) => {
+        const r = results[slot.get(keys[i]!)!]!;
+        return {
+          translations: r.data,
+          isLoading: r.isLoading,
+          isError: r.isError,
+          isReady: hasSubject(plan),
+        };
+      }),
   });
 }

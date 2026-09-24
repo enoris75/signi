@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Box, ListSubheader, Menu, MenuItem } from "@mui/material";
 import {
   DETERMINER_CATEGORIES,
@@ -43,7 +43,8 @@ function DeterminerMenu({
   open: boolean;
   // The anchor as a thunk, not an element: the determiner box may only have appeared in the very
   // commit that opened the menu (the D key reveals it first), and a ref is not attached yet while
-  // that render is in flight. MUI reads the thunk in its layout effect, by which time it is.
+  // that render is in flight. It is read in a layout effect, by which time it is, and the menu
+  // opens on it before the paint.
   getAnchor: () => HTMLElement | null;
   value: Definiteness;
   onPick: (value: Definiteness) => void;
@@ -53,10 +54,12 @@ function DeterminerMenu({
   // A digit per row, counted down the menu as it is shown: the values are too many to cycle,
   // and too many to arrow through, but each is one keystroke after the D that opened them.
   useMenuKeys({ open, keys: DETERMINER_DIGITS, onPick: (v) => { onPick(v as Definiteness); onClose(); } });
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => setAnchor(open ? getAnchor() : null), [open, getAnchor]);
   return (
     <Menu
-      anchorEl={() => getAnchor()!}
-      open={open}
+      anchorEl={anchor}
+      open={open && anchor !== null}
       onClose={onClose}
       MenuListProps={{ dense: true }}
     >

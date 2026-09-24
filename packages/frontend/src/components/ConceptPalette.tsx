@@ -68,6 +68,9 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
                 enterDelay={400}
                 slotProps={{ tooltip: { sx: { fontSize: '0.72rem', maxWidth: 200 } } }}
               >
+              {/* The tooltip listens on a wrapper: a disabled button fires no events, and its
+                  definition is still worth reading. */}
+              <Box component="span" sx={{ display: 'block' }}>
               <Box
                 // A real button: the panel is a list of words to choose from, and choosing one
                 // with ↵ is the whole point of reaching it by key (see PhraseSidebar).
@@ -115,6 +118,7 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
                 }}
               >
                 <ConceptWord concept={concept} />
+              </Box>
               </Box>
               </Tooltip>
             ))}

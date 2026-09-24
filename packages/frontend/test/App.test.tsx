@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import type { ComponentProps } from 'react';
 import type { Concept, LanguageCode, PhrasePlan, Translation } from '@signi/shared';
 import App from '../src/App.tsx';
-import { fetchTranslation } from '../src/api.ts';
+import { fetchConcepts, fetchTranslation } from '../src/api.ts';
 import type { PhraseContainer, PhraseLink } from '../src/components/PhraseBuilder/interfaces.ts';
 import type { PhraseWorkspace } from '../src/components/PhraseBuilder/PhraseWorkspace.tsx';
 import type { SavedPhrasesToolbar } from '../src/components/SavedPhrasesToolbar.tsx';
@@ -76,6 +76,8 @@ const leftColumn = () => screen.getByTestId('workspace').parentElement!;
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(fetchTranslation).mockImplementation(translate);
+  // The pickers' word lists; App's tests pick no word, and a query must not resolve to undefined.
+  vi.mocked(fetchConcepts).mockResolvedValue([]);
 });
 
 describe('App', () => {

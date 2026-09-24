@@ -7,10 +7,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import App from '../../src/App.tsx';
+import { fetchTranslation } from '../../src/api.ts';
 import { renderWithProviders } from '../render.tsx';
 import { ADJECTIVES, ADVERBS, NOUNS, PRONOUNS, VERBS } from './vocab.ts';
 
 vi.mock('../../src/api.ts');
+// The transcript's sentence reads the translation cache; no sentence is what these tests expect.
+vi.mocked(fetchTranslation).mockResolvedValue([]);
 vi.mock('../../src/hooks/useTranslation.ts', () => ({ useTranslations: () => [] }));
 // jsdom has no ResizeObserver and no layout: the canvas reads as its initial size, the compact
 // controls reach nowhere into it, and the resolver has no real footprint to shove boxes about on
