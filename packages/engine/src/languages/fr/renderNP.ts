@@ -14,6 +14,7 @@ import { frMods } from './frMods.js';
 import { joinArt } from './joinArt.js';
 import { liaisonAdjectives } from './liaisonAdjectives.js';
 import { relativeText } from './relativeText.js';
+import { frExamples } from './frExamples.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
 /**
@@ -96,5 +97,6 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
     : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`
     : withPost;
   const rel = relativeText(np);
-  return rel ? `${base} ${rel}` : base;
+  // The members of the head's set it names follow everything, the relative clause included (P09-E33).
+  return `${rel ? `${base} ${rel}` : base}${frExamples(np)}`;
 }

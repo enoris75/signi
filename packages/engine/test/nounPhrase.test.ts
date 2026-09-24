@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Definiteness, NounPhrase } from '@signi/shared';
+import type { Definiteness, NounElement, NounPhrase } from '@signi/shared';
 import { clause, furigana, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
@@ -838,5 +838,171 @@ describe('known bugs: an English superlative on a proper name', () => {
       .toBe('the cat sees equally big Europe.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('EUROPE', { adjectives: ['BIG'], adjectiveDegrees: ['less'] }) }), 'en'))
       .toBe('the cat sees less big Europe.');
+  });
+});
+
+// P09-E33. *Such as* and *including*: a noun phrase names some members of the set its head denotes
+// (`NounPhrase.examples`). The example agrees and takes case on its own (it *compreso / compresa*,
+// es *incluido / incluida*, de *einschließlich* + genitive, *wie* in the head's case); *including* is
+// parenthetical in the European languages, *such as* is not; Japanese says either prenominally.
+describe('examples: such as / including (P09-E33)', () => {
+  const suchAs = (phrase: NounElement) => ({ examples: { phrase, relation: 'example' as const } });
+  const including = (phrase: NounElement) => ({ examples: { phrase, relation: 'inclusion' as const } });
+  const animals = (extra: Partial<NounPhrase>) => np('ANIMAL', { number: 'plural', ...extra });
+
+  test('such as, subject: no commas; French keeps its bare plural (the missing *des* is not this construct)', () => {
+    expect(sayAll(clause(animals({ definiteness: 'bare', ...suchAs(np('CAT')) }), 'RUN'))).toEqual({
+      en: 'animals such as the cat run.',
+      it: 'animali come il gatto corrono.',
+      fr: 'animaux comme le chat courent.',
+      de: 'Tiere wie der Kater laufen.',
+      es: 'animales como el gato corren.',
+      pt: 'animais como o gato correm.',
+      ja: '猫のような動物は走ります。',
+    });
+  });
+
+  test('including, subject: commas on both sides; the German genitive', () => {
+    expect(sayAll(clause(animals(including(np('CAT'))), 'RUN'))).toEqual({
+      en: 'the animals, including the cat, run.',
+      it: 'gli animali, compreso il gatto, corrono.',
+      fr: 'les animaux, y compris le chat, courent.',
+      de: 'die Tiere, einschließlich des Katers, laufen.',
+      es: 'los animales, incluido el gato, corren.',
+      pt: 'os animais, incluindo o gato, correm.',
+      ja: '猫を含む動物は走ります。',
+    });
+  });
+
+  test('such as, object: German *wie* takes the head\'s accusative', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: animals({ definiteness: 'bare', ...suchAs(np('CAT')) }) }))).toEqual({
+      en: 'the man sees animals such as the cat.',
+      it: "l'uomo vede animali come il gatto.",
+      fr: "l'homme voit des animaux comme le chat.",
+      de: 'der Mann sieht Tiere wie den Kater.',
+      es: 'el hombre ve animales como el gato.',
+      pt: 'o homem vê animais como o gato.',
+      ja: '男は猫のような動物を見ます。',
+    });
+  });
+
+  test('including, object: the closing comma gives way to the full stop', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: animals(including(np('CAT'))) }))).toEqual({
+      en: 'the man sees the animals, including the cat.',
+      it: "l'uomo vede gli animali, compreso il gatto.",
+      fr: "l'homme voit les animaux, y compris le chat.",
+      de: 'der Mann sieht die Tiere, einschließlich des Katers.',
+      es: 'el hombre ve los animales, incluido el gato.',
+      pt: 'o homem vê os animais, incluindo o gato.',
+      ja: '男は猫を含む動物を見ます。',
+    });
+  });
+
+  test('such as, in the dative: German *wie dem Kater*', () => {
+    expect(sayAll(clause(np('MAN'), 'GIVE', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: animals(suchAs(np('CAT'))) } },
+    }))).toEqual({
+      en: 'the man gives the book to the animals such as the cat.',
+      it: "l'uomo dà il libro agli animali come il gatto.",
+      fr: "l'homme donne le livre aux animaux comme le chat.",
+      de: 'der Mann gibt den Tieren wie dem Kater das Buch.',
+      es: 'el hombre da el libro a los animales como el gato.',
+      pt: 'o homem dá o livro aos animais como o gato.',
+      ja: '男は猫のような動物に本をあげます。',
+    });
+  });
+
+  test.each<[string, NounPhrase, Record<string, string>]>([
+    ['a feminine example', np('CAT', { gender: 'fem' }), {
+      en: 'the animals, including the cat, run.',
+      it: 'gli animali, compresa la gatta, corrono.',
+      fr: 'les animaux, y compris la chatte, courent.',
+      de: 'die Tiere, einschließlich der Katze, laufen.',
+      es: 'los animales, incluida la gata, corren.',
+      pt: 'os animais, incluindo a gata, correm.',
+      ja: '猫を含む動物は走ります。',
+    }],
+    ['a plural example', np('DOG', { number: 'plural' }), {
+      en: 'the animals, including the dogs, run.',
+      it: 'gli animali, compresi i cani, corrono.',
+      fr: 'les animaux, y compris les chiens, courent.',
+      de: 'die Tiere, einschließlich der Hunde, laufen.',
+      es: 'los animales, incluidos los perros, corren.',
+      pt: 'os animais, incluindo os cães, correm.',
+      ja: '犬を含む動物は走ります。',
+    }],
+    ['a feminine plural example', np('CAT', { number: 'plural', gender: 'fem' }), {
+      en: 'the animals, including the cats, run.',
+      it: 'gli animali, comprese le gatte, corrono.',
+      fr: 'les animaux, y compris les chattes, courent.',
+      de: 'die Tiere, einschließlich der Katzen, laufen.',
+      es: 'los animales, incluidas las gatas, corren.',
+      pt: 'os animais, incluindo as gatas, correm.',
+      ja: '猫を含む動物は走ります。',
+    }],
+  ])('including agrees with the example, not the head: %s', (_, example, want) => {
+    expect(sayAll(clause(animals(including(example)), 'RUN'))).toEqual(want);
+  });
+
+  test('a coordinated group names several examples', () => {
+    expect(sayAll(clause(animals({ definiteness: 'bare', ...suchAs({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'and' }) }), 'RUN'))).toEqual({
+      en: 'animals such as the cat and the dog run.',
+      it: 'animali come il gatto e il cane corrono.',
+      fr: 'animaux comme le chat et le chien courent.',
+      de: 'Tiere wie der Kater und der Hund laufen.',
+      es: 'animales como el gato y el perro corren.',
+      pt: 'animais como o gato e o cão correm.',
+      ja: '猫と犬のような動物は走ります。',
+    });
+  });
+
+  test('a pronoun example: object form in English, tonic in it / fr, subject form in es / pt', () => {
+    expect(sayAll(clause(np('PERSON', { number: 'plural', definiteness: 'bare', ...suchAs(np('THIRD_PERSON')) }), 'RUN'))).toEqual({
+      en: 'people such as him run.',
+      it: 'persone come lui corrono.',
+      fr: 'personnes comme lui courent.',
+      de: 'Personen wie er laufen.',
+      es: 'personas como él corren.',
+      pt: 'pessoas como ele correm.',
+      ja: '彼のような人は走ります。',
+    });
+    expect(sayAll(clause(np('PERSON', { number: 'plural', ...including(np('FIRST_PERSON')) }), 'RUN'))).toEqual({
+      en: 'the people, including me, run.',
+      it: 'le persone, compreso me, corrono.',
+      fr: 'les personnes, y compris moi, courent.',
+      de: 'die Personen, einschließlich mir, laufen.',
+      es: 'las personas, incluido yo, corren.',
+      pt: 'as pessoas, incluindo eu, correm.',
+      ja: '私を含む人は走ります。',
+    });
+  });
+
+  test('it follows a relative clause, whose German closing comma it shares', () => {
+    expect(sayAll(clause(animals({ relative: { verbPhrase: { verb: 'EAT' } }, ...including(np('CAT')) }), 'RUN'))).toEqual({
+      en: 'the animals that eat, including the cat, run.',
+      it: 'gli animali che mangiano, compreso il gatto, corrono.',
+      fr: 'les animaux qui mangent, y compris le chat, courent.',
+      de: 'die Tiere, die fressen, einschließlich des Katers, laufen.',
+      es: 'los animales que comen, incluido el gato, corren.',
+      pt: 'os animais que comem, incluindo o gato, correm.',
+      ja: '猫を含む食べる動物は走ります。',
+    });
+  });
+
+  test('a possessor that names examples takes the English of-genitive, never the clitic', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: animals(suchAs(np('CAT'))) }), 'RUN'))).toEqual({
+      en: 'the book of the animals such as the cat runs.',
+      it: 'il libro degli animali come il gatto corre.',
+      fr: 'le livre des animaux comme le chat court.',
+      de: 'das Buch der Tiere wie des Katers läuft.',
+      es: 'el libro de los animales como el gato corre.',
+      pt: 'o livro dos animais como o gato corre.',
+      ja: '猫のような動物の本は走ります。',
+    });
+  });
+
+  test('the Japanese 含む carries its furigana', () => {
+    expect(furigana(clause(animals(including(np('CAT'))), 'RUN'))).toEqual(['ねこ', 'ふくむ', 'どうぶつ', 'はしります']);
   });
 });

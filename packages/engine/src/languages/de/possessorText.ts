@@ -11,6 +11,7 @@ import { determiner } from './determiner.js';
 import { genitiveShows } from './genitiveShows.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
+import { nounExamples } from './nounExamples.js';
 import { nounStandard } from './nounStandard.js';
 import { nounPhrase } from './nounPhrase.js';
 import { postnominal } from './postnominal.js';
@@ -56,7 +57,7 @@ function vonDative(poss: ResolvedNounPhrase): string {
     // A counted possessor keeps its cardinal: "ein Zeitraum von vierundzwanzig Stunden" (C31).
     numeralText(f, CARDINALS),
     adjPhrase(poss, 'dat', definiteness),
-    `${word}${postnominal(f)}${modifierGenitives(poss)}${possessorText(poss)}${nounStandard(poss, 'dat')}${subordinateClause(poss)}`,
+    `${word}${postnominal(f)}${modifierGenitives(poss)}${possessorText(poss)}${nounStandard(poss, 'dat')}${subordinateClause(poss)}${nounExamples(poss, 'dat')}`,
   ];
   return words.filter(Boolean).join(' ');
 }

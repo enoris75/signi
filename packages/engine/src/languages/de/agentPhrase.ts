@@ -11,6 +11,7 @@ import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
 import { possessedDeclension } from './possessedDeclension.js';
 import { possessorText } from './possessorText.js';
+import { nounExamples } from './nounExamples.js';
 import { nounStandard } from './nounStandard.js';
 import { postnominal } from './postnominal.js';
 import { prepDet } from './prepDet.js';
@@ -56,7 +57,7 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
     const possessive = poss
       ? `${possessiveDe(poss, 'dat', { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
       : '';
-    const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${possessorText(np)}${nounStandard(np, 'dat')}${subordinateClause(np)}`;
+    const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${possessorText(np)}${nounStandard(np, 'dat')}${subordinateClause(np)}${nounExamples(np, 'dat')}`;
     return head ? `${head} ${rest}` : rest;
   });
 }

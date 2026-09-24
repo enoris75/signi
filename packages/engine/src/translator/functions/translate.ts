@@ -4,6 +4,7 @@ import { engines } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveAddress } from './resolveAddress.js';
 import { resolvePhrase } from './resolvePhrase.js';
+import { tidyCommas } from './tidyCommas.js';
 
 /** A sentence's first word, capitalized where the script has case. */
 const capitalized = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
@@ -38,7 +39,8 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
     const calledRuby = address && ruby ? [...engine.renderRuby!(address), { t: engine.addressSeparator ?? ', ' }] : [];
     return {
       language: engine.language,
-      text: called + open + engine.render(resolved) + stop,
+      // A parenthetical's closing comma (P09-E33) gives way to the stop, or to a comma it meets.
+      text: called + open + tidyCommas(engine.render(resolved)) + stop,
       ...(ruby ? { ruby: [...calledRuby, ...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
     };
   });

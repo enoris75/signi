@@ -132,6 +132,12 @@ export interface ResolvedNounPhrase {
    * alone ("a cat as big as the dog", "un gatto tanto grande quanto il cane").
    */
   adjectiveStandard?: { index: number; standard: ResolvedNounElement };
+  /**
+   * The members of the head's set named after it (see NounPhrase.examples, P09-E33): "such as the
+   * cat" (`example`), "including the cat" (`inclusion`). The phrase is resolved on its own, so each
+   * engine agrees and cases the example itself.
+   */
+  examples?: { phrase: ResolvedNounElement; relation: 'example' | 'inclusion' };
 }
 
 /**

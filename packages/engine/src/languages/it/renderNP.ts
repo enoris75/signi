@@ -19,6 +19,7 @@ import { joinWords } from './joinWords.js';
 import { prenominalChain } from './prenominalChain.js';
 import { prepDet } from './prepDet.js';
 import { relativeText } from './relativeText.js';
+import { itExamples } from './itExamples.js';
 import { splitAdjectives } from './splitAdjectives.js';
 import { surface } from './surface.js';
 
@@ -87,5 +88,6 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const withPost = mods ? `${postAdj} ${mods}` : postAdj;
   const base = possFirst || !possText ? withPost : `${withPost} ${possText}`;
   const rel = relativeText(np);
-  return rel ? `${base} ${rel}` : base;
+  // The members of the head's set it names follow everything, the relative clause included (P09-E33).
+  return `${rel ? `${base} ${rel}` : base}${itExamples(np)}`;
 }

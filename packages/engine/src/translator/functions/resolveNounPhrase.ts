@@ -12,6 +12,7 @@ import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
 import { resolveAdjectiveStandard } from './resolveAdjectiveStandard.js';
+import { resolveNounElement } from './resolveNounElement.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
 import { resolveStandard } from './resolveStandard.js';
 
@@ -310,5 +311,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // engine places it inside the noun phrase: after the noun (en, de), after the adjective (Romance)
     // or before it (ja).
     ...(adjectiveStandard ? { adjectiveStandard } : {}),
+    // The members of the head's set it names ("animals such as the cat", P09-E33), resolved as a slot
+    // of their own: each engine agrees and cases the example, not the head.
+    ...(np.examples ? { examples: { phrase: resolveNounElement(np.examples.phrase, language, lookup), relation: np.examples.relation } } : {}),
   };
 }

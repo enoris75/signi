@@ -18,6 +18,7 @@ import { isPlural } from './isPlural.js';
 import { predicateText } from './predicateText.js';
 import { prepObjectText } from './prepObjectText.js';
 import { subjectText } from './subjectText.js';
+import { esExamples } from './esExamples.js';
 
 /**
  * Append a noun phrase's attributive nouns, possessor, and relative clause (invariant
@@ -35,8 +36,10 @@ import { subjectText } from './subjectText.js';
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
+  // The members of the head's set it names follow everything, the relative clause included (P09-E33).
+  const examples = esExamples(np);
   const rel = np.relative;
-  if (!rel) return withPoss;
+  if (!rel) return `${withPoss}${examples}`;
   // Under a `no` head the relative asserts nothing about a real referent, so its verb takes the
   // subjunctive, on every branch below: "ningún gato que coma" (A170).
   const verbPhrase = negatedAntecedentVerbPhrase(np, rel.verbPhrase);
@@ -48,7 +51,7 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
     const whose = `cuy${pf['gender'] === 'fem' ? 'a' : 'o'}${isPlural(pf) ? 's' : ''}`;
     const owned = [whose, subjectText(possessed),
       predicateText(possessed.agreement, verbPhrase, rel.directObject, rel.complements, undefined, relativeSubjectIsNegative(rel))];
-    return `${withPoss} ${owned.filter(Boolean).join(' ')}`.trimEnd();
+    return `${withPoss} ${owned.filter(Boolean).join(' ')}`.trimEnd() + examples;
   }
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const QUE = { base: 'que', plural: 'que', definiteness: 'definite' };
@@ -78,5 +81,5 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // in the main clause, "el libro que leo", where that leaves no subject-relative reading (A173).
   const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'que', predicateFor)
     ? '' : subjectText(rel.subject!);
-  return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
+  return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd() + examples;
 }
