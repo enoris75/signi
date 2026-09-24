@@ -23,6 +23,9 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     // over a group, each conjunct keeping its own dative article (see `GROUP_SCOPED_SPECIFIERS`).
     case 'on':          return prepDet('auf', f, _case, plural);
     case 'between':     return prepDet(BETWEEN_PREP, f, _case, plural);
+    // P09-E32: `among` is `between`'s word here (dative for a place, accusative for a goal), a deliberate merger (English and French alone tell
+    // them apart); it is lifted off a group's conjuncts the same way.
+    case 'among':       return prepDet(BETWEEN_PREP, f, _case, plural);
     case 'against':     return prepDet('an', f, _case, plural);
     case 'through':
     default:            return prepDet('durch', f, _case, plural);

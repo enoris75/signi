@@ -7,6 +7,7 @@ import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
@@ -16,7 +17,7 @@ import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
 import { liftPreposition } from '../../functions/liftPreposition.js';
-import { BETWEEN_PREP } from './fr.consts.js';
+import { AMONG_PREP, BETWEEN_PREP } from './fr.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -33,7 +34,7 @@ import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
 import { elidesBefore } from './elidesBefore.js';
-import { CONSTITUENT_NEGATOR, FR_TEMPORAL, LOCATIVE_IDIOMS } from './fr.consts.js';
+import { CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, FR_TEMPORAL, LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { frStandard } from './frStandard.js';
 import { joinArt } from './joinArt.js';
@@ -352,10 +353,13 @@ export function complementsPhrase(
       };
       // `between` is said once over the group, not per conjunct: each conjunct is built as above and
       // its "entre" lifted off (P09-E1 D2) — "entre la maison et l'arbre".
-      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const relation = groupScopedRelation(type, c);
+      const scoped = relation === 'among' ? AMONG_PREP : relation ? BETWEEN_PREP : '';
       const group = coordinate(c.phrase, (np) => liftPreposition(
         tonicText(np)
         || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        // A plain goal on it, "va à la maison" (P09-E37) — unless the verb fixes its own ("se déplace vers le foyer").
+        || (type === 'direction' && !verbForms['direction_prep'] && directionIdiom(c, np, DIRECTION_IDIOMS))
         || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))), scoped));
       return scoped ? `${scoped} ${group}` : group;
     })

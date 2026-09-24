@@ -59,3 +59,10 @@ describe('spatialHead: on, between, against', () => {
     expect(spatialHead('against', false, MERCADO)).toBe('contra el');
   });
 });
+
+// P09-E32: `among` is `between`'s "entre" in Spanish, a deliberate merger.
+describe('spatialHead: among', () => {
+  test('is entre, as between', () => {
+    expect(spatialHead('among', true, MERCADO)).toBe('entre los');
+  });
+});

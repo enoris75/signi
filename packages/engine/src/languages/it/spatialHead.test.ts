@@ -49,3 +49,11 @@ describe('spatialHead: on, between, against', () => {
     expect(spatialHead('against', { ...CASA, definiteness: 'bare' }, false, 'casa')).toBe('contro');
   });
 });
+
+// P09-E32: `among` is `between`'s "tra" in Italian, a deliberate merger.
+describe('spatialHead: among', () => {
+  test('is tra with a plain article, as between', () => {
+    expect(spatialHead('among', CASA, true, 'case')).toBe(spatialHead('between', CASA, true, 'case'));
+    expect(spatialHead('among', CASA, false, 'casa')).toBe('tra la');
+  });
+});

@@ -7,6 +7,7 @@ import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isSeemingPredicateNoun } from '../../functions/isSeemingPredicateNoun.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
@@ -18,7 +19,7 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
-import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, PRIVATIVE, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
+import { CAUSE_PREP, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, PRIVATIVE, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
@@ -132,6 +133,11 @@ export function complementsPhrase(
       // gives every conjunct its own instead of sharing it: "at home and in the market".
       if (type === 'locative' && c.phrase.conjuncts.some((np) => locativeIdiom(c, np, LOCATIVE_IDIOMS))) {
         return coordinate(c.phrase, (np) => locativeIdiom(c, np, LOCATIVE_IDIOMS) ?? `${prep} ${npText(np)}`);
+      }
+      // The same for a plain goal (P09-E37): "goes home", which takes no preposition at all, and a
+      // group holding it gives the other conjuncts their own "to": "goes home and to the market".
+      if (type === 'direction' && c.phrase.conjuncts.some((np) => directionIdiom(c, np, DIRECTION_IDIOMS))) {
+        return coordinate(c.phrase, (np) => directionIdiom(c, np, DIRECTION_IDIOMS) ?? `${prep} ${npText(np)}`);
       }
       // A pronoun behind the preposition takes its oblique form and no article — "with him", "in
       // him", "like him", never "with the he" (A197 for the comitative and the instrumental, A203

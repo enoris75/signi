@@ -8,6 +8,7 @@ import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { superlativeLead } from '../../functions/superlativeLead.js';
 import { takesPredicateArticle } from '../../functions/takesPredicateArticle.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
@@ -26,7 +27,7 @@ import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
-import { CONSTITUENT_NEGATOR, IT_DI_BEFORE_PRONOUN, IT_MANNER_PREP, IT_TEMPORAL, LOCATIVE_IDIOMS } from './it.consts.js';
+import { CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, IT_DI_BEFORE_PRONOUN, IT_MANNER_PREP, IT_TEMPORAL, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
 import { artFor } from './artFor.js';
@@ -263,7 +264,10 @@ export function complementsPhrase(
       const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
       const group = coordinate(c.phrase, (np) => liftPreposition(
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') || tonicText(np) ||
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))), scoped));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) ||
+        // A plain goal on it, "va a casa" (P09-E37) — unless the verb fixes its own ("si muove verso la casa").
+        (type === 'direction' && !verbForms['direction_prep'] && directionIdiom(c, np, DIRECTION_IDIOMS)) ||
+        renderNP(np, headFor(headForms(np))), scoped));
       const phrase = scoped ? `${scoped} ${group}` : group;
       // "fa" follows the whole group, as English's "ago" does: "un momento fa", "un giorno e una
       // notte fa". Every other temporal relation is an adposition and was emitted by `headFor`.

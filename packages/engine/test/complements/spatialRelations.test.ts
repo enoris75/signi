@@ -260,3 +260,128 @@ describe('the toolbar names each relation by its adposition', () => {
     expect(specifierAll({ kind: 'path', value })).toEqual(labels);
   });
 });
+
+// P09-E32: `among`, a location inside a set of several landmarks — the plural sibling of `between`.
+// English and French have a word of their own (among, parmi); the other five merge it with
+// `between` (tra, zwischen, entre, の間), a deliberate merger pinned below as ja's `on` = `over` is.
+describe('among — inside a plural set', () => {
+  const houses = np('HOUSE', { number: 'plural' });
+
+  test('a place, on a plural', () => {
+    expect(at('among', houses, 'RUN')).toEqual({
+      en: 'the cat runs among the houses.',
+      it: 'il gatto corre tra le case.',
+      fr: 'le chat court parmi les maisons.',
+      de: 'der Kater läuft zwischen den Häusern.', // dative of place, as `between`
+      es: 'el gato corre entre las casas.',
+      pt: 'o gato corre entre as casas.',
+      ja: '猫は家の間で走ります。',
+    });
+    expect(at('among', houses)).toEqual({
+      en: 'the cat is among the houses.',
+      it: 'il gatto è tra le case.',
+      fr: 'le chat est parmi les maisons.',
+      de: 'der Kater ist zwischen den Häusern.',
+      es: 'el gato está entre las casas.',
+      pt: 'o gato está entre as casas.',
+      ja: '猫は家の間にいます。',
+    });
+  });
+
+  test('a route, on a plural', () => {
+    expect(via('among', houses)).toEqual({
+      en: 'the cat goes among the houses.',
+      it: 'il gatto va tra le case.',
+      fr: 'le chat va parmi les maisons.',
+      de: 'der Kater geht zwischen den Häusern.',
+      es: 'el gato va entre las casas.',
+      pt: 'o gato vai entre as casas.',
+      ja: '猫は家の間を行きます。',
+    });
+  });
+
+  test('a goal takes the German accusative, as `between` does', () => {
+    expect(toward('among', houses)).toEqual({
+      en: 'the cat jumps among the houses.',
+      it: 'il gatto salta tra le case.',
+      fr: 'le chat saute parmi les maisons.',
+      de: 'der Kater springt zwischen die Häuser.',
+      es: 'el gato salta entre las casas.',
+      pt: 'o gato pula entre as casas.',
+      ja: '猫は家の間へ跳びます。',
+    });
+  });
+
+  // The merger, deliberate: where a language has one word for both, `among` on a plural is exactly
+  // `between` on it. English and French keep them apart.
+  test('five languages merge it with between; English and French do not', () => {
+    const among = at('among', houses, 'RUN');
+    const between = at('between', houses, 'RUN');
+    for (const lang of ['it', 'de', 'es', 'pt', 'ja'] as const) expect(among[lang]).toBe(between[lang]);
+    expect(between.en).toBe('the cat runs between the houses.');
+    expect(between.fr).toBe('le chat court entre les maisons.');
+  });
+
+  test('not `in`: inside the set, not inside each house', () => {
+    expect(at('in', houses, 'RUN')).toMatchObject({
+      en: 'the cat runs in the houses.',
+      it: 'il gatto corre nelle case.',
+      fr: 'le chat court dans les maisons.',
+      ja: '猫は家で走ります。',
+    });
+  });
+
+  test('the determiner still declines', () => {
+    expect(at('among', np('HOUSE', { number: 'plural', definiteness: 'this' }), 'RUN')).toEqual({
+      en: 'the cat runs among these houses.',
+      it: 'il gatto corre tra queste case.',
+      fr: 'le chat court parmi ces maisons.',
+      de: 'der Kater läuft zwischen diesen Häusern.',
+      es: 'el gato corre entre estas casas.',
+      pt: 'o gato corre entre estas casas.',
+      ja: '猫はこの家の間で走ります。',
+    });
+    expect(at('among', np('HOUSE', { number: 'plural', definiteness: 'bare' }), 'RUN')).toMatchObject({
+      en: 'the cat runs among houses.',
+      fr: 'le chat court parmi des maisons.', // A196: no zero article after a preposition
+      de: 'der Kater läuft zwischen Häusern.',
+    });
+  });
+
+  test('a plural pronoun takes its tonic form, and Spanish its nominative', () => {
+    expect(at('among', np('FIRST_PERSON', { number: 'plural' }), 'RUN')).toEqual({
+      en: 'the cat runs among us.',
+      it: 'il gatto corre tra noi.',
+      fr: 'le chat court parmi nous.',
+      de: 'der Kater läuft zwischen uns.',
+      es: 'el gato corre entre nosotros.',
+      pt: 'o gato corre entre nós.',
+      ja: '猫は私たちの間で走ります。',
+    });
+  });
+
+  // Over a coordinated group it is said once, as `between` is (GROUP_SCOPED_SPECIFIERS): never
+  // "parmi la maison et parmi le marché".
+  test('a coordinated group is read whole', () => {
+    expect(at('among', and(np('HOUSE'), np('MARKET')), 'RUN')).toEqual({
+      en: 'the cat runs among the house and the market.',
+      it: 'il gatto corre tra la casa e il mercato.',
+      fr: 'le chat court parmi la maison et le marché.',
+      de: 'der Kater läuft zwischen dem Haus und dem Markt.',
+      es: 'el gato corre entre la casa y el mercado.',
+      pt: 'o gato corre entre a casa e o mercado.',
+      ja: '猫は家と市場の間で走ります。',
+    });
+    expect(via('among', and(np('HOUSE'), np('MARKET')))).toMatchObject({
+      fr: 'le chat va parmi la maison et le marché.',
+      de: 'der Kater geht zwischen dem Haus und dem Markt.',
+      ja: '猫は家と市場の間を行きます。',
+    });
+  });
+
+  test('the toolbar names it by its adposition', () => {
+    expect(specifierAll({ kind: 'path', value: 'among' })).toEqual({
+      en: 'among', it: 'tra', fr: 'parmi', de: 'zwischen', es: 'entre', pt: 'entre', ja: '〜の間で',
+    });
+  });
+});

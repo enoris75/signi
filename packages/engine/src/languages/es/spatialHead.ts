@@ -26,6 +26,9 @@ export function spatialHead(spec: PathSpecifier, plural: boolean, f: Record<stri
     // contact "contra" ("contra la pared").
     case 'on':          return prepDet('sobre', f, plural);
     case 'between':     return prepDet(BETWEEN_PREP, f, plural);
+    // P09-E32: `among` is `between`'s word here, a deliberate merger (English and French alone tell
+    // them apart); it is lifted off a group's conjuncts the same way.
+    case 'among':       return prepDet(BETWEEN_PREP, f, plural);
     case 'against':     return prepDet('contra', f, plural);
     case 'through':
     default:            return prepDet('por', f, plural);

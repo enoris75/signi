@@ -33,3 +33,12 @@ describe('spatialCase: on, between, against', () => {
     }
   });
 });
+
+// P09-E32: `among`'s zwischen is two-way, as between's.
+describe('spatialCase: among', () => {
+  test('dative for a place and a path, accusative for a goal', () => {
+    expect(spatialCase('among', 'locative')).toBe('dat');
+    expect(spatialCase('among', 'route')).toBe('dat');
+    expect(spatialCase('among', 'direction')).toBe('acc');
+  });
+});

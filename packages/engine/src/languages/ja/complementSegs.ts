@@ -6,13 +6,14 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { causeNegative } from '../../functions/causeNegative.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { directionIdiom } from '../../functions/directionIdiom.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { isPrivative } from '../../functions/isPrivative.js';
-import { AGAINST_PARTICLE, CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_DEGREE, JA_ESSIVE, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
@@ -205,6 +206,10 @@ export function complementSegs(
       // A verb that puts something *at* the place wins over it: its に above says the same thing
       // better ("lives through the house" is 家に住みます), as the existential already did.
       : type === 'locative' && spec === 'through' ? PATH_CITATION.through
+      // A hearth goal takes に, not the "towards" へ: 家に行きます, where one goes home (P09-E37, see
+      // `DIRECTION_IDIOMS`). A lone conjunct only — the particle follows the group, and 家と市場へ is two goals.
+      : type === 'direction' && c.phrase.conjuncts.length === 1 && directionIdiom(c, firstConjunct(c.phrase), DIRECTION_IDIOMS)
+        ? directionIdiom(c, firstConjunct(c.phrase), DIRECTION_IDIOMS)!
       // A noun can ask for に as a verb does (A220): a direction is no place an act goes on in, so one
       // runs 反対の方向に, never 反対の方向で ("running while standing in a direction"). Plain
       // containment only — a relation keeps its relational noun and で (反対の方向の下で).

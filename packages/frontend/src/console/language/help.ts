@@ -123,6 +123,7 @@ export const EXAMPLES: Record<string, string> = {
   on: "/subj ( cat ) /verb ( eat ) /loc ( house /on )",
   between: "/subj ( cat ) /verb ( run ) /loc ( house /between /and dog )",
   against: "/subj ( dog ) /verb ( run ) /loc ( house /against )",
+  among: "/subj ( cat ) /verb ( run ) /loc ( house /pl /among )",
   at: "/subj ( man ) /verb ( run ) /time ( day /this /at )",
   ago: "/subj ( man ) /verb ( run ) /time ( moment /a /ago )",
   until: "/subj ( man ) /verb ( run ) /time ( night /until )",

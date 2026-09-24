@@ -60,3 +60,11 @@ describe('spatialHead: on, between, against', () => {
     expect(spatialHead('over', MARCHE, false, 'marché', 'locative')).toBe('au-dessus du');
   });
 });
+
+// P09-E32: `among` is French's own "parmi", apart from `between`'s "entre", and contracts with nothing.
+describe('spatialHead: among', () => {
+  test('is parmi', () => {
+    expect(spatialHead('among', ANGE, true, 'anges', 'locative')).toBe('parmi les');
+    expect(spatialHead('among', ANGE, false, 'ange', 'route')).toBe("parmi l'");
+  });
+});

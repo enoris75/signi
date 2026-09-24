@@ -123,6 +123,8 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
   on: 'on',
   between: 'between',
   against: 'against',
+  // P09-E32. Said once over a plural or a group, as `between` is.
+  among: 'among',
 };
 
 /**
@@ -140,6 +142,10 @@ export const GOAL_PREP: Record<PathSpecifier, string> = { ...PATH_PREP, in: 'int
 // The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
 // English says "at home", not "in the home".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'at home' };
+
+// The same noun's idiom as a plain goal (see `directionIdiom`, P09-E37): "goes home", with no
+// preposition at all, not "goes to the home".
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'home' };
 
 /**
  * The true English modal auxiliaries. They are defective — no infinitive, no participle,

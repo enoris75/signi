@@ -165,6 +165,8 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
   on: 'の上',
   between: 'の間',
   against: '',
+  // P09-E32: `among` is `between`'s の間, a deliberate merger — 家の間で is "among the houses".
+  among: 'の間',
 };
 
 /**
@@ -175,6 +177,15 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
  * the traversal and not the relation (壁を行きます).
  */
 export const AGAINST_PARTICLE = 'に';
+
+/**
+ * The particle a hearth noun takes in place of the goal's へ, keyed by concept id (see
+ * `directionIdiom`, P09-E37) — the Japanese side of the other engines' `DIRECTION_IDIOMS`. Japanese
+ * needs no idiom for the noun itself (家 is already article-less), only the particle: 家に帰る / 家に
+ * 行く is where one goes home to, where 家へ is "towards the house". A lone conjunct only, since the
+ * particle follows the whole group: 家と市場へ keeps its へ.
+ */
+export const DIRECTION_IDIOMS: Record<string, string> = { HOME: 'に' };
 
 /**
  * The same relations as they are **cited** — named out of a sentence, for a label (see
@@ -198,6 +209,7 @@ export const PATH_CITATION: Record<PathSpecifier, string> = {
   on: 'の上で',
   between: 'の間で',
   against: 'に',
+  among: 'の間で',
 };
 
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
@@ -212,6 +224,7 @@ export const REL_NOUN_READING: Record<PathSpecifier, string> = {
   on: 'のうえ',
   between: 'のあいだ',
   against: '',
+  among: 'のあいだ',
 };
 
 // Coordinating conjunctions as Japanese connective adverbs, placed after the first clause's 、.
