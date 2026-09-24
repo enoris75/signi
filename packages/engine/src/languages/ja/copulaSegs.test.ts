@@ -235,6 +235,16 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(bigHappy, 'present', true, 'stem'))).toBe('大きくも幸せでもないでい');
       expect(text(copulaSegs(complement(group('or', np(OOKII), np(SHIAWASE))), 'past', false, 'tara'))).toBe('大きいか幸せだったら');
     });
+
+    // A361: before まで and 前に a "neither … nor" is reached as a single negative is (A345).
+    test('a reach "neither … nor" is the change of state 〜もなくなる', () => {
+      const bigHappy = complement(el(np(OOKII), np(SHIAWASE)));
+      expect(text(copulaSegs(bigHappy, 'present', true, 'reach'))).toBe('大きくも幸せでもなくなる');
+      expect(text(copulaSegs(bigHappy, 'past', true, 'reach'))).toBe('大きくも幸せでもなくなった');
+      expect(text(copulaSegs(complement(el(np(DENSETSU), np(SHIAWASE))), 'present', true, 'reach'))).toBe('伝説でも幸せでもなくなる');
+      expect(text(copulaSegs(complement(el(np(OOKII), np(TSUKARETA))), 'present', true, 'reach'))).toBe('大きくも疲れてもいなくなる');
+      expect(text(copulaSegs(bigHappy, 'present', false, 'reach'))).toBe('大きくて幸せになる');
+    });
   });
 
   // An infinitive citation closes in the plain written style, as a verb's closes on its dictionary form.

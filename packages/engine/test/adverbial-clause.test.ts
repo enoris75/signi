@@ -704,7 +704,7 @@ describe('known bugs: a Japanese negated predicate before まで and 前に is n
 // "neither … nor" in its prenominal form: 犬が大きくも幸せでもないまで, a state holding where まで and 前に
 // want one reached. The negated coordination reached is 〜も〜もなくなる, "until the dog is neither big
 // nor happy any more". 時に keeps the plain negative. A negated lowered degree or superlative
-// (〜わけではないまで) is left to the fixer; not pinned.
+// (〜わけではないまで) keeps its prenominal わけではない, by ruling.
 describe('known bugs: a Japanese "neither … nor" before まで and 前に is not a change of state (A361)', () => {
   const both = (...conjuncts: string[]) => ({ phrase: { conjuncts: conjuncts.map((c) => np(c)), conjunction: 'and' } });
   const runs = (conjunction: SubordinatingConjunction, predicative: ReturnType<typeof both>, negative = true): PhrasePlan => ({
@@ -716,13 +716,19 @@ describe('known bugs: a Japanese "neither … nor" before まで and 前に is n
     },
   });
 
-  test.fails('an い- and a な-adjective, until and before', () => {
+  test('an い- and a な-adjective, until and before', () => {
     expect(say(runs('until', both('BIG', 'HAPPY')), 'ja')).toBe('猫は犬が大きくも幸せでもなくなるまで走ります。');
     expect(say(runs('before', both('BIG', 'HAPPY')), 'ja')).toBe('猫は犬が大きくも幸せでもなくなる前に走ります。');
   });
 
-  test.fails('two nouns', () => {
+  test('two nouns', () => {
     expect(say(runs('until', both('FRIEND', 'LEGEND')), 'ja')).toBe('猫は犬が友達でも伝説でもなくなるまで走ります。');
+  });
+
+  test('the nouns before, and a ている state last keeps the mechanical いなくなる', () => {
+    expect(say(runs('before', both('FRIEND', 'LEGEND')), 'ja')).toBe('猫は犬が友達でも伝説でもなくなる前に走ります。');
+    expect(say(runs('until', both('BIG', 'TIRED')), 'ja')).toBe('猫は犬が大きくも疲れてもいなくなるまで走ります。');
+    expect(say(runs('when', both('FRIEND', 'LEGEND')), 'ja')).toBe('猫は犬が友達でも伝説でもない時に走ります。');
   });
 
   test('regression: the affirmative, the other conjunctions, and the other six', () => {

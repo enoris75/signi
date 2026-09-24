@@ -47,3 +47,19 @@ throwaway copy of the tree; the rest of `adverbial-clause.test.ts` stayed green.
 | **Test** | `adverbial-clause.test.ts` → *known bugs: a Japanese "neither … nor" before まで and 前に is not a change of state (A361)* (2 `test.fails`: the い- and な-adjective pair under まで and 前に, the noun pair; plus a regression test for the affirmative, 時に and the other six) |
 
 Found from A345's resolution (its "Not touched" list), 2026-09-24.
+
+## Resolved
+
+2026-09-24. The negated coordination in
+[ja/copulaSegs.ts](../../../packages/engine/src/languages/ja/copulaSegs.ts) closes `reach` on the
+change of state of its negative tail, with なる taking the tense: the existential ない → なくなる
+(大きくも幸せでもなくなる, 友達でも伝説でもなくなる, past 〜なくなった). **Ruled:** a ている or a verb
+conjunct last keeps the mechanical change of the tail it already closes on, いない → いなくなる
+(大きくも疲れてもいなくなるまで) and しない → しなくなる; the coordination is not rewritten. **Not done:** a
+negated lowered degree or superlative keeps its prenominal わけではない before まで and 前に
+(それほど大きくないわけではないまで, 最も大きいわけではないまで), by ruling. 時に keeps the plain negative.
+
+Tests: the two `test.fails` in `adverbial-clause.test.ts` (*known bugs: a Japanese "neither … nor"
+before まで and 前に is not a change of state (A361)*) now pass, plus a new case for the nouns before 前に,
+the ている state last (the ruling) and the nouns under 時に; `copulaSegs.test.ts` gains a reach
+"neither … nor" case (present, past, a noun first, a state last, and the affirmative).
