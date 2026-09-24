@@ -1,6 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { VOWEL_START } from './fr.consts.js';
 import { aDet } from './aDet.js';
 import { deDet } from './deDet.js';
@@ -25,8 +25,12 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   // An object is never bare, with a preposition or without one: "clique sur des boutons" (A149). A
   // possessive takes the article's place ("sur son bouton").
   const possessive = isPronominalPossessor(np.possessor);
+  // A head that keeps its determiner beside a detached possessive takes "de" as it would without the
+  // possessive, built from its own forms, so "de" + "des" is "de": "dépend de conditions à moi", as
+  // the complements do since A326 (A342).
+  const ownDe = prep === 'de' ? (plural: boolean, lead: string) => deDet(ownHeadForms(np), plural, lead) : undefined;
   return renderNP(np, (plural, lead) =>
     prep === 'à' ? aDet(head, plural, lead) : prep === 'de' ? deDet(head, plural, lead)
     : possessive ? prepDet(prep, head, plural, lead)
-    : `${prep} ${partitiveArtFor(head, plural, lead)}`);
+    : `${prep} ${partitiveArtFor(head, plural, lead)}`, ownDe);
 }
