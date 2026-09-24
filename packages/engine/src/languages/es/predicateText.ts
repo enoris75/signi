@@ -3,6 +3,7 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNou
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
 import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
+import { negatorLead } from '../../functions/negatorLead.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
@@ -187,7 +188,12 @@ export function predicateText(
   // modal the main verb IS the finite one, and `verbNegative` already carries it.
   // A negative adverb on the main verb denies the group the modal governs, not the modal: "quiere
   // no comer nunca" — the cat wants to never eat — not "nunca quiere comer" (A236).
-  const governedNo = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0 ? 'no' : '';
+  // An adverb that is its own "no" with a word in front ("ya no") leads the negator it would otherwise
+  // repeat, and is not said after the verb: "puede ya no correr", "ya no correr", "ya no corras"
+  // (`negatorLead`, localization B84).
+  const lead = negatorLead(modifier);
+  const governedNo = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0
+    ? [lead, 'no'].filter(Boolean).join(' ') : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
@@ -284,7 +290,7 @@ export function predicateText(
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo || leadsNo ? modifierText : '';
-  const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo ? '' : modifierText;
+  const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo || (!!lead && governedNo !== '') ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
@@ -306,10 +312,11 @@ export function predicateText(
       ? (copulaVerb.forms['base'] ?? conjugated)
       : (imperativeForm('es', nonReflexiveVerb(copulaVerb), moodPN(subjectForms), impNeg) ?? conjugated);
     const enclitic = register === 'instruction' || !impNeg;
-    const impVerb = enclitic
+    const negated = enclitic
       ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${objectClitic}`)}`
       : esCliticize([reflexive, objectClitic].filter(Boolean).join(' '), `no ${impForm}`);
-    return [impVerb, modifierText, directObjectText, complementsText]
+    const impVerb = impNeg && lead ? `${lead} ${negated}` : negated;
+    return [impVerb, lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -325,8 +332,8 @@ export function predicateText(
     // A negative link ("sigue sin correr", A315) is the clause's negator, so it writes no "no" of its
     // own, and a negative word after it concords with it: "sin comer ninguna comida".
     const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
-    const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
-    return [infVerb, modifierText, directObjectText, complementsText]
+    const infVerb = `${infNeg ? (lead ? `${lead} no ` : 'no ') : ''}${esEnclitic(inf, objectClitic)}`;
+    return [infVerb, infNeg && lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }

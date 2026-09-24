@@ -559,9 +559,13 @@ export const adverbs: ConceptSeed[] = [
       it: { base: 'più', subtype: 'frequency', polarity: 'negative' },
       fr: { base: 'plus', subtype: 'frequency', polarity: 'negative' },
       de: { base: 'nicht mehr', subtype: 'frequency', polarity: 'negative' },
-      es: { base: 'ya no', subtype: 'frequency', polarity: 'negative' },
+      // Spanish and Portuguese say it with the negator itself, behind "ya" / "já": where the clause
+      // writes its own "no" (an infinitive, a command, the group a modal governs) the lead stands in
+      // front of it and the adverb is not said again — "ya no correr", never "no correr ya no"
+      // (`negator_lead`, localization B84).
+      es: { base: 'ya no', subtype: 'frequency', polarity: 'negative', negator_lead: 'ya' },
       ja: { base: 'もう', subtype: 'frequency', polarity: 'negative' },
-      pt: { base: 'já não', subtype: 'frequency', polarity: 'negative' },
+      pt: { base: 'já não', subtype: 'frequency', polarity: 'negative', negator_lead: 'já' },
     },
   },
   // ── P09's focus adverbs (localization B67) ───────────────────────
