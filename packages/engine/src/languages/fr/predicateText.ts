@@ -116,6 +116,10 @@ export function predicateText(
   // A long -ment adverb follows it ("a mangé lentement"). After a FINITE verb it is already in place
   // ("mange bien la souris"), so the class only matters where a non-finite verb is built (A155).
   const preInfinitive = modifier?.forms['pre_nonfinite'] === '1' ? modifierText : '';
+  // In a passive the verb it modifies is the participle, so it goes there ("est bien mangée", "a été
+  // bien mangée", "doit être bien mangée"), not before "être" / "été", where "bien" is the assertive
+  // "indeed" (A294). The auxiliary groups below take none of their own.
+  const auxiliaryPreInfinitive = passive ? '' : preInfinitive;
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
   // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne" — and for an
@@ -257,7 +261,7 @@ export function predicateText(
     // negation ("je dois ne pas toujours aller").
     const { finite, finiteAdverb, tail } = modalGroupFr(
       modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency && !governedAdverb ? modifierText : '', infinitiveClitic,
-      precedingObjectForms ?? cliticObjectForms, preInfinitive,
+      precedingObjectForms ?? cliticObjectForms, auxiliaryPreInfinitive,
       (word) => negateNonFinite(concordDrops && !governedNeg ? '' : governedNegator, word),
       governedNeg ? (group) => negateNonFinite(concordDrops ? '' : governedNegator, group) : undefined,
     );
@@ -269,7 +273,7 @@ export function predicateText(
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
     const { finite, tail } = aspectVerbFr(
-      finiteVerb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic, preInfinitive,
+      finiteVerb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic, auxiliaryPreInfinitive,
     );
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
@@ -283,11 +287,12 @@ export function predicateText(
   // The participe closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   // A frequency adverb belongs between the finite verb and the participe ("n'est jamais mangée"),
   // which the aspect and modal branches above already arrange for their own tails; the simple
-  // tenses put it in the trailing slot, so the passive takes it back into the group.
+  // tenses put it in the trailing slot, so the passive takes it back into the group. A short adverb
+  // stands right before the participe on every tense ("est bien mangée", "a été bien mangée", A294).
   if (passive) {
     const frequencyInGroup = isFrequency ? effectiveMod : '';
-    effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticipleText].filter(Boolean).join(' ');
-    if (isFrequency) effectiveMod = '';
+    effectiveVerb = [effectiveVerb, frequencyInGroup, preInfinitive, passiveParticipleText].filter(Boolean).join(' ');
+    if (isFrequency || preInfinitive) effectiveMod = '';
   }
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
@@ -297,13 +302,14 @@ export function predicateText(
   // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
   const negativeAdverb = isNegativeAdverb(modifier);
   const infinitiveMod = negativeAdverb || preInfinitive ? '' : modifierText;
-  // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée").
+  // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée"), a short
+  // adverb before the participe ("être bien mangée", A294).
   const infinitiveGroup = passive
-    ? [finiteVerb.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
+    ? [finiteVerb.forms['base'] ?? '', preInfinitive, passiveParticipleText].filter(Boolean).join(' ')
     : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
-    const group = [preInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
+    const group = [auxiliaryPreInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
     if (!verbNegative && !aucun && !negativeAdverb) return group;
     return negateNonFinite(negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '', group);
   };
