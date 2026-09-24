@@ -305,7 +305,10 @@ export function predicateText(
   // consumir"); an object pronoun attaches after it ("consumirlo", "no consumirlo").
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the participio ("ser comida").
-    const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
+    // A governor that takes the gerund writes it in the infinitive's place: "sigue corriendo",
+    // "sigue comiéndola" (P09-E42, `complement_form`).
+    const head = verbPhrase.gerundComplement ? (copulaVerb.forms['gerund'] ?? copulaVerb.forms['base']) : copulaVerb.forms['base'];
+    const inf = [head ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]

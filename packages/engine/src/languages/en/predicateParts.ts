@@ -269,8 +269,12 @@ function predicateWords(
       const group = [...chain, governedNot, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
       return ['', negateVerb ? `not ${to}${group}` : `${to}${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
     }
-    const group = verbGroupInfinitive(verb.forms, aspect);
-    const verbText = negateVerb ? `not ${to}${group}` : `${to}${group}`;
+    // A governor that takes the gerund writes the -ing form with no "to": "stops running", "continues
+    // eating the food", "stops not running" (P09-E42).
+    const group = verbPhrase.gerundComplement ? (verb.forms['gerund'] ?? verbGroupInfinitive(verb.forms, aspect)) : verbGroupInfinitive(verb.forms, aspect);
+    const verbText = verbPhrase.gerundComplement
+      ? (negateVerb ? `not ${group}` : group)
+      : negateVerb ? `not ${to}${group}` : `${to}${group}`;
     if (isFrequency && modifierText && negateVerb) {
       return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
     }

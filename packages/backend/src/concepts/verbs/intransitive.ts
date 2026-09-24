@@ -1208,6 +1208,168 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // P09's *stop* and *continue* in their aspectual use (P09-E42): a verb whose complement is another
+  // verb's activity, "stops running", "continues running". Their plain uses (*stop the car*,
+  // *continue the work*) are B84's STOP and CONTINUE; the words differ (*smettere / fermare*, *dejar
+  // de / detener*, やめる / 止める), so these are concepts of their own (P09 D2). Each takes an
+  // infinitive complement, and each language spells it its own way, which the lexeme names:
+  //   - `complement_form: 'gerund'` — English writes the -ing form with no "to" ("stops running"),
+  //     and Spanish *seguir* its gerund ("sigue corriendo").
+  //   - `infinitive_link` — the Romance link as TRY's (*smettere di, arrêter de, dejar de, parar de;
+  //     continuare a, continuer à, continuar a*), and Japanese やめる's のを (走るのをやめる).
+  //   - `complement_particle` — German *weitermachen* is not a verb + infinitive but the particle
+  //     *weiter* on the governed verb: "der Kater läuft weiter" (`fuseGovernedVerb`).
+  //   - `ja_complement: 'stem'` — Japanese 続ける compounds onto the governed verb's stem: 走り続ける.
+  {
+    id: 'STOP_DOING',
+    role: 'verb',
+    // Takes an infinitive complement as its object (P09-E12 D9): the builder's subordinate-clause menu offers *to*.
+    clauseObject: 'infinitive',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to cease an activity',
+    synonym: 'cease',
+    // "not to continue acting": the negation of CONTINUE_DOING, whose own gloss does not cite this
+    // one. "No longer to act" (NO_LONGER) would be the closer gloss, but it meets B84's defect in
+    // Spanish and Portuguese ("no actuar ya no").
+    definition: infinitiveGloss('CONTINUE_DOING', { negative: true, infinitive: 'ACT' }),
+    emoji: '⏹️',
+    forms: {
+      en: {
+        base: 'stop', complement_form: 'gerund',
+        '1sg_present': 'stop', '2sg_present': 'stop', '3sg_present': 'stops',
+        '1pl_present': 'stop', '2pl_present': 'stop', '3pl_present': 'stop',
+        past: 'stopped',
+      },
+      it: {
+        base: 'smettere', infinitive_link: 'di',
+        '1sg_present': 'smetto', '2sg_present': 'smetti', '3sg_present': 'smette',
+        '1pl_present': 'smettiamo', '2pl_present': 'smettete', '3pl_present': 'smettono',
+        '1sg_past': 'smisi', '2sg_past': 'smettesti', '3sg_past': 'smise',
+        '1pl_past': 'smettemmo', '2pl_past': 'smetteste', '3pl_past': 'smisero',
+        '1sg_future': 'smetterò', '2sg_future': 'smetterai', '3sg_future': 'smetterà',
+        '1pl_future': 'smetteremo', '2pl_future': 'smetterete', '3pl_future': 'smetteranno',
+      },
+      fr: {
+        base: 'arrêter', infinitive_link: 'de',
+        '1sg_present': 'arrête', '2sg_present': 'arrêtes', '3sg_present': 'arrête',
+        '1pl_present': 'arrêtons', '2pl_present': 'arrêtez', '3pl_present': 'arrêtent',
+        '1sg_past': 'arrêtai', '2sg_past': 'arrêtas', '3sg_past': 'arrêta',
+        '1pl_past': 'arrêtâmes', '2pl_past': 'arrêtâtes', '3pl_past': 'arrêtèrent',
+        '1sg_future': 'arrêterai', '2sg_future': 'arrêteras', '3sg_future': 'arrêtera',
+        '1pl_future': 'arrêterons', '2pl_future': 'arrêterez', '3pl_future': 'arrêteront',
+      },
+      de: {
+        // Separable (hört … auf, aufgehört), with the zu-infinitive after it: "hört auf zu laufen".
+        base: 'aufhören', particle: 'auf',
+        '1sg_present': 'höre', '2sg_present': 'hörst', '3sg_present': 'hört',
+        '1pl_present': 'hören', '2pl_present': 'hört', '3pl_present': 'hören',
+        '1sg_past': 'hörte', '2sg_past': 'hörtest', '3sg_past': 'hörte',
+        '1pl_past': 'hörten', '2pl_past': 'hörtet', '3pl_past': 'hörten',
+      },
+      es: {
+        base: 'dejar', infinitive_link: 'de',
+        '1sg_present': 'dejo', '2sg_present': 'dejas', '3sg_present': 'deja',
+        '1pl_present': 'dejamos', '2pl_present': 'dejáis', '3pl_present': 'dejan',
+        '1sg_past': 'dejé', '2sg_past': 'dejaste', '3sg_past': 'dejó',
+        '1pl_past': 'dejamos', '2pl_past': 'dejasteis', '3pl_past': 'dejaron',
+        '1sg_future': 'dejaré', '2sg_future': 'dejarás', '3sg_future': 'dejará',
+        '1pl_future': 'dejaremos', '2pl_future': 'dejaréis', '3pl_future': 'dejarán',
+      },
+      ja: {
+        // In kana: 止める is STOP's (B84), and やめる is how the aspectual verb is written. It takes
+        // its clause nominalized with の, not こと: 走るのをやめる.
+        base: 'やめる', infinitive_link: 'のを',
+        masu_present: 'やめます',
+      },
+      pt: {
+        base: 'parar', infinitive_link: 'de',
+        '1sg_present': 'paro', '2sg_present': 'para', '3sg_present': 'para',
+        '1pl_present': 'paramos', '2pl_present': 'param', '3pl_present': 'param',
+        '1sg_past': 'parei', '2sg_past': 'parou', '3sg_past': 'parou',
+        '1pl_past': 'paramos', '2pl_past': 'pararam', '3pl_past': 'pararam',
+        '1sg_future': 'pararei', '2sg_future': 'parará', '3sg_future': 'parará',
+        '1pl_future': 'pararemos', '2pl_future': 'pararão', '3pl_future': 'pararão',
+      },
+    },
+  },
+
+  {
+    id: 'CONTINUE_DOING',
+    role: 'verb',
+    // Takes an infinitive complement as its object (P09-E12 D9): the builder's subordinate-clause menu offers *to*.
+    clauseObject: 'infinitive',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to go on with an activity',
+    synonym: 'go on',
+    // "still to act", KEEP's shape ("still to have objects") on ACT.
+    definition: infinitiveGloss('ACT', { modifier: 'STILL' }),
+    emoji: '⏩',
+    forms: {
+      en: {
+        base: 'continue', complement_form: 'gerund',
+        '1sg_present': 'continue', '2sg_present': 'continue', '3sg_present': 'continues',
+        '1pl_present': 'continue', '2pl_present': 'continue', '3pl_present': 'continue',
+        past: 'continued',
+      },
+      it: {
+        base: 'continuare', infinitive_link: 'a',
+        '1sg_present': 'continuo', '2sg_present': 'continui', '3sg_present': 'continua',
+        '1pl_present': 'continuiamo', '2pl_present': 'continuate', '3pl_present': 'continuano',
+        '1sg_past': 'continuai', '2sg_past': 'continuasti', '3sg_past': 'continuò',
+        '1pl_past': 'continuammo', '2pl_past': 'continuaste', '3pl_past': 'continuarono',
+        '1sg_future': 'continuerò', '2sg_future': 'continuerai', '3sg_future': 'continuerà',
+        '1pl_future': 'continueremo', '2pl_future': 'continuerete', '3pl_future': 'continueranno',
+      },
+      fr: {
+        base: 'continuer', infinitive_link: 'à',
+        '1sg_present': 'continue', '2sg_present': 'continues', '3sg_present': 'continue',
+        '1pl_present': 'continuons', '2pl_present': 'continuez', '3pl_present': 'continuent',
+        '1sg_past': 'continuai', '2sg_past': 'continuas', '3sg_past': 'continua',
+        '1pl_past': 'continuâmes', '2pl_past': 'continuâtes', '3pl_past': 'continuèrent',
+        '1sg_future': 'continuerai', '2sg_future': 'continueras', '3sg_future': 'continuera',
+        '1pl_future': 'continuerons', '2pl_future': 'continuerez', '3pl_future': 'continueront',
+      },
+      de: {
+        // The picker's word is weitermachen; in a clause the particle rides the governed verb
+        // (`complement_particle`): "läuft weiter", "ist weitergelaufen".
+        base: 'weitermachen', particle: 'weiter', complement_particle: 'weiter',
+        '1sg_present': 'mache', '2sg_present': 'machst', '3sg_present': 'macht',
+        '1pl_present': 'machen', '2pl_present': 'macht', '3pl_present': 'machen',
+        '1sg_past': 'machte', '2sg_past': 'machtest', '3sg_past': 'machte',
+        '1pl_past': 'machten', '2pl_past': 'machtet', '3pl_past': 'machten',
+      },
+      es: {
+        // seguir + gerund (`complement_form`): "sigue corriendo". e → i under the stress, and gu → g
+        // before o (sigo).
+        base: 'seguir', complement_form: 'gerund',
+        '1sg_present': 'sigo', '2sg_present': 'sigues', '3sg_present': 'sigue',
+        '1pl_present': 'seguimos', '2pl_present': 'seguís', '3pl_present': 'siguen',
+        '1sg_past': 'seguí', '2sg_past': 'seguiste', '3sg_past': 'siguió',
+        '1pl_past': 'seguimos', '2pl_past': 'seguisteis', '3pl_past': 'siguieron',
+        '1sg_future': 'seguiré', '2sg_future': 'seguirás', '3sg_future': 'seguirá',
+        '1pl_future': 'seguiremos', '2pl_future': 'seguiréis', '3pl_future': 'seguirán',
+      },
+      ja: {
+        // Compounds onto the governed verb's stem (`ja_complement`): 走り続ける, 走り続けます.
+        base: '続ける', ja_complement: 'stem',
+        reading: 'つづける',
+        masu_present: '続けます',
+        masu_present_reading: 'つづけます',
+      },
+      pt: {
+        base: 'continuar', infinitive_link: 'a',
+        '1sg_present': 'continuo', '2sg_present': 'continua', '3sg_present': 'continua',
+        '1pl_present': 'continuamos', '2pl_present': 'continuam', '3pl_present': 'continuam',
+        '1sg_past': 'continuei', '2sg_past': 'continuou', '3sg_past': 'continuou',
+        '1pl_past': 'continuamos', '2pl_past': 'continuaram', '3pl_past': 'continuaram',
+        '1sg_future': 'continuarei', '2sg_future': 'continuará', '3sg_future': 'continuará',
+        '1pl_future': 'continuaremos', '2pl_future': 'continuarão', '3pl_future': 'continuarão',
+      },
+    },
+  },
+
   // The inchoative half of the pair CHANGE heads, as BEGIN is START's: CHANGE is "to make different"
   // (ja 変える), this is "to become different" (ja 変わる), so an object-less clause no longer comes out
   // as "その動作は変えます". It waited on the German reflexive (localization C17): German has no labile

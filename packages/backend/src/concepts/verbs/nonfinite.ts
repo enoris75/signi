@@ -601,6 +601,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     ja: { te: '必要として', te_reading: 'ひつようとして', nai: '必要としない', nai_reading: 'ひつようとしない', passive: '必要とされる', passive_reading: 'ひつようとされる' },
   },
   // versuchen is inseparable, so its participle has no ge-.
+  // P09-E42's aspectual verbs take avere / avoir / haben. German weitermachen's participle is only
+  // its own: in a clause the particle rides the governed verb, which brings its own participle.
+  STOP_DOING: {
+    en: { gerund: 'stopping', participle: 'stopped' },
+    it: { gerund: 'smettendo', participle: 'smesso' },
+    fr: { participle: 'arrêté' }, de: { participle: 'aufgehört' },
+    es: { gerund: 'dejando', participle: 'dejado' },
+    pt: { gerund: 'parando', participle: 'parado' },
+    ja: { te: 'やめて', nai: 'やめない', passive: 'やめられる' },
+  },
+  CONTINUE_DOING: {
+    en: { gerund: 'continuing', participle: 'continued' },
+    it: { gerund: 'continuando', participle: 'continuato' },
+    fr: { participle: 'continué' }, de: { participle: 'weitergemacht' },
+    es: { gerund: 'siguiendo', participle: 'seguido' },
+    pt: { gerund: 'continuando', participle: 'continuado' },
+    ja: { te: '続けて', te_reading: 'つづけて', nai: '続けない', nai_reading: 'つづけない', passive: '続けられる', passive_reading: 'つづけられる' },
+  },
   TRY: {
     en: { gerund: 'trying', participle: 'tried' },
     it: { gerund: 'provando', participle: 'provato' },

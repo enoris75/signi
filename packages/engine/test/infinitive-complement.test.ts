@@ -478,3 +478,170 @@ describe('an infinitive controlled by a dative object (P09-E43)', () => {
     });
   });
 });
+
+// P09-E42. The aspectual verbs over another verb's activity. Each language spells the complement its
+// own way, and the governing lexeme names it: English and Spanish *seguir* take the gerund
+// (`complement_form`), the Romance links are TRY's (`infinitive_link`), Japanese やめる takes a の
+// clause (its link, のを), German *weiter-* rides the governed verb as its particle and Japanese 続ける
+// compounds onto its stem (`fuseGovernedVerb`). TRY, NEED and DESIRE do not move.
+describe('stop doing, continue doing (P09-E42)', () => {
+  const doing = (verb: string, extra: Parameters<typeof clause>[2] = {}, subject = np('CAT')) =>
+    sayAll(clause(subject, verb, { infinitiveComplement: acts('RUN'), ...extra }));
+
+  test('the cat stops running', () => {
+    expect(doing('STOP_DOING')).toEqual({
+      en: 'the cat stops running.',
+      it: 'il gatto smette di correre.',
+      fr: 'le chat arrête de courir.',
+      de: 'der Kater hört auf zu laufen.',
+      es: 'el gato deja de correr.',
+      ja: '猫は走るのをやめます。',
+      pt: 'o gato para de correr.',
+    });
+  });
+
+  test('the cat continues running', () => {
+    expect(doing('CONTINUE_DOING')).toEqual({
+      en: 'the cat continues running.',
+      it: 'il gatto continua a correre.',
+      fr: 'le chat continue à courir.',
+      de: 'der Kater läuft weiter.',
+      es: 'el gato sigue corriendo.',
+      ja: '猫は走り続けます。',
+      pt: 'o gato continua a correr.',
+    });
+  });
+
+  test('the past', () => {
+    expect(doing('STOP_DOING', { verbPhrase: { tense: 'past' } })).toEqual({
+      en: 'the cat stopped running.',
+      it: 'il gatto smise di correre.',
+      fr: 'le chat arrêta de courir.',
+      de: 'der Kater hörte auf zu laufen.',
+      es: 'el gato dejó de correr.',
+      ja: '猫は走るのをやめました。',
+      pt: 'o gato parou de correr.',
+    });
+    expect(doing('CONTINUE_DOING', { verbPhrase: { tense: 'past' } })).toEqual({
+      en: 'the cat continued running.',
+      it: 'il gatto continuò a correre.',
+      fr: 'le chat continua à courir.',
+      de: 'der Kater lief weiter.',
+      es: 'el gato siguió corriendo.',
+      ja: '猫は走り続けました。',
+      pt: 'o gato continuou a correr.',
+    });
+  });
+
+  test('negated', () => {
+    expect(doing('STOP_DOING', { verbPhrase: { negative: true } })).toEqual({
+      en: 'the cat does not stop running.',
+      it: 'il gatto non smette di correre.',
+      fr: "le chat n'arrête pas de courir.",
+      de: 'der Kater hört nicht auf zu laufen.',
+      es: 'el gato no deja de correr.',
+      ja: '猫は走るのをやめません。',
+      pt: 'o gato não para de correr.',
+    });
+    expect(doing('CONTINUE_DOING', { verbPhrase: { negative: true } })).toEqual({
+      en: 'the cat does not continue running.',
+      it: 'il gatto non continua a correre.',
+      fr: 'le chat ne continue pas à courir.',
+      de: 'der Kater läuft nicht weiter.',
+      es: 'el gato no sigue corriendo.',
+      ja: '猫は走り続けません。',
+      pt: 'o gato não continua a correr.',
+    });
+  });
+
+  test('the governed verb brings its object: the gerund takes a clitic, German declines it before weiter', () => {
+    const eats = { infinitiveComplement: acts('EAT', { directObject: np('FOOD') }) };
+    expect(doing('CONTINUE_DOING', eats, np('CAT', { number: 'plural' }))).toEqual({
+      en: 'the cats continue eating the food.',
+      it: 'i gatti continuano a mangiare il cibo.',
+      fr: 'les chats continuent à manger la nourriture.',
+      de: 'die Kater fressen das Essen weiter.',
+      es: 'los gatos siguen comiendo la comida.',
+      ja: '猫は食べ物を食べ続けます。',
+      pt: 'os gatos continuam a comer a comida.',
+    });
+    expect(doing('STOP_DOING', eats, np('CAT', { number: 'plural' }))).toMatchObject({
+      en: 'the cats stop eating the food.', de: 'die Kater hören auf, das Essen zu fressen.', ja: '猫は食べ物を食べるのをやめます。',
+    });
+    const eatsIt = { infinitiveComplement: acts('EAT', { directObject: np('THIRD_PERSON', { antecedent: 'FOOD' }) }) };
+    expect(doing('CONTINUE_DOING', eatsIt)).toMatchObject({
+      en: 'the cat continues eating it.', es: 'el gato sigue comiéndola.', de: 'der Kater frisst es weiter.', ja: '猫はそれを食べ続けます。',
+    });
+  });
+
+  test('the compound past takes the governed verb\'s auxiliary in German', () => {
+    expect(doing('CONTINUE_DOING', { verbPhrase: { aspect: 'resultative' } }, np('CAT', { gender: 'fem' }))).toMatchObject({
+      en: 'the cat has continued running.', it: 'la gatta ha continuato a correre.', fr: 'la chatte a continué à courir.',
+      de: 'die Katze ist weitergelaufen.', es: 'la gata ha seguido corriendo.',
+    });
+    expect(doing('STOP_DOING', { verbPhrase: { aspect: 'resultative' } }, np('CAT', { gender: 'fem' }))).toMatchObject({
+      it: 'la gatta ha smesso di correre.', de: 'die Katze hat aufgehört zu laufen.', es: 'la gata ha dejado de correr.',
+    });
+  });
+
+  test('a separable governed verb, and a copula', () => {
+    expect(doing('CONTINUE_DOING', { infinitiveComplement: acts('RETURN') })).toMatchObject({
+      de: 'der Kater kehrt weiter zurück.', ja: '猫は戻り続けます。', es: 'el gato sigue volviendo.',
+    });
+    expect(doing('CONTINUE_DOING', { infinitiveComplement: acts('BE', { complements: predicate('HAPPY') }) }, np('CAT', { gender: 'fem' }))).toEqual({
+      en: 'the cat continues being happy.',
+      it: 'la gatta continua a essere felice.',
+      fr: 'la chatte continue à être heureuse.',
+      de: 'die Katze ist weiter glücklich.',
+      es: 'la gata sigue estando feliz.',
+      ja: '猫は幸せであることを続けます。', // a copula has no ます stem to compound
+      pt: 'a gata continua a estar feliz.',
+    });
+  });
+
+  test('the citations, and the glosses', () => {
+    const cited = (verb: string) => sayAll({ ...clause(np('GENERIC_PERSON'), verb, { infinitiveComplement: acts() }), infinitive: true });
+    expect(cited('STOP_DOING')).toEqual({
+      en: 'to stop acting.', it: 'smettere di agire.', fr: "arrêter d'agir.", de: 'aufhören zu handeln.',
+      es: 'dejar de actuar.', ja: '行動するのをやめる。', pt: 'parar de agir.',
+    });
+    expect(cited('CONTINUE_DOING')).toEqual({
+      en: 'to continue acting.', it: 'continuare ad agire.', fr: 'continuer à agir.', de: 'weiterhandeln.',
+      es: 'seguir actuando.', ja: '行動し続ける。', pt: 'continuar a agir.',
+    });
+    expect(definitionAll('STOP_DOING')).toEqual({
+      en: 'not to continue acting.', it: 'non continuare ad agire.', fr: 'ne pas continuer à agir.', de: 'nicht weiterhandeln.',
+      es: 'no seguir actuando.', ja: '行動し続けない。', pt: 'não continuar a agir.',
+    });
+    expect(definitionAll('CONTINUE_DOING')).toEqual({
+      en: 'still to act.', it: 'agire ancora.', fr: 'agir encore.', de: 'noch handeln.',
+      es: 'actuar todavía.', ja: 'まだ行動する。', pt: 'agir ainda.',
+    });
+  });
+
+  test('both conjugate', () => {
+    expect(doing('CONTINUE_DOING', { verbPhrase: { tense: 'future' }, infinitiveComplement: acts() }, np('FIRST_PERSON'))).toMatchObject({
+      en: 'I will continue acting.', it: 'continuerò ad agire.', fr: 'je continuerai à agir.', de: 'ich werde weiterhandeln.',
+      es: 'seguiré actuando.', pt: 'continuarei a agir.',
+    });
+    expect(doing('STOP_DOING', { verbPhrase: { tense: 'future' }, infinitiveComplement: acts() }, np('FIRST_PERSON'))).toMatchObject({
+      en: 'I will stop acting.', it: 'smetterò di agire.', fr: "j'arrêterai d'agir.", de: 'ich werde aufhören zu handeln.',
+      es: 'dejaré de actuar.', pt: 'pararei de agir.',
+    });
+    expect(sayAll(clause(np('FIRST_PERSON'), 'CONTINUE_DOING'))).toMatchObject({ it: 'continuo.', es: 'sigo.', de: 'ich mache weiter.' });
+    expect(sayAll(clause(np('FIRST_PERSON'), 'STOP_DOING'))).toMatchObject({ it: 'smetto.', de: 'ich höre auf.', pt: 'paro.' });
+  });
+
+  test('regression: TRY, NEED and DESIRE keep the linked infinitive', () => {
+    expect(doing('TRY')).toEqual({
+      en: 'the cat tries to run.', it: 'il gatto prova a correre.', fr: 'le chat essaie de courir.',
+      de: 'der Kater versucht zu laufen.', es: 'el gato intenta correr.', ja: '猫は走ることを試みます。', pt: 'o gato tenta correr.',
+    });
+    expect(doing('NEED', { verbPhrase: { tense: 'past' } })).toMatchObject({
+      en: 'the cat needed to run.', de: 'der Kater brauchte zu laufen.', es: 'el gato necesitaba correr.', ja: '猫は走ることを必要としていました。',
+    });
+    expect(doing('DESIRE', { verbPhrase: { negative: true } })).toMatchObject({
+      en: 'the cat does not desire to run.', de: 'der Kater wünscht nicht zu laufen.', ja: '猫は走ることを望んでいません。',
+    });
+  });
+});
