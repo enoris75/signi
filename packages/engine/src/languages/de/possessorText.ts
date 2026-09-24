@@ -4,6 +4,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { adjectivalNoun } from './adjectivalNoun.js';
 import { articledNameForms } from './articledNameForms.js';
+import { cardinalOne } from './cardinalOne.js';
 import { datPluralN } from './datPluralN.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './de.consts.js';
@@ -35,7 +36,9 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // article — so it adds nothing postposed here.
   // A possessor question's *wessen* is prenominal too (see `nounPhrase`, P09-E14).
   if (!poss || isPronominalPossessor(poss) || isQuestionPossessor(poss)) return '';
-  return ` ${genitiveShows(poss) ? nounPhrase(poss, 'gen') : vonDative(poss)}`;
+  // A possessor counted by one is the indefinite one: "eines Hundes", "einer Frau" (A321).
+  const counted = cardinalOne(poss);
+  return ` ${genitiveShows(counted) ? nounPhrase(counted, 'gen') : vonDative(counted)}`;
 }
 
 // "von" + the dative, for a possessor whose genitive would not show. No article can be there for

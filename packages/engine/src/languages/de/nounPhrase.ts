@@ -7,6 +7,7 @@ import type { Case } from './de.types.js';
 import { adjectivalNoun } from './adjectivalNoun.js';
 import { adjPhrase } from './adjPhrase.js';
 import { articledNameForms } from './articledNameForms.js';
+import { cardinalOne } from './cardinalOne.js';
 import { datPluralN } from './datPluralN.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './de.consts.js';
@@ -22,7 +23,9 @@ import { postnominal } from './postnominal.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
 
-export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
+export function nounPhrase(counted: ResolvedNounPhrase, _case: Case): string {
+  // A bare phrase counted by one is the indefinite one, its ein-word declined (A321).
+  const np = cardinalOne(counted);
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
@@ -69,7 +72,7 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
     : possessive;
   // A cardinal stands between the determiner and the declined adjectives: "die zwei großen Häuser"
   // (C31). It declines only at one, where it is the indefinite article's own word, and the article
-  // builder has already written that; from two up German's cardinals are invariable.
+  // builder has already written that (`cardinalOne`); from two up German's cardinals are invariable.
   const numeral = numeralText(forms, CARDINALS);
   const lead = [art, numeral].filter(Boolean).map((w) => `${w} `).join('');
   const vonPhrase = detached && pronominal ? ` von ${dativePronounDe(pronominal)}` : '';

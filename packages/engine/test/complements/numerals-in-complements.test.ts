@@ -271,33 +271,48 @@ describe('known bugs: the German cardinal one does not decline in a bare phrase 
   const temporal = (phrase: NounPhrase, value: 'within' | 'during') =>
     clause(np('CAT'), 'RUN', { complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value }] } } });
 
-  test.fails('the dative after mit', () => {
+  test('the dative after mit', () => {
     expect(de(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('DOG') } } }))).toBe('der Kater läuft mit einem Hund.');
   });
 
-  test.fails('the dative after in', () => {
+  test('the dative after in', () => {
     expect(de(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: one('HOUSE') } } }))).toBe('der Kater läuft in einem Haus.');
   });
 
-  test.fails('the genitive after innerhalb, feminine', () => {
+  test('the genitive after innerhalb, feminine', () => {
     expect(de(temporal(one('HOUR'), 'within'))).toBe('der Kater läuft innerhalb einer Stunde.');
   });
 
-  test.fails('the genitive after innerhalb, masculine, with the noun\'s genitive', () => {
+  test('the genitive after innerhalb, masculine, with the noun\'s genitive', () => {
     expect(de(temporal(one('DAY'), 'within'))).toBe('der Kater läuft innerhalb eines Tages.');
   });
 
-  test.fails('the genitive after während', () => {
+  test('the genitive after während', () => {
     expect(de(temporal(one('HOUR'), 'during'))).toBe('der Kater läuft während einer Stunde.');
   });
 
-  test.fails('the dative recipient', () => {
+  test('the dative recipient', () => {
     expect(de(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: one('DOG') } } })))
       .toBe('der Kater gibt einem Hund das Buch.');
   });
 
-  test.fails('the masculine accusative object', () => {
+  test('the masculine accusative object', () => {
     expect(de(clause(np('CAT'), 'SEE', { directObject: one('DOG') }))).toBe('der Kater sieht einen Hund.');
+  });
+
+  test('its adjectives decline mixed after it, a genitive possessor declines, and an approximator stands in front', () => {
+    expect(de(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('DOG', { definiteness: 'bare', numeral: 1, adjectives: ['OLD'] }) } } })))
+      .toBe('der Kater läuft mit einem alten Hund.');
+    expect(de(clause(np('CAT'), 'SEE', { directObject: np('DOG', { definiteness: 'bare', numeral: 1, adjectives: ['OLD'] }) })))
+      .toBe('der Kater sieht einen alten Hund.');
+    expect(de(clause(np('DOG', { definiteness: 'bare', numeral: 1, adjectives: ['OLD'] }), 'RUN'))).toBe('ein alter Hund läuft.');
+    expect(de(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'bare', numeral: 1, adjectives: ['BIG'] }) } } })))
+      .toBe('der Kater läuft in einem großen Haus.');
+    expect(de(clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor: one('MAN') }) }))).toBe('der Kater liest das Buch eines Mannes.');
+    expect(de(clause(np('CAT'), 'READ', { directObject: np('BOOK', { possessor: one('WOMAN') }) }))).toBe('der Kater liest das Buch einer Frau.');
+    expect(de(temporal(np('HOUR', { definiteness: 'bare', numeral: 1, approximator: 'about' }), 'within'))).toBe('der Kater läuft innerhalb etwa einer Stunde.');
+    // The indefinite the plan picked, which resolves bare under the numeral, is the same phrase.
+    expect(de(clause(np('CAT'), 'SEE', { directObject: np('DOG', { definiteness: 'indefinite', numeral: 1 }) }))).toBe('der Kater sieht einen Hund.');
   });
 
   test('regression: the nominative, the feminine accusative, the indefinite article and the other six', () => {

@@ -28,6 +28,7 @@ import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
 import { numeralText } from '../../../functions/numeralText.js';
+import { cardinalOne } from '../cardinalOne.js';
 import { CARDINALS, CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
@@ -115,7 +116,9 @@ export function complementsParts(
       // role (P09-E13) is the same "als" said of the subject, and as bare: "als Freund", where "wie
       // ein Freund" is the likeness, the similative manner.
       const essive = (type === 'objectPredicative' && objectPredication(c) === 'essive') || type === 'role';
-      const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+      // A bare conjunct counted by one is the indefinite one, its ein-word declined by the head's case
+      // ("mit einem Hund", "innerhalb eines Tages", A321).
+      const np = essive ? withDefiniteness(conjunct, 'bare') : cardinalOne(conjunct);
       // A German object predicative adjective is uninflected, as the subject one is ("streicht
       // die Wand rot", "betrachtet die Wand als rot"). An ordinal after "als" is nominalised
       // instead, as a subject one is (A225), in the gender and number of the object and in the case
