@@ -151,6 +151,8 @@ describe('P09-E39: where the adverb cannot open the sentence', () => {
     expect(sayAll(yesNo(eats('MAYBE', { negative: true, tense: 'past' })))).toMatchObject({
       it: 'il gatto forse non mangiò il cibo?', fr: 'est-ce que le chat ne mangea peut-être pas la nourriture\u00a0?',
       de: 'fraß der Kater das Essen vielleicht nicht?', es: '¿el gato quizás no comió la comida?',
+      // Ahead of its negator *talvez* still precedes the verb, and takes the subjunctive there too.
+      pt: 'o gato talvez não tenha comido a comida?',
     });
   });
 
@@ -161,8 +163,12 @@ describe('P09-E39: where the adverb cannot open the sentence', () => {
       fr: 'le chien dit que le chat ne mange peut-être pas la nourriture.',
       de: 'der Hund sagt, dass der Kater das Essen vielleicht nicht frisst.',
       es: 'el perro dice que el gato quizás no come la comida.', ja: '犬は猫が食べ物をもしかすると食べないと言います。',
-      pt: 'o cão diz que o gato talvez não come a comida.',
+      pt: 'o cão diz que o gato talvez não coma a comida.',
     });
+    // *Talvez* ahead of the negator precedes its verb, which takes the subjunctive, the perfect one
+    // for a past event; after an affirmative verb it follows it, and the verb keeps the indicative.
+    expect(says(eats('MAYBE', { negative: true, tense: 'past' })).pt).toBe('o cão diz que o gato talvez não tenha comido a comida.');
+    expect(says(eats('MAYBE')).pt).toBe('o cão diz que o gato come talvez a comida.');
     expect(says(eats('PROBABLY'))).toMatchObject({
       en: 'the dog says that the cat probably eats the food.', de: 'der Hund sagt, dass der Kater wahrscheinlich das Essen frisst.',
     });
@@ -174,7 +180,7 @@ describe('P09-E39: where the adverb cannot open the sentence', () => {
     expect(sayAll(cat('MAYBE'))).toMatchObject({
       en: 'the cat that maybe does not eat the food runs.', it: 'il gatto che forse non mangia il cibo corre.',
       fr: 'le chat qui ne mange peut-être pas la nourriture court.', de: 'der Kater, der das Essen vielleicht nicht frisst, läuft.',
-      es: 'el gato que quizás no come la comida corre.',
+      es: 'el gato que quizás no come la comida corre.', pt: 'o gato que talvez não coma a comida corre.',
     });
     // The German relative reads `negative_slot` as the main clause does, so STILL, ALSO and ALREADY's
     // negative word lead its "nicht" too (it wrote "nicht noch", "nicht auch", "nicht schon").
