@@ -105,7 +105,10 @@ export function predicateText(
   const locative = complements?.locative ?? (elided?.type === 'locative' ? elided.complement : undefined);
   const predicativeHead = predicative ? firstConjunct(predicative.phrase).head.forms : undefined;
   const transientPredicative =
-    predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
+    predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1'
+    // A superlative is headed by its article, a noun phrase with the noun understood, and that
+    // identifies the subject as a predicate noun does: "o gato é o mais feliz" (A284).
+    && predicativeHead['degree'] !== 'most' && predicativeHead['degree'] !== 'least';
   // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
   // "a casa onde o gato está arde" (A199). So does an adverb of place, which says where as a
   // locative does: "o gato está aqui", "está em toda parte", never "*é aqui" (localization B67).

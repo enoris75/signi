@@ -518,20 +518,40 @@ describe('known bugs: Spanish and Portuguese put estar before a transient superl
   });
   const ANIMALS = np('ANIMAL', { number: 'plural' });
 
-  test.fails('with a set: es el gato es el más feliz, pt o gato é o mais feliz', () => {
+  test('with a set: es el gato es el más feliz, pt o gato é o mais feliz', () => {
     expect(sayAll(happy('most', ANIMALS))).toMatchObject({
       es: 'el gato es el más feliz de los animales.', pt: 'o gato é o mais feliz dos animais.',
     });
   });
 
-  test.fails('the bare superlative', () => {
+  test('the bare superlative', () => {
     expect(sayAll(happy('most'))).toMatchObject({ es: 'el gato es el más feliz.', pt: 'o gato é o mais feliz.' });
   });
 
-  test.fails('least', () => {
+  test('least', () => {
     expect(sayAll(happy('least', ANIMALS))).toMatchObject({
       es: 'el gato es el menos feliz de los animales.', pt: 'o gato é o menos feliz dos animais.',
     });
+  });
+
+  test('ser follows the superlative through the tense, number, negation, a relative clause and an elided complement', () => {
+    const pick = ({ es, pt }: Record<string, string>) => ({ es, pt });
+    const most = (extra: Partial<PhrasePlan> = {}, subject: NounPhrase = np('CAT')): PhrasePlan => ({
+      ...clause(subject, 'BE', { complements: { predicative: { phrase: np('HAPPY', { headDegree: 'most' }) } } }), ...extra,
+    });
+    expect(pick(sayAll(most({}, np('CAT', { number: 'plural' })))))
+      .toEqual({ es: 'los gatos son los más felices.', pt: 'os gatos são os mais felizes.' });
+    expect(pick(sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase: { tense: 'past' }, complements: { predicative: { phrase: np('HAPPY', { headDegree: 'most' }) } },
+    })))).toEqual({ es: 'el gato era el más feliz.', pt: 'o gato era o mais feliz.' });
+    expect(pick(sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase: { negative: true }, complements: { predicative: { phrase: np('HAPPY', { headDegree: 'most' }) } },
+    })))).toEqual({ es: 'el gato no es el más feliz.', pt: 'o gato não é o mais feliz.' });
+    expect(pick(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'subject', verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('FAR', { headDegree: 'most' }) } } },
+    }), 'BURN')))).toEqual({ es: 'la casa que es la más lejana arde.', pt: 'a casa que é a mais distante arde.' });
+    expect(pick(sayAll(most({ coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { negative: true } }) } }))))
+      .toEqual({ es: 'el gato es el más feliz, pero el perro no lo es.', pt: 'o gato é o mais feliz, mas o cão não é.' });
   });
 
   test('regression: the other five, and estar for the positive and the comparative', () => {

@@ -419,7 +419,7 @@ describe('known bugs: VERY on a superlative (A257)', () => {
     expect(most('HAPPY')).toEqual({
       en: 'the cat is by far the happiest.', it: 'il gatto è di gran lunga il più felice.',
       fr: 'le chat est de loin le plus heureux.', de: 'der Kater ist bei weitem am glücklichsten.',
-      es: 'el gato está con mucho el más feliz.', ja: '猫は断然最も幸せです。', pt: 'o gato está de longe o mais feliz.',
+      es: 'el gato es con mucho el más feliz.', ja: '猫は断然最も幸せです。', pt: 'o gato é de longe o mais feliz.',
     });
     expect(most('GOOD')).toMatchObject({
       en: 'the cat is by far the best.', fr: 'le chat est de loin le meilleur.',
