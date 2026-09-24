@@ -22,6 +22,7 @@ import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
+import { refuseGenericObject } from './refuseGenericObject.js';
 import { withQuestionPossessor } from './withQuestionPossessor.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -137,6 +138,9 @@ export function resolvePhrase(
   // Beside a content clause the direct object is the addressee, and goes where the verb's addressee
   // goes (A317, see `addresseeObject`).
   plan = addresseeObject(plan, language, lookup);
+  // The generic person has no object form: as a direct object it is refused by name (A354, see
+  // `refuseGenericObject`) — after the addressee has left the object slot for the dative.
+  refuseGenericObject(plan.directObject, 'plan.directObject');
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is

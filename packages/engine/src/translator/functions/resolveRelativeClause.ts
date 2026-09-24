@@ -6,6 +6,7 @@ import { genericWithoutDative } from '../../functions/genericWithoutDative.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { copulaSwap, expletiveSubject } from './lexicalCopula.js';
 import { passiveGap } from './passiveGap.js';
+import { refuseGenericObject } from './refuseGenericObject.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
@@ -52,6 +53,8 @@ export function resolveRelativeClause(
   if (headRole !== 'subject' && !clause.subject) {
     throw new Error(`a relative clause whose head is its ${headRole} needs a subject of its own: relative.subject.concept is required (A275)`);
   }
+  // Nor can its object be the generic person, as a main clause's cannot (A354).
+  refuseGenericObject(clause.directObject, 'relative.directObject');
   const subject = clause.subject
     ? resolveNounElement(bindCoreferents(clause.subject, undefined, 'subject'), language, lookup)
     : undefined;

@@ -43,3 +43,31 @@ The builder should not offer it.
 | **Test** | `clause.test.ts` → *known bugs: the generic subject as a direct object renders its subject form (A354)* (2 `test.fails`: the object refused by name, negated and another verb; plus a regression test for the generic subject, its passive and the generic dative) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. **Refused**, as ruled (not seeded). A new
+[refuseGenericObject.ts](../../../packages/engine/src/translator/functions/refuseGenericObject.ts) throws
+*the generic person (GENERIC_PERSON) cannot be a direct object … (plan.directObject, A354)*.
+[resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts) calls it on the
+clause's object, which covers a content clause's, an infinitive's and a purpose's, and
+[resolveRelativeClause.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+on a relative's. The check runs after `addresseeObject`, so an addressee beside a content clause,
+moved to the dative (A317), still renders: *erzählt einem, dass*, *cuenta a uno que*. The passive
+refuses too: its patient is the plan's object. The generic subject, its agentless passive and A316's
+generic dative are unchanged.
+
+`/api/translate` answers with a 400 naming the path
+(`plan.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`), from
+[planError.ts](../../../packages/backend/src/planError.ts). It uses the verb's `complements` to exempt
+the addressee, as the engine does.
+
+The builder still offers *one* in the object's pronoun chooser. No filter hook for refused plans exists
+(A288's refusal is not kept out of the builder either), and a per-slot filter would have to know when
+the object is an addressee, so it was left out.
+
+Guarded by `clause.test.ts` → *known bugs: the generic subject as a direct object renders its subject
+form (A354)*: the two former `test.fails`, now plain tests, two new tests (a conjunct, the passive, a
+relative's, a content clause's, an infinitive's and a purpose's object; the addressee kept as the
+dative), and the regression test. Unit cases in `refuseGenericObject.test.ts` and the backend's
+`planError.test.ts`; the 400 in `index.test.ts`.

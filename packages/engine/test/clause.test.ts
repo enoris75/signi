@@ -531,13 +531,31 @@ describe('known bugs: a linked clause with no subject crashes the engine (A267)'
 describe('known bugs: the generic subject as a direct object renders its subject form (A354)', () => {
   const G = np('GENERIC_PERSON');
 
-  test.fails('the direct object is refused by name', () => {
+  test('the direct object is refused by name', () => {
     expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: G }))).toThrow(/GENERIC_PERSON/);
   });
 
-  test.fails('negated, and another verb', () => {
+  test('negated, and another verb', () => {
     expect(() => sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: G }))).toThrow(/GENERIC_PERSON/);
     expect(() => sayAll(clause(np('CAT'), 'EAT', { directObject: G }))).toThrow(/GENERIC_PERSON/);
+  });
+
+  test('a conjunct, the passive, and the object of a relative, a content clause, an infinitive and a purpose', () => {
+    const refused = /the generic person \(GENERIC_PERSON\) cannot be a direct object/;
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), G], conjunction: 'and' } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive' } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('DOG', { relative: { headRole: 'subject', verbPhrase: { verb: 'SEE' }, directObject: G } }), 'RUN')))
+      .toThrow(/relative\.directObject, A354/);
+    expect(() => sayAll(clause(np('MAN'), 'SAY', { contentObject: { subject: np('CAT'), verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('CAT'), 'WANT', { infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+    expect(() => sayAll(clause(np('CAT'), 'RUN', { purpose: { verbPhrase: { verb: 'SEE' }, directObject: G } }))).toThrow(refused);
+  });
+
+  // The addressee beside a content clause leaves the object for the dative (A317), where German and
+  // Spanish have the generic's form (A316); the other five say what their terminus says.
+  test('an addressee beside a content clause is the dative, not refused', () => {
+    expect(sayAll(clause(np('CAT'), 'TELL', { directObject: G, contentObject: { subject: np('DOG'), verbPhrase: { verb: 'RUN' } } })))
+      .toMatchObject({ de: 'der Kater erzählt einem, dass der Hund läuft.', es: 'el gato cuenta a uno que el perro corre.' });
   });
 
   test('regression: the generic subject, its passive, and the generic dative', () => {

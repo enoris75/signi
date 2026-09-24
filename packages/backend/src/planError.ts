@@ -45,10 +45,16 @@ const LINKED_KEYS = new Set(LINKED_CLAUSES.map(([key]) => key));
  *    points at`.
  *  - the address calls the hearer (A338): an instruction takes none, and a personal pronoun there is
  *    the 2nd person: `plan.address: an instruction addresses nobody, so it takes no address`.
+ *  - the generic person (GENERIC_PERSON) is never a direct object, wherever the object hangs — a
+ *    clause's, a relative's, a content clause's, an infinitive's or a purpose's (A354):
+ *    `plan.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`. An addressee
+ *    beside a content clause is exempt where the verb takes it to the dative, as the engine moves it.
  */
 export function planError(plan: unknown, formsOf?: FormsOf): string | undefined {
   if (!isNode(plan)) return 'plan.subject.concept is required';
-  return clauseError(plan, 'plan', plan['imperative'] === true && !plan['condition']) ?? addressError(plan, formsOf);
+  return clauseError(plan, 'plan', plan['imperative'] === true && !plan['condition'])
+    ?? addressError(plan, formsOf)
+    ?? genericObjectPath(plan, 'plan', formsOf);
 }
 
 /** A concept's forms, as the lexicon hands them to the engine, for the checks that read a word's kind. */
@@ -158,4 +164,44 @@ function coreferentPath(value: unknown, path: string): string | undefined {
     if (found) return found;
   }
   return undefined;
+}
+
+/**
+ * Where a direct object anywhere below `value` is the generic person, which has no object form in
+ * five of the languages (A354), as the message naming it — or `undefined`. A clause's object beside a
+ * content clause is the addressee the engine moves to the dative where the verb licenses a terminus
+ * and the plan names none (see the engine's `addresseeObject`), so it is exempt there; without the
+ * lexicon (`formsOf`) that cannot be read, and such an object is let through for the engine to judge.
+ */
+function genericObjectPath(value: unknown, path: string, formsOf?: FormsOf): string | undefined {
+  if (Array.isArray(value)) {
+    for (const [i, item] of value.entries()) {
+      const found = genericObjectPath(item, `${path}[${i}]`, formsOf);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (!isNode(value)) return undefined;
+  const object = value['directObject'];
+  if (isNode(object) && nounConjuncts(object as unknown as NounElement).some((np) => np?.concept === 'GENERIC_PERSON')
+    && !movesToAddressee(value, formsOf)) {
+    return `${path}.directObject: the generic person (GENERIC_PERSON) cannot be a direct object`;
+  }
+  for (const [key, inner] of Object.entries(value)) {
+    const found = genericObjectPath(inner, `${path}.${key}`, formsOf);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+/** Whether a clause's direct object is the addressee its content clause sends to the dative (A317). */
+function movesToAddressee(clause: Node, formsOf?: FormsOf): boolean {
+  if (!isNode(clause['contentObject'])) return false;
+  const verbPhrase = clause['verbPhrase'];
+  if (!isNode(verbPhrase) || verbPhrase['voice'] === 'passive') return false;
+  const complements = clause['complements'];
+  if (isNode(complements) && complements['terminus']) return false;
+  if (!formsOf) return true;
+  const verb = typeof verbPhrase['verb'] === 'string' ? formsOf(verbPhrase['verb']) : undefined;
+  return (verb?.['complements'] ?? '').split(',').map((c) => c.trim()).includes('terminus');
 }
