@@ -8,7 +8,7 @@ because INFORMATION, the word a gloss was expected to stand on, is not seeded
 ([B81](../B-needs-seed/B81-ideas-reasons-and-information.md)). The gloss does not need it: FACT, TELL
 and RECENTLY are all seeded. No new word, no new construct. It was filed with PROBABILITY, the other
 root noun of the batch, and split from it here: PROBABILITY is a dimension root on the literal by
-design, [C42](../C-needs-engine/C42-probability.md).)_
+design, [C42](C42-probability.md).)_
 
 ## Plan
 
@@ -90,3 +90,22 @@ One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec
 (NEWS in English and German, *Tatsachen, die man kürzlich erzählt hat*), and a unit pin beside NEWS's
 paradigm in [pluralia-tantum.test.ts](../../../packages/engine/test/pluralia-tantum.test.ts).
 [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts) must pass.
+
+## Done
+
+2026-09-24. Shipped the proposed row, **facts that one has told recently**, written out inline on
+the NEWS block in [concepts/nouns.ts](../../../packages/backend/src/concepts/nouns.ts) exactly as the
+Plan gives it (FACT bare plural, object-gap relative, generic subject, TELL resultative + RECENTLY).
+Re-probed against the current engine: every language matches the probe table.
+
+| en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|
+| facts that one has told recently | fatti che si sono raccontati di recente | faits qu'on a racontés récemment | Tatsachen, die man kürzlich erzählt hat | hechos que se han contado recientemente | 最近伝えた事実 | fatos que se contaram recentemente |
+
+- The backend boots clean with it (`buildConceptDefinitions`), and `/api/concepts` serves all seven.
+- Unit pin: "NEWS's definition" in
+  [pluralia-tantum.test.ts](../../../packages/engine/test/pluralia-tantum.test.ts).
+- e2e: "a bare plural head over an object gap (localize-seed A32: NEWS)" in
+  [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), English and German.
+- [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts) passes (no
+  collision). No engine change.

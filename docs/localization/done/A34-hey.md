@@ -85,3 +85,27 @@ seven), and extend the `/api/concepts?role=interjection` test in
 [index.test.ts](../../../packages/backend/src/index.test.ts) to expect HEY's composed
 `definitions`. [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts)
 must pass.
+
+## Done
+
+2026-09-24. Shipped the proposed row, **a word with which one calls a person**, written out inline
+on the HEY block in [concepts/interjections.ts](../../../packages/backend/src/concepts/interjections.ts)
+(WORD indefinite, `headRole: 'instrumental'`, generic subject, CALL, PERSON indefinite as object);
+`instrumentGloss` stays private to nouns.ts. Re-probed against the current engine: every language
+matches the probe table.
+
+| en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|
+| a word with which one calls a person | una parola con la quale si chiama una persona | un mot avec lequel on appelle une personne | ein Wort, mit dem man eine Person ruft | una palabra con la que se llama a una persona | 人を呼ぶ単語 | uma palavra com a qual se chama uma pessoa |
+
+- The backend boots clean with it, and `/api/concepts` (unfiltered and `?role=interjection`) serves
+  all seven.
+- Unit pins: "HEY's definition" in
+  [interjection.test.ts](../../../packages/engine/test/interjection.test.ts), and the
+  `?role=interjection` test in [index.test.ts](../../../packages/backend/src/index.test.ts) now
+  expects the composed `definitions`.
+- No e2e row: no picker lists the interjection role yet (see
+  [Where the tooltip shows](#where-the-tooltip-shows)); the tooltip shows once E30's follow-up adds
+  one.
+- [sweep-definitions.test.ts](../../../packages/engine/test/sweep-definitions.test.ts) passes. No
+  engine change.
