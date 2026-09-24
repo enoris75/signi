@@ -28,7 +28,7 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'qui' : 'quoi' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
-  const gap = questionGapComplement(question, { base: question.animate ? 'qui' : 'quoi' });
+  const gap = questionGapComplement(question, { base: question.animate ? 'qui' : 'quoi' }, verb.forms);
   if (gap) return complementsPhrase(gap, {}, verb.conceptId, {}, verb.forms).replace(/\s+/g, ' ').trim();
   const prep = objectPreposition(verb);
   const word = question.animate ? 'qui' : prep ? 'quoi' : 'que';

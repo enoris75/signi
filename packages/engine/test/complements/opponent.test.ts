@@ -376,19 +376,19 @@ describe('known bugs: the opponent question and relative ignore a verb-named opp
   const playedBy = (head: string, extra: Record<string, unknown> = {}) =>
     clause(np(head, { ...extra, relative: { headRole: 'opponent', subject: np('CAT'), verbPhrase: { verb: 'TEST_PLAY' } } }), 'RUN');
 
-  test.fails('the question on a person', () => {
+  test('the question on a person', () => {
     expect(sayAllWithPrep(ask(plays, true), preps)).toMatchObject({
       en: 'who does the cat play with?', it: 'con chi gioca il gatto?', de: 'mit wem spielt der Kater?',
     });
   });
 
-  test.fails('the question on a thing', () => {
+  test('the question on a thing', () => {
     expect(sayAllWithPrep(ask(plays), preps)).toMatchObject({
       en: 'what does the cat play with?', it: 'con che cosa gioca il gatto?', de: 'womit spielt der Kater?',
     });
   });
 
-  test.fails('the relative', () => {
+  test('the relative', () => {
     expect(sayAllWithPrep(playedBy('DOG'), preps)).toMatchObject({
       en: 'the dog with which the cat plays runs.', it: 'il cane con il quale il gatto gioca corre.', de: 'der Hund, mit dem der Kater spielt, läuft.',
     });
@@ -396,6 +396,28 @@ describe('known bugs: the opponent question and relative ignore a verb-named opp
     expect(sayAllWithPrep(playedBy('WOMAN'), preps)).toMatchObject({
       en: 'the woman with whom the cat plays runs.', de: 'die Frau, mit der der Kater spielt, läuft.',
     });
+  });
+
+  test('the plural and the feminine relatives, a complement after the stranded word, and the named word\'s own case', () => {
+    expect(sayAllWithPrep(playedBy('DOG', { number: 'plural' }), preps)).toMatchObject({
+      en: 'the dogs with which the cat plays run.', it: 'i cani con i quali il gatto gioca corrono.',
+    });
+    expect(sayAllWithPrep(playedBy('WOMAN'), preps).it).toBe('la donna con la quale il gatto gioca corre.');
+    expect(sayAllWithPrep(playedBy('WOMAN', { number: 'plural' }), preps)).toMatchObject({
+      en: 'the women with whom the cat plays run.', it: 'le donne con le quali il gatto gioca corrono.',
+      de: 'die Frauen, mit denen der Kater spielt, laufen.',
+    });
+    const inHouse = clause(np('CAT'), 'TEST_PLAY', { complements: { locative: { phrase: np('HOUSE') } } });
+    expect(sayAllWithPrep(ask(inHouse, true), preps)).toMatchObject({
+      en: 'who does the cat play with in the house?', de: 'mit wem spielt der Kater im Haus?',
+    });
+    // German declines the word in the case the named preposition governs, as the statement does (A318).
+    expect([sayAllWithPrep(ask(plays, true), { de: 'von' }).de, sayAllWithPrep(ask(plays), { de: 'von' }).de,
+      sayAllWithPrep(playedBy('DOG'), { de: 'von' }).de, sayAllWithPrep(ask(plays, true), { de: 'um' }).de,
+      sayAllWithPrep(playedBy('DOG'), { de: 'um' }).de]).toEqual([
+      'von wem spielt der Kater?', 'wovon spielt der Kater?', 'der Hund, von dem der Kater spielt, läuft.',
+      'um wen spielt der Kater?', 'der Hund, um den der Kater spielt, läuft.',
+    ]);
   });
 
   test('regression: with no word named, the question and the relative keep the generic word', () => {

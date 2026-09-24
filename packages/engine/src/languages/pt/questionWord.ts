@@ -25,7 +25,7 @@ export function questionWord(question: ResolvedQuestion, verb: ConceptForms): st
   if (question.role === 'agent') return agentPhrase(questionStandIn(question, { base: question.animate ? 'quem' : 'que coisa' })).replace(/\s+/g, ' ').trim();
   const adverb = questionAdverbial(question);
   if (adverb) return ADVERBIAL[adverb];
-  const gap = questionGapComplement(question, { base: question.animate ? 'quem' : 'que' });
+  const gap = questionGapComplement(question, { base: question.animate ? 'quem' : 'que' }, verb.forms);
   // The route's *por* over *que* would be the *why* of "por que?", so a place gone through is asked
   // *por onde*, as Portuguese asks it anyway (P09-E15).
   const text = gap ? complementsPhrase(gap, {}, verb.conceptId).replace(/\s+/g, ' ').trim() : '';
