@@ -38,3 +38,19 @@ inflect.
 | **Test** | `complements/temporal.test.ts` → *known bugs: a Japanese plural measure noun under for reads as one (A348)* (3 `test.fails`: HOUR present and past, DAY and YEAR, the bare plural; plus a regression test for one hour, two hours and the other six) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. The plural was lost as reported: `resolveNounPhrase` sets `number` back to `singular` for a
+noun with no plural word, which is every Japanese noun. It now also leaves `plural_unmarked: '1'` on
+such a head ([translator/functions/resolveNounPhrase.ts](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts),
+additive). [ja/jaMeasuredOnce.ts](../../../packages/engine/src/languages/ja/jaMeasuredOnce.ts) marks a
+plural indefinite or bare measure noun under *for* as `many`, and
+[ja/jaCounted.ts](../../../packages/engine/src/languages/ja/jaCounted.ts) writes it 何 + the counter + も
+in the head's place (何時間も走ります, 何日も, 何年も). **Ruled:** only *for*; within, during and ago keep
+their 一時間以内に, 一時間の間に, 一時間前に.
+
+Tests: the three `test.fails` in `complements/temporal.test.ts` (*known bugs: a Japanese plural measure
+noun under for reads as one (A348)*) now pass, plus a case pinning the other measuring relations, a
+definite plural and a plural subject as they were; `jaMeasuredOnce.test.ts`, `jaCounted.test.ts` and
+`resolveNounPhrase.test.ts` cover `many` and `plural_unmarked`.

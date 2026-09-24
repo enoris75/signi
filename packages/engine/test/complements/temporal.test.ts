@@ -779,18 +779,29 @@ describe('known bugs: a Japanese plural measure noun under for reads as one (A34
     complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value: 'for' }] } },
   }));
 
-  test.fails('for hours', () => {
+  test('for hours', () => {
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何時間も走ります。');
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'indefinite' }), 'past').ja).toBe('猫は何時間も走りました。');
   });
 
-  test.fails('for days and for years', () => {
+  test('for days and for years', () => {
     expect(runsFor(np('DAY', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何日も走ります。');
     expect(runsFor(np('YEAR', { number: 'plural', definiteness: 'indefinite' })).ja).toBe('猫は何年も走ります。');
   });
 
-  test.fails('a bare plural', () => {
+  test('a bare plural', () => {
     expect(runsFor(np('HOUR', { number: 'plural', definiteness: 'bare' })).ja).toBe('猫は何時間も走ります。');
+  });
+
+  // Ruled: only `for`; within, during and ago keep what they wrote.
+  test('the other measuring relations, a definite plural and a plural subject are left alone', () => {
+    const runsAt = (value: string, definiteness: 'indefinite' | 'definite' = 'indefinite') => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { number: 'plural', definiteness }), specifiers: [{ kind: 'temporal', value }] } },
+    } as never)).ja;
+    expect([runsAt('within'), runsAt('during'), runsAt('ago'), runsAt('for', 'definite'),
+      sayAll(clause(np('HOUR', { number: 'plural', definiteness: 'indefinite' }), 'BURN')).ja]).toEqual([
+      '猫は一時間以内に走ります。', '猫は一時間の間に走ります。', '猫は一時間前に走ります。', '猫は時間走ります。', '時間は燃えます。',
+    ]);
   });
 
   test('regression: an hour, two hours, and the other six', () => {

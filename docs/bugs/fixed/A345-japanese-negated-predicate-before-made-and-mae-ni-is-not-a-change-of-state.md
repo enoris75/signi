@@ -36,3 +36,19 @@ tense as the affirmative's does.
 | **Test** | `adverbial-clause.test.ts` → *known bugs: a Japanese negated predicate before まで and 前に is not a change of state (A345)* (2 `test.fails`: the な-adjective under まで and 前に, the い-adjective and the noun; plus a regression test for the affirmative, 時に and the other six) |
 
 Found by the lanes and the cross-lane probe while fixing A278–A338, 2026-09-24.
+
+## Resolved
+
+2026-09-24. `reach`'s negative cells in
+[ja/copulaSegs.ts](../../../packages/engine/src/languages/ja/copulaSegs.ts) are now the change of state
+of the negative, with なる taking the tense: an i-adjective く + なくなる (大きくなくなる), a na-adjective
+and a noun で + なくなる (幸せでなくなる, 友達でなくなる; a negative group でも), an intensifier's
+〜すぎ + なくなる. **Ruled:** the negated ている state goes the literal way, the verb's nai-stem + なくなる
+(疲れなくなるまで), read through [ja/jaStateVerb.ts](../../../packages/engine/src/languages/ja/jaStateVerb.ts)
+(A346); an ambiguous plain past keeps 疲れていない. Not touched: a negated lowered degree or superlative
+(〜わけではない) and a "neither … nor" coordination under まで / 前に keep their prenominal form.
+
+Tests: the two `test.fails` in `adverbial-clause.test.ts` (*known bugs: a Japanese negated predicate
+before まで and 前に is not a change of state (A345)*) now pass, plus new cases for the negated ている
+state (疲れなくなるまで, 疲れなくなる前に, the ruling) and the い-adjective and noun before 前に;
+`copulaSegs.test.ts`'s reach case asserts the negative cells.

@@ -1327,10 +1327,11 @@ describe('known bugs: a Japanese state verb in a content clause takes its dictio
     expect(ja('THINK', hasBook)).toBe('男は猫が本を持っていると考えます。');
   });
 
-  test('regression: a relative clause, an adverbial clause and a modal keep the dictionary form', () => {
+  // A347 gave the adverbial clause under ので its 〜ている; 前に names the event and keeps the dictionary form.
+  test('regression: a relative clause, an adverbial clause before 前に and a modal keep the dictionary form', () => {
     expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'HAVE' }, directObject: np('BOOK') } }), 'RUN'), 'ja')).toBe('本を持つ猫は走ります。');
-    expect(say({ subject: man, verbPhrase: { verb: 'RUN' }, adverbialClause: { conjunction: 'because', clause: hasBook } }, 'ja'))
-      .toBe('男は猫が本を持つので走ります。');
+    expect(say({ subject: man, verbPhrase: { verb: 'RUN' }, adverbialClause: { conjunction: 'before', clause: hasBook } }, 'ja'))
+      .toBe('男は猫が本を持つ前に走ります。');
     expect(ja('SAY', { ...hasBook, verbPhrase: { verb: 'HAVE', modals: ['MUST'] } })).toBe('男は猫が本を持つ必要があると言います。');
   });
 

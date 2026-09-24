@@ -6,11 +6,13 @@ const TABERU = { base: '食べる', reading: 'たべる' };
 const eats = (extra = {}) => clause(np(NEKO), vp(TABERU, extra));
 
 describe('shapeAdverbialClause', () => {
-  test('when and because keep the clause as it is', () => {
+  test('when and because keep the clause as it is, and ask for a state holding (A347)', () => {
     expect(shapeAdverbialClause({ conjunction: 'when', clause: eats({ tense: 'past' }) })).toEqual({
-      clause: eats({ tense: 'past', aspect: undefined }), word: '時に',
+      clause: eats({ tense: 'past', aspect: undefined }), word: '時に', held: true,
     });
     expect(shapeAdverbialClause({ conjunction: 'because', clause: eats() }).word).toBe('ので');
+    expect(['because', 'though', 'before', 'after', 'until', 'while', 'since'].map((c) =>
+      shapeAdverbialClause({ conjunction: c as 'because', clause: eats() }).held)).toEqual([true, true, undefined, undefined, undefined, undefined, undefined]);
   });
 
   test('after puts the verb in the past and before in the non-past, whatever the clause says', () => {
