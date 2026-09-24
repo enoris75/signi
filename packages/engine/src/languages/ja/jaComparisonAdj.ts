@@ -1,5 +1,6 @@
 import type { ConceptForms } from '../../types.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
+import { JA_ICHIDAN } from './ja.consts.js';
 import { jaAdjClass } from './jaAdjClass.js';
 
 /**
@@ -36,9 +37,10 @@ export function jaComparisonAdj(concept: ConceptForms): { base: string; reading?
   // The negative ending by class (see `jaAdjClass`): くない, ではない (幸せな and 茶色の alike), the
   // negative state ていない (疲れた → 疲れていない), or a verb's plain ない (大きすぎる → 大きすぎない).
   // Every one of them ends in ない, an い-adjective, so what comes back is one whatever went in.
-  const { kind, stem, reading: stemReading, predicative } =
+  // A godan verb's negative base is its own (違う → 違わない, localization B87).
+  const { kind, stem, reading: stemReading, predicative, verb } =
     jaAdjClass(base, reading, concept.forms['relational'] === '1', verbal);
-  const ending = kind === 'i' ? 'くない' : kind === 'ta' ? 'いない' : kind === 'ru' ? 'ない' : `${predicative}ではない`;
+  const ending = kind === 'i' ? 'くない' : kind === 'ta' ? 'いない' : kind === 'ru' ? `${(verb ?? JA_ICHIDAN).a}ない` : `${predicative}ではない`;
   return { base: `${stem}${ending}`, reading: stemReading === undefined ? undefined : `${stemReading}${ending}` };
 }
 
@@ -49,8 +51,10 @@ export function jaComparisonAdj(concept: ConceptForms): { base: string; reading?
 function suffixIntensifier(concept: ConceptForms): { base: string; reading?: string } {
   const suffix = concept.forms['intensifier'] ?? '';
   const raw = concept.forms['base'] ?? '';
-  const { kind, stem, reading } = jaAdjClass(raw, concept.forms['reading'], concept.forms['relational'] === '1');
-  const trim = (s: string) => (kind === 'ta' ? s.slice(0, -1) : s);
+  // A verb's word takes the suffix on its continuative: 違う → 違いすぎる (localization B87).
+  const { kind, stem, reading, verb } =
+    jaAdjClass(raw, concept.forms['reading'], concept.forms['relational'] === '1', concept.forms['ja_verbal'] === '1');
+  const trim = (s: string) => (kind === 'ta' ? s.slice(0, -1) : kind === 'ru' ? `${s}${(verb ?? JA_ICHIDAN).i}` : s);
   return {
     base: `${trim(stem)}${suffix}`,
     reading: reading === undefined ? undefined : `${trim(reading)}${concept.forms['intensifier_reading'] ?? suffix}`,

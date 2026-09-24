@@ -2481,6 +2481,77 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('誤りがない');
   });
 
+  test('a dimension gloss on the new LENGTH (localization B87: LONG)', async ({ app, page }) => {
+    // BIG's "of great size" on LENGTH, which B87 seeded for it.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('long');
+    const longDe = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longDe).toBeVisible();
+    await longDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von großer Länge');
+
+    // French grand precedes its noun and agrees with the feminine longueur.
+    await app.setUiLanguage('fr');
+    await app.openSubjectAdjective('long');
+    const longFr = page.locator('[data-testid="typeahead-option"][data-concept="LONG"]');
+    await expect(longFr).toBeVisible();
+    await longFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('de grande longueur');
+  });
+
+  test('SAME negated as a predicate (localization B87: DIFFERENT)', async ({ app, page }) => {
+    // The predicate SAME keeps its article in Spanish; Japanese negates the の-less 同じ.
+    await app.setSubject('CAT');
+    await app.setUiLanguage('ja');
+    await app.openSubjectAdjective('different');
+    const differentJa = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentJa).toBeVisible();
+    await differentJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('同じではない');
+
+    await app.setUiLanguage('es');
+    await app.openSubjectAdjective('different');
+    const differentEs = page.locator('[data-testid="typeahead-option"][data-concept="DIFFERENT"]');
+    await expect(differentEs).toBeVisible();
+    await differentEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('que no es el mismo');
+  });
+
+  test('a many subject inside a locative relative (localization B78: CITY)', async ({ app, page }) => {
+    // German relativises the place on an with the dative; Japanese fronts the clause, 多くの included.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('city');
+    const cityDe = page.locator('[data-testid="typeahead-option"][data-concept="CITY"]');
+    await expect(cityDe).toBeVisible();
+    await cityDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein großer Ort, an dem viele Personen wohnen');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('city');
+    const cityJa = page.locator('[data-testid="typeahead-option"][data-concept="CITY"]');
+    await expect(cityJa).toBeVisible();
+    await cityJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('多くの人が住む大きい場所');
+  });
+
+  test('a part-whole genitive carrying a relative (localization B78: DOOR)', async ({ app, page }) => {
+    // French elides the relative's que before the generic on; Portuguese says it with the impersonal se.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('door');
+    const doorFr = page.locator('[data-testid="typeahead-option"][data-concept="DOOR"]');
+    await expect(doorFr).toBeVisible();
+    await doorFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("une partie d'un mur qu'on ouvre");
+
+    await app.setUiLanguage('pt');
+    await app.subjectInput.fill('door');
+    const doorPt = page.locator('[data-testid="typeahead-option"][data-concept="DOOR"]');
+    await expect(doorPt).toBeVisible();
+    await doorPt.hover();
+    await expect(page.locator(tooltip)).toHaveText('uma parte de uma parede que se abre');
+  });
+
   test('a place, a manner and a fact adverb (localization B67: HERE, ALSO, REALLY)', async ({
     app,
     page,

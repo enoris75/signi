@@ -17,6 +17,28 @@ describe('jaAdjClass', () => {
     expect(jaAdjClass('死んだ')).toEqual({ kind: 'ta', stem: '死んで', reading: undefined, attributive: '', predicative: '' });
   });
 
+  // Localization B87: a verb's word carries the row its class writes after the stem.
+  test('a verb drops its last kana and says which row its endings build on', () => {
+    expect(jaAdjClass('大きすぎる', 'おおきすぎる', false, true)).toEqual({
+      kind: 'ru', stem: '大きすぎ', reading: 'おおきすぎ', attributive: '', predicative: '',
+      verb: { u: 'る', i: '', a: '', te: 'て', ta: 'た' },
+    });
+    expect(jaAdjClass('違う', 'ちがう', false, true)).toEqual({
+      kind: 'ru', stem: '違', reading: 'ちが', attributive: '', predicative: '',
+      verb: { u: 'う', i: 'い', a: 'わ', te: 'って', ta: 'った' },
+    });
+    expect(jaAdjClass('実在する', 'じつざいする', false, true)).toEqual({
+      kind: 'ru', stem: '実在', reading: 'じつざい', attributive: '', predicative: '',
+      verb: { u: 'する', i: 'し', a: 'し', te: 'して', ta: 'した' },
+    });
+    expect(jaAdjClass('読む', undefined, false, true)).toMatchObject({ stem: '読', verb: { i: 'み', a: 'ま', te: 'んで', ta: 'んだ' } });
+  });
+
+  test('without the flag a verb-shaped base is not read as one', () => {
+    expect(jaAdjClass('違う', 'ちがう')).toMatchObject({ kind: 'na', stem: '違う' });
+    expect(jaAdjClass('違う', 'ちがう')).not.toHaveProperty('verb');
+  });
+
   test('any other base is a na-adjective with nothing to drop', () => {
     expect(jaAdjClass('ゼロ')).toEqual({ kind: 'na', stem: 'ゼロ', reading: undefined, attributive: '', predicative: '' });
   });

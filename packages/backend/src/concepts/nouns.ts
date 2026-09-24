@@ -519,6 +519,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The scale LONG sits on, as SIZE is BIG's: "of great length" (localization B87). Portuguese
+    // comprimento, the measured length (longitude is the geographic one); Spanish longitud.
+    id: 'LENGTH',
+    role: 'noun',
+    description: 'how long something is; extent from end to end',
+    emoji: '↔️',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'length', plural: 'lengths', count: 'singular' },
+      it: { base: 'lunghezza', plural: 'lunghezze', gender: 'fem', count: 'singular' },
+      fr: { base: 'longueur', plural: 'longueurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Länge', plural: 'Längen', gender: 'fem', count: 'singular' },
+      es: { base: 'longitud', plural: 'longitudes', gender: 'fem', count: 'singular' },
+      ja: { base: '長さ', count: 'singular', reading: 'ながさ' },
+      pt: { base: 'comprimento', plural: 'comprimentos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // Italian/Portuguese "qualità/qualidade" and the Romance feminines; `quality` relation so a
     // gloss reads "of high quality" (di alta qualità). Italian "qualità" is invariable in the plural.
     id: 'QUALITY',
@@ -638,6 +656,28 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
       ja: { base: '円', count: 'singular', reading: 'えん' },
       pt: { base: 'círculo', plural: 'círculos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The drawn line, `synonym: 'stroke'` (localization B78): "a long shape", on B87's LONG. LINE is
+    // the line of text typed as one command (riga, Zeile, 行), and a queue (fila, file, Schlange, 列)
+    // would be a third concept. French ligne, Spanish línea and Portuguese linha are LINE's words too;
+    // Italian linea / riga, German Linie / Zeile and Japanese 線 / 行 split them.
+    id: 'LINE_MARK',
+    role: 'noun',
+    description: 'a long thin mark drawn or printed on a surface',
+    definition: glossOf('SHAPE', 'LONG'),
+    emoji: '➖',
+    isA: 'SHAPE',
+    synonym: 'stroke',
+    forms: {
+      en: { base: 'line', plural: 'lines', count: 'singular' },
+      it: { base: 'linea', plural: 'linee', gender: 'fem', count: 'singular' },
+      fr: { base: 'ligne', plural: 'lignes', gender: 'fem', count: 'singular' },
+      de: { base: 'Linie', plural: 'Linien', gender: 'fem', count: 'singular' },
+      es: { base: 'línea', plural: 'líneas', gender: 'fem', count: 'singular' },
+      ja: { base: '線', count: 'singular', reading: 'せん' },
+      pt: { base: 'linha', plural: 'linhas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -800,6 +840,78 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'ponto', plural: 'pontos', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // A part of a place or of land (localization B78), not REGION, the UI's "part of a page or a
+    // screen". French zone, Spanish zona and Portuguese área are REGION's words too; the glosses tell
+    // them apart. German Gebiet and Japanese 地域 differ from REGION's Bereich and 領域.
+    id: 'AREA',
+    role: 'noun',
+    description: 'a part of a place, a town or a country',
+    definition: partOfGloss('PLACE'),
+    emoji: '🗾',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'area', plural: 'areas', count: 'singular' },
+      it: { base: 'zona', plural: 'zone', gender: 'fem', count: 'singular' },
+      fr: { base: 'zone', plural: 'zones', gender: 'fem', count: 'singular' },
+      de: { base: 'Gebiet', plural: 'Gebiete', gender: 'neut', count: 'singular' },
+      es: { base: 'zona', plural: 'zonas', gender: 'fem', count: 'singular' },
+      ja: { base: '地域', count: 'singular', reading: 'ちいき' },
+      pt: { base: 'área', plural: 'áreas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The middle of a thing, `synonym: 'middle'`; the institution (centro, Zentrum, センター) is another
+    // concept. Literal by design (localization B78): a center is defined by its distance from the
+    // edges, and neither EDGE nor MIDDLE is seeded; MAIN is the grammar's "not depending on another
+    // clause" (übergeordnet, 主), and "a point that is far" says the opposite.
+    id: 'CENTER',
+    role: 'noun',
+    description: 'the middle point or part of something',
+    emoji: '🎯',
+    synonym: 'middle',
+    forms: {
+      en: { base: 'center', plural: 'centers', count: 'singular' },
+      it: { base: 'centro', plural: 'centri', gender: 'masc', count: 'singular' },
+      fr: { base: 'centre', plural: 'centres', gender: 'masc', count: 'singular' },
+      de: { base: 'Mitte', plural: 'Mitten', gender: 'fem', count: 'singular' },
+      es: { base: 'centro', plural: 'centros', gender: 'masc', count: 'singular' },
+      ja: { base: '中心', count: 'singular', reading: 'ちゅうしん' },
+      pt: { base: 'centro', plural: 'centros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A part of an object that is not the center: a genitive and a negated copular relative on one
+    // head, STEPFATHER's shape. Thin (a corner is one too), but the one lead that does not come out
+    // as every part. Japanese 側面, the free noun: 側 (がわ) is bound in everyday use (右側, 向こう側),
+    // and 猫は側を見ます is stiff.
+    id: 'SIDE',
+    role: 'noun',
+    description: 'a part of a thing away from its middle; a face or edge of it',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'indefinite',
+        possessor: { concept: 'OBJECT_THING', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+        relative: {
+          verbPhrase: { verb: 'BE', negative: true },
+          complements: { predicative: { phrase: { concept: 'CENTER', definiteness: 'definite' } } },
+        },
+      },
+    },
+    emoji: '🔲',
+    isA: 'PART',
+    forms: {
+      en: { base: 'side', plural: 'sides', count: 'singular' },
+      it: { base: 'lato', plural: 'lati', gender: 'masc', count: 'singular' },
+      fr: { base: 'côté', plural: 'côtés', gender: 'masc', count: 'singular' },
+      de: { base: 'Seite', plural: 'Seiten', gender: 'fem', count: 'singular' },
+      es: { base: 'lado', plural: 'lados', gender: 'masc', count: 'singular' },
+      ja: { base: '側面', count: 'singular', reading: 'そくめん' },
+      pt: { base: 'lado', plural: 'lados', gender: 'masc', count: 'singular' },
+    },
+  },
   // ── The places of a motion ────────────────────────────────────────
   // Where a motion ends, starts and passes: what the direction, source and route complements indicate
   // (localization B37, "a complement that indicates destinations"). Each is a place, but one reached,
@@ -949,6 +1061,104 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'hogar', plural: 'hogares', gender: 'masc', count: 'singular' },
       ja: { base: '家', count: 'singular', reading: 'いえ' },
       pt: { base: 'lar', plural: 'lares', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── The parts of a building, and what one goes in (localization B78) ─
+  {
+    // The part of a building, not room as space (posto, place, Platz), which is another concept.
+    // Portuguese cômodo, the generic room (quarto is a bedroom, sala a living room); Spanish
+    // habitación. German Zimmer is the same in the plural.
+    id: 'ROOM',
+    role: 'noun',
+    description: 'a part of a building enclosed by walls',
+    definition: partOfGloss('BUILDING'),
+    emoji: '🛋️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'room', plural: 'rooms', count: 'singular' },
+      it: { base: 'stanza', plural: 'stanze', gender: 'fem', count: 'singular' },
+      fr: { base: 'pièce', plural: 'pièces', gender: 'fem', count: 'singular' },
+      de: { base: 'Zimmer', plural: 'Zimmer', gender: 'neut', count: 'singular' },
+      es: { base: 'habitación', plural: 'habitaciones', gender: 'fem', count: 'singular' },
+      ja: { base: '部屋', count: 'singular', reading: 'へや' },
+      pt: { base: 'cômodo', plural: 'cômodos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A room where one works, not a building: a building where one works is a factory too, and
+    // every office is at least a room. French bureau pluralises in -x.
+    id: 'OFFICE',
+    role: 'noun',
+    description: 'a room where people work',
+    definition: whereGloss('ROOM', 'WORK_LABOUR'),
+    emoji: '🗄️',
+    isA: 'ROOM',
+    forms: {
+      en: { base: 'office', plural: 'offices', count: 'singular' },
+      it: { base: 'ufficio', plural: 'uffici', gender: 'masc', count: 'singular' },
+      fr: { base: 'bureau', plural: 'bureaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Büro', plural: 'Büros', gender: 'neut', count: 'singular' },
+      es: { base: 'oficina', plural: 'oficinas', gender: 'fem', count: 'singular' },
+      ja: { base: '事務所', count: 'singular', reading: 'じむしょ' },
+      pt: { base: 'escritório', plural: 'escritórios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A part of a wall that one opens: C26's part-whole genitive carrying an object-gap relative.
+    // Japanese 開く壁の部分 can also read "the part of the wall that opens", which is a door as well.
+    id: 'DOOR',
+    role: 'noun',
+    description: 'a panel in a wall that opens and closes',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'indefinite',
+        possessor: { concept: 'WALL', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+        relative: { headRole: 'directObject', subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb: 'OPEN' } },
+      },
+    },
+    emoji: '🚪',
+    forms: {
+      en: { base: 'door', plural: 'doors', count: 'singular' },
+      it: { base: 'porta', plural: 'porte', gender: 'fem', count: 'singular' },
+      fr: { base: 'porte', plural: 'portes', gender: 'fem', count: 'singular' },
+      de: { base: 'Tür', plural: 'Türen', gender: 'fem', count: 'singular' },
+      es: { base: 'puerta', plural: 'puertas', gender: 'fem', count: 'singular' },
+      ja: { base: 'ドア', count: 'singular' },
+      pt: { base: 'porta', plural: 'portas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // An object with which one goes to a place. It is not a vehicle gloss (VEHICLE is not seeded):
+    // a bicycle fits it too. The goal keeps German from "mit dem man geht" ("walks with"), and MOVE
+    // would say the UI's verschieben. Spanish coche, the peninsular word; Portuguese carro, the
+    // Brazilian one the corpus's Portuguese already is. Japanese counts cars with 台.
+    id: 'CAR',
+    role: 'noun',
+    description: 'a road vehicle with an engine, for a few people',
+    definition: {
+      subject: {
+        concept: 'OBJECT_THING',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'instrumental',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'GO' },
+          complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+        },
+      },
+    },
+    emoji: '🚗',
+    isA: 'OBJECT_THING',
+    forms: {
+      en: { base: 'car', plural: 'cars', count: 'singular' },
+      it: { base: 'macchina', plural: 'macchine', gender: 'fem', count: 'singular' },
+      fr: { base: 'voiture', plural: 'voitures', gender: 'fem', count: 'singular' },
+      de: { base: 'Auto', plural: 'Autos', gender: 'neut', count: 'singular' },
+      es: { base: 'coche', plural: 'coches', gender: 'masc', count: 'singular' },
+      ja: { base: '車', count: 'singular', reading: 'くるま', counter: '台' },
+      pt: { base: 'carro', plural: 'carros', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -3285,6 +3495,37 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
       ja: { base: '国', count: 'singular', reading: 'くに' },
       pt: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A big place where many people live (localization B78): HOME's LIVE, under a `many` subject.
+    // Italian città is invariable; German Stadt umlauts in the plural (Städte). Japanese 都市, the
+    // city as a kind of place (町 is also the town).
+    id: 'CITY',
+    role: 'noun',
+    description: 'a large town; a big place where many people live',
+    definition: {
+      subject: {
+        concept: 'PLACE',
+        definiteness: 'indefinite',
+        adjectives: ['BIG'],
+        relative: {
+          headRole: 'locative',
+          subject: { concept: 'PERSON', definiteness: 'many', number: 'plural' },
+          verbPhrase: { verb: 'LIVE' },
+        },
+      },
+    },
+    emoji: '🏙️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'city', plural: 'cities', count: 'singular' },
+      it: { base: 'città', plural: 'città', gender: 'fem', count: 'singular' },
+      fr: { base: 'ville', plural: 'villes', gender: 'fem', count: 'singular' },
+      de: { base: 'Stadt', plural: 'Städte', gender: 'fem', count: 'singular' },
+      es: { base: 'ciudad', plural: 'ciudades', gender: 'fem', count: 'singular' },
+      ja: { base: '都市', count: 'singular', reading: 'とし' },
+      pt: { base: 'cidade', plural: 'cidades', gender: 'fem', count: 'singular' },
     },
   },
   {

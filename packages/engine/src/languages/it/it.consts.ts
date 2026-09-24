@@ -94,8 +94,12 @@ export const PRENOMINAL_QUALIFYING = new Set([
  * Their position is their sense for the last two: after the noun, "il giorno stesso" is the day
  * itself and "il giorno ultimo" is not said, where "la settimana scorsa" (LAST_PREVIOUS) and "la
  * settimana prossima" (NEXT_COMING) follow it as any adjective does (localization B66).
+ *
+ * The genuine REAL stands with them (localization B87): "un vero problema", where "una storia vera"
+ * is a true story. It says the noun holds, not what the thing is like, so it leaves the qualifying
+ * slot free: "un vero grande amico".
  */
-export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE']);
+export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER', 'SAME', 'LAST_FINAL', 'OWN_ADJECTIVE', 'REAL_GENUINE']);
 
 /** Every adjective that can precede the noun, of either kind. */
 export const PRENOMINAL = new Set([...PRENOMINAL_DETERMINER, ...PRENOMINAL_QUALIFYING]);
