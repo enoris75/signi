@@ -16,7 +16,7 @@ runs.` The distributives go the same way. P09-E25 has the five plurale-tantum la
 `every` whole, as `all` (`tutte le notizie`). English keeps them on its singular mass noun: `each news
 burns.`, `every news burns.`
 
-| Case | Now | Want (recommended ruling) |
+| Case | Now | Want (the ruling taken) |
 |---|---|---|
 | the three NEWS RUN (subject, English) | `the three news runs.` | `the three pieces of news run.` |
 | the CAT READs the three NEWS (object, English) | `the cat reads the three news.` | `the cat reads the three pieces of news.` |
@@ -50,3 +50,31 @@ with つ (三つの食べ物), which is acceptable, but a refusal takes it along
 | | |
 |---|---|
 | **Test** | `quantity-determiners.test.ts` → *known bugs: a mass noun is counted as if it were a count noun (A311)* (5 `test.fails`, one per row, plus a regression test for the five plurale-tantum languages, FOOD's kind-reading `each` and `all news`) |
+
+## Resolved
+
+2026-09-24. Both recommended rulings were taken. English counts news by the piece: `the three pieces
+of news run.`, `each piece of news burns.`, `every piece of news burns.`, with a plural verb after a
+numeral above one. A numeral on a noun that is mass in every language is refused by name.
+
+- [countMass.ts](../../../packages/engine/src/translator/functions/countMass.ts), called from
+  `resolveNounPhrase` in
+  [resolveNounPhrase.ts](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts) right
+  after `applyPluralOnly`. `applyMassUnit` swaps a mass head that seeds a unit for that unit's counted
+  phrase when a numeral or a distributive (`each`, `every`) meets it. The head then drops its mass
+  flag, so it counts and agrees as a count noun. `refuseUncountableNumeral` throws (`a numeral cannot
+  count FOOD: it is a mass noun in every language, and no unit word is seeded to count it by (A311)`)
+  when no language's lexeme of the concept counts it, by a plurale tantum or a unit word. The check
+  reads all seven lexemes, so the refusal is the same in every language. Japanese NEWS still counts
+  (三つのニュース), because the other languages count NEWS.
+- Corpus: the English NEWS lexeme in
+  [nouns.ts](../../../packages/backend/src/concepts/nouns.ts) seeds `unit: 'piece of news'` and
+  `unit_plural: 'pieces of news'`. These are the whole counted phrases, so the language-neutral
+  resolver writes no English *of*. The live database needs a reseed.
+- FOOD's kind-reading `each` / `every` (`ogni cibo`, `every food`) and `all news burns.` are unchanged.
+
+Guarded by `quantity-determiners.test.ts` → *known bugs: a mass noun is counted as if it were a count
+noun (A311)*: the five former `test.fails`, now plain tests, two new tests (the unit with an
+adjective, an approximator, the numeral one, the object slot, the plain and `some` mass noun, and
+Japanese; the refusal on WATER, on the numeral one, in the object, and not on a distributive), and
+the regression test. Unit cases are in `countMass.test.ts`.

@@ -256,24 +256,42 @@ describe('P09-E25 on a plurale tantum', () => {
 // ruling (see the bug file's Decisions): English counts news by the piece, and a numeral on a noun that
 // is mass in every language is refused by name.
 describe('known bugs: a mass noun is counted as if it were a count noun (A311)', () => {
-  test.fails('English NEWS with a numeral, as the subject', () => {
+  test('English NEWS with a numeral, as the subject', () => {
     expect(sayAll(clause(np('NEWS', { numeral: 3 }), 'RUN')).en).toBe('the three pieces of news run.');
   });
 
-  test.fails('English NEWS with a numeral, as the object', () => {
+  test('English NEWS with a numeral, as the object', () => {
     expect(sayAll(clause(np('CAT'), 'READ', { directObject: np('NEWS', { numeral: 3 }) })).en).toBe('the cat reads the three pieces of news.');
   });
 
-  test.fails('English NEWS with each', () => {
+  test('English NEWS with each', () => {
     expect(sayAll(clause(np('NEWS', { definiteness: 'each' }), 'BURN')).en).toBe('each piece of news burns.');
   });
 
-  test.fails('English NEWS with every', () => {
+  test('English NEWS with every', () => {
     expect(sayAll(clause(np('NEWS', { definiteness: 'every' }), 'BURN')).en).toBe('every piece of news burns.');
   });
 
-  test.fails('a numeral on a noun that is mass in every language is refused by name', () => {
+  test('a numeral on a noun that is mass in every language is refused by name', () => {
     expect(() => sayAll(clause(np('FOOD', { numeral: 3 }), 'BURN'))).toThrow(/numeral/);
+  });
+
+  // The unit is the English lexeme's (`unit`, `unit_plural`); only a numeral or a distributive reads it.
+  test('the unit takes an adjective, an approximator and the object slot, and the plain mass noun stays', () => {
+    expect(sayAll(clause(np('NEWS', { numeral: 3, adjectives: ['NEW'] }), 'RUN')).en).toBe('the three new pieces of news run.');
+    expect(sayAll(clause(np('NEWS', { numeral: 3, approximator: 'about' }), 'RUN')).en).toBe('about three pieces of news run.');
+    expect(sayAll(clause(np('NEWS', { numeral: 1 }), 'RUN')).en).toBe('the one piece of news runs.');
+    expect(sayAll(clause(np('CAT'), 'READ', { directObject: np('NEWS', { definiteness: 'each' }) })).en).toBe('the cat reads each piece of news.');
+    expect(sayAll(clause(np('NEWS'), 'RUN')).en).toBe('the news runs.');
+    expect(sayAll(clause(np('NEWS', { definiteness: 'some' }), 'RUN')).en).toBe('some news runs.');
+    expect(sayAll(clause(np('NEWS', { numeral: 3 }), 'RUN')).ja).toBe('三つのニュースは走ります。');
+  });
+
+  test('the refusal covers any numeral, any slot and WATER, but not a distributive', () => {
+    expect(() => sayAll(clause(np('WATER', { numeral: 3 }), 'BURN'))).toThrow(/numeral/);
+    expect(() => sayAll(clause(np('FOOD', { numeral: 1 }), 'BURN'))).toThrow(/numeral/);
+    expect(() => sayAll(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { numeral: 2 }) }))).toThrow(/numeral/);
+    expect(sayAll(clause(np('FOOD', { definiteness: 'every' }), 'BURN'))).toMatchObject({ en: 'every food burns.', it: 'ogni cibo brucia.' });
   });
 
   test('regression: the five plurale-tantum languages count NEWS, and FOOD keeps its kind-reading each', () => {

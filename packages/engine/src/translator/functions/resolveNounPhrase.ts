@@ -9,6 +9,7 @@ import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
 import { applyPluralOnly } from './applyPluralOnly.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
+import { applyMassUnit, refuseUncountableNumeral } from './countMass.js';
 import { isGenericBound } from '../../functions/boundPossessor.js';
 import { foldIndefiniteModifier } from './foldIndefiniteModifier.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
@@ -154,6 +155,10 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // asks — the lexeme wins, as a mass noun's singular does (P09-E41 D2). Settled first, since it also
     // sheds the concept's mass flag, which the quantifiers below read.
     const pluralOnly = applyPluralOnly(head.forms);
+    // A numeral on a noun no language counts is refused; one a language counts by a unit word takes
+    // that word here, as does a distributive, so the quantifiers below see a count noun (A311).
+    refuseUncountableNumeral(np, head.forms, lookup);
+    applyMassUnit(head.forms, np.numeral, unmassed);
     // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25), read after
     // a plurale tantum has shed its mass flag. A plurale tantum has no singular for the distributives
     // to take, so each / every take it whole, as `all`: "tutte le notizie", never "*ogni notizie".

@@ -6596,7 +6596,8 @@ export const nouns: ConceptSeed[] = [
     emoji: '📰',
     countable: false,
     forms: {
-      en: { base: 'news', count: 'singular' },
+      // Mass in English, counted by the piece (A311): "three pieces of news", "each piece of news".
+      en: { base: 'news', count: 'singular', unit: 'piece of news', unit_plural: 'pieces of news' },
       it: { base: 'notizie', gender: 'fem', count: 'plural' },
       fr: { base: 'nouvelles', gender: 'fem', count: 'plural' },
       de: { base: 'Nachrichten', gender: 'fem', count: 'plural' },
