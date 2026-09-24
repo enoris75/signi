@@ -49,3 +49,19 @@ Found from A348's Decisions ("candidates; not pinned"), 2026-09-24.
 **Neighbouring leads, not filed here.** The other six under *within* and *during* with an
 indefinite plural may read oddly too: `innerhalb Stunden`, `während Stunden`, `entro ore`,
 `durante ore`, `d'ici des heures`. Not reviewed or reproduced as bugs; one ticket per topic.
+
+## Resolved
+
+2026-09-24. [ja/jaMeasuredOnce.ts](../../../packages/engine/src/languages/ja/jaMeasuredOnce.ts) marks
+a plural indefinite or bare measure noun (`number` plural or A348's `plural_unmarked`) under *within*,
+*during* and *ago* as `few`, and still as `many` under *for*;
+[ja/jaCounted.ts](../../../packages/engine/src/languages/ja/jaCounted.ts) writes `few` as 数 + the
+counter, with no も, in the head's place: 数時間以内に, 数日の間に, 数年前に, 数週間, 数か月. **Ruled:**
+数時間前に, not 何時間も前に; *for hours* keeps 何時間も (A348). **Not done:** a definite plural is
+unchanged and unpinned (猫は時間以内に走ります, 猫は時間走ります).
+
+Tests: the three `test.fails` in `complements/temporal.test.ts` (*known bugs: a Japanese plural
+measure noun under within, during and ago reads as one (A362)*) now pass, plus a new case for WEEK and
+MONTH under the three relations and DAY in the past. `jaMeasuredOnce.test.ts`'s plural case now asserts
+`few` under within, during and ago (it asserted the old count of one under *within*), and
+`jaCounted.test.ts` gains a `few` case.

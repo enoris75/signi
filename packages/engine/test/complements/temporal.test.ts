@@ -825,14 +825,14 @@ describe('known bugs: a Japanese plural measure noun under within, during and ag
       complements: { temporal: { phrase: np(concept, { number: 'plural', definiteness }), specifiers: [{ kind: 'temporal', value }] } },
     } as never));
 
-  test.fails('within, during and ago hours', () => {
+  test('within, during and ago hours', () => {
     expect(['within', 'during', 'ago'].map((v) => runsAt(v).ja)).toEqual([
       '猫は数時間以内に走ります。', '猫は数時間の間に走ります。', '猫は数時間前に走ります。',
     ]);
     expect(runsAt('ago', 'HOUR', 'indefinite', 'past').ja).toBe('猫は数時間前に走りました。');
   });
 
-  test.fails('days and years', () => {
+  test('days and years', () => {
     expect(['within', 'during', 'ago'].flatMap((v) => [runsAt(v, 'DAY').ja, runsAt(v, 'YEAR').ja])).toEqual([
       '猫は数日以内に走ります。', '猫は数年以内に走ります。',
       '猫は数日の間に走ります。', '猫は数年の間に走ります。',
@@ -840,10 +840,19 @@ describe('known bugs: a Japanese plural measure noun under within, during and ag
     ]);
   });
 
-  test.fails('a bare plural', () => {
+  test('a bare plural', () => {
     expect(['within', 'during', 'ago'].map((v) => runsAt(v, 'HOUR', 'bare').ja)).toEqual([
       '猫は数時間以内に走ります。', '猫は数時間の間に走ります。', '猫は数時間前に走ります。',
     ]);
+  });
+
+  test('weeks and months, and the past', () => {
+    expect(['within', 'during', 'ago'].flatMap((v) => [runsAt(v, 'WEEK').ja, runsAt(v, 'MONTH').ja])).toEqual([
+      '猫は数週間以内に走ります。', '猫は数か月以内に走ります。',
+      '猫は数週間の間に走ります。', '猫は数か月の間に走ります。',
+      '猫は数週間前に走ります。', '猫は数か月前に走ります。',
+    ]);
+    expect(runsAt('within', 'DAY', 'indefinite', 'past').ja).toBe('猫は数日以内に走りました。');
   });
 
   test('regression: one hour, for hours, and English', () => {

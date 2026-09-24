@@ -20,6 +20,14 @@ describe('jaCounted', () => {
     expect(jaCounted(np({ many: '1', counter: '匹' }))).toBeUndefined();
   });
 
+  test('an unspecified few is 数 + the counter, no も, in the head\'s place (A362)', () => {
+    const counted = jaCounted(np({ few: '1', counter: '時間', counter_join: 'head' }));
+    expect(counted?.segs).toEqual([{ t: '数時間' }]);
+    expect(counted?.replacesHead).toBe(true);
+    expect(jaCounted(np({ few: '1', counter: '日', counter_join: 'head' }))?.segs).toEqual([{ t: '数日' }]);
+    expect(jaCounted(np({ few: '1', counter: '匹' }))).toBeUndefined();
+  });
+
   test('a time word is its own counter, and is not said twice', () => {
     const counted = jaCounted(np({ numeral: '24', counter: '時間', counter_join: 'head' }));
     expect(counted?.segs).toEqual([{ t: '二十四時間' }]);
