@@ -6528,6 +6528,29 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'história', plural: 'histórias', gender: 'fem', count: 'singular' },
     },
   },
+  {
+    // A **plurale tantum** in five of the seven (P09-E41): *le notizie, les nouvelles, die
+    // Nachrichten, las noticias, as notícias* are plural in every use — the singular *la notizia* is
+    // "a news item" — while English *news* is mass and singular ("the news seems good"). Each of the
+    // five carries `count: 'plural'` and seeds its plural surface as `base` with no `plural`: the
+    // noun phrase then resolves plural whatever the plan asks (see `resolveNounPhrase`), so the
+    // article, the adjective and the verb agree plural. The concept is mass for English's sake;
+    // a plural-only lexeme sheds that, since *notizie* counts ("tre notizie").
+    id: 'NEWS',
+    role: 'noun',
+    description: 'reports of recent events',
+    emoji: '📰',
+    countable: false,
+    forms: {
+      en: { base: 'news', count: 'singular' },
+      it: { base: 'notizie', gender: 'fem', count: 'plural' },
+      fr: { base: 'nouvelles', gender: 'fem', count: 'plural' },
+      de: { base: 'Nachrichten', gender: 'fem', count: 'plural' },
+      es: { base: 'noticias', gender: 'fem', count: 'plural' },
+      ja: { base: 'ニュース', count: 'singular' },
+      pt: { base: 'notícias', gender: 'fem', count: 'plural' },
+    },
+  },
   // ── Substances and states (localization B53) ───────────────────────
   {
     id: 'SUBSTANCE',

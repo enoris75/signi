@@ -26,6 +26,7 @@ Proposed forms, for the seed author to check. Every row was **seeded in memory a
   [P09-E41](../../features/P-planning/P09-core-vocabulary/P09-E41-pluralia-tantum.md), which also
   owns NEWS. When it lands, the author can swap BUSINESS to the plural forms. *Commercio / commerce /
   Handel* are the trade itself and are correct as they stand, just less colloquial.
+  **E41 has landed (2026-09-24):** a lexeme seeded `count: 'plural'` with its plural as `base` now renders plural throughout ([P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
 - **COMPANY_BUSINESS keeps `synonym: 'business'`.** English then shows "business" and "company
   (business)" side by side, which is what the split is: the activity and the firm. If that reads
   badly, the author should rename the synonym (*firm*). OBJECT_THING's *thing* → *item* rename in

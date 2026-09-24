@@ -7,6 +7,7 @@ import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
 import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
+import { applyPluralOnly } from './applyPluralOnly.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
@@ -142,16 +143,24 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
       picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && otherLeads
         ? 'bare'
         : picked;
-    // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25).
-    const definiteness = head.forms['uncountable'] === '1' ? MASS_DETERMINER[unmassed] ?? unmassed : unmassed;
     // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
     // A cardinal above one counts, so it pluralises the head wherever the language has a plural —
     // "two cats", "le due case" — which is the first thing the numeral does (C31). At one it leaves
     // the number alone, and a mass noun is never counted.
+    // A plurale tantum (*le notizie*, *die Nachrichten*) is plural whatever the plan or its determiner
+    // asks — the lexeme wins, as a mass noun's singular does (P09-E41 D2). Settled first, since it also
+    // sheds the concept's mass flag, which the quantifiers below read.
+    const pluralOnly = applyPluralOnly(head.forms);
+    // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25), read after
+    // a plurale tantum has shed its mass flag. A plurale tantum has no singular for the distributives
+    // to take, so each / every take it whole, as `all`: "tutte le notizie", never "*ogni notizie".
+    const definiteness = head.forms['uncountable'] === '1' ? MASS_DETERMINER[unmassed] ?? unmassed
+      : pluralOnly && SINGULAR_DETERMINERS.has(unmassed) ? 'all'
+      : unmassed;
     const counted = (np.numeral ?? 0) > 1 && head.forms['uncountable'] !== '1';
     const forcesPlural = counted || (PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1');
     const forcesSingular = (definiteness === 'no' && NO_TAKES_SINGULAR.has(language)) || SINGULAR_DETERMINERS.has(definiteness);
-    const num = forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
+    const num = pluralOnly || forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);
     // Then the head's *own* word, where an adjective is part of it (ja 兄弟 + ELDER → 兄, P11 D5) —
@@ -249,7 +258,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // agree its adjectives) and resolve those adjectives against that gender/number.
     nounModifiers: (np.nounModifiers ?? []).map((m) => {
       const concept = resolve(m.concept, language, lookup);
-      const number = m.number ?? 'singular';
+      // A plural-only modifier is plural whatever the plan says, as the head is (P09-E41).
+      const number = applyPluralOnly(concept.forms) ? 'plural' : m.number ?? 'singular';
       // Fall back to singular when the lexicon has no plural surface (so isPlural/surface
       // don't select a missing form) — same guard the head noun uses above.
       concept.forms['number'] = (number === 'plural' && !concept.forms['plural']) ? 'singular' : number;
