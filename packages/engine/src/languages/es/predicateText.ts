@@ -29,6 +29,7 @@ import { conjugate } from './conjugate.js';
 import { slotFocus } from '../../functions/slotFocus.js';
 import { withFocus } from '../../functions/withFocus.js';
 import { coordinateElement } from './coordinateElement.js';
+import { esCliticCluster } from './esCliticCluster.js';
 import { esCliticize } from './esCliticize.js';
 import { esEnclitic } from './esEnclitic.js';
 import { isPlural } from './isPlural.js';
@@ -278,13 +279,18 @@ export function predicateText(
     ? (subjectForms['generic_reflexive'] ?? '') : '';
   const impersonalClitic = isGeneric && !genericSubject ? (subjectForms['base'] ?? '') : '';
   // A pronoun recipient is the dative clitic in the same slot, "le da el libro", "me da el libro"
-  // (A351): the plain clitic, undoubled. Only where the slot is free: the clitic path writes one
-  // clitic, and beside an object clitic, a pronominal verb's own or the impersonal se the recipient
-  // keeps its "a ella" rather than half a cluster.
-  const recipientForms = !objectClitic && !isGeneric && !reflexiveClitic(copulaVerb.forms, subjectForms)
+  // (A351): the plain clitic, undoubled. Beside a 3rd-person object clitic the two are one cluster,
+  // dative first, le / les turning se: "se lo da", "me lo da", riding wherever the lone clitic rides
+  // (A359). A 1st / 2nd person object admits no dative clitic beside it, and beside a pronominal
+  // verb's own or the impersonal se the recipient keeps its "a ella" rather than half a cluster.
+  const clusterObject = !!directObject && !objectPrep && !experiencerClitic && isPronounElement(directObject)
+    && firstConjunct(directObject).head.forms['person'] === '3';
+  const recipientForms = (!objectClitic || clusterObject) && !isGeneric && !reflexiveClitic(copulaVerb.forms, subjectForms)
     ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
-  const clitic = objectClitic || recipientClitic;
+  const clitic = esCliticCluster(recipientClitic, objectClitic);
+  // Attached to its host, a cluster is one word, the accent placed for the longer word: "dáselo".
+  const encliticCluster = clitic.replace(/ /g, '');
   const proclitics = [impersonalClitic, clitic].filter(Boolean).join(' ');
   // A passive has no direct object left — the patient is this clause's subject now — so the slot
   // after the verb carries the by-phrase instead ("es comida por el gato en la casa").
@@ -318,7 +324,7 @@ export function predicateText(
       : (imperativeForm('es', nonReflexiveVerb(copulaVerb), moodPN(subjectForms), impNeg) ?? conjugated);
     const enclitic = register === 'instruction' || !impNeg;
     const impVerb = enclitic
-      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${clitic}`)}`
+      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${encliticCluster}`)}`
       : esCliticize([reflexive, clitic].filter(Boolean).join(' '), `no ${impForm}`);
     return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
@@ -336,7 +342,7 @@ export function predicateText(
     // A negative link ("sigue sin correr", A315) is the clause's negator, so it writes no "no" of its
     // own, and a negative word after it concords with it: "sin comer ninguna comida".
     const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
-    const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, clitic)}`;
+    const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, encliticCluster)}`;
     return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

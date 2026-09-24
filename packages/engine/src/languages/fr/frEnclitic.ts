@@ -12,6 +12,9 @@ const REFLEXIVE_BY_PERSON: Record<string, string> = { '2sg': 'toi', '1pl': 'nous
  */
 export function frEnclitic(verb: string, objectClitic: string, reflexive: boolean, pn: string): string {
   const bare = reflexive ? verb.replace(LEADING_REFLEXIVE, '') : verb;
-  const pronouns = [reflexive ? REFLEXIVE_BY_PERSON[pn] ?? '' : '', STRESSED[objectClitic] ?? objectClitic].filter(Boolean);
+  // A cluster comes in its postverbal order, object first ("le lui", "le me"), each pronoun its own
+  // hyphenated word: "donne-le-lui", "donne-le-moi" (A359).
+  const objects = objectClitic.split(' ').filter(Boolean).map((c) => STRESSED[c] ?? c);
+  const pronouns = [reflexive ? REFLEXIVE_BY_PERSON[pn] ?? '' : '', ...objects].filter(Boolean);
   return [bare, ...pronouns].join('-');
 }
