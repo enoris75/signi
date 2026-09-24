@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A and Part B are both empty: no `test.fails` is left).** If
+this writing Part A holds A278–A290 and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -62,7 +62,36 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. The fifteen still open on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
+| # | File | Language | Summary |
+|---|---|---|---|
+| A278 | [A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md](A-must-fix/A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md) | Japanese | a な-adjective keeps its な before the indirect question's か: 猫が幸せなかどうか for 幸せであるかどうか |
+| A279 | [A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md](A-must-fix/A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md) | Japanese | a state verb in a content clause takes its dictionary form: 猫が本を持つと言います, 知るかどうか for 持っている, 知っている |
+| A280 | [A280-japanese-passive-terminus-question-doubles-ni.md](A-must-fix/A280-japanese-passive-terminus-question-doubles-ni.md) | Japanese | a passive terminus question doubles に: 本は女に誰にあげられますか for 女によって |
+| A281 | [A281-german-inanimate-dative-question-asks-with-was.md](A-must-fix/A281-german-inanimate-dative-question-asks-with-was.md) | German | an inanimate dative question asks with *was*: `was gibt der Mann das Buch?` for *wem* |
+| A282 | [A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md](A-must-fix/A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md) | English | a passive agent question strands *by* ahead of the recipient: `who is the book given by to the child?` for *given to the child by* |
+| A283 | [A283-english-postposed-equative-drops-just-under-very.md](A-must-fix/A283-english-postposed-equative-drops-just-under-very.md) | English | VERY drops "just" from a postposed equative: `a cat as big as the dog` for *just as big* |
+| A284 | [A284-spanish-portuguese-estar-before-a-transient-superlative.md](A-must-fix/A284-spanish-portuguese-estar-before-a-transient-superlative.md) | Spanish, Portuguese | *estar* before a transient superlative: `el gato está el más feliz de los animales` for *es* |
+| A285 | [A285-japanese-negated-superlative-reads-as-the-least.md](A-must-fix/A285-japanese-negated-superlative-reads-as-the-least.md) | Japanese | a negated superlative reads as the least: 最も大きくないです for 最も大きいわけではありません |
+| A286 | [A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md](A-must-fix/A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md) | German | a noun after *von* stays genitive in a coordinated set: `von uns und der Hunde` for *den Hunden* |
+| A287 | [A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md](A-must-fix/A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md) | Italian | a role or essive noun with a pronominal possessor takes the article: `come il suo amico` for *come suo amico* |
+| A288 | [A288-relative-clause-over-a-role-gap-renders-nonsense.md](A-must-fix/A288-relative-clause-over-a-role-gap-renders-nonsense.md) | English, Italian, French, German, Spanish, Portuguese (translator) | a relative clause over a role gap renders nonsense (`come quale`, `als  der Mann`); refuse it by name |
+| A289 | [A289-french-definite-object-with-a-numeral-drops-its-article.md](A-must-fix/A289-french-definite-object-with-a-numeral-drops-its-article.md) | French | a definite object with a numeral drops its article: `le chat lit deux livres` for *les deux livres* |
+| A290 | [A290-japanese-comitative-relative-drops-its-company.md](A-must-fix/A290-japanese-comitative-relative-drops-its-company.md) | Japanese | a comitative relative drops its company: 猫が走る犬 for 猫が一緒に走る犬 |
+
+**Thirteen open**, **A278–A290**, all filed on 2026-09-24 by an audit of the engine test coverage
+of P09-E13 to E19 (the role complement, the possessor, marked-relation and passive questions, the
+indirect question, and the attributive and superlative comparisons). Every line of the new code was
+already covered; these were found by rendering the language × variant cells no test pinned. Six
+are the new constructs' own: the indirect question's か after a な-adjective (A278), the passive
+question's agent particle and stranded *by* (A280, A282), German *was* where the gap is dative
+(A281), English VERY's "just" once E18 postposes the equative (A283), and the relative over a role
+gap (A288). The rest are older defects the new constructs make visible: a Japanese state verb in a
+content clause (A279), *estar* before a superlative (A284), a Japanese negated superlative (A285), a
+German mixed set after *von* (A286), an Italian role noun's article (A287), a French definite
+numeral object (A289) and a Japanese comitative relative (A290). A282 and A288 each leave a
+decision for the fixer.
+
+The fifteen filed before them on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
 same day by five lanes and are listed under **Fixed** below. The content-clause tense fix now covers
 the cases A254 and A260 left: Italian *stare* has its present subjunctive (A261), a past progressive
 under a subjunctive governor takes the imperfect subjunctive of its auxiliary under a present or a

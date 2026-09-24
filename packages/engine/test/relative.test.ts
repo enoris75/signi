@@ -1651,3 +1651,34 @@ describe('known bugs: an object relative with no subject reads as a subject rela
     expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')).en).toBe('the cat that eats runs.');
   });
 });
+
+// A290. A Japanese relative clause drops the gap's particle, which is fine for an object, a place or
+// an instrument, but leaves nothing to say a comitative head was company: 猫が走る犬 for 猫が一緒に走る犬.
+// The Want is what the engine writes once the clause carries TOGETHER (一緒に) itself.
+describe('known bugs: a Japanese comitative relative drops its company (A290)', () => {
+  const runsWith = (verbPhrase: VerbPhrase = { verb: 'RUN' }): RelativeClause =>
+    ({ headRole: 'comitative', subject: np('CAT'), verbPhrase });
+
+  test.fails('the comitative gap says 一緒に, on an object', () => {
+    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith() }) })).ja)
+      .toBe('女は猫が一緒に走る犬を見ます。');
+  });
+
+  test.fails('the comitative gap says 一緒に, on a subject', () => {
+    expect(sayAll(clause(np('FRIEND', { relative: { headRole: 'comitative', subject: np('MAN'), verbPhrase: { verb: 'ACT' } } }), 'RUN')).ja)
+      .toBe('男が一緒に行動する友達は走ります。');
+  });
+
+  test('regression: the other six keep the preposition, and a clause that says TOGETHER already reads right', () => {
+    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith() }) }))).toMatchObject({
+      en: 'the woman sees the dog with which the cat runs.',
+      it: 'la donna vede il cane con il quale il gatto corre.',
+      fr: 'la femme voit le chien avec lequel le chat court.',
+      de: 'die Frau sieht den Hund, mit dem der Kater läuft.',
+      es: 'la mujer ve el perro con el que el gato corre.',
+      pt: 'a mulher vê o cão com o qual o gato corre.',
+    });
+    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith({ verb: 'RUN', modifier: 'TOGETHER' }) }) })).ja)
+      .toBe('女は猫が一緒に走る犬を見ます。');
+  });
+});

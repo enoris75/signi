@@ -1,6 +1,37 @@
 # A-must-fix — confirmed bugs
 
-**None open.** The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
+**Thirteen open**, **A278–A290**, filed on 2026-09-24 by an audit of the engine test coverage of
+P09-E13 to E19. Every line of the new code was covered; these came from rendering the cells no test
+pinned.
+[A278](A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md), a Japanese な-adjective keeping its な before the indirect question's か
+(*猫が幸せなかどうか* for *幸せであるかどうか*).
+[A279](A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md), a Japanese state verb in a content clause taking its dictionary form (*猫が本を持つと言います*
+for *持っている*); A132's 〜ている covers the main clause only.
+[A280](A280-japanese-passive-terminus-question-doubles-ni.md), a Japanese passive terminus question doubling に (*本は女に誰にあげられますか* for
+*女によって*), because `jaAgentParticle` runs before the asked terminus joins the complements.
+[A281](A281-german-inanimate-dative-question-asks-with-was.md), a German inanimate dative question asking with *was*, which has no dative (*was gibt der
+Mann das Buch?*, *was hilft der Kater?* for *wem*); A223 fixed only the statement.
+[A282](A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md), an English passive agent question stranding *by* ahead of the recipient (*who is the book
+given by to the child?*); the fixer rules whether *by* goes after the arguments only (recommended,
+keeps P09-E16's D2) or at the end of the clause.
+[A283](A283-english-postposed-equative-drops-just-under-very.md), English VERY still dropping "just" from an equative that P09-E18 now puts after the noun
+(*a cat as big as the dog* for *just as big*).
+[A284](A284-spanish-portuguese-estar-before-a-transient-superlative.md), Spanish and Portuguese *estar* before a transient superlative, an article-headed noun
+phrase that takes *ser* (*el gato está el más feliz de los animales*). A257's HAPPY row in
+intensifiers.test.ts asserts the wrong copula and must move with the fix.
+[A285](A285-japanese-negated-superlative-reads-as-the-least.md), a Japanese negated superlative coming out byte-identical to the least (*最も大きくないです*,
+want *最も大きいわけではありません*, as A249 does).
+[A286](A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md), German leaving the noun genitive after *von* in a coordinated set that starts with a
+pronoun (*von uns und der Hunde*).
+[A287](A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md), an Italian role or essive noun with a pronominal possessor taking the article (*come il suo
+amico*), which turns the role back into the likeness; the target stays bare once A277 lands.
+[A288](A288-relative-clause-over-a-role-gap-renders-nonsense.md), a relative clause over a role gap rendering word salad (*come quale*, *als  der Mann*); the
+proposed target is a refusal by name, as the role question already is.
+[A289](A289-french-definite-object-with-a-numeral-drops-its-article.md), a French definite or demonstrative object with a numeral losing its determiner (*le chat lit
+deux livres*), because `objectArtFor` drops every article beside a numeral.
+[A290](A290-japanese-comitative-relative-drops-its-company.md), a Japanese comitative relative dropping its company (*猫が走る犬* for *猫が一緒に走る犬*).
+
+The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
 fix did. The history below is kept as it was written, in the present tense of each filing.
 

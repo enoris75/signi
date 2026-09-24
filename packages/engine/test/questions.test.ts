@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { PhrasePlan, Specifier } from '@signi/shared';
+import type { PathSpecifier, PhrasePlan, Specifier, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll, translateAll } from './harness.js';
 
 // A wh-question is a clause with a gap (PhrasePlan.questionRole, P09-E6): the slot it asks about is
@@ -282,19 +282,30 @@ describe('the possessor question', () => {
   });
 
   test('a plural possessed noun, and an adjective on it', () => {
-    expect(sayAll(whose(clause(np('CAT'), 'READ', { directObject: np('BOOK', { number: 'plural' }) }), 'directObject'))).toMatchObject({
+    expect(sayAll(whose(clause(np('CAT'), 'READ', { directObject: np('BOOK', { number: 'plural' }) }), 'directObject'))).toEqual({
       en: 'whose books does the cat read?',
       it: 'di chi legge i libri il gatto?',
+      fr: 'de qui est-ce que le chat lit les livres ?',
       de: 'wessen Bücher liest der Kater?',
+      es: '¿de quién lee el gato los libros?',
+      pt: 'de quem o gato lê os livros?',
       ja: '猫は誰の本を読みますか？',
     });
     // German declines strong after wessen, which declines nothing itself.
-    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { adjectives: ['GREAT'] }) }), 'directObject'))).toMatchObject({
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { adjectives: ['GREAT'] }) }), 'directObject'))).toEqual({
       en: 'whose great food does the cat eat?',
+      it: 'di chi mangia il grande cibo il gatto?',
+      fr: 'de qui est-ce que le chat mange la grande nourriture ?',
+      ja: '猫は誰の大きい食べ物を食べますか？',
+      pt: 'de quem o gato come a comida grande?',
       de: 'wessen großes Essen frisst der Kater?',
       es: '¿de quién come el gato la comida grande?',
     });
-    expect(sayAll(whose(clause(np('DOG', { adjectives: ['GREAT'] }), 'RUN')))).toMatchObject({
+    expect(sayAll(whose(clause(np('DOG', { adjectives: ['GREAT'] }), 'RUN')))).toEqual({
+      en: 'whose great dog runs?',
+      es: '¿el perro grande de quién corre?',
+      ja: '誰の大きい犬が走りますか？',
+      pt: 'o cão grande de quem corre?',
       de: 'wessen großer Hund läuft?',
       it: 'il grande cane di chi corre?',
       fr: 'le grand chien de qui court ?',
@@ -308,15 +319,22 @@ describe('the possessor question', () => {
 
   test('the tenses, negation and a dropped pronoun subject keep the order', () => {
     expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'past', negative: true } }), 'directObject')))
-      .toMatchObject({
+      .toEqual({
         en: 'whose food did the cat not eat?',
-        de: 'wessen Essen fraß der Kater nicht?',
         it: 'di chi non mangiò il cibo il gatto?',
+        fr: 'de qui est-ce que le chat ne mangea pas la nourriture ?',
+        de: 'wessen Essen fraß der Kater nicht?',
+        es: '¿de quién no comió el gato la comida?',
+        ja: '猫は誰の食べ物を食べませんでしたか？',
+        pt: 'de quem o gato não comeu a comida?',
       });
-    expect(sayAll(whose(clause(np('FIRST_PERSON'), 'EAT', { directObject: np('FOOD') }), 'directObject'))).toMatchObject({
+    expect(sayAll(whose(clause(np('FIRST_PERSON'), 'EAT', { directObject: np('FOOD') }), 'directObject'))).toEqual({
       en: 'whose food do I eat?',
       it: 'di chi mangio il cibo?',
+      fr: 'de qui est-ce que je mange la nourriture ?',
+      de: 'wessen Essen esse ich?',
       es: '¿de quién como la comida?',
+      ja: '私は誰の食べ物を食べますか？',
       pt: 'de quem como a comida?',
     });
   });
@@ -341,6 +359,94 @@ describe('the possessor question', () => {
     expect(() => translateAll(eats(np('FOOD', { possessorRole: 'whole' })))).toThrow(/owner.*P09-E14/);
     expect(() => translateAll({ ...whose(clause(np('CAT'), 'EAT')), questionPossessed: 'locative' as never })).toThrow(/P09-E14/);
   });
+
+  test('German declines the possessed noun for the case its verb governs, strong after wessen', () => {
+    const helps = (directObject: PhrasePlan['directObject']) => whose(clause(np('CAT'), 'HELP_VERB', { directObject }), 'directObject');
+    expect(sayAll(helps(np('DOG'))).de).toBe('wessen Hund hilft der Kater?');
+    expect(sayAll(helps(np('DOG', { number: 'plural', adjectives: ['GREAT'] }))).de).toBe('wessen großen Hunden hilft der Kater?');
+    expect(sayAll(helps(np('WOMAN')))).toMatchObject({
+      de: 'wessen Frau hilft der Kater?',
+      es: '¿de quién ayuda el gato a la mujer?', // a person asked about keeps the personal a
+    });
+    expect(sayAll(whose(clause(np('CAT'), 'SEE', { directObject: np('DOG', { adjectives: ['GREAT'] }) }), 'directObject')).de)
+      .toBe('wessen großen Hund sieht der Kater?');
+  });
+
+  test('a masculine noun under the object\'s preposition contracts with it', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'DEPEND', { directObject: np('DOG') }), 'directObject'))).toEqual({
+      en: 'whose dog does the cat depend on?',
+      it: 'dal cane di chi dipende il gatto?',
+      fr: 'du chien de qui est-ce que le chat dépend ?',
+      de: 'von wessen Hund hängt der Kater ab?',
+      es: '¿del perro de quién depende el gato?',
+      ja: '猫は誰の犬に依存していますか？',
+      pt: 'do cão de quem o gato depende?',
+    });
+  });
+
+  test('a modal and the resultative keep the verb group', () => {
+    const eats = (verbPhrase: Partial<VerbPhrase>) => clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase });
+    expect(sayAll(whose(eats({ modals: ['CAN'] }), 'directObject'))).toEqual({
+      en: 'whose food can the cat eat?',
+      it: 'di chi può mangiare il cibo il gatto?',
+      fr: 'de qui est-ce que le chat peut manger la nourriture ?',
+      de: 'wessen Essen kann der Kater fressen?',
+      es: '¿de quién puede comer el gato la comida?',
+      ja: '猫は誰の食べ物を食べることができますか？',
+      pt: 'de quem o gato pode comer a comida?',
+    });
+    expect(sayAll(whose(eats({ modals: ['CAN'] })))).toEqual({
+      en: 'whose cat can eat the food?',
+      it: 'il gatto di chi può mangiare il cibo?',
+      fr: 'le chat de qui peut manger la nourriture ?',
+      de: 'wessen Kater kann das Essen fressen?',
+      es: '¿el gato de quién puede comer la comida?',
+      ja: '誰の猫が食べ物を食べることができますか？',
+      pt: 'o gato de quem pode comer a comida?',
+    });
+    expect(sayAll(whose(eats({ aspect: 'resultative' }), 'directObject'))).toEqual({
+      en: 'whose food has the cat eaten?',
+      it: 'di chi ha mangiato il cibo il gatto?',
+      fr: 'de qui est-ce que le chat a mangé la nourriture ?',
+      de: 'wessen Essen hat der Kater gefressen?',
+      es: '¿de quién ha comido el gato la comida?',
+      ja: '猫は誰の食べ物を食べましたか？',
+      pt: 'de quem o gato comeu a comida?',
+    });
+  });
+
+  test('a ditransitive: the recipient keeps its place behind the object', () => {
+    expect(sayAll(whose(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('WOMAN') } } }), 'directObject'))).toEqual({
+      en: 'whose book does the man give to the woman?',
+      it: 'di chi dà il libro alla donna l\'uomo?',
+      fr: 'de qui est-ce que l\'homme donne le livre à la femme ?',
+      de: 'wessen Buch gibt der Mann der Frau?',
+      es: '¿de quién da el hombre el libro a la mujer?',
+      ja: '男は女に誰の本をあげますか？',
+      pt: 'de quem o homem dá o livro à mulher?',
+    });
+  });
+
+  test('a past negative subject question, and a pronoun subject', () => {
+    expect(sayAll(whose(clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'past', negative: true } })))).toEqual({
+      en: 'whose cat did not eat the food?', // do-support for the not, with no inversion
+      it: 'il gatto di chi non mangiò il cibo?',
+      fr: 'le chat de qui ne mangea pas la nourriture ?',
+      de: 'wessen Kater fraß das Essen nicht?',
+      es: '¿el gato de quién no comió la comida?',
+      ja: '誰の猫が食べ物を食べませんでしたか？',
+      pt: 'o gato de quem não comeu a comida?',
+    });
+    expect(sayAll(whose(clause(np('THIRD_PERSON', { number: 'plural' }), 'EAT', { directObject: np('FOOD') }), 'directObject'))).toEqual({
+      en: 'whose food do they eat?',
+      it: 'di chi mangiano il cibo?',
+      fr: 'de qui est-ce qu\'ils mangent la nourriture ?',
+      de: 'wessen Essen essen sie?',
+      es: '¿de quién comen la comida?',
+      ja: '彼らは誰の食べ物を食べますか？',
+      pt: 'de quem comem a comida?',
+    });
+  });
 });
 
 // A complement question keeps its relation (P09-E15): `questionSpecifiers` is the relation, and
@@ -348,7 +454,7 @@ describe('the possessor question', () => {
 // chooses between the adverb (*where from*) and the complement path (*who … from*).
 const about = (plan: PhrasePlan, questionRole: PhrasePlan['questionRole'], questionSpecifiers?: Specifier[], questionAnimate?: boolean): PhrasePlan =>
   ({ ...ask(plan, questionRole, questionAnimate), ...(questionSpecifiers ? { questionSpecifiers } : {}) });
-const path = (value: 'under' | 'around' | 'behind' | 'on'): Specifier[] => [{ kind: 'path', value }];
+const path = (value: PathSpecifier): Specifier[] => [{ kind: 'path', value }];
 const sentiment = (value: 'positive' | 'negative'): Specifier[] => [{ kind: 'sentiment', value }];
 
 describe('the question over a complement', () => {
@@ -455,8 +561,24 @@ describe('the question over a complement', () => {
       ja: '猫は何の周りで走りますか？',
       pt: 'ao redor de que o gato corre?',
     });
-    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('behind')))).toMatchObject({ de: 'wohinter frisst der Kater?', ja: '猫は何の後ろで食べますか？' });
-    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('on')))).toMatchObject({ de: 'worauf frisst der Kater?', it: 'su che cosa mangia il gatto?' });
+    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('behind')))).toEqual({
+      en: 'what does the cat eat behind?',
+      it: 'dietro che cosa mangia il gatto?',
+      fr: 'derrière quoi est-ce que le chat mange ?',
+      de: 'wohinter frisst der Kater?',
+      es: '¿detrás de qué come el gato?',
+      ja: '猫は何の後ろで食べますか？',
+      pt: 'atrás de que o gato come?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('on')))).toEqual({
+      en: 'what does the cat eat on?',
+      it: 'su che cosa mangia il gatto?',
+      fr: 'sur quoi est-ce que le chat mange ?',
+      de: 'worauf frisst der Kater?',
+      es: '¿sobre qué come el gato?',
+      ja: '猫は何の上で食べますか？',
+      pt: 'sobre que o gato come?',
+    });
   });
 
   test('the comitative, the topic and the route', () => {
@@ -478,7 +600,15 @@ describe('the question over a complement', () => {
       ja: '男は何について話しますか？',
       pt: 'sobre que o homem fala?',
     });
-    expect(sayAll(about(clause(np('MAN'), 'SPEAK'), 'topic', undefined, true))).toMatchObject({ de: 'über wen spricht der Mann?', it: 'di chi parla l\'uomo?' });
+    expect(sayAll(about(clause(np('MAN'), 'SPEAK'), 'topic', undefined, true))).toEqual({
+      en: 'who does the man speak about?',
+      it: 'di chi parla l\'uomo?',
+      fr: 'de qui est-ce que l\'homme parle ?',
+      de: 'über wen spricht der Mann?',
+      es: '¿sobre quién habla el hombre?',
+      ja: '男は誰について話しますか？',
+      pt: 'sobre quem o homem fala?',
+    });
     expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route'))).toEqual({
       en: 'what does the cat run through?',
       it: 'attraverso che cosa corre il gatto?',
@@ -521,35 +651,166 @@ describe('the question over a complement', () => {
       ja: '猫は誰へ行きますか？',
       pt: 'para quem o gato vai?',
     });
-    expect(sayAll(about(clause(np('CAT'), 'COME'), 'source', undefined, true))).toMatchObject({
+    expect(sayAll(about(clause(np('CAT'), 'COME'), 'source', undefined, true))).toEqual({
       en: 'who does the cat come from?',
+      it: 'da chi viene via il gatto?', // A276
       de: 'von wem kommt der Kater?',
+      es: '¿de quién viene el gato?',
+      pt: 'de quem o gato vem?',
       fr: 'de qui est-ce que le chat vient ?',
       ja: '猫は誰から来ますか？',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'source', undefined, true))).toEqual({
+      en: 'who does the cat run from?',
+      it: 'da chi corre via il gatto?',
+      fr: 'loin de qui est-ce que le chat court ?', // running away from is loin de, as the statement's
+      de: 'von wem läuft der Kater?',
+      es: '¿lejos de quién corre el gato?',
+      ja: '猫は誰から走りますか？',
+      pt: 'longe de quem o gato corre?',
     });
   });
 
   test('the stranded preposition stays in its own slot, ahead of the complements after it', () => {
     const plan = about(clause(np('MAN'), 'CUT', { directObject: np('BOOK'), complements: { locative: { phrase: np('HOUSE') } } }), 'instrumental');
-    expect(sayAll(plan)).toMatchObject({
+    expect(sayAll(plan)).toEqual({
       en: 'what does the man cut the book with in the house?',
+      it: 'con che cosa taglia il libro nella casa l\'uomo?',
+      fr: 'avec quoi est-ce que l\'homme coupe le livre dans la maison ?',
       de: 'womit schneidet der Mann das Buch im Haus?',
+      es: '¿con qué corta el hombre el libro en la casa?',
       ja: '男は何で家で本を切りますか？',
+      pt: 'com que o homem corta o livro na casa?',
     });
   });
 
   test('the tenses and the copula keep E6\'s orders', () => {
     expect(sayAll(about(clause(np('CAT'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'past' } }), 'locative', path('under'))))
-      .toMatchObject({
+      .toEqual({
         en: 'what did the cat eat the food under?',
         it: 'sotto che cosa mangiò il cibo il gatto?',
+        fr: 'sous quoi est-ce que le chat mangea la nourriture ?',
         de: 'worunter fraß der Kater das Essen?',
         es: '¿debajo de qué comió el gato la comida?',
+        ja: '猫は何の下で食べ物を食べましたか？',
+        pt: 'debaixo de que o gato comeu a comida?',
       });
-    expect(sayAll(about(clause(np('CAT'), 'BE'), 'locative', path('under')))).toMatchObject({
+    expect(sayAll(about(clause(np('CAT'), 'BE'), 'locative', path('under')))).toEqual({
       en: 'what is the cat under?',
+      it: 'sotto che cosa è il gatto?',
+      fr: 'sous quoi est-ce que le chat est ?',
+      de: 'worunter ist der Kater?',
       es: '¿debajo de qué está el gato?', // the place asked about still selects estar
       ja: '猫は何の下にいますか？',
+      pt: 'debaixo de que o gato está?',
+    });
+  });
+
+  test('negation, over a place and over the negative cause', () => {
+    expect(sayAll(about(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true } }), 'locative', path('under')))).toEqual({
+      en: 'what does the cat not eat under?',
+      it: 'sotto che cosa non mangia il gatto?',
+      fr: 'sous quoi est-ce que le chat ne mange pas ?',
+      de: 'worunter frisst der Kater nicht?',
+      es: '¿debajo de qué no come el gato?',
+      ja: '猫は何の下で食べませんか？',
+      pt: 'debaixo de que o gato não come?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN', { verbPhrase: { tense: 'past', negative: true } }), 'cause', sentiment('negative')))).toEqual({
+      en: 'through whose fault did the cat not run?',
+      it: 'per colpa di chi non corse il gatto?',
+      fr: 'par la faute de qui est-ce que le chat ne courut pas ?',
+      de: 'durch wessen Schuld lief der Kater nicht?',
+      es: '¿por culpa de quién no corrió el gato?',
+      ja: '猫は誰のせいで走りませんでしたか？',
+      pt: 'por culpa de quem o gato não correu?',
+    });
+  });
+
+  test('through, between and against', () => {
+    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('through')))).toEqual({
+      en: 'what does the cat eat through?',
+      it: 'attraverso che cosa mangia il gatto?',
+      fr: 'à travers quoi est-ce que le chat mange ?',
+      de: 'wodurch frisst der Kater?',
+      es: '¿por dónde come el gato?', // "por qué" would be why, as on the route
+      ja: '猫は何を通って食べますか？',
+      pt: 'por onde o gato come?',
+    });
+    // zwischen has no wo- compound
+    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('between'))).de).toBe('zwischen was frisst der Kater?');
+    expect(sayAll(about(clause(np('CAT'), 'EAT'), 'locative', path('against'))).de).toBe('woran frisst der Kater?');
+  });
+
+  test('a route with a path of its own', () => {
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route', path('under')))).toEqual({
+      en: 'what does the cat run under?',
+      it: 'sotto che cosa corre il gatto?',
+      fr: 'sous quoi est-ce que le chat court ?',
+      de: 'worunter läuft der Kater?',
+      es: '¿debajo de qué corre el gato?',
+      ja: '猫は何の下を走りますか？', // the route's を on the place noun, not どこを
+      pt: 'debaixo de que o gato corre?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'route', path('over')))).toEqual({
+      en: 'what does the cat run over?',
+      it: 'sopra che cosa corre il gatto?',
+      fr: 'par-dessus quoi est-ce que le chat court ?',
+      de: 'worüber läuft der Kater?',
+      es: '¿por encima de qué corre el gato?',
+      ja: '猫は何の上を走りますか？',
+      pt: 'por cima de que o gato corre?',
+    });
+  });
+
+  test('a thing where the pinned rows ask a person, and back', () => {
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'comitative'))).toEqual({
+      en: 'what does the cat run with?',
+      it: 'con che cosa corre il gatto?',
+      fr: 'avec quoi est-ce que le chat court ?',
+      de: 'womit läuft der Kater?',
+      es: '¿con qué corre el gato?',
+      ja: '猫は何と走りますか？',
+      pt: 'com que o gato corre?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN'), 'cause', sentiment('positive')))).toEqual({
+      en: 'what does the cat run thanks to?',
+      it: 'grazie a che cosa corre il gatto?',
+      fr: 'grâce à quoi est-ce que le chat court ?',
+      de: 'dank was läuft der Kater?', // dank has no compound (P09-E15)
+      es: '¿gracias a qué corre el gato?',
+      ja: '猫は何のおかげで走りますか？',
+      pt: 'graças a que o gato corre?',
+    });
+  });
+
+  test('the resultative, a modal and a dropped pronoun subject keep E6\'s orders', () => {
+    expect(sayAll(about(clause(np('CAT'), 'RUN', { verbPhrase: { aspect: 'resultative' } }), 'comitative', undefined, true))).toEqual({
+      en: 'who has the cat run with?',
+      it: 'con chi ha corso il gatto?',
+      fr: 'avec qui est-ce que le chat a couru ?',
+      de: 'mit wem ist der Kater gelaufen?',
+      es: '¿con quién ha corrido el gato?',
+      ja: '猫は誰と走りましたか？',
+      pt: 'com quem o gato correu?',
+    });
+    expect(sayAll(about(clause(np('CAT'), 'RUN', { verbPhrase: { modals: ['CAN'] } }), 'comitative', undefined, true))).toEqual({
+      en: 'who can the cat run with?',
+      it: 'con chi può correre il gatto?',
+      fr: 'avec qui est-ce que le chat peut courir ?',
+      de: 'mit wem kann der Kater laufen?',
+      es: '¿con quién puede correr el gato?',
+      ja: '猫は誰と走ることができますか？',
+      pt: 'com quem o gato pode correr?',
+    });
+    expect(sayAll(about(clause(np('FIRST_PERSON'), 'EAT'), 'locative', path('under')))).toEqual({
+      en: 'what do I eat under?',
+      it: 'sotto che cosa mangio?',
+      fr: 'sous quoi est-ce que je mange ?',
+      de: 'worunter esse ich?',
+      es: '¿debajo de qué como?',
+      ja: '私は何の下で食べますか？',
+      pt: 'debaixo de que como?',
     });
   });
 });
@@ -597,9 +858,14 @@ describe('the passive question', () => {
   });
 
   test('a plural patient asked about stays singular, and a person asked about is who', () => {
-    expect(sayAll(ask(clause(np('CAT', { number: 'plural' }), 'EAT', { verbPhrase: passive }), 'directObject'))).toMatchObject({
+    expect(sayAll(ask(clause(np('CAT', { number: 'plural' }), 'EAT', { verbPhrase: passive }), 'directObject'))).toEqual({
       en: 'what is eaten by the cats?',
       it: 'che cosa è mangiato dai gatti?',
+      fr: "qu'est-ce qui est mangé par les chats ?",
+      de: 'was wird von den Katern gefressen?',
+      es: '¿qué es comido por los gatos?',
+      ja: '何が猫に食べられますか？',
+      pt: 'o que é comido pelos gatos?',
     });
     expect(sayAll(ask(clause(np('CAT'), 'SEE', { verbPhrase: passive }), 'directObject', true))).toEqual({
       en: 'who is seen by the cat?',
@@ -610,9 +876,14 @@ describe('the passive question', () => {
       ja: '誰が猫に見られますか？',
       pt: 'quem é visto pelo gato?',
     });
-    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { ...passive, tense: 'past' } }), 'directObject'))).toMatchObject({
+    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { ...passive, tense: 'past' } }), 'directObject'))).toEqual({
       en: 'what was eaten by the cat?',
+      it: 'che cosa fu mangiato dal gatto?',
+      fr: "qu'est-ce qui fut mangé par le chat ?",
       de: 'was wurde vom Kater gefressen?',
+      es: '¿qué fue comido por el gato?',
+      ja: '何が猫に食べられましたか？',
+      pt: 'o que foi comido pelo gato?',
     });
   });
 
@@ -630,13 +901,25 @@ describe('the passive question', () => {
 
   test('the stranded by keeps the by-phrase\'s slot', () => {
     const plan = ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD'), complements: { locative: { phrase: np('HOUSE') } } }), 'subject', true);
-    expect(sayAll(plan)).toMatchObject({ en: 'who is the food eaten by in the house?', de: 'von wem wird das Essen im Haus gegessen?' });
+    expect(sayAll(plan)).toEqual({
+      en: 'who is the food eaten by in the house?', // ahead of an adjunct (D2); after an argument is A282
+      it: 'da chi è mangiato nella casa il cibo?',
+      fr: 'par qui est-ce que la nourriture est mangée dans la maison ?',
+      de: 'von wem wird das Essen im Haus gegessen?',
+      es: '¿por quién es comida la comida en la casa?',
+      ja: '食べ物は誰に家で食べられますか？',
+      pt: 'por quem a comida é comida na casa?',
+    });
   });
 
   test('a generic agent drops under a complement gap: where is the food eaten?', () => {
-    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'locative'))).toMatchObject({
+    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: passive, directObject: np('FOOD') }), 'locative'))).toEqual({
       en: 'where is the food eaten?',
+      it: "dov'è mangiato il cibo?",
+      fr: 'où est-ce que la nourriture est mangée ?',
       de: 'wo wird das Essen gegessen?',
+      es: '¿dónde es comida la comida?',
+      pt: 'onde a comida é comida?',
       ja: '食べ物はどこで食べられますか？',
     });
   });
@@ -655,13 +938,108 @@ describe('the passive question', () => {
 
   test('P09-E14\'s possessor inside the patient is a subject possessor question; inside the agent it is refused', () => {
     const food = clause(np('CAT'), 'EAT', { verbPhrase: passive, directObject: np('FOOD') });
-    expect(sayAll(whose(food, 'directObject'))).toMatchObject({
+    expect(sayAll(whose(food, 'directObject'))).toEqual({
       en: 'whose food is eaten by the cat?',
-      de: 'wessen Essen wird vom Kater gefressen?',
       it: 'il cibo di chi è mangiato dal gatto?',
+      fr: 'la nourriture de qui est mangée par le chat ?',
+      de: 'wessen Essen wird vom Kater gefressen?',
+      es: '¿la comida de quién es comida por el gato?',
       ja: '誰の食べ物が猫に食べられますか？',
+      pt: 'a comida de quem é comida pelo gato?',
     });
     expect(() => translateAll(whose(food, 'subject'))).toThrow(/agent.*P09-E16/);
+  });
+
+  test('the agent in the past, and over a plural patient', () => {
+    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: { ...passive, tense: 'past' }, directObject: np('FOOD') }), 'subject', true))).toEqual({
+      en: 'who was the food eaten by?',
+      it: 'da chi fu mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture fut mangée ?',
+      de: 'von wem wurde das Essen gegessen?',
+      es: '¿por quién fue comida la comida?',
+      ja: '食べ物は誰に食べられましたか？',
+      pt: 'por quem a comida foi comida?',
+    });
+    // The patient is a real subject here, so the auxiliary and the participle agree with it.
+    expect(sayAll(ask(clause(someone, 'WRITE', { verbPhrase: passive, directObject: np('BOOK', { number: 'plural' }) }), 'subject', true))).toEqual({
+      en: 'who are the books written by?',
+      it: 'da chi sono scritti i libri?',
+      fr: 'par qui est-ce que les livres sont écrits ?',
+      de: 'von wem werden die Bücher geschrieben?',
+      es: '¿por quién son escritos los libros?',
+      ja: '本は誰に書かれますか？',
+      pt: 'por quem os livros são escritos?',
+    });
+    expect(sayAll(ask(clause(someone, 'SEE', { verbPhrase: passive, directObject: np('WOMAN', { number: 'plural' }) }), 'subject', true))).toEqual({
+      en: 'who are the women seen by?',
+      it: 'da chi sono viste le donne?',
+      fr: 'par qui est-ce que les femmes sont vues ?',
+      de: 'von wem werden die Frauen gesehen?',
+      es: '¿por quién son vistas las mujeres?',
+      ja: '女は誰に見られますか？',
+      pt: 'por quem as mulheres são vistas?',
+    });
+  });
+
+  test('negation, over either gap', () => {
+    expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { ...passive, negative: true } }), 'directObject'))).toEqual({
+      en: 'what is not eaten by the cat?',
+      it: 'che cosa non è mangiato dal gatto?',
+      fr: "qu'est-ce qui n'est pas mangé par le chat ?",
+      de: 'was wird vom Kater nicht gefressen?',
+      es: '¿qué no es comido por el gato?',
+      ja: '何が猫に食べられませんか？',
+      pt: 'o que não é comido pelo gato?',
+    });
+    expect(sayAll(ask(clause(someone, 'EAT', { verbPhrase: { ...passive, negative: true }, directObject: np('FOOD') }), 'subject', true))).toEqual({
+      en: 'who is the food not eaten by?',
+      it: 'da chi non è mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture n\'est pas mangée ?',
+      de: 'von wem wird das Essen nicht gegessen?',
+      es: '¿por quién no es comida la comida?',
+      ja: '食べ物は誰に食べられませんか？',
+      pt: 'por quem a comida não é comida?',
+    });
+  });
+
+  test('the agent under the resultative and a modal', () => {
+    const eaten = (verbPhrase: Partial<VerbPhrase>) =>
+      ask(clause(someone, 'EAT', { verbPhrase: { ...passive, ...verbPhrase }, directObject: np('FOOD') }), 'subject', true);
+    expect(sayAll(eaten({ aspect: 'resultative' }))).toEqual({
+      en: 'who has the food been eaten by?',
+      it: 'da chi è stato mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture a été mangée ?',
+      de: 'von wem ist das Essen gegessen worden?',
+      es: '¿por quién ha sido comida la comida?',
+      ja: '食べ物は誰に食べられましたか？',
+      pt: 'por quem a comida foi comida?',
+    });
+    expect(sayAll(eaten({ modals: ['MUST'] }))).toEqual({
+      en: 'who must the food be eaten by?',
+      it: 'da chi deve essere mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture doit être mangée ?',
+      de: 'von wem muss das Essen gegessen werden?',
+      es: '¿por quién debe ser comida la comida?',
+      ja: '食べ物は誰に食べられる必要がありますか？',
+      pt: 'por quem a comida deve ser comida?',
+    });
+  });
+
+  test('a pronoun patient: who am I seen by?', () => {
+    expect(sayAll(ask(clause(someone, 'SEE', { verbPhrase: passive, directObject: np('FIRST_PERSON') }), 'subject', true))).toEqual({
+      en: 'who am I seen by?',
+      it: 'da chi sono visto?',
+      fr: 'par qui est-ce que je suis vu ?',
+      de: 'von wem werde ich gesehen?',
+      es: '¿por quién soy visto?',
+      ja: '私は誰に見られますか？',
+      pt: 'por quem sou visto?',
+    });
+  });
+
+  test('refused: a passive over an object the language takes with a preposition', () => {
+    // fragen takes its question with nach, so German has no passive to ask it through.
+    expect(() => translateAll(ask(clause(np('MAN'), 'ASK', { verbPhrase: passive }), 'directObject'))).toThrow(/passive in de.*P09-E16/);
   });
 });
 
@@ -707,5 +1085,96 @@ describe('known bugs: an Italian animate source question fronts the ablative via
     expect(sayAll(about(clause(np('CAT'), 'RUN'), 'source')).it).toBe('da dove corre il gatto?');
     expect(sayAll(about(clause(np('CAT'), 'COME'), 'source')).it).toBe('da dove viene il gatto?');
     expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('WOMAN') } } })).it).toBe('il gatto viene via dalla donna.');
+  });
+});
+
+// A280. A Japanese passive whose recipient is already に makes its agent によって (本は女によって男に
+// あげられます). The terminus asked about is 誰に / 何に in that same clause, but the agent's particle is
+// chosen before the asked slot joins the complements, so the clause says に twice.
+describe('known bugs: a Japanese passive terminus question doubles に (A280)', () => {
+  const given = (questionAnimate?: boolean) =>
+    ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', questionAnimate);
+
+  test.fails('who is the book given to by the woman: 女によって誰に', () => {
+    expect(sayAll(given(true)).ja).toBe('本は女によって誰にあげられますか？');
+  });
+
+  test.fails('what is the book given to by the woman: 女によって何に', () => {
+    expect(sayAll(given()).ja).toBe('本は女によって何にあげられますか？');
+  });
+
+  test('regression: the other six, the statement\'s によって and the agentless question', () => {
+    expect(sayAll(given(true))).toMatchObject({
+      en: 'who is the book given by the woman to?',
+      it: 'a chi è dato dalla donna il libro?',
+      fr: 'à qui est-ce que le livre est donné par la femme ?',
+      de: 'wem wird das Buch von der Frau gegeben?',
+      es: '¿a quién es dado el libro por la mujer?',
+      pt: 'a quem o livro é dado pela mulher?',
+    });
+    expect(say(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'ja'))
+      .toBe('本は女によって男にあげられます。');
+    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', true), 'ja')).toBe('本は誰にあげられますか？');
+  });
+});
+
+// A281. German `was` has no dative. A thing asked about in a dative slot — a recipient, the object of
+// helfen — is asked with `wem`, as the person is; the engine writes the nominative/accusative `was`.
+describe('known bugs: a German inanimate dative question asks with was (A281)', () => {
+  test.fails('the recipient: wem gibt der Mann das Buch?', () => {
+    expect(sayAll(about(clause(np('MAN'), 'GIVE', { directObject: np('BOOK') }), 'terminus')).de).toBe('wem gibt der Mann das Buch?');
+  });
+
+  test.fails('the recipient of a passive: wem wird das Buch von der Frau gegeben?', () => {
+    expect(sayAll(ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus')).de)
+      .toBe('wem wird das Buch von der Frau gegeben?');
+  });
+
+  test.fails('the dative object of helfen: wem hilft der Kater?', () => {
+    expect(sayAll(ask(clause(np('CAT'), 'HELP_VERB'), 'directObject')).de).toBe('wem hilft der Kater?');
+  });
+
+  test('regression: the other six, the statement\'s dative, and was where the slot is nominative or accusative', () => {
+    expect(sayAll(about(clause(np('MAN'), 'GIVE', { directObject: np('BOOK') }), 'terminus'))).toMatchObject({
+      en: 'what does the man give the book to?',
+      it: 'a che cosa dà il libro l\'uomo?',
+      fr: 'à quoi est-ce que l\'homme donne le livre ?',
+      es: '¿a qué da el hombre el libro?',
+      ja: '男は何に本をあげますか？',
+      pt: 'a que o homem dá o livro?',
+    });
+    expect(say(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('HOUSE') } } }), 'de'))
+      .toBe('der Mann gibt dem Haus das Buch.');
+    expect(say(ask(clause(someone, 'HELP_VERB', { directObject: np('CAT') }), 'subject'), 'de')).toBe('was hilft dem Kater?');
+    expect(say(about(clause(np('MAN'), 'ASK'), 'terminus'), 'de')).toBe('was fragt der Mann?'); // fragen's addressee is accusative
+  });
+});
+
+// A282. English strands the by of a passive agent question (P09-E16 D2), but writes it where the
+// by-phrase stands in the statement, ahead of the recipient: the preposition ends up between the
+// participle and an argument of the verb. It belongs after the verb's arguments.
+describe('known bugs: an English passive agent question strands by ahead of the recipient (A282)', () => {
+  const givenToTheChild = (questionAnimate?: boolean) =>
+    ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'subject', questionAnimate);
+
+  test.fails('who is the book given to the child by?', () => {
+    expect(sayAll(givenToTheChild(true)).en).toBe('who is the book given to the child by?');
+  });
+
+  test.fails('what is the book given to the child by?', () => {
+    expect(sayAll(givenToTheChild()).en).toBe('what is the book given to the child by?');
+  });
+
+  test('regression: the other six front the agent, and the statement keeps by-phrase then recipient', () => {
+    expect(sayAll(givenToTheChild(true))).toMatchObject({
+      it: 'da chi è dato al bambino il libro?',
+      fr: 'par qui est-ce que le livre est donné à l\'enfant ?',
+      de: 'von wem wird das Buch dem Kind gegeben?',
+      es: '¿por quién es dado el libro al niño?',
+      ja: '本は誰によって子供にあげられますか？',
+      pt: 'por quem o livro é dado à criança?',
+    });
+    expect(say(clause(np('MAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'en'))
+      .toBe('the book is given by the man to the child.');
   });
 });
