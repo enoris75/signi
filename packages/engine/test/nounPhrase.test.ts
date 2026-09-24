@@ -1006,3 +1006,10 @@ describe('examples: such as / including (P09-E33)', () => {
     expect(furigana(clause(animals(including(np('CAT'))), 'RUN'))).toEqual(['ねこ', 'ふくむ', 'どうぶつ', 'はしります']);
   });
 });
+
+// French *hyperonyme* begins with a mute h, as *heure* does, so its definite elides (A337).
+describe('French HYPERNYM elides its article', () => {
+  test("l'hyperonyme", () => {
+    expect(sayAll({ subject: np('HYPERNYM', { definiteness: 'definite' }) }).fr).toBe("l'hyperonyme.");
+  });
+});

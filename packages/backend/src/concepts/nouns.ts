@@ -4435,7 +4435,7 @@ export const nouns: ConceptSeed[] = [
     forms: {
       en: { base: 'hypernym', plural: 'hypernyms', count: 'singular' },
       it: { base: 'iperonimo', plural: 'iperonimi', gender: 'masc', count: 'singular' },
-      fr: { base: 'hyperonyme', plural: 'hyperonymes', gender: 'masc', count: 'singular' },
+      fr: { base: 'hyperonyme', plural: 'hyperonymes', gender: 'masc', count: 'singular', elides: '1' },
       de: { base: 'Hyperonym', plural: 'Hyperonyme', gender: 'neut', count: 'singular' },
       es: { base: 'hiperónimo', plural: 'hiperónimos', gender: 'masc', count: 'singular' },
       ja: { base: '上位語', count: 'singular', reading: 'じょういご' },
