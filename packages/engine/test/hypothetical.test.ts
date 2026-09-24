@@ -311,6 +311,8 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
       UNDO: 'desfizéssemos', REDO: 'refizéssemos', ARRANGE: 'dispuséssemos',
       // dizer's strong preterite (disse, not a regular -eu) takes the open é (B60).
       SAY: 'disséssemos',
+      // TELL_ORDER is dizer too (P09-E43).
+      TELL_ORDER: 'disséssemos',
       // B61: pôr itself (pus, pôs), and trazer's strong trouxe.
       PUT: 'puséssemos', BRING: 'trouxéssemos',
     };

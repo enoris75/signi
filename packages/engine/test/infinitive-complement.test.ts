@@ -322,3 +322,159 @@ describe('known bugs: German sets a bare zu-infinitive off with a comma (A266)',
     expect(sayAll(clause(np('MAN'), 'RUN', { purpose: { verbPhrase: { verb: 'CRY' } } })).de).toBe('der Mann läuft, um zu weinen.');
   });
 });
+
+// P09-E43. An infinitive whose controller is the governing verb's object, read with that verb's
+// lexical object case (C35's `object_case`) and its `infinitive_link`: the Romance four put ALLOW's
+// and TELL_ORDER's controller in the dative (*al gatto, au chat, al gato, ao gato*), German
+// *erlauben* declines it so (`controller_case`), Japanese marks it に, and HELP_VERB keeps its
+// accusative in Romance but links with *a* / *à*. TELL governing an infinitive is TELL_ORDER, its
+// `infinitive_sense`. LET, the bare-infinitive causative, does not move.
+describe('an infinitive controlled by a dative object (P09-E43)', () => {
+  const runs = (control: InfinitiveComplement['control'] = 'object'): InfinitiveComplement => ({ verbPhrase: { verb: 'RUN' }, control });
+  const governs = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(np('MAN'), verb, { directObject: np('CAT'), infinitiveComplement: runs(), ...extra }));
+
+  test('the man allows the cat to run', () => {
+    expect(governs('ALLOW')).toEqual({
+      en: 'the man allows the cat to run.',
+      it: "l'uomo permette al gatto di correre.",
+      fr: "l'homme permet au chat de courir.",
+      de: 'der Mann erlaubt dem Kater zu laufen.',
+      es: 'el hombre permite al gato correr.',
+      ja: '男は猫に走ることを許します。',
+      pt: 'o homem permite ao gato correr.',
+    });
+  });
+
+  test('the man helps the cat to run: an accusative, and the link', () => {
+    expect(governs('HELP_VERB')).toEqual({
+      en: 'the man helps the cat to run.',
+      it: "l'uomo aiuta il gatto a correre.",
+      fr: "l'homme aide le chat à courir.",
+      de: 'der Mann hilft dem Kater zu laufen.',
+      es: 'el hombre ayuda al gato a correr.', // the personal a, not a dative
+      ja: '男は猫が走ることを手伝います。',
+      pt: 'o homem ajuda o gato a correr.',
+    });
+  });
+
+  test('the man tells the cat to run: TELL_ORDER, not the narrating TELL', () => {
+    expect(governs('TELL')).toEqual({
+      en: 'the man tells the cat to run.',
+      it: "l'uomo dice al gatto di correre.",
+      fr: "l'homme dit au chat de courir.",
+      de: 'der Mann sagt dem Kater zu laufen.',
+      es: 'el hombre manda al gato correr.', // *decir que* is a finite clause; *mandar* takes the infinitive
+      ja: '男は猫に走るように言います。',
+      pt: 'o homem diz ao gato para correr.',
+    });
+  });
+
+  test('the past and the negation stay on the governing verb', () => {
+    const pastNegative = { verbPhrase: { tense: 'past' as const, negative: true } };
+    expect(governs('ALLOW', pastNegative)).toEqual({
+      en: 'the man did not allow the cat to run.',
+      it: "l'uomo non permise al gatto di correre.",
+      fr: "l'homme ne permit pas au chat de courir.",
+      de: 'der Mann erlaubte dem Kater nicht zu laufen.',
+      es: 'el hombre no permitió al gato correr.',
+      ja: '男は猫に走ることを許しませんでした。',
+      pt: 'o homem não permitiu ao gato correr.',
+    });
+    expect(governs('TELL', pastNegative)).toMatchObject({
+      it: "l'uomo non disse al gatto di correre.", fr: "l'homme ne dit pas au chat de courir.",
+      de: 'der Mann sagte dem Kater nicht zu laufen.', es: 'el hombre no mandó al gato correr.',
+      ja: '男は猫に走るように言いませんでした。', pt: 'o homem não disse ao gato para correr.',
+    });
+    expect(governs('HELP_VERB', pastNegative)).toMatchObject({
+      it: "l'uomo non aiutò il gatto a correre.", fr: "l'homme n'aida pas le chat à courir.",
+      es: 'el hombre no ayudó al gato a correr.', pt: 'o homem não ajudou o gato a correr.',
+    });
+  });
+
+  test('the dative contracts with a plural article, and the infinitive keeps its own object', () => {
+    expect(sayAll(clause(np('MAN'), 'ALLOW', {
+      directObject: np('CAT', { number: 'plural' }),
+      infinitiveComplement: { verbPhrase: { verb: 'EAT' }, directObject: np('FOOD'), control: 'object' },
+    }))).toEqual({
+      en: 'the man allows the cats to eat the food.',
+      it: "l'uomo permette ai gatti di mangiare il cibo.",
+      fr: "l'homme permet aux chats de manger la nourriture.",
+      de: 'der Mann erlaubt den Katern, das Essen zu fressen.',
+      es: 'el hombre permite a los gatos comer la comida.',
+      ja: '男は猫に食べ物を食べることを許します。',
+      pt: 'o homem permite aos gatos comer a comida.',
+    });
+  });
+
+  test('a pronoun controller is the dative clitic in Italian, French and Spanish', () => {
+    expect(governs('ALLOW', { directObject: np('THIRD_PERSON', { gender: 'fem' }) })).toMatchObject({
+      en: 'the man allows her to run.',
+      it: "l'uomo le permette di correre.",
+      fr: "l'homme lui permet de courir.",
+      de: 'der Mann erlaubt ihr zu laufen.',
+      es: 'el hombre le permite correr.',
+      ja: '男は彼女に走ることを許します。',
+    });
+    expect(governs('ALLOW', { directObject: np('THIRD_PERSON', { number: 'plural' }) })).toMatchObject({
+      it: "l'uomo gli permette di correre.", fr: "l'homme leur permet de courir.", es: 'el hombre les permite correr.',
+    });
+    expect(governs('TELL', { directObject: np('FIRST_PERSON') })).toMatchObject({
+      it: "l'uomo mi dice di correre.", fr: "l'homme me dit de courir.", es: 'el hombre me manda correr.',
+    });
+  });
+
+  test('without an infinitive ALLOW takes a plain object, and TELL still narrates', () => {
+    expect(sayAll(clause(np('MAN'), 'ALLOW', { directObject: np('FOOD') }))).toEqual({
+      en: 'the man allows the food.',
+      it: "l'uomo permette il cibo.",
+      fr: "l'homme permet la nourriture.",
+      de: 'der Mann erlaubt das Essen.',
+      es: 'el hombre permite la comida.',
+      ja: '男は食べ物を許します。',
+      pt: 'o homem permite a comida.',
+    });
+    expect(sayAll(clause(np('WOMAN'), 'TELL', { directObject: np('STORY') }))).toMatchObject({
+      it: 'la donna racconta la storia.', de: 'die Frau erzählt die Geschichte.',
+    });
+  });
+
+  test('ALLOW conjugates, and takes its compound past', () => {
+    expect(sayAll(clause(np('FIRST_PERSON'), 'ALLOW', { verbPhrase: { tense: 'future' }, directObject: np('FOOD') }))).toMatchObject({
+      en: 'I will allow the food.', it: 'permetterò il cibo.', fr: 'je permettrai la nourriture.',
+      de: 'ich werde das Essen erlauben.', es: 'permitiré la comida.', pt: 'permitirei a comida.',
+    });
+    expect(sayAll(clause(np('FIRST_PERSON', { number: 'plural' }), 'ALLOW', { verbPhrase: { tense: 'past' }, directObject: np('FOOD') }))).toEqual({
+      en: 'we allowed the food.', it: 'permettemmo il cibo.', fr: 'nous permîmes la nourriture.',
+      de: 'wir erlaubten das Essen.', es: 'permitimos la comida.', ja: '私たちは食べ物を許しました。', pt: 'permitimos a comida.',
+    });
+    expect(governs('ALLOW', { verbPhrase: { aspect: 'resultative' } })).toMatchObject({
+      it: "l'uomo ha permesso al gatto di correre.", fr: "l'homme a permis au chat de courir.",
+      de: 'der Mann hat dem Kater erlaubt zu laufen.', es: 'el hombre ha permitido al gato correr.',
+    });
+  });
+
+  test('regression: LET is the bare-infinitive causative still', () => {
+    expect(governs('LET')).toEqual({
+      en: 'the man lets the cat run.',
+      it: "l'uomo lascia il gatto correre.",
+      fr: "l'homme laisse le chat courir.",
+      de: 'der Mann lässt den Kater laufen.',
+      es: 'el hombre deja el gato correr.',
+      ja: '男は猫を走らせます。',
+      pt: 'o homem deixa o gato correr.',
+    });
+  });
+
+  test('ALLOW is "to let a person act" (B85)', () => {
+    expect(definitionAll('ALLOW')).toEqual({
+      en: 'to let a person act.',
+      it: 'lasciare una persona agire.',
+      fr: 'laisser une personne agir.',
+      de: 'eine Person handeln lassen.',
+      es: 'dejar a una persona actuar.',
+      ja: '人を行動させる。',
+      pt: 'deixar uma pessoa agir.',
+    });
+  });
+});

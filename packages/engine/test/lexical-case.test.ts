@@ -14,7 +14,8 @@ describe('HELP_VERB: a verb whose German object is dative', () => {
   test('the seven renderings of "the cat helps the dog"', () => {
     expect(sayAll(clause(np('CAT'), 'HELP_VERB', { directObject: np('DOG') }))).toEqual({
       en: 'the cat helps the dog.', it: 'il gatto aiuta il cane.', fr: 'le chat aide le chien.',
-      de: 'der Kater hilft dem Hund.', es: 'el gato ayuda el perro.', ja: '猫は犬を手伝います。',
+      // Spanish *ayudar* takes the one helped with the personal *a*, whoever it is (P09-E43, `object_a`).
+      de: 'der Kater hilft dem Hund.', es: 'el gato ayuda al perro.', ja: '猫は犬を手伝います。',
       pt: 'o gato ajuda o cão.',
     });
   });
@@ -69,14 +70,18 @@ describe('HELP_VERB: a verb whose German object is dative', () => {
   });
 
   // The key is German's alone. Against the same frame on an ordinary accusative verb, only German
-  // spells its object differently; the other six say the object word for word as they always do.
+  // spells its object differently; the other five say the object word for word as they always do.
+  // Spanish is the one other that moves, and not for a case: *ayudar* takes the personal *a* for
+  // any object (`object_a`, P09-E43), "ayuda al perro" beside "ve el perro".
   test('no other language moves, against the same frame on an accusative verb', () => {
     const helping = sayAll(clause(np('CAT'), 'HELP_VERB', { directObject: np('DOG') }));
     const seeing = sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG') }));
     const object: Record<LanguageCode, string> = {
       en: 'the dog', it: 'il cane', fr: 'le chien', de: 'dem Hund', es: 'el perro', ja: '犬を', pt: 'o cão',
     };
-    for (const lang of ['en', 'it', 'fr', 'es', 'ja', 'pt'] as LanguageCode[]) {
+    expect(helping.es).toContain('al perro');
+    expect(seeing.es).toContain('el perro');
+    for (const lang of ['en', 'it', 'fr', 'ja', 'pt'] as LanguageCode[]) {
       expect(helping[lang], lang).toContain(object[lang]);
       expect(seeing[lang], lang).toContain(object[lang]);
     }

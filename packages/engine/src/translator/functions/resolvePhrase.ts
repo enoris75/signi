@@ -8,6 +8,7 @@ import { contentClauseForce, declarativeClause } from './contentClauseForce.js';
 import { contentClauseMood } from './contentClauseMood.js';
 import { contentClauseTense } from './contentClauseTense.js';
 import { controlledSubject } from './controlledSubject.js';
+import { controllerCase } from './controllerCase.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { existentialPlan } from './existentialPlan.js';
@@ -168,6 +169,8 @@ export function resolvePhrase(
           // ("what is eaten by the cat?", P09-E16).
           !!plan.directObject || gap?.role === 'directObject',
           citation ? undefined : subject.agreement,
+          // Governing an infinitive selects an `infinitive_sense` (P09-E43): TELL_ORDER for TELL.
+          !!plan.infinitiveComplement,
         ),
         ...(question && !embedded ? { interrogative: true } : {}),
       }
@@ -223,7 +226,8 @@ export function resolvePhrase(
   const resolved: ResolvedPhrase = {
     subject: passive ? patient! : experiencer ? directObject! : subject,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
-    verbPhrase: clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject),
+    // An object controller takes the case the governing verb's lexeme names for it (P09-E43).
+    verbPhrase: controllerCase(clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject), language, objectControlled(plan)),
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
     ...(asked ? { question: asked } : {}),

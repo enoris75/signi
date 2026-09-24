@@ -15,6 +15,9 @@ import { resolve } from './resolve.js';
  *  - `subjectForms` are the subject's, or the head noun's where a relative gaps the subject: a
  *    lexeme naming a `subject_sense` resolves to it when the subject is an animal — German EAT is
  *    "essen" of a person but "fressen" of an animal, and either word of the other is wrong (A157).
+ *  - `hasInfinitive` is whether the clause governs an infinitive complement: a lexeme naming an
+ *    `infinitive_sense` resolves to it then — TELL relates a story (*raccontare*, *erzählen*) but
+ *    tells someone **to** do something with another verb (*dire di*, *sagen … zu*, 言う, P09-E43).
  *  A missing sense concept leaves the verb as it is, so a language that seeds none is unaffected.
  *
  *  Under a **passive** the sense is still selected by the *agent* — the one who acts is the one the
@@ -29,6 +32,7 @@ export function resolveVerbPhrase(
   register?: ImperativeRegister,
   hasObject = false,
   subjectForms?: Record<string, string>,
+  hasInfinitive = false,
 ): ResolvedVerbPhrase {
   // An imperative or an infinitive is a mood that occupies the finite/mood slot: it is always
   // present-tense, neutral-aspect and modal-free. The UI already enforces this, but normalise
@@ -38,7 +42,8 @@ export function resolveVerbPhrase(
   const finiteSlotTaken = imperative || mood === 'infinitive';
   const given = resolve(vp.verb, language, lookup);
   // A pronoun subject carries no animacy of its own ("er isst"), so it keeps the person's verb.
-  const sense = (subjectForms?.['animal'] === '1' ? given.forms['subject_sense'] : undefined)
+  const sense = (hasInfinitive ? given.forms['infinitive_sense'] : undefined)
+    ?? (subjectForms?.['animal'] === '1' ? given.forms['subject_sense'] : undefined)
     ?? (hasObject ? given.forms['object_sense'] : undefined);
   const verb = sense && lookup(sense, language) ? resolve(sense, language, lookup) : given;
   const voice = resolveVoice(vp, verb, language, imperative, hasObject);

@@ -65,6 +65,20 @@ describe('the concept corpus', () => {
     expect(bad).toEqual([]);
   });
 
+  // P09-E43: and for an infinitive. An `infinitive_sense` must name a sense of the verb that names it.
+  test('every infinitive_sense names a sense of the verb that names it', () => {
+    const naming = concepts.flatMap((c) =>
+      Object.entries(c.forms).filter(([, f]) => f['infinitive_sense']).map(([l]) => `${c.id} (${l})`),
+    );
+    expect(naming).toContain('TELL (it)');
+    const bad = concepts.flatMap((c) =>
+      Object.entries(c.forms)
+        .filter(([, f]) => f['infinitive_sense'] && byId.get(f['infinitive_sense'])?.senseOf !== c.id)
+        .map(([l, f]) => `${c.id} (${l}): ${f['infinitive_sense']}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
   // A157: the same rule for the subject side. A `subject_sense` must name a sense of the verb that
   // names it, or the translator would swap in an unrelated verb.
   test('every subject_sense names a sense of the verb that names it', () => {

@@ -13,6 +13,7 @@ import { hasNegativePossessorComplement } from '../../functions/hasNegativePosse
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negativeAdverb } from '../../functions/negativeAdverb.js';
+import { dativePronounForm } from '../../functions/dativePronounForm.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -238,6 +239,9 @@ export function predicateText(
     : verb.forms['experiencer'] === '1' && gapComplement === 'terminus' ? 'le'
     : '';
   const objectClitic = experiencerClitic || (!directObject ? (verbPhrase.elided?.type === 'predicative' ? 'lo' : '')
+    // An object taken with the dative "a" — a dative controller, "le permite correr" (P09-E43) — is
+    // still a clitic when it is a pronoun, the indirect-object one: never the tonic "permite a ella".
+    : objectPrep === 'a' && isPronounElement(directObject) ? dativePronounForm(firstConjunct(directObject).head.forms)
     : objectPrep ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : pronounGroup ? groupObjectClitic(directObject) : '');

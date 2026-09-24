@@ -9354,6 +9354,91 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // P09's *allow* (rank 346; localization B85, P09-E43): to permit. With a thing it takes a plain
+  // object ("allows the food"); with a person and what they may do it is an object-controlled
+  // infinitive whose controller is a **dative** — it "permette **al** gatto **di** correre", fr
+  // "permet **au** chat **de** courir", es "permite **al** gato correr", pt "permite **ao** gato
+  // correr", de "erlaubt **dem** Kater zu laufen", ja 猫**に**走ることを許す. The Romance and Japanese
+  // lexemes name the dative as `object_case: 'dat'`, which they read under object control only
+  // (`controllerCase`), and German as `controller_case: 'dat'`, since German declines `object_case`
+  // everywhere and *erlauben* takes a thing in the accusative. The link is `infinitive_link`. Not
+  // LET (*lasciare, laisser, lassen, dejar*), C36's bare-infinitive causative.
+  {
+    id: 'ALLOW',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to give permission for',
+    synonym: 'permit',
+    // "to let a person act" (B85): LET's causative with its own infinitive. LET's gloss is "to cause a
+    // person to be allowed to act", so the two are close and neither restates the other's word.
+    definition: infinitiveGloss('LET', {
+      object: 'PERSON',
+      definiteness: 'indefinite',
+      infinitive: { verbPhrase: { verb: 'ACT' }, control: 'object' },
+    }),
+    emoji: '✅',
+    forms: {
+      en: {
+        base: 'allow',
+        '1sg_present': 'allow', '2sg_present': 'allow', '3sg_present': 'allows',
+        '1pl_present': 'allow', '2pl_present': 'allow', '3pl_present': 'allow',
+        past: 'allowed',
+      },
+      it: {
+        base: 'permettere', object_case: 'dat', infinitive_link: 'di',
+        '1sg_present': 'permetto', '2sg_present': 'permetti', '3sg_present': 'permette',
+        '1pl_present': 'permettiamo', '2pl_present': 'permettete', '3pl_present': 'permettono',
+        '1sg_past': 'permisi', '2sg_past': 'permettesti', '3sg_past': 'permise',
+        '1pl_past': 'permettemmo', '2pl_past': 'permetteste', '3pl_past': 'permisero',
+        '1sg_future': 'permetterò', '2sg_future': 'permetterai', '3sg_future': 'permetterà',
+        '1pl_future': 'permetteremo', '2pl_future': 'permetterete', '3pl_future': 'permetteranno',
+      },
+      fr: {
+        base: 'permettre', object_case: 'dat', infinitive_link: 'de',
+        '1sg_present': 'permets', '2sg_present': 'permets', '3sg_present': 'permet',
+        '1pl_present': 'permettons', '2pl_present': 'permettez', '3pl_present': 'permettent',
+        '1sg_past': 'permis', '2sg_past': 'permis', '3sg_past': 'permit',
+        '1pl_past': 'permîmes', '2pl_past': 'permîtes', '3pl_past': 'permirent',
+        '1sg_future': 'permettrai', '2sg_future': 'permettras', '3sg_future': 'permettra',
+        '1pl_future': 'permettrons', '2pl_future': 'permettrez', '3pl_future': 'permettront',
+      },
+      de: {
+        // Inseparable: no ge- in the participle (erlaubt).
+        base: 'erlauben', controller_case: 'dat',
+        '1sg_present': 'erlaube', '2sg_present': 'erlaubst', '3sg_present': 'erlaubt',
+        '1pl_present': 'erlauben', '2pl_present': 'erlaubt', '3pl_present': 'erlauben',
+        '1sg_past': 'erlaubte', '2sg_past': 'erlaubtest', '3sg_past': 'erlaubte',
+        '1pl_past': 'erlaubten', '2pl_past': 'erlaubtet', '3pl_past': 'erlaubten',
+      },
+      es: {
+        base: 'permitir', object_case: 'dat',
+        '1sg_present': 'permito', '2sg_present': 'permites', '3sg_present': 'permite',
+        '1pl_present': 'permitimos', '2pl_present': 'permitís', '3pl_present': 'permiten',
+        '1sg_past': 'permití', '2sg_past': 'permitiste', '3sg_past': 'permitió',
+        '1pl_past': 'permitimos', '2pl_past': 'permitisteis', '3pl_past': 'permitieron',
+        '1sg_future': 'permitiré', '2sg_future': 'permitirás', '3sg_future': 'permitirá',
+        '1pl_future': 'permitiremos', '2pl_future': 'permitiréis', '3pl_future': 'permitirán',
+      },
+      ja: {
+        // LET's picker word too; LET says the causative suffix in a clause, ALLOW the verb itself.
+        base: '許す', object_case: 'dat',
+        reading: 'ゆるす',
+        masu_present: '許します',
+        masu_present_reading: 'ゆるします',
+      },
+      pt: {
+        base: 'permitir', object_case: 'dat',
+        '1sg_present': 'permito', '2sg_present': 'permite', '3sg_present': 'permite',
+        '1pl_present': 'permitimos', '2pl_present': 'permitem', '3pl_present': 'permitem',
+        '1sg_past': 'permiti', '2sg_past': 'permitiu', '3sg_past': 'permitiu',
+        '1pl_past': 'permitimos', '2pl_past': 'permitiram', '3pl_past': 'permitiram',
+        '1sg_future': 'permitirei', '2sg_future': 'permitirá', '3sg_future': 'permitirá',
+        '1pl_future': 'permitiremos', '2pl_future': 'permitirão', '3pl_future': 'permitirão',
+      },
+    },
+  },
+
   // P09's *like* (localization C34). The plan is always "the cat likes the dog"; four languages say
   // it that way and three do not. Italian *piacere* and Spanish *gustar* make the thing liked the
   // subject and the one who likes a dative ("al gatto piacciono i cani"), which their lexemes ask
@@ -9438,6 +9523,9 @@ export const transitiveVerbs: ConceptSeed[] = [
   // alike — so its lexeme names it (`object_case`, read by the German engine wherever the object is
   // declined, and by its impersonal passive "ihm wird geholfen"). Strong e→i in the present
   // singular (hilfst, hilft, and the du command hilf) and a strong preterite (half).
+  // With an infinitive the Romance four link it with *a* / *à* (`infinitive_link`, P09-E43):
+  // "aiuta il gatto a correre", "aide le chat à courir", "ayuda al gato a correr", "ajuda o gato a
+  // correr"; Spanish *ayudar* takes the one helped with the personal *a* whoever it is (`object_a`).
   {
     id: 'HELP_VERB',
     role: 'verb',
@@ -9454,7 +9542,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'helped',
       },
       it: {
-        base: 'aiutare',
+        base: 'aiutare', infinitive_link: 'a',
         '1sg_present': 'aiuto', '2sg_present': 'aiuti', '3sg_present': 'aiuta',
         '1pl_present': 'aiutiamo', '2pl_present': 'aiutate', '3pl_present': 'aiutano',
         '1sg_past': 'aiutai', '2sg_past': 'aiutasti', '3sg_past': 'aiutò',
@@ -9463,7 +9551,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'aiuteremo', '2pl_future': 'aiuterete', '3pl_future': 'aiuteranno',
       },
       fr: {
-        base: 'aider',
+        base: 'aider', infinitive_link: 'à',
         '1sg_present': 'aide', '2sg_present': 'aides', '3sg_present': 'aide',
         '1pl_present': 'aidons', '2pl_present': 'aidez', '3pl_present': 'aident',
         '1sg_past': 'aidai', '2sg_past': 'aidas', '3sg_past': 'aida',
@@ -9480,7 +9568,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '2sg_imperative': 'hilf', // strong e→i: the du command keeps the vowel change
       },
       es: {
-        base: 'ayudar',
+        base: 'ayudar', infinitive_link: 'a', object_a: '1',
         '1sg_present': 'ayudo', '2sg_present': 'ayudas', '3sg_present': 'ayuda',
         '1pl_present': 'ayudamos', '2pl_present': 'ayudáis', '3pl_present': 'ayudan',
         '1sg_past': 'ayudé', '2sg_past': 'ayudaste', '3sg_past': 'ayudó',
@@ -9495,7 +9583,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'てつだいます',
       },
       pt: {
-        base: 'ajudar',
+        base: 'ajudar', infinitive_link: 'a',
         '1sg_present': 'ajudo', '2sg_present': 'ajuda', '3sg_present': 'ajuda',
         '1pl_present': 'ajudamos', '2pl_present': 'ajudam', '3pl_present': 'ajudam',
         '1sg_past': 'ajudei', '2sg_past': 'ajudou', '3sg_past': 'ajudou',
