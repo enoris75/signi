@@ -10,6 +10,7 @@ import { directionIdiom } from '../../functions/directionIdiom.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
+import { jaMeasuredOnce } from './jaMeasuredOnce.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { isPrivative } from '../../functions/isPrivative.js';
@@ -176,7 +177,8 @@ export function complementSegs(
       if (degree) segs.push({ t: degree });
     }
     if (essiveAdj?.kind === 'na') segs.push(wordSeg(essiveAdj.stem, essiveAdj.reading));
-    else segs.push(...elSegs(c.phrase));
+    // A measuring time counts an indefinite measure noun as one: 一時間以内に, not 時間以内に (A322).
+    else segs.push(...elSegs(type === 'temporal' ? jaMeasuredOnce(c.phrase, temporalRelation(c)) : c.phrase));
     // The relational noun sits between the place and its particle, for a path and a place alike:
     // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
     const spec = type === 'route' || type === 'locative'

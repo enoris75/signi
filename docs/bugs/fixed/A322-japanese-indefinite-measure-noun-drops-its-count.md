@@ -44,3 +44,22 @@ The site is Japanese's temporal measure (the branch that builds 以内に and th
 | | |
 |---|---|
 | **Test** | `complements/temporal.test.ts` → *known bugs: a Japanese indefinite measure noun drops its count (A322)* (4 `test.fails`, one per row, plus a regression test for `numeral: 1` and the six languages' article) |
+
+## Resolved
+
+2026-09-24. Scope as decided: the measuring relations only (`within`, `for`, `during`, `ago`).
+A new [ja/jaMeasuredOnce.ts](../../../packages/engine/src/languages/ja/jaMeasuredOnce.ts), called
+from the temporal complement in [ja/complementSegs.ts](../../../packages/engine/src/languages/ja/complementSegs.ts),
+gives an indefinite singular noun that is its own counter (`counter_join: 'head'`: HOUR, DAY)
+`numeral: 1` under those four. So 一時間以内に, 一時間走ります, 一日の間に, 一時間前に. A point in time
+(`at`: 時間に), a definite (日以内に), a subject or object (時間は燃えます) and TIME (猫は時間走ります) are
+unchanged.
+
+Four passing P09-E34/E35 tests in
+[complements/temporal.test.ts](../../../packages/engine/test/complements/temporal.test.ts) moved with
+the fix, by design: 'within an hour' (一時間以内に), 'for an hour' (一時間走ります), and the `during`
+rows of 'is told apart from at and during' and 'is told apart from during' (一時間の間に).
+
+Guarded by `known bugs: a Japanese indefinite measure noun drops its count (A322)` in the same file:
+the four former `test.fails`, the regression test, and a new test for `during`, `ago`, and the
+cases that stay bare; plus [jaMeasuredOnce.test.ts](../../../packages/engine/src/languages/ja/jaMeasuredOnce.test.ts).
