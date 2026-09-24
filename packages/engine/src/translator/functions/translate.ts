@@ -4,6 +4,7 @@ import { engines } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveAddress } from './resolveAddress.js';
 import { resolvePhrase } from './resolvePhrase.js';
+import { liftSentenceAdverb } from './sentenceAdverb.js';
 
 /** A sentence's first word, capitalized where the script has case. */
 const capitalized = (text: string): string => text.charAt(0).toLocaleUpperCase() + text.slice(1);
@@ -22,7 +23,8 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
         : plan.infinitive
           ? 'infinitive'
           : undefined;
-    const resolved = resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive);
+    // A sentence adverb opens a main statement (P09-E39, see `liftSentenceAdverb`).
+    const resolved = liftSentenceAdverb(resolvePhrase(plan, engine.language, lookup, topMood, undefined, !!plan.infinitive));
     // Every rendered period closes with its language's full stop, appended here rather
     // than by each engine — the ruby segments must carry the same one, unread. A question closes
     // on its question mark instead, and opens on one where the language writes it (es "¿").

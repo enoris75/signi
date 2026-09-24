@@ -419,6 +419,14 @@ export interface ResolvedPhrase {
    */
   question?: ResolvedQuestion;
   /**
+   * A **sentence adverb** at the head of a main statement (*maybe, probably, actually, of course*,
+   * P09-E39), moved out of `verbPhrase.modifier` by the translator (see `liftSentenceAdverb`). Each
+   * engine writes it clause-initially, inside the clause (after any vocative): "maybe the cat did
+   * not eat", German as the first constituent with the verb second, French *peut-être* with *que*,
+   * Japanese after the topic. Set on the top clause only.
+   */
+  sentenceAdverb?: ConceptForms;
+  /**
    * A resolved hypothetical condition (the "if" clause). When present this phrase is the
    * main clause of a conditional (its verb resolved in the `'conditional'` mood) and
    * `condition` is the protasis (its verb resolved in the `'subjunctive'` mood). Engines

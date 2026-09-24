@@ -43,6 +43,7 @@ import { questionWord } from './questionWord.js';
 import { verbGroup } from './verbGroup.js';
 import { zuInfinitive } from './zuInfinitive.js';
 import { zuVerbOnly } from './zuVerbOnly.js';
+import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
 
 /**
  * The determiners that make an object *known* — the ones that let it stand ahead of the negation
@@ -83,6 +84,11 @@ function objectLeadsNicht(nichtBeforeObject: string, objectNoun: string, directO
 // clause has no V2 slot to move, so both flags are inert there. `zu` renders an infinitive clause
 // as the zu-infinitive another clause governs ("zu handeln", "das Essen zu essen").
 export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal = false, zu = false): string {
+  // A sentence adverb is the statement's first constituent, and the finite verb comes second, ahead of
+  // the subject: "vielleicht fraß der Kater das Essen nicht" (P09-E39, see `liftSentenceAdverb`).
+  if (given.sentenceAdverb) {
+    return withSentenceAdverb(given.sentenceAdverb, renderClause({ ...given, sentenceAdverb: undefined }, true, verbFinal, zu));
+  }
   // A modal governing an infinitive is the modal chain over it, in the verb cluster: "handeln wollen",
   // never "wollen, zu handeln" (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);

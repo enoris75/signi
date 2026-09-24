@@ -253,7 +253,11 @@ export function predicateText(
   // it would scope it over the non-finite verb alone ("sta per amare SEMPRE" is *is about to always
   // love*, A147). A simple tense ("mangia sempre") and a modal chain ("deve mangiare sempre") have
   // no periphrastic finite to follow, so both stay on the append path below.
-  const isFrequency = modifier?.forms['subtype'] === 'frequency';
+  // An adverb that scopes over the negation without a negative word of its own leads the "non": a
+  // sentence adverb in a subordinate clause, "dice che il gatto forse non mangia" (P09-E39).
+  const leadsNon = negAdverb?.slot === 'pre-negator' && negText === 'non' && !!modifierText;
+  const negLead = leadsNon ? `${modifierText} ${negText}` : negText;
+  const isFrequency = modifier?.forms['subtype'] === 'frequency' && !leadsNon;
   // The passive is periphrastic too — "è mangiato" is auxiliary + participio — so a frequency adverb
   // goes between the two ("è sempre mangiato"), not after the whole group.
   const periphrastic = passive || aspect === 'resultative' || aspect === 'progressive' || aspect === 'prospective';
@@ -274,7 +278,7 @@ export function predicateText(
     return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, directObjectText, complementsText]
       .filter(Boolean).join(' '));
   }
-  return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
+  return elideCi([negLead, leadingReflexive, objectClitic, impersonalClitic, verbText, leadsNon ? '' : modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' '));
 }

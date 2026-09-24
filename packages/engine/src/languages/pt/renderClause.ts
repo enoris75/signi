@@ -19,12 +19,17 @@ import { predicateText } from './predicateText.js';
 import { questionWord } from './questionWord.js';
 import { relativeGloss } from './relativeGloss.js';
 import { subjectText } from './subjectText.js';
+import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
 
 /**
  * One clause (subject + predicate), ignoring any attached hypothetical condition. A `subordinate`
  * clause follows its conjunction ("se …"), which then precedes the verb for clitic placement.
  */
 export function renderClause(phrase: ResolvedPhrase, subordinate = false): string {
+  // A sentence adverb opens the statement (P09-E39); fronted *claro* takes *que*, and *talvez* has
+  // already put the verb in the subjunctive (see `liftSentenceAdverb`). It leads the clause, so a
+  // clitic no longer opens it and stays in front of the verb: "talvez a veja", never "*talvez veja-a".
+  if (phrase.sentenceAdverb) return withSentenceAdverb(phrase.sentenceAdverb, renderClause({ ...phrase, sentenceAdverb: undefined }, true));
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande tamanho"), not a bare subject noun phrase — wrap the dimension NP in its adposition.

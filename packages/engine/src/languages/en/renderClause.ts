@@ -18,9 +18,12 @@ import { predicateParts } from './predicateParts.js';
 import { questionWord, strandedGap } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
+import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 export function renderClause(given: ResolvedPhrase): string {
+  // A sentence adverb opens the statement, outside its negation (P09-E39, see `liftSentenceAdverb`).
+  if (given.sentenceAdverb) return withSentenceAdverb(given.sentenceAdverb, renderClause({ ...given, sentenceAdverb: undefined }));
   // A modal governing an infinitive is the modal chain over it: "to be able to act", never "to can to
   // act" (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);

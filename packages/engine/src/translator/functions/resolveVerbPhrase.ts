@@ -3,6 +3,7 @@ import type { ConceptForms, Mood, ResolvedVerbPhrase } from '../../types.js';
 import { PASSIVE_AUXILIARY, PASSIVIZABLE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolve } from './resolve.js';
+import { asFrequencyAdverb } from './sentenceAdverb.js';
 
 /** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
  *  called when a verb phrase is present — a verbless period skips it (see translate).
@@ -52,7 +53,7 @@ export function resolveVerbPhrase(
         const m = typeof ref === 'string' ? { verb: ref } : ref;
         return {
           verb: resolve(m.verb, language, lookup),
-          modifier: m.modifier ? resolve(m.modifier, language, lookup) : undefined,
+          modifier: m.modifier ? asFrequencyAdverb(resolve(m.modifier, language, lookup)) : undefined,
           negative: m.negative,
         };
       });
@@ -73,7 +74,9 @@ export function resolveVerbPhrase(
       : {}),
     mood,
     register: imperative ? (register ?? 'request') : undefined,
-    modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
+    // A sentence adverb stands where a frequency adverb does, unless the top clause lifts it out
+    // (P09-E39, see `liftSentenceAdverb`).
+    modifier: vp.modifier ? asFrequencyAdverb(resolve(vp.modifier, language, lookup)) : undefined,
     // The outermost modal's negation has moved to `negative` above, so no engine reads it twice.
     modals: modals.map((m, i) => (i === 0 ? { ...m, negative: undefined } : m)),
     // Carried as asked; whether the subject lets it apply is the Japanese engine's call (P11-E1 D4).

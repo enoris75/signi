@@ -26,6 +26,7 @@ import { questionAdverb } from './questionAdverb.js';
 import { questionNoun } from './questionNoun.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 import { shapeAdverbialClause } from './shapeAdverbialClause.js';
+import { wordSeg } from './wordSeg.js';
 
 /**
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
@@ -98,6 +99,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   } else if (!dropsSubject && !(plain && phrase.subject.agreement['generic'] === '1')) {
     segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
   }
+  // A sentence adverb comments on the whole clause from right behind its topic, ahead of everything
+  // the predicate holds: 猫はもしかすると食べ物を食べませんでした (P09-E39, see `liftSentenceAdverb`).
+  if (phrase.sentenceAdverb) segs.push(wordSeg(phrase.sentenceAdverb.forms['base'] ?? '', phrase.sentenceAdverb.forms['reading']));
   // The demoted agent of a passive takes に, right after the topic and before everything else the
   // predicate holds: 食べ物は猫に食べられます ("the food is eaten by the cat"). The agentless passive has
   // none — the translator drops a generic agent rather than passing it (see ResolvedPhrase.agent).

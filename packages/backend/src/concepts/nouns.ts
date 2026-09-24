@@ -2759,6 +2759,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // How likely a thing is: PROBABLY is "with high probability" (P09-E39), which is how five of the
+    // seven say it — "con alta probabilità", "mit hoher Wahrscheinlichkeit", 高い確率で. A `means`
+    // noun, so the manner adverbial it heads takes "with" / *con* / *avec* / *mit* / で.
+    id: 'PROBABILITY',
+    role: 'noun',
+    description: 'how likely something is to be or to happen',
+    emoji: '📊',
+    mannerRelation: 'means',
+    forms: {
+      en: { base: 'probability', plural: 'probabilities', count: 'singular' },
+      it: { base: 'probabilità', plural: 'probabilità', gender: 'fem', count: 'singular' },
+      fr: { base: 'probabilité', plural: 'probabilités', gender: 'fem', count: 'singular' },
+      de: { base: 'Wahrscheinlichkeit', plural: 'Wahrscheinlichkeiten', gender: 'fem', count: 'singular' },
+      es: { base: 'probabilidad', plural: 'probabilidades', gender: 'fem', count: 'singular' },
+      ja: { base: '確率', count: 'singular', reading: 'かくりつ' },
+      pt: { base: 'probabilidade', plural: 'probabilidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'TRANSLATION',
     role: 'noun',
     description: 'a rendering of text or speech from one language into another',

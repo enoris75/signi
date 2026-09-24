@@ -20,9 +20,17 @@ import { questionWord } from './questionWord.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 import { subordinateText } from './subordinateText.js';
+import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
+import { VOWEL_START } from './fr.consts.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 export function renderClause(phrase: ResolvedPhrase): string {
+  // A sentence adverb opens the statement (P09-E39); fronted *peut-être* takes *que*, elided as
+  // "que" always is: "peut-être qu'il mange".
+  if (phrase.sentenceAdverb) {
+    return withSentenceAdverb(phrase.sentenceAdverb, renderClause({ ...phrase, sentenceAdverb: undefined }),
+      (c) => (VOWEL_START.test(c) ? `qu'${c}` : `que ${c}`));
+  }
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande taille"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
