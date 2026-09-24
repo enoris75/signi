@@ -46,7 +46,7 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A counted possessor keeps its cardinal: "un período de veinticuatro horas" (C31).
   // …and at one beside a definite or demonstrative it is left out: "del hombre", not "*del un
   // hombre" (A319, A339).
-  const numeral = oneBesideDeterminer(poss.head.forms) ? '' : numeralText(f, CARDINALS);
+  const numeral = oneBesideDeterminer(poss.head.forms, !!possessive) ? '' : numeralText(f, CARDINALS);
   const noun = [possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');
   return ` ${withRelative(`${deDet(artForms(f, adj), plural)} ${noun}`, poss)}`;
 }

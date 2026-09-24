@@ -344,7 +344,7 @@ export function complementsParts(
       // At one after der or dieser it declines weak: "mit dem einen Hund" (`numeralDe`, A319); after a
       // possessive mixed, read off the head's own determiner, which `f` gave to it: "mit ihrem einen
       // Freund" (A357).
-      const numeral = numeralDe({ ...f, definiteness: ownDeterminer }, nounCase, definiteness, isQuestionPossessor(np.possessor));
+      const numeral = numeralDe({ ...f, definiteness: ownDeterminer }, nounCase, definiteness, isQuestionPossessor(np.possessor), !!poss);
       const counted = numeral ? `${numeral} ` : '';
       const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;

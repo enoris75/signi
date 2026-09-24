@@ -489,17 +489,22 @@ describe('known bugs: a Japanese negated pair with TOO takes the concessive 〜�
   }), 'ja');
   const too = (c: string) => np(c, { headIntensifier: 'TOO' });
 
-  test.fails('two intensified adjectives', () => {
+  test('two intensified adjectives', () => {
     expect(pair(too('BIG'), too('SMALL'))).toBe('犬は大きすぎも小さすぎもしません。');
   });
 
-  test.fails('an intensified adjective first, before a plain one', () => {
+  test('an intensified adjective first, before a plain one', () => {
     expect(pair(too('BIG'), np('HAPPY'))).toBe('犬は大きすぎも幸せでもありません。');
   });
 
-  test('regression: the affirmative pair, an intensified adjective last, and the other six', () => {
+  test('regression: the affirmative pair, the plain pair, an intensified adjective last, the past, and the other six', () => {
     expect(pair(too('BIG'), too('SMALL'), false)).toBe('犬は大きすぎて小さすぎます。');
     expect(pair(np('BIG'), np('HAPPY'))).toBe('犬は大きくも幸せでもありません。');
+    expect(pair(np('HAPPY'), too('SMALL'))).toBe('犬は幸せでも小さすぎもしません。');
+    expect(say(clause(np('DOG'), 'BE', {
+      verbPhrase: { negative: true, tense: 'past' },
+      complements: { predicative: { phrase: { conjuncts: [too('BIG'), too('SMALL')], conjunction: 'and' } } },
+    }), 'ja')).toBe('犬は大きすぎも小さすぎもしませんでした。');
     expect(sayAll(clause(np('DOG'), 'BE', {
       verbPhrase: { negative: true },
       complements: { predicative: { phrase: { conjuncts: [too('BIG'), too('SMALL')], conjunction: 'and' } } },

@@ -28,4 +28,12 @@ describe('numeralDe', () => {
     expect(numeralDe({ ...HUND, definiteness: 'definite' }, 'dat', 'no', false)).toBe('einen');
     expect(numeralDe({ ...STUNDE, definiteness: 'definite' }, 'nom', 'no', false)).toBe('eine');
   });
+
+  // A365: after a possessive in a bare head's place, the same mixed ending.
+  test('one after a possessive on a bare head takes the mixed ending', () => {
+    expect(numeralDe({ ...HUND, definiteness: 'bare' }, 'nom', 'no', false, true)).toBe('einer');
+    expect(numeralDe({ ...HUND, definiteness: 'bare' }, 'acc', 'no', false, true)).toBe('einen');
+    expect(numeralDe({ ...STUNDE, definiteness: 'bare' }, 'dat', 'no', false, true)).toBe('einen');
+    expect(numeralDe({ ...HUND, definiteness: 'bare', indefinite_dropped: '1' }, 'nom', 'bare', false, true)).toBe('ein');
+  });
 });

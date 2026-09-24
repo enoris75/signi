@@ -40,3 +40,28 @@ ending, as it does after a definite with a possessive.
 | **Test** | `numerals.test.ts` → *known bugs: the numeral one beside a bare head with a pronominal possessive keeps the one (A365)* (3 `test.fails`: the subject and the object, the possessor and the comitative, a verb's own preposition; plus a regression test for English and Japanese, no numeral, the bare two and the bare one with no possessive) |
 
 Found by the A357 lane, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24.
+[oneBesideDeterminer](../../../packages/engine/src/functions/oneBesideDeterminer.ts) takes a
+`pronominalPossessive` flag: with it, a head the plan marks `bare` answers yes as a definite or
+demonstrative does, since the possessive stands in the determiner's place. The indefinite the
+translator made bare (`indefinite_dropped`, A329) still keeps its one (*un suo amico*), as does a bare
+one with no possessive or with a noun possessor (*un amico dell'uomo*).
+
+- Romance passes whether the phrase has a pronominal possessive:
+  [it/renderNP.ts](../../../packages/engine/src/languages/it/renderNP.ts),
+  [fr/renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts), and `nounPhrase.ts`,
+  `possessorText.ts`, `complementsPhrase.ts` and `prepObjectText.ts` in
+  [es/](../../../packages/engine/src/languages/es/) and [pt/](../../../packages/engine/src/languages/pt/).
+- German's [numeralDe.ts](../../../packages/engine/src/languages/de/numeralDe.ts) takes the same flag
+  from [de/nounPhrase.ts](../../../packages/engine/src/languages/de/nounPhrase.ts) and
+  [de/complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts),
+  and declines the one with the mixed ending (*ihr einer Freund*, *ihren einen Freund*, *ihres einen
+  Freundes*).
+
+Guarded by the three former `test.fails` in `numerals.test.ts` (*known bugs: … (A365)*), now plain
+tests, plus the predicative and a feminine object (*il gatto è il suo amico*, *der Kater sieht ihre
+eine Bedingung*) and a regression test for a noun possessor and the indefinite one beside a
+possessive; and unit cases in `oneBesideDeterminer.test.ts` and `numeralDe.test.ts`.

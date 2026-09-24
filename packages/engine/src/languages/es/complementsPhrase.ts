@@ -190,7 +190,7 @@ export function complementsPhrase(
       // `nounPhrase` places it: "en las tres casas", "con mis tres perros", "en estas tres casas mías"
       // (C31, A291).
       // …and at one beside a definite or demonstrative determiner it is left out, as there (A319).
-      const numeral = oneBesideDeterminer(np.head.forms) ? '' : numeralText(f, CARDINALS);
+      const numeral = oneBesideDeterminer(np.head.forms, !!possessive) ? '' : numeralText(f, CARDINALS);
       const noun = detached
         ? [numeral, withAdj(word, adj), stressed].filter(Boolean).join(' ')
         : [every, possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');

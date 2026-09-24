@@ -14,9 +14,11 @@ const TAILS: Record<'i' | 'na' | 'ta', Record<PredicateLink, [present: string, p
   ta: { te: ['いて', 'いて'], mo: ['も', 'も'], ka: ['いるか', 'いたか'] },
 };
 // A verb links as one, on its own row (see `JaVerbRow`): an intensifier's 〜すぎる as 大きすぎて,
-// 大きすぎても, 大きすぎるか (C33), and a godan verb as 違って, 違っても, 違うか (localization B87).
+// 大きすぎも, 大きすぎるか (C33), and a godan verb as 違って, 違いも, 違うか (localization B87). A verb's
+// "neither … nor" is its stem + も, closed on しない; the te-form + も would be the concessive
+// "even if" (大きすぎても — A366).
 const verbTails = (v: JaVerbRow): Record<PredicateLink, [present: string, past: string]> => ({
-  te: [v.te, v.te], mo: [`${v.te}も`, `${v.te}も`], ka: [`${v.u}か`, `${v.ta}か`],
+  te: [v.te, v.te], mo: [`${v.i}も`, `${v.i}も`], ka: [`${v.u}か`, `${v.ta}か`],
 });
 
 /**

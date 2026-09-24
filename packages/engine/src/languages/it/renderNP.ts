@@ -58,7 +58,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // Beside a definite or demonstrative determiner that article would say "*l'un cane", so the one is
   // left out and the phrase is the singular it counts: "il cane", "questo cane" (A319).
   const afterOne = (numeralLeads && pronominalPoss ? possWord : preSurfaces[0]) ?? noun;
-  const numeral = oneBesideDeterminer(forms) ? ''
+  const numeral = oneBesideDeterminer(forms, pronominalPoss) ? ''
     : forms['numeral'] === '1'
     ? `${forms['approximator'] ?? ''}${indefArticle(forms, false, afterOne)}`
     : numeralText(forms, CARDINALS);

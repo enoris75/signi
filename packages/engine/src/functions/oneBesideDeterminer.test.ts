@@ -15,4 +15,12 @@ describe('oneBesideDeterminer', () => {
     expect(oneBesideDeterminer({ numeral: '1', definiteness: 'no' })).toBe(false);
     expect(oneBesideDeterminer({ definiteness: 'definite' })).toBe(false);
   });
+
+  // A365: a pronominal possessive stands in a bare head's determiner, but not in the indefinite's.
+  test('one beside a bare head with a pronominal possessive, not the dropped indefinite', () => {
+    expect(oneBesideDeterminer({ numeral: '1', definiteness: 'bare' }, true)).toBe(true);
+    expect(oneBesideDeterminer({ numeral: '1', definiteness: 'bare', indefinite_dropped: '1' }, true)).toBe(false);
+    expect(oneBesideDeterminer({ numeral: '2', definiteness: 'bare' }, true)).toBe(false);
+    expect(oneBesideDeterminer({ numeral: '1', definiteness: 'no' }, true)).toBe(false);
+  });
 });

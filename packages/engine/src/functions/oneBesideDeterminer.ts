@@ -13,7 +13,16 @@ const IDENTIFYING: ReadonlySet<string> = new Set(['definite', 'this', 'that']);
  * with the determiner the user picked, not the builder's possessed forms that gave it to the
  * possessive. The indefinite one keeps its word there, its slot given to it by `keptBesidePossessive`
  * (A329): "un mio amico".
+ *
+ * A head the plan marks `bare` is identified by a pronominal possessive as well, which stands in the
+ * determiner's place (A365): "il suo amico", "son ami", German "ihr einer Freund", as the bare head
+ * with no numeral renders "il suo amico". `pronominalPossessive` says the phrase has one. Without it
+ * a bare one keeps its word ("un amico"), and so does the indefinite the translator made bare
+ * (`indefinite_dropped`, A329).
  */
-export function oneBesideDeterminer(forms: Record<string, string>): boolean {
-  return forms['numeral'] === '1' && IDENTIFYING.has(forms['definiteness'] ?? 'definite');
+export function oneBesideDeterminer(forms: Record<string, string>, pronominalPossessive = false): boolean {
+  if (forms['numeral'] !== '1') return false;
+  const definiteness = forms['definiteness'] ?? 'definite';
+  return IDENTIFYING.has(definiteness)
+    || (pronominalPossessive && definiteness === 'bare' && forms['indefinite_dropped'] !== '1');
 }

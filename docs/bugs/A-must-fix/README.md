@@ -1,9 +1,12 @@
 # A-must-fix — confirmed bugs
 
+None open. A365 and A366 were fixed on 2026-09-24 and moved to [`../fixed/`](../fixed/). The
+history below is kept as it was written.
+
 **Two open**, **A365** and **A366**, filed on 2026-09-24 from the leads the A355–A363 lanes
 reported. Each was reproduced at 17e57d9e plus that batch's fixes.
-[A365](A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md), the numeral one beside a bare head with a pronominal possessive (*il suo un amico*, *su un amigo*, *ihr ein Freund*), the case A357 left.
-[A366](A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md), a Japanese negated pair with TOO written with the concessive te-form (大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません).
+[A365](../fixed/A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md), the numeral one beside a bare head with a pronominal possessive (*il suo un amico*, *su un amigo*, *ihr ein Freund*), the case A357 left.
+[A366](../fixed/A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md), a Japanese negated pair with TOO written with the concessive te-form (大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません).
 
 [A367](../fixed/A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md) and
 [A368](../fixed/A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md), *piacere* /

@@ -14,10 +14,13 @@ import { declineAdj } from './declineAdj.js';
  * Freundes" (A357). `declension` is the determiner the phrase's adjectives decline after, and `forms`
  * carry the phrase's own determiner, the one a possessive stands in for.
  *
+ * A possessive in a bare head's place identifies it as well, and one after it takes the same mixed
+ * ending (A365): `pronominalPossessive`.
+ *
  * *wessen* declines nothing itself, and a one after it is left as it is (`wessen`).
  */
-export function numeralDe(forms: Record<string, string>, _case: Case, declension: string, wessen: boolean): string {
-  if (!wessen && oneBesideDeterminer(forms)) {
+export function numeralDe(forms: Record<string, string>, _case: Case, declension: string, wessen: boolean, pronominalPossessive = false): string {
+  if (!wessen && oneBesideDeterminer(forms, pronominalPossessive)) {
     return declineAdj('ein', _case, forms['gender'] ?? 'neut', false, declension);
   }
   return numeralText(forms, CARDINALS);

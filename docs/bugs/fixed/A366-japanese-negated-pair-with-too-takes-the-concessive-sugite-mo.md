@@ -31,3 +31,18 @@ change of state follows it (〜すぎも〜すぎもしなくなるまで, which
 | **Test** | `intensifiers.test.ts` → *known bugs: a Japanese negated pair with TOO takes the concessive 〜すぎても (A366)* (2 `test.fails`: two intensified adjectives, an intensified one first; plus a regression test for the affirmative pair, the plain pair and the other six) |
 
 Found by the A361 lane, 2026-09-24.
+
+## Resolved
+
+Fixed on 2026-09-24. In
+[ja/predicateLinkSegs.ts](../../../packages/engine/src/languages/ja/predicateLinkSegs.ts) a verb
+conjunct's `mo` link is its stem + も (the row's `i`), not the te-form + も: 大きすぎも小さすぎもしません,
+大きすぎも幸せでもありません. The fix is on `verbTails`, so it covers every verb row, and the godan 違う
+changes with it: 違いも大きくもありません, not the concessive 違っても (the E24 pin in
+`core-adjectives-e24.test.ts` is corrected accordingly). The comment in
+[ja/copulaSegs.ts](../../../packages/engine/src/languages/ja/copulaSegs.ts) on the change of state now
+reads 小さすぎもしなくなる.
+
+Guarded by the two former `test.fails` in `intensifiers.test.ts` (*known bugs: … (A366)*), now plain
+tests, with the regression test extended to an intensified adjective last (幸せでも小さすぎもしません)
+and the past (大きすぎも小さすぎもしませんでした).

@@ -39,7 +39,7 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   // A cardinal stands after the determiner and possessive, before the noun, as `nounPhrase` places it —
   // and at one beside a definite or demonstrative it is left out (A319): "a los dos amigos", "a
   // estos dos amigos", "a dos amigos" (A340).
-  const numeral = oneBesideDeterminer(pf) ? '' : numeralText(f, CARDINALS);
+  const numeral = oneBesideDeterminer(pf, !!possessive) ? '' : numeralText(f, CARDINALS);
   const noun = [possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');
   // The article is chosen from the adjective-aware forms: a prenominal adjective changes the one a
   // stressed-a noun takes ("en la primera agua").

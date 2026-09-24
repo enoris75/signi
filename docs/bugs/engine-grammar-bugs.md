@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds two, A365 and A366, and Part B is empty).** If
+this writing Part A and Part B are both empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -64,8 +64,10 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
-| A365 | [A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md](A-must-fix/A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md) | Italian, French, Spanish, Portuguese, German | the numeral one beside a bare head with a pronominal possessive is kept (*il suo un amico*, *son un ami*, *ihr ein Freund*), the case A357 left |
-| A366 | [A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md](A-must-fix/A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md) | Japanese | a negated pair with TOO takes the concessive te-form: 大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません |
+
+None open. A365 and A366 were fixed on 2026-09-24 and are listed under **Fixed** below; A366's fix
+covers every verb conjunct, so the godan 違う's "neither … nor" reads 違いも, not the concessive
+違っても.
 
 **Two open**, **A365** and **A366**, filed on 2026-09-24 from the leads the A355–A363 lanes
 reported: A357's one beside a possessive, left by a bare head (A365), and the Japanese "neither …
@@ -687,6 +689,8 @@ is listed under **Fixed** below.
 | A361 | [A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md](fixed/A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md) | Japanese | 2026-09-24 |
 | A362 | [A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md](fixed/A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md) | Japanese | 2026-09-24 |
 | A363 | [A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md](fixed/A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md) | French | 2026-09-24 |
+| A365 | [A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md](fixed/A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md) | Italian, French, Spanish, Portuguese, German | 2026-09-24 |
+| A366 | [A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md](fixed/A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md) | Japanese | 2026-09-24 |
 | A367 | [A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md](fixed/A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md) | Italian, Spanish | 2026-09-24 |
 | A368 | [A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md](fixed/A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md) | Italian, Spanish | 2026-09-24 |
 | A369 | [A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md](fixed/A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md) | Italian, Spanish | 2026-09-24 |

@@ -149,7 +149,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
       const table = lastKind === 'ta' ? STATE_NEITHER : lastKind === 'ru' ? RU_NEITHER : NEITHER;
       // Before まで and 前に the negative is reached (A361), as a single predicate's is (A345): the
       // existential's ない becomes なくなる, with なる taking the tense (大きくも幸せでもなくなる). A state's
-      // いない and a verb's しない change the same way (疲れてもいなくなる, 小さすぎてもしなくなる).
+      // いない and a verb's しない change the same way (疲れてもいなくなる, 小さすぎもしなくなる).
       const tail = form === 'reach'
         ? `${lastKind === 'ta' ? 'い' : lastKind === 'ru' ? 'し' : ''}${NARU[tense === 'past' ? 3 : 2]}`
         : table[row(form)][tense === 'past' ? 1 : 0];

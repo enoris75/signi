@@ -15,7 +15,7 @@ export function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives, po
   // grandes" (C31). It agrees only at one — and in Portuguese at two as well (dois / duas).
   // At one the cardinal is the indefinite article's own word: beside a definite or demonstrative
   // determiner it is left out, and the phrase is the singular it counts: "el perro", "este perro" (A319).
-  const numeral = oneBesideDeterminer(forms) ? '' : numeralText(forms, CARDINALS);
+  const numeral = oneBesideDeterminer(forms, !!possessive) ? '' : numeralText(forms, CARDINALS);
   const noun = `${numeral ? `${numeral} ` : ''}${withAdj(word, adj)}`;
   const definiteness = forms['definiteness'] ?? 'definite';
   // A pronominal possessive ("su perro") replaces the article, whatever determiner was picked —

@@ -214,7 +214,7 @@ describe('a Japanese verb-adjective: the godan 違う and the する verb 実在
 
   test('coordinated, lowered, intensified, and after SEEM and BECOME', () => {
     expect(ja(pair('DIFFERENT', 'and'))).toBe('猫は違って大きいです。');
-    expect(ja(pair('DIFFERENT', 'and', { negative: true }))).toBe('猫は違っても大きくもありません。');
+    expect(ja(pair('DIFFERENT', 'and', { negative: true }))).toBe('猫は違いも大きくもありません。');
     expect(ja(pair('DIFFERENT', 'or', { tense: 'past' }))).toBe('猫は違ったか大きかったです。');
     expect(ja(pair('REAL_EXISTING', 'and'))).toBe('猫は実在して大きいです。');
     expect(ja(clause(np('CAT', { definiteness: 'definite', adjectives: ['DIFFERENT'], adjectiveDegrees: ['less'] }), 'EAT')))
