@@ -666,13 +666,35 @@ describe('known bugs: the impersonal si / se with a pronoun recipient keeps the 
     verbPhrase: { negative }, directObject: np('BOOK'), complements: { terminus: { phrase: recipient } },
   }));
 
-  test.fails('the 3rd and the 1st person recipient', () => {
+  test('the 3rd and the 1st person recipient', () => {
     expect(oneGives(her)).toMatchObject({ it: 'le si dà il libro.', es: 'se le da el libro.' });
     expect(oneGives(np('FIRST_PERSON'))).toMatchObject({ it: 'mi si dà il libro.', es: 'se me da el libro.' });
   });
 
-  test.fails('negated', () => {
+  test('negated', () => {
     expect(oneGives(her, true)).toMatchObject({ it: 'non le si dà il libro.', es: 'no se le da el libro.' });
+  });
+
+  const one = (recipient: NounElement, verbPhrase: Partial<VerbPhrase> = {}, object: NounElement = np('BOOK')) =>
+    sayAll(clause(np('GENERIC_PERSON'), 'GIVE', { verbPhrase, directObject: object, complements: { terminus: { phrase: recipient } } }));
+
+  // With a plural noun object Italian's si is the passive si, and the dative leads it all the same.
+  test('the 2nd person, a plural noun object, the compound tense, a modal, and TELL', () => {
+    expect(one(np('SECOND_PERSON'))).toMatchObject({ it: 'ti si dà il libro.', es: 'se te da el libro.' });
+    expect(one(her, {}, np('BOOK', { number: 'plural' }))).toMatchObject({ it: 'le si danno i libri.', es: 'se le dan los libros.' });
+    expect(one(her, { aspect: 'resultative' })).toMatchObject({ it: 'le si è dato il libro.', es: 'se le ha dado el libro.' });
+    expect(one(her, { modals: ['MUST'] })).toMatchObject({ it: 'le si deve dare il libro.', es: 'se le debe dar el libro.' });
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'TELL', {
+      contentObject: { subject: np('CAT'), verbPhrase: { verb: 'RUN' } }, complements: { terminus: { phrase: her } },
+    }))).toMatchObject({ it: 'le si racconta che il gatto corre.', es: 'se le cuenta que el gato corre.' });
+  });
+
+  // Italian's impersonal si takes a whole cluster in front (A359): "glielo si dà". Spanish's cannot,
+  // since the cluster's own se would double it ("*se se lo da"), so the recipient keeps its phrase.
+  test('beside a pronoun object: the Italian cluster, the Spanish tonic recipient', () => {
+    expect(one(her, {}, np('THIRD_PERSON', { gender: 'neut' }))).toMatchObject({
+      it: 'glielo si dà.', fr: 'on le lui donne.', es: 'se lo da a ella.', pt: 'se o dá a ela.',
+    });
   });
 
   test('regression: French, a noun recipient, Portuguese, and the other languages', () => {

@@ -281,11 +281,13 @@ export function predicateText(
   // A pronoun recipient is the dative clitic in the same slot, "le da el libro", "me da el libro"
   // (A351): the plain clitic, undoubled. Beside a 3rd-person object clitic the two are one cluster,
   // dative first, le / les turning se: "se lo da", "me lo da", riding wherever the lone clitic rides
-  // (A359). A 1st / 2nd person object admits no dative clitic beside it, and beside a pronominal
-  // verb's own or the impersonal se the recipient keeps its "a ella" rather than half a cluster.
+  // (A359). The impersonal se leads a lone dative as it leads an object clitic: "se le da el libro",
+  // "se me da", "no se le da" (A360); beside an object clitic too it would make "*se se lo da", so
+  // there the recipient keeps its "a ella". A 1st / 2nd person object admits no dative clitic beside
+  // it, and beside a pronominal verb's own se the recipient keeps its phrase rather than half a cluster.
   const clusterObject = !!directObject && !objectPrep && !experiencerClitic && isPronounElement(directObject)
-    && firstConjunct(directObject).head.forms['person'] === '3';
-  const recipientForms = (!objectClitic || clusterObject) && !isGeneric && !reflexiveClitic(copulaVerb.forms, subjectForms)
+    && firstConjunct(directObject).head.forms['person'] === '3' && !isGeneric;
+  const recipientForms = (!objectClitic || clusterObject) && !reflexiveClitic(copulaVerb.forms, subjectForms)
     ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
   const clitic = esCliticCluster(recipientClitic, objectClitic);

@@ -180,10 +180,12 @@ export function predicateText(
   // A pronoun recipient is the dative clitic in the same slot, "le dà il libro", "gli racconta che"
   // (A351). Beside a 3rd-person object clitic the two are one cluster, dative first: "glielo dà", "me
   // lo dà", riding wherever the lone clitic rides — inside "non", up a modal, onto a command
-  // ("daglielo") (A359). A 1st / 2nd person object admits no dative clitic beside it, and beside a
-  // reflexive or the impersonal si the recipient keeps its tonic "a lei" rather than half a cluster.
+  // ("daglielo") (A359). Beside the impersonal si the dative leads it, as an object clitic does: "le
+  // si dà il libro", "mi si dà", "non le si dà", "glielo si dà" (A360). A 1st / 2nd person object
+  // admits no dative clitic beside it, and beside a reflexive the recipient keeps its tonic "a lei"
+  // rather than half a cluster.
   const clusterObject = !!cliticObject && !datClitic && cliticObject['person'] === '3';
-  const recipientForms = (!objectClitic || clusterObject) && !reflexive && subjectForms['generic'] !== '1'
+  const recipientForms = (!objectClitic || clusterObject) && !reflexive
     ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
   const clitic = itCliticCluster(recipientClitic, objectClitic);
