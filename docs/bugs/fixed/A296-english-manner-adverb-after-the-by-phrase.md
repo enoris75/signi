@@ -58,3 +58,15 @@ left alone.
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: English manner adverb after the by-phrase* (2 `test.fails`: the simple tenses with a complement and a question, and the verb groups with a relative clause; plus a regression test for the active clause, the agentless passive and a frequency adverb) |
+
+## Resolved
+
+2026-09-24. [en/predicateParts.ts](../../../packages/engine/src/languages/en/predicateParts.ts)
+builds the passive's `objectText` after the adverb is settled, and when the clause has an agent and
+its adverb is a plain manner adverb (no `subtype`, no negative form), writes that adverb between the
+participle and the by-phrase and leaves the trailing slot empty. Frequency, place, direction and
+sentence adverbs and a negation-sensitive one (ALREADY → "yet") keep their slots; a modal's own
+manner adverb still trails. Guarded by the two formerly-failing tests and two new ones (prospective,
+past, plural, pronoun agent; place, negated time and sentence adverbs unchanged) in `known bugs:
+English manner adverb after the by-phrase` in
+[adverb.test.ts](../../../packages/engine/test/adverb.test.ts).

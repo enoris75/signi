@@ -156,9 +156,6 @@ function predicateWords(
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np)),
       slotFocus(directObject), FOCUS_WORDS);
-  const objectText = passive
-    ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
-    : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
   // A focus adverb that scopes over the negation leaves the frequency slot between the auxiliary
   // and the verb, which reads as the negation scoping over IT. STILL steps ahead of the whole
   // negated group ("still does not eat"), and the additive takes its postposed NPI at the end of
@@ -185,7 +182,18 @@ function predicateWords(
   const isDirection = isDirectionAdverb(modifier);
   // The pre-negation adverb is spliced in front of the whole predicate by `predicateParts`, so it
   // leaves every in-clause slot empty here.
-  const modifierText = isDirection || isPlaceAdverb(modifier) || preNegationAdverb(verbPhrase) || governedLead ? '' : adverbText;
+  const clauseModifierText = isDirection || isPlaceAdverb(modifier) || preNegationAdverb(verbPhrase) || governedLead ? '' : adverbText;
+  // A passive writes its participle and by-phrase where an active writes its object, and a manner
+  // adverb goes with the participle, ahead of the demoted agent: "is eaten well by the dog", not "is
+  // eaten by the dog well" (A296). Only a plain manner adverb moves — one with no subtype and no
+  // negative form; every other kind keeps the slot it has, and the other complements still follow
+  // the agent. With no agent the trailing slot already reads "is eaten well".
+  const agentText = passive ? agentPhrase(agent, subjectForms) : '';
+  const passiveManner = agentText && !modifier?.forms['subtype'] && !negAdverb ? clauseModifierText : '';
+  const modifierText = passiveManner ? '' : clauseModifierText;
+  const objectText = passive
+    ? [passiveParticiple(lexical), passiveManner, agentText].filter(Boolean).join(' ')
+    : objectWords && objectPrep ? `${objectPrep} ${objectWords}` : objectWords;
   // An object that carries a relative clause ends in that clause's verb, and a particle standing
   // after it attaches to that verb instead: "*moves the book that sees the dog up". English puts the
   // particle in front of such an object — "moves up the book that sees the dog" — and every branch
