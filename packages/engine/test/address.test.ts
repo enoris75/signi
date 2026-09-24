@@ -286,7 +286,7 @@ describe('the vocative on a common noun', () => {
 // A335. A French pronoun addressee takes the subject clitic, "Tu, cours." A vocative pronoun stands
 // on its own, detached from any verb, so French takes the tonic form, as after a preposition.
 describe('known bugs: a French pronoun addressee takes the clitic (A335)', () => {
-  test.fails('a 2nd-singular pronoun address is the tonic toi', () => {
+  test('a 2nd-singular pronoun address is the tonic toi', () => {
     expect(sayAll(command(You))).toEqual({
       en: 'You, run.', it: 'Tu, corri.', fr: 'Toi, cours.', de: 'Du, lauf.',
       es: 'Tú, corre.', ja: 'あなた、走ってください。', pt: 'Você, corra.',
@@ -298,6 +298,21 @@ describe('known bugs: a French pronoun addressee takes the clitic (A335)', () =>
     expect(sayAll(command(YouAll, YouAll))).toEqual({
       en: 'You, run.', it: 'Voi, correte.', fr: 'Vous, courez.', de: 'Ihr, lauft.',
       es: 'Vosotros, corred.', ja: 'あなたたち、走ってください。', pt: 'Vocês, corram.',
+    });
+  });
+
+  test('toi behind an interjection, before a negative command and before a statement', () => {
+    expect(sayAll({ ...command(You), interjection: 'HEY' })).toEqual({
+      en: 'Hey, you, run.', it: 'Ehi, tu, corri.', fr: 'Hé, toi, cours.', de: 'Hey, du, lauf.',
+      es: 'Oye, tú, corre.', ja: 'ねえ、あなた、走ってください。', pt: 'Ei, você, corra.',
+    });
+    expect(sayAll({ ...command(You), verbPhrase: dontRun })).toEqual({
+      en: 'You, do not run.', it: 'Tu, non correre.', fr: 'Toi, ne cours pas.', de: 'Du, lauf nicht.',
+      es: 'Tú, no corras.', ja: 'あなた、走るな。', pt: 'Você, não corra.',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: You })).toEqual({
+      en: 'You, the cat runs.', it: 'Tu, il gatto corre.', fr: 'Toi, le chat court.', de: 'Du, der Kater läuft.',
+      es: 'Tú, el gato corre.', ja: 'あなた、猫は走ります。', pt: 'Você, o gato corre.',
     });
   });
 });

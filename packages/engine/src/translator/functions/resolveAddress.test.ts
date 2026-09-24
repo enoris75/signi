@@ -31,4 +31,12 @@ describe('resolveAddress', () => {
     expect(phrase.subject.conjuncts.map((np) => np.head.forms['definiteness'])).toEqual(['bare', 'bare']);
     expect(phrase.subject.agreement['number']).toBe('plural');
   });
+
+  test('a French pronoun takes its tonic form, the others keep the nominative (A335)', () => {
+    const TU = { base: 'tu', disjunctive: 'toi', person: '2', number: 'singular' };
+    const DU = { base: 'du', disjunctive: 'dir', person: '2', number: 'singular' };
+    const lookup = lexicon({}, { fr: { SECOND_PERSON: TU }, de: { SECOND_PERSON: DU }, it: { SECOND_PERSON: { base: 'tu', disjunctive: 'te', person: '2' } } });
+    const base = (language: string) => resolveAddress({ concept: 'SECOND_PERSON' }, language, lookup).subject.conjuncts[0].head.forms['base'];
+    expect([base('fr'), base('de'), base('it')]).toEqual(['toi', 'du', 'tu']);
+  });
 });
