@@ -45,6 +45,8 @@ export function subjectBinding(subject: ResolvedNounElement, planSubject: NounEl
     coreferent: 'subject',
     human,
     own,
+    // The generic subject's owner is *one's* in English and *proprio* in Italian (A332).
+    ...(agreement['generic'] === '1' ? { generic: true as const } : {}),
   };
 }
 

@@ -432,7 +432,7 @@ describe('known bugs: english writes his for a possessor linked to a female subj
 describe('known bugs: english and italian write his / suo for a possessor linked to the generic subject (A332)', () => {
   const one = np('GENERIC_PERSON');
 
-  test.fails('the link', () => {
+  test('the link', () => {
     expect(sees(one, L('BOOK'))).toEqual({
       en: "one sees one's book.", it: 'si vede il proprio libro.', fr: 'on voit son livre.', de: 'man sieht sein Buch.',
       es: 'se ve su libro.', ja: '人は自分の本を見ます。', pt: 'se vê o seu livro.',
@@ -440,7 +440,7 @@ describe('known bugs: english and italian write his / suo for a possessor linked
   });
 
   // proprio is already the emphasis, so Italian does not stack a second one.
-  test.fails('with OWN', () => {
+  test('with OWN', () => {
     expect(sees(one, L('BOOK', { possessorOwn: true }))).toEqual({
       en: "one sees one's own book.", it: 'si vede il proprio libro.', fr: 'on voit son propre livre.',
       de: 'man sieht sein eigenes Buch.', es: 'se ve su propio libro.', ja: '人は自分自身の本を見ます。',
@@ -449,18 +449,36 @@ describe('known bugs: english and italian write his / suo for a possessor linked
   });
 
   // A kin noun keeps its article before proprio, as it does before an adjective.
-  test.fails('on a kin noun', () => {
+  test('on a kin noun', () => {
     expect(sees(one, L('MOTHER'))).toEqual({
       en: "one sees one's mother.", it: 'si vede la propria madre.', fr: 'on voit sa mère.', de: 'man sieht seine Mutter.',
       es: 'se ve a su madre.', ja: '人は自分のお母さんを見ます。', pt: 'se vê a sua mãe.',
     });
   });
 
-  test.fails('in a complement', () => {
+  test('in a complement', () => {
     expect(sayAll(clause(one, 'RUN', { complements: { comitative: { phrase: L('DOG') } } }))).toEqual({
       en: "one runs with one's dog.", it: 'si corre con il proprio cane.', fr: 'on court avec son chien.',
       de: 'man läuft mit seinem Hund.', es: 'se corre con su perro.', ja: '人は自分の犬と走ります。',
       pt: 'se corre com o seu cão.',
+    });
+  });
+
+  // proprio agrees with its head as suo does, and one's stands wherever his stood.
+  test('agreement, a possessor chain, an indefinite head and OWN on a kin noun', () => {
+    const at = (object: NounPhrase) => sees(one, object);
+    expect(at(L('HOUSE'))).toMatchObject({ en: "one sees one's house.", it: 'si vede la propria casa.' });
+    expect(at(L('BOOK', { number: 'plural' }))).toMatchObject({ en: "one sees one's books.", it: 'si vedono i propri libri.' });
+    expect(at(np('BOOK', { possessor: L('MOTHER') }))).toMatchObject({
+      en: "one sees one's mother's book.", it: 'si vede il libro della propria madre.',
+    });
+    // The independent form, after a head that keeps its own article (A277).
+    expect(at(L('FRIEND', { definiteness: 'indefinite' }))).toMatchObject({
+      en: "one sees a friend of one's own.", it: 'si vede un proprio amico.',
+    });
+    expect(at(L('MOTHER', { possessorOwn: true }))).toMatchObject({
+      en: "one sees one's own mother.", it: 'si vede la propria madre.', fr: 'on voit sa propre mère.',
+      de: 'man sieht seine eigene Mutter.',
     });
   });
 

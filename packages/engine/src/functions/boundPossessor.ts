@@ -7,3 +7,6 @@ import type { BoundPossessor } from '../types.js';
  */
 export const isBoundPossessor = (p: unknown): p is BoundPossessor =>
   typeof p === 'object' && p !== null && (p as { coreferent?: unknown }).coreferent === 'subject';
+
+/** Whether a resolved possessor is bound to the generic subject (A332): *one's*, *proprio*. */
+export const isGenericBound = (p: unknown): p is BoundPossessor => isBoundPossessor(p) && p.generic === true;

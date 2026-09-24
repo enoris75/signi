@@ -1,3 +1,4 @@
+import { isGenericBound } from './functions/boundPossessor.js';
 import type { PronominalPossessor, RubySegment } from './types.js';
 
 /**
@@ -66,6 +67,8 @@ export function pronounPossessor(forms: Record<string, string>): PronominalPosse
 // ── English ─────────────────────────────────────────────────────────────────
 // Invariant of the possessed. Only 3rd-singular splits on the antecedent's gender.
 export function possessiveEn(feats: PronominalPossessor): string {
+  // A possessor linked to the generic subject: "one sees one's book" (A332).
+  if (isGenericBound(feats)) return "one's";
   if (pn(feats) === '3sg') {
     return feats.gender === 'fem' ? 'her' : feats.gender === 'neut' ? 'its' : 'his';
   }
@@ -82,6 +85,8 @@ export function possessiveEn(feats: PronominalPossessor): string {
  * of-genitive A184 built for a genitive possessor (A187).
  */
 export function possessiveEnIndependent(feats: PronominalPossessor): string {
+  // *one's* has no independent form of its own: "a book of one's own" (A332).
+  if (isGenericBound(feats)) return "one's own";
   if (pn(feats) === '3sg') {
     return feats.gender === 'fem' ? 'hers' : feats.gender === 'neut' ? 'its' : 'his';
   }
@@ -103,6 +108,7 @@ const IT: Record<PN, [string, string, string, string] | string> = {
   '2pl': ['vostro', 'vostra', 'vostri', 'vostre'],
   '3pl': 'loro',
 };
+const IT_GENERIC: [string, string, string, string] = ['proprio', 'propria', 'propri', 'proprie'];
 
 function romanceIndex(agree: PossessedAgreement): 0 | 1 | 2 | 3 {
   const fem = agree.gender === 'fem';
@@ -111,7 +117,9 @@ function romanceIndex(agree: PossessedAgreement): 0 | 1 | 2 | 3 {
 }
 
 export function possessiveIt(feats: PronominalPossessor, agree: PossessedAgreement): string {
-  const forms = IT[pn(feats)];
+  // Impersonal *si* binds only *proprio*, agreeing with the head as *suo* does: "si vede il proprio
+  // libro", where "il suo libro" is someone else's (A332).
+  const forms = isGenericBound(feats) ? IT_GENERIC : IT[pn(feats)];
   return typeof forms === 'string' ? forms : forms[romanceIndex(agree)];
 }
 

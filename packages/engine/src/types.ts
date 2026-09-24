@@ -25,6 +25,12 @@ export interface BoundPossessor extends PronominalPossessor {
    * his mother is the speaker's too (P11-E2 D3).
    */
   own: boolean;
+  /**
+   * Whether the subject is the generic one (GENERIC_PERSON: *one*, *si*, *on*, *man*): English
+   * says *one's* for its owner, not *his*, and Italian's impersonal *si* binds only *proprio* ("si
+   * vede il proprio libro"), where *suo* is someone else's (A332). Absent otherwise.
+   */
+  generic?: true;
 }
 
 /** A resolved noun-modifier: the attributive noun's forms plus its semantic relation. */
