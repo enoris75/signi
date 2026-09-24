@@ -226,6 +226,7 @@ export const COORD_VALUES: readonly ValueDef[] = [
     descriptionKey: "conjunction.kind.therefore",
   },
   { name: "then", value: "then", description: "temporal", descriptionKey: "conjunction.kind.then" },
+  { name: "however", value: "however", description: "adversative", descriptionKey: "conjunction.kind.however" },
 ];
 
 /** The conjunctions `/sub` opens an adverbial clause with (P09-E12 D9), each by the word it spells. */

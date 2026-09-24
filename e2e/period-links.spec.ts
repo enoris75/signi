@@ -48,6 +48,26 @@ test.describe('period links', () => {
     await expect(app.sentences('en')).toHaveCount(2);
   });
 
+  // P09-E29: "however" is on the same menu, a connective adverb after a semicolon — and German
+  // puts its "jedoch" after the second clause's finite verb.
+  test('"however" joins two periods after a semicolon', async ({ app }) => {
+    await app.buildClauseIn(0, 'DOG', 'RUN');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'EAT');
+
+    await app.linkCoordination(0, 1, 'However');
+    await app.expectSentences({
+      en: 'the dog runs; however, the cat eats.',
+      it: 'il cane corre; tuttavia, il gatto mangia.',
+      fr: 'le chien court ; cependant, le chat mange.',
+      de: 'der Hund läuft; der Kater frisst jedoch.',
+      es: 'el perro corre; sin embargo, el gato come.',
+      pt: 'o cão corre; no entanto, o gato come.',
+      ja: '犬は走ります。しかしながら、猫は食べます。',
+    });
+    await expect(app.period(0).getByRole('button', { name: 'Remove the coordination (However)' })).toBeVisible();
+  });
+
   // The subordinate clauses (P09-E12 D9): one border control, a menu of what the verb takes.
   test('a that-clause becomes the object of a verb of saying', async ({ app }) => {
     await app.buildClauseIn(0, 'MAN', 'SAY');

@@ -165,6 +165,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'that is',
   therefore: 'so',
   then: 'and then',
+  however: 'however',
 };
 
 /**
@@ -180,7 +181,7 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
  * them as well as before: "the cat runs, that is, the dog jumps". Clause joins only; a noun group
  * never takes one.
  */
-export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is', 'however']);
 
 // The negator that denies one constituent rather than the clause: "runs **not** because of the
 // dog", which says the cat runs and the dog is not why (see `Complement.negative`). English sets

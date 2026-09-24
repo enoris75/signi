@@ -224,6 +224,60 @@ describe('coordinated clauses', () => {
     });
   });
 
+  // P09-E29: "however" is the written adversative — a connective adverb, not a coordinator. A
+  // semicolon before it and a comma after it where it leads its clause; German puts "jedoch" after
+  // the finite verb; Japanese opens a new sentence with it, as with しかし.
+  test('adversative adverb — "however"', () => {
+    expect(sayAll({
+      ...clause(np('CAT'), 'RUN'),
+      coordination: { conjunction: 'however', clause: clause(np('DOG'), 'EAT') },
+    })).toEqual({
+      en: 'the cat runs; however, the dog eats.',
+      it: 'il gatto corre; tuttavia, il cane mangia.',
+      fr: 'le chat court ; cependant, le chien mange.',
+      de: 'der Kater läuft; der Hund frisst jedoch.',
+      es: 'el gato corre; sin embargo, el perro come.',
+      pt: 'o gato corre; no entanto, o cão come.',
+      ja: '猫は走ります。しかしながら、犬は食べます。',
+    });
+    expect(join('however')).toMatchObject({ de: 'der Kater läuft; der Hund springt jedoch.' });
+  });
+
+  test('German "jedoch" stands after the finite verb, whatever the subject and objects are', () => {
+    const second = (plan: PhrasePlan) =>
+      say({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'however', clause: plan } }, 'de');
+    // A subject of several words: the verb is still second, "jedoch" right behind it, no inversion.
+    expect(second(clause(np('DOG', { adjectives: ['BIG'] }), 'EAT', { directObject: np('FOOD') })))
+      .toBe('der Kater läuft; der große Hund frisst jedoch das Essen.');
+    // An object pronoun leads the Mittelfeld, so "jedoch" follows it.
+    expect(second(clause(np('DOG'), 'EAT', { directObject: np('THIRD_PERSON', { gender: 'neut' }) })))
+      .toBe('der Kater läuft; der Hund frisst es jedoch.');
+    // A compound tense: behind the finite auxiliary, the infinitive closing the clause.
+    expect(second(clause(np('DOG'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'future' } })))
+      .toBe('der Kater läuft; der Hund wird jedoch das Essen fressen.');
+    // A question: the verb leads, "jedoch" behind the subject it inverted over.
+    expect(say({
+      ...clause(np('CAT'), 'RUN'), interrogative: true,
+      coordination: { conjunction: 'however', clause: clause(np('DOG'), 'EAT') },
+    }, 'de')).toBe('läuft der Kater; frisst der Hund jedoch?');
+  });
+
+  test('the conjunction menu cites "however" as its bare word', () => {
+    expect(conjunctionAll('however')).toEqual({
+      en: 'however', it: 'tuttavia', fr: 'cependant', de: 'jedoch', es: 'sin embargo', ja: 'しかしながら', pt: 'no entanto',
+    });
+  });
+
+  test('"however" joins two statements only: under a command it falls back to "and"', () => {
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true,
+      coordination: { conjunction: 'however', clause: clause(np('SECOND_PERSON'), 'EAT') },
+    })).toEqual(sayAll({
+      ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true,
+      coordination: { conjunction: 'and', clause: clause(np('SECOND_PERSON'), 'EAT') },
+    }));
+  });
+
   test('German V2: "therefore" and "then" invert, the other four do not', () => {
     // The finite verb "springt" leads for the inverting pair, and trails the subject "der Hund"
     // for the rest — the one German axis the six conjunctions split on.

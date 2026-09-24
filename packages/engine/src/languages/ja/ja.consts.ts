@@ -222,6 +222,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'つまり',
   therefore: 'だから',
   then: 'それから',
+  however: 'しかしながら',
 };
 
 /**

@@ -440,6 +440,12 @@ export interface ResolvedPhrase {
    */
   coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
   /**
+   * A connective adverb an engine asks its clause renderer to place after the finite verb — German's
+   * *jedoch*, the `however` of a coordinated second clause (P09-E29): "der Hund frisst **jedoch**
+   * das Essen". Never set by the translator; the engine sets it on the clause it is about to render.
+   */
+  postFiniteAdverb?: string;
+  /**
    * A resolved infinitive complement: the clause this clause's predicate governs ("is able **to
    * eat**", see PhrasePlan.infinitiveComplement). Its verb is in the `'infinitive'` mood, so every
    * engine drops its subject; the subject is its **controller** — the governing clause's own

@@ -176,6 +176,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   // As in Spanish, "então" spans both senses; "portanto" / "e depois" separate them.
   therefore: 'portanto',
   then: 'e depois',
+  however: 'no entanto',
 };
 
 /**
@@ -190,7 +191,7 @@ export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
  * The explanatory connectors among the clause conjunctions, set off by a comma after them as well as
  * before: "o gato corre, isto é, o cão pula". "portanto" heading its clause may go without one.
  */
-export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is', 'however']);
 
 /**
  * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("a casa zero, os gatos zero");

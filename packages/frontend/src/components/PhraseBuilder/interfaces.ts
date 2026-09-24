@@ -19,6 +19,7 @@ export const COORD_CONJUNCTION_OPTIONS: {
   { value: "that_is", labelKey: "conjunction.value.that_is", hintKey: "conjunction.kind.that_is" },
   { value: "therefore", labelKey: "conjunction.value.therefore", hintKey: "conjunction.kind.therefore" },
   { value: "then", labelKey: "conjunction.value.then", hintKey: "conjunction.kind.then" },
+  { value: "however", labelKey: "conjunction.value.however", hintKey: "conjunction.kind.however" },
 ];
 
 /**
@@ -34,6 +35,7 @@ export const COORD_CONJUNCTION_KEYS: Record<CoordConjunction, string> = {
   that_is: "I",
   therefore: "S",
   then: "T",
+  however: "H",
 };
 
 // The catalog key naming each conjunction, for the call sites that have a CoordConjunction rather

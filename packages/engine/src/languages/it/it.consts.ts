@@ -158,6 +158,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'cioè',
   therefore: 'quindi',
   then: 'e poi',
+  however: 'tuttavia',
 };
 
 /**

@@ -25,7 +25,9 @@ export const portugueseEngine: LanguageEngine = {
     if (!phrase.coordination) return sentence;
     const { conjunction, clause } = phrase.coordination;
     const connector = `${COORD_WORDS[conjunction]}${PARENTHETICAL_CONNECTORS.has(conjunction) ? ',' : ''}`;
-    return `${sentence}, ${connector} ${renderClause(clause)}`;
+    // "however" is a connective adverb opening a clause of its own, so a semicolon comes before it
+    // rather than a comma (P09-E29).
+    return `${sentence}${conjunction === 'however' ? ';' : ','} ${connector} ${renderClause(clause)}`;
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

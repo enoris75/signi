@@ -48,6 +48,16 @@ export const germanEngine: LanguageEngine = {
     // ("…, das heißt, der Hund springt"; A192).
     if (!phrase.coordination) return punctuate(sentence);
     const { conjunction, clause } = phrase.coordination;
+    // "jedoch" is a connective adverb inside the second clause, not a coordinator before it: it
+    // stands after the finite verb, in the ordinary adverb slot, and the two clauses are parted by a
+    // semicolon — "der Kater läuft; der Hund frisst jedoch" (P09-E29). A clause with no V2 slot to
+    // put it behind (a verbless one) takes it in front instead.
+    if (conjunction === 'however') {
+      const word = COORD_WORDS.however;
+      const inside = renderClause({ ...clause, postFiniteAdverb: word }, question);
+      const second = inside === renderClause(clause, question) ? `${word} ${inside}` : inside;
+      return punctuate(`${sentence}; ${second}`);
+    }
     const connector = `${COORD_WORDS[conjunction]}${PARENTHETICAL_CONNECTORS.has(conjunction) ? ',' : ''}`;
     return punctuate(
       `${sentence}, ${connector} ${renderClause(clause, question || COORD_INVERTS[conjunction])}`,

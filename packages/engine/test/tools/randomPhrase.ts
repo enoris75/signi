@@ -80,7 +80,7 @@ const MARKED_DEGREES: Degree[] = ['more', 'most', 'less', 'least', 'equally'];
 const TENSES: Tense[] = ['present', 'past', 'future'];
 const MARKED_ASPECTS: Aspect[] = ['progressive', 'prospective', 'resultative'];
 const PATHS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of', 'on', 'between', 'against'];
-const CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then'];
+const CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then', 'however'];
 // Only these two join noun phrases (NOUN_COORD_CONJUNCTIONS); the others relate clauses.
 const NOUN_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
 const MODALS = ['MUST', 'CAN', 'WILL'];

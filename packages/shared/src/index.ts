@@ -1780,10 +1780,15 @@ export const IMPERATIVE_REGISTERS: ImperativeRegister[] = ['request', 'instructi
  *  - `then`      temporal — the second clause follows *after* the first ("and then", "e poi",
  *                "und dann"). Most languages mark sequence with an adverb rather than a
  *                conjunction, so the engines render this one with its coordinator attached.
+ *  - `however`   adversative like `but`, but a connective *adverb* set off like `that_is` (P09-E29):
+ *                "the cat runs; however, the dog eats". A semicolon before it and a comma after it
+ *                in en/it/fr/es/pt; German writes *jedoch* after the second clause's finite verb
+ *                ("der Kater läuft; der Hund frisst jedoch"); Japanese opens a new sentence with
+ *                しかしながら, as it does with しかし.
  */
-export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'therefore' | 'then';
+export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'therefore' | 'then' | 'however';
 
-export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then'];
+export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then', 'however'];
 
 /**
  * The conjunctions that may join two **commands** (see `PhrasePlan.coordination`). Four of the
@@ -1792,7 +1797,8 @@ export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that
  * "but" ("come in, but don't touch anything!"), and the disjunctive "or" offering the addressee
  * a choice ("call me or write to me!").
  *
- * The other two need a *statement* on at least one side and so are not offered under a command:
+ * The other three need a *statement* on at least one side and so are not offered under a command
+ * (`however`, P09-E29, is the written adversative, which a command's "but" already covers):
  * `therefore` draws a conclusion from a premise, and an order is not a premise ("eat the bread,
  * therefore run" is broken — what works, "it's late, so go to bed", is a statement joined to a
  * command, i.e. two different moods, which a symmetric join cannot express); `that_is`
