@@ -1,12 +1,12 @@
 import type { AbstractionLevel, CoordConjunction, SubordinatingConjunction } from "@signi/shared";
 import {
+  type RelativeGap,
   isConditionalLink,
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
   isSubordinateLink,
   type NounAddress,
-  type NounKey,
   type PhraseContainer,
   type PhraseLink,
   type PhraseSelection,
@@ -84,11 +84,19 @@ export function canBeRelativeTarget(
   containers: PhraseContainer[],
   links: PhraseLink[],
   sourceContainerId: string,
-  target: { containerId: string; nounKey: NounKey },
+  target: { containerId: string; nounKey: RelativeGap },
 ): boolean {
   if (sourceContainerId === target.containerId) return false;
   const c = containers.find((x) => x.id === target.containerId);
-  if (!c || !c.selection[target.nounKey as keyof PhraseSelection]) return false;
+  if (!c) return false;
+  // The instrument (P13): a gap of a verb that takes one and has none linked — the head is it.
+  if (target.nounKey === "instrumental") {
+    if (!c.selection.verb?.complements?.includes("instrumental")) return false;
+    if (links.some((l) => isInstrumentalLink(l) && l.source.containerId === c.id)) return false;
+  } else if (target.nounKey === "subject/possessor") {
+    // The subject's possessor (P13): the genitive relative, whose head owns the subject.
+    if (!c.selection.subjectPossessor?.subject) return false;
+  } else if (!c.selection[target.nounKey as keyof PhraseSelection]) return false;
   if (relativeTargetKeys(links, target.containerId).has(target.nounKey)) return false;
   return !isSelfOrAncestor(target.containerId, sourceContainerId, links);
 }
@@ -101,7 +109,7 @@ export function canBeRelativeTarget(
 export function addRelativeLink(
   links: PhraseLink[],
   source: { containerId: string; nounKey: NounAddress },
-  target: { containerId: string; nounKey: NounKey },
+  target: { containerId: string; nounKey: RelativeGap },
   id: string,
 ): PhraseLink[] {
   const kept = links.filter((l) =>
@@ -361,6 +369,8 @@ export function canBeInstrument(
 ): boolean {
   if (clauseId === instrumentId) return false;
   if (isSelfOrAncestor(instrumentId, clauseId, links)) return false;
+  // A clause whose instrument is a relative clause's gap has it already: the head (P13).
+  if (links.some((l) => isRelativeLink(l) && l.target.containerId === clauseId && l.target.nounKey === "instrumental")) return false;
   if (inClauseRelation(links, instrumentId)) return false;
   const instrument = containers.find((c) => c.id === instrumentId);
   return Boolean(instrument) && (level !== "object" || !instrument!.selection.verb);

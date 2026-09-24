@@ -573,6 +573,11 @@ export type NounKey = "subject" | "directObject" | BoxComplementType;
 // possessor or a conjunct head); targets are always plain `NounKey`.
 export type NounAddress = string;
 
+// The slot of a relative clause's period its head fills (P13, RelativeClause.headRole): one of its
+// nouns; its instrument, which has no box of its own ("an object **with which** one goes", CAR); or
+// the possessor of its subject, the genitive relative ("a word **whose** meaning …", HYPERNYM).
+export type RelativeGap = NounKey | "instrumental" | "subject/possessor";
+
 // Append a `/possessor` step to a noun address — the address of that noun's possessor head.
 export const possessorAddress = (base: NounAddress): NounAddress => `${base}/possessor`;
 
@@ -677,7 +682,7 @@ export type PhraseLink =
       id: string;
       kind?: 'relative';
       source: { containerId: string; nounKey: NounAddress };
-      target: { containerId: string; nounKey: NounKey };
+      target: { containerId: string; nounKey: RelativeGap };
       // Whether the clause is said *alone*, its head unspoken — "that has no problems" for OKAY, an
       // adjective's definition (P13, NounPhrase.relativeGloss). The head still picks the relativizer
       // and the agreement, so it stays in its box. Absent ⇒ the head is said.

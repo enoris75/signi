@@ -141,3 +141,19 @@ test.describe('the object complement and the companion', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/objpred ( friend /factitive )');
   });
 });
+
+test.describe('a relative clause whose gap no box holds', () => {
+  test('takes the instrument, CAR’s "an object with which one goes to a place", typed or picked', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj OBJECT_THING /a /rel #2.inst\n/subj one /verb GO /dir ( PLACE /a )');
+    await run(page);
+    await app.expectSentences({ en: 'an object with which one goes to a place.' });
+
+    // The same link, picked on the canvas: the relative control, then the instrument toggle.
+    await app.period(0).getByTestId('relative-ctl-subject').locator('button').click();
+    await app.period(0).getByTestId('relative-ctl-subject').locator('button').click();
+    await app.period(1).getByTestId('satellite-instrumental').click();
+    await app.expectSentences({ en: 'an object with which one goes to a place.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/rel #2.inst');
+  });
+});

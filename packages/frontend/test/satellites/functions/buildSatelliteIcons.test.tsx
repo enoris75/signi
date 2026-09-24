@@ -29,10 +29,19 @@ import {
 } from '../fixtures.tsx';
 
 // Only the parts of the workspace binding the satellite controls reach for.
-function workspace({ relativeSources = [] as string[], headless = [] as string[], instrumentalLinked = false } = {}) {
+function workspace({
+  relativeSources = [] as string[],
+  headless = [] as string[],
+  instrumentalLinked = false,
+  relativeTargets = [] as string[],
+  pickable = [] as string[],
+} = {}) {
   return {
     relative: {
       sourceKeys: new Set(relativeSources),
+      targetKeys: new Set(relativeTargets),
+      isPickTarget: (key: string) => pickable.includes(key),
+      onPick: vi.fn(),
       onStartLink: vi.fn(),
       onRemoveLink: vi.fn(),
       headlessKeys: new Set(headless),
@@ -505,6 +514,30 @@ describe('buildSatelliteIcons', () => {
         expect(chip.isSet).toBe(true);
         chip.onToggle();
         expect(alone.relative.onSetHeadless).toHaveBeenCalledExactlyOnceWith('subject', false);
+      });
+    });
+
+    // P13: a relative clause may take the period's instrument as its gap.
+    describe('the instrument as a relative clause’s gap', () => {
+      const CUT = concept('CUT', 'verb', { complements: ['instrumental'] });
+      const instrument = (binding: ReturnType<typeof workspace>) =>
+        icons({ verb: CUT }, { binding }).complementToggleIcons.find((i) => i.key === 'instrumental')!;
+
+      it('is where a relative pick lands while one runs', () => {
+        const binding = workspace({ pickable: ['instrumental'] });
+        const toggle = instrument(binding);
+        expect(toggle.pickTarget).toBe(true);
+        toggle.onToggle();
+        expect(binding.relative.onPick).toHaveBeenCalledExactlyOnceWith('instrumental');
+        expect(binding.instrumental.onStart).not.toHaveBeenCalled();
+      });
+
+      it('reads as linked once it is one, and starts no instrument link', () => {
+        const binding = workspace({ relativeTargets: ['instrumental'] });
+        const toggle = instrument(binding);
+        expect(toggle).toMatchObject({ isSet: true, valueLabel: expect.any(String) });
+        toggle.onToggle();
+        expect(binding.instrumental.onStart).not.toHaveBeenCalled();
       });
     });
 

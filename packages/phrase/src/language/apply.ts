@@ -22,6 +22,7 @@ import {
   type NounKey,
   type PhraseContainer,
   type PhraseLink,
+  type RelativeGap,
   type PhraseSelection,
   type SlotKey,
   type SubordinateKind,
@@ -102,7 +103,7 @@ import {
 import { codeOf, coded, diagnosticAt, type ClauseRole, type Coded, type ComplementSlot, type Nest } from "./diagnostics.ts";
 import { splitPeriods } from "./lex.ts";
 import { parse, type Item } from "./parse.ts";
-import { NOUN_NAMES, parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
+import { parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
 import type { ConsoleContext, Diagnostic, Span, Vocabulary, WordRef, WorkspaceState } from "./types.ts";
 import {
   adjectiveTarget,
@@ -224,7 +225,7 @@ type LinkOp =
       kind: "relative";
       source: { containerId: string; nounKey: NounAddress };
       target: Target;
-      nounKey?: NounKey;
+      nounKey?: RelativeGap;
       span: Span;
     }
   | { kind: "condition"; mainId: string; target: Target; span: Span }
@@ -736,12 +737,14 @@ class Run {
     if (item.ref) {
       const ref = this.readRef(item.ref);
       if (!ref.address) unfinished(item.ref, coded("relativeNeedsNoun", { period: ref.period }));
-      if (ref.address!.includes("/")) fail(item.ref, coded("relativeNounOfPeriod", { period: ref.period }));
+      // A noun of the period, or — its gap no box holds — its instrument or its subject's possessor (P13).
+      if (ref.address!.includes("/") && ref.address !== "subject/possessor")
+        fail(item.ref, coded("relativeNounOfPeriod", { period: ref.period }));
       this.queue.push({
         kind: "relative",
         source,
         target: this.target4(ref, item.ref),
-        nounKey: ref.address as NounKey,
+        nounKey: ref.address as RelativeGap,
         span: item,
       });
       this.touch(w.ref);
@@ -1282,12 +1285,20 @@ class Run {
   }
 
   /** Why a relative link can't be made, in the terms a user would give — or nothing if it can. */
-  relativeRefusal(sourceId: string, target: { containerId: string; nounKey: NounKey }): Coded | undefined {
+  relativeRefusal(sourceId: string, target: { containerId: string; nounKey: RelativeGap }): Coded | undefined {
     const n = this.periodNumber(target.containerId);
-    const ref = `#${n}.${NOUN_NAMES[target.nounKey]}`;
+    const ref = printRefText(n, target.nounKey);
     if (sourceId === target.containerId) return coded("relativeSamePeriod");
     const c = this.containers.find((x) => x.id === target.containerId);
-    if (!c?.selection[target.nounKey]) return coded("relativeGapEmpty", { ref });
+    // A gap no box holds (P13): the instrument of a verb that takes one, unlinked; the subject's possessor.
+    const there =
+      target.nounKey === "instrumental"
+        ? Boolean(c?.selection.verb?.complements?.includes("instrumental")) &&
+          !this.links.some((l) => isInstrumentalLink(l) && l.source.containerId === target.containerId)
+        : target.nounKey === "subject/possessor"
+          ? Boolean(c?.selection.subjectPossessor?.subject)
+          : Boolean(c?.selection[target.nounKey]);
+    if (!there) return coded("relativeGapEmpty", { ref });
     if (relativeTargetKeys(this.links, target.containerId).has(target.nounKey)) return coded("relativeGapTaken", { ref });
     if (isSelfOrAncestor(target.containerId, sourceId, this.links)) return coded("linkCircle", { period: n });
     return undefined;

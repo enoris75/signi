@@ -687,6 +687,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Licenses `instrumental` for what one asks with — QUESTION's differentia (P13).
   {
     // P09's ask in the inquire sense, not request. Japanese 尋ねる, since 聞く is HEAR's; Italian
     // chiedere, since domandare is QUESTION's domanda made a verb. German asks *for* the thing,
@@ -701,7 +702,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'ASK',
     role: 'verb',
     transitivity: 'ditransitive',
-    complements: ['manner', 'terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause', 'instrumental'],
     description: 'to put a question to someone',
     // "to say words to know the facts": the purpose says what asking is for without a question noun.
     // KNOW with a noun object takes KNOW_ACQUAINTED's verb (conoscere, kennen, A131), right with the

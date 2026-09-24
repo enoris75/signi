@@ -800,6 +800,11 @@ function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words
           if (!canBeRelativeTarget(state.containers, state.links, source.ref.containerId, { containerId: c.id, nounKey: key })) continue;
           out.push(refCandidate(printRef(n, key), concept, inPeriod(n)));
         }
+        // The gaps no box holds (P13): the period's instrument, and its subject's possessor.
+        for (const gap of ["instrumental", "subject/possessor"] as const) {
+          if (!canBeRelativeTarget(state.containers, state.links, source.ref.containerId, { containerId: c.id, nounKey: gap })) continue;
+          out.push(refCandidate(printRef(n, gap), gap === "subject/possessor" ? c.selection.subjectPossessor?.subject : undefined, inPeriod(n)));
+        }
         return;
       }
       case "condition":

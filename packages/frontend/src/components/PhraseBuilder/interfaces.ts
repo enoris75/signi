@@ -190,8 +190,10 @@ export function adaptPossessorBinding(
       sourceKeys: new Set(
         root.relative.sourceKeys.has(headPath) ? ["subject"] : [],
       ),
-      targetKeys: new Set(),
-      isPickTarget: () => false,
+      // A possessor's head may be a genitive relative's gap (P13), the only address below a period's
+      // own nouns a relative clause takes: the workspace says whether this one is.
+      targetKeys: new Set(root.relative.targetKeys.has(headPath) ? ["subject"] : []),
+      isPickTarget: (nounKey) => root.relative.isPickTarget(map(nounKey)),
       onPick: (nounKey) => root.relative.onPick(map(nounKey)),
       onStartLink: (nounKey) => root.relative.onStartLink(map(nounKey)),
       headlessKeys: new Set(root.relative.headlessKeys.has(headPath) ? ["subject"] : []),

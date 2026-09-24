@@ -25,6 +25,7 @@ import {
   standardAddress,
   type NounAddress,
   type NounKey,
+  type RelativeGap,
   type PhraseSelection,
   type SlotKey,
 } from '../../src/components/PhraseBuilder/interfaces.ts';
@@ -320,7 +321,11 @@ const OPS: Op[] = [
         const at = R.nounSliceAt(source.selection, h.address)!;
         return at.slice[at.which]?.role === 'noun';
       }));
-      const nounKey = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => target.selection[k]));
+      // A noun of the period — or, now and then, the gaps no box holds (P13): its instrument, its
+      // subject's possessor. canBeRelativeTarget says whether the period has them.
+      const nounKey: RelativeGap | undefined = rng() < 0.15
+        ? pick(rng, ['instrumental', 'subject/possessor'] as const)
+        : pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => target.selection[k]));
       if (!from || !nounKey) return undefined;
       const t = { containerId: target.id, nounKey };
       if (!L.canBeRelativeTarget(s.containers, s.links, source.id, t)) return undefined;

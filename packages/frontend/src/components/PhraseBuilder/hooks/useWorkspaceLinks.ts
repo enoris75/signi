@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import type { SubordinatingConjunction } from "@signi/shared";
 import {
+  type RelativeGap,
   AbstractionLevel,
   CoordConjunction,
   NounAddress,
-  NounKey,
   PhraseContainer,
   PhraseLink,
   PickMode,
@@ -129,7 +129,7 @@ export function useWorkspaceLinks(
     setLinks((ls) => setRelativeHeadless(ls, containerId, nounKey, headless));
   }
 
-  function completeLink(targetContainerId: string, targetNoun: NounKey) {
+  function completeLink(targetContainerId: string, targetNoun: RelativeGap) {
     if (!pick.active || pick.kind !== "relative") return;
     const source = pick.source;
     cancelPick();
@@ -287,10 +287,11 @@ export function useWorkspaceLinks(
           pick.kind === "relative" &&
           canBeRelativeTarget(containers, links, pick.source.containerId, {
             containerId: c.id,
-            nounKey: nounKey as NounKey,
+            nounKey: nounKey as RelativeGap,
           }),
-        // Only real top-level nouns are ever offered as pick targets, so the address is a NounKey.
-        onPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
+        // A top-level noun, the instrument or the subject's possessor (P13): canBeRelativeTarget
+        // refuses any other address.
+        onPick: (nounKey) => completeLink(c.id, nounKey as RelativeGap),
         onStartLink: (nounKey) => startLink(c.id, nounKey),
         onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
         headlessKeys: new Set(

@@ -1,3 +1,4 @@
+import { PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import {
@@ -144,6 +145,9 @@ export interface SatelliteIcon {
   // named = its label says what it does and what it holds, so its tooltip is the label alone — the
   // question mark, its who / what chip, the existential (P09-E12).
   named?: boolean;
+  // pickTarget = a pick in flight may land here — the instrument toggle, when a relative clause may
+  // take the instrument as its gap (P13). It wears the pick highlight and answers to the pick keys.
+  pickTarget?: boolean;
   onToggle: () => void;
 }
 
@@ -537,7 +541,9 @@ export function SatelliteButton({
         aria-keyshortcuts={keySpec ? keycapText(keySpec, platform) : undefined}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={sat.onToggle}
+        {...(sat.pickTarget ? { [PICK_TARGET]: sat.key } : {})}
         sx={{
+          ...(sat.pickTarget ? { ...pickBadgeSx, boxShadow: (th) => `0 0 0 3px ${th.palette.warning.main}` } : {}),
           // Block-level, so the box that positions a control hugs it. Left inline, the button
           // sits in a 28px line box and lands 2px below the point it was placed at — off the
           // border it rides and off the start of its connector.

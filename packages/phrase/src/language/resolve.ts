@@ -213,7 +213,8 @@ export function parseRef(text: string): Ref | { error: Coded } {
   const period = Number(head);
   if (period < 1) return { error: coded("periodsFromOne") };
   if (steps.length === 0) return { period };
-  const noun = NOUN_BY_NAME[steps[0]!];
+  // `#2.inst` is the period's instrument, which a relative clause may take as its gap (P13).
+  const noun = steps[0] === "inst" ? "instrumental" : NOUN_BY_NAME[steps[0]!];
   if (!noun) return { error: coded("notANoun", { step: steps[0]! }) };
   let address: NounAddress = noun;
   for (const step of steps.slice(1)) {
@@ -230,7 +231,7 @@ export function parseRef(text: string): Ref | { error: Coded } {
 export function printRef(period: number, address?: NounAddress): string {
   if (!address) return `#${period}`;
   const [base, ...steps] = address.split("/");
-  const parts = [NOUN_NAMES[base as NounKey] ?? base];
+  const parts = [base === "instrumental" ? "inst" : NOUN_NAMES[base as NounKey] ?? base];
   for (let i = 0; i < steps.length; i++) {
     if (steps[i] === "possessor") parts.push("poss");
     else if (steps[i] === "standard") parts.push("than");

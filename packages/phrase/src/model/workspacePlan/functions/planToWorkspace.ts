@@ -14,7 +14,7 @@ import type {
   VerbPhrase,
 } from "@signi/shared";
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
-import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection } from "../../interfaces.ts";
+import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
 import { conjunctAddress, possessorAddress, standardAddress } from "../../interfaces.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
@@ -351,13 +351,16 @@ class Builder {
     this.check("RelativeClause", rc, RELATIVE_FIELDS);
     const gap = rc.headRole ?? "subject";
     const box = gap === "subject" || gap === "directObject" || (BOX_COMPLEMENT_TYPES as string[]).includes(gap);
-    if (!box) {
+    if (!box && gap !== "instrumental" && gap !== "possessor") {
       this.unsupported.add(`RelativeClause.headRole.${gap}`);
       return;
     }
     const target = this.open();
     this.clause(target, rc);
-    set(target.selection, gap, head);
+    // The gap holds the head's word — the instrument has no box to hold it (P13), and a genitive
+    // relative's head is the subject's possessor.
+    if (gap === "possessor") set(target.selection, "subjectPossessor", { subject: head });
+    else if (gap !== "instrumental") set(target.selection, gap, head);
     for (const s of rc.headSpecifiers ?? []) {
       if (s.kind === "path" && (gap === "route" || gap === "locative")) set(target.selection, `${gap}Specifier`, s.value);
       else if (s.kind === "temporal" && gap === "temporal") target.selection.temporalRelation = s.value;
@@ -366,7 +369,7 @@ class Builder {
     }
     this.link({
       source: { containerId: c.id, nounKey: address },
-      target: { containerId: target.id, nounKey: gap as NounKey },
+      target: { containerId: target.id, nounKey: (gap === "possessor" ? "subject/possessor" : gap) as RelativeGap },
       ...(headless ? { headless: true } : {}),
     });
   }

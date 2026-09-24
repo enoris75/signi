@@ -3,11 +3,12 @@ import { infinitiveGloss } from './gloss.js';
 
 // Motion & copular verbs (license locative / direction / source / route).
 export const motionVerbs: ConceptSeed[] = [
+  // Licenses `instrumental` for what one goes with — CAR is "an object with which one goes to a place" (P13).
   {
     id: 'GO',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
+    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause', 'instrumental'],
     description: 'to move or travel from one place to another',
     // "to move from a place to another place": the source and the goal are both a place, the goal
     // another one (localization C17).

@@ -187,9 +187,12 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
       const srcAnchor = sourceAnchorEls.current.get(
         boxKey(link.source.containerId, link.source.nounKey),
       );
-      const tgtAnchor = targetAnchorEls.current.get(
-        boxKey(link.target.containerId, link.target.nounKey),
-      );
+      // A clause whose gap is its instrument (P13) has no box for it: the line ends at the instrument
+      // toggle on its verb phrase, where an instrument link would start.
+      const tgtAnchor =
+        link.target.nounKey === "instrumental"
+          ? verbAnchorEls.current.get(link.target.containerId)
+          : targetAnchorEls.current.get(boxKey(link.target.containerId, link.target.nounKey));
       const srcBox = boxEls.current.get(
         boxKey(link.source.containerId, link.source.nounKey),
       );

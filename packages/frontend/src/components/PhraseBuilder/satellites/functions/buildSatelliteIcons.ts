@@ -51,6 +51,10 @@ export function buildSatelliteIcons({
     if (sat.key === "instrumental") {
       if (!linkBinding) continue;
       const linked = linkBinding.instrumental.hasSource;
+      // The instrument may be a relative clause's gap instead (P13): then the head is it, and while a
+      // relative pick runs the toggle is where that pick can land.
+      const gap = linkBinding.relative.targetKeys.has("instrumental");
+      const pickTarget = linkBinding.relative.isPickTarget("instrumental");
       complementToggleIcons.push({
         key: sat.key,
         icon: sat.icon,
@@ -59,14 +63,19 @@ export function buildSatelliteIcons({
         // or not, and its tooltip says what clicking will do.
         active: false,
         label: sat.label,
-        isSet: linked,
+        isSet: linked || gap,
         valued: false,
-        valueLabel: linked ? linkedLabel : undefined,
+        valueLabel: linked || gap ? linkedLabel : undefined,
         link: true,
+        ...(pickTarget ? { pickTarget: true } : {}),
         onToggle: () =>
-          linked
-            ? linkBinding.instrumental.onClear()
-            : linkBinding.instrumental.onStart(),
+          pickTarget
+            ? linkBinding.relative.onPick("instrumental")
+            : gap
+              ? undefined
+              : linked
+                ? linkBinding.instrumental.onClear()
+                : linkBinding.instrumental.onStart(),
       });
       continue;
     }

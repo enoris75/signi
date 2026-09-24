@@ -9564,13 +9564,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
   // ── Governing a people, the state sense apart from the grammatical one (localization B56) ──
+  // Licenses `instrumental` for what one governs with — POWER's differentia (P13).
   {
     // GOVERN is the grammatical sense — what a subject does to a verb (localization A27). This is
     // the political one, split the way B48 split the climate senses of COLD and HOT.
     id: 'GOVERN_STATE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['manner', 'cause', 'locative'],
+    complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to rule a people, hold the government of',
     emoji: '🏛️',
     synonym: 'rule',

@@ -169,6 +169,20 @@ describe('linkRules', () => {
     expect(setInfinitiveControl(addSubordinate([], 'B', 'C', 'content', 'l2'), 'B', true)[0]).not.toHaveProperty('control');
   });
 
+  it('takes a gap no box holds: the instrument of a verb that takes one, and the subject’s possessor (P13)', () => {
+    const cut: PhraseContainer = { id: 'K', selection: { subject: noun('BOY'), verb: { ...verb('CUT'), complements: ['instrumental'] } } };
+    const owned: PhraseContainer = { id: 'O', selection: { subject: noun('CAT'), subjectPossessor: { subject: noun('MAN') }, verb: verb('RUN') } };
+    const all = [...CONTAINERS, cut, owned];
+    expect(canBeRelativeTarget(all, [], 'A', { containerId: 'K', nounKey: 'instrumental' })).toBe(true);
+    expect(canBeRelativeTarget(all, [], 'A', { containerId: 'B', nounKey: 'instrumental' })).toBe(false);
+    expect(canBeRelativeTarget(all, [], 'A', { containerId: 'O', nounKey: 'subject/possessor' })).toBe(true);
+    expect(canBeRelativeTarget(all, [], 'A', { containerId: 'K', nounKey: 'subject/possessor' })).toBe(false);
+    // An instrument already linked is no gap, and a gap takes no instrument link.
+    expect(canBeRelativeTarget(all, addInstrumental([], 'K', 'C', 'i'), 'A', { containerId: 'K', nounKey: 'instrumental' })).toBe(false);
+    const gapped = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'K', nounKey: 'instrumental' }, 'r');
+    expect(canBeInstrument(all, gapped, 'K', 'C')).toBe(false);
+  });
+
   it('says a noun’s relative clause alone, and says its head again with no flag left (P13)', () => {
     const headed = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'B', nounKey: 'directObject' }, 'l1');
     const headless = setRelativeHeadless(headed, 'A', 'subject', true);
