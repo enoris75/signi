@@ -236,7 +236,14 @@ export function complementsPhrase(
           // P09-E2. The purpose "pour", which contracts with nothing ("pour l'homme"), and the topic
           // "de", which does as any "de" does: "parle du chat", "d'un chat", "de chats". A verb may
           // govern its own topic's instead, "à" for "penser" ("pense au chat", see `topicLink`).
-          type === 'purpose'   ? prepDet('pour', nf, plural, lead) :
+          // A bare mass noun is what the act is for in general, and "pour" wants the generic article
+          // before it, as French writes any abstract noun said in general: "pour la joie", "pour
+          // l'argent", never "pour joie" (localization B82, GAME's "for joy"). The bare plural has its
+          // "des" from A196 above.
+          type === 'purpose'   ? prepDet('pour',
+            !possessive && !plural && (nf['definiteness'] ?? 'definite') === 'bare' && nf['uncountable'] === '1' && nf['proper'] !== '1'
+              ? { ...nf, definiteness: 'definite' } : nf,
+            plural, lead) :
           type === 'topic'     ? (
             c.link === 'à' ? aDet(nf, plural, lead) :
             c.link ? prepDet(c.link, nf, plural, lead) :
