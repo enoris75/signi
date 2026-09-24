@@ -28,6 +28,7 @@ import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import StartIcon from "@mui/icons-material/Start";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -884,7 +885,8 @@ export function SpecifierSelector({
  * The letter each temporal relation answers to while its toolbar is armed (P09-E12 D3): a letter
  * heard in the English word, as E1 chose N / W / G — **A**t, a**G**o, **U**ntil, a**F**ter,
  * **B**efore, **D**uring. A is not ago's: `at` is the default, and the one pressed most. `between`
- * (P09-E20) takes the spatial toolbar's W, the same relation answering to the same letter.
+ * (P09-E20) takes the spatial toolbar's W, the same relation answering to the same letter, and
+ * **S**ince (P09-E27) its initial.
  */
 export const TEMPORAL_KEYS: Record<TemporalRelation, string> = {
   at: "A",
@@ -894,6 +896,7 @@ export const TEMPORAL_KEYS: Record<TemporalRelation, string> = {
   before: "B",
   during: "D",
   between: "W",
+  since: "S",
 };
 
 const TEMPORAL_ICONS: Record<TemporalRelation, ReactNode> = {
@@ -904,10 +907,11 @@ const TEMPORAL_ICONS: Record<TemporalRelation, ReactNode> = {
   before: <SkipPreviousIcon sx={{ fontSize: 15 }} />,
   during: <TimelapseIcon sx={{ fontSize: 15 }} />,
   between: <DateRangeIcon sx={{ fontSize: 15 }} />,
+  since: <StartIcon sx={{ fontSize: 15 }} />,
 };
 
-// The temporal complement's relations — at / ago / until / after / before / during (P09-E12b) and
-// between (P09-E20) — the route's toolbar with a set of its own. Each is named by the word its
+// The temporal complement's relations — at / ago / until / after / before / during (P09-E12b),
+// between (P09-E20) and since (P09-E27) — the route's toolbar with a set of its own. Each is named by the word its
 // language says it with ("ago", "fa", "il y a", 〜前に), cited on a bare noun as the spatial
 // relations are.
 export function TemporalSelector({

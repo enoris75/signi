@@ -81,6 +81,10 @@ export const SUBORDINATE_OPTIONS: readonly SubordinateOption[] = [
   { link: "adverbial", conjunction: "because", labelKey: "subordinator.value.because", key: "C" },
   { link: "adverbial", conjunction: "after", labelKey: "subordinator.value.after", key: "A" },
   { link: "adverbial", conjunction: "before", labelKey: "subordinator.value.before", key: "B" },
+  // P09-E27: **U**ntil, **S**ince, thou**G**h — T and H are taken by *that* and *while*.
+  { link: "adverbial", conjunction: "until", labelKey: "subordinator.value.until", key: "U" },
+  { link: "adverbial", conjunction: "since", labelKey: "subordinator.value.since", key: "S" },
+  { link: "adverbial", conjunction: "though", labelKey: "subordinator.value.though", key: "G" },
 ];
 
 // The catalog key naming each subordinating conjunction, for the connector's label and the badge.
@@ -90,6 +94,9 @@ export const SUBORDINATOR_LABEL_KEY: Record<SubordinatingConjunction, UiStringKe
   because: "subordinator.value.because",
   after: "subordinator.value.after",
   before: "subordinator.value.before",
+  until: "subordinator.value.until",
+  since: "subordinator.value.since",
+  though: "subordinator.value.though",
 };
 
 // The catalog key naming a subordinate link by its word: *that*, the infinitive phrase, or its
@@ -106,7 +113,7 @@ export const subordinateLabelKey = (s: {
 
 // The menu's entries for a period whose verb is `verb` and which holds, or not, a direct object:
 // *that* only for a verb that takes a content clause and has no object (the clause *is* the object),
-// *to* only for a verb that takes an infinitive, and the five conjunctions whenever there is a verb.
+// *to* only for a verb that takes an infinitive, and the eight conjunctions whenever there is a verb.
 // A period with no verb is offered nothing (see canStartSubordinate).
 export function subordinateOptions(
   verb: { clauseObject?: ClauseObject } | undefined,

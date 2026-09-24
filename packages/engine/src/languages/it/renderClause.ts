@@ -84,11 +84,20 @@ export function renderClause(phrase: ResolvedPhrase): string {
     ? [objectComplementizer(phrase.contentObject, 'che', 'se'), renderClause(phrase.contentObject)].filter(Boolean).join(' ')
     : '';
   // An adverbial clause closes the sentence under its conjunction, in the mood that conjunction
-  // governs (P09-E4).
+  // governs (P09-E4). "Finché" writes its expletive *non* on the clause's verb (P09-E27 D1): the
+  // negation is Italian's word order for "until", not a denial, so it is added here and nowhere else.
   const adverbial = phrase.adverbialClause
-    ? `${SUBORDINATORS[phrase.adverbialClause.conjunction]} ${renderClause(phrase.adverbialClause.clause)}`
+    ? `${SUBORDINATORS[phrase.adverbialClause.conjunction].word} ${renderClause(expletive(phrase.adverbialClause))}`
     : '';
   return [subj, predicate, content, object, complement, purpose, adverbial].filter(Boolean).join(' ').trim();
+}
+
+/** An adverbial clause as its conjunction says it: with the expletive *non* where "finché" takes one. */
+function expletive({ conjunction, clause }: NonNullable<ResolvedPhrase['adverbialClause']>): ResolvedPhrase {
+  const vp = clause.verbPhrase;
+  return SUBORDINATORS[conjunction].expletiveNegation && vp && !vp.negative
+    ? { ...clause, verbPhrase: { ...vp, negative: true } }
+    : clause;
 }
 
 function withoutGeneric(forms: Record<string, string>): Record<string, string> {

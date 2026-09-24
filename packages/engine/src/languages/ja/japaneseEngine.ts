@@ -59,7 +59,9 @@ export const japaneseEngine: LanguageEngine = {
   // the plain past, which the citation keeps (〜た後で).
   renderSubordinator(sub: Subordinator): string {
     if (sub === 'that') return '〜と';
-    return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}` : `〜${JA_SUBORDINATORS[sub].word}`;
+    return sub === 'after' ? `〜た${JA_SUBORDINATORS[sub].word}`
+      : JA_SUBORDINATORS[sub].te ? `〜て${JA_SUBORDINATORS[sub].word}`
+      : `〜${JA_SUBORDINATORS[sub].word}`;
   },
   // The connective adverb Japanese writes between two clauses (そして, しかし, つまり). It follows the
   // first clause's 、 in a sentence; standing alone as a menu entry it is the word itself.

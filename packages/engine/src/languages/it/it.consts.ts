@@ -20,7 +20,7 @@ export const IT_MANNER_PREP: Record<MannerRelation, 'come' | 'con' | 'a' | 'in'>
  * The `at` row's "a" is only the fallback — a lexeme naming its own `temporal_prep` wins ("in questo
  * giorno"), the way `place_prep` and `mannerRelation` are the noun's to choose.
  */
-export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' | 'di'; postposed?: string }> = {
+export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' | 'di' | 'da'; postposed?: string }> = {
   at: { prep: 'a' },
   ago: { postposed: 'fa' },
   until: { word: 'fino', prep: 'a' },
@@ -29,6 +29,8 @@ export const IT_TEMPORAL: Record<TemporalRelation, { word?: string; prep?: 'a' |
   during: { word: 'durante' },
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: { word: 'tra' },
+  // A simple preposition, fused with the article like `at`'s "a": "dal giorno" (P09-E27 D3).
+  since: { prep: 'da' },
 };
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -161,11 +163,23 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
 };
 
 /**
- * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). "Prima che" governs the
- * subjunctive, which the translator resolves the clause in; the others take the indicative.
+ * The subordinating conjunctions (see PhrasePlan.adverbialClause, P09-E4). "Prima che" and "sebbene"
+ * govern the subjunctive, which the translator resolves the clause in; the others take the indicative.
+ *
+ * `expletiveNegation` is "finché"'s (P09-E27 D1): Italian says "until" with a *non* that negates
+ * nothing — "finché il cane non mangia" is *until the dog eats*. `renderClause` writes it on the
+ * clause's verb; the clause's own `negative` is never touched, which would deny the event in the
+ * other six languages. A clause that is negative already keeps its one *non*.
  */
-export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
-  when: 'quando', while: 'mentre', because: 'perché', after: 'dopo che', before: 'prima che',
+export const SUBORDINATORS: Record<SubordinatingConjunction, { word: string; expletiveNegation?: true }> = {
+  when: { word: 'quando' },
+  while: { word: 'mentre' },
+  because: { word: 'perché' },
+  after: { word: 'dopo che' },
+  before: { word: 'prima che' },
+  until: { word: 'finché', expletiveNegation: true },
+  since: { word: 'da quando' },
+  though: { word: 'sebbene' },
 };
 
 /**

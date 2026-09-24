@@ -104,6 +104,7 @@ export const TEMPORAL_PREP: Record<TemporalRelation, string> = {
   // Said once over a coordinated time, as the spatial `between` is (P09-E20); English repeats no
   // preposition across a group anyway.
   between: 'between',
+  since: 'since',
 };
 
 /** The relations English writes after the noun phrase rather than before it. */
@@ -173,6 +174,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'when', while: 'while', because: 'because', after: 'after', before: 'before',
+  until: 'until', since: 'since', though: 'though',
 };
 
 /**

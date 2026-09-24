@@ -16,8 +16,8 @@ import { JA_SUBORDINATORS } from './ja.consts.js';
  */
 export function shapeAdverbialClause(
   adverbial: NonNullable<ResolvedPhrase['adverbialClause']>,
-): { clause: ResolvedPhrase; word: string } {
-  const { word, tense, progressive, plain } = JA_SUBORDINATORS[adverbial.conjunction];
+): { clause: ResolvedPhrase; word: string; te?: true } {
+  const { word, tense, progressive, plain, te } = JA_SUBORDINATORS[adverbial.conjunction];
   const { clause } = adverbial;
   const vp = clause.verbPhrase;
   if (!vp) return { clause, word };
@@ -28,5 +28,6 @@ export function shapeAdverbialClause(
   return {
     clause: { ...clause, verbPhrase: { ...vp, tense: tense ?? vp.tense, aspect } },
     word,
+    ...(te ? { te } : {}),
   };
 }

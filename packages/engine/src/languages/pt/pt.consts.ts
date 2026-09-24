@@ -184,6 +184,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'quando', while: 'enquanto', because: 'porque', after: 'depois que', before: 'antes que',
+  // P09-E27: "até que" and "embora" govern the subjunctive, "desde que" the indicative.
+  until: 'até que', since: 'desde que', though: 'embora',
 };
 
 /**
@@ -237,4 +239,5 @@ export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   during: { word: 'durante' },
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: { word: 'entre' },
+  since: { word: 'desde' },
 };

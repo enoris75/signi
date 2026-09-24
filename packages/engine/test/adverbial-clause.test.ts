@@ -46,9 +46,10 @@ describe('the five conjunctions in the seven languages', () => {
     expect(sayAll(runs(conjunction))).toEqual(rendered);
   });
 
-  // D5: "during" introduces a noun phrase, not a clause, so it is not a conjunction here.
+  // D5: "during" introduces a noun phrase, not a clause, so it is not a conjunction here. P09-E27
+  // added until, since and though.
   test('there is no "during"', () => {
-    expect(SUBORDINATING_CONJUNCTIONS).toEqual(['when', 'while', 'because', 'after', 'before']);
+    expect(SUBORDINATING_CONJUNCTIONS).toEqual(['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though']);
   });
 });
 
@@ -472,5 +473,121 @@ describe('known bugs: a Japanese resultative under 前に or 後で keeps its ow
     expect(sayAll(runs('before', {}, resultative))).toMatchObject({
       en: 'the man runs before the cat has run.', it: "l'uomo corre prima che il gatto abbia corso.",
     });
+  });
+});
+
+// P09-E27: until, since and though — the same mechanism as E4's five, each with a wrinkle of its own.
+// Until: French, Spanish and Portuguese govern the subjunctive, and Italian "finché" an expletive
+// "non" that negates nothing (D1). Since: temporal only, its main clause's tense the plan's (D2), and
+// Japanese on the て-form (〜てから). Though: the subjunctive in Italian, French and Portuguese, the
+// indicative in Spanish "aunque", German "obwohl" and Japanese のに (D4).
+describe('until, since, though (P09-E27)', () => {
+  const catRuns = (
+    conjunction: SubordinatingConjunction,
+    sub: Partial<PhrasePlan['verbPhrase']> = {},
+    main: Partial<PhrasePlan['verbPhrase']> = {},
+    extra: Record<string, unknown> = {},
+  ): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN', ...main },
+    adverbialClause: { conjunction, clause: { subject: np('DOG'), verbPhrase: { verb: 'EAT', ...sub }, ...extra } },
+  });
+
+  test.each<[string, PhrasePlan, Record<LanguageCode, string>]>([
+    ['until (present)', catRuns('until'), {
+      en: 'the cat runs until the dog eats.', it: 'il gatto corre finché il cane non mangia.',
+      fr: "le chat court jusqu'à ce que le chien mange.", de: 'der Kater läuft, bis der Hund frisst.',
+      es: 'el gato corre hasta que el perro coma.', pt: 'o gato corre até que o cão coma.', ja: '猫は犬が食べるまで走ります。',
+    }],
+    ['until (past)', catRuns('until', { tense: 'past' }, { tense: 'past' }), {
+      en: 'the cat ran until the dog ate.', it: 'il gatto corse finché il cane non mangiò.',
+      fr: "le chat courut jusqu'à ce que le chien mange.", de: 'der Kater lief, bis der Hund fraß.',
+      es: 'el gato corrió hasta que el perro comiera.', pt: 'o gato correu até que o cão comesse.', ja: '猫は犬が食べるまで走りました。',
+    }],
+    ['since (present)', catRuns('since'), {
+      en: 'the cat runs since the dog eats.', it: 'il gatto corre da quando il cane mangia.',
+      fr: 'le chat court depuis que le chien mange.', de: 'der Kater läuft, seit der Hund frisst.',
+      es: 'el gato corre desde que el perro come.', pt: 'o gato corre desde que o cão come.', ja: '猫は犬が食べてから走ります。',
+    }],
+    ['since (past)', catRuns('since', { tense: 'past' }), {
+      en: 'the cat runs since the dog ate.', it: 'il gatto corre da quando il cane mangiò.',
+      fr: 'le chat court depuis que le chien mangea.', de: 'der Kater läuft, seit der Hund fraß.',
+      es: 'el gato corre desde que el perro comió.', pt: 'o gato corre desde que o cão comeu.', ja: '猫は犬が食べてから走ります。',
+    }],
+    // D2: the English "has run since" is the plan the builder makes, a resultative main clause; the
+    // others say the same aspect as their own perfect.
+    ['since (resultative)', catRuns('since', { aspect: 'resultative' }, { aspect: 'resultative' }), {
+      en: 'the cat has run since the dog has eaten.', it: 'il gatto ha corso da quando il cane ha mangiato.',
+      fr: 'le chat a couru depuis que le chien a mangé.', de: 'der Kater ist gelaufen, seit der Hund gefressen hat.',
+      es: 'el gato ha corrido desde que el perro ha comido.', pt: 'o gato correu desde que o cão comeu.', ja: '猫は犬が食べてから走りました。',
+    }],
+    ['though (present)', catRuns('though'), {
+      en: 'the cat runs though the dog eats.', it: 'il gatto corre sebbene il cane mangi.',
+      fr: 'le chat court bien que le chien mange.', de: 'der Kater läuft, obwohl der Hund frisst.',
+      es: 'el gato corre aunque el perro come.', pt: 'o gato corre embora o cão coma.', ja: '猫は犬が食べるのに走ります。',
+    }],
+    ['though (past)', catRuns('though', { tense: 'past' }, { tense: 'past' }), {
+      en: 'the cat ran though the dog ate.', it: 'il gatto corse sebbene il cane mangiasse.',
+      fr: 'le chat courut bien que le chien mange.', de: 'der Kater lief, obwohl der Hund fraß.',
+      es: 'el gato corrió aunque el perro comió.', pt: 'o gato correu embora o cão comesse.', ja: '猫は犬が食べたのに走りました。',
+    }],
+    ['though (resultative)', catRuns('though', { aspect: 'resultative' }), {
+      en: 'the cat runs though the dog has eaten.', it: 'il gatto corre sebbene il cane abbia mangiato.',
+      fr: 'le chat court bien que le chien ait mangé.', de: 'der Kater läuft, obwohl der Hund gefressen hat.',
+      es: 'el gato corre aunque el perro ha comido.', pt: 'o gato corre embora o cão tenha comido.', ja: '猫は犬が食べたのに走ります。',
+    }],
+  ])('%s', (_name, plan, rendered) => {
+    expect(sayAll(plan)).toEqual(rendered);
+  });
+
+  // D1: the Italian "non" is finché's, not the clause's: the other six stay affirmative, and a
+  // clause that is negative already keeps its one "non" (Italian cannot tell the two apart).
+  test('the Italian expletive non negates nothing in the other languages', () => {
+    expect(sayAll(catRuns('until', {}, {}, { directObject: np('FOOD') }))).toMatchObject({
+      it: 'il gatto corre finché il cane non mangia il cibo.',
+      en: 'the cat runs until the dog eats the food.',
+      fr: "le chat court jusqu'à ce que le chien mange la nourriture.",
+    });
+    expect(say(catRuns('until', { negative: true }), 'it')).toBe('il gatto corre finché il cane non mangia.');
+    expect(say(catRuns('until', { negative: true }), 'fr')).toBe("le chat court jusqu'à ce que le chien ne mange pas.");
+    // No other conjunction takes it.
+    expect(say(catRuns('when'), 'it')).toBe('il gatto corre quando il cane mangia.');
+  });
+
+  // Until is temporal: a future under it is the present in English and German (A251), and the
+  // subjunctive it governs anyway in Spanish and Portuguese. Since and though keep a future.
+  test('a future under until is deferred, under since and though it is kept', () => {
+    expect(sayAll(catRuns('until', { tense: 'future' }, { tense: 'future' }))).toMatchObject({
+      en: 'the cat will run until the dog eats.', de: 'der Kater wird laufen, bis der Hund frisst.',
+      it: 'il gatto correrà finché il cane non mangerà.', es: 'el gato correrá hasta que el perro coma.',
+      pt: 'o gato correrá até que o cão coma.',
+    });
+    expect(sayAll(catRuns('though', { tense: 'future' }, { tense: 'future' }))).toMatchObject({
+      en: 'the cat will run though the dog will eat.', de: 'der Kater wird laufen, obwohl der Hund fressen wird.',
+      es: 'el gato correrá aunque el perro comerá.', it: 'il gatto correrà sebbene il cane mangi.',
+    });
+  });
+
+  // German closes each on the finite verb, behind the object and "nicht", as E4's five.
+  test('German is verb-final under all three', () => {
+    for (const [conjunction, word] of [['until', 'bis'], ['since', 'seit'], ['though', 'obwohl']] as const) {
+      expect(say(catRuns(conjunction, { negative: true }, {}, { directObject: np('FOOD', { definiteness: 'definite' }) }), 'de'))
+        .toBe(`der Kater läuft, ${word} der Hund das Essen nicht frisst.`);
+    }
+  });
+
+  // Japanese: まで on the non-past whatever the tense, のに on the plain form of its own, and から on the
+  // て-form, a godan verb's included (走って).
+  test('Japanese closes on まで, のに and 〜てから', () => {
+    expect(say(catRuns('until', { tense: 'past' }), 'ja')).toBe('猫は犬が食べるまで走ります。');
+    expect(say(catRuns('though', { negative: true }), 'ja')).toBe('猫は犬が食べないのに走ります。');
+    expect(say(catRuns('since', { verb: 'RUN' }), 'ja')).toBe('猫は犬が走ってから走ります。');
+    expect(say(catRuns('since', {}, {}, { directObject: np('FOOD') }), 'ja')).toBe('猫は犬が食べ物を食べてから走ります。');
+  });
+
+  test('"que" elides before a vowel in the two French locutions', () => {
+    const he = { subject: np('THIRD_PERSON', { gender: 'masc' }) };
+    expect(say(catRuns('until', {}, {}, he), 'fr')).toBe("le chat court jusqu'à ce qu'il mange.");
+    expect(say(catRuns('though', {}, {}, he), 'fr')).toBe("le chat court bien qu'il mange.");
   });
 });

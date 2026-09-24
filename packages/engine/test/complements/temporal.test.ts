@@ -9,8 +9,8 @@ const runsAt = (value: TemporalRelation, concept = 'DAY', definiteness: Definite
 
 // The *when* of a clause — the complement the engine had none of until C29 (P09 §3, E3). It carries
 // a `temporal` specifier naming its relation to the time: at / ago / until / after / before /
-// during / between (P09-E20). Each is a distinct adposition in nearly every language, so all seven
-// are pinned here, and the two that are not adpositions at all — the postposed "ago" and the fronted
+// during / between (P09-E20) / since (P09-E27). Each is a distinct adposition in nearly every
+// language, so all are pinned here, and the two that are not adpositions at all — the postposed "ago" and the fronted
 // impersonal verb — are pinned beside them.
 describe('temporal', () => {
   // The default relation: no specifier means the act simply happens at that time.
@@ -132,6 +132,50 @@ describe('temporal', () => {
       es: 'el gato corre durante este día.',
       pt: 'o gato corre durante este dia.',
       ja: '猫はこの日の間に走ります。',
+    });
+  });
+
+  // P09-E27 D3. From that time on: Italian "da" is a simple preposition and fuses with the article
+  // ("dal giorno", "dalla settimana") as `at`'s "a" does; German "seit" takes the dative, and Japanese
+  // puts から straight on the time, as まで is.
+  test('since — Italian fuses its "da", German takes the dative', () => {
+    expect(runsAt('since')).toEqual({
+      en: 'the cat runs since this day.',
+      it: 'il gatto corre da questo giorno.',
+      fr: 'le chat court depuis ce jour.',
+      de: 'der Kater läuft seit diesem Tag.',
+      es: 'el gato corre desde este día.',
+      pt: 'o gato corre desde este dia.',
+      ja: '猫はこの日から走ります。',
+    });
+    expect(runsAt('since', 'WEEK', 'definite')).toEqual({
+      en: 'the cat runs since the week.',
+      it: 'il gatto corre dalla settimana.',
+      fr: 'le chat court depuis la semaine.',
+      de: 'der Kater läuft seit der Woche.',
+      es: 'el gato corre desde la semana.',
+      pt: 'o gato corre desde a semana.',
+      ja: '猫は週から走ります。',
+    });
+    expect(runsAt('since', 'MOMENT', 'indefinite')).toMatchObject({
+      it: 'il gatto corre da un momento.', de: 'der Kater läuft seit einem Augenblick.', fr: 'le chat court depuis un instant.',
+    });
+  });
+
+  // It distributes over a coordinated time, as every relation but `between` does.
+  test('since — repeated on each conjunct', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: {
+        temporal: { phrase: { conjuncts: [np('DAY'), np('NIGHT')], conjunction: 'and' }, specifiers: [{ kind: 'temporal', value: 'since' }] },
+      },
+    }))).toEqual({
+      en: 'the cat runs since the day and the night.',
+      it: 'il gatto corre dal giorno e dalla notte.',
+      fr: 'le chat court depuis le jour et depuis la nuit.',
+      de: 'der Kater läuft seit dem Tag und seit der Nacht.',
+      es: 'el gato corre desde el día y desde la noche.',
+      pt: 'o gato corre desde o dia e desde a noite.',
+      ja: '猫は日と夜から走ります。',
     });
   });
 

@@ -26,6 +26,7 @@ import { questionAdverb } from './questionAdverb.js';
 import { questionNoun } from './questionNoun.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
 import { shapeAdverbialClause } from './shapeAdverbialClause.js';
+import { teFromPlainPast } from './teFromPlainPast.js';
 
 /**
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
@@ -114,7 +115,10 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
     const adverbial = shapeAdverbialClause(phrase.adverbialClause);
-    segs.push(...buildClauseSegments(adverbial.clause, 'が', true), { t: adverbial.word });
+    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', true);
+    // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
+    // turns into.
+    segs.push(...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word });
   }
   // A clause of purpose precedes what it is done for, closed by ために on the dictionary form:
   // 「変更するためにクリック」, 「翻訳を見るために主語を選択」. It is a citation clause, so it speaks no

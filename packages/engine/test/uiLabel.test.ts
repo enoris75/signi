@@ -277,6 +277,10 @@ describe('relation toolbars: the adposition each specifier spells', () => {
     expect(temporal('between')).toEqual({
       en: 'between', it: 'tra', fr: 'entre', de: 'zwischen', es: 'entre', ja: '〜の間に', pt: 'entre',
     });
+    // P09-E27: the Italian "da" cited bare, as `at`'s "a" is.
+    expect(temporal('since')).toEqual({
+      en: 'since', it: 'da', fr: 'depuis', de: 'seit', es: 'desde', ja: '〜から', pt: 'desde',
+    });
   });
 
   test('a cause connector is a specifier too — the stance picks the word', () => {

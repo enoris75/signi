@@ -46,6 +46,10 @@ describe('SubordinateButton', () => {
       'BecauseC',
       'AfterA',
       'BeforeB',
+      // P09-E27.
+      'UntilU',
+      'SinceS',
+      'ThoughG',
     ]);
     fireEvent.click(within(menu).getByText('After'));
     expect(control.onStart).toHaveBeenCalledWith('adverbial', 'after');
@@ -72,7 +76,8 @@ describe('SubordinateButton', () => {
 describe('subordinateOptions', () => {
   const kinds = (verb: Parameters<typeof subordinateOptions>[0], hasObject = false) =>
     subordinateOptions(verb, hasObject).map((o) => o.conjunction ?? o.link);
-  const ADVERBIAL = ['when', 'while', 'because', 'after', 'before'];
+  // P09-E27 added until, since and though.
+  const ADVERBIAL = ['when', 'while', 'because', 'after', 'before', 'until', 'since', 'though'];
 
   it('offers *that* to a verb that takes a content clause and has no object, *to* to one that takes an infinitive', () => {
     expect(kinds({ clauseObject: 'content' })).toEqual(['content', ...ADVERBIAL]);

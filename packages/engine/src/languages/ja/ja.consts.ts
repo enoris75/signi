@@ -114,6 +114,8 @@ export const JA_TEMPORAL: Record<TemporalRelation, { noun: string; reading?: str
   // for "between this day and that day", and on a single time the two relations are one string,
   // as `on` and `over` share の上. It takes the time's に, not the locative's で.
   between: { noun: 'の間', reading: 'のあいだ', particle: 'に' },
+  // P09-E27 D3: から straight on the time, as まで is — この日から.
+  since: { noun: '', particle: 'から' },
 };
 
 /**
@@ -233,13 +235,21 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * clause simultaneous with its main one takes (猫が食べている間に走りました). `plain` clears a resultative
  * aspect as well: the order of the events is what 後で and 前に say, so a completed event before or after
  * another is the plain one (走る前に, 走った後で, never 走った前に or 走っていた後で, A264).
+ *
+ * P09-E27: まで closes an *until* clause on the plain non-past (猫が食べるまで), and のに a *though*
+ * clause on the plain form of its own tense (猫が食べるのに, 猫が食べたのに). から says *since* on the
+ * **て-form** (猫が食べてから), which `te` asks for: the clause is built on the plain past and its last
+ * word turned from 〜た into 〜て (see `teFromPlainPast`).
  */
-export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true }> = {
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true }> = {
   when: { word: '時に' },
   while: { word: '間に', tense: 'present', progressive: true },
   because: { word: 'ので' },
   after: { word: '後で', tense: 'past', plain: true },
   before: { word: '前に', tense: 'present', plain: true },
+  until: { word: 'まで', tense: 'present', plain: true },
+  since: { word: 'から', tense: 'past', plain: true, te: true },
+  though: { word: 'のに' },
 };
 
 /**

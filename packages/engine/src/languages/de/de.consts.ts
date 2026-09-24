@@ -163,6 +163,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'wenn', while: 'während', because: 'weil', after: 'nachdem', before: 'bevor',
+  // P09-E27: German has no subjunctive to govern, so each is the indicative, verb-final.
+  until: 'bis', since: 'seit', though: 'obwohl',
 };
 
 /**
@@ -227,4 +229,6 @@ export const DE_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until' | 'dur
   // The spatial BETWEEN_PREP with the dative, which the group scope lifts off each conjunct
   // (P09-E20): "zwischen diesem Tag und jenem Tag".
   between: 'zwischen',
+  // P09-E27 D3: "seit" + dative, "seit diesem Tag", "seit dem Tag".
+  since: 'seit',
 };

@@ -160,6 +160,9 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  */
 export const SUBORDINATORS: Record<SubordinatingConjunction, string> = {
   when: 'cuando', while: 'mientras', because: 'porque', after: 'después de que', before: 'antes de que',
+  // P09-E27: "hasta que" governs the subjunctive; "aunque" asserts its clause here (the factual
+  // reading "though the dog eats") and keeps the indicative, as "desde que" does.
+  until: 'hasta que', since: 'desde que', though: 'aunque',
 };
 
 /**
@@ -222,4 +225,5 @@ export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   during: { word: 'durante' },
   // The spatial BETWEEN_PREP, which the group scope lifts off each conjunct (P09-E20).
   between: { word: 'entre' },
+  since: { word: 'desde' },
 };
