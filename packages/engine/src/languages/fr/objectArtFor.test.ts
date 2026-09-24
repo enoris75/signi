@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AFRIQUE, ANGE, EAU, MOT, NOURRITURE, SOURIS } from './fr.fixtures.js';
+import { AFRIQUE, ANGE, EAU, LIVRE, MOT, NOURRITURE, SOURIS } from './fr.fixtures.js';
 import { objectArtFor } from './objectArtFor.js';
 
 describe('objectArtFor', () => {
@@ -30,5 +30,16 @@ describe('objectArtFor', () => {
 
   test('a proper noun keeps its article under a negation', () => {
     expect(objectArtFor({ ...AFRIQUE, definiteness: 'indefinite' }, false, 'Afrique', true)).toBe("l'");
+  });
+
+  test('a counted object has no article where the numeral took the indefinite\'s place (C31)', () => {
+    expect(objectArtFor({ ...SOURIS, definiteness: 'bare', numeral: '2' }, true, 'souris', false)).toBe('');
+    expect(objectArtFor({ ...SOURIS, definiteness: 'bare', numeral: '2' }, true, 'souris', true)).toBe('');
+  });
+
+  test('a definite or demonstrative counted object keeps its determiner (A289)', () => {
+    expect(objectArtFor({ ...LIVRE, definiteness: 'definite', numeral: '2' }, true, 'deux', false)).toBe('les');
+    expect(objectArtFor({ ...LIVRE, definiteness: 'definite', numeral: '2' }, true, 'deux', true)).toBe('les');
+    expect(objectArtFor({ ...LIVRE, definiteness: 'this', numeral: '2' }, true, 'deux', false)).toBe('ces');
   });
 });

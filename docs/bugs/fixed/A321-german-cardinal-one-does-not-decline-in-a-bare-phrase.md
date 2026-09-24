@@ -42,3 +42,23 @@ it is.
 | | |
 |---|---|
 | **Test** | `complements/numerals-in-complements.test.ts` → *known bugs: the German cardinal one does not decline in a bare phrase (A321)* (7 `test.fails`, one per row, plus a regression test for the nominative, the feminine accusative, the indefinite article and the other six) |
+
+## Resolved
+
+2026-09-24. A new German step, [cardinalOne.ts](../../../packages/engine/src/languages/de/cardinalOne.ts),
+turns a bare phrase counted by one into the indefinite phrase it is: `definiteness: 'indefinite'`, the
+cardinal dropped, an approximator moved in front of the determiner (`approximator_det`). The ein-word,
+the noun's case ending and the adjectives' mixed declension then all come from the article path. It
+runs at the top of [nounPhrase.ts](../../../packages/engine/src/languages/de/nounPhrase.ts) (subject,
+object, genitive possessor), on each non-essive conjunct in
+[complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts),
+and before [possessorText.ts](../../../packages/engine/src/languages/de/possessorText.ts) chooses
+between the genitive and *von*. It leaves alone a definite or demonstrative one (A319), a pronominal
+or question possessive (the possessive holds the ein-word slot), and a mass noun.
+
+Guarded by the seven tests of *known bugs: the German cardinal one does not decline in a bare phrase
+(A321)* in [numerals-in-complements.test.ts](../../../packages/engine/test/complements/numerals-in-complements.test.ts),
+now plain tests with their assertions unchanged, plus a new case in the same block (`mit einem alten
+Hund`, `sieht einen alten Hund`, `ein alter Hund läuft`, `in einem großen Haus`, `das Buch eines
+Mannes` / `einer Frau`, `innerhalb etwa einer Stunde`, and the plan's indefinite one). The colocated
+[cardinalOne.test.ts](../../../packages/engine/src/languages/de/cardinalOne.test.ts) is new.

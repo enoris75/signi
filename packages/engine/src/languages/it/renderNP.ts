@@ -5,10 +5,12 @@ import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessiveIt } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { CARDINALS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { defArticle } from './defArticle.js';
+import { indefArticle } from './indefArticle.js';
 import { isPlural } from './isPlural.js';
 import { itDeg } from './itDeg.js';
 import { itStandard } from './itStandard.js';
@@ -48,7 +50,14 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
     ? possessiveIt(poss, { gender: gender as 'masc' | 'fem', number: plural ? 'plural' : 'singular' })
     : '';
   // A cardinal stands between the determiner and the prenominal adjectives: "le due grandi case" (C31).
-  const numeral = numeralText(forms, CARDINALS);
+  // At one it is the indefinite article's own word, so it takes that article's form before the word
+  // that follows it: "un'ora", "un'amica", "uno studente", never "*una ora" (A320).
+  // Beside a definite or demonstrative determiner that article would say "*l'un cane", so the one is
+  // left out and the phrase is the singular it counts: "il cane", "questo cane" (A319).
+  const numeral = oneBesideDeterminer(forms) && !pronominalPoss ? ''
+    : forms['numeral'] === '1'
+    ? `${forms['approximator'] ?? ''}${indefArticle(forms, false, preSurfaces[0] ?? noun)}`
+    : numeralText(forms, CARDINALS);
   const preChain = [...(pronominalPoss ? [possWord] : []), ...(numeral ? [numeral] : []), ...preSurfaces];
   const lead = preChain[0] ?? noun;
   // The caller builds the head from `itPossessedHeadForms`, so a possessive gets the definite article,
