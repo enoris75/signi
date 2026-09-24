@@ -3,6 +3,7 @@ import { dePrep } from './dePrep.js';
 import { demonstrative } from './demonstrative.js';
 import { indefArticle } from './indefArticle.js';
 import { isBareName } from './isBareName.js';
+import { withApproximator } from '../../functions/withApproximator.js';
 
 /**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
@@ -11,6 +12,11 @@ import { isBareName } from './isBareName.js';
  * "nenhum/nenhuma" is singular and drives verb negation ("não") upstream when it is an object.
  */
 export function artFor(forms: Record<string, string>, plural = false): string {
+  // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
+  return withApproximator(forms, baseArtFor(forms, plural));
+}
+
+function baseArtFor(forms: Record<string, string>, plural = false): string {
   // A proper noun (a África) always takes the definite article in Portuguese, whatever
   // determiner the user picked; it is a property of the name, not a choice. A few names are bare
   // instead ("Portugal", never "o Portugal"), which their forms mark with `takes_article: '0'`:
@@ -49,7 +55,8 @@ export function artFor(forms: Record<string, string>, plural = false): string {
     case 'many':       return fem ? 'muitas' : 'muitos';
     case 'few':        return fem ? 'poucas' : 'poucos';
     case 'all':        return `${fem ? 'todas' : 'todos'} ${defArticle(forms, true)}`;
-    case 'no':         return fem ? 'nenhuma' : 'nenhum';
+    // Singular (NO_TAKES_SINGULAR), but for a plurale tantum: "nenhumas notícias".
+    case 'no':         return plural ? (fem ? 'nenhumas' : 'nenhuns') : fem ? 'nenhuma' : 'nenhum';
     // P09-E25. "cada" is invariant and singular (each and every share it); "ambos/as" keeps the
     // definite article as "todos" does; "a maioria" + the definite genitive ("dos gatos"); "vários/as"
     // agrees in gender; "tal/tais" in number. "Suficiente(s)" follows the noun, so it spells nothing

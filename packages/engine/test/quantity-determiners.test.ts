@@ -212,3 +212,38 @@ describe('P09-E25: the determiner menu', () => {
     ['SIMILATIVE', { en: 'that indicates such an object.', it: 'che indica un tale oggetto.', fr: 'qui indique un tel objet.', de: 'das so einen Gegenstand bezeichnet.', es: 'que indica tal objeto.', ja: 'そんな物体を示す。', pt: 'que indica tal objeto.' }],
   ])('%s — its gloss', (id, want) => expect(definitionAll(id)).toEqual(want));
 });
+
+// P09-E41's plurale tantum (NEWS: it "notizie", fr "nouvelles", de "Nachrichten", es "noticias", pt
+// "notícias"; en and ja are singular mass nouns). Its negative quantifier takes the plural the other
+// nouns never do, and the distributives, which want a singular it does not have, take it whole.
+describe('P09-E25 on a plurale tantum', () => {
+  const newsBurns = (definiteness: Definiteness) => sayAll(clause(np('NEWS', { definiteness }), 'BURN'));
+
+  test('`no` takes the plural quantifier where the lexeme has no singular', () => {
+    expect(newsBurns('no')).toEqual({
+      en: 'no news burns.', it: 'nessune notizie bruciano.', fr: 'aucunes nouvelles ne brûlent.', de: 'keine Nachrichten brennen.',
+      es: 'ningunas noticias arden.', ja: 'どのニュースも燃えません。', pt: 'nenhumas notícias ardem.',
+    });
+    expect(sayAll(clause(np('DOG'), 'READ', { directObject: np('NEWS', { definiteness: 'no' }) }))).toMatchObject({
+      it: 'il cane non legge nessune notizie.', fr: 'le chien ne lit aucunes nouvelles.', es: 'el perro no lee ningunas noticias.', pt: 'o cão não lê nenhumas notícias.',
+    });
+  });
+
+  test('an ordinary noun keeps the singular `no` whatever number was picked', () => {
+    expect(sayAll(clause(np('CAT', { definiteness: 'no', number: 'plural' }), 'RUN'))).toMatchObject({
+      it: 'nessun gatto corre.', fr: 'aucun chat ne court.', es: 'ningún gato corre.', pt: 'nenhum gato corre.',
+    });
+  });
+
+  test('each and every take a plurale tantum whole, as all', () => {
+    expect(newsBurns('each')).toMatchObject({
+      it: 'tutte le notizie bruciano.', fr: 'toutes les nouvelles brûlent.', de: 'alle Nachrichten brennen.', es: 'todas las noticias arden.', pt: 'todas as notícias ardem.',
+    });
+  });
+
+  test('the plural values take it as they take any plural', () => {
+    expect(newsBurns('most')).toMatchObject({ it: 'la maggior parte delle notizie brucia.', fr: 'la plupart des nouvelles brûlent.', de: 'die meisten Nachrichten brennen.' });
+    expect(newsBurns('several')).toMatchObject({ it: 'parecchie notizie bruciano.', fr: 'plusieurs nouvelles brûlent.', pt: 'várias notícias ardem.' });
+    expect(newsBurns('such')).toMatchObject({ it: 'tali notizie bruciano.', fr: 'de telles nouvelles brûlent.', de: 'solche Nachrichten brennen.', es: 'tales noticias arden.', pt: 'tais notícias ardem.' });
+  });
+});

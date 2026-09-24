@@ -4,6 +4,7 @@ import { nessunForm } from './nessunForm.js';
 import { prepArt } from './prepArt.js';
 import { quelloForm } from './quelloForm.js';
 import { questoForm } from './questoForm.js';
+import { withApproximator } from '../../functions/withApproximator.js';
 
 /**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
@@ -11,6 +12,11 @@ import { questoForm } from './questoForm.js';
  * or a quantifier agreeing in gender (and, for "tutti/e", carrying the definite article).
  */
 export function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
+  return withApproximator(forms, baseArtFor(forms, plural, lead));
+}
+
+function baseArtFor(forms: Record<string, string>, plural: boolean, lead: string): string {
   // A proper noun (l'Africa) always takes the definite article in Italian, whatever determiner the
   // user picked; it is a property of the name, not a choice. A personal name is the exception —
   // "Pietro", never "il Pietro" — which its forms mark with `takes_article: '0'` (C38).
@@ -50,7 +56,7 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
     case 'many':       return fem ? 'molte' : 'molti';
     case 'few':        return fem ? 'poche' : 'pochi';
     case 'all':        return `${fem ? 'tutte' : 'tutti'} ${defArticle(forms, true, lead)}`;
-    case 'no':         return nessunForm(forms['gender'] ?? 'masc', lead);
+    case 'no':         return nessunForm(forms['gender'] ?? 'masc', lead, plural);
     // P09-E25. "ogni" is invariant and singular (each and every share it); "entrambi/e" keeps the
     // definite article as "tutti" does; the partitive "most" is a fixed "la maggior parte" + the
     // definite genitive ("dei gatti", "degli uccelli", "delle case"); "tale" takes the indefinite

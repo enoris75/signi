@@ -3,6 +3,7 @@ import { demArticle } from './demArticle.js';
 import { dePrep } from './dePrep.js';
 import { elidesBefore } from './elidesBefore.js';
 import { indefArticle } from './indefArticle.js';
+import { withApproximator } from '../../functions/withApproximator.js';
 
 /**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
@@ -12,6 +13,11 @@ import { indefArticle } from './indefArticle.js';
  * negation ("ne") upstream.
  */
 export function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
+  return withApproximator(forms, baseArtFor(forms, plural, lead));
+}
+
+function baseArtFor(forms: Record<string, string>, plural: boolean, lead: string): string {
   // A proper noun (l'Afrique) always takes the definite article in French, whatever determiner the
   // user picked; it is a property of the name, not a choice. A personal name is the exception —
   // "Pierre", never "le Pierre" — which its forms mark with `takes_article: '0'` (C38).
@@ -53,7 +59,8 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
     case 'many':       return `beaucoup ${de}`;
     case 'few':        return `peu ${de}`;
     case 'all':        return `${fem ? 'toutes' : 'tous'} ${defArticle(forms, true, lead)}`;
-    case 'no':         return fem ? 'aucune' : 'aucun';
+    // Singular (NO_TAKES_SINGULAR), but for a plurale tantum: "aucunes nouvelles".
+    case 'no':         return plural ? (fem ? 'aucunes' : 'aucuns') : fem ? 'aucune' : 'aucun';
     // P09-E25. "chaque" is invariant and singular (each and every share it); "les deux" is the
     // article + the numeral (fused by a preposition: "aux deux chats", "des deux chats", see `aDet` /
     // `deDet`); "la plupart" + the definite genitive; "plusieurs" is invariant; "assez de" works like

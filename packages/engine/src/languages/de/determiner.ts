@@ -6,6 +6,7 @@ import { demForm } from './demForm.js';
 import { indefArticle } from './indefArticle.js';
 import { keinForm } from './keinForm.js';
 import { relativePronoun } from './relativePronoun.js';
+import { withApproximator } from '../../functions/withApproximator.js';
 
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'), declined
@@ -15,6 +16,11 @@ import { relativePronoun } from './relativePronoun.js';
  * self-negating (no verb concord); einige/viele/wenige/alle are plural quantifiers.
  */
 export function determiner(forms: Record<string, string>, _case: Case, plural: boolean): string {
+  // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
+  return withApproximator(forms, baseDeterminer(forms, _case, plural));
+}
+
+function baseDeterminer(forms: Record<string, string>, _case: Case, plural: boolean): string {
   // Most proper names go bare in German ("Afrika"), whatever determiner the user picked. But a
   // class of them is inherently articled — "die Antarktis", "die Schweiz", "die Türkei" — and that
   // is a property of the name, not a choice, so the lexicon marks it and the definite article wins.

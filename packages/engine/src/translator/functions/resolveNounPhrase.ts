@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isCoreferentPossessor, isPronominalPossessor } from '@signi/shared';
 import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
-import { MASS_DETERMINER, NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SINGULAR_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
+import { ALMOST_DETERMINERS, APPROXIMATOR_WORDS, MASS_DETERMINER, NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SINGULAR_DETERMINERS, POSSESSOR_OWN_ADJECTIVE, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyIntensifier } from './applyIntensifier.js';
@@ -175,8 +175,19 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // that article in five of them, and above one no language writes both — so the phrase resolves
     // bare and each engine's article builder writes nothing without being told (C31). The value
     // itself rides on the forms, as the determiner and the degree do.
-    head.forms['definiteness'] = np.numeral !== undefined && definiteness === 'indefinite' ? 'bare' : definiteness;
+    // An approximated numeral is no identified set, so it drops the definite article too: "about five
+    // cats", "circa cinque gatti", never "the about five cats" (P09-E38).
+    const about = np.approximator === 'about' && np.numeral !== undefined;
+    head.forms['definiteness'] = np.numeral !== undefined && (definiteness === 'indefinite' || (about && definiteness === 'definite'))
+      ? 'bare'
+      : definiteness;
     if (np.numeral !== undefined) head.forms['numeral'] = String(np.numeral);
+    // The approximator's word rides on the forms with its separator, as the numeral does: `approximator`
+    // before the numeral (see `numeralText`), `approximator_det` before the determiner (see
+    // `withApproximator`). Anywhere else it is ignored (P09-E38 D1).
+    const words = APPROXIMATOR_WORDS[language];
+    if (words && about) head.forms['approximator'] = words.about(head.forms['gender'] === 'fem');
+    if (words && np.approximator === 'almost' && ALMOST_DETERMINERS.has(definiteness)) head.forms['approximator_det'] = words.almost;
   }
   // An adjective head is the predicate adjective of a subject complement ("seems happy") —
   // the one head that carries a comparative degree of its own. Thread it onto the head's

@@ -41,9 +41,11 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const prenominalDet = pronounHead ? undefined
     : definiteness === 'enough' && np.head.forms['uncountable'] !== '1' ? JA_ENOUGH_OF_COUNT
     : JA_PRENOMINAL_DET[definiteness];
+  // "Almost" leads the determiner: ほとんどすべての, ほとんどどの…も (P09-E38).
+  const almost = np.head.forms['approximator_det'] ?? '';
   const detSegs: RubySegment[] =
-    prenominalDet ? [{ t: prenominalDet }]
-    : !pronounHead && definiteness === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.pre }]
+    prenominalDet ? [{ t: `${almost}${prenominalDet}` }]
+    : !pronounHead && definiteness === 'no' ? [{ t: `${almost}${JA_NEGATIVE_DETERMINER.pre}` }]
     : [];
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
   // adjectives / nested possessor / relative clause ("子供の猫の本"). A pronominal possessor

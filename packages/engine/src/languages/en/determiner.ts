@@ -1,4 +1,5 @@
 import { indefiniteArticle } from './indefiniteArticle.js';
+import { withApproximator } from '../../functions/withApproximator.js';
 
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'):
@@ -9,6 +10,11 @@ import { indefiniteArticle } from './indefiniteArticle.js';
  * trailing space, or "" for bare.
  */
 export function determiner(forms: Record<string, string>, lead: string, superlative = false): string {
+  // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
+  return withApproximator(forms, baseDeterminer(forms, lead, superlative));
+}
+
+function baseDeterminer(forms: Record<string, string>, lead: string, superlative = false): string {
   // A proper noun ("Africa") takes no article in English, whatever determiner was picked — except
   // under a superlative, which brings the article back ("the biggest Europe", A183). The positive and
   // the comparative stay bare ("big Europe", "bigger Europe").

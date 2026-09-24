@@ -102,6 +102,15 @@ What landed differently from the plan:
    - console commands `/each /every /both /mostof /several /enough /such` — **`/mostof`**, because
      `/most` is the adjective's superlative degree (a command has one name) — with golden entries
      and help examples.
+7. **On a plurale tantum** (P09-E41's NEWS, merged in afterwards): *each / every* have no singular to
+   take, so they take it whole as `all` (*tutte le notizie, toutes les nouvelles, alle Nachrichten*);
+   the plural values take it as any plural (*la maggior parte delle notizie brucia*, *de telles
+   nouvelles*). The same pass fixed `no` on it, which E41 left rendering "nessuna notizie", "aucune
+   nouvelles", "ninguna noticias", "nenhuma notícias": the negative quantifier now has the plural
+   the lexeme needs (*nessune notizie, aucunes nouvelles, ningunas noticias, nenhumas notícias*), and
+   it/es/pt `isPlural` no longer forces the singular under `no` for a `count: 'plural'` lexeme. English
+   *each news* / *every news* stay as rendered (English *news* is a singular mass noun). Pinned in
+   the same test file (committed with P09-E38).
 
 ## Why
 
