@@ -2,7 +2,8 @@ import type { ResolvedNounPhrase } from '../../types.js';
 
 /**
  * Whether a direct-object noun conjunct takes the personal "a": a human with a determiner ("al
- * niño", "a un hombre", "a su padre"). A bare human is non-specific and takes none ("busca niños").
+ * niño", "a un hombre", "a su padre"). A bare human is non-specific and takes none ("busca niños"), but a counted one is not bare
+ * ("ve a dos amigos", A340).
  *
  * A verb whose lexeme says `object_a` marks every determined object that way, human or not: seguir
  * in its sense of order, "sigue al primer objeto" (localization C24). It is still a direct object,
@@ -15,5 +16,9 @@ import type { ResolvedNounPhrase } from '../../types.js';
  */
 export function takesPersonalA(np: ResolvedNounPhrase, verbForms: Record<string, string> = {}): boolean {
   if (verbForms['object_no_a'] === '1') return false;
-  return (np.head.forms['human'] === '1' || verbForms['object_a'] === '1') && np.head.forms['definiteness'] !== 'bare';
+  // A counted head is no bare generic noun even when it writes no article: the numeral stands in the
+  // indefinite's place (and an approximated one in the definite's), so "ve a dos amigos", "ve a unos
+  // dos amigos" (A340).
+  const determined = np.head.forms['definiteness'] !== 'bare' || np.head.forms['numeral'] !== undefined;
+  return (np.head.forms['human'] === '1' || verbForms['object_a'] === '1') && determined;
 }

@@ -507,7 +507,7 @@ describe('known bugs: a Spanish or Portuguese noun possessor counted by one besi
 describe('known bugs: the Spanish personal a drops or loses the numeral of a counted human object (A340)', () => {
   const sees = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) => say(clause(np('CAT'), 'SEE', { directObject: object, verbPhrase }), 'es');
 
-  test.fails('a counted human object with no article takes the a', () => {
+  test('a counted human object with no article takes the a', () => {
     expect([
       sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite' })),
       sees(np('FRIEND', { numeral: 2, definiteness: 'bare' })),
@@ -521,12 +521,12 @@ describe('known bugs: the Spanish personal a drops or loses the numeral of a cou
     ]);
   });
 
-  test.fails('negated, and with an approximator', () => {
+  test('negated, and with an approximator', () => {
     expect(sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite' }), { negative: true })).toBe('el gato no ve a dos amigos.');
     expect(sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite', approximator: 'about' }))).toBe('el gato ve a unos dos amigos.');
   });
 
-  test.fails('a definite or demonstrative counted human object keeps its numeral', () => {
+  test('a definite or demonstrative counted human object keeps its numeral', () => {
     expect(sees(np('FRIEND', { numeral: 2, definiteness: 'definite' }))).toBe('el gato ve a los dos amigos.');
     expect(sees(np('FRIEND', { numeral: 2, definiteness: 'this' }))).toBe('el gato ve a estos dos amigos.');
   });
@@ -538,5 +538,30 @@ describe('known bugs: the Spanish personal a drops or loses the numeral of a cou
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { numeral: 2, definiteness: 'definite' }) }))).toMatchObject({
       en: 'the cat sees the two friends.', it: 'il gatto vede i due amici.', pt: 'o gato vê os dois amigos.',
     });
+  });
+
+  test('the one beside a definite, a possessive, an adjective, and a bare uncounted human', () => {
+    expect([
+      sees(np('FRIEND', { numeral: 1 })),
+      sees(np('WOMAN', { numeral: 1, definiteness: 'that' })),
+      sees(np('WOMAN', { numeral: 3 })),
+      sees(np('FRIEND', { numeral: 2, possessor: { kind: 'pronominal', person: '1', number: 'singular' } })),
+      sees(np('FRIEND', { numeral: 2, definiteness: 'indefinite', adjectives: ['OLD'] })),
+      sees(np('FRIEND', { number: 'plural', definiteness: 'bare' })),
+    ]).toEqual([
+      'el gato ve al amigo.',
+      'el gato ve a esa mujer.',
+      'el gato ve a las tres mujeres.',
+      'el gato ve a mis dos amigos.',
+      'el gato ve a dos amigos viejos.',
+      'el gato ve amigos.',
+    ]);
+  });
+
+  test('a verb\'s own preposition keeps the numeral too', () => {
+    const depends = (object: NounPhrase) => say(clause(np('CAT'), 'DEPEND', { directObject: object }), 'es');
+    expect(depends(np('CONDITION', { numeral: 2 }))).toBe('el gato depende de las dos condiciones.');
+    expect(depends(np('CONDITION', { numeral: 2, definiteness: 'indefinite' }))).toBe('el gato depende de dos condiciones.');
+    expect(depends(np('CONDITION', { numeral: 1 }))).toBe('el gato depende de la condición.');
   });
 });

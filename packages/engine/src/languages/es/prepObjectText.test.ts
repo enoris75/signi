@@ -23,6 +23,15 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(NINO, {}, mine), 'a')).toBe('a mi niño');
   });
 
+  // A340: the numeral stands between the determiner and the noun, and at one beside a definite it is
+  // left out (A319).
+  test('a counted object keeps its numeral', () => {
+    expect(prepObjectText(np(NINO, { numeral: '2', number: 'plural' }), 'a')).toBe('a los dos niños');
+    expect(prepObjectText(np(NINO, { numeral: '2', number: 'plural', definiteness: 'bare' }), 'a')).toBe('a dos niños');
+    expect(prepObjectText(np(CASA, { numeral: '2', number: 'plural', definiteness: 'this' }), 'en')).toBe('en estas dos casas');
+    expect(prepObjectText(np(NINO, { numeral: '1' }), 'a')).toBe('al niño');
+  });
+
   test('a pronoun takes its tonic form', () => {
     expect(prepObjectText(np(YO), 'en')).toBe('en mí');
     expect(prepObjectText(np(EL), 'en')).toBe('en él');
