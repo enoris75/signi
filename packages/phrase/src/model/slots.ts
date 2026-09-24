@@ -5,6 +5,7 @@ import {
   DETERMINER_COMPLEMENT_TYPES,
   type ComplementType,
   type Concept,
+  type ObjectPredication,
   type GrammaticalRole,
   type Transitivity,
   type UiStringKey,
@@ -34,15 +35,28 @@ export const isBoxComplement = (type: ComplementType): type is BoxComplementType
 
 /**
  * The complements a period offers for its verb: the ones the verb licenses, plus the adjuncts any
- * act can take (a time, a beneficiary — ADJUNCT_COMPLEMENT_TYPES, P09-E12 D2). No verb, none.
+ * act can take (a time, a beneficiary, a companion — ADJUNCT_COMPLEMENT_TYPES, P09-E12 D2), and —
+ * on a verb with an object — what that object is taken as, "uses the period **as a condition**"
+ * (the essive object complement, P13). No verb, none.
  */
 export const offeredComplements = (verb: Concept | undefined): ComplementType[] =>
   verb
     ? [
       ...(verb.complements ?? []),
       ...ADJUNCT_COMPLEMENT_TYPES.filter((type) => !verb.complements?.includes(type)),
+      ...(takesObject(verb) && !verb.complements?.includes("objectPredicative") ? ["objectPredicative" as const] : []),
     ]
     : [];
+
+const takesObject = (verb: Concept) => verb.transitivity === "transitive" || verb.transitivity === "ditransitive";
+
+/**
+ * What an object complement says of the object when the period does not say (P13): the factitive —
+ * it becomes the complement — where the verb licenses the complement (TRANSFORM, "into a command"),
+ * and the essive — it is taken as the complement — where the complement is the object's adjunct.
+ */
+export const defaultPredication = (verb: Concept | undefined): ObjectPredication =>
+  verb?.complements?.includes("objectPredicative") ? "factitive" : "essive";
 
 // Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
@@ -184,9 +198,10 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
  */
 export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   predicative: "P",
-  // The object complement takes O, the initial of its name; the comitative cannot take C (the
-  // cause has it) so it answers to W, the "with" every language but Japanese spells it as.
-  objectPredicative: "O",
+  // The object complement cannot take O, which folds the object away in the same menu (P13): it answers
+  // to E, the essive it is on most verbs; the comitative cannot take C (the cause has it) so it answers
+  // to W, the "with" every language but Japanese spells it as.
+  objectPredicative: "E",
   comitative: "W",
   terminus: "T",
   instrumental: "I",
@@ -505,6 +520,10 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   topic: { x: 58, y: 66 },
   temporal: { x: 76, y: 94 },
   purpose: { x: 40, y: 94 },
+  // P13's two: what the object is taken as, beside the object it describes; the companion beside the
+  // subject it goes with.
+  objectPredicative: { x: 86, y: 36 },
+  comitative: { x: 22, y: 66 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

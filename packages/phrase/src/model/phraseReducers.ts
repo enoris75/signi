@@ -15,6 +15,7 @@ import {
   type Degree,
   type ImperativeRegister,
   type ModifierRelation,
+  type ObjectPredication,
   type PathSpecifier,
   type Tense,
   type TemporalRelation,
@@ -46,6 +47,7 @@ import {
   adjectiveSlots,
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_KEY_SET,
+  defaultPredication,
   getActiveSlots,
   modalAdverbFor,
   modalNegativeFor,
@@ -142,6 +144,7 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
   if (which === "temporal") delete sel.temporalRelation;
+  if (which === "objectPredicative") delete sel.objectPredicativePredication;
   if (which === "cause") {
     delete sel.causeSentiment;
     delete sel.causeNegative;
@@ -708,6 +711,14 @@ export function setTemporalRelation(
   relation: TemporalRelation,
 ): PhraseSelection {
   return { ...prev, temporalRelation: relation };
+}
+
+// What the object is taken as or turned into (P13): essive or factitive. The verb's own default is
+// dropped rather than stored, so the box keeps following the verb.
+export function setPredication(prev: PhraseSelection, predication: ObjectPredication): PhraseSelection {
+  const next: PhraseSelection = { ...prev, objectPredicativePredication: predication };
+  if (predication === defaultPredication(prev.verb)) delete next.objectPredicativePredication;
+  return next;
 }
 
 // Deny the cause rather than name it: "not because of the dog". It is the complement's own

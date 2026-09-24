@@ -1,6 +1,6 @@
 import { DEFAULT_TEMPORAL_RELATION, type Complement, type ComplementType } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
-import { BOX_COMPLEMENT_TYPES } from "../../slots.ts";
+import { BOX_COMPLEMENT_TYPES, defaultPredication } from "../../slots.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 
 // The boxed complements a selection fills, each with its noun element and specifiers. Undefined
@@ -30,7 +30,12 @@ export function buildComplements(
               ? [{ kind: "temporal", value: sel.temporalRelation }]
               : type === "cause" && sel.causeSentiment && sel.causeSentiment !== "neutral"
                 ? [{ kind: "sentiment", value: sel.causeSentiment }]
-                : undefined,
+                // What the object is taken as or turned into (P13): said wherever it is the essive,
+                // which the engine's default, the factitive, is not.
+                : type === "objectPredicative" &&
+                    (sel.objectPredicativePredication ?? defaultPredication(sel.verb)) === "essive"
+                  ? [{ kind: "predication", value: "essive" }]
+                  : undefined,
     };
   }
   return Object.keys(out).length > 0 ? out : undefined;

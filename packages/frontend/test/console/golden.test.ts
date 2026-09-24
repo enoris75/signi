@@ -107,6 +107,25 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /rel #2.subj ) /verb ( read )',
     misuse: { line: '/subj child /verb read /rel #1.subj', says: { code: 'relativeSamePeriod' } },
   },
+  // P13's two boxes: what the object is taken as or turned into, and the companion. The object
+  // complement is the essive by default on a verb that does not license it, so `/factitive` is written.
+  objpred: {
+    line: '/verb eat /obj food /objpred cat',
+    prints: '/verb ( eat ) /obj ( food ) /objpred ( cat )',
+    holds: { objectPredicative: 'CAT' },
+    misuse: { line: '/verb run /objpred cat', says: { code: 'takesNoComplement', args: { verb: 'run', slot: 'objectPredicative' } } },
+  },
+  with: { line: '/verb eat /with dog', prints: '/verb ( eat ) /with ( dog )', holds: { comitative: 'DOG' } },
+  factitive: {
+    line: '/verb eat /obj food /objpred cat /factitive',
+    prints: '/verb ( eat ) /obj ( food ) /objpred ( cat /factitive )',
+    holds: { objectPredicativePredication: 'factitive' },
+  },
+  essive: {
+    line: '/verb eat /obj food /objpred cat /factitive /essive',
+    prints: '/verb ( eat ) /obj ( food ) /objpred ( cat )',
+    check: (s) => expect(sel(s)).not.toHaveProperty('objectPredicativePredication'),
+  },
   // What a noun's genitive possessor is to it (P13), said after the possessor's bracket.
   whole: {
     line: '/subj house /poss cat /whole',

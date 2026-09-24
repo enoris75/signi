@@ -1,3 +1,5 @@
+import HandymanIcon from "@mui/icons-material/Handyman";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import {
   alpha,
   Box,
@@ -45,6 +47,8 @@ import {
   type Definiteness,
   type PathSpecifier,
   type TemporalRelation,
+  type ObjectPredication,
+  OBJECT_PREDICATIONS,
   type Tense,
   type UiStringKey,
   type Voice,
@@ -964,6 +968,49 @@ const SENTIMENT_ICONS: Record<CauseSentiment, ReactNode> = {
   negative: <SentimentVeryDissatisfiedIcon sx={{ fontSize: 15 }} />,
   positive: <SentimentSatisfiedAltIcon sx={{ fontSize: 15 }} />,
 };
+
+// What the object complement says of the object (P13): taken as it — its usage, "uses the period
+// as a condition" — or turned into it — the result, "transforms it into a command". A (as) and I (into)
+// while the toolbar is armed.
+export const PREDICATION_KEYS: Record<ObjectPredication, string> = { essive: "A", factitive: "I" };
+
+const PREDICATION_ICONS: Record<ObjectPredication, ReactNode> = {
+  essive: <HandymanIcon sx={{ fontSize: 15 }} />,
+  factitive: <AutoFixHighIcon sx={{ fontSize: 15 }} />,
+};
+
+export function PredicationSelector({
+  value,
+  armed,
+  onDisarm,
+  onSelect,
+  placeAt,
+}: {
+  value: ObjectPredication;
+  armed?: boolean;
+  onDisarm?: () => void;
+  onSelect: (p: ObjectPredication) => void;
+  placeAt?: (p: ObjectPredication) => { x: number; y: number } | undefined;
+}) {
+  const t = useUiString();
+  const labels = Object.fromEntries(
+    OBJECT_PREDICATIONS.map((p) => [p, t(`predication.value.${p}`)]),
+  ) as Record<ObjectPredication, string>;
+  return (
+    <RelationToolbar
+      testId="predication-toolbar"
+      values={OBJECT_PREDICATIONS}
+      value={value}
+      labels={labels}
+      icons={PREDICATION_ICONS}
+      keys={PREDICATION_KEYS}
+      armed={armed}
+      onDisarm={onDisarm}
+      onSelect={onSelect}
+      placeAt={placeAt}
+    />
+  );
+}
 
 // Affective stances for the cause complement — neutral (because of), negative (fault of),
 // positive (thanks to) — mirroring the route's SpecifierSelector.

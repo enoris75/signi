@@ -117,3 +117,27 @@ test.describe('whose an infinitive is', () => {
     await expect(page.getByTestId('source-strip')).not.toContainText('/objctl');
   });
 });
+
+test.describe('the object complement and the companion', () => {
+  test('say INCLUDE and ACCOMPANY as their definitions do', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/inf /verb HAVE /objpred ( PART /zero )');
+    await run(page);
+    await app.expectSentences({ en: 'to have as part.', it: 'avere come parte.' });
+
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /inf /verb GO /with ( PERSON /a )');
+    await run(page);
+    await expect(page.getByTestId('source-strip')).toContainText('/with ( PERSON /a )');
+  });
+
+  test('turns the object into it with the toolbar’s Result', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj man /verb see /obj cat /objpred ( friend /a )');
+    await run(page);
+    await app.expectSentences({ en: 'the man sees the cat as a friend.' });
+    await expect(page.getByTestId('predication-toolbar')).toBeVisible();
+    await page.getByRole('button', { name: 'Result', exact: true }).click();
+    await expect(page.getByTestId('source-strip')).toContainText('/objpred ( friend /factitive )');
+  });
+});

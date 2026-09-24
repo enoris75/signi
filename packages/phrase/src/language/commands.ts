@@ -9,6 +9,7 @@ import {
   type Degree,
   type ImperativeRegister,
   type ModifierRelation,
+  type ObjectPredication,
   type PathSpecifier,
   type TemporalRelation,
   type Tense,
@@ -54,7 +55,9 @@ export type Setting =
   /** How a verbless period's subject reads (P13): `plain` is none. */
   | { id: "gloss"; value: NounGloss | "plain" }
   /** What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, its parts. */
-  | { id: "possessorRole"; value: PossessorRole | "owner" };
+  | { id: "possessorRole"; value: PossessorRole | "owner" }
+  /** What the object complement says of the object (P13): taken as it, or turned into it. */
+  | { id: "predication"; value: ObjectPredication };
 
 export type SettingId = Setting["id"];
 
@@ -356,6 +359,9 @@ export const COMMANDS: readonly CommandDef[] = [
   role("for", ["benefit"], "purpose", "purpose", "slot.purpose", "warning", /^purpose$/),
   role("about", ["topic"], "topic", "topic", "slot.topic", "warning", /^topic$/),
   role("cause", [], "cause", "cause", "slot.cause", "warning", /^cause$/),
+  // P13's two: what the object is taken as or turned into, and the companion — `/objpred` and `/with`.
+  role("objpred", ["objectcomplement"], "objectPredicative", "object complement", "slot.objectPredicative", "warning", /^objectPredicative$/),
+  role("with", ["comitative"], "comitative", "companion", "slot.comitative", "warning", /^comitative$/),
   {
     name: "inst",
     aliases: ["instrument", "instrumental"],
@@ -558,6 +564,12 @@ export const COMMANDS: readonly CommandDef[] = [
       ["setSpecifier"],
     ),
   ),
+  // What the object is taken as (the essive) or turned into (the factitive), on the object complement
+  // (P13): "/verb ( have ) /objpred ( part /zero /essive )" is INCLUDE's "to have as a part". The
+  // verb's own is the default: the factitive where it licenses the complement, the essive elsewhere.
+  // Named by their grammar: /as is the equative's already (/equally).
+  setting("essive", ["takenas"], "noun", { id: "predication", value: "essive" }, "taken as", "predication.value.essive", /^objectPredicative$/, ["setPredication"]),
+  setting("factitive", ["into"], "noun", { id: "predication", value: "factitive" }, "turned into", "predication.value.factitive", /^objectPredicative$/, ["setPredication"]),
   // What a noun's genitive possessor is to it (P13), said after the possessor's bracket: "/subj ( part /a
   // /poss [ place /a ] /whole )" is AREA, "a part of a place"; "/parts" FAMILY's "a group of relatives".
   // "/owner" is the default, possession.
@@ -1116,6 +1128,7 @@ export type TopicId =
   | "determiner"
   | "place"
   | "time"
+  | "predication"
   | "cause"
   | "possessor"
   | "relative"
@@ -1153,6 +1166,7 @@ export const TOPICS: readonly Topic[] = [
   { id: "place", label: "spatial relationship", labelKey: "console.topic.place", part: "noun" },
   // The temporal's relation, headed by the box it sets, as the cause's stance is by the cause.
   { id: "time", label: "temporal", labelKey: "slot.temporal", part: "noun" },
+  { id: "predication", label: "object complement", labelKey: "slot.objectPredicative", part: "noun" },
   { id: "cause", label: "cause", labelKey: "slot.cause", part: "noun" },
   { id: "possessor", label: "possessor", labelKey: "slot.possessor", part: "noun" },
   { id: "relative", label: "relative clause", labelKey: "satellite.relative", part: "noun" },
@@ -1188,6 +1202,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   relation: "relation",
   gloss: "gloss",
   possessorRole: "possessor",
+  predication: "predication",
 };
 
 /** The topic a command is listed under. */

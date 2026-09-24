@@ -36,7 +36,7 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "stan
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
   if (slot === "modifier" || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };
-  if (slot === "directObject" || slot === "cause" || slot === "purpose" || slot === "topic")
+  if (slot === "directObject" || slot === "cause" || slot === "purpose" || slot === "topic" || slot === "comitative")
     return { roles: ["noun", "pronoun"] };
   if (slot === "predicative") return { roles: ["noun", "adjective"] };
   if (/Adjective\d?$/.test(slot)) return { roles: ["adjective", "noun"] };
@@ -184,6 +184,9 @@ export const NOUN_NAMES: Record<NounKey, string> = {
   purpose: "for",
   topic: "about",
   cause: "cause",
+  // P13's two boxes: the object complement and the companion.
+  objectPredicative: "objpred",
+  comitative: "with",
 };
 
 const NOUN_BY_NAME: Record<string, NounKey> = Object.fromEntries(

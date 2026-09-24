@@ -12,12 +12,14 @@ import {
   SentimentSelector,
   SpecifierSelector,
   TemporalSelector,
+  PredicationSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { toolbarControlKey, VERB_PHRASE } from "./ringSpecs.ts";
-import { isModalAdverbSlot, isModalSlot } from "./slots.ts";
+import {
+  defaultPredication, isModalAdverbSlot, isModalSlot } from "./slots.ts";
 import { activatable } from "../../keyboard/activate.ts";
 import { ComplementMenu } from "./ComplementMenu.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -43,6 +45,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleSelectSpecifier,
     handleSelectLocativeSpecifier,
     handleSelectTemporalRelation,
+    handleSelectPredication,
     handleSelectSentiment,
     registerVerbAnchor,
     satelliteKeys,
@@ -174,6 +177,17 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           onDisarm={disarm}
           onSelect={handleSelectTemporalRelation}
           placeAt={toolbarAt("temporal")}
+        />
+      )}
+
+      {/* What the object complement says of the object (P13): its usage (as) or its result (into). */}
+      {!compact && selection.objectPredicative && (
+        <PredicationSelector
+          value={selection.objectPredicativePredication ?? defaultPredication(selection.verb)}
+          armed={toolbarFor === "objectPredicative"}
+          onDisarm={disarm}
+          onSelect={handleSelectPredication}
+          placeAt={toolbarAt("objectPredicative")}
         />
       )}
 

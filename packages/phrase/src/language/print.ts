@@ -428,7 +428,7 @@ class Printer {
       }
     }
     const afterAdjectives = this.tokens.length;
-    this.settings(w, ["number", "gender", "determiner", "specifier", "gloss", "temporal", "sentiment", "causePolarity", "degree"]);
+    this.settings(w, ["number", "gender", "determiner", "specifier", "gloss", "temporal", "predication", "sentiment", "causePolarity", "degree"]);
     const address = w.address!;
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its

@@ -260,8 +260,10 @@ describe('rawSatellites', () => {
         (COMPLEMENT_TYPES as string[]).includes(key),
       );
 
-      // The temporal and the purpose are offered on every verb (P09-E12 D2); the topic is not.
-      expect(toggles).toEqual(['locative', 'temporal', 'cause', 'purpose']);
+      // The temporal, the purpose and the companion are offered on every verb (P09-E12 D2, P13); the
+      // topic is not, nor — on a verb with no object — the object complement.
+      expect(toggles).toEqual(['comitative', 'locative', 'temporal', 'cause', 'purpose']);
+      expect(offered({ verb: concept('SEE', 'verb', { transitivity: 'transitive' }) })).toContain('objectPredicative');
     });
 
     it('offers the topic only where the verb licenses it, and no complement without a verb', () => {

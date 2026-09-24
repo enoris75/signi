@@ -49,7 +49,9 @@ export type ComplementSlot =
   // The temporal and the purpose are offered on every verb (ADJUNCT_COMPLEMENT_TYPES), so no verb
   // refuses them; the topic is licensed.
   | "topic"
-  | "cause";
+  | "cause"
+  // A verb with no object has nothing to take as something (P13); the comitative goes with any verb.
+  | "objectPredicative";
 
 /** A word a command could not reach, and the word of the period that could take it. */
 export interface NoTargetArgs {

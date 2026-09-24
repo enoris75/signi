@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
-import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
+import { CAUSE_SENTIMENTS, OBJECT_PREDICATIONS, PATH_SPECIFIERS, TEMPORAL_RELATIONS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
@@ -697,6 +697,7 @@ export function PhraseBuilder({
         ...(selection.locative && { locative: PATH_SPECIFIERS }),
         ...(selection.temporal && { temporal: TEMPORAL_RELATIONS }),
         ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
+        ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),
       },
       centerOf,
       linkPorts: ringHost ? { subject: ringHost.ports } : headLinkPorts,
@@ -1025,6 +1026,7 @@ export function PhraseBuilder({
     handleSelectSpecifier: commands.handleSelectSpecifier,
     handleSelectLocativeSpecifier: commands.handleSelectLocativeSpecifier,
     handleSelectTemporalRelation: commands.handleSelectTemporalRelation,
+    handleSelectPredication: commands.handleSelectPredication,
     handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,

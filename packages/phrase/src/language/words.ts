@@ -33,11 +33,13 @@ import {
   setGlossRelation,
   setSubjectGloss,
   setPossessorRole,
+  setPredication,
   setTemporalRelation,
   setTense,
   type Gender,
 } from "../model/phraseReducers.ts";
 import {
+  defaultPredication,
   adjectiveSlots,
   COORDINABLE_NOUN_KEYS,
   isModalAdverbSlot,
@@ -198,6 +200,9 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
         w.kind === "noun" && !w.ref.slice && Boolean(c) &&
         (w.which === "temporal" || (w.which === "subject" && w.slice.subjectGloss === "temporal"))
       );
+    // What the object complement says of the object (P13), on its box once it holds a word.
+    case "predication":
+      return w.kind === "noun" && !w.ref.slice && w.which === "objectPredicative" && Boolean(c);
     // What a genitive possessor is to its noun (P13), once there is one — a pronominal one has no role.
     case "possessorRole":
       return (
@@ -259,6 +264,8 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
       return setSubjectGloss(slice, s.value === "plain" ? undefined : s.value);
     case "possessorRole":
       return setPossessorRole(slice, which, s.value === "owner" ? undefined : s.value);
+    case "predication":
+      return setPredication(slice, s.value);
     case "sentiment":
       return setSentiment(slice, s.value);
     case "causePolarity":
@@ -302,6 +309,8 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
       return sel.subjectGloss ?? "plain";
     case "possessorRole":
       return sel.possessorRoles?.[which!] ?? "owner";
+    case "predication":
+      return sel.objectPredicativePredication ?? defaultPredication(w.root.verb);
     case "sentiment":
       return sel.causeSentiment ?? "neutral";
     case "causePolarity":
@@ -338,6 +347,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
       return "plain";
     case "possessorRole":
       return "owner";
+    case "predication":
+      return defaultPredication(w.root.verb);
     case "sentiment":
       return "neutral";
     case "causePolarity":

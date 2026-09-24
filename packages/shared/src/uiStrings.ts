@@ -287,6 +287,9 @@ const CANVAS_PARTS = {
   purpose: { concept: 'PURPOSE_COMPLEMENT', en: 'purpose' },
   topic: { concept: 'TOPIC_COMPLEMENT', en: 'topic' },
   cause: { concept: 'CAUSE_COMPLEMENT', en: 'cause' },
+  // P13's two boxes: what the object is taken as or turned into, and the companion.
+  objectPredicative: { concept: 'OBJECT_COMPLEMENT', en: 'object complement' },
+  comitative: { concept: 'COMITATIVE', en: 'comitative' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
@@ -295,8 +298,8 @@ export type CanvasPart = keyof typeof CANVAS_PARTS;
 // The complements the canvas draws as a boxed ring of their own: every one but the instrumental, which
 // lives in a period container of its own and is linked to (the canvas's BOX_COMPLEMENT_TYPES).
 const BOXED_COMPLEMENT_PARTS = [
-  'predicative', 'terminus', 'manner', 'locative', 'direction', 'source', 'route', 'temporal', 'purpose',
-  'topic', 'cause',
+  'objectPredicative', 'predicative', 'terminus', 'comitative', 'manner', 'locative', 'direction', 'source',
+  'route', 'temporal', 'purpose', 'topic', 'cause',
 ] as const satisfies readonly CanvasPart[];
 
 // Which parts each of those controls can act on — the members of each family below, exported so
@@ -704,6 +707,12 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Parts',
   },
+  // What the object complement says of the object (P13, `/as`, `/into`), on its toolbar: taken as it —
+  // the essive, its USAGE ("uses the period as a condition") — or turned into it, the factitive, its
+  // RESULT ("transforms it into a command"). Nouns rather than the words, since the factitive's word is
+  // the verb's own (en into, it in, de zu …).
+  'predication.value.essive': { plan: nameOf('USAGE'), format: NAME_FORMAT, fallback: 'Usage' },
+  'predication.value.factitive': { plan: nameOf('RESULT'), format: NAME_FORMAT, fallback: 'Result' },
 
   // The standard of comparison's ring title ("bigger than **the dog**" — the dog's ring, P09-E12 D5):
   // the grammar noun STANDARD_OF_COMPARISON, bare like the possessor's. It hangs off a predicate
@@ -3144,6 +3153,13 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: "to set an infinitive phrase's agent",
   },
+  // `/as`, `/into` (P13): "to set an object complement's relationship", it "impostare la relazione di un
+  // complemento predicativo dell'oggetto".
+  'purpose.predication': {
+    plan: setterOf('RELATIONSHIP', 'OBJECT_COMPLEMENT'),
+    format: { stripPeriod: true },
+    fallback: "to set an object complement's relationship",
+  },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un
   // periodo", ja 文に条件を加える).
@@ -3542,6 +3558,8 @@ export const UI_STRINGS = defineUiStrings({
         ['topic', 'TOPIC_COMPLEMENT', 'topic'],
         ['cause', 'CAUSE_COMPLEMENT', 'cause'],
         ['instrumental', 'INSTRUMENTAL', 'instrumental'],
+        // P13: a verb with no object has nothing to take as something (the comitative goes with any).
+        ['objectPredicative', 'OBJECT_COMPLEMENT', 'object complement'],
       ] as const
     ).map(([slot, concept, en]) => [
       `diagnostic.verbAcceptsNo.${slot}`,
@@ -3556,7 +3574,7 @@ export const UI_STRINGS = defineUiStrings({
       },
     ]),
   ) as Record<
-    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental'}`,
+    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental' | 'objectPredicative'}`,
     UiStringPlanDef
   >,
   // A verb that takes no clause as its object (P09-E12 D9): `/clause` on one whose `clauseObject` is

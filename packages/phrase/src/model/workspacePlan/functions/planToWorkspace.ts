@@ -16,7 +16,7 @@ import type {
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection } from "../../interfaces.ts";
 import { conjunctAddress, possessorAddress, standardAddress } from "../../interfaces.ts";
-import { adjectiveSlots, BOX_COMPLEMENT_TYPES, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
+import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
  * What `planToWorkspace` built, and what of the plan it could not: each field no canvas control
@@ -199,6 +199,10 @@ class Builder {
       return;
     }
     const handled = new Set(["phrase", "specifiers", ...(type === "cause" ? ["negative"] : [])]);
+    // A plan says the essive and leaves the factitive unsaid; where the verb's default is the essive,
+    // an unsaid predication is a factitive the period must hold.
+    if (type === "objectPredicative" && !complement.specifiers?.some((s) => s.kind === "predication") && defaultPredication(sel.verb) === "essive")
+      sel.objectPredicativePredication = "factitive";
     this.check(`complements.${type}`, complement, handled);
     this.noun(c, sel, type as NounKey, complement.phrase, type);
     if (complement.negative && type === "cause") sel.causeNegative = true;
@@ -208,6 +212,9 @@ class Builder {
         if (s.value !== DEFAULT_TEMPORAL_RELATION) sel.temporalRelation = s.value;
       } else if (s.kind === "sentiment" && type === "cause") {
         if (s.value !== "neutral") sel.causeSentiment = s.value;
+      } else if (s.kind === "predication" && type === "objectPredicative") {
+        // Held only where it is not what the verb says by default (see defaultPredication).
+        if (s.value !== defaultPredication(sel.verb)) sel.objectPredicativePredication = s.value;
       } else this.unsupported.add(`complements.${type}.specifiers.${s.kind}`);
     }
   }

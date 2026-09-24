@@ -242,6 +242,11 @@ describe('what each console command is for', () => {
       fr: "définir l'agent d'une proposition infinitive.", de: 'das Agens einer Infinitivphrase festlegen.',
       es: 'establecer el agente de una frase de infinitivo.', ja: '不定詞句の動作主を設定する。', pt: 'definir o agente de uma frase infinitiva.',
     },
+    'purpose.predication': {
+      en: "to set an object complement's relationship.", it: "impostare la relazione di un complemento predicativo dell'oggetto.",
+      fr: "définir la relation d'un attribut du complément d'objet.", de: 'die Beziehung eines Objektsprädikativs festlegen.',
+      es: 'establecer la relación de un complemento predicativo del objeto.', ja: '目的語補語の関係を設定する。', pt: 'definir a relação de um predicativo do objeto.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

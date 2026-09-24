@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, ImperativeRegister, PickerRole, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
+import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, ImperativeRegister, ObjectPredication, PickerRole, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
 import type { TemporalRelation } from "@signi/shared";
 import type { ClauseObject, SubordinatingConjunction } from "@signi/shared";
@@ -153,7 +153,7 @@ export function subordinateOptions(
  */
 export type BoxComplementType = Exclude<
     ComplementType,
-    "instrumental" | "objectPredicative" | "comitative" | "role" | "opponent"
+    "instrumental" | "role" | "opponent"
 >;
 
 export interface SlotConfig {
@@ -406,6 +406,24 @@ export interface PhraseSelection {
     terminusAdjective?: Concept;
     terminusAdjective2?: Concept;
     terminusAdjective3?: Concept;
+    // What the object is taken as or turned into (P13, the object complement): "to have **as** a part"
+    // (the essive, INCLUDE), "to transform a period **into** a command" (the factitive, TRANSFORM). Its
+    // `objectPredicativePredication` says which; absent, the verb's own — the factitive where the verb
+    // licenses the complement, the essive where the complement is an adjunct of its object.
+    objectPredicative?: Concept;
+    objectPredicativeNumber?: "singular" | "plural";
+    objectPredicativeGender?: "masc" | "fem" | "neut";
+    objectPredicativeAdjective?: Concept;
+    objectPredicativeAdjective2?: Concept;
+    objectPredicativeAdjective3?: Concept;
+    objectPredicativePredication?: ObjectPredication;
+    // The companion ("goes **with a person**", ACCOMPANY; P13): an adjunct any act takes.
+    comitative?: Concept;
+    comitativeNumber?: "singular" | "plural";
+    comitativeGender?: "masc" | "fem" | "neut";
+    comitativeAdjective?: Concept;
+    comitativeAdjective2?: Concept;
+    comitativeAdjective3?: Concept;
     // Adverbial of manner ("runs *at the speed of light*", "cuts *with care*"). A full noun
     // phrase, like the motion complements. Its preposition is not a field here: it follows the
     // head noun's semantic manner relation (SPEED→"at", CARE→"with"), resolved in the engine.
@@ -473,6 +491,8 @@ export interface PhraseSelection {
     causeConjuncts?: PhraseSelection[];
     terminusConjuncts?: PhraseSelection[];
     mannerConjuncts?: PhraseSelection[];
+    objectPredicativeConjuncts?: PhraseSelection[];
+    comitativeConjuncts?: PhraseSelection[];
     // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
     // noun phrases — see NOUN_COORD_CONJUNCTIONS.
     subjectConjunction?: CoordConjunction;
@@ -488,6 +508,8 @@ export interface PhraseSelection {
     causeConjunction?: CoordConjunction;
     terminusConjunction?: CoordConjunction;
     mannerConjunction?: CoordConjunction;
+    objectPredicativeConjunction?: CoordConjunction;
+    comitativeConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
@@ -501,6 +523,8 @@ export interface PhraseSelection {
     causePossessor?: PhraseSelection;
     terminusPossessor?: PhraseSelection;
     mannerPossessor?: PhraseSelection;
+    objectPredicativePossessor?: PhraseSelection;
+    comitativePossessor?: PhraseSelection;
     // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
     // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
     // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
@@ -519,6 +543,8 @@ export interface PhraseSelection {
     causePossessorRef?: NounAddress;
     terminusPossessorRef?: NounAddress;
     mannerPossessorRef?: NounAddress;
+    objectPredicativePossessorRef?: NounAddress;
+    comitativePossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun
@@ -619,7 +645,7 @@ export function slotCategories(
   // The direct object takes a pronoun on the same footing as the subject ("I see you"), and
   // the causal, purpose and topic complements take one behind their adposition ("because of him",
   // "for her", "about him" — the engine's TONIC_COMPLEMENTS).
-  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic")
+  if (slotKey === "directObject" || slotKey === "cause" || slotKey === "purpose" || slotKey === "topic" || slotKey === "comitative")
     return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
     return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };

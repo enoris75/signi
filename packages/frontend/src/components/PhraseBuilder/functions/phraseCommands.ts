@@ -5,6 +5,7 @@ import type {
   ImperativeRegister,
   PathSpecifier,
   TemporalRelation,
+  ObjectPredication,
 } from "@signi/shared";
 import type {
   GenderSlot,
@@ -32,6 +33,7 @@ import {
   setSentiment,
   setSpecifier,
   setTemporalRelation,
+  setPredication,
   toggleGender,
   toggleCauseNegative,
   toggleNegative,
@@ -99,6 +101,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
     handleSelectTemporalRelation: (relation: TemporalRelation) =>
       onPhraseUpdate((prev) => setTemporalRelation(prev, relation)),
+    // What the object complement says of the object (P13).
+    handleSelectPredication: (predication: ObjectPredication) =>
+      onPhraseUpdate((prev) => setPredication(prev, predication)),
     handleSelectSentiment: (sentiment: CauseSentiment) => onPhraseUpdate((prev) => setSentiment(prev, sentiment)),
   };
 }
