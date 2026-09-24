@@ -15,8 +15,20 @@ import { wordSeg } from './wordSeg.js';
  * Where the copula predicate stands, which picks its ending. `dict` and `stem` are the forms a modal
  * governs (see `JaForm`), which carries the tense and polarity itself. `citation` closes an infinitive
  * citation in the plain written style (可能である, 疲れている), as a verb's citation is its dictionary form.
+ * `closing` stands before a particle that closes the clause, the indirect question's か (A278): the
+ * prenominal form in every cell but a na- or の-adjective's present affirmative, which takes the terminal
+ * である where a noun would follow its attributive な (幸せであるかどうか, 幸せだったかどうか).
+ * `reach` stands before まで and 前に, which name a state reached (A323): the affirmative is the change of
+ * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる); the
+ * negative and a state (疲れている) keep the prenominal form.
  */
-export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | JaForm;
+export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | 'closing' | 'reach' | JaForm;
+// The forms with endings of their own; the others borrow a row (see `row`).
+type CopulaRow = Exclude<CopulaForm, 'closing' | 'reach'>;
+const row = (form: CopulaForm): CopulaRow => (form === 'closing' || form === 'reach' ? 'prenominal' : form);
+// The change of state `reach` says in its affirmative cells, [present, past], after the i-adjective's
+// く or the na-adjective's and the noun's に.
+const NARU = ['なる', 'なった'];
 
 // The endings by class and form, as [affirmative present, affirmative past, negative present, negative
 // past]. A たら form ignores tense, so it repeats its two cells; a governed form ignores both, so it
@@ -26,7 +38,7 @@ export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | JaForm;
 // ない必要があります). It is the plain ない form, and a `stem` governor reaches it through the same
 // 〜ないでい bridge `naiSegs` builds for a verb (幸せでないでいたいです) — marginal beside a verb's
 // 行かないでいたい, but compositional and the only shape that keeps the desire on the outside.
-const I_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
+const I_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   polite: ['いです', 'かったです', 'くないです', 'くなかったです'],
   prenominal: ['い', 'かった', 'くない', 'くなかった'],
   tara: ['かったら', 'かったら', 'くなかったら', 'くなかったら'],
@@ -34,7 +46,7 @@ const I_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   dict: ['い', 'い', 'くない', 'くない'],
   stem: ['くあり', 'くあり', 'くないでい', 'くないでい'],
 };
-const COPULA_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
+const COPULA_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   polite: ['です', 'でした', 'ではありません', 'ではありませんでした'],
   prenominal: ['である', 'だった', 'ではない', 'ではなかった'],
   tara: ['だったら', 'だったら', 'ではなかったら', 'ではなかったら'],
@@ -44,7 +56,7 @@ const COPULA_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
 };
 // An intensifier's 〜すぎる is an ichidan verb, so the predicate inflects as one, on the stem
 // jaAdjClass's `ru` class leaves (大きすぎ): 大きすぎます / 大きすぎました / 大きすぎません (C33).
-const RU_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
+const RU_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   polite: ['ます', 'ました', 'ません', 'ませんでした'],
   prenominal: ['る', 'た', 'ない', 'なかった'],
   tara: ['たら', 'たら', 'なかったら', 'なかったら'],
@@ -52,7 +64,7 @@ const RU_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   dict: ['る', 'る', 'ない', 'ない'],
   stem: ['', '', 'ないでい', 'ないでい'],
 };
-const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
+const STATE_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   polite: ['います', 'いました', 'いません', 'いませんでした'],
   prenominal: ['いる', 'いた', 'いない', 'いなかった'],
   tara: ['いたら', 'いたら', 'いなかったら', 'いなかったら'],
@@ -64,7 +76,7 @@ const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
 // The negative a "neither … nor" closes on, after the last conjunct's も, as [present, past]: the
 // existential ない (大きくも幸せでもない), or いない after a state's 〜ても (疲れてもいない). A governed
 // form takes the plain ない and its でい bridge, as the single-predicate endings above do.
-const NEITHER: Record<CopulaForm, [string, string]> = {
+const NEITHER: Record<CopulaRow, [string, string]> = {
   polite: ['ありません', 'ありませんでした'],
   prenominal: ['ない', 'なかった'],
   tara: ['なかったら', 'なかったら'],
@@ -72,7 +84,7 @@ const NEITHER: Record<CopulaForm, [string, string]> = {
   dict: ['ない', 'ない'],
   stem: ['ないでい', 'ないでい'],
 };
-const STATE_NEITHER: Record<CopulaForm, [string, string]> = {
+const STATE_NEITHER: Record<CopulaRow, [string, string]> = {
   polite: ['いません', 'いませんでした'],
   prenominal: ['いない', 'いなかった'],
   tara: ['いなかったら', 'いなかったら'],
@@ -81,7 +93,7 @@ const STATE_NEITHER: Record<CopulaForm, [string, string]> = {
   stem: ['いないでい', 'いないでい'],
 };
 // A verb closes the "neither … nor" on する, not on the existential ある: 大きすぎも小さすぎもしません.
-const RU_NEITHER: Record<CopulaForm, [string, string]> = {
+const RU_NEITHER: Record<CopulaRow, [string, string]> = {
   polite: ['しません', 'しませんでした'],
   prenominal: ['しない', 'しなかった'],
   tara: ['しなかったら', 'しなかったら'],
@@ -126,7 +138,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
         ? jaAdjClass(lastForms.base, lastForms.reading, false, lastForms.verbal).kind
         : 'na';
       const table = lastKind === 'ta' ? STATE_NEITHER : lastKind === 'ru' ? RU_NEITHER : NEITHER;
-      const tail = table[form][tense === 'past' ? 1 : 0];
+      const tail = table[row(form)][tense === 'past' ? 1 : 0];
       return [...conjuncts.flatMap((np) => predicateLinkSegs(np, 'mo')), { t: tail }];
     }
     const link = conjunction === 'or' ? 'ka' : 'te';
@@ -141,8 +153,10 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const cell = (negative ? 2 : 0) + (tense === 'past' ? 1 : 0);
   // A `no` noun predicate closes its circumfix in the copula: でもありません, not ではありません, and under a
   // modal でもある — or, where the modal denies it, でもない (A03).
+  const reached = form === 'reach' && cell < 2 ? NARU[cell] : undefined;
   if (f['role'] !== 'adjective') {
-    const ending = COPULA_ENDINGS[form][cell];
+    if (reached) return [...elSegs(pred.phrase), { t: `に${reached}` }];
+    const ending = COPULA_ENDINGS[row(form)][cell];
     return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^では|^で(?=[あな])/, 'でも') : ending }];
   }
   // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so it
@@ -161,12 +175,15 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // on わけ and the negated copula, which carries the tense — 犬ほど大きくないわけではありません(でした),
   // 大きくないわけではない猫 — never the stacked litotes 大きくなくないです.
   if (negative && isLoweredDegree(head.head)) {
-    return [...degSegs, wordSeg(stem, stemReading), { t: `${I_ENDINGS.dict[0]}わけ${COPULA_ENDINGS[form][cell]}` }];
+    return [...degSegs, wordSeg(stem, stemReading), { t: `${I_ENDINGS.dict[0]}わけ${COPULA_ENDINGS[row(form)][cell]}` }];
   }
-  const ending = kind === 'i' ? I_ENDINGS[form][cell]
-    : kind === 'ta' ? STATE_ENDINGS[form][cell]
-    : kind === 'ru' ? RU_ENDINGS[form][cell]
+  const at = row(form);
+  const ending = reached && kind === 'i' ? `く${reached}`
+    : reached && kind === 'na' ? `${predicative}に${reached}`
+    : kind === 'i' ? I_ENDINGS[at][cell]
+    : kind === 'ta' ? STATE_ENDINGS[at][cell]
+    : kind === 'ru' ? RU_ENDINGS[at][cell]
     : form === 'prenominal' && cell === 0 && attributive ? attributive
-    : `${predicative}${COPULA_ENDINGS[form][cell]}`;
+    : `${predicative}${COPULA_ENDINGS[at][cell]}`;
   return [...degSegs, wordSeg(stem, stemReading), { t: ending }];
 }

@@ -67,7 +67,7 @@ export const motionVerbs: ConceptSeed[] = [
         masu_present_reading: 'いきます',
         // 尊敬語 いらっしゃる, 「行く」「来る」「いる」の尊敬語; 謙譲語 参る, 「行く」「来る」の謙譲語
         // (大辞林, デジタル大辞泉). Someone else's relative いらっしゃいます; one's own, asked, 参ります (P11-E1).
-        honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない',
+        honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない', honorific_stem: 'いらっしゃり',
         humble: '参る', humble_masu_present: '参ります', humble_te: '参って', humble_nai: '参らない',
         humble_reading: 'まいる', humble_masu_present_reading: 'まいります', humble_te_reading: 'まいって', humble_nai_reading: 'まいらない',
         // An instruction labels with a verbal noun (see ADD's 追加), and 行く has none of its own:

@@ -14,6 +14,16 @@ describe('verbFormSeg', () => {
     expect(verbFormSeg(concept(KURU), 'stem')).toEqual({ t: '来', r: 'き' });
   });
 
+  // A333: a stored stem wins over the ます stem (いらっしゃいます, but いらっしゃりたい); the dictionary form
+  // ignores it.
+  test('a stored stem wins over the ます stem', () => {
+    const irassharu = concept({ base: 'いらっしゃる', masu_present: 'いらっしゃいます', stem: 'いらっしゃり' });
+    expect(verbFormSeg(irassharu, 'stem')).toEqual({ t: 'いらっしゃり' });
+    expect(verbFormSeg(irassharu, 'dict')).toEqual({ t: 'いらっしゃる' });
+    expect(verbFormSeg(concept({ base: '為さる', reading: 'なさる', masu_present: '為さいます', stem: '為さり', stem_reading: 'なさり' }), 'stem'))
+      .toEqual({ t: '為さり', r: 'なさり' });
+  });
+
   test('a kana verb with no reading takes no ruby in either form', () => {
     expect(verbFormSeg(concept(AGERU), 'dict')).toEqual({ t: 'あげる' });
     expect(verbFormSeg(concept(AGERU), 'stem')).toEqual({ t: 'あげ' });

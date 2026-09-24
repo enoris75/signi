@@ -79,6 +79,29 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'tara'))).toBe('伝説ではなかったら');
       expect(text(copulaSegs(pred({ role: 'adjective', base: '疲れた', reading: 'つかれた' }), 'present', false, 'tara'))).toBe('疲れていたら');
     });
+
+    // A278: before the indirect question's か a na- or の-adjective takes the terminal である, not its
+    // attributive particle; every other cell is the prenominal form's.
+    test('a closing copula is prenominal but for the na-adjective\'s である', () => {
+      expect(copulaSegs(pred(SHIAWASE), 'present', false, 'closing')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'である' }]);
+      expect(text(copulaSegs(pred(CHAIRO), 'present', false, 'closing'))).toBe('茶色である');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'closing'))).toBe('幸せだった');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'closing'))).toBe('幸せではない');
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'closing'))).toBe('大きい');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'closing'))).toBe('伝説である');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'closing'))).toBe('疲れている');
+    });
+
+    // A323: before まで and 前に the affirmative is the change of state 〜になる.
+    test('a reach copula is 〜になる in the affirmative, prenominal otherwise', () => {
+      expect(copulaSegs(pred(SHIAWASE), 'present', false, 'reach')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'になる' }]);
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'reach'))).toBe('大きくなる');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'reach'))).toBe('伝説になる');
+      expect(text(copulaSegs(pred(CHAIRO), 'present', false, 'reach'))).toBe('茶色になる');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'reach'))).toBe('幸せになった');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'reach'))).toBe('幸せではない');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'reach'))).toBe('疲れている');
+    });
   });
 
   // A128: under a modal the copula takes the form the modal governs, with no tense of its own. A03:

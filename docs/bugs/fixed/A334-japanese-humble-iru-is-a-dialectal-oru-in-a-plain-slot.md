@@ -52,3 +52,18 @@ Pinned by `known bugs: the humble いる is a dialectal おる in a plain slot (
 
 Found on 2026-09-24 by the P11-E1 coverage audit (rendering the humble register through the たら and
 the modals).
+
+## Resolved
+
+2026-09-24, at option (a), scoped to いる. `JA_IRU`'s humble column in
+[ja.consts.ts](../../../packages/engine/src/languages/ja/ja.consts.ts) keeps いる's own plain forms
+(`humble: 'いる'`, `humble_te: 'いて'`, `humble_nai: 'いない'`) and only its polite one is おる's
+(`humble_masu_present: 'おります'`). So `taraSeg`, `plainVerbSeg` and `verbFormSeg`'s `dict` form say
+いたら, いなかったら, いる必要, いない必要 and いることができました, and the polite paradigm keeps
+おります, おりました, おりませんでした and, on the ます stem, おりたいです. No other humble verb
+changes (参ったら, 参る必要).
+
+Guarded by the two formerly-`test.fails` in `known bugs: the humble いる is a dialectal おる in a plain
+slot (A334)` in [honorific-verbs.test.ts](../../../packages/engine/test/honorific-verbs.test.ts), now
+plain tests, plus a new one there (おりました, おりたいです, and the 1st person's おります and
+いる必要).

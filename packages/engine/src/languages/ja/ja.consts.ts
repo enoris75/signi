@@ -258,15 +258,16 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * P09-E27: まで closes an *until* clause on the plain non-past (猫が食べるまで), and のに a *though*
  * clause on the plain form of its own tense (猫が食べるのに, 猫が食べたのに). から says *since* on the
  * **て-form** (猫が食べてから), which `te` asks for: the clause is built on the plain past and its last
- * word turned from 〜た into 〜て (see `teFromPlainPast`).
+ * word turned from 〜た into 〜て (see `teFromPlainPast`). `reach` marks まで and 前に, which name a
+ * state reached: a copula predicate before them is the change of state 〜になる (幸せになるまで, A323).
  */
-export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true }> = {
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true; reach?: true }> = {
   when: { word: '時に' },
   while: { word: '間に', tense: 'present', progressive: true },
   because: { word: 'ので' },
   after: { word: '後で', tense: 'past', plain: true },
-  before: { word: '前に', tense: 'present', plain: true },
-  until: { word: 'まで', tense: 'present', plain: true },
+  before: { word: '前に', tense: 'present', plain: true, reach: true },
+  until: { word: 'まで', tense: 'present', plain: true, reach: true },
   since: { word: 'から', tense: 'past', plain: true, te: true },
   though: { word: 'のに' },
 };
@@ -348,13 +349,16 @@ export const JA_SOU: ResolvedComplement = {
 // The existential いる is the engine's word, not a lexeme — BE's own is the copula です — so its two
 // registers of respect live here beside it (P11-E1, see `jaRespectVerb`): 尊敬語 いらっしゃる,
 // 「いる」の尊敬語, and 謙譲語 おる, 「いる」の謙譲語 (大辞林, デジタル大辞泉) — あなたのお母さんは家に
-// いらっしゃいます, 父は家におります.
+// いらっしゃいます, 父は家におります. The humble おる is standard only in its polite forms (おります,
+// おりました, おりたい on the ます stem); its plain おる, おった, おらない are Kansai's everyday いる. So the
+// humble column keeps いる's own plain forms, and a plain slot says いる while the polite verb carries
+// the humility: もし父が家にいたら, 父は家にいる必要があります (A334).
 export const JA_IRU: ConceptForms = {
   conceptId: 'IRU',
   forms: {
     base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない',
-    honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない',
-    humble: 'おる', humble_masu_present: 'おります', humble_te: 'おって', humble_nai: 'おらない',
+    honorific: 'いらっしゃる', honorific_masu_present: 'いらっしゃいます', honorific_te: 'いらっしゃって', honorific_nai: 'いらっしゃらない', honorific_stem: 'いらっしゃり',
+    humble: 'いる', humble_masu_present: 'おります', humble_te: 'いて', humble_nai: 'いない',
   },
 };
 export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };

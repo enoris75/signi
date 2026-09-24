@@ -21,7 +21,7 @@ import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaRespectRegister } from './jaRespectRegister.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
-import { predicateSegs } from './predicateSegs.js';
+import { predicateSegs, type JaPlain } from './predicateSegs.js';
 import { questionAdverb } from './questionAdverb.js';
 import { questionNoun } from './questionNoun.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
@@ -33,7 +33,7 @@ import { wordSeg } from './wordSeg.js';
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
-export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string, plain: boolean | 'quote' = false): RubySegment[] {
+export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string, plain: JaPlain = false): RubySegment[] {
   // A modal governing an infinitive is the modal chain over it, suffixed to the verb: 行動したい, never
   // 行動することをたい (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);
@@ -90,7 +90,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   if (phrase.contentSubject) {
     // Nominalized, so the clause inside it is plain (行動する, not 行動します) — and a generic subject
     // is unsaid there, as it is in every citation: 行動することが正しい, not 人は行動することが正しい.
-    segs.push(...buildClauseSegments(phrase.contentSubject, 'が', true), { t: 'ことが' });
+    segs.push(...buildClauseSegments(phrase.contentSubject, 'が', 'content'), { t: 'ことが' });
   } else if (asked?.role === 'subject' && askedNoun) {
     // A subject wh-question is never the topic: a question word is new information, which は cannot
     // mark, so it takes が — 誰が食べ物を食べますか (P09-E6).
@@ -121,7 +121,8 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
     const adverbial = shapeAdverbialClause(phrase.adverbialClause);
-    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', true);
+    // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323).
+    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : true);
     // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
     // turns into.
     segs.push(...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word });
@@ -156,10 +157,12 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // An object clause stands where the object would, right ahead of the verb: plain, its subject
   // marked が, and closed by the verb's と or ことを — 猫が走ると言います, 猫が走ることを知っています (P09-E4).
   // A quoted clause closes on the terminal form, which only a copula tells apart (幸せであると). An
-  // indirect question closes on か / かどうか instead, on the plain form (P09-E17, see `contentClauseLink`).
+  // indirect question closes on か / かどうか instead, on the plain form (P09-E17, see `contentClauseLink`),
+  // which is terminal too before the particle (幸せであるかどうか, A278).
   if (phrase.contentObject) {
     const link = contentClauseLink(phrase);
-    segs.push(...buildClauseSegments(phrase.contentObject, 'が', link === 'と' ? 'quote' : true), { t: link });
+    const closing: JaPlain = link === 'と' ? 'quote' : link === 'か' || link === 'かどうか' ? 'question' : 'content';
+    segs.push(...buildClauseSegments(phrase.contentObject, 'が', closing), { t: link });
   }
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   // Japanese has no transitive verb "to cause" that governs a clause: the causative is the ようにする
