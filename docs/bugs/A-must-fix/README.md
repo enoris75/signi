@@ -31,6 +31,12 @@ proposed target is a refusal by name, as the role question already is.
 deux livres*), because `objectArtFor` drops every article beside a numeral.
 [A290](A290-japanese-comitative-relative-drops-its-company.md), a Japanese comitative relative dropping its company (*猫が走る犬* for *猫が一緒に走る犬*).
 
+**Three more**, filed the same day from the P09-E20..E24 / P11-E1..E5 batch, make sixteen.
+[A291](A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md), German, Spanish and Portuguese dropping the numeral inside any complement (*läuft in
+den Häusern*). [A292](A292-french-writes-de-before-a-bare-numeral-in-a-complement.md), French *de* before a bare numeral in a complement (*avec de trois
+chiens*). [A293](A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md), English *his* for a possessor linked to a female subject (*your mother sees
+his book*).
+
 The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
 fix did. The history below is kept as it was written, in the present tense of each filing.

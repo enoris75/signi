@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds A278–A290 and Part B is empty).** If
+this writing Part A holds A278–A293 and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -77,6 +77,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A288 | [A288-relative-clause-over-a-role-gap-renders-nonsense.md](A-must-fix/A288-relative-clause-over-a-role-gap-renders-nonsense.md) | English, Italian, French, German, Spanish, Portuguese (translator) | a relative clause over a role gap renders nonsense (`come quale`, `als  der Mann`); refuse it by name |
 | A289 | [A289-french-definite-object-with-a-numeral-drops-its-article.md](A-must-fix/A289-french-definite-object-with-a-numeral-drops-its-article.md) | French | a definite object with a numeral drops its article: `le chat lit deux livres` for *les deux livres* |
 | A290 | [A290-japanese-comitative-relative-drops-its-company.md](A-must-fix/A290-japanese-comitative-relative-drops-its-company.md) | Japanese | a comitative relative drops its company: 猫が走る犬 for 猫が一緒に走る犬 |
+| A291 | [A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md](A-must-fix/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md) | German, Spanish, Portuguese | the numeral is dropped inside a complement: `läuft in den Häusern`, `corre en las casas` for *in den drei Häusern*, *en las tres casas* |
+| A292 | [A292-french-writes-de-before-a-bare-numeral-in-a-complement.md](A-must-fix/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md) | French | *de* before a bare numeral in a complement: `avec de trois chiens` for *avec trois chiens* |
+| A293 | [A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md](A-must-fix/A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md) | English | a possessor linked to a female subject says *his*: `your mother sees his book` for *her book*; English nouns record no natural sex |
 
 **Thirteen open**, **A278–A290**, all filed on 2026-09-24 by an audit of the engine test coverage
 of P09-E13 to E19 (the role complement, the possessor, marked-relation and passive questions, the
@@ -90,6 +93,12 @@ content clause (A279), *estar* before a superlative (A284), a Japanese negated s
 German mixed set after *von* (A286), an Italian role noun's article (A287), a French definite
 numeral object (A289) and a Japanese comitative relative (A290). A282 and A288 each leave a
 decision for the fixer.
+
+**A291–A293** were filed the same day from the P09-E20..E24 / P11-E1..E5 batch's probes: two older
+numeral defects inside a complement — German, Spanish and Portuguese drop the numeral (A291), French
+writes *de* before a bare one (A292), both beside A289's direct object — and English *his* for a
+possessor linked by P11-E2 to a female subject (A293), whose fix wants a concept-level sex. So
+**sixteen are open**.
 
 The fifteen filed before them on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
 same day by five lanes and are listed under **Fixed** below. The content-clause tense fix now covers
