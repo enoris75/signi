@@ -1095,11 +1095,11 @@ describe('known bugs: a Japanese passive terminus question doubles に (A280)', 
   const given = (questionAnimate?: boolean) =>
     ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', questionAnimate);
 
-  test.fails('who is the book given to by the woman: 女によって誰に', () => {
+  test('who is the book given to by the woman: 女によって誰に', () => {
     expect(sayAll(given(true)).ja).toBe('本は女によって誰にあげられますか？');
   });
 
-  test.fails('what is the book given to by the woman: 女によって何に', () => {
+  test('what is the book given to by the woman: 女によって何に', () => {
     expect(sayAll(given()).ja).toBe('本は女によって何にあげられますか？');
   });
 
@@ -1115,6 +1115,13 @@ describe('known bugs: a Japanese passive terminus question doubles に (A280)', 
     expect(say(clause(np('WOMAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'ja'))
       .toBe('本は女によって男にあげられます。');
     expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK') }), 'terminus', true), 'ja')).toBe('本は誰にあげられますか？');
+  });
+
+  test('the past keeps によって, and an asked agent beside a stated recipient takes it too', () => {
+    expect(say(ask(clause(np('WOMAN'), 'GIVE', { verbPhrase: { ...passive, tense: 'past' }, directObject: np('BOOK') }), 'terminus', true), 'ja'))
+      .toBe('本は女によって誰にあげられましたか？');
+    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('MAN') } } }), 'agent', true), 'ja'))
+      .toBe('本は誰によって男にあげられますか？');
   });
 });
 
