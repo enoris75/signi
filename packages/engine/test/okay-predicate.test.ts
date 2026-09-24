@@ -117,7 +117,7 @@ describe('okay, a predicate with a lexical copula (P09-E31)', () => {
   test('the subjunctive a conjunction governs takes the copula\'s irregular stem', () => {
     // BE_FARING is *stare* / *aller*, whose present subjunctive the stored present cannot derive
     // ("sti", "vonte"): it borrows STARE's and GO's (found landing P09-E27 beside E31).
-    const before = (subject = np('CAT')): PhrasePlan => ({ ...clause(np('DOG'), 'RUN'), adverbialClause: { conjunction: 'before', clause: okay(subject) } });
+    const before = (subject = np('CAT')): PhrasePlan => ({ ...clause(np('DOG'), 'RUN'), adverbialClause: { conjunction: 'before', clause: { subject, verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('OKAY') } } } } });
     expect(sayAll(before())).toMatchObject({
       it: 'il cane corre prima che il gatto stia bene.', fr: 'le chien court avant que le chat aille bien.',
       es: 'el perro corre antes de que el gato esté bien.', pt: 'o cão corre antes que o gato esteja bem.',
