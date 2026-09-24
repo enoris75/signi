@@ -101,3 +101,46 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 WAIT in German and Japanese (the `until` relation inside a verb's gloss: *bis zu einer Zeit bleiben*,
 時間まで残る) and DIE in Spanish and Portuguese, after the defect is fixed (*ya no vivir*, *já não
 viver*).
+
+## Done
+
+Shipped 2026-09-24. **Five words seeded**: STOP_ONESELF (after STOP_DOING), DIE (after LIVE_ALIVE) and
+WAIT (after STAY) in [intransitive.ts](../../../packages/backend/src/concepts/verbs/intransitive.ts),
+STOP (after CHANGE) and CONTINUE (after DO) in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts), each with its
+[NONFINITE](../../../packages/backend/src/concepts/verbs/nonfinite.ts) entry and a row in
+verb.test.ts's Italian table. Synonyms: STOP `'halt'`, STOP_ONESELF `'come to a halt'`, CONTINUE
+`'carry on'` (CONTINUE_DOING keeps `'go on'`, STOP_DOING `'cease'`). **All five glosses** ship:
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| STOP | to cause an object no longer to move | indurre un oggetto a non muoversi più | induire un objet à ne plus se déplacer | einen Gegenstand veranlassen, sich nicht mehr zu bewegen | inducir un objeto a ya no moverse | 物体がもう移動しないようにする | induzir um objeto a já não se mover |
+| STOP_ONESELF | no longer to move | non muoversi più | ne plus se déplacer | sich nicht mehr bewegen | ya no moverse | もう移動しない | já não se mover |
+| WAIT | to stay until a time | restare fino a un tempo | rester jusqu'à un temps | bis zu einer Zeit bleiben | quedarse hasta un tiempo | 時間まで残る | ficar até um tempo |
+| DIE | no longer to live | non vivere più | ne plus vivre | nicht mehr leben | ya no vivir | もう生きない | já não viver |
+| CONTINUE | still to do an action | fare ancora un'azione | faire encore une action | noch eine Handlung tun | hacer todavía una acción | 動作をまだする | fazer ainda uma ação |
+
+Pinned in [posture-and-aspect-verbs.test.ts](../../../packages/engine/test/posture-and-aspect-verbs.test.ts);
+WAIT's German and Japanese and DIE's Spanish and Portuguese are e2e rows.
+
+### The NO_LONGER defect (reading 1), fixed
+
+Spanish *ya no* and Portuguese *já não* are the negator with a word in front. A finite clause fronts
+them in place of its own *no* / *não*; the clauses that write the negator themselves — an infinitive,
+a command, the group a modal governs — wrote it and then trailed the adverb, saying it twice (*no
+correr ya no*, *no corras ya no*, *puede no correr ya no*). NO_LONGER's es and pt lexemes now name
+their leading word (`negator_lead: 'ya'` / `'já'`, read by
+[negatorLead.ts](../../../packages/engine/src/functions/negatorLead.ts)), which stands in front of the
+negator instead: *ya no correr*, *já não se mover*, *ya no corras*, *puede ya no correr*, *para ya no
+correr*. NEVER, a word of its own, still trails (*no correr nunca*). Unit tests in
+negatorLead.test.ts and the lane file. It was not filed as a bug; this note is its record.
+
+### What landed differently from the plan
+
+1. **STOP_ONESELF's German is *stehen bleiben***, the everyday intransitive the file preferred, with
+   *stehen* as a particle written apart (B40): *bleibt stehen*, *stehen zu bleiben*, *ist stehen
+   geblieben*.
+2. **WAIT is transitive**, the awaited thing its optional object, as FOLLOW's is: English *for* and
+   German *auf* + accusative (`object_prep`), *wartet auf ihn*.
+3. **Spanish morir's subjunctive joined `ES_SUBJ_OVERRIDE`** (*muramos*, *muráis*), since the -ir rule
+   kept the stressed *ue*.

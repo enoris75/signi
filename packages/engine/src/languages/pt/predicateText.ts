@@ -3,6 +3,7 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNou
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
 import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
+import { negatorLead } from '../../functions/negatorLead.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
@@ -174,7 +175,12 @@ export function predicateText(
   // no modal the main verb IS the finite one, and `verbNegative` already carries it.
   // A negative adverb on the main verb denies the group the modal governs, not the modal: "quer não
   // comer nunca" — the cat wants to never eat — not "nunca quer comer" (A236).
-  const governedNao = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0 ? 'não' : '';
+  // An adverb that is its own "não" with a word in front ("já não") leads the negator it would
+  // otherwise repeat, and is not said after the verb: "pode já não correr", "já não correr", "já não
+  // corra" (`negatorLead`, localization B84).
+  const lead = negatorLead(modifier);
+  const governedNao = (governedNegative === true || governedHasNegativeAdverb(verbPhrase)) && modals.length > 0
+    ? [lead, 'não'].filter(Boolean).join(' ') : '';
   const conjugated = modals.length > 0
     ? [
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
@@ -264,7 +270,7 @@ export function predicateText(
   const outscopesNao = negAdverb?.slot === 'pre-negator';
   // Its negative word where it has one: ALREADY's "já" is "ainda não" (P09-E28).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? (modifier?.forms['negative'] ? negAdverb.text : modifierText) : '';
-  const postVerb = mainIsFronted || splitFrequency || outscopesNao ? '' : modifierText;
+  const postVerb = mainIsFronted || splitFrequency || outscopesNao || (!!lead && governedNao !== '') ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every
@@ -286,12 +292,13 @@ export function predicateText(
     const impForm = register === 'instruction'
       ? (copulaVerb.forms['base'] ?? conjugated)
       : (imperativeForm('pt', nonReflexiveVerb(copulaVerb), impPN, impNeg) ?? conjugated);
-    const impVerb = reflexive
+    const negated = reflexive
       ? (impNeg ? `não ${reflexive} ${impForm}` : `${reflexive === 'nos' ? impForm.replace(/s$/, '') : impForm}-${reflexive}`)
       : !impNeg && thirdPersonClitic
         ? ptEnclitic(impForm, thirdPersonClitic)
         : ptCliticize(objectClitic, impNeg ? ptNegateInfinitive(impForm) : impForm);
-    return [impVerb, modifierText, directObjectText, complementsText]
+    const impVerb = impNeg && lead ? `${lead} ${negated}` : negated;
+    return [impVerb, lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -303,10 +310,11 @@ export function predicateText(
     // A passive citation is the infinitive of "ser" plus the particípio ("ser comida").
     const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative;
-    const infVerb = !infNeg && thirdPersonClitic
+    const negated = !infNeg && thirdPersonClitic
       ? ptEnclitic(inf, thirdPersonClitic)
       : ptCliticize(objectClitic, infNeg ? ptNegateInfinitive(inf) : inf);
-    return [infVerb, modifierText, directObjectText, complementsText]
+    const infVerb = infNeg && lead ? `${lead} ${negated}` : negated;
+    return [infVerb, infNeg && lead ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }

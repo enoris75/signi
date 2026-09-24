@@ -2362,6 +2362,37 @@ test.describe('word definition tooltip', () => {
     });
   }
 
+  // B83, B84 and B86: the E24 body, ending and mind verbs. LEAD is a causative with its goal inside
+  // the caused clause; WAIT carries C29's `until` inside a verb's gloss; DIE says NO_LONGER's Spanish
+  // and Portuguese negator once, which B84's fix made so; CONSIDER is THINK's lexical topic
+  // preposition in a verb's gloss.
+  for (const [ticket, id, query, en, language, other] of [
+    ['B83', 'LEAD', 'lead', 'to cause a person to go to a place', 'de', 'eine Person veranlassen, zu einem Ort zu gehen'],
+    ['B83', 'LEAD', 'lead', 'to cause a person to go to a place', 'ja', '人が場所へ行くようにする'],
+    ['B84', 'WAIT', 'wait', 'to stay until a time', 'de', 'bis zu einer Zeit bleiben'],
+    ['B84', 'WAIT', 'wait', 'to stay until a time', 'ja', '時間まで残る'],
+    ['B84', 'DIE', 'die', 'no longer to live', 'es', 'ya no vivir'],
+    ['B84', 'DIE', 'die', 'no longer to live', 'pt', 'já não viver'],
+    ['B86', 'CONSIDER', 'consider', 'to think about a thing', 'de', 'an ein Ding denken'],
+    ['B86', 'CONSIDER', 'consider', 'to think about a thing', 'it', 'pensare a una cosa'],
+  ] as const) {
+    test(`a verb definition renders (localization ${ticket}: ${id}, ${language})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+
   // B62's two plays. German spielen and French jouer say both senses, so in those languages the
   // picker shows one word twice and only the gloss tells the game from the music.
   test('one verb, two senses, told apart by the gloss alone (localization B62: PLAY_GAME, PLAY_INSTRUMENT)', async ({

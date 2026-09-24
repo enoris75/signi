@@ -41,7 +41,7 @@ export function verbGroupInfinitiveFr(
     const etre = verbForms['aux'] === 'be';
     const part = verbForms['participle'] ?? inf;
     return etre
-      ? frCliticize(clitic, reflexiveFinite(verbForms, subjectForms, `être ${pre(agreeParticipleFr(part, subjectForms))}`))
+      ? frCliticize(clitic, reflexiveFinite(verbForms, subjectForms, `être ${pre(verbForms['reflexive_indirect'] === '1' ? (precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part) : agreeParticipleFr(part, subjectForms))}`))
       : frCliticize(clitic, `avoir ${pre(precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part)}`);
   }
   return group;

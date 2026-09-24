@@ -17,4 +17,11 @@ describe('frEnclitic', () => {
   test('a plain verb with no pronoun is unchanged', () => {
     expect(frEnclitic('cours', '', false, '2sg')).toBe('cours');
   });
+
+  // localization B86: a pronominal verb's direct object (se rappeler) comes before its own pronoun.
+  test('a third-person direct object precedes the reflexive pronoun', () => {
+    expect(frEnclitic('te rappelle', 'le', true, '2sg')).toBe('rappelle-le-toi');
+    expect(frEnclitic('vous rappelez', 'la', true, '2pl')).toBe('rappelez-la-vous');
+    expect(frEnclitic('nous rappelons', 'les', true, '1pl')).toBe('rappelons-les-nous');
+  });
 });
