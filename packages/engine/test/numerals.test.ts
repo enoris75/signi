@@ -131,29 +131,38 @@ describe('known bugs: a French definite object with a numeral drops its article 
   const reads = (extra: Partial<NounPhrase> = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
     clause(np('CAT'), 'READ', { verbPhrase, directObject: np('BOOK', { numeral: 2, ...extra }) });
 
-  test.fails('a definite object', () => {
+  test('a definite object', () => {
     expect(say(reads(), 'fr')).toBe('le chat lit les deux livres.');
   });
 
-  test.fails('a definite object, negated — the definite article is no partitive', () => {
+  test('a definite object, negated — the definite article is no partitive', () => {
     expect(say(reads({}, { negative: true }), 'fr')).toBe('le chat ne lit pas les deux livres.');
   });
 
-  test.fails('a definite object with a genitive possessor', () => {
+  test('a definite object with a genitive possessor', () => {
     expect(say(reads({ possessor: np('MAN') }), 'fr')).toBe("le chat lit les deux livres de l'homme.");
   });
 
-  test.fails('a demonstrative object', () => {
+  test('a demonstrative object', () => {
     expect(say(reads({ definiteness: 'this' }), 'fr')).toBe('le chat lit ces deux livres.');
   });
 
-  test.fails('an animate definite object', () => {
+  test('an animate definite object', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { numeral: 3 }) }), 'fr')).toBe('le chat voit les trois chiens.');
   });
 
-  test.fails('the object of a possessor question', () => {
+  test('the object of a possessor question', () => {
     expect(say({ ...reads(), questionRole: 'possessor', questionPossessed: 'directObject' }, 'fr'))
       .toBe('de qui est-ce que le chat lit les deux livres ?');
+  });
+
+  test('a feminine counted object keeps the definite and the distal, negated or not; the indefinite takes no de', () => {
+    const eats = (extra: Partial<NounPhrase>, negative = false) =>
+      say(clause(np('CAT'), 'EAT', { verbPhrase: { negative }, directObject: np('MOUSE', { numeral: 3, ...extra }) }), 'fr');
+    expect(eats({ definiteness: 'that' })).toBe('le chat mange ces trois souris.');
+    expect(eats({}, true)).toBe('le chat ne mange pas les trois souris.');
+    expect(eats({ definiteness: 'this' }, true)).toBe('le chat ne mange pas ces trois souris.');
+    expect(eats({ definiteness: 'indefinite' }, true)).toBe('le chat ne mange pas trois souris.');
   });
 
   test('regression: the other six keep it, as the French subject does; the indefinite and the possessive are right', () => {

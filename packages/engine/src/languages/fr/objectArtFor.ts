@@ -14,10 +14,12 @@ import { partitiveArtFor } from './partitiveArtFor.js';
  *
  * A **counted** object is the one that really has none: the cardinal stands where the article would,
  * so there is no partitive and no negative "de" either — "mange deux souris", "ne mange pas deux
- * souris" (C31).
+ * souris" (C31). That is the indefinite's place only, which `resolveNounPhrase` has resolved bare:
+ * a definite or demonstrative determiner stays in front of the numeral, as on the subject — "lit les
+ * deux livres", "lit ces deux livres", "ne lit pas les deux livres" (A289).
  */
 export function objectArtFor(forms: Record<string, string>, plural: boolean, lead: string, negated: boolean): string {
-  if (forms['numeral'] !== undefined) return '';
+  if (forms['numeral'] !== undefined && forms['definiteness'] === 'bare') return '';
   const picked = forms['definiteness'] ?? 'definite';
   const partitive = picked === 'bare' || picked === 'indefinite'
     || (picked === 'some' && forms['uncountable'] === '1');
