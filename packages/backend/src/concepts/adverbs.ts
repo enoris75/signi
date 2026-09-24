@@ -54,6 +54,17 @@ const frequencyGloss = (definiteness: Definiteness, number?: 'singular' | 'plura
   subject: { concept: 'TIME', definiteness, number, mannerGloss: true },
 });
 
+// A clause gloss the engine renders into every language: the similative adverbial clause said alone,
+// "as one expects" / "come si prevede" / "comme on s'y attend" / "wie man erwartet" / "como se espera"
+// / 予想するように, exactly as "the cat runs as one expects" says it after the verb. The act is the
+// generic one's, as in the evaluative modals' glosses; the plan's THING is the throwaway a verbless
+// period carries (see PhrasePlan.adverbialGloss, localization C41).
+const asGloss = (verb: string): PhrasePlan => ({
+  subject: { concept: 'THING' },
+  adverbialGloss: true,
+  adverbialClause: { conjunction: 'as', clause: { subject: { concept: 'GENERIC_PERSON' }, verbPhrase: { verb } } },
+});
+
 export const adverbs: ConceptSeed[] = [
   // ── ADVERBS ──────────────────────────────────────────────────────
   {
@@ -667,8 +678,10 @@ export const adverbs: ConceptSeed[] = [
   // to its clause: `que` (*peut-être que*, *claro que*) or a `comma` ("actually, the cat…"). REALLY
   // is not one of them: "does not really eat" is its scope inside the negation (E39 *Today*).
   //
-  // ACTUALLY, MAYBE and OF_COURSE are literal by design: E24 probed their leads — "in a possible way"
-  // reads as *possible*, "in fact" as *in Tatsache* / *en hecho*. PROBABLY is glossed (below).
+  // MAYBE and ACTUALLY are literal by design (localization C41): "maybe" leaves the odds open, which
+  // no degree of PROBABILITY says, and its content-clause gloss is MIGHT's; "in fact" is an idiom in
+  // English alone, and "in reality" is REALLY's gloss. PROBABLY is glossed on PROBABILITY, and
+  // OF_COURSE on the similative clause said alone, "as one expects" (both below).
   {
     // Perhaps, possibly. Portuguese *talvez* ahead of its verb puts it in the subjunctive (`mood`):
     // *talvez o gato não tenha comido*, where Spanish *quizás* keeps the indicative (E39 D2).
@@ -728,6 +741,9 @@ export const adverbs: ConceptSeed[] = [
     id: 'OF_COURSE',
     role: 'adverb',
     description: 'naturally; as one would expect',
+    // "As one expects": the statement-level reading, which a manner ("in the way that one expects")
+    // does not have. French says it with the pronominal s'attendre à, "comme on s'y attend" (C41).
+    definition: asGloss('EXPECT'),
     emoji: '👌',
     forms: {
       en: { base: 'of course', subtype: 'sentence', negative_slot: 'pre-negation' },
