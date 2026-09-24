@@ -17,7 +17,10 @@ import { withApproximator } from '../../functions/withApproximator.js';
  */
 export function determiner(forms: Record<string, string>, _case: Case, plural: boolean): string {
   // "almost all", "quasi tutti" (P09-E38): the approximator stands before whatever determiner is spelled.
-  return withApproximator(forms, baseDeterminer(forms, _case, plural));
+  const spelled = withApproximator(forms, baseDeterminer(forms, _case, plural));
+  // A negated clause's "nicht", carried by an object's amount quantifier (A310, see `finiteNegation`):
+  // "nicht viel Essen", "nicht genug Hunde".
+  return forms['nicht_det'] === '1' && spelled ? `nicht ${spelled}` : spelled;
 }
 
 function baseDeterminer(forms: Record<string, string>, _case: Case, plural: boolean): string {

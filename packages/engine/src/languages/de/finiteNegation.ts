@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import type { ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { negationSources } from '../../functions/negationSources.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -26,7 +26,8 @@ import { nichtSlots } from './nichtSlots.js';
  *   so the complement falls: "frisst keine Maus in einem Haus";
  * - otherwise the verb's "nicht", which `nichtSlots` places — unless an indefinite nominal can
  *   absorb it as "kein" (see `takesKein`), which is the same identity read the other way (A182),
- *   and never in the prospective, whose nominal stands inside the zu-group (A209).
+ *   and never in the prospective, whose nominal stands inside the zu-group (A209); or an object
+ *   counted by an amount quantifier takes it ahead of its determiner, "nicht viel Essen" (A310).
  *
  * The verb *group* can deny more than one of its words, though (A03): the finite element, the main
  * verb a modal governs, and each inner modal each carry their own flag. German spells every one of
@@ -87,15 +88,23 @@ export function finiteNegation(
   // With two, the nominal keeps its determiner and both "nicht" stay in the Mittelfeld.
   const absorbs = negate && !prospective;
   const keinObject = absorbs && takesKein(directObject);
-  const keinPredicative = absorbs && !keinObject && takesKein(complements?.['predicative']?.phrase);
   // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
   const adverb = !!(modalAdverbs(verbPhrase.modals) || verbPhrase.modifier?.forms['base']);
+  // A310: an object counted by an amount quantifier is neither the definite "nicht" follows nor the
+  // indefinite "kein" absorbs. The amount is what the negation denies, so "nicht" leads it: "frisst
+  // nicht viel Essen", "sieht nicht genug Hunde". The object carries it on its determiner, as it does
+  // "kein", and the Mittelfeld slot stays empty. Not beside a Mittelfeld adverb, whose "nicht immer"
+  // slot keeps the negation.
+  const nichtObject = absorbs && !keinObject && !adverb && leadsAmount(directObject);
+  const keinPredicative = absorbs && !keinObject && !nichtObject && takesKein(complements?.['predicative']?.phrase);
   return {
-    nicht: nichtSlots(keinObject || keinPredicative ? 0 : count,
+    nicht: nichtSlots(keinObject || keinPredicative || nichtObject ? 0 : count,
       { prospective, adverb, complements: leadsComplements }),
     // Per conjunct, as the complements are: a group mixing determiners keeps the ones that are not
     // negative ("die Maus und eine Katze"). A "kein" object is one conjunct by construction.
-    directObject: directObject && (plainObject || keinObject)
+    directObject: directObject && nichtObject
+      ? { ...directObject, conjuncts: directObject.conjuncts.map(withNichtDeterminer) }
+      : directObject && (plainObject || keinObject)
       ? {
         ...directObject,
         conjuncts: directObject.conjuncts.map((np) =>
@@ -120,6 +129,24 @@ function takesKein(element: ResolvedNounElement | undefined): boolean {
   const forms = element.conjuncts[0].head.forms;
   return !forms['person'] && forms['proper'] !== '1' && forms['role'] !== 'adjective'
     && (forms['definiteness'] === 'indefinite' || forms['definiteness'] === 'bare');
+}
+
+/**
+ * The amount quantifiers "nicht" leads rather than follows (A310): "nicht viel", "nicht wenig",
+ * "nicht genug". `most` is definite ("das meiste") and `some` / `several` read as specific ("einige
+ * Mäuse nicht"), so they keep "nicht" after the object.
+ */
+const NICHT_LEADS_AMOUNT: ReadonlySet<string> = new Set(['many', 'few', 'enough']);
+
+/** A noun phrase whose determiner carries the clause's "nicht" (A310, see `determiner`). */
+const withNichtDeterminer = (np: ResolvedNounPhrase): ResolvedNounPhrase =>
+  ({ ...np, head: { ...np.head, forms: { ...np.head.forms, nicht_det: '1' } } });
+
+/** Whether the direct object is one noun counted by an amount quantifier "nicht" leads (A310). */
+function leadsAmount(element: ResolvedNounElement | undefined): boolean {
+  if (!element || element.conjuncts.length !== 1) return false;
+  const forms = element.conjuncts[0].head.forms;
+  return !forms['person'] && forms['proper'] !== '1' && NICHT_LEADS_AMOUNT.has(forms['definiteness'] ?? '');
 }
 
 /** The complements with the predicate nominal re-determined as "kein" (A182). */
