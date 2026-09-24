@@ -751,7 +751,7 @@ describe('known bugs: a Japanese state verb in an adverbial clause takes the dic
     adverbialClause: { conjunction, clause: { subject: np('DOG'), verbPhrase: { verb, ...verbPhrase }, directObject: np(object) } },
   });
 
-  test.fails('because, when and though', () => {
+  test('because, when and though', () => {
     expect([runs('because'), runs('when'), runs('though')].map((p) => say(p, 'ja'))).toEqual([
       '猫は犬が本を持っているので走ります。',
       '猫は犬が本を持っている時に走ります。',
@@ -759,13 +759,27 @@ describe('known bugs: a Japanese state verb in an adverbial clause takes the dic
     ]);
   });
 
-  test.fails('the past and the negative', () => {
+  test('the past and the negative', () => {
     expect(say(runs('because', { tense: 'past' }), 'ja')).toBe('猫は犬が本を持っていたので走ります。');
     expect(say(runs('because', { negative: true }), 'ja')).toBe('猫は犬が本を持っていないので走ります。');
   });
 
-  test.fails('KNOW', () => {
+  test('KNOW', () => {
     expect(say(runs('because', {}, 'KNOW', 'MAN'), 'ja')).toBe('猫は犬が男を知っているので走ります。');
+  });
+
+  test('KNOW\'s negative stays 知らない, when and though in the past, and から untouched', () => {
+    expect([
+      say(runs('because', { negative: true }, 'KNOW', 'MAN'), 'ja'),
+      say(runs('when', { tense: 'past' }), 'ja'),
+      say(runs('though', { tense: 'past', negative: true }), 'ja'),
+      say(runs('since'), 'ja'),
+    ]).toEqual([
+      '猫は犬が男を知らないので走ります。',
+      '猫は犬が本を持っていた時に走ります。',
+      '猫は犬が本を持っていなかったのに走ります。',
+      '猫は犬が本を持ってから走ります。',
+    ]);
   });
 
   test('regression: while, before, after and until', () => {

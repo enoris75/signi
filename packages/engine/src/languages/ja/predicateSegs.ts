@@ -45,8 +45,10 @@ import { wordSeg } from './wordSeg.js';
  * adverbial one) does not, so only they give a state verb its 〜ている (A279: 猫が本を持っていると).
  * `'reach'` is an adverbial clause closed by まで or 前に, which name a state reached: a copula predicate
  * says it as the change of state 〜になる (犬が幸せになるまで, A323), and is otherwise prenominal.
+ * `'held'` is an adverbial clause closed by ので, 時に or のに, which report it as holding: prenominal, as
+ * `true` is, but a state verb takes its 〜ている as in a content clause (犬が本を持っているので, A347).
  */
-export type JaPlain = boolean | 'quote' | 'question' | 'content' | 'reach';
+export type JaPlain = boolean | 'quote' | 'question' | 'content' | 'reach' | 'held';
 
 export function predicateSegs(
   plannedVerbPhrase: ResolvedVerbPhrase,
@@ -330,9 +332,10 @@ export function predicateSegs(
   // 〜ます names the change of state ("picks up"). Two lexemes keep the plain form: a Japanese state verb
   // (`state_verb`: 思える, like ある), and a state whose negative is the event's (`event_negative`: 知りません).
   // A content clause reports the state as the main clause does, in the plain 〜ている (A279: 猫が本を
-  // 持っていると言います, 持っているかどうか, 持っていることを). A relative clause and the dictionary form a
-  // modal governs keep the plain verb (本を持つ猫).
-  const reported = plain === 'quote' || plain === 'question' || plain === 'content';
+  // 持っていると言います, 持っているかどうか, 持っていることを), and so does an adverbial clause under ので,
+  // 時に or のに (A347: 持っているので). A relative clause, an adverbial clause under 前に, 後で or まで
+  // (the event: 持つ前に) and the dictionary form a modal governs keep the plain verb (本を持つ猫).
+  const reported = plain === 'quote' || plain === 'question' || plain === 'content' || plain === 'held';
   const heldState = aspect === 'neutral' && (!plain || reported) && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
     && !(negated && verb.forms['event_negative'] === '1');
   // A modal suffixes the verb and takes the tense and the finite polarity itself; the polarity of what
