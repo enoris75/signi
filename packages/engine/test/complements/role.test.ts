@@ -454,15 +454,16 @@ describe('known bugs: a relative clause over a role gap renders nonsense (A288)'
     expect(() => sayAll(clause(np('FRIEND', { relative: actsAsWhom() }), 'RUN'))).toThrow(/role/);
   });
 
-  // Japanese is left out of the comitative row: 男が行動する友達 drops its company (A290).
+  // Japanese keeps the company the comitative gap's particle carried: 一緒に (A290).
   test('regression: a comitative gap on the same clause, and a role inside an object relative', () => {
-    expect(sayAll(clause(np('FRIEND', { relative: { ...actsAsWhom(), headRole: 'comitative' } }), 'RUN'))).toMatchObject({
+    expect(sayAll(clause(np('FRIEND', { relative: { ...actsAsWhom(), headRole: 'comitative' } }), 'RUN'))).toEqual({
       en: 'the friend with whom the man acts runs.',
       it: "l'amico con il quale l'uomo agisce corre.",
       fr: "l'ami avec lequel l'homme agit court.",
       de: 'der Freund, mit dem der Mann handelt, läuft.',
       es: 'el amigo con el que el hombre actúa corre.',
       pt: 'o amigo com o qual o homem age corre.',
+      ja: '男が一緒に行動する友達は走ります。',
     });
     expect(sayAll(clause(np('BOOK', {
       relative: { headRole: 'directObject', subject: np('MAN'), verbPhrase: { verb: 'READ' }, complements: { role: { phrase: np('STUDENT') } } },

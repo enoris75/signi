@@ -42,7 +42,7 @@ unchanged.
 the question or rephrase it. This file takes *wem*, the form German
 grammars give as the stand-in for the missing dative of *was*.
 
-The `was` in the passive row comes from this bug. That row's Japanese is [A280](../A-must-fix/A280-japanese-passive-terminus-question-doubles-ni.md).
+The `was` in the passive row comes from this bug. That row's Japanese is [A280](../fixed/A280-japanese-passive-terminus-question-doubles-ni.md).
 
 Pinned by `known bugs: a German inanimate dative question asks with was (A281)` in
 [questions.test.ts](../../../packages/engine/test/questions.test.ts).

@@ -40,7 +40,7 @@ describe('a possessor linked to the subject', () => {
 
   test('agrees with the subject the way each language reads it', () => {
     // German reads the noun's grammatical gender: die Frau → ihr. English has none to read, so it takes
-    // the gender the plan names, and a person's is not guessed without one.
+    // the gender the plan names, or the sex a person noun records (A293).
     expect(sees(np('WOMAN', { gender: 'fem' }), np('BOOK', { possessor: link }))).toMatchObject({
       en: 'the woman sees her book.', de: 'die Frau sieht ihr Buch.', it: 'la donna vede il suo libro.',
       fr: 'la femme voit son livre.', ja: '女は自分の本を見ます。',

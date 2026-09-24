@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds A278–A290, A293–A296, A308–A323, A325–A336 and A338, and Part B is empty).** If
+this writing Part A and Part B are both empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -62,54 +62,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Language | Summary |
-|---|---|---|---|
-| A278 | [A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md](A-must-fix/A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md) | Japanese | a な-adjective keeps its な before the indirect question's か: 猫が幸せなかどうか for 幸せであるかどうか |
-| A279 | [A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md](A-must-fix/A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md) | Japanese | a state verb in a content clause takes its dictionary form: 猫が本を持つと言います, 知るかどうか for 持っている, 知っている |
-| A280 | [A280-japanese-passive-terminus-question-doubles-ni.md](A-must-fix/A280-japanese-passive-terminus-question-doubles-ni.md) | Japanese | a passive terminus question doubles に: 本は女に誰にあげられますか for 女によって |
-| A281 | [A281-german-inanimate-dative-question-asks-with-was.md](A-must-fix/A281-german-inanimate-dative-question-asks-with-was.md) | German | an inanimate dative question asks with *was*: `was gibt der Mann das Buch?` for *wem* |
-| A282 | [A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md](A-must-fix/A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md) | English | a passive agent question strands *by* ahead of the recipient: `who is the book given by to the child?` for *given to the child by* |
-| A283 | [A283-english-postposed-equative-drops-just-under-very.md](A-must-fix/A283-english-postposed-equative-drops-just-under-very.md) | English | VERY drops "just" from a postposed equative: `a cat as big as the dog` for *just as big* |
-| A284 | [A284-spanish-portuguese-estar-before-a-transient-superlative.md](A-must-fix/A284-spanish-portuguese-estar-before-a-transient-superlative.md) | Spanish, Portuguese | *estar* before a transient superlative: `el gato está el más feliz de los animales` for *es* |
-| A285 | [A285-japanese-negated-superlative-reads-as-the-least.md](A-must-fix/A285-japanese-negated-superlative-reads-as-the-least.md) | Japanese | a negated superlative reads as the least: 最も大きくないです for 最も大きいわけではありません |
-| A286 | [A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md](A-must-fix/A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md) | German | a noun after *von* stays genitive in a coordinated set: `von uns und der Hunde` for *den Hunden* |
-| A287 | [A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md](A-must-fix/A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md) | Italian | a role or essive noun with a pronominal possessor takes the article: `come il suo amico` for *come suo amico* |
-| A288 | [A288-relative-clause-over-a-role-gap-renders-nonsense.md](A-must-fix/A288-relative-clause-over-a-role-gap-renders-nonsense.md) | English, Italian, French, German, Spanish, Portuguese (translator) | a relative clause over a role gap renders nonsense (`come quale`, `als  der Mann`); refuse it by name |
-| A289 | [A289-french-definite-object-with-a-numeral-drops-its-article.md](A-must-fix/A289-french-definite-object-with-a-numeral-drops-its-article.md) | French | a definite object with a numeral drops its article: `le chat lit deux livres` for *les deux livres* |
-| A290 | [A290-japanese-comitative-relative-drops-its-company.md](A-must-fix/A290-japanese-comitative-relative-drops-its-company.md) | Japanese | a relative whose gap's particle carried the relation drops it, comitative and opponent: 猫が走る犬 for 猫が一緒に走る犬, 猫が遊ぶ犬 for 猫が相手にして遊ぶ犬 |
-| A293 | [A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md](A-must-fix/A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md) | English | a possessor linked to a female subject says *his*: `your mother sees his book` for *her book*; English nouns record no natural sex |
-| A294 | [A294-french-bien-around-the-passive-participle.md](A-must-fix/A294-french-bien-around-the-passive-participle.md) | French | *bien* misses the passive participle: `est mangée bien par le chien`, `a bien été mangée` for *est bien mangée*, *a été bien mangée* |
-| A295 | [A295-german-attributive-noun-drops-its-inherent-adjective.md](A-must-fix/A295-german-attributive-noun-drops-its-inherent-adjective.md) | German | an attributive noun drops its inherent adjective: `Gefühle großer Frauen`, `Frauenbuch` for *großer junger Frauen*, *Buch junger Frauen* (YOUNG_WOMAN, the grammar terms) |
-| A296 | [A296-english-manner-adverb-after-the-by-phrase.md](A-must-fix/A296-english-manner-adverb-after-the-by-phrase.md) | English | a manner adverb trails the by-phrase: `is eaten by the dog well` for *is eaten well by the dog* |
-| A308 | [A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md](A-must-fix/A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md) | English, Italian, French, German, Spanish, Japanese, Portuguese | negation does not reach SOMEONE / SOMETHING inside a complement: `does not run with someone`, `läuft nicht mit jemandem`, 誰かと走りません for *with anyone*, *mit niemandem*, 誰とも |
-| A309 | [A309-relative-clause-on-someone-or-something-is-dropped.md](A-must-fix/A309-relative-clause-on-someone-or-something-is-dropped.md) | English, Italian, French, German, Spanish, Portuguese | a relative clause on SOMEONE / SOMETHING is silently dropped: `the cat sees someone.` for *someone who runs*; the subject too in it/fr/de |
-| A310 | [A310-german-nicht-after-an-object-counted-by-an-amount-quantifier.md](A-must-fix/A310-german-nicht-after-an-object-counted-by-an-amount-quantifier.md) | German | *nicht* after an object counted by *viel* / *genug* / *wenig*: `frisst viel Essen nicht` for *frisst nicht viel Essen* |
-| A311 | [A311-mass-noun-is-counted-as-if-it-were-a-count-noun.md](A-must-fix/A311-mass-noun-is-counted-as-if-it-were-a-count-noun.md) | English (NEWS); all seven (FOOD, WATER) | a mass noun is counted: `the three news runs`, `each news`, `il tre cibo brucia`; English *pieces of news* and a named refusal are the recommended ruling |
-| A312 | [A312-italian-a-does-not-become-ad-before-a-word-starting-with-a.md](A-must-fix/A312-italian-a-does-not-become-ad-before-a-word-starting-with-a.md) | Italian | *a* does not become *ad* before *a*: `a abbastanza cani`, `a alcuni cani`, `a amici` for *ad* |
-| A313 | [A313-portuguese-enough-with-a-possessive-trails-the-possessive.md](A-must-fix/A313-portuguese-enough-with-a-possessive-trails-the-possessive.md) | Portuguese | *enough* with a possessive puts the possessive after *suficientes*: `gatos suficientes seus` for *suficientes gatos seus* (the fixer rules the order) |
-| A314 | [A314-most-with-a-possessive-keeps-the-possessive-out-of-the-partitive.md](A-must-fix/A314-most-with-a-possessive-keeps-the-possessive-out-of-the-partitive.md) | English, French, German, Spanish, Portuguese | *most* with a possessive keeps it out of the partitive: `la plupart des chats à elle`, `most cats of hers` for *la plupart de ses chats*, *most of her cats* |
-| A315 | [A315-continue-doing-leaves-a-negated-or-copular-complement-unfused.md](A-must-fix/A315-continue-doing-leaves-a-negated-or-copular-complement-unfused.md) | German, Spanish, Japanese | CONTINUE_DOING leaves a negated or copular complement unfused: `sigue no corriendo`, `macht weiter, nicht zu laufen`, 幸せであることを続けます for *sigue sin correr*, 幸せであり続けます |
-| A316 | [A316-generic-subject-in-a-dative-experiencer-frame.md](A-must-fix/A316-generic-subject-in-a-dative-experiencer-frame.md) | German, Spanish | a generic subject in a dative experiencer frame: `man geht gut`, `el gato gusta` for *es geht einem gut*, *el gato le gusta a uno* |
-| A317 | [A317-tell-with-a-direct-object-and-a-content-clause-makes-the-addressee-the-told-thing.md](A-must-fix/A317-tell-with-a-direct-object-and-a-content-clause-makes-the-addressee-the-told-thing.md) | Italian, French, German, Spanish, Japanese, Portuguese | TELL with a direct object and a content clause makes the addressee the told thing: `racconta il cane che`, `erzählt den Hund, dass`, 犬を伝えます for *al cane*, *dem Hund*, 犬に |
-| A318 | [A318-german-keeps-gegen-accusative-under-a-verb-named-opponent-word.md](A-must-fix/A318-german-keeps-gegen-accusative-under-a-verb-named-opponent-word.md) | German | a verb-named opponent word keeps gegen's accusative: `spielt mit den Hund` for *mit dem Hund* (latent: no seeded verb names one) |
-| A319 | [A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md](A-must-fix/A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md) | Italian, French, Spanish, Portuguese, German | the numeral one beside a definite or demonstrative: `l'un cane`, `el un perro`, `der ein Hund` for *il cane*, *el perro*, *der eine Hund* |
-| A320 | [A320-italian-cardinal-una-does-not-elide-before-a-vowel.md](A-must-fix/A320-italian-cardinal-una-does-not-elide-before-a-vowel.md) | Italian | the cardinal *una* does not elide before a vowel: `entro una ora`, `vede una amica` for *un'ora*, *un'amica* |
-| A321 | [A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md](A-must-fix/A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md) | German | the cardinal *one* does not decline in a bare phrase: `mit ein Hund`, `innerhalb eine Stunde`, `sieht ein Hund` for *einem*, *einer*, *einen* |
-| A322 | [A322-japanese-indefinite-measure-noun-drops-its-count.md](A-must-fix/A322-japanese-indefinite-measure-noun-drops-its-count.md) | Japanese | an indefinite measure noun drops its count: 時間以内に, 時間走ります for 一時間以内に, 一時間走ります; two P09-E34/E35 tests pin the defect |
-| A323 | [A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md](A-must-fix/A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md) | Japanese | a な-adjective predicate takes な before まで and 前に: 大丈夫なまで, 幸せな前に for 大丈夫になるまで, 幸せになる前に |
-| A325 | [A325-spanish-personal-a-drops-the-determiner-beside-a-possessive.md](A-must-fix/A325-spanish-personal-a-drops-the-determiner-beside-a-possessive.md) | Spanish | the personal *a* drops the determiner beside a possessive: `el gato ve a mi amigo` for *ve a un amigo mío* (also *this*, *some*, *no*, *all*, negated, coreferent) |
-| A326 | [A326-french-german-plural-indefinite-possessor-detaches-into-a-broken-phrase.md](A-must-fix/A326-french-german-plural-indefinite-possessor-detaches-into-a-broken-phrase.md) | French, German | a plural or mass indefinite possessor detaches into a broken phrase: `la maison de des amis à moi`, `das Haus Freunde von mir` for *la maison d'amis à moi*, *das Haus von Freunden von mir* |
-| A327 | [A327-french-negated-object-keeps-un-beside-a-detached-possessive.md](A-must-fix/A327-french-negated-object-keeps-un-beside-a-detached-possessive.md) | French | a negated object keeps *un* beside a detached possessive: `ne voit pas un ami à moi` for *ne voit pas d'ami à moi* |
-| A328 | [A328-own-beside-a-kept-determiner-stays-on-the-head.md](A-must-fix/A328-own-beside-a-kept-determiner-stays-on-the-head.md) | English (fr/es/pt undecided) | OWN beside a kept determiner stays on the head: `an own friend of mine` for *a friend of my own* |
-| A329 | [A329-a-numeral-beside-a-possessive-ignores-the-indefinite.md](A-must-fix/A329-a-numeral-beside-a-possessive-ignores-the-indefinite.md) | English, Italian, French, German, Spanish, Portuguese | a numeral beside a pronominal possessive loses the indefinite: `my two friends run`, `mein ein Freund` for *two friends of mine*, *ein Freund von mir* |
-| A330 | [A330-spanish-portuguese-plural-predicate-with-a-possessive-keeps-the-determiner.md](A-must-fix/A330-spanish-portuguese-plural-predicate-with-a-possessive-keeps-the-determiner.md) | Spanish, Portuguese | the plural predicate with a possessive keeps the determiner: `los perros son mis amigos`, `na sua prisão` for *son amigos míos*, *em uma prisão sua* |
-| A331 | [A331-japanese-compounds-a-count-of-one-onto-kyoudai.md](A-must-fix/A331-japanese-compounds-a-count-of-one-onto-kyoudai.md) | Japanese | a count of one compounds onto 兄弟/姉妹: `私は一人兄弟です` for *私は一人の兄弟です* |
-| A332 | [A332-english-italian-write-his-for-a-possessor-linked-to-the-generic-subject.md](A-must-fix/A332-english-italian-write-his-for-a-possessor-linked-to-the-generic-subject.md) | English, Italian | a possessor linked to the generic subject is bound as a plain 3rd singular: `one sees his book.` / `si vede il suo libro.` for *one's book* / *il proprio libro* |
-| A333 | [A333-japanese-tai-stem-of-irassharu-nasaru-ossharu.md](A-must-fix/A333-japanese-tai-stem-of-irassharu-nasaru-ossharu.md) | Japanese | the たい stem of いらっしゃる, なさる and おっしゃる is taken from their ます form: `いらっしゃいたいです` for *いらっしゃりたいです* |
-| A334 | [A334-japanese-humble-iru-is-a-dialectal-oru-in-a-plain-slot.md](A-must-fix/A334-japanese-humble-iru-is-a-dialectal-oru-in-a-plain-slot.md) | Japanese | the humble いる in a plain slot is the dialectal おる: `もし父が家におったら` for *いたら* (the fixer rules: plain いる, or a documented simplification) |
-| A335 | [A335-french-pronoun-addressee-takes-the-clitic.md](A-must-fix/A335-french-pronoun-addressee-takes-the-clitic.md) | French | a pronoun addressee takes the subject clitic: `Tu, cours.` for *Toi, cours.* |
-| A336 | [A336-italian-portuguese-possessed-addressee-keeps-the-article.md](A-must-fix/A336-italian-portuguese-possessed-addressee-keeps-the-article.md) | Italian, Portuguese | an addressee with a pronominal possessive keeps the article: `Il mio amico, corri.` / `O meu pai, corra.` for *Mio amico* / *Meu pai* |
-| A338 | [A338-contradictory-address-plans-are-not-refused.md](A-must-fix/A338-contradictory-address-plans-are-not-refused.md) | all (translator) | an address on an instruction, or a 1st/3rd-person pronoun as the address, renders instead of being refused: `Maman, courir.`, `Je, le chat court.` |
+None open. The last forty-six, A278–A338, were fixed on 2026-09-24 and are listed under **Fixed** below.
 
 **Thirteen open**, **A278–A290**, all filed on 2026-09-24 by an audit of the engine test coverage
 of P09-E13 to E19 (the role complement, the possessor, marked-relation and passive questions, the
@@ -164,6 +117,24 @@ two P09-E34/E35 pins), and a Japanese な-adjective before まで / 前に (A323
 The same batch fixed **A291** and **A292** (a numeral inside a complement, which E35's *for two
 hours* needed) and **A337** (French HOUR's elision, which E34 and E35 met in every row), all listed
 under **Fixed** below. So **forty-six are open**.
+
+**All forty-six were fixed on 2026-09-24** by eight lanes, and are listed under **Fixed** below.
+The rulings the files left to the fixer: German asks a thing in the dative with *wem* (A281); a
+stranded *by* follows the arguments only, so an adjunct still trails it (A282); a relative over a
+role gap (A288) and a contradictory address (A338) are refused by name, with a 400 at
+`/api/translate`; English counts NEWS by *pieces of news*, and a noun that is mass in every language
+refuses a numeral (A311); Portuguese *suficientes* goes before the noun only beside a possessive
+(A313); *most* takes the possessive in its partitive, as *all* does (A314); CONTINUE_DOING under a
+negation is *läuft weiterhin nicht* and *sigue sin* + infinitive (A315); TELL's direct object
+becomes the addressee beside a content clause, with TELL's sense unchanged (A317); a Japanese
+indefinite HOUR or DAY counts as one under *within*, *for*, *during* and *ago* (A322); a Japanese
+な-adjective before まで / 前に is the change of state 〜になる (A323); and the humble いる falls back to
+plain いる in a plain form (A334). A328 fixed English only (*a friend of my own*): the French,
+Spanish and Portuguese targets are still undecided and render as before. Three needed the corpus:
+a person noun records its `sex` (A293), NEWS its `unit` (A311), and the honorific verbs their
+`honorific_stem` (A333); A315 and A316 added lexeme forms too (*seguir*'s `negative_complement_link`,
+*weitermachen*'s `negative_complement_adverb`, GENERIC_PERSON's `disjunctive`). Once A308 let negation reach a complement, German keeps
+only the first negative word of a clause (*gibt niemandem etwas*), since it has no negative concord.
 
 The fifteen filed before them on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
 same day by five lanes and are listed under **Fixed** below. The content-clause tense fix now covers
@@ -573,9 +544,55 @@ is listed under **Fixed** below.
 | A275 | [A275-object-relative-with-no-subject-reads-as-a-subject-relative.md](fixed/A275-object-relative-with-no-subject-reads-as-a-subject-relative.md) | engine, backend, frontend | 2026-09-23 |
 | A276 | [A276-italian-animate-source-question-fronts-the-ablative-via.md](fixed/A276-italian-animate-source-question-fronts-the-ablative-via.md) | Italian | 2026-09-23 |
 | A277 | [A277-an-indefinite-possessed-head-reads-as-a-definite-one.md](fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-24 |
+| A278 | [A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md](fixed/A278-japanese-na-adjective-keeps-na-before-the-indirect-question-ka.md) | Japanese | 2026-09-24 |
+| A279 | [A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md](fixed/A279-japanese-state-verb-in-a-content-clause-takes-the-dictionary-form.md) | Japanese | 2026-09-24 |
+| A280 | [A280-japanese-passive-terminus-question-doubles-ni.md](fixed/A280-japanese-passive-terminus-question-doubles-ni.md) | Japanese | 2026-09-24 |
+| A281 | [A281-german-inanimate-dative-question-asks-with-was.md](fixed/A281-german-inanimate-dative-question-asks-with-was.md) | German | 2026-09-24 |
+| A282 | [A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md](fixed/A282-english-passive-agent-question-strands-by-ahead-of-the-recipient.md) | English | 2026-09-24 |
+| A283 | [A283-english-postposed-equative-drops-just-under-very.md](fixed/A283-english-postposed-equative-drops-just-under-very.md) | English | 2026-09-24 |
+| A284 | [A284-spanish-portuguese-estar-before-a-transient-superlative.md](fixed/A284-spanish-portuguese-estar-before-a-transient-superlative.md) | Spanish, Portuguese | 2026-09-24 |
+| A285 | [A285-japanese-negated-superlative-reads-as-the-least.md](fixed/A285-japanese-negated-superlative-reads-as-the-least.md) | Japanese | 2026-09-24 |
+| A286 | [A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md](fixed/A286-german-noun-after-von-stays-genitive-in-a-coordinated-set.md) | German | 2026-09-24 |
+| A287 | [A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md](fixed/A287-italian-role-noun-with-a-pronominal-possessor-takes-the-article.md) | Italian | 2026-09-24 |
+| A288 | [A288-relative-clause-over-a-role-gap-renders-nonsense.md](fixed/A288-relative-clause-over-a-role-gap-renders-nonsense.md) | English, Italian, French, German, Spanish, Portuguese (translator) | 2026-09-24 |
+| A289 | [A289-french-definite-object-with-a-numeral-drops-its-article.md](fixed/A289-french-definite-object-with-a-numeral-drops-its-article.md) | French | 2026-09-24 |
+| A290 | [A290-japanese-comitative-relative-drops-its-company.md](fixed/A290-japanese-comitative-relative-drops-its-company.md) | Japanese | 2026-09-24 |
 | A291 | [A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md](fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md) | German, Spanish, Portuguese | 2026-09-24 |
 | A292 | [A292-french-writes-de-before-a-bare-numeral-in-a-complement.md](fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md) | French | 2026-09-24 |
+| A293 | [A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md](fixed/A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md) | English | 2026-09-24 |
+| A294 | [A294-french-bien-around-the-passive-participle.md](fixed/A294-french-bien-around-the-passive-participle.md) | French | 2026-09-24 |
+| A295 | [A295-german-attributive-noun-drops-its-inherent-adjective.md](fixed/A295-german-attributive-noun-drops-its-inherent-adjective.md) | German | 2026-09-24 |
+| A296 | [A296-english-manner-adverb-after-the-by-phrase.md](fixed/A296-english-manner-adverb-after-the-by-phrase.md) | English | 2026-09-24 |
+| A308 | [A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md](fixed/A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md) | English, Italian, French, German, Spanish, Japanese, Portuguese | 2026-09-24 |
+| A309 | [A309-relative-clause-on-someone-or-something-is-dropped.md](fixed/A309-relative-clause-on-someone-or-something-is-dropped.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-24 |
+| A310 | [A310-german-nicht-after-an-object-counted-by-an-amount-quantifier.md](fixed/A310-german-nicht-after-an-object-counted-by-an-amount-quantifier.md) | German | 2026-09-24 |
+| A311 | [A311-mass-noun-is-counted-as-if-it-were-a-count-noun.md](fixed/A311-mass-noun-is-counted-as-if-it-were-a-count-noun.md) | English (NEWS); all seven (FOOD, WATER) | 2026-09-24 |
+| A312 | [A312-italian-a-does-not-become-ad-before-a-word-starting-with-a.md](fixed/A312-italian-a-does-not-become-ad-before-a-word-starting-with-a.md) | Italian | 2026-09-24 |
+| A313 | [A313-portuguese-enough-with-a-possessive-trails-the-possessive.md](fixed/A313-portuguese-enough-with-a-possessive-trails-the-possessive.md) | Portuguese | 2026-09-24 |
+| A314 | [A314-most-with-a-possessive-keeps-the-possessive-out-of-the-partitive.md](fixed/A314-most-with-a-possessive-keeps-the-possessive-out-of-the-partitive.md) | English, French, German, Spanish, Portuguese | 2026-09-24 |
+| A315 | [A315-continue-doing-leaves-a-negated-or-copular-complement-unfused.md](fixed/A315-continue-doing-leaves-a-negated-or-copular-complement-unfused.md) | German, Spanish, Japanese | 2026-09-24 |
+| A316 | [A316-generic-subject-in-a-dative-experiencer-frame.md](fixed/A316-generic-subject-in-a-dative-experiencer-frame.md) | German, Spanish | 2026-09-24 |
+| A317 | [A317-tell-with-a-direct-object-and-a-content-clause-makes-the-addressee-the-told-thing.md](fixed/A317-tell-with-a-direct-object-and-a-content-clause-makes-the-addressee-the-told-thing.md) | Italian, French, German, Spanish, Japanese, Portuguese | 2026-09-24 |
+| A318 | [A318-german-keeps-gegen-accusative-under-a-verb-named-opponent-word.md](fixed/A318-german-keeps-gegen-accusative-under-a-verb-named-opponent-word.md) | German | 2026-09-24 |
+| A319 | [A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md](fixed/A319-numeral-one-beside-a-definite-or-demonstrative-determiner.md) | Italian, French, Spanish, Portuguese, German | 2026-09-24 |
+| A320 | [A320-italian-cardinal-una-does-not-elide-before-a-vowel.md](fixed/A320-italian-cardinal-una-does-not-elide-before-a-vowel.md) | Italian | 2026-09-24 |
+| A321 | [A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md](fixed/A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md) | German | 2026-09-24 |
+| A322 | [A322-japanese-indefinite-measure-noun-drops-its-count.md](fixed/A322-japanese-indefinite-measure-noun-drops-its-count.md) | Japanese | 2026-09-24 |
+| A323 | [A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md](fixed/A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md) | Japanese | 2026-09-24 |
+| A325 | [A325-spanish-personal-a-drops-the-determiner-beside-a-possessive.md](fixed/A325-spanish-personal-a-drops-the-determiner-beside-a-possessive.md) | Spanish | 2026-09-24 |
+| A326 | [A326-french-german-plural-indefinite-possessor-detaches-into-a-broken-phrase.md](fixed/A326-french-german-plural-indefinite-possessor-detaches-into-a-broken-phrase.md) | French, German | 2026-09-24 |
+| A327 | [A327-french-negated-object-keeps-un-beside-a-detached-possessive.md](fixed/A327-french-negated-object-keeps-un-beside-a-detached-possessive.md) | French | 2026-09-24 |
+| A328 | [A328-own-beside-a-kept-determiner-stays-on-the-head.md](fixed/A328-own-beside-a-kept-determiner-stays-on-the-head.md) | English (fr/es/pt undecided) | 2026-09-24 |
+| A329 | [A329-a-numeral-beside-a-possessive-ignores-the-indefinite.md](fixed/A329-a-numeral-beside-a-possessive-ignores-the-indefinite.md) | English, Italian, French, German, Spanish, Portuguese | 2026-09-24 |
+| A330 | [A330-spanish-portuguese-plural-predicate-with-a-possessive-keeps-the-determiner.md](fixed/A330-spanish-portuguese-plural-predicate-with-a-possessive-keeps-the-determiner.md) | Spanish, Portuguese | 2026-09-24 |
+| A331 | [A331-japanese-compounds-a-count-of-one-onto-kyoudai.md](fixed/A331-japanese-compounds-a-count-of-one-onto-kyoudai.md) | Japanese | 2026-09-24 |
+| A332 | [A332-english-italian-write-his-for-a-possessor-linked-to-the-generic-subject.md](fixed/A332-english-italian-write-his-for-a-possessor-linked-to-the-generic-subject.md) | English, Italian | 2026-09-24 |
+| A333 | [A333-japanese-tai-stem-of-irassharu-nasaru-ossharu.md](fixed/A333-japanese-tai-stem-of-irassharu-nasaru-ossharu.md) | Japanese | 2026-09-24 |
+| A334 | [A334-japanese-humble-iru-is-a-dialectal-oru-in-a-plain-slot.md](fixed/A334-japanese-humble-iru-is-a-dialectal-oru-in-a-plain-slot.md) | Japanese | 2026-09-24 |
+| A335 | [A335-french-pronoun-addressee-takes-the-clitic.md](fixed/A335-french-pronoun-addressee-takes-the-clitic.md) | French | 2026-09-24 |
+| A336 | [A336-italian-portuguese-possessed-addressee-keeps-the-article.md](fixed/A336-italian-portuguese-possessed-addressee-keeps-the-article.md) | Italian, Portuguese | 2026-09-24 |
 | A337 | [A337-french-hour-does-not-elide.md](fixed/A337-french-hour-does-not-elide.md) | French | 2026-09-24 |
+| A338 | [A338-contradictory-address-plans-are-not-refused.md](fixed/A338-contradictory-address-plans-are-not-refused.md) | all (translator) | 2026-09-24 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

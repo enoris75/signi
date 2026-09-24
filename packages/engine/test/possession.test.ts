@@ -1382,16 +1382,19 @@ describe('an indefinite possessed head across persons, clauses and slots (A277)'
   });
 
   // P11-E2's coreferent link detaches like a pronominal possessor, taking the subject's features.
-  // Spanish is A325 (the personal "a"); English under a female subject is A293.
+  // Spanish takes the personal "a" before the kept determiner (A325), and English reads the woman's
+  // sex off her concept (A293).
   test('a possessor linked to the subject', () => {
     const own = { kind: 'coreferent', slot: 'subject' } as const;
-    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toMatchObject({
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toEqual({
       en: 'the man sees a friend of his.', it: "l'uomo vede un suo amico.", fr: "l'homme voit un ami à lui.",
-      de: 'der Mann sieht einen Freund von ihm.', pt: 'o homem vê um amigo seu.', ja: '男は自分の友達を見ます。',
+      de: 'der Mann sieht einen Freund von ihm.', es: 'el hombre ve a un amigo suyo.', pt: 'o homem vê um amigo seu.',
+      ja: '男は自分の友達を見ます。',
     });
-    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toMatchObject({
-      it: 'la donna vede un suo amico.', fr: 'la femme voit un ami à elle.', de: 'die Frau sieht einen Freund von ihr.',
-      pt: 'a mulher vê um amigo seu.', ja: '女は自分の友達を見ます。',
+    expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: ind('FRIEND', { possessor: own }) }))).toEqual({
+      en: 'the woman sees a friend of hers.', it: 'la donna vede un suo amico.', fr: 'la femme voit un ami à elle.',
+      de: 'die Frau sieht einen Freund von ihr.', es: 'la mujer ve a un amigo suyo.', pt: 'a mulher vê um amigo seu.',
+      ja: '女は自分の友達を見ます。',
     });
   });
 

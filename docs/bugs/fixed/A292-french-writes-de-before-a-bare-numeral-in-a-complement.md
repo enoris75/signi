@@ -31,7 +31,7 @@ les deux bâtons`. So is a relation that governs *de* itself (`vient de deux mai
 chiens`). The other six languages write no article before a bare counted companion (`with three
 dogs`, `con tre cani`, 三匹の犬と; for de/es/pt see A291).
 
-**Related:** [A289](../A-must-fix/A289-french-definite-object-with-a-numeral-drops-its-article.md) is the
+**Related:** [A289](../fixed/A289-french-definite-object-with-a-numeral-drops-its-article.md) is the
 opposite problem on the direct object. There `objectArtFor` drops the definite article of a counted
 object (`lit deux livres` for *the two books*). The two bugs share C31's rule, that a numeral replaces
 only the indefinite, but they are in different code and neither fix touches the other's rows.
