@@ -565,10 +565,12 @@ export function toggleInterrogative(prev: PhraseSelection): PhraseSelection {
 // Mark the slot this period's wh-question asks about, or unmark it (P09-E12 M6). One per period, so
 // marking one moves the mark; marking makes the period a question, which is what lights the border's
 // toggle, and ends an existential, which has no wh-question. A who / what set on the old slot does
-// not carry over to the new one. Unmarking leaves the yes/no question standing.
+// not carry over to the new one. Unmarking takes the question with it, undoing the mark: the console
+// prints a wh-question as its gap alone (`/wh obj`, no `/ask`), so a yes/no left behind would be a
+// question the user never asked for.
 export function setQuestionRole(prev: PhraseSelection, role: QuestionRole | undefined): PhraseSelection {
   if (prev.questionRole === role) return prev;
-  if (!role) return { ...prev, questionRole: undefined, questionAnimate: undefined };
+  if (!role) return { ...prev, ...NOT_A_QUESTION };
   return {
     ...setInterrogative(prev, true),
     questionRole: role,

@@ -379,8 +379,8 @@ describe('the set-value reducers', () => {
     const who = R.setQuestionAnimate(what, true);
     // Moving the mark takes the who / what chosen for the old slot with it.
     expect(R.setQuestionRole(who, 'subject')).toMatchObject({ questionRole: 'subject', questionAnimate: undefined });
-    // Unmarking leaves the yes/no question standing.
-    expect(R.toggleQuestionRole(who, 'directObject')).toMatchObject({ interrogative: true, questionRole: undefined, questionAnimate: undefined });
+    // Unmarking takes the question with it: no yes/no is left behind.
+    expect(R.toggleQuestionRole(who, 'directObject')).toMatchObject({ interrogative: false, questionRole: undefined, questionAnimate: undefined });
     expect(R.setInterrogative(who, false)).toMatchObject({ interrogative: false, questionRole: undefined, questionAnimate: undefined });
     expect(R.setImperative(who, true)).toMatchObject({ questionRole: undefined });
     // Marking a slot ends an existential; an existential unmarks the slot.

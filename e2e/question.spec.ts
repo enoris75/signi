@@ -54,9 +54,9 @@ test.describe('the question', () => {
       ja: '猫は誰を見ますか？',
     });
 
-    // Unmarking leaves the yes/no question standing.
+    // Unmarking takes the question with it: no yes/no is left behind.
     await app.satellite('directObjectQuestion').click();
-    await app.expectSentences({ en: 'does the cat see the food?' });
+    await app.expectSentences({ en: 'the cat sees the food.' });
   });
 
   test('the existential on the subject’s ring says there is', async ({ app, page }) => {
