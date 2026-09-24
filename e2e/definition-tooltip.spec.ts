@@ -2748,6 +2748,81 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('a questo tempo');
   });
 
+  // P09-E24's time, degree and place words (localization B80, B89, B90): one row per ticket.
+  test('a frequency adverb as a locative, and a time adverb as "after" (localization B80: OFTEN, LATER)', async ({
+    app,
+    page,
+  }) => {
+    // OFTEN is the locative complement gloss on CASE_INSTANCE under `many`: REPEATEDLY has "at many times".
+    await app.setUiLanguage('de');
+    await app.buildClause('CAT', 'EAT');
+    const often = page.locator('[data-testid="typeahead-option"][data-concept="OFTEN"]');
+    const later = page.locator('[data-testid="typeahead-option"][data-concept="LATER"]');
+    await app.openVerbAdverb('oft');
+    await expect(often).toBeVisible();
+    await often.hover();
+    await expect(page.locator(tooltip)).toHaveText('in vielen Fällen');
+
+    // Japanese よく is also WELL's word; the row is OFTEN's by its concept.
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('よく');
+    await expect(often).toBeVisible();
+    await often.hover();
+    await expect(page.locator(tooltip)).toHaveText('多くの場合で');
+
+    // LATER is C29's `after` relation on TIME, with NOW's "this".
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('plus tard');
+    await expect(later).toBeVisible();
+    await later.hover();
+    await expect(page.locator(tooltip)).toHaveText('après ce temps');
+
+    await app.setUiLanguage('es');
+    await app.openVerbAdverb('más tarde');
+    await expect(later).toBeVisible();
+    await later.hover();
+    await expect(page.locator(tooltip)).toHaveText('después de este tiempo');
+  });
+
+  test('a place adverb on FAR, and an intensifier no picker offers (localization B89: FAR_AWAY, A_LITTLE)', async ({
+    app,
+    page,
+  }) => {
+    await app.setUiLanguage('de');
+    await app.buildClause('CAT', 'EAT');
+    const farAway = page.locator('[data-testid="typeahead-option"][data-concept="FAR_AWAY"]');
+    await app.openVerbAdverb('weit');
+    await expect(farAway).toBeVisible();
+    await farAway.hover();
+    await expect(page.locator(tooltip)).toHaveText('an einem fernen Ort');
+
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('遠く');
+    await expect(farAway).toBeVisible();
+    await farAway.hover();
+    await expect(page.locator(tooltip)).toHaveText('遠い場所で');
+
+    // A_LITTLE is an intensifier, like VERY: the verb's adverb picker leaves it out, so its gloss —
+    // VERY's with LOW — is checked where the tooltip reads it from.
+    await app.openVerbAdverb('少し');
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="A_LITTLE"]')).toHaveCount(0);
+    const res = await page.request.get('/api/concepts?role=adverb');
+    const { concepts } = (await res.json()) as { concepts: { id: string; definitions?: Record<string, string> }[] };
+    expect(concepts.find((c) => c.id === 'A_LITTLE')?.definitions).toMatchObject({
+      de: 'zu einer niedrigen Ebene', ja: '低い段階へ',
+    });
+  });
+
+  test('the universal thing pronoun is "all things" (localization B90: EVERYTHING)', async ({ page }) => {
+    // EVERYTHING is a pronoun of the indefinite slot, which the person chooser does not offer (as
+    // SOMETHING); its gloss is SOMETHING's genus under `all`.
+    const res = await page.request.get('/api/concepts?role=pronoun');
+    const { concepts } = (await res.json()) as { concepts: { id: string; definitions?: Record<string, string> }[] };
+    expect(concepts.find((c) => c.id === 'EVERYTHING')?.definitions).toMatchObject({
+      en: 'all things', de: 'alle Dinge', ja: 'すべてのもの',
+    });
+  });
+
   // P11's kin terms (localization B68–B74): one row per ticket, each on what that ticket's shape
   // turns on — the coordination, the relative clause that goes around a genus, the predicative a
   // copula wants, the genitive, the chain of two, the negated relative and the adverb Japanese needs.

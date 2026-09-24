@@ -142,6 +142,37 @@ export const pronouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's *everything* (localization B90): SOMETHING's universal, a thing pronoun with the same
+    // `indefinite` slot and `thing` flag, so it stays a phrase ("vede tutto", not a clitic). Unlike
+    // SOMETHING it has **no negative form**: it does not swap under negation ("does not see
+    // everything" is *not all*, "non vede tutto"). German alles is neuter; Italian, Spanish and
+    // Portuguese agree in the masculine. Japanese すべて takes を and は as a noun does.
+    //
+    // With OTHER it is a fused phrase in five languages (`with_other`), as SOMETHING's *autre chose*
+    // is: *tutto il resto*, *tout le reste*, *todo lo demás*, *todo o resto*, and German *alles
+    // andere*, which declines (*mit allem anderen*) and so names its dative (`with_other_disjunctive`).
+    // English "everything else" is OTHER's own `after_pronoun`.
+    //
+    // Glossed as SOMETHING's genus under `all`, EVERYWHERE's "in all places": "all things", a
+    // countable plural where the word itself is the mass pronoun.
+    id: 'EVERYTHING',
+    role: 'pronoun',
+    slot: 'indefinite',
+    description: 'all things; the whole of what there is',
+    definition: { subject: { concept: 'THING', definiteness: 'all', number: 'plural' } },
+    synonym: 'everything',
+    emoji: '🌐',
+    forms: {
+      en: { base: 'everything', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'everything', disjunctive: 'everything' },
+      it: { base: 'tutto', person: '3', number: 'singular', gender: 'masc', thing: '1', object: 'tutto', disjunctive: 'tutto', with_other: 'tutto il resto' },
+      fr: { base: 'tout', person: '3', number: 'singular', gender: 'masc', thing: '1', object: 'tout', disjunctive: 'tout', with_other: 'tout le reste' },
+      de: { base: 'alles', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'alles', disjunctive: 'allem', with_other: 'alles andere', with_other_disjunctive: 'allem anderen' },
+      es: { base: 'todo', person: '3', number: 'singular', gender: 'masc', thing: '1', object: 'todo', disjunctive: 'todo', with_other: 'todo lo demás' },
+      ja: { base: 'すべて', person: '3', number: 'singular', thing: '1' },
+      pt: { base: 'tudo', person: '3', number: 'singular', gender: 'masc', thing: '1', object: 'tudo', disjunctive: 'tudo', with_other: 'todo o resto' },
+    },
+  },
+  {
     // P09-E40's *someone*: SOMETHING's person counterpart. It is a full phrase for the same reason
     // SOMETHING is — the concept's `slot: 'indefinite'`, which the lexicon hands the engines as the
     // `indefinite` form (see `isPronounElement`) — and it carries no `thing`, so it is a person where
