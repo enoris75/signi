@@ -103,3 +103,37 @@ Readings to judge on authoring:
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 LEAD in German and Japanese (a causative with a goal inside the caused clause: *eine Person
 veranlassen, zu einem Ort zu gehen*, 人が場所へ行くようにする).
+
+## Done
+
+Shipped 2026-09-24. **Six words seeded**, all the E24 verbs this file proposed: RUN_AWAY and WALK in
+[motion.ts](../../../packages/backend/src/concepts/verbs/motion.ts) (after LEAVE_DEPART and GO_OUT),
+SIT_DOWN and STAND_UP there too (after MOVE_ONESELF), LEAD and HOLD_GRASP in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts) (after BRING and HOLD),
+each with its [NONFINITE](../../../packages/backend/src/concepts/verbs/nonfinite.ts) entry and a row in
+verb.test.ts's Italian table. HOLD gained `synonym: 'contain'` beside HOLD_GRASP's `'grasp'`; RUN_AWAY
+reads `'flee'` and LEAD `'guide'`. **Three glosses** ship, rendered from the shipped seed:
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| RUN_AWAY | to leave fast | partire velocemente | partir vite | schnell weggehen | partir rápido | 速く出発する | partir rapidamente |
+| LEAD | to cause a person to go to a place | indurre una persona ad andare a un luogo | induire une personne à aller à un lieu | eine Person veranlassen, zu einem Ort zu gehen | inducir a una persona a ir a un lugar | 人が場所へ行くようにする | induzir uma pessoa a ir a um lugar |
+| HOLD_GRASP | to have an object in the hand | avere un oggetto nella mano | avoir un objet dans la main | einen Gegenstand in der Hand haben | tener un objeto en la mano | 手で物体を持つ | ter um objeto na mão |
+
+**SIT_DOWN, STAND_UP and WALK stay on the literal** (readings 2 and 3), and TAKE_AWAY was not seeded
+(REMOVE says it). Pinned in
+[posture-and-aspect-verbs.test.ts](../../../packages/engine/test/posture-and-aspect-verbs.test.ts);
+LEAD's German and Japanese are e2e rows.
+
+### What landed differently from the plan
+
+1. **German *zu Fuß gehen* needed no fallback.** B40's `particleGap` already writes a particle that is
+   a word apart in the zu-infinitive, so WALK says *zu Fuß zu gehen*, *ist zu Fuß gegangen*, *…, der zu
+   Fuß geht*. The one oddity is the separable bracket with a goal: *der Kater geht zum Haus zu Fuß*,
+   where *geht zu Fuß zum Haus* is the commoner order. It is the placement every separable particle
+   gets, and is left.
+2. **The Romance posture verbs are pronominal throughout**, their clitic inside each form as
+   MOVE_ONESELF's: *si è seduta*, *s'est assise*, *siediti*, *assieds-toi*, *siéntate*, *sente-se*.
+   Italian's future is *siederò*; French is asseoir's *-ie-* conjugation.
+3. **Spanish LEAD is *guiar*, and the personal *a* is the engine's human-only rule**: *guía al hombre*
+   but *guía el perro*, as FOLLOW's lexeme is the only one to mark every object. No engine change.

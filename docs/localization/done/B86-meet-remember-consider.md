@@ -74,3 +74,35 @@ Readings to judge on authoring:
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 CONSIDER in German and Italian (THINK's lexical topic preposition in a verb's gloss: *an ein Ding
 denken*, *pensare a una cosa*).
+
+## Done
+
+Shipped 2026-09-24. **Three words seeded** in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts): REMEMBER and CONSIDER
+(after KNOW_ACQUAINTED) and MEET (after FIND), each with its
+[NONFINITE](../../../packages/backend/src/concepts/verbs/nonfinite.ts) entry and a row in
+verb.test.ts's Italian table. REMEMBER is `stative` (*ricordava*, 覚えています, 覚えていません). **Two
+glosses** ship:
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| REMEMBER | still to know facts | conoscere ancora fatti | connaître encore des faits | noch Tatsachen kennen | conocer todavía hechos | 事実をまだ知る | conhecer ainda fatos |
+| CONSIDER | to think about a thing | pensare a una cosa | penser à une chose | an ein Ding denken | pensar en una cosa | ものについて考える | pensar em uma coisa |
+
+**MEET stays on the literal by design** (reading 3). Pinned in
+[posture-and-aspect-verbs.test.ts](../../../packages/engine/test/posture-and-aspect-verbs.test.ts);
+CONSIDER's German and Italian are e2e rows.
+
+### What landed differently from the plan
+
+1. **German *sich erinnern an* combines as proposed**: *erinnert sich an den Mann*, *hat sich an ihn
+   erinnert*, *…, sich an den Hund zu erinnern*. No fallback was needed.
+2. **French *se rappeler* needed two engine fixes**, as the corpus's first transitive pronominal
+   verb. Its clitic now stays ahead of an object clitic (*se le rappelle*, *ne se la rappelle pas*,
+   *se l'est rappelé*, *veut se le rappeler*) and behind a third-person object in an affirmative
+   command (*rappelle-le-toi*), in frCliticize.ts and frEnclitic.ts; and a lexeme whose *se* is the
+   indirect object (`reflexive_indirect`) agrees its être participle as an avoir one does, never with
+   the subject (*la chatte s'est rappelé l'homme*), in aspectVerbFr.ts and verbGroupInfinitiveFr.ts.
+   Each has unit tests.
+3. **MEET's Spanish *encontrarse con*** is stored reflexive with its preposition, as MARRY's
+   *casarse con*: *se encuentra con él*, *encuéntrate con el hombre*. Japanese 会う takes に.
