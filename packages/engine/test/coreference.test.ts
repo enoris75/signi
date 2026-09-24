@@ -109,3 +109,67 @@ describe('a possessor linked to a subject that is not there to name', () => {
     expect(() => sayAll(clause(cat, 'RUN'))).toThrow(/cannot stand in the subject itself/);
   });
 });
+
+// A293. `subjectBinding` takes English's gender from the subject's lexeme, and an English noun records
+// none, so a person falls to the unmarked *his* unless the plan names a gender. That is the right
+// default for a person of unknown sex (PERSON, FRIEND), but MOTHER, WOMAN, SISTER, DAUGHTER, WIFE and
+// AUNT are female by meaning: "your mother sees his book" says she sees a man's. German, reading its
+// grammatical feminine, already says "ihr Buch". The link is what brings it in: with a pronominal
+// possessor the plan names the owner itself, and *his* is then its own pick.
+describe('known bugs: english writes his for a possessor linked to a female subject whose english noun records no gender (A293)', () => {
+  const her = (subject: NounPhrase) => sees(subject, np('BOOK', { possessor: link })).en;
+  const you = { kind: 'pronominal', person: '2', number: 'singular' } as const;
+
+  test.fails('your mother', () => {
+    expect(her(np('MOTHER', { possessor: you }))).toBe('your mother sees her book.');
+  });
+
+  test.fails('the woman', () => {
+    expect(her(np('WOMAN'))).toBe('the woman sees her book.');
+  });
+
+  test.fails('the sister', () => {
+    expect(her(np('SISTER'))).toBe('the sister sees her book.');
+  });
+
+  test.fails('the daughter', () => {
+    expect(her(np('DAUGHTER'))).toBe('the daughter sees her book.');
+  });
+
+  test.fails('the wife', () => {
+    expect(her(np('WIFE'))).toBe('the wife sees her book.');
+  });
+
+  test.fails('the aunt', () => {
+    expect(her(np('AUNT'))).toBe('the aunt sees her book.');
+  });
+
+  test.fails('with OWN', () => {
+    expect(sees(np('MOTHER'), np('BOOK', { possessor: link, possessorOwn: true })).en).toBe('the mother sees her own book.');
+  });
+
+  test.fails('inside a relative clause on the subject', () => {
+    const mother = np('MOTHER', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('BOOK', { possessor: link }) } });
+    expect(sayAll(clause(mother, 'RUN')).en).toBe('the mother who sees her book runs.');
+  });
+
+  test('regression: the other six, a gender the plan names, a man, a person of unknown sex, the plural and the pronominal possessor', () => {
+    expect(sees(np('MOTHER', { possessor: you }), np('BOOK', { possessor: link }))).toMatchObject({
+      it: 'tua madre vede il suo libro.', fr: 'ta mère voit son livre.', de: 'deine Mutter sieht ihr Buch.',
+      es: 'tu madre ve su libro.', ja: 'あなたのお母さんは自分の本を見ます。', pt: 'a sua mãe vê o seu livro.',
+    });
+    expect(her(np('WOMAN', { gender: 'fem' }))).toBe('the woman sees her book.');
+    expect(her(np('FRIEND', { gender: 'fem' }))).toBe('the friend sees her book.');
+    expect(her(np('MAN'))).toBe('the man sees his book.');
+    expect(her(np('FATHER'))).toBe('the father sees his book.');
+    // Not guessed: a person whose sex nothing records keeps the unmarked possessive.
+    expect(her(np('PERSON'))).toBe('the person sees his book.');
+    expect(her(np('MOTHER', { number: 'plural' }))).toBe('the mothers see their book.');
+    // A pronominal possessor names its owner in the plan, so the link is not involved.
+    const third = (gender?: 'fem') => sees(np('MOTHER'), np('BOOK', {
+      possessor: { kind: 'pronominal', person: '3', number: 'singular', ...(gender ? { gender } : {}) },
+    }));
+    expect(third()).toMatchObject({ en: 'the mother sees his book.', de: 'die Mutter sieht sein Buch.' });
+    expect(third('fem')).toMatchObject({ en: 'the mother sees her book.', de: 'die Mutter sieht ihr Buch.' });
+  });
+});
