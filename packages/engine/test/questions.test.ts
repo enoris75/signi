@@ -1170,12 +1170,29 @@ describe('known bugs: an English passive agent question strands by ahead of the 
   const givenToTheChild = (questionAnimate?: boolean) =>
     ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements: { terminus: { phrase: np('CHILD') } } }), 'subject', questionAnimate);
 
-  test.fails('who is the book given to the child by?', () => {
+  test('who is the book given to the child by?', () => {
     expect(sayAll(givenToTheChild(true)).en).toBe('who is the book given to the child by?');
   });
 
-  test.fails('what is the book given to the child by?', () => {
+  test('what is the book given to the child by?', () => {
     expect(sayAll(givenToTheChild()).en).toBe('what is the book given to the child by?');
+  });
+
+  test('the recipient moves ahead of by in the past, the negative, a plural patient and a pronoun', () => {
+    const given = (verbPhrase: Partial<VerbPhrase>, book = np('BOOK'), recipient = np('CHILD')) =>
+      say(ask(clause(someone, 'GIVE', { verbPhrase: { ...passive, ...verbPhrase }, directObject: book, complements: { terminus: { phrase: recipient } } }), 'subject', true), 'en');
+    expect(given({ tense: 'past' })).toBe('who was the book given to the child by?');
+    expect(given({ negative: true })).toBe('who is the book not given to the child by?');
+    expect(given({}, np('BOOK', { number: 'plural' }))).toBe('who are the books given to the child by?');
+    expect(given({}, np('BOOK'), np('THIRD_PERSON'))).toBe('who is the book given to him by?');
+  });
+
+  test('rule 1: an adjunct stays after the stranded by, as D2 has it', () => {
+    const complements = { terminus: { phrase: np('CHILD') }, locative: { phrase: np('HOUSE') } };
+    expect(say(ask(clause(someone, 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements }), 'subject', true), 'en'))
+      .toBe('who is the book given to the child by in the house?');
+    expect(say(clause(np('MAN'), 'GIVE', { verbPhrase: passive, directObject: np('BOOK'), complements }), 'en'))
+      .toBe('the book is given by the man to the child in the house.');
   });
 
   test('regression: the other six front the agent, and the statement keeps by-phrase then recipient', () => {

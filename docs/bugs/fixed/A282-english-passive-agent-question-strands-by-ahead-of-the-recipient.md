@@ -53,3 +53,18 @@ Pinned by `known bugs: an English passive agent question strands by ahead of the
 [questions.test.ts](../../../packages/engine/test/questions.test.ts).
 
 Found by the P09-E16 coverage audit on 2026-09-24.
+
+## Resolved
+
+Fixed 2026-09-24 under **rule 1**: *by* strands after the verb's arguments only.
+[en/predicateParts.ts](../../../packages/engine/src/languages/en/predicateParts.ts)'s `predicateWords`
+now writes the terminus between the participle and the bare *by* when the agent is the question's gap
+(`agentPhrase` returns the lone `AGENT_PREP`), and drops it from the trailing complements. An adjunct
+keeps the by-phrase's slot after it, so P09-E16 D2's "who is the food eaten by in the house?" is
+unchanged, and so is every statement ("the book is given by the man to the child").
+
+- **Tests:** [questions.test.ts](../../../packages/engine/test/questions.test.ts) → *known bugs: an
+  English passive agent question strands by ahead of the recipient (A282)*: both pins now pass, plus
+  the past, the negative ("who is the book not given to the child by?"), a plural patient, a pronoun
+  recipient ("who is the book given to him by?"), and rule 1 with an adjunct ("who is the book given
+  to the child by in the house?") beside its statement.
