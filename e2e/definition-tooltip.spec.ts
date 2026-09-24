@@ -273,6 +273,8 @@ test.describe('word definition tooltip', () => {
     test(`a reflexive-genus verb definition renders (localize-seed C17: ${id})`, async ({ app, page }) => {
       const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
       await app.setSubject('CAT');
+      // Park the pointer: left where the list opens, it held GOVERN's tooltip open beside GO's.
+      await page.mouse.move(0, 0);
 
       await app.verbInput.fill(query);
       await expect(option).toBeVisible();
@@ -2497,6 +2499,8 @@ test.describe('word definition tooltip', () => {
   test('a verb whose gloss may not repeat its own lemma (localization B62: DO)', async ({ app, page }) => {
     const option = page.locator('[data-testid="typeahead-option"][data-concept="DO"]');
     await app.setSubject('CAT');
+    // Park the pointer: left where the list opens, it held UNDO's tooltip open beside DO's.
+    await page.mouse.move(0, 0);
 
     await app.verbInput.fill('do');
     await expect(option).toBeVisible();
