@@ -76,3 +76,27 @@ Pinned by `known bugs: a Japanese relative drops the relation its gap's particle
 Found on 2026-09-24 while landing the P09-E13 coverage audit: lane R pinned the role-gap
 relative's comitative neighbour as a regression and flagged its Japanese. The opponent rows were
 added the same day from the P09-E22 coverage audit.
+
+## Resolved
+
+2026-09-24. [ja/relativeClauseSegs.ts](../../../packages/engine/src/languages/ja/relativeClauseSegs.ts)
+gives a `comitative` gap 一緒に and an `opponent` gap 相手にして, from Japanese constants
+(`JA_GAP_RELATION` in [ja/ja.consts.ts](../../../packages/engine/src/languages/ja/ja.consts.ts));
+nothing seeded says 相手にして, and 一緒に keeps TOGETHER's reading いっしょに.
+[ja/predicateSegs.ts](../../../packages/engine/src/languages/ja/predicateSegs.ts) takes the word as a
+new trailing `gapRelation` argument and seats it where the particle's phrase would stand: ahead of a
+manner adverb (猫が一緒に速く走る犬), behind a `frequency` one (猫がいつも一緒に走る犬). The decisions:
+
+- the words are constants, not lexemes;
+- a clause whose adverb is already TOGETHER says it once (猫が一緒に走る犬);
+- a verb that names its own opponent marker (`opponent_prep`, 戦う's と) gets nothing inserted:
+  猫が戦う犬は走ります。
+
+Still open, as the bug file left them: the path on a direction or locative gap (猫が跳ぶ壁, which
+spatialRelations.test.ts still leaves Japanese out of), and the topic and cause gaps.
+
+Guarded by `known bugs: a Japanese relative drops the relation its gap's particle carried (A290)` in
+[relative.test.ts](../../../packages/engine/test/relative.test.ts): the four former `test.fails`,
+the two regression tests, and new tests for tense, negation, adverb order, an object in the clause,
+the furigana, and the `opponent_prep` verb; plus a unit case in
+[relativeClauseSegs.test.ts](../../../packages/engine/src/languages/ja/relativeClauseSegs.test.ts).

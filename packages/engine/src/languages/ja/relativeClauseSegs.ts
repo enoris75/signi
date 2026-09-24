@@ -1,12 +1,14 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
-import { JA_SOU } from './ja.consts.js';
+import { opponentLink } from '../../functions/opponentLink.js';
+import { JA_GAP_RELATION, JA_SOU } from './ja.consts.js';
 import { slotSegs } from './slotSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
 import { predicateSegs } from './predicateSegs.js';
+import { wordSeg } from './wordSeg.js';
 
 /**
  * The segments of a noun phrase's relative clause, empty without one. `npSegs` puts them before the
@@ -46,5 +48,15 @@ export function relativeClauseSegs(np: ResolvedNounPhrase): RubySegment[] {
   // A head that fills the object slot is the thing possessed of an existential possession, and picks
   // its verb: 家にいる猫, 家にある壁 (A217).
   const animateObject = rel.headRole === 'directObject' ? isAnimate([np]) : undefined;
-  return [...clauseSubjectSegs, ...agentSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate, animateObject)];
+  // The gap's particle goes with the gap. Where it was all that said how the head takes part — the
+  // comitative's と, the opponent's を相手に — the clause says the relation before its predicate
+  // instead, as a manner adverb would sit: 猫が一緒に走る犬, 猫が相手にして遊ぶ犬 (A290). Not twice, where
+  // the clause already says TOGETHER; and not for a verb whose own case frame names its opponent
+  // (`opponent_prep`, 戦う's と), which already says whom it acts against: 猫が戦う犬.
+  const gapWord = JA_GAP_RELATION[rel.headRole as keyof typeof JA_GAP_RELATION];
+  const saysItAlready = rel.headRole === 'comitative' ? rel.verbPhrase.modifier?.conceptId === 'TOGETHER'
+    : rel.headRole === 'opponent' ? opponentLink(rel.verbPhrase.verb.forms) !== ''
+    : false;
+  const gapRelation = gapWord && !saysItAlready ? [wordSeg(gapWord.base, gapWord.reading)] : [];
+  return [...clauseSubjectSegs, ...agentSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate, animateObject, undefined, gapRelation)];
 }

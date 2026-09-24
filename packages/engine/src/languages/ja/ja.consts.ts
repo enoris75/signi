@@ -345,6 +345,15 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
 export const JA_SOU: ResolvedComplement = {
   phrase: { conjuncts: [{ head: { conceptId: 'SOU', forms: { base: 'そう' } }, adjectives: [], nounModifiers: [] }], agreement: {} },
 };
+// What a relative clause says for the relation its gap's particle carried, where the verb alone does
+// not (A290). The comitative's と goes with the gap and leaves nothing to say the head was company, so
+// the clause says 一緒に (TOGETHER's word): 猫が一緒に走る犬. The opponent's を相手に is を相手にして
+// shortened, and with its を gapped only the verb する can still take the head as its object:
+// 猫が相手にして遊ぶ犬.
+export const JA_GAP_RELATION: Partial<Record<ComplementType, { base: string; reading: string }>> = {
+  comitative: { base: '一緒に', reading: 'いっしょに' },
+  opponent: { base: '相手にして', reading: 'あいてにして' },
+};
 // The existential いる is the engine's word, not a lexeme — BE's own is the copula です — so its two
 // registers of respect live here beside it (P11-E1, see `jaRespectVerb`): 尊敬語 いらっしゃる,
 // 「いる」の尊敬語, and 謙譲語 おる, 「いる」の謙譲語 (大辞林, デジタル大辞泉) — あなたのお母さんは家に

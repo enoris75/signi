@@ -1663,11 +1663,11 @@ describe('known bugs: a Japanese relative drops the relation its gap\'s particle
     ({ headRole: 'comitative', subject: np('CAT'), verbPhrase });
   const playsAgainst: RelativeClause = { headRole: 'opponent', subject: np('CAT'), verbPhrase: { verb: 'PLAY_GAME' } };
 
-  test.fails('the opponent gap says 相手にして, on a subject', () => {
+  test('the opponent gap says 相手にして, on a subject', () => {
     expect(sayAll(clause(np('DOG', { relative: playsAgainst }), 'RUN')).ja).toBe('猫が相手にして遊ぶ犬は走ります。');
   });
 
-  test.fails('the opponent gap says 相手にして, on an object', () => {
+  test('the opponent gap says 相手にして, on an object', () => {
     expect(sayAll(clause(np('MAN'), 'SEE', { directObject: np('DOG', { relative: playsAgainst }) })).ja)
       .toBe('男は猫が相手にして遊ぶ犬を見ます。');
   });
@@ -1683,12 +1683,12 @@ describe('known bugs: a Japanese relative drops the relation its gap\'s particle
     });
   });
 
-  test.fails('the comitative gap says 一緒に, on an object', () => {
+  test('the comitative gap says 一緒に, on an object', () => {
     expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith() }) })).ja)
       .toBe('女は猫が一緒に走る犬を見ます。');
   });
 
-  test.fails('the comitative gap says 一緒に, on a subject', () => {
+  test('the comitative gap says 一緒に, on a subject', () => {
     expect(sayAll(clause(np('FRIEND', { relative: { headRole: 'comitative', subject: np('MAN'), verbPhrase: { verb: 'ACT' } } }), 'RUN')).ja)
       .toBe('男が一緒に行動する友達は走ります。');
   });
@@ -1704,5 +1704,42 @@ describe('known bugs: a Japanese relative drops the relation its gap\'s particle
     });
     expect(sayAll(clause(np('WOMAN'), 'SEE', { directObject: np('DOG', { relative: runsWith({ verb: 'RUN', modifier: 'TOGETHER' }) }) })).ja)
       .toBe('女は猫が一緒に走る犬を見ます。');
+  });
+
+  test('the relation word sits with the adverbs, ahead of the predicate, and keeps its reading', () => {
+    const dogThat = (relative: RelativeClause) => sayAll(clause(np('DOG', { relative }), 'RUN')).ja;
+    expect({
+      past: dogThat(runsWith({ verb: 'RUN', tense: 'past' })),
+      negated: dogThat(runsWith({ verb: 'RUN', negative: true })),
+      frequency: dogThat(runsWith({ verb: 'RUN', modifier: 'ALWAYS' })),
+      manner: dogThat(runsWith({ verb: 'RUN', modifier: 'FAST' })),
+      object: dogThat({ headRole: 'comitative', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') }),
+      opponentPast: dogThat({ ...playsAgainst, verbPhrase: { verb: 'PLAY_GAME', tense: 'past' } }),
+      furigana: furigana(clause(np('DOG', { relative: runsWith() }), 'RUN')),
+    }).toEqual({
+      past: '猫が一緒に走った犬は走ります。',
+      negated: '猫が一緒に走らない犬は走ります。',
+      // Behind a frequency adverb, ahead of a manner one, where the particle's phrase would stand.
+      frequency: '猫がいつも一緒に走る犬は走ります。',
+      manner: '猫が一緒に速く走る犬は走ります。',
+      object: '猫が食べ物を一緒に食べる犬は走ります。',
+      opponentPast: '猫が相手にして遊んだ犬は走ります。',
+      furigana: ['ねこ', 'いっしょに', 'はしる', 'いぬ', 'はしります'],
+    });
+  });
+
+  test('a verb that names its own opponent marker (戦う\'s と) takes no 相手にして', async () => {
+    const { translate } = await import('../src/index.js');
+    const { lookupLexicalEntry } = await import('../../backend/src/lexicon.js');
+    const FIGHT_JA: Record<string, string> = {
+      base: '戦う', reading: 'たたかう', masu_present: '戦います', masu_present_reading: 'たたかいます',
+      te: '戦って', te_reading: 'たたかって', nai: '戦わない', nai_reading: 'たたかわない',
+      role: 'verb', opponent_prep: 'と',
+    };
+    const lookup = (id: string, language: string) => id !== 'TEST_FIGHT' ? lookupLexicalEntry(id, language)
+      : language === 'ja' ? { conceptId: id, language: 'ja' as const, forms: FIGHT_JA }
+      : lookupLexicalEntry('PLAY_GAME', language);
+    const plan = clause(np('DOG', { relative: { ...playsAgainst, verbPhrase: { verb: 'TEST_FIGHT' } } }), 'RUN');
+    expect(translate(plan, lookup).find((t) => t.language === 'ja')?.text).toBe('猫が戦う犬は走ります。');
   });
 });
