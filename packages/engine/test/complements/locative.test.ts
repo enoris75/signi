@@ -1316,14 +1316,32 @@ describe('known bugs: the French locative writes en before an indefinite pronoun
   const inside = (phrase: NounPhrase, verbPhrase: Partial<VerbPhrase> = { verb: 'RUN' }) =>
     say(clause(np('CAT'), verbPhrase.verb ?? 'RUN', { verbPhrase, complements: { locative: { phrase } } }), 'fr');
 
-  test.fails('SOMETHING', () => {
+  test('SOMETHING', () => {
     expect(inside(np('SOMETHING'))).toBe('le chat court dans quelque chose.');
     expect(inside(np('SOMETHING'), { verb: 'EAT' })).toBe('le chat mange dans quelque chose.');
   });
 
-  test.fails('with a relative clause, and negated', () => {
+  test('with a relative clause, and negated', () => {
     expect(inside(np('SOMETHING', { relative: { verbPhrase: { verb: 'BURN' } } }))).toBe('le chat court dans quelque chose qui brûle.');
     expect(inside(np('SOMETHING'), { verb: 'RUN', negative: true })).toBe('le chat ne court dans rien.');
+  });
+
+  test('SOMEONE, the neuter cela, and a pronoun in a coordination go dans too', () => {
+    expect(inside(np('SOMEONE'))).toBe("le chat court dans quelqu'un.");
+    expect(inside(np('SOMEONE'), { verb: 'BE' })).toBe("le chat est dans quelqu'un.");
+    expect(inside(np('THIRD_PERSON', { gender: 'neut' }))).toBe('le chat court dans cela.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: { conjuncts: [np('HOUSE'), np('SOMETHING')], conjunction: 'and' } } },
+    }), 'fr')).toBe('le chat court dans la maison et dans quelque chose.');
+  });
+
+  test('regression: a personal pronoun keeps en, the bare noun keeps en, another relation keeps its own', () => {
+    expect(inside(np('THIRD_PERSON', { gender: 'masc' }))).toBe('le chat court en lui.');
+    expect(inside(np('THIRD_PERSON', { gender: 'neut', number: 'plural' }))).toBe('le chat court en eux.');
+    expect(inside(np('FIRST_PERSON'))).toBe('le chat court en moi.');
+    expect(inside(np('HOUSE', { definiteness: 'bare' }))).toBe('le chat court en maison.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('SOMETHING'), specifiers: [{ kind: 'path', value: 'under' }] } } }), 'fr'))
+      .toBe('le chat court sous quelque chose.');
   });
 
   test('regression: a noun, the direction, and the other six', () => {

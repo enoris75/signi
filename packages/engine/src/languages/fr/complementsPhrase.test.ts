@@ -249,6 +249,13 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(MAISON, { number: 'plural' })) }))).toBe('dans les maisons');
     });
 
+    // A352: a personal pronoun is "en lui"; an indefinite or thing pronoun goes "dans" like a noun.
+    test('a personal pronoun takes en, an indefinite or thing pronoun dans', () => {
+      const QUELQUE_CHOSE: Forms = { base: 'quelque chose', person: '3', number: 'singular', thing: '1', indefinite: '1', disjunctive: 'quelque chose' };
+      expect(complementsPhrase(complements({ locative: complement(np(IL)) }))).toBe('en lui');
+      expect(complementsPhrase(complements({ locative: complement(np(QUELQUE_CHOSE)) }))).toBe('dans quelque chose');
+    });
+
     test('a continent in plain containment is a bare en', () => {
       expect(complementsPhrase(complements({ locative: complement(np(EUROPE)) }))).toBe('en Europe');
       expect(complementsPhrase(complements({ locative: complement(np(AFRIQUE), [path('in')]) }))).toBe('en Afrique');
