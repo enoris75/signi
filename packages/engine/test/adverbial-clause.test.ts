@@ -700,6 +700,41 @@ describe('known bugs: a Japanese negated predicate before まで and 前に is n
   });
 });
 
+// A361. A345 made a negated predicate before まで / 前に the change of state 〜なくなる, and left a
+// "neither … nor" in its prenominal form: 犬が大きくも幸せでもないまで, a state holding where まで and 前に
+// want one reached. The negated coordination reached is 〜も〜もなくなる, "until the dog is neither big
+// nor happy any more". 時に keeps the plain negative. A negated lowered degree or superlative
+// (〜わけではないまで) is left to the fixer; not pinned.
+describe('known bugs: a Japanese "neither … nor" before まで and 前に is not a change of state (A361)', () => {
+  const both = (...conjuncts: string[]) => ({ phrase: { conjuncts: conjuncts.map((c) => np(c)), conjunction: 'and' } });
+  const runs = (conjunction: SubordinatingConjunction, predicative: ReturnType<typeof both>, negative = true): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN' },
+    adverbialClause: {
+      conjunction,
+      clause: { subject: np('DOG'), verbPhrase: { verb: 'BE', negative }, complements: { predicative } } as never,
+    },
+  });
+
+  test.fails('an い- and a な-adjective, until and before', () => {
+    expect(say(runs('until', both('BIG', 'HAPPY')), 'ja')).toBe('猫は犬が大きくも幸せでもなくなるまで走ります。');
+    expect(say(runs('before', both('BIG', 'HAPPY')), 'ja')).toBe('猫は犬が大きくも幸せでもなくなる前に走ります。');
+  });
+
+  test.fails('two nouns', () => {
+    expect(say(runs('until', both('FRIEND', 'LEGEND')), 'ja')).toBe('猫は犬が友達でも伝説でもなくなるまで走ります。');
+  });
+
+  test('regression: the affirmative, the other conjunctions, and the other six', () => {
+    expect(say(runs('until', both('BIG', 'HAPPY'), false), 'ja')).toBe('猫は犬が大きくて幸せになるまで走ります。');
+    expect(say(runs('when', both('BIG', 'HAPPY')), 'ja')).toBe('猫は犬が大きくも幸せでもない時に走ります。');
+    expect(sayAll(runs('until', both('BIG', 'HAPPY')))).toMatchObject({
+      en: 'the cat runs until the dog is not big and happy.', de: 'der Kater läuft, bis der Hund nicht groß und glücklich ist.',
+      fr: "le chat court jusqu'à ce que le chien ne soit pas grand et heureux.",
+    });
+  });
+});
+
 // A346. The same A323 left a 〜ている state before まで / 前に: TIRED (a た-adjective, 疲れている) gives
 // 犬が疲れているまで, 犬が疲れている前に. A323's file named it (疲れるまで is natural) and its ruling, the
 // state reached, covers it: the bare verb 疲れる, "until the dog gets tired". 時に keeps the state.
