@@ -179,8 +179,11 @@ export function complementsPhrase(
       // "todos" is the other determiner that survives a possessive, and it does not detach: it
       // stands in front of the unstressed one ("en todas mis casas"), which is why it is written
       // here rather than taken from `artFor` — that one would put the article back ("todas las").
+      // The partitive "most" stands there the same way, its article given to the possessive: "en la
+      // mayoría de mis casas" (A314).
       const every = possessive && ownDeterminer === 'all'
         ? (plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo'))
+        : possessive && ownDeterminer === 'most' ? (plural ? 'la mayoría de' : 'la mayor parte de')
         : '';
       // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
       // `nounPhrase` places it: "en las tres casas", "con mis tres perros", "en estas tres casas mías"

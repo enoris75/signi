@@ -50,6 +50,8 @@ describe('the determiners a possessive stands beside', () => {
   test('are the demonstratives, the quantifiers and the indefinite, but not all/definite/bare', () => {
     for (const d of ['this', 'that', 'some', 'many', 'few', 'no', 'indefinite']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(true);
     for (const d of ['definite', 'bare', 'all']) expect(KEPT_BESIDE_POSSESSIVE.has(d)).toBe(false);
+    // A314: `most` is a partitive whose article the possessive fills.
+    expect(KEPT_BESIDE_POSSESSIVE.has('most')).toBe(false);
   });
 
   // A329: a head left bare by a dropped indefinite keeps its (empty) slot; a bare head the plan

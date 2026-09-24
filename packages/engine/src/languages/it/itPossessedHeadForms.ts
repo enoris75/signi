@@ -22,7 +22,8 @@ import { isPlural } from './isPlural.js';
  * nothing in front of it is no Italian noun phrase ("*miei amici corrono"), so those keep the
  * definite article the possessive rides on: "i miei amici".
  */
-const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all']);
+// `most` too, whose partitive's own article carries the possessive: "la maggior parte dei suoi gatti".
+const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all', 'most']);
 
 function keepsOwnDeterminer(forms: Record<string, string>): boolean {
   const definiteness = forms['definiteness'] ?? 'definite';

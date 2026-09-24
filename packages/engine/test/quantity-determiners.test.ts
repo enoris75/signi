@@ -339,14 +339,14 @@ describe('known bugs: most with a possessive keeps the possessive out of the par
   const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
   const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
 
-  test.fails('as the subject', () => {
+  test('as the subject', () => {
     expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'most', possessor: her }), 'RUN'))).toEqual({
       en: 'most of her cats run.', it: 'la maggior parte dei suoi gatti corre.', fr: 'la plupart de ses chats courent.',
       de: 'die meisten ihrer Kater laufen.', es: 'la mayoría de sus gatos corre.', ja: '彼女のほとんどの猫は走ります。', pt: 'a maioria dos seus gatos corre.',
     });
   });
 
-  test.fails('as the object', () => {
+  test('as the object', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { number: 'plural', definiteness: 'most', possessor: my }) }))).toEqual({
       en: 'the dog sees most of my books.', it: 'il cane vede la maggior parte dei miei libri.', fr: 'le chien voit la plupart de mes livres.',
       de: 'der Hund sieht die meisten meiner Bücher.', es: 'el perro ve la mayoría de mis libros.', ja: '犬は私のほとんどの本を見ます。', pt: 'o cão vê a maioria dos meus livros.',
@@ -360,5 +360,44 @@ describe('known bugs: most with a possessive keeps the possessive out of the par
     expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'all', possessor: her }), 'RUN'))).toMatchObject({
       en: 'all her cats run.', fr: 'tous ses chats courent.', de: 'alle ihre Kater laufen.', es: 'todos sus gatos corren.', pt: 'todos os seus gatos correm.',
     });
+  });
+
+  // `most` left `KEPT_BESIDE_POSSESSIVE`, and each noun phrase writes its partitive in front of the
+  // possessive as it writes `all`: so a complement, a genitive possessor, a Spanish human object, an
+  // adjective, a mass noun and OWN go the same way. German's partitive head is genitive in any case.
+  test('a complement, a genitive possessor, a human object, an adjective, a mass noun and OWN', () => {
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { comitative: { phrase: np('CAT', { number: 'plural', definiteness: 'most', possessor: her }) } } })))
+      .toEqual({
+        en: 'the dog runs with most of her cats.', it: 'il cane corre con la maggior parte dei suoi gatti.', fr: 'le chien court avec la plupart de ses chats.',
+        de: 'der Hund läuft mit den meisten ihrer Kater.', es: 'el perro corre con la mayoría de sus gatos.', ja: '犬は彼女のほとんどの猫と走ります。',
+        pt: 'o cão corre com a maioria dos seus gatos.',
+      });
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { number: 'plural', definiteness: 'most', possessor: my }) } } })))
+      .toMatchObject({
+        de: 'der Hund läuft in den meisten meiner Häuser.', es: 'el perro corre en la mayoría de mis casas.',
+        fr: 'le chien court dans la plupart de mes maisons.', pt: 'o cão corre na maioria das minhas casas.',
+      });
+    expect(sayAll(clause(np('BOOK', { possessor: np('CAT', { number: 'plural', definiteness: 'most', possessor: her }) }), 'BURN')))
+      .toMatchObject({
+        en: 'the book of most of her cats burns.', fr: 'le livre de la plupart de ses chats brûle.', de: 'das Buch der meisten ihrer Kater brennt.',
+        es: 'el libro de la mayoría de sus gatos arde.', pt: 'o livro da maioria dos seus gatos arde.',
+      });
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('FRIEND', { number: 'plural', definiteness: 'most', possessor: my }) })).es)
+      .toBe('el perro ve a la mayoría de mis amigos.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'most', possessor: her, adjectives: ['OLD'] }), 'RUN')))
+      .toMatchObject({
+        en: 'most of her old cats run.', fr: 'la plupart de ses vieux chats courent.', de: 'die meisten ihrer alten Kater laufen.',
+        es: 'la mayoría de sus gatos viejos corre.', pt: 'a maioria dos seus gatos velhos corre.',
+      });
+    expect(sayAll(clause(np('WATER', { definiteness: 'most', possessor: my }), 'BURN')))
+      .toMatchObject({
+        en: 'most of my water burns.', fr: 'la plus grande partie de mon eau brûle.', de: 'das meiste meines Wassers brennt.',
+        es: 'la mayor parte de mi agua arde.', pt: 'a maior parte da minha água arde.',
+      });
+    expect(sayAll(clause(np('FRIEND', { number: 'plural', definiteness: 'most', possessor: my, possessorOwn: true }), 'RUN')))
+      .toMatchObject({
+        en: 'most of my own friends run.', fr: 'la plupart de mes propres amis courent.', de: 'die meisten meiner eigenen Freunde laufen.',
+        es: 'la mayoría de mis propios amigos corre.', pt: 'a maioria dos meus próprios amigos corre.',
+      });
   });
 });

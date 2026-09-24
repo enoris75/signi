@@ -35,7 +35,7 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // stands in front of the unstressed one, "de todos mis libros" (A237). The object builds that
   // phrase as well, so both go through `npText`.
   const ownDeterminer = poss.head.forms['definiteness'] ?? 'definite';
-  if (possessive && (ownDeterminer === 'all' || keptBesidePossessive(poss.head.forms))) {
+  if (possessive && (ownDeterminer === 'all' || ownDeterminer === 'most' || keptBesidePossessive(poss.head.forms))) {
     return ` de ${npText(poss)}`;
   }
   const f = possessedHeadForms(poss, 'bare');

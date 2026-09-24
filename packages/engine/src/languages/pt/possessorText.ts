@@ -38,7 +38,9 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // the one the object builds, behind a plain "de".
   if (possessive && ownDeterminer === 'all') return ` de ${npText(poss)}`;
   const detached = !!possessive && keptBesidePossessive(poss.head.forms);
-  const f = detached ? ownHeadForms(poss) : possessedHeadForms(poss, 'definite');
+  // The partitive "most" keeps its own article, which "de" fuses with and the possessive rides on:
+  // "da maioria dos seus gatos" (A314).
+  const f = detached || (possessive && ownDeterminer === 'most') ? ownHeadForms(poss) : possessedHeadForms(poss, 'definite');
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
   // A counted possessor keeps its cardinal: "um período de vinte e quatro horas" (C31).

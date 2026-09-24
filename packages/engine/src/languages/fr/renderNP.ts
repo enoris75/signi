@@ -73,6 +73,8 @@ export function renderNP(
   const detWord = ownHead ? ''
     : detached ? artFor(ownForms, plural, lead)
     : pronominal && definiteness === 'all' ? (fem ? 'toutes' : 'tous')
+    // The partitive "most" gives its article to the possessive: "la plupart de ses chats" (A314).
+    : pronominal && definiteness === 'most' ? (plural ? 'la plupart de' : 'la plus grande partie de')
     : '';
   // A cardinal stands between the determiner and the prenominal adjectives: "les deux grandes
   // maisons" (C31). A count noun whose cardinal form differs takes it here — "deux ans", where the

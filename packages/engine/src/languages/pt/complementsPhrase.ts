@@ -192,7 +192,7 @@ export function complementsPhrase(
       const possessive = ptPossessiveWord(np, false);
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
       const detached = !!possessive && keptBesidePossessive(np.head.forms);
-      const f = !!possessive && (detached || ownDeterminer === 'all')
+      const f = !!possessive && (detached || ownDeterminer === 'all' || ownDeterminer === 'most')
         ? ownHeadForms(np)
         : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);

@@ -47,3 +47,37 @@ partitive only when a possessive is present.
 | | |
 |---|---|
 | **Test** | `quantity-determiners.test.ts` → *known bugs: most with a possessive keeps the possessive out of the partitive (A314)* (2 `test.fails`, plus a regression test for A187's `each` shape and `all`) |
+
+## Resolved
+
+Fixed on 2026-09-24 as the shape above says: `most` is handled like `all`.
+
+- [possessive.ts](../../../packages/engine/src/possessive.ts): `most` left `KEPT_BESIDE_POSSESSIVE`.
+  [it/itPossessedHeadForms.ts](../../../packages/engine/src/languages/it/itPossessedHeadForms.ts) adds
+  it back to Italian's own set beside `all`, so *la maggior parte dei suoi gatti* is unchanged.
+- English [en/nounPhrase.ts](../../../packages/engine/src/languages/en/nounPhrase.ts): *most of* + the
+  dependent possessive, and OWN after it (*most of my own friends*, with A328).
+- French [fr/renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts): *la plupart de* /
+  *la plus grande partie de* in front of the prenominal possessive.
+- German [de/nounPhrase.ts](../../../packages/engine/src/languages/de/nounPhrase.ts) and
+  [de/complementsPhrase/complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts):
+  *die meisten* in the phrase's case, and the possessive, adjectives and noun in the partitive
+  genitive (*die meisten ihrer alten Kater*, *mit den meisten ihrer Kater*, *das meiste meines
+  Wassers*).
+- Spanish [es/nounPhrase.ts](../../../packages/engine/src/languages/es/nounPhrase.ts) and
+  [es/complementsPhrase.ts](../../../packages/engine/src/languages/es/complementsPhrase.ts):
+  *la mayoría de* / *la mayor parte de* + the unstressed possessive. `es/prepObjectText.ts` and
+  `es/possessorText.ts` send it to `npText` as they send *todos* (*ve a la mayoría de mis amigos*, *de
+  la mayoría de sus gatos*).
+- Portuguese [pt/nounPhrase.ts](../../../packages/engine/src/languages/pt/nounPhrase.ts),
+  [pt/complementsPhrase.ts](../../../packages/engine/src/languages/pt/complementsPhrase.ts) and
+  [pt/possessorText.ts](../../../packages/engine/src/languages/pt/possessorText.ts): the partitive's
+  own *dos* / *das*, which a preposition fuses with, and the possessive on it (*a maioria dos seus
+  gatos*, *na maioria das minhas casas*, *da maioria dos seus gatos*).
+
+Both `test.fails` in `known bugs: most with a possessive keeps the possessive out of the partitive
+(A314)` in [quantity-determiners.test.ts](../../../packages/engine/test/quantity-determiners.test.ts)
+are plain tests now. The same block gained the comitative in all seven, the locative, a genitive
+possessor, the Spanish human object, an adjective, a mass noun and OWN. The colocated
+`possessive.test.ts` and the English, Spanish and Portuguese `nounPhrase.test.ts` gained cases.
+A187's ruling for `each`, `some`, `many` and `several` is untouched.

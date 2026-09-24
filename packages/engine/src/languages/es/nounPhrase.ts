@@ -27,6 +27,9 @@ export function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives, po
     if (definiteness === 'all') {
       return `${plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo')} ${possessive} ${noun}`;
     }
+    // The partitive "most" gives its article to the unstressed possessive: "la mayoría de sus
+    // gatos", "la mayor parte de su agua" (A314).
+    if (definiteness === 'most') return `${plural ? 'la mayoría' : 'la mayor parte'} de ${possessive} ${noun}`;
     if (keptBesidePossessive(forms)) {
       const stressed = possessiveEsStressed(possessive, { gender: fem ? 'fem' : 'masc', number: plural ? 'plural' : 'singular' });
       const det = artFor(artForms(forms, adj), plural);

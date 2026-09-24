@@ -26,7 +26,7 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   // "a todos mis amigos" (A325), as `possessorText` does after "de". None of them fuses with the
   // preposition, so it simply leads the phrase.
   const possessive = esPossessiveWord(np);
-  if (possessive && ((pf['definiteness'] ?? 'definite') === 'all' || keptBesidePossessive(pf))) {
+  if (possessive && (['all', 'most'].includes(pf['definiteness'] ?? 'definite') || keptBesidePossessive(pf))) {
     return `${prep} ${npText(np)}`;
   }
   const f = possessedHeadForms(np, 'bare');

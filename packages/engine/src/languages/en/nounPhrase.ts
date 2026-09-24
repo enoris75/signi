@@ -35,6 +35,11 @@ export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: s
   // article is one of those determiners: "a friend of mine", "friends of mine" (A277).
   if (possessor && isPronominalPossessor(possessor)) {
     if (allHead) return `all ${possessiveEn(possessor)} ${a}${m}${word}`;
+    // "most" is a partitive whose "of" takes the dependent possessive, OWN with it: "most of her
+    // cats", "most of my own friends" (A314).
+    if ((forms['definiteness'] ?? 'definite') === 'most' && forms['proper'] !== '1') {
+      return `most of ${possessiveEn(possessor)}${own ? ' own' : ''} ${a}${m}${word}`;
+    }
     if (keepsDeterminerBesidePossessive(forms)) {
       // OWN goes with the possessive, which then takes its dependent form: "of my own" (A328).
       const of = own ? `${possessiveEn(possessor)} own` : possessiveEnIndependent(possessor);

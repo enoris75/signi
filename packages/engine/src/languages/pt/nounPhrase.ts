@@ -27,6 +27,9 @@ export function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives, po
       const fem = (forms['gender'] ?? 'masc') === 'fem';
       return `${plural ? (fem ? 'todas' : 'todos') : (fem ? 'toda' : 'todo')} ${possessive} ${noun}`;
     }
+    // The partitive "most" keeps its "de" + article, and the possessive rides on that article: "a
+    // maioria dos seus gatos", "a maior parte da sua água" (A314). `artFor` spells the partitive.
+    if (definiteness === 'most') return `${artFor(forms, plural)} ${possessive.split(' ').at(-1) ?? possessive} ${noun}`;
     if (keptBesidePossessive(forms)) {
       // `ptPossessiveWord` hands over the possessive with its leading definite article ("o seu");
       // postnominally that article belongs to the head's own determiner, so only the possessive goes.

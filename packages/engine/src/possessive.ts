@@ -31,11 +31,16 @@ type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';
  * came out "my friend", a definite phrase. `all` is not one of them: it prefixes the possessive
  * rather than standing in for it ("all her books", "tous ses livres", "alle ihre Bücher"), and each
  * noun phrase adds it itself — except Italian, which does stack the two ("tutti i suoi libri").
+ *
+ * `most` is not one of them either (A314). Its partitive already holds an article ("la plupart des
+ * chats", "la mayoría de los gatos"), and the possessive takes that article's place, as in Italian:
+ * "most of her cats", "la plupart de ses chats", "die meisten ihrer Kater", "la mayoría de sus gatos",
+ * "a maioria dos seus gatos". Each noun phrase writes that partitive itself, as it writes `all`.
  */
 export const KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> =
   new Set(['this', 'that', 'some', 'many', 'few', 'no', 'indefinite',
-    // P09-E25's seven keep their slot too: "each book of hers", "ogni suo libro".
-    'each', 'every', 'both', 'most', 'several', 'enough', 'such']);
+    // P09-E25's seven keep their slot too, `most` aside: "each book of hers", "ogni suo libro".
+    'each', 'every', 'both', 'several', 'enough', 'such']);
 
 /**
  * Whether a possessed head's forms keep their determiner beside a pronominal possessive, so the
