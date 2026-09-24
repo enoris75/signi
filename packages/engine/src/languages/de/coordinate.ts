@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 
 /**
@@ -7,5 +8,7 @@ import { joinConjuncts } from '../../functions/joinConjuncts.js';
  */
 export function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
   const word = el.conjunction === 'or' ? 'oder' : 'und';
-  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${word} `);
+  const parts = el.conjuncts.map(render);
+  // "sowohl der Kater als auch der Hund" (P09-E26).
+  return correlate(el, parts, ['sowohl', 'als auch']) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
 }

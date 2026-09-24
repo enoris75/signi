@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 
 /**
@@ -19,5 +20,7 @@ export function coordinateElement(el: ResolvedNounElement, render: (np: Resolved
     : el.conjunction === 'or'
       ? (/^(o|ho)/i.test(next) ? ' u ' : ' o ')
       : (/^(i|hi(?!e))/i.test(next) ? ' e ' : ' y ');
-  return joinConjuncts(el.conjuncts.map(render), ', ', link);
+  const parts = el.conjuncts.map(render);
+  // "tanto el gato como el perro" (P09-E26) — never over the concord "ni", which keeps its own join.
+  return (ni ? undefined : correlate(el, parts, ['tanto', 'como'])) ?? joinConjuncts(parts, ', ', link);
 }

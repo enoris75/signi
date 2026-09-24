@@ -37,7 +37,13 @@ export const frenchEngine: LanguageEngine = {
     }
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (phrase.coordination) {
-      sentence = `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+      // "cependant" is a connective adverb opening a clause of its own: a semicolon before it — set
+      // off by a no-break space, as French typography sets off its question mark — and a comma
+      // after it (P09-E29), "le chat court ; cependant, le chien mange".
+      const { conjunction, clause } = phrase.coordination;
+      sentence = conjunction === 'however'
+        ? `${sentence}\u00a0; ${COORD_WORDS[conjunction]}, ${renderClause(clause)}`
+        : `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause)}`;
     }
     // A yes/no question asks about the whole statement, coordinated or not, from one "est-ce que". A
     // wh-question fronts its word ahead of it ("qu'est-ce que le chat mange ?"), except over the

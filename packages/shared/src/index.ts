@@ -1,4 +1,14 @@
-export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb';
+/**
+ * A concept's part of speech. `interjection` (P09-E30) is a word outside the clause that opens it
+ * ("**hey**, the cat runs", see `PhrasePlan.interjection`); no picker offers one yet.
+ */
+export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
+
+/**
+ * The roles a word palette lists and a console slot searches — every role but `interjection`, which
+ * no picker offers yet (P09-E30) and so has no `palette.*` heading of its own.
+ */
+export type PickerRole = Exclude<GrammaticalRole, 'interjection'>;
 
 export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
 
@@ -1118,6 +1128,20 @@ export interface NounGroup {
   /** At least two — a lone phrase is not a group, it is a `NounPhrase` (see `NounElement`). */
   conjuncts: NounPhrase[];
   conjunction: CoordConjunction;
+  /**
+   * A **correlative** before the first conjunct, announcing the second: "**both** the cat **and** the
+   * dog run" (P09-E26). Five of the six other languages replace the plain *and* with a two-part word
+   * — *sia … sia*, *et … et*, *sowohl … als auch*, *tanto … como*, *tanto … quanto* — and Japanese
+   * writes も after every conjunct in place of と and of the topic は (猫も犬も走ります), as the focus
+   * particle *also* (C39) does.
+   *
+   * Valid with `and` only, and on **two** conjuncts only: *sia A sia B sia C* stretches awkwardly,
+   * so on three or more — or on `or` — the flag is ignored and the plain coordination renders.
+   * *Either … or* (the same field on `or`) and *neither … nor* are follow-ups. Japanese honours it on
+   * a slot its も can replace the particle of (subject, object); a complement keeps its plain と.
+   * Plan-only: no builder control sets it yet.
+   */
+  correlative?: true;
 }
 
 /**
@@ -1793,6 +1817,16 @@ export interface PhrasePlan {
    * is read there only — a linked clause's is ignored. Plan-only: no builder control sets it yet.
    */
   address?: NounElement;
+  /**
+   * An **interjection** before the clause — "**hey**, the cat runs", "**ehi**, il gatto corre", ねえ、猫は
+   * 走ります (P09-E30): the id of a concept of role `interjection`. A word outside the clause that takes
+   * no part in its grammar, and a sibling of the vocative, not part of it: "hey, the cat runs" has no
+   * addressee. It renders first, set off by the vocative's separator (a comma in six, 、 in Japanese)
+   * and capitalized as the sentence's first word; a vocative follows it ("Hey, Mom, run."), and both
+   * stand outside Spanish's opening ¿ ("Oye, Mamá, ¿el gato corre?"), which encloses only the question.
+   * Top clause only, like `address`. Plan-only: no builder control or picker offers it yet.
+   */
+  interjection?: string;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */
@@ -1810,10 +1844,15 @@ export const IMPERATIVE_REGISTERS: ImperativeRegister[] = ['request', 'instructi
  *  - `then`      temporal — the second clause follows *after* the first ("and then", "e poi",
  *                "und dann"). Most languages mark sequence with an adverb rather than a
  *                conjunction, so the engines render this one with its coordinator attached.
+ *  - `however`   adversative like `but`, but a connective *adverb* set off like `that_is` (P09-E29):
+ *                "the cat runs; however, the dog eats". A semicolon before it and a comma after it
+ *                in en/it/fr/es/pt; German writes *jedoch* after the second clause's finite verb
+ *                ("der Kater läuft; der Hund frisst jedoch"); Japanese opens a new sentence with
+ *                しかしながら, as it does with しかし.
  */
-export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'therefore' | 'then';
+export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'therefore' | 'then' | 'however';
 
-export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then'];
+export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then', 'however'];
 
 /**
  * The conjunctions that may join two **commands** (see `PhrasePlan.coordination`). Four of the
@@ -1822,7 +1861,8 @@ export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that
  * "but" ("come in, but don't touch anything!"), and the disjunctive "or" offering the addressee
  * a choice ("call me or write to me!").
  *
- * The other two need a *statement* on at least one side and so are not offered under a command:
+ * The other three need a *statement* on at least one side and so are not offered under a command
+ * (`however`, P09-E29, is the written adversative, which a command's "but" already covers):
  * `therefore` draws a conclusion from a premise, and an order is not a premise ("eat the bread,
  * therefore run" is broken — what works, "it's late, so go to bed", is a statement joined to a
  * command, i.e. two different moods, which a symmetric join cannot express); `that_is`

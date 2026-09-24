@@ -73,6 +73,8 @@ describe('getDb', () => {
         'concept_relations',
         'saved_phrases',
         ...roles.flatMap((r) => [`${r}_lexemes`, `${r}_forms`, `concept_${r}_links`, `${r}_relations`]),
+        // The interjection (P09-E30) is one fixed word: no within-language relations table.
+        'interjection_lexemes', 'interjection_forms', 'concept_interjection_links',
       ].sort(),
     );
   });
@@ -249,6 +251,40 @@ describe('migrations', () => {
 
     expect(columns(db, 'saved_phrases')).toContain('kind');
     expect(db.prepare("SELECT kind FROM saved_phrases WHERE id = 'old'").get()).toEqual({ kind: 'phrase' });
+  });
+
+  // P09-E30: a database whose role CHECK predates the interjection is rebuilt with the wider check,
+  // keeping its rows and the rows that point at them.
+  test('widens a legacy role check to take an interjection, keeping every row', async () => {
+    const file = path.join(tmp, 'checked.db');
+    const legacy = new Database(file);
+    legacy.exec(`
+      CREATE TABLE semantic_concepts (
+        id           TEXT PRIMARY KEY,
+        role         TEXT NOT NULL CHECK (role IN ('pronoun','noun','verb','adjective','adverb')),
+        description  TEXT NOT NULL
+      );
+      INSERT INTO semantic_concepts (id, role, description) VALUES ('WATER', 'noun', 'a clear liquid');
+      CREATE TABLE concept_definitions (
+        concept_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+        language   TEXT NOT NULL,
+        definition TEXT NOT NULL,
+        PRIMARY KEY (concept_id, language)
+      );
+      INSERT INTO concept_definitions VALUES ('WATER', 'en', 'a clear liquid');
+    `);
+    legacy.close();
+
+    const db = await track(file);
+    db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('HEY', 'interjection', 'a call')").run();
+    expect(db.prepare('SELECT id, role FROM semantic_concepts ORDER BY id').all()).toEqual([
+      { id: 'HEY', role: 'interjection' }, { id: 'WATER', role: 'noun' },
+    ]);
+    // The definition survived the rebuild: dropping the old table cascaded nothing.
+    expect(db.prepare('SELECT concept_id FROM concept_definitions').all()).toEqual([{ concept_id: 'WATER' }]);
+    expect(db.pragma('foreign_keys', { simple: true })).toBe(1);
+    expect(() => db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('X', 'particle', 'x')").run())
+      .toThrow(/CHECK constraint failed/);
   });
 
   test('migrates once: reopening a migrated database changes nothing', async () => {

@@ -349,14 +349,17 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
     // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
     const prospectiveFrequency = isFrequencyAdverb(modifier) && verbPhrase.modals.length === 0 ? modifierText : '';
+    // A connective adverb the engine asked for (German "jedoch", P09-E29) stands right behind the
+    // finite verb — behind an object pronoun, which leads the Mittelfeld: "der Hund frisst es jedoch".
+    const postFinite = phrase.postFiniteAdverb ?? '';
     const predicate = complex.zuInfinitive
-      ? prospectiveFrame(complex, {
+      ? [postFinite, ...prospectiveFrame(complex, {
         nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
         pronoun: objectPronounText,
         adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
         directionAdverb: adverb.afterObject, complements: complementsText,
-      }, verbFinal)
-      : [objectPronounText, aspectMid, ...(objectLeads ? objects : []),
+      }, verbFinal)]
+      : [objectPronounText, postFinite, aspectMid, ...(objectLeads ? objects : []),
         adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, ...(objectLeads ? [] : objects),
         adverb.nichtAfterObject, adverb.afterObject, complementsText, neg.after, bareGoverned,
         ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail, complex.particle ?? ''])];

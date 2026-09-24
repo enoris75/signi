@@ -126,6 +126,12 @@ const LABEL_SQL = `
             WHERE f.lexeme_id = al.id AND f.form_key = 'reading') AS reading
     FROM adverb_lexemes al
     JOIN concept_adverb_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 1
+    UNION ALL
+    SELECT cil.concept_id, il.language, il.lemma AS word,
+           (SELECT form_value FROM interjection_forms f
+            WHERE f.lexeme_id = il.id AND f.form_key = 'reading') AS reading
+    FROM interjection_lexemes il
+    JOIN concept_interjection_links cil ON cil.lexeme_id = il.id AND cil.is_primary = 1
   )
 `;
 
@@ -149,6 +155,10 @@ const ALIAS_SQL = `
     SELECT cal.concept_id, al.language, al.lemma AS word, al.id AS lexeme_id
     FROM adverb_lexemes al
     JOIN concept_adverb_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 0
+    UNION ALL
+    SELECT cil.concept_id, il.language, il.lemma AS word, il.id AS lexeme_id
+    FROM interjection_lexemes il
+    JOIN concept_interjection_links cil ON cil.lexeme_id = il.id AND cil.is_primary = 0
   )
   ORDER BY lexeme_id
 `;

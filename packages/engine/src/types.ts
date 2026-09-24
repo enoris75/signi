@@ -152,6 +152,11 @@ export interface ResolvedNounElement {
   /** The conjunction joining them; absent iff there is a single conjunct. */
   conjunction?: CoordConjunction;
   /**
+   * "**both** A **and** B" (`NounGroup.correlative`, P09-E26) — set only where it applies: an `and`
+   * group of exactly two conjuncts. Each engine's joiner spells its pair of words from it.
+   */
+  correlative?: true;
+  /**
    * The person/number/gender the *group* agrees as — what a verb agreeing with this slot, or an
    * adjective agreeing with it, must read. "Peter and Paul" is 3rd plural though both conjuncts
    * are singular; "il gatto e la volpe" is masculine plural though one conjunct is feminine.
@@ -448,6 +453,12 @@ export interface ResolvedPhrase {
    * itself coordinated.
    */
   coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
+  /**
+   * A connective adverb an engine asks its clause renderer to place after the finite verb — German's
+   * *jedoch*, the `however` of a coordinated second clause (P09-E29): "der Hund frisst **jedoch**
+   * das Essen". Never set by the translator; the engine sets it on the clause it is about to render.
+   */
+  postFiniteAdverb?: string;
   /**
    * A resolved infinitive complement: the clause this clause's predicate governs ("is able **to
    * eat**", see PhrasePlan.infinitiveComplement). Its verb is in the `'infinitive'` mood, so every

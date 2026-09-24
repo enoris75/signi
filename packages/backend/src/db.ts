@@ -24,7 +24,8 @@ function initSchema(db: Database.Database): void {
     -- ── Interlingual pivot ─────────────────────────────────────────────
     CREATE TABLE IF NOT EXISTS semantic_concepts (
       id           TEXT PRIMARY KEY,
-      role         TEXT NOT NULL CHECK (role IN ('pronoun','noun','verb','adjective','adverb')),
+      -- 'interjection' (P09-E30): a word outside the clause that opens it (hey) — see ROLE_CHECK below.
+      role         TEXT NOT NULL CHECK (role IN ('pronoun','noun','verb','adjective','adverb','interjection')),
       description  TEXT NOT NULL,
       emoji        TEXT,
       transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL),
@@ -144,6 +145,15 @@ function initSchema(db: Database.Database): void {
       notes    TEXT
     );
 
+    -- An interjection is one fixed word per language (hey / ehi / ねえ, P09-E30): a lemma and its
+    -- base form row, like an adverb.
+    CREATE TABLE IF NOT EXISTS interjection_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      lemma    TEXT NOT NULL,
+      notes    TEXT
+    );
+
     -- ── Per-type inflected-form tables ────────────────────────────────
     -- Only surface forms live here. Structured metadata (gender, person,
     -- number) is on the lexeme table, not in these rows.
@@ -188,6 +198,14 @@ function initSchema(db: Database.Database): void {
       UNIQUE (lexeme_id, form_key)
     );
 
+    CREATE TABLE IF NOT EXISTS interjection_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES interjection_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- 'base'
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
     -- ── Per-type concept → lexeme links ──────────────────────────────
     -- Typed FKs ensure a noun concept can only link to noun lexemes, etc.
     -- is_primary = 0 marks synonym lexemes for the same concept.
@@ -223,6 +241,13 @@ function initSchema(db: Database.Database): void {
     CREATE TABLE IF NOT EXISTS concept_adverb_links (
       concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
       lexeme_id  INTEGER NOT NULL REFERENCES adverb_lexemes(id)    ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS concept_interjection_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id)   ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES interjection_lexemes(id) ON DELETE CASCADE,
       is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
       PRIMARY KEY (concept_id, lexeme_id)
     );
@@ -323,12 +348,14 @@ function initSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_pronoun_lexemes_lang  ON pronoun_lexemes   (language);
     CREATE INDEX IF NOT EXISTS idx_adjective_lexemes_lang ON adjective_lexemes (language);
     CREATE INDEX IF NOT EXISTS idx_adverb_lexemes_lang   ON adverb_lexemes    (language);
+    CREATE INDEX IF NOT EXISTS idx_interjection_lexemes_lang ON interjection_lexemes (language);
 
     CREATE INDEX IF NOT EXISTS idx_verb_forms_lexeme      ON verb_forms      (lexeme_id);
     CREATE INDEX IF NOT EXISTS idx_noun_forms_lexeme      ON noun_forms      (lexeme_id);
     CREATE INDEX IF NOT EXISTS idx_pronoun_forms_lexeme   ON pronoun_forms   (lexeme_id);
     CREATE INDEX IF NOT EXISTS idx_adjective_forms_lexeme ON adjective_forms (lexeme_id);
     CREATE INDEX IF NOT EXISTS idx_adverb_forms_lexeme    ON adverb_forms    (lexeme_id);
+    CREATE INDEX IF NOT EXISTS idx_interjection_forms_lexeme ON interjection_forms (lexeme_id);
   `);
 
   // ── Migrations for databases created before a column existed ──────────
@@ -387,6 +414,7 @@ function initSchema(db: Database.Database): void {
   if (!conceptCols.includes('sense_of')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN sense_of TEXT');
   }
+  widenRoleCheck(db);
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.
   const savedPhraseCols = db
@@ -395,5 +423,38 @@ function initSchema(db: Database.Database): void {
     .map((c) => c.name);
   if (savedPhraseCols.length > 0 && !savedPhraseCols.includes('kind')) {
     db.exec("ALTER TABLE saved_phrases ADD COLUMN kind TEXT NOT NULL DEFAULT 'phrase'");
+  }
+}
+
+const LEGACY_ROLE_CHECK = "role IN ('pronoun','noun','verb','adjective','adverb')";
+const ROLE_CHECK = "role IN ('pronoun','noun','verb','adjective','adverb','interjection')";
+
+/**
+ * A database created before the `interjection` role (P09-E30) has the old role CHECK on
+ * `semantic_concepts`, which SQLite cannot ALTER: the reseed would fail on HEY. Rebuild the table
+ * with the widened CHECK and every row it holds — the documented SQLite procedure (new table, copy,
+ * drop, rename), with foreign keys off so dropping the old table cascades nothing into the link,
+ * definition and relation tables that point at it. The new table is the old one's own CREATE with
+ * the CHECK swapped, so its columns (and their order, which ALTER-added columns may have changed)
+ * are exactly the old ones'.
+ */
+function widenRoleCheck(db: Database.Database): void {
+  const row = db
+    .prepare<[], { sql: string }>("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'semantic_concepts'")
+    .get();
+  if (!row || !row.sql.includes(LEGACY_ROLE_CHECK)) return;
+  const create = row.sql
+    .replace(LEGACY_ROLE_CHECK, ROLE_CHECK)
+    .replace(/^CREATE TABLE\s+("?)semantic_concepts\1/, 'CREATE TABLE semantic_concepts_widened');
+  db.pragma('foreign_keys = OFF');
+  try {
+    db.transaction(() => {
+      db.exec(create);
+      db.exec('INSERT INTO semantic_concepts_widened SELECT * FROM semantic_concepts');
+      db.exec('DROP TABLE semantic_concepts');
+      db.exec('ALTER TABLE semantic_concepts_widened RENAME TO semantic_concepts');
+    })();
+  } finally {
+    db.pragma('foreign_keys = ON');
   }
 }

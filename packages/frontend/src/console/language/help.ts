@@ -49,7 +49,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
         : `${name} ${word} · ${name} [ ${word} … ]`;
     case "link":
       if (action.kind === "relative") return `${name} #n.noun · ${name} subj { … } · ${name} obj { … }`;
-      if (action.kind === "join") return `${name} and|or|but|thatis|therefore|then #n · { … }`;
+      if (action.kind === "join") return `${name} and|or|but|thatis|therefore|then|however #n · { … }`;
       if (action.kind === "subordinate" && action.link === "adverbial")
         return `${name} when|while|because|after|before #n · { … }`;
       return `${name} #n · ${name} { … }`;

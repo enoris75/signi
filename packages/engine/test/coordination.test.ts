@@ -83,6 +83,66 @@ describe('coordinated noun groups', () => {
   });
 });
 
+// P09-E26: "both … and" — a correlative on an "and" pair. Five of the six other languages replace
+// the plain "and" with a two-part word, and Japanese writes も after each conjunct, dropping と and は.
+describe('a correlative pair: both … and', () => {
+  const both = (a: NounPhrase, b: NounPhrase, conjunction: CoordConjunction = 'and'): NounElement =>
+    ({ conjuncts: [a, b], conjunction, correlative: true });
+
+  test('subject: both the cat and the dog run', () => {
+    expect(sayAll(clause(both(np('CAT'), np('DOG')), 'RUN'))).toEqual({
+      en: 'both the cat and the dog run.',
+      it: 'sia il gatto sia il cane corrono.',
+      fr: 'et le chat et le chien courent.',
+      de: 'sowohl der Kater als auch der Hund laufen.',
+      es: 'tanto el gato como el perro corren.',
+      pt: 'tanto o gato quanto o cão correm.',
+      ja: '猫も犬も走ります。',
+    });
+  });
+
+  test('object: the boy sees both the cat and the dog', () => {
+    expect(sayAll(clause(np('BOY'), 'SEE', { directObject: both(np('CAT'), np('DOG')) }))).toEqual({
+      en: 'the boy sees both the cat and the dog.',
+      it: 'il ragazzo vede sia il gatto sia il cane.',
+      fr: 'le garçon voit et le chat et le chien.',
+      de: 'der Junge sieht sowohl den Kater als auch den Hund.',
+      es: 'el niño ve tanto el gato como el perro.', // no personal a for animals, as without the pair
+      pt: 'o menino vê tanto o gato quanto o cão.',
+      ja: '男の子は猫も犬も見ます。',
+    });
+  });
+
+  test('a verbless period: Japanese closes on the last も with no particle to replace', () => {
+    expect(sayAll({ subject: both(np('CAT'), np('DOG')) })).toEqual({
+      en: 'both the cat and the dog.', it: 'sia il gatto sia il cane.', fr: 'et le chat et le chien.',
+      de: 'sowohl der Kater als auch der Hund.', es: 'tanto el gato como el perro.',
+      pt: 'tanto o gato quanto o cão.', ja: '猫も犬も。',
+    });
+  });
+
+  test('three conjuncts ignore the flag: the plain coordination (D2)', () => {
+    expect(sayAll(clause(
+      { conjuncts: [np('CAT'), np('DOG'), np('MOUSE')], conjunction: 'and', correlative: true }, 'RUN',
+    ))).toEqual(sayAll(clause({ conjuncts: [np('CAT'), np('DOG'), np('MOUSE')], conjunction: 'and' }, 'RUN')));
+  });
+
+  test('"or" ignores the flag: either … or is a follow-up (D1)', () => {
+    expect(sayAll(clause(both(np('CAT'), np('DOG'), 'or'), 'RUN')))
+      .toEqual(sayAll(clause({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'or' }, 'RUN')));
+  });
+
+  test('Japanese: a complement keeps its plain と, which も cannot replace there', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: both(np('HOUSE'), np('MARKET')) } },
+    }))).toMatchObject({
+      ja: '猫は家と市場で走ります。',
+      it: 'il gatto corre sia nella casa sia nel mercato.',
+      de: 'der Kater läuft sowohl im Haus als auch im Markt.',
+    });
+  });
+});
+
 // Two independent clauses joined by a conjunction. Symmetric, unlike a condition.
 describe('coordinated clauses', () => {
   test('copulative and adversative', () => {
@@ -162,6 +222,60 @@ describe('coordinated clauses', () => {
       de: 'der Kater läuft, und dann springt der Hund.',
       ja: '猫は走ります。それから、犬は跳びます。',
     });
+  });
+
+  // P09-E29: "however" is the written adversative — a connective adverb, not a coordinator. A
+  // semicolon before it and a comma after it where it leads its clause; German puts "jedoch" after
+  // the finite verb; Japanese opens a new sentence with it, as with しかし.
+  test('adversative adverb — "however"', () => {
+    expect(sayAll({
+      ...clause(np('CAT'), 'RUN'),
+      coordination: { conjunction: 'however', clause: clause(np('DOG'), 'EAT') },
+    })).toEqual({
+      en: 'the cat runs; however, the dog eats.',
+      it: 'il gatto corre; tuttavia, il cane mangia.',
+      fr: 'le chat court ; cependant, le chien mange.',
+      de: 'der Kater läuft; der Hund frisst jedoch.',
+      es: 'el gato corre; sin embargo, el perro come.',
+      pt: 'o gato corre; no entanto, o cão come.',
+      ja: '猫は走ります。しかしながら、犬は食べます。',
+    });
+    expect(join('however')).toMatchObject({ de: 'der Kater läuft; der Hund springt jedoch.' });
+  });
+
+  test('German "jedoch" stands after the finite verb, whatever the subject and objects are', () => {
+    const second = (plan: PhrasePlan) =>
+      say({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'however', clause: plan } }, 'de');
+    // A subject of several words: the verb is still second, "jedoch" right behind it, no inversion.
+    expect(second(clause(np('DOG', { adjectives: ['BIG'] }), 'EAT', { directObject: np('FOOD') })))
+      .toBe('der Kater läuft; der große Hund frisst jedoch das Essen.');
+    // An object pronoun leads the Mittelfeld, so "jedoch" follows it.
+    expect(second(clause(np('DOG'), 'EAT', { directObject: np('THIRD_PERSON', { gender: 'neut' }) })))
+      .toBe('der Kater läuft; der Hund frisst es jedoch.');
+    // A compound tense: behind the finite auxiliary, the infinitive closing the clause.
+    expect(second(clause(np('DOG'), 'EAT', { directObject: np('FOOD'), verbPhrase: { tense: 'future' } })))
+      .toBe('der Kater läuft; der Hund wird jedoch das Essen fressen.');
+    // A question: the verb leads, "jedoch" behind the subject it inverted over.
+    expect(say({
+      ...clause(np('CAT'), 'RUN'), interrogative: true,
+      coordination: { conjunction: 'however', clause: clause(np('DOG'), 'EAT') },
+    }, 'de')).toBe('läuft der Kater; frisst der Hund jedoch?');
+  });
+
+  test('the conjunction menu cites "however" as its bare word', () => {
+    expect(conjunctionAll('however')).toEqual({
+      en: 'however', it: 'tuttavia', fr: 'cependant', de: 'jedoch', es: 'sin embargo', ja: 'しかしながら', pt: 'no entanto',
+    });
+  });
+
+  test('"however" joins two statements only: under a command it falls back to "and"', () => {
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true,
+      coordination: { conjunction: 'however', clause: clause(np('SECOND_PERSON'), 'EAT') },
+    })).toEqual(sayAll({
+      ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true,
+      coordination: { conjunction: 'and', clause: clause(np('SECOND_PERSON'), 'EAT') },
+    }));
   });
 
   test('German V2: "therefore" and "then" invert, the other four do not', () => {

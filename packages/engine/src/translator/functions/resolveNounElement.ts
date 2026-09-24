@@ -28,6 +28,8 @@ export function resolveNounElement(el: NounElement, language: string, lookup: Le
   return {
     conjuncts,
     conjunction: el.conjunction,
+    // "both … and" (P09-E26): on an `and` pair only — ignored on "or" and on three or more (D2).
+    ...(el.correlative && el.conjunction === 'and' && conjuncts.length === 2 ? { correlative: true as const } : {}),
     agreement: groupAgreement(conjuncts, el.conjunction, language),
     invertedAgreement: groupAgreement(conjuncts, el.conjunction, language, /*verbFirst*/ true),
   };

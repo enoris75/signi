@@ -15,6 +15,7 @@ import { objectPredication } from '../../functions/objectPredication.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_DEGREE, JA_ESSIVE, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
+import { slotSegs } from './slotSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
@@ -62,8 +63,13 @@ export function complementSegs(
   if (!complements) return [];
   const segs: RubySegment[] = [];
   for (const type of JA_COMPLEMENT_ORDER) {
-    const c = complements[type];
-    if (!c) continue;
+    const given = complements[type];
+    if (!given) continue;
+    // A correlative pair ("both … and", P09-E26) is written with も only where も replaces a subject's
+    // or an object's particle (see `correlativeMo`). A complement's particle stays and も would follow
+    // it once per conjunct (家でも市場でも), which the group's single particle cannot say, so a
+    // complement keeps the plain と.
+    const c = given.phrase.correlative ? { ...given, phrase: { ...given.phrase, correlative: undefined } } : given;
     // The factitive object complement takes the same shapes as the subject complement, and for the
     // same reason: 「家を刑務所にする」 is 「家が刑務所になる」 under a causer, so an adjective head
     // takes its く-form (家を美しくする) and a noun head the に. Only the essive differs — として
@@ -134,7 +140,7 @@ export function complementSegs(
       const level = abstractionLevel(c);
       if (level !== 'object') {
         const v = c.action.verb.forms;
-        segs.push(...elSegs(c.phrase), ...jaParticleSegs(c.phrase, 'を'));
+        segs.push(...slotSegs(c.phrase, 'を'));
         const adverb = c.action.modifier;
         if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
         // Denied (the privative, P09-E2), the te-form becomes the ない-form + で — 単語を選ばないで

@@ -4,6 +4,7 @@ import { nouns } from './nouns.js';
 import { verbs } from './verbs/index.js';
 import { adjectives } from './adjectives.js';
 import { adverbs } from './adverbs.js';
+import { interjections } from './interjections.js';
 
 export const concepts: ConceptSeed[] = [
   ...pronouns,
@@ -11,6 +12,7 @@ export const concepts: ConceptSeed[] = [
   ...verbs,
   ...adjectives,
   ...adverbs,
+  ...interjections,
 ];
 
 export { NONFINITE } from './verbs/index.js';

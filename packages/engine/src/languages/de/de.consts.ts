@@ -159,6 +159,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   that_is: 'das heißt',
   therefore: 'also',
   then: 'und dann',
+  however: 'jedoch',
 };
 
 /**
@@ -189,6 +190,9 @@ export const COORD_INVERTS: Record<CoordConjunction, boolean> = {
   that_is: false,
   therefore: true,
   then: true,
+  // "jedoch" is no front-field adverb here: it stands after the finite verb (P09-E29), see
+  // `germanEngine.render`.
+  however: false,
 };
 
 // A reflexive verb's accusative pronoun, agreeing with the subject (mich/dich/sich/uns/euch/sich).

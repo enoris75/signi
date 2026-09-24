@@ -20,7 +20,11 @@ export const italianEngine: LanguageEngine = {
     const sentence = phrase.condition ? `se ${renderClause(phrase.condition)}, ${main}` : main;
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
-    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    // "tuttavia" is a connective adverb opening a clause of its own: a semicolon before it and a
+    // comma after it (P09-E29), "il gatto corre; tuttavia, il cane mangia".
+    const { conjunction, clause } = phrase.coordination;
+    if (conjunction === 'however') return `${sentence}; ${COORD_WORDS[conjunction]}, ${renderClause(clause)}`;
+    return `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause)}`;
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

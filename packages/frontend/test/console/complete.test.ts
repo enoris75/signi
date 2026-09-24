@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { complete, type Completion } from '../../src/console/language/complete.ts';
 import type { ConsoleContext, WorkspaceState } from '../../src/console/language/types.ts';
-import { empty, ok, periods, sel } from './helpers.ts';
+import { empty, ok, periods, print, sel } from './helpers.ts';
 import { EN, byId } from './vocab.ts';
 
 function at(text: string, { state = empty(), context, caret = text.length, history, recent, pinned, aliases }: {
@@ -209,9 +209,16 @@ describe('words', () => {
 
 describe('values', () => {
   it('offers the conjunctions after /join, only the four a command takes under one', () => {
-    expect(labels(at('/join '))).toEqual(['and', 'or', 'but', 'thatis', 'therefore', 'then']);
+    expect(labels(at('/join '))).toEqual(['and', 'or', 'but', 'thatis', 'therefore', 'then', 'however']);
     const command = ok('/command /verb eat');
     expect(labels(at('/join ', { state: command }))).toEqual(['and', 'or', 'but', 'then']);
+  });
+
+  // P09-E29: the seventh conjunction applies and prints back as it was typed.
+  it('takes /join however, and prints it back', () => {
+    const state = ok('/subj dog /verb run /join however ( /subj cat /verb eat )');
+    expect(state.links[0]).toMatchObject({ kind: 'coordinative', conjunction: 'however' });
+    expect(print(state)).toBe('/subj ( dog ) /verb ( run ) /join however #2');
   });
 
   it('offers what a command has not been given yet, and only on ⇥ once it has one', () => {

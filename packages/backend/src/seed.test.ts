@@ -11,7 +11,7 @@ import { getDb } from './db.js';
 import './seed.js';
 
 const LANGUAGE_COUNT = Object.keys(LANGUAGES).length;
-const ROLES = ['pronoun', 'noun', 'verb', 'adjective', 'adverb'] as const;
+const ROLES = ['pronoun', 'noun', 'verb', 'adjective', 'adverb', 'interjection'] as const;
 
 const count = (db: Database.Database, sql: string, ...params: unknown[]): number =>
   (db.prepare(sql).get(...params) as { n: number }).n;

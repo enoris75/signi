@@ -11,7 +11,7 @@ import { aspectFormSegs } from './aspectFormSegs.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
-import { elSegs } from './elSegs.js';
+import { slotSegs } from './slotSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
@@ -20,7 +20,6 @@ import { jaModifierSeg } from './jaModifierSeg.js';
 import { jaPassiveVerb } from './jaPassiveVerb.js';
 import type { JaRespect } from './jaRespectRegister.js';
 import { jaRespectVerb } from './jaRespectVerb.js';
-import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
 import { plainVerbSeg } from './plainVerbSeg.js';
 import { splitObjectPredicative } from './splitObjectPredicative.js';
@@ -206,7 +205,7 @@ export function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
-    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+    if (directObject) segs.push(...slotSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
     if (adverb) segs.push(adverb);
     segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
@@ -219,7 +218,7 @@ export function predicateSegs(
   // negative (食べない。, 食べないために, 行動しないことを; B13).
   if (mood === 'infinitive' && !copulaPredicate) {
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
-    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+    if (directObject) segs.push(...slotSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
     // A citation carries modals only as the chain a modal-headed clause folds into (A222, see
     // `foldModalGovernor`), and the chain closes it in the plain form, each modal's adverb ahead of the
@@ -241,7 +240,7 @@ export function predicateSegs(
     segs.push(...complementSegs(adjuncts));
     // An adjectival verb still has its object, which its particle marks — 猫は犬が好きです. The real
     // copula is intransitive and never has one.
-    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+    if (directObject) segs.push(...slotSegs(directObject, objectParticle));
     for (const m of modals) {
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
@@ -274,7 +273,7 @@ export function predicateSegs(
     return segs;
   }
   segs.push(...complementSegs(adjunctComplements, locativeParticle));
-  if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+  if (directObject) segs.push(...slotSegs(directObject, objectParticle));
   segs.push(...complementSegs(objectPredicative));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.

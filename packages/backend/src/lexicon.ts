@@ -204,6 +204,23 @@ function lookupAdverb(conceptId: string, language: string): LexicalEntry | undef
   return { conceptId, language: language as LexicalEntry['language'], forms: formsFromRows(rows) };
 }
 
+// An interjection (P09-E30) is one fixed word per language, read as an adverb is.
+function lookupInterjection(conceptId: string, language: string): LexicalEntry | undefined {
+  const db = getDb();
+  const lexeme = db.prepare<[string, string], { id: number }>(`
+    SELECT il.id FROM concept_interjection_links cil
+    JOIN interjection_lexemes il ON il.id = cil.lexeme_id
+    WHERE cil.concept_id = ? AND il.language = ? AND cil.is_primary = 1
+  `).get(conceptId, language);
+  if (!lexeme) return undefined;
+
+  const rows = db.prepare<[number], FormRow>(
+    'SELECT form_key, form_value FROM interjection_forms WHERE lexeme_id = ?'
+  ).all(lexeme.id);
+
+  return { conceptId, language: language as LexicalEntry['language'], forms: formsFromRows(rows) };
+}
+
 // ── Public API ─────────────────────────────────────────────────────────────
 
 const LOOKUP_BY_ROLE: Record<string, (c: string, l: string) => LexicalEntry | undefined> = {
@@ -212,6 +229,7 @@ const LOOKUP_BY_ROLE: Record<string, (c: string, l: string) => LexicalEntry | un
   pronoun:   lookupPronoun,
   adjective: lookupAdjective,
   adverb:    lookupAdverb,
+  interjection: lookupInterjection,
 };
 
 export function lookupLexicalEntry(conceptId: string, language: string): LexicalEntry | undefined {

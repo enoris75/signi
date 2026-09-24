@@ -2641,6 +2641,8 @@ export const UI_STRINGS = defineUiStrings({
   'conjunction.kind.that_is': { word: 'EXPLICATIVE', agreesWith: 'CONJUNCTION', fallback: 'explicative' },
   'conjunction.kind.therefore': { word: 'CONCLUSIVE', agreesWith: 'CONJUNCTION', fallback: 'conclusive' },
   'conjunction.kind.then': { word: 'TEMPORAL', agreesWith: 'CONJUNCTION', fallback: 'temporal' },
+  // "however" contrasts as "but" does (P09-E29): the same kind, told apart by its word.
+  'conjunction.kind.however': { word: 'ADVERSATIVE', agreesWith: 'CONJUNCTION', fallback: 'adversative' },
 
   // The conjunction menu's own entries: the word each conjunction *is*, which until now the menu
   // wrote in English beside its localized hint. A conjunction is a function word no lexicon holds —
@@ -2657,6 +2659,7 @@ export const UI_STRINGS = defineUiStrings({
   // clauses. "Therefore" is the adverb, and the menu is offering a join.
   'conjunction.value.therefore': { conjunction: 'therefore', format: { capitalize: true }, fallback: 'So' },
   'conjunction.value.then': { conjunction: 'then', format: { capitalize: true }, fallback: 'And then' },
+  'conjunction.value.however': { conjunction: 'however', format: { capitalize: true }, fallback: 'However' },
 
   // The subordinate-clause menu's entries (P09-E12 D9): `that`, the object clause's complementizer,
   // and the five subordinating conjunctions, each the word the engine writes before (or, in

@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 
 /**
@@ -8,5 +9,7 @@ import { joinConjuncts } from '../../functions/joinConjuncts.js';
  */
 export function coordinateElement(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
   const word = el.conjunction === 'or' ? 'ou' : 'e';
-  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${word} `);
+  const parts = el.conjuncts.map(render);
+  // "tanto o gato quanto o cão" (P09-E26).
+  return correlate(el, parts, ['tanto', 'quanto']) ?? joinConjuncts(parts, ', ', () => ` ${word} `);
 }

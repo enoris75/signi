@@ -49,6 +49,8 @@ describe('ConjunctionMenu', () => {
       'That isexplicativeI',
       'SoconclusiveS',
       'And thentemporalT',
+      // "however" is adversative like "but", and goes by its H (P09-E29).
+      'HoweveradversativeH',
     ]);
   });
 
@@ -74,6 +76,14 @@ describe('ConjunctionMenu', () => {
     fireEvent.keyDown(window, { key: 'i' });
 
     expect(onSelect).toHaveBeenCalledExactlyOnceWith('that_is');
+  });
+
+  it('takes "however" by its H', () => {
+    const { onSelect } = renderMenu();
+
+    fireEvent.keyDown(window, { key: 'h' });
+
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith('however');
   });
 
   it('names each relation in the UI language', () => {
