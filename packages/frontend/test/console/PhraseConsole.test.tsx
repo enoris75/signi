@@ -5,12 +5,14 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import type { ComponentProps } from 'react';
 import App from '../../src/App.tsx';
 import type { PhraseWorkspace } from '../../src/components/PhraseBuilder/PhraseWorkspace.tsx';
-import { savePhrase } from '../../src/api.ts';
+import { fetchTranslation, savePhrase } from '../../src/api.ts';
 import { renderWithProviders, type SeededStrings } from '../render.tsx';
 import { ADJECTIVES, ADVERBS, NOUNS, PRONOUNS, VERBS } from './vocab.ts';
 
 vi.mock('../../src/api.ts');
 vi.mock('../../src/hooks/useTranslation.ts', () => ({ useTranslations: () => [] }));
+// The transcript's sentence reads the translation cache; no sentence is what these tests expect.
+vi.mocked(fetchTranslation).mockResolvedValue([]);
 
 // The canvas is a feature with tests of its own; here it is the state the console hands it.
 const stubs = vi.hoisted(() => ({ workspace: undefined as unknown as ComponentProps<typeof PhraseWorkspace>, renders: 0 }));
