@@ -1,4 +1,5 @@
 import type { ConceptForms, ResolvedComplement, RubySegment } from '../../types.js';
+import { JA_ICHIDAN } from './ja.consts.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
@@ -35,7 +36,11 @@ export function copularContinuation(
       case 'i': return { segs: [...word, { t: 'く' }], stem: 'あり' };
       case 'na': return { segs: [...word, { t: `${cls.predicative}で` }], stem: 'あり' };
       case 'ta': return { segs: word, stem: 'い' };
-      case 'ru': return { segs: word, stem: '' };
+      // A verb compounds on its own continuative: 大きすぎ続けます, 違い続けます (localization B87).
+      case 'ru': {
+        const i = (cls.verb ?? JA_ICHIDAN).i;
+        return { segs: i ? [...word, { t: i }] : word, stem: '' };
+      }
     }
   })();
   const forms: Record<string, string> = { ...governor.forms };

@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
-import type { PredicateLink } from './ja.types.js';
+import { JA_ICHIDAN } from './ja.consts.js';
+import type { JaVerbRow, PredicateLink } from './ja.types.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
@@ -7,13 +8,16 @@ import { npSegs } from './npSegs.js';
 import { wordSeg } from './wordSeg.js';
 
 // The connective each class of conjunct takes, as [non-past, past]. Only `ka` tells the tenses apart.
-const TAILS: Record<'i' | 'na' | 'ta' | 'ru', Record<PredicateLink, [present: string, past: string]>> = {
+const TAILS: Record<'i' | 'na' | 'ta', Record<PredicateLink, [present: string, past: string]>> = {
   i: { te: ['くて', 'くて'], mo: ['くも', 'くも'], ka: ['いか', 'かったか'] },
   na: { te: ['で', 'で'], mo: ['でも', 'でも'], ka: ['か', 'だったか'] },
   ta: { te: ['いて', 'いて'], mo: ['も', 'も'], ka: ['いるか', 'いたか'] },
-  // An intensifier's 〜すぎる is a verb, so it links as one: 大きすぎて, 大きすぎても, 大きすぎるか (C33).
-  ru: { te: ['て', 'て'], mo: ['ても', 'ても'], ka: ['るか', 'たか'] },
 };
+// A verb links as one, on its own row (see `JaVerbRow`): an intensifier's 〜すぎる as 大きすぎて,
+// 大きすぎても, 大きすぎるか (C33), and a godan verb as 違って, 違っても, 違うか (localization B87).
+const verbTails = (v: JaVerbRow): Record<PredicateLink, [present: string, past: string]> => ({
+  te: [v.te, v.te], mo: [`${v.te}も`, `${v.te}も`], ka: [`${v.u}か`, `${v.ta}か`],
+});
 
 /**
  * A non-final conjunct of a coordinated predicate, closed by the connective that hands on to the next
@@ -33,6 +37,7 @@ export function predicateLinkSegs(np: ResolvedNounPhrase, link: PredicateLink, p
   const { base, reading, verbal } = jaComparisonAdj(np.head);
   // A relational の-adjective keeps its の here too: this is the predicate position, one conjunct
   // earlier (アメリカので, アメリカのでも — A246).
-  const { kind, stem, reading: stemReading, predicative } = jaAdjClass(base, reading, np.head.forms['relational'] === '1', verbal);
-  return [...jaDegreeSegs(np.head, np.standard), wordSeg(stem, stemReading), { t: `${predicative}${TAILS[kind][link][cell]}` }];
+  const { kind, stem, reading: stemReading, predicative, verb } = jaAdjClass(base, reading, np.head.forms['relational'] === '1', verbal);
+  const tails = kind === 'ru' ? verbTails(verb ?? JA_ICHIDAN) : TAILS[kind];
+  return [...jaDegreeSegs(np.head, np.standard), wordSeg(stem, stemReading), { t: `${predicative}${tails[link][cell]}` }];
 }

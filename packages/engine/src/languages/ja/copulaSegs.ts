@@ -2,7 +2,8 @@ import type { Tense } from '@signi/shared';
 import type { ResolvedComplement, RubySegment } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
-import type { JaForm } from './ja.types.js';
+import { JA_ICHIDAN } from './ja.consts.js';
+import type { JaForm, JaVerbRow } from './ja.types.js';
 import { elSegs } from './elSegs.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
@@ -55,16 +56,18 @@ const COPULA_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   dict: ['である', 'である', 'でない', 'でない'],
   stem: ['であり', 'であり', 'でないでい', 'でないでい'],
 };
-// An intensifier's 〜すぎる is an ichidan verb, so the predicate inflects as one, on the stem
-// jaAdjClass's `ru` class leaves (大きすぎ): 大きすぎます / 大きすぎました / 大きすぎません (C33).
-const RU_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
-  polite: ['ます', 'ました', 'ません', 'ませんでした'],
-  prenominal: ['る', 'た', 'ない', 'なかった'],
-  tara: ['たら', 'たら', 'なかったら', 'なかったら'],
-  citation: ['る', 'た', 'ない', 'なかった'],
-  dict: ['る', 'る', 'ない', 'ない'],
-  stem: ['', '', 'ないでい', 'ないでい'],
-};
+// A verb predicate inflects as the verb it is, on the stem jaAdjClass's `ru` class leaves and the
+// row of kana its class writes (see `JaVerbRow`): an intensifier's ichidan 〜すぎる writes none —
+// 大きすぎます / 大きすぎました / 大きすぎません (C33) — and a godan verb its own, 違います / 違った /
+// 違わない (localization B87).
+const verbEndings = (v: JaVerbRow): Record<CopulaRow, [string, string, string, string]> => ({
+  polite: [`${v.i}ます`, `${v.i}ました`, `${v.i}ません`, `${v.i}ませんでした`],
+  prenominal: [v.u, v.ta, `${v.a}ない`, `${v.a}なかった`],
+  tara: [`${v.ta}ら`, `${v.ta}ら`, `${v.a}なかったら`, `${v.a}なかったら`],
+  citation: [v.u, v.ta, `${v.a}ない`, `${v.a}なかった`],
+  dict: [v.u, v.u, `${v.a}ない`, `${v.a}ない`],
+  stem: [v.i, v.i, `${v.a}ないでい`, `${v.a}ないでい`],
+});
 const STATE_ENDINGS: Record<CopulaRow, [string, string, string, string]> = {
   polite: ['います', 'いました', 'いません', 'いませんでした'],
   prenominal: ['いる', 'いた', 'いない', 'いなかった'],
@@ -163,7 +166,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so it
   // inflects as one: 大きくないです).
   const { base, reading, verbal } = jaComparisonAdj(head.head);
-  const { kind, stem, reading: stemReading, attributive, predicative } = jaAdjClass(base, reading, f['relational'] === '1', verbal);
+  const { kind, stem, reading: stemReading, attributive, predicative, verb } = jaAdjClass(base, reading, f['relational'] === '1', verbal);
   // The predicate adjective's intensifier and degree adverb lead, as they do attributively
   // (とても楽しいです, もっと楽しいです). A suffix intensifier is inside the stem instead (C33).
   // A standard of comparison leads them both and takes the adverb's place (犬より大きいです, P09-E5).
@@ -181,7 +184,7 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const at = row(form);
   const endingOf = (f: CopulaForm, c: number): string => kind === 'i' ? I_ENDINGS[row(f)][c]
     : kind === 'ta' ? STATE_ENDINGS[row(f)][c]
-    : kind === 'ru' ? RU_ENDINGS[row(f)][c]
+    : kind === 'ru' ? verbEndings(verb ?? JA_ICHIDAN)[row(f)][c]
     : f === 'prenominal' && c === 0 && attributive ? attributive
     : `${predicative}${COPULA_ENDINGS[row(f)][c]}`;
   // A negated superlative (A285) denies the superlative proposition — someone else is bigger — and
