@@ -9,6 +9,7 @@ import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { jaCounted } from './jaCounted.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
+import { jaModifiedNegative } from './jaModifiedNegative.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { JA_REFLEXIVE_POSSESSOR } from './reflexivePossessor.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
@@ -117,6 +118,19 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     (standard ? comparedSegs : adjSegs).push(...jaDegreeSegs(a, standard), wordSeg(base, reading));
   }
   const head = np.head.forms;
+  // A negated indefinite pronoun with an adjective (P09-E36): the adjective stands on a plain noun
+  // (大きいもの, and the negative word follows the particle, see `jaParticleSegs`), or OTHER is the
+  // adverb ほかに before the negative word (ほかに何). See `jaModifiedNegative`.
+  const modifiedNegative = jaModifiedNegative(np);
+  if (modifiedNegative === 'else') {
+    const other = np.adjectives[0].forms;
+    core.push(wordSeg(other['before_negative_pronoun'] ?? ''), wordSeg(head['base'] ?? '', head['reading']));
+    return [...relativeClauseSegs(np), ...core];
+  }
+  if (modifiedNegative === 'modified') {
+    core.push(...adjSegs, wordSeg(head['negative_modified'] ?? '', head['negative_modified_reading']));
+    return [...comparedSegs, ...relativeClauseSegs(np), ...core];
+  }
   // A cardinal is written with the counter its noun chooses, ahead of the adjectives (二匹の大きい猫);
   // a time word IS its counter and is not said again (二十四時間). See `jaCounted`, C31.
   const counted = jaCounted(np);

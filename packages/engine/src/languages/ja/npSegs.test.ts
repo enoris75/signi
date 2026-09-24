@@ -244,4 +244,16 @@ describe('npSegs: the possessor question (P09-E14)', () => {
   test('the stand-in is 誰, joined with の', () => {
     expect(npSegs(np(NEKO, {}, { possessor: questionPossessor() }))).toEqual([{ t: '誰', r: 'だれ' }, { t: 'の' }, { t: '猫', r: 'ねこ' }]);
   });
+
+  // P09-E36: a negated indefinite pronoun with an adjective.
+  describe('a negated indefinite pronoun with an adjective', () => {
+    const NANI = { base: '何', reading: 'なに', person: '3', negative_modified: 'もの', definiteness: 'no' };
+    test('puts the adjective on its plain noun, leaving the negative word to the particle', () => {
+      expect(npSegs(np(NANI, {}, { adjectives: [adj(OOKII)] }))).toEqual([{ t: '大きい', r: 'おおきい' }, { t: 'もの' }]);
+    });
+    test('writes OTHER as ほかに before the negative word', () => {
+      const betsu = adj({ base: '別の', reading: 'べつの', before_negative_pronoun: 'ほかに' });
+      expect(npSegs(np(NANI, {}, { adjectives: [betsu] }))).toEqual([{ t: 'ほかに' }, { t: '何', r: 'なに' }]);
+    });
+  });
 });

@@ -130,12 +130,12 @@ export const pronouns: ConceptSeed[] = [
     emoji: '❔',
     forms: {
       en: { base: 'something', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'something', disjunctive: 'something', negative: 'anything', negative_subject: 'nothing' },
-      it: { base: 'qualcosa', person: '3', number: 'singular', thing: '1', object: 'qualcosa', disjunctive: 'qualcosa', negative: 'niente' },
-      fr: { base: 'quelque chose', person: '3', number: 'singular', thing: '1', object: 'quelque chose', disjunctive: 'quelque chose', negative: 'rien' },
+      it: { base: 'qualcosa', person: '3', number: 'singular', thing: '1', object: 'qualcosa', disjunctive: 'qualcosa', negative: 'niente', with_other: "qualcos'altro", negative_with_other: "nient'altro" },
+      fr: { base: 'quelque chose', person: '3', number: 'singular', thing: '1', object: 'quelque chose', disjunctive: 'quelque chose', negative: 'rien', with_other: 'autre chose' },
       de: { base: 'etwas', person: '3', number: 'singular', gender: 'neut', thing: '1', object: 'etwas', disjunctive: 'etwas', negative: 'nichts' },
-      es: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada' },
-      ja: { base: '何か', person: '3', number: 'singular', thing: '1', reading: 'なにか', negative: '何', negative_reading: 'なに' },
-      pt: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada' },
+      es: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada', with_other: 'otra cosa', negative_with_other: 'nada más' },
+      ja: { base: '何か', person: '3', number: 'singular', thing: '1', reading: 'なにか', negative: '何', negative_reading: 'なに', negative_modified: 'もの' },
+      pt: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada', with_other: 'outra coisa', negative_with_other: 'nada mais' },
     },
   },
   {
@@ -162,12 +162,12 @@ export const pronouns: ConceptSeed[] = [
     emoji: '🕵️',
     forms: {
       en: { base: 'someone', person: '3', number: 'singular', object: 'someone', disjunctive: 'someone', negative: 'anyone', negative_subject: 'nobody' },
-      it: { base: 'qualcuno', person: '3', number: 'singular', gender: 'masc', object: 'qualcuno', disjunctive: 'qualcuno', negative: 'nessuno' },
+      it: { base: 'qualcuno', person: '3', number: 'singular', gender: 'masc', object: 'qualcuno', disjunctive: 'qualcuno', negative: 'nessuno', with_other: 'qualcun altro', negative_with_other: 'nessun altro' },
       fr: { base: "quelqu'un", person: '3', number: 'singular', gender: 'masc', object: "quelqu'un", disjunctive: "quelqu'un", negative: 'personne' },
       de: { base: 'jemand', person: '3', number: 'singular', gender: 'masc', object: 'jemanden', disjunctive: 'jemandem', negative: 'niemand', negative_object: 'niemanden', negative_disjunctive: 'niemandem' },
       es: { base: 'alguien', person: '3', number: 'singular', gender: 'masc', object: 'alguien', disjunctive: 'alguien', negative: 'nadie' },
-      ja: { base: '誰か', person: '3', number: 'singular', reading: 'だれか', negative: '誰', negative_reading: 'だれ' },
-      pt: { base: 'alguém', person: '3', number: 'singular', gender: 'masc', object: 'alguém', disjunctive: 'alguém', negative: 'ninguém' },
+      ja: { base: '誰か', person: '3', number: 'singular', reading: 'だれか', negative: '誰', negative_reading: 'だれ', negative_modified: '人', negative_modified_reading: 'ひと' },
+      pt: { base: 'alguém', person: '3', number: 'singular', gender: 'masc', object: 'alguém', disjunctive: 'alguém', negative: 'ninguém', with_other: 'outra pessoa', negative_with_other: 'ninguém mais' },
     },
   },
 ];

@@ -3,6 +3,8 @@ import type { ResolvedNounElement, RubySegment } from '../../types.js';
 import { slotFocus } from '../../functions/slotFocus.js';
 import { JA_NEGATIVE_DETERMINER } from './ja.consts.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
+import { jaModifiedNegative } from './jaModifiedNegative.js';
+import { wordSeg } from './wordSeg.js';
 
 /** The particles a focus particle — and the `no` circumfix's も — replace outright; every other one stays in front. */
 const REPLACED_BY_MO: ReadonlySet<string> = new Set(['', 'が', 'を', 'は']);
@@ -31,5 +33,14 @@ export function jaParticleSegs(el: ResolvedNounElement, particle: string): RubyS
   }
   if (!isNegativeGroup(el)) return particle ? [{ t: particle }] : [];
   const mo = { t: JA_NEGATIVE_DETERMINER.post };
+  // A negated indefinite pronoun with an adjective (P09-E36) has put its adjective on a plain noun
+  // (大きいもの, see `jaModifiedNegative`): that noun takes the case particle — を kept, the subject's
+  // が / は as the contrastive は — and the negative word follows with its も: 大きいものを何も,
+  // 新しい人は誰も, 新しい人に誰も.
+  const single = el.conjuncts.length === 1 ? el.conjuncts[0] : undefined;
+  if (single && jaModifiedNegative(single) === 'modified') {
+    const case_ = REPLACED_BY_MO.has(particle) ? (particle === 'を' ? 'を' : 'は') : particle;
+    return [{ t: case_ }, wordSeg(single.head.forms['base'] ?? '', single.head.forms['reading']), mo];
+  }
   return REPLACED_BY_MO.has(particle) ? [mo] : [{ t: particle }, mo];
 }

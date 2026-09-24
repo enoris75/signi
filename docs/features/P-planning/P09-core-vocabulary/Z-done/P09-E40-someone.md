@@ -60,7 +60,7 @@ What landed differently from the plan:
 3. **The dative is the `disjunctive`**, as it is for the persons (`tonicPronounDe`): *jemandem*, and
    its negative `negative_disjunctive` *niemandem*, which the dative-governing object (HELP) reads.
    A complement under negation is not polarised at all (SOMETHING alike: "läuft nicht mit etwas"),
-   so the negative dative after a preposition does not render yet — see the report's defects.
+   so the negative dative after a preposition does not render yet (reported with this batch, not filed here).
 4. **No e2e row.** A pronoun with a `slot` is offered by no picker (the chooser's person row skips
    it, like SOMETHING's; `usePronounChooser`), so there is no tooltip to hover.
 5. English carries no gender (none is needed: *someone* agrees as a 3rd singular); the Romance
@@ -123,4 +123,4 @@ Engine suite green; SOMETHING's rows unchanged.
 ## Out of scope (follow-ups)
 
 - ***Everyone*** — not in the band; the same path.
-- ***Someone else*** — [P09-E36](../P09-E36-something-else.md).
+- ***Someone else*** — [P09-E36](P09-E36-something-else.md), shipped the same day.

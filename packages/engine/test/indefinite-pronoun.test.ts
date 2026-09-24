@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { LanguageCode } from '@signi/shared';
-import { clause, np, say, sayAll } from './harness.js';
+import { clause, furigana, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
@@ -164,4 +164,153 @@ describe('the person pronoun (P09-E40)', () => {
     expect(seed('SOMEONE')?.slot).toBe('indefinite');
     expect(seed('SOMEONE')?.human).toBe(true);
   });
+});
+
+// P09-E36: an adjective on an indefinite pronoun, which six of the seven used to drop. Each language
+// spells it its own way: postposed in English, Spanish and Portuguese, with di / de in Italian and
+// French, a neuter adjectival noun in German, prenominal in Japanese. OTHER is a word of its own
+// there (*else*, *d'autre*, *anderes*, *más*) or fuses with the pronoun (*qualcos'altro*, *autre
+// chose*, *otra cosa*, *outra pessoa*).
+describe('a modifier on the pronoun (P09-E36)', () => {
+  const eats = (adjective: string, negative = false) => clause(np('CAT'), 'EAT', {
+    directObject: np('SOMETHING', { adjectives: [adjective] }), ...(negative ? { verbPhrase: { negative } } : {}),
+  });
+  const sees = (adjective: string, negative = false) => clause(np('CAT'), 'SEE', {
+    directObject: np('SOMEONE', { adjectives: [adjective] }), ...(negative ? { verbPhrase: { negative } } : {}),
+  });
+  const runs = (id: string, adjective: string, negative = false) => clause(np(id, { adjectives: [adjective] }), 'RUN',
+    negative ? { verbPhrase: { negative } } : {});
+
+  test('something big', () => {
+    expect(sayAll(eats('BIG'))).toEqual({
+      en: 'the cat eats something big.', it: 'il gatto mangia qualcosa di grande.',
+      fr: 'le chat mange quelque chose de grand.', de: 'der Kater frisst etwas Großes.',
+      es: 'el gato come algo grande.', ja: '猫は大きい何かを食べます。', pt: 'o gato come algo grande.',
+    });
+    expect(sayAll(runs('SOMETHING', 'BIG'))).toEqual({
+      en: 'something big runs.', it: 'qualcosa di grande corre.', fr: 'quelque chose de grand court.',
+      de: 'etwas Großes läuft.', es: 'algo grande corre.', ja: '大きい何かは走ります。', pt: 'algo grande corre.',
+    });
+  });
+
+  test('something else', () => {
+    expect(sayAll(eats('OTHER'))).toEqual({
+      en: 'the cat eats something else.', it: 'il gatto mangia qualcos\'altro.',
+      fr: 'le chat mange autre chose.', de: 'der Kater frisst etwas anderes.',
+      es: 'el gato come otra cosa.', ja: '猫は別の何かを食べます。', pt: 'o gato come outra coisa.',
+    });
+    expect(sayAll(runs('SOMETHING', 'OTHER'))).toEqual({
+      en: 'something else runs.', it: 'qualcos\'altro corre.', fr: 'autre chose court.',
+      de: 'etwas anderes läuft.', es: 'otra cosa corre.', ja: '別の何かは走ります。', pt: 'outra coisa corre.',
+    });
+  });
+
+  test('nothing big: Japanese puts the adjective on もの and the negative word after it', () => {
+    expect(sayAll(eats('BIG', true))).toEqual({
+      en: 'the cat does not eat anything big.', it: 'il gatto non mangia niente di grande.',
+      fr: 'le chat ne mange rien de grand.', de: 'der Kater frisst nichts Großes.',
+      es: 'el gato no come nada grande.', ja: '猫は大きいものを何も食べません。', pt: 'o gato não come nada grande.',
+    });
+    expect(sayAll(runs('SOMETHING', 'BIG', true))).toEqual({
+      en: 'nothing big runs.', it: 'niente di grande corre.', fr: 'rien de grand ne court.',
+      de: 'nichts Großes läuft.', es: 'nada grande corre.', ja: '大きいものは何も走りません。', pt: 'nada grande corre.',
+    });
+  });
+
+  test('nothing else: Japanese says ほかに', () => {
+    expect(sayAll(eats('OTHER', true))).toEqual({
+      en: 'the cat does not eat anything else.', it: 'il gatto non mangia nient\'altro.',
+      fr: 'le chat ne mange rien d\'autre.', de: 'der Kater frisst nichts anderes.',
+      es: 'el gato no come nada más.', ja: '猫はほかに何も食べません。', pt: 'o gato não come nada mais.',
+    });
+    expect(sayAll(runs('SOMETHING', 'OTHER', true))).toEqual({
+      en: 'nothing else runs.', it: 'nient\'altro corre.', fr: 'rien d\'autre ne court.',
+      de: 'nichts anderes läuft.', es: 'nada más corre.', ja: 'ほかに何も走りません。', pt: 'nada mais corre.',
+    });
+    // ほかに is kana; 何 keeps its reading.
+    expect(furigana(eats('OTHER', true))).toEqual(['ねこ', 'なに', 'たべません']);
+  });
+
+  test('someone new', () => {
+    expect(sayAll(sees('NEW'))).toEqual({
+      en: 'the cat sees someone new.', it: 'il gatto vede qualcuno di nuovo.',
+      fr: 'le chat voit quelqu\'un de nouveau.', de: 'der Kater sieht jemand Neues.',
+      es: 'el gato ve a alguien nuevo.', ja: '猫は新しい誰かを見ます。', pt: 'o gato vê alguém novo.',
+    });
+    expect(sayAll(runs('SOMEONE', 'NEW'))).toEqual({
+      en: 'someone new runs.', it: 'qualcuno di nuovo corre.', fr: 'quelqu\'un de nouveau court.',
+      de: 'jemand Neues läuft.', es: 'alguien nuevo corre.', ja: '新しい誰かは走ります。', pt: 'alguém novo corre.',
+    });
+  });
+
+  test('someone else', () => {
+    expect(sayAll(sees('OTHER'))).toEqual({
+      en: 'the cat sees someone else.', it: 'il gatto vede qualcun altro.',
+      fr: 'le chat voit quelqu\'un d\'autre.', de: 'der Kater sieht jemand anderes.',
+      es: 'el gato ve a alguien más.', ja: '猫は別の誰かを見ます。', pt: 'o gato vê outra pessoa.',
+    });
+    expect(sayAll(runs('SOMEONE', 'OTHER'))).toEqual({
+      en: 'someone else runs.', it: 'qualcun altro corre.', fr: 'quelqu\'un d\'autre court.',
+      de: 'jemand anderes läuft.', es: 'alguien más corre.', ja: '別の誰かは走ります。', pt: 'outra pessoa corre.',
+    });
+  });
+
+  test('nobody new, nobody else', () => {
+    expect(sayAll(sees('NEW', true))).toEqual({
+      en: 'the cat does not see anyone new.', it: 'il gatto non vede nessuno di nuovo.',
+      fr: 'le chat ne voit personne de nouveau.', de: 'der Kater sieht niemand Neues.',
+      es: 'el gato no ve a nadie nuevo.', ja: '猫は新しい人を誰も見ません。', pt: 'o gato não vê ninguém novo.',
+    });
+    expect(sayAll(runs('SOMEONE', 'NEW', true))).toEqual({
+      en: 'nobody new runs.', it: 'nessuno di nuovo corre.', fr: 'personne de nouveau ne court.',
+      de: 'niemand Neues läuft.', es: 'nadie nuevo corre.', ja: '新しい人は誰も走りません。', pt: 'ninguém novo corre.',
+    });
+    expect(sayAll(sees('OTHER', true))).toEqual({
+      en: 'the cat does not see anyone else.', it: 'il gatto non vede nessun altro.',
+      fr: 'le chat ne voit personne d\'autre.', de: 'der Kater sieht niemand anderes.',
+      es: 'el gato no ve a nadie más.', ja: '猫はほかに誰も見ません。', pt: 'o gato não vê ninguém mais.',
+    });
+    expect(sayAll(runs('SOMEONE', 'OTHER', true))).toEqual({
+      en: 'nobody else runs.', it: 'nessun altro corre.', fr: 'personne d\'autre ne court.',
+      de: 'niemand anderes läuft.', es: 'nadie más corre.', ja: 'ほかに誰も走りません。', pt: 'ninguém mais corre.',
+    });
+    // 人 carries its reading on the plain noun.
+    expect(furigana(sees('NEW', true))).toContain('ひと');
+  });
+
+  test('German declines the adjectival noun for the dative; French elides before a vowel', () => {
+    expect(sayAll(clause(np('CAT'), 'HELP_VERB', { directObject: np('SOMEONE', { adjectives: ['OTHER'] }) }))).toMatchObject({
+      de: 'der Kater hilft jemand anderem.', es: 'el gato ayuda a alguien más.', pt: 'o gato ajuda outra pessoa.',
+    });
+    expect(say(clause(np('CAT'), 'HELP_VERB', { verbPhrase: { negative: true }, directObject: np('SOMEONE', { adjectives: ['NEW'] }) }), 'de'))
+      .toBe('der Kater hilft niemand Neuem.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('SOMETHING', { adjectives: ['BIG'] }) } } }))).toEqual({
+      en: 'the cat runs with something big.', it: 'il gatto corre con qualcosa di grande.',
+      fr: 'le chat court avec quelque chose de grand.', de: 'der Kater läuft mit etwas Großem.',
+      es: 'el gato corre con algo grande.', ja: '猫は大きい何かと走ります。', pt: 'o gato corre com algo grande.',
+    });
+    expect(say(clause(np('CAT'), 'RUN', { complements: { purpose: { phrase: np('SOMEONE', { adjectives: ['NEW'] }) } } }), 'de'))
+      .toBe('der Kater läuft für jemand Neues.');
+    expect(sayAll(eats('INTERESTING'))).toMatchObject({
+      fr: 'le chat mange quelque chose d\'intéressant.', de: 'der Kater frisst etwas Interessantes.',
+      it: 'il gatto mangia qualcosa di interessante.',
+    });
+  });
+
+  // A pronoun never loses the adjective its plan names: what no language can say is refused.
+  test('guard: an adjective the pronoun cannot say fails loudly', () => {
+    expect(() => sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { adjectives: ['BIG'] }) })))
+      .toThrow(/personal pronoun takes no adjective/);
+    expect(() => sayAll(clause(np('FIRST_PERSON', { adjectives: ['BIG'] }), 'RUN'))).toThrow(/personal pronoun/);
+    expect(() => sayAll(eatsTwo())).toThrow(/one adjective/);
+    expect(() => sayAll(clause(np('CAT'), 'EAT', {
+      directObject: np('SOMETHING', { adjectives: ['BIG'], adjectiveDegrees: ['more'] }),
+    }))).toThrow(/degree/);
+    // The builder's explicit positive degree is no degree at all.
+    expect(say(clause(np('CAT'), 'EAT', {
+      directObject: np('SOMETHING', { adjectives: ['BIG'], adjectiveDegrees: ['positive'] }),
+    }), 'en')).toBe('the cat eats something big.');
+  });
+
+  const eatsTwo = () => clause(np('CAT'), 'EAT', { directObject: np('SOMETHING', { adjectives: ['BIG', 'NEW'] }) });
 });
