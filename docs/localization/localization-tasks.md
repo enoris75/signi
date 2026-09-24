@@ -97,7 +97,20 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ### Part A — Ready (`A-ready/`)
 
-**None open.** A23–A30, the eight the sweep of 2026-09-22 filed, were all authored on 2026-09-22 and
+**Three open, 3 concepts: A32–A34**, filed on 2026-09-24 for the nine concepts
+[P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
+shipped with no `definition` (the other six are [C41–C43](#part-c--needs-engine--deferred-c-needs-engine)).
+Each composes today from seeded words, and each overturns the "left literal" of the E task that
+seeded it. Probe tables at 2c4cee46, checked against all 497 shipped definitions and against the
+concept's own word in all seven languages.
+
+| # | File | Concepts | Shape |
+|---|---|---|---|
+| A32 | [A-ready/A32-news.md](A-ready/A32-news.md) | 1 — NEWS | a bare plural FACT over an object-gap TELL, resultative, with RECENTLY — "facts that one has told recently"; INFORMATION (B81) not needed |
+| A33 | [A-ready/A33-okay.md](A-ready/A33-okay.md) | 1 — OKAY | `subjectGapGloss` on a negated HAVE PROBLEM, DARK's shape — "that does not have problems" (ja 問題がない) |
+| A34 | [A-ready/A34-hey.md](A-ready/A34-hey.md) | 1 — HEY | `instrumentGloss` on CALL a PERSON — "a word with which one calls a person"; **no surface shows it** until a picker lists the `interjection` role |
+
+A23–A30, the eight the sweep of 2026-09-22 filed, were all authored on 2026-09-22 and
 are in [`done/`](done/) — **51 of their 60 concepts** shipped a gloss. The nine that did not are
 each in a C ticket with the reason, and three of the nine went there for a reason the sweep's probe
 could not see: **a plan that renders correctly can still restate a gloss another concept already
@@ -281,7 +294,17 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-**None open.** C29–C40 were filed with the P09 batch on 2026-09-22, one per construct, and **all
+**Three open, 6 concepts: C41–C43**, filed on 2026-09-24 with [A32–A34](#part-a--ready-a-ready) for
+the P09-E25–E43 concepts shipped with no `definition`. Five are literal by design, every lead probed
+in the file; one, OF_COURSE, has a single lead, and it needs a construct.
+
+| # | File | Concepts | Blocked on |
+|---|---|---|---|
+| C41 | [C-needs-engine/C41-sentence-adverbs-maybe-actually-of-course.md](C-needs-engine/C41-sentence-adverbs-maybe-actually-of-course.md) | 3 — MAYBE, ACTUALLY, OF_COURSE | MAYBE and ACTUALLY **literal by design** ("in reality" is REALLY's, "in fact" is *en fait* itself and *in Tatsache*, "it is possible that…" is MIGHT's); OF_COURSE on **an *as* clause said alone** ("as one expects": no `as` conjunction, and a verbless period drops its adverbial clause) |
+| C42 | [C-needs-engine/C42-probability.md](C-needs-engine/C42-probability.md) | 1 — PROBABILITY | **literal by design**: the dimension PROBABLY scales on, SPEED's case in C26; every lead needs POSSIBILITY and LEVEL's *Ebene* / 段階 |
+| C43 | [C-needs-engine/C43-senses-tell-order-and-be-faring.md](C-needs-engine/C43-senses-tell-order-and-be-faring.md) | 2 — TELL_ORDER, BE_FARING | **literal by design**, as C28 ruled EAT_ANIMAL and KNOW_ACQUAINTED; a sense is never served by `/api/concepts`, so no tooltip could show a gloss |
+
+C29–C40 were filed with the P09 batch on 2026-09-22, one per construct, and **all
 twelve were built the same day** — see the Done table below and each file's own `## Done`. C29, the
 temporal complement, was the last of them, and with it every P09 word that a construct blocked is
 glossed. Five of P09's §3 rows are still unbuilt (E1, E2, E4, E5 and E6's wh-question), but no

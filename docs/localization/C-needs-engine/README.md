@@ -1,7 +1,16 @@
 # C-needs-engine — tasks blocked on a construct, or deferred
 
-**Empty.** Every catalogued task is either built or retired; a new one lands here when a string or
-gloss turns out to need a construct the engine cannot render.
+**Three open, filed on 2026-09-24** for the P09-E25–E43 concepts shipped with no `definition`
+(with [A32–A34](../A-ready/)):
+
+- [C41](C41-sentence-adverbs-maybe-actually-of-course.md) the sentence adverbs — MAYBE and ACTUALLY
+  literal by design; OF_COURSE blocked on an *as* clause said alone ("as one expects")
+- [C42](C42-probability.md) PROBABILITY — literal by design, the dimension PROBABLY scales on
+- [C43](C43-senses-tell-order-and-be-faring.md) the senses TELL_ORDER and BE_FARING — literal by
+  design, and no surface could show a gloss: `/api/concepts` never serves a sense
+
+A new one lands here when a string or gloss turns out to need a construct the engine cannot render,
+or is left on the literal by design with its leads probed.
 
 C29–C40 were filed with the P09 batch on 2026-09-22, one per construct, and **all twelve were built
 the same day**: each is in [`done/`](../done/) with a `## Done` section naming what shipped, what
