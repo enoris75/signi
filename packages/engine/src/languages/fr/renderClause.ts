@@ -54,7 +54,8 @@ export function renderClause(phrase: ResolvedPhrase): string {
       // "qui mange la nourriture ?" (P09-E6). An indirect one writes its own: "ce qui mange" (P09-E17).
       : phrase.question?.role === 'subject' && phrase.verbPhrase
         ? (phrase.embedded ? indirectQuestionWord : questionWord)(phrase.question, phrase.verbPhrase.verb)
-        : subjectText(subject);
+        // A verbless period (the vocative, A349) writes a pronoun group without its resumption.
+        : subjectText(subject, !!phrase.verbPhrase);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
   // A possessor question over the object fronts its *de qui* alone, and the object stays behind it,

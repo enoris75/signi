@@ -13,17 +13,19 @@ import { withRelative } from './withRelative.js';
  * is not French. It takes the tonic (disjunctive) form, and when the group resolves to the 1st or
  * 2nd person the sentence resumes it with the matching subject clitic: "toi et moi, nous
  * mangeons". A group of 3rd-person nouns needs no resumption ("le chat et le renard mangent").
+ * The resumption belongs to a clause: a verbless period — the vocative above all, "Toi et Maman,
+ * courez" — has no verb for the clitic to lean on, and writes the group alone (`resume` false, A349).
  *
  * A focus particle singles the whole slot out ("only the cat", "the cat too"): it stands outside
  * everything the phrase itself writes, including a coordination's conjunction (see `withFocus`, C39).
  */
-export function subjectText(el: ResolvedNounElement): string {
+export function subjectText(el: ResolvedNounElement, resume = true): string {
   if (el.conjuncts.length < 2) return withFocus(coordinate(el, subjectPhrase), slotFocus(el), FOCUS_WORDS);
   const conjuncts = coordinate(el, (np) => {
     const f = np.head.forms;
     return f['person'] ? withRelative(f['disjunctive'] ?? f['base'] ?? '', np) : subjectPhrase(np);
   });
   const person = el.agreement['person'] ?? '3';
-  if (person === '3') return conjuncts;
+  if (person === '3' || !resume) return conjuncts;
   return `${conjuncts}, ${person === '1' ? 'nous' : 'vous'}`;
 }
