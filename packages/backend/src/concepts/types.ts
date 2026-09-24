@@ -20,6 +20,7 @@ export interface ConceptSeed {
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   human?: boolean; // referent is a person — English relativises "who" on this, not animacy
+  sex?: 'masc' | 'fem'; // a person noun that is male or female by meaning (MOTHER, FATHER) — a genderless language's link to the subject takes its possessive from it, "the mother sees her book" (A293); unset for a person of unknown sex (PERSON, FRIEND)
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
   stative?: boolean; // verb naming a state that holds (have, want, be), not an event — the Romance past is its imperfect ("voleva", A130), Japanese says it with 〜ている ("持っています", A132)
   senseOf?: string; // a lexical sense the engine selects in place of the concept named here (KNOW_ACQUAINTED of KNOW, A131); left out of /api/concepts, so no picker offers it

@@ -80,8 +80,8 @@ function seed() {
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
     wipeInterjections: db.prepare('DELETE FROM interjection_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, number, string | null, number, number, string | null, string | null, number, string | null, string | null, number, number, number, number, number, string | null]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, human, synonym, countable, modal, clause_object, slot, proper, manner_relation, dimension_relation, temporal, transient, alarm, alarm_cry, stative, sense_of) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, number, string | null, number, number, string | null, string | null, number, string | null, string | null, number, number, number, number, number, string | null, string | null]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, human, synonym, countable, modal, clause_object, slot, proper, manner_relation, dimension_relation, temporal, transient, alarm, alarm_cry, stative, sense_of, sex) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
 
     // Only English is seeded (from the concept's `description`). Other languages are left
@@ -116,7 +116,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.human ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.clauseObject ?? null, c.slot ?? null, c.proper ? 1 : 0, c.mannerRelation ?? null, c.dimensionRelation ?? null, c.temporal ? 1 : 0, c.transient ? 1 : 0, c.alarm ? 1 : 0, c.alarmCry ? 1 : 0, c.stative ? 1 : 0, c.senseOf ?? null);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.human ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.clauseObject ?? null, c.slot ?? null, c.proper ? 1 : 0, c.mannerRelation ?? null, c.dimensionRelation ?? null, c.temporal ? 1 : 0, c.transient ? 1 : 0, c.alarm ? 1 : 0, c.alarmCry ? 1 : 0, c.stative ? 1 : 0, c.senseOf ?? null, c.sex ?? null);
       // Seed the English definition from `description`; other languages stay empty (fallback to en).
       stmts.insertDefinition.run(c.id, 'en', c.description);
 

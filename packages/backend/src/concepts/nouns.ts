@@ -1075,6 +1075,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'PERSON',
     forms: {
       en: { base: 'boy', plural: 'boys', count: 'singular' },
@@ -1094,6 +1095,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'PERSON',
     forms: {
       en: { base: 'man', plural: 'men', count: 'singular' },
@@ -1115,6 +1117,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'PERSON',
     forms: {
       en: { base: 'woman', plural: 'women', count: 'singular' },
@@ -1515,6 +1518,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'PARENT',
     forms: {
       en: { base: 'father', plural: 'fathers', count: 'singular' },
@@ -1608,6 +1612,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'PARENT',
     forms: {
       en: { base: 'mother', plural: 'mothers', count: 'singular' },
@@ -1664,6 +1669,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'CHILD_OFFSPRING',
     forms: {
       en: { base: 'son', plural: 'sons', count: 'singular' },
@@ -1682,6 +1688,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👧',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'CHILD_OFFSPRING',
     forms: {
       en: { base: 'daughter', plural: 'daughters', count: 'singular' },
@@ -1730,6 +1737,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'SIBLING',
     forms: {
       en: { base: 'brother', plural: 'brothers', count: 'singular' },
@@ -1754,6 +1762,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👧',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'SIBLING',
     forms: {
       en: { base: 'sister', plural: 'sisters', count: 'singular' },
@@ -1801,6 +1810,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🤵',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'SPOUSE',
     forms: {
       en: { base: 'husband', plural: 'husbands', count: 'singular' },
@@ -1820,6 +1830,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👰',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'SPOUSE',
     forms: {
       en: { base: 'wife', plural: 'wives', count: 'singular' },
@@ -1862,6 +1873,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👴',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'GRANDPARENT',
     forms: {
       en: { base: 'grandfather', plural: 'grandfathers', count: 'singular' },
@@ -1881,6 +1893,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👵',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'GRANDPARENT',
     forms: {
       en: { base: 'grandmother', plural: 'grandmothers', count: 'singular' },
@@ -1924,6 +1937,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'GRANDCHILD',
     forms: {
       en: { base: 'grandson', plural: 'grandsons', count: 'singular' },
@@ -1943,6 +1957,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👧',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'GRANDCHILD',
     forms: {
       en: { base: 'granddaughter', plural: 'granddaughters', count: 'singular' },
@@ -1965,6 +1980,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'uncle', plural: 'uncles', count: 'singular' },
@@ -1984,6 +2000,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'aunt', plural: 'aunts', count: 'singular' },
@@ -2036,6 +2053,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'nephew', plural: 'nephews', count: 'singular' },
@@ -2055,6 +2073,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👧',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'niece', plural: 'nieces', count: 'singular' },
@@ -2077,6 +2096,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👵',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'mother-in-law', plural: 'mothers-in-law', count: 'singular' },
@@ -2096,6 +2116,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👴',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'father-in-law', plural: 'fathers-in-law', count: 'singular' },
@@ -2115,6 +2136,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🤵',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'son-in-law', plural: 'sons-in-law', count: 'singular' },
@@ -2134,6 +2156,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👰',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'daughter-in-law', plural: 'daughters-in-law', count: 'singular' },
@@ -2154,6 +2177,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'brother-in-law', plural: 'brothers-in-law', count: 'singular' },
@@ -2177,6 +2201,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'sister-in-law', plural: 'sisters-in-law', count: 'singular' },
@@ -2203,6 +2228,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'stepfather', plural: 'stepfathers', count: 'singular' },
@@ -2222,6 +2248,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'RELATIVE',
     forms: {
       en: { base: 'stepmother', plural: 'stepmothers', count: 'singular' },
@@ -2251,6 +2278,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     animate: true,
     human: true,
+    sex: 'fem',
     isA: 'MOTHER',
     forms: {
       en: { base: 'mom', plural: 'moms', count: 'singular', as_name: '1' },
@@ -2270,6 +2298,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    sex: 'masc',
     isA: 'FATHER',
     forms: {
       en: { base: 'dad', plural: 'dads', count: 'singular', as_name: '1' },
@@ -2331,6 +2360,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    sex: 'masc',
     synonym: 'romantic partner',
     isA: 'PARTNER',
     forms: {
@@ -2351,6 +2381,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👧',
     animate: true,
     human: true,
+    sex: 'fem',
     synonym: 'romantic partner',
     isA: 'PARTNER',
     forms: {
@@ -2553,6 +2584,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👱‍♂️',
     animate: true,
     human: true,
+    sex: 'masc',
     synonym: 'youth',
     isA: 'PERSON',
     forms: {
@@ -2573,6 +2605,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👱‍♀️',
     animate: true,
     human: true,
+    sex: 'fem',
     synonym: 'youth',
     isA: 'PERSON',
     forms: {
@@ -2920,6 +2953,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '🧔',
     proper: true,
     human: true,
+    sex: 'masc',
     animate: true,
     countable: false,
     isA: 'PERSON',
@@ -2940,6 +2974,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👩',
     proper: true,
     human: true,
+    sex: 'fem',
     animate: true,
     countable: false,
     isA: 'PERSON',

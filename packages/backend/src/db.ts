@@ -85,7 +85,12 @@ function initSchema(db: Database.Database): void {
       -- For a lexical sense the engine selects in place of another concept, that concept's id
       -- (KNOW_ACQUAINTED, the "know a person / thing" verb, is a sense of KNOW, A131). The user
       -- picks the concept itself, so /api/concepts leaves a sense out; NULL for any other concept.
-      sense_of     TEXT
+      sense_of     TEXT,
+      -- 'masc' / 'fem' for a person noun that is male or female by meaning (MOTHER, FATHER, WOMAN).
+      -- English records no gender on a noun, so a possessor linked to such a subject takes its
+      -- possessive from this: "the mother sees her book" (A293). NULL for a person of unknown sex
+      -- (PERSON, FRIEND), who keeps the unmarked possessive, and for any other concept.
+      sex          TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL)
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -413,6 +418,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('sense_of')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN sense_of TEXT');
+  }
+  if (!conceptCols.includes('sex')) {
+    db.exec("ALTER TABLE semantic_concepts ADD COLUMN sex TEXT CHECK (sex IN ('masc','fem') OR sex IS NULL)");
   }
   widenRoleCheck(db);
 

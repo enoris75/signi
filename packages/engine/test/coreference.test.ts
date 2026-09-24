@@ -345,43 +345,57 @@ describe('known bugs: english writes his for a possessor linked to a female subj
   const her = (subject: NounPhrase) => sees(subject, np('BOOK', { possessor: link })).en;
   const you = { kind: 'pronominal', person: '2', number: 'singular' } as const;
 
-  test.fails('your mother', () => {
+  test('your mother', () => {
     expect(her(np('MOTHER', { possessor: you }))).toBe('your mother sees her book.');
   });
 
-  test.fails('the woman', () => {
+  test('the woman', () => {
     expect(her(np('WOMAN'))).toBe('the woman sees her book.');
   });
 
-  test.fails('the sister', () => {
+  test('the sister', () => {
     expect(her(np('SISTER'))).toBe('the sister sees her book.');
   });
 
-  test.fails('the daughter', () => {
+  test('the daughter', () => {
     expect(her(np('DAUGHTER'))).toBe('the daughter sees her book.');
   });
 
-  test.fails('the wife', () => {
+  test('the wife', () => {
     expect(her(np('WIFE'))).toBe('the wife sees her book.');
   });
 
-  test.fails('the aunt', () => {
+  test('the aunt', () => {
     expect(her(np('AUNT'))).toBe('the aunt sees her book.');
   });
 
-  test.fails('with OWN', () => {
+  test('with OWN', () => {
     expect(sees(np('MOTHER'), np('BOOK', { possessor: link, possessorOwn: true })).en).toBe('the mother sees her own book.');
   });
 
-  test.fails('inside a relative clause on the subject', () => {
+  test('inside a relative clause on the subject', () => {
     const mother = np('MOTHER', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('BOOK', { possessor: link }) } });
     expect(sayAll(clause(mother, 'RUN')).en).toBe('the mother who sees her book runs.');
   });
 
-  test.fails('my mother, on her older sister', () => {
+  test('my mother, on her older sister', () => {
     const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
     expect(sees(np('MOTHER', { possessor: mine }), np('SISTER', { adjectives: ['ELDER'], possessor: link })).en)
       .toBe('my mother sees her older sister.');
+  });
+
+  // The sex is the concept's (`sex`), recorded on every person noun that has one by meaning.
+  test('the other female persons, a name, a complement, and the plan’s own gender first', () => {
+    expect(her(np('GRANDMOTHER'))).toBe('the grandmother sees her book.');
+    expect(her(np('GIRLFRIEND'))).toBe('the girlfriend sees her book.');
+    expect(her(np('MOM'))).toBe('Mom sees her book.');
+    expect(her(np('MARY'))).toBe('Mary sees her book.');
+    expect(her(np('PETER'))).toBe('Peter sees his book.');
+    expect(sayAll(clause(np('WOMAN'), 'RUN', { complements: { comitative: { phrase: np('DOG', { possessor: link }) } } })).en)
+      .toBe('the woman runs with her dog.');
+    // The plan's own gender still comes first.
+    expect(her(np('WOMAN', { gender: 'masc' }))).toBe('the woman sees his book.');
+    expect(her(np('DOG'))).toBe('the dog sees its book.');
   });
 
   test('regression: the other six, a gender the plan names, a man, a person of unknown sex, the plural and the pronominal possessor', () => {
