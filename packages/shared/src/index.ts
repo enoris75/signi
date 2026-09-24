@@ -988,6 +988,20 @@ export interface NounPhrase {
    * name, and Italian drops its final -e before one (*signore* → *signor*).
    */
   title?: string;
+  /**
+   * Some **members of the set** the head denotes, named after it (P09-E33): `example` is *such as*
+   * ("animals **such as the cat**", an open list), `inclusion` is *including* ("the animals,
+   * **including the cat**,", a closed set some of whose members are named). The phrase is any noun
+   * element, so a coordinated group names several ("such as the cat and the dog").
+   *
+   * Each engine spells the word, and agrees and cases the example itself, not the head: it *come* /
+   * *compreso* (agreeing: *compresa la gatta*), fr *comme* / *y compris*, de *wie* in the head's case
+   * / *einschließlich* + genitive, es *como* / *incluido* (agreeing), pt *como* / *incluindo*. The
+   * inclusion is parenthetical, set off by commas on both sides in the European languages, and the
+   * example is not. Japanese puts either before the head as a prenominal clause: 猫**のような**動物,
+   * 猫**を含む**動物. It follows everything else in the phrase, a relative clause included.
+   */
+  examples?: { phrase: NounElement; relation: 'example' | 'inclusion' };
 }
 
 /**

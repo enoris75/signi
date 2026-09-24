@@ -38,6 +38,7 @@ import { genitiveShows } from '../genitiveShows.js';
 import { germanCompound } from '../germanCompound.js';
 import { modifierGenitives } from '../modifierGenitives.js';
 import { nounPhrase } from '../nounPhrase.js';
+import { nounExamples } from '../nounExamples.js';
 import { nounStandard } from '../nounStandard.js';
 import { possessedDeclension } from '../possessedDeclension.js';
 import { possessorText } from '../possessorText.js';
@@ -314,7 +315,7 @@ export function complementsParts(
         ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
       const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
-      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}`;
+      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;
       };
       // All but `between`, which is said once over the group: each conjunct is built as above, its

@@ -7,6 +7,7 @@ import { possessorBound } from '../../functions/possessorBound.js';
 import { possessiveJa } from '../../possessive.js';
 import { JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { jaCounted } from './jaCounted.js';
+import { jaExampleSegs } from './jaExampleSegs.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { jaDegreeSegs } from './jaDegreeSegs.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
@@ -133,5 +134,6 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
       : wordSeg(head['base'] ?? '', head['reading']));
   }
   // A relative clause is prenominal: the whole clause precedes everything else (see relativeClauseSegs).
-  return [...comparedSegs, ...relativeClauseSegs(np), ...core];
+  // The members of the head's set it names lead even the standard (P09-E33, see `jaExampleSegs`).
+  return [...jaExampleSegs(np), ...comparedSegs, ...relativeClauseSegs(np), ...core];
 }

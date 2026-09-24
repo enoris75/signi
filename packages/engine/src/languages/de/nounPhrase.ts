@@ -14,6 +14,7 @@ import { determiner } from './determiner.js';
 import { genitiveS } from './genitiveS.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
+import { nounExamples } from './nounExamples.js';
 import { nounStandard } from './nounStandard.js';
 import { possessorText } from './possessorText.js';
 import { possessedDeclension } from './possessedDeclension.js';
@@ -72,5 +73,5 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   const numeral = numeralText(forms, CARDINALS);
   const lead = [art, numeral].filter(Boolean).map((w) => `${w} `).join('');
   const vonPhrase = detached && pronominal ? ` von ${dativePronounDe(pronominal)}` : '';
-  return `${lead}${a}${word}${postnominal(forms)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}`;
+  return `${lead}${a}${word}${postnominal(forms)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
 }

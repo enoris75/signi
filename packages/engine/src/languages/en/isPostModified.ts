@@ -47,7 +47,8 @@ export function keepsDeterminerBesidePossessive(forms: Record<string, string>): 
 export function isPostModified(np: ResolvedNounPhrase): boolean {
   // An attributive standard trails the head noun just as a relative clause does (P09-E18): "the book
   // of a bigger cat than the dog", never "a bigger cat than the dog's book".
-  if (np.relative || np.adjectiveStandard) return true;
+  // So do the set's named members (P09-E33): "the book of the animals such as the cat".
+  if (np.relative || np.adjectiveStandard || np.examples) return true;
   if (!np.possessor) return false;
   // A pronominal possessor ("his") is a bare prenominal word, so it post-modifies nothing and
   // propagates nothing — unless the head kept its own determiner and sent it to the of-genitive
