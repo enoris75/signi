@@ -863,8 +863,10 @@ describe('attributive (P09-E18)', () => {
     expect(say(sees(compared('CAT', 'more', DOG, { definiteness: 'definite' })), 'de')).toBe('der Mann sieht den größeren Kater als den Hund.');
     expect(say(clause(compared('CAT', 'more', DOG, { definiteness: 'definite' }), 'EAT'), 'de')).toBe('der größere Kater als der Hund frisst.');
     expect(say(sees(compared('CAT', 'more', DOG, { number: 'plural', definiteness: 'bare' })), 'de')).toBe('der Mann sieht größere Kater als den Hund.');
+    // The possessive's mixed declension needs the definite: an indefinite possessed head keeps its
+    // article and detaches the possessive (A277), "einen größeren Kater von ihm als den Hund".
     expect(say(sees(compared('CAT', 'more', DOG, {
-      possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' },
+      definiteness: 'definite', possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' },
     })), 'de')).toBe('der Mann sieht seinen größeren Kater als den Hund.');
     expect(say(sees(compared('CAT', 'more', DOG, { gender: 'fem' })), 'de')).toBe('der Mann sieht eine größere Katze als den Hund.');
   });
