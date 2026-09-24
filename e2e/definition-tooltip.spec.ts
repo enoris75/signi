@@ -2905,4 +2905,47 @@ test.describe('word definition tooltip', () => {
     await partnerJa.hover();
     await expect(page.locator(tooltip)).toHaveText('一緒に住む人');
   });
+
+  // B82: the nouns of ranks 201–400. KIND_SORT's relative agrees with GROUP across the `parts`
+  // genitive; GAME's French purpose takes the generic article the engine now gives a bare mass noun.
+  for (const [id, query, language, rendered] of [
+    ['KIND_SORT', 'kind', 'de', 'eine Gruppe von Dingen, die die gleichen Merkmale hat'],
+    ['KIND_SORT', 'kind', 'ja', '同じ特徴があるもののグループ'],
+    ['GAME', 'game', 'fr', "une action qu'on fait pour la joie"],
+  ] as const) {
+    test(`a noun definition renders (localization B82: ${id}, ${language})`, async ({ app, page }) => {
+      await app.setUiLanguage(language);
+      await app.subjectInput.fill(query);
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(rendered);
+    });
+  }
+
+  // B85: the verbs of giving and getting. PAY is GIVE's dative recipient with a mass object, PROVIDE
+  // a causative over HAVE with a bare plural object, WIN the first gloss on B82's GAME.
+  for (const [id, query, en, language, other] of [
+    ['PAY', 'pay', 'to give money to a person', 'de', 'einer Person Geld geben'],
+    ['PAY', 'pay', 'to give money to a person', 'ja', '人にお金をあげる'],
+    ['PROVIDE', 'provide', 'to cause a person to have objects', 'fr', 'induire une personne à avoir des objets'],
+    ['PROVIDE', 'provide', 'to cause a person to have objects', 'pt', 'induzir uma pessoa a ter objetos'],
+    ['WIN', 'win', 'to be best in a game', 'de', 'in einem Spiel am besten sein'],
+  ] as const) {
+    test(`a verb definition renders (localization B85: ${id}, ${language})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
 });
