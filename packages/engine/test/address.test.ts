@@ -425,3 +425,39 @@ describe('known bugs: contradictory address plans are not refused (A338)', () =>
     });
   });
 });
+
+// A349. French resumes a coordinated subject holding a pronoun with its plural clitic ("toi et moi,
+// nous courons"). The vocative goes through the same subject text, so a coordinated address holding
+// the 2nd person gains a resumption of its own: "Toi et Maman, vous, courez." A command has no subject
+// to resume, and a statement already writes its own "vous": "Toi et Maman, vous, vous courez." The
+// address should be the bare group.
+describe('known bugs: a French coordinated address resumes itself with vous (A349)', () => {
+  const you = np('SECOND_PERSON');
+  const youAll = np('SECOND_PERSON', { number: 'plural' });
+  const youAndMom: NounElement = { conjuncts: [you, np('MOM')], conjunction: 'and' };
+
+  test.fails('the command', () => {
+    expect(sayAll(command(youAndMom, youAll)).fr).toBe('Toi et Maman, courez.');
+    expect(sayAll(command({ conjuncts: [np('MOM'), you], conjunction: 'and' }, youAll)).fr).toBe('Maman et toi, courez.');
+  });
+
+  test.fails('negated, and with an object', () => {
+    expect(sayAll({ ...command(youAndMom, youAll), verbPhrase: { verb: 'RUN', negative: true } }).fr).toBe('Toi et Maman, ne courez pas.');
+    expect(sayAll({ ...clause(youAll, 'EAT', { directObject: np('FOOD') }), imperative: true, address: youAndMom }).fr)
+      .toBe('Toi et Maman, mangez la nourriture.');
+  });
+
+  test.fails('a statement', () => {
+    expect(sayAll({ ...clause(youAll, 'RUN'), address: youAndMom }).fr).toBe('Toi et Maman, vous courez.');
+  });
+
+  test('regression: the other six, and a French address with no pronoun or a single one', () => {
+    expect(sayAll(command(youAndMom, youAll))).toMatchObject({
+      en: 'You and Mom, run.', it: 'Tu e mamma, correte.', de: 'Du und Mama, lauft.',
+      es: 'Tú y Mamá, corred.', ja: 'あなたとお母さん、走ってください。', pt: 'Você e Mamãe, corram.',
+    });
+    expect(sayAll(command({ conjuncts: [np('MOM'), np('DAD')], conjunction: 'and' }, youAll)).fr).toBe('Maman et Papa, courez.');
+    expect(sayAll(command(you)).fr).toBe('Toi, cours.');
+    expect(sayAll(command(youAll, youAll)).fr).toBe('Vous, courez.');
+  });
+});

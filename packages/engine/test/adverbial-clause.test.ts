@@ -655,3 +655,104 @@ describe('known bugs: a Japanese な-adjective predicate takes な before まで
     });
   });
 });
+
+// A345. A323 made a predicate before まで / 前に the change of state 〜になる (幸せになるまで), and left the
+// negative in its prenominal form: 犬が幸せではないまで, 大きくないまで, 友達ではないまで. まで and 前に
+// want an event there too; a negated state reached is 〜でなくなる / 〜くなくなる, "until it stops
+// being happy". 時に and ので keep the plain negative (幸せではない時に), which is right.
+describe('known bugs: a Japanese negated predicate before まで and 前に is not a change of state (A345)', () => {
+  const runs = (conjunction: SubordinatingConjunction, adjective: string, negative = true): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN' },
+    adverbialClause: {
+      conjunction,
+      clause: { subject: np('DOG'), verbPhrase: { verb: 'BE', negative }, complements: { predicative: { phrase: np(adjective) } } },
+    },
+  });
+
+  test.fails('a な-adjective until, and before', () => {
+    expect(say(runs('until', 'HAPPY'), 'ja')).toBe('猫は犬が幸せでなくなるまで走ります。');
+    expect(say(runs('before', 'HAPPY'), 'ja')).toBe('猫は犬が幸せでなくなる前に走ります。');
+  });
+
+  test.fails('an い-adjective and a noun', () => {
+    expect(say(runs('until', 'BIG'), 'ja')).toBe('猫は犬が大きくなくなるまで走ります。');
+    expect(say(runs('until', 'FRIEND'), 'ja')).toBe('猫は犬が友達でなくなるまで走ります。');
+  });
+
+  test('regression: the affirmative, the other conjunctions, and the other six', () => {
+    expect(say(runs('until', 'HAPPY', false), 'ja')).toBe('猫は犬が幸せになるまで走ります。');
+    expect(say(runs('when', 'HAPPY'), 'ja')).toBe('猫は犬が幸せではない時に走ります。');
+    expect(sayAll(runs('until', 'HAPPY'))).toMatchObject({
+      en: 'the cat runs until the dog is not happy.', de: 'der Kater läuft, bis der Hund nicht glücklich ist.',
+    });
+  });
+});
+
+// A346. The same A323 left a 〜ている state before まで / 前に: TIRED (a た-adjective, 疲れている) gives
+// 犬が疲れているまで, 犬が疲れている前に. A323's file named it (疲れるまで is natural) and its ruling, the
+// state reached, covers it: the bare verb 疲れる, "until the dog gets tired". 時に keeps the state.
+describe('known bugs: a Japanese ている state before まで and 前に keeps its ている (A346)', () => {
+  const runs = (conjunction: SubordinatingConjunction): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN' },
+    adverbialClause: {
+      conjunction,
+      clause: { subject: np('DOG'), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('TIRED') } } },
+    },
+  });
+
+  test.fails('until the dog is tired', () => {
+    expect(say(runs('until'), 'ja')).toBe('猫は犬が疲れるまで走ります。');
+  });
+
+  test.fails('before the dog is tired', () => {
+    expect(say(runs('before'), 'ja')).toBe('猫は犬が疲れる前に走ります。');
+  });
+
+  test('regression: when keeps the state, and the other six', () => {
+    expect(say(runs('when'), 'ja')).toBe('猫は犬が疲れている時に走ります。');
+    expect(sayAll(runs('until'))).toMatchObject({
+      en: 'the cat runs until the dog is tired.', de: 'der Kater läuft, bis der Hund müde ist.',
+      fr: "le chat court jusqu'à ce que le chien soit fatigué.",
+    });
+  });
+});
+
+// A347. A279 gave a Japanese state verb its 〜ている in a content clause and left the adverbial clause
+// as it was: 犬が本を持つので, 持つ時に, 持つのに, which report an event (the dog takes hold of the
+// book). A132 gives the main clause 持っています. The state wants 〜ている under ので, 時に and のに;
+// 前に and まで keep the dictionary form (the event), and 間に already has the state.
+describe('known bugs: a Japanese state verb in an adverbial clause takes the dictionary form (A347)', () => {
+  const runs = (conjunction: SubordinatingConjunction, verbPhrase: Record<string, unknown> = {}, verb = 'HAVE', object = 'BOOK'): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN' },
+    adverbialClause: { conjunction, clause: { subject: np('DOG'), verbPhrase: { verb, ...verbPhrase }, directObject: np(object) } },
+  });
+
+  test.fails('because, when and though', () => {
+    expect([runs('because'), runs('when'), runs('though')].map((p) => say(p, 'ja'))).toEqual([
+      '猫は犬が本を持っているので走ります。',
+      '猫は犬が本を持っている時に走ります。',
+      '猫は犬が本を持っているのに走ります。',
+    ]);
+  });
+
+  test.fails('the past and the negative', () => {
+    expect(say(runs('because', { tense: 'past' }), 'ja')).toBe('猫は犬が本を持っていたので走ります。');
+    expect(say(runs('because', { negative: true }), 'ja')).toBe('猫は犬が本を持っていないので走ります。');
+  });
+
+  test.fails('KNOW', () => {
+    expect(say(runs('because', {}, 'KNOW', 'MAN'), 'ja')).toBe('猫は犬が男を知っているので走ります。');
+  });
+
+  test('regression: while, before, after and until', () => {
+    expect([runs('while'), runs('before'), runs('after'), runs('until')].map((p) => say(p, 'ja'))).toEqual([
+      '猫は犬が本を持っている間に走ります。',
+      '猫は犬が本を持つ前に走ります。',
+      '猫は犬が本を持った後で走ります。',
+      '猫は犬が本を持つまで走ります。',
+    ]);
+  });
+});
