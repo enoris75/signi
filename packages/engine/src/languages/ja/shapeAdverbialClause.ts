@@ -13,11 +13,12 @@ import { JA_SUBORDINATORS } from './ja.consts.js';
  * says (猫が食べている間に); a clause that already has an aspect of its own keeps it. So does a clause
  * under a modal: 必要がある and ことができる are states already, a stretch 間に can measure, and the
  * progressive would land on the governed verb (A259) — 猫が食べる必要がある間に, not 食べている必要がある.
+ * `reach` passes on the conjunction's ask for a state reached (まで, 前に: 幸せになるまで, A323).
  */
 export function shapeAdverbialClause(
   adverbial: NonNullable<ResolvedPhrase['adverbialClause']>,
-): { clause: ResolvedPhrase; word: string; te?: true } {
-  const { word, tense, progressive, plain, te } = JA_SUBORDINATORS[adverbial.conjunction];
+): { clause: ResolvedPhrase; word: string; te?: true; reach?: true } {
+  const { word, tense, progressive, plain, te, reach } = JA_SUBORDINATORS[adverbial.conjunction];
   const { clause } = adverbial;
   const vp = clause.verbPhrase;
   if (!vp) return { clause, word };
@@ -29,5 +30,6 @@ export function shapeAdverbialClause(
     clause: { ...clause, verbPhrase: { ...vp, tense: tense ?? vp.tense, aspect } },
     word,
     ...(te ? { te } : {}),
+    ...(reach ? { reach } : {}),
   };
 }

@@ -18,11 +18,17 @@ import { wordSeg } from './wordSeg.js';
  * `closing` stands before a particle that closes the clause, the indirect question's か (A278): the
  * prenominal form in every cell but a na- or の-adjective's present affirmative, which takes the terminal
  * である where a noun would follow its attributive な (幸せであるかどうか, 幸せだったかどうか).
+ * `reach` stands before まで and 前に, which name a state reached (A323): the affirmative is the change of
+ * state 〜になる, on an i-adjective (大きくなる), a na-adjective (幸せになる) or a noun (友達になる); the
+ * negative and a state (疲れている) keep the prenominal form.
  */
-export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | 'closing' | JaForm;
+export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | 'closing' | 'reach' | JaForm;
 // The forms with endings of their own; the others borrow a row (see `row`).
-type CopulaRow = Exclude<CopulaForm, 'closing'>;
-const row = (form: CopulaForm): CopulaRow => (form === 'closing' ? 'prenominal' : form);
+type CopulaRow = Exclude<CopulaForm, 'closing' | 'reach'>;
+const row = (form: CopulaForm): CopulaRow => (form === 'closing' || form === 'reach' ? 'prenominal' : form);
+// The change of state `reach` says in its affirmative cells, [present, past], after the i-adjective's
+// く or the na-adjective's and the noun's に.
+const NARU = ['なる', 'なった'];
 
 // The endings by class and form, as [affirmative present, affirmative past, negative present, negative
 // past]. A たら form ignores tense, so it repeats its two cells; a governed form ignores both, so it
@@ -147,7 +153,9 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
   const cell = (negative ? 2 : 0) + (tense === 'past' ? 1 : 0);
   // A `no` noun predicate closes its circumfix in the copula: でもありません, not ではありません, and under a
   // modal でもある — or, where the modal denies it, でもない (A03).
+  const reached = form === 'reach' && cell < 2 ? NARU[cell] : undefined;
   if (f['role'] !== 'adjective') {
+    if (reached) return [...elSegs(pred.phrase), { t: `に${reached}` }];
     const ending = COPULA_ENDINGS[row(form)][cell];
     return [...elSegs(pred.phrase), { t: isNegativeGroup(pred.phrase) ? ending.replace(/^では|^で(?=[あな])/, 'でも') : ending }];
   }
@@ -170,7 +178,9 @@ export function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boo
     return [...degSegs, wordSeg(stem, stemReading), { t: `${I_ENDINGS.dict[0]}わけ${COPULA_ENDINGS[row(form)][cell]}` }];
   }
   const at = row(form);
-  const ending = kind === 'i' ? I_ENDINGS[at][cell]
+  const ending = reached && kind === 'i' ? `く${reached}`
+    : reached && kind === 'na' ? `${predicative}に${reached}`
+    : kind === 'i' ? I_ENDINGS[at][cell]
     : kind === 'ta' ? STATE_ENDINGS[at][cell]
     : kind === 'ru' ? RU_ENDINGS[at][cell]
     : form === 'prenominal' && cell === 0 && attributive ? attributive

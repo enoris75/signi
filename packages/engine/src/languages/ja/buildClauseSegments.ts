@@ -121,7 +121,8 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // subject marked が, closed by its postposed conjunction — 男性は猫が食べる時に走ります (P09-E4).
   if (phrase.adverbialClause) {
     const adverbial = shapeAdverbialClause(phrase.adverbialClause);
-    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', true);
+    // まで and 前に name a state reached, which a copula predicate says with 〜になる (幸せになるまで, A323).
+    const clauseSegs = buildClauseSegments(adverbial.clause, 'が', adverbial.reach ? 'reach' : true);
     // から says *since* on the て-form (猫が食べてから, P09-E27), which the plain past it was built on
     // turns into.
     segs.push(...(adverbial.te ? teFromPlainPast(clauseSegs) : clauseSegs), { t: adverbial.word });

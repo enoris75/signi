@@ -609,20 +609,38 @@ describe('known bugs: a Japanese な-adjective predicate takes な before まで
     },
   });
 
-  test.fails('until someone is okay', () => {
+  test('until someone is okay', () => {
     expect(say(runsUntil('SOMEONE', 'OKAY'), 'ja')).toBe('猫は誰かが大丈夫になるまで走ります。');
   });
 
-  test.fails('until the dog is happy', () => {
+  test('until the dog is happy', () => {
     expect(say(runsUntil('DOG', 'HAPPY'), 'ja')).toBe('猫は犬が幸せになるまで走ります。');
   });
 
-  test.fails('until, in the past', () => {
+  test('until, in the past', () => {
     expect(say(runsUntil('DOG', 'HAPPY', 'until', 'past'), 'ja')).toBe('猫は犬が幸せになるまで走りました。');
   });
 
-  test.fails('before the dog is happy', () => {
+  test('before the dog is happy', () => {
     expect(say(runsUntil('DOG', 'HAPPY', 'before'), 'ja')).toBe('猫は犬が幸せになる前に走ります。');
+  });
+
+  test('an い-adjective and a noun reach their state with 〜になる too', () => {
+    expect(say(runsUntil('DOG', 'BIG'), 'ja')).toBe('猫は犬が大きくなるまで走ります。');
+    expect(say(runsUntil('DOG', 'BIG', 'before'), 'ja')).toBe('猫は犬が大きくなる前に走ります。');
+    const friend: PhrasePlan = {
+      subject: np('CAT'), verbPhrase: { verb: 'RUN' },
+      adverbialClause: { conjunction: 'until', clause: {
+        subject: np('DOG'), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('FRIEND', { definiteness: 'indefinite' }) } },
+      } },
+    };
+    expect(say(friend, 'ja')).toBe('猫は犬が友達になるまで走ります。');
+  });
+
+  test('regression: the other conjunctions keep the prenominal な and the past', () => {
+    expect(say(runsUntil('DOG', 'HAPPY', 'when'), 'ja')).toBe('猫は犬が幸せな時に走ります。');
+    expect(say(runsUntil('DOG', 'HAPPY', 'because'), 'ja')).toBe('猫は犬が幸せなので走ります。');
+    expect(say(runsUntil('DOG', 'HAPPY', 'after'), 'ja')).toBe('猫は犬が幸せだった後で走ります。');
   });
 
   test('regression: a verb before まで, and the other six', () => {

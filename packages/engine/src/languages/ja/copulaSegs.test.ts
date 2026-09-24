@@ -91,6 +91,17 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'closing'))).toBe('伝説である');
       expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'closing'))).toBe('疲れている');
     });
+
+    // A323: before まで and 前に the affirmative is the change of state 〜になる.
+    test('a reach copula is 〜になる in the affirmative, prenominal otherwise', () => {
+      expect(copulaSegs(pred(SHIAWASE), 'present', false, 'reach')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'になる' }]);
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'reach'))).toBe('大きくなる');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'reach'))).toBe('伝説になる');
+      expect(text(copulaSegs(pred(CHAIRO), 'present', false, 'reach'))).toBe('茶色になる');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'reach'))).toBe('幸せになった');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'reach'))).toBe('幸せではない');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'reach'))).toBe('疲れている');
+    });
   });
 
   // A128: under a modal the copula takes the form the modal governs, with no tense of its own. A03:

@@ -42,8 +42,10 @@ import { wordSeg } from './wordSeg.js';
  * `'content'` is a nominalized content clause, before こと (猫が幸せなことを): prenominal, as `true` is.
  * The three content values say that the clause reports something, where `true` (a relative clause, an
  * adverbial one) does not, so only they give a state verb its 〜ている (A279: 猫が本を持っていると).
+ * `'reach'` is an adverbial clause closed by まで or 前に, which name a state reached: a copula predicate
+ * says it as the change of state 〜になる (犬が幸せになるまで, A323), and is otherwise prenominal.
  */
-export type JaPlain = boolean | 'quote' | 'question' | 'content';
+export type JaPlain = boolean | 'quote' | 'question' | 'content' | 'reach';
 
 export function predicateSegs(
   givenVerbPhrase: ResolvedVerbPhrase,
@@ -278,9 +280,9 @@ export function predicateSegs(
     const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
     // An "if" clause takes the たら form (幸せだったら), a relative clause the prenominal one (幸せな猫), and
     // a citation the plain one (「行動することが可能である」 "to be able to act"), and an indirect
-    // question the closing one (幸せであるかどうか, A278).
+    // question the closing one (幸せであるかどうか, A278), and まで / 前に the change of state (幸せになるまで, A323).
     const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' || plain === 'quote' ? 'citation'
-      : plain === 'question' ? 'closing' : plain ? 'prenominal' : 'polite';
+      : plain === 'question' ? 'closing' : plain === 'reach' ? 'reach' : plain ? 'prenominal' : 'polite';
     segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }

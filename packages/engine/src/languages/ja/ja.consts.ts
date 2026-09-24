@@ -258,15 +258,16 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * P09-E27: まで closes an *until* clause on the plain non-past (猫が食べるまで), and のに a *though*
  * clause on the plain form of its own tense (猫が食べるのに, 猫が食べたのに). から says *since* on the
  * **て-form** (猫が食べてから), which `te` asks for: the clause is built on the plain past and its last
- * word turned from 〜た into 〜て (see `teFromPlainPast`).
+ * word turned from 〜た into 〜て (see `teFromPlainPast`). `reach` marks まで and 前に, which name a
+ * state reached: a copula predicate before them is the change of state 〜になる (幸せになるまで, A323).
  */
-export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true }> = {
+export const JA_SUBORDINATORS: Record<SubordinatingConjunction, { word: string; tense?: Tense; progressive?: true; plain?: true; te?: true; reach?: true }> = {
   when: { word: '時に' },
   while: { word: '間に', tense: 'present', progressive: true },
   because: { word: 'ので' },
   after: { word: '後で', tense: 'past', plain: true },
-  before: { word: '前に', tense: 'present', plain: true },
-  until: { word: 'まで', tense: 'present', plain: true },
+  before: { word: '前に', tense: 'present', plain: true, reach: true },
+  until: { word: 'まで', tense: 'present', plain: true, reach: true },
   since: { word: 'から', tense: 'past', plain: true, te: true },
   though: { word: 'のに' },
 };
