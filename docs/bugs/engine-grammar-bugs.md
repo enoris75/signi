@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds A278–A293 and Part B is empty).** If
+this writing Part A holds A278–A296 and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -80,6 +80,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A291 | [A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md](A-must-fix/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md) | German, Spanish, Portuguese | the numeral is dropped inside a complement: `läuft in den Häusern`, `corre en las casas` for *in den drei Häusern*, *en las tres casas* |
 | A292 | [A292-french-writes-de-before-a-bare-numeral-in-a-complement.md](A-must-fix/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md) | French | *de* before a bare numeral in a complement: `avec de trois chiens` for *avec trois chiens* |
 | A293 | [A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md](A-must-fix/A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md) | English | a possessor linked to a female subject says *his*: `your mother sees his book` for *her book*; English nouns record no natural sex |
+| A294 | [A294-french-bien-around-the-passive-participle.md](A-must-fix/A294-french-bien-around-the-passive-participle.md) | French | *bien* misses the passive participle: `est mangée bien par le chien`, `a bien été mangée` for *est bien mangée*, *a été bien mangée* |
+| A295 | [A295-german-attributive-noun-drops-its-inherent-adjective.md](A-must-fix/A295-german-attributive-noun-drops-its-inherent-adjective.md) | German | an attributive noun drops its inherent adjective: `Gefühle großer Frauen`, `Frauenbuch` for *großer junger Frauen*, *Buch junger Frauen* (YOUNG_WOMAN, the grammar terms) |
+| A296 | [A296-english-manner-adverb-after-the-by-phrase.md](A-must-fix/A296-english-manner-adverb-after-the-by-phrase.md) | English | a manner adverb trails the by-phrase: `is eaten by the dog well` for *is eaten well by the dog* |
 
 **Thirteen open**, **A278–A290**, all filed on 2026-09-24 by an audit of the engine test coverage
 of P09-E13 to E19 (the role complement, the possessor, marked-relation and passive questions, the
@@ -97,8 +100,13 @@ decision for the fixer.
 **A291–A293** were filed the same day from the P09-E20..E24 / P11-E1..E5 batch's probes: two older
 numeral defects inside a complement — German, Spanish and Portuguese drop the numeral (A291), French
 writes *de* before a bare one (A292), both beside A289's direct object — and English *his* for a
-possessor linked by P11-E2 to a female subject (A293), whose fix wants a concept-level sex. So
-**sixteen are open**.
+possessor linked by P11-E2 to a female subject (A293), whose fix wants a concept-level sex.
+
+**A294–A296** were filed the same day from five random phrases: French *bien* misses the passive
+participle, trailing it in a simple tense and landing before *être* / *été* in a periphrastic one
+(A294), a German attributive noun drops its inherent adjective and postnominal genitive, so
+YOUNG_WOMAN reads as WOMAN (A295), and English puts a manner adverb after the by-phrase (A296). So
+**nineteen are open**.
 
 The fifteen filed before them on 2026-09-23, **A261–A271** and **A273–A276**, were fixed the
 same day by five lanes and are listed under **Fixed** below. The content-clause tense fix now covers

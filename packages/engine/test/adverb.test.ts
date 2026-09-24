@@ -436,3 +436,82 @@ describe('known bugs: an English particle after an object with a relative clause
     });
   });
 });
+
+// A294. A155 put French "bien" before the non-finite verb it modifies, but a passive's participle is
+// that verb too. In a simple tense "bien" still trails it ("est mangée bien par le chien"), and in a
+// periphrastic passive it lands before "être" / "été" ("a bien été mangée"), where it reads as the
+// assertive "indeed" rather than the manner. It belongs right before the participle.
+describe('known bugs: French "bien" before the passive participle', () => {
+  const mouseEatenWell = (verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<PhrasePlan> = {}) => sayAll({
+    ...clause(np('DOG'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'WELL', voice: 'passive', ...verbPhrase } }),
+    ...extra,
+  }).fr;
+
+  test.fails('in a simple tense, between être and the participle', () => {
+    expect(mouseEatenWell()).toBe('la souris est bien mangée par le chien.');
+    expect(mouseEatenWell({ tense: 'future' })).toBe('la souris sera bien mangée par le chien.');
+    expect(mouseEatenWell({ negative: true })).toBe("la souris n'est pas bien mangée par le chien.");
+    expect(sayAll(clause(np('MOUSE', {
+      relative: {
+        verbPhrase: { verb: 'EAT', tense: 'future', modifier: 'WELL', voice: 'passive', negative: true },
+        headRole: 'directObject', subject: np('DOG'),
+      },
+    }), 'RUN')).fr).toBe('la souris qui ne sera pas bien mangée par le chien court.');
+  });
+
+  test.fails('in a periphrastic passive, after être / été rather than before it', () => {
+    expect(mouseEatenWell({ aspect: 'resultative' })).toBe('la souris a été bien mangée par le chien.');
+    expect(mouseEatenWell({ aspect: 'resultative', negative: true })).toBe("la souris n'a pas été bien mangée par le chien.");
+    expect(mouseEatenWell({ aspect: 'progressive' })).toBe("la souris est en train d'être bien mangée par le chien.");
+    expect(mouseEatenWell({ modals: ['MUST'] })).toBe('la souris doit être bien mangée par le chien.');
+    expect(mouseEatenWell({ modals: ['MUST'], aspect: 'resultative' })).toBe('la souris doit avoir été bien mangée par le chien.');
+    expect(mouseEatenWell({}, { infinitive: true })).toBe('être bien mangée par le chien.');
+  });
+
+  test('regression: the active participle, a -ment adverb and a frequency adverb are already placed', () => {
+    expect(sayAll(clause(np('DOG'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'WELL', aspect: 'resultative' } })).fr)
+      .toBe('le chien a bien mangé la souris.');
+    expect(mouseEatenWell({ tense: 'future', modifier: 'SLOWLY' })).toBe('la souris sera mangée lentement par le chien.');
+    expect(mouseEatenWell({ tense: 'future', modifier: 'ALWAYS' })).toBe('la souris sera toujours mangée par le chien.');
+  });
+});
+
+// A296. An English passive carries its participle and by-phrase in the object slot, so a manner
+// adverb trails them like it trails an object: "is eaten by the dog well". In a passive the manner
+// adverb goes with the participle, ahead of the demoted agent: "is eaten well by the dog".
+describe('known bugs: English manner adverb after the by-phrase', () => {
+  const mouseEaten = (verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<PhrasePlan> = {}) => sayAll({
+    ...clause(np('DOG'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'WELL', voice: 'passive', ...verbPhrase } }),
+    ...extra,
+  }).en;
+
+  test.fails('English puts a manner adverb before the by-phrase', () => {
+    expect(mouseEaten()).toBe('the mouse is eaten well by the dog.');
+    expect(mouseEaten({ tense: 'future' })).toBe('the mouse will be eaten well by the dog.');
+    expect(mouseEaten({ negative: true })).toBe('the mouse is not eaten well by the dog.');
+    expect(mouseEaten({ tense: 'future', modifier: 'SLOWLY' })).toBe('the mouse will be eaten slowly by the dog.');
+    expect(mouseEaten({}, { interrogative: true })).toBe('is the mouse eaten well by the dog?');
+    expect(mouseEaten({}, { complements: { locative: { phrase: np('HOUSE') } } })).toBe('the mouse is eaten well by the dog in the house.');
+  });
+
+  test.fails('English puts it there in every verb group and in a relative clause', () => {
+    expect(mouseEaten({ aspect: 'resultative' })).toBe('the mouse has been eaten well by the dog.');
+    expect(mouseEaten({ aspect: 'progressive' })).toBe('the mouse is being eaten well by the dog.');
+    expect(mouseEaten({ modals: ['MUST'] })).toBe('the mouse must be eaten well by the dog.');
+    expect(mouseEaten({}, { infinitive: true })).toBe('to be eaten well by the dog.');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: {
+        verbPhrase: { verb: 'EAT', tense: 'future', modifier: 'WELL', voice: 'passive', negative: true },
+        headRole: 'directObject', subject: np('DOG'),
+      },
+    }), 'RUN')).en).toBe('the mouse that will not be eaten well by the dog runs.');
+  });
+
+  test('regression: the active clause, the agentless passive and a frequency adverb are already placed', () => {
+    expect(sayAll(clause(np('DOG'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'WELL' } })).en)
+      .toBe('the dog eats the mouse well.');
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'WELL', voice: 'passive' } })).en)
+      .toBe('the mouse is eaten well.');
+    expect(mouseEaten({ tense: 'future', modifier: 'ALWAYS' })).toBe('the mouse will always be eaten by the dog.');
+  });
+});
