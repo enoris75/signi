@@ -81,5 +81,12 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // in the main clause, "el libro que leo", where that leaves no subject-relative reading (A173).
   const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'que', predicateFor)
     ? '' : subjectText(rel.subject!);
+  // A relative on the one who likes says its subject after the verb, as the main clause does (A369, see
+  // `experiencerInverts`): "el gato al que le gusta el perro", "al que no le gusta ningún perro".
+  if (rel.headRole === 'terminus' && verbPhrase.verb.forms['experiencer'] === '1' && subjText) {
+    const inverted = predicateText(agreeForms, verbPhrase, rel.directObject, rel.complements, rel.agent, false, relativeGapType(rel),
+      { text: subjText, negative: relativeSubjectIsNegative(rel) });
+    return `${withPoss} ${relativizer} ${inverted}`.trimEnd() + examples;
+  }
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd() + examples;
 }

@@ -71,6 +71,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 reported: A357's one beside a possessive, left by a bare head (A365), and the Japanese "neither …
 nor" of an intensified adjective, which takes the concessive 〜すぎても (A366).
 
+A367–A369, *piacere* / *gustar*, were filed and fixed together on 2026-09-24 and are listed under
+**Fixed** below: a wh-question asking about the thing liked (*chi piaccio?* for *chi mi piace?*,
+A367) or about the one who likes (*chi piace a?* for *a chi piace il cane?*, A368), and the frame's
+word order (*un angelo mi piace* for *mi piace un angelo*, A369).
+
 The eight before them, A355–A357 and A359–A363, were fixed on 2026-09-24 and are listed under
 **Fixed** below.
 
@@ -682,6 +687,9 @@ is listed under **Fixed** below.
 | A361 | [A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md](fixed/A361-japanese-neither-nor-before-made-and-mae-ni-is-not-a-change-of-state.md) | Japanese | 2026-09-24 |
 | A362 | [A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md](fixed/A362-japanese-plural-measure-noun-under-within-during-and-ago-reads-as-one.md) | Japanese | 2026-09-24 |
 | A363 | [A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md](fixed/A363-french-prepositional-object-with-a-numeral-writes-a-double-space.md) | French | 2026-09-24 |
+| A367 | [A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md](fixed/A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md) | Italian, Spanish | 2026-09-24 |
+| A368 | [A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md](fixed/A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md) | Italian, Spanish | 2026-09-24 |
+| A369 | [A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md](fixed/A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md) | Italian, Spanish | 2026-09-24 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

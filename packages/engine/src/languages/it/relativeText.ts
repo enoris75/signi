@@ -85,6 +85,13 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // reading (A173).
   const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'che', predicateFor)
     ? '' : subjectText(rel.subject!);
+  // A relative on the one who likes says its subject after the verb, as the main clause does (A369, see
+  // `experiencerInverts`): "il gatto al quale piace il cane", "al quale non piace nessun cane".
+  if (rel.headRole === 'terminus' && rel.verbPhrase.verb.forms['experiencer'] === '1' && subjText) {
+    const inverted = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, false, gappedPatient,
+      { text: subjText, negative: relativeSubjectIsNegative(rel) });
+    return `${relativizer} ${inverted}`.trim();
+  }
   // The bare copula goes before its noun subject, "dove" eliding before "è" and "era": "un luogo dov'è il
   // gatto", "dove sono i gatti", "sotto la quale è il gatto" (A221, see `relativeInvertsCopula`).
   if (relativeInvertsCopula(rel)) {

@@ -5,6 +5,13 @@ reported. Each was reproduced at 17e57d9e plus that batch's fixes.
 [A365](A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md), the numeral one beside a bare head with a pronominal possessive (*il suo un amico*, *su un amigo*, *ihr ein Freund*), the case A357 left.
 [A366](A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md), a Japanese negated pair with TOO written with the concessive te-form (大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません).
 
+[A367](../fixed/A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md) and
+[A368](../fixed/A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md), *piacere* /
+*gustar* in a wh-question (*chi piaccio?* for *chi mi piace?*, *chi piace a?* for *a chi piace il
+cane?*), were filed and fixed together on 2026-09-24 and went straight to [`../fixed/`](../fixed/),
+with [A369](../fixed/A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md), the frame's
+word order (*un angelo mi piace* for *mi piace un angelo*).
+
 The eight listed below, A355–A357 and A359–A363, were all fixed on 2026-09-24 and
 moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) records the rulings each fix
 took. The history below is kept as it was written, in the present tense of each filing.

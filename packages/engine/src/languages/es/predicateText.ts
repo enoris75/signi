@@ -10,6 +10,7 @@ import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
+import type { InvertedSubject } from '../../functions/experiencerInverts.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negativeAdverb } from '../../functions/negativeAdverb.js';
@@ -63,6 +64,11 @@ export function predicateText(
   // choice below would otherwise see a clause that predicates nothing: "el slot donde el cursor
   // **es**" for "está" (A199).
   gapComplement?: ComplementType,
+  // The subject an experiencer clause says after the verb, where an object would stand, and whether
+  // its dative was fronted, which leaves only the clitic here: "al gato le gusta **el perro** en la
+  // casa" (A369, see `experiencerInverts`).
+  invertedSubject?: InvertedSubject,
+  frontedDative = false,
 ): string {
   const { verb: givenVerb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // An existential conjugates "haber" for the HAVE it was resolved with (P09-E6 D5, see
@@ -217,7 +223,9 @@ export function predicateText(
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña" — and so does a
   // "ningún" possessor, in the object or in a complement: "no ve la casa de ningún hombre" (A216).
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
+  const objectIsNegative = (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false)
+    // A negative subject behind the verb concords as a negative object does (A369): "al gato no le gusta ningún perro".
+    || invertedSubject?.negative === true;
   const complementIsNegative = hasNegativeComplement(complements) || hasNegativePossessorComplement(complements);
   // A negator inside the governed group is preverbal for everything that follows it, so a "ningún"
   // object or complement concords with that one instead: "quiere no comer ninguna comida" takes no
@@ -299,12 +307,18 @@ export function predicateText(
   const directObjectText = passive ? agentPhrase(agent)
     // A focus particle singles the object out, from outside the phrase: "come solo la comida" (C39).
     : directObject && (!objectClitic || pronounGroup)
-      ? withFocus(coordinateElement(directObject, tonicOrNoun, true), slotFocus(directObject), FOCUS_WORDS) : '';
+      ? withFocus(coordinateElement(directObject, tonicOrNoun, true), slotFocus(directObject), FOCUS_WORDS)
+      : invertedSubject?.text ?? '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo || leadsNo ? modifierText : '';
   const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo ? '' : modifierText;
-  const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
+  // A pronoun experiencer is its clitic alone: "me gusta el perro". The tonic beside it, "a mí", is
+  // the contrastive reading (A369); the generic "a uno" has no clitic of its own and keeps it.
+  const cliticExperiencer = !!experiencerDative && isPronounElement(experiencerDative.phrase)
+    && experiencerDative.phrase.agreement['generic'] !== '1';
+  const complementsText = complementsAroundAdverb(modifier, adverbText,
+    recipientClitic || frontedDative || cliticExperiencer ? withoutTerminus(complements) : complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command

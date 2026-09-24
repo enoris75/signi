@@ -20,6 +20,7 @@ import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
+import { experiencerGap } from './experiencerGap.js';
 import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
 import { refuseGenericObject } from './refuseGenericObject.js';
@@ -230,9 +231,6 @@ export function resolvePhrase(
   if (passive && gap?.role === 'possessor' && gap.possessed === 'subject') {
     throw new Error('a possessor question inside a passive\'s agent is not built (P09-E16)');
   }
-  const asked = gap && passive
-    ? gap.role === 'possessor' ? { ...gap, possessed: 'subject' as const } : { ...gap, role: passiveGap(gap.role) }
-    : gap;
   const patient = passive ? directObject ?? questionSubject(gap!) : undefined;
   const generic = subject.agreement['generic'] === '1';
   // An **experiencer verb** re-maps the clause too, and in the same way a passive does — the
@@ -250,10 +248,25 @@ export function resolvePhrase(
   // in a citation, whose generic subject is the unspoken one: "gustar". What is left is the plain citation of the verb
   // ("piacere", "gustar"), which cannot name the thing liked because that thing is its subject and a
   // citation has none — a fact about Italian and Spanish, not a gap in the plan.
-  const experiencer = !passive && !!directObject && verbPhrase?.verb.forms['experiencer'] === '1';
+  //
+  // An **experiencer wh-question** moves its gap with the slots (`experiencerGap`), as a passive one
+  // does: the thing liked gapped as the object is the subject's gap, the wordless stand-in a subject
+  // question has ("chi mi piace?", A367), and the one who likes gapped as the subject is the dative's
+  // gap, with the thing liked the subject ("a chi piace il cane?", A368).
+  const experiencer = !passive && (!!directObject || gap?.role === 'directObject')
+    && verbPhrase?.verb.forms['experiencer'] === '1';
+  const liked = experiencer ? directObject ?? questionSubject(gap!) : undefined;
+  const asked = gap && passive
+    ? gap.role === 'possessor' ? { ...gap, possessed: 'subject' as const } : { ...gap, role: passiveGap(gap.role) }
+    : gap && experiencer
+      ? gap.role === 'possessor' ? gap : { ...gap, role: experiencerGap(gap.role) }
+      : gap;
+  // The dative is the one who likes, unless the question gaps it.
+  const dative = experiencer && asked?.role !== 'terminus'
+    && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'));
   const positiveComplements = resolveComplements(complements, language, lookup, verbPhrase?.verb.forms);
   const resolved: ResolvedPhrase = {
-    subject: passive ? patient! : experiencer ? directObject! : subject,
+    subject: passive ? patient! : experiencer ? liked! : subject,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
     // An object controller takes the case the governing verb's lexeme names for it (P09-E43).
     verbPhrase: controllerCase(clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject), language, objectControlled(plan)),
@@ -262,7 +275,7 @@ export function resolvePhrase(
     ...(asked ? { question: asked } : {}),
     // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
     // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
-    complements: experiencer && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'))
+    complements: dative
       ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: subject } }
       : negativeComplements(positiveComplements, clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the

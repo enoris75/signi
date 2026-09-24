@@ -15,11 +15,14 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
 import { mannerGloss } from './mannerGloss.js';
+import { complementsPhrase } from './complementsPhrase.js';
 import { predicateText } from './predicateText.js';
 import { questionOrder } from './questionOrder.js';
 import { relativeText } from './relativeText.js';
 import { subjectText } from './subjectText.js';
 import { withSentenceAdverb } from '../../functions/withSentenceAdverb.js';
+import { experiencerInverts } from '../../functions/experiencerInverts.js';
+import { withoutTerminus } from '../../functions/recipientPronoun.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 export function renderClause(phrase: ResolvedPhrase): string {
@@ -59,12 +62,23 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // definite (P09-E14, see `withoutQuestionPossessor`) — unless the verb takes its object with a
   // preposition, which fronts whole: "dalla casa di chi dipende il gatto?" (`possessedPrepObject`).
   const prepFront = possessedPrepObject(phrase);
+  // An experiencer clause leads with its dative and says its subject after the verb (A369, see
+  // `experiencerInverts`): a noun dative is fronted whole, "al gatto piace il cane", and a pronoun one
+  // is already the clitic before the verb, "mi piace un angelo". A negative subject behind the verb
+  // takes the *non* an object would: "al gatto non piace nessun cane".
+  const inverts = experiencerInverts(phrase);
+  const dative = inverts && !isPronounElement(phrase.complements!.terminus!.phrase) ? phrase.complements!.terminus : undefined;
   const statement = predicateText(
     agreement, phrase.verbPhrase, prepFront ? undefined : withoutQuestionPossessor(phrase.directObject, phrase.question),
-    phrase.complements, phrase.agent,
+    dative ? withoutTerminus(phrase.complements) : phrase.complements, phrase.agent,
+    inverts ? false : undefined, undefined,
+    inverts ? { text: spoken, negative: agreement['definiteness'] === 'no' } : undefined,
   );
+  const lead = inverts
+    ? dative ? complementsPhrase({ terminus: dative }, agreement, phrase.verbPhrase.verb.conceptId, undefined, phrase.verbPhrase.verb.forms) : ''
+    : spoken;
   // A wh-question fronts its word and moves the subject behind the predicate (P09-E6).
-  const [subj, predicate] = questionOrder(phrase.question, spoken, statement, phrase.verbPhrase.verb,
+  const [subj, predicate] = questionOrder(phrase.question, lead, statement, phrase.verbPhrase.verb,
     prepFront ? prepObjectText(prepFront.np, prepFront.prep) : undefined);
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("essere capace di agire", "la gatta desidera essere attenta") or, under a causative,

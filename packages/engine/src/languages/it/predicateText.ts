@@ -10,6 +10,7 @@ import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
+import type { InvertedSubject } from '../../functions/experiencerInverts.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { lemmaTail } from '../../functions/lemmaTail.js';
 import { modalChain } from '../../functions/modalChain.js';
@@ -62,6 +63,9 @@ export function predicateText(
   // participle of the compound tense agrees with as it agrees with a spoken one ("l'opzione che si è
   // salvata", "i libri che si sono salvati"). See `relativeText`.
   gappedPatient?: Record<string, string>,
+  // The subject an experiencer clause says after the verb, where an object would stand: "al gatto
+  // piace **il cane** nella casa" (A369, see `experiencerInverts`).
+  invertedSubject?: InvertedSubject,
 ): string {
   const { verb, negative: verbNegative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
@@ -152,7 +156,9 @@ export function predicateText(
   const modifierIsNegative = finiteHasNegativeAdverb(verbPhrase);
   // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza" — and so
   // does a "nessun" possessor: "non vede la casa di nessun uomo" (A216).
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false;
+  const objectIsNegative = (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no' || possessorIsNegative(np)) ?? false)
+    // A negative subject behind the verb concords as a negative object does (A369): "al gatto non piace nessun cane".
+    || invertedSubject?.negative === true;
   // A postverbal negative word — a `no`-determined direct object OR complement ("in nessuna casa",
   // "a nessun mercato"), or a `no` possessor in one ("nella casa di nessun uomo") — obliges the
   // preverbal "non", the same concord as a negative object. But a preverbal negative SUBJECT
@@ -212,7 +218,8 @@ export function predicateText(
   // after the verb carries the by-phrase instead ("è mangiato dal gatto nella casa").
   const directObjectText = passive ? agentPhrase(agent)
     // A focus particle singles the object out, from outside the phrase: "mangia solo il cibo" (C39).
-    : directObject && (!objectClitic || existential) ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS) : '';
+    : directObject && (!objectClitic || existential) ? withFocus(coordinate(directObject, tonicOrNoun), slotFocus(directObject), FOCUS_WORDS)
+    : invertedSubject?.text ?? '';
   // A focus adverb under a negation takes its negative-polarity word in the same slot, where
   // Italian has one: "non mangia neanche il cibo", not "*non mangia anche il cibo" (A245).
   // A negation a modal governs denies the main verb's group, its adverb with it: "può non mangiare

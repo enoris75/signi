@@ -139,7 +139,7 @@ describe('okay, a predicate with a lexical copula (P09-E31)', () => {
 // the frame falls back to a nominative subject with no "es": "man geht gut", which is not German. The
 // generic dative is "einem": "es geht einem gut". Spanish LIKE has the same gap on its dative frame:
 // the generic experiencer is dropped ("el gato gusta."), where Spanish says "el gato le gusta a uno"
-// (in the engine's order for LIKE, "el perro le gusta al gato").
+// (since A369, in the dative-first order: "a uno le gusta el gato").
 describe('known bugs: a generic subject in a dative experiencer frame (A316)', () => {
   const okayFor = (verbPhrase: Partial<VerbPhrase> = {}) => sayAll(okay(np('GENERIC_PERSON'), verbPhrase));
 
@@ -156,7 +156,7 @@ describe('known bugs: a generic subject in a dative experiencer frame (A316)', (
   });
 
   test('Spanish LIKE', () => {
-    expect(sayAll(clause(np('GENERIC_PERSON'), 'LIKE', { directObject: np('CAT') })).es).toBe('el gato le gusta a uno.');
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'LIKE', { directObject: np('CAT') })).es).toBe('a uno le gusta el gato.');
   });
 
   test('German keeps "es … einem" in a question, under a modal and in a content clause', () => {
@@ -170,8 +170,8 @@ describe('known bugs: a generic subject in a dative experiencer frame (A316)', (
   test('Spanish keeps "le … a uno" negated, with a plural thing liked and in a relative clause; Italian still drops it', () => {
     const G = np('GENERIC_PERSON');
     expect(sayAll(clause(G, 'LIKE', { directObject: np('CAT'), verbPhrase: { negative: true } })))
-      .toMatchObject({ es: 'el gato no le gusta a uno.', it: 'il gatto non piace.' });
-    expect(sayAll(clause(G, 'LIKE', { directObject: np('CAT', { number: 'plural' }) })).es).toBe('los gatos le gustan a uno.');
+      .toMatchObject({ es: 'a uno no le gusta el gato.', it: 'il gatto non piace.' });
+    expect(sayAll(clause(G, 'LIKE', { directObject: np('CAT', { number: 'plural' }) })).es).toBe('a uno le gustan los gatos.');
     expect(sayAll(clause(np('CAT', { relative: { headRole: 'directObject', subject: G, verbPhrase: { verb: 'LIKE' } } }), 'RUN')).es)
       .toBe('el gato que le gusta a uno corre.');
   });
