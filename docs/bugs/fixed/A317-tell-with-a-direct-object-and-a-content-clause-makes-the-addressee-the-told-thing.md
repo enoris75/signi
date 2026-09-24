@@ -48,3 +48,29 @@ at 48af1d35.
 | | |
 |---|---|
 | **Test** | `content-clause.test.ts` → *known bugs: TELL with a direct object and a content clause makes the addressee the told thing (A317)* (3 `test.fails`, one per row, plus a regression test for the terminus plan, the story object and the Romance clitic) |
+
+## Resolved
+
+Fixed 2026-09-24 by **routing**. TELL's sense is unchanged (no switch to the saying verb). The new
+[addresseeObject.ts](../../../packages/engine/src/translator/functions/addresseeObject.ts), called at
+the top of [resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts), moves
+the direct object into the terminus before anything is resolved. It does so when the clause also has
+a `contentObject`, the verb licenses a `terminus` (the concept's `complements`), and the plan names no
+terminus of its own. The object then renders as the addressee does: *racconta al cane che*, *raconte
+au chien que*, *erzählt dem Hund, dass*, *cuenta al perro que*, 犬に伝えます, *conta ao cão que*.
+English keeps *tells the dog that*, through the bare terminus `clause_terminus_bare` gives it. Two
+cases keep their object:
+
+- A passive, whose object is the patient it promotes.
+- A Romance 1st- or 2nd-person pronoun. Its clitic is already the dative one (*ti racconta*, *te
+  raconte*, *te cuenta*, *te conta*, *mi racconta*), where the terminus would give the tonic *a te*.
+
+SAY licenses a terminus too, so it is routed the same way: *the man says to the dog that the cat
+runs*, *dice al cane che*, *sagt dem Hund, dass*.
+
+- **Tests:** [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts) → *known
+  bugs: TELL with a direct object and a content clause makes the addressee the told thing (A317)*: the
+  three pins now pass. Added: the past, the plural, an indirect question and the 1st person, and SAY.
+  The regression (terminus plan, story object, Romance clitic) is unchanged. The colocated
+  [addresseeObject.test.ts](../../../packages/engine/src/translator/functions/addresseeObject.test.ts)
+  covers the routing and each case left untouched.

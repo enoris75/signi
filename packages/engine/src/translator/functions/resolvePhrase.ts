@@ -1,6 +1,7 @@
 import type { ContentClause, ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan, Tense } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { addresseeObject } from './addresseeObject.js';
 import { adverbialClauseMood } from './adverbialClauseMood.js';
 import { adverbialClauseTense } from './adverbialClauseTense.js';
 import { clauseAddressee } from './clauseAddressee.js';
@@ -127,6 +128,9 @@ export function resolvePhrase(
   // name rather than left to die on a TypeError in the noun resolver (A267). `/api/translate` says the
   // same with the field's path.
   if (!plan.subject) throw new Error('a clause needs a subject: plan.subject.concept is required (A267)');
+  // Beside a content clause the direct object is the addressee, and goes where the verb's addressee
+  // goes (A317, see `addresseeObject`).
+  plan = addresseeObject(plan, language, lookup);
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is

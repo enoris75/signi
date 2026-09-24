@@ -1329,7 +1329,7 @@ describe('known bugs: a Japanese state verb in a content clause takes its dictio
 describe('known bugs: TELL with a direct object and a content clause makes the addressee the told thing (A317)', () => {
   const runs = { subject: np('CAT'), verbPhrase: { verb: 'RUN' } };
 
-  test.fails('a noun addressee', () => {
+  test('a noun addressee', () => {
     expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('DOG'), contentObject: runs }))).toEqual({
       en: 'the man tells the dog that the cat runs.', it: "l'uomo racconta al cane che il gatto corre.",
       fr: "l'homme raconte au chien que le chat court.", de: 'der Mann erzählt dem Hund, dass der Kater läuft.',
@@ -1337,16 +1337,48 @@ describe('known bugs: TELL with a direct object and a content clause makes the a
     });
   });
 
-  test.fails('a feminine noun addressee', () => {
+  test('a feminine noun addressee', () => {
     expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('WOMAN'), contentObject: runs }))).toMatchObject({
       it: "l'uomo racconta alla donna che il gatto corre.", fr: "l'homme raconte à la femme que le chat court.",
       de: 'der Mann erzählt der Frau, dass der Kater läuft.', ja: '男は猫が走ると女に伝えます。', pt: 'o homem conta à mulher que o gato corre.',
     });
   });
 
-  test.fails('a pronoun addressee', () => {
+  test('a pronoun addressee', () => {
     expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('SECOND_PERSON'), contentObject: runs }))).toMatchObject({
       de: 'der Mann erzählt dir, dass der Kater läuft.', ja: '男は猫が走るとあなたに伝えます。',
+    });
+  });
+
+  test('the routed addressee in the past, the plural, an indirect question, and the 1st person', () => {
+    expect(sayAll(clause(np('MAN'), 'TELL', { verbPhrase: { tense: 'past' }, directObject: np('DOG'), contentObject: runs }))).toEqual({
+      en: 'the man told the dog that the cat ran.', it: "l'uomo raccontò al cane che il gatto correva.",
+      fr: "l'homme raconta au chien que le chat courait.", de: 'der Mann erzählte dem Hund, dass der Kater läuft.',
+      es: 'el hombre contó al perro que el gato corría.', ja: '男は猫が走ると犬に伝えました。', pt: 'o homem contou ao cão que o gato corria.',
+    });
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('DOG', { number: 'plural' }), contentObject: runs }))).toEqual({
+      en: 'the man tells the dogs that the cat runs.', it: "l'uomo racconta ai cani che il gatto corre.",
+      fr: "l'homme raconte aux chiens que le chat court.", de: 'der Mann erzählt den Hunden, dass der Kater läuft.',
+      es: 'el hombre cuenta a los perros que el gato corre.', ja: '男は猫が走ると犬に伝えます。', pt: 'o homem conta aos cães que o gato corre.',
+    });
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('DOG'), contentObject: { ...runs, interrogative: true } }))).toEqual({
+      en: 'the man tells the dog whether the cat runs.', it: "l'uomo racconta al cane se il gatto corre.",
+      fr: "l'homme raconte au chien si le chat court.", de: 'der Mann erzählt dem Hund, ob der Kater läuft.',
+      es: 'el hombre cuenta al perro si el gato corre.', ja: '男は猫が走るかどうか犬に伝えます。', pt: 'o homem conta ao cão se o gato corre.',
+    });
+    // The Romance 1st-person clitic is the addressee's already, and stays; German and Japanese route it.
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('FIRST_PERSON'), contentObject: runs }))).toEqual({
+      en: 'the man tells me that the cat runs.', it: "l'uomo mi racconta che il gatto corre.",
+      fr: "l'homme me raconte que le chat court.", de: 'der Mann erzählt mir, dass der Kater läuft.',
+      es: 'el hombre me cuenta que el gato corre.', ja: '男は猫が走ると私に伝えます。', pt: 'o homem me conta que o gato corre.',
+    });
+  });
+
+  test('SAY routes its object the same way: says to the dog that', () => {
+    expect(sayAll(clause(np('MAN'), 'SAY', { directObject: np('DOG'), contentObject: runs }))).toEqual({
+      en: 'the man says to the dog that the cat runs.', it: "l'uomo dice al cane che il gatto corre.",
+      fr: "l'homme dit au chien que le chat court.", de: 'der Mann sagt dem Hund, dass der Kater läuft.',
+      es: 'el hombre dice al perro que el gato corre.', ja: '男は猫が走ると犬に言います。', pt: 'o homem diz ao cão que o gato corre.',
     });
   });
 
