@@ -4,8 +4,12 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@signi/shared": ["../shared/src/index.ts"]
-    }
+      "@signi/shared": ["../shared/src/index.ts"],
+      // The tests read the backend's concepts, whose definitions compile through @signi/phrase.
+      "@signi/phrase": ["../phrase/src/index.ts"]
+    },
+    // @signi/phrase's source imports with `.ts` specifiers (its build rewrites them).
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "test"]
 }

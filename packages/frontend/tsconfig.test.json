@@ -5,6 +5,7 @@
     "paths": {
       "@signi/shared": ["../shared/src/index.ts"],
       "@signi/phrase/*": ["../phrase/src/*"],
+      "@signi/phrase": ["../phrase/src/index.ts"],
       "@signi/engine": ["../engine/src/index.ts"]
     },
     // That pulls the engine's source into this program, and the engine does not hold itself to the
