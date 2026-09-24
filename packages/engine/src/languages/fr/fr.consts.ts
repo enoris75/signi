@@ -105,8 +105,8 @@ export const AVOIR_AUX: ConceptForms = { conceptId: 'AVOIR', forms: { '1sg_futur
 // compound perfect must restore it before the auxiliary: "s'est effondrée", not "est effondrée".
 export const FR_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'te', '3sg': 'se', '1pl': 'nous', '2pl': 'vous', '3pl': 'se' };
 
-/** French linking preposition for an attributive noun, by relation (bare, no article). */
-export const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de' };
+/** French linking preposition for an attributive noun, by relation (bare, but for the `domain`'s "du" / "de la", see frMods). */
+export const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de', domain: 'de' };
 
 // The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
 // "de" (**de** grande taille, **de** haute qualité), measure "à". The noun phrase (dimension noun +

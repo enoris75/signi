@@ -262,6 +262,73 @@ describe('AIR', () => {
   });
 });
 
+// The two nouns "time flies like an arrow" needs besides TIME: the insect, which the verb FLY
+// leaves to a suffixed id, and the projectile, which ARROW (the key) leaves to one too.
+describe('FLY_INSECT and ARROW_PROJECTILE', () => {
+  const inTheHouse = (subject: NounElement) =>
+    sayAll(clause(subject, 'BE', { complements: { locative: { phrase: np('HOUSE') } } }));
+  const likeAnArrow = { directObject: np('ARROW_PROJECTILE', { definiteness: 'indefinite' }) };
+
+  test('the fly is feminine in Romance and German, and animate', () => {
+    expect(inTheHouse(np('FLY_INSECT', { number: 'plural' }))).toEqual({
+      en: 'the flies are in the house.',
+      it: 'le mosche sono nella casa.',
+      fr: 'les mouches sont dans la maison.',
+      de: 'die Fliegen sind im Haus.',
+      es: 'las moscas están en la casa.',
+      ja: 'ハエは家にいます。', // いる: an animal
+      pt: 'as moscas estão na casa.',
+    });
+  });
+
+  test('the arrow is masculine in German, feminine in Romance, and a thing', () => {
+    expect(inTheHouse(np('ARROW_PROJECTILE', { number: 'plural' }))).toEqual({
+      en: 'the arrows are in the house.', // "arrows", not ARROW's "arrow keys"
+      it: 'le frecce sono nella casa.',
+      fr: 'les flèches sont dans la maison.',
+      de: 'die Pfeile sind im Haus.',
+      es: 'las flechas están en la casa.',
+      ja: '矢は家にあります。', // ある: a thing
+      pt: 'as flechas estão na casa.',
+    });
+    expect(inTheHouse(np('ARROW_PROJECTILE', { definiteness: 'indefinite' }))).toMatchObject({
+      en: 'an arrow is in the house.',
+      de: 'ein Pfeil ist im Haus.',
+    });
+    expect(furigana({ subject: np('ARROW_PROJECTILE') })).toEqual(['や']);
+  });
+
+  test('time flies like an arrow: time moves as an arrow does', () => {
+    const manner = { complements: { manner: { phrase: likeAnArrow.directObject } } };
+    expect(sayAll(clause(np('TIME'), 'FLY', manner))).toEqual({
+      en: 'the time flies like an arrow.',
+      it: 'il tempo vola come una freccia.',
+      fr: 'le temps vole comme une flèche.',
+      de: 'die Zeit fliegt wie ein Pfeil.',
+      es: 'el tiempo vuela como una flecha.',
+      ja: '時間は矢のように飛びます。',
+      pt: 'o tempo voa como uma flecha.',
+    });
+    expect(say(clause(np('TIME', { definiteness: 'bare' }), 'FLY', manner), 'en')).toBe('time flies like an arrow.');
+  });
+
+  test('time flies like an arrow: flies of a kind called time are fond of an arrow', () => {
+    // TIME is the flies' domain, as fruit is the fruit fly's: "le mosche del tempo".
+    const timeFlies = (definiteness: Definiteness) =>
+      np('FLY_INSECT', { definiteness, number: 'plural', nounModifiers: [{ concept: 'TIME', relation: 'domain' }] });
+    expect(sayAll(clause(timeFlies('definite'), 'LIKE', likeAnArrow))).toEqual({
+      en: 'the time flies like an arrow.',
+      it: 'alle mosche del tempo piace una freccia.', // piacere: the arrow is the subject
+      fr: 'les mouches du temps aiment une flèche.',
+      de: 'die Zeitfliegen mögen einen Pfeil.', // one compound
+      es: 'a las moscas del tiempo les gusta una flecha.',
+      ja: '時間のハエは矢が好きです。', // 好き: the arrow takes が
+      pt: 'as moscas do tempo gostam de uma flecha.',
+    });
+    expect(say(clause(timeFlies('bare'), 'LIKE', likeAnArrow), 'en')).toBe('time flies like an arrow.');
+  });
+});
+
 // A mass (uncountable) noun does not just block the plural — it takes DIFFERENT quantifier words.
 // English splits many/much and few/little on countability; the Romance and German quantifiers
 // change form or become a partitive. WATER is the mass noun; MOUSE the count noun for contrast.

@@ -165,6 +165,7 @@ export const EXAMPLES: Record<string, string> = {
   feature: "/subj ( creator /adj ( phrase /feature ) )",
   purpose: "/subj ( creator /adj ( phrase /purpose ) )",
   material: "/subj ( creator /adj ( phrase /material ) )",
+  domain: "/subj ( cat /adj ( house /domain ) )",
   // Period
   new: "/subj ( cat ) /new /subj ( dog )",
   command: "/command lets /verb ( run )",

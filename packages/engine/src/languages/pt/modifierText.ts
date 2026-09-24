@@ -1,11 +1,13 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { REL_PREP_PT } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
+import { dePrep } from './dePrep.js';
 
 /**
  * Postnominal attributive nouns as bare "prep noun" strings ("barco a vela", "óculos de
  * sol"). The modifier takes its own number and its adjectives agree with *its*
- * gender/number ("criador de frases semânticas"), postnominal as in Portuguese.
+ * gender/number ("criador de frases semânticas"), postnominal as in Portuguese. A `domain`
+ * takes the generic definite article, contracted ("mosca da fruta", "moscas do tempo").
  */
 export function modifierText(np: ResolvedNounPhrase): string {
   return np.nounModifiers
@@ -20,7 +22,7 @@ export function modifierText(np: ResolvedNounPhrase): string {
         .filter(Boolean)
         .join(' e ');
       const nounPart = adjs ? `${noun} ${adjs}` : noun;
-      return ` ${REL_PREP_PT[m.relation]} ${nounPart}`;
+      return ` ${m.relation === 'domain' ? dePrep(forms, plural) : REL_PREP_PT[m.relation]} ${nounPart}`;
     })
     .join('');
 }

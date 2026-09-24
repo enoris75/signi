@@ -105,8 +105,11 @@ export const QUELLO_FOR_ARTICLE: Record<string, string> = {
   il: 'quel', lo: 'quello', "l'": "quell'", i: 'quei', gli: 'quegli', la: 'quella', le: 'quelle',
 };
 
-/** Italian linking preposition for an attributive noun, chosen by its relation (bare, no article). */
-export const REL_PREP_IT: Record<ModifierRelation, string> = { feature: 'a', purpose: 'da', material: 'di' };
+/**
+ * Italian linking preposition for an attributive noun, chosen by its relation — bare, but for the
+ * `domain`, whose "di" fuses with the generic definite article ("mosca della frutta", see itMods).
+ */
+export const REL_PREP_IT: Record<ModifierRelation, 'a' | 'da' | 'di'> = { feature: 'a', purpose: 'da', material: 'di', domain: 'di' };
 
 // "stare" — the progressive/prospective auxiliary ("sto andando", "sto per andare"). Past
 // uses the *imperfect* ("stavo andando"): the progressive past is imperfective, so the

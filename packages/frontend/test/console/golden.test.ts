@@ -182,6 +182,11 @@ const GOLDEN: Record<string, Golden> = {
     check: (s) => expect(sel(s).modifierRelations?.subjectAdjective).toBe('material'),
     misuse: { line: '/subj cat /adj big /material', says: { code: 'noTarget', args: { command: 'material', last: { kind: 'adjective' } } } },
   },
+  domain: {
+    line: '/subj cat /adj house /domain', prints: '/subj ( cat /adj ( house /domain ) )',
+    check: (s) => expect(sel(s).modifierRelations?.subjectAdjective).toBe('domain'),
+    misuse: { line: '/subj cat /adj big /domain', says: { code: 'noTarget', args: { command: 'domain', last: { kind: 'adjective' } } } },
+  },
   new: { line: '/subj cat /new /subj dog', check: (s) => expect(s.containers.map((c) => c.selection.subject?.id)).toEqual(['CAT', 'DOG']), prints: '/subj ( cat )' },
   command: {
     line: '/command lets instruction /verb run', prints: '/command lets instruction /verb ( run )',

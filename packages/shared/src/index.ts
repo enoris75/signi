@@ -116,12 +116,17 @@ export function defaultDefiniteness(slot: string): Definiteness {
  * neutralise it (juxtaposition / compound / の); the Romance engines use it to select
  * the linking preposition, which is exactly where the relations diverge:
  *   feature (barca **a** vela) · purpose (occhiali **da** sole) · material (anello **di** oro)
+ *   · domain (mosca **della** frutta)
+ * The `domain` is the class or place the head belongs to — "fruit fly", "time flies" — which
+ * Romance names with the generic definite article fused into its "of" (it della, fr de la / du,
+ * es de la / del, pt da / do), where the other three link the bare noun. The article is the
+ * relation's, not a determiner the user picks: the modifier still refers to no one fruit.
  * This is distinct from a possessor (the genitive "barca **della** vela").
  */
-export type ModifierRelation = 'feature' | 'purpose' | 'material';
+export type ModifierRelation = 'feature' | 'purpose' | 'material' | 'domain';
 
 /** Cycle order used by the UI relation chip. */
-export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'material'];
+export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'material', 'domain'];
 
 /**
  * Comparative degree of an adjective — an orthogonal grammatical feature layered on

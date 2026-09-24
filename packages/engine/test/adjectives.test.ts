@@ -125,6 +125,37 @@ describe('nouns as adjectives', () => {
     expect(modifier('material')).toMatchObject({ it: 'la mappa di parola brucia.' });
   });
 
+  test('a domain takes the generic definite article, fused into the Romance "of"', () => {
+    // The class or place the head belongs to: "mosca della frutta". The article is the relation's,
+    // so it agrees with the modifier noun — its gender, its number, its elision.
+    const fly = (m: NounModifier) => sayAll(clause(np('FLY_INSECT', { nounModifiers: [m] }), 'EAT'));
+    expect(fly({ concept: 'FOOD', relation: 'domain' })).toEqual({
+      en: 'the food fly eats.',
+      it: 'la mosca del cibo mangia.',
+      fr: 'la mouche de la nourriture mange.',
+      de: 'die Essensfliege frisst.',
+      es: 'la mosca de la comida come.',
+      ja: '食べ物のハエは食べます。',
+      pt: 'a mosca da comida come.',
+    });
+    expect(fly({ concept: 'WATER', relation: 'domain' })).toMatchObject({
+      it: "la mosca dell'acqua mangia.", // elided, no space
+      fr: "la mouche de l'eau mange.",
+      es: 'la mosca del agua come.', // el before a stressed a
+    });
+    expect(fly({ concept: 'HOUSE', relation: 'domain', number: 'plural', adjectives: ['BIG'] })).toMatchObject({
+      it: 'la mosca delle case grandi mangia.',
+      fr: 'la mouche des grandes maisons mange.',
+      es: 'la mosca de las casas grandes come.',
+      pt: 'a mosca das casas grandes come.',
+    });
+    expect(fly({ concept: 'EUROPE', relation: 'domain' })).toMatchObject({
+      it: "la mosca dell'Europa mangia.",
+      es: 'la mosca de Europa come.', // a Spanish place name takes no article
+      pt: 'a mosca da Europa come.',
+    });
+  });
+
   test('English and German compound instead, regardless of the relation', () => {
     expect(modifier('feature')).toMatchObject({
       en: 'the word map burns.',

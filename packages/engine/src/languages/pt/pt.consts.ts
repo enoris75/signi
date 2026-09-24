@@ -151,8 +151,8 @@ export const HAVER_EXISTENTIAL: ConceptForms = {
 // vocês agree as the 3rd person (A108). Reflexivity is lexical: the infinitive ends in "-se" ("tornar-se").
 export const PT_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'se', '3sg': 'se', '1pl': 'nos', '2pl': 'se', '3pl': 'se' };
 
-/** Portuguese linking preposition for an attributive noun, by relation (bare, no article). */
-export const REL_PREP_PT: Record<ModifierRelation, string> = { feature: 'a', purpose: 'de', material: 'de' };
+/** Portuguese linking preposition for an attributive noun, by relation (bare, but for the `domain`'s "do" / "da", see modifierText). */
+export const REL_PREP_PT: Record<ModifierRelation, string> = { feature: 'a', purpose: 'de', material: 'de', domain: 'de' };
 
 // The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
 // "de" (**de** grande tamanho, **de** alta qualidade), measure "a". The noun phrase (dimension noun

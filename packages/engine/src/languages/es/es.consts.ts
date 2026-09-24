@@ -126,8 +126,11 @@ export const HABER_EXISTENTIAL: ConceptForms = {
 // restore it before the auxiliary — "se ha vuelto" (become), not "ha vuelto" (returned).
 export const ES_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'te', '3sg': 'se', '1pl': 'nos', '2pl': 'os', '3pl': 'se' };
 
-/** Spanish links every attributive-noun relation with bare "de" ("barco de vela", "gafas de sol"). */
-export const REL_PREP_ES: Record<ModifierRelation, string> = { feature: 'de', purpose: 'de', material: 'de' };
+/**
+ * Spanish links every attributive-noun relation with "de" ("barco de vela", "gafas de sol"), bare
+ * but for the `domain`'s "del" / "de la" ("mosca de la fruta", see modifierText).
+ */
+export const REL_PREP_ES: Record<ModifierRelation, string> = { feature: 'de', purpose: 'de', material: 'de', domain: 'de' };
 
 // The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
 // "de" (**de** gran tamaño, **de** alta calidad), measure "a". The noun phrase (dimension noun +

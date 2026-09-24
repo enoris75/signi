@@ -1,4 +1,5 @@
 import {
+  MODIFIER_RELATIONS,
   TEMPORAL_RELATIONS,
   type AbstractionLevel,
   type Aspect,
@@ -667,7 +668,7 @@ export const COMMANDS: readonly CommandDef[] = [
       ["setDegree"],
     ),
   ),
-  ...(["feature", "purpose", "material"] as const).map((value) =>
+  ...MODIFIER_RELATIONS.map((value) =>
     setting(
       value,
       [],

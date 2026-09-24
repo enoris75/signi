@@ -1377,6 +1377,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The insect, not the motion: FLY is the verb, so the noun takes the suffix (as POINT_NOUN
+    // does). Two readings of "time flies like an arrow" need both — TIME as a noun modifier on
+    // this one in the plural, liking an arrow. Glossed by what it does, "an animal that flies".
+    id: 'FLY_INSECT',
+    role: 'noun',
+    description: 'a small winged insect',
+    definition: whoGloss('ANIMAL', 'FLY'),
+    emoji: '🪰',
+    animate: true,
+    synonym: 'insect',
+    isA: 'ANIMAL',
+    forms: {
+      en: { base: 'fly', plural: 'flies', count: 'singular' },
+      it: { base: 'mosca', plural: 'mosche', gender: 'fem', count: 'singular' },
+      fr: { base: 'mouche', plural: 'mouches', gender: 'fem', count: 'singular' },
+      de: { base: 'Fliege', plural: 'Fliegen', gender: 'fem', count: 'singular' },
+      es: { base: 'mosca', plural: 'moscas', gender: 'fem', count: 'singular' },
+      ja: { base: 'ハエ', count: 'singular', reading: 'はえ' },
+      pt: { base: 'mosca', plural: 'moscas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // "A wood object": WOOD as a `material` noun modifier (localization C26), which Romance links
     // with the material's preposition (it "un oggetto di legno", es "un objeto de madera") and
     // German compounds (ein Holzgegenstand).
@@ -1400,6 +1422,27 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'palo', plural: 'palos', gender: 'masc', count: 'singular' },
       ja: { base: '棒', count: 'singular', reading: 'ぼう' },
       pt: { base: 'pau', plural: 'paus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The projectile a bow shoots — ARROW is the key the UI names — so "flies like an arrow" says
+    // the thing, not the key (en "arrow", where ARROW is "arrow key"). A sharp stick, as the gloss
+    // says; de Pfeil is the head Pfeiltaste compounds on.
+    id: 'ARROW_PROJECTILE',
+    role: 'noun',
+    description: 'a pointed shaft shot from a bow',
+    definition: glossOf('STICK', 'SHARP'),
+    emoji: '🏹',
+    synonym: 'projectile',
+    isA: 'STICK',
+    forms: {
+      en: { base: 'arrow', plural: 'arrows', count: 'singular' },
+      it: { base: 'freccia', plural: 'frecce', gender: 'fem', count: 'singular' },
+      fr: { base: 'flèche', plural: 'flèches', gender: 'fem', count: 'singular' },
+      de: { base: 'Pfeil', plural: 'Pfeile', gender: 'masc', count: 'singular' },
+      es: { base: 'flecha', plural: 'flechas', gender: 'fem', count: 'singular' },
+      ja: { base: '矢', count: 'singular', reading: 'や' },
+      pt: { base: 'flecha', plural: 'flechas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -6015,7 +6058,8 @@ export const nouns: ConceptSeed[] = [
   // ── What a modifier says of its head ──────────────────────────────
   // The relations an attributive noun bears to the noun it modifies, named in pairs: a boat with a
   // sail has it as a feature, or goes by it as a means; glasses for the sun have it as a purpose or
-  // a use; a ring of gold has it as its material or content (CONTENT is seeded above).
+  // a use; a ring of gold has it as its material or content (CONTENT is seeded above); a fly of the
+  // fruit has it as its domain or place (PLACE is seeded above).
   {
     id: 'FEATURE',
     role: 'noun',
@@ -6029,6 +6073,23 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'característica', plural: 'características', gender: 'fem', count: 'singular' },
       ja: { base: '特徴', count: 'singular', reading: 'とくちょう' },
       pt: { base: 'característica', plural: 'características', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The class or sphere a thing belongs to, the `domain` modifier relation's name. Not REGION's
+    // words: de "Gebiet", ja 分野, where the region of a page is a Bereich and a 領域.
+    id: 'DOMAIN',
+    role: 'noun',
+    description: 'the sphere or class a thing belongs to',
+    emoji: '🧭',
+    forms: {
+      en: { base: 'domain', plural: 'domains', count: 'singular' },
+      it: { base: 'dominio', plural: 'domini', gender: 'masc', count: 'singular' },
+      fr: { base: 'domaine', plural: 'domaines', gender: 'masc', count: 'singular' },
+      de: { base: 'Gebiet', plural: 'Gebiete', gender: 'neut', count: 'singular', compound: 'Gebiets' },
+      es: { base: 'dominio', plural: 'dominios', gender: 'masc', count: 'singular' },
+      ja: { base: '分野', count: 'singular', reading: 'ぶんや' },
+      pt: { base: 'domínio', plural: 'domínios', gender: 'masc', count: 'singular' },
     },
   },
   {

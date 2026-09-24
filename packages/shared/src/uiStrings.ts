@@ -1196,9 +1196,14 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'material',
   },
+  'modifier.relation.domain': {
+    plan: nameOf('DOMAIN'),
+    format: { stripPeriod: true },
+    fallback: 'domain',
+  },
   // The chip's tooltip spells the relation out with the two nouns that say what the modifier is to its
   // head, coordinated by `or`: a sail is the boat's feature or means, the sun the glasses' purpose or
-  // use, gold the ring's material or content. Keyed `modifier.relation.<ModifierRelation>.gloss`.
+  // use, gold the ring's material or content, the fruit the fly's domain or place. Keyed `modifier.relation.<ModifierRelation>.gloss`.
   'modifier.relation.feature.gloss': {
     plan: {
       subject: {
@@ -1237,6 +1242,19 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Material or content',
+  },
+  'modifier.relation.domain.gloss': {
+    plan: {
+      subject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'DOMAIN', definiteness: 'bare' },
+          { concept: 'PLACE', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Domain or place',
   },
 
   // The degree chip's caption on an adjective. DEGREE_GRAMMAR, the degree of comparison, not a unit
