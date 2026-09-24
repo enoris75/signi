@@ -23,86 +23,86 @@ const under = { specifiers: [{ kind: 'path', value: 'under' }] };
 // never read `forms['numeral']`, which their `nounPhrase` does. The phrase keeps its plural, so it
 // reads as *the houses*: the count is lost, and a bare one can no longer be told from a bare plural.
 describe('known bugs: german, spanish and portuguese drop the numeral inside a complement (A291)', () => {
-  test.fails('a definite place', () => {
+  test('a definite place', () => {
     expect(inComplement('locative', houses())).toMatchObject({
       de: 'der Kater läuft in den drei Häusern.', es: 'el gato corre en las tres casas.', pt: 'o gato corre nas três casas.',
     });
   });
 
-  test.fails('a bare place', () => {
+  test('a bare place', () => {
     expect(inComplement('locative', houses(bare))).toMatchObject({
       de: 'der Kater läuft in drei Häusern.', es: 'el gato corre en tres casas.', pt: 'o gato corre em três casas.',
     });
   });
 
-  test.fails('a demonstrative place', () => {
+  test('a demonstrative place', () => {
     expect(inComplement('locative', houses({ definiteness: 'this' }))).toMatchObject({
       de: 'der Kater läuft in diesen drei Häusern.', es: 'el gato corre en estas tres casas.', pt: 'o gato corre nestas três casas.',
     });
   });
 
-  test.fails('a definite companion', () => {
+  test('a definite companion', () => {
     expect(inComplement('comitative', dogs())).toMatchObject({
       de: 'der Kater spielt mit den drei Hunden.', es: 'el gato juega con los tres perros.', pt: 'o gato joga com os três cães.',
     });
   });
 
-  test.fails('a bare companion', () => {
+  test('a bare companion', () => {
     expect(inComplement('comitative', dogs(bare))).toMatchObject({
       de: 'der Kater spielt mit drei Hunden.', es: 'el gato juega con tres perros.', pt: 'o gato joga com três cães.',
     });
   });
 
-  test.fails('a companion with a possessive', () => {
+  test('a companion with a possessive', () => {
     expect(inComplement('comitative', dogs({ possessor: my }))).toMatchObject({
       de: 'der Kater spielt mit meinen drei Hunden.', es: 'el gato juega con mis tres perros.', pt: 'o gato joga com os meus três cães.',
     });
   });
 
-  test.fails('a companion with an adjective', () => {
+  test('a companion with an adjective', () => {
     expect(inComplement('comitative', dogs({ adjectives: ['BIG'] }))).toMatchObject({
       de: 'der Kater spielt mit den drei großen Hunden.', es: 'el gato juega con los tres perros grandes.',
       pt: 'o gato joga com os três cães grandes.',
     });
   });
 
-  test.fails('an opponent', () => {
+  test('an opponent', () => {
     expect(inComplement('opponent', dogs())).toMatchObject({
       de: 'der Kater spielt gegen die drei Hunde.', es: 'el gato juega contra los tres perros.', pt: 'o gato joga contra os três cães.',
     });
   });
 
-  test.fails('an instrument', () => {
+  test('an instrument', () => {
     expect(inComplement('instrumental', np('STICK', { numeral: 2 }))).toMatchObject({
       de: 'der Kater schneidet mit den zwei Stöcken.', es: 'el gato corta con los dos palos.', pt: 'o gato corta com os dois paus.',
     });
   });
 
-  test.fails('a goal', () => {
+  test('a goal', () => {
     expect(inComplement('direction', np('HOUSE', { numeral: 2 }))).toMatchObject({
       de: 'der Kater läuft zu den zwei Häusern.', es: 'el gato corre a las dos casas.', pt: 'o gato corre às duas casas.',
     });
   });
 
-  test.fails('a source', () => {
+  test('a source', () => {
     expect(inComplement('source', np('HOUSE', { numeral: 2 }))).toMatchObject({
       de: 'der Kater kommt aus den zwei Häusern.', es: 'el gato viene de las dos casas.', pt: 'o gato vem das duas casas.',
     });
   });
 
-  test.fails('a place under a spatial relation', () => {
+  test('a place under a spatial relation', () => {
     expect(inComplement('locative', np('HOUSE', { numeral: 2 }), under)).toMatchObject({
       de: 'der Kater läuft unter den zwei Häusern.', es: 'el gato corre debajo de las dos casas.', pt: 'o gato corre debaixo das duas casas.',
     });
   });
 
-  test.fails('a time', () => {
+  test('a time', () => {
     expect(inComplement('temporal', np('DAY', { numeral: 2 }))).toMatchObject({
       de: 'der Kater läuft an den zwei Tagen.', es: 'el gato corre en los dos días.', pt: 'o gato corre nos dois dias.',
     });
   });
 
-  test.fails('a recipient', () => {
+  test('a recipient', () => {
     expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: dogs() } } })))
       .toMatchObject({
         de: 'der Kater gibt den drei Hunden das Buch.', es: 'el gato da el libro a los tres perros.', pt: 'o gato dá o livro aos três cães.',
@@ -111,10 +111,49 @@ describe('known bugs: german, spanish and portuguese drop the numeral inside a c
 
   // "one" is the article's own word in Spanish and Portuguese; German's cardinal "ein" does not
   // decline for case in any slot yet ("sieht ein Hund"), so its row waits on that (see the bug file).
-  test.fails('a bare "one" in Spanish and Portuguese', () => {
+  test('a bare "one" in Spanish and Portuguese', () => {
     expect(inComplement('comitative', np('DOG', { numeral: 1, ...bare }))).toMatchObject({
       es: 'el gato juega con un perro.', pt: 'o gato joga com um cão.',
     });
+  });
+
+  // Beyond the catalogued rows: the possessive detached behind a demonstrative, "todos" before an
+  // unstressed possessive, a prenominal adjective after the numeral, the relations that govern
+  // their own case (the genitive "während", "wegen" on a bare plural) or scope over the group
+  // ("zwischen"), and the impersonal "hace" / "há" P09-E24 reported ("two days ago").
+  test('the numeral keeps its place beside every determiner, possessive and relation', () => {
+    expect(inComplement('locative', houses({ definiteness: 'this', possessor: my }))).toMatchObject({
+      de: 'der Kater läuft in diesen drei Häusern von mir.', es: 'el gato corre en estas tres casas mías.',
+      pt: 'o gato corre nestas três casas minhas.',
+    });
+    expect(inComplement('locative', houses({ definiteness: 'all', possessor: my }))).toMatchObject({
+      de: 'der Kater läuft in allen meinen drei Häusern.', es: 'el gato corre en todas mis tres casas.',
+      pt: 'o gato corre em todas as minhas três casas.',
+    });
+    expect(inComplement('comitative', dogs({ adjectives: ['FIRST'] }))).toMatchObject({
+      de: 'der Kater spielt mit den drei ersten Hunden.', es: 'el gato juega con los tres primeros perros.',
+      pt: 'o gato joga com os três primeiros cães.',
+    });
+    expect(inComplement('temporal', np('DAY', { numeral: 2, ...bare }), { specifiers: [{ kind: 'temporal', value: 'ago' }] }))
+      .toMatchObject({ de: 'der Kater läuft vor zwei Tagen.', es: 'el gato corre hace dos días.', pt: 'o gato corre há dois dias.' });
+    expect(inComplement('temporal', np('NIGHT', { numeral: 2 }), { specifiers: [{ kind: 'temporal', value: 'during' }] }))
+      .toMatchObject({
+        de: 'der Kater läuft während der zwei Nächte.', es: 'el gato corre durante las dos noches.', pt: 'o gato corre durante as duas noites.',
+      });
+    expect(inComplement('cause', np('DOG', { numeral: 2, ...bare }))).toMatchObject({
+      de: 'der Kater läuft wegen zwei Hunden.', es: 'el gato corre a causa de dos perros.', pt: 'o gato corre por causa de dois cães.',
+    });
+    expect(inComplement('locative', np('HOUSE', { numeral: 2 }), { specifiers: [{ kind: 'path', value: 'between' }] })).toMatchObject({
+      de: 'der Kater läuft zwischen den zwei Häusern.', es: 'el gato corre entre las dos casas.', pt: 'o gato corre entre as duas casas.',
+    });
+  });
+
+  // The feminine cardinal agrees as the subject's does: "una casa", "uma casa", "duas casas".
+  test('a feminine count agrees', () => {
+    expect(inComplement('locative', np('HOUSE', { numeral: 1, ...bare }))).toMatchObject({
+      es: 'el gato corre en una casa.', pt: 'o gato corre em uma casa.',
+    });
+    expect(inComplement('source', np('HOUSE', { numeral: 2, ...bare })).pt).toBe('o gato vem de duas casas.');
   });
 
   test('regression: the other four keep it, as the subject and the object do in all seven', () => {

@@ -26,7 +26,8 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { numeralText } from '../../../functions/numeralText.js';
+import { CARDINALS, CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -315,7 +316,12 @@ export function complementsParts(
         ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
       const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
-      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}`;
+      // A cardinal stands after the determiner and possessive and before the declined adjectives, as
+      // `nounPhrase` places it: "in den drei Häusern", "mit meinen drei Hunden" (C31, A291). The
+      // determiner is in `head`, so a fusion like "im" / "zum" is untouched.
+      const numeral = numeralText(f, CARDINALS);
+      const counted = numeral ? `${numeral} ` : '';
+      const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       };
       // All but `between`, which is said once over the group: each conjunct is built as above, its

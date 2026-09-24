@@ -22,6 +22,13 @@ describe('complementsPhrase', () => {
     expect(complementsPhrase({}, GATO, 'RUN')).toBe('');
   });
 
+  // A291: the cardinal stands after the determiner and possessive, before the noun (C31).
+  test('a counted phrase keeps its numeral', () => {
+    expect(render({ locative: complement(np(CASA, { number: 'plural', numeral: '3' })) })).toBe('en las tres casas');
+    expect(render({ comitative: complement(np(PERRO, { number: 'plural', numeral: '2', definiteness: 'bare' })) })).toBe('con dos perros');
+    expect(render({ locative: complement(np(CASA, { number: 'plural', numeral: '3', definiteness: 'this' })) })).toBe('en estas tres casas');
+  });
+
   describe('predicative', () => {
     test('a predicate adjective agrees with the subject', () => {
       expect(render({ predicative: complement(np(CANSADO)) })).toBe('cansado');

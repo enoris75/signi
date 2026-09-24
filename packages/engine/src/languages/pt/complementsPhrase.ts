@@ -38,7 +38,8 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
+import { numeralText } from '../../functions/numeralText.js';
+import { CARDINALS, COMITATIVE_FUSION, CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, NOMINATIVE_PREP, PT_DE_FUSING_PRONOUN, PT_TEMPORAL } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { ptStandard } from './ptStandard.js';
@@ -186,9 +187,13 @@ export function complementsPhrase(
         : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
+      // `nounPhrase` places it: "nas três casas", "com os meus três cães", "nestas três casas minhas"
+      // (C31, A291).
+      const numeral = numeralText(f, CARDINALS);
       const noun = detached
-        ? [withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
-        : [possessive, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
+        ? [numeral, withAdj(word, ptAdj(np)), possessive].filter(Boolean).join(' ')
+        : [possessive, numeral, withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para
