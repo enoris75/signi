@@ -596,7 +596,7 @@ describe('known bugs: the Spanish generic patient of a passive is the impersonal
   test('the passive composes on uno: tense, aspect, a modal, a fronted nunca', () => {
     const es = (vp: Partial<VerbPhrase>) =>
       say(clause(np('CAT'), 'SEE', { directObject: G, verbPhrase: { voice: 'passive', ...vp } }), 'es');
-    expect([es({ tense: 'past' }), es({ aspect: 'perfect' }), es({ modals: ['MUST'] }), es({ modifier: 'NEVER' })]).toEqual([
+    expect([es({ tense: 'past' }), es({ aspect: 'resultative' }), es({ modals: ['MUST'] }), es({ modifier: 'NEVER' })]).toEqual([
       'uno fue visto por el gato.', 'uno ha sido visto por el gato.', 'uno debe ser visto por el gato.', 'uno nunca es visto por el gato.',
     ]);
   });
