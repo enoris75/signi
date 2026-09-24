@@ -34,3 +34,22 @@ kept determiner and the postnominal *suficiente* meet.
 | | |
 |---|---|
 | **Test** | `quantity-determiners.test.ts` → *known bugs: Portuguese enough with a possessive trails the possessive after suficientes (A313)* (2 `test.fails`, plus a regression test for the plain *gatos suficientes* and the other six) |
+
+## Resolved
+
+Fixed on 2026-09-24 with the recommended ruling, and only beside a possessive: *suficientes gatos
+seus*, *o cão vê suficientes livros meus*. The plain *gatos suficientes* stays as P09-E25 pins it.
+
+The site was not `pt/nounPhrase.ts` but [pt/ptAdj.ts](../../../packages/engine/src/languages/pt/ptAdj.ts),
+which writes the postnominal *suficiente(s)*. When the phrase has a pronominal possessor, which
+follows the noun beside *enough* as beside any kept determiner, it puts *suficiente(s)* first among
+the prenominal words instead. So every builder that reads `ptAdj` follows: the complement (*em
+suficientes casas suas*), the genitive possessor (*o livro de suficientes gatos seus*) and the mass
+noun (*suficiente água sua*). A noun possessor is no possessive after the noun, so *gatos suficientes
+da mulher* is unchanged.
+
+Both `test.fails` in `known bugs: Portuguese enough with a possessive trails the possessive after
+suficientes (A313)` in [quantity-determiners.test.ts](../../../packages/engine/test/quantity-determiners.test.ts)
+are plain tests now. The same block gained the mass noun, an adjective (*suficientes gatos velhos
+seus*), the complement, the genitive possessor and the noun possessor. The colocated `ptAdj.test.ts`
+gained both orders.

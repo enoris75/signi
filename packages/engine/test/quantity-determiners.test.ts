@@ -296,11 +296,11 @@ describe('known bugs: Portuguese enough with a possessive trails the possessive 
   const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
   const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
 
-  test.fails('as the subject', () => {
+  test('as the subject', () => {
     expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'enough', possessor: her }), 'RUN')).pt).toBe('suficientes gatos seus correm.');
   });
 
-  test.fails('as the object', () => {
+  test('as the object', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { number: 'plural', definiteness: 'enough', possessor: my }) })).pt)
       .toBe('o cão vê suficientes livros meus.');
   });
@@ -311,6 +311,22 @@ describe('known bugs: Portuguese enough with a possessive trails the possessive 
       en: 'enough cats of hers run.', it: 'abbastanza suoi gatti corrono.', fr: 'assez de chats à elle courent.',
       de: 'genug Kater von ihr laufen.', es: 'suficientes gatos suyos corren.', ja: '彼女の十分な数の猫は走ります。',
     });
+  });
+
+  // `ptAdj` puts suficiente(s) first among the prenominal words whenever a pronominal possessive
+  // follows the noun, so the mass noun, an adjective, a complement and a genitive possessor go the
+  // same way. A noun possessor is no possessive after the noun, and keeps "gatos suficientes".
+  test('the mass noun, an adjective, a complement and a genitive possessor', () => {
+    const pt = (plan: Parameters<typeof sayAll>[0]) => sayAll(plan).pt;
+    expect(pt(clause(np('WATER', { definiteness: 'enough', possessor: her }), 'BURN'))).toBe('suficiente água sua arde.');
+    expect(pt(clause(np('CAT', { number: 'plural', definiteness: 'enough', possessor: her, adjectives: ['OLD'] }), 'RUN')))
+      .toBe('suficientes gatos velhos seus correm.');
+    expect(pt(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { number: 'plural', definiteness: 'enough', possessor: her }) } } })))
+      .toBe('o gato corre em suficientes casas suas.');
+    expect(pt(clause(np('BOOK', { possessor: np('CAT', { number: 'plural', definiteness: 'enough', possessor: her }) }), 'BURN')))
+      .toBe('o livro de suficientes gatos seus arde.');
+    expect(pt(clause(np('CAT', { number: 'plural', definiteness: 'enough', adjectives: ['OLD'] }), 'RUN'))).toBe('gatos velhos suficientes correm.');
+    expect(pt(clause(np('CAT', { number: 'plural', definiteness: 'enough', possessor: np('WOMAN') }), 'RUN'))).toBe('gatos suficientes da mulher correm.');
   });
 });
 
