@@ -3506,7 +3506,7 @@ export const nouns: ConceptSeed[] = [
     forms: {
       en: { base: 'hour', plural: 'hours', count: 'singular' },
       it: { base: 'ora', plural: 'ore', gender: 'fem', count: 'singular' },
-      fr: { base: 'heure', plural: 'heures', gender: 'fem', count: 'singular' },
+      fr: { base: 'heure', plural: 'heures', gender: 'fem', count: 'singular', elides: '1' },
       de: { base: 'Stunde', plural: 'Stunden', gender: 'fem', count: 'singular' },
       es: { base: 'hora', plural: 'horas', gender: 'fem', count: 'singular' },
       ja: { base: '時間', count: 'singular', reading: 'じかん', counter: '時間', counter_join: 'head' },

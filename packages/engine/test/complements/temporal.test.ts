@@ -538,3 +538,12 @@ describe('known bugs: French "en" before an article on a temporal noun (A265)', 
     });
   });
 });
+
+// French *heure* begins with a mute h, so its definite elides: "d'ici l'heure", never "la heure"
+// (HOUR's `elides`, found landing P09-E34 and E35).
+describe('French HOUR elides its article', () => {
+  test('within and for the hour', () => {
+    expect(runsAt('within', 'HOUR', 'definite').fr).toBe("le chat court d'ici l'heure.");
+    expect(runsAt('for', 'HOUR', 'definite').fr).toBe("le chat court pendant l'heure.");
+  });
+});
