@@ -1317,3 +1317,47 @@ describe('known bugs: a Japanese state verb in a content clause takes its dictio
     });
   });
 });
+
+// A317. TELL's addressee is a terminus ("racconta al cane che…", pinned above), but English writes it
+// bare ahead of a content clause ("tells the dog that…"), so a plan can put it in the direct object.
+// The other languages then read the narrating sense's object: "racconta il cane che il gatto corre",
+// "raconte le chien que", "erzählt den Hund, dass", "cuenta el perro que", 犬を伝えます, "conta o cão
+// que", and a pronoun "erzählt dich" / あなたを. Beside a content clause the object is the addressee
+// and should render as the terminus does. Whether TELL + a content clause should also switch to the
+// saying verb (dice, dit, sagt, dice, diz) is a Decision in the bug file; it moves the terminus test
+// above with it.
+describe('known bugs: TELL with a direct object and a content clause makes the addressee the told thing (A317)', () => {
+  const runs = { subject: np('CAT'), verbPhrase: { verb: 'RUN' } };
+
+  test.fails('a noun addressee', () => {
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('DOG'), contentObject: runs }))).toEqual({
+      en: 'the man tells the dog that the cat runs.', it: "l'uomo racconta al cane che il gatto corre.",
+      fr: "l'homme raconte au chien que le chat court.", de: 'der Mann erzählt dem Hund, dass der Kater läuft.',
+      es: 'el hombre cuenta al perro que el gato corre.', ja: '男は猫が走ると犬に伝えます。', pt: 'o homem conta ao cão que o gato corre.',
+    });
+  });
+
+  test.fails('a feminine noun addressee', () => {
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('WOMAN'), contentObject: runs }))).toMatchObject({
+      it: "l'uomo racconta alla donna che il gatto corre.", fr: "l'homme raconte à la femme que le chat court.",
+      de: 'der Mann erzählt der Frau, dass der Kater läuft.', ja: '男は猫が走ると女に伝えます。', pt: 'o homem conta à mulher que o gato corre.',
+    });
+  });
+
+  test.fails('a pronoun addressee', () => {
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('SECOND_PERSON'), contentObject: runs }))).toMatchObject({
+      de: 'der Mann erzählt dir, dass der Kater läuft.', ja: '男は猫が走るとあなたに伝えます。',
+    });
+  });
+
+  test('regression: the terminus addressee, the story object, and the clitic addressee in Romance', () => {
+    expect(sayAll(clause(np('MAN'), 'TELL', { complements: { terminus: { phrase: np('DOG') } }, contentObject: runs }))).toMatchObject({
+      it: "l'uomo racconta al cane che il gatto corre.", de: 'der Mann erzählt dem Hund, dass der Kater läuft.', ja: '男は猫が走ると犬に伝えます。',
+    });
+    expect(say(clause(np('MAN'), 'TELL', { directObject: np('STORY'), complements: { terminus: { phrase: np('DOG') } } }), 'it'))
+      .toBe("l'uomo racconta la storia al cane.");
+    expect(sayAll(clause(np('MAN'), 'TELL', { directObject: np('SECOND_PERSON'), contentObject: runs }))).toMatchObject({
+      it: "l'uomo ti racconta che il gatto corre.", fr: "l'homme te raconte que le chat court.", es: 'el hombre te cuenta que el gato corre.',
+    });
+  });
+});

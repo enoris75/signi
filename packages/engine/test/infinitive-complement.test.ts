@@ -645,3 +645,49 @@ describe('stop doing, continue doing (P09-E42)', () => {
     });
   });
 });
+
+// A315. CONTINUE_DOING fuses its governed verb (es "sigue corriendo", de "läuft weiter", ja 走り続けます),
+// but two complements fall back to a form the fusion should have replaced. A self-negated infinitive
+// gives es "sigue no corriendo", where Spanish says "sigue sin correr", and German drops the fusion
+// for "macht weiter, nicht zu laufen", which says the cat carries on with *not running* as an
+// activity; the Want below is the recommended rewording (see the bug file). A copular complement in
+// Japanese stays a nominalised clause, 幸せであることを続けます, where 続ける compounds onto the
+// copula's stem: 幸せであり続けます.
+describe('known bugs: CONTINUE_DOING leaves a negated or copular complement unfused (A315)', () => {
+  const continues = (infinitiveComplement: InfinitiveComplement) =>
+    sayAll(clause(np('CAT'), 'CONTINUE_DOING', { infinitiveComplement }));
+  const isA = (phrase: string): InfinitiveComplement =>
+    ({ verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np(phrase) } } });
+
+  test.fails('Spanish: a negated infinitive is "sin" + the infinitive', () => {
+    expect(continues({ verbPhrase: { verb: 'RUN', negative: true } }).es).toBe('el gato sigue sin correr.');
+    expect(continues({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD') }).es).toBe('el gato sigue sin comer la comida.');
+  });
+
+  test.fails('German: a negated infinitive is still not done, weiterhin nicht', () => {
+    expect(continues({ verbPhrase: { verb: 'RUN', negative: true } }).de).toBe('der Kater läuft weiterhin nicht.');
+    expect(continues({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('FOOD') }).de).toBe('der Kater frisst das Essen weiterhin nicht.');
+  });
+
+  test.fails('Japanese: a な-adjective or noun predicate compounds on であり', () => {
+    expect(continues(isA('HAPPY')).ja).toBe('猫は幸せであり続けます。');
+    expect(continues({ verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('FRIEND', { definiteness: 'indefinite' }) } } }).ja)
+      .toBe('猫は友達であり続けます。');
+  });
+
+  test.fails('Japanese: an い-adjective predicate compounds on くあり', () => {
+    expect(continues(isA('BIG')).ja).toBe('猫は大きくあり続けます。');
+  });
+
+  test('regression: the other languages\' negated and copular complements, and the plain fusion', () => {
+    expect(continues({ verbPhrase: { verb: 'RUN', negative: true } })).toMatchObject({
+      en: 'the cat continues not running.', it: 'il gatto continua a non correre.', fr: 'le chat continue à ne pas courir.',
+      pt: 'o gato continua a não correr.',
+    });
+    expect(continues(isA('HAPPY'))).toMatchObject({
+      en: 'the cat continues being happy.', it: 'il gatto continua a essere felice.', de: 'der Kater ist weiter glücklich.',
+      es: 'el gato sigue estando feliz.', pt: 'o gato continua a estar feliz.',
+    });
+    expect(continues({ verbPhrase: { verb: 'RUN' } })).toMatchObject({ de: 'der Kater läuft weiter.', es: 'el gato sigue corriendo.', ja: '猫は走り続けます。' });
+  });
+});

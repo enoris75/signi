@@ -591,3 +591,49 @@ describe('until, since, though (P09-E27)', () => {
     expect(say(catRuns('though', {}, {}, he), 'fr')).toBe("le chat court bien qu'il mange.");
   });
 });
+
+// A323. Japanese まで and 前に follow a clause's predicate in its plain form (食べるまで, 食べる前に).
+// A な-adjective predicate takes the attributive な instead, which belongs before a noun: 誰かが大丈夫な
+// まで, 犬が幸せなまで, 犬が幸せな前に. The Want is the recommended ruling in the bug file: the limit an
+// until-clause names is a state reached, so the predicate is 〜になる (大丈夫になるまで, 幸せになる前に);
+// 〜であるまで is the literal alternative.
+describe('known bugs: a Japanese な-adjective predicate takes な before まで and 前に (A323)', () => {
+  const runsUntil = (
+    subject: string, adjective: string, conjunction: SubordinatingConjunction = 'until', tense?: 'past',
+  ): PhrasePlan => ({
+    subject: np('CAT'),
+    verbPhrase: { verb: 'RUN', ...(tense ? { tense } : {}) },
+    adverbialClause: {
+      conjunction,
+      clause: { subject: np(subject), verbPhrase: { verb: 'BE', ...(tense ? { tense } : {}) }, complements: { predicative: { phrase: np(adjective) } } },
+    },
+  });
+
+  test.fails('until someone is okay', () => {
+    expect(say(runsUntil('SOMEONE', 'OKAY'), 'ja')).toBe('猫は誰かが大丈夫になるまで走ります。');
+  });
+
+  test.fails('until the dog is happy', () => {
+    expect(say(runsUntil('DOG', 'HAPPY'), 'ja')).toBe('猫は犬が幸せになるまで走ります。');
+  });
+
+  test.fails('until, in the past', () => {
+    expect(say(runsUntil('DOG', 'HAPPY', 'until', 'past'), 'ja')).toBe('猫は犬が幸せになるまで走りました。');
+  });
+
+  test.fails('before the dog is happy', () => {
+    expect(say(runsUntil('DOG', 'HAPPY', 'before'), 'ja')).toBe('猫は犬が幸せになる前に走ります。');
+  });
+
+  test('regression: a verb before まで, and the other six', () => {
+    expect(say({
+      subject: np('CAT'), verbPhrase: { verb: 'RUN' },
+      adverbialClause: { conjunction: 'until', clause: { subject: np('DOG'), verbPhrase: { verb: 'EAT' } } },
+    }, 'ja')).toBe('猫は犬が食べるまで走ります。');
+    expect(sayAll(runsUntil('DOG', 'HAPPY'))).toMatchObject({
+      en: 'the cat runs until the dog is happy.', it: 'il gatto corre finché il cane non è felice.',
+      fr: 'le chat court jusqu\'à ce que le chien soit heureux.', de: 'der Kater läuft, bis der Hund glücklich ist.',
+      es: 'el gato corre hasta que el perro esté feliz.', pt: 'o gato corre até que o cão esteja feliz.',
+    });
+  });
+});

@@ -247,3 +247,102 @@ describe('P09-E25 on a plurale tantum', () => {
     expect(newsBurns('such')).toMatchObject({ it: 'tali notizie bruciano.', fr: 'de telles nouvelles brûlent.', de: 'solche Nachrichten brennen.', es: 'tales noticias arden.', pt: 'tais notícias ardem.' });
   });
 });
+
+// A311. A mass noun is never pluralised (resolveNounPhrase: "a mass noun is never counted"), but its
+// numeral is still printed, so the count lands on a singular: "the three food burns", "il tre cibo",
+// "la trois nourriture", "das drei Essen". English NEWS is mass where the five plurale-tantum
+// languages count it, so English alone says "the three news runs", and the distributives, which the
+// five take whole as `all`, give "each news" / "every news". The Wants below are the recommended
+// ruling (see the bug file's Decisions): English counts news by the piece, and a numeral on a noun that
+// is mass in every language is refused by name.
+describe('known bugs: a mass noun is counted as if it were a count noun (A311)', () => {
+  test.fails('English NEWS with a numeral, as the subject', () => {
+    expect(sayAll(clause(np('NEWS', { numeral: 3 }), 'RUN')).en).toBe('the three pieces of news run.');
+  });
+
+  test.fails('English NEWS with a numeral, as the object', () => {
+    expect(sayAll(clause(np('CAT'), 'READ', { directObject: np('NEWS', { numeral: 3 }) })).en).toBe('the cat reads the three pieces of news.');
+  });
+
+  test.fails('English NEWS with each', () => {
+    expect(sayAll(clause(np('NEWS', { definiteness: 'each' }), 'BURN')).en).toBe('each piece of news burns.');
+  });
+
+  test.fails('English NEWS with every', () => {
+    expect(sayAll(clause(np('NEWS', { definiteness: 'every' }), 'BURN')).en).toBe('every piece of news burns.');
+  });
+
+  test.fails('a numeral on a noun that is mass in every language is refused by name', () => {
+    expect(() => sayAll(clause(np('FOOD', { numeral: 3 }), 'BURN'))).toThrow(/numeral/);
+  });
+
+  test('regression: the five plurale-tantum languages count NEWS, and FOOD keeps its kind-reading each', () => {
+    expect(sayAll(clause(np('NEWS', { numeral: 3 }), 'RUN'))).toMatchObject({
+      it: 'le tre notizie corrono.', fr: 'les trois nouvelles courent.', de: 'die drei Nachrichten laufen.',
+      es: 'las tres noticias corren.', pt: 'as três notícias correm.',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('FOOD', { definiteness: 'each' }) }))).toMatchObject({
+      it: 'il gatto mangia ogni cibo.', fr: 'le chat mange chaque nourriture.', de: 'der Kater frisst jedes Essen.', pt: 'o gato come cada comida.',
+    });
+    expect(sayAll(clause(np('NEWS', { definiteness: 'all' }), 'BURN')).en).toBe('all news burns.');
+  });
+});
+
+// A313. Portuguese puts "suficiente" after the noun ("gatos suficientes"), and A187 puts a possessive
+// beside a kept determiner after the noun too ("cada gato seu"). With both, the engine stacks them
+// in that order and the possessive trails the quantifier: "gatos suficientes seus". The Want is the
+// recommended ruling (Decisions in the bug file): the quantifier goes in front, as Spanish has it.
+describe('known bugs: Portuguese enough with a possessive trails the possessive after suficientes (A313)', () => {
+  const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+  const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+
+  test.fails('as the subject', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'enough', possessor: her }), 'RUN')).pt).toBe('suficientes gatos seus correm.');
+  });
+
+  test.fails('as the object', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { number: 'plural', definiteness: 'enough', possessor: my }) })).pt)
+      .toBe('o cão vê suficientes livros meus.');
+  });
+
+  test('regression: without a possessive suficientes stays after the noun, and the other six', () => {
+    expect(sayAll(clause(np('CAT', { definiteness: 'enough' }), 'RUN')).pt).toBe('gatos suficientes correm.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'enough', possessor: her }), 'RUN'))).toMatchObject({
+      en: 'enough cats of hers run.', it: 'abbastanza suoi gatti corrono.', fr: 'assez de chats à elle courent.',
+      de: 'genug Kater von ihr laufen.', es: 'suficientes gatos suyos corren.', ja: '彼女の十分な数の猫は走ります。',
+    });
+  });
+});
+
+// A314. The partitive "most" already holds a definite article ("la plupart des chats", "la mayoría de
+// los gatos"), and a possessive takes that article's place, as Italian does ("la maggior parte dei
+// suoi gatti"). The other five use A187's one-shape possessor for a kept determiner instead, which
+// suits "each" and "some" but not a partitive: "la plupart des chats à elle", "most cats of hers",
+// "die meisten Kater von ihr", "la mayoría de los gatos suyos", "a maioria dos gatos seus".
+describe('known bugs: most with a possessive keeps the possessive out of the partitive (A314)', () => {
+  const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+  const my: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+
+  test.fails('as the subject', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'most', possessor: her }), 'RUN'))).toEqual({
+      en: 'most of her cats run.', it: 'la maggior parte dei suoi gatti corre.', fr: 'la plupart de ses chats courent.',
+      de: 'die meisten ihrer Kater laufen.', es: 'la mayoría de sus gatos corre.', ja: '彼女のほとんどの猫は走ります。', pt: 'a maioria dos seus gatos corre.',
+    });
+  });
+
+  test.fails('as the object', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { number: 'plural', definiteness: 'most', possessor: my }) }))).toEqual({
+      en: 'the dog sees most of my books.', it: 'il cane vede la maggior parte dei miei libri.', fr: 'le chien voit la plupart de mes livres.',
+      de: 'der Hund sieht die meisten meiner Bücher.', es: 'el perro ve la mayoría de mis libros.', ja: '犬は私のほとんどの本を見ます。', pt: 'o cão vê a maioria dos meus livros.',
+    });
+  });
+
+  test('regression: A187\'s one shape stays for each, and all keeps the possessive in its place', () => {
+    expect(sayAll(clause(np('CAT', { definiteness: 'each', possessor: her }), 'RUN'))).toMatchObject({
+      en: 'each cat of hers runs.', fr: 'chaque chat à elle court.', de: 'jeder Kater von ihr läuft.', es: 'cada gato suyo corre.', pt: 'cada gato seu corre.',
+    });
+    expect(sayAll(clause(np('CAT', { number: 'plural', definiteness: 'all', possessor: her }), 'RUN'))).toMatchObject({
+      en: 'all her cats run.', fr: 'tous ses chats courent.', de: 'alle ihre Kater laufen.', es: 'todos sus gatos corren.', pt: 'todos os seus gatos correm.',
+    });
+  });
+});

@@ -435,3 +435,32 @@ describe('known bugs: a German dative pronoun trails the object (A229)', () => {
     });
   });
 });
+
+// A312. Italian writes the euphonic "ad" for "a" before a word starting with a: "ad abbastanza cani",
+// "ad alcuni cani", "ad amici". The infinitive link already does it ("continua ad aiutare",
+// it/infinitiveComplementText.ts); the terminus preposition does not, so an unarticled phrase after
+// it reads "a abbastanza", "a alcuni", "a amici". Before another vowel "a" stays ("a ogni cane", "a
+// un amico"), which is the modern standard.
+describe('known bugs: Italian "a" does not become "ad" before a word starting with a (A312)', () => {
+  const gives = (recipient: ReturnType<typeof np>) =>
+    sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: recipient } } })).it;
+
+  test.fails('enough', () => {
+    expect(gives(np('DOG', { number: 'plural', definiteness: 'enough' }))).toBe('il gatto dà il libro ad abbastanza cani.');
+  });
+
+  test.fails('some', () => {
+    expect(gives(np('DOG', { number: 'plural', definiteness: 'some' }))).toBe('il gatto dà il libro ad alcuni cani.');
+  });
+
+  test.fails('a bare plural starting with a', () => {
+    expect(gives(np('FRIEND', { number: 'plural', definiteness: 'bare' }))).toBe('il gatto dà il libro ad amici.');
+  });
+
+  test('regression: "a" before another vowel, before a consonant and fused with the article', () => {
+    expect(gives(np('DOG', { definiteness: 'each' }))).toBe('il gatto dà il libro a ogni cane.');
+    expect(gives(np('FRIEND', { definiteness: 'indefinite' }))).toBe('il gatto dà il libro a un amico.');
+    expect(gives(np('DOG', { number: 'plural', definiteness: 'several' }))).toBe('il gatto dà il libro a parecchi cani.');
+    expect(gives(np('FRIEND'))).toBe("il gatto dà il libro all'amico.");
+  });
+});

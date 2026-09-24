@@ -1692,3 +1692,47 @@ describe('P09-E28: not yet — ALREADY under a negation', () => {
     expect(sayAll(clause(the('CAT'), 'EAT', { verbPhrase: { modifier: 'ALSO', negative: true } })).es).toBe('el gato tampoco come.');
   });
 });
+
+// A310. German puts "nicht" after a definite object ("frisst das Essen nicht") and turns an indefinite
+// one into "kein" (A182). An object counted by an amount quantifier is neither: "viel", "genug" and
+// "wenig" are what the negation denies, so "nicht" stands in front of them, as English "not much" and
+// "not enough". The engine files them with the definites: "der Kater frisst viel Essen nicht" says
+// there is a lot of food the cat leaves alone.
+describe('known bugs: German puts "nicht" after an object counted by an amount quantifier (A310)', () => {
+  const notEat = (object: NounPhrase) =>
+    say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: object }), 'de');
+  const notSee = (object: NounPhrase) =>
+    say(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: object }), 'de');
+
+  test.fails('many, on a mass noun', () => {
+    expect(notEat(np('FOOD', { definiteness: 'many' }))).toBe('der Kater frisst nicht viel Essen.');
+  });
+
+  test.fails('enough, on a mass noun', () => {
+    expect(notEat(np('FOOD', { definiteness: 'enough' }))).toBe('der Kater frisst nicht genug Essen.');
+  });
+
+  test.fails('few, on a mass noun', () => {
+    expect(notEat(np('FOOD', { definiteness: 'few' }))).toBe('der Kater frisst nicht wenig Essen.');
+  });
+
+  test.fails('many, on a plural', () => {
+    expect(notSee(np('DOG', { number: 'plural', definiteness: 'many' }))).toBe('der Kater sieht nicht viele Hunde.');
+  });
+
+  test.fails('enough, on a plural', () => {
+    expect(notSee(np('DOG', { number: 'plural', definiteness: 'enough' }))).toBe('der Kater sieht nicht genug Hunde.');
+  });
+
+  // The definite-like quantifiers keep "nicht" after the object: most is definite (das meiste), and
+  // A182's regression rules that "some" keeps it; several goes with some. The other six are right.
+  test('regression: most, some and several keep "nicht" after the object, and the other six', () => {
+    expect(notEat(np('FOOD', { definiteness: 'most' }))).toBe('der Kater frisst das meiste Essen nicht.');
+    expect(notSee(np('DOG', { number: 'plural', definiteness: 'some' }))).toBe('der Kater sieht einige Hunde nicht.');
+    expect(notSee(np('DOG', { number: 'plural', definiteness: 'several' }))).toBe('der Kater sieht mehrere Hunde nicht.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: np('FOOD', { definiteness: 'many' }) }))).toMatchObject({
+      en: 'the cat does not eat much food.', it: 'il gatto non mangia molto cibo.', fr: 'le chat ne mange pas beaucoup de nourriture.',
+      es: 'el gato no come mucha comida.', ja: '猫は多くの食べ物を食べません。', pt: 'o gato não come muita comida.',
+    });
+  });
+});

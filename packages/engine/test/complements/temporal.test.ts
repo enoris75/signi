@@ -538,3 +538,40 @@ describe('known bugs: French "en" before an article on a temporal noun (A265)', 
     });
   });
 });
+
+// A322. A Japanese measure noun whose counter is the noun itself (HOUR 時間, DAY 日: `counter_is_head`)
+// says "one" with the numeral (一時間, 一日), and an article says nothing in Japanese. So the
+// indefinite "within an hour" / "for an hour" is 一時間以内に / 一時間走ります, as `numeral: 1` already
+// renders. The indefinite drops the count instead and leaves the bare noun: 時間以内に, 時間走ります,
+// 日以内に, 日走ります, which read "within time" / "runs time". Two P09-E34/E35 tests above pin that
+// output ('within an hour', 'for an hour') and move with the fix.
+describe('known bugs: a Japanese indefinite measure noun drops its count (A322)', () => {
+  test.fails('within an hour', () => {
+    expect(runsAt('within', 'HOUR', 'indefinite').ja).toBe('猫は一時間以内に走ります。');
+  });
+
+  test.fails('for an hour', () => {
+    expect(runsAt('for', 'HOUR', 'indefinite').ja).toBe('猫は一時間走ります。');
+  });
+
+  test.fails('within a day', () => {
+    expect(runsAt('within', 'DAY', 'indefinite').ja).toBe('猫は一日以内に走ります。');
+  });
+
+  test.fails('for a day', () => {
+    expect(runsAt('for', 'DAY', 'indefinite').ja).toBe('猫は一日走ります。');
+  });
+
+  test('regression: the numeral one, and the six languages that say the article', () => {
+    const withOne = (value: TemporalRelation, concept: string) => sayAll(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np(concept, { definiteness: 'bare', numeral: 1 }), specifiers: [{ kind: 'temporal', value }] } },
+    })).ja;
+    expect(withOne('within', 'HOUR')).toBe('猫は一時間以内に走ります。');
+    expect(withOne('for', 'HOUR')).toBe('猫は一時間走ります。');
+    expect(withOne('within', 'DAY')).toBe('猫は一日以内に走ります。');
+    expect(runsAt('for', 'HOUR', 'indefinite')).toMatchObject({
+      en: 'the cat runs for an hour.', it: "il gatto corre per un'ora.", fr: 'le chat court pendant une heure.',
+      de: 'der Kater läuft eine Stunde.', es: 'el gato corre durante una hora.', pt: 'o gato corre por uma hora.',
+    });
+  });
+});

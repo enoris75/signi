@@ -258,3 +258,56 @@ describe('known bugs: french writes de before a bare numeral in a complement (A2
     });
   });
 });
+
+// A321. German's cardinal one is the ein-word and declines as the indefinite article does ("mit einem
+// Hund", "innerhalb einer Stunde"). A bare phrase with `numeral: 1` takes it from the cardinal table,
+// which has one undeclined "ein" / "eine", so every oblique case shows the nominative: "mit ein Hund",
+// "innerhalb eine Stunde", "gibt ein Hund das Buch", "sieht ein Hund", and a genitive noun keeps its
+// nominative too ("innerhalb ein Tag"). The feminine accusative and the nominative happen to be right.
+// A definite head with one ("der ein Hund") is A319's, not this one.
+describe('known bugs: the German cardinal one does not decline in a bare phrase (A321)', () => {
+  const one = (concept: string) => np(concept, { definiteness: 'bare', numeral: 1 });
+  const de = (plan: Parameters<typeof sayAll>[0]) => sayAll(plan).de;
+  const temporal = (phrase: NounPhrase, value: 'within' | 'during') =>
+    clause(np('CAT'), 'RUN', { complements: { temporal: { phrase, specifiers: [{ kind: 'temporal', value }] } } });
+
+  test.fails('the dative after mit', () => {
+    expect(de(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('DOG') } } }))).toBe('der Kater läuft mit einem Hund.');
+  });
+
+  test.fails('the dative after in', () => {
+    expect(de(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: one('HOUSE') } } }))).toBe('der Kater läuft in einem Haus.');
+  });
+
+  test.fails('the genitive after innerhalb, feminine', () => {
+    expect(de(temporal(one('HOUR'), 'within'))).toBe('der Kater läuft innerhalb einer Stunde.');
+  });
+
+  test.fails('the genitive after innerhalb, masculine, with the noun\'s genitive', () => {
+    expect(de(temporal(one('DAY'), 'within'))).toBe('der Kater läuft innerhalb eines Tages.');
+  });
+
+  test.fails('the genitive after während', () => {
+    expect(de(temporal(one('HOUR'), 'during'))).toBe('der Kater läuft während einer Stunde.');
+  });
+
+  test.fails('the dative recipient', () => {
+    expect(de(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: one('DOG') } } })))
+      .toBe('der Kater gibt einem Hund das Buch.');
+  });
+
+  test.fails('the masculine accusative object', () => {
+    expect(de(clause(np('CAT'), 'SEE', { directObject: one('DOG') }))).toBe('der Kater sieht einen Hund.');
+  });
+
+  test('regression: the nominative, the feminine accusative, the indefinite article and the other six', () => {
+    expect(de(clause(one('HOUR'), 'BURN'))).toBe('eine Stunde brennt.');
+    expect(de(clause(np('CAT'), 'RUN', { complements: { temporal: { phrase: one('HOUR'), specifiers: [{ kind: 'temporal', value: 'for' }] } } })))
+      .toBe('der Kater läuft eine Stunde.');
+    expect(de(temporal(np('HOUR', { definiteness: 'indefinite' }), 'within'))).toBe('der Kater läuft innerhalb einer Stunde.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('DOG') } } }))).toMatchObject({
+      en: 'the cat runs with one dog.', it: 'il gatto corre con un cane.', fr: 'le chat court avec un chien.',
+      es: 'el gato corre con un perro.', ja: '猫は一匹の犬と走ります。', pt: 'o gato corre com um cão.',
+    });
+  });
+});
