@@ -37,6 +37,12 @@ den Häusern*). [A292](A292-french-writes-de-before-a-bare-numeral-in-a-compleme
 chiens*). [A293](A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md), English *his* for a possessor linked to a female subject (*your mother sees
 his book*).
 
+**Three more**, filed the same day from five random phrases, make nineteen.
+[A294](A294-french-bien-around-the-passive-participle.md), French *bien* missing the passive participle (*est mangée bien*, *a bien été mangée* for *est bien
+mangée*, *a été bien mangée*). [A295](A295-german-attributive-noun-drops-its-inherent-adjective.md), a German attributive noun dropping its inherent adjective (*Gefühle großer Frauen*
+for *großer junger Frauen*). [A296](A296-english-manner-adverb-after-the-by-phrase.md), English putting a manner adverb after the by-phrase (*is eaten by the
+dog well* for *is eaten well by the dog*).
+
 The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
 fix did. The history below is kept as it was written, in the present tense of each filing.

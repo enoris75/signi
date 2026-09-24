@@ -2320,3 +2320,41 @@ describe('known bugs: Spanish and Portuguese NEW before the noun', () => {
     expect(cat({ adjectives: ['BIG', 'OLD'] })).toMatchObject({ es: 'el gato grande y viejo come.', pt: 'o gato grande e velho come.' });
   });
 });
+
+// A295. German seeds YOUNG_WOMAN as "Frau" with an inherent adjective "jung", which `adjPhrase`
+// declines on the head. As an attributive noun it is lost: the compound takes the bare stem
+// ("Frauenbuch") and the postposed genitive (A20) declines only the modifier's own adjectives ("Buch
+// kleiner Frauen"), so YOUNG_WOMAN reads as WOMAN. The grammar-term nouns lose their inherent
+// adjective and their postnominal genitive the same way ("Bestimmungsbuch" for LOCATIVE).
+describe('known bugs: German attributive noun drops its inherent adjective', () => {
+  const bookOf = (modifier: NounModifier) => sayAll(clause(np('BOOK', { nounModifiers: [modifier] }), 'BURN')).de;
+
+  test.fails('German keeps "jung" beside the modifier\'s own adjective', () => {
+    expect(sayAll(clause(np('FEELING', {
+      number: 'plural',
+      nounModifiers: [{ concept: 'YOUNG_WOMAN', relation: 'purpose', number: 'plural', adjectives: ['GREAT'] }],
+    }), 'RUN')).de).toBe('die Gefühle großer junger Frauen laufen.');
+    expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural', adjectives: ['SMALL'] })).toBe('das Buch kleiner junger Frauen brennt.');
+    expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature', adjectives: ['SMALL'] })).toBe('das Buch kleiner junger Frau brennt.');
+  });
+
+  test.fails('German breaks a modifier with an inherent adjective out of the compound', () => {
+    expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural' })).toBe('das Buch junger Frauen brennt.');
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { direction: { phrase: np('BOOK', { nounModifiers: [{ concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural' }] }) } },
+    })).de).toBe('der Kater läuft zum Buch junger Frauen.');
+  });
+
+  test.fails('German keeps a grammar term\'s adjective and postnominal genitive in the modifier', () => {
+    expect(bookOf({ concept: 'LOCATIVE', relation: 'feature', number: 'plural' })).toBe('das Buch adverbialer Bestimmungen des Ortes brennt.');
+    expect(bookOf({ concept: 'LOCATIVE', relation: 'feature', adjectives: ['SMALL'] })).toBe('das Buch kleiner adverbialer Bestimmung des Ortes brennt.');
+  });
+
+  test('regression: WOMAN, and YOUNG_WOMAN as a head or a possessor, are already right', () => {
+    expect(bookOf({ concept: 'WOMAN', relation: 'feature' })).toBe('das Frauenbuch brennt.');
+    expect(bookOf({ concept: 'WOMAN', relation: 'feature', number: 'plural', adjectives: ['SMALL'] })).toBe('das Buch kleiner Frauen brennt.');
+    expect(sayAll(clause(np('FEELING', { possessor: np('YOUNG_WOMAN', { number: 'plural', adjectives: ['GREAT'] }) }), 'RUN')).de)
+      .toBe('das Gefühl der großen jungen Frauen läuft.');
+    expect(sayAll(clause(np('YOUNG_WOMAN', { number: 'plural', adjectives: ['GREAT'] }), 'RUN')).de).toBe('die großen jungen Frauen laufen.');
+  });
+});
