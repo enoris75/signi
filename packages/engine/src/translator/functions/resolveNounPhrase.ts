@@ -9,6 +9,8 @@ import { applyKinName } from './applyKinName.js';
 import { applyNounGender } from './applyNounGender.js';
 import { applyPluralOnly } from './applyPluralOnly.js';
 import { applyPossessorForm } from './applyPossessorForm.js';
+import { applyMassUnit, refuseUncountableNumeral } from './countMass.js';
+import { isGenericBound } from '../../functions/boundPossessor.js';
 import { foldIndefiniteModifier } from './foldIndefiniteModifier.js';
 import { fuseAdjectives } from './fuseAdjectives.js';
 import { resolve } from './resolve.js';
@@ -153,6 +155,10 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // asks — the lexeme wins, as a mass noun's singular does (P09-E41 D2). Settled first, since it also
     // sheds the concept's mass flag, which the quantifiers below read.
     const pluralOnly = applyPluralOnly(head.forms);
+    // A numeral on a noun no language counts is refused; one a language counts by a unit word takes
+    // that word here, as does a distributive, so the quantifiers below see a count noun (A311).
+    refuseUncountableNumeral(np, head.forms, lookup);
+    applyMassUnit(head.forms, np.numeral, unmassed);
     // A counting determiner on a mass noun says what it can (see MASS_DETERMINER, P09-E25), read after
     // a plurale tantum has shed its mass flag. A plurale tantum has no singular for the distributives
     // to take, so each / every take it whole, as `all`: "tutte le notizie", never "*ogni notizie".
@@ -234,7 +240,10 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
   // at the head of the list, where every language puts it, and marked so Japanese can tell it from
   // an ordinary adjective and drop the possessor it replaces. With no possessor there is nothing to
   // bind it to and the flag is ignored (C37).
-  const own = np.possessorOwn && np.possessor ? resolve(POSSESSOR_OWN_ADJECTIVE, language, lookup) : undefined;
+  // Italian's generic *proprio* is already the emphasis, so OWN adds no second one: "si vede il
+  // proprio libro" (A332).
+  const ownSaid = language === 'it' && isGenericBound(np.possessor);
+  const own = np.possessorOwn && np.possessor && !ownSaid ? resolve(POSSESSOR_OWN_ADJECTIVE, language, lookup) : undefined;
   if (own) own.forms['possessor_bound'] = '1';
   // The standard of one attributive adjective ("a bigger cat than the dog"), at most one per phrase
   // (see `resolveAdjectiveStandard`, P09-E18). Its index is looked up in the resolved list below,

@@ -27,6 +27,20 @@ describe('subjectBinding', () => {
     expect(subjectBinding(element({ number: 'singular', human: '1' }), { concept: 'MAN' })).not.toHaveProperty('gender');
   });
 
+  // A293: a person's sex by meaning, where neither the lexeme nor the plan gives a gender.
+  test('then the sex the person noun records, after the grammatical and the plan’s gender', () => {
+    expect(subjectBinding(element({ number: 'singular', human: '1', sex: 'fem' }), { concept: 'MOTHER' }).gender).toBe('fem');
+    expect(subjectBinding(element({ number: 'singular', human: '1', sex: 'fem' }), { concept: 'MOTHER', gender: 'masc' }).gender).toBe('masc');
+    expect(subjectBinding(element({ gender: 'masc', number: 'singular', human: '1', sex: 'fem' }), { concept: 'X' }).gender).toBe('masc');
+    expect(subjectBinding(element({ number: 'singular', human: '1' }), { concept: 'PERSON' })).not.toHaveProperty('gender');
+  });
+
+  // A332: the generic subject's owner is one's / proprio, which only the binding can say.
+  test('marks a generic subject, and only a generic one', () => {
+    expect(subjectBinding(element({ person: '3', number: 'singular', generic: '1', human: '1' }), { concept: 'GENERIC_PERSON' }).generic).toBe(true);
+    expect(subjectBinding(element({ number: 'singular', human: '1' }), { concept: 'MAN' })).not.toHaveProperty('generic');
+  });
+
   test('a pronoun is a person unless it is the neuter, and a group is the plural it agrees as', () => {
     expect(subjectBinding(element({ person: '1', number: 'singular', gender: 'masc' }), { concept: 'FIRST_PERSON' }))
       .toMatchObject({ person: '1', human: true });

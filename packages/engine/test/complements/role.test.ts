@@ -385,26 +385,36 @@ describe('role: the noun\'s own modifiers', () => {
 // A287. D3 keeps the Romance role noun bare, since only the article tells "come amico" (the role)
 // from "come un amico" (the likeness). Italian's pronominal possessor brings its own definite article
 // back ("il suo amico"), and "come il suo amico" reads as the likeness again. The essive object
-// predicative shares the helper, and the defect. The other six are right, but English and Italian are
-// not pinned as regressions here: a pending fix (A277) re-spells an indefinite head with a pronominal
-// possessor ("a friend of mine", "un mio amico"), and the role noun is indefinite by default.
+// predicative shares the helper, and the defect. The other six are right. English is not pinned as a
+// regression here: A277 re-spells an indefinite head with a pronominal possessor ("a friend of mine",
+// "un mio amico"), and the role noun is indefinite by default.
 describe('known bugs: an Italian role or essive noun with a pronominal possessor takes the article (A287)', () => {
   const his: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' };
   const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
 
-  test.fails('the role noun stays bare before the possessive', () => {
+  test('the role noun stays bare before the possessive', () => {
     expect(actsAs(np('FRIEND', { possessor: his }))['it']).toBe("l'uomo agisce come suo amico.");
   });
 
-  test.fails('a feminine role noun', () => {
+  test('a feminine role noun', () => {
     expect(actsAs(np('FRIEND', { gender: 'fem', possessor: her }), np('WOMAN'))['it']).toBe('la donna agisce come sua amica.');
   });
 
-  test.fails('the essive object predicative', () => {
+  test('the essive object predicative', () => {
     expect(say(clause(np('MAN'), 'USE', {
       directObject: np('BOOK'),
       complements: { objectPredicative: { phrase: np('FRIEND', { possessor: his }), specifiers: ESSIVE } },
     }), 'it')).toBe("l'uomo usa il libro come suo amico.");
+  });
+
+  test('the plural, the first person and "loro" stay bare too, and a plain object keeps its article', () => {
+    expect(actsAs(np('FRIEND', { number: 'plural', possessor: his }), np('MAN', { number: 'plural' }))['it'])
+      .toBe('gli uomini agiscono come suoi amici.');
+    expect(actsAs(np('FRIEND', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))['it'])
+      .toBe("l'uomo agisce come mio amico.");
+    expect(actsAs(np('FRIEND', { possessor: { kind: 'pronominal', person: '3', number: 'plural', gender: 'masc' } }))['it'])
+      .toBe("l'uomo agisce come loro amico.");
+    expect(say(clause(np('MAN'), 'SEE', { directObject: np('FRIEND', { possessor: his }) }), 'it')).toBe("l'uomo vede il suo amico.");
   });
 
   test('regression: the other Romance languages and German, and a genitive possessor in Italian', () => {

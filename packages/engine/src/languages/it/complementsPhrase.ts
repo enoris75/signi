@@ -296,7 +296,9 @@ function essivePhrase(c: ResolvedComplement, controller: Record<string, string>)
     if (np.head.forms['role'] === 'adjective') {
       return joinWords(['come', itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))]);
     }
-    const nf = itPossessedHeadForms(np);
-    return renderNP(np, (pl, lead) => prepDet('come', nf, pl, lead));
+    // The head's own forms, already bare: D3 drops the article before a possessive too, which
+    // `itPossessedHeadForms` would bring back ("come il suo amico" is the likeness, A287).
+    // `renderNP` still writes the possessive: "come suo amico".
+    return renderNP(np, (pl, lead) => prepDet('come', np.head.forms, pl, lead));
   });
 }

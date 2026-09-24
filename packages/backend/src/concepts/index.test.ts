@@ -46,6 +46,22 @@ describe('the concept corpus', () => {
     expect(bad).toEqual([]);
   });
 
+  // A person's sex by meaning is what English's link to the subject reads for *her* / *his* (A293).
+  // It is kept on persons, and a definition that names FEMALE or MALE must agree with it.
+  test('records a sex only on a person noun, in agreement with a definition that names one', () => {
+    const misplaced = concepts.filter((c) => c.sex && (c.role !== 'noun' || !c.human)).map((c) => c.id);
+    expect(misplaced).toEqual([]);
+    const bad = concepts.filter((c) => c.role === 'noun' && c.human && c.definition).flatMap((c) => {
+      const gloss = JSON.stringify(c.definition);
+      const named = gloss.includes('"FEMALE"') ? 'fem' : gloss.includes('"MALE"') ? 'masc' : undefined;
+      return named && named !== c.sex ? [`${c.id}: definition says ${named}, sex ${c.sex ?? 'unset'}`] : [];
+    });
+    expect(bad).toEqual([]);
+    expect(byId.get('MOTHER')?.sex).toBe('fem');
+    expect(byId.get('FATHER')?.sex).toBe('masc');
+    expect(byId.get('PERSON')?.sex).toBeUndefined();
+  });
+
   test('makes a lexical sense the sense of a seeded concept of its own role, not of another sense', () => {
     const senses = concepts.filter((c) => c.senseOf);
     expect(senses.map((c) => c.id)).toContain('KNOW_ACQUAINTED');

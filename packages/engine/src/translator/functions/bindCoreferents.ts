@@ -11,9 +11,11 @@ import type { BoundPossessor, ResolvedNounElement } from '../../types.js';
  *
  * A language whose nouns carry no gender (en, ja) leaves the natural one, as a pronoun standing for
  * the noun does (see `antecedentAgreement`): the gender the plan names on the subject, else neuter
- * for anything that is not a person ("the cat sees **its** book"). A person's natural gender is
- * recorded nowhere, and is not guessed: the possessive is then the unmarked 3rd singular *his*, which
- * is what a pronominal possessor with no gender already says.
+ * for anything that is not a person ("the cat sees **its** book"), else the sex a person noun has by
+ * meaning (`sex`, concept-level: MOTHER, WOMAN and WIFE are female, FATHER male), so that "your
+ * mother sees **her** book" (A293). A person of unknown sex (PERSON, FRIEND) is not guessed: the
+ * possessive is then the unmarked 3rd singular *his*, which is what a pronominal possessor with no
+ * gender already says. A group whose members differ in sex, or record none, has none.
  */
 export function subjectBinding(subject: ResolvedNounElement, planSubject: NounElement): BoundPossessor {
   const { agreement } = subject;
@@ -31,7 +33,10 @@ export function subjectBinding(subject: ResolvedNounElement, planSubject: NounEl
   // possessor is the speaker's) makes its relatives the speaker's too. Every one of a group must be.
   const own = subject.conjuncts.every((np) => np.head.forms['own'] === '1');
   const planGender = isNounGroup(planSubject) ? undefined : planSubject.gender;
-  const gender = grammatical ?? planGender ?? (human ? undefined : 'neut');
+  const sexes = new Set(subject.conjuncts.map((np) => np.head.forms['sex']));
+  const only = sexes.size === 1 ? [...sexes][0] : undefined;
+  const sex = only === 'masc' || only === 'fem' ? only : undefined;
+  const gender = grammatical ?? planGender ?? sex ?? (human ? undefined : 'neut');
   return {
     kind: 'pronominal',
     person,
@@ -40,6 +45,8 @@ export function subjectBinding(subject: ResolvedNounElement, planSubject: NounEl
     coreferent: 'subject',
     human,
     own,
+    // The generic subject's owner is *one's* in English and *proprio* in Italian (A332).
+    ...(agreement['generic'] === '1' ? { generic: true as const } : {}),
   };
 }
 

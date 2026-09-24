@@ -73,3 +73,24 @@ The fixer must decide:
 | | |
 |---|---|
 | **Test** | `coreference.test.ts` → *known bugs: english and italian write his / suo for a possessor linked to the generic subject (A332)* (4 `test.fails`, each asserting all seven: the plain link, OWN, the kin noun and the comitative, plus a regression test for French, German, Spanish, Portuguese and Japanese, the pronominal possessor and the subject question) |
+
+## Resolved
+
+2026-09-24. `subjectBinding` in
+[bindCoreferents.ts](../../../packages/engine/src/translator/functions/bindCoreferents.ts) marks the
+`BoundPossessor` `generic: true` when the subject's agreement is generic
+([types.ts](../../../packages/engine/src/types.ts); `isGenericBound` in
+[boundPossessor.ts](../../../packages/engine/src/functions/boundPossessor.ts)). In
+[possessive.ts](../../../packages/engine/src/possessive.ts), `possessiveEn` returns *one's*,
+`possessiveEnIndependent` *one's own* ("a friend of one's own"), and `possessiveIt` *proprio /
+propria / propri / proprie*, agreeing with the head as *suo* does. Italian's kin article drop
+([itPossessedHeadForms.ts](../../../packages/engine/src/languages/it/itPossessedHeadForms.ts)) skips a
+generic possessor (`la propria madre`). The no-double-*proprio* rule lives in
+[resolveNounPhrase.ts](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts), as in
+the trial: an Italian generic possessor takes no OWN adjective, since *proprio* is already the emphasis.
+`translatePossessive` (the builder's label for the link) is unchanged.
+
+Guarded by `coreference.test.ts` → *known bugs: english and italian write his / suo for a possessor
+linked to the generic subject (A332)*: the four former `test.fails`, now plain tests, a new test
+(agreement in gender and number, a possessor chain, an indefinite head, OWN on a kin noun), and the
+regression test. Unit cases in `possessive.test.ts` and `bindCoreferents.test.ts`.

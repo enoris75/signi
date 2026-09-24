@@ -198,3 +198,21 @@ describe('possessiveJa', () => {
     expect(possessiveJa(possessor('3', 'plural', 'neut'))).toEqual([{ t: 'それら' }, { t: 'の' }]);
   });
 });
+
+// A332: a possessor linked to the generic subject is *one's* in English and *proprio* in Italian;
+// the same features unlinked keep his / suo.
+describe('a possessor bound to the generic subject', () => {
+  const generic = { ...possessor('3'), coreferent: 'subject', human: true, own: false, generic: true } as const;
+  const linked = { ...possessor('3'), coreferent: 'subject', human: true, own: false } as const;
+
+  test("English says one's, and one's own for the independent form", () => {
+    expect(possessiveEn(generic)).toBe("one's");
+    expect(possessiveEnIndependent(generic)).toBe("one's own");
+    expect(possessiveEn(linked)).toBe('his');
+  });
+
+  test('Italian says proprio, agreeing with the possessed', () => {
+    expect([MASC_SG, FEM_SG, MASC_PL, FEM_PL].map((a) => possessiveIt(generic, a))).toEqual(['proprio', 'propria', 'propri', 'proprie']);
+    expect(possessiveIt(linked, MASC_SG)).toBe('suo');
+  });
+});

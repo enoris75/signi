@@ -68,8 +68,8 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number; manner_relation: string | null; dimension_relation: string | null; temporal: number; alarm: number }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper, sc.manner_relation, sc.dimension_relation, sc.temporal, sc.alarm FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number; manner_relation: string | null; dimension_relation: string | null; temporal: number; alarm: number; sex: string | null }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper, sc.manner_relation, sc.dimension_relation, sc.temporal, sc.alarm, sc.sex FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
@@ -87,6 +87,9 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   if (lexeme.gender) forms['gender'] = lexeme.gender;
   if (lexeme.animate) forms['animate'] = '1'; // concept-level animacy (affects motion-goal adposition)
   if (lexeme.human) forms['human'] = '1'; // concept-level personhood (English relativises "who" on this)
+  // A person's sex by meaning (MOTHER fem, FATHER masc), which English's nouns do not record: a
+  // possessor linked to the subject reads it for *her* / *his* (A293). Concept-level.
+  if (lexeme.sex) forms['sex'] = lexeme.sex;
   if (!lexeme.countable) forms['uncountable'] = '1'; // mass noun — changes quantifier words / blocks pluralisation
   if (lexeme.proper) forms['proper'] = '1'; // proper noun — the language fixes the article, not the user
   // How this noun enters a manner adverbial (measure / means / mode); the engine maps it to the

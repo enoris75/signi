@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { isGenericBound } from '../../functions/boundPossessor.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
 import { isPlural } from './isPlural.js';
@@ -41,6 +42,8 @@ export function itPossessedHeadForms(np: ResolvedNounPhrase): Record<string, str
     && !isPlural(np.head.forms)
     && np.adjectives.length === 0
     && np.nounModifiers.length === 0
-    && !(poss.person === '3' && poss.number === 'plural');
+    && !(poss.person === '3' && poss.number === 'plural')
+    // The generic subject's *proprio* takes the article back, "la propria madre" (A332).
+    && !isGenericBound(poss);
   return possessedHeadForms(np, bare ? 'bare' : 'definite');
 }

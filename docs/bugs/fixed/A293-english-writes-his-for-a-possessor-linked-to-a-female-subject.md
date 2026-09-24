@@ -91,3 +91,31 @@ The fixer must decide:
 | | |
 |---|---|
 | **Test** | `coreference.test.ts` → *known bugs: english writes his for a possessor linked to a female subject whose english noun records no gender (A293)* (9 `test.fails`, one per row, plus a regression test for the other six (on BOOK and on the older sister), a gender the plan names, MAN and FATHER, PERSON's unmarked *his*, the plural and the pronominal possessor with and without a gender) |
+
+## Resolved
+
+2026-09-24. A person's sex by meaning is now concept-level data, as `human` is: `sex?: 'masc' | 'fem'`
+on the concept ([concepts/types.ts](../../../packages/backend/src/concepts/types.ts)), stored in a
+`semantic_concepts.sex` column ([db.ts](../../../packages/backend/src/db.ts), with its migration;
+[seed.ts](../../../packages/backend/src/seed.ts)) and read back by `lookupNoun` as `forms['sex']` in
+every language ([lexicon.ts](../../../packages/backend/src/lexicon.ts)). `subjectBinding` in
+[bindCoreferents.ts](../../../packages/engine/src/translator/functions/bindCoreferents.ts) takes it
+after the grammatical gender and the plan's own gender, and before the non-person neuter. A group
+whose members differ in sex, or record none, has none. The grammatical gender still comes first, so
+the gendered languages are unchanged.
+
+Recorded in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts): *fem* on WOMAN, YOUNG_WOMAN,
+MOTHER, MOM, STEPMOTHER, MOTHER_IN_LAW, DAUGHTER, DAUGHTER_IN_LAW, SISTER, SISTER_IN_LAW, WIFE,
+GIRLFRIEND, AUNT, NIECE, GRANDMOTHER, GRANDDAUGHTER and MARY. *masc* on their male counterparts MAN,
+YOUNG_MAN, BOY, FATHER, DAD, STEPFATHER, FATHER_IN_LAW, SON, SON_IN_LAW, BROTHER, BROTHER_IN_LAW,
+HUSBAND, BOYFRIEND, UNCLE, NEPHEW, GRANDFATHER, GRANDSON and PETER. PERSON, FRIEND, the neutral kin
+(PARENT, SIBLING, SPOUSE, COUSIN, …), FIANCE and the title MR record none. A new corpus check in
+[concepts/index.test.ts](../../../packages/backend/src/concepts/index.test.ts) keeps `sex` on person
+nouns only and requires a definition naming FEMALE or MALE to agree with it. `antecedentAgreement` is
+unchanged: a pronoun standing for MOTHER is still the anaphor, the separate behaviour the Shape
+section names. The live database needs a reseed for the new column.
+
+Guarded by `coreference.test.ts` → *known bugs: english writes his for a possessor linked to a female
+subject whose english noun records no gender (A293)*: the nine former `test.fails`, now plain tests,
+a new test (GRANDMOTHER, GIRLFRIEND, MOM, MARY and PETER, a comitative, the plan's own gender first,
+a non-person's *its*), and the regression test. `db.test.ts` covers the column's migration and check.

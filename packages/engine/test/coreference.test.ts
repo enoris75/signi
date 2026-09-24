@@ -345,43 +345,57 @@ describe('known bugs: english writes his for a possessor linked to a female subj
   const her = (subject: NounPhrase) => sees(subject, np('BOOK', { possessor: link })).en;
   const you = { kind: 'pronominal', person: '2', number: 'singular' } as const;
 
-  test.fails('your mother', () => {
+  test('your mother', () => {
     expect(her(np('MOTHER', { possessor: you }))).toBe('your mother sees her book.');
   });
 
-  test.fails('the woman', () => {
+  test('the woman', () => {
     expect(her(np('WOMAN'))).toBe('the woman sees her book.');
   });
 
-  test.fails('the sister', () => {
+  test('the sister', () => {
     expect(her(np('SISTER'))).toBe('the sister sees her book.');
   });
 
-  test.fails('the daughter', () => {
+  test('the daughter', () => {
     expect(her(np('DAUGHTER'))).toBe('the daughter sees her book.');
   });
 
-  test.fails('the wife', () => {
+  test('the wife', () => {
     expect(her(np('WIFE'))).toBe('the wife sees her book.');
   });
 
-  test.fails('the aunt', () => {
+  test('the aunt', () => {
     expect(her(np('AUNT'))).toBe('the aunt sees her book.');
   });
 
-  test.fails('with OWN', () => {
+  test('with OWN', () => {
     expect(sees(np('MOTHER'), np('BOOK', { possessor: link, possessorOwn: true })).en).toBe('the mother sees her own book.');
   });
 
-  test.fails('inside a relative clause on the subject', () => {
+  test('inside a relative clause on the subject', () => {
     const mother = np('MOTHER', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('BOOK', { possessor: link }) } });
     expect(sayAll(clause(mother, 'RUN')).en).toBe('the mother who sees her book runs.');
   });
 
-  test.fails('my mother, on her older sister', () => {
+  test('my mother, on her older sister', () => {
     const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
     expect(sees(np('MOTHER', { possessor: mine }), np('SISTER', { adjectives: ['ELDER'], possessor: link })).en)
       .toBe('my mother sees her older sister.');
+  });
+
+  // The sex is the concept's (`sex`), recorded on every person noun that has one by meaning.
+  test('the other female persons, a name, a complement, and the plan’s own gender first', () => {
+    expect(her(np('GRANDMOTHER'))).toBe('the grandmother sees her book.');
+    expect(her(np('GIRLFRIEND'))).toBe('the girlfriend sees her book.');
+    expect(her(np('MOM'))).toBe('Mom sees her book.');
+    expect(her(np('MARY'))).toBe('Mary sees her book.');
+    expect(her(np('PETER'))).toBe('Peter sees his book.');
+    expect(sayAll(clause(np('WOMAN'), 'RUN', { complements: { comitative: { phrase: np('DOG', { possessor: link }) } } })).en)
+      .toBe('the woman runs with her dog.');
+    // The plan's own gender still comes first.
+    expect(her(np('WOMAN', { gender: 'masc' }))).toBe('the woman sees his book.');
+    expect(her(np('DOG'))).toBe('the dog sees its book.');
   });
 
   test('regression: the other six, a gender the plan names, a man, a person of unknown sex, the plural and the pronominal possessor', () => {
@@ -418,7 +432,7 @@ describe('known bugs: english writes his for a possessor linked to a female subj
 describe('known bugs: english and italian write his / suo for a possessor linked to the generic subject (A332)', () => {
   const one = np('GENERIC_PERSON');
 
-  test.fails('the link', () => {
+  test('the link', () => {
     expect(sees(one, L('BOOK'))).toEqual({
       en: "one sees one's book.", it: 'si vede il proprio libro.', fr: 'on voit son livre.', de: 'man sieht sein Buch.',
       es: 'se ve su libro.', ja: '人は自分の本を見ます。', pt: 'se vê o seu livro.',
@@ -426,7 +440,7 @@ describe('known bugs: english and italian write his / suo for a possessor linked
   });
 
   // proprio is already the emphasis, so Italian does not stack a second one.
-  test.fails('with OWN', () => {
+  test('with OWN', () => {
     expect(sees(one, L('BOOK', { possessorOwn: true }))).toEqual({
       en: "one sees one's own book.", it: 'si vede il proprio libro.', fr: 'on voit son propre livre.',
       de: 'man sieht sein eigenes Buch.', es: 'se ve su propio libro.', ja: '人は自分自身の本を見ます。',
@@ -435,18 +449,36 @@ describe('known bugs: english and italian write his / suo for a possessor linked
   });
 
   // A kin noun keeps its article before proprio, as it does before an adjective.
-  test.fails('on a kin noun', () => {
+  test('on a kin noun', () => {
     expect(sees(one, L('MOTHER'))).toEqual({
       en: "one sees one's mother.", it: 'si vede la propria madre.', fr: 'on voit sa mère.', de: 'man sieht seine Mutter.',
       es: 'se ve a su madre.', ja: '人は自分のお母さんを見ます。', pt: 'se vê a sua mãe.',
     });
   });
 
-  test.fails('in a complement', () => {
+  test('in a complement', () => {
     expect(sayAll(clause(one, 'RUN', { complements: { comitative: { phrase: L('DOG') } } }))).toEqual({
       en: "one runs with one's dog.", it: 'si corre con il proprio cane.', fr: 'on court avec son chien.',
       de: 'man läuft mit seinem Hund.', es: 'se corre con su perro.', ja: '人は自分の犬と走ります。',
       pt: 'se corre com o seu cão.',
+    });
+  });
+
+  // proprio agrees with its head as suo does, and one's stands wherever his stood.
+  test('agreement, a possessor chain, an indefinite head and OWN on a kin noun', () => {
+    const at = (object: NounPhrase) => sees(one, object);
+    expect(at(L('HOUSE'))).toMatchObject({ en: "one sees one's house.", it: 'si vede la propria casa.' });
+    expect(at(L('BOOK', { number: 'plural' }))).toMatchObject({ en: "one sees one's books.", it: 'si vedono i propri libri.' });
+    expect(at(np('BOOK', { possessor: L('MOTHER') }))).toMatchObject({
+      en: "one sees one's mother's book.", it: 'si vede il libro della propria madre.',
+    });
+    // The independent form, after a head that keeps its own article (A277).
+    expect(at(L('FRIEND', { definiteness: 'indefinite' }))).toMatchObject({
+      en: "one sees a friend of one's own.", it: 'si vede un proprio amico.',
+    });
+    expect(at(L('MOTHER', { possessorOwn: true }))).toMatchObject({
+      en: "one sees one's own mother.", it: 'si vede la propria madre.', fr: 'on voit sa propre mère.',
+      de: 'man sieht seine eigene Mutter.',
     });
   });
 
