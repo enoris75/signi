@@ -80,6 +80,17 @@ describe('renderNP', () => {
     expect(withArticle(np(LIVRE, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }))).toBe('leurs livres');
   });
 
+  // A326/A327: a caller that passes `ownHeadFor` gives a detached head its whole determiner, and
+  // renderNP writes none of its own; a head the possessive fills ignores it.
+  test('ownHeadFor gives a detached head its determiner', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(renderNP(np(LIVRE, { definiteness: 'indefinite', number: 'plural' }, { possessor: her }), () => 'de', () => 'de'))
+      .toBe('de livres à elle');
+    expect(renderNP(np(LIVRE, { definiteness: 'indefinite', number: 'plural' }, { possessor: her }), () => 'dans'))
+      .toBe('dans des livres à elle');
+    expect(renderNP(np(LIVRE, {}, { possessor: her }), () => 'de', () => 'IGNORED')).toBe('de son livre');
+  });
+
   // A187: the caller's head was built from a phrase `possessedHeadForms` left bare for the
   // possessive, so a determiner of the head's own is spelled here — behind the preposition the head
   // still carries — and the possessor trails as "à" + its disjunctive pronoun.

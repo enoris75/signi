@@ -2,7 +2,7 @@ import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { disjunctiveFr, keptBesidePossessive, possessiveFr } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
@@ -107,7 +107,7 @@ export function renderNP(
   // de qui" (P09-E14).
   const base = isQuestionPossessor(poss) ? `${withPost} de qui`
     : poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead), (plural, lead) => deDet(ownHeadForms(poss), plural, lead))}`
     // The detached possessor takes the genitive's own postnominal slot: "ce livre à elle".
     : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`
     : withPost;

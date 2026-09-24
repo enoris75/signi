@@ -1,5 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import { adjPhrase } from './adjPhrase.js';
 import { articledNameForms } from './articledNameForms.js';
 import { determiner } from './determiner.js';
@@ -21,7 +22,9 @@ const INVARIANT_MASS_DETERMINERS: ReadonlySet<string> = new Set(['some', 'many',
  * bare name articled (see `articledNameForms`).
  */
 export function genitiveShows(np: ResolvedNounPhrase, forms: Record<string, string> = articledNameForms(np)): boolean {
-  if (np.possessor && isPronominalPossessor(np.possessor)) return true;
+  // A prenominal possessive is an inflected ein-word. One detached beside a kept determiner ("von mir")
+  // marks no case, so the head's own determiner decides, as without it (A326).
+  if (np.possessor && isPronominalPossessor(np.possessor) && !keptBesidePossessive(np.head.forms)) return true;
   const plural = (forms['number'] ?? forms['count']) === 'plural';
   if (forms['proper'] === '1') {
     const base = forms['base'] ?? '';

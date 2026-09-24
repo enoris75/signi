@@ -1493,7 +1493,7 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
   const friends = np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine });
   const houseOf = (possessor: NounPhrase) => sayAll(clause(np('HOUSE', { possessor }), 'BURN'));
 
-  test.fails('the possessor', () => {
+  test('the possessor', () => {
     expect(houseOf(friends)).toEqual({
       en: 'the house of friends of mine burns.', it: 'la casa dei miei amici brucia.',
       fr: "la maison d'amis à moi brûle.", // now: "la maison de des amis à moi brûle."
@@ -1502,14 +1502,14 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     });
   });
 
-  test.fails('a mass possessor', () => {
+  test('a mass possessor', () => {
     expect(houseOf(np('WATER', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
       fr: "la maison d'eau à moi brûle.", // now: "la maison de de l'eau à moi brûle."
       de: 'das Haus von Wasser von mir brennt.', // now: "das Haus Wassers von mir brennt."
     });
   });
 
-  test.fails('the French source', () => {
+  test('the French source', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural', possessor: mine }) } } }))).toEqual({
       en: 'the cat runs from houses of mine.', it: 'il gatto corre via dalle mie case.',
       fr: 'le chat court loin de maisons à moi.', // now: "loin de des maisons à moi"
@@ -1518,7 +1518,7 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     });
   });
 
-  test.fails('the cause', () => {
+  test('the cause', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: friends } } }))).toMatchObject({
       fr: "le chat court à cause d'amis à moi.", // now: "à cause de des amis à moi"
       de: 'der Kater läuft wegen Freunden von mir.', // now: "wegen Freunde von mir"
@@ -1537,6 +1537,30 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     });
     expect(say(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural' }) } } }), 'fr'))
       .toBe('le chat court loin de maisons.');
+  });
+
+  // The fix hands a French detached head the determiner its caller would give it without the
+  // possessive (`renderNP`'s `ownHeadFor`), and lets German's genitive be decided by the head's own
+  // determiner, so every "de" relation, an adjective and a counted possessor (A329) go the same way.
+  test('the other relations, an adjective and a counted possessor', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    const runs = (complements: Record<string, unknown>) => sayAll(clause(np('CAT'), 'RUN', { complements } as never));
+    expect(sayAll(clause(np('BOOK', { possessor: np('FRIEND', { numeral: 2, definiteness: 'indefinite', possessor: her }) }), 'BURN')))
+      .toMatchObject({ fr: 'le livre de deux amis à elle brûle.', de: 'das Buch von zwei Freunden von ihr brennt.' });
+    expect(houseOf(np('FRIEND', { definiteness: 'indefinite', number: 'plural', adjectives: ['OLD'], possessor: mine })))
+      .toMatchObject({ fr: 'la maison de vieux amis à moi brûle.', de: 'das Haus alter Freunde von mir brennt.' });
+    expect(runs({ cause: { phrase: friends, specifiers: [{ kind: 'sentiment', value: 'negative' }] } }).fr)
+      .toBe("le chat court par la faute d'amis à moi.");
+    expect(runs({ cause: { phrase: friends, specifiers: [{ kind: 'sentiment', value: 'positive' }] } }))
+      .toMatchObject({ fr: 'le chat court grâce à des amis à moi.', de: 'der Kater läuft dank Freunden von mir.' });
+    expect(runs({ cause: { phrase: np('FRIEND', { definiteness: 'this', number: 'plural', possessor: mine }) } }))
+      .toMatchObject({ fr: 'le chat court à cause de ces amis à moi.', de: 'der Kater läuft wegen dieser Freunde von mir.' });
+    expect(runs({ comitative: { phrase: friends } }))
+      .toMatchObject({ fr: 'le chat court avec des amis à moi.', de: 'der Kater läuft mit Freunden von mir.' });
+    expect(runs({ locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: mine }) } }))
+      .toMatchObject({ fr: 'le chat court dans une maison à moi.', de: 'der Kater läuft in einem Haus von mir.' });
+    expect(sayAll(clause(np('CAT'), 'SPEAK', { complements: { topic: { phrase: friends } } })))
+      .toMatchObject({ fr: "le chat parle d'amis à moi.", de: 'der Kater spricht über Freunde von mir.' });
   });
 });
 
