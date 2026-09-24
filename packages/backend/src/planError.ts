@@ -36,7 +36,9 @@ const LINKED_KEYS = new Set(LINKED_CLAUSES.map(([key]) => key));
  *  - every relative clause needs a verb phrase (A273), wherever its noun hangs — a subject, an
  *    object, a complement, a possessor, a conjunct, or a noun inside another relative clause:
  *    `plan.directObject.relative.verbPhrase.verb is required`; and one whose head is not its subject
- *    needs a subject of its own (A275): `plan.subject.relative.subject.concept is required`.
+ *    needs a subject of its own (A275): `plan.subject.relative.subject.concept is required`. Its head
+ *    cannot be the role, which no language here relativises (A288):
+ *    `plan.directObject.relative.headRole: a relative clause cannot gap a role`.
  *  - a coreferent possessor points at its clause's subject (P11-E2), so it cannot stand inside that
  *    subject — in its possessor chain, a conjunct or a standard, though a relative clause there has a
  *    subject of its own: `plan.subject.possessor: a coreferent possessor cannot stand in the subject it
@@ -92,12 +94,14 @@ function nounsError(value: unknown, path: string): string | undefined {
 /**
  * What a relative clause is missing: the verb phrase that says what it says of its head (A273), and,
  * where the head is not its subject, a subject of its own (A275) — without one the engine would read
- * it as a subject relative, the head turned into the one who acts.
+ * it as a subject relative, the head turned into the one who acts. A head gapped as the role is
+ * refused outright (A288): no language here has a relative over its "as".
  */
 function relativeError(relative: Node, path: string): string | undefined {
   const verbPhrase = relative['verbPhrase'];
   if (!isNode(verbPhrase) || !verbPhrase['verb']) return `${path}.verbPhrase.verb is required`;
   const headRole = relative['headRole'] ?? 'subject';
+  if (headRole === 'role') return `${path}.headRole: a relative clause cannot gap a role`;
   if (headRole !== 'subject' && !hasHead(relative['subject'])) return `${path}.subject.concept is required`;
   return coreferentPath(relative['subject'], `${path}.subject`);
 }

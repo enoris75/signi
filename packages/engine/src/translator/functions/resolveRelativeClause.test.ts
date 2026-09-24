@@ -23,6 +23,15 @@ describe('resolveRelativeClause', () => {
     expect(resolveRelativeClause({ headRole: 'subject', verbPhrase: { verb: 'EAT' } }, 'it', LOOKUP).subject).toBeUndefined();
   });
 
+  // A288
+  test('refuses a role gap by name, with or without a subject, in every language', () => {
+    for (const language of ['it', 'en', 'ja']) {
+      expect(() => resolveRelativeClause({ headRole: 'role', subject: { concept: 'DOG' }, verbPhrase: { verb: 'RUN' } }, language, LOOKUP))
+        .toThrow(/cannot yet gap a role.*A288/);
+    }
+    expect(() => resolveRelativeClause({ headRole: 'role', verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).toThrow(/gap a role/);
+  });
+
   test('resolves its own subject, its verb phrase in no mood, and its complements', () => {
     const clause = resolveRelativeClause({
       headRole: 'directObject',

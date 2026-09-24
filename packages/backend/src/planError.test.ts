@@ -70,6 +70,14 @@ describe('planError: a relative clause with no verb phrase', () => {
     expect(planError({ ...main, directObject: cat({ ...eats, subject: { concept: 'DOG' } }) })).toBeUndefined();
   });
 
+  // A288
+  test('names a relative clause whose head is its role, wherever it hangs', () => {
+    const actsAs = { headRole: 'role', subject: { concept: 'MAN' }, verbPhrase: { verb: 'ACT' } };
+    expect(planError({ ...main, directObject: cat(actsAs) })).toBe('plan.directObject.relative.headRole: a relative clause cannot gap a role');
+    expect(planError({ ...main, subject: cat(actsAs) })).toBe('plan.subject.relative.headRole: a relative clause cannot gap a role');
+    expect(planError({ ...main, subject: cat({ ...actsAs, headRole: 'comitative' }) })).toBeUndefined();
+  });
+
   test('passes a relative clause with its verb phrase', () => {
     expect(planError({ ...main, subject: cat({ verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
     expect(planError({ ...main, directObject: cat({ headRole: 'directObject', subject: { concept: 'DOG' }, verbPhrase: { verb: 'EAT' } }) })).toBeUndefined();
