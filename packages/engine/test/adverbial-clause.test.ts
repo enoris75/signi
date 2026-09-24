@@ -670,14 +670,25 @@ describe('known bugs: a Japanese negated predicate before まで and 前に is n
     },
   });
 
-  test.fails('a な-adjective until, and before', () => {
+  test('a な-adjective until, and before', () => {
     expect(say(runs('until', 'HAPPY'), 'ja')).toBe('猫は犬が幸せでなくなるまで走ります。');
     expect(say(runs('before', 'HAPPY'), 'ja')).toBe('猫は犬が幸せでなくなる前に走ります。');
   });
 
-  test.fails('an い-adjective and a noun', () => {
+  test('an い-adjective and a noun', () => {
     expect(say(runs('until', 'BIG'), 'ja')).toBe('猫は犬が大きくなくなるまで走ります。');
     expect(say(runs('until', 'FRIEND'), 'ja')).toBe('猫は犬が友達でなくなるまで走ります。');
+  });
+
+  // Ruled: the negated ている state goes the literal way, the state stopping.
+  test('a negated ている state: 疲れなくなるまで', () => {
+    expect(say(runs('until', 'TIRED'), 'ja')).toBe('猫は犬が疲れなくなるまで走ります。');
+    expect(say(runs('before', 'TIRED'), 'ja')).toBe('猫は犬が疲れなくなる前に走ります。');
+  });
+
+  test('the い-adjective and the noun before 前に', () => {
+    expect(say(runs('before', 'BIG'), 'ja')).toBe('猫は犬が大きくなくなる前に走ります。');
+    expect(say(runs('before', 'FRIEND'), 'ja')).toBe('猫は犬が友達でなくなる前に走ります。');
   });
 
   test('regression: the affirmative, the other conjunctions, and the other six', () => {
