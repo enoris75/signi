@@ -1,5 +1,5 @@
 import type { PathSpecifier } from '@signi/shared';
-import { BETWEEN_PREP } from './fr.consts.js';
+import { AMONG_PREP, BETWEEN_PREP } from './fr.consts.js';
 import { deDet } from './deDet.js';
 import { prepDet } from './prepDet.js';
 
@@ -33,6 +33,9 @@ export function spatialHead(
     // the three contracts: "sur la table", "entre la maison et l'arbre", "contre le mur".
     case 'on':          return prepDet('sur', f, plural, lead);
     case 'between':     return prepDet(BETWEEN_PREP, f, plural, lead);
+    // P09-E32: `among` is "parmi", French's own word, not `between`'s "entre"; it contracts with
+    // nothing ("parmi les maisons") and is lifted off a group's conjuncts as "entre" is.
+    case 'among':       return prepDet(AMONG_PREP, f, plural, lead);
     case 'against':     return prepDet('contre', f, plural, lead);
     case 'through':
     default:            return prepDet('à travers', f, plural, lead);

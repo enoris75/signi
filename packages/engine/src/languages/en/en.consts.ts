@@ -123,6 +123,8 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
   on: 'on',
   between: 'between',
   against: 'against',
+  // P09-E32. Said once over a plural or a group, as `between` is.
+  among: 'among',
 };
 
 /**

@@ -29,6 +29,9 @@ export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plur
     case 'in_front_of': return `davanti ${prepDet('a', f, plural, lead)}`;
     case 'on':          return prepDet('su', f, plural, lead);
     case 'between':     return adv(BETWEEN_PREP);
+    // P09-E32: `among` is `between`'s word here, a deliberate merger (English and French alone tell
+    // them apart); it is lifted off a group's conjuncts the same way.
+    case 'among':       return adv(BETWEEN_PREP);
     case 'against':     return adv('contro');
     case 'through':
     default:            return adv('attraverso');

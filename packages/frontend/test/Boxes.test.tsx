@@ -530,6 +530,7 @@ const SPECIFIER_LABEL: Record<PathSpecifier, string> = {
   on: 'on',
   between: 'between',
   against: 'against',
+  among: 'among',
 };
 const SENTIMENT_LABEL: Record<CauseSentiment, string> = {
   neutral: 'Neutral — because of',
@@ -550,13 +551,20 @@ describe('SpecifierSelector', () => {
     );
   });
 
-  // P09-E1: support, a landmark on each side, and contact join the seven.
-  it('offers ten relations, the last three on, between and against', () => {
+  // P09-E1: support, a landmark on each side, and contact join the seven; P09-E32's among follows.
+  it('offers eleven relations, the last four on, between, against and among', () => {
     renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
 
     const labels = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
-    expect(labels).toHaveLength(10);
-    expect(labels.slice(-3)).toEqual(['on', 'between', 'against']);
+    expect(labels).toHaveLength(11);
+    expect(labels.slice(-4)).toEqual(['on', 'between', 'against', 'among']);
+  });
+
+  // P09-E32: among answers to its M, since A is around's.
+  it("answers to among's M", () => {
+    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
+
+    expect(screen.getByRole('button', { name: 'among' }).getAttribute('aria-keyshortcuts')).toBe('M');
   });
 
   it('selects the relation clicked', () => {

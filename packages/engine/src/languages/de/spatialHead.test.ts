@@ -71,3 +71,11 @@ describe('spatialHead: on, between, against', () => {
     expect(spatialHead('against', HAUS, false, 'direction')).toBe('ans');
   });
 });
+
+// P09-E32: `among` is `between`'s "zwischen" in German (not "unter", which stays `under`'s).
+describe('spatialHead: among', () => {
+  test('is zwischen, dative for a place and accusative for a goal', () => {
+    expect(spatialHead('among', KATZE, false, 'locative')).toBe('zwischen der');
+    expect(spatialHead('among', KATZE, false, 'direction')).toBe('zwischen die');
+  });
+});

@@ -165,6 +165,8 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
   on: 'の上',
   between: 'の間',
   against: '',
+  // P09-E32: `among` is `between`'s の間, a deliberate merger — 家の間で is "among the houses".
+  among: 'の間',
 };
 
 /**
@@ -207,6 +209,7 @@ export const PATH_CITATION: Record<PathSpecifier, string> = {
   on: 'の上で',
   between: 'の間で',
   against: 'に',
+  among: 'の間で',
 };
 
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
@@ -221,6 +224,7 @@ export const REL_NOUN_READING: Record<PathSpecifier, string> = {
   on: 'のうえ',
   between: 'のあいだ',
   against: '',
+  among: 'のあいだ',
 };
 
 // Coordinating conjunctions as Japanese connective adverbs, placed after the first clause's 、.

@@ -56,3 +56,10 @@ describe('spatialHead: on, between, against', () => {
     expect(spatialHead('against', LIVRO, false)).toBe('contra o');
   });
 });
+
+// P09-E32: `among` is `between`'s "entre" in Portuguese, a deliberate merger.
+describe('spatialHead: among', () => {
+  test('is entre, as between', () => {
+    expect(spatialHead('among', CASA, true)).toBe('entre as');
+  });
+});

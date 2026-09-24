@@ -17,7 +17,7 @@ import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
 import { liftPreposition } from '../../functions/liftPreposition.js';
-import { BETWEEN_PREP } from './fr.consts.js';
+import { AMONG_PREP, BETWEEN_PREP } from './fr.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
@@ -353,7 +353,8 @@ export function complementsPhrase(
       };
       // `between` is said once over the group, not per conjunct: each conjunct is built as above and
       // its "entre" lifted off (P09-E1 D2) — "entre la maison et l'arbre".
-      const scoped = groupScopedRelation(type, c) ? BETWEEN_PREP : '';
+      const relation = groupScopedRelation(type, c);
+      const scoped = relation === 'among' ? AMONG_PREP : relation ? BETWEEN_PREP : '';
       const group = coordinate(c.phrase, (np) => liftPreposition(
         tonicText(np)
         || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))

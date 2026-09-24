@@ -492,6 +492,8 @@ export const COMMANDS: readonly CommandDef[] = [
       ["on", [], "on"],
       ["between", [], "between"],
       ["against", [], "against"],
+      // P09-E32, on a plural or a group: "/loc ( house /pl /among )".
+      ["among", [], "among"],
     ] as const
   ).map(([name, aliases, value]) =>
     setting(

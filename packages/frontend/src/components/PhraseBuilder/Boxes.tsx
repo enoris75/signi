@@ -20,6 +20,7 @@ import FlipToBackIcon from "@mui/icons-material/FlipToBack";
 import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
 import LayersIcon from "@mui/icons-material/Layers";
 import ViewColumnIcon from "@mui/icons-material/ViewColumn";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import AlignHorizontalLeftIcon from "@mui/icons-material/AlignHorizontalLeft";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HistoryIcon from "@mui/icons-material/History";
@@ -707,6 +708,8 @@ const SPECIFIER_KEYS: Record<PathSpecifier, string> = {
   on: "N",
   between: "W",
   against: "G",
+  // P09-E32: a**M**ong, whose A is `around`'s.
+  among: "M",
 };
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
@@ -722,6 +725,8 @@ const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   on: <LayersIcon sx={{ fontSize: 15 }} />,
   between: <ViewColumnIcon sx={{ fontSize: 15 }} />,
   against: <AlignHorizontalLeftIcon sx={{ fontSize: 15 }} />,
+  // A point inside a scattered set (P09-E32).
+  among: <ScatterPlotIcon sx={{ fontSize: 15 }} />,
 };
 
 // A toolbar of selectable values for a complement's relation — one icon per value, the active one

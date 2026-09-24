@@ -48,3 +48,13 @@ describe('groupScopedRelation', () => {
     expect(groupScopedRelation('locative', complement(np(HOUSE), [{ kind: 'temporal', value: 'between' }]))).toBeUndefined();
   });
 });
+
+// P09-E32: `among` scopes over a group as `between` does.
+describe('groupScopedRelation: among', () => {
+  test('among scopes over the group on all three spatial complements', () => {
+    const among = complement(np(HOUSE), [{ kind: 'path', value: 'among' }]);
+    expect(groupScopedRelation('locative', among)).toBe('among');
+    expect(groupScopedRelation('route', among)).toBe('among');
+    expect(groupScopedRelation('direction', among)).toBe('among');
+  });
+});
