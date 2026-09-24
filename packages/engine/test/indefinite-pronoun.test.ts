@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, PhrasePlan } from '@signi/shared';
 import { clause, furigana, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
@@ -313,4 +313,106 @@ describe('a modifier on the pronoun (P09-E36)', () => {
   });
 
   const eatsTwo = () => clause(np('CAT'), 'EAT', { directObject: np('SOMETHING', { adjectives: ['BIG', 'NEW'] }) });
+});
+
+// A308. The negative swap (someone → anyone / nessuno / personne / niemand / nadie / 誰も / ninguém)
+// reaches SOMEONE and SOMETHING as the subject and the direct object, but not inside a complement:
+// "does not run with someone", "läuft nicht mit jemandem", 誰かと走りません. The complement keeps the
+// positive pronoun under a negated verb, which reads "there is someone it does not run with".
+describe('known bugs: negation does not reach an indefinite pronoun inside a complement (A308)', () => {
+  const notRun = (complements: NonNullable<PhrasePlan['complements']>) =>
+    sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements }));
+
+  test.fails('SOMEONE, comitative', () => {
+    expect(notRun({ comitative: { phrase: np('SOMEONE') } })).toEqual({
+      en: 'the cat does not run with anyone.', it: 'il gatto non corre con nessuno.', fr: 'le chat ne court avec personne.',
+      de: 'der Kater läuft mit niemandem.', es: 'el gato no corre con nadie.', ja: '猫は誰とも走りません。', pt: 'o gato não corre com ninguém.',
+    });
+  });
+
+  test.fails('SOMETHING, comitative', () => {
+    expect(notRun({ comitative: { phrase: np('SOMETHING') } })).toEqual({
+      en: 'the cat does not run with anything.', it: 'il gatto non corre con niente.', fr: 'le chat ne court avec rien.',
+      de: 'der Kater läuft mit nichts.', es: 'el gato no corre con nada.', ja: '猫は何とも走りません。', pt: 'o gato não corre com nada.',
+    });
+  });
+
+  test.fails('SOMEONE, purpose', () => {
+    expect(notRun({ purpose: { phrase: np('SOMEONE') } })).toEqual({
+      en: 'the cat does not run for anyone.', it: 'il gatto non corre per nessuno.', fr: 'le chat ne court pour personne.',
+      de: 'der Kater läuft für niemanden.', es: 'el gato no corre para nadie.', ja: '猫は誰のためにも走りません。', pt: 'o gato não corre para ninguém.',
+    });
+  });
+
+  test.fails('SOMEONE, terminus', () => {
+    expect(sayAll(clause(np('CAT'), 'GIVE', {
+      verbPhrase: { negative: true }, directObject: np('BOOK'), complements: { terminus: { phrase: np('SOMEONE') } },
+    }))).toEqual({
+      en: 'the cat does not give the book to anyone.', it: 'il gatto non dà il libro a nessuno.', fr: 'le chat ne donne le livre à personne.',
+      de: 'der Kater gibt niemandem das Buch.', es: 'el gato no da el libro a nadie.', ja: '猫は誰にも本をあげません。', pt: 'o gato não dá o livro a ninguém.',
+    });
+  });
+
+  test('regression: the direct object swaps already, and the positive complement keeps the positive pronoun', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: np('SOMEONE') }))).toEqual({
+      en: 'the cat does not see anyone.', it: 'il gatto non vede nessuno.', fr: 'le chat ne voit personne.', de: 'der Kater sieht niemanden.',
+      es: 'el gato no ve a nadie.', ja: '猫は誰も見ません。', pt: 'o gato não vê ninguém.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('SOMEONE') } } }))).toEqual({
+      en: 'the cat runs with someone.', it: 'il gatto corre con qualcuno.', fr: "le chat court avec quelqu'un.", de: 'der Kater läuft mit jemandem.',
+      es: 'el gato corre con alguien.', ja: '猫は誰かと走ります。', pt: 'o gato corre com alguém.',
+    });
+  });
+});
+
+// A309. A relative clause on SOMEONE or SOMETHING is dropped without a word in the six European
+// languages as the direct object and in a complement, and in Italian, French and German as the
+// subject too: "the cat sees someone.", "qualcuno vede il gatto." Japanese keeps it (走る誰か), and a
+// noun head keeps it everywhere ("the person who runs").
+describe('known bugs: a relative clause on SOMEONE or SOMETHING is dropped (A309)', () => {
+  const runs = { verbPhrase: { verb: 'RUN' } };
+
+  test.fails('SOMEONE who runs, as the object', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('SOMEONE', { relative: runs }) }))).toEqual({
+      en: 'the cat sees someone who runs.', it: 'il gatto vede qualcuno che corre.', fr: "le chat voit quelqu'un qui court.",
+      de: 'der Kater sieht jemanden, der läuft.', es: 'el gato ve a alguien que corre.', ja: '猫は走る誰かを見ます。', pt: 'o gato vê alguém que corre.',
+    });
+  });
+
+  test.fails('SOMETHING that burns, as the object', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('SOMETHING', { relative: { verbPhrase: { verb: 'BURN' } } }) }))).toEqual({
+      en: 'the cat sees something that burns.', it: 'il gatto vede qualcosa che brucia.', fr: 'le chat voit quelque chose qui brûle.',
+      de: 'der Kater sieht etwas, das brennt.', es: 'el gato ve algo que arde.', ja: '猫は燃える何かを見ます。', pt: 'o gato vê algo que arde.',
+    });
+  });
+
+  test.fails('SOMETHING the dog eats, an object gap', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('SOMETHING', { relative: { headRole: 'directObject', subject: np('DOG'), verbPhrase: { verb: 'EAT' } } }),
+    }))).toEqual({
+      en: 'the cat sees something that the dog eats.', it: 'il gatto vede qualcosa che il cane mangia.', fr: 'le chat voit quelque chose que le chien mange.',
+      de: 'der Kater sieht etwas, das der Hund frisst.', es: 'el gato ve algo que el perro come.', ja: '猫は犬が食べる何かを見ます。', pt: 'o gato vê algo que o cão come.',
+    });
+  });
+
+  test.fails('SOMEONE who runs, as the subject', () => {
+    expect(sayAll(clause(np('SOMEONE', { relative: runs }), 'SEE', { directObject: np('CAT') }))).toEqual({
+      en: 'someone who runs sees the cat.', it: 'qualcuno che corre vede il gatto.', fr: "quelqu'un qui court voit le chat.",
+      de: 'jemand, der läuft, sieht den Kater.', es: 'alguien que corre ve el gato.', ja: '走る誰かは猫を見ます。', pt: 'alguém que corre vê o gato.',
+    });
+  });
+
+  test.fails('SOMEONE who runs, in a complement', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('SOMEONE', { relative: runs }) } } }))).toEqual({
+      en: 'the cat runs with someone who runs.', it: 'il gatto corre con qualcuno che corre.', fr: "le chat court avec quelqu'un qui court.",
+      de: 'der Kater läuft mit jemandem, der läuft.', es: 'el gato corre con alguien que corre.', ja: '猫は走る誰かと走ります。', pt: 'o gato corre com alguém que corre.',
+    });
+  });
+
+  test('regression: a noun head keeps its relative', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('PERSON', { relative: runs }) }))).toEqual({
+      en: 'the cat sees the person who runs.', it: 'il gatto vede la persona che corre.', fr: 'le chat voit la personne qui court.',
+      de: 'der Kater sieht die Person, die läuft.', es: 'el gato ve a la persona que corre.', ja: '猫は走る人を見ます。', pt: 'o gato vê a pessoa que corre.',
+    });
+  });
 });

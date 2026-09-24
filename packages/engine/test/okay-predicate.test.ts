@@ -133,3 +133,37 @@ describe('okay, a predicate with a lexical copula (P09-E31)', () => {
     expect(faring?.stative).toBe(true);
   });
 });
+
+// A316. German OKAY takes the experiencer frame: the one who fares is a dative and "es" the subject
+// ("dem Kater geht es gut", "mir geht es gut"). GENERIC_PERSON's German word "man" has no dative, and
+// the frame falls back to a nominative subject with no "es": "man geht gut", which is not German. The
+// generic dative is "einem": "es geht einem gut". Spanish LIKE has the same gap on its dative frame:
+// the generic experiencer is dropped ("el gato gusta."), where Spanish says "el gato le gusta a uno"
+// (in the engine's order for LIKE, "el perro le gusta al gato").
+describe('known bugs: a generic subject in a dative experiencer frame (A316)', () => {
+  const okayFor = (verbPhrase: Partial<VerbPhrase> = {}) => sayAll(okay(np('GENERIC_PERSON'), verbPhrase));
+
+  test.fails('German OKAY, present', () => {
+    expect(okayFor().de).toBe('es geht einem gut.');
+  });
+
+  test.fails('German OKAY, negated', () => {
+    expect(okayFor({ negative: true }).de).toBe('es geht einem nicht gut.');
+  });
+
+  test.fails('German OKAY, past', () => {
+    expect(okayFor({ tense: 'past' }).de).toBe('es ging einem gut.');
+  });
+
+  test.fails('Spanish LIKE', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'LIKE', { directObject: np('CAT') })).es).toBe('el gato le gusta a uno.');
+  });
+
+  test('regression: the generic subject in the other languages, and a noun or pronoun experiencer in German', () => {
+    expect(okayFor()).toMatchObject({
+      en: 'one is okay.', it: 'si sta bene.', fr: 'on va bien.', es: 'se está bien.', pt: 'se está bem.',
+    });
+    expect(sayAll(okay(np('FIRST_PERSON'))).de).toBe('mir geht es gut.');
+    expect(sayAll(okay(np('SOMEONE'))).de).toBe('jemandem geht es gut.');
+  });
+});

@@ -179,3 +179,42 @@ describe('known bugs: a French definite object with a numeral drops its article 
       .toBe('le chat lit ses deux livres.');
   });
 });
+
+// A320. Italian elides the feminine indefinite before a vowel ("un'ora", "un'amica"), and the
+// article path does it ("entro un'ora" for an indefinite HOUR). The cardinal one is spelled from the
+// numeral table instead, which writes "una" whatever follows: "entro una ora", "per una ora", "una
+// ora brucia", "vede una amica". Masculine "un" needs no elision ("un amico"), so only "una" is hit.
+describe('known bugs: the Italian cardinal una does not elide before a vowel (A320)', () => {
+  const temporal = (value: 'within' | 'for' | 'during') => say(clause(np('CAT'), 'RUN', {
+    complements: { temporal: { phrase: np('HOUR', { definiteness: 'bare', numeral: 1 }), specifiers: [{ kind: 'temporal', value }] } },
+  }), 'it');
+
+  test.fails('within one hour', () => {
+    expect(temporal('within')).toBe("il gatto corre entro un'ora.");
+  });
+
+  test.fails('for one hour', () => {
+    expect(temporal('for')).toBe("il gatto corre per un'ora.");
+  });
+
+  test.fails('during one hour', () => {
+    expect(temporal('during')).toBe("il gatto corre durante un'ora.");
+  });
+
+  test.fails('as the subject', () => {
+    expect(say(clause(np('HOUR', { definiteness: 'bare', numeral: 1 }), 'BURN'), 'it')).toBe("un'ora brucia.");
+  });
+
+  test.fails('as the object, a feminine person', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { gender: 'fem', definiteness: 'bare', numeral: 1 }) }), 'it'))
+      .toBe("il gatto vede un'amica.");
+  });
+
+  test('regression: the indefinite article elides already, and a consonant or a masculine keeps its form', () => {
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { definiteness: 'indefinite' }), specifiers: [{ kind: 'temporal', value: 'within' }] } },
+    }), 'it')).toBe("il gatto corre entro un'ora.");
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('HOUSE', { definiteness: 'bare', numeral: 1 }) }), 'it')).toBe('il gatto vede una casa.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('DOG', { definiteness: 'bare', numeral: 1 }) }), 'it')).toBe('il gatto vede un cane.');
+  });
+});
