@@ -2937,6 +2937,157 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  // P09-E24's *lose* (rank 273), P09 D2's first half (localization B85): to no longer have, KEEP's
+  // opposite. Glossed "to stop having objects" on P09-E42's STOP_DOING, not the ticket's "no longer to
+  // have objects": NO_LONGER in an infinitive reads "no tener ya no objetos" and "não ter já não
+  // objetos" (B84's defect), and German wants "keine Gegenstände mehr". The game one loses is LOSE_GAME, which only Japanese says with its own word (負ける
+  // against 失う). Italian perdere is strong (persi, perso), Spanish perder diphthongs (pierdo),
+  // Portuguese perder has perco, French perdre is an -re verb (perd, perdit, perdu), German
+  // verlieren is strong and inseparable (verlor, verloren).
+  {
+    id: 'LOSE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to stop having something',
+    definition: infinitiveGloss('STOP_DOING', {
+      infinitive: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' } },
+    }),
+    emoji: '🫥',
+    forms: {
+      en: {
+        base: 'lose',
+        '1sg_present': 'lose', '2sg_present': 'lose', '3sg_present': 'loses',
+        '1pl_present': 'lose', '2pl_present': 'lose', '3pl_present': 'lose',
+        past: 'lost',
+      },
+      it: {
+        base: 'perdere',
+        '1sg_present': 'perdo', '2sg_present': 'perdi', '3sg_present': 'perde',
+        '1pl_present': 'perdiamo', '2pl_present': 'perdete', '3pl_present': 'perdono',
+        '1sg_past': 'persi', '2sg_past': 'perdesti', '3sg_past': 'perse',
+        '1pl_past': 'perdemmo', '2pl_past': 'perdeste', '3pl_past': 'persero',
+        '1sg_future': 'perderò', '2sg_future': 'perderai', '3sg_future': 'perderà',
+        '1pl_future': 'perderemo', '2pl_future': 'perderete', '3pl_future': 'perderanno',
+      },
+      fr: {
+        base: 'perdre',
+        '1sg_present': 'perds', '2sg_present': 'perds', '3sg_present': 'perd',
+        '1pl_present': 'perdons', '2pl_present': 'perdez', '3pl_present': 'perdent',
+        '1sg_past': 'perdis', '2sg_past': 'perdis', '3sg_past': 'perdit',
+        '1pl_past': 'perdîmes', '2pl_past': 'perdîtes', '3pl_past': 'perdirent',
+        '1sg_future': 'perdrai', '2sg_future': 'perdras', '3sg_future': 'perdra',
+        '1pl_future': 'perdrons', '2pl_future': 'perdrez', '3pl_future': 'perdront',
+      },
+      de: {
+        base: 'verlieren',
+        '1sg_present': 'verliere', '2sg_present': 'verlierst', '3sg_present': 'verliert',
+        '1pl_present': 'verlieren', '2pl_present': 'verliert', '3pl_present': 'verlieren',
+        '1sg_past': 'verlor', '2sg_past': 'verlorst', '3sg_past': 'verlor',
+        '1pl_past': 'verloren', '2pl_past': 'verlort', '3pl_past': 'verloren',
+      },
+      es: {
+        base: 'perder',
+        '1sg_present': 'pierdo', '2sg_present': 'pierdes', '3sg_present': 'pierde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdéis', '3pl_present': 'pierden',
+        '1sg_past': 'perdí', '2sg_past': 'perdiste', '3sg_past': 'perdió',
+        '1pl_past': 'perdimos', '2pl_past': 'perdisteis', '3pl_past': 'perdieron',
+        '1sg_future': 'perderé', '2sg_future': 'perderás', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderéis', '3pl_future': 'perderán',
+      },
+      ja: {
+        base: '失う',
+        reading: 'うしなう',
+        masu_present: '失います',
+        masu_present_reading: 'うしないます',
+      },
+      pt: {
+        base: 'perder',
+        '1sg_present': 'perco', '2sg_present': 'perde', '3sg_present': 'perde',
+        '1pl_present': 'perdemos', '2pl_present': 'perdem', '3pl_present': 'perdem',
+        '1sg_past': 'perdi', '2sg_past': 'perdeu', '3sg_past': 'perdeu',
+        '1pl_past': 'perdemos', '2pl_past': 'perderam', '3pl_past': 'perderam',
+        '1sg_future': 'perderei', '2sg_future': 'perderá', '3sg_future': 'perderá',
+        '1pl_future': 'perderemos', '2pl_future': 'perderão', '3pl_future': 'perderão',
+      },
+    },
+  },
+  // P09-E24's *win* (rank 347; localization B85): "to be best in a game", on B82's GAME. With or
+  // without an object (the game, the prize), and against someone (P09-E22's `opponent`). Japanese
+  // marks both に: the game (ゲームに勝ちます, `object_particle`) and the opponent (犬に勝ちます,
+  // `opponent_prep`). Italian vincere is strong (vinsi, vinto), German
+  // gewinnen too (gewann, gewonnen); Portuguese vencer, the contest word LOSE_GAME mirrors (ganhar is
+  // the prize's), with venço.
+  {
+    id: 'WIN',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative', 'opponent'],
+    description: 'to come first in a contest',
+    definition: infinitiveGloss('BE', {
+      predicate: 'GOOD',
+      predicateDegree: 'most',
+      complements: { locative: { phrase: { concept: 'GAME', definiteness: 'indefinite' } } },
+    }),
+    emoji: '🏆',
+    forms: {
+      en: {
+        base: 'win',
+        '1sg_present': 'win', '2sg_present': 'win', '3sg_present': 'wins',
+        '1pl_present': 'win', '2pl_present': 'win', '3pl_present': 'win',
+        past: 'won',
+      },
+      it: {
+        base: 'vincere',
+        '1sg_present': 'vinco', '2sg_present': 'vinci', '3sg_present': 'vince',
+        '1pl_present': 'vinciamo', '2pl_present': 'vincete', '3pl_present': 'vincono',
+        '1sg_past': 'vinsi', '2sg_past': 'vincesti', '3sg_past': 'vinse',
+        '1pl_past': 'vincemmo', '2pl_past': 'vinceste', '3pl_past': 'vinsero',
+        '1sg_future': 'vincerò', '2sg_future': 'vincerai', '3sg_future': 'vincerà',
+        '1pl_future': 'vinceremo', '2pl_future': 'vincerete', '3pl_future': 'vinceranno',
+      },
+      fr: {
+        base: 'gagner',
+        '1sg_present': 'gagne', '2sg_present': 'gagnes', '3sg_present': 'gagne',
+        '1pl_present': 'gagnons', '2pl_present': 'gagnez', '3pl_present': 'gagnent',
+        '1sg_past': 'gagnai', '2sg_past': 'gagnas', '3sg_past': 'gagna',
+        '1pl_past': 'gagnâmes', '2pl_past': 'gagnâtes', '3pl_past': 'gagnèrent',
+        '1sg_future': 'gagnerai', '2sg_future': 'gagneras', '3sg_future': 'gagnera',
+        '1pl_future': 'gagnerons', '2pl_future': 'gagnerez', '3pl_future': 'gagneront',
+      },
+      de: {
+        base: 'gewinnen',
+        '1sg_present': 'gewinne', '2sg_present': 'gewinnst', '3sg_present': 'gewinnt',
+        '1pl_present': 'gewinnen', '2pl_present': 'gewinnt', '3pl_present': 'gewinnen',
+        '1sg_past': 'gewann', '2sg_past': 'gewannst', '3sg_past': 'gewann',
+        '1pl_past': 'gewannen', '2pl_past': 'gewannt', '3pl_past': 'gewannen',
+      },
+      es: {
+        base: 'ganar',
+        '1sg_present': 'gano', '2sg_present': 'ganas', '3sg_present': 'gana',
+        '1pl_present': 'ganamos', '2pl_present': 'ganáis', '3pl_present': 'ganan',
+        '1sg_past': 'gané', '2sg_past': 'ganaste', '3sg_past': 'ganó',
+        '1pl_past': 'ganamos', '2pl_past': 'ganasteis', '3pl_past': 'ganaron',
+        '1sg_future': 'ganaré', '2sg_future': 'ganarás', '3sg_future': 'ganará',
+        '1pl_future': 'ganaremos', '2pl_future': 'ganaréis', '3pl_future': 'ganarán',
+      },
+      ja: {
+        base: '勝つ', opponent_prep: 'に', object_particle: 'に',
+        reading: 'かつ',
+        masu_present: '勝ちます',
+        masu_present_reading: 'かちます',
+      },
+      pt: {
+        base: 'vencer',
+        '1sg_present': 'venço', '2sg_present': 'vence', '3sg_present': 'vence',
+        '1pl_present': 'vencemos', '2pl_present': 'vencem', '3pl_present': 'vencem',
+        '1sg_past': 'venci', '2sg_past': 'venceu', '3sg_past': 'venceu',
+        '1pl_past': 'vencemos', '2pl_past': 'venceram', '3pl_past': 'venceram',
+        '1sg_future': 'vencerei', '2sg_future': 'vencerá', '3sg_future': 'vencerá',
+        '1pl_future': 'venceremos', '2pl_future': 'vencerão', '3pl_future': 'vencerão',
+      },
+    },
+  },
   {
     // P09's bring: carry here. French apporter (a thing; amener is for a person). Japanese 持ってくる
     // conjugates as 来る (持ってきます, 持ってこない). Transitive with a `direction`, as P09 says.
@@ -6464,6 +6615,156 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // P09-E24's *spend* (rank 353), in its two halves (P09 D2; localization B85). SPEND_MONEY is "to use
+  // money": Japanese 費やす, because 使う is USE's own word, and お金を使う, the everyday phrase, is the
+  // gloss. Italian spendere is strong (spesi, speso); German ausgeben is separable (gibt … aus,
+  // ausgegeben) with geben's e→i (gibst, the du command gib).
+  {
+    id: 'SPEND_MONEY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to pay out money',
+    definition: infinitiveGloss('USE', 'MONEY'),
+    synonym: 'spend money',
+    emoji: '💸',
+    forms: {
+      en: {
+        base: 'spend',
+        '1sg_present': 'spend', '2sg_present': 'spend', '3sg_present': 'spends',
+        '1pl_present': 'spend', '2pl_present': 'spend', '3pl_present': 'spend',
+        past: 'spent',
+      },
+      it: {
+        base: 'spendere',
+        '1sg_present': 'spendo', '2sg_present': 'spendi', '3sg_present': 'spende',
+        '1pl_present': 'spendiamo', '2pl_present': 'spendete', '3pl_present': 'spendono',
+        '1sg_past': 'spesi', '2sg_past': 'spendesti', '3sg_past': 'spese',
+        '1pl_past': 'spendemmo', '2pl_past': 'spendeste', '3pl_past': 'spesero',
+        '1sg_future': 'spenderò', '2sg_future': 'spenderai', '3sg_future': 'spenderà',
+        '1pl_future': 'spenderemo', '2pl_future': 'spenderete', '3pl_future': 'spenderanno',
+      },
+      fr: {
+        base: 'dépenser',
+        '1sg_present': 'dépense', '2sg_present': 'dépenses', '3sg_present': 'dépense',
+        '1pl_present': 'dépensons', '2pl_present': 'dépensez', '3pl_present': 'dépensent',
+        '1sg_past': 'dépensai', '2sg_past': 'dépensas', '3sg_past': 'dépensa',
+        '1pl_past': 'dépensâmes', '2pl_past': 'dépensâtes', '3pl_past': 'dépensèrent',
+        '1sg_future': 'dépenserai', '2sg_future': 'dépenseras', '3sg_future': 'dépensera',
+        '1pl_future': 'dépenserons', '2pl_future': 'dépenserez', '3pl_future': 'dépenseront',
+      },
+      de: {
+        base: 'ausgeben', particle: 'aus',
+        '1sg_present': 'gebe', '2sg_present': 'gibst', '3sg_present': 'gibt',
+        '1pl_present': 'geben', '2pl_present': 'gebt', '3pl_present': 'geben',
+        '1sg_past': 'gab', '2sg_past': 'gabst', '3sg_past': 'gab',
+        '1pl_past': 'gaben', '2pl_past': 'gabt', '3pl_past': 'gaben',
+        '2sg_imperative': 'gib', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'gastar',
+        '1sg_present': 'gasto', '2sg_present': 'gastas', '3sg_present': 'gasta',
+        '1pl_present': 'gastamos', '2pl_present': 'gastáis', '3pl_present': 'gastan',
+        '1sg_past': 'gasté', '2sg_past': 'gastaste', '3sg_past': 'gastó',
+        '1pl_past': 'gastamos', '2pl_past': 'gastasteis', '3pl_past': 'gastaron',
+        '1sg_future': 'gastaré', '2sg_future': 'gastarás', '3sg_future': 'gastará',
+        '1pl_future': 'gastaremos', '2pl_future': 'gastaréis', '3pl_future': 'gastarán',
+      },
+      ja: {
+        base: '費やす',
+        reading: 'ついやす',
+        masu_present: '費やします',
+        masu_present_reading: 'ついやします',
+      },
+      pt: {
+        base: 'gastar',
+        '1sg_present': 'gasto', '2sg_present': 'gasta', '3sg_present': 'gasta',
+        '1pl_present': 'gastamos', '2pl_present': 'gastam', '3pl_present': 'gastam',
+        '1sg_past': 'gastei', '2sg_past': 'gastou', '3sg_past': 'gastou',
+        '1pl_past': 'gastamos', '2pl_past': 'gastaram', '3pl_past': 'gastaram',
+        '1sg_future': 'gastarei', '2sg_future': 'gastará', '3sg_future': 'gastará',
+        '1pl_future': 'gastaremos', '2pl_future': 'gastarão', '3pl_future': 'gastarão',
+      },
+    },
+  },
+  // SPEND_TIME, the time as its object ("spends the day in the house"): passare, passer, verbringen
+  // (inseparable, verbrachte, verbracht), pasar, 過ごす, passar. Transitive, so passare and passer take
+  // HAVE. Glossed on STAY, not USE: "to use time" is also what one says of a clock. The period is
+  // the duration `for` (per, pendant, einen Zeitraum, 期間), not `during`, whose Japanese 期間の間に is
+  // heavy (B85 reading 3).
+  {
+    id: 'SPEND_TIME',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to pass time in a place or doing something',
+    definition: infinitiveGloss('STAY', {
+      complements: {
+        locative: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } },
+        temporal: { phrase: { concept: 'PERIOD_TIME', definiteness: 'indefinite' }, specifiers: [{ kind: 'temporal', value: 'for' }] },
+      },
+    }),
+    synonym: 'spend time',
+    emoji: '⏳',
+    forms: {
+      en: {
+        base: 'spend',
+        '1sg_present': 'spend', '2sg_present': 'spend', '3sg_present': 'spends',
+        '1pl_present': 'spend', '2pl_present': 'spend', '3pl_present': 'spend',
+        past: 'spent',
+      },
+      it: {
+        base: 'passare',
+        '1sg_present': 'passo', '2sg_present': 'passi', '3sg_present': 'passa',
+        '1pl_present': 'passiamo', '2pl_present': 'passate', '3pl_present': 'passano',
+        '1sg_past': 'passai', '2sg_past': 'passasti', '3sg_past': 'passò',
+        '1pl_past': 'passammo', '2pl_past': 'passaste', '3pl_past': 'passarono',
+        '1sg_future': 'passerò', '2sg_future': 'passerai', '3sg_future': 'passerà',
+        '1pl_future': 'passeremo', '2pl_future': 'passerete', '3pl_future': 'passeranno',
+      },
+      fr: {
+        base: 'passer',
+        '1sg_present': 'passe', '2sg_present': 'passes', '3sg_present': 'passe',
+        '1pl_present': 'passons', '2pl_present': 'passez', '3pl_present': 'passent',
+        '1sg_past': 'passai', '2sg_past': 'passas', '3sg_past': 'passa',
+        '1pl_past': 'passâmes', '2pl_past': 'passâtes', '3pl_past': 'passèrent',
+        '1sg_future': 'passerai', '2sg_future': 'passeras', '3sg_future': 'passera',
+        '1pl_future': 'passerons', '2pl_future': 'passerez', '3pl_future': 'passeront',
+      },
+      de: {
+        base: 'verbringen',
+        '1sg_present': 'verbringe', '2sg_present': 'verbringst', '3sg_present': 'verbringt',
+        '1pl_present': 'verbringen', '2pl_present': 'verbringt', '3pl_present': 'verbringen',
+        '1sg_past': 'verbrachte', '2sg_past': 'verbrachtest', '3sg_past': 'verbrachte',
+        '1pl_past': 'verbrachten', '2pl_past': 'verbrachtet', '3pl_past': 'verbrachten',
+      },
+      es: {
+        base: 'pasar',
+        '1sg_present': 'paso', '2sg_present': 'pasas', '3sg_present': 'pasa',
+        '1pl_present': 'pasamos', '2pl_present': 'pasáis', '3pl_present': 'pasan',
+        '1sg_past': 'pasé', '2sg_past': 'pasaste', '3sg_past': 'pasó',
+        '1pl_past': 'pasamos', '2pl_past': 'pasasteis', '3pl_past': 'pasaron',
+        '1sg_future': 'pasaré', '2sg_future': 'pasarás', '3sg_future': 'pasará',
+        '1pl_future': 'pasaremos', '2pl_future': 'pasaréis', '3pl_future': 'pasarán',
+      },
+      ja: {
+        base: '過ごす',
+        reading: 'すごす',
+        masu_present: '過ごします',
+        masu_present_reading: 'すごします',
+      },
+      pt: {
+        base: 'passar',
+        '1sg_present': 'passo', '2sg_present': 'passa', '3sg_present': 'passa',
+        '1pl_present': 'passamos', '2pl_present': 'passam', '3pl_present': 'passam',
+        '1sg_past': 'passei', '2sg_past': 'passou', '3sg_past': 'passou',
+        '1pl_past': 'passamos', '2pl_past': 'passaram', '3pl_past': 'passaram',
+        '1sg_future': 'passarei', '2sg_future': 'passará', '3sg_future': 'passará',
+        '1pl_future': 'passaremos', '2pl_future': 'passarão', '3pl_future': 'passarão',
+      },
+    },
+  },
+
   {
     // Licenses `direction` for where the copy goes ("copy to the clipboard").
     id: 'COPY',
@@ -9590,6 +9891,84 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'ajudamos', '2pl_past': 'ajudaram', '3pl_past': 'ajudaram',
         '1sg_future': 'ajudarei', '2sg_future': 'ajudará', '3sg_future': 'ajudará',
         '1pl_future': 'ajudaremos', '2pl_future': 'ajudarão', '3pl_future': 'ajudarão',
+      },
+    },
+  },
+
+  // P09-E24's *thank* (rank 300; localization B85). The one thanked is the object, which German
+  // danken governs in the dative (`object_case`, HELP_VERB's precedent: "dankt dem Kater") and
+  // Japanese marks に (猫に感謝します, `object_particle`). Portuguese agradecer takes it with a
+  // (`object_prep`, "agradece ao gato"); Spanish agradecer's is an indirect object too, which the
+  // personal a already says of a person ("agradece al gato"). Italian ringraziare writes one i
+  // (ringrazi), Spanish and Portuguese write zc and ç before o and a (agradezco, agradeço).
+  {
+    id: 'THANK',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to express gratitude to someone',
+    definition: infinitiveGloss('SAY', {
+      object: 'WORD',
+      number: 'plural',
+      adjectives: ['GOOD'],
+      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
+    emoji: '🙏',
+    forms: {
+      en: {
+        base: 'thank',
+        '1sg_present': 'thank', '2sg_present': 'thank', '3sg_present': 'thanks',
+        '1pl_present': 'thank', '2pl_present': 'thank', '3pl_present': 'thank',
+        past: 'thanked',
+      },
+      it: {
+        base: 'ringraziare',
+        '1sg_present': 'ringrazio', '2sg_present': 'ringrazi', '3sg_present': 'ringrazia',
+        '1pl_present': 'ringraziamo', '2pl_present': 'ringraziate', '3pl_present': 'ringraziano',
+        '1sg_past': 'ringraziai', '2sg_past': 'ringraziasti', '3sg_past': 'ringraziò',
+        '1pl_past': 'ringraziammo', '2pl_past': 'ringraziaste', '3pl_past': 'ringraziarono',
+        '1sg_future': 'ringrazierò', '2sg_future': 'ringrazierai', '3sg_future': 'ringrazierà',
+        '1pl_future': 'ringrazieremo', '2pl_future': 'ringrazierete', '3pl_future': 'ringrazieranno',
+      },
+      fr: {
+        base: 'remercier',
+        '1sg_present': 'remercie', '2sg_present': 'remercies', '3sg_present': 'remercie',
+        '1pl_present': 'remercions', '2pl_present': 'remerciez', '3pl_present': 'remercient',
+        '1sg_past': 'remerciai', '2sg_past': 'remercias', '3sg_past': 'remercia',
+        '1pl_past': 'remerciâmes', '2pl_past': 'remerciâtes', '3pl_past': 'remercièrent',
+        '1sg_future': 'remercierai', '2sg_future': 'remercieras', '3sg_future': 'remerciera',
+        '1pl_future': 'remercierons', '2pl_future': 'remercierez', '3pl_future': 'remercieront',
+      },
+      de: {
+        base: 'danken', object_case: 'dat',
+        '1sg_present': 'danke', '2sg_present': 'dankst', '3sg_present': 'dankt',
+        '1pl_present': 'danken', '2pl_present': 'dankt', '3pl_present': 'danken',
+        '1sg_past': 'dankte', '2sg_past': 'danktest', '3sg_past': 'dankte',
+        '1pl_past': 'dankten', '2pl_past': 'danktet', '3pl_past': 'dankten',
+      },
+      es: {
+        base: 'agradecer',
+        '1sg_present': 'agradezco', '2sg_present': 'agradeces', '3sg_present': 'agradece',
+        '1pl_present': 'agradecemos', '2pl_present': 'agradecéis', '3pl_present': 'agradecen',
+        '1sg_past': 'agradecí', '2sg_past': 'agradeciste', '3sg_past': 'agradeció',
+        '1pl_past': 'agradecimos', '2pl_past': 'agradecisteis', '3pl_past': 'agradecieron',
+        '1sg_future': 'agradeceré', '2sg_future': 'agradecerás', '3sg_future': 'agradecerá',
+        '1pl_future': 'agradeceremos', '2pl_future': 'agradeceréis', '3pl_future': 'agradecerán',
+      },
+      ja: {
+        base: '感謝する', object_particle: 'に',
+        reading: 'かんしゃする',
+        masu_present: '感謝します',
+        masu_present_reading: 'かんしゃします',
+      },
+      pt: {
+        base: 'agradecer', object_prep: 'a',
+        '1sg_present': 'agradeço', '2sg_present': 'agradece', '3sg_present': 'agradece',
+        '1pl_present': 'agradecemos', '2pl_present': 'agradecem', '3pl_present': 'agradecem',
+        '1sg_past': 'agradeci', '2sg_past': 'agradeceu', '3sg_past': 'agradeceu',
+        '1pl_past': 'agradecemos', '2pl_past': 'agradeceram', '3pl_past': 'agradeceram',
+        '1sg_future': 'agradecerei', '2sg_future': 'agradecerá', '3sg_future': 'agradecerá',
+        '1pl_future': 'agradeceremos', '2pl_future': 'agradecerão', '3pl_future': 'agradecerão',
       },
     },
   },
