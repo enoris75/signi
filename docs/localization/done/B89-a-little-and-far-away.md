@@ -70,3 +70,43 @@ Readings to judge on authoring:
 
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 A_LITTLE in German and Japanese, beside VERY's row (*zu einer niedrigen Ebene*, 低い段階へ).
+
+## Done
+
+Shipped 2026-09-24. **Two words seeded** in
+[adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts) — FAR_AWAY (a `place` adverb, after
+THERE) and A_LITTLE (an `intensifier`, after TOO) — and **both glosses** forecast. Pinned in
+[time-and-degree-words.test.ts](../../../packages/engine/test/time-and-degree-words.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| A_LITTLE | to a low level | a un livello basso | à un niveau bas | zu einer niedrigen Ebene | a un nivel bajo | 低い段階へ | a um nível baixo |
+| FAR_AWAY | in a far place | in un luogo lontano | dans un lieu lointain | an einem fernen Ort | en un lugar lejano | 遠い場所で | em um lugar distante |
+
+The words in a clause, as shipped:
+
+| plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| the cat is a little tired | the cat is a little tired. | il gatto è un po' stanco. | le chat est un peu fatigué. | der Kater ist ein bisschen müde. | el gato está un poco cansado. | 猫は少し疲れています。 | o gato está um pouco cansado. |
+| a (a little) big cat runs | a slightly big cat runs. | un gatto un po' grande corre. | un chat un peu grand court. | ein etwas großer Kater läuft. | un gato un poco grande corre. | 少し大きい猫は走ります。 | um gato um pouco grande corre. |
+| the cat is a little bigger | the cat is a little bigger. | il gatto è un po' più grande. | le chat est un peu plus grand. | der Kater ist ein bisschen größer. | el gato es un poco más grande. | 猫は少し大きいです。 | o gato é um pouco maior. |
+| the cat is far away | the cat is far away. | il gatto è lontano. | le chat est loin. | der Kater ist weit weg. | el gato está lejos. | 猫は遠くにいます。 | o gato está longe. |
+| the cat runs far away | the cat runs far away. | il gatto corre lontano. | le chat court loin. | der Kater läuft weit weg. | el gato corre lejos. | 猫は遠くで走ります。 | o gato corre longe. |
+
+What landed differently from the plan:
+
+1. **A_LITTLE before a noun takes another word in English and German.** The seed as proposed gave
+   *an a little big cat* and *ein ein bisschen großer Kater*. A new intensifier key, `attributive`
+   ([`applyIntensifier`](../../../packages/engine/src/translator/functions/applyIntensifier.ts), unit
+   tested), says *slightly* and *etwas* there; the predicate keeps *a little* / *ein bisschen*.
+2. **A_LITTLE's degrees.** Japanese 少し is its own comparative word, so もっと drops (少し大きい, not
+   少しもっと大きい); on the Japanese lowered degree, a negation, it is not written. No language says it
+   on an equative or a superlative (`drop_degrees`). The six others keep it on a comparative.
+3. **FAR_AWAY's Japanese is 遠くで, with 遠くに as `locative_ni`**, HERE's pattern, where the ticket
+   proposed 遠くに alone: an act goes on 遠くで (食べ物を遠くで食べます), being and living are 遠くに
+   (遠くにいます, 遠くに住みます). Reading 3's goal reading (遠くに走ります) is therefore not what RUN
+   renders: 遠くで走ります is the locative, as ここで走ります is. A kanji に form needed a reading, so
+   [`jaModifierSeg`](../../../packages/engine/src/languages/ja/jaModifierSeg.ts) reads
+   `locative_ni_reading` (とおくに).
+4. A_LITTLE is offered by no picker, as VERY is (C33's intensifier slot); its e2e row reads the
+   gloss from `/api/concepts`, and FAR_AWAY's from the adverb picker.

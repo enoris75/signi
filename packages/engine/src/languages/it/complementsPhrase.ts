@@ -19,7 +19,7 @@ import { groupScopedRelation } from '../../functions/groupScopedRelation.js';
 import { liftPreposition } from '../../functions/liftPreposition.js';
 import { BETWEEN_PREP } from './it.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
-import { temporalPreposition } from '../../functions/temporalPreposition.js';
+import { temporalBare, temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { withRelative } from './withRelative.js';
@@ -215,7 +215,8 @@ export function complementsPhrase(
         type === 'temporal'  ? (() => {
           const relation = temporalRelation(c);
           const { word, prep } = IT_TEMPORAL[relation];
-          const p = relation === 'at' ? temporalPreposition<ItPreposition>(c, 'a') : prep;
+          // A noun may take none at all: "la mattina", "questa mattina" (`temporalBare`, B80).
+          const p = relation === 'at' ? (temporalBare(c) ? undefined : temporalPreposition<ItPreposition>(c, 'a')) : prep;
           return joinWords([word ?? '', p ? prepDet(p, nf, plural, lead) : artFor(nf, plural, lead)]);
         })() :
         type === 'direction' ? (

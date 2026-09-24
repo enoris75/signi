@@ -13,7 +13,7 @@ import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
-import { temporalPreposition } from '../../functions/temporalPreposition.js';
+import { temporalBare, temporalPreposition } from '../../functions/temporalPreposition.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
@@ -114,6 +114,8 @@ export function complementsPhrase(
         // No tonic branch: a time is not a person, so `temporal` is absent from TONIC_COMPLEMENTS
         // and a pronoun here takes the ordinary noun-phrase path, as it does in the other six.
         const group = coordinate(c.phrase, npText);
+        // A noun may take none at all under a demonstrative: "this morning" (`temporalBare`, B80).
+        if (relation === 'at' && temporalBare(c)) return group;
         return TEMPORAL_POSTPOSED.has(relation) ? `${group} ${word}` : `${word} ${group}`;
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".

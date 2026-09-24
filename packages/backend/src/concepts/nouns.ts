@@ -3669,6 +3669,27 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // P09-E24's minute (localization B80), the unit an hour is counted in. A period of time like DAY
+    // and WEEK. Its own counter in Japanese, as 時間 is HOUR's: 五分, never 五つの分 (C31). A counted
+    // compound draws no furigana, so the ふん / ぷん of 一分 (いっぷん) and 三分 (さんぷん) is not the
+    // lexeme's to spell. Glossed on C26's part-whole shape, with HOUR as the whole.
+    id: 'MINUTE',
+    role: 'noun',
+    description: 'a period of sixty seconds; a sixtieth of an hour',
+    definition: partOfGloss('HOUR'),
+    emoji: '⏲️',
+    isA: 'PERIOD_TIME',
+    forms: {
+      en: { base: 'minute', plural: 'minutes', count: 'singular' },
+      it: { base: 'minuto', plural: 'minuti', gender: 'masc', count: 'singular' },
+      fr: { base: 'minute', plural: 'minutes', gender: 'fem', count: 'singular' },
+      de: { base: 'Minute', plural: 'Minuten', gender: 'fem', count: 'singular' },
+      es: { base: 'minuto', plural: 'minutos', gender: 'masc', count: 'singular' },
+      ja: { base: '分', count: 'singular', reading: 'ふん', counter: '分', counter_join: 'head' },
+      pt: { base: 'minuto', plural: 'minutos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'MONTH',
     role: 'noun',
     description: 'a period of about thirty days',
@@ -3731,6 +3752,40 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'noche', plural: 'noches', gender: 'fem', count: 'singular' },
       ja: { base: '夜', count: 'singular', reading: 'よる' },
       pt: { base: 'noite', plural: 'noites', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // P09-E24's morning (localization B80). Glossed as NIGHT is, FLAME's part-whole shape with DAY as
+    // the whole, and FIRST as the differentia: "the first part of a day". Definite, as NIGHT's: a day
+    // has one first part.
+    id: 'MORNING',
+    role: 'noun',
+    description: 'the early part of the day, from sunrise to noon',
+    definition: {
+      subject: {
+        concept: 'PART',
+        definiteness: 'definite',
+        adjectives: ['FIRST'],
+        possessor: { concept: 'DAY', definiteness: 'indefinite' },
+        possessorRole: 'whole',
+      },
+    },
+    emoji: '🌄',
+    isA: 'PERIOD_TIME',
+    forms: {
+      // The time it is said at (C29): English "in the morning" but "this morning", with no
+      // preposition under a demonstrative (`temporal_bare`); Italian and French with none at all,
+      // "la mattina", "questa mattina", "le matin", "ce matin"; German "am Morgen", "an diesem
+      // Morgen". Spanish and Portuguese take the generic "en" / "em" ("en la mañana", "nesta
+      // manhã", the American usage the corpus writes; Spain says "por la mañana"), and Japanese
+      // its に (朝に). The fused deictic words (stamattina, 今朝) are not composed.
+      en: { base: 'morning', plural: 'mornings', count: 'singular', temporal_prep: 'in', temporal_bare: 'this,that' },
+      it: { base: 'mattina', plural: 'mattine', gender: 'fem', count: 'singular', temporal_bare: '1' },
+      fr: { base: 'matin', plural: 'matins', gender: 'masc', count: 'singular', temporal_bare: '1' },
+      de: { base: 'Morgen', plural: 'Morgen', gender: 'masc', count: 'singular', temporal_prep: 'an' },
+      es: { base: 'mañana', plural: 'mañanas', gender: 'fem', count: 'singular' },
+      ja: { base: '朝', count: 'singular', reading: 'あさ' },
+      pt: { base: 'manhã', plural: 'manhãs', gender: 'fem', count: 'singular' },
     },
   },
   {

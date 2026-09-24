@@ -25,6 +25,13 @@ describe('foldIndefiniteModifier', () => {
     expect(big.forms).toMatchObject({ base: 'qualcosa di grande', negative: 'niente di grande' });
   });
 
+  // Localization B90: German EVERYTHING declines, so its fused OTHER names the dative of its own.
+  test('a fused OTHER may name its form per slot', () => {
+    const head = concept({ base: 'alles', object: 'alles', disjunctive: 'allem', person: '3', indefinite: '1', with_other: 'alles andere', with_other_disjunctive: 'allem anderen' });
+    foldIndefiniteModifier(head, [adj({ base: 'ander', after_pronoun: 'anderes' })], 'de');
+    expect(head.forms).toMatchObject({ base: 'alles andere', object: 'alles andere', disjunctive: 'allem anderen' });
+  });
+
   test('Japanese keeps its adjectives, and nothing to fold is no fold', () => {
     expect(foldIndefiniteModifier(concept(SOMEONE), [adj({ base: '大きい' })], 'ja')).toBe(false);
     expect(foldIndefiniteModifier(concept(SOMEONE), [], 'en')).toBe(false);

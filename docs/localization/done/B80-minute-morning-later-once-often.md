@@ -107,3 +107,49 @@ Two rows in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spe
 OFTEN in German and Japanese (the locative complement gloss under `many`: *in vielen Fällen*,
 多くの場合で) and LATER in French and Spanish (the `after` relation as an adverb's gloss: *après ce
 temps*, *después de este tiempo*).
+
+## Done
+
+Shipped 2026-09-24. **Five words seeded** — MINUTE in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts) (after HOUR) and MORNING (after NIGHT),
+both `isA: 'PERIOD_TIME'`; ONCE (after AGAIN), LATER (after RECENTLY) and OFTEN (before NEVER) in
+[adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts) — and **four glosses**, the four
+forecast. ONCE stays on the English literal by design (reading 4). Paradigms and glosses are pinned
+in [time-and-degree-words.test.ts](../../../packages/engine/test/time-and-degree-words.test.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| MINUTE | a part of an hour | una parte di un'ora | une partie d'une heure | ein Teil einer Stunde | una parte de una hora | 時間の部分 | uma parte de uma hora |
+| MORNING | the first part of a day | la prima parte di un giorno | la première partie d'un jour | der erste Teil eines Tages | la primera parte de un día | 日の第一の部分 | a primeira parte de um dia |
+| LATER | after this time | dopo questo tempo | après ce temps | nach dieser Zeit | después de este tiempo | この時間の後に | depois deste tempo |
+| OFTEN | in many cases | in molti casi | dans beaucoup de cas | in vielen Fällen | en muchos casos | 多くの場合で | em muitos casos |
+
+MORNING as the time of a clause, after the engine change below:
+
+| plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| the cat runs `at` the morning | the cat runs in the morning. | il gatto corre la mattina. | le chat court le matin. | der Kater läuft am Morgen. | el gato corre en la mañana. | 猫は朝に走ります。 | o gato corre na manhã. |
+| … `at` this morning | the cat runs this morning. | il gatto corre questa mattina. | le chat court ce matin. | der Kater läuft an diesem Morgen. | el gato corre en esta mañana. | 猫はこの朝に走ります。 | o gato corre nesta manhã. |
+| the cat ran five minutes ago | the cat ran five minutes ago. | il gatto corse cinque minuti fa. | le chat courut il y a cinq minutes. | der Kater lief vor fünf Minuten. | el gato corrió hace cinco minutos. | 猫は五分前に走りました。 | o gato correu há cinco minutos. |
+
+What landed differently from the plan:
+
+1. **MORNING's time preposition needed an engine key, `temporal_bare`** (reading 2). An empty
+   `temporal_prep` is not honoured (French falls back on *à*: *à ce matin*), so a lexeme now says
+   where the `at` time takes no adposition at all: `'1'` under every determiner (Italian *la mattina,
+   questa mattina, una mattina*; French *le matin, ce matin, un matin*), or a list of determiners
+   (English `this,that`: *this morning*, but *in the morning*). Read by
+   [`temporalBare`](../../../packages/engine/src/functions/temporalPreposition.ts) in the English,
+   Italian and French complement renderers, with its own unit test. German takes `temporal_prep:
+   'an'` (*am Morgen*); Spanish and Portuguese keep the generic *en* / *em*, the American usage the
+   corpus writes (Spain says *por la mañana*; Portuguese *pela manhã* would need `por` routed through
+   its contraction, not done). The fused *stamattina*, 今朝 are not composed.
+2. **MINUTE is `counter_join: 'head'`** (the ticket's `counter_is_head` is not a key): 五分, 一分.
+   A counted compound draws no furigana, so the ふん / ぷん alternation is not the lexeme's to spell.
+   MINUTE takes no `temporal` flag — only TIME has one, HOUR does not.
+3. **The numeral under `ago` (reading 6) no longer reproduces** at this base: *vor fünf Minuten,
+   hace cinco minutos, há cinco minutos*, 五分前に, *il y a cinq minutes* — pinned in the test file.
+4. **ONCE is literal, as ruled**, and seeded with no subtype: *the cat ran once*, *il gatto ha
+   mangiato una volta il cibo*. Its *formerly* sense is not seeded.
+5. Japanese 日の第一の部分 is FIRST's 第一の; 最初の would read better, and is FIRST's lexeme's
+   business, not this ticket's.
