@@ -1,8 +1,2 @@
-import { COMPLEMENT_TYPES } from "@signi/shared";
-import type { NounKey } from "../interfaces.ts";
-
-/** The noun slots that sit at the top level of a plan rather than under `complements`. */
-export const CORE_KEYS = new Set<NounKey>(["subject", "directObject"]);
-
-/** The noun slots that live under `complements[type].phrase`. */
-export const COMPLEMENT_KEYS = new Set<string>(COMPLEMENT_TYPES);
+// Moved to @signi/phrase (P13), which the backend loads too.
+export * from "@signi/phrase/model/workspacePlan/workspacePlan.consts.ts";

@@ -10,8 +10,12 @@ export interface ConceptSeed {
    * the payoff tagline). When present it supersedes the stored `description`/`concept_definitions`
    * literal for all languages; the literal remains the fallback for concepts without a plan.
    * Shaped as a bare/indefinite noun phrase — a genus-differentia gloss ("a small mammal").
+   *
+   * Written in the phrase language (P13), the line the console prints and applies, with every word
+   * named by its concept id — `'/subj ( MAMMAL /a /adj SMALL )'` — and compiled to its plan when the
+   * seed is assembled (see compileSeedDefinitions). A plan literal is still taken as it is.
    */
-  definition?: PhrasePlan;
+  definition?: PhrasePlan | string;
   emoji?: string;
   transitivity?: string; // only for verbs
   modal?: boolean; // verb that governs another verb's infinitive rather than heading a clause

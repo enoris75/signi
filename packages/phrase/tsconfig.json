@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    // The modules came from the frontend, which imports with `.ts` specifiers (Vite resolves them);
+    // tsc rewrites them to `.js` in dist, so the frontend and the backend read the same source.
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

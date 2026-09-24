@@ -1,1 +1,2 @@
-export { workspaceToPlans } from "./functions/workspaceToPlans.ts";
+// Moved to @signi/phrase (P13), which the backend loads too.
+export * from "@signi/phrase/model/workspacePlan/index.ts";

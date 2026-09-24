@@ -6,8 +6,11 @@
     // The tests run against the packages' source (see vitest.config.ts), so they are typed against it.
     "paths": {
       "@signi/shared": ["../shared/src/index.ts"],
-      "@signi/engine": ["../engine/src/index.ts"]
-    }
+      "@signi/engine": ["../engine/src/index.ts"],
+      "@signi/phrase": ["../phrase/src/index.ts"]
+    },
+    // @signi/phrase's source imports with `.ts` specifiers (it came from the frontend; its build rewrites them).
+    "allowImportingTsExtensions": true
   },
   "include": ["src"]
 }

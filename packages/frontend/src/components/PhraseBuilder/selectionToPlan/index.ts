@@ -1,3 +1,2 @@
-export { resolveAntecedent } from "./functions/resolveAntecedent.ts";
-export { selectionToPlan } from "./functions/selectionToPlan.ts";
-export { askQuestion } from "./functions/askQuestion.ts";
+// Moved to @signi/phrase (P13), which the backend loads too.
+export * from "@signi/phrase/model/selectionToPlan/index.ts";

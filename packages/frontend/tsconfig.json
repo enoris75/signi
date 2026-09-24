@@ -16,7 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@signi/shared": ["../shared/src/index.ts"]
+      "@signi/shared": ["../shared/src/index.ts"],
+      "@signi/phrase/*": ["../phrase/src/*"]
     }
   },
   "include": ["src"]

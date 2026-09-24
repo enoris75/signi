@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=packages/backend\" \"npm run dev --workspace=packages/frontend\"",
-    "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/engine && npm run build --workspace=packages/backend && npm run build --workspace=packages/frontend",
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/engine && npm run build --workspace=packages/phrase && npm run build --workspace=packages/backend && npm run build --workspace=packages/frontend",
     "start": "node packages/backend/dist/index.js",
     "seed": "npm run seed --workspace=packages/backend",
     "test": "npm run test:unit && npm run test:e2e",
@@ -17,7 +17,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:report": "playwright show-report",
     "phrases:random": "tsx packages/engine/test/tools/randomPhrase.ts",
-    "typecheck": "tsc --noEmit -p packages/engine/tsconfig.test.json && tsc --noEmit -p packages/frontend/tsconfig.test.json && tsc --noEmit -p packages/backend/tsconfig.test.json"
+    "typecheck": "tsc --noEmit -p packages/engine/tsconfig.test.json && tsc --noEmit -p packages/phrase/tsconfig.test.json && tsc --noEmit -p packages/frontend/tsconfig.test.json && tsc --noEmit -p packages/backend/tsconfig.test.json"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

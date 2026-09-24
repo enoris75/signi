@@ -4,6 +4,7 @@
     // The tests run against the packages' source (see vitest.config.ts), so they are typed against it.
     "paths": {
       "@signi/shared": ["../shared/src/index.ts"],
+      "@signi/phrase/*": ["../phrase/src/*"],
       "@signi/engine": ["../engine/src/index.ts"]
     },
     // That pulls the engine's source into this program, and the engine does not hold itself to the

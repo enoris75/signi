@@ -7,6 +7,10 @@ export default defineConfig({
       // The packages are consumed from source: @signi/shared's package entry points at dist,
       // which need not be built (and whose stale copy in src/ predates the current types).
       '@signi/shared': path.resolve(__dirname, 'packages/shared/src/index.ts'),
+      // The phrase model and language (P13): the frontend imports its modules one by one by path,
+      // the backend its entry; both read source here.
+      '@signi/phrase/': path.resolve(__dirname, 'packages/phrase/src') + '/',
+      '@signi/phrase': path.resolve(__dirname, 'packages/phrase/src/index.ts'),
     },
   },
   test: {

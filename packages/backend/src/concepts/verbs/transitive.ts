@@ -4479,6 +4479,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     role: 'verb',
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
+    // What the causee comes to do is an infinitive it governs ("to cause a person to see objects").
+    clauseObject: 'infinitive',
     description: 'to make something or someone come to act or to be in a state',
     emoji: '🎬',
     synonym: 'bring about',
@@ -7245,11 +7247,12 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
-    // Licenses `direction` for where the copy goes ("copy to the clipboard").
+    // Licenses `direction` for where the copy goes ("copy to the clipboard"), and `locative` for where
+    // it is kept — CLIPBOARD is "a place where one copies".
     id: 'COPY',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['manner', 'direction', 'source', 'cause'],
+    complements: ['manner', 'direction', 'source', 'cause', 'locative'],
     description: 'to make a duplicate of something',
     definition: infinitiveGloss('MAKE', { object: 'OBJECT_THING', definiteness: 'indefinite', adjectives: ['OTHER'] }),
     emoji: '📋',
@@ -8717,11 +8720,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Licenses `instrumental` for what one expresses with: SAY is "to express concepts with words".
   {
     id: 'EXPRESS',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['manner', 'cause', 'locative'],
+    complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to convey or put into words',
     definition: infinitiveGloss('INDICATE', 'CONCEPT', 'plural'),
     emoji: '🗣️',

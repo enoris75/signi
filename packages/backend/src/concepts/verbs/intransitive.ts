@@ -1362,11 +1362,13 @@ export const intransitiveVerbs: ConceptSeed[] = [
   // No `terminus`: a recipient belongs to the causative ("starts it for the cat"), not to an event
   // getting under way. `instrumental` stays — "the lesson begins with a word" is the inchoative
   // reading of the complement START was seeded to license.
+  // It governs an infinitive, "to begin to know" — LEARN's, ACQUIRE's and LEAVE_DEPART's differentia.
   {
     id: 'BEGIN',
     role: 'verb',
     transitivity: 'intransitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
+    clauseObject: 'infinitive',
     description: 'to come into being; to get under way',
     emoji: '▶️',
     synonym: 'get under way',
@@ -1752,13 +1754,14 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
   // SCHOOL's and STUDENT's differentia (localization B64): "to begin to know", ACQUIRE's shape ("to
-  // begin to have"), Japanese ことが始まる included. Intransitive, with the place one learns in.
+  // begin to have"), Japanese ことが始まる included. Transitive — INFORMATION is "content that one
+  // learns" (P13: the canvas builds only what a verb licenses) — with the place one learns in.
   // French apprendre is prendre's compound (apprends, apprit, appris); Japanese 学ぶ is godan
   // (学んで, 学ばない). Italian imparare takes avere.
   {
     id: 'LEARN',
     role: 'verb',
-    transitivity: 'intransitive',
+    transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to come to know or be able to do something',
     definition: infinitiveGloss('BEGIN', { infinitive: 'KNOW' }),

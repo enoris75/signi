@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@signi/shared': path.resolve(__dirname, '../shared/src/index.ts'),
+      // The phrase model and language (P13), whose modules the frontend imports one by one.
+      '@signi/phrase/': path.resolve(__dirname, '../phrase/src') + '/',
     },
   },
   server: {
