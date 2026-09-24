@@ -9,6 +9,7 @@ import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { dativePronounForm } from '../../functions/dativePronounForm.js';
+import { recipientPronoun, withoutTerminus } from '../../functions/recipientPronoun.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { hasNegativePossessorComplement } from '../../functions/hasNegativePossessorComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
@@ -241,11 +242,18 @@ export function predicateText(
   // A pro-form is no object, and the participle does not agree with it ("l'a été").
   const cliticObjectForms = !objectClitic || !directObject || datClitic || existential ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
+  // A pronoun recipient is the dative clitic in the same slot, "lui donne le livre", "leur raconte
+  // que", "ne me donne pas" (A351) — where the slot is free: the clitic path writes one clitic, and
+  // beside an object clitic or a pronominal verb's "se" the recipient keeps its "à elle" rather than
+  // half a cluster.
+  const recipientForms = !objectClitic && !/^(?:s'|se )/.test(verb.forms['base'] ?? '') ? recipientPronoun(complements) : undefined;
+  const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
+  const clitic = objectClitic || recipientClitic;
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
   // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit
   // l'avoir vu"); only the compound past keeps it on the finite auxiliary ("l'a vu").
-  const infinitiveClitic = modals.length > 0 || aspect === 'progressive' || aspect === 'prospective' ? objectClitic : '';
-  const finiteClitic = infinitiveClitic ? '' : objectClitic;
+  const infinitiveClitic = modals.length > 0 || aspect === 'progressive' || aspect === 'prospective' ? clitic : '';
+  const finiteClitic = infinitiveClitic ? '' : clitic;
   let effectiveVerb: string;
   let effectiveMod: string;
   if (modals.length > 0) {
@@ -295,7 +303,7 @@ export function predicateText(
     effectiveVerb = [effectiveVerb, frequencyInGroup, preInfinitive, passiveParticipleText].filter(Boolean).join(' ');
     if (isFrequency || preInfinitive) effectiveMod = '';
   }
-  const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
+  const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
   // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"
@@ -310,7 +318,7 @@ export function predicateText(
     : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
-    const group = [auxiliaryPreInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
+    const group = [auxiliaryPreInfinitive, frCliticize(clitic, inf)].filter(Boolean).join(' ');
     if (!verbNegative && !aucun && !negativeAdverb) return group;
     return negateNonFinite(negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '', group);
   };
@@ -333,8 +341,8 @@ export function predicateText(
     const reflexive = /^(?:s'|se )/.test(verb.forms['base'] ?? '');
     // A multiword command keeps its noun after the negation and the inner adverb: "n'aie pas besoin".
     const impVerb = affirmative
-      ? frEnclitic(negateFinite(impForm), objectClitic, reflexive, pn)
-      : frCliticize(objectClitic, negateFinite(impForm));
+      ? frEnclitic(negateFinite(impForm), clitic, reflexive, pn)
+      : frCliticize(clitic, negateFinite(impForm));
     return withDislocated([impVerb, innerAdverb(impForm) ? '' : modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
