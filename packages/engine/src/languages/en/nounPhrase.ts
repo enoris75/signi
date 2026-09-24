@@ -11,8 +11,10 @@ import { possessorPhrase } from './possessorPhrase.js';
 /**
  * `post` is what follows the head noun inside the phrase, before any of-possessor: an attributive
  * adjective's standard of comparison, "a bigger cat **than the dog**" (P09-E18; see `npStandard`).
+ * `own` is an OWN that goes with a detached possessive, taken out of `adj` by the caller: "a friend
+ * of my own" (A328; see `ownDetaches`).
  */
-export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false, partitive = false, post = ''): string {
+export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false, partitive = false, post = '', own = false): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const noun = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const word = post ? `${noun} ${post}` : noun;
@@ -34,7 +36,9 @@ export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: s
   if (possessor && isPronominalPossessor(possessor)) {
     if (allHead) return `all ${possessiveEn(possessor)} ${a}${m}${word}`;
     if (keepsDeterminerBesidePossessive(forms)) {
-      return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${possessiveEnIndependent(possessor)}`;
+      // OWN goes with the possessive, which then takes its dependent form: "of my own" (A328).
+      const of = own ? `${possessiveEn(possessor)} own` : possessiveEnIndependent(possessor);
+      return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${of}`;
     }
     return `${possessiveEn(possessor)} ${a}${m}${word}`;
   }

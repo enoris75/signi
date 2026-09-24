@@ -5,6 +5,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npAdj } from './npAdj.js';
 import { npHasSuperlative } from './npHasSuperlative.js';
 import { npStandard } from './npStandard.js';
+import { ownDetaches } from './ownDetaches.js';
 
 export function subjectPhrase(np: ResolvedNounPhrase): string {
   const forms = np.head.forms;
@@ -12,5 +13,5 @@ export function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np), hasPartitivePossessor(np), npStandard(np)); // noun — determiner from forms
+  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np), hasPartitivePossessor(np), npStandard(np), ownDetaches(np)); // noun — determiner from forms
 }

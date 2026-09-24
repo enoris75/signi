@@ -87,6 +87,13 @@ describe('nounPhrase', () => {
       expect(nounPhrase({ ...BOOK, number: 'plural', definiteness: 'all' }, 'big', undefined, her)).toBe('all her big books');
     });
 
+    // A328: an OWN the caller took out of the adjectives goes with the dependent possessive.
+    test('`own` writes the detached possessive as "of her own"', () => {
+      const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+      expect(nounPhrase({ ...BOOK, definiteness: 'indefinite' }, 'old', undefined, her, false, false, '', true)).toBe('an old book of her own');
+      expect(nounPhrase({ ...BOOK, definiteness: 'this' }, undefined, undefined, her, false, false, '', true)).toBe('this book of her own');
+    });
+
     test('a noun possessor is a Saxon genitive that replaces the article', () => {
       expect(nounPhrase(BOOK, undefined, undefined, np(CAT))).toBe("the cat's book");
       expect(nounPhrase(BOOK, 'old', undefined, np(CAT, { definiteness: 'indefinite' }))).toBe("a cat's old book");

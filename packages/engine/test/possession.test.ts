@@ -1621,23 +1621,23 @@ describe('known bugs: OWN beside a kept determiner stays on the head (A328)', ()
   const ownFriendRuns = (extra: Partial<NounPhrase>) =>
     say(clause(np('FRIEND', { possessor: mine, possessorOwn: true, ...extra }), 'RUN'), 'en');
 
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(ownFriendRuns({ definiteness: 'indefinite' })).toBe('a friend of my own runs.'); // now: "an own friend of mine runs."
   });
 
-  test.fails('"this"', () => {
+  test('"this"', () => {
     expect(ownFriendRuns({ definiteness: 'this' })).toBe('this friend of my own runs.'); // now: "this own friend of mine runs."
   });
 
-  test.fails('"no"', () => {
+  test('"no"', () => {
     expect(ownFriendRuns({ definiteness: 'no' })).toBe('no friend of my own runs.'); // now: "no own friend of mine runs."
   });
 
-  test.fails('an adjective beside it', () => {
+  test('an adjective beside it', () => {
     expect(ownFriendRuns({ definiteness: 'indefinite', adjectives: ['OLD'] })).toBe('an old friend of my own runs.'); // now: "an own old friend of mine runs."
   });
 
-  test.fails('the plural', () => {
+  test('the plural', () => {
     expect(say(clause(np('FRIEND', {
       definiteness: 'indefinite', number: 'plural', possessorOwn: true,
       possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' },
@@ -1651,5 +1651,21 @@ describe('known bugs: OWN beside a kept determiner stays on the head (A328)', ()
     });
     expect(say(clause(np('FRIEND', { definiteness: 'indefinite', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('un mio proprio amico corre.');
     expect(say(clause(np('FRIEND', { definiteness: 'this', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('questo mio proprio amico corre.');
+  });
+
+  // OWN leaves the adjectives wherever the English phrase detaches its possessive (`ownDetaches`):
+  // the object, a complement, a genitive possessor, a counted head (A329) and another person. "all"
+  // keeps the prenominal possessive, and OWN with it.
+  test('every slot, a counted head, another person, and "all"', () => {
+    const own = (extra: Partial<NounPhrase>) => np('FRIEND', { possessor: mine, possessorOwn: true, ...extra });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: own({ definiteness: 'some', number: 'plural' }) }), 'en'))
+      .toBe('the cat sees some friends of my own.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: mine, possessorOwn: true }) } } }), 'en'))
+      .toBe('the cat runs in a house of my own.');
+    expect(say(clause(np('BOOK', { possessor: own({ definiteness: 'indefinite' }) }), 'BURN'), 'en')).toBe('the book of a friend of my own burns.');
+    expect(ownFriendRuns({ definiteness: 'indefinite', numeral: 2 })).toBe('two friends of my own run.');
+    expect(say(clause(np('HOUSE', { definiteness: 'indefinite', possessor: { kind: 'pronominal', person: '1', number: 'plural' }, possessorOwn: true }), 'BURN'), 'en'))
+      .toBe('a house of our own burns.');
+    expect(ownFriendRuns({ definiteness: 'all', number: 'plural' })).toBe('all my own friends run.');
   });
 });

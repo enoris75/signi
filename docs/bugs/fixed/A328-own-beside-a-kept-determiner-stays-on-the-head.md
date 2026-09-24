@@ -84,3 +84,28 @@ Until these are settled, only English is pinned.
 | **Test** | `possession.test.ts` → *known bugs: OWN beside a kept determiner stays on the head (A328)* (5 `test.fails`, English only, one per row; plus a regression test for the definite in all seven and Italian's indefinite and *this*) |
 
 Found on 2026-09-24 by the P11-E4 / A277 coverage audit (lane P1).
+
+## Resolved
+
+Fixed on 2026-09-24 for English, as pinned. The French, Spanish and Portuguese targets are still
+undecided (see the decision above), and those languages are unchanged.
+
+- [en/ownDetaches.ts](../../../packages/engine/src/languages/en/ownDetaches.ts) (new): whether the
+  phrase's possessor-bound OWN (`possessorBound`) goes with a detached pronominal possessive
+  (`keepsDeterminerBesidePossessive`).
+- [en/npAdj.ts](../../../packages/engine/src/languages/en/npAdj.ts) leaves that OWN out of the
+  adjectives, so the article is chosen against the next word (*an old friend of my own*).
+- [en/nounPhrase.ts](../../../packages/engine/src/languages/en/nounPhrase.ts) takes an `own` flag and
+  writes the detached possessive as `of ${possessiveEn(…)} own`. `npText`, `subjectPhrase` and
+  `possessorPhrase` pass `ownDetaches(np)`.
+
+The five `test.fails` in `known bugs: OWN beside a kept determiner stays on the head (A328)` in
+[possession.test.ts](../../../packages/engine/test/possession.test.ts) are plain tests now. The same
+block gained the object (*some friends of my own*), a complement (*in a house of my own*), a genitive
+possessor (*the book of a friend of my own*), a counted head (*two friends of my own*), another
+person (*a house of our own*), and *all* (*all my own friends*, unchanged). The colocated
+`nounPhrase.test.ts` and `npAdj.test.ts` gained cases.
+
+Still rendered as before, pending the decision: fr *un propre ami à moi*, *ce propre ami à moi*; es
+*un propio amigo mío*, *este propio amigo mío*, *ningún propio amigo mío*; pt *um próprio amigo meu*,
+*este próprio amigo meu*. German *ein eigener Freund von mir* was not filed and is unchanged.
