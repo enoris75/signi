@@ -614,3 +614,33 @@ describe('known bugs: a Romance pronoun object and pronoun recipient build no cl
     });
   });
 });
+
+// A360. A351's dative clitic is not taken beside the impersonal clitic of a generic subject, so
+// Italian and Spanish keep the contrastive tonic recipient: "si dà il libro a lei", "se da el libro a
+// ella". The unmarked sentence puts the dative clitic beside the impersonal one, in each language's
+// order: "le si dà il libro", "se le da el libro". French's on is a word, and already takes "lui".
+describe('known bugs: the impersonal si / se with a pronoun recipient keeps the tonic recipient (A360)', () => {
+  const her = np('THIRD_PERSON', { gender: 'fem' });
+  const oneGives = (recipient: NounElement, negative = false) => sayAll(clause(np('GENERIC_PERSON'), 'GIVE', {
+    verbPhrase: { negative }, directObject: np('BOOK'), complements: { terminus: { phrase: recipient } },
+  }));
+
+  test.fails('the 3rd and the 1st person recipient', () => {
+    expect(oneGives(her)).toMatchObject({ it: 'le si dà il libro.', es: 'se le da el libro.' });
+    expect(oneGives(np('FIRST_PERSON'))).toMatchObject({ it: 'mi si dà il libro.', es: 'se me da el libro.' });
+  });
+
+  test.fails('negated', () => {
+    expect(oneGives(her, true)).toMatchObject({ it: 'non le si dà il libro.', es: 'no se le da el libro.' });
+  });
+
+  test('regression: French, a noun recipient, Portuguese, and the other languages', () => {
+    expect(oneGives(her)).toMatchObject({
+      fr: 'on lui donne le livre.', en: 'one gives the book to her.', de: 'man gibt ihr das Buch.',
+      ja: '人は彼女に本をあげます。', pt: 'se dá o livro a ela.',
+    });
+    expect(oneGives(np('FIRST_PERSON')).fr).toBe('on me donne le livre.');
+    expect(oneGives(her, true).fr).toBe('on ne lui donne pas le livre.');
+    expect(oneGives(np('DOG'))).toMatchObject({ it: 'si dà il libro al cane.', es: 'se da el libro al perro.' });
+  });
+});
