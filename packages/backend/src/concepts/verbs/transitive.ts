@@ -4761,7 +4761,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'added',
       },
       it: {
-        base: 'aggiungere',
+        base: 'aggiungere', terminus_tonic: '1',
         '1sg_present': 'aggiungo', '2sg_present': 'aggiungi', '3sg_present': 'aggiunge',
         '1pl_present': 'aggiungiamo', '2pl_present': 'aggiungete', '3pl_present': 'aggiungono',
         '1sg_past': 'aggiunsi', '2sg_past': 'aggiungesti', '3sg_past': 'aggiunse',
@@ -4770,7 +4770,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'aggiungeremo', '2pl_future': 'aggiungerete', '3pl_future': 'aggiungeranno',
       },
       fr: {
-        base: 'ajouter',
+        base: 'ajouter', terminus_tonic: '1',
         '1sg_present': 'ajoute', '2sg_present': 'ajoutes', '3sg_present': 'ajoute',
         '1pl_present': 'ajoutons', '2pl_present': 'ajoutez', '3pl_present': 'ajoutent',
         '1sg_past': 'ajoutai', '2sg_past': 'ajoutas', '3sg_past': 'ajouta',
@@ -4792,7 +4792,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '2sg_imperative': 'füge', // the optional du -e, kept
       },
       es: {
-        base: 'añadir',
+        base: 'añadir', terminus_tonic: '1',
         '1sg_present': 'añado', '2sg_present': 'añades', '3sg_present': 'añade',
         '1pl_present': 'añadimos', '2pl_present': 'añadís', '3pl_present': 'añaden',
         '1sg_past': 'añadí', '2sg_past': 'añadiste', '3sg_past': 'añadió',
@@ -4840,7 +4840,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'linked',
       },
       it: {
-        base: 'collegare',
+        base: 'collegare', terminus_tonic: '1',
         '1sg_present': 'collego', '2sg_present': 'colleghi', '3sg_present': 'collega',
         '1pl_present': 'colleghiamo', '2pl_present': 'collegate', '3pl_present': 'collegano',
         '1sg_past': 'collegai', '2sg_past': 'collegasti', '3sg_past': 'collegò',
@@ -4849,7 +4849,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'collegheremo', '2pl_future': 'collegherete', '3pl_future': 'collegheranno',
       },
       fr: {
-        base: 'relier',
+        base: 'relier', terminus_tonic: '1',
         '1sg_present': 'relie', '2sg_present': 'relies', '3sg_present': 'relie',
         '1pl_present': 'relions', '2pl_present': 'reliez', '3pl_present': 'relient',
         '1sg_past': 'reliai', '2sg_past': 'relias', '3sg_past': 'relia',
@@ -4865,7 +4865,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'verbanden', '2pl_past': 'verbandet', '3pl_past': 'verbanden',
       },
       es: {
-        base: 'enlazar',
+        base: 'enlazar', terminus_tonic: '1',
         '1sg_present': 'enlazo', '2sg_present': 'enlazas', '3sg_present': 'enlaza',
         '1pl_present': 'enlazamos', '2pl_present': 'enlazáis', '3pl_present': 'enlazan',
         '1sg_past': 'enlacé', '2sg_past': 'enlazaste', '3sg_past': 'enlazó',
@@ -9224,7 +9224,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
       it: {
         // connettere's strong preterite is connessi, on the same stem as the participle connesso.
-        base: 'connettere',
+        base: 'connettere', terminus_tonic: '1',
         '1sg_present': 'connetto', '2sg_present': 'connetti', '3sg_present': 'connette',
         '1pl_present': 'connettiamo', '2pl_present': 'connettete', '3pl_present': 'connettono',
         '1sg_past': 'connessi', '2sg_past': 'connettesti', '3sg_past': 'connesse',
@@ -9233,7 +9233,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'connetteremo', '2pl_future': 'connetterete', '3pl_future': 'connetteranno',
       },
       fr: {
-        base: 'connecter',
+        base: 'connecter', terminus_tonic: '1',
         '1sg_present': 'connecte', '2sg_present': 'connectes', '3sg_present': 'connecte',
         '1pl_present': 'connectons', '2pl_present': 'connectez', '3pl_present': 'connectent',
         '1sg_past': 'connectai', '2sg_past': 'connectas', '3sg_past': 'connecta',
@@ -9249,7 +9249,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'verbanden', '2pl_past': 'verbandet', '3pl_past': 'verbanden',
       },
       es: {
-        base: 'conectar',
+        base: 'conectar', terminus_tonic: '1',
         '1sg_present': 'conecto', '2sg_present': 'conectas', '3sg_present': 'conecta',
         '1pl_present': 'conectamos', '2pl_present': 'conectáis', '3pl_present': 'conectan',
         '1sg_past': 'conecté', '2sg_past': 'conectaste', '3sg_past': 'conectó',

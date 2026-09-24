@@ -20,6 +20,7 @@ describe('recipientPronoun', () => {
     expect(recipientPronoun({ terminus: { phrase: el(np({ base: 'uno', person: '3', generic: '1' })) } })).toBeUndefined();
     expect(recipientPronoun({ terminus: { phrase: el(np(LEI, {}, { focus: 'only' })) } })).toBeUndefined();
     expect(recipientPronoun({ terminus: { phrase: el(np(LEI)), negative: true } })).toBeUndefined();
+    expect(recipientPronoun({ terminus: { phrase: el(np(LEI)) } }, { base: 'relier', terminus_tonic: '1' })).toBeUndefined();
   });
 });
 

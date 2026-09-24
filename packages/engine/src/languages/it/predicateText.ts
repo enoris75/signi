@@ -179,7 +179,7 @@ export function predicateText(
   // A pronoun recipient is the dative clitic in the same slot, "le dà il libro", "gli racconta che"
   // (A351) — where the slot is free: the clitic path writes one clitic, and beside an object clitic,
   // a reflexive or the impersonal si the recipient keeps its tonic "a lei" rather than half a cluster.
-  const recipientForms = !objectClitic && !reflexive && subjectForms['generic'] !== '1' ? recipientPronoun(complements) : undefined;
+  const recipientForms = !objectClitic && !reflexive && subjectForms['generic'] !== '1' ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
   const clitic = objectClitic || recipientClitic;
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".

@@ -246,7 +246,7 @@ export function predicateText(
   // que", "ne me donne pas" (A351) — where the slot is free: the clitic path writes one clitic, and
   // beside an object clitic or a pronominal verb's "se" the recipient keeps its "à elle" rather than
   // half a cluster.
-  const recipientForms = !objectClitic && !/^(?:s'|se )/.test(verb.forms['base'] ?? '') ? recipientPronoun(complements) : undefined;
+  const recipientForms = !objectClitic && !/^(?:s'|se )/.test(verb.forms['base'] ?? '') ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
   const clitic = objectClitic || recipientClitic;
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic

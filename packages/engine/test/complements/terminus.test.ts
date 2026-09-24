@@ -549,6 +549,16 @@ describe('known bugs: a Romance pronoun recipient is the tonic pronoun, not the 
     expect(gives(np('FIRST_PERSON')).pt).toBe('o homem dá o livro a mim.');
   });
 
+  // ADD, LINK and CONNECT name a goal, not a recipient (German marks them with its own terminus_prep),
+  // so their lexemes say `terminus_tonic` and the pronoun keeps its phrase: "relie le livre à elle".
+  test('regression: a goal terminus keeps the tonic pronoun', () => {
+    const to = (verb: string, who = her) => sayAll(clause(np('MAN'), verb, { directObject: np('BOOK'), complements: { terminus: { phrase: who } } }));
+    expect(to('ADD')).toMatchObject({ it: "l'uomo aggiunge il libro a lei.", fr: "l'homme ajoute le livre à elle.", es: 'el hombre añade el libro a ella.' });
+    expect(to('LINK')).toMatchObject({ it: "l'uomo collega il libro a lei.", fr: "l'homme relie le livre à elle.", es: 'el hombre enlaza el libro a ella.' });
+    expect(to('CONNECT')).toMatchObject({ it: "l'uomo connette il libro a lei.", fr: "l'homme connecte le livre à elle.", es: 'el hombre conecta el libro a ella.' });
+    expect(to('ADD', np('FIRST_PERSON'))).toMatchObject({ it: "l'uomo aggiunge il libro a me.", fr: "l'homme ajoute le livre à moi.", es: 'el hombre añade el libro a mí.' });
+  });
+
   test('regression: a noun, a coordinated pronoun, TELL\'s 2nd person, and the other languages', () => {
     expect(gives(np('DOG'))).toMatchObject({ it: "l'uomo dà il libro al cane.", fr: "l'homme donne le livre au chien.", es: 'el hombre da el libro al perro.' });
     expect(gives({ conjuncts: [her, np('DOG')], conjunction: 'and' })).toMatchObject({

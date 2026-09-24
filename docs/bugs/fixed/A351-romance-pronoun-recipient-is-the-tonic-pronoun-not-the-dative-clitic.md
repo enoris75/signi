@@ -80,3 +80,10 @@ the modal, the compound past, the passive and the command (affirmative, 1st pers
 generic recipient and Portuguese as regressions. `recipientPronoun.test.ts` is new. One previously
 passing expectation moved, in [comitative.test.ts](../../../packages/engine/test/complements/comitative.test.ts):
 Spanish *el hombre da el libro a él.* is now *el hombre le da el libro.*
+
+**A goal is not a recipient.** ADD, LINK and CONNECT put their terminus in the same slot, but it names
+where the thing goes, not who gets it (German marks the three with its own `terminus_prep`). Their
+Italian, French and Spanish lexemes say `terminus_tonic: '1'` in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts), and `recipientPronoun`
+keeps the phrase for them: *relie le livre à elle*, not *lui relie le livre*. Pinned by *regression: a
+goal terminus keeps the tonic pronoun* in the same block.

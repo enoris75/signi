@@ -18,9 +18,16 @@ type Complements = Partial<Record<ComplementType, ResolvedComplement>>;
  * indefinite pronoun is no clitic (`isPronounElement`), and a focused one stands in the post-verbal
  * slot its particle needs ("solo a lei"). A negated or specified terminus keeps its phrase too, and so
  * does the generic dative, which has no clitic of its own ("da el libro a uno", A316).
+ *
+ * A verb whose terminus is a goal rather than a recipient marks it `terminus_tonic` in its lexeme
+ * (ADD, LINK, CONNECT: "relie le livre à elle", not "lui relie le livre"), as German marks the same
+ * verbs with their own `terminus_prep`; that terminus keeps its phrase.
  */
-export function recipientPronoun(complements: Complements | undefined): Record<string, string> | undefined {
+export function recipientPronoun(
+  complements: Complements | undefined, verbForms: Record<string, string> = {},
+): Record<string, string> | undefined {
   const terminus = complements?.terminus;
+  if (verbForms['terminus_tonic'] === '1') return undefined;
   if (!terminus || terminus.negative || terminus.specifiers?.length || !isPronounElement(terminus.phrase)) return undefined;
   const forms = firstConjunct(terminus.phrase).head.forms;
   if (slotFocus(terminus.phrase) || forms['generic'] === '1') return undefined;

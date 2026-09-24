@@ -280,7 +280,7 @@ export function predicateText(
   // clitic, and beside an object clitic, a pronominal verb's own or the impersonal se the recipient
   // keeps its "a ella" rather than half a cluster.
   const recipientForms = !objectClitic && !isGeneric && !reflexiveClitic(copulaVerb.forms, subjectForms)
-    ? recipientPronoun(complements) : undefined;
+    ? recipientPronoun(complements, verb.forms) : undefined;
   const recipientClitic = recipientForms ? dativePronounForm(recipientForms) : '';
   const clitic = objectClitic || recipientClitic;
   const proclitics = [impersonalClitic, clitic].filter(Boolean).join(' ');
