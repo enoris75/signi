@@ -1,24 +1,28 @@
 # A-must-fix — confirmed bugs
 
+**None open.** The sixteen listed below, A339–A354, were all fixed on 2026-09-24 and moved to
+[`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) records the rulings each fix took.
+The history below is kept as it was written, in the present tense of each filing.
+
 **Sixteen open**, **A339–A354**, filed on 2026-09-24 from the leads the A278–A338 lanes and their
 cross-lane probe reported while fixing that batch. Each was reproduced at b1efc0ff, and none is pinned
 as right by a passing test or ruled on by a file in [`../fixed/`](../fixed/).
-[A339](A339-spanish-portuguese-noun-possessor-counted-by-one-keeps-the-one.md), a Spanish or Portuguese noun possessor counted by one beside a definite keeping the one (*del un hombre*), the path A319 left.
-[A340](A340-spanish-personal-a-drops-or-loses-the-numeral-of-a-counted-human-object.md), the Spanish personal *a* dropped before a counted human object (*ve dos amigos*), or keeping the *a* and losing the numeral (*ve a los amigos*).
-[A341](A341-portuguese-prepositional-object-drops-the-determiner-beside-a-possessive.md), A325's Spanish fix in Portuguese: a verb's own preposition drops the determiner beside a possessive (*depende da minha condição* for *desta condição minha*).
-[A342](A342-french-prepositional-object-writes-de-des-before-a-detached-possessive.md), French *dépend de des conditions à moi*, the path A326's fold missed.
-[A343](A343-german-negative-cause-writes-a-genitive-that-cannot-show.md), German *durch die Schuld Freunde* for *von Freunden*.
-[A344](A344-french-german-detached-possessor-linked-to-the-generic-subject-names-someone-else.md), *on voit un ami à lui*, *man sieht einen Freund von ihm* for *à soi*, *von sich*.
-[A345](A345-japanese-negated-predicate-before-made-and-mae-ni-is-not-a-change-of-state.md), a Japanese negated predicate before まで / 前に (幸せではないまで for 幸せでなくなるまで).
-[A346](A346-japanese-teiru-state-before-made-and-mae-ni-keeps-its-teiru.md), a 〜ている state there (疲れているまで for 疲れるまで), which A323's file named.
-[A347](A347-japanese-state-verb-in-an-adverbial-clause-takes-the-dictionary-form.md), a state verb under ので / 時に / のに (持つので for 持っているので), which A279 left.
-[A348](A348-japanese-plural-measure-noun-under-for-reads-as-one.md), Japanese *for hours* read as one hour (一時間走ります for 何時間も走ります).
-[A349](A349-french-coordinated-address-resumes-itself-with-vous.md), *Toi et Maman, vous, courez.*
-[A350](A350-opponent-question-and-relative-ignore-a-verb-named-opponent-word.md), the opponent question and relative ignoring a verb-named word (*gegen wen* for *mit wem*), latent as A318 was.
-[A351](A351-romance-pronoun-recipient-is-the-tonic-pronoun-not-the-dative-clitic.md), a Romance pronoun recipient written tonic (*dà il libro a lei*, *raconte à elle que*) where the dative clitic belongs.
-[A352](A352-french-locative-writes-en-before-an-indefinite-pronoun.md), French *court en quelque chose*.
-[A353](A353-english-direction-adverb-after-the-by-phrase.md), English *the book is moved by the cat up*.
-[A354](A354-generic-subject-as-a-direct-object-renders-its-subject-form.md), the generic subject as a direct object (*il gatto si vede*, *der Kater sieht man*), to be refused by name.
+[A339](../fixed/A339-spanish-portuguese-noun-possessor-counted-by-one-keeps-the-one.md), a Spanish or Portuguese noun possessor counted by one beside a definite keeping the one (*del un hombre*), the path A319 left.
+[A340](../fixed/A340-spanish-personal-a-drops-or-loses-the-numeral-of-a-counted-human-object.md), the Spanish personal *a* dropped before a counted human object (*ve dos amigos*), or keeping the *a* and losing the numeral (*ve a los amigos*).
+[A341](../fixed/A341-portuguese-prepositional-object-drops-the-determiner-beside-a-possessive.md), A325's Spanish fix in Portuguese: a verb's own preposition drops the determiner beside a possessive (*depende da minha condição* for *desta condição minha*).
+[A342](../fixed/A342-french-prepositional-object-writes-de-des-before-a-detached-possessive.md), French *dépend de des conditions à moi*, the path A326's fold missed.
+[A343](../fixed/A343-german-negative-cause-writes-a-genitive-that-cannot-show.md), German *durch die Schuld Freunde* for *von Freunden*.
+[A344](../fixed/A344-french-german-detached-possessor-linked-to-the-generic-subject-names-someone-else.md), *on voit un ami à lui*, *man sieht einen Freund von ihm* for *à soi*, *von sich*.
+[A345](../fixed/A345-japanese-negated-predicate-before-made-and-mae-ni-is-not-a-change-of-state.md), a Japanese negated predicate before まで / 前に (幸せではないまで for 幸せでなくなるまで).
+[A346](../fixed/A346-japanese-teiru-state-before-made-and-mae-ni-keeps-its-teiru.md), a 〜ている state there (疲れているまで for 疲れるまで), which A323's file named.
+[A347](../fixed/A347-japanese-state-verb-in-an-adverbial-clause-takes-the-dictionary-form.md), a state verb under ので / 時に / のに (持つので for 持っているので), which A279 left.
+[A348](../fixed/A348-japanese-plural-measure-noun-under-for-reads-as-one.md), Japanese *for hours* read as one hour (一時間走ります for 何時間も走ります).
+[A349](../fixed/A349-french-coordinated-address-resumes-itself-with-vous.md), *Toi et Maman, vous, courez.*
+[A350](../fixed/A350-opponent-question-and-relative-ignore-a-verb-named-opponent-word.md), the opponent question and relative ignoring a verb-named word (*gegen wen* for *mit wem*), latent as A318 was.
+[A351](../fixed/A351-romance-pronoun-recipient-is-the-tonic-pronoun-not-the-dative-clitic.md), a Romance pronoun recipient written tonic (*dà il libro a lei*, *raconte à elle que*) where the dative clitic belongs.
+[A352](../fixed/A352-french-locative-writes-en-before-an-indefinite-pronoun.md), French *court en quelque chose*.
+[A353](../fixed/A353-english-direction-adverb-after-the-by-phrase.md), English *the book is moved by the cat up*.
+[A354](../fixed/A354-generic-subject-as-a-direct-object-renders-its-subject-form.md), the generic subject as a direct object (*il gatto si vede*, *der Kater sieht man*), to be refused by name.
 A345, A347, A348, A350, A351, A352 and A354 leave decisions for the fixer.
 
 The forty-six listed below, A278–A290, A293–A296, A308–A323, A325–A336 and A338,
