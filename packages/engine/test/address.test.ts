@@ -122,7 +122,7 @@ describe('the vocative', () => {
     const ja = (address: NounElement) => sayAll(command(address)).ja;
     expect(sayAll(command(np('WIFE', { possessor: of('1') })))).toEqual({
       en: 'My wife, run.', it: 'Mia moglie, corri.', fr: 'Ma femme, cours.', de: 'Meine Frau, lauf.',
-      es: 'Mi esposa, corre.', ja: '妻、走ってください。', pt: 'A minha esposa, corra.',
+      es: 'Mi esposa, corre.', ja: '妻、走ってください。', pt: 'Minha esposa, corra.',
     });
     expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['YOUNGER'] }))).toBe('弟、走ってください。');
     expect(ja(np('BROTHER', { possessor: of('1'), adjectives: ['ELDER'] }))).toBe('お兄さん、走ってください。');
@@ -286,7 +286,7 @@ describe('the vocative on a common noun', () => {
 // A335. A French pronoun addressee takes the subject clitic, "Tu, cours." A vocative pronoun stands
 // on its own, detached from any verb, so French takes the tonic form, as after a preposition.
 describe('known bugs: a French pronoun addressee takes the clitic (A335)', () => {
-  test.fails('a 2nd-singular pronoun address is the tonic toi', () => {
+  test('a 2nd-singular pronoun address is the tonic toi', () => {
     expect(sayAll(command(You))).toEqual({
       en: 'You, run.', it: 'Tu, corri.', fr: 'Toi, cours.', de: 'Du, lauf.',
       es: 'Tú, corre.', ja: 'あなた、走ってください。', pt: 'Você, corra.',
@@ -300,13 +300,28 @@ describe('known bugs: a French pronoun addressee takes the clitic (A335)', () =>
       es: 'Vosotros, corred.', ja: 'あなたたち、走ってください。', pt: 'Vocês, corram.',
     });
   });
+
+  test('toi behind an interjection, before a negative command and before a statement', () => {
+    expect(sayAll({ ...command(You), interjection: 'HEY' })).toEqual({
+      en: 'Hey, you, run.', it: 'Ehi, tu, corri.', fr: 'Hé, toi, cours.', de: 'Hey, du, lauf.',
+      es: 'Oye, tú, corre.', ja: 'ねえ、あなた、走ってください。', pt: 'Ei, você, corra.',
+    });
+    expect(sayAll({ ...command(You), verbPhrase: dontRun })).toEqual({
+      en: 'You, do not run.', it: 'Tu, non correre.', fr: 'Toi, ne cours pas.', de: 'Du, lauf nicht.',
+      es: 'Tú, no corras.', ja: 'あなた、走るな。', pt: 'Você, não corra.',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: You })).toEqual({
+      en: 'You, the cat runs.', it: 'Tu, il gatto corre.', fr: 'Toi, le chat court.', de: 'Du, der Kater läuft.',
+      es: 'Tú, el gato corre.', ja: 'あなた、猫は走ります。', pt: 'Você, o gato corre.',
+    });
+  });
 });
 
 // A336. Italian and Portuguese keep the definite article a possessive rides on in address: "Il mio
 // amico, corri", "O meu pai, corra". A vocative has no article, possessed or not: "Mio amico", "Meu
 // pai". P11-E3's Done §9 left it to the possessed-head work of P11-E4.
 describe('known bugs: an Italian or Portuguese addressee with a possessive keeps the article (A336)', () => {
-  test.fails('Italian and Portuguese: a possessed address off the kin-noun rule drops the article', () => {
+  test('Italian and Portuguese: a possessed address off the kin-noun rule drops the article', () => {
     expect(sayAll(command(np('FRIEND', { possessor: of('1') })))).toEqual({
       en: 'My friend, run.', it: 'Mio amico, corri.', fr: 'Mon ami, cours.', de: 'Mein Freund, lauf.',
       es: 'Mi amigo, corre.', ja: '私の友達、走ってください。', pt: 'Meu amigo, corra.',
@@ -328,7 +343,7 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
     });
   });
 
-  test.fails('Portuguese: a possessed kin noun drops the article', () => {
+  test('Portuguese: a possessed kin noun drops the article', () => {
     expect(sayAll(command(np('FATHER', { possessor: of('1') })))).toEqual({
       en: 'My father, run.', it: 'Mio padre, corri.', fr: 'Mon père, cours.', de: 'Mein Vater, lauf.',
       es: 'Mi padre, corre.', ja: 'お父さん、走ってください。', pt: 'Meu pai, corra.',
@@ -337,6 +352,27 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
       en: 'Your mother, run.', it: 'Tua madre, corri.', fr: 'Ta mère, cours.', de: 'Deine Mutter, lauf.',
       es: 'Tu madre, corre.', ja: 'あなたのお母さん、走ってください。', pt: 'Sua mãe, corra.',
     });
+  });
+
+  test('the article goes in a coordinated address, before a statement and for a plural possessor; the object keeps it', () => {
+    expect(sayAll(command({ conjuncts: [np('FRIEND', { possessor: of('1') }), np('MOM')], conjunction: 'and' }, YouAll))).toEqual({
+      en: 'My friend and Mom, run.', it: 'Mio amico e mamma, correte.', fr: 'Mon ami et Maman, courez.',
+      de: 'Mein Freund und Mama, lauft.', es: 'Mi amigo y Mamá, corred.', ja: '私の友達とお母さん、走ってください。',
+      pt: 'Meu amigo e Mamãe, corram.',
+    });
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FRIEND', { possessor: of('1') }) }))
+      .toMatchObject({ it: 'Mio amico, il gatto corre.', pt: 'Meu amigo, o gato corre.' });
+    const ours: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'plural' };
+    expect(sayAll(command(np('FRIEND', { possessor: ours })))).toMatchObject({ it: 'Nostro amico, corri.', pt: 'Nosso amigo, corra.' });
+    // The same possessed noun as the command's object is an argument, and keeps its article.
+    expect(sayAll({ ...command(np('FRIEND', { possessor: of('1') })), verbPhrase: { verb: 'SEE' }, directObject: np('FRIEND', { possessor: of('1') }) }))
+      .toMatchObject({ it: 'Mio amico, vedi il mio amico.', pt: 'Meu amigo, veja o meu amigo.' });
+  });
+
+  // Italian loro takes its article everywhere, and in address too.
+  test('regression: Italian loro keeps its article in address', () => {
+    const theirs: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'plural' };
+    expect(sayAll(command(np('FATHER', { possessor: theirs })))).toMatchObject({ it: 'Il loro padre, corri.', pt: 'Seu pai, corra.' });
   });
 
   test('regression: a name possessor in address, and the possessed subject outside it', () => {
@@ -353,16 +389,30 @@ describe('known bugs: an Italian or Portuguese addressee with a possessive keeps
 // has no correct output to pin, so the pins assert the throw. Refusing or dropping the address is the
 // fixer's decision; a drop would turn these pins into rendered rows.
 describe('known bugs: contradictory address plans are not refused (A338)', () => {
-  test.fails('an address on an instruction is refused by name', () => {
+  test('an address on an instruction is refused by name', () => {
     expect(() => sayAll({ ...command(np('MOM')), imperativeRegister: 'instruction' })).toThrow(/address/);
   });
 
-  test.fails('a 1st-person pronoun address is refused by name', () => {
+  test('a 1st-person pronoun address is refused by name', () => {
     expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FIRST_PERSON') })).toThrow(/address/);
   });
 
-  test.fails('a 3rd-person pronoun address is refused by name', () => {
+  test('a 3rd-person pronoun address is refused by name', () => {
     expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('THIRD_PERSON') })).toThrow(/address/);
+  });
+
+  test('the 1st plural and a group with one bad conjunct are refused too', () => {
+    expect(() => sayAll({ ...clause(np('CAT'), 'RUN'), address: np('FIRST_PERSON', { number: 'plural' }) })).toThrow(/address.*1st-person/);
+    expect(() => sayAll(command({ conjuncts: [np('MOM'), np('FIRST_PERSON')], conjunction: 'and' }, YouAll))).toThrow(/address.*1st-person/);
+    expect(() => sayAll(command(np('THIRD_PERSON', { number: 'plural' }), YouAll))).toThrow(/address.*3rd-person/);
+  });
+
+  // An indefinite pronoun calls whoever hears it, so it is an address.
+  test('regression: an indefinite pronoun address is not refused', () => {
+    expect(sayAll(command(np('SOMEONE')))).toEqual({
+      en: 'Someone, run.', it: 'Qualcuno, corri.', fr: "Quelqu'un, cours.", de: 'Jemand, lauf.',
+      es: 'Alguien, corre.', ja: '誰か、走ってください。', pt: 'Alguém, corra.',
+    });
   });
 
   test('regression: a request takes the address, and an instruction without one is its infinitive', () => {

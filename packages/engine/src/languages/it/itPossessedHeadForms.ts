@@ -22,6 +22,9 @@ import { isPlural } from './isPlural.js';
  * one. A plural or a mass indefinite has no article ("amici", "acqua"), and a possessive with
  * nothing in front of it is no Italian noun phrase ("*miei amici corrono"), so those keep the
  * definite article the possessive rides on: "i miei amici".
+ *
+ * In address (the `vocative` form `resolveAddress` sets) there is no article to ride on: "Mio amico,
+ * corri", "Miei nonni, correte" (A336). "Loro" keeps its article there too, as it does everywhere.
  */
 const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all']);
 
@@ -37,12 +40,14 @@ export function itPossessedHeadForms(np: ResolvedNounPhrase): Record<string, str
     const { proper: _name, ...forms } = np.head.forms;
     return forms;
   }
+  const loro = !!poss && isPronominalPossessor(poss) && poss.person === '3' && poss.number === 'plural';
+  if (np.head.forms['vocative'] === '1' && poss && isPronominalPossessor(poss) && !loro) return possessedHeadForms(np, 'bare');
   const bare = !!poss && isPronominalPossessor(poss)
     && np.head.forms['kinship'] === '1'
     && !isPlural(np.head.forms)
     && np.adjectives.length === 0
     && np.nounModifiers.length === 0
-    && !(poss.person === '3' && poss.number === 'plural')
+    && !loro
     // The generic subject's *proprio* takes the article back, "la propria madre" (A332).
     && !isGenericBound(poss);
   return possessedHeadForms(np, bare ? 'bare' : 'definite');

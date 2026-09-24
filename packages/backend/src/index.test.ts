@@ -737,3 +737,25 @@ describe('known bugs: an object relative with no subject is served (A275)', () =
     expect(((await res.json()) as { error: string }).error).toMatch(/relative\.subject.* is required/);
   });
 });
+
+// A338. An address on an instruction, or a 1st- or 3rd-person pronoun address, contradicts what an
+// address is. The engine refuses both by name; `/api/translate` answers them with a 400 rather than
+// the 500 of an engine throw. The engine's side is pinned in packages/engine/test/address.test.ts.
+describe('the address on /api/translate (A338)', () => {
+  test.each([
+    ['an address on an instruction', { subject: { concept: 'SECOND_PERSON' }, verbPhrase: { verb: 'RUN' }, imperative: true, imperativeRegister: 'instruction', address: { concept: 'MOM' } }, /instruction addresses nobody/],
+    ['a 1st-person pronoun address', { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, address: { concept: 'FIRST_PERSON' } }, /1st-person pronoun/],
+    ['a 3rd-person pronoun address', { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, address: { concept: 'THIRD_PERSON' } }, /3rd-person pronoun/],
+  ])('rejects %s', async (_, plan, error) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: string }).error).toMatch(error);
+  });
+
+  test('translates a 2nd-person pronoun address', async () => {
+    const plan = { subject: { concept: 'SECOND_PERSON' }, verbPhrase: { verb: 'RUN' }, imperative: true, address: { concept: 'SECOND_PERSON' } };
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(200);
+  });
+});
+

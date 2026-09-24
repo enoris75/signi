@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, ALT, BOOT, GROSS, JUNGE, np, nounModifier, SEGEL, WORT } from './de.fixtures.js';
+import { adj, ALT, BESTIMMUNG_RICHTUNG, BOOT, GROSS, JUNGE, np, nounModifier, SEGEL, WORT } from './de.fixtures.js';
 import { modifierGenitives } from './modifierGenitives.js';
 
 const SCHOEPFER = { base: 'Schöpfer', plural: 'Schöpfer', gender: 'masc', count: 'singular' };
@@ -36,5 +36,14 @@ describe('modifierGenitives', () => {
       ],
     });
     expect(modifierGenitives(phrase)).toBe(' alter Wörter semantischer Phrasen');
+  });
+
+  // A295: a name's inherent adjective and fixed genitive take the modifier into the genitive.
+  test('a name\'s inherent adjective declines after the own ones, its postnominal follows the noun', () => {
+    const FRAU = { base: 'Frau', plural: 'Frauen', gender: 'fem', count: 'singular', adjective: 'jung' };
+    expect(modifierGenitives(np(BOOT, {}, { nounModifiers: [nounModifier({ ...FRAU, number: 'plural' })] }))).toBe(' junger Frauen');
+    expect(modifierGenitives(np(BOOT, {}, { nounModifiers: [nounModifier({ ...FRAU, number: 'plural' }, [adj(GROSS)])] }))).toBe(' großer junger Frauen');
+    expect(modifierGenitives(np(BOOT, {}, { nounModifiers: [nounModifier({ ...BESTIMMUNG_RICHTUNG, number: 'plural' })] })))
+      .toBe(' adverbialer Bestimmungen der Richtung');
   });
 });

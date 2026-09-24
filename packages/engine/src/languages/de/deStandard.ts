@@ -19,11 +19,17 @@ import { tonicPronounDe } from './tonicPronounDe.js';
  * On a superlative it is the set the adjective selects from (`forms['domain']`, P09-E19): the bare
  * **genitive** of a noun ("das größte der Tiere", "der Familie"), and "von" + the dative of a pronoun
  * ("der größte von uns"; `DE_DOMAIN_PRONOUN`), the genitive pronoun being archaic — whatever `_case`.
- * Per conjunct, so a coordinated set is "der Tiere und der Männer".
+ * Per conjunct, so a coordinated set is "der Tiere und der Männer". A coordinated set with a pronoun
+ * among its conjuncts takes "von" once, before the whole group, and every conjunct then stands in the
+ * dative it governs: "von uns und den Hunden", "von den Hunden und uns" (A286).
  */
 export function deStandard(adj: ConceptForms, standard: ResolvedNounElement | undefined, _case: Case): string {
   if (!standard) return '';
   if (adj.forms['domain'] === '1') {
+    if (standard.conjuncts.length > 1 && standard.conjuncts.some((s) => s.head.forms['person'])) {
+      return `${DE_DOMAIN_PRONOUN} ${coordinate(standard, (s) =>
+        s.head.forms['person'] ? tonicPronounDe(s.head.forms, 'dat') : nounPhrase(s, 'dat'))}`;
+    }
     return coordinate(standard, (s) =>
       s.head.forms['person'] ? `${DE_DOMAIN_PRONOUN} ${tonicPronounDe(s.head.forms, 'dat')}` : nounPhrase(s, 'gen'));
   }

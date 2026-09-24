@@ -8,12 +8,13 @@ import { isPlural } from './isPlural.js';
 // ("o seu", "a sua", "os seus"), agreeing with this possessed head in gender/number. Empty for a
 // genitive/absent possessor — that one is postnominal ("de") and handled by `possessorText`. A
 // complement fuses its preposition with that article itself ("ao seu", "na minha"), so it asks for
-// the possessive alone (`withArticle` false).
+// the possessive alone (`withArticle` false), and so does an address, which has no article at all
+// ("Meu pai, corra"; the `vocative` form, A336).
 export function ptPossessiveWord(np: ResolvedNounPhrase, withArticle = true): string {
   const poss = np.possessor;
   if (!poss || !isPronominalPossessor(poss)) return '';
   const forms = np.head.forms;
   const plural = isPlural(forms);
   const agree = { gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem', number: (plural ? 'plural' : 'singular') as 'singular' | 'plural' };
-  return withArticle ? `${defArticle(forms, plural)} ${possessivePt(poss, agree)}` : possessivePt(poss, agree);
+  return withArticle && forms['vocative'] !== '1' ? `${defArticle(forms, plural)} ${possessivePt(poss, agree)}` : possessivePt(poss, agree);
 }

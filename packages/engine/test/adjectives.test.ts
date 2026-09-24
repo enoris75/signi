@@ -2329,7 +2329,7 @@ describe('known bugs: Spanish and Portuguese NEW before the noun', () => {
 describe('known bugs: German attributive noun drops its inherent adjective', () => {
   const bookOf = (modifier: NounModifier) => sayAll(clause(np('BOOK', { nounModifiers: [modifier] }), 'BURN')).de;
 
-  test.fails('German keeps "jung" beside the modifier\'s own adjective', () => {
+  test('German keeps "jung" beside the modifier\'s own adjective', () => {
     expect(sayAll(clause(np('FEELING', {
       number: 'plural',
       nounModifiers: [{ concept: 'YOUNG_WOMAN', relation: 'purpose', number: 'plural', adjectives: ['GREAT'] }],
@@ -2338,16 +2338,37 @@ describe('known bugs: German attributive noun drops its inherent adjective', () 
     expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature', adjectives: ['SMALL'] })).toBe('das Buch kleiner junger Frau brennt.');
   });
 
-  test.fails('German breaks a modifier with an inherent adjective out of the compound', () => {
+  test('German breaks a modifier with an inherent adjective out of the compound', () => {
     expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural' })).toBe('das Buch junger Frauen brennt.');
     expect(sayAll(clause(np('CAT'), 'RUN', {
       complements: { direction: { phrase: np('BOOK', { nounModifiers: [{ concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural' }] }) } },
     })).de).toBe('der Kater läuft zum Buch junger Frauen.');
   });
 
-  test.fails('German keeps a grammar term\'s adjective and postnominal genitive in the modifier', () => {
+  test('German keeps a grammar term\'s adjective and postnominal genitive in the modifier', () => {
     expect(bookOf({ concept: 'LOCATIVE', relation: 'feature', number: 'plural' })).toBe('das Buch adverbialer Bestimmungen des Ortes brennt.');
     expect(bookOf({ concept: 'LOCATIVE', relation: 'feature', adjectives: ['SMALL'] })).toBe('das Buch kleiner adverbialer Bestimmung des Ortes brennt.');
+  });
+
+  test('German takes YOUNG_WOMAN into the genitive in an object and under a possessor', () => {
+    const youngWomen: NounModifier = { concept: 'YOUNG_WOMAN', relation: 'feature', number: 'plural' };
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { nounModifiers: [youngWomen] }) })).de)
+      .toBe('der Kater sieht das Buch junger Frauen.');
+    expect(sayAll(clause(np('CAT', { possessor: np('MAN', { nounModifiers: [youngWomen] }) }), 'RUN')).de)
+      .toBe('der Kater des Mannes junger Frauen läuft.');
+    // The bare singular is the house form of an article-less singular genitive modifier (A57's "der
+    // Schöpfer kleinen Jungen"); whether a bare count singular should stand there is a question of
+    // its own.
+    expect(bookOf({ concept: 'YOUNG_WOMAN', relation: 'feature' })).toBe('das Buch junger Frau brennt.');
+  });
+
+  test('regression: the other languages keep a grammar-term modifier as they had it', () => {
+    expect(sayAll(clause(np('BOOK', { nounModifiers: [{ concept: 'LOCATIVE', relation: 'feature', number: 'plural' }] }), 'BURN'))).toEqual({
+      en: 'the locative book burns.', it: 'il libro a complementi di stato in luogo brucia.',
+      fr: 'le livre à compléments circonstanciels de lieu brûle.', de: 'das Buch adverbialer Bestimmungen des Ortes brennt.',
+      es: 'el libro de complementos circunstanciales de lugar arde.', ja: '場所の副詞語句の本は燃えます。',
+      pt: 'o livro a adjuntos adverbiais de lugar arde.',
+    });
   });
 
   test('regression: WOMAN, and YOUNG_WOMAN as a head or a possessor, are already right', () => {

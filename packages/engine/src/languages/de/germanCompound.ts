@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { compoundStem } from './compoundStem.js';
+import { isGenitiveModifier } from './modifierGenitives.js';
 
 /**
  * German realises an attributive noun as a closed compound ("Segel" + "Boot" →
@@ -12,9 +13,10 @@ import { compoundStem } from './compoundStem.js';
 export function germanCompound(np: ResolvedNounPhrase, headWord: string): string {
   // A modifier that carries its own adjective can't join the compound — German has no way to put
   // an adjective *inside* a compound — so it breaks out into a postposed bare genitive instead
-  // (see `modifierGenitives`). Only the adjective-less modifiers prefix onto the head here.
+  // (see `modifierGenitives`). So does one whose name holds an adjective or a genitive of its own
+  // (YOUNG_WOMAN's "jung", LOCATIVE's "des Ortes"; A295). Only the others prefix onto the head here.
   const mods = np.nounModifiers
-    .filter((m) => m.adjectives.length === 0)
+    .filter((m) => !isGenitiveModifier(m))
     .map((m) => compoundStem(m.concept.forms))
     .filter(Boolean);
   if (!mods.length || !headWord) return headWord;

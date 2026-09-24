@@ -41,3 +41,31 @@ the slot A159 already uses before a prepositional complement (`läuft nicht in e
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German puts "nicht" after an object counted by an amount quantifier (A310)* (5 `test.fails`, one per row, plus a regression test for most, some, several and the other six languages) |
+
+## Resolved
+
+2026-09-24. The third outcome is the object's, not a new Mittelfeld slot: like A182's *kein*, the
+object carries the clause's one *nicht* on its determiner, and the slots stay empty. That keeps the
+change out of `renderClause.ts`, `subordinateClause.ts` and `nichtSlots.ts`, and it holds in every
+clause order that shares `finiteNegation` (declarative, verb-final protasis and relative clause,
+command, instruction, infinitive under a modal).
+
+- [`de/finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts): a single-
+  conjunct object counted by `many`, `few` or `enough` (`NICHT_LEADS_AMOUNT`) takes the *nicht* as a
+  `nicht_det` head form when the clause has exactly one denial, is not prospective and has no
+  Mittelfeld adverb (whose *nicht immer* slot keeps the negation). A predicate nominal no longer takes
+  *kein* beside such an object.
+- [`de/determiner.ts`](../../../packages/engine/src/languages/de/determiner.ts): `nicht_det` writes
+  *nicht* ahead of the spelled determiner.
+
+`most`, `some` and `several` keep *nicht* after the object, as the bug file said. `each` and `all` are
+not changed (the scope question stays open).
+
+The five `test.fails` in [negation.test.ts](../../../packages/engine/test/negation.test.ts) (*known
+bugs: German puts "nicht" after an object counted by an amount quantifier (A310)*) are plain tests
+now, assertions unchanged. Added in the same block: *few* on a plural, the past, a modal, the
+protasis, the relative clause, the command, the instruction, a dative recipient and a locative; and a
+regression for the adverb (*frisst nicht immer viel Essen*), two denials (*kann viel Essen nicht nicht
+fressen*, unchanged) and a coordinated object (*sieht viele Hunde und den Mann nicht*).
+`finiteNegation.test.ts` and `determiner.test.ts` each gained a case.
+

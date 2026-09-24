@@ -63,6 +63,25 @@ describe('finiteNegation', () => {
       .toEqual(empty);
   });
 
+  // A310: an amount quantifier's object carries the "nicht" on its determiner ("frisst nicht viel
+  // Essen"); most and some keep it after the object, an adverb keeps its own slot.
+  test('an object counted by many, few or enough takes the nicht ahead of its determiner', () => {
+    const nichtDets = (el?: { conjuncts: { head: { forms: Record<string, string> } }[] }) =>
+      el?.conjuncts.map((c) => c.head.forms['nicht_det']);
+    for (const definiteness of ['many', 'few', 'enough']) {
+      const negated = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: el(np(WASSER, { definiteness })) }, false);
+      expect(negated.nicht).toEqual(empty);
+      expect(nichtDets(negated.directObject)).toEqual(['1']);
+    }
+    for (const definiteness of ['most', 'some']) {
+      const negated = finiteNegation({ verbPhrase: vp(ESSEN, { negative: true }), directObject: el(np(WASSER, { definiteness })) }, false);
+      expect(negated.nicht).toEqual({ ...empty, after: 'nicht' });
+      expect(nichtDets(negated.directObject)).toEqual([undefined]);
+    }
+    expect(finiteNegation({ verbPhrase: vp(ESSEN, { negative: true, modifier: concept(IMMER) }), directObject: el(np(WASSER, { definiteness: 'many' })) }, false).nicht)
+      .toEqual({ ...empty, beforeAdverb: 'nicht' });
+  });
+
   // The predicate nominal takes it on the same terms (ruled 2026-09-21); a predicate ADJECTIVE is
   // not a nominal "kein" can determine, so it keeps the "nicht" that leads it.
   test('an indefinite predicate nominal takes it too, an adjective does not: "wird keine Katze", "wird nicht müde"', () => {

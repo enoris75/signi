@@ -1704,28 +1704,60 @@ describe('known bugs: German puts "nicht" after an object counted by an amount q
   const notSee = (object: NounPhrase) =>
     say(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: object }), 'de');
 
-  test.fails('many, on a mass noun', () => {
+  test('many, on a mass noun', () => {
     expect(notEat(np('FOOD', { definiteness: 'many' }))).toBe('der Kater frisst nicht viel Essen.');
   });
 
-  test.fails('enough, on a mass noun', () => {
+  test('enough, on a mass noun', () => {
     expect(notEat(np('FOOD', { definiteness: 'enough' }))).toBe('der Kater frisst nicht genug Essen.');
   });
 
-  test.fails('few, on a mass noun', () => {
+  test('few, on a mass noun', () => {
     expect(notEat(np('FOOD', { definiteness: 'few' }))).toBe('der Kater frisst nicht wenig Essen.');
   });
 
-  test.fails('many, on a plural', () => {
+  test('many, on a plural', () => {
     expect(notSee(np('DOG', { number: 'plural', definiteness: 'many' }))).toBe('der Kater sieht nicht viele Hunde.');
   });
 
-  test.fails('enough, on a plural', () => {
+  test('enough, on a plural', () => {
     expect(notSee(np('DOG', { number: 'plural', definiteness: 'enough' }))).toBe('der Kater sieht nicht genug Hunde.');
   });
 
   // The definite-like quantifiers keep "nicht" after the object: most is definite (das meiste), and
   // A182's regression rules that "some" keeps it; several goes with some. The other six are right.
+  test('"nicht" leads the amount in every clause order and beside the other slots', () => {
+    const MUCH_FOOD = np('FOOD', { definiteness: 'many' });
+    const eats = (extra: Partial<PhrasePlan['verbPhrase']> = {}, rest: Partial<PhrasePlan> = {}) =>
+      clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, ...extra }, directObject: MUCH_FOOD, ...rest });
+    expect(notSee(np('DOG', { number: 'plural', definiteness: 'few' }))).toBe('der Kater sieht nicht wenige Hunde.');
+    expect(say(eats({ tense: 'past' }), 'de')).toBe('der Kater fraß nicht viel Essen.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', negative: true }] }, directObject: MUCH_FOOD }), 'de'))
+      .toBe('der Kater kann nicht viel Essen fressen.');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: eats() }, 'de')).toBe('wenn der Kater nicht viel Essen fressen würde, würde der Hund laufen.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: MUCH_FOOD } }), 'RUN'), 'de'))
+      .toBe('der Hund, der nicht viel Essen frisst, läuft.');
+    const command = clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: MUCH_FOOD });
+    expect(say({ ...command, imperative: true }, 'de')).toBe('iss nicht viel Essen.');
+    expect(say({ ...command, imperative: true, imperativeRegister: 'instruction' }, 'de')).toBe('nicht viel Essen essen.');
+    expect(say(clause(np('CAT'), 'GIVE', { verbPhrase: { negative: true }, directObject: MUCH_FOOD, complements: { terminus: { phrase: np('DOG') } } }), 'de'))
+      .toBe('der Kater gibt dem Hund nicht viel Essen.');
+    expect(say(eats({}, { complements: { locative: { phrase: np('HOUSE') } } }), 'de')).toBe('der Kater frisst nicht viel Essen im Haus.');
+  });
+
+  // A Mittelfeld adverb keeps its "nicht immer" slot, two denials both stay in the Mittelfeld, and a
+  // coordinated object keeps "nicht" after it.
+  test('regression: beside an adverb, two denials and a coordination the slot is unchanged', () => {
+    const MUCH_FOOD = np('FOOD', { definiteness: 'many' });
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modifier: 'ALWAYS' }, directObject: MUCH_FOOD }), 'de'))
+      .toBe('der Kater frisst nicht immer viel Essen.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', negative: true }], negative: true }, directObject: MUCH_FOOD }), 'de'))
+      .toBe('der Kater kann viel Essen nicht nicht fressen.');
+    const dogsAndMan: NounElement = { conjuncts: [np('DOG', { number: 'plural', definiteness: 'many' }), np('MAN')], conjunction: 'and' };
+    expect(say(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: dogsAndMan }), 'de'))
+      .toBe('der Kater sieht viele Hunde und den Mann nicht.');
+  });
+
   test('regression: most, some and several keep "nicht" after the object, and the other six', () => {
     expect(notEat(np('FOOD', { definiteness: 'most' }))).toBe('der Kater frisst das meiste Essen nicht.');
     expect(notSee(np('DOG', { number: 'plural', definiteness: 'some' }))).toBe('der Kater sieht einige Hunde nicht.');

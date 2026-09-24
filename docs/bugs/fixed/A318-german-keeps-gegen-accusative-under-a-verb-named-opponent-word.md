@@ -36,3 +36,20 @@ Pinned by `known bugs: German keeps gegen's accusative under a verb-named oppone
 [opponent.test.ts](../../../packages/engine/test/complements/opponent.test.ts).
 
 Found on 2026-09-24 by the P09-E22 coverage lane, which dropped its German override test on it.
+
+## Resolved
+
+2026-09-24. [`de/complementsPhrase/complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts),
+the opponent branch: the case is now the preposition's, `objectPrepCase(c.link || 'gegen')`, as the
+prepositional object's is. The generic *gegen* keeps the accusative.
+
+The two `test.fails` in [opponent.test.ts](../../../packages/engine/test/complements/opponent.test.ts)
+(*known bugs: German keeps gegen's accusative under a verb-named opponent word (A318)*) are plain
+tests now, assertions unchanged. Added in the same block: *von* and *zu* fusing with the dative (*vom
+Hund*, *zum Hund*), *um* keeping the accusative, a `no` opponent (*mit keinem Hund*) and a
+coordination (*mit dem Hund und mit der Frau*).
+
+Still latent, as before: no seeded German verb names an `opponent_prep`. Noticed, not fixed: the
+opponent question and relative clause ignore a verb-named word (*gegen wen spielt der Kater?*, *der
+Hund, gegen den der Kater spielt*, under `opponent_prep: 'mit'`).
+

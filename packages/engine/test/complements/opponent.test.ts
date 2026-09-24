@@ -334,11 +334,11 @@ describe('opponent', () => {
 describe('known bugs: German keeps gegen\'s accusative under a verb-named opponent word (A318)', () => {
   const plays = (phrase: NounElement) => clause(np('CAT'), 'TEST_PLAY', { complements: { opponent: { phrase } } });
 
-  test.fails('mit takes the dative, a noun', () => {
+  test('mit takes the dative, a noun', () => {
     expect(sayAllWithPrep(plays(np('DOG')), { de: 'mit' }).de).toBe('der Kater spielt mit dem Hund.');
   });
 
-  test.fails('mit takes the dative, the feminine, the plural, the indefinite and a pronoun', () => {
+  test('mit takes the dative, the feminine, the plural, the indefinite and a pronoun', () => {
     expect([np('WOMAN'), np('DOG', { number: 'plural' }), np('DOG', { definiteness: 'indefinite' }), np('THIRD_PERSON', { gender: 'masc' })]
       .map((p) => sayAllWithPrep(plays(p), { de: 'mit' }).de)).toEqual([
       'der Kater spielt mit der Frau.',
@@ -346,6 +346,15 @@ describe('known bugs: German keeps gegen\'s accusative under a verb-named oppone
       'der Kater spielt mit einem Hund.',
       'der Kater spielt mit ihm.',
     ]);
+  });
+
+  test('the case is the named word\'s: von and zu fuse with the dative, um keeps the accusative', () => {
+    expect(sayAllWithPrep(plays(np('DOG')), { de: 'von' }).de).toBe('der Kater spielt vom Hund.');
+    expect(sayAllWithPrep(plays(np('DOG')), { de: 'zu' }).de).toBe('der Kater spielt zum Hund.');
+    expect(sayAllWithPrep(plays(np('DOG')), { de: 'um' }).de).toBe('der Kater spielt um den Hund.');
+    expect(sayAllWithPrep(plays(np('DOG', { definiteness: 'no' })), { de: 'mit' }).de).toBe('der Kater spielt mit keinem Hund.');
+    expect(sayAllWithPrep(plays({ conjuncts: [np('DOG'), np('WOMAN')], conjunction: 'and' }), { de: 'mit' }).de)
+      .toBe('der Kater spielt mit dem Hund und mit der Frau.');
   });
 
   test('regression: the generic gegen keeps the accusative, and the comitative writes the dative', () => {

@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
-import { notingLookup } from './lexicon.js';
+import { isSeededConcept, lookupLexicalEntry, notingLookup } from './lexicon.js';
 import { planError } from './planError.js';
 import { translate } from '@signi/engine';
 import { buildUiStrings } from './uiStrings.js';
@@ -283,7 +283,7 @@ app.post('/api/translate', (req, res) => {
   // A subject is always required, on the top clause and on every clause it links (see
   // `planError`); the verb phrase is optional (a verbless period is a bare noun phrase, e.g. a
   // newspaper title like "breaking news").
-  const malformed = planError(body?.plan);
+  const malformed = planError(body?.plan, (id) => (isSeededConcept(id) ? lookupLexicalEntry(id, 'en')?.forms : undefined));
   if (malformed) {
     res.status(400).json({ error: malformed });
     return;

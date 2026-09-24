@@ -36,3 +36,18 @@ Pinned by `known bugs: a French pronoun addressee takes the clitic (A335)` in
 
 Found on 2026-09-24 in the P11-E3 coverage audit, by rendering the uncovered pronoun arm of
 `resolveAddress`.
+
+## Resolved
+
+2026-09-24. [`resolveAddress.ts`](../../../packages/engine/src/translator/functions/resolveAddress.ts)
+gives a pronoun conjunct its `disjunctive` form as its surface in the languages of a new
+`TONIC_ADDRESS` set, which holds French only: German's `disjunctive` is the dative (*dir*), and
+Italian, Spanish and Portuguese call the hearer with the nominative. A coordinated French address
+already took the tonic form through `fr/subjectText.ts`. The 1st- and 3rd-person pronoun address is
+refused by A338, so *Moi, …* / *Lui, …* never arise.
+
+The `test.fails` in [address.test.ts](../../../packages/engine/test/address.test.ts) (*known bugs: a
+French pronoun addressee takes the clitic (A335)*) is a plain test now, assertion unchanged. Added in
+the same block: *toi* behind an interjection (*Hé, toi, cours.*), before a negative command (*Toi, ne
+cours pas.*) and before a statement (*Toi, le chat court.*), all seven languages.
+`resolveAddress.test.ts` gained a case: French *toi*, German *du* (not *dir*), Italian *tu*.

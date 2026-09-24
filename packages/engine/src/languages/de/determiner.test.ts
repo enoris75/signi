@@ -66,4 +66,12 @@ describe('determiner', () => {
     expect(determiner({ ...KATER, definiteness: 'relative' }, 'dat', true)).toBe('denen');
     expect(determiner({ ...KATZE, definiteness: 'relative' }, 'gen', false)).toBe('deren');
   });
+
+  // A310: a negated clause's "nicht", carried by an amount quantifier.
+  test('nicht_det puts "nicht" ahead of the quantifier', () => {
+    expect(determiner({ ...WASSER, definiteness: 'many', nicht_det: '1' }, 'acc', false)).toBe('nicht viel');
+    expect(determiner({ ...KATZE, definiteness: 'enough', nicht_det: '1' }, 'acc', true)).toBe('nicht genug');
+    expect(determiner({ ...KATZE, definiteness: 'few', nicht_det: '1' }, 'dat', true)).toBe('nicht wenigen');
+  });
 });
+

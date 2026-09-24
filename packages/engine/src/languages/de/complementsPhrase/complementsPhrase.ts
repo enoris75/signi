@@ -44,6 +44,7 @@ import { modifierGenitives } from '../modifierGenitives.js';
 import { nounPhrase } from '../nounPhrase.js';
 import { nounExamples } from '../nounExamples.js';
 import { nounStandard } from '../nounStandard.js';
+import { objectPrepCase } from '../objectPrepCase.js';
 import { possessedDeclension } from '../possessedDeclension.js';
 import { possessorText } from '../possessorText.js';
 import { postnominal } from '../postnominal.js';
@@ -207,8 +208,13 @@ export function complementsParts(
         else if (type === 'instrumental' || type === 'comitative') head = prepDet('mit', f, 'dat', plural);
         // P09-E22. The opponent "gegen" governs the **accusative** ("spielt gegen den Hund", "gegen
         // ihn"), and is not the spatial `against`, the contact "an" + dative ("am Hund"). It fuses in
-        // writing with nothing ("gegens" is speech). A verb may name its own.
-        else if (type === 'opponent') { _case = 'acc'; head = prepDet(c.link || 'gegen', f, 'acc', plural); }
+        // writing with nothing ("gegens" is speech). A verb may name its own, which governs its own
+        // case, as a prepositional object's does: "spielt mit dem Hund" (A318, `objectPrepCase`).
+        else if (type === 'opponent') {
+          const prep = c.link || 'gegen';
+          _case = objectPrepCase(prep);
+          head = prepDet(prep, f, _case, plural);
+        }
         // P09-E2. The purpose "für" and the topic "über" both govern the **accusative**: "arbeitet für
         // den Mann", "spricht über den Kater". The topic's "über" is not the spatial one, which takes
         // the dative of a place ("über dem Kater", see `spatialCase`) and is the locative's. Neither

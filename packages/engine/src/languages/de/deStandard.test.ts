@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ER, GROSS, ICH, MANN, el, np } from './de.fixtures.js';
+import { ER, GROSS, ICH, MANN, el, group, np } from './de.fixtures.js';
 import { dePredAdj } from './dePredAdj.js';
 import { deStandard as render } from './deStandard.js';
 import type { ResolvedNounPhrase } from '../../types.js';
@@ -44,4 +44,15 @@ describe('deStandard: a superlative\'s set (P09-E19)', () => {
     expect(deStandard(selecting(el(np(ICH, { number: 'plural', disjunctive: 'uns' }))))).toBe('von uns');
     expect(deStandard(selecting(el(np(ER))))).toBe('von ihm');
   });
+
+  // A286: "von" governs the dative, so a mixed set takes it once, before the group.
+  test('a coordinated set with a pronoun takes "von" once, every conjunct dative', () => {
+    const us = np(ICH, { number: 'plural', disjunctive: 'uns' });
+    const men = np(MANN, { ...the, number: 'plural' });
+    expect(deStandard(selecting(group('and', us, men)))).toBe('von uns und den Männern');
+    expect(deStandard(selecting(group('and', men, us)))).toBe('von den Männern und uns');
+    // A set of nouns alone keeps its genitives.
+    expect(deStandard(selecting(group('and', men, np(MANN, the))))).toBe('der Männer und des Mannes');
+  });
 });
+

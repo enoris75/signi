@@ -40,4 +40,12 @@ describe('germanCompound', () => {
   test('an empty head word stays empty', () => {
     expect(germanCompound(np(BOOT, {}, { nounModifiers: [nounModifier(SEGEL)] }), '')).toBe('');
   });
+
+  // A295: a compound holds neither an inflected adjective nor a genitive.
+  test('leaves out a modifier whose name holds an adjective or a postnominal genitive', () => {
+    const FRAU = { base: 'Frau', plural: 'Frauen', gender: 'fem', count: 'singular', adjective: 'jung' };
+    expect(germanCompound(np(BOOT, {}, { nounModifiers: [nounModifier(FRAU)] }), 'Boot')).toBe('Boot');
+    expect(germanCompound(np(BOOT, {}, { nounModifiers: [nounModifier({ base: 'Ziel', gender: 'neut', postnominal: 'des Ortes' })] }), 'Boot')).toBe('Boot');
+    expect(germanCompound(np(BOOT, {}, { nounModifiers: [nounModifier(FRAU), nounModifier(SEGEL)] }), 'Boot')).toBe('Segelboot');
+  });
 });

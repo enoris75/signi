@@ -78,6 +78,13 @@ describe('translate', () => {
     expect(find(question, 'es')?.text).toMatch(/^[A-Z][^,]*, ¿.*\?$/);
   });
 
+  // A338: an instruction is addressed to nobody.
+  test('an address on an instruction is refused; on a request it is kept', () => {
+    const command: PhrasePlan = { ...YOU_RUN, imperative: true, address: { concept: 'DOG' } };
+    expect(() => translate({ ...command, imperativeRegister: 'instruction' }, LOOKUP)).toThrow(/instruction.*address.*A338/);
+    expect(find(translate({ ...command, imperativeRegister: 'request' }, LOOKUP), 'en')?.text).toBe('Dog, run.');
+  });
+
   test('Japanese sets the address off with 、, in the ruby too', () => {
     const ja = find(translate({ ...CAT_RUNS, address: { concept: 'CAT' } }, LOOKUP), 'ja')!;
     expect(ja.text.startsWith('猫、猫は')).toBe(true);
