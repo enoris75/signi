@@ -39,6 +39,12 @@ describe('jaCounted', () => {
     expect(jaCounted(withAdjective)?.segs).toEqual([{ t: '三人' }, { t: 'の' }]);
   });
 
+  // A331: the compound counts a family's siblings, so a count of one links with の.
+  test('a count of one does not compound, two does', () => {
+    expect(jaCounted(np({ numeral: '1', human: '1', base: '兄弟', counter_join: 'compound' }))?.segs).toEqual([{ t: '一人' }, { t: 'の' }]);
+    expect(jaCounted(np({ numeral: '2', human: '1', base: '兄弟', counter_join: 'compound' }))?.segs).toEqual([{ t: '二人' }]);
+  });
+
   test('a phrase that counts nothing has none', () => {
     expect(jaCounted(np({}))).toBeUndefined();
   });

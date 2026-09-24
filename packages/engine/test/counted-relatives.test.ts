@@ -174,16 +174,16 @@ describe('known bugs: Japanese compounds a count of one onto 兄弟 (A331)', () 
   });
   const one = (concept: string) => np(concept, { numeral: 1, definiteness: 'indefinite' });
 
-  test.fails('one sibling, as a predicate', () => {
+  test('one sibling, as a predicate', () => {
     expect(say(iAm(one('SIBLING')), 'ja')).toBe('私は一人の兄弟です。');
   });
-  test.fails('one brother, as a predicate', () => {
+  test('one brother, as a predicate', () => {
     expect(say(iAm(one('BROTHER')), 'ja')).toBe('私は一人の兄弟です。');
   });
-  test.fails('one sister, as a predicate', () => {
+  test('one sister, as a predicate', () => {
     expect(say(iAm(one('SISTER'), np('FIRST_PERSON', { gender: 'fem' })), 'ja')).toBe('私は一人の姉妹です。');
   });
-  test.fails('one sibling, as a subject', () => {
+  test('one sibling, as a subject', () => {
     expect(runs(one('SIBLING'))).toBe('一人の兄弟は走ります。');
   });
 
@@ -194,6 +194,20 @@ describe('known bugs: Japanese compounds a count of one onto 兄弟 (A331)', () 
     expect(sayAll(iAm(one('SIBLING')))).toMatchObject({
       en: 'I am one sibling.', it: 'sono un fratello.', fr: 'je suis un frère.', de: 'ich bin ein Geschwister.',
       es: 'soy un hermano.', pt: 'sou um irmão.',
+    });
+  });
+
+  test('one links with の in every slot, and a definite one too; ten still compounds', () => {
+    expect({
+      sisterRuns: runs(one('SISTER')),
+      seesOne: say(clause(np('MAN'), 'SEE', { directObject: one('SIBLING') }), 'ja'),
+      definiteOne: runs(np('SIBLING', { numeral: 1 })),
+      ten: say(weAre(np('SIBLING', { numeral: 10, definiteness: 'indefinite' })), 'ja'),
+    }).toEqual({
+      sisterRuns: '一人の姉妹は走ります。',
+      seesOne: '男は一人の兄弟を見ます。',
+      definiteOne: '一人の兄弟は走ります。',
+      ten: '私たちは十人兄弟です。',
     });
   });
 });

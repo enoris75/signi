@@ -47,3 +47,17 @@ Pinned by `known bugs: Japanese compounds a count of one onto 兄弟 (A331)` in
 [counted-relatives.test.ts](../../../packages/engine/test/counted-relatives.test.ts).
 
 Found on 2026-09-24 while landing the P11-E4 / P11-E5 coverage audit.
+
+## Resolved
+
+2026-09-24. [ja/jaCounted.ts](../../../packages/engine/src/languages/ja/jaCounted.ts) compounds only
+a count above one (`Number(forms['numeral']) > 1`), so a count of one links with の as every other
+counted phrase does: 一人の兄弟, 一人の姉妹. The rule is in code rather than a minimum count on the
+lexeme: it is the same for 兄弟 and 姉妹, and the smaller change. 二人兄弟, 三人姉妹 and 十人兄弟 are
+unchanged.
+
+Guarded by `known bugs: Japanese compounds a count of one onto 兄弟 (A331)` in
+[counted-relatives.test.ts](../../../packages/engine/test/counted-relatives.test.ts): the four former
+`test.fails`, the regression test, and a new test for one sister as a subject, one sibling as an
+object, a definite one, and ten still compounding; plus a unit case in
+[jaCounted.test.ts](../../../packages/engine/src/languages/ja/jaCounted.test.ts).
