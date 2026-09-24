@@ -75,9 +75,18 @@ What landed differently from the plan:
 7. **One existing expectation changed**: `interrogative.test.ts` *a frequency adverb follows the
    do-support; a manner adverb trails* pinned NEVER asked as "does the cat never eat?", "est-ce que
    le chat ne mange jamais ?", 猫は決して食べませんか？; it now pins *ever*, *déjà*, いつか.
-8. **Not covered, a limit shared with ALSO and STILL**: an adverb on a verb whose negation a modal
-   governs ("the cat can not eat the food yet") keeps its positive word in six languages, because
-   the negation there is `governedNegative`, which `negativeAdverb` does not read.
+8. **A negation a modal governs** (follow-up, same day). It is `governedNegative`, which every
+   engine's `negativeAdverb` call now reads too — before, the adverb kept its positive word in six
+   languages ("the cat can not already eat the food", *può non mangiare già*), and ALSO and STILL
+   with it. Now: "the cat can not eat the food yet", *può non mangiare ancora*, *peut ne pas encore
+   manger*, *kann das Essen noch nicht fressen* (German was already right), *puede no comer
+   todavía*, まだ食べないことができます, *pode não comer ainda*. English and French keep the slot —
+   *yet* last, "can **still** not eat", *peut ne **toujours** pas manger* in front of the governed
+   negator; Spanish and Portuguese keep the word where it stood, behind the governed *no* / *não*
+   (*puede no comer tampoco*), since their pre-negation slot is the finite verb's. The finite
+   modal's own negation ("the cat cannot eat the food yet", *todavía no puede comer*) and an
+   ordinary frequency adverb ("can not always eat") are unchanged. Pinned in `negation.test.ts`'s
+   *P09-E28: not yet*.
 
 ## The plan as filed
 

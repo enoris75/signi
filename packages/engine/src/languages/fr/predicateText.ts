@@ -86,9 +86,14 @@ export function predicateText(
   // A focus adverb that scopes over the negation. French changes both the word and the place: the
   // additive is *non plus* behind "pas", where *aussi* is ungrammatical, and STILL is *toujours* in
   // front of it — *ne … pas encore* is "not yet", the reading the plan does not mean (A244, A245).
-  const negAdverb = negativeAdverbForm(modifier, verbNegative === true);
-  const preNegator = negAdverb?.slot === 'pre-negator' ? negAdverb.text : '';
-  const adverbText = preNegator ? '' : (negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : ''));
+  // A negation a modal governs denies the main verb's group, its adverb with it: "le chat peut ne pas
+  // encore manger", "peut ne toujours pas manger" (P09-E28 follow-up). There the pre-negator word
+  // goes in front of the governed "pas" (see `governedNegator`).
+  const governedOnly = verbNegative !== true && governedNegative === true && modals.length > 0;
+  const negAdverb = negativeAdverbForm(modifier, verbNegative === true || governedOnly);
+  const preNegator = negAdverb?.slot === 'pre-negator' && !governedOnly ? negAdverb.text : '';
+  const governedPreNegator = negAdverb?.slot === 'pre-negator' && governedOnly ? negAdverb.text : '';
+  const adverbText = preNegator || governedPreNegator ? '' : (negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : ''));
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -127,7 +132,7 @@ export function predicateText(
   // manger", where "jamais" replaces the "pas" exactly as it does on a finite verb (A236).
   const governedAdverb = governedHasNegativeAdverb(verbPhrase);
   const governedNeg = (governedNegative === true || governedAdverb) && modals.length > 0;
-  const governedNegator = governedAdverb ? modifierText : 'pas';
+  const governedNegator = governedAdverb ? modifierText : governedPreNegator ? `${governedPreNegator} pas` : 'pas';
   // An inner modal denying itself ("je dois ne pas pouvoir aller"); the outermost modal's own
   // negation is the clause's, and lives in `verbNegative`.
   const innerNeg = modals.some((m, i) => i > 0 && m.negative === true);

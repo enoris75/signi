@@ -18,6 +18,10 @@ export type NegativeAdverbSlot = 'pre-negation' | 'pre-negator' | 'final';
  * three of them move it as well (A244, A245). The lexeme names what changes: `negative` the word,
  * `negative_slot` the position; either alone is enough, and a language that needs neither says
  * nothing and keeps the adverb exactly where the affirmative clause puts it.
+ *
+ * `negated` is the negation of the verb the adverb modifies: the finite one's, or — under a modal —
+ * the governed group's (`governedNegative`), which each engine passes too, so "the cat can not eat
+ * the food yet" and "può non mangiare ancora" take the word (P09-E28 follow-up).
  */
 export function negativeAdverb(
   modifier: ConceptForms | undefined,

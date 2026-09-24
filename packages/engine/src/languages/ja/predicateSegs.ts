@@ -129,7 +129,10 @@ export function predicateSegs(
   // 〜ている: ALREADY's もう is まだ食べていません "has not eaten yet", where the plain まだ食べません is
   // "won't eat yet" and もう食べていません "no longer" (P09-E28 D2). Only a plain verb takes it — an
   // existential or a copula has no 〜ている to give, a modal governs its own form.
-  const negAdverb = negativeAdverb(respected.modifier, respected.negative === true);
+  // A negation a modal governs denies the main verb, which the adverb modifies: まだ食べないことが
+  // できます (P09-E28 follow-up). The 〜ている stays a plain verb's (below).
+  const negAdverb = negativeAdverb(respected.modifier,
+    respected.negative === true || (respected.governedNegative === true && respected.modals.length > 0));
   const { reading: _reading, ...unread } = respected.modifier?.forms ?? {};
   const yetForms = negAdverb && respected.modifier?.forms['negative']
     ? { ...respected.modifier, forms: { ...unread, base: negAdverb.text } }

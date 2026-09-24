@@ -164,7 +164,13 @@ function predicateWords(
   // negated group ("still does not eat"), and the additive takes its postposed NPI at the end of
   // the clause ("does not eat the food either") — A244, A245. Both leave `isFrequency` behind: the
   // first is spliced in front of the parts, the second trails where a manner adverb does.
-  const negAdverb = negativeAdverb(modifier, verbPhrase.negative === true);
+  // A negation a modal governs denies the main verb's group, and its adverb is in that group: "the
+  // cat can not eat the food yet", "can still not eat" (P09-E28 follow-up).
+  const governedNeg = governedNegative === true && modals.length > 0;
+  const negAdverb = negativeAdverb(modifier, verbPhrase.negative === true || governedNeg);
+  // Under the governed "not" a pre-negation adverb leads that "not", inside the chain, not the
+  // whole predicate: "can still not eat", where "still can not eat" would scope over the modal.
+  const governedLead = governedNeg && verbPhrase.negative !== true && negAdverb?.slot === 'pre-negation' ? negAdverb.text : '';
   // A question cannot take the pre-negation adverb (see `preNegationAdverb`), so it keeps the
   // frequency slot and the ordinary word there: "does the cat not still eat the food?".
   const keepsSlot = negAdverb?.slot === undefined || (verbPhrase.interrogative === true && negAdverb.slot === 'pre-negation');
@@ -179,7 +185,7 @@ function predicateWords(
   const isDirection = isDirectionAdverb(modifier);
   // The pre-negation adverb is spliced in front of the whole predicate by `predicateParts`, so it
   // leaves every in-clause slot empty here.
-  const modifierText = isDirection || isPlaceAdverb(modifier) || preNegationAdverb(verbPhrase) ? '' : adverbText;
+  const modifierText = isDirection || isPlaceAdverb(modifier) || preNegationAdverb(verbPhrase) || governedLead ? '' : adverbText;
   // An object that carries a relative clause ends in that clause's verb, and a particle standing
   // after it attaches to that verb instead: "*moves the book that sees the dog up". English puts the
   // particle in front of such an object — "moves up the book that sees the dog" — and every branch
@@ -266,7 +272,7 @@ function predicateWords(
     // manner adverbs trail the clause with its own, as in the finite chain.
     if (modals.length > 0) {
       const chain = modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not');
-      const group = [...chain, governedNot, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
+      const group = [...chain, governedLead, governedNot, isFrequency ? modifierText : '', verbGroupInfinitive(verb.forms, aspect)].filter(Boolean).join(' ');
       return ['', negateVerb ? `not ${to}${group}` : `${to}${group}`, directObjectText, complementsText, trailing(isFrequency ? '' : modifierText)];
     }
     const group = verbGroupInfinitive(verb.forms, aspect);
@@ -284,7 +290,7 @@ function predicateWords(
   // so it takes "not" directly and carries no tense/agreement itself.
   if (mood === 'conditional') {
     const groups = modals.length > 0
-      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not'), governedNot, verbGroupInfinitive(verb.forms, aspect)].filter(Boolean)
+      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn, 'not'), governedLead, governedNot, verbGroupInfinitive(verb.forms, aspect)].filter(Boolean)
       : [verbGroupInfinitive(verb.forms, aspect)];
     const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
     // A frequency adverb follows "would" and its "not": "would always run", "would not always run".
@@ -341,7 +347,7 @@ function predicateWords(
       if (m.verb.forms['link']) words.push(m.verb.forms['link']);
     });
     const mainGroup = perfect ? perfectInfinitive(verb.forms, aspect) : verbGroupInfinitive(verb.forms, aspect);
-    if (governedNot) words.push(governedNot);
+    if (governedNot) words.push(governedLead, governedNot);
     if (modifierText && isFrequency) words.push(modifierText, mainGroup);
     else words.push(mainGroup);
     const trailingMod = trailing(modifierText && !isFrequency ? modifierText : '');

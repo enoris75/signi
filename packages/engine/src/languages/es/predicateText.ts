@@ -146,7 +146,12 @@ export function predicateText(
   // A focus adverb that scopes over the negation takes its negative-polarity word, and Spanish puts
   // that word preverbally, where it carries the negation itself and the clause's "no" gives way to
   // it — the concord *nunca* already has: "el gato tampoco come la comida" (A245).
-  const negAdverb = negativeAdverb(modifier, verbPhrase.negative === true);
+  // Under a negation a modal governs, the adverb is in the governed group behind its "no", and takes
+  // its negative word there without moving: "puede no comer todavía", "puede no comer tampoco"
+  // (P09-E28 follow-up). Its slot is the finite negation's.
+  const governedOnly = verbNegative !== true && governedNegative === true && modals.length > 0;
+  const negFound = negativeAdverb(modifier, verbNegative === true || governedOnly);
+  const negAdverb = negFound && governedOnly ? { text: negFound.text } : negFound;
   const adverbText = negAdverb?.text ?? adverbSurface(modifier);
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the

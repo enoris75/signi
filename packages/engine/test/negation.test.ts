@@ -1648,6 +1648,42 @@ describe('P09-E28: not yet — ALREADY under a negation', () => {
     });
   });
 
+  // The negation a modal governs denies the main verb's group, and the adverb is in it: `negativeAdverb`
+  // reads `governedNegative` too. English and French keep the slot (*yet* last, *still* and
+  // *toujours* ahead of the governed "not" / "pas"); Spanish and Portuguese keep the word where it
+  // stood, behind the governed "no" / "não"; German already said "noch nicht".
+  test('a negation a modal governs: the cat can not eat the food yet', () => {
+    expect(sayAll(eats({ modals: ['CAN'] }, true))).toEqual({
+      en: 'the cat can not eat the food yet.', it: 'il gatto può non mangiare ancora il cibo.',
+      fr: 'le chat peut ne pas encore manger la nourriture.', de: 'der Kater kann das Essen noch nicht fressen.',
+      es: 'el gato puede no comer todavía la comida.', ja: '猫は食べ物をまだ食べないことができます。',
+      pt: 'o gato pode não comer ainda a comida.',
+    });
+    expect(sayAll(eats({ modals: ['WILL'], aspect: 'resultative' }, true))).toMatchObject({
+      en: 'the cat wants to not have eaten the food yet.', es: 'el gato quiere no haber comido todavía la comida.',
+      ja: '猫は食べ物をまだ食べていないでいたいです。',
+    });
+  });
+
+  test('a negation a modal governs: STILL and ALSO take their negative forms too', () => {
+    const governed = (modifier: string) =>
+      sayAll(clause(the('CAT'), 'EAT', { directObject: the('FOOD'), verbPhrase: { modifier, negative: true, modals: ['CAN'] } }));
+    expect(governed('STILL')).toMatchObject({
+      en: 'the cat can still not eat the food.', fr: 'le chat peut ne toujours pas manger la nourriture.',
+      de: 'der Kater kann das Essen noch nicht fressen.',
+    });
+    expect(governed('ALSO')).toMatchObject({
+      en: 'the cat can not eat the food either.', it: 'il gatto può non mangiare neanche il cibo.',
+      fr: 'le chat peut ne pas non plus manger la nourriture.', de: 'der Kater kann das Essen auch nicht fressen.',
+      es: 'el gato puede no comer tampoco la comida.',
+    });
+    // The finite modal's own negation is unchanged, and so is an ordinary frequency adverb.
+    expect(sayAll(eats({ negative: undefined, modals: [{ verb: 'CAN', negative: true }] }, true))).toMatchObject({
+      en: 'the cat cannot eat the food yet.', es: 'el gato todavía no puede comer la comida.', pt: 'o gato ainda não pode comer a comida.',
+    });
+    expect(governed('ALWAYS')).toMatchObject({ en: 'the cat can not always eat the food.', es: 'el gato puede no comer siempre la comida.' });
+  });
+
   test('the affirmative keeps already in all seven, and ALSO keeps tampoco without a "no"', () => {
     expect(sayAll(clause(the('CAT'), 'EAT', { verbPhrase: { modifier: 'ALREADY', aspect: 'resultative' } }))).toEqual({
       en: 'the cat has already eaten.', it: 'il gatto ha già mangiato.', fr: 'le chat a déjà mangé.',
