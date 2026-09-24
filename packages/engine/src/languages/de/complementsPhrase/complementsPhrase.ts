@@ -27,9 +27,10 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { numeralText } from '../../../functions/numeralText.js';
+import { isQuestionPossessor } from '../../../functions/questionPossessor.js';
 import { cardinalOne } from '../cardinalOne.js';
-import { CARDINALS, CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { numeralDe } from '../numeralDe.js';
+import { CONSTITUENT_NEGATOR, DE_GENITIVE_TEMPORAL, DE_TEMPORAL, DIRECTION_IDIOMS, ESSIVE_ROLE_CASE, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case, ObjectPredicateHost } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -331,7 +332,8 @@ export function complementsParts(
       // A cardinal stands after the determiner and possessive and before the declined adjectives, as
       // `nounPhrase` places it: "in den drei Häusern", "mit meinen drei Hunden" (C31, A291). The
       // determiner is in `head`, so a fusion like "im" / "zum" is untouched.
-      const numeral = numeralText(f, CARDINALS);
+      // At one after der or dieser it declines weak: "mit dem einen Hund" (`numeralDe`, A319).
+      const numeral = numeralDe(f, _case, definiteness, !!poss || isQuestionPossessor(np.possessor));
       const counted = numeral ? `${numeral} ` : '';
       const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;

@@ -5,6 +5,7 @@ import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { possessiveIt } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { CARDINALS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -51,7 +52,10 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // A cardinal stands between the determiner and the prenominal adjectives: "le due grandi case" (C31).
   // At one it is the indefinite article's own word, so it takes that article's form before the word
   // that follows it: "un'ora", "un'amica", "uno studente", never "*una ora" (A320).
-  const numeral = forms['numeral'] === '1'
+  // Beside a definite or demonstrative determiner that article would say "*l'un cane", so the one is
+  // left out and the phrase is the singular it counts: "il cane", "questo cane" (A319).
+  const numeral = oneBesideDeterminer(forms) && !pronominalPoss ? ''
+    : forms['numeral'] === '1'
     ? `${forms['approximator'] ?? ''}${indefArticle(forms, false, preSurfaces[0] ?? noun)}`
     : numeralText(forms, CARDINALS);
   const preChain = [...(pronominalPoss ? [possWord] : []), ...(numeral ? [numeral] : []), ...preSurfaces];

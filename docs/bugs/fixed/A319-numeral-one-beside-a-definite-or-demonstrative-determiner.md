@@ -44,3 +44,31 @@ Pinned by `known bugs: the numeral one beside a definite or demonstrative determ
 
 Found on 2026-09-24 by the A277 / P11-E4 coverage lane (and seen independently by another session's
 P09-E25–E43 lane, which left it to this file, with the complement slot).
+
+## Resolved
+
+2026-09-24. A shared test, [oneBesideDeterminer.ts](../../../packages/engine/src/functions/oneBesideDeterminer.ts),
+says whether a phrase counts one beside a definite or demonstrative determiner. Where each Romance
+engine joins the numeral to its phrase, it then writes none, and the phrase is the singular it counts:
+Italian [renderNP.ts](../../../packages/engine/src/languages/it/renderNP.ts), French
+[renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts), and Spanish and Portuguese
+`nounPhrase.ts` and `complementsPhrase.ts`
+([es](../../../packages/engine/src/languages/es/nounPhrase.ts), [pt](../../../packages/engine/src/languages/pt/nounPhrase.ts)).
+German's new [numeralDe.ts](../../../packages/engine/src/languages/de/numeralDe.ts) declines *ein*
+as an adjective after that determiner (`der eine Hund`, `den einen Hund`, `dem einen Hund`, `dieser eine
+Hund`, `während der einen Stunde`). It is called from [nounPhrase.ts](../../../packages/engine/src/languages/de/nounPhrase.ts)
+and [complementsPhrase.ts](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts).
+A pronominal possessive in the determiner's place (*il mio un amico*) is left as it was, for A329.
+
+Guarded by the four tests of *known bugs: the numeral one beside a definite or demonstrative
+determiner (A319)* in [numerals.test.ts](../../../packages/engine/test/numerals.test.ts), now plain
+tests with their assertions unchanged. The same block gained a new case: the distal, the feminine, an
+adjective, the Spanish and Portuguese comitative, the German dative recipient and genitive, and the
+French object, negated or not. It also gained the colocated
+[oneBesideDeterminer.test.ts](../../../packages/engine/src/functions/oneBesideDeterminer.test.ts) and
+[numeralDe.test.ts](../../../packages/engine/src/languages/de/numeralDe.test.ts).
+
+Still open, left alone because they are possessor paths: a Spanish or Portuguese *noun* possessor
+counted by one beside the definite (`el libro del un hombre`, `o livro do um homem`, from the
+`numeralText` call in each `possessorText.ts`), and the German possessor question (`wessen ein
+Buch`).

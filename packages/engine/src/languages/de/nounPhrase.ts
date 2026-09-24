@@ -9,13 +9,12 @@ import { adjPhrase } from './adjPhrase.js';
 import { articledNameForms } from './articledNameForms.js';
 import { cardinalOne } from './cardinalOne.js';
 import { datPluralN } from './datPluralN.js';
-import { numeralText } from '../../functions/numeralText.js';
-import { CARDINALS } from './de.consts.js';
 import { determiner } from './determiner.js';
 import { genitiveS } from './genitiveS.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
 import { nounExamples } from './nounExamples.js';
+import { numeralDe } from './numeralDe.js';
 import { nounStandard } from './nounStandard.js';
 import { possessorText } from './possessorText.js';
 import { possessedDeclension } from './possessedDeclension.js';
@@ -71,9 +70,10 @@ export function nounPhrase(counted: ResolvedNounPhrase, _case: Case): string {
     : forms['definiteness'] === 'all' ? `${determiner(ownForms, _case, plural)} ${possessive}`
     : possessive;
   // A cardinal stands between the determiner and the declined adjectives: "die zwei großen Häuser"
-  // (C31). It declines only at one, where it is the indefinite article's own word, and the article
-  // builder has already written that (`cardinalOne`); from two up German's cardinals are invariable.
-  const numeral = numeralText(forms, CARDINALS);
+  // (C31). It declines only at one, where it is the indefinite article's own word: bare, the article
+  // builder has already written that (`cardinalOne`), and after der or dieser it declines weak, "der
+  // eine Hund" (`numeralDe`, A319). From two up German's cardinals are invariable.
+  const numeral = numeralDe(forms, _case, declension, !!pronominal || isQuestionPossessor(poss));
   const lead = [art, numeral].filter(Boolean).map((w) => `${w} `).join('');
   const vonPhrase = detached && pronominal ? ` von ${dativePronounDe(pronominal)}` : '';
   return `${lead}${a}${word}${postnominal(forms)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;

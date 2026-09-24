@@ -36,6 +36,7 @@ import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
 import { numeralText } from '../../functions/numeralText.js';
+import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS, COMITATIVE_FUSION, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ES_TEMPORAL, LOCATIVE_IDIOMS, NOMINATIVE_PREP } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
@@ -185,7 +186,8 @@ export function complementsPhrase(
       // A cardinal stands after the determiner and possessive, before the noun and its adjective, as
       // `nounPhrase` places it: "en las tres casas", "con mis tres perros", "en estas tres casas mías"
       // (C31, A291).
-      const numeral = numeralText(f, CARDINALS);
+      // …and at one beside a definite or demonstrative determiner it is left out, as there (A319).
+      const numeral = oneBesideDeterminer(f) && !possessive ? '' : numeralText(f, CARDINALS);
       const noun = detached
         ? [numeral, withAdj(word, adj), stressed].filter(Boolean).join(' ')
         : [every, possessive, numeral, withAdj(word, adj)].filter(Boolean).join(' ');

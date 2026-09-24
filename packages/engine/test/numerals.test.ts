@@ -262,7 +262,7 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
 describe('known bugs: the numeral one beside a definite or demonstrative determiner (A319)', () => {
   const one = (definiteness: 'definite' | 'this') => np('DOG', { numeral: 1, definiteness });
 
-  test.fails('Romance drops the one beside the definite, subject and object', () => {
+  test('Romance drops the one beside the definite, subject and object', () => {
     expect(sayAll(clause(one('definite'), 'RUN'))).toMatchObject({
       it: 'il cane corre.', fr: 'le chien court.', es: 'el perro corre.', pt: 'o cão corre.',
     });
@@ -271,19 +271,19 @@ describe('known bugs: the numeral one beside a definite or demonstrative determi
     });
   });
 
-  test.fails('Romance drops the one beside the demonstrative', () => {
+  test('Romance drops the one beside the demonstrative', () => {
     expect(sayAll(clause(one('this'), 'RUN'))).toMatchObject({
       it: 'questo cane corre.', fr: 'ce chien court.', es: 'este perro corre.', pt: 'este cão corre.',
     });
   });
 
-  test.fails('Romance drops the one in a complement', () => {
+  test('Romance drops the one in a complement', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }))).toMatchObject({
       it: 'il gatto corre con il cane.', fr: 'le chat court avec le chien.',
     });
   });
 
-  test.fails('German declines ein weak after der and dieser', () => {
+  test('German declines ein weak after der and dieser', () => {
     expect([
       say(clause(one('definite'), 'RUN'), 'de'),
       say(clause(np('CAT'), 'SEE', { directObject: one('definite') }), 'de'),
@@ -295,6 +295,30 @@ describe('known bugs: the numeral one beside a definite or demonstrative determi
       'dieser eine Hund läuft.',
       'der Kater läuft mit dem einen Hund.',
     ]);
+  });
+
+  test('the distal, the feminine, an adjective, the other complements and the French object', () => {
+    expect(sayAll(clause(np('DOG', { numeral: 1, definiteness: 'that' }), 'RUN'))).toMatchObject({
+      it: 'quel cane corre.', fr: 'ce chien court.', de: 'jener eine Hund läuft.', es: 'ese perro corre.', pt: 'esse cão corre.',
+    });
+    expect(sayAll(clause(np('HOUR', { numeral: 1 }), 'BURN'))).toMatchObject({
+      it: "l'ora brucia.", fr: "l'heure brûle.", de: 'die eine Stunde brennt.', es: 'la hora arde.', pt: 'a hora arde.',
+    });
+    expect(sayAll(clause(np('DOG', { numeral: 1, adjectives: ['OLD'] }), 'RUN'))).toMatchObject({
+      it: 'il vecchio cane corre.', fr: 'le vieux chien court.', de: 'der eine alte Hund läuft.',
+      es: 'el perro viejo corre.', pt: 'o cão velho corre.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: one('definite') } } }))).toMatchObject({
+      es: 'el gato corre con el perro.', pt: 'o gato corre com o cão.',
+    });
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: one('definite') } } }), 'de'))
+      .toBe('der Kater gibt dem einen Hund das Buch.');
+    expect(say(clause(np('CAT'), 'RUN', {
+      complements: { temporal: { phrase: np('HOUR', { numeral: 1 }), specifiers: [{ kind: 'temporal', value: 'during' }] } },
+    }), 'de')).toBe('der Kater läuft während der einen Stunde.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: one('definite') }), 'fr')).toBe('le chat voit le chien.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: np('MOUSE', { numeral: 1 }) }), 'fr'))
+      .toBe('le chat ne mange pas la souris.');
   });
 
   test('regression: English, Japanese, the indefinite one and the definite two', () => {
