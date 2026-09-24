@@ -70,7 +70,7 @@ describe('translate', () => {
   });
 
   // P11-E3: the vocative opens the sentence, set off by the language's separator.
-  test('an address opens the sentence, capitalized, ahead of Spanish's opening mark', () => {
+  test("an address opens the sentence, capitalized, ahead of Spanish's opening mark", () => {
     const translations = translate({ ...YOU_RUN, imperative: true, address: { concept: 'DOG' } }, LOOKUP);
     expect(find(translations, 'en')?.text).toBe('Dog, run.');
     const question = translate({ ...CAT_RUNS, interrogative: true, address: { concept: 'DOG' } }, LOOKUP);
