@@ -1,6 +1,11 @@
 # A-must-fix — confirmed bugs
 
-**None open.** The eight listed below, A355–A357 and A359–A363, were all fixed on 2026-09-24 and
+**Two open**, **A365** and **A366**, filed on 2026-09-24 from the leads the A355–A363 lanes
+reported. Each was reproduced at 17e57d9e plus that batch's fixes.
+[A365](A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md), the numeral one beside a bare head with a pronominal possessive (*il suo un amico*, *su un amigo*, *ihr ein Freund*), the case A357 left.
+[A366](A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md), a Japanese negated pair with TOO written with the concessive te-form (大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません).
+
+The eight listed below, A355–A357 and A359–A363, were all fixed on 2026-09-24 and
 moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) records the rulings each fix
 took. The history below is kept as it was written, in the present tense of each filing.
 

@@ -52,7 +52,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A and Part B are both empty).** If
+this writing Part A holds two, A365 and A366, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -64,6 +64,15 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
+| A365 | [A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md](A-must-fix/A365-numeral-one-beside-a-bare-possessed-head-keeps-the-one.md) | Italian, French, Spanish, Portuguese, German | the numeral one beside a bare head with a pronominal possessive is kept (*il suo un amico*, *son un ami*, *ihr ein Freund*), the case A357 left |
+| A366 | [A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md](A-must-fix/A366-japanese-negated-pair-with-too-takes-the-concessive-sugite-mo.md) | Japanese | a negated pair with TOO takes the concessive te-form: 大きすぎても小さすぎてもしません for 大きすぎも小さすぎもしません |
+
+**Two open**, **A365** and **A366**, filed on 2026-09-24 from the leads the A355–A363 lanes
+reported: A357's one beside a possessive, left by a bare head (A365), and the Japanese "neither …
+nor" of an intensified adjective, which takes the concessive 〜すぎても (A366).
+
+The eight before them, A355–A357 and A359–A363, were fixed on 2026-09-24 and are listed under
+**Fixed** below.
 
 **Eight open**, **A355–A357** and **A359–A363**, filed on 2026-09-24 from the leads the A339–A354
 lanes reported. Most are a fix's neighbour it did not reach: A354's passive patient in Spanish

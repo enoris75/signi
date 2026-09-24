@@ -477,3 +477,37 @@ describe('known bugs: Japanese VERY on a lowered degree (A258)', () => {
     expect(isBig({ headIntensifier: 'VERY' }).ja).toBe('猫はとても大きいです。');
   });
 });
+
+// A366. A negated coordination is "neither … nor": 〜も on each conjunct's connective form and the
+// negative after the last (大きくも幸せでもありません). An intensified adjective's 〜すぎる is a verb, and
+// a verb's "neither … nor" is its stem + も, closed on しない: 大きすぎも小さすぎもしません. The link
+// table gives it the te-form + も instead, 大きすぎても, which is the concessive "even if it is too big".
+describe('known bugs: a Japanese negated pair with TOO takes the concessive 〜すぎても (A366)', () => {
+  const pair = (a: NounPhraseLike, b: NounPhraseLike, negative = true) => say(clause(np('DOG'), 'BE', {
+    verbPhrase: { negative },
+    complements: { predicative: { phrase: { conjuncts: [a, b], conjunction: 'and' } } },
+  }), 'ja');
+  const too = (c: string) => np(c, { headIntensifier: 'TOO' });
+
+  test.fails('two intensified adjectives', () => {
+    expect(pair(too('BIG'), too('SMALL'))).toBe('犬は大きすぎも小さすぎもしません。');
+  });
+
+  test.fails('an intensified adjective first, before a plain one', () => {
+    expect(pair(too('BIG'), np('HAPPY'))).toBe('犬は大きすぎも幸せでもありません。');
+  });
+
+  test('regression: the affirmative pair, an intensified adjective last, and the other six', () => {
+    expect(pair(too('BIG'), too('SMALL'), false)).toBe('犬は大きすぎて小さすぎます。');
+    expect(pair(np('BIG'), np('HAPPY'))).toBe('犬は大きくも幸せでもありません。');
+    expect(sayAll(clause(np('DOG'), 'BE', {
+      verbPhrase: { negative: true },
+      complements: { predicative: { phrase: { conjuncts: [too('BIG'), too('SMALL')], conjunction: 'and' } } },
+    }))).toMatchObject({
+      en: 'the dog is not too big and too small.', de: 'der Hund ist nicht zu groß und zu klein.',
+      it: 'il cane non è troppo grande e troppo piccolo.',
+    });
+  });
+});
+
+type NounPhraseLike = ReturnType<typeof np>;
