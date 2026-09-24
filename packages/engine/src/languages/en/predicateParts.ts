@@ -29,6 +29,7 @@ import { npText } from './npText.js';
 import { objectPronounText } from './objectPronounText.js';
 import { perfectInfinitive } from './perfectInfinitive.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The adverb that leads a negated predicate, ahead of the auxiliary carrying the "not" — "the cat
@@ -152,7 +153,8 @@ function predicateWords(
   // the food", "eats the food too" (see `withFocus`, C39).
   const objectWords = passive || !directObject ? ''
     : withFocus(coordinate(directObject, (np) =>
-      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms)
+      // An indefinite pronoun keeps its relative clause: "sees someone who runs" (A309).
+      np.head.forms['person'] ? withRelative(objectPronounText(np.head.forms, subjectForms), np)
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np)),
       slotFocus(directObject), FOCUS_WORDS);
@@ -213,7 +215,7 @@ function predicateWords(
     : splitBareTerminus(settledComplements, lexical.forms);
   const bareTerminusText = bareTerminus
     ? coordinate(bareTerminus.phrase, (np) =>
-      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms) : npText(np))
+      np.head.forms['person'] ? withRelative(objectPronounText(np.head.forms, subjectForms), np) : npText(np))
     : '';
   const directObjectText = [
     particleFirst ? adverbText : '',

@@ -44,6 +44,7 @@ import { artFor } from './artFor.js';
 import { prepDet } from './prepDet.js';
 import { presentParticiple } from './presentParticiple.js';
 import { renderNP } from './renderNP.js';
+import { withRelative } from './withRelative.js';
 import { spatialHead } from './spatialHead.js';
 
 // `objectForms` are the direct object's, which the object complement predicates of and agrees an
@@ -348,9 +349,10 @@ export function complementsPhrase(
         if (!tonic) return '';
         // The instrument's "avec" carries a partitive for a noun ("avec de l'argent", A149), and a
         // pronoun is no quantity: it takes the plain preposition, which is the comitative's too.
-        if (type === 'instrumental' || type === 'comitative') return `${isPrivative(type, c) ? 'sans' : 'avec'} ${tonic}`;
+        // An indefinite pronoun keeps its relative clause: "avec quelqu'un qui court" (A309).
+        if (type === 'instrumental' || type === 'comitative') return withRelative(`${isPrivative(type, c) ? 'sans' : 'avec'} ${tonic}`, np);
         const nf = tonicHeadForms(np);
-        return tonicPhrase(headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic), tonic);
+        return withRelative(tonicPhrase(headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic), tonic), np);
       };
       // `between` is said once over the group, not per conjunct: each conjunct is built as above and
       // its "entre" lifted off (P09-E1 D2) — "entre la maison et l'arbre".

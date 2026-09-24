@@ -35,6 +35,7 @@ import { itEnclitic } from './itEnclitic.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
 import { prepObjectText } from './prepObjectText.js';
+import { withRelative } from './withRelative.js';
 import { reflexiveClitic } from './reflexiveClitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
@@ -183,7 +184,7 @@ export function predicateText(
   // the article ("gridò al lupo", A124).
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
     if (objectPrep) return prepObjectText(np, objectPrep);
-    if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
+    if (np.head.forms['person']) return withRelative(np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '', np);
     const cry = alarmCry(verb, np);
     return cry ? alarmCryText(cry) : npText(np);
   };

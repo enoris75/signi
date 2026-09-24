@@ -4,6 +4,7 @@ import { withFocus } from '../../functions/withFocus.js';
 import { FOCUS_WORDS } from './fr.consts.js';
 import { coordinate } from './coordinate.js';
 import { subjectPhrase } from './subjectPhrase.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * A subject slot: each conjunct with its own article/adjectives/relative, coordinated.
@@ -20,7 +21,7 @@ export function subjectText(el: ResolvedNounElement): string {
   if (el.conjuncts.length < 2) return withFocus(coordinate(el, subjectPhrase), slotFocus(el), FOCUS_WORDS);
   const conjuncts = coordinate(el, (np) => {
     const f = np.head.forms;
-    return f['person'] ? (f['disjunctive'] ?? f['base'] ?? '') : subjectPhrase(np);
+    return f['person'] ? withRelative(f['disjunctive'] ?? f['base'] ?? '', np) : subjectPhrase(np);
   });
   const person = el.agreement['person'] ?? '3';
   if (person === '3') return conjuncts;

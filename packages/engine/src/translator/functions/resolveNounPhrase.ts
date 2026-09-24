@@ -65,7 +65,10 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // Pronoun: synthesise the correct surface form as 'base' so all engines can use
     // their existing `forms['base']` / `forms['plural']` logic unchanged.
     const number = np.number ?? 'singular';
-    const gender = agreed?.gender ?? np.gender ?? 'masc';
+    // An indefinite pronoun's gender is its lexeme's where the lexeme names one, which a relative
+    // pronoun agrees with: de *etwas* is neuter, "etwas, das brennt" (A309).
+    const lexicalGender = head.forms['indefinite'] === '1' ? head.forms['gender'] as NounPhrase['gender'] : undefined;
+    const gender = agreed?.gender ?? np.gender ?? lexicalGender ?? 'masc';
     head.forms['number'] = number;
     // Expose the referent's gender for every person: the 1st/2nd-person surface is
     // gender-invariant ("io", "tu"), but Romance participle/adjective agreement still

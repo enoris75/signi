@@ -35,7 +35,7 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
   if (!agent) return '';
   return coordinate(agent, (np) => {
     if (np.head.forms['person']) {
-      return `von ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`;
+      return `von ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}${subordinateClause(np)}`;
     }
     // A possessive is an ein-word in place of the article, so the head is the preposition alone and
     // the adjectives decline as they do after "kein" ("von meinem kleinen Kater", see

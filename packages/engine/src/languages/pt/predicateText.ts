@@ -35,6 +35,7 @@ import { ptEnclitic } from './ptEnclitic.js';
 import { ptNegateInfinitive } from './ptNegateInfinitive.js';
 import { reflexiveClitic } from './reflexiveClitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The predicate half of a phrase — everything after the subject noun. Shared by the
@@ -226,7 +227,8 @@ export function predicateText(
   // Spanish says "ve a alguien".
   const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
     : np.head.forms['person']
-      ? `${np.head.forms['thing'] === '1' || np.head.forms['indefinite'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
+      // An indefinite pronoun keeps its relative clause: "vê alguém que corre" (A309).
+      ? withRelative(`${np.head.forms['thing'] === '1' || np.head.forms['indefinite'] === '1' ? '' : 'a '}${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`, np)
       : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").

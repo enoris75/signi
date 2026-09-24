@@ -156,8 +156,9 @@ export function complementsPhrase(
       // follows it in place of the noun.
       const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
       // The privative "sin" fuses with none of them: "sin mí", "sin ti" (P09-E2).
-      if (tonic && isPrivative(type, c)) return `sin ${tonic}`;
-      if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `con ${tonic}`;
+      // An indefinite pronoun keeps its relative clause: "con alguien que corre" (A309).
+      if (tonic && isPrivative(type, c)) return withRelative(`sin ${tonic}`, np);
+      if (tonic && (type === 'instrumental' || type === 'comitative')) return withRelative(COMITATIVE_FUSION[tonic] ?? `con ${tonic}`, np);
       // A possessive replaces the article, so the head is the preposition alone ("en mi casa", "a tu perro").
       // Unless the head carries a determiner of its own: that keeps its slot, the preposition takes
       // it as it would any other ("en esta casa", "en ninguna casa"), and the possessive follows the
@@ -254,7 +255,7 @@ export function complementsPhrase(
       // The pronoun is the whole phrase after the head: no article, no adjective, no relative. It is
       // the tonic form, unless the head is one of the adpositions that govern the nominative
       // instead ("corre como yo", never "como mí"), which only the 1st and 2nd singular spell apart.
-      if (tonic) return `${head} ${NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic}`;
+      if (tonic) return withRelative(`${head} ${NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic}`, np);
       return withRelative(`${head} ${noun}`, np);
       };
       // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic

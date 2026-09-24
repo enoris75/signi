@@ -17,6 +17,7 @@ import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { withRelative } from './withRelative.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
 import { CAUSE_PREP, CONSTITUENT_NEGATOR, DIRECTION_IDIOMS, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP, PRIVATIVE, TEMPORAL_POSTPOSED, TEMPORAL_PREP } from './en.consts.js';
@@ -43,7 +44,7 @@ export function complementsPhrase(
       // "because of" ("thanks to her", "through the fault of them", "because of him"). The choice is
       // per conjunct, so a group mixes the two under the one connector ("because of the dog and him").
       if (type === 'cause') {
-        const conjuncts = coordinate(c.phrase, (np) => tonicPronoun(np) ?? npText(np));
+        const conjuncts = coordinate(c.phrase, (np) => tonicWithRelative(np) ?? npText(np));
         return `${CAUSE_PREP[causeSentiment(c)]} ${conjuncts}`;
       }
       // An instrument presented as an action rather than a thing: "by choosing a word"
@@ -146,7 +147,7 @@ export function complementsPhrase(
       // fuses with no article. Per conjunct, so a group mixes the two under the one preposition
       // ("with the dog and him").
       const conjunctText = (np: ResolvedNounPhrase): string =>
-        (TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined) ?? npText(np);
+        (TONIC_COMPLEMENTS.has(type) ? tonicWithRelative(np) : undefined) ?? npText(np);
       return `${prep} ${coordinate(c.phrase, conjunctText)}`;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever
@@ -164,4 +165,10 @@ export function complementsPhrase(
 function superlativePredicate(np: ResolvedNounPhrase): string | undefined {
   const { lead, adjective } = superlativeLead(np.head);
   return lead ? [lead, 'the', enAdj(adjective), enStandard(np.head, np.standard)].filter(Boolean).join(' ') : undefined;
+}
+
+/** A pronoun behind a preposition (`tonicPronoun`), with the relative clause an indefinite one carries: "with someone who runs" (A309). */
+function tonicWithRelative(np: ResolvedNounPhrase): string | undefined {
+  const word = tonicPronoun(np);
+  return word === undefined ? undefined : withRelative(word, np);
 }

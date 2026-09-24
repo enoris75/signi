@@ -172,8 +172,9 @@ export function complementsPhrase(
       // to contract with (`tonicHeadForms`), and the tonic form follows it in place of the noun.
       const tonic = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
       // The privative "sem" fuses with none of them: "sem mim", "sem ele" (P09-E2).
-      if (tonic && isPrivative(type, c)) return `sem ${tonic}`;
-      if (tonic && (type === 'instrumental' || type === 'comitative')) return COMITATIVE_FUSION[tonic] ?? `com ${tonic}`;
+      // An indefinite pronoun keeps its relative clause: "com alguém que corre" (A309).
+      if (tonic && isPrivative(type, c)) return withRelative(`sem ${tonic}`, np);
+      if (tonic && (type === 'instrumental' || type === 'comitative')) return withRelative(COMITATIVE_FUSION[tonic] ?? `com ${tonic}`, np);
       // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
       // Unless the head carries a determiner of its own: that keeps its slot and takes the fusion
       // ("nesta casa", "em nenhuma casa"), and the possessive follows the noun, article and all left
@@ -269,7 +270,7 @@ export function complementsPhrase(
       // The pronoun is the whole phrase after the head: no article, no adjective, no relative. It is
       // the tonic form, unless the head is one of the adpositions that govern the nominative
       // instead ("corre como eu", never "como mim"), which only the 1st and 2nd singular spell apart.
-      if (tonic) return tonicPhrase(head, NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic);
+      if (tonic) return withRelative(tonicPhrase(head, NOMINATIVE_PREP.has(headPreposition(head)) ? (np.head.forms['base'] ?? tonic) : tonic), np);
       return withRelative(`${head} ${noun}`, np);
       };
       // A pronoun cause: neutral "por causa de mim / dele" takes the tonic form after "de"

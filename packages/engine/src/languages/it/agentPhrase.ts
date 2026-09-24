@@ -3,6 +3,7 @@ import { coordinate } from './coordinate.js';
 import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { prepDet } from './prepDet.js';
 import { renderNP } from './renderNP.js';
+import { withRelative } from './withRelative.js';
 
 /**
  * The by-phrase of a passive clause — the demoted agent under "da" ("è mangiato **dal gatto**").
@@ -18,6 +19,6 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
   if (!agent) return '';
   return coordinate(agent, (np) =>
     np.head.forms['person']
-      ? `da ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`
+      ? withRelative(`da ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`, np)
       : renderNP(np, (plural, lead) => prepDet('da', itPossessedHeadForms(np), plural, lead)));
 }

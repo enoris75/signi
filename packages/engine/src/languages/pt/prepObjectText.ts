@@ -28,7 +28,7 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const pf = np.head.forms;
   if (pf['person']) {
     const tonic = pf['disjunctive'] ?? pf['base'] ?? '';
-    return (prep === 'em' || prep === 'de') && PT_DE_FUSING_PRONOUN.test(tonic) ? `${prep === 'em' ? 'n' : 'd'}${tonic}` : `${prep} ${tonic}`;
+    return withRelative((prep === 'em' || prep === 'de') && PT_DE_FUSING_PRONOUN.test(tonic) ? `${prep === 'em' ? 'n' : 'd'}${tonic}` : `${prep} ${tonic}`, np);
   }
   // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
   const f = possessedHeadForms(np, 'definite');

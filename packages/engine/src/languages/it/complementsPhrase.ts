@@ -22,6 +22,7 @@ import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
+import { withRelative } from './withRelative.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
@@ -255,7 +256,7 @@ export function complementsPhrase(
         const nf = tonicHeadForms(np);
         const head = headFor(nf)((nf['number'] ?? nf['count']) === 'plural', tonic);
         const di = IT_DI_BEFORE_PRONOUN.has(headPreposition(head)) ? 'di ' : '';
-        return `${head} ${di}${tonic}`;
+        return withRelative(`${head} ${di}${tonic}`, np);
       };
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.

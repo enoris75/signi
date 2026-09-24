@@ -1,6 +1,7 @@
 import type { ResolvedNounElement } from '../../types.js';
 import { coordinate } from './coordinate.js';
 import { nounPhrase } from './nounPhrase.js';
+import { subordinateClause } from './subordinateClause.js';
 import { tonicPronounDe } from './tonicPronounDe.js';
 
 /**
@@ -12,7 +13,8 @@ export function elementPhrase(el: ResolvedNounElement, _case: 'nom' | 'acc' | 'd
   // A pronoun direct object takes its accusative form with no article ("sieht ihn"), not the noun
   // path that would give "den ich". The choice is per conjunct, so a group mixes the two ("den Hund
   // und dich"). The object of a dative-only preposition reaches a pronoun here too, in its dative
-  // ("hängt von ihr ab", see `objectPrepCase`).
+  // ("hängt von ihr ab", see `objectPrepCase`). An indefinite pronoun keeps its relative clause:
+  // "sieht jemanden, der läuft" (A309).
   return coordinate(el, (np) =>
-    _case !== 'nom' && np.head.forms['person'] ? tonicPronounDe(np.head.forms, _case) : nounPhrase(np, _case));
+    _case !== 'nom' && np.head.forms['person'] ? `${tonicPronounDe(np.head.forms, _case)}${subordinateClause(np)}` : nounPhrase(np, _case));
 }

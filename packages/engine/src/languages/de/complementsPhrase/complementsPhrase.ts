@@ -143,7 +143,7 @@ export function complementsParts(
       const pronoun = TONIC_COMPLEMENTS.has(type) ? tonicPronoun(np) : undefined;
       // The privative's "ohne" is no "mit": it governs the accusative, which the path below declines
       // the pronoun for ("ohne ihn", P09-E2).
-      if (pronoun && !isPrivative(type, c) && (type === 'instrumental' || type === 'comitative')) return `mit ${pronoun}`;
+      if (pronoun && !isPrivative(type, c) && (type === 'instrumental' || type === 'comitative')) return `mit ${pronoun}${subordinateClause(np)}`;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
       // the adjectives decline as they do after "kein" ("in meinem kleinen Haus", "deinem Hund",
       // "durch meine großen Häuser", see `possessedDeclension`). A bare-name place modified by an
@@ -304,8 +304,9 @@ export function complementsParts(
       }
       // The pronoun is the whole phrase after the head, declined for the case the head governs. The
       // bare-dative terminus leaves no head at all, and then the pronoun is the phrase ("gibt ihm").
+      // An indefinite pronoun keeps its relative clause: "mit jemandem, der läuft" (A309).
       if (pronoun) {
-        const word = tonicPronounDe(np.head.forms, _case);
+        const word = `${tonicPronounDe(np.head.forms, _case)}${subordinateClause(np)}`;
         return head ? `${head} ${word}` : word;
       }
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
