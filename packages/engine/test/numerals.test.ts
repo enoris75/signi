@@ -277,6 +277,15 @@ describe('known bugs: a numeral beside a possessive ignores the indefinite (A329
     });
   });
 
+  // German's one is the ein-word, and declines as the indefinite article does (A321) once the
+  // possessive has left it the slot.
+  test('German one beside a detached possessive declines for its case', () => {
+    const friend = np('FRIEND', { numeral: 1, definiteness: 'indefinite', possessor: mine });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: friend }), 'de')).toBe('der Kater sieht einen Freund von mir.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { numeral: 1, definiteness: 'indefinite', possessor: mine }) } } }), 'de'))
+      .toBe('der Kater läuft in einem Haus von mir.');
+  });
+
   test('regression: the definite, a demonstrative and a genuinely bare head keep their shapes', () => {
     expect(friends(2, { definiteness: 'definite' })).toEqual({
       en: 'my two friends run.', it: 'i miei due amici corrono.', fr: 'mes deux amis courent.',

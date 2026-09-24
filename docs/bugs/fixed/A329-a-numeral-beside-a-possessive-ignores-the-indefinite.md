@@ -111,6 +111,7 @@ hers*), and a regression test for the definite, the demonstrative and a genuinel
 colocated `possessive.test.ts`, `possessedHeadForms.test.ts` and `itPossessedHeadForms.test.ts` gained
 cases for the mark.
 
-Still open: German *ein* does not decline in a complement (*in ein Haus von mir*), which is
-[A321](../A-must-fix/A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md). The definite with
-one is not changed.
+German *ein* declines once A321 is in: after merging the numerals lane, its `de/cardinalOne.ts`
+also takes a counted head beside a detached possessive, so *der Kater sieht einen Freund von mir*, *in
+einem Haus von mir* (a test in the same block, and a case in `cardinalOne.test.ts`). The definite with
+one is not changed here.
