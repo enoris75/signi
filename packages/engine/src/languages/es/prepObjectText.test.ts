@@ -14,6 +14,15 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(LIBRO), 'de')).toBe('del libro');
   });
 
+  // A325: a determiner kept beside a possessive, and "todos", are the noun phrase's to write.
+  test('a determiner beside a possessive keeps its slot, the possessive following the noun', () => {
+    const mine = { possessor: { kind: 'pronominal', person: '1', number: 'singular' } as const };
+    expect(prepObjectText(np(NINO, { definiteness: 'indefinite' }, mine), 'a')).toBe('a un niño mío');
+    expect(prepObjectText(np(NINO, { definiteness: 'this' }, mine), 'a')).toBe('a este niño mío');
+    expect(prepObjectText(np(NINO, { definiteness: 'all', number: 'plural' }, mine), 'a')).toBe('a todos mis niños');
+    expect(prepObjectText(np(NINO, {}, mine), 'a')).toBe('a mi niño');
+  });
+
   test('a pronoun takes its tonic form', () => {
     expect(prepObjectText(np(YO), 'en')).toBe('en mí');
     expect(prepObjectText(np(EL), 'en')).toBe('en él');

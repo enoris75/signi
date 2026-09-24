@@ -77,4 +77,10 @@ describe('nounPhrase', () => {
     expect(nounPhrase({ ...CAO, number: 'plural', definiteness: 'all' }, undefined, 'os seus')).toBe('todos os seus cães');
     expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'all' }, undefined, 'as minhas')).toBe('todas as minhas casas');
   });
+
+  // A314: the partitive "most" keeps its article, and the possessive rides on it.
+  test('after "a maioria" the possessive rides on the partitive\'s article', () => {
+    expect(nounPhrase({ ...CAO, number: 'plural', definiteness: 'most' }, undefined, 'os seus')).toBe('a maioria dos seus cães');
+    expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'most' }, undefined, 'as minhas')).toBe('a maioria das minhas casas');
+  });
 });

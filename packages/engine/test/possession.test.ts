@@ -1417,7 +1417,7 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     directObject: np('FRIEND', { possessor: mine, ...extra }), ...(negative ? { verbPhrase: { negative: true } } : {}),
   }));
 
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(seesFriend({ definiteness: 'indefinite' })).toEqual({
       en: 'the cat sees a friend of mine.', it: 'il gatto vede un mio amico.', fr: 'le chat voit un ami à moi.',
       de: 'der Kater sieht einen Freund von mir.',
@@ -1426,31 +1426,31 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     });
   });
 
-  test.fails('the plural indefinite', () => {
+  test('the plural indefinite', () => {
     expect(seesFriend({ definiteness: 'indefinite', number: 'plural' }).es).toBe('el gato ve a unos amigos míos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('"this"', () => {
+  test('"this"', () => {
     expect(seesFriend({ definiteness: 'this' }).es).toBe('el gato ve a este amigo mío.'); // now: "ve a mi amigo"
   });
 
-  test.fails('"some"', () => {
+  test('"some"', () => {
     expect(seesFriend({ definiteness: 'some', number: 'plural' }).es).toBe('el gato ve a algunos amigos míos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('"no"', () => {
+  test('"no"', () => {
     expect(seesFriend({ definiteness: 'no' }).es).toBe('el gato no ve a ningún amigo mío.'); // now: "no ve a mi amigo"
   });
 
-  test.fails('"all"', () => {
+  test('"all"', () => {
     expect(seesFriend({ definiteness: 'all', number: 'plural' }).es).toBe('el gato ve a todos mis amigos.'); // now: "ve a mis amigos"
   });
 
-  test.fails('under a negation', () => {
+  test('under a negation', () => {
     expect(seesFriend({ definiteness: 'indefinite' }, true).es).toBe('el gato no ve a un amigo mío.'); // now: "no ve a mi amigo"
   });
 
-  test.fails('a possessor linked to the subject (P11-E2)', () => {
+  test('a possessor linked to the subject (P11-E2)', () => {
     expect(say(clause(np('MAN'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: { kind: 'coreferent', slot: 'subject' } }) }), 'es'))
       .toBe('el hombre ve a un amigo suyo.'); // now: "el hombre ve a su amigo."
   });
@@ -1465,6 +1465,21 @@ describe('known bugs: the Spanish personal a drops the determiner beside a posse
     expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('FRIEND', { definiteness: 'this', possessor: mine }) } } }), 'es'))
       .toBe('el gato da el libro a este amigo mío.');
   });
+
+  // The fix is in `prepObjectText`, so a verb's own object preposition takes it too ("depende de"),
+  // and a relative clause and an adjective ride along.
+  test('a verb\'s own object preposition, a relative clause and an adjective', () => {
+    const dependsOn = (extra: Partial<NounPhrase>) =>
+      say(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { possessor: mine, ...extra }) }), 'es');
+    expect(dependsOn({ definiteness: 'indefinite' })).toBe('el gato depende de una condición mía.');
+    expect(dependsOn({ definiteness: 'this' })).toBe('el gato depende de esta condición mía.');
+    expect(dependsOn({ definiteness: 'all', number: 'plural' })).toBe('el gato depende de todas mis condiciones.');
+    expect(dependsOn({ definiteness: 'definite' })).toBe('el gato depende de mi condición.');
+    expect(seesFriend({ definiteness: 'indefinite', relative: { verbPhrase: { verb: 'RUN' } } }).es)
+      .toBe('el gato ve a un amigo mío que corre.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('WOMAN', { definiteness: 'indefinite', possessor: mine, adjectives: ['OLD'] }) }), 'es'))
+      .toBe('el gato ve a una mujer vieja mía.');
+  });
 });
 
 // A326. A plural or mass indefinite has no article after "de" in French ("la maison d'amis") and
@@ -1478,7 +1493,7 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
   const friends = np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine });
   const houseOf = (possessor: NounPhrase) => sayAll(clause(np('HOUSE', { possessor }), 'BURN'));
 
-  test.fails('the possessor', () => {
+  test('the possessor', () => {
     expect(houseOf(friends)).toEqual({
       en: 'the house of friends of mine burns.', it: 'la casa dei miei amici brucia.',
       fr: "la maison d'amis à moi brûle.", // now: "la maison de des amis à moi brûle."
@@ -1487,14 +1502,14 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     });
   });
 
-  test.fails('a mass possessor', () => {
+  test('a mass possessor', () => {
     expect(houseOf(np('WATER', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
       fr: "la maison d'eau à moi brûle.", // now: "la maison de de l'eau à moi brûle."
       de: 'das Haus von Wasser von mir brennt.', // now: "das Haus Wassers von mir brennt."
     });
   });
 
-  test.fails('the French source', () => {
+  test('the French source', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural', possessor: mine }) } } }))).toEqual({
       en: 'the cat runs from houses of mine.', it: 'il gatto corre via dalle mie case.',
       fr: 'le chat court loin de maisons à moi.', // now: "loin de des maisons à moi"
@@ -1503,7 +1518,7 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     });
   });
 
-  test.fails('the cause', () => {
+  test('the cause', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: friends } } }))).toMatchObject({
       fr: "le chat court à cause d'amis à moi.", // now: "à cause de des amis à moi"
       de: 'der Kater läuft wegen Freunden von mir.', // now: "wegen Freunde von mir"
@@ -1523,6 +1538,30 @@ describe('known bugs: a French or German plural indefinite possessor detaches in
     expect(say(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('HOUSE', { definiteness: 'indefinite', number: 'plural' }) } } }), 'fr'))
       .toBe('le chat court loin de maisons.');
   });
+
+  // The fix hands a French detached head the determiner its caller would give it without the
+  // possessive (`renderNP`'s `ownHeadFor`), and lets German's genitive be decided by the head's own
+  // determiner, so every "de" relation, an adjective and a counted possessor (A329) go the same way.
+  test('the other relations, an adjective and a counted possessor', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    const runs = (complements: Record<string, unknown>) => sayAll(clause(np('CAT'), 'RUN', { complements } as never));
+    expect(sayAll(clause(np('BOOK', { possessor: np('FRIEND', { numeral: 2, definiteness: 'indefinite', possessor: her }) }), 'BURN')))
+      .toMatchObject({ fr: 'le livre de deux amis à elle brûle.', de: 'das Buch von zwei Freunden von ihr brennt.' });
+    expect(houseOf(np('FRIEND', { definiteness: 'indefinite', number: 'plural', adjectives: ['OLD'], possessor: mine })))
+      .toMatchObject({ fr: 'la maison de vieux amis à moi brûle.', de: 'das Haus alter Freunde von mir brennt.' });
+    expect(runs({ cause: { phrase: friends, specifiers: [{ kind: 'sentiment', value: 'negative' }] } }).fr)
+      .toBe("le chat court par la faute d'amis à moi.");
+    expect(runs({ cause: { phrase: friends, specifiers: [{ kind: 'sentiment', value: 'positive' }] } }))
+      .toMatchObject({ fr: 'le chat court grâce à des amis à moi.', de: 'der Kater läuft dank Freunden von mir.' });
+    expect(runs({ cause: { phrase: np('FRIEND', { definiteness: 'this', number: 'plural', possessor: mine }) } }))
+      .toMatchObject({ fr: 'le chat court à cause de ces amis à moi.', de: 'der Kater läuft wegen dieser Freunde von mir.' });
+    expect(runs({ comitative: { phrase: friends } }))
+      .toMatchObject({ fr: 'le chat court avec des amis à moi.', de: 'der Kater läuft mit Freunden von mir.' });
+    expect(runs({ locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: mine }) } }))
+      .toMatchObject({ fr: 'le chat court dans une maison à moi.', de: 'der Kater läuft in einem Haus von mir.' });
+    expect(sayAll(clause(np('CAT'), 'SPEAK', { complements: { topic: { phrase: friends } } })))
+      .toMatchObject({ fr: "le chat parle d'amis à moi.", de: 'der Kater spricht über Freunde von mir.' });
+  });
 });
 
 // A327. A French negated direct object turns its indefinite or partitive article into "de" (`objectArtFor`:
@@ -1535,7 +1574,7 @@ describe('known bugs: a French negated object keeps un beside a detached possess
   const notSee = (object: NounPhrase, verb = 'SEE') => sayAll(clause(np('CAT'), verb, { directObject: object, verbPhrase: { negative: true } }));
 
   // Spanish is left out: its "no ve a mi amigo" is A325's, and would tie the two fixes together.
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine }))).toMatchObject({
       en: 'the cat does not see a friend of mine.', it: 'il gatto non vede un mio amico.',
       fr: "le chat ne voit pas d'ami à moi.", // now: "le chat ne voit pas un ami à moi."
@@ -1543,7 +1582,7 @@ describe('known bugs: a French negated object keeps un beside a detached possess
     });
   });
 
-  test.fails('a thing, the plural and a mass noun', () => {
+  test('a thing, the plural and a mass noun', () => {
     expect(notSee(np('HOUSE', { definiteness: 'indefinite', possessor: mine })).fr).toBe('le chat ne voit pas de maison à moi.'); // now: "pas une maison"
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', number: 'plural', possessor: mine })).fr).toBe("le chat ne voit pas d'amis à moi."); // now: "pas des amis"
     expect(notSee(np('WATER', { definiteness: 'indefinite', possessor: mine }), 'DRINK').fr).toBe("le chat ne boit pas d'eau à moi."); // now: "pas de l'eau"
@@ -1556,6 +1595,18 @@ describe('known bugs: a French negated object keeps un beside a detached possess
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('FRIEND', { definiteness: 'indefinite', possessor: mine }) }), 'fr'))
       .toBe('le chat voit un ami à moi.');
     expect(notSee(np('FRIEND', { definiteness: 'indefinite', possessor: mine })).it).toBe('il gatto non vede un mio amico.');
+  });
+
+  // The negated object now reads its determiner off the head's own forms through `objectArtFor`, so
+  // the other kept determiners, a prenominal adjective, a counted object and another person go the
+  // way the unpossessed negation goes.
+  test('the other kept determiners, an adjective, a numeral and another person', () => {
+    const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(notSee(np('FRIEND', { definiteness: 'no', possessor: mine })).fr).toBe('le chat ne voit aucun ami à moi.');
+    expect(notSee(np('FRIEND', { definiteness: 'some', number: 'plural', possessor: mine })).fr).toBe('le chat ne voit pas quelques amis à moi.');
+    expect(notSee(np('FRIEND', { definiteness: 'indefinite', adjectives: ['OLD'], possessor: mine })).fr).toBe('le chat ne voit pas de vieil ami à moi.');
+    expect(notSee(np('FRIEND', { numeral: 2, definiteness: 'indefinite', possessor: mine })).fr).toBe('le chat ne voit pas deux amis à moi.');
+    expect(notSee(np('HOUSE', { definiteness: 'indefinite', possessor: her })).fr).toBe('le chat ne voit pas de maison à elle.');
   });
 });
 
@@ -1570,23 +1621,23 @@ describe('known bugs: OWN beside a kept determiner stays on the head (A328)', ()
   const ownFriendRuns = (extra: Partial<NounPhrase>) =>
     say(clause(np('FRIEND', { possessor: mine, possessorOwn: true, ...extra }), 'RUN'), 'en');
 
-  test.fails('the indefinite', () => {
+  test('the indefinite', () => {
     expect(ownFriendRuns({ definiteness: 'indefinite' })).toBe('a friend of my own runs.'); // now: "an own friend of mine runs."
   });
 
-  test.fails('"this"', () => {
+  test('"this"', () => {
     expect(ownFriendRuns({ definiteness: 'this' })).toBe('this friend of my own runs.'); // now: "this own friend of mine runs."
   });
 
-  test.fails('"no"', () => {
+  test('"no"', () => {
     expect(ownFriendRuns({ definiteness: 'no' })).toBe('no friend of my own runs.'); // now: "no own friend of mine runs."
   });
 
-  test.fails('an adjective beside it', () => {
+  test('an adjective beside it', () => {
     expect(ownFriendRuns({ definiteness: 'indefinite', adjectives: ['OLD'] })).toBe('an old friend of my own runs.'); // now: "an own old friend of mine runs."
   });
 
-  test.fails('the plural', () => {
+  test('the plural', () => {
     expect(say(clause(np('FRIEND', {
       definiteness: 'indefinite', number: 'plural', possessorOwn: true,
       possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' },
@@ -1600,5 +1651,21 @@ describe('known bugs: OWN beside a kept determiner stays on the head (A328)', ()
     });
     expect(say(clause(np('FRIEND', { definiteness: 'indefinite', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('un mio proprio amico corre.');
     expect(say(clause(np('FRIEND', { definiteness: 'this', possessor: mine, possessorOwn: true }), 'RUN'), 'it')).toBe('questo mio proprio amico corre.');
+  });
+
+  // OWN leaves the adjectives wherever the English phrase detaches its possessive (`ownDetaches`):
+  // the object, a complement, a genitive possessor, a counted head (A329) and another person. "all"
+  // keeps the prenominal possessive, and OWN with it.
+  test('every slot, a counted head, another person, and "all"', () => {
+    const own = (extra: Partial<NounPhrase>) => np('FRIEND', { possessor: mine, possessorOwn: true, ...extra });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: own({ definiteness: 'some', number: 'plural' }) }), 'en'))
+      .toBe('the cat sees some friends of my own.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: mine, possessorOwn: true }) } } }), 'en'))
+      .toBe('the cat runs in a house of my own.');
+    expect(say(clause(np('BOOK', { possessor: own({ definiteness: 'indefinite' }) }), 'BURN'), 'en')).toBe('the book of a friend of my own burns.');
+    expect(ownFriendRuns({ definiteness: 'indefinite', numeral: 2 })).toBe('two friends of my own run.');
+    expect(say(clause(np('HOUSE', { definiteness: 'indefinite', possessor: { kind: 'pronominal', person: '1', number: 'plural' }, possessorOwn: true }), 'BURN'), 'en'))
+      .toBe('a house of our own burns.');
+    expect(ownFriendRuns({ definiteness: 'all', number: 'plural' })).toBe('all my own friends run.');
   });
 });

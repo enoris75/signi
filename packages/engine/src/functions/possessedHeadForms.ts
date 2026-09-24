@@ -24,6 +24,18 @@ import type { ResolvedNounPhrase } from '../types.js';
  */
 export function possessedHeadForms(np: ResolvedNounPhrase, definiteness: 'definite' | 'bare'): Record<string, string> {
   if (!np.possessor || !isPronominalPossessor(np.possessor)) return np.head.forms;
-  const { proper: _name, ...forms } = np.head.forms;
+  // The possessive has the determiner slot in these forms, so a dropped indefinite's mark
+  // (`keptBesidePossessive`) no longer applies to them.
+  const { proper: _name, indefinite_dropped: _dropped, ...forms } = np.head.forms;
   return { ...forms, definiteness };
+}
+
+/**
+ * A possessed head's *own* forms, for a head that keeps its determiner beside a pronominal
+ * possessive (`keptBesidePossessive`): `proper` dropped as `possessedHeadForms` drops it, the picked
+ * determiner and a dropped indefinite's mark kept (A329).
+ */
+export function ownHeadForms(np: ResolvedNounPhrase): Record<string, string> {
+  const { proper: _name, ...forms } = np.head.forms;
+  return forms;
 }

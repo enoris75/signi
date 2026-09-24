@@ -6,7 +6,7 @@ describe('predicativeForms', () => {
   // "se vuelven gatos", not "se vuelven unos gatos".
   test('flattens an indefinite plural to bare', () => {
     const forms = { ...GATO, number: 'plural', definiteness: 'indefinite' };
-    expect(predicativeForms(forms)).toEqual({ ...forms, definiteness: 'bare' });
+    expect(predicativeForms(forms)).toEqual({ ...forms, definiteness: 'bare', indefinite_dropped: '1' });
     expect(predicativeForms({ ...LEYENDA, count: 'plural', definiteness: 'indefinite' })['definiteness']).toBe('bare');
   });
 

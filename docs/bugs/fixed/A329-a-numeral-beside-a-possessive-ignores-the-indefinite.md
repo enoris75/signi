@@ -80,3 +80,38 @@ Pinned by `known bugs: a numeral beside a possessive ignores the indefinite (A32
 [numerals.test.ts](../../../packages/engine/test/numerals.test.ts).
 
 Found on 2026-09-24 while landing the P11-E4 / P11-E5 coverage audit.
+
+## Resolved
+
+Fixed on 2026-09-24, by the second way in the shape above: a counted `bare` head is marked, and the
+readers of `KEPT_BESIDE_POSSESSIVE` treat it as kept.
+
+- [translator/functions/resolveNounPhrase.ts](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts):
+  when a numeral takes the indefinite's place, the head's forms carry `indefinite_dropped: '1'` beside
+  the `bare` it resolves to.
+- [possessive.ts](../../../packages/engine/src/possessive.ts): `keptBesidePossessive(forms)` is
+  `KEPT_BESIDE_POSSESSIVE` plus a `bare` head with that mark. A bare head the plan asked for has no mark
+  and still gives its slot to the possessive (*my friends*).
+- [functions/possessedHeadForms.ts](../../../packages/engine/src/functions/possessedHeadForms.ts):
+  `possessedHeadForms` drops the mark, because in those forms the possessive has the slot. The new
+  `ownHeadForms` is the head's own forms with only `proper` dropped, for the detached branches.
+- The readers now call `keptBesidePossessive`: `en/isPostModified.ts`, `fr/renderNP.ts`,
+  `de/nounPhrase.ts`, `de/possessedDeclension.ts`, `de/complementsPhrase/complementsPhrase.ts`,
+  `es/nounPhrase.ts`, `es/complementsPhrase.ts`, `es/possessorText.ts`, `pt/nounPhrase.ts`,
+  `pt/complementsPhrase.ts` and `pt/possessorText.ts`.
+- Italian: `it/itPossessedHeadForms.ts` keeps the slot for a marked bare head that carries a numeral,
+  and `it/renderNP.ts` puts that numeral ahead of the stacked possessive (*due miei amici*; at one,
+  *un mio amico*).
+
+Both `test.fails` in `known bugs: a numeral beside a possessive ignores the indefinite (A329)` in
+[numerals.test.ts](../../../packages/engine/test/numerals.test.ts) are plain tests now. The same
+block gained the object (*two houses of mine*), the locative complement (*in zwei Häusern von mir*,
+*en dos casas mías*, *em duas casas minhas*), another person with an adjective (*two old friends of
+hers*), and a regression test for the definite, the demonstrative and a genuinely bare head. The
+colocated `possessive.test.ts`, `possessedHeadForms.test.ts` and `itPossessedHeadForms.test.ts` gained
+cases for the mark.
+
+German *ein* declines once A321 is in: after merging the numerals lane, its `de/cardinalOne.ts`
+also takes a counted head beside a detached possessive, so *der Kater sieht einen Freund von mir*, *in
+einem Haus von mir* (a test in the same block, and a case in `cardinalOne.test.ts`). The definite with
+one is not changed here.

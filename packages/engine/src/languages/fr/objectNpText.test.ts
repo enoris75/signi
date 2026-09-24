@@ -24,4 +24,11 @@ describe('objectNpText', () => {
     expect(objectNpText(np(LIVRE, {}, { possessor: his }), false)).toBe('son livre');
     expect(objectNpText(np(LIVRE, { definiteness: 'bare' }, { possessor: his }), true)).toBe('son livre');
   });
+
+  // A327: a determiner kept beside a detached possessive is the object's own, and takes the negative de.
+  test('a kept indefinite beside a detached possessive takes de when negated', () => {
+    expect(objectNpText(np(LIVRE, { definiteness: 'indefinite' }, { possessor: his }), true)).toBe('de livre à lui');
+    expect(objectNpText(np(EAU, { definiteness: 'indefinite' }, { possessor: his }), true)).toBe("d'eau à lui");
+    expect(objectNpText(np(LIVRE, { definiteness: 'indefinite' }, { possessor: his }), false)).toBe('un livre à lui');
+  });
 });

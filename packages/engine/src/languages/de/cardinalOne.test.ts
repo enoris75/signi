@@ -18,6 +18,14 @@ describe('cardinalOne', () => {
     expect(forms['approximator_det']).toBe('etwa ');
   });
 
+  // A329: a possessive that detaches beside the dropped indefinite leaves it the ein-word slot.
+  test('a counted head beside a detached possessive becomes the indefinite too', () => {
+    const mine = { possessor: { kind: 'pronominal', person: '1', number: 'singular' } as const };
+    const forms = cardinalOne(np(HUND, { definiteness: 'bare', numeral: '1', indefinite_dropped: '1' }, mine)).head.forms;
+    expect(forms['definiteness']).toBe('indefinite');
+    expect(forms['numeral']).toBeUndefined();
+  });
+
   test('any other phrase is left as it is', () => {
     const cases = [
       np(HUND, { definiteness: 'bare', numeral: '2' }),

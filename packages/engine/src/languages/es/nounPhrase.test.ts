@@ -115,6 +115,12 @@ describe('nounPhrase', () => {
     expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'many' }, { pre: '', post: 'grandes' }, 'sus')).toBe('muchas casas grandes suyas');
   });
 
+  // A314: the partitive "most" gives its article to the unstressed possessive.
+  test('after "la mayoría de" the unstressed possessive takes the article\'s place', () => {
+    expect(nounPhrase({ ...GATO, number: 'plural', definiteness: 'most' }, undefined, 'sus')).toBe('la mayoría de sus gatos');
+    expect(nounPhrase({ ...DINERO, definiteness: 'most' }, undefined, 'mi')).toBe('la mayor parte de mi dinero');
+  });
+
   test('after "todos" the unstressed possessive keeps the article\'s place', () => {
     expect(nounPhrase({ ...GATO, number: 'plural', definiteness: 'all' }, undefined, 'sus')).toBe('todos sus gatos');
     expect(nounPhrase({ ...CASA, number: 'plural', definiteness: 'all' }, undefined, 'mis')).toBe('todas mis casas');

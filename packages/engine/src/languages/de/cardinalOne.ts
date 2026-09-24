@@ -1,6 +1,7 @@
 import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { keptBesidePossessive } from '../../possessive.js';
 
 /**
  * A bare phrase counted by one, as the indefinite phrase it is. German's cardinal one is the ein-word
@@ -15,7 +16,10 @@ import type { ResolvedNounPhrase } from '../../types.js';
 export function cardinalOne(np: ResolvedNounPhrase): ResolvedNounPhrase {
   const forms = np.head.forms;
   if (forms['numeral'] !== '1' || forms['definiteness'] !== 'bare' || forms['uncountable'] === '1') return np;
-  if (np.possessor && (isPronominalPossessor(np.possessor) || isQuestionPossessor(np.possessor))) return np;
+  // A prenominal possessive has the ein-word slot. One that detaches beside the one it counts leaves
+  // the slot to it: "einen Freund von mir" (A329, `keptBesidePossessive`).
+  if (np.possessor && isPronominalPossessor(np.possessor) && !keptBesidePossessive(forms)) return np;
+  if (isQuestionPossessor(np.possessor)) return np;
   const { numeral: _numeral, approximator, ...rest } = forms;
   const indefinite: Record<string, string> = { ...rest, definiteness: 'indefinite' };
   if (approximator) indefinite['approximator_det'] = approximator;

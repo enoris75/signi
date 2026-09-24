@@ -13,6 +13,15 @@ describe('genitiveShows', () => {
     expect(genitiveShows(np(KATER, { definiteness: 'relative' }))).toBe(true);
   });
 
+  // A326: a detached "von mir" marks no case, so the head's own determiner decides.
+  test('beside a detached possessive, the head\'s own determiner decides', () => {
+    const mine = { possessor: { kind: 'pronominal', person: '1', number: 'singular' } as const };
+    expect(genitiveShows(np(KATZE, { definiteness: 'indefinite', number: 'plural' }, mine))).toBe(false);
+    expect(genitiveShows(np(WASSER, { definiteness: 'indefinite' }, mine))).toBe(false);
+    expect(genitiveShows(np(KATZE, { definiteness: 'indefinite' }, mine))).toBe(true);
+    expect(genitiveShows(np(KATER, { definiteness: 'some', number: 'plural' }, mine))).toBe(true);
+  });
+
   test('with no determiner, only an adjective shows it', () => {
     expect(genitiveShows(np(KATZE, { definiteness: 'bare', number: 'plural' }))).toBe(false);
     expect(genitiveShows(np(KATZE, { definiteness: 'indefinite', number: 'plural' }))).toBe(false);

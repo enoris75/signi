@@ -1,6 +1,7 @@
 import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
+import { dativePronounDe, keptBesidePossessive } from '../../possessive.js';
 import { adjPhrase } from './adjPhrase.js';
 import { adjectivalNoun } from './adjectivalNoun.js';
 import { articledNameForms } from './articledNameForms.js';
@@ -41,6 +42,14 @@ export function possessorText(np: ResolvedNounPhrase): string {
   return ` ${genitiveShows(counted) ? nounPhrase(counted, 'gen') : vonDative(counted)}`;
 }
 
+// The possessor's own pronominal possessive, when it detached beside a kept determiner, as
+// `nounPhrase` writes it: "das Haus von Freunden von mir" (A326). A prenominal one never gets here,
+// since its ein-word shows the genitive.
+function detachedVon(poss: ResolvedNounPhrase): string {
+  const own = poss.possessor;
+  return own && isPronominalPossessor(own) && keptBesidePossessive(poss.head.forms) ? ` von ${dativePronounDe(own)}` : '';
+}
+
 // "von" + the dative, for a possessor whose genitive would not show. No article can be there for
 // "von" to fuse with: at most an invariant quantifier, after which an adjective declines strong ("von
 // etwas kaltem Wasser").
@@ -60,7 +69,7 @@ function vonDative(poss: ResolvedNounPhrase): string {
     // A counted possessor keeps its cardinal: "ein Zeitraum von vierundzwanzig Stunden" (C31).
     numeralText(f, CARDINALS),
     adjPhrase(poss, 'dat', definiteness),
-    `${word}${postnominal(f)}${modifierGenitives(poss)}${possessorText(poss)}${nounStandard(poss, 'dat')}${subordinateClause(poss)}${nounExamples(poss, 'dat')}`,
+    `${word}${postnominal(f)}${modifierGenitives(poss)}${detachedVon(poss)}${possessorText(poss)}${nounStandard(poss, 'dat')}${subordinateClause(poss)}${nounExamples(poss, 'dat')}`,
   ];
   return words.filter(Boolean).join(' ');
 }

@@ -2,8 +2,8 @@ import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { PronominalPossessor, ResolvedNounPhrase } from '../../types.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { disjunctiveFr, KEPT_BESIDE_POSSESSIVE, possessiveFr } from '../../possessive.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { disjunctiveFr, keptBesidePossessive, possessiveFr } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { CARDINALS } from './fr.consts.js';
@@ -22,8 +22,18 @@ import { splitAdjectives } from './splitAdjectives.js';
  * Render a noun phrase: [head] [prenominal adjectives] noun [postnominal adjectives].
  * `headFor` builds the article/preposition, receiving the surface of the word that will
  * follow it (`lead`) so it can pick the right elision ("le" vs "l'").
+ *
+ * `ownHeadFor` is the same builder over the head's *own* forms (`ownHeadForms`), for a caller whose
+ * determiner depends on what that head keeps beside a detached possessive. Given one, a detached head
+ * takes its whole determiner from it, and `renderNP` writes none of its own: the negated object's "de"
+ * ("ne voit pas d'ami à moi", A327), the "de" that drops a plural or mass indefinite ("la maison d'amis
+ * à moi", A326). Without one, the detached head's article is spelled here behind `headFor`.
  */
-export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: string) => string): string {
+export function renderNP(
+  np: ResolvedNounPhrase,
+  headFor: (plural: boolean, lead: string) => string,
+  ownHeadFor?: (plural: boolean, lead: string) => string,
+): string {
   const forms = np.head.forms;
   const plural = (forms['number'] ?? forms['count']) === 'plural';
   const noun = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
@@ -47,7 +57,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const poss = np.possessor;
   const pronominal = !!poss && isPronominalPossessor(poss);
   const definiteness = forms['definiteness'] ?? 'definite';
-  const detached = pronominal && KEPT_BESIDE_POSSESSIVE.has(definiteness);
+  const detached = pronominal && keptBesidePossessive(forms);
   const possWord = poss && isPronominalPossessor(poss) && !detached
     ? possessiveFr(
         poss,
@@ -59,8 +69,12 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // A possessed name takes the determiner the user picked, `proper` dropped as `possessedHeadForms`
   // drops it.
   const { proper: _name, ...ownForms } = forms;
-  const detWord = detached ? artFor(ownForms, plural, lead)
+  const ownHead = detached ? ownHeadFor : undefined;
+  const detWord = ownHead ? ''
+    : detached ? artFor(ownForms, plural, lead)
     : pronominal && definiteness === 'all' ? (fem ? 'toutes' : 'tous')
+    // The partitive "most" gives its article to the possessive: "la plupart de ses chats" (A314).
+    : pronominal && definiteness === 'most' ? (plural ? 'la plupart de' : 'la plus grande partie de')
     : '';
   // A cardinal stands between the determiner and the prenominal adjectives: "les deux grandes
   // maisons" (C31). A count noun whose cardinal form differs takes it here — "deux ans", where the
@@ -73,7 +87,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const words = [detWord, possWord, ...(numeral ? [numeral] : []), ...pre, counted].filter(Boolean);
   // A kept partitive elides into its noun like any article: "de l'eau à moi" (A277).
   const [first = '', ...rest] = words;
-  const core = joinArt(headFor(plural, first || noun), rest.length ? joinArt(first, rest.join(' ')) : first);
+  const core = joinArt((ownHead ?? headFor)(plural, first || noun), rest.length ? joinArt(first, rest.join(' ')) : first);
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
   const postStr = joinConjuncts(post, ', ', () => ' et ');
@@ -95,7 +109,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // de qui" (P09-E14).
   const base = isQuestionPossessor(poss) ? `${withPost} de qui`
     : poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead), (plural, lead) => deDet(ownHeadForms(poss), plural, lead))}`
     // The detached possessor takes the genitive's own postnominal slot: "ce livre à elle".
     : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`
     : withPost;

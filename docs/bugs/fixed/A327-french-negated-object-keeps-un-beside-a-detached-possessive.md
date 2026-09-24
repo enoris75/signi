@@ -50,3 +50,21 @@ caller, is the natural shape.
 | **Test** | `possession.test.ts` → *known bugs: a French negated object keeps un beside a detached possessive (A327)* (2 `test.fails`: the indefinite across six languages, Spanish left to A325; the thing, the plural and the mass noun. Plus a regression test for the unpossessed negation, the definite, *this*, the positive and Italian) |
 
 Found on 2026-09-24 by the P11-E4 / A277 coverage audit (lane P1).
+
+## Resolved
+
+Fixed on 2026-09-24 as the trial did, with one hook that A326 shares.
+
+- [fr/renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts) takes an optional
+  `ownHeadFor`, the caller's determiner builder over the head's own forms. A detached head that is
+  given one takes its whole determiner from it, and `renderNP` writes no article of its own.
+- [fr/objectNpText.ts](../../../packages/engine/src/languages/fr/objectNpText.ts): a negated object
+  whose determiner is kept beside the possessive (`keptBesidePossessive`) goes through `renderNP` with
+  `objectArtFor` over `ownHeadForms(np)`. Every other possessed object still goes through `npText`.
+
+Both `test.fails` in `known bugs: a French negated object keeps un beside a detached possessive
+(A327)` in [possession.test.ts](../../../packages/engine/test/possession.test.ts) are plain tests now.
+The same block gained *no* (*ne voit aucun ami à moi*), *some* (*ne voit pas quelques amis à moi*), a
+prenominal adjective (*ne voit pas de vieil ami à moi*), a counted object (*ne voit pas deux amis à
+moi*) and another person (*ne voit pas de maison à elle*). The colocated `objectNpText.test.ts`
+gained the negated and positive kept indefinite.

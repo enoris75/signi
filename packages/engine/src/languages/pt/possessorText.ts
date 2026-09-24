@@ -1,8 +1,8 @@
 import { isPronominalPossessor } from '@signi/shared';
 import { isQuestionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
-import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { CARDINALS } from './pt.consts.js';
 import { contractDet } from './contractDet.js';
@@ -37,9 +37,10 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // article of an ordinary possessor ("dos meus livros") but not across "todos", so the phrase is
   // the one the object builds, behind a plain "de".
   if (possessive && ownDeterminer === 'all') return ` de ${npText(poss)}`;
-  const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
-  const possessed = possessedHeadForms(poss, 'definite');
-  const f = detached ? { ...possessed, definiteness: ownDeterminer } : possessed;
+  const detached = !!possessive && keptBesidePossessive(poss.head.forms);
+  // The partitive "most" keeps its own article, which "de" fuses with and the possessive rides on:
+  // "da maioria dos seus gatos" (A314).
+  const f = detached || (possessive && ownDeterminer === 'most') ? ownHeadForms(poss) : possessedHeadForms(poss, 'definite');
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
   // A counted possessor keeps its cardinal: "um período de vinte e quatro horas" (C31).

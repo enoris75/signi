@@ -20,14 +20,14 @@ import { BETWEEN_PREP } from './pt.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
 import { headPreposition } from '../../functions/headPreposition.js';
 import { tonicPhrase } from './tonicPhrase.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS, TONIC_COMPLEMENTS } from '../../functions/functions.consts.js';
-import { KEPT_BESIDE_POSSESSIVE, possessivePt, pronounPossessor } from '../../possessive.js';
+import { keptBesidePossessive, possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { porPrep } from './porPrep.js';
 import { coordinateElement } from './coordinateElement.js';
@@ -117,14 +117,19 @@ export function complementsPhrase(
           // essive "como" contracts with nothing and drops the article from both ("como sua prisão",
           // see `essivePhrase`).
           const possessive = ptPossessiveWord(np, false);
+          // A determiner kept beside the possessive is not replaced, the indefinite included: the
+          // link takes it as it takes any other ("em uma prisão") and the possessive follows the noun
+          // — "em uma prisão sua", never "na sua prisão" (A330).
           const f0 = predicativeForms(np.head.forms);
-          const f = possessive ? { ...f0, definiteness: 'definite' } : f0;
+          const detached = !!possessive && keptBesidePossessive(f0);
+          const f = possessive && !detached ? { ...f0, definiteness: 'definite' } : f0;
           const pl = isPlural(f);
           const marker = !link ? ''
             : LINK_CONTRACT[link] ? contractDet(LINK_CONTRACT[link], link, f, pl)
             : prepDet(link, f, pl);
-          // The marker carries the determiner when there is one, so the phrase itself goes bare.
-          const bare = marker ? { ...f, definiteness: 'bare' } : f;
+          // The marker carries the determiner when there is one, so the phrase itself goes bare —
+          // marked as a determiner the marker took, where the possessive has to stay behind the noun.
+          const bare = marker ? { ...f, definiteness: 'bare', ...(detached ? { indefinite_dropped: '1' } : {}) } : f;
           return [marker, withRelative(nounPhrase(bare, ptAdj(np), possessive), np)].filter(Boolean).join(' ');
         });
       }
@@ -187,9 +192,9 @@ export function complementsPhrase(
       // prenominal without an article of its own.
       const possessive = ptPossessiveWord(np, false);
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
-      const detached = !!possessive && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
-      const f = !!possessive && (detached || ownDeterminer === 'all')
-        ? { ...possessedHeadForms(np, 'definite'), definiteness: ownDeterminer }
+      const detached = !!possessive && keptBesidePossessive(np.head.forms);
+      const f = !!possessive && (detached || ownDeterminer === 'all' || ownDeterminer === 'most')
+        ? ownHeadForms(np)
         : possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');

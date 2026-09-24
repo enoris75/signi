@@ -19,6 +19,15 @@ describe('ptAdj', () => {
     expect(ptAdj(two).post).toBe('grandes e velhas');
   });
 
+  // A313: "suficientes gatos seus", but "gatos suficientes" with no pronominal possessive.
+  test('enough leads the noun beside a pronominal possessive, and closes it otherwise', () => {
+    const mine = { possessor: { kind: 'pronominal', person: '1', number: 'singular' } as const };
+    expect(ptAdj(np(GATO, { number: 'plural', definiteness: 'enough' }, { ...mine, adjectives: [adj(VELHO)] })))
+      .toEqual({ pre: 'suficientes', post: 'velhos' });
+    expect(ptAdj(np(GATO, { number: 'plural', definiteness: 'enough' }, { adjectives: [adj(VELHO)] })))
+      .toEqual({ pre: '', post: 'velhos suficientes' });
+  });
+
   test('an ordinal precedes the noun', () => {
     const phrase = np(CASA, { number: 'plural' }, { adjectives: [concept(PRIMEIRO, 'FIRST'), adj(FORTE)] });
     expect(ptAdj(phrase)).toEqual({ pre: 'primeiras', post: 'fortes' });

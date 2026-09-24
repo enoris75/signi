@@ -15,13 +15,13 @@ import { BETWEEN_PREP } from '../de.consts.js';
 import { temporalRelation } from '../../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../../functions/tonicPronoun.js';
 import { isPrivative } from '../../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../../functions/tonicHeadForms.js';
 import { TONIC_COMPLEMENTS } from '../../../functions/functions.consts.js';
 import { tonicPronounDe } from '../tonicPronounDe.js';
-import { dativePronounDe, KEPT_BESIDE_POSSESSIVE, possessiveDe } from '../../../possessive.js';
+import { dativePronounDe, keptBesidePossessive, possessiveDe } from '../../../possessive.js';
 import { adjectivalNoun } from '../adjectivalNoun.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
@@ -165,11 +165,10 @@ export function complementsParts(
       // possessive rather than in its place ("in allen meinen Häusern"), so the head keeps its own
       // determiner there too while the possessive stays prenominal.
       const ownDeterminer = np.head.forms['definiteness'] ?? 'definite';
-      const detached = !!poss && KEPT_BESIDE_POSSESSIVE.has(ownDeterminer);
-      const possessedForms = possessedHeadForms(np, 'bare');
-      const nounForms = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all')
-        ? { ...possessedForms, definiteness: ownDeterminer }
-        : possessedForms);
+      const detached = !!poss && keptBesidePossessive(np.head.forms);
+      const nounForms = articledNameForms(np, !!poss && (detached || ownDeterminer === 'all' || ownDeterminer === 'most')
+        ? ownHeadForms(np)
+        : possessedHeadForms(np, 'bare'));
       const f = pronoun ? tonicHeadForms(np) : nounForms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = possessedDeclension(np, f);
@@ -321,26 +320,29 @@ export function complementsParts(
       }
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
       if (definiteness === 'relative') return head;
+      // "die meisten" takes a possessed head as its partitive genitive: "mit den meisten ihrer Kater",
+      // so what follows the head is genitive whatever case the preposition governs (A314).
+      const nounCase: Case = poss && ownDeterminer === 'most' && f['proper'] !== '1' ? 'gen' : _case;
       // An adjectival noun takes the adjective ending its determiner and case select and none of the
       // noun rules ("mit dem Verwandten", "zu einem Verlobten", P11 D8); a weak masculine goal/place
       // declines to -(e)n in the oblique ("zum/im/aus dem Jungen"); every other noun takes the
       // regular dative-plural -n, and a genitive its -(e)s ("wegen des Hundes").
       const word = f['adjectival'] === '1'
-        ? adjectivalNoun(compound, f, _case, definiteness, plural)
-        : _case === 'gen'
-          ? genitiveS(compound, _case, f, plural)
-          : f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
-      const declined = adjPhrase(np, _case, definiteness);
+        ? adjectivalNoun(compound, f, nounCase, definiteness, plural)
+        : nounCase === 'gen'
+          ? genitiveS(compound, nounCase, f, plural)
+          : f['weak'] === '1' ? weakN(compound, nounCase, plural) : datPluralN(compound, nounCase, plural);
+      const declined = adjPhrase(np, nounCase, definiteness);
       const adj = declined ? `${declined} ` : '';
       const possessive = poss && !detached
-        ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
+        ? `${possessiveDe(poss, nounCase, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
       const vonPhrase = detached && poss ? ` von ${dativePronounDe(poss)}` : '';
       // A cardinal stands after the determiner and possessive and before the declined adjectives, as
       // `nounPhrase` places it: "in den drei Häusern", "mit meinen drei Hunden" (C31, A291). The
       // determiner is in `head`, so a fusion like "im" / "zum" is untouched.
       // At one after der or dieser it declines weak: "mit dem einen Hund" (`numeralDe`, A319).
-      const numeral = numeralDe(f, _case, definiteness, !!poss || isQuestionPossessor(np.possessor));
+      const numeral = numeralDe(f, nounCase, definiteness, !!poss || isQuestionPossessor(np.possessor));
       const counted = numeral ? `${numeral} ` : '';
       const rest = `${possessive}${counted}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${vonPhrase}${possessorText(np)}${nounStandard(np, _case)}${subordinateClause(np)}${nounExamples(np, _case)}`;
       return head ? `${head} ${rest}` : rest;

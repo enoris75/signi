@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { np } from '../languages/resolved.fixtures.js';
-import { possessedHeadForms } from './possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from './possessedHeadForms.js';
 
 const CASA = { base: 'casa', gender: 'fem', definiteness: 'indefinite' };
 const GATTO = { base: 'gatto', gender: 'masc' };
@@ -20,6 +20,15 @@ describe('possessedHeadForms', () => {
     expect(yours.head.forms['proper']).toBe('1');
     const plain = np(ASIE);
     expect(possessedHeadForms(plain, 'bare')['proper']).toBe('1');
+  });
+
+  // A329: the possessive has the slot in these forms, so a dropped indefinite's mark goes; the
+  // head's own forms (`ownHeadForms`) keep it, and drop only `proper`.
+  test('the possessed forms drop a dropped indefinite\'s mark, the own forms keep it', () => {
+    const COUNTED = { base: 'casa', gender: 'fem', definiteness: 'bare', indefinite_dropped: '1', numeral: '2', proper: '1' };
+    const mine = np(COUNTED, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } });
+    expect(possessedHeadForms(mine, 'bare')).toEqual({ base: 'casa', gender: 'fem', definiteness: 'bare', numeral: '2' });
+    expect(ownHeadForms(mine)).toEqual({ base: 'casa', gender: 'fem', definiteness: 'bare', indefinite_dropped: '1', numeral: '2' });
   });
 
   test('a genitive possessor, or none, leaves the forms as they are', () => {

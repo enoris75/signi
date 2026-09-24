@@ -69,3 +69,34 @@ With both trial fixes, every row rendered its Want and the rest of the engine su
 | **Test** | `possession.test.ts` → *known bugs: a French or German plural indefinite possessor detaches into a broken phrase (A326)* (4 `test.fails`: the possessor on all seven, the mass possessor, the French source on all seven, the cause, plus a regression test for the unpossessed phrase, the singular, *some* and the plain source) |
 
 Found on 2026-09-24 by the P11-E4 / A277 coverage audit (lane P1).
+
+## Resolved
+
+Fixed on 2026-09-24. French takes the cleaner of the two shapes above: the detached branch lets the
+caller choose the determiner from the head's own forms. German takes the trial's fix.
+
+- **French.** [fr/renderNP.ts](../../../packages/engine/src/languages/fr/renderNP.ts) gained the
+  optional `ownHeadFor` for A327. A detached head given one takes its whole determiner from it. The
+  genitive possessor passes `deDet` over `ownHeadForms(poss)`, so *la maison d'amis à moi*, *d'eau à
+  moi*, *de deux amis à elle*. [fr/complementsPhrase.ts](../../../packages/engine/src/languages/fr/complementsPhrase.ts)
+  passes each relation's own `headFor` over the head's own forms, so every complement builds a
+  detached head as it builds the unpossessed one: *loin de maisons à moi*, *à cause d'amis à moi*,
+  *par la faute d'amis à moi*, *parle d'amis à moi*. The relations that do not govern *de* are
+  unchanged (*dans une maison à moi*, *avec des amis à moi*, *grâce à des amis à moi*).
+- **German.** [de/genitiveShows.ts](../../../packages/engine/src/languages/de/genitiveShows.ts) keeps
+  its early *yes* only for a prenominal possessive. A detached one (`keptBesidePossessive`) lets the
+  head's own determiner decide. [de/possessorText.ts](../../../packages/engine/src/languages/de/possessorText.ts)'s
+  `vonDative` writes the detached `von ${dativePronounDe(…)}`. So *das Haus von Freunden von mir*,
+  *von Wasser von mir*, *wegen Freunden von mir*. This also repairs the counted possessor that A329
+  had broken on this branch (*das Buch zwei Freunde von ihr* became *das Buch von zwei Freunden von
+  ihr*).
+
+The four `test.fails` in `known bugs: a French or German plural indefinite possessor detaches into a
+broken phrase (A326)` in [possession.test.ts](../../../packages/engine/test/possession.test.ts) are
+plain tests now. The same block gained the counted possessor, an adjective (*de vieux amis à moi*,
+*alter Freunde von mir*), the negative and positive cause, *this* in the cause, the comitative, the
+locative and the topic. The colocated `genitiveShows.test.ts` and `renderNP.test.ts` gained cases.
+
+Not changed: German's negative noun cause writes *durch die Schuld* + a genitive whether or not it
+shows (*durch die Schuld Freunde von mir*), with or without the possessive. That is a separate
+defect.

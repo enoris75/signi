@@ -21,7 +21,7 @@ import { AMONG_PREP, BETWEEN_PREP } from './fr.consts.js';
 import { temporalRelation } from '../../functions/temporalRelation.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
-import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
+import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { isPrivative } from '../../functions/isPrivative.js';
 import { tonicHeadForms } from '../../functions/tonicHeadForms.js';
@@ -168,10 +168,14 @@ export function complementsPhrase(
       // the forms and not the phrase. A169's positive and comparative stay bare.
       const bareName = (nf: Record<string, string>, lead: string): boolean =>
         nf['proper'] === '1' && lead === nf['base'] && nf['relativeSuperlative'] !== '1';
-      const headForms = (np: ResolvedNounPhrase): Record<string, string> => {
-        const nf = possessedHeadForms(np, 'bare');
-        return np.adjectives.some(isRelativeSuperlative) ? { ...nf, relativeSuperlative: '1' } : nf;
-      };
+      const marked = (np: ResolvedNounPhrase, nf: Record<string, string>): Record<string, string> =>
+        np.adjectives.some(isRelativeSuperlative) ? { ...nf, relativeSuperlative: '1' } : nf;
+      const headForms = (np: ResolvedNounPhrase): Record<string, string> => marked(np, possessedHeadForms(np, 'bare'));
+      // A head that keeps its determiner beside a detached possessive takes the head an unpossessed
+      // phrase would, built from its own forms (`renderNP`'s `ownHeadFor`): so "de" drops a plural or
+      // mass indefinite as it does without the possessive, "loin de maisons à moi", "à cause d'amis à
+      // moi" (A326).
+      const ownForms = (np: ResolvedNounPhrase): Record<string, string> => marked(np, ownHeadForms(np));
       // A bare land name is "in" and goes "to" with "en" when it is feminine or opens on a vowel ("en
       // Italie", "en Antarctique"), and with "au" when it is a masculine opening on a consonant ("au
       // Japon", "au Portugal"). All the continents take "en"; the countries split (localization B36).
@@ -329,11 +333,11 @@ export function complementsPhrase(
           return `${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
         };
         if (causeSent === 'negative') {
-          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(headForms(np))));
+          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(headForms(np)), headFor(ownForms(np))));
         }
         const tail = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
           causeSent === 'positive' ? aDet(nf, plural, lead) : deDet(nf, plural, lead);
-        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(headForms(np))));
+        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(headForms(np)), tail(ownForms(np))));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
       // A pronoun behind an adposition is the bare preposition + the tonic form, with no article
@@ -363,7 +367,7 @@ export function complementsPhrase(
         || (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
         // A plain goal on it, "va à la maison" (P09-E37) — unless the verb fixes its own ("se déplace vers le foyer").
         || (type === 'direction' && !verbForms['direction_prep'] && directionIdiom(c, np, DIRECTION_IDIOMS))
-        || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))), scoped));
+        || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor)), headFor(ownForms(np))), scoped));
       return scoped ? `${scoped} ${group}` : group;
     })
     // A cause the plan denies rather than the clause takes its negator here, in front of whatever

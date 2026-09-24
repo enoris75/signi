@@ -1,6 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { KEPT_BESIDE_POSSESSIVE } from '../../possessive.js';
+import { keptBesidePossessive } from '../../possessive.js';
 import { hasPartitivePossessor } from './hasPartitivePossessor.js';
 
 /**
@@ -32,7 +32,7 @@ export function keepsHeadDeterminer(forms: Record<string, string>): boolean {
  */
 export function keepsDeterminerBesidePossessive(forms: Record<string, string>): boolean {
   if (forms['proper'] === '1') return false;
-  return keepsHeadDeterminer(forms) || KEPT_BESIDE_POSSESSIVE.has(forms['definiteness'] ?? 'definite');
+  return keepsHeadDeterminer(forms) || keptBesidePossessive(forms);
 }
 
 /**

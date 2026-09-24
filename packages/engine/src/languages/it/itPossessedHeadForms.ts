@@ -26,11 +26,15 @@ import { isPlural } from './isPlural.js';
  * In address (the `vocative` form `resolveAddress` sets) there is no article to ride on: "Mio amico,
  * corri", "Miei nonni, correte" (A336). "Loro" keeps its article there too, as it does everywhere.
  */
-const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all']);
+// `most` too, whose partitive's own article carries the possessive: "la maggior parte dei suoi gatti".
+const IT_KEPT_BESIDE_POSSESSIVE: ReadonlySet<string> = new Set([...KEPT_BESIDE_POSSESSIVE, 'all', 'most']);
 
 function keepsOwnDeterminer(forms: Record<string, string>): boolean {
   const definiteness = forms['definiteness'] ?? 'definite';
   if (definiteness === 'indefinite') return !isPlural(forms) && forms['uncountable'] !== '1';
+  // A numeral that took the indefinite's place is written where the article would be, so the
+  // possessive stacks after it as after "un": "due miei amici", and at one "un mio amico" (A329).
+  if (definiteness === 'bare') return forms['indefinite_dropped'] === '1' && forms['numeral'] !== undefined;
   return IT_KEPT_BESIDE_POSSESSIVE.has(definiteness);
 }
 

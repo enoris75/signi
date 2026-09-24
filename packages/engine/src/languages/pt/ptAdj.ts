@@ -1,3 +1,4 @@
+import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
@@ -52,5 +53,11 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   // "gatos suficientes"), after the adjectives and outside their coordination (P09-E25). It is the
   // determiner, not one more adjective, so it closes the phrase: "comida quente suficiente".
   const enough = np.head.forms['definiteness'] === 'enough' ? (plural ? 'suficientes' : 'suficiente') : '';
+  // Beside a pronominal possessive, which follows the noun as beside any kept determiner (A187), it
+  // goes in front instead, as Spanish has it: "suficientes gatos seus", not the two postnominal words
+  // of "gatos suficientes seus" (A313).
+  if (enough && np.possessor && isPronominalPossessor(np.possessor)) {
+    return { pre: [enough, ...pre].join(' '), post: adjectives };
+  }
   return { pre: pre.join(' '), post: [adjectives, enough].filter(Boolean).join(' ') };
 }

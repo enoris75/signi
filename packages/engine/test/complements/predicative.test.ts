@@ -868,7 +868,7 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
       es: 'el perro es una casa nuestra.', pt: 'o cão é uma casa nossa.',
     });
     expect(dogIs(np('BOOK', { number: 'plural', possessor: owner('3', 'plural') }))).toMatchObject({
-      es: 'el perro es sus libros.', pt: 'o cão é os seus livros.',
+      es: 'el perro es libros suyos.', pt: 'o cão é livros seus.', // the bare plural predicate detaches the possessive (A330)
     });
     // The other predicative verbs, and a relative clause on the predicate, go the same way.
     expect(sayAll(clause(np('DOG'), 'BECOME', { complements: { predicative: { phrase: np('POSSESSOR', { possessor: his }) } } }))).toMatchObject({
@@ -883,14 +883,15 @@ describe('known bugs: Spanish and Portuguese drop a pronominal possessor on a pr
   });
 
   // The OBJECT complement is the same omission a few lines down in the same function, under both of
-  // its markers. Portuguese has to fuse the factitive link with the possessive's own article
-  // ("em" + "a" → "na sua prisão"); the essive "como" contracts with nothing and drops it.
+  // its markers. Portuguese fuses the factitive link with a definite possessive's own article
+  // ("em" + "a" → "na sua prisão"), and since A330 keeps the unchosen indefinite beside it ("em uma
+  // prisão sua"); the essive "como" contracts with nothing and drops it.
   test('an object complement keeps its possessive in Spanish and Portuguese', () => {
     expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
       directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('PRISON', { possessor: his }) } },
     }))).toMatchObject({
       es: 'el gato transforma la casa en una prisión suya.', // now: "… en una prisión." (the indefinite keeps its article beside "suya", A277)
-      pt: 'o gato transforma a casa na sua prisão.', // now: "… em uma prisão."
+      pt: 'o gato transforma a casa em uma prisão sua.', // the indefinite keeps its article beside "sua" (A330)
     });
     expect(sayAll(clause(np('CAT'), 'USE', {
       directObject: np('HOUSE'),
@@ -984,17 +985,17 @@ describe('known bugs: Spanish and Portuguese plural predicate with a possessive 
     complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'indefinite', possessor: his }) } },
   }));
 
-  test.fails('the dogs are friends of mine', () => {
+  test('the dogs are friends of mine', () => {
     expect(dogsAre({ definiteness: 'indefinite' })).toMatchObject({
       es: 'los perros son amigos míos.', pt: 'os cães são amigos meus.',
     });
   });
 
-  test.fails('the unchosen determiner is the indefinite, and goes the same way', () => {
+  test('the unchosen determiner is the indefinite, and goes the same way', () => {
     expect(dogsAre()).toMatchObject({ es: 'los perros son amigos míos.', pt: 'os cães são amigos meus.' });
   });
 
-  test.fails('Portuguese: the cat transforms the house into a prison of his', () => {
+  test('Portuguese: the cat transforms the house into a prison of his', () => {
     expect(intoAPrison().pt).toBe('o gato transforma a casa em uma prisão sua.');
   });
 
@@ -1026,6 +1027,35 @@ describe('known bugs: Spanish and Portuguese plural predicate with a possessive 
     expect(say(clause(np('CAT'), 'RUN', {
       complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', possessor: his }) } },
     }), 'pt')).toBe('o gato corre em uma casa sua.');
+  });
+
+  // The fix marks the flattened plural (`predicativeForms`) as a dropped indefinite, so every verb
+  // and adjective the predicate takes goes the same way, and the Portuguese factitive keeps its
+  // indefinite in the plural too. A bare predicate the plan asks for still gives its slot away.
+  test('the other predicative verbs, an adjective, the factitive plural and a genuine bare', () => {
+    expect(sayAll(clause(np('DOG'), 'BECOME', {
+      complements: { predicative: { phrase: np('FRIEND', { number: 'plural', possessor: mine }) } },
+    }))).toMatchObject({ es: 'el perro se vuelve amigos míos.', pt: 'o cão se torna amigos meus.' });
+    expect(dogsAre({ adjectives: ['OLD'] })).toMatchObject({
+      es: 'los perros son amigos viejos míos.', pt: 'os cães são amigos velhos meus.',
+    });
+    expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
+      directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('PRISON', { number: 'plural', definiteness: 'indefinite', possessor: his }) } },
+    }))).toMatchObject({
+      es: 'el gato transforma la casa en prisiones suyas.', pt: 'o gato transforma a casa em prisões suas.',
+    });
+    expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
+      directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'this', possessor: his }) } },
+    }))).toMatchObject({ pt: 'o gato transforma a casa nesta prisão sua.' });
+    expect(sayAll(clause(np('CAT'), 'TRANSFORM', {
+      directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'definite', possessor: his }) } },
+    }))).toMatchObject({ pt: 'o gato transforma a casa na sua prisão.' });
+    expect(dogsAre({ definiteness: 'bare' })).toMatchObject({
+      es: 'los perros son mis amigos.', pt: 'os cães são os meus amigos.',
+    });
   });
 });
 
