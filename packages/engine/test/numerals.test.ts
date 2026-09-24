@@ -565,3 +565,59 @@ describe('known bugs: the Spanish personal a drops or loses the numeral of a cou
     expect(depends(np('CONDITION', { numeral: 1 }))).toBe('el gato depende de la condición.');
   });
 });
+
+// A356. A340's gap in Portuguese: a verb's own preposition (DEPEND's de, CLICK's em) builds its object
+// in prepObjectText, which never writes the numeral. The count is lost after every determiner ("das
+// condições" for "das duas condições"), and the indefinite one loses its article too ("clica em
+// botão"). The Wants are the plain object's ("vê as duas condições") after the fused preposition.
+describe('known bugs: the Portuguese prepositional object drops the numeral (A356)', () => {
+  const mine = { kind: 'pronominal', person: '1', number: 'singular' } as const;
+  const depends = (object: NounPhrase, negative = false) =>
+    say(clause(np('CAT'), 'DEPEND', { directObject: object, verbPhrase: { negative } }), 'pt');
+  const clicks = (object: NounPhrase) => say(clause(np('CAT'), 'CLICK', { directObject: object }), 'pt');
+
+  test.fails('the definite and the indefinite', () => {
+    expect([
+      depends(np('CONDITION', { numeral: 2 })),
+      depends(np('CONDITION', { numeral: 2 }), true),
+      depends(np('CONDITION', { numeral: 2, definiteness: 'indefinite' })),
+    ]).toEqual([
+      'o gato depende das duas condições.',
+      'o gato não depende das duas condições.',
+      'o gato depende de duas condições.',
+    ]);
+  });
+
+  test.fails('the demonstratives and the possessive', () => {
+    expect([
+      depends(np('CONDITION', { numeral: 2, definiteness: 'this' })),
+      depends(np('CONDITION', { numeral: 3, definiteness: 'that' })),
+      depends(np('CONDITION', { numeral: 2, possessor: mine })),
+    ]).toEqual([
+      'o gato depende destas duas condições.',
+      'o gato depende dessas três condições.',
+      'o gato depende das minhas duas condições.',
+    ]);
+  });
+
+  test.fails('CLICK\'s em', () => {
+    expect([
+      clicks(np('BUTTON', { numeral: 2 })),
+      clicks(np('BUTTON', { numeral: 1, definiteness: 'indefinite' })),
+    ]).toEqual([
+      'o gato clica nos dois botões.',
+      'o gato clica em um botão.',
+    ]);
+  });
+
+  test('regression: the one beside a definite, the plain object, an uncounted plural, and the other languages', () => {
+    expect(depends(np('CONDITION', { numeral: 1 }))).toBe('o gato depende da condição.');
+    expect(depends(np('CONDITION', { number: 'plural' }))).toBe('o gato depende das condições.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('CONDITION', { numeral: 2 }) }), 'pt')).toBe('o gato vê as duas condições.');
+    expect(sayAll(clause(np('CAT'), 'DEPEND', { directObject: np('CONDITION', { numeral: 2 }) }))).toMatchObject({
+      en: 'the cat depends on the two conditions.', it: 'il gatto dipende dalle due condizioni.',
+      fr: 'le chat dépend des deux conditions.', de: 'der Kater hängt von den zwei Bedingungen ab.',
+      es: 'el gato depende de las dos condiciones.', ja: '猫は二つの条件に依存しています。',
+    });
+  });
+});
