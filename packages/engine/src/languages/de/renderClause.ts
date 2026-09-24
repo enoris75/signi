@@ -89,6 +89,17 @@ export function renderClause(given: ResolvedPhrase, inverted = false, verbFinal 
   if (given.sentenceAdverb) {
     return withSentenceAdverb(given.sentenceAdverb, renderClause({ ...given, sentenceAdverb: undefined }, true, verbFinal, zu));
   }
+  // The experiencer frame of a lexical copula fronts its dative, and the expletive subject follows the
+  // verb: "dem Kater geht es gut", "mir geht es nicht gut" (P09-E31, see `lexicalCopula`). Only a main
+  // declarative has a front field to give it; a question, a subordinate or an infinitive keeps the
+  // plain order ("geht es dir gut?", "…, dem es gut geht").
+  const dative = given.dativeFront ? given.complements?.['terminus'] : undefined;
+  const mood = given.verbPhrase?.mood;
+  if (dative && !inverted && !verbFinal && !zu && !given.verbPhrase?.interrogative && mood !== 'imperative' && mood !== 'infinitive') {
+    const { terminus: _terminus, ...rest } = given.complements!;
+    const front = complementsPhrase({ terminus: dative }, given.verbPhrase?.verb.forms);
+    return `${front} ${renderClause({ ...given, complements: rest, dativeFront: false }, true)}`;
+  }
   // A modal governing an infinitive is the modal chain over it, in the verb cluster: "handeln wollen",
   // never "wollen, zu handeln" (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);

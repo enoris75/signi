@@ -80,4 +80,23 @@ describe('resolveVerbPhrase', () => {
       expect(modals[0]!.verb.conceptId).toBe('WANT');
     });
   });
+
+  // P09-E43: TELL is "raccontare" with a story and "dire" with an infinitive.
+  describe('a verb with a sense for an infinitive', () => {
+    const RACCONTARE = { base: 'raccontare', infinitive_sense: 'TELL_ORDER' };
+    const DIRE = { base: 'dire', object_case: 'dat', infinitive_link: 'di' };
+    const TELLING = lexicon({ TELL: RACCONTARE, TELL_ORDER: DIRE });
+
+    test('resolves to that sense when the clause governs an infinitive, object or not', () => {
+      expect(resolveVerbPhrase({ verb: 'TELL' }, 'it', TELLING, undefined, undefined, true, undefined, true).verb)
+        .toEqual({ conceptId: 'TELL_ORDER', forms: DIRE });
+      expect(resolveVerbPhrase({ verb: 'TELL' }, 'it', TELLING, undefined, undefined, false, undefined, true).verb.conceptId)
+        .toBe('TELL_ORDER');
+    });
+
+    test('keeps the verb itself without one', () => {
+      expect(resolveVerbPhrase({ verb: 'TELL' }, 'it', TELLING, undefined, undefined, true).verb)
+        .toEqual({ conceptId: 'TELL', forms: RACCONTARE });
+    });
+  });
 });

@@ -144,7 +144,9 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   if (suffixCausative && causee) {
     segs.push(...slotSegs(causee, phrase.infinitiveComplement?.directObject ? 'に' : 'を'));
   } else if (phrase.infinitiveComplement) {
-    if (causee) segs.push(...slotSegs(causee, 'が'));
+    // A governor naming a dative controller (`object_case: 'dat'`, P09-E43) marks it に, as the one
+    // permitted or told: 猫に走ることを許す, 猫に走るように言う.
+    if (causee) segs.push(...slotSegs(causee, phrase.verbPhrase?.verb.forms['object_case'] === 'dat' ? 'に' : 'が'));
     segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: infinitiveLink(phrase) || 'ことを' });
   }
   // An object clause stands where the object would, right ahead of the verb: plain, its subject

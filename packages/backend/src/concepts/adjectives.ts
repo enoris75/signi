@@ -206,6 +206,36 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // P09's *okay* (rank 290, the predicate; P09-E31): well-being, which five languages say with a verb
+    // of their own rather than with BE + an adjective. The lexeme names that verb as `copula` — BE's
+    // sense BE_FARING, *stare* / *aller* / *gehen* — and the translator swaps it in for BE when this
+    // adjective is BE's predicate (`lexicalCopula`): "il gatto sta bene", "le chat va bien". German
+    // also takes the experiencer frame (`experiencer`, C34's key on the predicate): the one who fares
+    // is a dative and *es* the subject, "dem Kater geht es gut". Spanish and Portuguese keep BE, whose
+    // transient copula is already *estar* ("está bien", "está bem"); Japanese 大丈夫 is a な-adjective
+    // ("猫は大丈夫です") and English keeps BE ("is okay"). The Romance words are adverbs, so they never
+    // agree (INVARIABLE_ADJ).
+    //
+    // Predicative only (P09-E31 D3): "an okay cat" is marginal in English and impossible in five
+    // languages, but the picker has no predicate-only slot — `slot` would hide it from the predicate
+    // picker too, which is the same adjective picker — so it is still offered attributively.
+    id: 'OKAY',
+    role: 'adjective',
+    transient: true, // a state that holds now → es/pt predicate with estar (A47)
+    description: 'in a satisfactory state; all right',
+    synonym: 'all right',
+    emoji: '👌',
+    forms: {
+      en: { base: 'okay' },
+      it: { base: 'bene', copula: 'BE_FARING' },
+      fr: { base: 'bien', copula: 'BE_FARING' },
+      de: { base: 'gut', copula: 'BE_FARING', experiencer: '1' },
+      es: { base: 'bien' },
+      ja: { base: '大丈夫な', reading: 'だいじょうぶな' },
+      pt: { base: 'bem' },
+    },
+  },
+  {
     id: 'SAD',
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)

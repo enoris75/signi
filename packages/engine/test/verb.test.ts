@@ -507,6 +507,10 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['ARRANGE', 'la gatta ha disposto.'], ['ASSERT', 'la gatta ha affermato.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['APPLY', 'la gatta ha applicato.'],
+    // P09-E43: permettere's strong participle, and TELL_ORDER's dire.
+    ['ALLOW', 'la gatta ha permesso.'], ['TELL_ORDER', 'la gatta ha detto.'],
+    // P09-E42's aspectual verbs take avere.
+    ['STOP_DOING', 'la gatta ha smesso.'], ['CONTINUE_DOING', 'la gatta ha continuato.'],
     ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
     ['BECOME', 'la gatta è diventata.'],
     // The inchoative BEGIN selects essere and agrees; the causative START keeps avere.

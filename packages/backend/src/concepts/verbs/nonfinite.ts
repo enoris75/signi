@@ -284,6 +284,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'deixando', participle: 'deixado' },
     ja: { te: '許して', te_reading: 'ゆるして', nai: '許さない', nai_reading: 'ゆるさない', passive: '許される', passive_reading: 'ゆるされる' },
   },
+  ALLOW: {
+    en: { gerund: 'allowing', participle: 'allowed' },
+    it: { gerund: 'permettendo', participle: 'permesso' },
+    fr: { participle: 'permis' }, de: { participle: 'erlaubt' },
+    es: { gerund: 'permitiendo', participle: 'permitido' },
+    pt: { gerund: 'permitindo', participle: 'permitido' },
+    ja: { te: '許して', te_reading: 'ゆるして', nai: '許さない', nai_reading: 'ゆるさない', passive: '許される', passive_reading: 'ゆるされる' },
+  },
   // piacere selects essere (è piaciuto). Japanese needs none: 好き is an adjective, and its forms
   // come off the copula (localization C34).
   LIKE: {
@@ -593,6 +601,33 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     ja: { te: '必要として', te_reading: 'ひつようとして', nai: '必要としない', nai_reading: 'ひつようとしない', passive: '必要とされる', passive_reading: 'ひつようとされる' },
   },
   // versuchen is inseparable, so its participle has no ge-.
+  // P09-E42's aspectual verbs take avere / avoir / haben. German weitermachen's participle is only
+  // its own: in a clause the particle rides the governed verb, which brings its own participle.
+  // BE's faring sense (P09-E31): stare, aller and gehen take the BE auxiliary.
+  BE_FARING: {
+    en: { gerund: 'faring', participle: 'fared' },
+    it: { gerund: 'stando', participle: 'stato', aux: 'be' },
+    fr: { participle: 'allé', aux: 'be' }, de: { participle: 'gegangen', aux: 'be' },
+    es: { gerund: 'estando', participle: 'estado' },
+    pt: { gerund: 'estando', participle: 'estado' },
+    ja: { te: '過ごして', te_reading: 'すごして', nai: '過ごさない', nai_reading: 'すごさない' },
+  },
+  STOP_DOING: {
+    en: { gerund: 'stopping', participle: 'stopped' },
+    it: { gerund: 'smettendo', participle: 'smesso' },
+    fr: { participle: 'arrêté' }, de: { participle: 'aufgehört' },
+    es: { gerund: 'dejando', participle: 'dejado' },
+    pt: { gerund: 'parando', participle: 'parado' },
+    ja: { te: 'やめて', nai: 'やめない', passive: 'やめられる' },
+  },
+  CONTINUE_DOING: {
+    en: { gerund: 'continuing', participle: 'continued' },
+    it: { gerund: 'continuando', participle: 'continuato' },
+    fr: { participle: 'continué' }, de: { participle: 'weitergemacht' },
+    es: { gerund: 'siguiendo', participle: 'seguido' },
+    pt: { gerund: 'continuando', participle: 'continuado' },
+    ja: { te: '続けて', te_reading: 'つづけて', nai: '続けない', nai_reading: 'つづけない', passive: '続けられる', passive_reading: 'つづけられる' },
+  },
   TRY: {
     en: { gerund: 'trying', participle: 'tried' },
     it: { gerund: 'provando', participle: 'provato' },
@@ -1190,6 +1225,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'contando', participle: 'contado' },
     pt: { gerund: 'contando', participle: 'contado' },
     ja: { te: '伝えて', te_reading: 'つたえて', nai: '伝えない', nai_reading: 'つたえない', passive: '伝えられる', passive_reading: 'つたえられる' },
+  },
+  TELL_ORDER: {
+    en: { gerund: 'telling', participle: 'told' },
+    it: { gerund: 'dicendo', participle: 'detto' },
+    fr: { participle: 'dit' }, de: { participle: 'gesagt' },
+    es: { gerund: 'mandando', participle: 'mandado' },
+    pt: { gerund: 'dizendo', participle: 'dito' },
+    ja: { te: '言って', te_reading: 'いって', nai: '言わない', nai_reading: 'いわない', passive: '言われる', passive_reading: 'いわれる' },
   },
   ASK: {
     en: { gerund: 'asking', participle: 'asked' },

@@ -179,7 +179,7 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
  * so is a prepositional phrase standing for one ("la frase sin título"). The agreement rule would otherwise inflect
  * either like any adjective with its ending ("*sin títula").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['cero', 'sin título']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['cero', 'sin título', 'bien']);
 
 /**
  * "con" fuses with the 1st and 2nd singular tonic pronouns, and with the reflexive: con + mí →

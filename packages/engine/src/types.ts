@@ -254,6 +254,13 @@ export interface ResolvedVerbPhrase {
    */
   bareInfinitive?: boolean;
   /**
+   * Set on a governed infinitive clause whose governor takes it as a **gerund** — English *stop* and
+   * *continue* ("stops **running**", no "to") and Spanish *seguir* ("sigue **corriendo**"). Lexical,
+   * named by the governor (`complement_form: 'gerund'`), and read by the two engines whose lexemes
+   * name it (P09-E42).
+   */
+  gerundComplement?: boolean;
+  /**
    * The register of an imperative (see PhrasePlan.imperativeRegister). Absent ⇒ `'request'`,
    * a command spoken to someone. `'instruction'` is the impersonal directive a UI control or a
    * recipe step carries; each engine renders it in the form its language conventionally uses
@@ -404,6 +411,12 @@ export interface ResolvedQuestion {
 
 export interface ResolvedPhrase {
   subject: ResolvedNounElement;
+  /**
+   * The clause puts its `terminus` — a dative experiencer — ahead of the verb, with the expletive
+   * subject after it: German "**dem Kater** geht es gut" (P09-E31, see `lexicalCopula`). Read by the
+   * German engine in a main declarative clause; every other engine and clause type ignores it.
+   */
+  dativeFront?: boolean;
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
   verbPhrase?: ResolvedVerbPhrase;
   directObject?: ResolvedNounElement;

@@ -400,13 +400,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         // What is told may be a clause, and then the addressee is a bare object ahead of it: "tells the
         // dog that the cat runs", never "tells to the dog that…" (`clause_terminus_bare`, P09-E4). A
         // story keeps its "to" ("tells the story to the man").
-        base: 'tell', content_clause_force: 'either', clause_terminus_bare: '1',
+        base: 'tell', content_clause_force: 'either', clause_terminus_bare: '1', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'tell', '2sg_present': 'tell', '3sg_present': 'tells',
         '1pl_present': 'tell', '2pl_present': 'tell', '3pl_present': 'tell',
         past: 'told',
       },
       it: {
-        base: 'raccontare', content_clause_force: 'either',
+        base: 'raccontare', content_clause_force: 'either', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'racconto', '2sg_present': 'racconti', '3sg_present': 'racconta',
         '1pl_present': 'raccontiamo', '2pl_present': 'raccontate', '3pl_present': 'raccontano',
         '1sg_past': 'raccontai', '2sg_past': 'raccontasti', '3sg_past': 'raccontò',
@@ -415,7 +415,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'racconteremo', '2pl_future': 'racconterete', '3pl_future': 'racconteranno',
       },
       fr: {
-        base: 'raconter', content_clause_force: 'either',
+        base: 'raconter', content_clause_force: 'either', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'raconte', '2sg_present': 'racontes', '3sg_present': 'raconte',
         '1pl_present': 'racontons', '2pl_present': 'racontez', '3pl_present': 'racontent',
         '1sg_past': 'racontai', '2sg_past': 'racontas', '3sg_past': 'raconta',
@@ -425,7 +425,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       de: {
         // erzählen is inseparable: no ge- in the participle (erzählt).
-        base: 'erzählen', content_clause_force: 'either',
+        base: 'erzählen', content_clause_force: 'either', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'erzähle', '2sg_present': 'erzählst', '3sg_present': 'erzählt',
         '1pl_present': 'erzählen', '2pl_present': 'erzählt', '3pl_present': 'erzählen',
         '1sg_past': 'erzählte', '2sg_past': 'erzähltest', '3sg_past': 'erzählte',
@@ -433,7 +433,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       es: {
         // contar diphthongises o → ue under the stress: cuento, cuentan, but contamos.
-        base: 'contar', content_clause_force: 'either',
+        base: 'contar', content_clause_force: 'either', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'cuento', '2sg_present': 'cuentas', '3sg_present': 'cuenta',
         '1pl_present': 'contamos', '2pl_present': 'contáis', '3pl_present': 'cuentan',
         '1sg_past': 'conté', '2sg_past': 'contaste', '3sg_past': 'contó',
@@ -444,19 +444,96 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       ja: {
         // A verb of saying or thinking quotes the clause it reports with と, on the plain form — 猫が走ると伝えます —
         // where a verb of knowing nominalizes it with ことを (`content_clause_link`, P09-E4).
-        base: '伝える', content_clause_force: 'either', content_clause_link: 'と',
+        base: '伝える', content_clause_force: 'either', content_clause_link: 'と', infinitive_sense: 'TELL_ORDER',
         reading: 'つたえる',
         masu_present: '伝えます',
         masu_present_reading: 'つたえます',
       },
       pt: {
-        base: 'contar', content_clause_force: 'either',
+        base: 'contar', content_clause_force: 'either', infinitive_sense: 'TELL_ORDER',
         '1sg_present': 'conto', '2sg_present': 'conta', '3sg_present': 'conta',
         '1pl_present': 'contamos', '2pl_present': 'contam', '3pl_present': 'contam',
         '1sg_past': 'contei', '2sg_past': 'contou', '3sg_past': 'contou',
         '1pl_past': 'contamos', '2pl_past': 'contaram', '3pl_past': 'contaram',
         '1sg_future': 'contarei', '2sg_future': 'contará', '3sg_future': 'contará',
         '1pl_future': 'contaremos', '2pl_future': 'contarão', '3pl_future': 'contarão',
+      },
+    },
+  },
+
+  {
+    // TELL's sense of instructing (P09-E43): telling someone to do something, an object-controlled
+    // infinitive whose controller is a dative (`object_case: 'dat'`, see `controllerCase`). The
+    // translator selects it for TELL with an infinitive (`infinitive_sense`), so it is a sense of
+    // TELL and no picker offers it. It "dire **al** gatto **di** correre", fr "dire **au** chat
+    // **de** courir", de "sagen **dem** Kater zu laufen", pt "dizer **ao** gato **para** correr", ja
+    // 猫**に**走る**ように**言う. Spanish says it with a finite clause (*le dice al gato que corra*), which
+    // an infinitive complement cannot render, so its lexeme is *mandar*, which takes the infinitive:
+    // "manda al gato correr".
+    id: 'TELL_ORDER',
+    role: 'verb',
+    senseOf: 'TELL',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to instruct someone to do something',
+    emoji: '🗣️',
+    forms: {
+      en: {
+        base: 'tell',
+        '1sg_present': 'tell', '2sg_present': 'tell', '3sg_present': 'tells',
+        '1pl_present': 'tell', '2pl_present': 'tell', '3pl_present': 'tell',
+        past: 'told',
+      },
+      it: {
+        base: 'dire', object_case: 'dat', infinitive_link: 'di',
+        '1sg_present': 'dico', '2sg_present': 'dici', '3sg_present': 'dice',
+        '1pl_present': 'diciamo', '2pl_present': 'dite', '3pl_present': 'dicono',
+        '1sg_past': 'dissi', '2sg_past': 'dicesti', '3sg_past': 'disse',
+        '1pl_past': 'dicemmo', '2pl_past': 'diceste', '3pl_past': 'dissero',
+        '1sg_future': 'dirò', '2sg_future': 'dirai', '3sg_future': 'dirà',
+        '1pl_future': 'diremo', '2pl_future': 'direte', '3pl_future': 'diranno',
+      },
+      fr: {
+        base: 'dire', object_case: 'dat', infinitive_link: 'de',
+        '1sg_present': 'dis', '2sg_present': 'dis', '3sg_present': 'dit',
+        '1pl_present': 'disons', '2pl_present': 'dites', '3pl_present': 'disent',
+        '1sg_past': 'dis', '2sg_past': 'dis', '3sg_past': 'dit',
+        '1pl_past': 'dîmes', '2pl_past': 'dîtes', '3pl_past': 'dirent',
+        '1sg_future': 'dirai', '2sg_future': 'diras', '3sg_future': 'dira',
+        '1pl_future': 'dirons', '2pl_future': 'direz', '3pl_future': 'diront',
+      },
+      de: {
+        // The one told is a dative whatever follows (*sagt dem Kater*), so German's own key serves.
+        base: 'sagen', object_case: 'dat',
+        '1sg_present': 'sage', '2sg_present': 'sagst', '3sg_present': 'sagt',
+        '1pl_present': 'sagen', '2pl_present': 'sagt', '3pl_present': 'sagen',
+        '1sg_past': 'sagte', '2sg_past': 'sagtest', '3sg_past': 'sagte',
+        '1pl_past': 'sagten', '2pl_past': 'sagtet', '3pl_past': 'sagten',
+      },
+      es: {
+        base: 'mandar', object_case: 'dat',
+        '1sg_present': 'mando', '2sg_present': 'mandas', '3sg_present': 'manda',
+        '1pl_present': 'mandamos', '2pl_present': 'mandáis', '3pl_present': 'mandan',
+        '1sg_past': 'mandé', '2sg_past': 'mandaste', '3sg_past': 'mandó',
+        '1pl_past': 'mandamos', '2pl_past': 'mandasteis', '3pl_past': 'mandaron',
+        '1sg_future': 'mandaré', '2sg_future': 'mandarás', '3sg_future': 'mandará',
+        '1pl_future': 'mandaremos', '2pl_future': 'mandaréis', '3pl_future': 'mandarán',
+      },
+      ja: {
+        // An instruction is reported with ように on the plain form: 猫に走るように言う.
+        base: '言う', object_case: 'dat', infinitive_link: 'ように',
+        reading: 'いう',
+        masu_present: '言います',
+        masu_present_reading: 'いいます',
+      },
+      pt: {
+        base: 'dizer', object_case: 'dat', infinitive_link: 'para',
+        '1sg_present': 'digo', '2sg_present': 'diz', '3sg_present': 'diz',
+        '1pl_present': 'dizemos', '2pl_present': 'dizem', '3pl_present': 'dizem',
+        '1sg_past': 'disse', '2sg_past': 'disse', '3sg_past': 'disse',
+        '1pl_past': 'dissemos', '2pl_past': 'disseram', '3pl_past': 'disseram',
+        '1sg_future': 'direi', '2sg_future': 'dirá', '3sg_future': 'dirá',
+        '1pl_future': 'diremos', '2pl_future': 'dirão', '3pl_future': 'dirão',
       },
     },
   },

@@ -3,6 +3,7 @@ import type { ResolvedNounElement, ResolvedRelativeClause } from '../../types.js
 import { RELATIVIZES_AGENT } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
+import { copulaSwap, expletiveSubject } from './lexicalCopula.js';
 import { passiveGap } from './passiveGap.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -82,10 +83,24 @@ export function resolveRelativeClause(
     ? passiveRemap(headRole, subject, directObject)
     : experiencerSlots;
   const complements = resolveComplements(bindComplements(clause.complements, binding), language, lookup, verbPhrase.verb.forms);
+  // A predicate adjective may name the verb it is said with in place of BE, as in a main clause
+  // (P09-E31, see `lexicalCopula`): "il gatto che sta bene". Under German's experiencer frame the head
+  // gapped as the subject is the dative gap, with *es* as the subject: "der Kater, dem es gut geht".
+  const swapped = copulaSwap(verbPhrase, complements, language, lookup);
+  if (swapped?.experiencer && slots.headRole === 'subject') {
+    return {
+      ...slots,
+      headRole: 'terminus',
+      subject: expletiveSubject(language, lookup),
+      ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
+      verbPhrase: swapped.verbPhrase,
+      complements,
+    };
+  }
   return {
     ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
-    verbPhrase,
+    verbPhrase: swapped?.verbPhrase ?? verbPhrase,
     complements: experiencer ? { ...complements, terminus: { phrase: experiencer } } : complements,
   };
 }

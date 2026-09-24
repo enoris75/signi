@@ -5,7 +5,7 @@ coverage check of 2026-09-24: *pay* (rank 258), *provide* (272), *lose* (273), *
 *allow* (346), *win* (347) and *spend* (353, both halves). None is a concept at 1229928. Nine verbs,
 eight glosses probed, one proposed. LOSE meets [B84](B84-stop-wait-die-continue.md)'s NO_LONGER
 defect. *Allow the cat to run* is
-[P09-E43](../../features/P-planning/P09-core-vocabulary/P09-E43-allow-to.md)'s; ALLOW is seeded here
+[P09-E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md)'s; ALLOW is seeded here
 with a plain object.)_
 
 ## Seed first
@@ -23,7 +23,7 @@ Proposed forms, for the seed author to check. **The verbs were not seeded in mem
 | LOSE_GAME | verb | **E24**, rank 273, D2: to be beaten. Intransitive, the game as locative. Only Japanese splits (負ける), so the six others share LOSE's word | lose (lost) | perdere | perdre | verlieren | perder | 負ける (まける) | perder |
 | WIN | verb | **E24**, rank 347. Intransitive or transitive (the game, the prize); ja takes the opponent with に | win (won) | vincere (vinto) | gagner | gewinnen (gewonnen) | ganar | 勝つ (かつ) | vencer / ganhar |
 | THANK | verb | **E24**, rank 300. The person thanked is a dative in German (`object_case: 'dat'`, HELP_VERB's precedent) and に in Japanese; the Spanish and Portuguese *agradecer* take the person as an indirect object (*le agradece*) | thank | ringraziare | remercier | danken (dat.) | agradecer (agradezco) | 感謝する (かんしゃする) | agradecer (agradeço) |
-| ALLOW | verb | **E24**, rank 346. Transitive with a thing as object ("allows the food"). The person + infinitive is E43's. Not LET (*lasciare, laisser, lassen, dejar*), which is C36's bare-infinitive causative | allow | permettere (permesso) | permettre (permis) | erlauben (dat. person) | permitir | 許す (ゆるす) | permitir |
+| ALLOW | verb | **Seeded by [P09-E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md), 2026-09-24**, with these forms (German's dative as `controller_case`) and the gloss below. **E24**, rank 346. Transitive with a thing as object ("allows the food"). The person + infinitive is E43's. Not LET (*lasciare, laisser, lassen, dejar*), which is C36's bare-infinitive causative | allow | permettere (permesso) | permettre (permis) | erlauben (dat. person) | permitir | 許す (ゆるす) | permitir |
 
 - **SPEND_MONEY's Japanese is 費やす**, because 使う is USE's lexeme ("to use money", which is
   SPEND_MONEY's own gloss). お金を使う is the everyday phrase, and with 費やす the gloss お金を使う does not
@@ -49,7 +49,7 @@ Proposed forms, for the seed author to check. **The verbs were not seeded in mem
 | WIN | `infinitiveGloss('BE', { predicate: 'GOOD', predicateDegree: 'most', complements: { locative: GAME indefinite } })` | to be best in a game |
 | LOSE_GAME | **proposal, not probed** (it needs WIN seeded): `infinitiveGloss('WIN', { negative: true, complements: { locative: GAME indefinite } })` | not to win in a game |
 | THANK | `infinitiveGloss('SAY', { object: 'WORD', number: 'plural', adjectives: ['GOOD'], complements: { terminus: PERSON indefinite } })` | to say good words to a person |
-| ALLOW | `infinitiveGloss('LET', { object: 'PERSON', definiteness: 'indefinite', infinitive: { verbPhrase: { verb: 'ACT' }, control: 'object' } })` | to let a person act |
+| ALLOW | `infinitiveGloss('LET', { object: 'PERSON', definiteness: 'indefinite', infinitive: { verbPhrase: { verb: 'ACT' }, control: 'object' } })` | to let a person act — **shipped by P09-E43** |
 
 **Eight probed, one proposed.** WIN stands on [B82](B82-kinds-changes-games-and-parties.md)'s GAME;
 LOSE_GAME on WIN.
@@ -105,7 +105,7 @@ Readings to judge on authoring:
 1. **The NO_LONGER infinitive** and **German *nicht mehr* before a bare object** (reading 4) —
    engine defects. The Italian and Spanish suppletive superlative (reading 5) is a choice.
 2. **ALLOW + person + infinitive**, **HELP + infinitive** in Romance —
-   [P09-E43](../../features/P-planning/P09-core-vocabulary/P09-E43-allow-to.md).
+   [P09-E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md).
 3. **LOSE_GAME's gloss** until WIN is seeded.
 
 ## Coverage

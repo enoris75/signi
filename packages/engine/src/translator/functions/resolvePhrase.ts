@@ -8,9 +8,12 @@ import { contentClauseForce, declarativeClause } from './contentClauseForce.js';
 import { contentClauseMood } from './contentClauseMood.js';
 import { contentClauseTense } from './contentClauseTense.js';
 import { controlledSubject } from './controlledSubject.js';
+import { controllerCase } from './controllerCase.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { existentialPlan } from './existentialPlan.js';
+import { fuseGovernedVerb } from './fuseGovernedVerb.js';
+import { lexicalCopula } from './lexicalCopula.js';
 import { asImperfect, imperfectivePast } from './imperfectivePast.js';
 import { bindComplements, bindCoreferents, subjectBinding } from './bindCoreferents.js';
 import { negativePolarity } from './negativePolarity.js';
@@ -52,9 +55,13 @@ function resolveInfinitiveComplement(
   // *let* and German *lassen* write no "to" / "zu" and no comma. The flag belongs to the governed
   // clause, which is what renders it, so it is threaded onto that clause's verb phrase here (C36).
   const bare = governor?.['infinitive_bare'] === '1' && resolved.verbPhrase;
+  // A governor that takes a **gerund** names it the same way (`complement_form: 'gerund'`): English
+  // *stop* and *continue*, Spanish *seguir* — "stops running", "sigue corriendo" (P09-E42).
+  const gerund = governor?.['complement_form'] === 'gerund' && resolved.verbPhrase;
   return {
     ...resolved,
     ...(bare ? { verbPhrase: { ...resolved.verbPhrase!, bareInfinitive: true } } : {}),
+    ...(gerund ? { verbPhrase: { ...resolved.verbPhrase!, gerundComplement: true } } : {}),
     ...(byObject ? { control: 'object' as const } : {}),
   };
 }
@@ -168,6 +175,8 @@ export function resolvePhrase(
         // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
         // coordination is read off its group agreement, an animal only when every conjunct is one.
         citation ? undefined : subject.agreement,
+        // Governing an infinitive selects an `infinitive_sense` (P09-E43): TELL_ORDER for TELL.
+        !!plan.infinitiveComplement,
       )
     : undefined;
   const verbPhrase = resolvedVerbPhrase
@@ -229,7 +238,8 @@ export function resolvePhrase(
   const resolved: ResolvedPhrase = {
     subject: passive ? patient! : experiencer ? directObject! : subject,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
-    verbPhrase: clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject),
+    // An object controller takes the case the governing verb's lexeme names for it (P09-E43).
+    verbPhrase: controllerCase(clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject), language, objectControlled(plan)),
     directObject: passive || experiencer ? undefined : directObject,
     ...(passive && !generic && asked?.role !== 'agent' ? { agent: subject } : {}),
     ...(asked ? { question: asked } : {}),
@@ -323,7 +333,10 @@ export function resolvePhrase(
   // A bare copula elides the subject complement of the clause before it (A121). The main clause looks
   // back to its protasis first, so a coordinated clause can then look back to a main clause that
   // itself elides one.
-  const main = resolved.condition ? elideSubjectComplement(resolved, resolved.condition) : resolved;
+  // German *weiter-* and Japanese 〜続ける fuse the governing verb with the one it governs (P09-E42).
+  // A predicate adjective may name the verb it is said with in place of BE (P09-E31).
+  const fused = lexicalCopula(fuseGovernedVerb(resolved, language), language, lookup);
+  const main = fused.condition ? elideSubjectComplement(fused, fused.condition) : fused;
   return main.coordination
     ? { ...main, coordination: { ...main.coordination, clause: elideSubjectComplement(main.coordination.clause, main) } }
     : main;

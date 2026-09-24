@@ -788,6 +788,79 @@ export const motionVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // BE's sense of faring (P09-E31): being in a state of well-being, which the Romance languages and
+    // German say with a verb of their own — it *stare* ("sta bene"), fr *aller* ("va bien"), de *gehen*
+    // ("es geht gut"). A predicate adjective names it as its `copula` (OKAY), and the translator swaps it
+    // in for BE there (`lexicalCopula`), so it is a sense of BE and no picker offers it. Spanish and
+    // Portuguese say *estar*, English *fare* and Japanese 過ごす, which no predicate names today.
+    // A state: the Romance past is its imperfect ("stava bene", "allait bien").
+    id: 'BE_FARING',
+    role: 'verb',
+    senseOf: 'BE',
+    stative: true,
+    transitivity: 'intransitive',
+    complements: ['predicative', 'cause'],
+    description: 'to get on; to be in a state of well-being',
+    emoji: '🟰',
+    forms: {
+      en: {
+        base: 'fare',
+        '1sg_present': 'fare', '2sg_present': 'fare', '3sg_present': 'fares',
+        '1pl_present': 'fare', '2pl_present': 'fare', '3pl_present': 'fare',
+        past: 'fared',
+      },
+      it: {
+        base: 'stare',
+        '1sg_present': 'sto', '2sg_present': 'stai', '3sg_present': 'sta',
+        '1pl_present': 'stiamo', '2pl_present': 'state', '3pl_present': 'stanno',
+        '1sg_past': 'stetti', '2sg_past': 'stesti', '3sg_past': 'stette',
+        '1pl_past': 'stemmo', '2pl_past': 'steste', '3pl_past': 'stettero',
+        '1sg_future': 'starò', '2sg_future': 'starai', '3sg_future': 'starà',
+        '1pl_future': 'staremo', '2pl_future': 'starete', '3pl_future': 'staranno',
+      },
+      fr: {
+        base: 'aller',
+        '1sg_present': 'vais', '2sg_present': 'vas', '3sg_present': 'va',
+        '1pl_present': 'allons', '2pl_present': 'allez', '3pl_present': 'vont',
+        '1sg_past': 'allai', '2sg_past': 'allas', '3sg_past': 'alla',
+        '1pl_past': 'allâmes', '2pl_past': 'allâtes', '3pl_past': 'allèrent',
+        '1sg_future': 'irai', '2sg_future': 'iras', '3sg_future': 'ira',
+        '1pl_future': 'irons', '2pl_future': 'irez', '3pl_future': 'iront',
+      },
+      de: {
+        base: 'gehen',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+        '1sg_past': 'ging', '2sg_past': 'gingst', '3sg_past': 'ging',
+        '1pl_past': 'gingen', '2pl_past': 'gingt', '3pl_past': 'gingen',
+      },
+      es: {
+        base: 'estar',
+        '1sg_present': 'estoy', '2sg_present': 'estás', '3sg_present': 'está',
+        '1pl_present': 'estamos', '2pl_present': 'estáis', '3pl_present': 'están',
+        '1sg_past': 'estuve', '2sg_past': 'estuviste', '3sg_past': 'estuvo',
+        '1pl_past': 'estuvimos', '2pl_past': 'estuvisteis', '3pl_past': 'estuvieron',
+        '1sg_future': 'estaré', '2sg_future': 'estarás', '3sg_future': 'estará',
+        '1pl_future': 'estaremos', '2pl_future': 'estaréis', '3pl_future': 'estarán',
+      },
+      ja: {
+        base: '過ごす',
+        reading: 'すごす',
+        masu_present: '過ごします',
+        masu_present_reading: 'すごします',
+      },
+      pt: {
+        base: 'estar',
+        '1sg_present': 'estou', '2sg_present': 'está', '3sg_present': 'está',
+        '1pl_present': 'estamos', '2pl_present': 'estão', '3pl_present': 'estão',
+        '1sg_past': 'estive', '2sg_past': 'esteve', '3sg_past': 'esteve',
+        '1pl_past': 'estivemos', '2pl_past': 'estiveram', '3pl_past': 'estiveram',
+        '1sg_future': 'estarei', '2sg_future': 'estará', '3sg_future': 'estará',
+        '1pl_future': 'estaremos', '2pl_future': 'estarão', '3pl_future': 'estarão',
+      },
+    },
+  },
   // ── Flying, the motion a wing is for (localization B52) ────────────
   {
     id: 'FLY',

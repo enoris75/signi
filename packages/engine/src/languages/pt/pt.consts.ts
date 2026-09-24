@@ -202,7 +202,7 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
  * so is a prepositional phrase standing for one ("a frase sem título"). The agreement rule would otherwise inflect
  * either like any adjective with its ending ("*sem títula").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'sem título']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'sem título', 'bem']);
 
 // O negador de um só constituinte, e não da oração: "corre **não** por causa do cão" — corre, e o
 // cão não é a razão (ver `Complement.negative`).
