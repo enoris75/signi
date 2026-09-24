@@ -116,14 +116,19 @@ export function complementsPhrase(
           // essive "como" contracts with nothing and drops the article from both ("como sua prisão",
           // see `essivePhrase`).
           const possessive = ptPossessiveWord(np, false);
+          // A determiner kept beside the possessive is not replaced, the indefinite included: the
+          // link takes it as it takes any other ("em uma prisão") and the possessive follows the noun
+          // — "em uma prisão sua", never "na sua prisão" (A330).
           const f0 = predicativeForms(np.head.forms);
-          const f = possessive ? { ...f0, definiteness: 'definite' } : f0;
+          const detached = !!possessive && keptBesidePossessive(f0);
+          const f = possessive && !detached ? { ...f0, definiteness: 'definite' } : f0;
           const pl = isPlural(f);
           const marker = !link ? ''
             : LINK_CONTRACT[link] ? contractDet(LINK_CONTRACT[link], link, f, pl)
             : prepDet(link, f, pl);
-          // The marker carries the determiner when there is one, so the phrase itself goes bare.
-          const bare = marker ? { ...f, definiteness: 'bare' } : f;
+          // The marker carries the determiner when there is one, so the phrase itself goes bare —
+          // marked as a determiner the marker took, where the possessive has to stay behind the noun.
+          const bare = marker ? { ...f, definiteness: 'bare', ...(detached ? { indefinite_dropped: '1' } : {}) } : f;
           return [marker, withRelative(nounPhrase(bare, ptAdj(np), possessive), np)].filter(Boolean).join(' ');
         });
       }

@@ -5,7 +5,7 @@ import { GATO } from './pt.fixtures.js';
 describe('predicativeForms', () => {
   test('an indefinite plural goes bare ("tornam-se gatos"), leaving the input untouched', () => {
     const forms = { ...GATO, definiteness: 'indefinite', number: 'plural' };
-    expect(predicativeForms(forms)).toEqual({ ...forms, definiteness: 'bare' });
+    expect(predicativeForms(forms)).toEqual({ ...forms, definiteness: 'bare', indefinite_dropped: '1' });
     expect(forms['definiteness']).toBe('indefinite');
     expect(predicativeForms({ ...GATO, definiteness: 'indefinite', count: 'plural' })['definiteness']).toBe('bare');
   });
