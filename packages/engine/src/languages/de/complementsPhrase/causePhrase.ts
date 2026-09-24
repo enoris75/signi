@@ -26,6 +26,12 @@ function nounWegen(np: ResolvedNounPhrase): string {
   return `wegen ${nounPhrase(np, genitiveShows(np) ? 'gen' : 'dat')}`;
 }
 
+// The blamed party after "die Schuld": the genitive, or "von" + the dative where the genitive would
+// not show ("durch die Schuld von Freunden", "von Wasser", see `genitiveShows`) (A343).
+function schuldOf(np: ResolvedNounPhrase): string {
+  return genitiveShows(np) ? nounPhrase(np, 'gen') : `von ${nounPhrase(np, 'dat')}`;
+}
+
 // The cause shapes of their own: a group holding a pronoun, and the negative "Schuld" periphrasis.
 // A neutral or positive noun cause gives undefined — it is "wegen" + the genitive or "dank" + the
 // dative, spelled on each conjunct's article by the prepositional path in `complementsPhrase`.
@@ -49,7 +55,7 @@ export function causePhrase(c: ResolvedComplement): string | undefined {
       }
       return coordinate(c.phrase, (np) => np.head.forms['person']
         ? `durch ${schuldPossessive(np.head.forms)} Schuld`
-        : `durch die Schuld ${nounPhrase(np, 'gen')}`);
+        : `durch die Schuld ${schuldOf(np)}`);
     }
     if (sentiment === 'positive') {
       return `dank ${coordinate(c.phrase, (np) => np.head.forms['person']
@@ -60,7 +66,8 @@ export function causePhrase(c: ResolvedComplement): string | undefined {
   }
   // A negative noun cause takes the genitive periphrasis "durch die Schuld" (through the
   // fault) + the cause in the genitive: "durch die Schuld des Hundes". "durch" governs the
-  // accusative of the fixed "die Schuld"; the blamed party hangs off it as a genitive. Emitted
+  // accusative of the fixed "die Schuld"; the blamed party hangs off it as a genitive, or as "von" +
+  // the dative where the genitive cannot show ("durch die Schuld von Freunden"). Emitted
   // once before the group ("durch die Schuld des Hundes und der Katze").
   if (sentiment === 'negative') {
     // A relativizer blames through its genitive, ahead of "Schuld": "der Hund, durch dessen Schuld …".
@@ -70,7 +77,7 @@ export function causePhrase(c: ResolvedComplement): string | undefined {
     }
     // A question blames the same way, through *wessen*: "durch wessen Schuld läuft der Kater?" (P09-E15).
     if (blamed['definiteness'] === 'question') return 'durch wessen Schuld';
-    return `durch die Schuld ${coordinate(c.phrase, (np) => nounPhrase(np, 'gen'))}`;
+    return `durch die Schuld ${coordinate(c.phrase, schuldOf)}`;
   }
   return undefined;
 }

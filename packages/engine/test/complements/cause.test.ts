@@ -679,19 +679,34 @@ describe('known bugs: the German negative cause writes a genitive that cannot sh
     complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
   }), 'de');
 
-  test.fails('an indefinite or bare plural', () => {
+  test('an indefinite or bare plural', () => {
     expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'indefinite' }))).toBe('der Kater läuft durch die Schuld von Freunden.');
     expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'bare' }))).toBe('der Kater läuft durch die Schuld von Freunden.');
   });
 
-  test.fails('a bare numeral, and a detached possessive', () => {
+  test('a bare numeral, and a detached possessive', () => {
     expect(blamedOn(np('FRIEND', { numeral: 2, definiteness: 'indefinite' }))).toBe('der Kater läuft durch die Schuld von zwei Freunden.');
     expect(blamedOn(np('FRIEND', { number: 'plural', definiteness: 'indefinite', possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))
       .toBe('der Kater läuft durch die Schuld von Freunden von mir.');
   });
 
-  test.fails('a bare mass noun', () => {
+  test('a bare mass noun', () => {
     expect(blamedOn(np('WATER', { definiteness: 'bare' }))).toBe('der Kater läuft durch die Schuld von Wasser.');
+  });
+
+  test('an invariant mass quantifier, a noun group and a group mixing in a pronoun ask each conjunct', () => {
+    const group = (...conjuncts: NounPhrase[]) => blamedOn({ conjuncts, conjunction: 'and' } as unknown as NounPhrase);
+    expect([
+      blamedOn(np('WATER', { definiteness: 'some' })),
+      group(np('DOG'), np('FRIEND', { number: 'plural', definiteness: 'indefinite' })),
+      group(np('SECOND_PERSON'), np('FRIEND', { number: 'plural', definiteness: 'indefinite' })),
+      group(np('FRIEND', { number: 'plural', definiteness: 'bare' }), np('FIRST_PERSON')),
+    ]).toEqual([
+      'der Kater läuft durch die Schuld von etwas Wasser.',
+      'der Kater läuft durch die Schuld des Hundes und von Freunden.',
+      'der Kater läuft durch deine Schuld und durch die Schuld von Freunden.',
+      'der Kater läuft durch die Schuld von Freunden und durch meine Schuld.',
+    ]);
   });
 
   test('regression: a genitive that shows keeps it', () => {
