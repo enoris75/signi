@@ -138,4 +138,36 @@ export const pronouns: ConceptSeed[] = [
       pt: { base: 'algo', person: '3', number: 'singular', thing: '1', object: 'algo', disjunctive: 'algo', negative: 'nada' },
     },
   },
+  {
+    // P09-E40's *someone*: SOMETHING's person counterpart. It is a full phrase for the same reason
+    // SOMETHING is — the concept's `slot: 'indefinite'`, which the lexicon hands the engines as the
+    // `indefinite` form (see `isPronounElement`) — and it carries no `thing`, so it is a person where
+    // that matters: the Spanish and Portuguese personal *a* ("ve a alguien"), and the Japanese
+    // animacy of `isAnimate`. Its negative forms follow SOMETHING's: English *anyone* beside "not"
+    // and *nobody* where it absorbs the negation as the subject; one negative word elsewhere.
+    //
+    // German declines it (D2): `object` is the accusative *jemanden* the direct object takes and
+    // `disjunctive` the dative *jemandem* a preposition governs (see `tonicPronounDe`); its negative
+    // half declines alike, `negative_object` *niemanden* and `negative_disjunctive` *niemandem*.
+    // It is grammatically masculine in the languages that agree with it (*qualcuno è arrivato*,
+    // *jemand, der …*).
+    id: 'SOMEONE',
+    role: 'pronoun',
+    slot: 'indefinite',
+    human: true,
+    description: 'an unknown person',
+    // SOMETHING's gloss on PERSON: "an unknown person".
+    definition: { subject: { concept: 'PERSON', definiteness: 'indefinite', adjectives: ['UNKNOWN'] } },
+    synonym: 'somebody',
+    emoji: '🕵️',
+    forms: {
+      en: { base: 'someone', person: '3', number: 'singular', object: 'someone', disjunctive: 'someone', negative: 'anyone', negative_subject: 'nobody' },
+      it: { base: 'qualcuno', person: '3', number: 'singular', gender: 'masc', object: 'qualcuno', disjunctive: 'qualcuno', negative: 'nessuno' },
+      fr: { base: "quelqu'un", person: '3', number: 'singular', gender: 'masc', object: "quelqu'un", disjunctive: "quelqu'un", negative: 'personne' },
+      de: { base: 'jemand', person: '3', number: 'singular', gender: 'masc', object: 'jemanden', disjunctive: 'jemandem', negative: 'niemand', negative_object: 'niemanden', negative_disjunctive: 'niemandem' },
+      es: { base: 'alguien', person: '3', number: 'singular', gender: 'masc', object: 'alguien', disjunctive: 'alguien', negative: 'nadie' },
+      ja: { base: '誰か', person: '3', number: 'singular', reading: 'だれか', negative: '誰', negative_reading: 'だれ' },
+      pt: { base: 'alguém', person: '3', number: 'singular', gender: 'masc', object: 'alguém', disjunctive: 'alguém', negative: 'ninguém' },
+    },
+  },
 ];

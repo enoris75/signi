@@ -105,3 +105,63 @@ describe('the words', () => {
     expect(seed('THIRD_PERSON')?.slot).toBeUndefined();
   });
 });
+
+// P09-E40: SOMEONE, SOMETHING's person counterpart. It is a full phrase for the same reason (the
+// concept's `slot: 'indefinite'`, not `thing`), and a person where that matters: the Spanish
+// personal "a", German's declined *jemanden* / *jemandem*, and the Japanese animacy.
+describe('the person pronoun (P09-E40)', () => {
+  test('as a direct object: no clitic, the Spanish personal "a", the German accusative', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('SOMEONE') }))).toEqual({
+      en: 'the cat sees someone.', it: 'il gatto vede qualcuno.', fr: 'le chat voit quelqu\'un.',
+      de: 'der Kater sieht jemanden.', es: 'el gato ve a alguien.', ja: '猫は誰かを見ます。', pt: 'o gato vê alguém.',
+    });
+  });
+
+  test('as a subject: never dropped', () => {
+    expect(sayAll(clause(np('SOMEONE'), 'RUN'))).toEqual({
+      en: 'someone runs.', it: 'qualcuno corre.', fr: 'quelqu\'un court.', de: 'jemand läuft.',
+      es: 'alguien corre.', ja: '誰かは走ります。', pt: 'alguém corre.',
+    });
+    expect(sayAll(clause(np('SOMEONE'), 'SEE', { verbPhrase: { tense: 'past' }, directObject: np('CAT') }))).toEqual({
+      en: 'someone saw the cat.', it: 'qualcuno vide il gatto.', fr: 'quelqu\'un vit le chat.',
+      de: 'jemand sah den Kater.', es: 'alguien vio el gato.', ja: '誰かは猫を見ました。', pt: 'alguém viu o gato.',
+    });
+  });
+
+  test('negated as a direct object: German niemanden, Spanish "a nadie"', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: np('SOMEONE') }))).toEqual({
+      en: 'the cat does not see anyone.', it: 'il gatto non vede nessuno.', fr: 'le chat ne voit personne.',
+      de: 'der Kater sieht niemanden.', es: 'el gato no ve a nadie.', ja: '猫は誰も見ません。', pt: 'o gato não vê ninguém.',
+    });
+  });
+
+  test('negated as a subject: English "nobody" absorbs the negation', () => {
+    expect(sayAll(clause(np('SOMEONE'), 'RUN', { verbPhrase: { negative: true } }))).toEqual({
+      en: 'nobody runs.', it: 'nessuno corre.', fr: 'personne ne court.', de: 'niemand läuft.',
+      es: 'nadie corre.', ja: '誰も走りません。', pt: 'ninguém corre.',
+    });
+  });
+
+  test('German declines it in the dative, positive and negative', () => {
+    // HELP governs its object in the dative (`object_case`), which reads the `disjunctive`.
+    expect(sayAll(clause(np('CAT'), 'HELP_VERB', { directObject: np('SOMEONE') }))).toMatchObject({
+      de: 'der Kater hilft jemandem.', es: 'el gato ayuda a alguien.', pt: 'o gato ajuda alguém.',
+    });
+    expect(say(clause(np('CAT'), 'HELP_VERB', { verbPhrase: { negative: true }, directObject: np('SOMEONE') }), 'de'))
+      .toBe('der Kater hilft niemandem.');
+    // A preposition's case: *mit* the dative, *für* the accusative.
+    expect(say(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('SOMEONE') } } }), 'de'))
+      .toBe('der Kater läuft mit jemandem.');
+    expect(say(clause(np('CAT'), 'RUN', { complements: { purpose: { phrase: np('SOMEONE') } } }), 'de'))
+      .toBe('der Kater läuft für jemanden.');
+  });
+
+  test('SOMEONE is glossed on PERSON, and names the slot it fills', () => {
+    expect(definitionAll('SOMEONE')).toEqual({
+      en: 'an unknown person.', it: 'una persona sconosciuta.', fr: 'une personne inconnue.',
+      de: 'eine unbekannte Person.', es: 'una persona desconocida.', ja: '不明な人。', pt: 'uma pessoa desconhecida.',
+    });
+    expect(seed('SOMEONE')?.slot).toBe('indefinite');
+    expect(seed('SOMEONE')?.human).toBe(true);
+  });
+});

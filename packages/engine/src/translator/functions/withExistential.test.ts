@@ -31,6 +31,6 @@ describe('withExistential', () => {
 
   test('a personal-pronoun pivot is refused', () => {
     expect(() => withExistential(existential(el(np({ base: 'io', person: '1' }))), 'it')).toThrow(/pronoun/);
-    expect(withExistential(existential(el(np({ base: 'qualcosa', person: '3', thing: '1' }))), 'it').verbPhrase?.existential).toBe(true);
+    expect(withExistential(existential(el(np({ base: 'qualcosa', person: '3', thing: '1', indefinite: '1' }))), 'it').verbPhrase?.existential).toBe(true);
   });
 });
