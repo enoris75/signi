@@ -47,3 +47,16 @@ changed in the trial.
 | | |
 |---|---|
 | **Test** | `complements/role.test.ts` → *known bugs: an Italian role or essive noun with a pronominal possessor takes the article (A287)* (3 `test.fails`: the role, a feminine role, the essive, plus a regression test for fr / de / es / pt and the Italian genitive possessor) |
+
+## Resolved
+
+2026-09-24. `essivePhrase` in [it/complementsPhrase.ts](../../../packages/engine/src/languages/it/complementsPhrase.ts)
+now hands `prepDet('come', …)` the head's own forms, already bare from `withDefiniteness`, instead of
+`itPossessedHeadForms(np)`, which turned a pronominal possessor's head back to definite. `renderNP`
+still writes the possessive, so the role and the essive both read `come suo amico` (plural
+`come suoi amici`, `come mio amico`, `come loro amico`). A277 had landed first: the role still
+renders bare in Italian, with no *un*. The plain object keeps its article (`vede il suo amico`).
+
+Guarded by `complements/role.test.ts` → *known bugs: an Italian role or essive noun with a
+pronominal possessor takes the article (A287)*: the three former `test.fails`, now plain tests, a new
+test for the plural, the first person, *loro* and the plain object, and the regression test.
