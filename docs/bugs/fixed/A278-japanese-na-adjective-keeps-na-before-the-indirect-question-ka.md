@@ -56,3 +56,21 @@ Pinned by `known bugs: a Japanese な-adjective keeps its な before the indirec
 regression test.
 
 Found by the P09-E17 coverage audit on 2026-09-24.
+
+## Resolved
+
+2026-09-24. The indirect question's clause is built with a plain value of its own, `'question'`
+(`JaPlain`, exported by [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts)),
+which [`buildClauseSegments.ts`](../../../packages/engine/src/languages/ja/buildClauseSegments.ts) passes
+before か / かどうか. `predicateSegs` maps it to a new copula form, `closing`, in
+[`copulaSegs.ts`](../../../packages/engine/src/languages/ja/copulaSegs.ts): it borrows `prenominal`'s rows,
+so only a na- or の-adjective's present affirmative changes (its attributive な / の gives way to
+である). 幸せだったかどうか, 幸せではないかどうか, 動物であるかどうか, the quoted 幸せであると, KNOW's
+幸せなことを and a relative clause's 幸せな猫 are unchanged. The register question (幸せかどうか,
+動物かどうか) stays open.
+
+Guarded by the three formerly-`test.fails` in `known bugs: a Japanese な-adjective keeps its な before
+the indirect question's か (A278)` in [content-clause.test.ts](../../../packages/engine/test/content-clause.test.ts),
+now plain tests, plus a new one there (KNOW's yes/no and wh-question, a coordinated
+大きくて幸せであるかどうか, and the relative's 幸せな猫), and the `closing` case in
+[copulaSegs.test.ts](../../../packages/engine/src/languages/ja/copulaSegs.test.ts).

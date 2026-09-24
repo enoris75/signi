@@ -1239,18 +1239,29 @@ describe('known bugs: a Japanese な-adjective keeps its な before the indirect
   const man = np('MAN');
   const happy = { subject: np('CAT'), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('HAPPY') } } };
 
-  test.fails('a yes/no question: 猫が幸せであるかどうか', () => {
+  test('a yes/no question: 猫が幸せであるかどうか', () => {
     expect(say(clause(man, 'ASK', { contentObject: { ...happy, interrogative: true } }), 'ja')).toBe('男は猫が幸せであるかどうか尋ねます。');
   });
 
-  test.fails('a wh-question over the subject: 誰が幸せであるか', () => {
+  test('a wh-question over the subject: 誰が幸せであるか', () => {
     expect(say(clause(man, 'ASK', { contentObject: {
       ...happy, subject: np('GENERIC_PERSON'), questionRole: 'subject', questionAnimate: true,
     } }), 'ja')).toBe('男は誰が幸せであるか尋ねます。');
   });
 
-  test.fails('a wh-question over an adjunct: 猫がどこで幸せであるか', () => {
+  test('a wh-question over an adjunct: 猫がどこで幸せであるか', () => {
     expect(say(clause(man, 'ASK', { contentObject: { ...happy, questionRole: 'locative' } }), 'ja')).toBe('男は猫がどこで幸せであるか尋ねます。');
+  });
+
+  test('KNOW\'s indirect question, a coordinated predicate, and the relative clause\'s な', () => {
+    expect(say(clause(man, 'KNOW', { contentObject: { ...happy, interrogative: true } }), 'ja')).toBe('男は猫が幸せであるかどうか知っています。');
+    expect(say(clause(man, 'KNOW', { contentObject: { ...happy, questionRole: 'locative' } }), 'ja')).toBe('男は猫がどこで幸せであるか知っています。');
+    expect(say(clause(man, 'ASK', { contentObject: {
+      ...happy, complements: { predicative: { phrase: { conjuncts: [np('BIG'), np('HAPPY')], conjunction: 'and' } } }, interrogative: true,
+    } }), 'ja')).toBe('男は猫が大きくて幸せであるかどうか尋ねます。');
+    // A head noun still follows the attributive な.
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('HAPPY') } } } }), 'RUN'), 'ja'))
+      .toBe('幸せな猫は走ります。');
   });
 
   test('regression: an い-adjective, a noun, the past, the negative, and the other links are right', () => {

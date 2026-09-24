@@ -36,14 +36,18 @@ import { wordSeg } from './wordSeg.js';
  * the plain form instead of the polite ます (see plainVerbSeg), and so does its aspect (see
  * aspectVerbSegs). `'quote'` is the plain form a clause takes before the quotative と (P09-E4), which
  * differs only where a copula closes it: the terminal 幸せである, not the attributive 幸せな a head noun
- * would follow (猫が幸せであると言います).
+ * would follow (猫が幸せであると言います). `'question'` is the plain form before an indirect question's
+ * か / かどうか (P09-E17), which takes the terminal である where a na-adjective would write its
+ * attributive な (猫が幸せであるかどうか, A278) and is otherwise the prenominal form (幸せだったかどうか).
  */
+export type JaPlain = boolean | 'quote' | 'question';
+
 export function predicateSegs(
   givenVerbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounElement | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
-  plain: boolean | 'quote' = false,
+  plain: JaPlain = false,
   subjectNegative = false,
   // Whether the subject is animate (a person or an animal); picks いる over ある for a located subject.
   animateSubject = false,
@@ -270,8 +274,10 @@ export function predicateSegs(
     // prospective on a copula stay best-effort present. (Aspect on a copula is marginal.)
     const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
     // An "if" clause takes the たら form (幸せだったら), a relative clause the prenominal one (幸せな猫), and
-    // a citation the plain one (「行動することが可能である」 "to be able to act").
-    const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' || plain === 'quote' ? 'citation' : plain ? 'prenominal' : 'polite';
+    // a citation the plain one (「行動することが可能である」 "to be able to act"), and an indirect
+    // question the closing one (幸せであるかどうか, A278).
+    const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' || plain === 'quote' ? 'citation'
+      : plain === 'question' ? 'closing' : plain ? 'prenominal' : 'polite';
     segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }

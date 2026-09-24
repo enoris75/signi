@@ -21,7 +21,7 @@ import { jaAgentParticle } from './jaAgentParticle.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaRespectRegister } from './jaRespectRegister.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
-import { predicateSegs } from './predicateSegs.js';
+import { predicateSegs, type JaPlain } from './predicateSegs.js';
 import { questionAdverb } from './questionAdverb.js';
 import { questionNoun } from './questionNoun.js';
 import { relativeClauseSegs } from './relativeClauseSegs.js';
@@ -33,7 +33,7 @@ import { wordSeg } from './wordSeg.js';
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
-export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string, plain: boolean | 'quote' = false): RubySegment[] {
+export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: string, plain: JaPlain = false): RubySegment[] {
   // A modal governing an infinitive is the modal chain over it, suffixed to the verb: 行動したい, never
   // 行動することをたい (A222, see `foldModalGovernor`).
   const phrase = foldModalGovernor(given);
@@ -156,10 +156,12 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
   // An object clause stands where the object would, right ahead of the verb: plain, its subject
   // marked が, and closed by the verb's と or ことを — 猫が走ると言います, 猫が走ることを知っています (P09-E4).
   // A quoted clause closes on the terminal form, which only a copula tells apart (幸せであると). An
-  // indirect question closes on か / かどうか instead, on the plain form (P09-E17, see `contentClauseLink`).
+  // indirect question closes on か / かどうか instead, on the plain form (P09-E17, see `contentClauseLink`),
+  // which is terminal too before the particle (幸せであるかどうか, A278).
   if (phrase.contentObject) {
     const link = contentClauseLink(phrase);
-    segs.push(...buildClauseSegments(phrase.contentObject, 'が', link === 'と' ? 'quote' : true), { t: link });
+    const closing: JaPlain = link === 'と' ? 'quote' : link === 'か' || link === 'かどうか' ? 'question' : true;
+    segs.push(...buildClauseSegments(phrase.contentObject, 'が', closing), { t: link });
   }
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   // Japanese has no transitive verb "to cause" that governs a clause: the causative is the ようにする
