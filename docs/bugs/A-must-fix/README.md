@@ -32,8 +32,8 @@ deux livres*), because `objectArtFor` drops every article beside a numeral.
 [A290](A290-japanese-comitative-relative-drops-its-company.md), a Japanese comitative relative dropping its company (*猫が走る犬* for *猫が一緒に走る犬*).
 
 **Three more**, filed the same day from the P09-E20..E24 / P11-E1..E5 batch, make sixteen.
-[A291](A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md), German, Spanish and Portuguese dropping the numeral inside any complement (*läuft in
-den Häusern*). [A292](A292-french-writes-de-before-a-bare-numeral-in-a-complement.md), French *de* before a bare numeral in a complement (*avec de trois
+[A291](../fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md), German, Spanish and Portuguese dropping the numeral inside any complement (*läuft in
+den Häusern*). [A292](../fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md), French *de* before a bare numeral in a complement (*avec de trois
 chiens*). [A293](A293-english-writes-his-for-a-possessor-linked-to-a-female-subject.md), English *his* for a possessor linked to a female subject (*your mother sees
 his book*).
 
@@ -42,6 +42,31 @@ his book*).
 mangée*, *a été bien mangée*). [A295](A295-german-attributive-noun-drops-its-inherent-adjective.md), a German attributive noun dropping its inherent adjective (*Gefühle großer Frauen*
 for *großer junger Frauen*). [A296](A296-english-manner-adverb-after-the-by-phrase.md), English putting a manner adverb after the by-phrase (*is eaten by the
 dog well* for *is eaten well by the dog*).
+
+**Fourteen more**, filed the same day while landing P09-E25 to E43 (A318–A319 are the peer's).
+[A308](A308-negation-does-not-reach-an-indefinite-pronoun-inside-a-complement.md), negation not reaching SOMEONE / SOMETHING inside a complement (*does not run with
+someone*, *läuft nicht mit jemandem* for *with anyone*, *mit niemandem*).
+[A309](A309-relative-clause-on-someone-or-something-is-dropped.md), a relative clause on SOMEONE / SOMETHING dropped without a word (*the cat sees someone.*).
+[A310](A310-german-nicht-after-an-object-counted-by-an-amount-quantifier.md), German *nicht* after an object counted by *viel* / *genug* / *wenig* (*frisst viel Essen
+nicht*).
+[A311](A311-mass-noun-is-counted-as-if-it-were-a-count-noun.md), a mass noun counted (*the three news runs*, *each news*, *il tre cibo*); the fixer rules
+*pieces of news* and a named refusal.
+[A312](A312-italian-a-does-not-become-ad-before-a-word-starting-with-a.md), Italian *a* not becoming *ad* before *a* (*a abbastanza cani*, *a alcuni cani*).
+[A313](A313-portuguese-enough-with-a-possessive-trails-the-possessive.md), Portuguese *gatos suficientes seus*; the fixer rules the order.
+[A314](A314-most-with-a-possessive-keeps-the-possessive-out-of-the-partitive.md), *most* with a possessive kept out of the partitive (*la plupart des chats à elle*, *most
+cats of hers* for *la plupart de ses chats*, *most of her cats*); A187's one shape stays for the rest.
+[A315](A315-continue-doing-leaves-a-negated-or-copular-complement-unfused.md), CONTINUE_DOING leaving a negated or copular complement unfused (*sigue no corriendo*,
+*macht weiter, nicht zu laufen*, *幸せであることを続けます*).
+[A316](A316-generic-subject-in-a-dative-experiencer-frame.md), a generic subject in a dative experiencer frame (*man geht gut*, *el gato gusta*).
+[A317](A317-tell-with-a-direct-object-and-a-content-clause-makes-the-addressee-the-told-thing.md), TELL + direct object + content clause reading the addressee as the thing told
+(*racconta il cane che*, *erzählt den Hund, dass*).
+[A320](A320-italian-cardinal-una-does-not-elide-before-a-vowel.md), the Italian cardinal *una* not eliding (*entro una ora*).
+[A321](A321-german-cardinal-one-does-not-decline-in-a-bare-phrase.md), the German cardinal *one* not declining (*mit ein Hund*, *innerhalb eine Stunde*).
+[A322](A322-japanese-indefinite-measure-noun-drops-its-count.md), a Japanese indefinite measure noun dropping its count (*時間以内に* for *一時間以内に*).
+[A323](A323-japanese-na-adjective-predicate-takes-na-before-made-and-mae-ni.md), a Japanese な-adjective taking な before まで and 前に (*大丈夫なまで*), beside A278.
+
+**Two left** the same day, fixed by that batch: [A291](../fixed/A291-german-spanish-portuguese-drop-the-numeral-inside-a-complement.md) and
+[A292](../fixed/A292-french-writes-de-before-a-bare-numeral-in-a-complement.md). **Thirty-one are open.**
 
 The fifteen filed up to 2026-09-23, A261–A271 and A273–A276, were all fixed that
 day and moved to [`../fixed/`](../fixed/); [the index](../engine-grammar-bugs.md) sums up what each
