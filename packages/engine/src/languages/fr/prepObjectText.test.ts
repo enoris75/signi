@@ -30,6 +30,13 @@ describe('prepObjectText', () => {
     expect(prepObjectText(np(EAU, { definiteness: 'bare' }), 'sur')).toBe("sur de l'eau");
   });
 
+  // A363: a numeral leaves the partitive article empty, and the preposition stands alone before it.
+  test('a numeral with no article follows the preposition after one space', () => {
+    expect(prepObjectText(np(MAISON, { definiteness: 'indefinite', number: 'plural', numeral: '2' }), 'sur')).toBe('sur deux maisons');
+    expect(prepObjectText(np(MAISON, { definiteness: 'bare', number: 'plural', numeral: '3' }), 'sur')).toBe('sur trois maisons');
+    expect(prepObjectText(np(MAISON, { number: 'plural', numeral: '2' }), 'sur')).toBe('sur les deux maisons');
+  });
+
   test('a possessive stands in for the article', () => {
     expect(prepObjectText(np(LIVRE, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), 'sur')).toBe('sur mon livre');
   });

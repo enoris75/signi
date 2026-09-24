@@ -32,5 +32,13 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   return renderNP(np, (plural, lead) =>
     prep === 'à' ? aDet(head, plural, lead) : prep === 'de' ? deDet(head, plural, lead)
     : possessive ? prepDet(prep, head, plural, lead)
-    : `${prep} ${partitiveArtFor(head, plural, lead)}`, ownDe);
+    : prepArticle(prep, partitiveArtFor(head, plural, lead)), ownDe);
+}
+
+/**
+ * The preposition before its partitive article, or alone where a numeral leaves the article empty:
+ * "sur des boutons", "sur deux boutons", never "sur  deux" (A363).
+ */
+function prepArticle(prep: string, article: string): string {
+  return article ? `${prep} ${article}` : prep;
 }
