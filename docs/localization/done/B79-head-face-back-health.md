@@ -87,3 +87,27 @@ Readings to judge on authoring:
 One row in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) once authored:
 FACE in German and Japanese (a part-whole head carrying a relative: *der Teil eines Kopfes, der die
 Augen hat*, 目がある頭の部分).
+
+## Done (2026-09-24)
+
+**Four words seeded, three glossed, BACK_BODY literal by design**, as the ticket forecast. The seeds are
+in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts), after HAND, in the order the ticket gave
+(HEAD before FACE). They are pinned in
+[people-body-and-ideas.test.ts](../../../packages/engine/test/people-body-and-ideas.test.ts) and covered by
+one row in [definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) (FACE in German and
+Japanese).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| HEAD | the high part of a body | la parte alta di un corpo | la partie haute d'un corps | der hohe Teil eines Körpers | la parte alta de un cuerpo | 体の高い部分 | a parte alta de um corpo |
+| FACE | the part of a head that has the eyes | la parte di una testa che ha gli occhi | la partie d'une tête qui a les yeux | der Teil eines Kopfes, der die Augen hat | la parte de una cabeza que tiene los ojos | 目がある頭の部分 | a parte de uma cabeça que tem os olhos |
+| HEALTH | a body's good state | il buono stato di un corpo | le bon état d'un corps | der gute Zustand eines Körpers | el estado bueno de un cuerpo | 体の良い状態 | o estado bom de um corpo |
+
+What landed differently from the plan:
+
+1. **Portuguese BACK_BODY is *costas***, not the stopgap *dorso*. E41 had landed, so the word is seeded
+   as NEWS's five are, `count: 'plural'` with the plural as `base`. It renders *as costas*, *umas costas
+   grandes parecem boas* and *às costas*, and the bug in the probe table is gone.
+2. **BACK_BODY stays literal by design** (reading 3). Neither OPPOSITE's complement nor CHEST was seeded.
+3. No `isA` on any of the four, as EYE has none. HEALTH is mass.
+4. No engine change.
