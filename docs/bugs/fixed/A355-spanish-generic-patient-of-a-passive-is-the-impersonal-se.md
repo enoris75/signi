@@ -43,3 +43,21 @@ impersonal *se*. The `generic_reflexive` form is seeded in
 | **Test** | `clause.test.ts` → *known bugs: the Spanish generic patient of a passive is the impersonal se (A355)* (1 `test.fails`: the passive, plain and negated; plus a regression test for the other five languages, a noun patient and the reflexive generic) |
 
 Found by the A354 fix, which exempted the passive from its refusal, 2026-09-24.
+
+## Resolved
+
+2026-09-24. Spanish only, as ruled. In
+[es/predicateText.ts](../../../packages/engine/src/languages/es/predicateText.ts) a passive clause now
+takes the `genericSubject` branch a reflexive verb already took: the generic subject is written back
+into the subject slot as its `generic_reflexive` form, *uno*, and no impersonal clitic is written.
+*uno es visto por el gato.*, *uno no es visto por el gato.*; the rest of the verb group composes on it
+(*uno fue visto*, *uno ha sido visto*, *uno debe ser visto*, *uno nunca es visto*). No reseed.
+
+**Not done: Portuguese** is left unchanged (`se é visto pelo gato.`, `não se é visto pelo gato.`): no
+target is settled (see *Decisions for the fixer*), and a regression test pins the current output so a
+change there is deliberate.
+
+Guarded by `clause.test.ts` → *known bugs: the Spanish generic patient of a passive is the impersonal
+se (A355)*: the former `test.fails`, now a plain test; a new test for the past, the perfect, a modal
+and a fronted *nunca*; a new Portuguese regression test; and the existing regression test. Unit case
+in `es/predicateText.test.ts` (*the generic subject of a passive is uno, not the impersonal se*).

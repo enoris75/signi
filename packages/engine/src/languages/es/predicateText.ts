@@ -271,8 +271,10 @@ export function predicateText(
   // A reflexive verb already carries its own "se" in the form ("se mueve"), and the impersonal one
   // cannot stand beside it — "*se se mueve" is no sentence. The generic subject is then spelled out as a
   // word instead, written back into the subject slot the clause emptied: "uno se mueve" (A152).
+  // So is the generic patient a passive promotes to the subject: "ser" has no impersonal se, and
+  // "*se es visto por el gato" is no sentence either — "uno es visto por el gato" (A355).
   const isGeneric = subjectForms['generic'] === '1';
-  const genericSubject = isGeneric && reflexiveClitic(copulaVerb.forms, subjectForms)
+  const genericSubject = isGeneric && (passive || reflexiveClitic(copulaVerb.forms, subjectForms))
     ? (subjectForms['generic_reflexive'] ?? '') : '';
   const impersonalClitic = isGeneric && !genericSubject ? (subjectForms['base'] ?? '') : '';
   // A pronoun recipient is the dative clitic in the same slot, "le da el libro", "me da el libro"
