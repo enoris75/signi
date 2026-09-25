@@ -219,7 +219,7 @@ describe('known bugs: an animate route reads as another relation (A377)', () => 
   const runs = (extra: Partial<Parameters<typeof clause>[2]> = {}, route: Partial<{ specifiers: { kind: 'path'; value: PathSpecifier }[] }> = {}) =>
     sayAll(clause(np('CAT'), 'RUN', { ...extra, complements: { route: { phrase: np('MAN'), ...route } } }));
 
-  test.fails('es, pt and ja spell the path through a person', () => {
+  test('es, pt and ja spell the path through a person', () => {
     expect(runs()).toMatchObject({
       es: 'el gato corre a través del hombre.', // now: "el gato corre por el hombre."
       pt: 'o gato corre através do homem.', // now: "o gato corre pelo homem."
@@ -229,6 +229,31 @@ describe('known bugs: an animate route reads as another relation (A377)', () => 
       es: 'el gato corrió a través del hombre.', // now: "el gato corrió por el hombre."
       pt: 'o gato correu através do homem.', // now: "o gato correu pelo homem."
       ja: '猫は男の中を通って走りました。', // now: "猫は男を走りました。"
+    });
+  });
+
+  const through = (phrase: NounPhrase, route: Partial<{ specifiers: { kind: 'path'; value: PathSpecifier }[] }> = {}) =>
+    sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase, ...route } } }));
+
+  test('a feminine, a plural, an indefinite and a pronoun take the same path', () => {
+    expect(through(np('WOMAN'))).toMatchObject({
+      es: 'el gato corre a través de la mujer.', pt: 'o gato corre através da mulher.', ja: '猫は女の中を通って走ります。',
+    });
+    expect(through(np('DOG', { number: 'plural' }))).toMatchObject({
+      es: 'el gato corre a través de los perros.', pt: 'o gato corre através dos cães.', ja: '猫は犬の中を通って走ります。',
+    });
+    expect(through(np('MAN', { definiteness: 'indefinite' }))).toMatchObject({
+      es: 'el gato corre a través de un hombre.', pt: 'o gato corre através de um homem.',
+    });
+    expect(through(np('FIRST_PERSON'))).toMatchObject({
+      es: 'el gato corre a través de mí.', pt: 'o gato corre através de mim.', ja: '猫は私の中を通って走ります。',
+    });
+    expect(through(np('THIRD_PERSON'))).toMatchObject({ es: 'el gato corre a través de él.', pt: 'o gato corre através dele.' });
+  });
+
+  test('regression: a relation of its own keeps its word through a person', () => {
+    expect(through(np('MAN'), { specifiers: [{ kind: 'path', value: 'under' }] })).toMatchObject({
+      es: 'el gato corre debajo del hombre.', pt: 'o gato corre debaixo do homem.', ja: '猫は男の下を走ります。',
     });
   });
 

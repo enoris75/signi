@@ -203,6 +203,13 @@ describe('complementsPhrase', () => {
       expect(render({ route: complement(np(CASA, { definiteness: 'indefinite' })) })).toBe('por uma casa');
     });
 
+    test('through a person the path is spelled "através de" (A377)', () => {
+      expect(render({ route: complement(np(CAO)) })).toBe('através do cão');
+      expect(render({ route: complement(np(CAO, { definiteness: 'indefinite' }), [path('through')]) })).toBe('através de um cão');
+      expect(render({ route: complement(np(EU)) })).toBe('através de mim');
+      expect(render({ route: complement(np(CAO), [path('under')]) })).toBe('debaixo do cão');
+    });
+
     test('a path specifier picks the locution', () => {
       expect(render({ route: complement(np(MERCADO), [path('over')]) })).toBe('por cima do mercado');
       expect(render({ route: complement(np(MERCADO), [path('under')]) })).toBe('debaixo do mercado');

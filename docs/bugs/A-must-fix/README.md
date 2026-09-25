@@ -1,10 +1,12 @@
 # A-must-fix — confirmed bugs
 
+**Two open.** **A378** and **A379**. A377 and A380 were fixed on 2026-09-25 and moved to [`../fixed/`](../fixed/).
+
 **Four open.** **A377–A380**, filed on 2026-09-25 from the leads the A370–A376 lanes reported.
-[A377](A377-animate-route-reads-as-another-relation.md), a route through a person reads as *for* / *by* in es / pt, or as a path in ja.
+[A377](../fixed/A377-animate-route-reads-as-another-relation.md), a route through a person reads as *for* / *by* in es / pt, or as a path in ja.
 [A378](A378-italian-indefinite-plural-subject-stays-bare.md), an Italian indefinite plural subject is bare (*gatti corrono* for *dei gatti corrono*).
 [A379](A379-french-bare-passive-agent-has-no-article.md), a French bare passive agent keeps no article (*par chats*).
-[A380](A380-superlative-set-beside-a-possessor-stacks-two-genitives.md), a superlative's set beside a noun possessor stacks two genitives in de / pt.
+[A380](../fixed/A380-superlative-set-beside-a-possessor-stacks-two-genitives.md), a superlative's set beside a noun possessor stacks two genitives in de / pt.
 
 A370–A376 were all fixed on 2026-09-25 and moved to [`../fixed/`](../fixed/). The
 history below is kept as it was written.

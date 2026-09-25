@@ -247,7 +247,8 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
       en: 'the cat comes from him.', es: 'el gato viene de él.', pt: 'o gato vem dele.',
     });
     expect(around('route', 'RUN')).toMatchObject({
-      en: 'the cat runs through him.', es: 'el gato corre por él.', pt: 'o gato corre por ele.',
+      // Through a person the path is spelled, not the *for* / *by* of "por él" (A377).
+      en: 'the cat runs through him.', es: 'el gato corre a través de él.', pt: 'o gato corre através dele.',
     });
     expect(around('manner', 'RUN')).toMatchObject({
       en: 'the cat runs like him.', es: 'el gato corre como él.', pt: 'o gato corre como ele.',
@@ -336,7 +337,7 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
   // The similative is a shortened comparison — "corre como yo" stands for "como yo corro" — so the
   // Iberian languages put the SUBJECT pronoun there, as German's "wie" already does. Only the 1st
   // and 2nd singular spell the two apart; every other person and language is unaffected, and the
-  // tonic form stays where a true preposition governs it ("por mí", "debaixo de ti").
+  // tonic form stays where a true preposition governs it ("a través de mí", "debaixo de ti").
   test('the similative takes the nominative in Spanish, Portuguese and German', () => {
     const like = (concept: string) => sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: np(concept) } } }));
     expect(like('FIRST_PERSON')).toMatchObject({
@@ -347,7 +348,7 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
       es: 'el gato corre como tú.', pt: 'o gato corre como você.', de: 'der Kater läuft wie du.',
     });
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('FIRST_PERSON') } } }))).toMatchObject({
-      es: 'el gato corre por mí.', pt: 'o gato corre por mim.', de: 'der Kater läuft durch mich.',
+      es: 'el gato corre a través de mí.', pt: 'o gato corre através de mim.', de: 'der Kater läuft durch mich.',
     });
   });
 
@@ -367,7 +368,7 @@ describe('known bugs: a pronoun in the other adposition-bearing complements', ()
       de: 'der Kater ist in ihnen.', it: 'il gatto è in loro.',
     });
     expect(around('route', 'RUN', pl)).toMatchObject({
-      es: 'el gato corre por ellas.', pt: 'o gato corre por elas.', de: 'der Kater läuft durch sie.',
+      es: 'el gato corre a través de ellas.', pt: 'o gato corre através delas.', de: 'der Kater läuft durch sie.',
     });
   });
 

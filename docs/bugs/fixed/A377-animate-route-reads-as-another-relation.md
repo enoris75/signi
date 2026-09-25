@@ -32,3 +32,26 @@ phrase (a person, an animal, a pronoun). `ja/buildClauseSegments.ts` already has
 | | |
 |---|---|
 | **Test** | `complements/route.test.ts` → *known bugs: an animate route reads as another relation (A377)* (1 `test.fails`: es, pt, ja, present and past; plus a regression test for the other four and the inanimate route) |
+
+## Resolved
+
+2026-09-25. A route through a person — a `through` route, bare or spelled, whose noun is animate (a
+person, an animal, a pronoun) — spells its path in the statement, in A374's words:
+
+- **Spanish** [es/complementsPhrase.ts](../../../packages/engine/src/languages/es/complementsPhrase.ts):
+  *a través de*, fused through its *de* (`el gato corre a través del hombre`, `a través de mí`).
+- **Portuguese** [pt/complementsPhrase.ts](../../../packages/engine/src/languages/pt/complementsPhrase.ts):
+  *através de*, contracted (`através do homem`, `através dele`, `através de mim`).
+- **Japanese** [ja/complementSegs.ts](../../../packages/engine/src/languages/ja/complementSegs.ts): の中を通って
+  in place of を, read off `isAnimate`. The question's constant is renamed `JA_ANIMATE_ROUTE` in
+  [ja.consts.ts](../../../packages/engine/src/languages/ja/ja.consts.ts), shared by both.
+
+An inanimate route (`por la casa`, `pela casa`, 家を) and a relation of its own (`debajo del hombre`,
+男の下を) are unchanged; English, Italian, French and German were already right.
+
+Guarded by `complements/route.test.ts` → *known bugs: an animate route reads as another relation
+(A377)*: the former `test.fails`, now a plain test, a new test for a feminine, plural, indefinite and
+pronoun route, a relation-of-its-own regression, and the original regression. Colocated cases are in
+`es/complementsPhrase.test.ts`, `pt/complementsPhrase.test.ts` and `ja/complementSegs.test.ts`. The
+pronoun route pins in `complements/comitative.test.ts` (*por él*, *por mim*, *por ellas*) moved to the
+new words.

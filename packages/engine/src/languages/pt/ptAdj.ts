@@ -8,8 +8,10 @@ import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard
 import type { PtAdjectives } from './pt.types.js';
 import { PRENOMINAL, PT_SUPPLETIVE } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
+import { coordinateElement } from './coordinateElement.js';
 import { isPlural } from './isPlural.js';
 import { ptComparison } from './ptComparison.js';
+import { prepObjectText } from './prepObjectText.js';
 import { ptStandard } from './ptStandard.js';
 
 /**
@@ -38,8 +40,10 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
       const surface = ptComparison(a, gender, plural);
       if (surface) pre.push(surface);
       // Its set follows the noun, after every post-nominal adjective: "a maior casa da cidade" (A371).
+      // Behind a genitive possessor a second "de" would read as the possessor's, "da mulher da cidade",
+      // so the set is said as the place it is: "a maior casa da mulher na cidade" (A380).
       const set = attributiveStandard(np, a);
-      if (surface && set) trailingSet = ptStandard(a, set);
+      if (surface && set) trailingSet = possessorBeforeStandard(np) ? coordinateElement(set, (s) => prepObjectText(s, 'em')) : ptStandard(a, set);
     } else if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a)) {
       const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
       if (surface) pre.push(surface);

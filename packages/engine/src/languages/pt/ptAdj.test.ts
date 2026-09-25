@@ -81,11 +81,11 @@ describe('ptAdj: the compared adjective with a standard (P09-E18)', () => {
     expect(ptAdj(phrase)).toEqual({ pre: '', post: '', trail: 'velho e maior do que o cão' });
   });
 
-  test('a prenominal superlative\'s set closes the post-nominal ones, and alone trails a possessor (A371)', () => {
+  test('a prenominal superlative\'s set closes the post-nominal ones, and alone trails a possessor (A371), as a place (A380)', () => {
     const set = { index: 1, standard: el(np(CASA, { definiteness: 'definite', number: 'plural' })) };
     const adjectives = [adj(VELHO), adj(GRANDE, { degree: 'most', domain: '1' })];
     expect(ptAdj(np(GATO, {}, { adjectives, adjectiveStandard: set }))).toEqual({ pre: 'maior', post: 'velho das casas' });
     expect(ptAdj(np(GATO, {}, { adjectives, adjectiveStandard: set, possessor: np(MULHER, { definiteness: 'definite' }) })))
-      .toEqual({ pre: 'maior', post: 'velho', trail: 'das casas' });
+      .toEqual({ pre: 'maior', post: 'velho', trail: 'nas casas' });
   });
 });

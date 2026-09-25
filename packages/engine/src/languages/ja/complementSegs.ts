@@ -14,9 +14,10 @@ import { jaMeasuredOnce } from './jaMeasuredOnce.js';
 import { temporalPreposition } from '../../functions/temporalPreposition.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { isPrivative } from '../../functions/isPrivative.js';
-import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_DEGREE, JA_ESSIVE, JA_ICHIDAN, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { AGAINST_PARTICLE, CAUSE_PARTICLE, DIRECTION_IDIOMS, JA_ANIMATE_ROUTE, JA_DEGREE, JA_ESSIVE, JA_ICHIDAN, JA_PRIVATIVE, JA_TEMPORAL, PARTICLE, PATH_CITATION, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { slotSegs } from './slotSegs.js';
+import { isAnimate } from './isAnimate.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
@@ -241,6 +242,9 @@ export function complementSegs(
       : type === 'opponent' && c.link ? c.link
       // A route asked about a person carries its spelled path (A374, see `buildClauseSegments`).
       : type === 'route' && c.link ? c.link
+      // …and so does a route through a person in a statement: 男を走ります would run the man as a road
+      // (A377). A relation of its own keeps its relational noun (男の下を).
+      : type === 'route' && spec === 'through' && isAnimate(c.phrase.conjuncts) ? JA_ANIMATE_ROUTE
       : PARTICLE[type];
     // A `no` group closes its circumfix here: も after the particle (どの家でも, どの犬にも), or in place of
     // the route's を (どの市場も).

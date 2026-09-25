@@ -255,6 +255,9 @@ export function complementsPhrase(
           causeSent === 'negative' ? `por culpa ${deDet(af, plural)}` :
           `${connectorShared ? '' : 'a causa '}${deDet(af, plural)}`
         ) :
+        // Through a person the route's "por" reads as *for* or *by* ("corre por el hombre"), so the
+        // path is spelled "a través de", as the question's "a través de quién" (A374, A377).
+        type === 'route' && af['animate'] === '1' && pathSpecifier(c) === 'through' ? `a través ${deDet(af, plural)}` :
         spatialHead(pathSpecifier(c), plural, af);
       // The pronoun is the whole phrase after the head: no article, no adjective, no relative. It is
       // the tonic form, unless the head is one of the adpositions that govern the nominative

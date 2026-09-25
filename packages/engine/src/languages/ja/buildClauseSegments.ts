@@ -14,7 +14,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { isRelativeGloss } from './isRelativeGloss.js';
-import { JA_ANIMATE_ROUTE_QUESTION, JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
+import { JA_ANIMATE_ROUTE, JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { isPotentialPassive } from './isPotentialPassive.js';
 import { jaCausativeVerb } from './jaCausativeVerb.js';
 import { jaAgentParticle } from './jaAgentParticle.js';
@@ -130,7 +130,7 @@ export function buildClauseSegments(given: ResolvedPhrase, subjectParticle: stri
       [askedSlot]: {
         phrase: askedNoun,
         ...(asked?.specifiers ? { specifiers: asked.specifiers } : {}),
-        ...(animateRoute ? { link: JA_ANIMATE_ROUTE_QUESTION } : {}),
+        ...(animateRoute ? { link: JA_ANIMATE_ROUTE } : {}),
       },
     }
     : phrase.complements;

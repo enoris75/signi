@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, el, GROSS, ICH, KATER, MANN, np } from './de.fixtures.js';
+import { adj, el, GROSS, HAUS, ICH, KATER, KATZE, MANN, np } from './de.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 import { nounStandard } from './nounStandard.js';
 
@@ -21,6 +21,20 @@ describe('nounStandard', () => {
   test('after the noun, the adjective declined before it as ever', () => {
     expect(nounPhrase(compared('more'), 'acc')).toBe('einen größeren Kater als den Mann');
     expect(nounPhrase(compared('equally'), 'nom')).toBe('ein so großer Kater wie der Mann');
+  });
+
+  // A380: behind a genitive possessor a superlative's set is a place, not a second genitive.
+  const best = (set = el(np(HAUS, { definiteness: 'definite' })), possessor?: ReturnType<typeof np>) =>
+    np(KATER, { definiteness: 'definite' }, {
+      adjectives: [adj(GROSS, { degree: 'most', domain: '1' })], adjectiveStandard: { index: 0, standard: set },
+      ...(possessor ? { possessor } : {}),
+    });
+
+  test('a superlative\'s set is the genitive, and "in" + dative behind a genitive possessor (A380)', () => {
+    expect(nounStandard(best(), 'nom')).toBe(' des Hauses');
+    expect(nounStandard(best(undefined, np(KATZE, { definiteness: 'definite' })), 'nom')).toBe(' im Haus');
+    expect(nounStandard(best(el(np(KATZE, { definiteness: 'definite' })), np(MANN, { definiteness: 'definite' })), 'acc')).toBe(' in der Katze');
+    expect(nounStandard(best(el(np(ICH)), np(MANN, { definiteness: 'definite' })), 'nom')).toBe(' von mir');
   });
 
   test('nothing without one', () => {

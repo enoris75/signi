@@ -138,10 +138,11 @@ export const JA_ESSIVE = 'として';
 export const JA_PURPOSE = 'ために';
 
 /**
- * A route asked about a person (A374): 誰を would run a person as if it were a road (猫は誰を走りますか),
- * so the path is spelled out, "passing through the inside of whom": 猫は誰の中を通って走りますか.
+ * A route through a person (A374, A377): 誰を would run a person as if it were a road (猫は誰を走りますか),
+ * so the path is spelled out, "passing through the inside of whom": 猫は誰の中を通って走りますか, and the
+ * statement the same, 猫は男の中を通って走ります.
  */
-export const JA_ANIMATE_ROUTE_QUESTION = 'の中を通って';
+export const JA_ANIMATE_ROUTE = 'の中を通って';
 
 /**
  * Cause postposition per sentiment — Japanese marks the stance cleanly: neutral のために

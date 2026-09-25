@@ -181,6 +181,13 @@ describe('complementsPhrase', () => {
       expect(render({ route: complement(np(MERCADO)) })).toBe('por el mercado');
     });
 
+    test('through a person the path is spelled "a través de" (A377)', () => {
+      expect(render({ route: complement(np(MUJER)) })).toBe('a través de la mujer');
+      expect(render({ route: complement(np(PERRO), [path('through')]) })).toBe('a través del perro');
+      expect(render({ route: complement(np(YO)) })).toBe('a través de mí');
+      expect(render({ route: complement(np(PERRO), [path('under')]) })).toBe('debajo del perro');
+    });
+
     test('a path specifier picks the locution', () => {
       expect(render({ route: complement(np(MERCADO), [path('under')]) })).toBe('debajo del mercado');
       expect(render({ route: complement(np(CASA), [path('over')]) })).toBe('por encima de la casa');

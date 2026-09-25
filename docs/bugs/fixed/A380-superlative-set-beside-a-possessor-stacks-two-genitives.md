@@ -33,3 +33,25 @@ città* can read *più grande* as the woman's where the two nouns share a gender
 | | |
 |---|---|
 | **Test** | `comparison.test.ts` → *known bugs: a superlative's set beside a possessor stacks two genitives in de / pt (A380)* (1 `test.fails`: object and subject; plus a regression test for the set without a possessor and English) |
+
+## Resolved
+
+2026-09-25. **Decision: the set as a place.** Behind a noun (genitive) possessor, a superlative's set
+is said with the locative preposition, as English's own "in the city"; without one it stays genitive.
+
+- **German** [de/nounStandard.ts](../../../packages/engine/src/languages/de/nounStandard.ts): *in* + dative,
+  fused as a locative is (`das größte Haus der Frau in der Stadt`, `im Markt`, `in den Märkten`, `in
+  einem Markt`). `least` follows (`das am wenigsten große Haus der Frau in der Stadt`). A set holding a
+  pronoun keeps its *von* (`von mir`), which stacks nothing; a comparative's *als* is untouched.
+- **Portuguese** [pt/ptAdj.ts](../../../packages/engine/src/languages/pt/ptAdj.ts): the prenominal
+  superlative's trailing set takes *em*, contracted (`a maior casa da mulher na cidade`, `no mercado`,
+  `nos mercados`, `em um mercado`). A post-nominal superlative (`a casa da mulher mais velha da cidade`)
+  keeps A372's order, which this bug set aside.
+
+Swiss German, which says the possessor in the dative, keeps its own `nounStandard` and is unchanged.
+
+Guarded by `comparison.test.ts` → *known bugs: a superlative's set beside a possessor stacks two
+genitives in de / pt (A380)*: the former `test.fails`, now a plain test, a new test for `least`, a
+masculine, plural and indefinite set and a dative phrase, a comparative regression, and the original
+regression. Colocated cases are in `de/nounStandard.test.ts` and `pt/ptAdj.test.ts`. A371's two
+Portuguese pins (`… da mulher da cidade …`) moved to *na cidade*.

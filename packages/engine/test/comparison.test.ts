@@ -1166,8 +1166,9 @@ describe('known bugs: an attributive superlative drops its set (A371)', () => {
       it: "l'uomo vede la casa della donna più grande della città che corre.",
       fr: "l'homme voit la maison de la femme la plus grande de la ville qui court.",
       es: 'el hombre ve la casa de la mujer más grande de la ciudad que corre.',
-      // The suppletive superlative stands before the noun (A178), so only its set follows the possessor.
-      pt: 'o homem vê a maior casa da mulher da cidade que corre.',
+      // The suppletive superlative stands before the noun (A178), so only its set follows the possessor,
+      // said as a place so it does not read as the woman's (A380).
+      pt: 'o homem vê a maior casa da mulher na cidade que corre.',
     });
   });
 
@@ -1175,7 +1176,7 @@ describe('known bugs: an attributive superlative drops its set (A371)', () => {
     const house = np('HOUSE', {
       adjectives: ['OLD', 'BIG'], adjectiveDegrees: ['positive', 'most'], adjectiveStandards: [undefined, np('CITY')], possessor: np('WOMAN'),
     });
-    expect(say(clause(np('MAN'), 'SEE', { directObject: house }), 'pt')).toBe('o homem vê a maior casa velha da mulher da cidade.');
+    expect(say(clause(np('MAN'), 'SEE', { directObject: house }), 'pt')).toBe('o homem vê a maior casa velha da mulher na cidade.');
   });
 });
 
@@ -1188,7 +1189,7 @@ describe('known bugs: a superlative’s set beside a possessor stacks two geniti
   const house = (degree: Degree) =>
     np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [np('CITY')], possessor: np('WOMAN') });
 
-  test.fails('the set is said as a place', () => {
+  test('the set is said as a place', () => {
     expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house('most') }))).toMatchObject({
       de: 'der Mann sieht das größte Haus der Frau in der Stadt.', // now: "… der Frau der Stadt."
       pt: 'o homem vê a maior casa da mulher na cidade.', // now: "… da mulher da cidade."
@@ -1197,6 +1198,29 @@ describe('known bugs: a superlative’s set beside a possessor stacks two geniti
       de: 'das größte Haus der Frau in der Stadt brennt.', // now: "… der Frau der Stadt brennt."
       pt: 'a maior casa da mulher na cidade arde.', // now: "… da mulher da cidade arde."
     });
+  });
+
+  test('least, a masculine, a plural and an indefinite set, and a dative phrase', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house('least') })).de).toBe('der Mann sieht das am wenigsten große Haus der Frau in der Stadt.');
+    const inSet = (set: NounPhrase) =>
+      sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [set], possessor: np('WOMAN') }) }));
+    expect(inSet(np('MARKET'))).toMatchObject({
+      de: 'der Mann sieht das größte Haus der Frau im Markt.', pt: 'o homem vê a maior casa da mulher no mercado.',
+    });
+    expect(inSet(np('MARKET', { number: 'plural' }))).toMatchObject({
+      de: 'der Mann sieht das größte Haus der Frau in den Märkten.', pt: 'o homem vê a maior casa da mulher nos mercados.',
+    });
+    expect(inSet(np('MARKET', { definiteness: 'indefinite' }))).toMatchObject({
+      de: 'der Mann sieht das größte Haus der Frau in einem Markt.', pt: 'o homem vê a maior casa da mulher em um mercado.',
+    });
+    const cat = np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [np('CITY')], possessor: np('WOMAN') });
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: cat } } }))).toMatchObject({
+      de: 'der Mann gibt dem größten Kater der Frau in der Stadt das Buch.', pt: 'o homem dá o livro ao maior gato da mulher na cidade.',
+    });
+  });
+
+  test('regression: a comparative’s standard keeps its "als"', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house('more') })).de).toBe('der Mann sieht das größere Haus der Frau als die Stadt.');
   });
 
   test('regression: without a possessor the set stays genitive, and English says it in place', () => {
