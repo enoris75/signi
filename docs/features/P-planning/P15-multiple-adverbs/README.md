@@ -8,8 +8,17 @@ already places the single adverb. On the canvas the adverb disc chains the next 
 adjectives do.
 **Languages:** all seven. Every engine changes, because each one reads a single `modifier` in its
 predicate renderer.
-**Status:** planning. D1–D4 carry recommendations. None is open, but D2 decides how much of the
-engine work is needed.
+**Status: shipped** in all seven languages (and gsw), on the canvas, in the console and in saved
+phrases. One thing landed differently from the plan below:
+
+- **D2 is a primary plus a list, not one slot per class.** The translator keeps `modifier` as the
+  **primary** adverb, the highest-ranked one (negative > frequency > manner > direction > place), and
+  hands the rest over as `ResolvedVerbPhrase.moreAdverbs` (`verbAdverbs`). A lone adverb is exactly
+  the primary it always was, so every engine's negation, concord and slot logic runs unchanged, and a
+  frequency extra always has a frequency primary to stand beside. Each engine places the extras by
+  class (`moreAdverbsOf` / `moreAdverbText`); English and the four Romance engines share the
+  direction and place placement through `complementsAroundAdverb`'s new `more` argument.
+  `liftSentenceAdverb` lifts the first sentence adverb wherever it stands and re-picks the primary.
 
 ---
 
@@ -61,13 +70,9 @@ what a field meant, and this change does not.
 *Alternative:* retype `modifier` as `string | string[]`. That is terser in plans, but every reader
 has to branch on the type.
 
-**D2. Resolved shape: one slot per class, not a list.** *Recommendation:* the translator sorts the
-adverbs into the classes above and hands the engine `modifier` (manner, or the only adverb when
-there is one), plus `frequencyAdverb`, `placeAdverbs` and `sentenceAdverb` (a list, since
-`liftSentenceAdverb` already moves it to the head). Each engine keeps its current placement per
-class and gains a slot or two. It does not have to learn to walk a list.
-*Alternative:* `modifiers: ConceptForms[]`, which each engine walks. That is more general, but it
-means rewriting all seven predicate renderers. About 40 engine files read the single adverb today.
+**D2. Resolved shape: a primary and the rest** (as shipped; see Status). The plan first proposed
+one resolved slot per class. That would have moved the single adverb out of `modifier` in every
+engine, where about 40 files read it; keeping it as the primary left all of them untouched.
 
 **D3. At most one negative adverb per verb.** *Recommendation:* the translator keeps the first
 negative-polarity adverb and drops any later one, and the console and canvas do not offer a second
@@ -105,3 +110,19 @@ per link for little gain. The plan type can grow `ModalVerb.modifiers` later in 
 - Adverbs on modals (D4).
 - Adverbs modifying adjectives or other adverbs. VERY / TOO / A_LITTLE are intensifiers (C33), not
   verb adverbs.
+
+## Follow-ups noticed while shipping
+
+None of these is a P15 regression. Each also shows with a single adverb, or is a lexicon choice:
+
+- **A manner adverb before a noun object** in it, fr, es, pt and de ("sposta velocemente il libro",
+  "déplace vite le livre", "hat gut das Buch verschoben"): the existing single-adverb slot. Extras
+  follow it, so the stiffness now shows more often.
+- **French frequency after an infinitive** ("bien manger souvent la souris"): the frequency primary
+  already trails the infinitive, so a short manner extra leads it.
+- **AGAIN is a manner adverb**, so NEVER + AGAIN is "non corre mai di nuovo", "ne court jamais de
+  nouveau", "läuft nie erneut", where *mai più*, *plus jamais*, *nie wieder* are the idioms.
+- **ja WELL and OFTEN are both よく**, so WELL + SLOWLY reads "often slowly".
+- **An extra adverb keeps its plain form under negation**: only the primary takes a negative form
+  (ALREADY → *yet*). A second focus adverb under a negation would need its own.
+- **An instrument's action** (`Complement.action`, "by eating slowly") still reads one adverb.
