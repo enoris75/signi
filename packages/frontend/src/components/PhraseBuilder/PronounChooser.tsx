@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useConceptDefinition } from "../../i18n/useConceptLabel.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import {
+  PRONOUN_PERSONS,
   pronounFor,
   pronounGenders,
   type PronounChooser as Chooser,
@@ -20,18 +21,20 @@ export function PronounChooser({
   chooser,
   pronouns,
   onCommit,
-  disabled = [],
+  persons = PRONOUN_PERSONS,
 }: {
   chooser: Chooser;
   // The pronoun vocabulary, so the person row can name the concept each option stands for and
   // show its definition on hover — the tooltip the noun list gets from ConceptOption.
   pronouns: readonly Concept[];
   onCommit: () => void;
-  // Persons shown but not offered: the generic in an owner's chooser, which has no possessive (P11-E9 D2).
-  disabled?: readonly PronounPerson[];
+  // The persons the box takes (P11-E8's vocative: the 2nd alone); the others are shown, greyed, as the
+  // imperative's selector greys its persons under an instruction.
+  persons?: readonly PronounPerson[];
 }) {
   const t = useUiString();
   const { choice, set, row, setRow } = chooser;
+  const off = (person: PronounPerson) => !persons.includes(person);
 
   return (
     <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -40,18 +43,18 @@ export function PronounChooser({
           exclusive
           size="small"
           value={choice.person}
-          onChange={(_, v) => v && !disabled.includes(v) && set("person", v)}
+          onChange={(_, v) => v && !off(v) && set("person", v)}
         >
-          <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} />
-          <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} />
-          <PersonToggle person="3" pronouns={pronouns} label={t("pronoun.third")} />
+          <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} disabled={off("1")} />
+          <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} disabled={off("2")} />
+          <PersonToggle person="3" pronouns={pronouns} label={t("pronoun.third")} disabled={off("3")} />
           {/* The generic / impersonal "one" — a pronoun of its own, not a 4th person. */}
           <PersonToggle
             person="generic"
             pronouns={pronouns}
-            disabled={disabled.includes("generic")}
             label={t("pronoun.generic")}
             testId="pronoun-generic"
+            disabled={off("generic")}
           />
         </ToggleButtonGroup>
       </ChooserRow>
@@ -127,8 +130,9 @@ function PersonToggle({
   pronouns: readonly Concept[];
   label: string;
   testId?: string;
-  // Shown but not offered (P11-E9 D2): greyed and marked `aria-disabled` rather than `disabled`, so
-  // the definition tooltip still answers the pointer — a disabled button receives no events.
+  // Shown but not offered (P11-E9's owner, P11-E8's vocative): greyed and marked `aria-disabled`
+  // rather than `disabled`, so the definition tooltip still answers the pointer — a disabled button
+  // receives no events.
   disabled?: boolean;
 }) {
   const definition = useConceptDefinition();

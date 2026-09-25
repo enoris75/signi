@@ -69,16 +69,19 @@ export function rendersPassive(selection: PhraseSelection): boolean {
 
 /**
  * The slots a period shows for what it holds, its subject slot dressed as `roleSlot` if given — and,
- * first, the interjection box while the card's border shows it (P09-E47).
+ * first, the interjection box while the card's border shows it (P09-E47), then the vocative box and
+ * its adjectives while the border shows that (P11-E8).
  */
 export function visibleSlotsFor(
   selection: PhraseSelection,
   roleSlot: RoleSlot | undefined,
   interjection = false,
+  vocative = false,
 ): SlotConfig[] {
   const passive = rendersPassive(selection);
   return [
     ...(interjection ? ALL_SLOTS.filter((s) => s.key === "interjection") : []),
+    ...(vocative ? ALL_SLOTS.filter((s) => s.key.startsWith("vocative")) : []),
     ...getActiveSlots(
       selection.verb?.transitivity,
       selection.subject?.role,

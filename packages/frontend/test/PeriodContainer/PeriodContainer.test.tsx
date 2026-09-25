@@ -168,6 +168,20 @@ describe('PeriodContainer', () => {
         },
         '236px',
       ],
+      [
+        'all eight, the vocative after the interjection (P11-E8)',
+        {
+          imperative: mood(false),
+          infinitive: mood(false),
+          question: mood(false),
+          conditional: conditionalControl(),
+          coordinative: coordinativeControl(),
+          subordinate: subordinateControl(),
+          interjection: { shown: false, onToggle: () => {} },
+          vocative: { shown: false, onToggle: () => {} },
+        },
+        '268px',
+      ],
     ])('make the card at least as tall as their stack: %s', (_, props, minHeight) => {
       renderPeriod(props);
 

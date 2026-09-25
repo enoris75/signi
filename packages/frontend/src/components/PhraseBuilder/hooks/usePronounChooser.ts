@@ -70,15 +70,17 @@ export function usePronounChooser({
   // ↑ from the top row leaves the grid for the category tabs, as it leaves a list of words.
   onExitTop,
   onClose,
-  disabled = [],
+  persons = PRONOUN_PERSONS,
 }: {
   onCommit: (choice: PronounChoice) => void;
   onExitTop: () => void;
   onClose: () => void;
-  disabled?: readonly PronounPerson[];
+  // The persons the box takes, where not every one is: the vocative's 2nd alone (P11-E8). The others
+  // stay in the row, greyed; the keys pass them by, and the choice starts on the first one offered.
+  persons?: readonly PronounPerson[];
 }): PronounChooser {
   const [choice, setChoice] = useState<PronounChoice>({
-    person: "1",
+    person: persons[0] ?? "1",
     number: "singular",
     gender: "masc",
   });
@@ -94,7 +96,7 @@ export function usePronounChooser({
 
   /** The values the focused row offers, and where in them the current choice sits. */
   function rowValues(): readonly string[] {
-    if (row === "person") return PRONOUN_PERSONS.filter((p) => !disabled.includes(p));
+    if (row === "person") return PRONOUN_PERSONS.filter((p) => persons.includes(p));
     if (row === "number") return NUMBERS;
     return pronounGenders(choice.person);
   }
@@ -124,7 +126,7 @@ export function usePronounChooser({
     const person = PRONOUN_PERSONS[Number(event.key) - 1];
     if (person && event.key >= "1" && event.key <= "4") {
       event.preventDefault();
-      if (disabled.includes(person)) return;
+      if (!persons.includes(person)) return;
       set("person", person);
       setRow("person");
       return;

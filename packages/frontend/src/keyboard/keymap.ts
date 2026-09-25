@@ -178,6 +178,8 @@ export interface PeriodContext {
   toggleObjectControl?: (() => void) | undefined;
   /** E — show the interjection box, or take it away (P09-E47). Absent where the period offers none. */
   toggleInterjection?: (() => void) | undefined;
+  /** V — show the vocative box, or take it away (P11-E8). Absent where the period says none. */
+  toggleVocative?: (() => void) | undefined;
   /** Z / W / + − — the view: compact, tidy, and the canvas's height. */
   toggleCompact: () => void;
   tidy: () => void;
@@ -1230,6 +1232,19 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     hint: true,
     when: (ctx) => Boolean(ctx.toggleInterjection),
     run: (ctx) => ctx.toggleInterjection!(),
+  },
+  {
+    // The vocative (P11-E8) — V for *vocative*, a letter the period left free (a box's own V, the
+    // object's voice or the verb's adverb, is looked up first while the cursor is on a box). As E, it
+    // presses the border toggle; the box then takes the ordinary noun-box keys through its noun key.
+    id: "period.vocative",
+    scope: "period",
+    keys: ["V"],
+    label: "Vocative",
+    labelKey: "action.addVocative",
+    hint: true,
+    when: (ctx) => Boolean(ctx.toggleVocative),
+    run: (ctx) => ctx.toggleVocative!(),
   },
   {
     id: "period.level",

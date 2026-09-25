@@ -80,12 +80,15 @@ export function rawSatellites(
   // And, on an owner's hosted ring, whether the period that hosts it may ask *whose* there and does
   // (P09-E52, RingHost.question). And whether this is a hosted ring's builder (an owner, a conjunct, a
   // standard, examples), whose noun takes no standard and no examples of its own (P09-E50 D4, P09-E48 D2).
+  // And whether this is a vocative's conjunct (P11-E8), whose head the engine says bare as the
+  // vocative's own: it takes no determiner.
   {
     moodLocked = false,
     clauseObject = false,
     ownerQuestion,
     hosted = false,
     ownerHead = false,
+    bareHead = false,
   }: {
     moodLocked?: boolean;
     clauseObject?: boolean;
@@ -94,6 +97,8 @@ export function rawSatellites(
     // Whether this is an owner's ring (P11-E9): a pronoun there is a possessive, and of its persons
     // only the 3rd spells a gender (his / her / its), so the gender control is offered on it alone.
     ownerHead?: boolean;
+    // A vocative's conjunct (P11-E8): said bare, as the vocative is, so it takes no determiner.
+    bareHead?: boolean;
   } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
@@ -210,6 +215,90 @@ export function rawSatellites(
     Boolean(selection.directObject?.gendered) ||
     (directObjectRole === "pronoun" && selection.directObject?.person === "3");
 
+  // The period's vocative (P11-E8), "**Mom**, run": the noun ring's own controls — its adjectives,
+  // number and gender, relative clause, owner, group, standard and examples — less what an address
+  // cannot use. No determiner: the engine says the address bare in all seven, so the chip would change
+  // nothing. No question mark, existential or reading: those are the clause's, and the vocative stands
+  // outside it. Its pronoun is the 2nd person's, whose gender every language agrees with.
+  const vocativeSatellites = (): RawSatellite[] => {
+    const head = selection.vocative;
+    const noun = head?.role === "noun";
+    return [
+      ...(["vocativeAdjective", "vocativeAdjective2", "vocativeAdjective3"] as const).map((key, i, keys): RawSatellite => ({
+        key,
+        parent: i === 0 ? "vocative" : keys[i - 1]!,
+        label: t("category.adjective"),
+        labelKey: "category.adjective",
+        icon: <BrushIcon sx={iconSx} />,
+        available: noun && (i === 0 || Boolean(selection[keys[i - 1]!])),
+        hasValue: Boolean(selection[key]),
+        valueLabel: label(selection[key]),
+      })),
+      {
+        key: "vocativeNumber",
+        parent: "vocative",
+        label: t("satellite.number"),
+        labelKey: "satellite.number",
+        icon: <NumbersIcon sx={iconSx} />,
+        available: Boolean(head),
+        hasValue: selection.vocativeNumber === "plural",
+        alwaysSet: true,
+        directToggle: true,
+        valueLabel: t(`number.value.${selection.vocativeNumber ?? "singular"}`),
+      },
+      {
+        key: "vocativeGender",
+        parent: "vocative",
+        label: t("satellite.gender"),
+        labelKey: "satellite.gender",
+        icon: genderIcon(selection.vocativeGender),
+        available: head?.role === "pronoun" || (noun && Boolean(head?.gendered)),
+        hasValue: Boolean(selection.vocativeGender) && selection.vocativeGender !== "masc",
+        alwaysSet: true,
+        directToggle: true,
+        valueLabel: genderLabel(t, selection.vocativeGender),
+      },
+      {
+        key: "vocativeRelative",
+        parent: "vocative",
+        label: t("satellite.relative"),
+        icon: <AccountTreeIcon sx={iconSx} />,
+        available: noun,
+        hasValue: false,
+      },
+      {
+        key: "vocativeHeadless",
+        parent: "vocative",
+        label: t("relative.headless"),
+        labelKey: "relative.headless",
+        icon: <VisibilityOffIcon sx={iconSx} />,
+        available: noun,
+        hasValue: false,
+      },
+      {
+        key: "vocativePossessor",
+        parent: "vocative",
+        label: t("slot.possessor"),
+        labelKey: "slot.possessor",
+        icon: <KeyIcon sx={iconSx} />,
+        available: noun,
+        hasValue: Boolean(selection.vocativePossessor?.subject) || Boolean(selection.vocativePossessorRef),
+      },
+      possessorRole("vocative"),
+      standard("vocative"),
+      examples("vocative"),
+      {
+        key: "vocativeConjunct",
+        parent: "vocative",
+        label: t("satellite.coordination"),
+        icon: <CallSplitIcon sx={iconSx} />,
+        available: Boolean(head),
+        hasValue: conjunctCount("vocative") > 0,
+        valueLabel: t(conjunctCount("vocative") > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
+      },
+    ];
+  };
+
   return [
     {
       key: "subjectAdjective",
@@ -274,8 +363,9 @@ export function rawSatellites(
       label: t("satellite.determiner"),
       labelKey: "satellite.determiner",
       icon: <ArticleOutlinedIcon sx={iconSx} />,
-      // Only a noun head takes an article; pronoun subjects render without one.
-      available: subjectRole === "noun",
+      // Only a noun head takes an article; pronoun subjects render without one, and so does a
+      // vocative's conjunct (P11-E8).
+      available: subjectRole === "noun" && !bareHead,
       hasValue: Boolean(
         selection.subjectDefiniteness &&
           selection.subjectDefiniteness !== "definite",
@@ -680,6 +770,7 @@ export function rawSatellites(
     },
     question("directObject"),
     questionAnimacy("directObject"),
+    ...vocativeSatellites(),
     // The instrumental has no box on this canvas: its noun phrase lives in a period container
     // of its own, and this control on the verb-phrase dotted ring is the link to it (started,
     // and later cleared, in buildSatelliteIcons off the workspace binding — like the

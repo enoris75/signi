@@ -267,3 +267,108 @@ describe('known bugs: an object relative with no subject reads as a subject rela
     });
   });
 });
+
+// P11-E8: the vocative is the root period's, and not a linked clause's, a citation's or an
+// instruction's; the engine says it bare, and calls the hearer alone.
+describe('the vocative', () => {
+  const MOM = { id: 'MOM', role: 'noun' as const, description: 'mom', label: 'mom' };
+  const DAD = { id: 'DAD', role: 'noun' as const, description: 'dad', label: 'dad' };
+  const YOU = { id: 'SECOND_PERSON', role: 'pronoun' as const, description: 'you', label: 'you', person: '2' as const };
+  const ME = { id: 'FIRST_PERSON', role: 'pronoun' as const, description: 'I', label: 'I', person: '1' as const };
+  const RUN = { id: 'RUN', role: 'verb' as const, description: 'run', label: 'run', transitivity: 'intransitive' as const };
+
+  it('is written on the root period, as its address', () => {
+    const [{ plan }] = workspaceToPlans([period('p', { vocative: MOM, subject: CAT, verb: RUN })], []);
+    expect(plan.address).toEqual(expect.objectContaining({ concept: 'MOM' }));
+    // Not the subject, not even a command's (P11-E3 D4).
+    expect(plan.subject).toEqual(expect.objectContaining({ concept: 'CAT' }));
+    const [{ plan: command }] = workspaceToPlans([period('p', { vocative: MOM, verb: RUN, imperative: true })], []);
+    expect(command.address).toEqual(expect.objectContaining({ concept: 'MOM' }));
+    expect(command.subject).toEqual(expect.objectContaining({ concept: 'SECOND_PERSON' }));
+  });
+
+  it('is a group, "Mom and Dad"', () => {
+    const [{ plan }] = workspaceToPlans(
+      [period('p', { vocative: MOM, vocativeConjuncts: [{ subject: DAD }], verb: RUN, imperative: true, imperativePerson: '2pl' })],
+      [],
+    );
+    expect(plan.address).toEqual({ conjunction: 'and', conjuncts: [expect.objectContaining({ concept: 'MOM' }), expect.objectContaining({ concept: 'DAD' })] });
+  });
+
+  it.each<[string, PhraseLink]>([
+    ['a coordination’s second clause', coordinative('l', 'main', 'voc')],
+    ['a condition', conditional('l', 'main', 'voc')],
+  ])('is left out of %s', (_, link) => {
+    const [{ plan }] = workspaceToPlans(
+      [period('main', { subject: DOG, verb: SLEEP }), period('voc', { vocative: MOM, subject: CAT, verb: RUN })],
+      [link],
+    );
+    expect(plan.address).toBeUndefined();
+    expect(JSON.stringify(plan)).not.toContain('"MOM"');
+  });
+
+  it('is left out of a relative clause’s period', () => {
+    const [{ plan }] = workspaceToPlans(
+      [period('main', { subject: DOG, verb: SLEEP }), period('rel', { vocative: MOM, subject: DOG, verb: EAT })],
+      [relative('r', ['main', 'subject'], ['rel', 'subject'])],
+    );
+    expect(plan.address).toBeUndefined();
+    expect(JSON.stringify(plan)).not.toContain('"MOM"');
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    ['the infinitive: a citation calls no one', { infinitive: true }],
+    ['an instruction, which addresses nobody (A338)', { imperative: true, imperativeRegister: 'instruction' }],
+  ])('is left out under %s', (_, mood) => {
+    const [{ plan }] = workspaceToPlans([period('p', { vocative: MOM, verb: RUN, ...mood })], []);
+    expect(plan.address).toBeUndefined();
+  });
+
+  it('takes the 2nd person, and never lets another person reach the plan', () => {
+    const [{ plan: you }] = workspaceToPlans([period('p', { vocative: YOU, vocativeNumber: 'plural', verb: RUN, imperative: true })], []);
+    expect(you.address).toEqual(expect.objectContaining({ concept: 'SECOND_PERSON', number: 'plural' }));
+    const [{ plan: me }] = workspaceToPlans([period('p', { vocative: ME, verb: RUN, imperative: true })], []);
+    expect(me.address).toBeUndefined();
+    const [{ plan: group }] = workspaceToPlans([period('p', { vocative: MOM, vocativeConjuncts: [{ subject: ME }], verb: RUN, imperative: true })], []);
+    expect(group.address).toBeUndefined();
+  });
+
+  it('heads a relative clause, "Cat that runs, eat."', () => {
+    const [{ plan }] = workspaceToPlans(
+      [period('main', { vocative: CAT, verb: EAT, imperative: true }), period('rel', { subject: CAT, verb: RUN })],
+      [relative('r', ['main', 'vocative'], ['rel', 'subject'])],
+    );
+    expect((plan.address as NounPhrase).relative).toEqual(expect.objectContaining({ headRole: 'subject' }));
+  });
+
+  it('comes back from its plan whole: the four columns of the ticket', () => {
+    const byId = new Map([MOM, DAD, CAT, RUN, YOU].map((c) => [c.id, c]));
+    const subject = { concept: 'SECOND_PERSON', number: 'singular' };
+    const plans = [
+      { imperative: true, subject, verbPhrase: { verb: 'RUN' }, address: { concept: 'MOM' } },
+      { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, address: { concept: 'MOM' } },
+      { interrogative: true, subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' }, address: { concept: 'MOM' } },
+      { imperative: true, subject: { ...subject, number: 'plural' }, verbPhrase: { verb: 'RUN' }, address: { conjunction: 'and', conjuncts: [{ concept: 'MOM' }, { concept: 'DAD' }] } },
+    ] as PhrasePlan[];
+    for (const plan of plans) {
+      const back = planToWorkspace(plan, (id) => byId.get(id));
+      expect(back.unsupported).toEqual([]);
+      expect(back.containers[0]!.selection.vocative?.id).toBe('MOM');
+      const [{ plan: again }] = workspaceToPlans(back.containers, back.links);
+      expect(again.address).toMatchObject(plan.address!);
+    }
+  });
+
+  it('is said to be left out where the canvas would not say it', () => {
+    const byId = new Map([MOM, CAT, RUN].map((c) => [c.id, c]));
+    const base = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' } };
+    // A coreferent possessor inside it (P11-E2), which the engine refuses there.
+    const coref = planToWorkspace({ ...base, address: { concept: 'MOM', possessor: { kind: 'coreferent', slot: 'subject' } } } as PhrasePlan, (id) => byId.get(id));
+    expect(coref.unsupported).toEqual(['Possessor.coreferent']);
+    // A linked clause's, and a determiner the engine never says.
+    const linked = planToWorkspace({ ...base, coordination: { conjunction: 'and', clause: { ...base, address: { concept: 'MOM' } } } } as PhrasePlan, (id) => byId.get(id));
+    expect(linked.unsupported).toEqual(['PhrasePlan.address of a linked clause, a citation or an instruction']);
+    const determiner = planToWorkspace({ ...base, address: { concept: 'MOM', definiteness: 'indefinite' } } as PhrasePlan, (id) => byId.get(id));
+    expect(determiner.unsupported).toEqual(['PhrasePlan.address.definiteness']);
+  });
+});

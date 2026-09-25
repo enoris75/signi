@@ -619,6 +619,10 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
     ['INTERJECTION',
       { en: 'an interjection.', it: "un'interiezione.", fr: 'une interjection.', de: 'eine Interjektion.', es: 'una interjección.', ja: '感動詞。', pt: 'uma interjeição.' },
       { en: 'the interjections.', it: 'le interiezioni.', fr: 'les interjections.', de: 'die Interjektionen.', es: 'las interjecciones.', ja: '感動詞。', pt: 'as interjeições.' }],
+    // P11-E8: the phrase that calls the hearer, which names the period's vocative box.
+    ['VOCATIVE',
+      { en: 'a vocative.', it: 'un vocativo.', fr: 'un vocatif.', de: 'eine Anrede.', es: 'un vocativo.', ja: '呼びかけ。', pt: 'um vocativo.' },
+      { en: 'the vocatives.', it: 'i vocativi.', fr: 'les vocatifs.', de: 'die Anreden.', es: 'los vocativos.', ja: '呼びかけ。', pt: 'os vocativos.' }],
     ['TERMINUS',
       { en: 'a terminus.', it: 'un complemento di termine.', fr: "un complément d'objet second.", de: 'ein Dativobjekt.', es: 'un complemento indirecto.', ja: '間接目的語。', pt: 'um objeto indireto.' },
       { en: 'the termini.', it: 'i complementi di termine.', fr: "les compléments d'objet second.", de: 'die Dativobjekte.', es: 'los complementos indirectos.', ja: '間接目的語。', pt: 'os objetos indiretos.' }],

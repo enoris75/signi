@@ -121,6 +121,11 @@ export interface InterjectionControl {
   onToggle: () => void;
 }
 
+// The vocative's toggle on the card border (P11-E8), after the interjection's: shows the noun box that
+// names the hearer before the clause, "**Mom**, run", or takes it away with its words. Offered on a root
+// period that says its address — not a citation, not an instruction — so it is absent elsewhere.
+export type VocativeControl = InterjectionControl;
+
 // The cross-container relations a period card can light up for as a pick target.
 export type Relation = "conditional" | "coordinative" | "subordinate" | "instrumental";
 
@@ -146,6 +151,8 @@ export interface ClauseControls {
   // Interjection toggle on the card border (P09-E47), the last of the stack. Absent where the period
   // offers none (see InterjectionControl).
   interjection?: InterjectionControl;
+  // Vocative toggle on the card border (P11-E8), after the interjection's, the last of the stack.
+  vocative?: VocativeControl;
 }
 
 // The palette colour each relation and mood marks the card and its border control with. The six

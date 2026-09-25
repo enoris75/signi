@@ -131,5 +131,7 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleSelectSentiment: (sentiment: CauseSentiment) => onPhraseUpdate((prev) => setSentiment(prev, sentiment)),
     // The interjection's border toggle, taking its box away (P09-E47): the word goes with it.
     handleRemoveInterjection: () => onPhraseUpdate((prev) => applyClear(prev, "interjection")),
+    // The vocative's border toggle, taking its box away (P11-E8): its words go with it.
+    handleRemoveVocative: () => onPhraseUpdate((prev) => applyClear(prev, "vocative")),
   };
 }

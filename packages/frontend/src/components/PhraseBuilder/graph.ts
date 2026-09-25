@@ -123,6 +123,20 @@ export function roleGroups({
           },
         ]
       : []),
+    // The period's vocative (P11-E8), the hearer named next: a noun with its ring's controls, joined to
+    // nothing, while the card's border toggle shows its box.
+    ...(visibleSlots.some((s) => s.key === "vocative")
+      ? [
+          {
+            label: "Vocative",
+            labelKey: "slot.vocative" as const,
+            color: MUI_COLOR_HEX.info,
+            mainKey: "vocative",
+            nodeKeys: ["vocative", ...shown(adjectiveSlots("vocative"))],
+            detached: true,
+          },
+        ]
+      : []),
     ...(showSubject
       ? [
           {
@@ -260,7 +274,7 @@ export function buildEdges({
   if (verb) {
     for (const group of groupRects) {
       // A word of the period that belongs to no constituent is joined to none (see GroupDef.bare).
-      if (group === verb || group.bare) continue;
+      if (group === verb || group.bare || group.detached) continue;
       let from: Pt | undefined;
       let to: Pt | undefined;
       if (compact) {

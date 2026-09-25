@@ -41,6 +41,8 @@ export function rescaleYForHeight(
 const READING_ORDER = [
   // P09-E47's interjection, spoken before the clause.
   "Interjection",
+  // P11-E8's vocative, the hearer named after it.
+  "Vocative",
   "Subject",
   "Verb Phrase",
   "Direct Object",
@@ -48,7 +50,7 @@ const READING_ORDER = [
 ];
 
 // Tidy the whole period: pack the constituents' rings into non-overlapping, centred rows in
-// reading order — interjection · subject · verb phrase · direct object · complements. A ring's satellites are
+// reading order — interjection · vocative · subject · verb phrase · direct object · complements. A ring's satellites are
 // always seated on its orbit, so there is nothing to tidy inside one: each constituent is packed at
 // the footprint it really renders at, so an expanded one gets the room its satellites need.
 //

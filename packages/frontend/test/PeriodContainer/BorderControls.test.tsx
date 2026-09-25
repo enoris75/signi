@@ -66,6 +66,33 @@ describe('BorderControls', () => {
     expect(screen.getAllByRole('button').at(-1)).toHaveAttribute('aria-pressed', 'true');
   });
 
+  // P11-E8: the eighth control, after the interjection's, as the vocative is spoken after it.
+  it('stacks the vocative after the interjection, and names what pressing it does', () => {
+    const onToggle = vi.fn();
+    const { rerender } = renderControls({
+      imperative: mood(false),
+      interjection: { shown: false, onToggle: () => {} },
+      vocative: { shown: false, onToggle },
+    });
+
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.at(-2)).toHaveAttribute('data-kb-control', 'interjection');
+    const toggle = buttons.at(-1)!;
+    expect(toggle).toHaveAttribute('data-kb-control', 'vocative');
+    expect(toggle).toHaveAccessibleName('Add a vocative');
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(toggle);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <div>
+        <BorderControls imperative={mood(false)} vocative={{ shown: true, onToggle }} />
+      </div>,
+    );
+    expect(screen.getAllByRole('button').at(-1)).toHaveAccessibleName('Remove the vocative');
+    expect(screen.getAllByRole('button').at(-1)).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('shows only the controls it is given', () => {
     renderControls({ imperative: mood(false) });
 

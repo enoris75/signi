@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { hydrateWorkspace } from '../../../src/components/PhraseBuilder/phraseSerialize/functions/hydrateWorkspace.ts';
 import { serializeWorkspace } from '../../../src/components/PhraseBuilder/phraseSerialize/functions/serializeWorkspace.ts';
 import type { PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import { CAT, DOG, RICH, RICH_SAVED } from '../fixtures.ts';
@@ -20,6 +21,17 @@ describe('serializeWorkspace', () => {
       ],
       links: [],
     });
+  });
+
+  // P11-E8: the vocative is a noun block like any other — its head and its group's by id — and comes
+  // back from the save whole.
+  it('saves the vocative by id, and loads it back', () => {
+    const selection = { vocative: CAT, vocativeNumber: 'plural' as const, vocativeConjuncts: [{ subject: DOG }] };
+    const saved = serializeWorkspace([{ id: 'v', selection }], []);
+    expect(saved.containers[0]!.selection).toEqual({ vocative: 'CAT', vocativeNumber: 'plural', vocativeConjuncts: [{ subject: 'DOG' }] });
+    const back = hydrateWorkspace(saved, [CAT, DOG]);
+    expect(back.containers[0]!.selection).toEqual(selection);
+    expect(back.missing).toEqual([]);
   });
 
   it('saves a relative link with its noun addresses and no kind', () => {

@@ -59,6 +59,7 @@ export function PeriodContainer({
   infinitive,
   question,
   interjection,
+  vocative,
   children,
   ...headerControls
 }: PeriodContainerProps) {
@@ -76,9 +77,9 @@ export function PeriodContainer({
   // 142px tall, and five controls stack to 156px (28px each, 4px apart), standing 7px out of it at
   // either end. So the card grows to the stack plus 8px clear of the border at either end: each
   // 28px control and its 4px gap, less the last gap, plus 16 — 172px for five, 204px for six, 236px
-  // for all seven (command, infinitive, question, conditional, coordination, subordinate clause and
-  // P09-E47's interjection).
-  const borderControls = [imperative, infinitive, question, conditional, coordinative, subordinate, interjection].filter(
+  // for seven, 268px for all eight (command, infinitive, question, conditional, coordination,
+  // subordinate clause, P09-E47's interjection and P11-E8's vocative).
+  const borderControls = [imperative, infinitive, question, conditional, coordinative, subordinate, interjection, vocative].filter(
     Boolean,
   ).length;
   const minHeight = borderControls ? `${borderControls * 32 - 4 + 16}px` : undefined;
@@ -127,6 +128,7 @@ export function PeriodContainer({
         infinitive={infinitive}
         question={question}
         interjection={interjection}
+        vocative={vocative}
       />
       <Box
         ref={controlsRef}

@@ -51,6 +51,14 @@ describe('linkRules', () => {
     expect(canBeRelativeTarget([...CONTAINERS, act], [], 'A', { containerId: 'R', nounKey: 'subject' })).toBe(true);
   });
 
+  // P11-E8: a relative clause has no address, so the vocative is no gap — though it may head one.
+  it('never offers the vocative as a relative clause’s gap', () => {
+    const call: PhraseContainer = { id: 'V', selection: { vocative: noun('MOM'), subject: noun('CAT'), verb: verb('RUN') } };
+
+    expect(canBeRelativeTarget([...CONTAINERS, call], [], 'A', { containerId: 'V', nounKey: 'vocative' as never })).toBe(false);
+    expect(canBeRelativeTarget([...CONTAINERS, call], [], 'A', { containerId: 'V', nounKey: 'subject' })).toBe(true);
+  });
+
   // P09-E45: the opponent is a gap like any box, "the dog against which the cat plays".
   it('offers a filled opponent as a relative clause’s gap', () => {
     const play: PhraseContainer = { id: 'P', selection: { subject: noun('CAT'), verb: verb('PLAY_GAME'), opponent: noun('DOG') } };

@@ -348,6 +348,8 @@ const CANVAS_PARTS = {
   opponent: { concept: 'OPPONENT_COMPLEMENT', en: 'opponent' },
   // P09-E47's box before the subject: the period's interjection, "**hey**, the cat runs".
   interjection: { concept: 'INTERJECTION', en: 'interjection' },
+  // P11-E8's noun box after it: the period's vocative, "**Mom**, run".
+  vocative: { concept: 'VOCATIVE', en: 'vocative' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
@@ -366,14 +368,14 @@ const BOXED_COMPLEMENT_PARTS = [
 // drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
   'subject', 'agent', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'interjection', 'standard', 'comparisonSet', 'examples',
+  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'interjection', 'vocative', 'standard', 'comparisonSet', 'examples',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
   'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'voice', 'instrumental',
   ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor', 'standard', 'comparisonSet', 'examples',
 ] as const satisfies readonly CanvasPart[];
 export const COLLAPSIBLE_PARTS = [
-  'subject', 'agent', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
+  'subject', 'agent', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS, 'vocative',
 ] as const satisfies readonly CanvasPart[];
 // The rings a remove control drops from the clause: the boxed complements. The subject and the object
 // stay (clearing their word empties them), and the instrumental has no ring of its own to remove.
@@ -2438,6 +2440,41 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Remove the interjection',
+  },
+
+  // P11-E8's vocative, "**Mom**, run" — the noun box after the interjection, named by the grammar noun
+  // VOCATIVE (fr *vocatif*, de *Anrede*, ja 呼びかけ): its title, the two faces of its border toggle
+  // (ADD a vocative, indefinite; REMOVE the vocative, definite, which takes the box and its words away)
+  // and `/voc`'s purpose, which adds it to a period as `/interj` adds an interjection.
+  'slot.vocative': {
+    plan: nameOf('VOCATIVE'),
+    format: NAME_FORMAT,
+    fallback: 'Vocative',
+  },
+  'action.addVocative': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'VOCATIVE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a vocative',
+  },
+  'action.removeVocative': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'VOCATIVE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the vocative',
+  },
+  'purpose.vocative': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'VOCATIVE', definiteness: 'indefinite' },
+      { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a vocative to a period',
   },
 
   // The badge in a period's caption naming the part the period plays in a link: CLAUSE with the

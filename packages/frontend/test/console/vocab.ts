@@ -49,12 +49,15 @@ export const NOUNS = [
   c('FATHER', 'noun', 'father', 'padre', { animate: true, human: true, relative: true }),
 ];
 
-// Kin, for an owner that is a pronoun (P11-E9): "my mother runs", "my son marries your daughter". Kept
-// out of NOUNS and VERBS, which the round trip's random walk draws from, so the walk reaches what it did.
+// Kin, kept out of NOUNS and VERBS, which the round trip's random walk draws from, so the walk reaches
+// what it did: for an owner that is a pronoun (P11-E9), "my mother runs", "my son marries your
+// daughter"; and the parents one calls in the vocative (P11-E8), "Mom and Dad, run".
 export const KIN = [
   c('MOTHER', 'noun', 'mother', 'madre', { animate: true, human: true }),
   c('SON', 'noun', 'son', 'figlio', { animate: true, human: true }),
   c('DAUGHTER', 'noun', 'daughter', 'figlia', { animate: true, human: true }),
+  c('MOM', 'noun', 'mom', 'mamma', { animate: true, human: true }),
+  c('DAD', 'noun', 'dad', 'papà', { animate: true, human: true }),
 ];
 
 export const PRONOUNS = [

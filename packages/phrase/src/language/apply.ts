@@ -1449,7 +1449,8 @@ class Run {
     const ref = printRefText(n, target.nounKey);
     if (sourceId === target.containerId) return coded("relativeSamePeriod");
     // The capacity one acts in is never a relative's gap (P09-E44, A288): choose another noun.
-    if (target.nounKey === "role") return coded("relativeGapRole", { period: n });
+    // Nor is the vocative (P11-E8), which no relative clause has: the same refusal names the nouns to choose.
+    if (target.nounKey === "role" || (target.nounKey as string) === "vocative") return coded("relativeGapRole", { period: n });
     const c = this.containers.find((x) => x.id === target.containerId);
     // A gap no box holds (P13): the instrument of a verb that takes one, unlinked; the subject's possessor.
     const there =
@@ -1504,6 +1505,9 @@ export function roleRefusal(
   if (slot === "subject") return undefined;
   // The interjection is the period's own, whatever its clause holds (P09-E47).
   if (slot === "interjection") return undefined;
+  // So is the vocative (P11-E8), which calls the hearer of any period: a linked clause, a citation or an
+  // instruction holds one, dimmed, and the plan leaves it out (see vocativeOffered).
+  if (slot === "vocative") return undefined;
   if (slot === "directObject") {
     if (!verb) return coded("objectNeedsVerb");
     // A that-clause the period governs is its verb's object already (P09-E12 D9), as the canvas

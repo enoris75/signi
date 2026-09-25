@@ -250,6 +250,8 @@ class Printer {
       const statement = this.wordStatement(ref, "/interj", "info", root.interjection, undefined, true);
       this.emit(")", "close", "info", { word: ref, element: true, statement });
     }
+    // The vocative (P11-E8), the hearer, named next: after the interjection, before the subject.
+    this.noun(root, "vocative", undefined, "period");
     this.noun(root, "subject", undefined, "period");
     this.verbBlock(root);
     this.noun(root, "directObject", undefined, "period");
