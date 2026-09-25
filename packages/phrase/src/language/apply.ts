@@ -56,6 +56,7 @@ import {
   setInfinitiveControl,
 } from "../model/linkRules.ts";
 import {
+  setNumeral,
   addConjunct,
   applyClear,
   applyConceptSelect,
@@ -624,6 +625,15 @@ class Run {
         this.queue.push({ kind: "headless", containerId: w.ref.containerId, nounKey: w.address!, headless: true, span: item });
         this.touch(w.ref);
         return;
+      // A cardinal numeral (P13): a whole number, the engine's words running to 12 and 24.
+      case "numeral": {
+        const text = item.word?.text.trim() ?? "";
+        const n = Number(text);
+        if (!/^\d+$/.test(text) || n < 1 || n > 9999) return fail(item.word ?? item.head, coded("numeralNotANumber"));
+        this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setNumeral(s, w.which!, n));
+        this.touch(w.ref);
+        return;
+      }
     }
   }
 
@@ -1050,6 +1060,14 @@ class Run {
         );
         if (!w) fail(span, coded("noRelativeToRemove"));
         this.queue.push({ kind: "unlink", link: "relative", containerId, nounKey: w!.address!, span: item });
+        this.touch(w!.ref);
+        return;
+      }
+      // A noun's numeral (P13): the closest noun that has one.
+      case "num": {
+        const w = closest((x) => x.kind === "noun" && x.slice.numerals?.[x.which!] !== undefined);
+        if (!w) fail(span, coded("nothingToRemove"));
+        this.updateSlice(containerId, w!.ref.slice, (s) => setNumeral(s, w!.which!, undefined));
         this.touch(w!.ref);
         return;
       }

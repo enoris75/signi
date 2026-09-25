@@ -57,6 +57,8 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     adjectiveDegrees,
     nounModifiers,
     possessor,
+    // A cardinal numeral counting it (P13).
+    numeral: sel.numerals?.[which],
     // What a genitive possessor is to the head (P13): an owner unless the noun says otherwise.
     possessorRole: possSel && !possRef ? sel.possessorRoles?.[which] : undefined,
   };

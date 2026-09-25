@@ -432,6 +432,13 @@ class Printer {
     }
     const afterAdjectives = this.tokens.length;
     this.settings(w, ["number", "gender", "determiner", "specifier", "gloss", "temporal", "predication", "sentiment", "causePolarity", "degree"]);
+    // Its numeral, after its determiner (P13).
+    const numeral = sel.numerals?.[which];
+    if (numeral !== undefined) {
+      this.statement({ key: `${wordKey(ref)}:num`, removal: "/del num", owner: ref, about: ref });
+      this.emit("/num", "command", "setting", { word: ref });
+      this.emit(String(numeral), "value", "setting", { word: ref });
+    }
     const address = w.address!;
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its

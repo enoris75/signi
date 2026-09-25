@@ -61,7 +61,7 @@ const PERIOD_FIELDS = new Set([
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
   "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
-  "complementGloss", "possessorRole", "antecedent",
+  "complementGloss", "possessorRole", "antecedent", "numeral",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -295,6 +295,7 @@ class Builder {
     set(sel, which, head);
     set(sel, `${which}Number`, np.number);
     set(sel, `${which}Gender`, np.gender);
+    if (np.numeral !== undefined) sel.numerals = { ...sel.numerals, [which]: np.numeral };
     // The core slots and the complements a determiner reaches (DETERMINER_COMPLEMENT_TYPES) hold one.
     if (np.definiteness) {
       if (which === "subject" || which === "directObject" || DETERMINER_COMPLEMENT_TYPES.includes(which as ComplementType))

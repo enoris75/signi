@@ -220,3 +220,22 @@ test.describe('joined predicate adjectives', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/pred ( happy /and tired )');
   });
 });
+
+test.describe('a numeral', () => {
+  test('says DAY, "a period of 24 hours", typed or set from the determiner menu', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj PERIOD_TIME /a /poss ( /subj HOUR /a /num 24 ) /parts');
+    await run(page);
+    await app.expectSentences({ en: 'a period of twenty-four hours.' });
+
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /subj HOUR /verb run');
+    await run(page);
+    // The determiner's box, revealed from its satellite, opens the menu; the numeral is its last field.
+    await app.period(1).getByTestId('satellite-subjectDefiniteness').click();
+    await app.period(1).getByTestId('box-subjectDefiniteness').click();
+    await page.getByTestId('determiner-numeral').fill('3');
+    await page.getByTestId('determiner-numeral').press('Enter');
+    await expect(page.getByTestId('source-strip')).toContainText('/num 3');
+  });
+});

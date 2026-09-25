@@ -1102,6 +1102,9 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Only the relative clause',
   },
+  // The determiner menu's field for a cardinal numeral (P13): the NUMBER counting the noun, de "Zahl",
+  // not its grammatical number (satellite.number, NUMBER_GRAMMAR).
+  'determiner.numeral': { plan: nameOf('NUMBER'), format: NAME_FORMAT, fallback: 'Number' },
   // The chip on a verbless period's subject that says how it reads when it defines an adjective or an
   // adverb (P13, `/gloss`): its MEANING, it "Significato", de "Bedeutung", ja 意味. Each reading is named
   // by what the phrase reads as, with the catalogue's own names (category.*, slot.*).
@@ -3162,6 +3165,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: setterOf('RELATIONSHIP', 'OBJECT_COMPLEMENT'),
     format: { stripPeriod: true },
     fallback: "to set an object complement's relationship",
+  },
+  // `/num` (P13): "to set a noun's quantity", it "impostare la quantità di un sostantivo" — not its
+  // grammatical number, which `purpose.number` sets.
+  'purpose.numeral': {
+    plan: setterOf('QUANTITY', 'NOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's quantity",
   },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un

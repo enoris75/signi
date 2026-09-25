@@ -110,6 +110,7 @@ export interface PhraseRenderContext {
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
   handleSetDefiniteness: (which: NounKey, value: Definiteness) => void;
+  handleSetNumeral: (which: NounKey, numeral: number | undefined) => void;
   // Cycle the semantic relation of an attributive-noun modifier sitting in an adjective slot.
   handleCycleModifierRelation: (slotKey: SlotKey) => void;
   // Toggle a noun-modifier's own number (singular ⇄ plural), keyed by its adjective slot.

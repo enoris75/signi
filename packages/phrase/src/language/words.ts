@@ -392,6 +392,7 @@ export function takes(action: Action, w: WordInfo): boolean {
     case "possessor":
     case "relative":
     case "headless":
+    case "numeral":
       return w.kind === "noun" && w.concept?.role === "noun";
     // Only the period's predicate adjective is compared with a standard, whatever its degree: one
     // held under a degree that takes none is kept, and printed, so it must be read back too.
@@ -408,7 +409,7 @@ export function takes(action: Action, w: WordInfo): boolean {
 
 /** Whether a command attaches to a word, rather than to the period or the app. */
 export const attachesToWord = (action: Action): boolean =>
-  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "conjunct", "relative", "headless"].includes(action.kind);
+  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "conjunct", "relative", "headless", "numeral"].includes(action.kind);
 
 /** What kind of word a diagnostic says a word is: "food is a noun" (see diagnostics.ts). */
 export function kindOf(w: WordInfo): WordKindName {

@@ -115,6 +115,11 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
   delete sel[`${which}Definiteness` as keyof PhraseSelection];
   delete sel[POSSESSOR_KEY(which)];
   delete sel[POSSESSOR_REF_KEY(which)];
+  if (sel.numerals?.[which] !== undefined) {
+    const { [which]: _count, ...others } = sel.numerals;
+    if (Object.keys(others).length > 0) sel.numerals = others;
+    else delete sel.numerals;
+  }
   if (sel.possessorRoles?.[which]) {
     const { [which]: _dropped, ...rest } = sel.possessorRoles;
     if (Object.keys(rest).length > 0) sel.possessorRoles = rest;
@@ -778,6 +783,15 @@ export function removePossessor(
   const next = { ...prev };
   delete next[POSSESSOR_KEY(which)];
   return dropPossessorRole(next, which);
+}
+
+// A cardinal numeral counting the noun (P13), or none: "24 hours".
+export function setNumeral(prev: PhraseSelection, which: NounKey, numeral: number | undefined): PhraseSelection {
+  const { [which]: _old, ...others } = prev.numerals ?? {};
+  const numerals = numeral === undefined ? others : { ...others, [which]: numeral };
+  const next: PhraseSelection = { ...prev, numerals };
+  if (Object.keys(numerals).length === 0) delete next.numerals;
+  return next;
 }
 
 // What a noun's genitive possessor is to it (P13): the whole it is part of, the parts it is made of,

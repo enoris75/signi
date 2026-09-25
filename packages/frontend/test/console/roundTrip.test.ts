@@ -384,6 +384,13 @@ const OPS: Op[] = [
     if (!link || link.kind !== 'instrumental') return undefined;
     return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
   },
+  // A cardinal numeral counting a noun, or none (P13).
+  onPeriod((sel, rng) => {
+    const head = pick(rng, nounHeads(sel).filter((h) => R.nounSliceAt(sel, h.address)?.slice[R.nounSliceAt(sel, h.address)!.which]?.role === 'noun'));
+    if (!head) return undefined;
+    const n = rng() < 0.3 ? undefined : pick(rng, [1, 2, 3, 7, 12, 24, 100])!;
+    return R.updateNounAt(sel, head.address, (s, which) => R.setNumeral(s, which, n));
+  }),
   // What a noun's genitive possessor is to it (P13).
   onPeriod((sel, rng) => {
     const head = pick(rng, nounHeads(sel).filter((h) => {
@@ -567,9 +574,9 @@ describe('the question and the existential are gated as the engine is', () => {
     // coordinate wait for one (see attachSubordinate, attachCondition, attachCoordination; A267), and
     // a command's coordinate is given the addressee.
     expect(headless.slice(0, 3)).toEqual([]);
-    // The walk does reach the constructs it is here to check. A floor, not a share: each op the walk
-    // gains (P13 adds one per construct) makes every other one rarer.
-    expect(asked).toBeGreaterThan(SEEDS / 20);
+    // The walk does reach the constructs it is here to check. A count, not a share: each op the walk
+    // gains (P13 adds one per construct) makes every other one rarer, so a share would keep falling.
+    expect(asked).toBeGreaterThan(10);
   }, 120_000);
 });
 

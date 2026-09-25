@@ -214,6 +214,7 @@ const SEGMENTS = {
   noInstrumentLink: () => [say("diagnostic.periodHasNo.instrument")],
   noRelativeLink: () => [say("diagnostic.nounHasNo.relative")],
   noInfinitiveLink: () => [say("diagnostic.periodHasNo.subordinate")],
+  numeralNotANumber: () => [say("diagnostic.chooseValue", "1, 2, 3 … 24 …")],
   noLinkToRemove: (a: { link: "condition" | "join" | "subordinate" | "instrument" }) => [say(`diagnostic.periodHasNo.${a.link}`)],
   relativeSamePeriod: () => [say("diagnostic.chooseOtherPeriod")],
   relativeGapEmpty: (a: { ref: string }) => [say("diagnostic.missingWord", a.ref)],

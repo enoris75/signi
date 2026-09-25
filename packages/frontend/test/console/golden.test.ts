@@ -150,6 +150,13 @@ const GOLDEN: Record<string, Golden> = {
     holds: { subject: 'SPEED', subjectGloss: 'manner' },
     misuse: { line: '/verb eat /obj food /gloss manner', says: { code: 'noTarget', args: { command: 'gloss' } } },
   },
+  // A cardinal numeral counting a noun (P13), after its determiner; /del num takes it back.
+  num: {
+    line: '/subj cat /pl /num 12',
+    prints: '/subj ( cat /pl /num 12 )',
+    check: (s) => expect(sel(s).numerals).toEqual({ subject: 12 }),
+    misuse: { line: '/subj cat /num many', says: { code: 'numeralNotANumber' } },
+  },
   // The relative clause said alone, its head unspoken (P13) — on the link, as /without is.
   headless: {
     line: '/subj child /rel subj ( /verb love /obj cat ) /headless',

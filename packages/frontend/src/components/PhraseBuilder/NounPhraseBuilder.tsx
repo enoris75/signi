@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { Box, ListSubheader, Menu, MenuItem } from "@mui/material";
+import { Box, ListSubheader, Menu, MenuItem, TextField } from "@mui/material";
 import {
   DETERMINER_CATEGORIES,
   DETERMINER_CATEGORY_VALUES,
@@ -39,6 +39,8 @@ function DeterminerMenu({
   value,
   onPick,
   onClose,
+  numeral,
+  onNumeral,
 }: {
   open: boolean;
   // The anchor as a thunk, not an element: the determiner box may only have appeared in the very
@@ -49,6 +51,9 @@ function DeterminerMenu({
   value: Definiteness;
   onPick: (value: Definiteness) => void;
   onClose: () => void;
+  // A cardinal numeral counting the noun (P13), beside the determiner as the engine has it, and its setter.
+  numeral?: number;
+  onNumeral: (numeral: number | undefined) => void;
 }) {
   const t = useUiString();
   // A digit per row, counted down the menu as it is shown: the values are too many to cycle,
@@ -109,6 +114,32 @@ function DeterminerMenu({
             </Box>
           </MenuItem>
         )),
+        // The quantity a numeral says (P13), "24 hours": a whole number rather than a value to pick.
+        ...(category === "quantity"
+          ? [
+              <Box
+                key="numeral"
+                sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.25, py: 0.5, fontSize: "0.78rem" }}
+              >
+                {t("determiner.numeral")}
+                <TextField
+                  size="small"
+                  type="number"
+                  defaultValue={numeral ?? ""}
+                  inputProps={{ min: 1, max: 9999, "data-testid": "determiner-numeral", "aria-label": t("determiner.numeral") }}
+                  // The menu reads a typed letter as a jump to its row; the field keeps its keys.
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key !== "Enter") return;
+                    const n = Number((e.target as HTMLInputElement).value);
+                    onNumeral(Number.isInteger(n) && n >= 1 ? n : undefined);
+                    onClose();
+                  }}
+                  sx={{ width: 72, "& input": { py: 0.25, fontSize: "0.78rem" } }}
+                />
+              </Box>,
+            ]
+          : []),
       ])}
     </Menu>
   );
@@ -190,6 +221,8 @@ export function NounPhraseBuilder({
               ctx.handleSetDefiniteness(which as NounKey, value)
             }
             onClose={() => ctx.onDeterminerMenu(null)}
+            numeral={selection.numerals?.[which]}
+            onNumeral={(n) => ctx.handleSetNumeral(which as NounKey, n)}
           />
         </>
       )}

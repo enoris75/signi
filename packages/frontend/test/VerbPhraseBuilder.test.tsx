@@ -110,6 +110,7 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}): PhraseRenderCont
     handleSelectLocativeSpecifier: vi.fn(),
     handleSelectTemporalRelation: vi.fn(),
     handleSelectPredication: vi.fn(),
+    handleSetNumeral: vi.fn(),
     handleSelectDirectionSpecifier: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),

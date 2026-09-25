@@ -247,6 +247,11 @@ describe('what each console command is for', () => {
       fr: "définir la relation d'un attribut du complément d'objet.", de: 'die Beziehung eines Objektsprädikativs festlegen.',
       es: 'establecer la relación de un complemento predicativo del objeto.', ja: '目的語補語の関係を設定する。', pt: 'definir a relação de um predicativo do objeto.',
     },
+    'purpose.numeral': {
+      en: "to set a noun's quantity.", it: 'impostare la quantità di un sostantivo.',
+      fr: "définir la quantité d'un nom.", de: 'die Menge eines Substantivs festlegen.',
+      es: 'establecer la cantidad de un sustantivo.', ja: '名詞の数量を設定する。', pt: 'definir a quantidade de um substantivo.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

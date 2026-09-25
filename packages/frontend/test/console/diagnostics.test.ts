@@ -137,6 +137,7 @@ const SAMPLES: Samples = {
   noInstrumentLink: [[{}, 'This period has no instrumental']],
   noRelativeLink: [[{}, 'This noun has no relative clause']],
   noInfinitiveLink: [[{}, 'This period has no subordinate clause']],
+  numeralNotANumber: [[{}, 'Choose a value: 1, 2, 3 … 24 …']],
   noLinkToRemove: [
     [{ link: 'condition' }, 'This period has no condition'],
     [{ link: 'join' }, 'This period has no coordination'],

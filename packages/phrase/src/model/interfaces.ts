@@ -460,6 +460,9 @@ export interface PhraseSelection {
     // up of ("a group of relatives", FAMILY). Absent ⇒ the owner. Only English says the difference,
     // with an of-phrase where the owner takes the Saxon genitive.
     possessorRoles?: Partial<Record<string, PossessorRole>>;
+    // A cardinal numeral counting a noun, keyed by the noun block (P13, NounPhrase.numeral): DAY is "a
+    // period of **24** hours". A value beside the determiner, as the engine has it.
+    numerals?: Partial<Record<string, number>>;
     // Grammatical number of an attributive-noun modifier ("creatore di *frasi*"), keyed by
     // the adjective slot key like `modifierRelations`. Only consulted when that slot holds a
     // noun; defaults to 'singular'. See NounModifier.number in @signi/shared.

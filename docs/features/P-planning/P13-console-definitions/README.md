@@ -101,7 +101,7 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | ~~`complements.objectPredicative`~~ — `/objpred`, ✅ | 9 |
 | ~~`PhrasePlan.purpose`~~ — `/so`, ✅ | 8 |
 | ~~`PhrasePlan.infinitiveComplement governed by the predicate`~~ — "to be **able to act**", ✅ | 5 |
-| `NounPhrase.numeral` | 3 |
+| ~~`NounPhrase.numeral`~~ — `/num 24`, ✅ | 3 |
 | ~~`complements.comitative`~~ — `/with`, ✅ | 3 |
 | ~~`RelativeClause.headRole.possessor`~~ — `/rel #n.subj.poss`, ✅ | 2 |
 | `PhrasePlan.contentSubject` | 2 |
@@ -130,6 +130,7 @@ control, console command, printer case, catalogue strings and tests:
 | An infinitive the predicate adjective governs | `/to` on a period whose predicate adjective governs one | the subordinate menu's Infinitive phrase row, now offered there too | `clauseObject: 'infinitive'` on an adjective (ABLE, OBLIGED, ALLOWED), read by `governsInfinitive` wherever a verb's was. LET governs one too (ALLOW). No new control. 556 → 561. |
 | A direction's path, and an infinitive's own infinitive | `/dir ( AIR /in )`, `/goal` for the plain "to"; `/to` from a period that is itself an infinitive | the direction's toolbar (To, then the path relations); the Infinitive phrase row, the one an infinitive period's menu offers | `directionSpecifier`; `canStartSubordinate` lets an infinitive govern an infinitive (LET, "to be allowed to act") and nothing else, and `attachSubordinate` folds it into `InfinitiveComplement.infinitiveComplement`. 561 → 563. |
 | Joined predicate adjectives | `/pred ( male /or female )` — a predicate's conjunct is read as the predicate is, a noun or an adjective | a predicate's conjunct ring picks with the predicate's picker (Noun · Adjective) | `conjunctSpec` for the console and the printer; `predicateHead` for the ring. NEUTER, NEUTRAL. 563 → 565. |
+| A numeral | `/num 24` after the noun's determiner; `/del num` | a Number field under the determiner menu's Quantity section | `numerals` keyed by noun block, dropped with the noun. A value that is no whole number says "Choose a value". DAY, WEEK, YEAR. 565 → 568. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a

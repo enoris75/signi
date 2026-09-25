@@ -34,6 +34,7 @@ import {
   setSpecifier,
   setTemporalRelation,
   setPredication,
+  setNumeral,
   toggleGender,
   toggleCauseNegative,
   toggleNegative,
@@ -101,6 +102,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
     handleSelectTemporalRelation: (relation: TemporalRelation) =>
       onPhraseUpdate((prev) => setTemporalRelation(prev, relation)),
+    // A cardinal numeral counting a noun (P13), or none.
+    handleSetNumeral: (which: NounKey, numeral: number | undefined) =>
+      onPhraseUpdate((prev) => setNumeral(prev, which, numeral)),
     // The direction's relation (P13): its plain goal, or a path.
     handleSelectDirectionSpecifier: (spec: PathSpecifier | "to") =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec === "to" ? undefined : spec, "direction")),

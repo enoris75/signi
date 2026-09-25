@@ -42,7 +42,7 @@ describe('the help pages', () => {
     expect(usage('help')).toBe('/help [comando]');
     // The values, the references and the brackets are the console's own, in every language.
     expect(usage('level')).toBe('/level process|concept|object');
-    expect(usage('del')).toBe('/del [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|if|join|clause|sub|to|so|inst|period]');
+    expect(usage('del')).toBe('/del [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|num|if|join|clause|sub|to|so|inst|period]');
     expect(helpPage('adj', it_)?.usage).toBe('/adj parola · /adj ( parola … )');
   });
 
@@ -59,7 +59,7 @@ describe('the help pages', () => {
     const needsPurpose = COMMANDS.filter((c) => attachesToWord(c.action) || c.action.kind === 'condition' || c.action.kind === 'join' || c.action.kind === 'instrument');
     expect(needsPurpose.filter((c) => !c.purposeKey || !UI_STRINGS[c.purposeKey]).map((c) => c.name)).toEqual([]);
     const keys = new Set(COMMANDS.flatMap((c) => (c.purposeKey ? [c.purposeKey] : [])));
-    expect(keys.size).toBe(29);
+    expect(keys.size).toBe(30);
     // Every purpose the catalogue holds is some command's.
     const catalogued = Object.keys(UI_STRINGS).filter((key) => key.startsWith('purpose.'));
     expect(catalogued.sort()).toEqual([...keys].sort());

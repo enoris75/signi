@@ -93,6 +93,8 @@ export type Action =
   | { kind: "standard" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
+  /** A cardinal numeral counting the noun: `/num 24` (P13). */
+  | { kind: "numeral" }
   /** The noun's relative clause said alone, its head unspoken: `/headless` (P13). */
   | { kind: "headless" }
   | { kind: "condition" }
@@ -521,6 +523,21 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "link" },
     action: { kind: "relative" },
     satellites: /Relative$/,
+  },
+  // A cardinal numeral counting the noun (P13): DAY is "/subj ( period /a /poss [ hour /a /num 24 ] /parts )",
+  // "a period of 24 hours". `/del num` takes it back.
+  {
+    name: "num",
+    aliases: ["numeral", "count"],
+    group: "noun",
+    description: "a numeral",
+    descriptionKey: "determiner.numeral",
+    purposeKey: "purpose.numeral",
+    color: "setting",
+    arg: { kind: "word" },
+    action: { kind: "numeral" },
+    satellites: /Definiteness$/,
+    reducers: ["setNumeral"],
   },
   // The relative clause said alone, its head unspoken (P13): an adjective's definition is its relative
   // clause, OKAY "that has no problems". The head still picks "who" or "that" and the agreement, so it
@@ -1235,6 +1252,8 @@ export function topicOf(def: CommandDef): Topic {
         ? a.kind
         : a.kind === "headless"
           ? "relative"
+          : a.kind === "numeral"
+            ? "determiner"
         : a.kind === "conjunct"
           ? "coordination"
           : a.kind === "setting"
