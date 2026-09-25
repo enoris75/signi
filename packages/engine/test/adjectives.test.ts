@@ -2221,7 +2221,8 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
   });
 
   // Regression: the other degrees keep the determiner picked. The lowered comparative and the
-  // equative stay indefinite, and a comparative stays bare.
+  // equative stay indefinite, and a bare comparative stays bare where the language lets a subject go
+  // bare; the Romance generic subject takes the definite article (A376).
   test('"less", "equally" and a bare comparative keep their determiner', () => {
     expect(sees(dog('indefinite', 'less'))).toMatchObject({
       en: 'the cat sees a less big dog.', it: 'il gatto vede un cane meno grande.', fr: 'le chat voit un chien moins grand.',
@@ -2231,7 +2232,7 @@ describe('known bugs: a superlative under an indefinite or bare determiner', () 
       en: 'the cat sees an equally big dog.', it: 'il gatto vede un cane ugualmente grande.', de: 'der Kater sieht einen gleich großen Hund.',
     });
     expect(sayAll(clause(dog('bare', 'more', { number: 'plural' }), 'RUN'))).toMatchObject({
-      en: 'bigger dogs run.', it: 'cani più grandi corrono.', de: 'größere Hunde laufen.', es: 'perros más grandes corren.',
+      en: 'bigger dogs run.', it: 'i cani più grandi corrono.', de: 'größere Hunde laufen.', es: 'los perros más grandes corren.',
     });
   });
 });

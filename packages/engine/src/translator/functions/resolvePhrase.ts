@@ -21,6 +21,7 @@ import { bindComplements, bindCoreferents, subjectBinding } from './bindCorefere
 import { negativeComplements, negativePolarity } from './negativePolarity.js';
 import { predicativeGovernor } from './predicativeGovernor.js';
 import { experiencerGap } from './experiencerGap.js';
+import { genericSubject } from './genericSubject.js';
 import { passiveGap } from './passiveGap.js';
 import { questionSubject } from './questionSubject.js';
 import { refuseGenericObject } from './refuseGenericObject.js';
@@ -265,8 +266,13 @@ export function resolvePhrase(
   const dative = experiencer && asked?.role !== 'terminus'
     && !(generic && (genericWithoutDative(subject) || verbPhrase?.mood === 'infinitive'));
   const positiveComplements = resolveComplements(complements, language, lookup, verbPhrase?.verb.forms);
+  // A bare plural or mass subject is the generic, which the Romance four say with the definite article
+  // (A376, see `genericSubject`): the clause's grammatical subject, whichever slot of the plan it came
+  // from, and the one who likes in the dative an experiencer verb gives it. The agent a passive demotes
+  // keeps the plan's determiner, as any complement does. A verbless period is a label, and says no clause.
+  const asSubject = (el: typeof subject | undefined) => verbPhrase && verbPhrase.mood !== 'infinitive' ? genericSubject(el, language) : el;
   const resolved: ResolvedPhrase = {
-    subject: passive ? patient! : experiencer ? liked! : subject,
+    subject: asSubject(passive ? patient! : experiencer ? liked! : subject)!,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
     // An object controller takes the case the governing verb's lexeme names for it (P09-E43).
     verbPhrase: controllerCase(clauseAddressee(verbPhrase, !!plan.contentObject && !plan.directObject), language, objectControlled(plan)),
@@ -276,7 +282,7 @@ export function resolvePhrase(
     // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
     // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
     complements: dative
-      ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: subject } }
+      ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: asSubject(subject)! } }
       : negativeComplements(positiveComplements, clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires

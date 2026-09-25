@@ -616,14 +616,14 @@ describe('subject: the B30 genus FEELING and its child AFFECTION', () => {
       ja: '感情は走ります。',
       pt: 'os sentimentos correm.',
     });
-    // The bare plural FEEL's gloss renders ("to have feelings"): no article anywhere, and French
-    // drops the partitive it would otherwise take — the documented simplification B29 recorded.
+    // The bare plural FEEL's gloss renders ("to have feelings") as an object, bare; as a subject it is
+    // the generic, which the Romance four say with the definite article (A376).
     expect(subject(np('FEELING', { definiteness: 'bare', number: 'plural' }))).toMatchObject({
       en: 'feelings run.',
-      it: 'sentimenti corrono.',
-      fr: 'sentiments courent.',
+      it: 'i sentimenti corrono.',
+      fr: 'les sentiments courent.',
       de: 'Gefühle laufen.',
-      pt: 'sentimentos correm.',
+      pt: 'os sentimentos correm.',
     });
   });
 
@@ -659,7 +659,7 @@ describe('known bugs: a bare plural subject loses its article in it / fr / es / 
   const bare = { definiteness: 'bare', number: 'plural' } as const;
   const likes = (subj: NounPhrase, obj: NounPhrase) => sayAll(clause(subj, 'LIKE', { directObject: obj }));
 
-  test.fails('the generic subject takes the definite article', () => {
+  test('the generic subject takes the definite article', () => {
     expect(subject(cat(bare))).toMatchObject({
       it: 'i gatti corrono.', // now: "gatti corrono."
       fr: 'les chats courent.', // now: "chats courent."
@@ -686,5 +686,60 @@ describe('known bugs: a bare plural subject loses its article in it / fr / es / 
       es: 'el gato ve ratones.',
       pt: 'o gato vê ratos.',
     });
+  });
+
+  test('a bare mass subject takes it too, and a bare mass object keeps its own', () => {
+    expect(sayAll(clause(np('WATER', { definiteness: 'bare' }), 'FLOW'))).toMatchObject({
+      en: 'water flows.', it: "l'acqua scorre.", fr: "l'eau coule.", de: 'Wasser fließt.', es: 'el agua fluye.', pt: 'a água flui.',
+    });
+    expect(sayAll(clause(cat(), 'SEE', { directObject: np('WATER', { definiteness: 'bare' }) }))).toMatchObject({
+      it: 'il gatto vede acqua.', fr: "le chat voit de l'eau.", es: 'el gato ve agua.', pt: 'o gato vê água.',
+    });
+  });
+
+  test('the grammatical subject takes it whichever slot of the plan it came from; a passive agent does not', () => {
+    const mice = np('MOUSE', bare);
+    expect(sayAll(clause(cat(), 'EAT', { directObject: mice, verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      it: 'i topi sono mangiati dal gatto.', fr: 'les souris sont mangées par le chat.',
+      es: 'los ratones son comidos por el gato.', pt: 'os ratos são comidos pelo gato.',
+    });
+    // piacere / gustar make the thing liked the subject; French *aimer* keeps it the object.
+    expect(likes(cat(), mice)).toMatchObject({
+      it: 'al gatto piacciono i topi.', fr: 'le chat aime des souris.', es: 'al gato le gustan los ratones.', pt: 'o gato gosta de ratos.',
+    });
+    expect(sayAll(clause(np('MOUSE'), 'EAT', { directObject: cat(), verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      it: 'il gatto è mangiato dal topo.',
+    });
+    expect(sayAll(clause(cat(bare), 'EAT', { directObject: np('MOUSE'), verbPhrase: { voice: 'passive' } }))).toMatchObject({
+      it: 'il topo è mangiato da gatti.', es: 'el ratón es comido por gatos.', pt: 'o rato é comido por gatos.',
+    });
+  });
+
+  test("a relative clause's own subject, a coordination, a question and the past take it too", () => {
+    const seenBy = np('MOUSE', { relative: { headRole: 'directObject', subject: cat(bare), verbPhrase: { verb: 'SEE' } } });
+    expect(subject(seenBy)).toMatchObject({
+      en: 'the mouse that cats see runs.', it: 'il topo che i gatti vedono corre.', fr: 'la souris que les chats voient court.',
+      de: 'die Maus, die Kater sehen, läuft.', es: 'el ratón que los gatos ven corre.', pt: 'o rato que os gatos veem corre.',
+    });
+    expect(subject({ conjuncts: [cat(bare), np('DOG', bare)], conjunction: 'and' })).toMatchObject({
+      it: 'i gatti e i cani corrono.', fr: 'les chats et les chiens courent.', es: 'los gatos y los perros corren.', pt: 'os gatos e os cães correm.',
+    });
+    expect(sayAll(clause(cat(bare), 'RUN', { interrogative: true }))).toMatchObject({
+      en: 'do cats run?', it: 'i gatti corrono?', de: 'laufen Kater?', es: '¿los gatos corren?', pt: 'os gatos correm?',
+    });
+    expect(sayAll(clause(cat(bare), 'RUN', { verbPhrase: { tense: 'past' } }))).toMatchObject({
+      it: 'i gatti corsero.', es: 'los gatos corrieron.',
+    });
+  });
+
+  test('a bare the plan did not pick keeps it: a numeral, a name, otro; and a verbless period is a label', () => {
+    expect(subject(cat({ numeral: 2, definiteness: 'indefinite' }))).toMatchObject({
+      it: 'due gatti corrono.', fr: 'deux chats courent.', es: 'dos gatos corren.', pt: 'dois gatos correm.',
+    });
+    expect(subject(np('PETER'))).toMatchObject({ it: 'Pietro corre.', fr: 'Pierre court.', es: 'Pedro corre.' });
+    expect(subject(cat({ definiteness: 'indefinite', number: 'plural', adjectives: ['OTHER'] }))).toMatchObject({
+      es: 'otros gatos corren.', pt: 'outros gatos correm.',
+    });
+    expect(sayAll({ subject: cat(bare) })).toMatchObject({ it: 'gatti.', fr: 'chats.', es: 'gatos.', pt: 'gatos.' });
   });
 });

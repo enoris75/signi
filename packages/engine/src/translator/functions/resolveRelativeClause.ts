@@ -9,6 +9,7 @@ import { passiveGap } from './passiveGap.js';
 import { refuseGenericObject } from './refuseGenericObject.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
+import { genericSubject } from './genericSubject.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 import { withAlarmCry } from './withAlarmCry.js';
 
@@ -90,9 +91,12 @@ export function resolveRelativeClause(
   const { experiencer, ...experiencerSlots } = verbPhrase.verb.forms['experiencer'] === '1'
     ? experiencerRemap(headRole, subject, directObject)
     : { experiencer: undefined, headRole, subject, directObject };
-  const slots = verbPhrase.voice === 'passive'
+  const remapped = verbPhrase.voice === 'passive'
     ? passiveRemap(headRole, subject, directObject)
     : experiencerSlots;
+  // The relative's own subject is a clause's subject, generic where it is bare (A376, see
+  // `genericSubject`): "il topo che i gatti vedono".
+  const slots = remapped.subject ? { ...remapped, subject: genericSubject(remapped.subject, language) } : remapped;
   const complements = resolveComplements(bindComplements(clause.complements, binding), language, lookup, verbPhrase.verb.forms);
   // A predicate adjective may name the verb it is said with in place of BE, as in a main clause
   // (P09-E31, see `lexicalCopula`): "il gatto che sta bene". Under German's experiencer frame the head
@@ -112,7 +116,7 @@ export function resolveRelativeClause(
     ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     verbPhrase: swapped?.verbPhrase ?? verbPhrase,
-    complements: experiencer ? { ...complements, terminus: { phrase: experiencer } } : complements,
+    complements: experiencer ? { ...complements, terminus: { phrase: genericSubject(experiencer, language) } } : complements,
   };
 }
 

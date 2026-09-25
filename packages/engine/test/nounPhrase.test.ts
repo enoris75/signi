@@ -964,14 +964,14 @@ describe('examples: such as / including (P09-E33)', () => {
   const including = (phrase: NounElement) => ({ examples: { phrase, relation: 'inclusion' as const } });
   const animals = (extra: Partial<NounPhrase>) => np('ANIMAL', { number: 'plural', ...extra });
 
-  test('such as, subject: no commas; French keeps its bare plural (the missing *des* is not this construct)', () => {
+  test('such as, subject: no commas; the Romance generic subject takes the definite article (A376)', () => {
     expect(sayAll(clause(animals({ definiteness: 'bare', ...suchAs(np('CAT')) }), 'RUN'))).toEqual({
       en: 'animals such as the cat run.',
-      it: 'animali come il gatto corrono.',
-      fr: 'animaux comme le chat courent.',
+      it: 'gli animali come il gatto corrono.',
+      fr: 'les animaux comme le chat courent.',
       de: 'Tiere wie der Kater laufen.',
-      es: 'animales como el gato corren.',
-      pt: 'animais como o gato correm.',
+      es: 'los animales como el gato corren.',
+      pt: 'os animais como o gato correm.',
       ja: '猫のような動物は走ります。',
     });
   });
@@ -1062,11 +1062,11 @@ describe('examples: such as / including (P09-E33)', () => {
   test('a coordinated group names several examples', () => {
     expect(sayAll(clause(animals({ definiteness: 'bare', ...suchAs({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'and' }) }), 'RUN'))).toEqual({
       en: 'animals such as the cat and the dog run.',
-      it: 'animali come il gatto e il cane corrono.',
-      fr: 'animaux comme le chat et le chien courent.',
+      it: 'gli animali come il gatto e il cane corrono.',
+      fr: 'les animaux comme le chat et le chien courent.',
       de: 'Tiere wie der Kater und der Hund laufen.',
-      es: 'animales como el gato y el perro corren.',
-      pt: 'animais como o gato e o cão correm.',
+      es: 'los animales como el gato y el perro corren.',
+      pt: 'os animais como o gato e o cão correm.',
       ja: '猫と犬のような動物は走ります。',
     });
   });
@@ -1074,11 +1074,11 @@ describe('examples: such as / including (P09-E33)', () => {
   test('a pronoun example: object form in English, tonic in it / fr, subject form in es / pt', () => {
     expect(sayAll(clause(np('PERSON', { number: 'plural', definiteness: 'bare', ...suchAs(np('THIRD_PERSON')) }), 'RUN'))).toEqual({
       en: 'people such as him run.',
-      it: 'persone come lui corrono.',
-      fr: 'personnes comme lui courent.',
+      it: 'le persone come lui corrono.',
+      fr: 'les personnes comme lui courent.',
       de: 'Personen wie er laufen.',
-      es: 'personas como él corren.',
-      pt: 'pessoas como ele correm.',
+      es: 'las personas como él corren.',
+      pt: 'as pessoas como ele correm.',
       ja: '彼のような人は走ります。',
     });
     expect(sayAll(clause(np('PERSON', { number: 'plural', ...including(np('FIRST_PERSON')) }), 'RUN'))).toEqual({

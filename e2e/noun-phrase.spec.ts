@@ -336,11 +336,11 @@ test.describe('noun phrase', () => {
     await page.getByRole('menuitem', { name: /^Zero/ }).click();
     await app.expectSentences({
       en: 'animals such as the cat run.',
-      it: 'animali come il gatto corrono.',
-      fr: 'animaux comme le chat courent.',
+      it: 'gli animali come il gatto corrono.',
+      fr: 'les animaux comme le chat courent.',
       de: 'Tiere wie der Kater laufen.',
-      es: 'animales como el gato corren.',
-      pt: 'animais como o gato correm.',
+      es: 'los animales como el gato corren.',
+      pt: 'os animais como o gato correm.',
       ja: '猫のような動物は走ります。',
     });
   });

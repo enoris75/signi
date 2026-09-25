@@ -65,3 +65,41 @@ and not filed.
 | | |
 |---|---|
 | **Test** | `subject.test.ts` → *known bugs: a bare plural subject loses its article in it / fr / es / pt (A376)* (1 `test.fails`: three plans; plus a regression test for en / de / ja and the bare object) |
+
+## Resolved
+
+**2026-09-25.** The translator now reads a clause's bare plural or mass subject as the generic in
+Italian, French, Spanish and Portuguese, and gives it the definite article before any engine chooses
+one: [genericSubject.ts](../../../packages/engine/src/translator/functions/genericSubject.ts), applied in
+[resolvePhrase.ts](../../../packages/engine/src/translator/functions/resolvePhrase.ts) and
+[resolveRelativeClause.ts](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts).
+It works at resolution rather than in each engine's `subjectPhrase`, because the experiencer's dative
+(*ai gatti piace*) is built from the plan's subject but rendered as a complement.
+
+Decisions taken:
+- **Generic reading**: the definite article (*i gatti corrono*, *les chats courent*, *los gatos
+  corren*, *os gatos correm*); European Portuguese *os*.
+- **Bare mass subject**: same defect, same fix — *l'acqua scorre*, *l'eau coule*, *el agua fluye*,
+  *a água flui*.
+- **What counts as the subject**: the clause's grammatical subject, whichever slot of the plan it came
+  from — a passive's promoted patient (*i topi sono mangiati dal gatto*) and *piacere* / *gustar*'s
+  thing liked (*al gatto piacciono i topi*) too — and an experiencer's dative. A relative clause's own
+  subject takes it (*il topo che i gatti vedono*). A passive's agent, the object and the complements
+  keep the plan's determiner (*il topo è mangiato da gatti*, *il gatto vede topi*).
+- **Not changed**: a bare the plan did not pick — a numeral's dropped article (*due gatti corrono*), a
+  personal name (*Pietro*), a pronoun, Spanish/Portuguese *otros* standing for the indefinite article
+  (*otros gatos corren*) — a bare count singular, and a verbless period, which is a label (*gatti.*).
+- **Shipped definitions and UI strings**: none change. Every definition and UI string was rendered
+  before and after the fix, with no difference. UNIVERSITY's *una scuola dove persone adulte imparano*
+  is an **indefinite** plural, not a bare one. Italian writes no indefinite plural article, so it reads
+  the same as a bare plural, but it is a different construct and is not covered by this fix.
+
+Tests: [subject.test.ts](../../../packages/engine/test/subject.test.ts), *known bugs: a bare plural
+subject loses its article in it / fr / es / pt (A376)*. The former `test.fails` now passes, and new
+tests cover the mass subject, the passive / experiencer / agent slots, the relative / coordination /
+question / past cases, and the cases that stay bare. The function has its own tests in
+[genericSubject.test.ts](../../../packages/engine/src/translator/functions/genericSubject.test.ts). The
+pins that recorded the bug were corrected: *FEELING pluralises* (subject.test.ts), *"less", "equally"
+and a bare comparative* (adjectives.test.ts), P09-E33's *such as* subjects (nounPhrase.test.ts), and the
+e2e expectations in [console.spec.ts](../../../e2e/console.spec.ts) and
+[noun-phrase.spec.ts](../../../e2e/noun-phrase.spec.ts).
