@@ -112,6 +112,7 @@ const SAMPLES: Samples = {
   ],
   noPossessorToRemove: [[{}, 'No noun has a possessor']],
   noStandardToRemove: [[{}, 'No adjective has a standard of comparison']],
+  noExamplesToRemove: [[{}, 'No noun has examples']],
   noConjunctToRemove: [[{}, 'No noun is coordinated']],
   noSuchConjunct: [[{ index: 3 }, 'Missing conjunct: 3']],
   noRelativeToRemove: [[{}, 'No noun has a relative clause']],

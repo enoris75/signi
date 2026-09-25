@@ -90,6 +90,8 @@ export type PerimeterEntry = {
   // The predicate adjective's standard of comparison (P09-E12 D5): the line to its ring leaves
   // from it, as the owner's leaves from the possessor control.
   standard?: SatelliteIcon;
+  // A noun's examples (P09-E48): the line to their ring leaves from it too.
+  examples?: SatelliteIcon;
   conjunct?: SatelliteIcon;
   // The wh-question's mark and its who / what chip, and the subject's existential (P09-E12 M6, M7).
   question?: SatelliteIcon;

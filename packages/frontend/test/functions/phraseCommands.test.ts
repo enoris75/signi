@@ -39,6 +39,8 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleSetModifierAdjective', (c) => c.handleSetModifierAdjective('modifier', BIG), (p) => reducers.setModifierAdjective(p, 'modifier', BIG)],
   ['handleCycleDegree', (c) => c.handleCycleDegree('subjectAdjective'), (p) => reducers.cycleDegree(p, 'subjectAdjective')],
   ['handleRemoveStandard', (c) => c.handleRemoveStandard('directObject'), (p) => reducers.removeStandard(p, 'directObject')],
+  ['handleRemoveExamples', (c) => c.handleRemoveExamples('subject'), (p) => reducers.removeExamples(p, 'subject')],
+  ['handleToggleExampleRelation', (c) => c.handleToggleExampleRelation('subject'), (p) => reducers.toggleExampleRelation(p, 'subject')],
   ['handleCycleTense', (c) => c.handleCycleTense(), reducers.cycleTense],
   ['handleCycleAspect', (c) => c.handleCycleAspect(), reducers.cycleAspect],
   ['handleCycleVoice', (c) => c.handleCycleVoice(), reducers.cycleVoice],

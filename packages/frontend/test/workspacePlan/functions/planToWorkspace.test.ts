@@ -19,6 +19,27 @@ const roundTrip = (plan: PhrasePlan) => {
   return { containers, unsupported, back: workspaceToPlans(containers, links)[0]!.plan };
 };
 
+describe('planToWorkspace: the examples (P09-E48)', () => {
+  it.each(['example', 'inclusion'] as const)('holds one %s phrase as the noun’s examples, and gives it back', (relation) => {
+    const plan = {
+      subject: { concept: 'ANIMAL', number: 'plural', examples: { phrase: { concept: 'CAT' }, relation } },
+      verbPhrase: { verb: 'EAT' },
+    } as PhrasePlan;
+    const { containers, unsupported, back } = roundTrip(plan);
+    expect(unsupported).toEqual([]);
+    expect(containers[0]!.selection.subjectExamples).toMatchObject({ subject: { id: 'CAT' } });
+    expect((back.subject as { examples?: unknown }).examples).toMatchObject({ phrase: { concept: 'CAT' }, relation });
+  });
+
+  it('reports a group of examples', () => {
+    const plan = {
+      subject: { concept: 'ANIMAL', examples: { phrase: { conjuncts: [{ concept: 'CAT' }, { concept: 'DOG' }], conjunction: 'and' }, relation: 'inclusion' } },
+      verbPhrase: { verb: 'EAT' },
+    } as PhrasePlan;
+    expect(planToWorkspace(plan, conceptOf).unsupported).toEqual(['NounPhrase.examples of a group']);
+  });
+});
+
 describe('planToWorkspace: the attributive standard', () => {
   it.each<[string, PhrasePlan, string]>([
     ['the man sees a bigger cat than the dog', {

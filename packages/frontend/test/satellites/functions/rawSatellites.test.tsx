@@ -77,6 +77,7 @@ describe('rawSatellites', () => {
         'subjectRelative',
         'subjectHeadless',
         'subjectPossessor',
+        'subjectExamples',
         'subjectConjunct',
         // A verbless period's subject reads as something (P13): its relation only under a time reading.
         'subjectGloss',
@@ -207,6 +208,7 @@ describe('rawSatellites', () => {
         'directObjectRelative',
         'directObjectHeadless',
         'directObjectPossessor',
+        'directObjectExamples',
         'directObjectConjunct',
         // The wh-question's mark (P09-E12 M6): SEE takes an object to ask about.
         'directObjectQuestion',
@@ -306,6 +308,7 @@ describe('rawSatellites', () => {
         'locativeHeadless',
         'locativePossessor',
         'locativeConjunct',
+        'locativeExamples',
         // GO licenses the locative, and *where* asks it in its plain relation (P09-E12 M6).
         'locativeQuestion',
       ]);
@@ -378,6 +381,8 @@ describe('rawSatellites', () => {
         'cause',
         ...controls,
         'causeConjunct',
+        // A noun names a set its examples list (P09-E48); a pronoun does not.
+        ...(cause.role === 'noun' ? ['causeExamples'] : []),
         'causeNegative',
         'causeQuestion',
       ]);

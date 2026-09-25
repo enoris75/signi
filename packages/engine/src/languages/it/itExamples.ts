@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { IT_EXAMPLES } from './it.consts.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { coordinate } from './coordinate.js';
 import { isPlural } from './isPlural.js';
@@ -15,9 +16,9 @@ export function itExamples(np: ResolvedNounPhrase): string {
   const ex = np.examples;
   if (!ex) return '';
   const group = coordinate(ex.phrase, (s) => tonicPronoun(s) ?? npText(s));
-  if (ex.relation === 'example') return ` come ${group}`;
+  if (ex.relation === 'example') return ` ${IT_EXAMPLES.example} ${group}`;
   const agreement = ex.phrase.agreement;
   const fem = agreement['gender'] === 'fem';
   const ending = isPlural(agreement) ? (fem ? 'e' : 'i') : (fem ? 'a' : 'o');
-  return `, compres${ending} ${group},`;
+  return `, ${IT_EXAMPLES.inclusion.slice(0, -1)}${ending} ${group},`;
 }

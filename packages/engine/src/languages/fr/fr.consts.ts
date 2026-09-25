@@ -213,3 +213,9 @@ export const FR_TEMPORAL: Record<Exclude<TemporalRelation, 'at' | 'until'>, stri
   // P09-E35: the duration is "pendant" too — French says "for an hour" and "during an hour" alike.
   for: 'pendant',
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them.
+ */
+export const FR_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'comme', inclusion: 'y compris' };

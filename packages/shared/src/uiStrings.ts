@@ -173,6 +173,26 @@ export interface UiStringSubordinatorDef extends UiStringCommon {
 }
 
 /**
+ * One examples relation, named by the word it spells — the chip on the line to a noun's examples ring
+ * (P09-E48): *such as* (come / comme / wie / como / のような) or *including* (compreso / y compris /
+ * einschließlich / incluido / incluindo / を含む). Like a conjunction it is a word no lexicon holds,
+ * and each engine spells its own (`renderExamples`); the words that agree with the example are cited
+ * in their masculine singular.
+ */
+export interface UiStringExamplesDef extends UiStringCommon {
+  /** The relation this string names ("inclusion" → including / compreso / 〜を含む). */
+  examples: 'example' | 'inclusion';
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  conjunction?: never;
+  subordinator?: never;
+  specifier?: never;
+  degree?: never;
+}
+
+/**
  * One complement specifier, named by the adposition it spells — the tooltips of the spatial-relation
  * and cause-sentiment toolbars. A specifier is not a word the plan carries but a choice the engines
  * *realise*, and the adposition realising it has no citation form: the Romance prepositions fuse
@@ -230,6 +250,7 @@ export type UiStringDef =
   | UiStringPossessiveDef
   | UiStringConjunctionDef
   | UiStringSubordinatorDef
+  | UiStringExamplesDef
   | UiStringSpecifierDef
   | UiStringDegreeDef;
 
@@ -275,6 +296,8 @@ const CANVAS_PARTS = {
   // The standard's hosted ring, named by its degree: a rival or a superlative's set (P09-E12 D5, E51).
   standard: { concept: 'STANDARD_OF_COMPARISON', en: 'standard of comparison' },
   comparisonSet: { concept: 'COMPARISON_SET', en: 'comparison set' },
+  // A noun's examples ring (P09-E48): its head box holds one example (D3), so the part is singular.
+  examples: { concept: 'EXAMPLE', en: 'example' },
   modal: { concept: 'MODAL', en: 'modal' },
   tense: { concept: 'TENSE', en: 'tense' },
   aspect: { concept: 'ASPECT', en: 'aspect' },
@@ -311,11 +334,11 @@ const BOXED_COMPLEMENT_PARTS = [
 // drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
   'subject', 'agent', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'standard', 'comparisonSet',
+  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'standard', 'comparisonSet', 'examples',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
   'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'voice', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor', 'standard', 'comparisonSet',
+  ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor', 'standard', 'comparisonSet', 'examples',
 ] as const satisfies readonly CanvasPart[];
 export const COLLAPSIBLE_PARTS = [
   'subject', 'agent', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
@@ -732,6 +755,16 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Comparison set',
   },
+
+  // A noun's examples ring ("animals **such as the cat**", P09-E48): the grammar noun EXAMPLE, plural
+  // and bare. It is what `/suchas` and `/including` fill; the chip on its line says which relation.
+  'slot.examples': {
+    plan: { subject: { concept: 'EXAMPLE', definiteness: 'bare', number: 'plural' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Examples',
+  },
+  'examples.value.example': { examples: 'example', fallback: 'such as' },
+  'examples.value.inclusion': { examples: 'inclusion', fallback: 'including' },
 
   // The other side of a coordination: one of the phrases it joins, which `/del and` removes. The
   // bare grammar noun, like the satellite names beside it — es and pt have no word of the linguists'
@@ -2493,6 +2526,14 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Remove this comparison set',
   },
+  'action.removeExamples': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'EXAMPLE', definiteness: 'this', number: 'plural' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove these examples',
+  },
 
   // What a possessor control that points at another noun shows in place of the owner's word, when
   // that antecedent no longer resolves (it was cleared, or its period went): some noun, unnamed.
@@ -3164,6 +3205,16 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'to add a comparison set to an adjective',
   },
+  // `/suchas`'s and `/including`'s (P09-E48): examples added to the noun they name members of.
+  'purpose.examples': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'EXAMPLE', definiteness: 'bare', number: 'plural' },
+      { concept: 'NOUN', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add examples to a noun',
+  },
   'purpose.relative': {
     plan: purposeOf(
       'ADD',
@@ -3737,6 +3788,16 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'No adjective has a standard of comparison',
+  },
+  // `/del eg` with no examples to take off (P09-E48).
+  'diagnostic.noNounHasExamples': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'EXAMPLE', definiteness: 'bare', number: 'plural' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No noun has examples',
   },
   'diagnostic.noNounHasRelative': {
     plan: {

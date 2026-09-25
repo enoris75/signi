@@ -1,6 +1,6 @@
 import type { CoordConjunction, Definiteness, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase, RubySegment } from '../../types.js';
-import { CAUSE_PARTICLE, COORD_WORDS, JA_DEGREE, JA_DETERMINERS, PATH_CITATION } from './ja.consts.js';
+import { CAUSE_PARTICLE, COORD_WORDS, JA_DEGREE, JA_DETERMINERS, PATH_CITATION, JA_EXAMPLES } from './ja.consts.js';
 import { JA_TEMPORAL } from './ja.consts.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { buildSegments } from './buildSegments.js';
@@ -101,5 +101,9 @@ export const japaneseEngine: LanguageEngine = {
     return word && isLoweredDegree({ ...adjective, forms: { ...adjective.forms, degree } })
       ? `${word}〜ない`
       : word;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return JA_EXAMPLES[relation];
   },
 };

@@ -33,6 +33,7 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.possessor": "possessor",
   "slot.standard": "standard",
   "slot.comparisonSet": "comparisonSet",
+  "slot.examples": "examples",
   "satellite.determiner": "determiner",
   "slot.modal": "modal",
   "satellite.tense": "tense",

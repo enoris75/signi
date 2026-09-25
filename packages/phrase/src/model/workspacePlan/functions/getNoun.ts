@@ -28,6 +28,10 @@ export function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPh
       // as a top-level noun's first conjunct is.
       const element = np.headStandard ?? np.adjectiveStandards?.find((e) => e);
       np = element ? nounConjuncts(element)[0] : undefined;
+    } else if (steps[i] === "examples") {
+      // The members of its set a noun names ("animals such as the cat", P09-E48): the head of the
+      // examples' element.
+      np = np.examples ? nounConjuncts(np.examples.phrase)[0] : undefined;
     } else if (steps[i] === "conjunct") {
       // `conjunct/<i>` addresses the i-th *extra* conjunct, so it is offset by one past the head.
       const index = Number(steps[++i]);

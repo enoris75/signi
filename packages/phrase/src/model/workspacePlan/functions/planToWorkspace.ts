@@ -16,7 +16,7 @@ import type {
 } from "@signi/shared";
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
-import { conjunctAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
+import { conjunctAddress, examplesAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { comparedAdjectiveIndex } from "../../functions/comparison.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
@@ -61,7 +61,7 @@ const PERIOD_FIELDS = new Set([
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
-  "headStandard", "adjectiveStandards", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
+  "headStandard", "adjectiveStandards", "examples", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
   "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
@@ -338,6 +338,7 @@ class Builder {
           sel.possessorRoles = { ...sel.possessorRoles, [which]: np.possessorRole };
       }
     }
+    if (np.examples) this.examples(c, sel, which, np.examples, address);
     this.gloss(c, sel, which, np);
     if (np.relative) this.relative(c, address, head, np.relative, Boolean(np.relativeGloss));
     else if (np.relativeGloss) this.unsupported.add("NounPhrase.relativeGloss without a relative");
@@ -358,6 +359,18 @@ class Builder {
       this.noun(c, standard, "subject", element, standardAddress(address));
       set(sel, `${which}Standard`, standard);
     });
+  }
+
+  // The members of its set a period noun names after it (P09-E48): one example phrase, held as the
+  // noun's `${which}Examples`. A group of examples waits for a hosted ring that holds conjuncts (D3),
+  // and a hosted noun has no examples control (D2).
+  private examples(c: PhraseContainer, sel: PhraseSelection, which: NounKey, ex: NonNullable<NounPhrase["examples"]>, address: NounAddress): void {
+    if (sel !== c.selection) return void this.unsupported.add("NounPhrase.examples off a period noun");
+    if (isGroup(ex.phrase)) return void this.unsupported.add("NounPhrase.examples of a group");
+    const examples: PhraseSelection = {};
+    this.noun(c, examples, "subject", ex.phrase, examplesAddress(address));
+    set(sel, `${which}Examples`, examples);
+    if (ex.relation === "inclusion") sel.exampleRelations = { ...sel.exampleRelations, [which]: "inclusion" };
   }
 
   // The reading of a period's own subject (P13): the one noun a gloss flag is said on.

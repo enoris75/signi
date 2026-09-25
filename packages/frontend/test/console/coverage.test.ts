@@ -38,6 +38,7 @@ const WRAPS: Record<string, string> = {
   cycleGlossRelation: 'setGlossRelation',
   cyclePossessorRole: 'setPossessorRole',
   cycleNounConjunction: 'setNounConjunction',
+  toggleExampleRelation: 'setExampleRelation',
 };
 
 /**
@@ -69,6 +70,8 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'subject.existential': 'there',
   'noun.possessor': 'poss',
   'noun.standard': 'than',
+  'noun.examples': 'suchas',
+  'noun.examples.relation': 'including',
   'object.voice': 'passive',
   'object.voice.back': 'active',
   'noun.coordinate': 'and',

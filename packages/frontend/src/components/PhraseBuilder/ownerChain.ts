@@ -37,6 +37,8 @@ export function canvasKeyOf(address: NounAddress): string | undefined {
   if (steps[steps.length - 1] === "possessor") return address;
   // A standard of comparison goes by its address too (see standardRing).
   if (steps[steps.length - 1] === "standard") return address;
+  // So do a noun's examples (P09-E48).
+  if (steps[steps.length - 1] === "examples") return address;
   if (steps.length === 3 && steps[1] === "conjunct") {
     const i = Number(steps[2]);
     return Number.isInteger(i) ? conjunctKey(steps[0] as NounKey, i) : undefined;

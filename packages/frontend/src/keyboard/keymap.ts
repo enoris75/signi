@@ -122,6 +122,9 @@ export interface BoxContext {
   cycleDegree: (slotKey: SlotKey, step: 1 | -1) => void;
   /** The predicate adjective's standard of comparison: open its ring, or fold it (P09-E12 D5). */
   toggleStandard: () => void;
+  // Open or fold a noun's examples, and flip their relation such as ⇄ including (P09-E48).
+  toggleExamples: () => void;
+  toggleExampleRelation: () => void;
   cycleModifierRelation: (slotKey: SlotKey, step: 1 | -1) => void;
   cycleModifierNumber: (slotKey: SlotKey) => void;
   /** The chip that picks the adjective describing an attributive noun ("semantic *phrase* creator"). */
@@ -520,6 +523,30 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     satellite: /Possessor$/,
     when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}Possessor`),
     run: (ctx) => ctx.togglePossessor(ctx.nounKey!),
+  },
+  {
+    // The members of the set a noun names — "animals *such as the cat*" (P09-E48): X, for eXamples.
+    id: "noun.examples",
+    scope: "box:noun",
+    keys: ["X"],
+    label: "Examples",
+    labelKey: "slot.examples",
+    hint: true,
+    satellite: /Examples$/,
+    when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}Examples`),
+    run: (ctx) => ctx.toggleExamples(),
+  },
+  {
+    // ⇧X flips such as ⇄ including while the examples hold a word.
+    id: "noun.examples.relation",
+    scope: "box:noun",
+    keys: ["Shift+X"],
+    label: "Relation",
+    labelKey: "modifier.relation",
+    when: (ctx) =>
+      Boolean(ctx.nounKey) &&
+      Boolean((ctx.selection[`${ctx.nounKey}Examples` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject),
+    run: (ctx) => ctx.toggleExampleRelation(),
   },
   {
     // What a noun's compared adjective is measured against — "a bigger cat *than the dog*" (P09-E50):

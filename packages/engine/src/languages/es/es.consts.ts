@@ -244,3 +244,9 @@ export const ES_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   // P09-E35: the duration is "durante", as `during` is — Spanish does not tell the two apart.
   for: { word: 'durante' },
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them. The inclusion agrees with the example; this is its masculine singular.
+ */
+export const ES_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'como', inclusion: 'incluido' };

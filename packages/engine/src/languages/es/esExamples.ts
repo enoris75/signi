@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { ES_EXAMPLES } from './es.consts.js';
 import { coordinateElement } from './coordinateElement.js';
 import { isPlural } from './isPlural.js';
 import { npText } from './npText.js';
@@ -14,8 +15,8 @@ export function esExamples(np: ResolvedNounPhrase): string {
   const ex = np.examples;
   if (!ex) return '';
   const group = coordinateElement(ex.phrase, (s) => (s.head.forms['person'] ? s.head.forms['base'] ?? '' : npText(s)));
-  if (ex.relation === 'example') return ` como ${group}`;
+  if (ex.relation === 'example') return ` ${ES_EXAMPLES.example} ${group}`;
   const agreement = ex.phrase.agreement;
   const ending = `${agreement['gender'] === 'fem' ? 'a' : 'o'}${isPlural(agreement) ? 's' : ''}`;
-  return `, incluid${ending} ${group},`;
+  return `, ${ES_EXAMPLES.inclusion.slice(0, -1)}${ending} ${group},`;
 }

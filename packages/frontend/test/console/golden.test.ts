@@ -81,6 +81,26 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/verb ( seem ) /pred ( big /most /outof [ dog ] )',
     misuse: { line: '/subj 1st /outof cat', says: { code: 'noTarget', args: { command: 'outof', last: { kind: 'pronoun' } } } },
   },
+  // A noun's examples (P09-E48): a phrase in its bracket after its possessor, under its relation's
+  // name. A pronoun names no set.
+  suchas: {
+    line: '/subj animal /zero /pl /suchas cat /verb run',
+    check: (s) => {
+      expect(noun(sel(s).subjectExamples!)).toMatchObject({ subject: 'CAT' });
+      expect(sel(s).exampleRelations).toBeUndefined();
+    },
+    prints: '/subj ( animal /pl /zero /suchas [ cat ] ) /verb ( run )',
+    misuse: { line: '/subj 1st /suchas cat', says: { code: 'noTarget', args: { command: 'suchas', last: { kind: 'pronoun' } } } },
+  },
+  including: {
+    line: '/subj animal /pl /including ( /subj cat /poss man ) /verb run',
+    check: (s) => {
+      expect(noun(sel(s).subjectExamples!)).toMatchObject({ subject: 'CAT' });
+      expect(sel(s).exampleRelations).toEqual({ subject: 'inclusion' });
+    },
+    prints: '/subj ( animal /pl /including [ cat /poss [ man ] ] ) /verb ( run )',
+    misuse: { line: '/verb eat /obj 3rd /including cat', says: { code: 'noTarget', args: { command: 'including', last: { kind: 'pronoun' } } } },
+  },
   and: {
     line: '/subj cat /and ( /subj dog /pl )',
     check: (s) => expect(noun(sel(s).subjectConjuncts![0]!)).toMatchObject({ subject: 'DOG', subjectNumber: 'plural' }),
@@ -411,6 +431,22 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P09-E48 D4: either relation's examples go with `/del eg`, and the reference step `eg` reaches them.
+describe('the examples', () => {
+  it('are removed by /del eg, whichever relation', () => {
+    const state = ok('/subj animal /pl /including cat /verb run /del eg');
+    expect(sel(state).subjectExamples).toBeUndefined();
+    expect(sel(state).exampleRelations).toBeUndefined();
+    expect(run('/subj cat /del eg').diagnostic).toMatchObject({ code: 'noExamplesToRemove' });
+  });
+
+  it('head a relative clause of their own, printed inside their bracket', () => {
+    const state = ok('/subj animal /pl /suchas ( /subj cat /rel obj ( /subj man /verb see ) ) /verb run');
+    expect(state.links[0]).toMatchObject({ source: { nounKey: 'subject/examples' } });
+    expect(print(state)).toBe('/subj ( animal /pl /suchas [ cat /rel #2.obj ] ) /verb ( run )');
   });
 });
 

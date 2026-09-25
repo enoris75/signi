@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { isNestedSelectionKey } from '../../../src/components/PhraseBuilder/phraseSerialize/functions/isNestedSelectionKey.ts';
 
 describe('isNestedSelectionKey', () => {
-  it.each(['subjectPossessor', 'mannerPossessor', 'indirectObjectPossessor', 'predicativeStandard'])('nests a selection under %s', (key) => {
+  it.each(['subjectPossessor', 'mannerPossessor', 'indirectObjectPossessor', 'predicativeStandard', 'subjectExamples'])('nests a selection under %s', (key) => {
     expect(isNestedSelectionKey(key)).toBe(true);
   });
 

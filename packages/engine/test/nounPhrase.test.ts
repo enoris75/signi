@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness, NounElement, NounPhrase } from '@signi/shared';
+import { translateExamples } from '../src/index.js';
 import { clause, furigana, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
@@ -1075,6 +1076,13 @@ describe('examples: such as / including (P09-E33)', () => {
 
   test('the Japanese 含む carries its furigana', () => {
     expect(furigana(clause(animals(including(np('CAT'))), 'RUN'))).toEqual(['ねこ', 'ふくむ', 'どうぶつ', 'はしります']);
+  });
+
+  // P09-E48 D5: the chip on the examples ring cites each relation's word, as the sentences above write it.
+  test('cites each relation’s word for the chip', () => {
+    const cited = (relation: 'example' | 'inclusion') => Object.fromEntries(translateExamples(relation).map((t) => [t.language, t.text]));
+    expect(cited('example')).toEqual({ en: 'such as', it: 'come', fr: 'comme', de: 'wie', es: 'como', ja: 'のような', pt: 'como' });
+    expect(cited('inclusion')).toEqual({ en: 'including', it: 'compreso', fr: 'y compris', de: 'einschließlich', es: 'incluido', ja: 'を含む', pt: 'incluindo' });
   });
 });
 

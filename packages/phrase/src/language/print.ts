@@ -4,7 +4,9 @@ import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   STANDARD_KEY,
+  EXAMPLES_KEY,
   conjunctAddress,
+  examplesAddress,
   imperativePerson,
   imperativeRegisterOf,
   isConditionalLink,
@@ -195,7 +197,7 @@ class Printer {
     return this.state.containers.findIndex((c) => c.id === id) + 1;
   }
 
-  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period", slice?: NounAddress): string {
+  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "examples" | "conjunct" = "period", slice?: NounAddress): string {
     // A conjunct is read as its block's words are: a predicate's takes an adjective too (P13).
     const spec = frame === "conjunct" ? conjunctSpec(slice?.split("/")[0] as NounKey | undefined) : wordSpecFor(slot, frame);
     return printWord(concept, spec, this.vocab);
@@ -373,7 +375,7 @@ class Printer {
     sel: PhraseSelection,
     which: NounKey,
     slice: NounAddress | undefined,
-    frame: "period" | "possessor" | "standard" | "conjunct",
+    frame: "period" | "possessor" | "standard" | "examples" | "conjunct",
     lead = false,
   ): void {
     const id = this.containerId;
@@ -474,6 +476,14 @@ class Printer {
       this.settings(w, ["possessorRole"]);
     }
 
+    // Its examples (P09-E48), after its possessor: a phrase of its own in brackets, under the command
+    // its relation names. The reference step and the removal are `eg` for either.
+    const examples = sel[EXAMPLES_KEY(which)] as PhraseSelection | undefined;
+    if (!slice && concept.role === "noun" && examples && Object.keys(examples).length) {
+      const name = sel.exampleRelations?.[which] === "inclusion" ? "/including" : "/suchas";
+      this.phrase(ref, name, `${wordKey(ref)}:eg`, "/del eg", examples, examplesAddress(address), "examples");
+    }
+
     // Its conjuncts: a bare word where the phrase is only its word, else a bracket.
     const conjuncts = conjunctsOf(sel, which);
     if (conjuncts.length) {
@@ -528,7 +538,7 @@ class Printer {
     removal: string,
     sel: PhraseSelection,
     slice: NounAddress,
-    frame: "possessor" | "standard" | "conjunct",
+    frame: "possessor" | "standard" | "examples" | "conjunct",
   ): void {
     const color = bracketColor(commandByAction(frame));
     const statement = this.statement({ key, removal, owner, about: owner, scope: slice });

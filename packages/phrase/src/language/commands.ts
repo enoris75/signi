@@ -93,6 +93,8 @@ export type Action =
   /** What a predicate adjective is compared to: `/than [ dog ]` (P09-E12 D5). */
   | { kind: "standard" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
+  /** The members of its set a noun names: `/suchas [ cat ]`, `/including [ cat ]` (P09-E48). */
+  | { kind: "examples"; relation: "example" | "inclusion" }
   | { kind: "relative" }
   /** A demonstrative pointing away from the rest: `/contrast` (P13). */
   | { kind: "contrast" }
@@ -466,6 +468,36 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "standard" },
     satellites: /^predicativeStandard$/,
     reducers: ["updateStandard"],
+  },
+  {
+    // The members of its set a noun names after it (P09-E48): a noun phrase in square brackets, like
+    // a possessor's, written in the noun's own bracket after its possessor — `/subj ( animal /zero
+    // /pl /suchas [ cat ] )`. `/such` is the determiner; this is the relation *such as*.
+    name: "suchas",
+    aliases: ["eg", "example"],
+    group: "role",
+    description: "such as",
+    descriptionKey: "examples.value.example",
+    purposeKey: "purpose.examples",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "examples", relation: "example" },
+    satellites: /Examples$/,
+    reducers: ["updateExamples", "setExampleRelation"],
+  },
+  {
+    // The same examples, set off as a parenthesis: "the animals, *including the cat*, run".
+    name: "including",
+    aliases: ["incl", "inclusion"],
+    group: "role",
+    description: "including",
+    descriptionKey: "examples.value.inclusion",
+    purposeKey: "purpose.examples",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "examples", relation: "inclusion" },
+    satellites: /Examples$/,
+    reducers: ["updateExamples", "setExampleRelation"],
   },
   {
     name: "and",
@@ -1038,7 +1070,7 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "setting",
     arg: { kind: "text" },
     action: { kind: "del" },
-    reducers: ["applyClear", "removePossessor", "removeStandard", "clearPossessorRef", "removeConjunct"],
+    reducers: ["applyClear", "removePossessor", "removeStandard", "removeExamples", "clearPossessorRef", "removeConjunct"],
   },
   {
     name: "edit",
@@ -1225,6 +1257,7 @@ export type TopicId =
   | "degree"
   | "relation"
   | "gloss"
+  | "examples"
   | "mood"
   | "links"
   | "period"
@@ -1263,6 +1296,7 @@ export const TOPICS: readonly Topic[] = [
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
   { id: "gloss", label: "meaning", labelKey: "gloss.name", part: "noun" },
+  { id: "examples", label: "examples", labelKey: "slot.examples", part: "noun" },
   { id: "mood", label: "mood", labelKey: "console.topic.mood", part: "period" },
   { id: "links", label: "linked periods", labelKey: "console.topic.links", part: "period" },
   { id: "period", label: "the period", labelKey: "console.topic.period", part: "period" },
@@ -1293,6 +1327,7 @@ export function topicOf(def: CommandDef): Topic {
   const a = def.action;
   // The standard sits with the degree it depends on: no degree that compares, no standard.
   if (a.kind === "standard") return TOPICS.find((t) => t.id === "degree")!;
+  if (a.kind === "examples") return TOPICS.find((t) => t.id === "examples")!;
   const id: TopicId =
     a.kind === "role"
       ? "words"

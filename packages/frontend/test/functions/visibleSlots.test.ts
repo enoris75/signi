@@ -39,7 +39,12 @@ describe('roleSlotFor', () => {
     });
   });
 
-    it('dresses nothing for a builder with no host', () => {
+    // P09-E48: a noun's examples ring is named for what it holds.
+  it('names an examples ring’s head', () => {
+    expect(roleSlotFor({ kind: 'examples', role: 'subject' })).toMatchObject({ labelKey: 'slot.examples', required: false });
+  });
+
+  it('dresses nothing for a builder with no host', () => {
     expect(roleSlotFor(undefined)).toBeUndefined();
   });
 });

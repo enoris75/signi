@@ -83,6 +83,15 @@ describe('buildNounPhrase', () => {
     expect(buildNounPhrase({ ...sel, directObjectStandard: {} }, 'directObject')?.adjectiveStandards).toBeUndefined();
   });
 
+  // P09-E48: a noun's examples, under either relation; none on an empty ring or an adjective head.
+  it('gives a noun head its examples, such as or including', () => {
+    const sel: PhraseSelection = { subject: HOUSE, subjectNumber: 'plural', subjectExamples: { subject: DOG } };
+    expect(buildNounPhrase(sel, 'subject')?.examples).toMatchObject({ phrase: { concept: 'DOG' }, relation: 'example' });
+    expect(buildNounPhrase({ ...sel, exampleRelations: { subject: 'inclusion' } }, 'subject')?.examples).toMatchObject({ relation: 'inclusion' });
+    expect(buildNounPhrase({ ...sel, subjectExamples: {} }, 'subject')?.examples).toBeUndefined();
+    expect(buildNounPhrase({ predicative: BIG, predicativeExamples: { subject: DOG } }, 'predicative')?.examples).toBeUndefined();
+  });
+
   it('keeps an adjective head’s standard as its headStandard', () => {
     const sel: PhraseSelection = { predicative: BIG, adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: DOG } };
     expect(buildNounPhrase(sel, 'predicative')).toMatchObject({ headStandard: { concept: 'DOG' }, adjectiveStandards: undefined });

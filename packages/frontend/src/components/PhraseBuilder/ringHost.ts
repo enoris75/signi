@@ -13,7 +13,8 @@ import type { DragBoxProps, GroupDragProps } from "./phraseRender.tsx";
 export interface RingHost {
   // A standard of comparison ("bigger than **the dog**", P09-E12 D5) is hosted as an owner is: a noun
   // phrase of its own, joined to the predicate adjective it is compared with.
-  kind: "conjunct" | "owner" | "standard";
+  // A noun's examples ("animals such as **the cat**", P09-E48) are hosted as an owner is too.
+  kind: "conjunct" | "owner" | "standard" | "examples";
   // The ring's node key on the period's canvas (see conjunctKey; an owner goes by its address).
   key: string;
   // The period noun the ring belongs with. A conjunct's head plays that noun's role — a direct

@@ -1,7 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEn } from '../../possessive.js';
-import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP } from './en.consts.js';
+import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP, EN_EXAMPLES } from './en.consts.js';
 import { TEMPORAL_PREP } from './en.consts.js';
 import { enAdj } from './enAdj.js';
 import { determiner } from './determiner.js';
@@ -65,5 +65,9 @@ export const englishEngine: LanguageEngine = {
     const adverb = EN_DEGREE[degree];
     // Periphrastic: the adverb leads an unchanged base, and the adverb alone is what was added.
     return marked === `${adverb} ${adjective.forms['base'] ?? ''}` ? adverb : marked;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return EN_EXAMPLES[relation];
   },
 };

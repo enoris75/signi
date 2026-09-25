@@ -34,6 +34,11 @@ export function resolveAntecedent(
       if (!child) return undefined;
       sel = child;
       key = "subject";
+    } else if (steps[i] === "examples") {
+      const child = field<PhraseSelection>(sel, `${key}Examples`);
+      if (!child) return undefined;
+      sel = child;
+      key = "subject";
     } else {
       return undefined;
     }

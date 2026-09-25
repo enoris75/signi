@@ -268,6 +268,14 @@ export function buildSatelliteIcons({
     }
     // So does the standard of comparison's, on the predicative's ring or any period noun's (P09-E50):
     // the line to its ring leaves from it. PhraseBuilder gives it what it does (open, fold or name it).
+    // And a noun's examples control (P09-E48).
+    const examplesNoun: NounKey | null = sat.key.endsWith("Examples")
+      ? (sat.key.slice(0, -"Examples".length) as NounKey)
+      : null;
+    if (examplesNoun) {
+      (perimeterByNoun[examplesNoun] ??= {}).examples = iconEntry;
+      continue;
+    }
     const standardNoun: NounKey | null = sat.key.endsWith("Standard")
       ? (sat.key.slice(0, -"Standard".length) as NounKey)
       : null;

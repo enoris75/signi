@@ -14,7 +14,7 @@ export function buildSatellites(
   t: UiStringLookup,
   // What the selection alone cannot tell: whether a conditional, a coordination or a subordinate
   // link locks the period's mood, and whether it governs a that-clause (see rawSatellites).
-  clause: { moodLocked?: boolean; clauseObject?: boolean } = {},
+  clause: { moodLocked?: boolean; clauseObject?: boolean; hosted?: boolean } = {},
 ): BuiltSatellites {
   return resolveSatellites(rawSatellites(selection, language, t, clause), {
     revealed,

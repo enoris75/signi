@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { EN_EXAMPLES } from './en.consts.js';
 import { tonicPronoun } from '../../functions/tonicPronoun.js';
 import { coordinate } from './coordinate.js';
 import { npText } from './npText.js';
@@ -14,5 +15,5 @@ export function enExamples(np: ResolvedNounPhrase): string {
   const ex = np.examples;
   if (!ex) return '';
   const group = coordinate(ex.phrase, (s) => tonicPronoun(s) ?? npText(s));
-  return ex.relation === 'inclusion' ? `, including ${group},` : ` such as ${group}`;
+  return ex.relation === 'inclusion' ? `, ${EN_EXAMPLES.inclusion} ${group},` : ` ${EN_EXAMPLES.example} ${group}`;
 }

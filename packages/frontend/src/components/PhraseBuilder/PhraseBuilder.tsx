@@ -14,6 +14,7 @@ import {
   conjunctAddress,
   possessorAddress,
   standardAddress,
+  examplesAddress,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
@@ -67,6 +68,8 @@ import {
 } from "./conjunctChain.ts";
 import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
 import { standardLink, standardSpotsFor, type StandardSpot } from "./standardRing.ts";
+import { examplesLink, examplesSpotsFor, type ExamplesSpot } from "./examplesRing.ts";
+import { LinkChip } from "./ConjunctRings.tsx";
 import { possessiveRequests } from "./functions/possessiveRequests.ts";
 import { usePossessivePhrases } from "../../i18n/usePossessivePhrase.ts";
 import { PeriodCard } from "./PeriodCard.tsx";
@@ -262,6 +265,15 @@ export function PhraseBuilder({
   // Which standards of comparison are open — their rings drawn — by address: what the user last asked
   // each control for; unset, a named standard shows and an empty one doesn't (P09-E12 D5, P09-E50).
   const [standardsOpen, setStandardsOpen] = useState<Readonly<Record<NounAddress, boolean>>>({});
+  // Which nouns' examples are open, by address, the same way (P09-E48).
+  const [examplesOpen, setExamplesOpenAll] = useState<Readonly<Record<NounAddress, boolean>>>({});
+  const setExamplesOpen = (address: NounAddress, open: boolean | undefined) =>
+    setExamplesOpenAll((prev) => {
+      const next = { ...prev };
+      if (open === undefined) delete next[address];
+      else next[address] = open;
+      return next;
+    });
   const setStandardOpen = (address: NounAddress, open: boolean | undefined) =>
     setStandardsOpen((prev) => {
       const next = { ...prev };
@@ -331,8 +343,14 @@ export function PhraseBuilder({
     if (slot === "verb") setActiveSlot("verb");
     // A noun's standard goes with it (see clearNoun), and the next one starts folded. A verb takes
     // its complements with it.
-    if (NOUN_KEYS.includes(slot as NounKey)) setStandardOpen(standardAddress(slot as NounKey), undefined);
-    if (slot === "verb") setStandardsOpen({});
+    if (NOUN_KEYS.includes(slot as NounKey)) {
+      setStandardOpen(standardAddress(slot as NounKey), undefined);
+      setExamplesOpen(examplesAddress(slot as NounKey), undefined);
+    }
+    if (slot === "verb") {
+      setStandardsOpen({});
+      setExamplesOpenAll({});
+    }
   }
 
   // Remove a complement entirely: clear its concept/number/gender and collapse
@@ -427,6 +445,8 @@ export function PhraseBuilder({
       moodLocked: moodLocked(binding),
       // A that-clause this period governs is its verb's object, so the object box gives way to it.
       clauseObject: binding?.subordinate.asSource?.kind === "content",
+      // A hosted ring's noun takes no standard and no examples of its own (P09-E50 D4, P09-E48 D2).
+      hosted: Boolean(ringHost),
     },
   );
 
@@ -596,6 +616,8 @@ export function PhraseBuilder({
   // The standards of comparison whose rings are drawn: the predicate adjective's (P09-E12 D5) and the
   // period nouns' (P09-E50). A hosted ring's builder draws none: only a period's nouns take one (D4).
   const standards = ringHost ? [] : standardSpotsFor({ selection, groups, open: standardsOpen });
+  // The period nouns' examples whose rings are drawn (P09-E48); a hosted ring's builder draws none (D2).
+  const exampleSpots = ringHost ? [] : examplesSpotsFor({ selection, groups, open: examplesOpen });
 
   // The owners on this canvas, however deep — an owner's owner, a conjunct's, a standard's — and the
   // nouns that point to theirs. The period's own nouns may take one wherever their possessor control
@@ -603,9 +625,9 @@ export function PhraseBuilder({
   const { owners, pointers } = ringHost
     ? { owners: [], pointers: [] }
     : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen, standards });
-  // Every hosted ring placed beside the ring it hangs off: the standards first — their owners are
-  // placed beside them — then the owners, parents first.
-  const besideSpots = [...standards, ...owners];
+  // Every hosted ring placed beside the ring it hangs off: the standards and the examples first — their
+  // owners are placed beside them — then the owners, parents first.
+  const besideSpots = [...standards, ...exampleSpots, ...owners];
 
   // The possessed noun phrase each coreference link renders ("his horse", fr "son cheval"), which
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
@@ -636,6 +658,13 @@ export function PhraseBuilder({
       return [which, { ...entry, standard: { ...control, active: drawn, onToggle: () => handleToggleStandard(which as NounKey) } }];
     }),
   ) as typeof decorated;
+  // Each examples control opens its ring (an empty one is its word picker) and folds it away (P09-E48).
+  for (const [which, entry] of Object.entries(perimeterByNoun)) {
+    const control = entry?.examples;
+    if (!control) continue;
+    const drawn = exampleSpots.some((spot) => spot.possessed === which);
+    perimeterByNoun[which as NounKey] = { ...entry, examples: { ...control, active: drawn, onToggle: () => handleToggleExamples(which as NounKey) } };
+  }
 
   // What compact view packs, and in how big a cell (see compactPacking). A hosted ring's builder has
   // no canvas of its own to pack: its ring is placed by the period's.
@@ -714,6 +743,7 @@ export function PhraseBuilder({
         ? ringHost.possessorToward && { subject: ringHost.possessorToward }
         : aims.byGroup,
       standardAims: Object.fromEntries(standards.map((spot) => [spot.possessed, centerOf(spot.address)])),
+      examplesAims: Object.fromEntries(exampleSpots.map((spot) => [spot.possessed, centerOf(spot.address)])),
     }),
     centerOf,
     sizeOf,
@@ -737,16 +767,17 @@ export function PhraseBuilder({
 
   // The hosted rings as constituents of this canvas, once their builders have reported drawing them.
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
-  const { conjunctRects, ownerRects, standardRects, standIns } = hostedRectsFor({
+  const { conjunctRects, ownerRects, standardRects, examplesRects, standIns } = hostedRectsFor({
     chains,
     owners,
     standards,
+    examples: exampleSpots,
     groupRects,
     hostedRings,
     centerOf,
     compact,
   });
-  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects, ...standardRects];
+  const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects, ...standardRects, ...examplesRects];
 
   const { edges, groupEdges } = buildEdges({
     groupRects,
@@ -788,9 +819,15 @@ export function PhraseBuilder({
     const line = standardLink({ spot, ringOf, controlOn, compact });
     return line ? [linkEdge(line, headOf(spot.role)?.color ?? "", false)] : [];
   });
+  // The line from each noun to its examples, and the chip on it naming the relation (P09-E48).
+  const exampleLines = exampleSpots.flatMap((spot) => {
+    const line = examplesLink({ spot, ringOf, controlOn, compact });
+    return line ? [{ spot, line, color: headOf(spot.role)?.color ?? "" }] : [];
+  });
+  const examplesEdges: Edge[] = exampleLines.map(({ line, color }) => linkEdge(line, color, false));
 
   // What each hosted ring borrows from this canvas to draw its ring here.
-  const { conjunctHost, ownerHost, standardHost } = ringHosts({
+  const { conjunctHost, ownerHost, standardHost, examplesHost } = ringHosts({
     hosting: {
       graphSize,
       compact,
@@ -829,6 +866,25 @@ export function PhraseBuilder({
   // The standard control on a noun's dotted ring: open the standard's ring, or fold it away.
   function handleToggleStandard(which: NounKey) {
     setStandardOpen(standardAddress(which), !standards.some((spot) => spot.possessed === which));
+  }
+
+  // The examples control on a noun's dotted ring: open the examples' ring, or fold it away (P09-E48).
+  function handleToggleExamples(which: NounKey) {
+    setExamplesOpen(examplesAddress(which), !exampleSpots.some((spot) => spot.possessed === which));
+  }
+
+  // Take a noun's examples off. Relative clauses sourced from them, or from an owner they hold, go
+  // with them; so does where their rings were.
+  function handleRemoveExamples(spot: ExamplesSpot) {
+    const gone = [spot, ...ownersUnder(owners, spot.address)];
+    commands.handleRemoveExamples(spot.role);
+    setExamplesOpen(spot.address, false);
+    for (const o of gone) binding?.relative.onRemoveLink(o.address);
+    setPositions((prev) => {
+      const next = { ...prev };
+      for (const o of gone) delete next[o.address];
+      return next;
+    });
   }
 
   // Take a standard off its noun. Relative clauses sourced from it, or from an owner it holds, go
@@ -934,6 +990,14 @@ export function PhraseBuilder({
       clearSlot: handleClear,
       removeComplement: handleRemoveComplement,
       togglePossessor: handleTogglePossessor,
+      toggleExamples: () => {
+        const which = nounBlockOf(slot);
+        if (which) handleToggleExamples(which);
+      },
+      toggleExampleRelation: () => {
+        const which = nounBlockOf(slot);
+        if (which) commands.handleToggleExampleRelation(which);
+      },
       toggleStandard: () => {
         const which = nounBlockOf(slot);
         if (which) handleToggleStandard(which);
@@ -1063,6 +1127,8 @@ export function PhraseBuilder({
                 ? "action.removePossessor"
                 : ringHost.kind === "standard"
                   ? ringHost.set ? "action.removeComparisonSet" : "action.removeStandard"
+                  : ringHost.kind === "examples"
+                    ? "action.removeExamples"
                   : "action.removeConjunct",
             ),
             onRemove,
@@ -1081,7 +1147,7 @@ export function PhraseBuilder({
       canvasHeight={canvasHeight}
       graphSize={graphSize}
       edges={edges}
-      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges, ...standardEdges]}
+      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges, ...standardEdges, ...examplesEdges]}
       controlPos={controlPos}
       clearControls={clearControls}
       perimeterByNoun={perimeterByNoun}
@@ -1119,6 +1185,32 @@ export function PhraseBuilder({
               Builder={PhraseBuilder}
             />
           )}
+          {exampleSpots.map((spot) => (
+            // A noun's examples are an owner-shaped phrase too: the same lens, another host (P09-E48).
+            <OwnerRings
+              key={spot.address}
+              owners={[spot]}
+              pointers={[]}
+              selection={selection}
+              onPhraseUpdate={onPhraseUpdate}
+              onRemoveOwner={() => handleRemoveExamples(spot)}
+              hostFor={() => examplesHost(spot)}
+              binding={binding}
+              Builder={PhraseBuilder}
+            />
+          ))}
+          {exampleLines.map(({ spot, line, color }) => (
+            // The relation, on the line: such as or including, flipped by a click.
+            <LinkChip
+              key={`${spot.address}:chip`}
+              label={t(`examples.value.${spot.relation}`)}
+              color={color}
+              at={line.mid}
+              dashed={false}
+              onClick={() => commands.handleToggleExampleRelation(spot.role)}
+              testId="examples-chip"
+            />
+          ))}
           {standards.map((standard) => (
             // A standard of comparison is an owner-shaped phrase: the same lens, another host.
             <OwnerRings

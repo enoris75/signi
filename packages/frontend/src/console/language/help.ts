@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|outof|and n|wh|there|rel|headless|num|contrast|if|join|clause|sub|to|so|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|outof|eg|and n|wh|there|rel|headless|num|contrast|if|join|clause|sub|to|so|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -88,6 +88,8 @@ export const EXAMPLES: Record<string, string> = {
   poss: "/subj ( book /poss [ man /adj old ] )",
   than: "/subj ( cat ) /verb ( seem ) /pred ( big /more /than [ dog ] )",
   outof: "/subj ( cat ) /verb ( seem ) /pred ( big /most /outof [ dog /pl ] )",
+  suchas: "/subj ( animal /pl /zero /suchas [ cat ] ) /verb ( run )",
+  including: "/subj ( animal /pl /including [ cat ] ) /verb ( run )",
   and: "/subj ( cat /and dog ) /verb ( run )",
   or: "/subj ( cat /or dog ) /verb ( run )",
   // Noun

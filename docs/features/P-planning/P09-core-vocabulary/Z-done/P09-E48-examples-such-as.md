@@ -8,8 +8,8 @@ standard of comparison's shape. Its control sits in the noun's relations fan, an
 says the relation. `/suchas` and `/including` in the console, with their print → apply round trip.
 **Scope:** shared (a label kind), the engine (a label hook in each engine), the phrase model, the
 canvas, the keyboard, the console. All 7 languages for every new UI string.
-**Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the
-engine side is [P09-E33](Z-done/P09-E33-including-such-as.md).
+**Status:** **done** 2026-09-25 (see *Done*); filed 2026-09-25 from P09's plan-only constructs; the
+engine side is [P09-E33](P09-E33-including-such-as.md).
 
 What the engine renders from a plan at HEAD (e811c91e). Probed 2026-09-25 with `sayAll` on an
 in-memory seed:
@@ -37,43 +37,43 @@ why the control ships with its commands.
 
 Verified at HEAD, 2026-09-25.
 
-**The plan field.** [`NounPhrase.examples?: { phrase: NounElement; relation: 'example' | 'inclusion' }`](../../../../packages/shared/src/index.ts#L1064)
+**The plan field.** [`NounPhrase.examples?: { phrase: NounElement; relation: 'example' | 'inclusion' }`](../../../../../packages/shared/src/index.ts#L1064)
 is the last member of `NounPhrase`. The phrase is a whole noun element, so a group names several
 examples. Nothing in `packages/phrase` or `packages/frontend` reads or writes it. `planToWorkspace`'s
 `NOUN_FIELDS` leaves it out
-([`planToWorkspace.ts:61`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L61)).
+([`planToWorkspace.ts:61`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L61)).
 No seed definition uses one.
 
 **The two nested noun phrases the canvas already hosts.**
 
 - **The owner.** `${which}Possessor` is a `PhraseSelection` whose `subject` holds the head
-  ([`interfaces.ts:537`](../../../../packages/phrase/src/model/interfaces.ts#L537)). Its ring is
-  painted by [`OwnerRings`](../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx)
+  ([`interfaces.ts:537`](../../../../../packages/phrase/src/model/interfaces.ts#L537)). Its ring is
+  painted by [`OwnerRings`](../../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx)
   through a noun-phrase-only builder. Each noun has one.
 - **The standard of comparison (E12c).** It is the closest model: a single nested
-  `predicativeStandard` ([L491](../../../../packages/phrase/src/model/interfaces.ts#L491)) at the
-  address `predicative/standard` ([`standardAddress`, L610](../../../../packages/phrase/src/model/interfaces.ts#L610)).
+  `predicativeStandard` ([L491](../../../../../packages/phrase/src/model/interfaces.ts#L491)) at the
+  address `predicative/standard` ([`standardAddress`, L610](../../../../../packages/phrase/src/model/interfaces.ts#L610)).
   The same `OwnerRings` draws it with `RingHost.kind: "standard"`
-  ([`ringHost.ts:16`](../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L16)).
-  [`standardRing.ts`](../../../../packages/frontend/src/components/PhraseBuilder/standardRing.ts)
+  ([`ringHost.ts:16`](../../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L16)).
+  [`standardRing.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/standardRing.ts)
   holds the spot, the gate and the line. Its control is a `standard` entry in the predicative's
   relations fan at six o'clock. Once the ring is drawn, the control turns to face it
-  (`standardAims`, [`ringSpecs.ts:241`](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L241)).
+  (`standardAims`, [`ringSpecs.ts:241`](../../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L241)).
 - **Serialization.** A nested slice is recognised by its key's suffix,
-  [`isNestedSelectionKey`](../../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/isNestedSelectionKey.ts)
+  [`isNestedSelectionKey`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/isNestedSelectionKey.ts)
   (`…Possessor`, `…Standard`). Addresses are walked by `nounSliceAt` / `updateNounAt`
-  ([`phraseReducers.ts:980`](../../../../packages/phrase/src/model/phraseReducers.ts#L980)).
+  ([`phraseReducers.ts:980`](../../../../../packages/phrase/src/model/phraseReducers.ts#L980)).
 - **The limit E12c recorded.** A hosted ring does not host conjuncts, and `/and` attaches only to
   period nouns, so a coordinated standard exists "only in the model".
 
 **The dotted ring.** A noun's relations fan holds relative, headless, possessor, possessorRole,
-standard and conjunct ([`ringSpecs.ts:243`](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L243);
-kinds in [`PerimeterEntry`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L85)).
+standard and conjunct ([`ringSpecs.ts:243`](../../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L243);
+kinds in [`PerimeterEntry`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L85)).
 A line between rings can carry a chip: the conjunction's, or the possessive pronoun's
-([`LinkChip`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx#L29)).
+([`LinkChip`](../../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx#L29)).
 
 **Free names.** On a noun box, B F H I J K T U W X Y are free
-([`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts)). In the console, `/such` is
+([`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts)). In the console, `/such` is
 E25's determiner and `/like` is free; `/suchas`, `/including`, `/eg` and `/incl` are free.
 
 ## Design
@@ -100,7 +100,7 @@ kind of drawing.
 ### D2. Which nouns take examples
 
 The head is a noun (`role === "noun"`), because a set is named, and the gate is the one `/num`
-uses ([`words.ts:392`](../../../../packages/phrase/src/language/words.ts#L392)). The examples
+uses ([`words.ts:392`](../../../../../packages/phrase/src/language/words.ts#L392)). The examples
 themselves may be nouns or pronouns ("people such as him"). **In v1 only a period's own nouns**
 (subject, object, complements) carry the control. Hosted rings (owners, conjuncts, a standard,
 examples) get none, as E12a gave them no question marks.
@@ -166,7 +166,7 @@ The alternative, a new `Specifier` kind, would widen a plan type for the sake of
 - **Plan:** `buildNounPhrase` sets `examples` from `buildNounElement(slice, "subject", root)` once
   the slice holds a word.
 - **`planToWorkspace`:** `examples` joins `NOUN_FIELDS`, and the phrase is filled as the standard's
-  is ([L312](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L312)),
+  is ([L312](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L312)),
   with the group refusal of D3.
 - **Serialization:** `isNestedSelectionKey` accepts `…Examples`.
 
@@ -178,7 +178,7 @@ The alternative, a new `Specifier` kind, would widen a plan type for the sake of
 - The relation `LinkChip` on the line.
 - `PART_BY_LABEL_KEY` gains `slot.examples`.
 
-## 4. Keyboard — [`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts)
+## 4. Keyboard — [`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts)
 
 - `noun.examples`: **X** (*eXamples*) on a noun box opens or folds the ring. It is a hint.
 - `noun.examples.relation`: **Shift+X** flips such as ⇄ including while the ring holds a word.
@@ -187,7 +187,7 @@ The alternative, a new `Specifier` kind, would widen a plan type for the sake of
 ## 5. Console — `packages/phrase/src/language/`
 
 - `commands.ts`: the two commands (D4), `arg: phrase`, satellites `/Examples$/`, topic *noun*.
-- `resolve.ts`: the `eg` step, beside `than` ([L229](../../../../packages/phrase/src/language/resolve.ts#L229)).
+- `resolve.ts`: the `eg` step, beside `than` ([L229](../../../../../packages/phrase/src/language/resolve.ts#L229)).
 - `print.ts`, `apply.ts` and `complete.ts` handle them, `words.ts` adds the D2 gate, and the
   frontend's `help.ts` gets `/subj ( animal /zero /pl /suchas [ cat ] ) /verb ( run )`.
 - **The P02 debt:**
@@ -196,9 +196,9 @@ The alternative, a new `Specifier` kind, would widen a plan type for the sake of
   - a `phraseCommands` handler row;
   - a round-trip walk op that names, flips and removes examples;
   - ANIMAL added to the console test vocabulary
-    ([`vocab.ts`](../../../../packages/frontend/test/console/vocab.ts)), which lacks it.
+    ([`vocab.ts`](../../../../../packages/frontend/test/console/vocab.ts)), which lacks it.
 
-## 6. UI strings — [`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts)
+## 6. UI strings — [`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts)
 
 Probed 2026-09-25 on an in-memory seed:
 
@@ -246,3 +246,60 @@ Every one must render in all seven at boot.
   identical follow-up from E12c.
 - **Examples on hosted nouns**: an owner's, a conjunct's, a standard's (D2).
 - ***Excluding / except***, the negative relation (E33's follow-up).
+
+## Done
+
+Shipped 2026-09-25. **Engine:** `UiStringExamplesDef { examples }` (after `UiStringSubordinatorDef`),
+`translateExamples`, and `renderExamples` last in each of the seven engines over a hoisted word table
+(`EN_EXAMPLES` … `JA_EXAMPLES` in each `<lang>.consts.ts`), which the examples functions now read too.
+**Model:** `${noun}Examples` beside the standards, `exampleRelations` (only `inclusion` stored),
+`examplesAddress` / `EXAMPLES_KEY`, the `examples` step in `nounSliceAt`, `updateNounAt`,
+`resolveAntecedent`, `getNoun` and `canvasKeyOf`; `updateExamples`, `removeExamples`,
+`setExampleRelation`, `toggleExampleRelation`; `clearNounPhraseParts` drops both; `buildNounPhrase`
+writes `examples` for a noun head; `planToWorkspace` maps one example phrase and reports a group
+(`NounPhrase.examples of a group`) or one off a period noun. **Canvas:** `examplesRing.ts`, a hosted
+`examples` ring (`RingHost.kind`, `hostedRect`, `packPeriod` order), the `examples` perimeter entry as
+the seventh kind in the relations fan, aimed at its ring once drawn, and a solid `examples-chip` on the
+line reading the relation, which a click flips. **Keys:** X (`noun.examples`) and Shift+X
+(`noun.examples.relation`, once the ring holds a word). **Console:** `/suchas` (`eg`, `example`) and
+`/including` (`incl`, `inclusion`) under a new *examples* topic, printed after `/poss`; the reference
+step and removal are `eg`.
+
+Engine output from the plans the builder now makes, rendered 2026-09-25:
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| animals such as the cat run | animals such as the cat run. | animali come il gatto corrono. | animaux comme le chat courent. | Tiere wie der Kater laufen. | animales como el gato corren. | animais como o gato correm. | 猫のような動物は走ります。 |
+| the animals, including the cat, run | the animals, including the cat, run. | gli animali, compreso il gatto, corrono. | les animaux, y compris le chat, courent. | die Tiere, einschließlich des Katers, laufen. | los animales, incluido el gato, corren. | os animais, incluindo o gato, correm. | 猫を含む動物は走ります。 |
+| the man sees animals such as the cat | the man sees animals such as the cat. | l'uomo vede animali come il gatto. | l'homme voit des animaux comme le chat. | der Mann sieht Tiere wie den Kater. | el hombre ve animales como el gato. | o homem vê animais como o gato. | 男は猫のような動物を見ます。 |
+| …including the cat and the dog… | the animals, including the cat and the dog, run. | gli animali, compresi il gatto e il cane, corrono. | les animaux, y compris le chat et le chien, courent. | die Tiere, einschließlich des Katers und des Hundes, laufen. | los animales, incluidos el gato y el perro, corren. | os animais, incluindo o gato e o cão, correm. | 猫と犬を含む動物は走ります。 |
+
+The last row is plan-only still (D3). The chip's words, `examples.value.*`: en *such as* / *including*,
+it *come* / *compreso*, fr *comme* / *y compris*, de *wie* / *einschließlich*, es *como* / *incluido*,
+pt *como* / *incluindo*, ja のような / を含む. `slot.examples` en *Examples*, it *Esempi*, de
+*Beispiele*, ja 例; `action.removeExamples` "Remove these examples", de "Diese Beispiele entfernen";
+`purpose.examples` "to add examples to a noun", ja 名詞に例を加える.
+
+Measured in e2e (1500×1000, `group-box` rects): *the man sees a big cat* is identical with the
+examples control on both nouns (Subject 147², Verb Phrase 236², Direct Object 283², as E50 measured it),
+and *cat eats mouse* keeps Subject 147², Verb Phrase 236², Direct Object 144² on one row with the
+object's examples ring open (146², placed below). The fan took its seventh kind without growing.
+
+What landed differently from the plan:
+
+1. **`/del eg` has a diagnostic of its own**, `diagnostic.noNounHasExamples` ("No noun has
+   examples", de "Kein Substantiv hat Beispiele"), code `noExamplesToRemove`; `/del suchas` and
+   `/del including` are its synonyms.
+2. **The *examples* console topic is new**, after *meaning*: the file named a *noun* topic, which the
+   catalogue does not have.
+3. **`CANVAS_PARTS` gains `examples`** (clear / show / hide: "Clear the example", singular, since the
+   ring holds one example), so the ring's head box and its control do not fall back to English.
+4. **A hosted builder offers no standard and no examples control** (`rawSatellites`' new `hosted`
+   option). E50's standard control was offered on a hosted ring's compared adjective and did nothing
+   there; the same option now withdraws it (E50 D4).
+5. **The round-trip walk** leaves a standard's or an examples' word alone while a relative clause
+   hangs off it, as the canvas keeps a linked word; without that the walk made states the console
+   refuses (a pronoun heading a relative clause).
+6. The follow-up D3 names, *coordinated examples and a coordinated standard on a hosted ring*, is one
+   ticket for both.
+

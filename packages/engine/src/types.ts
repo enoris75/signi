@@ -636,6 +636,13 @@ export interface LanguageEngine {
    */
   renderDegree?(adjective: ConceptForms, degree: Degree): string;
   /**
+   * The word a noun's examples relation spells, alone, for the chip on the line to its examples ring
+   * (P09-E48): *such as* or *including*, as the language's examples function writes it (see
+   * `translateExamples`). A word that agrees with the example is cited in its masculine singular
+   * (it "compreso", es "incluido").
+   */
+  renderExamples?(relation: 'example' | 'inclusion'): string;
+  /**
    * Optional ruby (furigana) rendering: the same surface as `render`, split into
    * segments carrying kana readings. Implemented only by languages with furigana (ja).
    */

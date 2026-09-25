@@ -21,6 +21,7 @@ import {
   QUESTION_ROLES,
   builderNounAddress,
   conjunctAddress,
+  isRelativeLink,
   possessorAddress,
   standardAddress,
   subordinateReading,
@@ -74,7 +75,7 @@ function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
 type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut' };
 
 /** A word for a slot, from the categories its picker offers. */
-type Frame = 'period' | 'possessor' | 'standard' | 'conjunct';
+type Frame = 'period' | 'possessor' | 'standard' | 'examples' | 'conjunct';
 
 function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
@@ -98,6 +99,8 @@ function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame 
       if (poss) walk(poss, possessorAddress(address), 'possessor', ['subject']);
       const standard = sel[`${which}Standard` as keyof PhraseSelection] as PhraseSelection | undefined;
       if (standard && frame === 'period') walk(standard, standardAddress(address), 'standard', ['subject']);
+      const examples = sel[`${which}Examples` as keyof PhraseSelection] as PhraseSelection | undefined;
+      if (examples && frame === 'period') walk(examples, `${address}/examples`, 'examples', ['subject']);
       R.conjunctsOf(sel, which).forEach((c, i) => walk(c, conjunctAddress(address, i), 'conjunct', ['subject']));
     }
   };
@@ -262,7 +265,7 @@ const OPS: Op[] = [
   }),
   // A period noun's standard, for its compared adjective (P09-E50): named or taken off, its adjective's
   // degree cycled, or the adjective itself removed — the standard outlives both, muted but printed.
-  onPeriod((sel, rng) => {
+  onPeriod((sel, rng, s, cid) => {
     const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
     if (!which) return undefined;
     const r = rng();
@@ -270,8 +273,21 @@ const OPS: Op[] = [
     const adjective = adjectiveSlots(which).find((k) => (sel[k] as Concept | undefined)?.role === 'adjective');
     if (adjective && r < 0.4) return R.setDegree(sel, adjective, pick(rng, DEGREES)!);
     if (adjective && r < 0.5) return R.applyClear(sel, adjective);
+    if (s.links.some((l) => isRelativeLink(l) && l.source.containerId === cid && l.source.nounKey === `${which}/standard`)) return undefined;
     const w = wordFor(rng, 'subject', 'standard');
     return R.updateStandard(sel, which, (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
+  }),
+  // A period noun's examples (P09-E48): named, flipped between such as and including, or taken off.
+  // A head a relative clause hangs off keeps its word, as a linked box does.
+  onPeriod((sel, rng, s, cid) => {
+    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    if (!which) return undefined;
+    const r = rng();
+    if (sel[`${which}Examples` as keyof PhraseSelection] && r < 0.25) return R.removeExamples(sel, which);
+    if (sel[`${which}Examples` as keyof PhraseSelection] && r < 0.5) return R.toggleExampleRelation(sel, which);
+    if (s.links.some((l) => isRelativeLink(l) && l.source.containerId === cid && l.source.nounKey === `${which}/examples`)) return undefined;
+    const w = wordFor(rng, 'subject', 'examples');
+    return R.updateExamples(sel, which, (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
   }),
   // A conjunct, and a word and settings for it.
   onPeriod((sel, rng) => {
@@ -555,6 +571,13 @@ describe('the round trip', () => {
     expect(standards.some((p) => !/\/(more|less|equally|most|least) \/(than|outof)/.test(p))).toBe(true);
     // The name follows the degree: never `/than` on a superlative, never `/outof` off one.
     expect(standards.some((p) => /\/(most|least) \/than/.test(p) || (/\/outof/.test(p) && !/\/(most|least) \/outof/.test(p)))).toBe(false);
+  }, 30_000);
+
+  // P09-E48: the walk reaches a noun's examples, under both relations.
+  it('reaches the examples, such as and including', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 2000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    expect(texts.some((t) => t.includes('/suchas ['))).toBe(true);
+    expect(texts.some((t) => t.includes('/including ['))).toBe(true);
   }, 30_000);
 
   // P09-E50: the walk reaches a period noun's standard, printed in its bracket, with and without an

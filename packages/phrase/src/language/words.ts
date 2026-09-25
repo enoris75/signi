@@ -409,6 +409,10 @@ export function takes(action: Action, w: WordInfo): boolean {
         !w.ref.slice &&
         (w.concept?.role === "noun" || (w.which === "predicative" && w.concept?.role === "adjective"))
       );
+    // A noun names a set whose members it may list (P09-E48): a period noun with a noun head. A
+    // pronoun names no set, and a hosted noun has no examples control (D2).
+    case "examples":
+      return w.kind === "noun" && !w.ref.slice && w.concept?.role === "noun";
     case "conjunct":
       return (
         w.kind === "noun" && !w.ref.slice && COORDINABLE_NOUN_KEYS.includes(w.which!) && Boolean(w.concept)
@@ -420,7 +424,7 @@ export function takes(action: Action, w: WordInfo): boolean {
 
 /** Whether a command attaches to a word, rather than to the period or the app. */
 export const attachesToWord = (action: Action): boolean =>
-  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "conjunct", "relative", "headless", "numeral", "contrast"].includes(action.kind);
+  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "examples", "conjunct", "relative", "headless", "numeral", "contrast"].includes(action.kind);
 
 /** What kind of word a diagnostic says a word is: "food is a noun" (see diagnostics.ts). */
 export function kindOf(w: WordInfo): WordKindName {

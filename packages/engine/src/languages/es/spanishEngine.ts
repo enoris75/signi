@@ -1,7 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEs } from '../../possessive.js';
-import { COORD_WORDS, ES_DEGREE, PARENTHETICAL_CONNECTORS } from './es.consts.js';
+import { COORD_WORDS, ES_DEGREE, PARENTHETICAL_CONNECTORS, ES_EXAMPLES } from './es.consts.js';
 import { ES_TEMPORAL } from './es.consts.js';
 import { prepDet } from './prepDet.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -85,5 +85,9 @@ export const spanishEngine: LanguageEngine = {
     // gender a citation form is given in (as `renderPossessive` defaults).
     const word = ES_DEGREE[degree];
     return word && (degree === 'most' || degree === 'least') ? `el ${word}` : word;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return ES_EXAMPLES[relation];
   },
 };

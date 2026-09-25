@@ -17,6 +17,7 @@ import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import BalanceIcon from "@mui/icons-material/Balance";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -33,6 +34,7 @@ import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.t
 import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
 import { canAsk, canBeExistential, questionAnimateOf } from "../../functions/questionGates.ts";
 import { standardIsSet, takesStandard } from "../../standardRing.ts";
+import { takesExamples } from "../../examplesRing.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -73,8 +75,14 @@ export function rawSatellites(
   // coordination or a subordinate link it takes part in (see moodLocked), which a question mark that
   // would make it a question has to respect as the border's toggle does. And whether the period
   // governs a that-clause (P09-E12 D9), which is its verb's object: the object box is then
-  // withdrawn, as the clause and a direct object exclude each other.
-  { moodLocked = false, clauseObject = false }: { moodLocked?: boolean; clauseObject?: boolean } = {},
+  // withdrawn, as the clause and a direct object exclude each other. And whether this is a hosted
+  // ring's builder (an owner, a conjunct, a standard, examples), whose noun takes no standard and no
+  // examples of its own (P09-E50 D4, P09-E48 D2).
+  {
+    moodLocked = false,
+    clauseObject = false,
+    hosted = false,
+  }: { moodLocked?: boolean; clauseObject?: boolean; hosted?: boolean } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
@@ -125,8 +133,20 @@ export function rawSatellites(
     ...(standardIsSet(selection, type)
       ? { label: t("slot.comparisonSet"), labelKey: "slot.comparisonSet" as const, icon: <LeaderboardIcon sx={iconSx} /> }
       : { label: t("slot.standard"), labelKey: "slot.standard" as const, icon: <BalanceIcon sx={iconSx} /> }),
-    available: takesStandard(selection, type),
+    available: !hosted && takesStandard(selection, type),
     hasValue: Boolean((selection[`${type}Standard` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject),
+  });
+  // The members of the set a noun names — "animals *such as the cat*" (P09-E48). A noun phrase of its
+  // own, drawn as a hosted ring beside its noun's, whose line leaves from this control on the noun's
+  // dotted ring and carries the relation's chip. Offered on a period noun with a noun head (D2).
+  const examples = (type: NounKey): RawSatellite => ({
+    key: `${type}Examples`,
+    parent: type,
+    label: t("slot.examples"),
+    labelKey: "slot.examples",
+    icon: <FormatListBulletedIcon sx={iconSx} />,
+    available: !hosted && takesExamples(selection, type),
+    hasValue: Boolean((selection[`${type}Examples` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject),
   });
   // What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, or the parts it
   // is made of. Each click moves it on; it rides beside the possessor control while there is one to
@@ -283,6 +303,7 @@ export function rawSatellites(
     },
     possessorRole("subject"),
     standard("subject"),
+    examples("subject"),
     {
       key: "subjectConjunct",
       parent: "subject",
@@ -600,6 +621,7 @@ export function rawSatellites(
     },
     possessorRole("directObject"),
     standard("directObject"),
+    examples("directObject"),
     {
       key: "directObjectConjunct",
       parent: "directObject",
@@ -789,6 +811,7 @@ export function rawSatellites(
           valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
         },
         standard(type),
+        examples(type),
         // The cause alone can be denied rather than named — "not because of the dog", the act
         // happened and this was not the reason. A toggle, like the verb's own polarity, and
         // independent of the sentiment beside it: a credit can be denied too.

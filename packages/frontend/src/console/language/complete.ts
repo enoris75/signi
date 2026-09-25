@@ -278,7 +278,7 @@ function completeAt(
     // After an argument already given — the caret past it and a space — what follows is a new
     // command: a word's, a possessor's or a conjunct's word, or as many values as the command takes.
     const given = betweenWords.flatMap((t) => (t.kind === "word" ? t.text.split(/\s+/) : []));
-    const phraseWord = def.action.kind === "possessor" || def.action.kind === "standard" || def.action.kind === "conjunct";
+    const phraseWord = def.action.kind === "possessor" || def.action.kind === "standard" || def.action.kind === "examples" || def.action.kind === "conjunct";
     const argumentDone =
       !at &&
       (arg === "none" ||
@@ -308,6 +308,7 @@ function leadSpec(def: CommandDef, parent: Frame, state: WorkspaceState): WordSp
   const action = def.action;
   if (action.kind === "possessor") return wordSpecFor("subject", "possessor");
   if (action.kind === "standard") return wordSpecFor("subject", "standard");
+  if (action.kind === "examples") return wordSpecFor("subject", "examples");
   if (action.kind === "conjunct") return wordSpecFor("subject", "conjunct");
   return wordSpecForCommand(def, parent, frameWords(parent, state));
 }
@@ -798,6 +799,7 @@ const DEL_VALUES: readonly ValueDef[] = [
   { name: "poss", value: "poss", description: "the possessor", descriptionKey: "slot.possessor" },
   { name: "than", value: "than", description: "the standard of comparison", descriptionKey: "slot.standard" },
   { name: "outof", value: "outof", description: "the comparison set", descriptionKey: "slot.comparisonSet" },
+  { name: "eg", value: "eg", description: "the examples", descriptionKey: "slot.examples" },
   { name: "and", value: "and", description: "a coordinated phrase", descriptionKey: "slot.conjunct" },
   { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
   { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
@@ -938,15 +940,15 @@ function linkCompletion(
       { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", ...clause("slot.subject", "Subject") },
       { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", ...clause("slot.directObject", "Object") },
     );
-  } else if (action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") {
+  } else if (action.kind === "possessor" || action.kind === "standard" || action.kind === "examples" || action.kind === "conjunct") {
     rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase", detailKey: "console.new.phrase" });
   } else {
     rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period", detailKey: "console.new.period" });
   }
   // Then what exists already: the periods and nouns the rules let it reach.
-  if (action.kind !== "conjunct" && action.kind !== "standard" && targetHere) rows.push(...linkTargets(def, frame, state, words));
+  if (action.kind !== "conjunct" && action.kind !== "standard" && action.kind !== "examples" && targetHere) rows.push(...linkTargets(def, frame, state, words));
   // A possessor, a standard or a conjunct may also be named by its word.
-  if ((action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") && q) {
+  if ((action.kind === "possessor" || action.kind === "standard" || action.kind === "examples" || action.kind === "conjunct") && q) {
     const spec = wordSpecFor("subject", action.kind);
     rows.push(...wordCompletion(from, to, query, spec, opts, { title: "" }, "primary").candidates);
   }
@@ -985,6 +987,8 @@ function linkTitle(def: CommandDef): Title {
       return def.name === "outof"
         ? { title: "comparison set", titleKey: "slot.comparisonSet" }
         : { title: "standard of comparison", titleKey: "slot.standard" };
+    case "examples":
+      return { title: "examples", titleKey: "slot.examples" };
     default:
       return { title: "coordination", titleKey: "satellite.coordination" };
   }

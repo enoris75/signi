@@ -40,6 +40,7 @@ import {
   QuestionRole,
   SlotKey,
   STANDARD_KEY,
+  EXAMPLES_KEY,
 } from "./interfaces.ts";
 import { questionAnimateOf } from "./functions/questionGates.ts";
 import type { ModalNegativeField } from "./slots.ts";
@@ -129,6 +130,13 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
     const { [which]: _dropped, ...rest } = sel.possessorRoles;
     if (Object.keys(rest).length > 0) sel.possessorRoles = rest;
     else delete sel.possessorRoles;
+  }
+  // Examples name members of a set a noun names (P09-E48): a pronoun or an adjective head has none.
+  delete sel[EXAMPLES_KEY(which)];
+  if (sel.exampleRelations?.[which]) {
+    const { [which]: _dropped, ...rest } = sel.exampleRelations;
+    if (Object.keys(rest).length > 0) sel.exampleRelations = rest;
+    else delete sel.exampleRelations;
   }
   // A subject's reading (P13) is a noun phrase's: a pronoun or an adjective has none.
   if (which === "subject") {
@@ -854,6 +862,42 @@ export function removeStandard(prev: PhraseSelection, which: NounKey): PhraseSel
   return next;
 }
 
+// Apply `updater` to the examples of `which` ("animals such as the cat", P09-E48), seeding an empty
+// phrase the first time — the lens `updatePossessor` gives an owner.
+export function updateExamples(
+  prev: PhraseSelection,
+  which: NounKey,
+  updater: (prev: PhraseSelection) => PhraseSelection,
+): PhraseSelection {
+  return {
+    ...prev,
+    [EXAMPLES_KEY(which)]: updater((prev[EXAMPLES_KEY(which)] as PhraseSelection | undefined) ?? {}),
+  };
+}
+
+// Remove a noun block's examples entirely, and the relation they were given.
+export function removeExamples(prev: PhraseSelection, which: NounKey): PhraseSelection {
+  const next = setExampleRelation(prev, which, "example");
+  delete next[EXAMPLES_KEY(which)];
+  return next;
+}
+
+// Set how a noun block's examples relate to it: *such as* (`example`, the default, left unstored)
+// or *including* (`inclusion`).
+export function setExampleRelation(prev: PhraseSelection, which: NounKey, relation: "example" | "inclusion"): PhraseSelection {
+  if (relation === "inclusion") return { ...prev, exampleRelations: { ...prev.exampleRelations, [which]: "inclusion" } };
+  if (!prev.exampleRelations?.[which]) return { ...prev };
+  const { [which]: _dropped, ...rest } = prev.exampleRelations;
+  const next: PhraseSelection = { ...prev, exampleRelations: rest };
+  if (Object.keys(rest).length === 0) delete next.exampleRelations;
+  return next;
+}
+
+// Flip such as ⇄ including — what the chip on the examples line does.
+export function toggleExampleRelation(prev: PhraseSelection, which: NounKey): PhraseSelection {
+  return setExampleRelation(prev, which, prev.exampleRelations?.[which] ? "example" : "inclusion");
+}
+
 // The antecedent a noun block's pronominal possessor points at, if any ("the boy and *his* horse").
 export function possessorRefOf(prev: PhraseSelection, which: NounKey): NounAddress | undefined {
   return prev[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
@@ -999,6 +1043,10 @@ export function nounSliceAt(
       const child = slice[STANDARD_KEY(which)] as PhraseSelection | undefined;
       if (!child) return undefined;
       slice = child;
+    } else if (steps[i] === "examples") {
+      const child = slice[EXAMPLES_KEY(which)] as PhraseSelection | undefined;
+      if (!child) return undefined;
+      slice = child;
     } else {
       return undefined;
     }
@@ -1025,6 +1073,8 @@ export function updateNounAt(
       return updateConjunct(slice, which, Number(steps[i + 1]), (child) => walk(child, "subject", i + 2));
     if (steps[i] === "standard")
       return updateStandard(slice, which, (child) => walk(child, "subject", i + 1));
+    if (steps[i] === "examples")
+      return updateExamples(slice, which, (child) => walk(child, "subject", i + 1));
     return slice;
   };
   return walk(root, base as NounKey, 0);

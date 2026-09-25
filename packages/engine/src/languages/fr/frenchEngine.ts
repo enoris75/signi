@@ -7,7 +7,7 @@ import { elidesBefore } from './elidesBefore.js';
 import { estCeQue } from './estCeQue.js';
 import { frontQuestion } from './frontQuestion.js';
 import { questionWord } from './questionWord.js';
-import { COORD_WORDS, FR_DEGREE } from './fr.consts.js';
+import { COORD_WORDS, FR_DEGREE, FR_EXAMPLES } from './fr.consts.js';
 import { FR_TEMPORAL } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
@@ -125,5 +125,9 @@ export const frenchEngine: LanguageEngine = {
     // gender a citation form is given in (as `renderPossessive` defaults).
     const word = FR_DEGREE[degree];
     return word && (degree === 'most' || degree === 'least') ? `le ${word}` : word;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return FR_EXAMPLES[relation];
   },
 };

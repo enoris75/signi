@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
+import { JA_EXAMPLES } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -12,6 +13,6 @@ export function jaExampleSegs(np: ResolvedNounPhrase): RubySegment[] {
   const ex = np.examples;
   if (!ex) return [];
   return ex.relation === 'example'
-    ? [...elSegs(ex.phrase), { t: 'のような' }]
+    ? [...elSegs(ex.phrase), { t: JA_EXAMPLES.example }]
     : [...elSegs(ex.phrase), { t: 'を' }, wordSeg('含む', 'ふくむ')];
 }

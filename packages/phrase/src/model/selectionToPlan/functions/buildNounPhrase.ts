@@ -3,6 +3,7 @@ import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   STANDARD_KEY,
+  EXAMPLES_KEY,
   type NounAddress,
   type NounKey,
   type PhraseSelection,
@@ -63,6 +64,8 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     possessor,
     // A demonstrative pointing away from the rest (P13).
     contrastive: sel.contrastives?.[which] || undefined,
+    // The members of its set it names after it ("animals such as the cat", P09-E48): a noun head's.
+    examples: concept.role === "noun" ? examplesOf(sel, which, root) : undefined,
     // A cardinal numeral counting it (P13).
     numeral: sel.numerals?.[which],
     // What a genitive possessor is to the head (P13): an owner unless the noun says otherwise.
@@ -73,6 +76,12 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
 function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
   const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
   return standard ? buildNounElement(standard, "subject", root) : undefined;
+}
+
+function examplesOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection): NounPhrase["examples"] {
+  const slice = field<PhraseSelection>(sel, EXAMPLES_KEY(which));
+  const phrase = slice ? buildNounElement(slice, "subject", root) : undefined;
+  return phrase && { phrase, relation: sel.exampleRelations?.[which] ?? "example" };
 }
 
 function adjectiveStandardsOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {

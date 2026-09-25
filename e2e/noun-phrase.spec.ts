@@ -215,4 +215,63 @@ test.describe('noun phrase', () => {
     await app.expectSentences({ en: 'the cat and the fox run.' });
     await expect(page.getByRole('button', { name: /^and$/i })).toHaveCount(1);
   });
+
+  // P09-E48: a noun's examples, on a hosted ring whose line carries the relation's chip.
+  test('names a set’s members: such as and including, in all seven languages', async ({ app, page }) => {
+    await app.buildClause('ANIMAL', 'RUN');
+    await app.satellite('subjectNumber').click();
+    await app.expectSentences({ en: 'the animals run.' });
+    const rects = () =>
+      page.getByTestId('group-box').evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { group: (el as HTMLElement).dataset['group'], x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+        }),
+      );
+    const before = await rects();
+
+    await app.satellite('subjectExamples').click();
+    const examples = page.getByTestId('box-subject').nth(1);
+    await examples.locator('input').fill('cat');
+    await page.locator('[data-testid="typeahead-option"][data-concept="CAT"]').click();
+    await app.expectSentences({ en: 'the animals such as the cat run.' });
+    const after = await rects();
+    // The period's own rings keep their places relative to one another; the examples' ring is one more.
+    const fromSubject = (all: typeof before) => {
+      const origin = all.find((r) => r.group === 'Subject')!;
+      return all.map((r) => ({ ...r, x: r.x - origin.x, y: r.y - origin.y }));
+    };
+    for (const ring of fromSubject(before)) expect(fromSubject(after)).toContainEqual(ring);
+    expect(after).toHaveLength(before.length + 1);
+
+    // The chip on the line says the relation, and a click flips it.
+    const chip = page.getByTestId('examples-chip');
+    await expect(chip).toHaveText(/such as/i);
+    await chip.click();
+    await expect(chip).toHaveText(/including/i);
+    await app.expectSentences({
+      en: 'the animals, including the cat, run.',
+      it: 'gli animali, compreso il gatto, corrono.',
+      fr: 'les animaux, y compris le chat, courent.',
+      de: 'die Tiere, einschließlich des Katers, laufen.',
+      es: 'los animales, incluido el gato, corren.',
+      pt: 'os animais, incluindo o gato, correm.',
+      ja: '猫を含む動物は走ります。',
+    });
+
+    await chip.click();
+    // The period's own subject's determiner: the examples' ring has a subject box of its own.
+    await page.getByTestId('satellite-subjectDefiniteness').first().click();
+    await page.getByTestId('box-subjectDefiniteness').first().click();
+    await page.getByRole('menuitem', { name: /^Zero/ }).click();
+    await app.expectSentences({
+      en: 'animals such as the cat run.',
+      it: 'animali come il gatto corrono.',
+      fr: 'animaux comme le chat courent.',
+      de: 'Tiere wie der Kater laufen.',
+      es: 'animales como el gato corren.',
+      pt: 'animais como o gato correm.',
+      ja: '猫のような動物は走ります。',
+    });
+  });
 });

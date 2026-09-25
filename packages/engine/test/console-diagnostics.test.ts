@@ -377,6 +377,11 @@ describe('the diagnostics, as the catalogue plans them', () => {
       de: 'Kein Adjektiv hat eine Vergleichsgröße', es: 'Ningún adjetivo tiene un término de comparación', pt: 'Nenhum adjetivo tem um termo de comparação',
       ja: 'どの形容詞も比較の基準がありません',
     },
+    // `/del eg` with nothing to take off (P09-E48).
+    'diagnostic.noNounHasExamples': {
+      en: 'No noun has examples', it: 'Nessun sostantivo ha esempi', fr: "Aucun nom n'a d'exemples", de: 'Kein Substantiv hat Beispiele',
+      es: 'Ningún sustantivo tiene ejemplos', pt: 'Nenhum substantivo tem exemplos', ja: 'どの名詞も例がありません',
+    },
     'diagnostic.noNounHasRelative': {
       en: 'No noun has a relative clause', it: 'Nessun sostantivo ha una proposizione relativa', fr: "Aucun nom n'a de proposition relative", de: 'Kein Substantiv hat einen Relativsatz',
       es: 'Ningún sustantivo tiene una oración de relativo', pt: 'Nenhum substantivo tem uma oração relativa', ja: 'どの名詞も関係節がありません',

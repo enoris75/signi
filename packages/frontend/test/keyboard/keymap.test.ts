@@ -56,6 +56,8 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     cycleVoice: () => {},
     cycleDegree: () => {},
     toggleStandard: () => {},
+    toggleExamples: () => {},
+    toggleExampleRelation: () => {},
     cycleModifierRelation: () => {},
     cycleModifierNumber: () => {},
     openModifierAdjective: () => {},
@@ -225,6 +227,23 @@ describe('resolving a keystroke', () => {
     expect(commandFor('h', predicative)).toBe('predicative.standard');
     expect(commandFor('h', { ...predicative, satellite: () => undefined })).toBeUndefined();
     expect(commandFor('h', { slot: 'subjectAdjective', selection: { subjectAdjective: big } as PhraseSelection })).toBeUndefined();
+  });
+
+  // P09-E48: X opens a noun's examples, ⇧X flips their relation once they hold a word.
+  it('opens a noun’s examples with X, and flips their relation with Shift+X', () => {
+    const subject = { slot: 'subject' as const, nounKey: 'subject' as const, selection: { subject: noun('ANIMAL') } as PhraseSelection };
+    expect(commandFor('x', subject)).toBe('noun.examples');
+    expect(commandFor('x', { ...subject, satellite: () => undefined })).toBeUndefined();
+    const shiftX = (over: Partial<BoxKeyContext>) =>
+      resolveCommand(
+        KEYMAP,
+        boxScopeChain('noun'),
+        (spec) => matchesKeySpec(spec, { key: 'X', shiftKey: true, ctrlKey: false, metaKey: false, altKey: false }, 'other'),
+        ctx(over),
+      )?.id;
+    expect(shiftX(subject)).toBeUndefined();
+    const named = { ...subject, selection: { subject: noun('ANIMAL'), subjectExamples: { subject: noun('CAT') } } as PhraseSelection };
+    expect(shiftX(named)).toBe('noun.examples.relation');
   });
 
   // P09-E50: H means "standard" on a noun box too, for its compared adjective.

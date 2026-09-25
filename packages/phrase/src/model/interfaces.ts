@@ -530,6 +530,26 @@ export interface PhraseSelection {
     mannerStandard?: PhraseSelection;
     objectPredicativeStandard?: PhraseSelection;
     comitativeStandard?: PhraseSelection;
+    // The members of a noun's set it names after it ("animals *such as the cat*", P09-E48,
+    // NounPhrase.examples): a nested noun phrase whose head is its `subject`, the possessor's shape,
+    // one per noun block. Which relation it is sits in `exampleRelations`.
+    subjectExamples?: PhraseSelection;
+    directObjectExamples?: PhraseSelection;
+    predicativeExamples?: PhraseSelection;
+    locativeExamples?: PhraseSelection;
+    directionExamples?: PhraseSelection;
+    sourceExamples?: PhraseSelection;
+    routeExamples?: PhraseSelection;
+    temporalExamples?: PhraseSelection;
+    purposeExamples?: PhraseSelection;
+    topicExamples?: PhraseSelection;
+    causeExamples?: PhraseSelection;
+    terminusExamples?: PhraseSelection;
+    mannerExamples?: PhraseSelection;
+    objectPredicativeExamples?: PhraseSelection;
+    comitativeExamples?: PhraseSelection;
+    // The relation of each noun block's examples: *including*, or — absent — *such as* (P09-E48).
+    exampleRelations?: Partial<Record<string, "inclusion">>;
     // Relative clauses are no longer stored inside a selection: a noun's relative clause
     // is a *separate* phrase container linked to it (see PhraseLink / PhraseWorkspace).
     // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
@@ -651,6 +671,10 @@ export const possessorAddress = (base: NounAddress): NounAddress => `${base}/pos
 // attributive adjective's (`directObject/standard`, P09-E50).
 export const standardAddress = (base: NounAddress): NounAddress => `${base}/standard`;
 
+// Append an `/examples` step — the address of the head of that noun's examples ("animals such as
+// **the cat**", P09-E48).
+export const examplesAddress = (base: NounAddress): NounAddress => `${base}/examples`;
+
 // Append a `/conjunct/<i>` step — the address of the i-th *extra* conjunct of that noun.
 export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
   `${base}/conjunct/${i}`;
@@ -674,6 +698,9 @@ export const POSSESSOR_REF_KEY = (which: NounKey) =>
 
 export const STANDARD_KEY = (which: NounKey) =>
   `${which}Standard` as keyof PhraseSelection;
+
+export const EXAMPLES_KEY = (which: NounKey) =>
+  `${which}Examples` as keyof PhraseSelection;
 
 export const CONJUNCTS_KEY = (which: NounKey) =>
   `${which}Conjuncts` as keyof PhraseSelection;

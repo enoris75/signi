@@ -458,4 +458,19 @@ test.describe('the phrase console', () => {
     await run(page);
     await app.expectSentences({ en: 'the cat is biggest.' });
   });
+
+  // P09-E48 D4: a noun's examples are `/suchas` or `/including`, and `/del eg` takes them off.
+  test('names a set’s members with /suchas, and takes them off with /del eg', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj ( animal /pl /zero /suchas [ cat ] ) /verb ( run )');
+    await run(page);
+    await app.expectSentences({ en: 'animals such as the cat run.', it: 'animali come il gatto corrono.', ja: '猫のような動物は走ります。' });
+    await expect(page.getByTestId('examples-chip')).toHaveText(/such as/i);
+
+    // The console's context has moved on to the verb: /subj goes back to the noun whose examples go.
+    await page.keyboard.insertText('/subj /del eg');
+    await run(page);
+    await app.expectSentences({ en: 'animals run.' });
+    await expect(page.getByTestId('examples-chip')).toHaveCount(0);
+  });
 });

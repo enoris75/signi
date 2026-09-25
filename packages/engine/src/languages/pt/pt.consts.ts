@@ -256,3 +256,9 @@ export const PT_TEMPORAL: Record<Exclude<TemporalRelation, 'at'>, { word: string
   // with the definite article, through `porPrep` ("pela hora").
   for: { word: 'por', por: true },
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them.
+ */
+export const PT_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'como', inclusion: 'incluindo' };
