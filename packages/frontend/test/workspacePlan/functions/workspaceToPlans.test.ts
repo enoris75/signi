@@ -295,6 +295,16 @@ describe('the vocative', () => {
     expect(plan.address).toEqual({ conjunction: 'and', conjuncts: [expect.objectContaining({ concept: 'MOM' }), expect.objectContaining({ concept: 'DAD' })] });
   });
 
+  // P11-E9 × E8: "my wife, run" — the address's owner is a pronoun, written as one, and a pointer
+  // from it at the subject stays a copy: the address is outside every clause (P11-E7's gate).
+  it('takes a pronoun owner, "my wife, run", and keeps a pointer at the subject a copy', () => {
+    const WIFE = { id: 'WIFE', role: 'noun' as const, description: 'wife', label: 'wife', animate: true, human: true };
+    const [{ plan }] = workspaceToPlans([period('p', { vocative: WIFE, vocativePossessor: { subject: ME }, verb: RUN, imperative: true })], []);
+    expect(plan.address).toEqual(expect.objectContaining({ concept: 'WIFE', possessor: expect.objectContaining({ kind: 'pronominal', person: '1', number: 'singular' }) }));
+    const [{ plan: pointed }] = workspaceToPlans([period('p', { vocative: WIFE, vocativePossessorRef: 'subject', subject: CAT, verb: RUN })], []);
+    expect(JSON.stringify(pointed.address)).not.toContain('coreferent');
+  });
+
   it.each<[string, PhraseLink]>([
     ['a coordination’s second clause', coordinative('l', 'main', 'voc')],
     ['a condition', conditional('l', 'main', 'voc')],
