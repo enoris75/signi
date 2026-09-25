@@ -155,6 +155,13 @@ describe('applyConceptSelect', () => {
 });
 
 describe('applyClear', () => {
+  // Each adverb's reveal control rides the adverb before it (P15), as the adjectives' do.
+  it('takes the adverbs chained after a cleared one, and leaves those before it', () => {
+    const prev: PhraseSelection = { verb: SEE, modifier: NEVER, modifier2: WANT, modifier3: SEE };
+    expect(applyClear(prev, 'modifier2')).toEqual({ verb: SEE, modifier: NEVER });
+    expect(applyClear(prev, 'modifier')).toEqual({ verb: SEE });
+  });
+
   // A modal's polarity control rides the modal's box, so it cannot outlive the word it denied.
   it('takes a modal’s own adverb and polarity with the modal', () => {
     const prev: PhraseSelection = {

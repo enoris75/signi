@@ -98,7 +98,7 @@ import {
   updateExamples,
 } from "../model/phraseReducers.ts";
 import { pointerHolds } from "../model/functions/linksToSubject.ts";
-import { adjectiveSlots, MODAL_SLOTS, offeredComplements } from "../model/slots.ts";
+import { ADVERB_SLOTS, adjectiveSlots, MODAL_SLOTS, modalAdverbFor, offeredComplements } from "../model/slots.ts";
 import { nextActiveSlot } from "../model/functions/nextActiveSlot.ts";
 import { visibleSlotsFor } from "../model/functions/visibleSlots.ts";
 import {
@@ -1096,12 +1096,18 @@ class Run {
         return;
       }
       case "adv": {
-        const w = closest((x) => {
-          const slot = adverbTarget(x);
-          return Boolean(slot && x.root[slot]);
-        });
+        // The verb's adverbs are a chain (P15): the last goes, or the nth, as with `/del adj`. A
+        // modal's is its one.
+        const own = (x: WordInfo): SlotKey[] =>
+          x.ref.slice ? []
+          : x.kind === "verb" ? ADVERB_SLOTS.filter((key) => x.root[key])
+          : x.kind === "modal" && x.concept ? [modalAdverbFor(x.ref.slot)!].filter((key) => x.root[key])
+          : [];
+        const w = closest((x) => own(x).length > 0);
         if (!w) fail(span, coded("noAdverbToRemove"));
-        this.updateRoot(containerId, (s) => applyClear(s, adverbTarget(w!)!));
+        const key = index === undefined || w!.kind !== "verb" ? own(w!).at(-1) : ADVERB_SLOTS[index - 1];
+        if (!key || !w!.root[key]) fail(span, coded("noAdverbToRemove"));
+        this.updateRoot(containerId, (s) => applyClear(s, key!));
         this.touch(w!.ref);
         return;
       }

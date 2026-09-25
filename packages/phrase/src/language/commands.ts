@@ -491,7 +491,7 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "info",
     arg: { kind: "word" },
     action: { kind: "adverb" },
-    satellites: /^(modifier|verbModal2?Adverb)$/,
+    satellites: /^(modifier[23]?|verbModal2?Adverb)$/,
     reducers: ["applyConceptSelect"],
   },
   {

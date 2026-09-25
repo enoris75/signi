@@ -7,6 +7,7 @@ import {
   ALL_SLOTS,
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
+  ADVERB_SLOTS,
   MODAL_ADVERB_SLOTS,
   MODAL_SLOTS,
   MUI_COLOR_HEX,
@@ -158,7 +159,7 @@ export function roleGroups({
             mainKey: "verb",
             nodeKeys: [
               "verb",
-              ...shown([...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect", "modifier"]),
+              ...shown([...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect", ...ADVERB_SLOTS]),
             ],
           },
         ]),

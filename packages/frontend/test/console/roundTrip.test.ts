@@ -37,7 +37,7 @@ import { approximatorFor } from '../../src/components/PhraseBuilder/functions/ap
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
 import { canAsk, canBeExistential, canBeHumble, hasQuestionAnimacy } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
-import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
+import { ADVERB_SLOTS, adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
 import { printWorkspace } from '../../src/console/language/print.ts';
@@ -275,7 +275,8 @@ const OPS: Op[] = [
       return R.cycleVoice(sel);
     }
     if (r < 0.75) return R.toggleNegative(sel);
-    return R.applyConceptSelect(sel, 'modifier', pick(rng, ADVERBS)!);
+    // The next free adverb of the chain (P15), or the first again once all three hold one.
+    return R.applyConceptSelect(sel, ADVERB_SLOTS.find((k) => !sel[k]) ?? 'modifier', pick(rng, ADVERBS)!);
   }),
   // Modals and their adverbs.
   onPeriod((sel, rng) => {

@@ -154,9 +154,24 @@ describe('buildRingSpecs', () => {
     expect(result[VERB_PHRASE].satellites).toEqual([
       { key: 'verbTense', home: 11 },
       { key: 'verbAspect', home: 1 },
-      { key: 'modifier', home: 4.5 },
     ]);
+    // The adverb is the first link of the verb's second chain (P15), at its own hour.
+    expect(result[VERB_PHRASE].chains).toContainEqual({ home: 4.5, dir: 1, discs: ['modifier'] });
     expect(result.Subject.satellites).toEqual([{ key: 'subjectDefiniteness', home: 6 }]);
+  });
+
+  it("chains the verb's adverbs beside its modals, each next one's control in the gap after the last (P15)", () => {
+    const result = specs(groups(['verbModal', 'modifier', 'modifier2']), {
+      satelliteIconsByParent: { modifier: [icon('modifier2')], modifier2: [icon('modifier3')] },
+    })[VERB_PHRASE];
+    expect(result.chains).toEqual([
+      { home: 8.5, dir: -1, discs: ['verbModal'] },
+      { home: 4.5, dir: 1, discs: ['modifier', 'modifier2'] },
+    ]);
+    expect(result.gaps).toEqual([
+      { key: 'modifier2', after: 'modifier' },
+      { key: 'modifier3', after: 'modifier2' },
+    ]);
   });
 
   it("puts a noun phrase's links on its dotted ring: collapse, the relations fanned along the bottom, the incoming dot at the top", () => {

@@ -134,6 +134,22 @@ const MODAL_SLOT_SET = new Set<SlotKey>(MODAL_SLOTS);
 
 export const isModalSlot = (key: string): boolean => MODAL_SLOT_SET.has(key as SlotKey);
 
+// The main verb chains up to three adverbs (P15), revealed one at a time like the adjectives: the
+// verb box carries the control for the first, and each adverb's box the control for the next, so
+// `modifier2` only exists once `modifier` holds a word. The engine places each by its class.
+export const ADVERB_SLOTS: SlotKey[] = ["modifier", "modifier2", "modifier3"];
+
+const ADVERB_SLOT_SET = new Set<SlotKey>(ADVERB_SLOTS);
+
+/** Whether `key` is one of the main verb's adverb slots (not a modal's). */
+export const isVerbAdverbSlot = (key: string): boolean => ADVERB_SLOT_SET.has(key as SlotKey);
+
+/** The box an adverb's reveal control rides: the previous adverb, or undefined for the first. */
+export const adverbChainParent = (key: string): SlotKey | undefined => {
+  const idx = ADVERB_SLOTS.indexOf(key as SlotKey);
+  return idx > 0 ? ADVERB_SLOTS[idx - 1] : undefined;
+};
+
 // Each modal may carry its own adverb — the adverb slot paired to MODAL_SLOTS by index, so
 // `verbModalAdverb` scopes `verbModal` and `verbModal2Adverb` scopes `verbModal2`. They mirror the
 // main verb's `modifier`, and each is revealed from a control on its modal's box once it holds a word.
@@ -395,14 +411,16 @@ export const ALL_SLOTS: SlotConfig[] = [
     roles: ["adjective"],
     color: "success",
   },
-  {
-    key: "modifier",
-    label: "Adverb",
-    labelKey: "slot.adverb",
-    required: false,
-    roles: ["adverb"],
-    color: "info",
-  },
+  ...ADVERB_SLOTS.map(
+    (key, i): SlotConfig => ({
+      key,
+      label: i === 0 ? "Adverb" : `Adverb ${i + 1}`,
+      labelKey: "slot.adverb",
+      required: false,
+      roles: ["adverb"],
+      color: "info",
+    }),
+  ),
   // Motion/locative complements — noun slots gated by the verb's `complements`,
   // each with its own pair of chained adjective slots.
   ...BOX_COMPLEMENT_TYPES.flatMap(
@@ -458,7 +476,7 @@ export const COMPLEMENT_ADJECTIVE_TYPE: Partial<Record<SlotKey, ComplementType>>
 
 export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   ...adjectiveSlots("subject"),
-  "modifier",
+  ...ADVERB_SLOTS,
   ...MODAL_SLOTS,
   ...MODAL_ADVERB_SLOTS,
   ...adjectiveSlots("directObject"),
@@ -498,7 +516,7 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Verb Phrase",
     mainKey: "verb",
-    childKeys: ["modifier", ...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect"],
+    childKeys: [...ADVERB_SLOTS, ...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect"],
   },
   {
     label: "Direct Object",

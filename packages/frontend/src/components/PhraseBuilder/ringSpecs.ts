@@ -16,6 +16,7 @@ import type { SatelliteIcon } from "./Boxes.tsx";
 import type { PerimeterEntry } from "./satellites/index.ts";
 import type { OrbitChain, Pt, RingAim, RingControl, RingSpec } from "./ringLayout.ts";
 import {
+  ADVERB_SLOTS,
   adjectiveSlots,
   MODAL_ADVERB_SLOTS,
   MODAL_SLOTS,
@@ -112,12 +113,18 @@ export const portKey = (label: string, toward: string) => `port:${label}>${towar
 // "must probably be able to…".
 export const MODAL_CHAIN: string[] = MODAL_SLOTS.flatMap((modal, i) => [modal, MODAL_ADVERB_SLOTS[i]]);
 
-/** The chain a constituent's satellites grow along, in full chain order. */
-function chainFor(group: GroupDef): Omit<OrbitChain, "discs"> & { full: string[] } | null {
-  if (group.mainKey === "verb") return { full: MODAL_CHAIN, home: HOME.modal, dir: -1 };
+type Chain = Omit<OrbitChain, "discs"> & { full: string[] };
+
+/**
+ * The chains a constituent's satellites grow along, each in full chain order. The verb has two: its
+ * modals, and its adverbs (P15), which grow clockwise from the adverb's hour, away from the modals.
+ */
+function chainsFor(group: GroupDef): Chain[] {
+  if (group.mainKey === "verb")
+    return [{ full: MODAL_CHAIN, home: HOME.modal, dir: -1 }, { full: ADVERB_SLOTS, home: HOME.adverb, dir: 1 }];
   if (NOUN_KEYS.includes(group.mainKey as NounKey))
-    return { full: adjectiveSlots(group.mainKey as NounKey), home: HOME.adjective, dir: 1 };
-  return null;
+    return [{ full: adjectiveSlots(group.mainKey as NounKey), home: HOME.adjective, dir: 1 }];
+  return [];
 }
 
 /** Where a satellite outside any chain orbits, by its key. */
@@ -126,13 +133,13 @@ function satelliteHome(key: string): number | undefined {
   if (key === "verbTense") return HOME.tense;
   if (key === "verbAspect") return HOME.aspect;
   if (key === "verbVoice") return HOME.voice;
-  if (key === "modifier") return HOME.adverb;
   return undefined;
 }
 
 /** Which way a control on the solid ring faces. */
-function innerAim(key: string, chain: ReturnType<typeof chainFor>): RingAim {
-  if (chain && chain.full[0] === key) return { disc: key, home: chain.home };
+function innerAim(key: string, chains: Chain[]): RingAim {
+  const chain = chains.find((c) => c.full[0] === key);
+  if (chain) return { disc: key, home: chain.home };
   const home = satelliteHome(key);
   if (home !== undefined) return { disc: key, home };
   if (key.endsWith("Number")) return { clock: NUMBER_HOUR };
@@ -196,7 +203,7 @@ export function buildRingSpecs({
   for (const group of groups) {
     const { mainKey, label, nodeKeys } = group;
     const shown = new Set(nodeKeys.filter((k) => k !== mainKey));
-    const chain = chainFor(group);
+    const chains = chainsFor(group);
     const inner: RingControl[] = [];
     const outer: RingControl[] = [];
     const spec: RingSpec = { satellites: [], chains: [], inner, gaps: [], outer };
@@ -207,10 +214,10 @@ export function buildRingSpecs({
 
     // ── Orbit ──
     for (const key of shown) {
-      if (chain?.full.includes(key)) continue;
+      if (chains.some((chain) => chain.full.includes(key))) continue;
       spec.satellites.push({ key, home: satelliteHome(key) ?? HOME.adverb });
     }
-    if (chain) {
+    for (const chain of chains) {
       const discs = chain.full.filter((k) => shown.has(k));
       if (discs.length > 0) spec.chains.push({ home: chain.home, dir: chain.dir, discs });
       // The control for a chain member rides the gap where its disc sits (or would): right after
@@ -235,7 +242,7 @@ export function buildRingSpecs({
 
     // ── Solid ring ──
     for (const icon of satelliteIconsByParent[mainKey] ?? []) {
-      inner.push({ key: icon.key, aim: innerAim(icon.key, chain) });
+      inner.push({ key: icon.key, aim: innerAim(icon.key, chains) });
     }
 
     // ── Dotted ring ──

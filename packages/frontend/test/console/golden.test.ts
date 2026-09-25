@@ -527,6 +527,33 @@ describe('/humble and the plan', () => {
   });
 });
 
+// P15: the verb chains three adverbs, and /adv fills the next free one rather than replacing the first.
+describe('several adverbs', () => {
+  const ids3 = (state: WorkspaceState) => [sel(state).modifier?.id, sel(state).modifier2?.id, sel(state).modifier3?.id];
+
+  it('fills the chain in order, prints each, and reaches the plan', () => {
+    const state = ok('/verb eat /adv always /adv fast /adv never');
+    expect(ids3(state)).toEqual(['ALWAYS', 'FAST', 'NEVER']);
+    expect(print(state)).toBe('/verb ( eat /adv always /adv fast /adv never )');
+    expect(selectionToPlan(sel(state)).verbPhrase).toMatchObject({ modifier: 'ALWAYS', modifiers: ['FAST', 'NEVER'] });
+  });
+
+  it('refuses a fourth', () => {
+    expect(run('/verb eat /adv always /adv fast /adv never /adv fast').diagnostic?.code).toBe('noTarget');
+  });
+
+  it('takes the last back with /del adv, or the nth and those after it with an index', () => {
+    expect(ids3(ok('/verb eat /adv always /adv fast /adv never /del adv'))).toEqual(['ALWAYS', 'FAST', undefined]);
+    expect(ids3(ok('/verb eat /adv always /adv fast /adv never /del adv 2'))).toEqual(['ALWAYS', undefined, undefined]);
+  });
+
+  it('keeps a modal’s own adverb its one', () => {
+    const state = ok('/verb eat /adv fast /modal can /adv always');
+    expect(sel(state).verbModalAdverb?.id).toBe('ALWAYS');
+    expect(ids3(state)).toEqual(['FAST', undefined, undefined]);
+  });
+});
+
 // P09-E49: the other reading of /approx, and /del approx.
 describe('/approx on a determiner', () => {
   it('says almost on all, and /del approx takes it back', () => {

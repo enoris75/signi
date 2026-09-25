@@ -220,6 +220,8 @@ export interface SlotConfig {
     "verbModal2Adverb" |
     "directObject" |
     "modifier" |
+    "modifier2" |
+    "modifier3" |
     "subjectAdjective" |
     "subjectAdjective2" |
     "subjectAdjective3" |
@@ -398,6 +400,11 @@ export interface PhraseSelection {
     verbModal2Negative?: boolean;
     directObject?: Concept;
     modifier?: Concept;
+    // The main verb chains up to three adverbs (P15), each revealed from a control on the previous
+    // adverb's box, as the adjectives chain: "often runs fast here" is `modifier` = OFTEN,
+    // `modifier2` = FAST, `modifier3` = HERE.
+    modifier2?: Concept;
+    modifier3?: Concept;
     // Each noun block chains up to three adjectives; each one is revealed from a control
     // on the previous adjective's box, so `Adjective2` only exists once `Adjective` is set.
     subjectAdjective?: Concept;

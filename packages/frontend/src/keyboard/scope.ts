@@ -12,6 +12,7 @@ import type { NounKey, PhraseSelection, SlotKey } from "../components/PhraseBuil
 import {
   COMPLEMENT_KEY_SET,
   isModalAdverbSlot,
+  isVerbAdverbSlot,
   isModalSlot,
   NOUN_KEYS,
 } from "../components/PhraseBuilder/slots.ts";
@@ -85,7 +86,7 @@ export function boxScopesOf(slot: SlotKey, selection: PhraseSelection): Scope[] 
   if (slot === "verb" || isModalSlot(slot)) return boxScopeChain("verb");
   // An adverb is a word with no grammar of its own: it moves and is chosen like any box, and
   // there is nothing on it to cycle.
-  if (slot === "modifier" || isModalAdverbSlot(slot)) return boxScopeChain(null);
+  if (isVerbAdverbSlot(slot) || isModalAdverbSlot(slot)) return boxScopeChain(null);
   if (isAdjectiveSlot(slot)) return boxScopeChain("adjective");
   const held = selection[slot] as Concept | undefined;
   const noun = Boolean(nounKeyOf(slot));

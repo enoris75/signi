@@ -51,6 +51,7 @@ import {
   COMPLEMENT_KEY_SET,
   defaultPredication,
   getActiveSlots,
+  ADVERB_SLOTS,
   modalAdverbFor,
   modalNegativeFor,
   MODAL_SLOTS,
@@ -193,6 +194,14 @@ function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
     const negKey = modalNegativeFor(key);
     if (negKey) delete sel[negKey as keyof PhraseSelection];
   }
+}
+
+// Drop the adverbs chained after `slot` (P15) — as with the adjectives, the control that revealed
+// each later one rides the box before it.
+function clearChainedAdverbs(sel: PhraseSelection, slot: SlotKey): void {
+  const idx = ADVERB_SLOTS.indexOf(slot);
+  if (idx === -1) return;
+  for (const key of ADVERB_SLOTS.slice(idx + 1)) delete sel[key as keyof PhraseSelection];
 }
 
 // The gender a gendered noun keeps from the word it replaces. A noun is masculine or feminine; the
@@ -339,6 +348,7 @@ export function applyClear(
   // ride the box that just went away. Modals chain off the verb the same way.
   for (const which of NOUN_KEYS) clearChainedAdjectives(next, which, slot);
   clearChainedModals(next, slot);
+  clearChainedAdverbs(next, slot);
   return next;
 }
 

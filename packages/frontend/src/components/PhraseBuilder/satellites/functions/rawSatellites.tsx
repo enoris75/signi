@@ -630,6 +630,28 @@ export function rawSatellites(
       hasValue: Boolean(selection.modifier),
       valueLabel: label(selection.modifier),
     },
+    // The verb's further adverbs (P15), each revealed from the previous adverb's box once it holds a
+    // word, as a noun's adjectives chain: "often runs fast here".
+    {
+      key: "modifier2",
+      parent: "modifier",
+      label: t("slot.adverb"),
+      labelKey: "slot.adverb",
+      icon: <TuneIcon sx={iconSx} />,
+      available: Boolean(selection.modifier),
+      hasValue: Boolean(selection.modifier2),
+      valueLabel: label(selection.modifier2),
+    },
+    {
+      key: "modifier3",
+      parent: "modifier2",
+      label: t("slot.adverb"),
+      labelKey: "slot.adverb",
+      icon: <TuneIcon sx={iconSx} />,
+      available: Boolean(selection.modifier2),
+      hasValue: Boolean(selection.modifier3),
+      valueLabel: label(selection.modifier3),
+    },
     // The direct object's own control. It rides the verb-phrase dotted ring, like the complement
     // toggles, and anchors the connector that runs from there to the object's dotted ring — which
     // otherwise starts nowhere. Unlike a complement it is shown by default: a transitive verb

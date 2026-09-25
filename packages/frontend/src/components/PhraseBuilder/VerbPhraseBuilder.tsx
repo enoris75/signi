@@ -20,7 +20,7 @@ import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { toolbarControlKey, VERB_PHRASE } from "./ringSpecs.ts";
 import {
-  defaultPredication, isModalAdverbSlot, isModalSlot } from "./slots.ts";
+  defaultPredication, isModalAdverbSlot, isModalSlot, isVerbAdverbSlot } from "./slots.ts";
 import { activatable } from "../../keyboard/activate.ts";
 import { ComplementMenu } from "./ComplementMenu.tsx";
 import { hasRelation } from "./functions/questionGates.ts";
@@ -62,11 +62,11 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
   const disarm = () => onArmToolbar(null);
   const t = useUiString();
 
-  // The verb, its adverb, and its modal chain are all word slots on the verb phrase.
+  // The verb, its adverbs, and its modal chain are all word slots on the verb phrase.
   const verbSlots = renderedSlots.filter(
     (s) =>
       s.key === "verb" ||
-      s.key === "modifier" ||
+      isVerbAdverbSlot(s.key) ||
       isModalSlot(s.key) ||
       isModalAdverbSlot(s.key),
   );

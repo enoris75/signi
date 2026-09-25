@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
 import { ConceptSelectOpts, PhraseSelection, slotCategories, SlotKey } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET, MODAL_ADVERB_SLOTS } from "./slots.ts";
+import { COMPLEMENT_KEY_SET, isVerbAdverbSlot, MODAL_ADVERB_SLOTS } from "./slots.ts";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
@@ -134,8 +134,8 @@ function pickerFor(
             options={slotCategories(slotKey)?.options}
           />
         );
-      // The verb's adverb slot and each modal's own adverb slot — a single-vocabulary adverb picker.
-      if (slotKey === "modifier" || MODAL_ADVERB_SLOTS.includes(slotKey as SlotKey))
+      // The verb's adverb slots and each modal's own adverb slot — a single-vocabulary adverb picker.
+      if (isVerbAdverbSlot(slotKey) || MODAL_ADVERB_SLOTS.includes(slotKey as SlotKey))
         return <AdverbTypeahead onSelect={pick} />;
       // The complements that take a pronoun behind their adposition — the cause, the purpose, the
       // topic, the companion and the opponent: "because of him", "for her", "with her", "against

@@ -50,7 +50,7 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "stan
   if (slot === "vocative") return { roles: ["noun", "pronoun"], pronouns: VOCATIVE_PRONOUNS };
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
-  if (slot === "modifier" || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };
+  if (/^modifier[23]?$/.test(slot) || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };
   if (slot === "directObject" || slot === "cause" || slot === "purpose" || slot === "topic" || slot === "comitative" || slot === "opponent")
     return { roles: ["noun", "pronoun"] };
   if (slot === "predicative") return { roles: ["noun", "adjective"] };

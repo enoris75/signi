@@ -44,6 +44,8 @@ import {
   adjectiveSlots,
   COORDINABLE_NOUN_KEYS,
   isModalAdverbSlot,
+  isVerbAdverbSlot,
+  ADVERB_SLOTS,
   isModalSlot,
   modalAdverbFor,
   MODAL_SLOTS,
@@ -119,7 +121,7 @@ export function wordInfo(containers: PhraseContainer[], ref: WordRef): WordInfo 
     return { ref, kind: "adjective", root, slice, concept, which: nounOfAdjective(slot) };
   if (slot === "verb") return { ref, kind: "verb", root, slice, concept };
   if (isModalSlot(slot)) return { ref, kind: "modal", root, slice, concept };
-  if (slot === "modifier" || isModalAdverbSlot(slot)) return { ref, kind: "adverb", root, slice, concept };
+  if (isVerbAdverbSlot(slot) || isModalAdverbSlot(slot)) return { ref, kind: "adverb", root, slice, concept };
   if ((NOUN_KEYS as string[]).includes(slot)) {
     const which = slot as NounKey;
     return { ref, kind: "noun", root, slice, concept, which, address: builderNounAddress(ref.slice, which) };
@@ -143,10 +145,10 @@ export function adjectiveTarget(w: WordInfo): { slot: SlotKey; modifierAdjective
   return undefined;
 }
 
-/** The adverb box `/adv` fills: the verb's own, or a modal's. */
+/** The adverb box `/adv` fills: the verb's next free one (P15), or a modal's. */
 export function adverbTarget(w: WordInfo): SlotKey | undefined {
   if (w.ref.slice) return undefined;
-  if (w.kind === "verb") return "modifier";
+  if (w.kind === "verb") return ADVERB_SLOTS.find((key) => !w.root[key]);
   if (w.kind === "modal" && w.concept) return modalAdverbFor(w.ref.slot);
   return undefined;
 }

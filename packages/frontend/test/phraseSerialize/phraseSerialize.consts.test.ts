@@ -14,6 +14,8 @@ describe('CONCEPT_BASE_KEYS', () => {
         'verb',
         'directObject',
         'modifier',
+        'modifier2',
+        'modifier3',
         'verbModal',
         'verbModal2',
         'verbModalAdverb',

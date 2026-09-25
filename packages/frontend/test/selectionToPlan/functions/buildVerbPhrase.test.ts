@@ -20,6 +20,12 @@ describe('buildVerbPhrase', () => {
     expect(vp).not.toHaveProperty('modals');
   });
 
+  it('carries the further adverbs of the chain as `modifiers` (P15)', () => {
+    expect(buildVerbPhrase({ verb: GO, modifier: ALWAYS, modifier2: QUICKLY, modifier3: NEVER }))
+      .toMatchObject({ modifier: 'ALWAYS', modifiers: ['QUICKLY', 'NEVER'] });
+    expect(buildVerbPhrase({ verb: GO, modifier: ALWAYS })).not.toHaveProperty('modifiers');
+  });
+
   it('chains the modals outermost first, each with its own adverb', () => {
     expect(
       buildVerbPhrase({

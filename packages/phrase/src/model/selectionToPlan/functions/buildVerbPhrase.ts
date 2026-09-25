@@ -1,6 +1,6 @@
 import type { Concept, ModalVerb, VerbPhrase } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
-import { modalAdverbFor, modalNegativeFor, MODAL_SLOTS } from "../../slots.ts";
+import { ADVERB_SLOTS, modalAdverbFor, modalNegativeFor, MODAL_SLOTS } from "../../slots.ts";
 import { field } from "./field.ts";
 import { canBeHumble } from "../../functions/questionGates.ts";
 
@@ -25,6 +25,9 @@ export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
       ...(negative ? { negative } : {}),
     };
   }).filter((m): m is ModalVerb => Boolean(m));
+  const modifiers = ADVERB_SLOTS.slice(1)
+    .map((key) => field<Concept>(sel, key)?.id)
+    .filter((id): id is string => Boolean(id));
   return {
     verb: sel.verb.id,
     // The MAIN VERB's own negation — under a modal this is "to not go", and each modal's own
@@ -34,6 +37,8 @@ export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
     aspect: sel.verbAspect,
     voice: sel.verbVoice,
     modifier: sel.modifier?.id,
+    // The further adverbs of the chain (P15); a hole in it is skipped, as the modals' is.
+    ...(modifiers.length > 0 && { modifiers }),
     ...(modals.length > 0 && { modals }),
     // The humble register reaches the plan only where the engine lowers the verb (P11-E6, see
     // canBeHumble): a flag left on a subject or a verb that no longer takes it stays in the selection.

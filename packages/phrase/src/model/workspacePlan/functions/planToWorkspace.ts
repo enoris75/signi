@@ -20,7 +20,7 @@ import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection
 import { conjunctAddress, examplesAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { comparedAdjectiveIndex } from "../../functions/comparison.ts";
 import { approximatorFor } from "../../functions/approximatorFor.ts";
-import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
+import { ADVERB_SLOTS, adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
  * What `planToWorkspace` built, and what of the plan it could not: each field no canvas control
@@ -71,7 +71,7 @@ const NOUN_FIELDS = new Set([
   "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive", "approximator",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction", "correlative"]);
-const VERB_FIELDS = new Set(["verb", "negative", "humble", "modifier", "tense", "aspect", "voice", "modals"]);
+const VERB_FIELDS = new Set(["verb", "negative", "humble", "modifier", "modifiers", "tense", "aspect", "voice", "modals"]);
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
 const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control", "infinitiveComplement"]);
 const CLAUSE_FIELDS = new Set(["subject", "verbPhrase", "directObject", "complements"]);
@@ -239,7 +239,10 @@ class Builder {
     set(sel, "verbTense", vp.tense);
     set(sel, "verbAspect", vp.aspect);
     set(sel, "verbVoice", vp.voice);
-    if (vp.modifier) set(sel, "modifier", this.concept(vp.modifier));
+    // The adverbs fill the chain in order, `modifier` first (P15).
+    const adverbs = [vp.modifier, ...(vp.modifiers ?? [])].filter((id): id is string => Boolean(id));
+    if (adverbs.length > ADVERB_SLOTS.length) this.unsupported.add(`VerbPhrase.modifiers > ${ADVERB_SLOTS.length - 1}`);
+    adverbs.slice(0, ADVERB_SLOTS.length).forEach((id, i) => set(sel, ADVERB_SLOTS[i]!, this.concept(id)));
     const modals = vp.modals ?? [];
     if (modals.length > MODAL_SLOTS.length) this.unsupported.add(`VerbPhrase.modals > ${MODAL_SLOTS.length}`);
     modals.slice(0, MODAL_SLOTS.length).forEach((m: ModalRef, i) => {

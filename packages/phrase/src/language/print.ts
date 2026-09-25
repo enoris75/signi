@@ -24,7 +24,7 @@ import {
 import { readsAsSet } from "../model/functions/comparison.ts";
 import { conjunctsOf } from "../model/phraseReducers.ts";
 import { pointerHolds } from "../model/functions/linksToSubject.ts";
-import { adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
+import { ADVERB_SLOTS, adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
 import {
   COORD_VALUES,
   LEVEL_VALUES,
@@ -320,7 +320,10 @@ class Printer {
     if (root.verb) this.emit(this.word(root.verb, "verb"), "word", "secondary", { word: verbRef, italic: true });
     // The verb's own adverb and its own settings before any modal: after one, `/adv` and `/not`
     // would be the modal's (both attach to the closest verb or modal).
-    if (root.modifier) this.wordStatement({ containerId: id, slot: "modifier" }, "/adv", "info", root.modifier, verbRef);
+    for (const key of ADVERB_SLOTS) {
+      const adverb = root[key];
+      if (adverb) this.wordStatement({ containerId: id, slot: key }, "/adv", "info", adverb, verbRef);
+    }
     for (const s of settings) this.setting({ id: s, value: currentSetting(s, w) } as Setting, w);
     // The humble register after the polarity (P11-E6), before any modal takes the bracket's words.
     if (root.verbHumble) {

@@ -1,5 +1,5 @@
 import { COMPLEMENT_TYPES } from "@signi/shared";
-import { MODAL_ADVERB_SLOTS, MODAL_SLOTS } from "../slots.ts";
+import { ADVERB_SLOTS, MODAL_ADVERB_SLOTS, MODAL_SLOTS } from "../slots.ts";
 
 // A PhraseSelection embeds whole Concept objects (DB-derived) and nests further
 // selections under its `*Possessor` slots. To persist it we replace every Concept
@@ -14,7 +14,7 @@ export const CONCEPT_BASE_KEYS = new Set<string>([
   "subject",
   "verb",
   "directObject",
-  "modifier",
+  ...ADVERB_SLOTS,
   ...MODAL_SLOTS,
   ...MODAL_ADVERB_SLOTS,
   ...COMPLEMENT_TYPES,
