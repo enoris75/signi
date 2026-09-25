@@ -1396,6 +1396,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( CREATE ) /obj ( FIRE /zero )',
     emoji: '🧨',
     synonym: 'set on fire',
+    glosses: { it: 'dare fuoco' },
     forms: {
       en: {
         base: 'burn',
@@ -1752,6 +1753,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'instrumental', 'cause'],
     description: 'to have or keep in the hand',
     synonym: 'grasp',
+    glosses: { it: 'avere in mano' },
     // "to have an object in the hand" (localization B83): HAVE with the place it is had, on B65's HAND.
     definition: '/inf /verb ( HAVE ) /obj ( OBJECT_THING /a ) /loc ( HAND )',
     emoji: '✊',
@@ -2042,6 +2044,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( CREATE ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🔨',
     synonym: 'create',
+    glosses: { it: 'creare' },
     isA: 'CREATE',
     forms: {
       en: {
@@ -2118,6 +2121,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       /inf /verb ( HAPPEN )
     `,
     synonym: 'perform',
+    glosses: { it: 'compiere' },
     emoji: '✅',
     forms: {
       en: {
@@ -2193,6 +2197,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'cause'],
     description: 'to go on with, without stopping',
     synonym: 'carry on',
+    glosses: { it: 'proseguire' },
     // "still to do an action" (localization B84): KEEP's shape ("still to have objects") on DO.
     definition: '/inf /verb ( DO /adv STILL ) /obj ( ACTION /a )',
     emoji: '▶️',
@@ -2429,6 +2434,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to make an attempt',
     synonym: 'attempt',
+    glosses: { it: 'tentare' },
     emoji: '🎯',
     forms: {
       en: {
@@ -3178,6 +3184,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to continue to have; not to give up',
+    glosses: { it: 'conservare' },
     // "still to have objects" (localization B61): HAVE with STILL, English's frequency adverb before
     // its "to" by design. Its natural gloss, "to continue to have", needs a continuative complement
     // the engine lacks (Spanish continuar takes a gerund).
@@ -3560,6 +3567,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     `,
     emoji: '🧳',
     synonym: 'leave behind',
+    glosses: { it: 'non portare con sé' },
     forms: {
       en: {
         base: 'leave',
@@ -4229,6 +4237,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to experience an emotion or sensation',
+    glosses: { it: 'sentire' },
     // B30, once FEELING was seeded. Plural, because a count noun reads bare only in the plural.
     // Morphologically transparent in de (fühlen / Gefühle) and es/pt (sentir / sentimiento), as
     // BIG's "di grande dimensione" already is in Italian — the gloss still says what FEEL adds to
@@ -4307,6 +4316,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to let flow out; to pour forth',
     emoji: '💦',
     synonym: 'pour out',
+    glosses: { it: 'spargere' },
     forms: {
       en: {
         base: 'shed',
@@ -6543,6 +6553,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to reverse the last change',
+    glosses: { it: 'disfare' },
     definition: '/inf /verb ( CANCEL ) /obj ( ACTION /pl /zero )',
     emoji: '↩️',
     forms: {
@@ -7370,6 +7381,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'direction', 'cause'],
     description: 'to go away from a place',
     synonym: 'exit',
+    glosses: { it: 'andare via' },
     emoji: '🚪',
     forms: {
       en: {
@@ -8171,6 +8183,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to qualify or alter another word',
+    glosses: { it: 'qualificare una parola' },
     definition: '/inf /verb ( CHANGE ) /obj ( QUALITY /pl /zero )',
     emoji: '🔧',
     isA: 'CHANGE',
@@ -8315,6 +8328,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to change a text or a piece of work',
+    glosses: { it: 'rivedere' },
     definition: '/inf /verb ( CHANGE ) /obj ( TEXT /zero )',
     emoji: '✏️',
     isA: 'CHANGE',
@@ -10083,6 +10097,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to allow someone to act',
+    glosses: { it: 'permettere' },
     definition: `
       /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
       /inf /verb ( BE ) /pred ( ALLOWED ) /to #3

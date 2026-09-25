@@ -372,6 +372,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( PRODUCE ) /obj ( FLAME /pl /zero )',
     emoji: '🔥',
     synonym: 'be on fire',
+    glosses: { it: 'essere in fiamme' },
     forms: {
       en: {
         base: 'burn',
@@ -1271,6 +1272,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to be defeated in a contest',
     definition: '/inf /verb ( WIN /not ) /loc ( GAME /a )',
     synonym: 'be defeated',
+    glosses: { it: 'essere sconfitto' },
     emoji: '🥈',
     forms: {
       en: {
@@ -1604,6 +1606,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause', 'locative'],
     description: 'to go on with an activity',
     synonym: 'go on',
+    glosses: { it: 'andare avanti' },
     // "still to act", KEEP's shape ("still to have objects") on ACT.
     definition: '/inf /verb ( ACT /adv STILL )',
     emoji: '⏩',
@@ -1686,6 +1689,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause', 'locative'],
     description: 'to become different',
     synonym: 'become different',
+    glosses: { it: 'diventare diverso' },
     emoji: '🦎',
     forms: {
       en: {

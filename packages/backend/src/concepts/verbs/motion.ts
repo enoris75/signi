@@ -399,6 +399,7 @@ export const motionVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'direction', 'route', 'cause'],
     description: 'to go outside',
+    glosses: { it: 'andare fuori' },
     // "to go outside" (localization B61): GO with the direction adverb its particle says, as Duden
     // glosses hinausgehen "nach draußen gehen".
     definition: '/inf /verb ( GO /adv OUTSIDE )',

@@ -257,3 +257,37 @@ describe('the Swiss German column (P10-E4)', () => {
     expect(bad).toEqual([]);
   });
 });
+
+// A picker lists concepts by their word, so two verbs that share one in a language look identical
+// there unless a gloss beside the word tells them apart (BEGIN / START, both *iniziare*). Italian is
+// glossed; the other languages are not yet, and join the list as they are.
+describe('picker glosses', () => {
+  const GLOSSED: readonly string[] = ['it'];
+  const sensed = new Set(concepts.filter((c) => c.senseOf).map((c) => c.id));
+
+  test.each(GLOSSED)('%s: of the verbs that share a word, at most one goes unglossed', (lang) => {
+    const byWord = new Map<string, typeof concepts>();
+    for (const c of concepts) {
+      const word = c.forms[lang]?.['base'];
+      if (c.role !== 'verb' || !word || sensed.has(c.id)) continue;
+      byWord.set(word, [...(byWord.get(word) ?? []), c]);
+    }
+    const bare = [...byWord]
+      .filter(([, group]) => group.length > 1)
+      .map(([word, group]) => [word, group.filter((c) => !c.glosses?.[lang as 'it']).map((c) => c.id)] as const)
+      .filter(([, ids]) => ids.length > 1);
+    expect(bare).toEqual([]);
+  });
+
+  test('a gloss is never the word it glosses, nor another concept\'s gloss for the same word', () => {
+    const seen = new Map<string, string>();
+    for (const c of concepts) {
+      for (const [lang, gloss] of Object.entries(c.glosses ?? {})) {
+        expect(gloss, `${c.id} ${lang}`).not.toBe(c.forms[lang]?.['base']);
+        const key = `${lang}:${c.forms[lang]?.['base']}:${gloss}`;
+        expect(seen.get(key), `${c.id} ${lang}`).toBeUndefined();
+        seen.set(key, c.id);
+      }
+    }
+  });
+});

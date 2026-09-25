@@ -47,6 +47,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'have to',
+    glosses: { it: 'essere obbligato' },
     emoji: '❗',
     forms: {
       en: {
@@ -120,6 +121,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'be able to',
+    glosses: { it: 'essere in grado' },
     emoji: '💪',
     forms: {
       en: {
@@ -274,6 +276,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'be allowed to',
+    glosses: { it: 'avere il permesso' },
     emoji: '🎫',
     forms: {
       en: {
@@ -357,6 +360,7 @@ export const modals: ConceptSeed[] = [
       /subj ( one ) /verb ( ACT )
     `,
     synonym: 'ought to',
+    glosses: { it: 'essere opportuno' },
     emoji: '🫵',
     forms: {
       en: {
@@ -419,6 +423,7 @@ export const modals: ConceptSeed[] = [
       /subj ( one ) /verb ( ACT )
     `,
     synonym: 'possibly',
+    glosses: { it: 'forse' },
     emoji: '🎲',
     forms: {
       en: {
