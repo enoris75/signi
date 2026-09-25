@@ -69,9 +69,9 @@ export function GroupPerimeterControls({
         const examples = entry?.examples && controlPos[perimeterControlKey("examples", nounKey)];
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
         // The clause's own facts about this noun: the wh-question's mark, its who / what, the
-        // existential (P09-E12). Plain toggles: no line starts from them.
+        // existential (P09-E12), the humble register (P11-E6). Plain toggles: no line starts from them.
         // What the possessor is to the noun (P13) is a plain toggle too, beside the possessor control.
-        const clauseFacts = (["possessorRole", "question", "animacy", "existential", "gloss", "glossRelation"] as const).flatMap((kind) => {
+        const clauseFacts = (["possessorRole", "question", "animacy", "existential", "humble", "gloss", "glossRelation"] as const).flatMap((kind) => {
           const sat = entry?.[kind];
           const at = sat && controlPos[perimeterControlKey(kind, nounKey)];
           return sat && at ? [{ kind, sat, at }] : [];

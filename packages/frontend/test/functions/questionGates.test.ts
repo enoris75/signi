@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Concept } from '@signi/shared';
+import { selectionToPlan } from '../../src/components/PhraseBuilder/selectionToPlan/index.ts';
 import type { PhraseSelection, QuestionRole } from '../../src/components/PhraseBuilder/interfaces.ts';
 import {
   askedRole,
   asksQuestion,
   canAsk,
   canBeExistential,
+  canBeHumble,
   hasPatient,
   hasQuestionAnimacy,
   questionAnimateOf,
@@ -199,5 +201,68 @@ describe('the existential gate', () => {
     const ONE = c('GENERIC_PERSON', 'pronoun', { person: '3' });
     expect(canBeExistential({ subject: CAT, verb: BE, subjectConjuncts: [{ subject: CAT }, { subject: ONE }] })).toBe(false);
     expect(canBeExistential({ subject: ONE, verb: BE, subjectConjuncts: [{ subject: CAT }] })).toBe(false);
+  });
+});
+
+// P11-E6: the humble register mirrors the engine's gate — `buildClauseSegments` (no command, citation
+// or passive) and `jaRespectRegister` (every subject conjunct the speaker's own side) — and a verb with
+// a humble word (`Concept.humble`), or BE without a predicative, whose いる / おる is the engine's own.
+describe('the humble gate', () => {
+  const RELATIVE = { relative: true, human: true } as const;
+  const FATHER = c('FATHER', 'noun', RELATIVE);
+  const MOTHER = c('MOTHER', 'noun', RELATIVE);
+  const BROTHER = c('BROTHER', 'noun', RELATIVE);
+  const WIFE = c('WIFE', 'noun', RELATIVE);
+  const YOU = c('SECOND_PERSON', 'pronoun', { person: '2' });
+  const HUMBLE_EAT = c('EAT', 'verb', { transitivity: 'transitive', humble: true });
+  const GO = c('GO', 'verb', { transitivity: 'intransitive', humble: true });
+  const HOUSE = c('HOUSE', 'noun');
+  const BIG = c('BIG', 'adjective');
+  // "my X": an owner that points at the *I* holding the subject — the one shape the builder has for it.
+  const mine = (word: Concept): PhraseSelection => ({ subject: word, subjectPossessorRef: 'subject' });
+
+  it.each<[string, PhraseSelection]>([
+    ['I', { subject: ME, verb: HUMBLE_EAT }],
+    ['we', { subject: ME, subjectNumber: 'plural', verb: HUMBLE_EAT }],
+    ['I and my father', { subject: ME, verb: GO, subjectConjuncts: [mine(FATHER)] }],
+    ['I and my brother’s wife (a chain)', { subject: ME, verb: GO, subjectConjuncts: [{ subject: WIFE, subjectPossessor: mine(BROTHER) }] }],
+    ['I, at home (BE with a place)', { subject: ME, verb: BE, locative: HOUSE }],
+    ['I, asked a yes/no question', { subject: ME, verb: HUMBLE_EAT, interrogative: true }],
+    ['I, with an empty conjunct', { subject: ME, verb: HUMBLE_EAT, subjectConjuncts: [{}] }],
+  ])('is offered for %s', (_, sel) => {
+    expect(canBeHumble(sel)).toBe(true);
+  });
+
+  it.each<[string, PhraseSelection]>([
+    ['the cat', { subject: CAT, verb: HUMBLE_EAT }],
+    ['a relative nobody owns', { subject: FATHER, verb: HUMBLE_EAT }],
+    ['my cat (not a relative)', { subject: ME, verb: HUMBLE_EAT, subjectConjuncts: [mine(CAT)] }],
+    ['your mother', { subject: YOU, verb: HUMBLE_EAT, subjectConjuncts: [{ subject: MOTHER, subjectPossessorRef: 'subject' }] }],
+    ['the cat’s mother', { subject: MOTHER, subjectPossessor: { subject: CAT }, verb: HUMBLE_EAT }],
+    ['a brother’s wife (a kind of person)', { subject: ME, verb: GO, subjectConjuncts: [{ subject: WIFE, subjectPossessor: { ...mine(BROTHER), subjectDefiniteness: 'indefinite' } }] }],
+    ['my father and the cat', { subject: ME, verb: GO, subjectConjuncts: [mine(FATHER), { subject: CAT }] }],
+    ['no subject', { verb: HUMBLE_EAT }],
+    ['a command', { subject: ME, verb: HUMBLE_EAT, imperative: true }],
+    ['an infinitive', { subject: ME, verb: HUMBLE_EAT, infinitive: true }],
+    ['the passive', { subject: ME, verb: HUMBLE_EAT, directObject: CAT, verbVoice: 'passive' }],
+    ['a wh-asked subject', { subject: ME, verb: HUMBLE_EAT, interrogative: true, questionRole: 'subject' }],
+    ['RUN, which has no humble word', { subject: ME, verb: RUN }],
+    ['copular BE', { subject: ME, verb: BE, predicative: BIG }],
+    ['no verb', { subject: ME }],
+  ])('is refused for %s', (_, sel) => {
+    expect(canBeHumble(sel)).toBe(false);
+  });
+
+  // P11-E6 D5: the flag reaches the plan only under the gate, and a selection that stops licensing it
+  // keeps it — the plan leaves it out, and it comes back when the subject does.
+  it('writes the flag under the gate, and keeps it in the selection outside it', () => {
+    const humbleI: PhraseSelection = { subject: ME, verb: HUMBLE_EAT, verbHumble: true };
+    expect(selectionToPlan(humbleI).verbPhrase?.humble).toBe(true);
+    const cat: PhraseSelection = { ...humbleI, subject: CAT };
+    expect(cat.verbHumble).toBe(true);
+    expect(selectionToPlan(cat).verbPhrase).not.toHaveProperty('humble');
+    expect(selectionToPlan({ ...cat, subject: ME }).verbPhrase?.humble).toBe(true);
+    // Unset, it is never written, even where the gate holds.
+    expect(selectionToPlan({ subject: ME, verb: HUMBLE_EAT }).verbPhrase).not.toHaveProperty('humble');
   });
 });

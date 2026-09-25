@@ -139,8 +139,12 @@ export interface CompleteOptions {
   saved?: readonly string[];
 }
 
-/** The list renders at most this many rows. */
-const MAX_ROWS = 50;
+/**
+ * The list renders at most this many rows. Grown from 50 when `/humble` (P11-E6) joined the verb's
+ * commands and pushed the period's `/obj` off the end of a verb's list: the list grows to hold what a
+ * word offers, rather than dropping the next role.
+ */
+const MAX_ROWS = 60;
 
 // ── Ranking ──────────────────────────────────────────────────────────────────
 

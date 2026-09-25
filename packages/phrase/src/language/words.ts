@@ -398,6 +398,10 @@ export function takes(action: Action, w: WordInfo): boolean {
     // Only a quantity that takes one is approximated (P09-E49).
     case "approximator":
       return w.kind === "noun" && w.concept?.role === "noun" && approximatorFor(w.slice, w.which!) !== undefined;
+    // The humble register is the verb phrase's (P11-E6), said in the main verb's bracket whatever the
+    // subject is: the plan builder decides whether it reaches the plan (canBeHumble).
+    case "humble":
+      return w.kind === "verb";
     // Only a demonstrative points away from the rest (P13).
     case "contrast": {
       const d = w.slice[`${w.which}Definiteness` as keyof PhraseSelection];
@@ -428,7 +432,7 @@ export function takes(action: Action, w: WordInfo): boolean {
 
 /** Whether a command attaches to a word, rather than to the period or the app. */
 export const attachesToWord = (action: Action): boolean =>
-  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "examples", "conjunct", "relative", "headless", "numeral", "contrast", "approximator"].includes(action.kind);
+  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "examples", "conjunct", "relative", "headless", "numeral", "contrast", "approximator", "humble"].includes(action.kind);
 
 /** What kind of word a diagnostic says a word is: "food is a noun" (see diagnostics.ts). */
 export function kindOf(w: WordInfo): WordKindName {

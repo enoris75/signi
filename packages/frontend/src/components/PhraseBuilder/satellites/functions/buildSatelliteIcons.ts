@@ -27,6 +27,7 @@ export function buildSatelliteIcons({
   onToggleQuestion,
   onToggleQuestionAnimate,
   onToggleExistential,
+  onToggleHumble,
   onCycleGloss,
   onCycleGlossRelation,
   onCyclePossessorRole,
@@ -79,7 +80,7 @@ export function buildSatelliteIcons({
       });
       continue;
     }
-    // The wh-question's mark, its who / what chip and the existential ride the noun's dotted ring
+    // The wh-question's mark, its who / what chip, the existential and the humble register ride the noun's dotted ring
     // (P09-E12 M6, M7): each is about the phrase and the clause it is in, not about the word, and the
     // solid rings they would otherwise join are full. Each flips a value in place; each is named by
     // its label alone, since the label says what it does ("Question", "Who acts?", "There is
@@ -90,6 +91,8 @@ export function buildSatelliteIcons({
         ? ("question" as const)
         : sat.key === "subjectExistential"
           ? ("existential" as const)
+          : sat.key === "subjectHumble"
+            ? ("humble" as const)
           : sat.key === "subjectGloss"
             ? ("gloss" as const)
             : sat.key === "subjectGlossRelation"
@@ -106,7 +109,9 @@ export function buildSatelliteIcons({
               ? onCycleGloss
               : perimeterKind === "glossRelation"
                 ? onCycleGlossRelation
-                : onToggleExistential;
+                : perimeterKind === "humble"
+                  ? onToggleHumble
+                  : onToggleExistential;
       if (!onToggle) continue;
       (perimeterByNoun[noun] ??= {})[perimeterKind] = {
         key: sat.key,

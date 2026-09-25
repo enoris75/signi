@@ -45,6 +45,8 @@ export const NOUNS = [
   c('LIGHT', 'noun', 'light', 'luce'),
   // A set the examples name members of (P09-E48): "animals such as the cat".
   c('ANIMAL', 'noun', 'animal', 'animale', { animate: true }),
+  // A relative, whose own the speaker may be (P11-E6): "I and my father eat", humbly.
+  c('FATHER', 'noun', 'father', 'padre', { animate: true, human: true, relative: true }),
 ];
 
 export const PRONOUNS = [
@@ -55,7 +57,8 @@ export const PRONOUNS = [
 ];
 
 export const VERBS = [
-  verb('EAT', 'eat', 'mangiare', complements('instrumental', 'locative', 'cause')),
+  // It has a humble word (いただく), as the API serves it (P11-E6).
+  verb('EAT', 'eat', 'mangiare', { ...complements('instrumental', 'locative', 'cause'), humble: true }),
   verb('SEE', 'see', 'vedere'),
   verb('LOVE', 'love', 'amare'),
   verb('READ', 'read', 'leggere', complements('terminus')),
@@ -79,8 +82,9 @@ export const VERBS = [
   verb('SAY', 'say', 'dire', { clauseObject: 'content', clauseForce: 'either' }),
   // Its that-clause is a question, never a statement (P09-E55), as the API serves it.
   verb('ASK', 'ask', 'chiedere', { transitivity: 'ditransitive', clauseObject: 'content', clauseForce: 'interrogative', prepositionalObject: true }),
-  // Its that-clause is a statement only (P09-E55): no clauseForce.
-  verb('BELIEVE', 'believe', 'credere', { clauseObject: 'content' }),
+  // Its that-clause is a statement only (P09-E55): no clauseForce. Its object takes a preposition in
+  // some language (it "crede al cane", P09-E54), as the API serves it: no passive wh-question over it.
+  verb('BELIEVE', 'believe', 'credere', { clauseObject: 'content', prepositionalObject: true }),
   // Its object takes a preposition in it, fr and pt ("ha bisogno del cane"), as the API serves (P09-E54).
   verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive', prepositionalObject: true }),
   // The copula, the existential's verb (P09-E12 M7): "there is a cat in the house".

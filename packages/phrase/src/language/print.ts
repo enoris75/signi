@@ -311,7 +311,7 @@ class Printer {
       (s) => settingTakes({ id: s } as Setting, w) && currentSetting(s, w) !== defaultSetting(s, w),
     );
     const hasModal = MODAL_SLOTS.some((key) => root[key]);
-    if (!root.verb && !root.modifier && !hasModal && settings.length === 0) return;
+    if (!root.verb && !root.modifier && !hasModal && settings.length === 0 && !root.verbHumble) return;
     const statement = this.statement({ key: `${wordKey(verbRef)}:word`, removal: "/del verb", owner: verbRef, about: verbRef });
     this.emit("/verb", "command", "secondary", { word: verbRef });
     this.emit("(", "open", "secondary", { word: verbRef, element: true });
@@ -320,6 +320,11 @@ class Printer {
     // would be the modal's (both attach to the closest verb or modal).
     if (root.modifier) this.wordStatement({ containerId: id, slot: "modifier" }, "/adv", "info", root.modifier, verbRef);
     for (const s of settings) this.setting({ id: s, value: currentSetting(s, w) } as Setting, w);
+    // The humble register after the polarity (P11-E6), before any modal takes the bracket's words.
+    if (root.verbHumble) {
+      this.statement({ key: `${wordKey(verbRef)}:humble`, removal: "/del humble", owner: verbRef, about: verbRef });
+      this.emit("/humble", "command", "setting", { word: verbRef });
+    }
     for (const key of MODAL_SLOTS) {
       const modal = root[key];
       if (!modal) continue;

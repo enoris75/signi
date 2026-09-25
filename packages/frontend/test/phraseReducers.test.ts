@@ -441,6 +441,16 @@ describe('the set-value reducers', () => {
     expect(R.toggleExistential(R.toggleExistential({ subject: CAT })).existential).toBe(false);
   });
 
+  // P11-E6: a plain flag on the verb phrase, whatever the subject — the plan builder gates it.
+  it('set and flip the humble register, keeping it whoever the subject is', () => {
+    const s: PhraseSelection = { subject: CAT, verb: SEE };
+    expect(R.toggleHumble(s).verbHumble).toBe(true);
+    expect(R.toggleHumble(R.toggleHumble(s)).verbHumble).toBe(false);
+    expect(R.setHumble(s, false)).toBe(s);
+    const humble = R.setHumble(s, true);
+    expect(R.setHumble(humble, true)).toBe(humble);
+  });
+
   it('are what the toggles and cycles feed the next value', () => {
     const s: PhraseSelection = { subject: SHE };
     expect(R.toggleGender(R.toggleGender(s, 'subject'), 'subject').subjectGender).toBe('neut');

@@ -2772,6 +2772,31 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The register that lowers the speaker's own side, the Japanese 謙譲語 (P11-E6): 私はいただきます,
+    // 父は参ります. Suffixed because HUMBLE is the everyday virtue (謙虚な), which is not seeded; this is
+    // the grammar's word, and the label of the subject's humble toggle (`register.humble`). A humble
+    // verb is the one that describes what the speaker, or the speaker's own family, does — which is
+    // what sets it apart from the honorific, said of someone else's.
+    id: 'HUMBLE_GRAMMAR',
+    role: 'adjective',
+    synonym: 'grammar',
+    description: "lowering the speaker's own side, as a Japanese humble verb does (grammar)",
+    definition: `
+      /subj ( VERB /a /rel #2.subj /headless )
+      /subj ( VERB ) /verb ( DESCRIBE ) /obj ( ACTION /pl /poss [ SPEAKER /the ] )
+    `,
+    emoji: '🙇',
+    forms: {
+      en: { base: 'humble' },
+      it: { base: 'umile' },
+      fr: { base: 'humble' },
+      de: { base: 'bescheiden' },
+      es: { base: 'humilde' },
+      ja: { base: '謙譲の', reading: 'けんじょうの' },
+      pt: { base: 'humilde' },
+    },
+  },
+  {
     id: 'PROGRESSIVE',
     role: 'adjective',
     description: 'presenting an event as in progress (grammar)',

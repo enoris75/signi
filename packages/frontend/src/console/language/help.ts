@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|outof|eg|and n|wh|there|rel|headless|num|contrast|approx|if|join|clause|sub|to|so|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|outof|eg|and n|wh|there|humble|rel|headless|num|contrast|approx|if|join|clause|sub|to|so|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -164,6 +164,8 @@ export const EXAMPLES: Record<string, string> = {
   passive: "/subj ( cat ) /verb ( eat /passive ) /obj ( food )",
   not: "/subj ( cat ) /verb ( eat /not )",
   pos: "/subj ( cat ) /verb ( eat /pos )",
+  // The humble register (P11-E6), on a subject it lowers: 私はいただきます.
+  humble: "/subj ( 1st ) /verb ( eat /humble )",
   // Adjective
   more: "/subj ( cat /adj ( big /more ) ) /verb ( run )",
   most: "/subj ( cat /adj ( big /most ) ) /verb ( run )",

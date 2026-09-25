@@ -731,6 +731,18 @@ export function toggleExistential(prev: PhraseSelection): PhraseSelection {
   return setExistential(prev, !prev.existential);
 }
 
+// Say the verb in the humble register, the Japanese 謙譲語, or take it back (P11-E6). A plain flag: the
+// plan builder decides whether it reaches the plan (see canBeHumble), so a subject or a verb that
+// stops licensing it leaves it here for when they return.
+export function setHumble(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (Boolean(prev.verbHumble) === value) return prev;
+  return { ...prev, verbHumble: value };
+}
+
+export function toggleHumble(prev: PhraseSelection): PhraseSelection {
+  return setHumble(prev, !prev.verbHumble);
+}
+
 // Set the person the command's verb agrees with (2sg / 1pl "let's" / 2pl). Kept even under the
 // `instruction` register, where it is moot: the selector greys the row rather than forgetting the
 // pick, so switching back to an order restores it. No-op semantics off imperative, but harmless

@@ -203,6 +203,26 @@ describe('buildRingSpecs', () => {
     expect(hour(perimeterControlKey('question', 'subject'))).toBeGreaterThan(hour(perimeterControlKey('existential', 'subject')));
   });
 
+  // P11-E6: the humble register fans in with them, after the existential it may sit beside (an *I* at
+  // home): four controls at the one hour, in order, none dropped.
+  it("fans the humble register in with the existential on the subject's dotted ring", () => {
+    const [subject] = groups([]);
+    const { Subject } = specs([subject], {
+      perimeterByNoun: { subject: { question: icon('q'), animacy: icon('a'), existential: icon('e'), humble: icon('h') } },
+    });
+
+    expect(keys(Subject.outer)).toEqual([
+      collapseControlKey('Subject'),
+      perimeterControlKey('question', 'subject'),
+      perimeterControlKey('animacy', 'subject'),
+      perimeterControlKey('existential', 'subject'),
+      perimeterControlKey('humble', 'subject'),
+    ]);
+    const hour = (key: string) => (aimOf(Subject.outer, key) as { clock: number }).clock;
+    expect(hour(perimeterControlKey('existential', 'subject'))).toBeGreaterThan(hour(perimeterControlKey('humble', 'subject')));
+    expect(Math.abs(hour(perimeterControlKey('humble', 'subject')) - 8)).toBeLessThan(0.2);
+  });
+
   it.each(['subject', 'directObject', 'route'] as const)('puts the question mark on the %s ring alone', (noun) => {
     const defs = groups([noun], ['subject', 'verb', 'directObject', 'route']);
     const def = defs.find((g) => g.mainKey === noun)!;

@@ -4,6 +4,7 @@ import type { PhrasePlan } from '@signi/shared';
 import { compileDefinition, definitionVocabulary, planToWorkspace, printDefinition, workspaceToPlans } from '@signi/phrase';
 import { concepts } from './concepts/index.js';
 import { clauseForceOf, compileSeedDefinitions, seedConcept } from './concepts/definitionText.js';
+import { conceptIndex } from './concepts/hierarchy.js';
 import { adjectives } from './concepts/adjectives.js';
 import { adverbs } from './concepts/adverbs.js';
 import { interjections } from './concepts/interjections.js';
@@ -69,10 +70,11 @@ describe('a seed defined in text (P13)', () => {
   // The facts a line is checked against, as the seed states them and as the database serves them:
   // the definition compiler reads the first, the console the second, and they must not disagree.
   test('knows each word as the API serves it', () => {
-    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'clauseForce', 'prepositionalObject', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
+    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'clauseForce', 'prepositionalObject', 'humble', 'relative', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
     const pick = (c: object) => Object.fromEntries(FACTS.flatMap((k) => ((c as Record<string, unknown>)[k] === undefined ? [] : [[k, (c as Record<string, unknown>)[k]]])));
     const served = new Map(listConcepts({ senses: true }).map((c) => [c.id, pick(c)]));
-    for (const seed of concepts) expect(pick(seedConcept(seed)), seed.id).toEqual(served.get(seed.id));
+    const byId = conceptIndex(concepts);
+    for (const seed of concepts) expect(pick(seedConcept(seed, byId)), seed.id).toEqual(served.get(seed.id));
   });
 
   // P09-E54: the verbs whose object takes a preposition in some language, derived from `object_prep`.
@@ -82,6 +84,29 @@ describe('a seed defined in text (P13)', () => {
       'ASK', 'BELIEVE', 'CALL_PHONE', 'CLICK', 'DEPEND', 'FOLLOW', 'LEAVE', 'LIKE',
       'LOOK_AT', 'MARRY', 'MEET', 'NEED', 'PLAY_INSTRUMENT', 'REMEMBER', 'THANK', 'WAIT',
     ]);
+  });
+
+  // P11-E6 D3: the verbs with a humble word, derived from a lexeme's `humble` column. BE's いる / おる
+  // is the engine's own (JA_IRU), so the builder's gate counts BE by hand and it is not here.
+  test('serves which verbs have a humble word', () => {
+    const served = listConcepts({ senses: true }).filter((c) => c.humble).map((c) => c.id).sort();
+    expect(served).toEqual(['COME', 'DO', 'DRINK', 'EAT', 'GIVE', 'GO', 'SAY']);
+  });
+
+  // P11-E6 D2: the builder reads "a relative" off the isA tree (RELATIVE and what is under it), where
+  // the engine reads the Japanese lexeme's `kin`. The two must name the same nouns, or the humble
+  // toggle would be offered where the engine ignores it, or withheld where it would work: a kin term
+  // seeded outside RELATIVE, or under it without `kin`, fails here.
+  test('a relative is exactly a noun whose Japanese word is kin', () => {
+    const relatives = listConcepts({ senses: true }).filter((c) => c.relative).map((c) => c.id).sort();
+    const kin = concepts
+      .filter((c) => c.role === 'noun' && (c.forms['ja'] as Record<string, string> | undefined)?.['kin'] === '1')
+      .map((c) => c.id)
+      .sort();
+    expect(relatives).toEqual(kin);
+    expect(relatives).toContain('RELATIVE');
+    expect(relatives).toContain('MOM');
+    expect(relatives).not.toContain('PERSON');
   });
 
   // P09-E55: which verbs' that-clause may be a question, derived from `content_clause_force`.

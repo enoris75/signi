@@ -48,6 +48,7 @@ function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
     toggleQuestion: () => {},
     toggleQuestionAnimate: () => {},
     toggleExistential: () => {},
+    toggleHumble: () => {},
     cycleGloss: () => {},
     cycleGlossRelation: () => {},
     cyclePossessorRole: () => {},
@@ -403,6 +404,25 @@ describe('the question keys', () => {
     expect(satelliteKey('directObjectQuestion', boxScopeChain('noun'))).toBe('Q');
     expect(satelliteKey('subjectQuestionAnimate', boxScopeChain('noun'))).toBe('Shift+Q');
     expect(satelliteKey('subjectExistential', boxScopeChain('noun'))).toBe('E');
+  });
+});
+
+// P11-E6: K (kenjō) says the verb in the humble register, on the subject whose side decides it. H, the
+// ticket's first choice, is the noun's standard (P09-E50), which a compared relative also offers.
+describe('the humble key', () => {
+  it('toggles the humble register from the subject, and from no other noun', () => {
+    let toggled = 0;
+    expect(commandFor('k')).toBe('subject.humble');
+    expect(commandFor('k', { slot: 'directObject', nounKey: 'directObject' })).toBeUndefined();
+    expect(commandFor('k', { satellite: () => undefined })).toBeUndefined();
+    KEYMAP.find((c) => c.id === 'subject.humble')!.run(ctx({ toggleHumble: () => toggled++ }));
+    expect(toggled).toBe(1);
+  });
+
+  it('is not the standard’s H, and wears K on its control', () => {
+    expect(commandFor('h')).toBe('noun.standard');
+    expect(satelliteKey('subjectHumble', boxScopeChain('noun'))).toBe('K');
+    expect(KEYMAP.find((c) => c.id === 'subject.humble')!.labelKey).toBe('register.humble');
   });
 });
 

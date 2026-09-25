@@ -22,6 +22,7 @@ import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import {
   DEFAULT_TEMPORAL_RELATION,
   DETERMINER_COMPLEMENT_TYPES,
@@ -31,8 +32,8 @@ import {
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole, type SlotQuestionRole } from "../../interfaces.ts";
-import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type SlotQuestionRole } from "../../interfaces.ts";
+import { canAsk, canBeExistential, canBeHumble, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import { standardIsSet, takesStandard } from "../../standardRing.ts";
 import { takesExamples } from "../../examplesRing.ts";
 import {
@@ -374,6 +375,20 @@ export function rawSatellites(
       icon: <ViewInArIcon sx={iconSx} />,
       available: canBeExistential(selection),
       hasValue: Boolean(selection.existential),
+      directToggle: true,
+    },
+    {
+      // The humble register, the Japanese 謙譲語 (P11-E6): the verb phrase's flag, but whose the subject
+      // is decides it, so it rides the subject's ring beside the existential — the verb's rings are
+      // full. Offered where the engine lowers the verb (see canBeHumble): a speaker's-side subject and
+      // a verb with a humble word. Only the Japanese row changes, whatever the interface language.
+      key: "subjectHumble",
+      parent: "subject",
+      label: t("register.humble"),
+      labelKey: "register.humble",
+      icon: <VolunteerActivismIcon sx={iconSx} />,
+      available: canBeHumble(selection),
+      hasValue: Boolean(selection.verbHumble),
       directToggle: true,
     },
     {

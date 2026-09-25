@@ -34,7 +34,7 @@ import {
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
 import { approximatorFor } from '../../src/components/PhraseBuilder/functions/approximatorFor.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
-import { canAsk, canBeExistential, hasQuestionAnimacy } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
+import { canAsk, canBeExistential, canBeHumble, hasQuestionAnimacy } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
@@ -62,6 +62,8 @@ const pick = <T,>(rng: Rng, xs: readonly T[]): T | undefined => (xs.length ? xs[
 
 const PLAIN_VERBS = VERBS.filter((v) => !v.modal);
 const MODALS = VERBS.filter((v) => v.modal);
+// The verbs with a humble word (P11-E6), as the API marks them.
+const HUMBLE_VERBS = PLAIN_VERBS.filter((v) => v.humble);
 
 /** A pronoun as the chooser would pick it: its person, and a number and gender for it. */
 function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
@@ -395,6 +397,24 @@ const OPS: Op[] = [
     }
     return { ...s, containers: s.containers.map((x) => (x.id === c.id ? { ...x, selection: sel } : x)) };
   },
+  // The humble register (P11-E6), where the subject's ring offers it. A speaker's-side subject of a verb
+  // with a humble word is rare in a walk of random words, so the op may first fill the one empty slot
+  // that makes it so, as a user would: *I* or *we* for a humble verb, or a humble verb for an *I*. Later
+  // steps may swap the subject or the verb under it, which leaves the flag held and printed, and out of
+  // the plan.
+  (s, rng) => {
+    const c = pick(rng, s.containers)!;
+    let sel = c.selection;
+    if (!canBeHumble(sel)) {
+      if (readsClause(s, c.id) || isObjectInstrument(s, c.id)) return undefined;
+      if (sel.verb?.humble && !sel.subject)
+        sel = R.applyConceptSelect(sel, 'subject', byId('FIRST_PERSON'), { number: pick(rng, ['singular', 'plural'] as const)! });
+      else if (sel.subject?.person === '1' && !sel.verb) sel = R.applyConceptSelect(sel, 'verb', pick(rng, HUMBLE_VERBS)!);
+      if (!canBeHumble(sel)) return undefined;
+    }
+    sel = R.toggleHumble(sel);
+    return { ...s, containers: s.containers.map((x) => (x.id === c.id ? { ...x, selection: sel } : x)) };
+  },
   // Another period.
   (s, _rng, id) => ({ ...s, containers: [...s.containers, { id: id(), selection: {} }] }),
   // Links between periods, made only where a pick could make them.
@@ -607,8 +627,8 @@ describe('the round trip', () => {
   // that-clause needs SAY with no object and an infinitive NEED, so the two are rarer than the others.
   it('reaches each of the subordinate clauses, the clause of purpose and the two readings (P13) among them', () => {
     const kinds = new Set<string>();
-    // Twice the seeds the walk once needed: every op P13 adds makes each of these rarer.
-    for (let seed = 1; seed <= 8000; seed++) {
+    // Well past the seeds the walk once needed: every op P13 and P11-E6 add makes each of these rarer.
+    for (let seed = 1; seed <= 12000; seed++) {
       const state = reach(seed, 10 + (seed % 30));
       for (const l of state.links) kinds.add(l.kind ?? 'relative');
       // The readings a period with empty slots gives its clause (P13): the subject clause, the adverb.
@@ -675,12 +695,18 @@ const throws = (fn: () => unknown): boolean => {
     return true;
   }
 };
-// A plan with its question and its existential taken out, on every clause it holds.
+// A plan with its question, its existential and its humble register (P11-E6) taken out, on every
+// clause it holds.
 function unasked(plan: object): object {
   const {
     interrogative: _i, questionRole: _r, questionSpecifiers: _s, questionAnimate: _a, existential: _e,
     ...rest
   } = plan as Record<string, unknown>;
+  const verbPhrase = rest['verbPhrase'] as { humble?: boolean } | undefined;
+  if (verbPhrase?.humble) {
+    const { humble: _h, ...plain } = verbPhrase;
+    rest['verbPhrase'] = plain;
+  }
   const clause = (c: unknown) => (c && typeof c === 'object' ? unasked(c) : c);
   const coordination = rest['coordination'] as { clause?: object } | undefined;
   const adverbial = rest['adverbialClause'] as { clause?: object } | undefined;
@@ -693,7 +719,7 @@ function unasked(plan: object): object {
   };
 }
 
-describe('the question and the existential are gated as the engine is', () => {
+describe('the question, the existential and the humble register are gated as the engine is', () => {
   it('translates every state the walk reaches without a refusal', async () => {
     process.env['SIGNI_DB_PATH'] = ':memory:';
     const { lookupLexicalEntry } = await import('../../../backend/src/lexicon.ts');
@@ -704,6 +730,7 @@ describe('the question and the existential are gated as the engine is', () => {
     const refusals: string[] = [];
     const headless: string[] = [];
     let asked = 0;
+    let humble = 0;
     for (let seed = 1; seed <= SEEDS; seed++) {
       const state = reach(seed, 10 + (seed % 30));
       for (const { plan } of workspaceToPlans(state.containers, state.links)) {
@@ -712,6 +739,7 @@ describe('the question and the existential are gated as the engine is', () => {
         const subject = plan.subject as { concept?: string; conjuncts?: { concept?: string }[] } | undefined;
         if (!(subject?.conjuncts?.[0]?.concept ?? subject?.concept) || unseeded.test(json)) continue;
         if (plan.interrogative || plan.questionRole || plan.existential) asked++;
+        if (plan.verbPhrase?.humble) humble++;
         const finite = [plan.contentObject, plan.adverbialClause?.clause, plan.condition, plan.coordination?.clause].filter(Boolean) as { subject?: { concept?: string; conjuncts?: { concept?: string }[] } }[];
         if (finite.some((c) => !(c.subject?.conjuncts?.[0]?.concept ?? c.subject?.concept))) headless.push(`seed ${seed}: ${json}`);
         try {
@@ -732,6 +760,7 @@ describe('the question and the existential are gated as the engine is', () => {
     // The walk does reach the constructs it is here to check. A count, not a share: each op the walk
     // gains (P13 adds one per construct) makes every other one rarer, so a share would keep falling.
     expect(asked).toBeGreaterThan(10);
+    expect(humble).toBeGreaterThan(0);
   }, 120_000);
 });
 

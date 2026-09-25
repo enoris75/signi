@@ -530,6 +530,22 @@ describe('buildUiStrings', () => {
     expect(strings['action.show.voice']).toMatchObject({ it: 'Mostra la diatesi', ja: '態を見せ' });
   });
 
+  // P11-E6 — the humble register's toggle and `/humble`: HUMBLE_GRAMMAR named as the passive is (de
+  // *bescheiden*, ja 謙譲), and what the command is for, the verb's REGISTER set as its tense is.
+  test('names the humble register, and what setting it is for', () => {
+    const strings = buildUiStrings();
+    expect(strings['register.humble']).toEqual({ en: 'Humble', it: 'Umile', fr: 'Humble', de: 'Bescheiden', es: 'Humilde', ja: '謙譲', pt: 'Humilde' });
+    expect(strings['purpose.register']).toEqual({
+      en: "to set a verb's register",
+      it: 'impostare il registro di un verbo',
+      fr: "définir le registre d'un verbe",
+      de: 'das Register eines Verbs festlegen',
+      es: 'establecer el registro de un verbo',
+      ja: '動詞の言語使用域を設定する',
+      pt: 'definir o registro de um verbo',
+    });
+  });
+
   // C12 — the four constructs the catalog gained: a clause of purpose, the two readings of the
   // object complement, the comitative, and the genitive relative.
   test('says what a click is for, in the final clause each language writes', () => {
@@ -767,7 +783,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(35);
+    expect(purposes).toHaveLength(36);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );

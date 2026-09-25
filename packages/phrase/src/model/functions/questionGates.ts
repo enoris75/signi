@@ -1,6 +1,8 @@
 import { DEFAULT_TEMPORAL_RELATION, type Concept } from "@signi/shared";
 import { offeredComplements } from "../slots.ts";
-import type { PhraseSelection, QuestionRole, SlotQuestionRole } from "../interfaces.ts";
+import { POSSESSOR_KEY, POSSESSOR_REF_KEY, type NounAddress, type NounKey, type PhraseSelection, type QuestionRole, type SlotQuestionRole } from "../interfaces.ts";
+import { resolveAntecedent } from "../selectionToPlan/functions/resolveAntecedent.ts";
+import { field } from "../selectionToPlan/functions/field.ts";
 
 /**
  * What the question and the existential controls may reach (P09-E12 M6, M7). Each gate mirrors a
@@ -156,4 +158,56 @@ export function canBeExistential(sel: PhraseSelection): boolean {
   if (pivot.role !== "pronoun") return false;
   // A conjunct counts once it holds a word: an empty one is left out of the plan.
   return pivot.slot === "indefinite" || Boolean(sel.subjectConjuncts?.some((c) => c.subject));
+}
+
+/**
+ * Whether the period may be said with the **humble** verb, the Japanese 謙譲語 (P11-E6): 私は
+ * いただきます, 父と私は参ります. It mirrors the engine's gate (`buildClauseSegments`, `jaRespectRegister`)
+ * so the subject's toggle is offered exactly where it changes the Japanese sentence, and the plan
+ * builder reads it before it writes `VerbPhrase.humble`:
+ *
+ *  - the verb has a humble word (`Concept.humble`), or is BE without a predicative — the existential
+ *    or locative いる, whose おる is the engine's own (`JA_IRU`), not the copula;
+ *  - the clause says its subject and keeps its verb: no command, no citation, no passive;
+ *  - the subject is not the wh-question's gap, which is a throwaway with no one to lower;
+ *  - every subject conjunct that holds a word is the speaker's own side (see isOwnSide).
+ *
+ * A plain clause (relative, content, adverbial) is not asked about: the selection does not know that
+ * a link makes it one, and the engine leaves the flag alone there, as it does the existential's.
+ */
+export function canBeHumble(sel: PhraseSelection): boolean {
+  const verb = sel.verb;
+  if (!verb || sel.imperative || sel.infinitive || sel.verbVoice === "passive") return false;
+  if (!verb.humble && !(verb.id === "BE" && !sel.predicative)) return false;
+  if (askedRole(sel) === "subject") return false;
+  if (!isOwnSide(sel, "subject", sel)) return false;
+  const conjuncts = (sel.subjectConjuncts ?? []).filter((c) => c.subject);
+  return conjuncts.every((c) => isOwnSide(c, "subject", sel));
+}
+
+/**
+ * Whether the noun in `sel[key]` is the speaker's own side, the engine's `isOwnSide`: a 1st-person
+ * pronoun (*I*, *we*), or a relative (`Concept.relative`) whose owner is the speaker (see
+ * ownedBySpeaker). `root` is the period, where a pointed-to owner is resolved.
+ */
+function isOwnSide(sel: PhraseSelection, key: NounKey, root: PhraseSelection): boolean {
+  const word = field<Concept>(sel, key);
+  if (word?.role === "pronoun") return word.person === "1";
+  return word?.role === "noun" && Boolean(word.relative) && ownedBySpeaker(sel, key, root);
+}
+
+/**
+ * Whether the owner of the noun in `sel[key]` makes it the speaker's, as `applyPossessorForm` carries
+ * the engine's `own`: a possessor that points at a 1st-person word (*I and my father*), or a named
+ * owner that is itself the speaker's own side — a relative owned by the speaker, one link at a time
+ * (my brother's wife). A named owner that is a kind of person rather than a person (*a* brother's,
+ * brothers') makes no one one's own, as the engine's early return says.
+ */
+function ownedBySpeaker(sel: PhraseSelection, key: NounKey, root: PhraseSelection): boolean {
+  const ref = field<NounAddress>(sel, POSSESSOR_REF_KEY(key));
+  if (ref) return resolveAntecedent(root, ref)?.features.person === "1";
+  const owner = field<PhraseSelection>(sel, POSSESSOR_KEY(key));
+  if (!owner?.subject) return false;
+  if (owner.subjectDefiniteness === "indefinite" || owner.subjectDefiniteness === "bare") return false;
+  return isOwnSide(owner, "subject", root);
 }

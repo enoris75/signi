@@ -361,6 +361,11 @@ export interface PhraseSelection {
     subjectGlossRelation?: TemporalRelation;
     verb?: Concept;
     verbNegative?: boolean;
+    // When set, the verb is said in the **humble** register, the Japanese 謙譲語 (P11-E6,
+    // VerbPhrase.humble): 私はいただきます. The verb phrase's flag, toggled on the subject's ring, since
+    // whose the subject is decides it; it only reaches the plan where the engine lowers the verb (see
+    // `canBeHumble`), and is kept here for the user when the subject or the verb stops licensing it.
+    verbHumble?: boolean;
     verbTense?: Tense;
     // Grammatical aspect (neutral / progressive / prospective / resultative), orthogonal to
     // tense. Defaults to 'neutral' when absent.

@@ -8,6 +8,7 @@ import type { DiagnosticCode } from '../../src/console/language/diagnostics.ts';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { WorkspaceState } from '../../src/console/language/types.ts';
 import { ids_, ok, print, run, script, sel } from './helpers.ts';
+import { selectionToPlan } from '../../src/components/PhraseBuilder/selectionToPlan/index.ts';
 
 interface Golden {
   line: string;
@@ -305,6 +306,11 @@ const GOLDEN: Record<string, Golden> = {
   passive: { line: '/verb eat /passive /obj food', prints: '/verb ( eat /passive ) /obj ( food )', holds: { verbVoice: 'passive' } },
   not: { line: '/verb eat /not', prints: '/verb ( eat /not )', holds: { verbNegative: true }, misuse: { line: '/subj cat /not', says: { code: 'noTarget', args: { command: 'not' } } } },
   pos: { line: '/verb eat /not /pos', holds: { verbNegative: false }, prints: '/verb ( eat )' },
+  // The humble register (P11-E6), in the verb's bracket after its polarity; `/del humble` takes it back.
+  humble: {
+    line: '/subj 1st /verb eat /not /humble', prints: '/subj ( 1st ) /verb ( eat /not /humble )', holds: { verbHumble: true },
+    misuse: { line: '/subj 1st /verb eat /del humble', says: { code: 'nothingToRemove' } },
+  },
   more: { line: '/subj cat /adj big /more', prints: '/subj ( cat /adj ( big /more ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('more'), misuse: { line: '/subj cat /more', says: { code: 'noTarget', args: { command: 'more', last: { word: 'cat', kind: 'noun' } } } } },
   most: { line: '/verb seem /pred happy /most', prints: '/verb ( seem ) /pred ( happy /most )', check: (s) => expect(sel(s).adjectiveDegrees?.predicative).toBe('most') },
   less: { line: '/subj cat /adj big /less', prints: '/subj ( cat /adj ( big /less ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('less') },
@@ -466,6 +472,35 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P11-E6: /humble sets the verb phrase's flag whatever the subject is; the plan builder writes it only
+// where the engine lowers the verb, and a subject that does not take it keeps it for when one returns.
+describe('/humble and the plan', () => {
+  const humble = (line: string) => selectionToPlan(sel(ok(line))).verbPhrase?.humble;
+
+  it('reaches the plan under a speaker’s-side subject', () => {
+    expect(humble('/subj 1st /verb eat /humble')).toBe(true);
+    expect(humble('/subj ( 1st /pl ) /verb ( eat /humble )')).toBe(true);
+    expect(humble('/subj ( 1st /and ( father /poss #1.subj ) ) /verb ( eat /humble )')).toBe(true);
+  });
+
+  it('is kept, and printed, where the subject does not take it, and left out of the plan', () => {
+    const state = ok('/subj cat /verb eat /humble');
+    expect(sel(state).verbHumble).toBe(true);
+    expect(print(state)).toBe('/subj ( cat ) /verb ( eat /humble )');
+    expect(selectionToPlan(sel(state)).verbPhrase).not.toHaveProperty('humble');
+    // Nor a relative nobody owns, a verb with no humble word, or a command.
+    expect(humble('/subj father /verb eat /humble')).toBeUndefined();
+    expect(humble('/subj 1st /verb run /humble')).toBeUndefined();
+    expect(humble('/command /verb eat /humble')).toBeUndefined();
+  });
+
+  it('is taken back by /del humble', () => {
+    const state = ok('/subj 1st /verb eat /humble /del humble');
+    expect(sel(state)).not.toHaveProperty('verbHumble', true);
+    expect(print(state)).toBe('/subj ( 1st ) /verb ( eat )');
   });
 });
 

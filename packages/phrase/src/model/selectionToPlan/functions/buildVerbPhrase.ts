@@ -2,6 +2,7 @@ import type { Concept, ModalVerb, VerbPhrase } from "@signi/shared";
 import type { PhraseSelection } from "../../interfaces.ts";
 import { modalAdverbFor, modalNegativeFor, MODAL_SLOTS } from "../../slots.ts";
 import { field } from "./field.ts";
+import { canBeHumble } from "../../functions/questionGates.ts";
 
 // A verbless period (a bare noun phrase like "breaking news") has no verb phrase — return
 // undefined so the plan omits it and the engines render just the subject.
@@ -34,5 +35,8 @@ export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
     voice: sel.verbVoice,
     modifier: sel.modifier?.id,
     ...(modals.length > 0 && { modals }),
+    // The humble register reaches the plan only where the engine lowers the verb (P11-E6, see
+    // canBeHumble): a flag left on a subject or a verb that no longer takes it stays in the selection.
+    ...(sel.verbHumble && canBeHumble(sel) && { humble: true }),
   };
 }

@@ -64,6 +64,14 @@ const PREPOSITIONAL_OBJECT_SQL = `
   WHERE vf.form_key = 'object_prep'
 `;
 
+// The verbs with a humble word (謙譲語) in some language (P11-E6 D3, `Concept.humble`).
+const HUMBLE_SQL = `
+  SELECT DISTINCT cvl.concept_id
+  FROM verb_forms vf
+  JOIN concept_verb_links cvl ON cvl.lexeme_id = vf.lexeme_id AND cvl.is_primary = 1
+  WHERE vf.form_key = 'humble'
+`;
+
 // Every concept's per-language definitions — the tooltip gloss a picker shows on hover.
 // Only English is seeded so far; the map ships with the concept list (like labels) so the
 // picker can read the definition in whatever language it's already showing, falling back to
@@ -251,6 +259,14 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     .prepare<[], { concept_a_id: string; concept_b_id: string }>(HYPERNYM_SQL)
     .all();
   const hypernyms = new Map(hypernymRows.map((r) => [r.concept_a_id, r.concept_b_id]));
+  const humbleVerbs = new Set(db.prepare<[], { concept_id: string }>(HUMBLE_SQL).all().map((r) => r.concept_id));
+  // A noun under RELATIVE, walked up its hypernyms (P11-E6 D2, `Concept.relative`). The seed rejects
+  // a cyclic tree, and the walk is bounded anyway.
+  const isRelative = (id: string): boolean => {
+    let at: string | undefined = id;
+    for (let depth = 0; at && depth < 64; depth++, at = hypernyms.get(at)) if (at === 'RELATIVE') return true;
+    return false;
+  };
 
   const pronounMeta = db
     .prepare<[], { concept_id: string; person: string; number: string }>(PRONOUN_META_SQL)
@@ -274,6 +290,8 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     clauseObject: (r.clause_object as ClauseObject | null) ?? undefined,
     clauseForce: clauseForces.get(r.id),
     prepositionalObject: prepositionalObjects.has(r.id) || undefined,
+    humble: humbleVerbs.has(r.id) || undefined,
+    relative: (r.role === 'noun' && isRelative(r.id)) || undefined,
     slot: (r.slot as ConceptSlot | null) ?? undefined,
     mannerRelation: (r.manner_relation as MannerRelation) ?? undefined,
     dimensionRelation: (r.dimension_relation as DimensionRelation) ?? undefined,

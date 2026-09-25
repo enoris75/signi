@@ -370,6 +370,12 @@ describe('what each console command is for', () => {
       de: 'die Polarität eines Verbs festlegen.', es: 'establecer la polaridad de un verbo.', ja: '動詞の極性を設定する。',
       pt: 'definir a polaridade de um verbo.',
     },
+    // `/humble` (P11-E6): the verb's REGISTER, as the tense's TENSE.
+    'purpose.register': {
+      en: "to set a verb's register.", it: 'impostare il registro di un verbo.', fr: "définir le registre d'un verbe.",
+      de: 'das Register eines Verbs festlegen.', es: 'establecer el registro de un verbo.', ja: '動詞の言語使用域を設定する。',
+      pt: 'definir o registro de um verbo.',
+    },
     'purpose.negate': {
       en: 'to negate a verb.', it: 'negare un verbo.', fr: 'nier un verbe.', de: 'ein Verb verneinen.', es: 'negar un verbo.',
       ja: '動詞を否定する。', pt: 'negar um verbo.',

@@ -725,6 +725,21 @@ export interface Concept {
    */
   prepositionalObject?: boolean;
   /**
+   * Whether the verb has a **humble** word (謙譲語) in some language (P11-E6 D3): a lexeme carries a
+   * `humble` form — いただく for EAT, 参る for GO. Derived from the lexemes, not seeded. It is what
+   * offers the subject's humble toggle (`VerbPhrase.humble`); BE's pair is the engine's own and is
+   * counted by the gate, not here. Absent for every other verb.
+   */
+  humble?: boolean;
+  /**
+   * Whether the noun names a **relative** (P11-E6 D2): RELATIVE itself or a concept under it in the
+   * `isA` tree — FATHER, WIFE, MOM. Derived from the hypernym chain, not seeded, and shipped because
+   * the phrase builder has no concept list to walk that chain with. It is what lets one's own
+   * relative take the humble verb (父は参ります); a test holds it equal to the Japanese `kin` column.
+   * Absent for every other concept.
+   */
+  relative?: boolean;
+  /**
    * The slot this concept fills, where that is **not** the one its role implies (see `ConceptSlot`).
    * A picker offering its role must filter it out: *very* is an adverb that never modifies a verb,
    * *Mr* a noun that never fills a noun slot, *own* an adjective that exists only beside a possessor,

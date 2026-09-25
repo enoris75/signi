@@ -113,6 +113,8 @@ export interface BoxContext {
   toggleQuestion: (which: QuestionRole) => void;
   toggleQuestionAnimate: () => void;
   toggleExistential: () => void;
+  /** The humble register, on the subject whose side decides it (P11-E6). */
+  toggleHumble: () => void;
   /** How a verbless period's subject reads, and a time reading's relation (P13). */
   cycleGloss: (step: 1 | -1) => void;
   cycleGlossRelation: (step: 1 | -1) => void;
@@ -521,6 +523,20 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     satellite: /^subjectExistential$/,
     when: (ctx) => ctx.slot === "subject" && has(ctx, "subjectExistential"),
     run: (ctx) => ctx.toggleExistential(),
+  },
+  {
+    // The humble register, the Japanese 謙譲語 (P11-E6): the verb's, on the subject whose side decides
+    // it. K for *kenjō*: H, which the ticket proposed, is the noun's standard since P09-E50, and a
+    // compared relative ("my older father") would offer both. A flip, so it has no backwards twin.
+    id: "subject.humble",
+    scope: "box:noun",
+    keys: ["K"],
+    label: "Humble",
+    labelKey: "register.humble",
+    hint: true,
+    satellite: /^subjectHumble$/,
+    when: (ctx) => ctx.slot === "subject" && has(ctx, "subjectHumble"),
+    run: (ctx) => ctx.toggleHumble(),
   },
   {
     id: "noun.possessor",

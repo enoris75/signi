@@ -788,7 +788,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['ELDER', 'older'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
   ['FAILED', 'failed'], ['FAR', 'far'], ['FEMALE', 'female'],
   ['FIRST', 'first'], ['FUTURE', 'future'], ['GOOD', 'good'],
-  ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HOT_CLIMATE', 'hot'], ['HUNGRY', 'hungry'],
+  ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HOT_CLIMATE', 'hot'], ['HUMBLE_GRAMMAR', 'humble'], ['HUNGRY', 'hungry'],
   ['IMPORTANT', 'important'], ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['KNOWN', 'known'],
   ['LAZY', 'lazy'], ['LINKED', 'linked'], ['LOADED', 'loaded'], ['LONG', 'long'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MANIFOLD', 'manifold'], ['MISSING', 'missing'], ['MULTAL', 'multal'],
@@ -814,6 +814,28 @@ describe('every adjective renders attributively', () => {
       expect(said[lang]).toMatch(/[.。]$/);
       expect(said[lang]).not.toContain('undefined');
     }
+  });
+
+  // P11-E6: the grammar's name for the Japanese 謙譲語, which labels the subject's humble toggle — an
+  // adjective like any other, agreeing where the language agrees (de "bescheidene", Romance plurals).
+  test('HUMBLE_GRAMMAR agrees in every language', () => {
+    expect(cat({ adjectives: ['HUMBLE_GRAMMAR'] })).toMatchObject({
+      en: 'the humble cat eats.',
+      it: 'il gatto umile mangia.',
+      fr: 'le chat humble mange.',
+      de: 'der bescheidene Kater frisst.',
+      es: 'el gato humilde come.',
+      ja: '謙譲の猫は食べます。',
+      pt: 'o gato humilde come.',
+    });
+    expect(sayAll(clause(np('WOMAN', { number: 'plural', definiteness: 'indefinite', adjectives: ['HUMBLE_GRAMMAR'] }), 'EAT'))).toMatchObject({
+      en: 'humble women eat.',
+      it: 'donne umili mangiano.',
+      fr: 'des femmes humbles mangent.',
+      de: 'bescheidene Frauen essen.',
+      es: 'unas mujeres humildes comen.',
+      pt: 'umas mulheres humildes comem.',
+    });
   });
 });
 

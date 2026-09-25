@@ -24,7 +24,7 @@ import type { ConceptSeed } from './types.js';
 type Node = Pick<ConceptSeed, 'id' | 'isA'>;
 
 /** Index the seeds by id, for the walks below. */
-export function conceptIndex(seeds: Node[]): Map<string, Node> {
+export function conceptIndex(seeds: readonly Node[]): Map<string, Node> {
   return new Map(seeds.map((s) => [s.id, s]));
 }
 

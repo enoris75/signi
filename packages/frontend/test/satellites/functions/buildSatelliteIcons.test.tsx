@@ -808,3 +808,38 @@ describe('known bugs: the link controls’ tooltips', () => {
     expect(tooltip(linked)).toBe('t(slot.instrumental): t(status.linked) — t(hint.clickToRemove)');
   });
 });
+
+// P11-E6: the humble register rides the subject's dotted ring as a named direct toggle, like the
+// existential, and does nothing on a builder that was given no handler for it.
+describe('buildSatelliteIcons: the humble register', () => {
+  const EAT = concept('EAT', 'verb', { transitivity: 'transitive', humble: true });
+  const perimeter = (selection: PhraseSelection, onToggleHumble?: () => void) => {
+    const { satellites, shownMap } = build(selection, {});
+    return buildSatelliteIcons({
+      satellites,
+      shownMap,
+      collapsedMainKeys: new Set(),
+      linkBinding: undefined,
+      t,
+      onToggleNumber: vi.fn(),
+      onToggleGender: vi.fn(),
+      onToggleNegative: vi.fn(),
+      onToggleReveal: vi.fn(),
+      onAddConjunct: vi.fn(),
+      onToggleHumble,
+    }).perimeterByNoun['subject'];
+  };
+
+  it('seats it on the subject’s perimeter, and a click flips it', () => {
+    const onToggleHumble = vi.fn();
+    const humble = perimeter({ subject: I, verb: EAT, verbHumble: true }, onToggleHumble)!.humble!;
+    expect(humble).toMatchObject({ key: 'subjectHumble', labelKey: 'register.humble', isSet: true, directToggle: true, named: true });
+    humble.onToggle();
+    expect(onToggleHumble).toHaveBeenCalledOnce();
+  });
+
+  it('offers none where the subject does not take it, or with no handler', () => {
+    expect(perimeter({ subject: CAT, verb: EAT }, vi.fn())?.humble).toBeUndefined();
+    expect(perimeter({ subject: I, verb: EAT })?.humble).toBeUndefined();
+  });
+});

@@ -66,7 +66,7 @@ const NOUN_FIELDS = new Set([
   "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive", "approximator",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction", "correlative"]);
-const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
+const VERB_FIELDS = new Set(["verb", "negative", "humble", "modifier", "tense", "aspect", "voice", "modals"]);
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
 const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control", "infinitiveComplement"]);
 const CLAUSE_FIELDS = new Set(["subject", "verbPhrase", "directObject", "complements"]);
@@ -217,6 +217,7 @@ class Builder {
     if (!verb) return;
     sel.verb = verb;
     if (vp.negative) sel.verbNegative = true;
+    if (vp.humble) sel.verbHumble = true;
     set(sel, "verbTense", vp.tense);
     set(sel, "verbAspect", vp.aspect);
     set(sel, "verbVoice", vp.voice);

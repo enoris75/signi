@@ -45,6 +45,7 @@ import {
   toggleNegative,
   toggleNumber,
   toggleExistential,
+  toggleHumble,
   cycleGlossRelation,
   cycleSubjectGloss,
   cyclePossessorRole,
@@ -100,6 +101,8 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleToggleQuestion: (which: QuestionRole) => onPhraseUpdate((prev) => toggleQuestionRole(prev, which)),
     handleToggleQuestionAnimate: () => onPhraseUpdate(toggleQuestionAnimate),
     handleToggleExistential: () => onPhraseUpdate(toggleExistential),
+    // The humble register (P11-E6), toggled on the subject's ring.
+    handleToggleHumble: () => onPhraseUpdate(toggleHumble),
     // How a verbless period's subject reads, and a time reading's relation (P13).
     handleCycleGloss: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleSubjectGloss(prev, step)),
     handleCycleGlossRelation: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleGlossRelation(prev, step)),

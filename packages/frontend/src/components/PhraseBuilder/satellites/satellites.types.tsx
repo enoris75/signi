@@ -97,6 +97,8 @@ export type PerimeterEntry = {
   question?: SatelliteIcon;
   animacy?: SatelliteIcon;
   existential?: SatelliteIcon;
+  // The humble register (P11-E6), the verb's, on the subject whose side decides it.
+  humble?: SatelliteIcon;
   // How a verbless period's subject reads, and a time reading's relation (P13).
   gloss?: SatelliteIcon;
   glossRelation?: SatelliteIcon;
@@ -123,6 +125,8 @@ export interface BuildSatelliteIconsArgs {
   onToggleQuestion?: (which: QuestionRole) => void;
   onToggleQuestionAnimate?: () => void;
   onToggleExistential?: () => void;
+  // Say the verb in the humble register or take it back (P11-E6).
+  onToggleHumble?: () => void;
   // Move the subject's reading, and a time reading's relation, on by one (P13). A hosted ring's
   // builder has neither, as it has no existential: its phrase is not a period's subject.
   onCycleGloss?: () => void;

@@ -10,6 +10,7 @@ import type {
   Transitivity,
 } from '@signi/shared';
 import { compileDefinition, DefinitionError, definitionVocabulary } from '@signi/phrase';
+import { ancestors, conceptIndex } from './hierarchy.js';
 import type { ConceptSeed } from './types.js';
 
 /**
@@ -39,7 +40,19 @@ export function clauseForceOf(seed: Pick<ConceptSeed, 'id' | 'role' | 'forms'>):
   return force === 'interrogative' || force === 'either' ? force : undefined;
 }
 
-export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
+/** RELATIVE, whose kind every relative is (`Concept.relative`, P11-E6 D2). */
+export const RELATIVE = 'RELATIVE';
+
+/**
+ * Whether a noun names a relative, walking its hypernyms in `byId` (`Concept.relative`, P11-E6 D2).
+ * Without an index nothing is a relative: a seed alone does not know its ancestors.
+ */
+export function isRelativeSeed(seed: Pick<ConceptSeed, 'id' | 'role'>, byId?: ReturnType<typeof conceptIndex>): boolean {
+  if (seed.role !== 'noun' || !byId) return false;
+  return seed.id === RELATIVE || ancestors(seed.id, byId).includes(RELATIVE);
+}
+
+export function seedConcept(seed: Omit<ConceptSeed, 'definition'>, byId?: ReturnType<typeof conceptIndex>): Concept {
   const clauseForce = clauseForceOf(seed);
   const en = seed.forms['en'] ?? {};
   const pronoun = seed.role === 'pronoun';
@@ -53,6 +66,8 @@ export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
     ...(seed.clauseObject ? { clauseObject: seed.clauseObject as ClauseObject } : {}),
     ...(clauseForce ? { clauseForce } : {}),
     ...(seed.role === 'verb' && Object.values(seed.forms).some((f) => 'object_prep' in f) ? { prepositionalObject: true } : {}),
+    ...(seed.role === 'verb' && Object.values(seed.forms).some((f) => 'humble' in f) ? { humble: true } : {}),
+    ...(isRelativeSeed(seed, byId) ? { relative: true } : {}),
     ...(seed.modal ? { modal: true } : {}),
     ...(seed.slot ? { slot: seed.slot as ConceptSlot } : {}),
     ...(pronoun ? { person: (en['person'] ?? '3') as '1' | '2' | '3', number: (en['number'] ?? 'singular') as 'singular' | 'plural' } : {}),
@@ -82,7 +97,8 @@ export function definitionLines(text: string): string {
  * at boot and in every test that loads the corpus — naming the concept, the reason and the line.
  */
 export function compileSeedDefinitions(seeds: readonly ConceptSeed[]): DefinedConceptSeed[] {
-  const vocab = definitionVocabulary(seeds.map(seedConcept));
+  const byId = conceptIndex(seeds);
+  const vocab = definitionVocabulary(seeds.map((seed) => seedConcept(seed, byId)));
   return seeds.map(({ definition, ...seed }) => {
     if (definition === undefined) return seed;
     try {

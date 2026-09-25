@@ -1,7 +1,7 @@
 # P11-E6. The humble verb — a register toggle on the subject's ring
 
 **Feature:** the canvas, keyboard and console control for `VerbPhrase.humble`, the Japanese 謙譲語
-that [P11-E1](Z-done/P11-E1-japanese-honorific-verbs.md) shipped plan-only: 私は**いただきます**,
+that [P11-E1](P11-E1-japanese-honorific-verbs.md) shipped plan-only: 私は**いただきます**,
 父と私は**参ります**. The honorific (尊敬語) needs no control. The engine applies it by itself to
 someone else's relative.
 **Shape:** no engine grammar. One boolean on the selection. A toggle on the subject's dotted ring,
@@ -11,8 +11,8 @@ concept.
 **Scope:** `@signi/phrase` model and console language, the subject ring (`rawSatellites.tsx`,
 `buildSatelliteIcons.ts`, `ringSpecs.ts`), keymap, one derived `Concept` fact from the backend, one
 UI string. All 7 languages for the label. The sentences change in Japanese only.
-**Status:** **planning, unscheduled**. Filed 2026-09-25 from P11's plan-only constructs. The
-engine side is [P11-E1](Z-done/P11-E1-japanese-honorific-verbs.md).
+**Status:** shipped 2026-09-25. Filed 2026-09-25 from P11's plan-only constructs. The engine side
+is [P11-E1](P11-E1-japanese-honorific-verbs.md).
 
 Engine output at HEAD, from hand-written plans (rendered 2026-09-25 with `sayAll` on an in-memory
 seed). "my" is a pronominal 1st-person possessor, the shape the builder writes when a possessor points
@@ -41,6 +41,88 @@ More Japanese from the same probe, all with `humble` set:
   - 食べてください: a command.
   - 食べ物は私に食べられます: the passive.
 
+## Done
+
+Shipped 2026-09-25. No engine change: the model, the console, the canvas, the keymap, one derived
+`Concept` fact pair from the backend, one seeded concept and two UI strings. The gate is
+[`canBeHumble`](../../../../../packages/phrase/src/model/functions/questionGates.ts) beside
+`canBeExistential`, and the plan builder reads it in
+[`buildVerbPhrase`](../../../../../packages/phrase/src/model/selectionToPlan/functions/buildVerbPhrase.ts).
+
+Built on the canvas or typed in the console, with the toggle on (the six other rows are what they
+were without it — `e2e/humble.spec.ts` compares them):
+
+| period | ja |
+|---|---|
+| I eat the food | 私は食べ物を**いただきます**。 |
+| I eat | 私は**いただきます**。 |
+| we eat? | 私たちは**いただきます**か？ |
+| I and my father go (`/subj ( 1st /and [ father /poss #1.subj ] )`) | 私と父は**参ります**。 |
+| I and my brother's wife go (a chain) | 私と兄弟の妻は**参ります**。 |
+| I am in the house (BE with a place) | 私は家に**おります**。 |
+| I run (toggle withdrawn; the flag is kept, out of the plan) | 私は走ります。 |
+| the cat eats (toggle withdrawn) | 猫は食べます。 |
+
+What landed differently from the design below:
+
+1. **Two derived facts, not one.** `Concept.humble` (D3) is derived in `listConcepts` from a primary
+   lexeme's `humble` column: COME, DO, DRINK, EAT, GIVE, GO, SAY. D2's RELATIVE test also needed a
+   field, `Concept.relative`: the builder's selection holds `Concept` objects that carry only their
+   direct `isA`, and neither the canvas's satellites nor the plan builder has a concept list to walk
+   the chain with. So `listConcepts` walks it (RELATIVE and everything under it) and ships the answer.
+   The seed side (`seedConcept`, which the definition compiler reads) derives both too, and
+   `definitionText.test.ts` holds the two sides equal. The D2 pin is there as well: the nouns that are
+   `relative` are exactly the nouns whose Japanese lexeme has `kin: '1'` (34 of 34).
+2. **The key is K, not H.** H has been the noun's standard of comparison in `box:noun` since P09-E50,
+   and a compared relative ("my older father") would offer both. K is for *kenjō*.
+3. **The owner test is one recursive predicate.** `isOwnSide(sel, key, root)` is the engine's
+   `isOwnSide`: a pronoun is the speaker's side when it is 1st person, a noun when it is `relative` and
+   `ownedBySpeaker`. `ownedBySpeaker` is a pointed-to owner that resolves to the 1st person, or a named
+   owner that is itself `isOwnSide`, one link at a time. A named owner that is a kind of person
+   (indefinite or bare) makes no one one's own, which mirrors `applyPossessorForm`'s early return
+   (私と兄弟の妻は行きます for *a* brother's wife). The subject slot must hold a word, every conjunct
+   that holds one must pass, and the subject must not be the wh-question's gap (`askedRole`).
+4. **`/humble` needed a purpose.** A command that attaches to a word says what it is for
+   (`help.test.ts`), so `purpose.register` joins the catalogue: `setterOf('REGISTER', 'VERB')`, "to set
+   a verb's register", ja 動詞の言語使用域を設定する. `register.humble` is HUMBLE_GRAMMAR capitalized: en
+   *Humble*, it *Umile*, fr *Humble*, de *Bescheiden*, es/pt *Humilde*, ja 謙譲. The console lists
+   `/humble` under a topic of its own, `register`, named by that label.
+5. **HUMBLE_GRAMMAR's definition** is "(a verb) that describes the speaker's actions", in all seven
+   (it *che descrive le azioni del parlante*, ja 話し手の動作を描写する). What sets the humble apart
+   from the honorific is whose actions it says, and the corpus has no word for respect or lowering to
+   say more with.
+6. **The completion list holds 60 rows, not 50.** `/humble` joined the verb's commands, which pushed
+   the period's `/obj` off the end of a verb's list (`complete.test.ts`). The list grows to hold what a
+   word offers.
+7. **The ring did not grow.** Measured with FIRST_PERSON EAT FOOD against FIRST_PERSON SEE FOOD (no
+   toggle), and with "I and my father are in the house" (the question mark, the existential and the
+   humble fanned at `QUESTION_HOUR`): the subject group is 164.9px in each, the key badges Q, E and K do
+   not touch, and the object stays on the subject's row (`e2e/humble.spec.ts` pins the row).
+8. **The round-trip walk fills a slot to reach it.** A 1st-person subject of a humble verb is rare
+   among random words (never in 5,000 seeds), so the walk's humble op may first fill the one empty slot
+   that makes it so, as a user would: *I* or *we* for a humble verb, or a humble verb for an *I*. The
+   gate test counts the humble plans the walk reaches. Adding the op moved the walk, which then reached
+   two states it had not: `contentSubject` now needs 12,000 seeds rather than 8,000, and a passive
+   wh-question over BELIEVE, whose test vocabulary lacked the `prepositionalObject` the API serves (it
+   *crede al cane*). The test vocabulary now carries it.
+
+Not done here, and why:
+
+- **"My father comes" alone.** The owner picker takes no pronoun until [P11-E9](P11-E9-pronoun-owner.md).
+  The owner test needs no change for it: a named owner that is a 1st-person pronoun is already the
+  speaker's side (`isOwnSide`), so once E9 lets one be picked, "my father" passes one link down.
+- **A plain clause keeps the toggle.** A period linked in as a relative, content or adverbial clause
+  still offers it, and the engine ignores the flag there, as it does the existential's.
+- **BE stays hand-coded in the gate**, as it is in `canBeExistential`, not a seeded flag.
+
+Tests: `questionGates.test.ts` (the gate, offered and refused, and the plan's stale-mark rule),
+`planToWorkspaceHumble.test.ts`, `rawSatellites.test.tsx`, `buildSatelliteIcons.test.tsx`,
+`ringSpecs.test.ts` (the fan of four), `phraseReducers.test.ts`, `keymap.test.ts`, the console's
+`golden`, `coverage`, `help`, `complete` and `roundTrip` (green at `SEEDS=5000`),
+`phraseCommands.test.ts`, the backend's `definitionText.test.ts` (the two facts and the kin pin) and
+`uiStrings.test.ts`, the engine's `adjectives.test.ts` (HUMBLE_GRAMMAR's agreement) and
+`command-purposes.test.ts`, and `e2e/humble.spec.ts`.
+
 ## Why
 
 E1 made the humble opt-in (its D4), because humility is addressed to a listener the plan does not
@@ -52,67 +134,67 @@ one thing E1 shipped that the user cannot see.
 
 Verified at HEAD (1d8f359b), 2026-09-25, with a clean working tree.
 
-- **The plan field.** [`VerbPhrase.humble?: boolean`](../../../../packages/shared/src/index.ts#L1325)
+- **The plan field.** [`VerbPhrase.humble?: boolean`](../../../../../packages/shared/src/index.ts#L1325)
   is copied into the resolved verb phrase at
-  [`resolveVerbPhrase.ts:89`](../../../../packages/engine/src/translator/functions/resolveVerbPhrase.ts#L89).
+  [`resolveVerbPhrase.ts:89`](../../../../../packages/engine/src/translator/functions/resolveVerbPhrase.ts#L89).
   Only Japanese reads it. `grep -rn humble packages/frontend/src packages/phrase/src` returns
   nothing.
 - **The engine's gate** has two halves.
-  - [`buildClauseSegments.ts:197`](../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L197)
+  - [`buildClauseSegments.ts:197`](../../../../../packages/engine/src/languages/ja/buildClauseSegments.ts#L197)
     applies no register to a plain clause (a relative, content or adverbial clause, or a definition),
     to a command or an infinitive (`dropsSubject`), to a suffix causative, or to the passive.
-  - [`jaRespectRegister`](../../../../packages/engine/src/languages/ja/jaRespectRegister.ts#L43)
+  - [`jaRespectRegister`](../../../../../packages/engine/src/languages/ja/jaRespectRegister.ts#L43)
     returns `humble` only when **every** subject conjunct passes
-    [`isOwnSide`](../../../../packages/engine/src/languages/ja/jaRespectRegister.ts#L29). That means
+    [`isOwnSide`](../../../../../packages/engine/src/languages/ja/jaRespectRegister.ts#L29). That means
     the 1st person, or a `kin` head marked `own`. `own` is set by
-    [`applyPossessorForm`](../../../../packages/engine/src/translator/functions/applyPossessorForm.ts#L108)
+    [`applyPossessorForm`](../../../../../packages/engine/src/translator/functions/applyPossessorForm.ts#L108)
     when the possessor is a 1st-person pronoun, or is itself one's own relative (私の兄の妻).
   - The honorific wins over the flag: someone else's relative is raised whatever the plan says.
     `honorific-verbs.test.ts` pins that, and the whole gate, including "a vocative leaves the
-    register alone" ([L224](../../../../packages/engine/test/honorific-verbs.test.ts#L224)).
+    register alone" ([L224](../../../../../packages/engine/test/honorific-verbs.test.ts#L224)).
 - **Which verbs have a humble word:** EAT, DRINK, DO, SAY, COME, GO and GIVE carry a `humble`
   paradigm on their Japanese lexeme (probed from `concepts`). BE's pair is on the engine's
-  [`JA_IRU`](../../../../packages/engine/src/languages/ja/ja.consts.ts#L372), so only an existential
+  [`JA_IRU`](../../../../../packages/engine/src/languages/ja/ja.consts.ts#L372), so only an existential
   or locative BE takes it. The copula does not.
 - **`kin` is a Japanese lexeme column, not a `Concept` field.** The builder cannot see it. It can
-  see [`isA`](../../../../packages/shared/src/index.ts#L727). All 34 nouns with `kin: '1'` descend
+  see [`isA`](../../../../../packages/shared/src/index.ts#L727). All 34 nouns with `kin: '1'` descend
   from RELATIVE, and every noun under RELATIVE has `kin: '1'` (probed).
 - **The builder can say "I" but not "my" on its own.** A named owner takes a noun only, never a
   pronoun, in the canvas
-  ([`slotCategories`](../../../../packages/phrase/src/model/interfaces.ts#L689)) and in the console
-  ([`wordSpecFor("subject", "possessor")`](../../../../packages/phrase/src/language/apply.ts#L710)).
+  ([`slotCategories`](../../../../../packages/phrase/src/model/interfaces.ts#L689)) and in the console
+  ([`wordSpecFor("subject", "possessor")`](../../../../../packages/phrase/src/language/apply.ts#L710)).
   A 1st-person possessor exists only as a possessor that **points at** an *I* elsewhere in the
-  period ([`CorefPickContext.isEligible`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55),
-  [`resolveAntecedent`](../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts)).
+  period ([`CorefPickContext.isEligible`](../../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55),
+  [`resolveAntecedent`](../../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts)).
   So the humble subjects the builder can reach are *I* / *we*, and a relative whose owner points at
   an *I*, as in "I and my father go". A lone "my father comes" cannot be built today. See *Out of
   scope*.
 - **The closest existing control is the existential.**
   - `existential?: boolean` sits on the selection
-    ([`interfaces.ts:296`](../../../../packages/phrase/src/model/interfaces.ts#L296)).
-  - It is gated by [`canBeExistential`](../../../../packages/phrase/src/model/functions/questionGates.ts#L72).
+    ([`interfaces.ts:296`](../../../../../packages/phrase/src/model/interfaces.ts#L296)).
+  - It is gated by [`canBeExistential`](../../../../../packages/phrase/src/model/functions/questionGates.ts#L72).
   - It reaches the plan only through that gate
-    ([`selectionToPlan.ts:64`](../../../../packages/phrase/src/model/selectionToPlan/functions/selectionToPlan.ts#L64)).
+    ([`selectionToPlan.ts:64`](../../../../../packages/phrase/src/model/selectionToPlan/functions/selectionToPlan.ts#L64)).
   - Its control is the `subjectExistential` satellite
-    ([`rawSatellites.tsx:311`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L311)).
+    ([`rawSatellites.tsx:311`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L311)).
     It rides the subject's dotted ring at `QUESTION_HOUR`
-    ([`ringSpecs.ts:81`](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L81),
-    [L253](../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L253)).
+    ([`ringSpecs.ts:81`](../../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L81),
+    [L253](../../../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts#L253)).
   - Its key is `E` on the subject box
-    ([`keymap.ts:503`](../../../../packages/frontend/src/keyboard/keymap.ts#L503)).
+    ([`keymap.ts:503`](../../../../../packages/frontend/src/keyboard/keymap.ts#L503)).
   - In the console it is `/there`
-    ([`commands.ts:856`](../../../../packages/phrase/src/language/commands.ts#L856)), taken back by
-    `/del there` ([`apply.ts:1124`](../../../../packages/phrase/src/language/apply.ts#L1124)).
+    ([`commands.ts:856`](../../../../../packages/phrase/src/language/commands.ts#L856)), taken back by
+    `/del there` ([`apply.ts:1124`](../../../../../packages/phrase/src/language/apply.ts#L1124)).
 - **The closest verb flag is polarity.** `verbNegative` is set by `/not` / `/pos` inside the verb's
-  bracket ([`commands.ts:750`](../../../../packages/phrase/src/language/commands.ts#L750), printed by
-  [`verbBlock`](../../../../packages/phrase/src/language/print.ts#L293)). Voice is the precedent for a
+  bracket ([`commands.ts:750`](../../../../../packages/phrase/src/language/commands.ts#L750), printed by
+  [`verbBlock`](../../../../../packages/phrase/src/language/print.ts#L293)). Voice is the precedent for a
   verb setting whose control sits on another word's ring: `/voice` is in the verb bracket, and its
   control and `V` are on the object
-  ([`keymap.ts:457`](../../../../packages/frontend/src/keyboard/keymap.ts#L457)).
+  ([`keymap.ts:457`](../../../../../packages/frontend/src/keyboard/keymap.ts#L457)).
 - **The verb's solid ring is full.** It has six controls, and a seventh pushes the object off its row
   (measured 2026-09-21 for A01's voice).
 - **`planToWorkspace`** checks a verb phrase against
-  [`VERB_FIELDS`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L67),
+  [`VERB_FIELDS`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L67),
   which has no `humble`, so a humble plan is reported unsupported. No seed definition uses one.
 
 ## Design
@@ -171,7 +253,7 @@ A toggle on 私は走ります would change nothing in any language. By the rule
 because the grammar licenses it, it should not appear there. The builder cannot see the Japanese
 lexeme's `humble` column either.
 
-**Recommendation:** `listConcepts` ([`conceptList.ts`](../../../../packages/backend/src/conceptList.ts#L173))
+**Recommendation:** `listConcepts` ([`conceptList.ts`](../../../../../packages/backend/src/conceptList.ts#L173))
 derives `Concept.humble?: true` for a verb whose primary lexeme in any language has a `humble` form.
 Today that is the seven verbs above. The gate adds BE by hand, because its pair is the engine's
 `JA_IRU`: BE counts when the period has no `predicative` complement, the same hardcoded BE that
@@ -188,7 +270,7 @@ unchanged by the flag, and only the Japanese row moves.
    a German user building for the Japanese row loses the control.
 2. **Always offer it when D2 and D3 hold.** Clicking it visibly changes the ja row.
 
-**Recommendation: (2).** This is the reverse of [P09-E46](../P09-core-vocabulary/Z-done/P09-E46-both-and-toggle.md)'s
+**Recommendation: (2).** This is the reverse of [P09-E46](../../P09-core-vocabulary/Z-done/P09-E46-both-and-toggle.md)'s
 Japanese complements, where the chip is offered because six languages spell it and one does not.
 The honorific stays automatic and gets no control, as E1 D4 decided. The toggle does not undo it:
 with *your mother*, D2 fails and the toggle is not offered.
@@ -243,7 +325,7 @@ point:** whether German wants *demütig* or a noun-based label (*Bescheidenheits
 1. **Backend and shared:** `Concept.humble?: true`, derived in `listConcepts` (D3). The kin ⇔
    RELATIVE test (D2). Rebuild the shared dist.
 2. **Corpus:** `/seed HUMBLE_GRAMMAR` with its definition (D6), and `register.humble` in
-   [`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts). It must render in all seven at boot.
+   [`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts). It must render in all seven at boot.
 3. **Model** (`packages/phrase/src/model`): `verbHumble`, the reducers, `canBeHumble`,
    `buildVerbPhrase`, `VERB_FIELDS` (D2, D5).
 4. **Canvas:** the `subjectHumble` satellite in `rawSatellites.tsx`, its perimeter kind in

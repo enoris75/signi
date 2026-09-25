@@ -1067,3 +1067,33 @@ describe('the owner’s question', () => {
     expect(find(rawSatellites({ subject: CAT, verb: SEE }, 'en', t), 'possessorQuestion')).toBeUndefined();
   });
 });
+
+// P11-E6: the humble register rides the subject's ring, offered where the engine lowers the verb — a
+// subject on the speaker's side and a verb with a humble word — and named HUMBLE_GRAMMAR's label.
+describe('the humble register', () => {
+  const EAT = concept('EAT', 'verb', { transitivity: 'transitive', humble: true });
+  const humble = (sel: PhraseSelection) => satellite(sel, 'subjectHumble');
+
+  it('is a direct toggle on the subject, labelled by its catalogue key', () => {
+    expect(humble({ subject: I, verb: EAT })).toMatchObject({
+      parent: 'subject',
+      labelKey: 'register.humble',
+      available: true,
+      hasValue: false,
+      directToggle: true,
+    });
+    expect(humble({ subject: I, verb: EAT, verbHumble: true }).hasValue).toBe(true);
+  });
+
+  it('is withdrawn where the subject or the verb does not take it, and keeps its value', () => {
+    expect(humble({ subject: CAT, verb: EAT }).available).toBe(false);
+    expect(humble({ subject: I, verb: SEE }).available).toBe(false);
+    expect(humble({ subject: CAT, verb: EAT, verbHumble: true })).toMatchObject({ available: false, hasValue: true });
+  });
+
+  it('sits in the subject’s control list, and with the existential’s BE when it says where I am', () => {
+    const BE = concept('BE', 'verb', { transitivity: 'intransitive', complements: ['predicative', 'locative'] });
+    expect(offered({ subject: I, verb: EAT }, 'subject')).toContain('subjectHumble');
+    expect(offered({ subject: I, verb: BE, locative: HOUSE }, 'subject')).toContain('subjectHumble');
+  });
+});

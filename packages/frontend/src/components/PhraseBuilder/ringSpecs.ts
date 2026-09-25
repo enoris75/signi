@@ -83,7 +83,8 @@ const TOOLBAR_HOUR = 12;
 const RELATIONS_HOUR = 6;
 // The clause's facts that ride a noun's dotted ring (P09-E12): the wh-question's mark with its who /
 // what chip, and the subject's existential, which exclude each other and so share the hour — lower
-// left, beside the relations and clear of the collapse control above.
+// left, beside the relations and clear of the collapse control above. The humble register (P11-E6)
+// fans in with them: it may sit with the existential (an *I* at home), not with an asked subject.
 const QUESTION_HOUR = 8;
 const COMPLEMENTS_HOUR = 6;
 const DIRECT_OBJECT_HOUR = 3;
@@ -98,7 +99,7 @@ export const clearControlKey = (mainKey: string) => `clear:${mainKey}`;
 export const collapseControlKey = (label: string) => `collapse:${label}`;
 export const removeControlKey = (label: string) => `remove:${label}`;
 export const perimeterControlKey = (
-  kind: "relative" | "headless" | "possessor" | "possessorRole" | "standard" | "examples" | "conjunct" | "incoming" | "question" | "animacy" | "existential" | "gloss" | "glossRelation",
+  kind: "relative" | "headless" | "possessor" | "possessorRole" | "standard" | "examples" | "conjunct" | "incoming" | "question" | "animacy" | "existential" | "humble" | "gloss" | "glossRelation",
   noun: string,
 ) => `${kind}:${noun}`;
 export const toolbarControlKey = (type: string, value: string) => `toolbar:${type}:${value}`;
@@ -263,7 +264,7 @@ export function buildRingSpecs({
         }),
       );
       // A reading and its relation share the hour: only a verbless period has them, and it asks nothing.
-      const asks = (["question", "animacy", "existential", "gloss", "glossRelation"] as const).filter((kind) => entry?.[kind]);
+      const asks = (["question", "animacy", "existential", "humble", "gloss", "glossRelation"] as const).filter((kind) => entry?.[kind]);
       asks.forEach((kind, i) =>
         outer.push({
           key: perimeterControlKey(kind, mainKey),

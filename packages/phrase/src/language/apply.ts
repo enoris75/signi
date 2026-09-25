@@ -81,6 +81,7 @@ import {
   setInfinitive,
   setInterrogative,
   setExistential,
+  setHumble,
   setQuestionAnimate,
   setQuestionRole,
   setSentiment,
@@ -641,6 +642,11 @@ class Run {
         return this.relative(item, w);
       case "headless":
         this.queue.push({ kind: "headless", containerId: w.ref.containerId, nounKey: w.address!, headless: true, span: item });
+        this.touch(w.ref);
+        return;
+      // The humble register (P11-E6): the verb phrase's flag, whoever the subject is.
+      case "humble":
+        this.updateRoot(w.ref.containerId, (s) => setHumble(s, true));
         this.touch(w.ref);
         return;
       // A demonstrative pointing away from the rest (P13).
@@ -1222,6 +1228,13 @@ class Run {
       case "there": {
         if (!this.root(containerId).existential) fail(span, coded("nothingToRemove"));
         this.updateRoot(containerId, (s) => setExistential(s, false));
+        return;
+      }
+      // The humble register (P11-E6), the verb phrase's: the period's, whatever is in reach.
+      case "humble": {
+        if (!this.root(containerId).verbHumble) fail(span, coded("nothingToRemove"));
+        this.updateRoot(containerId, (s) => setHumble(s, false));
+        this.touch({ containerId, slot: "verb" });
         return;
       }
     }

@@ -120,6 +120,8 @@ export type Action =
   | { kind: "question" }
   /** The period made an existential, "there is a cat": `/there` (P09-E12). */
   | { kind: "existential" }
+  /** The verb said in the humble register, the Japanese 謙譲語: `/humble` (P11-E6). */
+  | { kind: "humble" }
   | { kind: "new" }
   | { kind: "del" }
   | { kind: "app"; app: AppCommand };
@@ -886,6 +888,24 @@ export const COMMANDS: readonly CommandDef[] = [
   // ("/verb ( go /not /modal ( want /not ) )"), exactly as /adv reaches the verb's adverb or a modal's.
   setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", POLARITY_SATELLITES, ["setNegative"]),
   setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", POLARITY_SATELLITES, ["setNegative"]),
+  // The humble register, the Japanese 謙譲語 (P11-E6): 私は**いただきます**. The verb phrase's flag, so it is
+  // said in the verb's bracket after its polarity, though its control rides the subject's ring — whose
+  // the subject is decides it, as the object decides the voice. It sets the flag whatever the subject
+  // is, and the plan builder leaves it out where the engine would not lower the verb (canBeHumble).
+  // Taken back by `/del humble`: the plain register is the default, which the printer never writes.
+  {
+    name: "humble",
+    aliases: [],
+    group: "verb",
+    description: "humble",
+    descriptionKey: "register.humble",
+    purposeKey: "purpose.register",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "humble" },
+    satellites: /^subjectHumble$/,
+    reducers: ["setHumble"],
+  },
 
   // ── Adjective ─────────────────────────────────────────────────────────────
   ...(
@@ -1342,6 +1362,7 @@ export type TopicId =
   | "aspect"
   | "voice"
   | "polarity"
+  | "register"
   | "degree"
   | "relation"
   | "gloss"
@@ -1381,6 +1402,8 @@ export const TOPICS: readonly Topic[] = [
   { id: "aspect", label: "aspect", labelKey: "satellite.aspect", part: "verb" },
   { id: "voice", label: "voice", labelKey: "satellite.voice", part: "verb" },
   { id: "polarity", label: "polarity", labelKey: "satellite.polarity", part: "verb" },
+  // The register the verb is said in (P11-E6): the humble alone, which names the topic.
+  { id: "register", label: "humble", labelKey: "register.humble", part: "verb" },
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
   { id: "gloss", label: "meaning", labelKey: "gloss.name", part: "noun" },
@@ -1425,6 +1448,8 @@ export function topicOf(def: CommandDef): Topic {
           ? "relative"
           : a.kind === "numeral" || a.kind === "contrast" || a.kind === "approximator"
             ? "determiner"
+        : a.kind === "humble"
+          ? "register"
         : a.kind === "conjunct"
           ? "coordination"
           : a.kind === "setting"

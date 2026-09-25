@@ -3597,6 +3597,22 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'There is something',
   },
+  // The humble register (P11-E6), the Japanese 謙譲語: the subject's toggle beside the existential, and
+  // `/humble` in the console. Six languages print the plain sentence, so it cannot be a demo phrase as
+  // the existential's is; it is named, as `voice.value.passive` is — HUMBLE_GRAMMAR, en "Humble", it
+  // "Umile", de "Bescheiden", ja 謙譲.
+  'register.humble': {
+    word: 'HUMBLE_GRAMMAR',
+    format: { capitalize: true },
+    fallback: 'Humble',
+  },
+  // What `/humble` is for: "to set a verb's register", REGISTER as the tense's TENSE (it "impostare il
+  // registro di un verbo", ja 動詞の言語使用域を設定する).
+  'purpose.register': {
+    plan: setterOf('REGISTER', 'VERB'),
+    format: { stripPeriod: true },
+    fallback: "to set a verb's register",
+  },
   // What `/plain` sets: the POSITIVE_DEGREE, an adjective compared with nothing (it "Grado positivo", de
   // "Positiv", pt "Grau normal", ja 原級). A noun of its own: `degree.value.positive` cites the degree on
   // an adjective, where the positive adds nothing ("—"), and POSITIVE is the polarity (ja 肯定).
