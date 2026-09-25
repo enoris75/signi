@@ -109,7 +109,7 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | ~~`InfinitiveComplement.infinitiveComplement`~~ — an infinitive's own `/to`, ✅ | 1 |
 | ~~`complements.cause.definiteness`~~ — the cause's determiner, ✅ 4c0511aa | 1 |
 | ~~`complements.direction.specifiers.path`~~ — `/in` on `/dir`, `/goal` back, ✅ | 1 |
-| `NounPhrase.contrastive` | 1 |
+| ~~`NounPhrase.contrastive`~~ — `/contrast`, ✅ | 1 |
 | `PhrasePlan.adverbialGloss` | 1 |
 | ~~`NounGroup of adjectives`~~ — a predicate's conjuncts read as the predicate, ✅ | 2 |
 
@@ -131,6 +131,7 @@ control, console command, printer case, catalogue strings and tests:
 | A direction's path, and an infinitive's own infinitive | `/dir ( AIR /in )`, `/goal` for the plain "to"; `/to` from a period that is itself an infinitive | the direction's toolbar (To, then the path relations); the Infinitive phrase row, the one an infinitive period's menu offers | `directionSpecifier`; `canStartSubordinate` lets an infinitive govern an infinitive (LET, "to be allowed to act") and nothing else, and `attachSubordinate` folds it into `InfinitiveComplement.infinitiveComplement`. 561 → 563. |
 | Joined predicate adjectives | `/pred ( male /or female )` — a predicate's conjunct is read as the predicate is, a noun or an adjective | a predicate's conjunct ring picks with the predicate's picker (Noun · Adjective) | `conjunctSpec` for the console and the printer; `predicateHead` for the ring. NEUTER, NEUTRAL. 563 → 565. |
 | A numeral | `/num 24` after the noun's determiner; `/del num` | a Number field under the determiner menu's Quantity section | `numerals` keyed by noun block, dropped with the noun. A value that is no whole number says "Choose a value". DAY, WEEK, YEAR. 565 → 568. |
+| A demonstrative pointing away from the rest | `/contrast` on a *this* / *that*; `/del contrast` | a Distance switch under the determiner menu's Deixis heading, live while *this* or *that* is chosen | `contrastives` by noun block, dropped when the determiner leaves the two. Only French shows it (*ce lieu-là*). THERE. 568 → 569. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a

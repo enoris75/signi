@@ -150,6 +150,13 @@ const GOLDEN: Record<string, Golden> = {
     holds: { subject: 'SPEED', subjectGloss: 'manner' },
     misuse: { line: '/verb eat /obj food /gloss manner', says: { code: 'noTarget', args: { command: 'gloss' } } },
   },
+  // A demonstrative pointing away from the rest (P13): only on *this* or *that*.
+  contrast: {
+    line: '/subj house /that /contrast',
+    prints: '/subj ( house /that /contrast )',
+    check: (s) => expect(sel(s).contrastives).toEqual({ subject: true }),
+    misuse: { line: '/subj house /contrast', says: { code: 'noTarget', args: { command: 'contrast' } } },
+  },
   // A cardinal numeral counting a noun (P13), after its determiner; /del num takes it back.
   num: {
     line: '/subj cat /pl /num 12',

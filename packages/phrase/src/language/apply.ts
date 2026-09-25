@@ -57,6 +57,7 @@ import {
 } from "../model/linkRules.ts";
 import {
   setNumeral,
+  setContrastive,
   addConjunct,
   applyClear,
   applyConceptSelect,
@@ -625,6 +626,11 @@ class Run {
         this.queue.push({ kind: "headless", containerId: w.ref.containerId, nounKey: w.address!, headless: true, span: item });
         this.touch(w.ref);
         return;
+      // A demonstrative pointing away from the rest (P13).
+      case "contrast":
+        this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setContrastive(s, w.which!, true));
+        this.touch(w.ref);
+        return;
       // A cardinal numeral (P13): a whole number, the engine's words running to 12 and 24.
       case "numeral": {
         const text = item.word?.text.trim() ?? "";
@@ -1060,6 +1066,14 @@ class Run {
         );
         if (!w) fail(span, coded("noRelativeToRemove"));
         this.queue.push({ kind: "unlink", link: "relative", containerId, nounKey: w!.address!, span: item });
+        this.touch(w!.ref);
+        return;
+      }
+      // A demonstrative's contrast (P13): the closest noun that has one.
+      case "contrast": {
+        const w = closest((x) => x.kind === "noun" && Boolean(x.slice.contrastives?.[x.which!]));
+        if (!w) fail(span, coded("nothingToRemove"));
+        this.updateSlice(containerId, w!.ref.slice, (s) => setContrastive(s, w!.which!, false));
         this.touch(w!.ref);
         return;
       }

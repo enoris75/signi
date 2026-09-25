@@ -252,6 +252,11 @@ describe('what each console command is for', () => {
       fr: "définir la quantité d'un nom.", de: 'die Menge eines Substantivs festlegen.',
       es: 'establecer la cantidad de un sustantivo.', ja: '名詞の数量を設定する。', pt: 'definir a quantidade de um substantivo.',
     },
+    'purpose.contrast': {
+      en: "to set a determiner's distance.", it: 'impostare la distanza di un determinante.',
+      fr: "définir la distance d'un déterminant.", de: 'die Entfernung eines Determinativs festlegen.',
+      es: 'establecer la distancia de un determinante.', ja: '限定詞の距離を設定する。', pt: 'definir a distância de um determinante.',
+    },
     'purpose.condition': {
       en: 'to add a condition to a period.', it: 'aggiungere una condizione a un periodo.',
       fr: 'ajouter une condition à une période.', de: 'eine Bedingung zu einem Satzgefüge hinzufügen.',

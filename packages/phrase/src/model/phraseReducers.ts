@@ -115,6 +115,11 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
   delete sel[`${which}Definiteness` as keyof PhraseSelection];
   delete sel[POSSESSOR_KEY(which)];
   delete sel[POSSESSOR_REF_KEY(which)];
+  if (sel.contrastives?.[which]) {
+    const { [which]: _contrast, ...rest } = sel.contrastives;
+    if (Object.keys(rest).length > 0) sel.contrastives = rest;
+    else delete sel.contrastives;
+  }
   if (sel.numerals?.[which] !== undefined) {
     const { [which]: _count, ...others } = sel.numerals;
     if (Object.keys(others).length > 0) sel.numerals = others;
@@ -441,7 +446,19 @@ export function setDefiniteness(
   which: NounKey,
   value: Definiteness,
 ): PhraseSelection {
-  return { ...prev, [`${which}Definiteness`]: value };
+  const next: PhraseSelection = { ...prev, [`${which}Definiteness`]: value };
+  // A contrast is the demonstratives' alone (P13).
+  return value === "this" || value === "that" ? next : setContrastive(next, which, false);
+}
+
+// Point a *this* / *that* determiner at one of a set, away from the rest (P13), or take that back.
+export function setContrastive(prev: PhraseSelection, which: NounKey, contrastive: boolean): PhraseSelection {
+  if (Boolean(prev.contrastives?.[which]) === contrastive) return prev;
+  const { [which]: _old, ...others } = prev.contrastives ?? {};
+  const contrastives = contrastive ? { ...others, [which]: true } : others;
+  const next: PhraseSelection = { ...prev, contrastives };
+  if (Object.keys(contrastives).length === 0) delete next.contrastives;
+  return next;
 }
 
 // Cycle a noun-modifier's semantic relation (feature → purpose → material → feature),

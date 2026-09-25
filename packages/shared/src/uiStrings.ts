@@ -1105,6 +1105,9 @@ export const UI_STRINGS = defineUiStrings({
   // The determiner menu's field for a cardinal numeral (P13): the NUMBER counting the noun, de "Zahl",
   // not its grammatical number (satellite.number, NUMBER_GRAMMAR).
   'determiner.numeral': { plan: nameOf('NUMBER'), format: NAME_FORMAT, fallback: 'Number' },
+  // The determiner menu's switch that makes a demonstrative contrastive (P13): its DISTANCE, which
+  // French alone spells, with -là ("ce lieu-là").
+  'determiner.contrast': { plan: nameOf('DISTANCE'), format: NAME_FORMAT, fallback: 'Distance' },
   // The chip on a verbless period's subject that says how it reads when it defines an adjective or an
   // adverb (P13, `/gloss`): its MEANING, it "Significato", de "Bedeutung", ja 意味. Each reading is named
   // by what the phrase reads as, with the catalogue's own names (category.*, slot.*).
@@ -3172,6 +3175,12 @@ export const UI_STRINGS = defineUiStrings({
     plan: setterOf('QUANTITY', 'NOUN'),
     format: { stripPeriod: true },
     fallback: "to set a noun's quantity",
+  },
+  // `/contrast` (P13): "to set a determiner's distance", it "impostare la distanza di un determinante".
+  'purpose.contrast': {
+    plan: setterOf('DISTANCE', 'DETERMINER'),
+    format: { stripPeriod: true },
+    fallback: "to set a determiner's distance",
   },
   // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
   // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un

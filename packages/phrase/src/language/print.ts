@@ -432,6 +432,11 @@ class Printer {
     }
     const afterAdjectives = this.tokens.length;
     this.settings(w, ["number", "gender", "determiner", "specifier", "gloss", "temporal", "predication", "sentiment", "causePolarity", "degree"]);
+    // Its demonstrative's contrast, after the determiner it qualifies (P13).
+    if (sel.contrastives?.[which]) {
+      this.statement({ key: `${wordKey(ref)}:contrast`, removal: "/del contrast", owner: ref, about: ref });
+      this.emit("/contrast", "command", "setting", { word: ref });
+    }
     // Its numeral, after its determiner (P13).
     const numeral = sel.numerals?.[which];
     if (numeral !== undefined) {

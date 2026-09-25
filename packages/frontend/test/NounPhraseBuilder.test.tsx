@@ -83,6 +83,7 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectTemporalRelation: vi.fn(),
     handleSelectPredication: vi.fn(),
     handleSetNumeral: vi.fn(),
+    handleSetContrastive: vi.fn(),
     handleSelectDirectionSpecifier: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
@@ -246,6 +247,8 @@ describe('NounPhraseBuilder', () => {
         '# Demonstrative',
         '4Proximal|this',
         '5Distal|that',
+        // The demonstrative's contrast switch (P13), a checkbox row rather than a value.
+        '# Distance',
         '# Quantifier',
         '6Partitive|some',
         '7Negative|no',

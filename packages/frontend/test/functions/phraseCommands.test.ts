@@ -56,6 +56,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleSelectLocativeSpecifier', (c) => c.handleSelectLocativeSpecifier('under'), (p) => reducers.setSpecifier(p, 'under', 'locative')],
   ['handleSelectTemporalRelation', (c) => c.handleSelectTemporalRelation('ago'), (p) => reducers.setTemporalRelation(p, 'ago')],
   ['handleSelectPredication', (c) => c.handleSelectPredication('factitive'), (p) => reducers.setPredication(p, 'factitive')],
+  ['handleSetContrastive', (c) => c.handleSetContrastive('subject', true), (p) => reducers.setContrastive(p, 'subject', true)],
   ['handleSetNumeral', (c) => c.handleSetNumeral('subject', 24), (p) => reducers.setNumeral(p, 'subject', 24)],
   ['handleSelectDirectionSpecifier', (c) => c.handleSelectDirectionSpecifier('in'), (p) => reducers.setSpecifier(p, 'in', 'direction')],
   ['handleSelectSentiment', (c) => c.handleSelectSentiment('positive'), (p) => reducers.setSentiment(p, 'positive')],

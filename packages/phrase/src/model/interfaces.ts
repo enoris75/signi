@@ -463,6 +463,10 @@ export interface PhraseSelection {
     // A cardinal numeral counting a noun, keyed by the noun block (P13, NounPhrase.numeral): DAY is "a
     // period of **24** hours". A value beside the determiner, as the engine has it.
     numerals?: Partial<Record<string, number>>;
+    // A *this* / *that* determiner pointing at one of a set, away from the rest (P13,
+    // NounPhrase.contrastive): THERE is "in *that* place", French "dans ce lieu-là". Keyed by the noun
+    // block; only held while the determiner is one of the two.
+    contrastives?: Partial<Record<string, boolean>>;
     // Grammatical number of an attributive-noun modifier ("creatore di *frasi*"), keyed by
     // the adjective slot key like `modifierRelations`. Only consulted when that slot holds a
     // noun; defaults to 'singular'. See NounModifier.number in @signi/shared.

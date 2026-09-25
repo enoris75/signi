@@ -41,6 +41,8 @@ function DeterminerMenu({
   onClose,
   numeral,
   onNumeral,
+  contrastive = false,
+  onContrastive,
 }: {
   open: boolean;
   // The anchor as a thunk, not an element: the determiner box may only have appeared in the very
@@ -54,6 +56,9 @@ function DeterminerMenu({
   // A cardinal numeral counting the noun (P13), beside the determiner as the engine has it, and its setter.
   numeral?: number;
   onNumeral: (numeral: number | undefined) => void;
+  // Whether the demonstrative points away from the rest (P13), and its setter.
+  contrastive?: boolean;
+  onContrastive: (contrastive: boolean) => void;
 }) {
   const t = useUiString();
   // A digit per row, counted down the menu as it is shown: the values are too many to cycle,
@@ -114,6 +119,23 @@ function DeterminerMenu({
             </Box>
           </MenuItem>
         )),
+        // The distance a demonstrative points at (P13): *that* one, not this — French's "ce lieu-là".
+        ...(category === "deixis"
+          ? [
+              <MenuItem
+                key="contrast"
+                role="menuitemcheckbox"
+                aria-checked={contrastive}
+                data-testid="determiner-contrast"
+                disabled={value !== "this" && value !== "that"}
+                onClick={() => onContrastive(!contrastive)}
+                sx={{ fontSize: "0.78rem", minHeight: 28, py: 0.25, pl: 1.25, gap: 1 }}
+              >
+                <Box component="span" sx={{ width: 14, textAlign: "center" }}>{contrastive ? "✓" : ""}</Box>
+                {t("determiner.contrast")}
+              </MenuItem>,
+            ]
+          : []),
         // The quantity a numeral says (P13), "24 hours": a whole number rather than a value to pick.
         ...(category === "quantity"
           ? [
@@ -223,6 +245,8 @@ export function NounPhraseBuilder({
             onClose={() => ctx.onDeterminerMenu(null)}
             numeral={selection.numerals?.[which]}
             onNumeral={(n) => ctx.handleSetNumeral(which as NounKey, n)}
+            contrastive={Boolean(selection.contrastives?.[which])}
+            onContrastive={(on) => ctx.handleSetContrastive(which as NounKey, on)}
           />
         </>
       )}

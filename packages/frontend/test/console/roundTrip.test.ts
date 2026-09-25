@@ -384,6 +384,15 @@ const OPS: Op[] = [
     if (!link || link.kind !== 'instrumental') return undefined;
     return { ...s, links: L.setInstrumentalNegative(s.links, link.target.containerId, !link.negative) };
   },
+  // A demonstrative pointing away from the rest, or not (P13) — only a *this* / *that* takes it.
+  onPeriod((sel, rng) => {
+    const head = pick(rng, nounHeads(sel).filter((h) => {
+      const at = R.nounSliceAt(sel, h.address);
+      const d = at?.slice[`${at.which}Definiteness` as keyof PhraseSelection];
+      return d === 'this' || d === 'that';
+    }));
+    return head ? R.updateNounAt(sel, head.address, (s, which) => R.setContrastive(s, which, rng() < 0.7)) : undefined;
+  }),
   // A cardinal numeral counting a noun, or none (P13).
   onPeriod((sel, rng) => {
     const head = pick(rng, nounHeads(sel).filter((h) => R.nounSliceAt(sel, h.address)?.slice[R.nounSliceAt(sel, h.address)!.which]?.role === 'noun'));
@@ -482,7 +491,8 @@ describe('the round trip', () => {
   // that-clause needs SAY with no object and an infinitive NEED, so the two are rarer than the others.
   it('reaches each of the subordinate clauses, the clause of purpose (P13) among them', () => {
     const kinds = new Set<string>();
-    for (let seed = 1; seed <= 4000; seed++)
+    // Twice the seeds the walk once needed: every op P13 adds makes each of these rarer.
+    for (let seed = 1; seed <= 8000; seed++)
       for (const l of reach(seed, 10 + (seed % 30)).links) kinds.add(l.kind ?? 'relative');
     expect([...kinds]).toEqual(expect.arrayContaining(['content', 'adverbial', 'infinitive', 'purpose']));
   });

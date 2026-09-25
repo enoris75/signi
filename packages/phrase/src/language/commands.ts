@@ -93,6 +93,8 @@ export type Action =
   | { kind: "standard" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
+  /** A demonstrative pointing away from the rest: `/contrast` (P13). */
+  | { kind: "contrast" }
   /** A cardinal numeral counting the noun: `/num 24` (P13). */
   | { kind: "numeral" }
   /** The noun's relative clause said alone, its head unspoken: `/headless` (P13). */
@@ -523,6 +525,21 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "link" },
     action: { kind: "relative" },
     satellites: /Relative$/,
+  },
+  // A *this* / *that* pointing at one of a set, away from the rest (P13): THERE is "/subj ( place /that
+  // /contrast /gloss place )", "in that place", French "dans ce lieu-là". `/del contrast` takes it back.
+  {
+    name: "contrast",
+    aliases: ["contrastive"],
+    group: "noun",
+    description: "pointing away from the rest",
+    descriptionKey: "determiner.contrast",
+    purposeKey: "purpose.contrast",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "contrast" },
+    satellites: /Definiteness$/,
+    reducers: ["setContrastive"],
   },
   // A cardinal numeral counting the noun (P13): DAY is "/subj ( period /a /poss [ hour /a /num 24 ] /parts )",
   // "a period of 24 hours". `/del num` takes it back.
@@ -1252,7 +1269,7 @@ export function topicOf(def: CommandDef): Topic {
         ? a.kind
         : a.kind === "headless"
           ? "relative"
-          : a.kind === "numeral"
+          : a.kind === "numeral" || a.kind === "contrast"
             ? "determiner"
         : a.kind === "conjunct"
           ? "coordination"

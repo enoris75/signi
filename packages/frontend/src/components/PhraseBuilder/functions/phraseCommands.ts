@@ -35,6 +35,7 @@ import {
   setTemporalRelation,
   setPredication,
   setNumeral,
+  setContrastive,
   toggleGender,
   toggleCauseNegative,
   toggleNegative,
@@ -102,6 +103,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
     handleSelectTemporalRelation: (relation: TemporalRelation) =>
       onPhraseUpdate((prev) => setTemporalRelation(prev, relation)),
+    // A demonstrative pointing away from the rest (P13).
+    handleSetContrastive: (which: NounKey, contrastive: boolean) =>
+      onPhraseUpdate((prev) => setContrastive(prev, which, contrastive)),
     // A cardinal numeral counting a noun (P13), or none.
     handleSetNumeral: (which: NounKey, numeral: number | undefined) =>
       onPhraseUpdate((prev) => setNumeral(prev, which, numeral)),

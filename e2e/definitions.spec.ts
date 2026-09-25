@@ -239,3 +239,19 @@ test.describe('a numeral', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/num 3');
   });
 });
+
+test.describe('a demonstrative pointing away from the rest', () => {
+  test('says THERE, French "dans ce lieu-là", typed or switched in the determiner menu', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj PLACE /that /contrast /gloss place');
+    await run(page);
+    await app.expectSentences({ en: 'in that place.', fr: 'dans ce lieu-là.' });
+
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /subj HOUSE /that /verb RUN');
+    await run(page);
+    await app.period(1).getByTestId('box-subjectDefiniteness').click();
+    await page.getByTestId('determiner-contrast').click();
+    await expect(page.getByTestId('source-strip')).toContainText('/that /contrast');
+  });
+});
