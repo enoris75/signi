@@ -173,7 +173,14 @@ export function predicateSegs(
   const { verb, negative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).
-  const { objectPredicative, rest: adjunctComplements } = splitObjectPredicative(complements);
+  const { objectPredicative, rest: splitComplements } = splitObjectPredicative(complements);
+  // A verb that marks its opponent with the particle its object already takes falls back to the
+  // generic を相手に beside that object (A373): WIN says 犬に勝ちます and ゲームに勝ちます, but both
+  // together are 犬を相手にゲームに勝ちます, never two に phrases.
+  const opponent = splitComplements?.opponent;
+  const adjunctComplements = directObject && opponent?.link && opponent.link === objectParticle
+    ? { ...splitComplements, opponent: { ...opponent, link: undefined } }
+    : splitComplements;
   // Whether the predicate is the copula's — the real copula with a complement, or a verb that is an
   // adjective in Japanese (see `adjectival` above). Both close the clause on です rather than on a
   // conjugated verb.

@@ -22,3 +22,18 @@ contra el perro.` LOSE_GAME takes no object (its game is a locative), so it cann
 | | |
 |---|---|
 | **Test** | `complements/opponent.test.ts` → *known bugs: Japanese WIN with an object and an opponent doubles に (A373)* (1 `test.fails`; plus a regression test for each alone and three other languages) |
+
+## Resolved
+
+2026-09-25. Ruling: the opponent becomes 〜を相手に beside a に object (the pinned Want). The
+restructured 犬とのゲームに was not taken. [ja/predicateSegs.ts](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+drops the verb's own opponent particle (`opponent_prep`, carried as the complement's `link`) when the
+clause has an object marked with that same particle. The opponent then takes the generic を相手に:
+`猫は犬を相手にゲームに勝ちます。` The opponent alone keeps 犬に, and so does a relative clause whose
+gap is the game (猫が犬に勝つゲーム).
+
+Guarded by `complements/opponent.test.ts` → *known bugs: Japanese WIN with an object and an opponent
+doubles に (A373)*: the former `test.fails`, now a plain test, the regression test, and a new test for
+the past, the negative, CAN and the relative clause. The colocated
+[ja/predicateSegs.test.ts](../../../packages/engine/src/languages/ja/predicateSegs.test.ts) pins the
+fallback and the lone opponent.

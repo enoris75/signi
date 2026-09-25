@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, LexicalEntry, NounElement, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
+import type { LanguageCode, LexicalEntry, NounElement, PhrasePlan, ReadyLanguageCode, VerbPhrase } from '@signi/shared';
 import { translate } from '../../src/index.js';
 import { clause, np, say, sayAll } from '../harness.js';
 import { isPreviewLanguage } from '@signi/shared';
@@ -436,10 +436,21 @@ describe('known bugs: the opponent question and relative ignore a verb-named opp
 // A373. Japanese WIN marks both its object and its opponent with に, so a game won against someone
 // doubles the particle: 猫は犬にゲームに勝ちます. Alone, each is right (ゲームに勝ちます, 犬に勝ちます).
 describe('known bugs: Japanese WIN with an object and an opponent doubles に (A373)', () => {
-  test.fails('the opponent takes 相手に beside a に object', () => {
+  test('the opponent takes 相手に beside a に object', () => {
     // Decision for the fixer: 犬を相手に (pinned) or the noun-modifying 犬とのゲームに.
     expect(say(clause(np('CAT'), 'WIN', { directObject: np('GAME'), complements: { opponent: { phrase: np('DOG') } } }), 'ja'))
       .toBe('猫は犬を相手にゲームに勝ちます。'); // now: "猫は犬にゲームに勝ちます。"
+  });
+
+  test('相手に holds through tense, negation and a modal; a relative on the game keeps the lone 犬に', () => {
+    const win = (verbPhrase: Partial<VerbPhrase>) =>
+      say(clause(np('CAT'), 'WIN', { directObject: np('GAME'), complements: { opponent: { phrase: np('DOG') } }, verbPhrase }), 'ja');
+    expect(win({ tense: 'past' })).toBe('猫は犬を相手にゲームに勝ちました。');
+    expect(win({ negative: true })).toBe('猫は犬を相手にゲームに勝ちません。');
+    expect(win({ modals: ['CAN'] })).toBe('猫は犬を相手にゲームに勝つことができます。');
+    // The game is the relative's gap, so the clause has one に phrase and the verb's own に stays.
+    expect(say(clause(np('GAME', { relative: { verbPhrase: { verb: 'WIN' }, headRole: 'directObject', subject: np('CAT'), complements: { opponent: { phrase: np('DOG') } } } }), 'RUN'), 'ja'))
+      .toBe('猫が犬に勝つゲームは走ります。');
   });
 
   test('either alone keeps its に, and the other languages are right', () => {

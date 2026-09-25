@@ -93,6 +93,15 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(TSUZUKU), el(np(INU)), undefined))).toBe('犬に続きます');
     });
 
+    // A373: a verb whose opponent takes the particle its object already takes falls back to を相手に
+    // beside that object; alone, the opponent keeps the verb's own particle.
+    test('an opponent sharing the object’s particle takes を相手に beside the object', () => {
+      const KATSU = { base: '勝つ', reading: 'かつ', masu_present: '勝ちます', masu_present_reading: 'かちます', object_particle: 'に', opponent_prep: 'に' };
+      const vsDog = complements({ opponent: { ...complement(np(INU)), link: 'に' } });
+      expect(text(predicateSegs(vp(KATSU), el(np(HON)), vsDog))).toBe('犬を相手に本に勝ちます');
+      expect(text(predicateSegs(vp(KATSU), undefined, vsDog))).toBe('犬に勝ちます');
+    });
+
     test('a modal’s adverb precedes the main verb’s', () => {
       const phrase = vp(TABERU, { modifier: concept(HAYAKU), modals: [modal(KOTO_GA_DEKIRU, ITSUMO)] });
       expect(text(predicateSegs(phrase, undefined, undefined))).toBe('いつも速く食べることができます');
