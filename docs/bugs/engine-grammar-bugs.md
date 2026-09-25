@@ -53,7 +53,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A is empty, and so is Part B).** If
+this writing Part A holds two files, A381 and A382, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -65,6 +65,14 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
+| A381 | [A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md](A-must-fix/A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md) | German | The du command of SPEAK and HAPPEN is the bare stem (*sprech*, *gescheh* for *sprich*, *geschieh*): neither lexeme seeds the `2sg_imperative` A48 stores for a strong e→i verb |
+| A382 | [A382-german-answer-takes-its-object-in-the-accusative.md](A-must-fix/A382-german-answer-takes-its-object-in-the-accusative.md) | German, Swiss German | ANSWER's object is a bare accusative, which *antworten* has no slot for (*der Mann antwortet das Wort* for *antwortet auf das Wort*); the fixer decides the passive, and a passing pin in `sweep-definitions.test.ts` moves with the fix |
+
+**Two open**, **A381** and **A382**, filed on 2026-09-25 from ten random phrases, at ba6f93ba; A382 on
+the user's ruling that ANSWER's pinned *antwortet das Wort* is a bug. Not filed: the
+generator's own gap (it hands VERY and TOO to a verb, which the canvas's adverb picker never offers),
+and two choices already made — Italian *stai essendo* (pinned in the conjugation snapshot), Spanish and
+Portuguese *estará estando* (left open by A66).
 
 **All four were fixed on 2026-09-25**, and are listed under **Fixed** below: A377 (an animate route in
 a statement spells its path: *a través del hombre*, *através do homem*, 男の中を通って), A378 (an Italian

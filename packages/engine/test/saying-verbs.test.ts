@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { LanguageCode, NounPhrase, PhrasePlan, ReadyLanguageCode } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
@@ -428,6 +428,41 @@ describe('known bugs: the dative clitic of a prepositional object (A240)', () =>
     expect(callsHim()).toMatchObject({
       en: 'the woman calls him.', de: 'die Frau ruft ihn an.', es: 'la mujer lo llama.', ja: '女は彼に電話します。',
       pt: 'a mulher telefona para ele.',
+    });
+  });
+});
+
+// A382. What is answered is ANSWER's direct object, and German antworten has no accusative for it:
+// it is "auf" + accusative (Swiss German "uf"), "der Mann antwortet auf das Wort". The engine writes
+// a bare accusative, "der Mann antwortet das Wort", "ihr antwortetet mich". The fix names `object_prep`
+// on the two lexemes, as CLICK does (A139); the passive is the fixer's decision and is not pinned. Found
+// by random phrase seeds 19035 and 19036. With the fix, sweep-definitions.test.ts's ANSWER row moves.
+describe('known bugs: German ANSWER takes its object in the accusative (A382)', () => {
+  const answers = (extra: Parameters<typeof clause>[2], subject = the('MAN')) => clause(subject, 'ANSWER', extra);
+  const WORD = { directObject: the('WORD') };
+  const OBJECT_ON_WORD = the('WORD', { relative: { verbPhrase: { verb: 'ANSWER' }, headRole: 'directObject', subject: the('MAN') } });
+
+  test.fails('what is answered takes auf / uf', () => {
+    expect(say(answers(WORD), 'de')).toBe('der Mann antwortet auf das Wort.');
+    expect(say(answers({ directObject: np('FIRST_PERSON') }), 'de')).toBe('der Mann antwortet auf mich.');
+    expect(say(answers({ ...WORD, complements: { terminus: { phrase: the('WOMAN') } } }), 'de'))
+      .toBe('der Mann antwortet der Frau auf das Wort.');
+    expect(say(answers({ ...WORD, verbPhrase: { aspect: 'resultative' } }), 'de')).toBe('der Mann hat auf das Wort geantwortet.');
+    expect(say(clause(OBJECT_ON_WORD, 'BURN'), 'de')).toBe('das Wort, auf das der Mann antwortet, brennt.');
+    expect(say(answers({ directObject: np('FIRST_PERSON'), verbPhrase: { tense: 'past' } }, np('SECOND_PERSON', { number: 'plural' })), 'de'))
+      .toBe('ihr antwortetet auf mich.');
+    expect(say(answers(WORD), 'gsw')).toBe('de Maa antwortet uf s Wort.');
+    expect(say(answers({ ...WORD, verbPhrase: { aspect: 'resultative' } }), 'gsw')).toBe('de Maa hät uf s Wort gantwortet.');
+    expect(say(clause(OBJECT_ON_WORD, 'BURN'), 'gsw')).toBe('s Wort, wo de Maa druf antwortet, brennt.');
+  });
+
+  test('regression: the dative person alone, the bare verb, and the languages that take a direct object', () => {
+    expect(say(answers({ complements: { terminus: { phrase: the('WOMAN') } } }), 'de')).toBe('der Mann antwortet der Frau.');
+    expect(say(answers({}), 'de')).toBe('der Mann antwortet.');
+    expect(say(answers({ complements: { terminus: { phrase: the('WOMAN') } } }), 'gsw')).toBe('de Maa antwortet de Frau.');
+    expect(sayAll(answers(WORD))).toMatchObject({
+      en: 'the man answers the word.', it: "l'uomo risponde la parola.", es: 'el hombre responde la palabra.',
+      ja: '男は単語を答えます。', pt: 'o homem responde a palavra.',
     });
   });
 });

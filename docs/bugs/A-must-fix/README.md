@@ -1,5 +1,9 @@
 # A-must-fix — confirmed bugs
 
+**Two open.** **A381** and **A382**, filed on 2026-09-25 from ten random phrases, at ba6f93ba.
+[A381](A381-german-du-imperative-of-speak-and-happen-drops-the-e-to-i.md), the German du command of SPEAK and HAPPEN is the bare stem (*sprech*, *gescheh*).
+[A382](A382-german-answer-takes-its-object-in-the-accusative.md), German ANSWER takes what is answered as a bare accusative (*antwortet das Wort* for *antwortet auf das Wort*).
+
 **None open.** A377–A380 were all fixed on 2026-09-25 and moved to [`../fixed/`](../fixed/). The
 history below is kept as it was written.
 

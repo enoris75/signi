@@ -336,6 +336,31 @@ describe('known bugs: German du-imperative forms', () => {
   });
 });
 
+// A381. SPEAK (sprechen) and HAPPEN (geschehen) are strong e→i/ie verbs seeded without the
+// `2sg_imperative` A48 stores on the lexeme, so the du command falls through to the bare stem:
+// "sprech", "gescheh" for "sprich", "geschieh". Found by random phrase seed 19029.
+describe('known bugs: the German du-imperative of SPEAK and HAPPEN drops the e→i change (A381)', () => {
+  const de = (verb: string, extra: Parameters<typeof clause>[2] = {}, subject = np('SECOND_PERSON'), plan: Partial<PhrasePlan> = {}) =>
+    sayAll({ ...clause(subject, verb, extra), imperative: true, ...plan }).de;
+
+  test.fails('the du command keeps the vowel change: sprich, geschieh', () => {
+    expect(de('SPEAK')).toBe('sprich.');
+    expect(de('HAPPEN')).toBe('geschieh.');
+    expect(de('SPEAK', { verbPhrase: { negative: true } })).toBe('sprich nicht.');
+    expect(de('SPEAK', { complements: { topic: { phrase: np('MAN') } } })).toBe('sprich über den Mann.');
+    expect(de('HAPPEN', { verbPhrase: { negative: true, modifier: 'SUDDENLY' } })).toBe('geschieh nicht plötzlich.');
+  });
+
+  test('ihr, the wir cohortative, the instruction register and the finite verb keep the e', () => {
+    expect(de('SPEAK', {}, np('SECOND_PERSON', { number: 'plural' }))).toBe('sprecht.');
+    expect(de('HAPPEN', {}, np('SECOND_PERSON', { number: 'plural' }))).toBe('gescheht.');
+    expect(de('SPEAK', {}, np('FIRST_PERSON', { number: 'plural' }))).toBe('sprechen wir.');
+    expect(de('SPEAK', {}, np('SECOND_PERSON'), { imperativeRegister: 'instruction' })).toBe('sprechen.');
+    expect(sayAll(clause(np('MAN'), 'SPEAK')).de).toBe('der Mann spricht.');
+    expect(sayAll(clause(np('STORY'), 'HAPPEN')).de).toBe('die Geschichte geschieht.');
+  });
+});
+
 // A49. The imperative (and its instruction register) places "nicht" after every other word of the
 // clause, with no counterpart of the declarative "nicht immer" / "nicht müde" rules: "nicht" belongs
 // before a Mittelfeld adverb and before a predicate complement.
