@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, ResolvedPhrase } from '../../types.js';
+import { moreAdverbText } from '../../functions/adverbClass.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { foldModalGovernor } from '../../functions/foldModalGovernor.js';
 import { isComplementGloss } from '../../functions/isComplementGloss.js';
@@ -249,7 +250,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       const impDirect = splitObject(objectToRender, proObject, objectPrep, objCase);
       // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
       // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
-      const impAdverb = adverbSlots(modifier, neg, '');
+      const impAdverb = adverbSlots(modifier, neg, '', verbPhrase.moreAdverbs);
       const impComplements = complementsWithNicht([proPlace, impDirect.prepositional], rest, verb.forms, neg.beforeComplements, subject.agreement, objectHost);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
@@ -281,7 +282,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
       // A folded modal chain's adverbs (A222) lead the main verb's, as in the finite clause.
       const infModalAdverbs = modalAdverbs(verbPhrase.modals);
-      const infAdverb = adverbSlots(modifier, neg, infModalAdverbs);
+      const infAdverb = adverbSlots(modifier, neg, infModalAdverbs, verbPhrase.moreAdverbs);
       const infDirect = splitObject(objectToRender, proObject, objectPrep, objCase);
       // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
       const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
@@ -355,7 +356,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     const modalAdverbsText = modalAdverbs(verbPhrase.modals);
     // The main verb's own adverb splits on its kind: a direction adverb follows the objects, every
     // other one leads them, and the "nicht" that marks the adverb slot goes where the adverb went.
-    const adverb = adverbSlots(modifier, neg, modalAdverbsText);
+    const adverb = adverbSlots(modifier, neg, modalAdverbsText, verbPhrase.moreAdverbs);
     // A known object leads the whole "nicht" + adverbs group rather than trailing it — "frisst die
     // Maus nicht schnell", "gibt dem Hund das Buch nicht schnell" (A191). The dative recipient keeps
     // its place in front of the accusative object and travels with it.
@@ -371,7 +372,10 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A frequency adverb scopes over the whole prospective, not over the zu-infinitive alone — "war
     // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
     // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
-    const prospectiveFrequency = isFrequencyAdverb(modifier) && verbPhrase.modals.length === 0 ? modifierText : '';
+    // A further frequency adverb goes out with it, and a further manner one stays in the group (P15):
+    // "war oft im Begriff, schnell zu laufen".
+    const prospectiveFrequency = isFrequencyAdverb(modifier) && verbPhrase.modals.length === 0
+      ? [modifierText, moreAdverbText(verbPhrase, 'frequency')].filter(Boolean).join(' ') : '';
     // A connective adverb the engine asked for (German "jedoch", P09-E29) stands right behind the
     // finite verb — behind an object pronoun, which leads the Mittelfeld: "der Hund frisst es jedoch".
     const postFinite = phrase.postFiniteAdverb ?? '';
@@ -379,8 +383,8 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       ? [postFinite, ...prospectiveFrame(complex, {
         nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
         pronoun: objectPronounText,
-        adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
-        directionAdverb: adverb.afterObject, complements: complementsText,
+        adverb: prospectiveFrequency ? moreAdverbText(verbPhrase, 'manner') : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
+        directionAdverb: [adverb.nichtAfterObject, adverb.afterObject].filter(Boolean).join(' '), complements: complementsText,
       }, verbFinal)]
       : [objectPronounText, postFinite, aspectMid, ...(objectLeads ? objects : []),
         adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, ...(objectLeads ? [] : objects),

@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { moreAdverbText } from '../../functions/adverbClass.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
@@ -28,9 +29,6 @@ import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
-import { negativeAdverb } from '../../functions/negativeAdverb.js';
-import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
-import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
 
 /**
  * A restrictive relative clause on `np`, German-style: comma, relative pronoun agreeing
@@ -167,7 +165,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const modalAdverbsText = modalAdverbs(modals);
   // The adverbs already follow the objects here, so a direction adverb only has to leave the
   // prospective group's pre-object slot (see `adverbSlots`).
-  const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
+  const adverb = adverbSlots(modifier, nicht, modalAdverbsText, rel.verbPhrase.moreAdverbs);
   // What an object predicate is said of (A231): the direct object in the accusative, which is the
   // head itself when the head is the gapped object ("der Hund, den der Kater als den Ersten sieht");
   // under the passive the patient is the clause's subject, in the nominative (see `renderClause`).
@@ -182,20 +180,21 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // A frequency adverb scopes over the whole prospective, not over the zu-infinitive alone — "war
   // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
   // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
-  const prospectiveFrequency = isFrequencyAdverb(modifier) && modals.length === 0 ? modifierText : '';
-  // An adverb that outscopes the "nicht" leads it here too, in its negative word where it has one:
-  // "der das Essen noch nicht frisst", "der … vielleicht nicht frisst" (A244, P09-E28, P09-E39) —
-  // `adverbSlots` has already written the pair.
-  const outscopes = negativeAdverb(modifier, !!nicht.beforeAdverb)?.slot === 'pre-negator' && !isDirectionAdverb(modifier) && !isPlaceAdverb(modifier);
-  const adverbGroup = outscopes
-    ? [adverb.nichtBeforeObject, modalAdverbsText]
-    : [nicht.beforeAdverb, modalAdverbsText, modifierText];
+  // A further frequency adverb goes out with it, and a further manner one stays in the group (P15).
+  const prospectiveFrequency = isFrequencyAdverb(modifier) && modals.length === 0
+    ? [modifierText, moreAdverbText(rel.verbPhrase, 'frequency')].filter(Boolean).join(' ') : '';
+  // The "nicht" and the adverbs go as `adverbSlots` lays them out, all behind the objects here. An
+  // adverb that outscopes the "nicht" leads it, in its negative word where it has one: "der das Essen
+  // noch nicht frisst", "der … vielleicht nicht frisst" (A244, P09-E28, P09-E39). Several adverbs (P15)
+  // keep its time–manner–place order: "der das Buch oft schnell hier verschiebt", "der das Buch hier
+  // nicht nach oben verschiebt".
+  const adverbGroup = [adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, adverb.nichtAfterObject, adverb.afterObject];
   const predicate = complex.zuInfinitive
     ? prospectiveFrame(complex, {
       nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
       pronoun: objectPronounText,
-      adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
-      directionAdverb: adverb.afterObject, complements: complementsText,
+      adverb: prospectiveFrequency ? moreAdverbText(rel.verbPhrase, 'manner') : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
+      directionAdverb: [adverb.nichtAfterObject, adverb.afterObject].filter(Boolean).join(' '), complements: complementsText,
     }, true)
     : [objectPronounText, mid, dativeText, directObjectText, ...adverbGroup, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, resumed, ...predicate, meansText]
