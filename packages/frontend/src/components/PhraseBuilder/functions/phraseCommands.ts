@@ -27,6 +27,8 @@ import {
   cycleNounConjunction,
   cycleTense,
   removeStandard,
+  removeExamples,
+  toggleExampleRelation,
   setDefiniteness,
   setImperativePerson,
   setImperativeRegister,
@@ -80,8 +82,12 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setModifierAdjective(prev, slotKey, concept)),
     handleCycleDegree: (slotKey: SlotKey, step: CycleStep = 1) =>
       onPhraseUpdate((prev) => cycleDegree(prev, slotKey, step)),
-    // Take the predicate adjective's standard of comparison off, word and all (P09-E12 D5).
-    handleRemoveStandard: () => onPhraseUpdate((prev) => removeStandard(prev, "predicative")),
+    // Take a noun's standard of comparison off, word and all: the predicate adjective's (P09-E12 D5)
+    // or a period noun's (P09-E50).
+    handleRemoveStandard: (which: NounKey) => onPhraseUpdate((prev) => removeStandard(prev, which)),
+    // Take a noun's examples off, and flip their relation such as ⇄ including (P09-E48).
+    handleRemoveExamples: (which: NounKey) => onPhraseUpdate((prev) => removeExamples(prev, which)),
+    handleToggleExampleRelation: (which: NounKey) => onPhraseUpdate((prev) => toggleExampleRelation(prev, which)),
     handleCycleTense: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleTense(prev, step)),
     handleCycleAspect: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleAspect(prev, step)),
     handleCycleVoice: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleVoice(prev, step)),

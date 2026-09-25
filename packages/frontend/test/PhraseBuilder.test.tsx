@@ -895,8 +895,17 @@ describe('PhraseBuilder', () => {
     });
 
     it('is offered only on a predicate adjective whose degree takes one', () => {
-      renderPeriod({ ...BIGGER, adjectiveDegrees: { predicative: 'most' } });
+      renderPeriod({ ...BIGGER, adjectiveDegrees: { predicative: 'positive' } });
       expect(standardControl()).not.toBeInTheDocument();
+    });
+
+    // P09-E51: a superlative takes the same control as its set, lit and named so.
+    it('is offered on a superlative as its comparison set, the ring undimmed', () => {
+      renderPeriod({ ...BIGGER, adjectiveDegrees: { predicative: 'most' }, predicativeStandard: { subject: DOG } });
+      expect(standardControl()).toBeInTheDocument();
+      expect(satellite('predicativeStandard')).toHaveAttribute('aria-label', 'Hide the comparison set');
+      expect(screen.queryByTestId('standard-dimmed')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
     });
 
     it('keeps the standard under a degree that takes none, its ring dimmed', () => {

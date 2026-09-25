@@ -8,6 +8,7 @@ export {
   translatePossessive,
   translateSpecifier,
   translateSubordinator,
+  translateExamples,
   engines,
 } from './translator/index.js';
 export type { LanguageEngine, ResolvedPhrase, ConceptForms } from './types.js';

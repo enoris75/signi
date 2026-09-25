@@ -5568,6 +5568,31 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What a superlative picks its one out of: "the dogs" of "the biggest of the dogs" (the same
+    // NounPhrase.headStandard, read as a set on `most` / `least`, P09-E19). It titles the standard's
+    // ring and control on the builder while the degree is a superlative (P09-E51 D2): a set is not
+    // a rival, and STANDARD_OF_COMPARISON's words name a rival (de Vergleichsgröße, ja 比較の基準).
+    // Glossed as that one is, with the group in place of the phrase.
+    id: 'COMPARISON_SET',
+    role: 'noun',
+    description: 'the group a superlative picks its one out of (grammar)',
+    definition: `
+      /subj ( GROUP /a /rel #2.obj )
+      /subj ( DEGREE_GRAMMAR /a ) /verb ( GOVERN ) /obj ( GROUP )
+    `,
+    emoji: '🏆',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'comparison set', plural: 'comparison sets', count: 'singular' },
+      it: { base: 'insieme di confronto', plural: 'insiemi di confronto', gender: 'masc', count: 'singular' },
+      fr: { base: 'ensemble de comparaison', plural: 'ensembles de comparaison', gender: 'masc', count: 'singular' },
+      de: { base: 'Vergleichsmenge', plural: 'Vergleichsmengen', gender: 'fem', count: 'singular' },
+      es: { base: 'conjunto de comparación', plural: 'conjuntos de comparación', gender: 'masc', count: 'singular' },
+      ja: { base: '比較の範囲', count: 'singular', reading: 'ひかくのはんい' },
+      pt: { base: 'conjunto de comparação', plural: 'conjuntos de comparação', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A modal verb (must, can, will), named by its mood in every language (it "verbo modale",
     // fr "verbe modal", de "Modalverb", ja 法助動詞). Italian school grammar also says "verbo servile".
     id: 'MODAL',

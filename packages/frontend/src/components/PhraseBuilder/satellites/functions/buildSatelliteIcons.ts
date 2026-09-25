@@ -266,10 +266,21 @@ export function buildSatelliteIcons({
       (perimeterByNoun[possessorNoun] ??= {}).possessor = iconEntry;
       continue;
     }
-    // So does the standard of comparison's: the line to its ring leaves from it. PhraseBuilder gives
-    // it what it does (open, fold or name the standard).
-    if (sat.key === "predicativeStandard") {
-      (perimeterByNoun.predicative ??= {}).standard = iconEntry;
+    // So does the standard of comparison's, on the predicative's ring or any period noun's (P09-E50):
+    // the line to its ring leaves from it. PhraseBuilder gives it what it does (open, fold or name it).
+    // And a noun's examples control (P09-E48).
+    const examplesNoun: NounKey | null = sat.key.endsWith("Examples")
+      ? (sat.key.slice(0, -"Examples".length) as NounKey)
+      : null;
+    if (examplesNoun) {
+      (perimeterByNoun[examplesNoun] ??= {}).examples = iconEntry;
+      continue;
+    }
+    const standardNoun: NounKey | null = sat.key.endsWith("Standard")
+      ? (sat.key.slice(0, -"Standard".length) as NounKey)
+      : null;
+    if (standardNoun) {
+      (perimeterByNoun[standardNoun] ??= {}).standard = iconEntry;
       continue;
     }
     if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {

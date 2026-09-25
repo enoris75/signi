@@ -16,6 +16,8 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import BalanceIcon from "@mui/icons-material/Balance";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -23,15 +25,16 @@ import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import {
   DEFAULT_TEMPORAL_RELATION,
   DETERMINER_COMPLEMENT_TYPES,
-  STANDARD_DEGREES,
   defaultDefiniteness,
   type Concept,
   type Definiteness,
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type SlotQuestionRole } from "../../interfaces.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole, type SlotQuestionRole } from "../../interfaces.ts";
 import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
+import { standardIsSet, takesStandard } from "../../standardRing.ts";
+import { takesExamples } from "../../examplesRing.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -74,12 +77,14 @@ export function rawSatellites(
   // governs a that-clause (P09-E12 D9), which is its verb's object: the object box is then
   // withdrawn, as the clause and a direct object exclude each other.
   // And, on an owner's hosted ring, whether the period that hosts it may ask *whose* there and does
-  // (P09-E52, RingHost.question).
+  // (P09-E52, RingHost.question). And whether this is a hosted ring's builder (an owner, a conjunct, a
+  // standard, examples), whose noun takes no standard and no examples of its own (P09-E50 D4, P09-E48 D2).
   {
     moodLocked = false,
     clauseObject = false,
     ownerQuestion,
-  }: { moodLocked?: boolean; clauseObject?: boolean; ownerQuestion?: { available: boolean; asked: boolean } } = {},
+    hosted = false,
+  }: { moodLocked?: boolean; clauseObject?: boolean; ownerQuestion?: { available: boolean; asked: boolean }; hosted?: boolean } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
@@ -117,6 +122,35 @@ export function rawSatellites(
       directToggle: true,
     };
   };
+  // What a compared adjective is measured against — "bigger *than the dog*" (P09-E12 D5), and
+  // off a noun's attributive adjective "a bigger cat *than the dog*" (P09-E50). A noun phrase of
+  // its own, drawn as a hosted ring beside its noun's, whose line leaves from this control on the
+  // noun's dotted ring. Offered where a degree takes it: the predicate adjective's on every degree
+  // but the positive, a noun's while one of its adjectives compares. One held with nothing to
+  // compare stays, its ring dimmed, and is reached from the ring. On a superlative predicate
+  // adjective it is the set it picks from — "the biggest *of the dogs*" — and is named and drawn
+  // so, a podium for the scales (P09-E51 D2).
+  const standard = (type: NounKey): RawSatellite => ({
+    key: `${type}Standard`,
+    parent: type,
+    ...(standardIsSet(selection, type)
+      ? { label: t("slot.comparisonSet"), labelKey: "slot.comparisonSet" as const, icon: <LeaderboardIcon sx={iconSx} /> }
+      : { label: t("slot.standard"), labelKey: "slot.standard" as const, icon: <BalanceIcon sx={iconSx} /> }),
+    available: !hosted && takesStandard(selection, type),
+    hasValue: Boolean((selection[`${type}Standard` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject),
+  });
+  // The members of the set a noun names — "animals *such as the cat*" (P09-E48). A noun phrase of its
+  // own, drawn as a hosted ring beside its noun's, whose line leaves from this control on the noun's
+  // dotted ring and carries the relation's chip. Offered on a period noun with a noun head (D2).
+  const examples = (type: NounKey): RawSatellite => ({
+    key: `${type}Examples`,
+    parent: type,
+    label: t("slot.examples"),
+    labelKey: "slot.examples",
+    icon: <FormatListBulletedIcon sx={iconSx} />,
+    available: !hosted && takesExamples(selection, type),
+    hasValue: Boolean((selection[`${type}Examples` as keyof PhraseSelection] as PhraseSelection | undefined)?.subject),
+  });
   // What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, or the parts it
   // is made of. Each click moves it on; it rides beside the possessor control while there is one to
   // describe — a pronominal possessor ("its part") has no role.
@@ -272,6 +306,8 @@ export function rawSatellites(
       hasValue: Boolean(selection.subjectPossessor?.subject) || Boolean(selection.subjectPossessorRef),
     },
     possessorRole("subject"),
+    standard("subject"),
+    examples("subject"),
     {
       key: "subjectConjunct",
       parent: "subject",
@@ -604,6 +640,8 @@ export function rawSatellites(
       hasValue: Boolean(selection.directObjectPossessor?.subject) || Boolean(selection.directObjectPossessorRef),
     },
     possessorRole("directObject"),
+    standard("directObject"),
+    examples("directObject"),
     {
       key: "directObjectConjunct",
       parent: "directObject",
@@ -792,23 +830,8 @@ export function rawSatellites(
           hasValue: conjunctCount(type) > 0,
           valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
         },
-        // What a predicate adjective is compared to — "bigger *than the dog*" (P09-E12 D5). A noun
-        // phrase of its own, drawn as a hosted ring beside the predicative's, whose line leaves from
-        // this control on the predicative's dotted ring. Offered where the degree takes a standard;
-        // one held under another degree stays, its ring dimmed, and is reached from the ring.
-        ...(type === "predicative"
-          ? [{
-            key: "predicativeStandard" as const,
-            parent: "predicative" as const,
-            label: t("slot.standard"),
-            labelKey: "slot.standard" as const,
-            icon: <BalanceIcon sx={iconSx} />,
-            available:
-              concept?.role === "adjective" &&
-              STANDARD_DEGREES.has(selection.adjectiveDegrees?.predicative ?? "positive"),
-            hasValue: Boolean(selection.predicativeStandard?.subject),
-          }]
-          : []),
+        standard(type),
+        examples(type),
         // The cause alone can be denied rather than named — "not because of the dog", the act
         // happened and this was not the reason. A toggle, like the verb's own polarity, and
         // independent of the sentiment beside it: a credit can be denied too.

@@ -507,4 +507,32 @@ test.describe('the phrase console', () => {
     await expect(chip).toHaveAttribute('data-editing', '1');
     await expect(chip).toHaveText('Bearbeiten · Satzgefüge 1 ›');
   });
+
+  // P09-E51 D3: a superlative's set is `/outof`, the same field `/than` fills, and `/del outof` takes it off.
+  test('names a superlative’s set with /outof', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj ( cat ) /verb ( be ) /pred ( big /most /outof [ dog /pl ] )');
+    await run(page);
+    await app.expectSentences({ en: 'the cat is the biggest of the dogs.', it: 'il gatto è il più grande dei cani.', ja: '猫は犬の中で最も大きいです。' });
+    await expect(app.satellite('predicativeStandard')).toHaveAttribute('aria-label', /comparison set/i);
+
+    await page.keyboard.insertText('/del outof');
+    await run(page);
+    await app.expectSentences({ en: 'the cat is biggest.' });
+  });
+
+  // P09-E48 D4: a noun's examples are `/suchas` or `/including`, and `/del eg` takes them off.
+  test('names a set’s members with /suchas, and takes them off with /del eg', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj ( animal /pl /zero /suchas [ cat ] ) /verb ( run )');
+    await run(page);
+    await app.expectSentences({ en: 'animals such as the cat run.', it: 'animali come il gatto corrono.', ja: '猫のような動物は走ります。' });
+    await expect(page.getByTestId('examples-chip')).toHaveText(/such as/i);
+
+    // The console's context has moved on to the verb: /subj goes back to the noun whose examples go.
+    await page.keyboard.insertText('/subj /del eg');
+    await run(page);
+    await app.expectSentences({ en: 'animals run.' });
+    await expect(page.getByTestId('examples-chip')).toHaveCount(0);
+  });
 });

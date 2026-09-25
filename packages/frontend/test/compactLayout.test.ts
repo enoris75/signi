@@ -131,6 +131,26 @@ describe('packPeriod', () => {
     expect(px('predicative/standard') - px('predicative+1')).toBeCloseTo(100 + CONJUNCT_GAP);
   });
 
+  // P09-E50: each period noun's standard packs after its own noun.
+  it('packs two standards, each after its own noun', () => {
+    const { positions } = packPeriod(
+      [
+        rect('directObject/standard', 100, undefined, undefined, { head: 'Direct Object', index: -0.5 }),
+        rect('subject/standard', 100, undefined, undefined, { head: 'Subject', index: -0.5 }),
+        rect('Direct Object', 100),
+        rect('Verb Phrase', 100),
+        rect('Subject', 100),
+      ],
+      { w: 2000, h: 400 },
+    );
+
+    const order = Object.entries(positions)
+      .sort(([, a], [, b]) => a.x - b.x)
+      .map(([key]) => key);
+    expect(order.indexOf('subject/standard')).toBe(order.indexOf('Subject') + 1);
+    expect(order.indexOf('directObject/standard')).toBe(order.indexOf('Direct Object') + 1);
+  });
+
   it('packs each owner straight after the ring it owns, and an owner’s owner after that', () => {
     const { positions } = packPeriod(
       [

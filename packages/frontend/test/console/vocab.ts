@@ -43,6 +43,8 @@ export const NOUNS = [
   c('ICE_CREAM', 'noun', 'ice cream', 'gelato'),
   // "light" is a noun and an adjective both.
   c('LIGHT', 'noun', 'light', 'luce'),
+  // A set the examples name members of (P09-E48): "animals such as the cat".
+  c('ANIMAL', 'noun', 'animal', 'animale', { animate: true }),
 ];
 
 export const PRONOUNS = [

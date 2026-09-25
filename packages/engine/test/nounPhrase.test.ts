@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness, NounElement, NounPhrase } from '@signi/shared';
+import { translateExamples } from '../src/index.js';
 import { clause, furigana, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
@@ -647,6 +648,10 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
     ['STANDARD_OF_COMPARISON',
       { en: 'a standard of comparison.', it: 'un termine di paragone.', fr: 'un terme de comparaison.', de: 'eine Vergleichsgröße.', es: 'un término de comparación.', ja: '比較の基準。', pt: 'um termo de comparação.' },
       { en: 'the standards of comparison.', it: 'i termini di paragone.', fr: 'les termes de comparaison.', de: 'die Vergleichsgrößen.', es: 'los términos de comparación.', ja: '比較の基準。', pt: 'os termos de comparação.' }],
+    // What a superlative picks its one out of (P09-E51 D2): German's one feminine compound again.
+    ['COMPARISON_SET',
+      { en: 'a comparison set.', it: 'un insieme di confronto.', fr: 'un ensemble de comparaison.', de: 'eine Vergleichsmenge.', es: 'un conjunto de comparación.', ja: '比較の範囲。', pt: 'um conjunto de comparação.' },
+      { en: 'the comparison sets.', it: 'gli insiemi di confronto.', fr: 'les ensembles de comparaison.', de: 'die Vergleichsmengen.', es: 'los conjuntos de comparación.', ja: '比較の範囲。', pt: 'os conjuntos de comparação.' }],
     ['MODAL',
       { en: 'a modal.', it: 'un verbo modale.', fr: 'un verbe modal.', de: 'ein Modalverb.', es: 'un verbo modal.', ja: '法助動詞。', pt: 'um verbo modal.' },
       { en: 'the modals.', it: 'i verbi modali.', fr: 'les verbes modaux.', de: 'die Modalverben.', es: 'los verbos modales.', ja: '法助動詞。', pt: 'os verbos modais.' }],
@@ -1075,6 +1080,13 @@ describe('examples: such as / including (P09-E33)', () => {
 
   test('the Japanese 含む carries its furigana', () => {
     expect(furigana(clause(animals(including(np('CAT'))), 'RUN'))).toEqual(['ねこ', 'ふくむ', 'どうぶつ', 'はしります']);
+  });
+
+  // P09-E48 D5: the chip on the examples ring cites each relation's word, as the sentences above write it.
+  test('cites each relation’s word for the chip', () => {
+    const cited = (relation: 'example' | 'inclusion') => Object.fromEntries(translateExamples(relation).map((t) => [t.language, t.text]));
+    expect(cited('example')).toEqual({ en: 'such as', it: 'come', fr: 'comme', de: 'wie', es: 'como', ja: 'のような', pt: 'como' });
+    expect(cited('inclusion')).toEqual({ en: 'including', it: 'compreso', fr: 'y compris', de: 'einschließlich', es: 'incluido', ja: 'を含む', pt: 'incluindo' });
   });
 });
 

@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { PT_EXAMPLES } from './pt.consts.js';
 import { coordinateElement } from './coordinateElement.js';
 import { npText } from './npText.js';
 
@@ -12,5 +13,5 @@ export function ptExamples(np: ResolvedNounPhrase): string {
   const ex = np.examples;
   if (!ex) return '';
   const group = coordinateElement(ex.phrase, (s) => (s.head.forms['person'] ? s.head.forms['base'] ?? '' : npText(s)));
-  return ex.relation === 'inclusion' ? `, incluindo ${group},` : ` como ${group}`;
+  return ex.relation === 'inclusion' ? `, ${PT_EXAMPLES.inclusion} ${group},` : ` ${PT_EXAMPLES.example} ${group}`;
 }

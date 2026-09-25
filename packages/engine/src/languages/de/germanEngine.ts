@@ -1,8 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
-import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS } from './de.consts.js';
-import { CORRELATIVE_PAIR } from './de.consts.js';
+import { COORD_INVERTS, COORD_WORDS, PARENTHETICAL_CONNECTORS, DE_EXAMPLES, CORRELATIVE_PAIR } from './de.consts.js';
 import { citeCorrelative } from '../../functions/correlate.js';
 import { DE_DURATION_CITATION, DE_GENITIVE_TEMPORAL, DE_TEMPORAL } from './de.consts.js';
 import { deComparative } from './deComparative.js';
@@ -133,5 +132,9 @@ export const germanEngine: LanguageEngine = {
     if (degree === 'least') return 'am wenigsten';
     if (degree === 'equally') return 'gleich';
     return '';
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return DE_EXAMPLES[relation];
   },
 };

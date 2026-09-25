@@ -78,6 +78,7 @@ describe('rawSatellites', () => {
         'subjectRelative',
         'subjectHeadless',
         'subjectPossessor',
+        'subjectExamples',
         'subjectConjunct',
         // A verbless period's subject reads as something (P13): its relation only under a time reading.
         'subjectGloss',
@@ -208,6 +209,7 @@ describe('rawSatellites', () => {
         'directObjectRelative',
         'directObjectHeadless',
         'directObjectPossessor',
+        'directObjectExamples',
         'directObjectConjunct',
         // The wh-question's mark (P09-E12 M6): SEE takes an object to ask about.
         'directObjectQuestion',
@@ -328,6 +330,7 @@ describe('rawSatellites', () => {
         'locativeHeadless',
         'locativePossessor',
         'locativeConjunct',
+        'locativeExamples',
         // GO licenses the locative, and *where* asks it in its plain relation (P09-E12 M6).
         'locativeQuestion',
       ]);
@@ -354,19 +357,34 @@ describe('rawSatellites', () => {
       ]);
     });
 
-    // P09-E12 D5: the standard of comparison, offered by the degrees that take one.
+    // P09-E12 D5: the standard of comparison, offered by the degrees that take one — every one but the
+    // positive, named the comparison set on a superlative (P09-E51 D1, D2).
     it.each([
-      ['more', true],
-      ['less', true],
-      ['equally', true],
-      ['positive', false],
-      ['most', false],
-      ['least', false],
-    ] as const)('offers a predicate adjective a standard of comparison under %s: %s', (degree, available) => {
+      ['more', true, 'slot.standard'],
+      ['less', true, 'slot.standard'],
+      ['equally', true, 'slot.standard'],
+      ['positive', false, 'slot.standard'],
+      ['most', true, 'slot.comparisonSet'],
+      ['least', true, 'slot.comparisonSet'],
+    ] as const)('offers a predicate adjective a standard of comparison under %s: %s, as %s', (degree, available, labelKey) => {
       const selection: PhraseSelection = { verb: GO, predicative: HAPPY, adjectiveDegrees: { predicative: degree } };
-      expect(satellite(selection, 'predicativeStandard')).toMatchObject({ parent: 'predicative', labelKey: 'slot.standard', available });
+      expect(satellite(selection, 'predicativeStandard')).toMatchObject({ parent: 'predicative', labelKey, available });
+      // The scales for a rival, a podium for a set.
+      expect(glyph(satellite(selection, 'predicativeStandard').icon)).toBe(labelKey === 'slot.standard' ? 'BalanceIcon' : 'LeaderboardIcon');
       expect(satellite({ ...selection, predicativeStandard: { subject: CAT } }, 'predicativeStandard').hasValue).toBe(true);
       expect(satellite({ verb: GO, predicative: CAT, adjectiveDegrees: { predicative: degree } }, 'predicativeStandard').available).toBe(false);
+    });
+
+    // P09-E50 D3: every period noun is offered a standard while one of its adjectives compares.
+    it.each(['subject', 'directObject', 'predicative', 'locative'] as const)('offers the %s a standard through its compared adjective', (which) => {
+      const base: PhraseSelection = { verb: SEE, [which]: HOUSE, [`${which}Adjective`]: BIG };
+      expect(satellite(base, `${which}Standard`)).toMatchObject({ parent: which, labelKey: 'slot.standard', available: false });
+      const compared = { ...base, adjectiveDegrees: { [`${which}Adjective`]: 'more' } } as PhraseSelection;
+      expect(satellite(compared, `${which}Standard`).available).toBe(true);
+      expect(glyph(satellite(compared, `${which}Standard`).icon)).toBe('BalanceIcon');
+      // A superlative picks from a set, which an attributive adjective does not say yet (E51 D4).
+      expect(satellite({ ...base, adjectiveDegrees: { [`${which}Adjective`]: 'most' } }, `${which}Standard`).available).toBe(false);
+      expect(satellite({ ...compared, [which]: SHE }, `${which}Standard`).available).toBe(false);
     });
 
     // Every cause also coordinates, and carries its own polarity — the one complement that can be
@@ -385,6 +403,8 @@ describe('rawSatellites', () => {
         'cause',
         ...controls,
         'causeConjunct',
+        // A noun names a set its examples list (P09-E48); a pronoun does not.
+        ...(cause.role === 'noun' ? ['causeExamples'] : []),
         'causeNegative',
         'causeQuestion',
       ]);

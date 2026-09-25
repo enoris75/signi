@@ -251,6 +251,37 @@ describe('nounSliceAt', () => {
   });
 });
 
+// A noun's examples (P09-E48): a nested phrase at `…/examples`, and its relation.
+describe('the examples', () => {
+  const NAMED: PhraseSelection = { subject: HOUSE, subjectExamples: { subject: DOG } };
+
+  it('are a slice of their own at their address, seeded the first time they are written', () => {
+    expect(nounSliceAt(NAMED, 'subject/examples')).toEqual({ slice: { subject: DOG }, which: 'subject' });
+    expect(updateNounAt({ subject: HOUSE }, 'subject/examples', (slice) => ({ ...slice, subject: CAT }))).toEqual({
+      subject: HOUSE,
+      subjectExamples: { subject: CAT },
+    });
+    expect(R.updateExamples({ subject: HOUSE }, 'subject', (p) => p)).toEqual({ subject: HOUSE, subjectExamples: {} });
+  });
+
+  it('flip between such as and including, the default left unstored', () => {
+    const inclusion = R.toggleExampleRelation(NAMED, 'subject');
+    expect(inclusion.exampleRelations).toEqual({ subject: 'inclusion' });
+    expect(R.toggleExampleRelation(inclusion, 'subject')).not.toHaveProperty('exampleRelations');
+    expect(R.setExampleRelation(NAMED, 'subject', 'inclusion').exampleRelations).toEqual({ subject: 'inclusion' });
+  });
+
+  it('go with removeExamples, with their noun, and when a pronoun takes its place', () => {
+    const inclusion = R.setExampleRelation(NAMED, 'subject', 'inclusion');
+    expect(R.removeExamples(inclusion, 'subject')).toEqual({ subject: HOUSE });
+    expect(applyClear(inclusion, 'subject')).not.toHaveProperty('subjectExamples');
+    expect(applyConceptSelect(inclusion, 'subject', SHE)).not.toHaveProperty('subjectExamples');
+    expect(applyConceptSelect(inclusion, 'subject', SHE)).not.toHaveProperty('exampleRelations');
+    // Another noun keeps them.
+    expect(applyConceptSelect(inclusion, 'subject', DOG).subjectExamples).toEqual({ subject: DOG });
+  });
+});
+
 // The predicate adjective's standard of comparison (P09-E12 D5): a nested phrase at `…/standard`.
 describe('the standard of comparison', () => {
   const COMPARED: PhraseSelection = { verb: GO, predicative: BIG, adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: DOG } };
@@ -264,10 +295,23 @@ describe('the standard of comparison', () => {
     expect(R.removeStandard(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
   });
 
-  it('passes to another adjective, and goes with a noun or with the predicative itself', () => {
+  // P09-E50 D3: a noun takes one too, through its compared adjective, so the head swap keeps it
+  // ("bigger than the dog" → "a bigger house than the dog"); a pronoun takes none.
+  it('passes to another adjective and to a noun, and goes with a pronoun or with the predicative itself', () => {
     expect(applyConceptSelect(COMPARED, 'predicative', RED).predicativeStandard).toEqual({ subject: DOG });
-    expect(applyConceptSelect(COMPARED, 'predicative', HOUSE)).not.toHaveProperty('predicativeStandard');
+    expect(applyConceptSelect(COMPARED, 'predicative', HOUSE).predicativeStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(applyConceptSelect(COMPARED, 'predicative', HOUSE), 'predicative', RED).predicativeStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(COMPARED, 'predicative', SHE)).not.toHaveProperty('predicativeStandard');
     expect(applyClear(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
+  });
+
+  it('is kept on a period noun until its noun goes or a pronoun takes its place', () => {
+    const OBJ: PhraseSelection = { directObject: HOUSE, directObjectAdjective: RED, directObjectStandard: { subject: DOG } };
+    expect(applyConceptSelect(OBJ, 'directObject', DOG).directObjectStandard).toEqual({ subject: DOG });
+    expect(applyClear(OBJ, 'directObjectAdjective').directObjectStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(OBJ, 'directObject', SHE)).not.toHaveProperty('directObjectStandard');
+    expect(applyClear(OBJ, 'directObject')).not.toHaveProperty('directObjectStandard');
+    expect(applyConceptSelect({ subject: HOUSE, subjectStandard: { subject: DOG } }, 'subject', SHE)).not.toHaveProperty('subjectStandard');
   });
 
   it('outlives a degree that takes none', () => {

@@ -3,7 +3,7 @@ import {
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
-import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type PhraseSelection, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   canBeCondition,
   canBeCoordinate,
@@ -15,6 +15,7 @@ import {
   canStartSubordinate,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
+import { comparedAdjectiveIndex, readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
 import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
@@ -277,7 +278,7 @@ function completeAt(
     // After an argument already given — the caret past it and a space — what follows is a new
     // command: a word's, a possessor's or a conjunct's word, or as many values as the command takes.
     const given = betweenWords.flatMap((t) => (t.kind === "word" ? t.text.split(/\s+/) : []));
-    const phraseWord = def.action.kind === "possessor" || def.action.kind === "standard" || def.action.kind === "conjunct";
+    const phraseWord = def.action.kind === "possessor" || def.action.kind === "standard" || def.action.kind === "examples" || def.action.kind === "conjunct";
     const argumentDone =
       !at &&
       (arg === "none" ||
@@ -307,6 +308,7 @@ function leadSpec(def: CommandDef, parent: Frame, state: WorkspaceState): WordSp
   const action = def.action;
   if (action.kind === "possessor") return wordSpecFor("subject", "possessor");
   if (action.kind === "standard") return wordSpecFor("subject", "standard");
+  if (action.kind === "examples") return wordSpecFor("subject", "examples");
   if (action.kind === "conjunct") return wordSpecFor("subject", "conjunct");
   return wordSpecForCommand(def, parent, frameWords(parent, state));
 }
@@ -377,10 +379,18 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
   const top = frame.words.length === 0 || frame.kind === "period";
   if (attachesToWord(action)) {
     // A relative clause said alone is offered only on a noun that heads one (P13).
+    // The standard is offered under the name its degree prints: `/outof` on a superlative, `/than`
+    // on the rest (P09-E51 D3). Both are read under any degree. A noun is offered it as its canvas
+    // control is, once an adjective of its compares, or while it holds one (P09-E50 D3).
     const fits = (w: WordInfo) =>
       takes(action, w) &&
       (action.kind !== "headless" ||
-        state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address));
+        state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address)) &&
+      (action.kind !== "standard" || (def.name === "outof") === (w.concept?.role === "adjective" && readsAsSet(w.slice.adjectiveDegrees?.[w.which!]))) &&
+      (action.kind !== "standard" ||
+        w.concept?.role !== "noun" ||
+        comparedAdjectiveIndex(w.slice, w.which!) !== undefined ||
+        Boolean(w.slice[`${w.which}Standard` as keyof PhraseSelection]));
     const i = words.findIndex(fits);
     if (i === -1) return undefined;
     return i === 0 ? 0 : 1;
@@ -788,6 +798,8 @@ const DEL_VALUES: readonly ValueDef[] = [
   { name: "modal", value: "modal", description: "a modal", descriptionKey: "slot.modal" },
   { name: "poss", value: "poss", description: "the possessor", descriptionKey: "slot.possessor" },
   { name: "than", value: "than", description: "the standard of comparison", descriptionKey: "slot.standard" },
+  { name: "outof", value: "outof", description: "the comparison set", descriptionKey: "slot.comparisonSet" },
+  { name: "eg", value: "eg", description: "the examples", descriptionKey: "slot.examples" },
   { name: "and", value: "and", description: "a coordinated phrase", descriptionKey: "slot.conjunct" },
   { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
   { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
@@ -928,15 +940,15 @@ function linkCompletion(
       { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", ...clause("slot.subject", "Subject") },
       { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", ...clause("slot.directObject", "Object") },
     );
-  } else if (action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") {
+  } else if (action.kind === "possessor" || action.kind === "standard" || action.kind === "examples" || action.kind === "conjunct") {
     rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase", detailKey: "console.new.phrase" });
   } else {
     rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period", detailKey: "console.new.period" });
   }
   // Then what exists already: the periods and nouns the rules let it reach.
-  if (action.kind !== "conjunct" && action.kind !== "standard" && targetHere) rows.push(...linkTargets(def, frame, state, words));
+  if (action.kind !== "conjunct" && action.kind !== "standard" && action.kind !== "examples" && targetHere) rows.push(...linkTargets(def, frame, state, words));
   // A possessor, a standard or a conjunct may also be named by its word.
-  if ((action.kind === "possessor" || action.kind === "standard" || action.kind === "conjunct") && q) {
+  if ((action.kind === "possessor" || action.kind === "standard" || action.kind === "examples" || action.kind === "conjunct") && q) {
     const spec = wordSpecFor("subject", action.kind);
     rows.push(...wordCompletion(from, to, query, spec, opts, { title: "" }, "primary").candidates);
   }
@@ -972,7 +984,11 @@ function linkTitle(def: CommandDef): Title {
     case "possessor":
       return { title: "possessor", titleKey: "slot.possessor" };
     case "standard":
-      return { title: "standard of comparison", titleKey: "slot.standard" };
+      return def.name === "outof"
+        ? { title: "comparison set", titleKey: "slot.comparisonSet" }
+        : { title: "standard of comparison", titleKey: "slot.standard" };
+    case "examples":
+      return { title: "examples", titleKey: "slot.examples" };
     default:
       return { title: "coordination", titleKey: "satellite.coordination" };
   }

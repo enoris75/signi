@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { DE_EXAMPLES } from './de.consts.js';
 import { coordinate } from './coordinate.js';
 import type { Case } from './de.types.js';
 import { nounPhrase } from './nounPhrase.js';
@@ -19,7 +20,7 @@ export function nounExamples(np: ResolvedNounPhrase, _case: Case): string {
   const ex = np.examples;
   if (!ex) return '';
   if (ex.relation === 'example') {
-    return ` wie ${coordinate(ex.phrase, (s) => (s.head.forms['person'] ? tonicPronounDe(s.head.forms, _case) : nounPhrase(s, _case)))}`;
+    return ` ${DE_EXAMPLES.example} ${coordinate(ex.phrase, (s) => (s.head.forms['person'] ? tonicPronounDe(s.head.forms, _case) : nounPhrase(s, _case)))}`;
   }
-  return `, einschließlich ${coordinate(ex.phrase, (s) => (s.head.forms['person'] ? tonicPronounDe(s.head.forms, 'dat') : nounPhrase(s, 'gen')))},`;
+  return `, ${DE_EXAMPLES.inclusion} ${coordinate(ex.phrase, (s) => (s.head.forms['person'] ? tonicPronounDe(s.head.forms, 'dat') : nounPhrase(s, 'gen')))},`;
 }

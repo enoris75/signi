@@ -252,3 +252,9 @@ export const CARDINALS: CardinalTable = {
   9: { word: 'nove' }, 10: { word: 'dieci' }, 11: { word: 'undici' }, 12: { word: 'dodici' },
   24: { word: 'ventiquattro' },
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them. The inclusion agrees with the example; this is its masculine singular.
+ */
+export const IT_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'come', inclusion: 'compreso' };

@@ -265,3 +265,9 @@ export const DE_GENITIVE_TEMPORAL: Record<'during' | 'within', string> = {
   during: 'während',
   within: 'innerhalb',
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them.
+ */
+export const DE_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'wie', inclusion: 'einschließlich' };

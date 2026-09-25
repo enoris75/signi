@@ -1,8 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveIt } from '../../possessive.js';
-import { COORD_WORDS, IT_DEGREE } from './it.consts.js';
-import { CORRELATIVE_PAIR } from './it.consts.js';
+import { COORD_WORDS, IT_DEGREE, IT_EXAMPLES, CORRELATIVE_PAIR } from './it.consts.js';
 import { citeCorrelative } from '../../functions/correlate.js';
 import { IT_TEMPORAL } from './it.consts.js';
 import { joinWords } from './joinWords.js';
@@ -91,5 +90,9 @@ export const italianEngine: LanguageEngine = {
     // gender a citation form is given in (as `renderPossessive` defaults).
     const word = IT_DEGREE[degree];
     return word && (degree === 'most' || degree === 'least') ? `il ${word}` : word;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return IT_EXAMPLES[relation];
   },
 };

@@ -221,3 +221,9 @@ export const CARDINALS: CardinalTable = {
   9: { word: 'nine' }, 10: { word: 'ten' }, 11: { word: 'eleven' }, 12: { word: 'twelve' },
   24: { word: 'twenty-four' },
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them.
+ */
+export const EN_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'such as', inclusion: 'including' };

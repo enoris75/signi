@@ -19,6 +19,7 @@ import {
   isSubordinateLink,
   possessorAddress,
   standardAddress,
+  examplesAddress,
   type ConceptSelectOpts,
   type ImperativePerson,
   type QuestionRole,
@@ -72,6 +73,8 @@ import {
   removeConjunct,
   removePossessor,
   removeStandard,
+  removeExamples,
+  setExampleRelation,
   setImperative,
   setImperativePerson,
   setImperativeRegister,
@@ -91,6 +94,7 @@ import {
   updateNounAt,
   updatePossessor,
   updateStandard,
+  updateExamples,
 } from "../model/phraseReducers.ts";
 import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
 import { adjectiveSlots, MODAL_SLOTS, offeredComplements } from "../model/slots.ts";
@@ -155,7 +159,7 @@ import {
  * It is pure: it reads the vocabulary it is handed and writes nothing but the state it returns.
  */
 
-export type NounFrameKind = "period" | "possessor" | "standard" | "conjunct";
+export type NounFrameKind = "period" | "possessor" | "standard" | "examples" | "conjunct";
 
 /**
  * A bracket level — the period itself at the top, then each phrase or clause opened inside it. An
@@ -629,6 +633,8 @@ class Run {
         return this.possessor(item, w);
       case "standard":
         return this.standard(item, w);
+      case "examples":
+        return this.examples(item, action.relation, w);
       case "conjunct":
         return this.conjunct(item, def.name, action.conjunction, w, action.correlative);
       case "relative":
@@ -746,6 +752,25 @@ class Run {
     }
     if (item.body)
       this.bracket(item, { kind: "standard", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: "than" });
+  }
+
+  /** `/suchas [ cat ]`, `/including [ cat ]` — the members of its set a noun names (P09-E48). */
+  examples(item: Item, relation: "example" | "inclusion", w: WordInfo): void {
+    const containerId = w.ref.containerId;
+    const named = w.address!;
+    const headRef: WordRef = { containerId, slice: examplesAddress(named), slot: "subject" };
+    // Seeded on the way in, so a bracket with no word yet still holds examples to fill.
+    this.updateRoot(containerId, (root) =>
+      updateNounAt(root, named, (s, which) => setExampleRelation(updateExamples(s, which, (p) => p), which, relation)),
+    );
+    this.touch(w.ref);
+    if (item.word) {
+      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "examples"), "eg");
+      this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept, opts));
+      this.touch(headRef);
+    }
+    if (item.body)
+      this.bracket(item, { kind: "examples", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: relation === "inclusion" ? "including" : "suchas" });
   }
 
   conjunct(item: Item, command: string, conjunction: "and" | "or", w: WordInfo, correlative?: true): void {
@@ -1091,10 +1116,22 @@ class Run {
         this.touch(w!.ref);
         return;
       }
-      case "than": {
+      // `/del outof` is the same removal, under the superlative's name (P09-E51 D3).
+      case "than":
+      case "outof": {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Standard` as keyof PhraseSelection]));
         if (!w) fail(span, coded("noStandardToRemove"));
         this.updateRoot(containerId, (root) => updateNounAt(root, w!.address!, (s, which) => removeStandard(s, which)));
+        this.touch(w!.ref);
+        return;
+      }
+      // Either relation's examples (P09-E48), under the reference step's name or either command's.
+      case "eg":
+      case "suchas":
+      case "including": {
+        const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Examples` as keyof PhraseSelection]));
+        if (!w) fail(span, coded("noExamplesToRemove"));
+        this.updateRoot(containerId, (root) => updateNounAt(root, w!.address!, (s, which) => removeExamples(s, which)));
         this.touch(w!.ref);
         return;
       }
@@ -1208,6 +1245,9 @@ class Run {
       } else if (steps.at(-1) === "standard") {
         const compared = steps.slice(0, -1).join("/");
         this.updateRoot(containerId, (root) => updateNounAt(root, compared, (s, which) => removeStandard(s, which)));
+      } else if (steps.at(-1) === "examples") {
+        const named = steps.slice(0, -1).join("/");
+        this.updateRoot(containerId, (root) => updateNounAt(root, named, (s, which) => removeExamples(s, which)));
       } else {
         const i = Number(steps.at(-1));
         const base = steps.slice(0, -2).join("/");

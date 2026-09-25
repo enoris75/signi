@@ -222,6 +222,19 @@ describe('what each console command is for', () => {
       es: 'añadir un término de comparación a un adjetivo.', ja: '形容詞に比較の基準を加える。',
       pt: 'adicionar um termo de comparação a um adjetivo.',
     },
+    // `/outof`'s (P09-E51 D3): the superlative's set, added to the adjective as the standard is.
+    'purpose.comparisonSet': {
+      en: 'to add a comparison set to an adjective.', it: 'aggiungere un insieme di confronto a un aggettivo.',
+      fr: 'ajouter un ensemble de comparaison à un adjectif.', de: 'eine Vergleichsmenge zu einem Adjektiv hinzufügen.',
+      es: 'añadir un conjunto de comparación a un adjetivo.', ja: '形容詞に比較の範囲を加える。',
+      pt: 'adicionar um conjunto de comparação a um adjetivo.',
+    },
+    // `/suchas`'s and `/including`'s (P09-E48): examples added to the noun they name members of.
+    'purpose.examples': {
+      en: 'to add examples to a noun.', it: 'aggiungere esempi a un sostantivo.', fr: 'ajouter des exemples à un nom.',
+      de: 'Beispiele zu einem Substantiv hinzufügen.', es: 'añadir ejemplos a un sustantivo.', ja: '名詞に例を加える。',
+      pt: 'adicionar exemplos a um substantivo.',
+    },
     'purpose.relative': {
       en: 'to add a relative clause to a noun.', it: 'aggiungere una proposizione relativa a un sostantivo.',
       fr: 'ajouter une proposition relative à un nom.', de: 'einen Relativsatz zu einem Substantiv hinzufügen.',

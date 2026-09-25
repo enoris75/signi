@@ -66,6 +66,7 @@ export function GroupPerimeterControls({
         const headless = entry?.headless && controlPos[perimeterControlKey("headless", nounKey)];
         const possessor = entry?.possessor && controlPos[perimeterControlKey("possessor", nounKey)];
         const standard = entry?.standard && controlPos[perimeterControlKey("standard", nounKey)];
+        const examples = entry?.examples && controlPos[perimeterControlKey("examples", nounKey)];
         const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
         // The clause's own facts about this noun: the wh-question's mark, its who / what, the
         // existential (P09-E12). Plain toggles: no line starts from them.
@@ -134,6 +135,16 @@ export function GroupPerimeterControls({
                   sat={entry!.standard!}
                   color={color}
                   keySpec={satelliteKeys[entry!.standard!.key]}
+                  tip={nounKey === cursorSlot}
+                />
+              </Box>
+            )}
+            {examples && (
+              <Box data-testid={`examples-ctl-${nounKey}`} sx={seat(examples)}>
+                <SatelliteButton
+                  sat={entry!.examples!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.examples!.key]}
                   tip={nounKey === cursorSlot}
                 />
               </Box>

@@ -8,6 +8,7 @@ import {
   translatePossessive,
   translateSpecifier,
   translateSubordinator,
+  translateExamples,
   translateWord,
 } from '@signi/engine';
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
@@ -24,6 +25,7 @@ import type {
   UiStringPossessiveDef,
   UiStringSpecifierDef,
   UiStringSubordinatorDef,
+  UiStringExamplesDef,
   UiStringWordDef,
 } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -42,6 +44,7 @@ vi.mock('@signi/engine', async (importOriginal) => {
     translateWord: vi.fn(engine.translateWord),
     translateConjunction: vi.fn(engine.translateConjunction),
     translateSubordinator: vi.fn(engine.translateSubordinator),
+    translateExamples: vi.fn(engine.translateExamples),
     translateDegree: vi.fn(engine.translateDegree),
     translateDeterminer: vi.fn(engine.translateDeterminer),
     translatePossessive: vi.fn(engine.translatePossessive),
@@ -79,6 +82,7 @@ const kindOf = (d: UiStringDef): string =>
   : d.possessive !== undefined ? 'possessive'
   : d.conjunction !== undefined ? 'conjunction'
   : d.subordinator !== undefined ? 'subordinator'
+  : 'examples' in d ? 'examples'
   : d.specifier !== undefined ? 'specifier'
   : d.degree !== undefined ? 'degree'
   : 'approximator' in d ? 'approximator'
@@ -91,6 +95,7 @@ const byKind = {
   possessive: of<UiStringPossessiveDef>('possessive'),
   conjunction: of<UiStringConjunctionDef>('conjunction'),
   subordinator: of<UiStringSubordinatorDef>('subordinator'),
+  examples: of<UiStringExamplesDef>('examples'),
   specifier: of<UiStringSpecifierDef>('specifier'),
   degree: of<UiStringDegreeDef>('degree'),
   approximator: of<UiStringApproximatorDef>('approximator'),
@@ -102,7 +107,7 @@ const rendering = (text: (language: LanguageCode) => string): Translation[] =>
   LANGUAGE_CODES.map((language) => ({ language, text: text(language) }) as Translation);
 
 afterEach(() => {
-  const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
+  const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateExamples, translateDegree,
     translateDeterminer, translatePossessive, translateSpecifier, translateApproximator];
   for (const fn of fns) vi.mocked(fn).mockReset();
 });
@@ -141,6 +146,9 @@ describe('buildUiStrings', () => {
       // Its sibling (P09-E12 D9), cited on nothing either.
       expect(translateSubordinator).toHaveBeenCalledWith(d.subordinator);
     }
+    expect(translateExamples).toHaveBeenCalledTimes(byKind.examples.length);
+    // The examples relation's word (P09-E48), cited on nothing as well.
+    for (const [, d] of byKind.examples) expect(translateExamples).toHaveBeenCalledWith(d.examples);
     expect(translateSpecifier).toHaveBeenCalledTimes(byKind.specifier.length);
     for (const [, d] of byKind.specifier) {
       expect(translateSpecifier).toHaveBeenCalledWith(d.specifier, theLexicon, d.agreesWith);
@@ -240,7 +248,7 @@ describe('buildUiStrings', () => {
 
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
-    const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
+    const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateExamples, translateDegree,
       translateDeterminer, translatePossessive, translateSpecifier, translateApproximator];
     for (const fn of fns) vi.mocked(fn).mockReturnValue(rendered);
 
@@ -759,7 +767,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(33);
+    expect(purposes).toHaveLength(35);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
@@ -803,6 +811,40 @@ describe('buildUiStrings', () => {
       pt: 'Remover este termo de comparação',
     });
     expect(strings['purpose.standard']).toMatchObject({ de: 'eine Vergleichsgröße zu einem Adjektiv hinzufügen', ja: '形容詞に比較の基準を加える' });
+    // The same ring on a superlative, the set it picks from (P09-E51 D2): COMPARISON_SET.
+    expect(strings['slot.comparisonSet']).toEqual({
+      en: 'Comparison set', it: 'Insieme di confronto', fr: 'Ensemble de comparaison', de: 'Vergleichsmenge',
+      es: 'Conjunto de comparación', ja: '比較の範囲', pt: 'Conjunto de comparação',
+    });
+    expect(strings['action.removeComparisonSet']).toEqual({
+      en: 'Remove this comparison set', it: "Rimuovi quest'insieme di confronto", fr: 'Retirer cet ensemble de comparaison',
+      de: 'Diese Vergleichsmenge entfernen', es: 'Quitar este conjunto de comparación', ja: 'この比較の範囲を取り除き',
+      pt: 'Remover este conjunto de comparação',
+    });
+    expect(strings['purpose.comparisonSet']).toMatchObject({ de: 'eine Vergleichsmenge zu einem Adjektiv hinzufügen', ja: '形容詞に比較の範囲を加える' });
+    // A noun's examples ring (P09-E48): EXAMPLE, plural and bare, and the chip's two words.
+    expect(strings['slot.examples']).toEqual({ en: 'Examples', it: 'Esempi', fr: 'Exemples', de: 'Beispiele', es: 'Ejemplos', ja: '例', pt: 'Exemplos' });
+    expect(strings['action.removeExamples']).toEqual({
+      en: 'Remove these examples', it: 'Rimuovi questi esempi', fr: 'Retirer ces exemples', de: 'Diese Beispiele entfernen',
+      es: 'Quitar estos ejemplos', ja: 'この例を取り除き', pt: 'Remover estes exemplos',
+    });
+    expect(strings['examples.value.example']).toEqual({ en: 'such as', it: 'come', fr: 'comme', de: 'wie', es: 'como', ja: 'のような', pt: 'como' });
+    expect(strings['examples.value.inclusion']).toEqual({
+      en: 'including', it: 'compreso', fr: 'y compris', de: 'einschließlich', es: 'incluido', ja: 'を含む', pt: 'incluindo',
+    });
+    expect(strings['action.clear.examples']).toEqual({
+      en: 'Clear the example', it: "Cancella l'esempio", fr: "Effacer l'exemple", de: 'Das Beispiel löschen', es: 'Borrar el ejemplo',
+      ja: '例を消去', pt: 'Limpar o exemplo',
+    });
+    // Its ring's head box, and the standard's, clear by name (P09-E51).
+    expect(strings['action.clear.standard']).toEqual({
+      en: 'Clear the standard of comparison', it: 'Cancella il termine di paragone', fr: 'Effacer le terme de comparaison',
+      de: 'Die Vergleichsgröße löschen', es: 'Borrar el término de comparación', ja: '比較の基準を消去', pt: 'Limpar o termo de comparação',
+    });
+    expect(strings['action.clear.comparisonSet']).toEqual({
+      en: 'Clear the comparison set', it: "Cancella l'insieme di confronto", fr: "Effacer l'ensemble de comparaison",
+      de: 'Die Vergleichsmenge löschen', es: 'Borrar el conjunto de comparación', ja: '比較の範囲を消去', pt: 'Limpar o conjunto de comparação',
+    });
     expect(strings['diagnostic.noAdjectiveHasStandard']).toMatchObject({
       en: 'No adjective has a standard of comparison', fr: "Aucun adjectif n'a de terme de comparaison", ja: 'どの形容詞も比較の基準がありません',
     });

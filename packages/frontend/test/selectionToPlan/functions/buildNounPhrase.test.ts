@@ -38,7 +38,7 @@ describe('buildNounPhrase', () => {
   });
 
   // P09-E12 D5: the standard rides with the degree that takes one; under the superlatives the
-  // translator would read it as the set (P09-E19), which the canvas dims and does not offer yet.
+  // translator reads it as the set (P09-E19), which the canvas offers too (P09-E51 D1).
   it('gives an adjective head its standard of comparison on the degrees that take one', () => {
     const sel: PhraseSelection = {
       predicative: BIG,
@@ -52,7 +52,8 @@ describe('buildNounPhrase', () => {
       headStandard: { concept: 'DOG', definiteness: 'indefinite' },
     });
     expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'equally' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
-    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toBeUndefined();
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'least' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
     expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'positive' } }, 'predicative')?.headStandard).toBeUndefined();
     expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
   });
@@ -64,6 +65,45 @@ describe('buildNounPhrase', () => {
     ['nothing unflagged', { subject: CAT, subjectDefiniteness: 'all' }, undefined],
   ])('writes the approximator: %s', (_, sel, want) => {
     expect(buildNounPhrase(sel, 'subject')?.approximator).toBe(want);
+  });
+
+  // P09-E50 D1: a noun's standard goes to its compared adjective, by index among real adjectives.
+  it('places a noun’s standard on its first compared adjective, past a noun modifier', () => {
+    const sel: PhraseSelection = {
+      directObject: CAT,
+      directObjectAdjective: SAIL,
+      directObjectAdjective2: HAPPY,
+      directObjectAdjective3: BIG,
+      adjectiveDegrees: { directObjectAdjective2: 'positive', directObjectAdjective3: 'more' },
+      directObjectStandard: { subject: DOG },
+    };
+    expect(buildNounPhrase(sel, 'directObject')).toMatchObject({
+      adjectives: ['HAPPY', 'BIG'],
+      adjectiveStandards: [undefined, { concept: 'DOG' }],
+      headStandard: undefined,
+    });
+    // Two compared adjectives: the first gets it.
+    const two = { ...sel, adjectiveDegrees: { directObjectAdjective2: 'less', directObjectAdjective3: 'more' } } as PhraseSelection;
+    expect(buildNounPhrase(two, 'directObject')?.adjectiveStandards).toMatchObject([{ concept: 'DOG' }]);
+    // None compares: kept in the selection, left out of the plan; a superlative is no rival.
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: {} }, 'directObject')?.adjectiveStandards).toBeUndefined();
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { directObjectAdjective3: 'most' } }, 'directObject')?.adjectiveStandards).toBeUndefined();
+    // An empty standard is none.
+    expect(buildNounPhrase({ ...sel, directObjectStandard: {} }, 'directObject')?.adjectiveStandards).toBeUndefined();
+  });
+
+  // P09-E48: a noun's examples, under either relation; none on an empty ring or an adjective head.
+  it('gives a noun head its examples, such as or including', () => {
+    const sel: PhraseSelection = { subject: HOUSE, subjectNumber: 'plural', subjectExamples: { subject: DOG } };
+    expect(buildNounPhrase(sel, 'subject')?.examples).toMatchObject({ phrase: { concept: 'DOG' }, relation: 'example' });
+    expect(buildNounPhrase({ ...sel, exampleRelations: { subject: 'inclusion' } }, 'subject')?.examples).toMatchObject({ relation: 'inclusion' });
+    expect(buildNounPhrase({ ...sel, subjectExamples: {} }, 'subject')?.examples).toBeUndefined();
+    expect(buildNounPhrase({ predicative: BIG, predicativeExamples: { subject: DOG } }, 'predicative')?.examples).toBeUndefined();
+  });
+
+  it('keeps an adjective head’s standard as its headStandard', () => {
+    const sel: PhraseSelection = { predicative: BIG, adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: DOG } };
+    expect(buildNounPhrase(sel, 'predicative')).toMatchObject({ headStandard: { concept: 'DOG' }, adjectiveStandards: undefined });
   });
 
   it('gives an adjective head the degree stored under its own slot', () => {

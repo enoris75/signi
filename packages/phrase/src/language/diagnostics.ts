@@ -27,7 +27,7 @@ import type { Span } from "./types.ts";
 
 /** The bracket a diagnostic points out: the kind of frame it is, and the command that opened it. */
 export interface Nest {
-  kind: "period" | "possessor" | "standard" | "conjunct" | "element";
+  kind: "period" | "possessor" | "standard" | "examples" | "conjunct" | "element";
   via?: string;
 }
 
@@ -190,6 +190,7 @@ const SEGMENTS = {
     a.index === undefined ? [say("diagnostic.verbHasNoModal")] : [say("diagnostic.missingModal", String(a.index))],
   noPossessorToRemove: () => [say("diagnostic.noNounHasPossessor")],
   noStandardToRemove: () => [say("diagnostic.noAdjectiveHasStandard")],
+  noExamplesToRemove: () => [say("diagnostic.noNounHasExamples")],
   noConjunctToRemove: () => [say("diagnostic.noNounIsCoordinated")],
   noSuchConjunct: (a: { index: number }) => [say("diagnostic.missingConjunct", String(a.index))],
   noRelativeToRemove: () => [say("diagnostic.noNounHasRelative")],

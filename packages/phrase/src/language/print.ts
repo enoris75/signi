@@ -4,7 +4,9 @@ import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   STANDARD_KEY,
+  EXAMPLES_KEY,
   conjunctAddress,
+  examplesAddress,
   imperativePerson,
   imperativeRegisterOf,
   isConditionalLink,
@@ -19,6 +21,7 @@ import {
   type PhraseSelection,
   type SlotKey,
 } from "../model/interfaces.ts";
+import { readsAsSet } from "../model/functions/comparison.ts";
 import { conjunctsOf } from "../model/phraseReducers.ts";
 import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
 import { adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
@@ -195,7 +198,7 @@ class Printer {
     return this.state.containers.findIndex((c) => c.id === id) + 1;
   }
 
-  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period", slice?: NounAddress): string {
+  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "examples" | "conjunct" = "period", slice?: NounAddress): string {
     // A conjunct is read as its block's words are: a predicate's takes an adjective too (P13).
     const spec = frame === "conjunct" ? conjunctSpec(slice?.split("/")[0] as NounKey | undefined) : wordSpecFor(slot, frame);
     return printWord(concept, spec, this.vocab);
@@ -386,7 +389,7 @@ class Printer {
     sel: PhraseSelection,
     which: NounKey,
     slice: NounAddress | undefined,
-    frame: "period" | "possessor" | "standard" | "conjunct",
+    frame: "period" | "possessor" | "standard" | "examples" | "conjunct",
     lead = false,
   ): void {
     const id = this.containerId;
@@ -465,12 +468,18 @@ class Printer {
     }
     const address = w.address!;
 
-    // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its
-    // own in brackets. It is written under any degree — one that takes none only mutes it — so the
-    // word the user gave comes back with the line.
+    // Its standard of comparison, after its degree and settings (P09-E12 D5): a phrase of its own in
+    // brackets. A predicate adjective's own, or a noun's for its compared adjective, before its
+    // possessor (P09-E50 D5). It is written under any degree — one that takes none only mutes it — so
+    // the word the user gave comes back with the line. On a superlative predicate adjective it is the
+    // set the adjective picks from, spelled `/outof` (P09-E51 D3); its removal and its reference step
+    // stay `than`.
     const standard = sel[STANDARD_KEY(which)] as PhraseSelection | undefined;
-    if (!slice && which === "predicative" && concept.role === "adjective" && standard && Object.keys(standard).length)
-      this.phrase(ref, "/than", `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
+    const compared = concept.role === "noun" || (which === "predicative" && concept.role === "adjective");
+    if (!slice && compared && standard && Object.keys(standard).length) {
+      const name = concept.role === "adjective" && readsAsSet(sel.adjectiveDegrees?.[which]) ? "/outof" : "/than";
+      this.phrase(ref, name, `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
+    }
 
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
     const possessorRef = sel[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
@@ -484,6 +493,14 @@ class Printer {
       this.phrase(ref, "/poss", `${wordKey(ref)}:poss`, "/del poss", possessor, possessorAddress(address), "possessor");
       // What it is to the noun (P13), once it is there to be read back onto.
       this.settings(w, ["possessorRole"]);
+    }
+
+    // Its examples (P09-E48), after its possessor: a phrase of its own in brackets, under the command
+    // its relation names. The reference step and the removal are `eg` for either.
+    const examples = sel[EXAMPLES_KEY(which)] as PhraseSelection | undefined;
+    if (!slice && concept.role === "noun" && examples && Object.keys(examples).length) {
+      const name = sel.exampleRelations?.[which] === "inclusion" ? "/including" : "/suchas";
+      this.phrase(ref, name, `${wordKey(ref)}:eg`, "/del eg", examples, examplesAddress(address), "examples");
     }
 
     // Its conjuncts: a bare word where the phrase is only its word, else a bracket.
@@ -541,7 +558,7 @@ class Printer {
     removal: string,
     sel: PhraseSelection,
     slice: NounAddress,
-    frame: "possessor" | "standard" | "conjunct",
+    frame: "possessor" | "standard" | "examples" | "conjunct",
   ): void {
     const color = bracketColor(commandByAction(frame));
     const statement = this.statement({ key, removal, owner, about: owner, scope: slice });

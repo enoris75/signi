@@ -86,6 +86,9 @@ describe('references', () => {
     // The predicate adjective's standard of comparison, by the command that names it (P09-E12 D5).
     expect(parseRef('1.pred.than')).toEqual({ period: 1, address: 'predicative/standard' });
     expect(printRef(1, 'predicative/standard/possessor')).toBe('#1.pred.than.poss');
+    // A noun's examples, by the step `/del eg` removes (P09-E48).
+    expect(parseRef('1.subj.eg')).toEqual({ period: 1, address: 'subject/examples' });
+    expect(printRef(1, 'subject/examples/possessor')).toBe('#1.subj.eg.poss');
     expect(parseRef('x')).toMatchObject({ error: { code: 'referenceStartsWithNumber' } });
   });
 });

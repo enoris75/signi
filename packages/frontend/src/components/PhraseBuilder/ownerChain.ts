@@ -35,8 +35,10 @@ export function canvasKeyOf(address: NounAddress): string | undefined {
   const steps = address.split("/");
   if (steps.length === 1) return address;
   if (steps[steps.length - 1] === "possessor") return address;
-  // The predicate adjective's standard of comparison goes by its address too (see standardRing).
+  // A standard of comparison goes by its address too (see standardRing).
   if (steps[steps.length - 1] === "standard") return address;
+  // So do a noun's examples (P09-E48).
+  if (steps[steps.length - 1] === "examples") return address;
   if (steps.length === 3 && steps[1] === "conjunct") {
     const i = Number(steps[2]);
     return Number.isInteger(i) ? conjunctKey(steps[0] as NounKey, i) : undefined;
@@ -89,15 +91,15 @@ export function possessionsFor({
   nouns,
   chains,
   ownersOpen,
-  standard,
+  standards = [],
 }: {
   selection: PhraseSelection;
   nouns: readonly NounKey[];
   chains: readonly { which: NounKey; count: number }[];
   ownersOpen: Readonly<Record<NounAddress, boolean>>;
-  // The predicate adjective's standard of comparison, when its ring is drawn: a noun phrase that may
-  // take an owner of its own ("bigger than the boy's dog", P09-E12 D5).
-  standard?: Pick<OwnerSpot, "address" | "order">;
+  // The standards of comparison whose rings are drawn: each a noun phrase that may take an owner of
+  // its own ("bigger than the boy's dog", P09-E12 D5), wearing its noun's colour (P09-E50).
+  standards?: readonly Pick<OwnerSpot, "address" | "order" | "role">[];
 }): { owners: OwnerSpot[]; pointers: PointerSpot[] } {
   const owners: OwnerSpot[] = [];
   const pointers: PointerSpot[] = [];
@@ -148,9 +150,11 @@ export function possessionsFor({
           visit(conjunct, "subject", conjunctAddress(which, i), conjunctKey(which, i), which, i, 0);
       });
   }
-  const standardSlice = standard && nounSliceAt(selection, standard.address)?.slice;
-  if (standard && standardSlice && isNoun(standardSlice.subject))
-    visit(standardSlice, "subject", standard.address, standard.address, "predicative", standard.order, 0);
+  for (const standard of standards) {
+    const standardSlice = nounSliceAt(selection, standard.address)?.slice;
+    if (standardSlice && isNoun(standardSlice.subject))
+      visit(standardSlice, "subject", standard.address, standard.address, standard.role, standard.order, 0);
+  }
   return { owners, pointers };
 }
 

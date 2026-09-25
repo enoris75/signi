@@ -4,6 +4,7 @@ import {
   translateConjunction,
   translateDegree,
   translateDeterminer,
+  translateExamples,
   translatePossessive,
   translateSpecifier,
   translateSubordinator,
@@ -41,6 +42,7 @@ function renderEntry(def: UiStringDef, lookup: LexicalLookup): Translation[] {
   if (def.possessive !== undefined) return translatePossessive(def.possessive, lookup, def.agreesWith);
   if (def.conjunction !== undefined) return translateConjunction(def.conjunction, def.correlative);
   if (def.subordinator !== undefined) return translateSubordinator(def.subordinator);
+  if ('examples' in def) return translateExamples(def.examples);
   if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookup, def.agreesWith);
   if (def.degree !== undefined) return translateDegree(def.degree, lookup, def.agreesWith);
   if ('approximator' in def) return translateApproximator(def.approximator);

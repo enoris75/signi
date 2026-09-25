@@ -74,6 +74,14 @@ describe('hydrateSelection', () => {
     expect(hydrate(saved).selection).toEqual(selection);
   });
 
+  // P09-E48: a noun's examples are a nested phrase too, and their relation a plain record.
+  it('restores a noun’s examples and their relation', () => {
+    const selection = { subject: CAT, subjectExamples: { subject: DOG }, exampleRelations: { subject: 'inclusion' as const } };
+    const saved = serializeSelection(selection);
+    expect(saved).toEqual({ subject: 'CAT', subjectExamples: { subject: 'DOG' }, exampleRelations: { subject: 'inclusion' } });
+    expect(hydrate(saved).selection).toEqual(selection);
+  });
+
   it('leaves out null fields', () => {
     expect(hydrate({ subject: 'CAT', verb: null, subjectPossessor: null }).selection).toEqual({ subject: CAT });
   });

@@ -1,8 +1,7 @@
 import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessivePt } from '../../possessive.js';
-import { COORD_WORDS, PARENTHETICAL_CONNECTORS, PT_DEGREE } from './pt.consts.js';
-import { CORRELATIVE_PAIR } from './pt.consts.js';
+import { COORD_WORDS, PARENTHETICAL_CONNECTORS, PT_DEGREE, PT_EXAMPLES, CORRELATIVE_PAIR } from './pt.consts.js';
 import { citeCorrelative } from '../../functions/correlate.js';
 import { PT_TEMPORAL } from './pt.consts.js';
 import { emPrep } from './emPrep.js';
@@ -95,5 +94,9 @@ export const portugueseEngine: LanguageEngine = {
     // gender a citation form is given in (as `renderPossessive` defaults).
     const word = PT_DEGREE[degree];
     return word && (degree === 'most' || degree === 'least') ? `o ${word}` : word;
+  },
+  // The examples relation alone, for the chip on the line to a noun's examples ring (P09-E48).
+  renderExamples(relation: 'example' | 'inclusion'): string {
+    return PT_EXAMPLES[relation];
   },
 };

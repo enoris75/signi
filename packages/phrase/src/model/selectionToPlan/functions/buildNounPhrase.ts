@@ -1,13 +1,15 @@
-import { STANDARD_DEGREES, type Concept, type Definiteness, type NounPhrase, type Possessor } from "@signi/shared";
+import { type Concept, type Definiteness, type NounElement, type NounPhrase, type Possessor } from "@signi/shared";
 import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
   STANDARD_KEY,
+  EXAMPLES_KEY,
   type NounAddress,
   type NounKey,
   type PhraseSelection,
 } from "../../interfaces.ts";
 import { approximatorFor } from "../../functions/approximatorFor.ts";
+import { comparedAdjectiveIndex, takesStandardOrSet } from "../../functions/comparison.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
@@ -41,13 +43,16 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     headDegree: concept.role === "adjective" ? sel.adjectiveDegrees?.[which] : undefined,
     // What that adjective is compared to ("bigger than the dog", P09-E12 D5): a nested noun phrase
     // headed by its `subject`, like a possessor, but a whole noun element — it may coordinate. It is
-    // passed only on the comparatives and the equative (STANDARD_DEGREES), the degrees whose ring the
-    // canvas draws undimmed: the translator would read it as the superlative's set ("the biggest of
-    // the dogs", P09-E19), which the canvas does not offer yet, and drops it on the positive.
+    // passed on every degree but the positive, the degrees whose ring the canvas draws undimmed: a
+    // rival on the comparatives and the equative, the superlative's set on `most` / `least` ("the
+    // biggest of the dogs", P09-E19, E51). The translator drops it on the positive.
     headStandard:
-      concept.role === "adjective" && STANDARD_DEGREES.has(sel.adjectiveDegrees?.[which] ?? "positive")
+      concept.role === "adjective" && takesStandardOrSet(sel.adjectiveDegrees?.[which])
         ? standardOf(sel, which, root)
         : undefined,
+    // A noun head's standard is its compared adjective's ("a bigger cat than the dog", P09-E50 D1):
+    // placed at that adjective's index among `adjectives`, and left out when none compares.
+    adjectiveStandards: concept.role === "noun" ? adjectiveStandardsOf(sel, which, root) : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a
@@ -60,6 +65,8 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     possessor,
     // A demonstrative pointing away from the rest (P13).
     contrastive: sel.contrastives?.[which] || undefined,
+    // The members of its set it names after it ("animals such as the cat", P09-E48): a noun head's.
+    examples: concept.role === "noun" ? examplesOf(sel, which, root) : undefined,
     // A cardinal numeral counting it (P13).
     numeral: sel.numerals?.[which],
     // An approximator on that quantity (P09-E49), its word the quantity's own.
@@ -73,3 +80,19 @@ function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection)
   const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
   return standard ? buildNounElement(standard, "subject", root) : undefined;
 }
+
+function examplesOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection): NounPhrase["examples"] {
+  const slice = field<PhraseSelection>(sel, EXAMPLES_KEY(which));
+  const phrase = slice ? buildNounElement(slice, "subject", root) : undefined;
+  return phrase && { phrase, relation: sel.exampleRelations?.[which] ?? "example" };
+}
+
+function adjectiveStandardsOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
+  const index = comparedAdjectiveIndex(sel, which);
+  const standard = index === undefined ? undefined : standardOf(sel, which, root);
+  if (index === undefined || !standard) return undefined;
+  const entries: (NounElement | undefined)[] = Array.from({ length: index + 1 }, () => undefined);
+  entries[index] = standard;
+  return entries;
+}
+

@@ -2,6 +2,7 @@ import type { NounKey } from "../interfaces.ts";
 import { chainKeys, chainPortKey, type HostedRing } from "../conjunctChain.ts";
 import { ownerPortKey, type OwnerSpot } from "../ownerChain.ts";
 import type { StandardSpot } from "../standardRing.ts";
+import type { ExamplesSpot } from "../examplesRing.ts";
 import type { Pt } from "../ringLayout.ts";
 import type { RingHost } from "../ringHost.ts";
 
@@ -45,6 +46,7 @@ export function ringHosts({
   conjunctHost: (which: NounKey, i: number) => RingHost;
   ownerHost: (spot: OwnerSpot) => RingHost;
   standardHost: (spot: StandardSpot) => RingHost;
+  examplesHost: (spot: ExamplesSpot) => RingHost;
 } {
   // Conjunct `i` of `which`: its ports face the rings either side of it in its group.
   const conjunctHost = (which: NounKey, i: number): RingHost => {
@@ -80,12 +82,16 @@ export function ringHosts({
   });
 
   // The predicate adjective's standard of comparison: an owner's hand-off, faded while its degree
-  // takes none (P09-E12 D5).
+  // takes none (P09-E12 D5), and named the comparison set on a superlative (P09-E51).
   const standardHost = (spot: StandardSpot): RingHost => ({
     ...ownerHost(spot),
     kind: "standard",
     dimmed: spot.dimmed,
+    set: spot.set,
   });
 
-  return { conjunctHost, ownerHost, standardHost };
+  // A noun's examples (P09-E48): an owner's hand-off of their own kind.
+  const examplesHost = (spot: ExamplesSpot): RingHost => ({ ...ownerHost(spot), kind: "examples" });
+
+  return { conjunctHost, ownerHost, standardHost, examplesHost };
 }

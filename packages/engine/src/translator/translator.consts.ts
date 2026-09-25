@@ -65,12 +65,10 @@ export const MOST_AGREES_SINGULAR: ReadonlySet<string> = new Set(['it', 'es', 'p
  */
 export const SUPERLATIVE_MAKES_DEFINITE: ReadonlySet<string> = new Set(['indefinite', 'bare']);
 
-/** The degrees of a relative superlative, which picks one member out of a set. */
-export const SUPERLATIVE_DEGREES: ReadonlySet<string> = new Set(['most', 'least']);
-
-// The degrees that take a standard of comparison live in shared (the builder gates its control on
-// them too); re-exported so the translator keeps one import site.
-export { STANDARD_DEGREES } from '@signi/shared';
+// The degrees that take a standard of comparison, and the superlatives' that take a set, live in
+// shared (the builder gates its control on them too); re-exported so the translator keeps one import
+// site.
+export { STANDARD_DEGREES, SUPERLATIVE_DEGREES } from '@signi/shared';
 
 /**
  * Languages whose negative quantifier takes a singular noun whatever number was picked: it "nessuna

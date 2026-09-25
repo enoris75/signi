@@ -13,7 +13,8 @@ import type { DragBoxProps, GroupDragProps } from "./phraseRender.tsx";
 export interface RingHost {
   // A standard of comparison ("bigger than **the dog**", P09-E12 D5) is hosted as an owner is: a noun
   // phrase of its own, joined to the predicate adjective it is compared with.
-  kind: "conjunct" | "owner" | "standard";
+  // A noun's examples ("animals such as **the cat**", P09-E48) are hosted as an owner is too.
+  kind: "conjunct" | "owner" | "standard" | "examples";
   // The ring's node key on the period's canvas (see conjunctKey; an owner goes by its address).
   key: string;
   // The period noun the ring belongs with. A conjunct's head plays that noun's role — a direct
@@ -36,13 +37,15 @@ export interface RingHost {
   // Where the ring's own possessor control faces while its noun has an owner: that owner's ring, or
   // the ring of the noun it points to.
   possessorToward?: Pt;
-  // A standard whose degree no longer takes one (positive, most, least) is drawn faded: the
-  // translator drops it, and the word waits for the degree to come back.
+  // A standard whose degree no longer takes one (the positive) is drawn faded: the translator drops
+  // it, and the word waits for the degree to come back.
   dimmed?: boolean;
   // An owner's *whose* (P09-E52 D1): the period asks it, so the period gates it — whether its mark
   // is offered on this ring, whether the period asks it now, and the toggle. Only a top-level owner
   // of the subject or the object has one.
   question?: { available: boolean; asked: boolean; toggle: () => void };
+  // A standard under a superlative is the set it picks from, and is titled so (P09-E51 D2).
+  set?: boolean;
   // Report the ring as drawn, and null once it is gone.
   onRing: (ring: HostedRing | null) => void;
   // A conjunct's group: its last ring carries the control that extends the group.

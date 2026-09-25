@@ -21,6 +21,7 @@ import {
   QUESTION_ROLES,
   builderNounAddress,
   conjunctAddress,
+  isRelativeLink,
   possessorAddress,
   standardAddress,
   subordinateReading,
@@ -75,7 +76,7 @@ function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
 type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut' };
 
 /** A word for a slot, from the categories its picker offers. */
-type Frame = 'period' | 'possessor' | 'standard' | 'conjunct';
+type Frame = 'period' | 'possessor' | 'standard' | 'examples' | 'conjunct';
 
 function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
@@ -88,7 +89,7 @@ function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opt
 }
 
 // The noun heads of a period, however deep — period nouns, possessor heads, conjunct heads, and the
-// head of the predicate adjective's standard of comparison.
+// heads of the period nouns' standards of comparison.
 function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame }[] {
   const out: { address: NounAddress; frame: Frame }[] = [];
   const walk = (sel: PhraseSelection, slice: NounAddress | undefined, frame: Frame, keys: NounKey[]) => {
@@ -98,7 +99,10 @@ function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame 
       out.push({ address, frame });
       const poss = sel[`${which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined;
       if (poss) walk(poss, possessorAddress(address), 'possessor', ['subject']);
-      if (which === 'predicative' && sel.predicativeStandard) walk(sel.predicativeStandard, standardAddress(address), 'standard', ['subject']);
+      const standard = sel[`${which}Standard` as keyof PhraseSelection] as PhraseSelection | undefined;
+      if (standard && frame === 'period') walk(standard, standardAddress(address), 'standard', ['subject']);
+      const examples = sel[`${which}Examples` as keyof PhraseSelection] as PhraseSelection | undefined;
+      if (examples && frame === 'period') walk(examples, `${address}/examples`, 'examples', ['subject']);
       R.conjunctsOf(sel, which).forEach((c, i) => walk(c, conjunctAddress(address, i), 'conjunct', ['subject']));
     }
   };
@@ -275,6 +279,32 @@ const OPS: Op[] = [
     const next = R.updateStandard(sel, 'predicative', (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
     // A standard is given for a degree that compares, and outlives a degree that does not.
     return rng() < 0.6 ? R.setDegree(next, 'predicative', pick(rng, DEGREES)!) : next;
+  }),
+  // A period noun's standard, for its compared adjective (P09-E50): named or taken off, its adjective's
+  // degree cycled, or the adjective itself removed — the standard outlives both, muted but printed.
+  onPeriod((sel, rng, s, cid) => {
+    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    if (!which) return undefined;
+    const r = rng();
+    if (sel[`${which}Standard` as keyof PhraseSelection] && r < 0.2) return R.removeStandard(sel, which);
+    const adjective = adjectiveSlots(which).find((k) => (sel[k] as Concept | undefined)?.role === 'adjective');
+    if (adjective && r < 0.4) return R.setDegree(sel, adjective, pick(rng, DEGREES)!);
+    if (adjective && r < 0.5) return R.applyClear(sel, adjective);
+    if (s.links.some((l) => isRelativeLink(l) && l.source.containerId === cid && l.source.nounKey === `${which}/standard`)) return undefined;
+    const w = wordFor(rng, 'subject', 'standard');
+    return R.updateStandard(sel, which, (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
+  }),
+  // A period noun's examples (P09-E48): named, flipped between such as and including, or taken off.
+  // A head a relative clause hangs off keeps its word, as a linked box does.
+  onPeriod((sel, rng, s, cid) => {
+    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    if (!which) return undefined;
+    const r = rng();
+    if (sel[`${which}Examples` as keyof PhraseSelection] && r < 0.25) return R.removeExamples(sel, which);
+    if (sel[`${which}Examples` as keyof PhraseSelection] && r < 0.5) return R.toggleExampleRelation(sel, which);
+    if (s.links.some((l) => isRelativeLink(l) && l.source.containerId === cid && l.source.nounKey === `${which}/examples`)) return undefined;
+    const w = wordFor(rng, 'subject', 'examples');
+    return R.updateExamples(sel, which, (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
   }),
   // A conjunct, and a word and settings for it.
   onPeriod((sel, rng) => {
@@ -601,15 +631,35 @@ describe('the round trip', () => {
   });
 
   // P09-E12 D5: the walk reaches the standard of comparison, so the printer's `/than` is exercised —
-  // under a degree that takes one, and muted under one that does not. A predicate adjective is a rare
-  // state (a copular verb, then an adjective in its box), and rarer still once E12b added its ops, so
-  // this looks much further than the default 400.
-  it('reaches the standard of comparison, with and without a degree that takes it', () => {
+  // under a degree that takes one, and muted under one that does not — and its `/outof`, the same
+  // field read as a superlative's set (P09-E51 D3). A predicate adjective is a rare state (a copular
+  // verb, then an adjective in its box), and rarer still once E12b added its ops, so this looks much
+  // further than the default 400.
+  it('reaches the standard of comparison, a superlative’s set, and a muted one', () => {
     const seeds = Math.max(SEEDS, 20000);
     const texts = Array.from({ length: seeds }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
-    const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/than \[/g) ?? []);
+    const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/(than|outof) \[/g) ?? []);
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);
-    expect(standards.some((p) => !/\/(more|less|equally) \/than/.test(p))).toBe(true);
+    expect(standards.some((p) => /\/(most|least) \/outof/.test(p))).toBe(true);
+    expect(standards.some((p) => !/\/(more|less|equally|most|least) \/(than|outof)/.test(p))).toBe(true);
+    // The name follows the degree: never `/than` on a superlative, never `/outof` off one.
+    expect(standards.some((p) => /\/(most|least) \/than/.test(p) || (/\/outof/.test(p) && !/\/(most|least) \/outof/.test(p)))).toBe(false);
+  }, 30_000);
+
+  // P09-E48: the walk reaches a noun's examples, under both relations.
+  it('reaches the examples, such as and including', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 2000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    expect(texts.some((t) => t.includes('/suchas ['))).toBe(true);
+    expect(texts.some((t) => t.includes('/including ['))).toBe(true);
+  }, 30_000);
+
+  // P09-E50: the walk reaches a period noun's standard, printed in its bracket, with and without an
+  // adjective that compares.
+  it('reaches an attributive standard, compared and muted', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 4000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    const standards = texts.flatMap((t) => t.match(/\/(subj|obj) \( [^()]*?(\/adj \( \S+ \/(more|less|equally) \) )?[^()]*?\/than \[/g) ?? []);
+    expect(standards.some((p) => /\/(more|less|equally) \)/.test(p))).toBe(true);
+    expect(standards.some((p) => !/\/(more|less|equally) \)/.test(p))).toBe(true);
   }, 30_000);
 });
 

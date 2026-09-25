@@ -420,3 +420,9 @@ export const JA_GODAN: Record<string, JaVerbRow> = {
   ぶ: { u: 'ぶ', i: 'び', a: 'ば', te: 'んで', ta: 'んだ' },
   ぬ: { u: 'ぬ', i: 'に', a: 'な', te: 'んで', ta: 'んだ' },
 };
+
+/**
+ * The words a noun's examples relation spells (P09-E33, E48): *such as* and *including*, as the
+ * examples function writes them and the chip on the examples ring cites them.
+ */
+export const JA_EXAMPLES: Record<'example' | 'inclusion', string> = { example: 'のような', inclusion: 'を含む' };

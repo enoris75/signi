@@ -247,6 +247,20 @@ describe('buildRingSpecs', () => {
     expect(hour(aimed.outer, perimeterControlKey('conjunct', 'subject'))).toBeCloseTo(6);
   });
 
+  // P09-E48: the examples control is a seventh relation in the fan, after the standard, and turns to
+  // face the examples' ring once it is drawn.
+  it('fans the examples control with the relations, and turns it to face the examples’ ring', () => {
+    const [subject] = groups([]);
+    const all = ['relative', 'headless', 'possessor', 'possessorRole', 'standard', 'examples', 'conjunct'] as const;
+    const perimeterByNoun = { subject: Object.fromEntries(all.map((k) => [k, icon(k)])) };
+    const row = specs([subject], { perimeterByNoun }).Subject;
+    expect(keys(row.outer)).toEqual([collapseControlKey('Subject'), ...all.map((k) => perimeterControlKey(k, 'subject'))]);
+
+    const ring = { x: 420, y: 380 };
+    const aimed = specs([subject], { perimeterByNoun, examplesAims: { subject: ring } }).Subject;
+    expect(aimOf(aimed.outer, perimeterControlKey('examples', 'subject'))).toEqual({ point: ring });
+  });
+
   it("fans a complement's relation toolbar across the top of its ring, beside its remove control", () => {
     const defs = groups(['route'], ['subject', 'verb', 'route']);
     const route = specs(defs, { toolbars: { route: ['in', 'through', 'under'] } }).Route;

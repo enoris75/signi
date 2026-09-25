@@ -2,6 +2,7 @@ import type { NounKey } from "../interfaces.ts";
 import { conjunctKey, hostedRect, type HostedRing } from "../conjunctChain.ts";
 import type { OwnerSpot } from "../ownerChain.ts";
 import type { StandardSpot } from "../standardRing.ts";
+import type { ExamplesSpot } from "../examplesRing.ts";
 import type { GroupRect } from "../graph.ts";
 import type { Pt } from "../ringLayout.ts";
 
@@ -16,7 +17,8 @@ import type { Pt } from "../ringLayout.ts";
 export function hostedRectsFor({
   chains,
   owners,
-  standard,
+  standards = [],
+  examples = [],
   groupRects,
   hostedRings,
   centerOf,
@@ -24,8 +26,10 @@ export function hostedRectsFor({
 }: {
   chains: readonly { which: NounKey; count: number }[];
   owners: readonly OwnerSpot[];
-  // The predicate adjective's standard of comparison, when its ring is drawn (P09-E12 D5).
-  standard?: StandardSpot;
+  // The standards of comparison whose rings are drawn (P09-E12 D5, P09-E50).
+  standards?: readonly StandardSpot[];
+  // The examples whose rings are drawn (P09-E48).
+  examples?: readonly ExamplesSpot[];
   groupRects: readonly GroupRect[];
   hostedRings: Readonly<Record<string, HostedRing>>;
   centerOf: (key: string) => Pt;
@@ -34,6 +38,7 @@ export function hostedRectsFor({
   conjunctRects: GroupRect[];
   ownerRects: GroupRect[];
   standardRects: GroupRect[];
+  examplesRects: GroupRect[];
   standIns: Record<string, GroupRect[]>;
 } {
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
@@ -48,7 +53,7 @@ export function hostedRectsFor({
     });
   });
 
-  const spotRect = (spot: OwnerSpot, kind: "owner" | "standard"): GroupRect[] => {
+  const spotRect = (spot: OwnerSpot, kind: "owner" | "standard" | "examples"): GroupRect[] => {
     const ring = hostedRings[spot.address];
     const head = headOf(spot.role);
     if (!ring || !head) return [];
@@ -66,7 +71,8 @@ export function hostedRectsFor({
     ];
   };
   const ownerRects = owners.flatMap((spot) => spotRect(spot, "owner"));
-  const standardRects = standard ? spotRect(standard, "standard") : [];
+  const standardRects = standards.flatMap((spot) => spotRect(spot, "standard"));
+  const examplesRects = examples.flatMap((spot) => spotRect(spot, "examples"));
 
   const standIns = Object.fromEntries(
     chains.flatMap(({ which }) => {
@@ -75,5 +81,5 @@ export function hostedRectsFor({
     }),
   );
 
-  return { conjunctRects, ownerRects, standardRects, standIns };
+  return { conjunctRects, ownerRects, standardRects, examplesRects, standIns };
 }

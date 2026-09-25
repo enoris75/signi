@@ -81,6 +81,11 @@ describe('every part a canvas control acts on is named by the catalog', () => {
     ...ALL_SLOTS.map(passiveCaptions),
     ...COORDINABLE_NOUN_KEYS.map((role) => roleSlotFor({ kind: 'conjunct', role })!),
     ...NOUN_KEYS.map((role) => roleSlotFor({ kind: 'owner', role })!),
+    // The standard's ring, under a rival's degree and a superlative's (P09-E51 D2).
+    roleSlotFor({ kind: 'standard', role: 'predicative' })!,
+    roleSlotFor({ kind: 'standard', role: 'predicative', set: true })!,
+    // A noun's examples' ring (P09-E48).
+    roleSlotFor({ kind: 'examples', role: 'subject' })!,
   ];
 
   // Every ring the period canvas draws, with everything shown, in both voices.
@@ -119,7 +124,7 @@ describe('every part a canvas control acts on is named by the catalog', () => {
     return [
       ...Object.values(icons.satelliteIconsByParent).flat(),
       ...icons.complementToggleIcons,
-      ...Object.values(icons.perimeterByNoun).flatMap((e) => [e.relative, e.possessor, e.conjunct]),
+      ...Object.values(icons.perimeterByNoun).flatMap((e) => [e.relative, e.possessor, e.conjunct, e.standard, e.examples]),
       icons.directObjectToggle,
     ].filter((icon): icon is SatelliteIcon => Boolean(icon && icon.active && !icon.link));
   };

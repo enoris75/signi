@@ -29,6 +29,21 @@ describe('roleSlotFor', () => {
     });
   });
 
+  // P09-E51 D2: a standard's ring is named by its degree, a rival's or a superlative's set.
+  it('names a standard’s head by what it is under its degree', () => {
+    expect(roleSlotFor({ kind: 'standard', role: 'predicative' })).toMatchObject({ labelKey: 'slot.standard', required: false });
+    expect(roleSlotFor({ kind: 'standard', role: 'predicative', set: true })).toMatchObject({
+      label: 'Comparison set',
+      labelKey: 'slot.comparisonSet',
+      required: false,
+    });
+  });
+
+    // P09-E48: a noun's examples ring is named for what it holds.
+  it('names an examples ring’s head', () => {
+    expect(roleSlotFor({ kind: 'examples', role: 'subject' })).toMatchObject({ labelKey: 'slot.examples', required: false });
+  });
+
   it('dresses nothing for a builder with no host', () => {
     expect(roleSlotFor(undefined)).toBeUndefined();
   });
