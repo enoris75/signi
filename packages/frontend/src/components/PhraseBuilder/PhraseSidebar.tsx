@@ -69,6 +69,11 @@ export function PhraseSidebar({
   // The map opens over the whole page, not inside this panel — the panel is a few hundred pixels
   // wide and a graph needs the room. Its open state is local: nothing outside cares.
   const [mapOpen, setMapOpen] = useState(false);
+  // The word lists are drawn only while the panel is out, and while it slides back in. Hidden, they
+  // were a button and a tooltip per word of the corpus, drawn again on every keystroke in the
+  // console, per period.
+  const [filled, setFilled] = useState(open);
+  if (open && !filled) setFilled(true);
   const headerOffset = useHeaderOffset();
   const t = useUiString();
   const startDrag = useWindowDrag();
@@ -133,6 +138,9 @@ export function PhraseSidebar({
       // attribute rather than the property.
       {...(open ? {} : ({ inert: "" } as Record<string, unknown>))}
       onKeyDown={onKeyDown}
+      onTransitionEnd={(event) => {
+        if (event.target === event.currentTarget && !open) setFilled(false);
+      }}
       onFocusCapture={(event) => {
         // Remember where the cursor came from, so esc can put it back on that box.
         const from = boxOf(event.relatedTarget as Element | null);
@@ -243,7 +251,7 @@ export function PhraseSidebar({
         </Box>
       </Box>
       <Box ref={listRef} sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
-        {activeSlotConfig ? (
+        {!filled ? null : activeSlotConfig ? (
           activeSlotConfig.roles.map((role) => (
             <ConceptPalette
               key={role}

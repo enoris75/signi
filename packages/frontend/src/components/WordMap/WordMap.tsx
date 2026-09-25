@@ -99,6 +99,10 @@ export function WordMap({ open, onClose }: Props) {
   // Which word ⇥ has walked to. The map has no selection — it is a read-only view — so walking it
   // lights the word the way hovering does, which is what the highlight is for.
   const [walked, setWalked] = useState(-1);
+  // Laid out only while the map is open, and until it has faded out: every period's words panel
+  // holds a map, and the corpus is no longer ~150 words.
+  const [live, setLive] = useState(open);
+  if (open && !live) setLive(true);
 
   /** A number and the noun it counts, in whichever number the count calls for. */
   const counted = (n: number, key: "wordMap.nodes" | "wordMap.relationships" | "wordMap.hidden") =>
@@ -109,7 +113,7 @@ export function WordMap({ open, onClose }: Props) {
   // Laying out ~150 nodes takes a few milliseconds, but it is pure and depends only on the corpus
   // and the relation filter — so it runs once per change rather than once per hover or pan.
   const graph = useMemo(() => {
-    if (!concepts) return null;
+    if (!concepts || !live) return null;
     return layoutWordMap(
       buildWordMap(
         concepts,
@@ -123,7 +127,7 @@ export function WordMap({ open, onClose }: Props) {
     // `t` and `complementLabel` are recreated each render; the language is what actually
     // changes the labels, and re-laying out on every render would be wasteful.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [concepts, shown, uiLanguage]);
+  }, [concepts, shown, uiLanguage, live]);
 
   const extent = useMemo(() => (graph ? graphExtent(graph, PADDING) : null), [graph]);
   const nodeById = useMemo(
@@ -155,7 +159,7 @@ export function WordMap({ open, onClose }: Props) {
     !lit ? base : lit.has(id) ? base : dim;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl" TransitionProps={{ onExited: () => setLive(false) }}>
       <DialogTitle
         sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, pb: 1 }}
       >
