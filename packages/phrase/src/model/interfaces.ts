@@ -368,6 +368,9 @@ export interface PhraseSelection {
     // "behind the tree" rather than only the containment it falls back on. Route and locative
     // share the relations but not the default (through vs in), so they need separate keys.
     locativeSpecifier?: PathSpecifier;
+    // And the direction's (P13): a goal reached *into* or *onto* it — JUMP is "to move oneself into
+    // the air". Absent ⇒ the plain goal, "to".
+    directionSpecifier?: PathSpecifier;
     // The time of the act ("runs *on this day*", P09-E12b) — a full noun phrase like the motion
     // complements, offered on every verb (ADJUNCT_COMPLEMENT_TYPES). Its relation (at / ago / until
     // / after / before / during) is the box's toolbar, as the route's path is; absent means `at`.

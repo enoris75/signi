@@ -185,3 +185,18 @@ test.describe('an infinitive the predicate adjective governs', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/to #2');
   });
 });
+
+test.describe('the last small constructs', () => {
+  test('say JUMP’s "into the air" and LET’s infinitive of an infinitive', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/inf /verb MOVE_ONESELF /dir ( AIR /in )');
+    await run(page);
+    await app.expectSentences({ en: 'to move into the air.' });
+    await expect(page.getByTestId('direction-toolbar')).toBeVisible();
+
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /inf /verb CAUSE_VERB /obj ( PERSON /a ) /to ( /verb BE /pred ALLOWED /to ( /verb ACT ) ) /objctl');
+    await run(page);
+    await expect(page.getByTestId('source-strip')).toContainText('/to #3');
+  });
+});

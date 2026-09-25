@@ -1,3 +1,4 @@
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
@@ -862,6 +863,44 @@ function RelationToolbar<V extends string>({
 
 // Spatial relations, shared by the route and locative complements, which draw on the same
 // relations; the caller passes the value (and so the default) its own complement carries.
+// The direction's relation (P13): its plain goal, "to the house", then the path relations it may
+// reach its goal by — "into the air" (JUMP), "onto the table". D for the plain direction.
+export type DirectionRelation = PathSpecifier | "to";
+const DIRECTION_RELATIONS: readonly DirectionRelation[] = ["to", ...PATH_SPECIFIERS];
+
+export function DirectionSelector({
+  value,
+  armed,
+  onDisarm,
+  onSelect,
+  placeAt,
+}: {
+  value: DirectionRelation;
+  armed?: boolean;
+  onDisarm?: () => void;
+  onSelect: (s: DirectionRelation) => void;
+  placeAt?: (s: DirectionRelation) => { x: number; y: number } | undefined;
+}) {
+  const t = useUiString();
+  const labels = Object.fromEntries(
+    DIRECTION_RELATIONS.map((s) => [s, s === "to" ? t("slot.direction") : t(`specifier.value.${s}`)]),
+  ) as Record<DirectionRelation, string>;
+  return (
+    <RelationToolbar
+      testId="direction-toolbar"
+      values={DIRECTION_RELATIONS}
+      value={value}
+      labels={labels}
+      icons={{ ...SPECIFIER_ICONS, to: <ArrowForwardIcon sx={{ fontSize: 15 }} /> }}
+      keys={{ ...SPECIFIER_KEYS, to: "D" }}
+      armed={armed}
+      onDisarm={onDisarm}
+      onSelect={onSelect}
+      placeAt={placeAt}
+    />
+  );
+}
+
 export function SpecifierSelector({
   value,
   armed,

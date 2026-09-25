@@ -77,7 +77,10 @@ export function periodControls(
     subordinate: {
       asSource: subordinate.asSource,
       asTarget: subordinate.asTarget,
-      options: subordinateOptions(selection.verb, Boolean(selection.directObject), selection.predicative),
+      // An infinitive period governs no clause but an infinitive of its own (P13, see canStartSubordinate).
+      options: subordinateOptions(selection.verb, Boolean(selection.directObject), selection.predicative).filter(
+        (o) => !subordinate.asTarget || (subordinate.asTarget.kind === "infinitive" && o.link === "infinitive"),
+      ),
       isPickTarget: subordinate.isPickTarget,
       pickActive: binding.pickActive,
       canStart: subordinate.canStart,

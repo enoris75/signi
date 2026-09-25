@@ -282,7 +282,15 @@ export function clearCoordinative(links: PhraseLink[], firstId: string): PhraseL
  */
 export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kind?: SubordinateKind): boolean {
   const verb = c.selection.verb;
-  if (!verb || links.some((l) => l.target.containerId === c.id)) return false;
+  if (!verb) return false;
+  // A subordinate clause governs none — except that an infinitive may govern an infinitive of its own
+  // (P13): LET is "to cause a person to be allowed to act".
+  const incoming = links.filter((l) => l.target.containerId === c.id);
+  if (incoming.length > 0) {
+    const infinitive = incoming.every((l) => isSubordinateLink(l) && l.kind === "infinitive");
+    if (!infinitive || (kind !== undefined && kind !== "infinitive")) return false;
+    return governsInfinitive(c.selection);
+  }
   if (kind === "content") return verb.clauseObject === "content" && !c.selection.directObject;
   if (kind === "infinitive") return governsInfinitive(c.selection);
   return true;

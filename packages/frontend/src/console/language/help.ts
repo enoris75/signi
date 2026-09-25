@@ -190,6 +190,7 @@ export const EXAMPLES: Record<string, string> = {
   objctl: "/subj ( cat ) /verb ( need ) /obj ( dog ) /to { /verb ( run ) } /objctl",
   objpred: "/subj ( cat ) /verb ( eat ) /obj ( food ) /objpred ( dog )",
   so: "/subj ( cat ) /verb ( eat ) /obj ( food ) /so { /verb ( run ) }",
+  goal: "/subj ( cat ) /verb ( run ) /dir ( house /in /goal )",
   with: "/subj ( cat ) /verb ( eat ) /with ( dog )",
   essive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive /essive )",
   factitive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive )",

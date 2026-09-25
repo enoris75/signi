@@ -25,6 +25,8 @@ export function buildComplements(
           ? [{ kind: "path", value: sel.routeSpecifier }]
           : type === "locative" && sel.locativeSpecifier
             ? [{ kind: "path", value: sel.locativeSpecifier }]
+            : type === "direction" && sel.directionSpecifier
+              ? [{ kind: "path", value: sel.directionSpecifier }]
             : type === "temporal" && sel.temporalRelation && sel.temporalRelation !== DEFAULT_TEMPORAL_RELATION
               // The temporal's relation, omitted at its default `at` as the cause omits `neutral`.
               ? [{ kind: "temporal", value: sel.temporalRelation }]

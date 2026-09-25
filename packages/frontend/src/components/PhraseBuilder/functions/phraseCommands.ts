@@ -101,6 +101,9 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative")),
     handleSelectTemporalRelation: (relation: TemporalRelation) =>
       onPhraseUpdate((prev) => setTemporalRelation(prev, relation)),
+    // The direction's relation (P13): its plain goal, or a path.
+    handleSelectDirectionSpecifier: (spec: PathSpecifier | "to") =>
+      onPhraseUpdate((prev) => setSpecifier(prev, spec === "to" ? undefined : spec, "direction")),
     // What the object complement says of the object (P13).
     handleSelectPredication: (predication: ObjectPredication) =>
       onPhraseUpdate((prev) => setPredication(prev, predication)),

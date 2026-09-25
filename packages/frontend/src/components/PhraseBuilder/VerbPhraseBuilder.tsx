@@ -13,6 +13,7 @@ import {
   SpecifierSelector,
   TemporalSelector,
   PredicationSelector,
+  DirectionSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
@@ -44,6 +45,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleCycleAspect,
     handleSelectSpecifier,
     handleSelectLocativeSpecifier,
+    handleSelectDirectionSpecifier,
     handleSelectTemporalRelation,
     handleSelectPredication,
     handleSelectSentiment,
@@ -166,6 +168,17 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           onDisarm={disarm}
           onSelect={handleSelectLocativeSpecifier}
           placeAt={toolbarAt("locative")}
+        />
+      )}
+
+      {/* The direction's relation (P13): its plain goal, or into / onto / … it. */}
+      {!compact && selection.direction && (
+        <DirectionSelector
+          value={selection.directionSpecifier ?? "to"}
+          armed={toolbarFor === "direction"}
+          onDisarm={disarm}
+          onSelect={handleSelectDirectionSpecifier}
+          placeAt={toolbarAt("direction")}
         />
       )}
 

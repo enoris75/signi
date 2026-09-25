@@ -36,3 +36,12 @@ describe('an infinitive governed by the predicate adjective', () => {
     expect(plan.infinitiveComplement).toMatchObject({ verbPhrase: { verb: 'RUN' } });
   });
 });
+
+// P13: JUMP is "to move oneself into the air" — a direction reached by a path relation.
+describe('a direction’s path relation', () => {
+  it('is said on the direction, and /goal takes it back to the plain goal', () => {
+    const plan = workspaceToPlans(ok('/verb run /dir house /in').containers, [])[0]!.plan;
+    expect(plan.complements?.direction?.specifiers).toEqual([{ kind: 'path', value: 'in' }]);
+    expect(script(ok('/verb run /dir house /in'))).toBe('/verb ( run ) /dir ( house /in )');
+  });
+});

@@ -123,6 +123,7 @@ export interface PhraseRenderContext {
   handleSelectLocativeSpecifier: (spec: PathSpecifier) => void;
   handleSelectTemporalRelation: (relation: TemporalRelation) => void;
   handleSelectPredication: (predication: ObjectPredication) => void;
+  handleSelectDirectionSpecifier: (spec: PathSpecifier | "to") => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;

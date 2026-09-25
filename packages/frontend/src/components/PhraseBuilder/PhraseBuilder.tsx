@@ -695,6 +695,7 @@ export function PhraseBuilder({
       toolbars: {
         ...(selection.route && { route: PATH_SPECIFIERS }),
         ...(selection.locative && { locative: PATH_SPECIFIERS }),
+        ...(selection.direction && { direction: ["to", ...PATH_SPECIFIERS] }),
         ...(selection.temporal && { temporal: TEMPORAL_RELATIONS }),
         ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
         ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),
@@ -1027,6 +1028,7 @@ export function PhraseBuilder({
     handleSelectLocativeSpecifier: commands.handleSelectLocativeSpecifier,
     handleSelectTemporalRelation: commands.handleSelectTemporalRelation,
     handleSelectPredication: commands.handleSelectPredication,
+    handleSelectDirectionSpecifier: commands.handleSelectDirectionSpecifier,
     handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,

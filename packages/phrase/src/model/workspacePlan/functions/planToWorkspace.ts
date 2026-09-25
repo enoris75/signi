@@ -66,7 +66,7 @@ const NOUN_FIELDS = new Set([
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
-const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control"]);
+const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control", "infinitiveComplement"]);
 const CLAUSE_FIELDS = new Set(["subject", "verbPhrase", "directObject", "complements"]);
 
 const isSet = (v: unknown) => v !== undefined && v !== false && !(Array.isArray(v) && v.length === 0);
@@ -173,6 +173,11 @@ class Builder {
       source: { containerId: main.id },
       target: { containerId: c.id },
     });
+    // Its own infinitive (P13), where what it predicates governs one.
+    if (inf.infinitiveComplement) {
+      if (governsInfinitive(c.selection)) this.infinitive(c, inf.infinitiveComplement);
+      else this.unsupported.add("PhrasePlan.infinitiveComplement governed by the predicate");
+    }
   }
 
   /** The words of a clause into a container's selection, and the periods its nouns' links lead to. */
@@ -223,7 +228,7 @@ class Builder {
     this.noun(c, sel, type as NounKey, complement.phrase, type);
     if (complement.negative && type === "cause") sel.causeNegative = true;
     for (const s of complement.specifiers ?? []) {
-      if (s.kind === "path" && (type === "route" || type === "locative")) set(sel, `${type}Specifier`, s.value);
+      if (s.kind === "path" && (type === "route" || type === "locative" || type === "direction")) set(sel, `${type}Specifier`, s.value);
       else if (s.kind === "temporal" && type === "temporal") {
         if (s.value !== DEFAULT_TEMPORAL_RELATION) sel.temporalRelation = s.value;
       } else if (s.kind === "sentiment" && type === "cause") {

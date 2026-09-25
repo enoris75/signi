@@ -183,6 +183,17 @@ describe('linkRules', () => {
     expect(canBeInstrument(all, gapped, 'K', 'C')).toBe(false);
   });
 
+  it('lets an infinitive govern an infinitive of its own, and nothing else, where it predicates one (P13)', () => {
+    const allowed = { id: 'ALLOWED', role: 'adjective' as const, description: 'allowed', clauseObject: 'infinitive' as const };
+    const cause = { ...verb('CAUSE_VERB'), clauseObject: 'infinitive' as const };
+    const main: PhraseContainer = { id: 'M', selection: { verb: cause, directObject: noun('PERSON') } };
+    const be: PhraseContainer = { id: 'I', selection: { verb: verb('BE'), predicative: allowed, infinitive: true } };
+    const linked = addSubordinate([], 'M', 'I', 'infinitive', 's');
+    expect(canStartSubordinate(linked, be, 'infinitive')).toBe(true);
+    expect(canStartSubordinate(linked, be, 'adverbial')).toBe(false);
+    expect(canStartSubordinate(addSubordinate([], 'M', 'I', 'content', 's'), be, 'infinitive')).toBe(false);
+  });
+
   it('says a noun’s relative clause alone, and says its head again with no flag left (P13)', () => {
     const headed = addRelativeLink([], { containerId: 'A', nounKey: 'subject' }, { containerId: 'B', nounKey: 'directObject' }, 'l1');
     const headless = setRelativeHeadless(headed, 'A', 'subject', true);

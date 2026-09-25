@@ -48,11 +48,14 @@ export function attachSubordinate(
       ...(complements ? { complements } : {}),
     };
   } else if (link.kind === "infinitive") {
-    const { verbPhrase, directObject, complements } = clausePlan;
+    // An infinitive may govern one of its own (P13), "to be allowed **to act**".
+    attachSubordinate(clausePlan, clause, links, byId, new Set([...seen, clause.id]));
+    const { verbPhrase, directObject, complements, infinitiveComplement } = clausePlan;
     plan.infinitiveComplement = {
       verbPhrase,
       ...(directObject ? { directObject } : {}),
       ...(complements ? { complements } : {}),
+      ...(infinitiveComplement ? { infinitiveComplement } : {}),
       // The causee's infinitive (P13): its unspoken subject is the governing clause's object.
       ...(link.control === "object" ? { control: "object" as const } : {}),
     } as InfinitiveComplement;

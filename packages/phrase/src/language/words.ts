@@ -191,8 +191,12 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
       return gendersOffered(w).includes(s.value);
     case "determiner":
       return w.kind === "noun" && c?.role === "noun" && hasDeterminer(w.which!, c);
+    // A route's and a place's relation, and — P13 — a direction's, whose default is the plain goal.
     case "specifier":
-      return w.kind === "noun" && !w.ref.slice && (w.which === "route" || w.which === "locative") && Boolean(c);
+      return (
+        w.kind === "noun" && !w.ref.slice && Boolean(c) &&
+        (w.which === "direction" || ((w.which === "route" || w.which === "locative") && s.value !== "to"))
+      );
     // The temporal's relation, on its box once it holds a word — where its toolbar is drawn — and a
     // time reading's, on the subject that reads so (P13).
     case "temporal":
@@ -257,7 +261,7 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
     case "determiner":
       return setDefiniteness(slice, which, s.value);
     case "specifier":
-      return setSpecifier(slice, s.value, which as "route" | "locative");
+      return setSpecifier(slice, s.value === "to" ? undefined : s.value, which as "route" | "locative" | "direction");
     case "temporal":
       return which === "subject" ? setGlossRelation(slice, s.value) : setTemporalRelation(slice, s.value);
     case "gloss":
@@ -302,7 +306,11 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
         defaultDefiniteness(which!)
       );
     case "specifier":
-      return which === "route" ? sel.routeSpecifier ?? "through" : sel.locativeSpecifier ?? "in";
+      return which === "route"
+        ? sel.routeSpecifier ?? "through"
+        : which === "direction"
+          ? sel.directionSpecifier ?? "to"
+          : sel.locativeSpecifier ?? "in";
     case "temporal":
       return (which === "subject" ? sel.subjectGlossRelation : sel.temporalRelation) ?? DEFAULT_TEMPORAL_RELATION;
     case "gloss":
@@ -340,7 +348,7 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
     case "determiner":
       return defaultDefiniteness(w.which!);
     case "specifier":
-      return w.which === "route" ? "through" : "in";
+      return w.which === "route" ? "through" : w.which === "direction" ? "to" : "in";
     case "temporal":
       return DEFAULT_TEMPORAL_RELATION;
     case "gloss":

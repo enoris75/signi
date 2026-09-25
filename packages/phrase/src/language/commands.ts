@@ -42,7 +42,8 @@ export type Setting =
   | { id: "number"; value: "singular" | "plural" }
   | { id: "gender"; value: Gender }
   | { id: "determiner"; value: Definiteness }
-  | { id: "specifier"; value: PathSpecifier }
+  /** A place's, a route's or a direction's relation; `to` is the direction's plain goal (P13). */
+  | { id: "specifier"; value: PathSpecifier | "to" }
   | { id: "temporal"; value: TemporalRelation }
   | { id: "sentiment"; value: CauseSentiment }
   | { id: "tense"; value: Tense }
@@ -560,10 +561,13 @@ export const COMMANDS: readonly CommandDef[] = [
       value.replace(/_/g, " "),
       // The adposition the relation is spoken with, as the canvas's toolbar names it (C13).
       `specifier.value.${value}`,
-      /^(locative|route)$/,
+      /^(locative|route|direction)$/,
       ["setSpecifier"],
     ),
   ),
+  // The direction's plain goal, "to the house", which its relations (/in "into", /on "onto") leave
+  // (P13). `/to` is the infinitive's, so it is `/goal`.
+  setting("goal", [], "noun", { id: "specifier", value: "to" }, "to", "slot.direction", /^direction$/, ["setSpecifier"]),
   // What the object is taken as (the essive) or turned into (the factitive), on the object complement
   // (P13): "/verb ( have ) /objpred ( part /zero /essive )" is INCLUDE's "to have as a part". The
   // verb's own is the default: the factitive where it licenses the complement, the essive elsewhere.

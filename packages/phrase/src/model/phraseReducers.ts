@@ -143,6 +143,7 @@ function clearNoun(sel: PhraseSelection, which: NounKey): void {
   delete sel[STANDARD_KEY(which)];
   if (which === "route") delete sel.routeSpecifier;
   if (which === "locative") delete sel.locativeSpecifier;
+  if (which === "direction") delete sel.directionSpecifier;
   if (which === "temporal") delete sel.temporalRelation;
   if (which === "objectPredicative") delete sel.objectPredicativePredication;
   if (which === "cause") {
@@ -670,9 +671,15 @@ export function cycleVoice(prev: PhraseSelection, step: CycleStep = 1): PhraseSe
 // the same relations but keep their own key, since their defaults differ (through vs in).
 export function setSpecifier(
   prev: PhraseSelection,
-  spec: PathSpecifier,
-  which: "route" | "locative" = "route",
+  spec: PathSpecifier | undefined,
+  which: "route" | "locative" | "direction" = "route",
 ): PhraseSelection {
+  // The direction's plain goal has no relation to hold (P13): undefined takes it back there.
+  if (which === "direction") {
+    const next: PhraseSelection = { ...prev, directionSpecifier: spec };
+    if (!spec) delete next.directionSpecifier;
+    return next;
+  }
   return which === "locative"
     ? { ...prev, locativeSpecifier: spec }
     : { ...prev, routeSpecifier: spec };

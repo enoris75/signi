@@ -106,9 +106,9 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | ~~`RelativeClause.headRole.possessor`~~ — `/rel #n.subj.poss`, ✅ | 2 |
 | `PhrasePlan.contentSubject` | 2 |
 | ~~`RelativeClause.headRole.comitative`~~ — cleared by the comitative's box, ✅ | 1 |
-| `InfinitiveComplement.infinitiveComplement` | 1 |
+| ~~`InfinitiveComplement.infinitiveComplement`~~ — an infinitive's own `/to`, ✅ | 1 |
 | ~~`complements.cause.definiteness`~~ — the cause's determiner, ✅ 4c0511aa | 1 |
-| `complements.direction.specifiers.path` — a path relation on the direction | 1 |
+| ~~`complements.direction.specifiers.path`~~ — `/in` on `/dir`, `/goal` back, ✅ | 1 |
 | `NounPhrase.contrastive` | 1 |
 | `PhrasePlan.adverbialGloss` | 1 |
 | `NounGroup of adjectives` — predicate adjectives joined, NEUTER "that is not male or female"; found once `/headless` let NEUTER through | 1 |
@@ -128,6 +128,7 @@ control, console command, printer case, catalogue strings and tests:
 | A relative clause whose gap no box holds | `/rel #n.inst` (its instrument), `/rel #n.subj.poss` (its subject's possessor, the genitive relative) | a relative pick lands on the instrument toggle of a verb that takes one, or on the possessor ring's head | The relative link's target is a `RelativeGap`; an instrument gap blocks an instrument link and vice versa, and the connector ends at the instrument toggle. GO, ASK and GOVERN_STATE license the instrument their definitions use (decision 8). 535 → 548. |
 | A clause of purpose | `/so #n` (or `/so ( … )`) — `/purpose` is the noun modifier's relation | the subordinate clause menu's Purpose row (<kbd>P</kbd>), on any verb | A fourth subordinate link kind, drawn in the infinitive with its mood locked; `attachSubordinate` folds it into `PhrasePlan.purpose`. A third-person pronoun object in it stands for the governing clause's object, which becomes its antecedent and gives it its gender in each language (SAVE's "to load it", de *ihn*). 548 → 556. |
 | An infinitive the predicate adjective governs | `/to` on a period whose predicate adjective governs one | the subordinate menu's Infinitive phrase row, now offered there too | `clauseObject: 'infinitive'` on an adjective (ABLE, OBLIGED, ALLOWED), read by `governsInfinitive` wherever a verb's was. LET governs one too (ALLOW). No new control. 556 → 561. |
+| A direction's path, and an infinitive's own infinitive | `/dir ( AIR /in )`, `/goal` for the plain "to"; `/to` from a period that is itself an infinitive | the direction's toolbar (To, then the path relations); the Infinitive phrase row, the one an infinitive period's menu offers | `directionSpecifier`; `canStartSubordinate` lets an infinitive govern an infinitive (LET, "to be allowed to act") and nothing else, and `attachSubordinate` folds it into `InfinitiveComplement.infinitiveComplement`. 561 → 563. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a

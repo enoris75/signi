@@ -157,9 +157,17 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( child /rel #2.subj /headless )',
     misuse: { line: '/subj child /verb read /headless', says: { code: 'noRelativeLink' } },
   },
+  // The direction's plain goal (P13), which its path relations leave: "runs into the house" and back.
+  goal: {
+    line: '/verb run /dir house /in /goal',
+    prints: '/verb ( run ) /dir ( house )',
+    check: (s) => expect(sel(s)).not.toHaveProperty('directionSpecifier'),
+    misuse: { line: '/verb run /loc house /goal', says: { code: 'noTarget', args: { command: 'goal' } } },
+  },
+  // …and a direction takes the path relations the place and the route do: "runs into the house".
   in: { line: '/verb run /route house /in', prints: '/verb ( run ) /route ( house /in )', holds: { routeSpecifier: 'in' } },
   through: { line: '/verb run /loc house /through', prints: '/verb ( run ) /loc ( house /through )', holds: { locativeSpecifier: 'through' } },
-  under: { line: '/verb run /loc house /under', prints: '/verb ( run ) /loc ( house /under )', holds: { locativeSpecifier: 'under' }, misuse: { line: '/verb run /dir house /under', says: { code: 'noTarget', args: { command: 'under' } } } },
+  under: { line: '/verb run /loc house /under', prints: '/verb ( run ) /loc ( house /under )', holds: { locativeSpecifier: 'under' }, misuse: { line: '/verb run /src house /under', says: { code: 'noTarget', args: { command: 'under' } } } },
   over: { line: '/verb run /loc house /over', prints: '/verb ( run ) /loc ( house /over )', holds: { locativeSpecifier: 'over' } },
   around: { line: '/verb run /route house /around', prints: '/verb ( run ) /route ( house /around )', holds: { routeSpecifier: 'around' } },
   behind: { line: '/verb run /loc house /behind', prints: '/verb ( run ) /loc ( house /behind )', holds: { locativeSpecifier: 'behind' } },
