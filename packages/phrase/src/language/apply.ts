@@ -27,6 +27,7 @@ import {
   type PhraseSelection,
   type SlotKey,
   type SubordinateKind,
+  subordinateReading,
 } from "../model/interfaces.ts";
 import {
   addConditional,
@@ -1242,10 +1243,13 @@ class Run {
         const clauseId = this.resolveTarget(op.target);
         const main = this.containers.find((c) => c.id === op.mainId)!;
         const verb = main.selection.verb;
-        if (!verb) fail(op.span, coded("subordinateNeedsVerb"));
-        if (op.link === "content" && verb!.clauseObject !== "content")
+        // P13: with no subject word the that-clause is the subject, whatever the verb takes; with no
+        // verb either, the adverbial clause is the adverb it glosses (see subordinateReading).
+        const reading = subordinateReading(main.selection);
+        if (!verb && !(reading === "adverb" && op.link === "adverbial")) fail(op.span, coded("subordinateNeedsVerb"));
+        if (op.link === "content" && reading !== "subject" && verb!.clauseObject !== "content")
           fail(op.span, coded("takesNoContentClause", { verb: this.vocab.label(verb!) }));
-        if (op.link === "content" && main.selection.directObject) fail(op.span, coded("contentClauseHasObject"));
+        if (op.link === "content" && reading !== "subject" && main.selection.directObject) fail(op.span, coded("contentClauseHasObject"));
         if (op.link === "infinitive" && !governsInfinitive(main.selection))
           fail(op.span, coded("takesNoInfinitive", { verb: this.vocab.label(verb!) }));
         if (!canStartSubordinate(this.links, main, op.link)) fail(op.span, coded("cantTakeSubordinate"));

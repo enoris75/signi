@@ -1,6 +1,7 @@
 import type { AbstractionLevel, CoordConjunction, SubordinatingConjunction } from "@signi/shared";
 import {
   governsInfinitive,
+  subordinateReading,
   type RelativeGap,
   isConditionalLink,
   isCoordinativeLink,
@@ -271,18 +272,24 @@ export function clearCoordinative(links: PhraseLink[], firstId: string): PhraseL
 
 /**
  * Whether a period may *govern* a subordinate clause of `kind`. It needs a verb — an object clause
- * is governed by one, and an adverbial clause modifies one — and it must be a clause of its own,
- * the target of no link: a subordinate clause does not nest, and an if-clause, a coordinate or a
- * relative clause is folded into its host with no room for one. Beyond that:
+ * is governed by one, and an adverbial clause modifies one — save for the adverb's gloss below, and
+ * it must be a clause of its own, the target of no link: a subordinate clause does not nest, and an
+ * if-clause, a coordinate or a relative clause is folded into its host with no room for one. Beyond
+ * that:
  *  - `content` — the verb takes a that-clause (`clauseObject: 'content'`) and holds no direct
- *    object, since the clause *is* its object;
+ *    object, since the clause *is* its object; or the period has no subject word, and the clause is
+ *    its subject (P13, see subordinateReading);
  *  - `infinitive` — the verb takes an infinitive complement (`clauseObject: 'infinitive'`);
- *  - `adverbial` — any verb: nothing licenses an adjunct.
+ *  - `adverbial` — any verb: nothing licenses an adjunct. A period with neither verb nor subject
+ *    takes it too, as the adverb it glosses (P13), and nothing else.
  * With no `kind`, whether it may govern any of the three (what the border control asks).
  */
 export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kind?: SubordinateKind): boolean {
   const verb = c.selection.verb;
-  if (!verb) return false;
+  const reading = subordinateReading(c.selection);
+  // A period with neither a verb nor a subject takes an adverbial clause as the adverb it glosses (P13).
+  if (!verb)
+    return reading === "adverb" && (kind === undefined || kind === "adverbial") && !links.some((l) => l.target.containerId === c.id);
   // A subordinate clause governs none — except that an infinitive may govern an infinitive of its own
   // (P13): LET is "to cause a person to be allowed to act".
   const incoming = links.filter((l) => l.target.containerId === c.id);
@@ -291,7 +298,8 @@ export function canStartSubordinate(links: PhraseLink[], c: PhraseContainer, kin
     if (!infinitive || (kind !== undefined && kind !== "infinitive")) return false;
     return governsInfinitive(c.selection);
   }
-  if (kind === "content") return verb.clauseObject === "content" && !c.selection.directObject;
+  // With no subject word, the that-clause is the subject (P13), whatever the verb and its object.
+  if (kind === "content") return reading === "subject" || (verb.clauseObject === "content" && !c.selection.directObject);
   if (kind === "infinitive") return governsInfinitive(c.selection);
   return true;
 }

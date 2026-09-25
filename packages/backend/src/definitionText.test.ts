@@ -17,12 +17,9 @@ import './seed.js';
 // default (a pronoun's number, a verb's tense), and a definition's only reader is the render.
 
 // The constructs the phrase language cannot say yet, as `planToWorkspace` names them — P13 §1. Each
-// phase-4 construct takes its name off this list; a definition using one of them is skipped until
-// then. A name not listed here is a construct nobody has planned for, and fails the second test.
-const WAITING = new Set([
-  'PhrasePlan.adverbialGloss',
-  'PhrasePlan.contentSubject',
-]);
+// phase-4 construct took its name off this list, and phase 4 left it empty: a construct a new
+// definition needs is planned here first, and fails the second test until it is.
+const WAITING = new Set<string>([]);
 
 const vocab = definitionVocabulary(listConcepts({ senses: true }));
 const byId = new Map(Object.values(vocab.concepts).flat().map((c) => [c.id, c]));
@@ -58,8 +55,8 @@ describe('definitions in the phrase language (P13)', () => {
   });
 
   test('most definitions are said already', () => {
-    // A floor, not a count: it moves up as phase 4 lands, and catches the inverse losing ground.
-    expect(said.length).toBeGreaterThanOrEqual(569);
+    // A floor, not a count: every definition since phase 4, and it catches the inverse losing ground.
+    expect(said.length).toBeGreaterThanOrEqual(573);
   });
 });
 

@@ -104,13 +104,13 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | ~~`NounPhrase.numeral`~~ — `/num 24`, ✅ | 3 |
 | ~~`complements.comitative`~~ — `/with`, ✅ | 3 |
 | ~~`RelativeClause.headRole.possessor`~~ — `/rel #n.subj.poss`, ✅ | 2 |
-| `PhrasePlan.contentSubject` | 2 |
+| ~~`PhrasePlan.contentSubject`~~ — `/clause` on a period with no subject word, ✅ | 2 |
 | ~~`RelativeClause.headRole.comitative`~~ — cleared by the comitative's box, ✅ | 1 |
 | ~~`InfinitiveComplement.infinitiveComplement`~~ — an infinitive's own `/to`, ✅ | 1 |
 | ~~`complements.cause.definiteness`~~ — the cause's determiner, ✅ 4c0511aa | 1 |
 | ~~`complements.direction.specifiers.path`~~ — `/in` on `/dir`, `/goal` back, ✅ | 1 |
 | ~~`NounPhrase.contrastive`~~ — `/contrast`, ✅ | 1 |
-| `PhrasePlan.adverbialGloss` | 1 |
+| ~~`PhrasePlan.adverbialGloss`~~ — `/sub` on a period with neither verb nor subject, ✅ | 1 |
 | ~~`NounGroup of adjectives`~~ — a predicate's conjuncts read as the predicate, ✅ | 2 |
 
 A definition can wait on several.
@@ -132,6 +132,7 @@ control, console command, printer case, catalogue strings and tests:
 | Joined predicate adjectives | `/pred ( male /or female )` — a predicate's conjunct is read as the predicate is, a noun or an adjective | a predicate's conjunct ring picks with the predicate's picker (Noun · Adjective) | `conjunctSpec` for the console and the printer; `predicateHead` for the ring. NEUTER, NEUTRAL. 563 → 565. |
 | A numeral | `/num 24` after the noun's determiner; `/del num` | a Number field under the determiner menu's Quantity section | `numerals` keyed by noun block, dropped with the noun. A value that is no whole number says "Choose a value". DAY, WEEK, YEAR. 565 → 568. |
 | A demonstrative pointing away from the rest | `/contrast` on a *this* / *that*; `/del contrast` | a Distance switch under the determiner menu's Deixis heading, live while *this* or *that* is chosen | `contrastives` by noun block, dropped when the determiner leaves the two. Only French shows it (*ce lieu-là*). THERE. 568 → 569. |
+| The clause a period with empty slots reads | `/clause` on a period with no subject word (the subject clause); `/sub` on one with neither verb nor subject (the adverb's gloss) | the subordinate menu: *That* on any period with no subject, the conjunctions alone on an empty one | No control and no flag: `subordinateReading` reads the period, and `attachSubordinate` sets `contentSubject` or `adverbialGloss` with the throwaway subject. Filling the slot the reading stands on leaves a link no pick could make, which the console refuses, as with any link's words. `/sub` is not offered on an empty period's completion, where it would shadow `/subj`. SHOULD, MIGHT, OF_COURSE. 569 → 573: every definition. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a
@@ -194,7 +195,7 @@ allow-list that each phase shrinks; phase 4 ends with it empty.
 | **1 · Extract** ✅ | `@signi/phrase` with the modules above; frontend re-exports; build and Vitest wiring. | Typecheck, the unit suite and `SEEDS=5000` round trip green; the frontend app unchanged. |
 | **2 · Inverse** ✅ | `planToWorkspace`, and the all-definitions round-trip test with its allow-list. | Every definition outside the allow-list round-trips; the allow-list is grouped by the construct it waits on. |
 | **3 · Seeds take text** ✅ | Seed vocabulary (ids), `compileDefinition`; `ConceptSeed.definition` accepts a string, compiled when the seed is assembled (decision 7); a diagnostic fails the import, and so the boot. | A string definition renders exactly like its plan in all seven languages; a broken one stops the boot naming concept and diagnostic. |
-| **4 · Constructs** | §1's gaps, one at a time. Each ships its selection field, reducer, plan build, canvas control, console command, printer case, golden/help/coverage entries and a round-trip walk op. | The allow-list is empty. |
+| **4 · Constructs** ✅ | §1's gaps, one at a time. Each ships its selection field, reducer, plan build, canvas control, console command, printer case, golden/help/coverage entries and a round-trip walk op. | The allow-list is empty. |
 | **5 · Migrate** | Every seed definition rewritten as text by a one-off script (print through the inverse), reviewed by hand where the printer's form reads poorly. | The rendered definitions of all concepts in all seven languages are byte-identical before and after (snapshot). |
 | **6 · Retire and tool** | Gloss helpers and their tests deleted; the `seed` and `localize-seed` skills and the localization task template author text; a console command opens a concept's definition on the canvas. | No import of the helpers remains; `/localize-seed` produces a text definition. |
 

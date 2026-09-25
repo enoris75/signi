@@ -23,6 +23,7 @@ import {
   conjunctAddress,
   possessorAddress,
   standardAddress,
+  subordinateReading,
   type NounAddress,
   type NounKey,
   type RelativeGap,
@@ -122,18 +123,29 @@ const isLinked = (s: WorkspaceState, cid: string) =>
 const isObjectInstrument = (s: WorkspaceState, cid: string) =>
   s.links.some((l) => l.kind === 'instrumental' && l.target.containerId === cid && (l.level ?? 'object') === 'object');
 
+// A period whose clause is read off its empty slots (P13, subordinateReading): its that-clause is its
+// subject while it has no subject word, its adverbial clause an adverb's gloss while it has no verb
+// either. Those slots and its mood are what the link stands on, like the words below.
+const readsClause = (s: WorkspaceState, cid: string) => {
+  const c = s.containers.find((x) => x.id === cid)!;
+  const reading = subordinateReading(c.selection);
+  return s.links.some(
+    (l) => l.source.containerId === cid && ((l.kind === 'content' && reading === 'subject') || (l.kind === 'adverbial' && reading === 'adverb')),
+  );
+};
+
 // The words a link stands on are left as the link found them. Changing them afterwards is something
 // the canvas allows — re-picking a clause's head as a pronoun, lowering an instrument that has a
 // verb back to a thing — but it leaves a link no pick could make, which the console, holding to
 // the pick's rules, rightly refuses to rebuild (see the plan's notes on phase 1).
 const OPS: Op[] = [
   onPeriod((sel, rng, s, cid) => {
-    if (isLinked(s, cid) && sel.subject) return undefined;
+    if ((isLinked(s, cid) && sel.subject) || readsClause(s, cid)) return undefined;
     const w = wordFor(rng, 'subject', 'period');
     return R.applyConceptSelect(sel, 'subject', w.concept, w.opts);
   }),
   onPeriod((sel, rng, s, cid) =>
-    (isLinked(s, cid) && sel.verb) || isObjectInstrument(s, cid) ? undefined : R.applyConceptSelect(sel, 'verb', pick(rng, PLAIN_VERBS)!),
+    (isLinked(s, cid) && sel.verb) || isObjectInstrument(s, cid) || readsClause(s, cid) ? undefined : R.applyConceptSelect(sel, 'verb', pick(rng, PLAIN_VERBS)!),
   ),
   onPeriod((sel, rng, s, cid) => {
     if (!sel.verb || sel.verb.transitivity === 'intransitive') return undefined;
@@ -269,7 +281,7 @@ const OPS: Op[] = [
         // A subordinate clause has no mood of its own (P09-E12 D9).
         ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive' || l.kind === 'purpose') && l.target.containerId === c.id),
     );
-    if (locked) return undefined;
+    if (locked || readsClause(s, c.id)) return undefined;
     const r = rng();
     let sel = c.selection;
     if (r < 0.4) {
@@ -293,6 +305,7 @@ const OPS: Op[] = [
         // A subordinate clause has no mood of its own (P09-E12 D9), the question's included.
         ((l.kind === 'content' || l.kind === 'adverbial' || l.kind === 'infinitive' || l.kind === 'purpose') && l.target.containerId === c.id),
     );
+    if (readsClause(s, c.id)) return undefined;
     let sel = c.selection;
     const r = rng();
     if (r < 0.3) {
@@ -489,12 +502,21 @@ describe('the round trip', () => {
 
   // The walk's subordinate-clause op is what exercises `/clause`, `/sub` and `/to` (P09-E12 D9). A
   // that-clause needs SAY with no object and an infinitive NEED, so the two are rarer than the others.
-  it('reaches each of the subordinate clauses, the clause of purpose (P13) among them', () => {
+  it('reaches each of the subordinate clauses, the clause of purpose and the two readings (P13) among them', () => {
     const kinds = new Set<string>();
     // Twice the seeds the walk once needed: every op P13 adds makes each of these rarer.
-    for (let seed = 1; seed <= 8000; seed++)
-      for (const l of reach(seed, 10 + (seed % 30)).links) kinds.add(l.kind ?? 'relative');
-    expect([...kinds]).toEqual(expect.arrayContaining(['content', 'adverbial', 'infinitive', 'purpose']));
+    for (let seed = 1; seed <= 8000; seed++) {
+      const state = reach(seed, 10 + (seed % 30));
+      for (const l of state.links) kinds.add(l.kind ?? 'relative');
+      // The readings a period with empty slots gives its clause (P13): the subject clause, the adverb.
+      for (const { plan } of workspaceToPlans(state.containers, state.links)) {
+        if (plan.contentSubject) kinds.add('contentSubject');
+        if (plan.adverbialGloss) kinds.add('adverbialGloss');
+      }
+    }
+    expect([...kinds]).toEqual(
+      expect.arrayContaining(['content', 'adverbial', 'infinitive', 'purpose', 'contentSubject', 'adverbialGloss']),
+    );
   });
 
   it('prints a reached state the same way twice', () => {

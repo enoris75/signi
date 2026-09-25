@@ -255,3 +255,36 @@ test.describe('a demonstrative pointing away from the rest', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/that /contrast');
   });
 });
+
+test.describe('the clause a period with empty slots reads', () => {
+  test('is the subject with no subject word, as SHOULD says "it is right that one acts", typed or linked', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/verb BE /pred RIGHT_CORRECT /clause ( /subj GENERIC_PERSON /verb ACT )');
+    await run(page);
+    await app.expectSentences({ en: 'it is right that one acts.', de: 'es ist richtig, dass man handelt.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/clause #2');
+
+    // On the canvas: a period with no subject offers *that* whatever its verb takes.
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /verb BE /pred POSSIBLE\n/new /subj cat /verb run');
+    await run(page);
+    await app.linkSubordinate(2, 3, 'That');
+    await expect(app.sentences('en').nth(1)).toHaveText('it is possible that the cat runs.');
+    await expect(page.getByTestId('source-strip')).toContainText('/pred ( possible ) /clause #4');
+  });
+
+  test('is the adverb with neither verb nor subject, as OF_COURSE says "as one expects", typed or linked', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/sub as ( /subj GENERIC_PERSON /verb EXPECT )');
+    await run(page);
+    await app.expectSentences({ en: 'as one expects.', it: 'come si prevede.' });
+
+    // On the canvas: an empty period's menu offers the conjunctions alone.
+    await prompt(page).click();
+    await page.keyboard.insertText('/new\n/new /subj cat /verb run');
+    await run(page);
+    await app.linkSubordinate(2, 3, 'As');
+    await expect(app.sentences('en').nth(1)).toHaveText('as the cat runs.');
+    await expect(page.getByTestId('source-strip')).toContainText('/sub as #4');
+  });
+});

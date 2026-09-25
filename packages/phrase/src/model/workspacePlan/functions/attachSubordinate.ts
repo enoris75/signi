@@ -1,5 +1,5 @@
 import type { ContentClause, InfinitiveComplement, NounElement, NounPhrase, PhrasePlan } from "@signi/shared";
-import { isSubordinateLink, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
+import { isSubordinateLink, subordinateReading, type PhraseContainer, type PhraseLink } from "../../interfaces.ts";
 import { selectionToPlan } from "../../selectionToPlan/index.ts";
 import { attachLinks } from "./attachLinks.ts";
 import { hasHead } from "./hasHead.ts";
@@ -10,7 +10,10 @@ import { hasHead } from "./hasHead.ts";
 //
 //  · content    — `plan.contentObject`, the verb's object clause ("says **that the cat runs**"). The
 //                 clause *is* the object, so a direct object the period still holds gives way to it.
+//                 On a period with no subject word it is `plan.contentSubject` instead, the subject
+//                 clause ("it is right **that one acts**", P13; see subordinateReading).
 //  · adverbial  — `plan.adverbialClause`, with the link's conjunction ("runs **when the cat eats**").
+//                 On a period with neither verb nor subject it is said alone, `adverbialGloss`.
 //  · infinitive — `plan.infinitiveComplement`, its verb phrase, object and complements, since its
 //                 subject is the governing clause's and goes unsaid ("needs **to run**"). The period
 //                 is drawn in the infinitive mood while linked, and read in it here whatever it holds.
@@ -60,10 +63,23 @@ export function attachSubordinate(
       ...(link.control === "object" ? { control: "object" as const } : {}),
     } as InfinitiveComplement;
   } else if (link.kind === "content") {
-    delete plan.directObject;
-    plan.contentObject = clausePlan as ContentClause;
+    if (subordinateReading(container.selection) === "subject") {
+      // A period with no subject word says its that-clause as its subject (P13): "it is right that one
+      // acts". The plan's own subject is the throwaway the engine does not render.
+      plan.subject = { concept: "THING" };
+      plan.contentSubject = clausePlan as ContentClause;
+    } else {
+      delete plan.directObject;
+      plan.contentObject = clausePlan as ContentClause;
+    }
   } else {
     plan.adverbialClause = { conjunction: link.conjunction, clause: clausePlan as ContentClause };
+    // A period with neither a verb nor a subject is the adverb its clause glosses (P13), "as one
+    // expects" — its subject, again, the throwaway.
+    if (subordinateReading(container.selection) === "adverb") {
+      plan.subject = { concept: "THING" };
+      plan.adverbialGloss = true;
+    }
   }
 }
 

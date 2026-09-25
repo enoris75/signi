@@ -1,6 +1,7 @@
 import {
   coordConjunctionOptions,
   subordinateOptions,
+  subordinateReading,
   type PhraseSelection,
   type WorkspaceBinding,
 } from "../../interfaces.ts";
@@ -72,13 +73,14 @@ export function periodControls(
       onPick: coordinative.onPick,
     },
     // The subordinate clause (P09-E12 D9): the menu offers what the verb takes — *that* only with no
-    // object, since the clause is the object — and a period with no verb, or one that is itself
-    // folded into another, governs none (the binding's canStart).
+    // object, since the clause is the object, or with no subject, since it is then the subject — and a
+    // period folded into another governs none (the binding's canStart), nor one with no verb unless
+    // it has no subject either, whose clause is the adverb it glosses (P13, see subordinateReading).
     subordinate: {
       asSource: subordinate.asSource,
       asTarget: subordinate.asTarget,
       // An infinitive period governs no clause but an infinitive of its own (P13, see canStartSubordinate).
-      options: subordinateOptions(selection.verb, Boolean(selection.directObject), selection.predicative).filter(
+      options: subordinateOptions(selection.verb, Boolean(selection.directObject), selection.predicative, subordinateReading(selection)).filter(
         (o) => !subordinate.asTarget || (subordinate.asTarget.kind === "infinitive" && o.link === "infinitive"),
       ),
       isPickTarget: subordinate.isPickTarget,

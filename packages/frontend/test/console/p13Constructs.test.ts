@@ -1,6 +1,7 @@
 // P13's constructs that live in the console's grammar rather than in a command of their own: the
 // relative gaps no box holds (CAR, HYPERNYM), an infinitive the predicate adjective governs (CAN), a
-// direction's path (JUMP) and joined predicate adjectives (NEUTER).
+// direction's path (JUMP), joined predicate adjectives (NEUTER), and the clause a period with empty
+// slots reads as its subject (SHOULD) or as an adverb (OF_COURSE).
 import { describe, expect, it } from 'vitest';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import type { NounPhrase } from '@signi/shared';
@@ -56,5 +57,31 @@ describe('joined predicate adjectives', () => {
     expect(script(ok(text))).toBe('/verb ( seem ) /pred ( happy /or big )');
     // A subject's conjunct stays a noun or a pronoun.
     expect(run('/subj cat /and big').diagnostic?.code).toBe('unknownWord');
+  });
+});
+
+// P13: SHOULD is "it is right that one acts" — a that-clause on a period with no subject word is its
+// subject, whatever the verb takes; OF_COURSE is "as one expects" — an adverbial clause on a period
+// with neither verb nor subject is the adverb it glosses. Both are read off the period, not set.
+describe('the clause a period with empty slots reads', () => {
+  it('is the subject where the period has no subject word', () => {
+    const text = '/verb be /pred happy /clause ( /subj cat /verb run )';
+    expect(plan(text)).toMatchObject({ subject: { concept: 'THING' }, contentSubject: { subject: { concept: 'CAT' } } });
+    expect(plan(text)).not.toHaveProperty('contentObject');
+    expect(script(ok(text))).toBe('/verb ( be ) /pred ( happy ) /clause #2\n/subj ( cat ) /verb ( run )');
+    // With a subject it is the object again, and a verb that takes none refuses it.
+    expect(plan('/subj man /verb say /clause ( /subj cat /verb run )')).toMatchObject({ subject: { concept: 'MAN' }, contentObject: {} });
+    expect(run('/subj man /verb be /pred happy /clause ( /subj cat /verb run )').diagnostic?.code).toBe('takesNoContentClause');
+    // A command's and a citation's subject goes unsaid: their that-clause is still the object.
+    expect(plan('/inf /verb say /clause ( /subj cat /verb run )')).toHaveProperty('contentObject');
+  });
+
+  it('is the adverb where the period has neither verb nor subject', () => {
+    const text = '/sub as ( /subj cat /verb run )';
+    expect(plan(text)).toMatchObject({ subject: { concept: 'THING' }, adverbialGloss: true, adverbialClause: { conjunction: 'as' } });
+    expect(script(ok(text))).toBe('/sub as #2\n/subj ( cat ) /verb ( run )');
+    // A period with a subject and no verb is a noun phrase, and governs no clause.
+    expect(run('/subj man /sub as ( /subj cat /verb run )').diagnostic?.code).toBe('subordinateNeedsVerb');
+    expect(run('/clause ( /subj cat /verb run )').diagnostic?.code).toBe('subordinateNeedsVerb');
   });
 });

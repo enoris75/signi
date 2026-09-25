@@ -121,19 +121,42 @@ export const subordinateLabelKey = (s: {
         ? "clause.purpose"
         : SUBORDINATOR_LABEL_KEY[s.conjunction ?? "when"];
 
+/**
+ * What a period with no subject word makes of the clause it governs (P13) — read off the period, so
+ * no control sets it and none can go stale:
+ *  - `subject` — a period with a verb that says a subject (not a command, a citation, an existential
+ *    or a question asking who): its that-clause stands where the subject would, "it is right **that
+ *    one acts**" (SHOULD, MIGHT; PhrasePlan.contentSubject).
+ *  - `adverb` — a period with neither a verb nor a subject: its adverbial clause is said alone, as the
+ *    adverb it glosses, "**as one expects**" (OF_COURSE; PhrasePlan.adverbialGloss).
+ */
+export type SubordinateReading = "subject" | "adverb";
+
+export function subordinateReading(
+  sel: Pick<PhraseSelection, "verb" | "subject" | "infinitive" | "imperative" | "existential" | "questionRole">,
+): SubordinateReading | undefined {
+  if (sel.subject || sel.infinitive || sel.imperative) return undefined;
+  if (!sel.verb) return "adverb";
+  return sel.existential || sel.questionRole === "subject" ? undefined : "subject";
+}
+
 // The menu's entries for a period whose verb is `verb` and which holds, or not, a direct object:
 // *that* only for a verb that takes a content clause and has no object (the clause *is* the object),
-// *to* only for a verb that takes an infinitive, and the eight conjunctions whenever there is a verb.
-// A period with no verb is offered nothing (see canStartSubordinate).
+// or for a period with no subject, whose that-clause is its subject; *to* only for a verb that takes
+// an infinitive; and the eight conjunctions whenever there is a verb. A period with no verb is
+// offered the conjunctions alone if it has no subject either — its clause is an adverb's gloss — and
+// nothing otherwise (see canStartSubordinate).
 export function subordinateOptions(
   verb: { clauseObject?: ClauseObject } | undefined,
   hasObject: boolean,
   predicate?: { clauseObject?: ClauseObject },
+  reading?: SubordinateReading,
 ): SubordinateOption[] {
+  if (reading === "adverb") return SUBORDINATE_OPTIONS.filter((o) => o.link === "adverbial");
   if (!verb) return [];
   return SUBORDINATE_OPTIONS.filter((o) =>
     o.link === "content"
-      ? verb.clauseObject === "content" && !hasObject
+      ? reading === "subject" || (verb.clauseObject === "content" && !hasObject)
       : o.link === "infinitive"
         ? verb.clauseObject === "infinitive" || predicate?.clauseObject === "infinitive"
         : true,

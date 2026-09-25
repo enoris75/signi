@@ -401,7 +401,9 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
     }
     case "subordinate": {
       const c = state.containers.find((x) => x.id === frame.containerId);
-      return frame.kind === "period" && c && canStartSubordinate(state.links, c, action.link) ? 3 : undefined;
+      // A period with no verb takes its clause as the adverb it glosses (P13), which is typed, not
+      // offered: every period starts that way, and `/sub` would stand in the way of `/subj`.
+      return frame.kind === "period" && c?.selection.verb && canStartSubordinate(state.links, c, action.link) ? 3 : undefined;
     }
     case "instrument": {
       const c = state.containers.find((x) => x.id === frame.containerId);

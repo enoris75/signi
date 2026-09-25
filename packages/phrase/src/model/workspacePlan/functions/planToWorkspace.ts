@@ -16,7 +16,7 @@ import type {
 } from "@signi/shared";
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
-import { conjunctAddress, governsInfinitive, possessorAddress, standardAddress } from "../../interfaces.ts";
+import { conjunctAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
@@ -56,7 +56,7 @@ type NewLink = PhraseLink extends infer L ? (L extends PhraseLink ? Omit<L, "id"
 const PERIOD_FIELDS = new Set([
   "subject", "verbPhrase", "directObject", "complements", "condition", "coordination", "interrogative",
   "existential", "imperative", "imperativeRegister", "infinitive", "contentObject", "adverbialClause",
-  "infinitiveComplement", "purpose",
+  "infinitiveComplement", "purpose", "contentSubject", "adverbialGloss",
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
@@ -118,9 +118,19 @@ class Builder {
     if (plan.infinitive) sel.infinitive = true;
     if (plan.interrogative) sel.interrogative = true;
     if (plan.existential) sel.existential = true;
-    // A command's and a citation's subject is the placeholder the mood puts there, not a word.
-    const subject = plan.imperative || plan.infinitive ? undefined : plan.subject;
+    // A command's and a citation's subject is the placeholder the mood puts there, not a word; so is
+    // the throwaway under a subject clause or an adverb's gloss (P13), which the canvas reads off a
+    // period with no subject (see subordinateReading).
+    const placeholder = plan.contentSubject || plan.adverbialGloss;
+    if (placeholder && (plan.subject as NounPhrase).concept !== "THING") this.unsupported.add("PhrasePlan.subject beside its clause");
+    const subject = plan.imperative || plan.infinitive || placeholder ? undefined : plan.subject;
     this.clause(c, { ...plan, subject });
+    // Each clause is read by what the period holds, so a plan the canvas would read otherwise is not said.
+    const reading = subordinateReading(sel);
+    if (plan.contentSubject ? reading !== "subject" : plan.contentObject && reading === "subject")
+      this.unsupported.add("PhrasePlan.contentSubject where the period reads otherwise");
+    if (plan.adverbialGloss ? reading !== "adverb" || !plan.adverbialClause : plan.adverbialClause && reading === "adverb")
+      this.unsupported.add("PhrasePlan.adverbialGloss where the period reads otherwise");
     if (plan.condition) this.link({ kind: "conditional", source: { containerId: c.id }, target: { containerId: this.period(plan.condition).id } });
     if (plan.coordination) {
       const second = this.period(plan.coordination.clause);
@@ -133,6 +143,7 @@ class Builder {
       this.link({ kind: "coordinative", conjunction: plan.coordination.conjunction, source: { containerId: c.id }, target: { containerId: second.id } });
     }
     if (plan.contentObject) this.subordinate(c, "content", plan.contentObject);
+    if (plan.contentSubject) this.subordinate(c, "content", plan.contentSubject);
     if (plan.purpose) this.purpose(c, plan.purpose, plan.directObject);
     if (plan.adverbialClause) this.subordinate(c, "adverbial", plan.adverbialClause.clause, plan.adverbialClause.conjunction);
     if (plan.infinitiveComplement) {
