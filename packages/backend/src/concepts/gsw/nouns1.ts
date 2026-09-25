@@ -89,6 +89,7 @@ export const GSW_NOUNS_1: GswColumn = {
   },
   ANGEL: { base: 'Ängel', plural: 'Ängel', gender: 'masc', count: 'singular', compound: 'Ängels' },
   LIFE: { base: 'Läbe', plural: 'Läbe', gender: 'neut', count: 'singular', compound: 'Läbes' },
+  BEGINNING: { base: 'Aafang', plural: 'Aafäng', gender: 'masc', count: 'singular', compound: 'Aafangs' },
   END: { base: 'Änd', plural: 'Änd', gender: 'neut', count: 'singular', compound: 'Änd', place_prep: 'a' },
   DEATH: { base: 'Tod', plural: 'Tod', gender: 'masc', count: 'singular', compound: 'Todes' },
   FEELING: { base: 'Gfüül', plural: 'Gfüül', gender: 'neut', count: 'singular', compound: 'Gfüüls' },

@@ -44,7 +44,7 @@ container"), which LIQUID's does ("substance that one pours"). See
 | literal by design — the subject is the differentia | EAT_ANIMAL, WORK, ACT, BECOME, CHANGE_ONESELF, MOVE_ONESELF | 6 |
 | literal by design — the genus word proposed does not hold | DESIRE, KNOW_ACQUAINTED, PERCEIVE | 3 |
 | literal by design — its gloss is another concept's | SHRINK (COMPACT's) | 1 |
-| literal by design — a primitive, every shape probed | CREATE, CHANGE, PRODUCE, HAVE, INDICATE, DESTROY, DIVIDE, STRIKE, PRESS, SHED, WRITE, FILTER, LINK, CONNECT, CANCEL, LEAVE, PIN, APPLY, GOVERN, ACCEPT, BEGIN, TRANSFER, CONFINE, BREATHE, ENCLOSE, GOVERN_STATE, SPEAK, ~~ANSWER~~, SEARCH, ARRANGE | 29 |
+| literal by design — a primitive, every shape probed | CREATE, CHANGE, PRODUCE, HAVE, INDICATE, DESTROY, DIVIDE, STRIKE, PRESS, SHED, WRITE, FILTER, LINK, CONNECT, CANCEL, LEAVE, PIN, APPLY, GOVERN, ACCEPT, ~~BEGIN~~, TRANSFER, CONFINE, BREATHE, ENCLOSE, GOVERN_STATE, SPEAK, ~~ANSWER~~, SEARCH, ARRANGE | 28 |
 | literal by design — a root a noun's gloss stands on | LIVE_ALIVE (LIFE's), POUR (LIQUID's) | 2 |
 
 **Three verbs joined this file's classes on 2026-09-22**, when the P09 batch seeded them, and each
@@ -314,8 +314,10 @@ Every one stays on the literal:
   would say it; SUBJECT_GRAMMAR, OBJECT_GRAMMAR and GENDER stand on it.
 - **ACCEPT** — ACQUIRE is "to begin to have", not to take as; Japanese does not say an adjective
   essive (有効なとして).
-- **BEGIN** — "to become active" is a machine starting (稼働中になる), not a day beginning. ACQUIRE
-  and START stand on it.
+- ~~**BEGIN**~~ — "to become active" is a machine starting (稼働中になる), not a day beginning. ACQUIRE
+  and START stand on it. **Glossed 2026-09-25** on a newly seeded BEGINNING: "to have a beginning",
+  *avere un inizio*, the dictionaries' "avere inizio". The same day BEGIN gained `glosses`, a picker
+  gloss in each of the five languages where it is START's word too (*iniziare (avere inizio)*).
 - **TRANSFER** — "to cause a person to have objects" is GIVE's meaning, and GIVE is a kind of
   TRANSFER; "to move objects from a place to another place" is MOVE's. GIVE, SEND, EXPORT and IMPORT
   stand on it.

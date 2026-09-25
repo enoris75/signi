@@ -1462,6 +1462,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // END's counterpart, the first part of a thing — and the noun intransitive BEGIN's gloss turns
+    // on, "to have a beginning", which is how Italian dictionaries give intransitive *iniziare*
+    // ("avere inizio"). Masculine in Italian, French, Spanish and Portuguese (l'inizio, le début,
+    // el comienzo, o início); German der Anfang, umlauting in the plural (Anfänge).
+    id: 'BEGINNING',
+    role: 'noun',
+    description: 'the first part of something; the point at which something begins',
+    emoji: '🏁',
+    forms: {
+      en: { base: 'beginning', plural: 'beginnings', count: 'singular' },
+      it: { base: 'inizio', plural: 'inizi', gender: 'masc', count: 'singular' },
+      fr: { base: 'début', plural: 'débuts', gender: 'masc', count: 'singular' },
+      de: { base: 'Anfang', plural: 'Anfänge', gender: 'masc', count: 'singular', compound: 'Anfangs' },
+      es: { base: 'comienzo', plural: 'comienzos', gender: 'masc', count: 'singular' },
+      ja: { base: '始まり', count: 'singular', reading: 'はじまり' },
+      pt: { base: 'início', plural: 'inícios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // "The end of a life": END with LIFE as the whole it is the end of (localization C26). The life
     // is indefinite, which every language reads as any one life — English has no generic article for
     // it ("the end of life" is bare, and bare LIFE is "das Ende von Leben" in German), and the

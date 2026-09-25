@@ -6388,8 +6388,8 @@ export const transitiveVerbs: ConceptSeed[] = [
     // The description, composed — START is the causative of BEGIN, which is the whole of the split
     // between them (localization C08). The five labile languages name their own lemma inside it
     // ("indurre un'azione a iniziare"), because their causative and their inchoative are one verb:
-    // the gloss is then what their dictionaries say, "far sì che qcs. inizi", and it is what tells
-    // the picker's two identical entries apart. en and ja have two words and read cleanly.
+    // the gloss is then what their dictionaries say, "far sì che qcs. inizi". The picker's two
+    // identical entries are told apart by BEGIN's `glosses`. en and ja have two words.
     definition: `
       /inf /verb ( CAUSE_VERB ) /obj ( ACTION /a ) /to #2 /objctl
       /inf /verb ( BEGIN )

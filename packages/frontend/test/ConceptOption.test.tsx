@@ -60,6 +60,22 @@ describe('ConceptOption', () => {
     expect(option).toHaveTextContent(/^piangere$/);
   });
 
+  it("shows the language's own gloss where the concept has one", () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    const BEGIN: Concept = {
+      id: 'BEGIN',
+      role: 'verb',
+      description: 'to come into being; to get under way',
+      label: 'begin',
+      labels: { en: 'begin', it: 'iniziare' },
+      synonym: 'get under way',
+      glosses: { it: 'avere inizio' },
+    };
+    const { option } = renderOption({ concept: BEGIN });
+
+    expect(option).toHaveTextContent(/^iniziare\s*\(avere inizio\)$/);
+  });
+
   it('shows no gloss for a word that has none', () => {
     const { option } = renderOption({ concept: CAT });
 

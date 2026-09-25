@@ -78,7 +78,7 @@ function assertValidAliases(seeds: typeof concepts): void {
  */
 function assertKnownLanguages(seeds: typeof concepts): void {
   for (const c of seeds) {
-    for (const lang of [...Object.keys(c.forms), ...Object.keys(c.aliases ?? {})]) {
+    for (const lang of [...Object.keys(c.forms), ...Object.keys(c.aliases ?? {}), ...Object.keys(c.glosses ?? {})]) {
       if (!(lang in LANGUAGES)) throw new Error(`${c.id}: forms for unknown language "${lang}"`);
     }
   }
@@ -103,6 +103,10 @@ function seed() {
     // definition is added here.
     insertDefinition: db.prepare<[string, string, string]>(
       'INSERT INTO concept_definitions (concept_id, language, definition) VALUES (?, ?, ?)'
+    ),
+
+    insertGloss: db.prepare<[string, string, string]>(
+      'INSERT INTO concept_glosses (concept_id, language, gloss) VALUES (?, ?, ?)'
     ),
 
     insertHypernym: db.prepare<[string, string]>(
@@ -133,6 +137,9 @@ function seed() {
       stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.human ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.clauseObject ?? null, c.slot ?? null, c.proper ? 1 : 0, c.mannerRelation ?? null, c.dimensionRelation ?? null, c.temporal ? 1 : 0, c.transient ? 1 : 0, c.alarm ? 1 : 0, c.alarmCry ? 1 : 0, c.stative ? 1 : 0, c.senseOf ?? null, c.sex ?? null);
       // Seed the English definition from `description`; other languages stay empty (fallback to en).
       stmts.insertDefinition.run(c.id, 'en', c.description);
+      for (const [lang, gloss] of Object.entries(c.glosses ?? {})) {
+        if (gloss) stmts.insertGloss.run(c.id, lang, gloss);
+      }
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

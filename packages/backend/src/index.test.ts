@@ -164,7 +164,7 @@ describe('GET /api/concepts', () => {
     expect(await find('CRY_OUT')).toMatchObject({ alarmCry: true });
 
     const divide = await find('DIVIDE');
-    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA', 'aliases']) {
+    for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'alarm', 'alarmCry', 'person', 'number', 'gendered', 'isA', 'aliases', 'glosses']) {
       expect(divide).not.toHaveProperty(key);
     }
   });
@@ -179,6 +179,16 @@ describe('GET /api/concepts', () => {
     expect(await find('RETURN')).toMatchObject({ label: 'return', aliases: { en: ['come back'] } });
     // The alias reaches the role-narrowed list too.
     expect((await list('?role=verb')).find((c) => c.id === 'SPEAK')?.aliases).toEqual({ en: ['talk'] });
+  });
+
+  // BEGIN is START's word in five languages, so the picker glosses it there as English does.
+  test('carries a concept\'s glosses in the languages other than English', async () => {
+    const begin = await find('BEGIN');
+    expect(begin.synonym).toBe('get under way');
+    expect(begin.glosses).toEqual({ it: 'avere inizio', fr: 'débuter', de: 'seinen Anfang nehmen', es: 'iniciarse', pt: 'ter início' });
+    expect(begin.definitions?.it).toBe('avere un inizio');
+    expect((await list('?role=verb')).find((c) => c.id === 'BEGIN')?.glosses?.it).toBe('avere inizio');
+    expect(await find('START')).not.toHaveProperty('glosses');
   });
 
   test('lists every seeded alias, and only those', async () => {

@@ -1354,8 +1354,16 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     clauseObject: 'infinitive',
     description: 'to come into being; to get under way',
+    // "To have a beginning", the dictionaries' "avere inizio" (Treccani). Every other lead was a
+    // wrong sense — "to become active" is a machine starting (localization C28), "to become real"
+    // is coming true. Japanese says it with 持つ, as every HAVE gloss does: the citation's generic
+    // subject is a person, who holds rather than has (始まりを持つ).
+    definition: '/inf /verb ( HAVE ) /obj ( BEGINNING /a )',
     emoji: '▶️',
     synonym: 'get under way',
+    // START is the same word in five languages (iniziare, commencer, beginnen, empezar, começar),
+    // so the picker glosses this one there as English does; Japanese has two words (始まる / 始める).
+    glosses: { it: 'avere inizio', fr: 'débuter', de: 'seinen Anfang nehmen', es: 'iniciarse', pt: 'ter início' },
     // The everyday doublets of the primaries (P09-E23): "cominciare" beside "iniziare", "anfangen"
     // beside "beginnen", "comenzar" beside "empezar".
     aliases: { it: ['cominciare'], de: ['anfangen'], es: ['comenzar'] },

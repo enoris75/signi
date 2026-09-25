@@ -70,6 +70,7 @@ describe('getDb', () => {
       [
         'semantic_concepts',
         'concept_definitions',
+        'concept_glosses',
         'concept_relations',
         'saved_phrases',
         ...roles.flatMap((r) => [`${r}_lexemes`, `${r}_forms`, `concept_${r}_links`, `${r}_relations`]),

@@ -56,3 +56,13 @@ export function conceptReading(
   if (concept.labels?.[language] === undefined) return undefined;
   return concept.readings?.[language];
 }
+
+/**
+ * The parenthesised disambiguator shown beside the concept's word in `language`: the English
+ * `synonym` ("cry (weep)") in English, and the concept's own gloss in that language elsewhere
+ * ("iniziare (avere inizio)" for BEGIN beside START's "iniziare"). An English gloss is never shown
+ * beside another language's word — it would gloss a word with one from a different language.
+ */
+export function conceptGloss(concept: Concept, language: LanguageCode): string | undefined {
+  return language === 'en' ? concept.synonym : concept.glosses?.[language];
+}

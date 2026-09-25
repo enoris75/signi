@@ -105,6 +105,17 @@ function initSchema(db: Database.Database): void {
       PRIMARY KEY (concept_id, language)
     );
 
+    -- ── Per-language picker glosses ─────────────────────────────────────
+    -- The synonym in the other languages: the disambiguator a picker shows in parentheses where two
+    -- concepts share a word in that language (BEGIN / START, both "iniziare"). English stays in
+    -- semantic_concepts.synonym.
+    CREATE TABLE IF NOT EXISTS concept_glosses (
+      concept_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      language   TEXT NOT NULL,
+      gloss      TEXT NOT NULL,
+      PRIMARY KEY (concept_id, language)
+    );
+
     -- ── Per-type lexeme tables ─────────────────────────────────────────
     -- Each table carries only the attributes that are meaningful for that
     -- grammatical category. Structured fields (gender, person, number) are

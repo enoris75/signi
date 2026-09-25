@@ -4,7 +4,7 @@ import { UI_STRINGS, type Concept, type UiStringKey } from "@signi/shared";
 import { fetchUiStrings } from "../api.ts";
 import { useConcepts } from "../hooks/useConcepts.ts";
 import { useUiLanguage } from "../i18n/LanguageContext.tsx";
-import { conceptWord } from "../i18n/conceptWord.ts";
+import { conceptGloss, conceptWord } from "../i18n/conceptWord.ts";
 import type { Vocabulary } from "./language/types.ts";
 
 /**
@@ -23,10 +23,7 @@ export function useVocabulary(): Vocabulary {
       conceptWord(concept, uiLanguage, (key: UiStringKey) => strings?.[key]?.[uiLanguage] ?? UI_STRINGS[key].fallback),
     [uiLanguage, strings],
   );
-  const gloss = useCallback(
-    (concept: Concept) => (uiLanguage === "en" ? concept.synonym : undefined),
-    [uiLanguage],
-  );
+  const gloss = useCallback((concept: Concept) => conceptGloss(concept, uiLanguage), [uiLanguage]);
   const { data: noun } = useConcepts("noun");
   const { data: pronoun } = useConcepts("pronoun");
   const { data: verb } = useConcepts("verb");

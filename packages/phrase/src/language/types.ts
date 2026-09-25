@@ -54,7 +54,7 @@ export interface Vocabulary {
   language: LanguageCode;
   /** The word as the pickers show it in the interface language (see conceptWord). */
   label: (concept: Concept) => string;
-  /** The English gloss the pickers show beside a word, where there is one. */
+  /** The gloss the pickers show beside a word in the interface language, where there is one. */
   gloss?: (concept: Concept) => string | undefined;
 }
 

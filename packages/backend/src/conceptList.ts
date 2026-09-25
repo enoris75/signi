@@ -80,6 +80,11 @@ const DEFINITION_SQL = `
   SELECT concept_id, language, definition FROM concept_definitions
 `;
 
+// The picker glosses in the languages other than English (`Concept.glosses`).
+const GLOSS_SQL = `
+  SELECT concept_id, language, gloss FROM concept_glosses
+`;
+
 // Every is_a edge, read as "a is_a b". A concept has at most one (the table's UNIQUE says so),
 // so this maps cleanly onto Concept.isA. Fetched unfiltered even when the request narrows to one
 // role: hypernyms relate concepts of the same role, so the parent is in the response either way.
@@ -232,6 +237,10 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     byLanguage[r.language] = r.definition;
     definitions.set(r.concept_id, byLanguage);
   }
+  const glosses = new Map<string, Partial<Record<LanguageCode, string>>>();
+  for (const r of db.prepare<[], { concept_id: string; language: LanguageCode; gloss: string }>(GLOSS_SQL).all()) {
+    glosses.set(r.concept_id, { ...glosses.get(r.concept_id), [r.language]: r.gloss });
+  }
   // An engine-composed definition (rendered from the concept's `definition` plan) supersedes the
   // stored literal, in every language it renders — so a planned concept reads consistently across
   // languages rather than mixing an English literal with translated fragments.
@@ -284,6 +293,7 @@ export function listConcepts({ role, senses = false, composedDefinitions, defini
     labels: labels.get(r.id),
     readings: readings.get(r.id),
     synonym: r.synonym ?? undefined,
+    glosses: glosses.get(r.id),
     countable: r.countable === 0 ? false : undefined,
     emoji: r.emoji ?? undefined,
     modal: r.modal === 1 || undefined,

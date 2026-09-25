@@ -1,6 +1,6 @@
 import type { Concept } from '@signi/shared';
 import { useCallback } from 'react';
-import { conceptWord } from './conceptWord.ts';
+import { conceptGloss, conceptWord } from './conceptWord.ts';
 import { useUiLanguage } from './LanguageContext.tsx';
 import { useUiString } from './useUiString.ts';
 
@@ -16,16 +16,12 @@ export function useConceptLabel(): (concept: Concept) => string {
 }
 
 /**
- * Returns `gloss`, the parenthesised disambiguator a picker shows beside the word ("cry
- * (weep)"). The gloss is an English synonym, so it is only shown beside the English word; in
- * another language it would gloss a word with one from a different language.
+ * Returns `gloss`, the parenthesised disambiguator a picker shows beside the word, in the current
+ * UI language: "cry (weep)", "iniziare (avere inizio)". See conceptGloss().
  */
 export function useConceptGloss(): (concept: Concept) => string | undefined {
   const { uiLanguage } = useUiLanguage();
-  return useCallback(
-    (concept: Concept) => (uiLanguage === 'en' ? concept.synonym : undefined),
-    [uiLanguage],
-  );
+  return useCallback((concept: Concept) => conceptGloss(concept, uiLanguage), [uiLanguage]);
 }
 
 /**
@@ -60,7 +56,8 @@ export function useConceptSearch(): (concept: Concept, query: string) => boolean
       if (!q) return true;
       const reading = concept.readings?.[uiLanguage] ?? '';
       const aliases = [...(concept.aliases?.[uiLanguage] ?? []), ...(concept.aliases?.en ?? [])].join(' ');
-      const haystack = `${word(concept)} ${reading} ${concept.label ?? ''} ${concept.synonym ?? ''} ${aliases}`;
+      const gloss = concept.glosses?.[uiLanguage] ?? '';
+      const haystack = `${word(concept)} ${reading} ${concept.label ?? ''} ${concept.synonym ?? ''} ${gloss} ${aliases}`;
       return haystack.toLowerCase().includes(q);
     },
     [word, uiLanguage],

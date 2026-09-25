@@ -719,6 +719,7 @@ function wordCompletion(
       concept.label ?? "",
       concept.readings?.[vocab.language] ?? "",
       concept.synonym ?? "",
+      concept.glosses?.[vocab.language] ?? "",
       ...(concept.aliases?.[vocab.language] ?? []),
       ...(concept.aliases?.en ?? []),
       concept.id,

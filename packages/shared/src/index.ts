@@ -746,6 +746,12 @@ export interface Concept {
    */
   readings?: Partial<Record<LanguageCode, string>>;
   synonym?: string;            // short disambiguating gloss shown in parentheses, e.g. "weep" for cry
+  /**
+   * `synonym` in the other languages: the parenthesised disambiguator a picker shows beside the
+   * word where that language's word is shared with another concept — *iniziare (avere inizio)* for
+   * BEGIN beside START's *iniziare*. English keeps `synonym`. Absent when the concept has none.
+   */
+  glosses?: Partial<Record<LanguageCode, string>>;
   emoji?: string;
   transitivity?: Transitivity; // only set for verbs
   modal?: boolean;             // verb that governs another verb rather than heading a clause

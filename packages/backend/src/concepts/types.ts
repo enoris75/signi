@@ -37,6 +37,12 @@ export interface ConceptSeed {
   dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
+  /**
+   * `synonym` in the other languages, for where the concept's word is another concept's too: BEGIN
+   * and START are both *iniziare*, so BEGIN carries `it: 'avere inizio'`. English stays in `synonym`.
+   * A phrase a dictionary gives for this sense, never the word itself.
+   */
+  glosses?: Partial<Record<Exclude<LanguageCode, 'en'>, string>>;
   isA?: string;     // immediate hypernym — CARAVEL isA SAILING_SHIP. One parent only; see concepts/hierarchy.ts
   /**
    * Secondary lexemes (P09-E23): other words that find this concept in the pickers and the console
