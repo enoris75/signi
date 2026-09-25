@@ -743,3 +743,22 @@ describe('known bugs: a bare plural subject loses its article in it / fr / es / 
     expect(sayAll({ subject: cat(bare) })).toMatchObject({ it: 'gatti.', fr: 'chats.', es: 'gatos.', pt: 'gatos.' });
   });
 });
+
+// A378. Italian writes an indefinite plural subject bare: "gatti corrono", "donne corrono". Like the
+// bare plural of A376, a preverbal subject cannot go bare in Italian; the indefinite plural takes the
+// partitive article, "dei gatti", "delle donne", as French takes des and Spanish / Portuguese unos /
+// uns. An object may stay bare ("il gatto vede topi"). Found by the A376 lane, 2026-09-25.
+describe('known bugs: Italian writes an indefinite plural subject bare (A378)', () => {
+  const some = { definiteness: 'indefinite', number: 'plural' } as const;
+
+  test.fails('the indefinite plural subject takes dei / delle', () => {
+    expect(subject(cat(some)).it).toBe('dei gatti corrono.'); // now: "gatti corrono."
+    expect(subject(np('WOMAN', some)).it).toBe('delle donne corrono.'); // now: "donne corrono."
+    expect(sayAll(clause(cat(some), 'RUN', { verbPhrase: { tense: 'past' } })).it).toBe('dei gatti corsero.'); // now: "gatti corsero."
+  });
+
+  test('regression: the other Romance three, and an indefinite plural object', () => {
+    expect(subject(cat(some))).toMatchObject({ fr: 'des chats courent.', es: 'unos gatos corren.', pt: 'uns gatos correm.' });
+    expect(sayAll(clause(cat(), 'SEE', { directObject: np('MOUSE', some) })).it).toBe('il gatto vede topi.');
+  });
+});

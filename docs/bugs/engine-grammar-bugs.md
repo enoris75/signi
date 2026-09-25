@@ -53,7 +53,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A is empty, and so is Part B).** If
+this writing Part A holds four files, A377–A380, and Part B is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -65,6 +65,18 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
+| A377 | [A377-animate-route-reads-as-another-relation.md](A-must-fix/A377-animate-route-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | A route through a person reads as *for* / *by* (*corre por el hombre*) or runs a person as a path (猫は男を走ります) |
+| A378 | [A378-italian-indefinite-plural-subject-stays-bare.md](A-must-fix/A378-italian-indefinite-plural-subject-stays-bare.md) | Italian | An indefinite plural subject is bare (*gatti corrono*) where it takes the partitive (*dei gatti corrono*) |
+| A379 | [A379-french-bare-passive-agent-has-no-article.md](A-must-fix/A379-french-bare-passive-agent-has-no-article.md) | French | A bare plural or mass passive agent keeps no article (*par chats*) where it takes *des* / *de l'* |
+| A380 | [A380-superlative-set-beside-a-possessor-stacks-two-genitives.md](A-must-fix/A380-superlative-set-beside-a-possessor-stacks-two-genitives.md) | German, Portuguese | A superlative's set beside a noun possessor stacks two genitives (*das größte Haus der Frau der Stadt*) |
+
+**Four open**, **A377–A380**, filed on 2026-09-25 from the leads the A370–A376 lanes reported, each
+probed at the fix: an animate route in a statement (A377, the statement A374 left), the Italian
+indefinite plural subject (A378, which moves UNIVERSITY's and WAR's definitions), the French bare
+passive agent (A379) and two genitives stacked by A371's set beside a possessor (A380). A380 leaves a
+decision for the fixer. Not filed: an indefinite mass subject in it / es / pt (*acqua scorre*, noted in
+A378), and the Japanese and same-gender Romance attachment of a superlative beside a possessor (A380's
+*Not filed*).
 
 **All seven were fixed on 2026-09-25** by four lanes, and are listed under **Fixed** below:
 A370 (Portuguese *já não* beside a concord *não*), A371 (an attributive superlative says its set,

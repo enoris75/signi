@@ -548,3 +548,29 @@ describe('known bugs: a French participle in -s doubles it in the masculine plur
     });
   });
 });
+
+// A379. French writes a bare plural or bare mass passive agent with no article: "mangée par chats",
+// "déplacé par eau". French cannot leave a count plural or a mass noun bare after par; it takes des /
+// de l'. Every other complement already does ("avec des chiens", "à des enfants", "dans des maisons"),
+// and so does a bare object (`objectArtFor`, A149). Found by the A376 lane, 2026-09-25.
+describe('known bugs: French writes a bare passive agent with no article (A379)', () => {
+  const bare = { definiteness: 'bare', number: 'plural' } as const;
+  const eatenBy = (agent: ReturnType<typeof np>, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(agent, 'EAT', { directObject: np('FOOD'), verbPhrase: { voice: 'passive', ...verbPhrase } }));
+
+  test.fails('the agent takes des / de l\'', () => {
+    expect(eatenBy(np('CAT', bare)).fr).toBe('la nourriture est mangée par des chats.'); // now: "… par chats."
+    expect(eatenBy(np('CAT', bare), { tense: 'past' }).fr).toBe('la nourriture fut mangée par des chats.'); // now: "… par chats."
+    expect(sayAll(clause(np('WATER', { definiteness: 'bare' }), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).fr)
+      .toBe("le livre est déplacé par de l'eau."); // now: "… par eau."
+  });
+
+  test('regression: the indefinite agent, the other languages, and a bare comitative', () => {
+    expect(eatenBy(np('CAT', { definiteness: 'indefinite', number: 'plural' })).fr).toBe('la nourriture est mangée par des chats.');
+    expect(eatenBy(np('CAT', bare))).toMatchObject({
+      en: 'the food is eaten by cats.', it: 'il cibo è mangiato da gatti.', es: 'la comida es comida por gatos.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('DOG', bare) } } })).fr)
+      .toBe('le chat court avec des chiens.');
+  });
+});

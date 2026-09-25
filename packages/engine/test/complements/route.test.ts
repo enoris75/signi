@@ -210,3 +210,35 @@ describe('known bugs: a route over crosses its landmark', () => {
     });
   });
 });
+
+// A377. A route through a person, in a statement: Spanish and Portuguese keep the route's por / pelo,
+// which with a person reads as *for* or *by* ("el gato corre por el hombre", *runs for the man*), and
+// Japanese keeps the path's を, running a person as if it were a road (猫は男を走ります). A374 spelled the
+// path for the question; the statement wants the same words. Found by the A374 lane, 2026-09-25.
+describe('known bugs: an animate route reads as another relation (A377)', () => {
+  const runs = (extra: Partial<Parameters<typeof clause>[2]> = {}, route: Partial<{ specifiers: { kind: 'path'; value: PathSpecifier }[] }> = {}) =>
+    sayAll(clause(np('CAT'), 'RUN', { ...extra, complements: { route: { phrase: np('MAN'), ...route } } }));
+
+  test.fails('es, pt and ja spell the path through a person', () => {
+    expect(runs()).toMatchObject({
+      es: 'el gato corre a través del hombre.', // now: "el gato corre por el hombre."
+      pt: 'o gato corre através do homem.', // now: "o gato corre pelo homem."
+      ja: '猫は男の中を通って走ります。', // now: "猫は男を走ります。"
+    });
+    expect(runs({ verbPhrase: { tense: 'past' } }, { specifiers: [{ kind: 'path', value: 'through' }] })).toMatchObject({
+      es: 'el gato corrió a través del hombre.', // now: "el gato corrió por el hombre."
+      pt: 'o gato correu através do homem.', // now: "o gato correu pelo homem."
+      ja: '猫は男の中を通って走りました。', // now: "猫は男を走りました。"
+    });
+  });
+
+  test('regression: the other four, and an inanimate route', () => {
+    expect(runs()).toMatchObject({
+      en: 'the cat runs through the man.', it: "il gatto corre attraverso l'uomo.",
+      fr: "le chat court à travers l'homme.", de: 'der Kater läuft durch den Mann.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('HOUSE') } } }))).toMatchObject({
+      es: 'el gato corre por la casa.', pt: 'o gato corre pela casa.', ja: '猫は家を走ります。',
+    });
+  });
+});

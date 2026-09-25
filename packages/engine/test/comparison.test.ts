@@ -1179,6 +1179,34 @@ describe('known bugs: an attributive superlative drops its set (A371)', () => {
   });
 });
 
+// A380. An attributive superlative's set beside a noun possessor stacks two genitives in German and
+// Portuguese: "das größte Haus der Frau der Stadt", "a maior casa da mulher da cidade", where the set
+// reads as the woman's ("the woman of the city"). A371 put the set where the comparative's standard
+// goes, after the possessor. Found by the A371 lane, 2026-09-25. Decision for the fixer: the set as a
+// locative (pinned, "in der Stadt", "na cidade", English's own "in the city"), or ahead of the possessor.
+describe('known bugs: a superlative’s set beside a possessor stacks two genitives in de / pt (A380)', () => {
+  const house = (degree: Degree) =>
+    np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [np('CITY')], possessor: np('WOMAN') });
+
+  test.fails('the set is said as a place', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house('most') }))).toMatchObject({
+      de: 'der Mann sieht das größte Haus der Frau in der Stadt.', // now: "… der Frau der Stadt."
+      pt: 'o homem vê a maior casa da mulher na cidade.', // now: "… da mulher da cidade."
+    });
+    expect(sayAll(clause(house('most'), 'BURN'))).toMatchObject({
+      de: 'das größte Haus der Frau in der Stadt brennt.', // now: "… der Frau der Stadt brennt."
+      pt: 'a maior casa da mulher na cidade arde.', // now: "… da mulher da cidade arde."
+    });
+  });
+
+  test('regression: without a possessor the set stays genitive, and English says it in place', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [np('CITY')] }) }))).toMatchObject({
+      de: 'der Mann sieht das größte Haus der Stadt.', pt: 'o homem vê a maior casa da cidade.',
+    });
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house('most') })).en).toBe("the man sees the woman's biggest house in the city.");
+  });
+});
+
 // A372. French, Spanish and Portuguese write a noun's possessor after its attributive standard (P09-E18,
 // E50), where it reads as the standard's: "un chat plus grand que le chien de la femme" is a cat bigger
 // than the woman's dog. Italian puts the possessor first, which is the order the three want.
