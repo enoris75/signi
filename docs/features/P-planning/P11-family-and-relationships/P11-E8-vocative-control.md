@@ -29,7 +29,7 @@ in-memory seed:
 
 The commands use the builder's default imperative, 2nd singular in the request register. The
 Portuguese *Minha esposa* has had no article since A336 was fixed. E3's *Done* table still shows *A minha
-esposa*, and that row is stale.
+esposa*, and that row is stale. The last column needs [P11-E9](P11-E9-pronoun-owner.md) as well: a command has no *I* in the period for "my" to point at.
 
 ## Why
 

@@ -244,7 +244,7 @@ by its `conjunction.value.*`.
   the pointer round-trips. `planToWorkspace` maps `Possessor.coreferent` to `PossessorRef:
   "subject"` on the possessed noun (at any depth: an owner's slice stores the period's address), so
   the link leaves `unsupported`. `Possessor.pronominal` stays unsupported: a plan has no address to
-  recover.
+  recover ([P11-E9](P11-E9-pronoun-owner.md) loads it as a free pronoun owner).
 
 **Recommendation: as stated.** The printed line does not change, so the golden lines stay valid.
 
@@ -306,4 +306,4 @@ by its `conjunction.value.*`.
   CAT, and both the copy and the link read it. That is a lead for the bug catalogue, not this control.
 - **The passive's 自分** (E2's lead): D3 withholds the link there until the engine decides.
 - **A 1st-person named owner** ("**my** brother" with no *I* elsewhere in the period): the owner
-  picker takes nouns only.
+  picker takes nouns only. That is [P11-E9](P11-E9-pronoun-owner.md).
