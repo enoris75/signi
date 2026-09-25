@@ -25,6 +25,8 @@ test('point to a noun as the owner', async ({ app, page }) => {
   expect(await app.sentence('it')).toBe('il ragazzo vede il suo cane.');
   expect(await app.sentence('de')).toBe('der Junge sieht seinen Hund.');
   expect(await app.sentence('es')).toBe('el niño ve su perro.');
+  // The pointer at the clause's subject is the link to it (P11-E7): Japanese says 自分の.
+  expect(await app.sentence('ja')).toBe('男の子は自分の犬を見ます。');
 });
 
 // The chip shows the **possessed noun phrase** the link will render, in the interface language
@@ -47,7 +49,8 @@ test('the chip shows the whole phrase, in the interface language', async ({ app,
   await expect(page.getByTestId('pronoun-chip')).toHaveText('sein Hund');
 
   await app.setUiLanguage('ja');
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('彼の犬');
+  // The link is rendered in its clause, so the chip says what the sentence says: 自分の (P11-E7 D5).
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('自分の犬');
 });
 
 // The agreement the phrase is there for: a feminine possessed noun takes "la sua", where the boy
@@ -112,4 +115,36 @@ test('name the owner in a ring of its own', async ({ app, page }) => {
   // Its ring's remove control takes the owner off again.
   await page.getByRole('button', { name: 'Remove this possessor' }).click();
   await expect.poll(() => app.sentence('en')).toBe('the boy sees the dog.');
+});
+
+// P11-E7: the pointer at the clause's own subject is E2's link, so the possessive agrees with the
+// subject as the engine reads it — German *ihr* for the woman, whose gender no pick states.
+test('a pointer at the subject is the link: her book', async ({ app, page }) => {
+  await app.buildClause('WOMAN', 'SEE');
+  await app.setDirectObject('BOOK');
+  await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+  await page.getByTestId('box-subject').first().click();
+
+  await expect.poll(() => app.sentence('en')).toBe('the woman sees her book.');
+  expect(await app.sentence('de')).toBe('die Frau sieht ihr Buch.');
+  expect(await app.sentence('ja')).toBe('女は自分の本を見ます。');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('her book');
+});
+
+// P11-E7 D4: under a command the command box stands for the subject, and pointing at it is pointing
+// at the addressee — "see your book" — never at a subject word the period keeps behind the box.
+test('pointing at the command box: see your book', async ({ app, page }) => {
+  await page.getByRole('button', { name: 'Command', exact: true }).click();
+  await app.setVerb('SEE');
+  await app.setDirectObject('BOOK');
+
+  await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+  const moodBox = page.getByTestId('mood-box');
+  await expect(moodBox).toHaveAttribute('data-kb-pick-target', 'subject');
+  await moodBox.click({ position: { x: 4, y: 4 } });
+
+  await expect.poll(() => app.sentence('en')).toBe('see your book.');
+  expect(await app.sentence('de')).toBe('sieh dein Buch.');
+  expect(await app.sentence('ja')).toBe('自分の本を見てください。');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('your book');
 });

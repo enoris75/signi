@@ -56,6 +56,9 @@ export interface PhraseRenderContext {
   // A noun-phrase canvas whose head may still be a pronoun: a conjunct's ("you and I"). Its
   // `subject` slot keeps the pronoun-inclusive picker, which a possessor head does without.
   pronounHead?: boolean;
+  // Whether this canvas is an owner's ring (P11-E9): its pronoun is a possessive's, so its chooser
+  // offers the three persons alone — the generic "one" has no possessive the plan can state.
+  ownerHead?: boolean;
   // Whether this canvas's `subject` slot is a predicate's conjunct (P13): it takes what the predicate
   // takes, a noun or an adjective — "is not male **or female**" — and picks with the predicate's picker.
   predicateHead?: boolean;
@@ -324,6 +327,7 @@ export function SlotNode({
     handleCycleDegree,
     nounPhrase,
     pronounHead,
+    ownerHead,
     onBoxRef,
     dimmedKeys,
     isPickTarget,
@@ -568,6 +572,7 @@ export function SlotNode({
           selection,
           onSelect: handleConceptSelect,
           nounSubject,
+          ownerHead: ownerHead && slot.key === "subject",
           editing,
           kind: categories ? slotKind(slot.key) : undefined,
           onKindChange: categories

@@ -1,7 +1,9 @@
+import type { PronominalPossessor } from "@signi/shared";
 import type { NounKey } from "../interfaces.ts";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
 import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
+import type { LinkClause } from "./subjectLink.ts";
 import {
   ownerLink,
   ownerPortKey,
@@ -22,6 +24,9 @@ import type { Pt } from "../ringLayout.ts";
  */
 export type PointerLine = { spot: PointerSpot; link: PossessionLink; pronoun: string | undefined; color: string };
 
+/** A named owner's line, with the phrase its chip shows where the owner is a pronoun (P11-E9 D7). */
+export type OwnerLine = { spot: OwnerSpot; link: PossessionLink; pronoun: string | undefined; color: string };
+
 /**
  * The lines of possession on a canvas: a solid line from each noun to its owner's ring, and a dashed
  * one from each noun that points to its owner, bowed past the rings between. Each leaves from the
@@ -34,6 +39,7 @@ export function possessionEdges({
   controlOn,
   colorOf,
   resolve,
+  linkOf = () => undefined,
   t,
   possessivePhrase,
   compact,
@@ -46,16 +52,22 @@ export function possessionEdges({
   // The colour of the period noun a possession belongs with.
   colorOf: (role: NounKey) => string;
   resolve: CorefPick["resolve"];
+  // Whether a pointer is the link to its clause's subject, and the clause its chip is rendered in (P11-E7 D5).
+  linkOf?: CorefPick["linkOf"];
   t: UiStringLookup;
   // The possessed noun phrase, once the backend has rendered it (see `usePossessivePhrases`).
   possessivePhrase: PossessivePhrase;
   compact: boolean;
-}): { edges: Edge[]; pointerLines: PointerLine[] } {
+}): { edges: Edge[]; pointerLines: PointerLine[]; ownerLines: OwnerLine[] } {
   // A hosted ring's builder knows its own possessor control by its head's key.
   const possessorControlOn = (key: string) =>
     controlOn(key, perimeterControlKey("possessor", key), perimeterControlKey("possessor", "subject"));
 
-  const ownerEdges = owners.flatMap((spot) => {
+  // The phrase a possessive renders, and the bare possessive until it has come back (C16).
+  const says = (concept: string | undefined, features: PronominalPossessor, clause?: LinkClause) =>
+    possessivePhrase(concept, features, clause) ?? t(possessiveHintKey(features));
+
+  const ownerLines = owners.flatMap((spot): OwnerLine[] => {
     const link = ownerLink({
       owned: ringOf(spot.possessedKey),
       owner: ringOf(spot.address),
@@ -63,8 +75,12 @@ export function possessionEdges({
       port: controlOn(spot.address, ownerPortKey(spot)),
       compact,
     });
-    return link ? [linkEdge(link, colorOf(spot.role), false)] : [];
+    if (!link) return [];
+    // A pronoun owner's line says the possessed phrase, as a pointer's does (P11-E9 D7): the ring
+    // reads "first person", the line "my mother".
+    return [{ spot, link, pronoun: spot.pronoun && says(spot.possessedConcept, spot.pronoun), color: colorOf(spot.role) }];
   });
+  const ownerEdges = ownerLines.map(({ link, color }) => linkEdge(link, color, false));
 
   const pointerLines = pointers.flatMap((spot): PointerLine[] => {
     const link = pointerLink({
@@ -77,14 +93,13 @@ export function possessionEdges({
     const resolved = resolve(spot.antecedent);
     // The whole phrase where the render has come back, the bare possessive until then: the Romance
     // possessive agrees with the noun possessed, which only the engine can settle (C16).
-    const pronoun = resolved
-      ? possessivePhrase(spot.possessedConcept, resolved.features) ?? t(possessiveHintKey(resolved.features))
-      : undefined;
+    const pronoun = resolved ? says(spot.possessedConcept, resolved.features, linkOf(spot.possessed, spot.antecedent)) : undefined;
     return [{ spot, link, pronoun, color: colorOf(spot.role) }];
   });
 
   return {
     edges: [...ownerEdges, ...pointerLines.map(({ link, color }) => linkEdge(link, color, true))],
     pointerLines,
+    ownerLines: ownerLines.filter((line) => line.pronoun),
   };
 }

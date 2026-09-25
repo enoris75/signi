@@ -11,7 +11,8 @@
 // there — so where it sits and what joins it is all worked out here. Owners nest (an owner's owner,
 // a conjunct's owner), and every one of them is on the one canvas.
 
-import type { Concept } from "@signi/shared";
+import type { Concept, PronominalPossessor } from "@signi/shared";
+import { isPersonalPronoun, pronounFeatures } from "@signi/phrase/model/selectionToPlan/functions/pronounFeatures.ts";
 import {
   conjunctAddress,
   possessorAddress,
@@ -60,6 +61,14 @@ export type OwnerSpot = {
   order: number;
   // Whether the owner holds a word yet. An empty ring is the picker the owner starts as.
   named: boolean;
+  /**
+   * A pronoun owner's possessive (P11-E9 D7): the features its ring's person, number and gender
+   * spell, which the line to it shows as the possessed phrase ("my mother"), as a pointer's does.
+   * Absent for a noun owner, whose ring says what it is.
+   */
+  pronoun?: PronominalPossessor;
+  // The possessed noun, which that phrase renders under the possessive.
+  possessedConcept?: string;
 };
 
 /** A pointed-to owner: the noun whose possessor it is, and the noun it points to. */
@@ -135,7 +144,19 @@ export function possessionsFor({
     const ownerAddress = possessorAddress(address);
     // Halving steps keep an owner after the ring it owns and before the next ring of the group.
     const ownerOrder = order + 0.5 ** (depth + 1);
-    owners.push({ address: ownerAddress, possessed: address, possessedKey: key, role, order: ownerOrder, named });
+    const head = owner?.subject;
+    owners.push({
+      address: ownerAddress,
+      possessed: address,
+      possessedKey: key,
+      role,
+      order: ownerOrder,
+      named,
+      ...(owner && head && isPersonalPronoun(head) && {
+        pronoun: pronounFeatures(owner, "subject", head),
+        possessedConcept: (slice[which] as Concept | undefined)?.id,
+      }),
+    });
     if (owner && isNoun(owner.subject))
       visit(owner, "subject", ownerAddress, ownerAddress, role, ownerOrder, depth + 1);
   };

@@ -24,6 +24,7 @@ export function SubjectTypeahead({
   kind = "noun",
   onKindChange,
   testId = "typeahead-subject",
+  personalOnly = false,
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
   // The picker is pronoun-inclusive (pronouns + nouns); the prompt varies by slot (a subject, a
@@ -39,6 +40,9 @@ export function SubjectTypeahead({
   // keeps `typeahead-noun`, which it shares with the noun-only complements, so which component
   // fills a box stays an implementation detail.
   testId?: string;
+  // The three persons alone (an owner's ring, P11-E9 D2): the generic "one" is shown disabled — it has
+  // no possessive the plan can state — and no key reaches it.
+  personalOnly?: boolean;
 }) {
   const t = useUiString();
   const prompt = `${t(placeholderKey)}…`;
@@ -67,7 +71,7 @@ export function SubjectTypeahead({
 
   function commitPronoun({ person, number, gender }: PronounChoice) {
     const concept = pronounFor(pronouns, person);
-    if (!concept) return;
+    if (!concept || (personalOnly && person === "generic")) return;
     // The generic ("one") is a distinct pronoun concept, not one of the 1/2/3 persons; it is
     // inherently 3rd-singular, so the number and gender the grid last held are not its to carry.
     if (person === "generic") {
@@ -88,6 +92,7 @@ export function SubjectTypeahead({
     onCommit: commitPronoun,
     onExitTop: () => picker.setInTabs(true),
     onClose: () => picker.setOpen(false),
+    disabled: personalOnly ? ["generic"] : [],
   });
 
   // Which handler the keys go to.
@@ -169,6 +174,7 @@ export function SubjectTypeahead({
             <PronounChooser
               chooser={chooser}
               pronouns={pronouns}
+              disabled={chooser.disabled}
               onCommit={() => commitPronoun(chooser.choice)}
             />
           ) : (

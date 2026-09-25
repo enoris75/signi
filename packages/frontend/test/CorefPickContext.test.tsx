@@ -166,6 +166,40 @@ describe('useProvideCorefPick', () => {
     });
     expect(result.current.resolve('subject/conjunct/0')).toBeUndefined();
   });
+
+  // P11-E7 D4: under a command the command box stands for the subject; it is a target of the pick,
+  // and what it names is the addressee, not the word the selection keeps behind the box.
+  it('takes the command box as the subject, naming the addressee', () => {
+    const SEE: Concept = { id: 'SEE', role: 'verb', description: 'SEE', transitivity: 'transitive' };
+    const command: PhraseSelection = { subject: BOY, imperative: true, imperativePerson: '2pl', verb: SEE, directObject: HORSE };
+    const { result } = renderCoordinator(command);
+
+    act(() => result.current.start('directObject', () => {}));
+
+    expect(result.current.isEligible('subject')).toBe(true);
+    expect(result.current.resolve('subject')).toMatchObject({
+      concept: { id: 'SECOND_PERSON', role: 'pronoun', person: '2' },
+      features: { kind: 'pronominal', person: '2', number: 'plural' },
+    });
+    // The pointer is the link, rendered in the clause of the addressee.
+    expect(result.current.linkOf('directObject', 'subject')).toEqual({
+      subject: { concept: 'SECOND_PERSON', number: 'plural' },
+      imperative: true,
+    });
+  });
+
+  // P11-E7 D2: the subject's group is one target: the link binds the whole group.
+  it('links a pointer at the subject to the whole group, and copies one at a conjunct', () => {
+    const SEE: Concept = { id: 'SEE', role: 'verb', description: 'SEE', transitivity: 'transitive' };
+    const { result } = renderCoordinator({ ...SELECTION, verb: SEE });
+
+    expect(result.current.linkOf('directObject', 'subject')?.subject).toMatchObject({
+      conjuncts: [{ concept: 'BOY' }, { concept: 'GIRL' }],
+    });
+    expect(result.current.linkOf('directObject', 'subject/conjunct/0')).toBeUndefined();
+    // Inside the subject's own subtree the pointer is the copy it was.
+    expect(result.current.linkOf('subject/possessor', 'subject')).toBeUndefined();
+  });
 });
 
 describe('useCorefPick', () => {

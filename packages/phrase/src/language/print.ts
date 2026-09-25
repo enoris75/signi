@@ -23,7 +23,7 @@ import {
 } from "../model/interfaces.ts";
 import { readsAsSet } from "../model/functions/comparison.ts";
 import { conjunctsOf } from "../model/phraseReducers.ts";
-import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
+import { pointerHolds } from "../model/functions/linksToSubject.ts";
 import { adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
 import {
   COORD_VALUES,
@@ -489,8 +489,9 @@ class Printer {
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
     const possessorRef = sel[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
     const possessor = sel[POSSESSOR_KEY(which)] as PhraseSelection | undefined;
-    // A reference whose noun has since gone points at nothing, and renders nothing.
-    if (possessorRef && resolveAntecedent(this.root, possessorRef)) {
+    // A reference whose noun has since gone points at nothing, and renders nothing — nor does one at a
+    // command's hidden subject the link cannot reach; one the link reaches prints as it was typed (P11-E7).
+    if (possessorRef && pointerHolds(this.root, address, possessorRef)) {
       this.statement({ key: `${wordKey(ref)}:possref`, removal: "/del poss", owner: ref, about: ref });
       this.emit("/poss", "command", "primary", { word: ref });
       this.emit(printRef(this.periodNumber(id), possessorRef), "ref", "ref");

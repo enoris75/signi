@@ -62,6 +62,8 @@ const PARK = concept('PARK', 'noun');
 const SAIL = concept('SAIL', 'noun');
 const GIRL = concept('GIRL', 'noun', { gendered: true });
 const THIRD = concept('THIRD_PERSON', 'pronoun', { person: '3' });
+const FIRST = concept('FIRST_PERSON', 'pronoun', { person: '1' });
+const GENERIC = concept('GENERIC_PERSON', 'pronoun', { person: '3' });
 const EAT = concept('EAT', 'verb', { transitivity: 'transitive' });
 const SLEEP = concept('SLEEP', 'verb', { transitivity: 'intransitive' });
 const WALK = concept('WALK', 'verb', {
@@ -73,7 +75,7 @@ const SEEM = concept('SEEM', 'verb', { transitivity: 'intransitive', complements
 
 const CONCEPTS = {
   noun: [BOY, CAT, DOG, HORSE, HOUSE, PARK, SAIL, GIRL],
-  pronoun: [THIRD],
+  pronoun: [FIRST, THIRD, GENERIC],
   verb: [EAT, SLEEP, WALK, SEEM],
   adjective: [BIG],
   adverb: [],
@@ -714,14 +716,66 @@ describe('PhraseBuilder', () => {
       expect(screen.getAllByTestId('satellite-subjectRelative')).toHaveLength(2);
     });
 
-    it('offers nouns alone for the owner’s head', () => {
+    // P11-E9 D1: an owner is named a noun or a pronoun ("my mother"), as a conjunct and a standard are.
+    it('offers nouns and the pronoun tab for the owner’s head', () => {
       renderPeriod({ subject: CAT, verb: SLEEP });
 
       fireEvent.click(satellite('subjectPossessor'));
 
-      // A pronoun owner is a pointed-to one: the empty ring's picker has no pronoun tab.
       expect(screen.getByTestId('typeahead-noun')).toBeInTheDocument();
-      expect(screen.queryByTestId('pronoun-tab')).not.toBeInTheDocument();
+      expect(screen.getByTestId('pronoun-tab')).toBeInTheDocument();
+    });
+
+    // P11-E9 D1, D8: naming the owner a pronoun is choosing not to point.
+    it('names a pronoun owner from the ring’s Pronoun tab, ending the pick the owner opened with', () => {
+      const { selection } = renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE });
+      fireEvent.click(satellite('directObjectPossessor'));
+      expect(pickable()).toEqual(['subject']);
+
+      fireEvent.click(screen.getByTestId('pronoun-tab'));
+      expect(pickable()).toEqual([]);
+      fireEvent.click(screen.getByTestId('pronoun-commit'));
+
+      expect(selection().directObjectPossessor).toEqual({ subject: FIRST, subjectNumber: 'singular', subjectGender: 'masc' });
+      expect(selection().directObjectPossessorRef).toBeUndefined();
+      // Its solid line says what the possessive renders, as a pointer's dashed one does (D7).
+      expect(screen.getByTestId('owner-pronoun-chip')).toHaveTextContent('my');
+      expect(screen.queryByTestId('pronoun-chip')).not.toBeInTheDocument();
+      // Folded away, the control says it: the person, and the phrase.
+      fireEvent.click(satellite('directObjectPossessor'));
+      expect(satellite('directObjectPossessor')).toHaveAccessibleName(/^Possessor: .*\(“my”\)$/);
+    });
+
+    it('shows the generic in the owner’s chooser, disabled: it has no possessive (D2)', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP });
+      fireEvent.click(satellite('subjectPossessor'));
+      fireEvent.click(screen.getByTestId('pronoun-tab'));
+
+      const generic = screen.getByTestId('pronoun-generic');
+      expect(generic).toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(generic);
+      expect(generic).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it.each<[string, Concept, number]>([
+      ['1st', FIRST, 0],
+      ['3rd', THIRD, 1],
+    ])('offers a %s person owner’s gender control only on the 3rd person (D3)', (_, pronoun, count) => {
+      renderPeriod({ subject: CAT, verb: SLEEP, subjectPossessor: { subject: pronoun, subjectNumber: 'singular', subjectGender: 'masc' } });
+
+      // The period's CAT is not gendered: every gender control on the canvas is the owner's.
+      expect(screen.queryAllByTestId('satellite-subjectGender')).toHaveLength(count);
+      expect(screen.getAllByTestId('satellite-subjectNumber')).toHaveLength(2);
+    });
+
+    it('withdraws the role chip under a pronoun owner and gives it back under a noun owner (D5)', () => {
+      renderPeriod({ subject: HOUSE, verb: SLEEP, subjectPossessor: { subject: FIRST }, possessorRoles: { subject: 'whole' } });
+      expect(screen.queryByTestId('satellite-subjectPossessorRole')).not.toBeInTheDocument();
+    });
+
+    it('keeps the role chip on a noun owner', () => {
+      renderPeriod({ subject: HOUSE, verb: SLEEP, subjectPossessor: { subject: BOY }, possessorRoles: { subject: 'whole' } });
+      expect(screen.getByTestId('satellite-subjectPossessorRole')).toBeInTheDocument();
     });
 
     it('gives the owner’s head no coordination: the plan reads an owner as one noun phrase', () => {

@@ -67,7 +67,8 @@ const HUMBLE_VERBS = PLAIN_VERBS.filter((v) => v.humble);
 
 /** A pronoun as the chooser would pick it: its person, and a number and gender for it. */
 function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
-  const concept = pick(rng, PRONOUNS)!;
+  // The chooser's rows: the three persons and the generic — an indefinite (SOMEONE) has none.
+  const concept = pick(rng, PRONOUNS.filter((p) => !p.slot))!;
   if (concept.id === 'GENERIC_PERSON') return { concept };
   const genders = concept.person === '3' ? (['masc', 'fem', 'neut'] as const) : (['masc', 'fem'] as const);
   return {
@@ -77,12 +78,24 @@ function pronounPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
 }
 type R_Opts = { number?: 'singular' | 'plural'; gender?: 'masc' | 'fem' | 'neut' };
 
+/** An owner's word as its ring picks it (P11-E9): a noun, or one of the three persons — never the generic. */
+// One draw names the noun as the walk always drew it, and the draw's remainder within that noun's
+// share decides a pronoun instead — so a walk that names a noun owner draws exactly what it did before
+// owners took pronouns, and reaches the rare states the other reach tests look for.
+function ownerPick(rng: Rng): { concept: Concept; opts?: R_Opts } {
+  const r = rng() * NOUNS.length;
+  if (r - Math.floor(r) >= 0.2) return { concept: NOUNS[Math.floor(r)]! };
+  let p = pronounPick(rng);
+  while (p.concept.id === 'GENERIC_PERSON') p = pronounPick(rng);
+  return p;
+}
+
 /** A word for a slot, from the categories its picker offers. */
 type Frame = 'period' | 'possessor' | 'standard' | 'examples' | 'conjunct';
 
 function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opts?: R_Opts } {
   const nounOrPronoun = () => (rng() < 0.25 ? pronounPick(rng) : { concept: pick(rng, NOUNS)! });
-  if (slot === 'subject') return frame === 'possessor' ? { concept: pick(rng, NOUNS)! } : nounOrPronoun();
+  if (slot === 'subject') return frame === 'possessor' ? ownerPick(rng) : nounOrPronoun();
   // The purpose, the topic and the opponent take a pronoun behind their adposition as the cause does
   // ("for her", "against him").
   if (slot === 'directObject' || slot === 'cause' || slot === 'purpose' || slot === 'topic' || slot === 'opponent') return nounOrPronoun();
@@ -268,8 +281,15 @@ const OPS: Op[] = [
     })());
     const head = pick(rng, heads);
     if (!head) return undefined;
-    if (rng() < 0.7) return R.updateNounAt(sel, head.address, (s, which) => R.updatePossessor(s, which, (p) => R.applyConceptSelect(p, 'subject', pick(rng, NOUNS)!)));
-    const antecedent = pick(rng, nounHeads(sel).filter((h) => h.address !== head.address && !h.address.startsWith(`${head.address}/`)));
+    // Named: a noun, or a pronoun from the owner's chooser — "my mother" (P11-E9).
+    if (rng() < 0.7) {
+      const owner = ownerPick(rng);
+      return R.updateNounAt(sel, head.address, (s, which) => R.updatePossessor(s, which, (p) => R.applyConceptSelect(p, 'subject', owner.concept, owner.opts)));
+    }
+    // A command's or a citation's mood box stands for the subject and is a target too (P11-E7 D4),
+    // whether or not a subject word is stashed behind it.
+    const moodBox = (sel.imperative || sel.infinitive) && !sel.subject ? [{ address: 'subject', frame: 'period' as const }] : [];
+    const antecedent = pick(rng, [...nounHeads(sel), ...moodBox].filter((h) => h.address !== head.address && !h.address.startsWith(`${head.address}/`)));
     return antecedent ? R.updateNounAt(sel, head.address, (s, which) => R.setPossessorRef(s, which, antecedent.address)) : undefined;
   }),
   // The predicate adjective's standard of comparison (P09-E12 D5), named or taken off. It is kept under
@@ -671,6 +691,30 @@ describe('the round trip', () => {
     const texts = Array.from({ length: Math.max(SEEDS, 2000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
     expect(texts.some((t) => t.includes('/suchas ['))).toBe(true);
     expect(texts.some((t) => t.includes('/including ['))).toBe(true);
+  }, 30_000);
+
+  // P11-E7: the walk points owners at the subject, so the link is planned — in a plain clause and
+  // under a command, where the pointer names the mood box.
+  it('reaches the link to the subject, under a command too', () => {
+    const kinds = new Set<string>();
+    for (let seed = 1; seed <= Math.max(SEEDS, 3000); seed++) {
+      const state = reach(seed, 10 + (seed % 30));
+      for (const { plan } of workspaceToPlans(state.containers, state.links)) {
+        const text = JSON.stringify(plan);
+        if (!text.includes('"coreferent"')) continue;
+        kinds.add(plan.imperative ? 'command' : 'clause');
+      }
+    }
+    expect([...kinds]).toEqual(expect.arrayContaining(['clause', 'command']));
+  }, 60_000);
+
+  // P11-E9: the walk names a pronoun owner — each person, and the 3rd with a gender — so the printer's
+  // `/poss [ 1st ]` is exercised.
+  it('reaches a pronoun owner of every person', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 2000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    for (const person of ['1st', '2nd', '3rd']) expect(texts.some((t) => t.includes(`/poss [ ${person}`))).toBe(true);
+    expect(texts.some((t) => /\/poss \[ 3rd( \/pl)? \/(fem|neut)/.test(t))).toBe(true);
+    expect(texts.some((t) => t.includes('/poss [ one'))).toBe(false);
   }, 30_000);
 
   // P09-E50: the walk reaches a period noun's standard, printed in its bracket, with and without an

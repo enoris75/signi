@@ -4,6 +4,9 @@ import {
   POSSESSOR_REF_KEY,
   STANDARD_KEY,
   EXAMPLES_KEY,
+  examplesAddress,
+  possessorAddress,
+  standardAddress,
   type NounAddress,
   type NounKey,
   type PhraseSelection,
@@ -13,26 +16,35 @@ import { comparedAdjectiveIndex, takesStandardOrSet } from "../../functions/comp
 import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
-import { resolveAntecedent } from "./resolveAntecedent.ts";
+import { pointedPossessor } from "../../functions/linksToSubject.ts";
+import { isPersonalPronoun, pronounFeatures } from "./pronounFeatures.ts";
 
 // Build one noun phrase from the flat `${which}*` fields. Relative clauses are no longer
 // stored in the selection — they are cross-container links assembled in workspacePlan,
 // which attaches `.relative` to the noun phrases this returns. `root` is the whole period
 // selection, needed to resolve a pronominal possessor's antecedent address; it defaults to
 // `sel` for the top-level call and is threaded unchanged through every recursion.
-export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: PhraseSelection = sel): NounPhrase | undefined {
+export function buildNounPhrase(
+  sel: PhraseSelection,
+  which: NounKey,
+  root: PhraseSelection = sel,
+  // Where the noun sits in the period (`root`): the top call's `which`, then `…/possessor`, `…/conjunct/i`,
+  // `…/standard`, `…/examples` — so a pointer at the subject can tell whether it may be the link (P11-E7).
+  address: NounAddress = which,
+): NounPhrase | undefined {
   const concept = field<Concept>(sel, which);
   if (!concept) return undefined;
   // A possessor is one of two shapes. A pronominal reference ("his") points at an antecedent noun
-  // in the period and resolves to its features; otherwise a genitive possessor is a nested noun
-  // phrase whose head lives in its `subject` slot, recursing for its own number/gender/adjectives/
-  // nested possessor. The reference wins when both somehow coexist (the UI keeps them exclusive).
+  // in the period and resolves to its features; otherwise a named owner is a nested selection whose
+  // head lives in its `subject` slot — a genitive noun phrase, recursing for its own number/gender/
+  // adjectives/nested possessor, or a pronoun named in the owner's ring ("my mother", P11-E9). The
+  // reference wins when both somehow coexist (the UI keeps them exclusive).
   const possRef = field<NounAddress>(sel, POSSESSOR_REF_KEY(which));
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
   const possessor: Possessor | undefined = possRef
-    ? resolveAntecedent(root, possRef)?.features
+    ? pointedPossessor(root, address, possRef)
     : possSel
-      ? buildNounPhrase(possSel, "subject", root)
+      ? namedOwner(possSel, root, possessorAddress(address))
       : undefined;
   const { adjectives, adjectiveDegrees, nounModifiers } = modifiers(sel, which);
   return {
@@ -48,11 +60,11 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     // biggest of the dogs", P09-E19, E51). The translator drops it on the positive.
     headStandard:
       concept.role === "adjective" && takesStandardOrSet(sel.adjectiveDegrees?.[which])
-        ? standardOf(sel, which, root)
+        ? standardOf(sel, which, root, address)
         : undefined,
     // A noun head's standard is its compared adjective's ("a bigger cat than the dog", P09-E50 D1):
     // placed at that adjective's index among `adjectives`, and left out when none compares.
-    adjectiveStandards: concept.role === "noun" ? adjectiveStandardsOf(sel, which, root) : undefined,
+    adjectiveStandards: concept.role === "noun" ? adjectiveStandardsOf(sel, which, root, address) : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a
@@ -66,30 +78,45 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     // A demonstrative pointing away from the rest (P13).
     contrastive: sel.contrastives?.[which] || undefined,
     // The members of its set it names after it ("animals such as the cat", P09-E48): a noun head's.
-    examples: concept.role === "noun" ? examplesOf(sel, which, root) : undefined,
+    examples: concept.role === "noun" ? examplesOf(sel, which, root, address) : undefined,
     // A cardinal numeral counting it (P13).
     numeral: sel.numerals?.[which],
     // An approximator on that quantity (P09-E49), its word the quantity's own.
     approximator: sel.approximators?.[which] ? approximatorFor(sel, which) : undefined,
     // What a genitive possessor is to the head (P13): an owner unless the noun says otherwise.
-    possessorRole: possSel && !possRef ? sel.possessorRoles?.[which] : undefined,
+    // A pronoun owner has none: the engine reads no role off a possessive pronoun (P11-E9 D5), so one
+    // set earlier stays in the selection and comes back when the owner is a noun again.
+    possessorRole: possSel && !possRef && possSel.subject?.role !== "pronoun" ? sel.possessorRoles?.[which] : undefined,
   };
 }
 
-function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
-  const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
-  return standard ? buildNounElement(standard, "subject", root) : undefined;
+/**
+ * A named owner, from its ring's slice. A noun head is a genitive noun phrase ("the boy's dog"); a
+ * pronoun head is the possessive pronoun its person, number and gender spell ("my mother", P11-E9 D2),
+ * never a genitive — "the I's mother" is what that would say. Only the three persons are owners: the
+ * generic "one" and the indefinites have no possessive the plan can state, so they drop. A pronoun
+ * owner's own settings — an owner, an adjective, a conjunct its slice may still hold — are not read.
+ */
+function namedOwner(owner: PhraseSelection, root: PhraseSelection, address: NounAddress): Possessor | undefined {
+  const head = owner.subject;
+  if (head?.role !== "pronoun") return buildNounPhrase(owner, "subject", root, address);
+  return isPersonalPronoun(head) ? pronounFeatures(owner, "subject", head) : undefined;
 }
 
-function examplesOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection): NounPhrase["examples"] {
+function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection, address: NounAddress) {
+  const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
+  return standard ? buildNounElement(standard, "subject", root, standardAddress(address)) : undefined;
+}
+
+function examplesOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection, address: NounAddress): NounPhrase["examples"] {
   const slice = field<PhraseSelection>(sel, EXAMPLES_KEY(which));
-  const phrase = slice ? buildNounElement(slice, "subject", root) : undefined;
+  const phrase = slice ? buildNounElement(slice, "subject", root, examplesAddress(address)) : undefined;
   return phrase && { phrase, relation: sel.exampleRelations?.[which] ?? "example" };
 }
 
-function adjectiveStandardsOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
+function adjectiveStandardsOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection, address: NounAddress) {
   const index = comparedAdjectiveIndex(sel, which);
-  const standard = index === undefined ? undefined : standardOf(sel, which, root);
+  const standard = index === undefined ? undefined : standardOf(sel, which, root, address);
   if (index === undefined || !standard) return undefined;
   const entries: (NounElement | undefined)[] = Array.from({ length: index + 1 }, () => undefined);
   entries[index] = standard;

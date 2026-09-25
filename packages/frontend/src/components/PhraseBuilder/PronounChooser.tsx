@@ -20,12 +20,15 @@ export function PronounChooser({
   chooser,
   pronouns,
   onCommit,
+  disabled = [],
 }: {
   chooser: Chooser;
   // The pronoun vocabulary, so the person row can name the concept each option stands for and
   // show its definition on hover — the tooltip the noun list gets from ConceptOption.
   pronouns: readonly Concept[];
   onCommit: () => void;
+  // Persons shown but not offered: the generic in an owner's chooser, which has no possessive (P11-E9 D2).
+  disabled?: readonly PronounPerson[];
 }) {
   const t = useUiString();
   const { choice, set, row, setRow } = chooser;
@@ -37,7 +40,7 @@ export function PronounChooser({
           exclusive
           size="small"
           value={choice.person}
-          onChange={(_, v) => v && set("person", v)}
+          onChange={(_, v) => v && !disabled.includes(v) && set("person", v)}
         >
           <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} />
           <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} />
@@ -46,6 +49,7 @@ export function PronounChooser({
           <PersonToggle
             person="generic"
             pronouns={pronouns}
+            disabled={disabled.includes("generic")}
             label={t("pronoun.generic")}
             testId="pronoun-generic"
           />
@@ -117,11 +121,15 @@ function PersonToggle({
   pronouns,
   label,
   testId,
+  disabled = false,
 }: {
   person: PronounPerson;
   pronouns: readonly Concept[];
   label: string;
   testId?: string;
+  // Shown but not offered (P11-E9 D2): greyed and marked `aria-disabled` rather than `disabled`, so
+  // the definition tooltip still answers the pointer — a disabled button receives no events.
+  disabled?: boolean;
 }) {
   const definition = useConceptDefinition();
   const concept = pronounFor(pronouns, person);
@@ -137,7 +145,13 @@ function PersonToggle({
       enterDelay={400}
       disableInteractive
     >
-      <ToggleButton value={person} data-concept={concept?.id} data-testid={testId}>
+      <ToggleButton
+        value={person}
+        data-concept={concept?.id}
+        data-testid={testId}
+        aria-disabled={disabled || undefined}
+        sx={disabled ? { color: "text.disabled", cursor: "default" } : undefined}
+      >
         {label}
       </ToggleButton>
     </Tooltip>

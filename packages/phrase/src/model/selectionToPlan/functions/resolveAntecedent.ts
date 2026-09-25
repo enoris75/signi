@@ -2,13 +2,15 @@ import type { Concept } from "@signi/shared";
 import type { NounAddress, PhraseSelection } from "../../interfaces.ts";
 import type { Antecedent } from "../selectionToPlan.types.ts";
 import { field } from "./field.ts";
+import { pronounFeatures } from "./pronounFeatures.ts";
 
 // Resolve a *pronominal* possessor reference into concrete features. `address` points at an
 // antecedent noun elsewhere in the same period (`root`); we navigate to it — mirroring `getNoun`
 // in workspacePlan, but over the selection so we can read the Concept's own person — and read off
 // the person/number/gender the possessive pronoun agrees with. A pronoun antecedent supplies its
 // own person/number; a noun is 3rd person, singular unless the user set it plural. The gender is
-// the antecedent's grammatical-gender pick (drives en his/her/its, de sein/ihr). Returns undefined
+// the antecedent's grammatical-gender pick (drives en his/her/its, de sein/ihr) — see pronounFeatures,
+// which a pronoun named as the owner reads too. Returns undefined
 // if the address no longer resolves (the antecedent was deleted), so the possessor just drops.
 export function resolveAntecedent(
   root: PhraseSelection,
@@ -45,8 +47,5 @@ export function resolveAntecedent(
   }
   const concept = field<Concept>(sel, key);
   if (!concept) return undefined;
-  const person = (concept.person ?? "3") as "1" | "2" | "3";
-  const number = field<"singular" | "plural">(sel, `${key}Number`) ?? concept.number ?? "singular";
-  const gender = field<"masc" | "fem" | "neut">(sel, `${key}Gender`);
-  return { concept, features: { kind: "pronominal", person, number, ...(gender && { gender }) } };
+  return { concept, features: pronounFeatures(sel, key, concept) };
 }

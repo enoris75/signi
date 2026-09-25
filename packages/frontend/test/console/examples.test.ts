@@ -203,7 +203,8 @@ describe('the help pages’ examples, in another interface language', () => {
   it('writes the words in Italian, and keeps the rest as written', () => {
     expect(exampleIn(EXAMPLES.sg!, IT)).toBe('/subj ( gatto /sg )');
     expect(exampleIn(EXAMPLES.rel!, IT)).toBe('/subj ( uomo /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )');
-    expect(exampleIn(EXAMPLES.poss!, IT)).toBe('/subj ( libro /poss [ uomo /adj vecchio ] )');
+    // An owner that is a person keeps its person (P11-E9).
+    expect(exampleIn(EXAMPLES.poss!, IT)).toBe('/subj ( madre /poss [ 1st ] ) /verb ( vedere ) /obj ( libro /poss [ uomo /adj vecchio ] )');
     expect(exampleIn(EXAMPLES.level!, IT)).toBe(
       '/subj ( uomo ) /verb ( iniziare ) /inst { /verb ( scegliere ) /obj ( parola ) } /level process',
     );

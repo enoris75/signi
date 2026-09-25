@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { buildNounPhrase } from '../../../src/components/PhraseBuilder/selectionToPlan/functions/buildNounPhrase.ts';
 import type { PhraseSelection } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import { BIG, BOY, CAT, DOG, HAPPY, HOUSE, SAIL } from '../fixtures.ts';
+import { BIG, BOY, CAT, concept, DOG, EAT, HAPPY, HOUSE, I, SAIL, WE } from '../fixtures.ts';
+import { buildNounElement } from '../../../src/components/PhraseBuilder/selectionToPlan/functions/buildNounElement.ts';
 
 describe('buildNounPhrase', () => {
   it('is undefined for an empty slot', () => {
@@ -137,15 +138,30 @@ describe('buildNounPhrase', () => {
     });
   });
 
-  it('resolves a pronominal possessor to its antecedent’s features', () => {
+  // P11-E7 D1: the pointer at the clause's subject is the link, not a copy of the subject's features.
+  it('writes a pointer at the clause’s subject as the link to it', () => {
     const sel: PhraseSelection = {
       subject: BOY,
       subjectGender: 'masc',
+      verb: EAT,
       directObject: DOG,
       directObjectPossessorRef: 'subject',
     };
 
-    expect(buildNounPhrase(sel, 'directObject')?.possessor).toEqual({
+    expect(buildNounPhrase(sel, 'directObject')?.possessor).toEqual({ kind: 'coreferent', slot: 'subject' });
+  });
+
+  it('resolves a pointer at another noun to its antecedent’s features', () => {
+    const sel: PhraseSelection = {
+      subject: BOY,
+      verb: EAT,
+      directObject: DOG,
+      directObjectGender: 'masc',
+      locative: HOUSE,
+      locativePossessorRef: 'directObject',
+    };
+
+    expect(buildNounPhrase(sel, 'locative')?.possessor).toEqual({
       kind: 'pronominal',
       person: '3',
       number: 'singular',
@@ -158,13 +174,64 @@ describe('buildNounPhrase', () => {
     const sel: PhraseSelection = {
       subject: BOY,
       subjectNumber: 'plural',
+      verb: EAT,
       directObject: HOUSE,
       directObjectPossessor: { subject: DOG, subjectPossessorRef: 'subject' },
     };
 
     const possessor = buildNounPhrase(sel, 'directObject')?.possessor;
 
-    expect(possessor).toMatchObject({ concept: 'DOG', possessor: { kind: 'pronominal', number: 'plural' } });
+    expect(possessor).toMatchObject({ concept: 'DOG', possessor: { kind: 'coreferent', slot: 'subject' } });
+  });
+
+  // P11-E7 D3: where the builder keeps the copy.
+  describe('the link to the subject, and where the copy stays', () => {
+    const LINK = { kind: 'coreferent', slot: 'subject' };
+    const base: PhraseSelection = { subject: BOY, subjectNumber: 'plural', verb: EAT };
+    const possessorOf = (sel: PhraseSelection, which: 'subject' | 'directObject' | 'locative' = 'directObject') =>
+      buildNounPhrase(sel, which)?.possessor;
+
+    it.each<[string, PhraseSelection, 'directObject' | 'locative', (p: unknown) => unknown]>([
+      ['the object', { ...base, directObject: DOG, directObjectPossessorRef: 'subject' }, 'directObject', (p) => p],
+      ['a complement', { ...base, locative: HOUSE, locativePossessorRef: 'subject' }, 'locative', (p) => p],
+      ['an owner’s owner', { ...base, directObject: HOUSE, directObjectPossessor: { subject: DOG, subjectPossessor: { subject: CAT, subjectPossessorRef: 'subject' } } }, 'directObject',
+        (p) => ((p as { possessor: { possessor: unknown } }).possessor).possessor],
+      ['a standard', { ...base, directObject: DOG, directObjectAdjective: BIG, adjectiveDegrees: { directObjectAdjective: 'more' }, directObjectStandard: { subject: CAT, subjectPossessorRef: 'subject' } }, 'directObject',
+        (p) => p],
+    ])('links from %s', (_, sel, which, at) => {
+      const np = buildNounPhrase(sel, which)!;
+      if (_ === 'a standard') expect((np.adjectiveStandards?.[0] as { possessor?: unknown }).possessor).toEqual(LINK);
+      else expect(at(np.possessor)).toEqual(LINK);
+    });
+
+    it('copies inside the subject’s own subtree: a conjunct’s owner, the subject’s owner’s owner', () => {
+      const conjunct: PhraseSelection = { ...base, subjectConjuncts: [{ subject: CAT, subjectPossessorRef: 'subject' }] };
+      expect(buildNounElement(conjunct, 'subject')).toMatchObject({
+        conjuncts: [{ concept: 'BOY' }, { concept: 'CAT', possessor: { kind: 'pronominal', number: 'plural' } }],
+      });
+      const owners: PhraseSelection = { ...base, subjectPossessor: { subject: DOG, subjectPossessorRef: 'subject' } };
+      expect(possessorOf(owners, 'subject')).toMatchObject({ possessor: { kind: 'pronominal' } });
+    });
+
+    it('copies a pointer at the subject’s owner, which is no subject', () => {
+      const sel: PhraseSelection = { ...base, subjectPossessor: { subject: CAT }, directObject: DOG, directObjectPossessorRef: 'subject/possessor' };
+      expect(possessorOf(sel)).toMatchObject({ kind: 'pronominal', person: '3' });
+    });
+
+    it('copies under the passive, and in a verbless period', () => {
+      const pointer: PhraseSelection = { ...base, directObject: DOG, directObjectPossessorRef: 'subject' };
+      expect(possessorOf({ ...pointer, verbVoice: 'passive' })).toMatchObject({ kind: 'pronominal', number: 'plural' });
+      const { verb: _verb, ...verbless } = pointer;
+      expect(possessorOf(verbless)).toMatchObject({ kind: 'pronominal', number: 'plural' });
+    });
+
+    // D4: under a command the subject pick is a stashed word the plan does not say.
+    it('links under a command, and drops a pointer at the hidden subject the link cannot reach', () => {
+      const command: PhraseSelection = { ...base, imperative: true, directObject: DOG, directObjectPossessorRef: 'subject' };
+      expect(possessorOf(command)).toEqual(LINK);
+      expect(possessorOf({ ...command, verbVoice: 'passive' })).toBeUndefined();
+      expect(possessorOf({ ...command, infinitive: true, imperative: undefined })).toEqual(LINK);
+    });
   });
 
   it('lets a pronominal reference win over a genitive possessor', () => {
@@ -176,6 +243,58 @@ describe('buildNounPhrase', () => {
     };
 
     expect(buildNounPhrase(sel, 'directObject')?.possessor).toMatchObject({ kind: 'pronominal' });
+  });
+
+  // P11-E9 D2: a pronoun named in the owner's ring is a possessive pronoun, never a genitive ("the I's").
+  describe('a pronoun named as the owner', () => {
+    const THIRD = concept('THIRD_PERSON', 'pronoun', { person: '3' });
+    const GENERIC = concept('GENERIC_PERSON', 'pronoun', { person: '3' });
+    const SOMEONE = concept('SOMEONE', 'pronoun', { person: '3', slot: 'indefinite' });
+    const owned = (owner: PhraseSelection, extra: PhraseSelection = {}) =>
+      buildNounPhrase({ subject: HOUSE, subjectPossessor: owner, ...extra }, 'subject');
+
+    it('writes the 1st person as a possessive pronoun, its gender left out', () => {
+      expect(owned({ subject: I, subjectNumber: 'singular', subjectGender: 'fem' })?.possessor).toEqual({
+        kind: 'pronominal',
+        person: '1',
+        number: 'singular',
+      });
+    });
+
+    it('reads the number off the ring, else the pronoun’s own: our', () => {
+      expect(owned({ subject: I, subjectNumber: 'plural' })?.possessor).toMatchObject({ person: '1', number: 'plural' });
+      expect(owned({ subject: WE })?.possessor).toMatchObject({ person: '1', number: 'plural' });
+    });
+
+    it('keeps the 3rd person’s gender: her', () => {
+      expect(owned({ subject: THIRD, subjectNumber: 'singular', subjectGender: 'fem' })?.possessor).toEqual({
+        kind: 'pronominal',
+        person: '3',
+        number: 'singular',
+        gender: 'fem',
+      });
+    });
+
+    it('drops the generic and an indefinite, which have no possessive the plan can state', () => {
+      expect(owned({ subject: GENERIC })?.possessor).toBeUndefined();
+      expect(owned({ subject: SOMEONE })?.possessor).toBeUndefined();
+    });
+
+    it('does not write what the owner’s slice still holds: its owner, adjective or conjuncts', () => {
+      const possessor = owned({
+        subject: I,
+        subjectAdjective: BIG,
+        subjectPossessor: { subject: DOG },
+        subjectConjuncts: [{ subject: CAT }],
+      })?.possessor;
+      expect(possessor).toEqual({ kind: 'pronominal', person: '1', number: 'singular' });
+    });
+
+    it('drops a role under a pronoun owner, and gives it back under a noun owner (D5)', () => {
+      const roles = { possessorRoles: { subject: 'whole' as const } };
+      expect(owned({ subject: I }, roles)?.possessorRole).toBeUndefined();
+      expect(owned({ subject: BOY }, roles)?.possessorRole).toBe('whole');
+    });
   });
 
   it('drops a reference whose antecedent is gone', () => {

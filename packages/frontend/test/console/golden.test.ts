@@ -9,6 +9,7 @@ import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfa
 import type { WorkspaceState } from '../../src/console/language/types.ts';
 import { ids_, ok, print, run, script, sel } from './helpers.ts';
 import { selectionToPlan } from '../../src/components/PhraseBuilder/selectionToPlan/index.ts';
+import { workspaceToPlans } from '@signi/phrase/model/workspacePlan/functions/workspaceToPlans.ts';
 
 interface Golden {
   line: string;
@@ -633,6 +634,80 @@ describe('the passive question', () => {
     expect(sel(state)).toMatchObject({ interrogative: true, questionRole: 'directObject', verbVoice: 'passive' });
     expect(print(state)).toBe('/wh obj /subj ( cat ) /verb ( eat /passive )');
     expect(print(ok(print(state)))).toBe(print(state));
+  });
+});
+
+// P11-E7 D6: `/poss #n.subj` keeps its syntax and means the link to the clause's subject wherever the
+// clause allows one — also where no box holds the subject: a command's addressee, an infinitive's
+// controller.
+describe('a pointer at the clause’s subject', () => {
+  const LINK = { kind: 'coreferent', slot: 'subject' };
+  const plans = (state: WorkspaceState) => workspaceToPlans(state.containers, state.links).map((p) => p.plan);
+
+  it.each<[string, string]>([
+    ['/subj woman /verb see /obj ( book /poss #1.subj )', '/subj ( woman ) /verb ( see ) /obj ( book /poss #1.subj )'],
+    ['/command /verb see /obj ( book /poss #1.subj )', '/command /verb ( see ) /obj ( book /poss #1.subj )'],
+  ])('%s: prints itself, and plans the link', (line, prints) => {
+    const state = ok(line);
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+    expect(plans(state)[0]!.directObject).toMatchObject({ possessor: LINK });
+  });
+
+  it('links a purpose clause’s owner to the controller no box holds', () => {
+    const state = ok('/subj man /verb run /so ( /verb see /obj ( mother /poss #2.subj ) )');
+    expect(plans(state)[0]!.purpose).toMatchObject({ directObject: { possessor: LINK } });
+    expect(script(ok(script(state)))).toBe(script(state));
+  });
+
+  it('keeps the copy where the clause allows no link: under the passive', () => {
+    const state = ok('/subj woman /verb ( see /passive ) /obj ( book /poss #1.subj )');
+    expect(plans(state)[0]!.directObject).toMatchObject({ possessor: { kind: 'pronominal' } });
+  });
+});
+
+// P11-E9 D8: an owner named as one of the three persons — "my mother runs" — printed as its person.
+describe('a pronoun as the owner', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/subj ( mother /poss [ 1st ] ) /verb ( run )', '/subj ( mother /poss [ 1st ] ) /verb ( run )', { subject: 'FIRST_PERSON' }],
+    ['/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', '/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'plural' }],
+    ['/subj 1st /verb see /obj ( book /poss [ 3rd /fem ] )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /fem ] )', { subject: 'THIRD_PERSON', subjectGender: 'fem' }],
+    // The English forms, and the possessive determiners in this frame alone; the person is what prints.
+    ['/subj mother /poss my /verb run', '/subj ( mother /poss [ 1st ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'singular' }],
+    ['/subj mother /poss we /verb run', '/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'plural' }],
+    ['/subj 1st /verb see /obj ( book /poss her )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /fem ] )', { subject: 'THIRD_PERSON', subjectGender: 'fem' }],
+    ['/subj 1st /verb see /obj ( book /poss their )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /pl ] )', { subject: 'THIRD_PERSON', subjectNumber: 'plural' }],
+  ])('%s', (line, prints, owner) => {
+    const state = ok(line);
+    const possessor = sel(state).subjectPossessor ?? sel(state).directObjectPossessor!;
+    expect(noun(possessor)).toMatchObject(owner);
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+  });
+
+  it('holds both owners of “my son marries your daughter”', () => {
+    const line = '/subj ( son /poss [ 1st ] ) /verb ( marry ) /obj ( daughter /poss [ 2nd ] )';
+    const state = ok(line);
+    expect(noun(sel(state).subjectPossessor!)).toMatchObject({ subject: 'FIRST_PERSON' });
+    expect(noun(sel(state).directObjectPossessor!)).toMatchObject({ subject: 'SECOND_PERSON' });
+    expect(print(state)).toBe(line);
+  });
+
+  it('holds a role after a pronoun owner, which the plan leaves out (the stale-mark rule)', () => {
+    const line = '/subj 1st /verb see /obj ( book /poss [ 1st ] /whole )';
+    expect(print(ok(line))).toBe('/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 1st ] /whole )');
+  });
+
+  it.each([
+    ['/subj mother /poss one /verb run', 'one'],
+    ['/subj mother /poss someone /verb run', 'someone'],
+    ['/subj mother /poss [ one ] /verb run', 'one'],
+  ])('takes no generic and no indefinite owner: %s', (line, text) => {
+    expect(run(line).diagnostic).toMatchObject({ code: 'unknownWord', args: { text } });
+  });
+
+  it('reads *my* in an owner’s frame alone: it is no subject', () => {
+    expect(run('/subj my /verb run').diagnostic).toMatchObject({ code: 'unknownWord', args: { text: 'my' } });
   });
 });
 

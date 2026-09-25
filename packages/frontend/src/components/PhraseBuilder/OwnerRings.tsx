@@ -11,6 +11,8 @@ interface OwnerRingsProps {
   owners: OwnerSpot[];
   // The pointed-to owners whose lines are drawn, with the pronoun each renders and its ring's colour.
   pointers: { spot: PointerSpot; link: PossessionLink; pronoun: string | undefined; color: string }[];
+  // The named owners that are pronouns, whose solid lines carry the possessed phrase too (P11-E9 D7).
+  ownerLines?: { spot: OwnerSpot; link: PossessionLink; pronoun: string | undefined; color: string }[];
   // The whole period's selection: every owner's phrase is a slice of it, however deep.
   selection: PhraseSelection;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
@@ -31,11 +33,13 @@ interface OwnerRingsProps {
  * is the word picker the owner starts as.
  *
  * Each pointed-to owner is drawn by its period's canvas as a dashed line; this puts the possessive
- * pronoun it renders on that line.
+ * pronoun it renders on that line. A named owner that is a pronoun ("my mother", P11-E9) wears the
+ * same chip on its solid line: its ring names the person, the chip what the possessive says.
  */
 export function OwnerRings({
   owners,
   pointers,
+  ownerLines = [],
   selection,
   onPhraseUpdate,
   onRemoveOwner,
@@ -71,6 +75,18 @@ export function OwnerRings({
             color={color}
             at={link.mid}
             testId="pronoun-chip"
+          />
+        ) : null,
+      )}
+      {ownerLines.map(({ spot, link, pronoun, color }) =>
+        pronoun ? (
+          <LinkChip
+            key={`${spot.address}:chip`}
+            label={pronoun}
+            color={color}
+            at={link.mid}
+            dashed={false}
+            testId="owner-pronoun-chip"
           />
         ) : null,
       )}

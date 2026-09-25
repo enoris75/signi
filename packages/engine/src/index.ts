@@ -12,3 +12,4 @@ export {
   engines,
 } from './translator/index.js';
 export type { LanguageEngine, ResolvedPhrase, ConceptForms } from './types.js';
+export type { TranslateOptions } from './translator/index.js';

@@ -4,10 +4,16 @@ import {
   isCoordinativeLink,
   isSubordinateLink,
   isInstrumentalLink,
+  builderNounAddress,
+  conjunctAddress,
+  possessorAddress,
+  standardAddress,
+  type NounAddress,
+  type NounKey,
   type PhraseLink,
   type PhraseSelection,
 } from "../model/interfaces.ts";
-import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
+import { pointerHolds } from "../model/functions/linksToSubject.ts";
 import type { WorkspaceState } from "./types.ts";
 
 /**
@@ -42,7 +48,9 @@ const RELATION_OF: Record<string, "locative" | "route" | "direction" | "temporal
 const isConcept =(v: unknown): v is Concept =>
   typeof v === "object" && v !== null && "id" in v && "role" in v;
 
-function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel): { [k: string]: Json } {
+// `slice` is where `sel` sits in the period (`root`), so a pointer can be judged from where it stands.
+function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel, slice?: NounAddress): { [k: string]: Json } {
+  const addressOf = (key: string, suffix: string) => builderNounAddress(slice, key.slice(0, -suffix.length) as NounKey);
   const out: { [k: string]: Json } = {};
   for (const [key, value] of Object.entries(sel).sort(([a], [b]) => a.localeCompare(b))) {
     if (value === undefined || value === null || value === false) continue;
@@ -60,16 +68,24 @@ function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel): 
     if (key.endsWith("Gender") && value === "masc") continue;
     if (key.endsWith("Conjunction") && value === "and") continue;
     if (key.endsWith("Definiteness") && value === defaultDefiniteness(key.replace(/Definiteness$/, ""))) continue;
-    // A possessor pointing at a noun that has since gone renders no possessor at all.
-    if (key.endsWith("PossessorRef") && !resolveAntecedent(root, value as string)) continue;
+    // A possessor pointing at a noun that has since gone renders no possessor at all; one pointing at a
+    // subject the plan cannot name there — a command's stashed word it cannot link to — neither (P11-E7).
+    if (key.endsWith("PossessorRef") && !pointerHolds(root, addressOf(key, "PossessorRef"), value as string)) continue;
     if (isConcept(value)) {
       out[key] = value.id;
     } else if (Array.isArray(value)) {
-      if (value.length) out[key] = value.map((v) => normalizeSelection(v as PhraseSelection, root));
+      if (value.length)
+        out[key] = value.map((v, i) =>
+          normalizeSelection(v as PhraseSelection, root, key.endsWith("Conjuncts") ? conjunctAddress(addressOf(key, "Conjuncts"), i) : undefined),
+        );
     } else if (typeof value === "object") {
       // A possessor, or a predicate adjective's standard of comparison: a phrase of its own.
       if (key.endsWith("Possessor") || key.endsWith("Standard")) {
-        const nested = normalizeSelection(value as PhraseSelection, root);
+        const nested = normalizeSelection(
+          value as PhraseSelection,
+          root,
+          key.endsWith("Possessor") ? possessorAddress(addressOf(key, "Possessor")) : standardAddress(addressOf(key, "Standard")),
+        );
         if (Object.keys(nested).length) out[key] = nested;
         continue;
       }
