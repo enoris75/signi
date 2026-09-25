@@ -6,8 +6,34 @@ import type { ConceptSeed } from './types.js';
 // Größe", ja "大きさが大きい"; TEMPERATURE with HIGH → "at high temperature" (the `measure` relation).
 // See NounPhrase.dimensionGloss and the engines' verbless branch. A degree puts the degree adjective
 // itself one step up — ELDER is "of greater age", `/adj ( GREAT /more )`, OLD's own gloss compared
-// (B69). The rest say what the thing is or does as a relative clause said alone, its head unspoken
-// (`/headless`): OKAY is "that has no problems".
+// (B69).
+//
+// The rest are defined by the clause they are: a relative clause said alone, its head unspoken
+// (`/rel #2.… /headless`, localization C23). SAVED is "that one has saved", WILD "that has not been
+// tamed", OKAY "that has no problems". A noun-phrase gloss ("an object that one has saved") defines
+// a *saved thing*, the wrong category for an adjective's tooltip. See NounPhrase.relativeGloss.
+//
+//  - **The antecedent** is the class of thing the adjective is said of. It is never spoken, but the
+//    clause agrees with it exactly as with the head of a headed relative: German's relative pronoun
+//    takes its gender (OBJECT_THING → *Gegenstand* → "den man gespeichert hat"; BEING → *Wesen* →
+//    "das man sehen kann"; OPTION → *Option* → "die …"), English says "who" for a person and "that"
+//    otherwise, and the Romance participles and predicate adjectives agree with it (fr "qu'on a
+//    enregistrée", it "che non è solida" of a feminine one). So pick the noun the adjective would
+//    modify — OBJECT_THING for a property of things, BEING or ANIMAL for one of creatures, PERSON for
+//    one of people — and read the German.
+//  - **The state a verb leaves** (C23's participial adjectives) is an object gap on the generic "one",
+//    in the resultative: SAVED is `/subj ( OBJECT_THING /a /rel #2.obj /headless )` over `/subj ( one
+//    ) /verb ( SAVE /result ) /obj ( OBJECT_THING )` → en "that one has saved", it "che si è salvato",
+//    fr "qu'on a enregistré", de "den man gespeichert hat", es "que se ha guardado", ja 保存した, pt
+//    "que se salvou". A standing property takes no aspect, and neither does a modal one, which the
+//    resultative would put in the past ("that one can have seen"): VISIBLE is `/verb ( SEE /modal CAN
+//    )` → "that one can see", de "den man sehen kann". The passive (`/result /passive`) says the state
+//    of the thing itself, the antecedent the clause's subject and the agent unsaid, so every Romance
+//    participle agrees with it: en "that has been saved", it "che è stato salvato", de "der
+//    gespeichert worden ist".
+//  - **What the thing does, or is** (C24's relational adjectives) is a subject gap, `#2.subj`, and
+//    the clause takes every part a clause takes: an object, complements, a predicate adjective,
+//    negation, an adverb, tense, aspect and modals. DIRECT is "that does not go through other places".
 
 export const adjectives: ConceptSeed[] = [
   // ── ADJECTIVES ───────────────────────────────────────────────────

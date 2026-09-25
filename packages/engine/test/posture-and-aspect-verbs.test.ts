@@ -4,7 +4,6 @@ import { clause, np, say, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
-import { infinitiveGloss, causativeGloss } from '../../backend/src/concepts/verbs/gloss.js';
 
 // docs/localization B83, B84 and B86: the E24 body verbs (SIT_DOWN, STAND_UP, WALK, RUN_AWAY, LEAD,
 // HOLD_GRASP), the verbs of ending and going on (STOP, STOP_ONESELF, WAIT, DIE, CONTINUE) and the
@@ -21,6 +20,11 @@ function definitionAll(id: string): Record<LanguageCode, string> {
 }
 const seed = (id: string) => concepts.find((c) => c.id === id);
 
+// An infinitive citation, "to run…", the shape a verb's definition takes: its subject the throwaway
+// the mood leaves unsaid.
+const inf = (verbPhrase: PhrasePlan['verbPhrase'], rest: Partial<PhrasePlan> = {}): PhrasePlan =>
+  ({ subject: { concept: 'GENERIC_PERSON' }, verbPhrase, ...rest, infinitive: true });
+
 const the = (concept: string, extra: Parameters<typeof np>[1] = {}) => np(concept, { definiteness: 'definite', ...extra });
 const command = (verb: string, extra: Parameters<typeof clause>[2] = {}): PhrasePlan =>
   ({ ...clause(np('SECOND_PERSON'), verb, extra), imperative: true });
@@ -33,12 +37,12 @@ const command = (verb: string, extra: Parameters<typeof clause>[2] = {}): Phrase
 // names the leading word (`negator_lead`), which now stands in front of the negator instead.
 describe('NO_LONGER leads the negator it carries (es, pt)', () => {
   test.each<[string, PhrasePlan, string, string]>([
-    ['an infinitive', infinitiveGloss('RUN', { modifier: 'NO_LONGER' }), 'ya no correr.', 'já não correr.'],
-    ['an infinitive with an object', infinitiveGloss('EAT', { object: 'FOOD', modifier: 'NO_LONGER' }), 'ya no comer comida.', 'já não comer comida.'],
-    ['an infinitive with a pronoun object', infinitiveGloss('EAT', { object: 'THIRD_PERSON', antecedent: 'FOOD', modifier: 'NO_LONGER' }), 'ya no comerla.', 'já não a comer.'],
-    ['a reflexive infinitive', infinitiveGloss('MOVE_ONESELF', { modifier: 'NO_LONGER' }), 'ya no moverse.', 'já não se mover.'],
-    ['a caused clause', causativeGloss({ object: 'PERSON', definiteness: 'indefinite' }, { verb: 'RUN', modifier: 'NO_LONGER' }), 'inducir a una persona a ya no correr.', 'induzir uma pessoa a já não correr.'],
-    ['a purpose clause', infinitiveGloss('EAT', { object: 'FOOD', purpose: { verb: 'RUN', modifier: 'NO_LONGER' } }), 'comer comida para ya no correr.', 'comer comida para já não correr.'],
+    ['an infinitive', inf({ verb: 'RUN', modifier: 'NO_LONGER' }), 'ya no correr.', 'já não correr.'],
+    ['an infinitive with an object', inf({ verb: 'EAT', modifier: 'NO_LONGER' }, { directObject: { concept: 'FOOD', definiteness: 'bare' } }), 'ya no comer comida.', 'já não comer comida.'],
+    ['an infinitive with a pronoun object', inf({ verb: 'EAT', modifier: 'NO_LONGER' }, { directObject: { concept: 'THIRD_PERSON', definiteness: 'bare', antecedent: 'FOOD' } }), 'ya no comerla.', 'já não a comer.'],
+    ['a reflexive infinitive', inf({ verb: 'MOVE_ONESELF', modifier: 'NO_LONGER' }), 'ya no moverse.', 'já não se mover.'],
+    ['a caused clause', inf({ verb: 'CAUSE_VERB' }, { directObject: { concept: 'PERSON', definiteness: 'indefinite' }, infinitiveComplement: { verbPhrase: { verb: 'RUN', modifier: 'NO_LONGER' }, control: 'object' } }), 'inducir a una persona a ya no correr.', 'induzir uma pessoa a já não correr.'],
+    ['a purpose clause', inf({ verb: 'EAT' }, { directObject: { concept: 'FOOD', definiteness: 'bare' }, purpose: { verbPhrase: { verb: 'RUN', modifier: 'NO_LONGER' } } }), 'comer comida para ya no correr.', 'comer comida para já não correr.'],
     ['a command', command('RUN', { verbPhrase: { modifier: 'NO_LONGER' } }), 'ya no corras.', 'já não corra.'],
     ['the group a modal governs', clause(the('CAT'), 'RUN', { verbPhrase: { modifier: 'NO_LONGER', modals: ['CAN'] } }), 'el gato puede ya no correr.', 'o gato pode já não correr.'],
   ])('%s', (_, plan, es, pt) => {
@@ -51,8 +55,8 @@ describe('NO_LONGER leads the negator it carries (es, pt)', () => {
   test('the finite clause, and NEVER', () => {
     expect(say(clause(the('CAT'), 'RUN', { verbPhrase: { modifier: 'NO_LONGER' } }), 'es')).toBe('el gato ya no corre.');
     expect(say(clause(the('CAT'), 'RUN', { verbPhrase: { modifier: 'NO_LONGER', tense: 'past' } }), 'pt')).toBe('o gato já não correu.');
-    expect(say(infinitiveGloss('RUN', { modifier: 'NEVER' }), 'es')).toBe('no correr nunca.');
-    expect(say(infinitiveGloss('RUN', { modifier: 'NEVER' }), 'pt')).toBe('não correr nunca.');
+    expect(say(inf({ verb: 'RUN', modifier: 'NEVER' }), 'es')).toBe('no correr nunca.');
+    expect(say(inf({ verb: 'RUN', modifier: 'NEVER' }), 'pt')).toBe('não correr nunca.');
     expect(say(command('RUN', { verbPhrase: { modifier: 'NEVER' } }), 'es')).toBe('no corras nunca.');
   });
 });
@@ -294,7 +298,7 @@ describe('what each verb licenses', () => {
 
   // German particles written apart stay apart in the zu-infinitive (B40), and join as ever otherwise.
   test('German zu-infinitives', () => {
-    const begins = (verb: string) => say(infinitiveGloss('BEGIN', { infinitive: verb }), 'de');
+    const begins = (verb: string) => say(inf({ verb: 'BEGIN' }, { infinitiveComplement: { verbPhrase: { verb } } }), 'de');
     expect(begins('WALK')).toBe('beginnen zu Fuß zu gehen.');
     expect(begins('STOP_ONESELF')).toBe('beginnen stehen zu bleiben.');
     expect(begins('STAND_UP')).toBe('beginnen aufzustehen.');

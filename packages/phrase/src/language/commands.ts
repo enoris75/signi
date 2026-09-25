@@ -65,6 +65,7 @@ export type SettingId = Setting["id"];
 export type AppCommand =
   | "save"
   | "load"
+  | "define"
   | "export"
   | "import"
   | "lang"
@@ -1053,6 +1054,18 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "setting",
     arg: { kind: "text" },
     action: { kind: "app", app: "load" },
+  },
+  // P13: a concept's definition, opened on the canvas in place of the workspace, as `/load` opens a
+  // saved phrase. The definition is a line of this language, so what opens is what the seed says.
+  {
+    name: "define",
+    aliases: ["definition"],
+    group: "workspace",
+    description: "open a word's definition",
+    descriptionKey: "action.define",
+    color: "setting",
+    arg: { kind: "text" },
+    action: { kind: "app", app: "define" },
   },
   {
     name: "export",

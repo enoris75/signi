@@ -670,6 +670,12 @@ export interface Concept {
    * seven so a translated definition is a data add, not a code change.
    */
   definitions?: Partial<Record<LanguageCode, string>>;
+  /**
+   * The definition as it is written in the seed (P13): the phrase language's text, every word named
+   * by its concept id. The console's `/define` opens it on the canvas. Absent where the concept has no
+   * engine-composed definition.
+   */
+  definitionText?: string;
   label?: string;              // English base form, e.g. "cat", "eat", "I"
   /**
    * The concept's citation form in every seeded language ("cat" / "gatto" / "Katze"), taken

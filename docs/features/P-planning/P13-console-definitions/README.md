@@ -25,8 +25,8 @@ use today, and every seeded definition is migrated to text.
 views of one phrase. P13 makes them the authoring form of the seed too. It keeps P02's invariant:
 every construct the language says, the canvas shows, and printing then applying returns the same
 workspace.
-**Status:** phases 1–5 landed, 2026-09-25: every one of the 573 definitions is written in the phrase
-language, and renders as it did. Phase 6 retires the exported gloss helpers.
+**Status:** done, 2026-09-25. Every one of the 573 definitions is written in the phrase language and
+renders as it did; the gloss helpers are gone, and `/define WORD` opens any definition on the canvas.
 
 ---
 
@@ -199,7 +199,7 @@ allow-list that each phase shrinks; phase 4 ends with it empty.
 | **3 · Seeds take text** ✅ | Seed vocabulary (ids), `compileDefinition`; `ConceptSeed.definition` accepts a string, compiled when the seed is assembled (decision 7); a diagnostic fails the import, and so the boot. | A string definition renders exactly like its plan in all seven languages; a broken one stops the boot naming concept and diagnostic. |
 | **4 · Constructs** ✅ | §1's gaps, one at a time. Each ships its selection field, reducer, plan build, canvas control, console command, printer case, golden/help/coverage entries and a round-trip walk op. | The allow-list is empty. |
 | **5 · Migrate** ✅ | Every seed definition rewritten as text by a one-off script (print through the inverse), reviewed by hand where the printer's form reads poorly. | The rendered definitions of all concepts in all seven languages are byte-identical before and after (snapshot). |
-| **6 · Retire and tool** | Gloss helpers and their tests deleted; the `seed` and `localize-seed` skills and the localization task template author text; a console command opens a concept's definition on the canvas. | No import of the helpers remains; `/localize-seed` produces a text definition. |
+| **6 · Retire and tool** ✅ | Gloss helpers and their tests deleted; the `seed` and `localize-seed` skills and the localization task template author text; a console command opens a concept's definition on the canvas. | No import of the helpers remains; `/localize-seed` produces a text definition. |
 
 Phases 4 and 5 can interleave: a definition migrates as soon as the constructs it needs have landed.
 
@@ -212,6 +212,12 @@ as one in a seed. A linked definition is a template literal indented with the co
 `definitionLines` strips before compiling. `ConceptSeed.definition` is now `string`, so a plan literal
 no longer type-checks. The seed files' local gloss helpers went with it, and their doc comments were
 kept as prose over the entries, each example rewritten as its text.
+
+**Phase 6, the tool.** `/define WORD` (aliases `/definition`, `/meaning`) opens a concept's
+definition on the canvas, replacing the workspace as `/load` does with a saved phrase — one undo step
+back. The API serves each definition's text beside its renders (`Concept.definitionText`), and the
+console applies it with the console's own vocabulary, so the periods print back in the interface's
+words. A word with no definition is refused. The line's completion offers the defined words.
 
 ## 4. Testing
 

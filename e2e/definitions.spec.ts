@@ -9,10 +9,16 @@ import type { Page } from '@playwright/test';
 
 const prompt = (page: Page) => page.getByTestId('console-prompt');
 
+// Run the line. The completion list opens a moment after a whole line is inserted, and on a busy run
+// it can open between the check and ↵, which then takes its highlighted entry (the line's own last
+// word) instead of running the line: so the list is closed and ↵ pressed again until the prompt
+// empties.
 async function run(page: Page): Promise<void> {
-  if (await page.getByTestId('console-list').isVisible()) await page.keyboard.press('Escape');
-  await page.keyboard.press('Enter');
-  await expect(prompt(page)).toHaveValue('');
+  await expect(async () => {
+    if (await page.getByTestId('console-list').isVisible()) await page.keyboard.press('Escape');
+    if ((await prompt(page).inputValue()) !== '') await page.keyboard.press('Enter');
+    await expect(prompt(page)).toHaveValue('', { timeout: 1000 });
+  }).toPass();
 }
 
 test.describe('a relative clause said alone', () => {
@@ -286,5 +292,19 @@ test.describe('the clause a period with empty slots reads', () => {
     await app.linkSubordinate(2, 3, 'As');
     await expect(app.sentences('en').nth(1)).toHaveText('as the cat runs.');
     await expect(page.getByTestId('source-strip')).toContainText('/sub as #4');
+  });
+});
+
+test.describe('a word’s definition, opened', () => {
+  test('is /define WORD, which puts the definition on the canvas in place of the phrase', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj man /verb run');
+    await run(page);
+    await prompt(page).click();
+    await page.keyboard.insertText('/define okay');
+    await run(page);
+    await app.expectSentences({ en: 'that does not have problems.', de: 'das keine Probleme hat.' });
+    await expect(page.getByTestId('source-strip')).toContainText('/rel #2.subj /headless');
+    await expect(page.getByTestId('source-strip')).not.toContainText('man');
   });
 });

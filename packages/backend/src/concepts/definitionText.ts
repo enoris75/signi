@@ -12,8 +12,11 @@ import type {
 import { compileDefinition, DefinitionError, definitionVocabulary } from '@signi/phrase';
 import type { ConceptSeed } from './types.js';
 
-/** A seed whose definition, if it has one, is a plan — what `concepts` hands every consumer. */
-export type DefinedConceptSeed = Omit<ConceptSeed, 'definition'> & { definition?: PhrasePlan };
+/**
+ * A seed whose definition, if it has one, is a plan — what `concepts` hands every consumer — with the
+ * text it was compiled from, which the console opens on the canvas (`/define`).
+ */
+export type DefinedConceptSeed = Omit<ConceptSeed, 'definition'> & { definition?: PhrasePlan; definitionText?: string };
 
 /**
  * A seed as the pickers and the console see it (`/api/concepts`), read off the seed itself rather
@@ -66,7 +69,8 @@ export function compileSeedDefinitions(seeds: readonly ConceptSeed[]): DefinedCo
   return seeds.map(({ definition, ...seed }) => {
     if (definition === undefined) return seed;
     try {
-      return { ...seed, definition: compileDefinition(definitionLines(definition), vocab) };
+      const text = definitionLines(definition);
+      return { ...seed, definition: compileDefinition(text, vocab), definitionText: text };
     } catch (e) {
       if (!(e instanceof DefinitionError)) throw e;
       throw new Error(`Definition for "${seed.id}" does not compile: ${e.reason}\n  in: ${e.text}`);

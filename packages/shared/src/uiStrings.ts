@@ -1736,6 +1736,17 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Save the whole phrase',
   },
 
+  // The console's `/define` (P13): it opens a word's definition on the canvas — SHOW on the definite
+  // MEANING of an indefinite WORD, "show a word's meaning", any word the user names.
+  'action.define': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: { concept: 'MEANING', definiteness: 'definite', possessor: { concept: 'WORD', definiteness: 'indefinite' } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "Show a word's meaning",
+  },
+
   // The header Load button's tooltip: the LOAD imperative on an indefinite PHRASE carrying the
   // SAVED adjective — "load a saved phrase", one of the many already stored. Indefinite where
   // `action.save.tooltip` is definite: that one acts on the phrase in the workspace, this one
@@ -3468,6 +3479,12 @@ export const UI_STRINGS = defineUiStrings({
     plan: { subject: { concept: 'NOUN', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Unknown noun',
+  },
+  // `/define` with a word that has no definition to open (P13): its meaning is not one Signi says.
+  'diagnostic.unknownMeaning': {
+    plan: { subject: { concept: 'MEANING', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown meaning',
   },
   // `/load` with a name no saved phrase has. Not "unknown saved phrase": two adjectives on one noun
   // coordinate in five languages (it "frase sconosciuta e salvata"), and `/load` lists saved ones anyway.

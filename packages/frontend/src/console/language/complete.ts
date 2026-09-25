@@ -37,6 +37,7 @@ import {
   PRONOUN_NAMES,
   printRef,
   printWord,
+  resolveWord,
   wordSpecFor,
   wordsFor,
   type WordSpec,
@@ -605,12 +606,36 @@ function argumentCompletion(
       return valueCompletion(from, to, query, COMMANDS.map((c) => ({ name: c.name, value: c.name, description: c.description, descriptionKey: c.descriptionKey })), def);
     if (action.kind === "app" && action.app === "load")
       return valueCompletion(from, to, query, (opts.saved ?? []).map((name) => ({ name, value: name, description: "" })), def, true);
+    // The words with a definition to open (P13), by the name the console calls them.
+    if (action.kind === "app" && action.app === "define")
+      return valueCompletion(from, to, query, definedWords(opts.vocab), def, true);
     return undefined;
   }
   if (arg.kind === "phrase" || arg.kind === "link") {
     return linkCompletion(def, from, to, query, between, frame, state, opts, words);
   }
   return undefined;
+}
+
+// Every word the console names, of any role: what `/define` looks a word up among.
+const ANY_WORD: WordSpec = { roles: ["noun", "pronoun", "verb", "adjective", "adverb"] };
+
+/** The words `/define` can open (P13): each concept with a definition, written as a line writes it. */
+export function definedWords(vocab: Vocabulary): ValueDef[] {
+  return Object.values(vocab.concepts).flatMap((concepts) =>
+    (concepts ?? [])
+      .filter((c) => c.definitionText)
+      .map((c) => {
+        const name = printWord(c, ANY_WORD, vocab);
+        return { name, value: name, description: c.definitions?.[vocab.language] ?? c.definitions?.en ?? "" };
+      }),
+  );
+}
+
+/** The concept `/define WORD` opens: the word as a line resolves it, among those with a definition. */
+export function definedConcept(word: string, vocab: Vocabulary): Concept | undefined {
+  const found = resolveWord(word, ANY_WORD, vocab);
+  return (found.ok ? [found.concept] : found.candidates).find((c) => c.definitionText);
 }
 
 /** The words a command's argument names, given where it would land. */

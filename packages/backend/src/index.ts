@@ -9,6 +9,7 @@ import { translate } from '@signi/engine';
 import { buildUiStrings } from './uiStrings.js';
 import { buildConceptDefinitions } from './definitions.js';
 import { listConcepts } from './conceptList.js';
+import { concepts } from './concepts/index.js';
 import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
@@ -35,10 +36,12 @@ getDb();
 // every language (like the UI-string bundle). A plan that fails to render in some language throws
 // here, on boot, rather than serving a broken tooltip. Merged over the stored literals per request.
 const CONCEPT_DEFINITIONS = buildConceptDefinitions();
+// And the text each is written in (P13), which the console opens on the canvas with `/define`.
+const DEFINITION_TEXTS = new Map(concepts.flatMap((c) => (c.definitionText ? [[c.id, c.definitionText] as const] : [])));
 
 app.get('/api/concepts', (req, res) => {
   const role = req.query['role'] as string | undefined;
-  const response: ConceptsResponse = { concepts: listConcepts({ role, composedDefinitions: CONCEPT_DEFINITIONS }) };
+  const response: ConceptsResponse = { concepts: listConcepts({ role, composedDefinitions: CONCEPT_DEFINITIONS, definitionTexts: DEFINITION_TEXTS }) };
   res.json(response);
 });
 

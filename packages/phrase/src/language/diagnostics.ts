@@ -233,6 +233,7 @@ const SEGMENTS = {
   phraseNotSaved: () => [say("failure.phraseNotSaved")],
   phraseNotLoaded: () => [say("failure.phraseNotLoaded")],
   noSavedPhrase: (a: { name: string }) => [say("diagnostic.unknownPhrase", quote(a.name))],
+  noDefinition: (a: { word: string }) => [say("diagnostic.unknownMeaning", quote(a.word))],
 };
 
 export type DiagnosticCode = keyof typeof SEGMENTS;

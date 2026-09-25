@@ -32,36 +32,38 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ## How the tasks are encoded
 
-- A concept's definition is a `PhrasePlan` set as its `definition` in the seed. Two shapes exist:
-  - **genus + differentia** — `glossOf(genus, ...adjectives)` → "a small mammal".
-  - **genus + relative clause** — `whoGloss(genus, verb, objectConcept?)` → "a person who makes
-    objects" (the head fills the clause's subject gap; the object renders bare-plural, or singular
-    for a mass reading — "a process that loads content"). The head can fill another gap instead:
-    `patientGloss` the object ("an object that one eats"), and a `headRole: 'locative'` clause the
-    place ("a place where one eats", see [B32](done/B32-place-glosses.md)).
-  - **a mass head takes `bare`, not `indefinite`** — *a content* counts what cannot be counted.
-    `patientGloss` takes the determiner as its third argument, and `massGlossOf(genus, ...adjectives)`
-    is `glossOf` with the same bare head ("solid substance", "great land"). Both are from
-    [A23](done/A23-ui-nouns-patient-and-place.md).
-  - **an object gap with a named agent** — `patientOfGloss(genus, verb, agent)` is `patientGloss`
-    with an indefinite noun where the generic "one" would stand: "a participant that **a verb**
-    governs", "land that **a nation** governs"
+- A concept's definition is its `definition` in the seed, written in the phrase language with every
+  word named by its concept id — the line the console prints and applies, compiled to its plan when
+  the seed is assembled ([P13](../features/P-planning/P13-console-definitions/README.md)). Until P13
+  the seeds built plans with gloss helpers (`glossOf`, `whoGloss`, `patientGloss`, …), which the
+  tickets in [`done/`](done/) still name; each is now the text below. The shapes the corpus uses:
+  - **genus + differentia** — `/subj ( MAMMAL /adj SMALL /a )` → "a small mammal".
+  - **genus + relative clause** — `/subj ( PERSON /a /rel #2.subj )` over `/subj ( PERSON ) /verb (
+    MAKE ) /obj ( OBJECT_THING /pl /zero )` → "a person who makes objects" (the head fills the
+    clause's subject gap; the object renders bare-plural, or singular for a mass reading — "a
+    process that loads content"). The head can fill another gap instead: `#2.obj` the object ("an
+    object that one eats"), `#2.loc` the place ("a place where one eats", see
+    [B32](done/B32-place-glosses.md)).
+  - **a mass head takes `/zero`, not `/a`** — *a content* counts what cannot be counted: "content
+    that one shows", "solid substance", "great land"
+    ([A23](done/A23-ui-nouns-patient-and-place.md)).
+  - **an object gap with a named agent** — an indefinite noun where the generic "one" would stand:
+    "a participant that **a verb** governs", "land that **a nation** governs"
     ([A27](done/A27-grammar-participants-and-clause-types.md)).
-  - **an adjective as the clause it is** — the headless relative (`NounPhrase.relativeGloss`,
-    helpers in [relativeGloss.ts](../../packages/backend/src/concepts/relativeGloss.ts)): the head
-    goes unsaid but stays the clause's antecedent, so it still drives agreement. `stateGloss` is the
-    state a verb leaves ("that one has saved", de *den man gespeichert hat*), `subjectGapGloss` what
-    the thing does or has ("that has testicles"), `namedAgentGloss` a named agent ("that a verb
-    governs"). Pick the antecedent as the class the adjective is said of, one per family
+  - **an adjective as the clause it is** — the headless relative, `/rel #2.subj /headless`
+    (`NounPhrase.relativeGloss`): the head goes unsaid but stays the clause's antecedent, so it
+    still drives agreement — the state a verb leaves ("that one has saved", de *den man gespeichert
+    hat*), what the thing does or has ("that has testicles"), a named agent ("that a verb governs").
+    Pick the antecedent as the class the adjective is said of, one per family
     ([C23](done/C23-participial-state-adjectives.md), [C24](done/C24-grammar-feature-adjectives.md)).
-  - **a place adverb as the complement it is** — `complementGloss` in adverbs.ts
-    (`NounPhrase.complementGloss`): EVERYWHERE is the locative "in all places", UP the direction "to a
-    higher place", rendered by each engine's own complement renderer
+  - **a place adverb as the complement it is** — `/gloss place` or `/gloss direction` on a verbless
+    period's subject (`NounPhrase.complementGloss`): EVERYWHERE is the locative "in all places", UP
+    the direction "to a higher place", rendered by each engine's own complement renderer
     ([C25](done/C25-place-and-direction-adverbs.md)).
-  - **a part and its whole** — `partOfGloss(whole)` ("a part of a keyboard"), or any possessor with
-    `possessorRole: 'whole'` / `'parts'` ("the end of a life", "a group of canvases"); English writes
-    it as an of-phrase where the Saxon genitive would say possession. And `instrumentGloss`, the
-    instrument gap ("an organ with which one sees") ([C26](done/C26-root-nouns-on-the-literal.md)).
+  - **a part and its whole** — `/poss [ KEYBOARD /a ] /whole` ("a part of a keyboard"), or `/parts`
+    ("a group of canvases"); English writes it as an of-phrase where the Saxon genitive would say
+    possession. And the instrument gap, `#2.inst` ("an organ with which one sees")
+    ([C26](done/C26-root-nouns-on-the-literal.md)).
 - The renderer [`buildConceptDefinitions()`](../../packages/backend/src/definitions.ts) renders every
   plan into all 7 languages **at backend startup and throws if any language is missing** — so a task
   is "done" only when it boots clean. That boot check is the catalogue's pinning test.
@@ -287,10 +289,10 @@ task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs,
 [C17](done/C17-motion-verbs-reflexive-genus.md): their genus MOVE_ONESELF is a reflexive verb in
 Italian and German. C17 built both and glossed RUN and GO; C18 added JUMP. COLLAPSE and COME, split from
 [C18](done/C18-motion-verbs-without-a-gloss.md), were B34 and B35, both done. The builder change B14 was meant to own
-landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
-`concepts/verbs/gloss.ts`) takes either the object id or a `GlossParts` object with the object's
-`definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
-("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
+landed with [done/B12](done/B12-possession-verbs.md) as the `infinitiveGloss` helper, which P13
+retired: a verb's definition is now its infinitive in the phrase language, `/inf /verb ( HAVE ) /obj
+( OBJECT_THING /pl /zero )`. A count-noun object takes `/pl` ("to have objects", not "to have
+object"); see [done/B09](done/B09-create-verbs.md).
 [C09](done/C09-modal-verbs.md) added two more parts: a `predicate` adjective for the copular genus
 BE, and the `infinitive` a gloss governs — "to be able **to act**". [C19](done/C19-verbs-needing-voice-purpose-or-comitative.md)
 added a `purpose` clause ("to write content **to load it**"), whose pronoun object

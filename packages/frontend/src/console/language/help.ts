@@ -201,6 +201,7 @@ export const EXAMPLES: Record<string, string> = {
   edit: "/edit",
   // Workspace
   save: "/save my cats",
+  define: "/define CAT",
   load: "/load my cats",
   export: "/export",
   import: "/import",

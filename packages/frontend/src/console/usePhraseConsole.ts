@@ -10,7 +10,7 @@ import { workspaceToPlans } from "../components/PhraseBuilder/workspacePlan/inde
 import type { PhraseContainer, PhraseLink } from "../components/PhraseBuilder/interfaces.ts";
 import { advanceContext, applyScript, wordExists, type ApplyResult, type Effect, type Frame } from "./language/apply.ts";
 import { commandNamed, type CommandDef } from "./language/commands.ts";
-import { complete, currentValue, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
+import { complete, currentValue, definedConcept, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
 import { finished, nextStop, structure } from "./language/edit.ts";
 import { diffWorkspaces, type EchoPart } from "./language/diff.ts";
 import { lex, splitPeriods } from "./language/lex.ts";
@@ -636,6 +636,29 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             add({ kind: "error", text: `/save ${arg}`, diagnostic: coded("phraseNotSaved") });
           }
           break;
+        // P13: a concept's definition opens in place of the workspace, as `/load` opens a saved phrase —
+        // one undo step. Its text names words by id, which this vocabulary resolves first.
+        case "define": {
+          const concept = arg ? definedConcept(arg, vocab) : undefined;
+          if (!concept?.definitionText) {
+            add({ kind: "error", text: `/define ${arg ?? ""}`.trim(), diagnostic: coded("noDefinition", { word: arg ?? "" }) });
+            break;
+          }
+          const first = uid();
+          const opened = applyScript({ containers: [{ id: first, selection: {} }], links: [] }, concept.definitionText, {
+            context: { containerId: first },
+            vocab,
+            newId: uid,
+          });
+          if (opened.diagnostic) {
+            add({ kind: "error", text: `/define ${arg}`, diagnostic: opened.diagnostic });
+            break;
+          }
+          writing.current = true;
+          history.replace(opened.state);
+          add({ kind: "info", text: `/define ${arg}`, detail: concept.definitions?.[vocab.language] ?? concept.definitions?.en ?? "" });
+          break;
+        }
         case "load": {
           if (!arg) {
             actions.press("load-workspace");

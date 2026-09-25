@@ -237,6 +237,10 @@ describe('the diagnostics, as the catalogue plans them', () => {
       en: 'Unknown phrase', it: 'Frase sconosciuta', fr: 'Phrase inconnue', de: 'Unbekannte Phrase',
       es: 'Frase desconocida', pt: 'Frase desconhecida', ja: '不明なフレーズ',
     },
+    'diagnostic.unknownMeaning': {
+      en: 'Unknown meaning', it: 'Significato sconosciuto', fr: 'Sens inconnu', de: 'Unbekannte Bedeutung',
+      es: 'Significado desconocido', pt: 'Significado desconhecido', ja: '不明な意味',
+    },
     'diagnostic.missingPeriod': {
       en: 'Missing period', it: 'Periodo mancante', fr: 'Période manquante', de: 'Fehlendes Satzgefüge',
       es: 'Período faltante', pt: 'Período faltante', ja: '見つからない文',

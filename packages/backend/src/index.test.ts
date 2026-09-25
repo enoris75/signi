@@ -126,6 +126,8 @@ describe('GET /api/concepts', () => {
         ja: '小さい哺乳類',
         pt: 'um mamífero pequeno',
       },
+      // The line it is written in (P13), which the console's /define opens.
+      definitionText: '/subj ( MAMMAL /adj SMALL /a )',
       label: 'cat',
       labels: { en: 'cat', it: 'gatto', fr: 'chat', de: 'Kater', es: 'gato', ja: '猫', pt: 'gato' },
       readings: { ja: 'ねこ' },

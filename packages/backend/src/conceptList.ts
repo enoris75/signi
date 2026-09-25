@@ -145,6 +145,8 @@ export interface ListConceptsOptions {
   senses?: boolean;
   /** The engine-composed definitions to merge over the stored literals (see buildConceptDefinitions). */
   composedDefinitions?: Map<string, Partial<Record<LanguageCode, string>>>;
+  /** Each definition's text in the phrase language (P13), which the console opens with `/define`. */
+  definitionTexts?: Map<string, string>;
 }
 
 /**
@@ -153,7 +155,7 @@ export interface ListConceptsOptions {
  * console read — the same records a `Vocabulary` is made of, which is why the definition compiler
  * (P13) reads them here too.
  */
-export function listConcepts({ role, senses = false, composedDefinitions }: ListConceptsOptions = {}): Concept[] {
+export function listConcepts({ role, senses = false, composedDefinitions, definitionTexts }: ListConceptsOptions = {}): Concept[] {
   const db = getDb();
 
   // A lexical sense (`sense_of`) is left out unless asked for: the engine selects it in place of the
@@ -233,6 +235,7 @@ export function listConcepts({ role, senses = false, composedDefinitions }: List
     role: r.role,
     description: r.description,
     definitions: definitionFor(r.id),
+    definitionText: definitionTexts?.get(r.id),
     label: labels.get(r.id)?.en,
     labels: labels.get(r.id),
     readings: readings.get(r.id),

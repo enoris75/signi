@@ -1,6 +1,6 @@
 ---
 name: localize-seed
-description: Localize one catalogued concept definition by its id (e.g. A05). Authors the concept's engine-composed `definition` PhrasePlan so its picker tooltip renders in all seven languages, verifies it, adds e2e coverage, and retires the task file to docs/localization/done/. Use when the user says "localize-seed A05", "/localize-seed A01", "localize the CREATOR definition", or names a task id from docs/localization/.
+description: Localize one catalogued concept definition by its id (e.g. A05). Authors the concept's engine-composed `definition`, a line of the phrase language, so its picker tooltip renders in all seven languages, verifies it, adds e2e coverage, and retires the task file to docs/localization/done/. Use when the user says "localize-seed A05", "/localize-seed A01", "localize the CREATOR definition", or names a task id from docs/localization/.
 ---
 
 # Localizing one catalogued concept definition
@@ -13,9 +13,13 @@ feasibility. This skill takes **one task id** (e.g. `A05`) and drives it from "c
 Read [docs/localization/localization-tasks.md](../../docs/localization/localization-tasks.md) first —
 it is the index and explains the encoding. The essentials:
 
-- A concept's definition is a `PhrasePlan` set as its `definition` in the seed
+- A concept's definition is its `definition` in the seed
   ([concepts/nouns.ts](../../packages/backend/src/concepts/nouns.ts) /
-  [pronouns.ts](../../packages/backend/src/concepts/pronouns.ts)). The renderer
+  [pronouns.ts](../../packages/backend/src/concepts/pronouns.ts) / …), written in the **phrase
+  language** — the text the console prints and applies, every word named by its concept id (P13):
+  `'/subj ( MAMMAL /adj SMALL /a )'`. It is compiled to its `PhrasePlan` when the seed is assembled
+  ([compileSeedDefinitions](../../packages/backend/src/concepts/definitionText.ts)); a line that does
+  not compile stops the boot, naming the concept and the line. The renderer
   [buildConceptDefinitions()](../../packages/backend/src/definitions.ts) renders every plan into all
   7 languages **at backend startup and throws if any language is missing** — that boot check is the
   pinning test. The API merges composed definitions over the stored literal in
@@ -46,7 +50,8 @@ it is the index and explains the encoding. The essentials:
 ### 1. Locate and read the task file
 Resolve the id to `docs/localization/A-ready/<id>-*.md` (e.g. `A05` →
 `A05-creator.md`). If it is not under `A-ready/`, apply the guardrails above. Read it — the **renders**
-table is the target, the **Plan** line is the exact `definition` to author, and **Vocabulary** lists
+table is the target, the **Plan** line is the `definition` to author (an older file may give it as a
+`PhrasePlan` or a gloss-helper call: author the text it prints to, below), and **Vocabulary** lists
 the concepts it references.
 
 ### 2. Confirm the referenced concepts are seeded in all 7 languages
@@ -60,35 +65,38 @@ sqlite3 packages/backend/signi.db "SELECT id, role FROM semantic_concepts WHERE 
 
 If any is missing, the task was misfiled — it is really a B. Stop and say so.
 
-### 3. Author the definition plan
-Add the `definition` to the concept's seed block in
-[nouns.ts](../../packages/backend/src/concepts/nouns.ts) or
-[pronouns.ts](../../packages/backend/src/concepts/pronouns.ts), right after `description`. Use the
-existing helpers:
+### 3. Author the definition
+Add the `definition` to the concept's seed block, right after `description`, as a line of the
+phrase language with every word named by its concept id. Build it on the canvas or in the console
+first: `/define WORD` opens any defined concept's definition to start from, and the source strip
+under the canvas is the text to copy, already in the printer's canonical form. Ids resolve before
+labels, so a line typed with ids reads the same in any interface language.
 
-- `glossOf(genus, ...adjectives)` — genus + differentia ("a small mammal"). Already in nouns.ts.
-- `whoGloss(genus, verb, objectConcept?)` — genus + subject-gap relative clause ("a person who makes
-  objects"; object renders bare-plural). **Add this helper to nouns.ts if it is not there yet** (the
-  first relative-clause task introduces it):
+The shapes the corpus uses, each described with its examples over the seed files that use it
+([nouns.ts](../../packages/backend/src/concepts/nouns.ts),
+[adjectives.ts](../../packages/backend/src/concepts/adjectives.ts),
+[adverbs.ts](../../packages/backend/src/concepts/adverbs.ts)):
+
+- genus + differentia — `'/subj ( MAMMAL /adj SMALL /a )'` ("a small mammal"); a mass genus is
+  `/zero`, not `/a`.
+- genus + relative clause — the head fills a gap in a linked period, one period a line:
 
   ```ts
-  const whoGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
-    subject: {
-      concept: genus,
-      definiteness: 'indefinite',
-      relative: {
-        verbPhrase: { verb },
-        ...(object ? { directObject: { concept: object, definiteness: 'bare', number: 'plural' } } : {}),
-      },
-    },
-  });
+  definition: `
+    /subj ( PERSON /a /rel #2.subj )
+    /subj ( PERSON ) /verb ( MAKE ) /obj ( OBJECT_THING /pl /zero )
+  `,
   ```
 
-  A definite gloss (the grammatical-person pronouns, A08–A10) is written inline:
-  `{ subject: { concept: 'PERSON_GRAMMAR', definiteness: 'definite', adjectives: ['FIRST'] } }`.
+  `#2.obj`, `#2.loc` and `#2.inst` are the object, place and instrument gaps; `/headless` after the
+  reference says the clause alone, as an adjective's definition does ("that has no problems").
+- a verb's infinitive — `'/inf /verb ( CONSUME ) /obj ( FOOD /zero )'`.
+- a definite gloss (the grammatical-person pronouns) — the definite is the default and has no
+  command: `'/subj ( PERSON_GRAMMAR /adj FIRST )'`.
 
-Change only the one concept's seed. Do not edit the renderer, the API, or the frontend — the
-mechanism is already wired.
+A linked definition is a template literal indented with the code around it; the indentation is
+stripped before it compiles. Change only the one concept's seed. Do not edit the renderer, the API,
+or the frontend — the mechanism is already wired.
 
 ### 4. Verify the render in all seven languages
 The composed definitions are rendered from the seed **in memory** at boot — no reseed needed. Boot

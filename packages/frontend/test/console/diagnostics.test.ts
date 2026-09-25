@@ -156,6 +156,7 @@ const SAMPLES: Samples = {
   phraseNotSaved: [[{}, 'The phrase could not be saved.']],
   phraseNotLoaded: [[{}, 'That phrase could not be loaded.']],
   noSavedPhrase: [[{ name: 'x' }, 'Unknown phrase: “x”']],
+  noDefinition: [[{ word: 'x' }, 'Unknown meaning: “x”']],
 };
 
 describe('what each diagnostic says in English', () => {

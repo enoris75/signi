@@ -370,6 +370,7 @@ const GOLDEN: Record<string, Golden> = {
   // The app's own commands are effects the console runs, not edits of the phrase.
   edit: { line: '/edit', check: () => expect(run('/edit').effects).toEqual([expect.objectContaining({ app: 'edit' })]), prints: '' },
   save: { line: '/save my cats', check: () => expect(run('/save my cats').effects).toEqual([expect.objectContaining({ app: 'save', arg: 'my cats' })]), prints: '' },
+  define: { line: '/define cat', check: () => expect(run('/define cat').effects[0]).toMatchObject({ app: 'define', arg: 'cat' }), prints: '' },
   load: { line: '/load my cats', check: () => expect(run('/load my cats').effects[0]).toMatchObject({ app: 'load', arg: 'my cats' }), prints: '' },
   export: { line: '/export', check: () => expect(run('/export').effects[0]).toMatchObject({ app: 'export' }), prints: '' },
   import: { line: '/import', check: () => expect(run('/import').effects[0]).toMatchObject({ app: 'import' }), prints: '' },

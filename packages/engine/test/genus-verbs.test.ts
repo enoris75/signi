@@ -4,7 +4,6 @@ import { clause, np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
-import { infinitiveGloss } from '../../backend/src/concepts/verbs/gloss.js';
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
 function definitionAll(id: string): Record<LanguageCode, string> {
@@ -1571,9 +1570,10 @@ describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
 });
 
 // The B08 verb definitions authored on the infinitive render mode: a verb's picker tooltip is now
-// its localized dictionary gloss (infinitiveGloss(genus, differentia)), not the English literal.
-// The differentia object renders bare (a mass noun: "food", "liquid"); French omits the partitive,
-// the same simplification whoGloss makes for its bare objects.
+// its localized dictionary gloss, the genus's infinitive with the differentia as its object (`/inf
+// /verb ( CONSUME ) /obj ( FOOD /zero )`), not the English literal. The differentia object renders
+// bare (a mass noun: "food", "liquid"); French omits the partitive, the same simplification a noun's
+// relative-clause gloss makes for its bare objects.
 describe('B08 verb definitions (infinitive citations)', () => {
   test('EAT → "to consume food"', () => {
     expect(definitionAll('EAT')).toEqual({
@@ -1672,9 +1672,8 @@ describe('B10 verb definitions (DESTROY genus)', () => {
 
 // The B11 perception- and cognition-verb definitions, on the PERCEIVE and UNDERSTAND genera. LIGHT
 // stays bare-singular in its mass sense; CONCEPT and WORD are count nouns, so they are passed plural.
-// READ is the first gloss whose differentia carries an adjective (WRITTEN), which infinitiveGloss
-// threads onto the bare object — agreeing in Romance, strong-declined in German, and verb-derived
-// with no linker in Japanese.
+// READ is the first gloss whose differentia carries an adjective (WRITTEN), on the bare object —
+// agreeing in Romance, strong-declined in German, and verb-derived with no linker in Japanese.
 describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
   test('SEE → "to perceive light"', () => {
     expect(definitionAll('SEE')).toEqual({
@@ -1768,9 +1767,12 @@ describe('B13 verb definitions (DIVIDE / CUT / STRIKE genera)', () => {
   });
 
   test('an instrumental carrying its own adjective', () => {
-    expect(sayAll(infinitiveGloss('DIVIDE', {
+    expect(sayAll({
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'DIVIDE' },
       complements: { instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite', adjectives: ['SHARP'] } } },
-    }))).toEqual({
+      infinitive: true,
+    })).toEqual({
       en: 'to divide with a sharp blade.',
       it: 'dividere con una lama affilata.',
       fr: 'diviser avec une lame tranchante.',
