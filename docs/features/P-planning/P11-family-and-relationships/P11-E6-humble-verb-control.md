@@ -295,7 +295,7 @@ point:** whether German wants *demütig* or a noun-based label (*Bescheidenheits
 
 - **"My X" as a named owner.** The owner picker takes no pronoun, so "my father comes" cannot be
   built without an *I* elsewhere in the period. That limits this toggle's reach, and every other
-  P11 construct's, but it is a possessor-picker change of its own. Neither sibling covers it:
+  P11 construct's, but it is a possessor-picker change of its own: [P11-E9](P11-E9-pronoun-owner.md). Neither sibling covers it:
   [P11-E7](P11-E7-coreferent-possessor-control.md)'s coreferent possessor cannot stand in the
   subject (E2 Done 6), so it never makes a subject the speaker's side, and E7 does not interact with
   this toggle.
