@@ -53,10 +53,13 @@ const WALK = concept('WALK', 'verb', {
 const SEEM = concept('SEEM', 'verb', { transitivity: 'intransitive', complements: ['predicative'] });
 const HAPPY = concept('HAPPY', 'adjective');
 const NEVER = concept('NEVER', 'adverb');
+const FIRST = concept('FIRST_PERSON', 'pronoun', { person: '1' });
+const SECOND = concept('SECOND_PERSON', 'pronoun', { person: '2' });
+const THIRD = concept('THIRD_PERSON', 'pronoun', { person: '3' });
 
 const CONCEPTS = {
   noun: [CAT, FOOD, GIRL, SAIL],
-  pronoun: [],
+  pronoun: [FIRST, SECOND, THIRD],
   verb: [EAT, SLEEP, CAN, SEEM, WALK],
   adjective: [BIG, HAPPY],
   adverb: [NEVER],
@@ -179,6 +182,24 @@ describe('the keys on a noun box', () => {
 
     // The owner is a noun phrase of its own, drawn by a builder of its own: one more subject box.
     expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
+  });
+
+  // P11-E9 D8: P opens the owner and a pick; ↑ → takes the Pronoun tab, which ends the pick, so the
+  // chooser's digit and ↵ are the chooser's and not the pick's numbered targets.
+  it('names a pronoun owner: P, then ↑ →, then 2 and ↵', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: EAT, directObject: FOOD });
+    cursorTo('directObject');
+
+    press('p');
+    expect(document.querySelectorAll('[data-kb-pick-target]').length).toBeGreaterThan(0);
+    press('ArrowUp');
+    press('ArrowRight');
+    expect(document.querySelectorAll('[data-kb-pick-target]')).toHaveLength(0);
+    press('2');
+    press('Enter');
+
+    expect(selection().directObjectPossessor).toMatchObject({ subject: SECOND, subjectNumber: 'singular' });
+    expect(selection().directObjectPossessorRef).toBeUndefined();
   });
 
   it('coordinates one more phrase with the noun', () => {

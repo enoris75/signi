@@ -61,6 +61,8 @@ export interface PronounChooser {
   row: PronounRow;
   setRow: (row: PronounRow) => void;
   onKeyDown: (event: KeyboardEvent) => void;
+  /** The persons shown but not offered — the generic in an owner's chooser (P11-E9 D2). */
+  disabled: readonly PronounPerson[];
 }
 
 export function usePronounChooser({
@@ -68,10 +70,12 @@ export function usePronounChooser({
   // ↑ from the top row leaves the grid for the category tabs, as it leaves a list of words.
   onExitTop,
   onClose,
+  disabled = [],
 }: {
   onCommit: (choice: PronounChoice) => void;
   onExitTop: () => void;
   onClose: () => void;
+  disabled?: readonly PronounPerson[];
 }): PronounChooser {
   const [choice, setChoice] = useState<PronounChoice>({
     person: "1",
@@ -90,7 +94,7 @@ export function usePronounChooser({
 
   /** The values the focused row offers, and where in them the current choice sits. */
   function rowValues(): readonly string[] {
-    if (row === "person") return PRONOUN_PERSONS;
+    if (row === "person") return PRONOUN_PERSONS.filter((p) => !disabled.includes(p));
     if (row === "number") return NUMBERS;
     return pronounGenders(choice.person);
   }
@@ -120,6 +124,7 @@ export function usePronounChooser({
     const person = PRONOUN_PERSONS[Number(event.key) - 1];
     if (person && event.key >= "1" && event.key <= "4") {
       event.preventDefault();
+      if (disabled.includes(person)) return;
       set("person", person);
       setRow("person");
       return;
@@ -149,5 +154,5 @@ export function usePronounChooser({
     }
   }
 
-  return { choice, set, row, setRow, onKeyDown };
+  return { choice, set, row, setRow, onKeyDown, disabled };
 }

@@ -14,6 +14,7 @@ import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
 import { resolveAntecedent } from "./resolveAntecedent.ts";
+import { isPersonalPronoun, pronounFeatures } from "./pronounFeatures.ts";
 
 // Build one noun phrase from the flat `${which}*` fields. Relative clauses are no longer
 // stored in the selection — they are cross-container links assembled in workspacePlan,
@@ -24,15 +25,16 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
   const concept = field<Concept>(sel, which);
   if (!concept) return undefined;
   // A possessor is one of two shapes. A pronominal reference ("his") points at an antecedent noun
-  // in the period and resolves to its features; otherwise a genitive possessor is a nested noun
-  // phrase whose head lives in its `subject` slot, recursing for its own number/gender/adjectives/
-  // nested possessor. The reference wins when both somehow coexist (the UI keeps them exclusive).
+  // in the period and resolves to its features; otherwise a named owner is a nested selection whose
+  // head lives in its `subject` slot — a genitive noun phrase, recursing for its own number/gender/
+  // adjectives/nested possessor, or a pronoun named in the owner's ring ("my mother", P11-E9). The
+  // reference wins when both somehow coexist (the UI keeps them exclusive).
   const possRef = field<NounAddress>(sel, POSSESSOR_REF_KEY(which));
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
   const possessor: Possessor | undefined = possRef
     ? resolveAntecedent(root, possRef)?.features
     : possSel
-      ? buildNounPhrase(possSel, "subject", root)
+      ? namedOwner(possSel, root)
       : undefined;
   const { adjectives, adjectiveDegrees, nounModifiers } = modifiers(sel, which);
   return {
@@ -72,8 +74,23 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     // An approximator on that quantity (P09-E49), its word the quantity's own.
     approximator: sel.approximators?.[which] ? approximatorFor(sel, which) : undefined,
     // What a genitive possessor is to the head (P13): an owner unless the noun says otherwise.
-    possessorRole: possSel && !possRef ? sel.possessorRoles?.[which] : undefined,
+    // A pronoun owner has none: the engine reads no role off a possessive pronoun (P11-E9 D5), so one
+    // set earlier stays in the selection and comes back when the owner is a noun again.
+    possessorRole: possSel && !possRef && possSel.subject?.role !== "pronoun" ? sel.possessorRoles?.[which] : undefined,
   };
+}
+
+/**
+ * A named owner, from its ring's slice. A noun head is a genitive noun phrase ("the boy's dog"); a
+ * pronoun head is the possessive pronoun its person, number and gender spell ("my mother", P11-E9 D2),
+ * never a genitive — "the I's mother" is what that would say. Only the three persons are owners: the
+ * generic "one" and the indefinites have no possessive the plan can state, so they drop. A pronoun
+ * owner's own settings — an owner, an adjective, a conjunct its slice may still hold — are not read.
+ */
+function namedOwner(owner: PhraseSelection, root: PhraseSelection): Possessor | undefined {
+  const head = owner.subject;
+  if (head?.role !== "pronoun") return buildNounPhrase(owner, "subject", root);
+  return isPersonalPronoun(head) ? pronounFeatures(owner, "subject", head) : undefined;
 }
 
 function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {

@@ -2,7 +2,8 @@ import type { Concept } from "@signi/shared";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
 import type { NounAddress, NounKey, PhraseSelection } from "../interfaces.ts";
-import { POSSESSOR_REF_KEY } from "../interfaces.ts";
+import { POSSESSOR_KEY, POSSESSOR_REF_KEY } from "../interfaces.ts";
+import { namedPronounOwner } from "./possessiveRequests.ts";
 import { NOUN_KEYS } from "../slots.ts";
 import { openConjunctsFor } from "../conjunctChain.ts";
 import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
@@ -71,8 +72,15 @@ export function decoratePerimeterControls({
     const says = resolved
       && (possessivePhrase((selection[which] as Concept | undefined)?.id, resolved.features)
         ?? t(possessiveHintKey(resolved.features)));
+    // A named owner that is a pronoun says the same thing a pointer does (P11-E9 D7): its person, and
+    // the possessed phrase its possessive renders ("first person (“my mother”)").
+    const pronoun = namedPronounOwner(selection, which);
+    const owner = selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined;
+    const ownerSays = pronoun
+      && (possessivePhrase((selection[which] as Concept | undefined)?.id, pronoun) ?? t(possessiveHintKey(pronoun)));
     next[which]!.possessor = {
       ...control,
+      ...(pronoun && owner?.subject && { valueLabel: `${word(owner.subject)} (“${ownerSays}”)` }),
       ...(antecedent && {
         active: false,
         valueLabel: `${resolved ? word(resolved.concept) : t("hint.aNoun")}${

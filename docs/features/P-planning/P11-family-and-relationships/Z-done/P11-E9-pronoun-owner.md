@@ -12,9 +12,9 @@ the console, with its print → apply round trip. `planToWorkspace` learns the p
 **Scope:** `@signi/phrase` (plan building, `planToWorkspace`, console resolve / apply / print), the
 owner ring (`PhraseBuilder.tsx`, `rawSatellites.tsx`, `OwnerRings.tsx`), the pick keys, and console
 completion. No new UI string, no seed, no engine change.
-**Status:** **planning, unscheduled** — filed 2026-09-25; found while writing
-[P11-E6](P11-E6-humble-verb-control.md), whose *Out of scope* names the gap.
-[P11-E7](P11-E7-coreferent-possessor-control.md) and [P11-E8](P11-E8-vocative-control.md) record it
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25; found while writing
+[P11-E6](../P11-E6-humble-verb-control.md), whose *Out of scope* names the gap.
+[P11-E7](../P11-E7-coreferent-possessor-control.md) and [P11-E8](../P11-E8-vocative-control.md) record it
 too.
 
 Engine output at HEAD (1bb7c878), from hand-written plans. Rendered 2026-09-25 with `sayAll` on an
@@ -48,6 +48,71 @@ A feminine 3rd plural changes only Japanese: 彼女らの猫は走ります, whi
 probed with 1sg, 1pl and 2pl, masc against fem: *nostro padre*, *vuestro padre*, *euer Vater*,
 私たちの父 either way.
 
+## Done
+
+Shipped 2026-09-25, as D1–D8 recommend, with no engine change, no seed and no new UI string. Both
+tables above are now **built**, not hand-written: every cell of the first, and the his / her / its /
+their row of the second, renders byte-for-byte as shown from a console line put through
+`applyScript` → `selectionToPlan` (pinned in
+[`engine/test/pronoun-owner.test.ts`](../../../../../packages/engine/test/pronoun-owner.test.ts)),
+and "my mother runs" and "my son marries your daughter" are built on the canvas through the owner's
+Pronoun tab and checked in all seven languages
+([`e2e/pronoun-owner.spec.ts`](../../../../../e2e/pronoun-owner.spec.ts)). A named 3rd person owner
+beside a subject stays another person's: 男の子は彼のお母さんを見ます (D6).
+
+What landed, and where it differs from the plan below:
+
+1. **Model** (D2). [`pronounFeatures.ts`](../../../../../packages/phrase/src/model/selectionToPlan/functions/pronounFeatures.ts)
+   holds the read both gestures share — person from the concept, number from the pick else the
+   concept's, gender on the 3rd person only — and `isPersonalPronoun`, the chooser's own rule (a
+   person, not GENERIC_PERSON, no `slot`). `resolveAntecedent` now calls it. **Deviation:** that
+   gates the *pointer's* gender to the 3rd person too, so a pointer at a feminine *I* no longer
+   writes `gender: 'fem'`; D3's probes show it changed nothing rendered, and `resolveAntecedent`'s
+   tests pass unchanged. `buildNounPhrase` writes a pronoun-headed owner as the `PronominalPossessor`
+   (the generic and an indefinite **drop** rather than become a genitive), and writes `possessorRole`
+   for a noun owner only (D5).
+2. **`planToWorkspace`** (D8) loads `Possessor.pronominal` as an owner slice `{ subject: <person's
+   pronoun>, subjectNumber, subjectGender (3rd only) }`. A plan that also carries a `possessorRole`
+   on it names `NounPhrase.possessorRole on a pronoun` unsupported, since the canvas would hold it
+   and never write it. `Possessor.coreferent` is still unsupported here (E7's).
+3. **Canvas** (D1, D3, D5, D7, D8). `pronounHead` is set for an owner ring, and a new `ownerHead`
+   flag gives its empty box the pronoun-inclusive picker under the noun-or-pronoun prompt (its field
+   keeps the `typeahead-noun` test id). The chooser's generic is shown **`aria-disabled`, not
+   `disabled`**, so its definition tooltip still answers the pointer; its digit 4, the arrows and a
+   click all skip it. The gender control on an owner ring is offered on the 3rd person alone
+   (`rawSatellites`' `ownerHead`); `possessorRoles` needs a noun owner. Taking the Pronoun tab in an
+   owner's picker (click, or ↑ →) cancels the pick the ring opened with. The owner's solid line wears
+   the possessed phrase (`owner-pronoun-chip`, "my mother"), from `usePossessivePhrases` with the
+   `pronoun.possessive.*` fallback, and the folded possessor control's tooltip names the person and
+   then the phrase in quotes, as a pointer's does. Measured on "my son marries your daughter": the pronoun owner ring carries only
+   its number and *whose* controls and the chips sit clear, so nothing was widened.
+4. **Console** (D8). `WordSpec.personal` keeps an owner's pronouns to the three persons, which
+   completion follows; the possessive determiners *my, our, your, his, its, their* are read in that
+   frame alone; `/poss` carries the pronoun form's number and gender (`/poss we` is `[ 1st /pl ]`).
+   `/poss one` and `/poss someone` are `unknownWord`. **Deviation:** the console still takes and
+   prints a gender on a 1st or 2nd person owner (`/poss [ 1st /fem ]`), as the chooser's held pick,
+   so the round trip keeps it; only the canvas control is withdrawn. The `/poss` help example is now
+   "/subj ( mother /poss [ 1st ] ) /verb ( see ) /obj ( book /poss [ man /adj old ] )".
+5. **Tests.** `buildNounPhrase.test.ts` (a describe of its own), `planToWorkspacePossessor.test.ts`
+   (each table plan loads with nothing unsaid and re-plans to itself), `ownerChain.test.ts`,
+   `possessionEdges.test.ts`, `PhraseBuilder.test.tsx` (the old "offers nouns alone for the owner's
+   head" pin is rewritten: the tab is there; the pick ends on the tab; the generic is disabled;
+   gender on the 3rd only; the role chip withdrawn), `canvasKeys.test.tsx` (P, ↑ →, 2, ↵), and
+   the console's `golden`, `complete`, `examples` and round-trip suites — the walk names pronoun owners
+   of every person and gender, green at `SEEDS=5000`. The console test vocabulary gained MOTHER, SON,
+   DAUGHTER, MARRY and SOMEONE in arrays of their own, and the walk's owner pick derives the pronoun
+   from the same draw, so the walk still reaches every rare state the other reach tests look for.
+
+Open points, settled:
+
+- **Gender default** (D3): unchanged, as ruled.
+- **↵ against a running pick** (D8): **a live defect at HEAD**, reproduced in jsdom at 23ea680a
+  before this change: P on the object opens the owner and its pick, typing "gir" into the owner's
+  noun picker and pressing ↵ stores `directObjectPossessorRef: "subject"` — `usePickKeys` takes ↵ in
+  the capture phase for target 1 — instead of naming GIRL. Wanted: the owner named GIRL. Reported,
+  not fixed here (the Pronoun tab's own ↵ is reached, because taking the tab ends the pick).
+- **Japanese topic-repeating 私の** (D6): not filed, as recorded.
+
 ## Why
 
 Every kin term P11 seeded is at its most useful with an owner, and the owner most often wanted is the
@@ -60,28 +125,28 @@ keeps E6's humble toggle away from most of the subjects it is for.
 
 Verified at HEAD (1bb7c878), 2026-09-25.
 
-- **The plan field.** [`PronominalPossessor`](../../../../packages/shared/src/index.ts#L1085) is
+- **The plan field.** [`PronominalPossessor`](../../../../../packages/shared/src/index.ts#L1085) is
   `{ kind: 'pronominal', person, number, gender? }`, one of the three `Possessor` shapes beside a
-  genitive `NounPhrase` and E2's [`CoreferentPossessor`](../../../../packages/shared/src/index.ts#L1111).
+  genitive `NounPhrase` and E2's [`CoreferentPossessor`](../../../../../packages/shared/src/index.ts#L1111).
 - **A named owner takes a noun only**, in both places:
   - **Canvas.** An owner is a hosted ring whose builder runs `nounPhraseOnly`
-    ([`OwnerRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx#L36)).
-    [`slotCategories("subject", nounSubject)`](../../../../packages/phrase/src/model/interfaces.ts#L688)
+    ([`OwnerRings.tsx`](../../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx#L36)).
+    [`slotCategories("subject", nounSubject)`](../../../../../packages/phrase/src/model/interfaces.ts#L688)
     returns no category switch when `nounSubject` is set. `nounSubject` is `nounPhrase && !pronounHead`
-    ([`phraseRender.tsx:339`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L339)).
+    ([`phraseRender.tsx:339`](../../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L339)).
     `pronounHead` is set for a conjunct and a standard only
-    ([`PhraseBuilder.tsx:983`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L983)),
+    ([`PhraseBuilder.tsx:983`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L983)),
     which is how "you and I" and "bigger than him" already get the pronoun tab. The owner is the one
     hosted ring left out.
-  - **Console.** [`apply.ts:710`](../../../../packages/phrase/src/language/apply.ts#L710) resolves
-    `/poss`'s word with [`wordSpecFor("subject", "possessor")`](../../../../packages/phrase/src/language/resolve.ts#L34),
+  - **Console.** [`apply.ts:710`](../../../../../packages/phrase/src/language/apply.ts#L710) resolves
+    `/poss`'s word with [`wordSpecFor("subject", "possessor")`](../../../../../packages/phrase/src/language/resolve.ts#L34),
     which is `{ roles: ["noun"] }`. Completion reads the same spec
-    ([`complete.ts:308`](../../../../packages/frontend/src/console/language/complete.ts#L308)).
+    ([`complete.ts:308`](../../../../../packages/frontend/src/console/language/complete.ts#L308)).
 - **A pronominal possessor exists only as a pointer.** The noun's `${which}PossessorRef` is an address
-  that [`buildNounPhrase`](../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L29)
-  hands to [`resolveAntecedent`](../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts#L13).
+  that [`buildNounPhrase`](../../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L29)
+  hands to [`resolveAntecedent`](../../../../../packages/phrase/src/model/selectionToPlan/functions/resolveAntecedent.ts#L13).
   That reads a pronoun antecedent's person from the concept and its number and gender from the slice's
-  picks. [`CorefPickContext.isEligible`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55)
+  picks. [`CorefPickContext.isEligible`](../../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L55)
   accepts any noun of the period except the possessed noun and its subtree, so a *my* needs an *I* to
   point at.
 - **A genitive noun phrase headed by a pronoun is wrong in six languages.** This is what the builder
@@ -94,22 +159,22 @@ Verified at HEAD (1bb7c878), 2026-09-25.
   | SOMEONE (I see BOOK) | I see the someone's book. | vedo il libro del qualcuno. | ich sehe das Buch des jemands. | 私は誰かの本を見ます。 |
   | GENERIC_PERSON (I see BOOK) | I see the one's book. | vedo il libro del si. | ich sehe das Buch des manes. | 私は人の本を見ます。 |
 
-- **The pronoun chooser** ([`PronounChooser`](../../../../packages/frontend/src/components/PhraseBuilder/PronounChooser.tsx#L19))
+- **The pronoun chooser** ([`PronounChooser`](../../../../../packages/frontend/src/components/PhraseBuilder/PronounChooser.tsx#L19))
   offers the 1st, 2nd and 3rd person and the generic. It always commits a number and a gender
-  ([`commitPronoun`](../../../../packages/frontend/src/components/PhraseBuilder/SubjectTypeahead.tsx#L68)).
+  ([`commitPronoun`](../../../../../packages/frontend/src/components/PhraseBuilder/SubjectTypeahead.tsx#L68)).
   The default is 1st singular masculine, and neuter is offered for the 3rd person only
-  ([`pronounGenders`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/usePronounChooser.ts#L33)).
+  ([`pronounGenders`](../../../../../packages/frontend/src/components/PhraseBuilder/hooks/usePronounChooser.ts#L33)).
   The indefinites (SOMETHING, EVERYTHING, SOMEONE) carry `slot: 'indefinite'` and have no row
-  ([`pronounFor`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/usePronounChooser.ts#L49)).
+  ([`pronounFor`](../../../../../packages/frontend/src/components/PhraseBuilder/hooks/usePronounChooser.ts#L49)).
 - **A pronoun head already sheds the noun controls.** On the head's ring,
-  [`rawSatellites`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L147)
+  [`rawSatellites`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L147)
   gates the adjective, determiner, relative clause and owner on `subjectRole === "noun"`. It keeps
   number and gender, and it offers gender for **every** person of a pronoun. A hosted owner never gets
   the coordinate control
-  ([`decoratePerimeterControls.ts:56`](../../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L56)).
-  The `possessorRoles` chip ([L116](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L116))
+  ([`decoratePerimeterControls.ts:56`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L56)).
+  The `possessorRoles` chip ([L116](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L116))
   is offered for any named owner that holds a word, and
-  [`buildNounPhrase`](../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L65)
+  [`buildNounPhrase`](../../../../../packages/phrase/src/model/selectionToPlan/functions/buildNounPhrase.ts#L65)
   writes the role only for a genitive owner.
 - **The engine ignores `possessorRole` on a pronominal owner.** Probed: PART with a neuter owner is
   "I see its part" with `whole` and without, and GROUP with a 3pl owner and `parts` is "I see their
@@ -117,7 +182,7 @@ Verified at HEAD (1bb7c878), 2026-09-25.
   owner ("a part of a keyboard") is not produced for a pronoun.
 - **Gender with no pick.** A 3sg owner with no `gender` renders as the masculine in every language:
   *his*, *sein*, 彼の. The chooser never sends one, but `/poss 3rd` would (see D3).
-  [C20](../../../localization/done/C20-pronoun-agreement.md)'s rule is not to guess a person's sex,
+  [C20](../../../../localization/done/C20-pronoun-agreement.md)'s rule is not to guess a person's sex,
   so an unstated antecedent becomes その人. That rule is `antecedentAgreement`'s, and it applies to a
   pronoun **standing for a noun**. A deictic THIRD_PERSON is "he" by default as a subject too.
 - **No formal *you*.** The plan has no politeness feature on a pronoun or on a possessor. pt says the
@@ -135,7 +200,7 @@ Verified at HEAD (1bb7c878), 2026-09-25.
 
   The free 3rd person is the other person's *his*. The free 1st person on a kin head gives the row
   P11's README pins (私は妻を愛しています, 私の dropped by
-  [`applyPossessorForm`](../../../../packages/engine/src/translator/functions/applyPossessorForm.ts#L67)).
+  [`applyPossessorForm`](../../../../../packages/engine/src/translator/functions/applyPossessorForm.ts#L67)).
 - **Every slot renders a pronominal owner.** Probed: the object ("the cat sees my house"), a locative
   ("in my house", *in meinem Haus*), the comitative (*mit meinem Vater*, 父と), a standard ("bigger than
   my dog", 私の犬より), an owner's owner ("my father's house", *das Haus meines Vaters*, 父の家), a
@@ -143,29 +208,29 @@ Verified at HEAD (1bb7c878), 2026-09-25.
   母を見る男), the address ("My wife, run.", 妻、走ってください), and an indefinite possessed noun ("a
   mother of mine", *una mia madre*, *eine Mutter von mir*).
 - **The whose-question refuses it** as it refuses any owner: "a possessor question cannot ask about a
-  noun that already has a possessor (P09-E14)". [P09-E52](../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md)
+  noun that already has a possessor (P09-E14)". [P09-E52](../../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md)
   D3 deletes the owner before asking.
-- **The round trip.** [`planToWorkspace`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L328)
+- **The round trip.** [`planToWorkspace`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L328)
   reports every possessor with a `kind` as unsupported, `Possessor.pronominal` included. The printer
   writes a pointer as `/poss #n.noun` and a named owner as `/poss [ … ]`
-  ([`print.ts:460`](../../../../packages/phrase/src/language/print.ts#L460)). A pronoun is written as
+  ([`print.ts:460`](../../../../../packages/phrase/src/language/print.ts#L460)). A pronoun is written as
   its person, `1st` / `2nd` / `3rd` / `one`, with `/pl` and `/fem`
-  ([`printWord`](../../../../packages/phrase/src/language/resolve.ts#L167)). The English forms *I, we,
+  ([`printWord`](../../../../../packages/phrase/src/language/resolve.ts#L167)). The English forms *I, we,
   you, he, she, her, it, they* are accepted on the way in
-  ([`PRONOUN_FORMS`](../../../../packages/phrase/src/language/resolve.ts#L90)), but not *my, our,
+  ([`PRONOUN_FORMS`](../../../../../packages/phrase/src/language/resolve.ts#L90)), but not *my, our,
   his, its, their*.
 - **Labels.** A pronoun box reads its person, `pronoun.person.1` ("first person"), through
-  [`conceptWord`](../../../../packages/frontend/src/i18n/conceptWord.ts#L31). A pointer's line and the
+  [`conceptWord`](../../../../../packages/frontend/src/i18n/conceptWord.ts#L31). A pointer's line and the
   possessor control's tooltip show the possessed phrase ("his horse", *la sua casa*), which
-  [`usePossessivePhrases`](../../../../packages/frontend/src/i18n/usePossessivePhrase.ts#L39) renders
+  [`usePossessivePhrases`](../../../../../packages/frontend/src/i18n/usePossessivePhrase.ts#L39) renders
   on request from `(concept, features)`. Until the render arrives they fall back to the catalog's
-  `pronoun.possessive.*` ([`possessiveHintKey`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L106),
-  [C16](../../../localization/done/C16-ui-possessive-pronoun-chip.md)). The 3pl fallback key has no
+  `pronoun.possessive.*` ([`possessiveHintKey`](../../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L106),
+  [C16](../../../../localization/done/C16-ui-possessive-pronoun-chip.md)). The 3pl fallback key has no
   gender split, which only Japanese would use.
-- **Keys.** `P` is `noun.possessor` ([`keymap.ts:514`](../../../../packages/frontend/src/keyboard/keymap.ts#L514)).
+- **Keys.** `P` is `noun.possessor` ([`keymap.ts:514`](../../../../../packages/frontend/src/keyboard/keymap.ts#L514)).
   On an empty owner it opens the ring and starts the coref pick in one go (`openAndPick`,
-  [`PhraseBuilder.tsx:364`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L364)).
-  While that pick runs, [`usePickKeys`](../../../../packages/frontend/src/keyboard/usePickKeys.ts#L97)
+  [`PhraseBuilder.tsx:364`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L364)).
+  While that pick runs, [`usePickKeys`](../../../../../packages/frontend/src/keyboard/usePickKeys.ts#L97)
   listens on `window` in the capture phase and takes the digits 1–9, ⇥ and ↵ for the numbered
   targets. The pronoun chooser's own keys are 1–4 for the person and ↵ to commit, so the two collide
   (D7).
@@ -265,7 +330,7 @@ On the possessed noun, the **`possessorRoles` chip** is withdrawn while the owne
 engine ignores the role there, and `parts` would even read the wrong way round ("their group"). A role
 set earlier stays in the selection and is not written, and it comes back if the owner becomes a noun
 again. The gate adds `owner.subject.role === "noun"` to
-[`possessorRole`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L125)'s
+[`possessorRole`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L125)'s
 `available`, and the same test goes into `buildNounPhrase`.
 
 **Recommendation: as stated.**
@@ -278,7 +343,7 @@ The builder then has three ways to give a noun a pronoun owner, and they mean di
 |---|---|---|
 | name a pronoun in the owner ring (this task) | `pronominal`, the features picked | 彼の / 私の / あなたの: whoever those features name |
 | point at a noun of the period, not the clause subject | `pronominal`, copied from that noun | as the copied features read |
-| point at the clause's subject ([E7](P11-E7-coreferent-possessor-control.md)) | `coreferent` | 自分の: the subject itself |
+| point at the clause's subject ([E7](../P11-E7-coreferent-possessor-control.md)) | `coreferent` | 自分の: the subject itself |
 
 1. **Keep them apart.** A free *his* is the other person's. That is a real meaning, and it is the
    only way to say it, since E7 turns every pointer at the subject into the link.
@@ -307,7 +372,7 @@ a question for the bug catalogue. It is recorded here and not filed.
   `usePossessivePhrases` with the owner's `pronounFeatures`, with `pronoun.possessive.*` as the
   fallback while the render is in flight (C16). So the ring says *first person* and the chip says *my
   mother*, which is how the pointer already reads.
-- **The request list.** [`possessiveRequests`](../../../../packages/frontend/src/components/PhraseBuilder/functions/possessiveRequests.ts#L16)
+- **The request list.** [`possessiveRequests`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/possessiveRequests.ts#L16)
   adds the free owners beside the pointers. `OwnerRings` draws the chip from spots the period's builder
   already holds. The owner ring does not report anything new to its parent (the report-loop rule).
 - **Nothing new is seeded or catalogued.** `category.pronoun`, `pronoun.person.*`, `pronoun.first` and
@@ -357,22 +422,22 @@ a question for the bug catalogue. It is recorded here and not filed.
 
 ### D9. The sibling tickets
 
-- **[P11-E6](P11-E6-humble-verb-control.md).** The humble register's `own` is set by
+- **[P11-E6](../P11-E6-humble-verb-control.md).** The humble register's `own` is set by
   `applyPossessorForm` for any 1st-person pronominal owner, so "my father comes" + `humble` gives
   父は参ります (E6's table). E6 D2's `canBeHumble` gains one case: a noun under RELATIVE whose named
   owner's head is FIRST_PERSON. Whichever of the two lands second adds it. E6's *Out of scope* note
   retires when this ships.
-- **[P11-E7](P11-E7-coreferent-possessor-control.md).** There is no conflict of gestures: E7 changes
+- **[P11-E7](../P11-E7-coreferent-possessor-control.md).** There is no conflict of gestures: E7 changes
   what a pointer at the subject means, and this task adds a ring. The two tickets overlap in two
   places:
   - `planToWorkspace`: E7 maps the link, this maps the features;
   - the chip: E7's D5 hook renders a link in context, and this reuses the bare-phrase render.
   E7's *Out of scope* note ("a 1st-person named owner") retires.
-- **[P11-E8](P11-E8-vocative-control.md).** Its fourth column, "my wife, run", is a command with no *I*
+- **[P11-E8](../P11-E8-vocative-control.md).** Its fourth column, "my wife, run", is a command with no *I*
   in the period, so without this task it cannot be built. E8 D3's "possessor: named ring or pointed-to
   pronoun" row then includes a pronoun-headed ring. Every person is allowed there: the refusal E8
   inherits (A338) is on the address's **head**, not its owner.
-- **[P09-E52](../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md).** No change. The asked
+- **[P09-E52](../../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md).** No change. The asked
   owner is a named ring whose word is dropped (E52 D3), and a pronoun word is dropped like a noun.
 
 ## Implementation
@@ -383,7 +448,7 @@ a question for the bug catalogue. It is recorded here and not filed.
    - `planToWorkspace` maps `pronominal` to an owner slice (D8);
    - `slotCategories`' comment, which says a possessor head is noun-only.
 2. **Canvas** (`packages/frontend/src/components/PhraseBuilder/`):
-   - `pronounHead` for owner rings ([`PhraseBuilder.tsx:983`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L983));
+   - `pronounHead` for owner rings ([`PhraseBuilder.tsx:983`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L983));
    - the generic person disabled in an owner's chooser;
    - the gender chip gated to the 3rd person on an owner ring (the owner builder passes its
      `ringHost.kind` into the satellite context);

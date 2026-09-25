@@ -6,6 +6,7 @@ import type {
   SlotKey,
 } from "../model/interfaces.ts";
 import { COMPLEMENT_KEY_SET, nounOnlyConjunct } from "../model/slots.ts";
+import { isPersonalPronoun } from "../model/selectionToPlan/functions/pronounFeatures.ts";
 import { coded, type Coded } from "./diagnostics.ts";
 import type { Vocabulary } from "./types.ts";
 
@@ -24,6 +25,11 @@ export interface WordSpec {
   roles: GrammaticalRole[];
   /** Verbs only: the modal verbs (`/modal`) or every other one (`/verb`). */
   modal?: boolean;
+  /**
+   * Pronouns only: the three persons alone — no generic "one", no indefinite — which are what an
+   * owner's chooser offers (P11-E9 D8). Their possessive determiners (*my*, *their*) name them too.
+   */
+  personal?: boolean;
 }
 
 /**
@@ -32,7 +38,8 @@ export interface WordSpec {
  * noun or a pronoun: "you and I").
  */
 export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "standard" | "examples" | "conjunct" = "period"): WordSpec {
-  if (slot === "subject") return frame === "possessor" ? { roles: ["noun"] } : { roles: ["noun", "pronoun"] };
+  // An owner is a noun or one of the three persons, "my mother" (P11-E9 D8).
+  if (slot === "subject") return frame === "possessor" ? { roles: ["noun", "pronoun"], personal: true } : { roles: ["noun", "pronoun"] };
   if (slot === "interjection") return { roles: ["interjection"] };
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
@@ -60,7 +67,9 @@ export const conjunctSpec = (which: NounKey | undefined): WordSpec =>
 export function wordsFor(spec: WordSpec, vocab: Vocabulary): Concept[] {
   return spec.roles.flatMap((role) =>
     (vocab.concepts[role] ?? []).filter(
-      (c) => role !== "verb" || spec.modal === undefined || Boolean(c.modal) === spec.modal,
+      (c) =>
+        (role !== "verb" || spec.modal === undefined || Boolean(c.modal) === spec.modal) &&
+        (role !== "pronoun" || !spec.personal || isPersonalPronoun(c)),
     ),
   );
 }
@@ -114,6 +123,20 @@ export const PRONOUN_FORMS: Record<string, PronounForm> = {
   them: { id: "THIRD_PERSON", number: "plural" },
 };
 
+/**
+ * The English possessive determiners, read in an owner's frame only (P11-E9 D8): *my* is no subject.
+ * *her* is a pronoun form already; *your* is the 2nd singular, as *you* is. The line prints the person
+ * (`/poss [ 1st ]`), never these.
+ */
+export const POSSESSIVE_FORMS: Record<string, PronounForm> = {
+  my: { id: "FIRST_PERSON", number: "singular" },
+  our: { id: "FIRST_PERSON", number: "plural" },
+  your: { id: "SECOND_PERSON", number: "singular" },
+  his: { id: "THIRD_PERSON", number: "singular", gender: "masc" },
+  its: { id: "THIRD_PERSON", number: "singular", gender: "neut" },
+  their: { id: "THIRD_PERSON", number: "plural" },
+};
+
 // ── Words ────────────────────────────────────────────────────────────────────
 
 export type WordResolution =
@@ -133,7 +156,8 @@ export function resolveWord(text: string, spec: WordSpec, vocab: Vocabulary): Wo
   const q = norm(text);
   const words = wordsFor(spec, vocab);
   if (spec.roles.includes("pronoun")) {
-    const form = PRONOUN_FORMS[q];
+    // An owner's frame reads the possessive determiners too: `/poss my` is the 1st singular.
+    const form = PRONOUN_FORMS[q] ?? (spec.personal ? POSSESSIVE_FORMS[q] : undefined);
     const concept = form && words.find((c) => c.id === form.id);
     if (form && concept) {
       const opts: ConceptSelectOpts = {};

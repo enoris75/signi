@@ -47,11 +47,25 @@ export const NOUNS = [
   c('ANIMAL', 'noun', 'animal', 'animale', { animate: true }),
 ];
 
+// Kin, for an owner that is a pronoun (P11-E9): "my mother runs", "my son marries your daughter". Kept
+// out of NOUNS and VERBS, which the round trip's random walk draws from, so the walk reaches what it did.
+export const KIN = [
+  c('MOTHER', 'noun', 'mother', 'madre', { animate: true, human: true }),
+  c('SON', 'noun', 'son', 'figlio', { animate: true, human: true }),
+  c('DAUGHTER', 'noun', 'daughter', 'figlia', { animate: true, human: true }),
+];
+
 export const PRONOUNS = [
   c('FIRST_PERSON', 'pronoun', 'I', 'io', { person: '1', description: '1st Person' }),
   c('SECOND_PERSON', 'pronoun', 'you', 'tu', { person: '2', description: '2nd Person' }),
   c('THIRD_PERSON', 'pronoun', 'he', 'lui', { person: '3', description: '3rd Person' }),
   c('GENERIC_PERSON', 'pronoun', 'one', 'si', { person: '3', synonym: 'one', description: 'one (generic person)' }),
+];
+
+// An indefinite (C32): a pronoun whose slot is not a person's, which no owner is (P11-E9) and no chooser
+// row picks — kept out of PRONOUNS, which the walk draws from, for that reason.
+export const INDEFINITES = [
+  c('SOMEONE', 'pronoun', 'someone', 'qualcuno', { person: '3', slot: 'indefinite', description: 'someone' }),
 ];
 
 export const VERBS = [
@@ -93,6 +107,9 @@ export const VERBS = [
   verb('WILL', 'want', 'volere', { modal: true }),
 ];
 
+// The kin's verb (P11-E9), out of VERBS as KIN is out of NOUNS.
+export const KIN_VERBS = [verb('MARRY', 'marry', 'sposare')];
+
 export const ADJECTIVES = [
   c('BROWN', 'adjective', 'brown', 'marrone'),
   c('OLD', 'adjective', 'old', 'vecchio'),
@@ -112,7 +129,7 @@ export const ADVERBS = [
 // The period's interjection (P09-E47): HEY, the corpus's one.
 export const INTERJECTIONS = [c('HEY', 'interjection', 'hey', 'ehi')];
 
-export const ALL = [...NOUNS, ...PRONOUNS, ...VERBS, ...ADJECTIVES, ...ADVERBS, ...INTERJECTIONS];
+export const ALL = [...NOUNS, ...KIN, ...PRONOUNS, ...INDEFINITES, ...VERBS, ...KIN_VERBS, ...ADJECTIVES, ...ADVERBS, ...INTERJECTIONS];
 
 export const byId = (id: string): Concept => {
   const hit = ALL.find((x) => x.id === id);
@@ -127,10 +144,10 @@ const PERSON_NAMES: Record<string, Record<string, string>> = {
 
 export function vocabFor(language: LanguageCode = 'en'): Vocabulary {
   return {
-    concepts: { noun: NOUNS, pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS, interjection: INTERJECTIONS },
+    concepts: { noun: [...NOUNS, ...KIN], pronoun: [...PRONOUNS, ...INDEFINITES], verb: [...VERBS, ...KIN_VERBS], adjective: ADJECTIVES, adverb: ADVERBS, interjection: INTERJECTIONS },
     language,
     label: (concept) =>
-      concept.role === 'pronoun'
+      concept.role === 'pronoun' && !concept.slot
         ? PERSON_NAMES[language]![concept.id === 'GENERIC_PERSON' ? 'generic' : concept.person!]!
         : concept.labels?.[language] ?? concept.label ?? concept.description,
     gloss: (concept) => (language === 'en' ? concept.synonym : undefined),

@@ -484,6 +484,8 @@ export function PhraseBuilder({
       ...(ringHost?.question && { ownerQuestion: ringHost.question }),
       // A hosted ring's noun takes no standard and no examples of its own (P09-E50 D4, P09-E48 D2).
       hosted: Boolean(ringHost),
+      // An owner's pronoun is a possessive, whose gender only the 3rd person spells (P11-E9 D3).
+      ownerHead: ringHost?.kind === "owner",
     },
   );
 
@@ -672,7 +674,7 @@ export function PhraseBuilder({
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
   // catalog entry can hold it (C16). Both the chip on the link and the control's tooltip read it.
   const possessivePhrase = usePossessivePhrases(
-    possessiveRequests(selection, pointers, coref.resolve),
+    possessiveRequests(selection, pointers, coref.resolve, owners),
   );
 
   // The group-extending control rides the group's last ring; each possessor control names or points
@@ -1111,9 +1113,13 @@ export function PhraseBuilder({
   const ctx: PhraseRenderContext = {
     selection,
     nounPhrase: nounPhraseMode,
-    // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him") — but not a
-    // role's conjunct, a noun as the role's head is (P09-E44).
-    pronounHead: (ringHost?.kind === "conjunct" && !nounOnlyConjunct(ringHost.role)) || ringHost?.kind === "standard",
+    // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him") and an owner
+    // ("my mother", P11-E9) — but not a role's conjunct, a noun as the role's head is (P09-E44).
+    pronounHead:
+      (ringHost?.kind === "conjunct" && !nounOnlyConjunct(ringHost.role)) ||
+      ringHost?.kind === "standard" ||
+      ringHost?.kind === "owner",
+    ownerHead: ringHost?.kind === "owner",
     // …and a predicate's conjunct takes an adjective, as the predicate does (P13).
     predicateHead: ringHost?.kind === "conjunct" && ringHost.role === "predicative",
     showSubject: !actionMode,
@@ -1146,7 +1152,13 @@ export function PhraseBuilder({
     handleCancelEdit: cancelEdit,
     handleConceptSelect,
     slotKind,
-    onSlotKindChange: setSlotKind,
+    onSlotKindChange: (slot, kind) => {
+      // Naming the owner a pronoun is choosing not to point (P11-E9 D8): the pick the owner opened
+      // with ends, so the chooser's digits and ↵ reach the chooser rather than the pick's targets.
+      if (ringHost?.kind === "owner" && slot === "subject" && kind === "pronoun" && coref.picking && possessorPath === possessorAddress(coref.picking))
+        coref.cancel();
+      setSlotKind(slot, kind);
+    },
     handleClear,
     handleToggleNumber: commands.handleToggleNumber,
     handleToggleGender: commands.handleToggleGender,
@@ -1236,6 +1248,7 @@ export function PhraseBuilder({
             <OwnerRings
               owners={owners}
               pointers={possession.pointerLines}
+              ownerLines={possession.ownerLines}
               selection={selection}
               onPhraseUpdate={onPhraseUpdate}
               onRemoveOwner={handleRemoveOwner}

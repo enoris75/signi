@@ -1,3 +1,4 @@
+import type { PronominalPossessor } from "@signi/shared";
 import type { NounKey } from "../interfaces.ts";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
@@ -21,6 +22,9 @@ import type { Pt } from "../ringLayout.ts";
  * (see `usePossessivePhrases`), with the bare possessive as the fallback until it arrives.
  */
 export type PointerLine = { spot: PointerSpot; link: PossessionLink; pronoun: string | undefined; color: string };
+
+/** A named owner's line, with the phrase its chip shows where the owner is a pronoun (P11-E9 D7). */
+export type OwnerLine = { spot: OwnerSpot; link: PossessionLink; pronoun: string | undefined; color: string };
 
 /**
  * The lines of possession on a canvas: a solid line from each noun to its owner's ring, and a dashed
@@ -50,12 +54,16 @@ export function possessionEdges({
   // The possessed noun phrase, once the backend has rendered it (see `usePossessivePhrases`).
   possessivePhrase: PossessivePhrase;
   compact: boolean;
-}): { edges: Edge[]; pointerLines: PointerLine[] } {
+}): { edges: Edge[]; pointerLines: PointerLine[]; ownerLines: OwnerLine[] } {
   // A hosted ring's builder knows its own possessor control by its head's key.
   const possessorControlOn = (key: string) =>
     controlOn(key, perimeterControlKey("possessor", key), perimeterControlKey("possessor", "subject"));
 
-  const ownerEdges = owners.flatMap((spot) => {
+  // The phrase a possessive renders, and the bare possessive until it has come back (C16).
+  const says = (concept: string | undefined, features: PronominalPossessor) =>
+    possessivePhrase(concept, features) ?? t(possessiveHintKey(features));
+
+  const ownerLines = owners.flatMap((spot): OwnerLine[] => {
     const link = ownerLink({
       owned: ringOf(spot.possessedKey),
       owner: ringOf(spot.address),
@@ -63,8 +71,12 @@ export function possessionEdges({
       port: controlOn(spot.address, ownerPortKey(spot)),
       compact,
     });
-    return link ? [linkEdge(link, colorOf(spot.role), false)] : [];
+    if (!link) return [];
+    // A pronoun owner's line says the possessed phrase, as a pointer's does (P11-E9 D7): the ring
+    // reads "first person", the line "my mother".
+    return [{ spot, link, pronoun: spot.pronoun && says(spot.possessedConcept, spot.pronoun), color: colorOf(spot.role) }];
   });
+  const ownerEdges = ownerLines.map(({ link, color }) => linkEdge(link, color, false));
 
   const pointerLines = pointers.flatMap((spot): PointerLine[] => {
     const link = pointerLink({
@@ -77,14 +89,13 @@ export function possessionEdges({
     const resolved = resolve(spot.antecedent);
     // The whole phrase where the render has come back, the bare possessive until then: the Romance
     // possessive agrees with the noun possessed, which only the engine can settle (C16).
-    const pronoun = resolved
-      ? possessivePhrase(spot.possessedConcept, resolved.features) ?? t(possessiveHintKey(resolved.features))
-      : undefined;
+    const pronoun = resolved ? says(spot.possessedConcept, resolved.features) : undefined;
     return [{ spot, link, pronoun, color: colorOf(spot.role) }];
   });
 
   return {
     edges: [...ownerEdges, ...pointerLines.map(({ link, color }) => linkEdge(link, color, true))],
     pointerLines,
+    ownerLines: ownerLines.filter((line) => line.pronoun),
   };
 }

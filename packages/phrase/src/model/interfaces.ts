@@ -826,7 +826,8 @@ const ADJECTIVE_CATEGORY: SlotCategory = {
 
 export function slotCategories(
   slotKey: SlotKey,
-  // In noun-phrase (possessor) mode the `subject` slot is a plain noun head — no pronoun.
+  // A noun-only hosted ring (examples, a role's conjunct) has a plain noun head — no pronoun. An
+  // owner's head takes a pronoun, "my mother" (P11-E9), as a conjunct's and a standard's do.
   nounSubject = false,
 ): { options: SlotCategory[]; fallback: string } | null {
   if (slotKey === "subject")

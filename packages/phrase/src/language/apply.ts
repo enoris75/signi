@@ -728,8 +728,9 @@ class Run {
     this.updateRoot(containerId, (root) => updateNounAt(root, possessed, (s, which) => updatePossessor(s, which, (p) => p)));
     this.touch(w.ref);
     if (item.word) {
-      const { concept } = this.word(item.word, wordSpecFor("subject", "possessor"), "poss");
-      this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept));
+      // A pronoun carries what its form says: `/poss we` is the 1st plural, `/poss her` the 3rd feminine.
+      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "possessor"), "poss");
+      this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept, opts));
       this.touch(headRef);
     }
     // A bracket that opens with the head word reaches it: `/poss [ child /adj old ]`.

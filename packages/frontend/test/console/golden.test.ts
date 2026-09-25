@@ -601,6 +601,51 @@ describe('the passive question', () => {
   });
 });
 
+// P11-E9 D8: an owner named as one of the three persons — "my mother runs" — printed as its person.
+describe('a pronoun as the owner', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/subj ( mother /poss [ 1st ] ) /verb ( run )', '/subj ( mother /poss [ 1st ] ) /verb ( run )', { subject: 'FIRST_PERSON' }],
+    ['/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', '/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'plural' }],
+    ['/subj 1st /verb see /obj ( book /poss [ 3rd /fem ] )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /fem ] )', { subject: 'THIRD_PERSON', subjectGender: 'fem' }],
+    // The English forms, and the possessive determiners in this frame alone; the person is what prints.
+    ['/subj mother /poss my /verb run', '/subj ( mother /poss [ 1st ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'singular' }],
+    ['/subj mother /poss we /verb run', '/subj ( mother /poss [ 1st /pl ] ) /verb ( run )', { subject: 'FIRST_PERSON', subjectNumber: 'plural' }],
+    ['/subj 1st /verb see /obj ( book /poss her )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /fem ] )', { subject: 'THIRD_PERSON', subjectGender: 'fem' }],
+    ['/subj 1st /verb see /obj ( book /poss their )', '/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 3rd /pl ] )', { subject: 'THIRD_PERSON', subjectNumber: 'plural' }],
+  ])('%s', (line, prints, owner) => {
+    const state = ok(line);
+    const possessor = sel(state).subjectPossessor ?? sel(state).directObjectPossessor!;
+    expect(noun(possessor)).toMatchObject(owner);
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+  });
+
+  it('holds both owners of “my son marries your daughter”', () => {
+    const line = '/subj ( son /poss [ 1st ] ) /verb ( marry ) /obj ( daughter /poss [ 2nd ] )';
+    const state = ok(line);
+    expect(noun(sel(state).subjectPossessor!)).toMatchObject({ subject: 'FIRST_PERSON' });
+    expect(noun(sel(state).directObjectPossessor!)).toMatchObject({ subject: 'SECOND_PERSON' });
+    expect(print(state)).toBe(line);
+  });
+
+  it('holds a role after a pronoun owner, which the plan leaves out (the stale-mark rule)', () => {
+    const line = '/subj 1st /verb see /obj ( book /poss [ 1st ] /whole )';
+    expect(print(ok(line))).toBe('/subj ( 1st ) /verb ( see ) /obj ( book /poss [ 1st ] /whole )');
+  });
+
+  it.each([
+    ['/subj mother /poss one /verb run', 'one'],
+    ['/subj mother /poss someone /verb run', 'someone'],
+    ['/subj mother /poss [ one ] /verb run', 'one'],
+  ])('takes no generic and no indefinite owner: %s', (line, text) => {
+    expect(run(line).diagnostic).toMatchObject({ code: 'unknownWord', args: { text } });
+  });
+
+  it('reads *my* in an owner’s frame alone: it is no subject', () => {
+    expect(run('/subj my /verb run').diagnostic).toMatchObject({ code: 'unknownWord', args: { text: 'my' } });
+  });
+});
+
 // P09-E52 D5: the owner's gap, and the noun it is inside, on /wh.
 describe('the possessor question', () => {
   it.each<[string, string, Record<string, unknown>]>([

@@ -14,7 +14,7 @@ import type {
   RelativeClause,
   VerbPhrase,
 } from "@signi/shared";
-import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
+import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES, isPronominalPossessor } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
 import { conjunctAddress, examplesAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
 import { comparedAdjectiveIndex } from "../../functions/comparison.ts";
@@ -70,6 +70,9 @@ const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", 
 const RELATIVE_FIELDS = new Set(["headRole", "headSpecifiers", "subject", "verbPhrase", "directObject", "complements"]);
 const INFINITIVE_FIELDS = new Set(["verbPhrase", "directObject", "complements", "control", "infinitiveComplement"]);
 const CLAUSE_FIELDS = new Set(["subject", "verbPhrase", "directObject", "complements"]);
+
+// The pronoun a possessive pronoun's person names, as the owner ring's chooser picks it.
+const PRONOUN_BY_PERSON = { "1": "FIRST_PERSON", "2": "SECOND_PERSON", "3": "THIRD_PERSON" } as const;
 
 const isSet = (v: unknown) => v !== undefined && v !== false && !(Array.isArray(v) && v.length === 0);
 const isGroup = (el: NounElement): el is NounGroup => "conjuncts" in el;
@@ -348,7 +351,18 @@ class Builder {
     this.modifiers(sel, which, np);
     this.adjectiveStandard(c, sel, which, np, address);
     if (np.possessor) {
-      if ("kind" in np.possessor) this.unsupported.add(`Possessor.${np.possessor.kind}`);
+      if (isPronominalPossessor(np.possessor)) {
+        // A possessive pronoun is an owner ring whose head is the pronoun of its person (P11-E9 D8):
+        // it has no address to recover, so a plan the builder wrote from a pointer comes back as a free
+        // owner with the same features, which re-plans to itself.
+        const pronoun = this.concept(PRONOUN_BY_PERSON[np.possessor.person]);
+        if (pronoun) {
+          const owner: PhraseSelection = { subject: pronoun, subjectNumber: np.possessor.number };
+          if (np.possessor.person === "3") set(owner, "subjectGender", np.possessor.gender);
+          set(sel, `${which}Possessor`, owner);
+        }
+        if (np.possessorRole && np.possessorRole !== "owner") this.unsupported.add("NounPhrase.possessorRole on a pronoun");
+      } else if ("kind" in np.possessor) this.unsupported.add(`Possessor.${np.possessor.kind}`);
       else {
         const owner: PhraseSelection = {};
         this.phrase(c, owner, "subject", np.possessor, possessorAddress(address));

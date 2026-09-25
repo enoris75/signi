@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildNounPhrase } from '../../../src/components/PhraseBuilder/selectionToPlan/functions/buildNounPhrase.ts';
 import type { PhraseSelection } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import { BIG, BOY, CAT, DOG, HAPPY, HOUSE, SAIL } from '../fixtures.ts';
+import { BIG, BOY, CAT, concept, DOG, HAPPY, HOUSE, I, SAIL, WE } from '../fixtures.ts';
 
 describe('buildNounPhrase', () => {
   it('is undefined for an empty slot', () => {
@@ -176,6 +176,58 @@ describe('buildNounPhrase', () => {
     };
 
     expect(buildNounPhrase(sel, 'directObject')?.possessor).toMatchObject({ kind: 'pronominal' });
+  });
+
+  // P11-E9 D2: a pronoun named in the owner's ring is a possessive pronoun, never a genitive ("the I's").
+  describe('a pronoun named as the owner', () => {
+    const THIRD = concept('THIRD_PERSON', 'pronoun', { person: '3' });
+    const GENERIC = concept('GENERIC_PERSON', 'pronoun', { person: '3' });
+    const SOMEONE = concept('SOMEONE', 'pronoun', { person: '3', slot: 'indefinite' });
+    const owned = (owner: PhraseSelection, extra: PhraseSelection = {}) =>
+      buildNounPhrase({ subject: HOUSE, subjectPossessor: owner, ...extra }, 'subject');
+
+    it('writes the 1st person as a possessive pronoun, its gender left out', () => {
+      expect(owned({ subject: I, subjectNumber: 'singular', subjectGender: 'fem' })?.possessor).toEqual({
+        kind: 'pronominal',
+        person: '1',
+        number: 'singular',
+      });
+    });
+
+    it('reads the number off the ring, else the pronoun’s own: our', () => {
+      expect(owned({ subject: I, subjectNumber: 'plural' })?.possessor).toMatchObject({ person: '1', number: 'plural' });
+      expect(owned({ subject: WE })?.possessor).toMatchObject({ person: '1', number: 'plural' });
+    });
+
+    it('keeps the 3rd person’s gender: her', () => {
+      expect(owned({ subject: THIRD, subjectNumber: 'singular', subjectGender: 'fem' })?.possessor).toEqual({
+        kind: 'pronominal',
+        person: '3',
+        number: 'singular',
+        gender: 'fem',
+      });
+    });
+
+    it('drops the generic and an indefinite, which have no possessive the plan can state', () => {
+      expect(owned({ subject: GENERIC })?.possessor).toBeUndefined();
+      expect(owned({ subject: SOMEONE })?.possessor).toBeUndefined();
+    });
+
+    it('does not write what the owner’s slice still holds: its owner, adjective or conjuncts', () => {
+      const possessor = owned({
+        subject: I,
+        subjectAdjective: BIG,
+        subjectPossessor: { subject: DOG },
+        subjectConjuncts: [{ subject: CAT }],
+      })?.possessor;
+      expect(possessor).toEqual({ kind: 'pronominal', person: '1', number: 'singular' });
+    });
+
+    it('drops a role under a pronoun owner, and gives it back under a noun owner (D5)', () => {
+      const roles = { possessorRoles: { subject: 'whole' as const } };
+      expect(owned({ subject: I }, roles)?.possessorRole).toBeUndefined();
+      expect(owned({ subject: BOY }, roles)?.possessorRole).toBe('whole');
+    });
   });
 
   it('drops a reference whose antecedent is gone', () => {

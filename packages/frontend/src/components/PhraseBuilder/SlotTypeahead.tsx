@@ -20,6 +20,7 @@ export function slotTypeahead({
   selection,
   onSelect,
   nounSubject = false,
+  ownerHead = false,
   pickerSlot,
   editing = false,
   kind,
@@ -32,6 +33,9 @@ export function slotTypeahead({
   // In noun-phrase mode (an owner's ring) the `subject` slot is the owner's head, which is
   // noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
   nounSubject?: boolean;
+  // An owner's head (P11-E9): a noun or one of the three persons, under the prompt a noun-or-pronoun
+  // box has — the generic "one" is shown disabled, having no possessive.
+  ownerHead?: boolean;
   // The slot whose picker it opens, where it is not its own (P13: a predicate's conjunct's `subject`).
   pickerSlot?: SlotKey;
   // Re-picking the word of an already-filled box: bypass the empty/active guard so the
@@ -48,7 +52,7 @@ export function slotTypeahead({
 
   const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
-  return pickerFor(pickerSlot ?? slotKey, pick, nounSubject, kind, onKindChange);
+  return pickerFor(pickerSlot ?? slotKey, pick, nounSubject, kind, onKindChange, ownerHead);
 }
 
 // Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can
@@ -68,11 +72,23 @@ function pickerFor(
   // starting class for a re-pick is decided by the caller (from the held concept's role).
   kind?: string,
   onKindChange?: (kind: string) => void,
+  ownerHead = false,
 ): ReactNode {
   switch (slotKey) {
     case "verb":
       return <VerbTypeahead onSelect={pick} />;
     case "subject":
+      if (ownerHead && !nounSubject)
+        return (
+          <SubjectTypeahead
+            onSelect={pick}
+            placeholderKey="slot.nounOrPronoun.placeholder"
+            kind={kind}
+            onKindChange={onKindChange}
+            personalOnly
+            testId="typeahead-noun"
+          />
+        );
       return nounSubject ? (
         <DirectObjectTypeahead onSelect={pick} />
       ) : (

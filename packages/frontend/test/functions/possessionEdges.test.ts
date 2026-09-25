@@ -127,12 +127,24 @@ describe('possessionEdges', () => {
     ]);
   });
 
+  // P11-E9 D7: a pronoun owner's solid line carries the possessed phrase too; a noun owner's none.
+  it('puts the possessed phrase on a pronoun owner’s line, and none on a noun owner’s', () => {
+    const pronounOwner: OwnerSpot = { ...OWNER, pronoun: { kind: 'pronominal', person: '1', number: 'singular' }, possessedConcept: 'HORSE' };
+    const rendered = edges({ owners: [pronounOwner], possessivePhrase: (concept) => (concept === 'HORSE' ? 'my horse' : undefined) });
+    expect(rendered.ownerLines).toHaveLength(1);
+    expect(rendered.ownerLines[0]).toMatchObject({ spot: pronounOwner, pronoun: 'my horse', color: 'blue' });
+    expect(rendered.edges).toHaveLength(1);
+    // Until the render arrives, the catalog's bare possessive.
+    expect(edges({ owners: [pronounOwner] }).ownerLines[0]?.pronoun).toBe(t('pronoun.possessive.1sg'));
+    expect(edges({ owners: [OWNER] }).ownerLines).toEqual([]);
+  });
+
   it('draws no line until both its rings are on the canvas', () => {
     const result = edges({
       owners: [{ ...OWNER, address: 'directObject/possessor', possessedKey: 'directObject' }],
       pointers: [{ ...POINTER, antecedentKey: undefined }],
     });
 
-    expect(result).toEqual({ edges: [], pointerLines: [] });
+    expect(result).toEqual({ edges: [], pointerLines: [], ownerLines: [] });
   });
 });

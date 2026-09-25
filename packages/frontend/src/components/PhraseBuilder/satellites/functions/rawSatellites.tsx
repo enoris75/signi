@@ -84,7 +84,16 @@ export function rawSatellites(
     clauseObject = false,
     ownerQuestion,
     hosted = false,
-  }: { moodLocked?: boolean; clauseObject?: boolean; ownerQuestion?: { available: boolean; asked: boolean }; hosted?: boolean } = {},
+    ownerHead = false,
+  }: {
+    moodLocked?: boolean;
+    clauseObject?: boolean;
+    ownerQuestion?: { available: boolean; asked: boolean };
+    hosted?: boolean;
+    // Whether this is an owner's ring (P11-E9): a pronoun there is a possessive, and of its persons
+    // only the 3rd spells a gender (his / her / its), so the gender control is offered on it alone.
+    ownerHead?: boolean;
+  } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
@@ -153,7 +162,8 @@ export function rawSatellites(
   });
   // What a noun's genitive possessor is to it (P13): its owner, the whole it is part of, or the parts it
   // is made of. Each click moves it on; it rides beside the possessor control while there is one to
-  // describe — a pronominal possessor ("its part") has no role.
+  // describe — a pronominal possessor ("its part") has no role, whether pointed to or named in the
+  // owner's ring (P11-E9 D5): a role set earlier stays and comes back with a noun owner.
   const possessorRole = (which: NounKey): RawSatellite => {
     const owner = selection[`${which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined;
     const role = selection.possessorRoles?.[which];
@@ -163,7 +173,7 @@ export function rawSatellites(
       label: t("modifier.relation"),
       labelKey: "modifier.relation",
       icon: <PieChartOutlineIcon sx={iconSx} />,
-      available: Boolean(owner?.subject) && !selection[`${which}PossessorRef` as keyof PhraseSelection],
+      available: owner?.subject?.role === "noun" && !selection[`${which}PossessorRef` as keyof PhraseSelection],
       hasValue: Boolean(role),
       valueLabel: t(role ? `possessorRole.value.${role}` : "slot.possessor"),
       directToggle: true,
@@ -185,8 +195,10 @@ export function rawSatellites(
     selection.verb?.transitivity === "transitive" || selection.verb?.transitivity === "ditransitive";
 
   const showSubjectNumber = Boolean(selection.subject);
+  // A pronoun subject keeps it for every person, since a participle agrees with it ("tu sei stata");
+  // an owner's pronoun is a possessive, which no language genders outside the 3rd person (P11-E9 D3).
   const showSubjectGender =
-    selection.subject?.role === "pronoun" ||
+    (selection.subject?.role === "pronoun" && (!ownerHead || selection.subject.person === "3")) ||
     (selection.subject?.role === "noun" &&
       Boolean(selection.subject?.gendered));
   const directObjectRole = selection.directObject?.role;

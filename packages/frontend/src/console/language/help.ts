@@ -85,7 +85,8 @@ export const EXAMPLES: Record<string, string> = {
   adj: "/subj ( cat /adj brown )",
   adv: "/subj ( dog ) /verb ( run /adv fast )",
   modal: "/subj ( cat ) /verb ( eat /modal can )",
-  poss: "/subj ( book /poss [ man /adj old ] )",
+  // A named owner, and one that is a person (P11-E9): "my mother sees the old man's book".
+  poss: "/subj ( mother /poss [ 1st ] ) /verb ( see ) /obj ( book /poss [ man /adj old ] )",
   than: "/subj ( cat ) /verb ( seem ) /pred ( big /more /than [ dog ] )",
   outof: "/subj ( cat ) /verb ( seem ) /pred ( big /most /outof [ dog /pl ] )",
   suchas: "/subj ( animal /pl /zero /suchas [ cat ] ) /verb ( run )",

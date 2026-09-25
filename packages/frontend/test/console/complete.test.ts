@@ -493,6 +493,23 @@ describe('inside a bracket (structured lines)', () => {
     expect(commands(c)).not.toContain('/subj');
   });
 
+  // P11-E9 D8: an owner is a noun or one of the three persons — what the owner ring's chooser enables.
+  it('offers the three persons in a possessor’s phrase, and no generic or indefinite', () => {
+    const inserts = at('/subj ( cat /poss [ ').candidates.map((x) => x.insert);
+    expect(inserts).toEqual(expect.arrayContaining(['1st', '2nd', '3rd', 'man']));
+    expect(inserts).not.toContain('one');
+    expect(inserts).not.toContain('someone');
+    expect(inserts).not.toContain('SOMEONE');
+    // After a period's subject the generic is a word like any other.
+    expect(at('/subj ').candidates.map((x) => x.insert)).toContain('one');
+  });
+
+  it('describes a pronoun owner as the pronoun it is: no adjective, a number', () => {
+    const c = at('/subj ( cat /poss [ 1st ');
+    expect(commands(c)).toContain('/pl');
+    expect(commands(c)).not.toContain('/adj');
+  });
+
   it('offers a phrase’s bracket in square brackets', () => {
     const c = at('/subj ( cat /poss ');
     expect(c.candidates[0]).toMatchObject({ kind: 'phrase', insert: '[', close: ']' });

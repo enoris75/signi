@@ -124,6 +124,27 @@ describe('possessionsFor', () => {
     ]);
   });
 
+  // P11-E9 D7: a pronoun owner's spot carries the possessive its line will say, and no owner below it.
+  it('gives a pronoun owner the possessive it spells, with the noun it owns', () => {
+    const I = { ...pronoun('FIRST_PERSON'), person: '1' as const };
+    const { owners } = spots({
+      directObject: HORSE,
+      directObjectPossessor: { subject: I, subjectNumber: 'plural', subjectGender: 'fem', subjectPossessor: { subject: DOG } },
+    });
+    expect(owners).toEqual([
+      {
+        address: 'directObject/possessor',
+        possessed: 'directObject',
+        possessedKey: 'directObject',
+        role: 'directObject',
+        order: -0.5,
+        named: true,
+        pronoun: { kind: 'pronominal', person: '1', number: 'plural' },
+        possessedConcept: 'HORSE',
+      },
+    ]);
+  });
+
   it('looks only at the nouns it is given, and at no owner below a pronoun head', () => {
     expect(spots({ subject: BOOK, subjectPossessor: { subject: CAT } }, {}, ['directObject'] as never).owners).toEqual([]);
     expect(
