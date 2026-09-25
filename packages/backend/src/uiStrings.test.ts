@@ -718,7 +718,7 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(31);
+    expect(purposes).toHaveLength(32);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
@@ -752,6 +752,26 @@ describe('buildUiStrings', () => {
       pt: 'Remover este termo de comparação',
     });
     expect(strings['purpose.standard']).toMatchObject({ de: 'eine Vergleichsgröße zu einem Adjektiv hinzufügen', ja: '形容詞に比較の基準を加える' });
+    // The same ring on a superlative, the set it picks from (P09-E51 D2): COMPARISON_SET.
+    expect(strings['slot.comparisonSet']).toEqual({
+      en: 'Comparison set', it: 'Insieme di confronto', fr: 'Ensemble de comparaison', de: 'Vergleichsmenge',
+      es: 'Conjunto de comparación', ja: '比較の範囲', pt: 'Conjunto de comparação',
+    });
+    expect(strings['action.removeComparisonSet']).toEqual({
+      en: 'Remove this comparison set', it: "Rimuovi quest'insieme di confronto", fr: 'Retirer cet ensemble de comparaison',
+      de: 'Diese Vergleichsmenge entfernen', es: 'Quitar este conjunto de comparación', ja: 'この比較の範囲を取り除き',
+      pt: 'Remover este conjunto de comparação',
+    });
+    expect(strings['purpose.comparisonSet']).toMatchObject({ de: 'eine Vergleichsmenge zu einem Adjektiv hinzufügen', ja: '形容詞に比較の範囲を加える' });
+    // Its ring's head box, and the standard's, clear by name (P09-E51).
+    expect(strings['action.clear.standard']).toEqual({
+      en: 'Clear the standard of comparison', it: 'Cancella il termine di paragone', fr: 'Effacer le terme de comparaison',
+      de: 'Die Vergleichsgröße löschen', es: 'Borrar el término de comparación', ja: '比較の基準を消去', pt: 'Limpar o termo de comparação',
+    });
+    expect(strings['action.clear.comparisonSet']).toEqual({
+      en: 'Clear the comparison set', it: "Cancella l'insieme di confronto", fr: "Effacer l'ensemble de comparaison",
+      de: 'Die Vergleichsmenge löschen', es: 'Borrar el conjunto de comparación', ja: '比較の範囲を消去', pt: 'Limpar o conjunto de comparação',
+    });
     expect(strings['diagnostic.noAdjectiveHasStandard']).toMatchObject({
       en: 'No adjective has a standard of comparison', fr: "Aucun adjectif n'a de terme de comparaison", ja: 'どの形容詞も比較の基準がありません',
     });

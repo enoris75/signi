@@ -8,6 +8,8 @@ export type RoleSlot = Pick<SlotConfig, "label" | "labelKey" | "required" | "col
 export interface RingRole {
   kind: "conjunct" | "owner" | "standard";
   role: NounKey;
+  // A standard under a superlative, which reads as the set it picks from (P09-E51 D2).
+  set?: boolean;
 }
 
 /**
@@ -21,9 +23,12 @@ export function roleSlotFor(ringHost: RingRole | undefined): RoleSlot | undefine
   if (!hostRole) return undefined;
   if (ringHost.kind === "owner")
     return { label: "Possessor", labelKey: "slot.possessor", required: false, color: hostRole.color };
-  // A standard of comparison is named for what it is too, in the predicative's colour (P09-E12 D5).
+  // A standard of comparison is named for what it is too, in the predicative's colour (P09-E12 D5):
+  // on a superlative, the set it picks from (P09-E51 D2).
   if (ringHost.kind === "standard")
-    return { label: "Standard of comparison", labelKey: "slot.standard", required: false, color: hostRole.color };
+    return ringHost.set
+      ? { label: "Comparison set", labelKey: "slot.comparisonSet", required: false, color: hostRole.color }
+      : { label: "Standard of comparison", labelKey: "slot.standard", required: false, color: hostRole.color };
   return hostRole;
 }
 

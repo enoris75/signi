@@ -19,6 +19,7 @@ import {
   type PhraseSelection,
   type SlotKey,
 } from "../model/interfaces.ts";
+import { readsAsSet } from "../model/functions/comparison.ts";
 import { conjunctsOf } from "../model/phraseReducers.ts";
 import { resolveAntecedent } from "../model/selectionToPlan/index.ts";
 import { adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../model/slots.ts";
@@ -448,10 +449,13 @@ class Printer {
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its
     // own in brackets. It is written under any degree — one that takes none only mutes it — so the
-    // word the user gave comes back with the line.
+    // word the user gave comes back with the line. On a superlative it is the set the adjective picks
+    // from, and is spelled `/outof` (P09-E51 D3); its removal and its reference step stay `than`.
     const standard = sel[STANDARD_KEY(which)] as PhraseSelection | undefined;
-    if (!slice && which === "predicative" && concept.role === "adjective" && standard && Object.keys(standard).length)
-      this.phrase(ref, "/than", `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
+    if (!slice && which === "predicative" && concept.role === "adjective" && standard && Object.keys(standard).length) {
+      const name = readsAsSet(sel.adjectiveDegrees?.[which]) ? "/outof" : "/than";
+      this.phrase(ref, name, `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
+    }
 
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
     const possessorRef = sel[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;

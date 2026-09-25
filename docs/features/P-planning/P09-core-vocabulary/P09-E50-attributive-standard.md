@@ -162,7 +162,7 @@ subject). The reference step (`#1.obj.than`) and `/del than` need nothing new.
 
 **Recommendation: as above.** Printing `/than` inside the adjective's bracket would read better, but
 it breaks down when no adjective compares (D3). What a superlative spells is
-[E51](P09-E51-superlative-set.md)'s question.
+[E51](Z-done/P09-E51-superlative-set.md)'s question.
 
 ## 1. Model — [`packages/phrase/src/model/`](../../../../packages/phrase/src/model/)
 
@@ -237,7 +237,7 @@ comparison to an adjective") and `diagnostic.noAdjectiveHasStandard`
 
 - **The attributive superlative's set** ("the biggest cat of the three"): the engine drops it
   (probed: "the man sees the biggest cat."), so it is an engine ticket first. D1's per-noun key
-  already carries it; see [E51](P09-E51-superlative-set.md) D4.
+  already carries it; see [E51](Z-done/P09-E51-superlative-set.md) D4.
 - **A standard on a hosted ring's adjective** (D4), and coordinated standards (E12c's follow-up).
 - **The fr/es/pt possessor behind a standard** (*Today*). File it as a bug if it is wanted otherwise.
 - The object predicative's standard (A269's field, a predicate `headStandard`, not this one).

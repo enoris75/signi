@@ -1050,7 +1050,7 @@ export function PhraseBuilder({
               ringHost.kind === "owner"
                 ? "action.removePossessor"
                 : ringHost.kind === "standard"
-                  ? "action.removeStandard"
+                  ? ringHost.set ? "action.removeComparisonSet" : "action.removeStandard"
                   : "action.removeConjunct",
             ),
             onRemove,

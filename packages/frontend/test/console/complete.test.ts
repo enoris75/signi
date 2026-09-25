@@ -56,6 +56,17 @@ describe('commands', () => {
     expect({ from: c.from, to: c.to }).toEqual({ from: 0, to: 1 });
   });
 
+  // P09-E51 D3: the standard is offered under the name its degree prints — `/outof` on a superlative,
+  // `/than` on the rest — though apply reads either.
+  it('offers a predicate adjective’s standard under its degree’s name', () => {
+    const offers = (text: string, name: string) => labels(at(text)).includes(name);
+    expect(offers('/verb ( seem ) /pred ( big /most /outof', '/outof')).toBe(true);
+    expect(offers('/verb ( seem ) /pred ( big /least /than', '/than')).toBe(false);
+    expect(offers('/verb ( seem ) /pred ( big /more /than', '/than')).toBe(true);
+    expect(offers('/verb ( seem ) /pred ( big /more /outof', '/outof')).toBe(false);
+    expect(offers('/verb ( seem ) /pred ( big /than', '/than')).toBe(true);
+  });
+
   it('narrows by prefix, and ghosts the rest of the best', () => {
     const c = at('/p', onCat());
     expect(labels(c).slice(0, 2)).toEqual(['/pl', '/poss']);

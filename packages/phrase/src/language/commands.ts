@@ -450,6 +450,23 @@ export const COMMANDS: readonly CommandDef[] = [
     reducers: ["updateStandard"],
   },
   {
+    // The same field read as a superlative's set (P09-E51 D3): "the biggest *out of the dogs*" — `/pred
+    // ( big /most /outof [ dog /pl ] )`. `/of` is the possessor's and `/among` / `/in` are places, so it
+    // is named for the English that fits a superlative. Apply reads either name under any degree; the
+    // printer writes this one on `most` / `least` and `/than` on the rest.
+    name: "outof",
+    aliases: ["out_of", "set"],
+    group: "role",
+    description: "comparison set",
+    descriptionKey: "slot.comparisonSet",
+    purposeKey: "purpose.comparisonSet",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "standard" },
+    satellites: /^predicativeStandard$/,
+    reducers: ["updateStandard"],
+  },
+  {
     name: "and",
     aliases: [],
     group: "role",

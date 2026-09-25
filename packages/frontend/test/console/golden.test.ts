@@ -72,6 +72,14 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/verb ( seem ) /pred ( big /more /than [ dog ] )',
     misuse: { line: '/verb seem /pred dog /than cat', says: { code: 'noTarget', args: { command: 'than', last: { word: 'dog', kind: 'noun' } } } },
   },
+  // The same field read as a superlative's set (P09-E51 D3): typed with either name, printed `/outof`
+  // on `most` / `least`. A pronoun picks nothing out of a set.
+  outof: {
+    line: '/verb seem /pred big /most /than dog',
+    check: (s) => expect(noun(sel(s).predicativeStandard!)).toMatchObject({ subject: 'DOG' }),
+    prints: '/verb ( seem ) /pred ( big /most /outof [ dog ] )',
+    misuse: { line: '/subj 1st /outof cat', says: { code: 'noTarget', args: { command: 'outof', last: { kind: 'pronoun' } } } },
+  },
   and: {
     line: '/subj cat /and ( /subj dog /pl )',
     check: (s) => expect(noun(sel(s).subjectConjuncts![0]!)).toMatchObject({ subject: 'DOG', subjectNumber: 'plural' }),

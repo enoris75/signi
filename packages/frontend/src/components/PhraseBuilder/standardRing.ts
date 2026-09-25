@@ -4,7 +4,7 @@
 // `subject`), placed, dragged and kept clear of the other rings by the period's canvas, and joined to
 // the predicative by a line from the standard control on the predicative's dotted ring.
 
-import { STANDARD_DEGREES } from "@signi/shared";
+import { readsAsSet, takesStandardOrSet } from "@signi/phrase/model/functions/comparison.ts";
 import { standardAddress, type NounAddress, type PhraseSelection } from "./interfaces.ts";
 import { conjunctsOf } from "./phraseReducers.ts";
 import { ownerLink, ownerPortKey, type OwnerSpot, type PossessionLink, type RingAt } from "./ownerChain.ts";
@@ -19,15 +19,25 @@ export const STANDARD_ADDRESS: NounAddress = standardAddress("predicative");
  * wears, where tidying packs it and whether it holds a word — plus whether it is dimmed.
  */
 export type StandardSpot = OwnerSpot & {
-  // The degree no longer takes a standard (positive, most, least): the plan leaves it out, so the
-  // ring is drawn faded. The word is kept, and comes back into the sentence with the degree.
+  // The degree no longer takes a standard (the positive): the plan leaves it out, so the ring is
+  // drawn faded. The word is kept, and comes back into the sentence with the degree.
   dimmed: boolean;
+  // The degree is a superlative, so the standard reads as the set it picks from ("the biggest **of
+  // the dogs**", P09-E51): the ring is titled the comparison set, not the standard of comparison.
+  set: boolean;
 };
 
-/** Whether the predicate adjective's degree takes a standard — the gate on its control. */
+/**
+ * Whether the predicate adjective's degree takes a standard — the gate on its control. Every degree
+ * but the positive does: a rival on the comparatives and the equative, a set on the superlatives
+ * (P09-E51 D1).
+ */
 export const takesStandard = (selection: PhraseSelection): boolean =>
-  selection.predicative?.role === "adjective" &&
-  STANDARD_DEGREES.has(selection.adjectiveDegrees?.predicative ?? "positive");
+  selection.predicative?.role === "adjective" && takesStandardOrSet(selection.adjectiveDegrees?.predicative);
+
+/** Whether the predicate adjective's standard reads as a superlative's set (P09-E51 D2). */
+export const standardIsSet = (selection: PhraseSelection): boolean =>
+  selection.predicative?.role === "adjective" && readsAsSet(selection.adjectiveDegrees?.predicative);
 
 /**
  * The standard's ring on a canvas, or undefined when none is drawn: the predicative must be on the
@@ -56,6 +66,7 @@ export function standardSpotFor({
     order: conjunctsOf(selection, "predicative").length - 0.5,
     named,
     dimmed: !takesStandard(selection),
+    set: standardIsSet(selection),
   };
 }
 

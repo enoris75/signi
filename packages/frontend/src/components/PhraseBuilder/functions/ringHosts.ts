@@ -76,11 +76,12 @@ export function ringHosts({
   });
 
   // The predicate adjective's standard of comparison: an owner's hand-off, faded while its degree
-  // takes none (P09-E12 D5).
+  // takes none (P09-E12 D5), and named the comparison set on a superlative (P09-E51).
   const standardHost = (spot: StandardSpot): RingHost => ({
     ...ownerHost(spot),
     kind: "standard",
     dimmed: spot.dimmed,
+    set: spot.set,
   });
 
   return { conjunctHost, ownerHost, standardHost };

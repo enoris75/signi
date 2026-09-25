@@ -15,6 +15,7 @@ import {
   canStartSubordinate,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
+import { readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
 import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
@@ -377,10 +378,13 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
   const top = frame.words.length === 0 || frame.kind === "period";
   if (attachesToWord(action)) {
     // A relative clause said alone is offered only on a noun that heads one (P13).
+    // The standard is offered under the name its degree prints: `/outof` on a superlative, `/than`
+    // on the rest (P09-E51 D3). Both are read under any degree.
     const fits = (w: WordInfo) =>
       takes(action, w) &&
       (action.kind !== "headless" ||
-        state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address));
+        state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address)) &&
+      (action.kind !== "standard" || (def.name === "outof") === readsAsSet(w.slice.adjectiveDegrees?.[w.which!]));
     const i = words.findIndex(fits);
     if (i === -1) return undefined;
     return i === 0 ? 0 : 1;
@@ -788,6 +792,7 @@ const DEL_VALUES: readonly ValueDef[] = [
   { name: "modal", value: "modal", description: "a modal", descriptionKey: "slot.modal" },
   { name: "poss", value: "poss", description: "the possessor", descriptionKey: "slot.possessor" },
   { name: "than", value: "than", description: "the standard of comparison", descriptionKey: "slot.standard" },
+  { name: "outof", value: "outof", description: "the comparison set", descriptionKey: "slot.comparisonSet" },
   { name: "and", value: "and", description: "a coordinated phrase", descriptionKey: "slot.conjunct" },
   { name: "rel", value: "rel", description: "the relative clause", descriptionKey: "satellite.relative" },
   { name: "if", value: "if", description: "the if-condition", descriptionKey: "clause.conditional" },
@@ -972,7 +977,9 @@ function linkTitle(def: CommandDef): Title {
     case "possessor":
       return { title: "possessor", titleKey: "slot.possessor" };
     case "standard":
-      return { title: "standard of comparison", titleKey: "slot.standard" };
+      return def.name === "outof"
+        ? { title: "comparison set", titleKey: "slot.comparisonSet" }
+        : { title: "standard of comparison", titleKey: "slot.standard" };
     default:
       return { title: "coordination", titleKey: "satellite.coordination" };
   }

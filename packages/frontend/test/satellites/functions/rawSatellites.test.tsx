@@ -332,17 +332,20 @@ describe('rawSatellites', () => {
       ]);
     });
 
-    // P09-E12 D5: the standard of comparison, offered by the degrees that take one.
+    // P09-E12 D5: the standard of comparison, offered by the degrees that take one — every one but the
+    // positive, named the comparison set on a superlative (P09-E51 D1, D2).
     it.each([
-      ['more', true],
-      ['less', true],
-      ['equally', true],
-      ['positive', false],
-      ['most', false],
-      ['least', false],
-    ] as const)('offers a predicate adjective a standard of comparison under %s: %s', (degree, available) => {
+      ['more', true, 'slot.standard'],
+      ['less', true, 'slot.standard'],
+      ['equally', true, 'slot.standard'],
+      ['positive', false, 'slot.standard'],
+      ['most', true, 'slot.comparisonSet'],
+      ['least', true, 'slot.comparisonSet'],
+    ] as const)('offers a predicate adjective a standard of comparison under %s: %s, as %s', (degree, available, labelKey) => {
       const selection: PhraseSelection = { verb: GO, predicative: HAPPY, adjectiveDegrees: { predicative: degree } };
-      expect(satellite(selection, 'predicativeStandard')).toMatchObject({ parent: 'predicative', labelKey: 'slot.standard', available });
+      expect(satellite(selection, 'predicativeStandard')).toMatchObject({ parent: 'predicative', labelKey, available });
+      // The scales for a rival, a podium for a set.
+      expect(glyph(satellite(selection, 'predicativeStandard').icon)).toBe(labelKey === 'slot.standard' ? 'BalanceIcon' : 'LeaderboardIcon');
       expect(satellite({ ...selection, predicativeStandard: { subject: CAT } }, 'predicativeStandard').hasValue).toBe(true);
       expect(satellite({ verb: GO, predicative: CAT, adjectiveDegrees: { predicative: degree } }, 'predicativeStandard').available).toBe(false);
     });

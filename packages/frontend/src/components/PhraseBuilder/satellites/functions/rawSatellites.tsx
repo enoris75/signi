@@ -16,6 +16,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import BalanceIcon from "@mui/icons-material/Balance";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import PersonIcon from "@mui/icons-material/Person";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -23,7 +24,6 @@ import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import {
   DEFAULT_TEMPORAL_RELATION,
   DETERMINER_COMPLEMENT_TYPES,
-  STANDARD_DEGREES,
   defaultDefiniteness,
   type Concept,
   type Definiteness,
@@ -32,6 +32,7 @@ import {
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
 import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
 import { canAsk, canBeExistential, questionAnimateOf } from "../../functions/questionGates.ts";
+import { readsAsSet, takesStandardOrSet } from "@signi/phrase/model/functions/comparison.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -770,18 +771,18 @@ export function rawSatellites(
         },
         // What a predicate adjective is compared to — "bigger *than the dog*" (P09-E12 D5). A noun
         // phrase of its own, drawn as a hosted ring beside the predicative's, whose line leaves from
-        // this control on the predicative's dotted ring. Offered where the degree takes a standard;
-        // one held under another degree stays, its ring dimmed, and is reached from the ring.
+        // this control on the predicative's dotted ring. Offered on every degree but the positive;
+        // one held under the positive stays, its ring dimmed, and is reached from the ring. On a
+        // superlative it is the set the adjective picks from — "the biggest *of the dogs*" — and is
+        // named and drawn so, a podium for the scales (P09-E51 D2).
         ...(type === "predicative"
           ? [{
             key: "predicativeStandard" as const,
             parent: "predicative" as const,
-            label: t("slot.standard"),
-            labelKey: "slot.standard" as const,
-            icon: <BalanceIcon sx={iconSx} />,
-            available:
-              concept?.role === "adjective" &&
-              STANDARD_DEGREES.has(selection.adjectiveDegrees?.predicative ?? "positive"),
+            ...(readsAsSet(selection.adjectiveDegrees?.predicative)
+              ? { label: t("slot.comparisonSet"), labelKey: "slot.comparisonSet" as const, icon: <LeaderboardIcon sx={iconSx} /> }
+              : { label: t("slot.standard"), labelKey: "slot.standard" as const, icon: <BalanceIcon sx={iconSx} /> }),
+            available: concept?.role === "adjective" && takesStandardOrSet(selection.adjectiveDegrees?.predicative),
             hasValue: Boolean(selection.predicativeStandard?.subject),
           }]
           : []),

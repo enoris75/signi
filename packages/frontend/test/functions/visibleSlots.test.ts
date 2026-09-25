@@ -29,7 +29,17 @@ describe('roleSlotFor', () => {
     });
   });
 
-  it('dresses nothing for a builder with no host', () => {
+  // P09-E51 D2: a standard's ring is named by its degree, a rival's or a superlative's set.
+  it('names a standard’s head by what it is under its degree', () => {
+    expect(roleSlotFor({ kind: 'standard', role: 'predicative' })).toMatchObject({ labelKey: 'slot.standard', required: false });
+    expect(roleSlotFor({ kind: 'standard', role: 'predicative', set: true })).toMatchObject({
+      label: 'Comparison set',
+      labelKey: 'slot.comparisonSet',
+      required: false,
+    });
+  });
+
+    it('dresses nothing for a builder with no host', () => {
     expect(roleSlotFor(undefined)).toBeUndefined();
   });
 });

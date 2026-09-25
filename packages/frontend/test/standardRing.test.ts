@@ -4,7 +4,7 @@ import type { Concept } from '@signi/shared';
 import type { PhraseSelection } from '../src/components/PhraseBuilder/interfaces.ts';
 import { ownerPortKey, type RingAt } from '../src/components/PhraseBuilder/ownerChain.ts';
 import { perimeterControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
-import { STANDARD_ADDRESS, standardLink, standardSpotFor, takesStandard } from '../src/components/PhraseBuilder/standardRing.ts';
+import { STANDARD_ADDRESS, standardIsSet, standardLink, standardSpotFor, takesStandard } from '../src/components/PhraseBuilder/standardRing.ts';
 
 const BIG: Concept = { id: 'BIG', role: 'adjective', description: 'BIG', label: 'big' };
 const CAT: Concept = { id: 'CAT', role: 'noun', description: 'CAT', label: 'cat' };
@@ -18,10 +18,12 @@ describe('takesStandard', () => {
     ['less', true],
     ['equally', true],
     ['positive', false],
-    ['most', false],
-    ['least', false],
+    // P09-E51 D1: a superlative takes the same field as its set.
+    ['most', true],
+    ['least', true],
   ] as const)('takes a standard under %s: %s', (degree, takes) => {
     expect(takesStandard({ predicative: BIG, adjectiveDegrees: { predicative: degree } })).toBe(takes);
+    expect(standardIsSet({ predicative: BIG, adjectiveDegrees: { predicative: degree } })).toBe(degree === 'most' || degree === 'least');
   });
 
   it('takes none on a predicate noun', () => {
@@ -39,6 +41,7 @@ describe('standardSpotFor', () => {
       order: -0.5,
       named: true,
       dimmed: false,
+      set: false,
     });
     expect(
       standardSpotFor({ selection: { ...BIGGER, predicativeConjuncts: [{ subject: BIG }] }, groups: GROUPS, open: undefined })?.order,
@@ -47,8 +50,18 @@ describe('standardSpotFor', () => {
 
   it('dims a standard its degree takes none of, and keeps drawing it', () => {
     expect(
+      standardSpotFor({ selection: { ...BIGGER, adjectiveDegrees: { predicative: 'positive' } }, groups: GROUPS, open: undefined }),
+    ).toMatchObject({ dimmed: true, set: false });
+  });
+
+  // P09-E51: on a superlative the ring is the set it picks from, drawn undimmed.
+  it('draws a superlative’s standard undimmed, as its set', () => {
+    expect(
       standardSpotFor({ selection: { ...BIGGER, adjectiveDegrees: { predicative: 'most' } }, groups: GROUPS, open: undefined }),
-    ).toMatchObject({ dimmed: true });
+    ).toMatchObject({ dimmed: false, set: true });
+    expect(
+      standardSpotFor({ selection: { ...BIGGER, adjectiveDegrees: { predicative: 'least' } }, groups: GROUPS, open: undefined }),
+    ).toMatchObject({ dimmed: false, set: true });
   });
 
   it('draws an empty standard only while it is open, and a folded one not at all', () => {

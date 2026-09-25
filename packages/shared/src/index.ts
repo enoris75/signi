@@ -163,6 +163,13 @@ export const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', '
 export const STANDARD_DEGREES: ReadonlySet<Degree> = new Set<Degree>(['more', 'less', 'equally']);
 
 /**
+ * The degrees of a relative superlative, which picks one member out of a set (P09-E19): "the biggest
+ * of the dogs". On these the standard's field reads as that set, so the builder offers the same
+ * control under another name (the comparison set, P09-E51).
+ */
+export const SUPERLATIVE_DEGREES: ReadonlySet<Degree> = new Set<Degree>(['most', 'least']);
+
+/**
  * Verb tense the phrase is rendered in. Only the simple tenses today; the
  * imperfect/continuous aspect is reserved for a later split of `past`.
  */

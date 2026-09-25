@@ -1040,7 +1040,9 @@ class Run {
         this.touch(w!.ref);
         return;
       }
-      case "than": {
+      // `/del outof` is the same removal, under the superlative's name (P09-E51 D3).
+      case "than":
+      case "outof": {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Standard` as keyof PhraseSelection]));
         if (!w) fail(span, coded("noStandardToRemove"));
         this.updateRoot(containerId, (root) => updateNounAt(root, w!.address!, (s, which) => removeStandard(s, which)));

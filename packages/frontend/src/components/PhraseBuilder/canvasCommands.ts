@@ -31,6 +31,8 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.predicative": "predicative",
   "slot.manner": "manner",
   "slot.possessor": "possessor",
+  "slot.standard": "standard",
+  "slot.comparisonSet": "comparisonSet",
   "satellite.determiner": "determiner",
   "slot.modal": "modal",
   "satellite.tense": "tense",

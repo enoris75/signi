@@ -272,6 +272,9 @@ const CANVAS_PARTS = {
   manner: { concept: 'ADVERBIAL_OF_MANNER', en: 'adverbial of manner' },
   determiner: { concept: 'DETERMINER', en: 'determiner' },
   possessor: { concept: 'POSSESSOR', en: 'possessor' },
+  // The standard's hosted ring, named by its degree: a rival or a superlative's set (P09-E12 D5, E51).
+  standard: { concept: 'STANDARD_OF_COMPARISON', en: 'standard of comparison' },
+  comparisonSet: { concept: 'COMPARISON_SET', en: 'comparison set' },
   modal: { concept: 'MODAL', en: 'modal' },
   tense: { concept: 'TENSE', en: 'tense' },
   aspect: { concept: 'ASPECT', en: 'aspect' },
@@ -308,11 +311,11 @@ const BOXED_COMPLEMENT_PARTS = [
 // drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
   'subject', 'agent', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'possessor',
+  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'standard', 'comparisonSet',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
   'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'voice', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor',
+  ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor', 'standard', 'comparisonSet',
 ] as const satisfies readonly CanvasPart[];
 export const COLLAPSIBLE_PARTS = [
   'subject', 'agent', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
@@ -721,6 +724,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('STANDARD_OF_COMPARISON'),
     format: NAME_FORMAT,
     fallback: 'Standard of comparison',
+  },
+  // The same ring on a superlative ("the biggest **of the dogs**", P09-E51 D2): the set the
+  // superlative picks from, the grammar noun COMPARISON_SET. It is what `/outof` fills.
+  'slot.comparisonSet': {
+    plan: nameOf('COMPARISON_SET'),
+    format: NAME_FORMAT,
+    fallback: 'Comparison set',
   },
 
   // The other side of a coordination: one of the phrases it joins, which `/del and` removes. The
@@ -2475,6 +2485,14 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Remove this standard of comparison',
   },
+  'action.removeComparisonSet': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'COMPARISON_SET', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove this comparison set',
+  },
 
   // What a possessor control that points at another noun shows in place of the owner's word, when
   // that antecedent no longer resolves (it was cleared, or its period went): some noun, unnamed.
@@ -3135,6 +3153,16 @@ export const UI_STRINGS = defineUiStrings({
     ),
     format: { stripPeriod: true },
     fallback: 'to add a standard of comparison to an adjective',
+  },
+  // `/outof`'s: the set a superlative picks from, added to the adjective (P09-E51 D3).
+  'purpose.comparisonSet': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'COMPARISON_SET', definiteness: 'indefinite' },
+      { concept: 'ADJECTIVE', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a comparison set to an adjective',
   },
   'purpose.relative': {
     plan: purposeOf(

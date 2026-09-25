@@ -445,4 +445,17 @@ test.describe('the phrase console', () => {
     await expect(chip).toHaveAttribute('data-editing', '1');
     await expect(chip).toHaveText('Bearbeiten · Satzgefüge 1 ›');
   });
+
+  // P09-E51 D3: a superlative's set is `/outof`, the same field `/than` fills, and `/del outof` takes it off.
+  test('names a superlative’s set with /outof', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj ( cat ) /verb ( be ) /pred ( big /most /outof [ dog /pl ] )');
+    await run(page);
+    await app.expectSentences({ en: 'the cat is the biggest of the dogs.', it: 'il gatto è il più grande dei cani.', ja: '猫は犬の中で最も大きいです。' });
+    await expect(app.satellite('predicativeStandard')).toHaveAttribute('aria-label', /comparison set/i);
+
+    await page.keyboard.insertText('/del outof');
+    await run(page);
+    await app.expectSentences({ en: 'the cat is biggest.' });
+  });
 });

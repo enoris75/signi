@@ -38,7 +38,7 @@ describe('buildNounPhrase', () => {
   });
 
   // P09-E12 D5: the standard rides with the degree that takes one; under the superlatives the
-  // translator would read it as the set (P09-E19), which the canvas dims and does not offer yet.
+  // translator reads it as the set (P09-E19), which the canvas offers too (P09-E51 D1).
   it('gives an adjective head its standard of comparison on the degrees that take one', () => {
     const sel: PhraseSelection = {
       predicative: BIG,
@@ -52,7 +52,8 @@ describe('buildNounPhrase', () => {
       headStandard: { concept: 'DOG', definiteness: 'indefinite' },
     });
     expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'equally' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
-    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toBeUndefined();
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'most' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'least' } }, 'predicative')?.headStandard).toMatchObject({ concept: 'DOG' });
     expect(buildNounPhrase({ ...sel, adjectiveDegrees: { predicative: 'positive' } }, 'predicative')?.headStandard).toBeUndefined();
     expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
   });
