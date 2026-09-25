@@ -1,6 +1,6 @@
 # B80. Minute, morning, later, once and often — the time words of ranks 201–400
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *minute* (rank 326), *often* (335), *once* (343), *later* (363) and
 *morning* (377). None is a concept at 1229928. Five words, four glosses. ONCE is literal by design.
 None goes to a C ticket. The probe also met a shipped defect in the numeral under `ago` (reading 6),
@@ -98,7 +98,7 @@ Readings to judge on authoring:
 
 1. **ONCE's gloss** (reading 4), and its *formerly* sense.
 2. **The numeral under `ago`** (reading 6) — an A bug, not this ticket.
-3. **"For five minutes"**, the duration — [P09-E35](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E35-duration.md).
+3. **"For five minutes"**, the duration — [P09-E35](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E35-duration.md).
 4. **Evening, afternoon, tomorrow** — not in the band.
 
 ## Coverage

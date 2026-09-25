@@ -5,7 +5,7 @@ not a property of the one who acts. MUST, CAN, WILL and MAY ship on the C09 shap
 able / allowed to act", where the adjective is said of the actor; *right* and *possible* are said of
 the action, and no plan could make an action a subject.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E4** (content clauses). Both words are seeded by [B63](B63-modal-verbs-may-should-might.md),
 which probes every lead; this ticket owned their glosses. **Done** on 2026-09-22: the content clause
 shipped and both are glossed; see [Done](#done).)_

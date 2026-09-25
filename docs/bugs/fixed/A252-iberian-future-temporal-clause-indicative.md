@@ -36,7 +36,7 @@ renders a future-tense subjunctive as its future subjunctive, the Spanish one as
 Pinned by `known bugs: an Iberian future temporal clause takes the future indicative (A252)` in
 [adverbial-clause.test.ts](../../../packages/engine/test/adverbial-clause.test.ts).
 
-Found shipping [P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md), adverbial
+Found shipping [P09-E4](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E4-clauses.md), adverbial
 clauses.
 
 ## Resolved

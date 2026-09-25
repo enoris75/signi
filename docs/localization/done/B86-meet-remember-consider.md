@@ -1,6 +1,6 @@
 # B86. Meet, remember and consider
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *meet* (rank 294), *remember* (334) and *consider* (395). None is a
 concept at 1229928. Three verbs, two glosses. MEET is literal by design. *Watch* (315), which looked
 like a fourth, is covered by LOOK_AT (P09 D1; see the E24 checklist). None goes to a C ticket.)_

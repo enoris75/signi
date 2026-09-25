@@ -3,7 +3,7 @@
 _(from the P09 core-vocabulary sweep of 2026-09-22. The rows *get, take, put, keep, bring, leave*
 (split in two), *turn*, *look* and *out* (as GO_OUT). All ten have a gloss: four on the corpus as it
 stands, three on a word B65 or B67 seeds, three on one new word each. COME_BACK gets no concept
-(RETURN says it). The words come from [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+(RETURN says it). The words come from [P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

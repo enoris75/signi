@@ -270,7 +270,7 @@ unchanged by the flag, and only the Japanese row moves.
    a German user building for the Japanese row loses the control.
 2. **Always offer it when D2 and D3 hold.** Clicking it visibly changes the ja row.
 
-**Recommendation: (2).** This is the reverse of [P09-E46](../../P09-core-vocabulary/Z-done/P09-E46-both-and-toggle.md)'s
+**Recommendation: (2).** This is the reverse of [P09-E46](../../../Z-Done/P09-core-vocabulary/Z-done/P09-E46-both-and-toggle.md)'s
 Japanese complements, where the chip is offered because six languages spell it and one does not.
 The honorific stays automatic and gets no control, as E1 D4 decided. The toggle does not undo it:
 with *your mother*, D2 fails and the toggle is not offered.

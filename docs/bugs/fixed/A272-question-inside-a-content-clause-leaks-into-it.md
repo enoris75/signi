@@ -21,7 +21,7 @@ wh-question writes its question word in five languages, and French and German dr
 carry one. Under a condition, a command or a citation, `resolvePhrase` keeps the question only where
 the mood is indicative. Italian, French, German, Spanish and Portuguese already render the yes/no case
 as the plain statement. A content clause is one more such place until indirect questions exist
-([P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md): *asks whether the cat runs*, *what the cat eats*). A throw would refuse a plan that renders
+([P09-E17](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md): *asks whether the cat runs*, *what the cat eats*). A throw would refuse a plan that renders
 correctly in five languages today. The builder does not build this plan, so it matters only to
 hand-written plans and the console.
 
@@ -42,7 +42,7 @@ Found by P09-E12 while its tasks were being written.
 
 ## Resolved
 
-2026-09-23, with [P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md).
+2026-09-23, with [P09-E17](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md).
 `ContentClause` now carries the four question fields, and
 [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) reads them per
 host. Under `contentSubject` and `adverbialClause` it drops them (`declarativeClause` in

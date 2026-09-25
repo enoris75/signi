@@ -5,7 +5,7 @@ seeded early). All five seed today, and one of them glosses: NIGHT, on FLAME's p
 with DAY as the whole and one new adjective, DARK. DAY, WEEK and YEAR are measured in numbers the
 engine does not have (E7), and TODAY is "on this day", a temporal complement (E3): DAY, WEEK and YEAR go to
 [C31](../done/C31-numerals.md), TODAY to [C29](C29-temporal-complement.md). The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

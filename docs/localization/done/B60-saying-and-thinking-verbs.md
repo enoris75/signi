@@ -5,7 +5,7 @@ CALL_PHONE, MEAN, THINK, BELIEVE — and **all nine ship on this seed**, two of 
 on a differentia word proposed here, TELEPHONE and MIND. TALK gets no concept: SPEAK covers it. P09
 has no content clause (E4, "says *that* …"), so nothing here says what is said; each gloss says what
 it is said *with*, *to* or *for*. Nothing goes to a C ticket.
-The words come from [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+The words come from [P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

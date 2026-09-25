@@ -5,7 +5,7 @@ vocative, "**Mom**, run", "**Mom**, the cat runs". `PhrasePlan.address` is a nou
 engine renders it before the clause, with each language's separator, in all seven languages. Neither
 the canvas nor the console can build one.
 **Shape:** no engine grammar. A period-level **noun box** in front of the clause, revealed from the
-card's border. It seats directly after [P09-E47](../../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s
+card's border. It seats directly after [P09-E47](../../../Z-Done/P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s
 interjection box. `vocative` joins the canvas's noun blocks, so it gets the noun ring's own controls,
 less the ones address cannot use. `/voc` in the console, with its print → apply round trip.
 **Scope:** one seed (the grammar noun VOCATIVE, D5), shared UI strings, the phrase model, the canvas,

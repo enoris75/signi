@@ -4,7 +4,7 @@
 
 P09-E5 renders a standard of comparison on the subject complement only. The object predicative, both
 the factitive and the essive, ignores `headStandard`
-([P09-E5](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
+([P09-E5](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
 "Only the subject complement renders a standard"). Before any slot is known,
 [`resolveStandard`](../../../packages/engine/src/translator/functions/resolveStandard.ts) marks the
 head `standard: '1'`, and that flag turns the equative's adverb into the first half of its circumfix:

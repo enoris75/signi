@@ -6,7 +6,7 @@ drives them.
 
 **None is open.** [A32](../done/A32-news.md) (NEWS), [A33](../done/A33-okay.md) (OKAY) and
 [A34](../done/A34-hey.md) (HEY), filed on 2026-09-24 for three of the nine concepts
-[P09-E25–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
+[P09-E25–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
 shipped with no `definition`, were authored the same day and are in [`done/`](../done/), each on its
 ticket's proposed row. The other six were [C41–C43](../done/C41-sentence-adverbs-maybe-actually-of-course.md).
 

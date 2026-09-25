@@ -2,7 +2,7 @@
 
 **Languages:** German
 
-The opponent complement ([P09-E22](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E22-adversarial-against.md))
+The opponent complement ([P09-E22](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E22-adversarial-against.md))
 lets a verb name its own word for the opponent in its lexeme (`opponent_prep`, read by
 `opponentLink`), as 戦う takes と in Japanese. German takes the word, but still puts the noun in the
 accusative that its generic *gegen* governs. A dative preposition then governs an accusative.

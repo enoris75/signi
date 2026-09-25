@@ -3,7 +3,7 @@
 **Kind:** was blocked on a construct. Two P09 adverbs that only ever modify an adjective ("very big",
 "too big"), where the engine attached adverbs to verbs alone.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E8**. **Done** on 2026-09-22: the intensifier slot shipped, both words are seeded, VERY is
 glossed and TOO is literal by design; see [Done](#done).)_
 

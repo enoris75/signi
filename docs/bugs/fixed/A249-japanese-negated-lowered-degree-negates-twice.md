@@ -38,7 +38,7 @@ A relative clause takes the plain わけではない.
 Pinned by `known bugs: Japanese negates a lowered degree twice (A249)` in
 [comparison.test.ts](../../../packages/engine/test/comparison.test.ts).
 
-Found shipping [P09-E5](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
+Found shipping [P09-E5](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
 the standard of comparison.
 
 ## Resolved

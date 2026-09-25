@@ -6,7 +6,7 @@ new verb (BROADCAST) and [B61](B61-handling-and-leaving-verbs.md)'s TAKE. SYSTEM
 [B64](B64-institutions-and-people.md)'s STATE_NATION. The ninth word, STATE_CONDITION, gets no
 concept because STATE covers it. None goes to a C
 ticket. The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

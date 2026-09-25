@@ -2,7 +2,7 @@
 
 **Languages:** German
 
-German's superlative set ([P09-E19](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md))
+German's superlative set ([P09-E19](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md))
 is a bare genitive after a noun ("das größte **der Tiere**") and *von* + the dative after a pronoun
 ("der größte **von uns**"), chosen per conjunct. In a coordinated set that starts with a pronoun,
 *von* stands before the whole group, so the noun after *und* is under *von* too. It still takes the

@@ -1,8 +1,8 @@
 # A32. NEWS — facts that one has told recently
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. NEWS was seeded by
-[P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md) with the
+[P09-E41](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md) with the
 plural-only construct, and its Done item 5 left it on the literal ("reports of recent events")
 because INFORMATION, the word a gloss was expected to stand on, is not seeded
 ([B81](B81-ideas-reasons-and-information.md)). The gloss does not need it: FACT, TELL

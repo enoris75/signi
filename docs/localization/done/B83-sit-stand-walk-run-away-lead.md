@@ -1,6 +1,6 @@
 # B83. Sit down, stand up, walk, run away, lead and hold — the body's verbs
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *away* (rank 267, as P09 D3's phrasal verb), *sit* (318), *stand*
 (329), *lead* (349) and *walk* (384), and *hold* (235) in its grasping sense: the seeded HOLD is
 "to contain or keep" (*contenere, enthalten*), which [B65](../done/B65-everyday-nouns.md) reading 5

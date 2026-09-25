@@ -4,7 +4,7 @@
 German, where *helfen* governs the dative. The id is **HELP_VERB**: HELP is taken, by the noun
 [B41](B41-ui-help-overlay.md) seeded for the help overlay ("content that one shows").
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E9**, split from the other two verbs of that row: LIKE is [C34](C34-like-experiencer-verb.md)
 and LET is [C36](C36-let-bare-infinitive.md). **Done** on 2026-09-22: the lexical case shipped,
 HELP_VERB is seeded, and *fragen* was fixed with the same key; see [Done](#done).)_

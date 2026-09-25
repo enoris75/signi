@@ -6,7 +6,7 @@ VERY on an equative is *just*: "the cat is **just** as big as the dog". Before a
 no "*a just as big cat", so the lexeme drops the intensifier there (`attributive_drop_degrees:
 'equally'` on VERY, [A255](../fixed/A255-very-on-an-equative.md)), and "an equally big cat" keeps the adverb alone. But an
 attributive equative with a standard now stands **after** the noun
-([P09-E18](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E18-attributive-comparison.md)):
+([P09-E18](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E18-attributive-comparison.md)):
 "a cat as big as the dog". That is the predicate's word order, where *just* is fine, yet the drop
 still fires, and the intensifier the other six languages keep is lost.
 

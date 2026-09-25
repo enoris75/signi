@@ -431,3 +431,23 @@ describe('known bugs: the opponent question and relative ignore a verb-named opp
     });
   });
 });
+
+// A373. Japanese WIN marks both its object and its opponent with に, so a game won against someone
+// doubles the particle: 猫は犬にゲームに勝ちます. Alone, each is right (ゲームに勝ちます, 犬に勝ちます).
+describe('known bugs: Japanese WIN with an object and an opponent doubles に (A373)', () => {
+  test.fails('the opponent takes 相手に beside a に object', () => {
+    // Decision for the fixer: 犬を相手に (pinned) or the noun-modifying 犬とのゲームに.
+    expect(say(clause(np('CAT'), 'WIN', { directObject: np('GAME'), complements: { opponent: { phrase: np('DOG') } } }), 'ja'))
+      .toBe('猫は犬を相手にゲームに勝ちます。'); // now: "猫は犬にゲームに勝ちます。"
+  });
+
+  test('either alone keeps its に, and the other languages are right', () => {
+    expect(say(clause(np('CAT'), 'WIN', { directObject: np('GAME') }), 'ja')).toBe('猫はゲームに勝ちます。');
+    expect(say(clause(np('CAT'), 'WIN', { complements: { opponent: { phrase: np('DOG') } } }), 'ja')).toBe('猫は犬に勝ちます。');
+    expect(sayAll(clause(np('CAT'), 'WIN', { directObject: np('GAME'), complements: { opponent: { phrase: np('DOG') } } }))).toMatchObject({
+      en: 'the cat wins the game against the dog.',
+      de: 'der Kater gewinnt das Spiel gegen den Hund.',
+      es: 'el gato gana el juego contra el perro.',
+    });
+  });
+});

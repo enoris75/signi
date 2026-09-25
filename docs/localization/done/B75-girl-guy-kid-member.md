@@ -1,6 +1,6 @@
 # B75. Girl, guy, kid and member — the people words of COCA ranks 201–400
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *guy* (rank 203), *kid* (275), *girl* (313) and *member* (341) of the
 COCA lemma list. None of the four is a concept at 1229928. Two ship a gloss, two are register words
 and are literal by design on the MOM/DAD precedent. None goes to a C ticket.)_

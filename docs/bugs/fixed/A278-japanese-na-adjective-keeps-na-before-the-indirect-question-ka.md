@@ -3,7 +3,7 @@
 **Languages:** Japanese
 
 A Japanese indirect question
-([P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md))
+([P09-E17](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md))
 closes on か (wh) or かどうか (yes/no). The particle follows the predicate's terminal form. It never
 follows the attributive form a head noun takes. A な-adjective writes な only before a noun (幸せな猫).
 Before か it takes the copula (幸せであるか) or nothing (幸せか). The engine builds the clause with the

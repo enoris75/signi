@@ -6,7 +6,7 @@ as the checklist.
 senses turn into more concepts, plus 36 words that need an engine construct before they can be used.
 **Scope:** all 7 languages, like every seed. Only the checklist is English: the other six languages
 get the same concepts, not their own top 200.
-**Status:** **§2 and §3 done.** §2 and six of §3's eleven constructs landed on 2026-09-22, by the
+**Status:** **done, 2026-09-25.** **§2 and §3 done.** §2 and six of §3's eleven constructs landed on 2026-09-22, by the
 localization tickets B59–B67 and C29–C40 (see *Follow-ups*), which supersede some rows below. Every
 word of §2 is seeded and every one of them is glossed or literal by design. The other five — E1, E2,
 E4, E5 and E6's wh-question, each **a task file in this folder** — **shipped on 2026-09-23**, in the
@@ -23,8 +23,10 @@ box), and E24's coverage check for ranks 201–400 filed B75–B90 and E25–E43
 E25–E43 shipped on 2026-09-24**, in eight lanes landed together (§5), with A291 and A292 fixed on
 the way. Eleven of the constructs E13–E38 shipped **plan-only**, so on 2026-09-25 **twelve task
 files, E44–E55**, were filed to build them on the canvas and in the console (§6), and **all twelve
-shipped the same day**, in five lanes landed together. P09 stays open only for the leads §6 lists,
-none of them filed yet. The decisions below were
+shipped the same day**, in five lanes landed together. The bugs among §6's leads were filed as
+A371–A375 the same day. **P09 is done** (2026-09-25) and moved to `Z-Done/`. Two feature items are
+left for task files of their own: the layout lead (a new complement box leaves the object on the upper
+row) and a hosted ring that holds conjuncts (coordinated examples and standards). The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -107,10 +109,10 @@ use was missing. Both are now seeded, by [C31](../../../localization/done/C31-nu
 | # | Question | Recommendation | Why |
 |---|---|---|---|
 | D1 | Some words are close to a seeded concept. Do they get their own? | **get:** seed `GET`; ACQUIRE stays. **begin:** no concept, START covers it. **hear:** `/specialize PERCEIVE into HEAR`. **again:** seed `AGAIN`; REPEATEDLY stays. **thing:** `/generalize OBJECT_THING into THING`. **call:** seed `CALL` and `CALL_PHONE`; NAME stays. | START already renders *beginnen, commencer, empezar* in every language, so BEGIN would just duplicate it. The others differ in meaning or register. ACQUIRE is formal (*acquisire, erwerben*) where *get* is everyday (*ottenere, bekommen, conseguir*). REPEATEDLY means "many times" (*ripetutamente*), while *again* means "once more" (*di nuovo, wieder*). OBJECT_THING is a physical object (*oggetto, Gegenstand, 物体*), while *thing* is anything (*cosa, Ding, もの*). NAME means "give a name" (*nominare, benennen*); *call* is *chiamare, rufen*, and phoning is *telefonare, anrufen*. |
-| D2 | One concept per word, or one per meaning? | **One per meaning**, wherever a language uses different words (the [P08 D1](../P08-collective-nouns/README.md) rule). The splits are listed in §2. Where a verb and a noun share a word, the noun takes the `_NOUN` suffix, as with USE / USE_NOUN and NAME / NAME_NOUN. | A single concept can't render both *giocare* and *suonare*. |
+| D2 | One concept per word, or one per meaning? | **One per meaning**, wherever a language uses different words (the [P08 D1](../../P-planning/P08-collective-nouns/README.md) rule). The splits are listed in §2. Where a verb and a noun share a word, the noun takes the `_NOUN` suffix, as with USE / USE_NOUN and NAME / NAME_NOUN. | A single concept can't render both *giocare* and *suonare*. |
 | D3 | *back*, *out*, *off* | **No standalone adverbs.** Seed phrasal verbs, as TURN_OFF and EXTINGUISH ("put out") already are: `COME_BACK` and `GO_OUT` now, and others as phrases need them. | Other languages use a different verb, not verb + particle: *tornare, revenir, volver, 戻る*; *uscire, sortir, salir, 出る*. A standalone BACK would render "the cat comes back" as *il gatto viene indietro* ✗. |
 | D4 | Focus adverbs (*just, only, even, still, also, really*) | **Seed them as verb adverbs now**, with `subtype: 'frequency'` like ALWAYS and NEVER so English puts them before the verb, and pin each language's position in tests. Scope over a noun ("only the cat") goes to §3. | "The cat also runs" / "il gatto corre anche" works through the existing `VerbPhrase.modifier`. Scope over a noun needs a new construct. |
-| D5 | Seeding order | ~~**LIVE** (dwelling) first~~ — **landed 2026-09-16** with [B32](../../../localization/done/B32-place-glosses.md). Then **QUESTION** + **ASK**, the time words (*day, week, year, night, now, today*), and the rest by rank. FAMILY, GROUP and GOVERNMENT are seeded by [P08](../P08-collective-nouns/README.md). | LIVE unblocked B32 (HOME, "a place where one lives") and is seeded with `synonym: 'dwell'`; LIVE_ALIVE is still open. Time words make many plain sentences possible at once. |
+| D5 | Seeding order | ~~**LIVE** (dwelling) first~~ — **landed 2026-09-16** with [B32](../../../localization/done/B32-place-glosses.md). Then **QUESTION** + **ASK**, the time words (*day, week, year, night, now, today*), and the rest by rank. FAMILY, GROUP and GOVERNMENT are seeded by [P08](../../P-planning/P08-collective-nouns/README.md). | LIVE unblocked B32 (HOME, "a place where one lives") and is seeded with `synonym: 'dwell'`; LIVE_ALIVE is still open. Time words make many plain sentences possible at once. |
 
 ## 2. Seed
 
@@ -383,7 +385,9 @@ E48) and Q (E53, E54, E52, E55), in the orders above; the key letters landed as 
 - The round-trip walk no longer puts a pronoun in a predicate's conjunct, which the console never
   accepted (`/pred ( brown /and [ 1st /pl ] )`, reproducible at 1d8f359b with `SEEDS=30000`).
 
-**Leads the lanes met, not filed:**
+**Leads the lanes met.** The bugs among them were filed on 2026-09-25 as
+[A371–A375](../../../bugs/engine-grammar-bugs.md); the two feature items (layout, hosted-ring
+conjuncts) are not bugs and wait for a task file. As first listed:
 
 - **Layout:** an opponent or topic box sends the verb phrase down a row, and on a verb with an
   object (*cat wins game* + *against the dog*) the object stays on the upper row. The topic box

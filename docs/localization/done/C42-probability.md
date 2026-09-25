@@ -3,11 +3,11 @@
 **Kind:** **deliberately left on the English literal**, like the dimension nouns of
 [C26](../done/C26-root-nouns-on-the-literal.md) (SIZE, HEIGHT, QUALITY, STRENGTH, AGE, TEMPERATURE,
 and SPEED, which FAST scales on). PROBABILITY is the noun
-[P09-E39](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E39-sentence-adverbs.md) seeded so
+[P09-E39](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E39-sentence-adverbs.md) seeded so
 that PROBABLY could be glossed "with high probability" (`mannerGloss('PROBABILITY', 'bare', 'HIGH')`);
 it is to PROBABLY what SPEED is to FAST.
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. E39's Done called it "a root noun; not probed for a gloss". It is probed
 here. It was filed with NEWS, the batch's other root noun, and split from it: NEWS composes today,
 [A32](A32-news.md).)_

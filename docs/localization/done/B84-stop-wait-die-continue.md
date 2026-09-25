@@ -1,10 +1,10 @@
 # B84. Stop, wait, die and continue — the verbs of ending and going on
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *stop* (rank 257, both halves), *wait* (289), *continue* (350) and
 *die* (371). None is a concept at 1229928. Five verbs, five glosses, three of which meet a shipped
 defect in Spanish and Portuguese (reading 1). *Stop doing* and *continue doing* are
-[P09-E42](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E42-stop-and-continue-doing.md)'s; the
+[P09-E42](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E42-stop-and-continue-doing.md)'s; the
 nouns are seeded here, not the aspectual use.)_
 
 ## Seed first
@@ -91,7 +91,7 @@ Readings to judge on authoring:
 
 1. **The NO_LONGER infinitive** (reading 1) — an A bug.
 2. ***Stop doing*, *continue doing*** — shipped as their own concepts, **STOP_DOING and
-   CONTINUE_DOING**, separate from this task's STOP and CONTINUE (which are still to seed here) — [P09-E42](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E42-stop-and-continue-doing.md).
+   CONTINUE_DOING**, separate from this task's STOP and CONTINUE (which are still to seed here) — [P09-E42](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E42-stop-and-continue-doing.md).
 3. **Intransitive CONTINUE** ("the story continues": *continua, continue, geht weiter*, 続く) — later,
    once a phrase wants it.
 

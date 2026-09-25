@@ -3,7 +3,7 @@
 **Languages:** English
 
 English asks a passive's agent by stranding *by*
-([P09-E16](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E16-passive-question.md) D2): "who
+([P09-E16](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E16-passive-question.md) D2): "who
 is the food eaten **by**?". The engine writes the bare *by* in the by-phrase's own slot, right after
 the participle. In the statement that slot comes ahead of the recipient ("the book is given by the man
 to the child"). In the question, *by* is then left between the participle and an argument of the verb,

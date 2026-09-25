@@ -1,12 +1,12 @@
 # C41. MAYBE, ACTUALLY, OF_COURSE — the sentence adverbs with no gloss
 
 **Kind:** two concepts **literal by design** and one **blocked on a construct**. The three
-`subtype: 'sentence'` adverbs [P09-E39](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E39-sentence-adverbs.md)
+`subtype: 'sentence'` adverbs [P09-E39](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E39-sentence-adverbs.md)
 seeded beside PROBABLY, which shipped "with high probability". Their meaning is a comment on the
 whole statement (*it is possible that…*, *in fact…*, *as one would expect…*), and the manner
 adverbial every other adverb gloss is cannot say that without turning it into *how* the act is done.
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. E39's D3 left all three literal on E24's probes ("in a possible way"
 reads as *possible*, "in fact" is *in Tatsache, en hecho*), which were never written down; every lead
 is re-probed here, with the collisions and say-backs checked. PROBABILITY, the noun E39 seeded for

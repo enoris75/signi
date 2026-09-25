@@ -2,7 +2,7 @@
 
 **None is open.** [B75](../done/B75-girl-guy-kid-member.md)–[B90](../done/B90-everything.md),
 filed on 2026-09-24 by
-[P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the
+[P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the
 coverage check of COCA lemma ranks 201–400, were authored the same day and are in
 [`done/`](../done/). They **seeded 84 words and shipped 70 glosses**, every one they forecast; the 13
 literal-by-design verdicts stand, and B85's ALLOW was already seeded (P09-E43). Nine engine changes
@@ -24,7 +24,7 @@ D8 had not taught — the "von" + dative and a complement's dative. Each is writ
 that met it.
 
 [B59](../done/B59-time-words.md)–[B67](../done/B67-place-and-focus-adverbs.md), the
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) core vocabulary, were filed on
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) core vocabulary, were filed on
 2026-09-22 and authored the same day; all nine are in [`done/`](../done/), and so is every B ticket
 before them. B01–B58 retired earlier.
 

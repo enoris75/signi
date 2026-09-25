@@ -1,8 +1,8 @@
 # A33. OKAY — that does not have problems
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. OKAY was seeded by
-[P09-E31](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E31-state-predicate-okay.md), the
+[P09-E31](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E31-state-predicate-okay.md), the
 lexical copula (*sta bene, va bien, dem Kater geht es gut*). Its Done item 5 left it unglossed: "no
 plan in the corpus says 'in a satisfactory state' without restating *good* or *well*". A relative
 on PROBLEM does, and so does one on STATE; this ticket **overturns that remark**. No new word, no new

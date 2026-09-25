@@ -650,3 +650,41 @@ describe('subject: the B30 genus FEELING and its child AFFECTION', () => {
     });
   });
 });
+
+// A376. A bare plural subject keeps no article in Italian, French, Spanish and Portuguese, where a
+// preverbal subject cannot go bare: English "cats run" is generic, and the Romance generic is the
+// definite article. The console line `/subj ( fly /adj ( time ) /pl /zero ) /verb ( like ) …` gave
+// "a mosche a tempo piace una freccia." Found 2026-09-25; B76 reading 5 and P09-E24 had reported it.
+describe('known bugs: a bare plural subject loses its article in it / fr / es / pt (A376)', () => {
+  const bare = { definiteness: 'bare', number: 'plural' } as const;
+  const likes = (subj: NounPhrase, obj: NounPhrase) => sayAll(clause(subj, 'LIKE', { directObject: obj }));
+
+  test.fails('the generic subject takes the definite article', () => {
+    expect(subject(cat(bare))).toMatchObject({
+      it: 'i gatti corrono.', // now: "gatti corrono."
+      fr: 'les chats courent.', // now: "chats courent."
+      es: 'los gatos corren.', // now: "gatos corren."
+      pt: 'os gatos correm.', // now: "gatos correm."
+    });
+    expect(likes(cat(bare), np('MOUSE', { definiteness: 'indefinite' }))).toMatchObject({
+      it: 'ai gatti piace un topo.', // now: "a gatti piace un topo."
+      fr: 'les chats aiment une souris.', // now: "chats aiment une souris."
+      es: 'a los gatos les gusta un ratón.', // now: "a gatos les gusta un ratón."
+      pt: 'os gatos gostam de um rato.', // now: "gatos gostam de um rato."
+    });
+    const timeFlies = np('FLY_INSECT', { ...bare, nounModifiers: [{ concept: 'TIME', relation: 'domain' }] });
+    expect(likes(timeFlies, np('ARROW_PROJECTILE', { definiteness: 'indefinite' }))).toMatchObject({
+      it: 'alle mosche del tempo piace una freccia.', // now: "a mosche del tempo piace una freccia."
+    });
+  });
+
+  test('English, German and Japanese keep it bare, and a bare plural object stays bare', () => {
+    expect(subject(cat(bare))).toMatchObject({ en: 'cats run.', de: 'Kater laufen.', ja: '猫は走ります。' });
+    expect(sayAll(clause(cat(), 'SEE', { directObject: np('MOUSE', bare) }))).toMatchObject({
+      it: 'il gatto vede topi.',
+      fr: 'le chat voit des souris.',
+      es: 'el gato ve ratones.',
+      pt: 'o gato vê ratos.',
+    });
+  });
+});

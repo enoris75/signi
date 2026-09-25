@@ -8,7 +8,8 @@ German column in every concept of the corpus, and the groundwork of
 §0](../P04-romansh/README.md#0-groundwork) (single language list, no database CHECK, a
 `preview`/`ready` language status, ready-only test gating). Whichever of P03, P04 and P10 ships first
 carries that groundwork.
-**Status:** planning. Every decision below is **proposed**, not confirmed.
+**Status:** planning. Every decision below is **proposed**, not confirmed. Split into **E1–E15**
+(2026-09-25), one per phase step and per construct — see [§7](#7-tasks-e1e15).
 
 > **The framing problem, before any decision: Swiss German is not a written language.** The written
 > language of German-speaking Switzerland is Standard German, and the corpus already has it as `de`.
@@ -22,14 +23,14 @@ carries that groundwork.
 | the cat eats the mouse | d Chatz frisst d Muus |
 | the cat ate the mouse | d Chatz **hät** d Muus **gfrässe** — perfect; there is no preterite (D5) |
 | the (female) cat went | si **isch ggange** — *sii* auxiliary |
-| the cat will eat the mouse | d Chatz frisst d Muus (**morn**) — present + adverb, no future tense (D7) |
+| the cat will eat the mouse | d Chatz frisst d Muus (**morn**) — present + adverb, no future tense (D8) |
 | the cat does not eat the mouse | d Chatz frisst d Muus **nöd** *(Bern* nid*, Basel* nit*)* |
 | we eat | **mir ässed** *(Zurich* -ed*; Bern* mir ässe*)* |
 | one eats the mouse | **me** frisst d Muus |
 | the man, the water | **de** Maa, **s** Wasser |
-| the father's house | **em Vatter sis Huus** — possessor dative; there is no genitive (D6) |
-| the man who is coming | de Maa, **wo** chunt — invariant *wo* (D9) |
-| the cat is eating | d Chatz **isch am Frässe** — grammaticalized progressive (D8) |
+| the father's house | **em Vatter sis Huus** — possessor dative; there is no genitive (D7) |
+| the man who is coming | de Maa, **wo** chunt — invariant *wo* (D10) |
+| the cat is eating | d Chatz **isch am Frässe** — grammaticalized progressive (D9) |
 | if the dog ran, … | wenn de Hund **würd springe**, … *(verify against synthetic* chäm*-type forms)* |
 
 ## Why this is a good engine target
@@ -97,7 +98,9 @@ Swiss-German-specific additions:
 
 ## 1. Data — what a Swiss German column costs
 
-Measured against `packages/backend/signi.db`, using German as the baseline:
+Measured against `packages/backend/signi.db`, using German as the baseline. **Stale:** the corpus has
+since grown to 784 concepts and 3,869 `de` form rows; [E4](P10-E4-corpus-column.md#today) has the
+2026-09-25 measurement (about 3,400 `gsw` values).
 
 | role | concepts | `de` form rows | `gsw` estimate | why it differs |
 |---|---|---|---|---|
@@ -122,7 +125,8 @@ than transformation *(estimate — worth measuring on a 50-concept sample before
 
 ## 2. The engine — `packages/engine/src/languages/gsw/`
 
-A **fork of `de`**, which is the largest engine in the package: **75 source files, 2,430 LOC**, plus
+A **fork of `de`**, which is the largest engine in the package: **75 source files, 2,430 LOC** (102 files,
+4,163 LOC at 2026-09-25 — see [E5](P10-E5-engine-fork-noun-phrase.md#today)), plus
 its colocated tests. Expect `gsw` to come in **smaller, around 60 files and ~1,900 LOC**, because
 three of `de`'s subsystems have no counterpart.
 
@@ -195,6 +199,29 @@ addition.
 - **Regional emblems are unfamiliar** (D4). Zürich's arms and P04's league arms are correct and distinguishable, but few readers outside Switzerland will recognise any of them, so neither plan can lean on the icon to identify the row.
 - **Verb cluster order** (D11) may turn out to be required rather than optional, in which case it
   touches the modal stack and the subordinate clause builder, and that work is outside phase 3.
+
+## 7. Tasks (E1–E15)
+
+Filed 2026-09-25, verified against HEAD 7a392187. Decision numbers are this README's. E3 gates the
+bulk seeding; E14 needs a calibrated reviewer; everything else is engine or data work in phase order.
+
+| task | phase | what | shape |
+|---|---|---|---|
+| [P10-E1](P10-E1-language-groundwork.md) | 0 | Groundwork: single language list, no DB CHECK (**seven** sites now), `preview`/`ready`, test gating; `gsw` registered as an empty `preview` row | P03 §0 / P04 §0, only if neither shipped first |
+| [P10-E2](P10-E2-row-identity.md) | 0 | The row's identity: `SWISS_GERMAN`, *Swiss German (Zürich)*, the Dieth description, the arms of Zürich | one concept, the `Flag` widening (D1–D4) |
+| [P10-E3](P10-E3-orthography-and-lexical-sample.md) | before 1 | A Dieth style sheet, a 50-concept lexical-distance sample, the reviewer's calibration | no code; gates E4 (§1, §4, §6) |
+| [P10-E4](P10-E4-corpus-column.md) | 1–3 | The `gsw` column on all 784 concepts, in batches; no `*_past`, no genitive | data + the seeding skills (D5, D7) |
+| [P10-E5](P10-E5-engine-fork-noun-phrase.md) | 1 | Fork `de`; the noun phrase in three cases, clitic articles, genitive machinery deleted | the fork (§2, D7) |
+| [P10-E6](P10-E6-clause-core-present-and-noed.md) | 1–2 | Present tense, verb-second, the brace, *nöd*, *me*, a `de`-leak guard | carry-over + the negator |
+| [P10-E7](P10-E7-perfect-for-past.md) | 2 | `past` = the perfect with *haa/sii*; `past` = `resultative` pinned | routing (D5, D6) |
+| [P10-E8](P10-E8-present-for-future.md) | 2 | `future` = the present; `WERDEN` gone, the prospective kept | routing (D8) |
+| [P10-E9](P10-E9-am-progressive.md) | 2 | *isch am Frässe* — the aspect `de` lacks | new construction (D9) |
+| [P10-E10](P10-E10-modals-and-verb-clusters.md) | 2 | Modals, copula, degree; `de`'s cluster order shipped, the Swiss one pinned `test.fails` | carry-over + a gap (D11) |
+| [P10-E11](P10-E11-invariant-wo-relatives.md) | 3 | Invariant *wo*; resumptives for oblique roles | `relativePronoun` collapses (D10) |
+| [P10-E12](P10-E12-possessor-dative.md) | 3 | *em Vatter sis Huus* / *s Huus vom Vatter* | new builder (D7) |
+| [P10-E13](P10-E13-remaining-clause-suite.md) | 3 | The sweep: complements, coordination, conditional, imperative, infinitive — a `gsw` line in every suite | carry-over, per suite |
+| [P10-E14](P10-E14-review.md) | 4 | The full review sheet; every *(verify)*, D2, D8, D11 ruled on | docs + pins |
+| [P10-E15](P10-E15-promotion.md) | 5 | `ready`: UI strings and definitions in `gsw`, exhaustive tests, interface language | the status flip |
 
 ## Out of scope
 

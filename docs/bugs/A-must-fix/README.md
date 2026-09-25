@@ -1,5 +1,16 @@
 # A-must-fix — confirmed bugs
 
+**Seven open.** **A376**, filed on 2026-09-25 from a console line checked by hand, at 7a392187.
+[A376](A376-romance-bare-plural-subject-loses-its-article.md), a bare plural subject keeps no article in it / fr / es / pt (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite.
+
+**A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported, each
+re-probed at c8f098dc.
+[A371](A371-attributive-superlative-drops-its-set.md), an attributive superlative's set dropped in all seven ("the biggest house" for "the biggest house in the city").
+[A372](A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md), fr / es / pt write a possessor after an attributive standard, where it reads as the standard's.
+[A373](A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md), Japanese WIN with an object and an opponent doubles に.
+[A374](A374-animate-route-question-reads-as-another-relation.md), an animate route question reads as *for whom* (es, pt) or runs a person as a path (ja).
+[A375](A375-enter-in-the-owner-picker-points-to-the-subject.md), ↵ in the canvas owner picker points to the subject ("his food"); pinned in e2e.
+
 **One open**, **A370**, filed on 2026-09-24 from ten random phrases.
 [A370](A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md), Portuguese ALREADY beside the concord "não" of a `no` object or complement, written "ainda não" (*not yet*) for "já não".
 
@@ -241,9 +252,9 @@ they are dropped on (`drop_degrees`, `attributive_drop_degrees`).
 The seven before them,
 **A247–A253**, were filed and fixed on 2026-09-23, met by
 the lanes that shipped P09's grammar tasks
-[E2](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
-[E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md) and
-[E5](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md), each a
+[E2](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
+[E4](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E4-clauses.md) and
+[E5](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md), each a
 construct those tasks first made reachable: **A247**, a negated BELIEVE or THINK keeping the
 indicative in French, Spanish and Portuguese (*no cree que el gato corre*); **A248**, VERY on a
 comparative (*very bigger*, *très plus grand*) where a comparative takes *much*, *bien*, *viel*,

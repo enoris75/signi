@@ -4,7 +4,7 @@
 "even the cat", "the cat too"), and Japanese says all three as particles on it (猫**だけ**,
 猫**さえ**, 猫**も**). The engine attached them to the verb.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22. [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22. [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 D4 sends the noun-scope use of the focus adverbs to §3, but **§3 has no row for it**: this ticket was
 that row. **Done** on 2026-09-22: the focus value shipped; see [Done](#done).)_
 

@@ -8,7 +8,7 @@ Spanish and Portuguese pick *estar* for a transient predicate adjective ("el gat
 feliz", "**o** mais feliz" ([A26](../fixed/A26-romance-predicative-superlative-article.md)): a noun
 phrase with the noun understood, and *estar* takes no noun phrase. The engine reads only the
 adjective's `transient` flag, so the superlative of a transient adjective keeps *estar*. The
-superlative set of [P09-E19](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md)
+superlative set of [P09-E19](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md)
 makes it plainer ("the happiest *of the animals*"), but the bare superlative has the same fault.
 
 | Case | Now | Want |

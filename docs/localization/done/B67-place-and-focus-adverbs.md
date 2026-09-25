@@ -8,7 +8,7 @@ JUST and STILL on a temporal complement ([C29](C29-temporal-complement.md)), ONL
 ([C32](../done/C32-indefinite-pronouns.md)), THERE on the French distal demonstrative
 ([C40](../done/C40-french-distal-demonstrative.md)). EVEN's concept waits as well, because Japanese has no verb
 adverb for it ([C39](../done/C39-focus-particle-on-a-noun-phrase.md)). The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

@@ -1,6 +1,6 @@
 # B78. City, room, office, door, car, area, side, center and line — ROOM before OFFICE, CENTER before SIDE
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *city* (rank 222), *room* (264), *side* (286), *area* (296), *line*
 (312, the drawn line), *car* (321), *center* (367), *office* (380) and *door* (385). None is a
 concept at 1229928. Nine words, eight glosses. CENTER is literal by design. LINE_MARK needs

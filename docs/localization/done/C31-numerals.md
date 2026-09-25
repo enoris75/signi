@@ -4,7 +4,7 @@
 not an adjective in any of the seven languages, and the dictionary glosses of DAY, WEEK and YEAR are
 counts.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E7**. DAY, WEEK and YEAR are seeded by [B59](B59-time-words.md), which probes every number-free
 lead; this ticket owned their glosses. **Done** on 2026-09-22: the cardinal shipped and all three are
 glossed; see [Done](#done).)_

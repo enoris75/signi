@@ -9,7 +9,7 @@ reads off its governor), so under a past BELIEVE, THINK, SAY or KNOW it keeps th
 names. A clause simultaneous with a past governor shifts back (sequence of tenses): the Romance
 present subjunctive becomes the imperfect subjunctive, the indicative present the imperfect, the
 future the conditional, and English backshifts the present to the past and *will* to *would*.
-[P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md) listed it as out of scope;
+[P09-E4](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E4-clauses.md) listed it as out of scope;
 the constructs it shipped reach it.
 
 | Case | Now | Want |

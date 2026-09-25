@@ -148,3 +148,27 @@ test('pointing at the command box: see your book', async ({ app, page }) => {
   expect(await app.sentence('ja')).toBe('自分の本を見てください。');
   await expect(page.getByTestId('pronoun-chip')).toHaveText('your book');
 });
+
+// A375. The owner ring's word picker takes ↵ as "point to" rather than as the word typed: filling
+// "dog" and pressing Enter builds a pronominal possessor on the subject ("the cat eats his food"),
+// while a click on the same row builds "the dog's food". The picker's own rule is ↵ to choose
+// (usePickerKeys). Reproduced at 1d8f359b, before P09-E52 touched the owner ring.
+test.describe('known bugs: Enter in the owner picker points to the subject (A375)', () => {
+  test.fail('↵ takes the word typed', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+    await page.getByTestId('typeahead-noun').fill('dog');
+    await page.keyboard.press('Enter');
+    await app.expectSentences({ en: "the cat eats the dog's food." }); // now: "the cat eats his food."
+  });
+
+  test('a click on the row takes it', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+    await page.getByTestId('typeahead-noun').fill('dog');
+    await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+    await app.expectSentences({ en: "the cat eats the dog's food." });
+  });
+});
