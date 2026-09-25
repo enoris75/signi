@@ -59,6 +59,7 @@ import {
 import {
   setNumeral,
   setContrastive,
+  setApproximated,
   addConjunct,
   applyClear,
   applyConceptSelect,
@@ -633,6 +634,11 @@ class Run {
         this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setContrastive(s, w.which!, true));
         this.touch(w.ref);
         return;
+      // An approximator on the quantity (P09-E49): `takes` has checked the quantity takes one.
+      case "approximator":
+        this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setApproximated(s, w.which!, true));
+        this.touch(w.ref);
+        return;
       // A cardinal numeral (P13): a whole number, the engine's words running to 12 and 24.
       case "numeral": {
         const text = item.word?.text.trim() ?? "";
@@ -1080,6 +1086,14 @@ class Run {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice.contrastives?.[x.which!]));
         if (!w) fail(span, coded("nothingToRemove"));
         this.updateSlice(containerId, w!.ref.slice, (s) => setContrastive(s, w!.which!, false));
+        this.touch(w!.ref);
+        return;
+      }
+      // A noun's approximator (P09-E49): the closest noun that has one.
+      case "approx": {
+        const w = closest((x) => x.kind === "noun" && Boolean(x.slice.approximators?.[x.which!]));
+        if (!w) fail(span, coded("nothingToRemove"));
+        this.updateSlice(containerId, w!.ref.slice, (s) => setApproximated(s, w!.which!, false));
         this.touch(w!.ref);
         return;
       }

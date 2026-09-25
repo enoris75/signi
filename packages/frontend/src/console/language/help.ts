@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|num|contrast|if|join|clause|sub|to|so|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|num|contrast|approx|if|join|clause|sub|to|so|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -194,6 +194,7 @@ export const EXAMPLES: Record<string, string> = {
   goal: "/subj ( cat ) /verb ( run ) /dir ( house /in /goal )",
   num: "/subj ( cat /pl /num 12 ) /verb ( run )",
   contrast: "/subj ( house /that /contrast ) /verb ( run )",
+  approx: "/subj ( cat /num 5 /approx ) /verb ( run )",
   with: "/subj ( cat ) /verb ( eat ) /with ( dog )",
   essive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive /essive )",
   factitive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive )",

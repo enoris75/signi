@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { translateApproximator } from '../src/index.js';
 import { clause, np, sayAll } from './harness.js';
 
 // P09-E38: NounPhrase.approximator — `about` on a numeral, `almost` on the quantity determiners
@@ -129,5 +130,19 @@ describe('P09-E38: almost on a quantity determiner', () => {
   test('anywhere else it is ignored: on the definite, and on a numeral (D1)', () => {
     expect(sayAll(clause(np('CAT', { approximator: 'almost' }), 'RUN'))).toMatchObject({ en: 'the cat runs.', it: 'il gatto corre.' });
     expect(sayAll(clause(np('CAT', { numeral: 5, approximator: 'almost' }), 'RUN'))).toMatchObject({ en: 'the five cats run.', it: 'i cinque gatti corrono.' });
+  });
+});
+
+// P09-E49: the determiner menu's approximator row is labelled with the word it adds — the one the
+// sentence writes, Spanish's agreeing *about* cited in the masculine.
+describe('P09-E49: the approximator row’s label', () => {
+  const label = (a: 'about' | 'almost') => Object.fromEntries(translateApproximator(a).map((t) => [t.language, t.text]));
+
+  test('about', () => {
+    expect(label('about')).toEqual({ en: 'about', it: 'circa', fr: 'environ', de: 'etwa', es: 'unos', pt: 'cerca de', ja: '約' });
+  });
+
+  test('almost', () => {
+    expect(label('almost')).toEqual({ en: 'almost', it: 'quasi', fr: 'presque', de: 'fast', es: 'casi', pt: 'quase', ja: 'ほとんど' });
   });
 });

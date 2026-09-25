@@ -11,6 +11,8 @@ const BIG: Concept = { id: 'BIG', role: 'adjective', description: 'BIG', label: 
 // A period with something for every command to act on.
 const PERIOD: PhraseSelection = {
   subject: CAT,
+  // A quantity an approximator takes (P09-E49).
+  subjectDefiniteness: 'all',
   subjectConjuncts: [{ subject: CAT }],
   verb: EAT,
   directObject: CAT,
@@ -58,6 +60,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleSelectPredication', (c) => c.handleSelectPredication('factitive'), (p) => reducers.setPredication(p, 'factitive')],
   ['handleSetContrastive', (c) => c.handleSetContrastive('subject', true), (p) => reducers.setContrastive(p, 'subject', true)],
   ['handleSetNumeral', (c) => c.handleSetNumeral('subject', 24), (p) => reducers.setNumeral(p, 'subject', 24)],
+  ['handleSetApproximated', (c) => c.handleSetApproximated('subject', true), (p) => reducers.setApproximated(p, 'subject', true)],
   ['handleSelectDirectionSpecifier', (c) => c.handleSelectDirectionSpecifier('in'), (p) => reducers.setSpecifier(p, 'in', 'direction')],
   ['handleSelectSentiment', (c) => c.handleSelectSentiment('positive'), (p) => reducers.setSentiment(p, 'positive')],
 ];
@@ -69,6 +72,13 @@ describe('phraseCommands', () => {
     phraseCommands(onPhraseUpdate).handleCycleConjunction('subject');
     const updater = onPhraseUpdate.mock.calls[0][0] as (prev: PhraseSelection) => PhraseSelection;
     expect(updater(PERIOD).correlatives).toEqual({ subject: true });
+  });
+
+  it('handleSetApproximated hands up a change, not a no-op', () => {
+    const onPhraseUpdate = vi.fn();
+    phraseCommands(onPhraseUpdate).handleSetApproximated('subject', true);
+    const updater = onPhraseUpdate.mock.calls[0][0] as (prev: PhraseSelection) => PhraseSelection;
+    expect(updater(PERIOD).approximators).toEqual({ subject: true });
   });
 
   it('binds every command it offers', () => {

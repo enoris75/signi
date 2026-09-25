@@ -80,6 +80,47 @@ test.describe('noun phrase', () => {
     });
   });
 
+  // P09-E49: the approximator row under Quantity says *about* on a numeral and *almost* on all.
+  test('the determiner menu approximates a quantity: almost all, about five', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.setDeterminer('subject', 'Universal');
+    await app.expectSentences({ en: 'all cats run.' });
+    await app.period(0).getByTestId('box-subjectDefiniteness').click();
+    await expect(page.getByTestId('determiner-approximator')).toHaveText(/almost/i);
+    await page.getByTestId('determiner-approximator').click();
+    await page.keyboard.press('Escape');
+    await app.expectSentences({
+      en: 'almost all cats run.',
+      it: 'quasi tutti i gatti corrono.',
+      fr: 'presque tous les chats courent.',
+      de: 'fast alle Kater laufen.',
+      es: 'casi todos los gatos corren.',
+      pt: 'quase todos os gatos correm.',
+      ja: 'ほとんどすべての猫は走ります。',
+    });
+
+    // The article again, and a numeral: the row now reads about.
+    await app.setDeterminer('subject', 'Definite');
+    await app.expectSentences({ en: 'the cat runs.' });
+    await app.period(0).getByTestId('box-subjectDefiniteness').click();
+    await expect(page.getByTestId('determiner-approximator')).toHaveAttribute('aria-disabled', 'true');
+    await page.getByTestId('determiner-numeral').fill('5');
+    await page.getByTestId('determiner-numeral').press('Enter');
+    await app.period(0).getByTestId('box-subjectDefiniteness').click();
+    await expect(page.getByTestId('determiner-approximator')).toHaveText(/about/i);
+    await page.getByTestId('determiner-approximator').click();
+    await page.keyboard.press('Escape');
+    await app.expectSentences({
+      en: 'about five cats run.',
+      it: 'circa cinque gatti corrono.',
+      fr: 'environ cinq chats courent.',
+      de: 'etwa fünf Kater laufen.',
+      es: 'unos cinco gatos corren.',
+      pt: 'cerca de cinco gatos correm.',
+      ja: '約五匹の猫は走ります。',
+    });
+  });
+
   test('a personal pronoun subject from the pronoun chooser', async ({ app }) => {
     await app.setPronounSubject('third', 'singular', 'female');
     await app.setVerb('SEE');

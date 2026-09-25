@@ -99,6 +99,8 @@ export type Action =
   | { kind: "contrast" }
   /** A cardinal numeral counting the noun: `/num 24` (P13). */
   | { kind: "numeral" }
+  /** An approximator on the noun's quantity, its word the quantity's own: `/approx` (P09-E49). */
+  | { kind: "approximator" }
   /** The noun's relative clause said alone, its head unspoken: `/headless` (P13). */
   | { kind: "headless" }
   | { kind: "condition" }
@@ -572,6 +574,22 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "numeral" },
     satellites: /Definiteness$/,
     reducers: ["setNumeral"],
+  },
+  // An approximator on the quantity (P09-E49): "/subj ( cat /num 5 /approx )", *about five cats*;
+  // "/subj ( cat /all /approx )", *almost all cats*. Written after `/num`, so the quantity it reads is
+  // set; `/del approx` takes it back. `/about` is the topic, and `/almost` would say *about* on a numeral.
+  {
+    name: "approx",
+    aliases: ["approximately", "circa"],
+    group: "noun",
+    description: "about, almost",
+    descriptionKey: "approximator.value.about",
+    purposeKey: "purpose.approximator",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "approximator" },
+    satellites: /Definiteness$/,
+    reducers: ["setApproximated"],
   },
   // The relative clause said alone, its head unspoken (P13): an adjective's definition is its relative
   // clause, OKAY "that has no problems". The head still picks "who" or "that" and the agreement, so it
@@ -1298,7 +1316,7 @@ export function topicOf(def: CommandDef): Topic {
         ? a.kind
         : a.kind === "headless"
           ? "relative"
-          : a.kind === "numeral" || a.kind === "contrast"
+          : a.kind === "numeral" || a.kind === "contrast" || a.kind === "approximator"
             ? "determiner"
         : a.kind === "conjunct"
           ? "coordination"

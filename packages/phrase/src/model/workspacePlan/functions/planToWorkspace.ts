@@ -17,6 +17,7 @@ import type {
 import { DEFAULT_TEMPORAL_RELATION, DETERMINER_COMPLEMENT_TYPES } from "@signi/shared";
 import type { NounAddress, NounKey, PhraseContainer, PhraseLink, PhraseSelection, RelativeGap } from "../../interfaces.ts";
 import { conjunctAddress, governsInfinitive, possessorAddress, standardAddress, subordinateReading } from "../../interfaces.ts";
+import { approximatorFor } from "../../functions/approximatorFor.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, defaultPredication, MODAL_SLOTS, modalAdverbFor, modalNegativeFor } from "../../slots.ts";
 
 /**
@@ -61,7 +62,7 @@ const PERIOD_FIELDS = new Set([
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
   "headStandard", "nounModifiers", "relative", "relativeGloss", "possessor", "dimensionGloss", "mannerGloss",
-  "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive",
+  "complementGloss", "possessorRole", "antecedent", "numeral", "contrastive", "approximator",
 ]);
 const GROUP_FIELDS = new Set(["conjuncts", "conjunction", "correlative"]);
 const VERB_FIELDS = new Set(["verb", "negative", "modifier", "tense", "aspect", "voice", "modals"]);
@@ -321,6 +322,12 @@ class Builder {
       if (which === "subject" || which === "directObject" || DETERMINER_COMPLEMENT_TYPES.includes(which as ComplementType))
         set(sel, `${which}Definiteness`, np.definiteness);
       else this.unsupported.add(`complements.${which}.definiteness`);
+    }
+    // An approximator (P09-E49) is a flag on the canvas, its word the quantity's own; a value the
+    // quantity does not take is one the engine ignores, and is named unsaid.
+    if (np.approximator) {
+      if (np.approximator === approximatorFor(sel, which)) sel.approximators = { ...sel.approximators, [which]: true };
+      else this.unsupported.add("NounPhrase.approximator off its quantity");
     }
     if (np.headDegree && np.headDegree !== "positive") sel.adjectiveDegrees = { ...sel.adjectiveDegrees, [which]: np.headDegree };
     if (np.headStandard) {

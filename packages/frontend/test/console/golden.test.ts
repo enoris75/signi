@@ -171,6 +171,13 @@ const GOLDEN: Record<string, Golden> = {
     check: (s) => expect(sel(s).numerals).toEqual({ subject: 12 }),
     misuse: { line: '/subj cat /num many', says: { code: 'numeralNotANumber' } },
   },
+  // An approximator on the quantity (P09-E49), printed after /num; its word is the quantity's own.
+  approx: {
+    line: '/subj cat /pl /num 5 /approx',
+    prints: '/subj ( cat /pl /num 5 /approx )',
+    check: (s) => expect(sel(s).approximators).toEqual({ subject: true }),
+    misuse: { line: '/subj cat /some /approx', says: { code: 'noTarget', args: { command: 'approx' } } },
+  },
   // The relative clause said alone, its head unspoken (P13) — on the link, as /without is.
   headless: {
     line: '/subj child /rel subj ( /verb love /obj cat ) /headless',
@@ -409,6 +416,20 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P09-E49: the other reading of /approx, and /del approx.
+describe('/approx on a determiner', () => {
+  it('says almost on all, and /del approx takes it back', () => {
+    const state = ok('/subj cat /pl /all /approx');
+    expect(sel(state).approximators).toEqual({ subject: true });
+    expect(print(state)).toBe('/subj ( cat /pl /all /approx )');
+    expect(sel(ok('/subj cat /pl /all /approx /del approx'))).not.toHaveProperty('approximators');
+  });
+
+  it('goes with a quantity that takes none any more', () => {
+    expect(sel(ok('/subj cat /pl /all /approx /some'))).not.toHaveProperty('approximators');
   });
 });
 

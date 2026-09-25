@@ -3,7 +3,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { useState } from 'react';
 import type { Concept } from '@signi/shared';
 import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
-import type { NounKey, NumberSlot, SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
+import type { NounKey, NumberSlot, PhraseSelection, SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
 import { NounPhraseBuilder } from '../src/components/PhraseBuilder/NounPhraseBuilder.tsx';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
 import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
@@ -84,6 +84,7 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectPredication: vi.fn(),
     handleSetNumeral: vi.fn(),
     handleSetContrastive: vi.fn(),
+    handleSetApproximated: vi.fn(),
     handleSelectDirectionSpecifier: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
@@ -263,6 +264,8 @@ describe('NounPhraseBuilder', () => {
         '0Multiple|several',
         '0Sufficient|enough',
         '0Similative|such a',
+        // The quantity's approximator switch (P09-E49), after the numeral field; a checkbox row too.
+        '# About',
       ]);
       expect(within(menu).getByRole('menuitem', { name: /Distal/ })).toHaveClass('Mui-selected');
       expect(within(menu).getByRole('menuitem', { name: /Definite/ })).not.toHaveClass(
@@ -288,6 +291,47 @@ describe('NounPhraseBuilder', () => {
 
       expect(ctx.handleSetDefiniteness).toHaveBeenCalledExactlyOnceWith('directObject', 'few');
       await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    });
+
+    // P09-E49: the approximator row names the word it adds to the quantity on screen, and is disabled,
+    // not hidden, on a quantity that takes none.
+    describe('the approximator row', () => {
+      const row = () => screen.getByTestId('determiner-approximator');
+      const open = (selection: PhraseSelection) => {
+        const view = renderNoun('subject', { shownMap: { subjectDefiniteness: true }, selection: { subject: noun('CAT'), ...selection } });
+        fireEvent.pointerUp(determinerBox());
+        return view;
+      };
+
+      it.each<[string, PhraseSelection, string]>([
+        ['a numeral', { numerals: { subject: 5 } }, 'About'],
+        ['a numeral with all', { numerals: { subject: 5 }, subjectDefiniteness: 'all' }, 'About'],
+        ['all', { subjectDefiniteness: 'all' }, 'Almost'],
+        ['no', { subjectDefiniteness: 'no' }, 'Almost'],
+        ['many', { subjectDefiniteness: 'many' }, 'Almost'],
+      ])('offers it on %s, named by its word', (_, selection, label) => {
+        open(selection);
+        expect(row()).toHaveTextContent(label);
+        expect(row()).not.toHaveAttribute('aria-disabled');
+        expect(row()).toHaveAttribute('aria-checked', 'false');
+      });
+
+      it.each<[string, PhraseSelection]>([
+        ['the definite', {}],
+        ['some', { subjectDefiniteness: 'some' }],
+      ])('is disabled on %s, reading "about"', (_, selection) => {
+        open(selection);
+        expect(row()).toHaveAttribute('aria-disabled', 'true');
+        expect(row()).toHaveTextContent('About');
+      });
+
+      it('ticks it on and off on its own block', () => {
+        const { ctx } = open({ subjectDefiniteness: 'all', approximators: { subject: true } });
+        expect(row()).toHaveAttribute('aria-checked', 'true');
+        expect(row()).toHaveTextContent('✓Almost');
+        fireEvent.click(row());
+        expect(ctx.handleSetApproximated).toHaveBeenCalledExactlyOnceWith('subject', false);
+      });
     });
 
     it('keeps a press on the menu from starting a drag of the determiner box', () => {

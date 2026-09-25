@@ -21,6 +21,7 @@ import {
   type TemporalRelation,
   type Voice,
 } from "@signi/shared";
+import { approximatorFor } from "./functions/approximatorFor.ts";
 import {
   CONJUNCTION_KEY,
   CONJUNCTS_KEY,
@@ -124,6 +125,11 @@ function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
     const { [which]: _count, ...others } = sel.numerals;
     if (Object.keys(others).length > 0) sel.numerals = others;
     else delete sel.numerals;
+  }
+  if (sel.approximators?.[which]) {
+    const { [which]: _approx, ...rest } = sel.approximators;
+    if (Object.keys(rest).length > 0) sel.approximators = rest;
+    else delete sel.approximators;
   }
   if (sel.possessorRoles?.[which]) {
     const { [which]: _dropped, ...rest } = sel.possessorRoles;
@@ -475,7 +481,27 @@ export function setDefiniteness(
 ): PhraseSelection {
   const next: PhraseSelection = { ...prev, [`${which}Definiteness`]: value };
   // A contrast is the demonstratives' alone (P13).
-  return value === "this" || value === "that" ? next : setContrastive(next, which, false);
+  const contrasted = value === "this" || value === "that" ? next : setContrastive(next, which, false);
+  // An approximator needs a quantity that takes one (P09-E49).
+  return keepApproximated(contrasted, which);
+}
+
+// Approximate a noun's quantity (P09-E49), or take that back. A quantity that takes no approximator
+// takes none, so turning it on there changes nothing.
+export function setApproximated(prev: PhraseSelection, which: NounKey, on: boolean): PhraseSelection {
+  if (on && !approximatorFor(prev, which)) return prev;
+  if (Boolean(prev.approximators?.[which]) === on) return prev;
+  const { [which]: _old, ...others } = prev.approximators ?? {};
+  const approximators: Partial<Record<string, true>> = on ? { ...others, [which]: true } : others;
+  const next: PhraseSelection = { ...prev, approximators };
+  if (Object.keys(approximators).length === 0) delete next.approximators;
+  return next;
+}
+
+// Drop the approximator once the quantity under it takes none: moving between licensed quantities
+// keeps it (about five → all is almost all).
+function keepApproximated(sel: PhraseSelection, which: NounKey): PhraseSelection {
+  return approximatorFor(sel, which) ? sel : setApproximated(sel, which, false);
 }
 
 // Point a *this* / *that* determiner at one of a set, away from the rest (P13), or take that back.
@@ -835,7 +861,7 @@ export function setNumeral(prev: PhraseSelection, which: NounKey, numeral: numbe
   const numerals = numeral === undefined ? others : { ...others, [which]: numeral };
   const next: PhraseSelection = { ...prev, numerals };
   if (Object.keys(numerals).length === 0) delete next.numerals;
-  return next;
+  return keepApproximated(next, which);
 }
 
 // What a noun's genitive possessor is to it (P13): the whole it is part of, the parts it is made of,

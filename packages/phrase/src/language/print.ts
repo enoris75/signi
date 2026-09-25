@@ -444,6 +444,11 @@ class Printer {
       this.emit("/num", "command", "setting", { word: ref });
       this.emit(String(numeral), "value", "setting", { word: ref });
     }
+    // Its approximator, after the numeral whose quantity it reads (P09-E49).
+    if (sel.approximators?.[which]) {
+      this.statement({ key: `${wordKey(ref)}:approx`, removal: "/del approx", owner: ref, about: ref });
+      this.emit("/approx", "command", "setting", { word: ref });
+    }
     const address = w.address!;
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its

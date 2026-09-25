@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   translate,
+  translateApproximator,
   translateConjunction,
   translateDegree,
   translateDeterminer,
@@ -12,6 +13,7 @@ import {
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
 import type {
   LanguageCode,
+  UiStringApproximatorDef,
   PhrasePlan,
   Translation,
   UiStringConjunctionDef,
@@ -36,6 +38,7 @@ vi.mock('@signi/engine', async (importOriginal) => {
   return {
     ...engine,
     translate: vi.fn(engine.translate),
+    translateApproximator: vi.fn(engine.translateApproximator),
     translateWord: vi.fn(engine.translateWord),
     translateConjunction: vi.fn(engine.translateConjunction),
     translateSubordinator: vi.fn(engine.translateSubordinator),
@@ -78,6 +81,7 @@ const kindOf = (d: UiStringDef): string =>
   : d.subordinator !== undefined ? 'subordinator'
   : d.specifier !== undefined ? 'specifier'
   : d.degree !== undefined ? 'degree'
+  : 'approximator' in d ? 'approximator'
   : d.word !== undefined ? 'word'
   : 'plan';
 const of = <T extends UiStringDef>(kind: string) =>
@@ -89,6 +93,7 @@ const byKind = {
   subordinator: of<UiStringSubordinatorDef>('subordinator'),
   specifier: of<UiStringSpecifierDef>('specifier'),
   degree: of<UiStringDegreeDef>('degree'),
+  approximator: of<UiStringApproximatorDef>('approximator'),
   word: of<UiStringWordDef>('word'),
   plan: of<UiStringPlanDef>('plan'),
 };
@@ -98,7 +103,7 @@ const rendering = (text: (language: LanguageCode) => string): Translation[] =>
 
 afterEach(() => {
   const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
-    translateDeterminer, translatePossessive, translateSpecifier];
+    translateDeterminer, translatePossessive, translateSpecifier, translateApproximator];
   for (const fn of fns) vi.mocked(fn).mockReset();
 });
 
@@ -143,6 +148,11 @@ describe('buildUiStrings', () => {
     expect(translateDegree).toHaveBeenCalledTimes(byKind.degree.length);
     for (const [, d] of byKind.degree) {
       expect(translateDegree).toHaveBeenCalledWith(d.degree, theLexicon, d.agreesWith);
+    }
+    expect(translateApproximator).toHaveBeenCalledTimes(byKind.approximator.length);
+    for (const [, d] of byKind.approximator) {
+      // The word an approximator adds (P09-E49), cited on nothing.
+      expect(translateApproximator).toHaveBeenCalledWith(d.approximator);
     }
     expect(translateWord).toHaveBeenCalledTimes(byKind.word.length);
     for (const [, d] of byKind.word) {
@@ -231,7 +241,7 @@ describe('buildUiStrings', () => {
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
     const fns = [translate, translateWord, translateConjunction, translateSubordinator, translateDegree,
-      translateDeterminer, translatePossessive, translateSpecifier];
+      translateDeterminer, translatePossessive, translateSpecifier, translateApproximator];
     for (const fn of fns) vi.mocked(fn).mockReturnValue(rendered);
 
     const strings = buildUiStrings();
@@ -718,12 +728,22 @@ describe('buildUiStrings', () => {
   test('says what each console command is for, as a verb is glossed', () => {
     const strings = buildUiStrings();
     const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
-    expect(purposes).toHaveLength(31);
+    expect(purposes).toHaveLength(32);
     const stopped = purposes.flatMap(([key, byLanguage]) =>
       Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
     );
     expect(stopped).toEqual([]);
     expect(purposes.filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['en']!.startsWith('to ')).map(([key]) => key)).toEqual([]);
+    // `/approx` (P09-E49): the quantity, APPROXIMATE on it.
+    expect(strings['purpose.approximator']).toEqual({
+      en: "to set a noun's approximate quantity",
+      it: 'impostare la quantità approssimativa di un sostantivo',
+      fr: "définir la quantité approximative d'un nom",
+      de: 'die ungefähre Menge eines Substantivs festlegen',
+      es: 'establecer la cantidad aproximada de un sustantivo',
+      pt: 'definir a quantidade aproximada de um substantivo',
+      ja: '名詞のおおよその数量を設定する',
+    });
     // SET on a setting, the word it belongs to as its possessor; German festlegen keeps its particle
     // on the infinitive.
     expect(strings['purpose.number']).toEqual({

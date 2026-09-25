@@ -57,6 +57,15 @@ describe('buildNounPhrase', () => {
     expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
   });
 
+  // P09-E49: the flag's word is the quantity's own.
+  it.each<[string, PhraseSelection, string | undefined]>([
+    ['about on a numeral', { subject: CAT, numerals: { subject: 5 }, approximators: { subject: true } }, 'about'],
+    ['almost on all', { subject: CAT, subjectDefiniteness: 'all', approximators: { subject: true } }, 'almost'],
+    ['nothing unflagged', { subject: CAT, subjectDefiniteness: 'all' }, undefined],
+  ])('writes the approximator: %s', (_, sel, want) => {
+    expect(buildNounPhrase(sel, 'subject')?.approximator).toBe(want);
+  });
+
   it('gives an adjective head the degree stored under its own slot', () => {
     const sel: PhraseSelection = { predicative: HAPPY, adjectiveDegrees: { predicative: 'more' } };
 

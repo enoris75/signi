@@ -4,6 +4,7 @@ import {
   DETERMINER_CATEGORIES,
   DETERMINER_CATEGORY_VALUES,
   defaultDefiniteness,
+  type Approximator,
   type Definiteness,
 } from "@signi/shared";
 import { DeterminerToggleBox, VoiceToggleBox } from "./Boxes.tsx";
@@ -11,6 +12,7 @@ import { NounKey, NumberSlot, PhraseSelection } from "./interfaces.ts";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { adjectiveSlots } from "./slots.ts";
+import { approximatorFor } from "./functions/approximatorFor.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { activatable } from "../../keyboard/activate.ts";
 import { Keycap } from "../../keyboard/Keycap.tsx";
@@ -43,6 +45,9 @@ function DeterminerMenu({
   onNumeral,
   contrastive = false,
   onContrastive,
+  approximator,
+  approximated = false,
+  onApproximated,
 }: {
   open: boolean;
   // The anchor as a thunk, not an element: the determiner box may only have appeared in the very
@@ -59,6 +64,11 @@ function DeterminerMenu({
   // Whether the demonstrative points away from the rest (P13), and its setter.
   contrastive?: boolean;
   onContrastive: (contrastive: boolean) => void;
+  // The approximator the quantity on screen takes (P09-E49) — none disables the row — whether it is
+  // on, and its setter.
+  approximator?: Approximator;
+  approximated?: boolean;
+  onApproximated: (on: boolean) => void;
 }) {
   const t = useUiString();
   // A digit per row, counted down the menu as it is shown: the values are too many to cycle,
@@ -160,6 +170,20 @@ function DeterminerMenu({
                   sx={{ width: 72, "& input": { py: 0.25, fontSize: "0.78rem" } }}
                 />
               </Box>,
+              // The approximator on that quantity (P09-E49), named by the word it adds: "about" on a
+              // numeral, "almost" on all / no / many. Disabled, never hidden, on any other quantity.
+              <MenuItem
+                key="approximator"
+                role="menuitemcheckbox"
+                aria-checked={approximated}
+                data-testid="determiner-approximator"
+                disabled={!approximator}
+                onClick={() => onApproximated(!approximated)}
+                sx={{ fontSize: "0.78rem", minHeight: 28, py: 0.25, pl: 1.25, gap: 1 }}
+              >
+                <Box component="span" sx={{ width: 14, textAlign: "center" }}>{approximated ? "✓" : ""}</Box>
+                {t(`approximator.value.${approximator ?? "about"}`)}
+              </MenuItem>,
             ]
           : []),
       ])}
@@ -247,6 +271,9 @@ export function NounPhraseBuilder({
             onNumeral={(n) => ctx.handleSetNumeral(which as NounKey, n)}
             contrastive={Boolean(selection.contrastives?.[which])}
             onContrastive={(on) => ctx.handleSetContrastive(which as NounKey, on)}
+            approximator={approximatorFor({ ...selection, [`${which}Definiteness`]: definiteness }, which as NounKey)}
+            approximated={Boolean(selection.approximators?.[which])}
+            onApproximated={(on) => ctx.handleSetApproximated(which as NounKey, on)}
           />
         </>
       )}

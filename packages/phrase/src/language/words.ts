@@ -49,6 +49,7 @@ import {
   negativeFieldOf,
   NOUN_KEYS,
 } from "../model/slots.ts";
+import { approximatorFor } from "../model/functions/approximatorFor.ts";
 import type { Action, Setting } from "./commands.ts";
 import type { WordKindName } from "./diagnostics.ts";
 import type { WordRef } from "./types.ts";
@@ -394,6 +395,9 @@ export function takes(action: Action, w: WordInfo): boolean {
     case "headless":
     case "numeral":
       return w.kind === "noun" && w.concept?.role === "noun";
+    // Only a quantity that takes one is approximated (P09-E49).
+    case "approximator":
+      return w.kind === "noun" && w.concept?.role === "noun" && approximatorFor(w.slice, w.which!) !== undefined;
     // Only a demonstrative points away from the rest (P13).
     case "contrast": {
       const d = w.slice[`${w.which}Definiteness` as keyof PhraseSelection];
@@ -414,7 +418,7 @@ export function takes(action: Action, w: WordInfo): boolean {
 
 /** Whether a command attaches to a word, rather than to the period or the app. */
 export const attachesToWord = (action: Action): boolean =>
-  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "conjunct", "relative", "headless", "numeral", "contrast"].includes(action.kind);
+  ["adjective", "adverb", "modal", "setting", "set", "possessor", "standard", "conjunct", "relative", "headless", "numeral", "contrast", "approximator"].includes(action.kind);
 
 /** What kind of word a diagnostic says a word is: "food is a noun" (see diagnostics.ts). */
 export function kindOf(w: WordInfo): WordKindName {

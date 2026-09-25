@@ -64,6 +64,13 @@ export type Definiteness =
 /** What `NounPhrase.approximator` can say (P09-E38). */
 export type Approximator = 'about' | 'almost';
 
+/**
+ * The determiners `almost` modifies (P09-E38 D1): "almost all", "almost no", "almost many". Here
+ * rather than in the engine because the builder gates its approximator row on it too (P09-E49), as
+ * it does the standard of comparison on STANDARD_DEGREES; the engine re-exports it.
+ */
+export const ALMOST_DETERMINERS: ReadonlySet<string> = new Set(['all', 'no', 'many']);
+
 export type DeterminerCategory = 'identifiability' | 'deixis' | 'quantity';
 
 /** Display order of the dimensions. */

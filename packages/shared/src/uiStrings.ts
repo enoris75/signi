@@ -1,5 +1,6 @@
 import type {
   AbstractionLevel,
+  Approximator,
   CoordConjunction,
   Definiteness,
   Degree,
@@ -228,6 +229,25 @@ export interface UiStringDegreeDef extends UiStringCommon {
   specifier?: never;
 }
 
+/**
+ * One approximator, named by the word it adds before a quantity (P09-E49) — the label of the
+ * determiner menu's approximator row: "about" before a numeral, "almost" before *all*, *no* or *many*.
+ * No lexicon holds it; each engine's word is the one its sentence writes (circa / environ / etwa /
+ * 約), Spanish cited in the masculine (*unos*), and it is cited alone.
+ */
+export interface UiStringApproximatorDef extends UiStringCommon {
+  /** The approximator this string names ("about" → circa / environ / etwa / 約). */
+  approximator: Approximator;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  conjunction?: never;
+  subordinator?: never;
+  specifier?: never;
+  degree?: never;
+}
+
 export type UiStringDef =
   | UiStringPlanDef
   | UiStringWordDef
@@ -236,7 +256,8 @@ export type UiStringDef =
   | UiStringConjunctionDef
   | UiStringSubordinatorDef
   | UiStringSpecifierDef
-  | UiStringDegreeDef;
+  | UiStringDegreeDef
+  | UiStringApproximatorDef;
 
 // Preserves the literal keys (a plain `Record<string, UiStringDef>` annotation would widen
 // them to `string` and lose the typo-checking on `t('…')`).
@@ -1113,6 +1134,10 @@ export const UI_STRINGS = defineUiStrings({
   // The determiner menu's switch that makes a demonstrative contrastive (P13): its DISTANCE, which
   // French alone spells, with -là ("ce lieu-là").
   'determiner.contrast': { plan: nameOf('DISTANCE'), format: NAME_FORMAT, fallback: 'Distance' },
+  // The determiner menu's approximator row (P09-E49), by the word it adds before the quantity: "about"
+  // before a numeral, "almost" before all / no / many — each engine's own (circa, environ, etwa, 約).
+  'approximator.value.about': { approximator: 'about', format: { capitalize: true }, fallback: 'About' },
+  'approximator.value.almost': { approximator: 'almost', format: { capitalize: true }, fallback: 'Almost' },
   // The chip on a verbless period's subject that says how it reads when it defines an adjective or an
   // adverb (P13, `/gloss`): its MEANING, it "Significato", de "Bedeutung", ja 意味. Each reading is named
   // by what the phrase reads as, with the catalogue's own names (category.*, slot.*).
@@ -3194,6 +3219,12 @@ export const UI_STRINGS = defineUiStrings({
     plan: setterOf('QUANTITY', 'NOUN'),
     format: { stripPeriod: true },
     fallback: "to set a noun's quantity",
+  },
+  // `/approx` (P09-E49): "to set a noun's approximate quantity".
+  'purpose.approximator': {
+    plan: setterOf('QUANTITY', 'NOUN', ['APPROXIMATE']),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's approximate quantity",
   },
   // `/contrast` (P13): "to set a determiner's distance", it "impostare la distanza di un determinante".
   'purpose.contrast': {

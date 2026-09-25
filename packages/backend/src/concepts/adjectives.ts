@@ -1907,6 +1907,24 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // A quantity said roughly rather than exactly — the approximator's (P09-E38) purpose string, "to
+    // set a noun's approximate quantity" (P09-E49). German "ungefähr" declines as an attributive
+    // adjective ("die ungefähre Menge"); Japanese takes the の form, as 複数の does.
+    id: 'APPROXIMATE',
+    role: 'adjective',
+    description: 'close to an amount, but not exact',
+    emoji: '≈',
+    forms: {
+      en: { base: 'approximate' },
+      it: { base: 'approssimativo' },
+      fr: { base: 'approximatif' },
+      de: { base: 'ungefähr' },
+      es: { base: 'aproximado' },
+      ja: { base: 'おおよその', reading: 'おおよその' },
+      pt: { base: 'aproximado' },
+    },
+  },
+  {
     id: 'SIMILATIVE',
     role: 'adjective',
     description: 'naming something of the kind already meant (grammar)',

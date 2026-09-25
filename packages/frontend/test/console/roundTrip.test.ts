@@ -31,6 +31,7 @@ import {
   type SlotKey,
 } from '../../src/components/PhraseBuilder/interfaces.ts';
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
+import { approximatorFor } from '../../src/components/PhraseBuilder/functions/approximatorFor.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
 import { canAsk, canBeExistential } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
@@ -421,6 +422,23 @@ const OPS: Op[] = [
     if (!head) return undefined;
     const n = rng() < 0.3 ? undefined : pick(rng, [1, 2, 3, 7, 12, 24, 100])!;
     return R.updateNounAt(sel, head.address, (s, which) => R.setNumeral(s, which, n));
+  }),
+  // An approximator on a quantity that takes one (P09-E49), then the numeral and the determiner under
+  // it changed — which keeps it on a quantity that still takes one and drops it on one that does not.
+  onPeriod((sel, rng) => {
+    const head = pick(rng, nounHeads(sel).filter((h) => {
+      const at = R.nounSliceAt(sel, h.address);
+      return at && approximatorFor(at.slice, at.which) !== undefined;
+    }));
+    if (!head) return undefined;
+    return R.updateNounAt(sel, head.address, (s, which) => {
+      let next = R.setApproximated(s, which, rng() < 0.8);
+      if (rng() < 0.4) next = R.setNumeral(next, which, rng() < 0.5 ? undefined : pick(rng, [2, 5, 12])!);
+      // Only where a determiner is already held: not every block takes one.
+      if (s[`${which}Definiteness` as keyof PhraseSelection] && rng() < 0.4)
+        next = R.setDefiniteness(next, which, pick(rng, ['all', 'no', 'many', 'some', 'definite'] as const)!);
+      return next;
+    });
   }),
   // What a noun's genitive possessor is to it (P13).
   onPeriod((sel, rng) => {
