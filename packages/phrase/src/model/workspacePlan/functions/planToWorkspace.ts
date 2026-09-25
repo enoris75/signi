@@ -269,8 +269,8 @@ class Builder {
       this.check("NounGroup", el, GROUP_FIELDS);
       const [first, ...rest] = el.conjuncts;
       if (!first) return;
-      // A conjunct's box holds a noun: predicate adjectives joined, "not male or female", have none yet.
-      if (el.conjuncts.some((np) => this.conceptOf(np.concept)?.role === "adjective")) {
+      // A conjunct's box holds a noun — or, beside a predicate, an adjective too (P13).
+      if (which !== "predicative" && el.conjuncts.some((np) => this.conceptOf(np.concept)?.role === "adjective")) {
         this.unsupported.add("NounGroup of adjectives");
         return;
       }

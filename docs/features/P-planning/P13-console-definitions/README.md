@@ -111,7 +111,7 @@ found four more, and the canonical names the test keeps (`WAITING` in
 | ~~`complements.direction.specifiers.path`~~ — `/in` on `/dir`, `/goal` back, ✅ | 1 |
 | `NounPhrase.contrastive` | 1 |
 | `PhrasePlan.adverbialGloss` | 1 |
-| `NounGroup of adjectives` — predicate adjectives joined, NEUTER "that is not male or female"; found once `/headless` let NEUTER through | 1 |
+| ~~`NounGroup of adjectives`~~ — a predicate's conjuncts read as the predicate, ✅ | 2 |
 
 A definition can wait on several.
 
@@ -129,6 +129,7 @@ control, console command, printer case, catalogue strings and tests:
 | A clause of purpose | `/so #n` (or `/so ( … )`) — `/purpose` is the noun modifier's relation | the subordinate clause menu's Purpose row (<kbd>P</kbd>), on any verb | A fourth subordinate link kind, drawn in the infinitive with its mood locked; `attachSubordinate` folds it into `PhrasePlan.purpose`. A third-person pronoun object in it stands for the governing clause's object, which becomes its antecedent and gives it its gender in each language (SAVE's "to load it", de *ihn*). 548 → 556. |
 | An infinitive the predicate adjective governs | `/to` on a period whose predicate adjective governs one | the subordinate menu's Infinitive phrase row, now offered there too | `clauseObject: 'infinitive'` on an adjective (ABLE, OBLIGED, ALLOWED), read by `governsInfinitive` wherever a verb's was. LET governs one too (ALLOW). No new control. 556 → 561. |
 | A direction's path, and an infinitive's own infinitive | `/dir ( AIR /in )`, `/goal` for the plain "to"; `/to` from a period that is itself an infinitive | the direction's toolbar (To, then the path relations); the Infinitive phrase row, the one an infinitive period's menu offers | `directionSpecifier`; `canStartSubordinate` lets an infinitive govern an infinitive (LET, "to be allowed to act") and nothing else, and `attachSubordinate` folds it into `InfinitiveComplement.infinitiveComplement`. 561 → 563. |
+| Joined predicate adjectives | `/pred ( male /or female )` — a predicate's conjunct is read as the predicate is, a noun or an adjective | a predicate's conjunct ring picks with the predicate's picker (Noun · Adjective) | `conjunctSpec` for the console and the printer; `predicateHead` for the ring. NEUTER, NEUTRAL. 563 → 565. |
 
 Found on the way, and fixed with it: an instrument on a *linked* period (a relative clause, an
 if-clause, a coordinate) never reached the plan, since only the root attached one; and removing a

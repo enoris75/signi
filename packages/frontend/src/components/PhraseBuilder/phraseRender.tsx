@@ -56,6 +56,9 @@ export interface PhraseRenderContext {
   // A noun-phrase canvas whose head may still be a pronoun: a conjunct's ("you and I"). Its
   // `subject` slot keeps the pronoun-inclusive picker, which a possessor head does without.
   pronounHead?: boolean;
+  // Whether this canvas's `subject` slot is a predicate's conjunct (P13): it takes what the predicate
+  // takes, a noun or an adjective — "is not male **or female**" — and picks with the predicate's picker.
+  predicateHead?: boolean;
   // Whether the subject box is drawn at all. False for an instrument period at an action level:
   // the act ("by choosing a word") has no subject of its own — the clause it serves supplies it.
   showSubject?: boolean;
@@ -477,7 +480,9 @@ export function SlotNode({
   // A switchable slot (subject/object/cause = noun|pronoun; predicative + adjectives = noun|adj)
   // wears its category toggle on the empty box; the same value threads into the picker so
   // the in-dropdown selector matches. Single-vocabulary slots return null → no toggle.
-  const categories = slotCategories(slot.key, nounSubject);
+  // A predicate's conjunct picks as the predicate does (P13).
+  const pickerSlot: SlotKey = ctx.predicateHead && slot.key === "subject" ? "predicative" : slot.key;
+  const categories = slotCategories(pickerSlot, nounSubject);
   const categoryToggle =
     categories && !held ? (
       <CategoryToggle
@@ -555,6 +560,7 @@ export function SlotNode({
         categoryToggle={categoryToggle}
         emptyContent={slotTypeahead({
           slotKey: slot.key,
+          pickerSlot,
           activeSlot,
           selection,
           onSelect: handleConceptSelect,

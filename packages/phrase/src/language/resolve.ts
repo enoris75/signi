@@ -44,6 +44,13 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "stan
   return { roles: ["noun"] };
 }
 
+/**
+ * The words a conjunct of the `which` block takes: a noun or a pronoun, as a period's own subject does
+ * — or, beside a predicate, what a predicate takes (P13), "is not **male or female**".
+ */
+export const conjunctSpec = (which: NounKey | undefined): WordSpec =>
+  which === "predicative" ? wordSpecFor("predicative") : wordSpecFor("subject", "conjunct");
+
 /** The words of a spec, in the order its picker lists them. */
 export function wordsFor(spec: WordSpec, vocab: Vocabulary): Concept[] {
   return spec.roles.flatMap((role) =>

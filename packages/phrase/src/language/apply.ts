@@ -104,7 +104,7 @@ import {
 import { codeOf, coded, diagnosticAt, type ClauseRole, type Coded, type ComplementSlot, type Nest } from "./diagnostics.ts";
 import { splitPeriods } from "./lex.ts";
 import { parse, type Item } from "./parse.ts";
-import { parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
+import { conjunctSpec, parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
 import type { ConsoleContext, Diagnostic, Span, Vocabulary, WordRef, WorkspaceState } from "./types.ts";
 import {
   adjectiveTarget,
@@ -725,7 +725,7 @@ class Run {
     const headRef: WordRef = { containerId, slice, slot: "subject" };
     this.touch(w.ref);
     if (item.word) {
-      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "conjunct"), conjunction);
+      const { concept, opts } = this.word(item.word, conjunctSpec(which), conjunction);
       this.updateRoot(containerId, (root) => updateConjunct(root, which, i, (c) => applyConceptSelect(c, "subject", concept, opts)));
       this.touch(headRef);
     }

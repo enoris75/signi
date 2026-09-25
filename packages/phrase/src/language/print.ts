@@ -39,7 +39,8 @@ import {
 import type { ResolvedWord } from "./apply.ts";
 import { CLOSER, type Shape } from "./lex.ts";
 import { bracketColor } from "./parse.ts";
-import { printRef, printWord, wordSpecFor } from "./resolve.ts";
+import {
+  conjunctSpec, printRef, printWord, wordSpecFor } from "./resolve.ts";
 import type { Span, Vocabulary, WordRef, WorkspaceState } from "./types.ts";
 import { currentSetting, defaultSetting, settingTakes, wordInfo, type WordInfo } from "./words.ts";
 
@@ -193,8 +194,10 @@ class Printer {
     return this.state.containers.findIndex((c) => c.id === id) + 1;
   }
 
-  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period"): string {
-    return printWord(concept, wordSpecFor(slot, frame), this.vocab);
+  word(concept: Concept, slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period", slice?: NounAddress): string {
+    // A conjunct is read as its block's words are: a predicate's takes an adjective too (P13).
+    const spec = frame === "conjunct" ? conjunctSpec(slice?.split("/")[0] as NounKey | undefined) : wordSpecFor(slot, frame);
+    return printWord(concept, spec, this.vocab);
   }
 
   // ── A period ──
@@ -379,7 +382,7 @@ class Printer {
     const w = this.info(ref)!;
     const role = roleCommand(which)!;
     const color = role.color;
-    const word = this.word(concept, which, frame);
+    const word = this.word(concept, which, frame, slice);
     const statement = this.statement({
       key: `${wordKey(ref)}:word`,
       removal: `/del ${role.name}`,
@@ -467,7 +470,7 @@ class Printer {
         if (c.subject && isBareConjunct(c) && !relative) {
           this.statement({ key, removal: `/del and ${i + 2}`, owner: ref, about: headRef });
           this.emit(`/${conjunction}`, "command", "primary", { word: headRef });
-          this.emit(this.word(c.subject, "subject", "conjunct"), "word", "primary", { word: headRef, italic: true });
+          this.emit(this.word(c.subject, "subject", "conjunct", cAddress), "word", "primary", { word: headRef, italic: true });
         } else {
           this.phrase(ref, `/${conjunction}`, key, `/del and ${i + 2}`, c, cAddress, "conjunct");
         }

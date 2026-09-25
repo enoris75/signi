@@ -981,6 +981,8 @@ export function PhraseBuilder({
     nounPhrase: nounPhraseMode,
     // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him").
     pronounHead: ringHost?.kind === "conjunct" || ringHost?.kind === "standard",
+    // …and a predicate's conjunct takes an adjective, as the predicate does (P13).
+    predicateHead: ringHost?.kind === "conjunct" && ringHost.role === "predicative",
     showSubject: !actionMode,
     activeSlot,
     renderedSlots,

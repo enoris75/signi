@@ -19,6 +19,7 @@ export function slotTypeahead({
   selection,
   onSelect,
   nounSubject = false,
+  pickerSlot,
   editing = false,
   kind,
   onKindChange,
@@ -30,6 +31,8 @@ export function slotTypeahead({
   // In noun-phrase mode (an owner's ring) the `subject` slot is the owner's head, which is
   // noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
   nounSubject?: boolean;
+  // The slot whose picker it opens, where it is not its own (P13: a predicate's conjunct's `subject`).
+  pickerSlot?: SlotKey;
   // Re-picking the word of an already-filled box: bypass the empty/active guard so the
   // picker renders over the current word.
   editing?: boolean;
@@ -44,7 +47,7 @@ export function slotTypeahead({
 
   const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
-  return pickerFor(slotKey, pick, nounSubject, kind, onKindChange);
+  return pickerFor(pickerSlot ?? slotKey, pick, nounSubject, kind, onKindChange);
 }
 
 // Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can

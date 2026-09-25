@@ -20,7 +20,6 @@ import './seed.js';
 // phase-4 construct takes its name off this list; a definition using one of them is skipped until
 // then. A name not listed here is a construct nobody has planned for, and fails the second test.
 const WAITING = new Set([
-  'NounGroup of adjectives',
   'NounPhrase.numeral',
   'NounPhrase.contrastive',
   'PhrasePlan.adverbialGloss',
@@ -62,7 +61,7 @@ describe('definitions in the phrase language (P13)', () => {
 
   test('most definitions are said already', () => {
     // A floor, not a count: it moves up as phase 4 lands, and catches the inverse losing ground.
-    expect(said.length).toBeGreaterThanOrEqual(563);
+    expect(said.length).toBeGreaterThanOrEqual(565);
   });
 });
 

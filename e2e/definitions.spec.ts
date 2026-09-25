@@ -200,3 +200,23 @@ test.describe('the last small constructs', () => {
     await expect(page.getByTestId('source-strip')).toContainText('/to #3');
   });
 });
+
+test.describe('joined predicate adjectives', () => {
+  test('are typed with /or, and a predicate’s conjunct ring picks an adjective', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj cat /verb become /pred ( HAPPY /or SAD )');
+    await run(page);
+    await app.expectSentences({ en: 'the cat becomes happy or sad.' });
+
+    // On the canvas: the predicate's coordination control adds a ring that takes an adjective too.
+    await prompt(page).click();
+    await page.keyboard.insertText('/new /subj dog /verb become /pred HAPPY');
+    await run(page);
+    await app.period(1).getByTestId('satellite-predicativeConjunct').click();
+    // Its picker opens with the predicate's switch — Noun | Adjective — as the predicate's own does.
+    await page.getByRole('button', { name: 'Adjective', exact: true }).last().click();
+    await page.keyboard.type('tired');
+    await page.locator('[data-testid="typeahead-option"][data-concept="TIRED"]').click();
+    await expect(page.getByTestId('source-strip')).toContainText('/pred ( happy /and tired )');
+  });
+});
