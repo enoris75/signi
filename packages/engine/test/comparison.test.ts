@@ -848,14 +848,14 @@ describe('attributive (P09-E18)', () => {
     expect(say(bigFirst, 'ja')).toBe('男は犬より大きい茶色の猫を見ます。');
   });
 
-  // Italian puts it ahead of the compared adjective instead (A271), where it cannot read as the
-  // standard's possessor; the other Romance languages keep it after the standard.
-  test('a genitive possessor keeps its place after the standard, but for Italian (A271)', () => {
+  // Romance puts it ahead of the compared adjective (A271 in Italian, A372 in the others), where it
+  // cannot read as the standard's possessor.
+  test('a genitive possessor goes ahead of the compared adjective and its standard (A271, A372)', () => {
     expect(sayAll(sees(compared('CAT', 'more', DOG, { possessor: np('WOMAN') })))).toMatchObject({
       it: "l'uomo vede un gatto della donna più grande del cane.",
-      fr: "l'homme voit un chat plus grand que le chien de la femme.",
-      es: 'el hombre ve un gato más grande que el perro de la mujer.',
-      pt: 'o homem vê um gato maior do que o cão da mulher.',
+      fr: "l'homme voit un chat de la femme plus grand que le chien.",
+      es: 'el hombre ve un gato de la mujer más grande que el perro.',
+      pt: 'o homem vê um gato da mulher maior do que o cão.',
       // German puts it after the possessor: "*als den Hund der Frau" would be the woman's dog.
       de: 'der Mann sieht einen größeren Kater der Frau als den Hund.',
     });
@@ -1130,11 +1130,44 @@ describe('known bugs: fr / es / pt write a possessor after an attributive standa
   const runs = () =>
     sayAll(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveStandards: [DOG], possessor: np('WOMAN') }), 'RUN'));
 
-  test.fails('the possessor ahead of the standard', () => {
+  test('the possessor ahead of the standard', () => {
     expect(runs()).toMatchObject({
       fr: 'un chat de la femme plus grand que le chien court.', // now: "… plus grand que le chien de la femme court."
       es: 'un gato de la mujer más grande que el perro corre.', // now: "… más grande que el perro de la mujer corre."
       pt: 'um gato da mulher maior do que o cão corre.', // now: "… maior do que o cão da mulher corre."
+    });
+  });
+
+  // Every post-nominal adjective follows the possessor, as in Italian, so the coordination stays whole;
+  // a relative clause still closes the phrase, and a complement's noun phrase does the same.
+  const brownCat = np('CAT', {
+    definiteness: 'indefinite', adjectives: ['BROWN', 'BIG'], adjectiveDegrees: ['positive', 'more'], adjectiveStandards: [undefined, DOG],
+    possessor: np('WOMAN'),
+  });
+
+  test('the other post-nominal adjectives follow it too, and a relative clause closes the phrase', () => {
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: { ...brownCat, relative: { verbPhrase: { verb: 'RUN' } } } }))).toMatchObject({
+      it: "l'uomo vede un gatto della donna marrone e più grande del cane che corre.",
+      fr: "l'homme voit un chat de la femme brun et plus grand que le chien qui court.",
+      es: 'el hombre ve un gato de la mujer marrón y más grande que el perro que corre.',
+      pt: 'o homem vê um gato da mulher castanho e maior do que o cão que corre.',
+    });
+  });
+
+  test('in a prepositional complement', () => {
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: brownCat } } }))).toMatchObject({
+      fr: "l'homme donne le livre à un chat de la femme brun et plus grand que le chien.",
+      es: 'el hombre da el libro a un gato de la mujer marrón y más grande que el perro.',
+      pt: 'o homem dá o livro a um gato da mulher castanho e maior do que o cão.',
+    });
+  });
+
+  test('a pronominal possessor stands before the noun and moves nothing', () => {
+    const hers = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+    expect(sayAll(clause(np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveStandards: [DOG], possessor: hers }), 'RUN'))).toMatchObject({
+      fr: 'son chat plus grand que le chien court.',
+      es: 'su gato más grande que el perro corre.',
+      pt: 'o seu gato maior do que o cão corre.',
     });
   });
 

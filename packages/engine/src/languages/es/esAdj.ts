@@ -2,6 +2,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
+import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard.js';
 import type { EsAdjectives } from './es.types.js';
 import { PRENOMINAL } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -39,5 +40,8 @@ export function esAdj(np: ResolvedNounPhrase): EsAdjectives {
     }
   }
   if (compared) post.push(compared);
+  // Beside a genitive possessor they follow it, so the standard is not read as its noun's: "un gato de
+  // la mujer más grande que el perro" (A372).
+  if (possessorBeforeStandard(np)) return { pre: pre.join(' '), post: '', trail: coordinate(post) };
   return { pre: pre.join(' '), post: coordinate(post) };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, AGUA, CASA, concept, el, FRIO, GATO, GRANDE, HERMOSO, MARRON, np, NUEVO, PERRO, PRIMERO, RATON, SEGUNDO, TERCERO, VIEJO } from './es.fixtures.js';
+import { adj, AGUA, CASA, concept, el, FRIO, GATO, GRANDE, HERMOSO, MARRON, MUJER, np, NUEVO, PERRO, PRIMERO, RATON, SEGUNDO, TERCERO, VIEJO } from './es.fixtures.js';
 import { esAdj } from './esAdj.js';
 
 describe('esAdj', () => {
@@ -49,5 +49,14 @@ describe('esAdj: the compared adjective with a standard (P09-E18)', () => {
       adjectiveStandard: { index: 0, standard: el(np(PERRO, { definiteness: 'definite' })) },
     });
     expect(esAdj(phrase).post).toBe('marrón y más grande que el perro');
+  });
+
+  test('beside a genitive possessor they trail it instead of following the noun (A372)', () => {
+    const phrase = np(GATO, {}, {
+      adjectives: [adj(GRANDE, { degree: 'more', standard: '1' }), adj(MARRON)],
+      adjectiveStandard: { index: 0, standard: el(np(PERRO, { definiteness: 'definite' })) },
+      possessor: np(MUJER, { definiteness: 'definite' }),
+    });
+    expect(esAdj(phrase)).toEqual({ pre: '', post: '', trail: 'marrón y más grande que el perro' });
   });
 });

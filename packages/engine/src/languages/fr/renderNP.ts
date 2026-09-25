@@ -6,6 +6,7 @@ import { ownHeadForms, possessedHeadForms } from '../../functions/possessedHeadF
 import { disjunctiveFr, keptBesidePossessive, possessiveFr } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
+import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard.js';
 import { CARDINALS } from './fr.consts.js';
 import { artFor } from './artFor.js';
 import { deDet } from './deDet.js';
@@ -95,7 +96,10 @@ export function renderNP(
   // says both (C40): "ce lieu-là", "cette robe bleue-là". It closes the noun's own material, so it
   // stands behind the postnominal adjectives and ahead of a modifier, possessor or relative.
   const deictic = deicticClitic(definiteness, np.contrastive === true);
-  const postAdj = `${postStr ? `${core} ${postStr}` : core}${deictic}`;
+  // Beside an attributive standard or set a genitive possessor comes first, so it is not read as the
+  // standard's: "un chat de la femme plus grand que le chien" (A372, see `possessorBeforeStandard`).
+  const possFirst = possessorBeforeStandard(np);
+  const postAdj = `${postStr && !possFirst ? `${core} ${postStr}` : core}${deictic}`;
   // Attributive nouns are postnominal and bare, the relation choosing the preposition:
   // feature "à" (bateau à voile), purpose/material "de" (lunettes de soleil). Distinct
   // from the possessor's contracted "du/de la".
@@ -107,12 +111,13 @@ export function renderNP(
   // was already rendered prenominally above.)
   // A possessor question's stand-in is *de qui* in the same slot — never the relative *dont*: "le chat
   // de qui" (P09-E14).
-  const base = isQuestionPossessor(poss) ? `${withPost} de qui`
+  const possText = isQuestionPossessor(poss) ? 'de qui'
     : poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead), (plural, lead) => deDet(ownHeadForms(poss), plural, lead))}`
+    ? renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead), (plural, lead) => deDet(ownHeadForms(poss), plural, lead))
     // The detached possessor takes the genitive's own postnominal slot: "ce livre à elle".
-    : detached && poss ? `${withPost} à ${disjunctiveFr(poss as PronominalPossessor)}`
-    : withPost;
+    : detached && poss ? `à ${disjunctiveFr(poss as PronominalPossessor)}`
+    : '';
+  const base = [withPost, possText, possFirst ? postStr : ''].filter(Boolean).join(' ');
   const rel = relativeText(np);
   // The members of the head's set it names follow everything, the relative clause included (P09-E33).
   return `${rel ? `${base} ${rel}` : base}${frExamples(np)}`;

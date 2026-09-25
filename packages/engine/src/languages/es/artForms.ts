@@ -15,7 +15,7 @@ import type { EsAdjectives } from './es.types.js';
  */
 export function artForms(forms: Record<string, string>, adj?: EsAdjectives): Record<string, string> {
   const bareName = forms['proper'] === '1' && forms['takes_article'] !== '1';
-  const articled = bareName && !!(adj?.pre || adj?.post);
+  const articled = bareName && !!(adj?.pre || adj?.post || adj?.trail);
   if (!articled && !adj?.pre) return forms;
   const out = { ...forms };
   if (articled) out['takes_article'] = '1';

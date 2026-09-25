@@ -14,6 +14,8 @@ import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
+import { esAdj } from './esAdj.js';
+import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard.js';
 import { isPlural } from './isPlural.js';
 import { predicateText } from './predicateText.js';
 import { prepObjectText } from './prepObjectText.js';
@@ -35,7 +37,9 @@ import { esExamples } from './esExamples.js';
  * escrito por el niño").
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
-  const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
+  // Adjectives held back past a genitive possessor, one of them with its standard (A372).
+  const trail = possessorBeforeStandard(np) ? esAdj(np).trail : '';
+  const withPoss = `${text}${modifierText(np)}${possessorText(np)}${trail ? ` ${trail}` : ''}`;
   // The members of the head's set it names follow everything, the relative clause included (P09-E33).
   const examples = esExamples(np);
   const rel = np.relative;

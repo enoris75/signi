@@ -4,6 +4,7 @@ import { adjDegree } from '../../functions/adjDegree.js';
 import { attributiveStandard } from '../../functions/attributiveStandard.js';
 import { hasIntensifier } from '../../functions/hasIntensifier.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
+import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard.js';
 import type { PtAdjectives } from './pt.types.js';
 import { PRENOMINAL, PT_SUPPLETIVE } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -59,5 +60,8 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   if (enough && np.possessor && isPronominalPossessor(np.possessor)) {
     return { pre: [enough, ...pre].join(' '), post: adjectives };
   }
+  // Beside a genitive possessor the adjectives follow it, so the standard is not read as its noun's:
+  // "um gato da mulher maior do que o cão" (A372). "suficiente" stays with the noun.
+  if (possessorBeforeStandard(np)) return { pre: pre.join(' '), post: enough, trail: adjectives };
   return { pre: pre.join(' '), post: [adjectives, enough].filter(Boolean).join(' ') };
 }

@@ -3,11 +3,12 @@ import { questionPossessor } from '../../functions/questionPossessor.js';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import {
-  AILE, ANGE, ANIMAL, BEAU, BON, CHAT, CHIEN, concept, CREATEUR, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
+  AILE, ANGE, ANIMAL, BEAU, BON, CHAT, CHIEN, concept, CREATEUR, FEMME, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
   MANGER, nounModifier, np, PERE, PETIT, PHRASE, SEMANTIQUE, SOURIS, TRISTE, VIEUX, vp,
 } from './fr.fixtures.js';
 import { artFor } from './artFor.js';
 import { renderNP } from './renderNP.js';
+import { el } from '../resolved.fixtures.js';
 
 const BATEAU: Forms = { base: 'bateau', plural: 'bateaux', gender: 'masc', count: 'singular' };
 const VOILE: Forms = { base: 'voile', plural: 'voiles', gender: 'fem', count: 'singular' };
@@ -161,5 +162,22 @@ describe('renderNP', () => {
 describe('renderNP: the possessor question (P09-E14)', () => {
   test('the stand-in is de qui after the noun, never the relative dont', () => {
     expect(withArticle(np(CHAT, {}, { possessor: questionPossessor() }))).toBe('le chat de qui');
+  });
+});
+
+describe('renderNP: a possessor beside an attributive standard (A372)', () => {
+  const bigger = concept({ ...GRAND, degree: 'more', standard: '1' }, 'BIG');
+  const compared = (possessor: ResolvedNounPhrase['possessor']) => np(CHAT, { definiteness: 'indefinite' }, {
+    adjectives: [bigger], adjectiveStandard: { index: 0, standard: el(np(CHIEN)) }, ...(possessor ? { possessor } : {}),
+  });
+
+  test('the genitive goes ahead of the compared adjective, so it is not read as the standard\'s', () => {
+    expect(withArticle(compared(np(FEMME)))).toBe('un chat de la femme plus grand que le chien');
+    expect(withArticle(compared(questionPossessor()))).toBe('un chat de qui plus grand que le chien');
+  });
+
+  test('without a standard the possessor keeps its place after the adjectives', () => {
+    expect(withArticle(np(CHAT, { definiteness: 'indefinite' }, { adjectives: [concept({ ...GRAND, degree: 'more' }, 'BIG')], possessor: np(FEMME) })))
+      .toBe('un chat plus grand de la femme');
   });
 });

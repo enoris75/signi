@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, BELO, BOM, CAO, CASA, concept, el, FORTE, GATO, GRANDE, np, PRIMEIRO, RATO, SEGUNDO, VELHO } from './pt.fixtures.js';
+import { adj, BELO, BOM, CAO, CASA, concept, el, FORTE, GATO, GRANDE, MULHER, np, PRIMEIRO, RATO, SEGUNDO, VELHO } from './pt.fixtures.js';
 import { ptAdj } from './ptAdj.js';
 
 describe('ptAdj', () => {
@@ -70,5 +70,14 @@ describe('ptAdj: the compared adjective with a standard (P09-E18)', () => {
       adjectiveStandard: { index: 0, standard: el(np(CAO, { definiteness: 'definite' })) },
     });
     expect(ptAdj(phrase).post).toBe('velho e maior do que o cão');
+  });
+
+  test('beside a genitive possessor they trail it instead of following the noun (A372)', () => {
+    const phrase = np(GATO, {}, {
+      adjectives: [adj(GRANDE, { degree: 'more', standard: '1' }), adj(VELHO)],
+      adjectiveStandard: { index: 0, standard: el(np(CAO, { definiteness: 'definite' })) },
+      possessor: np(MULHER, { definiteness: 'definite' }),
+    });
+    expect(ptAdj(phrase)).toEqual({ pre: '', post: '', trail: 'velho e maior do que o cão' });
   });
 });

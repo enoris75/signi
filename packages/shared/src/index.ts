@@ -912,7 +912,8 @@ export interface NounPhrase {
    *    adjective moves behind the noun with it ("a cat as big as the dog").
    *  - it / fr / es / pt: the compared adjective, already post-nominal, moves last among the
    *    post-nominal adjectives and the standard follows it ("un gatto marrone e più grande del
-   *    cane"), ahead of a genitive possessor.
+   *    cane"). A genitive possessor goes ahead of the post-nominal adjectives, where it cannot read as
+   *    the standard's ("un chat de la femme plus grand que le chien", A271, A372).
    *  - de: the adjective declines before the noun as ever and the standard follows the noun, in the
    *    phrase's own case ("sieht einen größeren Kater als den Hund").
    *  - ja: before the compared adjective, in its degree adverb's place (犬より大きい猫).
