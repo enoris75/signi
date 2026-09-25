@@ -152,15 +152,17 @@ test('pointing at the command box: see your book', async ({ app, page }) => {
 // A375. The owner ring's word picker takes ↵ as "point to" rather than as the word typed: filling
 // "dog" and pressing Enter builds a pronominal possessor on the subject ("the cat eats his food"),
 // while a click on the same row builds "the dog's food". The picker's own rule is ↵ to choose
-// (usePickerKeys). Reproduced at 1d8f359b, before P09-E52 touched the owner ring.
+// (usePickerKeys). Reproduced at 1d8f359b, before P09-E52 touched the owner ring. Fixed: while a pick
+// is in flight, ↵ and ⇥ in a text field are the field's (usePickKeys); the digits and esc stay the
+// pick's. Opened from the possessor control or from the noun's owner satellite alike.
 test.describe('known bugs: Enter in the owner picker points to the subject (A375)', () => {
-  test.fail('↵ takes the word typed', async ({ app, page }) => {
+  test('↵ takes the word typed', async ({ app, page }) => {
     await app.buildClause('CAT', 'EAT');
     await app.setDirectObject('FOOD');
     await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
     await page.getByTestId('typeahead-noun').fill('dog');
     await page.keyboard.press('Enter');
-    await app.expectSentences({ en: "the cat eats the dog's food." }); // now: "the cat eats his food."
+    await app.expectSentences({ en: "the cat eats the dog's food." });
   });
 
   test('a click on the row takes it', async ({ app, page }) => {
@@ -169,6 +171,24 @@ test.describe('known bugs: Enter in the owner picker points to the subject (A375
     await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
     await page.getByTestId('typeahead-noun').fill('dog');
     await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+    await app.expectSentences({ en: "the cat eats the dog's food." });
+  });
+
+  test('a row is highlighted while the list is open', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+    await page.getByTestId('typeahead-noun').fill('dog');
+    await expect(page.locator('[data-testid="typeahead-option"][data-highlighted]')).toHaveCount(1);
+    await expect(page.locator('[data-testid="typeahead-option"][data-concept="DOG"]')).toHaveAttribute('data-highlighted', '');
+  });
+
+  test('↵ takes the word typed, with the owner opened from its satellite', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('satellite-directObjectPossessor').click();
+    await page.getByTestId('typeahead-noun').fill('dog');
+    await page.keyboard.press('Enter');
     await app.expectSentences({ en: "the cat eats the dog's food." });
   });
 });

@@ -24,6 +24,19 @@ export const PICK_INDEX = "data-kb-pick-index";
 /** As many as can be named by a single digit; beyond that, ⇥ and ↵ still reach them. */
 const MAX_DIGITS = 9;
 
+/**
+ * Is the key's target a field being typed in — a word picker's input? Its ↵ and ⇥ are its own:
+ * ↵ chooses the highlighted word and ⇥ chooses it and moves on (usePickerKeys). A pick can be in
+ * flight while one has the cursor — opening a noun's owner starts the pointing gesture *and* draws
+ * the owner ring's picker, focused — and taking ↵ for the walk there made typing "dog" + ↵ point
+ * at the subject instead of choosing the dog (A375). The digits and esc stay the pick's.
+ */
+function inTextField(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable || target instanceof HTMLTextAreaElement) return true;
+  return target instanceof HTMLInputElement && !["button", "checkbox", "radio"].includes(target.type);
+}
+
 function targets(): HTMLElement[] {
   if (typeof document === "undefined") return [];
   return Array.from(document.querySelectorAll<HTMLElement>(`[${PICK_TARGET}]`));
@@ -77,13 +90,14 @@ export function usePickKeys({
         take(found[digit - 1]);
         return;
       }
-      if (matchesKeySpec("Tab", event, platform) || matchesKeySpec("Shift+Tab", event, platform)) {
+      const fieldKeys = inTextField(event.target);
+      if (!fieldKeys && (matchesKeySpec("Tab", event, platform) || matchesKeySpec("Shift+Tab", event, platform))) {
         event.preventDefault();
         event.stopPropagation();
         setWalked((at) => (at + (event.shiftKey ? -1 : 1) + found.length) % found.length);
         return;
       }
-      if (matchesKeySpec("Enter", event, platform)) {
+      if (!fieldKeys && matchesKeySpec("Enter", event, platform)) {
         take(found[walked]);
         return;
       }
