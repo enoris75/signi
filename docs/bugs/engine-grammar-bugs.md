@@ -53,8 +53,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds seven files, A370–A376, and Part B is empty). One is pinned in `e2e/` instead, as a
-Playwright `test.fail`: A375, a canvas key that only a browser reaches.** If
+this writing Part A is empty, and so is Part B).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -66,13 +65,19 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
-| A370 | [A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md](A-must-fix/A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md) | Portuguese | ALREADY beside the concord "não" of a `no` object or complement becomes "ainda não" (*not yet*) instead of "já não" |
-| A371 | [A371-attributive-superlative-drops-its-set.md](A-must-fix/A371-attributive-superlative-drops-its-set.md) | all | An attributive superlative's set (`adjectiveStandards` on `most` / `least`) is dropped: "the biggest house" for "the biggest house in the city" |
-| A372 | [A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md](A-must-fix/A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md) | French, Spanish, Portuguese | A possessor written after an attributive standard reads as the standard's ("plus grand que le chien de la femme") |
-| A373 | [A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md](A-must-fix/A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md) | Japanese | WIN with an object and an opponent doubles に (猫は犬にゲームに勝ちます) |
-| A374 | [A374-animate-route-question-reads-as-another-relation.md](A-must-fix/A374-animate-route-question-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | An animate route question reads as *for whom* (¿por quién…?) or runs a person as a path (誰を走りますか) |
-| A375 | [A375-enter-in-the-owner-picker-points-to-the-subject.md](A-must-fix/A375-enter-in-the-owner-picker-points-to-the-subject.md) | frontend | ↵ in the owner ring's word picker builds a pronominal possessor on the subject ("his food") instead of the word typed |
-| A376 | [A376-romance-bare-plural-subject-loses-its-article.md](A-must-fix/A376-romance-bare-plural-subject-loses-its-article.md) | Italian, French, Spanish, Portuguese | A bare plural subject keeps no article (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite (*i gatti corrono*, *ai gatti piace*) |
+
+**All seven were fixed on 2026-09-25** by four lanes, and are listed under **Fixed** below:
+A370 (Portuguese *já não* beside a concord *não*), A371 (an attributive superlative says its set,
+right after the adjective, as the comparative's standard does), A372 (fr / es / pt write the possessor
+before the attributive standard, in Italian's order), A373 (Japanese WIN's opponent takes を相手に beside
+a に object), A374 (an animate route question spells the path: *a través de quién*, *através de quem*,
+誰の中を通って), A375 (↵ and ⇥ in a text field are left to the field while a pick runs) and A376 (a bare
+plural or mass subject in it / fr / es / pt takes the generic definite article, including the
+experiencer's dative and a relative clause's subject). Leads the lanes reported and did not file: an
+animate route in a statement (*corre por el hombre*, 猫は男を走ります); an Italian indefinite plural
+subject left bare (*persone adulte imparano* for *delle persone*); French bare plural agents without
+*des* (*par chats*); and two genitives stacking after an attributive superlative's set beside a noun
+possessor (*das größte Haus der Frau der Stadt*, *a maior casa da mulher da cidade*).
 
 **One more open**, **A376**, filed on 2026-09-25 from a console line checked by hand (*a mosche a tempo
 piace una freccia*): the Romance bare plural subject, reported before by B76 and P09-E24 and not filed.
@@ -721,6 +726,13 @@ is listed under **Fixed** below.
 | A367 | [A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md](fixed/A367-experiencer-verb-asked-about-its-object-keeps-the-one-who-likes-as-the-subject.md) | Italian, Spanish | 2026-09-24 |
 | A368 | [A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md](fixed/A368-experiencer-verb-asked-about-its-subject-gaps-the-subject-not-the-dative.md) | Italian, Spanish | 2026-09-24 |
 | A369 | [A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md](fixed/A369-experiencer-verb-keeps-the-thing-liked-in-front-of-the-verb.md) | Italian, Spanish | 2026-09-24 |
+| A370 | [A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md](fixed/A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md) | Portuguese | 2026-09-25 |
+| A371 | [A371-attributive-superlative-drops-its-set.md](fixed/A371-attributive-superlative-drops-its-set.md) | all | 2026-09-25 |
+| A372 | [A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md](fixed/A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md) | French, Spanish, Portuguese | 2026-09-25 |
+| A373 | [A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md](fixed/A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md) | Japanese | 2026-09-25 |
+| A374 | [A374-animate-route-question-reads-as-another-relation.md](fixed/A374-animate-route-question-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | 2026-09-25 |
+| A375 | [A375-enter-in-the-owner-picker-points-to-the-subject.md](fixed/A375-enter-in-the-owner-picker-points-to-the-subject.md) | frontend | 2026-09-25 |
+| A376 | [A376-romance-bare-plural-subject-loses-its-article.md](fixed/A376-romance-bare-plural-subject-loses-its-article.md) | Italian, French, Spanish, Portuguese | 2026-09-25 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a
 product decision rather than as outright bugs._

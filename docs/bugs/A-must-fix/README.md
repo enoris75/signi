@@ -1,18 +1,21 @@
 # A-must-fix — confirmed bugs
 
+**None open.** A370–A376 were all fixed on 2026-09-25 and moved to [`../fixed/`](../fixed/). The
+history below is kept as it was written.
+
 **Seven open.** **A376**, filed on 2026-09-25 from a console line checked by hand, at 7a392187.
-[A376](A376-romance-bare-plural-subject-loses-its-article.md), a bare plural subject keeps no article in it / fr / es / pt (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite.
+[A376](../fixed/A376-romance-bare-plural-subject-loses-its-article.md), a bare plural subject keeps no article in it / fr / es / pt (*gatti corrono*, *a gatti piace un topo*) where the generic takes the definite.
 
 **A371–A375**, filed on 2026-09-25 from the leads the P09-E44–E55 lanes reported, each
 re-probed at c8f098dc.
-[A371](A371-attributive-superlative-drops-its-set.md), an attributive superlative's set dropped in all seven ("the biggest house" for "the biggest house in the city").
-[A372](A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md), fr / es / pt write a possessor after an attributive standard, where it reads as the standard's.
-[A373](A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md), Japanese WIN with an object and an opponent doubles に.
-[A374](A374-animate-route-question-reads-as-another-relation.md), an animate route question reads as *for whom* (es, pt) or runs a person as a path (ja).
+[A371](../fixed/A371-attributive-superlative-drops-its-set.md), an attributive superlative's set dropped in all seven ("the biggest house" for "the biggest house in the city").
+[A372](../fixed/A372-romance-possessor-after-an-attributive-standard-reads-as-the-standards.md), fr / es / pt write a possessor after an attributive standard, where it reads as the standard's.
+[A373](../fixed/A373-japanese-win-with-an-object-and-an-opponent-doubles-ni.md), Japanese WIN with an object and an opponent doubles に.
+[A374](../fixed/A374-animate-route-question-reads-as-another-relation.md), an animate route question reads as *for whom* (es, pt) or runs a person as a path (ja).
 [A375](../fixed/A375-enter-in-the-owner-picker-points-to-the-subject.md), ↵ in the canvas owner picker points to the subject ("his food"); pinned in e2e. Fixed on 2026-09-25.
 
 **One open**, **A370**, filed on 2026-09-24 from ten random phrases.
-[A370](A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md), Portuguese ALREADY beside the concord "não" of a `no` object or complement, written "ainda não" (*not yet*) for "já não".
+[A370](../fixed/A370-portuguese-already-turns-into-ainda-nao-beside-a-concord-nao.md), Portuguese ALREADY beside the concord "não" of a `no` object or complement, written "ainda não" (*not yet*) for "já não".
 
 A365 and A366 were fixed on 2026-09-24 and moved to [`../fixed/`](../fixed/). The
 history below is kept as it was written.

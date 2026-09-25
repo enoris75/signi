@@ -17,8 +17,8 @@ output. English, German and Japanese neutralise it (*time flies*, *Zeitfliegen*,
 ## Why
 
 The console line `/subj ( fly /adj ( time ) /pl /zero ) /verb ( like ) /obj ( arrow /a )` renders in
-Italian as *a mosche **a tempo** piace una freccia*. (The missing article is a separate defect,
-[A376](../../../bugs/A-must-fix/A376-romance-bare-plural-subject-loses-its-article.md).) *Mosche a
+Italian as *a mosche **a tempo** piace una freccia*. (The missing article was a separate defect,
+[A376](../../../bugs/fixed/A376-romance-bare-plural-subject-loses-its-article.md), fixed on 2026-09-25.) *Mosche a
 tempo* would be "timed flies", like *contratto a tempo*. The phrase means "flies of time", which is
 `domain`: *le mosche del tempo*. The comment on `ModifierRelation` in
 [`shared/src/index.ts`](../../../../packages/shared/src/index.ts) uses "time flies" as its own example of
