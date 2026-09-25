@@ -10,7 +10,7 @@ import { seedConcept } from '../../backend/src/concepts/definitionText.js';
 // engine's output for the plan the builder now writes (a `PronominalPossessor`, never a genitive
 // noun phrase headed by the pronoun), and the Japanese of the kin rows is kinship.test.ts's.
 
-const VOCAB = definitionVocabulary(concepts.map(seedConcept));
+const VOCAB = definitionVocabulary(concepts.map((c) => seedConcept(c)));
 const said = (line: string) => sayAll(compileDefinition(line, VOCAB));
 
 describe('a pronoun as a named owner (P11-E9)', () => {

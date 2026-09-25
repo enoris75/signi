@@ -12,7 +12,7 @@ import { seedConcept } from '../../backend/src/concepts/definitionText.js';
 // then `workspaceToPlans`. Each row is P11-E7's table, now said by the builder's own plan; the link's
 // grammar is pinned in coreference.test.ts.
 
-const VOCAB = definitionVocabulary(concepts.map(seedConcept));
+const VOCAB = definitionVocabulary(concepts.map((c) => seedConcept(c)));
 const said = (line: string) => sayAll(compileDefinition(line, VOCAB));
 
 describe('a pointer at the subject is the link (P11-E7)', () => {
