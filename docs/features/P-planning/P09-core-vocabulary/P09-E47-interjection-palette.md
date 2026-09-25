@@ -234,5 +234,5 @@ Every one must render in all seven at boot. Probe them after the seed.
 - ***Yeah, oh, yes*** as seeds on this slot (E30's follow-up). Each is a `/seed`.
 - **The vocative** (`PhrasePlan.address`, P11-E3), also plan-only. It is spoken between the
   interjection and the clause, so its box would take the next seat in reading order. It is its own
-  task.
+  task, [P11-E8](../P11-family-and-relationships/P11-E8-vocative-control.md).
 - **An exclamative clause** and Spanish ¡…!.
