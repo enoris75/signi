@@ -449,6 +449,16 @@ describe('the question over a marked relation', () => {
   });
 });
 
+// P09-E54: the passive question needs no new word — /passive on the verb and /wh on the period.
+describe('the passive question', () => {
+  it('asks the patient of a passive: "what is eaten by the cat?"', () => {
+    const state = ok('/subj cat /verb ( eat /passive ) /wh obj');
+    expect(sel(state)).toMatchObject({ interrogative: true, questionRole: 'directObject', verbVoice: 'passive' });
+    expect(print(state)).toBe('/wh obj /subj ( cat ) /verb ( eat /passive )');
+    expect(print(ok(print(state)))).toBe(print(state));
+  });
+});
+
 // A268: an if-clause is rendered in its own mood and asks nothing, so `/if` refuses a question as one,
 // and says why, as it refuses one as a subordinate clause; the main clause may not ask either
 // (`cantTakeCondition`).

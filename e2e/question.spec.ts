@@ -125,6 +125,37 @@ test.describe('the question', () => {
     await app.expectSentences({ en: 'where does the cat go?', de: 'wohin geht der Kater?' });
   });
 
+  // P09-E54: every mark stays in the passive, and an asked object is the patient.
+  test('the passive asks its patient and its agent', async ({ app }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await app.satellite('directObjectQuestion').click();
+    await app.cycle('verbVoice');
+    await app.expectSentences({
+      en: 'what is eaten by the cat?',
+      it: 'che cosa è mangiato dal gatto?',
+      fr: 'qu\'est-ce qui est mangé par le chat ?',
+      de: 'was wird vom Kater gefressen?',
+      es: '¿qué es comido por el gato?',
+      pt: 'o que é comido pelo gato?',
+      ja: '何が猫に食べられますか？',
+    });
+
+    // The agent: the object's word comes back, and the subject's mark asks who.
+    await app.satellite('directObjectQuestion').click();
+    await app.satellite('subjectQuestion').click();
+    await app.satellite('subjectQuestionAnimate').click();
+    await app.expectSentences({
+      en: 'who is the food eaten by?',
+      it: 'da chi è mangiato il cibo?',
+      fr: 'par qui est-ce que la nourriture est mangée ?',
+      de: 'von wem wird das Essen gegessen?',
+      es: '¿por quién es comida la comida?',
+      pt: 'por quem a comida é comida?',
+      ja: '食べ物は誰に食べられますか？',
+    });
+  });
+
   test('the existential on the subject’s ring says there is', async ({ app, page }) => {
     await app.buildClause('CAT', 'BE');
     await app.revealAndPick('locative', 'HOUSE');

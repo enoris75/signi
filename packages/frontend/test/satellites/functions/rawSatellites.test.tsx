@@ -8,6 +8,7 @@ import {
 } from '@signi/shared';
 import { rawSatellites } from '../../../src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx';
 import { setImperative, setInfinitive, setVoice } from '../../../src/components/PhraseBuilder/phraseReducers.ts';
+import { rendersPassive } from '../../../src/components/PhraseBuilder/functions/visibleSlots.ts';
 import type { RawSatellite } from '../../../src/components/PhraseBuilder/satellites/satellites.types.tsx';
 import type { PhraseSelection, QuestionRole } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import {
@@ -985,5 +986,23 @@ describe('the question over a marked relation', () => {
   it('withdraws the mark from a time asked in a relation the engine refuses', () => {
     const sel: PhraseSelection = { subject: CAT, verb: MOVE, interrogative: true, questionRole: 'temporal', temporalRelation: 'ago' };
     expect(find(rawSatellites(sel, 'en', t), 'temporalQuestion').available).toBe(false);
+  });
+});
+
+// P09-E54 D2: an asked object is the patient, although it is usually empty — the voice control stays
+// on it, and the passive's captions hold.
+describe('the passive question', () => {
+  it('keeps the voice on an empty asked object, and the agent caption', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: SEE, interrogative: true, questionRole: 'directObject', verbVoice: 'passive' };
+    expect(satellite(sel, 'verbVoice').available).toBe(true);
+    expect(rendersPassive(sel)).toBe(true);
+    expect(satellite({ subject: CAT, verb: SEE }, 'verbVoice').available).toBe(false);
+    expect(rendersPassive({ subject: CAT, verb: SEE, verbVoice: 'passive' })).toBe(false);
+  });
+
+  it('offers the marks in the passive', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: SEE, directObject: FRIEND, verbVoice: 'passive' };
+    expect(satellite(sel, 'subjectQuestion').available).toBe(true);
+    expect(satellite(sel, 'directObjectQuestion').available).toBe(true);
   });
 });

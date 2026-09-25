@@ -6,6 +6,7 @@ import {
   asksQuestion,
   canAsk,
   canBeExistential,
+  hasPatient,
   hasQuestionAnimacy,
   questionAnimateOf,
 } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
@@ -33,7 +34,6 @@ describe('the wh-question gate', () => {
   });
 
   it.each<[string, PhraseSelection]>([
-    ['the passive', { verbVoice: 'passive' }],
     ['an existential', { existential: true }],
     ['a command', { imperative: true }],
     ['a citation', { infinitive: true }],
@@ -63,7 +63,26 @@ describe('the wh-question gate', () => {
       'subject', 'comitative', 'direction', 'source', 'route', 'temporal',
     ]);
     expect(askableOf({ verb: SPEAK })).toEqual(['subject', 'comitative', 'topic', 'temporal']);
-    expect(askableOf({ verb: GO, verbVoice: 'passive' })).toEqual([]);
+  });
+
+  // P09-E54 D1, D3: the passive asks every slot, the agent's included, unless the verb's object takes
+  // a preposition in some language — there the engine refuses the passive question.
+  it('asks every slot in the passive, but none over a prepositional object', () => {
+    expect(askable({ subject: CAT, verb: EAT, verbVoice: 'passive' })).toEqual(ROLES);
+    const CLICK = c('CLICK', 'verb', { transitivity: 'transitive', complements: ['locative'], prepositionalObject: true });
+    const DEPEND = c('DEPEND', 'verb', { transitivity: 'transitive', prepositionalObject: true });
+    expect(askable({ subject: CAT, verb: CLICK, verbVoice: 'passive' })).toEqual([]);
+    expect(askable({ subject: CAT, verb: DEPEND, verbVoice: 'passive' })).toEqual([]);
+    // The active asks them as ever.
+    expect(askable({ subject: CAT, verb: CLICK })).toEqual(['subject', 'directObject', 'locative']);
+    // The existential still refuses the passive, for its own reason.
+    expect(canBeExistential({ subject: CAT, verb: BE, verbVoice: 'passive' })).toBe(false);
+  });
+
+  it('counts an asked object as the patient', () => {
+    expect(hasPatient({ directObject: CAT })).toBe(true);
+    expect(hasPatient({ questionRole: 'directObject' })).toBe(true);
+    expect(hasPatient({ questionRole: 'subject' })).toBe(false);
   });
 
   it('asks a time only at or until: the other relations are refused by the engine', () => {
@@ -81,7 +100,8 @@ describe('the wh-question gate', () => {
 
   it('carries the mark into the plan only where the question is asked', () => {
     expect(askedRole({ verb: EAT, interrogative: true, questionRole: 'directObject' })).toBe('directObject');
-    expect(askedRole({ verb: EAT, interrogative: true, questionRole: 'directObject', verbVoice: 'passive' })).toBeUndefined();
+    expect(askedRole({ verb: EAT, interrogative: true, questionRole: 'directObject', verbVoice: 'passive' })).toBe('directObject');
+    expect(askedRole({ verb: EAT, interrogative: true, questionRole: 'directObject', existential: true })).toBeUndefined();
     expect(asksQuestion({ interrogative: true })).toBe(false);
     expect(asksQuestion({ verb: EAT, interrogative: true, imperative: true })).toBe(false);
   });

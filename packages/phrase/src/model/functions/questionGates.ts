@@ -7,7 +7,7 @@ import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
  * refusal of the engine — `resolveQuestion` for a wh-question, `existentialPlan` / `withExistential`
  * for an existential — so a control is withdrawn exactly where the plan it would make is refused, and
  * the plan builder reads the same gate before it writes the field (`selectionToPlan`, `askQuestion`):
- * a mark the selection still holds after the period changed under it (a passive set, a verb swapped)
+ * a mark the selection still holds after the period changed under it (a command set, a verb swapped)
  * is kept for the user and left out of the plan, as a degree left on a noun is.
  */
 
@@ -56,17 +56,23 @@ export const asksQuestion = (sel: PhraseSelection): boolean =>
   Boolean(sel.interrogative && sel.verb && !sel.imperative && !sel.infinitive);
 
 /**
- * Whether `role` may be the gap of this period's wh-question. Not in the passive (the passive
- * re-maps the slots the gap names), not on an existential, not under a command or a citation; the
- * slot must be the verb's to have — an object for a verb that takes one, a complement it is offered
- * (`offeredComplements`, so a time and a companion on any verb). A complement keeps its relation
- * (P09-E15, P09-E53 D2): a place, a direction, a source or a route in any relation, a cause in any
- * stance but not denied (a gap has no complement to carry the denial), a time only *at* or *until*.
+ * Whether `role` may be the gap of this period's wh-question. Not on an existential, not under a
+ * command or a citation; the slot must be the verb's to have — an object for a verb that takes one,
+ * a complement it is offered (`offeredComplements`, so a time and a companion on any verb). A
+ * complement keeps its relation (P09-E15, P09-E53 D2): a place, a direction, a source or a route in
+ * any relation, a cause in any stance but not denied (a gap has no complement to carry the denial),
+ * a time only *at* or *until*.
+ *
+ * The passive asks every slot (P09-E16, P09-E54 D1): the roles stay the active ones, the object's
+ * gap asks the patient ("what is eaten by the cat?") and the subject's the agent ("who is the food
+ * eaten by?"). Not over a verb whose object takes a preposition in some language
+ * (`prepositionalObject`, D3): that language has no passive, and in the active the gap would name
+ * another slot, so the engine refuses the question.
  */
 export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
   const verb = sel.verb;
   if (!verb || sel.imperative || sel.infinitive || sel.existential) return false;
-  if (sel.verbVoice === "passive") return false;
+  if (sel.verbVoice === "passive" && verb.prepositionalObject) return false;
   switch (role) {
     case "subject":
       return true;
@@ -82,6 +88,14 @@ export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
       return true;
   }
 }
+
+/**
+ * Whether the period has a patient for the passive to promote (P09-E54 D2): an object that holds a
+ * word, or one a wh-question asks about, which is usually empty — the engine counts the gap as the
+ * object ("what is eaten by the cat?").
+ */
+export const hasPatient = (sel: PhraseSelection): boolean =>
+  Boolean(sel.directObject) || sel.questionRole === "directObject";
 
 /**
  * Whether a box's relation is there to choose (P09-E53 D3): on a box that holds a word, and on the

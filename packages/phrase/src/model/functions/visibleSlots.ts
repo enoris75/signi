@@ -1,5 +1,6 @@
 import type { NounKey, PhraseSelection, SlotConfig } from "../interfaces.ts";
 import { ALL_SLOTS, getActiveSlots, offeredComplements, REVEALABLE_SLOT_KEYS } from "../slots.ts";
+import { hasPatient } from "./questionGates.ts";
 
 /** What a hosted ring's head slot wears in place of its builder's own `subject` slot. */
 export type RoleSlot = Pick<SlotConfig, "label" | "labelKey" | "required" | "color">;
@@ -53,7 +54,8 @@ export function rendersPassive(selection: PhraseSelection): boolean {
     selection.verbVoice === "passive" &&
     !selection.imperative &&
     (transitivity === "transitive" || transitivity === "ditransitive") &&
-    Boolean(selection.directObject)
+    // An asked object is the patient too, usually empty (P09-E54 D2).
+    hasPatient(selection)
   );
 }
 

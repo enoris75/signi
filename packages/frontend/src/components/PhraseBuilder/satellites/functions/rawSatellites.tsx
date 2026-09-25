@@ -31,7 +31,7 @@ import {
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
 import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
-import { canAsk, canBeExistential, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
+import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -367,7 +367,8 @@ export function rawSatellites(
       // the aspect, the voice does not sit in the finite slot: an infinitive citation keeps it, and
       // the engine says the passive one ("to be loved"). Only a command forces the active, so only
       // the command withdraws the control (`setImperative` resets the voice to match).
-      available: !selection.imperative && passivizable && Boolean(selection.directObject),
+      // An asked object is the patient too, although it is usually empty (P09-E54 D2, hasPatient).
+      available: !selection.imperative && passivizable && hasPatient(selection),
       // Non-default (solid) once the voice is anything but the implicit active.
       hasValue: selection.verbVoice === "passive",
       alwaysSet: true,

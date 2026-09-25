@@ -11,7 +11,7 @@ toggle and marks do the asking. A *Whether* row joins the subordinate menu, and 
 reseed), `@signi/phrase` link rules and plan, canvas menu, console. One new UI string, in all 7.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
 side is [P09-E17](Z-done/P09-E17-indirect-question.md). Last of four question controls, after
-[E53](Z-done/P09-E53-marked-relation-question-control.md), [E54](P09-E54-passive-question-control.md) and
+[E53](Z-done/P09-E53-marked-relation-question-control.md), [E54](Z-done/P09-E54-passive-question-control.md) and
 [E52](P09-E52-possessor-question-control.md) (see E53 D6): every gap they open becomes markable
 inside the clause too.
 

@@ -703,6 +703,13 @@ export interface Concept {
    */
   clauseObject?: ClauseObject;
   /**
+   * Whether the verb's object takes a preposition in some language (P09-E54): a lexeme names
+   * `object_prep` — "waits **for** the dog", *wartet auf den Hund*. Derived from the lexemes, not
+   * seeded. Such a verb has no passive there, and a passive wh-question over it is refused (P09-E16),
+   * so the builder offers no question mark in its passive. Absent for every other verb.
+   */
+  prepositionalObject?: boolean;
+  /**
    * The slot this concept fills, where that is **not** the one its role implies (see `ConceptSlot`).
    * A picker offering its role must filter it out: *very* is an adverb that never modifies a verb,
    * *Mr* a noun that never fills a noun slot, *own* an adjective that exists only beside a possessor,

@@ -36,6 +36,7 @@ export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
     ...(seed.transitivity ? { transitivity: seed.transitivity as Transitivity } : {}),
     ...(seed.complements ? { complements: seed.complements as ComplementType[] } : {}),
     ...(seed.clauseObject ? { clauseObject: seed.clauseObject as ClauseObject } : {}),
+    ...(seed.role === 'verb' && Object.values(seed.forms).some((f) => 'object_prep' in f) ? { prepositionalObject: true } : {}),
     ...(seed.modal ? { modal: true } : {}),
     ...(seed.slot ? { slot: seed.slot as ConceptSlot } : {}),
     ...(pronoun ? { person: (en['person'] ?? '3') as '1' | '2' | '3', number: (en['number'] ?? 'singular') as 'singular' | 'plural' } : {}),

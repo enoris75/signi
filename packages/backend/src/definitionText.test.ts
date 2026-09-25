@@ -69,10 +69,19 @@ describe('a seed defined in text (P13)', () => {
   // The facts a line is checked against, as the seed states them and as the database serves them:
   // the definition compiler reads the first, the console the second, and they must not disagree.
   test('knows each word as the API serves it', () => {
-    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
+    const FACTS = ['role', 'transitivity', 'complements', 'clauseObject', 'prepositionalObject', 'modal', 'slot', 'person', 'number', 'gendered', 'mannerRelation', 'dimensionRelation'] as const;
     const pick = (c: object) => Object.fromEntries(FACTS.flatMap((k) => ((c as Record<string, unknown>)[k] === undefined ? [] : [[k, (c as Record<string, unknown>)[k]]])));
     const served = new Map(listConcepts({ senses: true }).map((c) => [c.id, pick(c)]));
     for (const seed of concepts) expect(pick(seedConcept(seed)), seed.id).toEqual(served.get(seed.id));
+  });
+
+  // P09-E54: the verbs whose object takes a preposition in some language, derived from `object_prep`.
+  test('serves which verbs take a prepositional object', () => {
+    const served = listConcepts({ senses: true }).filter((c) => c.prepositionalObject).map((c) => c.id).sort();
+    expect(served).toEqual([
+      'ASK', 'BELIEVE', 'CALL_PHONE', 'CLICK', 'DEPEND', 'FOLLOW', 'LEAVE', 'LIKE',
+      'LOOK_AT', 'MARRY', 'MEET', 'NEED', 'PLAY_INSTRUMENT', 'REMEMBER', 'THANK', 'WAIT',
+    ]);
   });
 
   // Every seed as it is written, and CAT defined by `text`.

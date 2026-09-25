@@ -67,7 +67,8 @@ export const VERBS = [
   verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
   verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
-  verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive' }),
+  // Its object takes a preposition in it, fr and pt ("ha bisogno del cane"), as the API serves (P09-E54).
+  verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive', prepositionalObject: true }),
   // The copula, the existential's verb (P09-E12 M7): "there is a cat in the house".
   verb('BE', 'be', 'essere', { transitivity: 'intransitive', ...complements('predicative', 'locative', 'cause') }),
   // Two verbs that read "cry" in English: only the id tells them apart.

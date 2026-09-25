@@ -11,7 +11,7 @@ animacy changes the word, and `/wh` values for the new slots.
 already; no new UI string.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
 side is [P09-E15](P09-E15-question-over-a-marked-relation.md). First of four question controls:
-**E53 → [E54](../P09-E54-passive-question-control.md) → [E52](../P09-E52-possessor-question-control.md) →
+**E53 → [E54](P09-E54-passive-question-control.md) → [E52](../P09-E52-possessor-question-control.md) →
 [E55](../P09-E55-indirect-question-control.md)** (see D6).
 
 Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the seeded lexicon):
@@ -185,7 +185,7 @@ does not check the verb. The plan builder gates it.
 ### D6. Order of the four question controls
 
 **Recommendation: E53 first**, because it widens `QuestionRole` and the gate on rings that already
-carry the mark. Then [E54](../P09-E54-passive-question-control.md) (a gate and a served fact), then
+carry the mark. Then [E54](P09-E54-passive-question-control.md) (a gate and a served fact), then
 [E52](../P09-E52-possessor-question-control.md) (a new seat on a hosted ring and a second plan field),
 then [E55](../P09-E55-indirect-question-control.md), which puts every gap the first three open inside a
 content clause. Each retires on its own.

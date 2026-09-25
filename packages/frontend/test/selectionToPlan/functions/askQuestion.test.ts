@@ -52,13 +52,36 @@ describe('the question and the existential in the plan', () => {
   });
 
   it('leaves out a mark the engine would refuse, and keeps the word', () => {
-    const passive = planOf({ subject: CAT, verb: EAT, directObject: DOG, verbVoice: 'passive', interrogative: true, questionRole: 'directObject' });
+    // A passive over a verb whose object takes a preposition somewhere (P09-E54 D3).
+    const CLICK = concept('CLICK', 'verb', { transitivity: 'transitive', prepositionalObject: true });
+    const passive = planOf({ subject: CAT, verb: CLICK, directObject: DOG, verbVoice: 'passive', interrogative: true, questionRole: 'directObject' });
     expect(passive).not.toHaveProperty('questionRole');
     expect(passive.directObject).toMatchObject({ concept: 'DOG' });
     // A time the engine asks only at or until (P09-E53 D2).
     const ago = planOf({ subject: CAT, verb: EAT, temporal: HOUSE, temporalRelation: 'ago', interrogative: true, questionRole: 'temporal' });
     expect(ago).not.toHaveProperty('questionRole');
     expect(ago.complements?.temporal).toBeDefined();
+  });
+
+  // P09-E54: the passive question, the roles still the active ones — the object's gap the patient,
+  // the subject's the agent — each from an EMPTY asked box.
+  describe('asks in the passive', () => {
+    const FOOD = concept('FOOD', 'noun');
+    it('what is eaten by the cat?', () => {
+      const plan = planOf({ subject: CAT, verb: EAT, verbVoice: 'passive', interrogative: true, questionRole: 'directObject' });
+      expect(plan).toMatchObject({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT', voice: 'passive' }, questionRole: 'directObject' });
+      expect(plan).not.toHaveProperty('directObject');
+    });
+    it('who is the food eaten by?', () => {
+      const plan = planOf({ verb: EAT, directObject: FOOD, verbVoice: 'passive', interrogative: true, questionRole: 'subject', questionAnimate: true });
+      expect(plan).toMatchObject({
+        subject: { concept: 'GENERIC_PERSON' },
+        directObject: { concept: 'FOOD' },
+        verbPhrase: { voice: 'passive' },
+        questionRole: 'subject',
+        questionAnimate: true,
+      });
+    });
   });
 
   // P09-E53 D3: one plan per column of the task's table, each from an EMPTY asked box with its
