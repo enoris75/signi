@@ -346,6 +346,14 @@ describe('the question keys', () => {
     expect(shifted?.id).toBe('noun.question.animacy');
   });
 
+  // P09-E52 D5: Q on an owner's box toggles its period's whose.
+  it('marks an owner from its own box', () => {
+    const onlyOwner = { satellite: (key: string) => (key === 'possessorQuestion' ? ({ key, available: true } as Satellite) : undefined) };
+    expect(commandFor('q', { ...onlyOwner, path: 'directObject/possessor' })).toBe('noun.question');
+    // Off an owner's box the owner mark is nothing Q reaches.
+    expect(commandFor('q', onlyOwner)).toBeUndefined();
+  });
+
   it('offers them only where their controls are', () => {
     const none = { satellite: () => undefined };
     expect(commandFor('q', none)).toBeUndefined();

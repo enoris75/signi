@@ -36,9 +36,10 @@ import {
   toggleImperative,
   toggleInfinitive,
   toggleInterrogative,
+  toggleQuestionRole,
 } from "./phraseReducers.ts";
 import { moodLocked } from "./functions/moodLocked.ts";
-import { hasRelation } from "./functions/questionGates.ts";
+import { canAsk, hasRelation } from "./functions/questionGates.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
@@ -418,6 +419,8 @@ export function PhraseBuilder({
       moodLocked: moodLocked(binding),
       // A that-clause this period governs is its verb's object, so the object box gives way to it.
       clauseObject: binding?.subordinate.asSource?.kind === "content",
+      // An owner's ring carries the *whose* mark its period gates (P09-E52).
+      ...(ringHost?.question && { ownerQuestion: ringHost.question }),
     },
   );
 
@@ -476,6 +479,8 @@ export function PhraseBuilder({
         onCycleGloss: () => commands.handleCycleGloss(1),
         onCycleGlossRelation: () => commands.handleCycleGlossRelation(1),
       }),
+      // …but an owner's ring carries its period's *whose* (P09-E52).
+      ...(ringHost?.question && { onToggleQuestion: () => ringHost.question!.toggle() }),
       t,
     });
   const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
@@ -800,6 +805,20 @@ export function PhraseBuilder({
     possessorToward: aims.toward,
     reportRing,
     onAddConjunct: commands.handleAddConjunct,
+    // *Whose* is asked of a top-level owner of the subject or the object (P09-E52 D1), gated as the
+    // slots' own marks are: where the engine asks it, and not where the mood is locked, unless the
+    // period is a question already.
+    ownerQuestion: (spot) => {
+      const possessed = spot.possessed;
+      if (ringHost || (possessed !== "subject" && possessed !== "directObject")) return undefined;
+      const locked = moodLocked(binding) && !selection.interrogative;
+      const governsClause = possessed === "directObject" && binding?.subordinate.asSource?.kind === "content";
+      return {
+        available: canAsk(selection, "possessor", possessed) && !locked && !governsClause,
+        asked: selection.questionRole === "possessor" && (selection.questionPossessed ?? "subject") === possessed,
+        toggle: () => onPhraseUpdate((prev) => toggleQuestionRole(prev, "possessor", possessed)),
+      };
+    },
   });
 
   // Take an owner off the noun it owns. Relative clauses sourced from it, or from an owner it holds,
@@ -957,7 +976,8 @@ export function PhraseBuilder({
       toggleGender: commands.handleToggleGender,
       toggleNegative: commands.handleToggleNegative,
       toggleCauseNegative: commands.handleToggleCauseNegative,
-      toggleQuestion: commands.handleToggleQuestion,
+      // On an owner's ring, Q toggles the period's *whose* (P09-E52 D5).
+      toggleQuestion: ringHost?.question ? () => ringHost.question!.toggle() : commands.handleToggleQuestion,
       toggleQuestionAnimate: commands.handleToggleQuestionAnimate,
       toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,

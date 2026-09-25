@@ -22,6 +22,7 @@ import type {
   NounKey,
   PhraseSelection,
   QuestionRole,
+  SlotQuestionRole,
   SlotKey,
 } from "../components/PhraseBuilder/interfaces.ts";
 import type { Satellite } from "../components/PhraseBuilder/satellites/index.ts";
@@ -485,7 +486,10 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     labelKey: "mood.question",
     hint: true,
     satellite: /Question$/,
-    when: (ctx) => ctx.slot === ctx.nounKey && has(ctx, `${ctx.nounKey}Question`),
+    // …and on an owner's box, the period's *whose* (P09-E52 D5).
+    when: (ctx) =>
+      ctx.slot === ctx.nounKey &&
+      (has(ctx, `${ctx.nounKey}Question`) || (Boolean(ctx.path) && has(ctx, "possessorQuestion"))),
     run: (ctx) => ctx.toggleQuestion(ctx.nounKey as QuestionRole),
   },
   {
@@ -641,7 +645,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     // ("thanks to" / "because of" / "the fault of"). Both are toolbars already on the ring, so S
     // points the next key at one rather than opening anything — on an empty box too, when a
     // wh-question asks about it (P09-E53 D3).
-    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && hasRelation(ctx.selection, ctx.slot as QuestionRole | "objectPredicative"),
+    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && hasRelation(ctx.selection, ctx.slot as SlotQuestionRole | "objectPredicative"),
     run: (ctx) => ctx.armToolbar(ctx.slot),
   },
   {

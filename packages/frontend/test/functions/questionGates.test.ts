@@ -79,6 +79,34 @@ describe('the wh-question gate', () => {
     expect(canBeExistential({ subject: CAT, verb: BE, verbVoice: 'passive' })).toBe(false);
   });
 
+  // P09-E52 D2: the owner inside the subject or the object, as the engine's possessorQuestion takes it.
+  it('asks the owner of a single noun subject or object', () => {
+    const FOOD = c('FOOD', 'noun');
+    const base: PhraseSelection = { subject: CAT, verb: EAT, directObject: FOOD };
+    expect(canAsk(base, 'possessor', 'subject')).toBe(true);
+    expect(canAsk(base, 'possessor', 'directObject')).toBe(true);
+    // The possessed noun defaults to the subject.
+    expect(canAsk({ ...base, questionPossessed: 'directObject' }, 'possessor')).toBe(true);
+    expect(askedRole({ ...base, interrogative: true, questionRole: 'possessor', questionPossessed: 'directObject' })).toBe('possessor');
+  });
+
+  it.each<[string, PhraseSelection, 'subject' | 'directObject']>([
+    ['a pronoun', { subject: ME, verb: EAT }, 'subject'],
+    ['an empty slot', { verb: EAT }, 'directObject'],
+    ['a coordination', { subject: CAT, verb: EAT, subjectConjuncts: [{ subject: MAN }] }, 'subject'],
+    ['a pointed-to owner', { subject: CAT, verb: EAT, directObject: MAN, directObjectPossessorRef: 'subject' }, 'directObject'],
+    ['a whole', { subject: CAT, verb: EAT, possessorRoles: { subject: 'whole' } }, 'subject'],
+    ['parts', { subject: CAT, verb: EAT, possessorRoles: { subject: 'parts' } }, 'subject'],
+    ['the agent’s owner', { subject: CAT, verb: EAT, directObject: MAN, verbVoice: 'passive' }, 'subject'],
+    ['an intransitive verb’s object', { subject: CAT, verb: RUN, directObject: MAN }, 'directObject'],
+  ])('refuses the owner of %s', (_, sel, possessed) => {
+    expect(canAsk(sel, 'possessor', possessed)).toBe(false);
+  });
+
+  it('asks the patient’s owner in the passive', () => {
+    expect(canAsk({ subject: CAT, verb: EAT, directObject: MAN, verbVoice: 'passive' }, 'possessor', 'directObject')).toBe(true);
+  });
+
   it('counts an asked object as the patient', () => {
     expect(hasPatient({ directObject: CAT })).toBe(true);
     expect(hasPatient({ questionRole: 'directObject' })).toBe(true);

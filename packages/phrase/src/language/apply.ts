@@ -948,7 +948,11 @@ class Run {
   question(item: Item, frame: Frame): void {
     if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
     const parts = (item.word?.text ?? "").split(/\s+/).filter(Boolean);
-    const slot = parts.map((p) => valueNamed(QUESTION_SLOT_VALUES, p)).find(Boolean);
+    const slots = parts.map((p) => valueNamed(QUESTION_SLOT_VALUES, p)).filter((v) => v !== undefined);
+    // The owner's slot names the noun it is inside with a second slot value, `/wh poss obj` (P09-E52).
+    const slot = slots.find((v) => v.value === "possessor") ?? slots[0];
+    const possessed =
+      slot?.value === "possessor" ? (slots.find((v) => v !== slot)?.value as "subject" | "directObject" | undefined) : undefined;
     const animacy = parts.map((p) => valueNamed(QUESTION_ANIMACY_VALUES, p)).find(Boolean);
     const relationPart = parts.find((p) => valueNamed(QUESTION_RELATION_VALUES, p));
     if (!slot) {
@@ -967,11 +971,12 @@ class Run {
     const id = frame.containerId;
     const root = this.root(id);
     if (!root.interrogative && this.moodLocked(id)) fail(item.head, coded("moodLocked"));
-    let sel = setQuestionRole(root, role);
+    let sel = setQuestionRole(root, role, possessed);
     if (animacy) sel = setQuestionAnimate(sel, animacy.value === "who");
     if (relation) sel = relation(sel);
     this.updateRoot(id, () => sel);
-    this.touch({ containerId: id, slot: slot.value as QuestionRole });
+    // The owner's gap is inside the noun it asks about, which is where the context goes.
+    this.touch({ containerId: id, slot: role === "possessor" ? sel.questionPossessed! : role });
   }
 
   /** `/there` — the period made an existential, "there is a cat" (P09-E12 M7). */

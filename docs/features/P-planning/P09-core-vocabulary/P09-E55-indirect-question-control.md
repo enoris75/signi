@@ -12,7 +12,7 @@ reseed), `@signi/phrase` link rules and plan, canvas menu, console. One new UI s
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
 side is [P09-E17](Z-done/P09-E17-indirect-question.md). Last of four question controls, after
 [E53](Z-done/P09-E53-marked-relation-question-control.md), [E54](Z-done/P09-E54-passive-question-control.md) and
-[E52](P09-E52-possessor-question-control.md) (see E53 D6): every gap they open becomes markable
+[E52](Z-done/P09-E52-possessor-question-control.md) (see E53 D6): every gap they open becomes markable
 inside the clause too.
 
 Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the seeded lexicon):

@@ -293,6 +293,11 @@ export function sameKind(a: ValueDef, b: ValueDef): boolean {
               QUESTION_RELATION_VALUES.includes(v)
               ? "relation"
               : "value";
+  // The owner's slot takes the noun it is inside as a second slot value: `/wh poss obj` (P09-E52).
+  const possessedPair = (x: ValueDef, y: ValueDef) =>
+    x.value === "possessor" && (y.value === "subject" || y.value === "directObject");
+  if (QUESTION_SLOT_VALUES.includes(a) && QUESTION_SLOT_VALUES.includes(b) && (possessedPair(a, b) || possessedPair(b, a)))
+    return false;
   return kind(a) === kind(b);
 }
 

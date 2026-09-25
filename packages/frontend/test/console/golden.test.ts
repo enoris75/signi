@@ -459,6 +459,28 @@ describe('the passive question', () => {
   });
 });
 
+// P09-E52 D5: the owner's gap, and the noun it is inside, on /wh.
+describe('the possessor question', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/wh poss obj /subj cat /verb eat /obj food', '/wh poss obj /subj ( cat ) /verb ( eat ) /obj ( food )', { questionRole: 'possessor', questionPossessed: 'directObject' }],
+    ['/wh whose /subj cat /verb eat', '/wh poss subj /subj ( cat ) /verb ( eat )', { questionRole: 'possessor', questionPossessed: 'subject' }],
+    // The owner's word is kept in its bracket, and not spoken while the owner is asked.
+    ['/wh poss subj /subj cat /poss man /verb eat', '/wh poss subj /subj ( cat /poss [ man ] ) /verb ( eat )', { questionRole: 'possessor', questionPossessed: 'subject' }],
+  ])('%s', (line, prints, holds) => {
+    const state = ok(line);
+    expect(sel(state)).toMatchObject({ interrogative: true, ...holds });
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+  });
+
+  it('takes one noun for the owner to be inside, and no other slot beside it', () => {
+    expect(run('/wh poss subj obj').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+    expect(run('/wh poss loc').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+    // Another slot moves the mark, and the owner's noun goes with it.
+    expect(sel(ok('/wh poss obj /wh subj'))).not.toHaveProperty('questionPossessed');
+  });
+});
+
 // A268: an if-clause is rendered in its own mood and asks nothing, so `/if` refuses a question as one,
 // and says why, as it refuses one as a subordinate clause; the main clause may not ask either
 // (`cantTakeCondition`).

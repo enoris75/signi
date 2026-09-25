@@ -24,6 +24,19 @@ export function askQuestion(plan: Partial<PhrasePlan>, sel: PhraseSelection): vo
   // A that-clause the period governs is its verb's object (see attachSubordinate), so the object is
   // no gap: "what does the man say that the cat runs?" asks nothing a period can hold.
   if (role === "directObject" && plan.contentObject) return;
+  if (role === "possessor") {
+    // The owner inside the subject or the object (P09-E52 D3): the noun stays, its owner is the gap —
+    // "whose food does the cat eat?". The owner's word, if the ring holds one, is not spoken, as a
+    // gapped slot's is not, and *whose* is always a person, so no who / what is written.
+    const possessed = sel.questionPossessed ?? "subject";
+    const slot = plan[possessed];
+    if (!slot || !("concept" in slot)) return;
+    const { possessor: _owner, possessorRole: _role, ...noun } = slot;
+    plan[possessed] = noun;
+    plan.questionRole = "possessor";
+    plan.questionPossessed = possessed;
+    return;
+  }
   if (role === "subject") plan.subject = { concept: "GENERIC_PERSON" };
   else if (role === "directObject") delete plan.directObject;
   else {

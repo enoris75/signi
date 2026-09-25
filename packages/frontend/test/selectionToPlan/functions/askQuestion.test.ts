@@ -84,6 +84,29 @@ describe('the question and the existential in the plan', () => {
     });
   });
 
+  // P09-E52 D3: the owner's gap keeps the possessed noun and drops its owner — the plans
+  // questions.test.ts pins in the engine.
+  describe('asks whose', () => {
+    const FOOD = concept('FOOD', 'noun');
+    it('whose food does the cat eat? — from an empty owner ring', () => {
+      const plan = planOf({
+        subject: CAT, verb: EAT, directObject: FOOD, directObjectPossessor: {},
+        interrogative: true, questionRole: 'possessor', questionPossessed: 'directObject',
+      });
+      expect(plan).toMatchObject({ questionRole: 'possessor', questionPossessed: 'directObject', directObject: { concept: 'FOOD' } });
+      expect(plan.directObject).not.toHaveProperty('possessor');
+      expect(plan).not.toHaveProperty('questionAnimate');
+    });
+    it('whose cat eats the food? — the owner’s word kept in the selection, not spoken', () => {
+      const plan = planOf({
+        subject: CAT, subjectPossessor: { subject: MAN }, verb: EAT, directObject: FOOD,
+        interrogative: true, questionRole: 'possessor', questionPossessed: 'subject',
+      });
+      expect(plan).toMatchObject({ questionRole: 'possessor', questionPossessed: 'subject', subject: { concept: 'CAT' } });
+      expect(plan.subject).not.toHaveProperty('possessor');
+    });
+  });
+
   // P09-E53 D3: one plan per column of the task's table, each from an EMPTY asked box with its
   // relation — the plans questions.test.ts pins in the engine.
   describe('asks a complement that keeps its relation, from an empty box', () => {

@@ -156,6 +156,40 @@ test.describe('the question', () => {
     });
   });
 
+  // P09-E52: whose, marked on the owner's own ring — the mark itself, or Q on the owner's box.
+  test('the object’s empty owner ring asks whose', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+    // The empty owner ring is its word picker, and its mark asks whose.
+    await app.satellite('possessorQuestion').click();
+    await app.expectSentences({
+      en: 'whose food does the cat eat?',
+      it: 'di chi mangia il cibo il gatto?',
+      fr: 'de qui est-ce que le chat mange la nourriture ?',
+      de: 'wessen Essen frisst der Kater?',
+      es: '¿de quién come el gato la comida?',
+      pt: 'de quem o gato come a comida?',
+      ja: '猫は誰の食べ物を食べますか？',
+    });
+  });
+
+  test('Q on the owner’s box asks whose, and keeps its word unspoken', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('FOOD');
+    await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+    await page.getByTestId('typeahead-noun').fill('dog');
+    await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+    await app.expectSentences({ en: "the cat eats the dog's food." });
+    // The cursor stays on the word just chosen, the owner's.
+    await page.keyboard.press('q');
+    await app.expectSentences({ en: 'whose food does the cat eat?', de: 'wessen Essen frisst der Kater?' });
+
+    // The mark itself takes it back, and the word is spoken again.
+    await app.satellite('possessorQuestion').click();
+    await app.expectSentences({ en: "the cat eats the dog's food." });
+  });
+
   test('the existential on the subject’s ring says there is', async ({ app, page }) => {
     await app.buildClause('CAT', 'BE');
     await app.revealAndPick('locative', 'HOUSE');

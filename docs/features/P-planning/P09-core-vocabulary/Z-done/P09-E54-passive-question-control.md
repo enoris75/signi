@@ -54,7 +54,7 @@ What landed differently from the plan:
    withdraw every mark, and `askedRole` keeps a passive object gap; `askQuestion.test.ts`'s refused
    passive is now over a `prepositionalObject` verb (CLICK).
 3. D4's rule (the possessor mark offered only on the patient's owner in the passive) is carried by
-   [E52](../P09-E52-possessor-question-control.md).
+   [E52](P09-E52-possessor-question-control.md).
 
 ## Why
 
@@ -139,7 +139,7 @@ checks that the seed and the API agree.
 
 ### D4. The agent's possessor waits for E52
 
-The possessor mark does not exist yet. [E52](../P09-E52-possessor-question-control.md) lands after this
+The possessor mark does not exist yet. [E52](P09-E52-possessor-question-control.md) lands after this
 task and brings the rule: in the passive, its mark is offered on the patient's owner only.
 **Recommendation:** name the rule here, and let E52 carry it.
 

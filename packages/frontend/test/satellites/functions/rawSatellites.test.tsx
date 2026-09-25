@@ -1006,3 +1006,23 @@ describe('the passive question', () => {
     expect(satellite(sel, 'directObjectQuestion').available).toBe(true);
   });
 });
+
+// P09-E52 D1, D2: an owner's ring carries the *whose* its period gates, and while asked it offers no
+// owner of its own. Any other phrase has no such mark.
+describe('the owner’s question', () => {
+  const find = (sats: RawSatellite[], key: string) => sats.find((x) => x.key === key);
+  it('rides the owner’s ring as its period says', () => {
+    const offered = rawSatellites({ subject: CAT }, 'en', t, { ownerQuestion: { available: true, asked: false } });
+    expect(find(offered, 'possessorQuestion')).toMatchObject({ parent: 'subject', labelKey: 'mood.question', available: true, hasValue: false });
+    expect(find(offered, 'subjectPossessor')?.available).toBe(true);
+    const asked = rawSatellites({ subject: CAT }, 'en', t, { ownerQuestion: { available: true, asked: true } });
+    expect(find(asked, 'possessorQuestion')?.hasValue).toBe(true);
+    expect(find(asked, 'subjectPossessor')?.available).toBe(false);
+    // No who / what: whose is always a person.
+    expect(asked.some((s) => s.key === 'possessorQuestionAnimate')).toBe(false);
+  });
+
+  it('is on no other phrase', () => {
+    expect(find(rawSatellites({ subject: CAT, verb: SEE }, 'en', t), 'possessorQuestion')).toBeUndefined();
+  });
+});

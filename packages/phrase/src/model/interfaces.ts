@@ -230,10 +230,14 @@ export type ImperativePerson = "2sg" | "1pl" | "2pl";
 // word of their own — who / what, where, how, why — and the boxed complements that keep their relation
 // (P09-E15, P09-E53): "**to whom**", "**with whom**", "**about what**", "**where to**", "**where
 // from**", "**which way**", "**when**". Left out: the predicative and the object predicative (no
-// adposition), the purpose ("what for?" overlaps *why*), and the instrumental, a linked period.
+// adposition), the purpose ("what for?" overlaps *why*), and the instrumental, a linked period. The
+// `possessor` (P09-E52) is the owner inside the subject or the object ("**whose** food does the cat
+// eat?", see `questionPossessed`); its mark is on the owner's hosted ring, so it is no slot of
+// QUESTION_ROLES, the rings of the period's own boxes.
 export type QuestionRole =
   | "subject"
   | "directObject"
+  | "possessor"
   | "locative"
   | "manner"
   | "cause"
@@ -244,7 +248,9 @@ export type QuestionRole =
   | "source"
   | "route"
   | "temporal";
-export const QUESTION_ROLES: readonly QuestionRole[] = [
+/** A question role whose mark is on a box of the period: every one but the owner (P09-E52). */
+export type SlotQuestionRole = Exclude<QuestionRole, "possessor">;
+export const QUESTION_ROLES: readonly SlotQuestionRole[] = [
   "subject",
   "directObject",
   "locative",
@@ -314,6 +320,9 @@ export interface PhraseSelection {
     // clears it. The slot's word, if it holds one, is left out of the plan (the gap), and a subject
     // gap takes the throwaway subject the plan type needs (see `askQuestion`).
     questionRole?: QuestionRole;
+    // The noun a `possessor` gap asks inside (P09-E52, PhrasePlan.questionPossessed): the subject's
+    // owner or the object's. Set with the `possessor` mark and cleared with it; absent otherwise.
+    questionPossessed?: "subject" | "directObject";
     // Whether a subject or direct-object question asks *who* rather than *what* (PhrasePlan
     // .questionAnimate). Absent means the default, which is the held word's `human` — the who / what
     // chip on the marked ring sets it only when the user flips it (see `questionAnimateOf`).

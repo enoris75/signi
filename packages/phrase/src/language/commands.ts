@@ -320,6 +320,9 @@ export const REGISTER_VALUES: readonly ValueDef[] = [
 export const QUESTION_SLOT_VALUES: readonly ValueDef[] = [
   { name: "subj", aliases: ["subject"], value: "subject", description: "subject", descriptionKey: "slot.subject" },
   { name: "obj", aliases: ["object"], value: "directObject", description: "direct object", descriptionKey: "slot.directObject" },
+  // P09-E52: the owner inside the subject or the object, which a second slot value names — `/wh poss
+  // obj` is "whose food does the cat eat?"; the subject's owner by default.
+  { name: "poss", aliases: ["whose", "possessor"], value: "possessor", description: "possessor", descriptionKey: "slot.possessor" },
   { name: "loc", aliases: ["locative", "place"], value: "locative", description: "place", descriptionKey: "slot.locative" },
   { name: "manner", value: "manner", description: "manner", descriptionKey: "slot.manner" },
   { name: "cause", value: "cause", description: "cause", descriptionKey: "slot.cause" },

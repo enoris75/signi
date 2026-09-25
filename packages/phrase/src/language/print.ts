@@ -227,6 +227,9 @@ class Printer {
       this.statement({ key: ":wh", removal: "/del wh" });
       this.emit("/wh", "command", "setting");
       this.emit(QUESTION_SLOT_VALUES.find((v) => v.value === root.questionRole)!.name, "value", "setting");
+      // The owner's gap names the noun it is inside, `/wh poss obj` (P09-E52).
+      if (root.questionRole === "possessor")
+        this.emit(QUESTION_SLOT_VALUES.find((v) => v.value === (root.questionPossessed ?? "subject"))!.name, "value", "setting");
       if (root.questionAnimate !== undefined) this.emit(root.questionAnimate ? "who" : "what", "value", "setting");
       // An empty asked box's relation rides /wh (P09-E53 D5): a box that holds a word says it in its
       // bracket, so each fact is printed in one place.
@@ -542,14 +545,13 @@ class Printer {
   }
 }
 
-/** A conjunct that is nothing but its word (and the defaults a pick seeds), written without brackets. */
 /**
  * The relation an asked, empty box is said in, as a `/wh` value (QUESTION_RELATION_VALUES), or
  * undefined at the box's default and wherever the box holds a word (its bracket says it).
  */
 function questionRelationValue(root: PhraseSelection): string | undefined {
   const role = root.questionRole;
-  if (!role || root[role]) return undefined;
+  if (!role || role === "possessor" || root[role]) return undefined;
   switch (role) {
     case "locative":
       return root.locativeSpecifier && root.locativeSpecifier !== "in" ? `specifier:${root.locativeSpecifier}` : undefined;
@@ -566,6 +568,7 @@ function questionRelationValue(root: PhraseSelection): string | undefined {
   }
 }
 
+/** A conjunct that is nothing but its word (and the defaults a pick seeds), written without brackets. */
 function isBareConjunct(c: PhraseSelection): boolean {
   return Object.entries(c).every(([k, v]) => {
     if (k === "subject") return true;

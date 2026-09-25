@@ -30,6 +30,7 @@ export function ringHosts({
   possessorToward,
   reportRing,
   onAddConjunct,
+  ownerQuestion,
 }: {
   hosting: Hosting;
   chains: readonly { which: NounKey; count: number }[];
@@ -38,6 +39,8 @@ export function ringHosts({
   possessorToward: (key: string) => Pt | undefined;
   reportRing: (key: string, ring: HostedRing | null) => void;
   onAddConjunct: (which: NounKey) => void;
+  // The *whose* an owner's ring carries, where its period offers one (P09-E52).
+  ownerQuestion?: (spot: OwnerSpot) => RingHost["question"];
 }): {
   conjunctHost: (which: NounKey, i: number) => RingHost;
   ownerHost: (spot: OwnerSpot) => RingHost;
@@ -73,6 +76,7 @@ export function ringHosts({
     ports: [{ key: ownerPortKey(spot), toward: centerOf(spot.possessedKey) }],
     possessorToward: possessorToward(spot.address),
     onRing: (ring) => reportRing(spot.address, ring),
+    question: ownerQuestion?.(spot),
   });
 
   // The predicate adjective's standard of comparison: an owner's hand-off, faded while its degree

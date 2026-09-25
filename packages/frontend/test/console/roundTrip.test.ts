@@ -324,6 +324,11 @@ const OPS: Op[] = [
         else if (role === 'cause') sel = R.setSentiment(sel, pick(rng, CAUSE_SENTIMENTS)!);
       }
       if (sel.questionRole === role && hasQuestionAnimacy(sel, role) && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
+    } else if (r < 0.85) {
+      // P09-E52: whose, on the subject's or the object's owner where its ring offers the mark.
+      const possessed = pick(rng, (['subject', 'directObject'] as const).filter((p) => canAsk(sel, 'possessor', p)));
+      if (!possessed || (locked && !sel.interrogative)) return undefined;
+      sel = R.toggleQuestionRole(sel, 'possessor', possessed);
     } else {
       if (!canBeExistential(sel)) return undefined;
       sel = R.toggleExistential(sel);

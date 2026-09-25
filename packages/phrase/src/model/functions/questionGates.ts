@@ -1,6 +1,6 @@
 import { DEFAULT_TEMPORAL_RELATION, type Concept } from "@signi/shared";
 import { offeredComplements } from "../slots.ts";
-import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
+import type { PhraseSelection, QuestionRole, SlotQuestionRole } from "../interfaces.ts";
 
 /**
  * What the question and the existential controls may reach (P09-E12 M6, M7). Each gate mirrors a
@@ -12,7 +12,8 @@ import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
  */
 
 /** The word held in the asked slot, whose `human` the who / what chip defaults to. */
-const heldWord = (sel: PhraseSelection, role: QuestionRole): Concept | undefined => sel[role];
+const heldWord = (sel: PhraseSelection, role: QuestionRole): Concept | undefined =>
+  role === "possessor" ? undefined : sel[role];
 
 /**
  * Whether the question over `role` has the two words *who* and *what* (P09-E53 D4): the subject and
@@ -69,13 +70,19 @@ export const asksQuestion = (sel: PhraseSelection): boolean =>
  * (`prepositionalObject`, D3): that language has no passive, and in the active the gap would name
  * another slot, so the engine refuses the question.
  */
-export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
+export function canAsk(
+  sel: PhraseSelection,
+  role: QuestionRole,
+  possessed: "subject" | "directObject" = sel.questionPossessed ?? "subject",
+): boolean {
   const verb = sel.verb;
   if (!verb || sel.imperative || sel.infinitive || sel.existential) return false;
   if (sel.verbVoice === "passive" && verb.prepositionalObject) return false;
   switch (role) {
     case "subject":
       return true;
+    case "possessor":
+      return canAskOwner(sel, possessed);
     case "directObject":
       return verb.transitivity !== "intransitive";
     default:
@@ -90,6 +97,25 @@ export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
 }
 
 /**
+ * Whether the owner of the subject or the object may be asked, "**whose** food does the cat eat?"
+ * (P09-E52 D2), past the clause's own conditions: the possessed slot holds a single noun — no
+ * pronoun, no coordination — whose owner is a named ring, not a pointed-to noun, and is its owner
+ * rather than the whole it is part of or the parts it is made of; the object is the verb's to have;
+ * and in the passive only the patient's owner, the agent's being refused (P09-E54 D4). Each mirrors a
+ * refusal of the engine's `possessorQuestion` / `resolvePhrase`.
+ */
+function canAskOwner(sel: PhraseSelection, possessed: "subject" | "directObject"): boolean {
+  if (possessed === "directObject" && sel.verb?.transitivity === "intransitive") return false;
+  if (sel.verbVoice === "passive" && possessed !== "directObject") return false;
+  if (sel[possessed]?.role !== "noun") return false;
+  const conjuncts = (sel[`${possessed}Conjuncts`] ?? []) as PhraseSelection[];
+  if (conjuncts.some((c) => c.subject)) return false;
+  if (sel[`${possessed}PossessorRef`]) return false;
+  const role = sel.possessorRoles?.[possessed];
+  return role !== "whole" && role !== "parts";
+}
+
+/**
  * Whether the period has a patient for the passive to promote (P09-E54 D2): an object that holds a
  * word, or one a wh-question asks about, which is usually empty — the engine counts the gap as the
  * object ("what is eaten by the cat?").
@@ -101,7 +127,7 @@ export const hasPatient = (sel: PhraseSelection): boolean =>
  * Whether a box's relation is there to choose (P09-E53 D3): on a box that holds a word, and on the
  * one a wh-question asks about, which is usually empty — the relation is the gap's ("**under what**").
  */
-export const hasRelation = (sel: PhraseSelection, slot: QuestionRole | "objectPredicative"): boolean =>
+export const hasRelation = (sel: PhraseSelection, slot: SlotQuestionRole | "objectPredicative"): boolean =>
   Boolean(sel[slot]) || sel.questionRole === slot;
 
 /** The wh-question's gap as the plan will carry it: the marked slot, where the engine asks it. */

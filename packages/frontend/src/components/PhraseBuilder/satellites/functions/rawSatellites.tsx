@@ -30,7 +30,7 @@ import {
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type SlotQuestionRole } from "../../interfaces.ts";
 import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import {
   BOX_COMPLEMENT_TYPES,
@@ -73,18 +73,24 @@ export function rawSatellites(
   // would make it a question has to respect as the border's toggle does. And whether the period
   // governs a that-clause (P09-E12 D9), which is its verb's object: the object box is then
   // withdrawn, as the clause and a direct object exclude each other.
-  { moodLocked = false, clauseObject = false }: { moodLocked?: boolean; clauseObject?: boolean } = {},
+  // And, on an owner's hosted ring, whether the period that hosts it may ask *whose* there and does
+  // (P09-E52, RingHost.question).
+  {
+    moodLocked = false,
+    clauseObject = false,
+    ownerQuestion,
+  }: { moodLocked?: boolean; clauseObject?: boolean; ownerQuestion?: { available: boolean; asked: boolean } } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
   // offered where the engine asks that gap (see canAsk), and — since marking a slot makes the period
   // a question — not where the mood is locked, unless the period is a question already.
   // A that-clause the period governs is its verb's object, so the object is no gap to ask about.
-  const askable = (role: QuestionRole) =>
+  const askable = (role: SlotQuestionRole) =>
     canAsk(selection, role) &&
     (!moodLocked || Boolean(selection.interrogative)) &&
     !(clauseObject && role === "directObject");
-  const question = (role: QuestionRole): RawSatellite => ({
+  const question = (role: SlotQuestionRole): RawSatellite => ({
     key: `${role}Question`,
     parent: role,
     label: t("mood.question"),
@@ -98,7 +104,7 @@ export function rawSatellites(
   // word changes with the answer's animacy (P09-E53 D4, see hasQuestionAnimacy): what the question
   // asks for, a person or a thing, defaulting to the held word's (see questionAnimateOf). The chip
   // names the question it makes ("Who acts?"), so its label is its value.
-  const questionAnimacy = (role: QuestionRole): RawSatellite => {
+  const questionAnimacy = (role: SlotQuestionRole): RawSatellite => {
     const who = questionAnimateOf(selection, role);
     return {
       key: `${role}QuestionAnimate`,
@@ -260,7 +266,8 @@ export function rawSatellites(
       icon: <KeyIcon sx={iconSx} />,
       // A possessor (Saxon genitive) attaches only to a noun head; its own head noun
       // lives in the nested selection's `subject` slot.
-      available: subjectRole === "noun",
+      // An owner asked about (P09-E52 D2) is a gap, and what it would own goes with it: none is offered.
+      available: subjectRole === "noun" && !ownerQuestion?.asked,
       // Set by either a genitive possessor phrase or a pronominal reference to another noun.
       hasValue: Boolean(selection.subjectPossessor?.subject) || Boolean(selection.subjectPossessorRef),
     },
@@ -279,6 +286,21 @@ export function rawSatellites(
     },
     question("subject"),
     questionAnimacy("subject"),
+    // An owner's ring asks *whose* (P09-E52 D1): the mark on the owner's dotted ring, gated by the
+    // period that hosts it, since this phrase has no verb to ask with. No who / what: *whose* is
+    // always a person (D4).
+    ...(ownerQuestion
+      ? [{
+        key: "possessorQuestion",
+        parent: "subject" as const,
+        label: t("mood.question"),
+        labelKey: "mood.question" as const,
+        icon: <QuestionMarkIcon sx={iconSx} />,
+        available: ownerQuestion.available,
+        hasValue: ownerQuestion.asked,
+        directToggle: true,
+      }]
+      : []),
     // How the subject of a verbless period reads when it defines an adjective or an adverb (P13): each
     // click moves it on — a noun phrase, an adjective's dimension, a manner, a place, a direction, a
     // time. A period with a verb has no reading: its subject is the one who acts.
@@ -807,7 +829,7 @@ export function rawSatellites(
         // The wh-question's mark on every complement a question can ask about (P09-E12 M6, P09-E53),
         // and its who / what chip where the question word has the two.
         ...((QUESTION_ROLES as readonly string[]).includes(type)
-          ? [question(type as QuestionRole), questionAnimacy(type as QuestionRole)]
+          ? [question(type as SlotQuestionRole), questionAnimacy(type as SlotQuestionRole)]
           : []),
       ];
     }),
