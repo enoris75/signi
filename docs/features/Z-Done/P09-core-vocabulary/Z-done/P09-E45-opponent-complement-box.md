@@ -214,7 +214,7 @@ its uniqueness test for the menu letters covers V.
   `diagnostic.verbAcceptsNo.opponent` joins the list at
   [`uiStrings.ts:3580`](../../../../../packages/shared/src/uiStrings.ts#L3580).
 - **Help:** an example in the frontend's `console/language/help.ts`.
-- **The P02 debt** ([P02](../../../Z-Done/P02-phrase-console/README.md)):
+- **The P02 debt** ([P02](../../P02-phrase-console/README.md)):
   - a `golden.test.ts` line, with a misuse on EAT;
   - a `help.test.ts` example;
   - a `phraseCommands` handler row;

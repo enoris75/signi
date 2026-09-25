@@ -4,7 +4,7 @@
 day, a moment *ago*, *up to* now. The engine has complements for where, whither, whence, which way,
 why, with what, how, with whom and to whom, and none for when.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E3**. The three words are seeded by their B tickets, [B59](B59-time-words.md)
 and [B67](B67-place-and-focus-adverbs.md), where every lead is probed; this ticket
 owns their glosses. **All three were seeded on 2026-09-22**, when those tickets were authored, and

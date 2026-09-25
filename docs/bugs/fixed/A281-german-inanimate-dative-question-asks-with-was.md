@@ -6,8 +6,8 @@ German *was* has no dative. A thing asked about in a bare dative slot is asked w
 dative question pronoun there is, or the sentence is rephrased. The engine's
 [`questionPronoun`](../../../packages/engine/src/languages/de/questionPronoun.ts) declines *wer* for a
 person and returns *was* in every case for a thing. So an inanimate recipient
-([P09-E15](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md))
-and the inanimate object of a dative verb ([P09-E6](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E6-questions-and-existentials.md))
+([P09-E15](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md))
+and the inanimate object of a dative verb ([P09-E6](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E6-questions-and-existentials.md))
 come out as a nominative or accusative *was*, which reads as the subject or the object.
 [A223](../fixed/A223-german-inanimate-terminus-of-give-and-connect.md) fixed the statement ("der Mann gibt
 **dem Haus** das Buch"), not the question.

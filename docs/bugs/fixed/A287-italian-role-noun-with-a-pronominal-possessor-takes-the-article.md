@@ -3,7 +3,7 @@
 **Languages:** Italian
 
 The role noun is bare in the four Romance languages
-([P09-E13](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E13-role-complement.md), D3).
+([P09-E13](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E13-role-complement.md), D3).
 They spell the role and the likeness alike (*come / comme / como*), and only the article tells them
 apart: "agisce come amico" is the capacity, "agisce come un amico" the resemblance. Italian's
 pronominal possessor brings the definite article back ("il suo amico"), so the role reads as the

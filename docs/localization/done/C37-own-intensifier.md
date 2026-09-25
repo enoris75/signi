@@ -4,7 +4,7 @@
 property"). The adjective of "my own cat" exists only beside a possessor, and in Japanese it replaces
 the possessor.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E10**. **Done** on 2026-09-22: the possessor-bound modifier shipped, OWN_ADJECTIVE is seeded
 and glossed; see [Done](#done).)_
 

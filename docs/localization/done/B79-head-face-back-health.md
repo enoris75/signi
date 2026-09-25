@@ -1,9 +1,9 @@
 # B79. Head, face, back and health — HEAD before FACE
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *head* (rank 278), *back* as a noun (331), *health* (333) and *face*
 (369). None is a concept at 1229928. Four words, three glosses. BACK_BODY is literal by design, and
-its Portuguese waits on [P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)
+its Portuguese waits on [P09-E41](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)
 for its everyday word. None goes to a C ticket.)_
 
 ## Seed first
@@ -19,9 +19,9 @@ Proposed forms, for the seed author to check. Every row was **seeded in memory a
 
 - **Portuguese says *as costas***, a noun that is plural in every use. Seeded as `count: 'plural'`
   with no singular it rendered *o gato vê **uma** costas* and *a costas grande parece boa*: the
-  engine has no plurale tantum ([P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
+  engine has no plurale tantum ([P09-E41](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
   Seed *dorso*, the anatomical singular, now, and swap to *costas* when E41 lands.
-  **E41 has landed (2026-09-24):** a lexeme seeded `count: 'plural'` with its plural as `base` now renders plural throughout ([P09-E41](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
+  **E41 has landed (2026-09-24):** a lexeme seeded `count: 'plural'` with its plural as `base` now renders plural throughout ([P09-E41](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E41-pluralia-tantum.md)).
 - **Italian *viso* against *faccia***: both are the face. *Faccia* is also "cheek" (nerve) and
   appears in idioms; *viso* is the neutral word. Spanish *cara* is also "expensive" (fem. of CARO),
   which no seeded adjective is.

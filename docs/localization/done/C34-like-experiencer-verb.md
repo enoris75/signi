@@ -4,7 +4,7 @@
 already written by the engine) swaps its participants in Italian and Spanish, takes a preposition in
 Portuguese and is an adjective in Japanese.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E9**, split from the other two verbs of that row: HELP is [C35](C35-lexical-object-case.md)
 and LET is [C36](C36-let-bare-infinitive.md). **Done** on 2026-09-22: the experiencer frame shipped,
 LIKE is seeded and glossed; see [Done](#done).)_

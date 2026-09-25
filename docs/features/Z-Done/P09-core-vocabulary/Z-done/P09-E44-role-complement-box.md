@@ -223,7 +223,7 @@ There is no Alt layer.
   [`uiStrings.ts:3580`](../../../../../packages/shared/src/uiStrings.ts#L3580).
 - **Help:** an example in the frontend's `console/language/help.ts`:
   `/subj ( man ) /verb ( act ) /role ( friend )`.
-- **The P02 debt** ([P02 rule](../../../Z-Done/P02-phrase-console/README.md)):
+- **The P02 debt** ([P02 rule](../../P02-phrase-console/README.md)):
   - a `golden.test.ts` line, with a misuse on a verb that does not license the role;
   - a `help.test.ts` example;
   - a `phraseCommands` handler row;

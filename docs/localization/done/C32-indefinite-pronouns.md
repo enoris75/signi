@@ -3,7 +3,7 @@
 **Kind:** was blocked on a construct. P09's *something* is a pronoun that is not a person, and it
 turns into *nothing* or *anything* under negation.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E7**. ONLY is seeded by [B67](B67-place-and-focus-adverbs.md), which probes every lead, and
 this ticket owned its gloss. **Done** on 2026-09-22: the pronoun shipped and is glossed; ONLY is
 literal by design; see [Done](#done).)_

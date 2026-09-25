@@ -6,7 +6,7 @@ purpose clause on ACT (WORK_LABOUR, PLAY_GAME), an instrument gap (WORK_NOUN), a
 PRODUCE (PLAY_INSTRUMENT), a causative (DO) and MUST's own OBLIGED (NEED). **TRY is literal by
 design**, beside DESIRE. It also answers P09's open question on NEED — **one concept** — and shows
 what P09's `modal: true` costs TRY. Nothing goes to a C ticket.
-The words come from [P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+The words come from [P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

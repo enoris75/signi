@@ -1,6 +1,6 @@
 # B88. National, social, political and public — the relational adjectives, on C24's *indicates*
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *national* (rank 310), *social* (344), *political* (356) and *public*
 (370). None is a concept at 1229928. Four adjectives, four glosses, all on shipped shapes. SOCIAL
 stands on [B77](B77-teams-institutions-and-business.md)'s COMMUNITY and POLITICAL on

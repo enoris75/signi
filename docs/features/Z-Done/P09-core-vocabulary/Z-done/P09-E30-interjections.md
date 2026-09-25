@@ -25,7 +25,7 @@ Engine output. The proposal's second column was the bare "hey, Peter!", which no
 
 ## Done
 
-Shipped 2026-09-24. The vocative ([P11-E3](../../P11-family-and-relationships/Z-done/P11-E3-address-and-the-vocative.md))
+Shipped 2026-09-24. The vocative ([P11-E3](../../../P-planning/P11-family-and-relationships/Z-done/P11-E3-address-and-the-vocative.md))
 shipped with no interjection slot, so this took D1's second branch:
 
 - **shared**: `PhrasePlan.interjection?: string` (a concept id), the last member of the plan, right

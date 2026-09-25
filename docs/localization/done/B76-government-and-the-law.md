@@ -1,6 +1,6 @@
 # B76. Government, party, law, court, right, power and war — POWER first, since PARTY_POLITICAL stands on it
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *government* (rank 220), *right* as a noun (243), *law* (268), *power*
 (274), *war* (276), *party* (327, political half) and *court* (388). None is a concept at 1229928.
 GOVERNMENT is a row of [P08](../../features/P-planning/P08-collective-nouns/README.md), still

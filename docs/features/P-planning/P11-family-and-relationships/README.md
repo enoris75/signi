@@ -324,7 +324,7 @@ column is `plural_honorific`, beside `possessed_plural`.
 
 Catalogued on 2026-09-22, **before** the seeding rather than after: each word was seeded in memory
 and its definition rendered through the engine source at HEAD, the way
-[P09](../P09-core-vocabulary/README.md) was. The 41 concepts of §4 are
+[P09](../../Z-Done/P09-core-vocabulary/README.md) was. The 41 concepts of §4 are
 [B68–B74](../../../localization/localization-tasks.md#part-b--needs-seeding-b-needs-seed), one
 ticket per branch of the family, and their **Seed first** tables are this plan's §4 with the forms
 checked, so authoring one is the seeding and the tooltips in a single pass. **37 of the 41 concepts
@@ -381,7 +381,7 @@ through a feature task.
 | [P11-E5](Z-done/P11-E5-counting-relatives.md) | **Shipped 2026-09-24.** 三人兄弟 — `counter_join: 'compound'` on 兄弟 and 姉妹, replacing `counter_is_head` | a third value of a flag that has two |
 | [P11-E6](P11-E6-humble-verb-control.md) | **Planning.** The builder control for E1's humble — a toggle on the subject's ring, `H`, `/humble` in the verb's bracket | one selection flag, a gate mirroring the engine's, one seeded label concept |
 | [P11-E7](P11-E7-coreferent-possessor-control.md) | **Planning.** The builder control for E2's link — no new control: an owner pointed at the clause's own subject writes `coreferent` instead of copying its features | one gate in `buildNounPhrase`; command and infinitive boxes become pick targets |
-| [P11-E8](P11-E8-vocative-control.md) | **Planning.** The builder control for E3's vocative — a period border toggle revealing an address box, `V`, `/voc ( … )` | a new noun key, one seeded label concept; seats beside [P09-E47](../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s interjection |
+| [P11-E8](P11-E8-vocative-control.md) | **Planning.** The builder control for E3's vocative — a period border toggle revealing an address box, `V`, `/voc ( … )` | a new noun key, one seeded label concept; seats beside [P09-E47](../../Z-Done/P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s interjection |
 | [P11-E9](P11-E9-pronoun-owner.md) | **Planning.** A pronoun as a named owner — "my mother runs" with no *I* elsewhere in the period, which this doc's own first table needs; found writing E6 | the owner picker's Pronoun tab, written as a `PronominalPossessor`; `/poss [ 1st ]` |
 
 **No task, by design:**

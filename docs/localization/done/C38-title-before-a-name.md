@@ -3,7 +3,7 @@
 **Kind:** was blocked on a construct. P09's *Mr* ranks high only because the frequency list is
 news-heavy, and it could not be used without a personal name to precede.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E11**. **Done** on 2026-09-22: personal names and the title shipped; see [Done](#done).)_
 
 ## The concepts

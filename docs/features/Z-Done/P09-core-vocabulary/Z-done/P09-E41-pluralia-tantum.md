@@ -2,7 +2,7 @@
 
 **Construct:** a noun that is plural in every use in one language and singular (or mass) in another,
 so the verb, the article and the adjectives agree plural there.
-**Shape:** `count: 'plural'` with no singular, as [P08 D5](../../P08-collective-nouns/README.md)
+**Shape:** `count: 'plural'` with no singular, as [P08 D5](../../../P-planning/P08-collective-nouns/README.md)
 proposed, honoured by every engine's article, adjective and verb agreement.
 **Scope:** all 7 languages (English and Japanese mostly unchanged).
 **Status:** **shipped, 2026-09-24** — resolved once in the shared noun-phrase resolution for all seven

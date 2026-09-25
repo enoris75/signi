@@ -4,7 +4,7 @@
 suggested: [C08](C08-copular-and-genus-verbs.md)'s object-controlled infinitive already rendered four
 languages. What was missing was the bare infinitive of English and German and the Japanese causative.
 
-_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/P-planning/P09-core-vocabulary/README.md)
+_(from the P09 core-vocabulary sweep of 2026-09-22; [P09](../../features/Z-Done/P09-core-vocabulary/README.md)
 §3, **E9**, split from the other two verbs of that row, with which it shares no mechanism: LIKE is
 [C34](C34-like-experiencer-verb.md) and HELP is [C35](C35-lexical-object-case.md). **Done** on
 2026-09-22: both flags shipped, LET is seeded and glossed, ALLOWED is literal by design; see

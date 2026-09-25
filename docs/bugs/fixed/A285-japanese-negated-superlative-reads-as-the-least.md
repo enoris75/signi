@@ -6,7 +6,7 @@ Japanese has no word for *least*: the engine negates the superlative, 最も大�
 big") ([A10](../fixed/A10-japanese-degree-least-less.md)). A negated clause over `most` negates the
 adjective the same way, so "the cat is **not the biggest**" comes out byte for byte as "the cat is
 **the least big**". With the superlative set of
-[P09-E19](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md) the
+[P09-E19](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E19-superlative-partitive.md) the
 two collide in full sentences: 猫は動物の中で最も大きくないです is pinned as the affirmative `least`
 row in comparison.test.ts.
 

@@ -5,7 +5,7 @@
 Italian marks motion away from a person with the ablative particle *via* before *da*: "il gatto viene
 **via** dalla donna" (*from the woman*), against "il gatto viene dalla donna" (*to the woman's place*).
 The particle belongs to the verb. The question over an animate source
-([P09-E15](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md))
+([P09-E15](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md))
 fronts the whole complement as the statement writes it, and the particle moves with it.
 
 | Case | Now | Want |

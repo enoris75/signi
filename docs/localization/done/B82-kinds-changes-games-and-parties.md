@@ -1,6 +1,6 @@
 # B82. Kind, change, game, percent and party — the abstract nouns of ranks 201–400
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *game* (rank 210), *kind* (256), *percent* (265), *change* as a noun
 (364) and *party* (327, the celebration half). None is a concept at 1229928. Five words, four
 glosses. PERCENT is literal by design. None goes to a C ticket.)_

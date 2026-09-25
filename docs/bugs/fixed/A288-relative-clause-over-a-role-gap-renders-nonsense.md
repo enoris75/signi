@@ -3,7 +3,7 @@
 **Package:** engine (translator)
 
 A relative clause may gap any complement (`RelativeClause.headRole`), and since
-[P09-E13](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E13-role-complement.md) that
+[P09-E13](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E13-role-complement.md) that
 includes `role`. The engines treat the role gap like a prepositional one and put the essive marker in
 front of a relative pronoun. Romance and German have no relative over an essive *as*, so the result
 is word salad. German also loses the relative pronoun and leaves a double space.

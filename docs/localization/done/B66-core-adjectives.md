@@ -7,7 +7,7 @@ is FIRST read the other way. LAST_PREVIOUS is FOLLOW's object gap under *this*. 
 negated. RIGHT_CORRECT needs one word, ERROR. AMERICAN and RIGHT_SIDE are literal by design, the
 verdicts [C26](../done/C26-root-nouns-on-the-literal.md) gave the countries and
 [C25](../done/C25-place-and-direction-adverbs.md) the RIGHT adverb. The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

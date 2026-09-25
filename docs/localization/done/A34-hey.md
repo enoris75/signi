@@ -1,8 +1,8 @@
 # A34. HEY — a word with which one calls a person
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. HEY is the only concept of the `interjection` role, which
-[P09-E30](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E30-interjections.md) built. Its
+[P09-E30](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E30-interjections.md) built. Its
 Done item 4 left it on the literal ("a word said to catch someone's attention") because "a word that
 asks attention" and "a word that calls attention" did not compose, and waited for a CATCH or ATTRACT
 verb. The **instrument gap** on CALL, with a person as its object, composes in all seven. No new

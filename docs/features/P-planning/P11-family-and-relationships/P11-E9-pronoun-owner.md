@@ -143,7 +143,7 @@ Verified at HEAD (1bb7c878), 2026-09-25.
   母を見る男), the address ("My wife, run.", 妻、走ってください), and an indefinite possessed noun ("a
   mother of mine", *una mia madre*, *eine Mutter von mir*).
 - **The whose-question refuses it** as it refuses any owner: "a possessor question cannot ask about a
-  noun that already has a possessor (P09-E14)". [P09-E52](../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md)
+  noun that already has a possessor (P09-E14)". [P09-E52](../../Z-Done/P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md)
   D3 deletes the owner before asking.
 - **The round trip.** [`planToWorkspace`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L328)
   reports every possessor with a `kind` as unsupported, `Possessor.pronominal` included. The printer
@@ -372,7 +372,7 @@ a question for the bug catalogue. It is recorded here and not filed.
   in the period, so without this task it cannot be built. E8 D3's "possessor: named ring or pointed-to
   pronoun" row then includes a pronoun-headed ring. Every person is allowed there: the refusal E8
   inherits (A338) is on the address's **head**, not its owner.
-- **[P09-E52](../P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md).** No change. The asked
+- **[P09-E52](../../Z-Done/P09-core-vocabulary/Z-done/P09-E52-possessor-question-control.md).** No change. The asked
   owner is a named ring whose word is dropped (E52 D3), and a pronoun word is dropped like a noun.
 
 ## Implementation

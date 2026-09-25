@@ -6,7 +6,7 @@ gave MUST and CAN. **SHOULD and MIGHT do not.** Each judges the act (right, poss
 adjective that says so takes the act as its subject ("it is possible that one acts"). That needs a
 content clause, so both go to [C30](../done/C30-content-clause-with-expletive-subject.md),
 E4. The ticket also sorts the modals' seeding into seed work and engine work. The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

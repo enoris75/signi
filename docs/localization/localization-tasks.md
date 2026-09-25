@@ -100,7 +100,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 ### Part A — Ready (`A-ready/`)
 
 **None is open.** A32–A34, filed on 2026-09-24 for three of the nine concepts
-[P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
+[P09-E25–E43](../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs)
 shipped with no `definition` (the other six were [C41–C43](#part-c--needs-engine--deferred-c-needs-engine)),
 were authored the same day and are in [`done/`](done/). All three shipped the ticket's proposed
 row, re-probed in all seven languages; no engine change was needed.
@@ -132,12 +132,12 @@ catalogued and authored the same day, so it never sat in `A-ready/`. A08–A10 a
 ### Part B — Needs seeding (`B-needs-seed/`)
 
 **None is open.** B75–B90, filed on 2026-09-24 by
-[P09-E24](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the coverage
+[P09-E24](../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md), the coverage
 check of COCA lemma ranks 201–400, were authored the same day in eight parallel lanes and are all in
 [`done/`](done/). Like B59–B67, their concepts **did not exist**, so each ticket was the E24 seeding
 and its tooltips in one pass. They **seeded 84 words and shipped 70 glosses** — every one the tickets
 forecast. B85's ALLOW, the 85th proposed concept, was already seeded and glossed by
-[P09-E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md); LOSE_GAME, the
+[P09-E43](../features/Z-Done/P09-core-vocabulary/Z-done/P09-E43-allow-to.md); LOSE_GAME, the
 proposed gloss, shipped. The **13 literal-by-design verdicts** stand as filed, and LENGTH is a
 dimension root like SIZE.
 
@@ -183,7 +183,7 @@ before a bare object (B85); English *realer* (B87); a relative clause dropping a
 `infinitiveComplement`, and French losing *des* on a bare plural subject (B76).
 
 The E24 words that are **not** here are constructs, not seeds:
-[P09-E25–E43](../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs).
+[P09-E25–E43](../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md#3-needs-the-engine-first-19-constructs).
 Three of them seed words when they land: NEWS (E41), SOMEONE (E40), and MAYBE, PROBABLY, ACTUALLY and
 OF_COURSE (E39).
 
@@ -230,7 +230,7 @@ B59–B67, the P09 core vocabulary, were filed on 2026-09-22 (see
 [the P09 sweep](#the-p09-sweep-of-2026-09-22)) and authored the same day; all nine are in
 [`done/`](done/). They differed from every B before them in one way: the concepts they gloss **did
 not exist**, so the first rows of each **Seed first** table were the
-[P09](../features/P-planning/P09-core-vocabulary/README.md) words themselves, and authoring a ticket
+[P09](../features/Z-Done/P09-core-vocabulary/README.md) words themselves, and authoring a ticket
 was P09's seeding and the tooltips in one pass.
 
 Between them they **seeded 73 words and authored 56 glosses**, taking the corpus from 538 concepts
@@ -513,7 +513,7 @@ typical object or instrument each, and **KNOW ↔ UNDERSTAND**, the one near-syn
 
 ### The P09 sweep of 2026-09-22
 
-[P09](../features/P-planning/P09-core-vocabulary/README.md) plans to seed the everyday words the
+[P09](../features/Z-Done/P09-core-vocabulary/README.md) plans to seed the everyday words the
 corpus lacks, measured against the 200 most frequent English words, and its *Follow-ups* asked for
 their localization tickets. Twelve of its words had been seeded in the meantime by the sweeps above
 (LIVE, LIVE_ALIVE, FIND, HEAR, HAPPEN, WORK, COUNTRY, PART, NEXT, NOW, AGAIN, GROUP), each with its

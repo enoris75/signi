@@ -1,6 +1,6 @@
 # B87. Different, sure, real, important, long, black and white — LENGTH first, since LONG stands on it
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *different* (rank 236), *sure* (247), *real* (280, both senses),
 *long* (285), *important* (297), *black* (340) and *white* (386). None is a concept at 1229928.
 Eight adjectives and one differentia noun (LENGTH). Five glosses. REAL_GENUINE, BLACK and WHITE are

@@ -4,7 +4,7 @@ _(from the P09 core-vocabulary sweep of 2026-09-22. P09 §2's *school*, *student
 (the polity half of its split) and *world*. All five ship on this seed, on two new verbs, LEARN and
 SELL, and one noun that [B65](B65-everyday-nouns.md) seeds. None goes to a C
 ticket. The words come from
-[P09](../../features/P-planning/P09-core-vocabulary/README.md) §2.)_
+[P09](../../features/Z-Done/P09-core-vocabulary/README.md) §2.)_
 
 ## Seed first
 

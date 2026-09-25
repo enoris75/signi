@@ -6,8 +6,8 @@ A Japanese passive marks its demoted agent with に, unless the clause already s
 recipient of a ditransitive. Then the agent takes the compound によって, because two に in one clause
 cannot be told apart: 本は女**によって**男にあげられます (*the book is given to the man by the woman*).
 The question over that recipient
-([P09-E15](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md)
-under [P09-E16](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E16-passive-question.md)'s
+([P09-E15](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E15-question-over-a-marked-relation.md)
+under [P09-E16](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E16-passive-question.md)'s
 passive) asks with 誰に / 何に in the recipient's slot, but the agent still takes the bare に.
 
 | Case | Now | Want |

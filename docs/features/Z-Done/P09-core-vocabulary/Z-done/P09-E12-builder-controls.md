@@ -179,7 +179,7 @@ subject's and the object's rings took a control with no growth at all.
 Values are not commands (`/join and #2` takes `and` as a value although `/and` is a command), so a
 value may reuse any of these names.
 
-**P12 redraws the instrument** ([P12](../../P12-hosted-instrument/README.md)) and names `comitative`,
+**P12 redraws the instrument** ([P12](../../../P-planning/P12-hosted-instrument/README.md)) and names `comitative`,
 `objectPredicative` and `temporal` as out of its scope. Two things cross it:
 
 - **E2's privative toggle rides the instrument link.** `PrivativeSwitch` is in the instrument

@@ -8,10 +8,10 @@ that names a `copula`, `lexicalCopula`), so no picker lists them and **no toolti
 for them** (see [Where the tooltip shows](#where-the-tooltip-shows)). Every lead was probed anyway,
 as C28 probed EAT_ANIMAL's and KNOW_ACQUAINTED's, and each fails on its own terms.
 
-_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(filed on 2026-09-24 for the concepts [P09-E24–E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 seeded with no `definition`. TELL_ORDER came with
-[P09-E43](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E43-allow-to.md) (Done item 4),
-BE_FARING with [P09-E31](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E31-state-predicate-okay.md)
+[P09-E43](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E43-allow-to.md) (Done item 4),
+BE_FARING with [P09-E31](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E31-state-predicate-okay.md)
 (Done item 1); neither Done section mentions a gloss.)_
 
 ## The concepts

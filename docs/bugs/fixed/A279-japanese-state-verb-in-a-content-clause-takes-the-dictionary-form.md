@@ -6,8 +6,8 @@ A Japanese state verb says that a state holds with the resultant 〜ている. I
 the change of state: 猫が本を持つ is "the cat (will) pick up the book", and 猫が本を持っている is "the cat
 has the book". [A132](../fixed/A132-japanese-state-verb-main-clause.md) gave the finite main clause the
 〜ている (猫は本を持っています). But the check it added in `predicateSegs` is `!plain`. A content clause
-([P09-E4](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E4-clauses.md), and the indirect
-question of [P09-E17](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md))
+([P09-E4](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E4-clauses.md), and the indirect
+question of [P09-E17](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E17-indirect-question.md))
 is built plain, like the relative clause A132 deliberately left alone. So the clause reports an event.
 
 | Case | Now | Want |

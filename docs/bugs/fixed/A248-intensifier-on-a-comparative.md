@@ -43,7 +43,7 @@ has a target of its own to decide (*by far the biggest*, *much too big*); they a
 Pinned by `known bugs: an intensifier on a comparative (A248)` in
 [intensifiers.test.ts](../../../packages/engine/test/intensifiers.test.ts).
 
-Found shipping [P09-E5](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
+Found shipping [P09-E5](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E5-standard-of-comparison.md),
 the standard of comparison.
 
 ## Resolved

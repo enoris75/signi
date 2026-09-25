@@ -101,7 +101,7 @@ es/pt predicate it with *estar*).
   question mark, so the mark is kept by doing nothing. `capitalize` did need fixing: it uppercased the
   first *character*, which for Spanish is the "¿". It now capitalizes the first *letter*, past any opening mark.
 - **No builder control.** The canvas has no toggle for a question (the imperative has its megaphone); the
-  mood is reachable from a plan only. [P09 E6](../../features/P-planning/P09-core-vocabulary/README.md)
+  mood is reachable from a plan only. [P09 E6](../../features/Z-Done/P09-core-vocabulary/README.md)
   wants the rest of it — question words, wh-order — and can build on this.
 
 Pinned by [interrogative.test.ts](../../../packages/engine/test/interrogative.test.ts) (every language,

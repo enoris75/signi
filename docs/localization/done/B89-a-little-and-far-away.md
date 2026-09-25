@@ -1,6 +1,6 @@
 # B89. A little and far away — a degree adverb and a place adverb
 
-_(from the [P09-E24](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
+_(from the [P09-E24](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E24-ranks-201-400.md)
 coverage check of 2026-09-24: *little* (rank 238 as an adjective, 398 as an adverb) and *far* (266,
 as an adverb). The adjective *little* is SMALL (P09 D1: *piccolo, petit, klein, pequeño*, 小さい),
 and the mass determiner *little* ("little water") is written by the engine
@@ -63,7 +63,7 @@ Readings to judge on authoring:
 
 1. **A_LITTLE on a verb** (above) — a second use of the intensifier slot, not planned.
 2. ***A little* as a determiner** ("a little water": *un po' d'acqua, un peu d'eau, ein bisschen
-   Wasser*) — [P09-E25](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E25-quantity-determiners.md)'s
+   Wasser*) — [P09-E25](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E25-quantity-determiners.md)'s
    quantity values, next to *a lot of*.
 
 ## Coverage

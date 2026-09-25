@@ -35,7 +35,7 @@ Pinned by `known bugs: a boot render serves the hole an unseeded concept leaves 
 [definitions.test.ts](../../../packages/backend/src/definitions.test.ts) and
 [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts).
 
-Found shipping [P09-E2](../../features/P-planning/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
+Found shipping [P09-E2](../../features/Z-Done/P09-core-vocabulary/Z-done/P09-E2-complement-types.md),
 where a manner complement naming the unseeded WIND rendered `like the`.
 
 ## Resolved
