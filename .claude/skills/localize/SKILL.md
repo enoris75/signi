@@ -55,7 +55,9 @@ Adding a string means adding **one entry to the catalog**. No new route, fetcher
 
 ## Definition of done
 
-- The literal is gone from the component; the string renders in all seven languages.
+- The literal is gone from the component; the string renders in all seven ready languages, and in
+  Swiss German (`gsw`, preview) wherever its words have `gsw` forms — a hole there warns at boot
+  rather than failing it (P10-E1).
 - The plan says what the label *means* — a command is an imperative, a section heading is a plural
   noun — rather than being reverse-engineered to make the English come out right.
 - Nothing else in the app hardcodes the same text.

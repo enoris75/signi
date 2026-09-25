@@ -5,7 +5,7 @@ dative (*s Huus vom Vatter*); `gsw` has no genitive at all.
 **Shape:** a new `gsw` builder replacing `de`'s `possessorText`, `genitiveS`, `genitiveShows` and
 `modifierGenitives` (deleted in E5).
 **Scope:** engine; `gsw` suite.
-**Status:** **planning**. Filed 2026-09-25 from P10 D7 and phase 3. Depends on E5.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P10 D7 and phase 3. Depends on E5.
 
 | plan | `de` | `gsw` *(verify)* |
 |---|---|---|
@@ -48,3 +48,14 @@ The table above; a possessed subject, object and dative; a possessor question (*
 ## Out of scope
 
 Kin-specific article rules (P11 is `it`/`fr`/`de`/`ja`; `gsw` follows `de`'s none).
+
+## Done
+
+Shipped 2026-09-25, D1–D3 as recommended. `possessorText.ts` is rebuilt: `withPossessorDative` moves a
+definite owner that is a person or an animal in front, in the determiner's place (*em Vatter sis Huus,
+de Mueter ires Huus, de Chatze ires Ässe, mim Vatter sis Huus*, and after a preposition *mit em Vatter
+sim Hund*); every other owner follows with *vo* + the dative (*s Huus vo emene Maa*, *d Tür vom Huus*).
+The linking possessive is `possessiveGsw` for a third-person owner, agreeing with the possessed noun
+(D2); an inner owner follows with *vo* (D3, *em Vatter vo de Mueter sis Huus*). A possessor question is
+*wem sis*. Names are articled in Swiss German (*de Peter*, *em Peter sis Huus*), which the data now
+says (`takes_article`).

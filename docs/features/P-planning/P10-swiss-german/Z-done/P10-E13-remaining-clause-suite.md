@@ -5,7 +5,7 @@ preview gate (phase 3's *done when*).
 **Shape:** mostly carry-over from `de`, reviewed construct by construct; each divergence is a line
 in the `gsw` suite, and each unresolved one a `test.fails`.
 **Scope:** engine; every sentence suite.
-**Status:** **planning**. Filed 2026-09-25 from P10 phase 3. Depends on E5–E12.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P10 phase 3. Depends on E5–E12.
 
 | construct | `gsw` *(verify)* | note |
 |---|---|---|
@@ -28,7 +28,7 @@ turns out to need real engine work leaves the sweep as its own ticket (one ticke
 ### D1. The conditional
 
 `de` uses the *würde*-periphrasis
-([`isConditionalMood`](../../../../packages/engine/src/languages/de/isConditionalMood.ts)).
+([`isConditionalMood`](../../../../../packages/engine/src/languages/de/isConditionalMood.ts)).
 Zürichdeutsch has *würd* + infinitive **and** synthetic subjunctives for the frequent verbs (*chäm,
 wär, hett, gieng*). **Recommendation:** *würd* for all verbs except *sii* and *haa* (*wär, hett*),
 which are universal; the synthetic forms of the rest wait for E14, as P10's table already flags.
@@ -51,3 +51,20 @@ Every sentence suite has a `gsw` expectation or a `test.fails`.
 ## Out of scope
 
 The Swiss cluster order (E10 D2); verb doubling (*ich gang go poschte*, P10 out of scope).
+
+## Done
+
+Shipped 2026-09-25 for its table, **not** as D3's per-suite sweep.
+
+- **D1** as recommended: *würd* + infinitive (*wenn de Hund springe würd, würd …*, German cluster order,
+  the Swiss *würd springe* in `test.fails`), *sii* and *haa* on their stored *wär / hett*.
+- **D2:** `prepDet`'s contractions (*im, am, zum, vom, bim, is, as, ufs*); *zu de* stays apart.
+- The table renders: *spring.*, *mir wänd springe.*, *ich wott ässe*, *ich probier z ässe*, *d Chatz und
+  de Hund springed*, *ich gang hei*, *d Chatz springt is Huus* (commands close on the full stop every
+  language's command does).
+- **D3, the sweep, is deferred to promotion.** E1 excludes a preview language from the exhaustive
+  tables by design (so unreviewed text is not pinned in ninety files), and P03 §0.5 makes adding its
+  line to every table *the* acceptance review, i.e. E15. What stands in for it now: the `gsw` suite
+  covers every construct of E5–E13, the leak guard, and every UI string and definition renders in
+  `gsw` at boot with no hole (the review sheet lists them). A random-phrase pass (40 plans, seed 4242)
+  found one defect, the *-en* adjectives, fixed.

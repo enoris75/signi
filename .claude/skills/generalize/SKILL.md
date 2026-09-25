@@ -39,7 +39,7 @@ Read these before editing. They are what the schema and the seed-time validator 
 1. **Check the base concept exists** — grep [packages/backend/src/concepts/](packages/backend/src/concepts/)
    for its id. If it does not exist there is nothing to generalize; seed it first, or ask.
 2. **Seed the new, broader concept** by following [seed](../seed/SKILL.md) in full: file by role,
-   SCREAMING_SNAKE `id`, `description`, `emoji`, `forms` for **all seven** languages.
+   SCREAMING_SNAKE `id`, `description`, `emoji`, `forms` for **all seven** ready languages, and the Swiss German entry in `concepts/gsw/` (see [seed](../seed/SKILL.md)).
 3. **Re-point the chain. This is the whole job — get it right.**
 
    Look at whether the base concept **already has an `isA`**.

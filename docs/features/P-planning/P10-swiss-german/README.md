@@ -8,8 +8,11 @@ German column in every concept of the corpus, and the groundwork of
 §0](../P04-romansh/README.md#0-groundwork) (single language list, no database CHECK, a
 `preview`/`ready` language status, ready-only test gating). Whichever of P03, P04 and P10 ships first
 carries that groundwork.
-**Status:** planning. Every decision below is **proposed**, not confirmed. Split into **E1–E15**
-(2026-09-25), one per phase step and per construct — see [§7](#7-tasks-e1e15).
+**Status:** **phases 0–3 shipped 2026-09-25, as a `preview` language** — every phrase renders a Swiss
+German row, every UI string and definition renders in `gsw`, and a 93-row suite pins it. **Phase 4 (the
+review) and phase 5 (promotion) wait on a native Zürich reviewer**, whom the project does not have:
+nothing here has been checked by a speaker, and every form is *(verify)*. Split into **E1–E15**
+(2026-09-25) — see [§7](#7-tasks-e1e15).
 
 > **The framing problem, before any decision: Swiss German is not a written language.** The written
 > language of German-speaking Switzerland is Standard German, and the corpus already has it as `de`.
@@ -202,26 +205,27 @@ addition.
 
 ## 7. Tasks (E1–E15)
 
-Filed 2026-09-25, verified against HEAD 7a392187. Decision numbers are this README's. E3 gates the
-bulk seeding; E14 needs a calibrated reviewer; everything else is engine or data work in phase order.
+Filed 2026-09-25, verified against HEAD 7a392187. Decision numbers are this README's. **E1, E2 and
+E4–E13 shipped on 2026-09-25** and are in [`Z-done/`](Z-done/). E3 shipped its two documents but not
+its calibration, which needs the reviewer E14 needs; E15 waits on E14.
 
-| task | phase | what | shape |
+| task | phase | what | status |
 |---|---|---|---|
-| [P10-E1](P10-E1-language-groundwork.md) | 0 | Groundwork: single language list, no DB CHECK (**seven** sites now), `preview`/`ready`, test gating; `gsw` registered as an empty `preview` row | P03 §0 / P04 §0, only if neither shipped first |
-| [P10-E2](P10-E2-row-identity.md) | 0 | The row's identity: `SWISS_GERMAN`, *Swiss German (Zürich)*, the Dieth description, the arms of Zürich | one concept, the `Flag` widening (D1–D4) |
-| [P10-E3](P10-E3-orthography-and-lexical-sample.md) | before 1 | A Dieth style sheet, a 50-concept lexical-distance sample, the reviewer's calibration | no code; gates E4 (§1, §4, §6) |
-| [P10-E4](P10-E4-corpus-column.md) | 1–3 | The `gsw` column on all 784 concepts, in batches; no `*_past`, no genitive | data + the seeding skills (D5, D7) |
-| [P10-E5](P10-E5-engine-fork-noun-phrase.md) | 1 | Fork `de`; the noun phrase in three cases, clitic articles, genitive machinery deleted | the fork (§2, D7) |
-| [P10-E6](P10-E6-clause-core-present-and-noed.md) | 1–2 | Present tense, verb-second, the brace, *nöd*, *me*, a `de`-leak guard | carry-over + the negator |
-| [P10-E7](P10-E7-perfect-for-past.md) | 2 | `past` = the perfect with *haa/sii*; `past` = `resultative` pinned | routing (D5, D6) |
-| [P10-E8](P10-E8-present-for-future.md) | 2 | `future` = the present; `WERDEN` gone, the prospective kept | routing (D8) |
-| [P10-E9](P10-E9-am-progressive.md) | 2 | *isch am Frässe* — the aspect `de` lacks | new construction (D9) |
-| [P10-E10](P10-E10-modals-and-verb-clusters.md) | 2 | Modals, copula, degree; `de`'s cluster order shipped, the Swiss one pinned `test.fails` | carry-over + a gap (D11) |
-| [P10-E11](P10-E11-invariant-wo-relatives.md) | 3 | Invariant *wo*; resumptives for oblique roles | `relativePronoun` collapses (D10) |
-| [P10-E12](P10-E12-possessor-dative.md) | 3 | *em Vatter sis Huus* / *s Huus vom Vatter* | new builder (D7) |
-| [P10-E13](P10-E13-remaining-clause-suite.md) | 3 | The sweep: complements, coordination, conditional, imperative, infinitive — a `gsw` line in every suite | carry-over, per suite |
-| [P10-E14](P10-E14-review.md) | 4 | The full review sheet; every *(verify)*, D2, D8, D11 ruled on | docs + pins |
-| [P10-E15](P10-E15-promotion.md) | 5 | `ready`: UI strings and definitions in `gsw`, exhaustive tests, interface language | the status flip |
+| [P10-E1](Z-done/P10-E1-language-groundwork.md) | 0 | Groundwork: one language list, no DB CHECK (seven sites), `preview`/`ready`, ready-only test gating; `gsw` registered | **Shipped.** A preview row never borrows another language's word |
+| [P10-E2](Z-done/P10-E2-row-identity.md) | 0 | *Swiss German (Zürich)*, the Dieth caveat, the arms of Zürich | **Shipped.** ZURICH seeded; the flag's tinctures corrected |
+| [P10-E3](P10-E3-orthography-and-lexical-sample.md) | before 1 | The [Dieth style sheet](dieth-style-sheet.md), the [lexical sample](lexical-sample.md), calibration | **Partial:** sheet and sample done (20% different words on the everyday sample, 6% corpus-wide); **calibration needs a native reviewer** |
+| [P10-E4](Z-done/P10-E4-corpus-column.md) | 1–3 | The `gsw` column, all 791 concepts | **Shipped**, in `concepts/gsw/`; every form *(verify)* |
+| [P10-E5](Z-done/P10-E5-engine-fork-noun-phrase.md) | 1 | The fork; three cases, clitic articles, no genitive | **Shipped** |
+| [P10-E6](Z-done/P10-E6-clause-core-present-and-noed.md) | 1–2 | Present, verb-second, the brace, *nöd*, *me*, the leak guard | **Shipped** |
+| [P10-E7](Z-done/P10-E7-perfect-for-past.md) | 2 | `past` = the perfect; `past == resultative` pinned | **Shipped** |
+| [P10-E8](Z-done/P10-E8-present-for-future.md) | 2 | `future` = the present | **Shipped** |
+| [P10-E9](Z-done/P10-E9-am-progressive.md) | 2 | *isch am Frässe* | **Shipped** |
+| [P10-E10](Z-done/P10-E10-modals-and-verb-clusters.md) | 2 | Modals, copula, degree; German's cluster order, the Swiss one `test.fails` | **Shipped**; the ticket's table corrected |
+| [P10-E11](Z-done/P10-E11-invariant-wo-relatives.md) | 3 | Invariant *wo*, resumptives | **Shipped**, resumptives included |
+| [P10-E12](Z-done/P10-E12-possessor-dative.md) | 3 | *em Vatter sis Huus* / *vo* + dative | **Shipped** |
+| [P10-E13](Z-done/P10-E13-remaining-clause-suite.md) | 3 | Conditional, commands, *z*-infinitive, coordination, contractions | **Shipped for its table**; the per-suite sweep moves to promotion (E15) |
+| [P10-E14](P10-E14-review.md) | 4 | The review: every *(verify)*, D2, D8, D11 ruled on | **Open.** The [review sheet](review-sheet.md) is generated (2,228 rows); the review needs a calibrated native reviewer |
+| [P10-E15](P10-E15-promotion.md) | 5 | `ready`: interface language, exhaustive tests | **Blocked on E14** |
 
 ## Out of scope
 

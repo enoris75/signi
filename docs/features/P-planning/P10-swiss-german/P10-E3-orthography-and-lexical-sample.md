@@ -7,7 +7,7 @@ consistently in Dieth (§4, D2).
 a 50-concept sample sheet, and a reviewer's calibration pass over it. The result either confirms
 the plan's cost estimate or reopens D1/D2.
 **Scope:** docs and one reviewer. Nothing in the corpus.
-**Status:** **planning**. Filed 2026-09-25 from P10 §1, §4, §6. Gates E4.
+**Status:** **partial, 2026-09-25** — D1 and D2 shipped, D3 waits on a reviewer; see [Progress](#progress). Filed 2026-09-25 from P10 §1, §4, §6. Gates E4.
 
 ## Why
 
@@ -50,3 +50,21 @@ second pass disagrees with the first on fewer than 5% of strings.
 ## Out of scope
 
 Any seeding (E4); the full review (E14).
+
+## Progress
+
+2026-09-25.
+
+- **D2, the style sheet:** [dieth-style-sheet.md](dieth-style-sheet.md). The four open rulings are
+  made, each marked **ruling** and listed for the calibration pass: *nd/ng* written as etymology;
+  clitic articles apart with no apostrophe (*d Chatz*); no linking *-n-* (the engine writes full
+  pronouns, *wo ich*); nouns capitalised. It also fixes the articles, the adjective endings, the
+  irregular core's cells and every function word the engine writes.
+- **D1, the sample:** [lexical-sample.md](lexical-sample.md). On the 50 everyday concepts **20% are a
+  different word** (10/50); over the whole corpus, classified at seeding, **6%** (48/783), because the
+  corpus is mostly grammar and interface vocabulary Swiss usage borrows. **Below a third and far below
+  half: the cost estimate stands, and P10 D1 is not reopened.**
+- **Not done — D3, the calibration.** It needs a native Zürich speaker to spell the 50 lemmas and 20
+  sentences twice, a week apart. The column was authored without one (E4 went ahead on the style sheet
+  alone, since the engine work could not be tested without data), so every string it holds is
+  *(verify)*, and the calibration now also decides how much of the column E14 rewrites.

@@ -7,7 +7,7 @@ language. No preterite cells (P10 D5), no genitive cells (D7).
 **Scope:** backend concept files, `/seed` and its siblings (`/specialize`, `/generalize`,
 `/localize-seed`), `signi.db`. Shipped in batches by role; the engine can start (E5) as soon as the
 first batch is in.
-**Status:** **planning**. Filed 2026-09-25 from P10 §1. Depends on E1 and on E3's style sheet.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P10 §1. Depends on E1 and on E3's style sheet.
 
 ## Why
 
@@ -68,3 +68,24 @@ The completeness report reads 784/784. `git diff --stat` on the concept files is
 ## Out of scope
 
 Rendering (E5 on); diminutives (P10 D12); verb doubling (*ich gang go poschte*).
+
+## Done
+
+Shipped 2026-09-25: **791 of 791 concepts** carry a `gsw` lexeme (the corpus grew by E2's five).
+
+- **Where:** `packages/backend/src/concepts/gsw/` — one file per role (nouns in three, verbs in two),
+  `Record<conceptId, forms>`, merged into `forms.gsw` by `concepts/index.ts`, which refuses an entry
+  naming no concept. Kept out of the role files so the column can be authored, counted and reviewed as
+  one body (E14's sheet reads it).
+- **D1–D3.** `de`'s keys minus every `*_past`, `genitive` and `weak`; one plural form for the three
+  persons (D3, stored); `participle` and `2sg_imperative` on every verb; `aux: 'be'` where Zürich selects
+  *sii* — German's list exactly, but for SIT_DOWN (*abhocke*, *isch abghockt*). *sii* and *haa* store
+  their synthetic conditionals (*wär, hett*) for E13 D1.
+- **D2, the open point, ruled as recommended:** the seed skill refuses a copied German form; a
+  seeder who cannot give a Zürich one leaves it out and names the concept in `GSW_PENDING` (empty).
+- Authored by the implementer against the [style sheet](../dieth-style-sheet.md), every form
+  *(verify)* — E3's calibration and E14's review have not happened.
+
+Tests (`concepts/index.test.ts`, "the Swiss German column"): every concept has a lexeme or is pending;
+no preterite, genitive or weak cell; every verb a participle; *sii* where German has *sein* (SIT_DOWN
+aside); one plural form; no ß, no apostrophe. The completeness report is that first test.

@@ -41,7 +41,7 @@ breaking them is caught late and confusingly.
    for its id. If it does not exist, seed it first (see [seed](../seed/SKILL.md)) — you cannot hang a
    concept under a parent that isn't there; the foreign key will reject it.
 2. **Seed the new concept** by following [seed](../seed/SKILL.md) in full: same file-by-role rule,
-   `id` in SCREAMING_SNAKE, `description`, `emoji`, and `forms` for **all seven** languages. A
+   `id` in SCREAMING_SNAKE, `description`, `emoji`, and `forms` for **all seven** ready languages, and the Swiss German entry in `concepts/gsw/` (see [seed](../seed/SKILL.md)). A
    specialized concept is a concept — it is not exempt from any of that.
 3. **Set `isA` on the new concept** to the base concept's id:
    ```ts

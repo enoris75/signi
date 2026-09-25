@@ -4,7 +4,7 @@
 verb-final in subordinates, separable particles at the brace, and negation with *nöd*.
 **Shape:** `de`'s clause machinery carries over; the negator is swapped.
 **Scope:** engine; `gsw` suite.
-**Status:** **planning**. Filed 2026-09-25 from P10 §2 and phases 1–2. Depends on E5.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P10 §2 and phases 1–2. Depends on E5.
 
 | plan | `gsw` *(verify)* |
 |---|---|
@@ -23,11 +23,11 @@ Phase 1's *done when*: "the basic clause and noun-phrase sentences render in the
 ## Today
 
 Verified at HEAD (7a392187), 2026-09-25. `de`'s negation is placed by
-[`nichtSlots`](../../../../packages/engine/src/languages/de/nichtSlots.ts),
-[`finiteNegation`](../../../../packages/engine/src/languages/de/finiteNegation.ts) and
-[`complementsWithNicht`](../../../../packages/engine/src/languages/de/complementsWithNicht.ts); the
-brace by [`particleGap`](../../../../packages/engine/src/languages/de/particleGap.ts) and
-[`verbFinalCluster`](../../../../packages/engine/src/languages/de/verbFinalCluster.ts).
+[`nichtSlots`](../../../../../packages/engine/src/languages/de/nichtSlots.ts),
+[`finiteNegation`](../../../../../packages/engine/src/languages/de/finiteNegation.ts) and
+[`complementsWithNicht`](../../../../../packages/engine/src/languages/de/complementsWithNicht.ts); the
+brace by [`particleGap`](../../../../../packages/engine/src/languages/de/particleGap.ts) and
+[`verbFinalCluster`](../../../../../packages/engine/src/languages/de/verbFinalCluster.ts).
 
 ## Design
 
@@ -54,3 +54,20 @@ The table above, a question, and each subordinate type.
 ## Out of scope
 
 Past, future, progressive, modals (E7–E10).
+
+## Done
+
+Shipped 2026-09-25. The whole table renders as written (with the corpus's *Chatz* as the cat's feminine,
+*frisst* its animal verb).
+
+- **D1:** *nöd* is `NEGATOR` in `nichtSlots.ts`, read by every site that wrote *nicht*; *kei* per E5.
+  The files keep their German names (`nichtSlots`, `complementsWithNicht`): renaming them all would
+  have made the fork unreadable against its parent, and the leak check below is the mechanical guard
+  the rename was for.
+- **D2:** *me* is the `gsw` GENERIC_PERSON lexeme; `personalPronoun`'s fallback says *me* too.
+- **D3:** the suite's leak guard renders thirteen plans across tense, aspect, negation, modals and
+  noun phrases and fails on any Standard-German-only word (*nicht, kein*, *ist, hat, wird, ein*, *dass,
+  auch, man, gerade, nur, noch, schon, bin, bist, haben, wurde, sein*). A corpus-wide sweep of all 778
+  UI strings and 577 definitions found only *durch*, now *dur*.
+- Also: *das* / *öb* complementizers, *für … z* purposes, *wo* for a past *when*, *wieso, wohii, wänn*,
+  *uf was* for German's *wo*-compounds, *mir wänd* + infinitive for the cohortative.

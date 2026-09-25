@@ -59,13 +59,16 @@ fails, fix that first; a plan built on an invalid literal makes a working featur
 
 ### 3. Fix the engine
 The engine is [packages/engine/src/](../../packages/engine/src/): one folder per language
-(`languages/{en,it,fr,es,pt,de,ja}/`, one file per function plus `<lang>.consts.ts` /
+(`languages/{en,it,fr,es,pt,de,ja,gsw}/`, one file per function plus `<lang>.consts.ts` /
 `<lang>.types.ts`), with shared plumbing in `translator.ts` (resolves a `PhrasePlan` into
 per-language `ConceptForms`) and `mood.ts`; the plan model is typed in
 [packages/shared/src/index.ts](../../packages/shared/src/index.ts). Edit the language folder named by
 the bug's **Language** row. Make the **Want** row true; change nothing else. Each function has a
 colocated unit test (`<fn>.test.ts`) — update it alongside the fix, and add a case for the new
-behaviour. A few defects (A7, A8,
+behaviour. **`gsw/` is a fork of `de/`** (P10-E5 D1), and a German fix does not reach it: after fixing
+a `de` function, grep `gsw/` for the same function name and decide whether Swiss German has the same
+defect — if it does, fix it there too and pin it in `test/languages/gsw.test.ts`; `gsw/` has no colocated
+tests of its own. A few defects (A7, A8,
 A21) need a corpus/schema change, not just an engine edit — the bug file says so; follow it.
 
 ### 4. Verify, then flip the marker

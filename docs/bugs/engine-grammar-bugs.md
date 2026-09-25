@@ -22,7 +22,8 @@ The individual defects now live one-per-file under the three subdirectories:
 
 ## Orientation
 
-- The engine is `packages/engine/src/`. One folder per language, `languages/{en,it,fr,es,pt,de,ja}/`,
+- The engine is `packages/engine/src/`. One folder per language, `languages/{en,it,fr,es,pt,de,ja,gsw}/`
+  (`gsw`, Swiss German, is a preview fork of `de`: a German fix does not reach it by itself, P10-E5),
   with one file per function, `<lang>.consts.ts` / `<lang>.types.ts`, the engine object
   (`englishEngine.ts`, …) behind an `index.ts`, and a unit test next to each function. Shared plumbing is `translator/` (resolves a `PhrasePlan` into per-language `ConceptForms`),
   `mood.ts`, and `functions/` — the helpers every engine reads the resolved shapes with, one file per

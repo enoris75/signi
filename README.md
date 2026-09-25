@@ -10,7 +10,14 @@ Traditional translators map *surface text* from one language to another, inherit
 
 ## Supported languages
 
-English · Italian · French · German · Spanish · Japanese · Portuguese
+English · Italian · French · German · Spanish · Japanese · Portuguese — and, **in preview**, Swiss German
+(Zürichdeutsch, in Dieth spelling).
+
+A language is `ready` (tested, selectable as the interface language) or `preview` (rendered as a row
+of the translations panel, labelled *preview*, and nowhere else) — `LANGUAGE_STATUS` in
+`@signi/shared`. Swiss German is preview until a native reviewer has signed off its review sheet
+([P10](docs/features/P-planning/P10-swiss-german/README.md)). It has no standard spelling to be checked
+against, and its row says so.
 
 Six are SVO (en, it, fr, de, es, pt) and one is SOV (ja, with は/を particles and masu-form verbs). The engines handle language-specific grammar such as gender agreement, article elision (French `l'`), German nominative/accusative/dative case, and Japanese particle placement.
 

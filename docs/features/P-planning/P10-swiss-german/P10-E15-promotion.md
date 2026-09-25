@@ -5,7 +5,7 @@ definition renders in `gsw`, and `gsw` joins exhaustive tests and snapshots.
 **Shape:** flip `LANGUAGE_STATUS.gsw` to `ready` once everything that gate checks is green.
 **Scope:** corpus (any concept a UI string needs), `uiStrings.ts` coverage, engine exhaustive tests,
 frontend snapshots, e2e. Phase 5.
-**Status:** **planning**. Filed 2026-09-25 from P10 phase 5. Depends on E14.
+**Status:** **blocked on E14**, 2026-09-25 — see [Progress](#progress). Filed 2026-09-25 from P10 phase 5. Depends on E14.
 
 ## Why
 
@@ -33,3 +33,20 @@ change the fact.
 1. Switch the UI to Swiss German: every label, tooltip, key hint and console help line is `gsw`.
 2. Engine, backend, phrase and frontend suites, snapshots and full e2e green.
 3. P10 moves to `docs/features/Z-Done/`.
+
+## Progress
+
+2026-09-25. Promotion is a one-line change (`LANGUAGE_STATUS.gsw = 'ready'`) that must not be made
+before E14 signs off: the status is what tells a reader the column has been reviewed. What D1 checks is
+already true or ready to be:
+
+- Every UI string (778) and every engine-composed definition (577) renders non-empty in `gsw` at boot
+  — the boot log reports no preview hole.
+- The type `ReadyLanguageCode` derives from `LANGUAGE_STATUS`, so flipping the status makes the
+  compiler ask for a `gsw` line in every exhaustive table (typed `Record<ReadyLanguageCode, string>`),
+  and `sayAll` starts returning it: that edit is E13 D3's per-suite sweep, and the acceptance review
+  P03 §0.5 describes. The conjugation snapshots re-baseline at the same time.
+- The selector, `/lang` and the stored UI language read `READY_LANGUAGES`, and pick `gsw` up with no
+  further change; the row keeps its caveat (D2).
+- Still to do then: the UI-string sweep of D1 (breadcrumb grep, `PART_BY_LABEL_KEY`, keymap and
+  console tables) with `gsw` as the interface language, and a full e2e run.

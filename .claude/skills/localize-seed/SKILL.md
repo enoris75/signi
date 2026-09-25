@@ -21,8 +21,9 @@ it is the index and explains the encoding. The essentials:
   ([compileSeedDefinitions](../../packages/backend/src/concepts/definitionText.ts)); a line that does
   not compile stops the boot, naming the concept and the line. The renderer
   [buildConceptDefinitions()](../../packages/backend/src/definitions.ts) renders every plan into all
-  7 languages **at backend startup and throws if any language is missing** — that boot check is the
-  pinning test. The API merges composed definitions over the stored literal in
+  languages **at backend startup and throws if a ready language is missing** — that boot check is the
+  pinning test. A preview language (Swiss German, `gsw`) is rendered too but only warned about: check
+  its line reads right, and if a word it needs has no `gsw` form, see [seed](../seed/SKILL.md). The API merges composed definitions over the stored literal in
   [index.ts](../../packages/backend/src/index.ts); the frontend already prefers them
   (`useConceptDefinition`, falling back to English).
 - Tasks are classified by id prefix / subdirectory:

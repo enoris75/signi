@@ -4,7 +4,7 @@
 am Frässe*.
 **Shape:** a real construction in `gsw`'s verb group, replacing `de`'s *gerade* adverb.
 **Scope:** engine; `gsw` suite.
-**Status:** **planning**. Filed 2026-09-25 from P10 D9 and phase 2. Depends on E6 and E7.
+**Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25 from P10 D9 and phase 2. Depends on E6 and E7.
 
 | plan | `de` today | `gsw` *(verify)* |
 |---|---|---|
@@ -23,9 +23,9 @@ the engine's aspect abstraction by addition.
 ## Today
 
 Verified at HEAD (7a392187), 2026-09-25. `de` renders the progressive as *gerade* over the plain
-finite verb ([`verbGroup.ts:12`](../../../../packages/engine/src/languages/de/verbGroup.ts#L12),
-[`modalVerbGroup.ts:36`](../../../../packages/engine/src/languages/de/modalVerbGroup.ts#L36),
-[`renderClause.ts:338`](../../../../packages/engine/src/languages/de/renderClause.ts#L338)).
+finite verb ([`verbGroup.ts:12`](../../../../../packages/engine/src/languages/de/verbGroup.ts#L12),
+[`modalVerbGroup.ts:36`](../../../../../packages/engine/src/languages/de/modalVerbGroup.ts#L36),
+[`renderClause.ts:338`](../../../../../packages/engine/src/languages/de/renderClause.ts#L338)).
 
 ## Design
 
@@ -55,3 +55,12 @@ The table above, plus a particle verb, a modal (*ich mues am Schaffe sii*, *veri
 ## Out of scope
 
 The progressive in other languages.
+
+## Done
+
+Shipped 2026-09-25, D1–D3 as recommended. `amInfinitive` capitalises the `base` and joins its particle
+(*am Frässe*, *am Zruggchoo*); the *am*-phrase is clause-final, so an object stands between *isch* and
+*am* (*isch d Muus am Frässe*) — a pronoun object too, pending E14 (D2). The past closes on *gsii*, a
+verb-final clause on the finite verb (*… das d Chatz am Frässe isch*), a modal keeps it (*ich mues am
+Schaffe sii*), the future is the present progressive. Rendered for every verb (D3); the stative ones
+E14 lists will fall back.
