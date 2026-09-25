@@ -21,7 +21,9 @@ question (E17, which retired A272), and the superlative's set and attributive co
 **E20–E23 shipped on 2026-09-24** (E20 and E22 plan-only in the engine, E20 also on the temporal
 box), and E24's coverage check for ranks 201–400 filed B75–B90 and E25–E43 (§5). **All nineteen of
 E25–E43 shipped on 2026-09-24**, in eight lanes landed together (§5), with A291 and A292 fixed on
-the way. The decisions below were
+the way. Eleven of the constructs E13–E38 shipped **plan-only**, so on 2026-09-25 **twelve task
+files, E44–E55**, were filed to build them on the canvas and in the console (§6); they are what keeps
+P09 open. The decisions below were
 **proposed**, each with a recommendation; every one is now resolved, and where the seeding
 overturned it the row says so.
 
@@ -239,8 +241,8 @@ which is the record.
 **The other five shipped on 2026-09-23**, each from **a task file of its own in this folder** —
 written the same morning, when the breakdown was made, and built in five parallel lanes. Each task
 file's `## Done` section carries the seven-language table the engine actually wrote and what landed
-differently from its plan. All five are **plan-only** — a plan can say them, the canvas cannot yet
-(see *Follow-ups*) — except E1's three relations, which the locative and route toolbars offer as
+differently from its plan. All five shipped **plan-only** — a plan could say them, the canvas could not — until
+[E12](Z-done/P09-E12-builder-controls.md) gave them controls on 2026-09-23; the exceptions were E1's three relations, which the locative and route toolbars offer as
 they offer the other seven, and E2's privative, which is a toggle on the instrument.
 
 | task | construct | what it turned out to be | shipped |
@@ -273,8 +275,8 @@ plan's own reading and the task files supersede them where they differ.
 ## 4. Follow-up tasks (E12–E24)
 
 What §3's lanes and this plan's *Follow-ups* left, filed on 2026-09-23 as **a task file each**,
-numbered on from E11 so no id means two things. All are **planning, unscheduled**; each states what
-is built at HEAD and recommends an answer to every decision it raises.
+numbered on from E11 so no id means two things. Each stated what was built at HEAD and recommended
+an answer to every decision it raised; all have since shipped.
 
 | task | what | from |
 |---|---|---|
@@ -320,7 +322,47 @@ need only seeding are [B75–B90](../../../localization/localization-tasks.md#pa
 | [P09-E40](Z-done/P09-E40-someone.md) | *Someone* — a human indefinite pronoun — **Shipped.** `isPronounElement` keys on the indefinite slot; SOMEONE seeded with German case forms |
 | [P09-E41](Z-done/P09-E41-pluralia-tantum.md) | Pluralia tantum — *the news*, *le notizie*, *die Nachrichten* — **Shipped.** `count: 'plural'` makes the phrase plural; NEWS seeded |
 | [P09-E42](Z-done/P09-E42-stop-and-continue-doing.md) | *Stop doing*, *continue doing* — aspectual verbs over a verb — **Shipped.** STOP_DOING and CONTINUE_DOING: the English/Spanish gerund, German *weiter-*, ja 続ける |
-| [P09-E43](Z-done/P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object — **Shipped**, plan-only control. the controller's dative and the infinitive's link under object control; ALLOW and TELL_ORDER seeded |
+| [P09-E43](Z-done/P09-E43-allow-to.md) | *Allow the cat to run* — an infinitive controlled by a dative object — **Shipped.** the controller's dative and the infinitive's link under object control; ALLOW and TELL_ORDER seeded. Plan-only when filed; P13 (002e75f0) gave object control its canvas switch and `/objctl` |
+
+## 6. Canvas controls for the plan-only constructs (E44–E55)
+
+Filed on 2026-09-25, one per construct, after a check at HEAD e811c91e found eleven constructs of
+§4 and §5 that a `PhrasePlan` can say and neither the canvas nor the console can build. Like
+[E12](Z-done/P09-E12-builder-controls.md), each control comes with its console command and the
+print → apply round trip. All are **planning, unscheduled**; each has a seven-language table the
+engine renders today, a *Today* verified at HEAD, and a recommendation for every decision. Two
+constructs of that list need nothing: E20's *between* is on the temporal toolbar, and E43's object
+control got its switch and `/objctl` in P13.
+
+| task | construct | control (recommended) | engine side |
+|---|---|---|---|
+| [P09-E44](P09-E44-role-complement-box.md) | "acts **as a friend**" | a `role` box, licensed by ACT and (one seed line) WORK_LABOUR; menu letter E → Q, which clears a latent clash with the object complement; `/role` | [E13](Z-done/P09-E13-role-complement.md) |
+| [P09-E45](P09-E45-opponent-complement-box.md) | "plays **against the dog**" | an `opponent` box, licensed by PLAY_GAME, WIN and LOSE_GAME; key V; `/vs` (`/against` is spatial) | [E22](Z-done/P09-E22-adversarial-against.md) |
+| [P09-E46](P09-E46-both-and-toggle.md) | ***both** the cat **and** the dog* | a third state of the conjunction chip on a two-member *and* group; `/bothand` | [E26](Z-done/P09-E26-both-and.md) |
+| [P09-E47](P09-E47-interjection-palette.md) | "**hey**, the cat runs" | a word box before the subject behind a seventh border toggle; seeds INTERJECTION for the palette heading and drops `PickerRole`; `/interj` | [E30](Z-done/P09-E30-interjections.md) |
+| [P09-E48](P09-E48-examples-such-as.md) | "cats **such as** the lion" | a hosted examples ring in the standard's shape, a SUCH AS / INCLUDING chip; `/suchas`, `/including` | [E33](Z-done/P09-E33-including-such-as.md) |
+| [P09-E49](P09-E49-approximator-control.md) | "**about** five", "**almost** all" | a checkbox under the determiner menu's Quantity heading, the value derived; seeds APPROXIMATE; `/approx` | [E38](Z-done/P09-E38-approximators.md) |
+| [P09-E50](P09-E50-attributive-standard.md) | "a bigger cat **than the dog**" | the standard control on the noun's ring, one standard per noun; `/than` on any noun | [E18](Z-done/P09-E18-attributive-comparison.md) |
+| [P09-E51](P09-E51-superlative-set.md) | "the biggest **of** the cats" | the standard's ring lit on most / least, labelled by degree (seeds COMPARISON_SET); `/outof` | [E19](Z-done/P09-E19-superlative-partitive.md) |
+| [P09-E52](P09-E52-possessor-question-control.md) | "**whose** food does the cat eat?" | the asked-slot mark on the owner's hosted ring; `/wh poss` | [E14](Z-done/P09-E14-possessor-question.md) |
+| [P09-E53](P09-E53-marked-relation-question-control.md) | "under **what** …?", *when*, *where from* | the asked-slot mark on seven more boxes, the relation toolbar on an empty asked box; `/wh loc under` | [E15](Z-done/P09-E15-question-over-a-marked-relation.md) |
+| [P09-E54](P09-E54-passive-question-control.md) | "what is eaten by the cat?" | `canAsk`'s passive refusal lifted, the agent askable; a served `prepositionalObject` fact gates the 16 verbs the engine refuses | [E16](Z-done/P09-E16-passive-question.md) |
+| [P09-E55](P09-E55-indirect-question-control.md) | "asks **whether** / **what** …" | a question target on a content link where the verb's served `clauseForce` licenses it; ASK's `clauseObject`; a *Whether* row | [E17](Z-done/P09-E17-indirect-question.md) |
+
+**Order.** E51 before E50 (same lines of `standardRing.ts` and the printer); E53, E54, E52, E55 in
+that order (E53 D6). E44 and E45 share one mechanism and may land in one lane. E48 and E50 both add
+to a noun's relations fan and both meet the hosted ring's conjunct limit — measure the fan once and
+file that follow-up once. Re-check key letters across lanes before landing: E44 takes Q in the
+complement menu, E47 E on the period, E48 X / Shift+X, E50 H on the noun box, E52 Q on the owner's box,
+E55 E in the link menu.
+
+**What the check met on the way**, each noted in its task file, none filed yet: fr / es / pt write a
+possessor after an attributive standard so it reads as the standard's ("plus grand que le chien de
+la femme", E50); an attributive superlative's set is dropped by the engine ("the biggest cat of the
+three", E51 — needs an engine ticket); Japanese WIN with an object and an opponent doubles に (E45);
+an animate route question (es "¿por quién corre el gato?", ja 猫は誰を走りますか, E53); a possessor
+question over OBJECT prints an empty noun (E52); the canvas pronoun picker leaves out the comitative
+the console accepts (E45).
 
 ## Verification
 

@@ -7,7 +7,8 @@
 lexical object case (C35) and `infinitive_link`, read together.
 **Scope:** all 7 languages.
 **Status:** **shipped, 2026-09-24** — engine and seed, all seven languages; plan-only for the
-controller (the builder never sets `control: 'object'`); see [Done](#done). Filed 2026-09-24 from
+controller when filed (the builder never set `control: 'object'`) until P13 (002e75f0) gave it a
+Subject/Object switch on the infinitive period and `/objctl`; see [Done](#done). Filed 2026-09-24 from
 [P09-E24](P09-E24-ranks-201-400.md)'s §3.
 **Words:** *allow* (rank 346, with a person and an infinitive; ALLOW with a thing is seeded by
 [B85](../../../../localization/done/B85-pay-provide-spend-win-lose-thank-allow.md)). The same
