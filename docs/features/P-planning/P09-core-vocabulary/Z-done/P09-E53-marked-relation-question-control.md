@@ -1,6 +1,6 @@
 # P09-E53. The question over a marked relation — the asked-slot mark on every adposition-bearing box
 
-**Feature:** the canvas and console control for [P09-E15](Z-done/P09-E15-question-over-a-marked-relation.md)'s
+**Feature:** the canvas and console control for [P09-E15](P09-E15-question-over-a-marked-relation.md)'s
 gap: the question mark E12 put on five rings, extended to the boxes that keep a relation — "**under
 what** does the cat eat?", "**thanks to whom**?", "**where** does the cat come **from**?", "**when**?",
 "**with whom**?", "**to whom**?".
@@ -10,7 +10,7 @@ animacy changes the word, and `/wh` values for the new slots.
 **Scope:** frontend (`@signi/phrase` model, canvas, keymap) and the console. All 7 languages render
 already; no new UI string.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
-side is [P09-E15](Z-done/P09-E15-question-over-a-marked-relation.md). First of four question controls:
+side is [P09-E15](P09-E15-question-over-a-marked-relation.md). First of four question controls:
 **E53 → [E54](P09-E54-passive-question-control.md) → [E52](P09-E52-possessor-question-control.md) →
 [E55](P09-E55-indirect-question-control.md)** (see D6).
 
@@ -26,6 +26,48 @@ Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the 
 | pt | debaixo de que o gato come? | graças a quem o gato corre? | de onde o gato vem? | quando o gato come? | com quem o gato corre? | a quem o homem dá o livro? |
 | ja | 猫は何の下で食べますか？ | 猫は誰のおかげで走りますか？ | 猫はどこから来ますか？ | 猫はいつ食べますか？ | 猫は誰と走りますか？ | 男は誰に本をあげますか？ |
 
+## Done
+
+Shipped 2026-09-25. `QuestionRole` / `QUESTION_ROLES` gain terminus, comitative, topic, direction,
+source, route and temporal; `canAsk` licenses a complement by `offeredComplements` and mirrors E15's
+refusals (a time only *at* / *until*, a denied cause never); `hasQuestionAnimacy` says which gaps have
+*who* / *what*, and `questionAnimateOf` reads the asked complement's held word. The plan's
+`questionSpecifiers` come from `complementSpecifiers(sel, type)`, factored out of `buildComplements`,
+so an empty asked box carries its relation. `hasRelation` draws the relation toolbar (PhraseBuilder
+seats, VerbPhraseBuilder buttons) and arms `S` on a box that holds a word or is asked. The console's
+`/wh` takes the seven slot names and a relation value (max 3), printed only when the asked box is
+empty. Rendered through the real selection → plan → engine path, each from an **empty** asked box:
+
+| lang | under what does the cat eat? | thanks to whom does the cat run? | where does the cat come from? | until when does the cat eat? | with whom does the cat run? | to whom does the man give the book? |
+|---|---|---|---|---|---|---|
+| en | what does the cat eat under? | who does the cat run thanks to? | where does the cat come from? | until when does the cat eat? | who does the cat run with? | who does the man give the book to? |
+| it | sotto che cosa mangia il gatto? | grazie a chi corre il gatto? | da dove viene il gatto? | fino a quando mangia il gatto? | con chi corre il gatto? | a chi dà il libro l'uomo? |
+| fr | sous quoi est-ce que le chat mange ? | grâce à qui est-ce que le chat court ? | d'où est-ce que le chat vient ? | jusqu'à quand est-ce que le chat mange ? | avec qui est-ce que le chat court ? | à qui est-ce que l'homme donne le livre ? |
+| de | worunter frisst der Kater? | dank wem läuft der Kater? | woher kommt der Kater? | bis wann frisst der Kater? | mit wem läuft der Kater? | wem gibt der Mann das Buch? |
+| es | ¿debajo de qué come el gato? | ¿gracias a quién corre el gato? | ¿de dónde viene el gato? | ¿hasta cuándo come el gato? | ¿con quién corre el gato? | ¿a quién da el hombre el libro? |
+| pt | debaixo de que o gato come? | graças a quem o gato corre? | de onde o gato vem? | até quando o gato come? | com quem o gato corre? | a quem o homem dá o livro? |
+| ja | 猫は何の下で食べますか？ | 猫は誰のおかげで走りますか？ | 猫はどこから来ますか？ | 猫はいつまで食べますか？ | 猫は誰と走りますか？ | 男は誰に本をあげますか？ |
+
+What landed differently from the plan:
+
+1. **A `/wh` relation must be one the asked box has.** D5 says apply does not check the relation
+   against the slot; it still cannot write a path onto a companion, so `/wh with under` is refused
+   with `valueNotTaken`, listing the slot's relations (none for the companion). Whether the engine
+   asks it (`/wh time ago`) is left to the plan builder, as D5 rules.
+2. **The relation values are the bracket commands' names** (`under`, `goal`, `until`, `span`,
+   `lasting`, `thanks`, …); a value is stored as `kind:value`. The path and stance lists are hoisted
+   out of `COMMANDS` (`PATH_RELATION_NAMES`, `SENTIMENT_NAMES`) so the two spellings cannot drift.
+3. **`normalizeWorkspace` drops a box's relation when the box is empty and not asked** — it renders
+   nothing, and the printer has nowhere to say it, which the round-trip walk (which now sets a
+   relation on the asked box) reaches as soon as the mark is taken back.
+4. **The `/wh` help example** is now `/wh loc under /subj ( cat ) /verb ( eat )`.
+5. **The asked box's toolbar on the canvas** needed `VerbPhraseBuilder`'s five toolbar conditions as
+   well as the seats in `PhraseBuilder`; both read `hasRelation`. No ring grew: the chip joins the mark
+   at `QUESTION_HOUR` (measured on an asked *cat goes to the house* direction, `question.spec.ts`).
+6. **Tests changed**: `askQuestion.test.ts`'s "leaves out a mark the engine would refuse" now refuses a
+   time *ago* instead of a place *under* (which is asked now); `questionGates.test.ts`'s locative /
+   cause gate expectations follow D2.
+
 ## Why
 
 E15 made every adposition-bearing gap askable, and the canvas still offers E6's five. The boxes are
@@ -37,39 +79,39 @@ the gate, and the three places that assume a gap has no relation of its own.
 
 Verified at HEAD, 2026-09-25.
 
-- **Five slots.** [`QuestionRole` / `QUESTION_ROLES`](../../../../packages/phrase/src/model/interfaces.ts#L208)
+- **Five slots.** [`QuestionRole` / `QUESTION_ROLES`](../../../../../packages/phrase/src/model/interfaces.ts#L208)
   are subject, directObject, locative, manner and cause. The ring mark is offered on a box only when
-  its type is in that list ([`rawSatellites.tsx:806`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L806)).
-- **E6's gate, not E15's.** [`canAsk`](../../../../packages/phrase/src/model/functions/questionGates.ts#L38)
+  its type is in that list ([`rawSatellites.tsx:806`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L806)).
+- **E6's gate, not E15's.** [`canAsk`](../../../../../packages/phrase/src/model/functions/questionGates.ts#L38)
   admits a locative only in `in` (L47–48) and a cause only neutral and not denied (L51–56), and reads
   the licence off `verb.complements`, so the adjuncts — temporal, purpose, comitative, offered on
-  every verb by [`offeredComplements`](../../../../packages/phrase/src/model/slots.ts#L42) — would
+  every verb by [`offeredComplements`](../../../../../packages/phrase/src/model/slots.ts#L42) — would
   never pass.
 - **The engine's refusals** that the gate must mirror, in
-  [`resolveQuestion`](../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L43):
+  [`resolveQuestion`](../../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L43):
   the predicative, the object predicative and the role (L43–45), the purpose (L46), a temporal in any
   relation but `at` / `until` (L47–49, so E20's `between` and E35's duration too), and an instrument
   at the `process` / `concept` level (L52–54). All probed: each throws.
-- **A gap's relation is read off its word.** [`askQuestion`](../../../../packages/phrase/src/model/selectionToPlan/functions/askQuestion.ts#L30)
+- **A gap's relation is read off its word.** [`askQuestion`](../../../../../packages/phrase/src/model/selectionToPlan/functions/askQuestion.ts#L30)
   copies `questionSpecifiers` from the built complement, and
-  [`buildComplements`](../../../../packages/phrase/src/model/selectionToPlan/functions/buildComplements.ts#L13)
+  [`buildComplements`](../../../../../packages/phrase/src/model/selectionToPlan/functions/buildComplements.ts#L13)
   skips a box with no word. The relation toolbars are drawn only on a box that holds one
-  ([`PhraseBuilder.tsx:695`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L695)),
-  and `S` arms one only then ([`keymap.ts:642`](../../../../packages/frontend/src/keyboard/keymap.ts#L642)).
-  An asked box is shown empty ([`rawSatellites.tsx:642`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L642)),
+  ([`PhraseBuilder.tsx:695`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx#L695)),
+  and `S` arms one only then ([`keymap.ts:642`](../../../../../packages/frontend/src/keyboard/keymap.ts#L642)).
+  An asked box is shown empty ([`rawSatellites.tsx:642`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L642)),
   so "under what" is reachable today only by leaving a word in the box.
 - **Who / what** is a subject and object matter:
-  [`questionAnimateOf`](../../../../packages/phrase/src/model/functions/questionGates.ts#L22) returns
+  [`questionAnimateOf`](../../../../../packages/phrase/src/model/functions/questionGates.ts#L22) returns
   false for any other role, and the chip is built for those two only
-  ([`rawSatellites.tsx:100`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L100)).
+  ([`rawSatellites.tsx:100`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L100)).
   E15 reads `questionAnimate` on complement gaps.
-- **The console.** `/wh` takes [`QUESTION_SLOT_VALUES`](../../../../packages/phrase/src/language/commands.ts#L319)
-  (five) plus who / what, max 2 ([L841](../../../../packages/phrase/src/language/commands.ts#L841)); the
-  printer writes it period-level ([`print.ts:225`](../../../../packages/phrase/src/language/print.ts#L225)).
+- **The console.** `/wh` takes [`QUESTION_SLOT_VALUES`](../../../../../packages/phrase/src/language/commands.ts#L319)
+  (five) plus who / what, max 2 ([L841](../../../../../packages/phrase/src/language/commands.ts#L841)); the
+  printer writes it period-level ([`print.ts:225`](../../../../../packages/phrase/src/language/print.ts#L225)).
   A box's relation is a setting inside its bracket (`/loc ( house /under )`), printed only when the
   box holds a word.
 - **The instrument** is a period of its own, reached by a link
-  ([`LINKED_COMPLEMENT_TYPES`](../../../../packages/phrase/src/model/slots.ts#L20)), and P12 is
+  ([`LINKED_COMPLEMENT_TYPES`](../../../../../packages/phrase/src/model/slots.ts#L20)), and P12 is
   redrawing where it sits.
 
 ## Design

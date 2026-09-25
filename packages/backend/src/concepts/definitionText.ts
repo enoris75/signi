@@ -25,7 +25,22 @@ export type DefinedConceptSeed = Omit<ConceptSeed, 'definition'> & { definition?
  * number, whether a noun has a feminine. `listConcepts` serves the same from the database, and a test
  * holds the two to each other.
  */
+/**
+ * The force a verb's that-clause may have (P09-E55, `Concept.clauseForce`), read off its lexemes'
+ * `content_clause_force`. The canvas builds one plan for all seven languages, so a verb whose
+ * languages disagree (one takes a question, another only a statement) would let a control reach one
+ * language's refusal: that is a seed error, thrown here.
+ */
+export function clauseForceOf(seed: Pick<ConceptSeed, 'id' | 'role' | 'forms'>): Concept['clauseForce'] {
+  if (seed.role !== 'verb') return undefined;
+  const forces = new Set(Object.values(seed.forms).map((f) => (f as Record<string, string>)['content_clause_force']));
+  if (forces.size > 1) throw new Error(`${seed.id}'s content_clause_force differs between its languages (P09-E55)`);
+  const [force] = forces;
+  return force === 'interrogative' || force === 'either' ? force : undefined;
+}
+
 export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
+  const clauseForce = clauseForceOf(seed);
   const en = seed.forms['en'] ?? {};
   const pronoun = seed.role === 'pronoun';
   return {
@@ -36,6 +51,8 @@ export function seedConcept(seed: Omit<ConceptSeed, 'definition'>): Concept {
     ...(seed.transitivity ? { transitivity: seed.transitivity as Transitivity } : {}),
     ...(seed.complements ? { complements: seed.complements as ComplementType[] } : {}),
     ...(seed.clauseObject ? { clauseObject: seed.clauseObject as ClauseObject } : {}),
+    ...(clauseForce ? { clauseForce } : {}),
+    ...(seed.role === 'verb' && Object.values(seed.forms).some((f) => 'object_prep' in f) ? { prepositionalObject: true } : {}),
     ...(seed.modal ? { modal: true } : {}),
     ...(seed.slot ? { slot: seed.slot as ConceptSlot } : {}),
     ...(pronoun ? { person: (en['person'] ?? '3') as '1' | '2' | '3', number: (en['number'] ?? 'singular') as 'singular' | 'plural' } : {}),

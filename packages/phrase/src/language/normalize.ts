@@ -30,7 +30,16 @@ const DEFAULTS: Record<string, string> = {
   imperativeRegister: "request",
 };
 
-const isConcept = (v: unknown): v is Concept =>
+// The relation settings, by the box whose relation each is.
+const RELATION_OF: Record<string, "locative" | "route" | "direction" | "temporal" | "cause"> = {
+  locativeSpecifier: "locative",
+  routeSpecifier: "route",
+  directionSpecifier: "direction",
+  temporalRelation: "temporal",
+  causeSentiment: "cause",
+};
+
+const isConcept =(v: unknown): v is Concept =>
   typeof v === "object" && v !== null && "id" in v && "role" in v;
 
 function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel): { [k: string]: Json } {
@@ -40,6 +49,10 @@ function normalizeSelection(sel: PhraseSelection, root: PhraseSelection = sel): 
     // A head's settings mean nothing without the head.
     const head = key.match(/^(.+?)(Number|Gender|Definiteness|Conjunction|Conjuncts)$/)?.[1];
     if (head && !sel[head as keyof PhraseSelection]) continue;
+    // …and a box's relation means nothing without its word, unless a question asks about the box
+    // (P09-E53): "under what" is the empty asked box's.
+    const related = RELATION_OF[key];
+    if (related && !sel[related] && sel.questionRole !== related) continue;
     if (key === "imperativePerson" && (!sel.imperative || value === "2sg")) continue;
     if (key === "imperativeRegister" && !sel.imperative) continue;
     if (DEFAULTS[key] === value) continue;

@@ -10,6 +10,7 @@ import {
   NounAddress,
   NounKey,
   PhraseSelection,
+  QuestionRole,
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
@@ -36,10 +37,13 @@ import {
   updateNounAt,
   toggleImperative,
   toggleInfinitive,
+  setInterrogative,
   toggleInterrogative,
+  toggleQuestionRole,
 } from "./phraseReducers.ts";
-import { moodLocked } from "./functions/moodLocked.ts";
 import { interjectionOffered } from "./functions/interjectionOffered.ts";
+import { keepsQuestion, marksLocked } from "./functions/moodLocked.ts";
+import { canAsk, hasRelation } from "./functions/questionGates.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
@@ -422,6 +426,12 @@ export function PhraseBuilder({
     setInterjectionOpen(true);
     focusSlot("interjection");
   };
+  // A gap's mark, taken off the clause of ASK, leaves a yes/no question rather than a statement ASK
+  // cannot report (P09-E55 D3).
+  const staysAsked = (next: PhraseSelection) =>
+    keepsQuestion(binding) && !next.interrogative ? setInterrogative(next, true) : next;
+  const handleToggleMark = (which: QuestionRole, possessed?: "subject" | "directObject") =>
+    onPhraseUpdate((prev) => staysAsked(toggleQuestionRole(prev, which, possessed)));
 
   // An owner's ring is shown while its owner is open, which the period's builder holds (see
   // `ownersOpen`), so that reads in place of the possessor satellite's own reveal.
@@ -438,9 +448,12 @@ export function PhraseBuilder({
     t,
     {
       // A question mark that would make the period a question respects the lock the border's toggle does.
-      moodLocked: moodLocked(binding),
+      // …except on the clause of a verb that reports a question (P09-E55), whose gap is its own.
+      moodLocked: marksLocked(binding),
       // A that-clause this period governs is its verb's object, so the object box gives way to it.
       clauseObject: binding?.subordinate.asSource?.kind === "content",
+      // An owner's ring carries the *whose* mark its period gates (P09-E52).
+      ...(ringHost?.question && { ownerQuestion: ringHost.question }),
     },
   );
 
@@ -493,12 +506,14 @@ export function PhraseBuilder({
       onCyclePossessorRole: (which: NounKey) => commands.handleCyclePossessorRole(which),
       // A hosted ring's phrase is a noun phrase, not a clause: it asks nothing and states no existence.
       ...(!ringHost && {
-        onToggleQuestion: commands.handleToggleQuestion,
+        onToggleQuestion: (which: QuestionRole) => handleToggleMark(which),
         onToggleQuestionAnimate: commands.handleToggleQuestionAnimate,
         onToggleExistential: commands.handleToggleExistential,
         onCycleGloss: () => commands.handleCycleGloss(1),
         onCycleGlossRelation: () => commands.handleCycleGlossRelation(1),
       }),
+      // …but an owner's ring carries its period's *whose* (P09-E52).
+      ...(ringHost?.question && { onToggleQuestion: () => ringHost.question!.toggle() }),
       t,
     });
   const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
@@ -716,12 +731,14 @@ export function PhraseBuilder({
       perimeterByNoun,
       linkTargetKeys: linkBinding?.relative.targetKeys,
       clearable,
+      // A relation's toolbar sits on a box that holds a word, or on one a wh-question asks about,
+      // which is usually empty: "**under what** does the cat eat?" (P09-E53 D3, see hasRelation).
       toolbars: {
-        ...(selection.route && { route: PATH_SPECIFIERS }),
-        ...(selection.locative && { locative: PATH_SPECIFIERS }),
-        ...(selection.direction && { direction: ["to", ...PATH_SPECIFIERS] }),
-        ...(selection.temporal && { temporal: TEMPORAL_RELATIONS }),
-        ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
+        ...(hasRelation(selection, "route") && { route: PATH_SPECIFIERS }),
+        ...(hasRelation(selection, "locative") && { locative: PATH_SPECIFIERS }),
+        ...(hasRelation(selection, "direction") && { direction: ["to", ...PATH_SPECIFIERS] }),
+        ...(hasRelation(selection, "temporal") && { temporal: TEMPORAL_RELATIONS }),
+        ...(hasRelation(selection, "cause") && { cause: CAUSE_SENTIMENTS }),
         ...(selection.objectPredicative && { objectPredicative: OBJECT_PREDICATIONS }),
       },
       centerOf,
@@ -821,6 +838,20 @@ export function PhraseBuilder({
     possessorToward: aims.toward,
     reportRing,
     onAddConjunct: commands.handleAddConjunct,
+    // *Whose* is asked of a top-level owner of the subject or the object (P09-E52 D1), gated as the
+    // slots' own marks are: where the engine asks it, and not where the mood is locked, unless the
+    // period is a question already.
+    ownerQuestion: (spot) => {
+      const possessed = spot.possessed;
+      if (ringHost || (possessed !== "subject" && possessed !== "directObject")) return undefined;
+      const locked = marksLocked(binding) && !selection.interrogative;
+      const governsClause = possessed === "directObject" && binding?.subordinate.asSource?.kind === "content";
+      return {
+        available: canAsk(selection, "possessor", possessed) && !locked && !governsClause,
+        asked: selection.questionRole === "possessor" && (selection.questionPossessed ?? "subject") === possessed,
+        toggle: () => handleToggleMark("possessor", possessed),
+      };
+    },
   });
 
   // Take an owner off the noun it owns. Relative clauses sourced from it, or from an owner it holds,
@@ -978,7 +1009,8 @@ export function PhraseBuilder({
       toggleGender: commands.handleToggleGender,
       toggleNegative: commands.handleToggleNegative,
       toggleCauseNegative: commands.handleToggleCauseNegative,
-      toggleQuestion: commands.handleToggleQuestion,
+      // On an owner's ring, Q toggles the period's *whose* (P09-E52 D5).
+      toggleQuestion: ringHost?.question ? () => ringHost.question!.toggle() : (which: QuestionRole) => handleToggleMark(which),
       toggleQuestionAnimate: commands.handleToggleQuestionAnimate,
       toggleExistential: commands.handleToggleExistential,
       cycleTense: commands.handleCycleTense,

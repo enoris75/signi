@@ -635,6 +635,7 @@ export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
 const NOT_A_QUESTION = {
   interrogative: false,
   questionRole: undefined,
+  questionPossessed: undefined,
   questionAnimate: undefined,
 } as const;
 
@@ -663,19 +664,36 @@ export function toggleInterrogative(prev: PhraseSelection): PhraseSelection {
 // not carry over to the new one. Unmarking takes the question with it, undoing the mark: the console
 // prints a wh-question as its gap alone (`/wh obj`, no `/ask`), so a yes/no left behind would be a
 // question the user never asked for.
-export function setQuestionRole(prev: PhraseSelection, role: QuestionRole | undefined): PhraseSelection {
-  if (prev.questionRole === role) return prev;
+//
+// The owner's mark (P09-E52) names the noun it is inside too, the subject's owner by default: marking
+// the object's owner moves the mark as marking another slot does.
+export function setQuestionRole(
+  prev: PhraseSelection,
+  role: QuestionRole | undefined,
+  possessed?: "subject" | "directObject",
+): PhraseSelection {
+  const owner = role === "possessor" ? possessed ?? "subject" : undefined;
+  if (prev.questionRole === role && prev.questionPossessed === owner) return prev;
   if (!role) return { ...prev, ...NOT_A_QUESTION };
-  return {
+  const next: PhraseSelection = {
     ...setInterrogative(prev, true),
     questionRole: role,
+    questionPossessed: owner,
     questionAnimate: undefined,
     existential: false,
   };
+  if (!owner) delete next.questionPossessed;
+  return next;
 }
 
-export function toggleQuestionRole(prev: PhraseSelection, role: QuestionRole): PhraseSelection {
-  return setQuestionRole(prev, prev.questionRole === role ? undefined : role);
+export function toggleQuestionRole(
+  prev: PhraseSelection,
+  role: QuestionRole,
+  possessed?: "subject" | "directObject",
+): PhraseSelection {
+  const asked =
+    prev.questionRole === role && (role !== "possessor" || (prev.questionPossessed ?? "subject") === (possessed ?? "subject"));
+  return setQuestionRole(prev, asked ? undefined : role, possessed);
 }
 
 // Whether the marked subject or object question asks *who* (true) or *what* (false). Kept as the
@@ -696,7 +714,7 @@ export function toggleQuestionAnimate(prev: PhraseSelection): PhraseSelection {
 export function setExistential(prev: PhraseSelection, value: boolean): PhraseSelection {
   if (Boolean(prev.existential) === value) return prev;
   if (!value) return { ...prev, existential: false };
-  return { ...prev, existential: true, questionRole: undefined, questionAnimate: undefined };
+  return { ...prev, existential: true, questionRole: undefined, questionPossessed: undefined, questionAnimate: undefined };
 }
 
 export function toggleExistential(prev: PhraseSelection): PhraseSelection {

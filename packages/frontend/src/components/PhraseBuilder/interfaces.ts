@@ -7,6 +7,7 @@ import {
   type ImperativePerson,
   type NounAddress,
   type NounKey,
+  type ClauseForce,
   type SubordinateKind,
 } from "@signi/phrase/model/interfaces.ts";
 
@@ -98,21 +99,32 @@ export interface CoordinativeBinding {
   onPick: () => void;
 }
 
+// A subordinate link as one of its periods stands in it: its kind, an adverbial one's conjunction,
+// and for a content link (P09-E55) the clause's force and the question its governing verb licenses —
+// what names the link *that* or *whether*, and what frees the clause's question to be set.
+export interface SubordinateStanding {
+  kind: SubordinateKind;
+  conjunction?: SubordinatingConjunction;
+  force?: ClauseForce;
+  licence?: "interrogative" | "either";
+}
+
 // Clause-level subordination (P09-E12 D9) for one container: the object clause, the adverbial
 // clause and the infinitive complement it governs, or the one it is. Mirrors CoordinativeBinding,
 // but a subordinate link has a kind, and an adverbial one a conjunction, which onStart takes.
 export interface SubordinateBinding {
   // The subordinate link this container governs (it is the main clause), if any.
-  asSource?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  asSource?: SubordinateStanding;
   // The subordinate link this container is the clause of, if any.
-  asTarget?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  asTarget?: SubordinateStanding;
   // May this container start one (see canStartSubordinate)?
   canStart: boolean;
   // During another container's subordinate pick, is this container a legal target?
   isPickTarget: boolean;
   // Start a subordinate link of `kind` from this container (awaits the clause's pick); clear the
   // one sourced here; choose this container as a pending pick's clause.
-  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
+  // `question` — *Whether* (P09-E55): the clause it lands on is made a yes/no question.
+  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction, question?: boolean) => void;
   onClear: () => void;
   onPick: () => void;
   // Whose this infinitive period is (P13): present only on an infinitive whose governing clause has

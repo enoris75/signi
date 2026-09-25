@@ -579,7 +579,8 @@ merge settled what no single lane could:
   infinitive, question, conditional, coordination, subordinate): 172px for five, 204px for six.
 - **Two accents:** the subordinate link keeps `error.main`, the question mood takes `text.primary`
   — every semantic theme colour was already taken.
-- **A question cannot be a subordinate clause** (`canBeSubordinate` refuses `interrogative` and
+- **A question cannot be a subordinate clause** — except a content clause its verb licenses, since
+  [P09-E55](P09-E55-indirect-question-control.md) — (`canBeSubordinate` refuses `interrogative` and
   `questionRole`; English would print "says that does the cat run"), and a subordinate target locks
   the question as it locks the command and the infinitive. A question may still *govern* one ("does
   the man say that the cat runs?"). A period governing a that-clause offers no object question mark.

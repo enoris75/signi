@@ -40,6 +40,8 @@ describe('SubordinateButton', () => {
     const menu = screen.getByRole('menu');
     expect(within(menu).getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
       'ThatT',
+      // P09-E55.
+      'WhetherE',
       'Infinitive phraseO',
       // P13.
       'PurposeP',
@@ -55,7 +57,7 @@ describe('SubordinateButton', () => {
       'AsL',
     ]);
     fireEvent.click(within(menu).getByText('After'));
-    expect(control.onStart).toHaveBeenCalledWith('adverbial', 'after');
+    expect(control.onStart).toHaveBeenCalledWith('adverbial', 'after', undefined);
   });
 
   it('answers each row to its letter while the menu is open', () => {
@@ -64,7 +66,11 @@ describe('SubordinateButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: START }));
     fireEvent.keyDown(window, { key: 't' });
-    expect(control.onStart).toHaveBeenCalledWith('content', undefined);
+    expect(control.onStart).toHaveBeenCalledWith('content', undefined, undefined);
+    // P09-E55: E is *whether*, a content link whose clause becomes a question.
+    fireEvent.click(screen.getByRole('button', { name: START }));
+    fireEvent.keyDown(window, { key: 'e' });
+    expect(control.onStart).toHaveBeenLastCalledWith('content', undefined, true);
   });
 
   it('clears the clause it governs', () => {
@@ -102,5 +108,16 @@ describe('subordinateOptions', () => {
     expect(kinds({}, true, undefined, 'subject')).toEqual(['content', ...ADVERBIAL]);
     // "as one expects": said alone, as the adverb it glosses — no purpose, which is an infinitive's.
     expect(kinds(undefined, false, undefined, 'adverb')).toEqual(ADVERBIAL.filter((k) => k !== 'purpose'));
+  });
+
+  // P09-E55: *whether* where the verb's clause may be a question, *that* where it may be a statement.
+  it('offers *whether* by the force the verb reports', () => {
+    const rows = (verb: Parameters<typeof subordinateOptions>[0], reading?: Parameters<typeof subordinateOptions>[3]) =>
+      subordinateOptions(verb, false, undefined, reading).map((o) => o.conjunction ?? (o.question ? 'whether' : o.link));
+    expect(rows({ clauseObject: 'content', clauseForce: 'interrogative' })).toEqual(['whether', ...ADVERBIAL]);
+    expect(rows({ clauseObject: 'content', clauseForce: 'either' })).toEqual(['content', 'whether', ...ADVERBIAL]);
+    expect(rows({ clauseObject: 'content' })).toEqual(['content', ...ADVERBIAL]);
+    // A subject clause is a statement: "it is right that one acts".
+    expect(rows({ clauseForce: 'either' }, 'subject')).toEqual(['content', ...ADVERBIAL]);
   });
 });

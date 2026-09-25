@@ -39,6 +39,10 @@ export interface RingHost {
   // A standard whose degree no longer takes one (positive, most, least) is drawn faded: the
   // translator drops it, and the word waits for the degree to come back.
   dimmed?: boolean;
+  // An owner's *whose* (P09-E52 D1): the period asks it, so the period gates it — whether its mark
+  // is offered on this ring, whether the period asks it now, and the toggle. Only a top-level owner
+  // of the subject or the object has one.
+  question?: { available: boolean; asked: boolean; toggle: () => void };
   // Report the ring as drawn, and null once it is gone.
   onRing: (ring: HostedRing | null) => void;
   // A conjunct's group: its last ring carries the control that extends the group.

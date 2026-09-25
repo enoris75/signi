@@ -74,8 +74,13 @@ export const VERBS = [
   verb('PLAY_GAME', 'play', 'giocare', { transitivity: 'intransitive', ...complements('opponent', 'locative') }),
   verb('WIN', 'win', 'vincere', complements('opponent')),
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
-  verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
-  verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive' }),
+  verb('SAY', 'say', 'dire', { clauseObject: 'content', clauseForce: 'either' }),
+  // Its that-clause is a question, never a statement (P09-E55), as the API serves it.
+  verb('ASK', 'ask', 'chiedere', { transitivity: 'ditransitive', clauseObject: 'content', clauseForce: 'interrogative' }),
+  // Its that-clause is a statement only (P09-E55): no clauseForce.
+  verb('BELIEVE', 'believe', 'credere', { clauseObject: 'content' }),
+  // Its object takes a preposition in it, fr and pt ("ha bisogno del cane"), as the API serves (P09-E54).
+  verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive', prepositionalObject: true }),
   // The copula, the existential's verb (P09-E12 M7): "there is a cat in the house".
   verb('BE', 'be', 'essere', { transitivity: 'intransitive', ...complements('predicative', 'locative', 'cause') }),
   // Two verbs that read "cry" in English: only the id tells them apart.

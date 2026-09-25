@@ -75,6 +75,51 @@ describe('workspaceToPlans', () => {
     expect(plan.directObject).toBeUndefined();
   });
 
+  // P09-E55: the that-clause of a verb that reports a question carries its own, gap and all — the
+  // plans content-clause.test.ts pins in the engine.
+  describe('the indirect question', () => {
+    const ASK = { ...SAY, id: 'ASK', clauseForce: 'interrogative' as const };
+    const KNOW = { ...SAY, id: 'KNOW', clauseForce: 'either' as const };
+    const TELL = { ...SAY, id: 'TELL', clauseForce: 'either' as const };
+    const contentOf = (main: object, clause: object) =>
+      workspaceToPlans([period('main', main), period('that', clause)], [subordinate('s', 'content', 'main', 'that')])[0]!.plan;
+
+    it('the man asks whether the cat runs', () => {
+      expect(contentOf({ subject: BOY, verb: ASK }, { subject: CAT, verb: SLEEP, interrogative: true }).contentObject).toMatchObject({
+        interrogative: true,
+        subject: { concept: 'CAT' },
+      });
+    });
+    it('the man asks what the cat eats', () => {
+      const clause = contentOf({ subject: BOY, verb: ASK }, { subject: CAT, verb: EAT, directObject: DOG, interrogative: true, questionRole: 'directObject' }).contentObject;
+      expect(clause).toMatchObject({ interrogative: true, questionRole: 'directObject' });
+      expect(clause).not.toHaveProperty('directObject');
+    });
+    it('the man knows where the cat eats', () => {
+      expect(
+        contentOf({ subject: BOY, verb: KNOW }, { subject: CAT, verb: { ...EAT, complements: ['locative'] }, interrogative: true, questionRole: 'locative' }).contentObject,
+      ).toMatchObject({ questionRole: 'locative' });
+    });
+    it('the man tells the dog who eats', () => {
+      expect(
+        contentOf({ subject: BOY, verb: TELL }, { subject: DOG, verb: EAT, interrogative: true, questionRole: 'subject', questionAnimate: true }).contentObject,
+      ).toMatchObject({ subject: { concept: 'GENERIC_PERSON' }, questionRole: 'subject', questionAnimate: true });
+    });
+    it('who asks what the cat eats? — a gap on both periods', () => {
+      const plan = contentOf(
+        { subject: BOY, verb: ASK, interrogative: true, questionRole: 'subject', questionAnimate: true },
+        { subject: CAT, verb: EAT, interrogative: true, questionRole: 'directObject' },
+      );
+      expect(plan).toMatchObject({ questionRole: 'subject', subject: { concept: 'GENERIC_PERSON' }, contentObject: { questionRole: 'directObject' } });
+    });
+    it('withholds a statement under ASK, and states a question under a verb that reports none', () => {
+      expect(contentOf({ subject: BOY, verb: ASK }, { subject: CAT, verb: EAT })).not.toHaveProperty('contentObject');
+      const said = contentOf({ subject: BOY, verb: SAY }, { subject: CAT, verb: EAT, interrogative: true, questionRole: 'subject' }).contentObject;
+      expect(said).not.toHaveProperty('interrogative');
+      expect(said).not.toHaveProperty('questionRole');
+    });
+  });
+
   it('folds an adverbial clause in with its conjunction', () => {
     const periods = [period('main', { subject: BOY, verb: SLEEP }), period('when', { subject: CAT, verb: EAT })];
     const [{ plan }] = workspaceToPlans(periods, [subordinate('s', 'adverbial', 'main', 'when', 'because')]);

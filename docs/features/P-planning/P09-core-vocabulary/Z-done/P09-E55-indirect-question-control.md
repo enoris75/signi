@@ -1,6 +1,6 @@
 # P09-E55. The indirect question — a question inside a that-clause link
 
-**Feature:** the canvas and console control for [P09-E17](Z-done/P09-E17-indirect-question.md)'s
+**Feature:** the canvas and console control for [P09-E17](P09-E17-indirect-question.md)'s
 embedded question: a content-clause target that is itself a question, "the man asks **whether** the
 cat runs", "the man asks **what** the cat eats", "the man knows **where** the cat eats".
 **Shape:** no engine grammar. The content link E12d built, with the question it refuses today let
@@ -10,7 +10,7 @@ toggle and marks do the asking. A *Whether* row joins the subordinate menu, and 
 **Scope:** shared (a served fact, a subordinator), engine (one citation per language), seeds (ASK,
 reseed), `@signi/phrase` link rules and plan, canvas menu, console. One new UI string, in all 7.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
-side is [P09-E17](Z-done/P09-E17-indirect-question.md). Last of four question controls, after
+side is [P09-E17](P09-E17-indirect-question.md). Last of four question controls, after
 [E53](P09-E53-marked-relation-question-control.md), [E54](P09-E54-passive-question-control.md) and
 [E52](P09-E52-possessor-question-control.md) (see E53 D6): every gap they open becomes markable
 inside the clause too.
@@ -30,6 +30,48 @@ Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the 
 A question over the whole also renders: "who asks what the cat eats?", *wer fragt, was der Kater
 frisst?*, 誰が猫が何を食べるか尋ねますか？.
 
+## Done
+
+Shipped 2026-09-25. `Concept.clauseForce` is derived from `content_clause_force` (`clauseForceOf` in
+`seedConcept`, which throws on a verb whose languages disagree, and `CLAUSE_FORCE_SQL` in
+`listConcepts`; both in `FACTS`). `canBeSubordinate` admits a question on a content link whose
+governor has one (`governedForce`); `attachSubordinate` runs `askQuestion` on such a clause, withholds
+a statement under ASK and strips a stale question elsewhere. `moodLocked.ts` gains `marksLocked`,
+`questionLocked` and `keepsQuestion`. The menu's *Whether* (E) row, `subordinator.value.whether`
+and each engine's `renderSubordinator` citation; ASK's `clauseObject: 'content'` (reseeded). Rendered
+through the real selection → plan → engine path, from linked periods:
+
+| lang | the man asks whether the cat runs | the man asks what the cat eats | the man knows where the cat eats | the man tells the dog who eats | who asks what the cat eats? |
+|---|---|---|---|---|---|
+| en | the man asks whether the cat runs. | the man asks what the cat eats. | the man knows where the cat eats. | the man tells the dog who eats. | who asks what the cat eats? |
+| it | l'uomo chiede se il gatto corre. | l'uomo chiede che cosa mangia il gatto. | l'uomo sa dove mangia il gatto. | l'uomo racconta al cane chi mangia. | chi chiede che cosa mangia il gatto? |
+| fr | l'homme demande si le chat court. | l'homme demande ce que le chat mange. | l'homme sait où le chat mange. | l'homme raconte au chien qui mange. | qui demande ce que le chat mange ? |
+| de | der Mann fragt, ob der Kater läuft. | der Mann fragt, was der Kater frisst. | der Mann weiß, wo der Kater frisst. | der Mann erzählt dem Hund, wer isst. | wer fragt, was der Kater frisst? |
+| es | el hombre pregunta si el gato corre. | el hombre pregunta qué come el gato. | el hombre sabe dónde come el gato. | el hombre cuenta al perro quién come. | ¿quién pregunta qué come el gato? |
+| pt | o homem pergunta se o gato corre. | o homem pergunta o que o gato come. | o homem sabe onde o gato come. | o homem conta ao cão quem come. | quem pergunta o que o gato come? |
+| ja | 男は猫が走るかどうか尋ねます。 | 男は猫が何を食べるか尋ねます。 | 男は猫がどこで食べるか知っています。 | 男は誰が食べるか犬に伝えます。 | 誰が猫が何を食べるか尋ねますか？ |
+
+`subordinator.value.whether` cites *whether*, *se*, *si*, *ob*, *si*, *se*, 〜かどうか.
+
+What landed differently from the plan:
+
+1. **The *Whether* row is a content link with `question: true`** (on `SubordinateOption` and the
+   subordinate pick), not a link kind of its own; linking from it, or any content link from ASK, sets
+   the target's `interrogative`.
+2. **Unmarking a gap on ASK's clause leaves a yes/no question** (the canvas marks and `/del wh`), so
+   the period never becomes the statement ASK cannot report.
+3. **A question on the clause of a verb that reports none is stripped from the plan** rather than
+   refused: only a stale selection can hold one, since the link refuses it.
+4. **The console's `/statement` on ASK's clause and `/command` / `/inf` on any content clause still
+   answer `moodLocked`**; `/ask` and `/statement` are free on a KNOW / SAY / TELL clause.
+5. **The `clause` help example is now ASK's**, `/subj ( man ) /verb ( ask ) /clause { /wh obj /subj (
+   cat ) /verb ( eat ) }`; the console tests' vocabulary gains ASK and BELIEVE, and SAY its `either`.
+6. **Tests changed**: the golden "question on a subordinate clause" lock now links BELIEVE (SAY
+   reports a question now); `SubordinateButton.test.tsx`'s menu rows gain *Whether* and `onStart` its
+   third argument; `PhraseWorkspace.test.tsx`'s `useConnectors` call its `forceOf` argument.
+7. **The wh-question clause's badge** reads plainly *Subordinate clause*, with no bracketed word, and
+   its connector the same.
+
 ## Why
 
 ASK is seeded, and what it is for, reporting a question, is the one object the canvas cannot give
@@ -42,17 +84,17 @@ the rule stayed.
 
 Verified at HEAD, 2026-09-25.
 
-- **The link refuses a question target.** [`canBeSubordinate`](../../../../packages/phrase/src/model/linkRules.ts#L306)
+- **The link refuses a question target.** [`canBeSubordinate`](../../../../../packages/phrase/src/model/linkRules.ts#L306)
   returns false for any target with `interrogative` or `questionRole` (L323), whatever the link kind.
-  The console mirrors it with `clauseQuestion` ([`apply.ts:1349`](../../../../packages/phrase/src/language/apply.ts#L1349)).
+  The console mirrors it with `clauseQuestion` ([`apply.ts:1349`](../../../../../packages/phrase/src/language/apply.ts#L1349)).
 - **A subordinate target's moods are all locked**, the question with them
-  ([`moodLocked.ts`](../../../../packages/frontend/src/components/PhraseBuilder/functions/moodLocked.ts#L11)),
+  ([`moodLocked.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/moodLocked.ts#L11)),
   so its border toggle and ring marks are withdrawn. The console holds `/ask` and `/wh` to the same
-  lock ([`apply.ts:950`](../../../../packages/phrase/src/language/apply.ts#L950)).
-- **Only a root asks.** [`workspaceToPlans`](../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)
-  runs `askQuestion` on root periods alone. [`attachSubordinate`](../../../../packages/phrase/src/model/workspacePlan/functions/attachSubordinate.ts#L62)
+  lock ([`apply.ts:950`](../../../../../packages/phrase/src/language/apply.ts#L950)).
+- **Only a root asks.** [`workspaceToPlans`](../../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)
+  runs `askQuestion` on root periods alone. [`attachSubordinate`](../../../../../packages/phrase/src/model/workspacePlan/functions/attachSubordinate.ts#L62)
   folds a content target in as `selectionToPlan` built it. That would carry `interrogative`, but no
-  gap. [`ContentClause`](../../../../packages/shared/src/index.ts#L1427) already has the four
+  gap. [`ContentClause`](../../../../../packages/shared/src/index.ts#L1427) already has the four
   question fields plus `questionPossessed`.
 - **The licence lives in the lexemes.** `content_clause_force` is a per-language form: `interrogative`
   on all seven of ASK's, `either` on KNOW's, SAY's and TELL's (all seven agree, checked in
@@ -60,17 +102,17 @@ Verified at HEAD, 2026-09-25.
   engine refuses a mismatch: "THINK does not take an indirect question", "ASK takes an indirect
   question, not a statement" (both probed).
 - **ASK has no `clauseObject`** on purpose, so the menu cannot offer *That* for a declarative that
-  E17 refuses ([`ditransitive.ts:698`](../../../../packages/backend/src/concepts/verbs/ditransitive.ts#L698)).
+  E17 refuses ([`ditransitive.ts:698`](../../../../../packages/backend/src/concepts/verbs/ditransitive.ts#L698)).
   `clauseObject: 'content'` is on SAY, THINK, BELIEVE, KNOW and TELL.
-- **The menu** ([`SUBORDINATE_OPTIONS`](../../../../packages/phrase/src/model/interfaces.ts#L78)) has
-  *That* on T, gated by [`subordinateOptions`](../../../../packages/phrase/src/model/interfaces.ts#L128),
+- **The menu** ([`SUBORDINATE_OPTIONS`](../../../../../packages/phrase/src/model/interfaces.ts#L78)) has
+  *That* on T, gated by [`subordinateOptions`](../../../../../packages/phrase/src/model/interfaces.ts#L128),
   and letters T O P W H C A B U S G L taken. A content link is labelled *that* on its connector and
-  badge ([`subordinateLabelKey`](../../../../packages/phrase/src/model/interfaces.ts#L112)). The
-  word is a `subordinator` UiString ([`uiStrings.ts:2725`](../../../../packages/shared/src/uiStrings.ts#L2725)),
-  whose [`Subordinator`](../../../../packages/shared/src/index.ts#L1534) type is the conjunctions plus
+  badge ([`subordinateLabelKey`](../../../../../packages/phrase/src/model/interfaces.ts#L112)). The
+  word is a `subordinator` UiString ([`uiStrings.ts:2725`](../../../../../packages/shared/src/uiStrings.ts#L2725)),
+  whose [`Subordinator`](../../../../../packages/shared/src/index.ts#L1534) type is the conjunctions plus
   `'that'`.
 - **The console:** `/clause #n` checks the licence and the target
-  ([`apply.ts:1246`](../../../../packages/phrase/src/language/apply.ts#L1246)), and `/to` sets its
+  ([`apply.ts:1246`](../../../../../packages/phrase/src/language/apply.ts#L1246)), and `/to` sets its
   target's infinitive on linking (L1256).
 
 ## Design
@@ -79,8 +121,8 @@ Verified at HEAD, 2026-09-25.
 
 **Recommendation: `Concept.clauseForce?: 'interrogative' | 'either'`**, derived from the lexemes'
 `content_clause_force` where `gendered` is derived
-([`conceptList.ts:217`](../../../../packages/backend/src/conceptList.ts#L217),
-[`definitionText.ts:39`](../../../../packages/backend/src/concepts/definitionText.ts#L39)). Absent
+([`conceptList.ts:217`](../../../../../packages/backend/src/conceptList.ts#L217),
+[`definitionText.ts:39`](../../../../../packages/backend/src/concepts/definitionText.ts#L39)). Absent
 means declarative only. The seed check fails if a verb's seven lexemes disagree: the canvas builds
 one plan for all seven languages, so a split licence would let a control reach one language's
 refusal. The fact joins `FACTS` in `definitionText.test.ts`. A hand-seeded column would say the same

@@ -33,7 +33,7 @@ import {
 import * as R from '../../src/components/PhraseBuilder/phraseReducers.ts';
 import { approximatorFor } from '../../src/components/PhraseBuilder/functions/approximatorFor.ts';
 import * as L from '../../src/components/PhraseBuilder/linkRules.ts';
-import { canAsk, canBeExistential } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
+import { canAsk, canBeExistential, hasQuestionAnimacy } from '../../src/components/PhraseBuilder/functions/questionGates.ts';
 import { workspaceToPlans } from '../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, COORDINABLE_NOUN_KEYS, MODAL_SLOTS, modalAdverbFor, offeredComplements } from '../../src/components/PhraseBuilder/slots.ts';
 import { applyScript } from '../../src/console/language/apply.ts';
@@ -345,7 +345,20 @@ const OPS: Op[] = [
       const role = pick(rng, QUESTION_ROLES.filter((q) => canAsk(sel, q)));
       if (!role || (locked && !sel.interrogative)) return undefined;
       sel = R.toggleQuestionRole(sel, role);
-      if (sel.questionRole === role && (role === 'subject' || role === 'directObject') && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
+      // P09-E53: the asked box's relation, from its toolbar — any of them, the refused ones too (the
+      // plan builder gates those) — and the who / what chip where the question word has the two.
+      if (sel.questionRole === role && rng() < 0.6) {
+        if (role === 'locative' || role === 'route') sel = R.setSpecifier(sel, pick(rng, PATH_SPECIFIERS)!, role);
+        else if (role === 'direction') sel = R.setSpecifier(sel, pick(rng, [undefined, ...PATH_SPECIFIERS]), role);
+        else if (role === 'temporal') sel = R.setTemporalRelation(sel, pick(rng, TEMPORAL_RELATIONS)!);
+        else if (role === 'cause') sel = R.setSentiment(sel, pick(rng, CAUSE_SENTIMENTS)!);
+      }
+      if (sel.questionRole === role && hasQuestionAnimacy(sel, role) && rng() < 0.5) sel = R.toggleQuestionAnimate(sel);
+    } else if (r < 0.85) {
+      // P09-E52: whose, on the subject's or the object's owner where its ring offers the mark.
+      const possessed = pick(rng, (['subject', 'directObject'] as const).filter((p) => canAsk(sel, 'possessor', p)));
+      if (!possessed || (locked && !sel.interrogative)) return undefined;
+      sel = R.toggleQuestionRole(sel, 'possessor', possessed);
     } else {
       if (!canBeExistential(sel)) return undefined;
       sel = R.toggleExistential(sel);
@@ -397,10 +410,15 @@ const OPS: Op[] = [
     if (!L.canStartSubordinate(s.links, source, kind)) return undefined;
     if (!L.canBeSubordinate(s.containers, s.links, source.id, target.id, kind)) return undefined;
     const links = L.addSubordinate(s.links, source.id, target.id, kind, id(), pick(rng, SUBORDINATING_CONJUNCTIONS)!);
+    // P09-E55: a question target where the verb reports one — the pick's *Whether*, or any clause of
+    // ASK, is made a question.
+    const asked = kind === 'content' && (L.governedForce(source) === 'interrogative' || (L.governedForce(source) && rng() < 0.3));
     const containers =
       kind === 'infinitive' || kind === 'purpose'
         ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInfinitive(c.selection, true) } : c))
-        : s.containers;
+        : asked
+          ? s.containers.map((c) => (c.id === target.id ? { ...c, selection: R.setInterrogative(c.selection, true) } : c))
+          : s.containers;
     return { ...s, containers, links };
   },
   // An instrument's level, and — raised to an act — a verb for it.

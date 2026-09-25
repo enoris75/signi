@@ -30,8 +30,8 @@ import {
   type LanguageCode,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
-import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type QuestionRole } from "../../interfaces.ts";
-import { canAsk, canBeExistential, questionAnimateOf } from "../../functions/questionGates.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY, QUESTION_ROLES, type SlotQuestionRole } from "../../interfaces.ts";
+import { canAsk, canBeExistential, hasPatient, hasQuestionAnimacy, questionAnimateOf } from "../../functions/questionGates.ts";
 import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_LABEL_KEYS,
@@ -73,18 +73,24 @@ export function rawSatellites(
   // would make it a question has to respect as the border's toggle does. And whether the period
   // governs a that-clause (P09-E12 D9), which is its verb's object: the object box is then
   // withdrawn, as the clause and a direct object exclude each other.
-  { moodLocked = false, clauseObject = false }: { moodLocked?: boolean; clauseObject?: boolean } = {},
+  // And, on an owner's hosted ring, whether the period that hosts it may ask *whose* there and does
+  // (P09-E52, RingHost.question).
+  {
+    moodLocked = false,
+    clauseObject = false,
+    ownerQuestion,
+  }: { moodLocked?: boolean; clauseObject?: boolean; ownerQuestion?: { available: boolean; asked: boolean } } = {},
 ): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   // The wh-question's mark, on the dotted ring of each slot it can ask about (P09-E12 M6). It is
   // offered where the engine asks that gap (see canAsk), and — since marking a slot makes the period
   // a question — not where the mood is locked, unless the period is a question already.
   // A that-clause the period governs is its verb's object, so the object is no gap to ask about.
-  const askable = (role: QuestionRole) =>
+  const askable = (role: SlotQuestionRole) =>
     canAsk(selection, role) &&
     (!moodLocked || Boolean(selection.interrogative)) &&
     !(clauseObject && role === "directObject");
-  const question = (role: QuestionRole): RawSatellite => ({
+  const question = (role: SlotQuestionRole): RawSatellite => ({
     key: `${role}Question`,
     parent: role,
     label: t("mood.question"),
@@ -94,10 +100,11 @@ export function rawSatellites(
     hasValue: selection.questionRole === role,
     directToggle: true,
   });
-  // Its who / what chip, on a marked subject or object: what the question asks for, a person or a
-  // thing, defaulting to the held word's (see questionAnimateOf). The chip names the question it
-  // makes ("Who acts?"), so its label is its value.
-  const questionAnimacy = (role: "subject" | "directObject"): RawSatellite => {
+  // Its who / what chip, on a marked subject or object, and on a marked complement whose question
+  // word changes with the answer's animacy (P09-E53 D4, see hasQuestionAnimacy): what the question
+  // asks for, a person or a thing, defaulting to the held word's (see questionAnimateOf). The chip
+  // names the question it makes ("Who acts?"), so its label is its value.
+  const questionAnimacy = (role: SlotQuestionRole): RawSatellite => {
     const who = questionAnimateOf(selection, role);
     return {
       key: `${role}QuestionAnimate`,
@@ -105,7 +112,7 @@ export function rawSatellites(
       label: t(who ? "question.who" : "question.what"),
       labelKey: who ? "question.who" : "question.what",
       icon: who ? <PersonIcon sx={iconSx} /> : <CategoryIcon sx={iconSx} />,
-      available: askable(role) && selection.questionRole === role,
+      available: askable(role) && selection.questionRole === role && hasQuestionAnimacy(selection, role),
       hasValue: who,
       directToggle: true,
     };
@@ -259,7 +266,8 @@ export function rawSatellites(
       icon: <KeyIcon sx={iconSx} />,
       // A possessor (Saxon genitive) attaches only to a noun head; its own head noun
       // lives in the nested selection's `subject` slot.
-      available: subjectRole === "noun",
+      // An owner asked about (P09-E52 D2) is a gap, and what it would own goes with it: none is offered.
+      available: subjectRole === "noun" && !ownerQuestion?.asked,
       // Set by either a genitive possessor phrase or a pronominal reference to another noun.
       hasValue: Boolean(selection.subjectPossessor?.subject) || Boolean(selection.subjectPossessorRef),
     },
@@ -278,6 +286,21 @@ export function rawSatellites(
     },
     question("subject"),
     questionAnimacy("subject"),
+    // An owner's ring asks *whose* (P09-E52 D1): the mark on the owner's dotted ring, gated by the
+    // period that hosts it, since this phrase has no verb to ask with. No who / what: *whose* is
+    // always a person (D4).
+    ...(ownerQuestion
+      ? [{
+        key: "possessorQuestion",
+        parent: "subject" as const,
+        label: t("mood.question"),
+        labelKey: "mood.question" as const,
+        icon: <QuestionMarkIcon sx={iconSx} />,
+        available: ownerQuestion.available,
+        hasValue: ownerQuestion.asked,
+        directToggle: true,
+      }]
+      : []),
     // How the subject of a verbless period reads when it defines an adjective or an adverb (P13): each
     // click moves it on — a noun phrase, an adjective's dimension, a manner, a place, a direction, a
     // time. A period with a verb has no reading: its subject is the one who acts.
@@ -366,7 +389,8 @@ export function rawSatellites(
       // the aspect, the voice does not sit in the finite slot: an infinitive citation keeps it, and
       // the engine says the passive one ("to be loved"). Only a command forces the active, so only
       // the command withdraws the control (`setImperative` resets the voice to match).
-      available: !selection.imperative && passivizable && Boolean(selection.directObject),
+      // An asked object is the patient too, although it is usually empty (P09-E54 D2, hasPatient).
+      available: !selection.imperative && passivizable && hasPatient(selection),
       // Non-default (solid) once the voice is anything but the implicit active.
       hasValue: selection.verbVoice === "passive",
       alwaysSet: true,
@@ -802,8 +826,11 @@ export function rawSatellites(
             valueLabel: t(`polarity.value.${selection.causeNegative ? "negative" : "positive"}`),
           }]
           : []),
-        // The wh-question's mark on the three complements that have a question word (P09-E12 M6).
-        ...((QUESTION_ROLES as readonly string[]).includes(type) ? [question(type as QuestionRole)] : []),
+        // The wh-question's mark on every complement a question can ask about (P09-E12 M6, P09-E53),
+        // and its who / what chip where the question word has the two.
+        ...((QUESTION_ROLES as readonly string[]).includes(type)
+          ? [question(type as SlotQuestionRole), questionAnimacy(type as SlotQuestionRole)]
+          : []),
       ];
     }),
   ];

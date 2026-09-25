@@ -1,6 +1,6 @@
 # P09-E52. The possessor question — the asked-slot mark on an owner's ring
 
-**Feature:** the canvas and console control for [P09-E14](Z-done/P09-E14-possessor-question.md)'s
+**Feature:** the canvas and console control for [P09-E14](P09-E14-possessor-question.md)'s
 gap inside a noun phrase: "**whose** food does the cat eat?", "**whose** cat eats the food?". The
 possessed noun is spoken, and its owner is the question word.
 **Shape:** no engine grammar. A sixth kind of gap in the model (`'possessor'` plus which noun it is
@@ -9,7 +9,7 @@ and a `/wh poss` value.
 **Scope:** `@signi/phrase` model, the owner ring (`OwnerRings.tsx`, `ringHost.ts`), keymap, console.
 No new UI string.
 **Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the engine
-side is [P09-E14](Z-done/P09-E14-possessor-question.md). Third of four question controls, after
+side is [P09-E14](P09-E14-possessor-question.md). Third of four question controls, after
 [E53](P09-E53-marked-relation-question-control.md) and [E54](P09-E54-passive-question-control.md)
 (see E53 D6).
 
@@ -25,6 +25,43 @@ Engine output at HEAD, from hand-written plans (rendered 2026-09-25 against the 
 | pt | de quem o gato come a comida? | o gato de quem come a comida? | a comida de quem é comida pelo gato? |
 | ja | 猫は誰の食べ物を食べますか？ | 誰の猫が食べ物を食べますか？ | 誰の食べ物が猫に食べられますか？ |
 
+## Done
+
+Shipped 2026-09-25. `QuestionRole` gains `possessor` and `PhraseSelection.questionPossessed`;
+`setQuestionRole` / `toggleQuestionRole` take the possessed noun and clear it with the mark; `canAsk`
+checks D2 through `canAskOwner`; `askQuestion` keeps the noun, drops its `possessor` and
+`possessorRole`, and writes `questionPossessed` explicitly and no `questionAnimate`. `RingHost.question`
+(filled by `ringHosts`' `ownerQuestion`, which the period builder gates) puts a `possessorQuestion`
+satellite on the owner's dotted ring at `QUESTION_HOUR`; `Q` reaches it on the owner's box. The
+console's `/wh poss obj` (aliases `whose`, `possessor`) prints the possessed noun always. Rendered
+through the real selection → plan → engine path:
+
+| lang | whose food does the cat eat? (empty owner ring) | whose cat eats the food? (owner word kept) | whose food is eaten by the cat? (with E54) |
+|---|---|---|---|
+| en | whose food does the cat eat? | whose cat eats the food? | whose food is eaten by the cat? |
+| it | di chi mangia il cibo il gatto? | il gatto di chi mangia il cibo? | il cibo di chi è mangiato dal gatto? |
+| fr | de qui est-ce que le chat mange la nourriture ? | le chat de qui mange la nourriture ? | la nourriture de qui est mangée par le chat ? |
+| de | wessen Essen frisst der Kater? | wessen Kater frisst das Essen? | wessen Essen wird vom Kater gefressen? |
+| es | ¿de quién come el gato la comida? | ¿el gato de quién come la comida? | ¿la comida de quién es comida por el gato? |
+| pt | de quem o gato come a comida? | o gato de quem come a comida? | a comida de quem é comida pelo gato? |
+| ja | 猫は誰の食べ物を食べますか？ | 誰の猫が食べ物を食べますか？ | 誰の食べ物が猫に食べられますか？ |
+
+What landed differently from the plan:
+
+1. **`possessor` is no member of `QUESTION_ROLES`.** That list is the rings of the period's own boxes;
+   a `SlotQuestionRole` type (`QuestionRole` without the owner) names them, and the functions that
+   index the selection by the role (`hasRelation`, the rings' marks) take it.
+2. **`/wh poss obj` takes two slot values.** `sameKind` lets the owner's slot pair with `subj` / `obj`
+   only, so `/wh poss loc` and `/wh poss subj obj` are refused with `valueAlreadyGiven`.
+3. **An asked owner's ring is drawn although it is empty** (`possessionsFor`), so a `/wh poss obj`
+   typed with no `/poss` still shows its mark.
+4. **Keyboard**: an empty owner ring is its word picker, which holds the cursor, so `Q` there types a
+   letter; `Q` toggles the mark once the owner holds a word (the e2e drives both the mark on an empty
+   ring and `Q` on a named owner).
+5. **The canvas gate also withdraws the object's owner while the period governs a that-clause**, as
+   the object's own mark is.
+6. **No new help example**: `/wh` has one, now E53's `/wh loc under`.
+
 ## Why
 
 Every noun on the canvas can take an owner, drawn as a ring of its own. *Whose* is the question
@@ -35,11 +72,11 @@ E12a's marks are on period rings only, and hosted rings get none.
 
 Verified at HEAD, 2026-09-25.
 
-- **The model has no possessor gap.** [`QuestionRole`](../../../../packages/phrase/src/model/interfaces.ts#L208)
+- **The model has no possessor gap.** [`QuestionRole`](../../../../../packages/phrase/src/model/interfaces.ts#L208)
   is five period slots. The plan field is `questionRole: 'possessor'` plus
-  [`questionPossessed?: 'subject' | 'directObject'`](../../../../packages/shared/src/index.ts#L1666),
+  [`questionPossessed?: 'subject' | 'directObject'`](../../../../../packages/shared/src/index.ts#L1666),
   whose default is the subject.
-- **What the engine refuses**, in [`possessorQuestion`](../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L61)
+- **What the engine refuses**, in [`possessorQuestion`](../../../../../packages/engine/src/translator/functions/resolveQuestion.ts#L61)
   (each probed):
   - a possessed slot other than subject or object ("in whose house?" is E14's follow-up);
   - a coordination;
@@ -47,25 +84,25 @@ Verified at HEAD, 2026-09-25.
     the asked owner *is* its possessor;
   - `possessorRole` `whole` / `parts`;
   - a pronoun (in `resolvePhrase`);
-  - in the passive, a possessor inside the agent ([`resolvePhrase.ts:231`](../../../../packages/engine/src/translator/functions/resolvePhrase.ts#L231)).
+  - in the passive, a possessor inside the agent ([`resolvePhrase.ts:231`](../../../../../packages/engine/src/translator/functions/resolvePhrase.ts#L231)).
 
   `questionAnimate` is not read: *whose* is always a person.
-- **Owners are hosted rings.** [`OwnerRings`](../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx#L36)
+- **Owners are hosted rings.** [`OwnerRings`](../../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx#L36)
   paints each named owner with a `nounPhraseOnly` PhraseBuilder over the owner's slice (its head is
-  the slice's `subject`), with a [`RingHost`](../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L16)
+  the slice's `subject`), with a [`RingHost`](../../../../../packages/frontend/src/components/PhraseBuilder/ringHost.ts#L16)
   of kind `owner`. The slice has no verb, so `canAsk` could never pass inside it. That is why E12a
   found that "hosted rings get none of these controls".
-- **An owner is filled one of two ways** ([`ownerChain.ts`](../../../../packages/frontend/src/components/PhraseBuilder/ownerChain.ts#L48)):
+- **An owner is filled one of two ways** ([`ownerChain.ts`](../../../../../packages/frontend/src/components/PhraseBuilder/ownerChain.ts#L48)):
   a named owner is a ring, which is empty when first opened and is then its own word picker; a
   pointed-to owner ("his horse") is a dashed line with no ring
-  ([`possessorToggleAction`](../../../../packages/frontend/src/components/PhraseBuilder/functions/possessorToggleAction.ts#L13)).
+  ([`possessorToggleAction`](../../../../../packages/frontend/src/components/PhraseBuilder/functions/possessorToggleAction.ts#L13)).
   What the owner is to the noun (owner, whole, parts) is `possessorRoles`
-  ([`interfaces.ts:462`](../../../../packages/phrase/src/model/interfaces.ts#L462)), on its own chip.
+  ([`interfaces.ts:462`](../../../../../packages/phrase/src/model/interfaces.ts#L462)), on its own chip.
 - **Keys:** `Q` is `noun.question` on a noun box, and it looks for a `${nounKey}Question` satellite
-  ([`keymap.ts:480`](../../../../packages/frontend/src/keyboard/keymap.ts#L480)). `P` is the
-  possessor ([L514](../../../../packages/frontend/src/keyboard/keymap.ts#L514)).
+  ([`keymap.ts:480`](../../../../../packages/frontend/src/keyboard/keymap.ts#L480)). `P` is the
+  possessor ([L514](../../../../../packages/frontend/src/keyboard/keymap.ts#L514)).
 - **Console:** the owner is `/poss [ … ]` inside the possessed noun's bracket, and `/wh` takes a slot
-  value and who / what ([`commands.ts:841`](../../../../packages/phrase/src/language/commands.ts#L841)).
+  value and who / what ([`commands.ts:841`](../../../../../packages/phrase/src/language/commands.ts#L841)).
 
 ## Design
 

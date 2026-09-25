@@ -1,26 +1,54 @@
-import type { Concept } from "@signi/shared";
-import type { PhraseSelection, QuestionRole } from "../interfaces.ts";
+import { DEFAULT_TEMPORAL_RELATION, type Concept } from "@signi/shared";
+import { offeredComplements } from "../slots.ts";
+import type { PhraseSelection, QuestionRole, SlotQuestionRole } from "../interfaces.ts";
 
 /**
  * What the question and the existential controls may reach (P09-E12 M6, M7). Each gate mirrors a
  * refusal of the engine — `resolveQuestion` for a wh-question, `existentialPlan` / `withExistential`
  * for an existential — so a control is withdrawn exactly where the plan it would make is refused, and
  * the plan builder reads the same gate before it writes the field (`selectionToPlan`, `askQuestion`):
- * a mark the selection still holds after the period changed under it (a passive set, a verb swapped)
+ * a mark the selection still holds after the period changed under it (a command set, a verb swapped)
  * is kept for the user and left out of the plan, as a degree left on a noun is.
  */
 
-/** The word held in a subject or object gap, whose `human` the who / what chip defaults to. */
+/** The word held in the asked slot, whose `human` the who / what chip defaults to. */
 const heldWord = (sel: PhraseSelection, role: QuestionRole): Concept | undefined =>
-  role === "subject" ? sel.subject : role === "directObject" ? sel.directObject : undefined;
+  role === "possessor" ? undefined : sel[role];
+
+/**
+ * Whether the question over `role` has the two words *who* and *what* (P09-E53 D4): the subject and
+ * the object, and the complements whose question word changes with the answer's animacy — *con chi* /
+ * *con che cosa*, *zu wem* / *wohin*, *unter wem* / *worunter*, *dank wem* / *dank was*. Not the
+ * adverbial gaps (*when*, *how*, a plain *where*, a neutral *why*), not the negative cause (always
+ * *whose fault*), and not the route, whose animate question reads "for whom" (es) or takes an object
+ * (ja).
+ */
+export function hasQuestionAnimacy(sel: PhraseSelection, role: QuestionRole | undefined): boolean {
+  switch (role) {
+    case "subject":
+    case "directObject":
+    case "terminus":
+    case "comitative":
+    case "topic":
+    case "direction":
+    case "source":
+      return true;
+    case "locative":
+      return (sel.locativeSpecifier ?? "in") !== "in";
+    case "cause":
+      return sel.causeSentiment === "positive";
+    default:
+      return false;
+  }
+}
 
 /**
  * Whether the question over `role` asks *who* rather than *what*: the chip's own setting, else the
- * held word's `human` (a man is a who, a cat a what), else *what*. Only a subject or an object gap
- * has the two words.
+ * held word's `human` (a man is a who, a cat a what), else *what*. Only a gap with the two words has
+ * them (see hasQuestionAnimacy).
  */
 export function questionAnimateOf(sel: PhraseSelection, role: QuestionRole | undefined = sel.questionRole): boolean {
-  if (role !== "subject" && role !== "directObject") return false;
+  if (!role || !hasQuestionAnimacy(sel, role)) return false;
   return sel.questionAnimate ?? Boolean(heldWord(sel, role)?.human);
 }
 
@@ -29,33 +57,78 @@ export const asksQuestion = (sel: PhraseSelection): boolean =>
   Boolean(sel.interrogative && sel.verb && !sel.imperative && !sel.infinitive);
 
 /**
- * Whether `role` may be the gap of this period's wh-question. Not in the passive (the passive
- * re-maps the slots the gap names), not on an existential, not under a command or a citation; the
- * slot must be the verb's to have — an object for a verb that takes one, a complement it licenses —
- * and a locative only in its plain relation (*where* is *in*), a cause only neutral and not denied
- * (*why* is *because of*).
+ * Whether `role` may be the gap of this period's wh-question. Not on an existential, not under a
+ * command or a citation; the slot must be the verb's to have — an object for a verb that takes one,
+ * a complement it is offered (`offeredComplements`, so a time and a companion on any verb). A
+ * complement keeps its relation (P09-E15, P09-E53 D2): a place, a direction, a source or a route in
+ * any relation, a cause in any stance but not denied (a gap has no complement to carry the denial),
+ * a time only *at* or *until*.
+ *
+ * The passive asks every slot (P09-E16, P09-E54 D1): the roles stay the active ones, the object's
+ * gap asks the patient ("what is eaten by the cat?") and the subject's the agent ("who is the food
+ * eaten by?"). Not over a verb whose object takes a preposition in some language
+ * (`prepositionalObject`, D3): that language has no passive, and in the active the gap would name
+ * another slot, so the engine refuses the question.
  */
-export function canAsk(sel: PhraseSelection, role: QuestionRole): boolean {
+export function canAsk(
+  sel: PhraseSelection,
+  role: QuestionRole,
+  possessed: "subject" | "directObject" = sel.questionPossessed ?? "subject",
+): boolean {
   const verb = sel.verb;
   if (!verb || sel.imperative || sel.infinitive || sel.existential) return false;
-  if (sel.verbVoice === "passive") return false;
+  if (sel.verbVoice === "passive" && verb.prepositionalObject) return false;
   switch (role) {
     case "subject":
       return true;
+    case "possessor":
+      return canAskOwner(sel, possessed);
     case "directObject":
       return verb.transitivity !== "intransitive";
-    case "locative":
-      return Boolean(verb.complements?.includes("locative")) && (sel.locativeSpecifier ?? "in") === "in";
-    case "manner":
-      return Boolean(verb.complements?.includes("manner"));
-    case "cause":
-      return (
-        Boolean(verb.complements?.includes("cause")) &&
-        (sel.causeSentiment ?? "neutral") === "neutral" &&
-        !sel.causeNegative
-      );
+    default:
+      if (!offeredComplements(verb).includes(role)) return false;
+      if (role === "cause") return !sel.causeNegative;
+      if (role === "temporal") {
+        const relation = sel.temporalRelation ?? DEFAULT_TEMPORAL_RELATION;
+        return relation === "at" || relation === "until";
+      }
+      return true;
   }
 }
+
+/**
+ * Whether the owner of the subject or the object may be asked, "**whose** food does the cat eat?"
+ * (P09-E52 D2), past the clause's own conditions: the possessed slot holds a single noun — no
+ * pronoun, no coordination — whose owner is a named ring, not a pointed-to noun, and is its owner
+ * rather than the whole it is part of or the parts it is made of; the object is the verb's to have;
+ * and in the passive only the patient's owner, the agent's being refused (P09-E54 D4). Each mirrors a
+ * refusal of the engine's `possessorQuestion` / `resolvePhrase`.
+ */
+function canAskOwner(sel: PhraseSelection, possessed: "subject" | "directObject"): boolean {
+  if (possessed === "directObject" && sel.verb?.transitivity === "intransitive") return false;
+  if (sel.verbVoice === "passive" && possessed !== "directObject") return false;
+  if (sel[possessed]?.role !== "noun") return false;
+  const conjuncts = (sel[`${possessed}Conjuncts`] ?? []) as PhraseSelection[];
+  if (conjuncts.some((c) => c.subject)) return false;
+  if (sel[`${possessed}PossessorRef`]) return false;
+  const role = sel.possessorRoles?.[possessed];
+  return role !== "whole" && role !== "parts";
+}
+
+/**
+ * Whether the period has a patient for the passive to promote (P09-E54 D2): an object that holds a
+ * word, or one a wh-question asks about, which is usually empty — the engine counts the gap as the
+ * object ("what is eaten by the cat?").
+ */
+export const hasPatient = (sel: PhraseSelection): boolean =>
+  Boolean(sel.directObject) || sel.questionRole === "directObject";
+
+/**
+ * Whether a box's relation is there to choose (P09-E53 D3): on a box that holds a word, and on the
+ * one a wh-question asks about, which is usually empty — the relation is the gap's ("**under what**").
+ */
+export const hasRelation = (sel: PhraseSelection, slot: SlotQuestionRole | "objectPredicative"): boolean =>
+  Boolean(sel[slot]) || sel.questionRole === slot;
 
 /** The wh-question's gap as the plan will carry it: the marked slot, where the engine asks it. */
 export function askedRole(sel: PhraseSelection): QuestionRole | undefined {

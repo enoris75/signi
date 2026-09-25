@@ -7,7 +7,7 @@ import { COMMANDS } from '../../src/console/language/commands.ts';
 import type { DiagnosticCode } from '../../src/console/language/diagnostics.ts';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { WorkspaceState } from '../../src/console/language/types.ts';
-import { ids_, ok, print, run, sel } from './helpers.ts';
+import { ids_, ok, print, run, script, sel } from './helpers.ts';
 
 interface Golden {
   line: string;
@@ -484,9 +484,9 @@ describe('a complement’s conjuncts', () => {
 // P09-E12: a subordinate clause has no mood of its own, the question's included — it would be spoken
 // inside the clause ("says that does the cat run") — so the question is locked on it as the other two
 // moods are, by /ask and by /wh alike; the clause that governs it may still ask ("does the man say
-// that the cat runs?").
+// that the cat runs?"). Not on the clause of a verb that reports a question (P09-E55, below), so BELIEVE.
 describe('the question on a subordinate clause', () => {
-  const linked = () => ok('/subj man /verb say /clause ( /subj cat /verb run )');
+  const linked = () => ok('/subj man /verb believe /clause ( /subj cat /verb run )');
 
   it.each(['/ask', '/wh subj', '/command'])('is locked on the clause: %s', (line) => {
     const state = linked();
@@ -496,6 +496,99 @@ describe('the question on a subordinate clause', () => {
   it('is free on the clause that governs it', () => {
     expect(sel(ok('/ask', { state: linked() })).interrogative).toBe(true);
     expect(sel(ok('/wh subj who', { state: linked() }))).toMatchObject({ interrogative: true, questionRole: 'subject' });
+  });
+});
+
+// P09-E53: the complements that keep their relation, and an empty asked box's relation on /wh (D5).
+describe('the question over a marked relation', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/wh with who /subj cat /verb run', '/wh with who /subj ( cat ) /verb ( run )', { questionRole: 'comitative', questionAnimate: true }],
+    ['/wh loc under /subj cat /verb eat', '/wh loc under /subj ( cat ) /verb ( eat )', { questionRole: 'locative', locativeSpecifier: 'under' }],
+    ['/wh cause thanks who /subj cat /verb run', '/wh cause who thanks /subj ( cat ) /verb ( run )', { questionRole: 'cause', causeSentiment: 'positive', questionAnimate: true }],
+    ['/wh time until /subj cat /verb eat', '/wh time until /subj ( cat ) /verb ( eat )', { questionRole: 'temporal', temporalRelation: 'until' }],
+    ['/wh dir goal /subj cat /verb run', '/wh dir /subj ( cat ) /verb ( run )', { questionRole: 'direction' }],
+    ['/wh src /subj cat /verb run', '/wh src /subj ( cat ) /verb ( run )', { questionRole: 'source' }],
+  ])('%s', (line, prints, holds) => {
+    const state = ok(line);
+    expect(sel(state)).toMatchObject({ interrogative: true, ...holds });
+    expect(print(state)).toBe(prints);
+  });
+
+  it('says the relation in the bracket of a box that holds a word, and on /wh only when it is empty', () => {
+    expect(print(ok('/wh loc /subj cat /verb eat /loc ( house /under )'))).toBe('/wh loc /subj ( cat ) /verb ( eat ) /loc ( house /under )');
+  });
+
+  it('refuses a relation the asked box has not', () => {
+    expect(run('/wh with under').diagnostic).toMatchObject({ code: 'valueNotTaken', args: { command: 'wh', given: 'under', values: [] } });
+    expect(run('/wh time under').diagnostic).toMatchObject({ code: 'valueNotTaken', args: { command: 'wh', given: 'under' } });
+    expect(run('/wh loc under thanks').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+  });
+});
+
+// P09-E54: the passive question needs no new word — /passive on the verb and /wh on the period.
+describe('the passive question', () => {
+  it('asks the patient of a passive: "what is eaten by the cat?"', () => {
+    const state = ok('/subj cat /verb ( eat /passive ) /wh obj');
+    expect(sel(state)).toMatchObject({ interrogative: true, questionRole: 'directObject', verbVoice: 'passive' });
+    expect(print(state)).toBe('/wh obj /subj ( cat ) /verb ( eat /passive )');
+    expect(print(ok(print(state)))).toBe(print(state));
+  });
+});
+
+// P09-E52 D5: the owner's gap, and the noun it is inside, on /wh.
+describe('the possessor question', () => {
+  it.each<[string, string, Record<string, unknown>]>([
+    ['/wh poss obj /subj cat /verb eat /obj food', '/wh poss obj /subj ( cat ) /verb ( eat ) /obj ( food )', { questionRole: 'possessor', questionPossessed: 'directObject' }],
+    ['/wh whose /subj cat /verb eat', '/wh poss subj /subj ( cat ) /verb ( eat )', { questionRole: 'possessor', questionPossessed: 'subject' }],
+    // The owner's word is kept in its bracket, and not spoken while the owner is asked.
+    ['/wh poss subj /subj cat /poss man /verb eat', '/wh poss subj /subj ( cat /poss [ man ] ) /verb ( eat )', { questionRole: 'possessor', questionPossessed: 'subject' }],
+  ])('%s', (line, prints, holds) => {
+    const state = ok(line);
+    expect(sel(state)).toMatchObject({ interrogative: true, ...holds });
+    expect(print(state)).toBe(prints);
+    expect(print(ok(prints))).toBe(prints);
+  });
+
+  it('takes one noun for the owner to be inside, and no other slot beside it', () => {
+    expect(run('/wh poss subj obj').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+    expect(run('/wh poss loc').diagnostic).toMatchObject({ code: 'valueAlreadyGiven' });
+    // Another slot moves the mark, and the owner's noun goes with it.
+    expect(sel(ok('/wh poss obj /wh subj'))).not.toHaveProperty('questionPossessed');
+  });
+});
+
+// P09-E55: the indirect question — a that-clause of a verb that reports one may be a question.
+describe('the indirect question', () => {
+  it('makes the clause of ASK a question on linking: "the man asks whether the cat runs"', () => {
+    const state = ok('/subj man /verb ask /clause { /subj cat /verb run }');
+    expect(sel(state, 1)).toMatchObject({ interrogative: true });
+    expect(script(state)).toBe(script(ok(script(state))));
+  });
+
+  it('asks a gap in the clause: "the man asks what the cat eats"', () => {
+    const state = ok('/subj man /verb ask /clause { /wh obj /subj cat /verb eat }');
+    expect(sel(state, 1)).toMatchObject({ interrogative: true, questionRole: 'directObject' });
+    expect(script(ok(script(state)))).toBe(script(state));
+  });
+
+  it('frees the question of an either verb’s clause, and keeps ASK’s one', () => {
+    const say = ok('/subj man /verb say /clause { /subj cat /verb run }');
+    const clause = { containerId: say.containers[1]!.id };
+    expect(sel(ok('/ask', { state: say, context: clause }), 1).interrogative).toBe(true);
+    expect(run('/command', { state: say, context: clause }).diagnostic).toMatchObject({ code: 'moodLocked' });
+    const ask = ok('/subj man /verb ask /clause { /subj cat /verb run }');
+    expect(run('/statement', { state: ask, context: { containerId: ask.containers[1]!.id } }).diagnostic).toMatchObject({ code: 'moodLocked' });
+    // Unmarking the gap leaves a yes/no question, not a statement ASK cannot report.
+    const wh = ok('/subj man /verb ask /clause { /wh obj /subj cat /verb eat }');
+    expect(sel(ok('/del wh', { state: wh, context: { containerId: wh.containers[1]!.id } }), 1)).toMatchObject({ interrogative: true });
+  });
+
+  it('still refuses a question as the clause of a verb that reports none, or as an adverbial clause', () => {
+    const withQuestion = (line: string) => ok(`/new /ask /subj cat /verb run`, { state: ok(line) });
+    const onFirst = (state: WorkspaceState) => ({ state, context: { containerId: state.containers[0]!.id } });
+    expect(run('/clause #2', onFirst(withQuestion('/subj man /verb say'))).diagnostic).toBeUndefined();
+    expect(run('/clause #2', onFirst(withQuestion('/subj man /verb believe'))).diagnostic).toMatchObject({ code: 'clauseQuestion' });
+    expect(run('/sub when #2', onFirst(withQuestion('/subj man /verb say'))).diagnostic).toMatchObject({ code: 'clauseQuestion' });
   });
 });
 

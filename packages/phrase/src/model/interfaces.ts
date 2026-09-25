@@ -71,12 +71,17 @@ export type SubordinateKind = "content" | "adverbial" | "infinitive" | "purpose"
 export interface SubordinateOption {
   link: SubordinateKind;
   conjunction?: SubordinatingConjunction;
+  // *Whether* (P09-E55): a content link whose clause is made a yes/no question.
+  question?: boolean;
   labelKey: UiStringKey;
   key: string;
 }
 
 export const SUBORDINATE_OPTIONS: readonly SubordinateOption[] = [
   { link: "content", labelKey: "subordinator.value.that", key: "T" },
+  // P09-E55: the indirect question, "asks **whether** the cat runs" — E is heard in *whether*, and W is
+  // *when*'s.
+  { link: "content", question: true, labelKey: "subordinator.value.whether", key: "E" },
   { link: "infinitive", labelKey: "infinitive.phrase", key: "O" },
   // P13: what the act is *for*, "to write content **to load it**" — any act has one, as any has a
   // time; **P** for purpose.
@@ -108,18 +113,31 @@ export const SUBORDINATOR_LABEL_KEY: Record<SubordinatingConjunction, UiStringKe
 };
 
 // The catalog key naming a subordinate link by its word: *that*, the infinitive phrase, or its
-// conjunction — for the control's tooltip, the connector's label and the clause's badge.
+// conjunction — for the control's tooltip, the connector's label and the clause's badge. A content
+// clause is named by its force (P09-E55): *that* a statement, *whether* a yes/no question, and a
+// wh-question plainly a subordinate clause, whose own question word says the rest.
 export const subordinateLabelKey = (s: {
   kind: SubordinateKind;
   conjunction?: SubordinatingConjunction;
+  force?: ClauseForce;
 }): UiStringKey =>
   s.kind === "content"
-    ? "subordinator.value.that"
+    ? s.force === "yesno"
+      ? "subordinator.value.whether"
+      : s.force === "wh"
+        ? "clause.subordinate"
+        : "subordinator.value.that"
     : s.kind === "infinitive"
       ? "infinitive.phrase"
       : s.kind === "purpose"
         ? "clause.purpose"
         : SUBORDINATOR_LABEL_KEY[s.conjunction ?? "when"];
+
+/** A clause's force, as a content link names it (P09-E55): a statement, a yes/no or a wh-question. */
+export type ClauseForce = "statement" | "yesno" | "wh";
+
+export const forceOfClause = (sel: Pick<PhraseSelection, "interrogative" | "questionRole">): ClauseForce =>
+  sel.questionRole ? "wh" : sel.interrogative ? "yesno" : "statement";
 
 /**
  * What a period with no subject word makes of the clause it governs (P13) — read off the period, so
@@ -147,7 +165,7 @@ export function subordinateReading(
 // offered the conjunctions alone if it has no subject either — its clause is an adverb's gloss — and
 // nothing otherwise (see canStartSubordinate).
 export function subordinateOptions(
-  verb: { clauseObject?: ClauseObject } | undefined,
+  verb: { clauseObject?: ClauseObject; clauseForce?: "interrogative" | "either" } | undefined,
   hasObject: boolean,
   predicate?: { clauseObject?: ClauseObject },
   reading?: SubordinateReading,
@@ -156,7 +174,11 @@ export function subordinateOptions(
   if (!verb) return [];
   return SUBORDINATE_OPTIONS.filter((o) =>
     o.link === "content"
-      ? reading === "subject" || (verb.clauseObject === "content" && !hasObject)
+      ? o.question
+        // *Whether* where the verb's clause may be a question (P09-E55), *that* where it may be a
+        // statement: ASK takes *whether* alone, THINK *that* alone, KNOW both.
+        ? reading !== "subject" && verb.clauseObject === "content" && !hasObject && Boolean(verb.clauseForce)
+        : reading === "subject" || (verb.clauseObject === "content" && !hasObject && verb.clauseForce !== "interrogative")
       : o.link === "infinitive"
         ? verb.clauseObject === "infinitive" || predicate?.clauseObject === "infinitive"
         : true,
@@ -222,10 +244,44 @@ export interface SlotConfig {
 // the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
 export type ImperativePerson = "2sg" | "1pl" | "2pl";
 
-// The five slots a wh-question can ask about — the only gaps with a question word in every engine
-// (see the engine's resolveQuestion): who / what, where, how, why.
-export type QuestionRole = "subject" | "directObject" | "locative" | "manner" | "cause";
-export const QUESTION_ROLES: readonly QuestionRole[] = ["subject", "directObject", "locative", "manner", "cause"];
+// The slots a wh-question can ask about (see the engine's resolveQuestion): E6's five with a question
+// word of their own — who / what, where, how, why — and the boxed complements that keep their relation
+// (P09-E15, P09-E53): "**to whom**", "**with whom**", "**about what**", "**where to**", "**where
+// from**", "**which way**", "**when**". Left out: the predicative and the object predicative (no
+// adposition), the purpose ("what for?" overlaps *why*), and the instrumental, a linked period. The
+// `possessor` (P09-E52) is the owner inside the subject or the object ("**whose** food does the cat
+// eat?", see `questionPossessed`); its mark is on the owner's hosted ring, so it is no slot of
+// QUESTION_ROLES, the rings of the period's own boxes.
+export type QuestionRole =
+  | "subject"
+  | "directObject"
+  | "possessor"
+  | "locative"
+  | "manner"
+  | "cause"
+  | "terminus"
+  | "comitative"
+  | "topic"
+  | "direction"
+  | "source"
+  | "route"
+  | "temporal";
+/** A question role whose mark is on a box of the period: every one but the owner (P09-E52). */
+export type SlotQuestionRole = Exclude<QuestionRole, "possessor">;
+export const QUESTION_ROLES: readonly SlotQuestionRole[] = [
+  "subject",
+  "directObject",
+  "locative",
+  "manner",
+  "cause",
+  "terminus",
+  "comitative",
+  "topic",
+  "direction",
+  "source",
+  "route",
+  "temporal",
+];
 
 // The person a selection's command agrees with (default 2sg). Still meaningful under the
 // `instruction` register — the selector only greys it there, it does not forget it, so
@@ -287,6 +343,9 @@ export interface PhraseSelection {
     // clears it. The slot's word, if it holds one, is left out of the plan (the gap), and a subject
     // gap takes the throwaway subject the plan type needs (see `askQuestion`).
     questionRole?: QuestionRole;
+    // The noun a `possessor` gap asks inside (P09-E52, PhrasePlan.questionPossessed): the subject's
+    // owner or the object's. Set with the `possessor` mark and cleared with it; absent otherwise.
+    questionPossessed?: "subject" | "directObject";
     // Whether a subject or direct-object question asks *who* rather than *what* (PhrasePlan
     // .questionAnimate). Absent means the default, which is the held word's `human` — the who / what
     // chip on the marked ring sets it only when the user flips it (see `questionAnimateOf`).
@@ -886,6 +945,8 @@ export type PickMode =
       kind: 'subordinate';
       link: SubordinateKind;
       conjunction?: SubordinatingConjunction;
+      // A content link started from *Whether* (P09-E55): the clause it lands on becomes a question.
+      question?: boolean;
       source: { containerId: string };
     }
   | { active: true; kind: 'instrumental'; source: { containerId: string } };

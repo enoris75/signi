@@ -9,6 +9,7 @@ import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
   COORD_CONJUNCTION_LABEL_KEY,
   subordinateLabelKey,
+  forceOfClause,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
@@ -80,7 +81,9 @@ export function PhraseWorkspace({
     verbAnchorEls,
     bumpGeom,
     connectors,
-  } = useConnectors(links, t("slot.instrumental").toLowerCase());
+  } = useConnectors(links, t("slot.instrumental").toLowerCase(), (id) =>
+    forceOfClause(containers.find((c) => c.id === id)?.selection ?? {}),
+  );
 
   // A link the console's line would make is drawn dashed until ↵, like the boxes it would change.
   const marks = useConsoleMarks();
@@ -380,7 +383,7 @@ export function PhraseWorkspace({
                 ? `${t("pick.coordinated")} (${t(COORD_CONJUNCTION_LABEL_KEY[pick.conjunction])})`
                 : pick.active && pick.kind === "subordinate"
                   // The clause's word trails the sentence in brackets, as the coordination's does.
-                  ? `${t("pick.subordinate")} (${t(subordinateLabelKey({ kind: pick.link, conjunction: pick.conjunction }))})`
+                  ? `${t("pick.subordinate")} (${t(subordinateLabelKey({ kind: pick.link, conjunction: pick.conjunction, ...(pick.question && { force: "yesno" as const }) }))})`
                 : pick.active && pick.kind === "instrumental"
                   ? t("pick.instrumental")
                   : t("pick.relativeHead")}

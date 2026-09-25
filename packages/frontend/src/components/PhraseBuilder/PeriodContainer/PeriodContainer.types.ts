@@ -5,6 +5,7 @@ import type {
   CoordConjunction,
   SubordinateKind,
   SubordinateOption,
+  SubordinateStanding,
 } from "../interfaces.ts";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
@@ -56,9 +57,9 @@ export interface CoordinativeControl {
 // subordinating conjunction), then the period that is to be it. Undefined for a standalone period.
 export interface SubordinateControl {
   // The subordinate clause this period governs, if any: its kind, and an adverbial one's conjunction.
-  asSource?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  asSource?: SubordinateStanding;
   // The one this period is, if any.
-  asTarget?: { kind: SubordinateKind; conjunction?: SubordinatingConjunction };
+  asTarget?: SubordinateStanding;
   // What the menu offers here, by the verb (see subordinateOptions). Empty without a verb.
   options: SubordinateOption[];
   // A subordinate pick is in progress and this period is a legal target.
@@ -67,7 +68,7 @@ export interface SubordinateControl {
   pickActive: boolean;
   // May this period govern a subordinate clause (see canStartSubordinate).
   canStart: boolean;
-  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction) => void;
+  onStart: (kind: SubordinateKind, conjunction?: SubordinatingConjunction, question?: boolean) => void;
   onClear: () => void;
   onPick: () => void;
   // Whose this infinitive period is, where it can be the governing clause's object's (P13).

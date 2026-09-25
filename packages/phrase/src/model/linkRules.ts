@@ -327,12 +327,26 @@ export function canBeSubordinate(
   const clause = containers.find((c) => c.id === clauseId);
   if (!clause) return false;
   const sel = clause.selection;
-  // Nor a question (P09-E12 M5): a content clause keeps a statement's order whatever hosts it, so the
-  // engine would render a question's words inside it ("says that does the cat run"). The clause that
-  // governs it may be one ("does the man say that the cat runs?").
-  if (sel.interrogative || sel.questionRole) return false;
+  // Nor a question (P09-E12 M5), except the that-clause of a verb that reports one (P09-E55, its
+  // served `clauseForce`): "asks **whether** the cat runs", "knows **where** the cat eats". An adverbial
+  // or an infinitive clause asks nothing, and nor does THINK's. The clause that governs it may be one
+  // ("does the man say that the cat runs?").
+  if ((sel.interrogative || sel.questionRole) && !(kind === "content" && reportsQuestion(containers, mainId))) return false;
   return !sel.imperative && (kind === "infinitive" || kind === "purpose" || !sel.infinitive);
 }
+
+/**
+ * The force a governing period's that-clause may have, from its verb's served `clauseForce`
+ * (P09-E55): `interrogative` — a question only (ASK); `either` (KNOW, SAY, TELL); undefined — a
+ * statement only. A period whose that-clause is its subject (P13) takes a statement.
+ */
+export function governedForce(main: PhraseContainer | undefined): "interrogative" | "either" | undefined {
+  if (!main || subordinateReading(main.selection) === "subject") return undefined;
+  return main.selection.verb?.clauseForce;
+}
+
+const reportsQuestion = (containers: PhraseContainer[], mainId: string): boolean =>
+  Boolean(governedForce(containers.find((c) => c.id === mainId)));
 
 /** One subordinate clause per governing clause: the one it had, of whatever kind, is replaced. */
 export function addSubordinate(

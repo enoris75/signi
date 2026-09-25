@@ -56,6 +56,7 @@ export const spanishEngine: LanguageEngine = {
   // The word that opens a subordinate clause, for the builder's subordinate-clause menu (P09-E12
   // D9): `that`, the object clause's complementizer, or a subordinating conjunction. Spanish cites each as it opens its clause ("después de que").
   renderSubordinator(sub: Subordinator): string {
+    if (sub === 'whether') return 'si'; // P09-E55, the indirect yes/no question's complementizer
     return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
   renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {

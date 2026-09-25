@@ -2813,6 +2813,9 @@ export const UI_STRINGS = defineUiStrings({
   // Japanese, after) the clause — it "dopo che", fr "parce que", de "nachdem", ja 〜ので. Keyed by
   // Subordinator, so the menu writes t(`subordinator.value.${value}`).
   'subordinator.value.that': { subordinator: 'that', format: { capitalize: true }, fallback: 'That' },
+  // P09-E55: the indirect yes/no question's complementizer, cited as the engines write it — "whether",
+  // "se", "si", "ob", 〜かどうか.
+  'subordinator.value.whether': { subordinator: 'whether', format: { capitalize: true }, fallback: 'Whether' },
   'subordinator.value.when': { subordinator: 'when', format: { capitalize: true }, fallback: 'When' },
   'subordinator.value.while': { subordinator: 'while', format: { capitalize: true }, fallback: 'While' },
   'subordinator.value.because': { subordinator: 'because', format: { capitalize: true }, fallback: 'Because' },

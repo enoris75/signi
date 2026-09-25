@@ -98,6 +98,21 @@ describe('PeriodCard', () => {
     expect(screen.getByRole('button', { name: QUESTION })).toBeDisabled();
   });
 
+  // P09-E55: the that-clause of a verb that reports a question has its question for its own — free
+  // under KNOW, locked on under ASK; the command and the infinitive stay locked.
+  it.each([
+    ['KNOW', 'either', true],
+    ['ASK', 'interrogative', false],
+  ] as const)('frees the question of a clause of %s as its verb reports it', (_verb, licence, free) => {
+    renderCard({ binding: binding({ subordinate: { asTarget: { kind: 'content', force: 'yesno', licence } } }) }, { subject: CAT, interrogative: true });
+
+    expect(screen.getByRole('button', { name: COMMAND })).toBeDisabled();
+    expect(screen.getByRole('button', { name: CITATION })).toBeDisabled();
+    const question = screen.getByRole('button', { name: QUESTION });
+    if (free) expect(question).toBeEnabled();
+    else expect(question).toBeDisabled();
+  });
+
   it('leaves the moods free on the clause that governs a subordinate one', () => {
     renderCard({ binding: binding({ subordinate: { asSource: { kind: 'content' } } }) });
 

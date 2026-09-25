@@ -22,6 +22,7 @@ import type {
   NounKey,
   PhraseSelection,
   QuestionRole,
+  SlotQuestionRole,
   SlotKey,
 } from "../components/PhraseBuilder/interfaces.ts";
 import type { Satellite } from "../components/PhraseBuilder/satellites/index.ts";
@@ -34,6 +35,7 @@ import {
   modalAdverbFor,
   negativeFieldOf,
 } from "../components/PhraseBuilder/slots.ts";
+import { hasRelation } from "../components/PhraseBuilder/functions/questionGates.ts";
 import { isComplementSlot, nounBlockOf, type Scope } from "./scope.ts";
 import type { Direction } from "./spatialNav.ts";
 
@@ -156,6 +158,8 @@ export interface PeriodContext {
   toggleInfinitive: () => void;
   toggleQuestion: () => void;
   moodLocked: boolean;
+  /** The question's own lock, where it differs (P09-E55): free on the clause of a verb that reports one. */
+  questionLocked?: boolean;
   /** I / J — the two clause-level relations: start the pick, or drop the link there is. */
   condition: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
   coordination: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
@@ -486,7 +490,10 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     labelKey: "mood.question",
     hint: true,
     satellite: /Question$/,
-    when: (ctx) => ctx.slot === ctx.nounKey && has(ctx, `${ctx.nounKey}Question`),
+    // …and on an owner's box, the period's *whose* (P09-E52 D5).
+    when: (ctx) =>
+      ctx.slot === ctx.nounKey &&
+      (has(ctx, `${ctx.nounKey}Question`) || (Boolean(ctx.path) && has(ctx, "possessorQuestion"))),
     run: (ctx) => ctx.toggleQuestion(ctx.nounKey as QuestionRole),
   },
   {
@@ -640,8 +647,9 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     hint: true,
     // The spatial complements carry a relation ("under the bed"), the cause an affective stance
     // ("thanks to" / "because of" / "the fault of"). Both are toolbars already on the ring, so S
-    // points the next key at one rather than opening anything.
-    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && Boolean(ctx.selection[ctx.slot]),
+    // points the next key at one rather than opening anything — on an empty box too, when a
+    // wh-question asks about it (P09-E53 D3).
+    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && hasRelation(ctx.selection, ctx.slot as SlotQuestionRole | "objectPredicative"),
     run: (ctx) => ctx.armToolbar(ctx.slot),
   },
   {
@@ -1115,7 +1123,7 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     label: "Question",
     labelKey: "mood.question",
     hint: true,
-    when: (ctx) => !ctx.moodLocked,
+    when: (ctx) => !(ctx.questionLocked ?? ctx.moodLocked),
     run: (ctx) => ctx.toggleQuestion(),
   },
   {

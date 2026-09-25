@@ -11,6 +11,11 @@ describe('translateSubordinator', () => {
     expect(byLanguage('that')).toEqual({ en: 'that', it: 'che', fr: 'que', de: 'dass', es: 'que', pt: 'que', ja: '〜と' });
   });
 
+  // P09-E55: the indirect yes/no question's complementizer, as the engines write it (P09-E17).
+  it('cites whether', () => {
+    expect(byLanguage('whether')).toEqual({ en: 'whether', it: 'se', fr: 'si', de: 'ob', es: 'si', pt: 'se', ja: '〜かどうか' });
+  });
+
   it('cites each subordinating conjunction as its clause writes it, two words where there are two', () => {
     expect(byLanguage('before')).toEqual({
       en: 'before', it: 'prima che', fr: 'avant que', de: 'bevor', es: 'antes de que', pt: 'antes que', ja: '〜前に',

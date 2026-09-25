@@ -496,5 +496,17 @@ describe('VerbPhraseBuilder', () => {
       );
       expect(toolbars()).toEqual([]);
     });
+
+    // P09-E53 D3: an asked box is usually empty, and its relation is the question's ("under what").
+    it('ride an empty ring a question asks about', () => {
+      const { ctx } = renderVerb({
+        selection: { interrogative: true, questionRole: 'locative', locativeSpecifier: 'under' },
+        groupRects: [LOCATIVE],
+        controlPos: CONTROL_POS,
+      });
+      expect(highlighted()).toEqual(['under']);
+      fireEvent.click(screen.getByRole('button', { name: 'behind' }));
+      expect(ctx.handleSelectLocativeSpecifier).toHaveBeenCalledExactlyOnceWith('behind');
+    });
   });
 });

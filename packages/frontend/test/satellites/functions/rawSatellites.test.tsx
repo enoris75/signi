@@ -8,8 +8,9 @@ import {
 } from '@signi/shared';
 import { rawSatellites } from '../../../src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx';
 import { setImperative, setInfinitive, setVoice } from '../../../src/components/PhraseBuilder/phraseReducers.ts';
+import { rendersPassive } from '../../../src/components/PhraseBuilder/functions/visibleSlots.ts';
 import type { RawSatellite } from '../../../src/components/PhraseBuilder/satellites/satellites.types.tsx';
-import type { PhraseSelection } from '../../../src/components/PhraseBuilder/interfaces.ts';
+import type { PhraseSelection, QuestionRole } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import {
   BIG,
   CAN,
@@ -946,5 +947,103 @@ describe('known bugs: A179 a passive infinitive', () => {
       // The subject is still a gap to ask about ("who says that the cat runs?").
       expect(find(sats, 'subjectQuestion').available).toBe(true);
     });
+  });
+});
+
+// P09-E53: the mark on the complements that keep their relation, and the who / what chip where the
+// question word changes with the answer's animacy.
+describe('the question over a marked relation', () => {
+  const find = (sats: RawSatellite[], key: string) => sats.find((x) => x.key === key)!;
+  const GIVE = concept('GIVE', 'verb', { transitivity: 'ditransitive', complements: ['terminus'] });
+  const MOVE = concept('MOVE', 'verb', { transitivity: 'intransitive', complements: ['locative', 'direction', 'source', 'route', 'cause'] });
+  const SPEAK = concept('SPEAK', 'verb', { transitivity: 'intransitive', complements: ['topic'] });
+
+  it.each<[string, Concept]>([
+    ['terminus', GIVE],
+    ['comitative', MOVE],
+    ['topic', SPEAK],
+    ['direction', MOVE],
+    ['source', MOVE],
+    ['route', MOVE],
+    ['temporal', MOVE],
+  ])('marks the %s, on an empty box', (type, verb) => {
+    const sat = find(rawSatellites({ subject: CAT, verb }, 'en', t), `${type}Question`);
+    expect(sat).toMatchObject({ parent: type, available: true, hasValue: false });
+    const asked = rawSatellites({ subject: CAT, verb, interrogative: true, questionRole: type as QuestionRole }, 'en', t);
+    expect(find(asked, `${type}Question`).hasValue).toBe(true);
+    // The asked box is shown although it holds no word.
+    expect(find(asked, type).defaultShown).toBe(true);
+  });
+
+  it.each<[string, PhraseSelection, boolean]>([
+    ['the comitative', { questionRole: 'comitative' }, true],
+    ['the terminus', { verb: GIVE, questionRole: 'terminus' }, true],
+    ['the topic', { verb: SPEAK, questionRole: 'topic' }, true],
+    ['the direction', { questionRole: 'direction' }, true],
+    ['the source', { questionRole: 'source' }, true],
+    ['a marked place', { questionRole: 'locative', locativeSpecifier: 'under' }, true],
+    ['a positive cause', { questionRole: 'cause', causeSentiment: 'positive' }, true],
+    ['a plain place', { questionRole: 'locative' }, false],
+    ['a neutral cause', { questionRole: 'cause' }, false],
+    ['a negative cause', { questionRole: 'cause', causeSentiment: 'negative' }, false],
+    ['the route', { questionRole: 'route' }, false],
+    ['the time', { questionRole: 'temporal' }, false],
+  ])('offers who / what on %s: %s', (_, extra, available) => {
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, interrogative: true, ...extra };
+    const sat = find(rawSatellites(sel, 'en', t), `${extra.questionRole}QuestionAnimate`);
+    expect(sat.available).toBe(available);
+  });
+
+  it('defaults the chip to the held word and names the question it makes', () => {
+    const MAN = concept('MAN', 'noun', { human: true });
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, comitative: MAN, interrogative: true, questionRole: 'comitative' };
+    expect(find(rawSatellites(sel, 'en', t), 'comitativeQuestionAnimate')).toMatchObject({ hasValue: true, labelKey: 'question.who' });
+    expect(find(rawSatellites({ ...sel, questionAnimate: false }, 'en', t), 'comitativeQuestionAnimate')).toMatchObject({
+      hasValue: false,
+      labelKey: 'question.what',
+    });
+  });
+
+  it('withdraws the mark from a time asked in a relation the engine refuses', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: MOVE, interrogative: true, questionRole: 'temporal', temporalRelation: 'ago' };
+    expect(find(rawSatellites(sel, 'en', t), 'temporalQuestion').available).toBe(false);
+  });
+});
+
+// P09-E54 D2: an asked object is the patient, although it is usually empty — the voice control stays
+// on it, and the passive's captions hold.
+describe('the passive question', () => {
+  it('keeps the voice on an empty asked object, and the agent caption', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: SEE, interrogative: true, questionRole: 'directObject', verbVoice: 'passive' };
+    expect(satellite(sel, 'verbVoice').available).toBe(true);
+    expect(rendersPassive(sel)).toBe(true);
+    expect(satellite({ subject: CAT, verb: SEE }, 'verbVoice').available).toBe(false);
+    expect(rendersPassive({ subject: CAT, verb: SEE, verbVoice: 'passive' })).toBe(false);
+  });
+
+  it('offers the marks in the passive', () => {
+    const sel: PhraseSelection = { subject: CAT, verb: SEE, directObject: FRIEND, verbVoice: 'passive' };
+    expect(satellite(sel, 'subjectQuestion').available).toBe(true);
+    expect(satellite(sel, 'directObjectQuestion').available).toBe(true);
+  });
+});
+
+// P09-E52 D1, D2: an owner's ring carries the *whose* its period gates, and while asked it offers no
+// owner of its own. Any other phrase has no such mark.
+describe('the owner’s question', () => {
+  const find = (sats: RawSatellite[], key: string) => sats.find((x) => x.key === key);
+  it('rides the owner’s ring as its period says', () => {
+    const offered = rawSatellites({ subject: CAT }, 'en', t, { ownerQuestion: { available: true, asked: false } });
+    expect(find(offered, 'possessorQuestion')).toMatchObject({ parent: 'subject', labelKey: 'mood.question', available: true, hasValue: false });
+    expect(find(offered, 'subjectPossessor')?.available).toBe(true);
+    const asked = rawSatellites({ subject: CAT }, 'en', t, { ownerQuestion: { available: true, asked: true } });
+    expect(find(asked, 'possessorQuestion')?.hasValue).toBe(true);
+    expect(find(asked, 'subjectPossessor')?.available).toBe(false);
+    // No who / what: whose is always a person.
+    expect(asked.some((s) => s.key === 'possessorQuestionAnimate')).toBe(false);
+  });
+
+  it('is on no other phrase', () => {
+    expect(find(rawSatellites({ subject: CAT, verb: SEE }, 'en', t), 'possessorQuestion')).toBeUndefined();
   });
 });

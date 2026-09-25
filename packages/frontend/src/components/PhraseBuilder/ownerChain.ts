@@ -125,7 +125,11 @@ export function possessionsFor({
     }
     const owner = slice[POSSESSOR_KEY(which)] as PhraseSelection | undefined;
     const named = Boolean(owner?.subject);
-    if (!(ownersOpen[address] ?? named)) return;
+    // An owner the period asks *whose* of is drawn although it is empty: its ring carries the mark
+    // (P09-E52 D1), as an asked complement's box is shown empty.
+    const asked =
+      depth === 0 && selection.questionRole === "possessor" && (selection.questionPossessed ?? "subject") === address;
+    if (!(ownersOpen[address] ?? (named || asked))) return;
     const ownerAddress = possessorAddress(address);
     // Halving steps keep an owner after the ring it owns and before the next ring of the group.
     const ownerOrder = order + 0.5 ** (depth + 1);

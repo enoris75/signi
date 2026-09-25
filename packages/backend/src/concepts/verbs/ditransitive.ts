@@ -683,10 +683,12 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     // "fragt den Mann nach dem Namen", not "fragt dem Mann".
     // Its object clause is a question, never a statement (`content_clause_force: 'interrogative'`,
     // P09-E17): "asks whether the cat runs", "asks what the cat eats". A that-clause would be the
-    // mandative "asks that the cat run", a sense it does not have, and is refused. It names no
-    // `clauseObject`, since the builder builds no indirect question yet.
+    // mandative "asks that the cat run", a sense it does not have, and is refused. Its `clauseObject`
+    // offers the builder's *Whether* (P09-E55), never *That*: the served `clauseForce` says the clause
+    // is a question, and linking one makes its period a question.
     id: 'ASK',
     role: 'verb',
+    clauseObject: 'content',
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause', 'instrumental'],
     description: 'to put a question to someone',
