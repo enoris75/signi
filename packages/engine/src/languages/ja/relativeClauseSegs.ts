@@ -54,7 +54,8 @@ export function relativeClauseSegs(np: ResolvedNounPhrase): RubySegment[] {
   // the clause already says TOGETHER; and not for a verb whose own case frame names its opponent
   // (`opponent_prep`, 戦う's と), which already says whom it acts against: 猫が戦う犬.
   const gapWord = JA_GAP_RELATION[rel.headRole as keyof typeof JA_GAP_RELATION];
-  const saysItAlready = rel.headRole === 'comitative' ? rel.verbPhrase.modifier?.conceptId === 'TOGETHER'
+  const saysItAlready = rel.headRole === 'comitative'
+    ? [rel.verbPhrase.modifier, ...(rel.verbPhrase.moreAdverbs ?? [])].some((a) => a?.conceptId === 'TOGETHER')
     : rel.headRole === 'opponent' ? opponentLink(rel.verbPhrase.verb.forms) !== ''
     : false;
   const gapRelation = gapWord && !saysItAlready ? [wordSeg(gapWord.base, gapWord.reading)] : [];
