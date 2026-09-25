@@ -282,8 +282,12 @@ const OPS: Op[] = [
     let next = R.addConjunct(sel, which);
     const i = R.conjunctsOf(next, which).length - 1;
     if (rng() < 0.9) {
-      // Beside a predicate, what a predicate takes (P13, conjunctSpec): no pronoun there.
-      const w = which === 'predicative' ? wordFor(rng, 'predicative', 'period') : wordFor(rng, 'subject', 'conjunct');
+      // Beside a predicate, what a predicate takes (P13, conjunctSpec): no pronoun there; nor beside a
+      // role, whose conjuncts are nouns as its head is (P09-E44).
+      const w =
+        which === 'predicative' ? wordFor(rng, 'predicative', 'period')
+        : which === 'role' ? { concept: pick(rng, NOUNS)! }
+        : wordFor(rng, 'subject', 'conjunct');
       next = R.updateConjunct(next, which, i, (c) => R.applyConceptSelect(c, 'subject', w.concept, w.opts));
     }
     if (rng() < 0.3) next = R.cycleNounConjunction(next, which);

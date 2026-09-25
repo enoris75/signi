@@ -5,7 +5,7 @@ import type {
   NounKey,
   SlotKey,
 } from "../model/interfaces.ts";
-import { COMPLEMENT_KEY_SET } from "../model/slots.ts";
+import { COMPLEMENT_KEY_SET, nounOnlyConjunct } from "../model/slots.ts";
 import { coded, type Coded } from "./diagnostics.ts";
 import type { Vocabulary } from "./types.ts";
 
@@ -49,7 +49,11 @@ export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "stan
  * — or, beside a predicate, what a predicate takes (P13), "is not **male or female**".
  */
 export const conjunctSpec = (which: NounKey | undefined): WordSpec =>
-  which === "predicative" ? wordSpecFor("predicative") : wordSpecFor("subject", "conjunct");
+  which === "predicative"
+    ? wordSpecFor("predicative")
+    : nounOnlyConjunct(which)
+      ? { roles: ["noun"] }
+      : wordSpecFor("subject", "conjunct");
 
 /** The words of a spec, in the order its picker lists them. */
 export function wordsFor(spec: WordSpec, vocab: Vocabulary): Concept[] {

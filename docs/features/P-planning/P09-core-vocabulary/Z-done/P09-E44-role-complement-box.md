@@ -329,7 +329,12 @@ What landed differently from the plan:
    row (y 216, 213²), the Role box (132²) takes the row's left seat and the Subject moves a row down
    to y 451. ACT's eight toggles fit the ring as EAT's do, so no second arc. *cat eats mouse* is
    unchanged (Verb Phrase 236² at y 205, Direct Object at y 255).
-5. **Tests:** [`complementKeys.test.ts`](../../../../../packages/frontend/test/complementKeys.test.ts)
+5. **A role's conjuncts are nouns too** (a follow-up to D3). A pronoun in the group drops the whole
+   role in all seven ("the man acts.", E13 D4). So `conjunctSpec('role')` is noun-only, and the
+   console refuses `/role ( friend /and he )` as an unknown word. On the canvas, the conjunct ring of
+   a role box has no pronoun tab. Both go through `nounOnlyConjunct` in `slots.ts`. The opponent's
+   conjuncts still take pronouns, which render ("against the dog and him").
+6. **Tests:** [`complementKeys.test.ts`](../../../../../packages/frontend/test/complementKeys.test.ts)
    pins the menu letters unique (O included);
    [`complementBoxes.test.ts`](../../../../../packages/frontend/test/workspacePlan/complementBoxes.test.ts)
    the plan → box → plan trip; `complements.spec.ts` and `console.spec.ts` the canvas and `/role`.

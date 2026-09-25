@@ -58,6 +58,14 @@ const takesObject = (verb: Concept) => verb.transitivity === "transitive" || ver
 export const defaultPredication = (verb: Concept | undefined): ObjectPredication =>
   verb?.complements?.includes("objectPredicative") ? "factitive" : "essive";
 
+/**
+ * Whether a block's conjuncts are nouns only, as its head is: the role's (P09-E44 D3). A pronoun in
+ * a role group is no capacity, and the translator drops the whole group ("the man acts."), so neither
+ * the console nor the canvas offers one. Every other block's conjunct may be a pronoun ("you and I",
+ * "against the dog and him"); a predicate's takes what the predicate takes (see conjunctSpec).
+ */
+export const nounOnlyConjunct = (which: NounKey | undefined): boolean => which === "role";
+
 // Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
 export const NOUN_KEYS: NounKey[] = [
