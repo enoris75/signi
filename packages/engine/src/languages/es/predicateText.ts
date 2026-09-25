@@ -5,6 +5,7 @@ import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb
 import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { negatorLead } from '../../functions/negatorLead.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
+import { moreAdverbsOf, moreAdverbText } from '../../functions/adverbClass.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
@@ -124,8 +125,10 @@ export function predicateText(
     && predicativeHead['degree'] !== 'most' && predicativeHead['degree'] !== 'least';
   // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
   // "la casa donde el gato está arde" (A199). So does an adverb of place, which says where as a
-  // locative does: "el gato está aquí", "está en todas partes", never "*es aquí" (localization B67).
-  const locativeAlone = (!!locative || gapComplement === 'locative' || isPlaceAdverb(modifier)) && !predicative;
+  // locative does: "el gato está aquí", "está en todas partes", never "*es aquí" (localization B67),
+  // and one among several: "el gato está a menudo aquí" (P15).
+  const locativeAlone = (!!locative || gapComplement === 'locative' || isPlaceAdverb(modifier)
+    || moreAdverbsOf(verbPhrase, 'place').length > 0) && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "debe estar", "ha
   // estado", "no estés", "estar en la casa".
   // The passive conjugates "ser" where the active conjugates the lexical verb, and agrees that
@@ -176,6 +179,14 @@ export function predicateText(
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A verb's further adverbs (P15). A frequency one follows the primary, a frequency adverb too, in
+  // the slot after the verb ("corre ya a menudo"), and keeps that slot where the primary stands in
+  // front ("todavía no ha comido a menudo"). A manner one follows them there, ahead of a noun object,
+  // where a manner primary stands ("come a menudo rápido el ratón"): behind the object, "el ratón
+  // rápido" would read as the adjective. It trails a prospective's whole group, as a manner primary
+  // does. A direction or place one stands among the complements.
+  const moreFrequency = moreAdverbText(verbPhrase, 'frequency', adverbSurface);
+  const moreManner = moreAdverbText(verbPhrase, 'manner', adverbSurface);
   const outscopesNo = negAdverb?.slot === 'pre-negation';
   // An adverb that outscopes the negation without carrying it stands in front of the "no" and keeps
   // it: ALREADY's "ya" is "todavía no ha comido", where *tampoco* and *nunca* stand alone (P09-E28).
@@ -223,7 +234,7 @@ export function predicateText(
     && aspect === 'prospective' && modals.length === 0;
   // The participio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   const grouped = [splitFrequency
-    ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
+    ? [conjugated.split(' ')[0], modifierText, moreFrequency, ...conjugated.split(' ').slice(1)].filter(Boolean).join(' ')
     : conjugated, passiveParticipleText].filter(Boolean).join(' ');
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
@@ -318,14 +329,19 @@ export function predicateText(
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNo || leadsNo ? modifierText : '';
-  const postVerb = mainIsFronted || splitFrequency || outscopesNo || leadsNo || (!!lead && governedNo !== '') ? '' : modifierText;
+  const postVerb = [
+    mainIsFronted || splitFrequency || outscopesNo || leadsNo || (!!lead && governedNo !== '') ? '' : modifierText,
+    splitFrequency ? '' : moreFrequency,
+    moreManner,
+  ].filter(Boolean).join(' ');
   // A pronoun experiencer is its clitic alone: "me gusta el perro". The tonic beside it, "a mí", is
   // the contrastive reading (A369); the generic "a uno" has no clitic of its own and keeps it.
   const cliticExperiencer = !!experiencerDative && isPronounElement(experiencerDative.phrase)
     && experiencerDative.phrase.agreement['generic'] !== '1';
   const complementsText = complementsAroundAdverb(modifier, adverbText,
     recipientClitic || frontedDative || cliticExperiencer ? withoutTerminus(complements) : complements,
-    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement),
+    { direction: moreAdverbText(verbPhrase, 'direction', adverbSurface), place: moreAdverbText(verbPhrase, 'place', adverbSurface) });
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
   // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here. An object pronoun
@@ -349,7 +365,7 @@ export function predicateText(
       ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${encliticCluster}`)}`
       : esCliticize([reflexive, clitic].filter(Boolean).join(' '), `no ${impForm}`);
     const impVerb = impNeg && lead ? `${lead} ${negated}` : negated;
-    return [impVerb, lead ? '' : modifierText, directObjectText, complementsText]
+    return [impVerb, lead ? '' : modifierText, moreFrequency, moreManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -366,7 +382,7 @@ export function predicateText(
     // own, and a negative word after it concords with it: "sin comer ninguna comida".
     const infNeg = !verbPhrase.negativeLink && (verbNegative === true || objectIsNegative || modifierIsNegative || complementIsNegative);
     const infVerb = `${infNeg ? (lead ? `${lead} no ` : 'no ') : ''}${esEnclitic(inf, encliticCluster)}`;
-    return [infVerb, infNeg && lead ? '' : modifierText, directObjectText, complementsText]
+    return [infVerb, infNeg && lead ? '' : modifierText, moreFrequency, moreManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
