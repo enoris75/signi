@@ -372,7 +372,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( PRODUCE ) /obj ( FLAME /pl /zero )',
     emoji: '🔥',
     synonym: 'be on fire',
-    glosses: { it: 'essere in fiamme' },
+    glosses: { it: 'essere in fiamme', fr: 'être en feu' },
     forms: {
       en: {
         base: 'burn',
@@ -521,6 +521,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( BE ) /loc ( HOME )',
     emoji: '🏘️',
     synonym: 'dwell',
+    glosses: { es: 'residir' },
     forms: {
       en: {
         base: 'live',
@@ -597,6 +598,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to be alive',
     emoji: '💓',
     synonym: 'be alive',
+    glosses: { es: 'estar vivo' },
     forms: {
       en: {
         base: 'live',
@@ -894,6 +896,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to buy and sell goods',
+    glosses: { de: 'Handel treiben' },
     definition: '/inf /verb ( BUY ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🤝',
     forms: {
@@ -1200,6 +1203,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
       /inf /verb ( FEEL ) /obj ( JOY /zero )
     `,
     synonym: 'play a game',
+    glosses: { fr: 'à un jeu' },
     emoji: '🎲',
     forms: {
       en: {
@@ -1272,7 +1276,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     description: 'to be defeated in a contest',
     definition: '/inf /verb ( WIN /not ) /loc ( GAME /a )',
     synonym: 'be defeated',
-    glosses: { it: 'essere sconfitto' },
+    glosses: { it: 'essere sconfitto', fr: 'être vaincu', de: 'besiegt werden', es: 'ser derrotado', pt: 'ser derrotado' },
     emoji: '🥈',
     forms: {
       en: {
@@ -1454,6 +1458,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause', 'locative'],
     description: 'to cease an activity',
     synonym: 'cease',
+    glosses: { fr: 'cesser', es: 'dejar de', pt: 'deixar de' },
     // "not to continue acting": the negation of CONTINUE_DOING, whose own gloss does not cite this
     // one. "No longer to act" (NO_LONGER) would be the closer gloss, but it meets B84's defect in
     // Spanish and Portuguese ("no actuar ya no").
@@ -1535,6 +1540,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'cause'],
     description: 'to come to a halt',
     synonym: 'come to a halt',
+    glosses: { pt: 'deter-se' },
     // "no longer to move" (localization B84): MOVE_ONESELF under NO_LONGER.
     definition: '/inf /verb ( MOVE_ONESELF /adv NO_LONGER )',
     emoji: '🛑',
@@ -1606,7 +1612,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause', 'locative'],
     description: 'to go on with an activity',
     synonym: 'go on',
-    glosses: { it: 'andare avanti' },
+    glosses: { it: 'andare avanti', fr: 'continuer à faire', es: 'continuar', ja: 'し続ける', pt: 'continuar a fazer' },
     // "still to act", KEEP's shape ("still to have objects") on ACT.
     definition: '/inf /verb ( ACT /adv STILL )',
     emoji: '⏩',
@@ -1689,7 +1695,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause', 'locative'],
     description: 'to become different',
     synonym: 'become different',
-    glosses: { it: 'diventare diverso' },
+    glosses: { it: 'diventare diverso', fr: 'devenir différent', es: 'volverse distinto', pt: 'tornar-se diferente' },
     emoji: '🦎',
     forms: {
       en: {

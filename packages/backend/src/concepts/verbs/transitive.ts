@@ -1042,6 +1042,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['cause'],
     description: 'to regard something as likely to happen or arrive',
+    glosses: { fr: 'prévoir', es: 'prever', pt: 'prever' },
     emoji: '🔮',
     forms: {
       en: {
@@ -1185,6 +1186,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( PRODUCE ) /obj ( SOUND /adj LOUD /pl /zero )',
     emoji: '📢',
     synonym: 'shout',
+    glosses: { de: 'schreien' },
     // The cry of a danger (an `alarm` noun) is the shout itself, "Wolf!", with no determiner of its
     // own: English "cried wolf", Italian and French a / à + the article, "gridò al lupo", "cria au
     // loup". Any other cry stays a plain object, "cried the word", "gridò la parola" (A124, A163).
@@ -1327,6 +1329,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( STRIKE /adv REPEATEDLY )',
     emoji: '🥊',
     synonym: 'hit/defeat',
+    glosses: { de: 'verprügeln', ja: '叩く' },
     isA: 'STRIKE',
     forms: {
       en: {
@@ -1396,7 +1399,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( CREATE ) /obj ( FIRE /zero )',
     emoji: '🧨',
     synonym: 'set on fire',
-    glosses: { it: 'dare fuoco' },
+    glosses: { it: 'dare fuoco', fr: 'mettre le feu' },
     forms: {
       en: {
         base: 'burn',
@@ -1467,6 +1470,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( DESTROY ) /obj ( FIRE /zero )',
     emoji: '🧯',
     synonym: 'extinguish',
+    glosses: { de: 'ein Feuer ausmachen' },
     forms: {
       en: {
         // phrasal: the particle stays adjacent to the verb before a noun object ("puts out the
@@ -1904,6 +1908,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to shut in a place and prevent from leaving',
+    glosses: { es: 'recluir' },
     emoji: '🔐',
     forms: {
       en: {
@@ -2044,7 +2049,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: '/inf /verb ( CREATE ) /obj ( OBJECT_THING /pl /zero )',
     emoji: '🔨',
     synonym: 'create',
-    glosses: { it: 'creare' },
+    glosses: { it: 'creare', fr: 'créer', es: 'crear', pt: 'criar' },
     isA: 'CREATE',
     forms: {
       en: {
@@ -2121,7 +2126,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       /inf /verb ( HAPPEN )
     `,
     synonym: 'perform',
-    glosses: { it: 'compiere' },
+    glosses: { it: 'compiere', fr: 'accomplir', es: 'realizar', pt: 'realizar' },
     emoji: '✅',
     forms: {
       en: {
@@ -2197,7 +2202,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'cause'],
     description: 'to go on with, without stopping',
     synonym: 'carry on',
-    glosses: { it: 'proseguire' },
+    glosses: { it: 'proseguire', fr: 'poursuivre', pt: 'prosseguir' },
     // "still to do an action" (localization B84): KEEP's shape ("still to have objects") on DO.
     definition: '/inf /verb ( DO /adv STILL ) /obj ( ACTION /a )',
     emoji: '▶️',
@@ -2275,6 +2280,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       /subj ( OBJECT_THING /a )
     `,
     synonym: 'play music',
+    glosses: { fr: 'de la musique', de: 'musizieren' },
     emoji: '🎻',
     forms: {
       en: {
@@ -3567,7 +3573,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     `,
     emoji: '🧳',
     synonym: 'leave behind',
-    glosses: { it: 'non portare con sé' },
+    glosses: { it: 'non portare con sé', fr: 'ne pas emporter', es: 'no llevarse', pt: 'não levar' },
     forms: {
       en: {
         base: 'leave',
@@ -3640,6 +3646,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to turn one\'s eyes toward something',
+    glosses: { ja: '眺める' },
     // "to direct the eyes to an object" (localization B61), on DIRECT_VERB: every verb the corpus had
     // for pointing the eyes failed somewhere (TURN_OBJECT's 目を回す is getting dizzy, MOVE's is
     // shifting them, PERCEIVE's is SEE's meaning).
@@ -4073,6 +4080,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'locative', 'cause'],
     description: 'to bring to a halt',
     synonym: 'halt',
+    glosses: { fr: 'immobiliser', pt: 'imobilizar' },
     // "to cause an object no longer to move" (localization B84): C08's causative on MOVE_ONESELF under
     // NO_LONGER, which B84's fix lets Spanish and Portuguese say once.
     definition: `
@@ -4156,6 +4164,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['objectPredicative', 'manner', 'instrumental', 'cause', 'locative'],
     description: 'to change a thing into another thing',
+    glosses: { ja: '変形する' },
     // "to cause an object to become another object" (localization C28). Its genus CHANGE has no
     // gloss to be told apart from, and "to change objects" would be CHANGE's own meaning; the
     // causative says what sets it apart, the other thing it ends up as. Japanese 物体が別の物体になる
@@ -4316,7 +4325,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to let flow out; to pour forth',
     emoji: '💦',
     synonym: 'pour out',
-    glosses: { it: 'spargere' },
+    glosses: { it: 'spargere', fr: 'répandre' },
     forms: {
       en: {
         base: 'shed',
@@ -5438,6 +5447,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause'],
     description: 'to join one thing to another',
+    glosses: { de: 'verknüpfen' },
     emoji: '🔗',
     forms: {
       en: {
@@ -5720,6 +5730,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to empty something of its contents',
+    glosses: { de: 'leeren' },
     definition: '/inf /verb ( DESTROY ) /obj ( CONTENT /zero )',
     emoji: '🧹',
     forms: {
@@ -6553,7 +6564,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to reverse the last change',
-    glosses: { it: 'disfare' },
+    glosses: { it: 'disfare', fr: 'défaire' },
     definition: '/inf /verb ( CANCEL ) /obj ( ACTION /pl /zero )',
     emoji: '↩️',
     forms: {
@@ -6623,6 +6634,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to make again a change that was undone',
+    glosses: { de: 'wiederherstellen' },
     definition: '/inf /verb ( MAKE /adv AGAIN )',
     emoji: '↪️',
     forms: {
@@ -6931,6 +6943,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to try something again after it failed',
+    glosses: { de: 'erneut versuchen' },
     definition: '/inf /verb ( START /adv AGAIN )',
     emoji: '🔄',
     // P09's /attach RETRY under TRY (localization B62). Its gloss stays "to start again": TRY is
@@ -7298,6 +7311,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'direction', 'source', 'cause', 'locative'],
     description: 'to change the position of something',
+    glosses: { ja: '移動させる' },
     // "to change an object's place" (localization C28), RESIZE's genus on PLACE, with the object whose
     // place it is as the genitive: it "cambiare il luogo di un oggetto", ja 物体の場所を変える.
     definition: '/inf /verb ( CHANGE ) /obj ( PLACE /poss [ OBJECT_THING /a ] )',
@@ -7381,7 +7395,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'direction', 'cause'],
     description: 'to go away from a place',
     synonym: 'exit',
-    glosses: { it: 'andare via' },
+    glosses: { it: 'andare via', es: 'marcharse', ja: '去る', pt: 'ir embora' },
     emoji: '🚪',
     forms: {
       en: {
@@ -8183,7 +8197,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to qualify or alter another word',
-    glosses: { it: 'qualificare una parola' },
+    glosses: { it: 'qualificare una parola', fr: 'qualifier un mot' },
     definition: '/inf /verb ( CHANGE ) /obj ( QUALITY /pl /zero )',
     emoji: '🔧',
     isA: 'CHANGE',
@@ -8328,7 +8342,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to change a text or a piece of work',
-    glosses: { it: 'rivedere' },
+    glosses: { it: 'rivedere', fr: 'réviser' },
     definition: '/inf /verb ( CHANGE ) /obj ( TEXT /zero )',
     emoji: '✏️',
     isA: 'CHANGE',
@@ -8407,6 +8421,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to determine the form of another word (grammar)',
     emoji: '🧭',
     synonym: 'grammar',
+    glosses: { de: 'in der Grammatik' },
     forms: {
       en: {
         base: 'govern',
@@ -8864,6 +8879,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     `,
     emoji: '📣',
     synonym: 'summon',
+    glosses: { de: 'herbeirufen' },
     forms: {
       en: {
         base: 'call',
@@ -8945,6 +8961,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     `,
     emoji: '📞',
     synonym: 'phone',
+    glosses: { es: 'por teléfono' },
     forms: {
       en: {
         base: 'call',
@@ -9383,6 +9400,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to shut a space in on its sides',
     emoji: '⭕',
     synonym: 'surround',
+    glosses: { es: 'cercar' },
     forms: {
       en: {
         base: 'enclose',
@@ -9527,6 +9545,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to rule a people, hold the government of',
     emoji: '🏛️',
     synonym: 'rule',
+    glosses: { de: 'herrschen' },
     forms: {
       en: {
         base: 'govern',
@@ -9884,6 +9903,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to come together with someone',
+    glosses: { pt: 'reunir-se com' },
     emoji: '🤝',
     forms: {
       en: {
@@ -10097,7 +10117,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to allow someone to act',
-    glosses: { it: 'permettere' },
+    glosses: { it: 'permettere', fr: 'permettre', es: 'permitir', ja: 'させる', pt: 'permitir' },
     definition: `
       /inf /verb ( CAUSE_VERB ) /obj ( PERSON /a ) /to #2 /objctl
       /inf /verb ( BE ) /pred ( ALLOWED ) /to #3
@@ -10183,6 +10203,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'cause'],
     description: 'to give permission for',
     synonym: 'permit',
+    glosses: { ja: '許可する' },
     // "to let a person act" (B85): LET's causative with its own infinitive. LET's gloss is "to cause a
     // person to be allowed to act", so the two are close and neither restates the other's word.
     definition: `
@@ -10264,6 +10285,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to find pleasant',
+    glosses: { fr: 'apprécier' },
     // "To find pleasant" needs a word the corpus lacks, so the gloss says what liking is: the joy
     // the thing causes. FEEL + JOY alone is PLAY_GAME's differentia (B62); the cause is what tells
     // them apart.

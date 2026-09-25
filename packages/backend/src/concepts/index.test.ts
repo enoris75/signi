@@ -259,13 +259,16 @@ describe('the Swiss German column (P10-E4)', () => {
 });
 
 // A picker lists concepts by their word, so two verbs that share one in a language look identical
-// there unless a gloss beside the word tells them apart (BEGIN / START, both *iniziare*). Italian is
-// glossed; the other languages are not yet, and join the list as they are.
+// there unless a gloss beside the word tells them apart (BEGIN / START, both *iniziare*): English's
+// `synonym`, every other language's `glosses`. Verbs are glossed in every ready language; the other
+// roles are not yet.
 describe('picker glosses', () => {
-  const GLOSSED: readonly string[] = ['it'];
+  const READY = ['en', 'it', 'fr', 'de', 'es', 'ja', 'pt'] as const;
   const sensed = new Set(concepts.filter((c) => c.senseOf).map((c) => c.id));
+  const glossOf = (c: (typeof concepts)[number], lang: (typeof READY)[number]) =>
+    lang === 'en' ? c.synonym : c.glosses?.[lang];
 
-  test.each(GLOSSED)('%s: of the verbs that share a word, at most one goes unglossed', (lang) => {
+  test.each(READY)('%s: of the verbs that share a word, at most one goes unglossed', (lang) => {
     const byWord = new Map<string, typeof concepts>();
     for (const c of concepts) {
       const word = c.forms[lang]?.['base'];
@@ -274,15 +277,19 @@ describe('picker glosses', () => {
     }
     const bare = [...byWord]
       .filter(([, group]) => group.length > 1)
-      .map(([word, group]) => [word, group.filter((c) => !c.glosses?.[lang as 'it']).map((c) => c.id)] as const)
+      .map(([word, group]) => [word, group.filter((c) => !glossOf(c, lang)).map((c) => c.id)] as const)
       .filter(([, ids]) => ids.length > 1);
     expect(bare).toEqual([]);
   });
 
   test('a gloss is never the word it glosses, nor another concept\'s gloss for the same word', () => {
     const seen = new Map<string, string>();
-    for (const c of concepts) {
-      for (const [lang, gloss] of Object.entries(c.glosses ?? {})) {
+    // A pronoun's picker shows its person, not its word, so its synonym may be the word ("one"); a
+    // slotted concept (OWN_ADJECTIVE) is in no picker at all.
+    for (const c of concepts.filter((c) => c.role !== 'pronoun' && !c.slot)) {
+      for (const lang of READY) {
+        const gloss = glossOf(c, lang);
+        if (!gloss) continue;
         expect(gloss, `${c.id} ${lang}`).not.toBe(c.forms[lang]?.['base']);
         const key = `${lang}:${c.forms[lang]?.['base']}:${gloss}`;
         expect(seen.get(key), `${c.id} ${lang}`).toBeUndefined();

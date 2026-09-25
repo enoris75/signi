@@ -47,7 +47,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'have to',
-    glosses: { it: 'essere obbligato' },
+    glosses: { it: 'essere obbligato', fr: 'être obligé', es: 'estar obligado', pt: 'ser obrigado' },
     emoji: '❗',
     forms: {
       en: {
@@ -121,7 +121,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'be able to',
-    glosses: { it: 'essere in grado' },
+    glosses: { it: 'essere in grado', fr: 'être capable', es: 'ser capaz', pt: 'ser capaz' },
     emoji: '💪',
     forms: {
       en: {
@@ -276,7 +276,7 @@ export const modals: ConceptSeed[] = [
       /inf /verb ( ACT )
     `,
     synonym: 'be allowed to',
-    glosses: { it: 'avere il permesso' },
+    glosses: { it: 'avere il permesso', fr: 'avoir la permission', es: 'tener permiso', pt: 'ter permissão' },
     emoji: '🎫',
     forms: {
       en: {
@@ -360,7 +360,7 @@ export const modals: ConceptSeed[] = [
       /subj ( one ) /verb ( ACT )
     `,
     synonym: 'ought to',
-    glosses: { it: 'essere opportuno' },
+    glosses: { it: 'essere opportuno', fr: 'être souhaitable', es: 'ser conveniente', pt: 'ser conveniente' },
     emoji: '🫵',
     forms: {
       en: {
@@ -423,7 +423,7 @@ export const modals: ConceptSeed[] = [
       /subj ( one ) /verb ( ACT )
     `,
     synonym: 'possibly',
-    glosses: { it: 'forse' },
+    glosses: { it: 'forse', fr: 'peut-être', de: 'vielleicht', es: 'quizás', pt: 'talvez' },
     emoji: '🎲',
     forms: {
       en: {
