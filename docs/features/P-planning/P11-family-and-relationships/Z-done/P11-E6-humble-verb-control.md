@@ -108,9 +108,9 @@ What landed differently from the design below:
 
 Not done here, and why:
 
-- **"My father comes" alone.** The owner picker takes no pronoun until [P11-E9](P11-E9-pronoun-owner.md).
-  The owner test needs no change for it: a named owner that is a 1st-person pronoun is already the
-  speaker's side (`isOwnSide`), so once E9 lets one be picked, "my father" passes one link down.
+- **"My father comes" alone** arrived with [P11-E9](P11-E9-pronoun-owner.md), merged the same day, with no
+  change to the gate: a named owner that is a 1st-person pronoun is already the speaker's side
+  (`isOwnSide`). `questionGates.test.ts` pins "my father" and "our mother" offered, "your mother" refused.
 - **A plain clause keeps the toggle.** A period linked in as a relative, content or adverbial clause
   still offers it, and the engine ignores the flag there, as it does the existential's.
 - **BE stays hand-coded in the gate**, as it is in `canBeExistential`, not a seeded flag.
@@ -375,12 +375,6 @@ point:** whether German wants *demütig* or a noun-based label (*Bescheidenheits
 
 ## Out of scope
 
-- **"My X" as a named owner.** The owner picker takes no pronoun, so "my father comes" cannot be
-  built without an *I* elsewhere in the period. That limits this toggle's reach, and every other
-  P11 construct's, but it is a possessor-picker change of its own: [P11-E9](P11-E9-pronoun-owner.md). Neither sibling covers it:
-  [P11-E7](P11-E7-coreferent-possessor-control.md)'s coreferent possessor cannot stand in the
-  subject (E2 Done 6), so it never makes a subject the speaker's side, and E7 does not interact with
-  this toggle.
 - **An automatic humble.** E1 D4 made the humble opt-in because the plan models no addressee.
   [P11-E8](P11-E8-vocative-control.md)'s vocative puts one in the plan, but the engine keeps the
   register unchanged under an address (pinned). Making a vocative imply the humble is an engine
