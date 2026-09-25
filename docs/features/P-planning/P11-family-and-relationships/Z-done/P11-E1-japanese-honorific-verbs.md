@@ -182,5 +182,5 @@ existing reading columns carry.
 - **Social deixis beyond kin** (D3) — a teacher, a customer, a superior.
 - **The productive お+stem+になる / お+stem+する** (D2).
 - **Automatic humble** (D4), which needs an addressee in the model — the same gap
-  [P11-E3](../P11-E3-address-and-the-vocative.md) runs into from the other side.
+  [P11-E3](P11-E3-address-and-the-vocative.md) runs into from the other side.
 - **Honorific adjectives and copulas** (でいらっしゃる).

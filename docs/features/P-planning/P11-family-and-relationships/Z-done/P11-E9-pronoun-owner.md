@@ -13,8 +13,8 @@ the console, with its print → apply round trip. `planToWorkspace` learns the p
 owner ring (`PhraseBuilder.tsx`, `rawSatellites.tsx`, `OwnerRings.tsx`), the pick keys, and console
 completion. No new UI string, no seed, no engine change.
 **Status:** **shipped, 2026-09-25** — see [Done](#done). Filed 2026-09-25; found while writing
-[P11-E6](../P11-E6-humble-verb-control.md), whose *Out of scope* names the gap.
-[P11-E7](P11-E7-coreferent-possessor-control.md) and [P11-E8](../P11-E8-vocative-control.md) record it
+[P11-E6](P11-E6-humble-verb-control.md), whose *Out of scope* names the gap.
+[P11-E7](P11-E7-coreferent-possessor-control.md) and [P11-E8](P11-E8-vocative-control.md) record it
 too.
 
 Engine output at HEAD (1bb7c878), from hand-written plans. Rendered 2026-09-25 with `sayAll` on an
@@ -423,7 +423,7 @@ a question for the bug catalogue. It is recorded here and not filed.
 
 ### D9. The sibling tickets
 
-- **[P11-E6](../P11-E6-humble-verb-control.md).** The humble register's `own` is set by
+- **[P11-E6](P11-E6-humble-verb-control.md).** The humble register's `own` is set by
   `applyPossessorForm` for any 1st-person pronominal owner, so "my father comes" + `humble` gives
   父は参ります (E6's table). E6 D2's `canBeHumble` gains one case: a noun under RELATIVE whose named
   owner's head is FIRST_PERSON. Whichever of the two lands second adds it. E6's *Out of scope* note
@@ -434,7 +434,7 @@ a question for the bug catalogue. It is recorded here and not filed.
   - `planToWorkspace`: E7 maps the link, this maps the features;
   - the chip: E7's D5 hook renders a link in context, and this reuses the bare-phrase render.
   E7's *Out of scope* note ("a 1st-person named owner") retires.
-- **[P11-E8](../P11-E8-vocative-control.md).** Its fourth column, "my wife, run", is a command with no *I*
+- **[P11-E8](P11-E8-vocative-control.md).** Its fourth column, "my wife, run", is a command with no *I*
   in the period, so without this task it cannot be built. E8 D3's "possessor: named ring or pointed-to
   pronoun" row then includes a pronoun-headed ring. Every person is allowed there: the refusal E8
   inherits (A338) is on the address's **head**, not its owner.

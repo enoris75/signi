@@ -29,7 +29,7 @@ in-memory seed:
 
 The commands use the builder's default imperative, 2nd singular in the request register. The
 Portuguese *Minha esposa* has had no article since A336 was fixed. E3's *Done* table still shows *A minha
-esposa*, and that row is stale. The last column needs [P11-E9](../P11-E9-pronoun-owner.md) as well: a command has no *I* in the period for "my" to point at.
+esposa*, and that row is stale. The last column needs [P11-E9](P11-E9-pronoun-owner.md) as well: a command has no *I* in the period for "my" to point at.
 
 ## Why
 
@@ -206,7 +206,7 @@ and nothing else".
 | relative clause (as source) | yes | "Cat that runs, eat." |
 | **determiner**, contrast | **withdrawn** | forced bare in all seven, so the chip would change nothing in any language. E44 kept its chip only because English prints it |
 | title | none | no builder control sets `NounPhrase.title` anywhere today (C38 is label-only) |
-| coreferent possessor ([P11-E7](../P11-E7-coreferent-possessor-control.md)) | **not offered** | the engine throws on one inside the address |
+| coreferent possessor ([P11-E7](P11-E7-coreferent-possessor-control.md)) | **not offered** | the engine throws on one inside the address |
 | question mark, existential, voice | no | clause slots only |
 
 Withdrawing the determiner is not a case for "grow, never hide". That rule keeps controls the grammar
@@ -290,7 +290,7 @@ Reseed `signi.db`.
   Enter for the word, A, N, G, P, C, Backspace. `noun.determiner` is withdrawn, because its `when`
   finds no `vocativeDefiniteness`.
 - `KEY_COMMANDS['period.vocative'] = 'voc'` in the console coverage test. There is no Alt layer.
-- Recheck V against E47, [P11-E6](../P11-E6-humble-verb-control.md) and [P11-E7](../P11-E7-coreferent-possessor-control.md) before landing. None of them claims V as filed.
+- Recheck V against E47, [P11-E6](P11-E6-humble-verb-control.md) and [P11-E7](P11-E7-coreferent-possessor-control.md) before landing. None of them claims V as filed.
 
 **Recommendation: as stated.**
 
@@ -424,7 +424,7 @@ canvas and the console build the `PhrasePlan.address` E3 already renders.
 Built on the canvas (the border toggle and **V**, the group from the ring's coordinate control) and
 checked in all seven by `translation.spec.ts`. The last column is the person default (D4) at work: the
 second word in the group turned the command's 2nd singular into the 2nd plural. *My wife, run* waits
-for [P11-E9](../P11-E9-pronoun-owner.md), as the table above says: the vocative's owner controls are
+for [P11-E9](P11-E9-pronoun-owner.md), as the table above says: the vocative's owner controls are
 the ordinary ones, so E9's picker reaches them unchanged.
 
 What landed:

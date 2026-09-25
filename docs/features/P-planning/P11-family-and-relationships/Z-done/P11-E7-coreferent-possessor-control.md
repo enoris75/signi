@@ -174,7 +174,7 @@ Verified at HEAD (1d8f359b), 2026-09-25.
   - a link anywhere inside the subject it points at: its owner chain, a conjunct, a standard
     (`plan.subject.possessor: a coreferent possessor cannot stand in the subject it points at`). A
     relative clause's or a content clause's own subject is refused the same way;
-  - a link in a phrase no clause holds. That is the address, [E8](../P11-E8-vocative-control.md)'s vocative
+  - a link in a phrase no clause holds. That is the address, [E8](P11-E8-vocative-control.md)'s vocative
     ([`coreference.test.ts:332`](../../../../../packages/engine/test/coreference.test.ts#L332)).
 
   The binding is per clause ([`resolvePhrase.ts:159`](../../../../../packages/engine/src/translator/functions/resolvePhrase.ts#L159)).

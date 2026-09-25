@@ -368,7 +368,7 @@ changes in this plan:
 
 The follow-ups below were broken down on 2026-09-23. **Five need a construct** and were task files in
 this folder — **all five shipped on 2026-09-24**, in one batch, and are in [`Z-done/`](Z-done/). E1–E3
-shipped plan-only, so their builder controls were filed on 2026-09-25 as **E6–E8**, and the pronoun owner they lean on as **E9**. The rest are vocabulary, which goes through
+shipped plan-only, so their builder controls were filed on 2026-09-25 as **E6–E8**, and the pronoun owner they lean on as **E9** — all four shipped the same day. The rest are vocabulary, which goes through
 [`/seed`](../../../../.claude/skills/seed/SKILL.md) and the B queue as P09 §2's words did, not
 through a feature task.
 
@@ -379,10 +379,10 @@ through a feature task.
 | [P11-E3](Z-done/P11-E3-address-and-the-vocative.md) | **Shipped 2026-09-24.** Address — MOM and DAD as names ("Mom runs", *la mamma corre*) and the vocative `PhrasePlan.address` ("Mom, run.", *Mamá, ¿el gato corre?*), the Japanese honorific for elders only; plan-only | two halves; the name half is data, the vocative is a new slot |
 | [P11-E4](Z-done/P11-E4-indefinite-possessed-head.md) | **Shipped 2026-09-24, as bug [A277](../../../bugs/fixed/A277-an-indefinite-possessed-head-reads-as-a-definite-one.md).** "a friend of mine" / *un mio amico* / *ein Freund von mir* | one `Set` member — and **possibly a bug rather than a feature**, see its D3 |
 | [P11-E5](Z-done/P11-E5-counting-relatives.md) | **Shipped 2026-09-24.** 三人兄弟 — `counter_join: 'compound'` on 兄弟 and 姉妹, replacing `counter_is_head` | a third value of a flag that has two |
-| [P11-E6](P11-E6-humble-verb-control.md) | **Planning.** The builder control for E1's humble — a toggle on the subject's ring, `H`, `/humble` in the verb's bracket | one selection flag, a gate mirroring the engine's, one seeded label concept |
-| [P11-E7](P11-E7-coreferent-possessor-control.md) | **Planning.** The builder control for E2's link — no new control: an owner pointed at the clause's own subject writes `coreferent` instead of copying its features | one gate in `buildNounPhrase`; command and infinitive boxes become pick targets |
-| [P11-E8](P11-E8-vocative-control.md) | **Planning.** The builder control for E3's vocative — a period border toggle revealing an address box, `V`, `/voc ( … )` | a new noun key, one seeded label concept; seats beside [P09-E47](../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s interjection |
-| [P11-E9](P11-E9-pronoun-owner.md) | **Planning.** A pronoun as a named owner — "my mother runs" with no *I* elsewhere in the period, which this doc's own first table needs; found writing E6 | the owner picker's Pronoun tab, written as a `PronominalPossessor`; `/poss [ 1st ]` |
+| [P11-E6](Z-done/P11-E6-humble-verb-control.md) | **Shipped 2026-09-25.** The builder control for E1's humble — a toggle on the subject's ring, `K`, `/humble` in the verb's bracket | one selection flag, a gate mirroring the engine's, one seeded label concept |
+| [P11-E7](Z-done/P11-E7-coreferent-possessor-control.md) | **Shipped 2026-09-25.** The builder control for E2's link — no new control: an owner pointed at the clause's own subject writes `coreferent` instead of copying its features | one gate in `buildNounPhrase`; command and infinitive boxes become pick targets |
+| [P11-E8](Z-done/P11-E8-vocative-control.md) | **Shipped 2026-09-25.** The builder control for E3's vocative — a period border toggle revealing an address box, `V`, `/voc ( … )` | a new noun key, one seeded label concept; seats beside [P09-E47](../P09-core-vocabulary/Z-done/P09-E47-interjection-palette.md)'s interjection |
+| [P11-E9](Z-done/P11-E9-pronoun-owner.md) | **Shipped 2026-09-25.** A pronoun as a named owner — "my mother runs" with no *I* elsewhere in the period, which this doc's own first table needs; found writing E6 | the owner picker's Pronoun tab, written as a `PronominalPossessor`; `/poss [ 1st ]` |
 
 **No task, by design:**
 
