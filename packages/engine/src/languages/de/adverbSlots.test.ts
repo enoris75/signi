@@ -32,6 +32,22 @@ describe('adverbSlots', () => {
       .toEqual({ beforeObject: '', afterObject: '', nichtBeforeObject: 'auch nicht', nichtAfterObject: '' });
   });
 
+  test('further adverbs take their class\'s slot, time–manner–place (P15)', () => {
+    const OFT = concept({ base: 'oft', subtype: 'frequency' });
+    const more = [concept({ base: 'schnell' }), concept({ base: 'hier', subtype: 'place' }), concept({ base: 'wieder', subtype: 'frequency' })];
+    expect(adverbSlots(OFT, NICHT, '', more))
+      .toEqual({ beforeObject: 'oft wieder schnell', afterObject: 'hier', nichtBeforeObject: 'nicht', nichtAfterObject: '' });
+  });
+
+  test('a direction adverb closes the Mittelfeld behind a place one, and "nicht" leads it alone (P15)', () => {
+    const UP = concept({ base: 'nach oben', subtype: 'direction' });
+    const HERE = concept({ base: 'hier', subtype: 'place' });
+    expect(adverbSlots(UP, NICHT, '', [HERE]))
+      .toEqual({ beforeObject: '', afterObject: 'nach oben', nichtBeforeObject: '', nichtAfterObject: 'hier nicht' });
+    expect(adverbSlots(HERE, NONE, '', [UP]))
+      .toEqual({ beforeObject: '', afterObject: 'nach oben', nichtBeforeObject: '', nichtAfterObject: 'hier' });
+  });
+
   test('no adverb at all', () => {
     expect(adverbSlots(undefined, NONE, ''))
       .toEqual({ beforeObject: '', afterObject: '', nichtBeforeObject: '', nichtAfterObject: '' });
