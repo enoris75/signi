@@ -1,7 +1,7 @@
 # B68. The family — a relative, a family, a parent's child: five glosses, and *son* and *daughter* on the literal
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. The nuclear family of
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) §4 and its casual names.
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4 and its casual names.
 Eight words seed, four gloss, and PARENT — seeded already — is **re-pointed** to the new
 CHILD_OFFSPRING (P11 D11) and gets the three plurals of D7. SON, DAUGHTER, MOM and DAD stay on the
 English literal, each with its leads probed below. No gloss here reads P11's new lexeme columns, so
@@ -16,7 +16,7 @@ them until the engine learned that an indefinite possessor is nobody in particul
 Proposed forms, for the seed author to check — suggestions, not renders. **(k)** is the Italian
 `kinship: '1'` flag (P11 D9); the Japanese `base` is given here, with the `possessed` / `honorific` /
 `kin` columns P11 D2 adds in the same seed (they are listed in
-[P11 §4](../../features/P-planning/P11-family-and-relationships/README.md), and no definition reads
+[P11 §4](../../features/Z-Done/P11-family-and-relationships/README.md), and no definition reads
 them).
 
 | concept | role | en | it | fr | de | es | ja | pt |

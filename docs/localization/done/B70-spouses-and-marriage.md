@@ -1,7 +1,7 @@
 # B70. Spouses and marriage — four words, four glosses, and the copula that must not take an object
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. SPOUSE, HUSBAND and WIFE of
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) §4, and the verb **MARRY**.
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4, and the verb **MARRY**.
 All four gloss. HUSBAND and WIFE are the pair D12 keeps on `glossOf(genus, MALE / FEMALE)`, and they
 work because *coniuge*, *conjoint*, *Ehepartner*, *cónyuge*, *cônjuge* and 配偶者 are neutral in every
 language.)_

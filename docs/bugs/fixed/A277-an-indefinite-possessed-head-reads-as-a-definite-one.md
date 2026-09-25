@@ -33,7 +33,7 @@ possessive after the article only where there is one.
 Pinned by `known bugs: an indefinite possessed head reads as a definite one (A277)` in
 [possession.test.ts](../../../packages/engine/test/possession.test.ts).
 
-Found by P11 ([P11-E4](../../features/P-planning/P11-family-and-relationships/Z-done/P11-E4-indefinite-possessed-head.md)).
+Found by P11 ([P11-E4](../../features/Z-Done/P11-family-and-relationships/Z-done/P11-E4-indefinite-possessed-head.md)).
 
 ## Resolved
 

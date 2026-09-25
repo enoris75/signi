@@ -142,7 +142,7 @@ express anyway.
 Five of the seven mark a vocative with **nothing but position and a comma** — it is fronted, set off,
 and otherwise a bare noun phrase. Japanese adds a comma and drops the particle. No language in this
 set has a vocative *case* (Polish and Ukrainian do, which is
-[P05](../../P05-polish/README.md)/[P07](../../P07-ukrainian/README.md)'s problem and worth naming now).
+[P05](../../../P-planning/P05-polish/README.md)/[P07](../../../P-planning/P07-ukrainian/README.md)'s problem and worth naming now).
 
 **Recommendation: `address?: NounElement` on `PhrasePlan`**, rendered before the clause with the
 language's separator. Determiner-less by rule in every language — "the Mom, run!" is wrong in all

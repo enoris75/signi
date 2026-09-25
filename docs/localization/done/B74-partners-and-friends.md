@@ -1,7 +1,7 @@
 # B74. Partners and friends — five words, five glosses, and the Japanese gap that needs an adverb
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. The people one chooses rather than is
-born to, [P11](../../features/P-planning/P11-family-and-relationships/README.md) §4: PARTNER,
+born to, [P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4: PARTNER,
 BOYFRIEND, GIRLFRIEND, FIANCE and FRIEND. All five gloss. Four surfaces collide with concepts the
 corpus already has — de *Freund*, it *ragazzo* and *compagno*, fr *compagnon* — and these tooltips
 are what tell them apart.)_

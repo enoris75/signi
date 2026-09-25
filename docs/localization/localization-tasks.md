@@ -187,7 +187,7 @@ The E24 words that are **not** here are constructs, not seeds:
 Three of them seed words when they land: NEWS (E41), SOMEONE (E40), and MAYBE, PROBABLY, ACTUALLY and
 OF_COURSE (E39).
 
-B68–B74, the [P11](../features/P-planning/P11-family-and-relationships/README.md) kin
+B68–B74, the [P11](../features/Z-Done/P11-family-and-relationships/README.md) kin
 terms, were filed on 2026-09-22 (see [the P11 sweep](#the-p11-sweep-of-2026-09-22)) and authored the
 same day; all seven are in [`done/`](done/). They seeded **41 concepts** — forty relatives and
 partners, the two adjectives ELDER and YOUNGER, and the verb MARRY — and authored **38 definitions**:
@@ -355,7 +355,7 @@ concepts ([B68–B74](#part-b--needs-seeding-b-needs-seed)) composed 37 glosses 
 stood, and the four that stay on the literal — SON, DAUGHTER, MOM and DAD — are literal by design,
 not blocked: no construct would move them. The engine work that feature needs (the Japanese
 `possessed` and `honorific` columns, German's adjectival noun, the sibling fusion) belongs to
-[P11](../features/P-planning/P11-family-and-relationships/README.md) itself — but "no definition
+[P11](../features/Z-Done/P11-family-and-relationships/README.md) itself — but "no definition
 reads any of it", which this paragraph said and every ticket repeated, turned out to be false: eleven
 of the glosses are genitives, and a genitive possessor selects the head's word. The rule that keeps a
 tooltip out of the honorific is in [B68](done/B68-the-family.md)'s report; it is a narrowing of P11's
@@ -651,7 +651,7 @@ render that changed.
 
 ### The P11 sweep of 2026-09-22
 
-[P11](../features/P-planning/P11-family-and-relationships/README.md) plans the kin terms — about
+[P11](../features/Z-Done/P11-family-and-relationships/README.md) plans the kin terms — about
 forty relatives and partners, two adjectives and MARRY — and its **D12** asks for localization
 tickets for the pairs it could not see a definition for. This sweep files the whole seed, as
 [B68–B74](#part-b--needs-seeding-b-needs-seed), one ticket per branch of the family, and files **no

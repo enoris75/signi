@@ -1,7 +1,7 @@
 # B69. Brothers and sisters — five glosses on one shape, and the Spanish *a* that has to go
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. SIBLING, BROTHER and SISTER of
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) §4, and the two adjectives
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4, and the two adjectives
 **ELDER** and **YOUNGER** that D5 seeds for the Japanese fusion. All five gloss. The route is not
 the one P11 D12 assumed — see reading 1 — and it meets one Spanish defect, which the seed has to fix
 (reading 2).)_
@@ -14,7 +14,7 @@ seed, as reading 2 asked.
 Proposed forms, for the seed author to check — suggestions, not renders. **(k)** is the Italian
 `kinship: '1'` flag (P11 D9). The Japanese `with_ELDER` / `with_YOUNGER` fusion columns (兄, 弟, 姉,
 妹 and their honorifics) are in [P11
-§4](../../features/P-planning/P11-family-and-relationships/README.md#the-family); no definition
+§4](../../features/Z-Done/P11-family-and-relationships/README.md#the-family); no definition
 reads them, so the tooltips do not wait on P11 §2–§3.
 
 | concept | role | en | it | fr | de | es | ja | pt |

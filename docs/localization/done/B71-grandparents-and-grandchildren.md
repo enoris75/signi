@@ -1,7 +1,7 @@
 # B71. Grandparents and grandchildren — six words, six glosses, all on a genitive
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. The generation above the parents and
-the one below the children, [P11](../../features/P-planning/P11-family-and-relationships/README.md)
+the one below the children, [P11](../../features/Z-Done/P11-family-and-relationships/README.md)
 §4. All six gloss, four on a kin genitive ("a parent's parent") and two on the sex adjective, which
 works here where [B69](B69-brothers-and-sisters.md) had to go around it: *nipote*, *petit-enfant*,
 *Enkelkind* and 孫 are neutral.)_

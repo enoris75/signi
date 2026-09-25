@@ -260,7 +260,7 @@ fünf Häusern*) come along (A291); the French `artFor` writes no indefinite art
 so *avec trois chiens*, and a bare `one` instrument is *avec un bâton* (A292); and French HOUR and
 HYPERNYM carry `elides` (A337: *l'heure*, *l'hyperonyme*).
 
-**A277**, filed and fixed on 2026-09-24 from [P11-E4](../features/P-planning/P11-family-and-relationships/Z-done/P11-E4-indefinite-possessed-head.md)
+**A277**, filed and fixed on 2026-09-24 from [P11-E4](../features/Z-Done/P11-family-and-relationships/Z-done/P11-E4-indefinite-possessed-head.md)
 (whose own D3 called it a defect), was an indefinite possessed head read as a definite one: *indefinite*
 + *my* rendered "my friend" in six languages. `KEPT_BESIDE_POSSESSIVE` now holds `indefinite`, so the
 possessive detaches — "a friend of mine", *un mio amico*, *un ami à moi*, *ein Freund von mir*, *un

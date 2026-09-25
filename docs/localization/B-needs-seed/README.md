@@ -10,7 +10,7 @@ came with them, each pinned and written up in its ticket — see
 [the index](../localization-tasks.md#part-b--needs-seeding-b-needs-seed).
 
 [B68](../done/B68-the-family.md)–[B74](../done/B74-partners-and-friends.md), the
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) kin terms, were filed on
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) kin terms, were filed on
 2026-09-22 and authored the same day: **41 concepts seeded** — forty relatives and partners, the two
 adjectives ELDER and YOUNGER, and the verb MARRY — and **38 definitions**, which is every one they
 forecast. Four of the 41 stay on the English literal by design (SON and DAUGHTER, which would close a

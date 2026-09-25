@@ -1,7 +1,7 @@
 # B72. Uncles, aunts and cousins — five words, five glosses, and the first genitive inside a genitive
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. The extended family of
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) §4: UNCLE, AUNT, COUSIN,
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4: UNCLE, AUNT, COUSIN,
 NEPHEW and NIECE. All five gloss, each naming the relative it hangs off — a parent's brother, a
 sibling's son — and COUSIN chains two genitives, which no shipped definition does yet.)_
 
@@ -90,7 +90,7 @@ Three readings to judge on authoring:
    SIBLING.
 2. **Which side the relative is on** (mother's brother against father's brother) is what Japanese
    writes in the kanji this seed avoids, and what Russian and Ukrainian will need for the in-laws
-   ([P11's *Later languages*](../../features/P-planning/P11-family-and-relationships/README.md#later-languages)).
+   ([P11's *Later languages*](../../features/Z-Done/P11-family-and-relationships/README.md#later-languages)).
    A gloss cannot say it without the coordination above.
 3. **No word is seeded here that only an unwritable tooltip would use** — all five are P11 §4 rows.
 

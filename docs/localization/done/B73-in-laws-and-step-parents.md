@@ -1,7 +1,7 @@
 # B73. In-laws and step-parents — eight words, eight glosses, two of which have to deny an identity
 
 _(from the P11 family-and-relationships sweep of 2026-09-22. The relatives by marriage of
-[P11](../../features/P-planning/P11-family-and-relationships/README.md) §4, and the two
+[P11](../../features/Z-Done/P11-family-and-relationships/README.md) §4, and the two
 step-parents. All eight gloss: six are one genitive ("a spouse's mother"), and STEPFATHER and
 STEPMOTHER need a negated relative beside the genitive, because a mother's husband is otherwise just
 a father.)_
