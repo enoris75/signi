@@ -963,6 +963,18 @@ describe('PhraseBuilder', () => {
       ]);
     });
 
+    // P09-E44 D3: a role's conjunct is a noun, as its head is — a pronoun would drop the whole role.
+    it('keeps a role’s conjunct to nouns', () => {
+      const act: Concept = { id: 'ACT', role: 'verb', description: 'ACT', label: 'act', transitivity: 'intransitive', complements: ['role'] };
+      const { selection } = renderPeriod({ subject: CAT, verb: act, role: DOG });
+      fireEvent.click(satellite('roleConjunct'));
+
+      expect(selection().roleConjuncts).toEqual([{}]);
+      expect(screen.queryByTestId('pronoun-tab')).not.toBeInTheDocument();
+      pickOption('HORSE');
+      expect(selection().roleConjuncts).toEqual([{ subject: HORSE }]);
+    });
+
     it('names a conjunct’s ring after the role it shares with its head', () => {
       renderPeriod({
         subject: BOY,

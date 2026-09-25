@@ -23,6 +23,7 @@ import {
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
   MUI_COLOR_HEX,
+  nounOnlyConjunct,
 } from "./slots.ts";
 import {
   applyConceptSelect,
@@ -1002,8 +1003,9 @@ export function PhraseBuilder({
   const ctx: PhraseRenderContext = {
     selection,
     nounPhrase: nounPhraseMode,
-    // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him").
-    pronounHead: ringHost?.kind === "conjunct" || ringHost?.kind === "standard",
+    // A conjunct may be a pronoun ("you and I"), and so may a standard ("bigger than him") — but not a
+    // role's conjunct, a noun as the role's head is (P09-E44).
+    pronounHead: (ringHost?.kind === "conjunct" && !nounOnlyConjunct(ringHost.role)) || ringHost?.kind === "standard",
     // …and a predicate's conjunct takes an adjective, as the predicate does (P13).
     predicateHead: ringHost?.kind === "conjunct" && ringHost.role === "predicative",
     showSubject: !actionMode,

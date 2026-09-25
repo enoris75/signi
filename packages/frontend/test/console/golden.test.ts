@@ -468,6 +468,19 @@ describe('/bothand past a pair', () => {
   });
 });
 
+// P09-E44 D3: a role's conjuncts are nouns, as its head is — a pronoun in the group would drop the whole
+// role ("the man acts."). The opponent's take a pronoun, which renders ("against the dog and him").
+describe('a complement’s conjuncts', () => {
+  it('refuses a pronoun beside the role, and takes a noun', () => {
+    expect(run('/verb act /role ( friend /and he )').diagnostic).toMatchObject({ code: 'unknownWord', args: { text: 'he' } });
+    expect(print(ok('/verb act /role ( friend /and man )'))).toBe('/verb ( act ) /role ( friend /and man )');
+  });
+
+  it('takes a pronoun beside the opponent', () => {
+    expect(run('/verb play /vs ( dog /and he )').diagnostic).toBeUndefined();
+  });
+});
+
 // P09-E12: a subordinate clause has no mood of its own, the question's included — it would be spoken
 // inside the clause ("says that does the cat run") — so the question is locked on it as the other two
 // moods are, by /ask and by /wh alike; the clause that governs it may still ask ("does the man say
