@@ -255,6 +255,21 @@ describe('P10-E12: possession without a genitive', () => {
   });
 });
 
+// A371: an attributive superlative says its set after the noun, as the predicate does (the fork shares
+// de's `nounStandard`, and the set is resolved for every language).
+describe('A371: an attributive superlative keeps its set', () => {
+  const house = (degree: 'most' | 'least') => np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [np('CITY')] });
+
+  test.each<[string, PhrasePlan, string]>([
+    ['the predicate', clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: 'most', headStandard: np('CITY') }) } } }), 's Huus isch s gröscht de Stadt.'],
+    ['the object', clause(np('MAN'), 'SEE', { directObject: house('most') }), 'de Maa gseet s gröscht Huus de Stadt.'],
+    ['least', clause(np('MAN'), 'SEE', { directObject: house('least') }), 'de Maa gseet s am wenigschte gross Huus de Stadt.'],
+    ['the subject', clause(house('most'), 'RUN'), 's gröscht Huus de Stadt springt.'],
+  ])('%s', (_, plan, want) => {
+    expect(gsw(plan)).toBe(want);
+  });
+});
+
 describe('names', () => {
   // Swiss German articles a person's name, where Standard German does not (verify, E14).
   test.each<[string, PhrasePlan, string]>([

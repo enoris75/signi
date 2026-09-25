@@ -899,11 +899,15 @@ export interface NounPhrase {
    * `headStandard`'s, by degree (than / as, di / quanto, que, als / wie, que / como, do que / como,
    * より / ほど / と同じくらい).
    *
+   * On a superlative it is the **set** the adjective selects from, said with the predicate's words
+   * (P09-E19, A371): "the biggest house **in the city**", *la casa più grande **della città***, *das
+   * größte Haus **der Stadt***, **都市の中で**最も大きい家. It stands where a comparative's standard
+   * does.
+   *
    * **At most one renders**: the first adjective whose degree takes a standard (`STANDARD_DEGREES`:
-   * the comparatives and the equative) and whose entry is set. Every other entry is dropped — on a
-   * `positive` adjective, on a superlative (whose set is predicative only, P09-E19 D5), and on a
-   * second compared adjective, since no language says "a bigger-than-the-dog more-beautiful-than-the-
-   * fox cat".
+   * the comparatives and the equative) or a set (`SUPERLATIVE_DEGREES`) and whose entry is set. Every
+   * other entry is dropped — on a `positive` adjective, and on a second compared adjective, since no
+   * language says "a bigger-than-the-dog more-beautiful-than-the-fox cat".
    *
    * Where it goes is each language's:
    *

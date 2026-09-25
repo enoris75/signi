@@ -276,8 +276,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // dog" (A283; only English moves one, and the Romance words have no attributive keys).
     applyIntensifier(cf, np.adjectiveIntensifiers?.[i], language, lookup, i !== attributive?.planIndex);
     // The one attributive standard, on the adjective it belongs to (P09-E18): marked as a predicate
-    // adjective's is, so its equative adverb takes the circumfix ("a cat as big as the dog").
-    if (i === attributive?.planIndex) { cf.forms['standard'] = '1'; compared = cf; }
+    // adjective's is, so its equative adverb takes the circumfix ("a cat as big as the dog") — or, on
+    // a superlative, as the set it selects from (P09-E19, A371: "the biggest house in the city").
+    if (i === attributive?.planIndex) { cf.forms[attributive.domain ? 'domain' : 'standard'] = '1'; compared = cf; }
     return [cf];
   }));
   const adjectiveStandard = attributive && compared

@@ -122,6 +122,13 @@ describe('renderNP', () => {
         .toBe('il gatto più grande della donna');
     });
 
+    // A371: a superlative with a set has two *di*s, and the possessor goes first so the set keeps its own.
+    test('a noun possessor goes ahead of a superlative that carries its set', () => {
+      const most = adj(GRANDE, { degree: 'most', domain: '1' });
+      expect(withDeterminer(np(CASA, {}, { adjectives: [most], adjectiveStandard: { index: 0, standard: el(np(CASA, { number: 'plural' })) }, possessor: np(DONNA) })))
+        .toBe('la casa della donna più grande delle case');
+    });
+
     test('a noun possessor can carry its own possessor', () => {
       expect(withDeterminer(np(LIBRO, {}, { possessor: np(PADRE, {}, { possessor: np(GATTO) }) }))).toBe('il libro del padre del gatto');
     });

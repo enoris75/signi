@@ -869,10 +869,10 @@ describe('attributive (P09-E18)', () => {
     expect(say(two, 'en')).toBe('the man sees a bigger more beautiful cat than the dog.');
   });
 
-  test('a standard on a positive or a superlative adjective is dropped', () => {
+  // A superlative's is its set, which renders (A371, below).
+  test('a standard on a positive adjective is dropped', () => {
     const plain = (degree: Degree) => sees(np('CAT', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: [degree] }));
     expect(sayAll(sees(compared('CAT', 'positive')))).toEqual(sayAll(plain('positive')));
-    expect(sayAll(sees(compared('CAT', 'most')))).toEqual(sayAll(plain('most')));
   });
 
   test('Japanese: a second plain adjective after the compared one', () => {
@@ -1098,7 +1098,7 @@ describe('known bugs: an attributive superlative drops its set (A371)', () => {
   const sees = (degree: Degree) =>
     sayAll(clause(np('MAN'), 'SEE', { directObject: np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: [degree], adjectiveStandards: [np('CITY')] }) }));
 
-  test.fails('the object "the biggest house in the city"', () => {
+  test('the object "the biggest house in the city"', () => {
     expect(sees('most')).toEqual({
       en: 'the man sees the biggest house in the city.', // now: "the man sees the biggest house."
       it: "l'uomo vede la casa più grande della città.",
@@ -1120,6 +1120,62 @@ describe('known bugs: an attributive superlative drops its set (A371)', () => {
       ja: '家は都市の中で最も大きいです。',
       pt: 'a casa é a maior da cidade.',
     });
+  });
+
+  test('least says its set the same way', () => {
+    expect(sees('least')).toEqual({
+      en: 'the man sees the least big house in the city.',
+      it: "l'uomo vede la casa meno grande della città.",
+      fr: "l'homme voit la maison la moins grande de la ville.",
+      de: 'der Mann sieht das am wenigsten große Haus der Stadt.',
+      es: 'el hombre ve la casa menos grande de la ciudad.',
+      ja: '男は都市の中で最も大きくない家を見ます。',
+      pt: 'o homem vê a casa menos grande da cidade.',
+    });
+  });
+
+  test('as the subject, and in a prepositional complement', () => {
+    expect(sayAll(clause(np('HOUSE', { adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [np('CITY')] }), 'RUN'))).toMatchObject({
+      en: 'the biggest house in the city runs.',
+      de: 'das größte Haus der Stadt läuft.',
+      pt: 'a maior casa da cidade corre.',
+      ja: '都市の中で最も大きい家は走ります。',
+    });
+    const woman = np('WOMAN', { adjectives: ['BEAUTIFUL'], adjectiveDegrees: ['most'], adjectiveStandards: [np('CITY')] });
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: woman } } }))).toEqual({
+      en: 'the man gives the book to the most beautiful woman in the city.',
+      it: "l'uomo dà il libro alla donna più bella della città.",
+      fr: "l'homme donne le livre à la femme la plus belle de la ville.",
+      // The set is genitive whatever the phrase's case.
+      de: 'der Mann gibt der schönsten Frau der Stadt das Buch.',
+      es: 'el hombre da el libro a la mujer más hermosa de la ciudad.',
+      ja: '男は都市の中で最も美しい女に本をあげます。',
+      pt: 'o homem dá o livro à mulher mais bela da cidade.',
+    });
+  });
+
+  // The set goes where the comparative's standard goes: Romance writes the possessor ahead of the
+  // adjective (A372), a relative clause closing the phrase; English keeps its Saxon genitive.
+  test('beside a possessor and a relative clause', () => {
+    const house = np('HOUSE', {
+      adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [np('CITY')], possessor: np('WOMAN'),
+      relative: { verbPhrase: { verb: 'RUN' } },
+    });
+    expect(sayAll(clause(np('MAN'), 'SEE', { directObject: house }))).toMatchObject({
+      en: "the man sees the woman's biggest house in the city that runs.",
+      it: "l'uomo vede la casa della donna più grande della città che corre.",
+      fr: "l'homme voit la maison de la femme la plus grande de la ville qui court.",
+      es: 'el hombre ve la casa de la mujer más grande de la ciudad que corre.',
+      // The suppletive superlative stands before the noun (A178), so only its set follows the possessor.
+      pt: 'o homem vê a maior casa da mulher da cidade que corre.',
+    });
+  });
+
+  test('Portuguese: a plain adjective stays with the noun when only the set follows the possessor', () => {
+    const house = np('HOUSE', {
+      adjectives: ['OLD', 'BIG'], adjectiveDegrees: ['positive', 'most'], adjectiveStandards: [undefined, np('CITY')], possessor: np('WOMAN'),
+    });
+    expect(say(clause(np('MAN'), 'SEE', { directObject: house }), 'pt')).toBe('o homem vê a maior casa velha da mulher da cidade.');
   });
 });
 

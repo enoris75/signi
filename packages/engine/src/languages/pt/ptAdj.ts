@@ -25,6 +25,7 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const pre: string[] = [];
   const post: string[] = [];
   let compared = '';
+  let trailingSet = '';
   for (const a of np.adjectives) {
     // A compared adjective follows the noun even when its plain form precedes it: its degree
     // marking belongs with the phrase, not between the article and the noun — "o gato maior" (the
@@ -36,6 +37,9 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
     if (PT_SUPPLETIVE[a.forms['base'] ?? ''] && adjDegree(a) === 'most' && !hasIntensifier(a)) {
       const surface = ptComparison(a, gender, plural);
       if (surface) pre.push(surface);
+      // Its set follows the noun, after every post-nominal adjective: "a maior casa da cidade" (A371).
+      const set = attributiveStandard(np, a);
+      if (surface && set) trailingSet = ptStandard(a, set);
     } else if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive' && !hasIntensifier(a)) {
       const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
       if (surface) pre.push(surface);
@@ -49,7 +53,8 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   if (compared) post.push(compared);
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "e"
   // only before the last ("grande, velho e belo"), like a coordinated noun slot.
-  const adjectives = joinConjuncts(post, ', ', () => ' e ');
+  const coordinated = joinConjuncts(post, ', ', () => ' e ');
+  const adjectives = [coordinated, trailingSet].filter(Boolean).join(' ');
   // The determiner "enough" is the postnominal "suficiente(s)" in Portuguese ("comida suficiente",
   // "gatos suficientes"), after the adjectives and outside their coordination (P09-E25). It is the
   // determiner, not one more adjective, so it closes the phrase: "comida quente suficiente".
@@ -62,6 +67,12 @@ export function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   }
   // Beside a genitive possessor the adjectives follow it, so the standard is not read as its noun's:
   // "um gato da mulher maior do que o cão" (A372). "suficiente" stays with the noun.
-  if (possessorBeforeStandard(np)) return { pre: pre.join(' '), post: enough, trail: adjectives };
+  // A prenominal superlative leaves only its set to follow it, the plain adjectives staying with the
+  // noun: "a maior casa velha da mulher da cidade" (A371), never "*… da mulher velha", the woman's.
+  if (possessorBeforeStandard(np)) {
+    return trailingSet
+      ? { pre: pre.join(' '), post: [coordinated, enough].filter(Boolean).join(' '), trail: trailingSet }
+      : { pre: pre.join(' '), post: enough, trail: adjectives };
+  }
   return { pre: pre.join(' '), post: [adjectives, enough].filter(Boolean).join(' ') };
 }

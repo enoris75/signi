@@ -7,6 +7,7 @@ import { possessiveIt } from '../../possessive.js';
 import { numeralText } from '../../functions/numeralText.js';
 import { oneBesideDeterminer } from '../../functions/oneBesideDeterminer.js';
 import { adjDegree } from '../../functions/adjDegree.js';
+import { possessorBeforeStandard } from '../../functions/possessorBeforeStandard.js';
 import { CARDINALS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { defArticle } from './defArticle.js';
@@ -93,8 +94,10 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // A271. Behind a compared adjective the possessor's *di* is where the standard goes, and reads as
   // one ("un gatto più piccolo della donna", *smaller than the woman*). So under a `more`, `less` or
   // `equally` degree the possessor goes ahead of the post-nominal adjectives: "un gatto della donna
-  // più piccolo". A superlative keeps its place: its *di* is the partitive it takes anyway (C01).
-  const possFirst = !!possText && post.some((a) => COMPARED_DEGREES.has(adjDegree(a)));
+  // più piccolo". A superlative keeps its place: its *di* is the partitive it takes anyway (C01) —
+  // unless it has a set, whose *di* would take the possessor in: "la casa della donna più grande della
+  // città", not "*… della città della donna" (A371, see `possessorBeforeStandard`).
+  const possFirst = !!possText && (post.some((a) => COMPARED_DEGREES.has(adjDegree(a))) || possessorBeforeStandard(np));
   const postAdj = [core, possFirst ? possText : '', postStr].filter(Boolean).join(' ');
   // Attributive nouns are postnominal and bare (no article), the relation choosing the
   // preposition: feature "a" (barca a vela), purpose "da" (occhiali da sole), material

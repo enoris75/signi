@@ -135,7 +135,8 @@ export interface ResolvedNounPhrase {
    * that adjective's position in `adjectives` above — the resolved list, which may lead with a bound
    * OWN or have lost a fused adjective, so not always the plan's index. At most one per phrase; the
    * adjective carries `forms['standard'] = '1'` as a predicate one does, so its equative adverb swaps
-   * alone ("a cat as big as the dog", "un gatto tanto grande quanto il cane").
+   * alone ("a cat as big as the dog", "un gatto tanto grande quanto il cane") — or, on a superlative,
+   * `forms['domain'] = '1'`, the element being its set ("the biggest house in the city", A371).
    */
   adjectiveStandard?: { index: number; standard: ResolvedNounElement };
   /**

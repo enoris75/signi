@@ -18,10 +18,17 @@ describe('resolveAdjectiveStandard', () => {
     }
   });
 
-  test('positive and the superlatives take none', () => {
-    for (const degree of ['positive', 'most', 'least'] as const) {
-      expect(resolveAdjectiveStandard(phrase([degree], [DOG], ['BIG']), 'it', LOOKUP)).toBeUndefined();
+  test('positive takes none', () => {
+    expect(resolveAdjectiveStandard(phrase(['positive'], [DOG], ['BIG']), 'it', LOOKUP)).toBeUndefined();
+  });
+
+  test('the superlatives take one as their set (A371)', () => {
+    for (const degree of ['most', 'least'] as const) {
+      const found = resolveAdjectiveStandard(phrase([degree], [DOG], ['BIG']), 'it', LOOKUP);
+      expect(found?.planIndex).toBe(0);
+      expect(found?.domain).toBe(true);
     }
+    expect(resolveAdjectiveStandard(phrase(['more'], [DOG], ['BIG']), 'it', LOOKUP)?.domain).toBe(false);
   });
 
   test('at most one: the first compared adjective whose entry is set', () => {
@@ -42,6 +49,13 @@ describe('resolveNounPhrase: the attributive standard', () => {
     expect(np.adjectives[1]?.forms['standard']).toBe('1');
     expect(np.adjectives[0]?.forms).not.toHaveProperty('standard');
     expect(np.standard).toBeUndefined();
+  });
+
+  test('marks a superlative\'s set as its domain, never as a standard (A371)', () => {
+    const np = resolveNounPhrase({ concept: 'CAT', adjectives: ['BIG'], adjectiveDegrees: ['most'], adjectiveStandards: [DOG] }, 'it', LOOKUP);
+    expect(np.adjectiveStandard?.index).toBe(0);
+    expect(np.adjectives[0]?.forms['domain']).toBe('1');
+    expect(np.adjectives[0]?.forms).not.toHaveProperty('standard');
   });
 
   test('none on a phrase without one', () => {
