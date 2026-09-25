@@ -6,6 +6,7 @@ import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
 import { AdverbTypeahead } from "./AdverbTypeahead.tsx";
+import { InterjectionTypeahead } from "./InterjectionTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 
@@ -90,6 +91,9 @@ function pickerFor(
           testId="typeahead-noun"
         />
       );
+    // The period's interjection (P09-E47): a word of its own role, before the clause.
+    case "interjection":
+      return <InterjectionTypeahead onSelect={pick} />;
     case "verbModal":
     case "verbModal2":
       // Modals are verb concepts, so the modal picker filters the verb list on `modal`.

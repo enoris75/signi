@@ -368,6 +368,12 @@ export const COMMANDS: readonly CommandDef[] = [
   // P13's two: what the object is taken as or turned into, and the companion — `/objpred` and `/with`.
   role("objpred", ["objectcomplement"], "objectPredicative", "object complement", "slot.objectPredicative", "warning", /^objectPredicative$/),
   role("with", ["comitative"], "comitative", "companion", "slot.comitative", "warning", /^comitative$/),
+  // P09-E47: the period's interjection, "**hey**, the cat runs" — a word before the clause, printed
+  // first in the period as it is spoken first. The box's own control is the card's border toggle.
+  {
+    ...role("interj", ["interjection"], "interjection", "interjection", "slot.interjection", "info"),
+    purposeKey: "purpose.interjection",
+  },
   {
     name: "inst",
     aliases: ["instrument", "instrumental"],

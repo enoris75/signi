@@ -39,7 +39,7 @@ import { applyScript } from '../../src/console/language/apply.ts';
 import { normalizeWorkspace } from '../../src/console/language/normalize.ts';
 import { printWorkspace } from '../../src/console/language/print.ts';
 import type { Vocabulary, WorkspaceState } from '../../src/console/language/types.ts';
-import { ADJECTIVES, ADVERBS, EN, IT, NOUNS, PRONOUNS, VERBS, byId } from './vocab.ts';
+import { ADJECTIVES, ADVERBS, EN, INTERJECTIONS, IT, NOUNS, PRONOUNS, VERBS, byId } from './vocab.ts';
 import { empty, ids } from './helpers.ts';
 
 // ── A seeded random walk ─────────────────────────────────────────────────────
@@ -438,6 +438,14 @@ const OPS: Op[] = [
     if (!link || link.kind || !('nounKey' in link.source)) return undefined;
     return { ...s, links: L.setRelativeHeadless(s.links, link.source.containerId, link.source.nounKey, !link.headless) };
   },
+  // The period's interjection (P09-E47), set where the card's border offers it — a period no link
+  // targets, outside the infinitive — and cleared anywhere, as its box's clear button does. The links
+  // the walk makes afterwards leave a word on a linked clause or a citation, which prints and comes back.
+  onPeriod((sel, rng, s, cid) => {
+    if (sel.interjection && rng() < 0.3) return R.applyClear(sel, 'interjection');
+    if (sel.infinitive || s.links.some((l) => l.target.containerId === cid)) return undefined;
+    return R.applyConceptSelect(sel, 'interjection', pick(rng, INTERJECTIONS)!);
+  }),
   // Clearing: an adjective, a modal, a possessor, a conjunct — never a word a link stands on.
   onPeriod((sel, rng, s, cid) => {
     if (isLinked(s, cid)) return undefined;

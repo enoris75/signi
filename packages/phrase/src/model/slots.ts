@@ -235,6 +235,17 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
 const ADJECTIVE_LABEL_KEY: UiStringKey = "category.adjective";
 
 export const ALL_SLOTS: SlotConfig[] = [
+  // The period's interjection (P09-E47): first in reading order, as it is spoken first. It is on the
+  // canvas only while the card's border toggle shows it (see getActiveSlots), in the word map's colour
+  // for its role.
+  {
+    key: "interjection",
+    label: "Interjection",
+    labelKey: "slot.interjection",
+    required: false,
+    roles: ["interjection"],
+    color: "info",
+  },
   {
     key: "subjectAdjective",
     label: "Adjective",
@@ -475,6 +486,9 @@ export function getActiveSlots(
   verbComplements?: ComplementType[],
 ): SlotConfig[] {
   return ALL_SLOTS.filter((slot) => {
+    // The interjection is the period's, not the verb's or the subject's: its box is shown from the
+    // card's border toggle, which the canvas asks (see visibleSlotsFor), never by what the clause holds.
+    if (slot.key === "interjection") return false;
     if (slot.key === "directObject") return transitivity !== "intransitive";
     if (DIRECT_OBJECT_ADJECTIVES.has(slot.key))
       return transitivity !== "intransitive";
@@ -498,6 +512,10 @@ export function getActiveSlots(
 // so it goes wherever its word goes. Constituents that start out overlapping are pushed apart by
 // the overlap resolver, which grows the canvas when it has to.
 export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
+  // P09-E47's interjection, before the subject on its row, as it is spoken ("hey, the cat runs"): far
+  // enough in that its ring starts inside the canvas's left wall, where the overlap resolver holds it
+  // and shoves the subject's ring right to clear it.
+  interjection: { x: 9, y: 42 },
   subject: { x: 22, y: 42 },
   verb: { x: 52, y: 42 },
   directObject: { x: 82, y: 42 },

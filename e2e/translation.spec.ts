@@ -59,4 +59,30 @@ test.describe('translation', () => {
     expect(await app.sentence('de')).toBe('man isst die Maus.');
     expect(await app.sentence('ja')).toBe('人はネズミを食べます。');
   });
+
+  // P09-E47: the interjection, shown from the card's seventh border control and picked in its own box.
+  test('says an interjection before the clause, in every language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await page.locator('[data-kb-control="interjection"]').click();
+    const input = page.getByTestId('box-interjection').locator('input');
+    await expect(input).toBeVisible();
+    await input.fill('hey');
+    await page.locator('[data-testid="typeahead-option"][data-concept="HEY"]').click();
+
+    await app.expectSentences({
+      en: 'Hey, the cat runs.',
+      it: 'Ehi, il gatto corre.',
+      fr: 'Hé, le chat court.',
+      de: 'Hey, der Kater läuft.',
+      es: 'Oye, el gato corre.',
+      pt: 'Ei, o gato corre.',
+      ja: 'ねえ、猫は走ります。',
+    });
+
+    // The same control takes it away, word and all.
+    await page.locator('[data-kb-control="interjection"]').click();
+    await expect(page.getByTestId('box-interjection')).toHaveCount(0);
+    await app.expectSentences({ en: 'the cat runs.' });
+  });
 });
+

@@ -1377,6 +1377,8 @@ export function roleRefusal(
     return objectInstrument ? coded("instrumentAsThing") : undefined;
   }
   if (slot === "subject") return undefined;
+  // The interjection is the period's own, whatever its clause holds (P09-E47).
+  if (slot === "interjection") return undefined;
   if (slot === "directObject") {
     if (!verb) return coded("objectNeedsVerb");
     // A that-clause the period governs is its verb's object already (P09-E12 D9), as the canvas

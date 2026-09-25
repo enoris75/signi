@@ -1,14 +1,9 @@
 /**
  * A concept's part of speech. `interjection` (P09-E30) is a word outside the clause that opens it
- * ("**hey**, the cat runs", see `PhrasePlan.interjection`); no picker offers one yet.
+ * ("**hey**, the cat runs", see `PhrasePlan.interjection`); the period's interjection box picks one
+ * (P09-E47), so every role has a palette of its own.
  */
 export type GrammaticalRole = 'pronoun' | 'noun' | 'verb' | 'adjective' | 'adverb' | 'interjection';
-
-/**
- * The roles a word palette lists and a console slot searches — every role but `interjection`, which
- * no picker offers yet (P09-E30) and so has no `palette.*` heading of its own.
- */
-export type PickerRole = Exclude<GrammaticalRole, 'interjection'>;
 
 export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
 
@@ -1879,7 +1874,8 @@ export interface PhrasePlan {
    * addressee. It renders first, set off by the vocative's separator (a comma in six, 、 in Japanese)
    * and capitalized as the sentence's first word; a vocative follows it ("Hey, Mom, run."), and both
    * stand outside Spanish's opening ¿ ("Oye, Mamá, ¿el gato corre?"), which encloses only the question.
-   * Top clause only, like `address`. Plan-only: no builder control or picker offers it yet.
+   * Top clause only, like `address`. The canvas sets it from the period's interjection box, revealed
+   * from the card's border, and the console from `/interj` (P09-E47).
    */
   interjection?: string;
 }

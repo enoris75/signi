@@ -94,7 +94,10 @@ export const ADVERBS = [
   c('ALWAYS', 'adverb', 'always', 'sempre'),
 ];
 
-export const ALL = [...NOUNS, ...PRONOUNS, ...VERBS, ...ADJECTIVES, ...ADVERBS];
+// The period's interjection (P09-E47): HEY, the corpus's one.
+export const INTERJECTIONS = [c('HEY', 'interjection', 'hey', 'ehi')];
+
+export const ALL = [...NOUNS, ...PRONOUNS, ...VERBS, ...ADJECTIVES, ...ADVERBS, ...INTERJECTIONS];
 
 export const byId = (id: string): Concept => {
   const hit = ALL.find((x) => x.id === id);
@@ -109,7 +112,7 @@ const PERSON_NAMES: Record<string, Record<string, string>> = {
 
 export function vocabFor(language: LanguageCode = 'en'): Vocabulary {
   return {
-    concepts: { noun: NOUNS, pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS },
+    concepts: { noun: NOUNS, pronoun: PRONOUNS, verb: VERBS, adjective: ADJECTIVES, adverb: ADVERBS, interjection: INTERJECTIONS },
     language,
     label: (concept) =>
       concept.role === 'pronoun'

@@ -77,6 +77,7 @@ const CONCEPTS = {
   verb: [EAT, SLEEP, WALK, SEEM],
   adjective: [BIG],
   adverb: [],
+  interjection: [concept('HEY', 'interjection')],
 };
 
 type Compartments = Omit<WorkspaceBinding, 'containerId' | 'pickActive'>;
@@ -1377,3 +1378,58 @@ function canvasHeight() {
   const layer = document.querySelector('svg[viewBox^="0 0 600 "]')!;
   return parseFloat(getComputedStyle(layer.parentElement!).height);
 }
+
+// P09-E47: the interjection box before the subject, shown and taken away by the card's seventh
+// border control — offered on a root period outside the infinitive, withdrawn elsewhere.
+describe('the interjection', () => {
+  const toggle = () => document.querySelector<HTMLElement>('[data-kb-control="interjection"]');
+
+  it('shows its box from the border, takes a word, and goes with its word', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
+    expect(boxes()).not.toContain('interjection');
+
+    fireEvent.click(toggle()!);
+    expect(boxes()[0]).toBe('interjection');
+    // A word of the period, in its solid ring alone: no dotted ring, nothing joins it to the verb.
+    expect(groups()).not.toContain('Interjection');
+    pickOption('HEY');
+    expect(selection().interjection?.id).toBe('HEY');
+    expect(toggle()).toHaveAccessibleName('Remove the interjection');
+
+    fireEvent.click(toggle()!);
+    expect(selection().interjection).toBeUndefined();
+    expect(boxes()).not.toContain('interjection');
+  });
+
+  it('shows a chosen word without being asked', () => {
+    renderPeriod({ interjection: concept('HEY', 'interjection'), subject: CAT, verb: SLEEP });
+    expect(boxes()[0]).toBe('interjection');
+    expect(screen.queryByTestId('interjection-dimmed')).not.toBeInTheDocument();
+  });
+
+  it.each<[string, BindingOverrides]>([
+    ['a relative clause', { relative: { targetKeys: new Set(['subject']) } }],
+    ['an if-clause', { conditional: { hasTarget: true } }],
+    ['a coordinate', { coordinative: { hasTarget: true } }],
+    ['a subordinate clause', { subordinate: { asTarget: { kind: 'content' } } }],
+    ['an instrument', { instrumental: { hasTarget: true } }],
+  ])('is withdrawn from %s, whose chosen word stays dimmed', (_, overrides) => {
+    renderPeriod(
+      { interjection: concept('HEY', 'interjection'), subject: CAT, verb: SLEEP },
+      { binding: makeBinding(overrides) },
+    );
+    expect(toggle()).toBeNull();
+    expect(screen.getByTestId('interjection-dimmed')).toContainElement(box('interjection'));
+  });
+
+  it('is withdrawn under the infinitive', () => {
+    renderPeriod({ subject: CAT, verb: SLEEP, infinitive: true }, { binding: makeBinding() });
+    expect(toggle()).toBeNull();
+  });
+
+  it('is offered on a root period of the workspace', () => {
+    renderPeriod({ subject: CAT, verb: SLEEP }, { binding: makeBinding({ conditional: { hasSource: true } }) });
+    expect(toggle()).toHaveAccessibleName('Add an interjection');
+  });
+});
+

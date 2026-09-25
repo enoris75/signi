@@ -8,8 +8,8 @@ card's border. The role joins the pickers once it has a palette heading. `/inter
 with its print → apply round trip.
 **Scope:** one seed (the grammar noun INTERJECTION, D3), shared types, the phrase model, the
 canvas, the keyboard, the console. All 7 languages for every new UI string.
-**Status:** **planning, unscheduled** — filed 2026-09-25 from P09's plan-only constructs; the
-engine side is [P09-E30](Z-done/P09-E30-interjections.md).
+**Status:** **done** 2026-09-25 (see Done below) — filed 2026-09-25 from P09's plan-only constructs;
+the engine side is [P09-E30](P09-E30-interjections.md).
 
 What the engine renders from a plan at HEAD (e811c91e). Probed 2026-09-25 with `sayAll` on an
 in-memory seed:
@@ -37,49 +37,49 @@ slot. P13 definitions round-trip through the console, so the control ships with 
 
 Verified at HEAD, 2026-09-25.
 
-**The plan field and the role.** [`PhrasePlan.interjection?: string`](../../../../packages/shared/src/index.ts#L1878)
-is a concept id, top clause only, like `address` ([L1868](../../../../packages/shared/src/index.ts#L1868)).
-[`GrammaticalRole`](../../../../packages/shared/src/index.ts#L5) includes `interjection`, and
-[`PickerRole`](../../../../packages/shared/src/index.ts#L11) excludes it. HEY is the only word
-([`interjections.ts`](../../../../packages/backend/src/concepts/interjections.ts)). Its definition is
+**The plan field and the role.** [`PhrasePlan.interjection?: string`](../../../../../packages/shared/src/index.ts#L1878)
+is a concept id, top clause only, like `address` ([L1868](../../../../../packages/shared/src/index.ts#L1868)).
+[`GrammaticalRole`](../../../../../packages/shared/src/index.ts#L5) includes `interjection`, and
+[`PickerRole`](../../../../../packages/shared/src/index.ts#L11) excludes it. HEY is the only word
+([`interjections.ts`](../../../../../packages/backend/src/concepts/interjections.ts)). Its definition is
 now composed ("a word with which one calls a person"), not literal as E30's Done 4 still says.
 
 **Where the role is carried, inertly.**
 
-- [`ConceptPalette`](../../../../packages/frontend/src/components/ConceptPalette.tsx#L16):
+- [`ConceptPalette`](../../../../../packages/frontend/src/components/ConceptPalette.tsx#L16):
   `ROLE_CONFIG` has an `interjection` entry "to keep the map total"
-  ([L22](../../../../packages/frontend/src/components/ConceptPalette.tsx#L22)). The component takes
-  a `PickerRole` ([L27](../../../../packages/frontend/src/components/ConceptPalette.tsx#L27)) and
-  titles itself `t(\`palette.${role}\`)` ([L55](../../../../packages/frontend/src/components/ConceptPalette.tsx#L55)).
-- [`WordMap`](../../../../packages/frontend/src/components/WordMap/WordMap.tsx#L75) colours the
+  ([L22](../../../../../packages/frontend/src/components/ConceptPalette.tsx#L22)). The component takes
+  a `PickerRole` ([L27](../../../../../packages/frontend/src/components/ConceptPalette.tsx#L27)) and
+  titles itself `t(\`palette.${role}\`)` ([L55](../../../../../packages/frontend/src/components/ConceptPalette.tsx#L55)).
+- [`WordMap`](../../../../../packages/frontend/src/components/WordMap/WordMap.tsx#L75) colours the
   role `info` and already draws HEY.
-- `SlotConfig.roles` ([`interfaces.ts:173`](../../../../packages/phrase/src/model/interfaces.ts#L173))
-  and the console's [`WordSpec.roles`](../../../../packages/phrase/src/language/resolve.ts#L23) are
+- `SlotConfig.roles` ([`interfaces.ts:173`](../../../../../packages/phrase/src/model/interfaces.ts#L173))
+  and the console's [`WordSpec.roles`](../../../../../packages/phrase/src/language/resolve.ts#L23) are
   both `PickerRole[]`.
-- The console's [`useVocabulary`](../../../../packages/frontend/src/console/useVocabulary.ts#L30)
+- The console's [`useVocabulary`](../../../../../packages/frontend/src/console/useVocabulary.ts#L30)
   fetches five roles and not this one. The backend's `definitionVocabulary`
-  ([`definition.ts:12`](../../../../packages/phrase/src/definition.ts#L12)) groups every role, so a
+  ([`definition.ts:12`](../../../../../packages/phrase/src/definition.ts#L12)) groups every role, so a
   definition could name HEY once the language has a command.
 
 **Why `PickerRole` exists.** `palette.${role}` must name every role it is given, and each heading
-is a bare grammar noun (`palette.noun` is NOUN, plural, [`uiStrings.ts:1552`](../../../../packages/shared/src/uiStrings.ts#L1552)).
+is a bare grammar noun (`palette.noun` is NOUN, plural, [`uiStrings.ts:1552`](../../../../../packages/shared/src/uiStrings.ts#L1552)).
 **No INTERJECTION concept is seeded**, so `palette.interjection` cannot be composed. The only
 alternative would be an English literal, and the catalogue refuses those.
 
 **The period.** Nothing in the builder is period-level and before the clause. The card's border
 already stacks six controls: command, infinitive, question, conditional, coordination and
-subordinate clause ([`BorderControls.tsx:41`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx#L41)).
+subordinate clause ([`BorderControls.tsx:41`](../../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/BorderControls.tsx#L41)).
 The card grows to fit them, `n·32 − 4 + 16`px, which is 204px for six
-([`PeriodContainer.tsx:79`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/PeriodContainer.tsx#L79)).
-Only roots are translated as sentences ([`isRoot`](../../../../packages/phrase/src/model/workspacePlan/functions/isRoot.ts)),
+([`PeriodContainer.tsx:79`](../../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/PeriodContainer.tsx#L79)).
+Only roots are translated as sentences ([`isRoot`](../../../../../packages/phrase/src/model/workspacePlan/functions/isRoot.ts)),
 and `askQuestion` runs on roots alone
-([`workspaceToPlans.ts:28`](../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)).
+([`workspaceToPlans.ts:28`](../../../../../packages/phrase/src/model/workspacePlan/functions/workspaceToPlans.ts#L28)).
 `planToWorkspace`'s `PERIOD_FIELDS` has no `interjection`
-([L56](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L56)). No
+([L56](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L56)). No
 seed definition uses one.
 
 **Free names.** On the period, the letters A B D E F G H K M P V X Y are free
-([`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts)). In the console, `/interj`
+([`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts)). In the console, `/interj`
 and `/interjection` are free.
 
 ## Design
@@ -173,11 +173,11 @@ INTERJECTION (D3). Reseed.
   `borderControls` count includes it.
 - The box, its ring, its `DEFAULT_POSITIONS` entry and its `READING_ORDER` rank (D1).
 - `PhraseSidebar` lists the role's palette for the slot, as it does for any slot's roles
-  ([`PhraseSidebar.tsx:255`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L255)).
+  ([`PhraseSidebar.tsx:255`](../../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L255)).
 - `CANVAS_PARTS` and `PART_BY_LABEL_KEY` gain the part, so clear and remove are named in the
   catalogue.
 
-## 5. Keyboard — [`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts)
+## 5. Keyboard — [`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts)
 
 - `period.interjection`: **E**, a free period letter (*exclamation*). It is a hint, and it presses
   the border toggle as J and U do. Re-check it against the sibling tasks filed the same day before
@@ -185,7 +185,7 @@ INTERJECTION (D3). Reseed.
 - Once shown, the box takes the ordinary box keys: Enter for the word, Backspace to clear.
 - `KEY_COMMANDS['period.interjection'] = 'interj'`. There is no Alt layer.
 
-## 6. UI strings — [`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts)
+## 6. UI strings — [`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts)
 
 - `palette.interjection`: INTERJECTION, plural and bare, like `palette.adverb`.
 - `slot.interjection`.
@@ -236,3 +236,73 @@ Every one must render in all seven at boot. Probe them after the seed.
   interjection and the clause, so its box would take the next seat in reading order. It is its own
   task.
 - **An exclamative clause** and Spanish ¡…!.
+
+## Done
+
+Shipped 2026-09-25. What landed:
+
+- **seed**: INTERJECTION in `nouns.ts`, right after ROLE_COMPLEMENT — *interjection, interiezione (f),
+  interjection (f), Interjektion (f), interjección (f), interjeição (f), 感動詞 (かんどうし)*, `isA` WORD,
+  its definition composed like its siblings': "a word that expresses feelings" (`/verb ( EXPRESS )
+  /obj ( FEELING /pl /zero )`). Pinned in `nounPhrase.test.ts`'s grammar-noun table and in
+  `furigana.test.ts`. Reseed `signi.db` for the dev backend.
+- **shared**: `PickerRole` is gone; `SlotConfig.roles`, `WordSpec.roles` and `ConceptPalette` take
+  `GrammaticalRole`. New strings, beside their relatives: `slot.interjection`,
+  `slot.interjection.placeholder` (the picker's prompt, not in §6), `palette.interjection`,
+  `action.addInterjection` / `action.removeInterjection`, `purpose.interjection`, and
+  `action.clear.interjection` from `CANVAS_PARTS` (interjection joins `CLEARABLE_PARTS`).
+- **model**: `PhraseSelection.interjection`, an `ALL_SLOTS` entry first in the list (`info`), which
+  `getActiveSlots` never offers — `visibleSlotsFor` adds it while the border shows it.
+  `workspaceToPlans` writes `plan.interjection` on roots only, and not under the infinitive.
+  `planToWorkspace` reads it back on the root; a linked clause's or a citation's is reported
+  unsupported (`PhrasePlan.interjection of a linked clause or a citation`).
+- **canvas**: `InterjectionToggle` (RecordVoiceOver), the seventh border control, after the
+  subordinate button; the card grows to 236px. The box is a *bare* ring (`GroupDef.bare`): its solid
+  ring and clear button only — no dotted ring, no collapse, no port, no line to the verb phrase — so
+  its footprint is its solid ring. `READING_ORDER` puts "Interjection" first;
+  `DEFAULT_POSITIONS.interjection` is `{ x: 9, y: 42 }`. `InterjectionTypeahead` is its picker, and
+  the words panel lists the role's palette for the slot. Withdrawn on a link target (relative,
+  if-clause, coordinate, subordinate, instrument) and under the infinitive
+  (`interjectionOffered`); a word already chosen stays, its box faded (`interjection-dimmed`).
+- **keyboard**: `period.interjection` on **E**, pressing the border toggle as J and U do.
+- **console**: `/interj` (alias `/interjection`, purpose `purpose.interjection`), printed after the
+  period-level statements and before `/subj`; `/del interj` takes it back; `useVocabulary` fetches the
+  role. Golden line and misuse (`/interj cat` → `unknownWord`), help example, `KEY_COMMANDS`, a
+  `phraseCommands` row (`handleRemoveInterjection`), and a round-trip walk op that sets and clears an
+  interjection where the border offers one, links made around it. Green at `SEEDS=5000`.
+
+**Landed differently from the plan:**
+
+- The box's shown state is view state in `PhraseBuilder` (`interjectionOpen`, as `standardOpen` is:
+  unset, a chosen word shows and an empty box does not), not a `setInterjectionShown` reducer. A
+  selection flag would print nothing and so break the round trip, and the coverage test would ask a
+  command of the reducer.
+- `DEFAULT_POSITIONS.interjection` is `{ x: 9, y: 42 }`, not `{ x: 6, y: 42 }`: at 6% the ring
+  started past the canvas's left wall, where the overlap resolver holds a box still.
+- The ring has no dotted ring at all (D1 said its ring "carries only the clear control"): with nothing
+  on it, it only widened the footprint and pushed the ring off the canvas.
+- No `action.remove.interjection`: the ring has no remove control to title (the toggle's
+  `action.removeInterjection` is the remove), so `REMOVABLE_PARTS` is unchanged.
+
+**Measured** (1500×1000, *hey, cat eats mouse*, group-box rects in viewport px): Subject x 157 w 147,
+Verb Phrase x 301 w 236, Direct Object x 568 w 134 — one row (tops 249 / 205 / 255, centres level);
+the interjection's solid ring sits left of the subject, inside the canvas. The seven-control card:
+min-height 236px, the stack 220px; compact, the card is 236px tall.
+
+Engine output at HEAD, rendered from the real corpus with `sayAll`:
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| statement | Hey, the cat runs. | Ehi, il gatto corre. | Hé, le chat court. | Hey, der Kater läuft. | Oye, el gato corre. | Ei, o gato corre. | ねえ、猫は走ります。 |
+| command | Hey, run. | Ehi, corri. | Hé, cours. | Hey, lauf. | Oye, corre. | Ei, corra. | ねえ、走ってください。 |
+| yes/no question | Hey, does the cat run? | Ehi, il gatto corre? | Hé, est-ce que le chat court ? | Hey, läuft der Kater? | Oye, ¿el gato corre? | Ei, o gato corre? | ねえ、猫は走りますか？ |
+| verbless period | Hey, the cat. | Ehi, il gatto. | Hé, le chat. | Hey, der Kater. | Oye, el gato. | Ei, o gato. | ねえ、猫。 |
+| *hey, cat eats mouse* | Hey, the cat eats the mouse. | Ehi, il gatto mangia il topo. | Hé, le chat mange la souris. | Hey, der Kater frisst die Maus. | Oye, el gato come el ratón. | Ei, o gato come o rato. | ねえ、猫はネズミを食べます。 |
+
+Tests: `workspaceToPlans.test.ts` (root, that-clause, infinitive, `planToWorkspace`),
+`PhraseBuilder.test.tsx` (the toggle, the box, withdrawal on each link target and the infinitive),
+`BorderControls.test.tsx`, `PeriodContainer.test.tsx` (236px), `ConceptPalette.test.tsx`,
+`uiStrings.test.ts` (all seven), `command-purposes.test.ts`, the console's golden / help /
+coverage / round-trip tests; e2e in `translation.spec.ts` (all seven rows, built with the toggle and
+the picker) and `console.spec.ts` (`/interj`, `/del interj`).
+

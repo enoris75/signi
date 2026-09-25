@@ -290,6 +290,8 @@ const CANVAS_PARTS = {
   // P13's two boxes: what the object is taken as or turned into, and the companion.
   objectPredicative: { concept: 'OBJECT_COMPLEMENT', en: 'object complement' },
   comitative: { concept: 'COMITATIVE', en: 'comitative' },
+  // P09-E47's box before the subject: the period's interjection, "**hey**, the cat runs".
+  interjection: { concept: 'INTERJECTION', en: 'interjection' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
@@ -308,7 +310,7 @@ const BOXED_COMPLEMENT_PARTS = [
 // drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
   'subject', 'agent', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
-  ...BOXED_COMPLEMENT_PARTS, 'possessor',
+  ...BOXED_COMPLEMENT_PARTS, 'possessor', 'interjection',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
   'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'voice', 'instrumental',
@@ -739,6 +741,14 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Adverb',
   },
 
+  // The interjection box's title (P09-E47) — the bare grammar noun, like the adverb's: "hey" is an
+  // interjection in every tradition (it "interiezione", de "Interjektion", ja 感動詞).
+  'slot.interjection': {
+    plan: nameOf('INTERJECTION'),
+    format: NAME_FORMAT,
+    fallback: 'Interjection',
+  },
+
   // The instrumental complement's box title and satellite label. Each language names the
   // relation as its own grammar tradition does — a one-word name in en/de ("instrumental"), a
   // whole phrase in the Romance ones ("complemento di mezzo", "complément de moyen") — so it is
@@ -908,6 +918,14 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: { stripPeriod: true },
     fallback: 'type an adverb',
+  },
+  'slot.interjection.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'INTERJECTION', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type an interjection',
   },
   'slot.modal.placeholder': {
     plan: {
@@ -1568,6 +1586,11 @@ export const UI_STRINGS = defineUiStrings({
     plan: { subject: { concept: 'ADVERB', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Adverbs',
+  },
+  'palette.interjection': {
+    plan: { subject: { concept: 'INTERJECTION', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Interjections',
   },
 
   // The pronoun chooser's three rows — the grammatical features a pronoun is picked by, each
@@ -2319,6 +2342,26 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Add a subordinate clause',
+  },
+
+  // The interjection's toggle on a period's border (P09-E47), its two faces: ADD an interjection,
+  // indefinite, which reveals the box before the subject; REMOVE the interjection, definite, which
+  // takes the box and its word away.
+  'action.addInterjection': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'INTERJECTION', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add an interjection',
+  },
+  'action.removeInterjection': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'INTERJECTION', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the interjection',
   },
 
   // The badge in a period's caption naming the part the period plays in a link: CLAUSE with the
@@ -3245,6 +3288,17 @@ export const UI_STRINGS = defineUiStrings({
     plan: purposeOf('GOVERN', { concept: 'VERB', definiteness: 'indefinite' }),
     format: { stripPeriod: true },
     fallback: 'to govern a verb',
+  },
+  // `/interj` (P09-E47): ADD an interjection to a period, as the instrument's purpose adds its complement
+  // to the verb.
+  'purpose.interjection': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'INTERJECTION', definiteness: 'indefinite' },
+      { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add an interjection to a period',
   },
   // The setting commands (`setterOf`): SET — it "impostare", fr "définir", de "festlegen", ja 設定する —
   // on the setting of a word. Keyed by the console's Setting id, so a setting command finds its own.

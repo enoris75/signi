@@ -109,6 +109,20 @@ export function roleGroups({
     return { label, labelKey: (slot.labelKey ?? labelKey) as K };
   };
   return [
+    // The period's interjection (P09-E47), first as it is spoken first: a word on its own, while the
+    // card's border toggle shows its box (see visibleSlotsFor).
+    ...(visibleSlots.some((s) => s.key === "interjection")
+      ? [
+          {
+            label: "Interjection",
+            labelKey: "slot.interjection" as const,
+            color: MUI_COLOR_HEX.info,
+            mainKey: "interjection",
+            nodeKeys: ["interjection"],
+            bare: true,
+          },
+        ]
+      : []),
     ...(showSubject
       ? [
           {
@@ -187,7 +201,8 @@ export function buildRings({
     Object.assign(controlPos, ring.controls);
     groupRects.push({
       ...group,
-      ...ringFootprint(ring.center, compact ? ring.rIn : ring.rOut),
+      // A bare ring (P09-E47's interjection) has no dotted ring, so it takes up its solid ring alone.
+      ...ringFootprint(ring.center, compact || group.bare ? ring.rIn : ring.rOut),
       center: ring.center,
       rIn: ring.rIn,
       orbit: ring.orbit,
@@ -244,7 +259,8 @@ export function buildEdges({
   const verb = groupRects.find((g) => g.label === VERB_PHRASE);
   if (verb) {
     for (const group of groupRects) {
-      if (group === verb) continue;
+      // A word of the period that belongs to no constituent is joined to none (see GroupDef.bare).
+      if (group === verb || group.bare) continue;
       let from: Pt | undefined;
       let to: Pt | undefined;
       if (compact) {

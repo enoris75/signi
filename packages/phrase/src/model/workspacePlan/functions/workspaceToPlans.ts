@@ -26,6 +26,10 @@ export function workspaceToPlans(
       attachSubordinate(plan, c, links, byId, new Set([c.id]));
       // A wh-question's gap is the top clause's own: the linked clauses above ask nothing of their own.
       askQuestion(plan, c.selection);
+      // So is the interjection (P09-E47): set here, on the root alone, so a that-clause — which carries
+      // its target's whole plan — never takes one along; and not under the infinitive, whose citation
+      // calls no one ("Hey, to run." reads wrong in all seven).
+      if (c.selection.interjection && !c.selection.infinitive) plan.interjection = c.selection.interjection.id;
       return { containerId: c.id, plan };
     });
 }

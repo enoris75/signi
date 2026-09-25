@@ -167,6 +167,8 @@ export interface PeriodContext {
   togglePrivative: (() => void) | undefined;
   /** O — whose an infinitive period is: the governing clause's object, or its subject (P13). */
   toggleObjectControl?: (() => void) | undefined;
+  /** E — show the interjection box, or take it away (P09-E47). Absent where the period offers none. */
+  toggleInterjection?: (() => void) | undefined;
   /** Z / W / + − — the view: compact, tidy, and the canvas's height. */
   toggleCompact: () => void;
   tidy: () => void;
@@ -1151,6 +1153,19 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     when: (ctx) => Boolean(ctx.subordination?.canStart || ctx.subordination?.hasLink),
     run: (ctx) =>
       ctx.subordination!.hasLink ? ctx.subordination!.clear() : ctx.subordination!.start(),
+  },
+  {
+    // The interjection (P09-E47) — E for *exclamation*, a letter the period left free. As J and U, it
+    // presses the border toggle, which shows the box before the subject or takes it away; the box then
+    // takes the ordinary box keys (↵ for its word, ⌫ to clear it).
+    id: "period.interjection",
+    scope: "period",
+    keys: ["E"],
+    label: "Interjection",
+    labelKey: "action.addInterjection",
+    hint: true,
+    when: (ctx) => Boolean(ctx.toggleInterjection),
+    run: (ctx) => ctx.toggleInterjection!(),
   },
   {
     id: "period.level",

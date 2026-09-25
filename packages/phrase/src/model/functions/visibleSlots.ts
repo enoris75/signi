@@ -57,11 +57,19 @@ export function rendersPassive(selection: PhraseSelection): boolean {
   );
 }
 
-/** The slots a period shows for what it holds, its subject slot dressed as `roleSlot` if given. */
-export function visibleSlotsFor(selection: PhraseSelection, roleSlot: RoleSlot | undefined): SlotConfig[] {
+/**
+ * The slots a period shows for what it holds, its subject slot dressed as `roleSlot` if given — and,
+ * first, the interjection box while the card's border shows it (P09-E47).
+ */
+export function visibleSlotsFor(
+  selection: PhraseSelection,
+  roleSlot: RoleSlot | undefined,
+  interjection = false,
+): SlotConfig[] {
   const passive = rendersPassive(selection);
-  return (
-    getActiveSlots(
+  return [
+    ...(interjection ? ALL_SLOTS.filter((s) => s.key === "interjection") : []),
+    ...getActiveSlots(
       selection.verb?.transitivity,
       selection.subject?.role,
       Boolean(selection.subjectAdjective),
@@ -75,8 +83,8 @@ export function visibleSlotsFor(selection: PhraseSelection, roleSlot: RoleSlot |
         roleSlot && s.key === "subject"
           ? { ...s, label: roleSlot.label, labelKey: roleSlot.labelKey, required: roleSlot.required, color: roleSlot.color }
           : s,
-      )
-  );
+      ),
+  ];
 }
 
 /**

@@ -111,6 +111,15 @@ export interface MoodControl {
 
 export type Mood = "imperative" | "infinitive" | "question";
 
+// The interjection's toggle on the card border (P09-E47): shows the word box before the subject, or
+// takes it away, word and all. Offered on a root period only, and not under the infinitive — a linked
+// clause's interjection is never spoken, and a citation calls no one — so it is absent there.
+export interface InterjectionControl {
+  // The box is on the canvas.
+  shown: boolean;
+  onToggle: () => void;
+}
+
 // The cross-container relations a period card can light up for as a pick target.
 export type Relation = "conditional" | "coordinative" | "subordinate" | "instrumental";
 
@@ -133,6 +142,9 @@ export interface ClauseControls {
   infinitive?: MoodControl;
   // Question toggle on the card border, the third mood (P09-E12 M5). Present for every period.
   question?: MoodControl;
+  // Interjection toggle on the card border (P09-E47), the last of the stack. Absent where the period
+  // offers none (see InterjectionControl).
+  interjection?: InterjectionControl;
 }
 
 // The palette colour each relation and mood marks the card and its border control with. The six
