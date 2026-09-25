@@ -269,7 +269,7 @@ describe('A_LITTLE, an intensifier', () => {
       es: 'un gato un poco grande corre.', ja: '少し大きい猫は走ります。', pt: 'um gato um pouco grande corre.',
     });
     expect(attributive({ number: 'plural' }, 'HOUSE')).toEqual({
-      en: 'slightly big houses run.', it: "case un po' grandi corrono.", fr: 'des maisons un peu grandes courent.', de: 'etwas große Häuser laufen.',
+      en: 'slightly big houses run.', it: "delle case un po' grandi corrono.", fr: 'des maisons un peu grandes courent.', de: 'etwas große Häuser laufen.',
       es: 'unas casas un poco grandes corren.', ja: '少し大きい家は走ります。', pt: 'umas casas um pouco grandes correm.',
     });
   });

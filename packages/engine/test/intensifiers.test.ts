@@ -47,7 +47,7 @@ describe('an intensifier inside the noun phrase', () => {
     expect(sayAll(clause(np('HOUSE', {
       number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveIntensifiers: ['VERY'],
     }), 'RUN'))).toMatchObject({
-      it: 'case molto grandi corrono.', fr: 'des maisons très grandes courent.',
+      it: 'delle case molto grandi corrono.', fr: 'des maisons très grandes courent.',
       es: 'unas casas muy grandes corren.', pt: 'umas casas muito grandes correm.',
       de: 'sehr große Häuser laufen.',
     });
@@ -192,7 +192,7 @@ describe('known bugs: an intensifier on a comparative (A248)', () => {
     expect(sayAll(clause(np('HOUSE', {
       number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['more'], adjectiveIntensifiers: ['VERY'],
     }), 'RUN'))).toEqual({
-      en: 'much bigger houses run.', it: 'case molto più grandi corrono.', fr: 'des maisons bien plus grandes courent.',
+      en: 'much bigger houses run.', it: 'delle case molto più grandi corrono.', fr: 'des maisons bien plus grandes courent.',
       de: 'viel größere Häuser laufen.', es: 'unas casas mucho más grandes corren.', ja: 'ずっと大きい家は走ります。',
       pt: 'umas casas muito maiores correm.',
     });
@@ -280,7 +280,7 @@ describe('known bugs: VERY on an equative (A255)', () => {
     expect(sayAll(clause(np('CAT', {
       number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['equally'], adjectiveIntensifiers: ['VERY'],
     }), 'RUN'))).toEqual({
-      en: 'equally big cats run.', it: 'gatti altrettanto grandi corrono.', fr: 'des chats tout aussi grands courent.',
+      en: 'equally big cats run.', it: 'dei gatti altrettanto grandi corrono.', fr: 'des chats tout aussi grands courent.',
       de: 'genauso große Kater laufen.', es: 'unos gatos igual de grandes corren.', ja: '同じくらい大きい猫は走ります。',
       pt: 'uns gatos igualmente grandes correm.',
     });

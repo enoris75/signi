@@ -214,13 +214,13 @@ describe('the glosses render in every language', () => {
     // MAY in an object-gap relative: the Romance languages say permission with CAN's verb.
     ['RIGHT_NOUN', { en: 'an action that one may do.', it: "un'azione che si può fare.", fr: "une action qu'on peut faire.", de: 'eine Handlung, die man tun darf.', es: 'una acción que se puede hacer.', ja: 'することが許される動作。', pt: 'uma ação que se pode fazer.' }],
     // The indefinite plural subject keeps French des; Spanish and Portuguese then say unas / umas.
-    ['WAR', { en: 'a period where nations kill.', it: 'un periodo dove nazioni uccidono.', fr: 'une période où des nations tuent.', de: 'ein Zeitraum, in dem Nationen töten.', es: 'un período donde unas naciones matan.', ja: '国民が殺す期間。', pt: 'um período onde umas nações matam.' }],
+    ['WAR', { en: 'a period where nations kill.', it: 'un periodo dove delle nazioni uccidono.', fr: 'une période où des nations tuent.', de: 'ein Zeitraum, in dem Nationen töten.', es: 'un período donde unas naciones matan.', ja: '国民が殺す期間。', pt: 'um período onde umas nações matam.' }],
     // B77. Japanese PLAY_GAME is 遊ぶ, as in PLAY_GAME's own gloss.
     ['TEAM', { en: 'a group that plays.', it: 'un gruppo che gioca.', fr: 'un groupe qui joue.', de: 'eine Gruppe, die spielt.', es: 'un grupo que juega.', ja: '遊ぶグループ。', pt: 'um grupo que joga.' }],
     // SYSTEM's shape: the relative agrees with GROUP; a locative with SAME.
     ['COMMUNITY', { en: 'a group of people that lives in the same place.', it: 'un gruppo di persone che abita nello stesso luogo.', fr: 'un groupe de personnes qui habite dans le même lieu.', de: 'eine Gruppe von Personen, die am gleichen Ort wohnt.', es: 'un grupo de personas que vive en el mismo lugar.', ja: '同じ場所に住む人のグループ。', pt: 'um grupo de pessoas que mora no mesmo lugar.' }],
     // A locative gap with a subject of its own, under an adjective.
-    ['UNIVERSITY', { en: 'a school where adult people learn.', it: 'una scuola dove persone adulte imparano.', fr: 'une école où des personnes adultes apprennent.', de: 'eine Schule, in der erwachsene Personen lernen.', es: 'una escuela donde unas personas adultas aprenden.', ja: '大人の人が学ぶ学校。', pt: 'uma escola onde umas pessoas adultas aprendem.' }],
+    ['UNIVERSITY', { en: 'a school where adult people learn.', it: 'una scuola dove delle persone adulte imparano.', fr: 'une école où des personnes adultes apprennent.', de: 'eine Schule, in der erwachsene Personen lernen.', es: 'una escuela donde unas personas adultas aprenden.', ja: '大人の人が学ぶ学校。', pt: 'uma escola onde umas pessoas adultas aprendem.' }],
     // E2's purpose complement inside an object-gap relative, on a bare mass head.
     ['SERVICE', { en: 'work that one does for other people.', it: 'lavoro che si fa per altre persone.', fr: "travail qu'on fait pour d'autres personnes.", de: 'Arbeit, die man für andere Personen tut.', es: 'trabajo que se hace para otras personas.', ja: '別の人のためにする仕事。', pt: 'trabalho que se faz para outras pessoas.' }],
     // MARKET's verb (a place where one trades) on WORK_NOUN.

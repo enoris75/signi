@@ -116,7 +116,7 @@ export function resolveRelativeClause(
     ...slots,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     verbPhrase: swapped?.verbPhrase ?? verbPhrase,
-    complements: experiencer ? { ...complements, terminus: { phrase: genericSubject(experiencer, language) } } : complements,
+    complements: experiencer ? { ...complements, terminus: { phrase: genericSubject(experiencer, language, true) } } : complements,
   };
 }
 

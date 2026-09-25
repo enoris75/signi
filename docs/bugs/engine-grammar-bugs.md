@@ -53,7 +53,7 @@ They live in `describe` blocks named either:
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
 `packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (as of
-this writing Part A holds two files, A378 and A379, and Part B is empty).** If
+this writing Part A is empty, and so is Part B).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -65,13 +65,13 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Summary |
 |---|---|---|---|
-| A378 | [A378-italian-indefinite-plural-subject-stays-bare.md](A-must-fix/A378-italian-indefinite-plural-subject-stays-bare.md) | Italian | An indefinite plural subject is bare (*gatti corrono*) where it takes the partitive (*dei gatti corrono*) |
-| A379 | [A379-french-bare-passive-agent-has-no-article.md](A-must-fix/A379-french-bare-passive-agent-has-no-article.md) | French | A bare plural or mass passive agent keeps no article (*par chats*) where it takes *des* / *de l'* |
 
-**Two open**, **A378** and **A379**. A377 and A380 were fixed on 2026-09-25 and are listed under
-**Fixed** below: an animate route in a statement spells its path (*a través del hombre*, *através do
-homem*, 男の中を通って), and a superlative's set behind a noun possessor is said as a place (*das größte Haus
-der Frau in der Stadt*, *a maior casa da mulher na cidade*). The four, **A377–A380**, were filed on 2026-09-25 from the leads the A370–A376 lanes reported, each
+**All four were fixed on 2026-09-25**, and are listed under **Fixed** below: A377 (an animate route in
+a statement spells its path: *a través del hombre*, *através do homem*, 男の中を通って), A378 (an Italian
+indefinite plural subject takes the partitive: *dei gatti corrono*), A379 (a French bare passive agent
+takes *des* / *de l'*: *par des chats*) and A380 (a superlative's set behind a noun possessor is said as
+a place: *das größte Haus der Frau in der Stadt*, *a maior casa da mulher na cidade*).
+The four, **A377–A380**, were filed on 2026-09-25 from the leads the A370–A376 lanes reported, each
 probed at the fix: an animate route in a statement (A377, the statement A374 left), the Italian
 indefinite plural subject (A378, which moves UNIVERSITY's and WAR's definitions), the French bare
 passive agent (A379) and two genitives stacked by A371's set beside a possessor (A380). A380 leaves a
@@ -747,6 +747,8 @@ is listed under **Fixed** below.
 | A375 | [A375-enter-in-the-owner-picker-points-to-the-subject.md](fixed/A375-enter-in-the-owner-picker-points-to-the-subject.md) | frontend | 2026-09-25 |
 | A376 | [A376-romance-bare-plural-subject-loses-its-article.md](fixed/A376-romance-bare-plural-subject-loses-its-article.md) | Italian, French, Spanish, Portuguese | 2026-09-25 |
 | A377 | [A377-animate-route-reads-as-another-relation.md](fixed/A377-animate-route-reads-as-another-relation.md) | Spanish, Portuguese, Japanese | 2026-09-25 |
+| A378 | [A378-italian-indefinite-plural-subject-stays-bare.md](fixed/A378-italian-indefinite-plural-subject-stays-bare.md) | Italian | 2026-09-25 |
+| A379 | [A379-french-bare-passive-agent-has-no-article.md](fixed/A379-french-bare-passive-agent-has-no-article.md) | French | 2026-09-25 |
 | A380 | [A380-superlative-set-beside-a-possessor-stacks-two-genitives.md](fixed/A380-superlative-set-beside-a-possessor-stacks-two-genitives.md) | German, Portuguese | 2026-09-25 |
 
 _B1 / B1b / B2 / B3 / B4, and B5–B7 / B9–B14, were documented simplifications (Part B), fixed after a

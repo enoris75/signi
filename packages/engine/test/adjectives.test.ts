@@ -830,7 +830,7 @@ describe('every adjective renders attributively', () => {
     });
     expect(sayAll(clause(np('WOMAN', { number: 'plural', definiteness: 'indefinite', adjectives: ['HUMBLE_GRAMMAR'] }), 'EAT'))).toMatchObject({
       en: 'humble women eat.',
-      it: 'donne umili mangiano.',
+      it: 'delle donne umili mangiano.',
       fr: 'des femmes humbles mangent.',
       de: 'bescheidene Frauen essen.',
       es: 'unas mujeres humildes comen.',
@@ -976,7 +976,7 @@ describe('adjective agreement: SHARP and LOUD', () => {
   test('LOUD agrees with a masculine plural and a feminine plural head', () => {
     expect(sayAll(clause(np('SOUND', { number: 'plural', definiteness: 'indefinite', adjectives: ['LOUD'] }), 'RUN'))).toEqual({
       en: 'loud sounds run.',
-      it: 'suoni forti corrono.',
+      it: 'dei suoni forti corrono.',
       fr: 'des sons forts courent.',
       es: 'unos sonidos fuertes corren.',
       pt: 'uns sons altos correm.',
@@ -1846,7 +1846,7 @@ describe('OTHER', () => {
     });
     expect(cat({ definiteness: 'indefinite', gender: 'fem', number: 'plural', adjectives: ['OTHER'] })).toEqual({
       en: 'other cats eat.',
-      it: 'altre gatte mangiano.',
+      it: 'delle altre gatte mangiano.',
       fr: "d'autres chattes mangent.",
       de: 'andere Katzen fressen.',
       es: 'otras gatas comen.',

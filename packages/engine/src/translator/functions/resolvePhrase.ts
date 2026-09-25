@@ -270,7 +270,7 @@ export function resolvePhrase(
   // (A376, see `genericSubject`): the clause's grammatical subject, whichever slot of the plan it came
   // from, and the one who likes in the dative an experiencer verb gives it. The agent a passive demotes
   // keeps the plan's determiner, as any complement does. A verbless period is a label, and says no clause.
-  const asSubject = (el: typeof subject | undefined) => verbPhrase && verbPhrase.mood !== 'infinitive' ? genericSubject(el, language) : el;
+  const asSubject = (el: typeof subject | undefined, dative = false) => verbPhrase && verbPhrase.mood !== 'infinitive' ? genericSubject(el, language, dative) : el;
   const resolved: ResolvedPhrase = {
     subject: asSubject(passive ? patient! : experiencer ? liked! : subject)!,
     // A clause object may leave the addressee bare, where the verb's lexeme says so (P09-E4).
@@ -282,7 +282,7 @@ export function resolvePhrase(
     // An indefinite pronoun inside a complement takes its negative form as the object's does: "does
     // not run with anyone", "non corre con nessuno", "läuft mit niemandem" (A308).
     complements: dative
-      ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: asSubject(subject)! } }
+      ? { ...negativeComplements(positiveComplements, clauseNegative), terminus: { phrase: asSubject(subject, true)! } }
       : negativeComplements(positiveComplements, clauseNegative),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
