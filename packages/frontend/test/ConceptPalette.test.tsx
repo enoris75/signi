@@ -53,6 +53,14 @@ describe('ConceptPalette', () => {
     expect(container).toHaveTextContent(/^Nounscatdogfox$/);
   });
 
+  // P09-E47: the interjections have a heading of their own, now that INTERJECTION is seeded.
+  it('heads the interjections with their own name', () => {
+    const HEY: Concept = { id: 'HEY', role: 'interjection', description: 'hey', label: 'hey' };
+    const { container } = renderPalette({ role: 'interjection' }, { concepts: { interjection: [HEY] } });
+
+    expect(container).toHaveTextContent(/^Interjectionshey$/);
+  });
+
   it('names the role and its words in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     const { container } = renderPalette(

@@ -35,12 +35,15 @@ describe('roleGroups', () => {
   // A19. The label is what a ring's collapse state is stored under: renamed "Agent", the agent's ring
   // folded nothing, and the patient's, renamed "Subject", folded the agent's satellites.
   it('captions a passive’s rings by the roles they play, under the names they are stored by', () => {
+    // Every slot visible: the interjection's ring too (P09-E47), which a passive does not rename.
     expect(rings(false)).toEqual([
+      ['Interjection', 'slot.interjection', 'interjection'],
       ['Subject', 'slot.subject', 'subject'],
       ['Verb Phrase', 'slot.verbPhrase', 'verb'],
       ['Direct Object', 'slot.directObject', 'directObject'],
     ]);
     expect(rings(true)).toEqual([
+      ['Interjection', 'slot.interjection', 'interjection'],
       ['Subject', 'slot.agent', 'subject'],
       ['Verb Phrase', 'slot.verbPhrase', 'verb'],
       ['Direct Object', 'slot.subject', 'directObject'],

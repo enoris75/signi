@@ -183,6 +183,20 @@ test.describe('the phrase console', () => {
     await app.expectSentences({ en: 'the five cats run.' });
   });
 
+  // P09-E47: the period's interjection, printed first as it is spoken first.
+  test('says an interjection with /interj, and /del interj takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat /verb run /interj hey');
+    await run(page);
+    await app.expectSentences({ en: 'Hey, the cat runs.', it: 'Ehi, il gatto corre.', ja: 'ねえ、猫は走ります。' });
+    await expect(page.getByTestId('box-interjection')).toContainText('hey');
+    await expect(page.getByTestId('source-strip')).toContainText('/interj ( hey ) /subj ( cat ) /verb ( run )');
+    await page.keyboard.type('/del interj');
+    await run(page);
+    await app.expectSentences({ en: 'the cat runs.' });
+    await expect(page.getByTestId('box-interjection')).toHaveCount(0);
+  });
+
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');

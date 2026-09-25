@@ -57,7 +57,7 @@ type NewLink = PhraseLink extends infer L ? (L extends PhraseLink ? Omit<L, "id"
 const PERIOD_FIELDS = new Set([
   "subject", "verbPhrase", "directObject", "complements", "condition", "coordination", "interrogative",
   "existential", "imperative", "imperativeRegister", "infinitive", "contentObject", "adverbialClause",
-  "infinitiveComplement", "purpose", "contentSubject", "adverbialGloss",
+  "infinitiveComplement", "purpose", "contentSubject", "adverbialGloss", "interjection",
 ]);
 const NOUN_FIELDS = new Set([
   "concept", "number", "gender", "definiteness", "adjectives", "adjectiveDegrees", "headDegree",
@@ -108,6 +108,8 @@ class Builder {
   /** A period of its own: a root, a condition or a coordinate. Returns its container. */
   period(plan: PhrasePlan): PhraseContainer {
     this.check("PhrasePlan", plan, PERIOD_FIELDS);
+    // The first period opened is the root; the rest are linked clauses.
+    const root = this.n === 0;
     const c = this.open();
     const sel = c.selection;
     if (plan.imperative) {
@@ -117,6 +119,11 @@ class Builder {
       sel.imperativePerson = s.concept === "FIRST_PERSON" ? "1pl" : s.number === "plural" ? "2pl" : "2sg";
     }
     if (plan.infinitive) sel.infinitive = true;
+    // The period's interjection (P09-E47): the root's word, before the clause. A linked clause's is
+    // one the engine never speaks, and the canvas serialises none, so it is not said; nor is one under
+    // the infinitive, whose citation calls no one.
+    if (plan.interjection && (!root || plan.infinitive)) this.unsupported.add("PhrasePlan.interjection of a linked clause or a citation");
+    else if (plan.interjection) set(sel, "interjection", this.concept(plan.interjection));
     if (plan.interrogative) sel.interrogative = true;
     if (plan.existential) sel.existential = true;
     // A command's and a citation's subject is the placeholder the mood puts there, not a word; so is

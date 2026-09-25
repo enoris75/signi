@@ -198,6 +198,7 @@ export const EXAMPLES: Record<string, string> = {
   with: "/subj ( cat ) /verb ( eat ) /with ( dog )",
   role: "/subj ( man ) /verb ( act ) /role ( friend )",
   vs: "/subj ( cat ) /verb ( play ) /vs ( dog )",
+  interj: "/interj ( hey ) /subj ( cat ) /verb ( run )",
   essive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive /essive )",
   factitive: "/verb ( eat ) /obj ( food ) /objpred ( dog /factitive )",
   subjctl: "/subj ( cat ) /verb ( need ) /obj ( dog ) /to { /verb ( run ) } /objctl /subjctl",

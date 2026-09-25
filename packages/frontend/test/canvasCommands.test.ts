@@ -128,10 +128,13 @@ describe('every part a canvas control acts on is named by the catalog', () => {
     expect(english(boxCaptions, (key) => clearTitle(t, '…', key))).toEqual([]);
   });
 
+  // A bare ring — P09-E47's interjection — carries no collapse toggle to title.
+  const collapsible = rings.filter((r) => !r.bare);
+
   it('on every ring’s collapse toggle, in the active and in the passive', () => {
     expect(rings.map((r) => r.labelKey)).toContain('slot.agent');
-    expect(english(rings, (key) => collapseTitle(t, false, '…', key))).toEqual([]);
-    expect(english(rings, (key) => collapseTitle(t, true, '…', key))).toEqual([]);
+    expect(english(collapsible, (key) => collapseTitle(t, false, '…', key))).toEqual([]);
+    expect(english(collapsible, (key) => collapseTitle(t, true, '…', key))).toEqual([]);
   });
 
   it('on every complement ring’s remove button', () => {

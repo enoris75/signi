@@ -5,6 +5,7 @@ import { focusRing } from "../../keyboard/focusRing.ts";
 import { usePeriodCursor, usePeriodHasCursor } from "../../keyboard/KeyboardProvider.tsx";
 import type { PeriodContext } from "../../keyboard/keymap.ts";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
+import type { InterjectionControl } from "./PeriodContainer/PeriodContainer.types.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
 import { moodLocked } from "./functions/moodLocked.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
@@ -33,6 +34,8 @@ export interface PeriodCardProps {
   onToggleImperative: () => void;
   onToggleInfinitive: () => void;
   onToggleQuestion: () => void;
+  // The interjection's border toggle (P09-E47); absent where the period offers none.
+  interjection?: InterjectionControl;
   // One more period, empty or loaded from the saved ones — the workspace's own two buttons, which
   // the period's N and L reach without leaving the card (see the keymap's period scope).
   onAddPeriod?: () => void;
@@ -69,6 +72,7 @@ export function PeriodCard({
   onToggleImperative,
   onToggleInfinitive,
   onToggleQuestion,
+  interjection,
   onAddPeriod,
   onLoadPeriod,
   controlsRef,
@@ -158,6 +162,10 @@ export function PeriodCard({
       toggleObjectControl: subordinate?.objectControl
         ? () => subordinate.objectControl!.onChange(!subordinate.objectControl!.object)
         : undefined,
+      // The interjection's toggle takes the cursor into the box it shows, so E presses the control.
+      toggleInterjection: interjection
+        ? () => pressControl("interjection", cardRef.current ?? document)
+        : undefined,
       toggleCompact: onToggleCompact,
       tidy: onTidy,
       hasGroups,
@@ -212,6 +220,7 @@ export function PeriodCard({
         imperative={{ active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }}
         infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}
         question={{ active: Boolean(selection.interrogative), disabled: locked, onToggle: onToggleQuestion }}
+        interjection={interjection}
       >
         {children}
 

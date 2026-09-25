@@ -204,6 +204,12 @@ describe('what each console command is for', () => {
       es: 'añadir un complemento circunstancial de instrumento al verbo.', ja: '動詞に手段語を加える。',
       pt: 'adicionar um adjunto adverbial de instrumento ao verbo.',
     },
+    // P09-E47's /interj.
+    'purpose.interjection': {
+      en: 'to add an interjection to a period.', it: "aggiungere un'interiezione a un periodo.",
+      fr: 'ajouter une interjection à une période.', de: 'eine Interjektion zu einem Satzgefüge hinzufügen.',
+      es: 'añadir una interjección a un período.', ja: '文に感動詞を加える。', pt: 'adicionar uma interjeição a um período.',
+    },
     'purpose.possessor': {
       en: 'to add a possessor to a noun.', it: 'aggiungere un possessore a un sostantivo.',
       fr: 'ajouter un possesseur à un nom.', de: 'einen Besitzer zu einem Substantiv hinzufügen.',

@@ -30,7 +30,7 @@ const KANJI_NOUNS: [id: string, reading: string][] = [
   ['DETERMINER', 'げんていし'], ['DOG', 'いぬ'], ['ENGLISH', 'えいご'], ['FATHER', 'ちちおや'], ['FIRE', 'ひ'],
   ['FEELING', 'かんじょう'],
   ['GENDER', 'せい'], ['HOME', 'いえ'], ['HOUSE', 'いえ'], ['INSTRUCTION', 'しじ'],
-  ['INSTRUMENTAL', 'しゅだんご'], ['JAPANESE', 'にほんご'], ['LANGUAGE', 'げんご'], ['LEGEND', 'でんせつ'],
+  ['INSTRUMENTAL', 'しゅだんご'], ['INTERJECTION', 'かんどうし'], ['JAPANESE', 'にほんご'], ['LANGUAGE', 'げんご'], ['LEGEND', 'でんせつ'],
   ['MAMMAL', 'ほにゅうるい'], ['MAN', 'おとこ'], ['MAP', 'ちず'], ['MARKET', 'いちば'],
   ['NORTH_AMERICA', 'ほくべい'], ['NOUN', 'めいし'], ['NUMBER', 'かず'], ['NUMBER_GRAMMAR', 'すう'],
   ['COMITATIVE', 'きょうどうかく'], ['OBJECT_COMPLEMENT', 'もくてきごほご'], ['OBJECT_GRAMMAR', 'もくてきご'], ['OBJECT_THING', 'ぶったい'], ['OPTION', 'せんたくし'], ['ORDER', 'めいれい'], ['OX', 'おうし'],

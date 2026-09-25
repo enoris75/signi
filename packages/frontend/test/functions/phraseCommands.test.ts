@@ -40,6 +40,8 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleCycleModifierNumber', (c) => c.handleCycleModifierNumber('modifier'), (p) => reducers.cycleModifierNumber(p, 'modifier')],
   ['handleSetModifierAdjective', (c) => c.handleSetModifierAdjective('modifier', BIG), (p) => reducers.setModifierAdjective(p, 'modifier', BIG)],
   ['handleCycleDegree', (c) => c.handleCycleDegree('subjectAdjective'), (p) => reducers.cycleDegree(p, 'subjectAdjective')],
+  // The interjection's border toggle taking its box away, word and all (P09-E47).
+  ['handleRemoveInterjection', (c) => c.handleRemoveInterjection(), (p) => reducers.applyClear(p, 'interjection')],
   ['handleRemoveStandard', (c) => c.handleRemoveStandard(), (p) => reducers.removeStandard(p, 'predicative')],
   ['handleCycleTense', (c) => c.handleCycleTense(), reducers.cycleTense],
   ['handleCycleAspect', (c) => c.handleCycleAspect(), reducers.cycleAspect],

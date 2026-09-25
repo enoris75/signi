@@ -1394,3 +1394,44 @@ describe('known bugs: a boot render serves the hole an unseeded concept leaves (
     expect(() => buildUiStrings()).not.toThrow();
   });
 });
+
+// P09-E47: the interjection's box, palette, toggle and command, composed from the seeded INTERJECTION.
+describe('the interjection’s strings', () => {
+  test('render in all seven', () => {
+    const strings = buildUiStrings();
+    const keys = [
+      'slot.interjection',
+      'slot.interjection.placeholder',
+      'palette.interjection',
+      'action.addInterjection',
+      'action.removeInterjection',
+      'action.clear.interjection',
+      'purpose.interjection',
+    ] as const;
+    expect(Object.fromEntries(keys.map((k) => [k, strings[k]]))).toEqual({
+      'slot.interjection': { en: 'Interjection', it: 'Interiezione', fr: 'Interjection', de: 'Interjektion', es: 'Interjección', pt: 'Interjeição', ja: '感動詞' },
+      'slot.interjection.placeholder': {
+        en: 'type an interjection', it: "digita un'interiezione", fr: 'taper une interjection', de: 'eine Interjektion tippen',
+        es: 'teclear una interjección', pt: 'digitar uma interjeição', ja: '感動詞を入力',
+      },
+      'palette.interjection': { en: 'Interjections', it: 'Interiezioni', fr: 'Interjections', de: 'Interjektionen', es: 'Interjecciones', pt: 'Interjeições', ja: '感動詞' },
+      'action.addInterjection': {
+        en: 'Add an interjection', it: "Aggiungi un'interiezione", fr: 'Ajouter une interjection', de: 'Eine Interjektion hinzufügen',
+        es: 'Añadir una interjección', pt: 'Adicionar uma interjeição', ja: '感動詞を追加',
+      },
+      'action.removeInterjection': {
+        en: 'Remove the interjection', it: "Rimuovi l'interiezione", fr: "Retirer l'interjection", de: 'Die Interjektion entfernen',
+        es: 'Quitar la interjección', pt: 'Remover a interjeição', ja: '感動詞を取り除き',
+      },
+      'action.clear.interjection': {
+        en: 'Clear the interjection', it: "Cancella l'interiezione", fr: "Effacer l'interjection", de: 'Die Interjektion löschen',
+        es: 'Borrar la interjección', pt: 'Limpar a interjeição', ja: '感動詞を消去',
+      },
+      'purpose.interjection': {
+        en: 'to add an interjection to a period', it: "aggiungere un'interiezione a un periodo", fr: 'ajouter une interjection à une période',
+        de: 'eine Interjektion zu einem Satzgefüge hinzufügen', es: 'añadir una interjección a un período', pt: 'adicionar uma interjeição a um período',
+        ja: '文に感動詞を加える',
+      },
+    });
+  });
+});

@@ -58,6 +58,7 @@ export function PeriodContainer({
   imperative,
   infinitive,
   question,
+  interjection,
   children,
   ...headerControls
 }: PeriodContainerProps) {
@@ -74,9 +75,12 @@ export function PeriodContainer({
   // (widen, never hide: the canvas rule). Measured 2026-09-23: a compact *cat eats mouse* card is
   // 142px tall, and five controls stack to 156px (28px each, 4px apart), standing 7px out of it at
   // either end. So the card grows to the stack plus 8px clear of the border at either end: each
-  // 28px control and its 4px gap, less the last gap, plus 16 — 172px for five, 204px for all six
-  // (command, infinitive, question, conditional, coordination, subordinate clause).
-  const borderControls = [imperative, infinitive, question, conditional, coordinative, subordinate].filter(Boolean).length;
+  // 28px control and its 4px gap, less the last gap, plus 16 — 172px for five, 204px for six, 236px
+  // for all seven (command, infinitive, question, conditional, coordination, subordinate clause and
+  // P09-E47's interjection).
+  const borderControls = [imperative, infinitive, question, conditional, coordinative, subordinate, interjection].filter(
+    Boolean,
+  ).length;
   const minHeight = borderControls ? `${borderControls * 32 - 4 + 16}px` : undefined;
 
   return (
@@ -122,6 +126,7 @@ export function PeriodContainer({
         imperative={imperative}
         infinitive={infinitive}
         question={question}
+        interjection={interjection}
       />
       <Box
         ref={controlsRef}

@@ -233,6 +233,12 @@ class Printer {
       this.statement({ key: ":there", removal: "/del there" });
       this.emit("/there", "command", "setting");
     }
+    // The interjection (P09-E47), the first word spoken, in its bracket as a period word is.
+    if (root.interjection) {
+      const ref: WordRef = { containerId: id, slot: "interjection" };
+      const statement = this.wordStatement(ref, "/interj", "info", root.interjection, undefined, true);
+      this.emit(")", "close", "info", { word: ref, element: true, statement });
+    }
     this.noun(root, "subject", undefined, "period");
     this.verbBlock(root);
     this.noun(root, "directObject", undefined, "period");

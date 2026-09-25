@@ -375,6 +375,12 @@ export const COMMANDS: readonly CommandDef[] = [
   role("role", ["capacity"], "role", "role", "slot.role", "warning", /^role$/),
   // P09-E45: the party the act is directed against — `/vs` (`/against` is the spatial relation's).
   role("vs", ["versus", "opponent"], "opponent", "opponent", "slot.opponent", "warning", /^opponent$/),
+  // P09-E47: the period's interjection, "**hey**, the cat runs" — a word before the clause, printed
+  // first in the period as it is spoken first. The box's own control is the card's border toggle.
+  {
+    ...role("interj", ["interjection"], "interjection", "interjection", "slot.interjection", "info"),
+    purposeKey: "purpose.interjection",
+  },
   {
     name: "inst",
     aliases: ["instrument", "instrumental"],

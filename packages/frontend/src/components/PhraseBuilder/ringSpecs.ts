@@ -41,6 +41,10 @@ export type GroupDef = {
   removeKey?: BoxComplementType;
   // A conjunct's ring also carries a remove control: it drops that phrase out of its group.
   removable?: boolean;
+  // A word of the period that belongs to no constituent (P09-E47's interjection): its dotted ring
+  // carries no control and no port, and no line joins it to the verb phrase — its word's solid ring
+  // carries the clear button, and the card's border toggle shows and removes it.
+  bare?: boolean;
   // Set on a conjunct's ring as its head's canvas sees it: the head's group label, and which of
   // the head's conjuncts it is. Tidying packs it right after the rings before it in its group.
   conjunct?: { head: string; index: number };
@@ -226,6 +230,7 @@ export function buildRingSpecs({
     }
 
     // ── Dotted ring ──
+    if (group.bare) continue;
     outer.push({ key: collapseControlKey(label), aim: { clock: COLLAPSE_HOUR } });
     if (group.removeKey || group.removable)
       outer.push({ key: removeControlKey(label), aim: { clock: REMOVE_HOUR } });
@@ -288,7 +293,7 @@ export function buildRingSpecs({
       }
 
       for (const other of groups) {
-        if (other === verb || verbEnd(other, complementToggleIcons, directObjectToggle) !== null) continue;
+        if (other === verb || other.bare || verbEnd(other, complementToggleIcons, directObjectToggle) !== null) continue;
         outer.push({ key: portKey(label, other.label), aim: { point: centerOf(other.mainKey) }, half: PORT_HALF });
       }
     } else if (verb) {

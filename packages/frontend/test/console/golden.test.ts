@@ -137,6 +137,13 @@ const GOLDEN: Record<string, Golden> = {
     holds: { opponent: 'DOG' },
     misuse: { line: '/verb eat /vs dog', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'opponent' } } },
   },
+  // P09-E47: the period's interjection, printed first as it is spoken first; a noun is no interjection.
+  interj: {
+    line: '/subj cat /verb run /interj hey',
+    prints: '/interj ( hey ) /subj ( cat ) /verb ( run )',
+    holds: { interjection: 'HEY', subject: 'CAT' },
+    misuse: { line: '/interj cat', says: { code: 'unknownWord', args: { text: 'cat' } } },
+  },
   factitive: {
     line: '/verb eat /obj food /objpred cat /factitive',
     prints: '/verb ( eat ) /obj ( food ) /objpred ( cat /factitive )',

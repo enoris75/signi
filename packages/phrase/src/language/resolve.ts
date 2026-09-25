@@ -1,4 +1,4 @@
-import type { Concept, PickerRole } from "@signi/shared";
+import type { Concept, GrammaticalRole } from "@signi/shared";
 import type {
   ConceptSelectOpts,
   NounAddress,
@@ -21,7 +21,7 @@ import type { Vocabulary } from "./types.ts";
 
 /** Which words a slot takes: the roles searched, in order, and which verbs. */
 export interface WordSpec {
-  roles: PickerRole[];
+  roles: GrammaticalRole[];
   /** Verbs only: the modal verbs (`/modal`) or every other one (`/verb`). */
   modal?: boolean;
 }
@@ -33,6 +33,7 @@ export interface WordSpec {
  */
 export function wordSpecFor(slot: SlotKey, frame: "period" | "possessor" | "standard" | "conjunct" = "period"): WordSpec {
   if (slot === "subject") return frame === "possessor" ? { roles: ["noun"] } : { roles: ["noun", "pronoun"] };
+  if (slot === "interjection") return { roles: ["interjection"] };
   if (slot === "verb") return { roles: ["verb"], modal: false };
   if (slot === "verbModal" || slot === "verbModal2") return { roles: ["verb"], modal: true };
   if (slot === "modifier" || /^verbModal2?Adverb$/.test(slot)) return { roles: ["adverb"] };

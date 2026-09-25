@@ -18,6 +18,7 @@ import type {
 } from "../interfaces.ts";
 import {
   addConjunct,
+  applyClear,
   cycleAspect,
   cycleVoice,
   cycleDegree,
@@ -119,5 +120,7 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleSelectPredication: (predication: ObjectPredication) =>
       onPhraseUpdate((prev) => setPredication(prev, predication)),
     handleSelectSentiment: (sentiment: CauseSentiment) => onPhraseUpdate((prev) => setSentiment(prev, sentiment)),
+    // The interjection's border toggle, taking its box away (P09-E47): the word goes with it.
+    handleRemoveInterjection: () => onPhraseUpdate((prev) => applyClear(prev, "interjection")),
   };
 }

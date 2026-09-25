@@ -32,8 +32,10 @@ export function useVocabulary(): Vocabulary {
   const { data: verb } = useConcepts("verb");
   const { data: adjective } = useConcepts("adjective");
   const { data: adverb } = useConcepts("adverb");
+  // The period's interjection (P09-E47), which `/interj` names.
+  const { data: interjection } = useConcepts("interjection");
   return useMemo(
-    () => ({ concepts: { noun, pronoun, verb, adjective, adverb }, language: uiLanguage, label, gloss }),
-    [noun, pronoun, verb, adjective, adverb, uiLanguage, label, gloss],
+    () => ({ concepts: { noun, pronoun, verb, adjective, adverb, interjection }, language: uiLanguage, label, gloss }),
+    [noun, pronoun, verb, adjective, adverb, interjection, uiLanguage, label, gloss],
   );
 }

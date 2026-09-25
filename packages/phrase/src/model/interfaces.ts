@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, ImperativeRegister, ObjectPredication, PickerRole, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
+import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ObjectPredication, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
 import type { TemporalRelation } from "@signi/shared";
 import type { ClauseObject, SubordinatingConjunction } from "@signi/shared";
@@ -189,7 +189,8 @@ export const governsInfinitive = (sel: Pick<PhraseSelection, "verb" | "predicati
 export type BoxComplementType = Exclude<ComplementType, "instrumental">;
 
 export interface SlotConfig {
-    key: "subject" |
+    key: "interjection" |
+    "subject" |
     "verb" |
     "verbModal" |
     "verbModal2" |
@@ -213,7 +214,7 @@ export interface SlotConfig {
     // name used in tooltips / group headings). Slots migrate to a key as their word is seeded.
     labelKey?: UiStringKey;
     required: boolean;
-    roles: PickerRole[];
+    roles: GrammaticalRole[];
     color: "primary" | "secondary" | "success" | "warning" | "info" | "error";
 }
 
@@ -251,6 +252,11 @@ export function imperativeRegisterOf(selection: PhraseSelection): ImperativeRegi
 }
 
 export interface PhraseSelection {
+    // The period's interjection (P09-E47, PhrasePlan.interjection): "**hey**, the cat runs" — a word
+    // before the clause and outside it, in a box of its own that the card's border reveals. Only the
+    // root period's is spoken, and not under the infinitive (a citation calls no one): the plan leaves
+    // it out there, and the box stays, dimmed, with its word (see workspaceToPlans).
+    interjection?: Concept;
     subject?: Concept;
     // When set, this period is an imperative (command). The subject box becomes the addressee
     // selector (see `imperativePerson`) and the subject is dropped by the engines; tense/aspect

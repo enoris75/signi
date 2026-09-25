@@ -155,6 +155,19 @@ describe('PeriodContainer', () => {
         },
         '204px',
       ],
+      [
+        'all seven, the interjection last (P09-E47)',
+        {
+          imperative: mood(false),
+          infinitive: mood(false),
+          question: mood(false),
+          conditional: conditionalControl(),
+          coordinative: coordinativeControl(),
+          subordinate: subordinateControl(),
+          interjection: { shown: false, onToggle: () => {} },
+        },
+        '236px',
+      ],
     ])('make the card at least as tall as their stack: %s', (_, props, minHeight) => {
       renderPeriod(props);
 

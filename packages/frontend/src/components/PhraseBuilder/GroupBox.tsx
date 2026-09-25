@@ -73,8 +73,9 @@ export function GroupBox({
     removeRing,
   } = ctx;
   const t = useUiString();
-  // Compact view hides the dotted rings entirely — only the words in their solid rings remain.
-  if (compact) return null;
+  // Compact view hides the dotted rings entirely — only the words in their solid rings remain. A bare
+  // ring (P09-E47's interjection) has no dotted ring at all: nothing rides it.
+  if (compact || rect.bare) return null;
   const isCollapsed = collapsedGroups[rect.label] ?? false;
 
   return (

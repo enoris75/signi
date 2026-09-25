@@ -45,6 +45,27 @@ describe('BorderControls', () => {
     ]);
   });
 
+  // P09-E47: the seventh control, last of the stack. Its two faces add the box and take it away.
+  it('stacks the interjection last, and names what pressing it does', () => {
+    const onToggle = vi.fn();
+    const { rerender } = renderControls({ imperative: mood(false), interjection: { shown: false, onToggle } });
+
+    const toggle = screen.getAllByRole('button').at(-1)!;
+    expect(toggle).toHaveAttribute('data-kb-control', 'interjection');
+    expect(toggle).toHaveAccessibleName('Add an interjection');
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(toggle);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <div>
+        <BorderControls imperative={mood(false)} interjection={{ shown: true, onToggle }} />
+      </div>,
+    );
+    expect(screen.getAllByRole('button').at(-1)).toHaveAccessibleName('Remove the interjection');
+    expect(screen.getAllByRole('button').at(-1)).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('shows only the controls it is given', () => {
     renderControls({ imperative: mood(false) });
 

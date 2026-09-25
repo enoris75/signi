@@ -614,6 +614,10 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
     ['COMITATIVE',
       { en: 'a comitative.', it: 'un complemento di compagnia.', fr: "un complément d'accompagnement.", de: 'ein Komitativ.', es: 'un complemento circunstancial de compañía.', ja: '共同格。', pt: 'um adjunto adverbial de companhia.' },
       { en: 'the comitatives.', it: 'i complementi di compagnia.', fr: "les compléments d'accompagnement.", de: 'die Komitative.', es: 'los complementos circunstanciales de compañía.', ja: '共同格。', pt: 'os adjuntos adverbiais de companhia.' }],
+    // P09-E47: the part of speech of HEY, which names the period's interjection box.
+    ['INTERJECTION',
+      { en: 'an interjection.', it: "un'interiezione.", fr: 'une interjection.', de: 'eine Interjektion.', es: 'una interjección.', ja: '感動詞。', pt: 'uma interjeição.' },
+      { en: 'the interjections.', it: 'le interiezioni.', fr: 'les interjections.', de: 'die Interjektionen.', es: 'las interjecciones.', ja: '感動詞。', pt: 'as interjeições.' }],
     ['TERMINUS',
       { en: 'a terminus.', it: 'un complemento di termine.', fr: "un complément d'objet second.", de: 'ein Dativobjekt.', es: 'un complemento indirecto.', ja: '間接目的語。', pt: 'um objeto indireto.' },
       { en: 'the termini.', it: 'i complementi di termine.', fr: "les compléments d'objet second.", de: 'die Dativobjekte.', es: 'los complementos indirectos.', ja: '間接目的語。', pt: 'os objetos indiretos.' }],

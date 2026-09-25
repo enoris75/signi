@@ -17,7 +17,8 @@ import { ALL_SLOTS, BOX_COMPLEMENT_TYPES } from "./slots.ts";
 import { DEFAULT_NODE_SIZE, type Edge } from "./graph.ts";
 import { innerRadius } from "./ringLayout.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
-import { nodeElRef, type PhraseRenderContext } from "./phraseRender.tsx";
+import { nodeElRef, SlotNode, type PhraseRenderContext } from "./phraseRender.tsx";
+import { GroupBox } from "./GroupBox.tsx";
 import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
 import { focusRing } from "../../keyboard/focusRing.ts";
 import { boxScopesOf } from "../../keyboard/scope.ts";
@@ -64,6 +65,9 @@ export interface PhraseCanvasProps {
   // A hosted ring's builder paints its ring onto the period's canvas, which is already on the page: it
   // draws its constituent and controls with no canvas box of its own.
   overlay?: boolean;
+  // The interjection's box stays, faded, where the period no longer offers it — a linked clause, a
+  // citation — but its word is still chosen (P09-E47 D2): the engine does not speak it there.
+  interjectionDimmed?: boolean;
 }
 
 const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
@@ -89,6 +93,7 @@ export function PhraseCanvas({
   hosted,
   recolor,
   overlay = false,
+  interjectionDimmed = false,
 }: PhraseCanvasProps) {
   const {
     selection,
@@ -134,6 +139,20 @@ export function PhraseCanvas({
   const openingPicker = !showCanvas && !moodBox;
   const openingSize = useElementSize(openingRef, DEFAULT_NODE_SIZE, openingPicker);
 
+  // The period's interjection (P09-E47): its word in a ring of its own before the subject, joined to
+  // nothing, while the card's border toggle shows it.
+  const interjectionSlot = ctx.renderedSlots?.find((s) => s.key === "interjection");
+  const interjectionRect = ctx.groupRects?.find((g) => g.mainKey === "interjection");
+  const interjection = interjectionSlot && (
+    <Box
+      data-testid={interjectionDimmed ? "interjection-dimmed" : undefined}
+      sx={interjectionDimmed ? { opacity: 0.45 } : undefined}
+    >
+      {interjectionRect && <GroupBox rect={interjectionRect} ctx={ctx} />}
+      <SlotNode slot={interjectionSlot} ctx={ctx} />
+    </Box>
+  );
+
   // What the populated canvas draws: the links, the constituents, and the controls on their rings.
   const drawing = (
     <>
@@ -144,6 +163,7 @@ export function PhraseCanvas({
       />
 
       <>
+        {interjection}
         {ctx.showSubject === false ? null : moodBox ? (
           // A subject-dropping mood (command / infinitive) drops the subject, so the subject box
           // has no noun to hold: the mood box *is* the subject node — dragged, positioned and

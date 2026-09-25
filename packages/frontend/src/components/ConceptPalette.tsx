@@ -6,7 +6,7 @@ import {
   Stack,
   Tooltip,
 } from '@mui/material';
-import type { Concept, GrammaticalRole, PickerRole } from '@signi/shared';
+import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
 import { ConceptWord } from '../i18n/ConceptWord.tsx';
 import { useConceptDefinition } from '../i18n/useConceptLabel.ts';
@@ -19,12 +19,12 @@ const ROLE_CONFIG: Record<GrammaticalRole, { color: 'primary' | 'secondary' | 's
   verb: { color: 'secondary' },
   adjective: { color: 'warning' },
   adverb: { color: 'info' },
-  // No palette lists an interjection yet (P09-E30); the entry keeps the map total.
+  // The period's interjection box (P09-E47), in the word map's colour for the role.
   interjection: { color: 'info' },
 };
 
 interface Props {
-  role: PickerRole;
+  role: GrammaticalRole;
   onSelect: (concept: Concept) => void;
   selectedId?: string;
   disabledIds?: string[];

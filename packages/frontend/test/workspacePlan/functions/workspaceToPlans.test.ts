@@ -1,6 +1,7 @@
 import type { PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
 import { describe, expect, it } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import type { NounPhrase, PhrasePlan } from '@signi/shared';
+import { planToWorkspace } from '@signi/phrase/model/workspacePlan/functions/planToWorkspace.ts';
 import { workspaceToPlans } from '../../../src/components/PhraseBuilder/workspacePlan/functions/workspaceToPlans.ts';
 import { selectionToPlan } from '../../../src/components/PhraseBuilder/selectionToPlan/index.ts';
 import {
@@ -185,5 +186,39 @@ describe('known bugs: an object relative with no subject reads as a subject rela
     const periods = [period('main', { subject: CAT, verb: SLEEP }), period('rel', { subject: DOG, verb: EAT })];
     const [{ plan }] = workspaceToPlans(periods, [relative('r', ['main', 'subject'], ['rel', 'subject'])]);
     expect(plan.subject).toHaveProperty('relative');
+  });
+
+  // P09-E47: the interjection is the root period's, and not a citation's.
+  describe('the interjection', () => {
+    const HEY = { id: 'HEY', role: 'interjection' as const, description: 'hey', label: 'hey' };
+
+    it('is written on the root period', () => {
+      const [{ plan }] = workspaceToPlans([period('p', { interjection: HEY, subject: CAT, verb: EAT })], []);
+      expect(plan.interjection).toBe('HEY');
+    });
+
+    it('is not taken along by a that-clause, whose plan is its target period’s whole', () => {
+      const periods = [period('main', { subject: DOG, verb: SAY }), period('that', { interjection: HEY, subject: CAT, verb: EAT })];
+      const [{ plan }] = workspaceToPlans(periods, [subordinate('s', 'content', 'main', 'that')]);
+      expect(plan.interjection).toBeUndefined();
+      expect(plan.contentObject).toBeDefined();
+      expect(plan.contentObject).not.toHaveProperty('interjection');
+    });
+
+    it('is not written under the infinitive: a citation calls no one', () => {
+      const [{ plan }] = workspaceToPlans([period('p', { interjection: HEY, verb: EAT, infinitive: true })], []);
+      expect(plan.interjection).toBeUndefined();
+    });
+
+    it('comes back from its plan whole', () => {
+      const plan = { interjection: 'HEY', subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT' } } as PhrasePlan;
+      const byId = new Map([HEY, CAT, EAT].map((c) => [c.id, c]));
+      const back = planToWorkspace(plan, (id) => byId.get(id));
+      expect(back.unsupported).toEqual([]);
+      expect(back.containers[0]!.selection.interjection?.id).toBe('HEY');
+      // A linked clause's is one the engine never speaks, so it is said to be left out.
+      const linked = planToWorkspace({ ...plan, interjection: undefined, coordination: { conjunction: 'and', clause: plan } } as PhrasePlan, (id) => byId.get(id));
+      expect(linked.unsupported).toEqual(['PhrasePlan.interjection of a linked clause or a citation']);
+    });
   });
 });

@@ -4421,6 +4421,29 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The part of speech of HEY (P09-E30): a word outside the clause that opens it, "**hey**, the cat
+    // runs". It names the period's interjection box, its palette heading and its border toggle
+    // (P09-E47), composed like the part-of-speech nouns below — "a word that expresses feelings".
+    id: 'INTERJECTION',
+    role: 'noun',
+    description: 'a word said on its own to express a feeling or to call someone (grammar)',
+    definition: `
+      /subj ( WORD /a /rel #2.subj )
+      /subj ( WORD ) /verb ( EXPRESS ) /obj ( FEELING /pl /zero )
+    `,
+    emoji: '❗',
+    isA: 'WORD',
+    forms: {
+      en: { base: 'interjection', plural: 'interjections', count: 'singular' },
+      it: { base: 'interiezione', plural: 'interiezioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'interjection', plural: 'interjections', gender: 'fem', count: 'singular' },
+      de: { base: 'Interjektion', plural: 'Interjektionen', gender: 'fem', count: 'singular' },
+      es: { base: 'interjección', plural: 'interjecciones', gender: 'fem', count: 'singular' },
+      ja: { base: '感動詞', count: 'singular', reading: 'かんどうし' },
+      pt: { base: 'interjeição', plural: 'interjeições', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // The recipient or goal of the action ("gives the book to the cat"). Italian names it after the
     // goal ("complemento di termine"). The other traditions call it an object: the indirect one
     // (es, pt, ja 間接目的語), the second one (fr) or the dative one (de).

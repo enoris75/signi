@@ -38,6 +38,7 @@ import {
   toggleInterrogative,
 } from "./phraseReducers.ts";
 import { moodLocked } from "./functions/moodLocked.ts";
+import { interjectionOffered } from "./functions/interjectionOffered.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
@@ -192,15 +193,25 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
+  // Whether the interjection box (P09-E47) is on the canvas: what the user last asked its border toggle
+  // for; unset, a chosen word shows and an empty box does not. The toggle is offered on a root period
+  // outside the infinitive alone (see interjectionOffered); where it is withdrawn, a word already chosen
+  // stays, dimmed, and an empty box goes.
+  const [interjectionOpen, setInterjectionOpen] = useState<boolean | undefined>(undefined);
+  const offersInterjection = !ringHost && !possessorPath && interjectionOffered(selection, binding);
+  const interjectionShown =
+    !ringHost && !possessorPath && (offersInterjection ? (interjectionOpen ?? Boolean(selection.interjection)) : Boolean(selection.interjection));
   // A period of its own, another clause's instrument, or a hosted ring's noun phrase — and so
-  // whether it draws a canvas yet (see resolveBuilderMode).
-  const { nounPhraseMode, actionMode, showCanvas, hasContent } = resolveBuilderMode({
+  // whether it draws a canvas yet (see resolveBuilderMode). The interjection's box draws it too.
+  const mode = resolveBuilderMode({
     selection,
     binding,
     possessorPath,
     nounPhraseOnly,
     hosted: Boolean(ringHost),
   });
+  const { nounPhraseMode, actionMode, hasContent } = mode;
+  const showCanvas = mode.showCanvas || interjectionShown;
   // Coref-pick coordinator for pronominal possessors ("the boy and his horse"). The outermost
   // period builder owns one (keyed to the whole period selection) and re-provides it below; a
   // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
@@ -263,7 +274,7 @@ export function PhraseBuilder({
   const [standardOpen, setStandardOpen] = useState<boolean | undefined>(undefined);
   // A hosted ring's head slot wears its role's name and colour (see roleSlotFor).
   const roleSlot = roleSlotFor(ringHost);
-  const visibleSlots = visibleSlotsFor(selection, roleSlot);
+  const visibleSlots = visibleSlotsFor(selection, roleSlot, interjectionShown);
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
   const commands = phraseCommands(onPhraseUpdate);
@@ -398,6 +409,18 @@ export function PhraseBuilder({
   };
   // The question keeps the subject box (a question has a subject), so the cursor stays where it is.
   const handleToggleQuestion = () => onPhraseUpdate(toggleInterrogative);
+  // The interjection's border toggle (P09-E47): show its box and take the cursor into it, or take the
+  // box away with its word.
+  const handleToggleInterjection = () => {
+    if (interjectionShown) {
+      commands.handleRemoveInterjection();
+      setInterjectionOpen(false);
+      if (activeSlot === "interjection") setActiveSlot(selection.subject ? "verb" : "subject");
+      return;
+    }
+    setInterjectionOpen(true);
+    focusSlot("interjection");
+  };
 
   // An owner's ring is shown while its owner is open, which the period's builder holds (see
   // `ownersOpen`), so that reads in place of the possessor satellite's own reveal.
@@ -1080,6 +1103,7 @@ export function PhraseBuilder({
       containerRef={containerRef}
       recolor={roleSlot ? { subject: roleSlot.color } : undefined}
       overlay={Boolean(ringHost)}
+      interjectionDimmed={interjectionShown && !offersInterjection}
       hosted={
         <>
           {chains.length > 0 && (
@@ -1163,6 +1187,7 @@ export function PhraseBuilder({
       onToggleImperative={handleToggleImperative}
       onToggleInfinitive={handleToggleInfinitive}
       onToggleQuestion={handleToggleQuestion}
+      interjection={offersInterjection ? { shown: interjectionShown, onToggle: handleToggleInterjection } : undefined}
       controlsRef={periodControlsRef}
       graphHeight={graphHeight}
       onGraphHeightChange={setGraphHeight}
