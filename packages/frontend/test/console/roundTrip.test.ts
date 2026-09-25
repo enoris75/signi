@@ -712,10 +712,10 @@ describe('the round trip', () => {
   // P09-E12 D5: the walk reaches the standard of comparison, so the printer's `/than` is exercised —
   // under a degree that takes one, and muted under one that does not — and its `/outof`, the same
   // field read as a superlative's set (P09-E51 D3). A predicate adjective is a rare state (a copular
-  // verb, then an adjective in its box), and rarer still once E12b and P11-E8 added their ops, so this
-  // looks much further than the default 400 (40,000 seeds since P11-E8's vocative op).
+  // verb, then an adjective in its box), and rarer still once E12b and P11-E6–E9 added their ops, so this
+  // looks much further than the default 400 (120,000 seeds since P11-E6–E9's ops met: 80,000 missed).
   it('reaches the standard of comparison, a superlative’s set, and a muted one', () => {
-    const seeds = Math.max(SEEDS, 40000);
+    const seeds = Math.max(SEEDS, 120000);
     const texts = Array.from({ length: seeds }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
     const standards = texts.flatMap((t) => t.match(/\/pred \( \S+( \/\w+)* \/(than|outof) \[/g) ?? []);
     expect(standards.some((p) => /\/(more|less|equally) \/than/.test(p))).toBe(true);
@@ -723,7 +723,7 @@ describe('the round trip', () => {
     expect(standards.some((p) => !/\/(more|less|equally|most|least) \/(than|outof)/.test(p))).toBe(true);
     // The name follows the degree: never `/than` on a superlative, never `/outof` off one.
     expect(standards.some((p) => /\/(most|least) \/than/.test(p) || (/\/outof/.test(p) && !/\/(most|least) \/outof/.test(p)))).toBe(false);
-  }, 30_000);
+  }, 60_000);
 
   // P09-E48: the walk reaches a noun's examples, under both relations.
   it('reaches the examples, such as and including', () => {

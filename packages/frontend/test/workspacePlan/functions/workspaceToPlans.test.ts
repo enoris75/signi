@@ -364,7 +364,7 @@ describe('the vocative', () => {
     const base = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' } };
     // A coreferent possessor inside it (P11-E2), which the engine refuses there.
     const coref = planToWorkspace({ ...base, address: { concept: 'MOM', possessor: { kind: 'coreferent', slot: 'subject' } } } as PhrasePlan, (id) => byId.get(id));
-    expect(coref.unsupported).toEqual(['Possessor.coreferent']);
+    expect(coref.unsupported).toEqual(['Possessor.coreferent where the builder copies']);
     // A linked clause's, and a determiner the engine never says.
     const linked = planToWorkspace({ ...base, coordination: { conjunction: 'and', clause: { ...base, address: { concept: 'MOM' } } } } as PhrasePlan, (id) => byId.get(id));
     expect(linked.unsupported).toEqual(['PhrasePlan.address of a linked clause, a citation or an instruction']);

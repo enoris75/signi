@@ -61,8 +61,6 @@ export interface PronounChooser {
   row: PronounRow;
   setRow: (row: PronounRow) => void;
   onKeyDown: (event: KeyboardEvent) => void;
-  /** The persons shown but not offered — the generic in an owner's chooser (P11-E9 D2). */
-  disabled: readonly PronounPerson[];
 }
 
 export function usePronounChooser({
@@ -156,5 +154,5 @@ export function usePronounChooser({
     }
   }
 
-  return { choice, set, row, setRow, onKeyDown, disabled };
+  return { choice, set, row, setRow, onKeyDown };
 }

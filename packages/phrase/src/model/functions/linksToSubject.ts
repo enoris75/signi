@@ -1,5 +1,5 @@
 import type { Possessor } from "@signi/shared";
-import type { NounAddress, PhraseSelection } from "../interfaces.ts";
+import { inVocative, type NounAddress, type PhraseSelection } from "../interfaces.ts";
 import { resolveAntecedent } from "../selectionToPlan/functions/resolveAntecedent.ts";
 
 /**
@@ -24,7 +24,9 @@ const LINK_GATES: readonly LinkGate[] = [
   (root) => root.verbVoice !== "passive",
   // A clause: a verbless period is its subject alone, so nothing in it but the subject could link.
   (root) => Boolean(root.verb),
-  // (The address — E8's vocative — is outside any clause; its gate joins this list with that box.)
+  // Not in the address (P11-E8's vocative): the engine says it outside every clause, so a link there
+  // has no subject to name and is refused (P11-E2). A pointer in it stays a copy.
+  (_root, possessed) => !inVocative(possessed),
 ];
 
 /** Whether a possessor of the noun at `possessed`, pointed at `subject`, is the link (D3). */

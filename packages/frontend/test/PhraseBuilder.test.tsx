@@ -1549,8 +1549,8 @@ describe('the vocative', () => {
     fireEvent.click(toggle()!);
     fireEvent.click(screen.getByTestId('pronoun-tab'));
     expect(screen.getByRole('button', { name: 'second' })).toBeEnabled();
-    for (const name of ['first', 'third']) expect(screen.getByRole('button', { name })).toBeDisabled();
-    expect(screen.getByTestId('pronoun-generic')).toBeDisabled();
+    for (const name of ['first', 'third']) expect(screen.getByRole('button', { name })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('pronoun-generic')).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('turns a command’s 2nd singular plural with it, and back, but leaves “let’s” alone', () => {
