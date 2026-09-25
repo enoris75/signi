@@ -1,5 +1,6 @@
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
+import { moreAdverbsOf, moreAdverbText } from '../../functions/adverbClass.js';
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
@@ -97,7 +98,11 @@ export function predicateText(
   const negAdverb = negativeAdverbForm(modifier, verbNegative === true || governedOnly);
   const preNegator = negAdverb?.slot === 'pre-negator' && !governedOnly ? negAdverb.text : '';
   const governedPreNegator = negAdverb?.slot === 'pre-negator' && governedOnly ? negAdverb.text : '';
-  const adverbText = preNegator || governedPreNegator ? '' : (negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : ''));
+  const primaryText = preNegator || governedPreNegator ? '' : (negAdverb?.text ?? (modifier ? (modifier.forms['base'] ?? '') : ''));
+  // Several adverbs (P15): a further frequency one stands beside the primary, which is then one too,
+  // wherever that goes ("court déjà souvent", "a déjà souvent couru"), and behind "pas" when the
+  // primary outscopes the negation ("ne court toujours pas souvent").
+  const adverbText = [primaryText, moreAdverbText(verbPhrase, 'frequency')].filter(Boolean).join(' ');
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -123,7 +128,17 @@ export function predicateText(
   // In a passive the verb it modifies is the participle, so it goes there ("est bien mangée", "a été
   // bien mangée", "doit être bien mangée"), not before "être" / "été", where "bien" is the assertive
   // "indeed" (A294). The auxiliary groups below take none of their own.
-  const auxiliaryPreInfinitive = passive ? '' : preInfinitive;
+  // A further manner adverb (P15) takes the slot its own class takes: a short one before the
+  // non-finite verb ("a souvent bien couru", "doit souvent bien courir"), a long one in the trailing
+  // manner slot, behind a manner primary ("a bien mangé lentement"). With no non-finite verb to lead,
+  // the short one trails as well ("court souvent bien"), as a short primary does.
+  const moreManner = moreAdverbsOf(verbPhrase, 'manner');
+  const spell = (pre: boolean) => moreManner.filter((a) => (a.forms['pre_nonfinite'] === '1') === pre)
+    .map((a) => a.forms['base'] ?? '').filter(Boolean).join(' ');
+  const preMore = spell(true);
+  const postMore = spell(false);
+  const preGroup = [preInfinitive, preMore].filter(Boolean).join(' ');
+  const auxiliaryPreInfinitive = passive ? '' : preGroup;
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
   // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne" — and for an
@@ -159,8 +174,14 @@ export function predicateText(
   // Empty for any other verb. `innerAdverb` is the adverb a finite takes inside: none unless it ends
   // in the noun, so an auxiliary or a modal in front of the lemma ("a eu besoin", "doit") is untouched.
   const lemmaNoun = lemmaTail(verb);
-  const innerAdverb = (finite: string): string =>
-    splitLemmaTail(finite, lemmaNoun)[1] && (isFrequency || preInfinitive) ? modifierText : '';
+  // A further short adverb (P15) goes in with them: "n'a pas souvent bien besoin".
+  const innerAdverb = (finite: string): string => !splitLemmaTail(finite, lemmaNoun)[1] ? ''
+    : [isFrequency || preInfinitive ? modifierText : '', preMore].filter(Boolean).join(' ');
+  // What a finite verb leaves for the slot right after it: the adverb it did not take inside, and a
+  // further short adverb, which has no non-finite verb to lead ("court souvent bien").
+  const afterFinite = (finite: string): string => splitLemmaTail(finite, lemmaNoun)[1]
+    ? (isFrequency || preInfinitive ? '' : modifierText)
+    : [modifierText, preMore].filter(Boolean).join(' ');
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched. A
@@ -309,7 +330,7 @@ export function predicateText(
     // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais). An
     // affirmative verb comes back as it is, but for a multiword one's inner adverb ("a toujours besoin").
     effectiveVerb = negateFinite(conjugated);
-    effectiveMod = innerAdverb(conjugated) ? '' : modifierText;
+    effectiveMod = passive ? modifierText : afterFinite(conjugated);
   }
   // The participe closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   // A frequency adverb belongs between the finite verb and the participe ("n'est jamais mangée"),
@@ -318,21 +339,22 @@ export function predicateText(
   // stands right before the participe on every tense ("est bien mangée", "a été bien mangée", A294).
   if (passive) {
     const frequencyInGroup = isFrequency ? effectiveMod : '';
-    effectiveVerb = [effectiveVerb, frequencyInGroup, preInfinitive, passiveParticipleText].filter(Boolean).join(' ');
+    effectiveVerb = [effectiveVerb, frequencyInGroup, preGroup, passiveParticipleText].filter(Boolean).join(' ');
     if (isFrequency || preInfinitive) effectiveMod = '';
   }
   const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
-    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms),
+    { direction: moreAdverbText(verbPhrase, 'direction'), place: moreAdverbText(verbPhrase, 'place') });
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
   // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"
   // takes "ne" alone ("ne manger aucune souris"), as `negateFinite` has it; "ne" elides against the
   // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
   const negativeAdverb = isNegativeAdverb(modifier);
-  const infinitiveMod = negativeAdverb || preInfinitive ? '' : modifierText;
+  const infinitiveMod = [negativeAdverb || preInfinitive ? '' : modifierText, postMore].filter(Boolean).join(' ');
   // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée"), a short
   // adverb before the participe ("être bien mangée", A294).
   const infinitiveGroup = passive
-    ? [finiteVerb.forms['base'] ?? '', preInfinitive, passiveParticipleText].filter(Boolean).join(' ')
+    ? [finiteVerb.forms['base'] ?? '', preGroup, passiveParticipleText].filter(Boolean).join(' ')
     : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
@@ -361,7 +383,7 @@ export function predicateText(
     const impVerb = affirmative
       ? frEnclitic(negateFinite(impForm), commandClitic, reflexive, pn)
       : frCliticize(clitic, negateFinite(impForm));
-    return withDislocated([impVerb, innerAdverb(impForm) ? '' : modifierText, directObjectText, complementsText]
+    return withDislocated([impVerb, afterFinite(impForm), postMore, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
   }
@@ -374,7 +396,7 @@ export function predicateText(
       .filter(Boolean)
       .join(' '));
   }
-  return withDislocated([frCliticize(finiteClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
+  return withDislocated([frCliticize(finiteClitic, effectiveVerb), effectiveMod, postMore, directObjectText, complementsText]
     .filter(Boolean)
     .join(' '));
 }
