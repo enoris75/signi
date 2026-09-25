@@ -60,3 +60,16 @@ già nessun uomo`), and "già non" or "non … più" might read better. That is 
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: Portuguese ALREADY turns into "ainda não" beside a concord "não" (A370)* (1 `test.fails`: the present, the past, under CAN, a `no` locative, and the random phrase's ASK; plus a regression test for the other languages, a negated verb, the affirmative and ALSO) |
+
+## Resolved
+
+2026-09-25. [pt/predicateText.ts](../../../packages/engine/src/languages/pt/predicateText.ts) keeps the
+pre-negator slot as it was and gates only the word swap on the verb's own negation
+(`verbNegative === true`), as the shape above verified. A concord "não" in front of a postverbal
+"nenhum" now leaves ALREADY as "já", ahead of it: "o gato já não come nenhuma comida." A verb negated
+on its own, and a negated modal, keep "ainda não". ALSO keeps "também não". Italian's "già" was left
+as it is, out of scope.
+
+Guarded by `negation.test.ts` → *known bugs: Portuguese ALREADY turns into "ainda não" beside a
+concord "não" (A370)*: the former `test.fails`, now a plain test, the regression test, and a new test
+for the future, the plural, a relative clause and a negated CAN.

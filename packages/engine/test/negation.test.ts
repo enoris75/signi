@@ -1704,13 +1704,23 @@ describe('known bugs: Portuguese ALREADY turns into "ainda não" beside a concor
     sayAll(clause(np('CAT'), 'EAT', { ...extra, verbPhrase: { modifier: 'ALREADY', ...verbPhrase } }));
   const noFood = { directObject: noNP('FOOD') };
 
-  test.fails('a `no` object or complement keeps "já" ahead of the concord "não"', () => {
+  test('a `no` object or complement keeps "já" ahead of the concord "não"', () => {
     expect(already(noFood).pt).toBe('o gato já não come nenhuma comida.'); // now: "o gato ainda não come …"
     expect(already(noFood, { tense: 'past' }).pt).toBe('o gato já não comeu nenhuma comida.');
     expect(already(noFood, { modals: ['CAN'] }).pt).toBe('o gato já não pode comer nenhuma comida.');
     expect(already({ complements: { locative: { phrase: noNP('HOUSE') } } }).pt).toBe('o gato já não come em nenhuma casa.');
     expect(say(clause(np('CHILD'), 'ASK', { verbPhrase: { modifier: 'ALREADY', tense: 'future' }, directObject: noNP('MAN') }), 'pt'))
       .toBe('a criança já não perguntará nenhum homem.');
+  });
+
+  test('"já não" holds in the future, the plural and a relative clause; a negated modal is still not yet', () => {
+    expect(already(noFood, { tense: 'future' }).pt).toBe('o gato já não comerá nenhuma comida.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'EAT', { ...noFood, verbPhrase: { modifier: 'ALREADY', tense: 'past' } }), 'pt'))
+      .toBe('os gatos já não comeram nenhuma comida.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', modifier: 'ALREADY' }, directObject: noNP('FOOD') } }), 'RUN'), 'pt'))
+      .toBe('o cão que já não come nenhuma comida corre.');
+    // CAN negated on its own is the verb's own denial: "cannot eat any food yet".
+    expect(already(noFood, { modals: [{ verb: 'CAN', negative: true }] }).pt).toBe('o gato ainda não pode comer nenhuma comida.');
   });
 
   test('the other languages keep already, and a negated verb is still not yet', () => {

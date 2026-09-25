@@ -269,7 +269,7 @@ export function predicateText(
   const negAdverb = negativeAdverb(modifier, verbText.startsWith('não '));
   const outscopesNao = negAdverb?.slot === 'pre-negator';
   // Its negative word where it has one: ALREADY's "já" is "ainda não" (P09-E28).
-  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? (modifier?.forms['negative'] ? negAdverb.text : modifierText) : '';
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? (modifier?.forms['negative'] && verbNegative === true ? negAdverb.text : modifierText) : '';
   const postVerb = mainIsFronted || splitFrequency || outscopesNao || (!!lead && governedNao !== '') ? '' : modifierText;
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
     (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
