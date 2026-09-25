@@ -10,8 +10,8 @@ apply round trip.
 **Scope:** shared, the phrase model, the canvas and the console. The UI strings for the new canvas
 actions, in all 7 languages. No seed work.
 **Status:** **planning, unscheduled**. Filed 2026-09-25 from P09's plan-only constructs. The
-engine side is [P09-E22](Z-done/P09-E22-adversarial-against.md). E45 shares its mechanism with
-[P09-E44](Z-done/P09-E44-role-complement-box.md) (the role box): each adds one `BoxComplementType` member
+engine side is [P09-E22](P09-E22-adversarial-against.md). E45 shares its mechanism with
+[P09-E44](P09-E44-role-complement-box.md) (the role box): each adds one `BoxComplementType` member
 and one set of `PhraseSelection` fields. The two can land in one lane, but each retires on its own.
 
 What the engine renders from a plan at HEAD. Probed 2026-09-25 with `sayAll` on an in-memory seed:
@@ -48,31 +48,31 @@ Verified at HEAD, 2026-09-25.
 
 **Nothing builds an opponent, but the maps already carry it.**
 
-- [`COMPLEMENT_TYPES`](../../../../packages/shared/src/index.ts#L320) leaves `opponent` out.
-  [`COMPLEMENT_RENDER_ORDER`](../../../../packages/shared/src/index.ts#L354) (right after
-  `comitative`) and [`DETERMINER_COMPLEMENT_TYPES`](../../../../packages/shared/src/index.ts#L389)
+- [`COMPLEMENT_TYPES`](../../../../../packages/shared/src/index.ts#L320) leaves `opponent` out.
+  [`COMPLEMENT_RENDER_ORDER`](../../../../../packages/shared/src/index.ts#L354) (right after
+  `comitative`) and [`DETERMINER_COMPLEMENT_TYPES`](../../../../../packages/shared/src/index.ts#L389)
   include it, as does the engine's
-  [`TONIC_COMPLEMENTS`](../../../../packages/engine/src/functions/functions.consts.ts#L33).
-- [`BoxComplementType`](../../../../packages/phrase/src/model/interfaces.ts#L168) excludes it. The
+  [`TONIC_COMPLEMENTS`](../../../../../packages/engine/src/functions/functions.consts.ts#L33).
+- [`BoxComplementType`](../../../../../packages/phrase/src/model/interfaces.ts#L168) excludes it. The
   doc comment above that type is stale; see E44's *Today*.
 - Inert entries already exist:
-  - `COMPLEMENT_LABEL_KEYS` → `slot.opponent` ([`slots.ts:192`](../../../../packages/phrase/src/model/slots.ts#L192));
-  - `COMPLEMENT_KEYS` → **V**, from *versus* ([L226](../../../../packages/phrase/src/model/slots.ts#L226)),
+  - `COMPLEMENT_LABEL_KEYS` → `slot.opponent` ([`slots.ts:192`](../../../../../packages/phrase/src/model/slots.ts#L192));
+  - `COMPLEMENT_KEYS` → **V**, from *versus* ([L226](../../../../../packages/phrase/src/model/slots.ts#L226)),
     a letter no other complement uses;
   - `complementIcons` → a grappling icon
-    ([`satellites.types.tsx:165`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L165)).
+    ([`satellites.types.tsx:165`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/satellites.types.tsx#L165)).
 
   `slot.opponent` renders in all seven from OPPONENT_COMPLEMENT, literal by design
-  ([`uiStrings.ts:858`](../../../../packages/shared/src/uiStrings.ts#L858),
-  [`nouns.ts:4480`](../../../../packages/backend/src/concepts/nouns.ts#L4480)).
+  ([`uiStrings.ts:858`](../../../../../packages/shared/src/uiStrings.ts#L858),
+  [`nouns.ts:4480`](../../../../../packages/backend/src/concepts/nouns.ts#L4480)).
 
 **Who licenses it: three verbs, not one.** E22 seeded the licence on PLAY_GAME. Since then, E24's
 *win* and *lose* took it too:
 
-- PLAY_GAME ([`intransitive.ts:1211`](../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1211));
-- LOSE_GAME ([L1283](../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1283)), whose
+- PLAY_GAME ([`intransitive.ts:1211`](../../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1211));
+- LOSE_GAME ([L1283](../../../../../packages/backend/src/concepts/verbs/intransitive.ts#L1283)), whose
   ja 負ける takes `opponent_prep: 'に'`, giving 猫は犬に負けます;
-- WIN, a transitive verb ([`transitive.ts:3346`](../../../../packages/backend/src/concepts/verbs/transitive.ts#L3346)),
+- WIN, a transitive verb ([`transitive.ts:3346`](../../../../../packages/backend/src/concepts/verbs/transitive.ts#L3346)),
   whose ja 勝つ also takes に.
 
 FIGHT is still not seeded. So the box is reachable from three verbs, and the verb-governed marker
@@ -83,11 +83,11 @@ the box holds only the noun.
 code:
 
 - The dotted-ring toggle comes from `BOX_COMPLEMENT_TYPES`
-  ([`rawSatellites.tsx:608`](../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L608)),
-  gated on [`offeredComplements`](../../../../packages/phrase/src/model/slots.ts#L42).
+  ([`rawSatellites.tsx:608`](../../../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L608)),
+  gated on [`offeredComplements`](../../../../../packages/phrase/src/model/slots.ts#L42).
 - The plan comes from `buildComplements`.
 - `planToWorkspace` fills the box from a plan instead of reporting `complements.opponent`
-  ([`planToWorkspace.ts:219`](../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L219)).
+  ([`planToWorkspace.ts:219`](../../../../../packages/phrase/src/model/workspacePlan/functions/planToWorkspace.ts#L219)).
   No seeded definition uses an opponent, so P13's count does not move.
 
 Ring counts after the change: PLAY_GAME goes from seven toggles to eight, and so does WIN (three
@@ -97,12 +97,12 @@ carries eight.
 **It takes a pronoun, and the builder does not know it.** Pronoun heads are listed by hand in three
 places:
 
-- [`slotCategories`](../../../../packages/phrase/src/model/interfaces.ts#L677) (model) lists
+- [`slotCategories`](../../../../../packages/phrase/src/model/interfaces.ts#L677) (model) lists
   `directObject`, `cause`, `purpose`, `topic` and `comitative`.
-- [`wordSpecFor`](../../../../packages/phrase/src/language/resolve.ts#L39) (console) lists the
+- [`wordSpecFor`](../../../../../packages/phrase/src/language/resolve.ts#L39) (console) lists the
   same five.
 - `SlotTypeahead`'s pronoun-inclusive picker
-  ([`SlotTypeahead.tsx:117`](../../../../packages/frontend/src/components/PhraseBuilder/SlotTypeahead.tsx#L117))
+  ([`SlotTypeahead.tsx:117`](../../../../../packages/frontend/src/components/PhraseBuilder/SlotTypeahead.tsx#L117))
   lists only `cause`, `purpose` and `topic`.
 
 The comitative is missing from that third list. It looks like a P13 gap: the console can say
@@ -111,7 +111,7 @@ The comitative is missing from that third list. It looks like a P13 gap: the con
 **`Complement.negative` is ignored on an opponent** (E22 Done, item 9). The box must not offer it.
 
 **Console names.** `/against` is taken: it is a spatial relation setting, scoped to the locative,
-route and direction ([`commands.ts:585`](../../../../packages/phrase/src/language/commands.ts#L585)).
+route and direction ([`commands.ts:585`](../../../../../packages/phrase/src/language/commands.ts#L585)).
 `/vs`, `/versus` and `/opponent` are free.
 
 ## Design
@@ -165,11 +165,11 @@ opponent ("who does the cat play against?", E22 Done item 6) is a different matt
 **Recommendation: `/vs`, with the aliases `versus` and `opponent`.** It matches the menu letter V.
 `/against` must stay the spatial relation.
 
-## 1. Shared — [`index.ts`](../../../../packages/shared/src/index.ts)
+## 1. Shared — [`index.ts`](../../../../../packages/shared/src/index.ts)
 
 `opponent` joins `COMPLEMENT_TYPES` right after `comitative`, and its doc comment loses the
 opponent's half of the "no box" sentence. The `ComplementType` doc comment
-([L306](../../../../packages/shared/src/index.ts#L306)) drops "Plan-only".
+([L306](../../../../../packages/shared/src/index.ts#L306)) drops "Plan-only".
 
 ## 2. Model — `packages/phrase/src/model/`
 
@@ -177,7 +177,7 @@ opponent's half of the "no box" sentence. The `ComplementType` doc comment
 - **`PhraseSelection`:** `opponent`, `opponentNumber`, `opponentGender`,
   `opponentAdjective{,2,3}`, `opponentConjuncts`, `opponentConjunction`, `opponentPossessor` and
   `opponentPossessorRef`. Use the comitative's block as the model
-  ([L438](../../../../packages/phrase/src/model/interfaces.ts#L438) onward).
+  ([L438](../../../../../packages/phrase/src/model/interfaces.ts#L438) onward).
 - **`slotCategories`:** add `opponent` (D3). **`DEFAULT_POSITIONS.opponent`:** as in D1.
 - `buildComplements`, `clearNoun` and `planToWorkspace` need nothing specific: there is no
   specifier. A plan with `negative: true` on an opponent stays `unsupported`, since the engine
@@ -186,17 +186,17 @@ opponent's half of the "no box" sentence. The `ComplementType` doc comment
 ## 3. Canvas — `packages/frontend/src/components/PhraseBuilder/`
 
 - The box, the toggle and its satellites follow from `BOX_COMPLEMENT_TYPES`. Check the ring order,
-  which `READING_ORDER` ([`layout.ts:41`](../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L41))
+  which `READING_ORDER` ([`layout.ts:41`](../../../../../packages/frontend/src/components/PhraseBuilder/layout.ts#L41))
   derives from the list.
 - Add `"slot.opponent": "opponent"` to `PART_BY_LABEL_KEY`
-  ([`canvasCommands.ts:23`](../../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts#L23)),
+  ([`canvasCommands.ts:23`](../../../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts#L23)),
   and add `opponent` to `SlotTypeahead`'s pronoun-inclusive branch (D3). Better, have that branch
   read `slotCategories`, so the three lists cannot drift apart again.
 
-## 4. Keyboard — [`keymap.ts`](../../../../packages/frontend/src/keyboard/keymap.ts)
+## 4. Keyboard — [`keymap.ts`](../../../../../packages/frontend/src/keyboard/keymap.ts)
 
 No new binding. The box is reached through `verb.complement` (`+` / `=`,
-[L843](../../../../packages/frontend/src/keyboard/keymap.ts#L843)) and then V. It has no relation
+[L843](../../../../../packages/frontend/src/keyboard/keymap.ts#L843)) and then V. It has no relation
 toolbar, so it stays out of `TOOLBAR_SLOTS`. There is no Alt layer. If E44 lands in the same lane,
 its uniqueness test for the menu letters covers V.
 
@@ -204,17 +204,17 @@ its uniqueness test for the menu letters covers V.
 
 - **Command:** `role("vs", ["versus", "opponent"], "opponent", "opponent", "slot.opponent",
   "warning", /^opponent$/)` beside `/with`
-  ([`commands.ts:369`](../../../../packages/phrase/src/language/commands.ts#L369)). It prints as
+  ([`commands.ts:369`](../../../../../packages/phrase/src/language/commands.ts#L369)). It prints as
   `/subj ( cat ) /verb ( play ) /vs ( dog )`.
 - **Reference name:** `NOUN_NAMES.opponent = "vs"`
-  ([`resolve.ts:180`](../../../../packages/phrase/src/language/resolve.ts#L180)), giving `#n.vs`
+  ([`resolve.ts:180`](../../../../../packages/phrase/src/language/resolve.ts#L180)), giving `#n.vs`
   (which `/del` also takes).
 - **Pronouns:** `wordSpecFor` takes pronouns for `opponent` (D3), so `/vs ( him )` works.
 - **Licence errors:** `ComplementSlot` gains `opponent` for `takesNoComplement`, and
   `diagnostic.verbAcceptsNo.opponent` joins the list at
-  [`uiStrings.ts:3580`](../../../../packages/shared/src/uiStrings.ts#L3580).
+  [`uiStrings.ts:3580`](../../../../../packages/shared/src/uiStrings.ts#L3580).
 - **Help:** an example in the frontend's `console/language/help.ts`.
-- **The P02 debt** ([P02](../../Z-Done/P02-phrase-console/README.md)):
+- **The P02 debt** ([P02](../../../Z-Done/P02-phrase-console/README.md)):
   - a `golden.test.ts` line, with a misuse on EAT;
   - a `help.test.ts` example;
   - a `phraseCommands` handler row;
@@ -222,10 +222,10 @@ its uniqueness test for the menu letters covers V.
     pronoun head.
 
   The console test vocabulary
-  ([`vocab.ts`](../../../../packages/frontend/test/console/vocab.ts)) has DOG but not PLAY_GAME or
+  ([`vocab.ts`](../../../../../packages/frontend/test/console/vocab.ts)) has DOG but not PLAY_GAME or
   WIN, so add them. No `KEY_COMMANDS` or `WRAPS` entry is needed.
 
-## 6. UI strings — [`uiStrings.ts`](../../../../packages/shared/src/uiStrings.ts)
+## 6. UI strings — [`uiStrings.ts`](../../../../../packages/shared/src/uiStrings.ts)
 
 - `CANVAS_PARTS.opponent = { concept: 'OPPONENT_COMPLEMENT', en: 'opponent' }`, and `opponent` in
   `BOXED_COMPLEMENT_PARTS`. Together these yield
@@ -276,3 +276,50 @@ Every one must render in all seven at backend boot.
   are awkward; 犬にゲームで勝ちます may be wanted. This box makes that sentence buildable, so it
   needs a native check, and a bug file if confirmed. It is not filed here.
 - **E44's role box**, which may share the lane (see *Status*).
+
+## Done
+
+Shipped 2026-09-25. `opponent` joined `COMPLEMENT_TYPES` right after `comitative`, so
+`BoxComplementType` now excludes only the instrumental. The box has its `PhraseSelection` fields
+(the comitative's block), sits at `DEFAULT_POSITIONS.opponent = { x: 40, y: 66 }`, and its toggle
+rides the dotted ring of PLAY_GAME, LOSE_GAME and WIN, with no seed work. It takes a noun or a
+pronoun (`slotCategories`, `wordSpecFor`), menu letter **V**, and `/vs` (aliases `/versus`,
+`/opponent`) with `#n.vs`. No negation chip. Engine output from the real seed (`sayAll`), identical
+to the plan's table:
+
+| | en | it | fr | de | es | pt | ja |
+|---|---|---|---|---|---|---|---|
+| cat, PLAY_GAME, dog | the cat plays against the dog. | il gatto gioca contro il cane. | le chat joue contre le chien. | der Kater spielt gegen den Hund. | el gato juega contra el perro. | o gato joga contra o cão. | 猫は犬を相手に遊びます。 |
+| cat, PLAY_GAME, him | the cat plays against him. | il gatto gioca contro di lui. | le chat joue contre lui. | der Kater spielt gegen ihn. | el gato juega contra él. | o gato joga contra ele. | 猫は彼を相手に遊びます。 |
+| cat, WIN, dog | the cat wins against the dog. | il gatto vince contro il cane. | le chat gagne contre le chien. | der Kater gewinnt gegen den Hund. | el gato gana contra el perro. | o gato vence contra o cão. | 猫は犬に勝ちます。 |
+| cat, LOSE_GAME, dog | the cat loses against the dog. | il gatto perde contro il cane. | le chat perd contre le chien. | der Kater verliert gegen den Hund. | el gato pierde contra el perro. | o gato perde contra o cão. | 猫は犬に負けます。 |
+| man, PLAY_GAME, with cat, against dog, in house | the man plays with the cat against the dog in the house. | l'uomo gioca con il gatto contro il cane nella casa. | l'homme joue avec le chat contre le chien dans la maison. | der Mann spielt mit dem Kater gegen den Hund im Haus. | el hombre juega con el gato contra el perro en la casa. | o homem joga com o gato contra o cão na casa. | 男は猫と犬を相手に家で遊びます。 |
+
+The new strings, all seven rendered from OPPONENT_COMPLEMENT:
+`action.{clear,show,hide,expand,compact,remove}.opponent` ("Remove the opponent", it "Rimuovi il
+complemento di svantaggio", de "Die adverbiale Bestimmung des Gegners entfernen", ja
+相手の副詞語句を取り除き) and `diagnostic.verbAcceptsNo.opponent` ("This verb accepts no opponent").
+
+What landed differently from the plan:
+
+1. **`SlotTypeahead`'s pronoun branch reads `slotCategories`** (§3's "better"), so the model, the
+   console and the canvas picker share one list. This also closes the comitative's P13 gap: the
+   canvas now offers "with him" too.
+2. **No `phraseCommands` row**, as for E44: the box has no reducer of its own.
+3. **A denied opponent stays `unsupported`** (`complements.opponent.negative`), pinned in
+   [`complementBoxes.test.ts`](../../../../../packages/frontend/test/workspacePlan/complementBoxes.test.ts).
+4. **The console prints PLAY_GAME by its id.** "play" also names PLAY_INSTRUMENT, so the line reads
+   `/verb ( PLAY_GAME ) /vs ( 3rd … )`, the console's rule for a label shared by two words.
+5. **Measured on the canvas** (group-box rects, 1500×1000). No ring grew: the Verb Phrase keeps its
+   size (PLAY_GAME 213², WIN 236², the same as EAT's). What moves is tidy's placement:
+   - *cat plays*: Subject (101, 235), Verb Phrase (285, 202).
+   - *cat plays against the dog*: Opponent 147² at (238, 262); the Subject and the Verb Phrase both
+     move a row down to y 496.
+   - *cat wins game*: the same rects as *cat eats mouse* (Verb Phrase y 205, Direct Object y 255).
+   - *cat wins game against the dog*: Opponent at (238, 262), Verb Phrase down to y 496, and the
+     Direct Object up to y 186. **The object leaves the verb's row.**
+
+   This is the tidy layout, not the ring: the topic box does the same on *woman thinks about the
+   cat* (Verb Phrase from y 228 to 496). E12b's second-arc lever is for a crowded ring, so it does
+   not apply, and it was not used. This is left as a layout lead.
+   *cat eats mouse* is unchanged.

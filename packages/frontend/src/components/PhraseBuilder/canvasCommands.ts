@@ -49,6 +49,7 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.objectPredicative": "objectPredicative",
   "slot.comitative": "comitative",
   "slot.role": "role",
+  "slot.opponent": "opponent",
 };
 
 // The part `labelKey` names, if the control has a catalog family member for it.

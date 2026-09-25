@@ -292,6 +292,8 @@ const CANVAS_PARTS = {
   comitative: { concept: 'COMITATIVE', en: 'comitative' },
   // P09-E44's box: the capacity the subject acts in, "acts as a friend".
   role: { concept: 'ROLE_COMPLEMENT', en: 'role' },
+  // P09-E45's box: the party the act is directed against, "plays against the dog".
+  opponent: { concept: 'OPPONENT_COMPLEMENT', en: 'opponent' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
@@ -300,7 +302,7 @@ export type CanvasPart = keyof typeof CANVAS_PARTS;
 // The complements the canvas draws as a boxed ring of their own: every one but the instrumental, which
 // lives in a period container of its own and is linked to (the canvas's BOX_COMPLEMENT_TYPES).
 const BOXED_COMPLEMENT_PARTS = [
-  'objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'manner', 'locative', 'direction', 'source',
+  'objectPredicative', 'predicative', 'terminus', 'role', 'comitative', 'opponent', 'manner', 'locative', 'direction', 'source',
   'route', 'temporal', 'purpose', 'topic', 'cause',
 ] as const satisfies readonly CanvasPart[];
 
@@ -854,8 +856,8 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Role',
   },
-  // The party an act is directed *against* (P09-E22), "plays against the dog". Plan-only: no box shows
-  // it yet, and the word map names it on the verbs that license it (PLAY_GAME).
+  // The party an act is directed *against* (P09-E22), "plays against the dog". It titles the opponent's
+  // box (P09-E45), offered on the verbs that license it (PLAY_GAME, WIN, LOSE_GAME).
   'slot.opponent': {
     plan: nameOf('OPPONENT_COMPLEMENT'),
     format: NAME_FORMAT,
@@ -3602,6 +3604,8 @@ export const UI_STRINGS = defineUiStrings({
         ['objectPredicative', 'OBJECT_COMPLEMENT', 'object complement'],
         // P09-E44: the capacity one acts in is licensed (ACT, WORK_LABOUR).
         ['role', 'ROLE_COMPLEMENT', 'role'],
+        // P09-E45: so is the party the act is directed against (PLAY_GAME, WIN, LOSE_GAME).
+        ['opponent', 'OPPONENT_COMPLEMENT', 'opponent'],
       ] as const
     ).map(([slot, concept, en]) => [
       `diagnostic.verbAcceptsNo.${slot}`,
@@ -3616,7 +3620,7 @@ export const UI_STRINGS = defineUiStrings({
       },
     ]),
   ) as Record<
-    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental' | 'objectPredicative' | 'role'}`,
+    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'topic' | 'cause' | 'instrumental' | 'objectPredicative' | 'role' | 'opponent'}`,
     UiStringPlanDef
   >,
   // A verb that takes no clause as its object (P09-E12 D9): `/clause` on one whose `clauseObject` is

@@ -104,6 +104,15 @@ describe('buildComplements', () => {
     expect(complements.role?.phrase).not.toHaveProperty('definiteness', expect.anything());
   });
 
+  // P09-E45: the opponent takes a pronoun behind its adposition, "against him".
+  it('builds the opponent, a pronoun head included', () => {
+    const him = { id: 'THIRD_PERSON', role: 'pronoun', description: 'he', person: '3' } as const;
+    const complements = buildComplements({ opponent: him, opponentGender: 'masc' } as PhraseSelection)!;
+
+    expect(complements.opponent).toEqual({ phrase: expect.objectContaining({ concept: 'THIRD_PERSON', gender: 'masc' }), specifiers: undefined });
+    expect(complements.opponent).not.toHaveProperty('negative', true);
+  });
+
   it.each([['negative'], ['positive']] as const)('gives the cause a %s sentiment', (sentiment) => {
     expect(buildComplements({ cause: DOG, causeSentiment: sentiment })?.cause?.specifiers).toEqual([
       { kind: 'sentiment', value: sentiment },

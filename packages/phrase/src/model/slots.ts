@@ -222,7 +222,7 @@ export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   // it is went to the object complement, its R is the route's, and the A of "as" the temporal's.
   role: "Q",
   // P09-E22's opponent takes V, from "versus" (its O is the object complement's, and the A of
-  // "against" the temporal's). Plan-only, so no menu offers it yet.
+  // "against" the temporal's); a box since P09-E45.
   opponent: "V",
 };
 
@@ -527,6 +527,9 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // P09-E44's role, above the subject it is said of ("the man acts as a friend"), in the row the
   // companion below the subject leaves empty.
   role: { x: 22, y: 18 },
+  // P09-E45's opponent, between the companion and the topic: the two co-participants side by side, in
+  // the order they read ("plays with the cat against the dog").
+  opponent: { x: 40, y: 66 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

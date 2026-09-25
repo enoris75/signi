@@ -321,9 +321,9 @@ describe('buildUiStrings', () => {
     });
   });
 
-  // The complements that got a box of their own (P09-E44): each ring's controls name it by the grammar
-  // noun that titles it, built as the topic's are.
-  test('names the controls of the role box', () => {
+  // The complements that got a box of their own (P09-E44, P09-E45): each ring's controls name it by
+  // the grammar noun that titles it, built as the topic's are.
+  test('names the controls of the role and opponent boxes', () => {
     const strings = buildUiStrings();
     const family = (part: string) =>
       Object.fromEntries(['clear', 'show', 'hide', 'expand', 'compact', 'remove'].map((verb) => [verb, strings[`action.${verb}.${part}` as keyof typeof strings]]));
@@ -339,6 +339,17 @@ describe('buildUiStrings', () => {
       pt: 'Remover o adjunto adverbial de papel',
     });
     expect(role.clear).toMatchObject({ en: 'Clear the role', it: 'Cancella il complemento di ruolo', de: 'Die adverbiale Bestimmung der Rolle löschen' });
+    const opponent = family('opponent');
+    for (const verb of Object.keys(opponent)) expect(Object.keys(opponent[verb] ?? {}).sort()).toEqual([...LANGUAGE_CODES].sort());
+    expect(opponent.remove).toEqual({
+      en: 'Remove the opponent',
+      it: 'Rimuovi il complemento di svantaggio',
+      fr: "Retirer le complément circonstanciel d'opposition",
+      de: 'Die adverbiale Bestimmung des Gegners entfernen',
+      es: 'Quitar el complemento circunstancial de oposición',
+      ja: '相手の副詞語句を取り除き',
+      pt: 'Remover o adjunto adverbial de oposição',
+    });
   });
 
   // A period's part in a link is a clause, named as each tradition names it (B21). Japanese compounds

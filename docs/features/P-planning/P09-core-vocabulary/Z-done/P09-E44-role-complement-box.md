@@ -11,7 +11,7 @@ with its print → apply round trip.
 edit (D2). The UI strings for the new canvas actions, in all 7 languages.
 **Status:** **planning, unscheduled**. Filed 2026-09-25 from P09's plan-only constructs. The
 engine side is [P09-E13](P09-E13-role-complement.md). E44 shares its mechanism with
-[P09-E45](../P09-E45-opponent-complement-box.md) (the opponent box): each adds one
+[P09-E45](P09-E45-opponent-complement-box.md) (the opponent box): each adds one
 `BoxComplementType` member and one set of `PhraseSelection` fields. The two can land in one lane,
 but each retires on its own.
 

@@ -53,7 +53,9 @@ export type ComplementSlot =
   // A verb with no object has nothing to take as something (P13); the comitative goes with any verb.
   | "objectPredicative"
   // The capacity one acts in is licensed (ACT, WORK_LABOUR; P09-E44).
-  | "role";
+  | "role"
+  // The party the act is directed against is licensed too (PLAY_GAME, WIN, LOSE_GAME; P09-E45).
+  | "opponent";
 
 /** A word a command could not reach, and the word of the period that could take it. */
 export interface NoTargetArgs {

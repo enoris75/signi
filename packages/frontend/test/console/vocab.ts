@@ -69,6 +69,10 @@ export const VERBS = [
   verb('THINK', 'think', 'pensare', { transitivity: 'intransitive', ...complements('topic') }),
   // The verb that licenses the role (P09-E13, P09-E44): "acts as a friend".
   verb('ACT', 'act', 'agire', { transitivity: 'intransitive', ...complements('manner', 'role', 'locative', 'cause', 'instrumental') }),
+  // Two of the verbs that license the opponent (P09-E22, P09-E45): "plays against the dog", and a
+  // transitive one, "wins the game against the dog".
+  verb('PLAY_GAME', 'play', 'giocare', { transitivity: 'intransitive', ...complements('opponent', 'locative') }),
+  verb('WIN', 'win', 'vincere', complements('opponent')),
   // The verbs that take a clause as their object (P09-E12 D9): a that-clause, an infinitive.
   verb('SAY', 'say', 'dire', { clauseObject: 'content' }),
   verb('NEED', 'need', 'avere bisogno', { clauseObject: 'infinitive' }),

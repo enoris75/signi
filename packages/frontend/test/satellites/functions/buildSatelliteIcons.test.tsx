@@ -358,6 +358,14 @@ describe('buildSatelliteIcons', () => {
       expect(keysOf(complementToggleIcons)).toEqual(['role', 'comitative', 'manner', 'locative', 'temporal', 'cause', 'purpose']);
     });
 
+    // P09-E45: and the opponent, beside the companion it reads next to.
+    it('carries the opponent’s toggle on a verb that licenses it', () => {
+      const play = concept('PLAY_GAME', 'verb', { transitivity: 'intransitive', complements: ['opponent', 'locative'] });
+      const { complementToggleIcons } = icons({ verb: play });
+
+      expect(keysOf(complementToggleIcons)).toEqual(['comitative', 'opponent', 'locative', 'temporal', 'purpose']);
+    });
+
     it('pins the object’s fold-away control apart from the toggle row and the verb box', () => {
       const result = icons({ verb: SEE });
 

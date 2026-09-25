@@ -147,6 +147,19 @@ test.describe('the phrase console', () => {
     await app.expectSentences({ en: 'the woman acts.' });
   });
 
+  // P09-E45: the party the act is directed against — `/vs`, since `/against` is the spatial relation.
+  test('says whom the act is against with /vs, and /del vs takes it back', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat /verb PLAY_GAME /vs him');
+    await run(page);
+    await app.expectSentences({ en: 'the cat plays against him.', it: 'il gatto gioca contro di lui.', de: 'der Kater spielt gegen ihn.' });
+    // A pronoun prints as its person, the verb as its id ("play" names two verbs).
+    await expect(page.getByTestId('source-strip')).toContainText('/verb ( PLAY_GAME ) /vs ( 3rd');
+    await page.keyboard.type('/del vs');
+    await run(page);
+    await app.expectSentences({ en: 'the cat plays.' });
+  });
+
   test('says there is with /there, and /del there takes it back', async ({ app, page }) => {
     await prompt(page).click();
     await page.keyboard.type('/there /subj ( cat /a ) /verb be /loc house');

@@ -123,6 +123,13 @@ const GOLDEN: Record<string, Golden> = {
     holds: { role: 'FRIEND', roleGender: 'fem' },
     misuse: { line: '/verb eat /role friend', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'role' } } },
   },
+  // P09-E45: the party the act is directed against, licensed (PLAY_GAME, WIN); a pronoun too.
+  vs: {
+    line: '/subj cat /verb play /vs dog',
+    prints: '/subj ( cat ) /verb ( play ) /vs ( dog )',
+    holds: { opponent: 'DOG' },
+    misuse: { line: '/verb eat /vs dog', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'opponent' } } },
+  },
   factitive: {
     line: '/verb eat /obj food /objpred cat /factitive',
     prints: '/verb ( eat ) /obj ( food ) /objpred ( cat /factitive )',
