@@ -17,7 +17,7 @@ import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
-import { jaModifierSeg } from './jaModifierSeg.js';
+import { jaAdverbSegs } from './jaAdverbSegs.js';
 import { jaPassiveVerb } from './jaPassiveVerb.js';
 import type { JaRespect } from './jaRespectRegister.js';
 import { jaRespectVerb } from './jaRespectVerb.js';
@@ -170,7 +170,7 @@ export function predicateSegs(
     modifier: yetForms,
     ...(resultativeNegative ? { aspect: 'resultative' as const } : {}),
   };
-  const { verb, negative, governedNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative, governedNegative, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).
   const { objectPredicative, rest: splitComplements } = splitObjectPredicative(complements);
@@ -191,10 +191,9 @@ export function predicateSegs(
   // on in (家に住みます, 犬を家に閉じ込めます; A190). Everything else keeps the default で, so it passes
   // nothing. Read off `verbPhrase.verb`, the verb actually rendered, so a passive carries it too.
   const locativeParticle = existential ? 'に' : verbPhrase.verb.forms['locative_particle'];
-  // The verb's adverb, which an adverb of place says with the same particle (ここにいます, ここで食べます;
-  // see `jaModifierSeg`).
-  const adverb = jaModifierSeg(modifier, locativeParticle);
-  const frequency = modifier?.forms['subtype'] === 'frequency';
+  // The verb's adverbs, which an adverb of place says with the same particle (ここにいます, ここで食べます;
+  // see `jaModifierSeg`), each in its class's place before the predicate (P15, see `jaAdverbSegs`).
+  const adverbs = jaAdverbSegs(verbPhrase, locativeParticle);
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -244,7 +243,7 @@ export function predicateSegs(
     segs.push(...complementSegs(adjunctComplements, locativeParticle));
     if (directObject) segs.push(...slotSegs(directObject, objectParticle));
     segs.push(...complementSegs(objectPredicative));
-    if (adverb) segs.push(adverb);
+    segs.push(...adverbs);
     if (continuation) segs.push(...continuation.segs);
     segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
     return segs;
@@ -265,7 +264,7 @@ export function predicateSegs(
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
-    if (adverb) segs.push(adverb);
+    segs.push(...adverbs);
     if (continuation) segs.push(...continuation.segs);
     segs.push(...(modals.length > 0
       ? modalSegs(modals, verb, 'present', negated, 0, undefined, 'plain', undefined, undefined, governedNeg)
@@ -284,12 +283,7 @@ export function predicateSegs(
       const b = m.modifier?.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
     }
-    if (!frequency) segs.push(...gapRelation);
-    if (modifier) {
-      const base = modifier.forms['base'] ?? '';
-      if (base) segs.push(wordSeg(base, modifier.forms['reading']));
-    }
-    if (frequency) segs.push(...gapRelation);
+    segs.push(...jaAdverbSegs(verbPhrase, undefined, gapRelation));
     // A modal suffixes the predicate in the form it governs, and takes the tense, polarity and ending
     // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
     // A polarity of the predicate's own goes on the predicate, in that same governed form (A03:
@@ -324,9 +318,7 @@ export function predicateSegs(
     const b = m.modifier?.forms['base'] ?? '';
     if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
   }
-  if (!frequency) segs.push(...gapRelation);
-  if (adverb) segs.push(adverb);
-  if (frequency) segs.push(...gapRelation);
+  segs.push(...jaAdverbSegs(verbPhrase, locativeParticle, gapRelation));
   if (continuation) segs.push(...continuation.segs);
   // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form on whatever closes
   // its verb group — the verb (食べたら, 食べなかったら), the outermost modal (食べることができたら) or the
