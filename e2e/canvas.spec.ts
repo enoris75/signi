@@ -82,11 +82,12 @@ test.describe('canvas', () => {
         '[data-testid^="satellite-verb"], [data-testid="satellite-modifier"], [aria-label="Clear the verb"]',
       ],
       // The relative, possessor and conjunct controls ride the subject's dotted ring, not its solid one,
-      // and so do the question mark, its who / what chip and the existential (P09-E12 D7, D8).
+      // and so do the question mark, its who / what chip and the existential (P09-E12 D7, D8), and the
+      // noun's standard and examples controls in its relations fan (P09-E50, P09-E48).
       [
         'subject',
         'Africa',
-        `${['Relative', 'Possessor', 'Conjunct', 'Question', 'QuestionAnimate', 'Existential'].reduce(
+        `${['Relative', 'Possessor', 'Conjunct', 'Question', 'QuestionAnimate', 'Existential', 'Standard', 'Examples'].reduce(
           (sel, kind) => `${sel}:not([data-testid$="${kind}"])`,
           '[data-testid^="satellite-subject"]',
         )}, [aria-label="Clear the subject"]`,
