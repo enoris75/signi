@@ -36,6 +36,7 @@ import {
   setPredication,
   setNumeral,
   setContrastive,
+  setApproximated,
   toggleGender,
   toggleCauseNegative,
   toggleNegative,
@@ -109,6 +110,8 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     // A cardinal numeral counting a noun (P13), or none.
     handleSetNumeral: (which: NounKey, numeral: number | undefined) =>
       onPhraseUpdate((prev) => setNumeral(prev, which, numeral)),
+    handleSetApproximated: (which: NounKey, on: boolean) =>
+      onPhraseUpdate((prev) => setApproximated(prev, which, on)),
     // The direction's relation (P13): its plain goal, or a path.
     handleSelectDirectionSpecifier: (spec: PathSpecifier | "to") =>
       onPhraseUpdate((prev) => setSpecifier(prev, spec === "to" ? undefined : spec, "direction")),

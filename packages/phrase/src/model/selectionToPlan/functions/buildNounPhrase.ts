@@ -7,6 +7,7 @@ import {
   type NounKey,
   type PhraseSelection,
 } from "../../interfaces.ts";
+import { approximatorFor } from "../../functions/approximatorFor.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
@@ -61,6 +62,8 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
     contrastive: sel.contrastives?.[which] || undefined,
     // A cardinal numeral counting it (P13).
     numeral: sel.numerals?.[which],
+    // An approximator on that quantity (P09-E49), its word the quantity's own.
+    approximator: sel.approximators?.[which] ? approximatorFor(sel, which) : undefined,
     // What a genitive possessor is to the head (P13): an owner unless the noun says otherwise.
     possessorRole: possSel && !possRef ? sel.possessorRoles?.[which] : undefined,
   };

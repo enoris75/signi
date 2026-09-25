@@ -87,15 +87,18 @@ export function LinkChip({
 /**
  * The conjunction joining a group, as a chip sitting on a link between two of its rings. One
  * conjunction covers the whole group ("the cat, the dog **and** the fox" — not a separate word per
- * junction), so every chip of a group shows it, and clicking any of them cycles and ⇄ or.
+ * junction), so every chip of a group shows it, and clicking any of them cycles and ⇄ or — on a pair,
+ * and → both … and → or (P09-E46), the chip reading the correlative pair while it is on.
  */
 export function ConjunctionChip({
   conjunction,
+  correlative = false,
   color,
   at,
   onClick,
 }: {
   conjunction: CoordConjunction;
+  correlative?: boolean;
   color: string;
   at: Pt;
   onClick: () => void;
@@ -103,7 +106,7 @@ export function ConjunctionChip({
   const t = useUiString();
   return (
     <LinkChip
-      label={t(COORD_CONJUNCTION_LABEL_KEY[conjunction])}
+      label={t(correlative ? "conjunction.correlative.and" : COORD_CONJUNCTION_LABEL_KEY[conjunction])}
       color={color}
       at={at}
       onClick={onClick}
@@ -184,6 +187,7 @@ export function ConjunctRings({
         <ConjunctionChip
           key={`${link.which}:${link.index}`}
           conjunction={conjunctionOf(selection, link.which)}
+          correlative={Boolean(selection.correlatives?.[link.which])}
           color={nounColor(link.which)}
           at={link.mid}
           onClick={() => onCycleConjunction(link.which)}

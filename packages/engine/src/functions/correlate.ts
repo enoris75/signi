@@ -15,3 +15,11 @@ export function correlate(
   if (!el.correlative || parts.length !== 2 || !parts[0] || !parts[1]) return undefined;
   return `${first} ${parts[0]} ${second} ${parts[1]}`;
 }
+
+/**
+ * A correlative pair cited alone, for the conjunction chip's label (P09-E46): its two words with an
+ * ellipsis where the first conjunct goes — "both … and", "sowohl … als auch".
+ */
+export function citeCorrelative([first, second]: readonly [string, string]): string {
+  return `${first} … ${second}`;
+}

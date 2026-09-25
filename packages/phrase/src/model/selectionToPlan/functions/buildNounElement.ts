@@ -23,5 +23,7 @@ export function buildNounElement(sel: PhraseSelection, which: NounKey, root: Phr
   return {
     conjuncts: [head, ...conjuncts],
     conjunction: field<CoordConjunction>(sel, CONJUNCTION_KEY(which)) ?? "and",
+    // "both … and" (P09-E46): the reducers hold the flag only on an "and" pair.
+    ...(sel.correlatives?.[which] && { correlative: true as const }),
   };
 }

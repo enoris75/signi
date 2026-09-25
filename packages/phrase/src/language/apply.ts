@@ -59,6 +59,7 @@ import {
 import {
   setNumeral,
   setContrastive,
+  setApproximated,
   addConjunct,
   applyClear,
   applyConceptSelect,
@@ -77,6 +78,7 @@ import {
   setQuestionRole,
   setModifierAdjective,
   setNounConjunction,
+  setCorrelative,
   setPossessorRef,
   updateConjunct,
   updateNounAt,
@@ -620,7 +622,7 @@ class Run {
       case "standard":
         return this.standard(item, w);
       case "conjunct":
-        return this.conjunct(item, action.conjunction, w);
+        return this.conjunct(item, def.name, action.conjunction, w, action.correlative);
       case "relative":
         return this.relative(item, w);
       case "headless":
@@ -630,6 +632,11 @@ class Run {
       // A demonstrative pointing away from the rest (P13).
       case "contrast":
         this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setContrastive(s, w.which!, true));
+        this.touch(w.ref);
+        return;
+      // An approximator on the quantity (P09-E49): `takes` has checked the quantity takes one.
+      case "approximator":
+        this.updateSlice(w.ref.containerId, w.ref.slice, (s) => setApproximated(s, w.which!, true));
         this.touch(w.ref);
         return;
       // A cardinal numeral (P13): a whole number, the engine's words running to 12 and 24.
@@ -733,21 +740,25 @@ class Run {
       this.bracket(item, { kind: "standard", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: "than" });
   }
 
-  conjunct(item: Item, conjunction: "and" | "or", w: WordInfo): void {
+  conjunct(item: Item, command: string, conjunction: "and" | "or", w: WordInfo, correlative?: true): void {
     const containerId = w.ref.containerId;
     const which = w.which!;
-    this.updateRoot(containerId, (root) => setNounConjunction(addConjunct(root, which), which, conjunction));
+    // `/bothand` spells the pair it makes "both … and" (P09-E46); on any other group it is a plain `/and`.
+    this.updateRoot(containerId, (root) => {
+      const next = setNounConjunction(addConjunct(root, which), which, conjunction);
+      return correlative ? setCorrelative(next, which, true) : next;
+    });
     const i = conjunctsOf(this.root(containerId), which).length - 1;
     const slice = conjunctAddress(which, i);
     const headRef: WordRef = { containerId, slice, slot: "subject" };
     this.touch(w.ref);
     if (item.word) {
-      const { concept, opts } = this.word(item.word, conjunctSpec(which), conjunction);
+      const { concept, opts } = this.word(item.word, conjunctSpec(which), command);
       this.updateRoot(containerId, (root) => updateConjunct(root, which, i, (c) => applyConceptSelect(c, "subject", concept, opts)));
       this.touch(headRef);
     }
     if (item.body)
-      this.bracket(item, { kind: "conjunct", containerId, slice, words: item.lead ? [headRef] : [], via: conjunction });
+      this.bracket(item, { kind: "conjunct", containerId, slice, words: item.lead ? [headRef] : [], via: command });
   }
 
   relative(item: Item, w: WordInfo): void {
@@ -1075,6 +1086,14 @@ class Run {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice.contrastives?.[x.which!]));
         if (!w) fail(span, coded("nothingToRemove"));
         this.updateSlice(containerId, w!.ref.slice, (s) => setContrastive(s, w!.which!, false));
+        this.touch(w!.ref);
+        return;
+      }
+      // A noun's approximator (P09-E49): the closest noun that has one.
+      case "approx": {
+        const w = closest((x) => x.kind === "noun" && Boolean(x.slice.approximators?.[x.which!]));
+        if (!w) fail(span, coded("nothingToRemove"));
+        this.updateSlice(containerId, w!.ref.slice, (s) => setApproximated(s, w!.which!, false));
         this.touch(w!.ref);
         return;
       }

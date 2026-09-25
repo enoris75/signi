@@ -1,7 +1,7 @@
 import type { FocusParticle } from '@signi/shared';
 import type { ResolvedNounElement, RubySegment } from '../../types.js';
 import { slotFocus } from '../../functions/slotFocus.js';
-import { JA_NEGATIVE_DETERMINER } from './ja.consts.js';
+import { CORRELATIVE_MO, JA_NEGATIVE_DETERMINER } from './ja.consts.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaModifiedNegative } from './jaModifiedNegative.js';
 import { wordSeg } from './wordSeg.js';
@@ -37,7 +37,7 @@ export function correlativeMo(el: ResolvedNounElement, particle: string | undefi
  * phrase and so have to know which slot it is (C39). 猫も食べます, 食べ物さえ食べます, 家にも住みます.
  */
 export function jaParticleSegs(el: ResolvedNounElement, particle: string): RubySegment[] {
-  if (correlativeMo(el, particle)) return [{ t: 'も' }];
+  if (correlativeMo(el, particle)) return [{ t: CORRELATIVE_MO }];
   const focus = slotFocus(el);
   if (focus) {
     const word = FOCUS_PARTICLE[focus];

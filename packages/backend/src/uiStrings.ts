@@ -1,5 +1,6 @@
 import {
   translate,
+  translateApproximator,
   translateConjunction,
   translateDegree,
   translateDeterminer,
@@ -38,10 +39,11 @@ function applyFormat(text: string, format?: UiStringFormat): string {
 function renderEntry(def: UiStringDef, lookup: LexicalLookup): Translation[] {
   if (def.determiner !== undefined) return translateDeterminer(def.determiner, lookup, def.agreesWith);
   if (def.possessive !== undefined) return translatePossessive(def.possessive, lookup, def.agreesWith);
-  if (def.conjunction !== undefined) return translateConjunction(def.conjunction);
+  if (def.conjunction !== undefined) return translateConjunction(def.conjunction, def.correlative);
   if (def.subordinator !== undefined) return translateSubordinator(def.subordinator);
   if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookup, def.agreesWith);
   if (def.degree !== undefined) return translateDegree(def.degree, lookup, def.agreesWith);
+  if ('approximator' in def) return translateApproximator(def.approximator);
   if (def.word !== undefined) return translateWord(def.word, lookup, def.agreesWith);
   return translate(def.plan, lookup);
 }

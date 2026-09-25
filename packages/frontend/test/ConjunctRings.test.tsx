@@ -176,6 +176,15 @@ describe('ConjunctRings', () => {
     expect(onCycleConjunction.mock.calls).toEqual([['directObject'], ['subject'], ['subject']]);
   });
 
+  // P09-E46: the chip's third state on a pair — the correlative, "both … and".
+  it('reads the correlative pair on a pair spelled with it, and cycles on from there', () => {
+    const { onCycleConjunction } = renderRings({ selection: { ...SELECTION, correlatives: { directObject: true } } });
+
+    expect(chips().map((c) => c.textContent)).toEqual(['Or', 'Or', 'Both … and']);
+    fireEvent.click(screen.getByRole('button', { name: 'Both … and' }));
+    expect(onCycleConjunction).toHaveBeenLastCalledWith('directObject');
+  });
+
   it('colours each chip after its noun block', () => {
     renderRings();
 

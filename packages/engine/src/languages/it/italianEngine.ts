@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveIt } from '../../possessive.js';
 import { COORD_WORDS, IT_DEGREE } from './it.consts.js';
+import { CORRELATIVE_PAIR } from './it.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { IT_TEMPORAL } from './it.consts.js';
 import { joinWords } from './joinWords.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -55,7 +57,9 @@ export const italianEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'che' : SUBORDINATORS[sub].word;
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // The adposition alone. Italian fuses its prepositions with the *definite* article ("nella

@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEn } from '../../possessive.js';
 import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP } from './en.consts.js';
+import { CORRELATIVE_PAIR } from './en.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { TEMPORAL_PREP } from './en.consts.js';
 import { enAdj } from './enAdj.js';
 import { determiner } from './determiner.js';
@@ -43,7 +45,9 @@ export const englishEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'that' : SUBORDINATORS[sub];
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // English prepositions neither fuse with an article nor decline, so the cited noun goes unread.

@@ -444,6 +444,11 @@ class Printer {
       this.emit("/num", "command", "setting", { word: ref });
       this.emit(String(numeral), "value", "setting", { word: ref });
     }
+    // Its approximator, after the numeral whose quantity it reads (P09-E49).
+    if (sel.approximators?.[which]) {
+      this.statement({ key: `${wordKey(ref)}:approx`, removal: "/del approx", owner: ref, about: ref });
+      this.emit("/approx", "command", "setting", { word: ref });
+    }
     const address = w.address!;
 
     // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its
@@ -470,7 +475,8 @@ class Printer {
     // Its conjuncts: a bare word where the phrase is only its word, else a bracket.
     const conjuncts = conjunctsOf(sel, which);
     if (conjuncts.length) {
-      const conjunction = (sel[CONJUNCTION_KEY(which)] as string | undefined) ?? "and";
+      // A pair spelled "both … and" says so where its "and" goes (P09-E46).
+      const conjunction = sel.correlatives?.[which] ? "bothand" : ((sel[CONJUNCTION_KEY(which)] as string | undefined) ?? "and");
       conjuncts.forEach((c, i) => {
         const cAddress = conjunctAddress(address, i);
         const key = `${wordKey(ref)}:and:${i}`;

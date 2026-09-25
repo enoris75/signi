@@ -92,12 +92,15 @@ export type Action =
   | { kind: "possessor" }
   /** What a predicate adjective is compared to: `/than [ dog ]` (P09-E12 D5). */
   | { kind: "standard" }
-  | { kind: "conjunct"; conjunction: "and" | "or" }
+  /** A conjunct; `correlative` spells an "and" pair "both … and": `/bothand` (P09-E46). */
+  | { kind: "conjunct"; conjunction: "and" | "or"; correlative?: true }
   | { kind: "relative" }
   /** A demonstrative pointing away from the rest: `/contrast` (P13). */
   | { kind: "contrast" }
   /** A cardinal numeral counting the noun: `/num 24` (P13). */
   | { kind: "numeral" }
+  /** An approximator on the noun's quantity, its word the quantity's own: `/approx` (P09-E49). */
+  | { kind: "approximator" }
   /** The noun's relative clause said alone, its head unspoken: `/headless` (P13). */
   | { kind: "headless" }
   | { kind: "condition" }
@@ -479,6 +482,21 @@ export const COMMANDS: readonly CommandDef[] = [
     satellites: /Conjunct$/,
     reducers: ["addConjunct", "updateConjunct", "setNounConjunction"],
   },
+  // "both … and" (P09-E46): an "and" pair spelled with its correlative, `/subj ( cat /bothand dog )`. A
+  // third conjunct drops it, as the chip does. `/both` is the determiner (P09-E25).
+  {
+    name: "bothand",
+    aliases: ["both_and", "correlative"],
+    group: "role",
+    description: "coordinate, both … and",
+    descriptionKey: "conjunction.correlative.and",
+    purposeKey: "purpose.conjunct",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "conjunct", conjunction: "and", correlative: true },
+    satellites: /Conjunct$/,
+    reducers: ["addConjunct", "updateConjunct", "setNounConjunction", "setCorrelative"],
+  },
 
   // ── Noun ──────────────────────────────────────────────────────────────────
   setting("sg", ["singular"], "noun", { id: "number", value: "singular" }, "singular", "number.value.singular", /Number$/, ["setNumber", "setModifierNumber"]),
@@ -560,6 +578,22 @@ export const COMMANDS: readonly CommandDef[] = [
     action: { kind: "numeral" },
     satellites: /Definiteness$/,
     reducers: ["setNumeral"],
+  },
+  // An approximator on the quantity (P09-E49): "/subj ( cat /num 5 /approx )", *about five cats*;
+  // "/subj ( cat /all /approx )", *almost all cats*. Written after `/num`, so the quantity it reads is
+  // set; `/del approx` takes it back. `/about` is the topic, and `/almost` would say *about* on a numeral.
+  {
+    name: "approx",
+    aliases: ["approximately", "circa"],
+    group: "noun",
+    description: "about, almost",
+    descriptionKey: "approximator.value.about",
+    purposeKey: "purpose.approximator",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "approximator" },
+    satellites: /Definiteness$/,
+    reducers: ["setApproximated"],
   },
   // The relative clause said alone, its head unspoken (P13): an adjective's definition is its relative
   // clause, OKAY "that has no problems". The head still picks "who" or "that" and the agreement, so it
@@ -1286,7 +1320,7 @@ export function topicOf(def: CommandDef): Topic {
         ? a.kind
         : a.kind === "headless"
           ? "relative"
-          : a.kind === "numeral" || a.kind === "contrast"
+          : a.kind === "numeral" || a.kind === "contrast" || a.kind === "approximator"
             ? "determiner"
         : a.kind === "conjunct"
           ? "coordination"

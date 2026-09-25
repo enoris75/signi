@@ -246,6 +246,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   however: 'しかしながら',
 };
 
+// The correlative pair of an "and" group (P09-E26): も after each conjunct (猫も犬も), in place of と. The
+// sentence and the conjunction chip's label (P09-E46) read this particle.
+export const CORRELATIVE_MO = 'も';
+
 /**
  * The subordinating conjunctions, which Japanese **postposes** to a plain clause (see
  * PhrasePlan.adverbialClause, P09-E4): 猫が食べる時に, 猫が食べるので. `tense` is the form the clause's verb

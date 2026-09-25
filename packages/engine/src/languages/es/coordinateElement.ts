@@ -1,6 +1,7 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
 import { correlate } from '../../functions/correlate.js';
 import { joinConjuncts } from '../../functions/joinConjuncts.js';
+import { CORRELATIVE_PAIR } from './es.consts.js';
 
 /**
  * Render every conjunct of a noun slot and coordinate them the Spanish way: commas between all
@@ -22,5 +23,5 @@ export function coordinateElement(el: ResolvedNounElement, render: (np: Resolved
       : (/^(i|hi(?!e))/i.test(next) ? ' e ' : ' y ');
   const parts = el.conjuncts.map(render);
   // "tanto el gato como el perro" (P09-E26) — never over the concord "ni", which keeps its own join.
-  return (ni ? undefined : correlate(el, parts, ['tanto', 'como'])) ?? joinConjuncts(parts, ', ', link);
+  return (ni ? undefined : correlate(el, parts, CORRELATIVE_PAIR)) ?? joinConjuncts(parts, ', ', link);
 }

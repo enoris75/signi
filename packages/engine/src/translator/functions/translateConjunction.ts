@@ -12,10 +12,13 @@ import { engines } from '../translator.consts.js';
  * It is cited *between two clauses*, which is where the menu puts it: a period joined to a period.
  * Three of the six can also join two nouns, and Japanese writes those differently there (〜と, not
  * そして), which is why the position has to be fixed for the label to mean anything.
+ *
+ * `correlative` names the pair an "and" group of two may be spelled with instead ("both … and",
+ * P09-E46): the label of the conjunction chip in that state.
  */
-export function translateConjunction(conjunction: CoordConjunction): Translation[] {
+export function translateConjunction(conjunction: CoordConjunction, correlative?: boolean): Translation[] {
   return engines.map((engine) => ({
     language: engine.language,
-    text: engine.renderConjunction?.(conjunction)?.trim() || '—',
+    text: engine.renderConjunction?.(conjunction, { correlative })?.trim() || '—',
   }));
 }

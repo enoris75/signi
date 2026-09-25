@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessivePt } from '../../possessive.js';
 import { COORD_WORDS, PARENTHETICAL_CONNECTORS, PT_DEGREE } from './pt.consts.js';
+import { CORRELATIVE_PAIR } from './pt.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { PT_TEMPORAL } from './pt.consts.js';
 import { emPrep } from './emPrep.js';
 import { prepDet } from './prepDet.js';
@@ -59,7 +61,9 @@ export const portugueseEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // The adposition alone: Portuguese contracts de/em/por/a with the article ("debaixo do carro",

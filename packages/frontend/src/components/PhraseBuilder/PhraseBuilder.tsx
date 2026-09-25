@@ -1032,6 +1032,7 @@ export function PhraseBuilder({
     handleSelectPredication: commands.handleSelectPredication,
     handleSetNumeral: commands.handleSetNumeral,
     handleSetContrastive: commands.handleSetContrastive,
+    handleSetApproximated: commands.handleSetApproximated,
     handleSelectDirectionSpecifier: commands.handleSelectDirectionSpecifier,
     handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,

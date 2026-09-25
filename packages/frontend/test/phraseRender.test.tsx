@@ -93,6 +93,7 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectPredication: vi.fn(() => {}),
     handleSetNumeral: vi.fn(() => {}),
     handleSetContrastive: vi.fn(() => {}),
+    handleSetApproximated: vi.fn(() => {}),
     handleSelectDirectionSpecifier: vi.fn(() => {}),
     handleSelectSentiment: vi.fn(() => {}),
     handleToggleCollapse: vi.fn(() => {}),

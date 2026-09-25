@@ -8,6 +8,8 @@ import { estCeQue } from './estCeQue.js';
 import { frontQuestion } from './frontQuestion.js';
 import { questionWord } from './questionWord.js';
 import { COORD_WORDS, FR_DEGREE } from './fr.consts.js';
+import { CORRELATIVE_PAIR } from './fr.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { FR_TEMPORAL } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
@@ -92,7 +94,9 @@ export const frenchEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // The adposition alone: French contracts "de"/"à" with the definite article ("autour du chien"),

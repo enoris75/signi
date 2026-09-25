@@ -1,4 +1,5 @@
 import type { ResolvedNounElement, RubySegment } from '../../types.js';
+import { CORRELATIVE_MO } from './ja.consts.js';
 import { correlativeMo } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
 
@@ -16,7 +17,7 @@ import { npSegs } from './npSegs.js';
  * `particle` is one も replaces (see `correlativeMo`); the last も is the particle's own.
  */
 export function elSegs(el: ResolvedNounElement, particle?: string): RubySegment[] {
-  const word = correlativeMo(el, particle) ? 'も' : el.conjunction === 'or' ? 'か' : 'と';
+  const word = correlativeMo(el, particle) ? CORRELATIVE_MO : el.conjunction === 'or' ? 'か' : 'と';
   const segs: RubySegment[] = [];
   el.conjuncts.forEach((np, i) => {
     if (i > 0) segs.push({ t: word });

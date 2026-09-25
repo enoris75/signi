@@ -1,6 +1,7 @@
 import type { CoordConjunction, Definiteness, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase, RubySegment } from '../../types.js';
 import { CAUSE_PARTICLE, COORD_WORDS, JA_DEGREE, JA_DETERMINERS, PATH_CITATION } from './ja.consts.js';
+import { CORRELATIVE_MO } from './ja.consts.js';
 import { JA_TEMPORAL } from './ja.consts.js';
 import { isLoweredDegree } from './isLoweredDegree.js';
 import { buildSegments } from './buildSegments.js';
@@ -65,7 +66,9 @@ export const japaneseEngine: LanguageEngine = {
   },
   // The connective adverb Japanese writes between two clauses (そして, しかし, つまり). It follows the
   // first clause's 、 in a sentence; standing alone as a menu entry it is the word itself.
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair is a particle after each conjunct, so its label writes both places (P09-E46).
+    if (options?.correlative && conjunction === 'and') return `…${CORRELATIVE_MO}…${CORRELATIVE_MO}`;
     return COORD_WORDS[conjunction];
   },
   /**

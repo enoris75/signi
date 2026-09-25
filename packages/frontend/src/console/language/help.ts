@@ -40,7 +40,7 @@ export function usageOf(def: CommandDef, words: UsageWords = USAGE_WORDS): strin
     case "values":
       return `${name} ${def.arg.values.map((v) => v.name).join("|")}`;
     case "text":
-      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|num|contrast|if|join|clause|sub|to|so|inst|period]`;
+      if (action.kind === "del") return `${name} [subj|obj|adj n|adv|modal n|poss|than|and n|wh|there|rel|headless|num|contrast|approx|if|join|clause|sub|to|so|inst|period]`;
       if (action.kind === "app" && action.app === "help") return `${name} [${words.command}]`;
       return `${name} ${words.name}`;
     case "phrase":
@@ -89,6 +89,7 @@ export const EXAMPLES: Record<string, string> = {
   than: "/subj ( cat ) /verb ( seem ) /pred ( big /more /than [ dog ] )",
   and: "/subj ( cat /and dog ) /verb ( run )",
   or: "/subj ( cat /or dog ) /verb ( run )",
+  bothand: "/subj ( cat /bothand dog ) /verb ( run )",
   // Noun
   sg: "/subj ( cat /sg )",
   pl: "/subj ( cat /pl )",
@@ -193,6 +194,7 @@ export const EXAMPLES: Record<string, string> = {
   goal: "/subj ( cat ) /verb ( run ) /dir ( house /in /goal )",
   num: "/subj ( cat /pl /num 12 ) /verb ( run )",
   contrast: "/subj ( house /that /contrast ) /verb ( run )",
+  approx: "/subj ( cat /num 5 /approx ) /verb ( run )",
   with: "/subj ( cat ) /verb ( eat ) /with ( dog )",
   role: "/subj ( man ) /verb ( act ) /role ( friend )",
   vs: "/subj ( cat ) /verb ( play ) /vs ( dog )",

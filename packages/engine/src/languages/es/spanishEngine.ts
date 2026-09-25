@@ -2,6 +2,8 @@ import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEs } from '../../possessive.js';
 import { COORD_WORDS, ES_DEGREE, PARENTHETICAL_CONNECTORS } from './es.consts.js';
+import { CORRELATIVE_PAIR } from './es.consts.js';
+import { citeCorrelative } from '../../functions/correlate.js';
 import { ES_TEMPORAL } from './es.consts.js';
 import { prepDet } from './prepDet.js';
 import { agreeAdj } from './agreeAdj.js';
@@ -56,7 +58,9 @@ export const spanishEngine: LanguageEngine = {
   renderSubordinator(sub: Subordinator): string {
     return sub === 'that' ? 'que' : SUBORDINATORS[sub];
   },
-  renderConjunction(conjunction: CoordConjunction): string {
+  renderConjunction(conjunction: CoordConjunction, options?: { correlative?: boolean }): string {
+    // The correlative pair, its two places marked (P09-E46).
+    if (options?.correlative && conjunction === 'and') return citeCorrelative(CORRELATIVE_PAIR);
     return COORD_WORDS[conjunction];
   },
   // The adposition alone: Spanish contracts only de/a + "el" ("debajo del árbol"), so a bare noun

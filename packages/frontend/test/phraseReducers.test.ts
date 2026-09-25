@@ -9,6 +9,7 @@ import {
   updateNounAt,
 } from '../src/components/PhraseBuilder/phraseReducers.ts';
 import * as R from '../src/components/PhraseBuilder/phraseReducers.ts';
+import { approximatorFor } from '../src/components/PhraseBuilder/functions/approximatorFor.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id, label: id });
 
@@ -437,6 +438,94 @@ describe('removeConjunct', () => {
     const next = R.removeConjunct(group, 'subject', 1);
     expect(next.subjectConjuncts).toEqual([{ subject: BOOK }]);
     expect(R.removeConjunct({ ...group, directObjectPossessorRef: 'subject' }, 'subject', 0).directObjectPossessorRef).toBe('subject');
+  });
+});
+
+// P09-E46: "both … and" spells a pair joined by "and", and nothing else — the chip passes through it on
+// a pair, and whatever makes the group no such pair drops it.
+describe('the correlative', () => {
+  const pair: PhraseSelection = { subject: CAT, subjectConjuncts: [{ subject: DOG }] };
+  const three: PhraseSelection = { subject: CAT, subjectConjuncts: [{ subject: DOG }, { subject: BOY }] };
+  const both = R.setCorrelative(pair, 'subject', true);
+  const states = (sel: PhraseSelection, n: number) => {
+    const out: string[] = [];
+    for (let i = 0; i < n; i++) {
+      sel = R.cycleNounConjunction(sel, 'subject');
+      out.push(sel.correlatives?.subject ? 'both' : R.conjunctionOf(sel, 'subject'));
+    }
+    return out;
+  };
+
+  it('cycles a pair and → both … and → or → and', () => {
+    expect(states(pair, 3)).toEqual(['both', 'or', 'and']);
+  });
+
+  it('cycles three conjuncts and ⇄ or, as before', () => {
+    expect(states(three, 2)).toEqual(['or', 'and']);
+  });
+
+  it('is set on an "and" pair only', () => {
+    expect(both.correlatives).toEqual({ subject: true });
+    expect(R.setCorrelative(three, 'subject', true)).toBe(three);
+    expect(R.setCorrelative({ ...pair, subjectConjunction: 'or' }, 'subject', true)).not.toHaveProperty('correlatives');
+    expect(R.setCorrelative(both, 'subject', false)).not.toHaveProperty('correlatives');
+  });
+
+  it('is dropped by "or", by a third conjunct and by a removal', () => {
+    expect(R.setNounConjunction(both, 'subject', 'or')).not.toHaveProperty('correlatives');
+    expect(R.setNounConjunction(both, 'subject', 'and').correlatives).toEqual({ subject: true });
+    expect(R.addConjunct(both, 'subject')).not.toHaveProperty('correlatives');
+    expect(R.removeConjunct(both, 'subject', 0)).not.toHaveProperty('correlatives');
+  });
+
+  it('goes with the head, and keeps another block’s', () => {
+    const two = R.setCorrelative({ ...both, directObject: BOOK, directObjectConjuncts: [{ subject: WOOD }] }, 'directObject', true);
+    expect(R.applyClear(two, 'subject').correlatives).toEqual({ directObject: true });
+  });
+});
+
+// P09-E49: an approximator is a flag whose word the quantity decides — about on a numeral, almost on
+// all / no / many — and it goes once the quantity under it takes none.
+describe('the approximator', () => {
+  const on = (sel: PhraseSelection) => R.setApproximated(sel, 'subject', true);
+
+  it.each<[string, PhraseSelection, string | undefined]>([
+    ['a numeral', { subject: CAT, numerals: { subject: 5 } }, 'about'],
+    ['all', { subject: CAT, subjectDefiniteness: 'all' }, 'almost'],
+    ['no', { subject: CAT, subjectDefiniteness: 'no' }, 'almost'],
+    ['many', { subject: CAT, subjectDefiniteness: 'many' }, 'almost'],
+    ['some', { subject: CAT, subjectDefiniteness: 'some' }, undefined],
+    ['the definite', { subject: CAT }, undefined],
+    ['a numeral with all', { subject: CAT, subjectDefiniteness: 'all', numerals: { subject: 5 } }, 'about'],
+  ])('reads %s as %s', (_, sel, want) => {
+    expect(approximatorFor(sel, 'subject')).toBe(want);
+  });
+
+  it('is set only on a quantity that takes one', () => {
+    expect(on({ subject: CAT, numerals: { subject: 5 } }).approximators).toEqual({ subject: true });
+    const some: PhraseSelection = { subject: CAT, subjectDefiniteness: 'some' };
+    expect(on(some)).toBe(some);
+  });
+
+  it('is dropped with the numeral that licensed it, and kept by one that is still there', () => {
+    const five = on({ subject: CAT, numerals: { subject: 5 } });
+    expect(R.setNumeral(five, 'subject', undefined)).not.toHaveProperty('approximators');
+    expect(R.setNumeral(five, 'subject', 7).approximators).toEqual({ subject: true });
+  });
+
+  it('is dropped by a determiner that takes none, and moves between the licensed ones', () => {
+    const all = on({ subject: CAT, subjectDefiniteness: 'all' });
+    expect(R.setDefiniteness(all, 'subject', 'some')).not.toHaveProperty('approximators');
+    expect(R.setDefiniteness(all, 'subject', 'no').approximators).toEqual({ subject: true });
+    // about five → the numeral goes, all is picked: almost all.
+    const five = on({ subject: CAT, numerals: { subject: 5 } });
+    const allNow = R.setDefiniteness(five, 'subject', 'all');
+    expect(R.setNumeral(allNow, 'subject', undefined).approximators).toEqual({ subject: true });
+  });
+
+  it('goes with a noun that stops being one', () => {
+    const all = on({ subject: CAT, subjectDefiniteness: 'all' });
+    expect(R.applyConceptSelect(all, 'subject', SHE)).not.toHaveProperty('approximators');
   });
 });
 

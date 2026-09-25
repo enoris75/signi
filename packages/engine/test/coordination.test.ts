@@ -141,6 +141,25 @@ describe('a correlative pair: both … and', () => {
       de: 'der Kater läuft sowohl im Haus als auch im Markt.',
     });
   });
+
+  // P09-E46: the conjunction chip's label in its third state — the pair the sentence writes, its
+  // first conjunct's place an ellipsis. Japanese writes its particle after each conjunct.
+  test('the chip labels the pair with the words the sentence writes (P09-E46)', () => {
+    expect(conjunctionAll('and', true)).toEqual({
+      en: 'both … and',
+      it: 'sia … sia',
+      fr: 'et … et',
+      de: 'sowohl … als auch',
+      es: 'tanto … como',
+      pt: 'tanto … quanto',
+      ja: '…も…も',
+    });
+  });
+
+  test('the flag labels nothing but "and": "or" keeps its own word (P09-E46)', () => {
+    expect(conjunctionAll('or', true)).toEqual(conjunctionAll('or'));
+    expect(conjunctionAll('and', false)).toEqual(conjunctionAll('and'));
+  });
 });
 
 // Two independent clauses joined by a conjunction. Symmetric, unlike a condition.

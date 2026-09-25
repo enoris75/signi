@@ -1,5 +1,6 @@
 export {
   translate,
+  translateApproximator,
   translateWord,
   translateConjunction,
   translateDegree,

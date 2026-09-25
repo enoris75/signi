@@ -79,6 +79,13 @@ const GOLDEN: Record<string, Golden> = {
     misuse: { line: '/verb eat /and dog', says: { code: 'noTarget', args: { command: 'and' } } },
   },
   or: { line: '/subj cat /or dog', prints: '/subj ( cat /or dog )', holds: { subjectConjunction: 'or' }, check: (s) => expect(sel(s).subjectConjuncts).toHaveLength(1) },
+  // "both … and" (P09-E46): an "and" pair spelled with its correlative, printed where its /and goes.
+  bothand: {
+    line: '/subj cat /bothand dog',
+    prints: '/subj ( cat /bothand dog )',
+    check: (s) => expect(sel(s).correlatives).toEqual({ subject: true }),
+    misuse: { line: '/verb eat /bothand dog', says: { code: 'noTarget', args: { command: 'bothand' } } },
+  },
   sg: { line: '/subj cat /pl /sg', holds: { subjectNumber: 'singular' }, prints: '/subj ( cat )', misuse: { line: '/verb eat /sg', says: { code: 'noTarget', args: { command: 'sg' } } } },
   pl: { line: '/subj cat /pl', prints: '/subj ( cat /pl )', holds: { subjectNumber: 'plural' } },
   masc: { line: '/subj cat /fem /masc', holds: { subjectGender: 'masc' }, prints: '/subj ( cat )' },
@@ -177,6 +184,13 @@ const GOLDEN: Record<string, Golden> = {
     prints: '/subj ( cat /pl /num 12 )',
     check: (s) => expect(sel(s).numerals).toEqual({ subject: 12 }),
     misuse: { line: '/subj cat /num many', says: { code: 'numeralNotANumber' } },
+  },
+  // An approximator on the quantity (P09-E49), printed after /num; its word is the quantity's own.
+  approx: {
+    line: '/subj cat /pl /num 5 /approx',
+    prints: '/subj ( cat /pl /num 5 /approx )',
+    check: (s) => expect(sel(s).approximators).toEqual({ subject: true }),
+    misuse: { line: '/subj cat /some /approx', says: { code: 'noTarget', args: { command: 'approx' } } },
   },
   // The relative clause said alone, its head unspoken (P13) — on the link, as /without is.
   headless: {
@@ -416,6 +430,34 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P09-E49: the other reading of /approx, and /del approx.
+describe('/approx on a determiner', () => {
+  it('says almost on all, and /del approx takes it back', () => {
+    const state = ok('/subj cat /pl /all /approx');
+    expect(sel(state).approximators).toEqual({ subject: true });
+    expect(print(state)).toBe('/subj ( cat /pl /all /approx )');
+    expect(sel(ok('/subj cat /pl /all /approx /del approx'))).not.toHaveProperty('approximators');
+  });
+
+  it('goes with a quantity that takes none any more', () => {
+    expect(sel(ok('/subj cat /pl /all /approx /some'))).not.toHaveProperty('approximators');
+  });
+});
+
+// P09-E46: the correlative spells a pair alone. A third conjunct drops it, as the chip does, so the line
+// reads back plain — whichever of the two conjuncts carried it.
+describe('/bothand past a pair', () => {
+  it.each(['/subj cat /bothand dog /and man', '/subj cat /and dog /bothand man'])('reads “%s” back as a plain and', (line) => {
+    const state = ok(line);
+    expect(sel(state)).not.toHaveProperty('correlatives');
+    expect(print(state)).toBe('/subj ( cat /and dog /and man )');
+  });
+
+  it('is dropped by /or, which the pair no longer spells', () => {
+    expect(sel(ok('/subj cat /bothand dog /del and /or dog'))).not.toHaveProperty('correlatives');
   });
 });
 

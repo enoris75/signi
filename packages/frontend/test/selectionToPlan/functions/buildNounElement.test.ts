@@ -36,6 +36,14 @@ describe('buildNounElement', () => {
     expect(buildNounElement(sel, 'directObject')).toMatchObject({ conjunction: 'or' });
   });
 
+  // P09-E46.
+  it('spells a pair flagged correlative "both … and"', () => {
+    const sel: PhraseSelection = { subject: BOY, subjectConjuncts: [{ subject: CAT }], correlatives: { subject: true } };
+
+    expect(buildNounElement(sel, 'subject')).toMatchObject({ conjunction: 'and', correlative: true });
+    expect(buildNounElement({ ...sel, correlatives: undefined }, 'subject')).not.toHaveProperty('correlative');
+  });
+
   it('skips a conjunct with no head among full ones', () => {
     const sel: PhraseSelection = { subject: BOY, subjectConjuncts: [{}, { subject: DOG }] };
 

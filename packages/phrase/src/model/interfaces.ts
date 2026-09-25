@@ -502,6 +502,14 @@ export interface PhraseSelection {
     // NounPhrase.contrastive): THERE is "in *that* place", French "dans ce lieu-là". Keyed by the noun
     // block; only held while the determiner is one of the two.
     contrastives?: Partial<Record<string, boolean>>;
+    // An approximator on the noun's quantity (P09-E49, NounPhrase.approximator): "*about* five cats",
+    // "*almost* all cats". Keyed by the noun block; a flag, its word derived from the quantity by
+    // `approximatorFor`, and only held while that quantity takes one.
+    approximators?: Partial<Record<string, true>>;
+    // An "and" pair spelled with its correlative, "*both* the cat *and* the dog" (P09-E46,
+    // NounGroup.correlative). Keyed by the noun block whose group it spells; only held while that
+    // group is a pair joined by "and" — a third conjunct, a removal or "or" drops it.
+    correlatives?: Partial<Record<string, true>>;
     // Grammatical number of an attributive-noun modifier ("creatore di *frasi*"), keyed by
     // the adjective slot key like `modifierRelations`. Only consulted when that slot holds a
     // noun; defaults to 'singular'. See NounModifier.number in @signi/shared.

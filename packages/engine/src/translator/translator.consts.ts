@@ -36,8 +36,9 @@ export const APPROXIMATOR_WORDS: Readonly<Record<string, { about: (fem: boolean)
   ja: { about: () => '約', almost: 'ほとんど' },
 };
 
-/** The determiners `almost` modifies (P09-E38 D1): "almost all", "almost no", "almost many". */
-export const ALMOST_DETERMINERS: ReadonlySet<string> = new Set(['all', 'no', 'many']);
+// The determiners `almost` modifies (P09-E38 D1) live in shared (the builder gates its approximator
+// row on them too, P09-E49); re-exported so the translator keeps one import site.
+export { ALMOST_DETERMINERS } from '@signi/shared';
 
 /** The distributive determiners, which take a singular noun in every language: "each cat", "ogni gatto" (P09-E25). */
 export const SINGULAR_DETERMINERS: ReadonlySet<string> = new Set(['each', 'every']);
