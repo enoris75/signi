@@ -39,8 +39,8 @@ describe('hostedRectsFor', () => {
     const PREDICATIVE = head('predicative', 'Subject Complement', '#ed6c02');
     const standard = { ...owner('predicative/standard', 'predicative', 'predicative', 0.5), dimmed: false, set: false };
 
-    expect(rects({ groupRects: [PREDICATIVE], standard }).standardRects).toEqual([]);
-    const { standardRects, ownerRects } = rects({ groupRects: [PREDICATIVE], standard, hostedRings: { 'predicative/standard': ring(60) } });
+    expect(rects({ groupRects: [PREDICATIVE], standards: [standard] }).standardRects).toEqual([]);
+    const { standardRects, ownerRects } = rects({ groupRects: [PREDICATIVE], standards: [standard], hostedRings: { 'predicative/standard': ring(60) } });
     expect(standardRects).toEqual([
       hostedRect({ key: 'predicative/standard', color: PREDICATIVE.color, kind: 'standard', head: 'Subject Complement', index: 0.5, center: centerOf('predicative/standard'), ring: ring(60), compact: false }),
     ]);

@@ -95,4 +95,49 @@ test.describe('the standard of comparison', () => {
     });
     await expect(page.getByTestId('standard-dimmed')).toHaveCount(0);
   });
+
+  // P09-E50: the standard of an attributive adjective, on the object's dotted ring.
+  test('builds "the man sees a bigger cat than the dog" in all seven languages', async ({ app, page }) => {
+    await app.buildClause('MAN', 'SEE');
+    await app.setDirectObject('CAT');
+    await app.setDeterminer('directObject', 'Indefinite');
+    await app.revealAndPick('directObjectAdjective', 'BIG');
+    await app.expectSentences({ en: 'the man sees a big cat.' });
+
+    // The control is offered once the adjective compares.
+    await expect(app.satellite('directObjectStandard')).toHaveCount(0);
+    await page.getByTestId('box-directObjectAdjective').getByLabel(/^Degree:/).click();
+    await app.expectSentences({ en: 'the man sees a bigger cat.' });
+    const before = await rects(page);
+
+    await app.satellite('directObjectStandard').click();
+    const standard = page.getByTestId('box-subject').nth(1);
+    await standard.locator('input').fill('dog');
+    await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+
+    await app.expectSentences({
+      en: 'the man sees a bigger cat than the dog.',
+      it: "l'uomo vede un gatto più grande del cane.",
+      fr: "l'homme voit un chat plus grand que le chien.",
+      de: 'der Mann sieht einen größeren Kater als den Hund.',
+      es: 'el hombre ve un gato más grande que el perro.',
+      pt: 'o homem vê um gato maior do que o cão.',
+      ja: '男は犬より大きい猫を見ます。',
+    });
+    const after = await rects(page);
+    // The period's own rings keep their places: the standard's ring is one more beside them. The page
+    // may scroll to the new ring's picker, so the rings are measured from the subject's.
+    const fromSubject = (all: Awaited<ReturnType<typeof rects>>) => {
+      const origin = all.find((r) => r.group === 'Subject')!;
+      return all.map((r) => ({ ...r, x: r.x - origin.x, y: r.y - origin.y }));
+    };
+    for (const ring of fromSubject(before)) expect(fromSubject(after)).toContainEqual(ring);
+    expect(after).toHaveLength(before.length + 1);
+
+    // The positive mutes it: the word stays, dimmed, and the sentence drops it.
+    for (let i = 0; i < 5; i++) await page.getByTestId('box-directObjectAdjective').getByLabel(/^Degree:/).click();
+    await app.expectSentences({ en: 'the man sees a big cat.' });
+    await expect(page.getByTestId('standard-dimmed')).toHaveCSS('opacity', '0.45');
+    await expect(page.getByTestId('box-subject')).toHaveCount(2);
+  });
 });

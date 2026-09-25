@@ -58,6 +58,36 @@ describe('buildNounPhrase', () => {
     expect(buildNounPhrase({ predicative: BIG }, 'predicative')?.headStandard).toBeUndefined();
   });
 
+  // P09-E50 D1: a noun's standard goes to its compared adjective, by index among real adjectives.
+  it('places a noun’s standard on its first compared adjective, past a noun modifier', () => {
+    const sel: PhraseSelection = {
+      directObject: CAT,
+      directObjectAdjective: SAIL,
+      directObjectAdjective2: HAPPY,
+      directObjectAdjective3: BIG,
+      adjectiveDegrees: { directObjectAdjective2: 'positive', directObjectAdjective3: 'more' },
+      directObjectStandard: { subject: DOG },
+    };
+    expect(buildNounPhrase(sel, 'directObject')).toMatchObject({
+      adjectives: ['HAPPY', 'BIG'],
+      adjectiveStandards: [undefined, { concept: 'DOG' }],
+      headStandard: undefined,
+    });
+    // Two compared adjectives: the first gets it.
+    const two = { ...sel, adjectiveDegrees: { directObjectAdjective2: 'less', directObjectAdjective3: 'more' } } as PhraseSelection;
+    expect(buildNounPhrase(two, 'directObject')?.adjectiveStandards).toMatchObject([{ concept: 'DOG' }]);
+    // None compares: kept in the selection, left out of the plan; a superlative is no rival.
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: {} }, 'directObject')?.adjectiveStandards).toBeUndefined();
+    expect(buildNounPhrase({ ...sel, adjectiveDegrees: { directObjectAdjective3: 'most' } }, 'directObject')?.adjectiveStandards).toBeUndefined();
+    // An empty standard is none.
+    expect(buildNounPhrase({ ...sel, directObjectStandard: {} }, 'directObject')?.adjectiveStandards).toBeUndefined();
+  });
+
+  it('keeps an adjective head’s standard as its headStandard', () => {
+    const sel: PhraseSelection = { predicative: BIG, adjectiveDegrees: { predicative: 'more' }, predicativeStandard: { subject: DOG } };
+    expect(buildNounPhrase(sel, 'predicative')).toMatchObject({ headStandard: { concept: 'DOG' }, adjectiveStandards: undefined });
+  });
+
   it('gives an adjective head the degree stored under its own slot', () => {
     const sel: PhraseSelection = { predicative: HAPPY, adjectiveDegrees: { predicative: 'more' } };
 

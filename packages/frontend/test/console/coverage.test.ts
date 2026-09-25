@@ -68,6 +68,7 @@ const KEY_COMMANDS: Record<string, string | null> = {
   'noun.question.animacy': 'wh',
   'subject.existential': 'there',
   'noun.possessor': 'poss',
+  'noun.standard': 'than',
   'object.voice': 'passive',
   'object.voice.back': 'active',
   'noun.coordinate': 'and',

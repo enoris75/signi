@@ -86,7 +86,7 @@ function wordFor(rng: Rng, slot: SlotKey, frame: Frame): { concept: Concept; opt
 }
 
 // The noun heads of a period, however deep — period nouns, possessor heads, conjunct heads, and the
-// head of the predicate adjective's standard of comparison.
+// heads of the period nouns' standards of comparison.
 function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame }[] {
   const out: { address: NounAddress; frame: Frame }[] = [];
   const walk = (sel: PhraseSelection, slice: NounAddress | undefined, frame: Frame, keys: NounKey[]) => {
@@ -96,7 +96,8 @@ function nounHeads(root: PhraseSelection): { address: NounAddress; frame: Frame 
       out.push({ address, frame });
       const poss = sel[`${which}Possessor` as keyof PhraseSelection] as PhraseSelection | undefined;
       if (poss) walk(poss, possessorAddress(address), 'possessor', ['subject']);
-      if (which === 'predicative' && sel.predicativeStandard) walk(sel.predicativeStandard, standardAddress(address), 'standard', ['subject']);
+      const standard = sel[`${which}Standard` as keyof PhraseSelection] as PhraseSelection | undefined;
+      if (standard && frame === 'period') walk(standard, standardAddress(address), 'standard', ['subject']);
       R.conjunctsOf(sel, which).forEach((c, i) => walk(c, conjunctAddress(address, i), 'conjunct', ['subject']));
     }
   };
@@ -258,6 +259,19 @@ const OPS: Op[] = [
     const next = R.updateStandard(sel, 'predicative', (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
     // A standard is given for a degree that compares, and outlives a degree that does not.
     return rng() < 0.6 ? R.setDegree(next, 'predicative', pick(rng, DEGREES)!) : next;
+  }),
+  // A period noun's standard, for its compared adjective (P09-E50): named or taken off, its adjective's
+  // degree cycled, or the adjective itself removed — the standard outlives both, muted but printed.
+  onPeriod((sel, rng) => {
+    const which = pick(rng, (['subject', 'directObject', ...BOX_COMPLEMENT_TYPES] as NounKey[]).filter((k) => (sel[k] as Concept | undefined)?.role === 'noun'));
+    if (!which) return undefined;
+    const r = rng();
+    if (sel[`${which}Standard` as keyof PhraseSelection] && r < 0.2) return R.removeStandard(sel, which);
+    const adjective = adjectiveSlots(which).find((k) => (sel[k] as Concept | undefined)?.role === 'adjective');
+    if (adjective && r < 0.4) return R.setDegree(sel, adjective, pick(rng, DEGREES)!);
+    if (adjective && r < 0.5) return R.applyClear(sel, adjective);
+    const w = wordFor(rng, 'subject', 'standard');
+    return R.updateStandard(sel, which, (s) => R.applyConceptSelect(s, 'subject', w.concept, w.opts));
   }),
   // A conjunct, and a word and settings for it.
   onPeriod((sel, rng) => {
@@ -541,6 +555,15 @@ describe('the round trip', () => {
     expect(standards.some((p) => !/\/(more|less|equally|most|least) \/(than|outof)/.test(p))).toBe(true);
     // The name follows the degree: never `/than` on a superlative, never `/outof` off one.
     expect(standards.some((p) => /\/(most|least) \/than/.test(p) || (/\/outof/.test(p) && !/\/(most|least) \/outof/.test(p)))).toBe(false);
+  }, 30_000);
+
+  // P09-E50: the walk reaches a period noun's standard, printed in its bracket, with and without an
+  // adjective that compares.
+  it('reaches an attributive standard, compared and muted', () => {
+    const texts = Array.from({ length: Math.max(SEEDS, 4000) }, (_, i) => printWorkspace(reach(i + 1, 10 + ((i + 1) % 30)), EN));
+    const standards = texts.flatMap((t) => t.match(/\/(subj|obj) \( [^()]*?(\/adj \( \S+ \/(more|less|equally) \) )?[^()]*?\/than \[/g) ?? []);
+    expect(standards.some((p) => /\/(more|less|equally) \)/.test(p))).toBe(true);
+    expect(standards.some((p) => !/\/(more|less|equally) \)/.test(p))).toBe(true);
   }, 30_000);
 });
 

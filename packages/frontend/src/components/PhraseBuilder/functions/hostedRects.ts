@@ -16,7 +16,7 @@ import type { Pt } from "../ringLayout.ts";
 export function hostedRectsFor({
   chains,
   owners,
-  standard,
+  standards = [],
   groupRects,
   hostedRings,
   centerOf,
@@ -24,8 +24,8 @@ export function hostedRectsFor({
 }: {
   chains: readonly { which: NounKey; count: number }[];
   owners: readonly OwnerSpot[];
-  // The predicate adjective's standard of comparison, when its ring is drawn (P09-E12 D5).
-  standard?: StandardSpot;
+  // The standards of comparison whose rings are drawn (P09-E12 D5, P09-E50).
+  standards?: readonly StandardSpot[];
   groupRects: readonly GroupRect[];
   hostedRings: Readonly<Record<string, HostedRing>>;
   centerOf: (key: string) => Pt;
@@ -66,7 +66,7 @@ export function hostedRectsFor({
     ];
   };
   const ownerRects = owners.flatMap((spot) => spotRect(spot, "owner"));
-  const standardRects = standard ? spotRect(standard, "standard") : [];
+  const standardRects = standards.flatMap((spot) => spotRect(spot, "standard"));
 
   const standIns = Object.fromEntries(
     chains.flatMap(({ which }) => {

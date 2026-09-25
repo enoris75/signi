@@ -13,6 +13,7 @@ import {
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
+  standardAddress,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
@@ -65,7 +66,7 @@ import {
   dropConjunctPosition,
 } from "./conjunctChain.ts";
 import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
-import { standardLink, standardSpotFor } from "./standardRing.ts";
+import { standardLink, standardSpotsFor, type StandardSpot } from "./standardRing.ts";
 import { possessiveRequests } from "./functions/possessiveRequests.ts";
 import { usePossessivePhrases } from "../../i18n/usePossessivePhrase.ts";
 import { PeriodCard } from "./PeriodCard.tsx";
@@ -258,9 +259,16 @@ export function PhraseBuilder({
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
   const { hostedRings, reportRing } = useHostedRings();
   const { ownersOpen, setOwnerOpen } = useOwnersOpen(ringHost);
-  // Whether the predicate adjective's standard of comparison is open — its ring drawn: what the user
-  // last asked its control for; unset, a named standard shows and an empty one doesn't (P09-E12 D5).
-  const [standardOpen, setStandardOpen] = useState<boolean | undefined>(undefined);
+  // Which standards of comparison are open — their rings drawn — by address: what the user last asked
+  // each control for; unset, a named standard shows and an empty one doesn't (P09-E12 D5, P09-E50).
+  const [standardsOpen, setStandardsOpen] = useState<Readonly<Record<NounAddress, boolean>>>({});
+  const setStandardOpen = (address: NounAddress, open: boolean | undefined) =>
+    setStandardsOpen((prev) => {
+      const next = { ...prev };
+      if (open === undefined) delete next[address];
+      else next[address] = open;
+      return next;
+    });
   // A hosted ring's head slot wears its role's name and colour (see roleSlotFor).
   const roleSlot = roleSlotFor(ringHost);
   const visibleSlots = visibleSlotsFor(selection, roleSlot);
@@ -321,8 +329,10 @@ export function PhraseBuilder({
   function handleClear(slot: SlotKey) {
     onPhraseUpdate((prev) => applyClear(prev, slot));
     if (slot === "verb") setActiveSlot("verb");
-    // The predicative's standard goes with it (see clearNoun), and the next one starts folded.
-    if (slot === "predicative" || slot === "verb") setStandardOpen(undefined);
+    // A noun's standard goes with it (see clearNoun), and the next one starts folded. A verb takes
+    // its complements with it.
+    if (NOUN_KEYS.includes(slot as NounKey)) setStandardOpen(standardAddress(slot as NounKey), undefined);
+    if (slot === "verb") setStandardsOpen({});
   }
 
   // Remove a complement entirely: clear its concept/number/gender and collapse
@@ -583,19 +593,19 @@ export function PhraseBuilder({
   // ring is the period canvas's.)
   const chains = ringHost ? [] : canvasChains(selection, groups);
 
-  // The predicate adjective's standard of comparison, when its ring is drawn (P09-E12 D5). A hosted
-  // ring's builder draws none: only a period has a predicative.
-  const standard = ringHost ? undefined : standardSpotFor({ selection, groups, open: standardOpen });
+  // The standards of comparison whose rings are drawn: the predicate adjective's (P09-E12 D5) and the
+  // period nouns' (P09-E50). A hosted ring's builder draws none: only a period's nouns take one (D4).
+  const standards = ringHost ? [] : standardSpotsFor({ selection, groups, open: standardsOpen });
 
   // The owners on this canvas, however deep — an owner's owner, a conjunct's, a standard's — and the
   // nouns that point to theirs. The period's own nouns may take one wherever their possessor control
   // is offered.
   const { owners, pointers } = ringHost
     ? { owners: [], pointers: [] }
-    : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen, standard });
-  // Every hosted ring placed beside the ring it hangs off: the standard first — its owners are
-  // placed beside it — then the owners, parents first.
-  const besideSpots = standard ? [standard, ...owners] : owners;
+    : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen, standards });
+  // Every hosted ring placed beside the ring it hangs off: the standards first — their owners are
+  // placed beside them — then the owners, parents first.
+  const besideSpots = [...standards, ...owners];
 
   // The possessed noun phrase each coreference link renders ("his horse", fr "son cheval"), which
   // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
@@ -616,18 +626,16 @@ export function PhraseBuilder({
     possessivePhrase,
     t,
   });
-  // The standard control opens the standard's ring (an empty one is its word picker) and folds it
+  // Each standard control opens its standard's ring (an empty one is its word picker) and folds it
   // away again, keeping its word; the ring's own remove control takes the standard off.
-  const standardControl = decorated.predicative?.standard;
-  const perimeterByNoun = standardControl
-    ? {
-        ...decorated,
-        predicative: {
-          ...decorated.predicative,
-          standard: { ...standardControl, active: Boolean(standard), onToggle: handleToggleStandard },
-        },
-      }
-    : decorated;
+  const perimeterByNoun = Object.fromEntries(
+    Object.entries(decorated).map(([which, entry]) => {
+      const control = entry?.standard;
+      if (!control) return [which, entry];
+      const drawn = standards.some((spot) => spot.possessed === which);
+      return [which, { ...entry, standard: { ...control, active: drawn, onToggle: () => handleToggleStandard(which as NounKey) } }];
+    }),
+  ) as typeof decorated;
 
   // What compact view packs, and in how big a cell (see compactPacking). A hosted ring's builder has
   // no canvas of its own to pack: its ring is placed by the period's.
@@ -705,7 +713,7 @@ export function PhraseBuilder({
       possessorAims: ringHost
         ? ringHost.possessorToward && { subject: ringHost.possessorToward }
         : aims.byGroup,
-      standardAims: standard ? { predicative: centerOf(standard.address) } : undefined,
+      standardAims: Object.fromEntries(standards.map((spot) => [spot.possessed, centerOf(spot.address)])),
     }),
     centerOf,
     sizeOf,
@@ -732,7 +740,7 @@ export function PhraseBuilder({
   const { conjunctRects, ownerRects, standardRects, standIns } = hostedRectsFor({
     chains,
     owners,
-    standard,
+    standards,
     groupRects,
     hostedRings,
     centerOf,
@@ -775,9 +783,11 @@ export function PhraseBuilder({
     possessivePhrase,
     compact,
   });
-  // The line from the predicate adjective to its standard of comparison.
-  const standardLine = standard && standardLink({ spot: standard, ringOf, controlOn, compact });
-  const standardEdges: Edge[] = standardLine ? [linkEdge(standardLine, headOf("predicative")?.color ?? "", false)] : [];
+  // The line from each compared noun to its standard of comparison.
+  const standardEdges: Edge[] = standards.flatMap((spot) => {
+    const line = standardLink({ spot, ringOf, controlOn, compact });
+    return line ? [linkEdge(line, headOf(spot.role)?.color ?? "", false)] : [];
+  });
 
   // What each hosted ring borrows from this canvas to draw its ring here.
   const { conjunctHost, ownerHost, standardHost } = ringHosts({
@@ -816,18 +826,17 @@ export function PhraseBuilder({
     });
   }
 
-  // The standard control on the predicative's dotted ring: open the standard's ring, or fold it away.
-  function handleToggleStandard() {
-    setStandardOpen(!standard);
+  // The standard control on a noun's dotted ring: open the standard's ring, or fold it away.
+  function handleToggleStandard(which: NounKey) {
+    setStandardOpen(standardAddress(which), !standards.some((spot) => spot.possessed === which));
   }
 
-  // Take the standard off the predicate adjective. Relative clauses sourced from it, or from an owner
-  // it holds, go with it; so does where its rings were.
-  function handleRemoveStandard() {
-    if (!standard) return;
+  // Take a standard off its noun. Relative clauses sourced from it, or from an owner it holds, go
+  // with it; so does where its rings were.
+  function handleRemoveStandard(standard: StandardSpot) {
     const gone = [standard, ...ownersUnder(owners, standard.address)];
-    commands.handleRemoveStandard();
-    setStandardOpen(false);
+    commands.handleRemoveStandard(standard.role);
+    setStandardOpen(standard.address, false);
     for (const o of gone) binding?.relative.onRemoveLink(o.address);
     setPositions((prev) => {
       const next = { ...prev };
@@ -925,7 +934,10 @@ export function PhraseBuilder({
       clearSlot: handleClear,
       removeComplement: handleRemoveComplement,
       togglePossessor: handleTogglePossessor,
-      toggleStandard: handleToggleStandard,
+      toggleStandard: () => {
+        const which = nounBlockOf(slot);
+        if (which) handleToggleStandard(which);
+      },
       addConjunct: ringHost?.onAddConjunct
         ? () => ringHost.onAddConjunct!()
         : commands.handleAddConjunct,
@@ -1107,19 +1119,20 @@ export function PhraseBuilder({
               Builder={PhraseBuilder}
             />
           )}
-          {standard && (
-            // The standard of comparison is an owner-shaped phrase: the same lens, another host.
+          {standards.map((standard) => (
+            // A standard of comparison is an owner-shaped phrase: the same lens, another host.
             <OwnerRings
+              key={standard.address}
               owners={[standard]}
               pointers={[]}
               selection={selection}
               onPhraseUpdate={onPhraseUpdate}
-              onRemoveOwner={handleRemoveStandard}
+              onRemoveOwner={() => handleRemoveStandard(standard)}
               hostFor={() => standardHost(standard)}
               binding={binding}
               Builder={PhraseBuilder}
             />
-          )}
+          ))}
         </>
       }
     />

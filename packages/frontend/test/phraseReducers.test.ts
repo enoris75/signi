@@ -263,10 +263,23 @@ describe('the standard of comparison', () => {
     expect(R.removeStandard(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
   });
 
-  it('passes to another adjective, and goes with a noun or with the predicative itself', () => {
+  // P09-E50 D3: a noun takes one too, through its compared adjective, so the head swap keeps it
+  // ("bigger than the dog" → "a bigger house than the dog"); a pronoun takes none.
+  it('passes to another adjective and to a noun, and goes with a pronoun or with the predicative itself', () => {
     expect(applyConceptSelect(COMPARED, 'predicative', RED).predicativeStandard).toEqual({ subject: DOG });
-    expect(applyConceptSelect(COMPARED, 'predicative', HOUSE)).not.toHaveProperty('predicativeStandard');
+    expect(applyConceptSelect(COMPARED, 'predicative', HOUSE).predicativeStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(applyConceptSelect(COMPARED, 'predicative', HOUSE), 'predicative', RED).predicativeStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(COMPARED, 'predicative', SHE)).not.toHaveProperty('predicativeStandard');
     expect(applyClear(COMPARED, 'predicative')).not.toHaveProperty('predicativeStandard');
+  });
+
+  it('is kept on a period noun until its noun goes or a pronoun takes its place', () => {
+    const OBJ: PhraseSelection = { directObject: HOUSE, directObjectAdjective: RED, directObjectStandard: { subject: DOG } };
+    expect(applyConceptSelect(OBJ, 'directObject', DOG).directObjectStandard).toEqual({ subject: DOG });
+    expect(applyClear(OBJ, 'directObjectAdjective').directObjectStandard).toEqual({ subject: DOG });
+    expect(applyConceptSelect(OBJ, 'directObject', SHE)).not.toHaveProperty('directObjectStandard');
+    expect(applyClear(OBJ, 'directObject')).not.toHaveProperty('directObjectStandard');
+    expect(applyConceptSelect({ subject: HOUSE, subjectStandard: { subject: DOG } }, 'subject', SHE)).not.toHaveProperty('subjectStandard');
   });
 
   it('outlives a degree that takes none', () => {

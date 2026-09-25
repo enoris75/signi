@@ -226,6 +226,13 @@ describe('resolving a keystroke', () => {
     expect(commandFor('h', { ...predicative, satellite: () => undefined })).toBeUndefined();
     expect(commandFor('h', { slot: 'subjectAdjective', selection: { subjectAdjective: big } as PhraseSelection })).toBeUndefined();
   });
+
+  // P09-E50: H means "standard" on a noun box too, for its compared adjective.
+  it('opens a noun’s standard of comparison from its box while the satellite offers it', () => {
+    const object = { slot: 'directObject' as const, nounKey: 'directObject' as const, selection: { directObject: noun('CAT') } as PhraseSelection };
+    expect(commandFor('h', object)).toBe('noun.standard');
+    expect(commandFor('h', { ...object, satellite: () => undefined })).toBeUndefined();
+  });
 });
 
 describe('the menus and toolbars a key opens', () => {

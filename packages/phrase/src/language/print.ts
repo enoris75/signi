@@ -447,13 +447,16 @@ class Printer {
     }
     const address = w.address!;
 
-    // A predicate adjective's standard of comparison, after its degree (P09-E12 D5): a phrase of its
-    // own in brackets. It is written under any degree — one that takes none only mutes it — so the
-    // word the user gave comes back with the line. On a superlative it is the set the adjective picks
-    // from, and is spelled `/outof` (P09-E51 D3); its removal and its reference step stay `than`.
+    // Its standard of comparison, after its degree and settings (P09-E12 D5): a phrase of its own in
+    // brackets. A predicate adjective's own, or a noun's for its compared adjective, before its
+    // possessor (P09-E50 D5). It is written under any degree — one that takes none only mutes it — so
+    // the word the user gave comes back with the line. On a superlative predicate adjective it is the
+    // set the adjective picks from, spelled `/outof` (P09-E51 D3); its removal and its reference step
+    // stay `than`.
     const standard = sel[STANDARD_KEY(which)] as PhraseSelection | undefined;
-    if (!slice && which === "predicative" && concept.role === "adjective" && standard && Object.keys(standard).length) {
-      const name = readsAsSet(sel.adjectiveDegrees?.[which]) ? "/outof" : "/than";
+    const compared = concept.role === "noun" || (which === "predicative" && concept.role === "adjective");
+    if (!slice && compared && standard && Object.keys(standard).length) {
+      const name = concept.role === "adjective" && readsAsSet(sel.adjectiveDegrees?.[which]) ? "/outof" : "/than";
       this.phrase(ref, name, `${wordKey(ref)}:than`, "/del than", standard, standardAddress(address), "standard");
     }
 

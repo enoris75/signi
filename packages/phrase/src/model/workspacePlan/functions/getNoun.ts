@@ -23,9 +23,11 @@ export function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPh
       const p: Possessor | undefined = np.possessor;
       np = p && !isPronominalPossessor(p) && !isCoreferentPossessor(p) ? p : undefined;
     } else if (steps[i] === "standard") {
-      // The predicate adjective's standard of comparison ("bigger than the dog", P09-E12 D5): the
-      // head of its element, as a top-level noun's first conjunct is.
-      np = np.headStandard ? nounConjuncts(np.headStandard)[0] : undefined;
+      // The standard of comparison: a predicate adjective's ("bigger than the dog", P09-E12 D5), or a
+      // noun's compared adjective's ("a bigger cat than the dog", P09-E50) — the head of its element,
+      // as a top-level noun's first conjunct is.
+      const element = np.headStandard ?? np.adjectiveStandards?.find((e) => e);
+      np = element ? nounConjuncts(element)[0] : undefined;
     } else if (steps[i] === "conjunct") {
       // `conjunct/<i>` addresses the i-th *extra* conjunct, so it is offset by one past the head.
       const index = Number(steps[++i]);

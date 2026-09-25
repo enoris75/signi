@@ -350,6 +350,18 @@ describe('rawSatellites', () => {
       expect(satellite({ verb: GO, predicative: CAT, adjectiveDegrees: { predicative: degree } }, 'predicativeStandard').available).toBe(false);
     });
 
+    // P09-E50 D3: every period noun is offered a standard while one of its adjectives compares.
+    it.each(['subject', 'directObject', 'predicative', 'locative'] as const)('offers the %s a standard through its compared adjective', (which) => {
+      const base: PhraseSelection = { verb: SEE, [which]: HOUSE, [`${which}Adjective`]: BIG };
+      expect(satellite(base, `${which}Standard`)).toMatchObject({ parent: which, labelKey: 'slot.standard', available: false });
+      const compared = { ...base, adjectiveDegrees: { [`${which}Adjective`]: 'more' } } as PhraseSelection;
+      expect(satellite(compared, `${which}Standard`).available).toBe(true);
+      expect(glyph(satellite(compared, `${which}Standard`).icon)).toBe('BalanceIcon');
+      // A superlative picks from a set, which an attributive adjective does not say yet (E51 D4).
+      expect(satellite({ ...base, adjectiveDegrees: { [`${which}Adjective`]: 'most' } }, `${which}Standard`).available).toBe(false);
+      expect(satellite({ ...compared, [which]: SHE }, `${which}Standard`).available).toBe(false);
+    });
+
     // Every cause also coordinates, and carries its own polarity — the one complement that can be
     // denied rather than named ("not because of the dog"), whatever kind of word heads it.
     it.each<[string, Concept, string[]]>([

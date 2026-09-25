@@ -522,6 +522,19 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     run: (ctx) => ctx.togglePossessor(ctx.nounKey!),
   },
   {
+    // What a noun's compared adjective is measured against — "a bigger cat *than the dog*" (P09-E50):
+    // H, as on the predicate adjective. Offered while an adjective of the noun compares.
+    id: "noun.standard",
+    scope: "box:noun",
+    keys: ["H"],
+    label: "Standard of comparison",
+    labelKey: "slot.standard",
+    hint: true,
+    satellite: /Standard$/,
+    when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}Standard`),
+    run: (ctx) => ctx.toggleStandard(),
+  },
+  {
     id: "noun.coordinate",
     scope: "box:noun",
     keys: ["C"],

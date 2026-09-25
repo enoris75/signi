@@ -65,6 +65,10 @@ describe('commands', () => {
     expect(offers('/verb ( seem ) /pred ( big /more /than', '/than')).toBe(true);
     expect(offers('/verb ( seem ) /pred ( big /more /outof', '/outof')).toBe(false);
     expect(offers('/verb ( seem ) /pred ( big /than', '/than')).toBe(true);
+    // P09-E50: a noun, once an adjective of its compares, under /than only.
+    expect(offers('/verb ( see ) /obj ( cat /adj ( big /more ) /than', '/than')).toBe(true);
+    expect(offers('/verb ( see ) /obj ( cat /adj ( big /more ) /outof', '/outof')).toBe(false);
+    expect(offers('/verb ( see ) /obj ( cat /adj big /than', '/than')).toBe(false);
   });
 
   it('narrows by prefix, and ghosts the rest of the best', () => {

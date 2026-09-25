@@ -269,10 +269,12 @@ export function applyConceptSelect(
     if (concept.role !== "noun") clearNounPhraseParts(next, slot as NounKey);
     if (concept.role === "adjective")
       delete next[`${slot}Number` as keyof PhraseSelection];
-    // Only an adjective is compared, so only an adjective keeps its standard: another adjective
-    // placed there takes it over ("bigger than the dog" → "older than the dog"), a noun drops it.
-    else delete next[STANDARD_KEY(slot as NounKey)];
   }
+  // A standard survives its head changing between an adjective and a noun: another adjective takes it
+  // over ("bigger than the dog" → "older than the dog"), and so does a noun's compared adjective ("a
+  // bigger animal than the dog", P09-E50 D3). A pronoun takes no adjective, so it drops it.
+  if (concept.role === "pronoun" && (slot === "subject" || slot === "directObject" || COMPLEMENT_KEY_SET.has(slot)))
+    delete next[STANDARD_KEY(slot as NounKey)];
   if (opts?.number !== undefined)
     (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] = opts.number as never;
   if (opts?.gender !== undefined)

@@ -399,10 +399,16 @@ export function takes(action: Action, w: WordInfo): boolean {
       const d = w.slice[`${w.which}Definiteness` as keyof PhraseSelection];
       return w.kind === "noun" && w.concept?.role === "noun" && (d === "this" || d === "that");
     }
-    // Only the period's predicate adjective is compared with a standard, whatever its degree: one
-    // held under a degree that takes none is kept, and printed, so it must be read back too.
+    // A period's noun is compared with a standard, whatever its degree: the predicate adjective itself
+    // (P09-E12 D5), or any noun head through its compared adjective (P09-E50 D5). One held under a
+    // degree that takes none is kept, and printed, so it must be read back too. A pronoun takes no
+    // adjective, and a hosted noun (an owner, a conjunct, a standard) none of its controls (D4).
     case "standard":
-      return w.kind === "noun" && !w.ref.slice && w.which === "predicative" && w.concept?.role === "adjective";
+      return (
+        w.kind === "noun" &&
+        !w.ref.slice &&
+        (w.concept?.role === "noun" || (w.which === "predicative" && w.concept?.role === "adjective"))
+      );
     case "conjunct":
       return (
         w.kind === "noun" && !w.ref.slice && COORDINABLE_NOUN_KEYS.includes(w.which!) && Boolean(w.concept)

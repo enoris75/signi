@@ -47,8 +47,8 @@ export type GroupDef = {
   // Set on an owner's ring the same way: the group it belongs with, and its place there — just after
   // the ring it owns (see possessionsFor).
   owner?: { head: string; index: number };
-  // Set on the predicate adjective's standard of comparison the same way (P09-E12 D5): it packs just
-  // after the predicative and its conjuncts (see standardSpotFor).
+  // Set on a standard of comparison the same way (P09-E12 D5, P09-E50): it packs just after its noun
+  // and that noun's conjuncts (see standardSpotsFor).
   standard?: { head: string; index: number };
 };
 

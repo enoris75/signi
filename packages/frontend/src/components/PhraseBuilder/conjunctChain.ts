@@ -110,7 +110,7 @@ export function hostedRect({
   kind: "conjunct" | "owner" | "standard";
   // The group label of the period noun the ring belongs with, and where it reads among that group's
   // rings (a conjunct's index; an owner's or a standard's fractional order — see possessionsFor,
-  // standardSpotFor).
+  // standardSpotsFor).
   head: string;
   index: number;
   center: Pt;

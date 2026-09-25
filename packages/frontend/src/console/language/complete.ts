@@ -3,7 +3,7 @@ import {
   type Concept,
   type UiStringKey,
 } from "@signi/shared";
-import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import { isInstrumentalLink, isRelativeLink, isSubordinateLink, type NounKey, type PhraseSelection, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import {
   canBeCondition,
   canBeCoordinate,
@@ -15,7 +15,7 @@ import {
   canStartSubordinate,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
-import { readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
+import { comparedAdjectiveIndex, readsAsSet } from "@signi/phrase/model/functions/comparison.ts";
 import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
@@ -379,12 +379,17 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
   if (attachesToWord(action)) {
     // A relative clause said alone is offered only on a noun that heads one (P13).
     // The standard is offered under the name its degree prints: `/outof` on a superlative, `/than`
-    // on the rest (P09-E51 D3). Both are read under any degree.
+    // on the rest (P09-E51 D3). Both are read under any degree. A noun is offered it as its canvas
+    // control is, once an adjective of its compares, or while it holds one (P09-E50 D3).
     const fits = (w: WordInfo) =>
       takes(action, w) &&
       (action.kind !== "headless" ||
         state.links.some((l) => isRelativeLink(l) && l.source.containerId === w.ref.containerId && l.source.nounKey === w.address)) &&
-      (action.kind !== "standard" || (def.name === "outof") === readsAsSet(w.slice.adjectiveDegrees?.[w.which!]));
+      (action.kind !== "standard" || (def.name === "outof") === (w.concept?.role === "adjective" && readsAsSet(w.slice.adjectiveDegrees?.[w.which!]))) &&
+      (action.kind !== "standard" ||
+        w.concept?.role !== "noun" ||
+        comparedAdjectiveIndex(w.slice, w.which!) !== undefined ||
+        Boolean(w.slice[`${w.which}Standard` as keyof PhraseSelection]));
     const i = words.findIndex(fits);
     if (i === -1) return undefined;
     return i === 0 ? 0 : 1;

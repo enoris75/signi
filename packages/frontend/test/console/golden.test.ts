@@ -65,12 +65,13 @@ const GOLDEN: Record<string, Golden> = {
     misuse: { line: '/subj 1st /poss man', says: { code: 'noTarget', args: { command: 'poss', last: { kind: 'pronoun' } } } },
   },
   // The standard of comparison (P09-E12 D5): a phrase in the predicate adjective's bracket, after its
-  // degree. A predicative noun is compared with nothing.
+  // degree — or in a noun's, for its compared adjective (P09-E50, below). A pronoun takes no adjective,
+  // so it is compared with nothing.
   than: {
     line: '/verb seem /pred big /more /than dog',
     check: (s) => expect(noun(sel(s).predicativeStandard!)).toMatchObject({ subject: 'DOG' }),
     prints: '/verb ( seem ) /pred ( big /more /than [ dog ] )',
-    misuse: { line: '/verb seem /pred dog /than cat', says: { code: 'noTarget', args: { command: 'than', last: { word: 'dog', kind: 'noun' } } } },
+    misuse: { line: '/subj 1st /than cat', says: { code: 'noTarget', args: { command: 'than', last: { kind: 'pronoun' } } } },
   },
   // The same field read as a superlative's set (P09-E51 D3): typed with either name, printed `/outof`
   // on `most` / `least`. A pronoun picks nothing out of a set.
@@ -410,6 +411,27 @@ describe('every command', () => {
 
   it('has a golden entry for every command of the catalogue', () => {
     expect(Object.keys(GOLDEN).sort()).toEqual(COMMANDS.map((c) => c.name).sort());
+  });
+});
+
+// P09-E50 D5: a noun's standard, for its compared adjective, printed in the noun's bracket after its
+// adjectives and before its possessor. /than skips the adjective, which takes none, for its noun.
+describe('the attributive standard', () => {
+  it('applies to the object through its compared adjective', () => {
+    const state = ok('/verb see /obj cat /adj big /more /than dog');
+    expect(noun(sel(state).directObjectStandard!)).toMatchObject({ subject: 'DOG' });
+    expect(print(state)).toBe('/verb ( see ) /obj ( cat /adj ( big /more ) /than [ dog ] )');
+  });
+
+  it('prints before the possessor, and is kept while no adjective compares', () => {
+    const line = '/verb see /obj ( cat /adj big /than [ dog ] /poss [ woman ] )';
+    const state = ok(line);
+    expect(print(state)).toBe('/verb ( see ) /obj ( cat /adj big /than [ dog ] /poss [ woman ] )');
+  });
+
+  it('takes a predicate noun too, and refuses a hosted noun', () => {
+    expect(print(ok('/verb seem /pred dog /adj big /more /than cat'))).toBe('/verb ( seem ) /pred ( dog /adj ( big /more ) /than [ cat ] )');
+    expect(run('/subj cat /poss ( /subj woman /than dog )').diagnostic).toMatchObject({ code: 'noTarget', args: { command: 'than' } });
   });
 });
 

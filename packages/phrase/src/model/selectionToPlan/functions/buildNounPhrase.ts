@@ -1,4 +1,4 @@
-import { type Concept, type Definiteness, type NounPhrase, type Possessor } from "@signi/shared";
+import { type Concept, type Definiteness, type NounElement, type NounPhrase, type Possessor } from "@signi/shared";
 import {
   POSSESSOR_KEY,
   POSSESSOR_REF_KEY,
@@ -7,7 +7,7 @@ import {
   type NounKey,
   type PhraseSelection,
 } from "../../interfaces.ts";
-import { takesStandardOrSet } from "../../functions/comparison.ts";
+import { comparedAdjectiveIndex, takesStandardOrSet } from "../../functions/comparison.ts";
 import { buildNounElement } from "./buildNounElement.ts";
 import { field } from "./field.ts";
 import { modifiers } from "./modifiers.ts";
@@ -48,6 +48,9 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
       concept.role === "adjective" && takesStandardOrSet(sel.adjectiveDegrees?.[which])
         ? standardOf(sel, which, root)
         : undefined,
+    // A noun head's standard is its compared adjective's ("a bigger cat than the dog", P09-E50 D1):
+    // placed at that adjective's index among `adjectives`, and left out when none compares.
+    adjectiveStandards: concept.role === "noun" ? adjectiveStandardsOf(sel, which, root) : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a
@@ -71,3 +74,13 @@ function standardOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection)
   const standard = field<PhraseSelection>(sel, STANDARD_KEY(which));
   return standard ? buildNounElement(standard, "subject", root) : undefined;
 }
+
+function adjectiveStandardsOf(sel: PhraseSelection, which: NounKey, root: PhraseSelection) {
+  const index = comparedAdjectiveIndex(sel, which);
+  const standard = index === undefined ? undefined : standardOf(sel, which, root);
+  if (index === undefined || !standard) return undefined;
+  const entries: (NounElement | undefined)[] = Array.from({ length: index + 1 }, () => undefined);
+  entries[index] = standard;
+  return entries;
+}
+

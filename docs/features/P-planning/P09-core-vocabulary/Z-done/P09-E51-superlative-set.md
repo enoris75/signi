@@ -145,7 +145,7 @@ probed at HEAD, `adjectiveStandards` on `most` renders "the man sees the biggest
 [`resolveAdjectiveStandard`](../../../../../packages/engine/src/translator/functions/resolveAdjectiveStandard.ts#L23)
 reads only `STANDARD_DEGREES`. E19 D5 postponed it because of the Romance possessor collision:
 - A271 has since fixed Italian;
-- fr, es and pt still write a possessor after the standard ([E50](../P09-E50-attributive-standard.md) *Today*).
+- fr, es and pt still write a possessor after the standard ([E50](P09-E50-attributive-standard.md) *Today*).
 
 **Recommendation: an engine ticket first, not part of this task or of E50.** How the two tickets
 meet:

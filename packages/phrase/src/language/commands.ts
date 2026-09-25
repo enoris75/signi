@@ -435,7 +435,8 @@ export const COMMANDS: readonly CommandDef[] = [
   {
     // The standard of comparison (P09-E12 D5): a noun phrase in square brackets, like a possessor's,
     // written in the predicate adjective's own bracket after its degree — `/pred ( big /more /than [
-    // dog ] )`. It is kept, and printed, under any degree; the translator drops it off the ones that
+    // dog ] )` — or in a noun's, for its compared adjective: `/obj ( cat /adj ( big /more ) /than [ dog
+    // ] )` (P09-E50 D5). It is kept, and printed, under any degree; the translator drops it off the ones that
     // take none, as the canvas dims its ring.
     name: "than",
     aliases: ["standard"],
@@ -446,7 +447,7 @@ export const COMMANDS: readonly CommandDef[] = [
     color: "primary",
     arg: { kind: "phrase" },
     action: { kind: "standard" },
-    satellites: /^predicativeStandard$/,
+    satellites: /Standard$/,
     reducers: ["updateStandard"],
   },
   {
