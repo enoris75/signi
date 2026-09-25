@@ -5,6 +5,7 @@ import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb
 import { governedHasNegativeAdverb } from '../../functions/governedHasNegativeAdverb.js';
 import { negatorLead } from '../../functions/negatorLead.js';
 import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
+import { moreAdverbsOf, moreAdverbText } from '../../functions/adverbClass.js';
 import { complementsAroundAdverb } from '../../functions/complementsAroundAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isPlaceAdverb } from '../../functions/isPlaceAdverb.js';
@@ -113,8 +114,10 @@ export function predicateText(
     && predicativeHead['degree'] !== 'most' && predicativeHead['degree'] !== 'least';
   // A relativised place is the gap, not a complement, and it predicates just as a spoken one does:
   // "a casa onde o gato está arde" (A199). So does an adverb of place, which says where as a
-  // locative does: "o gato está aqui", "está em toda parte", never "*é aqui" (localization B67).
-  const locativeAlone = (!!locative || gapComplement === 'locative' || isPlaceAdverb(modifier)) && !predicative;
+  // locative does: "o gato está aqui", "está em toda parte", never "*é aqui" (localization B67),
+  // and one among several: "o gato está frequentemente aqui" (P15).
+  const locativeAlone = (!!locative || gapComplement === 'locative' || isPlaceAdverb(modifier)
+    || moreAdverbsOf(verbPhrase, 'place').length > 0) && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "deve estar", "tinha
   // estado", "esteja", "estar na casa".
   // The passive conjugates "ser" where the active conjugates the lexical verb, and agrees that
@@ -160,6 +163,14 @@ export function predicateText(
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A verb's further adverbs (P15). A frequency one follows the primary, a frequency adverb too, in
+  // the slot after the verb ("corre já frequentemente"), and keeps that slot where the primary stands
+  // in front ("ainda não comeu frequentemente"). A manner one follows them there, ahead of a noun
+  // object, where a manner primary stands ("come frequentemente rapidamente o rato"), so it trails a
+  // prospective's whole group, as a manner primary does. A direction or place one stands among the
+  // complements.
+  const moreFrequency = moreAdverbText(verbPhrase, 'frequency', adverbSurface);
+  const moreManner = moreAdverbText(verbPhrase, 'manner', adverbSurface);
   // Portuguese fronts one negative frequency adverb ("nunca") preverbally without "não", whichever
   // verb it modifies. Scan the group outermost-first (each modal, then the main verb); the first
   // negative adverb takes that slot. `frontIdx` indexes this array: 0…n-1 modals, n = main verb.
@@ -202,7 +213,7 @@ export function predicateText(
     && aspect === 'prospective' && modals.length === 0;
   // The particípio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   const grouped = [splitFrequency
-    ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
+    ? [conjugated.split(' ')[0], modifierText, moreFrequency, ...conjugated.split(' ').slice(1)].filter(Boolean).join(' ')
     : conjugated, passiveParticipleText].filter(Boolean).join(' ');
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
@@ -270,9 +281,14 @@ export function predicateText(
   const outscopesNao = negAdverb?.slot === 'pre-negator';
   // Its negative word where it has one: ALREADY's "já" is "ainda não" (P09-E28).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : outscopesNao ? (modifier?.forms['negative'] && verbNegative === true ? negAdverb.text : modifierText) : '';
-  const postVerb = mainIsFronted || splitFrequency || outscopesNao || (!!lead && governedNao !== '') ? '' : modifierText;
+  const postVerb = [
+    mainIsFronted || splitFrequency || outscopesNao || (!!lead && governedNao !== '') ? '' : modifierText,
+    splitFrequency ? '' : moreFrequency,
+    moreManner,
+  ].filter(Boolean).join(' ');
   const complementsText = complementsAroundAdverb(modifier, adverbText, complements,
-    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement));
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement),
+    { direction: moreAdverbText(verbPhrase, 'direction', adverbSurface), place: moreAdverbText(verbPhrase, 'place', adverbSurface) });
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")
   // prefixes "não". The adverb simply trails the verb here.
@@ -298,7 +314,7 @@ export function predicateText(
         ? ptEnclitic(impForm, thirdPersonClitic)
         : ptCliticize(objectClitic, impNeg ? ptNegateInfinitive(impForm) : impForm);
     const impVerb = impNeg && lead ? `${lead} ${negated}` : negated;
-    return [impVerb, lead ? '' : modifierText, directObjectText, complementsText]
+    return [impVerb, lead ? '' : modifierText, moreFrequency, moreManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -314,7 +330,7 @@ export function predicateText(
       ? ptEnclitic(inf, thirdPersonClitic)
       : ptCliticize(objectClitic, infNeg ? ptNegateInfinitive(inf) : inf);
     const infVerb = infNeg && lead ? `${lead} ${negated}` : negated;
-    return [infVerb, infNeg && lead ? '' : modifierText, directObjectText, complementsText]
+    return [infVerb, infNeg && lead ? '' : modifierText, moreFrequency, moreManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
