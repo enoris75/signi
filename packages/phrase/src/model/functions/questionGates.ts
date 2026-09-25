@@ -143,13 +143,15 @@ export function askedRole(sel: PhraseSelection): QuestionRole | undefined {
  * Whether the subject may be an existential's pivot: the verb is BE, the clause active, with no
  * command, citation or wh-question, and the pivot a noun or an indefinite pronoun — *something*, not
  * *me* (the engine has no existential of a personal pronoun yet). A coordinated pivot is a group, not
- * a pronoun, and stays.
+ * a pronoun, and stays — unless it holds the generic person, which has no object form for the
+ * pivot to take (A354: "there is a night and one" is refused), head or conjunct alike.
  */
 export function canBeExistential(sel: PhraseSelection): boolean {
   if (sel.verb?.id !== "BE" || sel.imperative || sel.infinitive || sel.questionRole) return false;
   if (sel.verbVoice === "passive") return false;
   const pivot = sel.subject;
   if (!pivot) return false;
+  if ([pivot, ...(sel.subjectConjuncts ?? []).map((c) => c.subject)].some((w) => w?.id === "GENERIC_PERSON")) return false;
   if (pivot.role === "noun") return true;
   if (pivot.role !== "pronoun") return false;
   // A conjunct counts once it holds a word: an empty one is left out of the plan.

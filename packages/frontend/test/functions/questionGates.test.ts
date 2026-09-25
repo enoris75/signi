@@ -192,4 +192,12 @@ describe('the existential gate', () => {
   it('takes a coordinated pivot, which is a group and not a pronoun', () => {
     expect(canBeExistential({ subject: ME, verb: BE, subjectConjuncts: [{ subject: CAT }] })).toBe(true);
   });
+
+  // The generic person has no object form (A354), so a pivot holding it anywhere is refused: the
+  // round trip's gating walk reached "there is a legend, a night and one" (seed 1177, P09-E44–E55).
+  it('refuses a pivot that holds the generic person, head or conjunct', () => {
+    const ONE = c('GENERIC_PERSON', 'pronoun', { person: '3' });
+    expect(canBeExistential({ subject: CAT, verb: BE, subjectConjuncts: [{ subject: CAT }, { subject: ONE }] })).toBe(false);
+    expect(canBeExistential({ subject: ONE, verb: BE, subjectConjuncts: [{ subject: CAT }] })).toBe(false);
+  });
 });
