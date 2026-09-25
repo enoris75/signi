@@ -23,3 +23,17 @@ The **Want** column is written by hand.
 | | |
 |---|---|
 | **Test** | `voice.test.ts` → *known bugs: French writes a bare passive agent with no article (A379)* (1 `test.fails`; plus a regression test for the indefinite agent, the other languages and a bare comitative) |
+
+## Resolved
+
+2026-09-25. French [agentPhrase.ts](../../../packages/engine/src/languages/fr/agentPhrase.ts) writes a
+noun agent through the direct object's `objectNpText` (never negated) in place of `npText`, so a bare
+agent takes the object's partitive: `par des chats`, `par de l'eau`, `par des femmes`, `par des chats et
+des chiens`, and *de* before a prenominal adjective as the object has it (`par de grands chats`). A
+definite, quantified or pronoun agent is unchanged (`par le chat`, `par quelques chats`, `par moi`); the
+other languages keep their bare agent.
+
+Guarded by `voice.test.ts` → *known bugs: French writes a bare passive agent with no article (A379)*:
+the former `test.fails`, now a plain test, a new test for a feminine, coordinated and adjective-led
+agent, a definite / quantified / pronoun regression, and the original regression. `fr/agentPhrase` has no
+colocated test file.

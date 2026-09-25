@@ -49,7 +49,9 @@ function baseArtFor(forms: Record<string, string>, plural: boolean, lead: string
   }
   switch (definiteness) {
     case 'bare':       return '';
-    case 'indefinite': return indefArticle(forms, plural, lead);
+    // A preverbal subject cannot go bare, so an indefinite plural one takes the partitive the
+    // translator flags: "dei gatti corrono", "delle donne" (A378, see `genericSubject`).
+    case 'indefinite': return plural && forms['partitive'] === '1' ? prepArt('di', forms, true, lead) : indefArticle(forms, plural, lead);
     case 'this':       return questoForm(forms, plural, lead);
     case 'that':       return quelloForm(forms, plural, lead);
     case 'some':       return fem ? 'alcune' : 'alcuni';

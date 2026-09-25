@@ -558,11 +558,24 @@ describe('known bugs: French writes a bare passive agent with no article (A379)'
   const eatenBy = (agent: ReturnType<typeof np>, verbPhrase: Partial<VerbPhrase> = {}) =>
     sayAll(clause(agent, 'EAT', { directObject: np('FOOD'), verbPhrase: { voice: 'passive', ...verbPhrase } }));
 
-  test.fails('the agent takes des / de l\'', () => {
+  test('the agent takes des / de l\'', () => {
     expect(eatenBy(np('CAT', bare)).fr).toBe('la nourriture est mangée par des chats.'); // now: "… par chats."
     expect(eatenBy(np('CAT', bare), { tense: 'past' }).fr).toBe('la nourriture fut mangée par des chats.'); // now: "… par chats."
     expect(sayAll(clause(np('WATER', { definiteness: 'bare' }), 'MOVE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).fr)
       .toBe("le livre est déplacé par de l'eau."); // now: "… par eau."
+  });
+
+  test('a feminine, a coordinated and an adjective-led bare agent', () => {
+    expect(eatenBy(np('WOMAN', bare)).fr).toBe('la nourriture est mangée par des femmes.');
+    expect(sayAll(clause({ conjuncts: [np('CAT', bare), np('DOG', bare)], conjunction: 'and' }, 'EAT', { directObject: np('FOOD'), verbPhrase: { voice: 'passive' } })).fr)
+      .toBe('la nourriture est mangée par des chats et des chiens.');
+    expect(eatenBy(np('CAT', { ...bare, adjectives: ['BIG'] })).fr).toBe('la nourriture est mangée par de grands chats.');
+  });
+
+  test('regression: a definite, a quantified and a pronoun agent keep theirs', () => {
+    expect(eatenBy(np('CAT')).fr).toBe('la nourriture est mangée par le chat.');
+    expect(eatenBy(np('CAT', { definiteness: 'some', number: 'plural' })).fr).toBe('la nourriture est mangée par quelques chats.');
+    expect(eatenBy(np('FIRST_PERSON')).fr).toBe('la nourriture est mangée par moi.');
   });
 
   test('regression: the indefinite agent, the other languages, and a bare comitative', () => {

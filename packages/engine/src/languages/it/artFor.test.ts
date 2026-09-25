@@ -12,6 +12,10 @@ describe('artFor', () => {
     expect(artFor({ ...SLOT, definiteness: 'indefinite' }, false, 'slot')).toBe('uno');
     expect(artFor({ ...ALA, definiteness: 'indefinite' }, false, 'ala')).toBe("un'");
     expect(artFor({ ...GATTO, definiteness: 'indefinite' }, true, 'gatti')).toBe('');
+    // …unless the translator flags a preverbal subject partitive (A378).
+    expect(artFor({ ...GATTO, definiteness: 'indefinite', partitive: '1' }, true, 'gatti')).toBe('dei');
+    expect(artFor({ ...UOMO, definiteness: 'indefinite', partitive: '1' }, true, 'uomini')).toBe('degli');
+    expect(artFor({ ...CASA, definiteness: 'indefinite', partitive: '1' }, true, 'case')).toBe('delle');
   });
 
   test('bare takes no determiner', () => {

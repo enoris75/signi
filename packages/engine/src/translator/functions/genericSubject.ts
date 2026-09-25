@@ -18,17 +18,31 @@ export const GENERIC_DEFINITE_SUBJECT: ReadonlySet<string> = new Set(['it', 'fr'
  * corrono"), a personal name ("Pietro"), a pronoun, and Spanish/Portuguese *otro* standing where the
  * indefinite article would ("otros gatos") all resolve bare too, and keep it.
  */
-export function genericSubject<T extends ResolvedNounElement | undefined>(el: T, language: string): T {
+export function genericSubject<T extends ResolvedNounElement | undefined>(el: T, language: string, dative = false): T {
   if (!el || !GENERIC_DEFINITE_SUBJECT.has(language)) return el;
-  if (!el.conjuncts.some((np) => generic(np, language))) return el;
+  const partitive = (np: ResolvedNounPhrase) => !dative && language === 'it' && italianPartitive(np);
+  if (!el.conjuncts.some((np) => generic(np, language) || partitive(np))) return el;
   const conjuncts = el.conjuncts.map((np) => generic(np, language)
     ? { ...np, head: { ...np.head, forms: { ...np.head.forms, definiteness: 'definite' } } }
+    : partitive(np) ? { ...np, head: { ...np.head, forms: { ...np.head.forms, partitive: '1' } } }
     : np);
   // A single conjunct agrees as its own head, so its agreement carries the determiner too.
   const agreement = el.conjuncts.length === 1 && el.agreement['definiteness'] === 'bare'
     ? { ...el.agreement, definiteness: 'definite' }
     : el.agreement;
   return { ...el, conjuncts, agreement };
+}
+
+/**
+ * An Italian indefinite plural subject (A378), which has no plural indefinite article and cannot go
+ * bare before the verb either: it takes the partitive, *dei gatti corrono*, *delle donne corrono*, as
+ * French takes *des* and Spanish / Portuguese *unos* / *uns*. The flag is Italian `artFor`'s to spell.
+ * The experiencer's dative (`dative`) is left bare: *a dei gatti piace* reads worse than *a gatti*.
+ */
+function italianPartitive(np: ResolvedNounPhrase): boolean {
+  const f = np.head.forms;
+  return f['definiteness'] === 'indefinite' && f['number'] === 'plural' && f['uncountable'] !== '1'
+    && !f['person'] && f['proper'] !== '1' && f['numeral'] === undefined;
 }
 
 function generic(np: ResolvedNounPhrase, language: string): boolean {

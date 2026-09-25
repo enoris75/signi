@@ -48,3 +48,23 @@ describe('genericSubject (A376)', () => {
     expect(genericSubject(undefined, 'fr')).toBeUndefined();
   });
 });
+
+describe('genericSubject: the Italian partitive (A378)', () => {
+  const flag = (e: ResolvedNounElement | undefined) => e!.conjuncts[0].head.forms['partitive'];
+
+  test('an Italian indefinite plural subject is flagged partitive, keeping its determiner', () => {
+    const some = genericSubject(el({ definiteness: 'indefinite', number: 'plural' }), 'it');
+    expect(flag(some)).toBe('1');
+    expect(det(some)).toBe('indefinite');
+  });
+
+  test('not in the experiencer’s dative, not in the other languages, not on a singular, a mass noun or a numeral', () => {
+    expect(flag(genericSubject(el({ definiteness: 'indefinite', number: 'plural' }), 'it', true))).toBeUndefined();
+    for (const language of ['fr', 'es', 'pt', 'en', 'de']) {
+      expect(flag(genericSubject(el({ definiteness: 'indefinite', number: 'plural' }), language))).toBeUndefined();
+    }
+    expect(flag(genericSubject(el({ definiteness: 'indefinite', number: 'singular' }), 'it'))).toBeUndefined();
+    expect(flag(genericSubject(el({ definiteness: 'indefinite', number: 'singular', uncountable: '1' }), 'it'))).toBeUndefined();
+    expect(flag(genericSubject(el({ definiteness: 'indefinite', number: 'plural', numeral: '2' }), 'it'))).toBeUndefined();
+  });
+});

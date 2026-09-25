@@ -79,7 +79,7 @@ describe('pluralia tantum: NEWS', () => {
   test('indefinite, as subject: "a news" is the indefinite plural (or English mass bare)', () => {
     expect(sayAll(clause(np('NEWS', { definiteness: 'indefinite' }), 'SEEM', good))).toEqual({
       en: 'news seems good.',
-      it: 'notizie sembrano buone.',
+      it: 'delle notizie sembrano buone.',
       fr: 'des nouvelles semblent bonnes.',
       de: 'Nachrichten scheinen gut.',
       es: 'unas noticias parecen buenas.',

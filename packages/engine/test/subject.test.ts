@@ -237,7 +237,7 @@ describe('subject: adjectives in the plural', () => {
     expect(subject(cat({ number: 'plural', definiteness: 'indefinite', adjectives: ['BIG'] })))
       .toMatchObject({
         en: 'big cats run.', // English drops the article for an indefinite plural
-        it: 'grandi gatti corrono.',
+        it: 'dei grandi gatti corrono.', // a preverbal subject takes the partitive (A378)
         es: 'unos gatos grandes corren.',
         de: 'große Kater laufen.', // strong ending, there being no determiner
       });
@@ -751,10 +751,22 @@ describe('known bugs: a bare plural subject loses its article in it / fr / es / 
 describe('known bugs: Italian writes an indefinite plural subject bare (A378)', () => {
   const some = { definiteness: 'indefinite', number: 'plural' } as const;
 
-  test.fails('the indefinite plural subject takes dei / delle', () => {
+  test('the indefinite plural subject takes dei / delle', () => {
     expect(subject(cat(some)).it).toBe('dei gatti corrono.'); // now: "gatti corrono."
     expect(subject(np('WOMAN', some)).it).toBe('delle donne corrono.'); // now: "donne corrono."
     expect(sayAll(clause(cat(some), 'RUN', { verbPhrase: { tense: 'past' } })).it).toBe('dei gatti corsero.'); // now: "gatti corsero."
+  });
+
+  test('degli before a vowel, each conjunct of a group, and the subject a passive or piacere makes', () => {
+    expect(subject(np('FRIEND', some)).it).toBe('degli amici corrono.');
+    expect(sayAll(clause({ conjuncts: [cat(some), np('WOMAN', some)], conjunction: 'and' }, 'RUN')).it).toBe('dei gatti e delle donne corrono.');
+    expect(sayAll(clause(cat(), 'SEE', { directObject: np('MOUSE', some), verbPhrase: { voice: 'passive' } })).it).toBe('dei topi sono visti dal gatto.');
+    expect(sayAll(clause(cat(), 'LIKE', { directObject: np('MOUSE', some) })).it).toBe('al gatto piacciono dei topi.');
+  });
+
+  test('regression: the experiencer’s dative stays bare, and a numeral keeps its own', () => {
+    expect(sayAll(clause(cat(some), 'LIKE', { directObject: np('MOUSE') })).it).toBe('a gatti piace il topo.');
+    expect(subject(cat({ ...some, numeral: 2 })).it).toBe('due gatti corrono.');
   });
 
   test('regression: the other Romance three, and an indefinite plural object', () => {
