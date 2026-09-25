@@ -1,5 +1,6 @@
 import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
+import { adverbClass, moreAdverbText } from '../../functions/adverbClass.js';
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { finiteHasNegativeAdverb } from '../../functions/finiteHasNegativeAdverb.js';
@@ -233,9 +234,20 @@ export function predicateText(
   // place (EVERYWHERE) leaves the manner slot too, but stands among the complements where a locative
   // does, not at their head (A189).
   const isDirection = isDirectionAdverb(modifier);
-  const modifierText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
+  const primaryText = isDirection || isPlaceAdverb(modifier) ? '' : adverbText;
+  // Several adverbs (P15): a further frequency one stands beside a frequency primary, wherever that
+  // goes ("ha già spesso corso"), and a further manner one beside a manner primary ("corre lentamente
+  // bene"). A manner one behind any other primary takes the manner slot after the whole verb group
+  // (`trailingManner`): "corre spesso velocemente", "ha spesso corso velocemente". Further direction
+  // and place adverbs join the complements, as a lone one does.
+  const moreFrequency = moreAdverbText(verbPhrase, 'frequency');
+  const moreManner = moreAdverbText(verbPhrase, 'manner');
+  const primaryIsManner = !!modifier && adverbClass(modifier) === 'manner';
+  const trailingManner = primaryIsManner ? '' : moreManner;
+  const modifierText = [primaryText, moreFrequency, primaryIsManner ? moreManner : ''].filter(Boolean).join(' ');
   const complementsText = complementsAroundAdverb(modifier, adverbText, recipientClitic ? withoutTerminus(complements) : complements,
-    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms));
+    (c) => complementsPhrase(c, subjectForms, verb.conceptId, directObject?.agreement, verb.forms),
+    { direction: moreAdverbText(verbPhrase, 'direction'), place: moreAdverbText(verbPhrase, 'place') });
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
   // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.
@@ -252,7 +264,7 @@ export function predicateText(
     const short = !infinitive && impPN === '2sg' && IT_SHORT_IMPERATIVE.has(verb.conceptId);
     const impReflexive = reflexive ? (IT_REFLEXIVE[impPN] ?? '') : '';
     const impVerb = itEnclitic(impForm, `${impReflexive}${encliticCluster}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
-    return [negText, impVerb, modifierText, directObjectText, complementsText]
+    return [negText, impVerb, modifierText, trailingManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -268,7 +280,7 @@ export function predicateText(
       ? [plain.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
       : verb.forms['base'] ?? verbText;
     const infWithClitic = itEnclitic(inf, encliticCluster, 'infinitive');
-    return [negText, infWithClitic, modifierText, directObjectText, complementsText]
+    return [negText, infWithClitic, modifierText, trailingManner, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -281,8 +293,9 @@ export function predicateText(
   // no periphrastic finite to follow, so both stay on the append path below.
   // An adverb that scopes over the negation without a negative word of its own leads the "non": a
   // sentence adverb in a subordinate clause, "dice che il gatto forse non mangia" (P09-E39).
-  const leadsNon = negAdverb?.slot === 'pre-negator' && negText === 'non' && !!modifierText;
-  const negLead = leadsNon ? `${modifierText} ${negText}` : negText;
+  // Its further frequency adverbs stay inside the negation, after the verb: "forse non corre spesso".
+  const leadsNon = negAdverb?.slot === 'pre-negator' && negText === 'non' && !!primaryText;
+  const negLead = leadsNon ? `${primaryText} ${negText}` : negText;
   const isFrequency = modifier?.forms['subtype'] === 'frequency' && !leadsNon;
   // The passive is periphrastic too — "è mangiato" is auxiliary + participio — so a frequency adverb
   // goes between the two ("è sempre mangiato"), not after the whole group.
@@ -290,7 +303,8 @@ export function predicateText(
   if (isFrequency && modifierText && periphrastic && modals.length === 0) {
     const [finite, ...rest] = verbText.split(' ');
     const withAdverb = [finite, modifierText, ...rest].join(' ');
-    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
+    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, withAdverb, trailingManner, directObjectText, complementsText]
+      .filter(Boolean).join(' '));
   }
   // A multiword lemma's noun, "bisogno" in avere bisogno (NEED, B62), sits where a participle does:
   // the frequency adverb splits the lemma instead of trailing the whole thing ("non ha MAI bisogno
@@ -301,10 +315,11 @@ export function predicateText(
   const lemmaNoun = periphrastic ? '' : lemmaTail(plain);
   const [finiteHead, lemmaEnd] = splitLemmaTail(verbText, lemmaNoun);
   if (isFrequency && modifierText && lemmaEnd) {
-    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, directObjectText, complementsText]
+    return elideCi([negText, leadingReflexive, clitic, impersonalClitic, finiteHead, modifierText, lemmaEnd, trailingManner, directObjectText, complementsText]
       .filter(Boolean).join(' '));
   }
-  return elideCi([negLead, leadingReflexive, clitic, impersonalClitic, verbText, leadsNon ? '' : modifierText, directObjectText, complementsText]
+  return elideCi([negLead, leadingReflexive, clitic, impersonalClitic, verbText, leadsNon ? moreFrequency : modifierText, trailingManner, directObjectText,
+    complementsText]
     .filter(Boolean)
     .join(' '));
 }
