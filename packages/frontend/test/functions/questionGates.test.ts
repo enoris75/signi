@@ -68,7 +68,7 @@ describe('the wh-question gate', () => {
   // P09-E54 D1, D3: the passive asks every slot, the agent's included, unless the verb's object takes
   // a preposition in some language — there the engine refuses the passive question.
   it('asks every slot in the passive, but none over a prepositional object', () => {
-    expect(askable({ subject: CAT, verb: EAT, verbVoice: 'passive' })).toEqual(ROLES);
+    expect(askable({ subject: CAT, verb: EAT, directObject: MAN, verbVoice: 'passive' })).toEqual(ROLES);
     const CLICK = c('CLICK', 'verb', { transitivity: 'transitive', complements: ['locative'], prepositionalObject: true });
     const DEPEND = c('DEPEND', 'verb', { transitivity: 'transitive', prepositionalObject: true });
     expect(askable({ subject: CAT, verb: CLICK, verbVoice: 'passive' })).toEqual([]);
@@ -105,6 +105,18 @@ describe('the wh-question gate', () => {
 
   it('asks the patient’s owner in the passive', () => {
     expect(canAsk({ subject: CAT, verb: EAT, directObject: MAN, verbVoice: 'passive' }, 'possessor', 'directObject')).toBe(true);
+  });
+
+  // A passive with nothing to promote (a stale voice, its object gone) asks nothing but the object:
+  // the engine refuses "a passive wh-question needs a verb that takes the passive".
+  it('refuses a passive question with no patient', () => {
+    const stale: PhraseSelection = { subject: CAT, verb: EAT, verbVoice: 'passive' };
+    expect(canAsk(stale, 'subject')).toBe(false);
+    expect(canAsk(stale, 'locative')).toBe(false);
+    expect(askedRole({ ...stale, interrogative: true, questionRole: 'subject', questionAnimate: true })).toBeUndefined();
+    // The object's own gap is the patient.
+    expect(canAsk(stale, 'directObject')).toBe(true);
+    expect(canAsk({ ...stale, directObject: MAN }, 'subject')).toBe(true);
   });
 
   it('counts an asked object as the patient', () => {

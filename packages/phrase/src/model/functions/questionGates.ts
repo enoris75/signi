@@ -78,6 +78,9 @@ export function canAsk(
   const verb = sel.verb;
   if (!verb || sel.imperative || sel.infinitive || sel.existential) return false;
   if (sel.verbVoice === "passive" && verb.prepositionalObject) return false;
+  // A passive question needs a patient to promote, the engine's own condition: an object, or the
+  // object as the gap. A passive left on a period whose object is gone asks nothing.
+  if (sel.verbVoice === "passive" && !sel.directObject && role !== "directObject") return false;
   switch (role) {
     case "subject":
       return true;
